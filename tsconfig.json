@@ -6,6 +6,7 @@
     "emitDecoratorMetadata": true,
     "paths": {
       "@components/*": ["./components/*"],
+      "@containers/*": ["./containers/*"],
       "@data/*": ["./data/*"],
       "@hooks/*": ["./hooks/*"],
       "@i18n/*": ["./i18n/*"],

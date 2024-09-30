@@ -173,7 +173,7 @@ const getListArray = (
   return reverseArray;
 };
 
-export default function Chat() {
+export default function Chat({ readOnly = false }: { readOnly?: boolean }) {
   const conversation = useConversationContext("conversation");
   const isBlockedPeer = useConversationContext("isBlockedPeer");
   const onReadyToFocus = useConversationContext("onReadyToFocus");
@@ -249,12 +249,20 @@ export default function Chat() {
   const chatContentStyle = useAnimatedStyle(
     () => ({
       ...styles.chatContent,
-      paddingBottom: showChatInput
+      paddingBottom: readOnly
+        ? 0 // Remove bottom padding if readOnly is true
+        : showChatInput
         ? chatInputDisplayedHeight.value +
           Math.max(insets.bottom, keyboardHeight.value)
         : insets.bottom,
     }),
-    [showChatInput, keyboardHeight, chatInputDisplayedHeight, insets.bottom]
+    [
+      showChatInput,
+      keyboardHeight,
+      chatInputDisplayedHeight,
+      insets.bottom,
+      readOnly,
+    ]
   );
 
   const ListFooterComponent = useMemo(() => {
@@ -366,6 +374,12 @@ export default function Chat() {
     [framesStore]
   );
 
+  const handleOnLayout = useCallback(() => {
+    setTimeout(() => {
+      onReadyToFocus();
+    }, 50);
+  }, [onReadyToFocus]);
+
   return (
     <View
       style={styles.chatContainer}
@@ -381,11 +395,7 @@ export default function Chat() {
             refreshing={conversation?.pending}
             extraData={[peerSocials]}
             renderItem={renderItem}
-            onLayout={() => {
-              setTimeout(() => {
-                onReadyToFocus();
-              }, 50);
-            }}
+            onLayout={handleOnLayout}
             ref={(r) => {
               if (r) {
                 messageListRef.current = r;
@@ -408,7 +418,8 @@ export default function Chat() {
             keyboardShouldPersistTaps="handled"
             estimatedItemSize={80}
             // Size glitch on Android
-            showsVerticalScrollIndicator={Platform.OS === "ios"}
+            showsVerticalScrollIndicator={!readOnly && Platform.OS === "ios"}
+            pointerEvents={readOnly ? "none" : "auto"}
             ListFooterComponent={ListFooterComponent}
           />
         )}
@@ -418,9 +429,10 @@ export default function Chat() {
         {showPlaceholder && conversation?.isGroup && (
           <GroupChatPlaceholder messagesCount={listArray.length} />
         )}
-        {conversation?.isGroup ? <GroupConsentPopup /> : <ConsentPopup />}
+        {!readOnly &&
+          (conversation?.isGroup ? <GroupConsentPopup /> : <ConsentPopup />)}
       </Animated.View>
-      {showChatInput && (
+      {!readOnly && showChatInput && (
         <>
           <ReanimatedView
             style={[
