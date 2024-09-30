@@ -39,6 +39,7 @@ import {
 import { XmtpConversation } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
 import {
+  ConversationFlatListItem,
   LastMessagePreview,
   getFilteredConversationsWithSearch,
 } from "../utils/conversation";
@@ -48,7 +49,6 @@ import { sortRequestsBySpamScore } from "../utils/xmtpRN/conversations";
 type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;
 };
-type FlatListItem = ConversationWithLastMessagePreview | { topic: string };
 
 type Props = {
   searchBarRef:
@@ -88,7 +88,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const pinnedConversations = useChatStore((s) => s.pinnedConversations);
 
   const [flatListItems, setFlatListItems] = useState<{
-    items: FlatListItem[];
+    items: ConversationFlatListItem[];
     searchQuery: string;
   }>({ items: [], searchQuery: "" });
 

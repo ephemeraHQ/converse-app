@@ -8,6 +8,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
+import { converseEventEmitter } from "@utils/events";
 import {
   Platform,
   StyleSheet,
@@ -21,13 +22,11 @@ import Picto from "../Picto/Picto";
 
 type Props = {
   spamCount: number;
-  handlePress: () => void;
   toggleActivated: boolean;
 };
 
 export default function HiddenRequestsButton({
   spamCount,
-  handlePress,
   toggleActivated = false,
 }: Props) {
   const colorScheme = useColorScheme();
@@ -36,7 +35,9 @@ export default function HiddenRequestsButton({
     <TouchableHighlight
       underlayColor={clickedItemBackgroundColor(colorScheme)}
       key="spam"
-      onPress={handlePress}
+      onPress={() => {
+        converseEventEmitter.emit("toggleSpamRequests");
+      }}
     >
       <View style={styles.spamHeader}>
         <Text style={styles.spamHeaderTitle}>
