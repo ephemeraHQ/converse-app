@@ -17,7 +17,7 @@ import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 
 import { NavigationParamList } from "./Navigation/Navigation";
-import ConverseChat from "../components/Chat/Chat";
+import { Chat } from "../components/Chat/Chat";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
 import { EmojiPicker } from "../containers/EmojiPicker";
 import {
@@ -303,7 +303,7 @@ const Conversation = ({
             tagsFetchedOnceForMessage,
           }}
         >
-          <ConverseChat />
+          <Chat />
         </ConversationContext.Provider>
       ) : (
         <View style={styles.filler} />
