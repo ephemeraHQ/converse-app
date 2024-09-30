@@ -15,13 +15,8 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
-import {
-  createGroupJoinRequest,
-  getGroupJoinRequest,
-  GroupJoinRequestStatus,
-} from "@utils/api";
-import { getTopicFromGroupId } from "@utils/groupUtils/groupId";
-import logger from "@utils/logger";
+import { useActor } from "@xstate/react";
+import { joinGroupService } from "./joinGroup.machine";
 import { navigate } from "@utils/navigation";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 import { refreshGroup } from "@utils/xmtpRN/conversations";
@@ -62,22 +57,9 @@ export default function GroupInviteScreen({
   } = useGroupInviteQuery(route.params.groupInviteId);
 
   /**************************************************************
-   * React State
+   * State Machine
    * ************************************************************/
-  const [
-    { polling, finishedPollingUnsuccessfully, joinStatus },
-    setGroupJoinState,
-  ] = useState<{
-    polling: boolean;
-    /* Unsuccessfully here means that we have not yet received confirmation
-        from the invitee that we have been added to the group */
-    finishedPollingUnsuccessfully: boolean;
-    joinStatus: null | GroupJoinRequestStatus;
-  }>({
-    polling: false,
-    finishedPollingUnsuccessfully: false,
-    joinStatus: null,
-  });
+  const [state, send] = useActor(joinGroupService);
 
   const [newGroup, setNewGroup] = useState<GroupWithCodecsType | undefined>(
     undefined
@@ -116,19 +98,9 @@ export default function GroupInviteScreen({
     }
   }, [handleNewGroup, newGroup]);
 
-  // invoked when the user clicks the "Join Group" button
-  const joinGroup = useCallback(async () => {
-    if (!groupInvite?.id) return;
-
-    // we cant rely on our stream from the sdk at the moment,
-    // so our hack is to poll
-    //react state required to track implicit state machine
-    setGroupJoinState({
-      polling: true,
-      finishedPollingUnsuccessfully: false,
-      joinStatus: "PENDING",
-    });
-    const groupId = groupInvite.groupId;
+  const joinGroup = useCallback(() => {
+    send("user.didTapJoinGroup");
+  }, [send]);
     // Group ID is not available on previous versions of the app, so we need to fetch the groups
     // during our poll loop, we need to grab the old list in order to perform
     // a diff against it to determine what the new group added is
@@ -230,10 +202,10 @@ export default function GroupInviteScreen({
 
   return (
     <View style={styles.groupInvite}>
-      {isLoading && (
+      {state.matches("Loading Group Invite Metadata") && (
         <ActivityIndicator color={textPrimaryColor(colorScheme)} size="large" />
       )}
-      {groupInviteError && (
+      {state.matches("Error") && (
         <Text style={styles.error}>{translate("An error occurred")}</Text>
       )}
       {groupInvite && (
