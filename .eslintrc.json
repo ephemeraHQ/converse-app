@@ -22,7 +22,18 @@
     ],
     "react/jsx-key": "error",
 
-    "prettier/prettier": "off" // We use prettier manually on the side
+    "prettier/prettier": "off", // We use prettier manually on the side
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "i18n-js",
+            "message": "You probably want to import the @i18n app module instead."
+          }
+        ]
+      }
+    ]
   },
   "root": true
 }
