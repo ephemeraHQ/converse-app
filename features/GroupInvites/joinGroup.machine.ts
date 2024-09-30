@@ -70,8 +70,17 @@ export const joinGroupMachineLogic = setup({
     //
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QFdZgE4DEyQEYEMBjAawFkiALASwDswA6AYQrBNqgAIBJAMw4FEAHgBcMNfABsOAJTAA3KmADuA8bgmQOC-B2z5hydGF0T8UAMQ8cEAiXpgRYybIXK9Bo5lNR+ajRABtAAYAXURQAAcAe1gqYSoomnCQQUQAWgBGDIAmegBWAHZsgBYATmK8gA5KjKDSvOyAGhAAT3SM4voOgGZqqoA2AqCajMGAXzHm1AxsPCIySloGZlZidm4+IVF0cSkXRRVffHVNbV0wfUNjLzNLa1tie0cd53kD9yubqAARKlhj-zBMJIEDRWLxRLJVIIbp1ejZSoVSpBKoFPIo0r9ZptBCZboZehlArdArE0nDbLZAoTKZoLD3ebkQjUOhMFhsGicXgcAAqLBkb2U3FgHG+yGMPKiHAAyhQoko7nM7A5trt9souLAxWAgckwXEEkkQdC0v0CUFitlBviMpUChkCv1utjENl6vRyrDEcUHciqsUaSBpvSlQtmUs2at1ty+cZ1SpNaLxbypbL5YqbPMnqrXq4lJqAHJRYTa3Ug-UQo2gaHddFdbo+4oNmpo0oOl0IDLdfr0J3Iu39YoFTFuyqB4OzTMkJks5bstacjYcAASF3Q6wAglQICKN0YOIxEnRCKIIBmHvQ-oeaMfT5LV-h15ytzuy5EYgbIcb0ojCeiihUJKOjaHb9EEuRdvalTdt0pQIkE-TjnSk4PDOEYrByXJ8A+T6cC+u77tet6QOeWZ-EWwhEawd5RDh7D4W+oIfpWUKIN0Vr0DUCGWqUvElNUHZDgSOSVJi6LwWiSEzAy06LKyGELlhvL8lsTh7IKKg8ug+AtCu+AigAQjgNAynKSg0KRyrPGqGlaTpy76RRRlgDQabmYxFaGqxuI5D2GR5JidqWkEtbdM6rSIHBBQena4EOm6xT9NkGRSSGU5hrOkaYUusYCNZkgCnmvLabpDmGcZpnyhZVihtmanxnZLRlc5rlmTQHnMV534wlkXTZN2FSOmavQdqSEGYg6DZgWBTapShjJyXOUaLjG-IAKp0sKArCPgVASJZjzBpqsg7XtHXgl11bpA0eTwiF9p5Bkbawk9HZdg69BFDdWROl61KTEGyEyRl6HztGfC5RtGBbSdu37TV6X0EdsAUbDZ2hHqnVfldCB5GFnHDsMFSUnUcFvQ6t39FTDSVEl-QNEOc3A2h8lgytfDCPyAAyYBQEQukbhEEQyPo6yNXp5UuZV5kHfQFCOcW0rGTzfOEC0gsRNIouco152flWKTtNkQQxTdTrFEOdrDm9+LRV92SPaMYXDP9tLSaGLNLdl3Kc8YKv8xwGsi-Ei7i2VHAtdL1XA3L+lKy5-tqxrWsh1AusY+WWMG9CpQNvCU21lSufDOFOLvXb-FhcSbZdgGAMTszi1ZYpS5B4mXAmRuJlcAAttE6A7TQwgmPKHAABSqS8EgAJSy-gQuFsWHdd73-eD8IXjynrLHdWkueffTcGW8SsFWm9lR5J0RT9Tk-UBXaY710DHtNwp4OB0LW0d4H3d91EA-4CHiPFQE98ozzngvWAy8aCr3-uvTeSht6XUNrjIIJsEKwUSuxZEYE7RvSSibYcVR-IBWNsbboTMX7hlZJPXYhUDi8ioD3aGh5kBD3WN8KqlgJDynoLAHaA9IBIOxigx00VKR5EkbWNsAUggFHPpfT6lIGxtlpqUaClD0qe3oLQgq8ZGHMPQAeKIbDU6ii4WAHucRTx8OEP-MwDBkARAgPoSA9AeA8KULAYR2dXT7zAg7J6wU6jWwip2C+0V+jVExAUUSpQ6h5EQk-d2Wim66PUkVHkTCWEmPYYuThMtBD8NcfQfAPBthj1hGgoIs8G5UMyuk+hQosmGOMaYjhVUfHeS7KUD0pIHTFAiSTRKHYHYFE6L6SkloGhZAtpo1CTcADqu0zGYH-nlHMGSGEIOMX3DQlZuG8MIFEPZYBTxdO6rURK8Iahuiev2RJTQwm2kUdfIomIwK2nYvMha1CGDLINIuNZRjGn6J2YeU5BzLHWLcfw+xMAkbONcRAdxnjvEZ3fBdER0JaiiXhFaM0okGxdmSm9H0t16hoLdGiX6PzZJ-PoG5dYoKNIcAAAroBOREYQ5hgz0AgNuHk89FnrlEBueMFycY1D6k6BmtR1FogyKM3OuR7pokqFSWZdKQasiZYuFlRUOVcp5XygVEAhURF+LAKxsB0XAkxfrbyTZbqOhKHBREGrT6jPtJE2CL1jaYgQtq7Rb92bcCHmpYOzK-CnCoDoD4+4viy1oJslO7AE1gC+EcE4gQMVMSxb4zsbZOhwXAr0OoaikrKttJ9Xi5Qna50HHkYNr82ZKQ7psqN+qY0QC0HG84lxE3eGTRGqeabOQZq+FagEQi82eWxYgJ6HQPRkPLeo-oI5vVJU+jUdECEUSDhCi2hlob22jroeOrkIptQjtTdrKAmpSxzqzt0v1+R-K3xKJaUklQOywmHB6LsyJ7SJQtFTY9mVT1Lg7ZGy9W0b0IwvCm+q97F4lnFJKlBPTujvsepSL9VJYl-pCug6oCJ6YaoPY-N2aUFknrba3T+7dO6-zXoA4eOyx4wanrPRDWZ54RDQ9A2BACh4IMw9CZKcJ4nQSifTcZdQ-2jBNg0D5QSnpwQock2jvzIMMe5G3EU38u7cD-qJjjnjx7cd2LxmOAnNTCbM-AzxEnF1vsenhqZ36iNhPxGBfIboqbqb4lpmj816WZWs3o+9BicntPyVwopO1RClPKRgSp1Sam8ufqkhlUW9gxZaXFvJnACntWfQW7yVInT0GqdBZRVRoJKe3SRm0yUshWggxGAFqz1n5a7ZwcFXL9mGkOUoegxzIWzvtfmx1lz3MfvwxbQjv7fNSfoLWR6Gr0T3069p8LOqGB6q5Oe6LZijV9xNXSflgr55ss6nITNwNXM9WggfB2lJXXVBJEp42G2rSJPGfBclXXdVmWjKdgr53OWXeyxgG75r54Fl5qLR7B2Xv4je66ho1WETQXkb5h0Jt-LGztHxEKXZQdHfBytSHA32Uw+5XD9ACOLVWptXazGlXuqY5w9jz7SVvsE5xP+lTQQrlyeKCiFKgYaBRAgHAZIdTcuzi53NnGaRCg4fIQ9JdL1SgdjSIEjbUSvlDjqGaJJYXG70eWkpA1DDs3+D7fGi4HhrjeDVzvDXkEPSJWqBbXFl8iiG9GJ0C0NMnpU0SmUKnzd365X0YmbUKZpZe+QSaPFwwkpXKpLTYY5NciiSJ-Ep6CIwqhcBikujem7dLjooufCgdCJHmopAdPC7cR2k4g6eKVJ0SjEpIJIYtbD5TSmTkOPUHVrGAd80kqEsI4VTcgbedhbMgW3rLacX1Qd+utGvaTifYd-lHJM2-bNva-ewhutTaiY0YSA7+v+mvYqawjKIURKQw8hvQQpUQDtQQwvQhcVuVeOmEWoMdePs3MKOasH8wscGYc+kS+UsK+T+TqyUn0joJ+4EgyTYxQNsH0p8ZOAU4ykkF+9SkB1+8BX8LGpmbGQCnG6S086Bu8OQ0U3YtQvQk0okYib0pBtWZQ4u9QsEHQeMcec+mk2SRirCJW5i5krBOMgy-+jo0EVST0aCAkYSyUbohINKgONotocePW6wwKGysGrKQ2kKyCa+3k5QJsTYGq9QtMME-k+Cf2WCFsUuVotog4cex25hU8TSKgF23KihKCj08IZs4Eg4DY4ETyOImqHBciTYPSCSpQU++mfA-WcGTusarug6HuZg4ROKX0vYYksqucAywuroVo0U229QAS4uJQ5+1ulBrMUB2RdOcGye4oJRi6ciOGdQPoCEtQciFoNRMIFouQFsRQwwvovEpImRnRNBzGP89BcC7GwCVmkOLBmc3OOMROOGIx6iYUUutskxfmJsG6Q00EmhsxceORhW0hbSchZW-RCAX6t0hQokRcQwpI4yzW1xpQtxVS3orsYBB22iJhQKfW3RMWVhEQI2IithlycUhIKI2B8xG6r0a24EhIPoM0yisSEJyuNeEYARTx0OxqHxCIcEMUIkw4Fs+IgyQJ5RaIQwOQohceFEHAAA4lEGLKmGZMpH8DKHALECiS+jzkOLkBNMSHaLIsOKXGxAhL0paCUPTHgfUDLhMEAA */
   id: "joinGroupMachine",
+  context: ({ input }) => {
+    const account = currentAccount();
+    const { groupInviteId } = input;
+    console.log({ account, groupInviteId });
+
+    return {
+      account,
+      groupInviteId,
+    };
+  },
   context: ({ input }) => {
     // const reviewsAndRatings = entityTracker.getLastEntityValue('reviewsAndRatings');
     // const flows = entityTracker.getLastEntityValue('flows');
@@ -100,9 +109,102 @@ export const joinGroupMachineLogic = setup({
           };
         },
       },
-      onDone: {},
-      onError: {},
+      onDone: {
+        target: "Checking Invite Status",
+        actions: assign({
+          groupInviteMetadata: (_, event) => event.output,
+        }),
+      },
+      onError: {
+        target: "Error",
+        actions: assign({
+          error: (_, event) => event.data,
+        }),
+      },
     },
+    "Checking Invite Status": {
+      always: [
+        {
+          guard: "isInviteValid",
+          target: "Waiting For User To Join",
+        },
+        {
+          target: "Invalid Invite",
+        },
+      ],
+    },
+    "Waiting For User To Join": {
+      on: {
+        "user.didTapJoinGroup": {
+          target: "Sending Join Request",
+        },
+      },
+    },
+    "Sending Join Request": {
+      invoke: {
+        src: "sendJoinRequest",
+        input: ({ context }) => {
+          return {
+            account: context.account,
+            groupInviteId: context.groupInviteId,
+          };
+        },
+      },
+      onDone: {
+        target: "Polling Join Request Status",
+        actions: assign({
+          joinRequestId: (_, event) => event.output.id,
+        }),
+      },
+      onError: {
+        target: "Error",
+        actions: assign({
+          error: (_, event) => event.data,
+        }),
+      },
+    },
+    "Polling Join Request Status": {
+      invoke: {
+        src: "pollJoinRequestStatus",
+        input: ({ context }) => {
+          return {
+            joinRequestId: context.joinRequestId,
+          };
+        },
+      },
+      onDone: [
+        {
+          guard: "isJoinAccepted",
+          target: "Join Successful",
+        },
+        {
+          guard: "isJoinRejected",
+          target: "Join Rejected",
+        },
+        {
+          target: "Error",
+        },
+      ],
+      onError: {
+        target: "Error",
+        actions: assign({
+          error: (_, event) => event.data,
+        }),
+      },
+    },
+    "Join Successful": {
+      type: "final",
+    },
+    "Join Rejected": {
+      type: "final",
+    },
+    "Invalid Invite": {
+      type: "final",
+    },
+    "Error": {
+      type: "final",
+    },
+  },
     //
     // 'Checking If Feedback Enabled via Feature Flag': {
     //   always: [
