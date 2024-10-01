@@ -14,6 +14,7 @@
     "test": "echo \"➜ Running tests...\" && jest",
     "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit",
     "update": "node scripts/build/update.js",
+    "deep-linking": "node scripts/deep-linking.js",
     "web:preview": "EXPO_ENV=preview expo export -p web"
   },
   "cross-os": {

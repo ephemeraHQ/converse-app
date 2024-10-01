@@ -5,12 +5,7 @@ import {
   listItemSeparatorColor,
   textPrimaryColor,
 } from "@styles/colors";
-import {
-  ColorSchemeName,
-  Linking,
-  Platform,
-  useWindowDimensions,
-} from "react-native";
+import { ColorSchemeName, Platform, useWindowDimensions } from "react-native";
 
 import config from "../../config";
 import { isDesktop } from "../../utils/device";
@@ -34,10 +29,6 @@ export const getConverseStateFromPath = (path: string, options: any) => {
   }
   const state = getStateFromPath(pathForState, options);
   return state;
-};
-
-export const getConverseInitialURL = () => {
-  return Linking.getInitialURL();
 };
 
 export const stackGroupScreenOptions = (colorScheme: ColorSchemeName) => ({

@@ -1,15 +1,17 @@
 import { setAndroidColors } from "@styles/colors/helpers";
 import * as Linking from "expo-linking";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 
 import config from "../../config";
 import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import logger from "../../utils/logger";
 import {
   navigateToTopicWithRetry,
   topicToNavigateTo,
 } from "../../utils/navigation";
+import { sentryTrackError } from "../../utils/sentry";
 import { hideSplashScreen } from "../../utils/splash/splash";
 
 const getSchemedURLFromUniversalURL = (url: string) => {
@@ -23,50 +25,76 @@ const getSchemedURLFromUniversalURL = (url: string) => {
   return schemedURL;
 };
 
+const isDevelopmentClientURL = (url: string) => {
+  return url.includes("expo-development-client");
+};
+
 export default function InitialStateHandler() {
   const colorScheme = useColorScheme();
+
+  const url = Linking.useURL();
 
   const { setSplashScreenHidden, hydrationDone } = useAppStore(
     useSelect(["setSplashScreenHidden", "hydrationDone"])
   );
 
+  /**
+   * TODO: place somewhere else?
+   */
   useEffect(() => {
     setAndroidColors(colorScheme);
   }, [colorScheme]);
 
-  const splashScreenHidden = useRef(false);
-
+  /**
+   * Splash screen
+   */
   useEffect(() => {
-    if (splashScreenHidden.current || !hydrationDone) {
+    if (!hydrationDone) {
+      return;
+    }
+
+    hideSplashScreen()
+      .then(() => {
+        setSplashScreenHidden(true);
+      })
+      .catch(sentryTrackError);
+  }, [hydrationDone, setSplashScreenHidden]);
+
+  /**
+   * Redirection
+   */
+  useEffect(() => {
+    if (!hydrationDone || !useAppStore.getState().splashScreenHidden) {
       return;
     }
 
     async function handleRedirection() {
       try {
-        const initialURL = await Linking.getInitialURL();
-        const schemedURL = initialURL
-          ? getSchemedURLFromUniversalURL(initialURL)
-          : "";
-
         if (topicToNavigateTo) {
-          await navigateToTopicWithRetry();
-        } else if (schemedURL) {
+          return navigateToTopicWithRetry();
+        }
+
+        const schemedURL = url ? getSchemedURLFromUniversalURL(url) : "";
+
+        if (schemedURL) {
+          if (isDevelopmentClientURL(schemedURL || "")) {
+            logger.debug(
+              "Skipping linking redirection because it's a development client URL:",
+              url
+            );
+            return;
+          }
+
+          logger.debug("Opening URL:", schemedURL);
           await Linking.openURL(schemedURL);
         }
       } catch (error) {
-        // TODO: Handle redirection error
+        console.error("Failed to handle redirection:", error);
       }
     }
 
-    const hideSplashScreenPromise = hideSplashScreen().then(() => {
-      splashScreenHidden.current = true;
-      setSplashScreenHidden(true);
-    });
-
-    Promise.all([hideSplashScreenPromise, handleRedirection]).catch(() => {
-      // TODO: Handle error
-    });
-  }, [hydrationDone, setSplashScreenHidden]);
+    handleRedirection();
+  }, [hydrationDone, url]);
 
   return null;
 }
