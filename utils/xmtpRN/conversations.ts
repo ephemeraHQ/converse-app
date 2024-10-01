@@ -203,7 +203,8 @@ const handleNewConversation = async (
     isGroup &&
     !(conversation as GroupWithCodecsType).members.some(
       (m) => m.addresses[0].toLowerCase() === client.address.toLowerCase()
-    );
+    ) &&
+    (conversation as GroupWithCodecsType).creatorInboxId !== client.inboxId;
   if (shouldSkip) {
     logger.warn(
       `Skipping group; ${client.address} is not a member of ${
@@ -211,6 +212,9 @@ const handleNewConversation = async (
       }`
     );
     return;
+  }
+  if (isGroup) {
+    (conversation as GroupWithCodecsType).sync();
   }
   saveConversations(
     client.address,
