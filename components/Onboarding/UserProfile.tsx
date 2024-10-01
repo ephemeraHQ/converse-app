@@ -12,6 +12,7 @@ import { getProfile } from "@utils/profile";
 import React, { useCallback, useRef, useState } from "react";
 import {
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -259,11 +260,13 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
       shrinkWithKeyboard
       inNav={!onboarding}
     >
-      <Avatar
-        uri={profile?.avatar}
-        style={styles.avatar}
-        name={profile.displayName || profile.username}
-      />
+      <Pressable onPress={addPFP}>
+        <Avatar
+          uri={profile?.avatar}
+          style={styles.avatar}
+          name={profile.displayName || profile.username}
+        />
+      </Pressable>
       <Button
         variant="text"
         title={
