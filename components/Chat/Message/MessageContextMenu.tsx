@@ -101,14 +101,32 @@ const BackdropComponent: FC<{
     const getTransformValue = () => {
       if (itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top) {
         const spacing = 16;
-        const topTransform =
+        const statusBarHeight =
+          Platform.OS === "android" ? StatusBar.currentHeight ?? 0 : 0;
+        const totalHeight =
           itemRectY.value +
           itemRectHeight.value +
           menuHeight +
           spacing +
-          (Platform.OS === "android" ? StatusBar.currentHeight ?? 0 : 0) +
-          (safeAreaInsets?.bottom || 0);
-        return topTransform > height ? height - topTransform : 0;
+          statusBarHeight +
+          safeAreaInsets.bottom;
+        const overflow = totalHeight - height;
+
+        if (overflow > 0) {
+          // If there is overflow, we need to move the bubble up
+          let adjustedTopTransform = -overflow; // Move up by the overflow amount
+          const topEdgeAfterAdjustment = itemRectY.value + adjustedTopTransform;
+
+          // Ensure the top of the bubble does not go above the top of the screen
+          if (topEdgeAfterAdjustment < safeAreaInsets.top) {
+            adjustedTopTransform = safeAreaInsets.top - itemRectY.value;
+          }
+
+          return adjustedTopTransform;
+        } else {
+          // No overflow, no adjustment needed
+          return 0;
+        }
       } else {
         return (
           -1 *
@@ -120,7 +138,11 @@ const BackdropComponent: FC<{
     return {
       position: "absolute",
       bottom:
-        height - Math.max(itemRectY.value - 10 + tY, AUXILIARY_VIEW_MIN_HEIGHT),
+        height -
+        Math.max(
+          itemRectY.value - 10 + tY,
+          AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top
+        ),
       height: Math.max(
         itemRectY.value - itemRectHeight.value - safeAreaInsets.top + tY,
         AUXILIARY_VIEW_MIN_HEIGHT
