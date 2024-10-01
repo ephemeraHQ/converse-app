@@ -5,15 +5,13 @@ import { Client } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
 
 export const getOtherInstallations = async (client: Client<any>) => {
-  const state = await client.inboxState(true);
+  const inboxState = await client.inboxState(true);
+  const installationsIds = inboxState.installations.map((i) => i.id);
   logger.debug(
-    `Current installation id : ${client.installationId} - All installation ids : ${state.installationIds}`
+    `Current installation id : ${client.installationId} - All installation ids : ${installationsIds}`
   );
-  const otherInstallations = state.installationIds.filter(
+  const otherInstallations = installationsIds.filter(
     (installationId) => installationId !== client.installationId
-  );
-  logger.debug(
-    `Current installation id : ${client.installationId} - All installation ids : ${state.installationIds}`
   );
   return otherInstallations;
 };
