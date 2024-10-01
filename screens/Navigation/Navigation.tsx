@@ -1,4 +1,4 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
 import { Platform, useColorScheme } from "react-native";
@@ -48,6 +48,7 @@ import {
 import config from "../../config";
 import { useAppStore } from "../../data/store/appStore";
 import { isDesktop } from "../../utils/device";
+import logger from "../../utils/logger";
 import { converseNavigations } from "../../utils/navigation";
 
 export type NavigationParamList = {
@@ -73,7 +74,7 @@ export type NavigationParamList = {
 
 export const NativeStack = createNativeStackNavigator<NavigationParamList>();
 const prefix = Linking.createURL("/");
-const linking = {
+const linking: LinkingOptions<NavigationParamList> = {
   prefixes: [prefix, ...config.universalLinks],
   config: {
     initialRouteName: "Chats",
@@ -98,10 +99,15 @@ export const navigationAnimation = Platform.OS === "ios" ? "default" : "none";
 export default function Navigation() {
   const colorScheme = useColorScheme();
   const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer
-        linking={splashScreenHidden ? (linking as any) : undefined}
+        linking={splashScreenHidden ? linking : undefined}
+        onReady={() => {
+          logger.debug("Navigation ready");
+          useAppStore.setState({ navigationReady: true });
+        }}
         initialState={
           Platform.OS === "ios" || Platform.OS === "web"
             ? {

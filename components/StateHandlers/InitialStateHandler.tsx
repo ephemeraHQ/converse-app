@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 
 import config from "../../config";
+import { useCurrentAccount } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import logger from "../../utils/logger";
@@ -34,8 +35,21 @@ export default function InitialStateHandler() {
 
   const url = Linking.useURL();
 
-  const { setSplashScreenHidden, hydrationDone } = useAppStore(
-    useSelect(["setSplashScreenHidden", "hydrationDone"])
+  // Use this to verify if the user is signed in for now
+  const isSignedIn = !!useCurrentAccount();
+
+  const {
+    setSplashScreenHidden,
+    hydrationDone,
+    navigationReady,
+    splashScreenHidden,
+  } = useAppStore(
+    useSelect([
+      "setSplashScreenHidden",
+      "hydrationDone",
+      "navigationReady",
+      "splashScreenHidden",
+    ])
   );
 
   /**
@@ -64,7 +78,24 @@ export default function InitialStateHandler() {
    * Redirection
    */
   useEffect(() => {
-    if (!hydrationDone || !useAppStore.getState().splashScreenHidden) {
+    if (!hydrationDone) {
+      logger.debug("Not redirecting because hydrationDone is false");
+      return;
+    }
+
+    if (!splashScreenHidden) {
+      logger.debug("Not redirecting because splashScreenHidden is false");
+      return;
+    }
+
+    if (!navigationReady) {
+      logger.debug("Not redirecting because navigationReady is false");
+      return;
+    }
+
+    // For now we don't have any redirection when the user is not signed in
+    if (!isSignedIn) {
+      logger.debug("Not redirecting because isSignedIn is false");
       return;
     }
 
@@ -94,7 +125,7 @@ export default function InitialStateHandler() {
     }
 
     handleRedirection();
-  }, [hydrationDone, url]);
+  }, [hydrationDone, url, splashScreenHidden, navigationReady, isSignedIn]);
 
   return null;
 }

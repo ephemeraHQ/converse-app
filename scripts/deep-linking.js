@@ -48,6 +48,30 @@ async function openDeepLink() {
       break;
   }
 
+  const { destination } = await prompts({
+    type: "select",
+    name: "destination",
+    message: "Choose a destination:",
+    choices: [
+      { title: "Chat", value: "/" },
+      { title: "Conversation", value: "conversation" },
+      { title: "New Conversation", value: "newConversation" },
+      { title: "Profile", value: "profile" },
+      { title: "Group", value: "group" },
+      { title: "Group Link", value: "groupLink" },
+      { title: "Group Invite", value: "groupInvite" },
+      { title: "Share Profile", value: "shareProfile" },
+      { title: "Webview Preview", value: "webviewPreview" },
+    ],
+  });
+
+  if (!destination) {
+    console.log("Operation cancelled.");
+    process.exit(1);
+  }
+
+  baseUrl = `${baseUrl}${destination}`;
+
   let params = [];
   let addMoreParams = true;
 
@@ -55,7 +79,7 @@ async function openDeepLink() {
     const { wantToAddParam } = await prompts({
       type: "confirm",
       name: "wantToAddParam",
-      message: "Want to add a parameter?",
+      message: "Want to add parameters?",
       initial: true,
     });
 

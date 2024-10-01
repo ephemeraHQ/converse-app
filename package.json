@@ -6,6 +6,7 @@
     "android:reverse": "adb reverse tcp:8081 tcp:8081 && adb reverse tcp:9875 tcp:9875",
     "build": "node scripts/build/build.js",
     "commit": "git show --format=\"%h\" --no-patch",
+    "run:ios": "EXPO_ENV=dev expo run:ios",
     "db": "ts-node scripts/migrations/db.ts",
     "lint": "eslint --ext .ts,.tsx . --max-warnings 325",
     "ios": "EXPO_ENV=dev expo start --ios",

@@ -35,6 +35,9 @@ type AppStoreType = {
 
   contextMenuShownId: string | null;
   setContextMenuShown: (messageId: string | null) => void;
+
+  navigationReady: boolean;
+  setNavigationReady: (ready: boolean) => void;
 };
 
 export const useAppStore = create<AppStoreType>()(
@@ -75,6 +78,10 @@ export const useAppStore = create<AppStoreType>()(
       contextMenuShownId: null,
       setContextMenuShown: (messageId: string | null) =>
         set(() => ({ contextMenuShownId: messageId })),
+
+      navigationReady: false,
+      setNavigationReady: (ready: boolean) =>
+        set(() => ({ navigationReady: ready })),
     }),
     {
       name: "store-app",
