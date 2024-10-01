@@ -14,8 +14,8 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import { useExternalSigner } from "@utils/evm/external";
 import { usePrivySigner } from "@utils/evm/privy";
+import { useXmtpSigner } from "@utils/evm/xmtp";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { shortAddress } from "@utils/str";
 import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
@@ -24,7 +24,6 @@ import {
   revokeOtherInstallations,
 } from "@utils/xmtpRN/revoke";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
-import { Signer } from "ethers";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -122,7 +121,7 @@ export default function ProfileScreen({
     groupTopic ?? ""
   );
   const isSplitScreen = useIsSplitScreen();
-  const { getExternalSigner, resetExternalSigner } = useExternalSigner();
+  const { getXmtpSigner } = useXmtpSigner();
   const privySigner = usePrivySigner();
 
   const insets = useSafeAreaInsets();
@@ -793,44 +792,16 @@ export default function ProfileScreen({
                     );
                     return;
                   }
-                  let signer: Signer | undefined = undefined;
+                  const signer = await getXmtpSigner(
+                    translate("revoke_wallet_picker_title"),
+                    translate("revoke_wallet_picker_description", {
+                      wallet:
+                        getPreferredUsername(socials) ||
+                        shortAddress(client.address),
+                    })
+                  );
+                  if (!signer) return;
 
-                  if (privySigner) {
-                    const privyAddress = await privySigner.getAddress();
-                    if (
-                      privyAddress.toLowerCase() ===
-                      client.address.toLowerCase()
-                    ) {
-                      signer = privySigner;
-                    }
-                  }
-
-                  if (!signer) {
-                    const socials =
-                      useProfilesStore.getState().profiles[client.address]
-                        ?.socials;
-                    signer = await getExternalSigner(
-                      translate("revoke_wallet_picker_title"),
-                      translate("revoke_wallet_picker_description", {
-                        wallet:
-                          getPreferredUsername(socials) ||
-                          shortAddress(client.address),
-                      })
-                    );
-                    if (!signer) return;
-                    const externalAddress = await signer.getAddress();
-                    if (
-                      externalAddress.toLowerCase() !==
-                      client.address.toLowerCase()
-                    ) {
-                      Alert.alert(
-                        translate("xmtp_wrong_signer"),
-                        translate("xmtp_wrong_signer_description")
-                      );
-                      resetExternalSigner();
-                      return;
-                    }
-                  }
                   const revoked = await revokeOtherInstallations(
                     signer,
                     client,
