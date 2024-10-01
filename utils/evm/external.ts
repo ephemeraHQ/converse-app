@@ -8,6 +8,7 @@ import { ethereum } from "thirdweb/chains";
 import {
   useActiveAccount,
   useActiveWallet,
+  useAutoConnect,
   useDisconnect,
   useSetActiveWallet,
 } from "thirdweb/react";
@@ -24,6 +25,9 @@ export const useExternalSigner = () => {
   const activeAccount = useActiveAccount();
   const activeWallet = useActiveWallet();
   const { disconnect } = useDisconnect();
+  useAutoConnect({
+    client: thirdwebClient,
+  });
 
   const getExternalSigner = useCallback(
     async (title?: string, subtitle?: string) => {

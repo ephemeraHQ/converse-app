@@ -230,7 +230,7 @@ const en = {
   security: "SECURITY",
   xmtp_wrong_signer: "Wrong wallet",
   xmtp_wrong_signer_description:
-    "Please connect the wallet that owns this XMTP account",
+    "Linked wallet does not own that XMTP identity. We unlinked it, please try again.",
 
   // Context Menu
   reply: "Reply",
