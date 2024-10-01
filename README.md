@@ -95,9 +95,8 @@ yarn dev
 yarn test
 ```
 
+# Frames
 
-# Key Cases Needed for App Release
+Frames are expected to follow the Open Frames Standard https://github.com/open-frames/standard
 
-1. Old conversations are persisted
-2. Can send a message without duplicates
-3. Can create a group
+
