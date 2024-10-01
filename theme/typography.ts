@@ -51,6 +51,7 @@ export const typography = {
   primary: Platform.select({
     ios: fonts.sfPro,
     android: fonts.roboto,
+    default: fonts.sfPro,
   }),
   /**
    * An alternate font used for perhaps titles and stuff.
@@ -58,5 +59,6 @@ export const typography = {
   secondary: Platform.select({
     ios: fonts.sfPro,
     android: fonts.sansSerif,
+    default: fonts.sfPro,
   }),
 };

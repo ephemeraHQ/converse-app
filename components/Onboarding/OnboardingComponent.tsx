@@ -18,7 +18,7 @@ import {
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Terms from "./Terms";
+import { Terms } from "./Terms";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";

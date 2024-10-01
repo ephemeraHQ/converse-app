@@ -8,7 +8,13 @@ import React from "react";
 import { IPictoProps } from "./Picto/Picto";
 
 export function SubtitleComponent({ style, ...rest }: IAnimatedTextProps) {
-  return <AnimatedText style={[{ textAlign: "center" }, style]} {...rest} />;
+  return (
+    <AnimatedText
+      preset="subheading"
+      style={[{ textAlign: "center" }, style]}
+      {...rest}
+    />
+  );
 }
 
 export function TitleComponent({ style, ...rest }: ITitleProps) {
