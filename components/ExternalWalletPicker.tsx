@@ -23,12 +23,12 @@ import { Account, createWallet, Wallet } from "thirdweb/wallets";
 
 import Button from "./Button/Button";
 import { Drawer, DrawerRef } from "./Drawer";
+import config from "../config";
 import {
   InstalledWallet,
   useInstalledWallets,
 } from "./Onboarding/supportedWallets";
 import Picto from "./Picto/Picto";
-import config from "../config";
 
 export default function ExternalWalletPicker() {
   const styles = useStyles();
@@ -97,8 +97,8 @@ export default function ExternalWalletPicker() {
           account: undefined,
         });
       }
-      await waitUntilAppActive(500);
       setVisible(false);
+      await waitUntilAppActive(500);
     },
     []
   );
@@ -119,7 +119,9 @@ export default function ExternalWalletPicker() {
       );
     };
   }, [displayExternalWalletPicker]);
+
   const wallets = useInstalledWallets();
+
   return (
     <Drawer
       visible={visible}
