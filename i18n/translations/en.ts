@@ -311,6 +311,13 @@ const en = {
     "Share your feedback and ideas with the Converse team and other alpha testers.",
   joinAlphaGroup: "Join Converse VIP Alpha Chat",
   linkCopied: "Link copied",
+
+  // New Conversation
+  new_conversation: "New conversation",
+  new_group: "New group",
+  add: "Add",
+  add_members: "Add members",
+  next: "Next",
 };
 
 export default en;
