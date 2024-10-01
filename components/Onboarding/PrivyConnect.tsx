@@ -1,6 +1,7 @@
 import { translate } from "@i18n";
 import { useEmbeddedWallet, useLoginWithSMS, usePrivy } from "@privy-io/expo";
 import {
+  backgroundColor,
   primaryColor,
   textPrimaryColor,
   textSecondaryColor,
@@ -253,7 +254,9 @@ export default function PrivyConnect() {
               placeholderTextColor: textSecondaryColor(colorScheme),
               selectionColor: textPrimaryColor(colorScheme),
               placeholder: translate("privyConnect.phoneInput.placeholder"),
-              style: {},
+              style: {
+                color: textPrimaryColor(colorScheme),
+              },
             }}
             codeTextStyle={{ display: "none" }}
             renderDropdownImage={
@@ -383,8 +386,12 @@ const useStyles = () => {
       borderRadius: 8,
       paddingLeft: 12,
       marginBottom: 8,
+      backgroundColor: backgroundColor(colorScheme),
     },
-    phoneInput: { backgroundColor: "transparent", left: 0 },
+    phoneInput: {
+      backgroundColor: "transparent",
+      left: 0,
+    },
     phoneInputText: {
       height: 20,
       color: textPrimaryColor(colorScheme),
