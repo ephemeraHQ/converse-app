@@ -1,12 +1,10 @@
 import { setAndroidColors } from "@styles/colors/helpers";
-import logger from "@utils/logger";
 import * as Linking from "expo-linking";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useColorScheme } from "react-native";
 
 import config from "../../config";
 import { useAppStore } from "../../data/store/appStore";
-import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import {
   navigateToTopicWithRetry,
@@ -25,13 +23,9 @@ const getSchemedURLFromUniversalURL = (url: string) => {
   return schemedURL;
 };
 
-export let initialURL = "";
-
 export default function InitialStateHandler() {
   const colorScheme = useColorScheme();
-  const setDesktopConnectSessionId = useOnboardingStore(
-    (s) => s.setDesktopConnectSessionId
-  );
+
   const { setSplashScreenHidden, hydrationDone } = useAppStore(
     useSelect(["setSplashScreenHidden", "hydrationDone"])
   );
@@ -40,68 +34,38 @@ export default function InitialStateHandler() {
     setAndroidColors(colorScheme);
   }, [colorScheme]);
 
-  const parseDesktopSessionURL = useCallback(
-    (url?: string) => {
-      if (!url) return;
-      const schemedURL = getSchemedURLFromUniversalURL(url);
-      try {
-        const { hostname, queryParams, path } = Linking.parse(schemedURL);
-        if (
-          hostname?.toLowerCase() === "desktopconnect" &&
-          (queryParams?.sessionId || path)
-        ) {
-          const sessionId = queryParams?.sessionId
-            ? queryParams?.sessionId.toString()
-            : `${path}`;
-          setDesktopConnectSessionId(sessionId);
-        }
-      } catch (e) {
-        logger.error(e);
-      }
-    },
-    [setDesktopConnectSessionId]
-  );
-
-  useEffect(() => {
-    const handleInitialDeeplink = async () => {
-      let openedViaURL = (await Linking.getInitialURL()) || "";
-      // Handling universal links by saving a schemed URI
-      openedViaURL = getSchemedURLFromUniversalURL(openedViaURL);
-      initialURL = openedViaURL;
-      parseDesktopSessionURL(openedViaURL);
-    };
-    handleInitialDeeplink();
-  }, [parseDesktopSessionURL]);
-
-  useEffect(() => {
-    // Parsing the desktop session id if any!
-    Linking.addEventListener("url", (event) => {
-      parseDesktopSessionURL(event.url);
-    });
-  }, [parseDesktopSessionURL]);
-
   const splashScreenHidden = useRef(false);
 
   useEffect(() => {
-    const hideSplashScreenIfReady = async () => {
-      if (!splashScreenHidden.current && hydrationDone) {
-        splashScreenHidden.current = true;
-        setSplashScreenHidden(true);
-        await hideSplashScreen();
+    if (splashScreenHidden.current || !hydrationDone) {
+      return;
+    }
 
-        // If app was loaded by clicking on notification,
-        // let's navigate
+    async function handleRedirection() {
+      try {
+        const initialURL = await Linking.getInitialURL();
+        const schemedURL = initialURL
+          ? getSchemedURLFromUniversalURL(initialURL)
+          : "";
+
         if (topicToNavigateTo) {
-          navigateToTopicWithRetry();
-        } else if (initialURL) {
-          Linking.openURL(initialURL);
-          // Once opened, let's remove so we don't navigate twice
-          // when logging out / relogging in
-          initialURL = "";
+          await navigateToTopicWithRetry();
+        } else if (schemedURL) {
+          await Linking.openURL(schemedURL);
         }
+      } catch (error) {
+        // TODO: Handle redirection error
       }
-    };
-    hideSplashScreenIfReady();
+    }
+
+    const hideSplashScreenPromise = hideSplashScreen().then(() => {
+      splashScreenHidden.current = true;
+      setSplashScreenHidden(true);
+    });
+
+    Promise.all([hideSplashScreenPromise, handleRedirection]).catch(() => {
+      // TODO: Handle error
+    });
   }, [hydrationDone, setSplashScreenHidden]);
 
   return null;
