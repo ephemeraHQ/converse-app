@@ -13,6 +13,10 @@ import {
 } from "thirdweb/react";
 import { Wallet } from "thirdweb/wallets";
 
+/**
+ * External wallet signer (i.e. not Privy)
+ * for XMTP signatures or tx frames
+ */
 export const useExternalSigner = () => {
   const thirdwebSigner = useRef<Signer | undefined>();
   const thirdwebWallet = useRef<Wallet | undefined>();
