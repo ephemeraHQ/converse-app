@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, Platform, TextInput } from "react-native";
 
+import { getLensHandleFromConversationIdAndPeer } from "./lens";
 import logger from "./logger";
 import { getPreferredName, getProfile } from "./profile";
 import {
@@ -68,6 +69,15 @@ export const conversationName = (
     )?.socials;
 
   if (socials) {
+    if (conversation.context?.conversationId?.startsWith("lens.dev")) {
+      const lensHandle = getLensHandleFromConversationIdAndPeer(
+        conversation.context.conversationId,
+        socials.lensHandles
+      );
+      if (lensHandle) {
+        return lensHandle;
+      }
+    }
     const preferredName = getPreferredName(socials, conversation.peerAddress);
     return preferredName;
   }
