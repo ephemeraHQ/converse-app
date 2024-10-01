@@ -1,9 +1,10 @@
 import { translate } from "@i18n";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import * as Linking from "expo-linking";
+import React from "react";
 import { Platform, StyleSheet, Text, useColorScheme } from "react-native";
 
-export default function Terms() {
+export const Terms = React.memo(() => {
   const styles = useStyles();
 
   return (
@@ -21,7 +22,7 @@ export default function Terms() {
       </Text>
     </Text>
   );
-}
+});
 
 const useStyles = () => {
   const colorScheme = useColorScheme();

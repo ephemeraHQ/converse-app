@@ -1,8 +1,10 @@
+import { Screen } from "@components/Screen";
+import { Text } from "@design-system/Text";
 import { textPrimaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import * as Linking from "expo-linking";
 import React from "react";
-import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 
 import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
@@ -10,52 +12,57 @@ import { useSettingsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { requestPushNotificationsPermissions } from "../utils/notifications";
 
-export default function NotificationsScreen() {
+export function NotificationsScreen() {
+  const styles = useStyles();
+
   const setNotificationsSettings = useSettingsStore(
     (s) => s.setNotificationsSettings
   );
   const setNotificationsPermissionStatus = useAppStore(
     (s) => s.setNotificationsPermissionStatus
   );
-  const styles = useStyles();
+
   return (
-    <View style={styles.notifications}>
-      <Picto
-        picto="message.badge"
-        size={PictoSizes.notification}
-        style={styles.picto}
-      />
-      <Text style={styles.title}>Accept notifications</Text>
-      <Text style={styles.p}>
-        Converse is a messaging app, it works much better with notifications.
-      </Text>
-      <Button
-        title="Accept notifications"
-        variant="primary"
-        onPress={async () => {
-          // Open popup
-          const newStatus = await requestPushNotificationsPermissions();
-          if (!newStatus) return;
-          if (newStatus === "denied" && Platform.OS === "android") {
-            // Android 13 always show denied first but sometimes
-            // it will still show the popup. If not, go to Settings!
-            Linking.openSettings();
-          } else {
+    <Screen>
+      <View style={styles.notifications}>
+        <Picto
+          picto="message.badge"
+          size={PictoSizes.notification}
+          style={styles.picto}
+        />
+        <Text style={styles.title}>Accept notifications</Text>
+        <Text style={styles.p}>
+          Converse is a messaging app, it works much better with notifications.
+        </Text>
+
+        <Button
+          title="Accept notifications"
+          variant="primary"
+          onPress={async () => {
+            // Open popup
+            const newStatus = await requestPushNotificationsPermissions();
+            if (!newStatus) return;
+            if (newStatus === "denied" && Platform.OS === "android") {
+              // Android 13 always show denied first but sometimes
+              // it will still show the popup. If not, go to Settings!
+              Linking.openSettings();
+            } else {
+              setNotificationsSettings({ showNotificationScreen: false });
+            }
+            setNotificationsPermissionStatus(newStatus);
+          }}
+        />
+
+        <Button
+          title="Later"
+          style={styles.later}
+          variant="text"
+          onPress={() => {
             setNotificationsSettings({ showNotificationScreen: false });
-          }
-          setNotificationsPermissionStatus(newStatus);
-        }}
-      />
-      <Button
-        title="Later"
-        style={styles.later}
-        variant="text"
-        textStyle={{ fontWeight: "600" }}
-        onPress={() => {
-          setNotificationsSettings({ showNotificationScreen: false });
-        }}
-      />
-    </View>
+          }}
+        />
+      </View>
+    </Screen>
   );
 }
 

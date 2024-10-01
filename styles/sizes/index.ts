@@ -17,7 +17,6 @@ export enum AvatarSizes {
 
 export enum PictoSizes {
   default = 48,
-
   accoutSettings = 24,
   actionButton = Platform.OS === "android" ? 20 : 11.7,
   button = 13,

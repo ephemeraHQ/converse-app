@@ -1,14 +1,18 @@
 import UserProfile from "@components/Onboarding/UserProfile";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  createNativeStackNavigator,
+  NativeStackNavigationOptions,
+} from "@react-navigation/native-stack";
 import { stackGroupScreenOptions } from "@screens/Navigation/navHelpers";
-import NotificationsScreen from "@screens/NotificationsScreen";
-import ConnectWalletScreen from "@screens/Onboarding/ConnectWalletScreen";
-import EphemeralLoginScreen from "@screens/Onboarding/EphemeraLoginScreen";
-import GetStartedScreen from "@screens/Onboarding/GetStartedScreen";
-import PhoneLoginScreen from "@screens/Onboarding/PhoneLoginScreen";
-import PrivyConnectScreen from "@screens/Onboarding/PrivyConnectScreen";
+import { NotificationsScreen } from "@screens/NotificationsScreen";
+import { ConnectWalletScreen } from "@screens/Onboarding/ConnectWalletScreen";
+import { EphemeraLoginScreen } from "@screens/Onboarding/EphemeraLoginScreen";
+import { GetStartedScreen } from "@screens/Onboarding/GetStartedScreen";
+import { PrivyConnectScreen } from "@screens/Onboarding/PrivyConnectScreen";
 import React from "react";
 import { useColorScheme } from "react-native";
+
+import { colors } from "../theme";
 
 export type AuthStackParamList = {
   GetStarted: undefined;
@@ -17,7 +21,6 @@ export type AuthStackParamList = {
   Notifications: undefined;
   EphemeralLogin: undefined;
   Profile: undefined;
-  PhoneLogin: undefined;
 };
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -28,27 +31,49 @@ export default function AuthNavigation() {
   return (
     <AuthStack.Navigator
       screenOptions={{
-        headerShown: false,
+        contentStyle: {
+          backgroundColor: colors.background,
+        },
+        // headerShown: false,
       }}
     >
       <AuthStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
-        <AuthStack.Screen name="GetStarted" component={GetStartedScreen} />
-        <AuthStack.Screen name="PrivyConnect" component={PrivyConnectScreen} />
+        <AuthStack.Screen
+          options={{
+            headerShown: false,
+          }}
+          name="GetStarted"
+          component={GetStartedScreen}
+        />
+        <AuthStack.Screen
+          options={sharedScreenOptions}
+          name="PrivyConnect"
+          component={PrivyConnectScreen}
+        />
         <AuthStack.Screen
           name="ConnectWallet"
+          options={sharedScreenOptions}
           component={ConnectWalletScreen}
         />
         <AuthStack.Screen
           name="Notifications"
+          options={sharedScreenOptions}
           component={NotificationsScreen}
         />
         <AuthStack.Screen name="Profile" component={UserProfile} />
-        <AuthStack.Screen name="PhoneLogin" component={PhoneLoginScreen} />
         <AuthStack.Screen
+          options={sharedScreenOptions}
           name="EphemeralLogin"
-          component={EphemeralLoginScreen}
+          component={EphemeraLoginScreen}
         />
       </AuthStack.Group>
     </AuthStack.Navigator>
   );
 }
+
+const sharedScreenOptions: NativeStackNavigationOptions = {
+  headerTitle: "",
+  headerBackTitle: "Back",
+  headerBackTitleVisible: false,
+  headerShadowVisible: false,
+};

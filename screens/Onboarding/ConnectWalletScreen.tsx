@@ -18,7 +18,7 @@ import { translate } from "i18n-js";
 import { useCallback } from "react";
 import { Alert } from "react-native";
 
-export default function ConnectWalletScreen() {
+export function ConnectWalletScreen() {
   const { connectionMethod, address, isEphemeral, pkPath, privyAccountId } =
     useOnboardingStore(
       useSelect([

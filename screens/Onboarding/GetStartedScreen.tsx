@@ -36,7 +36,7 @@ import { useAuthNavigation } from "../../navigation/use-navigation";
 
 const animationDelays = [525, 550, 575, 800, 825, 850] as const;
 
-export default function GetStartedScreen() {
+export function GetStartedScreen() {
   const appState = useRef(AppState.currentState);
   const router = useAuthNavigation();
   const colorScheme = useColorScheme();
@@ -105,7 +105,7 @@ export default function GetStartedScreen() {
     >
       <PictoTitleSubtitle.Container
         style={{
-          marginBottom: spacing.xxl,
+          marginBottom: spacing.xl,
           marginTop: spacing.xl,
         }}
       >
@@ -128,22 +128,6 @@ export default function GetStartedScreen() {
           {translate("walletSelector.subtitle")}
         </PictoTitleSubtitle.Subtitle>
       </PictoTitleSubtitle.Container>
-      {/* <Picto
-        style={{
-          height: PictoSizes.onboardingComponent,
-        }}
-        picto="message.circle.fill"
-        size={PictoSizes.onboardingComponent}
-      />
-
-      <Title>{translate("walletSelector.title")}</Title>
-      <Subtitle>{translate("walletSelector.subtitle")}</Subtitle> */}
-
-      {/* <PictoTitleSubtitle
-        picto="message.circle.fill"
-        title={translate("walletSelector.title")}
-        subtitle={translate("walletSelector.subtitle")}
-      /> */}
 
       <AnimatedVStack
         entering={animations.fadeInDownSlow().delay(animationDelays[3])}
@@ -159,7 +143,8 @@ export default function GetStartedScreen() {
               ),
               rightView,
               action: () => {
-                router.push("PhoneLogin");
+                setConnectionMethod("phone");
+                router.push("PrivyConnect");
               },
             },
             {
@@ -170,6 +155,7 @@ export default function GetStartedScreen() {
               ),
               rightView,
               action: () => {
+                setConnectionMethod("ephemeral");
                 router.push("EphemeralLogin");
               },
             },
@@ -254,7 +240,10 @@ export default function GetStartedScreen() {
                 "walletSelector.connectionOptions.connectViaKey"
               ),
               rightView,
-              action: () => router.push("ConnectWallet"),
+              action: () => {
+                setConnectionMethod("privateKey");
+                router.push("ConnectWallet");
+              },
             },
           ]}
         />
