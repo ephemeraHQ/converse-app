@@ -5,8 +5,6 @@ import * as Linking from "expo-linking";
 import { useEffect, useRef } from "react";
 import { useColorScheme } from "react-native";
 
-import SplitLeftStackNavigation from "./SplitLeftStackNavigation";
-import SplitRightStackNavigation from "./SplitRightStackNavigation";
 import config from "../../../config";
 import {
   getChatStore,
@@ -19,6 +17,8 @@ import {
   ConversationScreenConfig,
 } from "../ConversationNav";
 import { getConverseInitialURL, getConverseStateFromPath } from "../navHelpers";
+import SplitLeftStackNavigation from "./SplitLeftStackNavigation";
+import SplitRightStackNavigation from "./SplitRightStackNavigation";
 
 export type SplitScreenDrawerParams = {
   Chats: undefined;
