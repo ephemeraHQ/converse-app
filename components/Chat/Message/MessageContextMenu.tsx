@@ -206,6 +206,7 @@ const BackdropComponent: FC<{
     const animateOpacity = () =>
       withDelay(HOLD_ITEM_TRANSFORM_DURATION, withTiming(0, { duration: 0 }));
     const getTransformValue = () => {
+      const spacing = 6;
       if (
         itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top ||
         itemRectHeight.value > height / 2
@@ -220,13 +221,13 @@ const BackdropComponent: FC<{
           return height - topTransform;
         } else {
           // Short message
-          return topTransform > height ? height - topTransform : 0;
+          return topTransform > height ? height - topTransform + spacing : 0;
         }
       } else {
         return (
           -1 *
           (itemRectY.value -
-            10 -
+            spacing -
             AUXILIARY_VIEW_MIN_HEIGHT -
             safeAreaInsets.top)
         );
