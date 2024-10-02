@@ -25,9 +25,6 @@ export const useExternalSigner = () => {
   const activeAccount = useActiveAccount();
   const activeWallet = useActiveWallet();
   const { disconnect } = useDisconnect();
-  useAutoConnect({
-    client: thirdwebClient,
-  });
 
   const getExternalSigner = useCallback(
     async (title?: string, subtitle?: string) => {
@@ -71,4 +68,12 @@ export const useExternalSigner = () => {
   }, [activeWallet, disconnect]);
 
   return { getExternalSigner, resetExternalSigner };
+};
+
+export const useAutoConnectExternalWallet = () => {
+  // Keep access to last
+  // thirdweb external wallet
+  useAutoConnect({
+    client: thirdwebClient,
+  });
 };

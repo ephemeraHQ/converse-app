@@ -54,3 +54,7 @@ export const useExternalSigner = () => {
 
   return { getExternalSigner, resetExternalSigner };
 };
+
+export const useAutoConnectExternalWallet = () => {
+  // Built into web3modal
+};

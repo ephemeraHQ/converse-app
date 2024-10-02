@@ -35,21 +35,15 @@ import {
 } from "../TableView/TableViewImage";
 
 export default function WalletSelector() {
-  const {
-    setConnectionMethod,
-    setSigner,
-    setLoading,
-    addingNewAccount,
-    setAddingNewAccount,
-  } = useOnboardingStore(
-    useSelect([
-      "setConnectionMethod",
-      "setSigner",
-      "setLoading",
-      "addingNewAccount",
-      "setAddingNewAccount",
-    ])
-  );
+  const { setConnectionMethod, setSigner, setLoading, setAddingNewAccount } =
+    useOnboardingStore(
+      useSelect([
+        "setConnectionMethod",
+        "setSigner",
+        "setLoading",
+        "setAddingNewAccount",
+      ])
+    );
   const colorScheme = useColorScheme();
   const { connect: thirdwebConnect } = useConnect();
   const setActiveWallet = useSetActiveWallet();
