@@ -37,7 +37,7 @@ export const initSentry = () => {
     // party crash reporters break Apple's crash reporting and it can be
     // best to just disable the Native part of Sentry for now on iOS.
     sentryOptions.enableNative = false;
-    const releaseNumber = `${appBuildNumbers.expo.ios.version}+${appBuildNumbers.expo.ios.buildNumber}`;
+    const releaseNumber = `${appBuildNumbers.expo.version}+${appBuildNumbers.expo.ios.buildNumber}`;
     const release = `${config.bundleId}@${releaseNumber}`;
     sentryOptions.release = release;
   }
