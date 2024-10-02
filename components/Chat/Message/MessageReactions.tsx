@@ -19,17 +19,17 @@ import { MessageToDisplay } from "./Message";
 import {
   useCurrentAccount,
   useProfilesStore,
-} from "../../../data/store/accountsStore";
+} from "@data/store/accountsStore";
 import {
   getPreferredAvatar,
   getPreferredName,
   getProfile,
-} from "../../../utils/profile";
+} from "@utils/profile";
 import {
   MessageReaction,
   addReactionToMessage,
   removeReactionFromMessage,
-} from "../../../utils/reactions";
+} from "@utils/reactions";
 
 const MAX_REACTORS_TO_SHOW = 3;
 const REACTOR_OFFSET = 10;

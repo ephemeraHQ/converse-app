@@ -46,7 +46,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MessageToDisplay } from "./Message";
-import Picto from "../../Picto/Picto";
+import Picto from "@components/Picto/Picto";
 
 interface MessageReactionsListProps {
   reactions: {

@@ -8,14 +8,15 @@ import {
   BACKDROP_LIGHT_BACKGROUND_COLOR,
   HOLD_ITEM_TRANSFORM_DURATION,
   ITEM_WIDTH,
+  OUTTER_SPACING,
   SIDE_MARGIN,
   SPRING_CONFIGURATION,
+  STATUS_BAR_HEIGHT,
 } from "@utils/contextMenu/constants";
 import { ConversationContext } from "@utils/conversation";
 import React, { FC, memo, useEffect, useMemo } from "react";
 import {
   Platform,
-  StatusBar,
   StyleSheet,
   TouchableWithoutFeedback,
   useColorScheme,
@@ -68,6 +69,7 @@ const BackdropComponent: FC<{
   const { height, width } = useWindowDimensions();
   const safeAreaInsets = useSafeAreaInsets();
   const styles = useStyles();
+
   useEffect(() => {
     activeValue.value = isActive;
     opacityValue.value = withTiming(isActive ? 1 : 0, {
@@ -77,6 +79,7 @@ const BackdropComponent: FC<{
       duration: HOLD_ITEM_TRANSFORM_DURATION,
     });
   }, [activeValue, isActive, opacityValue, intensityValue]);
+
   const menuHeight = useMemo(() => {
     return calculateMenuHeight(items.length);
   }, [items]);
@@ -97,18 +100,17 @@ const BackdropComponent: FC<{
     return { backgroundColor };
   }, []);
 
+  // Reactions
   const animatedAuxiliaryViewStyle = useAnimatedStyle(() => {
     const getTransformValue = () => {
       if (itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top) {
         const spacing = 16;
-        const statusBarHeight =
-          Platform.OS === "android" ? StatusBar.currentHeight ?? 0 : 0;
         const totalHeight =
           itemRectY.value +
           itemRectHeight.value +
           menuHeight +
           spacing +
-          statusBarHeight +
+          STATUS_BAR_HEIGHT +
           safeAreaInsets.bottom;
         const overflow = totalHeight - height;
 
@@ -137,10 +139,11 @@ const BackdropComponent: FC<{
     const tY = getTransformValue();
     return {
       position: "absolute",
+      // This allows the emoji picker to reach the selected message
       bottom:
         height -
         Math.max(
-          itemRectY.value - 10 + tY,
+          itemRectY.value - OUTTER_SPACING + tY,
           AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top
         ),
       height: Math.max(
@@ -155,27 +158,30 @@ const BackdropComponent: FC<{
     };
   });
 
+  // Context menu
   const animatedMenuStyle = useAnimatedStyle(() => {
     const getTransformValue = () => {
-      if (
-        itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top ||
-        itemRectHeight.value > height / 2
-      ) {
-        const spacing = 18;
-        const topTransform =
-          itemRectY.value +
-          itemRectHeight.value +
-          menuHeight +
-          spacing +
-          (safeAreaInsets?.bottom || 0);
-        if (itemRectHeight.value > height / 2) {
-          // Long message
-          return height - topTransform;
-        } else {
-          // Short message
-          return topTransform > height ? height - topTransform : 0;
-        }
+      // Calculate the vertical position of the context menu
+      const topTransform =
+        // Y position of the message
+        itemRectY.value + 
+        // Height of the message
+        itemRectHeight.value + 
+        // Height of the context menu
+        menuHeight + 
+        // Space between the message and the context menu
+        OUTTER_SPACING + 
+        // Account for safe area at the bottom of the screen
+        (safeAreaInsets?.bottom || 0); 
+
+      // Adjust positioning when message height exceeds half the screen
+      if (itemRectHeight.value > height / 2) {
+        return height - topTransform;
+      } else if (itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top) {
+        // General case for shorter messages
+        return topTransform > height ? height - topTransform : 0;
       } else {
+        // Short message near the top of the screen, requires downward adjustment
         return (
           -1 *
           (itemRectY.value - AUXILIARY_VIEW_MIN_HEIGHT - safeAreaInsets.top - 5)
@@ -202,6 +208,7 @@ const BackdropComponent: FC<{
     };
   });
 
+  // Message
   const animatedPortalStyle = useAnimatedStyle(() => {
     const animateOpacity = () =>
       withDelay(HOLD_ITEM_TRANSFORM_DURATION, withTiming(0, { duration: 0 }));
