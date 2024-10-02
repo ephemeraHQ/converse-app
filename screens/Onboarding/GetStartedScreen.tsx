@@ -18,13 +18,12 @@ import { textSecondaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { animations } from "@theme/animations";
 import { spacing } from "@theme/spacing";
-import { componentKeyDebug } from "@utils/debug";
 import { isDesktop } from "@utils/device";
 import { getEthOSSigner } from "@utils/ethos";
 import logger from "@utils/logger";
 import { thirdwebClient } from "@utils/thirdweb";
 import * as Linking from "expo-linking";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AppState, useColorScheme } from "react-native";
 import { useConnect, useSetActiveWallet } from "thirdweb/react";
 import { createWallet } from "thirdweb/wallets";
@@ -37,64 +36,18 @@ import { useAuthNavigation } from "../../navigation/use-navigation";
 const animationDelays = [525, 550, 575, 800, 825, 850] as const;
 
 export function GetStartedScreen() {
-  const appState = useRef(AppState.currentState);
   const router = useAuthNavigation();
-  const colorScheme = useColorScheme();
-  const { connect: thirdwebConnect } = useConnect();
-  const setActiveWallet = useSetActiveWallet();
 
-  const { setConnectionMethod, setSigner, setLoading } = useOnboardingStore(
-    useSelect([
-      "setConnectionMethod",
-      "setSigner",
-      "setLoading",
-      "addingNewAccount",
-      "setAddingNewAccount",
-    ])
+  const { setConnectionMethod } = useOnboardingStore(
+    useSelect(["setConnectionMethod"])
   );
 
-  const [walletsInstalled, setWalletsInstalled] = useState({
-    checked: false,
-    list: installedWallets as InstalledWallet[],
-  });
-
-  useEffect(() => {
-    const loadInstalledWallets = async (refresh: boolean) => {
-      const list = await getInstalledWallets(refresh);
-      setWalletsInstalled({ checked: true, list });
-    };
-    loadInstalledWallets(false);
-
-    const subscription = AppState.addEventListener(
-      "change",
-      async (nextAppState) => {
-        if (
-          nextAppState === "active" &&
-          appState.current.match(/inactive|background/)
-        ) {
-          loadInstalledWallets(true);
-        }
-        appState.current = nextAppState;
-      }
-    );
-    return () => subscription.remove();
-  }, []);
+  const { walletsInstalled } = useInstalledWallets();
 
   const hasInstalledWallets = walletsInstalled.list.length > 0;
 
-  const rightView = useMemo(
-    () => (
-      <TableViewPicto
-        symbol="chevron.right"
-        color={textSecondaryColor(colorScheme)}
-      />
-    ),
-    [colorScheme]
-  );
-
   return (
     <Screen
-      {...componentKeyDebug()}
       safeAreaEdges={["top", "bottom"]}
       preset="scroll"
       contentContainerStyle={{
@@ -141,7 +94,7 @@ export function GetStartedScreen() {
               title: translate(
                 "walletSelector.converseAccount.connectViaPhone"
               ),
-              rightView,
+              rightView: RightViewChevron(),
               action: () => {
                 setConnectionMethod("phone");
                 router.push("PrivyConnect");
@@ -153,7 +106,7 @@ export function GetStartedScreen() {
               title: translate(
                 "walletSelector.converseAccount.createEphemeral"
               ),
-              rightView,
+              rightView: RightViewChevron(),
               action: () => {
                 setConnectionMethod("ephemeral");
                 router.push("EphemeralLogin");
@@ -167,104 +120,191 @@ export function GetStartedScreen() {
         <AnimatedVStack
           entering={animations.fadeInDownSlow().delay(animationDelays[4])}
         >
-          <TableView
-            title={translate("walletSelector.installedApps.title")}
-            items={walletsInstalled.list.map((w) => ({
-              id: w.name,
-              leftView: <TableViewImage imageURI={w.iconURL} />,
-              rightView,
-              title: translate("walletSelector.installedApps.connectWallet", {
-                walletName: w.name,
-              }),
-              action: async () => {
-                setLoading(true);
-                setConnectionMethod("wallet");
-                logger.debug(
-                  `[Onboarding] Clicked on wallet ${w.name} - opening external app`
-                );
-                try {
-                  if (w.name === "Coinbase Wallet") {
-                    thirdwebConnect(async () => {
-                      const coinbaseWallet = createWallet(
-                        "com.coinbase.wallet",
-                        {
-                          appMetadata: config.walletConnectConfig.appMetadata,
-                          mobileConfig: {
-                            callbackURL: `https://${config.websiteDomain}/coinbase`,
-                          },
-                        }
-                      );
-                      await coinbaseWallet.connect({ client: thirdwebClient });
-                      setActiveWallet(coinbaseWallet);
-                      return coinbaseWallet;
-                    });
-                  } else if (w.name === "EthOS Wallet") {
-                    const signer = getEthOSSigner();
-                    signer ? setSigner(signer) : setLoading(false);
-                  } else if (w.thirdwebId) {
-                    const walletConnectWallet = createWallet(w.thirdwebId);
-                    await walletConnectWallet.connect({
-                      client: thirdwebClient,
-                      walletConnect: config.walletConnectConfig,
-                    });
-                    setActiveWallet(walletConnectWallet);
-                    return walletConnectWallet;
-                  }
-                } catch (e: any) {
-                  logger.error("Error connecting to wallet:", e);
-                  setConnectionMethod(undefined);
-                  setLoading(false);
-                }
-              },
-            }))}
-          />
+          <InstalledWallets wallets={walletsInstalled.list} />
         </AnimatedVStack>
       )}
 
       <AnimatedVStack
         entering={animations.fadeInDownSlow().delay(animationDelays[5])}
       >
-        <TableView
-          title={
-            isDesktop
-              ? translate("walletSelector.connectionOptions.title")
-              : hasInstalledWallets
-              ? translate("walletSelector.connectionOptions.otherOptions")
-              : translate("walletSelector.connectionOptions.connectForDevs")
-          }
-          items={[
-            {
-              id: "privateKey",
-              leftView: <TableViewEmoji emoji="🔑" />,
-              title: translate(
-                "walletSelector.connectionOptions.connectViaKey"
-              ),
-              rightView,
-              action: () => {
-                setConnectionMethod("privateKey");
-                router.push("ConnectWallet");
-              },
-            },
-          ]}
-        />
+        <BasicMethods hasInstalledWallets={hasInstalledWallets} />
       </AnimatedVStack>
 
       {!hasInstalledWallets && !isDesktop && (
         <AnimatedVStack
           entering={animations.fadeInDownSlow().delay(animationDelays[5])}
         >
-          <TableView
-            title={translate("walletSelector.popularMobileApps.title")}
-            items={POPULAR_WALLETS.map((w) => ({
-              id: w.name,
-              title: w.name,
-              leftView: <TableViewImage imageURI={w.iconURL} />,
-              rightView,
-              action: () => Linking.openURL(w.url),
-            }))}
-          />
+          <PopularWallets />
         </AnimatedVStack>
       )}
     </Screen>
   );
+}
+
+// TODO: Rename?
+export function BasicMethods({
+  hasInstalledWallets,
+}: {
+  hasInstalledWallets: boolean;
+}) {
+  const router = useAuthNavigation();
+
+  const { setConnectionMethod } = useOnboardingStore(
+    useSelect(["setConnectionMethod"])
+  );
+
+  return (
+    <TableView
+      title={
+        isDesktop
+          ? translate("walletSelector.connectionOptions.title")
+          : hasInstalledWallets
+          ? translate("walletSelector.connectionOptions.otherOptions")
+          : translate("walletSelector.connectionOptions.connectForDevs")
+      }
+      items={[
+        {
+          id: "privateKey",
+          leftView: <TableViewEmoji emoji="🔑" />,
+          title: translate("walletSelector.connectionOptions.connectViaKey"),
+          rightView: RightViewChevron(),
+          action: () => {
+            setConnectionMethod("privateKey");
+            router.push("ConnectWallet");
+          },
+        },
+      ]}
+    />
+  );
+}
+
+export function PopularWallets() {
+  return (
+    <TableView
+      title={translate("walletSelector.popularMobileApps.title")}
+      items={POPULAR_WALLETS.map((w) => ({
+        id: w.name,
+        title: w.name,
+        leftView: <TableViewImage imageURI={w.iconURL} />,
+        rightView: RightViewChevron(),
+        action: () => Linking.openURL(w.url),
+      }))}
+    />
+  );
+}
+
+export function RightViewChevron() {
+  const colorScheme = useColorScheme();
+
+  return (
+    <TableViewPicto
+      symbol="chevron.right"
+      color={textSecondaryColor(colorScheme)}
+    />
+  );
+}
+
+export function InstalledWallets({ wallets }: { wallets: InstalledWallet[] }) {
+  const { connect: thirdwebConnect } = useConnect();
+
+  const setActiveWallet = useSetActiveWallet();
+
+  const { setConnectionMethod, setSigner, setLoading } = useOnboardingStore(
+    useSelect([
+      "setConnectionMethod",
+      "setSigner",
+      "setLoading",
+      "addingNewAccount",
+      "setAddingNewAccount",
+    ])
+  );
+
+  return (
+    <TableView
+      title={translate("walletSelector.installedApps.title")}
+      items={wallets.map((w) => ({
+        id: w.name,
+        leftView: <TableViewImage imageURI={w.iconURL} />,
+        rightView: RightViewChevron(),
+        title: translate("walletSelector.installedApps.connectWallet", {
+          walletName: w.name,
+        }),
+        action: async () => {
+          setLoading(true);
+          setConnectionMethod("wallet");
+          logger.debug(
+            `[Onboarding] Clicked on wallet ${w.name} - opening external app`
+          );
+          try {
+            if (w.name === "Coinbase Wallet") {
+              thirdwebConnect(async () => {
+                const coinbaseWallet = createWallet("com.coinbase.wallet", {
+                  appMetadata: config.walletConnectConfig.appMetadata,
+                  mobileConfig: {
+                    callbackURL: `https://${config.websiteDomain}/coinbase`,
+                  },
+                });
+                await coinbaseWallet.connect({ client: thirdwebClient });
+                setActiveWallet(coinbaseWallet);
+                return coinbaseWallet;
+              });
+            } else if (w.name === "EthOS Wallet") {
+              const signer = getEthOSSigner();
+              signer ? setSigner(signer) : setLoading(false);
+            } else if (w.thirdwebId) {
+              const walletConnectWallet = createWallet(w.thirdwebId);
+              await walletConnectWallet.connect({
+                client: thirdwebClient,
+                walletConnect: config.walletConnectConfig,
+              });
+              setActiveWallet(walletConnectWallet);
+              return walletConnectWallet;
+            }
+          } catch (e: any) {
+            logger.error("Error connecting to wallet:", e);
+            setConnectionMethod(undefined);
+            setLoading(false);
+          }
+        },
+      }))}
+    />
+  );
+}
+
+export function useInstalledWallets() {
+  const [walletsInstalled, setWalletsInstalled] = useState<{
+    checked: boolean;
+    list: InstalledWallet[];
+  }>({
+    checked: false,
+    list: installedWallets as InstalledWallet[],
+  });
+
+  const appState = useRef(AppState.currentState);
+
+  useEffect(() => {
+    const loadInstalledWallets = async (refresh: boolean) => {
+      const list = await getInstalledWallets(refresh);
+      setWalletsInstalled({ checked: true, list });
+    };
+
+    loadInstalledWallets(false);
+
+    const subscription = AppState.addEventListener(
+      "change",
+      async (nextAppState) => {
+        if (
+          nextAppState === "active" &&
+          appState.current.match(/inactive|background/)
+        ) {
+          loadInstalledWallets(true);
+        }
+        appState.current = nextAppState;
+      }
+    );
+
+    return () => subscription.remove();
+  }, []);
+
+  return { walletsInstalled };
 }

@@ -1,15 +1,12 @@
+import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { backgroundColor } from "@styles/colors";
 import { getProfile } from "@utils/profile";
 import { useCheckCurrentInstallation } from "@utils/xmtpRN/client";
+import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
 
-import AccountsAndroid from "./Accounts/AccountsAndroid";
-import AccountsDrawer from "./Accounts/AccountsDrawer";
-import Navigation from "./Navigation/Navigation";
-import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
-import { useIsSplitScreen } from "./Navigation/navHelpers";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
@@ -17,6 +14,7 @@ import MainIdentityStateHandler from "../components/StateHandlers/MainIdentitySt
 import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler";
 import ConversationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
 import WalletsStateHandler from "../components/StateHandlers/WalletsStateHandler";
+import config from "../config";
 import {
   useCurrentAccount,
   useProfilesStore,
@@ -24,12 +22,49 @@ import {
 import { useAppStore } from "../data/store/appStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
-import AuthNavigation from "../navigation/AuthNavigation";
-import NavigationContainer from "../navigation/NavigationContainer";
-import NewAccountNavigation from "../navigation/NewAccountNavigation";
 import { useAddressBookStateHandler } from "../utils/addressBook";
 import { converseEventEmitter } from "../utils/events";
 import { usePrivyAccessToken } from "../utils/evm/privy";
+import { converseNavigations } from "../utils/navigation";
+import AccountsAndroid from "./Accounts/AccountsAndroid";
+import AccountsDrawer from "./Accounts/AccountsDrawer";
+import { ConversationScreenConfig } from "./Navigation/ConversationNav";
+import { GroupInviteScreenConfig } from "./Navigation/GroupInviteNav";
+import { GroupLinkScreenConfig } from "./Navigation/GroupLinkNav";
+import { GroupScreenConfig } from "./Navigation/GroupNav";
+import MainNavigation, { NavigationParamList } from "./Navigation/Navigation";
+import { NewConversationScreenConfig } from "./Navigation/NewConversationNav";
+import { ProfileScreenConfig } from "./Navigation/ProfileNav";
+import { ShareProfileScreenConfig } from "./Navigation/ShareProfileNav";
+import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
+import { WebviewPreviewScreenConfig } from "./Navigation/WebviewPreviewNav";
+import {
+  getConverseInitialURL,
+  getConverseStateFromPath,
+  useIsSplitScreen,
+} from "./Navigation/navHelpers";
+
+const prefix = Linking.createURL("/");
+
+const linking: LinkingOptions<NavigationParamList> = {
+  prefixes: [prefix, ...config.universalLinks],
+  config: {
+    initialRouteName: "Chats",
+    screens: {
+      Chats: "/",
+      Conversation: ConversationScreenConfig,
+      NewConversation: NewConversationScreenConfig,
+      Profile: ProfileScreenConfig,
+      Group: GroupScreenConfig,
+      GroupLink: GroupLinkScreenConfig,
+      GroupInvite: GroupInviteScreenConfig,
+      ShareProfile: ShareProfileScreenConfig,
+      WebviewPreview: WebviewPreviewScreenConfig,
+    },
+  },
+  getStateFromPath: getConverseStateFromPath,
+  getInitialURL: getConverseInitialURL,
+};
 
 export default function Main() {
   // Makes sure we have a Privy token ready to make API calls
@@ -39,8 +74,20 @@ export default function Main() {
 
   return (
     <>
-      <Header />
-      <NavigationContainer>
+      <Initializer />
+      <NavigationContainer
+        linking={linking}
+        ref={(r) => {
+          if (r) {
+            converseNavigations["splitScreen"] = r;
+          }
+        }}
+        onUnhandledAction={() => {
+          // Since we're handling multiple navigators,
+          // let's silence errors when the action
+          // is not meant for this one
+        }}
+      >
         <NavigationContent />
       </NavigationContainer>
     </>
@@ -73,15 +120,6 @@ const NavigationContent = () => {
     return null;
   }
 
-  if (!userAddress) {
-    return <AuthNavigation />;
-  }
-
-  // TODO: Should not be here
-  if (addingNewAccount) {
-    return <NewAccountNavigation />;
-  }
-
   if (Platform.OS === "android") {
     return (
       <AccountsDrawer
@@ -90,7 +128,7 @@ const NavigationContent = () => {
         drawerWidth={Dimensions.get("screen").width * 0.77}
         renderNavigationView={() => <AccountsAndroid />}
       >
-        <Navigation />
+        <MainNavigation />
       </AccountsDrawer>
     );
   }
@@ -99,10 +137,11 @@ const NavigationContent = () => {
     return <SplitScreenNavigation />;
   }
 
-  return <Navigation />;
+  return <MainNavigation />;
 };
 
-const Header = () => {
+// Bunch of handlers. Not really react components
+const Initializer = () => {
   const colorScheme = useColorScheme();
   const isWeb = Platform.OS === "web";
   const isAndroid = Platform.OS === "android";

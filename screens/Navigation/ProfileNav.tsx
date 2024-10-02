@@ -33,9 +33,11 @@ export default function ProfileNav() {
         : textPrimaryColor(colorScheme),
     animation: navigationAnimation,
   };
+
   if (Platform.OS === "web") {
     options.headerTitleStyle = { left: -20 } as any;
   }
+
   return (
     <NativeStack.Screen
       name="Profile"

@@ -1,55 +1,48 @@
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import * as Linking from "expo-linking";
+import {
+  createNativeStackNavigator,
+  NativeStackNavigationOptions,
+} from "@react-navigation/native-stack";
 import { Platform, useColorScheme } from "react-native";
 
+import UserProfile from "../../components/Onboarding/UserProfile";
+import { useCurrentAccount } from "../../data/store/accountsStore";
+import { isDesktop } from "../../utils/device";
+import { NotificationsScreen } from "../NotificationsScreen";
+import { ConnectWalletScreen } from "../Onboarding/ConnectWalletScreen";
+import { EphemeraLoginScreen } from "../Onboarding/EphemeraLoginScreen";
+import { GetStartedScreen } from "../Onboarding/GetStartedScreen";
+import { PrivyConnectScreen } from "../Onboarding/PrivyConnectScreen";
 import AccountsNav from "./AccountsNav";
 import ConversationBlockedListNav from "./ConversationBlockedListNav";
 import ConversationListNav from "./ConversationListNav";
-import ConversationNav, {
-  ConversationNavParams,
-  ConversationScreenConfig,
-} from "./ConversationNav";
+import ConversationNav, { ConversationNavParams } from "./ConversationNav";
 import ConversationRequestsListNav from "./ConversationRequestsListNav";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
 import EnableTransactionsNav from "./EnableTransactionsNav";
-import GroupInviteNav, {
-  GroupInviteNavParams,
-  GroupInviteScreenConfig,
-} from "./GroupInviteNav";
-import GroupLinkNav, {
-  GroupLinkNavParams,
-  GroupLinkScreenConfig,
-} from "./GroupLinkNav";
-import GroupNav, { GroupNavParams, GroupScreenConfig } from "./GroupNav";
+import GroupInviteNav, { GroupInviteNavParams } from "./GroupInviteNav";
+import GroupLinkNav, { GroupLinkNavParams } from "./GroupLinkNav";
+import GroupNav, { GroupNavParams } from "./GroupNav";
+import { NewAccountNav } from "./NewAccountNav";
 import NewConversationNav, {
   NewConversationNavParams,
-  NewConversationScreenConfig,
 } from "./NewConversationNav";
-import ProfileNav, {
-  ProfileNavParams,
-  ProfileScreenConfig,
-} from "./ProfileNav";
+import ProfileNav, { ProfileNavParams } from "./ProfileNav";
 import ShareFrameNav, { ShareFrameNavParams } from "./ShareFrameNav";
-import ShareProfileNav, { ShareProfileScreenConfig } from "./ShareProfileNav";
+import ShareProfileNav from "./ShareProfileNav";
 import TopUpNav from "./TopUpNav";
-import UserProfileNav from "./UserProfileNav";
 import WebviewPreviewNav, {
   WebviewPreviewNavParams,
-  WebviewPreviewScreenConfig,
 } from "./WebviewPreviewNav";
-import {
-  getConverseInitialURL,
-  getConverseStateFromPath,
-  screenListeners,
-  stackGroupScreenOptions,
-} from "./navHelpers";
-import config from "../../config";
-import { useAppStore } from "../../data/store/appStore";
-import { isDesktop } from "../../utils/device";
-import { converseNavigations } from "../../utils/navigation";
+import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 
 export type NavigationParamList = {
+  // Auth / Account creation
+  GetStarted: undefined;
+  PrivyConnect: undefined;
+  ConnectWallet: undefined;
+  Notifications: undefined;
+  EphemeralLogin: undefined;
+
   Accounts: undefined;
   Blocked: undefined;
   Chats: undefined;
@@ -68,94 +61,82 @@ export type NavigationParamList = {
   GroupInvite: GroupInviteNavParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
+  NewAccount: undefined;
+};
+
+const authScreensSharedScreenOptions: NativeStackNavigationOptions = {
+  headerTitle: "",
+  headerBackTitle: "Back",
+  headerBackTitleVisible: false,
+  headerShadowVisible: false,
 };
 
 export const NativeStack = createNativeStackNavigator<NavigationParamList>();
-const prefix = Linking.createURL("/");
-const linking = {
-  prefixes: [prefix, ...config.universalLinks],
-  config: {
-    initialRouteName: "Chats",
-    screens: {
-      Chats: "/",
-      Conversation: ConversationScreenConfig,
-      NewConversation: NewConversationScreenConfig,
-      Profile: ProfileScreenConfig,
-      Group: GroupScreenConfig,
-      GroupLink: GroupLinkScreenConfig,
-      GroupInvite: GroupInviteScreenConfig,
-      ShareProfile: ShareProfileScreenConfig,
-      WebviewPreview: WebviewPreviewScreenConfig,
-    },
-  },
-  getStateFromPath: getConverseStateFromPath,
-  getInitialURL: getConverseInitialURL,
-};
 
 export const navigationAnimation = Platform.OS === "ios" ? "default" : "none";
 
-export default function Navigation() {
+export default function MainNavigation() {
   const colorScheme = useColorScheme();
-  const splashScreenHidden = useAppStore((s) => s.splashScreenHidden);
+
+  const isSignedIn = !!useCurrentAccount();
+
   return (
-    <NavigationContainer
-      linking={splashScreenHidden ? (linking as any) : undefined}
-      initialState={
-        Platform.OS === "ios" || Platform.OS === "web"
-          ? {
-              // On iOS, the Accounts switcher is available through a back button
-              index: 1,
-              routes: [
-                {
-                  name: "Accounts",
-                },
-                {
-                  name: "Chats",
-                },
-              ],
-              type: "stack",
-            }
-          : {
-              // On Android, the Accounts switcher is available through the drawer
-              index: 0,
-              routes: [
-                {
-                  name: "Chats",
-                },
-              ],
-              type: "stack",
-            }
-      }
-      onUnhandledAction={() => {
-        // Since we're handling multiple navigators,
-        // let's silence errors when the action
-        // is not meant for this one
-      }}
+    <NativeStack.Navigator
+      screenOptions={{ gestureEnabled: !isDesktop }}
+      initialRouteName={isSignedIn ? "Chats" : "GetStarted"}
+      // TODO: Do we still need this?
+      screenListeners={screenListeners("fullStackNavigation")}
     >
-      <NativeStack.Navigator
-        screenOptions={{ gestureEnabled: !isDesktop }}
-        screenListeners={screenListeners("fullStackNavigation")}
-      >
-        <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
-          {AccountsNav()}
-          {ConversationListNav()}
-          {ConversationRequestsListNav()}
-          {ConversationBlockedListNav()}
-          {ConversationNav()}
-          {NewConversationNav()}
-          {ConverseMatchMakerNav()}
-          {ShareProfileNav()}
-          {ShareFrameNav()}
-          {WebviewPreviewNav()}
-          {ProfileNav()}
-          {GroupNav()}
-          {GroupLinkNav()}
-          {GroupInviteNav()}
-          {UserProfileNav()}
-          {TopUpNav()}
-          {EnableTransactionsNav()}
-        </NativeStack.Group>
-      </NativeStack.Navigator>
-    </NavigationContainer>
+      <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
+        {AccountsNav()}
+        {ConversationListNav()}
+        {ConversationRequestsListNav()}
+        {ConversationBlockedListNav()}
+        {ConversationNav()}
+        {NewConversationNav()}
+        {ConverseMatchMakerNav()}
+        {ShareProfileNav()}
+        {ShareFrameNav()}
+        {WebviewPreviewNav()}
+        {ProfileNav()}
+        {GroupNav()}
+        {GroupLinkNav()}
+        {GroupInviteNav()}
+        {TopUpNav()}
+        {EnableTransactionsNav()}
+        {NewAccountNav()}
+      </NativeStack.Group>
+
+      <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
+        <NativeStack.Screen
+          options={{
+            headerShown: false,
+          }}
+          name="GetStarted"
+          component={GetStartedScreen}
+        />
+        <NativeStack.Screen
+          options={authScreensSharedScreenOptions}
+          name="PrivyConnect"
+          component={PrivyConnectScreen}
+        />
+        <NativeStack.Screen
+          name="ConnectWallet"
+          options={authScreensSharedScreenOptions}
+          component={ConnectWalletScreen}
+        />
+        <NativeStack.Screen
+          name="Notifications"
+          options={authScreensSharedScreenOptions}
+          component={NotificationsScreen}
+        />
+        <NativeStack.Screen name="UserProfile" component={UserProfile} />
+        <NativeStack.Screen
+          options={authScreensSharedScreenOptions}
+          name="EphemeralLogin"
+          component={EphemeraLoginScreen}
+        />
+      </NativeStack.Group>
+    </NativeStack.Navigator>
   );
 }
