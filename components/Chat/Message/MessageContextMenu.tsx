@@ -161,15 +161,20 @@ const BackdropComponent: FC<{
         itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top ||
         itemRectHeight.value > height / 2
       ) {
-        const spacing = 10;
+        const spacing = 18;
         const topTransform =
           itemRectY.value +
           itemRectHeight.value +
           menuHeight +
           spacing +
           (safeAreaInsets?.bottom || 0);
-        const ty = topTransform > height ? height - topTransform : 0;
-        return ty;
+        if (itemRectHeight.value > height / 2) {
+          // Long message
+          return height - topTransform;
+        } else {
+          // Short message
+          return topTransform > height ? height - topTransform : 0;
+        }
       } else {
         return (
           -1 *
@@ -205,15 +210,18 @@ const BackdropComponent: FC<{
         itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top ||
         itemRectHeight.value > height / 2
       ) {
-        const spacing = 16;
         const topTransform =
           itemRectY.value +
           itemRectHeight.value +
           menuHeight +
-          spacing +
-          (safeAreaInsets?.bottom || 0);
-        const ty = topTransform > height ? height - topTransform : 0;
-        return ty;
+          (safeAreaInsets?.top || 0);
+        if (itemRectHeight.value > height / 2) {
+          // Long message
+          return height - topTransform;
+        } else {
+          // Short message
+          return topTransform > height ? height - topTransform : 0;
+        }
       } else {
         return (
           -1 *
