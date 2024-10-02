@@ -241,8 +241,31 @@ const getListArray = (
   return reverseArray;
 };
 
+const useAnimatedListView = (
+  conversation: XmtpConversationWithUpdate | undefined
+) => {
+  // The first message was really buggy on iOS & Android and this is due to FlashList
+  // so we keep FlatList for new convos and switch to FlashList for bigger convos
+  // that need great perf.
+  return useMemo(() => {
+    const isConversationNotPending = conversation && !conversation.pending;
+    return isConversationNotPending && Platform.OS !== "web"
+      ? ReanimatedFlashList
+      : ReanimatedFlatList;
+  }, [conversation]);
+};
+
+const useIsShowingPlaceholder = (
+  listArray: MessageToDisplay[],
+  isBlockedPeer: boolean,
+  conversation: XmtpConversationWithUpdate | undefined
+): boolean => {
+  return listArray.length === 0 || isBlockedPeer || !conversation;
+};
+
 export function Chat() {
   const conversation = useConversationContext("conversation");
+  const AnimatedListView = useAnimatedListView(conversation);
   const isBlockedPeer = useConversationContext("isBlockedPeer");
   const onReadyToFocus = useConversationContext("onReadyToFocus");
   const transactionMode = useConversationContext("transactionMode");
@@ -342,8 +365,11 @@ export function Chat() {
   ]);
 
   const framesStore = useFramesStore().frames;
-  const showPlaceholder =
-    listArray.length === 0 || isBlockedPeer || !conversation;
+  const showPlaceholder = useIsShowingPlaceholder(
+    listArray,
+    isBlockedPeer,
+    conversation
+  );
   const renderItem = useRenderItem(
     xmtpAddress,
     conversation,
@@ -351,17 +377,6 @@ export function Chat() {
     colorScheme
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
-
-  // The first message was really buggy on iOS & Android and this is due to FlashList
-  // so we keep FlatList for new convos and switch to FlashList for bigger convos
-  // that need great perf.
-  const conversationNotPendingRef = useRef(
-    conversation && !conversation.pending
-  );
-  const AnimatedListView =
-    conversationNotPendingRef.current && Platform.OS !== "web"
-      ? ReanimatedFlashList
-      : ReanimatedFlatList;
 
   const messageListRef = useRef<
     FlatList<MessageToDisplay> | FlashList<MessageToDisplay> | undefined
@@ -390,8 +405,6 @@ export function Chat() {
       converseEventEmitter.off("scrollChatToMessage", scrollToMessage);
     };
   }, [scrollToMessage]);
-
-  const itemType = getItemType(framesStore);
 
   const handleOnLayout = useCallback(() => {
     setTimeout(() => {
@@ -433,7 +446,7 @@ export function Chat() {
             }
             inverted
             keyExtractor={keyExtractor}
-            getItemType={itemType}
+            getItemType={getItemType(framesStore)}
             keyboardShouldPersistTaps="handled"
             estimatedItemSize={80}
             // Size glitch on Android
@@ -481,6 +494,7 @@ export function Chat() {
 // Lightweight chat preview component used for longpress on chat
 export function ChatPreview() {
   const conversation = useConversationContext("conversation");
+  const AnimatedListView = useAnimatedListView(conversation);
   const isBlockedPeer = useConversationContext("isBlockedPeer");
   const onReadyToFocus = useConversationContext("onReadyToFocus");
 
@@ -506,8 +520,11 @@ export function ChatPreview() {
   );
 
   const framesStore = useFramesStore().frames;
-  const showPlaceholder =
-    listArray.length === 0 || isBlockedPeer || !conversation;
+  const showPlaceholder = useIsShowingPlaceholder(
+    listArray,
+    isBlockedPeer,
+    conversation
+  );
   const renderItem = useRenderItem(
     xmtpAddress,
     conversation,
@@ -516,22 +533,9 @@ export function ChatPreview() {
   );
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
-  // The first message was really buggy on iOS & Android and this is due to FlashList
-  // so we keep FlatList for new convos and switch to FlashList for bigger convos
-  // that need great perf.
-  const conversationNotPendingRef = useRef(
-    conversation && !conversation.pending
-  );
-  const AnimatedListView =
-    conversationNotPendingRef.current && Platform.OS !== "web"
-      ? ReanimatedFlashList
-      : ReanimatedFlatList;
-
   const messageListRef = useRef<
     FlatList<MessageToDisplay> | FlashList<MessageToDisplay> | undefined
   >();
-
-  const itemType = getItemType(framesStore);
 
   const handleOnLayout = useCallback(() => {
     setTimeout(() => {
@@ -566,7 +570,7 @@ export function ChatPreview() {
             estimatedListSize={Dimensions.get("screen")}
             inverted
             keyExtractor={keyExtractor}
-            getItemType={itemType}
+            getItemType={getItemType(framesStore)}
             keyboardShouldPersistTaps="handled"
             estimatedItemSize={80}
             showsVerticalScrollIndicator={false}
