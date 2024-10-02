@@ -329,7 +329,7 @@ export const syncConversationsMessages = async (
   logger.info(
     `[1:1 Sync] ${
       client.address
-    } - Fetched ${messagesFetched} 1:1 messages from network in ${
+    } -  syncConversationsMessages done - ${messagesFetched} 1:1 messages from network in ${
       (afterSync - beforeSync) / 1000
     } sec`
   );
