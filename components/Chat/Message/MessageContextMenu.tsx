@@ -157,7 +157,10 @@ const BackdropComponent: FC<{
 
   const animatedMenuStyle = useAnimatedStyle(() => {
     const getTransformValue = () => {
-      if (itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top) {
+      if (
+        itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top ||
+        itemRectHeight.value > height / 2
+      ) {
         const spacing = 10;
         const topTransform =
           itemRectY.value +
@@ -198,8 +201,11 @@ const BackdropComponent: FC<{
     const animateOpacity = () =>
       withDelay(HOLD_ITEM_TRANSFORM_DURATION, withTiming(0, { duration: 0 }));
     const getTransformValue = () => {
-      if (itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top) {
-        const spacing = 15;
+      if (
+        itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top ||
+        itemRectHeight.value > height / 2
+      ) {
+        const spacing = 16;
         const topTransform =
           itemRectY.value +
           itemRectHeight.value +
@@ -211,7 +217,10 @@ const BackdropComponent: FC<{
       } else {
         return (
           -1 *
-          (itemRectY.value - AUXILIARY_VIEW_MIN_HEIGHT - safeAreaInsets.top)
+          (itemRectY.value -
+            10 -
+            AUXILIARY_VIEW_MIN_HEIGHT -
+            safeAreaInsets.top)
         );
       }
     };
