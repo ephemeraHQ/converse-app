@@ -69,19 +69,6 @@ export default function ConnectViaWallet({
   const thirdwebWallet = useActiveWallet();
   const thirdwebAccount = useActiveAccount();
   const [thirdwebSigner, setThirdwebSigner] = useState<Signer | undefined>();
-  useEffect(() => {
-    if (thirdwebAccount) {
-      ethers5Adapter.signer
-        .toEthers({
-          client: thirdwebClient,
-          chain: ethereum,
-          account: thirdwebAccount,
-        })
-        .then(setThirdwebSigner);
-    } else {
-      setThirdwebSigner(undefined);
-    }
-  }, [thirdwebAccount]);
 
   const { disconnect: disconnectWallet } = useDisconnect();
 
@@ -96,7 +83,7 @@ export default function ConnectViaWallet({
   const inXmtpClientCreationFlow = useRef(false);
 
   const disconnect = useCallback(
-    async (resetLoading = true) => {
+    async (resetLoading = true, resetOnboard = true) => {
       if (inXmtpClientCreationFlow.current) {
         /*
         Pretty edge case where user has started the XMTP flow 
@@ -109,18 +96,14 @@ export default function ConnectViaWallet({
       }
       logger.debug("[Onboarding] Logging out");
       if (address) {
-        logoutAccount(
-          address,
-          false,
-          true,
-          () => {},
-          () => {}
-        );
+        logoutAccount(address, false, true, () => {});
       }
       setWaitingForNextSignature(false);
       clickedSignature.current = false;
       initiatingClientFor.current = undefined;
-      resetOnboarding();
+      if (resetOnboard) {
+        resetOnboarding();
+      }
       if (resetLoading) {
         setLoading(false);
       }
@@ -130,7 +113,9 @@ export default function ConnectViaWallet({
       const storageKeys = await AsyncStorage.getAllKeys();
       const wcKeys = storageKeys.filter((k) => k.startsWith("wc@2:"));
       await AsyncStorage.multiRemove(wcKeys);
-      setConnectionMethod(undefined);
+      if (resetOnboard) {
+        setConnectionMethod(undefined);
+      }
     },
     [
       disconnectWallet,
@@ -143,11 +128,42 @@ export default function ConnectViaWallet({
     ]
   );
 
+  // Since we now keep a link to the connected wallet for
+  // key revocation and transactional frames, in onboarding we
+  // make sure that we disconnect the thirdweb signer before
+  // instantiating a new one
+  const readyToHandleThirdwebSigner = useRef(false);
+  useEffect(() => {
+    if (!readyToHandleThirdwebSigner.current) {
+      disconnect(false, false).then(() => {
+        readyToHandleThirdwebSigner.current = true;
+      });
+    }
+  }, [disconnect]);
+
+  useEffect(() => {
+    if (readyToHandleThirdwebSigner.current && thirdwebAccount) {
+      ethers5Adapter.signer
+        .toEthers({
+          client: thirdwebClient,
+          chain: ethereum,
+          account: thirdwebAccount,
+        })
+        .then(setThirdwebSigner);
+    } else {
+      setThirdwebSigner(undefined);
+    }
+  }, [thirdwebAccount]);
+
   const handlingThirdwebSigner = useRef("");
 
   useEffect(() => {
     (async () => {
-      if (thirdwebSigner && !handlingThirdwebSigner.current) {
+      if (
+        thirdwebSigner &&
+        !handlingThirdwebSigner.current &&
+        readyToHandleThirdwebSigner.current
+      ) {
         try {
           const a = await thirdwebSigner.getAddress();
           handlingThirdwebSigner.current = a;
