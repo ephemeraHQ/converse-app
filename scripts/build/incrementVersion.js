@@ -54,10 +54,9 @@ fs.readFile(filePath, "utf-8", (err, data) => {
   const appJson = JSON.parse(data);
 
   // Increment the version for both iOS and Android
-  const newVersion = incrementVersion(appJson.expo.ios.version, incrementType);
+  const newVersion = incrementVersion(appJson.expo.version, incrementType);
 
-  appJson.expo.ios.version = newVersion;
-  appJson.expo.android.version = newVersion;
+  appJson.expo.version = newVersion;
 
   // Write the updated app.json back to the file
   fs.writeFile(filePath, JSON.stringify(appJson, null, 2), "utf-8", (err) => {
