@@ -24,7 +24,9 @@ const groupsQueryFn = async (account: string) => {
   await client.conversations.syncGroups();
   const afterSync = new Date().getTime();
   logger.debug(
-    `[Groups] Fetching group list took ${(afterSync - beforeSync) / 1000} sec`
+    `[Groups] Fetching group list from network took ${
+      (afterSync - beforeSync) / 1000
+    } sec`
   );
   const groups = await client.conversations.listGroups();
   const afterList = new Date().getTime();
