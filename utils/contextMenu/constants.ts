@@ -35,9 +35,8 @@ export {
   BACKDROP_LIGHT_BACKGROUND_COLOR,
   BACKDROP_DARK_BACKGROUND_COLOR,
   STATUS_BAR_HEIGHT,
-  OUTTER_SPACING
+  OUTTER_SPACING,
 };
-  
 
 export const contextMenuStyleGuide = {
   spacing: 8,
