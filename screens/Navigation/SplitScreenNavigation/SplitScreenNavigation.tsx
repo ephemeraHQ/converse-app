@@ -36,7 +36,7 @@ const linking = {
       Conversation: ConversationScreenConfig,
     },
   },
-  getStateFromPath: getConverseStateFromPath,
+  getStateFromPath: getConverseStateFromPath("splitScreen"),
   getInitialURL: getConverseInitialURL,
 };
 

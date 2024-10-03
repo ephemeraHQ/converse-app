@@ -5,32 +5,53 @@ import {
   listItemSeparatorColor,
   textPrimaryColor,
 } from "@styles/colors";
+import { converseEventEmitter } from "@utils/events";
 import { ColorSchemeName, Platform, useWindowDimensions } from "react-native";
 
 import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
 import config from "../../config";
 import { isDesktop } from "../../utils/device";
 
-export const getConverseStateFromPath = (path: string, options: any) => {
-  // dm method must link to the Conversation Screen as well
-  // but prefilling the parameters
-  let pathForState = path;
-  if (Platform.OS === "web" && pathForState.startsWith("/")) {
-    pathForState = pathForState.slice(1);
-  }
-  if (pathForState.startsWith("dm?peer=")) {
-    const peer = pathForState.slice(8).trim().toLowerCase();
-    pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true`;
-  } else if (pathForState.startsWith("dm/")) {
-    const peer = pathForState.slice(3).trim().toLowerCase();
-    pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true`;
-  } else if (pathForState.startsWith("groupInvite")) {
-    // TODO: Remove this once enough users have updated (September 30, 2024)
-    pathForState = pathForState.replace("groupInvite", "group-invite");
-  }
-  const state = getStateFromPath(pathForState, options);
-  return state;
-};
+export const getConverseStateFromPath =
+  (navigationName: string) => (path: string, options: any) => {
+    // dm method must link to the Conversation Screen as well
+    // but prefilling the parameters
+    let pathForState = path;
+    if (Platform.OS === "web" && pathForState.startsWith("/")) {
+      pathForState = pathForState.slice(1);
+    }
+    if (pathForState.startsWith("dm?peer=")) {
+      const peer = pathForState.slice(8).trim().toLowerCase();
+      pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true`;
+    } else if (pathForState.startsWith("dm/")) {
+      const url = new URL(`https://${config.websiteDomain}/${pathForState}`);
+      const params = new URLSearchParams(url.search);
+      const peer = url.pathname.slice(4).trim().toLowerCase();
+      const text = params.get("text");
+      if (peer.length === 0) {
+        if (text) {
+          // If navigating but no peer, we can still prefill message for current convo
+          const navigationState = navigationStates[navigationName];
+          const currentRoutes = navigationState?.state.routes || [];
+          if (
+            currentRoutes.length > 0 &&
+            currentRoutes[currentRoutes.length - 1].name === "Conversation"
+          ) {
+            converseEventEmitter.emit("setCurrentConversationInputValue", text);
+          }
+        }
+        return null;
+      }
+      pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true${
+        text ? `&message=${text}` : ""
+      }`;
+    } else if (pathForState.startsWith("groupInvite")) {
+      // TODO: Remove this once enough users have updated (September 30, 2024)
+      pathForState = pathForState.replace("groupInvite", "group-invite");
+    }
+    const state = getStateFromPath(pathForState, options);
+    return state;
+  };
 
 export const getConverseInitialURL = () => {
   return initialURL;
@@ -74,15 +95,22 @@ export const screenListeners =
             currentRoute.params?.peer !== newRoute.params?.peer
           ) {
             shouldReplace = true;
-          } else if (
-            newRoute.name === "Conversation" &&
-            ((newRoute.params?.mainConversationWithPeer &&
+          } else if (newRoute.name === "Conversation") {
+            const isNewPeer =
+              newRoute.params?.mainConversationWithPeer &&
               newRoute.params?.mainConversationWithPeer !==
-                currentRoute.params?.mainConversationWithPeer) ||
-              (newRoute.params?.topic &&
-                newRoute.params?.topic !== currentRoute.params?.topic))
-          ) {
-            shouldReplace = true;
+                currentRoute.params?.mainConversationWithPeer;
+            const isNewTopic =
+              newRoute.params?.topic &&
+              newRoute.params?.topic !== currentRoute.params?.topic;
+            if (isNewPeer || isNewTopic) {
+              shouldReplace = true;
+            } else if (newRoute.params?.message) {
+              converseEventEmitter.emit(
+                "setCurrentConversationInputValue",
+                newRoute.params.message
+              );
+            }
           }
         }
         if (shouldReplace) {

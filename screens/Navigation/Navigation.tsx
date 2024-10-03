@@ -89,7 +89,7 @@ const linking = {
       WebviewPreview: WebviewPreviewScreenConfig,
     },
   },
-  getStateFromPath: getConverseStateFromPath,
+  getStateFromPath: getConverseStateFromPath("fullStackNavigation"),
   getInitialURL: getConverseInitialURL,
 };
 
