@@ -7840,6 +7840,15 @@
   resolved "https://registry.yarnpkg.com/@tanstack/virtual-core/-/virtual-core-3.4.0.tgz#afd72bc5a839b71c2cda87a738eb4eb18451b80a"
   integrity sha512-75jXqXxqq5M5Veb9KP1STi8kA5u408uOOAefk2ftHDGCpUk3RP6zX++QqfbmHJTBiU72NQ+ghgCZVts/Wocz8Q==
 
+"@testing-library/react-native@^12.6.1":
+  version "12.6.1"
+  resolved "https://registry.yarnpkg.com/@testing-library/react-native/-/react-native-12.6.1.tgz#dbb6b00246a3cffbffa18bbbb618fab968c0de28"
+  integrity sha512-ykXKeQEkqJ/lk0dqGfEspODjV5skmUh/6vVtyGZQsneFrcqGZJrO4uGhmChICLbnEKkstxXkjXeyoB7z8k9InQ==
+  dependencies:
+    jest-matcher-utils "^29.7.0"
+    pretty-format "^29.7.0"
+    redent "^3.0.0"
+
 "@thirdweb-dev/react-native-adapter@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@thirdweb-dev/react-native-adapter/-/react-native-adapter-1.2.0.tgz#4c082119722756c29b304ba40ad49985cbf73666"
