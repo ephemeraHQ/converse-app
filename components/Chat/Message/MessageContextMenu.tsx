@@ -164,20 +164,23 @@ const BackdropComponent: FC<{
       // Calculate the vertical position of the context menu
       const topTransform =
         // Y position of the message
-        itemRectY.value + 
+        itemRectY.value +
         // Height of the message
-        itemRectHeight.value + 
+        itemRectHeight.value +
         // Height of the context menu
-        menuHeight + 
+        menuHeight +
         // Space between the message and the context menu
-        OUTTER_SPACING + 
+        OUTTER_SPACING +
         // Account for safe area at the bottom of the screen
-        (safeAreaInsets?.bottom || 0); 
+        (safeAreaInsets?.bottom || 0);
 
       // Adjust positioning when message height exceeds half the screen
       if (itemRectHeight.value > height / 2) {
         return height - topTransform;
-      } else if (itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top) {
+      } else if (
+        itemRectY.value >
+        AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top
+      ) {
         // General case for shorter messages
         return topTransform > height ? height - topTransform : 0;
       } else {
@@ -213,24 +216,24 @@ const BackdropComponent: FC<{
     const animateOpacity = () =>
       withDelay(HOLD_ITEM_TRANSFORM_DURATION, withTiming(0, { duration: 0 }));
     const getTransformValue = () => {
-      const spacing = 6;
-      if (
-        itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top ||
-        itemRectHeight.value > height / 2
+      const spacing = 6; // TODO
+      const topTransform =
+        itemRectY.value +
+        itemRectHeight.value +
+        menuHeight +
+        (safeAreaInsets?.top || 0);
+
+      if (itemRectHeight.value > height / 2) {
+        // Long Message
+        return height - topTransform;
+      } else if (
+        itemRectY.value >
+        AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top
       ) {
-        const topTransform =
-          itemRectY.value +
-          itemRectHeight.value +
-          menuHeight +
-          (safeAreaInsets?.top || 0);
-        if (itemRectHeight.value > height / 2) {
-          // Long message
-          return height - topTransform;
-        } else {
-          // Short message
-          return topTransform > height ? height - topTransform + spacing : 0;
-        }
+        // Short message
+        return topTransform > height ? height - topTransform + spacing : 0;
       } else {
+        // Short message near the top of the screen, requires downward adjustment
         return (
           -1 *
           (itemRectY.value -
