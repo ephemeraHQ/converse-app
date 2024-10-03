@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActivityIndicator Component renders correctly on Android 1`] = `<ActivityIndicator />`;
+
+exports[`ActivityIndicator Component renders correctly on iOS/Default 1`] = `<ActivityIndicator />`;

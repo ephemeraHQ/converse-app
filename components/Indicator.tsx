@@ -7,11 +7,17 @@ import {
   View,
 } from "react-native";
 
-const IndicatorInner = ({ size }: { size: number }) => {
+const IndicatorInner = ({
+  size,
+  testID,
+}: {
+  size: number;
+  testID?: string;
+}) => {
   const styles = getStyles(useColorScheme(), size);
 
   return (
-    <View style={styles.indicator}>
+    <View style={styles.indicator} testID={testID}>
       <View style={styles.indicatorInner} />
     </View>
   );
@@ -31,8 +37,6 @@ const getStyles = (colorScheme: ColorSchemeName, size: number) =>
       alignItems: "center",
       justifyContent: "center",
       borderRadius: size / 5,
-      // borderWidth: 2,
-      // borderColor: backgroundColor(colorScheme),
     },
     indicatorInner: {
       height: size / 5 - 4,

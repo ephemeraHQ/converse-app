@@ -203,6 +203,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
+    "@testing-library/react-native": "^12.6.1",
     "@types/base-64": "^1.0.0",
     "@types/big.js": "^6.2.2",
     "@types/elliptic": "^6.4.14",
