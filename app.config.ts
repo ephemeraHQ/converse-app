@@ -31,10 +31,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     fallbackToCacheTimeout: 0,
     url: "https://u.expo.dev/49a65fae-3895-4487-8e8a-5bd8bee3a401",
   },
-  version:
-    env.EXPO_PLATFORM === "android"
-      ? appBuildNumbers.expo.android.version
-      : appBuildNumbers.expo.ios.version,
+  version: appBuildNumbers.expo.version,
   assetBundlePatterns: ["**/*"],
   ios: {
     supportsTablet: true,
@@ -60,10 +57,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     ENV: isDev ? "dev" : isPreview ? "preview" : "prod",
   },
-  runtimeVersion:
-    env.EXPO_PLATFORM === "android"
-      ? appBuildNumbers.expo.android.version
-      : appBuildNumbers.expo.ios.version,
+  runtimeVersion: appBuildNumbers.expo.version,
   owner: "converse",
   jsEngine: "hermes",
 });
