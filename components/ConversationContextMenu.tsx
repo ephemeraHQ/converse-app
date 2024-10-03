@@ -102,19 +102,24 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
     );
   }, [height, onClose, translateY]);
 
-  const gesture = Gesture.Pan()
-    .onUpdate((event) => {
-      translateY.value = Math.max(0, event.translationY);
+  const gesture = Gesture.Simultaneous(
+    Gesture.Pan()
+      .onUpdate((event) => {
+        translateY.value = Math.max(0, event.translationY);
+      })
+      .onEnd((event) => {
+        if (event.velocityY > 500 || event.translationY > height * 0.2) {
+          runOnJS(closeMenu)();
+        } else {
+          translateY.value = withTiming(0, {
+            duration: HOLD_ITEM_TRANSFORM_DURATION,
+          });
+        }
+      }),
+    Gesture.Tap().onEnd(() => {
+      runOnJS(closeMenu)();
     })
-    .onEnd((event) => {
-      if (event.velocityY > 500 || event.translationY > height * 0.2) {
-        runOnJS(closeMenu)();
-      } else {
-        translateY.value = withTiming(0, {
-          duration: HOLD_ITEM_TRANSFORM_DURATION,
-        });
-      }
-    });
+  );
 
   if (!isVisible) {
     return null;
