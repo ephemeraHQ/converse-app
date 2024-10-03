@@ -16,42 +16,91 @@ export const getConverseStateFromPath =
   (navigationName: string) => (path: string, options: any) => {
     // dm method must link to the Conversation Screen as well
     // but prefilling the parameters
-    let pathForState = path;
-    if (Platform.OS === "web" && pathForState.startsWith("/")) {
+    let pathForState = path as string | undefined;
+    if (Platform.OS === "web" && pathForState?.startsWith("/")) {
       pathForState = pathForState.slice(1);
     }
-    if (pathForState.startsWith("dm?peer=")) {
-      const peer = pathForState.slice(8).trim().toLowerCase();
-      pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true`;
-    } else if (pathForState.startsWith("dm/")) {
+    if (pathForState?.startsWith("dm?peer=")) {
+      const params = new URLSearchParams(pathForState.slice(3));
+      pathForState = handleConversationLink({
+        navigationName,
+        peer: params.get("peer"),
+        text: params.get("text"),
+      });
+    } else if (pathForState?.startsWith("dm/")) {
       const url = new URL(`https://${config.websiteDomain}/${pathForState}`);
       const params = new URLSearchParams(url.search);
       const peer = url.pathname.slice(4).trim().toLowerCase();
-      const text = params.get("text");
-      if (peer.length === 0) {
-        if (text) {
-          // If navigating but no peer, we can still prefill message for current convo
-          const navigationState = navigationStates[navigationName];
-          const currentRoutes = navigationState?.state.routes || [];
-          if (
-            currentRoutes.length > 0 &&
-            currentRoutes[currentRoutes.length - 1].name === "Conversation"
-          ) {
-            converseEventEmitter.emit("setCurrentConversationInputValue", text);
-          }
-        }
-        return null;
-      }
-      pathForState = `conversation?mainConversationWithPeer=${peer}&focus=true${
-        text ? `&message=${text}` : ""
-      }`;
-    } else if (pathForState.startsWith("groupInvite")) {
+      pathForState = handleConversationLink({
+        navigationName,
+        peer,
+        text: params.get("text"),
+      });
+    } else if (pathForState?.startsWith("group?groupId=")) {
+      const params = new URLSearchParams(pathForState.slice(6));
+      pathForState = handleConversationLink({
+        navigationName,
+        groupId: params.get("groupId"),
+        text: params.get("text"),
+      });
+    } else if (pathForState?.startsWith("group/")) {
+      const url = new URL(`https://${config.websiteDomain}/${pathForState}`);
+      const params = new URLSearchParams(url.search);
+      const groupId = url.pathname.slice(6).trim();
+      pathForState = handleConversationLink({
+        navigationName,
+        groupId,
+        text: params.get("text"),
+      });
+    } else if (pathForState?.startsWith("groupInvite")) {
       // TODO: Remove this once enough users have updated (September 30, 2024)
       pathForState = pathForState.replace("groupInvite", "group-invite");
     }
+
+    // Prevent navigation
+    if (!pathForState) return null;
+
     const state = getStateFromPath(pathForState, options);
     return state;
   };
+
+const handleConversationLink = ({
+  navigationName,
+  groupId,
+  peer,
+  text,
+}: {
+  navigationName: string;
+  groupId?: string | null;
+  peer?: string | null;
+  text?: string | null;
+}) => {
+  if (!groupId && !peer) {
+    if (text) {
+      // If navigating but no group or peer, we can still prefill message for current convo
+      const navigationState = navigationStates[navigationName];
+      const currentRoutes = navigationState?.state.routes || [];
+      if (
+        currentRoutes.length > 0 &&
+        currentRoutes[currentRoutes.length - 1].name === "Conversation"
+      ) {
+        converseEventEmitter.emit("setCurrentConversationInputValue", text);
+      }
+    }
+    return;
+  }
+  const parameters: { [param: string]: string } = { focus: "true" };
+  if (peer) {
+    parameters["mainConversationWithPeer"] = peer;
+  } else if (groupId) {
+    parameters["topic"] = `/xmtp/mls/1/g-${groupId}/proto`;
+  }
+  if (text) {
+    parameters["text"] = text;
+  }
+  const queryString = new URLSearchParams(parameters).toString();
+  return `conversation?${queryString}`;
+};
 
 export const getConverseInitialURL = () => {
   return initialURL;
@@ -106,6 +155,8 @@ export const screenListeners =
             if (isNewPeer || isNewTopic) {
               shouldReplace = true;
             } else if (newRoute.params?.message) {
+              // If navigating to the same route but with a message param
+              // we can set the input value (for instance from a frame)
               converseEventEmitter.emit(
                 "setCurrentConversationInputValue",
                 newRoute.params.message
