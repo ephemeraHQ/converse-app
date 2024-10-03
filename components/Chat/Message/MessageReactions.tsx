@@ -1,4 +1,5 @@
 import Avatar from "@components/Avatar";
+import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
 import {
   inversePrimaryColor,
   textPrimaryColor,
@@ -6,6 +7,16 @@ import {
   primaryColor,
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
+import {
+  getPreferredAvatar,
+  getPreferredName,
+  getProfile,
+} from "@utils/profile";
+import {
+  MessageReaction,
+  addReactionToMessage,
+  removeReactionFromMessage,
+} from "@utils/reactions";
 import { memo, useCallback, useMemo } from "react";
 import {
   StyleSheet,
@@ -16,20 +27,6 @@ import {
 } from "react-native";
 
 import { MessageToDisplay } from "./Message";
-import {
-  useCurrentAccount,
-  useProfilesStore,
-} from "../../../data/store/accountsStore";
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getProfile,
-} from "../../../utils/profile";
-import {
-  MessageReaction,
-  addReactionToMessage,
-  removeReactionFromMessage,
-} from "../../../utils/reactions";
 
 const MAX_REACTORS_TO_SHOW = 3;
 const REACTOR_OFFSET = 10;
