@@ -23,7 +23,7 @@ const BACKDROP_DARK_BACKGROUND_COLOR =
 const STATUS_BAR_HEIGHT =
   Platform.OS === "android" ? StatusBar.currentHeight ?? 0 : 0;
 
-const OUTTER_SPACING = 14;
+const OUTTER_SPACING = 8;
 
 export {
   SIDE_MARGIN,

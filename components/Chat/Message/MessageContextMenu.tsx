@@ -216,28 +216,34 @@ const BackdropComponent: FC<{
     const animateOpacity = () =>
       withDelay(HOLD_ITEM_TRANSFORM_DURATION, withTiming(0, { duration: 0 }));
     const getTransformValue = () => {
-      const spacing = 6; // TODO
+      // Calculate the vertical position of the message bubble
       const topTransform =
+        // Y position of the message
         itemRectY.value +
+        // Height of the message
         itemRectHeight.value +
+        // Height of the context menu
         menuHeight +
-        (safeAreaInsets?.top || 0);
+        // Add spacing between menu and message
+        OUTTER_SPACING +
+        // Account for bottom safe area (messages aligned from bottom)
+        (safeAreaInsets?.bottom || 0);
 
+      // Adjust positioning when message height exceeds half the screen
       if (itemRectHeight.value > height / 2) {
-        // Long Message
         return height - topTransform;
       } else if (
         itemRectY.value >
         AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top
       ) {
-        // Short message
-        return topTransform > height ? height - topTransform + spacing : 0;
+        // General case for shorter messages
+        return topTransform > height ? height - topTransform : 0;
       } else {
         // Short message near the top of the screen, requires downward adjustment
         return (
           -1 *
           (itemRectY.value -
-            spacing -
+            OUTTER_SPACING -
             AUXILIARY_VIEW_MIN_HEIGHT -
             safeAreaInsets.top)
         );
