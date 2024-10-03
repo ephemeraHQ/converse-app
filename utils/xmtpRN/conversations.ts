@@ -332,7 +332,7 @@ const listGroups = async (client: ConverseXmtpClientType) => {
   await client.conversations.syncAllGroups();
   const afterSyncAll = new Date().getTime();
   logger.debug(
-    `[Groups] Syncing all groups took ${
+    `[Groups] Syncing all groups from network took ${
       (afterSyncAll - beforeSyncAll) / 1000
     } sec`
   );

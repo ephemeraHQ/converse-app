@@ -261,9 +261,13 @@ export const syncConversationsMessages = async (
     ..._queryConversationsFromTimestamp,
   };
   let messagesFetched = 0;
+  const beforeSync = new Date().getTime();
 
   while (Object.keys(queryConversationsFromTimestamp).length > 0) {
     const topicsToQuery = Object.keys(queryConversationsFromTimestamp);
+    logger.debug(
+      `[1:1 Sync] ${client.address} - Calling listBatchMessages for ${topicsToQuery.length} topics`
+    );
     const messagesBatch = await client.listBatchMessages(
       topicsToQuery.map((topic) => ({
         contentTopic: topic,
@@ -273,7 +277,7 @@ export const syncConversationsMessages = async (
       }))
     );
     logger.debug(
-      `[XmtpRn] Fetched ${messagesBatch.length} messages from network for ${client.address}`
+      `[1:1 Sync] ${client.address} - Fetched batch of ${messagesBatch.length} messages from network for ${topicsToQuery.length} topics`
     );
 
     const oldQueryConversationsFromTimestamp = {
@@ -321,7 +325,14 @@ export const syncConversationsMessages = async (
       protocolMessagesToStateMessages(messagesBatch)
     );
   }
-  logger.info(`Fetched ${messagesFetched} 1:1 messages from network`);
+  const afterSync = new Date().getTime();
+  logger.info(
+    `[1:1 Sync] ${
+      client.address
+    } -  syncConversationsMessages done - ${messagesFetched} 1:1 messages from network in ${
+      (afterSync - beforeSync) / 1000
+    } sec`
+  );
   return messagesFetched;
 };
 
