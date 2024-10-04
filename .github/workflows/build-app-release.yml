@@ -1,11 +1,17 @@
-name: Build Internal
-# This worflow is used to create internal testing builds to allow for testing features before merge into main
+name: Build App Release
+# This workflow is triggered by a schedule or manually (via the Actions tab on GitHub)
+# It will generate a new version of the app and create a PR to increment the version numbers
 
 permissions:
   contents: write
   pull-requests: write
 
 on:
+  schedule:
+    # These will run only on the default branch
+    # These numbers will likely change when we move to EAS Update
+    - cron: "0 18 * * 2" # Tuesdays at 11 AM PT
+    - cron: "0 21 * * 4" # Thursdays at 2 PM PT
   workflow_dispatch:
 
 jobs:
@@ -96,7 +102,6 @@ jobs:
 
   increment-build-numbers:
     runs-on: ubuntu-latest
-    # needs: [build-android, build-ios]
 
     steps:
       - name: Checkout repository
@@ -107,8 +112,15 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Increment version numbers
-        run: node scripts/build/incrementBuildNumbers.js
+      - name: Increment version number
+        run: |
+          node scripts/build/incrementVersion.js --bump=patch
+
+      - name: Commit changes
+        run: |
+          git add app.json
+          git commit -m "Increment build numbers"
+          git push
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
