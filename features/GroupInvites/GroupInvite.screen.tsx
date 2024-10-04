@@ -31,8 +31,8 @@ import { ActivityIndicator } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
-  getInviteJoinRequest,
-  saveInviteJoinRequest,
+  getInviteJoinRequestId,
+  saveInviteJoinRequestId,
 } from "./groupInvites.utils";
 
 export default function GroupInviteScreen({
@@ -53,17 +53,17 @@ export default function GroupInviteScreen({
   const account = useCurrentAccount() as string;
 
   /**************************************************************
-   * React Query
-   * ************************************************************/
-  const {
-    data: groupInvite,
-    error: groupInviteError,
-    isLoading,
-  } = useGroupInviteQuery(route.params.groupInviteId);
-
-  /**************************************************************
    * React State
    * ************************************************************/
+  // our hack requires us to keep track of the new group
+  // added to the user's list of groups in order to
+  // "handle" that they've joined it
+  const [newGroup, setNewGroup] = useState<GroupWithCodecsType | undefined>(
+    undefined
+  );
+
+  const handlingNewGroup = useRef(false);
+
   const [
     { polling, finishedPollingUnsuccessfully, joinStatus },
     setGroupJoinState,
@@ -79,19 +79,25 @@ export default function GroupInviteScreen({
     joinStatus: null,
   });
 
-  const [newGroup, setNewGroup] = useState<GroupWithCodecsType | undefined>(
-    undefined
-  );
-
+  /**************************************************************
+   * React Query
+   * ************************************************************/
   const { allowGroup } = useGroupConsent(newGroup?.topic || "");
-  const handlingNewGroup = useRef(false);
+  const {
+    data: groupInvite,
+    error: groupInviteError,
+    isLoading,
+    // loads the group invite
+    // caches group invite on invite ID and current account string
+  } = useGroupInviteQuery(route.params.groupInviteId);
 
   const handleNewGroup = useCallback(
     async (group: GroupWithCodecsType) => {
-      const whatDoesThisConditionIndicate =
+      const wasInviteIntendedForUs =
         group.client.address === account && !handlingNewGroup.current;
 
-      if (whatDoesThisConditionIndicate) {
+      if (wasInviteIntendedForUs) {
+        logger.debug("Handling new group", group);
         handlingNewGroup.current = true;
 
         await allowGroup({
@@ -109,12 +115,6 @@ export default function GroupInviteScreen({
     },
     [account, allowGroup, navigation]
   );
-
-  useEffect(() => {
-    if (newGroup) {
-      handleNewGroup(newGroup);
-    }
-  }, [handleNewGroup, newGroup]);
 
   // invoked when the user clicks the "Join Group" button
   const joinGroup = useCallback(async () => {
@@ -141,7 +141,7 @@ export default function GroupInviteScreen({
     );
     // this is super strange logic, we're getting a string from mmkv,
     // assigning it to a variable called ID, then ignoring
-    let joinRequestId = getInviteJoinRequest(account, groupInvite?.id);
+    let joinRequestId = getInviteJoinRequestId(account, groupInvite?.id);
     if (!joinRequestId) {
       logger.debug(
         `[GroupInvite] Sending the group join request to Converse backend`
@@ -150,9 +150,12 @@ export default function GroupInviteScreen({
         account,
         groupInvite?.id
       );
+      logger.debug("[GroupInvite] Join request created", joinRequest);
       joinRequestId = joinRequest.id;
-      saveInviteJoinRequest(account, groupInvite?.id, joinRequestId);
+      saveInviteJoinRequestId(account, groupInvite?.id, joinRequestId);
     }
+
+    // polling logic (move to Dependency JoinGroupClient.listenForGroupJoinAcceptance)
     let count = 0;
     let status: GroupJoinRequestStatus = "PENDING";
     while (count < 10 && status === "PENDING") {
@@ -227,6 +230,23 @@ export default function GroupInviteScreen({
       });
     }
   }, [account, groupInvite?.id, groupInvite?.groupId]);
+
+  useEffect(() => {
+    if (newGroup) {
+      handleNewGroup(newGroup);
+    }
+  }, [handleNewGroup, newGroup]);
+
+  logger.debug({
+    account,
+    groupInvite,
+    groupInviteError,
+    groupInviteLoading: isLoading,
+    polling,
+    finishedPollingUnsuccessfully,
+    joinStatus,
+    newGroup,
+  });
 
   return (
     <View style={styles.groupInvite}>

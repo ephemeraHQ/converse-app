@@ -9,7 +9,7 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import GroupInviteScreen from "./GroupInvite.screen";
+import GroupInviteScreen from "./GroupInviteScreen.old.screen";
 
 export type GroupInviteNavParams = {
   groupInviteId: string;
