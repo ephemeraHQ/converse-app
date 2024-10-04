@@ -46,7 +46,7 @@ export const getConverseStateFromPath =
     } else if (pathForState?.startsWith("group/")) {
       const url = new URL(`https://${config.websiteDomain}/${pathForState}`);
       const params = new URLSearchParams(url.search);
-      const groupId = url.pathname.slice(6).trim();
+      const groupId = url.pathname.slice(7).trim();
       pathForState = handleConversationLink({
         navigationName,
         groupId,

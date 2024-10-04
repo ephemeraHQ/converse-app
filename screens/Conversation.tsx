@@ -289,6 +289,7 @@ const Conversation = ({
       {route.params?.topic || route.params?.mainConversationWithPeer ? (
         <ConversationContext.Provider
           value={{
+            topic: conversationTopic,
             conversation,
             messageToPrefill,
             inputRef: textInputRef,
