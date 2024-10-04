@@ -6,6 +6,7 @@ import { useGroupConsentQuery } from "@queries/useGroupConsentQuery";
 import { useGroupQuery } from "@queries/useGroupQuery";
 import { QueryObserverOptions } from "@tanstack/react-query";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
+import logger from "@utils/logger";
 import { consentToInboxIdsOnProtocol } from "@utils/xmtpRN/conversations";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
@@ -43,6 +44,7 @@ export const useGroupConsent = (
 
   const allowGroup = useCallback(
     async (options: OnConsentOptions) => {
+      logger.debug(`[useGroupConsent] Allowing group ${topic}`);
       await allowGroupMutation();
       setGroupStatus({ [getGroupIdFromTopic(topic).toLowerCase()]: "allowed" });
       const inboxIdsToAllow: InboxId[] = [];

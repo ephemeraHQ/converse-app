@@ -484,6 +484,7 @@ export const createGroupJoinRequest = async (
       headers: await getXmtpApiHeaders(account),
     }
   );
+  logger.debug("[API] Group join request created", data);
   return data;
 };
 

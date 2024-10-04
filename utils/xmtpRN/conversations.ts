@@ -686,18 +686,22 @@ export const createGroup = async (
 };
 
 export const refreshGroup = async (account: string, topic: string) => {
+  logger.debug(`[refreshGroup] Refreshing group ${topic}`);
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   await client.conversations.syncGroups();
   const group = await client.conversations.findGroup(
     getGroupIdFromTopic(topic)
   );
   if (!group) throw new Error(`Group ${topic} not found, cannot refresh`);
+
   await group.sync();
+  logger.debug(`[refreshGroup] Group ${topic} synced`);
   saveConversations(
     client.address,
     [protocolGroupToStateConversation(account, group)],
     true
   );
+  logger.debug(`[refreshGroup] Conversations saved`);
   const updatedMembers = await group.membersList();
   saveMemberInboxIds(account, updatedMembers);
 };

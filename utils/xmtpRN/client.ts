@@ -59,6 +59,7 @@ export type ConversationWithCodecsType = Awaited<
 export type GroupWithCodecsType = Awaited<
   ReturnType<ConverseXmtpClientType["conversations"]["newGroup"]>
 >;
+// const c: GroupWithCodecsType = null as any as GroupWithCodecsType;
 
 export type DecodedMessageWithCodecsType = Awaited<
   ReturnType<ConversationWithCodecsType["messages"]>

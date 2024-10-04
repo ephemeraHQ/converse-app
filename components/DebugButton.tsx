@@ -21,8 +21,8 @@ import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 import { Platform, Alert } from "react-native";
 
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import config from "../config";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { getConverseDbPath } from "../data/db";
 import { currentAccount, useAccountsList } from "../data/store/accountsStore";
 import { getPresignedUriForUpload } from "../utils/api";
@@ -30,6 +30,7 @@ import mmkv from "../utils/mmkv";
 
 export const useDebugEnabled = (address?: string) => {
   const accounts = useAccountsList();
+  return true;
   if (address && debugEnabled(address)) {
     return true;
   }
