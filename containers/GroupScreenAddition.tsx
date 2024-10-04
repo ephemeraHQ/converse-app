@@ -8,7 +8,7 @@ import { useGroupName } from "@hooks/useGroupName";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { useGroupPhoto } from "@hooks/useGroupPhoto";
 import { translate } from "@i18n";
-import Clipboard from "@react-native-clipboard/clipboard";
+// // import Clipboard from "@react-native-clipboard/clipboard";
 import {
   actionSecondaryColor,
   inversePrimaryColor,
@@ -89,7 +89,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
       return;
     }
     setSnackMessage(translate("group_invite_link_copied"));
-    Clipboard.setString(groupInviteLink);
+    // Clipboard.setString(groupInviteLink);
   }, [groupInviteLink]);
 
   const onCreateInviteLinkPress = useCallback(() => {
@@ -103,7 +103,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
         saveInviteIdByGroupId(getGroupIdFromTopic(topic), groupInvite.id);
         saveGroupInviteLink(groupInvite.id, getGroupIdFromTopic(topic));
         setGroupInviteLink(topic, groupInvite.inviteLink);
-        Clipboard.setString(groupInvite.inviteLink);
+        // Clipboard.setString(groupInvite.inviteLink);
         setSnackMessage(translate("group_invite_link_created_copied"));
       })
       .catch((err) => {

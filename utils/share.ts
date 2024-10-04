@@ -1,8 +1,8 @@
-import RNShare from "react-native-share";
+// import RNShare from "react-native-share";
 
 class Share {
   open(payload: { title: string; url: string; type: string }) {
-    RNShare.open(payload);
+    // RNShare.open(payload);
   }
 }
 
