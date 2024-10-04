@@ -15,6 +15,7 @@ import {
   useColorScheme,
   useWindowDimensions,
   View,
+  ViewStyle,
 } from "react-native";
 import {
   Gesture,
@@ -40,7 +41,7 @@ export interface DrawerProps {
   visible: boolean;
   children: React.ReactNode;
   onClose?: () => void;
-  style?: any;
+  style?: ViewStyle;
 }
 
 export const DrawerContext = React.createContext<{
