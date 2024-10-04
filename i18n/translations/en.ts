@@ -292,16 +292,16 @@ const en = {
   approve_member_to_this_group: "Approve {{name}} to this group",
 
   // Revocation
-  current_installation_revoked: "Installation revoked",
+  current_installation_revoked: "Logged out",
   current_installation_revoked_description:
-    "The current installation has been revoked, you will now get logged out and group chats will be deleted",
-  other_installations_count: "You have {{count}} other installations",
-  revoke_description: "Can we revoke those installations now?",
+    "You have been logged out of your account. Your group chats will be deleted from this device.",
+  other_installations_count: "You have {{count}} active logins",
+  revoke_description: "Would you like to log out from all other sessions?",
   revoke_done_title: "Done",
-  revoke_done_description: "{{count}} other installations successfully revoked",
-  revoke_empty: "You have no other installations",
-  revoke_others_cta: "Revoke other installations",
-  revoke_wallet_picker_title: "Revoke other installations",
+  revoke_done_description: "Logged out of {{count}} sessions",
+  revoke_empty: "You have no other active sessions",
+  revoke_others_cta: "Log out others",
+  revoke_wallet_picker_title: "Log out others",
   revoke_wallet_picker_description:
     "Connect the wallet associated with your XMTP account: {{wallet}}",
 
