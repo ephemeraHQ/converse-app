@@ -1,4 +1,4 @@
-import ConverseChat from "@components/Chat/Chat";
+import { ChatPreview } from "@components/Chat/Chat";
 import { EmojiPicker } from "@containers/EmojiPicker";
 import {
   currentAccount,
@@ -32,17 +32,10 @@ export const ConversationReadOnly: React.FC<{
     {}
   );
 
-  const {
-    conversations,
-    conversationsMapping,
-    setConversationMessageDraft,
-    setConversationMediaPreview,
-  } = useChatStore(
+  const { conversations, conversationsMapping } = useChatStore(
     useSelect([
       "conversations",
       "conversationsMapping",
-      "setConversationMessageDraft",
-      "setConversationMediaPreview",
       "lastUpdateAt", // Added even if unused to trigger a rerender
     ])
   );
@@ -137,22 +130,6 @@ export const ConversationReadOnly: React.FC<{
     }
   }, [conversation]);
 
-  const onLeaveScreen = useCallback(async () => {
-    if (!conversation) return;
-
-    useChatStore.getState().setOpenedConversationTopic(null);
-    if (textInputRef.current) {
-      setConversationMessageDraft(
-        conversation.topic,
-        textInputRef.current.currentValue
-      );
-    }
-    setConversationMediaPreview(
-      conversation.topic,
-      mediaPreviewRef.current || null
-    );
-  }, [conversation, setConversationMessageDraft, setConversationMediaPreview]);
-
   return (
     <View style={styles.container} key={`conversation-${colorScheme}`}>
       {conversationTopic ? (
@@ -172,7 +149,7 @@ export const ConversationReadOnly: React.FC<{
             tagsFetchedOnceForMessage,
           }}
         >
-          <ConverseChat readOnly />
+          <ChatPreview />
         </ConversationContext.Provider>
       ) : (
         <View style={styles.filler} />

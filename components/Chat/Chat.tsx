@@ -53,9 +53,78 @@ import { UUID_REGEX } from "../../utils/regex";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { Recommendation } from "../Recommendations/Recommendation";
 
+const usePeerSocials = () => {
+  const conversation = useConversationContext("conversation");
+  const peerSocials = useProfilesStore(
+    useShallow((s) =>
+      conversation?.peerAddress
+        ? getProfile(conversation.peerAddress, s.profiles)?.socials
+        : undefined
+    )
+  );
+
+  return peerSocials;
+};
+
+const useRenderItem = ({
+  xmtpAddress,
+  conversation,
+  framesStore,
+  colorScheme,
+}: {
+  xmtpAddress: string;
+  conversation: any;
+  framesStore: any;
+  colorScheme: any;
+}) => {
+  return useCallback(
+    ({ item }: { item: MessageToDisplay }) => {
+      return (
+        <CachedChatMessage
+          account={xmtpAddress}
+          message={{ ...item }}
+          colorScheme={colorScheme}
+          isGroup={!!conversation?.isGroup}
+          isFrame={!!framesStore[item.content.toLowerCase()]}
+        />
+      );
+    },
+    [colorScheme, xmtpAddress, conversation?.isGroup, framesStore]
+  );
+};
+
+const getItemType = (framesStore: any) => (item: MessageToDisplay) => {
+  const fromMeString = item.fromMe ? "fromMe" : "notFromMe";
+  if (
+    isContentType("text", item.contentType) &&
+    item.converseMetadata?.frames?.[0]
+  ) {
+    const frameUrl = item.converseMetadata?.frames?.[0];
+    const frame = framesStore[frameUrl];
+    // Recycle frames with the same aspect ratio
+    return `FRAME-${
+      frame?.frameInfo?.image?.aspectRatio || "1.91.1"
+    }-${fromMeString}`;
+  } else if (
+    (isContentType("attachment", item.contentType) ||
+      isContentType("remoteAttachment", item.contentType)) &&
+    item.converseMetadata?.attachment?.size?.height &&
+    item.converseMetadata?.attachment?.size?.width
+  ) {
+    const aspectRatio = (
+      item.converseMetadata.attachment.size.width /
+      item.converseMetadata.attachment.size.height
+    ).toFixed(2);
+    return `ATTACHMENT-${aspectRatio}-${fromMeString}`;
+  } else {
+    return `${item.contentType}-${fromMeString}`;
+  }
+};
+
 const getListArray = (
   xmtpAddress?: string,
-  conversation?: XmtpConversationWithUpdate
+  conversation?: XmtpConversationWithUpdate,
+  lastMessages?: number // Optional parameter to limit the number of messages
 ) => {
   const messageAttachments = useChatStore.getState().messageAttachments;
   const isAttachmentLoading = (messageId: string) => {
@@ -170,35 +239,63 @@ const getListArray = (
     reverseArray.push(message);
   }
 
+  // If lastMessages is defined, slice the array to return only the last n messages
+  if (lastMessages !== undefined) {
+    return reverseArray.slice(0, lastMessages);
+  }
+
   return reverseArray;
 };
 
-export default function Chat({ readOnly = false }: { readOnly?: boolean }) {
+const useAnimatedListView = (
+  conversation: XmtpConversationWithUpdate | undefined
+) => {
+  // The first message was really buggy on iOS & Android and this is due to FlashList
+  // so we keep FlatList for new convos and switch to FlashList for bigger convos
+  // that need great perf.
+  return useMemo(() => {
+    const isConversationNotPending = conversation && !conversation.pending;
+    return isConversationNotPending && Platform.OS !== "web"
+      ? ReanimatedFlashList
+      : ReanimatedFlatList;
+  }, [conversation]);
+};
+
+const useIsShowingPlaceholder = ({
+  messages,
+  isBlockedPeer,
+  conversation,
+}: {
+  messages: MessageToDisplay[];
+  isBlockedPeer: boolean;
+  conversation: XmtpConversationWithUpdate | undefined;
+}): boolean => {
+  return messages.length === 0 || isBlockedPeer || !conversation;
+};
+
+export function Chat() {
   const conversation = useConversationContext("conversation");
+  const AnimatedListView = useAnimatedListView(conversation);
   const isBlockedPeer = useConversationContext("isBlockedPeer");
   const onReadyToFocus = useConversationContext("onReadyToFocus");
   const transactionMode = useConversationContext("transactionMode");
   const frameTextInputFocused = useConversationContext("frameTextInputFocused");
 
   const xmtpAddress = useCurrentAccount() as string;
-  const peerSocials = useProfilesStore(
-    useShallow((s) =>
-      conversation?.peerAddress
-        ? getProfile(conversation.peerAddress, s.profiles)?.socials
-        : undefined
-    )
-  );
+  const peerSocials = usePeerSocials();
   const isSplitScreen = useIsSplitScreen();
   const recommendationsData = useRecommendationsStore(
     useShallow((s) =>
       conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined
     )
   );
+
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const messageAttachmentsLength = useChatStore(
     useShallow((s) => Object.keys(s.messageAttachments).length)
   );
+
   const listArray = useMemo(
     () => getListArray(xmtpAddress, conversation),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -249,20 +346,12 @@ export default function Chat({ readOnly = false }: { readOnly?: boolean }) {
   const chatContentStyle = useAnimatedStyle(
     () => ({
       ...styles.chatContent,
-      paddingBottom: readOnly
-        ? 0 // Remove bottom padding if readOnly is true
-        : showChatInput
+      paddingBottom: showChatInput
         ? chatInputDisplayedHeight.value +
           Math.max(insets.bottom, keyboardHeight.value)
         : insets.bottom,
     }),
-    [
-      showChatInput,
-      keyboardHeight,
-      chatInputDisplayedHeight,
-      insets.bottom,
-      readOnly,
-    ]
+    [showChatInput, keyboardHeight, chatInputDisplayedHeight, insets.bottom]
   );
 
   const ListFooterComponent = useMemo(() => {
@@ -284,36 +373,23 @@ export default function Chat({ readOnly = false }: { readOnly?: boolean }) {
     recommendationsData,
     styles.inChatRecommendations,
   ]);
+
   const framesStore = useFramesStore().frames;
 
-  const showPlaceholder =
-    listArray.length === 0 || isBlockedPeer || !conversation;
-  const renderItem = useCallback(
-    ({ item }: { item: MessageToDisplay }) => {
-      return (
-        <CachedChatMessage
-          account={xmtpAddress}
-          message={{ ...item }}
-          colorScheme={colorScheme}
-          isGroup={!!conversation?.isGroup}
-          isFrame={!!framesStore[item.content.toLowerCase()]}
-        />
-      );
-    },
-    [colorScheme, xmtpAddress, conversation?.isGroup, framesStore]
-  );
-  const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
+  const showPlaceholder = useIsShowingPlaceholder({
+    messages: listArray,
+    isBlockedPeer,
+    conversation,
+  });
 
-  // The first message was really buggy on iOS & Android and this is due to FlashList
-  // so we keep FlatList for new convos and switch to FlashList for bigger convos
-  // that need great perf.
-  const conversationNotPendingRef = useRef(
-    conversation && !conversation.pending
-  );
-  const AnimatedListView =
-    conversationNotPendingRef.current && Platform.OS !== "web"
-      ? ReanimatedFlashList
-      : ReanimatedFlatList;
+  const renderItem = useRenderItem({
+    xmtpAddress,
+    conversation,
+    framesStore,
+    colorScheme,
+  });
+
+  const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
   const messageListRef = useRef<
     FlatList<MessageToDisplay> | FlashList<MessageToDisplay> | undefined
@@ -342,37 +418,6 @@ export default function Chat({ readOnly = false }: { readOnly?: boolean }) {
       converseEventEmitter.off("scrollChatToMessage", scrollToMessage);
     };
   }, [scrollToMessage]);
-
-  const getItemType = useCallback(
-    (item: MessageToDisplay) => {
-      const fromMeString = item.fromMe ? "fromMe" : "notFromMe";
-      if (
-        isContentType("text", item.contentType) &&
-        item.converseMetadata?.frames?.[0]
-      ) {
-        const frameUrl = item.converseMetadata?.frames?.[0];
-        const frame = framesStore[frameUrl];
-        // Recycle frames with the same aspect ratio
-        return `FRAME-${
-          frame?.frameInfo?.image?.aspectRatio || "1.91.1"
-        }-${fromMeString}`;
-      } else if (
-        (isContentType("attachment", item.contentType) ||
-          isContentType("remoteAttachment", item.contentType)) &&
-        item.converseMetadata?.attachment?.size?.height &&
-        item.converseMetadata?.attachment?.size?.width
-      ) {
-        const aspectRatio = (
-          item.converseMetadata.attachment.size.width /
-          item.converseMetadata.attachment.size.height
-        ).toFixed(2);
-        return `ATTACHMENT-${aspectRatio}-${fromMeString}`;
-      } else {
-        return `${item.contentType}-${fromMeString}`;
-      }
-    },
-    [framesStore]
-  );
 
   const handleOnLayout = useCallback(() => {
     setTimeout(() => {
@@ -414,12 +459,12 @@ export default function Chat({ readOnly = false }: { readOnly?: boolean }) {
             }
             inverted
             keyExtractor={keyExtractor}
-            getItemType={getItemType}
+            getItemType={getItemType(framesStore)}
             keyboardShouldPersistTaps="handled"
             estimatedItemSize={80}
             // Size glitch on Android
-            showsVerticalScrollIndicator={!readOnly && Platform.OS === "ios"}
-            pointerEvents={readOnly ? "none" : "auto"}
+            showsVerticalScrollIndicator={Platform.OS === "ios"}
+            pointerEvents="auto"
             ListFooterComponent={ListFooterComponent}
           />
         )}
@@ -429,10 +474,9 @@ export default function Chat({ readOnly = false }: { readOnly?: boolean }) {
         {showPlaceholder && conversation?.isGroup && (
           <GroupChatPlaceholder messagesCount={listArray.length} />
         )}
-        {!readOnly &&
-          (conversation?.isGroup ? <GroupConsentPopup /> : <ConsentPopup />)}
+        {conversation?.isGroup ? <GroupConsentPopup /> : <ConsentPopup />}
       </Animated.View>
-      {!readOnly && showChatInput && (
+      {showChatInput && (
         <>
           <ReanimatedView
             style={[
@@ -460,6 +504,106 @@ export default function Chat({ readOnly = false }: { readOnly?: boolean }) {
   );
 }
 
+// Lightweight chat preview component used for longpress on chat
+export function ChatPreview() {
+  const conversation = useConversationContext("conversation");
+  const AnimatedListView = useAnimatedListView(conversation);
+  const isBlockedPeer = useConversationContext("isBlockedPeer");
+  const onReadyToFocus = useConversationContext("onReadyToFocus");
+
+  const xmtpAddress = useCurrentAccount() as string;
+  const peerSocials = usePeerSocials();
+
+  const colorScheme = useColorScheme();
+  const styles = useStyles();
+  const messageAttachmentsLength = useChatStore(
+    useShallow((s) => Object.keys(s.messageAttachments).length)
+  );
+
+  const listArray = useMemo(
+    // Get only the last 20 messages for performance in preview
+    () => getListArray(xmtpAddress, conversation, 20),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      xmtpAddress,
+      conversation,
+      conversation?.lastUpdateAt,
+      messageAttachmentsLength,
+    ]
+  );
+
+  const framesStore = useFramesStore().frames;
+
+  const showPlaceholder = useIsShowingPlaceholder({
+    messages: listArray,
+    isBlockedPeer,
+    conversation,
+  });
+
+  const renderItem = useRenderItem({
+    xmtpAddress,
+    conversation,
+    framesStore,
+    colorScheme,
+  });
+
+  const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
+
+  const messageListRef = useRef<
+    FlatList<MessageToDisplay> | FlashList<MessageToDisplay> | undefined
+  >();
+
+  const handleOnLayout = useCallback(() => {
+    setTimeout(() => {
+      onReadyToFocus();
+    }, 50);
+  }, [onReadyToFocus]);
+
+  return (
+    <View
+      style={styles.chatContainer}
+      key={`chat-${conversation?.peerAddress}-${
+        conversation?.context?.conversationId || ""
+      }-${isBlockedPeer}`}
+    >
+      <Animated.View style={styles.chatPreviewContent}>
+        {conversation && listArray.length > 0 && !isBlockedPeer && (
+          <AnimatedListView
+            contentContainerStyle={styles.chat}
+            data={listArray}
+            refreshing={conversation?.pending}
+            extraData={[peerSocials]}
+            renderItem={renderItem}
+            onLayout={handleOnLayout}
+            ref={(r) => {
+              if (r) {
+                messageListRef.current = r;
+              }
+            }}
+            keyboardDismissMode="interactive"
+            automaticallyAdjustContentInsets={false}
+            contentInsetAdjustmentBehavior="never"
+            estimatedListSize={Dimensions.get("screen")}
+            inverted
+            keyExtractor={keyExtractor}
+            getItemType={getItemType(framesStore)}
+            keyboardShouldPersistTaps="handled"
+            estimatedItemSize={80}
+            showsVerticalScrollIndicator={false}
+            pointerEvents="none"
+          />
+        )}
+        {showPlaceholder && !conversation?.isGroup && (
+          <ChatPlaceholder messagesCount={listArray.length} />
+        )}
+        {showPlaceholder && conversation?.isGroup && (
+          <GroupChatPlaceholder messagesCount={listArray.length} />
+        )}
+      </Animated.View>
+    </View>
+  );
+}
+
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
@@ -471,6 +615,11 @@ const useStyles = () => {
     chatContent: {
       backgroundColor: backgroundColor(colorScheme),
       flex: 1,
+    },
+    chatPreviewContent: {
+      backgroundColor: backgroundColor(colorScheme),
+      flex: 1,
+      paddingBottom: 0,
     },
     chat: {
       backgroundColor: backgroundColor(colorScheme),
