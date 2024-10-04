@@ -111,6 +111,7 @@ export default function ChatGroupUpdatedMessage({
           profileDisplay={a.readableName}
           profileAddress={a.address}
           textStyle={styles.groupChange}
+          pressableTextStyle={styles.profileStyle}
         />
       ))}
     </>
@@ -133,6 +134,9 @@ const useStyles = () => {
       marginTop: 5,
       marginBottom: 9,
       paddingHorizontal: 24,
+    },
+    profileStyle: {
+      fontWeight: "bold",
     },
   });
 };
