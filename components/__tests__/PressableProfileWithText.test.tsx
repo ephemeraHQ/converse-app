@@ -12,6 +12,7 @@ describe("PressableProfileWithTextInner", () => {
   const profileDisplay = "User123";
   const text = "Hello User123, welcome!";
   const textStyle = { fontSize: 18 };
+  const pressableTextStyle = { fontSize: 18, color: "blue" };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -68,5 +69,36 @@ describe("PressableProfileWithTextInner", () => {
     fireEvent.press(parsedText);
 
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("renders with the provided style", () => {
+    const { getByText } = render(
+      <PressableProfileWithText
+        profileAddress={profileAddress}
+        profileDisplay={profileDisplay}
+        text={text}
+        textStyle={textStyle}
+      />
+    );
+
+    const parsedText = getByText(profileDisplay);
+
+    expect(parsedText.props.style).toEqual([textStyle, undefined]);
+  });
+
+  it("renders with the provided style for pressable text", () => {
+    const { getByText } = render(
+      <PressableProfileWithText
+        profileAddress={profileAddress}
+        profileDisplay={profileDisplay}
+        text={text}
+        textStyle={textStyle}
+        pressableTextStyle={pressableTextStyle}
+      />
+    );
+
+    const parsedText = getByText(profileDisplay);
+
+    expect(parsedText.props.style).toEqual([textStyle, pressableTextStyle]);
   });
 });
