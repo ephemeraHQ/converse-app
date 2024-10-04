@@ -13,4 +13,8 @@ export const spacing = {
   xxxl: 64,
 } as const;
 
+export const layout = {
+  screenHorizontalPadding: spacing.lg,
+} as const;
+
 export type Spacing = keyof typeof spacing;

@@ -1,8 +1,6 @@
-import Button from "@components/Button/Button";
 import { Terms } from "@components/Onboarding/Terms";
-import { PictoTitleSubtitle } from "@components/PictoTitleSubtitle";
-import { Screen } from "@components/Screen";
 import { translate } from "@i18n";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
   primaryColor,
@@ -23,11 +21,17 @@ import {
 } from "react-native";
 import { AvoidSoftInput } from "react-native-avoid-softinput";
 
-import { initXmtpClient } from "../../components/Onboarding/use-init-xmtp-client";
+import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
+import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
+import { OnboardingScreen } from "../../components/Onboarding/OnboardingScreen";
+import { initXmtpClient } from "../../components/Onboarding/init-xmtp-client";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { VStack } from "../../design-system/VStack";
+import { sentryTrackError } from "../../utils/sentry";
+import { NavigationParamList } from "../Navigation/Navigation";
 
-export const getSignerFromPrivateKey = async (privateKey: string) => {
+const getSignerFromPrivateKey = async (privateKey: string) => {
   try {
     const signer = new Wallet(privateKey);
     return signer;
@@ -36,26 +40,30 @@ export const getSignerFromPrivateKey = async (privateKey: string) => {
   }
 };
 
-export function PrivateKeyConnectScreen() {
-  const [privateKey, setPrivateKey] = useState("");
+export function OnboardingPrivateKeyScreen(
+  props: NativeStackScreenProps<NavigationParamList, "OnboardingPrivateKey">
+) {
   const colorScheme = useColorScheme();
   const textInputRef = useRef<TextInput | null>(null);
+
   const styles = useStyles();
-  const { setLoading, setConnectionMethod, setSigner } = useOnboardingStore(
-    useSelect(["setLoading", "setConnectionMethod", "setSigner"])
-  );
+
+  const { setSigner } = useOnboardingStore(useSelect(["setSigner"]));
+
+  const [loading, setLoading] = useState(false);
+  const [privateKey, setPrivateKey] = useState("");
 
   const loginWithPrivateKey = useCallback(
     async (privateKey: string) => {
       setLoading(true);
-      setTimeout(async () => {
+      try {
         const signer = await getSignerFromPrivateKey(privateKey);
         if (!signer) {
           setLoading(false);
           return;
         }
         setSigner(signer);
-        initXmtpClient({
+        await initXmtpClient({
           signer,
           address: await signer.getAddress(),
           connectionMethod: "privateKey",
@@ -63,20 +71,11 @@ export function PrivateKeyConnectScreen() {
           isEphemeral: false,
           pkPath: "",
         });
-
-        // What is this?
-        // Let's save
-        // const pkPath = `PK-${uuidv4()}`;
-        // try {
-        //   await savePrivateKey(pkPath, seedPhraseSigner.privateKey);
-        //   setPkPath(pkPath);
-        //   setSigner(seedPhraseSigner);
-        // } catch (e: any) {
-        //   // No biometrics?
-        //   Alert.alert("An error occured", e.toString());
-        //   setLoading(false);
-        // }
-      }, 10);
+      } catch (error) {
+        sentryTrackError(error);
+      } finally {
+        setLoading(false);
+      }
     },
     [setLoading, setSigner]
   );
@@ -98,21 +97,16 @@ export function PrivateKeyConnectScreen() {
   useEffect(avoidInputEffect);
 
   return (
-    <Screen>
-      <PictoTitleSubtitle.Container
-        style={{
-          marginBottom: spacing.xxl,
-          marginTop: spacing.xl,
-        }}
-      >
-        <PictoTitleSubtitle.Picto
+    <OnboardingScreen preset="scroll">
+      <OnboardingPictoTitleSubtitle.Container>
+        <OnboardingPictoTitleSubtitle.Picto
           picto="key.horizontal"
           size={PictoSizes.onboardingComponent}
         />
-        <PictoTitleSubtitle.Title>
+        <OnboardingPictoTitleSubtitle.Title>
           {translate("privateKeyConnect.title")}
-        </PictoTitleSubtitle.Title>
-        <PictoTitleSubtitle.Subtitle>
+        </OnboardingPictoTitleSubtitle.Title>
+        <OnboardingPictoTitleSubtitle.Subtitle>
           {translate("privateKeyConnect.subtitle", {
             storage: translate(
               `privateKeyConnect.storage.${
@@ -120,8 +114,8 @@ export function PrivateKeyConnectScreen() {
               }`
             ),
           })}
-        </PictoTitleSubtitle.Subtitle>
-      </PictoTitleSubtitle.Container>
+        </OnboardingPictoTitleSubtitle.Subtitle>
+      </OnboardingPictoTitleSubtitle.Container>
 
       <View style={styles.entryContainer}>
         <TextInput
@@ -148,17 +142,22 @@ export function PrivateKeyConnectScreen() {
         />
       </View>
 
-      <Button
-        title={translate("privateKeyConnect.connectButton")}
-        variant="primary"
-        onPress={() => {
-          if (!privateKey || privateKey.trim().length === 0) return;
-          loginWithPrivateKey(privateKey.trim());
+      <VStack
+        style={{
+          rowGap: spacing.xs,
         }}
-      />
-
-      <Terms />
-    </Screen>
+      >
+        <OnboardingPrimaryCtaButton
+          loading={loading}
+          title={translate("privateKeyConnect.connectButton")}
+          onPress={() => {
+            if (!privateKey || privateKey.trim().length === 0) return;
+            loginWithPrivateKey(privateKey.trim());
+          }}
+        />
+        <Terms />
+      </VStack>
+    </OnboardingScreen>
   );
 }
 
@@ -167,10 +166,8 @@ const useStyles = () => {
   return StyleSheet.create({
     entryContainer: {
       width: "100%",
-      paddingRight: 25,
-      paddingLeft: 25,
       height: 130,
-      marginTop: 38,
+      marginBottom: spacing.xl,
     },
     textInput: {
       width: "100%",

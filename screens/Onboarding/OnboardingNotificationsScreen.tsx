@@ -1,18 +1,22 @@
-import { Screen } from "@components/Screen";
 import { Text } from "@design-system/Text";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { textPrimaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import * as Linking from "expo-linking";
 import React from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 
-import Button from "../components/Button/Button";
-import Picto from "../components/Picto/Picto";
-import { useSettingsStore } from "../data/store/accountsStore";
-import { useAppStore } from "../data/store/appStore";
-import { requestPushNotificationsPermissions } from "../utils/notifications";
+import Button from "../../components/Button/Button";
+import Picto from "../../components/Picto/Picto";
+import { Screen } from "../../components/Screen/ScreenComp/Screen";
+import { useSettingsStore } from "../../data/store/accountsStore";
+import { useAppStore } from "../../data/store/appStore";
+import { requestPushNotificationsPermissions } from "../../utils/notifications";
+import { NavigationParamList } from "../Navigation/Navigation";
 
-export function NotificationsScreen() {
+export function OnboardingNotificationsScreen(
+  props: NativeStackScreenProps<NavigationParamList, "OnboardingNotifications">
+) {
   const styles = useStyles();
 
   const setNotificationsSettings = useSettingsStore(
@@ -23,7 +27,7 @@ export function NotificationsScreen() {
   );
 
   return (
-    <Screen>
+    <Screen preset="scroll">
       <View style={styles.notifications}>
         <Picto
           picto="message.badge"

@@ -25,6 +25,10 @@ const getSchemedURLFromUniversalURL = (url: string) => {
   return schemedURL;
 };
 
+const isDevelopmentClientURL = (url: string) => {
+  return url.includes("expo-development-client");
+};
+
 export let initialURL = "";
 
 export default function InitialStateHandler() {
@@ -94,6 +98,9 @@ export default function InitialStateHandler() {
         if (topicToNavigateTo) {
           navigateToTopicWithRetry();
         } else if (initialURL) {
+          if (isDevelopmentClientURL(initialURL)) {
+            return;
+          }
           Linking.openURL(initialURL);
           // Once opened, let's remove so we don't navigate twice
           // when logging out / relogging in

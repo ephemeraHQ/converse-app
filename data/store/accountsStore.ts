@@ -172,6 +172,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           if (newAccounts.length === 0) {
             newAccounts.push(TEMPORARY_ACCOUNT_NAME);
           }
+
           // New current account doesn't change if it's not the one to remove,
           // else we find the first non temporary one and fallback to temporary (= logout)
           const newCurrentAccount =

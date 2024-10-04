@@ -20,9 +20,6 @@ type OnboardingStoreType = {
   desktopConnectSessionId: string | null;
   setDesktopConnectSessionId: (sessionId: string | null) => void;
 
-  connectionMethod: ConnectionMethod;
-  setConnectionMethod: (method: ConnectionMethod) => void;
-
   signer: Signer | undefined;
   address: string | undefined;
   setSigner: (s: Signer | undefined) => void;
@@ -60,12 +57,6 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
     set(() => ({
       desktopConnectSessionId: sessionId,
       addingNewAccount: !!sessionId,
-    })),
-
-  connectionMethod: undefined,
-  setConnectionMethod: (method) =>
-    set(() => ({
-      connectionMethod: method,
     })),
 
   signer: undefined,

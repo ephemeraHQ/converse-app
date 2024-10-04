@@ -32,7 +32,7 @@ export function ContainerComponent({
         {
           alignItems: "center",
           justifyContent: "center",
-          rowGap: spacing.sm,
+          rowGap: spacing.xs,
         },
         style,
       ]}

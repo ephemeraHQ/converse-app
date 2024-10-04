@@ -77,7 +77,7 @@ export default function Accounts(
               } catch (e) {
                 logger.error(e);
               } finally {
-                router.push("NewAccount");
+                router.push("NewAccountNavigator");
               }
             },
           },

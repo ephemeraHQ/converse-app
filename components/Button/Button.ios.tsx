@@ -7,30 +7,16 @@ import {
 import { PictoSizes } from "@styles/sizes";
 import React from "react";
 import {
-  GestureResponderEvent,
+  ActivityIndicator,
   Platform,
-  StyleProp,
   StyleSheet,
   Text,
-  TextStyle,
   TouchableOpacity,
   useColorScheme,
-  ViewStyle,
 } from "react-native";
 
+import { IButtonProps } from "./Button.props";
 import Picto from "../Picto/Picto";
-
-type Props = {
-  title: string;
-  onPress?: (event: GestureResponderEvent) => void;
-  variant: "primary" | "secondary" | "secondary-danger" | "grey" | "text";
-  style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
-  allowFontScaling?: boolean;
-  picto?: string;
-  numberOfLines?: number;
-  hitSlop?: number;
-};
 
 export default function Button({
   title,
@@ -42,7 +28,8 @@ export default function Button({
   allowFontScaling = true,
   numberOfLines,
   hitSlop,
-}: Props) {
+  loading,
+}: IButtonProps) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const buttonStyle =
@@ -69,28 +56,36 @@ export default function Button({
       onPress={onPress}
       hitSlop={hitSlop}
     >
-      {picto && (
-        <Picto
-          picto={picto}
-          size={variant === "text" ? PictoSizes.textButton : PictoSizes.button}
-          style={[
-            styles.picto,
-            variant === "text" ? { paddingLeft: 15 } : undefined,
-          ]}
-          color={
-            variant === "text"
-              ? primaryColor(colorScheme)
-              : inversePrimaryColor(colorScheme)
-          }
-        />
+      {loading ? (
+        <ActivityIndicator />
+      ) : (
+        <>
+          {picto && (
+            <Picto
+              picto={picto}
+              size={
+                variant === "text" ? PictoSizes.textButton : PictoSizes.button
+              }
+              style={[
+                styles.picto,
+                variant === "text" ? { paddingLeft: 15 } : undefined,
+              ]}
+              color={
+                variant === "text"
+                  ? primaryColor(colorScheme)
+                  : inversePrimaryColor(colorScheme)
+              }
+            />
+          )}
+          <Text
+            style={[...buttonTextStyle, textStyle]}
+            allowFontScaling={allowFontScaling}
+            numberOfLines={numberOfLines}
+          >
+            {title}
+          </Text>
+        </>
       )}
-      <Text
-        style={[...buttonTextStyle, textStyle]}
-        allowFontScaling={allowFontScaling}
-        numberOfLines={numberOfLines}
-      >
-        {title}
-      </Text>
     </TouchableOpacity>
   );
 }

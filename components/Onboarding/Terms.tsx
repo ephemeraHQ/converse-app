@@ -29,8 +29,6 @@ const useStyles = () => {
   return StyleSheet.create({
     links: {
       textAlign: "center",
-      marginLeft: 32,
-      marginRight: 32,
       ...Platform.select({
         default: {
           fontSize: 13,

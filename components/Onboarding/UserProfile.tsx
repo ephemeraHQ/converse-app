@@ -57,7 +57,10 @@ export type ProfileType = {
 type OwnProps = {
   onboarding?: boolean;
 };
-type NavProps = NativeStackScreenProps<NavigationParamList, "UserProfile">;
+type NavProps = NativeStackScreenProps<
+  NavigationParamList,
+  "UserProfile" | "UserProfileNewAccount" | "UserProfileOnboarding"
+>;
 
 type Props = OwnProps & Partial<NavProps>;
 
@@ -65,9 +68,14 @@ const LOADING_SENTENCES = Object.values(
   translate("userProfile.loadingSentences")
 );
 
-export const UserProfile = ({ onboarding, navigation }: Props) => {
-  const address = useCurrentAccount() as string;
+export const UserProfile = ({ onboarding, navigation, route }: Props) => {
+  const isFromOnboarding = !!route?.params && "onboarding" in route?.params;
+  const isFromNewAccount = !!route?.params && "newAccount" in route?.params;
+
+  const address = useCurrentAccount()!; // We assume if someone goes to this screen we have address
+
   const profiles = useProfilesStore((state) => state.profiles);
+
   const currentUserUsername = getProfile(
     address,
     profiles
@@ -80,10 +88,16 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
   const { ephemeralAccount } = useSettingsStore(
     useSelect(["ephemeralAccount"])
   );
+
   const usernameWithoutSuffix = currentUserUsername?.name?.replace(
     config.usernameSuffix,
     ""
   );
+
+  console.log("currentUserUsername:", currentUserUsername);
+
+  console.log("usernameWithoutSuffix:", usernameWithoutSuffix);
+
   const defaultEphemeralUsername = formatEphemeralUsername(
     address,
     usernameWithoutSuffix

@@ -1,26 +1,9 @@
 import React from "react";
-import {
-  GestureResponderEvent,
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextStyle,
-  View,
-  ViewStyle,
-} from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Button as MaterialButton } from "react-native-paper";
 
+import { IButtonProps } from "./Button.props";
 import Picto from "../Picto/Picto";
-
-type Props = {
-  title: string;
-  onPress?: (event: GestureResponderEvent) => void;
-  variant: "primary" | "secondary" | "grey" | "text" | "secondary-danger";
-  style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
-  allowFontScaling?: boolean;
-  picto?: string;
-};
 
 export default function Button({
   title,
@@ -30,7 +13,8 @@ export default function Button({
   textStyle,
   picto,
   allowFontScaling = true,
-}: Props) {
+  loading,
+}: IButtonProps) {
   return (
     <View
       style={[
@@ -43,6 +27,7 @@ export default function Button({
       ]}
     >
       <MaterialButton
+        loading={loading}
         mode={
           variant === "primary" || variant === "secondary"
             ? "contained"

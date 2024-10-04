@@ -713,7 +713,6 @@ export default function ProfileScreen({
                 id: "accounts",
                 title: "Change or add account",
                 action: () => {
-                  navigation.pop();
                   navigation.push("Accounts");
                 },
                 titleColor:

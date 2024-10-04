@@ -25,7 +25,7 @@ import {
 import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { useAuthNavigation } from "../../navigation/use-navigation";
+import { useRouter } from "../../navigation/use-navigation";
 import { isDesktop } from "../../utils/device";
 import { getEthOSSigner } from "../../utils/ethos";
 import TableView from "../TableView/TableView";
@@ -36,7 +36,7 @@ import {
 } from "../TableView/TableViewImage";
 
 export default function WalletSelector() {
-  const router = useAuthNavigation();
+  const router = useRouter();
 
   const { setConnectionMethod, setSigner, setLoading, setAddingNewAccount } =
     useOnboardingStore(

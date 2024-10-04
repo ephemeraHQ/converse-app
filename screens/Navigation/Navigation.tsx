@@ -2,17 +2,9 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationOptions,
 } from "@react-navigation/native-stack";
+import { memo } from "react";
 import { Platform, useColorScheme } from "react-native";
 
-import UserProfile from "../../components/Onboarding/UserProfile";
-import { useCurrentAccount } from "../../data/store/accountsStore";
-import { isDesktop } from "../../utils/device";
-import { NotificationsScreen } from "../NotificationsScreen";
-import { ConnectWalletScreen } from "../Onboarding/ConnectWalletScreen";
-import { EphemeraLoginScreen } from "../Onboarding/EphemeraLoginScreen";
-import { GetStartedScreen } from "../Onboarding/GetStartedScreen";
-import { PrivyConnectScreen } from "../Onboarding/PrivyConnectScreen";
-import AccountsNav from "./AccountsNav";
 import ConversationBlockedListNav from "./ConversationBlockedListNav";
 import ConversationListNav from "./ConversationListNav";
 import ConversationNav, { ConversationNavParams } from "./ConversationNav";
@@ -22,10 +14,30 @@ import EnableTransactionsNav from "./EnableTransactionsNav";
 import GroupInviteNav, { GroupInviteNavParams } from "./GroupInviteNav";
 import GroupLinkNav, { GroupLinkNavParams } from "./GroupLinkNav";
 import GroupNav, { GroupNavParams } from "./GroupNav";
-import { NewAccountNav } from "./NewAccountNav";
 import NewConversationNav, {
   NewConversationNavParams,
 } from "./NewConversationNav";
+import UserProfile from "../../components/Onboarding/UserProfile";
+import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
+import {
+  TEMPORARY_ACCOUNT_NAME,
+  useCurrentAccount,
+} from "../../data/store/accountsStore";
+import { useRouter } from "../../navigation/use-navigation";
+import { isDesktop } from "../../utils/device";
+import Accounts from "../Accounts/Accounts";
+import { NewAccountConnectWalletScreen } from "../NewAccount/NewAccountConnectWalletScreen";
+import { NewAccountEphemeraLoginScreen } from "../NewAccount/NewAccountEphemeraLoginScreen";
+import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeyScreen";
+import { NewAccountPrivyScreen } from "../NewAccount/NewAccountPrivyScreen";
+import { NewAccountScreen } from "../NewAccount/NewAccountScreen";
+import { NewAccountUserProfileScreen } from "../NewAccount/NewAccountUserProfileScreen";
+import { ConnectWalletScreen } from "../Onboarding/OnboardingConnectWalletScreen";
+import { OnboardingEphemeraLoginScreen } from "../Onboarding/OnboardingEphemeraLoginScreen";
+import { OnboardingGetStartedScreen } from "../Onboarding/OnboardingGetStartedScreen";
+import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificationsScreen";
+import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
+import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
 import ProfileNav, { ProfileNavParams } from "./ProfileNav";
 import ShareFrameNav, { ShareFrameNavParams } from "./ShareFrameNav";
 import ShareProfileNav from "./ShareProfileNav";
@@ -36,13 +48,25 @@ import WebviewPreviewNav, {
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 
 export type NavigationParamList = {
-  // Auth / Account creation
-  GetStarted: undefined;
-  PrivyConnect: undefined;
-  ConnectWallet: undefined;
-  Notifications: undefined;
-  EphemeralLogin: undefined;
+  // Auth / Onboarding
+  // Onboarding
+  OnboardingGetStarted: undefined;
+  OnboardingPrivyConnect: undefined;
+  OnboardingConnectWallet: undefined;
+  OnboardingPrivateKey: undefined;
+  OnboardingNotifications: undefined;
+  OnboardingEphemeralLogin: undefined;
+  OnboardingUserProfile: undefined;
 
+  // Nwe account
+  NewAccountNavigator: undefined;
+  NewAccountUserProfile: undefined;
+  NewAccountConnectWallet: undefined;
+  NewAccountPrivyConnect: undefined;
+  NewAccountPrivateKey: undefined;
+  NewAccountEphemeralLogin: undefined;
+
+  // Main
   Accounts: undefined;
   Blocked: undefined;
   Chats: undefined;
@@ -64,7 +88,7 @@ export type NavigationParamList = {
   NewAccount: undefined;
 };
 
-const authScreensSharedScreenOptions: NativeStackNavigationOptions = {
+export const authScreensSharedScreenOptions: NativeStackNavigationOptions = {
   headerTitle: "",
   headerBackTitle: "Back",
   headerBackTitleVisible: false,
@@ -76,19 +100,77 @@ export const NativeStack = createNativeStackNavigator<NavigationParamList>();
 export const navigationAnimation = Platform.OS === "ios" ? "default" : "none";
 
 export default function MainNavigation() {
-  const colorScheme = useColorScheme();
+  const currentAccount = useCurrentAccount();
 
-  const isSignedIn = !!useCurrentAccount();
+  if (!!currentAccount && currentAccount !== TEMPORARY_ACCOUNT_NAME) {
+    return <SignedInNavigator />;
+  }
+
+  return <AuthNavigator />;
+}
+
+const AuthNavigator = memo(function AuthNavigator() {
+  const colorScheme = useColorScheme();
 
   return (
     <NativeStack.Navigator
       screenOptions={{ gestureEnabled: !isDesktop }}
-      initialRouteName={isSignedIn ? "Chats" : "GetStarted"}
+      // TODO: Do we still need this?
+      screenListeners={screenListeners("fullStackNavigation")}
+    >
+      <NativeStack.Group
+        screenOptions={{
+          ...stackGroupScreenOptions(colorScheme),
+          ...authScreensSharedScreenOptions,
+        }}
+      >
+        <NativeStack.Screen
+          options={{
+            headerShown: false,
+          }}
+          name="OnboardingGetStarted"
+          component={OnboardingGetStartedScreen}
+        />
+        <NativeStack.Screen
+          name="OnboardingPrivyConnect"
+          component={OnboardingPrivyScreen}
+        />
+        <NativeStack.Screen
+          name="OnboardingConnectWallet"
+          component={ConnectWalletScreen}
+        />
+        <NativeStack.Screen
+          name="OnboardingNotifications"
+          component={OnboardingNotificationsScreen}
+        />
+        <NativeStack.Screen
+          name="OnboardingUserProfile"
+          component={UserProfile}
+        />
+        <NativeStack.Screen
+          name="OnboardingPrivateKey"
+          component={OnboardingPrivateKeyScreen}
+        />
+        <NativeStack.Screen
+          name="OnboardingEphemeralLogin"
+          component={OnboardingEphemeraLoginScreen}
+        />
+      </NativeStack.Group>
+    </NativeStack.Navigator>
+  );
+});
+
+const SignedInNavigator = memo(function SignedInNavigator() {
+  const colorScheme = useColorScheme();
+  const router = useRouter();
+
+  return (
+    <NativeStack.Navigator
+      screenOptions={{ gestureEnabled: !isDesktop }}
       // TODO: Do we still need this?
       screenListeners={screenListeners("fullStackNavigation")}
     >
       <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
-        {AccountsNav()}
         {ConversationListNav()}
         {ConversationRequestsListNav()}
         {ConversationBlockedListNav()}
@@ -104,39 +186,88 @@ export default function MainNavigation() {
         {GroupInviteNav()}
         {TopUpNav()}
         {EnableTransactionsNav()}
-        {NewAccountNav()}
       </NativeStack.Group>
 
-      <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
+      {/* Modals */}
+      <NativeStack.Group
+        screenOptions={{
+          presentation: "modal",
+          ...stackGroupScreenOptions(colorScheme),
+        }}
+      >
         <NativeStack.Screen
+          name="Accounts"
+          component={Accounts}
           options={{
-            headerShown: false,
+            headerLargeTitle: true,
+            headerShadowVisible: false,
+            headerLeft: () => (
+              <ScreenHeaderModalCloseButton onPress={router.goBack} />
+            ),
           }}
-          name="GetStarted"
-          component={GetStartedScreen}
-        />
-        <NativeStack.Screen
-          options={authScreensSharedScreenOptions}
-          name="PrivyConnect"
-          component={PrivyConnectScreen}
-        />
-        <NativeStack.Screen
-          name="ConnectWallet"
-          options={authScreensSharedScreenOptions}
-          component={ConnectWalletScreen}
-        />
-        <NativeStack.Screen
-          name="Notifications"
-          options={authScreensSharedScreenOptions}
-          component={NotificationsScreen}
         />
         <NativeStack.Screen name="UserProfile" component={UserProfile} />
         <NativeStack.Screen
-          options={authScreensSharedScreenOptions}
-          name="EphemeralLogin"
-          component={EphemeraLoginScreen}
+          name="NewAccountNavigator"
+          component={NewAccountNavigator}
+          options={{
+            headerShown: false,
+          }}
         />
       </NativeStack.Group>
     </NativeStack.Navigator>
   );
-}
+});
+
+const NewAccountStack = createNativeStackNavigator<NavigationParamList>();
+
+const NewAccountNavigator = memo(function NewAccountNavigator() {
+  const colorScheme = useColorScheme();
+  const router = useRouter();
+
+  return (
+    <NewAccountStack.Navigator>
+      <NewAccountStack.Group
+        screenOptions={{
+          headerTitle: "",
+          headerBackTitle: "Back",
+          ...stackGroupScreenOptions(colorScheme),
+        }}
+      >
+        <NativeStack.Screen
+          name="NewAccount"
+          component={NewAccountScreen}
+          options={{
+            headerTitle: "New account",
+            headerLeft: () => (
+              <ScreenHeaderModalCloseButton
+                title="Cancel"
+                onPress={router.goBack}
+              />
+            ),
+          }}
+        />
+        <NewAccountStack.Screen
+          name="NewAccountPrivyConnect"
+          component={NewAccountPrivyScreen}
+        />
+        <NewAccountStack.Screen
+          name="NewAccountConnectWallet"
+          component={NewAccountConnectWalletScreen}
+        />
+        <NewAccountStack.Screen
+          name="NewAccountPrivateKey"
+          component={NewAccountPrivateKeyScreen}
+        />
+        <NewAccountStack.Screen
+          name="NewAccountUserProfile"
+          component={NewAccountUserProfileScreen}
+        />
+        <NewAccountStack.Screen
+          name="NewAccountEphemeralLogin"
+          component={NewAccountEphemeraLoginScreen}
+        />
+      </NewAccountStack.Group>
+    </NewAccountStack.Navigator>
+  );
+});

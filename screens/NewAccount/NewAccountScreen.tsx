@@ -1,44 +1,23 @@
 import { memo } from "react";
 
-import { NativeStack } from "./Navigation";
 import { PictoTitleSubtitle } from "../../components/PictoTitleSubtitle";
-import { Screen } from "../../components/Screen";
+import { Screen } from "../../components/Screen/ScreenComp/Screen";
 import TableView from "../../components/TableView/TableView";
 import { TableViewEmoji } from "../../components/TableView/TableViewImage";
-import { useOnboardingStore } from "../../data/store/onboardingStore";
-import { useSelect } from "../../data/store/storeHelpers";
 import { translate } from "../../i18n";
-import { useAuthNavigation } from "../../navigation/use-navigation";
+import { useRouter } from "../../navigation/use-navigation";
 import { PictoSizes } from "../../styles/sizes";
 import { spacing } from "../../theme";
 import { isDesktop } from "../../utils/device";
 import {
-  BasicMethods,
   InstalledWallets,
   PopularWallets,
   RightViewChevron,
   useInstalledWallets,
-} from "../Onboarding/GetStartedScreen";
+} from "../Onboarding/OnboardingGetStartedScreen";
 
-export function NewAccountNav() {
-  return (
-    <NativeStack.Screen
-      name="NewAccount"
-      component={NewAccountScreen}
-      options={{
-        presentation: "modal",
-        headerShown: false,
-      }}
-    />
-  );
-}
-
-const NewAccountScreen = memo(function NewAccountScreen() {
-  const router = useAuthNavigation();
-
-  const { setConnectionMethod } = useOnboardingStore(
-    useSelect(["setConnectionMethod"])
-  );
+export const NewAccountScreen = memo(function NewAccountScreen() {
+  const router = useRouter();
 
   const { walletsInstalled } = useInstalledWallets();
 
@@ -79,8 +58,7 @@ const NewAccountScreen = memo(function NewAccountScreen() {
             title: translate("walletSelector.converseAccount.connectViaPhone"),
             rightView: RightViewChevron(),
             action: () => {
-              setConnectionMethod("phone");
-              router.push("PrivyConnect");
+              router.push("PrivyConnectNewAccount");
             },
           },
           {
@@ -89,8 +67,7 @@ const NewAccountScreen = memo(function NewAccountScreen() {
             title: translate("walletSelector.converseAccount.createEphemeral"),
             rightView: RightViewChevron(),
             action: () => {
-              setConnectionMethod("ephemeral");
-              router.push("EphemeralLogin");
+              router.push("EphemeralLoginNewAccount");
             },
           },
         ]}
@@ -100,7 +77,26 @@ const NewAccountScreen = memo(function NewAccountScreen() {
         <InstalledWallets wallets={walletsInstalled.list} />
       )}
 
-      <BasicMethods hasInstalledWallets={hasInstalledWallets} />
+      <TableView
+        title={
+          isDesktop
+            ? translate("walletSelector.connectionOptions.title")
+            : hasInstalledWallets
+            ? translate("walletSelector.connectionOptions.otherOptions")
+            : translate("walletSelector.connectionOptions.connectForDevs")
+        }
+        items={[
+          {
+            id: "privateKey",
+            leftView: <TableViewEmoji emoji="🔑" />,
+            title: translate("walletSelector.connectionOptions.connectViaKey"),
+            rightView: RightViewChevron(),
+            action: () => {
+              router.push("PrivateKeyConnectOnboarding");
+            },
+          },
+        ]}
+      />
 
       {!hasInstalledWallets && !isDesktop && <PopularWallets />}
     </Screen>

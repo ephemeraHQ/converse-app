@@ -5,7 +5,7 @@ import {
   POPULAR_WALLETS,
 } from "@components/Onboarding/supportedWallets";
 import { PictoTitleSubtitle } from "@components/PictoTitleSubtitle";
-import { Screen } from "@components/Screen";
+import { Screen } from "@components/Screen/ScreenComp/Screen";
 import TableView from "@components/TableView/TableView";
 import {
   TableViewEmoji,
@@ -31,16 +31,12 @@ import { createWallet } from "thirdweb/wallets";
 import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { useAuthNavigation } from "../../navigation/use-navigation";
+import { useRouter } from "../../navigation/use-navigation";
 
 const animationDelays = [525, 550, 575, 800, 825, 850] as const;
 
-export function GetStartedScreen() {
-  const router = useAuthNavigation();
-
-  const { setConnectionMethod } = useOnboardingStore(
-    useSelect(["setConnectionMethod"])
-  );
+export function OnboardingGetStartedScreen() {
+  const router = useRouter();
 
   const { walletsInstalled } = useInstalledWallets();
 
@@ -96,8 +92,7 @@ export function GetStartedScreen() {
               ),
               rightView: RightViewChevron(),
               action: () => {
-                setConnectionMethod("phone");
-                router.push("PrivyConnect");
+                router.push("PrivyConnectOnboarding");
               },
             },
             {
@@ -108,8 +103,7 @@ export function GetStartedScreen() {
               ),
               rightView: RightViewChevron(),
               action: () => {
-                setConnectionMethod("ephemeral");
-                router.push("EphemeralLogin");
+                router.push("EphemeralLoginOnboarding");
               },
             },
           ]}
@@ -127,7 +121,28 @@ export function GetStartedScreen() {
       <AnimatedVStack
         entering={animations.fadeInDownSlow().delay(animationDelays[5])}
       >
-        <BasicMethods hasInstalledWallets={hasInstalledWallets} />
+        <TableView
+          title={
+            isDesktop
+              ? translate("walletSelector.connectionOptions.title")
+              : hasInstalledWallets
+              ? translate("walletSelector.connectionOptions.otherOptions")
+              : translate("walletSelector.connectionOptions.connectForDevs")
+          }
+          items={[
+            {
+              id: "privateKey",
+              leftView: <TableViewEmoji emoji="🔑" />,
+              title: translate(
+                "walletSelector.connectionOptions.connectViaKey"
+              ),
+              rightView: RightViewChevron(),
+              action: () => {
+                router.push("PrivateKeyConnectOnboarding");
+              },
+            },
+          ]}
+        />
       </AnimatedVStack>
 
       {!hasInstalledWallets && !isDesktop && (
@@ -138,43 +153,6 @@ export function GetStartedScreen() {
         </AnimatedVStack>
       )}
     </Screen>
-  );
-}
-
-// TODO: Rename?
-export function BasicMethods({
-  hasInstalledWallets,
-}: {
-  hasInstalledWallets: boolean;
-}) {
-  const router = useAuthNavigation();
-
-  const { setConnectionMethod } = useOnboardingStore(
-    useSelect(["setConnectionMethod"])
-  );
-
-  return (
-    <TableView
-      title={
-        isDesktop
-          ? translate("walletSelector.connectionOptions.title")
-          : hasInstalledWallets
-          ? translate("walletSelector.connectionOptions.otherOptions")
-          : translate("walletSelector.connectionOptions.connectForDevs")
-      }
-      items={[
-        {
-          id: "privateKey",
-          leftView: <TableViewEmoji emoji="🔑" />,
-          title: translate("walletSelector.connectionOptions.connectViaKey"),
-          rightView: RightViewChevron(),
-          action: () => {
-            setConnectionMethod("privateKey");
-            router.push("ConnectWallet");
-          },
-        },
-      ]}
-    />
   );
 }
 
@@ -209,9 +187,8 @@ export function InstalledWallets({ wallets }: { wallets: InstalledWallet[] }) {
 
   const setActiveWallet = useSetActiveWallet();
 
-  const { setConnectionMethod, setSigner, setLoading } = useOnboardingStore(
+  const { setSigner, setLoading } = useOnboardingStore(
     useSelect([
-      "setConnectionMethod",
       "setSigner",
       "setLoading",
       "addingNewAccount",
@@ -231,7 +208,6 @@ export function InstalledWallets({ wallets }: { wallets: InstalledWallet[] }) {
         }),
         action: async () => {
           setLoading(true);
-          setConnectionMethod("wallet");
           logger.debug(
             `[Onboarding] Clicked on wallet ${w.name} - opening external app`
           );
@@ -262,7 +238,6 @@ export function InstalledWallets({ wallets }: { wallets: InstalledWallet[] }) {
             }
           } catch (e: any) {
             logger.error("Error connecting to wallet:", e);
-            setConnectionMethod(undefined);
             setLoading(false);
           }
         },

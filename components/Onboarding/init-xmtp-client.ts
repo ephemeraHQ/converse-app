@@ -1,5 +1,4 @@
 import { Signer } from "ethers";
-import { translate } from "i18n-js";
 import { Alert } from "react-native";
 
 import { initDb } from "../../data/db";
@@ -13,6 +12,7 @@ import {
   ConnectionMethod,
   useOnboardingStore,
 } from "../../data/store/onboardingStore";
+import { translate } from "../../i18n";
 import { awaitableAlert } from "../../utils/alert";
 import { saveXmtpKey } from "../../utils/keychain/helpers";
 import logger from "../../utils/logger";

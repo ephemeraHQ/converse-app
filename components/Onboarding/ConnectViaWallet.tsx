@@ -28,6 +28,7 @@ import {
 
 import OnboardingComponent from "./OnboardingComponent";
 import ValueProps from "./ValueProps";
+import { connectWithBase64Key } from "./init-xmtp-client";
 import {
   getAccountsList,
   useAccountsStore,
@@ -40,11 +41,7 @@ import {
   getXmtpBase64KeyFromSigner,
 } from "../../utils/xmtpRN/signIn";
 
-export default function ConnectViaWallet({
-  connectWithBase64Key,
-}: {
-  connectWithBase64Key: (base64Key: string, onError: () => void) => void;
-}) {
+export default function ConnectViaWallet() {
   const {
     setConnectionMethod,
     signer,
@@ -311,7 +308,14 @@ export default function ConnectViaWallet({
       inXmtpClientCreationFlow.current = false;
       if (!base64Key) return;
       logger.debug("[Onboarding] Got base64 key, now connecting");
-      await connectWithBase64Key(base64Key, disconnect);
+      await connectWithBase64Key({
+        address,
+        base64Key,
+        connectionMethod: "wallet",
+        privyAccountId: "",
+        isEphemeral: false,
+        pkPath: "",
+      });
       logger.info("[Onboarding] Successfully logged in using a wallet");
       onboardingDone = true;
     } catch (e) {
@@ -324,7 +328,6 @@ export default function ConnectViaWallet({
   }, [
     address,
     alreadyV3Db,
-    connectWithBase64Key,
     disconnect,
     onXmtp,
     setLoading,

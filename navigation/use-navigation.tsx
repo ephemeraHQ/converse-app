@@ -1,13 +1,9 @@
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { useEffect } from "react";
 
-import { AuthStackParamList } from "./AuthNavigation";
+import { NavigationParamList } from "../screens/Navigation/Navigation";
 
-export function useAuthNavigation() {
-  return useRouter<AuthStackParamList>();
-}
-
-export function useRouter<T extends Record<string, any>>(args?: {
+export function useRouter(args?: {
   onTransitionEnd?: (isClosing: boolean) => void;
   onBeforeRemove?: () => void;
   onBlur?: () => void;
@@ -15,7 +11,7 @@ export function useRouter<T extends Record<string, any>>(args?: {
 }) {
   const { onTransitionEnd, onFocus, onBeforeRemove, onBlur } = args || {};
 
-  const navigation = useNavigation<NavigationProp<T>>();
+  const navigation = useNavigation<NavigationProp<NavigationParamList>>();
 
   useEffect(() => {
     const unsubscribe = navigation.addListener(
