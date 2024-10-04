@@ -152,7 +152,9 @@ export default function FramePreview({
         const link = button.target;
         if (
           !link ||
-          !link.startsWith("http") ||
+          !(
+            link.startsWith("http") || link.startsWith(`${config.scheme}://`)
+          ) ||
           !(await Linking.canOpenURL(link))
         )
           return;
