@@ -66,13 +66,18 @@ const usePeerSocials = () => {
   return peerSocials;
 };
 
-const useRenderItem = (
-  xmtpAddress: string,
-  conversation: any,
-  framesStore: any,
-  colorScheme: any
-) =>
-  useCallback(
+const useRenderItem = ({
+  xmtpAddress,
+  conversation,
+  framesStore,
+  colorScheme,
+}: {
+  xmtpAddress: string;
+  conversation: any;
+  framesStore: any;
+  colorScheme: any;
+}) => {
+  return useCallback(
     ({ item }: { item: MessageToDisplay }) => {
       return (
         <CachedChatMessage
@@ -86,6 +91,7 @@ const useRenderItem = (
     },
     [colorScheme, xmtpAddress, conversation?.isGroup, framesStore]
   );
+};
 
 const getItemType = (framesStore: any) => (item: MessageToDisplay) => {
   const fromMeString = item.fromMe ? "fromMe" : "notFromMe";
@@ -255,12 +261,16 @@ const useAnimatedListView = (
   }, [conversation]);
 };
 
-const useIsShowingPlaceholder = (
-  listArray: MessageToDisplay[],
-  isBlockedPeer: boolean,
-  conversation: XmtpConversationWithUpdate | undefined
-): boolean => {
-  return listArray.length === 0 || isBlockedPeer || !conversation;
+const useIsShowingPlaceholder = ({
+  messages,
+  isBlockedPeer,
+  conversation,
+}: {
+  messages: MessageToDisplay[];
+  isBlockedPeer: boolean;
+  conversation: XmtpConversationWithUpdate | undefined;
+}): boolean => {
+  return messages.length === 0 || isBlockedPeer || !conversation;
 };
 
 export function Chat() {
@@ -365,17 +375,20 @@ export function Chat() {
   ]);
 
   const framesStore = useFramesStore().frames;
-  const showPlaceholder = useIsShowingPlaceholder(
-    listArray,
+
+  const showPlaceholder = useIsShowingPlaceholder({
+    messages: listArray,
     isBlockedPeer,
-    conversation
-  );
-  const renderItem = useRenderItem(
+    conversation,
+  });
+
+  const renderItem = useRenderItem({
     xmtpAddress,
     conversation,
     framesStore,
-    colorScheme
-  );
+    colorScheme,
+  });
+
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
   const messageListRef = useRef<
@@ -520,17 +533,20 @@ export function ChatPreview() {
   );
 
   const framesStore = useFramesStore().frames;
-  const showPlaceholder = useIsShowingPlaceholder(
-    listArray,
+
+  const showPlaceholder = useIsShowingPlaceholder({
+    messages: listArray,
     isBlockedPeer,
-    conversation
-  );
-  const renderItem = useRenderItem(
+    conversation,
+  });
+
+  const renderItem = useRenderItem({
     xmtpAddress,
     conversation,
     framesStore,
-    colorScheme
-  );
+    colorScheme,
+  });
+
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
   const messageListRef = useRef<
