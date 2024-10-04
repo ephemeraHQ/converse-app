@@ -8,11 +8,13 @@ const PressableProfileWithTextInner = ({
   profileDisplay,
   text,
   textStyle,
+  pressableTextStyle,
 }: {
   text: string;
   profileDisplay: string;
   profileAddress: string;
   textStyle?: StyleProp<TextStyle>;
+  pressableTextStyle?: StyleProp<TextStyle>;
 }) => {
   const onPress = useCallback(() => {
     if (profileAddress) {
@@ -32,10 +34,10 @@ const PressableProfileWithTextInner = ({
       {
         onPress,
         pattern,
-        style: textStyle,
+        style: pressableTextStyle,
       },
     ],
-    [onPress, pattern, textStyle]
+    [onPress, pattern, pressableTextStyle]
   );
 
   return (
