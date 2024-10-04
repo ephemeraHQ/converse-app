@@ -252,7 +252,7 @@ to accept the invite.
           {
             guard: ({ event }) =>
               event.output.type === "group-join-request.error",
-            target: "Error Joining Group",
+            // target: "Error Joining Group",
           },
           {
             guard: ({ event }) =>
@@ -295,9 +295,9 @@ user will be able to join the group.
     ///////////////////////////////////////////////////////////////////////////
 
     "Error Loading Group Invite": {},
-  },
 
-  "Error Joining Group": {
-    type: "final",
+    "Error Joining Group": {
+      type: "final",
+    },
   },
 });
