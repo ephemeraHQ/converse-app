@@ -55,6 +55,10 @@ export const getConverseStateFromPath =
     } else if (pathForState?.startsWith("groupInvite")) {
       // TODO: Remove this once enough users have updated (September 30, 2024)
       pathForState = pathForState.replace("groupInvite", "group-invite");
+    } else if (pathForState?.startsWith("?text=")) {
+      const url = new URL(`https://${config.websiteDomain}/${pathForState}`);
+      const params = new URLSearchParams(url.search);
+      setOpenedConversationText({ text: params.get("text"), navigationName });
     }
 
     // Prevent navigation
@@ -76,17 +80,7 @@ const handleConversationLink = ({
   text?: string | null;
 }) => {
   if (!groupId && !peer) {
-    if (text) {
-      // If navigating but no group or peer, we can still prefill message for current convo
-      const navigationState = navigationStates[navigationName];
-      const currentRoutes = navigationState?.state.routes || [];
-      if (
-        currentRoutes.length > 0 &&
-        currentRoutes[currentRoutes.length - 1].name === "Conversation"
-      ) {
-        converseEventEmitter.emit("setCurrentConversationInputValue", text);
-      }
-    }
+    setOpenedConversationText({ text, navigationName });
     return;
   }
   const parameters: { [param: string]: string } = { focus: "true" };
@@ -100,6 +94,26 @@ const handleConversationLink = ({
   }
   const queryString = new URLSearchParams(parameters).toString();
   return `conversation?${queryString}`;
+};
+
+const setOpenedConversationText = ({
+  text,
+  navigationName,
+}: {
+  text?: string | null;
+  navigationName: string;
+}) => {
+  if (text) {
+    // If navigating but no group or peer, we can still prefill message for current convo
+    const navigationState = navigationStates[navigationName];
+    const currentRoutes = navigationState?.state.routes || [];
+    if (
+      currentRoutes.length > 0 &&
+      currentRoutes[currentRoutes.length - 1].name === "Conversation"
+    ) {
+      converseEventEmitter.emit("setCurrentConversationInputValue", text);
+    }
+  }
 };
 
 export const getConverseInitialURL = () => {
