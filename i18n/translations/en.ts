@@ -291,6 +291,9 @@ const en = {
   deny: "Deny",
   approve_member_to_this_group: "Approve {{name}} to this group",
 
+  // Wallet selector
+  no_wallet_detected: "No wallet detected",
+
   // Revocation
   current_installation_revoked: "Installation revoked",
   current_installation_revoked_description:

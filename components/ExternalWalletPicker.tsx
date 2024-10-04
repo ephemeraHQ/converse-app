@@ -150,7 +150,7 @@ export default function ExternalWalletPicker() {
             />
           </TouchableOpacity>
         ))}
-        {wallets.length === 0 && <Text>No wallet detected</Text>}
+        {wallets.length === 0 && <Text>{translate("no_wallet_detected")}</Text>}
         <Button
           variant="primary"
           title={translate("cancel")}
@@ -172,9 +172,11 @@ const useStyles = () => {
     title: {
       fontSize: 16,
       fontWeight: "700",
+      color: textPrimaryColor(colorScheme),
     },
     subtitle: {
       fontSize: 14,
+      color: textPrimaryColor(colorScheme),
     },
     separator: {
       marginTop: 13,
@@ -200,6 +202,7 @@ const useStyles = () => {
       fontSize: 14,
       fontWeight: "500",
       marginLeft: 8,
+      color: textPrimaryColor(colorScheme),
     },
     walletIcon: {
       width: 40,
