@@ -1,7 +1,7 @@
 import { GroupInvite } from "@utils/api.types";
 import { assign, fromPromise, log, setup } from "xstate";
 
-import { JoinGroupResult } from "./joinGroup.types";
+import { JoinGroupResult, JoinGroupResultType } from "./joinGroup.types";
 import { Controlled } from "../../dependencies/Environment/Environment";
 
 type JoinGroupMachineEvents = { type: "user.didTapJoinGroup" };
@@ -61,19 +61,60 @@ export const joinGroupMachineLogic = setup({
       groupInviteMetadata: (_, params: { groupInviteMetadata: GroupInvite }) =>
         params.groupInviteMetadata,
     }),
+
     saveError: assign({
       error: (_, params: { error: string }) => params.error,
     }),
+
     navigateToGroupScreen: log(
-      ({ event }) =>
+      (_, params: { groupId: string | undefined }) =>
         `-> navigateToGroupScreen ${JSON.stringify({
           question: "Does the event have a groupId?",
-          event,
+          groupInviteId: params.groupId,
         })}`
     ),
   },
 
-  guards: {},
+  guards: {
+    isGroupJoinRequestAccepted: (
+      _,
+      params: { groupJoinRequestEventType: JoinGroupResultType }
+    ) => {
+      return params.groupJoinRequestEventType === "group-join-request.accepted";
+    },
+
+    isGroupJoinRequestAlreadyJoined: (
+      _,
+      params: { groupJoinRequestEventType: JoinGroupResultType }
+    ) => {
+      return (
+        params.groupJoinRequestEventType === "group-join-request.already-joined"
+      );
+    },
+
+    isGroupJoinRequestRejected: (
+      _,
+      params: { groupJoinRequestEventType: JoinGroupResultType }
+    ) => {
+      return params.groupJoinRequestEventType === "group-join-request.rejected";
+    },
+
+    isGroupJoinRequestError: (
+      _,
+      params: { groupJoinRequestEventType: JoinGroupResultType }
+    ) => {
+      return params.groupJoinRequestEventType === "group-join-request.error";
+    },
+
+    isGroupJoinRequestTimedOut: (
+      _,
+      params: { groupJoinRequestEventType: JoinGroupResultType }
+    ) => {
+      return (
+        params.groupJoinRequestEventType === "group-join-request.timed-out"
+      );
+    },
+  },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QCsD2BLAdgcQE6oFcAHAWQEMBjACyzADoAZVMiLKAAj0KPYElMAbugAuYdiTDCWZKQGIIqTPSwDUAa3oAzSdS7F+Q0UyjoKAbQAMAXUSgiqWCPSLbIAB6IAjAHYAnHQAOPwtPABYAZm8AJgBWADYLUKiAGhAAT0QouLpwi3jwuN84oO9PRIBfctS0LD1SSholRmZWTA46vkERMQkpCBkyWTBcfFw6IgAbGU1UXABbOm1hXXx9LqNUE3NrV3tHYWdMVw8EaKi6KIsAgtDi+JjwmNSMhABaT19QnM8o0rjPEq+AKeGKVaoYHCrerUWh0ADqZCcbXYADFZuwAKqwYbsACCFAOilkBGxY1YEAAKmQiAApCF1Sw2JAgPZOFzMk5RXzhOjecI+Cy+MLhAKxULeZ6IbzFHLeUIg3wWXLhJKVKogTCoCBwVw1SHccgwpS7Bxso4cqU8-6PCx8iyxcKPAKSt7hKIBOhxOJilWK0KK0HqvV1Q2NehMFhsThQzqGHqSaRSE37Q7HLxRTyezw2u0Op0u15ReV0cUxWIfGK+KsgsEgYNQ0OwhFIjho3CY0l4gmp5mswnm0AnH6Z60xW25PNxF02i7eAK3OK5BK+GIxUK1+sGhqwgCiI3REda7RjBm6ybNaYQZWBOQSPyVVfCVYLPh5IqB3lKMQCAU+sTV5RAA */
   id: "joinGroupMachine",
@@ -81,7 +122,6 @@ export const joinGroupMachineLogic = setup({
     // const account = currentAccount();
     const account = "0x123";
     const { groupInviteId } = input;
-    console.log({ account, groupInviteId });
 
     return {
       account,
@@ -180,32 +220,49 @@ to accept the invite.
         },
         onDone: [
           {
-            guard: ({ event }) => {
-              console.log(event.output);
-              const b = event.output.type === "group-join-request.accepted";
-              console.log(b);
-              return b;
+            guard: {
+              type: "isGroupJoinRequestAccepted",
+              params: ({ event }) => ({
+                groupJoinRequestEventType: event.output.type,
+              }),
             },
-
-            actions: [log(({ event }) => `User Joined Group ${event}`)],
-
             target: "User Joined Group",
           },
           {
-            guard: ({ event }) => {
-              return event.output.type === "group-join-request.rejected";
+            guard: {
+              type: "isGroupJoinRequestAlreadyJoined",
+              params: ({ event }) => ({
+                groupJoinRequestEventType: event.output.type,
+              }),
             },
-
-            target: "Request to Join Group Rejected",
+            target: "User Joined Group",
           },
           {
-            guard: ({ event }) =>
-              event.output.type === "group-join-request.error",
+            guard: {
+              type: "isGroupJoinRequestRejected",
+              params: ({ event }) => ({
+                groupJoinRequestEventType: event.output.type,
+              }),
+            },
+            target: "Request to Join Group Rejected",
+          },
+
+          {
+            guard: {
+              type: "isGroupJoinRequestError",
+              params: ({ event }) => ({
+                groupJoinRequestEventType: event.output.type,
+              }),
+            },
             target: "Error Joining Group",
           },
           {
-            guard: ({ event }) =>
-              event.output.type === "group-join-request.timed-out",
+            guard: {
+              type: "isGroupJoinRequestTimedOut",
+              params: ({ event }) => ({
+                groupJoinRequestEventType: event.output.type,
+              }),
+            },
             target: "Attempting to Join Group Timed Out",
           },
         ],
@@ -213,9 +270,20 @@ to accept the invite.
     },
 
     "User Joined Group": {
-      entry: [log(({ event }) => `User Joined Group ${JSON.stringify(event)}`)],
       type: "final",
-      actions: ["navigateToGroupScreen"],
+      entry: [
+        // log(({ event }) => `User Joined Group ${JSON.stringify(event)}`),
+        {
+          type: "navigateToGroupScreen",
+          params: ({ context }) => {
+            console.log(context.groupInviteMetadata?.groupId);
+
+            return {
+              groupId: context.groupInviteMetadata?.groupId,
+            };
+          },
+        },
+      ],
     },
 
     "Request to Join Group Rejected": {

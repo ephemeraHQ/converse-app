@@ -19,12 +19,20 @@ describe.only("Joining a Group from an Invite", () => {
     });
   });
   it("Should Successfully allow user to join valid group invite", async () => {
+    const navigateToGroupScreenSpy = jest.fn();
     Controlled.joinGroupClient = JoinGroupClient.fixture();
 
     const input = { groupInviteId: "valid-invite-id" };
-    const joinGroupActor = createActor(joinGroupMachineLogic, {
-      input,
-    }).start();
+    const joinGroupActor = createActor(
+      joinGroupMachineLogic.provide({
+        actions: {
+          navigateToGroupScreen: navigateToGroupScreenSpy,
+        },
+      }),
+      {
+        input,
+      }
+    ).start();
     expect(joinGroupActor.getSnapshot().value).toBe(
       "Loading Group Invite Metadata"
     );
@@ -37,6 +45,47 @@ describe.only("Joining a Group from an Invite", () => {
 
     await waitFor(joinGroupActor, (state) =>
       state.matches("User Joined Group")
+    );
+
+    expect(joinGroupActor.getSnapshot().value).toBe("User Joined Group");
+
+    // this is gross and long and doesn't work i just want to check that
+    // the navigateToGroupScreenSpy is called with the correct groupId
+    // (groupid123) in this case......
+    expect(navigateToGroupScreenSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({
+          account: "0x123",
+          groupInviteId: "valid-invite-id",
+          groupInviteMetadata: expect.objectContaining({
+            createdByAddress: "0x123",
+            description: "Group Description",
+            groupId: "groupId123",
+            groupName: "Group Name from valid-invite-id",
+            id: "groupInviteId123",
+            imageUrl: "https://www.google.com",
+            inviteLink: "https://www.google.com",
+          }),
+        }),
+        event: expect.objectContaining({
+          actorId: "0.joinGroupMachine.Attempting to Join Group",
+          output: expect.objectContaining({
+            groupId: "groupId123",
+            type: "group-join-request.accepted",
+          }),
+          type: "xstate.done.actor.0.joinGroupMachine.Attempting to Join Group",
+        }),
+        self: expect.objectContaining({
+          id: "x:0",
+          xstate$$type: 1,
+        }),
+        system: expect.any(Object),
+      })
+    );
+    expect(navigateToGroupScreenSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        groupId: "groupId123",
+      })
     );
   });
 });
