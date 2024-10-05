@@ -6,6 +6,7 @@ import { getProfile } from "@utils/profile";
 import { getRepository } from "./db";
 import { Conversation } from "./db/entities/conversationEntity";
 import { Message } from "./db/entities/messageEntity";
+import { refreshProfilesIfNeeded } from "./helpers/profiles/profilesUpdate";
 import { xmtpConversationFromDb } from "./mappers";
 import { getChatStore, getProfilesStore } from "./store/accountsStore";
 import { saveXmtpEnv, saveApiURI } from "../utils/sharedData";
@@ -88,4 +89,6 @@ export const loadDataToContext = async (account: string) => {
         )
       )
     );
+
+  refreshProfilesIfNeeded(account);
 };

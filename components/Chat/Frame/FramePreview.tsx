@@ -161,8 +161,12 @@ export default function FramePreview({
       }
       if (!conversation) return;
       setPostingActionForButton(button.index);
+      // https://github.com/open-frames/standard?tab=readme-ov-file#determining-the-post_url
       let actionPostUrl =
-        button.target || frame.frameInfo?.postUrl || initialFrame.url;
+        button.target ||
+        button.postUrl ||
+        frame.frameInfo?.postUrl ||
+        initialFrame.url;
       try {
         const participantAccountAddresses: string[] = conversation.isGroup
           ? conversation.groupMembers || []

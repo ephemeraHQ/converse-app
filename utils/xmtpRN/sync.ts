@@ -181,13 +181,14 @@ export const syncXmtpClient = async (account: string) => {
     });
     streamingAccounts[account] = true;
 
-    logger.debug("RECALLING syncConversationsMessages / syncGroupsMessages");
+    logger.debug("[XmtpRN] Syncing 1:1 messages & group messages...");
     const [fetchedMessagesCount, fetchedGroupMessagesCount] = await Promise.all(
       [
         syncConversationsMessages(account, queryConversationsFromTimestamp),
         syncGroupsMessages(account, groups, queryGroupsFromTimestamp),
       ]
     );
+    logger.debug("[XmtpRN] Done syncing 1:1 messages & group messages");
 
     // Refresh spam scores after the initial load of conversation data is complete
     // Ensure spam scores are current, reflecting any new messages received since the last sync

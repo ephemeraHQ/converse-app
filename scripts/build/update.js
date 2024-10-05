@@ -24,6 +24,7 @@ const update = async () => {
   if (!env) process.exit(1);
 
   try {
+    await executeCommand("node", ["scripts/build/eas.js", "--env", env]);
     await executeCommand("node", [`scripts/build/ios/${env}.js`]);
     await executeCommand("node", [`scripts/build/android/${env}.js`]);
     const updateEnv = { ...process.env };

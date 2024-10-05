@@ -88,11 +88,7 @@ const build = async () => {
     platform,
   ];
 
-  const iosVersion = appJson.expo.ios.version;
-  const androidVersion = appJson.expo.android.version;
-  if (iosVersion !== androidVersion) {
-    throw new Error("app.json iOS & Android version mismatch");
-  }
+  const version = appJson.expo.version;
 
   if (env === "production") {
     const { typecheck } = await prompts([
@@ -106,7 +102,7 @@ const build = async () => {
     if (typecheck === "yes") {
       await executeCommand("yarn", ["typecheck"]);
     }
-    const tagName = `v${iosVersion}`;
+    const tagName = `v${version}`;
     const { pushTag } = await prompts([
       {
         type: "select",

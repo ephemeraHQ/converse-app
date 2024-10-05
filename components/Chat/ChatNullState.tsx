@@ -1,4 +1,3 @@
-import AnimatedBanner from "@components/Banner/AnimatedBanner";
 import Recommendations from "@components/Recommendations/Recommendations";
 import { useSettingsStore } from "@data/store/accountsStore";
 import { translate } from "@i18n/index";
@@ -12,14 +11,7 @@ import {
 } from "@styles/colors";
 import { BorderRadius, Paddings, Margins } from "@styles/sizes";
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  useColorScheme,
-  Platform,
-  Linking,
-} from "react-native";
+import { View, Text, StyleSheet, useColorScheme, Platform } from "react-native";
 
 import config from "../../config";
 import {
@@ -68,7 +60,7 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
 
   return (
     <View style={styles.container}>
-      {!hasUserDismissedBanner && (
+      {/* {!hasUserDismissedBanner && (
         <AnimatedBanner
           title={translate("alphaTestTitle")}
           description={translate("alphaTestDescription")}
@@ -78,7 +70,7 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
             Linking.openURL(config.alphaGroupChatUrl);
           }}
         />
-      )}
+      )} */}
 
       <View style={styles.contentContainer}>
         <View

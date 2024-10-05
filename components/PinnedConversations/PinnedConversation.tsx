@@ -38,9 +38,13 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
   const { topic, isGroup } = conversation;
   const { data: groupName } = useGroupNameQuery(account, topic, {
     refetchOnMount: false,
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
   const { data: groupPhoto } = useGroupPhotoQuery(account, topic, {
     refetchOnMount: false,
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
   const title = isGroup ? groupName : conversationName(conversation);
   const socials = getProfile(conversation.peerAddress, profiles)?.socials;

@@ -1,4 +1,5 @@
-import { Platform } from "react-native";
+import { Platform, StatusBar } from "react-native";
+
 const HOLD_ITEM_TRANSFORM_DURATION = 280;
 
 const MENU_ITEM_HEIGHT = 44;
@@ -12,7 +13,17 @@ const SPRING_CONFIGURATION = {
 
 const SIDE_MARGIN = 20;
 const ITEM_WIDTH = 180;
-const AUXILIARY_VIEW_MIN_HEIGHT = 190;
+const AUXILIARY_VIEW_MIN_HEIGHT = 205;
+
+const BACKDROP_LIGHT_BACKGROUND_COLOR =
+  Platform.OS === "ios" ? "rgba(0,0,0,0.2)" : "rgba(19, 19, 19, 0.95)";
+const BACKDROP_DARK_BACKGROUND_COLOR =
+  Platform.OS === "ios" ? "rgba(0,0,0,0.75)" : "rgba(120,120,120,0.2)";
+
+const STATUS_BAR_HEIGHT =
+  Platform.OS === "android" ? StatusBar.currentHeight ?? 0 : 0;
+
+const OUTTER_SPACING = 8;
 
 export {
   SIDE_MARGIN,
@@ -21,6 +32,10 @@ export {
   MENU_ITEM_HEIGHT,
   HOLD_ITEM_TRANSFORM_DURATION,
   SPRING_CONFIGURATION,
+  BACKDROP_LIGHT_BACKGROUND_COLOR,
+  BACKDROP_DARK_BACKGROUND_COLOR,
+  STATUS_BAR_HEIGHT,
+  OUTTER_SPACING,
 };
 
 export const contextMenuStyleGuide = {
@@ -48,8 +63,3 @@ export const contextMenuStyleGuide = {
     },
   },
 };
-
-export const BACKDROP_LIGHT_BACKGROUND_COLOR =
-  Platform.OS === "ios" ? "rgba(0,0,0,0.2)" : "rgba(19, 19, 19, 0.95)";
-export const BACKDROP_DARK_BACKGROUND_COLOR =
-  Platform.OS === "ios" ? "rgba(0,0,0,0.75)" : "rgba(120,120,120,0.2)";
