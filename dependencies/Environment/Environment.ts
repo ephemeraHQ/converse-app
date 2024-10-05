@@ -1,19 +1,26 @@
+import api from "@utils/api";
+
+import { JoinGroupClient } from "../../features/GroupInvites/GroupInvites.client";
 import { NetworkMonitorClient } from "../NetworkMonitor/NetworkMonitor";
 
 export type Environment = {
   networkMonitorClient: NetworkMonitorClient;
+  joinGroupClient: JoinGroupClient;
 };
 
 export const LiveEnvironment = (): Environment => ({
   networkMonitorClient: NetworkMonitorClient.live(),
+  joinGroupClient: JoinGroupClient.live({ api }),
 });
 
 export const QaEnvironment = (): Environment => ({
   networkMonitorClient: NetworkMonitorClient.satisfied(),
+  joinGroupClient: JoinGroupClient.live({ api }),
 });
 
 export const UnimplementedEnvironment: Environment = {
   networkMonitorClient: NetworkMonitorClient.unimplemented(),
+  joinGroupClient: JoinGroupClient.unimplemented(),
 };
 
 const isTest = process.env.NODE_ENV === "test";

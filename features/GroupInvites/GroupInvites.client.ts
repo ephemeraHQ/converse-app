@@ -1,5 +1,15 @@
+import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
 import { GroupInvite } from "@utils/api.types";
 import { AxiosInstance } from "axios";
+
+import {
+  getInviteJoinRequestId,
+  saveInviteJoinRequestId,
+} from "./groupInvites.utils";
+import { JoinGroupResult } from "./joinGroup.types";
+
+const GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS = 10;
+const GROUP_JOIN_REQUEST_POLL_INTERVAL_MS = 1000;
 
 /**
  * TODOs:
@@ -18,29 +28,91 @@ import { AxiosInstance } from "axios";
  * Get:   gets data from some local cache or storage
  * Save:  saves data to some local cache or storage
  */
+
 export class JoinGroupClient {
   fetchGroupInvite: (groupInviteId: string) => Promise<GroupInvite>;
+  attemptToJoinGroup: (
+    account: string,
+    groupInviteId: string
+  ) => Promise<JoinGroupResult>;
 
-  // todo - create a well that imlpicitly uses the query client..... think about why that could be a poor decision
   constructor(
-    fetchGroupInvite: (groupInviteId: string) => Promise<GroupInvite>
+    fetchGroupInvite: (groupInviteId: string) => Promise<GroupInvite>,
+    attemptToJoinGroup: (
+      account: string,
+      groupInviteId: string
+    ) => Promise<JoinGroupResult>
   ) {
     this.fetchGroupInvite = fetchGroupInvite;
+    this.attemptToJoinGroup = attemptToJoinGroup;
   }
 
   static live({ api }: { api: AxiosInstance }): JoinGroupClient {
-    const liveGetGroupInvite = async (groupInviteId: string) => {
+    const liveGetGroupInvite = async (
+      groupInviteId: string
+    ): Promise<GroupInvite> => {
       const { data } = await api.get(`/api/groupInvite/${groupInviteId}`);
       return data as GroupInvite;
     };
 
-    return new JoinGroupClient(liveGetGroupInvite);
+    /**
+     * TODO: add sdk polling and race promises
+     * @param account
+     * @param groupInviteId
+     */
+    const liveAttemptToJoinGroup = async (
+      account: string,
+      groupInviteId: string
+    ): Promise<JoinGroupResult> => {
+      const sleep = (ms: number) =>
+        new Promise((resolve) => setTimeout(resolve, ms));
+
+      let joinRequestId = getInviteJoinRequestId(account, groupInviteId);
+      if (!joinRequestId) {
+        const joinRequest = await createGroupJoinRequest(
+          account,
+          groupInviteId
+        );
+        joinRequestId = joinRequest.id;
+        saveInviteJoinRequestId(account, groupInviteId, joinRequestId);
+      }
+
+      let attemptsToRetryJoinGroup = 0;
+      while (attemptsToRetryJoinGroup < GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS) {
+        const joinRequestData = await getGroupJoinRequest(joinRequestId);
+
+        if (joinRequestData.status !== "PENDING") {
+          switch (joinRequestData.status) {
+            case "ACCEPTED":
+              return {
+                type: "group-join-request.accepted",
+                groupId: joinRequestData.groupId as string,
+              };
+            case "REJECTED":
+              return { type: "group-join-request.rejected" };
+            case "ERROR":
+              return { type: "group-join-request.error" };
+          }
+        }
+
+        attemptsToRetryJoinGroup += 1;
+        await sleep(GROUP_JOIN_REQUEST_POLL_INTERVAL_MS);
+      }
+
+      return { type: "group-join-request.timed-out" };
+    };
+
+    return new JoinGroupClient(liveGetGroupInvite, liveAttemptToJoinGroup);
   }
 
   static mock(
-    fetchGroupInvite: (groupInviteId: string) => Promise<GroupInvite>
+    fetchGroupInvite: (groupInviteId: string) => Promise<GroupInvite>,
+    attemptToJoinGroup: (
+      account: string,
+      groupInviteId: string
+    ) => Promise<JoinGroupResult>
   ): JoinGroupClient {
-    return new JoinGroupClient(fetchGroupInvite);
+    return new JoinGroupClient(fetchGroupInvite, attemptToJoinGroup);
   }
 
   static fixture(): JoinGroupClient {
@@ -58,22 +130,37 @@ export class JoinGroupClient {
       return fixtureGroupInvite;
     };
 
-    return new JoinGroupClient(fixtureGetGroupInvite);
+    const fixtureAttemptToJoinGroup = async (
+      account: string,
+      groupInviteId: string
+    ) => {
+      return {
+        type: "group-join-request.accepted",
+        groupId: "groupId123",
+      } as const;
+    };
+
+    return new JoinGroupClient(
+      fixtureGetGroupInvite,
+      fixtureAttemptToJoinGroup
+    );
   }
 
-  /**
-   * Creates a JoinGroupClient that throws an error when used.
-   * This is useful for ensuring that tests explicitly provide implementations,
-   * preventing unintended or uncontrolled use of dependencies in tests.
-   */
   static unimplemented(): JoinGroupClient {
-    return new JoinGroupClient(() => {
-      throw new Error(
-        "[JoinGroupClient] ERROR: unimplemented - Your code has invoked JoinGroupClient " +
-          "without specifying an implementation. This unimplemented dependency is here to " +
-          "ensure you don't invoke code you don't intend to, ensuring your tests are truly " +
-          "testing what they are expected to"
-      );
-    });
+    const unimplementedError = (method: string) => () => {
+      const error = `
+[JoinGroupClient] ERROR: unimplemented ${method} - Your code has invoked JoinGroupClient 
+without specifying an implementation. This unimplemented dependency is here to 
+ensure you don't invoke code you don't intend to, ensuring your tests are truly 
+testing what they are expected to
+`;
+      console.warn(error);
+      throw new Error(error);
+    };
+
+    return new JoinGroupClient(
+      unimplementedError("fetchGroupInvite"),
+      unimplementedError("attemptToJoinGroup")
+    );
   }
 }
