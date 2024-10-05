@@ -1,3 +1,4 @@
+import { GroupInvite } from "@utils/api.types";
 import axios from "axios";
 import * as Contacts from "expo-contacts";
 
@@ -17,7 +18,7 @@ import type { ProfileSocials } from "../data/store/profilesStore";
 import type { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: config.apiURI,
 });
 
@@ -408,16 +409,6 @@ export const joinGroupFromLink = async (
     }
   );
   return data as JoinGroupLinkResult;
-};
-
-export type GroupInvite = {
-  id: string;
-  inviteLink: string;
-  createdByAddress: string;
-  groupName: string;
-  imageUrl?: string;
-  description?: string;
-  groupId?: string;
 };
 
 export type CreateGroupInviteResult = Pick<GroupInvite, "id" | "inviteLink">;
