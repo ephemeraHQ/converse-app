@@ -17,7 +17,7 @@ import GroupNav, { GroupNavParams } from "./GroupNav";
 import NewConversationNav, {
   NewConversationNavParams,
 } from "./NewConversationNav";
-import UserProfile from "../../components/Onboarding/UserProfile";
+import { OnboardingUserProfile } from "../../components/Onboarding/OnboardingUserProfile";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
 import {
   TEMPORARY_ACCOUNT_NAME,
@@ -51,7 +51,7 @@ export type NavigationParamList = {
   // Auth / Onboarding
   // Onboarding
   OnboardingGetStarted: undefined;
-  OnboardingPrivyConnect: undefined;
+  OnboardingPrivy: undefined;
   OnboardingConnectWallet: undefined;
   OnboardingPrivateKey: undefined;
   OnboardingNotifications: undefined;
@@ -62,7 +62,7 @@ export type NavigationParamList = {
   NewAccountNavigator: undefined;
   NewAccountUserProfile: undefined;
   NewAccountConnectWallet: undefined;
-  NewAccountPrivyConnect: undefined;
+  NewAccountPrivy: undefined;
   NewAccountPrivateKey: undefined;
   NewAccountEphemeralLogin: undefined;
 
@@ -132,7 +132,7 @@ const AuthNavigator = memo(function AuthNavigator() {
           component={OnboardingGetStartedScreen}
         />
         <NativeStack.Screen
-          name="OnboardingPrivyConnect"
+          name="OnboardingPrivy"
           component={OnboardingPrivyScreen}
         />
         <NativeStack.Screen
@@ -145,7 +145,7 @@ const AuthNavigator = memo(function AuthNavigator() {
         />
         <NativeStack.Screen
           name="OnboardingUserProfile"
-          component={UserProfile}
+          component={OnboardingUserProfile}
         />
         <NativeStack.Screen
           name="OnboardingPrivateKey"
@@ -206,7 +206,16 @@ const SignedInNavigator = memo(function SignedInNavigator() {
             ),
           }}
         />
-        <NativeStack.Screen name="UserProfile" component={UserProfile} />
+        <NativeStack.Screen
+          name="NewAccountUserProfile"
+          component={NewAccountUserProfileScreen}
+          options={{
+            headerLeft: () => (
+              <ScreenHeaderModalCloseButton onPress={router.goBack} />
+            ),
+            headerTitle: "Modify profile",
+          }}
+        />
         <NativeStack.Screen
           name="NewAccountNavigator"
           component={NewAccountNavigator}
@@ -248,7 +257,7 @@ const NewAccountNavigator = memo(function NewAccountNavigator() {
           }}
         />
         <NewAccountStack.Screen
-          name="NewAccountPrivyConnect"
+          name="NewAccountPrivy"
           component={NewAccountPrivyScreen}
         />
         <NewAccountStack.Screen

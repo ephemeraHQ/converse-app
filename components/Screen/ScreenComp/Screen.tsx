@@ -13,13 +13,13 @@ import {
 } from "./Screen.helpers";
 import {
   AutoScreenProps,
-  ScreenProps,
+  IScreenProps,
   ScrollScreenProps,
 } from "./Screen.props";
 import { VStack } from "../../../design-system/VStack";
 import { spacing } from "../../../theme";
 
-function ScreenWithoutScrolling(props: ScreenProps) {
+function ScreenWithoutScrolling(props: IScreenProps) {
   const { style, contentContainerStyle, children } = props;
   return (
     <View style={[$outerStyle, style]}>
@@ -28,7 +28,7 @@ function ScreenWithoutScrolling(props: ScreenProps) {
   );
 }
 
-function ScreenWithScrolling(props: ScreenProps) {
+function ScreenWithScrolling(props: IScreenProps) {
   const insets = useSafeAreaInsets();
 
   const {
@@ -84,7 +84,7 @@ function ScreenWithScrolling(props: ScreenProps) {
  * It handles safe area insets, status bar settings, keyboard avoiding behavior, and scrollability based on the preset.
  * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/app/components/Screen/}
  */
-export function Screen(props: ScreenProps) {
+export function Screen(props: IScreenProps) {
   const {
     backgroundColor = colors.background,
     safeAreaEdges,
@@ -110,10 +110,6 @@ const $containerStyle: ViewStyle = {
   flex: 1,
   height: "100%",
   width: "100%",
-};
-
-const $keyboardAvoidingViewStyle: ViewStyle = {
-  flex: 1,
 };
 
 const $outerStyle: ViewStyle = {

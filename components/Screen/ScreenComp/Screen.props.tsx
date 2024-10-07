@@ -68,7 +68,7 @@ export interface AutoScreenProps extends Omit<ScrollScreenProps, "preset"> {
   scrollEnabledToggleThreshold?: { percent?: number; point?: number };
 }
 
-export type ScreenProps =
+export type IScreenProps =
   | ScrollScreenProps
   | FixedScreenProps
   | AutoScreenProps;

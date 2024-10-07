@@ -6,14 +6,14 @@ import {
 import { Platform, useColorScheme } from "react-native";
 
 import { NativeStack } from "./Navigation";
-import UserProfile from "../../components/Onboarding/UserProfile";
+import { OnboardingUserProfile } from "../../components/Onboarding/OnboardingUserProfile";
 
 export default function UserProfileNav() {
   const colorScheme = useColorScheme();
   return (
     <NativeStack.Screen
       name="UserProfile"
-      component={UserProfile}
+      component={OnboardingUserProfile}
       options={{
         headerTitle: "Modify profile",
         headerTitleStyle: headerTitleStyle(colorScheme),

@@ -1,6 +1,7 @@
 import { StyleProp, TextStyle } from "react-native";
 
-import { $presets, $sizeStyles } from "./Text.styles";
+import { $presets } from "./Text.presets";
+import { $sizeStyles } from "./Text.styles";
 import { TxKeyPath } from "../../i18n";
 import { typography } from "../../theme";
 

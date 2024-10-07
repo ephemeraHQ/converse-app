@@ -92,7 +92,7 @@ export function OnboardingGetStartedScreen() {
               ),
               rightView: RightViewChevron(),
               action: () => {
-                router.push("PrivyConnectOnboarding");
+                router.push("OnboardingPrivy");
               },
             },
             {
@@ -103,7 +103,7 @@ export function OnboardingGetStartedScreen() {
               ),
               rightView: RightViewChevron(),
               action: () => {
-                router.push("EphemeralLoginOnboarding");
+                router.push("OnboardingEphemeralLogin");
               },
             },
           ]}
@@ -138,7 +138,7 @@ export function OnboardingGetStartedScreen() {
               ),
               rightView: RightViewChevron(),
               action: () => {
-                router.push("PrivateKeyConnectOnboarding");
+                router.push("OnboardingPrivateKey");
               },
             },
           ]}

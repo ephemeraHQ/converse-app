@@ -32,36 +32,10 @@ export const $fontWeightStyles = Object.entries(typography.primary).reduce(
   {}
 ) as Record<IWeights, TextStyle>;
 
-const $baseStyle: StyleProp<TextStyle> = [
+export const $baseStyle: StyleProp<TextStyle> = [
   $sizeStyles.sm,
   $fontWeightStyles.normal,
   { color: colors.text },
 ];
 
 export const $rtlStyle: TextStyle = isRTL ? { writingDirection: "rtl" } : {};
-
-export const $presets = {
-  default: $baseStyle,
-
-  bold: [$baseStyle, $fontWeightStyles.bold] as StyleProp<TextStyle>,
-
-  heading: [
-    $baseStyle,
-    $sizeStyles.xxl,
-    $fontWeightStyles.semiBold,
-  ] as StyleProp<TextStyle>,
-
-  subheading: [
-    $baseStyle,
-    $sizeStyles.sm,
-    $fontWeightStyles.light,
-  ] as StyleProp<TextStyle>,
-
-  formLabel: [$baseStyle, $fontWeightStyles.medium] as StyleProp<TextStyle>,
-
-  formHelper: [
-    $baseStyle,
-    $sizeStyles.sm,
-    $fontWeightStyles.normal,
-  ] as StyleProp<TextStyle>,
-};

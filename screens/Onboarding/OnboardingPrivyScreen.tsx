@@ -400,11 +400,7 @@ function useLoginWithSmsWrapper() {
 
       const code = getOtpCode();
 
-      console.log("code:", code);
-
       const user = await loginWithCodePrivy({ code });
-
-      console.log("user:", user);
 
       if (!user) {
         Alert.alert(translate("privyConnect.errors.invalidCode"));

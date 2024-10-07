@@ -1,13 +1,9 @@
 import React from "react";
 import { Text as RNText, StyleProp, TextStyle } from "react-native";
 
+import { $presets } from "./Text.presets";
 import { IPresets, ITextProps } from "./Text.props";
-import {
-  $fontWeightStyles,
-  $presets,
-  $rtlStyle,
-  $sizeStyles,
-} from "./Text.styles";
+import { $fontWeightStyles, $rtlStyle, $sizeStyles } from "./Text.styles";
 import { translate } from "../../i18n";
 
 /**

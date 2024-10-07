@@ -58,7 +58,7 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
             title: translate("walletSelector.converseAccount.connectViaPhone"),
             rightView: RightViewChevron(),
             action: () => {
-              router.push("PrivyConnectNewAccount");
+              router.push("NewAccountPrivy");
             },
           },
           {
@@ -67,7 +67,7 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
             title: translate("walletSelector.converseAccount.createEphemeral"),
             rightView: RightViewChevron(),
             action: () => {
-              router.push("EphemeralLoginNewAccount");
+              router.push("NewAccountEphemeralLogin");
             },
           },
         ]}
@@ -92,7 +92,7 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
             title: translate("walletSelector.connectionOptions.connectViaKey"),
             rightView: RightViewChevron(),
             action: () => {
-              router.push("PrivateKeyConnectOnboarding");
+              router.push("NewAccountPrivateKey");
             },
           },
         ]}
