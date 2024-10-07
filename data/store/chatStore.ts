@@ -114,6 +114,10 @@ export type TopicsData = {
 export type MediaPreview = {
   mediaURI: string;
   status: "picked" | "uploading" | "uploaded" | "error" | "sending";
+  dimensions?: {
+    width: number;
+    height: number;
+  };
   uploadedAttachment?: RemoteAttachmentContent | null;
   attachmentToSave?: {
     filePath: string;

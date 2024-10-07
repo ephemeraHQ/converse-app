@@ -37,11 +37,13 @@ import { AttachmentSelectedStatus } from "../../../utils/media";
 import { sendMessage, SendMessageInput } from "../../../utils/message";
 import { TextInputWithValue } from "../../../utils/str";
 import { serializeRemoteAttachmentMessageContent } from "../../../utils/xmtpRN/attachments";
-import AddAttachmentButton from "../Attachment/AddAttachmentButton";
+import AddAttachmentButton, {
+  SelectedAttachment,
+} from "../Attachment/AddAttachmentButton";
 import SendAttachmentPreview from "../Attachment/SendAttachmentPreview";
 import { MessageToDisplay } from "../Message/Message";
 
-const DEFAULT_MEDIA_PREVIEW_HEIGHT = 120;
+const DEFAULT_MEDIA_PREVIEW_HEIGHT = { PORTRAIT: 120, LANDSCAPE: 90 };
 const MEDIA_PREVIEW_PADDING = Platform.OS === "android" ? 9 : 14;
 const LINE_HEIGHT = 22;
 const MAX_INPUT_HEIGHT = 500;
@@ -174,12 +176,19 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
 
   const calculateInputHeight = useCallback(() => {
     const textContentHeight = (numberOfLinesRef.current - 1) * LINE_HEIGHT;
+    const isLandscape =
+      mediaPreviewRef.current?.dimensions?.height &&
+      mediaPreviewRef.current?.dimensions?.width &&
+      mediaPreviewRef.current.dimensions.width >
+        mediaPreviewRef.current.dimensions.height;
     const mediaPreviewHeight =
       mediaPreviewRef.current &&
       (mediaPreviewRef.current.status === "picked" ||
         mediaPreviewRef.current.status === "uploading" ||
         mediaPreviewRef.current.status === "uploaded")
-        ? DEFAULT_MEDIA_PREVIEW_HEIGHT + MEDIA_PREVIEW_PADDING
+        ? isLandscape
+          ? DEFAULT_MEDIA_PREVIEW_HEIGHT.LANDSCAPE
+          : DEFAULT_MEDIA_PREVIEW_HEIGHT.PORTRAIT + MEDIA_PREVIEW_PADDING
         : 0;
     const replyingToMessageHeight = replyingToMessageRef.current
       ? REPLYING_TO_MESSAGE_HEIGHT
@@ -260,16 +269,30 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
 
   const handleAttachmentSelection = (
     status: AttachmentSelectedStatus,
-    attachment: any
+    attachment: SelectedAttachment
   ) => {
-    if (status === "picked") {
-      setMediaPreview({ mediaURI: attachment.uri, status });
-      mediaPreviewRef.current = { mediaURI: attachment.uri, status };
+    if (status === "picked" && attachment.uri) {
+      setMediaPreview({
+        mediaURI: attachment.uri,
+        status,
+        dimensions: attachment.attachmentToSave?.dimensions,
+      });
+      mediaPreviewRef.current = {
+        mediaURI: attachment.uri,
+        status,
+        dimensions: attachment.attachmentToSave?.dimensions,
+      };
       mediaPreviewAnimation.value = withSpring(1, PREVIEW_SPRING_CONFIG);
-    } else if (status === "uploaded" && conversation) {
+    } else if (
+      status === "uploaded" &&
+      conversation &&
+      attachment.uploadedAttachment
+    ) {
       preparedAttachmentMessageRef.current = {
         conversation,
-        content: serializeRemoteAttachmentMessageContent(attachment),
+        content: serializeRemoteAttachmentMessageContent(
+          attachment.uploadedAttachment
+        ),
         contentType: "xmtp.org/remoteStaticAttachment:1.0",
       };
     }
@@ -373,6 +396,14 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
                   error={mediaPreview.status === "error"}
                   isLoading={mediaPreview.status === "uploading"}
                   scale={mediaPreviewAnimation}
+                  isLandscape={
+                    !!(
+                      mediaPreview.dimensions?.height &&
+                      mediaPreview.dimensions?.width &&
+                      mediaPreview.dimensions.width >
+                        mediaPreview.dimensions.height
+                    )
+                  }
                 />
               </Animated.View>
             )}
