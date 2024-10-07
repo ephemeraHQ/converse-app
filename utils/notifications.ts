@@ -229,7 +229,10 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
         await getLastNotificationsSubscribeHash(account, nativePushToken);
     }
 
-    if (lastNotifSubscribeByAccount[account]?.serverHash === hash) {
+    if (
+      lastNotifSubscribeByAccount[account] &&
+      lastNotifSubscribeByAccount[account]?.serverHash === hash
+    ) {
       lastNotifSubscribeByAccount[account].stringToHash = stringToHash;
       // We're already up to date!
       delete subscribingByAccount[account];
