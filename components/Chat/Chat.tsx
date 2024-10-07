@@ -428,9 +428,9 @@ export function Chat() {
   return (
     <View
       style={styles.chatContainer}
-      key={`chat-${conversation?.peerAddress}-${
-        conversation?.context?.conversationId || ""
-      }-${isBlockedPeer}`}
+      key={`chat-${
+        conversation?.isGroup ? conversation?.topic : conversation?.peerAddress
+      }-${conversation?.context?.conversationId || ""}-${isBlockedPeer}`}
     >
       <Animated.View style={chatContentStyle}>
         {conversation && listArray.length > 0 && !isBlockedPeer && (
