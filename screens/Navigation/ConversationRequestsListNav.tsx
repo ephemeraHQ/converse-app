@@ -14,7 +14,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
 
@@ -23,7 +23,6 @@ import {
   navigationAnimation,
   NavigationParamList,
 } from "./Navigation";
-import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../../components/AndroidBackAction";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
@@ -108,20 +107,8 @@ export default function ConversationRequestsListNav() {
       navigation: any;
     }) => ({
       animation: navigationAnimation as StackAnimationTypes,
-      headerTitle: clearingAll
-        ? Platform.OS === "ios"
-          ? () => (
-              <View style={styles.headerContainer}>
-                <ActivityIndicator />
-                <Text style={styles.headerText}>{translate("clearing")}</Text>
-              </View>
-            )
-          : "Clearing..."
-        : "Requests",
-      headerLeft:
-        Platform.OS === "ios"
-          ? undefined
-          : () => <AndroidBackAction navigation={navigation} />,
+      headerTitle: clearingAll ? "Clearing..." : "Requests",
+      headerLeft: () => <AndroidBackAction navigation={navigation} />,
       headerRight: () =>
         clearingAll ? undefined : (
           <Button
@@ -131,7 +118,7 @@ export default function ConversationRequestsListNav() {
           />
         ),
     }),
-    [clearAllSpam, clearingAll, styles.headerContainer, styles.headerText]
+    [clearAllSpam, clearingAll]
   );
 
   const toggleSpamRequests = useCallback(() => {
@@ -209,7 +196,7 @@ const useStyles = () => {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      width: Platform.OS === "ios" ? 110 : 130,
+      width: 130,
     },
     headerText: {
       marginLeft: 10,
