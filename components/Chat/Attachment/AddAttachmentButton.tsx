@@ -29,9 +29,13 @@ type AttachmentToSave = {
   filePath: string;
   fileName: string;
   mimeType: string | null;
+  dimensions: {
+    height: number;
+    width: number;
+  };
 };
 
-type SelectedAttachment = {
+export type SelectedAttachment = {
   uploadedAttachment?: RemoteAttachmentContent;
   attachmentToSave?: AttachmentToSave;
   uri?: string;
@@ -70,15 +74,21 @@ export default function AddAttachmentButton({
   }, [mediaPreviewRef, mediaPreviewRef.current?.mediaURI, assetRef]);
 
   const handleAttachmentSelected = useCallback(
-    async (uri: string | null, status: AttachmentSelectedStatus) => {
-      if (uri) {
-        onSelectionStatusChange("picked", { uri });
-        const asset = { uri } as ImagePicker.ImagePickerAsset;
+    async (
+      asset: ImagePicker.ImagePickerAsset,
+      status: AttachmentSelectedStatus
+    ) => {
+      if (asset) {
+        onSelectionStatusChange("picked", { uri: asset.uri });
         assetRef.current = asset;
 
         converseEventEmitter.emit("setCurrentConversationMediaPreviewValue", {
           mediaURI: asset.uri,
           status: "uploading",
+          dimensions: {
+            height: asset.height,
+            width: asset.width,
+          },
         });
         const resizedImage = await compressAndResizeImage(asset.uri);
         let mimeType = mime.getType(resizedImage.uri);
@@ -99,8 +109,7 @@ export default function AddAttachmentButton({
             currentAccount,
             encryptedAttachment
           );
-          onSelectionStatusChange("uploaded", {
-            ...uploadedAttachment,
+          const selectedAttachment: SelectedAttachment = {
             attachmentToSave:
               Platform.OS === "web"
                 ? undefined
@@ -108,11 +117,21 @@ export default function AddAttachmentButton({
                     filePath: resizedImage.uri,
                     fileName: asset.uri.split("/").pop() || `${uuidv4()}`,
                     mimeType,
+                    dimensions: {
+                      height: resizedImage.height,
+                      width: resizedImage.width,
+                    },
                   },
-          });
+            uploadedAttachment,
+          };
+          onSelectionStatusChange("uploaded", selectedAttachment);
           converseEventEmitter.emit("setCurrentConversationMediaPreviewValue", {
             mediaURI: asset.uri,
             status: "uploaded",
+            dimensions: {
+              height: resizedImage.height,
+              width: resizedImage.width,
+            },
           });
         } catch (error) {
           sentryTrackMessage("ATTACHMENT_UPLOAD_ERROR", { error });
@@ -136,14 +155,14 @@ export default function AddAttachmentButton({
     }
     if (!asset) return;
     assetRef.current = asset;
-    handleAttachmentSelected(asset.uri, "picked");
+    handleAttachmentSelected(asset, "picked");
   }, [handleAttachmentSelected]);
 
   const openCamera = useCallback(async () => {
     const asset = await takePictureFromCamera();
     if (!asset) return;
     assetRef.current = asset;
-    handleAttachmentSelected(asset.uri, "picked");
+    handleAttachmentSelected(asset, "picked");
   }, [handleAttachmentSelected]);
 
   return (

@@ -22,6 +22,7 @@ type SendAttachmentPreviewProps = {
   isLoading: boolean;
   error: boolean;
   scale: Animated.SharedValue<number>;
+  isLandscape: boolean;
 };
 
 export default function SendAttachmentPreview({
@@ -30,6 +31,7 @@ export default function SendAttachmentPreview({
   isLoading,
   error,
   scale,
+  isLandscape,
 }: SendAttachmentPreviewProps) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -42,11 +44,24 @@ export default function SendAttachmentPreview({
   }, [colorScheme]);
   if (!currentAttachmentMediaURI) return null;
   return (
-    <View style={styles.previewContainer}>
-      <View style={styles.imageContainer}>
+    <View
+      style={[
+        styles.previewContainer,
+        isLandscape
+          ? styles.previewContainerLandscape
+          : styles.previewContainerPortrait,
+      ]}
+    >
+      <View
+        style={
+          isLandscape
+            ? styles.imageContainerLandscape
+            : styles.imageContainerPortrait
+        }
+      >
         <Image
           source={{ uri: currentAttachmentMediaURI }}
-          style={styles.image}
+          style={isLandscape ? styles.imageLandscape : styles.imagePortrait}
           contentFit="cover"
         />
         {isLoading && (
@@ -89,19 +104,34 @@ const useStyles = () => {
   return StyleSheet.create({
     previewContainer: {
       borderRadius: 4,
-      aspectRatio: 0.75,
       position: "relative",
       overflow: "hidden",
+    },
+    previewContainerPortrait: {
+      aspectRatio: 0.75,
       maxHeight: 120,
     },
-    imageContainer: {
+    previewContainerLandscape: {
+      aspectRatio: 1.33,
+      maxHeight: 90,
+    },
+    imageContainerPortrait: {
       maxHeight: 120,
       position: "relative",
     },
-    image: {
+    imageContainerLandscape: {
+      maxHeight: 90,
+      position: "relative",
+    },
+    imagePortrait: {
       width: "100%",
       height: "100%",
       maxHeight: 120,
+    },
+    imageLandscape: {
+      width: "100%",
+      height: "100%",
+      maxHeight: 90,
     },
     controls: {
       width: "100%",
