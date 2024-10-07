@@ -5,7 +5,7 @@ import { Screen } from "../../components/Screen/ScreenComp/Screen";
 import TableView from "../../components/TableView/TableView";
 import { TableViewEmoji } from "../../components/TableView/TableViewImage";
 import { translate } from "../../i18n";
-import { useRouter } from "../../navigation/use-navigation";
+import { useRouter } from "../../navigation/useNavigation";
 import { PictoSizes } from "../../styles/sizes";
 import { spacing } from "../../theme";
 import { isDesktop } from "../../utils/device";

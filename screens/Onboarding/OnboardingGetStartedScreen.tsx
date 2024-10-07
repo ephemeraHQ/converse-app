@@ -31,7 +31,7 @@ import { createWallet } from "thirdweb/wallets";
 import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { useRouter } from "../../navigation/use-navigation";
+import { useRouter } from "../../navigation/useNavigation";
 
 const animationDelays = [525, 550, 575, 800, 825, 850] as const;
 
@@ -103,7 +103,7 @@ export function OnboardingGetStartedScreen() {
               ),
               rightView: RightViewChevron(),
               action: () => {
-                router.push("OnboardingEphemeralLogin");
+                router.push("OnboardingEphemeral");
               },
             },
           ]}

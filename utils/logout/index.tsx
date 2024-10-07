@@ -4,24 +4,26 @@ import { ConverseXmtpClientType, dropXmtpClient } from "@utils/xmtpRN/client";
 import { getInboxId } from "@utils/xmtpRN/signIn";
 import { useCallback } from "react";
 
-import { useDisconnectFromPrivy } from "./privy";
-import { useDisconnectWallet } from "./wallet";
 import { clearConverseDb, getConverseDbPath } from "../../data/db";
 import {
   getAccountsList,
   getChatStore,
   getWalletStore,
+  TEMPORARY_ACCOUNT_NAME,
   useAccountsStore,
 } from "../../data/store/accountsStore";
 import { deleteSecureItemAsync } from "../keychain";
 import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
 import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
+import { navigate } from "../navigation";
 import {
   deleteSubscribedTopics,
   lastNotifSubscribeByAccount,
   unsubscribeFromNotifications,
 } from "../notifications";
 import { resetSharedData } from "../sharedData";
+import { useDisconnectFromPrivy } from "./privy";
+import { useDisconnectWallet } from "./wallet";
 import { getXmtpApiHeaders } from "../xmtpRN/api";
 import { importedTopicsDataForAccount } from "../xmtpRN/conversations";
 import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
@@ -209,6 +211,26 @@ export const logoutAccount = async (
 
   // Remove account so we don't use it anymore
   useAccountsStore.getState().removeAccount(account);
+
+  // Set the new current account if we have one
+  // New current account doesn't change if it's not the one to remove,
+  // else we find the first non temporary one and fallback to temporary (= logout)
+  const currentAccount = useAccountsStore.getState().currentAccount;
+  console.log("account:", account);
+  console.log("currentAccount:", currentAccount);
+  const setCurrentAccount = useAccountsStore.getState().setCurrentAccount;
+  if (currentAccount === account) {
+    const nonTemporaryAccount = accounts.find(
+      (a) => a !== TEMPORARY_ACCOUNT_NAME
+    );
+    if (nonTemporaryAccount) {
+      setCurrentAccount(nonTemporaryAccount, false);
+    } else {
+      setCurrentAccount(TEMPORARY_ACCOUNT_NAME, false);
+      // No more accounts, let's go back to onboarding
+      navigate("OnboardingGetStarted");
+    }
+  }
 
   // This clears the Converse sqlite database (v2)
   clearConverseDb(account, converseDbPath);

@@ -1,3 +1,3 @@
-import { ButtonProps } from "react-native";
+import { IButtonProps } from "../../Button/Button.props";
 
-export type IScreenHeaderButtonProps = ButtonProps;
+export type IScreenHeaderButtonProps = IButtonProps;

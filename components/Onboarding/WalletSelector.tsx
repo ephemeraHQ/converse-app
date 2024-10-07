@@ -25,7 +25,7 @@ import {
 import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { useRouter } from "../../navigation/use-navigation";
+import { useRouter } from "../../navigation/useNavigation";
 import { isDesktop } from "../../utils/device";
 import { getEthOSSigner } from "../../utils/ethos";
 import TableView from "../TableView/TableView";

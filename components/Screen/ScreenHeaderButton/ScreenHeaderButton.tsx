@@ -1,12 +1,12 @@
 import { memo } from "react";
-import { Button, useColorScheme } from "react-native";
 
 import { IScreenHeaderButtonProps } from "./ScreenHeaderButton.props";
-import { textPrimaryColor } from "../../../styles/colors";
+import { Optional } from "../../../types/general";
+import Button from "../../Button/Button";
 
 export const ScreenHeaderButton = memo(function ScreenHeaderButton(
-  props: IScreenHeaderButtonProps
+  props: Optional<IScreenHeaderButtonProps, "variant">
 ) {
-  const colorScheme = useColorScheme();
-  return <Button color={textPrimaryColor(colorScheme)} {...props} />;
+  const { variant, ...restProps } = props;
+  return <Button variant={variant || "text"} {...restProps} />;
 });

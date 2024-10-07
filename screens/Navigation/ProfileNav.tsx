@@ -6,7 +6,7 @@ import { ScreenHeaderButton } from "../../components/Screen/ScreenHeaderButton/S
 import { ScreenHeaderIconButton } from "../../components/Screen/ScreenHeaderIconButton/ScreenHeaderIconButton";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
 import { useCurrentAccount } from "../../data/store/accountsStore";
-import { useRouter } from "../../navigation/use-navigation";
+import { useRouter } from "../../navigation/useNavigation";
 import { navigate } from "../../utils/navigation";
 import ProfileScreen from "../Profile";
 import { NativeStack, navigationAnimation } from "./Navigation";

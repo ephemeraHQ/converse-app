@@ -11,7 +11,11 @@ export const NewAccountScreenComp = memo(function (props: IScreenProps) {
     <Screen
       preset="scroll"
       contentContainerStyle={[
-        { paddingHorizontal: spacing.md, paddingTop: spacing.lg },
+        {
+          paddingHorizontal: spacing.md,
+          paddingTop: spacing.lg,
+          alignItems: "center",
+        },
         contentContainerStyle,
       ]}
       {...restProps}

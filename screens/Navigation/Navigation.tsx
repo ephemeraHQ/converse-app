@@ -14,38 +14,39 @@ import EnableTransactionsNav from "./EnableTransactionsNav";
 import GroupInviteNav, { GroupInviteNavParams } from "./GroupInviteNav";
 import GroupLinkNav, { GroupLinkNavParams } from "./GroupLinkNav";
 import GroupNav, { GroupNavParams } from "./GroupNav";
-import NewConversationNav, {
-  NewConversationNavParams,
-} from "./NewConversationNav";
-import { OnboardingUserProfile } from "../../components/Onboarding/OnboardingUserProfile";
+import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
+import { OnboardingUserProfileScreen } from "../../components/Onboarding/OnboardingUserProfileScreen";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
-import {
-  TEMPORARY_ACCOUNT_NAME,
-  useCurrentAccount,
-} from "../../data/store/accountsStore";
-import { useRouter } from "../../navigation/use-navigation";
+import { useRouter } from "../../navigation/useNavigation";
 import { isDesktop } from "../../utils/device";
 import Accounts from "../Accounts/Accounts";
 import { NewAccountConnectWalletScreen } from "../NewAccount/NewAccountConnectWalletScreen";
-import { NewAccountEphemeraLoginScreen } from "../NewAccount/NewAccountEphemeraLoginScreen";
+import { NewAccountEphemeraScreen } from "../NewAccount/NewAccountEphemeraScreen";
 import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeyScreen";
 import { NewAccountPrivyScreen } from "../NewAccount/NewAccountPrivyScreen";
 import { NewAccountScreen } from "../NewAccount/NewAccountScreen";
 import { NewAccountUserProfileScreen } from "../NewAccount/NewAccountUserProfileScreen";
 import { ConnectWalletScreen } from "../Onboarding/OnboardingConnectWalletScreen";
-import { OnboardingEphemeraLoginScreen } from "../Onboarding/OnboardingEphemeraLoginScreen";
+import { OnboardingEphemeraScreen } from "../Onboarding/OnboardingEphemeraScreen";
 import { OnboardingGetStartedScreen } from "../Onboarding/OnboardingGetStartedScreen";
 import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificationsScreen";
 import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
 import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
+import NewConversationNav, {
+  NewConversationNavParams,
+} from "./NewConversationNav";
 import ProfileNav, { ProfileNavParams } from "./ProfileNav";
 import ShareFrameNav, { ShareFrameNavParams } from "./ShareFrameNav";
 import ShareProfileNav from "./ShareProfileNav";
 import TopUpNav from "./TopUpNav";
+import UserProfileNav from "./UserProfileNav";
 import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
-import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
+import {
+  getCurrentAccount,
+  TEMPORARY_ACCOUNT_NAME,
+} from "../../data/store/accountsStore";
 
 export type NavigationParamList = {
   // Auth / Onboarding
@@ -55,7 +56,7 @@ export type NavigationParamList = {
   OnboardingConnectWallet: undefined;
   OnboardingPrivateKey: undefined;
   OnboardingNotifications: undefined;
-  OnboardingEphemeralLogin: undefined;
+  OnboardingEphemeral: undefined;
   OnboardingUserProfile: undefined;
 
   // Nwe account
@@ -64,7 +65,7 @@ export type NavigationParamList = {
   NewAccountConnectWallet: undefined;
   NewAccountPrivy: undefined;
   NewAccountPrivateKey: undefined;
-  NewAccountEphemeralLogin: undefined;
+  NewAccountEphemera: undefined;
 
   // Main
   Accounts: undefined;
@@ -99,25 +100,25 @@ export const NativeStack = createNativeStackNavigator<NavigationParamList>();
 
 export const navigationAnimation = Platform.OS === "ios" ? "default" : "none";
 
-export default function MainNavigation() {
-  const currentAccount = useCurrentAccount();
-
-  if (!!currentAccount && currentAccount !== TEMPORARY_ACCOUNT_NAME) {
-    return <SignedInNavigator />;
-  }
-
-  return <AuthNavigator />;
-}
-
-const AuthNavigator = memo(function AuthNavigator() {
+export function MainNavigation() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
+
+  const currentAccount = getCurrentAccount();
+
+  console.log("currentAccount:", currentAccount);
 
   return (
     <NativeStack.Navigator
       screenOptions={{ gestureEnabled: !isDesktop }}
-      // TODO: Do we still need this?
-      screenListeners={screenListeners("fullStackNavigation")}
+      screenListeners={screenListeners("fullStackNavigation")} // TODO: Do we still need this?
+      initialRouteName={
+        currentAccount && currentAccount !== TEMPORARY_ACCOUNT_NAME
+          ? "Chats"
+          : "OnboardingGetStarted"
+      }
     >
+      {/* Auth / Onboarding */}
       <NativeStack.Group
         screenOptions={{
           ...stackGroupScreenOptions(colorScheme),
@@ -145,31 +146,18 @@ const AuthNavigator = memo(function AuthNavigator() {
         />
         <NativeStack.Screen
           name="OnboardingUserProfile"
-          component={OnboardingUserProfile}
+          component={OnboardingUserProfileScreen}
         />
         <NativeStack.Screen
           name="OnboardingPrivateKey"
           component={OnboardingPrivateKeyScreen}
         />
         <NativeStack.Screen
-          name="OnboardingEphemeralLogin"
-          component={OnboardingEphemeraLoginScreen}
+          name="OnboardingEphemeral"
+          component={OnboardingEphemeraScreen}
         />
       </NativeStack.Group>
-    </NativeStack.Navigator>
-  );
-});
 
-const SignedInNavigator = memo(function SignedInNavigator() {
-  const colorScheme = useColorScheme();
-  const router = useRouter();
-
-  return (
-    <NativeStack.Navigator
-      screenOptions={{ gestureEnabled: !isDesktop }}
-      // TODO: Do we still need this?
-      screenListeners={screenListeners("fullStackNavigation")}
-    >
       <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
         {ConversationListNav()}
         {ConversationRequestsListNav()}
@@ -195,6 +183,7 @@ const SignedInNavigator = memo(function SignedInNavigator() {
           ...stackGroupScreenOptions(colorScheme),
         }}
       >
+        {UserProfileNav()}
         <NativeStack.Screen
           name="Accounts"
           component={Accounts}
@@ -226,7 +215,7 @@ const SignedInNavigator = memo(function SignedInNavigator() {
       </NativeStack.Group>
     </NativeStack.Navigator>
   );
-});
+}
 
 const NewAccountStack = createNativeStackNavigator<NavigationParamList>();
 
@@ -273,8 +262,8 @@ const NewAccountNavigator = memo(function NewAccountNavigator() {
           component={NewAccountUserProfileScreen}
         />
         <NewAccountStack.Screen
-          name="NewAccountEphemeralLogin"
-          component={NewAccountEphemeraLoginScreen}
+          name="NewAccountEphemera"
+          component={NewAccountEphemeraScreen}
         />
       </NewAccountStack.Group>
     </NewAccountStack.Navigator>

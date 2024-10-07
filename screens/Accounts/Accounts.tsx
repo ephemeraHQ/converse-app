@@ -16,7 +16,7 @@ import {
   useAccountsStore,
   useErroredAccountsMap,
 } from "../../data/store/accountsStore";
-import { useRouter } from "../../navigation/use-navigation";
+import { useRouter } from "../../navigation/useNavigation";
 import { useDisconnectWallet } from "../../utils/logout/wallet";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";

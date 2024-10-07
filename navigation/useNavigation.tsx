@@ -3,6 +3,8 @@ import { useEffect } from "react";
 
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 
+// Wrapper around useNavigation to add some useful hooks.
+// Also, expo-router syntax is useRouter so if we want to migrate towards that later it's useful to call it useRouter now.
 export function useRouter(args?: {
   onTransitionEnd?: (isClosing: boolean) => void;
   onBeforeRemove?: () => void;

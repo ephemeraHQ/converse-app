@@ -1,6 +1,5 @@
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { backgroundColor } from "@styles/colors";
-import { getProfile } from "@utils/profile";
 import { useCheckCurrentInstallation } from "@utils/xmtpRN/client";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
@@ -15,12 +14,7 @@ import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler
 import ConversationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
 import WalletsStateHandler from "../components/StateHandlers/WalletsStateHandler";
 import config from "../config";
-import {
-  useCurrentAccount,
-  useProfilesStore,
-} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useAddressBookStateHandler } from "../utils/addressBook";
 import { converseEventEmitter } from "../utils/events";
@@ -32,7 +26,7 @@ import { ConversationScreenConfig } from "./Navigation/ConversationNav";
 import { GroupInviteScreenConfig } from "./Navigation/GroupInviteNav";
 import { GroupLinkScreenConfig } from "./Navigation/GroupLinkNav";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
-import MainNavigation, { NavigationParamList } from "./Navigation/Navigation";
+import { MainNavigation, NavigationParamList } from "./Navigation/Navigation";
 import { NewConversationScreenConfig } from "./Navigation/NewConversationNav";
 import { ProfileScreenConfig } from "./Navigation/ProfileNav";
 import { ShareProfileScreenConfig } from "./Navigation/ShareProfileNav";
@@ -103,17 +97,6 @@ const NavigationContent = () => {
   );
 
   const { navigationDrawer } = useNavigationDrawer();
-  const { userAddress, addingNewAccount } = useUserStatus();
-
-  const { resetOnboarding } = useOnboardingStore(
-    useSelect(["resetOnboarding", "addingNewAccount"])
-  );
-
-  useEffect(() => {
-    if (userAddress && !addingNewAccount) {
-      resetOnboarding();
-    }
-  }, [addingNewAccount, resetOnboarding, userAddress]);
 
   if (!splashScreenHidden) {
     // TODO: Add a loading screen
@@ -188,23 +171,4 @@ const useNavigationDrawer = () => {
   }, [toggleNavigationDrawer]);
 
   return { navigationDrawer, toggleNavigationDrawer };
-};
-
-const useUserStatus = () => {
-  const userAddress = useCurrentAccount();
-  const socials = useProfilesStore((s) =>
-    userAddress ? getProfile(userAddress, s.profiles)?.socials : undefined
-  );
-  const currentUserName = socials?.userNames?.find((e) => e.isPrimary);
-  const { resetOnboarding, addingNewAccount } = useOnboardingStore(
-    useSelect(["resetOnboarding", "addingNewAccount"])
-  );
-
-  useEffect(() => {
-    if (userAddress && !addingNewAccount) {
-      resetOnboarding();
-    }
-  }, [addingNewAccount, resetOnboarding, userAddress]);
-
-  return { userAddress, currentUserName, addingNewAccount };
 };

@@ -24,7 +24,7 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { useRouter } from "../navigation/use-navigation";
+import { useRouter } from "../navigation/useNavigation";
 import { converseEventEmitter } from "../utils/events";
 import { navigate } from "../utils/navigation";
 import {

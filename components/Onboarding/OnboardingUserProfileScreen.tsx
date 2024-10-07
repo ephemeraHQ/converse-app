@@ -24,13 +24,16 @@ import { OnboardingPrimaryCtaButton } from "./OnboardingPrimaryCtaButton";
 import config from "../../config";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import {
+  getCurrentAccount,
   useCurrentAccount,
   useProfilesStore,
   useSettingsStore,
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { VStack } from "../../design-system/VStack";
 import { translate } from "../../i18n";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
+import { spacing } from "../../theme";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
 import { uploadFile } from "../../utils/attachment";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
@@ -39,10 +42,10 @@ import {
   pickMediaFromLibrary,
   takePictureFromCamera,
 } from "../../utils/media";
+import { sentryTrackError } from "../../utils/sentry";
 import {
   formatEphemeralDisplayName,
   formatEphemeralUsername,
-  useLoopTxt,
 } from "../../utils/str";
 import Avatar from "../Avatar";
 import Button from "../Button/Button";
@@ -56,80 +59,28 @@ export type ProfileType = {
   displayName?: string;
 };
 
-type OwnProps = {
-  onboarding?: boolean;
-};
-type NavProps = NativeStackScreenProps<
-  NavigationParamList,
-  "OnboardingUserProfile"
->;
+export const OnboardingUserProfileScreen = (
+  props: NativeStackScreenProps<NavigationParamList, "OnboardingUserProfile">
+) => {
+  const { navigation } = props;
 
-type Props = OwnProps & Partial<NavProps>;
-
-const LOADING_SENTENCES = Object.values(
-  translate("userProfile.loadingSentences")
-);
-
-export const OnboardingUserProfile = ({
-  onboarding,
-  navigation,
-  route,
-}: Props) => {
-  const address = useCurrentAccount()!; // We assume if someone goes to this screen we have address
-
-  const profiles = useProfilesStore((state) => state.profiles);
-
-  const currentUserUsername = getProfile(
-    address,
-    profiles
-  )?.socials?.userNames?.find((u) => u.isPrimary);
-
-  const [errorMessage, setErrorMessage] = useState("");
   const colorScheme = useColorScheme();
-  const styles = useStyles(colorScheme, errorMessage);
 
-  const { ephemeralAccount } = useSettingsStore(
-    useSelect(["ephemeralAccount"])
-  );
+  const { profile, setProfile } = useProfile();
 
-  const usernameWithoutSuffix = currentUserUsername?.name?.replace(
-    config.usernameSuffix,
-    ""
-  );
+  const { createOrUpdateProfile, loading, errorMessage } =
+    useCreateOrUpdateProfileInfo();
 
-  const defaultEphemeralUsername = formatEphemeralUsername(
-    address,
-    usernameWithoutSuffix
-  );
-  const defaultEphemeralDisplayName = formatEphemeralDisplayName(
-    address,
-    currentUserUsername?.displayName
-  );
+  const styles = useUserProfileStyles(colorScheme, errorMessage);
 
-  const [loading, setLoading] = useState(false);
-  const [profile, setProfile] = useState<ProfileType>({
-    username: ephemeralAccount
-      ? defaultEphemeralUsername
-      : usernameWithoutSuffix || "",
-    avatar: currentUserUsername?.avatar || "",
-    displayName: ephemeralAccount
-      ? defaultEphemeralDisplayName
-      : currentUserUsername?.displayName || "",
-  });
-
-  // Was called when someone go back, maybe we put this in the GetStarted screen in useEffect ?
-  // const logout = useLogoutFromConverse(address);
-
-  const loadingSubtitle = useLoopTxt(2000, LOADING_SENTENCES, loading, false);
-
-  const handleContinue = useCreateOrUpdateProfileInfo({
-    profile,
-    address,
-    setErrorMessage,
-    setLoading,
-    onboarding,
-    navigation,
-  });
+  const handleContinue = useCallback(async () => {
+    try {
+      await createOrUpdateProfile({ profile });
+      navigation.push("Chats");
+    } catch (error) {
+      sentryTrackError(error);
+    }
+  }, [createOrUpdateProfile, profile, navigation]);
 
   const usernameRef = useRef<TextInput>();
 
@@ -156,18 +107,6 @@ export const OnboardingUserProfile = ({
             ? translate("userProfile.buttons.changeProfilePicture")
             : translate("userProfile.buttons.addProfilePicture")
         }
-        textStyle={{ fontWeight: "500" }}
-        onPress={addPFP}
-      />
-
-      <Button
-        variant="text"
-        title={
-          profile?.avatar
-            ? translate("userProfile.buttons.changeProfilePicture")
-            : translate("userProfile.buttons.addProfilePicture")
-        }
-        textStyle={{ fontWeight: "500" }}
         onPress={addPFP}
       />
 
@@ -215,20 +154,67 @@ export const OnboardingUserProfile = ({
           autoComplete="off"
         />
       </View>
-      <Text style={styles.p}>
-        {errorMessage || translate("userProfile.converseProfiles")}
-      </Text>
 
-      <OnboardingPrimaryCtaButton
-        title={translate("userProfile.buttons.continue")}
-        onPress={handleContinue}
-        loading={loading}
-      />
+      <VStack
+        style={{
+          rowGap: spacing.sm,
+        }}
+      >
+        <Text style={styles.p}>
+          {errorMessage || translate("userProfile.converseProfiles")}
+        </Text>
+        <OnboardingPrimaryCtaButton
+          title={translate("userProfile.buttons.continue")}
+          onPress={handleContinue}
+          loading={loading}
+        />
+      </VStack>
     </NewAccountScreenComp>
   );
 };
 
-function useAddPfp() {
+export function useProfile() {
+  const address = useCurrentAccount()!; // We assume if someone goes to this screen we have address
+
+  const profiles = useProfilesStore((state) => state.profiles);
+
+  const currentUserUsername = getProfile(
+    address,
+    profiles
+  )?.socials?.userNames?.find((u) => u.isPrimary);
+
+  const { ephemeralAccount } = useSettingsStore(
+    useSelect(["ephemeralAccount"])
+  );
+
+  const usernameWithoutSuffix = currentUserUsername?.name?.replace(
+    config.usernameSuffix,
+    ""
+  );
+
+  const defaultEphemeralUsername = formatEphemeralUsername(
+    address,
+    usernameWithoutSuffix
+  );
+  const defaultEphemeralDisplayName = formatEphemeralDisplayName(
+    address,
+    currentUserUsername?.displayName
+  );
+
+  const [profile, setProfile] = useState<ProfileType>({
+    username: ephemeralAccount
+      ? defaultEphemeralUsername
+      : usernameWithoutSuffix || "",
+    avatar: currentUserUsername?.avatar || "",
+    displayName: ephemeralAccount
+      ? defaultEphemeralDisplayName
+      : currentUserUsername?.displayName || "",
+  });
+
+  return { profile, setProfile };
+}
+
+export function useAddPfp() {
   const [asset, setAsset] = useState<ImagePickerAsset>();
 
   const colorScheme = useColorScheme();
@@ -287,106 +273,107 @@ function useAddPfp() {
   return { addPFP, asset };
 }
 
-export function useCreateOrUpdateProfileInfo(args: object) {
-  const {
-    profile,
-    address,
-    setErrorMessage,
-    setLoading,
-    onboarding,
-    navigation,
-  } = args;
+export function useCreateOrUpdateProfileInfo() {
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>();
 
-  return useCallback(async () => {
-    if (
-      profile.displayName &&
-      profile.displayName.length > 0 &&
-      (profile.displayName.length < 3 || profile.displayName.length > 32)
-    ) {
-      setErrorMessage(translate("userProfile.errors.displayNameLength"));
-      return;
-    }
+  const createOrUpdateProfile = useCallback(
+    async (args: { profile: ProfileType }) => {
+      const { profile } = args;
 
-    if (!/^[a-zA-Z0-9]*$/.test(profile.username)) {
-      setErrorMessage(translate("userProfile.errors.usernameAlphanumeric"));
-      return;
-    }
+      const address = getCurrentAccount()!;
 
-    if (profile.username.length < 3 || profile.username.length > 30) {
-      setErrorMessage(translate("userProfile.errors.usernameLength"));
-      return;
-    }
+      if (
+        profile.displayName &&
+        profile.displayName.length > 0 &&
+        (profile.displayName.length < 3 || profile.displayName.length > 32)
+      ) {
+        setErrorMessage(translate("userProfile.errors.displayNameLength"));
+        return;
+      }
 
-    setLoading(true);
+      if (!/^[a-zA-Z0-9]*$/.test(profile.username)) {
+        setErrorMessage(translate("userProfile.errors.usernameAlphanumeric"));
+        return;
+      }
 
-    try {
-      await checkUsernameValid(address, profile.username);
-    } catch (e: any) {
-      logger.error(e, { context: "UserProfile: Checking username valid" });
-      setLoading(false);
-      setErrorMessage(
-        e?.response?.data?.message || "An unknown error occurred"
-      );
-      return;
-    }
+      if (profile.username.length < 3 || profile.username.length > 30) {
+        setErrorMessage(translate("userProfile.errors.usernameLength"));
+        return;
+      }
 
-    let publicAvatar = "";
-    if (profile.avatar) {
-      if (profile.avatar.startsWith("https://")) {
-        publicAvatar = profile.avatar;
-      } else {
-        const resizedImage = await compressAndResizeImage(profile.avatar, true);
+      setLoading(true);
 
-        try {
-          publicAvatar =
-            Platform.OS === "web"
-              ? await uploadFile({
-                  account: address,
-                  contentType: "image/jpeg",
-                  blob: new Blob(
-                    [Buffer.from(resizedImage.base64 as string, "base64")],
-                    { type: "image/png" }
-                  ),
-                })
-              : await uploadFile({
-                  account: address,
-                  filePath: resizedImage.uri,
-                  contentType: "image/jpeg",
-                });
-        } catch (e: any) {
-          logger.error(e, { context: "UserProfile: uploading profile pic" });
-          setErrorMessage(
-            e?.response?.data?.message || "An unknown error occurred"
+      try {
+        await checkUsernameValid(address, profile.username);
+      } catch (e: any) {
+        logger.error(e, { context: "UserProfile: Checking username valid" });
+        setLoading(false);
+        setErrorMessage(
+          e?.response?.data?.message || "An unknown error occurred"
+        );
+        return;
+      }
+
+      let publicAvatar = "";
+      if (profile.avatar) {
+        if (profile.avatar.startsWith("https://")) {
+          publicAvatar = profile.avatar;
+        } else {
+          const resizedImage = await compressAndResizeImage(
+            profile.avatar,
+            true
           );
-          setLoading(false);
-          return;
+
+          try {
+            publicAvatar =
+              Platform.OS === "web"
+                ? await uploadFile({
+                    account: address,
+                    contentType: "image/jpeg",
+                    blob: new Blob(
+                      [Buffer.from(resizedImage.base64 as string, "base64")],
+                      { type: "image/png" }
+                    ),
+                  })
+                : await uploadFile({
+                    account: address,
+                    filePath: resizedImage.uri,
+                    contentType: "image/jpeg",
+                  });
+          } catch (e: any) {
+            logger.error(e, { context: "UserProfile: uploading profile pic" });
+            setErrorMessage(
+              e?.response?.data?.message || "An unknown error occurred"
+            );
+            setLoading(false);
+            return;
+          }
         }
       }
-    }
 
-    try {
-      await claimProfile({
-        account: address,
-        profile: { ...profile, avatar: publicAvatar },
-      });
-      await refreshProfileForAddress(address, address);
-    } catch (e: any) {
-      logger.error(e, { context: "UserProfile: claiming and refreshing" });
-      setErrorMessage(
-        e?.response?.data?.message || "An unknown error occurred"
-      );
-      setLoading(false);
-      return;
-    }
+      try {
+        await claimProfile({
+          account: address,
+          profile: { ...profile, avatar: publicAvatar },
+        });
+        await refreshProfileForAddress(address, address);
+      } catch (e: any) {
+        logger.error(e, { context: "UserProfile: claiming and refreshing" });
+        setErrorMessage(
+          e?.response?.data?.message || "An unknown error occurred"
+        );
+        setLoading(false);
+      }
+    },
+    [setLoading, setErrorMessage]
+  );
 
-    if (!onboarding && navigation) {
-      navigation.goBack();
-    }
-  }, [address, navigation, onboarding, profile, setErrorMessage, setLoading]);
+  return { createOrUpdateProfile, loading, errorMessage };
 }
 
-const useStyles = (colorScheme: any, errorMessage: any) =>
-  StyleSheet.create({
+export const useUserProfileStyles = (colorScheme: any, errorMessage: any) => {
+  return StyleSheet.create({
     avatar: {
       marginBottom: 10,
       marginTop: 23,
@@ -464,3 +451,4 @@ const useStyles = (colorScheme: any, errorMessage: any) =>
       }),
     },
   });
+};

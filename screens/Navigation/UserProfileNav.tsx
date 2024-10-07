@@ -5,18 +5,25 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
+import { UserProfileScreen } from "../UserProfileScreen";
 import { NativeStack } from "./Navigation";
-import { OnboardingUserProfile } from "../../components/Onboarding/OnboardingUserProfile";
+import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
+import { useRouter } from "../../navigation/useNavigation";
 
 export default function UserProfileNav() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
+
   return (
     <NativeStack.Screen
       name="UserProfile"
-      component={OnboardingUserProfile}
+      component={UserProfileScreen}
       options={{
         headerTitle: "Modify profile",
         headerTitleStyle: headerTitleStyle(colorScheme),
+        headerLeft: () => (
+          <ScreenHeaderModalCloseButton onPress={router.goBack} />
+        ),
         headerTintColor:
           Platform.OS === "android" || Platform.OS === "web"
             ? textSecondaryColor(colorScheme)

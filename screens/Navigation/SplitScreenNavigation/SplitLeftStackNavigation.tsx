@@ -4,7 +4,7 @@ import { memo } from "react";
 import { Platform, useColorScheme } from "react-native";
 
 import { ScreenHeaderModalCloseButton } from "../../../components/Screen/ScreenHeaderModalCloseButton";
-import { useRouter } from "../../../navigation/use-navigation";
+import { useRouter } from "../../../navigation/useNavigation";
 import { isDesktop } from "../../../utils/device";
 import { converseNavigations } from "../../../utils/navigation";
 import Accounts from "../../Accounts/Accounts";
