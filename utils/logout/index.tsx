@@ -216,13 +216,12 @@ export const logoutAccount = async (
   // New current account doesn't change if it's not the one to remove,
   // else we find the first non temporary one and fallback to temporary (= logout)
   const currentAccount = useAccountsStore.getState().currentAccount;
-  console.log("account:", account);
-  console.log("currentAccount:", currentAccount);
   const setCurrentAccount = useAccountsStore.getState().setCurrentAccount;
   if (currentAccount === account) {
     const nonTemporaryAccount = accounts.find(
-      (a) => a !== TEMPORARY_ACCOUNT_NAME
+      (a) => a !== TEMPORARY_ACCOUNT_NAME && a !== account
     );
+    console.log("nonTemporaryAccount:", nonTemporaryAccount);
     if (nonTemporaryAccount) {
       setCurrentAccount(nonTemporaryAccount, false);
     } else {

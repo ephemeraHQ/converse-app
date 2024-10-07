@@ -2,6 +2,7 @@ import { IAnimatedVStackProps } from "@design-system/VStack";
 import { spacing } from "@theme/spacing";
 import React from "react";
 
+import { NewAccountTitleSubtitlePicto } from "../NewAccount/NewAccountTitleSubtitlePicto";
 import { PictoTitleSubtitle } from "../PictoTitleSubtitle";
 
 function OnboardingContainerComponent({
@@ -26,6 +27,7 @@ function OnboardingContainerComponent({
 }
 
 export const OnboardingPictoTitleSubtitle = {
+  All: NewAccountTitleSubtitlePicto,
   Subtitle: PictoTitleSubtitle.Subtitle,
   Title: PictoTitleSubtitle.Title,
   Container: OnboardingContainerComponent,

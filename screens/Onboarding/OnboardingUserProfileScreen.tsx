@@ -20,7 +20,12 @@ import {
   View,
 } from "react-native";
 
-import { OnboardingPrimaryCtaButton } from "./OnboardingPrimaryCtaButton";
+import Avatar from "../../components/Avatar";
+import Button from "../../components/Button/Button";
+import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
+import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
+import { OnboardingScreen } from "../../components/Onboarding/OnboardingScreen";
+import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import config from "../../config";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import {
@@ -32,7 +37,6 @@ import {
 import { useSelect } from "../../data/store/storeHelpers";
 import { VStack } from "../../design-system/VStack";
 import { translate } from "../../i18n";
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { spacing } from "../../theme";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
 import { uploadFile } from "../../utils/attachment";
@@ -47,11 +51,7 @@ import {
   formatEphemeralDisplayName,
   formatEphemeralUsername,
 } from "../../utils/str";
-import Avatar from "../Avatar";
-import Button from "../Button/Button";
-import { NewAccountScreenComp } from "../NewAccount/NewAccountScreenComp";
-import { NewAccountTitleSubtitlePicto } from "../NewAccount/NewAccountTitleSubtitlePicto";
-import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
+import { NavigationParamList } from "../Navigation/Navigation";
 
 export type ProfileType = {
   avatar?: string;
@@ -76,7 +76,7 @@ export const OnboardingUserProfileScreen = (
   const handleContinue = useCallback(async () => {
     try {
       await createOrUpdateProfile({ profile });
-      navigation.push("Chats");
+      navigation.push("OnboardingNotifications");
     } catch (error) {
       sentryTrackError(error);
     }
@@ -87,8 +87,8 @@ export const OnboardingUserProfileScreen = (
   const { addPFP, asset } = useAddPfp();
 
   return (
-    <NewAccountScreenComp>
-      <NewAccountTitleSubtitlePicto
+    <OnboardingScreen contentContainerStyle={{ alignItems: "center" }}>
+      <OnboardingPictoTitleSubtitle.All
         title={translate("userProfile.title.profile")}
       />
 
@@ -169,7 +169,7 @@ export const OnboardingUserProfileScreen = (
           loading={loading}
         />
       </VStack>
-    </NewAccountScreenComp>
+    </OnboardingScreen>
   );
 };
 

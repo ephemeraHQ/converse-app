@@ -1,6 +1,5 @@
 import ValueProps from "@components/Onboarding/ValueProps";
 import { PictoTitleSubtitle } from "@components/PictoTitleSubtitle";
-import { Screen } from "@components/Screen/ScreenComp/Screen";
 import { translate } from "@i18n";
 import { utils } from "@noble/secp256k1";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -10,6 +9,7 @@ import { Wallet } from "ethers";
 import { useCallback, useState } from "react";
 
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
+import { OnboardingScreen } from "../../components/Onboarding/OnboardingScreen";
 import { Terms } from "../../components/Onboarding/Terms";
 import { initXmtpClient } from "../../components/Onboarding/init-xmtp-client";
 import { Text } from "../../design-system/Text/Text";
@@ -46,13 +46,7 @@ export function OnboardingEphemeraScreen(
   }, [setLoading, router]);
 
   return (
-    <Screen
-      preset="scroll"
-      safeAreaEdges={["bottom"]}
-      contentContainerStyle={{
-        paddingHorizontal: spacing.lg,
-      }}
-    >
+    <OnboardingScreen>
       <PictoTitleSubtitle.Container
         style={{
           // ...debugBorder(),
@@ -96,6 +90,6 @@ export function OnboardingEphemeraScreen(
         />
         <Terms />
       </VStack>
-    </Screen>
+    </OnboardingScreen>
   );
 }

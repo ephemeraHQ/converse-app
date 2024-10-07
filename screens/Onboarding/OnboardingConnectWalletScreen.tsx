@@ -1,11 +1,11 @@
 import ConnectViaWallet from "@components/Onboarding/ConnectViaWallet";
 
-import { Screen } from "../../components/Screen/ScreenComp/Screen";
+import { OnboardingScreen } from "../../components/Onboarding/OnboardingScreen";
 
 export function ConnectWalletScreen() {
   return (
-    <Screen preset="scroll" safeAreaEdges={["bottom"]}>
+    <OnboardingScreen>
       <ConnectViaWallet />
-    </Screen>
+    </OnboardingScreen>
   );
 }

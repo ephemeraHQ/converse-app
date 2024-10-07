@@ -114,7 +114,7 @@ export function OnboardingPrivyScreen() {
   );
 }
 
-export const OnboardingPictoTitleSubtitlePictoWrapper = memo(
+const OnboardingPictoTitleSubtitlePictoWrapper = memo(
   function OnboardingPictoTitleSubtitlePictoWrapper() {
     const status = useStatus();
     return (

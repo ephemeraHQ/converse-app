@@ -3,14 +3,14 @@ import { memo, useCallback, useEffect, useRef } from "react";
 import { TextInput, useColorScheme, View } from "react-native";
 
 import Avatar from "../components/Avatar";
-import Button from "../components/Button/Button";
-import { NewAccountScreenComp } from "../components/NewAccount/NewAccountScreenComp";
 import {
   useAddPfp,
   useCreateOrUpdateProfileInfo,
   useProfile,
   useUserProfileStyles,
-} from "../components/Onboarding/OnboardingUserProfileScreen";
+} from "./Onboarding/OnboardingUserProfileScreen";
+import Button from "../components/Button/Button";
+import { NewAccountScreenComp } from "../components/NewAccount/NewAccountScreenComp";
 import { ScreenHeaderButton } from "../components/Screen/ScreenHeaderButton/ScreenHeaderButton";
 import { Pressable } from "../design-system/Pressable";
 import { Text } from "../design-system/Text";

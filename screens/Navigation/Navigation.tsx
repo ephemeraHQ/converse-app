@@ -14,8 +14,18 @@ import EnableTransactionsNav from "./EnableTransactionsNav";
 import GroupInviteNav, { GroupInviteNavParams } from "./GroupInviteNav";
 import GroupLinkNav, { GroupLinkNavParams } from "./GroupLinkNav";
 import GroupNav, { GroupNavParams } from "./GroupNav";
+import NewConversationNav, {
+  NewConversationNavParams,
+} from "./NewConversationNav";
+import ProfileNav, { ProfileNavParams } from "./ProfileNav";
+import ShareFrameNav, { ShareFrameNavParams } from "./ShareFrameNav";
+import ShareProfileNav from "./ShareProfileNav";
+import TopUpNav from "./TopUpNav";
+import UserProfileNav from "./UserProfileNav";
+import WebviewPreviewNav, {
+  WebviewPreviewNavParams,
+} from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
-import { OnboardingUserProfileScreen } from "../../components/Onboarding/OnboardingUserProfileScreen";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
 import { useRouter } from "../../navigation/useNavigation";
 import { isDesktop } from "../../utils/device";
@@ -32,21 +42,11 @@ import { OnboardingGetStartedScreen } from "../Onboarding/OnboardingGetStartedSc
 import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificationsScreen";
 import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
 import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
-import NewConversationNav, {
-  NewConversationNavParams,
-} from "./NewConversationNav";
-import ProfileNav, { ProfileNavParams } from "./ProfileNav";
-import ShareFrameNav, { ShareFrameNavParams } from "./ShareFrameNav";
-import ShareProfileNav from "./ShareProfileNav";
-import TopUpNav from "./TopUpNav";
-import UserProfileNav from "./UserProfileNav";
-import WebviewPreviewNav, {
-  WebviewPreviewNavParams,
-} from "./WebviewPreviewNav";
 import {
   getCurrentAccount,
   TEMPORARY_ACCOUNT_NAME,
 } from "../../data/store/accountsStore";
+import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
 
 export type NavigationParamList = {
   // Auth / Onboarding
@@ -105,8 +105,6 @@ export function MainNavigation() {
   const router = useRouter();
 
   const currentAccount = getCurrentAccount();
-
-  console.log("currentAccount:", currentAccount);
 
   return (
     <NativeStack.Navigator

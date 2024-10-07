@@ -7,13 +7,11 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import { PictoSizes } from "@styles/sizes";
 import { spacing } from "@theme/spacing";
 import { Wallet } from "ethers";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
-  Platform,
   StyleSheet,
   TextInput,
   useColorScheme,
@@ -98,24 +96,11 @@ export function OnboardingPrivateKeyScreen(
 
   return (
     <OnboardingScreen preset="scroll">
-      <OnboardingPictoTitleSubtitle.Container>
-        <OnboardingPictoTitleSubtitle.Picto
-          picto="key.horizontal"
-          size={PictoSizes.onboardingComponent}
-        />
-        <OnboardingPictoTitleSubtitle.Title>
-          {translate("privateKeyConnect.title")}
-        </OnboardingPictoTitleSubtitle.Title>
-        <OnboardingPictoTitleSubtitle.Subtitle>
-          {translate("privateKeyConnect.subtitle", {
-            storage: translate(
-              `privateKeyConnect.storage.${
-                Platform.OS === "ios" ? "ios" : "android"
-              }`
-            ),
-          })}
-        </OnboardingPictoTitleSubtitle.Subtitle>
-      </OnboardingPictoTitleSubtitle.Container>
+      <OnboardingPictoTitleSubtitle.All
+        title={translate("privateKeyConnect.title")}
+        subtitle={translate("privateKeyConnect.subtitle")}
+        picto="key.horizontal"
+      />
 
       <View style={styles.entryContainer}>
         <TextInput

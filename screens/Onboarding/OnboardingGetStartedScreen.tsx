@@ -4,8 +4,6 @@ import {
   installedWallets,
   POPULAR_WALLETS,
 } from "@components/Onboarding/supportedWallets";
-import { PictoTitleSubtitle } from "@components/PictoTitleSubtitle";
-import { Screen } from "@components/Screen/ScreenComp/Screen";
 import TableView from "@components/TableView/TableView";
 import {
   TableViewEmoji,
@@ -17,7 +15,6 @@ import { translate } from "@i18n";
 import { textSecondaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { animations } from "@theme/animations";
-import { spacing } from "@theme/spacing";
 import { isDesktop } from "@utils/device";
 import { getEthOSSigner } from "@utils/ethos";
 import logger from "@utils/logger";
@@ -28,6 +25,8 @@ import { AppState, useColorScheme } from "react-native";
 import { useConnect, useSetActiveWallet } from "thirdweb/react";
 import { createWallet } from "thirdweb/wallets";
 
+import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
+import { OnboardingScreen } from "../../components/Onboarding/OnboardingScreen";
 import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
@@ -43,40 +42,27 @@ export function OnboardingGetStartedScreen() {
   const hasInstalledWallets = walletsInstalled.list.length > 0;
 
   return (
-    <Screen
-      safeAreaEdges={["top", "bottom"]}
-      preset="scroll"
-      contentContainerStyle={{
-        paddingHorizontal: spacing.md,
-        // ...debugBorder("red"),
-        // paddingHorizontal: Platform.OS === "android" ? 0 : 24,
-      }}
-    >
-      <PictoTitleSubtitle.Container
-        style={{
-          marginBottom: spacing.xl,
-          marginTop: spacing.xl,
-        }}
-      >
+    <OnboardingScreen safeAreaEdges={["top", "bottom"]}>
+      <OnboardingPictoTitleSubtitle.Container>
         <AnimatedVStack
           entering={animations.fadeInUpSlow().delay(animationDelays[2])}
         >
-          <PictoTitleSubtitle.Picto
+          <OnboardingPictoTitleSubtitle.Picto
             picto="message.circle.fill"
             size={PictoSizes.onboardingComponent}
           />
         </AnimatedVStack>
-        <PictoTitleSubtitle.Title
+        <OnboardingPictoTitleSubtitle.Title
           entering={animations.fadeInUpSlow().delay(animationDelays[1])}
         >
           {translate("walletSelector.title")}
-        </PictoTitleSubtitle.Title>
-        <PictoTitleSubtitle.Subtitle
+        </OnboardingPictoTitleSubtitle.Title>
+        <OnboardingPictoTitleSubtitle.Subtitle
           entering={animations.fadeInUpSlow().delay(animationDelays[0])}
         >
           {translate("walletSelector.subtitle")}
-        </PictoTitleSubtitle.Subtitle>
-      </PictoTitleSubtitle.Container>
+        </OnboardingPictoTitleSubtitle.Subtitle>
+      </OnboardingPictoTitleSubtitle.Container>
 
       <AnimatedVStack
         entering={animations.fadeInDownSlow().delay(animationDelays[3])}
@@ -152,7 +138,7 @@ export function OnboardingGetStartedScreen() {
           <PopularWallets />
         </AnimatedVStack>
       )}
-    </Screen>
+    </OnboardingScreen>
   );
 }
 

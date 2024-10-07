@@ -1,22 +1,24 @@
-import { Text } from "@design-system/Text";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { textPrimaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import * as Linking from "expo-linking";
 import React from "react";
-import { Platform, StyleSheet, useColorScheme, View } from "react-native";
+import { Platform, StyleSheet, useColorScheme } from "react-native";
 
 import Button from "../../components/Button/Button";
-import Picto from "../../components/Picto/Picto";
-import { Screen } from "../../components/Screen/ScreenComp/Screen";
+import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
+import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
+import { OnboardingScreen } from "../../components/Onboarding/OnboardingScreen";
 import { useSettingsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
+import { debugBorder } from "../../utils/debug-style";
 import { requestPushNotificationsPermissions } from "../../utils/notifications";
 import { NavigationParamList } from "../Navigation/Navigation";
 
 export function OnboardingNotificationsScreen(
   props: NativeStackScreenProps<NavigationParamList, "OnboardingNotifications">
 ) {
+  const { navigation } = props;
+
   const styles = useStyles();
 
   const setNotificationsSettings = useSettingsStore(
@@ -27,81 +29,66 @@ export function OnboardingNotificationsScreen(
   );
 
   return (
-    <Screen preset="scroll">
-      <View style={styles.notifications}>
-        <Picto
+    <OnboardingScreen contentContainerStyle={styles.container}>
+      {/* <Picto
+        picto="message.badge"
+        size={PictoSizes.notification}
+        style={styles.picto}
+      />
+      <Text style={styles.title}>Accept notifications</Text>
+      <Text style={styles.p}>
+        Converse is a messaging app, it works much better with notifications.
+      </Text> */}
+
+      <OnboardingPictoTitleSubtitle.Container>
+        <OnboardingPictoTitleSubtitle.Picto
           picto="message.badge"
           size={PictoSizes.notification}
-          style={styles.picto}
         />
-        <Text style={styles.title}>Accept notifications</Text>
-        <Text style={styles.p}>
+        <OnboardingPictoTitleSubtitle.Title>
+          Accept notifications
+        </OnboardingPictoTitleSubtitle.Title>
+        <OnboardingPictoTitleSubtitle.Subtitle>
           Converse is a messaging app, it works much better with notifications.
-        </Text>
+        </OnboardingPictoTitleSubtitle.Subtitle>
+      </OnboardingPictoTitleSubtitle.Container>
 
-        <Button
-          title="Accept notifications"
-          variant="primary"
-          onPress={async () => {
-            // Open popup
-            const newStatus = await requestPushNotificationsPermissions();
-            if (!newStatus) return;
-            if (newStatus === "denied" && Platform.OS === "android") {
-              // Android 13 always show denied first but sometimes
-              // it will still show the popup. If not, go to Settings!
-              Linking.openSettings();
-            } else {
-              setNotificationsSettings({ showNotificationScreen: false });
-            }
-            setNotificationsPermissionStatus(newStatus);
-          }}
-        />
-
-        <Button
-          title="Later"
-          style={styles.later}
-          variant="text"
-          onPress={() => {
+      <OnboardingPrimaryCtaButton
+        title="Accept notifications"
+        onPress={async () => {
+          // Open popup
+          const newStatus = await requestPushNotificationsPermissions();
+          if (!newStatus) return;
+          if (newStatus === "denied" && Platform.OS === "android") {
+            // Android 13 always show denied first but sometimes
+            // it will still show the popup. If not, go to Settings!
+            Linking.openSettings();
+          } else {
             setNotificationsSettings({ showNotificationScreen: false });
-          }}
-        />
-      </View>
-    </Screen>
+          }
+          setNotificationsPermissionStatus(newStatus);
+        }}
+      />
+
+      <Button
+        title="Later"
+        style={styles.later}
+        variant="text"
+        onPress={() => {
+          setNotificationsSettings({ showNotificationScreen: false });
+          navigation.push("Chats");
+        }}
+      />
+    </OnboardingScreen>
   );
 }
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
-    notifications: {
+    container: {
       flex: 1,
-      alignItems: "center",
-    },
-    picto: {
-      ...Platform.select({
-        default: {
-          marginTop: 124,
-          marginBottom: 98,
-        },
-        android: {
-          marginTop: 165,
-          marginBottom: 61,
-        },
-      }),
-    },
-    title: {
-      fontWeight: "700",
-      fontSize: 34,
-      color: textPrimaryColor(colorScheme),
-    },
-    p: {
-      fontSize: 17,
-      marginLeft: 32,
-      marginRight: 32,
-      textAlign: "center",
-      marginTop: 21,
-      marginBottom: "auto",
-      color: textPrimaryColor(colorScheme),
+      ...debugBorder(),
     },
     later: {
       marginBottom: 54,

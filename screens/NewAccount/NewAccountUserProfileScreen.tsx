@@ -6,12 +6,6 @@ import Avatar from "../../components/Avatar";
 import Button from "../../components/Button/Button";
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
-import {
-  useAddPfp,
-  useCreateOrUpdateProfileInfo,
-  useProfile,
-  useUserProfileStyles,
-} from "../../components/Onboarding/OnboardingUserProfileScreen";
 import { Pressable } from "../../design-system/Pressable";
 import { Text } from "../../design-system/Text";
 import { VStack } from "../../design-system/VStack";
@@ -20,6 +14,12 @@ import { textSecondaryColor } from "../../styles/colors";
 import { spacing } from "../../theme";
 import { sentryTrackError } from "../../utils/sentry";
 import { NavigationParamList } from "../Navigation/Navigation";
+import {
+  useAddPfp,
+  useCreateOrUpdateProfileInfo,
+  useProfile,
+  useUserProfileStyles,
+} from "../Onboarding/OnboardingUserProfileScreen";
 
 export const NewAccountUserProfileScreen = memo(
   function NewAccountUserProfileScreen(

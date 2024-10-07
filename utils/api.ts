@@ -10,11 +10,11 @@ import type { TransferAuthorizationMessage } from "./evm/erc20";
 import { getPrivyRequestHeaders } from "./evm/privy";
 import logger from "./logger";
 import type { TransactionDetails } from "./transaction";
-import type { ProfileType } from "../components/Onboarding/OnboardingUserProfileScreen";
 import config from "../config";
 import type { TopicData } from "../data/store/chatStore";
 import type { ProfileSocials } from "../data/store/profilesStore";
 import type { Frens } from "../data/store/recommendationsStore";
+import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
 
 const api = axios.create({
