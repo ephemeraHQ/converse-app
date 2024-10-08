@@ -1,3 +1,4 @@
+import { translate } from "@i18n";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -105,11 +106,11 @@ export default function NewConversation({
         ),
       headerTitle: group.enabled
         ? route.params?.addingToGroupTopic
-          ? "Add members"
-          : "New group"
-        : "New conversation",
+          ? translate("add_members")
+          : translate("new_group")
+        : translate("new_conversation"),
       headerRight: () => {
-        if (group.enabled && group.members.length > 0) {
+        if (group.enabled) {
           if (loading) {
             return <ActivityIndicator style={styles.activityIndicator} />;
           } else {
