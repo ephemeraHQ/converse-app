@@ -70,7 +70,6 @@ const styles = StyleSheet.create({
   },
   buttonSecondaryContainer: {
     paddingHorizontal: 16,
-    width: "auto",
   },
   buttonPrimary: {
     width: "100%",

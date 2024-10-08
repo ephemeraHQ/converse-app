@@ -7,7 +7,7 @@ import { Wallet } from "ethers";
 import { useCallback, useState } from "react";
 
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
-import { NewAccountTitleSubtitlePicto } from "../../components/NewAccount/NewAccountTitleSubtitlePicto";
+import { NewAccountPictoTitleSubtitle } from "../../components/NewAccount/NewAccountTitleSubtitlePicto";
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
 import { Terms } from "../../components/Onboarding/Terms";
 import { initXmtpClient } from "../../components/Onboarding/init-xmtp-client";
@@ -46,11 +46,15 @@ export function NewAccountEphemeraScreen(
 
   return (
     <NewAccountScreenComp safeAreaEdges={["bottom"]}>
-      <NewAccountTitleSubtitlePicto
-        picto="cloud"
-        title={translate("createEphemeral.title")}
-        subtitle={translate("createEphemeral.subtitle")}
-      />
+      <NewAccountPictoTitleSubtitle.Container>
+        <NewAccountPictoTitleSubtitle.Picto picto="cloud" />
+        <NewAccountPictoTitleSubtitle.Title>
+          {translate("createEphemeral.title")}
+        </NewAccountPictoTitleSubtitle.Title>
+        <NewAccountPictoTitleSubtitle.Subtitle>
+          {translate("createEphemeral.subtitle")}
+        </NewAccountPictoTitleSubtitle.Subtitle>
+      </NewAccountPictoTitleSubtitle.Container>
 
       <ValueProps />
 

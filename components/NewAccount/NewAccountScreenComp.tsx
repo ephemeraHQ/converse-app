@@ -10,11 +10,10 @@ export const NewAccountScreenComp = memo(function (props: IScreenProps) {
   return (
     <Screen
       preset="scroll"
+      safeAreaEdges={["bottom"]}
       contentContainerStyle={[
         {
           paddingHorizontal: spacing.md,
-          paddingTop: spacing.lg,
-          alignItems: "center",
         },
         contentContainerStyle,
       ]}

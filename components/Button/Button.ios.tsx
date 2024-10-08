@@ -97,7 +97,6 @@ const useStyles = () => {
       backgroundColor: primaryColor(colorScheme),
       display: "flex",
       alignSelf: "stretch",
-      marginHorizontal: 32,
       textAlign: "center",
       paddingVertical: 14,
       borderRadius: 14,

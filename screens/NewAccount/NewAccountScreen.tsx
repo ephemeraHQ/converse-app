@@ -1,12 +1,11 @@
 import { memo } from "react";
 
-import { PictoTitleSubtitle } from "../../components/PictoTitleSubtitle";
-import { Screen } from "../../components/Screen/ScreenComp/Screen";
+import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
+import { NewAccountPictoTitleSubtitle } from "../../components/NewAccount/NewAccountTitleSubtitlePicto";
 import TableView from "../../components/TableView/TableView";
 import { TableViewEmoji } from "../../components/TableView/TableViewImage";
 import { translate } from "../../i18n";
 import { useRouter } from "../../navigation/useNavigation";
-import { PictoSizes } from "../../styles/sizes";
 import { spacing } from "../../theme";
 import { isDesktop } from "../../utils/device";
 import {
@@ -24,30 +23,19 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
   const hasInstalledWallets = walletsInstalled.list.length > 0;
 
   return (
-    <Screen
+    <NewAccountScreenComp
       safeAreaEdges={["bottom"]}
       preset="scroll"
       contentContainerStyle={{
         paddingHorizontal: spacing.md,
       }}
     >
-      <PictoTitleSubtitle.Container
-        style={{
-          marginBottom: spacing.xl,
-          marginTop: spacing.xl,
-        }}
-      >
-        <PictoTitleSubtitle.Picto
-          picto="message.circle.fill"
-          size={PictoSizes.onboardingComponent}
-        />
-        <PictoTitleSubtitle.Title>
+      <NewAccountPictoTitleSubtitle.Container>
+        <NewAccountPictoTitleSubtitle.Picto picto="message.circle.fill" />
+        <NewAccountPictoTitleSubtitle.Title>
           {translate("walletSelector.title")}
-        </PictoTitleSubtitle.Title>
-        <PictoTitleSubtitle.Subtitle>
-          {translate("walletSelector.subtitle")}
-        </PictoTitleSubtitle.Subtitle>
-      </PictoTitleSubtitle.Container>
+        </NewAccountPictoTitleSubtitle.Title>
+      </NewAccountPictoTitleSubtitle.Container>
 
       <TableView
         title={translate("walletSelector.converseAccount.title")}
@@ -67,7 +55,7 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
             title: translate("walletSelector.converseAccount.createEphemeral"),
             rightView: RightViewChevron(),
             action: () => {
-              router.push("NewAccountEphemeralLogin");
+              router.push("NewAccountEphemera");
             },
           },
         ]}
@@ -99,6 +87,6 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
       />
 
       {!hasInstalledWallets && !isDesktop && <PopularWallets />}
-    </Screen>
+    </NewAccountScreenComp>
   );
 });

@@ -13,4 +13,8 @@ export const spacing = {
   xxxl: 64,
 } as const;
 
+export const layout = {
+  onboardingScreenPadding: spacing.lg,
+};
+
 export type Spacing = keyof typeof spacing;

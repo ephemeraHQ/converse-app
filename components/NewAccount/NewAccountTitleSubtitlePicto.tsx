@@ -1,34 +1,32 @@
-import { memo } from "react";
+import { IAnimatedVStackProps } from "@design-system/VStack";
+import { spacing } from "@theme/spacing";
 
-import { PictoSizes } from "../../styles/sizes";
-import { spacing } from "../../theme";
-import { IPicto } from "../Picto/Picto";
 import { PictoTitleSubtitle } from "../PictoTitleSubtitle";
 
-export const NewAccountTitleSubtitlePicto = memo(function (props: {
-  title: string;
-  picto?: IPicto;
-  subtitle?: string;
-}) {
-  const { picto, title, subtitle } = props;
-
+function NewAccountContainerComponent({
+  children,
+  style,
+  ...props
+}: IAnimatedVStackProps) {
   return (
     <PictoTitleSubtitle.Container
-      style={{
-        // ...debugBorder(),
-        marginBottom: spacing.lg,
-      }}
+      style={[
+        {
+          marginBottom: spacing.lg,
+          marginTop: spacing.lg,
+        },
+        style,
+      ]}
+      {...props}
     >
-      {!!picto && (
-        <PictoTitleSubtitle.Picto
-          picto={picto}
-          size={PictoSizes.onboardingComponent}
-        />
-      )}
-      <PictoTitleSubtitle.Title>{title}</PictoTitleSubtitle.Title>
-      {!!subtitle && (
-        <PictoTitleSubtitle.Subtitle>{subtitle}</PictoTitleSubtitle.Subtitle>
-      )}
+      {children}
     </PictoTitleSubtitle.Container>
   );
-});
+}
+
+export const NewAccountPictoTitleSubtitle = {
+  Subtitle: PictoTitleSubtitle.Subtitle,
+  Title: PictoTitleSubtitle.Title,
+  Container: NewAccountContainerComponent,
+  Picto: PictoTitleSubtitle.Picto,
+};

@@ -5,10 +5,10 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import { UserProfileScreen } from "../UserProfileScreen";
-import { NativeStack } from "./Navigation";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
 import { useRouter } from "../../navigation/useNavigation";
+import { UserProfileScreen } from "../UserProfileScreen";
+import { NativeStack } from "./Navigation";
 
 export default function UserProfileNav() {
   const colorScheme = useColorScheme();

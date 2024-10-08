@@ -221,7 +221,6 @@ export const logoutAccount = async (
     const nonTemporaryAccount = accounts.find(
       (a) => a !== TEMPORARY_ACCOUNT_NAME && a !== account
     );
-    console.log("nonTemporaryAccount:", nonTemporaryAccount);
     if (nonTemporaryAccount) {
       setCurrentAccount(nonTemporaryAccount, false);
     } else {

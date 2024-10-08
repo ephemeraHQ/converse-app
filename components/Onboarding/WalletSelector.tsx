@@ -38,16 +38,14 @@ import {
 export default function WalletSelector() {
   const router = useRouter();
 
-  const { setConnectionMethod, setSigner, setLoading, setAddingNewAccount } =
-    useOnboardingStore(
-      useSelect([
-        "setConnectionMethod",
-        "setSigner",
-        "setLoading",
-        "addingNewAccount",
-        "setAddingNewAccount",
-      ])
-    );
+  const { setSigner, setLoading, setAddingNewAccount } = useOnboardingStore(
+    useSelect([
+      "setSigner",
+      "setLoading",
+      "addingNewAccount",
+      "setAddingNewAccount",
+    ])
+  );
   const colorScheme = useColorScheme();
   const { connect: thirdwebConnect } = useConnect();
   const setActiveWallet = useSetActiveWallet();
@@ -146,7 +144,6 @@ export default function WalletSelector() {
               }),
               action: async () => {
                 setLoading(true);
-                setConnectionMethod("wallet");
                 logger.debug(
                   `[Onboarding] Clicked on wallet ${w.name} - opening external app`
                 );
@@ -180,7 +177,6 @@ export default function WalletSelector() {
                   }
                 } catch (e: any) {
                   logger.error("Error connecting to wallet:", e);
-                  setConnectionMethod(undefined);
                   setLoading(false);
                 }
               },

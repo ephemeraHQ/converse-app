@@ -3,11 +3,15 @@ import { AnimatedText, IAnimatedTextProps } from "@design-system/Text";
 import { ITitleProps, Title } from "@design-system/Title";
 import { AnimatedVStack, IAnimatedVStackProps } from "@design-system/VStack";
 import { spacing } from "@theme/spacing";
-import React from "react";
+import React, { memo } from "react";
 
-import { IPictoProps } from "./Picto/Picto";
+import { PictoSizes } from "../styles/sizes";
+import { IPicto, IPictoProps } from "./Picto/Picto";
 
-export function SubtitleComponent({ style, ...rest }: IAnimatedTextProps) {
+const SubtitleComponent = memo(function SubtitleComponent({
+  style,
+  ...rest
+}: IAnimatedTextProps) {
   return (
     <AnimatedText
       preset="subheading"
@@ -15,13 +19,16 @@ export function SubtitleComponent({ style, ...rest }: IAnimatedTextProps) {
       {...rest}
     />
   );
-}
+});
 
-export function TitleComponent({ style, ...rest }: ITitleProps) {
+const TitleComponent = memo(function TitleComponent({
+  style,
+  ...rest
+}: ITitleProps) {
   return <Title style={[{ textAlign: "center" }, style]} {...rest} />;
-}
+});
 
-export function ContainerComponent({
+const ContainerComponent = memo(function ContainerComponent({
   children,
   style,
   ...props
@@ -41,13 +48,47 @@ export function ContainerComponent({
       {children}
     </AnimatedVStack>
   );
-}
+});
 
-export function PictoComponent(props: IPictoProps) {
-  return <Picto style={{ height: props.size }} {...props} />;
-}
+const PictoComponent = memo(function PictoComponent(props: IPictoProps) {
+  const { size = spacing.xxxl, ...rest } = props;
+  return <Picto size={size} style={{ height: size }} {...rest} />;
+});
+
+export type IPictoTitleSubtitleAllProps = {
+  title: string;
+  picto?: IPicto;
+  subtitle?: string;
+};
+
+const PictoTitleSubtitleAll = memo(function (
+  props: IPictoTitleSubtitleAllProps
+) {
+  const { picto, title, subtitle } = props;
+
+  return (
+    <PictoTitleSubtitle.Container
+      style={{
+        // ...debugBorder(),
+        marginBottom: spacing.lg,
+      }}
+    >
+      {!!picto && (
+        <PictoTitleSubtitle.Picto
+          picto={picto}
+          size={PictoSizes.onboardingComponent} // Todo replace with new sizes later
+        />
+      )}
+      <PictoTitleSubtitle.Title>{title}</PictoTitleSubtitle.Title>
+      {!!subtitle && (
+        <PictoTitleSubtitle.Subtitle>{subtitle}</PictoTitleSubtitle.Subtitle>
+      )}
+    </PictoTitleSubtitle.Container>
+  );
+});
 
 export const PictoTitleSubtitle = {
+  All: PictoTitleSubtitleAll,
   Subtitle: SubtitleComponent,
   Title: TitleComponent,
   Container: ContainerComponent,
