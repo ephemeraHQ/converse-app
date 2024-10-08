@@ -58,6 +58,7 @@ fs.readFile(filePath, "utf-8", (err, data) => {
 
   appJson.expo.version = newVersion;
   appJson.expo.ios.buildNumber = "1";
+  appJson.expo.android.versionCode = appJson.expo.android.versionCode + 1;
 
   // Write the updated app.json back to the file
   fs.writeFile(
