@@ -47,6 +47,10 @@ fun isGroupMessageTopic(topic: String): Boolean {
     return topic.startsWith("/xmtp/mls/1/g-")
 }
 
+fun getGroupIdFromTopic(topic: String): String {
+    return topic.replace("/xmtp/mls/1/g-", "").replace("/proto", "")
+}
+
 fun isGroupWelcomeTopic(topic: String): Boolean {
     return topic.startsWith("/xmtp/mls/1/w-")
 }
