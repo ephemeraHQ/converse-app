@@ -317,7 +317,7 @@ const en = {
 
   // New Conversation
   cannot_be_added_to_group_yet:
-    "{{name}} needs to be on the latest version of Converse to be added to a group",
+    "{{name}} needs to update Converse to be added to a group",
 };
 
 export default en;
