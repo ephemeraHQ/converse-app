@@ -70,7 +70,7 @@ export async function initXmtpClient(args: {
   }
 }
 
-async function connectWithBase64Key(args: {
+export async function connectWithBase64Key(args: {
   address: string;
   base64Key: string;
   connectionMethod: ConnectionMethod;

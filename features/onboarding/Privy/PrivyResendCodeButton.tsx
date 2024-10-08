@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useState } from "react";
 
-import { usePrivyConnectStore } from "./privyAuthStore";
+import { usePrivyAuthStoreContext } from "./privyAuthStore";
 import Button from "../../../components/Button/Button";
 import { translate } from "../../../i18n";
 import { sentryTrackError } from "../../../utils/sentry";
@@ -10,7 +10,7 @@ export const ResendCodeButton = memo(function ResendCodeButton(props: {
 }) {
   const { onPress } = props;
 
-  const loading = usePrivyConnectStore((state) => state.loading);
+  const loading = usePrivyAuthStoreContext((state) => state.loading);
 
   const [retrySeconds, setRetrySeconds] = useState(60);
 

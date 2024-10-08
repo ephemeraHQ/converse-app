@@ -15,7 +15,7 @@ import { AvoidSoftInput } from "react-native-avoid-softinput";
 
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
-import { OnboardingScreen } from "../../components/Onboarding/OnboardingScreen";
+import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { initXmtpClient } from "../../components/Onboarding/init-xmtp-client";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
@@ -32,7 +32,7 @@ export function OnboardingPrivateKeyScreen(
   const [privateKey, setPrivateKey] = useState("");
 
   return (
-    <OnboardingScreen preset="scroll">
+    <OnboardingScreenComp preset="scroll">
       <OnboardingPictoTitleSubtitle.All
         title={translate("privateKeyConnect.title")}
         subtitle={translate("privateKeyConnect.subtitle")}
@@ -58,7 +58,7 @@ export function OnboardingPrivateKeyScreen(
           <Terms />
         </VStack>
       </VStack>
-    </OnboardingScreen>
+    </OnboardingScreenComp>
   );
 }
 

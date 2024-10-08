@@ -7,7 +7,7 @@ import { Platform } from "react-native";
 import Button from "../../components/Button/Button";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
-import { OnboardingScreen } from "../../components/Onboarding/OnboardingScreen";
+import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { useSettingsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { VStack } from "../../design-system/VStack";
@@ -28,7 +28,7 @@ export function OnboardingNotificationsScreen(
   );
 
   return (
-    <OnboardingScreen
+    <OnboardingScreenComp
       contentContainerStyle={{
         flex: 1,
         alignItems: "center",
@@ -87,6 +87,6 @@ export function OnboardingNotificationsScreen(
           }}
         />
       </VStack>
-    </OnboardingScreen>
+    </OnboardingScreenComp>
   );
 }

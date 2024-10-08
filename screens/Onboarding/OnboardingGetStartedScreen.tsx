@@ -26,7 +26,7 @@ import { useConnect, useSetActiveWallet } from "thirdweb/react";
 import { createWallet } from "thirdweb/wallets";
 
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
-import { OnboardingScreen } from "../../components/Onboarding/OnboardingScreen";
+import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
@@ -42,7 +42,7 @@ export function OnboardingGetStartedScreen() {
   const hasInstalledWallets = walletsInstalled.list.length > 0;
 
   return (
-    <OnboardingScreen safeAreaEdges={["top", "bottom"]}>
+    <OnboardingScreenComp safeAreaEdges={["top", "bottom"]}>
       <OnboardingPictoTitleSubtitle.Container>
         <AnimatedVStack
           entering={animations.fadeInUpSlow().delay(animationDelays[2])}
@@ -138,7 +138,7 @@ export function OnboardingGetStartedScreen() {
           <PopularWallets />
         </AnimatedVStack>
       )}
-    </OnboardingScreen>
+    </OnboardingScreenComp>
   );
 }
 

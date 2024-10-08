@@ -2,14 +2,16 @@ import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
 import { usePrivyAccessToken, usePrivySigner } from "@utils/evm/privy";
 import { useEffect, useRef } from "react";
 
-import { usePrivyConnectStore } from "./privyAuthStore";
+import { usePrivyAuthStoreContext } from "./privyAuthStore";
 import { initXmtpClient } from "../../../components/Onboarding/init-xmtp-client";
 import { sentryTrackError } from "../../../utils/sentry";
 
 export function usePrivyConnection() {
   const { isReady: privyReady, user: privyUser, logout } = usePrivy();
   const embeddedWallet = useEmbeddedWallet();
-  const privyAccountId = usePrivyConnectStore((state) => state.privyAccountId);
+  const privyAccountId = usePrivyAuthStoreContext(
+    (state) => state.privyAccountId
+  );
   const privySigner = usePrivySigner(true);
   const privyAccessToken = usePrivyAccessToken();
   const creatingEmbeddedWallet = useRef(false);

@@ -9,7 +9,7 @@ import { Wallet } from "ethers";
 import { useCallback, useState } from "react";
 
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
-import { OnboardingScreen } from "../../components/Onboarding/OnboardingScreen";
+import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { Terms } from "../../components/Onboarding/Terms";
 import { initXmtpClient } from "../../components/Onboarding/init-xmtp-client";
 import { Text } from "../../design-system/Text/Text";
@@ -46,7 +46,7 @@ export function OnboardingEphemeraScreen(
   }, [setLoading, router]);
 
   return (
-    <OnboardingScreen>
+    <OnboardingScreenComp>
       <PictoTitleSubtitle.Container
         style={{
           // ...debugBorder(),
@@ -90,6 +90,6 @@ export function OnboardingEphemeraScreen(
         />
         <Terms />
       </VStack>
-    </OnboardingScreen>
+    </OnboardingScreenComp>
   );
 }

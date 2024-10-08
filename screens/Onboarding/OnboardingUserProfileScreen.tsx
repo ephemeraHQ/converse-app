@@ -24,7 +24,7 @@ import Avatar from "../../components/Avatar";
 import Button from "../../components/Button/Button";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
-import { OnboardingScreen } from "../../components/Onboarding/OnboardingScreen";
+import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import config from "../../config";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
@@ -87,7 +87,7 @@ export const OnboardingUserProfileScreen = (
   const { addPFP, asset } = useAddPfp();
 
   return (
-    <OnboardingScreen contentContainerStyle={{ alignItems: "center" }}>
+    <OnboardingScreenComp contentContainerStyle={{ alignItems: "center" }}>
       <OnboardingPictoTitleSubtitle.All
         title={translate("userProfile.title.profile")}
       />
@@ -169,7 +169,7 @@ export const OnboardingUserProfileScreen = (
           loading={loading}
         />
       </VStack>
-    </OnboardingScreen>
+    </OnboardingScreenComp>
   );
 };
 

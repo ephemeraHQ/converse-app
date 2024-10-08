@@ -43,7 +43,7 @@ type Props = {
   showTerms?: boolean;
 };
 
-export default function OnboardingComponent({
+export default function DeprecatedOnboardingComponent({
   title,
   picto,
   subtitle,

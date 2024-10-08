@@ -11,7 +11,7 @@ import {
 import { OtpInput, OtpInputRef } from "react-native-otp-entry";
 
 import { ResendCodeButton } from "./PrivyResendCodeButton";
-import { usePrivyConnectStore } from "./privyAuthStore";
+import { usePrivyAuthStoreContext } from "./privyAuthStore";
 import { usePrivySmsLogin } from "./usePrivySmsLogin";
 import { translate } from "../../../i18n";
 
@@ -21,7 +21,8 @@ export const PrivyPhoneVerification = memo(() => {
   const otpInputRef = useRef<OtpInputRef>();
   const [showOtpTick, setShowOtpTick] = useState(true);
   const { loginWithCode, sendCode } = usePrivySmsLogin();
-  const { phone, setOtpCode } = usePrivyConnectStore();
+  const phone = usePrivyAuthStoreContext((state) => state.phone);
+  const setOtpCode = usePrivyAuthStoreContext((state) => state.setOtpCode);
   const beautifulPhone = formatPhoneNumberToBeautifulFormat(phone);
 
   useEffect(() => {

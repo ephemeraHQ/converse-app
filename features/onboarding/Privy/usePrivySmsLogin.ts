@@ -6,18 +6,25 @@ import {
 import { useCallback } from "react";
 import { Alert } from "react-native";
 
-import { usePrivyConnectStore } from "./privyAuthStore";
+import { usePrivyAuthStore, usePrivyAuthStoreContext } from "./privyAuthStore";
 import { translate } from "../../../i18n";
 import { sentryTrackError } from "../../../utils/sentry";
 
 export function usePrivySmsLogin() {
   const { loginWithCode: loginWithCodePrivy, sendCode: sendCodePrivy } =
     useLoginWithSMS();
-  const { setLoading, setOtpCode, setStatus, setPrivyAccountId } =
-    usePrivyConnectStore();
+
+  const setLoading = usePrivyAuthStoreContext((state) => state.setLoading);
+  const setOtpCode = usePrivyAuthStoreContext((state) => state.setOtpCode);
+  const setStatus = usePrivyAuthStoreContext((state) => state.setStatus);
+  const setPrivyAccountId = usePrivyAuthStoreContext(
+    (state) => state.setPrivyAccountId
+  );
+
+  const privyAuthStore = usePrivyAuthStore();
 
   const sendCode = useCallback(async () => {
-    const phone = usePrivyConnectStore.getState().phone;
+    const phone = privyAuthStore.getState().phone;
     if (!isValidPhoneNumber(phone)) {
       Alert.alert(translate("privyConnect.errors.invalidPhoneNumber"));
       return false;
@@ -41,12 +48,12 @@ export function usePrivySmsLogin() {
     } finally {
       setLoading(false);
     }
-  }, [sendCodePrivy, setLoading, setOtpCode, setStatus]);
+  }, [sendCodePrivy, setLoading, setOtpCode, setStatus, privyAuthStore]);
 
   const loginWithCode = useCallback(async () => {
     try {
       setLoading(true);
-      const code = usePrivyConnectStore.getState().otpCode;
+      const code = privyAuthStore.getState().otpCode;
       const user = await loginWithCodePrivy({ code });
 
       if (!user) {
@@ -59,7 +66,7 @@ export function usePrivySmsLogin() {
     } finally {
       setLoading(false);
     }
-  }, [loginWithCodePrivy, setLoading, setPrivyAccountId]);
+  }, [loginWithCodePrivy, setLoading, setPrivyAccountId, privyAuthStore]);
 
   return { sendCode, loginWithCode };
 }

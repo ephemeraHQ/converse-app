@@ -1,11 +1,10 @@
-import ConnectViaWallet from "@components/Onboarding/ConnectViaWallet";
-
-import { OnboardingScreen } from "../../components/Onboarding/OnboardingScreen";
+import { ConnectViaWallet } from "../../components/Onboarding/ConnectViaWallet";
+import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 
 export function ConnectWalletScreen() {
   return (
-    <OnboardingScreen>
+    <OnboardingScreenComp>
       <ConnectViaWallet />
-    </OnboardingScreen>
+    </OnboardingScreenComp>
   );
 }

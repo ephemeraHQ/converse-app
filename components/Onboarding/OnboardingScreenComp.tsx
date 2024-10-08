@@ -4,7 +4,7 @@ import { spacing } from "../../theme";
 import { Screen } from "../Screen/ScreenComp/Screen";
 import { IScreenProps } from "../Screen/ScreenComp/Screen.props";
 
-export const OnboardingScreen = memo(function OnboardingScreen(
+export const OnboardingScreenComp = memo(function OnboardingScreenComp(
   props: IScreenProps
 ) {
   const { contentContainerStyle, ...rest } = props;

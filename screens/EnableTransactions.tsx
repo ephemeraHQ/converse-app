@@ -19,7 +19,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
-import OnboardingComponent from "../components/Onboarding/OnboardingComponent";
+import DeprecatedOnboardingComponent from "../components/Onboarding/DeprecatedOnboardingComponent";
 import { getSignerFromPrivateKey } from "../components/Onboarding/PrivateKeyConnect";
 import { useCurrentAccount, useWalletStore } from "../data/store/accountsStore";
 import { converseEventEmitter } from "../utils/events";
@@ -94,7 +94,7 @@ export default function EnableTransactionsScreen({
 
   return (
     <View style={styles.enableTransactionsContainer}>
-      <OnboardingComponent
+      <DeprecatedOnboardingComponent
         title="Enable transactions"
         subtitle={`Please enter your seed phrase or private key below to enable transactions from Converse. It will be stored locally in the ${
           Platform.OS === "ios"
@@ -139,7 +139,7 @@ export default function EnableTransactionsScreen({
             }}
           />
         </View>
-      </OnboardingComponent>
+      </DeprecatedOnboardingComponent>
     </View>
   );
 }

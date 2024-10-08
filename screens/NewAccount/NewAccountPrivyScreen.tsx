@@ -4,13 +4,24 @@ import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScre
 import { NewAccountPictoTitleSubtitle } from "../../components/NewAccount/NewAccountTitleSubtitlePicto";
 import { PrivyPhoneEntry } from "../../features/onboarding/Privy/PrivyPhoneEntry";
 import { PrivyPhoneVerification } from "../../features/onboarding/Privy/PrivyPhoneVerification";
-import { usePrivyConnectStore } from "../../features/onboarding/Privy/privyAuthStore";
+import {
+  PrivyAuthStoreProvider,
+  usePrivyAuthStoreContext,
+} from "../../features/onboarding/Privy/privyAuthStore";
 import { usePrivyConnection } from "../../features/onboarding/Privy/usePrivyConnection";
 import { translate } from "../../i18n";
 import { PictoSizes } from "../../styles/sizes";
 
 export const NewAccountPrivyScreen = memo(function () {
-  const status = usePrivyConnectStore((state) => state.status);
+  return (
+    <PrivyAuthStoreProvider>
+      <Content />
+    </PrivyAuthStoreProvider>
+  );
+});
+
+const Content = memo(function Content() {
+  const status = usePrivyAuthStoreContext((state) => state.status);
 
   usePrivyConnection();
 

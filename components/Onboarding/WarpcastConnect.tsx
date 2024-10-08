@@ -2,7 +2,7 @@ import logger from "@utils/logger";
 import { useState } from "react";
 import { Text } from "react-native";
 
-import OnboardingComponent from "./OnboardingComponent";
+import DeprecatedOnboardingComponent from "./DeprecatedOnboardingComponent";
 import config from "../../config";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import {
@@ -39,7 +39,7 @@ export default function WarpcastConnect() {
     },
   });
   return (
-    <OnboardingComponent
+    <DeprecatedOnboardingComponent
       title="Warpcast connect"
       picto="message.circle.fill"
       subtitle="Warpcast connect"
@@ -59,6 +59,6 @@ export default function WarpcastConnect() {
     >
       <Text>Connect to Warpcast</Text>
       {error && <Text>{error}</Text>}
-    </OnboardingComponent>
+    </DeprecatedOnboardingComponent>
   );
 }

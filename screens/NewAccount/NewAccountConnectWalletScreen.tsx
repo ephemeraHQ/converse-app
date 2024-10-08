@@ -1,5 +1,12 @@
 import { memo } from "react";
 
+import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
+import { ConnectViaWallet } from "../../components/Onboarding/ConnectViaWallet";
+
 export const NewAccountConnectWalletScreen = memo(function () {
-  return null;
+  return (
+    <NewAccountScreenComp>
+      <ConnectViaWallet />
+    </NewAccountScreenComp>
+  );
 });

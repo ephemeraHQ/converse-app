@@ -1,6 +1,5 @@
 import { translate } from "@i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { awaitableAlert } from "@utils/alert";
 import { getDatabaseFilesForInboxId } from "@utils/fileSystem";
 import logger from "@utils/logger";
@@ -10,14 +9,7 @@ import { thirdwebClient } from "@utils/thirdweb";
 import { Signer } from "ethers";
 import { reloadAppAsync } from "expo";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  AppState,
-  Platform,
-  StyleSheet,
-  Text,
-  useColorScheme,
-} from "react-native";
+import { Alert, AppState, Text } from "react-native";
 import { ethers5Adapter } from "thirdweb/adapters/ethers5";
 import { ethereum } from "thirdweb/chains";
 import {
@@ -26,7 +18,7 @@ import {
   useDisconnect,
 } from "thirdweb/react";
 
-import OnboardingComponent from "./OnboardingComponent";
+import DeprecatedOnboardingComponent from "./DeprecatedOnboardingComponent";
 import ValueProps from "./ValueProps";
 import { connectWithBase64Key } from "./init-xmtp-client";
 import {
@@ -41,26 +33,18 @@ import {
   getXmtpBase64KeyFromSigner,
 } from "../../utils/xmtpRN/signIn";
 
-export default function ConnectViaWallet() {
-  const {
-    setConnectionMethod,
-    signer,
-    setSigner,
-    address,
-    loading,
-    setLoading,
-    resetOnboarding,
-  } = useOnboardingStore(
-    useSelect([
-      "setConnectionMethod",
-      "signer",
-      "setSigner",
-      "loading",
-      "setLoading",
-      "address",
-      "resetOnboarding",
-    ])
-  );
+export function ConnectViaWallet() {
+  const { signer, setSigner, address, loading, setLoading, resetOnboarding } =
+    useOnboardingStore(
+      useSelect([
+        "signer",
+        "setSigner",
+        "loading",
+        "setLoading",
+        "address",
+        "resetOnboarding",
+      ])
+    );
   const [onXmtp, setOnXmtp] = useState(false);
   const [alreadyV3Db, setAlreadyV3Db] = useState(false);
   const thirdwebWallet = useActiveWallet();
@@ -127,12 +111,10 @@ export default function ConnectViaWallet() {
       const storageKeys = await AsyncStorage.getAllKeys();
       const wcKeys = storageKeys.filter((k) => k.startsWith("wc@2:"));
       await AsyncStorage.multiRemove(wcKeys);
-      setConnectionMethod(undefined);
     },
     [
       disconnectWallet,
       resetOnboarding,
-      setConnectionMethod,
       setLoading,
       setWaitingForNextSignature,
       thirdwebWallet,
@@ -360,9 +342,7 @@ export default function ConnectViaWallet() {
     backButtonAction = disconnect;
   } else {
     backButtonText = translate("connectViaWallet.backButton");
-    backButtonAction = () => {
-      setConnectionMethod(undefined);
-    };
+    backButtonAction = () => {};
   }
 
   if (signer && address) {
@@ -403,7 +383,7 @@ export default function ConnectViaWallet() {
     !(waitingForNextSignature && !loading) || clickedSignature.current;
 
   return (
-    <OnboardingComponent
+    <DeprecatedOnboardingComponent
       picto="tray"
       title={title}
       subtitle={subtitle}
@@ -418,32 +398,6 @@ export default function ConnectViaWallet() {
           <ValueProps />
         </>
       )}
-    </OnboardingComponent>
+    </DeprecatedOnboardingComponent>
   );
 }
-
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    link: {
-      textDecorationLine: "underline",
-    },
-    terms: {
-      textAlign: "center",
-      marginLeft: 32,
-      marginRight: 32,
-      ...Platform.select({
-        default: {
-          fontSize: 17,
-          color: textPrimaryColor(colorScheme),
-        },
-        android: {
-          fontSize: 14,
-          lineHeight: 20,
-          color: textSecondaryColor(colorScheme),
-          maxWidth: 260,
-        },
-      }),
-    },
-  });
-};
