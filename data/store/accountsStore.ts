@@ -10,7 +10,11 @@ import {
   initRecommendationsStore,
   RecommendationsStoreType,
 } from "./recommendationsStore";
-import { initSettingsStore, SettingsStoreType } from "./settingsStore";
+import {
+  GroupStatus,
+  initSettingsStore,
+  SettingsStoreType,
+} from "./settingsStore";
 import {
   initTransactionsStore,
   TransactionsStoreType,
@@ -231,6 +235,29 @@ const getAccountStore = (account: string) => {
   } else {
     return storesByAccount[TEMPORARY_ACCOUNT_NAME];
   }
+};
+
+/**
+ * TODO: determine if this is the way we want to transition to imperatively
+ * calling our Zustand store.
+ * TODO: move this to a different file
+ *
+ * It isn't very ergonomic and mocking things seems a little difficult.
+ *
+ * We might want to look into creating a subscription to our stores and a
+ * behavior subject by which to observe it across the app.
+ *
+ * Set the group status for the current account
+ * @param groupStatus The group status to set
+ */
+export const setGroupStatus = (groupStatus: GroupStatus) => {
+  const account = currentAccount();
+  if (!account) {
+    logger.warn("[setGroupStatus] No current account");
+    return;
+  }
+  const setGroupStatus = getSettingsStore(account).getState().setGroupStatus;
+  setGroupStatus(groupStatus);
 };
 
 export const currentAccount = (): string =>

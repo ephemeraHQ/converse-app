@@ -1,3 +1,6 @@
+import { setGroupStatus } from "@data/store/accountsStore";
+import { OnConsentOptions } from "@hooks/useGroupConsent";
+import { createAllowGroupMutationObserver } from "@queries/useAllowGroupMutation";
 import {
   fetchGroupsQuery,
   GroupData,
@@ -6,11 +9,9 @@ import {
 } from "@queries/useGroupsQuery";
 import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
 import { GroupInvite } from "@utils/api.types";
+import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
-import {
-  consentToGroupsOnProtocol,
-  refreshGroup,
-} from "@utils/xmtpRN/conversations";
+import { refreshGroup } from "@utils/xmtpRN/conversations";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { AxiosInstance } from "axios";
 
@@ -41,6 +42,12 @@ const GROUP_JOIN_REQUEST_POLL_INTERVAL_MS = 1000;
  * Save:  saves data to some local cache or storage
  */
 
+export type AllowGroupProps = {
+  account: string;
+  group: GroupData;
+  options: OnConsentOptions;
+};
+
 export class JoinGroupClient {
   fetchGroupInvite: (groupInviteId: string) => Promise<GroupInvite>;
   attemptToJoinGroup: (
@@ -48,11 +55,7 @@ export class JoinGroupClient {
     groupInviteId: string
   ) => Promise<JoinGroupResult>;
   fetchGroupsByAccount: (account: string) => Promise<GroupsDataEntity>;
-  allowGroup: (
-    account: string,
-    topic: string,
-    groupId: string
-  ) => Promise<void>;
+  allowGroup: (props: AllowGroupProps) => Promise<void>;
   refreshGroup: (account: string, topic: string) => Promise<void>;
 
   constructor(
@@ -62,11 +65,7 @@ export class JoinGroupClient {
       groupInviteId: string
     ) => Promise<JoinGroupResult>,
     fetchGroupsByAccount: (account: string) => Promise<GroupsDataEntity>,
-    allowGroup: (
-      account: string,
-      topic: string,
-      groupId: string
-    ) => Promise<void>,
+    allowGroup: (props: AllowGroupProps) => Promise<void>,
     refreshGroup: (account: string, topic: string) => Promise<void>
   ) {
     this.fetchGroupInvite = fetchGroupInvite;
@@ -152,12 +151,27 @@ export class JoinGroupClient {
       return { type: "group-join-request.timed-out" };
     };
 
-    const liveAllowGroup = async (
-      account: string,
-      topic: string,
-      groupId: string
-    ) => {
-      await consentToGroupsOnProtocol(account, [groupId], "allow");
+    const liveAllowGroup = async ({
+      account,
+      group,
+      options,
+    }: AllowGroupProps) => {
+      const { topic, id: groupId } = group;
+      logger.debug(`[JoinGroupClient] Allowing group ${topic}`);
+      const allowGroupMutationObserver = createAllowGroupMutationObserver({
+        account,
+        topic,
+        groupId,
+      });
+      await allowGroupMutationObserver.mutate();
+      setGroupStatus({ [getGroupIdFromTopic(topic).toLowerCase()]: "allowed" });
+      const inboxIdsToAllow: InboxId[] = [];
+      const inboxIds: { [inboxId: string]: "allowed" } = {};
+      if (options.includeAddedBy && group?.addedByInboxId) {
+        const addedBy = group.addedByInboxId;
+        inboxIds[addedBy as string] = "allowed";
+        inboxIdsToAllow.push(addedBy);
+      }
     };
 
     const liveRefreshGroup = async (account: string, topic: string) => {
@@ -181,11 +195,7 @@ export class JoinGroupClient {
       groupIdFromInvite?: string
     ) => Promise<JoinGroupResult>,
     fetchGroupsByAccount: (account: string) => Promise<GroupsEntity>,
-    allowGroup: (
-      account: string,
-      topic: string,
-      groupId: string
-    ) => Promise<void>,
+    allowGroup: (props: AllowGroupProps) => Promise<void>,
     refreshGroup: (account: string, topic: string) => Promise<void>
   ): JoinGroupClient {
     return new JoinGroupClient(
@@ -249,11 +259,11 @@ export class JoinGroupClient {
       return fixtureGroupsDataEntity;
     };
 
-    const fixtureAllowGroup = async (
-      account: string,
-      topic: string,
-      groupId: string
-    ) => {};
+    const fixtureAllowGroup = async ({
+      account,
+      options,
+      group,
+    }: AllowGroupProps) => {};
 
     const fixtureRefreshGroup = async (account: string, topic: string) => {};
 

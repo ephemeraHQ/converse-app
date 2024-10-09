@@ -13,7 +13,7 @@ import { useCallback } from "react";
 
 import { useGroupCreator } from "./useGroupCreator";
 
-interface OnConsentOptions {
+export interface OnConsentOptions {
   includeCreator?: boolean;
   includeAddedBy?: boolean;
 }

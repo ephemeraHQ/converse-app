@@ -2,6 +2,7 @@ import { GroupData, GroupsDataEntity } from "@queries/useGroupsQuery";
 import { GroupInvite } from "@utils/api.types";
 import { assign, fromPromise, log, setup } from "xstate";
 
+import { AllowGroupProps } from "./GroupInvites.client";
 import { JoinGroupResult, JoinGroupResultType } from "./joinGroup.types";
 import { Controlled } from "../../dependencies/Environment/Environment";
 
@@ -65,6 +66,30 @@ export const joinGroupMachineLogic = setup({
         groupInviteId
       );
     }),
+
+    provideUserConsentToJoinGroup: fromPromise<
+      void,
+      { account: string; group: GroupData }
+    >(async ({ input }) => {
+      const { account, group } = input;
+      const allowGroupProps: AllowGroupProps = {
+        account,
+        options: {
+          includeCreator: false,
+          includeAddedBy: false,
+        },
+        group,
+      };
+
+      return await Controlled.joinGroupClient.allowGroup(allowGroupProps);
+    }),
+
+    refreshGroup: fromPromise<void, { account: string; topic: string }>(
+      async ({ input }) => {
+        const { account, topic } = input;
+        return await Controlled.joinGroupClient.refreshGroup(account, topic);
+      }
+    ),
   },
 
   actions: {
@@ -447,42 +472,92 @@ consent for the new group.
           target: "User Joined Group",
         },
         {
-          target: "Checking If User Has Been Blocked From Group",
+          guard: {
+            type: "hasUserBeenBlocked",
+            params: ({ context }) => ({
+              newGroup: context.newGroup,
+            }),
+          },
+          target: "User Has Been Blocked From Group",
+        },
+        {
+          target: "Providing User Consent to Join Group",
         },
       ],
     },
 
-    "Providing User Consent to Join Group": {},
-
-    "User Has Been Blocked From Group": {
-      type: "final",
-      entry: assign({
-        error: "The group is not active or you have been removed from it.",
-      }),
-    },
-
-    "Error Determining New Group": {
-      type: "final",
-    },
-
-    "User Joined Group": {
-      type: "final",
-      entry: {
-        type: "navigateToGroupScreen",
-        params: ({ context }) => {
-          return {
-            topic: context.newGroup!.topic,
-          };
+    "Providing User Consent to Join Group": {
+      invoke: {
+        id: "provideUserConsentToJoinGroup",
+        src: "provideUserConsentToJoinGroup",
+        input: ({ context }) => ({
+          account: context.account,
+          group: context.newGroup!,
+          options: {
+            includeCreator: false,
+            includeAddedBy: false,
+          },
+        }),
+        onDone: {
+          target: "Refreshing Group",
+        },
+        onError: {
+          target: "Error Providing User Consent",
+          actions: {
+            type: "saveError",
+            params: ({ event }) => ({ error: JSON.stringify(event.error) }),
+          },
         },
       },
     },
 
-    "Request to Join Group Rejected": {
-      type: "final",
+    "Refreshing Group": {
+      invoke: {
+        id: "refreshGroup",
+        src: "refreshGroup",
+        input: ({ context }) => ({
+          account: context.account,
+          topic: context.newGroup!.topic,
+        }),
+        onDone: {
+          target: "User Joined Group",
+        },
+        onError: {
+          target: "Error Refreshing Group",
+          actions: {
+            type: "saveError",
+            params: ({ event }) => ({ error: JSON.stringify(event.error) }),
+          },
+        },
+      },
     },
+  },
 
-    "Attempting to Join Group Timed Out": {
-      description: `
+  "User Has Been Blocked From Group": {
+    type: "final",
+    entry: assign({
+      error: "The group is not active or you have been removed from it.",
+    }),
+  },
+
+  "User Joined Group": {
+    type: "final",
+    entry: {
+      type: "navigateToGroupScreen",
+      params: ({ context }) => {
+        return {
+          topic: context.newGroup!.topic,
+        };
+      },
+    },
+  },
+
+  "Request to Join Group Rejected": {
+    type: "final",
+  },
+
+  "Attempting to Join Group Timed Out": {
+    description: `
 The invitor client has not yet automatically accepted the
 group join request. This is a known limitation of our current
 implementation, and we are exploring ideas such as allowing
@@ -496,17 +571,24 @@ The next time we are able to contact the inviter, we will
 automatically accept the request and the newly invited
 user will be able to join the group.
 `,
-      type: "final",
-    },
-
-    ///////////////////////////////////////////////////////////////////////////
-    // ERROR STATES
-    ///////////////////////////////////////////////////////////////////////////
-
-    "Error Loading Group Invite": {},
-
-    "Error Joining Group": {
-      type: "final",
-    },
+    type: "final",
   },
+
+  ///////////////////////////////////////////////////////////////////////////
+  // ERROR STATES
+  ///////////////////////////////////////////////////////////////////////////
+
+  "Error Loading Group Invite": {},
+
+  "Error Joining Group": {
+    type: "final",
+  },
+
+  "Error Loading Groups": {},
+
+  "Error Determining New Group": {},
+
+  "Error Providing User Consent": {},
+
+  "Error Refreshing Group": {},
 });

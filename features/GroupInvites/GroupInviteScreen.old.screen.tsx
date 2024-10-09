@@ -74,8 +74,8 @@ export default function GroupInviteScreen({
           includeCreator: false,
           includeAddedBy: false,
         });
-        // does replace work here?
         await refreshGroup(account, group.topic);
+        // does replace work here?
         navigation.goBack();
         setTimeout(() => {
           navigation.navigate("Conversation", { topic: group.topic });
@@ -177,7 +177,20 @@ export default function GroupInviteScreen({
         (id) => !oldGroupIds.has(id)
       );
       if (newGroupId) {
-        setNewGroup(groupsAfterJoining.byId[newGroupId]);
+        const newGroup = groupsAfterJoining.byId[newGroupId];
+        // looks like if the user was on an old version of the app
+        // nd they joined a group that they had been blocked from,
+        // then there would be some uncovered edge case?
+        const wasblocked = !newGroup.isGroupActive;
+        if (wasblocked) {
+          setGroupJoinState({
+            polling: false,
+            finishedPollingUnsuccessfully: false,
+            joinStatus: "REJECTED",
+          });
+        } else {
+          setNewGroup(newGroup);
+        }
       } else {
         setGroupJoinState({
           polling: false,
