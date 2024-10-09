@@ -1,8 +1,9 @@
-import { StyleProp, TextStyle } from "react-native";
+import { TextStyle } from "react-native";
 
 import { IWeights } from "./Text.props";
 import { isRTL } from "../../i18n";
-import { colors, typography } from "../../theme";
+import { typography } from "../../theme";
+import { ThemedStyle } from "../../theme/useAppTheme";
 
 export const $sizeStyles = {
   xxl: { fontSize: 36, lineHeight: 44 } satisfies TextStyle,
@@ -32,10 +33,10 @@ export const $fontWeightStyles = Object.entries(typography.primary).reduce(
   {}
 ) as Record<IWeights, TextStyle>;
 
-export const $baseStyle: StyleProp<TextStyle> = [
-  $sizeStyles.sm,
-  $fontWeightStyles.normal,
-  { color: colors.text },
-];
+export const $baseStyle: ThemedStyle<TextStyle> = (theme) => ({
+  ...$sizeStyles.sm,
+  ...$fontWeightStyles.normal,
+  color: theme.colors.text,
+});
 
 export const $rtlStyle: TextStyle = isRTL ? { writingDirection: "rtl" } : {};

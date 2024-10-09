@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
-export type IAuthStatus = "idle" | "signOut" | "signIn";
+export type IAuthStatus = "idle" | "signedOut" | "signedIn";
 
 export interface IAuthStore {
   status: IAuthStatus;

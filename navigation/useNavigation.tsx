@@ -1,4 +1,8 @@
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import {
+  NavigationProp,
+  StackActions,
+  useNavigation,
+} from "@react-navigation/native";
 import { useEffect } from "react";
 
 import { NavigationParamList } from "../screens/Navigation/Navigation";
@@ -80,8 +84,8 @@ export function useRouter(args?: {
   }, [onBeforeRemove, navigation]);
 
   return {
-    setOptions: navigation.setOptions,
-    push: navigation.navigate,
-    goBack: navigation.goBack,
+    push: navigation.navigate, // To make sure if we decide to migrate to expo-router it's easier
+    popToTop: () => navigation.dispatch(StackActions.popToTop()),
+    ...navigation,
   };
 }

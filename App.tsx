@@ -31,7 +31,12 @@ import "./utils/splash/splash";
 
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
+import {
+  TEMPORARY_ACCOUNT_NAME,
+  useAccountsStore,
+} from "./data/store/accountsStore";
 import { useAppStore } from "./data/store/appStore";
+import { setAuthStatus } from "./data/store/authStore";
 import { useSelect } from "./data/store/storeHelpers";
 import {
   runAsyncUpdates,
@@ -99,6 +104,16 @@ export default function App() {
       });
     }
   }, [isInternetReachable, hydrationDone]);
+
+  // For now we use persit with zustand to get the accounts when the app launch so here is okay to see if we're logged in or not
+  useEffect(() => {
+    const currentAccount = useAccountsStore.getState().currentAccount;
+    if (currentAccount && currentAccount !== TEMPORARY_ACCOUNT_NAME) {
+      setAuthStatus("signedIn");
+    } else {
+      setAuthStatus("idle");
+    }
+  }, []);
 
   // On Android we use the default keyboard "animation"
   const AppKeyboardProvider =

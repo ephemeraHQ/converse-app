@@ -62,3 +62,5 @@ export const typography = {
     default: fonts.sfPro,
   }),
 };
+
+export type ITypography = typeof typography;

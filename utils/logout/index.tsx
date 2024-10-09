@@ -12,10 +12,10 @@ import {
   TEMPORARY_ACCOUNT_NAME,
   useAccountsStore,
 } from "../../data/store/accountsStore";
+import { setAuthStatus } from "../../data/store/authStore";
 import { deleteSecureItemAsync } from "../keychain";
 import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
 import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
-import { navigate } from "../navigation";
 import {
   deleteSubscribedTopics,
   lastNotifSubscribeByAccount,
@@ -226,7 +226,7 @@ export const logoutAccount = async (
     } else {
       setCurrentAccount(TEMPORARY_ACCOUNT_NAME, false);
       // No more accounts, let's go back to onboarding
-      navigate("OnboardingGetStarted");
+      setAuthStatus("signedOut");
     }
   }
 

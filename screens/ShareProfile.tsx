@@ -1,5 +1,4 @@
 import Clipboard from "@react-native-clipboard/clipboard";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -55,7 +54,6 @@ const ShareProfileContent = ({
   compact?: boolean;
 }) => {
   const colorScheme = useColorScheme();
-  const headerHeight = useHeaderHeight();
   const styles = useStyles();
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -147,7 +145,6 @@ const ShareProfileContent = ({
           </TouchableOpacity>
         )}
       </View>
-      {!compact && <View style={{ height: headerHeight }} />}
     </View>
   );
 };

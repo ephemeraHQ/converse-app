@@ -13,18 +13,16 @@ import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
 import GroupInviteNav, { GroupInviteNavParams } from "./GroupInviteNav";
 import GroupLinkNav, { GroupLinkNavParams } from "./GroupLinkNav";
 import GroupNav, { GroupNavParams } from "./GroupNav";
+import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
+import { useAuthStatus } from "../../data/store/authStore";
+import { useRouter } from "../../navigation/useNavigation";
+import { isDesktop } from "../../utils/device";
+import Accounts from "../Accounts/Accounts";
+import { IdleScreen } from "../IdleScreen";
 import NewConversationNav, {
   NewConversationNavParams,
 } from "./NewConversationNav";
 import ProfileNav, { ProfileNavParams } from "./ProfileNav";
-import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
-import {
-  getCurrentAccount,
-  TEMPORARY_ACCOUNT_NAME,
-} from "../../data/store/accountsStore";
-import { useRouter } from "../../navigation/useNavigation";
-import { isDesktop } from "../../utils/device";
-import Accounts from "../Accounts/Accounts";
 import { NewAccountConnectWalletScreen } from "../NewAccount/NewAccountConnectWalletScreen";
 import { NewAccountEphemeraScreen } from "../NewAccount/NewAccountEphemeraScreen";
 import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeyScreen";
@@ -48,8 +46,9 @@ import WebviewPreviewNav, {
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 
 export type NavigationParamList = {
+  Idle: undefined;
+
   // Auth / Onboarding
-  // Onboarding
   OnboardingGetStarted: undefined;
   OnboardingPrivy: undefined;
   OnboardingConnectWallet: undefined;
@@ -101,113 +100,127 @@ export const navigationAnimation = Platform.OS === "ios" ? "default" : "none";
 export function MainNavigation() {
   const colorScheme = useColorScheme();
   const router = useRouter();
-
-  const currentAccount = getCurrentAccount();
+  const authStatus = useAuthStatus();
 
   return (
     <NativeStack.Navigator
       screenOptions={{ gestureEnabled: !isDesktop }}
       screenListeners={screenListeners("fullStackNavigation")} // TODO: Do we still need this?
-      initialRouteName={
-        currentAccount && currentAccount !== TEMPORARY_ACCOUNT_NAME
-          ? "Chats"
-          : "OnboardingGetStarted"
-      }
     >
-      {/* Auth / Onboarding */}
-      <NativeStack.Group
-        screenOptions={{
-          ...stackGroupScreenOptions(colorScheme),
-          ...authScreensSharedScreenOptions,
-        }}
-      >
+      {authStatus === "idle" && (
         <NativeStack.Screen
           options={{
             headerShown: false,
           }}
-          name="OnboardingGetStarted"
-          component={OnboardingGetStartedScreen}
+          name="Idle"
+          component={IdleScreen}
         />
-        <NativeStack.Screen
-          name="OnboardingPrivy"
-          component={OnboardingPrivyScreen}
-        />
-        <NativeStack.Screen
-          name="OnboardingConnectWallet"
-          component={OnboardingConnectWalletScreen}
-        />
-        <NativeStack.Screen
-          name="OnboardingNotifications"
-          component={OnboardingNotificationsScreen}
-        />
-        <NativeStack.Screen
-          name="OnboardingUserProfile"
-          component={OnboardingUserProfileScreen}
-        />
-        <NativeStack.Screen
-          name="OnboardingPrivateKey"
-          component={OnboardingPrivateKeyScreen}
-        />
-        <NativeStack.Screen
-          name="OnboardingEphemeral"
-          component={OnboardingEphemeraScreen}
-        />
-      </NativeStack.Group>
+      )}
 
-      <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
-        {ConversationListNav()}
-        {ConversationRequestsListNav()}
-        {ConversationBlockedListNav()}
-        {ConversationNav()}
-        {NewConversationNav()}
-        {ConverseMatchMakerNav()}
-        {ShareProfileNav()}
-        {ShareFrameNav()}
-        {WebviewPreviewNav()}
-        {ProfileNav()}
-        {GroupNav()}
-        {GroupLinkNav()}
-        {GroupInviteNav()}
-        {TopUpNav()}
-      </NativeStack.Group>
+      {authStatus === "signedIn" && (
+        <NativeStack.Group>
+          <NativeStack.Group
+            screenOptions={stackGroupScreenOptions(colorScheme)}
+          >
+            {ConversationListNav()}
+            {ConversationRequestsListNav()}
+            {ConversationBlockedListNav()}
+            {ConversationNav()}
+            {NewConversationNav()}
+            {ConverseMatchMakerNav()}
+            {ShareProfileNav()}
+            {ShareFrameNav()}
+            {WebviewPreviewNav()}
+            {ProfileNav()}
+            {GroupNav()}
+            {GroupLinkNav()}
+            {GroupInviteNav()}
+            {TopUpNav()}
+          </NativeStack.Group>
 
-      {/* Modals */}
-      <NativeStack.Group
-        screenOptions={{
-          presentation: "modal",
-          ...stackGroupScreenOptions(colorScheme),
-        }}
-      >
-        {UserProfileNav()}
-        <NativeStack.Screen
-          name="Accounts"
-          component={Accounts}
-          options={{
-            headerLargeTitle: true,
-            headerShadowVisible: false,
-            headerLeft: () => (
-              <ScreenHeaderModalCloseButton onPress={router.goBack} />
-            ),
-          }}
-        />
-        <NativeStack.Screen
-          name="NewAccountUserProfile"
-          component={NewAccountUserProfileScreen}
-          options={{
-            headerLeft: () => (
-              <ScreenHeaderModalCloseButton onPress={router.goBack} />
-            ),
-            headerTitle: "Modify profile",
-          }}
-        />
-        <NativeStack.Screen
-          name="NewAccountNavigator"
-          component={NewAccountNavigator}
-          options={{
-            headerShown: false,
-          }}
-        />
-      </NativeStack.Group>
+          {/* Modals */}
+          <NativeStack.Group
+            screenOptions={{
+              presentation: "modal",
+              ...stackGroupScreenOptions(colorScheme),
+            }}
+          >
+            {UserProfileNav()}
+            <NativeStack.Screen
+              name="Accounts"
+              component={Accounts}
+              options={{
+                headerLargeTitle: true,
+                headerShadowVisible: false,
+                headerLeft: () => (
+                  <ScreenHeaderModalCloseButton onPress={router.goBack} />
+                ),
+              }}
+            />
+            <NativeStack.Screen
+              name="NewAccountUserProfile"
+              component={NewAccountUserProfileScreen}
+              options={{
+                headerLeft: () => (
+                  <ScreenHeaderModalCloseButton onPress={router.goBack} />
+                ),
+                headerTitle: "Modify profile",
+              }}
+            />
+            <NativeStack.Screen
+              name="NewAccountNavigator"
+              component={NewAccountNavigator}
+              options={{
+                headerShown: false,
+              }}
+            />
+          </NativeStack.Group>
+        </NativeStack.Group>
+      )}
+
+      {authStatus === "signedOut" && (
+        <NativeStack.Group>
+          {/* Auth / Onboarding */}
+          <NativeStack.Group
+            screenOptions={{
+              ...stackGroupScreenOptions(colorScheme),
+              ...authScreensSharedScreenOptions,
+            }}
+          >
+            <NativeStack.Screen
+              options={{
+                headerShown: false,
+              }}
+              name="OnboardingGetStarted"
+              component={OnboardingGetStartedScreen}
+            />
+            <NativeStack.Screen
+              name="OnboardingPrivy"
+              component={OnboardingPrivyScreen}
+            />
+            <NativeStack.Screen
+              name="OnboardingConnectWallet"
+              component={OnboardingConnectWalletScreen}
+            />
+            <NativeStack.Screen
+              name="OnboardingNotifications"
+              component={OnboardingNotificationsScreen}
+            />
+            <NativeStack.Screen
+              name="OnboardingUserProfile"
+              component={OnboardingUserProfileScreen}
+            />
+            <NativeStack.Screen
+              name="OnboardingPrivateKey"
+              component={OnboardingPrivateKeyScreen}
+            />
+            <NativeStack.Screen
+              name="OnboardingEphemeral"
+              component={OnboardingEphemeraScreen}
+            />
+          </NativeStack.Group>
+        </NativeStack.Group>
+      )}
     </NativeStack.Navigator>
   );
 }

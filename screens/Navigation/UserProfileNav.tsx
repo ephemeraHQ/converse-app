@@ -22,7 +22,11 @@ export default function UserProfileNav() {
         headerTitle: "Modify profile",
         headerTitleStyle: headerTitleStyle(colorScheme),
         headerLeft: () => (
-          <ScreenHeaderModalCloseButton onPress={router.goBack} />
+          <ScreenHeaderModalCloseButton
+            onPress={() => {
+              router.goBack();
+            }}
+          />
         ),
         headerTintColor:
           Platform.OS === "android" || Platform.OS === "web"

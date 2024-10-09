@@ -14,3 +14,5 @@ export const timing = {
    */
   slow: 1000,
 };
+
+export type Timing = typeof timing;

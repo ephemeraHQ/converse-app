@@ -1,14 +1,12 @@
 import { TextProps as RNTextProps, StyleProp, TextStyle } from "react-native";
 
-import { $presets } from "./Text.presets";
+import { IPresets } from "./Text.presets";
 import { $sizeStyles } from "./Text.styles";
 import { i18n, TxKeyPath } from "../../i18n";
 import { typography } from "../../theme";
 
 export type ISizes = keyof typeof $sizeStyles;
 export type IWeights = keyof typeof typography.primary;
-export type IPresets = keyof typeof $presets;
-
 export interface ITextProps extends RNTextProps {
   /**
    * Text which is looked up via i18n.

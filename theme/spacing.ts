@@ -17,4 +17,4 @@ export const layout = {
   onboardingScreenPadding: spacing.lg,
 };
 
-export type Spacing = keyof typeof spacing;
+export type ISpacing = typeof spacing;

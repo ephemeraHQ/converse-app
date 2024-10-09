@@ -1,4 +1,3 @@
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { primaryColor, textPrimaryColor } from "@styles/colors";
 import React, {
   Platform,
@@ -7,12 +6,12 @@ import React, {
   useColorScheme,
 } from "react-native";
 
-export default function NoResult({
-  navigation,
-}: {
-  navigation: NativeStackNavigationProp<any>;
-}) {
+import { useRouter } from "../../navigation/useNavigation";
+
+export default function NoResult() {
   const styles = useStyles();
+
+  const navigation = useRouter();
 
   return (
     <>
@@ -25,7 +24,7 @@ export default function NoResult({
         <Text
           style={styles.clickableText}
           onPress={() => {
-            navigation.navigate("NewConversation", { focus: true });
+            navigation.push("NewConversation", {});
           }}
         >
           start a new conversation

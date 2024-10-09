@@ -1,10 +1,11 @@
 import React from "react";
 import { Text as RNText, StyleProp, TextStyle } from "react-native";
 
-import { $presets } from "./Text.presets";
-import { IPresets, ITextProps } from "./Text.props";
+import { $presets, IPresets } from "./Text.presets";
+import { ITextProps } from "./Text.props";
 import { $fontWeightStyles, $rtlStyle, $sizeStyles } from "./Text.styles";
 import { translate } from "../../i18n";
+import { useAppTheme } from "../../theme/useAppTheme";
 
 /**
  * For your text displaying needs.
@@ -25,6 +26,8 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     ...rest
   } = props;
 
+  const { themed } = useAppTheme();
+
   const i18nText = tx && translate(tx, txOptions);
   const content = i18nText || text || children;
 
@@ -32,7 +35,7 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
 
   const $styles: StyleProp<TextStyle> = [
     $rtlStyle,
-    $presets[preset],
+    themed($presets[preset]),
     weight && $fontWeightStyles[weight],
     size && $sizeStyles[size],
     $styleOverride,

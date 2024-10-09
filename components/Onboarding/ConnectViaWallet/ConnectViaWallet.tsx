@@ -18,10 +18,6 @@ import {
 } from "thirdweb/react";
 
 import {
-  ConnectViaWalletStoreProvider,
-  useConnectViaWalletStoreContext,
-} from "./connectViaWalletStore";
-import {
   getAccountsList,
   useAccountsStore,
 } from "../../../data/store/accountsStore";
@@ -34,6 +30,11 @@ import {
 import DeprecatedOnboardingComponent from "../DeprecatedOnboardingComponent";
 import ValueProps from "../ValueProps";
 import { connectWithBase64Key } from "../init-xmtp-client";
+import {
+  ConnectViaWalletStoreProvider,
+  useConnectViaWalletStore,
+  useConnectViaWalletStoreContext,
+} from "./connectViaWalletStore";
 
 function useThirdwebSigner() {
   const thirdwebAccount = useActiveAccount();
@@ -75,9 +76,13 @@ function useXmtpConnection() {
     setSignaturesDone: state.setSignaturesDone,
   }));
 
+  const useConnectViewWalletStore = useConnectViaWalletStore();
+
   const inXmtpClientCreationFlow = useRef(false);
   const initiatingClientFor = useRef<string | undefined>(undefined);
   const clickedSignature = useRef(false);
+
+  const disconnect = useDisconnect();
 
   const waitForClickSignature = useCallback(async () => {
     while (!clickedSignature.current) {
@@ -116,7 +121,9 @@ function useXmtpConnection() {
           clickedSignature.current = false;
         },
         async () => {
-          setSignaturesDone((s) => s + 1);
+          const currentSignature =
+            useConnectViewWalletStore.getState().signaturesDone;
+          setSignaturesDone(currentSignature + 1);
           setLoading(false);
           logger.debug("Waiting until signature click for Enable");
           await waitForClickSignature();
@@ -135,7 +142,9 @@ function useXmtpConnection() {
           }
         },
         async () => {
-          setSignaturesDone((s) => s + 1);
+          const currentSignature =
+            useConnectViewWalletStore.getState().signaturesDone;
+          setSignaturesDone(currentSignature + 1);
           setLoading(false);
           logger.debug("Waiting until signature click for Authenticate");
           await waitForClickSignature();
@@ -176,6 +185,8 @@ function useXmtpConnection() {
     waitForClickSignature,
     setWaitingForNextSignature,
     setSignaturesDone,
+    disconnect,
+    useConnectViewWalletStore,
   ]);
 
   return { initXmtpClient };
@@ -198,7 +209,6 @@ const Content = memo(function Content() {
     setLoading,
     setOnXmtp,
     setAlreadyV3Db,
-    resetOnboarding,
     signer,
     onXmtp,
     alreadyV3Db,
@@ -211,7 +221,6 @@ const Content = memo(function Content() {
     setLoading: state.setLoading,
     setOnXmtp: state.setOnXmtp,
     setAlreadyV3Db: state.setAlreadyV3Db,
-    resetOnboarding: state.resetOnboarding,
     signer: state.signer,
     onXmtp: state.onXmtp,
     alreadyV3Db: state.alreadyV3Db,
@@ -219,34 +228,8 @@ const Content = memo(function Content() {
   }));
 
   const { thirdwebSigner } = useThirdwebSigner();
-  const { disconnect: disconnectWallet } = useThirdwebDisconnect();
-  const thirdwebWallet = useActiveWallet();
 
-  const disconnect = useCallback(
-    async (resetLoading = true) => {
-      logger.debug("[Onboarding] Logging out");
-      if (address) {
-        logoutAccount(
-          address,
-          false,
-          true,
-          () => {},
-          () => {}
-        );
-      }
-      resetOnboarding();
-      if (resetLoading) {
-        setLoading(false);
-      }
-      if (thirdwebWallet) {
-        await disconnectWallet(thirdwebWallet);
-      }
-      const storageKeys = await AsyncStorage.getAllKeys();
-      const wcKeys = storageKeys.filter((k) => k.startsWith("wc@2:"));
-      await AsyncStorage.multiRemove(wcKeys);
-    },
-    [address, resetOnboarding, setLoading, disconnectWallet, thirdwebWallet]
-  );
+  const disconnect = useDisconnect();
 
   const { initXmtpClient } = useXmtpConnection();
 
@@ -428,3 +411,41 @@ const Content = memo(function Content() {
     </DeprecatedOnboardingComponent>
   );
 });
+
+function useDisconnect() {
+  const { disconnect: disconnectWallet } = useThirdwebDisconnect();
+  const thirdwebWallet = useActiveWallet();
+
+  const { address, setLoading, resetOnboarding } =
+    useConnectViaWalletStoreContext((state) => ({
+      address: state.address,
+      setLoading: state.setLoading,
+      resetOnboarding: state.resetOnboarding,
+    }));
+
+  return useCallback(
+    async (resetLoading = true) => {
+      logger.debug("[Onboarding] Logging out");
+      if (address) {
+        logoutAccount(
+          address,
+          false,
+          true,
+          () => {},
+          () => {}
+        );
+      }
+      resetOnboarding();
+      if (resetLoading) {
+        setLoading(false);
+      }
+      if (thirdwebWallet) {
+        disconnectWallet(thirdwebWallet);
+      }
+      const storageKeys = await AsyncStorage.getAllKeys();
+      const wcKeys = storageKeys.filter((k) => k.startsWith("wc@2:"));
+      await AsyncStorage.multiRemove(wcKeys);
+    },
+    [address, resetOnboarding, setLoading, disconnectWallet, thirdwebWallet]
+  );
+}

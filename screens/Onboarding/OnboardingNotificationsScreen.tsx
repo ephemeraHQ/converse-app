@@ -10,6 +10,7 @@ import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/Onboardi
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { useSettingsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
+import { setAuthStatus } from "../../data/store/authStore";
 import { VStack } from "../../design-system/VStack";
 import { spacing } from "../../theme";
 import { requestPushNotificationsPermissions } from "../../utils/notifications";
@@ -18,8 +19,6 @@ import { NavigationParamList } from "../Navigation/Navigation";
 export function OnboardingNotificationsScreen(
   props: NativeStackScreenProps<NavigationParamList, "OnboardingNotifications">
 ) {
-  const { navigation } = props;
-
   const setNotificationsSettings = useSettingsStore(
     (s) => s.setNotificationsSettings
   );
@@ -83,7 +82,7 @@ export function OnboardingNotificationsScreen(
           variant="text"
           onPress={() => {
             setNotificationsSettings({ showNotificationScreen: false });
-            navigation.push("Chats");
+            setAuthStatus("signedIn");
           }}
         />
       </VStack>

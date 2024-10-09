@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
 
+import { WebviewPreviewScreenConfig } from "./Navigation/WebviewPreviewNav";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
@@ -16,6 +17,7 @@ import WalletsStateHandler from "../components/StateHandlers/WalletsStateHandler
 import config from "../config";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
+import { useThemeProvider } from "../theme/useAppTheme";
 import { useAddressBookStateHandler } from "../utils/addressBook";
 import { converseEventEmitter } from "../utils/events";
 import { usePrivyAccessToken } from "../utils/evm/privy";
@@ -31,7 +33,6 @@ import { NewConversationScreenConfig } from "./Navigation/NewConversationNav";
 import { ProfileScreenConfig } from "./Navigation/ProfileNav";
 import { ShareProfileScreenConfig } from "./Navigation/ShareProfileNav";
 import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
-import { WebviewPreviewScreenConfig } from "./Navigation/WebviewPreviewNav";
 import {
   getConverseInitialURL,
   getConverseStateFromPath,
@@ -66,37 +67,59 @@ export default function Main() {
   useAddressBookStateHandler();
   useCheckCurrentInstallation();
 
+  const isSplitScreen = useIsSplitScreen();
+
+  const {
+    themeScheme,
+    navigationTheme,
+    setThemeContextOverride,
+    ThemeProvider,
+  } = useThemeProvider();
+
+  if (isSplitScreen) {
+    return (
+      <>
+        <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
+          <Initializer />
+          <SplitScreenNavigation />
+        </ThemeProvider>
+      </>
+    );
+  }
+
   return (
     <>
-      <Initializer />
-      <NavigationContainer
-        linking={linking}
-        ref={(r) => {
-          if (r) {
-            converseNavigations["splitScreen"] = r;
-          }
-        }}
-        onUnhandledAction={() => {
-          // Since we're handling multiple navigators,
-          // let's silence errors when the action
-          // is not meant for this one
-        }}
-      >
-        <NavigationContent />
-      </NavigationContainer>
+      <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
+        <Initializer />
+        <NavigationContainer
+          theme={navigationTheme}
+          linking={linking}
+          ref={(r) => {
+            if (r) {
+              converseNavigations["main"] = r;
+            }
+          }}
+          onUnhandledAction={() => {
+            // Since we're handling multiple navigators,
+            // let's silence errors when the action
+            // is not meant for this one
+          }}
+        >
+          <NavigationContent />
+        </NavigationContainer>
+      </ThemeProvider>
     </>
   );
 }
 
 const NavigationContent = () => {
   const colorScheme = useColorScheme();
-  const isSplitScreen = useIsSplitScreen();
+
+  const { navigationDrawer } = useNavigationDrawer();
 
   const { splashScreenHidden } = useAppStore(
     useSelect(["notificationsPermissionStatus", "splashScreenHidden"])
   );
-
-  const { navigationDrawer } = useNavigationDrawer();
 
   if (!splashScreenHidden) {
     // TODO: Add a loading screen
@@ -114,10 +137,6 @@ const NavigationContent = () => {
         <MainNavigation />
       </AccountsDrawer>
     );
-  }
-
-  if (isSplitScreen) {
-    return <SplitScreenNavigation />;
   }
 
   return <MainNavigation />;

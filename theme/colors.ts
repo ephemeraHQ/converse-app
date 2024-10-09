@@ -38,47 +38,17 @@ const palette = {
 } as const;
 
 export const colors = {
-  /**
-   * The palette is available to use, but prefer using the name.
-   * This is only included for rare, one-off cases. Try to use
-   * semantic names as much as possible.
-   */
-  palette,
-  /**
-   * A helper for making something see-thru.
-   */
   transparent: "rgba(0, 0, 0, 0)",
-  /**
-   * The default text color in many components.
-   */
   text: palette.neutral800,
-  /**
-   * Secondary text information.
-   */
   textDim: palette.neutral600,
-  /**
-   * The default color of the screen background.
-   */
   background: palette.neutral100,
-  /**
-   * The default border color.
-   */
   border: palette.neutral400,
-  /**
-   * The main tinting color.
-   */
   tint: palette.primary500,
-  /**
-   * A subtle color used for lines.
-   */
   separator: palette.neutral300,
-  /**
-   * Error messages.
-   */
   error: palette.angry500,
-  /**
-   * Error Background.
-   *
-   */
   errorBackground: palette.angry100,
 };
+
+export type IColorsKey = keyof typeof colors;
+
+export type IColors = { [key in IColorsKey]: string };
