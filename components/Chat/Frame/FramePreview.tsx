@@ -1,6 +1,5 @@
 import logger from "@utils/logger";
 import { FrameActionInputs } from "@xmtp/frames-client";
-import { ethers } from "ethers";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -9,11 +8,9 @@ import { v4 as uuidv4 } from "uuid";
 
 import FrameBottom from "./FrameBottom";
 import FrameImage from "./FrameImage";
-import config from "../../../config";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { cacheForMedia, fetchAndCacheMedia } from "../../../utils/cache/cache";
 import { useConversationContext } from "../../../utils/conversation";
-import { useExternalSigner } from "../../../utils/evm/external";
 import {
   FrameButtonType,
   FrameToDisplay,
@@ -22,7 +19,7 @@ import {
   getFrameButtons,
   getFrameImage,
   getFramesClient,
-  handleTxAction,
+  useHandleTxAction,
   validateFrame,
 } from "../../../utils/frames";
 import { MessageToDisplay } from "../Message/Message";
@@ -58,7 +55,7 @@ export default function FramePreview({
   const messageId = useRef(message.id);
   const fetchingInitialForMessageId = useRef(undefined as undefined | string);
 
-  const { getExternalSigner } = useExternalSigner();
+  const { handleTxAction } = useHandleTxAction();
 
   // Components are recycled, let's fix when stuff changes
   if (message.id !== messageId.current) {
@@ -192,23 +189,14 @@ export default function FramePreview({
           const payload = await framesClient.signFrameAction(actionInput);
 
           if (button.action === "tx") {
-            if (Platform.OS !== "web" || !config.enableTransactionFrames) {
-              alert("Transaction frames are not supported yet.");
-              throw new Error("Transaction frames not supported yet");
-            }
-            // For tx, we get the tx data from target, then trigger it, then do a POST action
-            const externalSigner = await getExternalSigner();
-            if (!externalSigner || !externalSigner.provider)
-              throw new Error("Could not get an external signer");
-
-            const { buttonPostUrl, txHash } = await handleTxAction(
+            const { buttonPostUrl, transactionReceipt } = await handleTxAction(
               frame,
               button,
-              payload,
-              externalSigner.provider as ethers.providers.Web3Provider
+              payload
             );
 
-            payload.untrustedData.transactionId = txHash;
+            payload.untrustedData.transactionId =
+              transactionReceipt.transactionHash;
             actionPostUrl = buttonPostUrl;
           }
 
@@ -282,7 +270,7 @@ export default function FramePreview({
       conversation,
       frame,
       frameTextInputValue,
-      getExternalSigner,
+      handleTxAction,
       initialFrame.url,
       message.topic,
       setFrameTextInputFocused,

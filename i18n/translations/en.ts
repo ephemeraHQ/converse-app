@@ -324,6 +324,10 @@ const en = {
     "Share your feedback and ideas with the Converse team and other alpha testers.",
   joinAlphaGroup: "Join Converse VIP Alpha Chat",
   linkCopied: "Link copied",
+
+  // Transactional frames
+  transactionalFrameConnectWallet:
+    "Connect to a wallet app to trigger a transaction",
 };
 
 export default en;

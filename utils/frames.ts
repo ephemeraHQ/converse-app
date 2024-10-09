@@ -1,4 +1,5 @@
 import { debugEnabled } from "@components/DebugButton";
+import { translate } from "@i18n";
 import { OpenFramesProxy } from "@open-frames/proxy-client";
 import {
   GetMetadataResponse,
@@ -9,13 +10,12 @@ import {
   FramesClient,
   OPEN_FRAMES_PROXY_URL,
 } from "@xmtp/frames-client";
-import { BigNumber, ethers } from "ethers";
-import { hexValue } from "ethers/lib/utils";
+import { useCallback } from "react";
 
+import { useExternalSigner } from "./evm/external";
 import logger from "./logger";
 import { URL_REGEX } from "./regex";
 import { strByteSize } from "./str";
-import { extractChainIdToHex } from "./transaction";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { getXmtpClient } from "./xmtpRN/sync";
 import { MessageToDisplay } from "../components/Chat/Message/Message";
@@ -197,77 +197,53 @@ export const getFrameImage = (frame: FrameWithType) => {
   }
 };
 
-export const handleTxAction = async (
-  frame: FrameToDisplay,
-  button: FrameButtonType,
-  payload: any,
-  provider: ethers.providers.Web3Provider
-) => {
-  // @todo => proxy should get upgraded to extract post url from button
-  const buttonPostUrl =
-    frame.extractedTags[`fc:frame:button:${button.index}:post_url`];
-  const buttonTarget = button.target;
-  if (!buttonPostUrl || !buttonTarget)
-    throw new Error("Missing postUrl or target");
-  const txData = await framesProxy.postTransaction(buttonTarget, payload);
-  if (txData.method !== "eth_sendTransaction") {
-    throw new Error("method should be eth_sendTransaction");
-  }
-  const hexChainId = extractChainIdToHex(txData.chainId.replace("eip155:", ""));
-  if (
-    ![
-      "0x5d50",
-      "0xaa37dc",
-      "0x12c",
-      "0xe705",
-      "0x14a34",
-      "0x66eee",
-      "0x8274f",
-      "0xaa36a7",
-      "0x134d7c4",
-      "0xa0c71fd",
-      "0x3b9ac9ff",
-      "0x6b6b7274",
-    ].includes(hexChainId)
-  ) {
-    alert("Transaction frames support only Sepolia testnets for now");
-    throw new Error("Transaction frames support only Sepolia testnets for now");
-  }
-  try {
-    await provider.send?.("wallet_switchEthereumChain", [
-      {
-        chainId: hexChainId,
-      },
-    ]);
-  } catch (e: any) {
-    if (e.code !== 4001) {
-      alert(
-        `Could not switch to chain ${txData.chainId}\nPlease check that this chain is configured in your wallet.`
+export const useHandleTxAction = () => {
+  const { getExternalSigner, sendTransaction, switchChain } =
+    useExternalSigner();
+
+  const handleTxAction = useCallback(
+    async (frame: FrameToDisplay, button: FrameButtonType, payload: any) => {
+      const externalSigner = await getExternalSigner(
+        translate("transactionalFrameConnectWallet")
       );
-    }
-    throw e;
-  }
+      if (!externalSigner) throw new Error("Could not get an external signer");
 
-  const account = (await provider.listAccounts())[0];
-  const txHash = await provider.send(txData.method, [
-    {
-      from: account,
-      to: txData.params.to,
-      data: txData.params.data ? hexValue(txData.params.data) : undefined,
-      value: hexValue(BigNumber.from(txData.params.value || "0").toHexString()),
+      const buttonPostUrl =
+        frame.extractedTags[`fc:frame:button:${button.index}:post_url`];
+      const buttonTarget = button.target;
+      if (!buttonPostUrl || !buttonTarget)
+        throw new Error("Missing postUrl or target");
+
+      const txData = await framesProxy.postTransaction(buttonTarget, payload);
+      if (txData.method !== "eth_sendTransaction") {
+        throw new Error("method should be eth_sendTransaction");
+      }
+
+      if (!txData.chainId.startsWith("eip155:")) {
+        throw new Error("Can only handle eip155: chain ids");
+      }
+
+      const chainId = parseInt(txData.chainId.slice(7), 10);
+
+      logger.debug(`[TxFrame] Switching to chain id ${chainId}`);
+
+      await switchChain(chainId);
+
+      const transactionReceipt = await sendTransaction({
+        to: txData.params.to,
+        value: txData.params.value,
+        data: txData.params.data,
+      });
+
+      logger.debug(
+        `[TxFrame] Triggered transaction with hash ${transactionReceipt.transactionHash}`
+      );
+
+      return { buttonPostUrl, transactionReceipt };
     },
-  ]);
-
-  const transactionReceipt = await provider.getTransaction(txHash);
-
-  if (
-    transactionReceipt.to?.toLowerCase() !== txData.params.to.toLowerCase() ||
-    transactionReceipt.value.toBigInt() !== BigInt(txData.params.value || 0)
-  ) {
-    // Error handle, shouldn't show frame success screen
-    throw new Error("transaction failed");
-  }
-  return { buttonPostUrl, txHash };
+    [getExternalSigner, sendTransaction, switchChain]
+  );
+  return { handleTxAction };
 };
 
 export const isFrameMessage = (message: MessageToDisplay): boolean => {

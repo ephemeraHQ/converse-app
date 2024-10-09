@@ -67,7 +67,6 @@ const ENV = {
     universalLinks: ["dev.converse.xyz/", "dev.getconverse.app/"].flatMap(
       (domain) => [`https://${domain}`, `http://${domain}`, domain]
     ),
-    enableTransactionFrames: true,
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/UDv3aYZONQGc6_XPJY6Ch",
   },
@@ -86,7 +85,6 @@ const ENV = {
       "preview.converse.xyz/",
       "preview.getconverse.app/",
     ].flatMap((domain) => [`https://${domain}`, `http://${domain}`, domain]),
-    enableTransactionFrames: true,
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
   },
@@ -120,7 +118,6 @@ const ENV = {
       },
       rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     },
-    enableTransactionFrames: false,
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
   },
