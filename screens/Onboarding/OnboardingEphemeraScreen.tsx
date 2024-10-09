@@ -32,10 +32,7 @@ export function OnboardingEphemeraScreen(
       await initXmtpClient({
         signer,
         address: await signer.getAddress(),
-        connectionMethod: "ephemeral",
-        privyAccountId: "",
         isEphemeral: true,
-        pkPath: "",
       });
       router.push("OnboardingUserProfile");
     } catch (error) {

@@ -88,9 +88,11 @@ export const OnboardingUserProfileScreen = (
 
   return (
     <OnboardingScreenComp contentContainerStyle={{ alignItems: "center" }}>
-      <OnboardingPictoTitleSubtitle.All
-        title={translate("userProfile.title.profile")}
-      />
+      <OnboardingPictoTitleSubtitle.Container>
+        <OnboardingPictoTitleSubtitle.Title>
+          {translate("userProfile.title.profile")}
+        </OnboardingPictoTitleSubtitle.Title>
+      </OnboardingPictoTitleSubtitle.Container>
 
       <Pressable onPress={addPFP}>
         <Avatar

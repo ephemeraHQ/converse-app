@@ -31,10 +31,7 @@ export function NewAccountEphemeraScreen(
       await initXmtpClient({
         signer,
         address: await signer.getAddress(),
-        connectionMethod: "ephemeral",
-        privyAccountId: "",
         isEphemeral: true,
-        pkPath: "",
       });
       router.push("NewAccountUserProfile");
     } catch (error) {

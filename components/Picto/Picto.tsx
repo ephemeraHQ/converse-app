@@ -54,6 +54,7 @@ import {
   ViewStyle,
 } from "react-native";
 
+import Exclamationmark from "../../../assets/exclamationmark.triangle.svg";
 import Reply from "../../assets/reply.svg";
 
 const pictoMapping = {
@@ -106,6 +107,8 @@ const pictoMapping = {
   "person.crop.circle.badge.plus": GroupAdd,
   tray: Inbox,
   cloud: Cloud,
+  "exclamationmark.triangle": Exclamationmark,
+  magnifyingglass: Search,
 } as const;
 
 export type IPicto = keyof typeof pictoMapping;

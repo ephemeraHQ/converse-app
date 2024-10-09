@@ -10,13 +10,7 @@ type IPrivyAuthStoreProps = {
   loading?: boolean;
 };
 
-type IPrivyAuthStoreState = {
-  phone: string;
-  status: "enter-phone" | "verify-phone";
-  privyAccountId: string;
-  otpCode: string;
-  retrySeconds: number;
-  loading: boolean;
+type IPrivyAuthStoreState = IPrivyAuthStoreProps & {
   setPhone: (phone: string) => void;
   setStatus: (status: "enter-phone" | "verify-phone") => void;
   setPrivyAccountId: (id: string) => void;
@@ -48,7 +42,7 @@ export const PrivyAuthStoreProvider = memo(
 );
 
 const createPrivyAuthStore = (initProps: IPrivyAuthStoreProps) => {
-  const DEFAULT_PROPS: IPrivyAuthStoreState = {
+  const DEFAULT_PROPS: IPrivyAuthStoreProps = {
     phone: "",
     status: "enter-phone",
     privyAccountId: "",

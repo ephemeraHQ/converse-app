@@ -1,4 +1,3 @@
-import { useDebugEnabled } from "@components/DebugButton";
 import {
   backgroundColor,
   textPrimaryColor,
@@ -19,16 +18,14 @@ import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Terms } from "./Terms";
-import { useOnboardingStore } from "../../data/store/onboardingStore";
-import { useSelect } from "../../data/store/storeHelpers";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import Button from "../Button/Button";
-import Picto from "../Picto/Picto";
+import Picto, { IPicto } from "../Picto/Picto";
 
 type Props = {
   title: string;
-  picto?: string | undefined;
+  picto?: IPicto | undefined;
   subtitle?: string | React.ReactNode;
   isLoading?: boolean;
   children: React.ReactNode;
@@ -60,20 +57,13 @@ export default function DeprecatedOnboardingComponent({
   showTerms = false,
 }: Props) {
   const styles = useStyles(showTerms);
-  const insets = useSafeAreaInsets();
 
-  const {
-    loading: stateLoading,
-    setLoading,
-    address,
-  } = useOnboardingStore(useSelect(["loading", "setLoading", "address"]));
-  const debugEnabled = useDebugEnabled(address);
   const showDebug = useCallback(() => {
     converseEventEmitter.emit("showDebugMenu");
   }, []);
-  const loading = stateLoading || isLoading;
 
   const { height: keyboardHeight } = useKeyboardAnimation();
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
       paddingBottom: keyboardHeight.value,
@@ -122,16 +112,11 @@ export default function DeprecatedOnboardingComponent({
         )}
         {!picto && <View style={{ marginTop: inNav ? 32 : 140 }} />}
 
-        <Text
-          style={styles.title}
-          onLongPress={debugEnabled ? showDebug : undefined}
-        >
-          {title}
-        </Text>
-        {loading && (
+        <Text style={styles.title}>{title}</Text>
+        {isLoading && (
           <ActivityIndicator size="large" style={{ marginTop: 30 }} />
         )}
-        {!loading && (
+        {!isLoading && (
           <>
             {subtitle && <Text style={styles.p}>{subtitle}</Text>}
             {children}
@@ -151,7 +136,7 @@ export default function DeprecatedOnboardingComponent({
             )}
           </>
         )}
-        {loading && loadingSubtitle && (
+        {isLoading && loadingSubtitle && (
           <Text style={styles.p}>{loadingSubtitle}</Text>
         )}
       </ScrollView>

@@ -21,11 +21,15 @@ export const NewAccountPrivateKeyScreen = memo(function () {
 
   return (
     <NewAccountScreenComp preset="scroll">
-      <NewAccountPictoTitleSubtitle.All
-        title={translate("privateKeyConnect.title")}
-        subtitle={translate("privateKeyConnect.subtitle")}
-        picto="key.horizontal"
-      />
+      <NewAccountPictoTitleSubtitle.Container>
+        <NewAccountPictoTitleSubtitle.Picto picto="key.horizontal" />
+        <NewAccountPictoTitleSubtitle.Title>
+          {translate("privateKeyConnect.title")}
+        </NewAccountPictoTitleSubtitle.Title>
+        <NewAccountPictoTitleSubtitle.Subtitle>
+          {translate("privateKeyConnect.subtitle")}
+        </NewAccountPictoTitleSubtitle.Subtitle>
+      </NewAccountPictoTitleSubtitle.Container>
 
       <VStack style={{ rowGap: spacing.md }}>
         <PrivateKeyInput value={privateKey} onChange={setPrivateKey} />

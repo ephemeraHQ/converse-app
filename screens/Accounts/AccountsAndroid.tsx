@@ -12,7 +12,6 @@ import {
   useAccountsList,
   useAccountsStore,
 } from "../../data/store/accountsStore";
-import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { converseEventEmitter } from "../../utils/events";
 import { useDisconnectWallet } from "../../utils/logout/wallet";
@@ -31,9 +30,10 @@ export default function AccountsAndroid({ navigation }: Props) {
   const { currentAccount, setCurrentAccount } = useAccountsStore(
     useSelect(["currentAccount", "setCurrentAccount"])
   );
-  const setAddingNewAccount = useOnboardingStore((s) => s.setAddingNewAccount);
+
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
+
   return (
     <Drawer.Section
       title={Platform.OS === "web" ? undefined : "Accounts"}
@@ -70,9 +70,7 @@ export default function AccountsAndroid({ navigation }: Props) {
               color={color}
             />
           )}
-          right={({ color }) => (
-            <AccountSettingsButton account={a} navigation={navigation} />
-          )}
+          right={({ color }) => <AccountSettingsButton account={a} />}
           rippleColor={
             currentAccount === a
               ? undefined
@@ -91,7 +89,6 @@ export default function AccountsAndroid({ navigation }: Props) {
           } catch (e) {
             logger.error(e);
           }
-          setAddingNewAccount(true);
         }}
         rippleColor={clickedItemBackgroundColor(colorScheme)}
       />

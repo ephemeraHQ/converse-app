@@ -11,7 +11,7 @@ import { AsYouType, CountryCode } from "libphonenumber-js";
 import React, { memo, useRef } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import * as RNLocalize from "react-native-localize";
-import PhoneInput from "react-native-phone-number-input";
+import PhoneInput, { PhoneInputProps } from "react-native-phone-number-input";
 
 import { usePrivyAuthStoreContext } from "./privyAuthStore";
 import { usePrivySmsLogin } from "./usePrivySmsLogin";
@@ -42,7 +42,9 @@ export const PrivyPhoneEntry = memo(() => {
       >
         <PhoneInput
           ref={phoneInputRef}
-          defaultCode={RNLocalize.getCountry() as CountryCode}
+          defaultCode={
+            RNLocalize.getCountry() as PhoneInputProps["defaultCode"]
+          }
           layout="first"
           formatter={(t) => {
             const countryCode = phoneInputRef.current?.getCountryCode();

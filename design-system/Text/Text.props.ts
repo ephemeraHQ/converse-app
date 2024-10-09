@@ -1,8 +1,8 @@
-import { StyleProp, TextStyle } from "react-native";
+import { TextProps as RNTextProps, StyleProp, TextStyle } from "react-native";
 
 import { $presets } from "./Text.presets";
 import { $sizeStyles } from "./Text.styles";
-import { TxKeyPath } from "../../i18n";
+import { i18n, TxKeyPath } from "../../i18n";
 import { typography } from "../../theme";
 
 export type ISizes = keyof typeof $sizeStyles;

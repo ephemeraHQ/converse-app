@@ -8,10 +8,6 @@ import {
   getWalletStore,
   useAccountsStore,
 } from "../../data/store/accountsStore";
-import {
-  ConnectionMethod,
-  useOnboardingStore,
-} from "../../data/store/onboardingStore";
 import { translate } from "../../i18n";
 import { awaitableAlert } from "../../utils/alert";
 import { saveXmtpKey } from "../../utils/keychain/helpers";
@@ -24,22 +20,16 @@ import { getXmtpClient } from "../../utils/xmtpRN/sync";
 export async function initXmtpClient(args: {
   signer: Signer;
   address: string;
-  connectionMethod: ConnectionMethod;
-  privyAccountId: string;
-  isEphemeral: boolean;
-  pkPath: string;
+  privyAccountId?: string;
+  isEphemeral?: boolean;
+  pkPath?: string;
 }) {
-  const {
-    signer,
-    address,
-    connectionMethod,
-    privyAccountId,
-    isEphemeral,
-    pkPath,
-  } = args;
+  const { signer, address, ...restArgs } = args;
+
   if (!signer || !address) {
     throw new Error("No signer or address");
   }
+
   try {
     const base64Key = await getXmtpBase64KeyFromSigner(signer, async () => {
       await awaitableAlert(
@@ -48,18 +38,17 @@ export async function initXmtpClient(args: {
       );
       throw new Error("Current installation revoked");
     });
+
     if (!base64Key) return;
+
     await connectWithBase64Key({
       address,
       base64Key,
-      connectionMethod,
-      privyAccountId,
-      isEphemeral,
-      pkPath,
+      ...restArgs,
     });
   } catch (e) {
-    logoutAccount(
-      await signer.getAddress(),
+    await logoutAccount(
+      address,
       false,
       true,
       () => {},
@@ -70,61 +59,82 @@ export async function initXmtpClient(args: {
   }
 }
 
-export async function connectWithBase64Key(args: {
+type IBaseArgs = {
   address: string;
   base64Key: string;
-  connectionMethod: ConnectionMethod;
+};
+
+type IPrivyArgs = IBaseArgs & {
   privyAccountId: string;
-  isEphemeral: boolean;
+};
+
+type IEphemeralArgs = IBaseArgs & {
+  isEphemeral: true;
+};
+
+type IPrivateKeyArgs = IBaseArgs & {
   pkPath: string;
-}) {
-  const {
-    address,
-    base64Key,
-    connectionMethod,
-    privyAccountId,
-    isEphemeral,
-    pkPath,
-  } = args;
+};
+
+type IStandardArgs = IBaseArgs;
+
+type IConnectWithBase64KeyArgs =
+  | IPrivyArgs
+  | IEphemeralArgs
+  | IPrivateKeyArgs
+  | IStandardArgs;
+
+export async function connectWithBase64Key(args: IConnectWithBase64KeyArgs) {
+  const { address, base64Key } = args;
   logger.debug("In connectWithBase64Key");
+
   if (!address) {
     sentryTrackMessage("Could not connect because no address");
     return;
   }
+
+  try {
+    await performLogoutAndSaveKey(address, base64Key);
+
+    useAccountsStore.getState().setCurrentAccount(address, true);
+
+    await initializeDatabase(address);
+    await finalizeAccountSetup(args);
+    sentryTrackMessage("Connecting done!");
+  } catch (e) {
+    logger.error(e, { context: "Onboarding - connectWithBase64Key" });
+    Alert.alert(translate("onboarding_error"));
+    throw e;
+  }
+}
+
+async function performLogoutAndSaveKey(address: string, base64Key: string) {
   logger.debug("Waiting for logout tasks");
   await waitForLogoutTasksDone(500);
   logger.debug("Logout tasks done, saving xmtp key");
   await saveXmtpKey(address, base64Key);
   logger.debug("XMTP Key saved");
-  // Successfull login for user, let's setup the storage !
-  useAccountsStore.getState().setCurrentAccount(address, true);
-  try {
-    if (connectionMethod === "phone" && privyAccountId) {
-      useAccountsStore.getState().setPrivyAccountId(address, privyAccountId);
-    }
-    logger.debug("Initiating converse db");
-    await initDb(address);
-    logger.debug("Refreshing profiles");
-    await refreshProfileForAddress(address, address);
-    // Now we can really set!
-    useAccountsStore.getState().setCurrentAccount(address, false);
-    getSettingsStore(address).getState().setOnboardedAfterProfilesRelease(true);
-    if (isEphemeral) {
-      getSettingsStore(address).getState().setEphemeralAccount(true);
-    } else {
-      getSettingsStore(address).getState().setEphemeralAccount(false);
-    }
-    if (pkPath) {
-      getWalletStore(address).getState().setPrivateKeyPath(pkPath);
-    }
-    useOnboardingStore.getState().setAddingNewAccount(false);
-    // Now we can instantiate the XMTP Client
-    getXmtpClient(address);
-    sentryTrackMessage("Connecting done!");
-  } catch (e) {
-    // Cleanup
-    logger.error(e, { context: "Onboarding - connectWithBase64Key" });
-    Alert.alert(translate("onboarding_error"));
-    throw e;
+}
+
+async function initializeDatabase(address: string) {
+  logger.debug("Initiating converse db");
+  await initDb(address);
+  logger.debug("Refreshing profiles");
+  await refreshProfileForAddress(address, address);
+}
+
+async function finalizeAccountSetup(args: IConnectWithBase64KeyArgs) {
+  const { address } = args;
+
+  useAccountsStore.getState().setCurrentAccount(address, false);
+
+  getSettingsStore(address)
+    .getState()
+    .setEphemeralAccount("isEphemeral" in args && args.isEphemeral);
+
+  if ("pkPath" in args) {
+    getWalletStore(address).getState().setPrivateKeyPath(args.pkPath);
   }
+
+  getXmtpClient(address);
 }

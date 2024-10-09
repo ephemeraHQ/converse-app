@@ -49,7 +49,6 @@ export default function ProfileNav() {
               return (
                 <ScreenHeaderButton
                   title="Modify"
-                  color={textPrimaryColor(colorScheme)}
                   onPress={() => {
                     navigate("UserProfile");
                   }}

@@ -1,7 +1,7 @@
-import { ConnectViaWallet } from "../../components/Onboarding/ConnectViaWallet";
+import { ConnectViaWallet } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWallet";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 
-export function ConnectWalletScreen() {
+export function OnboardingConnectWalletScreen() {
   return (
     <OnboardingScreenComp>
       <ConnectViaWallet />

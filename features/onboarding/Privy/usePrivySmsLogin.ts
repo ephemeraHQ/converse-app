@@ -6,7 +6,7 @@ import {
 import { useCallback } from "react";
 import { Alert } from "react-native";
 
-import { usePrivyAuthStore, usePrivyAuthStoreContext } from "./privyAuthStore";
+import { usePrivyAuthStore } from "./privyAuthStore";
 import { translate } from "../../../i18n";
 import { sentryTrackError } from "../../../utils/sentry";
 
@@ -14,17 +14,16 @@ export function usePrivySmsLogin() {
   const { loginWithCode: loginWithCodePrivy, sendCode: sendCodePrivy } =
     useLoginWithSMS();
 
-  const setLoading = usePrivyAuthStoreContext((state) => state.setLoading);
-  const setOtpCode = usePrivyAuthStoreContext((state) => state.setOtpCode);
-  const setStatus = usePrivyAuthStoreContext((state) => state.setStatus);
-  const setPrivyAccountId = usePrivyAuthStoreContext(
-    (state) => state.setPrivyAccountId
-  );
-
   const privyAuthStore = usePrivyAuthStore();
 
   const sendCode = useCallback(async () => {
-    const phone = privyAuthStore.getState().phone;
+    const { phone, setLoading, setOtpCode, setStatus } =
+      privyAuthStore.getState();
+
+    if (!phone) {
+      return false;
+    }
+
     if (!isValidPhoneNumber(phone)) {
       Alert.alert(translate("privyConnect.errors.invalidPhoneNumber"));
       return false;
@@ -48,12 +47,20 @@ export function usePrivySmsLogin() {
     } finally {
       setLoading(false);
     }
-  }, [sendCodePrivy, setLoading, setOtpCode, setStatus, privyAuthStore]);
+  }, [sendCodePrivy, privyAuthStore]);
 
   const loginWithCode = useCallback(async () => {
+    const { setLoading, setPrivyAccountId } = privyAuthStore.getState();
+
     try {
       setLoading(true);
+
       const code = privyAuthStore.getState().otpCode;
+
+      if (!code) {
+        throw new Error("No code provided");
+      }
+
       const user = await loginWithCodePrivy({ code });
 
       if (!user) {
@@ -66,7 +73,7 @@ export function usePrivySmsLogin() {
     } finally {
       setLoading(false);
     }
-  }, [loginWithCodePrivy, setLoading, setPrivyAccountId, privyAuthStore]);
+  }, [loginWithCodePrivy, privyAuthStore]);
 
   return { sendCode, loginWithCode };
 }

@@ -17,8 +17,6 @@ import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/Onboar
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { initXmtpClient } from "../../components/Onboarding/init-xmtp-client";
-import { useOnboardingStore } from "../../data/store/onboardingStore";
-import { useSelect } from "../../data/store/storeHelpers";
 import { VStack } from "../../design-system/VStack";
 import { sentryTrackError } from "../../utils/sentry";
 import { NavigationParamList } from "../Navigation/Navigation";
@@ -33,11 +31,15 @@ export function OnboardingPrivateKeyScreen(
 
   return (
     <OnboardingScreenComp preset="scroll">
-      <OnboardingPictoTitleSubtitle.All
-        title={translate("privateKeyConnect.title")}
-        subtitle={translate("privateKeyConnect.subtitle")}
-        picto="key.horizontal"
-      />
+      <OnboardingPictoTitleSubtitle.Container>
+        <OnboardingPictoTitleSubtitle.Picto picto="key.horizontal" />
+        <OnboardingPictoTitleSubtitle.Title>
+          {translate("privateKeyConnect.title")}
+        </OnboardingPictoTitleSubtitle.Title>
+        <OnboardingPictoTitleSubtitle.Subtitle>
+          {translate("privateKeyConnect.subtitle")}
+        </OnboardingPictoTitleSubtitle.Subtitle>
+      </OnboardingPictoTitleSubtitle.Container>
 
       <VStack style={{ rowGap: spacing.md }}>
         <PrivateKeyInput value={privateKey} onChange={setPrivateKey} />
@@ -87,34 +89,25 @@ export const useAvoidInputEffect = () => {
 export const useLoginWithPrivateKey = () => {
   const [loading, setLoading] = useState(false);
 
-  const { setSigner } = useOnboardingStore(useSelect(["setSigner"]));
-
-  const loginWithPrivateKey = useCallback(
-    async (privateKey: string) => {
-      setLoading(true);
-      try {
-        const signer = await getSignerFromPrivateKey(privateKey);
-        if (!signer) {
-          setLoading(false);
-          return;
-        }
-        setSigner(signer);
-        await initXmtpClient({
-          signer,
-          address: await signer.getAddress(),
-          connectionMethod: "privateKey",
-          privyAccountId: "",
-          isEphemeral: false,
-          pkPath: "",
-        });
-      } catch (error) {
-        sentryTrackError(error);
-      } finally {
+  const loginWithPrivateKey = useCallback(async (privateKey: string) => {
+    setLoading(true);
+    try {
+      const signer = await getSignerFromPrivateKey(privateKey);
+      if (!signer) {
         setLoading(false);
+        return;
       }
-    },
-    [setSigner]
-  );
+
+      await initXmtpClient({
+        signer,
+        address: await signer.getAddress(),
+      });
+    } catch (error) {
+      sentryTrackError(error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   return { loading, loginWithPrivateKey };
 };

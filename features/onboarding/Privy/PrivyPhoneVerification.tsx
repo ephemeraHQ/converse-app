@@ -23,7 +23,7 @@ export const PrivyPhoneVerification = memo(() => {
   const { loginWithCode, sendCode } = usePrivySmsLogin();
   const phone = usePrivyAuthStoreContext((state) => state.phone);
   const setOtpCode = usePrivyAuthStoreContext((state) => state.setOtpCode);
-  const beautifulPhone = formatPhoneNumberToBeautifulFormat(phone);
+  const beautifulPhone = phone ? formatPhoneNumberToBeautifulFormat(phone) : "";
 
   useEffect(() => {
     const keyboardListeners = [

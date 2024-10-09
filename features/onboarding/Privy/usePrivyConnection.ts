@@ -43,10 +43,7 @@ export function usePrivyConnection() {
           await initXmtpClient({
             signer: privySigner,
             address: await privySigner.getAddress(),
-            connectionMethod: "phone",
             privyAccountId,
-            isEphemeral: false,
-            pkPath: "",
           });
         }
       } catch (error) {

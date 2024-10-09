@@ -28,8 +28,6 @@ import { createWallet } from "thirdweb/wallets";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import config from "../../config";
-import { useOnboardingStore } from "../../data/store/onboardingStore";
-import { useSelect } from "../../data/store/storeHelpers";
 import { useRouter } from "../../navigation/useNavigation";
 
 const animationDelays = [525, 550, 575, 800, 825, 850] as const;
@@ -173,14 +171,9 @@ export function InstalledWallets({ wallets }: { wallets: InstalledWallet[] }) {
 
   const setActiveWallet = useSetActiveWallet();
 
-  const { setSigner, setLoading } = useOnboardingStore(
-    useSelect([
-      "setSigner",
-      "setLoading",
-      "addingNewAccount",
-      "setAddingNewAccount",
-    ])
-  );
+  const router = useRouter();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <TableView
@@ -193,13 +186,15 @@ export function InstalledWallets({ wallets }: { wallets: InstalledWallet[] }) {
           walletName: w.name,
         }),
         action: async () => {
-          setLoading(true);
+          setIsLoading(true);
+
           logger.debug(
             `[Onboarding] Clicked on wallet ${w.name} - opening external app`
           );
+
           try {
             if (w.name === "Coinbase Wallet") {
-              thirdwebConnect(async () => {
+              await thirdwebConnect(async () => {
                 const coinbaseWallet = createWallet("com.coinbase.wallet", {
                   appMetadata: config.walletConnectConfig.appMetadata,
                   mobileConfig: {
@@ -210,21 +205,34 @@ export function InstalledWallets({ wallets }: { wallets: InstalledWallet[] }) {
                 setActiveWallet(coinbaseWallet);
                 return coinbaseWallet;
               });
-            } else if (w.name === "EthOS Wallet") {
+            }
+
+            if (w.name === "EthOS Wallet") {
               const signer = getEthOSSigner();
-              signer ? setSigner(signer) : setLoading(false);
-            } else if (w.thirdwebId) {
+              if (signer) {
+                // TODO
+                // setSigner(signer);
+              } else {
+                setIsLoading(false);
+              }
+            }
+
+            if (w.thirdwebId) {
               const walletConnectWallet = createWallet(w.thirdwebId);
               await walletConnectWallet.connect({
                 client: thirdwebClient,
                 walletConnect: config.walletConnectConfig,
               });
               setActiveWallet(walletConnectWallet);
-              return walletConnectWallet;
             }
+
+            router.push("OnboardingConnectWallet");
+
+            throw new Error("Unsupported wallet");
           } catch (e: any) {
             logger.error("Error connecting to wallet:", e);
-            setLoading(false);
+          } finally {
+            setIsLoading(false);
           }
         },
       }))}

@@ -2,6 +2,8 @@ import { useRef, useState } from "react";
 import { LayoutChangeEvent } from "react-native";
 import { Edge, useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AutoScreenProps } from "./Screen.props";
+
 export type ExtendedEdge = Edge | "start" | "end";
 
 const propertySuffixMap = {
