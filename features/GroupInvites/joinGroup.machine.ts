@@ -531,64 +531,64 @@ consent for the new group.
         },
       },
     },
-  },
 
-  "User Has Been Blocked From Group": {
-    type: "final",
-    entry: assign({
-      error: "The group is not active or you have been removed from it.",
-    }),
-  },
+    "User Has Been Blocked From Group": {
+      type: "final",
+      entry: assign({
+        error: "The group is not active or you have been removed from it.",
+      }),
+    },
 
-  "User Joined Group": {
-    type: "final",
-    entry: {
-      type: "navigateToGroupScreen",
-      params: ({ context }) => {
-        return {
-          topic: context.newGroup!.topic,
-        };
+    "User Joined Group": {
+      type: "final",
+      entry: {
+        type: "navigateToGroupScreen",
+        params: ({ context }) => {
+          return {
+            topic: context.newGroup!.topic,
+          };
+        },
       },
     },
+
+    "Request to Join Group Rejected": {
+      type: "final",
+    },
+
+    "Attempting to Join Group Timed Out": {
+      description: `
+  The invitor client has not yet automatically accepted the
+  group join request. This is a known limitation of our current
+  implementation, and we are exploring ideas such as allowing
+  more admins to accept the invite.
+  
+  This doesn't mean the user cannot join, it just means that
+  the client that was invited needs to wait for the inviter
+  to accept the request.
+  
+  The next time we are able to contact the inviter, we will
+  automatically accept the request and the newly invited
+  user will be able to join the group.
+  `,
+      type: "final",
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // ERROR STATES
+    ///////////////////////////////////////////////////////////////////////////
+
+    "Error Loading Group Invite": {},
+
+    "Error Joining Group": {
+      type: "final",
+    },
+
+    "Error Loading Groups": {},
+
+    "Error Determining New Group": {},
+
+    "Error Providing User Consent": {},
+
+    "Error Refreshing Group": {},
   },
-
-  "Request to Join Group Rejected": {
-    type: "final",
-  },
-
-  "Attempting to Join Group Timed Out": {
-    description: `
-The invitor client has not yet automatically accepted the
-group join request. This is a known limitation of our current
-implementation, and we are exploring ideas such as allowing
-more admins to accept the invite.
-
-This doesn't mean the user cannot join, it just means that
-the client that was invited needs to wait for the inviter
-to accept the request.
-
-The next time we are able to contact the inviter, we will
-automatically accept the request and the newly invited
-user will be able to join the group.
-`,
-    type: "final",
-  },
-
-  ///////////////////////////////////////////////////////////////////////////
-  // ERROR STATES
-  ///////////////////////////////////////////////////////////////////////////
-
-  "Error Loading Group Invite": {},
-
-  "Error Joining Group": {
-    type: "final",
-  },
-
-  "Error Loading Groups": {},
-
-  "Error Determining New Group": {},
-
-  "Error Providing User Consent": {},
-
-  "Error Refreshing Group": {},
 });
