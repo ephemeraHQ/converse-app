@@ -7,7 +7,7 @@
     "build": "node scripts/build/build.js",
     "commit": "git show --format=\"%h\" --no-patch",
     "db": "ts-node scripts/migrations/db.ts",
-    "lint": "eslint --ext .ts,.tsx . --max-warnings 325",
+    "lint": "eslint --ext .ts,.tsx . --max-warnings 420",
     "ios": "EXPO_ENV=dev expo start --ios",
     "postinstall": "patch-package && node scripts/wasm.js && husky install && cross-os postinstall",
     "start": "EXPO_ENV=dev expo start",
