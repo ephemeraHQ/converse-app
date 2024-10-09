@@ -1,3 +1,4 @@
+import { GroupData, GroupsDataEntity } from "@queries/useGroupsQuery";
 import { GroupInvite } from "@utils/api.types";
 import { assign, fromPromise, log, setup } from "xstate";
 
@@ -10,6 +11,8 @@ type JoinGroupMachineContext = {
   // Context
   account: string;
   groupInviteMetadata?: GroupInvite;
+  groupsBeforeJoinAttempt?: GroupsDataEntity;
+  newGroup?: GroupData;
 
   // From Input
   groupInviteId: string;
@@ -44,6 +47,14 @@ export const joinGroupMachineLogic = setup({
       return groupInvite;
     }),
 
+    fetchGroupsByAccountActorLogic: fromPromise<
+      GroupsDataEntity,
+      { account: string }
+    >(async ({ input }) => {
+      const { account } = input;
+      return await Controlled.joinGroupClient.fetchGroupsByAccount(account);
+    }),
+
     attemptToJoinGroupActorLogic: fromPromise<
       JoinGroupResult,
       { account: string; groupInviteId: string }
@@ -67,12 +78,27 @@ export const joinGroupMachineLogic = setup({
     }),
 
     navigateToGroupScreen: log(
-      (_, params: { groupId: string | undefined }) =>
-        `-> navigateToGroupScreen ${JSON.stringify({
+      (_, params: { topic: string }) =>
+        `-> TODO: provide navigateToGroupScreen ${JSON.stringify({
           question: "Does the event have a groupId?",
-          groupInviteId: params.groupId,
+          topic: params.topic,
         })}`
     ),
+
+    navigationGoBack: log((_) => {
+      return `-> TODO: provide navigationGoBack`;
+    }),
+
+    saveGroupsBeforeJoinAttempt: assign({
+      groupsBeforeJoinAttempt: (
+        _,
+        params: { groupsBeforeJoinAttempt: GroupsDataEntity }
+      ) => params.groupsBeforeJoinAttempt,
+    }),
+
+    saveNewGroup: assign({
+      newGroup: (_, params: { newGroup: GroupData }) => params.newGroup,
+    }),
   },
 
   guards: {
@@ -113,6 +139,21 @@ export const joinGroupMachineLogic = setup({
       return (
         params.groupJoinRequestEventType === "group-join-request.timed-out"
       );
+    },
+
+    hasGroupIdInMetadata: (_, params: { groupInviteMetadata: GroupInvite }) => {
+      return params.groupInviteMetadata.groupId !== undefined;
+    },
+
+    userHasAlreadyJoinedGroup: (
+      _,
+      params: { newGroup: GroupData | undefined }
+    ) => {
+      return params.newGroup === undefined;
+    },
+
+    hasUserBeenBlocked: (_, params: { newGroup: GroupData | undefined }) => {
+      return params.newGroup?.isGroupActive === false;
     },
   },
 }).createMachine({
@@ -193,6 +234,44 @@ screen so I'm going to follow what's currently there.
       },
     },
 
+    "Determining Groups Joined Before Attempt": {
+      description: `
+TODO: perform this fetch only conditionally if the groupId is not 
+in the metadata
+
+Fetches the groups that the user has joined before attempting
+to join the group. This is used to determine the groups that the
+user has joined before, so that we can compare the groups after
+the join attempt to see if there are any new groups that the
+user has joined.
+    `,
+      invoke: {
+        id: "fetchGroupsBeforeJoining",
+        src: "fetchGroupsByAccountActorLogic",
+        input: ({ context }) => {
+          return {
+            account: context.account,
+          };
+        },
+        onDone: {
+          target: "Attempting to Join Group",
+          actions: {
+            type: "saveGroupsBeforeJoinAttempt",
+            params: ({ event }) => ({
+              groupsBeforeJoinAttempt: event.output,
+            }),
+          },
+        },
+        onError: {
+          target: "Error Loading Groups",
+          actions: {
+            type: "saveError",
+            params: ({ event }) => ({ error: JSON.stringify(event.error) }),
+          },
+        },
+      },
+    },
+
     "Attempting to Join Group": {
       description: `
 Attempts to join the group.
@@ -226,7 +305,7 @@ to accept the invite.
                 groupJoinRequestEventType: event.output.type,
               }),
             },
-            target: "User Joined Group",
+            target: "Determining Newly Joined Group",
           },
           {
             guard: {
@@ -269,21 +348,133 @@ to accept the invite.
       },
     },
 
-    "User Joined Group": {
-      type: "final",
-      entry: [
-        // log(({ event }) => `User Joined Group ${JSON.stringify(event)}`),
-        {
-          type: "navigateToGroupScreen",
-          params: ({ context }) => {
-            console.log(context.groupInviteMetadata?.groupId);
-
-            return {
-              groupId: context.groupInviteMetadata?.groupId,
-            };
+    "Determining Newly Joined Group": {
+      description: `
+Immediately upon entering this state, we fetch the groups
+query to determine our groups after receiving the accepted
+status. Our logic then splits based on whether we have a
+group ID in our group invite metadata:
+1. If we have a group ID, we can use it to look up the new
+   group directly.
+2. If we don't have a group ID, we need to compare the
+   groups before joining (stored in our context) with the
+   newly fetched groups. We perform a diff between the old
+   IDs and the new IDs to identify the new group.
+If the list of IDs are identical, it indicates that the user
+has already joined this group.
+Once we successfully determine the new group that
+was joined, we transition to a state for allowing group
+consent for the new group.
+`,
+      invoke: {
+        id: "fetchUpdatedGroupsAfterJoining",
+        src: "fetchGroupsByAccountActorLogic",
+        input: ({ context }) => ({
+          account: context.account,
+        }),
+        onDone: [
+          {
+            guard: {
+              type: "hasGroupIdInMetadata",
+              params: ({ context }) => ({
+                groupInviteMetadata: context.groupInviteMetadata!,
+              }),
+            },
+            actions: [
+              {
+                type: "saveNewGroup",
+                params: ({ context, event }) => ({
+                  newGroup:
+                    event.output.byId[context.groupInviteMetadata!.groupId!],
+                }),
+              },
+            ],
+            target: "Checking If User Has Been Blocked From Group",
+          },
+          {
+            actions: [
+              assign({
+                newGroup: ({ context, event }) => {
+                  const oldGroupIds = new Set(
+                    context.groupsBeforeJoinAttempt!.ids
+                  );
+                  const newGroupId = event.output.ids.find(
+                    (id) => !oldGroupIds.has(id)
+                  );
+                  return newGroupId ? event.output.byId[newGroupId] : undefined;
+                },
+              }),
+            ],
+            target: "Checking If User Has Already Joined Group",
+          },
+        ],
+        onError: {
+          target: "Error Determining New Group",
+          actions: {
+            type: "saveError",
+            params: ({ event }) => ({ error: JSON.stringify(event.error) }),
           },
         },
+      },
+    },
+
+    "Checking If User Has Been Blocked From Group": {
+      always: [
+        {
+          guard: {
+            type: "hasUserBeenBlocked",
+            params: ({ context }) => ({
+              newGroup: context.newGroup,
+            }),
+          },
+          target: "User Has Been Blocked From Group",
+        },
+        {
+          target: "Providing User Consent to Join Group",
+        },
       ],
+    },
+
+    "Checking If User Has Already Joined Group": {
+      always: [
+        {
+          guard: {
+            type: "userHasAlreadyJoinedGroup",
+            params: ({ context }) => ({
+              newGroup: context.newGroup,
+            }),
+          },
+          target: "User Joined Group",
+        },
+        {
+          target: "Checking If User Has Been Blocked From Group",
+        },
+      ],
+    },
+
+    "Providing User Consent to Join Group": {},
+
+    "User Has Been Blocked From Group": {
+      type: "final",
+      entry: assign({
+        error: "The group is not active or you have been removed from it.",
+      }),
+    },
+
+    "Error Determining New Group": {
+      type: "final",
+    },
+
+    "User Joined Group": {
+      type: "final",
+      entry: {
+        type: "navigateToGroupScreen",
+        params: ({ context }) => {
+          return {
+            topic: context.newGroup!.topic,
+          };
+        },
+      },
     },
 
     "Request to Join Group Rejected": {

@@ -1,5 +1,17 @@
+import {
+  fetchGroupsQuery,
+  GroupData,
+  GroupsDataEntity,
+  GroupsEntity,
+} from "@queries/useGroupsQuery";
 import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
 import { GroupInvite } from "@utils/api.types";
+import logger from "@utils/logger";
+import {
+  consentToGroupsOnProtocol,
+  refreshGroup,
+} from "@utils/xmtpRN/conversations";
+import { InboxId } from "@xmtp/react-native-sdk";
 import { AxiosInstance } from "axios";
 
 import {
@@ -35,16 +47,33 @@ export class JoinGroupClient {
     account: string,
     groupInviteId: string
   ) => Promise<JoinGroupResult>;
+  fetchGroupsByAccount: (account: string) => Promise<GroupsDataEntity>;
+  allowGroup: (
+    account: string,
+    topic: string,
+    groupId: string
+  ) => Promise<void>;
+  refreshGroup: (account: string, topic: string) => Promise<void>;
 
   constructor(
     fetchGroupInvite: (groupInviteId: string) => Promise<GroupInvite>,
     attemptToJoinGroup: (
       account: string,
       groupInviteId: string
-    ) => Promise<JoinGroupResult>
+    ) => Promise<JoinGroupResult>,
+    fetchGroupsByAccount: (account: string) => Promise<GroupsDataEntity>,
+    allowGroup: (
+      account: string,
+      topic: string,
+      groupId: string
+    ) => Promise<void>,
+    refreshGroup: (account: string, topic: string) => Promise<void>
   ) {
     this.fetchGroupInvite = fetchGroupInvite;
     this.attemptToJoinGroup = attemptToJoinGroup;
+    this.fetchGroupsByAccount = fetchGroupsByAccount;
+    this.allowGroup = allowGroup;
+    this.refreshGroup = refreshGroup;
   }
 
   static live({ api }: { api: AxiosInstance }): JoinGroupClient {
@@ -55,17 +84,38 @@ export class JoinGroupClient {
       return data as GroupInvite;
     };
 
+    const liveFetchGroupsByAccount = async (
+      account: string
+    ): Promise<GroupsDataEntity> => {
+      const groupsEntity: GroupsDataEntity = await fetchGroupsQuery(account);
+
+      // I believe this will already be done since we
+      // are using the fetchGroupsQuery now
+      // queryClient.setQueryData(groupsQueryKey(account), groupsEntity);
+
+      return groupsEntity;
+    };
+
     /**
-     * TODO: add sdk polling and race promises
+     * TODO: add sdk streaming and race promises
      * @param account
      * @param groupInviteId
+     * @param groupIdFromInvite
      */
     const liveAttemptToJoinGroup = async (
       account: string,
-      groupInviteId: string
+      groupInviteId: string,
+      groupIdFromInvite?: string
     ): Promise<JoinGroupResult> => {
       const sleep = (ms: number) =>
         new Promise((resolve) => setTimeout(resolve, ms));
+
+      const groupsBeforeJoining = groupIdFromInvite
+        ? { ids: [], byId: {} }
+        : await liveFetchGroupsByAccount(account);
+      logger.debug(
+        `[GroupInvite] Before joining, group count = ${groupsBeforeJoining.ids.length}`
+      );
 
       let joinRequestId = getInviteJoinRequestId(account, groupInviteId);
       if (!joinRequestId) {
@@ -102,17 +152,49 @@ export class JoinGroupClient {
       return { type: "group-join-request.timed-out" };
     };
 
-    return new JoinGroupClient(liveGetGroupInvite, liveAttemptToJoinGroup);
+    const liveAllowGroup = async (
+      account: string,
+      topic: string,
+      groupId: string
+    ) => {
+      await consentToGroupsOnProtocol(account, [groupId], "allow");
+    };
+
+    const liveRefreshGroup = async (account: string, topic: string) => {
+      await refreshGroup(account, topic);
+    };
+
+    return new JoinGroupClient(
+      liveGetGroupInvite,
+      liveAttemptToJoinGroup,
+      liveFetchGroupsByAccount,
+      liveAllowGroup,
+      liveRefreshGroup
+    );
   }
 
   static mock(
     fetchGroupInvite: (groupInviteId: string) => Promise<GroupInvite>,
     attemptToJoinGroup: (
       account: string,
-      groupInviteId: string
-    ) => Promise<JoinGroupResult>
+      groupInviteId: string,
+      groupIdFromInvite?: string
+    ) => Promise<JoinGroupResult>,
+    fetchGroupsByAccount: (account: string) => Promise<GroupsEntity>,
+    allowGroup: (
+      account: string,
+      topic: string,
+      groupId: string
+    ) => Promise<void>,
+    refreshGroup: (account: string, topic: string) => Promise<void>
   ): JoinGroupClient {
-    return new JoinGroupClient(fetchGroupInvite, attemptToJoinGroup);
+    return new JoinGroupClient(
+      fetchGroupInvite,
+      attemptToJoinGroup,
+      fetchGroupsByAccount,
+      allowGroup,
+      refreshGroup
+    );
   }
 
   static fixture(): JoinGroupClient {
@@ -140,9 +222,47 @@ export class JoinGroupClient {
       } as const;
     };
 
+    const fixtureFetchGroupsByAccount = async (
+      account: string
+    ): Promise<GroupsDataEntity> => {
+      const fixtureGroup: GroupData = {
+        id: "groupId123",
+        createdAt: new Date().getTime(),
+        members: [],
+        topic: "topic123",
+        isGroupActive: true,
+        state: "allowed",
+        creatorInboxId: "0xabc" as InboxId,
+        name: "Group Name",
+        addedByInboxId: "0x123" as InboxId,
+        imageUrlSquare: "https://www.google.com",
+        description: "Group Description",
+      } as const;
+
+      const fixtureGroupsDataEntity: GroupsDataEntity = {
+        ids: [fixtureGroup.id],
+        byId: {
+          [fixtureGroup.id]: fixtureGroup,
+        },
+      } as const;
+
+      return fixtureGroupsDataEntity;
+    };
+
+    const fixtureAllowGroup = async (
+      account: string,
+      topic: string,
+      groupId: string
+    ) => {};
+
+    const fixtureRefreshGroup = async (account: string, topic: string) => {};
+
     return new JoinGroupClient(
       fixtureGetGroupInvite,
-      fixtureAttemptToJoinGroup
+      fixtureAttemptToJoinGroup,
+      fixtureFetchGroupsByAccount,
+      fixtureAllowGroup,
+      fixtureRefreshGroup
     );
   }
 
@@ -160,7 +280,10 @@ testing what they are expected to
 
     return new JoinGroupClient(
       unimplementedError("fetchGroupInvite"),
-      unimplementedError("attemptToJoinGroup")
+      unimplementedError("attemptToJoinGroup"),
+      unimplementedError("fetchGroupsByAccount"),
+      unimplementedError("allowGroup"),
+      unimplementedError("refreshGroup")
     );
   }
 }

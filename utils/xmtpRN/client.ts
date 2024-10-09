@@ -7,6 +7,7 @@ import { useLogoutFromConverse } from "@utils/logout";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
+  Group,
   GroupUpdatedCodec,
   ReactionCodec,
   ReadReceiptCodec,
@@ -17,7 +18,6 @@ import {
 } from "@xmtp/react-native-sdk";
 import { useEffect, useRef } from "react";
 
-import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 import { getXmtpClient } from "./sync";
 import config from "../../config";
 import { getDbDirectory } from "../../data/db";
@@ -25,23 +25,26 @@ import { getCleanAddress } from "../eth";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
+const codecs = [
+  new TextCodec(),
+  new ReactionCodec(),
+  new ReadReceiptCodec(),
+  new GroupUpdatedCodec(),
+  new ReplyCodec(),
+  new RemoteAttachmentCodec(),
+  new StaticAttachmentCodec(),
+  new TransactionReferenceCodec(),
+];
+
+export type CodecsType = (typeof codecs)[number];
+
 export const getXmtpClientFromBase64Key = async (base64Key: string) => {
   const dbDirectory = await getDbDirectory();
   const dbEncryptionKey = await getDbEncryptionKey();
 
   return Client.createFromKeyBundle(base64Key, {
     env,
-    codecs: [
-      new TextCodec(),
-      new ReactionCodec(),
-      new ReadReceiptCodec(),
-      new GroupUpdatedCodec(),
-      new ReplyCodec(),
-      new RemoteAttachmentCodec(),
-      new StaticAttachmentCodec(),
-      new TransactionReferenceCodec(),
-      new CoinbaseMessagingPaymentCodec(),
-    ],
+    codecs,
     enableV3: true,
     dbDirectory,
     dbEncryptionKey,
@@ -56,10 +59,17 @@ export type ConversationWithCodecsType = Awaited<
   ReturnType<ConverseXmtpClientType["conversations"]["newConversation"]>
 >;
 
+// while this gets us auto complete, it's very cumbersome to jump into the
+// actual definition, hence any group below. cmd+click jumps right to
+// the sdk definition
 export type GroupWithCodecsType = Awaited<
   ReturnType<ConverseXmtpClientType["conversations"]["newGroup"]>
 >;
-// const c: GroupWithCodecsType = null as any as GroupWithCodecsType;
+
+// It's a little strange that there is no group type without behavior
+// the behavior is driven by the generic codecs but are unused
+// simply for data purposes,
+export type AnyGroup = Group<any[]>;
 
 export type DecodedMessageWithCodecsType = Awaited<
   ReturnType<ConversationWithCodecsType["messages"]>

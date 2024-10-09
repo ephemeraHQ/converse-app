@@ -74,6 +74,7 @@ export default function GroupInviteScreen({
           includeCreator: false,
           includeAddedBy: false,
         });
+        // does replace work here?
         await refreshGroup(account, group.topic);
         navigation.goBack();
         setTimeout(() => {
@@ -167,8 +168,9 @@ export default function GroupInviteScreen({
             joinStatus: "ACCEPTED",
           });
         }
+
         return;
-      }
+      } // returns from here so below doesn't happen if groupId is not null
 
       const oldGroupIds = new Set(groupsBeforeJoining.ids);
       const newGroupId = groupsAfterJoining.ids.find(
