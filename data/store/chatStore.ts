@@ -114,6 +114,10 @@ export type TopicsData = {
 export type MediaPreview = {
   mediaURI: string;
   status: "picked" | "uploading" | "uploaded" | "error" | "sending";
+  dimensions?: {
+    width: number;
+    height: number;
+  };
   uploadedAttachment?: RemoteAttachmentContent | null;
   attachmentToSave?: {
     filePath: string;
@@ -755,8 +759,11 @@ export const initChatStore = (account: string) => {
                 lastUpdateAt: now(),
               };
               Object.entries(topicSpamScores).forEach(([topic, spamScore]) => {
-                newState.conversations[topic].spamScore = spamScore;
-                newState.conversations[topic].lastUpdateAt = now();
+                // This is indicative of an issue, how are we setting spam scores for non existent conversations?
+                if (newState.conversations[topic]) {
+                  newState.conversations[topic].spamScore = spamScore;
+                  newState.conversations[topic].lastUpdateAt = now();
+                }
               });
               return newState;
             }),
