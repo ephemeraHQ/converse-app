@@ -314,47 +314,51 @@ export default function NewGroupSummary({
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    avatar: {
-      marginBottom: 10,
-      marginTop: 23,
-    },
-    group: {
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    groupContent: {
-      paddingHorizontal:
-        Platform.OS === "ios" || Platform.OS === "web" ? 18 : 0,
-    },
-    sectionTitle: {
-      marginBottom: -8,
-      color: textSecondaryColor(colorScheme),
-      fontSize: 13,
-      fontWeight: "500",
-    },
-    activitySpinner: {
-      marginRight: 5,
-    },
-    listSectionContainer: {
-      alignItems: "center",
-    },
-    buttonText: {
-      fontWeight: "500",
-    },
-    nameInput: {
-      fontSize: 16,
-    },
-    p: {
-      textAlign: "center",
-      marginLeft: 32,
-      marginRight: 32,
-      ...Platform.select({
-        default: {
-          fontSize: 13,
-          lineHeight: 17,
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        avatar: {
+          marginBottom: 10,
+          marginTop: 23,
+        },
+        group: {
+          backgroundColor: backgroundColor(colorScheme),
+        },
+        groupContent: {
+          paddingHorizontal:
+            Platform.OS === "ios" || Platform.OS === "web" ? 18 : 0,
+        },
+        sectionTitle: {
+          marginBottom: -8,
           color: textSecondaryColor(colorScheme),
+          fontSize: 13,
+          fontWeight: "500",
+        },
+        activitySpinner: {
+          marginRight: 5,
+        },
+        listSectionContainer: {
+          alignItems: "center",
+        },
+        buttonText: {
+          fontWeight: "500",
+        },
+        nameInput: {
+          fontSize: 16,
+        },
+        p: {
+          textAlign: "center",
+          marginLeft: 32,
+          marginRight: 32,
+          ...Platform.select({
+            default: {
+              fontSize: 13,
+              lineHeight: 17,
+              color: textSecondaryColor(colorScheme),
+            },
+          }),
         },
       }),
-    },
-  });
+    [colorScheme]
+  );
 };
