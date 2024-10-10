@@ -204,7 +204,7 @@ const ConversationListItem = memo(function ConversationListItem({
     }
     navigate("Conversation", {
       topic: conversationTopic,
-      message: routeParams?.frameURL,
+      text: routeParams?.frameURL,
     });
   }, [
     isGroupConversation,

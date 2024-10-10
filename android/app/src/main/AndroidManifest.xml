@@ -92,6 +92,8 @@
         <data android:host="dev.converse.xyz" android:pathPrefix="/dm" android:scheme="https"/>
         <data android:host="dev.getconverse.app" android:pathPrefix="/group-invite" android:scheme="https"/>
         <data android:host="dev.converse.xyz" android:pathPrefix="/group-invite" android:scheme="https"/>
+        <data android:host="dev.getconverse.app" android:pathPrefix="/group" android:scheme="https"/>
+        <data android:host="dev.converse.xyz" android:pathPrefix="/group" android:scheme="https"/>
         <data android:host="dev.getconverse.app" android:pathPrefix="/coinbase" android:scheme="https"/>
         <data android:host="dev.converse.xyz" android:pathPrefix="/coinbase" android:scheme="https"/>
         <data android:host="dev.getconverse.app" android:pathPrefix="/desktopconnect" android:scheme="https"/>
