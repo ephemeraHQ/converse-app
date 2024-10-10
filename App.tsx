@@ -38,6 +38,7 @@ import {
   updateLastVersionOpen,
 } from "./data/updates/asyncUpdates";
 import Main from "./screens/Main";
+import { useThemeProvider } from "./theme/useAppTheme";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
@@ -98,6 +99,9 @@ export default function App() {
     }
   }, [isInternetReachable, hydrationDone]);
 
+  const { themeScheme, setThemeContextOverride, ThemeProvider } =
+    useThemeProvider();
+
   // On Android we use the default keyboard "animation"
   const AppKeyboardProvider =
     Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
@@ -108,21 +112,23 @@ export default function App() {
         <ThirdwebProvider>
           <AppKeyboardProvider>
             <ActionSheetProvider>
-              <PaperProvider
-                theme={
-                  colorScheme === "dark"
-                    ? MaterialDarkTheme
-                    : MaterialLightTheme
-                }
-              >
-                <PortalProvider>
-                  <View style={styles.safe}>
-                    <XmtpEngine />
-                    <Main />
-                    <DebugButton ref={debugRef} />
-                  </View>
-                </PortalProvider>
-              </PaperProvider>
+              <ThemeProvider value={{ themeScheme, setThemeContextOverride }} r>
+                <PaperProvider
+                  theme={
+                    colorScheme === "dark"
+                      ? MaterialDarkTheme
+                      : MaterialLightTheme
+                  }
+                >
+                  <PortalProvider>
+                    <View style={styles.safe}>
+                      <XmtpEngine />
+                      <Main />
+                      <DebugButton ref={debugRef} />
+                    </View>
+                  </PortalProvider>
+                </PaperProvider>
+              </ThemeProvider>
             </ActionSheetProvider>
           </AppKeyboardProvider>
         </ThirdwebProvider>
