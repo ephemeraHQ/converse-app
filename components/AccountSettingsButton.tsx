@@ -1,6 +1,6 @@
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { translate } from "@i18n";
-// import Clipboard from "@react-native-clipboard/clipboard";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { NavigationProp } from "@react-navigation/native";
 import {
   actionSheetColors,

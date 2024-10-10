@@ -1,4 +1,4 @@
-// import Clipboard from "@react-native-clipboard/clipboard";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { actionSheetColors } from "@styles/colors";
 import * as Linking from "expo-linking";
 import { useCallback } from "react";

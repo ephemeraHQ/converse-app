@@ -1,4 +1,4 @@
-// import Clipboard from "@react-native-clipboard/clipboard";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {

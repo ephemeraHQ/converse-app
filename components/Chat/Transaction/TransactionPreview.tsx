@@ -1,4 +1,4 @@
-// import Clipboard from "@react-native-clipboard/clipboard";
+import Clipboard from "@react-native-clipboard/clipboard";
 import {
   actionSheetColors,
   messageInnerBubbleColor,

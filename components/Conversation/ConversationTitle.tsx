@@ -1,4 +1,4 @@
-// import Clipboard from "@react-native-clipboard/clipboard";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { headerTitleStyle, textPrimaryColor } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
