@@ -1,5 +1,6 @@
-import { GroupData, GroupsDataEntity } from "@queries/useGroupsQuery";
+import { GroupJoinRequestStatus } from "@utils/api";
 import { GroupInvite } from "@utils/api.types";
+import { GroupData, GroupsDataEntity } from "@utils/xmtpRN/client.types";
 import { assign, fromPromise, log, setup } from "xstate";
 
 import { AllowGroupProps } from "./GroupInvites.client";
@@ -8,24 +9,31 @@ import { Controlled } from "../../dependencies/Environment/Environment";
 
 type JoinGroupMachineEvents = { type: "user.didTapJoinGroup" };
 
+type JoinGroupMachineErrorType =
+  | "fetchGroupInviteError"
+  | "fetchGroupsByAccountError"
+  | "attemptToJoinGroupError"
+  | "provideUserConsentToJoinGroupError"
+  | "refreshGroupError";
+
 type JoinGroupMachineContext = {
   // Context
   account: string;
   groupInviteMetadata?: GroupInvite;
   groupsBeforeJoinAttempt?: GroupsDataEntity;
   newGroup?: GroupData;
-
+  joinStatus?: GroupJoinRequestStatus;
   // From Input
   groupInviteId: string;
 
-  error?: string;
+  error?: { type: JoinGroupMachineErrorType; payload: string };
 };
 
 type JoinGroupMachineInput = {
   groupInviteId: string;
 };
 
-type JoinGroupMachineTags = "loading";
+type JoinGroupMachineTags = "loading" | "polling" | "error";
 
 export const joinGroupMachineLogic = setup({
   types: {
@@ -99,7 +107,10 @@ export const joinGroupMachineLogic = setup({
     }),
 
     saveError: assign({
-      error: (_, params: { error: string }) => params.error,
+      error: (
+        _,
+        params: { error: { type: JoinGroupMachineErrorType; payload: string } }
+      ) => params.error,
     }),
 
     navigateToGroupScreen: log(
@@ -123,6 +134,11 @@ export const joinGroupMachineLogic = setup({
 
     saveNewGroup: assign({
       newGroup: (_, params: { newGroup: GroupData }) => params.newGroup,
+    }),
+
+    saveGroupJoinStatus: assign({
+      joinStatus: (_, params: { joinStatus: GroupJoinRequestStatus }) =>
+        params.joinStatus,
     }),
   },
 
@@ -236,7 +252,12 @@ joined, so I think I'm missing some context.
           target: "Error Loading Group Invite",
           actions: {
             type: "saveError",
-            params: ({ event }) => ({ error: JSON.stringify(event.error) }),
+            params: ({ event }) => ({
+              error: {
+                type: "fetchGroupInviteError",
+                payload: JSON.stringify(event.error),
+              },
+            }),
           },
         },
       },
@@ -291,7 +312,12 @@ user has joined.
           target: "Error Loading Groups",
           actions: {
             type: "saveError",
-            params: ({ event }) => ({ error: JSON.stringify(event.error) }),
+            params: ({ event }) => ({
+              error: {
+                type: "fetchGroupsByAccountError",
+                payload: JSON.stringify(event.error),
+              },
+            }),
           },
         },
       },
@@ -313,8 +339,9 @@ This is a known limitation of our current implementation,
 and we are exploring ideas such as allowing more admins
 to accept the invite.
           `,
-
+      tags: ["polling"],
       invoke: {
+        id: "attemptToJoinGroupActorLogic",
         src: "attemptToJoinGroupActorLogic",
         input: ({ context }) => {
           return {
@@ -437,7 +464,12 @@ consent for the new group.
           target: "Error Determining New Group",
           actions: {
             type: "saveError",
-            params: ({ event }) => ({ error: JSON.stringify(event.error) }),
+            params: ({ event }) => ({
+              error: {
+                type: "fetchGroupsByAccountError",
+                payload: JSON.stringify(event.error),
+              },
+            }),
           },
         },
       },
@@ -464,21 +496,21 @@ consent for the new group.
       always: [
         {
           guard: {
-            type: "userHasAlreadyJoinedGroup",
-            params: ({ context }) => ({
-              newGroup: context.newGroup,
-            }),
-          },
-          target: "User Joined Group",
-        },
-        {
-          guard: {
             type: "hasUserBeenBlocked",
             params: ({ context }) => ({
               newGroup: context.newGroup,
             }),
           },
           target: "User Has Been Blocked From Group",
+        },
+        {
+          guard: {
+            type: "userHasAlreadyJoinedGroup",
+            params: ({ context }) => ({
+              newGroup: context.newGroup,
+            }),
+          },
+          target: "User Joined Group",
         },
         {
           target: "Providing User Consent to Join Group",
@@ -505,7 +537,12 @@ consent for the new group.
           target: "Error Providing User Consent",
           actions: {
             type: "saveError",
-            params: ({ event }) => ({ error: JSON.stringify(event.error) }),
+            params: ({ event }) => ({
+              error: {
+                type: "provideUserConsentToJoinGroupError",
+                payload: JSON.stringify(event.error),
+              },
+            }),
           },
         },
       },
@@ -526,29 +563,48 @@ consent for the new group.
           target: "Error Refreshing Group",
           actions: {
             type: "saveError",
-            params: ({ event }) => ({ error: JSON.stringify(event.error) }),
+            params: ({ event }) => ({
+              error: {
+                type: "refreshGroupError",
+                payload: JSON.stringify(event.error),
+              },
+            }),
           },
         },
       },
     },
 
     "User Has Been Blocked From Group": {
+      description: `
+The user has been blocked from the group or the group is not active.
+      `,
       type: "final",
-      entry: assign({
-        error: "The group is not active or you have been removed from it.",
-      }),
+      entry: {
+        type: "saveGroupJoinStatus",
+        params: {
+          joinStatus: "REJECTED",
+        },
+      },
     },
 
     "User Joined Group": {
       type: "final",
-      entry: {
-        type: "navigateToGroupScreen",
-        params: ({ context }) => {
-          return {
-            topic: context.newGroup!.topic,
-          };
+      entry: [
+        {
+          type: "saveGroupJoinStatus",
+          params: {
+            joinStatus: "ACCEPTED",
+          },
         },
-      },
+        {
+          type: "navigateToGroupScreen",
+          params: ({ context }) => {
+            return {
+              topic: context.newGroup!.topic,
+            };
+          },
+        },
+      ],
     },
 
     "Request to Join Group Rejected": {
@@ -577,18 +633,29 @@ consent for the new group.
     // ERROR STATES
     ///////////////////////////////////////////////////////////////////////////
 
-    "Error Loading Group Invite": {},
+    "Error Loading Group Invite": {
+      tags: ["error"],
+    },
 
     "Error Joining Group": {
+      tags: ["error"],
       type: "final",
     },
 
-    "Error Loading Groups": {},
+    "Error Loading Groups": {
+      tags: ["error"],
+    },
 
-    "Error Determining New Group": {},
+    "Error Determining New Group": {
+      tags: ["error"],
+    },
 
-    "Error Providing User Consent": {},
+    "Error Providing User Consent": {
+      tags: ["error"],
+    },
 
-    "Error Refreshing Group": {},
+    "Error Refreshing Group": {
+      tags: ["error"],
+    },
   },
 });

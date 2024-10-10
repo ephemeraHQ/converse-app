@@ -22,7 +22,7 @@ import {
 } from "@utils/api";
 import { getTopicFromGroupId } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
-import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { GroupWithCodecsType } from "@utils/xmtpRN/client.types";
 import { refreshGroup } from "@utils/xmtpRN/conversations";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
