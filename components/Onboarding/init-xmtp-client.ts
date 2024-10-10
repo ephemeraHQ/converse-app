@@ -86,6 +86,7 @@ type IConnectWithBase64KeyArgs =
 
 export async function connectWithBase64Key(args: IConnectWithBase64KeyArgs) {
   const { address, base64Key } = args;
+
   logger.debug("In connectWithBase64Key");
 
   if (!address) {
@@ -124,6 +125,8 @@ async function initializeDatabase(address: string) {
 }
 
 async function finalizeAccountSetup(args: IConnectWithBase64KeyArgs) {
+  logger.debug("Finalizing account setup");
+
   const { address } = args;
 
   useAccountsStore.getState().setCurrentAccount(address, false);
@@ -137,4 +140,6 @@ async function finalizeAccountSetup(args: IConnectWithBase64KeyArgs) {
   }
 
   getXmtpClient(address);
+
+  logger.debug("Account setup finalized");
 }

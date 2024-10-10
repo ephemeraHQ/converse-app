@@ -15,6 +15,8 @@ type IConnectViaWalletStoreState = {
   waitingForNextSignature: boolean;
   onXmtp: boolean;
   alreadyV3Db: boolean;
+  clickedSignature: boolean;
+  initiatingClientForAddress: string | undefined;
   setSigner: (signer: Signer | undefined) => void;
   setAddress: (address: string | undefined) => void;
   setLoading: (loading: boolean) => void;
@@ -23,6 +25,10 @@ type IConnectViaWalletStoreState = {
   setOnXmtp: (onXmtp: boolean) => void;
   setAlreadyV3Db: (alreadyV3Db: boolean) => void;
   resetOnboarding: () => void;
+  setClickedSignature: (clickedSignature: boolean) => void;
+  setInitiatingClientForAddress: (
+    initiatingClientForAddress: string | undefined
+  ) => void;
 };
 
 type IConnectViaWalletStore = ReturnType<typeof createConnectViaWalletStore>;
@@ -50,6 +56,8 @@ const createConnectViaWalletStore = () =>
     waitingForNextSignature: false,
     onXmtp: false,
     alreadyV3Db: false,
+    clickedSignature: false,
+    initiatingClientForAddress: undefined,
     setSigner: (signer) => set({ signer }),
     setAddress: (address) => set({ address }),
     setLoading: (loading) => set({ loading }),
@@ -58,9 +66,13 @@ const createConnectViaWalletStore = () =>
       set({ waitingForNextSignature: waiting }),
     setOnXmtp: (onXmtp) => set({ onXmtp }),
     setAlreadyV3Db: (alreadyV3Db) => set({ alreadyV3Db }),
+    setClickedSignature: (clickedSignature) => set({ clickedSignature }),
+    setInitiatingClientForAddress: (initiatingClientForAddress) =>
+      set({ initiatingClientForAddress }),
     resetOnboarding: () =>
       set({
         signer: undefined,
+        clickedSignature: false,
         address: undefined,
         loading: false,
         signaturesDone: 0,

@@ -15,7 +15,9 @@ import { OnboardingUserProfileScreen } from "../screens/Onboarding/OnboardingUse
 type OnboardingParamList = {
   OnboardingGetStarted: undefined;
   OnboardingPrivy: undefined;
-  OnboardingConnectWallet: undefined;
+  OnboardingConnectWallet: {
+    address?: string;
+  };
   OnboardingNotifications: undefined;
   OnboardingUserProfile: undefined;
   OnboardingPrivateKey: undefined;

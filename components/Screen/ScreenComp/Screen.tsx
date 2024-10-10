@@ -1,5 +1,4 @@
 import { useScrollToTop } from "@react-navigation/native";
-import { colors } from "@theme/colors";
 import { StatusBar } from "expo-status-bar";
 import React, { useRef } from "react";
 import { ScrollView, View, ViewStyle } from "react-native";
@@ -18,6 +17,7 @@ import {
 } from "./Screen.props";
 import { VStack } from "../../../design-system/VStack";
 import { spacing } from "../../../theme";
+import { useAppTheme } from "../../../theme/useAppTheme";
 
 function ScreenWithoutScrolling(props: IScreenProps) {
   const { style, contentContainerStyle, children } = props;
@@ -85,8 +85,9 @@ function ScreenWithScrolling(props: IScreenProps) {
  * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/app/components/Screen/}
  */
 export function Screen(props: IScreenProps) {
+  const { theme } = useAppTheme();
   const {
-    backgroundColor = colors.background,
+    backgroundColor = theme.colors.background,
     safeAreaEdges,
     StatusBarProps,
     statusBarStyle = "dark",

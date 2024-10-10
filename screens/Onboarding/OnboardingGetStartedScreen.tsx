@@ -194,7 +194,7 @@ export function InstalledWallets({ wallets }: { wallets: InstalledWallet[] }) {
 
           try {
             if (w.name === "Coinbase Wallet") {
-              await thirdwebConnect(async () => {
+              const res = await thirdwebConnect(async () => {
                 const coinbaseWallet = createWallet("com.coinbase.wallet", {
                   appMetadata: config.walletConnectConfig.appMetadata,
                   mobileConfig: {
@@ -205,30 +205,34 @@ export function InstalledWallets({ wallets }: { wallets: InstalledWallet[] }) {
                 setActiveWallet(coinbaseWallet);
                 return coinbaseWallet;
               });
+              if (!res) {
+                throw new Error("Failed to connect to Coinbase Wallet");
+              }
+              router.push("OnboardingConnectWallet", {});
             }
-
-            if (w.name === "EthOS Wallet") {
+            //
+            else if (w.name === "EthOS Wallet") {
               const signer = getEthOSSigner();
               if (signer) {
-                // TODO
-                // setSigner(signer);
+                const address = await signer.getAddress();
+                router.push("OnboardingConnectWallet", { address });
               } else {
                 setIsLoading(false);
               }
             }
-
-            if (w.thirdwebId) {
+            //
+            else if (w.thirdwebId) {
               const walletConnectWallet = createWallet(w.thirdwebId);
-              await walletConnectWallet.connect({
+              const res = await walletConnectWallet.connect({
                 client: thirdwebClient,
                 walletConnect: config.walletConnectConfig,
               });
               setActiveWallet(walletConnectWallet);
+              if (!res) {
+                throw new Error("Failed to connect to wallet");
+              }
+              router.push("OnboardingConnectWallet", {});
             }
-
-            router.push("OnboardingConnectWallet");
-
-            throw new Error("Unsupported wallet");
           } catch (e: any) {
             logger.error("Error connecting to wallet:", e);
           } finally {

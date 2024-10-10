@@ -1,6 +1,51 @@
 // TODO: write documentation for colors and palette in own markdown file and add links from here
 
+import { Platform } from "react-native";
+
 import { IColors } from "./colors";
+
+const MaterialDarkColors = {
+  primary: "rgb(255,255,255)",
+  onPrimary: "rgb(0,0,0)",
+  primaryContainer: "rgb(255,255,255)",
+  onPrimaryContainer: "rgb(0,0,0)",
+  secondary: "rgb(209, 209, 209)",
+  onSecondary: "rgb(55, 55, 55)",
+  secondaryContainer: "rgb(50, 50, 50)",
+  onSecondaryContainer: "rgb(238, 238, 238)",
+  tertiary: "rgb(93, 213, 252)",
+  onTertiary: "rgb(0, 53, 68)",
+  tertiaryContainer: "rgb(0, 77, 97)",
+  onTertiaryContainer: "rgb(183, 234, 255)",
+  error: "rgb(255, 180, 171)",
+  onError: "rgb(105, 0, 5)",
+  errorContainer: "rgb(147, 0, 10)",
+  onErrorContainer: "rgb(255, 180, 171)",
+  background: "rgb(0, 0, 0)",
+  onBackground: "rgb(229, 229, 229)",
+  surface: "rgb(0, 0, 0)",
+  onSurface: "rgb(229, 229, 229)",
+  surfaceVariant: "rgb(28, 28, 30)",
+  onSurfaceVariant: "rgb(205, 196, 206)",
+  outline: "rgb(150, 142, 152)",
+  outlineVariant: "rgb(28, 28, 30)",
+  shadow: "rgb(0, 0, 0)",
+  scrim: "rgb(0, 0, 0)",
+  inverseSurface: "rgb(231, 225, 229)",
+  inverseOnSurface: "rgb(50, 50, 50)",
+  inversePrimary: "rgb(0,0,0)",
+  elevation: {
+    level0: "transparent",
+    level1: "rgb(39, 35, 41)",
+    level2: "rgb(45, 45, 45)",
+    level3: "rgb(50, 50, 50)",
+    level4: "rgb(52, 52, 52)",
+    level5: "rgb(56, 56, 56)",
+  },
+  surfaceDisabled: "rgba(231, 225, 229, 0.12)",
+  onSurfaceDisabled: "rgba(231, 225, 229, 0.38)",
+  backdrop: "rgba(52, 46, 55, 0.4)",
+};
 
 const palette = {
   neutral100: "#000000",
@@ -43,7 +88,11 @@ export const colorsDark: IColors = {
   transparent: "rgba(0, 0, 0, 0)",
   text: palette.neutral800,
   textDim: palette.neutral600,
-  background: palette.neutral100,
+  background: Platform.select({
+    android: MaterialDarkColors.surface,
+    ios: "#111111",
+    default: "#111111",
+  }),
   border: palette.neutral400,
   tint: palette.primary500,
   separator: palette.neutral300,

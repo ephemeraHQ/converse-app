@@ -23,6 +23,14 @@ import NewConversationNav, {
   NewConversationNavParams,
 } from "./NewConversationNav";
 import ProfileNav, { ProfileNavParams } from "./ProfileNav";
+import ShareFrameNav, { ShareFrameNavParams } from "./ShareFrameNav";
+import ShareProfileNav from "./ShareProfileNav";
+import TopUpNav from "./TopUpNav";
+import UserProfileNav from "./UserProfileNav";
+import WebviewPreviewNav, {
+  WebviewPreviewNavParams,
+} from "./WebviewPreviewNav";
+import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { NewAccountConnectWalletScreen } from "../NewAccount/NewAccountConnectWalletScreen";
 import { NewAccountEphemeraScreen } from "../NewAccount/NewAccountEphemeraScreen";
 import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeyScreen";
@@ -36,14 +44,6 @@ import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificat
 import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
 import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
 import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
-import ShareFrameNav, { ShareFrameNavParams } from "./ShareFrameNav";
-import ShareProfileNav from "./ShareProfileNav";
-import TopUpNav from "./TopUpNav";
-import UserProfileNav from "./UserProfileNav";
-import WebviewPreviewNav, {
-  WebviewPreviewNavParams,
-} from "./WebviewPreviewNav";
-import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -51,7 +51,9 @@ export type NavigationParamList = {
   // Auth / Onboarding
   OnboardingGetStarted: undefined;
   OnboardingPrivy: undefined;
-  OnboardingConnectWallet: undefined;
+  OnboardingConnectWallet: {
+    address?: string;
+  };
   OnboardingPrivateKey: undefined;
   OnboardingNotifications: undefined;
   OnboardingEphemeral: undefined;

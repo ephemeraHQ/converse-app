@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import "./polyfills";
+import "expo-dev-client";
 
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
@@ -111,7 +112,7 @@ export default function App() {
     if (currentAccount && currentAccount !== TEMPORARY_ACCOUNT_NAME) {
       setAuthStatus("signedIn");
     } else {
-      setAuthStatus("idle");
+      setAuthStatus("signedOut");
     }
   }, []);
 
