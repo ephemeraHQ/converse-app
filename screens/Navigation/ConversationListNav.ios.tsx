@@ -133,7 +133,7 @@ export default function ConversationListNav() {
               hitSlop={8}
             />
             <View style={styles.offsetComposeIcon}>
-              <NewConversationButton navigation={navigation} route={route} />
+              <NewConversationButton />
             </View>
           </View>
         ),

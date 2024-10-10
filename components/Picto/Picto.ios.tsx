@@ -12,11 +12,12 @@ type Props = {
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
   const colorScheme = useColorScheme();
+
   return (
     <SFSymbol
       name={picto}
       weight={(weight as any) || "regular"}
-      scale="large"
+      // scale="large"
       color={color || primaryColor(colorScheme)}
       size={size}
       multicolor={false}

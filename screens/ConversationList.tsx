@@ -17,15 +17,15 @@ import {
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
-import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
-import { NavigationParamList } from "./Navigation/Navigation";
-import { useIsSplitScreen } from "./Navigation/navHelpers";
 import ChatNullState from "../components/Chat/ChatNullState";
 import ConversationFlashList from "../components/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
 import RequestsButton from "../components/ConversationList/RequestsButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
+import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
+import { NavigationParamList } from "./Navigation/Navigation";
+import { useIsSplitScreen } from "./Navigation/navHelpers";
 import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
@@ -195,12 +195,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     ListHeaderComponents.push(
       <View key="search" style={styles.headerTitleContainer}>
         <Text style={styles.headerTitle}>Messages</Text>
-        <RequestsButton
-          key="requests"
-          navigation={navigation}
-          route={route}
-          requestsCount={requestsCount}
-        />
+        <RequestsButton key="requests" requestsCount={requestsCount} />
       </View>
     );
   } else if (!sharingMode) {
@@ -223,7 +218,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     ListHeaderComponents.push(<EphemeralAccountBanner key="ephemeral" />);
   }
   if (showNoResult) {
-    ListFooterComponent = <NoResult navigation={navigation} />;
+    ListFooterComponent = <NoResult />;
   }
 
   if (showChatNullState) {
@@ -254,9 +249,9 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
         }
         ListFooterComponent={ListFooterComponent}
       />
-      <Recommendations navigation={navigation} visibility="HIDDEN" />
+      <Recommendations visibility="HIDDEN" />
       {(Platform.OS === "android" || Platform.OS === "web") && !sharingMode && (
-        <NewConversationButton navigation={navigation} route={route} />
+        <NewConversationButton />
       )}
     </>
   );

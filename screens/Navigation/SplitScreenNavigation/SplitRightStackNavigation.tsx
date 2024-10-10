@@ -12,7 +12,6 @@ import ConversationNav, {
   ConversationNavParams,
   ConversationScreenConfig,
 } from "../ConversationNav";
-import EnableTransactionsNav from "../EnableTransactionsNav";
 import GroupLinkNav, {
   GroupLinkNavParams,
   GroupLinkScreenConfig,
@@ -44,7 +43,6 @@ export type NavigationParamList = {
   Conversation: ConversationNavParams;
   NewConversation: NewConversationNavParams;
   NewGroupSummary: undefined;
-  EnableTransactions: undefined;
   ShareProfile: undefined;
   ShareFrame: ShareFrameNavParams;
   TopUp: undefined;
@@ -111,7 +109,6 @@ export default function SplitRightStackNavigation({
           {GroupLinkNav()}
           {UserProfileNav()}
           {TopUpNav()}
-          {EnableTransactionsNav()}
         </NativeStack.Group>
       </NativeStack.Navigator>
     </NavigationContainer>

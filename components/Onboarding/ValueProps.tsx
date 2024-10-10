@@ -73,9 +73,9 @@ const useStyles = () => {
   return StyleSheet.create({
     valuePropsContainer: {
       flexDirection: "column",
-      gap: 8,
+      rowGap: 8,
       alignSelf: "center",
-      padding: 24,
+      width: "100%",
     },
     valuePropsItem: {
       flexDirection: "row",

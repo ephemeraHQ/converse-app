@@ -17,7 +17,6 @@ export enum AvatarSizes {
 
 export enum PictoSizes {
   default = 48,
-
   accoutSettings = 24,
   actionButton = Platform.OS === "android" ? 20 : 11.7,
   button = 13,
@@ -25,7 +24,7 @@ export enum PictoSizes {
   newConversationButton = Platform.OS === "ios" ? 16 : 24,
   navItem = 24,
   notification = Platform.OS === "android" ? 80 : 43,
-  onboardingComponent = Platform.OS === "android" ? 80 : 43,
+  onboardingComponent = Platform.OS === "android" ? 65 : 65,
   onboarding = 80,
   privyConnect = Platform.OS === "ios" ? 12 : 22,
   replyButton = Platform.OS === "android" ? 16 : 14,

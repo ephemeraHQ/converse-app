@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import "./polyfills";
+import "expo-dev-client";
 
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
@@ -31,7 +32,12 @@ import "./utils/splash/splash";
 
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
+import {
+  TEMPORARY_ACCOUNT_NAME,
+  useAccountsStore,
+} from "./data/store/accountsStore";
 import { useAppStore } from "./data/store/appStore";
+import { setAuthStatus } from "./data/store/authStore";
 import { useSelect } from "./data/store/storeHelpers";
 import {
   runAsyncUpdates,
@@ -41,6 +47,8 @@ import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
+
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -98,6 +106,16 @@ export default function App() {
     }
   }, [isInternetReachable, hydrationDone]);
 
+  // For now we use persit with zustand to get the accounts when the app launch so here is okay to see if we're logged in or not
+  useEffect(() => {
+    const currentAccount = useAccountsStore.getState().currentAccount;
+    if (currentAccount && currentAccount !== TEMPORARY_ACCOUNT_NAME) {
+      setAuthStatus("signedIn");
+    } else {
+      setAuthStatus("signedOut");
+    }
+  }, []);
+
   // On Android we use the default keyboard "animation"
   const AppKeyboardProvider =
     Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
@@ -115,13 +133,15 @@ export default function App() {
                     : MaterialLightTheme
                 }
               >
-                <PortalProvider>
-                  <View style={styles.safe}>
-                    <XmtpEngine />
-                    <Main />
-                    <DebugButton ref={debugRef} />
-                  </View>
-                </PortalProvider>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <PortalProvider>
+                    <View style={styles.safe}>
+                      <XmtpEngine />
+                      <Main />
+                      <DebugButton ref={debugRef} />
+                    </View>
+                  </PortalProvider>
+                </GestureHandlerRootView>
               </PaperProvider>
             </ActionSheetProvider>
           </AppKeyboardProvider>
