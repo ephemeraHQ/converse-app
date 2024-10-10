@@ -1,5 +1,7 @@
+import ExternalWalletPicker from "@components/ExternalWalletPicker";
 import UserProfile from "@components/Onboarding/UserProfile";
 import { backgroundColor } from "@styles/colors";
+import { useAutoConnectExternalWallet } from "@utils/evm/external";
 import { getProfile } from "@utils/profile";
 import { useCheckCurrentInstallation } from "@utils/xmtpRN/client";
 import { StatusBar } from "expo-status-bar";
@@ -37,6 +39,7 @@ export default function Main() {
   usePrivyAccessToken();
   useAddressBookStateHandler();
   useCheckCurrentInstallation();
+  useAutoConnectExternalWallet();
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount();
   const socials = useProfilesStore((s) =>
@@ -148,6 +151,7 @@ export default function Main() {
     <>
       {mainHeaders}
       {screenToShow}
+      <ExternalWalletPicker />
     </>
   );
 }

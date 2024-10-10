@@ -15,6 +15,7 @@ import {
   useColorScheme,
   useWindowDimensions,
   View,
+  ViewStyle,
 } from "react-native";
 import {
   Gesture,
@@ -40,6 +41,7 @@ export interface DrawerProps {
   visible: boolean;
   children: React.ReactNode;
   onClose?: () => void;
+  style?: ViewStyle;
 }
 
 export const DrawerContext = React.createContext<{
@@ -57,7 +59,7 @@ export interface DrawerRef {
 }
 
 export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
-  { children, visible, onClose },
+  { children, visible, onClose, style },
   ref
 ) {
   const styles = useStyles();
@@ -171,7 +173,7 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
           </TouchableWithoutFeedback>
           <GestureDetector gesture={composed}>
             <ReanimatedView
-              style={[styles.trayContainer, animtedStyle]}
+              style={[styles.trayContainer, animtedStyle, style]}
               layout={LinearTransition.springify()}
             >
               <View style={styles.handle} />

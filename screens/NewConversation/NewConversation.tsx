@@ -43,7 +43,7 @@ import {
   getAddressForPeer,
   getCleanAddress,
   isSupportedPeer,
-} from "../../utils/eth";
+} from "../../utils/evm/address";
 import { navigate } from "../../utils/navigation";
 import { isEmptyObject } from "../../utils/objects";
 import { getPreferredName } from "../../utils/profile";

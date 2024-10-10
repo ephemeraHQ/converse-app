@@ -5,7 +5,7 @@ import { In } from "typeorm/browser";
 import { v4 as uuidv4 } from "uuid";
 
 import { saveConversations } from "./upsertConversations";
-import { getCleanAddress } from "../../../utils/eth";
+import { getCleanAddress } from "../../../utils/evm/address";
 import { getRepository } from "../../db";
 import { Conversation } from "../../db/entities/conversationEntity";
 import { upsertRepository } from "../../db/upsert";

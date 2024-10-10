@@ -1,4 +1,5 @@
 import * as Linking from "expo-linking";
+import { useEffect, useState } from "react";
 import { WalletId } from "thirdweb/wallets";
 
 import { isDesktop } from "../../utils/device";
@@ -160,4 +161,12 @@ export const getInstalledWallets = async (
   installedWallets = wallets;
   hasCheckedInstalled = true;
   return installedWallets;
+};
+
+export const useInstalledWallets = () => {
+  const [wallets, setWallets] = useState(installedWallets);
+  useEffect(() => {
+    getInstalledWallets(true).then(setWallets);
+  }, []);
+  return wallets;
 };

@@ -1,4 +1,4 @@
-import { getCleanAddress } from "./eth";
+import { getCleanAddress } from "./evm/address";
 import { shortAddress } from "./str";
 import { ProfileByAddress, ProfileSocials } from "../data/store/profilesStore";
 import { RecommendationData } from "../data/store/recommendationsStore";
