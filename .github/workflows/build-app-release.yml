@@ -116,12 +116,6 @@ jobs:
         run: |
           node scripts/build/incrementVersion.js --bump=patch
 
-      - name: Commit changes
-        run: |
-          git add app.json
-          git commit -m "Increment build numbers"
-          git push
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
