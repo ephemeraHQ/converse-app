@@ -152,8 +152,8 @@ const Conversation = ({
   const mediaPreviewRef = useRef<MediaPreview>();
 
   const messageToPrefill = useMemo(
-    () => route.params?.message || conversation?.messageDraft || "",
-    [conversation?.messageDraft, route.params?.message]
+    () => route.params?.text || conversation?.messageDraft || "",
+    [conversation?.messageDraft, route.params?.text]
   );
   const mediaPreviewToPrefill = useMemo(
     () => conversation?.mediaPreview || null,
@@ -289,6 +289,7 @@ const Conversation = ({
       {route.params?.topic || route.params?.mainConversationWithPeer ? (
         <ConversationContext.Provider
           value={{
+            topic: conversationTopic,
             conversation,
             messageToPrefill,
             inputRef: textInputRef,

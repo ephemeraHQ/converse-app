@@ -71,7 +71,7 @@ const linking = {
       WebviewPreview: WebviewPreviewScreenConfig,
     },
   },
-  getStateFromPath: getConverseStateFromPath,
+  getStateFromPath: getConverseStateFromPath("splitRightStack"),
   getInitialURL: getConverseInitialURL,
 };
 

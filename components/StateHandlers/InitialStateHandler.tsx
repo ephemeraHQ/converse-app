@@ -4,26 +4,15 @@ import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef } from "react";
 import { useColorScheme } from "react-native";
 
-import config from "../../config";
 import { useAppStore } from "../../data/store/appStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import {
+  getSchemedURLFromUniversalURL,
   navigateToTopicWithRetry,
   topicToNavigateTo,
 } from "../../utils/navigation";
 import { hideSplashScreen } from "../../utils/splash/splash";
-
-const getSchemedURLFromUniversalURL = (url: string) => {
-  let schemedURL = url;
-  // Handling universal links by saving a schemed URI
-  config.universalLinks.forEach((prefix) => {
-    if (schemedURL.startsWith(prefix)) {
-      schemedURL = Linking.createURL(schemedURL.replace(prefix, ""));
-    }
-  });
-  return schemedURL;
-};
 
 const isDevelopmentClientURL = (url: string) => {
   return url.includes("expo-development-client");
