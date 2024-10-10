@@ -223,6 +223,9 @@ class PushNotificationsService : FirebaseMessagingService() {
             if (payload is GroupInviteNotification) {
                 handleGroupInviteNotification(payload)
                 println("This is an GroupInviteNotification with message: ${payload.groupInviteId}")
+            } else if (payload is GroupSyncNotification) {
+                handleGroupSyncNotification(payload)
+                println("This is an GroupSyncNotification with message: ${payload.contentTopic}")
             } else {
                 println("Unknown payload type")
             }
@@ -271,6 +274,33 @@ class PushNotificationsService : FirebaseMessagingService() {
                 }
 
 
+            } catch (e: Exception) {
+                // Handle any exceptions
+                Log.e(TAG, "Error on IO Dispatcher coroutine", e)
+            }
+        }
+    }
+
+    private fun handleGroupSyncNotification(notification: GroupSyncNotification) {
+        val context = this
+
+        // Using IO dispatcher for background work, not blocking the main thread and UI
+        serviceScope.launch {
+            try {
+                val mmkv = getMmkv(context)
+                val xmtpClient = getXmtpClient(context, notification.account) ?: run {
+                    Log.d(
+                        TAG,
+                        "NO XMTP CLIENT FOUND FOR GROUP SYNC ${notification.contentTopic}"
+                    )
+                    return@launch
+                }
+                val groupId = getGroupIdFromTopic(notification.contentTopic)
+                val group = getGroup(xmtpClient, groupId)
+                if (group != null) {
+                    group.sync()
+    
+                }
             } catch (e: Exception) {
                 // Handle any exceptions
                 Log.e(TAG, "Error on IO Dispatcher coroutine", e)

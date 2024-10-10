@@ -144,12 +144,28 @@ func handleConverseNotification(contentHandler: ((UNNotificationContent) -> Void
         contentHandler(UNNotificationContent())
         return
       }
-      await handleGroupJoinRequestNotification(
+      let shouldShowNotification = await handleGroupJoinRequestNotification(
         groupInviteId: groupInviteId,
         joinRequestId: joinRequestId,
         address: address,
         account: account,
         content: content
+      )
+      if (shouldShowNotification) {
+        contentHandler(content)
+      } else {
+        contentHandler(UNNotificationContent())
+      }
+      break
+    case "group_sync":
+      guard let contentTopic = data["contentTopic"] as? String,
+            let account = data["account"] as? String else {
+        contentHandler(UNNotificationContent())
+        return
+      }
+      await handleGroupSyncNotification(
+        contentTopic: contentTopic,
+        account: account
       )
       contentHandler(UNNotificationContent())
       break
@@ -160,33 +176,54 @@ func handleConverseNotification(contentHandler: ((UNNotificationContent) -> Void
     
   }
   
-  func handleGroupJoinRequestNotification(groupInviteId: String, joinRequestId: String, address: String, account: String, content: UNMutableNotificationContent) async {
+  func handleGroupJoinRequestNotification(groupInviteId: String, joinRequestId: String, address: String, account: String, content: UNMutableNotificationContent) async -> Bool {
     do {
-      
       let mmkv = getMmkv()
-      if let xmtpClient = await getXmtpClient(account: account){
+      if let xmtpClient = await getXmtpClient(account: account) {
         guard let groupId = mmkv?.string(forKey: "group-invites-link-\(groupInviteId)") else {
           // Don't handle this as it's stored on a different device
-          return
+          return false // Do not show notification
         }
         var apiURI = mmkv?.string(forKey: "api-uri")
         if (apiURI == nil) {
           let sharedDefaults = try! SharedDefaults()
           apiURI = sharedDefaults.string(forKey: "api-uri")?.replacingOccurrences(of: "\"", with: "")
         }
-        
-        if let group = await getGroup(xmtpClient: xmtpClient, groupId: groupId), let apiURI = apiURI {
-          try await group.addMembers(addresses: [address])
-          await putGroupInviteRequest(apiURI: apiURI, account: account, xmtpClient: xmtpClient, status: "ACCEPTED", joinRequestId: joinRequestId)
+        do {
+          if let group = await getGroup(xmtpClient: xmtpClient, groupId: groupId), let apiURI = apiURI {
+            try await group.addMembers(addresses: [address])
+            try await putGroupInviteRequest(apiURI: apiURI, account: account, xmtpClient: xmtpClient, status: "ACCEPTED", joinRequestId: joinRequestId)
+            return false // Do not show notification when successfully added
+          }
+        } catch {
+          sentryTrackError(error: error, extras: ["message": "Could not add member to group"])
+          return true // Show notification if any of these errors occurs
         }
       } else {
         sentryTrackMessage(message: "No client found for account", extras: ["account": account])
       }
     } catch {
       sentryTrackError(error: error, extras: ["message": "Could not get or sync group"])
-      
     }
-    
+    return false // Do not show notification if any error occurs, could not have the client or mmkv
+  }
+
+  func handleGroupSyncNotification(contentTopic: String, account: String) async {
+    do {
+      let groupId = getGroupIdFromTopic(topic: contentTopic)
+      let mmkv = getMmkv()
+      if let xmtpClient = await getXmtpClient(account: account) {
+        if let group = await getGroup(xmtpClient: xmtpClient, groupId: groupId) {
+          try await group.sync()
+        } else {
+          sentryTrackMessage(message: "Group not found", extras: ["groupId": groupId, "account": account])
+        }
+      } else {
+        sentryTrackMessage(message: "No client found for account", extras: ["account": account])
+      }
+    } catch {
+      sentryTrackError(error: error, extras: ["message": "Could not sync group"])
+    }
   }
 }
 
