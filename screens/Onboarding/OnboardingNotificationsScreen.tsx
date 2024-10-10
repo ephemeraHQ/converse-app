@@ -14,6 +14,7 @@ import { setAuthStatus } from "../../data/store/authStore";
 import { VStack } from "../../design-system/VStack";
 import { spacing } from "../../theme";
 import { requestPushNotificationsPermissions } from "../../utils/notifications";
+import { sentryTrackError } from "../../utils/sentry";
 import { NavigationParamList } from "../Navigation/Navigation";
 
 export function OnboardingNotificationsScreen(
@@ -63,17 +64,23 @@ export function OnboardingNotificationsScreen(
         <OnboardingPrimaryCtaButton
           title="Accept notifications"
           onPress={async () => {
-            // Open popup
-            const newStatus = await requestPushNotificationsPermissions();
-            if (!newStatus) return;
-            if (newStatus === "denied" && Platform.OS === "android") {
-              // Android 13 always show denied first but sometimes
-              // it will still show the popup. If not, go to Settings!
-              Linking.openSettings();
-            } else {
-              setNotificationsSettings({ showNotificationScreen: false });
+            try {
+              // Open popup
+              const newStatus = await requestPushNotificationsPermissions();
+              if (!newStatus) return;
+              if (newStatus === "denied" && Platform.OS === "android") {
+                // Android 13 always show denied first but sometimes
+                // it will still show the popup. If not, go to Settings!
+                Linking.openSettings();
+              } else {
+                setNotificationsSettings({ showNotificationScreen: false });
+              }
+              setNotificationsPermissionStatus(newStatus);
+            } catch (error) {
+              sentryTrackError(error);
+            } finally {
+              setAuthStatus("signedIn");
             }
-            setNotificationsPermissionStatus(newStatus);
           }}
         />
 

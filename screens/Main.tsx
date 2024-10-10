@@ -28,7 +28,13 @@ import { ConversationScreenConfig } from "./Navigation/ConversationNav";
 import { GroupInviteScreenConfig } from "./Navigation/GroupInviteNav";
 import { GroupLinkScreenConfig } from "./Navigation/GroupLinkNav";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
-import { MainNavigation, NavigationParamList } from "./Navigation/Navigation";
+import {
+  IdleNavigation,
+  MainNavigation,
+  NavigationParamList,
+  SignedInNavigation,
+  SignedOutNavigation,
+} from "./Navigation/Navigation";
 import { NewConversationScreenConfig } from "./Navigation/NewConversationNav";
 import { ProfileScreenConfig } from "./Navigation/ProfileNav";
 import { ShareProfileScreenConfig } from "./Navigation/ShareProfileNav";
@@ -38,6 +44,7 @@ import {
   getConverseStateFromPath,
   useIsSplitScreen,
 } from "./Navigation/navHelpers";
+import { useAuthStatus } from "../data/store/authStore";
 
 const prefix = Linking.createURL("/");
 
@@ -117,6 +124,8 @@ const NavigationContent = () => {
 
   const { navigationDrawer } = useNavigationDrawer();
 
+  const authStatus = useAuthStatus();
+
   const { splashScreenHidden } = useAppStore(
     useSelect(["notificationsPermissionStatus", "splashScreenHidden"])
   );
@@ -139,7 +148,15 @@ const NavigationContent = () => {
     );
   }
 
-  return <MainNavigation />;
+  if (authStatus === "idle") {
+    return <IdleNavigation />;
+  }
+
+  if (authStatus === "signedOut") {
+    return <SignedOutNavigation />;
+  }
+
+  return <SignedInNavigation />;
 };
 
 // Bunch of handlers. Not really react components
