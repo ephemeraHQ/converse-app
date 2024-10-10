@@ -133,7 +133,7 @@ export const joinGroupMachineLogic = setup({
     }),
 
     saveNewGroup: assign({
-      newGroup: (_, params: { newGroup: GroupData }) => params.newGroup,
+      newGroup: (_, params: { newGroup?: GroupData }) => params.newGroup,
     }),
 
     saveGroupJoinStatus: assign({
@@ -193,12 +193,12 @@ export const joinGroupMachineLogic = setup({
       return params.newGroup === undefined;
     },
 
-    hasUserBeenBlocked: (_, params: { newGroup: GroupData | undefined }) => {
-      return params.newGroup?.isGroupActive === false;
+    hasUserNotBeenBlocked: (_, params: { newGroup: GroupData | undefined }) => {
+      return params.newGroup?.isGroupActive === true;
     },
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QCsD2BLAdgcQE6oFcAHAWQEMBjACyzADoAZVMiLKAAj0KPYElMAbugAuYdiTDCWZKQGIIqTPSwDUAa3oAzSdS7F+Q0QEEKw1LiZR0FANoAGALqJQRVLBHpFzkAA9EANgAWAHY6ACYAVgAOCIBOWOD-AGYk+OCAGhAAT0QAWkCk0MCCwLCCwojUhIBfasy0LD1SSholRmZWTA4mvkERMQkpCBkyWTBcfFw6IgAbGU1zAFs6bWFdfH0+41NzS2t7JyQQV3dhT0xvPwQARluo8LjAuztg65ioqIzsvOjruii7Ek7NdEhFimEanUQA0cBtmtRaHQAOpkDxddgAMXM7AAqrBxuwTGdFLICPipqwIAAVMhEABSGFh3AO3hOHi8RyuwTC-jodii-kSYQ+UVigTemRyCAiwVChVidn8wrKyQKtXqjKa5ARbQAIpJxossGxOHDYOwGbQIOwAEJgBa4MRGYSiRZEYTyRTKQTqLQ6KhNWB2h1gS2YNgso5s4kXTmIYJ2MJ0WVRW5g-mxT5JSWIa5hUKKvMRSqfa5isLq6GauHa1r0fWiXBG8PowMWxmQW328xOl1gN0e8aTaZzYQO5ardbcIPdx1hiOOVludmx0BXW6KuiBBXFMX+a4RfyVHMIXL+Ox0WKRN6xFJRQIy-z+SswrUtRHO13uk1mdtYU3cJ6bQqL6dAyF+whUqgYZNESuyoFYtiLlGy4xpciAykmURhNcLxgthMTxCetwgnQ1xJGESTJAkCp2IEz5Qq+Nbvm0n79t+6K-mGAHEEB3qqBoYF9gOUEwXCcEWAh+zXIcLioec6E3BRF7PEqLwUTyURJFExG3KE5GUbeSQgvukIao0zE6vQbEDj+qB-pgPFEHxdAgYJ4HsZB0HVtwEl7LYYSycc8kcmuuYUX8qZ6ThdjRImumxLyGY0dc-gCpRUQvj5xC1h+wkcRwXGMk5LlufQHkid5Fm+TskmITYSRBdGClxkpKR8olFFXs8V6JcRwr3FeSTbi8wIRLFFaMdl8J1nQNkFewRX-k0pU+u5+VeWJNVmHV+yBE1IWrr44VvP82nREkcSUQ+xGpH8I2vNhCYRBCWXVTlLH1gaTbGuiAByYAAO4zFkDmditCjAWtfprFQOJEMMogQIGRiaI285dJGcmnC1YXSp8dAytuhQvAC9FfFKqWxH8iWVA+h75qUgRvUyH1WXQDaGr9HAA8DoNhuDcKrQJMPUPDiOQCjaPjBjUA2DJS446Fx03G8SZUUeYTAqlIRUcR-jU5eR7DcWSrBEzLNvuznM-S2PNAyDYPWitQ7mCO8xLCs-rizIktmqj6OMguB1K0dVyRMU-yxJUwTjdhwqBDp3wIGEEJJs8w2RAk5sHpblmzQAwlQYAUGoJq8JouLkuwAASZDmnaYCOTaMyoKXnYYvgiwlVjwWh4ptwQuEyQZweILgieOH7nyZTkQqqYxBEefcLlbRFyXZfohXVcEnXDdgE3tqt+31qd6g3crfLIcrop5u8pm2nCskCap9mydT38ibiqk-JvMWy9s0LsXUu5dK54l3vXQkMxHQsH5h2Z2Qte7NWVuHcagQOoygTHYMU2DiiTzpnQIITNhpBDKLEABM1ETrxAVvMB1c95QJgRAOBVoe4KxQv3Vq5FrjoLLPRHqwItKpUnoUAs95ghGWLE8RKFDV70GoZvDg29wG4FrpAow0CwCwKdj3QKisb5cOMrwvcAi3jGX8JPUoSQ+TiIfJmMoOFgiyM+nQAACvgIQnQOAqPYAXRQ+JMDCEWvZbiEMvSuWhtMDx6AIBgBUX4zAATNrTSQYdAe8QLyHkSvEaI2EDz4LooTYESoBTbkTlpZx7N3GoE8SaHxCSknBIciVV2UxZgeybFEmpMS4nkgaU3ZJ70iCpM4XjMsCpCYGwNtHD4OEIj4OSITMhqccL02iJU2aAAle0jpYCtG6ELSG-FQKOk0LsgMcIRkGLxjyXC-xclYIovuVOljE7hHNolbkIJZRLymkMuRdBtlnLgPslpEw3btLHJ7U55ymhXLQq1W5F53ifAzrcl579twRGTObGIBtYqlHvLUKEmBUCxPgEcJiK9Pr6IRXjF66C8l4UTsKOIsQTy5FeElRI9F8xaykczP5rNKFtCYCwE0PQDD9HEJIaQUhaW4xVtEWIDxCKp1UvRDlJTCY8oFIKQ8usNmIhRGiDgWJVE+KJIq5BYcMIJEmfeT4h5ZTAgpogDWdAKKpi1pdeIl1BXmWFQCm2zYJVmh0cGHshINoKpQQEbBhDU7JDiHRTBFjk65G4f8e855iYQh4fmI1rENp2WaU0WNtr8YqsiHip+Pr+QnllLw88aVUpkOjgGqs-yXEhu5uwXmjsBYIO4BWxSyrVVpUTDrK8gR+qJB1UTaOiRtLBEykKq2QCN6gJ3qohhjdm7Hw0KfLuTlR2tWSLyV4B4ChSNXemym0dsUVGwYkPhiYGKBo3VQ4Bii+B0IgeaDRTCWFKGHcQM9YytYqq0gqSixZMFupuI+z1scX2mSeDyIt9Bqm1PRPU-xAymmhLhBBlWZtLyCOKLmoInwRHREvB8fFt5nqVCw4CnZIKw0jo4dclWlFClvCmamFIkR72IDKACPkxT+SPW4Wxnxe6D4HrbkezEJ7y08bpXxnhBZqbxGyYKPB787jvO-veVI41kjyerkO09mnFXhzFH8GKMpbwJDzLO9+lFQgRDLFFXW5FO1UsAYibZABHAgcAglLUcj0bZyAS5I1I+HYy+lBRqzUq8XSApPWRCneNFUaU2PzTOJxEJxUehUnQIsTsAB5AgwhkviaBEmJ8twma3BHp5ymJCF0AiemysobGACi4LVFiq8U5XohgwBNZTmQwmxQ8zLeCIUCiHKpGeqvLKc2iZ8Ifq7UGlxo3JgOS4+B+zcaU5AnuAmII55U7RFIf1HLIJhrlmSCCIb6786IhO9iCb52iAUuxrx8OonCFrYPGNN41wOWpC3InfcWZ1LPDoiNsb7Be1237UDOzoOtPh2KNYwU5YI70U+N18TBXkwKkSC+wRTifvUvZv91ROGYl1Orv0wJc3+O8IFIlYTFFDz4JiEUg8j80rbk+Bj07QLzlA751FJZEInW4VvIKfBpFY46YhHEEmgrahAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QCsD2BLAdgcQE6oFcAHAWQEMBjACyzADoAZVMiLKAAj0KPYElMAbugAuYdiTDCWZKQGIIqTPSwDUAa3oAzSdS7F+Q0QEEKw1LiZR0FANoAGALqJQRVLBHpFzkAA9EANgAWAHY6ACYAVgAOCIBOWOD-AGYk+OCAGhAAT0QAWkCk0MCCwLCCwojUhIBfasy0LD1SSholRmZWTA4mvkERMQkpCBkyWTBcfFw6IgAbGU1zAFs6bWFdfH0+41NzS2t7JyQQV3dhT0xvPwQARiiwun9YiOuk67jXsODrsMychFzotc6FE7ElQXYEsEImEolFavUMDgNs1qLQ6AB1MgeLrsABi5nYAFVYON2CYzopZAQSVNWBAACpkIgAKURTQO3hOHi8RyuwTC-jodii-kegWigVipSSv0QEWCsTowUCUVi10eURCwrC8JADSR3HIqLaABFJONFlg2JxkbB2KzaBB2AAhMALXBiIzCUSLIjCeSKZSCdRaHRUJqwV3usAOzBsDlHLkUi68xDBOz3YLBKLXN6BYWxKLBGXZRDfUJ2fzfCKVIvXKU6up6tnIo2tehm0S4S1xnER+2IyAut3mT3esC+-3jSbTObCd3LVbrbiRkce2PxxyctzclOgK7XbNC+sQsKpUWHqKy-7PYFVw-KoIqpKffy6-VNNtor0+v3WswDlgNrcAGbQqCGdAyL+wj0qgsZNOSuyoFYthbomO7Jpccr8sCYTXHYUIqjCcSxNeuaHnQLxnskCSxHYdiBG+TYfq2LTfuOk7-qggGYMBxCgUGqgaJBHF+rB8HIohFjIfs1yHC4GHnFhNyVHYwKqkkESiiK4oCmR+FJEKYQEcknzyv4-Lvi2hpsW0P4Tn+OIAbGfFEAJdDgcJUEOTBcHWcQUl7LYYTyccik8vuZaVIEQr+NC2YioelQRGRxkxTCnxfK8kp3MEVmNKxxr0PZnFOdxLlNO5nn0N5k7if5RCBTJthJKFSZKamKninQmkMZpTz+LCbypQklHqhlmrZkE+UGsQX52aJZxlTxrlVcGXmLfVBXcE1KE2IEbXhXuvhRa8QqxAKdFJERsSPGRVQPFEmn4YE6qwgqM2frZHbmt2Vo4gAcmAADuMxZDxQ6VQoYHraGaxUISRDDKIEARkYmhdhuXQJgppwdZFNxVkKsIxGqzxJDmJZ-PWeHAgR6YvKCjHCp9hXtnQnYWv9HBA6D4OxpDyJrUJcPUIjyOQGjGPjFjUA2HJ254xFJ0IDmMVJBZKS3TEYJnmR2aKnY5kWVpGYwqzNlFRzv09tavNgxDTqVdO5izvMSwrGG4syJLtro5jiKbodSvHVcuRgnQjHFq8GYXQqpRkcUanJJWUIRPRry3Bbc3fXQADCVBgBQajWrwmhEjS7AABJkHarpgLxzozKgxdDri+CLKtONhSHykwqELy3K9bxSqKoLXme+GxcWIp0RCQRJNnKLswXRclziZcV6SNd12ADcus3rdOu3qCd5V8vB7uymDYqqpPJEpR0f4kQTzH08U489G3QUS-zfQq-F1LuXYk29a5khmB6Fg-NBxOyFt3dqysrhhGQYZa4kpDyRH8HYW4ZFYQxXzLpWElQBS5l-rnAB68OCbxAbgauYCjAQLAFAx2XcFboV7p1ZB2DKIKiNsZE2aCJ6RFCPEKUt0FQUwIovZiDU-750LoAjewDK473AZAiA0DHRdxCorK+nVbjymBPWeU8oR5SgyKWBAyDDGiMlBZWIkjixkKtgABXwEIToHAaHsDzooEkmBhDsGcoiVa0NBIQSIO49AEAwA0N8ZgfxvkJLcHgUdPut4YjREiGUL44oLITywVESORY6zXVMUxBE20c6uKiZ4retD4mJKCeVEJzsJiu1mO7bs0xamxJpI0huSSGqpI4QTXIeEilSmiNEZ+9F6IJ0sWUUaRsNbphfE9NBFTmxVOXmiAASm6D0sBWjdCFmEjysM6Aek0Ec8MyIRl6IJp8WE4RCwCk1NCbBUIJ6aiKWEOOqQvj0SrFslilt2YHJuXAE5q0XZTE6fOD21zbnsjQrjR5KtcjKh6skV6hZlRZnwtcH5NYhTKjVNpWEjYmyYFQDE+ARwwXVPbLozCnVchYPuJpTU10qwMQYoEa8WL1RkqCLPf5ooXzOPZkwFg1oegGH6OISQ0gpCsvxiraIipIiky4ZWRiQrn5FPMiqUUUIghOJkTsuRmJsQcHxLQ7x5INUINDnKUaWlfnmqzF868GtBTrO+KCEimlAjSrRJzP6vZTkrhYVGUcZJFrqsQQECEDxkHJDiAxeUiQhWD3UszSUL41SlDyla2auyFrQS4itJoya3UIC1eEaZRrZlgivJYrMMV1SVhzM-SUTww3lq+lbSNttAYgwdgLWB3B63KSbTqrSMI20QlStikUnwUiPGQe88NbQKFAPqXQ3e+8m4tw0MfDurk52cKntYrBuYGIvFVEIyIkdIhG3TlKEE4o93-wUZQvgyjQF2gYeozRSgZ3EBvQTNBiRgQpFuFNfC-yqZlipZRCI4oKavilGgv9dA3GoA8dabxAyAnNNrciGDKtjJFPVMUQ84oEh4IsX8MoMQ6CqWuvRNKRYIgEchbc+V1H2EYqQdCXCmpH5PpVCKElhkjZvDuPECUiQCPeNUfXRuh8L14ivXWsTbLYNlDUikYybxXj8gMkIl8xTTJJRngJ4dbM0TeOndeozGqkHFkNtmp4ap+QmVwcUSO2aNZ0aeDEQTYAACOBA4CBOCUBHoBzkBFxRjRpB9ZBQ1iwxZnMPxLFBqBMQrMaoLqMbLZUitciSqOQ4Ml3iPR6ToEWEOAA8gQYQWXEB4TTU9OKsJrrxCLGhm4hR7i3R3fq6bzwCMAFF2m0NlXUhVWwwC9f+PWGKVK4p0WhKTO4QrTY9QFOKQEpr6yLeWzxETs6vMpqsaZyOVYs1iIFON74UocXP3lLdHLsIbuTHYKt+7xAGXouM5ih8lEll4TeFhoFgrLHhzM5qTlYJbjjSlMDgkY7ubsF5p5qH3m8gUwiEqLBQQ4pf1uFKROoWqwwnVMWtB+GXPgrREtkHRGSM4jI34wZW2ARYZ6hKXlL0BUT2eMasEmcvk32q9s2rucecEiE9C8HRARdRxxZ8Q83xKarsWaqdKXxEgqiuq8aRtQgA */
   id: "joinGroupMachine",
   context: ({ input }) => {
     // const account = currentAccount();
@@ -277,6 +277,11 @@ prior where we check the status of the group join request, but
 that isn't how things are done in the current version of the
 screen so I'm going to follow what's currently there.
     `,
+      on: {
+        "user.didTapJoinGroup": {
+          target: "Attempting to Join Group",
+        },
+      },
     },
 
     "Determining Groups Joined Before Attempt": {
@@ -447,18 +452,33 @@ consent for the new group.
           },
           {
             actions: [
-              assign({
-                newGroup: ({ context, event }) => {
+              {
+                type: "saveNewGroup",
+                params: ({ context, event }) => {
                   const oldGroupIds = new Set(
                     context.groupsBeforeJoinAttempt!.ids
                   );
                   const newGroupId = event.output.ids.find(
                     (id) => !oldGroupIds.has(id)
                   );
-                  return newGroupId ? event.output.byId[newGroupId] : undefined;
+                  return {
+                    newGroup: newGroupId
+                      ? event.output.byId[newGroupId]
+                      : undefined,
+                  };
                 },
-              }),
+              },
             ],
+            description: `
+This branch handles the case where we don't have a groupId in our metadata.
+We need to determine if a new group was joined by comparing the groups before and after the join attempt.
+This method is less certain than when we have a groupId, as there's a possibility
+that no new group was actually joined (e.g., if the user was already a member).
+If we don't find a new group (i.e., old groups === new groups),
+we assume the user has already joined the group indicated by the invite link.
+This approach allows us to handle cases where the groupId isn't available in the metadata,
+providing a fallback method to determine the join status.
+            `,
             target: "Checking If User Has Already Joined Group",
           },
         ],
@@ -481,28 +501,21 @@ consent for the new group.
       always: [
         {
           guard: {
-            type: "hasUserBeenBlocked",
+            type: "hasUserNotBeenBlocked",
             params: ({ context }) => ({
               newGroup: context.newGroup,
             }),
           },
+          target: "Providing User Consent to Join Group",
+        },
+        {
           target: "User Has Been Blocked From Group",
         },
-        "Providing User Consent to Join Group",
       ],
     },
 
     "Checking If User Has Already Joined Group": {
       always: [
-        {
-          guard: {
-            type: "hasUserBeenBlocked",
-            params: ({ context }) => ({
-              newGroup: context.newGroup,
-            }),
-          },
-          target: "User Has Been Blocked From Group",
-        },
         {
           guard: {
             type: "userHasAlreadyJoinedGroup",
@@ -513,7 +526,16 @@ consent for the new group.
           target: "User Joined Group",
         },
         {
+          guard: {
+            type: "hasUserNotBeenBlocked",
+            params: ({ context }) => ({
+              newGroup: context.newGroup,
+            }),
+          },
           target: "Providing User Consent to Join Group",
+        },
+        {
+          target: "User Has Been Blocked From Group",
         },
       ],
     },
