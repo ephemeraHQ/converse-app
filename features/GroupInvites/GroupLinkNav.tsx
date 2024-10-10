@@ -1,12 +1,15 @@
 import {
+  NativeStack,
+  navigationAnimation,
+} from "@screens/Navigation/Navigation";
+import {
   headerTitleStyle,
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import { NativeStack, navigationAnimation } from "./Navigation";
-import GroupLinkScreen from "../GroupLink";
+import GroupLinkScreen from "./GroupLink";
 
 export type GroupLinkNavParams = {
   groupLinkId: string;

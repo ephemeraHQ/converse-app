@@ -3,7 +3,7 @@ import { TableViewItemType } from "@components/TableView/TableView";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
 import { useSelect } from "@data/store/storeHelpers";
 import { translate } from "@i18n/index";
-import Clipboard from "@react-native-clipboard/clipboard";
+// import Clipboard from "@react-native-clipboard/clipboard";
 import {
   messageBubbleColor,
   messageHighlightedBubbleColor,

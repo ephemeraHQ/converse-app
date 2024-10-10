@@ -14,14 +14,6 @@ import ConversationNav, {
 import ConversationRequestsListNav from "./ConversationRequestsListNav";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
 import EnableTransactionsNav from "./EnableTransactionsNav";
-import GroupInviteNav, {
-  GroupInviteNavParams,
-  GroupInviteScreenConfig,
-} from "./GroupInviteNav";
-import GroupLinkNav, {
-  GroupLinkNavParams,
-  GroupLinkScreenConfig,
-} from "./GroupLinkNav";
 import GroupNav, { GroupNavParams, GroupScreenConfig } from "./GroupNav";
 import NewConversationNav, {
   NewConversationNavParams,
@@ -47,6 +39,15 @@ import {
 } from "./navHelpers";
 import config from "../../config";
 import { useAppStore } from "../../data/store/appStore";
+import {
+  GroupInviteNavigation,
+  GroupInviteNavParams,
+  GroupInviteScreenConfig,
+} from "../../features/GroupInvites/GroupInvite.navigation";
+import GroupLinkNav, {
+  GroupLinkNavParams,
+  GroupLinkScreenConfig,
+} from "../../features/GroupInvites/GroupLinkNav";
 import { isDesktop } from "../../utils/device";
 import { converseNavigations } from "../../utils/navigation";
 
@@ -159,7 +160,7 @@ export default function Navigation() {
             {ProfileNav()}
             {GroupNav()}
             {GroupLinkNav()}
-            {GroupInviteNav()}
+            {GroupInviteNavigation()}
             {UserProfileNav()}
             {TopUpNav()}
             {EnableTransactionsNav()}

@@ -1,4 +1,4 @@
-import mmkv from "./mmkv";
+import mmkv from "@utils/mmkv";
 
 const GROUP_INVITE_LINKS_STORAGE_KEY_PREFIX = "group-invites-link-";
 const INVITE_ID_BY_GROUP_ID_STORAGE_KEY_PREFIX = "invite-id-by-group-id-";
@@ -40,7 +40,7 @@ const createGroupJoinStorageKey = (account: string, inviteId: string) => {
   return `${GROUP_JOIN_REQUEST_STORAGE_KEY_PREFIX}${inviteId}-${account}`;
 };
 
-export const saveInviteJoinRequest = (
+export const saveInviteJoinRequestId = (
   account: string,
   inviteId: string,
   joinRequestId: string
@@ -48,7 +48,7 @@ export const saveInviteJoinRequest = (
   return mmkv.set(createGroupJoinStorageKey(account, inviteId), joinRequestId);
 };
 
-export const getInviteJoinRequest = (account: string, inviteId: string) => {
+export const getInviteJoinRequestId = (account: string, inviteId: string) => {
   return mmkv.getString(createGroupJoinStorageKey(account, inviteId));
 };
 

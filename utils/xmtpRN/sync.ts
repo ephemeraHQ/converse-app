@@ -36,12 +36,15 @@ const instantiatingClientForAccount: {
 export const getXmtpClient = async (
   account: string
 ): Promise<ConverseXmtpClientType | Client> => {
+  logger.info(`[XmtpRN] Getting client for ${account}`);
+  logger.info(`[XmtpRN] Clients: ${Object.keys(xmtpClientByAccount)}`);
   if (account && xmtpClientByAccount[account]) {
     return xmtpClientByAccount[account];
   }
   // Return the existing instantiating promise to avoid race condition
   const alreadyInstantiating = instantiatingClientForAccount[account];
   if (alreadyInstantiating) {
+    logger.info(`[XmtpRN] Already instantiating client for ${account}`);
     return alreadyInstantiating;
   }
   // Avoid instantiating any 2 clients at the same time to avoid
@@ -52,10 +55,10 @@ export const getXmtpClient = async (
   }
   instantiatingClientForAccount[account] = (async () => {
     try {
-      logger.debug("[XmtpRN] Loading base64 key");
+      logger.info("[XmtpRN] Loading base64 key");
       const base64Key = await loadXmtpKey(account);
       if (base64Key) {
-        logger.debug("[XmtpRN] Getting client from base64 key");
+        logger.info("[XmtpRN] Getting client from base64 key");
         const client = await getXmtpClientFromBase64Key(base64Key);
         logger.info(`[XmtpRN] Instantiated client for ${client.address}`);
         getChatStore(account).getState().setLocalClientConnected(true);
@@ -94,7 +97,7 @@ const onSyncLost = async (account: string, error: any) => {
         "Reconnecting XMTP Pool because it didn't reconnect automatically"
       );
       await reconnectXmtpClientsDbConnections();
-      logger.debug("Done reconnecting XMTP Pool");
+      logger.info("Done reconnecting XMTP Pool");
     } else if (AppState.currentState === "background") {
       // This error is normal when backgrounded, fail silently
       // as reopening the app will launch a resync
@@ -110,7 +113,7 @@ const onSyncLost = async (account: string, error: any) => {
     });
   }
   // Wait a bit before reco
-  logger.debug(`[XmtpRN] Reconnecting in ${currentBackoff}ms`);
+  logger.info(`[XmtpRN] Reconnecting in ${currentBackoff}ms`);
   await new Promise((r) => setTimeout(r, currentBackoff));
   currentBackoff = Math.min(currentBackoff * 2, MAX_BACKOFF);
   // Now let's reload if this is still an opened account

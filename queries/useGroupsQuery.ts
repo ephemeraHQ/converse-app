@@ -6,13 +6,32 @@ import { groupsQueryKey } from "./QueryKeys";
 import { entify, EntityObject } from "./entify";
 import { queryClient } from "./queryClient";
 import {
+  AnyGroup,
   ConverseXmtpClientType,
   GroupWithCodecsType,
 } from "../utils/xmtpRN/client";
 
-type GroupMembersSelectData = EntityObject<GroupWithCodecsType, string>;
+export type GroupsEntity = EntityObject<AnyGroup>;
+type GroupMembersSelectData = EntityObject<GroupWithCodecsType>;
 
-const groupsQueryFn = async (account: string) => {
+export type GroupData = Pick<
+  AnyGroup,
+  | "id"
+  | "createdAt"
+  | "members"
+  | "topic"
+  | "creatorInboxId"
+  | "name"
+  | "isGroupActive"
+  | "addedByInboxId"
+  | "imageUrlSquare"
+  | "description"
+  | "state"
+>;
+
+export type GroupsDataEntity = EntityObject<GroupData>;
+
+export const groupsQueryFn = async (account: string): Promise<GroupsEntity> => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   if (!client) {
     return {
@@ -28,14 +47,16 @@ const groupsQueryFn = async (account: string) => {
       (afterSync - beforeSync) / 1000
     } sec`
   );
-  const groups = await client.conversations.listGroups();
+  const groups: AnyGroup[] = await client.conversations.listGroups();
   const afterList = new Date().getTime();
   logger.debug(
     `[Groups] Listing ${groups.length} groups took ${
       (afterList - afterSync) / 1000
     } sec`
   );
-  return entify(groups, (group) => group.topic);
+  const groupEntity: GroupsEntity = entify(groups, (group) => group.topic);
+  logger.debug(`[Groups] Fetched ${groupEntity.ids.length} groups`);
+  return groupEntity;
 };
 
 export const useGroupsQuery = (account: string) => {
@@ -46,7 +67,10 @@ export const useGroupsQuery = (account: string) => {
   });
 };
 
-export const fetchGroupsQuery = (account: string, staleTime?: number) => {
+export const fetchGroupsQuery = (
+  account: string,
+  staleTime?: number
+): Promise<GroupsEntity> => {
   return queryClient.fetchQuery({
     queryKey: groupsQueryKey(account),
     queryFn: () => groupsQueryFn(account),

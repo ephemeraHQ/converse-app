@@ -19,3 +19,5 @@ builds
 
 # iOS
 ios/Converse.xcworkspace/xcshareddata/swiftpm/Package.resolved
+/.idea
+.aider*
