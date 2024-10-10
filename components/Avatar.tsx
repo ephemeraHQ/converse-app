@@ -59,8 +59,9 @@ function Avatar({
         style={[styles.imageContainer, style]}
         imageStyle={styles.image}
         cachePolicy="memory-disk"
+        testID="avatar-image"
       >
-        {showIndicator && <Indicator size={size} />}
+        {showIndicator && <Indicator size={size} testID="avatar-indicator" />}
       </ImageBackground>
     </>
   ) : (
@@ -70,6 +71,7 @@ function Avatar({
         style,
         { width: size, height: size, borderRadius: size / 2 },
       ])}
+      testID="avatar-placeholder"
     >
       {name ? (
         <Text style={styles.text}>{firstLetter}</Text>
@@ -80,7 +82,9 @@ function Avatar({
           color="white"
         />
       )}
-      {showIndicator && <Indicator size={size} />}
+      {showIndicator && (
+        <Indicator size={size} testID="avatar-placeholder-indicator" />
+      )}
     </View>
   );
 }

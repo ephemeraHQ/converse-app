@@ -1,3 +1,4 @@
+import { translate } from "@i18n";
 import {
   chatInputBackgroundColor,
   headerTitleStyle,
@@ -80,9 +81,11 @@ export default function ConversationListNav() {
   const onChangeSearch = (query: string) => setSearchQuery(query);
   const searchPlaceholder = (): string => {
     if (shouldShowConnectingOrSyncing && !searchBarFocused) {
-      return shouldShowConnecting.shouldShow ? "Connecting…" : "Syncing…";
+      return shouldShowConnecting.shouldShow
+        ? translate("connecting")
+        : translate("syncing");
     }
-    return "Search chats";
+    return translate("search_chats");
   };
 
   return (

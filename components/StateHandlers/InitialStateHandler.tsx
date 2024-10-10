@@ -67,6 +67,7 @@ export default function InitialStateHandler() {
           if (isDevelopmentClientURL(initialURL)) {
             return;
           }
+
           Linking.openURL(initialURL);
           // Once opened, let's remove so we don't navigate twice
           // when logging out / relogging in

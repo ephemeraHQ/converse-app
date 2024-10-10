@@ -1,4 +1,5 @@
 import GroupAvatar from "@components/GroupAvatar";
+import Picto from "@components/Picto/Picto";
 import {
   useChatStore,
   useCurrentAccount,
@@ -46,7 +47,6 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MessageToDisplay } from "./Message";
-import Picto from "../../Picto/Picto";
 
 interface MessageReactionsListProps {
   reactions: {

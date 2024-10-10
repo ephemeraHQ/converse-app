@@ -172,6 +172,9 @@ const en = {
   view_only: "View only",
   view_and_restore: "View and Restore",
   view_removed_group_chat: "View removed group chat?",
+  connecting: "Connecting…",
+  syncing: "Syncing…",
+  search_chats: "Search chats",
 
   // Requests
   requests: "Requests",
@@ -311,6 +314,10 @@ const en = {
     "Share your feedback and ideas with the Converse team and other alpha testers.",
   joinAlphaGroup: "Join Converse VIP Alpha Chat",
   linkCopied: "Link copied",
+
+  // New Conversation
+  cannot_be_added_to_group_yet:
+    "{{name}} needs to update Converse to be added to a group",
 };
 
 export default en;

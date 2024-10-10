@@ -1,0 +1,149 @@
+name: Build App Release
+# This workflow is triggered by a schedule or manually (via the Actions tab on GitHub)
+# It will generate a new version of the app and create a PR to increment the version numbers
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  schedule:
+    # These will run only on the default branch
+    # These numbers will likely change when we move to EAS Update
+    - cron: "0 18 * * 2" # Tuesdays at 11 AM PT
+    - cron: "0 21 * * 4" # Thursdays at 2 PM PT
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: 🏗 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Create .env file from secrets
+        run: |
+          echo "EXPO_PUBLIC_CONTACT_ADDRESS=${{ secrets.EXPO_PUBLIC_CONTACT_ADDRESS }}" >> .env.production
+          echo "EXPO_PUBLIC_DEBUG_ADDRESSES=${{ secrets.EXPO_PUBLIC_DEBUG_ADDRESSES }}" >> .env.production
+          echo "EXPO_PUBLIC_SENTRY_DSN=${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}" >> .env.production
+          echo "EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID=${{ secrets.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID }}" >> .env.production
+          echo "EXPO_PUBLIC_THIRDWEB_CLIENT_ID=${{ secrets.EXPO_PUBLIC_THIRDWEB_CLIENT_ID }}" >> .env.production
+          echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> .env.production
+          echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> .env.production
+          echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> .env.production
+
+      - name: Update EAS config with env variables
+        run: node scripts/build/eas.js --env production
+
+      - name: Update Android Files
+        # TODO: This should be handled by build configs in the future
+        run: node scripts/build/android/production.js
+
+      - name: Build for Android
+        run: eas build --profile production-android --platform android --non-interactive --auto-submit --no-wait
+
+  build-ios:
+    runs-on: ubuntu-latest
+    environment: Production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: 🏗 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Create .env file from secrets
+        run: |
+          echo "EXPO_PUBLIC_CONTACT_ADDRESS=${{ secrets.EXPO_PUBLIC_CONTACT_ADDRESS }}" >> .env.production
+          echo "EXPO_PUBLIC_DEBUG_ADDRESSES=${{ secrets.EXPO_PUBLIC_DEBUG_ADDRESSES }}" >> .env.production
+          echo "EXPO_PUBLIC_SENTRY_DSN=${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}" >> .env.production
+          echo "EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID=${{ secrets.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID }}" >> .env.production
+          echo "EXPO_PUBLIC_THIRDWEB_CLIENT_ID=${{ secrets.EXPO_PUBLIC_THIRDWEB_CLIENT_ID }}" >> .env.production
+          echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> .env.production
+          echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> .env.production
+          echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> .env.production
+
+      - name: Update EAS config with env variables
+        run: node scripts/build/eas.js --env production
+
+      - name: Update iOS Files
+        # TODO: This should be handled by schemes in the future
+        run: node scripts/build/ios/production.js
+
+      - name: Build for iOS
+        run: eas build --profile production-ios --platform ios --non-interactive --auto-submit --no-wait
+
+  increment-build-numbers:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Increment version number
+        run: |
+          node scripts/build/incrementVersion.js --bump=patch
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: increment-version
+          title: "Increment version numbers"
+          body: "This PR increments the buildNumber for iOS and the versionCode for Android."
+
+  create-release-notes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Generate and output release notes
+        run: |
+          # Find the last commit hash with the specific title
+          START_COMMIT_SHA=$(git log -1 --grep="\[create-pull-request\] automated change" --format=format:%H)
+
+          # Exit if no matching commit was found
+          if [ -z "$START_COMMIT_SHA" ]; then
+            echo "No previous commit with title '[create-pull-request] automated change' found."
+            exit 1
+          fi
+
+          # Define the latest commit hash
+          END_COMMIT_SHA=$(git rev-parse HEAD)
+
+          # Run the release notes script with the start and end commit hashes
+          scripts/build/release_notes.sh $START_COMMIT_SHA $END_COMMIT_SHA

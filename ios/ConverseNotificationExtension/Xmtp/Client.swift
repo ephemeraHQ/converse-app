@@ -50,8 +50,14 @@ func getXmtpClient(account: String) async -> XMTP.Client? {
     if (xmtpKeyData == nil) {
       return nil;
     }
-    let encryptionKey = try! getDbEncryptionKey()
-    let privateKeyBundle = try! PrivateKeyBundle(serializedData: xmtpKeyData!)
+    guard let encryptionKey = try? getDbEncryptionKey() else {
+      sentryTrackMessage(message: "Db Encryption Key is undefined", extras: [:])
+      return nil
+    }
+    guard let privateKeyBundle = try? PrivateKeyBundle(serializedData: xmtpKeyData!) else {
+      sentryTrackMessage(message: "Private Key Bundle is undefined", extras: [:])
+        return nil
+    }
     let xmtpEnv = getXmtpEnv()
     
     let groupId = "group.\(try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil))"
