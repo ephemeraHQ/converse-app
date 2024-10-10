@@ -8,6 +8,7 @@ import { useGroupName } from "@hooks/useGroupName";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { useGroupPhoto } from "@hooks/useGroupPhoto";
 import { translate } from "@i18n";
+import Clipboard from "@react-native-clipboard/clipboard";
 import {
   actionSecondaryColor,
   inversePrimaryColor,

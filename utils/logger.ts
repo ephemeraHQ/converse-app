@@ -1,4 +1,3 @@
-import Clipboard from "@react-native-clipboard/clipboard";
 import Constants from "expo-constants";
 import path from "path";
 import { Platform } from "react-native";
@@ -42,9 +41,6 @@ export const rotateLoggingFile = async () => {
   }
   const tempDir = RNFS.TemporaryDirectoryPath;
   loggingFilePath = path.join(tempDir, `${uuidv4()}.converse.log.txt`);
-  console.log({ loggingFilePath });
-  Clipboard.setString(loggingFilePath);
-
   const appVersion = Constants.expoConfig?.version;
   const buildNumber =
     Platform.OS === "ios"

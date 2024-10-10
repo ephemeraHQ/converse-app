@@ -4,41 +4,27 @@ import { awaitableAlert } from "@utils/alert";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { useLogoutFromConverse } from "@utils/logout";
+import { XmtpClientByAccount } from "@utils/xmtpRN/client.types";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
-  TextCodec,
+  GroupUpdatedCodec,
   ReactionCodec,
   ReadReceiptCodec,
-  GroupUpdatedCodec,
-  ReplyCodec,
   RemoteAttachmentCodec,
+  ReplyCodec,
   StaticAttachmentCodec,
+  TextCodec,
 } from "@xmtp/react-native-sdk";
 import { useEffect, useRef } from "react";
 
+import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 import { getXmtpClient } from "./sync";
 import config from "../../config";
 import { getDbDirectory } from "../../data/db";
 import { getCleanAddress } from "../eth";
-import {
-  AnyGroup,
-  DecodedMessageWithCodecsType,
-  XmtpClientByAccount,
-} from "./client.types";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
-
-export const codecs = [
-  new TextCodec(),
-  new ReactionCodec(),
-  new ReadReceiptCodec(),
-  new GroupUpdatedCodec(),
-  new ReplyCodec(),
-  new RemoteAttachmentCodec(),
-  new StaticAttachmentCodec(),
-  new TransactionReferenceCodec(),
-];
 
 export const getXmtpClientFromBase64Key = async (base64Key: string) => {
   const dbDirectory = await getDbDirectory();
@@ -46,14 +32,22 @@ export const getXmtpClientFromBase64Key = async (base64Key: string) => {
 
   return Client.createFromKeyBundle(base64Key, {
     env,
-    codecs,
+    codecs: [
+      new TextCodec(),
+      new ReactionCodec(),
+      new ReadReceiptCodec(),
+      new GroupUpdatedCodec(),
+      new ReplyCodec(),
+      new RemoteAttachmentCodec(),
+      new StaticAttachmentCodec(),
+      new TransactionReferenceCodec(),
+      new CoinbaseMessagingPaymentCodec(),
+    ],
     enableV3: true,
     dbDirectory,
     dbEncryptionKey,
   });
 };
-
-export type { AnyGroup, DecodedMessageWithCodecsType };
 
 export const isOnXmtp = async (address: string) =>
   Client.canMessage(getCleanAddress(address), {

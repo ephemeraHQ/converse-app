@@ -30,7 +30,6 @@ import mmkv from "../utils/mmkv";
 
 export const useDebugEnabled = (address?: string) => {
   const accounts = useAccountsList();
-  return true;
   if (address && debugEnabled(address)) {
     return true;
   }
