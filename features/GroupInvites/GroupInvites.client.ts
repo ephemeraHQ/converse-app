@@ -1,17 +1,13 @@
-import { setGroupStatus } from "@data/store/accountsStore";
 import { OnConsentOptions } from "@hooks/useGroupConsent";
-import { createAllowGroupMutationObserver } from "@queries/useAllowGroupMutation";
-import {
-  fetchGroupsQuery,
-  GroupData,
-  GroupsDataEntity,
-  GroupsEntity,
-} from "@queries/useGroupsQuery";
 import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
 import { GroupInvite } from "@utils/api.types";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
-import { refreshGroup } from "@utils/xmtpRN/conversations";
+import {
+  GroupData,
+  GroupsDataEntity,
+  GroupsEntity,
+} from "@utils/xmtpRN/client.types";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { AxiosInstance } from "axios";
 
@@ -86,6 +82,7 @@ export class JoinGroupClient {
     const liveFetchGroupsByAccount = async (
       account: string
     ): Promise<GroupsDataEntity> => {
+      const { fetchGroupsQuery } = await import("@queries/useGroupsQuery");
       const groupsEntity: GroupsDataEntity = await fetchGroupsQuery(account);
 
       // I believe this will already be done since we
@@ -156,6 +153,15 @@ export class JoinGroupClient {
       group,
       options,
     }: AllowGroupProps) => {
+      // Dynamically import dependencies to avoid the need for mocking in tests
+      // and to make this client more flexible. This allows the tests to run
+      // without mocking these dependencies, which would be necessary if they
+      // were imported at the top level of this module.
+      const { setGroupStatus } = await import("@data/store/accountsStore");
+      const { createAllowGroupMutationObserver } = await import(
+        "@queries/useAllowGroupMutation"
+      );
+
       const { topic, id: groupId } = group;
       logger.debug(`[JoinGroupClient] Allowing group ${topic}`);
       const allowGroupMutationObserver = createAllowGroupMutationObserver({
@@ -164,7 +170,10 @@ export class JoinGroupClient {
         groupId,
       });
       await allowGroupMutationObserver.mutate();
+
+      // Dynamically import setGroupStatus
       setGroupStatus({ [getGroupIdFromTopic(topic).toLowerCase()]: "allowed" });
+
       const inboxIdsToAllow: InboxId[] = [];
       const inboxIds: { [inboxId: string]: "allowed" } = {};
       if (options.includeAddedBy && group?.addedByInboxId) {
@@ -175,6 +184,11 @@ export class JoinGroupClient {
     };
 
     const liveRefreshGroup = async (account: string, topic: string) => {
+      // Dynamically import dependencies to avoid the need for mocking in tests
+      // and to make this client more flexible. This allows the tests to run
+      // without mocking these dependencies, which would be necessary if they
+      // were imported at the top level of this module.
+      const { refreshGroup } = await import("@utils/xmtpRN/conversations");
       await refreshGroup(account, topic);
     };
 

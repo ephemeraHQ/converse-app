@@ -1,10 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { getCleanAddress } from "@utils/eth";
 import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
-import {
-  ConverseXmtpClientType,
-  xmtpClientByAccount,
-} from "@utils/xmtpRN/client";
+import { xmtpClientByAccount } from "@utils/xmtpRN/client";
+import { ConverseXmtpClientType } from "@utils/xmtpRN/client.types";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { Group } from "@xmtp/react-native-sdk";
 

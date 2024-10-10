@@ -1,35 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
+import {
+  ConverseXmtpClientType,
+  GroupsEntity,
+  GroupWithCodecsType,
+} from "@utils/xmtpRN/client.types";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 
 import { groupsQueryKey } from "./QueryKeys";
 import { entify, EntityObject } from "./entify";
 import { queryClient } from "./queryClient";
-import {
-  AnyGroup,
-  ConverseXmtpClientType,
-  GroupWithCodecsType,
-} from "../utils/xmtpRN/client";
+import { AnyGroup } from "../utils/xmtpRN/client";
 
-export type GroupsEntity = EntityObject<AnyGroup>;
 type GroupMembersSelectData = EntityObject<GroupWithCodecsType>;
-
-export type GroupData = Pick<
-  AnyGroup,
-  | "id"
-  | "createdAt"
-  | "members"
-  | "topic"
-  | "creatorInboxId"
-  | "name"
-  | "isGroupActive"
-  | "addedByInboxId"
-  | "imageUrlSquare"
-  | "description"
-  | "state"
->;
-
-export type GroupsDataEntity = EntityObject<GroupData>;
 
 export const groupsQueryFn = async (account: string): Promise<GroupsEntity> => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;

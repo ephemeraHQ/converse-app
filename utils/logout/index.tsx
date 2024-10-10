@@ -1,18 +1,19 @@
-import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
-import logger from "@utils/logger";
-import { ConverseXmtpClientType, dropXmtpClient } from "@utils/xmtpRN/client";
-import { getInboxId } from "@utils/xmtpRN/signIn";
-import { useCallback } from "react";
-
-import { useDisconnectFromPrivy } from "./privy";
-import { useDisconnectWallet } from "./wallet";
-import { clearConverseDb, getConverseDbPath } from "../../data/db";
+import { clearConverseDb, getConverseDbPath } from "@data/db";
 import {
   getAccountsList,
   getChatStore,
   getWalletStore,
   useAccountsStore,
-} from "../../data/store/accountsStore";
+} from "@data/store/accountsStore";
+import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
+import logger from "@utils/logger";
+import { dropXmtpClient } from "@utils/xmtpRN/client";
+import { ConverseXmtpClientType } from "@utils/xmtpRN/client.types";
+import { getInboxId } from "@utils/xmtpRN/signIn";
+import { useCallback } from "react";
+
+import { useDisconnectFromPrivy } from "./privy";
+import { useDisconnectWallet } from "./wallet";
 import { deleteSecureItemAsync } from "../keychain";
 import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
 import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";

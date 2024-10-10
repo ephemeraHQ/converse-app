@@ -1,4 +1,20 @@
+import {
+  saveConversations,
+  saveConversationsLastNotificationSubscribePeriod,
+} from "@data/helpers/conversations/upsertConversations";
+import { saveMessages } from "@data/helpers/messages";
+import {
+  currentAccount,
+  getAccountsList,
+  getChatStore,
+  getProfilesStore,
+  getSettingsStore,
+  useAccountsStore,
+} from "@data/store/accountsStore";
+import { useAppStore } from "@data/store/appStore";
+import { XmtpMessage } from "@data/store/chatStore";
 import { createHash } from "@mfellner/react-native-fast-create-hash";
+import { ConverseXmtpClientType } from "@utils/xmtpRN/client.types";
 import { keystore } from "@xmtp/proto";
 import { buildUserInviteTopic } from "@xmtp/xmtp-js";
 import * as Notifications from "expo-notifications";
@@ -25,24 +41,8 @@ import {
   loadSavedNotificationsConversations,
   loadSavedNotificationsMessages,
 } from "./sharedData";
-import { ConverseXmtpClientType } from "./xmtpRN/client";
 import { loadConversationsHmacKeys } from "./xmtpRN/conversations";
 import { getXmtpClient } from "./xmtpRN/sync";
-import {
-  saveConversations,
-  saveConversationsLastNotificationSubscribePeriod,
-} from "../data/helpers/conversations/upsertConversations";
-import { saveMessages } from "../data/helpers/messages";
-import {
-  currentAccount,
-  getAccountsList,
-  getChatStore,
-  getProfilesStore,
-  getSettingsStore,
-  useAccountsStore,
-} from "../data/store/accountsStore";
-import { useAppStore } from "../data/store/appStore";
-import { XmtpMessage } from "../data/store/chatStore";
 
 let nativePushToken: string | null;
 

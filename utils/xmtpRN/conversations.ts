@@ -1,11 +1,28 @@
+import { getPendingConversationsToCreate } from "@data/helpers/conversations/pendingConversations";
+import { saveConversations } from "@data/helpers/conversations/upsertConversations";
+import { saveMemberInboxIds } from "@data/helpers/inboxId/saveInboxIds";
+import { getChatStore, getSettingsStore } from "@data/store/accountsStore";
+import { XmtpConversation, XmtpGroupConversation } from "@data/store/chatStore";
+import { SettingsStoreType } from "@data/store/settingsStore";
 import { entifyWithAddress } from "@queries/entify";
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
 import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
+import { setGroupNameQueryData } from "@queries/useGroupNameQuery";
+import { setGroupPhotoQueryData } from "@queries/useGroupPhotoQuery";
 import { setGroupQueryData } from "@queries/useGroupQuery";
+import {
+  addGroupToGroupsQuery,
+  fetchGroupsQuery,
+} from "@queries/useGroupsQuery";
 import { converseEventEmitter } from "@utils/events";
 import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import { areSetsEqual } from "@utils/set";
+import {
+  ConversationWithCodecsType,
+  ConverseXmtpClientType,
+  GroupWithCodecsType,
+} from "@utils/xmtpRN/client.types";
 import {
   ConsentListEntry,
   ConversationContext,
@@ -15,29 +32,9 @@ import {
 } from "@xmtp/react-native-sdk";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 
-import {
-  ConversationWithCodecsType,
-  ConverseXmtpClientType,
-  GroupWithCodecsType,
-} from "./client";
 import { syncConversationsMessages, syncGroupsMessages } from "./messages";
 import { getXmtpClient } from "./sync";
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
-import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
-import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
-import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
-import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
-import {
-  XmtpConversation,
-  XmtpGroupConversation,
-} from "../../data/store/chatStore";
-import { SettingsStoreType } from "../../data/store/settingsStore";
-import { setGroupNameQueryData } from "../../queries/useGroupNameQuery";
-import { setGroupPhotoQueryData } from "../../queries/useGroupPhotoQuery";
-import {
-  addGroupToGroupsQuery,
-  fetchGroupsQuery,
-} from "../../queries/useGroupsQuery";
 import { ConversationWithLastMessagePreview } from "../conversation";
 import { getCleanAddress } from "../eth";
 import { getTopicDataFromKeychain } from "../keychain/helpers";
