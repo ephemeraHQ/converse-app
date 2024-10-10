@@ -198,7 +198,7 @@ export const joinGroupMachineLogic = setup({
     },
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QCsD2BLAdgcQE6oFcAHAWQEMBjACyzADoAZVMiLKAAj0KPYElMAbugAuYdiTDCWZKQGIIqTPSwDUAa3oAzSdS7F+Q0QEEKw1LiZR0FANoAGALqJQRVLBHpFzkAA9EAVgBmQLoATnCADgjA0IBGOyiANgAaEABPRAAWWMy6TIB2RP98wMTg0Py4gF8q1LQsPVJKGiVGZlZMDka+QRExCSkIGTJZMFx8XDoiABsZTXMAWzptYV18fV7jU3NLa3snJBBXd2FPTG8-BCCQ8NComPik1IyEQIAmWLo7N8DMxNjfm8SnZQjU6hgcOsmtRaHQAOpkDyddgAMXM7AAqrAxuwTKdFLICNjJqwIAAVMhEABSEMa+28xw8XkOlxydkSYXClX88WCv38zwCOTobzsgRB-gi+SBb3+YJA9Uh3HIMNaABFJGMFlg2JwobB2DTaBB2AAhMDzXBiIzCUQLIjCeSKZSCdRaHRURqwc2WsBGzBsemHRn484sxBsjm3bm84KZAXpRCiz5A36JCLxRIg0L+UG1BW0qEqlr0DWiXDagPIr2GiGQM0W8zW21ge2OsYTKazYSWpYrNbcb2Nq3+wOOBluJlh0CszLszkVHOx-mChDxfJ0CKi2VBOxsiIg+WKxrF2E2u0O3VmWtYPXcJ2tFRuujHovNM8tttX1A3zB34gIE+FAyGc+xBi4k6hhcSaxPkERhFm+TxH8hSZAUq6VCEpQVNEiSypkor5EehbKu+rTnq2l7Ite-r-kQD4uqoGgviRxCnuRn5URwNEQnRgGusBoZgbEBwQScZzQQgHxwQhdhIXYKGJGh+Srm88Z0NhSHRLmSGBLE-jEQ0b6qvQFFftRP60Y0DF0E+zGvqRJl0GZXHsDxt6NPxqiCaBjg2G8olHJBEnhlJsHwaEiHIYkqHoYma7fG8m6JHc0pioEB4KYZSpsWRpmcacFm-nRNl2fQDm5U5LmFdxlm8Z5QEgYoYGBIFIYhTOMEyZFcnRbFKnxbEanJXcsThARCQxXm4JGY5JbOQV37FdZCiPq69msdC83VUtVlQl5qA+c1fmZG1wXMp1YXdVFCkxUpcUvH8-gaSl+S5mhHxvP4Bn5hVW2wmWWo6siAByYAAO7TGkv71itzq2et7qrFQGJEEMogQF6RiaOWo6dOBQXiRdviIO8WZfBloRqREkRSgNLwRGUm5-Bl+mhPGWbTQWs2VfNgMVsDHBg5D0P+rDUKlYjyweqj6OQFjONjHjUA2CJE5E9OJOvLKdgUzT1O0-k9OIEUoQimUdi5kEXJwdlJ55XQ-OVrqwtQzDJrWR25hdnMizS8jssyPL+rY7jEJjmdGuSWTutivrmQ03cdMYfkusxHpcFwXcKWZHbxnzQAwlQYAUGouq8JomLEuwAASZAGuaYB-qa0yHRoJoovgCwlQT7XE5c2TFHkkQgjF0qVCnuR3OzjOZJT7K579m3sfQRcl2XyIV1XOJ1w3YBN2arel-WneoN31mq5HU6SYPG6ZCPkVG0CoSrjTNw0zywR2N84R53NsJr1LuXSuWId711xNMK0LBRZ1g9hLXu51NYD30nfB+Y9n6rn+LkBOOZAjSgToUCIf9eYAOLkAzeIDq67wgVAiAMDjQ9zVsGRBN8UHDzuKPJ+E94rpiStPSUsRYgRATluWIxD-qtEARvDgW9QG4FruAowkCwDQPdj3AK6tr6hVvuwg8j9x4v3itKCKH9ggZiEezQI4iV50AAAr4CEB0Dgcj2AF0UNiTAwg3J1Q8hLVajFnxEAcegCAYA5FuMwB44QZJUD+jpOOZhUdtHRBCFKe+CRSilDwq-eIeQF6xCUlnLMRCl48wkfQexqBHG6hcREqJ3jloSy9pMGYvsKxTGCaE8J7im7RNiZtBBSTLoJ2CJufI6TcJZLeK-FKeQ3gVHiApOcbxGbWIdgAJQtFaWALQuh+PhmVOgVpNDbM9FCQZWjLr+HjLkApc44IHgPFbDC1y6CwQqN9BS+DKhrKcpsk5cBdklWaT7HsftjmnPiVfKCoVrmvLuXJKICRLY5lfnuOgU17olHSYImo+ZMCoFCfAQ4f0V6aJhZdAAtCkeK1LfnzSYCwXU3QDB9HEJIaQUhyUdS1gRVc2QNwrMKTFOSpQkL0thAiJEHA0TyJcXiHlfckGIDiFPW4gixpqQTpkflMQ6Cpz0gCRI-wswpR+jNHK5THaagFlWPZg41E+ibLiAq3L+4quFLcA8RsE6f1iDkug-hv57nvnOHkBErGlMtTYnaRU9rcDdcqtcd1ZLSkNSsn4Or4rBGeoIu47wQTfElG8CV6obXO1BhDN2Ys4EJsSZcrWQJ0x61CHguF7IyiYLeElf4dwRFDXmXcUtq8yHSL4JQsBe8D4tzbifLudFE3R0KLrOc-wUGJz+FmhmERnpbhWezUUHMjbDroFI4B295HUKUbQ+hSha3EEXaFPBW4vjGtFP8Qo+lSiYIzCKGIxQPj3z7URKN9snKVOqciWpPTPENPjQ++tFLeVzw3GkqmaVgiFFfnOMINMCj-EpsUc13No0bK2YC5lUJH1XJyKg6SKUEgGowjusI7IYhFHw2KYjpKHYuOoY3ZuR926onnY0ajyG8FjPvjKdKWGjHvFw0uQI-g8KphKRasD80XE1oXYhnllwVOvK3BmSKQqMpbsQKnXNlQDGShU0Ik9myACOBA4BePcn+bomzkAlwxuJy4Tb4Jx1bW9eMHbAirniKKDFY0kIoI+OKReGn84fgvDVOD9UoTsDJOgBY9YADyBBhD+aTIQltbawvGoi9mpSMWKjGsKQUfwJbQMpdaAAUXGOiRlTi6I9EMGAErCBVULjiHmrVwjVy-BCMGvcVMQTxhzElkjmnYSdYmL+SjdaxINoC2V4LFWg1Vci92urkVRrdu7ctnjTl1vdfaFt4gxKdtIdZCmnqabBEZt+Cds2lQx6VEEYPH4J67vyKdoLdgwtdMvf06TZdeS13FA3UpDCVMXrnYBJEQoIHkv-w611+REGQk1OrnU3pQ3w10dggxqUYpX5xERzHRccXQeE-YP805j2iCU445uFZY08KM3M6-H4GKVM6wecI94eKqhAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QCsD2BLAdgcQE6oFcAHAWQEMBjACyzADoAZVMiLKAAj0KPYElMAbugAuYdiTDCWZKQGIIqTPSwDUAa3oAzSdS7F+Q0QEEKw1LiZR0FANoAGALqJQRVLBHpFzkAA9EANgAWAHY6ACYAVgAOCIBOWOD-AGYk+OCAGhAAT0QAWkCk0MCCwLCCwojUhIBfasy0LD1SSholRmZWTA4mvkERMQkpCBkyWTBcfFw6IgAbGU1zAFs6bWFdfH0+41NzS2t7JyQQV3dhT0xvPwQARluo8LjAuztg65ioqIzsvOjruii7Ek7NdEhFimEanUQA0cBtmtRaHQAOpkDxddgAMXM7AAqrBxuwTGdFLICPipqwIAAVMhEABSGFh3AO3hOHi8RyuwTC-jodii-kSYQ+UVigTemRyCAiwVChVidn8wrKyQKtXqjKa5ARbQAIpJxossGxOHDYOwGbQIOwAEJgBa4MRGYSiRZEYTyRTKQTqLQ6KhNWB2h1gS2YNgso5s4kXTmIYJ2MJ0WVRW5g-mxT5JSWIa5hUKKvMRSqfa5isLq6GauHa1r0fWiXBG8PowMWxmQW328xOl1gN0e8aTaZzYQO5ardbcIPdx1hiOOVludmx0BXW6KuiBBXFMX+a4RfyVHMIXL+Ox0WKRN6xFJRQIy-z+SswrUtRHO13uk1mdtYU3cJ6bQqL6dAyF+whUqgYZNESuyoFYtiLlGy4xpciAykmURhNcLxgthMTxCetwgnQ1xJGESTJAkCp2IEz5Qq+Nbvm0n79t+6K-mGAHEEB3qqBoYF9gOUEwXCcEWAh+zXIcLioec6E3BRF7PEqLwUTyURJFExG3KE5GUbeSQgvukIao0zE6vQbEDj+qB-pgPFEHxdAgYJ4HsZB0HVtwEl7LYYSycc8kcmuuYUX8qZ6ThdjRImumxLyGY0dc-gCpRUQvj5xC1h+wkcRwXGMk5LlufQHkid5Fm+TskmITYSRBdGClxkpKR8olFFXs8V6JcRwr3FeSTbi8wIRLFFaMdl8J1nQNkFewRX-k0pU+u5+VeWJNVmHV+yBE1IWrr44VvP82nREkcSUQ+xGpH8I2vNhCYRBCWXVTlLH1gaTbGuiAByYAAO4zFkDmditCjAWtfprFQOJEMMogQIGRiaI285dJGcmnC1YXSp8dAytuhQvAC9FfFKqWxH8iWVA+h75qUgRvUyH1WXQDaGr9HAA8DoNhuDcKrQJMPUPDiOQCjaPjBjUA2DJS446Fx03G8SZUUeYTAqlIRUcR-jU5eR7DcWSrBEzLNvuznM-S2PNAyDYPWitQ7mCO8xLCs-rizIktmqj6OMguB1K0dVyRMU-yxJUwTjdhwqBDp3wIGEEJJs8w2RAk5sHpblmzQAwlQYAUGoJq8JouLkuwAASZDmnaYCOTaMyoKXnYYvgiwlVjwWh4ptwQuEyQZweILgieOH7nyZTkQqqYxBEefcLlbRFyXZfohXVcEnXDdgE3tqt+31qd6g3crfLIcrop5u8pm2nCskCap9mydT38ibiqk-JvMWy9s0LsXUu5dK54l3vXQkMxHQsH5h2Z2Qte7NWVuHcagQOoygTHYMU2DiiTzpnQIITNhpBDKLEABM1ETrxAVvMB1c95QJgRAOBVoe4KxQv3Vq5FrjoLLPRHqwItKpUnoUAs95ghGWLE8RKFDV70GoZvDg29wG4FrpAow0CwCwKdj3QKisb5cOMrwvcAi3jGX8JPUoSQ+TiIfJmMoOFgiyM+nQAACvgIQnQOAqPYAXRQ+JMDCEWvZbiEMvSuWhtMDx6AIBgBUX4zAATNrTSQYdAe8QLyHkSvEaI2EDz4LooTYESoBTbkTlpZx7N3GoE8SaHxCSknBIciVV2UxZgeybFEmpMS4nkgaU3ZJ70iCpM4XjMsCpCYGwNtHD4OEIj4OSITMhqccL02iJU2aAAle0jpYCtG6ELSG-FQKOk0LsgMcIRkGLxjyXC-xclYIovuVOljE7hHNolbkIJZRLymkMuRdBtlnLgPslpEw3btLHJ7U55ymhXLQq1W5F53ifAzrcl579twRGTObGIBtYqlHvLUKEmBUCxPgEcJiK9Pr6IRXjF66C8l4UTsKOIsQTy5FeElRI9F8xaykczP5rNKFtCYCwE0PQDD9HEJIaQUhaW4xVtEWIDxCKp1UvRDlJTCY8oFIKQ8usNmIhRGiDgWJVE+KJIq5BYcMIJEmfeT4h5ZTAgpogDWdAKKpi1pdeIl1BXmWFQCm2zYJVmh0cGHshINoKpQQEbBhDU7JDiHRTBFjk65G4f8e855iYQh4fmI1rENp2WaU0WNtr8YqsiHip+Pr+QnllLw88aVUpkOjgGqs-yXEhu5uwXmjsBYIO4BWxSyrVVpUTDrK8gR+qJB1UTaOiRtLBEykKq2QCN6gJ3qohhjdm7Hw0KfLuTlR2tWSLyV4B4ChSNXemym0dsUVGwYkPhiYGKBo3VQ4Bii+B0IgeaDRTCWFKGHcQM9YytYqq0gqSixZMFupuI+z1scX2mSeDyIt9Bqm1PRPU-xAymmhLhBBlWZtLyCOKLmoInwRHREvB8fFt5nqVCw4CnZIKw0jo4dclWlFClvCmamFIkR72IDKACPkxT+SPW4Wxnxe6D4HrbkezEJ7y08bpXxnhBZqbxGyYKPB787jvO-veVI41kjyerkO09mnFXhzFH8GKMpbwJDzLO9+lFQgRDLFFXW5FO1UsAYibZABHAgcAglLUcj0bZyAS5I1I+HYy+lBRqzUq8XSApPWRCneNFUaU2PzTOJxEJxUehUnQIsTsAB5AgwhkviaBEmJ8twma3BHp5ymJCF0AiemysobGACi4LVFiq8U5XohgwBNZTmQwmxQ8zLeCIUCiHKpGeqvLKc2iZ8Ifq7UGlxo3JgOS4+B+zcaU5AnuAmII55U7RFIf1HLIJhrlmSCCIb6786IhO9iCb52iAUuxrx8OonCFrYPGNN41wOWpC3InfcWZ1LPDoiNsb7Be1237UDOzoOtPh2KNYwU5YI70U+N18TBXkwKkSC+wRTifvUvZv91ROGYl1Orv0wJc3+O8IFIlYTFFDz4JiEUg8j80rbk+Bj07QLzlA751FJZEInW4VvIKfBpFY46YhHEEmgrahAA */
   id: "joinGroupMachine",
   context: ({ input }) => {
     // const account = currentAccount();
@@ -239,14 +239,18 @@ that isn't how things are done, so I'm going to follow what's currently there.
 This requires that the user click the button before we check if they've already
 joined, so I think I'm missing some context.
 `,
+
           // target/*TODO: can we create the ability to check an invite status without creating a groupJoinRequest?*/: "Checking Invite Status",
-          target: "Waiting For User Action",
+          target: "Determining Groups Joined Before Attempt",
+
           actions: {
             type: "saveGroupInviteMetadata",
             params: ({ event }) => ({
               groupInviteMetadata: event.output,
             }),
           },
+
+          reenter: true,
         },
         onError: {
           target: "Error Loading Group Invite",
@@ -273,11 +277,6 @@ prior where we check the status of the group join request, but
 that isn't how things are done in the current version of the
 screen so I'm going to follow what's currently there.
     `,
-      on: {
-        "user.didTapJoinGroup": {
-          target: "Attempting to Join Group",
-        },
-      },
     },
 
     "Determining Groups Joined Before Attempt": {
@@ -300,13 +299,16 @@ user has joined.
           };
         },
         onDone: {
-          target: "Attempting to Join Group",
+          target: "Waiting For User Action",
+
           actions: {
             type: "saveGroupsBeforeJoinAttempt",
             params: ({ event }) => ({
               groupsBeforeJoinAttempt: event.output,
             }),
           },
+
+          reenter: true,
         },
         onError: {
           target: "Error Loading Groups",
@@ -486,9 +488,7 @@ consent for the new group.
           },
           target: "User Has Been Blocked From Group",
         },
-        {
-          target: "Providing User Consent to Join Group",
-        },
+        "Providing User Consent to Join Group",
       ],
     },
 
