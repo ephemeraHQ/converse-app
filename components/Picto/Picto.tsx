@@ -42,6 +42,7 @@ import Search from "@material-symbols/svg-400/outlined/search.svg";
 import Send from "@material-symbols/svg-400/outlined/send.svg";
 import Settings from "@material-symbols/svg-400/outlined/settings.svg";
 import Signature from "@material-symbols/svg-400/outlined/signature.svg";
+import Star from "@material-symbols/svg-400/outlined/star.svg";
 import WavingHand from "@material-symbols/svg-400/outlined/waving_hand.svg";
 import { primaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
@@ -109,6 +110,7 @@ const pictoMapping = {
   cloud: Cloud,
   "exclamationmark.triangle": Exclamationmark,
   magnifyingglass: Search,
+  star: Star,
 } as const;
 
 export type IPicto = keyof typeof pictoMapping;

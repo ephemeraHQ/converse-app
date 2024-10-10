@@ -371,10 +371,11 @@ function useXmtpConnection() {
 
     connectViewWalletStore.getState().setInitiatingClientForAddress(address);
 
-    let onboardingDone = false;
+    connectViewWalletStore.getState().setOnboardingDone(false);
 
     setTimeout(() => {
-      if (onboardingDone === false) {
+      const onboardingDone = connectViewWalletStore.getState().onboardingDone;
+      if (!onboardingDone) {
         sentryTrackMessage("Onboarding took more than 30 seconds");
       }
     }, 30000);
@@ -490,7 +491,7 @@ function useXmtpConnection() {
       });
 
       logger.info("[Connect Wallet] Successfully logged in using a wallet");
-      onboardingDone = true;
+      connectViewWalletStore.getState().setOnboardingDone(true);
       logger.debug(
         "[Connect Wallet] ConnectViaWallet initXmtpClient: Function completed successfully"
       );

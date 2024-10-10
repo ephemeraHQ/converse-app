@@ -3,7 +3,7 @@ import {
   StackActions,
   useNavigation,
 } from "@react-navigation/native";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 
@@ -83,9 +83,11 @@ export function useRouter(args?: {
     };
   }, [onBeforeRemove, navigation]);
 
-  return {
-    push: navigation.navigate, // To make sure if we decide to migrate to expo-router it's easier
-    popToTop: () => navigation.dispatch(StackActions.popToTop()),
-    ...navigation,
-  };
+  return useMemo(() => {
+    return {
+      push: navigation.navigate, // To make sure if we decide to migrate to expo-router it's easier
+      popToTop: () => navigation.dispatch(StackActions.popToTop()),
+      ...navigation,
+    };
+  }, [navigation]);
 }
