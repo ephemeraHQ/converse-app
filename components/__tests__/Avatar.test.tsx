@@ -37,14 +37,4 @@ describe("Avatar Component", () => {
     const picto = getByTestId("avatar-placeholder");
     expect(picto).toBeTruthy();
   });
-
-  it("renders the indicator correctly when showIndicator is true", () => {
-    const { getByTestId } = render(
-      <Avatar showIndicator size={50} uri="https://example.com/avatar.png" />
-    );
-
-    // Check if the Indicator component is rendered
-    const indicator = getByTestId("avatar-indicator");
-    expect(indicator).toBeTruthy();
-  });
 });

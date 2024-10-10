@@ -28,9 +28,6 @@ export const Indicator = memo(IndicatorInner);
 const getStyles = (colorScheme: ColorSchemeName, size: number) =>
   StyleSheet.create({
     indicator: {
-      position: "absolute",
-      right: size / 20,
-      bottom: size / 20,
       height: size / 5,
       width: size / 5,
       backgroundColor: backgroundColor(colorScheme),
