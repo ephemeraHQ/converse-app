@@ -124,13 +124,7 @@ export default function Onboarding() {
       });
       if (!base64Key) return;
       await connectWithBase64Key(base64Key, async () => {
-        logoutAccount(
-          await signer.getAddress(),
-          false,
-          true,
-          () => {},
-          () => {}
-        );
+        logoutAccount(await signer.getAddress(), false, true, () => {});
       });
     } catch (e) {
       initiatingClientFor.current = undefined;

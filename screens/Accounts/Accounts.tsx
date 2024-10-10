@@ -5,7 +5,6 @@ import {
   primaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import logger from "@utils/logger";
 import { ScrollView, StyleSheet, View, useColorScheme } from "react-native";
 
 import AccountSettingsButton from "../../components/AccountSettingsButton";
@@ -17,7 +16,6 @@ import {
   useErroredAccountsMap,
 } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
-import { useDisconnectWallet } from "../../utils/logout/wallet";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";
 
@@ -32,7 +30,6 @@ export default function Accounts({
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
   const setAddingNewAccount = useOnboardingStore((s) => s.setAddingNewAccount);
   const colorScheme = useColorScheme();
-  const disconnectWallet = useDisconnectWallet();
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
@@ -70,12 +67,7 @@ export default function Accounts({
             id: "add",
             title: "Add an account",
             titleColor: primaryColor(colorScheme),
-            action: async () => {
-              try {
-                await disconnectWallet();
-              } catch (e) {
-                logger.error(e);
-              }
+            action: () => {
               setAddingNewAccount(true);
             },
           },

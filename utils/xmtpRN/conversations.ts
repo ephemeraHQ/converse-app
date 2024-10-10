@@ -39,7 +39,7 @@ import {
   fetchGroupsQuery,
 } from "../../queries/useGroupsQuery";
 import { ConversationWithLastMessagePreview } from "../conversation";
-import { getCleanAddress } from "../eth";
+import { getCleanAddress } from "../evm/address";
 import { getTopicDataFromKeychain } from "../keychain/helpers";
 import { getSecureMmkvForAccount } from "../mmkv";
 import { sentryTrackError } from "../sentry";

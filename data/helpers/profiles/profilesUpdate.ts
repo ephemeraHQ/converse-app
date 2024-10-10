@@ -1,15 +1,10 @@
-import { getCleanAddress } from "@utils/eth";
+import { getCleanAddress } from "@utils/evm/address";
 
 import { getProfilesForAddresses } from "../../../utils/api";
 import { getProfile } from "../../../utils/profile";
 import { getChatStore, getProfilesStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 import { ProfileSocials } from "../../store/profilesStore";
-
-type ConversationHandlesUpdate = {
-  conversation: XmtpConversation;
-  updated: boolean;
-};
 
 export const updateProfilesForConvos = async (
   account: string,

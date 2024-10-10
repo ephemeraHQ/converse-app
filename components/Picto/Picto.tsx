@@ -62,6 +62,7 @@ type Props = {
   style?: StyleProp<ViewStyle>;
   color?: ColorValue;
   size?: number;
+  weight?: string;
 };
 
 const pictoMapping: {
