@@ -10,7 +10,6 @@ import {
   useUserProfileStyles,
 } from "./Onboarding/OnboardingUserProfileScreen";
 import Button from "../components/Button/Button";
-import { NewAccountScreenComp } from "../components/NewAccount/NewAccountScreenComp";
 import { ScreenHeaderButton } from "../components/Screen/ScreenHeaderButton/ScreenHeaderButton";
 import { Pressable } from "../design-system/Pressable";
 import { Text } from "../design-system/Text";
@@ -18,6 +17,7 @@ import { translate } from "../i18n";
 import { textSecondaryColor } from "../styles/colors";
 import { sentryTrackError } from "../utils/sentry";
 import { NavigationParamList } from "./Navigation/Navigation";
+import { Screen } from "../components/Screen/ScreenComp/Screen";
 
 export const UserProfileScreen = memo(function UserProfileScreen(
   props: NativeStackScreenProps<NavigationParamList, "UserProfile">
@@ -63,7 +63,7 @@ export const UserProfileScreen = memo(function UserProfileScreen(
   const { addPFP, asset } = useAddPfp();
 
   return (
-    <NewAccountScreenComp
+    <Screen
       contentContainerStyle={{
         alignItems: "center",
       }}
@@ -133,6 +133,6 @@ export const UserProfileScreen = memo(function UserProfileScreen(
       <Text style={styles.p}>
         {errorMessage || translate("userProfile.converseProfiles")}
       </Text>
-    </NewAccountScreenComp>
+    </Screen>
   );
 });

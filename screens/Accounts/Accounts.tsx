@@ -46,7 +46,7 @@ export default function Accounts(
           title: accountsProfiles[a] || shortAddress(a),
           action: () => {
             setCurrentAccount(a, false);
-            router.push("Chats");
+            router.navigate("Chats");
           },
           rightView: (
             <View style={{ flexDirection: "row" }}>

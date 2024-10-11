@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { Platform } from "react-native";
 
 import { ScreenHeaderButton } from "./ScreenHeaderButton/ScreenHeaderButton";
 import { IScreenHeaderButtonProps } from "./ScreenHeaderButton/ScreenHeaderButton.props";
@@ -17,7 +18,13 @@ export const ScreenHeaderModalCloseButton = memo(
     return (
       <ScreenHeaderButton
         variant={variant ?? "text"}
-        title={title ?? "Close"}
+        title={
+          title ??
+          Platform.select({
+            android: "Back",
+            default: "Close",
+          })
+        }
         {...rest}
       />
     );

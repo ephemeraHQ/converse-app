@@ -12,18 +12,18 @@ import {
   Share,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useColorScheme,
   View,
-  TouchableOpacity,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
-import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Avatar from "../components/Avatar";
 import ConverseButton from "../components/Button/Button";
 import ActionButton from "../components/Chat/ActionButton";
 import Picto from "../components/Picto/Picto";
+import { Screen } from "../components/Screen/ScreenComp/Screen";
 import config from "../config";
 import {
   useCurrentAccount,
@@ -31,12 +31,13 @@ import {
 } from "../data/store/accountsStore";
 import { isDesktop } from "../utils/device";
 import {
-  getPreferredUsername,
   getPreferredAvatar,
   getPreferredName,
+  getPreferredUsername,
   getProfile,
 } from "../utils/profile";
 import { shortAddress } from "../utils/str";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 const ShareProfileContent = ({
   userAddress,
@@ -188,13 +189,15 @@ export default function ShareProfileScreen({
   }`;
 
   return (
-    <ShareProfileContent
-      userAddress={userAddress}
-      username={username}
-      displayName={displayName}
-      avatar={avatar || ""}
-      profileUrl={profileUrl}
-    />
+    <Screen safeAreaEdges={["bottom"]} contentContainerStyle={{ flex: 1 }}>
+      <ShareProfileContent
+        userAddress={userAddress}
+        username={username}
+        displayName={displayName}
+        avatar={avatar || ""}
+        profileUrl={profileUrl}
+      />
+    </Screen>
   );
 }
 

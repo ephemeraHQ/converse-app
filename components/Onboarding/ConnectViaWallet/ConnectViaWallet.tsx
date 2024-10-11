@@ -23,6 +23,7 @@ import {
 } from "../../../data/store/accountsStore";
 import { VStack } from "../../../design-system/VStack";
 import { useAppStateHandlers } from "../../../hooks/useAppStateHandlers";
+import { useRouter } from "../../../navigation/useNavigation";
 import { spacing } from "../../../theme";
 import { wait } from "../../../utils/general";
 import { isOnXmtp } from "../../../utils/xmtpRN/client";
@@ -66,12 +67,6 @@ export const ConnectViaWallet = memo(function ConnectViaWallet() {
   const disconnect = useDisconnect();
   const { initXmtpClient } = useXmtpConnection();
 
-  useEffect(() => {
-    return () => {
-      disconnect();
-    };
-  }, [disconnect]);
-
   useAppStateHandlers({
     deps: [thirdwebSigner],
     onForeground: () => {
@@ -88,7 +83,6 @@ export const ConnectViaWallet = memo(function ConnectViaWallet() {
     (async () => {
       if (thirdwebSigner) {
         try {
-          console.log("go");
           const address = await thirdwebSigner.getAddress();
           if (getAccountsList().includes(address)) {
             Alert.alert(
@@ -265,6 +259,8 @@ function useDisconnect() {
 
   const connectViaWalletStore = useConnectViaWalletStore();
 
+  const router = useRouter();
+
   return useCallback(
     async (resetLoading = true) => {
       logger.debug("[Connect Wallet] Logging out");
@@ -288,9 +284,12 @@ function useDisconnect() {
       const storageKeys = await AsyncStorage.getAllKeys();
       const wcKeys = storageKeys.filter((k) => k.startsWith("wc@2:"));
       await AsyncStorage.multiRemove(wcKeys);
+
+      // TODO: No the best to put here
+      router.goBack();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [address, thirdwebWallet]
+    [address, thirdwebWallet, router]
   );
 }
 
@@ -496,6 +495,7 @@ function useXmtpConnection() {
         "[Connect Wallet] ConnectViaWallet initXmtpClient: Function completed successfully"
       );
     } catch (e) {
+      logger.error("[Connect Wallet] Error in initXmtpClient:", e);
       connectViewWalletStore
         .getState()
         .setInitiatingClientForAddress(undefined);
@@ -503,7 +503,6 @@ function useXmtpConnection() {
       connectViewWalletStore.getState().setClickedSignature(false);
       connectViewWalletStore.getState().setWaitingForNextSignature(false);
       disconnect();
-      logger.error("[Connect Wallet] Error in initXmtpClient:", e);
     }
   }, [
     address,

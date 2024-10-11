@@ -1,4 +1,5 @@
 import {
+  NavigationAction,
   NavigationProp,
   StackActions,
   useNavigation,
@@ -11,7 +12,7 @@ import { NavigationParamList } from "../screens/Navigation/Navigation";
 // Also, expo-router syntax is useRouter so if we want to migrate towards that later it's useful to call it useRouter now.
 export function useRouter(args?: {
   onTransitionEnd?: (isClosing: boolean) => void;
-  onBeforeRemove?: () => void;
+  onBeforeRemove?: (e: { data: { action: NavigationAction } }) => void;
   onBlur?: () => void;
   onFocus?: () => void;
 }) {
@@ -72,8 +73,9 @@ export function useRouter(args?: {
 
   useEffect(() => {
     navigation.addListener("beforeRemove", (e) => {
+      console.log("e:", e);
       if (onBeforeRemove) {
-        onBeforeRemove();
+        onBeforeRemove(e);
       }
     });
     return () => {
@@ -85,7 +87,6 @@ export function useRouter(args?: {
 
   return useMemo(() => {
     return {
-      push: navigation.navigate, // To make sure if we decide to migrate to expo-router it's easier
       popToTop: () => navigation.dispatch(StackActions.popToTop()),
       ...navigation,
     };

@@ -57,7 +57,6 @@ export const PrivyPhoneEntry = memo(() => {
           }}
           onChangeFormattedText={setPhone}
           withDarkTheme={colorScheme === "dark"}
-          autoFocus
           countryPickerProps={{
             flatListProps: { style: styles.countryPicker },
             withFilter: true,

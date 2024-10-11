@@ -50,7 +50,7 @@ export const NewAccountUserProfileScreen = memo(
     const { addPFP, asset } = useAddPfp();
 
     return (
-      <NewAccountScreenComp>
+      <NewAccountScreenComp contentContainerStyle={{ alignItems: "center" }}>
         <Pressable onPress={addPFP}>
           <Avatar
             uri={profile?.avatar || asset?.uri}

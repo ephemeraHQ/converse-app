@@ -34,7 +34,7 @@ export function OnboardingEphemeraScreen(
         address: await signer.getAddress(),
         isEphemeral: true,
       });
-      router.push("OnboardingUserProfile");
+      router.navigate("OnboardingUserProfile");
     } catch (error) {
       sentryTrackError(error);
     } finally {
