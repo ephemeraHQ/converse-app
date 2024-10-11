@@ -1,4 +1,3 @@
-import { useDebugEnabled } from "@components/DebugButton";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { primaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
@@ -18,7 +17,6 @@ export default function NewConversationButton({
   "Chats" | "Conversation" | "ShareFrame" | "Blocked"
 >) {
   const colorScheme = useColorScheme();
-  const debugEnabled = useDebugEnabled();
   const onPress = useCallback(() => {
     navigate("NewConversation");
   }, []);
@@ -31,7 +29,7 @@ export default function NewConversationButton({
       <TouchableOpacity
         activeOpacity={0.2}
         onPress={onPress}
-        onLongPress={debugEnabled ? showDebug : undefined}
+        onLongPress={showDebug}
       >
         <Picto
           picto="square.and.pencil"
@@ -62,7 +60,7 @@ export default function NewConversationButton({
           bottom: 20,
         }}
         onPress={onPress}
-        onLongPress={debugEnabled ? showDebug : undefined}
+        onLongPress={showDebug}
       />
     );
   }
