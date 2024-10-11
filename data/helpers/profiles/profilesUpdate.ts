@@ -50,7 +50,14 @@ export const refreshProfileForAddress = async (
   const now = new Date().getTime();
   const profilesByAddress = await getProfilesForAddresses([address]);
   // Save profiles to db
-
+  getProfilesStore(account)
+    .getState()
+    .setProfiles({
+      [address]: {
+        socials: profilesByAddress[address],
+        updatedAt: now,
+      },
+    });
   setProfileSocialsQueryData(account, address, profilesByAddress[address], now);
 };
 
