@@ -38,11 +38,7 @@ export default function GroupInviteScreen({
     joinGroupMachineLogic.provide({
       actions: {
         navigateToGroupScreen: (_, params: { topic: string }) => {
-          navigation.navigate("Group", { topic: params.topic });
-        },
-
-        navigationGoBack: () => {
-          navigation.goBack();
+          navigation.replace("Group", { topic: params.topic });
         },
       },
     }),

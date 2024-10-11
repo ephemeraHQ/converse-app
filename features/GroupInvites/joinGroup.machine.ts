@@ -121,10 +121,6 @@ export const joinGroupMachineLogic = setup({
         })}`
     ),
 
-    navigationGoBack: log((_) => {
-      return `-> TODO: provide navigationGoBack`;
-    }),
-
     saveGroupsBeforeJoinAttempt: assign({
       groupsBeforeJoinAttempt: (
         _,
