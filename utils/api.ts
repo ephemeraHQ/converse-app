@@ -1,3 +1,4 @@
+import { TransactionData } from "@components/TransactionPreview";
 import axios from "axios";
 import * as Contacts from "expo-contacts";
 
@@ -524,6 +525,28 @@ export const getPendingGroupJoinRequests = async (
   const { data } = await api.get("/api/groupJoinRequest/pending", {
     headers: await getXmtpApiHeaders(account),
   });
+  return data;
+};
+
+export const simulateTransaction = async (
+  account: string,
+  from: string,
+  chainId: number,
+  transaction: TransactionData
+) => {
+  const { data } = await api.post(
+    "/api/transactions/simulate",
+    {
+      address: from,
+      network: "base", // @todo => use chainId
+      value: transaction.value,
+      to: transaction.to,
+      data: transaction.data,
+    },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
   return data;
 };
 

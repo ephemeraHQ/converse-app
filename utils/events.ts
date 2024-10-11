@@ -1,7 +1,8 @@
 import { MessageToDisplay } from "@components/Chat/Message/Message";
-import { TransactionData } from "@components/TransactionPreview";
+import { TransactionToTrigger } from "@components/TransactionPreview";
 import { MediaPreview } from "@data/store/chatStore";
 import EventEmitter from "eventemitter3";
+import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 import { Account, Wallet } from "thirdweb/wallets";
 
 import { GroupWithCodecsType } from "./xmtpRN/client";
@@ -33,7 +34,8 @@ type ConverseEvents = {
     wallet: Wallet | undefined;
     account: Account | undefined;
   }) => void;
-  previewTransaction: (transactionData: TransactionData) => void;
+  previewTransaction: (transactionData: TransactionToTrigger) => void;
+  transactionResult: (id: string, receipt?: TransactionReceipt) => void;
 };
 
 type ShowActionSheetEvents = {

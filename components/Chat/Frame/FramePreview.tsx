@@ -203,7 +203,7 @@ export default function FramePreview({
             );
 
             payload.untrustedData.transactionId =
-              transactionReceipt.transactionHash;
+              transactionReceipt?.transactionHash;
             actionPostUrl = buttonPostUrl;
           }
 

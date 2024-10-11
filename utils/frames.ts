@@ -11,8 +11,9 @@ import {
   OPEN_FRAMES_PROXY_URL,
 } from "@xmtp/frames-client";
 import { useCallback } from "react";
+import { v4 as uuidv4 } from "uuid";
 
-import { converseEventEmitter } from "./events";
+import { converseEventEmitter, waitForConverseEvent } from "./events";
 import { useExternalSigner } from "./evm/external";
 import logger from "./logger";
 import { URL_REGEX } from "./regex";
@@ -225,29 +226,24 @@ export const useHandleTxAction = () => {
       }
 
       // Let's display the transaction preview screen
+      const chainId = parseInt(txData.chainId.slice(7), 10);
       const transactionData = {
+        id: uuidv4(),
+        chainId,
         to: txData.params.to,
         value: txData.params.value,
         data: txData.params.data,
       };
       converseEventEmitter.emit("previewTransaction", transactionData);
-      return;
-
-      const chainId = parseInt(txData.chainId.slice(7), 10);
-
-      logger.debug(`[TxFrame] Switching to chain id ${chainId}`);
-
-      await switchChain(chainId);
-
-      const transactionReceipt = await sendTransaction(transactionData);
-
-      logger.debug(
-        `[TxFrame] Triggered transaction with hash ${transactionReceipt.transactionHash}`
+      const [transactionId, receipt] = await waitForConverseEvent(
+        "transactionResult"
       );
+      const transactionReceipt =
+        transactionId === transactionData.id ? receipt : undefined;
 
       return { buttonPostUrl, transactionReceipt };
     },
-    [getExternalSigner, sendTransaction, switchChain]
+    [getExternalSigner]
   );
   return { handleTxAction };
 };
