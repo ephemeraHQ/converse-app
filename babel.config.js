@@ -41,6 +41,8 @@ module.exports = {
           "@screens": "./screens",
           "@styles": "./styles",
           "@utils": "./utils",
+          "@theme": "./theme",
+          "@design-system": "./design-system",
         },
       },
     ],
