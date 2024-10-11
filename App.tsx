@@ -112,7 +112,7 @@ export default function App() {
         <ThirdwebProvider>
           <AppKeyboardProvider>
             <ActionSheetProvider>
-              <ThemeProvider value={{ themeScheme, setThemeContextOverride }} r>
+              <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
                 <PaperProvider
                   theme={
                     colorScheme === "dark"
