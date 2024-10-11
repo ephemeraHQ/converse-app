@@ -1,9 +1,13 @@
 import React from "react";
 import { Text as RNText, StyleProp, TextStyle } from "react-native";
 
-import { $presets, IPresets } from "./Text.presets";
+import { IPresets, presets } from "./Text.presets";
 import { ITextProps } from "./Text.props";
-import { $fontWeightStyles, $rtlStyle, $sizeStyles } from "./Text.styles";
+import {
+  textFontWeightStyles,
+  textRtlStyle,
+  textSizeStyles,
+} from "./Text.styles";
 import { translate } from "../../i18n";
 import { useAppTheme } from "../../theme/useAppTheme";
 
@@ -22,7 +26,7 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     txOptions,
     text,
     children,
-    style: $styleOverride,
+    style: styleProp,
     ...rest
   } = props;
 
@@ -33,16 +37,16 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
 
   const preset: IPresets = props.preset ?? "default";
 
-  const $styles: StyleProp<TextStyle> = [
-    $rtlStyle,
-    themed($presets[preset]),
-    weight && $fontWeightStyles[weight],
-    size && $sizeStyles[size],
-    $styleOverride,
+  const styles: StyleProp<TextStyle> = [
+    textRtlStyle,
+    themed(presets[preset]),
+    weight && textFontWeightStyles[weight],
+    size && textSizeStyles[size],
+    styleProp,
   ];
 
   return (
-    <RNText ref={ref} {...rest} style={$styles}>
+    <RNText ref={ref} {...rest} style={styles}>
       {content}
     </RNText>
   );

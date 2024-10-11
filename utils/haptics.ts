@@ -8,90 +8,45 @@ const impactFeedbackStyle = ExpoHaptics.ImpactFeedbackStyle;
 const notificationFeedbackStyles = ExpoHaptics.NotificationFeedbackType;
 
 const selectionAsync = () => {
-  try {
-    // logger.debug("selectionAsync");
-    ExpoHaptics.impactAsync(impactFeedbackStyle.Light).catch(sentryTrackError); // Selection doens't seem to work? So use light impact for now
-  } catch (error) {
-    sentryTrackError(error);
-  }
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Light).catch(sentryTrackError); // Selection doens't seem to work? So use light impact for now
 };
 
 const successNotificationAsync = () => {
-  try {
-    // logger.debug("notificationAsync");
-    ExpoHaptics.notificationAsync(notificationFeedbackStyles.Success).catch(
-      sentryTrackError
-    );
-  } catch (error) {
-    sentryTrackError(error);
-  }
+  ExpoHaptics.notificationAsync(notificationFeedbackStyles.Success).catch(
+    sentryTrackError
+  );
 };
 
 const warningNotificationAsync = () => {
-  try {
-    // logger.debug("notificationAsync");
-    ExpoHaptics.notificationAsync(notificationFeedbackStyles.Warning).catch(
-      sentryTrackError
-    );
-  } catch (error) {
-    sentryTrackError(error);
-  }
+  ExpoHaptics.notificationAsync(notificationFeedbackStyles.Warning).catch(
+    sentryTrackError
+  );
 };
 
 const errorNotificationAsync = () => {
-  try {
-    // logger.debug("notificationAsync");
-    ExpoHaptics.notificationAsync(notificationFeedbackStyles.Error).catch(
-      sentryTrackError
-    );
-  } catch (error) {
-    sentryTrackError(error);
-  }
+  ExpoHaptics.notificationAsync(notificationFeedbackStyles.Error).catch(
+    sentryTrackError
+  );
 };
 
 const lightImpactAsync = () => {
-  try {
-    // logger.debug("lightImpactAsync");
-    ExpoHaptics.impactAsync(impactFeedbackStyle.Light).catch(sentryTrackError);
-  } catch (error) {
-    sentryTrackError(error);
-  }
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Light).catch(sentryTrackError);
 };
 
 const mediumImpactAsync = () => {
-  try {
-    // logger.debug("mediumImpactAsync");
-    ExpoHaptics.impactAsync(impactFeedbackStyle.Medium).catch(sentryTrackError);
-  } catch (error) {
-    sentryTrackError(error);
-  }
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Medium).catch(sentryTrackError);
 };
 
 const heavyImpactAsync = () => {
-  try {
-    // logger.debug("heavyImpactAsync");
-    ExpoHaptics.impactAsync(impactFeedbackStyle.Heavy).catch(sentryTrackError);
-  } catch (error) {
-    sentryTrackError(error);
-  }
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Heavy).catch(sentryTrackError);
 };
 
 const softImpactAsync = () => {
-  try {
-    // logger.debug("softImpactAsync");
-    ExpoHaptics.impactAsync(impactFeedbackStyle.Soft).catch(sentryTrackError);
-  } catch (error) {
-    sentryTrackError(error);
-  }
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Soft).catch(sentryTrackError);
 };
 
 const rigidImpactAsync = () => {
-  try {
-    // logger.debug("rigidImpactAsync");
-    ExpoHaptics.impactAsync(impactFeedbackStyle.Rigid).catch(sentryTrackError);
-  } catch (error) {
-    sentryTrackError(error);
-  }
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Rigid).catch(sentryTrackError);
 };
 
 export const Haptics = {
