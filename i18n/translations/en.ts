@@ -201,6 +201,10 @@ const en = {
   if_you_block_contact:
     "If you block this contact, you will not receive messages from them anymore",
   opening_conversation: "Opening your conversation",
+  conversation_not_found:
+    "We couldn't find this conversation. Please try again",
+  group_not_found:
+    "We couldn't find this group. Please try again or ask someone to invite you to this group",
   say_hi: "Say hi",
   do_you_trust_this_contact: "Do you trust this contact?",
   do_you_want_to_join_this_group: "Do you want to join this group?",

@@ -147,14 +147,21 @@ export default function FramePreview({
   const onButtonPress = useCallback(
     async (button: FrameButtonType) => {
       if (button.action === "link") {
+        if (!button.target) return;
         const link = button.target;
-        if (
-          !link ||
-          !link.startsWith("http") ||
-          !(await Linking.canOpenURL(link))
-        )
+        try {
+          const url = new URL(link);
+          if (
+            (url.protocol === "http:" ||
+              url.protocol === "https:" ||
+              url.protocol === `${config.scheme}:`) &&
+            (await Linking.canOpenURL(link))
+          ) {
+            Linking.openURL(link);
+          }
+        } catch {
           return;
-        Linking.openURL(link);
+        }
         return;
       }
       if (!conversation) return;
