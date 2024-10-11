@@ -25,6 +25,7 @@ import { VStack } from "../../../design-system/VStack";
 import { useAppStateHandlers } from "../../../hooks/useAppStateHandlers";
 import { useRouter } from "../../../navigation/useNavigation";
 import { spacing } from "../../../theme";
+import { isAppActive } from "../../../utils/appState";
 import { wait } from "../../../utils/general";
 import { isOnXmtp } from "../../../utils/xmtpRN/client";
 import {
@@ -78,6 +79,16 @@ export const ConnectViaWallet = memo(function ConnectViaWallet() {
       }, 1500);
     },
   });
+
+  useEffect(() => {
+    return () => {
+      // We don't want to disconnect while we're signing
+      if (isAppActive()) {
+        logger.debug("[Connect Wallet] Unmounting, disconnecting");
+        disconnect().catch(sentryTrackError);
+      }
+    };
+  }, [disconnect]);
 
   const primaryButtonAction = useCallback(() => {
     if (waitingForNextSignature) {
