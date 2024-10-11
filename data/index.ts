@@ -1,8 +1,8 @@
 import "reflect-metadata";
 
+import { setProfileSocialsQueryData } from "@queries/useProfileSocialsQuery";
 import logger from "@utils/logger";
 import { getProfile } from "@utils/profile";
-import { setProfileSocialsQueryData } from "@queries/useProfileSocialsQuery";
 
 import { getRepository } from "./db";
 import { Conversation } from "./db/entities/conversationEntity";
@@ -78,12 +78,16 @@ export const loadDataToContext = async (account: string) => {
 
   const profilesByAddress = getProfilesStore(account).getState().profiles;
   for (const peerAddress in profilesByAddress) {
-    if (!profilesByAddress[peerAddress]) continue;
+    if (
+      !profilesByAddress[peerAddress]?.socials ||
+      !profilesByAddress[peerAddress]?.updatedAt
+    )
+      continue;
     setProfileSocialsQueryData(
       account,
       peerAddress,
-      profilesByAddress[peerAddress]?.socials,
-      profilesByAddress[peerAddress]?.updatedAt
+      profilesByAddress[peerAddress].socials,
+      profilesByAddress[peerAddress].updatedAt
     );
   }
   getChatStore(account)

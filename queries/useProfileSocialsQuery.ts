@@ -1,7 +1,6 @@
 import { ProfileSocials } from "@data/store/profilesStore";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { getProfilesForAddresses } from "@utils/api";
-import logger from "@utils/logger";
 import {
   create,
   windowedFiniteBatchScheduler,
@@ -13,7 +12,6 @@ import { queryClient } from "./queryClient";
 
 const profileSocials = create({
   fetcher: async (addresses: string[]) => {
-    logger.info("Fetching profiles for addresses", addresses);
     const data = await getProfilesForAddresses(addresses);
     return data;
   },
@@ -26,7 +24,6 @@ const profileSocials = create({
 
 const fetchProfileSocials = async (peerAddress: string) => {
   const data = await profileSocials.fetch(peerAddress);
-  // Save to mmkv to access it later
   return data;
 };
 
@@ -38,11 +35,10 @@ const profileSocialesQueryConfig = (account: string, peerAddress: string) => ({
   gcTime: 1000 * 60 * 60 * 24 * 30,
   refetchIntervalInBackground: false,
   refetchOnWindowFocus: false,
-  // TODO: Clean this up after development
-  // refetchOnMount: false,
   // We really just want a 24 hour cache here
   // And automatic retries if there was an error fetching
-  staleTime: 1000, //1000 * 60 * 60 * 24,
+  refetchOnMount: false,
+  staleTime: 1000 * 60 * 60 * 24,
 });
 
 export const useProfileSocialsQuery = (
