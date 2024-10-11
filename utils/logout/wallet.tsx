@@ -2,10 +2,10 @@ import { useActiveWallet, useDisconnect } from "thirdweb/react";
 
 export const useDisconnectWallet = () => {
   const { disconnect: disconnectWallet } = useDisconnect();
-  const thirdwebWallet = useActiveWallet();
+  const activeWallet = useActiveWallet();
   return () => {
-    if (thirdwebWallet) {
-      disconnectWallet(thirdwebWallet);
+    if (activeWallet) {
+      disconnectWallet(activeWallet);
     }
   };
 };

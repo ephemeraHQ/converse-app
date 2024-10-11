@@ -35,6 +35,7 @@ export enum PictoSizes {
   tableViewImage = Platform.OS === "ios" ? 16 : 24,
   textButton = 15,
   cancelAttachmentButton = 6,
+  externalWallet = 14,
 }
 
 export const BorderRadius = {

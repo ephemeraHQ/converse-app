@@ -4,7 +4,7 @@ import {
   itemSeparatorColor,
   tertiaryBackgroundColor,
 } from "@styles/colors";
-import { getCleanAddress } from "@utils/eth";
+import { getCleanAddress } from "@utils/evm/address";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {

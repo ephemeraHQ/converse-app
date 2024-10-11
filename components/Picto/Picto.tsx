@@ -120,6 +120,7 @@ export type IPictoProps = {
   style?: StyleProp<ViewStyle>;
   color?: ColorValue;
   size?: number;
+  weight?: string;
 };
 
 export default function Picto({

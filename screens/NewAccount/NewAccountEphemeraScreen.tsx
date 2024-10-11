@@ -33,7 +33,7 @@ export function NewAccountEphemeraScreen(
         address: await signer.getAddress(),
         isEphemeral: true,
       });
-      router.navigate("NewAccountUserProfile");
+      router.push("NewAccountUserProfile");
     } catch (error) {
       sentryTrackError(error);
     } finally {

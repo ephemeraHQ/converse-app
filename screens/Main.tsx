@@ -6,7 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
 
-import { WebviewPreviewScreenConfig } from "./Navigation/WebviewPreviewNav";
+import ExternalWalletPicker from "../components/ExternalWalletPicker";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
@@ -16,10 +16,12 @@ import ConversationsStateHandler from "../components/StateHandlers/Notifications
 import WalletsStateHandler from "../components/StateHandlers/WalletsStateHandler";
 import config from "../config";
 import { useAppStore } from "../data/store/appStore";
+import { useAuthStatus } from "../data/store/authStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useThemeProvider } from "../theme/useAppTheme";
 import { useAddressBookStateHandler } from "../utils/addressBook";
 import { converseEventEmitter } from "../utils/events";
+import { useAutoConnectExternalWallet } from "../utils/evm/external";
 import { usePrivyAccessToken } from "../utils/evm/privy";
 import { converseNavigations } from "../utils/navigation";
 import AccountsAndroid from "./Accounts/AccountsAndroid";
@@ -30,7 +32,6 @@ import { GroupLinkScreenConfig } from "./Navigation/GroupLinkNav";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
 import {
   IdleNavigation,
-  MainNavigation,
   NavigationParamList,
   SignedInNavigation,
   SignedOutNavigation,
@@ -39,12 +40,12 @@ import { NewConversationScreenConfig } from "./Navigation/NewConversationNav";
 import { ProfileScreenConfig } from "./Navigation/ProfileNav";
 import { ShareProfileScreenConfig } from "./Navigation/ShareProfileNav";
 import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
+import { WebviewPreviewScreenConfig } from "./Navigation/WebviewPreviewNav";
 import {
   getConverseInitialURL,
   getConverseStateFromPath,
   useIsSplitScreen,
 } from "./Navigation/navHelpers";
-import { useAuthStatus } from "../data/store/authStore";
 
 const prefix = Linking.createURL("/");
 
@@ -64,7 +65,8 @@ const linking: LinkingOptions<NavigationParamList> = {
       WebviewPreview: WebviewPreviewScreenConfig,
     },
   },
-  getStateFromPath: getConverseStateFromPath,
+  // @ts-ignore
+  getStateFromPath: getConverseStateFromPath("fullStackNavigation"),
   getInitialURL: getConverseInitialURL,
 };
 
@@ -73,6 +75,12 @@ export default function Main() {
   usePrivyAccessToken();
   useAddressBookStateHandler();
   useCheckCurrentInstallation();
+  useAutoConnectExternalWallet();
+
+  const userAddress = useCurrentAccount();
+  const socials = useProfilesStore((s) =>
+    userAddress ? getProfile(userAddress, s.profiles)?.socials : undefined
+  );
 
   const isSplitScreen = useIsSplitScreen();
 
@@ -89,6 +97,7 @@ export default function Main() {
         <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
           <Initializer />
           <SplitScreenNavigation />
+          <ExternalWalletPicker />
         </ThemeProvider>
       </>
     );
@@ -114,6 +123,7 @@ export default function Main() {
         >
           <NavigationContent />
         </NavigationContainer>
+        <ExternalWalletPicker />
       </ThemeProvider>
     </>
   );
@@ -143,7 +153,7 @@ const NavigationContent = () => {
         drawerWidth={Dimensions.get("screen").width * 0.77}
         renderNavigationView={() => <AccountsAndroid />}
       >
-        <MainNavigation />
+        <SignedInNavigation />
       </AccountsDrawer>
     );
   }

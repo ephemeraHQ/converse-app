@@ -1,4 +1,4 @@
-import { getCleanAddress } from "@utils/eth";
+import { getCleanAddress } from "@utils/evm/address";
 import { Member } from "@xmtp/react-native-sdk";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";

@@ -23,7 +23,6 @@ import {
 } from "../notifications";
 import { resetSharedData } from "../sharedData";
 import { useDisconnectFromPrivy } from "./privy";
-import { useDisconnectWallet } from "./wallet";
 import { getXmtpApiHeaders } from "../xmtpRN/api";
 import { importedTopicsDataForAccount } from "../xmtpRN/conversations";
 import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
@@ -142,7 +141,6 @@ export const logoutAccount = async (
   account: string,
   dropLocalDatabase: boolean,
   isV3Enabled: boolean = true,
-  disconnectWallet: () => void,
   privyLogout: () => void
 ) => {
   logger.debug(
@@ -167,7 +165,6 @@ export const logoutAccount = async (
     }
   }
   await dropXmtpClient(await getInboxId(account));
-  disconnectWallet();
   const isPrivyAccount = !!useAccountsStore.getState().privyAccountId[account];
   if (isPrivyAccount) {
     privyLogout();
@@ -248,18 +245,11 @@ export const logoutAccount = async (
 
 export const useLogoutFromConverse = (account: string) => {
   const privyLogout = useDisconnectFromPrivy();
-  const disconnectWallet = useDisconnectWallet();
   const logout = useCallback(
     async (dropLocalDatabase: boolean, isV3Enabled: boolean = true) => {
-      logoutAccount(
-        account,
-        dropLocalDatabase,
-        isV3Enabled,
-        disconnectWallet,
-        privyLogout
-      );
+      logoutAccount(account, dropLocalDatabase, isV3Enabled, privyLogout);
     },
-    [account, disconnectWallet, privyLogout]
+    [account, privyLogout]
   );
   return logout;
 };

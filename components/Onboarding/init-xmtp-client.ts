@@ -47,13 +47,7 @@ export async function initXmtpClient(args: {
       ...restArgs,
     });
   } catch (e) {
-    await logoutAccount(
-      address,
-      false,
-      true,
-      () => {},
-      () => {}
-    );
+    await logoutAccount(address, false, true, () => {});
     logger.error(e);
     throw e;
   }

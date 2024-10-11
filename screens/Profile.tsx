@@ -14,11 +14,21 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
+import { usePrivySigner } from "@utils/evm/privy";
+import { useXmtpSigner } from "@utils/evm/xmtp";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
+import { shortAddress } from "@utils/str";
+import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
+import {
+  getOtherInstallations,
+  revokeOtherInstallations,
+} from "@utils/xmtpRN/revoke";
+import { getXmtpClient } from "@utils/xmtpRN/sync";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  Alert,
   Platform,
   ScrollView,
   StyleSheet,
@@ -71,6 +81,7 @@ import {
   getPreferredAvatar,
   getPreferredName,
   getProfile,
+  getPreferredUsername,
 } from "../utils/profile";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
@@ -110,6 +121,8 @@ export default function ProfileScreen({
     groupTopic ?? ""
   );
   const isSplitScreen = useIsSplitScreen();
+  const { getXmtpSigner } = useXmtpSigner();
+  const privySigner = usePrivySigner();
 
   const insets = useSafeAreaInsets();
   const shouldShowError = useShouldShowErrored();
@@ -756,6 +769,52 @@ export default function ProfileScreen({
                   Platform.OS === "android"
                     ? undefined
                     : primaryColor(colorScheme),
+              },
+              {
+                id: "revokeOtherInstallations",
+                title: translate("revoke_others_cta"),
+                titleColor:
+                  Platform.OS === "android"
+                    ? undefined
+                    : primaryColor(colorScheme),
+                action: async () => {
+                  const client = (await getXmtpClient(
+                    userAddress
+                  )) as ConverseXmtpClientType;
+                  const otherInstallations = await getOtherInstallations(
+                    client
+                  );
+                  if (otherInstallations.length === 0) {
+                    Alert.alert(
+                      translate("revoke_done_title"),
+                      translate("revoke_empty")
+                    );
+                    return;
+                  }
+                  const signer = await getXmtpSigner(
+                    translate("revoke_wallet_picker_title"),
+                    translate("revoke_wallet_picker_description", {
+                      wallet:
+                        getPreferredUsername(socials) ||
+                        shortAddress(client.address),
+                    })
+                  );
+                  if (!signer) return;
+
+                  const revoked = await revokeOtherInstallations(
+                    signer,
+                    client,
+                    otherInstallations.length
+                  );
+                  if (revoked) {
+                    Alert.alert(
+                      translate("revoke_done_title"),
+                      translate("revoke_done_description", {
+                        count: otherInstallations.length,
+                      })
+                    );
+                  }
+                },
               },
               {
                 id: "delete",

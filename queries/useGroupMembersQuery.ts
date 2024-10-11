@@ -3,7 +3,7 @@ import {
   SetDataOptions,
   useQuery,
 } from "@tanstack/react-query";
-import { getCleanAddress } from "@utils/eth";
+import { getCleanAddress } from "@utils/evm/address";
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 

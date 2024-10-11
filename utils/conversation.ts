@@ -9,7 +9,7 @@ import {
   isAttachmentMessage,
   fetchLocalAttachmentUrl,
 } from "./attachment/helpers";
-import { getAddressForPeer } from "./eth";
+import { getAddressForPeer } from "./evm/address";
 import { getGroupIdFromTopic } from "./groupUtils/groupId";
 import logger from "./logger";
 import { subscribeToNotifications } from "./notifications";
@@ -18,9 +18,9 @@ import { getMatchedPeerAddresses } from "./search";
 import { sentryTrackMessage } from "./sentry";
 import { TextInputWithValue, addressPrefix } from "./str";
 import { isTransactionMessage } from "./transaction";
+import config from "../config";
 import { isOnXmtp } from "./xmtpRN/client";
 import { isContentType } from "./xmtpRN/contentTypes";
-import config from "../config";
 import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
 import { getChatStore, useChatStore } from "../data/store/accountsStore";
 import {
@@ -270,6 +270,7 @@ export const openMainConversationWithPeer = async (
 };
 
 export type ConversationContextType = {
+  topic?: string;
   conversation?: XmtpConversationWithUpdate;
   inputRef: MutableRefObject<TextInputWithValue | undefined>;
   mediaPreviewRef: MutableRefObject<MediaPreview | undefined>;
@@ -287,6 +288,7 @@ export type ConversationContextType = {
 };
 
 export const ConversationContext = createContext<ConversationContextType>({
+  topic: undefined,
   conversation: undefined,
   inputRef: createRef() as MutableRefObject<TextInputWithValue | undefined>,
   mediaPreviewRef: createRef() as MutableRefObject<MediaPreview | undefined>,

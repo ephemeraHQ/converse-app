@@ -4,7 +4,7 @@ import { awaitableAlert } from "@utils/alert";
 import { getDatabaseFilesForInboxId } from "@utils/fileSystem";
 import logger from "@utils/logger";
 import { logoutAccount } from "@utils/logout";
-import { sentryTrackMessage } from "@utils/sentry";
+import { sentryTrackError, sentryTrackMessage } from "@utils/sentry";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Signer } from "ethers";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -61,11 +61,10 @@ export const ConnectViaWallet = memo(function ConnectViaWallet() {
   }));
 
   const connectViewWalletStore = useConnectViaWalletStore();
-
-  const thirdwebWallet = useActiveWallet();
-  const { thirdwebSigner } = useThirdwebSigner();
   const disconnect = useDisconnect();
   const { initXmtpClient } = useXmtpConnection();
+  const { thirdwebSigner } = useThirdwebSigner();
+  const router = useRouter();
 
   useAppStateHandlers({
     deps: [thirdwebSigner],
@@ -73,51 +72,12 @@ export const ConnectViaWallet = memo(function ConnectViaWallet() {
       setTimeout(() => {
         if (!thirdwebSigner) {
           logger.debug("[Connect Wallet] Still no signer after 1.5 sec");
-          disconnect();
+          disconnect().catch(sentryTrackError);
+          router.goBack();
         }
       }, 1500);
     },
   });
-
-  useEffect(() => {
-    (async () => {
-      if (thirdwebSigner) {
-        try {
-          const address = await thirdwebSigner.getAddress();
-          if (getAccountsList().includes(address)) {
-            Alert.alert(
-              translate("connectViaWallet.alreadyConnected.title"),
-              translate("connectViaWallet.alreadyConnected.message")
-            );
-            disconnect();
-            useAccountsStore.getState().setCurrentAccount(address, false);
-            return;
-          }
-          const isOnNetwork = await isOnXmtp(address);
-          connectViewWalletStore.getState().setOnXmtp(isOnNetwork);
-          const inboxId = await getInboxId(address);
-          const v3Dbs = await getDatabaseFilesForInboxId(inboxId);
-          connectViewWalletStore
-            .getState()
-            .setAlreadyV3Db(
-              v3Dbs.filter((n) => n.name.endsWith(".db3")).length > 0
-            );
-          connectViewWalletStore.getState().setSigner(thirdwebSigner);
-          connectViewWalletStore.getState().setAddress(address);
-          connectViewWalletStore.getState().setLoading(false);
-          logger.debug(
-            `[Connect Wallet] User connected wallet ${thirdwebWallet?.id} (${address}). ${
-              isOnNetwork ? "Already" : "Not yet"
-            } on XMTP. V3 database ${
-              v3Dbs.length > 0 ? "already" : "not"
-            } present`
-          );
-        } catch (e) {
-          logger.error(e, { context: "Handling thirdweb signer" });
-        }
-      }
-    })();
-  }, [disconnect, thirdwebSigner, connectViewWalletStore, thirdwebWallet]);
 
   const primaryButtonAction = useCallback(() => {
     if (waitingForNextSignature) {
@@ -252,53 +212,62 @@ export const ConnectViaWallet = memo(function ConnectViaWallet() {
 function useDisconnect() {
   const { disconnect: disconnectWallet } = useThirdwebDisconnect();
   const thirdwebWallet = useActiveWallet();
-
-  const { address } = useConnectViaWalletStoreContext((state) => ({
-    address: state.address,
-  }));
-
-  const connectViaWalletStore = useConnectViaWalletStore();
-
-  const router = useRouter();
+  const connectViewWalletStore = useConnectViaWalletStore();
 
   return useCallback(
-    async (resetLoading = true) => {
+    async () => {
       logger.debug("[Connect Wallet] Logging out");
+
+      const address = connectViewWalletStore.getState().address;
+
       if (address) {
-        logoutAccount(
-          address,
-          false,
-          true,
-          () => {},
-          () => {}
-        );
+        logoutAccount(address, false, true, () => {});
       }
 
-      connectViaWalletStore.getState().resetOnboarding();
-      if (resetLoading) {
-        connectViaWalletStore.getState().setLoading(false);
-      }
       if (thirdwebWallet) {
         disconnectWallet(thirdwebWallet);
       }
+
       const storageKeys = await AsyncStorage.getAllKeys();
       const wcKeys = storageKeys.filter((k) => k.startsWith("wc@2:"));
       await AsyncStorage.multiRemove(wcKeys);
-
-      // TODO: No the best to put here
-      router.goBack();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [address, thirdwebWallet, router]
+    [thirdwebWallet]
   );
 }
 
 function useThirdwebSigner() {
+  const thirdwebWallet = useActiveWallet();
   const thirdwebAccount = useActiveAccount();
+
   const [thirdwebSigner, setThirdwebSigner] = useState<Signer | undefined>();
 
+  const disconnect = useDisconnect();
+
+  const connectViewWalletStore = useConnectViaWalletStore();
+
+  const handlingThirdwebSigner = useRef<string | undefined>(undefined);
+
+  const router = useRouter();
+
+  // Since we now keep a link to the connected wallet for
+  // key revocation and transactional frames, in onboarding we
+  // make sure that we disconnect the thirdweb signer before
+  // instantiating a new one
+  const readyToHandleThirdwebSigner = useRef(false);
   useEffect(() => {
-    if (thirdwebAccount) {
+    if (!readyToHandleThirdwebSigner.current) {
+      disconnect()
+        .then(() => {
+          readyToHandleThirdwebSigner.current = true;
+        })
+        .catch(sentryTrackError);
+    }
+  }, [disconnect]);
+
+  useEffect(() => {
+    if (readyToHandleThirdwebSigner.current && thirdwebAccount) {
       ethers5Adapter.signer
         .toEthers({
           client: thirdwebClient,
@@ -310,6 +279,70 @@ function useThirdwebSigner() {
       setThirdwebSigner(undefined);
     }
   }, [thirdwebAccount]);
+
+  useEffect(() => {
+    (async () => {
+      if (
+        thirdwebSigner &&
+        readyToHandleThirdwebSigner.current &&
+        !handlingThirdwebSigner.current
+      ) {
+        try {
+          const address = await thirdwebSigner.getAddress();
+          handlingThirdwebSigner.current = address;
+
+          if (getAccountsList().includes(address)) {
+            Alert.alert(
+              translate("connectViaWallet.alreadyConnected.title"),
+              translate("connectViaWallet.alreadyConnected.message")
+            );
+            try {
+              await disconnect();
+            } catch (error) {
+              // Handle the error appropriately, maybe show an alert to the user
+              logger.error(
+                "Error during disconnect and account activation:",
+                error
+              );
+            } finally {
+              // At least activate said wallet so user can logout again but not be stuck
+              useAccountsStore.getState().setCurrentAccount(address, false);
+              router.goBack();
+            }
+            return;
+          }
+          const isOnNetwork = await isOnXmtp(address);
+          connectViewWalletStore.getState().setOnXmtp(isOnNetwork);
+          const inboxId = await getInboxId(address);
+          const v3Dbs = await getDatabaseFilesForInboxId(inboxId);
+          connectViewWalletStore
+            .getState()
+            .setAlreadyV3Db(
+              v3Dbs.filter((n) => n.name.endsWith(".db3")).length > 0
+            );
+          connectViewWalletStore.getState().setSigner(thirdwebSigner);
+          connectViewWalletStore.getState().setAddress(address);
+          connectViewWalletStore.getState().setLoading(false);
+          logger.debug(
+            `[Connect Wallet] User connected wallet ${thirdwebWallet?.id} (${address}). ${
+              isOnNetwork ? "Already" : "Not yet"
+            } on XMTP. V3 database ${
+              v3Dbs.length > 0 ? "already" : "not"
+            } present`
+          );
+        } catch (e) {
+          logger.error(e, { context: "Handling thirdweb signer" });
+          handlingThirdwebSigner.current = undefined;
+        }
+      }
+    })();
+  }, [
+    disconnect,
+    thirdwebSigner,
+    connectViewWalletStore,
+    thirdwebWallet,
+    router,
+  ]);
 
   return { thirdwebSigner };
 }
@@ -328,6 +361,8 @@ function useXmtpConnection() {
   const inXmtpClientCreationFlow = useRef(false);
 
   const disconnect = useDisconnect();
+
+  const router = useRouter();
 
   const waitForClickSignature = useCallback(async () => {
     while (!connectViewWalletStore.getState().clickedSignature) {
@@ -395,11 +430,17 @@ function useXmtpConnection() {
         signer,
         async () => {
           logger.debug("[Connect Wallet] Installation revoked, disconnecting");
-          await awaitableAlert(
-            translate("current_installation_revoked"),
-            translate("current_installation_revoked_description")
-          );
-          disconnect();
+          try {
+            await awaitableAlert(
+              translate("current_installation_revoked"),
+              translate("current_installation_revoked_description")
+            );
+            await disconnect();
+          } catch (error) {
+            sentryTrackError(error);
+          } finally {
+            router.goBack();
+          }
         },
         async () => {
           signaturesAsked.create = true;
@@ -502,7 +543,8 @@ function useXmtpConnection() {
       connectViewWalletStore.getState().setLoading(false);
       connectViewWalletStore.getState().setClickedSignature(false);
       connectViewWalletStore.getState().setWaitingForNextSignature(false);
-      disconnect();
+      disconnect().catch(sentryTrackError);
+      router.goBack();
     }
   }, [
     address,
@@ -512,6 +554,7 @@ function useXmtpConnection() {
     signer,
     waitForClickSignature,
     connectViewWalletStore,
+    router,
   ]);
 
   return { initXmtpClient };

@@ -17,7 +17,7 @@ import Conversation from "../Conversation";
 
 export type ConversationNavParams = {
   topic?: string;
-  message?: string;
+  text?: string;
   focus?: boolean;
   mainConversationWithPeer?: string;
 };

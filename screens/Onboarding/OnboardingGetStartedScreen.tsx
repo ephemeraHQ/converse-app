@@ -76,7 +76,7 @@ export function OnboardingGetStartedScreen() {
               ),
               rightView: RightViewChevron(),
               action: () => {
-                router.navigate("OnboardingPrivy");
+                router.push("OnboardingPrivy");
               },
             },
             {
@@ -87,7 +87,7 @@ export function OnboardingGetStartedScreen() {
               ),
               rightView: RightViewChevron(),
               action: () => {
-                router.navigate("OnboardingEphemeral");
+                router.push("OnboardingEphemeral");
               },
             },
           ]}
@@ -122,7 +122,7 @@ export function OnboardingGetStartedScreen() {
               ),
               rightView: RightViewChevron(),
               action: () => {
-                router.navigate("OnboardingPrivateKey");
+                router.push("OnboardingPrivateKey");
               },
             },
           ]}
@@ -208,14 +208,14 @@ export function InstalledWallets({ wallets }: { wallets: InstalledWallet[] }) {
               if (!res) {
                 throw new Error("Failed to connect to Coinbase Wallet");
               }
-              router.navigate("OnboardingConnectWallet", {});
+              router.push("OnboardingConnectWallet", {});
             }
             //
             else if (w.name === "EthOS Wallet") {
               const signer = getEthOSSigner();
               if (signer) {
                 const address = await signer.getAddress();
-                router.navigate("OnboardingConnectWallet", { address });
+                router.push("OnboardingConnectWallet", { address });
               } else {
                 setIsLoading(false);
               }
@@ -231,7 +231,7 @@ export function InstalledWallets({ wallets }: { wallets: InstalledWallet[] }) {
               if (!res) {
                 throw new Error("Failed to connect to wallet");
               }
-              router.navigate("OnboardingConnectWallet", {});
+              router.push("OnboardingConnectWallet", {});
             }
           } catch (e: any) {
             logger.error("Error connecting to wallet:", e);
