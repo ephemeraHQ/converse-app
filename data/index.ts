@@ -78,17 +78,15 @@ export const loadDataToContext = async (account: string) => {
 
   const profilesByAddress = getProfilesStore(account).getState().profiles;
   for (const peerAddress in profilesByAddress) {
-    if (
-      !profilesByAddress[peerAddress]?.socials ||
-      !profilesByAddress[peerAddress]?.updatedAt
-    )
-      continue;
-    setProfileSocialsQueryData(
-      account,
-      peerAddress,
-      profilesByAddress[peerAddress].socials,
-      profilesByAddress[peerAddress].updatedAt
-    );
+    const profile = profilesByAddress[peerAddress];
+    if (profile?.socials && profile?.updatedAt) {
+      setProfileSocialsQueryData(
+        account,
+        peerAddress,
+        profile.socials,
+        profile.updatedAt
+      );
+    }
   }
   getChatStore(account)
     .getState()
