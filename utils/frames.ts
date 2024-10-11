@@ -12,6 +12,7 @@ import {
 } from "@xmtp/frames-client";
 import { useCallback } from "react";
 
+import { converseEventEmitter } from "./events";
 import { useExternalSigner } from "./evm/external";
 import logger from "./logger";
 import { URL_REGEX } from "./regex";
@@ -223,17 +224,22 @@ export const useHandleTxAction = () => {
         throw new Error("Can only handle eip155: chain ids");
       }
 
+      // Let's display the transaction preview screen
+      const transactionData = {
+        to: txData.params.to,
+        value: txData.params.value,
+        data: txData.params.data,
+      };
+      converseEventEmitter.emit("previewTransaction", transactionData);
+      return;
+
       const chainId = parseInt(txData.chainId.slice(7), 10);
 
       logger.debug(`[TxFrame] Switching to chain id ${chainId}`);
 
       await switchChain(chainId);
 
-      const transactionReceipt = await sendTransaction({
-        to: txData.params.to,
-        value: txData.params.value,
-        data: txData.params.data,
-      });
+      const transactionReceipt = await sendTransaction(transactionData);
 
       logger.debug(
         `[TxFrame] Triggered transaction with hash ${transactionReceipt.transactionHash}`

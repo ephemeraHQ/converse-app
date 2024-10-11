@@ -1,4 +1,5 @@
 import { MessageToDisplay } from "@components/Chat/Message/Message";
+import { TransactionData } from "@components/TransactionPreview";
 import { MediaPreview } from "@data/store/chatStore";
 import EventEmitter from "eventemitter3";
 import { Account, Wallet } from "thirdweb/wallets";
@@ -32,6 +33,7 @@ type ConverseEvents = {
     wallet: Wallet | undefined;
     account: Account | undefined;
   }) => void;
+  previewTransaction: (transactionData: TransactionData) => void;
 };
 
 type ShowActionSheetEvents = {

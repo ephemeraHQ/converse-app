@@ -2,7 +2,7 @@ import { converseEventEmitter, waitForConverseEvent } from "@utils/events";
 import logger from "@utils/logger";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Signer } from "ethers";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { prepareTransaction, sendAndConfirmTransaction } from "thirdweb";
 import { ethers5Adapter } from "thirdweb/adapters/ethers5";
 import { base, Chain, ethereum, sepolia } from "thirdweb/chains";
@@ -14,7 +14,7 @@ import {
   useSetActiveWallet,
   useSwitchActiveWalletChain,
 } from "thirdweb/react";
-import { Wallet } from "thirdweb/wallets";
+import { Account } from "thirdweb/wallets";
 
 /**
  * External wallet signer (i.e. not Privy)
@@ -22,51 +22,64 @@ import { Wallet } from "thirdweb/wallets";
  */
 export const useExternalSigner = () => {
   const thirdwebSigner = useRef<Signer | undefined>();
-  const thirdwebWallet = useRef<Wallet | undefined>();
   const setActiveWallet = useSetActiveWallet();
   const activeAccount = useActiveAccount();
+  const accountRef = useRef<Account | undefined>();
   const activeWallet = useActiveWallet();
   const { disconnect } = useDisconnect();
   const switchActiveWalletChain = useSwitchActiveWalletChain();
 
+  useEffect(() => {
+    accountRef.current = activeAccount;
+  }, [activeAccount]);
+
   const getExternalSigner = useCallback(
     async (title?: string, subtitle?: string) => {
-      if (thirdwebSigner.current) return thirdwebSigner.current;
-      if (activeAccount) {
-        thirdwebSigner.current = await ethers5Adapter.signer.toEthers({
-          client: thirdwebClient,
-          chain: ethereum,
-          account: activeAccount,
-        });
+      if (thirdwebSigner.current) {
+        console.log("we have a current value");
         return thirdwebSigner.current;
       }
+      if (accountRef.current) {
+        console.log("we have an active account");
+        const signer = await ethers5Adapter.signer.toEthers({
+          client: thirdwebClient,
+          chain: ethereum,
+          account: accountRef.current,
+        });
+        thirdwebSigner.current = signer;
+
+        return signer;
+      }
+      console.log("showing the external picker");
       converseEventEmitter.emit("displayExternalWalletPicker", title, subtitle);
       const [{ wallet, account }] = await waitForConverseEvent(
         "externalWalletPicked"
       );
       if (!wallet || !account) return;
       setActiveWallet(wallet);
-      thirdwebSigner.current = await ethers5Adapter.signer.toEthers({
+      const signer = await ethers5Adapter.signer.toEthers({
         client: thirdwebClient,
         chain: ethereum,
         account,
       });
-      thirdwebWallet.current = wallet;
-      return thirdwebSigner.current;
+      thirdwebSigner.current = signer;
+
+      return signer;
     },
-    [activeAccount, setActiveWallet]
+    [setActiveWallet, thirdwebSigner]
   );
 
   const resetExternalSigner = useCallback(() => {
     try {
+      activeWallet?.disconnect();
       if (activeWallet) {
+        console.log("DISCONNECTING WALLET");
         disconnect(activeWallet);
       }
-      thirdwebWallet.current?.disconnect();
     } catch (e) {
       logger.warn(e);
     }
-    thirdwebWallet.current = undefined;
+    console.log("setting undefined");
     thirdwebSigner.current = undefined;
   }, [activeWallet, disconnect]);
 
@@ -128,11 +141,19 @@ export const useExternalSigner = () => {
     [activeAccount, activeWallet]
   );
 
+  console.log("current", {
+    thirdwebSigner: !!thirdwebSigner.current,
+    activeAccount: !!activeAccount,
+    activeWallet: !!activeWallet,
+  });
+
   return {
     getExternalSigner,
     resetExternalSigner,
     switchChain,
     sendTransaction: sendTx,
+    address: activeAccount?.address,
+    walletAppId: activeWallet?.id,
   };
 };
 

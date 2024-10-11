@@ -1,5 +1,6 @@
 import ExternalWalletPicker from "@components/ExternalWalletPicker";
 import UserProfile from "@components/Onboarding/UserProfile";
+import TransactionPreview from "@components/TransactionPreview";
 import { backgroundColor } from "@styles/colors";
 import { useAutoConnectExternalWallet } from "@utils/evm/external";
 import { getProfile } from "@utils/profile";
@@ -151,7 +152,9 @@ export default function Main() {
     <>
       {mainHeaders}
       {screenToShow}
+      {/* Drawers that can be triggered from multiple places in the app */}
       <ExternalWalletPicker />
+      <TransactionPreview />
     </>
   );
 }
