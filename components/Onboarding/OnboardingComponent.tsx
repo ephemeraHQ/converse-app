@@ -1,4 +1,3 @@
-import { useDebugEnabled } from "@components/DebugButton";
 import {
   backgroundColor,
   textPrimaryColor,
@@ -60,14 +59,10 @@ export default function OnboardingComponent({
   showTerms = false,
 }: Props) {
   const styles = useStyles(showTerms);
-  const insets = useSafeAreaInsets();
 
-  const {
-    loading: stateLoading,
-    setLoading,
-    address,
-  } = useOnboardingStore(useSelect(["loading", "setLoading", "address"]));
-  const debugEnabled = useDebugEnabled(address);
+  const { loading: stateLoading, setLoading } = useOnboardingStore(
+    useSelect(["loading", "setLoading", "address"])
+  );
   const showDebug = useCallback(() => {
     converseEventEmitter.emit("showDebugMenu");
   }, []);
@@ -122,10 +117,7 @@ export default function OnboardingComponent({
         )}
         {!picto && <View style={{ marginTop: inNav ? 32 : 140 }} />}
 
-        <Text
-          style={styles.title}
-          onLongPress={debugEnabled ? showDebug : undefined}
-        >
+        <Text style={styles.title} onLongPress={showDebug}>
           {title}
         </Text>
         {loading && (
