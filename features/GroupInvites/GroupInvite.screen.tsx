@@ -2,6 +2,7 @@ import Avatar from "@components/Avatar";
 import Button from "@components/Button/Button";
 import { translate } from "@i18n";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { useNavigation } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { NavigationParamList } from "@screens/Navigation/Navigation";
 import {
@@ -11,33 +12,36 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
+import { GroupInvite } from "@utils/api.types";
 import { useActor } from "@xstate/react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { joinGroupMachineLogic } from "./joinGroup.machine";
+import {
+  joinGroupMachineLogic,
+  JoinGroupMachineContext,
+} from "./joinGroup.machine";
 
-export default function GroupInviteScreen({
-  route,
-  navigation,
-}: NativeStackScreenProps<NavigationParamList, "GroupInvite">) {
-  const groupInviteId = route.params.groupInviteId;
-  /**************************************************************
-   * View/UI
-   * ************************************************************/
-  const styles = useStyles();
-  const colorScheme = useColorScheme();
-  const insets = useSafeAreaInsets();
-  const headerHeight = useHeaderHeight();
+interface UseJoinGroupResult {
+  isGroupInviteLoading: boolean;
+  polling: boolean;
+  groupInvite: GroupInvite | undefined;
+  joinStatus: JoinGroupMachineContext["joinStatus"];
+  error: JoinGroupMachineContext["error"];
+  groupInviteError: boolean;
+  pollingTimedOut: boolean;
+  joinButtonEnabled: boolean;
+  joinGroup: () => void;
+}
 
-  /**************************************************************
-   * State/Logic
-   * ************************************************************/
+function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
+  const navigation = useNavigation();
   const [state, send] = useActor(
     joinGroupMachineLogic.provide({
       actions: {
         navigateToGroupScreen: (_, params: { topic: string }) => {
+          // @ts-expect-error TODO: this should work why isn't TS happy?
           navigation.replace("Group", { topic: params.topic });
         },
       },
@@ -63,6 +67,43 @@ export default function GroupInviteScreen({
   const joinGroup = () => {
     send({ type: "user.didTapJoinGroup" });
   };
+
+  return {
+    isGroupInviteLoading,
+    polling,
+    groupInvite,
+    joinStatus,
+    error,
+    groupInviteError,
+    pollingTimedOut,
+    joinButtonEnabled,
+    joinGroup,
+  };
+}
+
+export default function GroupInviteScreen({
+  route,
+}: NativeStackScreenProps<NavigationParamList, "GroupInvite">) {
+  const groupInviteId = route.params.groupInviteId;
+
+  const {
+    isGroupInviteLoading,
+    polling,
+    groupInvite,
+    joinStatus,
+    groupInviteError,
+    pollingTimedOut,
+    joinButtonEnabled,
+    joinGroup,
+  } = useJoinGroup(groupInviteId);
+
+  /**************************************************************
+   * View/UI
+   * ************************************************************/
+  const styles = useStyles();
+  const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
+  const headerHeight = useHeaderHeight();
 
   return (
     <View style={styles.groupInvite}>

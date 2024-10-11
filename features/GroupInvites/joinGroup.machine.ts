@@ -1,3 +1,5 @@
+/// Shared Diagram: https://stately.ai/registry/editor/9e6921a4-4b05-4277-96c4-cb4d4e60680a?machineId=dbb1249d-7715-4b1f-8fb7-e476a116272a
+/// Figma: TODO
 import { GroupJoinRequestStatus } from "@utils/api";
 import { GroupInvite } from "@utils/api.types";
 import { GroupData, GroupsDataEntity } from "@utils/xmtpRN/client.types";
@@ -16,7 +18,7 @@ type JoinGroupMachineErrorType =
   | "provideUserConsentToJoinGroupError"
   | "refreshGroupError";
 
-type JoinGroupMachineContext = {
+export type JoinGroupMachineContext = {
   // Context
   account: string;
   groupInviteMetadata?: GroupInvite;

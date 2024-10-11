@@ -85,6 +85,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
   }, [topic]);
 
   const onCopyInviteLinkPress = useCallback(() => {
+    console.log("onCopyInviteLinkPress", groupInviteLink);
     if (!groupInviteLink) {
       return;
     }
