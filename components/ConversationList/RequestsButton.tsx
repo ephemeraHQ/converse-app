@@ -22,13 +22,13 @@ type IRequestsButtonProps = {
 export default function RequestsButton({
   requestsCount,
 }: IRequestsButtonProps) {
-  const navigation = useRouter();
+  const router = useRouter();
   const styles = useStyles();
 
   return (
     <Pressable
       key="requests"
-      onPress={() => navigation.push("ChatsRequests")}
+      onPress={() => router.navigate("ChatsRequests")}
       style={styles.requestsHeader}
     >
       {({ pressed }) => (

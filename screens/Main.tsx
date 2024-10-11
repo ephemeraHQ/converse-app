@@ -77,11 +77,6 @@ export default function Main() {
   useCheckCurrentInstallation();
   useAutoConnectExternalWallet();
 
-  const userAddress = useCurrentAccount();
-  const socials = useProfilesStore((s) =>
-    userAddress ? getProfile(userAddress, s.profiles)?.socials : undefined
-  );
-
   const isSplitScreen = useIsSplitScreen();
 
   const {

@@ -11,7 +11,7 @@ import { useRouter } from "../../navigation/useNavigation";
 export default function NoResult() {
   const styles = useStyles();
 
-  const navigation = useRouter();
+  const router = useRouter();
 
   return (
     <>
@@ -24,7 +24,7 @@ export default function NoResult() {
         <Text
           style={styles.clickableText}
           onPress={() => {
-            navigation.push("NewConversation", {});
+            router.navigate("NewConversation", {});
           }}
         >
           start a new conversation

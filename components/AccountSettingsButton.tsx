@@ -75,7 +75,7 @@ export default function AccountSettingsButton({ account }: Props) {
             if (Platform.OS === "web") {
               await new Promise((r) => setTimeout(r, 200));
             }
-            router.push("Chats");
+            router.navigate("Chats");
           }
           navigate("Profile", {
             address: account,
