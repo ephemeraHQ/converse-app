@@ -128,10 +128,16 @@ func putGroupInviteRequest(apiURI: String?, account: String, xmtpClient: Client,
         ]
       
       let response = await AF.request(joinRequestUri, method: .put, parameters: body, encoding: JSONEncoding.default, headers: headers).serializingResponse(using: JSONResponseSerializer()).response
-      switch response.result {
-      case .success(let value):
-          debugPrint("Group Invite Response: \(value)")
-      case .failure(let error):
+      if let statusCode = response.response?.statusCode, (200...299).contains(statusCode) {
+          switch response.result {
+          case .success(let value):
+              debugPrint("Group Invite Response: \(value)")
+          case .failure(let error):
+              sentryTrackError(error: error, extras: ["message": "PUT_GROUP_INVITE_REQUEST_FAILED"])
+              throw error
+          }
+      } else {
+          let error = NSError(domain: "", code: response.response?.statusCode ?? 0, userInfo: ["message": "Request failed with status code: \(response.response?.statusCode ?? 0)"])
           sentryTrackError(error: error, extras: ["message": "PUT_GROUP_INVITE_REQUEST_FAILED"])
           throw error
       }
