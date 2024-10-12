@@ -1,4 +1,4 @@
-package com.converse.dev
+package com.converse
 
 import com.google.crypto.tink.subtle.Base64
 import com.google.protobuf.ByteString

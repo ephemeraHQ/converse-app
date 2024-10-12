@@ -1,4 +1,4 @@
-package com.converse.dev
+package com.converse
 
 import android.content.ComponentName
 import android.content.Context
@@ -14,7 +14,7 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.converse.dev.xmtp.NotificationDataResult
+import com.converse.xmtp.NotificationDataResult
 import expo.modules.notifications.notifications.model.Notification
 import expo.modules.notifications.notifications.model.NotificationAction
 import expo.modules.notifications.notifications.model.NotificationResponse
