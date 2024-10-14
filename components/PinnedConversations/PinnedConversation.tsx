@@ -1,3 +1,4 @@
+import { Indicator } from "@components/Indicator";
 import { useSelect } from "@data/store/storeHelpers";
 import { useGroupNameQuery } from "@queries/useGroupNameQuery";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
@@ -12,6 +13,7 @@ import {
   Text,
   TouchableOpacity,
   useColorScheme,
+  View,
 } from "react-native";
 
 import Avatar from "..//Avatar";
@@ -84,7 +86,6 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
       size={AvatarSizes.pinnedConversation}
       style={styles.avatar}
       topic={conversation.topic}
-      showIndicator={showUnread}
     />
   ) : (
     <Avatar
@@ -93,7 +94,6 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
       size={AvatarSizes.pinnedConversation}
       style={styles.avatar}
       name={getPreferredName(socials, conversation.peerAddress || "")}
-      showIndicator={showUnread}
     />
   );
 
@@ -104,7 +104,17 @@ export const PinnedConversation: FC<Props> = ({ conversation }) => {
       onLongPress={onLongPress}
     >
       {avatarComponent}
-      <Text style={styles.text}>{title}</Text>
+      <View style={styles.textContainer}>
+        {showUnread && (
+          <View>
+            <Indicator
+              size={AvatarSizes.pinnedConversation}
+              testID="pinned-indicator"
+            />
+          </View>
+        )}
+        <Text style={styles.text}>{title}</Text>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -119,6 +129,7 @@ const useStyles = () => {
     container: {
       margin: 8,
       padding: 4,
+      alignItems: "center",
     },
     avatar: { margin: 8 },
     text: {
@@ -126,6 +137,9 @@ const useStyles = () => {
       textAlign: "center",
       flexWrap: "wrap",
       maxWidth: 100,
+    },
+    textContainer: {
+      flexDirection: "row",
     },
   });
 };
