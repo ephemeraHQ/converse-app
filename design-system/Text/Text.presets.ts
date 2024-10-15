@@ -1,6 +1,10 @@
 import { TextStyle } from "react-native";
 
-import { $baseStyle, $fontWeightStyles, $sizeStyles } from "./Text.styles";
+import {
+  $textBaseStyle,
+  $textFontWeightStyles,
+  $textSizeStyles,
+} from "./Text.styles";
 import { ThemedStyleArray } from "../../theme/useAppTheme";
 
 export type IPresets =
@@ -12,15 +16,23 @@ export type IPresets =
   | "formHelper";
 
 export const $presets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
-  default: [$baseStyle],
+  default: [$textBaseStyle],
 
-  bold: [$baseStyle, $fontWeightStyles.bold],
+  bold: [$textBaseStyle, $textFontWeightStyles.bold],
 
-  heading: [$baseStyle, $sizeStyles.xxl, $fontWeightStyles.semiBold],
+  heading: [
+    $textBaseStyle,
+    $textSizeStyles.xxl,
+    $textFontWeightStyles.semiBold,
+  ],
 
-  subheading: [$baseStyle, $sizeStyles.sm, $fontWeightStyles.light],
+  subheading: [$textBaseStyle, $textSizeStyles.sm, $textFontWeightStyles.light],
 
-  formLabel: [$baseStyle, $fontWeightStyles.medium],
+  formLabel: [$textBaseStyle, $textFontWeightStyles.medium],
 
-  formHelper: [$baseStyle, $sizeStyles.sm, $fontWeightStyles.normal],
+  formHelper: [
+    $textBaseStyle,
+    $textSizeStyles.sm,
+    $textFontWeightStyles.normal,
+  ],
 };

@@ -1,4 +1,3 @@
-import { useDebugEnabled } from "@components/DebugButton";
 import { primaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { converseEventEmitter } from "@utils/events";
@@ -11,7 +10,6 @@ import Picto from "../Picto/Picto";
 
 export default function NewConversationButton() {
   const colorScheme = useColorScheme();
-  const debugEnabled = useDebugEnabled();
   const onPress = useCallback(() => {
     navigate("NewConversation");
   }, []);
@@ -24,7 +22,7 @@ export default function NewConversationButton() {
       <TouchableOpacity
         activeOpacity={0.2}
         onPress={onPress}
-        onLongPress={debugEnabled ? showDebug : undefined}
+        onLongPress={showDebug}
       >
         <Picto
           picto="square.and.pencil"
@@ -55,7 +53,7 @@ export default function NewConversationButton() {
           bottom: 20,
         }}
         onPress={onPress}
-        onLongPress={debugEnabled ? showDebug : undefined}
+        onLongPress={showDebug}
       />
     );
   }

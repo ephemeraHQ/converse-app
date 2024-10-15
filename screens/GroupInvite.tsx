@@ -17,10 +17,6 @@ import {
   getGroupJoinRequest,
   GroupJoinRequestStatus,
 } from "@utils/api";
-import {
-  getInviteJoinRequest,
-  saveInviteJoinRequest,
-} from "@utils/groupInvites";
 import { getTopicFromGroupId } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
@@ -32,7 +28,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NavigationParamList } from "./Navigation/Navigation";
 import Button from "../components/Button/Button";
 import { useCurrentAccount } from "../data/store/accountsStore";
-import { navigate } from "../utils/navigation";
 import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export default function GroupInviteScreen({
@@ -76,10 +71,7 @@ export default function GroupInviteScreen({
           includeAddedBy: false,
         });
         await refreshGroup(account, group.topic);
-        navigation.goBack();
-        setTimeout(() => {
-          navigate("Conversation", { topic: group.topic });
-        }, 300);
+        navigation.replace("Conversation", { topic: group.topic });
       }
     },
     [account, allowGroup, navigation]
@@ -100,24 +92,20 @@ export default function GroupInviteScreen({
     });
     const groupId = groupInvite.groupId;
     // Group ID is not available on previous versions of the app, so we need to fetch the groups
-    const groupsBeforeJoining = groupId
-      ? { ids: [], byId: {} }
-      : await fetchGroupsQuery(account);
+    const groupsBeforeJoining = await fetchGroupsQuery(account);
+    if (groupId && groupsBeforeJoining.byId[getTopicFromGroupId(groupId)]) {
+      // User has already been added to the group
+      handleNewGroup(groupsBeforeJoining.byId[getTopicFromGroupId(groupId)]);
+      return;
+    }
     logger.debug(
       `[GroupInvite] Before joining, group count = ${groupsBeforeJoining.ids.length}`
     );
-    let joinRequestId = getInviteJoinRequest(account, groupInvite?.id);
-    if (!joinRequestId) {
-      logger.debug(
-        `[GroupInvite] Sending the group join request to Converse backend`
-      );
-      const joinRequest = await createGroupJoinRequest(
-        account,
-        groupInvite?.id
-      );
-      joinRequestId = joinRequest.id;
-      saveInviteJoinRequest(account, groupInvite?.id, joinRequestId);
-    }
+    logger.debug(
+      `[GroupInvite] Sending the group join request to Converse backend`
+    );
+    const joinRequest = await createGroupJoinRequest(account, groupInvite?.id);
+    const joinRequestId = joinRequest.id;
     let count = 0;
     let status: GroupJoinRequestStatus = "PENDING";
     while (count < 10 && status === "PENDING") {
@@ -191,7 +179,7 @@ export default function GroupInviteScreen({
         joinStatus: status,
       });
     }
-  }, [account, groupInvite?.id, groupInvite?.groupId]);
+  }, [groupInvite?.id, groupInvite?.groupId, account, handleNewGroup]);
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
 

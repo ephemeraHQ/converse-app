@@ -1,6 +1,6 @@
+import "expo-dev-client";
 import "reflect-metadata";
 import "./polyfills";
-import "expo-dev-client";
 
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
@@ -17,7 +17,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   LogBox,
   Platform,
@@ -28,7 +28,6 @@ import {
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
-import "./utils/splash/splash";
 
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
@@ -44,11 +43,11 @@ import {
   updateLastVersionOpen,
 } from "./data/updates/asyncUpdates";
 import Main from "./screens/Main";
+import { useThemeProvider } from "./theme/useAppTheme";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
-
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import "./utils/splash/splash";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -64,15 +63,13 @@ configureCoinbase({
 
 initSentry();
 
-export default function App() {
-  const colorScheme = useColorScheme();
+const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
+
+const App = () => {
   const styles = useStyles();
   const debugRef = useRef();
 
-  useCoinbaseWalletListener(
-    true,
-    new URL(`https://${config.websiteDomain}/coinbase`)
-  );
+  useCoinbaseWalletListener(true, coinbaseUrl);
 
   useEffect(() => {
     registerBackgroundFetchTask();
@@ -116,9 +113,28 @@ export default function App() {
     }
   }, []);
 
-  // On Android we use the default keyboard "animation"
-  const AppKeyboardProvider =
-    Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
+  return (
+    <View style={styles.safe}>
+      <XmtpEngine />
+      <Main />
+      <DebugButton ref={debugRef} />
+    </View>
+  );
+};
+
+// On Android we use the default keyboard "animation"
+const AppKeyboardProvider =
+  Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
+
+export default function AppWithProviders() {
+  const colorScheme = useColorScheme();
+
+  const theme = useMemo(() => {
+    return colorScheme === "dark" ? MaterialDarkTheme : MaterialLightTheme;
+  }, [colorScheme]);
+
+  const { themeScheme, setThemeContextOverride, ThemeProvider } =
+    useThemeProvider();
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -126,23 +142,13 @@ export default function App() {
         <ThirdwebProvider>
           <AppKeyboardProvider>
             <ActionSheetProvider>
-              <PaperProvider
-                theme={
-                  colorScheme === "dark"
-                    ? MaterialDarkTheme
-                    : MaterialLightTheme
-                }
-              >
-                <GestureHandlerRootView style={{ flex: 1 }}>
+              <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
+                <PaperProvider theme={theme}>
                   <PortalProvider>
-                    <View style={styles.safe}>
-                      <XmtpEngine />
-                      <Main />
-                      <DebugButton ref={debugRef} />
-                    </View>
+                    <App />
                   </PortalProvider>
-                </GestureHandlerRootView>
-              </PaperProvider>
+                </PaperProvider>
+              </ThemeProvider>
             </ActionSheetProvider>
           </AppKeyboardProvider>
         </ThirdwebProvider>
@@ -153,10 +159,14 @@ export default function App() {
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    safe: {
-      flex: 1,
-      backgroundColor: backgroundColor(colorScheme),
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        safe: {
+          flex: 1,
+          backgroundColor: backgroundColor(colorScheme),
+        },
+      }),
+    [colorScheme]
+  );
 };

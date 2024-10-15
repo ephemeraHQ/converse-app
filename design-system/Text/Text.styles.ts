@@ -5,7 +5,7 @@ import { isRTL } from "../../i18n";
 import { typography } from "../../theme";
 import { ThemedStyle } from "../../theme/useAppTheme";
 
-export const $sizeStyles = {
+export const $textSizeStyles = {
   xxl: { fontSize: 36, lineHeight: 44 } satisfies TextStyle,
   xl: { fontSize: 24, lineHeight: 34 } satisfies TextStyle,
   lg: { fontSize: 20, lineHeight: 32 } satisfies TextStyle,
@@ -23,7 +23,7 @@ const numericWeights: Record<IWeights, number> = {
   bold: 700,
 };
 
-export const $fontWeightStyles = Object.entries(typography.primary).reduce(
+export const $textFontWeightStyles = Object.entries(typography.primary).reduce(
   (acc, [weight, fontFamily]) => {
     return {
       ...acc,
@@ -33,10 +33,12 @@ export const $fontWeightStyles = Object.entries(typography.primary).reduce(
   {}
 ) as Record<IWeights, TextStyle>;
 
-export const $baseStyle: ThemedStyle<TextStyle> = (theme) => ({
-  ...$sizeStyles.sm,
-  ...$fontWeightStyles.normal,
+export const $textBaseStyle: ThemedStyle<TextStyle> = (theme) => ({
+  ...$textSizeStyles.sm,
+  ...$textFontWeightStyles.normal,
   color: theme.colors.text,
 });
 
-export const $rtlStyle: TextStyle = isRTL ? { writingDirection: "rtl" } : {};
+export const $textRtlStyle: TextStyle = isRTL
+  ? { writingDirection: "rtl" }
+  : {};

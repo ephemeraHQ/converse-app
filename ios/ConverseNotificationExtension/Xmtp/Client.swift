@@ -108,16 +108,16 @@ func subscribeToTopic(apiURI: String?, account: String, pushToken: String?, topi
   }
 }
 
-func putGroupInviteRequest(apiURI: String?, account: String, xmtpClient: Client, status: String, joinRequestId: String) async {
+func putGroupInviteRequest(apiURI: String?, account: String, xmtpClient: Client, status: String, joinRequestId: String) async throws {
   if let apiURI = apiURI, !apiURI.isEmpty {
     do {
       let joinRequestUri = "\(apiURI)/api/groupJoinRequest/\(joinRequestId)"
       let secureMmkv = getSecureMmkvForAccount(account: account)
       guard let mmkv = secureMmkv else {
-          return
+          throw NSError(domain: "PutGroupInviteRequest", code: 1, userInfo: [NSLocalizedDescriptionKey: "Secure MMKV not found"])
       }
       guard let apiKey = mmkv.string(forKey: "CONVERSE_API_KEY") else {
-        return
+        throw NSError(domain: "PutGroupInviteRequest", code: 2, userInfo: [NSLocalizedDescriptionKey: "API Key not found"])
       }
       let headers: HTTPHeaders = [
           "xmtp-api-signature": apiKey,
@@ -127,11 +127,27 @@ func putGroupInviteRequest(apiURI: String?, account: String, xmtpClient: Client,
             "status": status,
         ]
       
-      AF.request(joinRequestUri, method: .put, parameters: body, encoding: JSONEncoding.default, headers: headers).response { response in
-          debugPrint("Group Invite Response: \(response)")
+      let response = await AF.request(joinRequestUri, method: .put, parameters: body, encoding: JSONEncoding.default, headers: headers).serializingResponse(using: JSONResponseSerializer()).response
+      if let statusCode = response.response?.statusCode, (200...299).contains(statusCode) {
+          switch response.result {
+          case .success(let value):
+              debugPrint("Group Invite Response: \(value)")
+          case .failure(let error):
+              sentryTrackError(error: error, extras: ["message": "PUT_GROUP_INVITE_REQUEST_FAILED"])
+              throw error
+          }
+      } else {
+          let error = NSError(domain: "", code: response.response?.statusCode ?? 0, userInfo: ["message": "Request failed with status code: \(response.response?.statusCode ?? 0)"])
+          sentryTrackError(error: error, extras: ["message": "PUT_GROUP_INVITE_REQUEST_FAILED"])
+          throw error
       }
     } catch {
-      
+      sentryTrackError(error: error, extras: ["message": "PUT_GROUP_INVITE_REQUEST_FAILED"])
+      throw error
     }
+  } else {
+    let error = NSError(domain: "PutGroupInviteRequest", code: 3, userInfo: [NSLocalizedDescriptionKey: "Invalid API URI"])
+    sentryTrackError(error: error, extras: ["message": "PUT_GROUP_INVITE_REQUEST_FAILED"])
+    throw error
   }
 }
