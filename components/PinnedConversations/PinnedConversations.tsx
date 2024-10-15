@@ -1,17 +1,34 @@
+import { useChatStore } from "@data/store/accountsStore";
+import { useSelect } from "@data/store/storeHelpers";
+import { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { PinnedConversation } from "./PinnedConversation";
-import { XmtpConversation } from "../../data/store/chatStore";
+import { ChatStoreType, XmtpConversation } from "../../data/store/chatStore";
 
-type Props = {
-  convos?: XmtpConversation[];
-};
+const chatStoreSelectedKeys: (keyof ChatStoreType)[] = ["topicsData"];
 
-export default function PinnedConversations({ convos }: Props) {
-  const pinnedConvos = !convos
+export function PinnedConversations({
+  convos,
+}: {
+  convos: XmtpConversation[];
+}) {
+  const { topicsData } = useChatStore(useSelect(chatStoreSelectedKeys));
+
+  const pinnedTopics = useMemo(() => {
+    const pinnedConvoIds: string[] = [];
+    for (const topic in topicsData) {
+      if (topicsData[topic]?.isPinned) {
+        pinnedConvoIds.push(topic);
+      }
+    }
+    return pinnedConvoIds;
+  }, [topicsData]);
+
+  const pinnedConvos = !pinnedTopics
     ? []
-    : convos?.map((convo) => {
-        return <PinnedConversation conversation={convo} key={convo.topic} />;
+    : pinnedTopics?.map((topic) => {
+        return <PinnedConversation topic={topic} key={topic} />;
       });
   return <View style={styles.container}>{pinnedConvos}</View>;
 }

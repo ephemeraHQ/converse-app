@@ -326,8 +326,7 @@ const conversationsSortMethod = (
 // or just be totally hidden (blocked peer, deleted convo)
 export const conversationShouldBeDisplayed = (
   conversation: ConversationWithLastMessagePreview,
-  topicsData: TopicsData,
-  pinnedConversations?: ConversationFlatListItem[]
+  topicsData: TopicsData
 ) => {
   const isNotReady =
     (conversation.isGroup && !conversation.groupMembers) ||
@@ -339,9 +338,7 @@ export const conversationShouldBeDisplayed = (
   const isActive = conversation.isGroup ? conversation.isActive : true;
   const isV1 = conversation.version === "v1";
   const isForbidden = conversation.topic.includes("\x00"); // Forbidden character that breaks
-  const isPinned = pinnedConversations?.find(
-    (convo) => convo.topic === conversation.topic
-  );
+  const isPinned = topicsData[conversation.topic]?.isPinned;
   return (
     (!isPending || isNotEmpty) &&
     !isDeleted &&
@@ -410,8 +407,7 @@ export async function sortAndComputePreview(
   userAddress: string,
   topicsData: TopicsData,
   peersStatus: PeersStatus,
-  groupStatus: GroupStatus,
-  pinnedConversations?: ConversationFlatListItem[]
+  groupStatus: GroupStatus
 ) {
   const conversationsRequests: ConversationWithLastMessagePreview[] = [];
   const conversationsInbox: ConversationWithLastMessagePreview[] = [];
@@ -424,13 +420,7 @@ export async function sortAndComputePreview(
           (!conversation.isGroup && !conversation.peerAddress);
         if (isNotReady) return;
 
-        if (
-          conversationShouldBeDisplayed(
-            conversation,
-            topicsData,
-            pinnedConversations
-          )
-        ) {
+        if (conversationShouldBeDisplayed(conversation, topicsData)) {
           conversation.lastMessagePreview =
             await conversationLastMessagePreview(conversation, userAddress);
           if (

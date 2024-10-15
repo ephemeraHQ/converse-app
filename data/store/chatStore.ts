@@ -105,6 +105,7 @@ export type TopicData = {
   status: "deleted" | "unread" | "read";
   readUntil?: number;
   timestamp?: number;
+  isPinned?: boolean;
 };
 
 export type TopicsData = {
@@ -264,11 +265,11 @@ export const initChatStore = (account: string) => {
                 if (lastMessageId) {
                   const lastMessage = conversation.messages.get(lastMessageId);
                   if (lastMessage) {
-                    const newData = {
+                    const newData: TopicData = {
                       status: "read",
                       readUntil: lastMessage.sent,
                       timestamp: now(),
-                    } as TopicData;
+                    };
                     newState.topicsData[topic] = newData;
                     saveTopicsData(account, {
                       [topic]: newData,
@@ -605,7 +606,13 @@ export const initChatStore = (account: string) => {
                     newState.conversations
                   );
                   newState.topicsData = topicsUpdates;
-                  saveTopicsData(account, topicsUpdates);
+                  // TODO:
+                  const pinnedTopics = state.pinnedConversations.map(
+                    (c) => c.topic
+                  );
+                  if (pinnedTopics.length > 0) {
+                    saveTopicsData(account, topicsUpdates);
+                  }
                 } else {
                   setTimeout(() => {
                     markConversationsAsReadIfNecessary(account);

@@ -1,3 +1,4 @@
+import { ChatStoreType } from "@data/store/chatStore";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -26,7 +27,7 @@ import NewConversationButton from "../components/ConversationList/NewConversatio
 import RequestsButton from "../components/ConversationList/RequestsButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
-import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
+import { PinnedConversations } from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
@@ -36,19 +37,13 @@ import {
   useProfilesStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
 import {
   ConversationFlatListItem,
-  LastMessagePreview,
   getFilteredConversationsWithSearch,
 } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
 import { sortRequestsBySpamScore } from "../utils/xmtpRN/conversations";
-
-type ConversationWithLastMessagePreview = XmtpConversation & {
-  lastMessagePreview?: LastMessagePreview;
-};
 
 type Props = {
   searchBarRef:
@@ -58,6 +53,17 @@ type Props = {
   NavigationParamList,
   "Chats" | "ShareFrame" | "Blocked"
 >;
+
+const chatStoreSelectedKeys: (keyof ChatStoreType)[] = [
+  "initialLoadDoneOnce",
+  "searchQuery",
+  "setSearchQuery",
+  "searchBarFocused",
+  "setSearchBarFocused",
+  "sortedConversationsWithPreview",
+  "openedConversationTopic",
+  "pinnedConversations",
+];
 
 function ConversationList({ navigation, route, searchBarRef }: Props) {
   const styles = useStyles();
@@ -69,23 +75,13 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     sortedConversationsWithPreview,
     openedConversationTopic,
     setSearchQuery,
-  } = useChatStore(
-    useSelect([
-      "initialLoadDoneOnce",
-      "searchQuery",
-      "setSearchQuery",
-      "searchBarFocused",
-      "setSearchBarFocused",
-      "sortedConversationsWithPreview",
-      "openedConversationTopic",
-    ])
-  );
+    pinnedConversations,
+  } = useChatStore(useSelect(chatStoreSelectedKeys));
 
   const { ephemeralAccount } = useSettingsStore(
     useSelect(["peersStatus", "ephemeralAccount"])
   );
   const profiles = useProfilesStore((s) => s.profiles);
-  const pinnedConversations = useChatStore((s) => s.pinnedConversations);
 
   const [flatListItems, setFlatListItems] = useState<{
     items: ConversationFlatListItem[];
@@ -266,67 +262,71 @@ export default gestureHandlerRootHOC(ConversationList);
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    searchTitleContainer: Platform.select({
-      default: {
-        padding: 10,
-        paddingLeft: 16,
-        backgroundColor: backgroundColor(colorScheme),
-        borderBottomColor: itemSeparatorColor(colorScheme),
-        borderBottomWidth: 0.5,
-      },
-      android: {
-        padding: 10,
-        paddingLeft: 16,
-        borderBottomWidth: 0,
-      },
-    }),
-    searchTitle: {
-      ...Platform.select({
-        default: {
-          fontSize: 22,
-          fontWeight: "bold",
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        searchTitleContainer: Platform.select({
+          default: {
+            padding: 10,
+            paddingLeft: 16,
+            backgroundColor: backgroundColor(colorScheme),
+            borderBottomColor: itemSeparatorColor(colorScheme),
+            borderBottomWidth: 0.5,
+          },
+          android: {
+            padding: 10,
+            paddingLeft: 16,
+            borderBottomWidth: 0,
+          },
+        }),
+        searchTitle: {
+          ...Platform.select({
+            default: {
+              fontSize: 22,
+              fontWeight: "bold",
+              color: textPrimaryColor(colorScheme),
+            },
+            android: {
+              fontSize: 16,
+            },
+          }),
+        },
+        headerTitleContainer: {
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingTop: 12,
+          paddingBottom: 8,
+          paddingHorizontal: 16,
+          ...Platform.select({
+            default: {
+              backgroundColor: backgroundColor(colorScheme),
+              borderTopWidth: 0.25,
+              borderTopColor: listItemSeparatorColor(colorScheme),
+            },
+            android: {
+              borderBottomWidth: 0,
+            },
+          }),
+        },
+        headerTitle: {
           color: textPrimaryColor(colorScheme),
+          ...Platform.select({
+            default: {
+              fontSize: 16,
+              fontWeight: "600",
+              marginBottom: 3,
+              marginRight: 110,
+            },
+            android: {
+              fontSize: 16,
+            },
+          }),
         },
-        android: {
-          fontSize: 16,
-        },
-      }),
-    },
-    headerTitleContainer: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      paddingTop: 12,
-      paddingBottom: 8,
-      paddingHorizontal: 16,
-      ...Platform.select({
-        default: {
+        scrollViewWrapper: {
           backgroundColor: backgroundColor(colorScheme),
-          borderTopWidth: 0.25,
-          borderTopColor: listItemSeparatorColor(colorScheme),
-        },
-        android: {
-          borderBottomWidth: 0,
         },
       }),
-    },
-    headerTitle: {
-      color: textPrimaryColor(colorScheme),
-      ...Platform.select({
-        default: {
-          fontSize: 16,
-          fontWeight: "600",
-          marginBottom: 3,
-          marginRight: 110,
-        },
-        android: {
-          fontSize: 16,
-        },
-      }),
-    },
-    scrollViewWrapper: {
-      backgroundColor: backgroundColor(colorScheme),
-    },
-  });
+    [colorScheme]
+  );
 };

@@ -1,7 +1,6 @@
 import { MessageContextMenu } from "@components/Chat/Message/MessageContextMenu";
 import { TableViewItemType } from "@components/TableView/TableView";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
-import { useSelect } from "@data/store/storeHelpers";
 import { translate } from "@i18n/index";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {
@@ -47,7 +46,6 @@ import { MessageToDisplay } from "./Message";
 import { MessageReactionsList } from "./MessageReactionsList";
 import MessageTail from "./MessageTail";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
-import { useAppStore } from "../../../data/store/appStore";
 import { useFramesStore } from "../../../data/store/framesStore";
 import { ReanimatedTouchableOpacity } from "../../../utils/animations";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
@@ -85,9 +83,6 @@ export default function ChatMessageActions({
   const colorScheme = useColorScheme();
   const userAddress = useCurrentAccount() as string;
   const styles = useStyles();
-  const { setContextMenuShown } = useAppStore(
-    useSelect(["setContextMenuShown"])
-  );
   const inputRef = useConversationContext("inputRef");
   const opacity = useSharedValue(0);
   const scale = useSharedValue(0.7);
@@ -141,10 +136,9 @@ export default function ChatMessageActions({
         activateAnimation();
         runOnJS(dismissKeyboard)();
         runOnJS(setIsActive)(true);
-        runOnJS(setContextMenuShown)(message.id);
       }
     },
-    [activateAnimation, message.id, setContextMenuShown, dismissKeyboard]
+    [activateAnimation, dismissKeyboard]
   );
 
   const scaleHold = useCallback(() => {
