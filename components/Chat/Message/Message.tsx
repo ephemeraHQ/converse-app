@@ -66,7 +66,7 @@ import Avatar from "../../Avatar";
 import ClickableText from "../../ClickableText";
 import ActionButton from "../ActionButton";
 import AttachmentMessagePreview from "../Attachment/AttachmentMessagePreview";
-import ChatGroupUpdatedMessage from "../ChatGroupUpdatedMessage";
+import { ChatGroupUpdatedMessage } from "../ChatGroupUpdatedMessage";
 import { FramesPreviews } from "../Frame/FramesPreviews";
 import ChatInputReplyBubble from "../Input/InputReplyBubble";
 import TransactionPreview from "../Transaction/TransactionPreview";
