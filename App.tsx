@@ -16,7 +16,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   LogBox,
   Platform,
@@ -57,15 +57,13 @@ configureCoinbase({
 
 initSentry();
 
-export default function App() {
-  const colorScheme = useColorScheme();
+const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
+
+const App = () => {
   const styles = useStyles();
   const debugRef = useRef();
 
-  useCoinbaseWalletListener(
-    true,
-    new URL(`https://${config.websiteDomain}/coinbase`)
-  );
+  useCoinbaseWalletListener(true, coinbaseUrl);
 
   useEffect(() => {
     registerBackgroundFetchTask();
@@ -99,12 +97,28 @@ export default function App() {
     }
   }, [isInternetReachable, hydrationDone]);
 
+  return (
+    <View style={styles.safe}>
+      <XmtpEngine />
+      <Main />
+      <DebugButton ref={debugRef} />
+    </View>
+  );
+};
+
+// On Android we use the default keyboard "animation"
+const AppKeyboardProvider =
+  Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
+
+export default function AppWithProviders() {
+  const colorScheme = useColorScheme();
+
+  const theme = useMemo(() => {
+    return colorScheme === "dark" ? MaterialDarkTheme : MaterialLightTheme;
+  }, [colorScheme]);
+
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();
-
-  // On Android we use the default keyboard "animation"
-  const AppKeyboardProvider =
-    Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -113,19 +127,9 @@ export default function App() {
           <AppKeyboardProvider>
             <ActionSheetProvider>
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                <PaperProvider
-                  theme={
-                    colorScheme === "dark"
-                      ? MaterialDarkTheme
-                      : MaterialLightTheme
-                  }
-                >
+                <PaperProvider theme={theme}>
                   <PortalProvider>
-                    <View style={styles.safe}>
-                      <XmtpEngine />
-                      <Main />
-                      <DebugButton ref={debugRef} />
-                    </View>
+                    <App />
                   </PortalProvider>
                 </PaperProvider>
               </ThemeProvider>
@@ -139,10 +143,14 @@ export default function App() {
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    safe: {
-      flex: 1,
-      backgroundColor: backgroundColor(colorScheme),
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        safe: {
+          flex: 1,
+          backgroundColor: backgroundColor(colorScheme),
+        },
+      }),
+    [colorScheme]
+  );
 };
