@@ -279,13 +279,7 @@ const ChatMessage = ({
   const reactions = useMemo(() => getMessageReactions(message), [message]);
   const hasReactions = Object.keys(reactions).length > 0;
   const isChatMessage = !isGroupUpdated;
-  const shouldShowReactionsOutside =
-    isChatMessage && (isAttachment || isFrame || isTransaction);
-  const shouldShowReactionsInside =
-    isChatMessage && !shouldShowReactionsOutside;
-  const shouldShowOutsideContentRow =
-    isChatMessage &&
-    (isTransaction || isFrame || (isAttachment && hasReactions));
+  const shouldShowOutsideContentRow = isChatMessage && hasReactions;
 
   let messageMaxWidth: DimensionValue;
   if (isDesktop) {
@@ -476,18 +470,6 @@ const ChatMessage = ({
                       </TouchableOpacity>
                     </View>
                   )}
-                  {shouldShowReactionsInside && (
-                    <View
-                      style={
-                        hasReactions ? styles.reactionsContainer : { flex: 1 }
-                      }
-                    >
-                      <ChatMessageReactions
-                        message={message}
-                        reactions={reactions}
-                      />
-                    </View>
-                  )}
                 </ChatMessageActions>
                 {shouldShowOutsideContentRow ? (
                   <View style={styles.outsideContentRow}>
@@ -502,14 +484,12 @@ const ChatMessage = ({
                         </Text>
                       </TouchableOpacity>
                     )}
-                    {shouldShowReactionsOutside && (
-                      <View style={styles.outsideReactionsContainer}>
-                        <ChatMessageReactions
-                          message={message}
-                          reactions={reactions}
-                        />
-                      </View>
-                    )}
+                    <View style={styles.outsideReactionsContainer}>
+                      <ChatMessageReactions
+                        message={message}
+                        reactions={reactions}
+                      />
+                    </View>
                     {isFrame && message.fromMe && !hasReactions && (
                       <MessageStatus message={message} />
                     )}
