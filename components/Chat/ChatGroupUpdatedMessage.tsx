@@ -1,8 +1,13 @@
 import { PressableProfileWithText } from "@components/PressableProfileWithText";
+import { InboxIdStoreType } from "@data/store/inboxIdStore";
+import { ProfilesStoreType } from "@data/store/profilesStore";
+import { useSelect } from "@data/store/storeHelpers";
+import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
 import { textSecondaryColor } from "@styles/colors";
+import { navigate } from "@utils/navigation";
 import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { StyleSheet, useColorScheme } from "react-native";
 
 import { MessageToDisplay } from "./Message/Message";
@@ -12,14 +17,16 @@ import {
 } from "../../data/store/accountsStore";
 import { getPreferredName, getProfile } from "../../utils/profile";
 
-export default function ChatGroupUpdatedMessage({
+const inboxIdStoreSelectedKeys: (keyof InboxIdStoreType)[] = ["byInboxId"];
+const profilesStoreSelectedKeys: (keyof ProfilesStoreType)[] = ["profiles"];
+export function ChatGroupUpdatedMessage({
   message,
 }: {
   message: MessageToDisplay;
 }) {
   const styles = useStyles();
-  const byInboxId = useInboxIdStore().byInboxId;
-  const profiles = useProfilesStore().profiles;
+  const { byInboxId } = useInboxIdStore(useSelect(inboxIdStoreSelectedKeys));
+  const { profiles } = useProfilesStore(useSelect(profilesStoreSelectedKeys));
   // JSON Parsing is heavy so useMemo
   const parsedContent = useMemo(
     () => JSON.parse(message.content) as GroupUpdatedContent,
@@ -102,19 +109,24 @@ export default function ChatGroupUpdatedMessage({
     }
   });
 
+  const onPress = useCallback((address: string) => {
+    return navigate("Profile", {
+      address,
+    });
+  }, []);
+
   return (
-    <>
+    <VStack style={styles.textContainer}>
       {membersActions.map((a) => (
         <PressableProfileWithText
           key={a.address}
           text={a.content}
           profileDisplay={a.readableName}
           profileAddress={a.address}
-          textStyle={styles.groupChange}
-          pressableTextStyle={styles.profileStyle}
+          onPress={onPress}
         />
       ))}
-    </>
+    </VStack>
   );
 }
 
@@ -122,9 +134,9 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     textContainer: {
-      flexDirection: "row",
+      justifyContent: "center",
       alignItems: "center",
-      textAlign: "center",
+      width: "100%",
     },
     groupChange: {
       color: textSecondaryColor(colorScheme),
