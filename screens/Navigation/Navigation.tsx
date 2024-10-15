@@ -40,14 +40,10 @@ import {
 import config from "../../config";
 import { useAppStore } from "../../data/store/appStore";
 import {
-  GroupInviteNavigation,
-  GroupInviteNavParams,
-  GroupInviteScreenConfig,
-} from "../../features/GroupInvites/GroupInvite.navigation";
-import GroupLinkNav, {
-  GroupLinkNavParams,
-  GroupLinkScreenConfig,
-} from "../../features/GroupInvites/GroupLinkNav";
+  JoinGroupNavigation,
+  JoinGroupNavigationParams,
+  JoinGroupScreenConfig,
+} from "../../features/GroupInvites/JoinGroupNavigation";
 import { isDesktop } from "../../utils/device";
 import { converseNavigations } from "../../utils/navigation";
 
@@ -66,8 +62,7 @@ export type NavigationParamList = {
   TopUp: undefined;
   Profile: ProfileNavParams;
   Group: GroupNavParams;
-  GroupLink: GroupLinkNavParams;
-  GroupInvite: GroupInviteNavParams;
+  GroupInvite: JoinGroupNavigationParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
 };
@@ -84,8 +79,7 @@ const linking = {
       NewConversation: NewConversationScreenConfig,
       Profile: ProfileScreenConfig,
       Group: GroupScreenConfig,
-      GroupLink: GroupLinkScreenConfig,
-      GroupInvite: GroupInviteScreenConfig,
+      GroupInvite: JoinGroupScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
       WebviewPreview: WebviewPreviewScreenConfig,
     },
@@ -159,8 +153,7 @@ export default function Navigation() {
             {WebviewPreviewNav()}
             {ProfileNav()}
             {GroupNav()}
-            {GroupLinkNav()}
-            {GroupInviteNavigation()}
+            {JoinGroupNavigation()}
             {UserProfileNav()}
             {TopUpNav()}
             {EnableTransactionsNav()}

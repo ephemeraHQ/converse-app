@@ -260,6 +260,7 @@ const en = {
   removed_reaction_to_attachment: "Removed the reaction to an attachment",
   removed_reaction_to: 'Removed the reaction to "{{content}}"',
 
+  "test foo.bar": "test foo.bar",
   // Group Invites
   group_admin_approval:
     "A group admin may need to approve your membership prior to joining.",

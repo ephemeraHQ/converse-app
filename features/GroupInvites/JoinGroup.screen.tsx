@@ -81,7 +81,7 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
   };
 }
 
-export default function GroupInviteScreen({
+export function JoinGroupScreen({
   route,
 }: NativeStackScreenProps<NavigationParamList, "GroupInvite">) {
   const groupInviteId = route.params.groupInviteId;
@@ -107,6 +107,7 @@ export default function GroupInviteScreen({
 
   return (
     <View style={styles.groupInvite}>
+      <Text>Hi there testing</Text>
       {isGroupInviteLoading && (
         <ActivityIndicator color={textPrimaryColor(colorScheme)} size="large" />
       )}

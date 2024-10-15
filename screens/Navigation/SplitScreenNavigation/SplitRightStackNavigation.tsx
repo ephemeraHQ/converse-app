@@ -6,10 +6,6 @@ import { Platform, useColorScheme } from "react-native";
 import { SplitScreenDrawerParams } from "./SplitScreenNavigation";
 import config from "../../../config";
 import { useAppStore } from "../../../data/store/appStore";
-import GroupLinkNav, {
-  GroupLinkNavParams,
-  GroupLinkScreenConfig,
-} from "../../../features/GroupInvites/GroupLinkNav";
 import { isDesktop } from "../../../utils/device";
 import { converseNavigations } from "../../../utils/navigation";
 import ConversationNav, {
@@ -50,7 +46,6 @@ export type NavigationParamList = {
   TopUp: undefined;
   Profile: ProfileNavParams;
   Group: GroupNavParams;
-  GroupLink: GroupLinkNavParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
 };
@@ -66,7 +61,6 @@ const linking = {
       NewConversation: NewConversationScreenConfig,
       Profile: ProfileScreenConfig,
       Group: GroupScreenConfig,
-      GroupLink: GroupLinkScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
       WebviewPreview: WebviewPreviewScreenConfig,
     },
@@ -108,7 +102,6 @@ export default function SplitRightStackNavigation({
           {WebviewPreviewNav()}
           {ProfileNav()}
           {GroupNav()}
-          {GroupLinkNav()}
           {UserProfileNav()}
           {TopUpNav()}
           {EnableTransactionsNav()}
