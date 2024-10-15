@@ -1,6 +1,6 @@
 import ExternalWalletPicker from "@components/ExternalWalletPicker";
 import UserProfile from "@components/Onboarding/UserProfile";
-import TransactionPreview from "@components/TransactionPreview";
+import { TransactionPreview } from "@components/TransactionPreview";
 import { backgroundColor } from "@styles/colors";
 import { useAutoConnectExternalWallet } from "@utils/evm/external";
 import { getProfile } from "@utils/profile";

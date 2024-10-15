@@ -203,8 +203,18 @@ export default function FramePreview({
               payload
             );
 
+            if (
+              !transactionReceipt ||
+              transactionReceipt.status === "reverted"
+            ) {
+              // error, let's fail
+              setPostingActionForButton(undefined);
+              return;
+            }
+
             payload.untrustedData.transactionId =
               transactionReceipt?.transactionHash;
+            payload.untrustedData.address = transactionReceipt?.from;
             actionPostUrl = buttonPostUrl;
           }
 

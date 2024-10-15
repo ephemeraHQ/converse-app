@@ -42,6 +42,7 @@ export interface DrawerProps {
   children: React.ReactNode;
   onClose?: () => void;
   style?: ViewStyle;
+  showHandle?: boolean;
 }
 
 export const DrawerContext = React.createContext<{
@@ -59,7 +60,7 @@ export interface DrawerRef {
 }
 
 export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
-  { children, visible, onClose, style },
+  { children, visible, onClose, style, showHandle },
   ref
 ) {
   const styles = useStyles();
@@ -176,7 +177,7 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
               style={[styles.trayContainer, animtedStyle, style]}
               layout={LinearTransition.springify()}
             >
-              <View style={styles.handle} />
+              {showHandle && <View style={styles.handle} />}
               {children}
             </ReanimatedView>
           </GestureDetector>

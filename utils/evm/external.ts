@@ -9,6 +9,7 @@ import { base, Chain, ethereum, sepolia } from "thirdweb/chains";
 import {
   useActiveAccount,
   useActiveWallet,
+  useActiveWalletChain,
   useAutoConnect,
   useDisconnect,
   useSetActiveWallet,
@@ -25,6 +26,7 @@ let accountSingleton: Account | undefined = undefined;
  */
 export const useExternalSigner = () => {
   const setActiveWallet = useSetActiveWallet();
+  const chain = useActiveWalletChain();
   const activeAccount = useActiveAccount();
   const activeWallet = useActiveWallet();
   const { disconnect } = useDisconnect();
@@ -144,6 +146,7 @@ export const useExternalSigner = () => {
     sendTransaction: sendTx,
     address: activeAccount?.address,
     walletAppId: activeWallet?.id,
+    chainId: chain?.id,
   };
 };
 

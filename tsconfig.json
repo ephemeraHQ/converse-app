@@ -15,8 +15,8 @@
       "@screens/*": ["./screens/*"],
       "@styles/*": ["./styles/*"],
       "@utils/*": ["./utils/*"],
-      "@theme": ["./theme/*"],
-      "@design-system": ["./design-system/*"]
+      "@theme/*": ["./theme/*"],
+      "@design-system/*": ["./design-system/*"]
     }
   },
   "exclude": ["./vendor/**/*", "./node_modules/**/*", "./dist/**/*"]

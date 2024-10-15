@@ -337,10 +337,13 @@ const en = {
   transactionalFrameConnectWallet:
     "Connect to a wallet app to trigger a transaction",
   transaction_failure: "Transaction failed",
-  transaction_pending: "Continue in {{wallet}}",
+  transaction_pending: "Trigger in {{wallet}}",
   transaction_triggering: "Opening {{wallet}}...",
   transaction_triggered: "Transacting...",
   transaction_success: "Done!",
+  transaction_simulating: "Safely Simulating this Transaction",
+  transaction_switch_chain: "Switch to {{chainName}}",
+  transaction_pay_with: "Pay with",
 
   // New Conversation
   cannot_be_added_to_group_yet:
