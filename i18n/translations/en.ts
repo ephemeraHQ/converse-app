@@ -274,7 +274,8 @@ const en = {
   join_group: "Join group",
   group_join_error: "An error occurred",
   group_join_invite_invalid: "This invite is no longer valid",
-  group_finished_polling_unsuccessfully: "This is taking longer than expected",
+  group_finished_polling_unsuccessfully:
+    "Your request has been sent. Wait for the admin approve you",
   group_already_joined: "This invite has already been accepted",
   group_invite_default_group_name: "New Group",
 

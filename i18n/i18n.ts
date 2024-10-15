@@ -4,6 +4,8 @@ import i18n from "i18n-js";
 import { I18nManager } from "react-native";
 
 import en, { Translations } from "./translations/en";
+
+export { i18n };
 // import fr from "./translations/fr";
 
 i18n.fallbacks = true;
