@@ -1,29 +1,34 @@
-import { navigate } from "@utils/navigation";
+import { ITextStyleProps } from "@design-system/Text/Text.props";
+import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { memo, useCallback, useMemo } from "react";
-import { StyleProp, TextStyle } from "react-native";
-import ParsedText from "react-native-parsed-text";
+import { TextStyle } from "react-native";
+
+import { ParsedText } from "./ParsedText/ParsedText";
+
+const $pressableStyle: ITextStyleProps = {
+  weight: "bold",
+};
+
+const $textStyle: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.fill.secondary,
+});
 
 const PressableProfileWithTextInner = ({
   profileAddress,
   profileDisplay,
   text,
-  textStyle,
-  pressableTextStyle,
+  onPress,
 }: {
+  onPress: (address: string) => void;
   text: string;
   profileDisplay: string;
   profileAddress: string;
-  textStyle?: StyleProp<TextStyle>;
-  pressableTextStyle?: StyleProp<TextStyle>;
 }) => {
-  const onPress = useCallback(() => {
-    if (profileAddress) {
-      return navigate("Profile", {
-        address: profileAddress,
-      });
-    }
-    return undefined;
-  }, [profileAddress]);
+  const { themed } = useAppTheme();
+
+  const handlePress = useCallback(() => {
+    return onPress(profileAddress);
+  }, [profileAddress, onPress]);
 
   const pattern = useMemo(
     () => new RegExp(profileDisplay, "g"),
@@ -32,16 +37,21 @@ const PressableProfileWithTextInner = ({
   const parseOptions = useMemo(
     () => [
       {
-        onPress,
+        onPress: handlePress,
         pattern,
-        style: pressableTextStyle,
       },
     ],
-    [onPress, pattern, pressableTextStyle]
+    [handlePress, pattern]
   );
 
   return (
-    <ParsedText style={textStyle} parse={parseOptions}>
+    <ParsedText
+      preset="smaller"
+      size="xxs"
+      style={themed($textStyle)}
+      pressableStyle={$pressableStyle}
+      parse={parseOptions}
+    >
       {text}
     </ParsedText>
   );
