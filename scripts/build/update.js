@@ -7,11 +7,11 @@ const prompts = require("prompts");
 const PROJECT_ROOT = path.join(__dirname, "..", "..");
 
 const update = async () => {
-  const clean = await isClean();
-  if (!clean) {
-    console.log("Git index not clean");
-    process.exit(1);
-  }
+  // const clean = await isClean();
+  // if (!clean) {
+  //   console.log("Git index not clean");
+  //   process.exit(1);
+  // }
   const questions = [
     {
       type: "select",
