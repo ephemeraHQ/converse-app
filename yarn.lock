@@ -9647,6 +9647,18 @@
   resolved "https://registry.yarnpkg.com/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz#e77a97fbd345b76d83245edcd17d393b1b41fb31"
   integrity sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==
 
+"@yornaath/batshit-devtools@^1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@yornaath/batshit-devtools/-/batshit-devtools-1.7.1.tgz#6c247f2c4c4e3322811beca96cb62bbf19489e04"
+  integrity sha512-AyttV1Njj5ug+XqEWY1smV45dTWMlWKtj1B8jcFYgBKUFyUlF/qEhD+iP1E5UaRYW6hQRYD9T2WNDwFTrOMWzQ==
+
+"@yornaath/batshit@^0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@yornaath/batshit/-/batshit-0.10.1.tgz#f750b2bf6abb9207330eb6a5ab2356af9b79ae78"
+  integrity sha512-WGZ1WNoiVN6CLf28O73+6SCf+2lUn4U7TLGM9f4zOad0pn9mdoXIq8cwu3Kpf7N2OTYgWGK4eQPTflwFlduDGA==
+  dependencies:
+    "@yornaath/batshit-devtools" "^1.7.1"
+
 "@zxing/text-encoding@0.9.0":
   version "0.9.0"
   resolved "https://registry.yarnpkg.com/@zxing/text-encoding/-/text-encoding-0.9.0.tgz#fb50ffabc6c7c66a0c96b4c03e3d9be74864b70b"
