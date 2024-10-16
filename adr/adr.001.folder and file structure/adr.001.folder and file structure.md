@@ -221,27 +221,51 @@ Given the size of the codebase, we will adopt a phased approach:
 
 1. **Preparation:**
    - Communicate the plan to the development team.
-   - Freeze new feature development temporarily to reduce conflicts.
-   
-2. **Phase 1 - Critical Features:**
-   - Reorganize the most critical features first (e.g., Accounts, Conversations).
-   - Update import paths and fix any immediate issues.
-   
-3. **Phase 2 - Remaining Features:**
-   - Gradually reorganize the rest of the features.
-   - Continue updating import paths and resolving issues.
-   
-4. **Phase 3 - Shared Components and Utilities:**
-   - Move shared components and utilities into the `shared/` directory.
-   - Ensure all features are using the shared resources correctly.
-   
-5. **Testing:**
-   - Perform thorough testing after each phase.
-   - Use automated tests to catch regressions.
-   
-6. **Completion:**
-   - Merge changes into the main branch.
-   - Resume normal development activities.
+   - Agree on naming conventions and structure details.
+   - Set up import aliasing for features:
+     - Configure build tools (e.g., Babel, TypeScript) to support
+       aliases like `@features/foo`.
+     - Update tsconfig.json or babel.config.js to include paths
+       for new feature directories.
+
+2. **Phase 1 - Shared Components:**
+   - Start with Thierry's work on shared components.
+   - Create a `shared/design-system` directory.
+   - In one PR, move relevant files to this new directory.
+   - In a follow-up PR, update imports and make necessary
+     changes to the moved components.
+
+3. **Phase 2 - Feature Identification:**
+   - Evaluate ongoing work to identify affected features.
+   - For each feature:
+     a. Create a feature directory (e.g., `features/accounts`).
+     b. In one PR, move relevant files to this directory.
+     c. In a follow-up PR, update imports and refactor as needed.
+
+4. **Phase 3 - Gradual Feature Migration:**
+   - Prioritize remaining features for migration.
+   - For each feature:
+     a. Create the feature directory.
+     b. Move files in one PR.
+     c. Refactor and update imports in a separate PR.
+
+5. **Phase 4 - Shared Utilities:**
+   - Identify shared utilities across features.
+   - Move these to `features/shared/utils` or appropriate subdirectories.
+   - Update imports in affected features.
+
+6. **Continuous Testing:**
+   - Perform thorough testing after each PR.
+   - Ensure automated tests are updated and passing.
+
+7. **Documentation and Training:**
+   - Update documentation to reflect new structure.
+   - Conduct team training sessions on new import conventions.
+
+8. **Completion:**
+   - Final review of entire codebase structure.
+   - Merge any remaining changes.
+   - Resume normal development with new structure in place.
 
 ## Consequences
 
