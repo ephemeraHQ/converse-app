@@ -27,8 +27,8 @@ const GROUP_JOIN_REQUEST_POLL_INTERVAL_MS = 1000;
  * options:
  * 1) in base client type so that all flavors behave the same
  * - I'm leaning towards this
- * 2) decided per flavor, so that we can have a live client that uses the query client
- * and a mock client that doesn't
+ * 2) decided per flavor, so that we can have a live client that uses the query
+ * client and a mock client that doesn't
  *
  * Naming Conventions:
  *
@@ -84,12 +84,44 @@ export class JoinGroupClient {
     ): Promise<GroupsDataEntity> => {
       const { fetchGroupsQuery } = await import("@queries/useGroupsQuery");
       const groupsEntity: GroupsDataEntity = await fetchGroupsQuery(account);
+      function findCircular(obj: any, seen = new Set()) {
+        if (obj && typeof obj === "object") {
+          if (seen.has(obj)) {
+            console.error("Circular reference detected:", obj);
+            return true;
+          }
+          seen.add(obj);
+          for (const key in obj) {
+            if (findCircular(obj[key], seen)) {
+              console.error(`Property causing circular reference: ${key}`);
+              return true;
+            }
+          }
+          seen.delete(obj);
+        }
+        return false;
+      }
+      // Remove client from all values in groupsEntity
+      const cleanedGroupsEntity = {
+        byId: Object.fromEntries(
+          Object.entries(groupsEntity.byId).map(([id, group]) => [
+            id,
+            { ...group, client: undefined },
+          ])
+        ),
+        ids: groupsEntity.ids,
+      };
+
+      // Example usage (commented out to avoid errors)
+      // const anyId = cleanedGroupsEntity.ids[0];
+      // const anyGroup = cleanedGroupsEntity.byId[anyId];
+      // console.log('Group without client:', anyGroup);
 
       // I believe this will already be done since we
       // are using the fetchGroupsQuery now
       // queryClient.setQueryData(groupsQueryKey(account), groupsEntity);
 
-      return groupsEntity;
+      return cleanedGroupsEntity;
     };
 
     /**

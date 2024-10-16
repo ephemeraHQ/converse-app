@@ -59,6 +59,7 @@
     "@sentry/react-native": "^5.31.1",
     "@shopify/flash-list": "1.6.4",
     "@stardazed/streams-polyfill": "^2.4.0",
+    "@statelyai/inspect": "^0.4.0",
     "@tanstack/query-persist-client-core": "^5.54.1",
     "@tanstack/query-sync-storage-persister": "^5.45.0",
     "@tanstack/react-query": "^5.45.0",
@@ -89,6 +90,7 @@
     "eciesjs": "^0.4.4",
     "emoji-regex": "^10.3.0",
     "ethers": "5.7.2",
+    "event-target-shim": "^6.0.2",
     "eventemitter3": "^5.0.1",
     "expo": "~51.0.31",
     "expo-application": "~5.9.1",
@@ -203,8 +205,6 @@
     "xstate": "^5.18.2",
     "zustand": "^4.4.7"
   },
-
-
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
     "@testing-library/react-native": "^12.6.1",

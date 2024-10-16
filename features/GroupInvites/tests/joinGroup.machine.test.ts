@@ -1,8 +1,9 @@
 import { createActor, waitFor } from "xstate";
 
-import { Controlled } from "../../dependencies/Environment/Environment";
-import { JoinGroupClient } from "../GroupInvites/GroupInvites.client";
-import { joinGroupMachineLogic } from "../GroupInvites/joinGroup.machine";
+import { Controlled } from "../../../dependencies/Environment/Environment";
+import { AccountsClient } from "../../Accounts/Accounts.client";
+import { JoinGroupClient } from "../GroupInvites.client";
+import { joinGroupMachineLogic } from "../joinGroup.machine";
 
 jest.setTimeout(1);
 
@@ -25,6 +26,7 @@ describe.only("Joining a Group from an Invite", () => {
       navigateToGroupPayload = payload;
     });
     Controlled.joinGroupClient = JoinGroupClient.fixture();
+    Controlled.accountsClient = AccountsClient.fixture();
 
     const input = { groupInviteId: "valid-invite-id" };
     const joinGroupActor = createActor(

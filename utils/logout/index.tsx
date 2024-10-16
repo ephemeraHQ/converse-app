@@ -13,7 +13,7 @@ import { getInboxId } from "@utils/xmtpRN/signIn";
 import { useCallback } from "react";
 
 import { useDisconnectFromPrivy } from "./privy";
-import { useDisconnectWallet } from "./wallet";
+// import { useDisconnectWallet } from "./wallet";
 import { deleteSecureItemAsync } from "../keychain";
 import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
 import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
@@ -229,7 +229,8 @@ export const logoutAccount = async (
 
 export const useLogoutFromConverse = (account: string) => {
   const privyLogout = useDisconnectFromPrivy();
-  const disconnectWallet = useDisconnectWallet();
+  // const disconnectWallet = useDisconnectWallet();
+  const disconnectWallet = () => {};
   const logout = useCallback(
     async (dropLocalDatabase: boolean, isV3Enabled: boolean = true) => {
       logoutAccount(
@@ -240,7 +241,11 @@ export const useLogoutFromConverse = (account: string) => {
         privyLogout
       );
     },
-    [account, disconnectWallet, privyLogout]
+    [
+      account,
+      // disconnectWallet,
+      privyLogout,
+    ]
   );
   return logout;
 };

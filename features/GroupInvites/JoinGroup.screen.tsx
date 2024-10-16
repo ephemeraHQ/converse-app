@@ -48,6 +48,21 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
     }),
     {
       input: { groupInviteId },
+
+      // inspect: (inspectionEvent) => {
+      //   if (inspectionEvent.type === "@xstate.snapshot") {
+      //     console.log(
+      //       "SNAPSHOT",
+      //       JSON.stringify(inspectionEvent.snapshot, null, 2)
+      //     );
+      //   }
+      // },
+
+      // inspect: createSkyInspector({
+      //   clientType: "node",
+      //   autoStart: true,
+      //   // WebSocket: WebSocket,
+      // }).inspect,
     }
   );
 
@@ -60,9 +75,14 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
 
   const pollingTimedOut = state.value === "Attempting to Join Group Timed Out";
 
-  const joinButtonEnabled =
-    !polling &&
-    ["PENDING", "ACCEPTED", "REJECTED", "ERROR"].includes(joinStatus ?? "");
+  const joinButtonEnabled = !polling;
+  console.log(
+    JSON.stringify(
+      { joinButtonEnabled, joinStatus, polling, groupInvite },
+      null,
+      2
+    )
+  );
 
   const joinGroup = () => {
     send({ type: "user.didTapJoinGroup" });
@@ -84,7 +104,8 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
 export function JoinGroupScreen({
   route,
 }: NativeStackScreenProps<NavigationParamList, "GroupInvite">) {
-  const groupInviteId = route.params.groupInviteId;
+  // const groupInviteId = route.params.groupInviteId;
+  const groupInviteId = "PxvieeSrHD_KS63p_eEvN";
 
   const {
     isGroupInviteLoading,
