@@ -26,10 +26,9 @@ SUPERSEDED by [ADR-XXXX](adr.###.some cool decision.md)]
 
 ## Date
 - **Proposed**: [YYYY-MM-DD]
-- **Agreed**: [YYYY-MM-DD]
+- **Decided**: [YYYY-MM-DD]
 - **Work Began**: [YYYY-MM-DD]
 - **Work Completed**: [YYYY-MM-DD]
-- **Rejected**: [YYYY-MM-DD]
 
 
 ## Context
