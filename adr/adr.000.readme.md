@@ -21,15 +21,13 @@ An ADR is a Markdown file with specific sections. Follow these steps:
 # ADR-[NUMBER]: [TITLE]
 
 ## Status
-[PROPOSED | ACCEPTED | REJECTED | DEPRECATED | 
-SUPERSEDED by [ADR-XXXX](adr.###.some cool decision.md)]
+[PROPOSED | ACCEPTED | REJECTED | DEPRECATED | SUPERSEDED by [ADR-XXXX](adr.###.some-cool-decision.md)]
 
 ## Date
 - **Proposed**: [YYYY-MM-DD]
 - **Decided**: [YYYY-MM-DD]
 - **Work Began**: [YYYY-MM-DD]
 - **Work Completed**: [YYYY-MM-DD]
-
 
 ## Context
 [Provide a brief description of the issue at hand, including any relevant background information.]
@@ -79,3 +77,10 @@ SUPERSEDED by [ADR-XXXX](adr.###.some cool decision.md)]
 
 ## Implementation Details
 [For code-related decisions, include example code or pseudocode here]
+
+
+## Migration Plan
+[Outline the steps required to implement the proposal, especially if it involves significant changes]
+
+## Consequences
+[Discuss the positive and negative consequences of the proposed solution]

@@ -1,5 +1,7 @@
 # Proposed Folder Structure (October 16, 2024)
 
+This is an approximation of what our end goal will look like. I've attempted to organize the current Converse App files list into the newly proposed folder structure. There will be differences between this and what we end up with, but this should give us a good idea of what to expect.
+
 ## Root Structure
 
 ```

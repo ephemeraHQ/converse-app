@@ -211,6 +211,7 @@ features/
     ├── accounts.utils.ts
     ├── accounts.client.ts
     └── accounts.queries.ts
+```
 
 
 *Note:* Care should be taken to ensure that any platform-specific files (e.g., `.ios.tsx`, `.android.tsx`, `.web.tsx`) are correctly placed and that conditional imports are handled properly.
