@@ -13,6 +13,7 @@ import ConversationNav, {
   ConversationScreenConfig,
 } from "../ConversationNav";
 import EnableTransactionsNav from "../EnableTransactionsNav";
+import GroupInviteNav from "../GroupInviteNav";
 import GroupLinkNav, {
   GroupLinkNavParams,
   GroupLinkScreenConfig,
@@ -110,6 +111,7 @@ export default function SplitRightStackNavigation({
           {GroupNav()}
           {GroupLinkNav()}
           {UserProfileNav()}
+          {GroupInviteNav()}
           {TopUpNav()}
           {EnableTransactionsNav()}
         </NativeStack.Group>
