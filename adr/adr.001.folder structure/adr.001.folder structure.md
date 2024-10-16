@@ -59,6 +59,9 @@ Each feature directory may contain any of the following directories:
 - `queries`: React Query functionality for caching, refetching,
   and optimistic updates specific to the feature.
 
+- `types`: TypeScript types and interfaces relevant to the feature.
+
+- `actors`: State machines or actors that control feature behavior.
 
 
 ## Considered Options
