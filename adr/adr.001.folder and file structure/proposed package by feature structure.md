@@ -7,16 +7,16 @@ This is an approximation of what our end goal will look like. I've attempted to 
 ```
 converse-app/
 ├── features/
-│   ├── Accounts/
-│   ├── Conversations/
-│   ├── Groups/
-│   ├── Transactions/
-│   ├── Profiles/
-│   ├── Search/
-│   ├── Notifications/
-│   ├── Frames/
-│   ├── Recommendations/
-│   └── Settings/
+│   ├── accounts/
+│   ├── conversations/
+│   ├── groups/
+│   ├── transactions/
+│   ├── profiles/
+│   ├── search/
+│   ├── notifications/
+│   ├── frames/
+│   ├── recommendations/
+│   └── settings/
 ├── shared/
 │   ├── components/
 │   ├── hooks/
@@ -40,7 +40,7 @@ converse-app/
 ```
 converse-app/
 ├── features/
-│   ├── Accounts/
+│   ├── accounts/
 │   │   ├── components/
 │   │   │   ├── AccountSettingsButton.tsx
 │   │   │   ├── ExternalWalletPicker.tsx
@@ -103,8 +103,8 @@ converse-app/
 │   │   │   └── store/
 │   │   │       ├── accountsStore.ts
 │   │   │       └── walletStore.ts
-│   │   └── Accounts.client.ts
-│   ├── Conversations/
+│   │   └── accounts.client.ts
+│   ├── conversations/
 │   │   ├── components/
 │   │   │   ├── Chat/
 │   │   │   │   ├── Chat.tsx
@@ -190,7 +190,7 @@ converse-app/
 │   │       ├── useGroupPendingMessages.ts
 │   │       ├── usePendingRequestsQuery.ts
 │   │       └── [other conversation-related queries]
-│   ├── Groups/
+│   ├── groups/
 │   │   ├── components/
 │   │   │   ├── GroupAvatar.tsx
 │   │   │   ├── GroupPendingRequestsTable.tsx
@@ -262,7 +262,7 @@ converse-app/
 │   │       ├── useRemoveFromGroupMutation.ts
 │   │       ├── useRevokeAdminMutation.ts
 │   │       └── useRevokeSuperAdminMutation.ts
-│   ├── Transactions/
+│   ├── transactions/
 │   │   ├── components/
 │   │   │   └── Chat/
 │   │   │       └── Transaction/
@@ -280,7 +280,7 @@ converse-app/
 │   │   └── data/
 │   │       └── store/
 │   │           └── transactionsStore.ts
-│   ├── Profiles/
+│   ├── profiles/
 │   │   ├── components/
 │   │   │   ├── Avatar.tsx
 │   │   │   └── UserProfile.tsx
@@ -308,7 +308,7 @@ converse-app/
 │   │   │       └── entities/
 │   │   └── queries/
 │   │       └── [profile-related queries]
-│   ├── Search/
+│   ├── search/
 │   │   ├── components/
 │   │   │   ├── SearchBar.tsx
 │   │   │   ├── ProfileSearchItem.tsx
@@ -325,7 +325,7 @@ converse-app/
 │   │   └── data/
 │   │       └── store/
 │   │           └── searchStore.ts
-│   ├── Notifications/
+│   ├── notifications/
 │   │   ├── screens/
 │   │   │   └── NotificationsScreen.tsx
 │   │   ├── hooks/
@@ -334,7 +334,7 @@ converse-app/
 │   │   └── utils/
 │   │       ├── notifications.ts
 │   │       └── notifications.web.ts
-│   ├── Frames/
+│   ├── frames/
 │   │   ├── components/
 │   │   │   └── Frame/
 │   │   ├── navigation/
@@ -346,7 +346,7 @@ converse-app/
 │   │   └── data/
 │   │       └── store/
 │   │           └── framesStore.ts
-│   ├── Settings/
+│   ├── settings/
 │   │   ├── components/
 │   │   │   ├── DebugButton.tsx
 │   │   │   ├── ErroredHeader.tsx
@@ -360,7 +360,7 @@ converse-app/
 │   │   └── data/
 │   │       └── store/
 │   │           └── settingsStore.ts
-│   ├── MatchMaker/
+│   ├── matchmaker/
 │   │   ├── screens/
 │   │   │   └── ConverseMatchMaker.tsx
 │   │   ├── navigation/
