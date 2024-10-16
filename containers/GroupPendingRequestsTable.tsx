@@ -1,7 +1,8 @@
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
-import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupPendingRequests } from "@hooks/useGroupPendingRequests";
+import { usePreferredNames } from "@hooks/usePreferredNames";
 import { translate } from "@i18n";
 import { useAddToGroupMutation } from "@queries/useAddToGroupMutation";
 import { invalidatePendingJoinRequestsQuery } from "@queries/usePendingRequestsQuery";
@@ -26,20 +27,18 @@ export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
   const currentAccount = useCurrentAccount() as string;
   const styles = useStyles();
   const requests = useGroupPendingRequests(topic);
-  const profiles = useProfilesStore((s) => s.profiles);
+  const addresses = useMemo(() => requests.map((a) => a[0]), [requests]);
+  const preferredNames = usePreferredNames(addresses);
   const { mutateAsync: addToGroup } = useAddToGroupMutation(
     currentAccount,
     topic
   );
   const tableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
-    requests.forEach((a) => {
+    requests.forEach((a, id) => {
       const address = a[0];
       const request = a[1];
-      const preferredName = getPreferredName(
-        getProfile(address, profiles)?.socials,
-        address
-      );
+      const preferredName = preferredNames[id];
       items.push({
         id: address,
         title: preferredName,
@@ -101,7 +100,7 @@ export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
     addToGroup,
     colorScheme,
     currentAccount,
-    profiles,
+    preferredNames,
     requests,
     styles.adminText,
     styles.tableViewRight,

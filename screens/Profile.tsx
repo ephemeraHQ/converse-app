@@ -1,4 +1,5 @@
 import Picto from "@components/Picto/Picto";
+import { ConnectedAvatar } from "@containers/ConnectedAvatar";
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
 import { translate } from "@i18n";
@@ -43,7 +44,6 @@ import { ConversationNavParams } from "./Navigation/ConversationNav";
 import { NavigationParamList } from "./Navigation/Navigation";
 import { useIsSplitScreen } from "./Navigation/navHelpers";
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
-import Avatar from "../components/Avatar";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import TableView, {
   TableViewItemType,
@@ -78,7 +78,6 @@ import {
   requestPushNotificationsPermissions,
 } from "../utils/notifications";
 import {
-  getPreferredAvatar,
   getPreferredName,
   getProfile,
   getPreferredUsername,
@@ -600,11 +599,7 @@ export default function ProfileScreen({
       style={styles.profile}
       contentContainerStyle={styles.profileContent}
     >
-      <Avatar
-        uri={getPreferredAvatar(socials)}
-        style={styles.avatar}
-        name={getPreferredName(socials, peerAddress)}
-      />
+      <ConnectedAvatar peerAddress={peerAddress} style={styles.avatar} />
       <Text style={styles.title}>{getPreferredName(socials, peerAddress)}</Text>
       {isMyProfile && shouldShowError && (
         <View style={styles.errorContainer}>

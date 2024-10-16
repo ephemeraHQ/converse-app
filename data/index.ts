@@ -1,15 +1,16 @@
 import "reflect-metadata";
 
+import { setProfileSocialsQueryData } from "@queries/useProfileSocialsQuery";
 import logger from "@utils/logger";
 import { getProfile } from "@utils/profile";
 
 import { getRepository } from "./db";
 import { Conversation } from "./db/entities/conversationEntity";
 import { Message } from "./db/entities/messageEntity";
-import { refreshProfilesIfNeeded } from "./helpers/profiles/profilesUpdate";
 import { xmtpConversationFromDb } from "./mappers";
 import { getChatStore, getProfilesStore } from "./store/accountsStore";
 import { saveXmtpEnv, saveApiURI } from "../utils/sharedData";
+import { refreshProfilesIfNeeded } from "./helpers/profiles/profilesUpdate";
 
 const getTypeormBoolValue = (value: number) => value === 1;
 
@@ -76,6 +77,17 @@ export const loadDataToContext = async (account: string) => {
   });
 
   const profilesByAddress = getProfilesStore(account).getState().profiles;
+  for (const peerAddress in profilesByAddress) {
+    const profile = profilesByAddress[peerAddress];
+    if (profile?.socials && profile?.updatedAt) {
+      setProfileSocialsQueryData(
+        account,
+        peerAddress,
+        profile.socials,
+        profile.updatedAt
+      );
+    }
+  }
   getChatStore(account)
     .getState()
     .setConversations(

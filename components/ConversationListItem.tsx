@@ -41,11 +41,11 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 
-import Avatar from "./Avatar";
 import { ConversationContextMenu } from "./ConversationContextMenu";
 import GroupAvatar from "./GroupAvatar";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
+import { ConnectedAvatar } from "../containers/ConnectedAvatar";
 import {
   currentAccount,
   useChatStore,
@@ -258,15 +258,14 @@ const ConversationListItem = memo(function ConversationListItem({
         onConversationListScreen
       />
     ) : (
-      <Avatar
+      <ConnectedAvatar
         size={AvatarSizes.conversationListItem}
         style={styles.avatarWrapper}
-        uri={conversationPeerAvatar}
-        name={conversationName}
+        peerAddress={conversationPeerAddress!}
       />
     );
   }, [
-    conversationName,
+    conversationPeerAddress,
     conversationPeerAvatar,
     conversationTopic,
     isGroupConversation,
