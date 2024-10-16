@@ -3,7 +3,11 @@ on:
   pull_request:
     branches:
       - main
-
+      - release/*
+    paths:
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "package.json"
 jobs:
   tsc:
     runs-on: ubuntu-latest
