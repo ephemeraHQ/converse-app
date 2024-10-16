@@ -82,11 +82,39 @@ const isDMLink = (url: string) => {
   return false;
 };
 
+const isGroupInviteLink = (url: string) => {
+  for (const prefix of config.universalLinks) {
+    if (url.startsWith(prefix)) {
+      const path = url.slice(prefix.length);
+      if (path.toLowerCase().startsWith("group-invite/")) {
+        return true;
+      }
+    }
+  }
+};
+
+const isGroupLink = (url: string) => {
+  for (const prefix of config.universalLinks) {
+    if (url.startsWith(prefix)) {
+      const path = url.slice(prefix.length);
+      if (path.toLowerCase().startsWith("group/")) {
+        return true;
+      }
+    }
+  }
+};
+
 const originalOpenURL = RNLinking.openURL.bind(RNLinking);
 RNLinking.openURL = (url: string) => {
   // If the URL is a DM link, open it inside the app
   // as a deeplink, not the browser
   if (isDMLink(url)) {
+    return originalOpenURL(getSchemedURLFromUniversalURL(url));
+  }
+  if (isGroupInviteLink(url)) {
+    return originalOpenURL(getSchemedURLFromUniversalURL(url));
+  }
+  if (isGroupLink(url)) {
     return originalOpenURL(getSchemedURLFromUniversalURL(url));
   }
   return originalOpenURL(url);
