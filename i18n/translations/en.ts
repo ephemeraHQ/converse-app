@@ -342,7 +342,7 @@ const en = {
   transaction_triggered: "Transacting...",
   transaction_success: "Done!",
   transaction_simulating: "Safely Simulating this Transaction",
-  transaction_switch_chain: "Switch to {{chainName}}",
+  transaction_switch_chain: "Switch to chain {{chainName}}",
   transaction_pay_with: "Pay with",
 
   // New Conversation

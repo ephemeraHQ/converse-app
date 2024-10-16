@@ -83,6 +83,7 @@ export const useExternalSigner = () => {
 
   const supportedChains = useMemo(() => {
     const byId: { [chainId: number]: Chain } = {};
+    // @todo => support more here!
     [ethereum, sepolia, base].forEach((chain) => {
       byId[chain.id] = chain;
     });
@@ -103,17 +104,27 @@ export const useExternalSigner = () => {
       to,
       data,
       value,
+      chainId,
     }: {
       to?: string;
       data?: string | undefined;
       value?: string | undefined;
+      chainId?: number | undefined;
     }) => {
       if (!activeAccount || !activeWallet) {
         throw new Error("No current active account");
       }
-      const chain = await activeWallet.getChain();
-      if (!chain) {
-        throw new Error("Wallet does not seem connected to a chain");
+      let chain: Chain | undefined = undefined;
+      if (chainId) {
+        chain = supportedChains[chainId];
+        if (!chain) {
+          throw new Error(`Chain ${chainId} is not supported`);
+        }
+      } else {
+        chain = await activeWallet.getChain();
+        if (!chain) {
+          throw new Error("Wallet does not seem connected to a chain");
+        }
       }
 
       logger.info(
@@ -136,7 +147,7 @@ export const useExternalSigner = () => {
         transaction,
       });
     },
-    [activeAccount, activeWallet]
+    [activeAccount, activeWallet, supportedChains]
   );
 
   return {

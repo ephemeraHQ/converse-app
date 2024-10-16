@@ -200,8 +200,7 @@ export const getFrameImage = (frame: FrameWithType) => {
 };
 
 export const useHandleTxAction = () => {
-  const { getExternalSigner, sendTransaction, switchChain } =
-    useExternalSigner();
+  const { getExternalSigner } = useExternalSigner();
 
   const handleTxAction = useCallback(
     async (frame: FrameToDisplay, button: FrameButtonType, payload: any) => {

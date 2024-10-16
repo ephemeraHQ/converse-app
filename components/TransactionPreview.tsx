@@ -69,7 +69,7 @@ export function TransactionPreview() {
         );
         setTransactionToPreview(undefined);
       }
-      setSimulating(false);
+      setSimulating(true);
       setTxStatus("pending");
     },
     [transactionToPreview]
@@ -92,13 +92,13 @@ export function TransactionPreview() {
     };
   }, [previewTransaction]);
 
-  const [simulating, setSimulating] = useState(false);
+  const [simulating, setSimulating] = useState(true);
   useEffect(() => {
     const simulate = async () => {
       if (transactionToPreview && address) {
         setSimulating(true);
         try {
-          // await new Promise((r) => setTimeout(r, 1500));
+          await new Promise((r) => setTimeout(r, 1500));
           // const simulation = await simulateTransaction(
           //   account,
           //   address,
@@ -128,7 +128,7 @@ export function TransactionPreview() {
         `[TxFrame] Switching to chain id ${transactionToPreview.chainId}`
       );
 
-      await switchChain(transactionToPreview.chainId);
+      // await switchChain(transactionToPreview.chainId);
 
       const submittedTx = await sendTransaction(transactionToPreview);
       setTxStatus("triggered");
@@ -153,15 +153,17 @@ export function TransactionPreview() {
       if (`${e}`.includes("User rejected the request")) {
         setTxStatus("pending");
       } else {
+        logger.error(e);
         setTxStatus("failure");
       }
     }
-  }, [close, sendTransaction, switchChain, transactionToPreview]);
+  }, [close, sendTransaction, transactionToPreview]);
 
-  const shouldSwitchChain =
-    !simulating &&
-    transactionToPreview &&
-    transactionToPreview.chainId !== chainId;
+  // const shouldSwitchChain =
+  //   !simulating &&
+  //   transactionToPreview &&
+  //   transactionToPreview.chainId !== chainId;
+  const shouldSwitchChain = false;
 
   const showWalletSwitcher = !simulating && walletApp && txStatus === "pending";
 
@@ -179,12 +181,12 @@ export function TransactionPreview() {
       <VStack>
         <HStack style={styles.top}>
           <CurrentAccount style={styles.account} />
-          <Pressable onPress={close}>
-            <Text>CLOSEBUTTON</Text>
+          <Pressable onPress={() => close()}>
+            <Text>Close</Text>
           </Pressable>
         </HStack>
         {simulating && (
-          <VStack style={styles.simulation}>
+          <VStack style={styles.center}>
             <ActivityIndicator />
             <Text>{translate("transaction_simulating")}</Text>
           </VStack>
@@ -216,7 +218,7 @@ export function TransactionPreview() {
           />
         )}
         {showTxLoader && (
-          <VStack>
+          <VStack style={styles.center}>
             <ActivityIndicator />
             <Text>
               {translate(
@@ -229,7 +231,7 @@ export function TransactionPreview() {
           </VStack>
         )}
         {showTxResult && (
-          <VStack>
+          <VStack style={styles.center}>
             <Text>
               {translate(
                 txStatus === "failure"
@@ -270,7 +272,7 @@ const TransactionPreviewRow = memo((props: ITransactionPreviewRowProps) => (
 const styles = StyleSheet.create({
   top: { alignItems: "center", marginVertical: spacing.md },
   account: { marginRight: "auto" },
-  simulation: { alignItems: "center" },
+  center: { alignItems: "center" },
   row: { alignItems: "center", paddingBottom: spacing.sm },
   leftImage: {
     width: 40,
