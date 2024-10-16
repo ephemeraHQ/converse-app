@@ -9,6 +9,7 @@ import {
   useProfilesStore,
   useWalletStore,
 } from "../../data/store/accountsStore";
+import Button from "../../design-system/Button/Button";
 import { evmHelpers } from "../../utils/evm/helpers";
 import { navigate } from "../../utils/navigation";
 import {
@@ -17,7 +18,6 @@ import {
   getProfile,
 } from "../../utils/profile";
 import Avatar from "../Avatar";
-import Button from "../Button/Button";
 
 export default function ProfileSettingsButton() {
   const isPrivy = useLoggedWithPrivy();

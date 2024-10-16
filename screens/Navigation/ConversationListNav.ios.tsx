@@ -5,21 +5,15 @@ import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import React, { useLayoutEffect } from "react";
 import {
   NativeSyntheticEvent,
+  StyleSheet,
   Text,
   TextInputChangeEventData,
+  TouchableOpacity,
   View,
   useColorScheme,
-  TouchableOpacity,
-  StyleSheet,
 } from "react-native";
 import { SearchBarCommands } from "react-native-screens";
 
-import {
-  NativeStack,
-  NavigationParamList,
-  navigationAnimation,
-} from "./Navigation";
-import Button from "../../components/Button/Button.ios";
 import Connecting, {
   useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
@@ -28,10 +22,17 @@ import NewConversationButton from "../../components/ConversationList/NewConversa
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { IconButton } from "../../design-system/IconButton";
+import { PictoSizes } from "../../styles/sizes";
 import { isDesktop } from "../../utils/device";
 import { navigate } from "../../utils/navigation";
 import { getReadableProfile, shortDisplayName } from "../../utils/str";
 import ConversationList from "../ConversationList";
+import {
+  NativeStack,
+  NavigationParamList,
+  navigationAnimation,
+} from "./Navigation";
 
 type HeaderSearchBarProps = {
   searchBarRef: React.RefObject<any>;
@@ -125,10 +126,9 @@ export default function ConversationListNav() {
         headerBackTitle: getReadableProfile(currentAccount, currentAccount),
         headerRight: () => (
           <View style={styles.headerRightContainer}>
-            <Button
-              title=""
-              variant="text"
-              picto="qrcode"
+            <IconButton
+              iconName="qrcode"
+              size={PictoSizes.conversationNav}
               onPress={() => navigate("ShareProfile")}
               hitSlop={8}
             />

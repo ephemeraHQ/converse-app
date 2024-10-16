@@ -15,9 +15,9 @@ import {
   useCurrentAccount,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
+import Button from "../../../design-system/Button/Button";
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../../utils/conversation";
-import Button from "../../Button/Button";
 
 export function GroupConsentPopup() {
   const conversation = useConversationContext("conversation");

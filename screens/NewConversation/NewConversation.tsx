@@ -22,7 +22,6 @@ import {
 import { NewConversationModalParams } from "./NewConversationModal";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../../components/AndroidBackAction";
-import ConverseButton from "../../components/Button/Button";
 import SearchBar from "../../components/NewConversation/SearchBar";
 import Recommendations from "../../components/Recommendations/Recommendations";
 import ProfileSearch from "../../components/Search/ProfileSearch";
@@ -37,6 +36,7 @@ import {
 } from "../../data/store/accountsStore";
 import { ProfileSocials } from "../../data/store/profilesStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import ConverseButton from "../../design-system/Button/Button";
 import { useGroupMembers } from "../../hooks/useGroupMembers";
 import { searchProfiles } from "../../utils/api";
 import {
@@ -345,7 +345,6 @@ export default function NewConversation({
             picto="person.2"
             title="New group"
             style={styles.newGroupButton}
-            textStyle={{ fontWeight: "500" }}
             onPress={() => {
               setGroup({ enabled: true, members: [] });
             }}

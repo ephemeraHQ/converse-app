@@ -12,8 +12,8 @@ import { Platform, useColorScheme } from "react-native";
 
 import NewConversation from "./NewConversation";
 import NewGroupSummary from "./NewGroupSummary";
-import Button from "../../components/Button/Button";
 import { ProfileSocials } from "../../data/store/profilesStore";
+import Button from "../../design-system/Button/Button";
 import {
   NavigationParamList,
   navigationAnimation,

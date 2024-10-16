@@ -14,10 +14,10 @@ import {
   getSettingsStore,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
+import Button from "../../../design-system/Button/Button";
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../../utils/conversation";
 import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
-import Button from "../../Button/Button";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
 export default function ConsentPopup() {

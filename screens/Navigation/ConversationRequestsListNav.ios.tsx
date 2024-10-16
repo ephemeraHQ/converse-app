@@ -25,13 +25,13 @@ import {
   NavigationParamList,
 } from "./Navigation";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
-import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import {
   useChatStore,
   useCurrentAccount,
 } from "../../data/store/accountsStore";
+import Button from "../../design-system/Button/Button";
 import {
   consentToPeersOnProtocol,
   sortRequestsBySpamScore,

@@ -10,10 +10,10 @@ import {
   currentAccount,
   useProfilesStore,
 } from "../../data/store/accountsStore";
+import Button from "../../design-system/Button/Button";
 import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
 import { navigate } from "../../utils/navigation";
 import { canGroupMessage } from "../../utils/xmtpRN/conversations";
-import Button from "../Button/Button";
 
 type NavigationChatProps = {
   navigation: NativeStackNavigationProp<any>;

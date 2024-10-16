@@ -20,9 +20,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Terms from "./Terms";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import Button from "../../design-system/Button/Button";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
-import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
 
 type Props = {

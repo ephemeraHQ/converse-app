@@ -113,7 +113,7 @@ const AppKeyboardProvider =
 export default function AppWithProviders() {
   const colorScheme = useColorScheme();
 
-  const theme = useMemo(() => {
+  const paperTheme = useMemo(() => {
     return colorScheme === "dark" ? MaterialDarkTheme : MaterialLightTheme;
   }, [colorScheme]);
 
@@ -127,7 +127,7 @@ export default function AppWithProviders() {
           <AppKeyboardProvider>
             <ActionSheetProvider>
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                <PaperProvider theme={theme}>
+                <PaperProvider theme={paperTheme}>
                   <PortalProvider>
                     <App />
                   </PortalProvider>

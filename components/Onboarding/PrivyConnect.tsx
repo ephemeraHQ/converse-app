@@ -25,9 +25,9 @@ import PhoneInput from "react-native-phone-number-input";
 
 import OnboardingComponent from "./OnboardingComponent";
 import ValueProps from "./ValueProps";
-import Button from "../../components/Button/Button";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import Button from "../../design-system/Button/Button";
 import { usePrivyAccessToken, usePrivySigner } from "../../utils/evm/privy";
 import Picto from "../Picto/Picto";
 

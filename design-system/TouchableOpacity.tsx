@@ -11,6 +11,8 @@ export type ITouchableOpacityProps = TouchableOpacityProps & {
   withHaptics?: boolean;
 };
 
+export const TOUCHABLE_OPACITY_ACTIVE_OPACITY = 0.7;
+
 export const TouchableOpacity = memo(function TouchableOpacity(
   props: ITouchableOpacityProps
 ) {
@@ -28,5 +30,11 @@ export const TouchableOpacity = memo(function TouchableOpacity(
     [onPressProps, withHaptics]
   );
 
-  return <RNTouchableOpacity onPress={onPress} activeOpacity={0.8} {...rest} />;
+  return (
+    <RNTouchableOpacity
+      onPress={onPress}
+      activeOpacity={TOUCHABLE_OPACITY_ACTIVE_OPACITY}
+      {...rest}
+    />
+  );
 });
