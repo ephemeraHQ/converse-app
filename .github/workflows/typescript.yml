@@ -12,48 +12,48 @@ jobs:
   tsc:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4.0.2
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 20.x
           cache: "yarn"
       - run: yarn
       - run: yarn typecheck
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4.0.2
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 20.x
           cache: "yarn"
       - run: yarn
       - run: yarn lint
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4.0.2
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 20.x
           cache: "yarn"
       - run: yarn
       - run: yarn test
   performance-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4.0.2
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 20.x
           cache: "yarn"
       - run: |
           BASELINE_BRANCH=${GITHUB_BASE_REF:="main"}
