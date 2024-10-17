@@ -43,6 +43,7 @@ export function TransactionPreview() {
     getExternalSigner,
     switchChain,
     sendTransaction,
+    chainId,
   } = useExternalSigner();
   const walletApp = walletAppId
     ? installedWallets.find((w) => w.thirdwebId === walletAppId)
@@ -158,11 +159,10 @@ export function TransactionPreview() {
     }
   }, [close, sendTransaction, transactionToPreview]);
 
-  // const shouldSwitchChain =
-  //   !simulating &&
-  //   transactionToPreview &&
-  //   transactionToPreview.chainId !== chainId;
-  const shouldSwitchChain = false;
+  const shouldSwitchChain =
+    !simulating &&
+    transactionToPreview &&
+    transactionToPreview.chainId !== chainId;
 
   const showWalletSwitcher = !simulating && walletApp && txStatus === "pending";
 
