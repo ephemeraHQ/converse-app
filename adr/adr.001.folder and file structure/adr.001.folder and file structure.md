@@ -162,6 +162,7 @@ indicates the purpose of each file.
   - `[featureName].actor.ts`: State machines or actors
   - `[featureName].client.ts`: Clients that control dependencies
   - `[featureName].types.ts`: Types for this particular feature
+  - `[featureName].test.ts`: Test file(s) for this particular feature
 
 This naming convention offers several benefits:
 1. Easy to search: Use command+P to quickly find all 
