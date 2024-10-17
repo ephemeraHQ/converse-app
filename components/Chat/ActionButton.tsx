@@ -8,10 +8,10 @@ import {
   ViewStyle,
 } from "react-native";
 
-import Picto from "../Picto/Picto";
+import Picto, { IPicto } from "../Picto/Picto";
 
 type ChatActionProps = {
-  picto: string;
+  picto: IPicto;
   style?: StyleProp<ViewStyle>;
   pictoStyle?: StyleProp<ViewStyle>;
 };

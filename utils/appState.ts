@@ -33,3 +33,5 @@ export const waitUntilAppActive = async (endDelayMs: number) => {
     );
   });
 };
+
+export const isAppActive = () => AppState.currentState === "active";

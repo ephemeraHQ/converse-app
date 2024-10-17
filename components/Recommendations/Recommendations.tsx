@@ -1,5 +1,4 @@
 import { ProfileByAddress, ProfileSocials } from "@data/store/profilesStore";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   backgroundColor,
   itemSeparatorColor,
@@ -28,13 +27,13 @@ import {
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { useRouter } from "../../navigation/useNavigation";
 import { refreshRecommendationsForAccount } from "../../utils/recommendations";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 
 const EXPIRE_AFTER = 86400000; // 1 DAY
 
 export default function Recommendations({
-  navigation,
   visibility,
   profiles,
   groupMode,
@@ -42,7 +41,6 @@ export default function Recommendations({
   addToGroup,
   showTitle = true,
 }: {
-  navigation: NativeStackNavigationProp<any>;
   visibility: "FULL" | "EMBEDDED" | "HIDDEN";
   profiles?: ProfileByAddress;
   groupMode?: boolean;
@@ -50,6 +48,8 @@ export default function Recommendations({
   addToGroup?: (member: ProfileSocials & { address: string }) => void;
   showTitle?: boolean;
 }) {
+  const navigation = useRouter();
+
   const userAddress = useCurrentAccount();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const {
@@ -157,7 +157,6 @@ export default function Recommendations({
         <Recommendation
           address={item}
           recommendationData={frens[item]}
-          navigation={navigation}
           isVisible={!!viewableItems[item]}
           socials={getProfile(item, profiles)?.socials}
           groupMode={groupMode}
@@ -167,7 +166,6 @@ export default function Recommendations({
     },
     [
       frens,
-      navigation,
       styles.emoji,
       styles.sectionTitle,
       styles.sectionTitleContainer,

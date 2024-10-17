@@ -308,6 +308,7 @@
 					};
 					4C650449295C7C1F00C5A40F = {
 						CreatedOnToolsVersion = 14.2;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};

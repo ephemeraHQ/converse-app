@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 
+import { getRandomId } from "./general";
 import logger from "./logger";
 
 const timestamps: { [timestampId: string]: { start: number; last: number } } =
@@ -55,4 +56,10 @@ export const useLogRenderCount = (componentName: string, id: string) => {
       `${componentName} rendered - for ${id} ${componentRenderCount[componentName].byId[id]} - total ${componentRenderCount[componentName].total}`
     );
   });
+};
+
+export const componentKeyDebug = () => {
+  return {
+    key: getRandomId(),
+  };
 };
