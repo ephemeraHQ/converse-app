@@ -33,32 +33,18 @@ const SplitLeftStackNavigation = memo(function SplitLeftStackNavigation() {
   return (
     <NavigationContainer
       independent
-      initialState={
-        Platform.OS === "ios" || Platform.OS === "web"
-          ? {
-              // On iOS, the Accounts switcher is available through a back button
-              index: 1,
-              routes: [
-                {
-                  name: "Accounts",
-                },
-                {
-                  name: "Chats",
-                },
-              ],
-              type: "stack",
-            }
-          : {
-              // On Android, the Accounts switcher is available through the drawer
-              index: 0,
-              routes: [
-                {
-                  name: "Chats",
-                },
-              ],
-              type: "stack",
-            }
-      }
+      initialState={{
+        index: 1,
+        routes: [
+          {
+            name: "Accounts",
+          },
+          {
+            name: "Chats",
+          },
+        ],
+        type: "stack",
+      }}
       ref={(r) => {
         if (r) {
           converseNavigations["splitLeftStack"] = r;

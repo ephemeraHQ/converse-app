@@ -3,8 +3,8 @@ import { backgroundColor } from "@styles/colors";
 import { useCheckCurrentInstallation } from "@utils/xmtpRN/client";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
-import React, { useCallback, useEffect, useRef } from "react";
-import { Dimensions, Platform, useColorScheme } from "react-native";
+import React from "react";
+import { Platform, useColorScheme } from "react-native";
 
 import ExternalWalletPicker from "../components/ExternalWalletPicker";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
@@ -20,12 +20,9 @@ import { useAuthStatus } from "../data/store/authStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useThemeProvider } from "../theme/useAppTheme";
 import { useAddressBookStateHandler } from "../utils/addressBook";
-import { converseEventEmitter } from "../utils/events";
 import { useAutoConnectExternalWallet } from "../utils/evm/external";
 import { usePrivyAccessToken } from "../utils/evm/privy";
 import { converseNavigations } from "../utils/navigation";
-import AccountsAndroid from "./Accounts/AccountsAndroid";
-import AccountsDrawer from "./Accounts/AccountsDrawer";
 import { ConversationScreenConfig } from "./Navigation/ConversationNav";
 import { GroupInviteScreenConfig } from "./Navigation/GroupInviteNav";
 import { GroupLinkScreenConfig } from "./Navigation/GroupLinkNav";
@@ -125,10 +122,6 @@ export default function Main() {
 }
 
 const NavigationContent = () => {
-  const colorScheme = useColorScheme();
-
-  const { navigationDrawer } = useNavigationDrawer();
-
   const authStatus = useAuthStatus();
 
   const { splashScreenHidden } = useAppStore(
@@ -138,19 +131,6 @@ const NavigationContent = () => {
   if (!splashScreenHidden) {
     // TODO: Add a loading screen
     return null;
-  }
-
-  if (Platform.OS === "android") {
-    return (
-      <AccountsDrawer
-        drawerBackgroundColor={backgroundColor(colorScheme)}
-        ref={navigationDrawer}
-        drawerWidth={Dimensions.get("screen").width * 0.77}
-        renderNavigationView={() => <AccountsAndroid />}
-      >
-        <SignedInNavigation />
-      </AccountsDrawer>
-    );
   }
 
   if (authStatus === "idle") {
@@ -188,28 +168,4 @@ const Initializer = () => {
       <WalletsStateHandler />
     </>
   );
-};
-
-const useNavigationDrawer = () => {
-  const navigationDrawer = useRef<any>(null);
-
-  const toggleNavigationDrawer = useCallback((open: boolean) => {
-    if (open) {
-      navigationDrawer.current?.openDrawer();
-    } else {
-      navigationDrawer.current?.closeDrawer();
-    }
-  }, []);
-
-  useEffect(() => {
-    converseEventEmitter.on("toggle-navigation-drawer", toggleNavigationDrawer);
-    return () => {
-      converseEventEmitter.off(
-        "toggle-navigation-drawer",
-        toggleNavigationDrawer
-      );
-    };
-  }, [toggleNavigationDrawer]);
-
-  return { navigationDrawer, toggleNavigationDrawer };
 };

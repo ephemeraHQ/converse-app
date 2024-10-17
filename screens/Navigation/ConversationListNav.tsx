@@ -28,7 +28,6 @@ import ProfileSettingsButton from "../../components/ConversationList/ProfileSett
 import Picto from "../../components/Picto/Picto";
 import { useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { converseEventEmitter } from "../../utils/events";
 import ConversationList from "../ConversationList";
 
 export const useHeaderSearchBar = (props: any) => {
@@ -115,9 +114,7 @@ export default function ConversationListNav() {
                   <Picto picto="menu" size={PictoSizes.navItem} color={color} />
                 )}
                 onIconPress={() => {
-                  if (Platform.OS === "android") {
-                    converseEventEmitter.emit("toggle-navigation-drawer", true);
-                  } else if (Platform.OS === "web") {
+                  if (Platform.OS === "web") {
                     navigation.goBack();
                   }
                 }}
