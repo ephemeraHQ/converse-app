@@ -15,7 +15,7 @@ import {
 } from "react-native";
 
 import { useCurrentAccount } from "../../../data/store/accountsStore";
-import Button from "../../../design-system/Button/Button";
+import { Button } from "../../../design-system/Button/Button";
 import { useConversationContext } from "../../../utils/conversation";
 import { sendMessage } from "../../../utils/message";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
@@ -87,7 +87,7 @@ export function GroupChatPlaceholder({ messagesCount }: Props) {
             </Text>
 
             <Button
-              variant="secondary"
+              action="secondary"
               picto="hand.wave"
               title={translate("say_hi")}
               style={styles.cta}

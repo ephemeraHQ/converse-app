@@ -1,6 +1,6 @@
 import GroupAvatar from "@components/GroupAvatar";
 import { useCurrentAccount } from "@data/store/accountsStore";
-import Button from "@design-system/Button/Button";
+import { Button } from "@design-system/Button/Button";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { useGroupPhoto } from "@hooks/useGroupPhoto";
@@ -69,7 +69,7 @@ export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
         />
         {canEditGroupImage && (
           <Button
-            variant="text"
+            action="text"
             title={
               groupPhoto
                 ? translate("change_profile_picture")

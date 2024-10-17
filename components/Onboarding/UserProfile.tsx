@@ -29,7 +29,7 @@ import {
   useSettingsStore,
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import Button from "../../design-system/Button/Button";
+import { Button } from "../../design-system/Button/Button";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
 import { uploadFile } from "../../utils/attachment";
@@ -268,7 +268,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
         />
       </Pressable>
       <Button
-        variant="text"
+        action="text"
         title={
           profile?.avatar
             ? translate("userProfile.buttons.changeProfilePicture")

@@ -13,7 +13,7 @@ import { Platform, useColorScheme } from "react-native";
 import NewConversation from "./NewConversation";
 import NewGroupSummary from "./NewGroupSummary";
 import { ProfileSocials } from "../../data/store/profilesStore";
-import Button from "../../design-system/Button/Button";
+import { Button } from "../../design-system/Button/Button";
 import {
   NavigationParamList,
   navigationAnimation,
@@ -76,7 +76,7 @@ const NewConversationModal = ({
         options={{
           headerBackTitle: "Back",
           headerTitle: "New group",
-          headerRight: () => <Button variant="text" title="Create" />, // Dummy button for style
+          headerRight: () => <Button action="text" title="Create" />, // Dummy button for style
         }}
       />
     </ModalStack.Navigator>

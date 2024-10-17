@@ -14,7 +14,7 @@ import {
   getSettingsStore,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
-import Button from "../../../design-system/Button/Button";
+import { Button } from "../../../design-system/Button/Button";
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../../utils/conversation";
 import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
@@ -59,7 +59,7 @@ export default function ConsentPopup() {
       <Text style={styles.info}>{translate("do_you_trust_this_contact")}</Text>
       <View style={styles.buttonsContainer}>
         <Button
-          variant="secondary-danger"
+          action="danger"
           picto="xmark"
           title={translate("block")}
           style={styles.cta}
@@ -87,7 +87,7 @@ export default function ConsentPopup() {
           }}
         />
         <Button
-          variant="secondary"
+          action="secondary"
           picto="checkmark"
           title={translate("accept")}
           style={styles.cta}

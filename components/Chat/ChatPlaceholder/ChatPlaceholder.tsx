@@ -17,7 +17,7 @@ import {
   useRecommendationsStore,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
-import Button from "../../../design-system/Button/Button";
+import { Button } from "../../../design-system/Button/Button";
 import { useConversationContext } from "../../../utils/conversation";
 import { sendMessage } from "../../../utils/message";
 import { getProfile, getProfileData } from "../../../utils/profile";
@@ -78,7 +78,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
           <View>
             <Text style={styles.chatPlaceholderText}>This user is blocked</Text>
             <Button
-              variant="secondary"
+              action="secondary"
               picto="lock.open"
               title="Unblock"
               style={styles.cta}
@@ -124,7 +124,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
             )}
 
             <Button
-              variant="secondary"
+              action="secondary"
               picto="hand.wave"
               title="Say hi"
               style={styles.cta}

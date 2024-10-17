@@ -4,7 +4,7 @@ import { render, fireEvent } from "@testing-library/react-native";
 import React from "react";
 import { Platform } from "react-native";
 
-import Button from "../../design-system/Button/Button";
+import { Button } from "../../design-system/Button/Button";
 
 // Mock useColorScheme for consistent testing
 jest.mock("react-native/Libraries/Utilities/useColorScheme", () => ({
@@ -18,7 +18,7 @@ describe("Button Component", () => {
       Platform.OS = "ios"; // Set the platform to iOS
 
       const { toJSON, getByText } = render(
-        <Button title="Primary Button" variant="primary" />
+        <Button title="Primary Button" action="primary" />
       );
 
       // Verify snapshot
@@ -35,7 +35,7 @@ describe("Button Component", () => {
       const { getByText } = render(
         <Button
           title="Clickable Button"
-          variant="primary"
+          action="primary"
           onPress={onPressMock}
         />
       );
@@ -48,11 +48,11 @@ describe("Button Component", () => {
   });
 
   describe("Default (Android) Button", () => {
-    it("renders correctly with secondary-danger variant", () => {
+    it("renders correctly with danger variant", () => {
       Platform.OS = "android"; // Set the platform to Android (or default)
 
       const { toJSON, getByText } = render(
-        <Button title="Secondary Danger Button" variant="secondary-danger" />
+        <Button title="Secondary Danger Button" action="danger" />
       );
 
       // Verify snapshot
@@ -66,7 +66,7 @@ describe("Button Component", () => {
       Platform.OS = "android";
 
       const { toJSON, getByText } = render(
-        <Button title="Button with Picto" variant="grey" picto="star" />
+        <Button title="Button with Picto" picto="star" />
       );
 
       // Verify snapshot

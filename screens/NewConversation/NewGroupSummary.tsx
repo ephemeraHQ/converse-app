@@ -31,7 +31,7 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../../data/store/accountsStore";
-import Button from "../../design-system/Button/Button";
+import { Button } from "../../design-system/Button/Button";
 import { usePhotoSelect } from "../../hooks/usePhotoSelect";
 import { uploadFile } from "../../utils/attachment";
 import { navigate } from "../../utils/navigation";
@@ -182,7 +182,7 @@ export default function NewGroupSummary({
         creatingGroup || isUploadingGroupPhoto ? (
           <ActivityIndicator style={styles.activitySpinner} />
         ) : (
-          <Button variant="text" title="Create" onPress={onCreateGroupPress} />
+          <Button action="text" title="Create" onPress={onCreateGroupPress} />
         ),
     });
   }, [
@@ -238,7 +238,7 @@ export default function NewGroupSummary({
             excludeSelf={false}
           />
           <Button
-            variant="text"
+            action="text"
             title={
               groupPhoto ? "Change profile picture" : "Add profile picture"
             }

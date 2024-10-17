@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NavigationParamList } from "./Navigation/Navigation";
 import { useCurrentAccount } from "../data/store/accountsStore";
-import Button from "../design-system/Button/Button";
+import { Button } from "../design-system/Button/Button";
 import { GroupLink, getGroupLink, joinGroupFromLink } from "../utils/api";
 import { navigate } from "../utils/navigation";
 import { refreshGroup } from "../utils/xmtpRN/conversations";
@@ -97,7 +97,7 @@ export default function GroupScreen({
           )}
           {!errorMessage && (
             <Button
-              variant="primary"
+              action="primary"
               title={joining ? "Joining..." : "Join group"}
               style={[
                 {

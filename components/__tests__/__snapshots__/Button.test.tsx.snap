@@ -76,7 +76,7 @@ exports[`Button Component Default (Android) Button renders correctly with picto 
 </View>
 `;
 
-exports[`Button Component Default (Android) Button renders correctly with secondary-danger variant 1`] = `
+exports[`Button Component Default (Android) Button renders correctly with danger variant 1`] = `
 <View
   accessibilityState={
     {

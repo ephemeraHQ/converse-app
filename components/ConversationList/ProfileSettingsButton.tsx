@@ -9,7 +9,7 @@ import {
   useProfilesStore,
   useWalletStore,
 } from "../../data/store/accountsStore";
-import Button from "../../design-system/Button/Button";
+import { Button } from "../../design-system/Button/Button";
 import { evmHelpers } from "../../utils/evm/helpers";
 import { navigate } from "../../utils/navigation";
 import {
@@ -52,7 +52,7 @@ export default function ProfileSettingsButton() {
     if (Platform.OS === "android" || Platform.OS === "web") {
       return (
         <Button
-          variant="primary"
+          action="primary"
           title={stringBalance}
           onPress={openProfile}
           style={{
@@ -75,7 +75,7 @@ export default function ProfileSettingsButton() {
     }
     return (
       <Button
-        variant="text"
+        action="text"
         title={stringBalance}
         onPress={openProfile}
         style={{ marginTop: 3.5, marginRight: 16 }}

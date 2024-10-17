@@ -10,7 +10,6 @@ import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
 import {
-  Button,
   Platform,
   StyleSheet,
   Text,
@@ -19,13 +18,13 @@ import {
   View,
 } from "react-native";
 
-import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
+import { NavigationParamList } from "./Navigation/Navigation";
 import { useCurrentAccount } from "../data/store/accountsStore";
-import ConverseButton from "../design-system/Button/Button";
+import { Button } from "../design-system/Button/Button";
 
 export default function TopUp({
   route,
@@ -54,8 +53,8 @@ export default function TopUp({
 
   return (
     <View style={styles.topUp}>
-      <ConverseButton
-        variant="primary"
+      <Button
+        action="primary"
         title="Bridge from any wallet"
         style={styles.bridgeButton}
         onPress={() => {

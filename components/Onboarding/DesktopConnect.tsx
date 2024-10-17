@@ -3,7 +3,7 @@ import { StyleSheet, Text } from "react-native";
 import OnboardingComponent from "./OnboardingComponent";
 import config from "../../config";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
-import Button from "../../design-system/Button/Button";
+import { Button } from "../../design-system/Button/Button";
 
 export default function DesktopConnect() {
   const styles = useStyles();
@@ -25,7 +25,7 @@ export default function DesktopConnect() {
       <Button
         title="Back to home screen"
         style={[styles.logout, { marginTop: "auto" }]}
-        variant="text"
+        action="text"
         textStyle={{ fontWeight: "600" }}
         onPress={() => {
           setConnectionMethod(undefined);

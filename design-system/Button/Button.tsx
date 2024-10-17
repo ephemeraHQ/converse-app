@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   GestureResponderEvent,
   StyleProp,
@@ -10,15 +10,23 @@ import { Button as RNPButton } from "react-native-paper";
 import Picto from "../../components/Picto/Picto";
 import { useAppTheme } from "../../theme/useAppTheme";
 
-export type IButtonVariant =
+export type IButtonAction =
   | "primary"
   | "secondary"
-  | "secondary-danger"
-  | "grey"
+  | "positive"
+  | "negative"
+  | "danger"
+  /**
+   * @deprecated These action types are deprecated and will be removed in a future version.
+   */
+  | "warning"
   | "text";
+
+export type IButtonVariant = "solid" | "link" | "outlined";
 
 export type IButtonProps = {
   title: string;
+  action?: IButtonAction;
   variant?: IButtonVariant;
   onPress?: (event: GestureResponderEvent) => void;
   style?: StyleProp<ViewStyle>;
@@ -27,10 +35,11 @@ export type IButtonProps = {
   hitSlop?: number;
 };
 
-export default function Button({
+export function Button({
   title,
   onPress,
-  variant = "primary",
+  variant = "solid",
+  action = "primary",
   textStyle,
   picto,
   hitSlop,
@@ -49,16 +58,75 @@ export default function Button({
     [picto]
   );
 
+  const mode = useMemo(() => {
+    switch (variant) {
+      case "solid":
+        return "contained";
+      case "outlined":
+        return "outlined";
+      case "link":
+      default:
+        return "text";
+    }
+  }, [variant]);
+
+  const labelColor = useMemo(() => {
+    return action === "text" ? theme.colors.text : theme.colors.background;
+  }, [action, theme.colors]);
+
+  const backgroundColor = useMemo(() => {
+    if (variant === "solid") {
+      switch (action) {
+        case "primary":
+          return theme.colors.tint;
+        case "secondary":
+          return theme.colors.actionSecondary;
+        case "danger":
+          return theme.colors.error;
+        default:
+          return undefined;
+      }
+    }
+    return undefined;
+  }, [variant, action, theme.colors]);
+
+  const borderColor = useMemo(() => {
+    if (variant === "outlined") {
+      switch (action) {
+        case "primary":
+          return theme.colors.tint;
+        case "secondary":
+          return theme.colors.actionSecondary;
+        case "danger":
+          return theme.colors.error;
+        default:
+          return undefined;
+      }
+    }
+    return undefined;
+  }, [variant, action, theme.colors]);
+
+  const textColor = useMemo(() => {
+    return action === "text" ? theme.colors.tint : theme.colors.background;
+  }, [action, theme.colors]);
+
   return (
     <RNPButton
-      mode={
-        variant === "primary" || variant === "secondary" ? "contained" : "text"
-      }
+      mode={mode}
       onPress={onPress}
-      labelStyle={textStyle}
+      labelStyle={[{ color: labelColor }, textStyle]}
       icon={renderIcon}
       hitSlop={hitSlop}
-      style={[{ borderRadius: theme.borderRadius.xl }, style]}
+      style={[
+        {
+          borderRadius: theme.borderRadius.xl,
+          backgroundColor,
+          borderColor,
+        },
+        style,
+      ]}
+      textColor={textColor}
+      buttonColor={backgroundColor}
       {...rest}
     >
       {title}

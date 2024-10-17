@@ -28,7 +28,7 @@ import {
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
-import Button from "../design-system/Button/Button";
+import { Button } from "../design-system/Button/Button";
 import { saveXmtpKey } from "../utils/keychain/helpers";
 import { getXmtpBase64KeyFromSigner } from "../utils/xmtpRN/signIn";
 import { getXmtpClient } from "../utils/xmtpRN/sync";
@@ -195,7 +195,7 @@ export default function Onboarding() {
       {addingNewAccount && (
         <Button
           title="Cancel"
-          variant="text"
+          action="text"
           style={styles.cancelButton}
           onPress={() => setAddingNewAccount(false)}
         />

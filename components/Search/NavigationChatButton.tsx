@@ -10,7 +10,7 @@ import {
   currentAccount,
   useProfilesStore,
 } from "../../data/store/accountsStore";
-import Button from "../../design-system/Button/Button";
+import { Button } from "../../design-system/Button/Button";
 import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
 import { navigate } from "../../utils/navigation";
 import { canGroupMessage } from "../../utils/xmtpRN/conversations";
@@ -71,7 +71,7 @@ export function NavigationChatButton({
 
   return (
     <Button
-      variant={
+      action={
         Platform.OS === "android" || Platform.OS === "web"
           ? "text"
           : "secondary"

@@ -30,7 +30,7 @@ import {
   useChatStore,
   useCurrentAccount,
 } from "../../data/store/accountsStore";
-import Button from "../../design-system/Button/Button";
+import { Button } from "../../design-system/Button/Button";
 import {
   consentToPeersOnProtocol,
   sortRequestsBySpamScore,
@@ -112,7 +112,7 @@ export default function ConversationRequestsListNav() {
       headerRight: () =>
         clearingAll ? undefined : (
           <Button
-            variant="text"
+            action="text"
             title={translate("clear_all")}
             onPress={clearAllSpam}
           />

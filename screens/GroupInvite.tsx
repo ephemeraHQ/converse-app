@@ -27,7 +27,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NavigationParamList } from "./Navigation/Navigation";
 import { useCurrentAccount } from "../data/store/accountsStore";
-import Button from "../design-system/Button/Button";
+import { Button } from "../design-system/Button/Button";
 import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export default function GroupInviteScreen({
@@ -214,7 +214,7 @@ export default function GroupInviteScreen({
             joinStatus !== "ACCEPTED" &&
             joinStatus !== "REJECTED" && (
               <Button
-                variant="primary"
+                action="primary"
                 title={translate("join_group")}
                 style={styles.cta}
                 onPress={joinGroup}
@@ -222,7 +222,7 @@ export default function GroupInviteScreen({
             )}
           {polling && (
             <Button
-              variant="primary"
+              action="primary"
               title={translate("joining")}
               style={styles.cta}
             />

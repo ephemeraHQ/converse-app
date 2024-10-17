@@ -28,7 +28,7 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../data/store/accountsStore";
-import Button from "../design-system/Button/Button";
+import { Button } from "../design-system/Button/Button";
 import { spacing } from "../theme";
 import { useAppTheme } from "../theme/useAppTheme";
 import { isDesktop } from "../utils/device";
@@ -126,7 +126,7 @@ const ShareProfileContent = ({
       >
         {!compact ? (
           <Button
-            variant="primary"
+            action="primary"
             style={{
               width: "100%",
             }}
