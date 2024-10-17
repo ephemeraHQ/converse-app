@@ -1,26 +1,12 @@
 package com.converse.dev
 
 import android.Manifest
-import android.app.ActivityManager
-import android.content.ComponentName
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.net.Uri
-import android.os.Build
-import android.os.Parcelable
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.Person
-import androidx.core.content.pm.ShortcutInfoCompat
-import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.graphics.drawable.IconCompat
 import com.beust.klaxon.Klaxon
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.converse.dev.xmtp.NotificationDataResult
 import com.converse.dev.xmtp.getGroup
 import com.converse.dev.xmtp.getNewConversationFromEnvelope
@@ -219,17 +205,23 @@ class PushNotificationsService : FirebaseMessagingService() {
             Log.i(TAG, "Handling Converse Notification")
             val envelopeJSON = remoteMessage.data["data"] ?: return
             val klaxon = Klaxon().converter(NotificationConverter())
-            val payload = klaxon.parse<NotificationPayload>(envelopeJSON)
-            if (payload is GroupInviteNotification) {
-                handleGroupInviteNotification(payload)
-                println("This is an GroupInviteNotification with message: ${payload.groupInviteId}")
-            } else if (payload is GroupSyncNotification) {
-                handleGroupSyncNotification(payload)
-                println("This is an GroupSyncNotification with message: ${payload.contentTopic}")
-            } else {
-                println("Unknown payload type")
+            val payload: NotificationPayload? = try {
+                klaxon.parse<NotificationPayload>(envelopeJSON)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to parse NotificationPayload", e)
+                null
             }
-
+            if (payload != null) {
+                if (payload is GroupInviteNotification) {
+                    handleGroupInviteNotification(payload)
+                    println("This is an GroupInviteNotification with message: ${payload.groupInviteId}")
+                } else if (payload is GroupSyncNotification) {
+                    handleGroupSyncNotification(payload)
+                    println("This is an GroupSyncNotification with message: ${payload.contentTopic}")
+                }
+            } else {
+                Log.e(TAG, "Payload is null after parsing")
+            }
         } else {
             Log.i(TAG, "Empty Notification")
         }
