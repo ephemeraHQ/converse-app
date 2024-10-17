@@ -1,4 +1,4 @@
-package com.converse.dev.xmtp
+package com.converse.xmtp
 
 import android.content.Context
 import android.util.Log
@@ -7,7 +7,7 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.beust.klaxon.Klaxon
-import com.converse.dev.*
+import com.converse.*
 import com.google.crypto.tink.subtle.Base64
 
 import org.json.JSONObject

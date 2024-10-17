@@ -1,4 +1,4 @@
-package com.converse.dev
+package com.converse
 
 import android.database.sqlite.SQLiteDatabase
 import android.content.Context
