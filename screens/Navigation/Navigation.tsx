@@ -86,6 +86,8 @@ export type NavigationParamList = {
   NewAccount: undefined;
 };
 
+export type IScreenName = keyof NavigationParamList;
+
 export const authScreensSharedScreenOptions: NativeStackNavigationOptions = {
   headerTitle: "",
   headerBackTitle: "Back",
