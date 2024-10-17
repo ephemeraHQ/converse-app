@@ -7,6 +7,7 @@ import com.beust.klaxon.Klaxon
 sealed class NotificationPayload()
 
 data class GroupInviteNotification(val groupInviteId: String, val joinRequestId: String, val address: String, val account: String) : NotificationPayload()
+data class GroupSyncNotification(val contentTopic: String, val account: String) : NotificationPayload()
 // Add new Classes for custom notifications here
 
 class NotificationConverter : Converter {
@@ -15,10 +16,13 @@ class NotificationConverter : Converter {
 
     override fun fromJson(jv: JsonValue): NotificationPayload {
         val obj = jv.obj ?: throw IllegalArgumentException("Expected a JSON object")
-        return when {
-            obj.containsKey("groupInviteId") -> Klaxon().parseFromJsonObject<GroupInviteNotification>(obj)!!
-            // Add Identifiers to decide classes here
-            else -> throw IllegalArgumentException("Unknown payload type")
+        val type = obj.string("type") ?: throw IllegalArgumentException("Expected a 'type' field")
+        
+        return when (type) {
+            "group_join_request" -> Klaxon().parseFromJsonObject<GroupInviteNotification>(obj)!!
+            "group_sync" -> Klaxon().parseFromJsonObject<GroupSyncNotification>(obj)!!
+            // Add more cases for other types here
+            else -> throw IllegalArgumentException("Unknown payload type: $type")
         }
     }
 
