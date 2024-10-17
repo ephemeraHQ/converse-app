@@ -336,7 +336,7 @@ const en = {
   // Transactional frames
   transactionalFrameConnectWallet:
     "Connect to a wallet app to trigger a transaction",
-  transaction_failure: "Transaction failed",
+  transaction_failure: "Transaction failed with error: {{error}}",
   transaction_pending: "Trigger in {{wallet}}",
   transaction_triggering: "Opening {{wallet}}...",
   transaction_triggered: "Transacting...",

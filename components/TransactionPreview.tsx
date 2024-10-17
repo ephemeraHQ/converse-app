@@ -34,6 +34,11 @@ export type TransactionToTrigger = TransactionData & {
   chainId: number;
 };
 
+type TransactionState = {
+  status: "pending" | "triggering" | "triggered" | "success" | "failure";
+  error?: string;
+};
+
 export function TransactionPreview() {
   const account = useCurrentAccount() as string;
   const {
@@ -51,6 +56,10 @@ export function TransactionPreview() {
   const [transactionToPreview, setTransactionToPreview] = useState<
     TransactionToTrigger | undefined
   >(undefined);
+
+  const [txState, setTxState] = useState<TransactionState>({
+    status: "pending",
+  });
 
   const previewTransaction = useCallback(
     (transactionData: TransactionToTrigger) => {
@@ -70,7 +79,7 @@ export function TransactionPreview() {
         setTransactionToPreview(undefined);
       }
       setSimulating(true);
-      setTxStatus("pending");
+      setTxState({ status: "pending" });
     },
     [transactionToPreview]
   );
@@ -114,15 +123,11 @@ export function TransactionPreview() {
     simulate();
   }, [account, address, transactionToPreview]);
 
-  const [txStatus, setTxStatus] = useState<
-    "pending" | "triggering" | "triggered" | "success" | "failure"
-  >("pending");
-
   const trigger = useCallback(async () => {
     console.log("clicked trigger");
     if (!transactionToPreview) return;
     // converseEventEmitter.emit("triggerTransaction", transactionToPreview.id);
-    setTxStatus("triggering");
+    setTxState({ status: "triggering" });
     try {
       logger.debug(
         `[TxFrame] Switching to chain id ${transactionToPreview.chainId}`
@@ -131,7 +136,7 @@ export function TransactionPreview() {
       // await switchChain(transactionToPreview.chainId);
 
       const submittedTx = await sendTransaction(transactionToPreview);
-      setTxStatus("triggered");
+      setTxState({ status: "triggered" });
       logger.debug(
         `[TxFrame] Triggered transaction with hash ${submittedTx.transactionHash}`
       );
@@ -141,9 +146,10 @@ export function TransactionPreview() {
         transactionToPreview.id,
         transactionReceipt
       );
-      setTxStatus(
-        transactionReceipt.status === "success" ? "success" : "failure"
-      );
+      setTxState({
+        status: transactionReceipt.status === "success" ? "success" : "failure",
+      });
+
       if (transactionReceipt.status === "success") {
         setTimeout(() => {
           close(transactionReceipt);
@@ -151,14 +157,15 @@ export function TransactionPreview() {
       }
     } catch (e) {
       if (`${e}`.includes("User rejected the request")) {
-        setTxStatus("pending");
+        setTxState({ status: "pending" });
       } else {
         logger.error(e);
-        setTxStatus("failure");
+        setTxState({ status: "failure", error: `${e}` });
       }
     }
   }, [close, sendTransaction, transactionToPreview]);
 
+  const txStatus = txState.status;
   const shouldSwitchChain =
     !simulating &&
     transactionToPreview &&
@@ -239,7 +246,8 @@ export function TransactionPreview() {
               {translate(
                 txStatus === "failure"
                   ? "transaction_failure"
-                  : "transaction_success"
+                  : "transaction_success",
+                { error: txState.error }
               )}
             </Text>
           </VStack>
