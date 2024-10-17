@@ -14,7 +14,7 @@ import Navigation from "./Navigation/Navigation";
 import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
 import { useIsSplitScreen } from "./Navigation/navHelpers";
 import NotificationsScreen from "./NotificationsScreen";
-import Onboarding from "./Onboarding";
+import SCWTest from "./SCWTest";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
@@ -106,7 +106,7 @@ export default function Main() {
 
   if (splashScreenHidden) {
     if (!userAddress || addingNewAccount) {
-      screenToShow = <Onboarding />;
+      screenToShow = <SCWTest />;
     }
     // else if (!currentFarcaster && !skipFarcaster) {
     //   return <WarpcastConnect />;

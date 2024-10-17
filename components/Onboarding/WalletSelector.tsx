@@ -149,7 +149,7 @@ export default function WalletSelector() {
                   `[Onboarding] Clicked on wallet ${w.name} - opening external app`
                 );
                 try {
-                  if (w.name === "Coinbase Wallet") {
+                  if (w.thirdwebId === "com.coinbase.wallet") {
                     thirdwebConnect(async () => {
                       // instantiate wallet
                       const coinbaseWallet = createWallet(
@@ -160,7 +160,9 @@ export default function WalletSelector() {
                             callbackURL: `https://${config.websiteDomain}/coinbase`,
                           },
                           walletConfig: {
-                            options: "smartWalletOnly",
+                            options: w.isSmartContractWallet
+                              ? "smartWalletOnly"
+                              : "eoaOnly",
                           },
                         }
                       );
