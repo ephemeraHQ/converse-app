@@ -36,7 +36,7 @@ import { syncConversationsMessages, syncGroupsMessages } from "./messages";
 import { getXmtpClient } from "./sync";
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { ConversationWithLastMessagePreview } from "../conversation";
-import { getCleanAddress } from "../eth";
+import { getCleanAddress } from "../evm/address";
 import { getTopicDataFromKeychain } from "../keychain/helpers";
 import { getSecureMmkvForAccount } from "../mmkv";
 import { sentryTrackError } from "../sentry";

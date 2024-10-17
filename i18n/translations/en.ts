@@ -201,6 +201,10 @@ const en = {
   if_you_block_contact:
     "If you block this contact, you will not receive messages from them anymore",
   opening_conversation: "Opening your conversation",
+  conversation_not_found:
+    "We couldn't find this conversation. Please try again",
+  group_not_found:
+    "We couldn't find this group. Please try again or ask someone to invite you to this group",
   say_hi: "Say hi",
   do_you_trust_this_contact: "Do you trust this contact?",
   do_you_want_to_join_this_group: "Do you want to join this group?",
@@ -231,6 +235,9 @@ const en = {
   youre_the_og: "YOU'RE THE OG",
   app_version: "APP VERSION",
   security: "SECURITY",
+  xmtp_wrong_signer: "Wrong wallet",
+  xmtp_wrong_signer_description:
+    "Linked wallet does not own that XMTP identity. We unlinked it, please try again.",
 
   // Context Menu
   reply: "Reply",
@@ -273,9 +280,8 @@ const en = {
   group_join_error: "An error occurred",
   "An error occurred": "An error occurred",
   group_join_invite_invalid: "This invite is no longer valid",
-  "This invite is no longer valid": "This invite is no longer valid",
-  group_finished_polling_unsuccessfully: "This is taking longer than expected",
-  "This is taking longer than expected": "This is taking longer than expected",
+  group_finished_polling_unsuccessfully:
+    "Your request has been sent. Wait for the admin approve you",
   group_already_joined: "This invite has already been accepted",
   "This invite has already been accepted":
     "This invite has already been accepted",
@@ -294,6 +300,7 @@ const en = {
   group_invite_link_created_copied: "Invite link created and copied!",
   group_invite_link_copied: "Invite link copied!",
   group_invite_link_deleted: "Invite link deleted!",
+  add_more_members: "Add more members",
   "Add more members": "Add more members",
   copy_invite_link: "Copy invite link",
   create_invite_link: "Create invite link",
@@ -302,12 +309,22 @@ const en = {
   deny: "Deny",
   approve_member_to_this_group: "Approve {{name}} to this group",
 
+  // Wallet selector
+  no_wallet_detected: "No wallet detected",
+
   // Revocation
-  current_installation_revoked: "Installation revoked",
+  current_installation_revoked: "Logged out",
   current_installation_revoked_description:
-    "The current installation has been revoked, you will now get logged out and group chats will be deleted",
-  other_installations_count: "You have {{count}} other installations",
-  temporary_revoke_description: "Can we revoke those installations now?",
+    "You have been logged out of your account. Your group chats will be deleted from this device.",
+  other_installations_count: "You have {{count}} active logins",
+  revoke_description: "Would you like to log out from all other sessions?",
+  revoke_done_title: "Done",
+  revoke_done_description: "Logged out of {{count}} sessions",
+  revoke_empty: "You have no other active sessions",
+  revoke_others_cta: "Log out others",
+  revoke_wallet_picker_title: "Log out others",
+  revoke_wallet_picker_description:
+    "Connect the wallet associated with your XMTP account: {{wallet}}",
 
   // Emoji Picker
   search_emojis: "Search emojis",

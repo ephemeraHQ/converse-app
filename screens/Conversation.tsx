@@ -25,7 +25,7 @@ import {
   useChatStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
-import { MediaPreview } from "../data/store/chatStore";
+import { ChatStoreType, MediaPreview } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
 import {
   ConversationContext,
@@ -36,6 +36,14 @@ import { converseEventEmitter } from "../utils/events";
 import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
 import { TextInputWithValue } from "../utils/str";
 import { loadOlderMessages } from "../utils/xmtpRN/messages";
+
+const conversationSelectKeys: (keyof ChatStoreType)[] = [
+  "conversations",
+  "conversationsMapping",
+  "setConversationMessageDraft",
+  "setConversationMediaPreview",
+  "lastUpdateAt", // Added even if unused to trigger a rerender
+];
 
 const Conversation = ({
   route,
@@ -54,15 +62,7 @@ const Conversation = ({
     conversationsMapping,
     setConversationMessageDraft,
     setConversationMediaPreview,
-  } = useChatStore(
-    useSelect([
-      "conversations",
-      "conversationsMapping",
-      "setConversationMessageDraft",
-      "setConversationMediaPreview",
-      "lastUpdateAt", // Added even if unused to trigger a rerender
-    ])
-  );
+  } = useChatStore(useSelect(conversationSelectKeys));
 
   // Initial conversation topic will be set only if in route params
   const [_conversationTopic, setConversationTopic] = useState(
@@ -152,8 +152,8 @@ const Conversation = ({
   const mediaPreviewRef = useRef<MediaPreview>();
 
   const messageToPrefill = useMemo(
-    () => route.params?.message || conversation?.messageDraft || "",
-    [conversation?.messageDraft, route.params?.message]
+    () => route.params?.text || conversation?.messageDraft || "",
+    [conversation?.messageDraft, route.params?.text]
   );
   const mediaPreviewToPrefill = useMemo(
     () => conversation?.mediaPreview || null,
@@ -284,25 +284,41 @@ const Conversation = ({
     };
   }, [navigation, onLeaveScreen, onOpeningConversation]);
 
+  const conversationContextValue = useMemo(
+    () => ({
+      conversation,
+      messageToPrefill,
+      inputRef: textInputRef,
+      mediaPreviewToPrefill,
+      mediaPreviewRef,
+      isBlockedPeer,
+      onReadyToFocus,
+      transactionMode,
+      setTransactionMode,
+      frameTextInputFocused,
+      setFrameTextInputFocused,
+      tagsFetchedOnceForMessage,
+    }),
+    [
+      conversation,
+      messageToPrefill,
+      textInputRef,
+      mediaPreviewToPrefill,
+      mediaPreviewRef,
+      isBlockedPeer,
+      onReadyToFocus,
+      transactionMode,
+      setTransactionMode,
+      frameTextInputFocused,
+      setFrameTextInputFocused,
+      tagsFetchedOnceForMessage,
+    ]
+  );
+
   return (
     <View style={styles.container} key={`conversation-${colorScheme}`}>
       {route.params?.topic || route.params?.mainConversationWithPeer ? (
-        <ConversationContext.Provider
-          value={{
-            conversation,
-            messageToPrefill,
-            inputRef: textInputRef,
-            mediaPreviewToPrefill,
-            mediaPreviewRef,
-            isBlockedPeer,
-            onReadyToFocus,
-            transactionMode,
-            setTransactionMode,
-            frameTextInputFocused,
-            setFrameTextInputFocused,
-            tagsFetchedOnceForMessage,
-          }}
-        >
+        <ConversationContext.Provider value={conversationContextValue}>
           <Chat />
         </ConversationContext.Provider>
       ) : (

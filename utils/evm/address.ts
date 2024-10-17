@@ -1,20 +1,13 @@
-import { pbkdf2 } from "crypto";
-import { ethers } from "ethers";
-import {
-  entropyToMnemonic,
-  getAddress,
-  isAddress,
-  mnemonicToEntropy,
-} from "ethers/lib/utils";
-
 import {
   resolveEnsName,
-  resolveFarcasterUsername,
   resolveUnsDomain,
-} from "./api";
-import { getLensOwner } from "./lens";
-import { isUNSAddress } from "./uns";
-import config from "../config";
+  resolveFarcasterUsername,
+} from "@utils/api";
+import { getLensOwner } from "@utils/lens";
+import { isUNSAddress } from "@utils/uns";
+import { isAddress, getAddress } from "ethers/lib/utils";
+
+import config from "../../config";
 
 export const isSupportedPeer = (peer: string) => {
   const is0x = isAddress(peer.toLowerCase());
@@ -60,21 +53,6 @@ export const getAddressForPeer = async (peer: string) => {
     : peer;
   return resolvedAddress;
 };
-
-export const validateMnemonic = (mnemonic: string) =>
-  entropyToMnemonic(mnemonicToEntropy(mnemonic));
-
-export const getPrivateKeyFromMnemonic = (mnemonic: string): Promise<string> =>
-  new Promise((resolve, reject) => {
-    pbkdf2(mnemonic, "mnemonic", 2048, 64, "sha512", (error, key) => {
-      if (error) return reject(error);
-      const hdnode = ethers.utils.HDNode.fromSeed(key);
-      const path = "m/44'/60'/0'/0/0";
-      const childNode = hdnode.derivePath(path);
-      const privateKey = childNode.privateKey;
-      resolve(privateKey);
-    });
-  });
 
 export const getCleanAddress = (address: string) => {
   const lowercased = address.toLowerCase();

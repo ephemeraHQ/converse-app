@@ -1,0 +1,67 @@
+name: Create New Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  create_release_branch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Fetch All Branches
+        run: git fetch --all
+
+      - name: Get All Release Branches
+        id: release_branches
+        run: |
+          RELEASE_BRANCHES=$(git branch -r | grep 'origin/release/' | sed 's|origin/release/||' | sort -V)
+          echo "RELEASE_BRANCHES<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_BRANCHES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Determine Next Version
+        id: next_version
+        run: |
+          LATEST_RELEASE_BRANCH=$(echo "${{ steps.release_branches.outputs.RELEASE_BRANCHES }}" | tail -n1)
+          echo "Latest release branch: $LATEST_RELEASE_BRANCH"
+          IFS='.' read -ra ADDR <<< "$LATEST_RELEASE_BRANCH"
+          MAJOR=${ADDR[0]:-0}
+          MINOR=${ADDR[1]:-0}
+          PATCH=${ADDR[2]:-0}
+          NEXT_PATCH=$((PATCH+1))
+          NEXT_VERSION="$MAJOR.$MINOR.$NEXT_PATCH"
+          echo "NEXT_VERSION=$NEXT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create New Release Branch
+        run: |
+          git checkout main
+          git pull origin main
+          git checkout -b release/${{ steps.next_version.outputs.NEXT_VERSION }}
+
+      - name: Increment Version in package.json
+        run: |
+          node scripts/build/incrementVersion.js
+          git add app.json
+          git commit -m "Increment version to ${{ steps.next_version.outputs.NEXT_VERSION }}"
+
+      - name: Push New Release Branch
+        run: |
+          git push origin release/${{ steps.next_version.outputs.NEXT_VERSION }}

@@ -10,7 +10,7 @@ import { Client } from "@xmtp/xmtp-js";
 
 import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 import config from "../../config";
-import { getCleanAddress } from "../eth";
+import { getCleanAddress } from "../evm/address";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 

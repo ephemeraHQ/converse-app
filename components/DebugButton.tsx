@@ -12,8 +12,6 @@ import {
 import { navigate } from "@utils/navigation";
 import Share from "@utils/share";
 import { getNativeLogFile } from "@utils/xmtpRN/logs";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
-import { Client } from "@xmtp/react-native-sdk";
 import axios from "axios";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
@@ -56,6 +54,7 @@ export async function delayToPropogate(): Promise<void> {
 
 const DebugButton = forwardRef((props, ref) => {
   const appVersion = Constants.expoConfig?.version;
+  const debugEnabled = useDebugEnabled();
   const buildNumber =
     Platform.OS === "ios"
       ? Constants.expoConfig?.ios?.buildNumber
@@ -65,60 +64,7 @@ const DebugButton = forwardRef((props, ref) => {
   // as the second argument
   useImperativeHandle(ref, () => ({
     showDebugMenu() {
-      const methods: any = {
-        "Share current session logs": async () => {
-          Share.open({
-            title: "Converse Log Session",
-            url: `file://${loggingFilePath}`,
-            type: "text/plain",
-          });
-        },
-        "Share native logs": async () => {
-          const nativeLogFilePath = await getNativeLogFile();
-          Share.open({
-            title: "LibXMTP Logs",
-            url: `file://${nativeLogFilePath}`,
-            type: "text/plain",
-          });
-        },
-        "Share previous session logs": async () => {
-          const previousLoggingFile = await getPreviousSessionLoggingFile();
-          if (!previousLoggingFile) {
-            return Alert.alert("No previous session logging file found");
-          }
-          Share.open({
-            title: "Converse Log Session",
-            url: `file://${previousLoggingFile}`,
-            type: "text/plain",
-          });
-        },
-        "New log session": rotateLoggingFile,
-        "Display current session logs": async () => {
-          navigate("WebviewPreview", { uri: loggingFilePath });
-        },
-        "Display native logs": async () => {
-          const nativeLogFilePath = await getNativeLogFile();
-          navigate("WebviewPreview", { uri: nativeLogFilePath });
-        },
-        "Display previous session logs": async () => {
-          const previousLoggingFile = await getPreviousSessionLoggingFile();
-          if (!previousLoggingFile) {
-            return Alert.alert("No previous session logging file found");
-          }
-          navigate("WebviewPreview", { uri: previousLoggingFile });
-        },
-        "Get installations": async () => {
-          const client = (await getXmtpClient(currentAccount())) as Client;
-          const state = await client.inboxState(true);
-          Alert.alert(
-            `${state.installations.length} installations`,
-            `InboxId: ${client.inboxId}\n\nCurrent installation: ${
-              client.installationId
-            }\n\nAll installations:\n\n${state.installations
-              .map((i) => `${i.id}`)
-              .join("\n\n")}`
-          );
-        },
+      const debugMethods = {
         "Trigger OTA Update": async () => {
           try {
             const update = await Updates.fetchUpdateAsync();
@@ -185,6 +131,50 @@ const DebugButton = forwardRef((props, ref) => {
             }mediacache`
           );
           alert("Done!");
+        },
+      };
+      const methods: any = {
+        ...(debugEnabled ? debugMethods : {}),
+        "Share current session logs": async () => {
+          Share.open({
+            title: "Converse Log Session",
+            url: `file://${loggingFilePath}`,
+            type: "text/plain",
+          });
+        },
+        "Share native logs": async () => {
+          const nativeLogFilePath = await getNativeLogFile();
+          Share.open({
+            title: "LibXMTP Logs",
+            url: `file://${nativeLogFilePath}`,
+            type: "text/plain",
+          });
+        },
+        "Share previous session logs": async () => {
+          const previousLoggingFile = await getPreviousSessionLoggingFile();
+          if (!previousLoggingFile) {
+            return Alert.alert("No previous session logging file found");
+          }
+          Share.open({
+            title: "Converse Log Session",
+            url: `file://${previousLoggingFile}`,
+            type: "text/plain",
+          });
+        },
+        "New log session": rotateLoggingFile,
+        "Display current session logs": async () => {
+          navigate("WebviewPreview", { uri: loggingFilePath });
+        },
+        "Display native logs": async () => {
+          const nativeLogFilePath = await getNativeLogFile();
+          navigate("WebviewPreview", { uri: nativeLogFilePath });
+        },
+        "Display previous session logs": async () => {
+          const previousLoggingFile = await getPreviousSessionLoggingFile();
+          if (!previousLoggingFile) {
+            return Alert.alert("No previous session logging file found");
+          }
+          navigate("WebviewPreview", { uri: previousLoggingFile });
         },
         Cancel: undefined,
       };

@@ -1,7 +1,6 @@
 import { NavigationProp } from "@react-navigation/native";
 import { backgroundColor, clickedItemBackgroundColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import logger from "@utils/logger";
 import { Dimensions, Platform, StyleSheet, useColorScheme } from "react-native";
 import { Drawer } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,7 +14,6 @@ import {
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { converseEventEmitter } from "../../utils/events";
-import { useDisconnectWallet } from "../../utils/logout/wallet";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 
 type Props = {
@@ -27,7 +25,6 @@ export default function AccountsAndroid({ navigation }: Props) {
   const accounts = useAccountsList();
   const accountsProfiles = useAccountsProfiles();
 
-  const disconnectWallet = useDisconnectWallet();
   const { currentAccount, setCurrentAccount } = useAccountsStore(
     useSelect(["currentAccount", "setCurrentAccount"])
   );
@@ -85,12 +82,7 @@ export default function AccountsAndroid({ navigation }: Props) {
         icon={({ color }) => (
           <Picto picto="plus" size={PictoSizes.navItem} color={color} />
         )}
-        onPress={async () => {
-          try {
-            await disconnectWallet();
-          } catch (e) {
-            logger.error(e);
-          }
+        onPress={() => {
           setAddingNewAccount(true);
         }}
         rippleColor={clickedItemBackgroundColor(colorScheme)}

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getCleanAddress } from "@utils/eth";
+import { getCleanAddress } from "@utils/evm/address";
 import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
 import { xmtpClientByAccount } from "@utils/xmtpRN/client";
 import { ConverseXmtpClientType } from "@utils/xmtpRN/client.types";

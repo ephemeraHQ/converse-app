@@ -1,19 +1,17 @@
-import { clearConverseDb, getConverseDbPath } from "@data/db";
+import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
+import logger from "@utils/logger";
+import { ConverseXmtpClientType, dropXmtpClient } from "@utils/xmtpRN/client";
+import { getInboxId } from "@utils/xmtpRN/signIn";
+import { useCallback } from "react";
+
+import { useDisconnectFromPrivy } from "./privy";
+import { clearConverseDb, getConverseDbPath } from "../../data/db";
 import {
   getAccountsList,
   getChatStore,
   getWalletStore,
   useAccountsStore,
-} from "@data/store/accountsStore";
-import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
-import logger from "@utils/logger";
-import { dropXmtpClient } from "@utils/xmtpRN/client";
-import { ConverseXmtpClientType } from "@utils/xmtpRN/client.types";
-import { getInboxId } from "@utils/xmtpRN/signIn";
-import { useCallback } from "react";
-
-import { useDisconnectFromPrivy } from "./privy";
-// import { useDisconnectWallet } from "./wallet";
+} from "../../data/store/accountsStore";
 import { deleteSecureItemAsync } from "../keychain";
 import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
 import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
@@ -141,7 +139,6 @@ export const logoutAccount = async (
   account: string,
   dropLocalDatabase: boolean,
   isV3Enabled: boolean = true,
-  disconnectWallet: () => void,
   privyLogout: () => void
 ) => {
   logger.debug(
@@ -166,7 +163,6 @@ export const logoutAccount = async (
     }
   }
   await dropXmtpClient(await getInboxId(account));
-  disconnectWallet();
   const isPrivyAccount = !!useAccountsStore.getState().privyAccountId[account];
   if (isPrivyAccount) {
     privyLogout();
@@ -229,23 +225,11 @@ export const logoutAccount = async (
 
 export const useLogoutFromConverse = (account: string) => {
   const privyLogout = useDisconnectFromPrivy();
-  // const disconnectWallet = useDisconnectWallet();
-  const disconnectWallet = () => {};
   const logout = useCallback(
     async (dropLocalDatabase: boolean, isV3Enabled: boolean = true) => {
-      logoutAccount(
-        account,
-        dropLocalDatabase,
-        isV3Enabled,
-        disconnectWallet,
-        privyLogout
-      );
+      logoutAccount(account, dropLocalDatabase, isV3Enabled, privyLogout);
     },
-    [
-      account,
-      // disconnectWallet,
-      privyLogout,
-    ]
+    [account, privyLogout]
   );
   return logout;
 };

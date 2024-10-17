@@ -4,7 +4,7 @@ import {
   itemSeparatorColor,
   tertiaryBackgroundColor,
 } from "@styles/colors";
-import { getCleanAddress } from "@utils/eth";
+import { getCleanAddress } from "@utils/evm/address";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -273,6 +273,8 @@ const useIsShowingPlaceholder = ({
   return messages.length === 0 || isBlockedPeer || !conversation;
 };
 
+const keyExtractor = (item: MessageToDisplay) => item.id;
+
 export function Chat() {
   const conversation = useConversationContext("conversation");
   const AnimatedListView = useAnimatedListView(conversation);
@@ -388,8 +390,6 @@ export function Chat() {
     framesStore,
     colorScheme,
   });
-
-  const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
 
   const messageListRef = useRef<
     FlatList<MessageToDisplay> | FlashList<MessageToDisplay> | undefined
@@ -606,36 +606,40 @@ export function ChatPreview() {
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    chatContainer: {
-      flex: 1,
-      justifyContent: "flex-end",
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    chatContent: {
-      backgroundColor: backgroundColor(colorScheme),
-      flex: 1,
-    },
-    chatPreviewContent: {
-      backgroundColor: backgroundColor(colorScheme),
-      flex: 1,
-      paddingBottom: 0,
-    },
-    chat: {
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    inputBottomFiller: {
-      position: "absolute",
-      width: "100%",
-      bottom: 0,
-      backgroundColor: backgroundColor(colorScheme),
-      zIndex: 0,
-    },
-    inChatRecommendations: {
-      borderBottomWidth: 0.5,
-      borderBottomColor: itemSeparatorColor(colorScheme),
-      marginHorizontal: 20,
-      marginBottom: 10,
-    },
-  });
+  return useMemo(
+    () =>
+      StyleSheet.create({
+        chatContainer: {
+          flex: 1,
+          justifyContent: "flex-end",
+          backgroundColor: backgroundColor(colorScheme),
+        },
+        chatContent: {
+          backgroundColor: backgroundColor(colorScheme),
+          flex: 1,
+        },
+        chatPreviewContent: {
+          backgroundColor: backgroundColor(colorScheme),
+          flex: 1,
+          paddingBottom: 0,
+        },
+        chat: {
+          backgroundColor: backgroundColor(colorScheme),
+        },
+        inputBottomFiller: {
+          position: "absolute",
+          width: "100%",
+          bottom: 0,
+          backgroundColor: backgroundColor(colorScheme),
+          zIndex: 0,
+        },
+        inChatRecommendations: {
+          borderBottomWidth: 0.5,
+          borderBottomColor: itemSeparatorColor(colorScheme),
+          marginHorizontal: 20,
+          marginBottom: 10,
+        },
+      }),
+    [colorScheme]
+  );
 };

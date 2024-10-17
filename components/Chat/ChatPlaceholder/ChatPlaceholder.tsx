@@ -1,5 +1,6 @@
 import { translate } from "@i18n";
 import { actionSheetColors, textPrimaryColor } from "@styles/colors";
+import { isGroupTopic } from "@utils/groupUtils/groupId";
 import {
   Keyboard,
   Platform,
@@ -31,6 +32,7 @@ type Props = {
 };
 
 export default function ChatPlaceholder({ messagesCount }: Props) {
+  const topic = useConversationContext("topic");
   const conversation = useConversationContext("conversation");
   const isBlockedPeer = useConversationContext("isBlockedPeer");
   const onReadyToFocus = useConversationContext("onReadyToFocus");
@@ -62,9 +64,13 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
       >
         {!conversation && (
           <View>
-            <ActivityIndicator style={{ marginBottom: 20 }} />
+            {!topic && <ActivityIndicator style={{ marginBottom: 20 }} />}
             <Text style={styles.chatPlaceholderText}>
-              Opening your conversation
+              {topic
+                ? isGroupTopic(topic)
+                  ? translate("group_not_found")
+                  : translate("conversation_not_found")
+                : translate("opening_conversation")}
             </Text>
           </View>
         )}
@@ -152,6 +158,7 @@ const useStyles = () => {
       textAlign: "center",
       fontSize: Platform.OS === "android" ? 16 : 17,
       color: textPrimaryColor(colorScheme),
+      paddingHorizontal: 30,
     },
     cta: {
       alignSelf: "center",

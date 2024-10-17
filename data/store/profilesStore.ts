@@ -1,4 +1,4 @@
-import { getCleanAddress } from "@utils/eth";
+import { getCleanAddress } from "@utils/evm/address";
 import logger from "@utils/logger";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";

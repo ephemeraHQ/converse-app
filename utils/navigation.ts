@@ -1,5 +1,9 @@
+import * as Linking from "expo-linking";
+import { Linking as RNLinking } from "react-native";
+
 import logger from "./logger";
 import { loadSavedNotificationMessagesToContext } from "./notifications";
+import config from "../config";
 import { currentAccount, getChatStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
@@ -54,4 +58,64 @@ export const navigateToTopicWithRetry = async () => {
   if (topicToNavigateTo && conversationToNavigateTo) {
     navigateToConversation(conversationToNavigateTo);
   }
+};
+
+export const getSchemedURLFromUniversalURL = (url: string) => {
+  // Handling universal links by saving a schemed URI
+  for (const prefix of config.universalLinks) {
+    if (url.startsWith(prefix)) {
+      return Linking.createURL(url.replace(prefix, ""));
+    }
+  }
+  return url;
+};
+
+const isDMLink = (url: string) => {
+  for (const prefix of config.universalLinks) {
+    if (url.startsWith(prefix)) {
+      const path = url.slice(prefix.length);
+      if (path.toLowerCase().startsWith("dm/")) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+const isGroupInviteLink = (url: string) => {
+  for (const prefix of config.universalLinks) {
+    if (url.startsWith(prefix)) {
+      const path = url.slice(prefix.length);
+      if (path.toLowerCase().startsWith("group-invite/")) {
+        return true;
+      }
+    }
+  }
+};
+
+const isGroupLink = (url: string) => {
+  for (const prefix of config.universalLinks) {
+    if (url.startsWith(prefix)) {
+      const path = url.slice(prefix.length);
+      if (path.toLowerCase().startsWith("group/")) {
+        return true;
+      }
+    }
+  }
+};
+
+const originalOpenURL = RNLinking.openURL.bind(RNLinking);
+RNLinking.openURL = (url: string) => {
+  // If the URL is a DM link, open it inside the app
+  // as a deeplink, not the browser
+  if (isDMLink(url)) {
+    return originalOpenURL(getSchemedURLFromUniversalURL(url));
+  }
+  if (isGroupInviteLink(url)) {
+    return originalOpenURL(getSchemedURLFromUniversalURL(url));
+  }
+  if (isGroupLink(url)) {
+    return originalOpenURL(getSchemedURLFromUniversalURL(url));
+  }
+  return originalOpenURL(url);
 };

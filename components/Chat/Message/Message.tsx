@@ -542,6 +542,20 @@ type RenderedChatMessage = {
 };
 
 const renderedMessages = new LimitedMap<string, RenderedChatMessage>(50);
+const keysChangesToRerender: (keyof MessageToDisplay)[] = [
+  "id",
+  "sent",
+  "status",
+  "lastUpdateAt",
+  "dateChange",
+  "hasNextMessageInSeries",
+  "hasPreviousMessageInSeries",
+  "isLatestSettledFromMe",
+  "isLatestSettledFromPeer",
+  "isLoadingAttachment",
+  "nextMessageIsLoadingAttachment",
+  "reactions",
+];
 
 export default function CachedChatMessage({
   account,
@@ -550,20 +564,6 @@ export default function CachedChatMessage({
   isGroup,
   isFrame = false,
 }: Props) {
-  const keysChangesToRerender: (keyof MessageToDisplay)[] = [
-    "id",
-    "sent",
-    "status",
-    "lastUpdateAt",
-    "dateChange",
-    "hasNextMessageInSeries",
-    "hasPreviousMessageInSeries",
-    "isLatestSettledFromMe",
-    "isLatestSettledFromPeer",
-    "isLoadingAttachment",
-    "nextMessageIsLoadingAttachment",
-    "reactions",
-  ];
   const alreadyRenderedMessage = renderedMessages.get(
     `${account}-${message.id}`
   );

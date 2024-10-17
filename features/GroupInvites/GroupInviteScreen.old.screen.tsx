@@ -1,13 +1,10 @@
 import Avatar from "@components/Avatar";
-import Button from "@components/Button/Button";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
 import { useGroupInviteQuery } from "@queries/useGroupInviteQuery";
 import { fetchGroupsQuery } from "@queries/useGroupsQuery";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { NavigationParamList } from "@screens/Navigation/Navigation";
 import {
   backgroundColor,
   dangerColor,
@@ -22,17 +19,16 @@ import {
 } from "@utils/api";
 import { getTopicFromGroupId } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
-import { GroupWithCodecsType } from "@utils/xmtpRN/client.types";
-import { refreshGroup } from "@utils/xmtpRN/conversations";
+import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import {
-  getInviteJoinRequestId,
-  saveInviteJoinRequestId,
-} from "./groupInvites.utils";
+import { NavigationParamList } from "./Navigation/Navigation";
+import Button from "../components/Button/Button";
+import { useCurrentAccount } from "../data/store/accountsStore";
+import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export default function GroupInviteScreen({
   route,
@@ -50,7 +46,7 @@ export default function GroupInviteScreen({
     setGroupJoinState,
   ] = useState<{
     polling: boolean;
-    /* Unsuccessfully here means that we have not yet received confirmation
+    /* Unsuccessfully here means that we have not yet received confirmation 
         from the invitee that we have been added to the group */
     finishedPollingUnsuccessfully: boolean;
     joinStatus: null | GroupJoinRequestStatus;
@@ -75,11 +71,7 @@ export default function GroupInviteScreen({
           includeAddedBy: false,
         });
         await refreshGroup(account, group.topic);
-        // does replace work here?
-        navigation.goBack();
-        setTimeout(() => {
-          navigation.navigate("Conversation", { topic: group.topic });
-        }, 300);
+        navigation.replace("Conversation", { topic: group.topic });
       }
     },
     [account, allowGroup, navigation]
@@ -100,24 +92,20 @@ export default function GroupInviteScreen({
     });
     const groupId = groupInvite.groupId;
     // Group ID is not available on previous versions of the app, so we need to fetch the groups
-    const groupsBeforeJoining = groupId
-      ? { ids: [], byId: {} }
-      : await fetchGroupsQuery(account);
+    const groupsBeforeJoining = await fetchGroupsQuery(account);
+    if (groupId && groupsBeforeJoining.byId[getTopicFromGroupId(groupId)]) {
+      // User has already been added to the group
+      handleNewGroup(groupsBeforeJoining.byId[getTopicFromGroupId(groupId)]);
+      return;
+    }
     logger.debug(
       `[GroupInvite] Before joining, group count = ${groupsBeforeJoining.ids.length}`
     );
-    let joinRequestId = getInviteJoinRequestId(account, groupInvite?.id);
-    if (!joinRequestId) {
-      logger.debug(
-        `[GroupInvite] Sending the group join request to Converse backend`
-      );
-      const joinRequest = await createGroupJoinRequest(
-        account,
-        groupInvite?.id
-      );
-      joinRequestId = joinRequest.id;
-      saveInviteJoinRequestId(account, groupInvite?.id, joinRequestId);
-    }
+    logger.debug(
+      `[GroupInvite] Sending the group join request to Converse backend`
+    );
+    const joinRequest = await createGroupJoinRequest(account, groupInvite?.id);
+    const joinRequestId = joinRequest.id;
     let count = 0;
     let status: GroupJoinRequestStatus = "PENDING";
     while (count < 10 && status === "PENDING") {
@@ -168,29 +156,15 @@ export default function GroupInviteScreen({
             joinStatus: "ACCEPTED",
           });
         }
-
         return;
-      } // returns from here so below doesn't happen if groupId is not null
+      }
 
       const oldGroupIds = new Set(groupsBeforeJoining.ids);
       const newGroupId = groupsAfterJoining.ids.find(
         (id) => !oldGroupIds.has(id)
       );
       if (newGroupId) {
-        const newGroup = groupsAfterJoining.byId[newGroupId];
-        // looks like if the user was on an old version of the app
-        // nd they joined a group that they had been blocked from,
-        // then there would be some uncovered edge case?
-        const wasblocked = !newGroup.isGroupActive;
-        if (wasblocked) {
-          setGroupJoinState({
-            polling: false,
-            finishedPollingUnsuccessfully: false,
-            joinStatus: "REJECTED",
-          });
-        } else {
-          setNewGroup(newGroup);
-        }
+        setNewGroup(groupsAfterJoining.byId[newGroupId]);
       } else {
         setGroupJoinState({
           polling: false,
@@ -205,7 +179,7 @@ export default function GroupInviteScreen({
         joinStatus: status,
       });
     }
-  }, [account, groupInvite?.id, groupInvite?.groupId]);
+  }, [groupInvite?.id, groupInvite?.groupId, account, handleNewGroup]);
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
 

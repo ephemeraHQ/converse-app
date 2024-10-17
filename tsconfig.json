@@ -1,46 +1,23 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "module": "ESNext",
     "strict": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      "@components/*": [
-        "./components/*"
-      ],
-      "@containers/*": [
-        "./containers/*"
-      ],
-      "@data/*": [
-        "./data/*"
-      ],
-      "@hooks/*": [
-        "./hooks/*"
-      ],
-      "@i18n/*": [
-        "./i18n/*"
-      ],
-      "@i18n": [
-        "./i18n/index"
-      ],
-      "@queries/*": [
-        "./queries/*"
-      ],
-      "@screens/*": [
-        "./screens/*"
-      ],
-      "@styles/*": [
-        "./styles/*"
-      ],
-      "@utils/*": [
-        "./utils/*"
-      ],
-    },
+      "@components/*": ["./components/*"],
+      "@containers/*": ["./containers/*"],
+      "@data/*": ["./data/*"],
+      "@hooks/*": ["./hooks/*"],
+      "@i18n/*": ["./i18n/*"],
+      "@i18n": ["./i18n/index"],
+      "@queries/*": ["./queries/*"],
+      "@screens/*": ["./screens/*"],
+      "@styles/*": ["./styles/*"],
+      "@utils/*": ["./utils/*"],
+      "@theme": ["./theme/*"],
+      "@design-system": ["./design-system/*"]
+    }
   },
-  "exclude": [
-    "./vendor/**/*",
-    "./node_modules/**/*",
-    "./dist/**/*",
-  ]
+  "exclude": ["./vendor/**/*", "./node_modules/**/*", "./dist/**/*"]
 }
