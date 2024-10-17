@@ -13,13 +13,12 @@ import {
   Share,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useColorScheme,
   View,
-  TouchableOpacity,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
-import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Avatar from "../components/Avatar";
 import ActionButton from "../components/Chat/ActionButton";
@@ -34,12 +33,13 @@ import { spacing } from "../theme";
 import { useAppTheme } from "../theme/useAppTheme";
 import { isDesktop } from "../utils/device";
 import {
-  getPreferredUsername,
   getPreferredAvatar,
   getPreferredName,
+  getPreferredUsername,
   getProfile,
 } from "../utils/profile";
 import { shortAddress } from "../utils/str";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 const ShareProfileContent = ({
   userAddress,
@@ -127,6 +127,9 @@ const ShareProfileContent = ({
         {!compact ? (
           <Button
             variant="primary"
+            style={{
+              width: "100%",
+            }}
             title={shareButtonText}
             picto={
               Platform.OS === "web"

@@ -8,6 +8,7 @@ import {
 import { Button as RNPButton } from "react-native-paper";
 
 import Picto from "../../components/Picto/Picto";
+import { useAppTheme } from "../../theme/useAppTheme";
 
 export type IButtonVariant =
   | "primary"
@@ -33,8 +34,11 @@ export default function Button({
   textStyle,
   picto,
   hitSlop,
+  style,
   ...rest
 }: IButtonProps) {
+  const { theme } = useAppTheme();
+
   const renderIcon = useCallback(
     ({ color, size }: { color: string; size: number }) => {
       if (!picto) {
@@ -54,6 +58,7 @@ export default function Button({
       labelStyle={textStyle}
       icon={renderIcon}
       hitSlop={hitSlop}
+      style={[{ borderRadius: theme.borderRadius.xl }, style]}
       {...rest}
     >
       {title}

@@ -22,7 +22,9 @@ import NewConversationButton from "../../components/ConversationList/NewConversa
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { HStack } from "../../design-system/HStack";
 import { IconButton } from "../../design-system/IconButton";
+import { VStack } from "../../design-system/VStack";
 import { PictoSizes } from "../../styles/sizes";
 import { isDesktop } from "../../utils/device";
 import { navigate } from "../../utils/navigation";
@@ -125,17 +127,17 @@ export default function ConversationListNav() {
           ),
         headerBackTitle: getReadableProfile(currentAccount, currentAccount),
         headerRight: () => (
-          <View style={styles.headerRightContainer}>
+          <HStack style={styles.headerRightContainer}>
             <IconButton
               iconName="qrcode"
               size={PictoSizes.conversationNav}
               onPress={() => navigate("ShareProfile")}
               hitSlop={8}
             />
-            <View style={styles.offsetComposeIcon}>
+            <VStack style={styles.offsetComposeIcon}>
               <NewConversationButton navigation={navigation} route={route} />
-            </View>
-          </View>
+            </VStack>
+          </HStack>
         ),
         headerTintColor: textPrimaryColor(colorScheme),
         headerShadowVisible: false,
@@ -192,7 +194,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   headerRightContainer: {
-    flexDirection: "row",
     alignItems: "center",
     marginTop: -8,
   },

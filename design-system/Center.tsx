@@ -2,7 +2,7 @@ import { ForwardedRef, forwardRef } from "react";
 import { View } from "react-native";
 import Animated, { AnimatedProps } from "react-native-reanimated";
 
-import { HStack } from "./HStack";
+import { HStack, IHStackProps } from "./HStack";
 
 export type ICenterProps = IHStackProps;
 

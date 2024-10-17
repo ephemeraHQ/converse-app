@@ -5,3 +5,5 @@ export const borderRadius = {
   xl: 16,
   xxl: 24,
 } as const;
+
+export type IBorderRadius = typeof borderRadius;

@@ -7,8 +7,8 @@ import {
 import { IconSource as RNPIconSource } from "react-native-paper/lib/typescript/components/Icon";
 import { interpolate, useAnimatedStyle } from "react-native-reanimated";
 
-import { AnimatedCenter } from "./Center";
 import { TOUCHABLE_OPACITY_ACTIVE_OPACITY } from "./TouchableOpacity";
+import { AnimatedVStack } from "./VStack";
 import Picto from "../components/Picto/Picto";
 import { usePressInOut } from "../hooks/usePressInOut";
 import { $globalStyles } from "../theme/styles";
@@ -47,7 +47,6 @@ export const IconButton = memo(function IconButton({
       }
 
       if (iconName) {
-        console.log("props.color:", props.color);
         return <Picto picto={iconName} color={props.color} size={props.size} />;
       }
 
@@ -87,7 +86,7 @@ export const IconButton = memo(function IconButton({
   );
 
   return (
-    <AnimatedCenter style={animatedStyle}>
+    <AnimatedVStack style={animatedStyle}>
       <RNPIconButton
         onPress={onPress}
         onPressIn={handlePressIn}
@@ -102,6 +101,6 @@ export const IconButton = memo(function IconButton({
         })}
         {...rest}
       />
-    </AnimatedCenter>
+    </AnimatedVStack>
   );
 });

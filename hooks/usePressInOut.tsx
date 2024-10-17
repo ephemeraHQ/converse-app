@@ -22,11 +22,11 @@ export function usePressInOut() {
   );
 
   const handlePressIn = useCallback(() => {
-    pressedInAV.value = withTiming(1, { duration: timing.veryVeryFast });
+    pressedInAV.value = withTiming(1, { duration: timing.veryFast });
   }, [pressedInAV]);
 
   const handlePressOut = useCallback(() => {
-    pressedInAV.value = withTiming(0, { duration: timing.veryVeryFast });
+    pressedInAV.value = withTiming(0, { duration: timing.veryFast });
   }, [pressedInAV]);
 
   return {
