@@ -22,12 +22,20 @@ type JoinGroupMachineErrorType =
 
 export type JoinGroupMachineContext = {
   // Context
+  /** User's currently active account */
   account: string;
+  /** Group invite metadata, includes info such as group name, group ID, etc */
   groupInviteMetadata?: GroupInvite;
+  /** Contains a snapshot of the groups a user was a member of prior to
+   * attempting to join this group from the Deeplink */
   groupsBeforeJoinRequestAccepted?: GroupsDataEntity;
-  newGroup?: GroupData;
+  /** The group that the user has been invited to join */
+  invitedGroup?: GroupData;
+  /** The status of the group join request (accepted, rejected, pending) */
   joinStatus: GroupJoinRequestStatus;
+
   // From Input
+  /** The ID of the group invite - used to fetch the metadata */
   groupInviteId: string;
 
   error?: { type: JoinGroupMachineErrorType; payload: string };
@@ -53,14 +61,9 @@ export const joinGroupMachineLogic = setup({
       GroupInvite,
       { account: string; groupInviteId: string }
     >(async ({ input }) => {
-      console.log(`[fetchGroupInviteActorLogic] Starting with input:`, input);
       const { groupInviteId } = input;
       const groupInvite = await Controlled.joinGroupClient.fetchGroupInvite(
         groupInviteId
-      );
-      console.log(
-        `[fetchGroupInviteActorLogic] Fetched group invite:`,
-        groupInvite
       );
       return groupInvite;
     }),
@@ -69,15 +72,10 @@ export const joinGroupMachineLogic = setup({
       GroupsDataEntity,
       { account: string }
     >(async ({ input }) => {
-      console.log(
-        `[fetchGroupsByAccountActorLogic] Starting with input:`,
-        input
-      );
       const { account } = input;
       const groups = await Controlled.joinGroupClient.fetchGroupsByAccount(
         account
       );
-      console.log(`[fetchGroupsByAccountActorLogic] Fetched groups:`, groups);
       return groups;
     }),
 
@@ -85,15 +83,10 @@ export const joinGroupMachineLogic = setup({
       JoinGroupResult,
       { account: string; groupInviteId: string }
     >(async ({ input }) => {
-      console.log(`[attemptToJoinGroupActorLogic] Starting with input:`, input);
       const { account, groupInviteId } = input;
       const result = await Controlled.joinGroupClient.attemptToJoinGroup(
         account,
         groupInviteId
-      );
-      console.log(
-        `[attemptToJoinGroupActorLogic] Join attempt result:`,
-        result
       );
       return result;
     }),
@@ -117,7 +110,6 @@ export const joinGroupMachineLogic = setup({
       };
 
       await Controlled.joinGroupClient.allowGroup(allowGroupProps);
-      console.log(`[provideUserConsentToJoinGroup] User consent provided`);
     }),
 
     refreshGroup: fromPromise<void, { account: string; topic: string }>(
@@ -136,10 +128,6 @@ export const joinGroupMachineLogic = setup({
         _,
         params: { groupInviteMetadata: GroupInvite }
       ) => {
-        console.log(
-          `[saveGroupInviteMetadata] Saving metadata:`,
-          params.groupInviteMetadata
-        );
         return params.groupInviteMetadata;
       },
     }),
@@ -149,14 +137,12 @@ export const joinGroupMachineLogic = setup({
         _,
         params: { error: { type: JoinGroupMachineErrorType; payload: string } }
       ) => {
-        console.log(`[saveError] Saving error:`, params.error);
         return params.error;
       },
     }),
 
     navigateToGroupScreen: log((_, params: { topic: string }) => {
       const logMessage = `[navigateToGroupScreen] Navigating to group screen with topic: ${params.topic}`;
-      console.log(logMessage);
       return logMessage;
     }),
 
@@ -174,9 +160,9 @@ export const joinGroupMachineLogic = setup({
     }),
 
     saveNewGroup: assign({
-      newGroup: (_, params: { newGroup?: GroupData }) => {
-        console.log(`[saveNewGroup] Saving new group:`, params.newGroup);
-        return params.newGroup;
+      invitedGroup: (_, params: { invitedGroup?: GroupData }) => {
+        console.log(`[saveNewGroup] Saving new group:`, params.invitedGroup);
+        return params.invitedGroup;
       },
     }),
 
@@ -251,15 +237,18 @@ export const joinGroupMachineLogic = setup({
 
     userHasAlreadyJoinedGroup: (
       _,
-      params: { newGroup: GroupData | undefined }
+      params: { invitedGroup: GroupData | undefined }
     ) => {
-      const result = params.newGroup === undefined;
+      const result = params.invitedGroup === undefined;
       console.log(`[userHasAlreadyJoinedGroup] Result:`, result);
       return result;
     },
 
-    hasUserNotBeenBlocked: (_, params: { newGroup: GroupData | undefined }) => {
-      const result = params.newGroup?.isGroupActive === true;
+    hasUserNotBeenBlocked: (
+      _,
+      params: { invitedGroup: GroupData | undefined }
+    ) => {
+      const result = params.invitedGroup?.isGroupActive === true;
       console.log(`[hasUserNotBeenBlocked] Result:`, result);
       return result;
     },
@@ -280,7 +269,7 @@ export const joinGroupMachineLogic = setup({
     },
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QCsD2BLAdgcQE6oFcAHAWQEMBjACyzADoAZVMiLKAAj0KPYElMAbugAuYdiTDCWZKQGIIqTPSwDUAa3oAzSdS7F+Q0QEEKw1LiZR0FANoAGALqJQRVLBHpFzkAA9EANgAWAHY6ACYAVgAOCIBOWOD-AGYk+OCAGhAAT0QAWkCk0MCCwLCCwojUhIBfasy0LD1SSholRmZWTA4mvkERMQkpCBkyWTBcfFw6IgAbGU1zAFs6bWFdfH0+41NzS2t7JyQQV3dhT0xvPwQARiiwun9YiOuk67jXsODrsMychFzotc6FE7ElQXYEsEImEolFavUMDgNs1qLQ6AB1MgeLrsABi5nYAFVYON2CYzopZAQSVNWBAACpkIgAKURTQO3hOHi8RyuwTC-jodii-kegWigVipSSv0QEWCsTowUCUVi10eURCwrC8JADSR3HIqLaABFJONFlg2JxkbB2KzaBB2AAhMALXBiIzCUSLIjCeSKZSCdRaHRUJqwV3usAOzBsDlHLkUi68xDBOz3YLBKLXN6BYWxKLBGXZRDfUJ2fzfCKVIvXKU6up6tnIo2tehm0S4S1xnER+2IyAut3mT3esC+-3jSbTObCd3LVbrbiRkce2PxxyctzclOgK7XbNC+sQsKpUWHqKy-7PYFVw-KoIqpKffy6-VNNtor0+v3WswDlgNrcAGbQqCGdAyL+wj0qgsZNOSuyoFYthbomO7Jpccr8sCYTXHYUIqjCcSxNeuaHnQLxnskCSxHYdiBG+TYfq2LTfuOk7-qggGYMBxCgUGqgaJBHF+rB8HIohFjIfs1yHC4GHnFhNyVHYwKqkkESiiK4oCmR+FJEKYQEcknzyv4-Lvi2hpsW0P4Tn+OIAbGfFEAJdDgcJUEOTBcHWcQUl7LYYTyccik8vuZaVIEQr+NC2YioelQRGRxkxTCnxfK8kp3MEVmNKxxr0PZnFOdxLlNO5nn0N5k7if5RCBTJthJKFSZKamKninQmkMZpTz+LCbypQklHqhlmrZkE+UGsQX52aJZxlTxrlVcGXmLfVBXcE1KE2IEbXhXuvhRa8QqxAKdFJERsSPGRVQPFEmn4YE6qwgqM2frZHbmt2Vo4gAcmAADuMxZDxQ6VQoYHraGaxUISRDDKIEARkYmhdhuXQJgppwdZFNxVkKsIxGqzxJDmJZ-PWeHAgR6YvKCjHCp9hXtnQnYWv9HBA6D4OxpDyJrUJcPUIjyOQGjGPjFjUA2HJ254xFJ0IDmMVJBZKS3TEYJnmR2aKnY5kWVpGYwqzNlFRzv09tavNgxDTqVdO5izvMSwrGG4syJLtro5jiKbodSvHVcuRgnQjHFq8GYXQqpRkcUanJJWUIRPRry3Bbc3fXQADCVBgBQajWrwmhEjS7AABJkHarpgLxzozKgxdDri+CLKtONhSHykwqELy3K9bxSqKoLXme+GxcWIp0RCQRJNnKLswXRclziZcV6SNd12ADcus3rdOu3qCd5V8vB7uymDYqqpPJEpR0f4kQTzH08U489G3QUS-zfQq-F1LuXYk29a5khmB6Fg-NBxOyFt3dqysrhhGQYZa4kpDyRH8HYW4ZFYQxXzLpWElQBS5l-rnAB68OCbxAbgauYCjAQLAFAx2XcFboV7p1ZB2DKIKiNsZE2aCJ6RFCPEKUt0FQUwIovZiDU-750LoAjewDK473AZAiA0DHRdxCorK+nVbjymBPWeU8oR5SgyKWBAyDDGiMlBZWIkjixkKtgABXwEIToHAaHsDzooEkmBhDsGcoiVa0NBIQSIO49AEAwA0N8ZgfxvkJLcHgUdPut4YjREiGUL44oLITywVESORY6zXVMUxBE20c6uKiZ4retD4mJKCeVEJzsJiu1mO7bs0xamxJpI0huSSGqpI4QTXIeEilSmiNEZ+9F6IJ0sWUUaRsNbphfE9NBFTmxVOXmiAASm6D0sBWjdCFmEjysM6Aek0Ec8MyIRl6IJp8WE4RCwCk1NCbBUIJ6aiKWEOOqQvj0SrFslilt2YHJuXAE5q0XZTE6fOD21zbnsjQrjR5KtcjKh6skV6hZlRZnwtcH5NYhTKjVNpWEjYmyYFQDE+ARwwXVPbLozCnVchYPuJpTU10qwMQYoEa8WL1RkqCLPf5ooXzOPZkwFg1oegGH6OISQ0gpCsvxiraIipIiky4ZWRiQrn5FPMiqUUUIghOJkTsuRmJsQcHxLQ7x5INUINDnKUaWlfnmqzF868GtBTrO+KCEimlAjSrRJzP6vZTkrhYVGUcZJFrqsQQECEDxkHJDiAxeUiQhWD3UszSUL41SlDyla2auyFrQS4itJoya3UIC1eEaZRrZlgivJYrMMV1SVhzM-SUTww3lq+lbSNttAYgwdgLWB3B63KSbTqrSMI20QlStikUnwUiPGQe88NbQKFAPqXQ3e+8m4tw0MfDurk52cKntYrBuYGIvFVEIyIkdIhG3TlKEE4o93-wUZQvgyjQF2gYeozRSgZ3EBvQTNBiRgQpFuFNfC-yqZlipZRCI4oKavilGgv9dA3GoA8dabxAyAnNNrciGDKtjJFPVMUQ84oEh4IsX8MoMQ6CqWuvRNKRYIgEchbc+V1H2EYqQdCXCmpH5PpVCKElhkjZvDuPECUiQCPeNUfXRuh8L14ivXWsTbLYNlDUikYybxXj8gMkIl8xTTJJRngJ4dbM0TeOndeozGqkHFkNtmp4ap+QmVwcUSO2aNZ0aeDEQTYAACOBA4CBOCUBHoBzkBFxRjRpB9ZBQ1iwxZnMPxLFBqBMQrMaoLqMbLZUitciSqOQ4Ml3iPR6ToEWEOAA8gQYQWXEB4TTU9OKsJrrxCLGhm4hR7i3R3fq6bzwCMAFF2m0NlXUhVWwwC9f+PWGKVK4p0WhKTO4QrTY9QFOKQEpr6yLeWzxETs6vMpqsaZyOVYs1iIFON74UocXP3lLdHLsIbuTHYKt+7xAGXouM5ih8lEll4TeFhoFgrLHhzM5qTlYJbjjSlMDgkY7ubsF5p5qH3m8gUwiEqLBQQ4pf1uFKROoWqwwnVMWtB+GXPgrREtkHRGSM4jI34wZW2ARYZ6hKXlL0BUT2eMasEmcvk32q9s2rucecEiE9C8HRARdRxxZ8Q83xKarsWaqdKXxEgqiuq8aRtQgA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QCsD2BLAdgcQE6oFcAHAWQEMBjACyzADoAZVMiLKAAj0KPYElMAbugAuYdiTDCWZKQGIIqTPSwDUAa3oAzSdS7F+Q0QEEKw1LiZR0FANoAGALqJQRVLBHpFzkAA9EANgB2AEY6ACY7f38AZkCo4P8ADn8AVgAaEABPRABaaJT-OgBOIujg4LCQ6IAWIrtogF8GjLQsPVJKGiVGZlZMDna+QRExCSkIGTJZMFx8XDoiABsZTXMAWzptYV18fWHjU3NLa3snJBBXd2FPTG8-BGDEsLp-IpTgspTSipCwjOyEDkUolQol6uCioFAikwolEk0WhgcLsOtRaD0WGwhh4yItFpl2AApJGQTgo2DyRTKQTqeiLXpsfg4vGZYm0CDtWCnbyXDxec73IHBOx0RIlRIpaJFMLSp5xf6IYHRF52aofIJ1GWShEgVrI7jkNHdJiY-rY664-FEkkQMncCkzOYLZbCVa4Db001QJkWllspQc8nc8686780CC6KROjC6opQJysJBBIKwEfQIvaphapZgpZkFxnV69qGrr0ADCVDAFDUWN4mnYAFVYDN2AAJMiwdhGRa4MAsAn+0mDABCYDdYmbrZMYcwsmDLjcfNuAtyrxFdiTWeC1TswTeH1TwRSdgzUa+J6i0WiYW1zV1SJLnXRlertbN9abLdw7c73d7-YQIONp2sQ7BjhOX7TqYNzzsEZyLlcNx3Ig1SFEkkSVHCbxvP4qbXuUdCqtEURRHCTxFo+KKluiU4-gA6n+PZ9gO7BkOIYBrAARq2qANoMAAKuCeD+ZjsOWizWO+HD+uwDBYGosgEN+dCsBAAAqZBEAA8kQYCYOWigCDMsAyDcC4XEus4oQgkpEckiRQthF54VkiDXq8RHVCRpHkWElFtNRz7dIxHhmgAYuYUE-jOsHKTMqnoBpWn+u0Fmhshq4IIEYTKgm1RxPU0IpHGgRHmURR0JKaHJFCQSBEU8L3sWQVGvQoXXBFUV0d2MGKEpKlqZpOl6QZRkmWZijpVZmURog5SOeEUQpJK+SJOe+EJBmUIREUx61KVAX6sQNHdAAIpIMxrFgWKcta7LgeO5hiEYwiiGsRDCJS3QqLSmw6FQnIQc9-psNNSHhr4iCBHYIoFf4jzlCUXx2IkqbJIUiQFZu7wNUm-hHU+bV0BdojujdZp3UOtrA323ZvZxn3TLM5jOis6z-dsgPkrTYCg-04PLjZwQJkR+52NKUrxAmqZCqKCMi4EaE5utlQE81VEGsF9Cve9n1YmJsntN91KqBodAyHrwjqagqUojORyoFYtiODyM2Q-c8Yiu8e1qpUNQxNER4SoUe0gteULCnEjQa4FWvE7rjOdRwhtIqBRAm3Qv3m5bSc23b3AOxYTsnPBbsQyuc0PDCiRVY5WbZlCdgFMHWaipEq2RAmUqE61ZZ0InH3J+wqdYOnmfZ-QudD-nmvEEXxy2GECGWRXwuSqE0c1GhML5K8R5FDmRFJCV5Sns3Oa9-H-eD-rZqj5g48KD9NI5wzM+23PRALyXtjRCvGUPbzRKsqVUEo9xKyVljNGbkEARBIsUTczckxSlKMCK+J1tYD3fnfFOqB7qP2Ns-U2f1p6fVnnHeehxi7OxsNUAB7tK5Q2rrCOgDVTwFA+GKWGfxYFhA+JVNCsokFii+NUDBqJ+6kyuhTDgAA5MAAB3K01Mn5Uizq-LQANORGE0GTdoBgRgmAoGAT6kBBbWSyuUUWuF-CwlSCgrM+EozKnzDUfah94wSNOvQaR5NMBYgUco4CD0iHqMnpzHY9pdH6JRIYg4JizEQBsGXEMjDhYi1rrY+xMIYhOL4dKao4QcoSw8YdWOx1JHoj8ddAJZogkqJAsbR0rMljs3dJE7m0S9EzAMfsMAxjTGiGSa7NJa8rGZOKAUOxyRck1F4QCWEcRim7TKV4ipRN+6vhrHWBsPUOxdjHPpcC9IayknCvgNY48LGzWYbCIpTwSiRDeLDV4BV8KqkqhKT4URSj1HVoiShVTujbOknwPZ35fyHLAMckcpyNC2guagK5xsUkMPGVXJIGYvjQj2vwooy0igfNqKKDe0y-kkW8Vg0FuzopQv-CxICBDhwonnKMxCQssphG5SKLGOVojrRPN3IOfC7FFPFjKZIcZrwx0BZUnxdAaUfgha2A5DLAIhIDNc1JHLLFV3xbXRyIRMnAmsSKxZJRtoSnxsCYEDUqXEyVRwT8+ymIAVYqo1Fy9y6cqro8FaVURb+DVJeL4MCLWQjYda5aEpHJFAdf3ISqAhB9A4D1QymAWyYGECPfBRtWXEI0WbegRB8AprAHRDNWbrafyBTcoBcCSUrQFXtIqSs9rOOqLXf2wbyixATAmBN6Ik0pqxOmxQ1bc0EPHi0+YbTXQc1LcmpKFbvxVv0jWguxB61MMFNy0Ijc8aPKliUfCuVMZShzHueBUqh3dAAErjj7LALoAwC3hM0XQPsmhn1dO3ey1evq7kJhSMUAl14sxZjscEfCwJa6nnAS8-hMq730EfT+uAr6Z0sznS6N0Gxv2-rSgBwBu7cjLOWvkXcWMtrxlg4feWkQpVgjFCLJo95MCoAgHAbwLVr60B9Xq5hORhSRp3CRaEN59yxHSLAnIIRCinlSAKp49QPiyofEChVJpU3pyGIYUYkhpBSEE7cz2Ypwi2ulBESIaFZYzKqnELtURoTBsCBpvjmDiY6brAE30jTQnklMw2vJUyohoWKgVMqcmRbPDETKLuMz-Co1Q4qqsOzlV0rVcxDVzLbSjienTHqsVIakZsjkQ+lUaiowjheLt5r5pJlCAUdzJQqO3j2qlnqjEuw5dYuxCQ3FeL8RROwISIkp0SSkliWS8lMBqGC2RwEOFEGPGSwVeGdijwJiyZCZLFRbMhECKljqWJIo-mK31JhZWsoXiWqkVaSpm4wdgWfQofbuHHhsyEVLNTZHpy7Ko3m9MraLYyQg7yBqoylRiLLRu4QyjqhDeAgqqXb7DwfunMHt3khhaS3M-JAJjwfGKMrd4aoYZBH8hsvu1TLr+MCUogLWr2jY6rsCUO0ycmOIa3AvcRTg3gJqFjSVKRUtOvBVlv8RzH5wtQGcxFlysdjKA-cCIGZJa+UPkrXKvOZSpHCMKJ4XaHLR3F+lsFLrIXZfdUyz1KI2fMJ3ErKqZRbwkXeDEJMqYkz8NJ+CME64PipZHUlMdkL13Zqnfm7gju1fN3ltmVWJ4pT7jPbeOgZQEYSxBLeL4Hmv4KvQ7+26DuVdCbVyeKqSYTzJG17vejzx1ruZhAOvah8uvW+lzC2X8LzlK9Z+XszjWBVESjKjM+CZ0w+8hM8SoqySqeOOzT-j3Qer29j0PhtPa2Gbmlgh8oPvgTirqFGZLe56ipcfQARwIHAHNmPBiPuQNWYZcfED4qKe7rtOLHj1Fk0TofKEGUBKF2o1HGB8OIivl5jfDghjnmmnIMOpOgGsKSNpAQMIO-nAlHK7jvGqLuCjK5IsuUM8JAk8jmAkJCKlgAKI4ZyQMiUyjbxJgBYEiYMZwg151A1xhoLK5AFAig3jBorQFjJD7g0F0H8xvqb66rD5wK5S1zHgEotZSgYwAEf71DiowibhQglSqjNziFzD0FegA6sGKwxjZjSjlArQFSxiyxRiZ5YzJa5R7ggh2Id7QHAr0C0GGF-Z1LyJKLK4yENp5BwjHy3hgghBqYrQ+6PBFIqEc4VCJEF5aZYLeFRSh66bjqZobqmGfIxjeRBCSj4oybOJJDV57jHipBqgAqabyqpF0HF6Yal7SGAYV65BCIvDBqpDqbQiVB2awIkQ1BETxjVRJDZiX7sZAA */
   id: "joinGroupMachine",
   context: ({ input }) => {
     // const account = Controlled.accountsClient.getCurrentAccountAddress();
@@ -299,7 +288,6 @@ export const joinGroupMachineLogic = setup({
   initial: "Loading Group Invite Metadata",
 
   states: {
-    // entry: log(({ context }) => `[joinGroupMachine] Entry: groupInviteId=${context.groupInviteId}`),
     "Loading Group Invite Metadata": {
       description: `
 Fetches the group invite metadata from the server.
@@ -367,7 +355,6 @@ joiner will see when they land on the deep link page.
     },
 
     "Loading Initially Joined Groups": {
-      entry: log(() => `[Loading Initially Joined Groups] Entered state`),
       invoke: {
         id: "loadingInitiallyJoinedGroups",
         src: "fetchGroupsByAccountActorLogic",
@@ -380,8 +367,7 @@ joiner will see when they land on the deep link page.
           actions: [
             {
               type: "saveGroupsBeforeJoinAttempt",
-              params: ({ context, event }) => {
-                // const groupId = context.groupInviteMetadata?.groupId;
+              params: ({ event }) => {
                 const groups = event.output;
                 return {
                   groupsBeforeJoinRequestAccepted: groups,
@@ -393,22 +379,14 @@ joiner will see when they land on the deep link page.
               params: ({ context }) => {
                 const groupId = context.groupInviteMetadata!.groupId!;
                 const groups = context.groupsBeforeJoinRequestAccepted!;
-                const newGroup = groups.byId[groupId];
-                console.log(
-                  `[Loading Initially Joined Groups] New group:`,
-                  newGroup
-                );
+                const maybeInvitedGroup: GroupData | undefined =
+                  groups.byId[groupId];
+                console.log(` New group:`, maybeInvitedGroup);
                 return {
-                  newGroup,
+                  invitedGroup: maybeInvitedGroup,
                 };
               },
             },
-            log(
-              ({ event }) =>
-                `[Loading Initially Joined Groups] Completed: ${JSON.stringify(
-                  event.output
-                )}`
-            ),
           ],
         },
         onError: {
@@ -435,14 +413,10 @@ joiner will see when they land on the deep link page.
     },
 
     "Checking If User Has Already Joined Group Before User Action": {
-      entry: [
-        log(
-          () =>
-            `[Checking If User Has Already Joined Group Before User Action] Entered state`
-        ),
-      ],
       always: [
         {
+          target:
+            "User Was Already a Member of Group Prior to Clicking Join Link",
           guard: {
             type: "isUserInGroup",
             params: ({ context }) => ({
@@ -450,7 +424,6 @@ joiner will see when they land on the deep link page.
               groups: context.groupsBeforeJoinRequestAccepted,
             }),
           },
-          target: "User Was a Member Prior of Group Link Already",
         },
         {
           target: "Waiting For User Action",
@@ -458,14 +431,23 @@ joiner will see when they land on the deep link page.
       ],
     },
 
-    "User Was a Member Prior of Group Link Already": {
-      type: "final",
-      entry: {
-        type: "navigateToGroupScreen",
-        params: ({ context }) => {
-          return {
-            topic: context.newGroup!.topic,
-          };
+    "User Was Already a Member of Group Prior to Clicking Join Link": {
+      description: `
+The user was already a member of the group they clicked the 
+link to join. In this case, we just want to allow them to 
+navigate to the group conversation and provide them
+messaging to give them some context.
+      `,
+      on: {
+        "user.didTapOpenConversation": {
+          actions: {
+            type: "navigateToGroupScreen",
+            params: ({ context }) => {
+              return {
+                topic: context.invitedGroup!.topic,
+              };
+            },
+          },
         },
       },
     },
@@ -496,85 +478,13 @@ screen so I'm going to follow what's currently there.
             {
               type: "navigateToGroupScreen",
               params: ({ context }) => ({
-                topic: context.newGroup?.topic!,
+                topic: context.invitedGroup?.topic!,
               }),
             },
           ],
         },
       },
       exit: log(() => `[Waiting For User Action] Exiting state`),
-    },
-
-    "Determining Groups Joined Before Attempt": {
-      description: `
-TODO: perform this fetch only conditionally if the groupId is not 
-in the metadata
-
-Fetches the groups that the user has joined before attempting
-to join the group. This is used to determine the groups that the
-user has joined before, so that we can compare the groups after
-the join attempt to see if there are any new groups that the
-user has joined.
-    `,
-      entry: log(
-        () => `[Determining Groups Joined Before Attempt] Entered state`
-      ),
-      invoke: {
-        id: "fetchGroupsBeforeJoining",
-        src: "fetchGroupsByAccountActorLogic",
-        input: ({ context }) => {
-          console.log(
-            `[Determining Groups Joined Before Attempt] Invoking fetchGroupsByAccountActorLogic with:`,
-            context
-          );
-          return {
-            account: context.account,
-          };
-        },
-        onDone: {
-          target: "Waiting For User Action",
-
-          actions: [
-            {
-              type: "saveGroupsBeforeJoinAttempt",
-              params: ({ event }) => ({
-                groupsBeforeJoinRequestAccepted: event.output,
-              }),
-            },
-            log(
-              ({ event }) =>
-                `[Determining Groups Joined Before Attempt] Completed: ${JSON.stringify(
-                  event.output
-                )}`
-            ),
-          ],
-
-          reenter: true,
-        },
-        onError: {
-          target: "Error Loading Groups",
-          actions: [
-            {
-              type: "saveError",
-              params: ({ event }) => ({
-                error: {
-                  type: "fetchGroupsByAccountError",
-                  payload: JSON.stringify(event.error),
-                },
-              }),
-            },
-            log(
-              ({ event }) =>
-                `[Determining Groups Joined Before Attempt] Error: ${JSON.stringify(
-                  event.error
-                )}`
-            ),
-          ],
-        },
-      },
-      exit: log(
-        () => `[Determining Groups Joined Before Attempt] Exiting state`
-      ),
     },
 
     "Attempting to Join Group": {
@@ -617,9 +527,6 @@ to accept the invite.
               }),
             },
             target: "Determining Newly Joined Group",
-            actions: log(
-              () => `[Attempting to Join Group] Join request accepted`
-            ),
           },
           {
             guard: {
@@ -629,9 +536,6 @@ to accept the invite.
               }),
             },
             target: "User Joined Group",
-            actions: log(
-              () => `[Attempting to Join Group] User already joined`
-            ),
           },
           {
             guard: {
@@ -641,9 +545,6 @@ to accept the invite.
               }),
             },
             target: "Request to Join Group Rejected",
-            actions: log(
-              () => `[Attempting to Join Group] Join request rejected`
-            ),
           },
           {
             guard: {
@@ -653,9 +554,6 @@ to accept the invite.
               }),
             },
             target: "Error Joining Group",
-            actions: log(
-              () => `[Attempting to Join Group] Error joining group`
-            ),
           },
           {
             guard: {
@@ -665,13 +563,9 @@ to accept the invite.
               }),
             },
             target: "Attempting to Join Group Timed Out",
-            actions: log(
-              () => `[Attempting to Join Group] Join request timed out`
-            ),
           },
         ],
       },
-      exit: log(() => `[Attempting to Join Group] Exiting state`),
     },
 
     "Determining Newly Joined Group": {
@@ -692,7 +586,6 @@ Once we successfully determine the new group that
 was joined, we transition to a state for allowing group
 consent for the new group.
 `,
-      entry: log(() => `[Determining Newly Joined Group] Entered state`),
       invoke: {
         id: "fetchGroupsAfterGroupInviteAccepted",
         src: "fetchGroupsByAccountActorLogic",
@@ -711,15 +604,10 @@ consent for the new group.
               {
                 type: "saveNewGroup",
                 params: ({ context, event }) => ({
-                  newGroup:
+                  invitedGroup:
                     event.output.byId[context.groupInviteMetadata!.groupId!],
                 }),
               },
-              log(
-                ({ context, event }) =>
-                  `[Determining Newly Joined Group] Group ID in metadata: ${context.groupInviteMetadata!
-                    .groupId!}`
-              ),
             ],
             target: "Checking If User Has Been Blocked From Group",
           },
@@ -735,18 +623,12 @@ consent for the new group.
                     (id) => !oldGroupIds.has(id)
                   );
                   return {
-                    newGroup: newGroupId
+                    invitedGroup: newGroupId
                       ? event.output.byId[newGroupId]
                       : undefined,
                   };
                 },
               },
-              log(
-                ({ context, event }) =>
-                  `[Determining Newly Joined Group] No group ID in metadata, new group: ${JSON.stringify(
-                    context.newGroup
-                  )}`
-              ),
             ],
             description: `
 This branch handles the case where we don't have a groupId in our metadata.
@@ -774,50 +656,32 @@ providing a fallback method to determine the join status.
           },
         },
       },
-      exit: log(() => `[Determining Newly Joined Group] Exiting state`),
     },
 
     "Checking If User Has Been Blocked From Group": {
-      entry: log(
-        () => `[Checking If User Has Been Blocked From Group] Entered state`
-      ),
       always: [
         {
           guard: {
             type: "hasUserNotBeenBlocked",
             params: ({ context }) => ({
-              newGroup: context.newGroup,
+              invitedGroup: context.invitedGroup,
             }),
           },
           target: "Providing User Consent to Join Group",
-          actions: log(
-            () =>
-              `[Checking If User Has Been Blocked From Group] User not blocked, transitioning to Providing User Consent`
-          ),
         },
         {
           target: "User Has Been Blocked From Group",
-          actions: log(
-            () =>
-              `[Checking If User Has Been Blocked From Group] User blocked, transitioning to User Has Been Blocked From Group`
-          ),
         },
       ],
-      exit: log(
-        () => `[Checking If User Has Been Blocked From Group] Exiting state`
-      ),
     },
 
     "Checking If User Has Already Joined Group": {
-      entry: log(
-        () => `[Checking If User Has Already Joined Group] Entered state`
-      ),
       always: [
         {
           guard: {
             type: "userHasAlreadyJoinedGroup",
             params: ({ context }) => ({
-              newGroup: context.newGroup,
+              invitedGroup: context.invitedGroup,
             }),
           },
           target: "User Joined Group",
@@ -830,7 +694,7 @@ providing a fallback method to determine the join status.
           guard: {
             type: "hasUserNotBeenBlocked",
             params: ({ context }) => ({
-              newGroup: context.newGroup,
+              invitedGroup: context.invitedGroup,
             }),
           },
           target: "Providing User Consent to Join Group",
@@ -847,19 +711,15 @@ providing a fallback method to determine the join status.
           ),
         },
       ],
-      exit: log(
-        () => `[Checking If User Has Already Joined Group] Exiting state`
-      ),
     },
 
     "Providing User Consent to Join Group": {
-      entry: log(() => `[Providing User Consent to Join Group] Entered state`),
       invoke: {
         id: "provideUserConsentToJoinGroup",
         src: "provideUserConsentToJoinGroup",
         input: ({ context }) => ({
           account: context.account,
-          group: context.newGroup!,
+          group: context.invitedGroup!,
           options: {
             includeCreator: false,
             includeAddedBy: false,
@@ -881,7 +741,6 @@ providing a fallback method to determine the join status.
           },
         },
       },
-      exit: log(() => `[Providing User Consent to Join Group] Exiting state`),
     },
 
     "Refreshing Group": {
@@ -891,7 +750,7 @@ providing a fallback method to determine the join status.
         src: "refreshGroup",
         input: ({ context }) => ({
           account: context.account,
-          topic: context.newGroup!.topic,
+          topic: context.invitedGroup!.topic,
         }),
         onDone: {
           target: "User Joined Group",
@@ -947,14 +806,14 @@ The user has been blocked from the group or the group is not active.
           type: "navigateToGroupScreen",
           params: ({ context }) => {
             return {
-              topic: context.newGroup!.topic,
+              topic: context.invitedGroup!.topic,
             };
           },
         },
         log(
           ({ context }) =>
             `[User Joined Group] Navigating to group screen with topic: ${
-              context.newGroup!.topic
+              context.invitedGroup!.topic
             }`
         ),
       ],

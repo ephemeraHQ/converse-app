@@ -81,16 +81,6 @@ export class JoinGroupClient {
     ): Promise<GroupsDataEntity> => {
       const { fetchGroupsQuery } = await import("@queries/useGroupsQuery");
       const groupsEntity: GroupsDataEntity = await fetchGroupsQuery(account);
-      // LOG  [fetchGroupsByAccountActorLogic] Fetched groups: {"byId": {"/xmtp/mls/1/g-eeff1e9058ee7fbbdb034837420be11d/proto": {"addedByInboxId": "155a86f747676bdbdde1e5b8f0b275a81e2787739b365a259d5652e753f64d2e", "client": undefined, "createdAt": 1729164750000, "creatorInboxId": "155a86f747676bdbdde1e5b8f0b275a81e2787739b365a259d5652e753f64d2e", "description": "", "id": "eeff1e9058ee7fbbdb034837420be11d", "imageUrlSquare": "", "isGroupActive": true, "members": [Array], "name": "Alice, yyy", "state": "unknown", "topic": "/xmtp/mls/1/g-eeff1e9058ee7fbbdb034837420be11d/proto", "version": "GROUP"}}, "ids": ["/xmtp/mls/1/g-eeff1e9058ee7fbbdb034837420be11d/proto"]}
-      // LOG  [hasGroupIdInMetadata] Result: true
-      // LOG  [Determining Newly Joined Group] Exiting state
-      // LOG  [saveNewGroup] Saving new group: undefined
-      // LOG  [Determining Newly Joined Group] Group ID in metadata: eeff1e9058ee7fbbdb034837420be11d
-      // LOG  [Checking If User Has Been Blocked From Group] Entered state
-      // LOG  7:39:36 AM | DEBUG : [hasUserNotBeenBlocked] newGroup: Undefined Message
-      // LOG  [hasUserNotBeenBlocked] Result: false
-      // LOG  [Checking If User Has Been Blocked From Group] Exiting state
-      // Remove client from all values in groupsEntity
       const cleanedGroupsEntity = {
         byId: Object.fromEntries(
           Object.entries(groupsEntity.byId).map(([id, group]) => [
@@ -100,15 +90,6 @@ export class JoinGroupClient {
         ),
         ids: Object.values(groupsEntity.byId).map((group) => group.id),
       };
-
-      // Example usage (commented out to avoid errors)
-      // const anyId = cleanedGroupsEntity.ids[0];
-      // const anyGroup = cleanedGroupsEntity.byId[anyId];
-      // console.log('Group without client:', anyGroup);
-
-      // I believe this will already be done since we
-      // are using the fetchGroupsQuery now
-      // queryClient.setQueryData(groupsQueryKey(account), groupsEntity);
 
       return cleanedGroupsEntity;
     };
@@ -280,6 +261,8 @@ export class JoinGroupClient {
   }
 
   static userAlreadyAMemberFixture(): JoinGroupClient {
+    const GroupIdUserAlreadyWasAMemberOf = "groupId123";
+
     const fixtureGetGroupInvite = async (groupInviteId: string) => {
       const fixtureGroupInvite: GroupInvite = {
         id: "groupInviteId123",
@@ -288,7 +271,7 @@ export class JoinGroupClient {
         groupName: `Group Name from ${groupInviteId}`,
         imageUrl: "https://www.google.com",
         description: "Group Description",
-        groupId: "groupId123",
+        groupId: GroupIdUserAlreadyWasAMemberOf,
       } as const;
 
       return fixtureGroupInvite;
@@ -300,7 +283,7 @@ export class JoinGroupClient {
     ) => {
       return {
         type: "group-join-request.accepted",
-        groupId: "groupId123",
+        groupId: GroupIdUserAlreadyWasAMemberOf,
       } as const;
     };
 
@@ -308,7 +291,79 @@ export class JoinGroupClient {
       account: string
     ): Promise<GroupsDataEntity> => {
       const fixtureGroup: GroupData = {
-        id: "groupId123",
+        id: GroupIdUserAlreadyWasAMemberOf,
+        createdAt: new Date().getTime(),
+        members: [],
+        topic: "topic123",
+        isGroupActive: true,
+        state: "allowed",
+        creatorInboxId: "0xabc" as InboxId,
+        name: "Group Name",
+        addedByInboxId: "0x123" as InboxId,
+        imageUrlSquare: "https://www.google.com",
+        description: "Group Description",
+      } as const;
+
+      const fixtureGroupsDataEntity: GroupsDataEntity = {
+        ids: [GroupIdUserAlreadyWasAMemberOf],
+        byId: {
+          [GroupIdUserAlreadyWasAMemberOf]: fixtureGroup,
+        },
+      } as const;
+
+      return fixtureGroupsDataEntity;
+    };
+
+    const fixtureAllowGroup = async ({
+      account,
+      options,
+      group,
+    }: AllowGroupProps) => {};
+
+    const fixtureRefreshGroup = async (account: string, topic: string) => {};
+
+    return new JoinGroupClient(
+      fixtureGetGroupInvite,
+      fixtureAttemptToJoinGroup,
+      fixtureFetchGroupsByAccount,
+      fixtureAllowGroup,
+      fixtureRefreshGroup
+    );
+  }
+
+  static userIsNewToGroup(): JoinGroupClient {
+    const GroupIdUserIsNewTo = "superCoolAwesomeGroupABC456";
+    const GroupIdUserIsAlreadyAMemberOf = "groupId123";
+
+    const fixtureGetGroupInvite = async (groupInviteId: string) => {
+      const fixtureGroupInvite: GroupInvite = {
+        id: "groupInviteId123",
+        inviteLink: "https://www.google.com",
+        createdByAddress: "0x123",
+        groupName: `Group Name from ${groupInviteId}`,
+        imageUrl: "https://www.google.com",
+        description: "Group Description",
+        groupId: GroupIdUserIsNewTo,
+      } as const;
+
+      return fixtureGroupInvite;
+    };
+
+    const fixtureAttemptToJoinGroup = async (
+      account: string,
+      groupInviteId: string
+    ) => {
+      return {
+        type: "group-join-request.accepted",
+        groupId: GroupIdUserIsNewTo,
+      } as const;
+    };
+
+    const fixtureFetchGroupsByAccount = async (
+      account: string
+    ): Promise<GroupsDataEntity> => {
+      const fixtureGroup: GroupData = {
+        id: GroupIdUserIsAlreadyAMemberOf,
         createdAt: new Date().getTime(),
         members: [],
         topic: "topic123",
