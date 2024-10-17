@@ -25,7 +25,6 @@ import {
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useRouter } from "../navigation/useNavigation";
-import { converseEventEmitter } from "../utils/events";
 import { navigate } from "../utils/navigation";
 import {
   NotificationPermissionStatus,
@@ -69,14 +68,10 @@ export default function AccountSettingsButton({ account }: Props) {
         if (account) {
           refreshProfileForAddress(account, account);
           setCurrentAccount(account, false);
-          if (Platform.OS === "android") {
-            converseEventEmitter.emit("toggle-navigation-drawer", false);
-          } else {
-            if (Platform.OS === "web") {
-              await new Promise((r) => setTimeout(r, 200));
-            }
-            router.navigate("Chats");
+          if (Platform.OS === "web") {
+            await new Promise((r) => setTimeout(r, 200));
           }
+          router.navigate("Chats");
           navigate("Profile", {
             address: account,
           });

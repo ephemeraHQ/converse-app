@@ -13,7 +13,6 @@ import {
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { useRouter } from "../../navigation/useNavigation";
-import { converseEventEmitter } from "../../utils/events";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 
 type Props = {
@@ -57,11 +56,7 @@ export default function AccountsAndroid({ navigation }: Props) {
           active={currentAccount === a}
           onPress={() => {
             setCurrentAccount(a, false);
-            if (Platform.OS === "android") {
-              converseEventEmitter.emit("toggle-navigation-drawer", false);
-            } else {
-              navigation?.navigate("Chats");
-            }
+            navigation?.navigate("Chats");
           }}
           icon={({ color }) => (
             <Picto
