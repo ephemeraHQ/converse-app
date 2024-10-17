@@ -11,112 +11,59 @@
       "env": {
         "EXPO_ENV": "dev"
       },
-      "node": "20.15.1"
+      "node": "20.15.1",
+      "ios": {
+        "cocoapods": "1.14.3"
+      },
+      "android": {
+        "gradleCommand": ":app:assembleDevDebug",
+        "resourceClass": "medium"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "android": {
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleProdRelease",
+        "resourceClass": "large"
+      },
+      "node": "20.15.1",
+      "ios": {
+        "resourceClass": "large",
+        "cocoapods": "1.14.3"
+      }
+    },
+    "preview": {
+      "extends": "production",
+      "channel": "preview",
+      "android": {
+        "gradleCommand": ":app:bundlePreviewRelease"
+      },
+      "env": {
+        "EXPO_ENV": "preview"
+      },
+      "ios": {
+        "resourceClass": "medium"
+      }
     },
     "ios-simulator": {
+      "extends": "development",
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development",
       "env": {
         "EXPO_ENV": "dev"
       },
       "ios": {
-        "simulator": true,
-        "cocoapods": "1.14.3"
-      },
-      "node": "20.15.1"
-    },
-    "preview-ios": {
-      "autoIncrement": true,
-      "channel": "preview",
-      "env": {
-        "EXPO_ENV": "preview",
-        "EXPO_PLATFORM": "ios"
-      },
-      "node": "20.15.1",
-      "ios": {
-        "cocoapods": "1.14.3"
+        "simulator": true
       }
     },
-    "preview-ios-internal": {
-      "distribution": "internal",
-      "autoIncrement": true,
-      "channel": "preview",
-      "env": {
-        "EXPO_ENV": "preview",
-        "EXPO_PLATFORM": "ios"
-      },
-      "node": "20.15.1",
-      "ios": {
-        "cocoapods": "1.14.3"
-      }
+    "preview-internal": {
+      "extends": "preview",
+      "distribution": "internal"
     },
-    "preview-android": {
-      "distribution": "internal",
-      "autoIncrement": true,
-      "channel": "preview",
-      "env": {
-        "EXPO_ENV": "preview",
-        "EXPO_PLATFORM": "android"
-      },
-      "node": "20.15.1",
-      "ios": {
-        "cocoapods": "1.14.3"
-      },
-      "android": {
-        "buildType": "app-bundle"
-      }
-    },
-    "production-ios-internal": {
-      "distribution": "internal",
-      "channel": "production",
-      "autoIncrement": true,
-      "env": {
-        "EXPO_PLATFORM": "ios"
-      },
-      "node": "20.15.1",
-      "ios": {
-        "resourceClass": "large",
-        "cocoapods": "1.14.3"
-      }
-    },
-    "production-ios": {
-      "channel": "production",
-      "autoIncrement": true,
-      "env": {
-        "EXPO_PLATFORM": "ios"
-      },
-      "node": "20.15.1",
-      "ios": {
-        "resourceClass": "large",
-        "cocoapods": "1.14.3"
-      }
-    },
-    "production-android": {
-      "channel": "production",
-      "autoIncrement": true,
-      "env": {
-        "EXPO_PLATFORM": "android"
-      },
-      "node": "20.15.1",
-      "ios": {
-        "cocoapods": "1.14.3"
-      },
-      "android": {
-        "resourceClass": "large"
-      }
-    },
-    "production-android-internal": {
-      "distribution": "internal",
-      "channel": "production",
-      "autoIncrement": true,
-      "node": "20.15.1",
-      "ios": {
-        "cocoapods": "1.14.3"
-      },
-      "android": {
-        "resourceClass": "large"
-      }
+    "production-internal": {
+      "extends": "production",
+      "distribution": "internal"
     }
   },
   "submit": {

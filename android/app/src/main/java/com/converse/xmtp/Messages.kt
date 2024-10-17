@@ -1,4 +1,4 @@
-package com.converse.dev.xmtp
+package com.converse.xmtp
 
 import android.content.Context
 import android.util.Log
@@ -7,8 +7,8 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.beust.klaxon.Klaxon
 
-import com.converse.dev.*
-import com.converse.dev.PushNotificationsService.Companion.TAG
+import com.converse.*
+import com.converse.PushNotificationsService.Companion.TAG
 import android.util.Base64
 import android.util.Base64.NO_WRAP
 import androidx.core.app.Person
