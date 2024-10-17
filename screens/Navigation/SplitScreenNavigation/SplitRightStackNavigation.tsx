@@ -21,10 +21,7 @@ import NewConversationNav, {
   NewConversationNavParams,
   NewConversationScreenConfig,
 } from "../NewConversationNav";
-import ProfileNav, {
-  ProfileNavParams,
-  ProfileScreenConfig,
-} from "../ProfileNav";
+import { ProfileNavParams, ProfileScreenConfig } from "../ProfileNav";
 import ShareFrameNav, { ShareFrameNavParams } from "../ShareFrameNav";
 import ShareProfileNav, { ShareProfileScreenConfig } from "../ShareProfileNav";
 import TopUpNav from "../TopUpNav";
@@ -105,7 +102,6 @@ export default function SplitRightStackNavigation({
           {ShareProfileNav()}
           {ShareFrameNav()}
           {WebviewPreviewNav()}
-          {ProfileNav()}
           {GroupNav()}
           {GroupLinkNav()}
           {UserProfileNav()}

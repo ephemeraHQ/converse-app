@@ -4,7 +4,7 @@ import { Platform, useColorScheme } from "react-native";
 
 import { ScreenHeaderButton } from "../../components/Screen/ScreenHeaderButton/ScreenHeaderButton";
 import { ScreenHeaderIconButton } from "../../components/Screen/ScreenHeaderIconButton/ScreenHeaderIconButton";
-import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
+import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton/ScreenHeaderModalCloseButton";
 import { useCurrentAccount } from "../../data/store/accountsStore";
 import { useRouter } from "../../navigation/useNavigation";
 import { navigate } from "../../utils/navigation";

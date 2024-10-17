@@ -5,7 +5,7 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
+import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton/ScreenHeaderModalCloseButton";
 import { useRouter } from "../../navigation/useNavigation";
 import { UserProfileScreen } from "../UserProfileScreen";
 import { NativeStack } from "./Navigation";
@@ -19,6 +19,7 @@ export default function UserProfileNav() {
       name="UserProfile"
       component={UserProfileScreen}
       options={{
+        presentation: "modal",
         headerTitle: "Modify profile",
         headerTitleStyle: headerTitleStyle(colorScheme),
         headerLeft: () => (

@@ -7,7 +7,7 @@ import { PictoSizes } from "../../../styles/sizes";
 import Picto from "../../Picto";
 import { IPictoProps } from "../../Picto/Picto";
 
-type IScreenHeaderIconButtonProps = IPictoProps & {
+export type IScreenHeaderIconButtonProps = IPictoProps & {
   onPress: () => void;
 };
 

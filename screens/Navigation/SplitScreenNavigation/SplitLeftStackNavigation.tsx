@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { memo } from "react";
 import { Platform, useColorScheme } from "react-native";
 
-import { ScreenHeaderModalCloseButton } from "../../../components/Screen/ScreenHeaderModalCloseButton";
+import { ScreenHeaderModalCloseButton } from "../../../components/Screen/ScreenHeaderModalCloseButton/ScreenHeaderModalCloseButton";
 import { useRouter } from "../../../navigation/useNavigation";
 import { isDesktop } from "../../../utils/device";
 import { converseNavigations } from "../../../utils/navigation";
@@ -12,6 +12,8 @@ import ConversationBlockedListNav from "../ConversationBlockedListNav";
 import ConversationListNav from "../ConversationListNav";
 import ConversationRequestsListNav from "../ConversationRequestsListNav";
 import ConverseMatchMakerNav from "../ConverseMatchMakerNav";
+import ProfileNav from "../ProfileNav";
+import UserProfileNav from "../UserProfileNav";
 import { stackGroupScreenOptions } from "../navHelpers";
 
 export type NavigationParamList = {
@@ -83,6 +85,8 @@ const SplitLeftStackNavigation = memo(function SplitLeftStackNavigation() {
               ),
             }}
           />
+          {ProfileNav()}
+          {UserProfileNav()}
           {ConversationListNav()}
           {ConversationRequestsListNav()}
           {ConverseMatchMakerNav()}

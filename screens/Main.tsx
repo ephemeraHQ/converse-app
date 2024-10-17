@@ -39,12 +39,10 @@ import {
 import { NewConversationScreenConfig } from "./Navigation/NewConversationNav";
 import { ProfileScreenConfig } from "./Navigation/ProfileNav";
 import { ShareProfileScreenConfig } from "./Navigation/ShareProfileNav";
-import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
 import { WebviewPreviewScreenConfig } from "./Navigation/WebviewPreviewNav";
 import {
   getConverseInitialURL,
   getConverseStateFromPath,
-  useIsSplitScreen,
 } from "./Navigation/navHelpers";
 
 const prefix = Linking.createURL("/");
@@ -77,26 +75,12 @@ export default function Main() {
   useCheckCurrentInstallation();
   useAutoConnectExternalWallet();
 
-  const isSplitScreen = useIsSplitScreen();
-
   const {
     themeScheme,
     navigationTheme,
     setThemeContextOverride,
     ThemeProvider,
   } = useThemeProvider();
-
-  if (isSplitScreen) {
-    return (
-      <>
-        <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-          <Initializer />
-          <SplitScreenNavigation />
-          <ExternalWalletPicker />
-        </ThemeProvider>
-      </>
-    );
-  }
 
   return (
     <>
