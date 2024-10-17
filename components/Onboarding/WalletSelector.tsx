@@ -159,6 +159,9 @@ export default function WalletSelector() {
                           mobileConfig: {
                             callbackURL: `https://${config.websiteDomain}/coinbase`,
                           },
+                          walletConfig: {
+                            options: "smartWalletOnly",
+                          },
                         }
                       );
                       await coinbaseWallet.connect({ client: thirdwebClient });

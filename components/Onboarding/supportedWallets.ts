@@ -52,9 +52,17 @@ export type InstalledWallet = {
   walletConnectId?: string;
   platforms?: string[];
   thirdwebId?: WalletId;
+  isSmartContractWallet?: boolean;
 };
 
 const SUPPORTED_WALLETS: InstalledWallet[] = [
+  {
+    name: "Coinbase Smart Wallet",
+    iconURL:
+      "https://explorer-api.walletconnect.com/v3/logo/sm/a5ebc364-8f91-4200-fcc6-be81310a0000?projectId=2f05ae7f1116030fde2d36508f472bfb",
+    thirdwebId: "com.coinbase.wallet",
+    isSmartContractWallet: true,
+  },
   {
     name: "Coinbase Wallet",
     iconURL:
@@ -145,7 +153,9 @@ export const getInstalledWallets = async (
 ): Promise<InstalledWallet[]> => {
   if ((hasCheckedInstalled && !refresh) || isDesktop) return installedWallets;
   const checkInstalled = await Promise.all(
-    SUPPORTED_WALLETS.map((w) => Linking.canOpenURL(`${w.customScheme}wc`))
+    SUPPORTED_WALLETS.map(
+      (w) => !!w.customScheme && Linking.canOpenURL(`${w.customScheme}wc`)
+    )
   );
   const wallets: typeof SUPPORTED_WALLETS = [];
 
@@ -157,7 +167,11 @@ export const getInstalledWallets = async (
     });
   }
 
-  wallets.push(...SUPPORTED_WALLETS.filter((w, i) => checkInstalled[i]));
+  wallets.push(
+    ...SUPPORTED_WALLETS.filter(
+      (w, i) => checkInstalled[i] || w.isSmartContractWallet
+    )
+  );
   installedWallets = wallets;
   hasCheckedInstalled = true;
   return installedWallets;
