@@ -3,7 +3,7 @@ import * as Localization from "expo-localization";
 import i18n from "i18n-js";
 import { I18nManager } from "react-native";
 
-import en, { Translations } from "./translations/en";
+import { en, Translations } from "./translations/en";
 
 export { i18n };
 // import fr from "./translations/fr";
