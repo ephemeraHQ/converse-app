@@ -55,7 +55,7 @@ import {
   ViewStyle,
 } from "react-native";
 
-import Exclamationmark from "../../../assets/exclamationmark.triangle.svg";
+import Exclamationmark from "../../assets/exclamationmark.triangle.svg";
 import Reply from "../../assets/reply.svg";
 
 const pictoMapping = {
