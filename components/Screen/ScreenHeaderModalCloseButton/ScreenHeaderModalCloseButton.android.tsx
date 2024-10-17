@@ -13,9 +13,9 @@ export type IScreenHeaderModalCloseButtonProps = Optional<
 
 export const ScreenHeaderModalCloseButton = memo(
   function ScreenHeaderModalCloseButton(
-    props: Optional<IScreenHeaderModalCloseButtonProps, "variant" | "title">
+    props: IScreenHeaderModalCloseButtonProps
   ) {
-    const { title, variant, ...rest } = props;
-    return <ScreenHeaderIconButton picto="chevron.left" {...rest} />;
+    const { picto = "chevron.left", ...rest } = props;
+    return <ScreenHeaderIconButton picto={picto} {...rest} />;
   }
 );
