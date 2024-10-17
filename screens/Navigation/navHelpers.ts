@@ -1,4 +1,8 @@
-import { StackActions, getStateFromPath } from "@react-navigation/native";
+import {
+  StackActions,
+  createNavigationContainerRef,
+  getStateFromPath,
+} from "@react-navigation/native";
 import {
   backgroundColor,
   headerTitleStyle,
@@ -6,8 +10,15 @@ import {
   textPrimaryColor,
 } from "@styles/colors";
 import { converseEventEmitter } from "@utils/events";
-import { ColorSchemeName, Platform, useWindowDimensions } from "react-native";
+import { useEffect } from "react";
+import {
+  BackHandler,
+  ColorSchemeName,
+  Platform,
+  useWindowDimensions,
+} from "react-native";
 
+import { IScreenName, NavigationParamList } from "./Navigation";
 import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
 import config from "../../config";
 import { isDesktop } from "../../utils/device";
@@ -193,3 +204,47 @@ export const useIsSplitScreen = () => {
 
   return dimensions.width > config.splitScreenThreshold || isDesktop;
 };
+
+export function getCurrentRouteName() {
+  return navigationRef?.getCurrentRoute()?.name as IScreenName;
+}
+
+export const navigationRef =
+  createNavigationContainerRef<NavigationParamList>();
+
+export function useBackButtonHandler() {
+  useEffect(() => {
+    // ignore unless android... no back button!
+    if (Platform.OS !== "android") return;
+
+    // We'll fire this when the back button is pressed on Android.
+    const onBackPress = () => {
+      if (!navigationRef.isReady()) {
+        return false;
+      }
+
+      const routeName = getCurrentRouteName();
+
+      if (routeName === "Chats") {
+        // exit and let the system know we've handled the event
+        BackHandler.exitApp();
+        return true;
+      }
+
+      // we can't exit, so let's turn this into a back action
+      if (navigationRef.canGoBack()) {
+        navigationRef.goBack();
+        return true;
+      }
+
+      return false;
+    };
+
+    // Subscribe when we come to life
+    BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+    // Unsubscribe when we're done
+    return () =>
+      BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+  }, []);
+}

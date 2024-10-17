@@ -144,7 +144,7 @@ const ConversationListItem = memo(function ConversationListItem({
           });
           // Take the user back to wherever the conversation was restored "to"
           // https://github.com/ephemeraHQ/converse-app/issues/315#issuecomment-2312903441
-          navigationRef.current?.pop(isSplitScreen ? 1 : 2);
+          navigationRef.current?.pop(2);
         },
         [translate("cancel")]: () => {},
       };

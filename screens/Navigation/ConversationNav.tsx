@@ -2,18 +2,21 @@ import { NavigationProp } from "@react-navigation/native";
 import { textPrimaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { useCallback } from "react";
-import { Platform, StyleSheet, useColorScheme } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import {
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native";
 import { StackAnimationTypes } from "react-native-screens";
 
+import Picto from "../../components/Picto/Picto";
+import Conversation from "../Conversation";
 import {
   NativeStack,
   navigationAnimation,
   NavigationParamList,
 } from "./Navigation";
-import { useIsSplitScreen } from "./navHelpers";
-import Picto from "../../components/Picto/Picto";
-import Conversation from "../Conversation";
 
 export type ConversationNavParams = {
   topic?: string;
@@ -38,7 +41,6 @@ export default function ConversationNav(
   // If we're in split screen mode, the topic is not passed via the usual StackNavigation
   // but via the DrawerNavigation that passes it back to this component via prop
   // so we override the route when instantiating Conversation
-  const isSplitScreen = useIsSplitScreen();
   const colorScheme = useColorScheme();
   const navigationOptions = useCallback(
     ({ navigation }: { navigation: NavigationProp<NavigationParamList> }) => ({
@@ -65,21 +67,11 @@ export default function ConversationNav(
     }),
     [colorScheme]
   );
+
   return (
     <NativeStack.Screen name="Conversation" options={navigationOptions}>
       {({ route, navigation }) => (
-        <Conversation
-          navigation={navigation}
-          key={
-            isSplitScreen
-              ? `conversation-${JSON.stringify(routeParams || {})}`
-              : "conversation"
-          }
-          route={{
-            ...route,
-            params: isSplitScreen ? routeParams || {} : route.params,
-          }}
-        />
+        <Conversation navigation={navigation} route={route} />
       )}
     </NativeStack.Screen>
   );

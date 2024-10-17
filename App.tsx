@@ -1,3 +1,4 @@
+import "expo-dev-client";
 import "reflect-metadata";
 import "./polyfills";
 
@@ -27,11 +28,15 @@ import {
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
-import "./utils/splash/splash";
 
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
+import {
+  TEMPORARY_ACCOUNT_NAME,
+  useAccountsStore,
+} from "./data/store/accountsStore";
 import { useAppStore } from "./data/store/appStore";
+import { setAuthStatus } from "./data/store/authStore";
 import { useSelect } from "./data/store/storeHelpers";
 import {
   runAsyncUpdates,
@@ -42,6 +47,7 @@ import { useThemeProvider } from "./theme/useAppTheme";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
+import "./utils/splash/splash";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -96,6 +102,16 @@ const App = () => {
       });
     }
   }, [isInternetReachable, hydrationDone]);
+
+  // For now we use persit with zustand to get the accounts when the app launch so here is okay to see if we're logged in or not
+  useEffect(() => {
+    const currentAccount = useAccountsStore.getState().currentAccount;
+    if (currentAccount && currentAccount !== TEMPORARY_ACCOUNT_NAME) {
+      setAuthStatus("signedIn");
+    } else {
+      setAuthStatus("signedOut");
+    }
+  }, []);
 
   return (
     <View style={styles.safe}>

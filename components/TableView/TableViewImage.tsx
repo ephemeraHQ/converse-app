@@ -14,7 +14,7 @@ import {
 } from "react-native";
 
 import IconLoading from "../../assets/icon-loading.png";
-import Picto from "../Picto/Picto";
+import Picto, { IPicto } from "../Picto/Picto";
 import SvgImageUri from "../SvgImageUri";
 
 const IMAGE_SIZE = Platform.OS === "android" ? 24 : 30;
@@ -52,7 +52,7 @@ export const TableViewPicto = ({
   color,
   onPress,
 }: {
-  symbol: string;
+  symbol: IPicto;
   color?: ColorValue;
   onPress?: () => void;
 }) => {

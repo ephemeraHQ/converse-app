@@ -11,8 +11,8 @@ import {
   useAccountsList,
   useAccountsStore,
 } from "../../data/store/accountsStore";
-import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { useRouter } from "../../navigation/useNavigation";
 import { converseEventEmitter } from "../../utils/events";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 
@@ -28,9 +28,12 @@ export default function AccountsAndroid({ navigation }: Props) {
   const { currentAccount, setCurrentAccount } = useAccountsStore(
     useSelect(["currentAccount", "setCurrentAccount"])
   );
-  const setAddingNewAccount = useOnboardingStore((s) => s.setAddingNewAccount);
+
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
+
+  const router = useRouter();
+
   return (
     <Drawer.Section
       title={Platform.OS === "web" ? undefined : "Accounts"}
@@ -67,9 +70,7 @@ export default function AccountsAndroid({ navigation }: Props) {
               color={color}
             />
           )}
-          right={({ color }) => (
-            <AccountSettingsButton account={a} navigation={navigation} />
-          )}
+          right={({ color }) => <AccountSettingsButton account={a} />}
           rippleColor={
             currentAccount === a
               ? undefined
@@ -83,7 +84,7 @@ export default function AccountsAndroid({ navigation }: Props) {
           <Picto picto="plus" size={PictoSizes.navItem} color={color} />
         )}
         onPress={() => {
-          setAddingNewAccount(true);
+          router.navigate("NewAccountNavigator");
         }}
         rippleColor={clickedItemBackgroundColor(colorScheme)}
       />

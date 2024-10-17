@@ -172,20 +172,11 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           if (newAccounts.length === 0) {
             newAccounts.push(TEMPORARY_ACCOUNT_NAME);
           }
-          // New current account doesn't change if it's not the one to remove,
-          // else we find the first non temporary one and fallback to temporary (= logout)
-          const newCurrentAccount =
-            state.currentAccount === accountToRemove
-              ? newAccounts.find((a) => a !== TEMPORARY_ACCOUNT_NAME) ||
-                TEMPORARY_ACCOUNT_NAME
-              : state.currentAccount;
-
           const newDatabaseId = { ...state.databaseId };
           delete newDatabaseId[accountToRemove];
           deleteStores(accountToRemove);
           return {
             accounts: newAccounts,
-            currentAccount: newCurrentAccount,
             databaseId: newDatabaseId,
           };
         }),
@@ -238,6 +229,10 @@ export const useCurrentAccount = () => {
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
 };
+export function getCurrentAccount() {
+  const currentAccount = useAccountsStore.getState().currentAccount;
+  return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
+}
 
 export const loggedWithPrivy = () => {
   const account = currentAccount();
