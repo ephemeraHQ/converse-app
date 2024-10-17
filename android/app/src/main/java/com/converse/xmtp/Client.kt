@@ -1,8 +1,8 @@
-package com.converse.dev.xmtp
+package com.converse.xmtp
 
 import android.content.Context
 import android.util.Log
-import com.converse.dev.*
+import com.converse.*
 import org.xmtp.android.library.*
 import com.google.crypto.tink.subtle.Base64
 import org.xmtp.android.library.Client
