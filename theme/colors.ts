@@ -103,7 +103,6 @@ export const palette = {
 };
 
 export const colors = {
-  palette,
   transparent: Platform.select({
     android: MaterialLightColors.background,
     default: "rgba(0, 0, 0, 0)",
@@ -142,15 +141,15 @@ export const colors = {
    */
   navigationSecondaryBackground: Platform.select({
     android: MaterialLightColors.surfaceVariant,
-    default: "#F9F9F9",
+    default: palette.shade96,
   }),
   textPrimary: Platform.select({
     android: MaterialLightColors.onBackground,
-    default: "#000",
+    default: palette.shade8,
   }),
   textSecondary: Platform.select({
     android: MaterialLightColors.onSurfaceVariant,
-    default: "#666",
+    default: palette.shade60,
   }),
   actionSecondary: Platform.select({
     android: MaterialLightColors.secondaryContainer,
@@ -158,19 +157,19 @@ export const colors = {
   }),
   clickedItemBackground: Platform.select({
     android: MaterialLightColors.surfaceVariant,
-    default: "#D1D1D5",
+    default: palette.shade30,
   }),
   listItemSeparator: Platform.select({
     android: MaterialLightColors.outlineVariant,
-    default: "#b2b2b2",
+    default: palette.shade30,
   }),
   itemSeparator: Platform.select({
     android: MaterialLightColors.outlineVariant,
-    default: "#D1D1D5",
+    default: palette.shade30,
   }),
   messageBubble: Platform.select({
     android: MaterialLightColors.surfaceVariant,
-    default: "#E9E9EB",
+    default: palette.shade96,
   }),
   messageInnerBubble: Platform.select({
     android: MaterialLightColors.surface,
@@ -178,11 +177,11 @@ export const colors = {
   }),
   messageHighlightedBubbleColor: Platform.select({
     android: "#e7cbce",
-    default: "#c9c9cf",
+    default: palette.shade30,
   }),
   myMessageBubble: Platform.select({
     android: MaterialLightColors.primary,
-    default: "#000",
+    default: palette.shade8,
   }),
   myMessageInnerBubble: Platform.select({
     android: MaterialLightColors.primaryContainer,
@@ -190,7 +189,7 @@ export const colors = {
   }),
   tertiaryBackground: Platform.select({
     android: MaterialLightColors.tertiaryContainer,
-    default: "#EFEFF0",
+    default: palette.shade96,
   }),
   requestsText: Platform.select({
     android: MaterialLightColors.tertiary,

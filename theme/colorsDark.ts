@@ -100,18 +100,17 @@ export const palette = {
 };
 
 export const colorsDark: IColors = {
-  palette,
   transparent: Platform.select({
     android: MaterialDarkColors.background,
     default: "rgba(0, 0, 0, 0)",
   }),
   text: Platform.select({
     android: MaterialDarkColors.onBackground,
-    default: palette.neutral800,
+    default: palette.shade8,
   }),
   textDim: Platform.select({
     android: MaterialDarkColors.onSurfaceVariant,
-    default: palette.neutral600,
+    default: palette.shade60,
   }),
   background: Platform.select({
     android: MaterialDarkColors.surface,
@@ -120,15 +119,15 @@ export const colorsDark: IColors = {
   }),
   border: Platform.select({
     android: MaterialDarkColors.outline,
-    default: palette.neutral400,
+    default: palette.shade30,
   }),
   tint: Platform.select({
     android: MaterialDarkColors.primary,
-    default: palette.primary500,
+    default: palette.primary,
   }),
   separator: Platform.select({
     android: MaterialDarkColors.outlineVariant,
-    default: palette.neutral300,
+    default: palette.shade30,
   }),
   error: Platform.select({
     android: MaterialDarkColors.error,
@@ -144,11 +143,11 @@ export const colorsDark: IColors = {
   }),
   textPrimary: Platform.select({
     android: MaterialDarkColors.onBackground,
-    default: "#FFF",
+    default: palette.primary,
   }),
   textSecondary: Platform.select({
     android: MaterialDarkColors.onSurfaceVariant,
-    default: "#EBEBEB",
+    default: palette.shade8,
   }),
   actionSecondary: Platform.select({
     android: MaterialDarkColors.secondaryContainer,
@@ -184,7 +183,7 @@ export const colorsDark: IColors = {
   }),
   myMessageInnerBubble: Platform.select({
     android: MaterialDarkColors.primaryContainer,
-    default: "rgba(0, 0, 0, 0.08)",
+    default: palette.alpha8,
   }),
   tertiaryBackground: Platform.select({
     android: MaterialDarkColors.tertiaryContainer,
