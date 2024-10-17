@@ -576,122 +576,118 @@ export default function CachedChatMessage({
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
-  return useMemo(
-    () =>
-      StyleSheet.create({
-        messageContainer: {
-          flexDirection: "row",
-          width: "100%",
-          alignItems: "flex-end",
-        },
-        innerBubble: {
-          backgroundColor: messageInnerBubbleColor(colorScheme),
-          borderRadius: 14,
-          paddingHorizontal: 12,
-          paddingVertical: 10,
-          marginTop: 10,
-          marginHorizontal: 10,
-        },
-        innerBubbleMe: {
-          backgroundColor: myMessageInnerBubbleColor(colorScheme),
-        },
-        messageRow: {
-          flexDirection: "row",
-          flexWrap: "wrap",
-        },
-        messageSwipeable: {
-          width: "100%",
-          flexDirection: "row",
-          paddingLeft: 12,
-          paddingRight: 15,
-          overflow: "visible",
-        },
-        messageSwipeableChildren: {
-          width: "100%",
-          flexDirection: "row",
-          flexWrap: "wrap",
-        },
-        linkToFrame: {
-          fontSize: 12,
-          padding: 6,
-          color: textSecondaryColor(colorScheme),
-          flexGrow: 1,
-        },
-        dateTimeContainer: {
-          width: "100%",
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-        },
-        dateTime: {
-          textAlign: "center",
-          fontSize: 12,
-          color: textSecondaryColor(colorScheme),
-          marginTop: 12,
-          marginBottom: 8,
-          fontWeight: "bold",
-          height: 20,
-        },
-        replyToUsername: {
-          fontSize: 12,
-          marginBottom: 4,
-          color: textSecondaryColor(colorScheme),
-          paddingVertical: 0,
-          paddingHorizontal: 0,
-        },
-        messageContentContainer: {
-          paddingHorizontal: 13,
-          paddingVertical: 6,
-        },
-        messageText: {
-          color: textPrimaryColor(colorScheme),
-          fontSize: 17,
-        },
-        messageTextMe: {
-          color: inversePrimaryColor(colorScheme),
-        },
-        allEmojisAndMaxThree: {
-          fontSize: 64,
-          paddingHorizontal: 0,
-        },
-        messageTextReply: {
-          color: textPrimaryColor(colorScheme),
-        },
-        messageTextReplyMe: {
-          color: inversePrimaryColor(colorScheme),
-        },
-        groupSenderAvatarWrapper: {
-          marginRight: 6,
-        },
-        groupSenderWrapper: {
-          flexDirection: "row",
-          flexBasis: "100%",
-        },
-        groupSender: {
-          fontSize: 12,
-          color: textSecondaryColor(colorScheme),
-          marginLeft: 10,
-          marginVertical: 4,
-        },
-        avatarPlaceholder: {
-          width: AvatarSizes.messageSender,
-          height: AvatarSizes.messageSender,
-        },
-        outsideContentRow: {
-          marginTop: 1,
-          flexDirection: "row",
-          justifyContent: "flex-start",
-          columnGap: 8,
-          width: "100%",
-        },
-        reactionsContainer: {
-          marginHorizontal: 8,
-          marginBottom: 8,
-        },
-        outsideReactionsContainer: {
-          flex: 1,
-        },
-      }),
-    [colorScheme]
-  );
+  return StyleSheet.create({
+    messageContainer: {
+      flexDirection: "row",
+      width: "100%",
+      alignItems: "flex-end",
+    },
+    innerBubble: {
+      backgroundColor: messageInnerBubbleColor(colorScheme),
+      borderRadius: 14,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      marginTop: 10,
+      marginHorizontal: 10,
+    },
+    innerBubbleMe: {
+      backgroundColor: myMessageInnerBubbleColor(colorScheme),
+    },
+    messageRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+    },
+    messageSwipeable: {
+      width: "100%",
+      flexDirection: "row",
+      paddingLeft: 12,
+      paddingRight: 15,
+      overflow: "visible",
+    },
+    messageSwipeableChildren: {
+      width: "100%",
+      flexDirection: "row",
+      flexWrap: "wrap",
+    },
+    linkToFrame: {
+      fontSize: 12,
+      padding: 6,
+      color: textSecondaryColor(colorScheme),
+      flexGrow: 1,
+    },
+    dateTimeContainer: {
+      width: "100%",
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    dateTime: {
+      textAlign: "center",
+      fontSize: 12,
+      color: textSecondaryColor(colorScheme),
+      marginTop: 12,
+      marginBottom: 8,
+      fontWeight: "bold",
+      height: 20,
+    },
+    replyToUsername: {
+      fontSize: 12,
+      marginBottom: 4,
+      color: textSecondaryColor(colorScheme),
+      paddingVertical: 0,
+      paddingHorizontal: 0,
+    },
+    messageContentContainer: {
+      paddingHorizontal: 13,
+      paddingVertical: 6,
+    },
+    messageText: {
+      color: textPrimaryColor(colorScheme),
+      fontSize: 17,
+    },
+    messageTextMe: {
+      color: inversePrimaryColor(colorScheme),
+    },
+    allEmojisAndMaxThree: {
+      fontSize: 64,
+      paddingHorizontal: 0,
+    },
+    messageTextReply: {
+      color: textPrimaryColor(colorScheme),
+    },
+    messageTextReplyMe: {
+      color: inversePrimaryColor(colorScheme),
+    },
+    groupSenderAvatarWrapper: {
+      marginRight: 6,
+    },
+    groupSenderWrapper: {
+      flexDirection: "row",
+      flexBasis: "100%",
+    },
+    groupSender: {
+      fontSize: 12,
+      color: textSecondaryColor(colorScheme),
+      marginLeft: 10,
+      marginVertical: 4,
+    },
+    avatarPlaceholder: {
+      width: AvatarSizes.messageSender,
+      height: AvatarSizes.messageSender,
+    },
+    outsideContentRow: {
+      marginTop: 1,
+      flexDirection: "row",
+      justifyContent: "flex-start",
+      columnGap: 8,
+      width: "100%",
+    },
+    reactionsContainer: {
+      marginHorizontal: 8,
+      marginBottom: 8,
+    },
+    outsideReactionsContainer: {
+      flex: 1,
+    },
+  });
 };
