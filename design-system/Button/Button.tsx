@@ -119,7 +119,7 @@ export function Button({
       hitSlop={hitSlop}
       style={[
         {
-          borderRadius: theme.borderRadius.xl,
+          borderRadius: theme.borderRadius.sm,
           backgroundColor,
           borderColor,
         },

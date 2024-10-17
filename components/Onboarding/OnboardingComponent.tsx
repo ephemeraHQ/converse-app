@@ -162,6 +162,7 @@ const useStyles = (showTerms: boolean) => {
       backgroundColor: backgroundColor(colorScheme),
     },
     backButton: {
+      alignSelf: "flex-start",
       paddingVertical: 8,
       marginTop: insets.top,
       width: Platform.OS === "android" ? 100 : undefined,
