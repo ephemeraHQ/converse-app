@@ -164,6 +164,7 @@
     "react-native-otp-entry": "^1.2.0",
     "react-native-paper": "^5.10.6",
     "react-native-parsed-text": "^0.0.22",
+    "react-native-passkey": "^2.1.1",
     "react-native-phone-number-input": "^2.1.0",
     "react-native-polyfill-globals": "^3.1.0",
     "react-native-qrcode-svg": "^6.2.0",

@@ -18937,6 +18937,11 @@ react-native-parsed-text@^0.0.22:
   dependencies:
     prop-types "^15.7.x"
 
+react-native-passkey@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/react-native-passkey/-/react-native-passkey-2.1.1.tgz#30a1f4d99e22a209a4cc1e64b37a363c06eac8c3"
+  integrity sha512-/SBlL+8aJOiAAyO4jmRhJAxo1LklMpjQijLyl1jZlt9bKtRnh4Uz94z7AYouBR2anTB+DaEycLIhunG7h8Xbwg==
+
 react-native-phone-number-input@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/react-native-phone-number-input/-/react-native-phone-number-input-2.1.0.tgz#e9743d391d438d33b91ae3d03482b291b3d20ea5"
