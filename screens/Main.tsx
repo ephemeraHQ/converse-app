@@ -5,6 +5,7 @@ import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { Platform, useColorScheme } from "react-native";
+
 import ExternalWalletPicker from "../components/ExternalWalletPicker";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
