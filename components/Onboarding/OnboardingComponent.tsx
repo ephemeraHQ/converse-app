@@ -20,9 +20,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Terms from "./Terms";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { Button } from "../../design-system/Button/Button";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
-import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
 
 type Props = {
@@ -79,7 +79,7 @@ export default function OnboardingComponent({
     <View style={{ flex: 1, flexDirection: "column" }}>
       {backButtonText && (
         <Button
-          variant="text"
+          action="text"
           picto={
             backButtonText.toLowerCase().includes("back")
               ? "chevron.left"
@@ -131,7 +131,7 @@ export default function OnboardingComponent({
             {primaryButtonText && (
               <Button
                 title={primaryButtonText}
-                variant="primary"
+                action="primary"
                 style={styles.primaryButton}
                 onPress={primaryButtonAction}
               />
@@ -162,6 +162,7 @@ const useStyles = (showTerms: boolean) => {
       backgroundColor: backgroundColor(colorScheme),
     },
     backButton: {
+      alignSelf: "flex-start",
       paddingVertical: 8,
       marginTop: insets.top,
       width: Platform.OS === "android" ? 100 : undefined,

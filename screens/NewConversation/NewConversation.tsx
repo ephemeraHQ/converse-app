@@ -9,7 +9,6 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
-  Button,
   Platform,
   ScrollView,
   StyleSheet,
@@ -22,7 +21,6 @@ import {
 import { NewConversationModalParams } from "./NewConversationModal";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../../components/AndroidBackAction";
-import ConverseButton from "../../components/Button/Button";
 import SearchBar from "../../components/NewConversation/SearchBar";
 import Recommendations from "../../components/Recommendations/Recommendations";
 import ProfileSearch from "../../components/Search/ProfileSearch";
@@ -37,6 +35,7 @@ import {
 } from "../../data/store/accountsStore";
 import { ProfileSocials } from "../../data/store/profilesStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { Button } from "../../design-system/Button/Button";
 import { useGroupMembers } from "../../hooks/useGroupMembers";
 import { searchProfiles } from "../../utils/api";
 import {
@@ -95,11 +94,7 @@ export default function NewConversation({
     navigation.setOptions({
       headerLeft: () =>
         Platform.OS === "ios" ? (
-          <Button
-            title="Cancel"
-            color={textPrimaryColor(colorScheme)}
-            onPress={handleBack}
-          />
+          <Button variant="link" title="Cancel" onPress={handleBack} />
         ) : (
           <AndroidBackAction navigation={navigation} />
         ),
@@ -114,8 +109,8 @@ export default function NewConversation({
             return <ActivityIndicator style={styles.activityIndicator} />;
           } else {
             return (
-              <ConverseButton
-                variant="text"
+              <Button
+                variant="link"
                 title={route.params?.addingToGroupTopic ? "Add" : "Next"}
                 onPress={handleRightAction}
                 style={{ marginRight: -10, padding: 10 }}
@@ -340,12 +335,11 @@ export default function NewConversation({
         ]}
       >
         {!group.enabled && (
-          <ConverseButton
-            variant="text"
+          <Button
+            variant="link"
             picto="person.2"
             title="New group"
             style={styles.newGroupButton}
-            textStyle={{ fontWeight: "500" }}
             onPress={() => {
               setGroup({ enabled: true, members: [] });
             }}
@@ -358,10 +352,10 @@ export default function NewConversation({
             const preferredName = getPreferredName(m, m.address);
 
             return (
-              <ConverseButton
+              <Button
                 key={m.address}
                 title={preferredName}
-                variant="secondary"
+                variant="link"
                 picto="xmark"
                 style={styles.groupMemberButton}
                 textStyle={{

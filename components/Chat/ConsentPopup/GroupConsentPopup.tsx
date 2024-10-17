@@ -15,9 +15,9 @@ import {
   useCurrentAccount,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
+import { Button } from "../../../design-system/Button/Button";
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../../utils/conversation";
-import Button from "../../Button/Button";
 
 export function GroupConsentPopup() {
   const conversation = useConversationContext("conversation");
@@ -91,13 +91,13 @@ export function GroupConsentPopup() {
       </Text>
       <View style={styles.buttonsContainer}>
         <Button
-          variant="text"
+          action="text"
           title={translate("decline")}
           style={[styles.cta, styles.blockCta]}
           onPress={onBlock}
         />
         <Button
-          variant="secondary"
+          action="secondary"
           picto="checkmark"
           title={translate("join_this_group")}
           style={styles.cta}

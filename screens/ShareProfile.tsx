@@ -13,16 +13,14 @@ import {
   Share,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useColorScheme,
   View,
-  TouchableOpacity,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
-import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Avatar from "../components/Avatar";
-import ConverseButton from "../components/Button/Button";
 import ActionButton from "../components/Chat/ActionButton";
 import Picto from "../components/Picto/Picto";
 import config from "../config";
@@ -30,14 +28,18 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../data/store/accountsStore";
+import { Button } from "../design-system/Button/Button";
+import { spacing } from "../theme";
+import { useAppTheme } from "../theme/useAppTheme";
 import { isDesktop } from "../utils/device";
 import {
-  getPreferredUsername,
   getPreferredAvatar,
   getPreferredName,
+  getPreferredUsername,
   getProfile,
 } from "../utils/profile";
 import { shortAddress } from "../utils/str";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 const ShareProfileContent = ({
   userAddress,
@@ -82,6 +84,9 @@ const ShareProfileContent = ({
       Share.share(shareDict);
     }
   };
+
+  const { themed } = useAppTheme();
+
   return (
     <View style={compact ? styles.shareProfileCompact : styles.shareProfile}>
       <View style={styles.shareProfileContent}>
@@ -120,10 +125,12 @@ const ShareProfileContent = ({
         ]}
       >
         {!compact ? (
-          <ConverseButton
-            variant="primary"
+          <Button
+            action="primary"
+            style={{
+              width: "100%",
+            }}
             title={shareButtonText}
-            style={styles.shareButton}
             picto={
               Platform.OS === "web"
                 ? copiedLink
@@ -253,14 +260,10 @@ const useStyles = () => {
       flex: 1,
       justifyContent: "flex-end",
       alignItems: "center",
+      paddingHorizontal: spacing.lg,
     },
     shareButtonContainerCompact: {
       flex: 0,
-    },
-    shareButton: {
-      maxWidth: Platform.OS === "web" ? 300 : undefined,
-      borderRadius: 16,
-      marginHorizontal: 24,
     },
     shareButtonIconCompact: {
       marginRight: 8,
