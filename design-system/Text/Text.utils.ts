@@ -1,4 +1,4 @@
-import { useAppTheme } from "@theme/useAppTheme";
+import { IThemed } from "@theme/useAppTheme";
 import { StyleProp, TextStyle } from "react-native";
 
 import { IPresets, presets } from "./Text.presets";
@@ -10,7 +10,7 @@ import {
 } from "./Text.styles";
 
 export const getTextStyle = (
-  themed: ReturnType<typeof useAppTheme>["themed"],
+  themed: IThemed,
   { weight, size, style: styleProp, ...props }: ITextStyleProps
 ): StyleProp<TextStyle> => {
   const preset: IPresets = props.preset ?? "default";

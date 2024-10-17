@@ -1,11 +1,9 @@
-import { ITextStyleProps } from "@design-system/Text/Text.props";
 import { memo, useCallback, useMemo } from "react";
 
+import { textFontWeightStyles } from "../design-system/Text/Text.styles";
+import { getTextStyle } from "../design-system/Text/Text.utils";
+import { useAppTheme } from "../theme/useAppTheme";
 import { ParsedText } from "./ParsedText/ParsedText";
-
-const pressableStyle: ITextStyleProps = {
-  weight: "bold",
-};
 
 const PressableProfileWithTextInner = ({
   profileAddress,
@@ -36,12 +34,24 @@ const PressableProfileWithTextInner = ({
     [handlePress, pattern]
   );
 
+  const { themed } = useAppTheme();
+
+  const pressableStyle = {
+    ...textFontWeightStyles.bold,
+  };
+
+  const textStyle = getTextStyle(themed, {
+    ...pressableStyle,
+    weight: "bold",
+    preset: "subheading",
+    size: "xxs",
+  });
+
   return (
     <ParsedText
-      preset="subheading"
-      size="xxs"
-      pressableStyle={pressableStyle}
       parse={parseOptions}
+      pressableStyle={pressableStyle}
+      style={textStyle}
     >
       {text}
     </ParsedText>
