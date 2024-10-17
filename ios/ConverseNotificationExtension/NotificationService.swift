@@ -157,6 +157,18 @@ func handleConverseNotification(contentHandler: ((UNNotificationContent) -> Void
         contentHandler(UNNotificationContent())
       }
       break
+    case "group_sync":
+      guard let contentTopic = data["contentTopic"] as? String,
+            let account = data["account"] as? String else {
+        contentHandler(UNNotificationContent())
+        return
+      }
+      await handleGroupSyncNotification(
+        contentTopic: contentTopic,
+        account: account
+      )
+      contentHandler(UNNotificationContent())
+      break
     default:
       contentHandler(UNNotificationContent())
       return
@@ -194,6 +206,24 @@ func handleConverseNotification(contentHandler: ((UNNotificationContent) -> Void
       sentryTrackError(error: error, extras: ["message": "Could not get or sync group"])
     }
     return false // Do not show notification if any error occurs, could not have the client or mmkv
+  }
+
+  func handleGroupSyncNotification(contentTopic: String, account: String) async {
+    do {
+      let groupId = getGroupIdFromTopic(topic: contentTopic)
+      let mmkv = getMmkv()
+      if let xmtpClient = await getXmtpClient(account: account) {
+        if let group = await getGroup(xmtpClient: xmtpClient, groupId: groupId) {
+          try await group.sync()
+        } else {
+          sentryTrackMessage(message: "Group not found", extras: ["groupId": groupId, "account": account])
+        }
+      } else {
+        sentryTrackMessage(message: "No client found for account", extras: ["account": account])
+      }
+    } catch {
+      sentryTrackError(error: error, extras: ["message": "Could not sync group"])
+    }
   }
 }
 
