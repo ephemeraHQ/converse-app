@@ -3,11 +3,7 @@ import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
 import { GroupInvite } from "@utils/api.types";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
-import {
-  GroupData,
-  GroupsDataEntity,
-  GroupsEntity,
-} from "@utils/xmtpRN/client.types";
+import { GroupData, GroupsDataEntity } from "@utils/xmtpRN/client.types";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { AxiosInstance } from "axios";
 
@@ -240,28 +236,10 @@ export class JoinGroupClient {
     );
   }
 
-  static mock(
-    fetchGroupInvite: (groupInviteId: string) => Promise<GroupInvite>,
-    attemptToJoinGroup: (
-      account: string,
-      groupInviteId: string,
-      groupIdFromInvite?: string
-    ) => Promise<JoinGroupResult>,
-    fetchGroupsByAccount: (account: string) => Promise<GroupsEntity>,
-    allowGroup: (props: AllowGroupProps) => Promise<void>,
-    refreshGroup: (account: string, topic: string) => Promise<void>
+  static userAMemberOfGroupWithId(
+    alreadyAMemberGroupId: string
   ): JoinGroupClient {
-    return new JoinGroupClient(
-      fetchGroupInvite,
-      attemptToJoinGroup,
-      fetchGroupsByAccount,
-      allowGroup,
-      refreshGroup
-    );
-  }
-
-  static userAlreadyAMemberFixture(): JoinGroupClient {
-    const GroupIdUserAlreadyWasAMemberOf = "groupId123";
+    const GroupIdUserAlreadyWasAMemberOf = alreadyAMemberGroupId;
 
     const fixtureGetGroupInvite = async (groupInviteId: string) => {
       const fixtureGroupInvite: GroupInvite = {
@@ -331,8 +309,10 @@ export class JoinGroupClient {
     );
   }
 
-  static userIsNewToGroup(): JoinGroupClient {
-    const GroupIdUserIsNewTo = "superCoolAwesomeGroupABC456";
+  static userNotAMemberOfGroupWithId(
+    notJoinedGroupId: string
+  ): JoinGroupClient {
+    const GroupIdUserIsNewTo = notJoinedGroupId;
     const GroupIdUserIsAlreadyAMemberOf = "groupId123";
 
     const fixtureGetGroupInvite = async (groupInviteId: string) => {
@@ -382,6 +362,8 @@ export class JoinGroupClient {
           [fixtureGroup.id]: fixtureGroup,
         },
       } as const;
+
+      // todo remove these from the fixture if they were to even get in
 
       return fixtureGroupsDataEntity;
     };

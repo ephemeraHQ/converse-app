@@ -5,7 +5,7 @@ import { GroupInvite } from "@utils/api.types";
 import { GroupData, GroupsDataEntity } from "@utils/xmtpRN/client.types";
 import { assign, fromPromise, log, setup } from "xstate";
 
-import { AllowGroupProps } from "./GroupInvites.client";
+import { AllowGroupProps } from "./JoinGroup.client";
 import { JoinGroupResult, JoinGroupResultType } from "./joinGroup.types";
 import { Controlled } from "../../dependencies/Environment/Environment";
 

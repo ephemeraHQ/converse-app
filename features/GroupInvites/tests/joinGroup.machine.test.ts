@@ -1,9 +1,7 @@
-import { GroupData, GroupsDataEntity } from "@utils/xmtpRN/client.types";
-import { InboxId } from "@xmtp/react-native-sdk";
 import { createActor, waitFor } from "xstate";
 
 import { Controlled } from "../../../dependencies/Environment/Environment";
-import { JoinGroupClient } from "../GroupInvites.client";
+import { JoinGroupClient } from "../JoinGroup.client";
 import { joinGroupMachineLogic } from "../joinGroup.machine";
 
 jest.setTimeout(1);
@@ -22,11 +20,13 @@ describe.only("Joining a Group from an Invite", () => {
   });
 
   it("Should Successfully allow an Invited user to join with a valid group invite", async () => {
+    const newlyInvitedGroupId = "groupIdAbc";
     let navigateToGroupPayload: any = null;
     const navigateToGroupScreenSpy = jest.fn((payload) => {
       navigateToGroupPayload = payload;
     });
-    Controlled.joinGroupClient = JoinGroupClient.userIsNewToGroup();
+    Controlled.joinGroupClient =
+      JoinGroupClient.userNotAMemberOfGroupWithId(newlyInvitedGroupId);
 
     const input = { groupInviteId: "irrelevant", account: "irrelevant" };
     const joinGroupActor = createActor(
@@ -56,64 +56,28 @@ describe.only("Joining a Group from an Invite", () => {
     // User taps join group
     joinGroupActor.send({ type: "user.didTapJoinGroup" });
     expect(joinGroupActor.getSnapshot().value).toBe("Attempting to Join Group");
-    const newlyInvitedGroupId =
-      joinGroupActor.getSnapshot().context.groupInviteMetadata!.groupId!;
-    console.log(newlyInvitedGroupId);
 
-    Controlled.joinGroupClient.fetchGroupsByAccount = async (
-      account: string
-    ): Promise<GroupsDataEntity> => {
-      const fixtureGroup: GroupData = {
-        id: newlyInvitedGroupId,
-        createdAt: new Date().getTime(),
-        members: [],
-        topic: "topic123",
-        isGroupActive: true,
-        state: "allowed",
-        creatorInboxId: "0xabc" as InboxId,
-        name: "Group Name",
-        addedByInboxId: "0x123" as InboxId,
-        imageUrlSquare: "https://www.google.com",
-        description: "Group Description",
-      } as const;
+    Controlled.joinGroupClient =
+      JoinGroupClient.userAMemberOfGroupWithId(newlyInvitedGroupId);
 
-      const fixtureGroupsDataEntity: GroupsDataEntity = {
-        ids: [fixtureGroup.id],
-        byId: {
-          [fixtureGroup.id]: fixtureGroup,
-        },
-      } as const;
-
-      return fixtureGroupsDataEntity;
-    };
-    // Wait for join attempt to complete
-    await waitFor(
-      joinGroupActor,
-      (state) => !state.matches("Attempting to Join Group")
-    );
-    console.log(joinGroupActor.getSnapshot().value);
+    // Nice utility for debugging state machines
+    // await waitFor(
+    //   joinGroupActor,
+    //   (state) => !state.matches("Attempting to Join Group")
+    // );
+    // console.log(joinGroupActor.getSnapshot().value);
 
     // Wait for join attempt to complete
     await waitFor(joinGroupActor, (state) =>
       state.matches("Determining Newly Joined Group")
     );
 
-    await waitFor(
-      joinGroupActor,
-      (state) => !state.matches("Determining Newly Joined Group")
-    );
-
-    console.log(joinGroupActor.getSnapshot().value);
-
-    // Wait for user consent
     await waitFor(joinGroupActor, (state) =>
       state.matches("Providing User Consent to Join Group")
     );
 
-    // Wait for group refresh
     await waitFor(joinGroupActor, (state) => state.matches("Refreshing Group"));
 
-    // Final state: User Joined Group
     await waitFor(joinGroupActor, (state) =>
       state.matches("User Joined Group")
     );
@@ -129,7 +93,7 @@ describe.only("Joining a Group from an Invite", () => {
     const navigateToGroupScreenSpy = jest.fn((payload) => {
       navigateToGroupPayload = payload;
     });
-    Controlled.joinGroupClient = JoinGroupClient.userAlreadyAMemberFixture();
+    Controlled.joinGroupClient = JoinGroupClient.userAMemberOfGroupWithId();
 
     const input = { groupInviteId: "valid-invite-id", account: "0x123" };
     const joinGroupActor = createActor(
