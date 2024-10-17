@@ -36,7 +36,7 @@ export const textFontWeightStyles = Object.entries(typography.primary).reduce(
 export const textBaseStyle: ThemedStyle<TextStyle> = (theme) => ({
   ...textSizeStyles.sm,
   ...textFontWeightStyles.normal,
-  color: theme.colors.text,
+  color: theme.colors.text.primary,
 });
 
 export const textRtlStyle: TextStyle = isRTL ? { writingDirection: "rtl" } : {};

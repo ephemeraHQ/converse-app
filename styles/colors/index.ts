@@ -1,11 +1,14 @@
+import { MaterialDarkColors, MaterialLightColors } from "@theme/palette";
 import { ColorSchemeName, Platform } from "react-native";
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 
-import { colors, MaterialLightColors } from "../../theme";
-import { colorsDark, MaterialDarkColors } from "../../theme/colorsDark";
+import { colorsLight } from "../../theme";
+import { colorsDark } from "../../theme/colorsDark";
 
 export const backgroundColor = (colorScheme: ColorSchemeName) => {
-  return colorScheme === "dark" ? colorsDark.background : colors.background;
+  return colorScheme === "dark"
+    ? colorsDark.background.surface
+    : colorsLight.background.surface;
 };
 
 export const navigationSecondaryBackgroundColor = (
@@ -13,59 +16,61 @@ export const navigationSecondaryBackgroundColor = (
 ) => {
   return colorScheme === "dark"
     ? colorsDark.navigationSecondaryBackground
-    : colors.navigationSecondaryBackground;
+    : colorsLight.navigationSecondaryBackground;
 };
 
 export const chatInputBackgroundColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark"
     ? colorsDark.navigationSecondaryBackground
-    : colors.navigationSecondaryBackground;
+    : colorsLight.navigationSecondaryBackground;
 };
 
 export const textPrimaryColor = (colorScheme: ColorSchemeName) => {
-  return colorScheme === "dark" ? colorsDark.textPrimary : colors.textPrimary;
+  return colorScheme === "dark"
+    ? colorsDark.textPrimary
+    : colorsLight.textPrimary;
 };
 
 export const textSecondaryColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark"
     ? colorsDark.textSecondary
-    : colors.textSecondary;
+    : colorsLight.textSecondary;
 };
 
 export const actionSecondaryColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark"
     ? colorsDark.actionSecondary
-    : colors.actionSecondary;
+    : colorsLight.actionSecondary;
 };
 
 export const clickedItemBackgroundColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark"
     ? colorsDark.clickedItemBackground
-    : colors.clickedItemBackground;
+    : colorsLight.clickedItemBackground;
 };
 
 export const listItemSeparatorColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark"
     ? colorsDark.listItemSeparator
-    : colors.listItemSeparator;
+    : colorsLight.listItemSeparator;
 };
 
 export const itemSeparatorColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark"
     ? colorsDark.itemSeparator
-    : colors.itemSeparator;
+    : colorsLight.itemSeparator;
 };
 
 export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark"
     ? colorsDark.messageBubble
-    : colors.messageBubble;
+    : colorsLight.messageBubble;
 };
 
 export const messageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark"
     ? colorsDark.messageInnerBubble
-    : colors.messageInnerBubble;
+    : colorsLight.messageInnerBubble;
 };
 
 export const messageHighlightedBubbleColor = (colorScheme: ColorSchemeName) => {
@@ -75,13 +80,13 @@ export const messageHighlightedBubbleColor = (colorScheme: ColorSchemeName) => {
 export const myMessageBubbleColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark"
     ? colorsDark.myMessageBubble
-    : colors.myMessageBubble;
+    : colorsLight.myMessageBubble;
 };
 
 export const myMessageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark"
     ? colorsDark.myMessageInnerBubble
-    : colors.myMessageInnerBubble;
+    : colorsLight.myMessageInnerBubble;
 };
 
 export const myMessageHighlightedBubbleColor = (
@@ -93,15 +98,19 @@ export const myMessageHighlightedBubbleColor = (
 export const tertiaryBackgroundColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark"
     ? colorsDark.tertiaryBackground
-    : colors.tertiaryBackground;
+    : colorsLight.tertiaryBackground;
 };
 
 export const primaryColor = (colorScheme: ColorSchemeName) => {
-  return colorScheme === "dark" ? colorsDark.tint : colors.tint;
+  return colorScheme === "dark"
+    ? colorsDark.global.primary
+    : colorsLight.global.primary;
 };
 
 export const inversePrimaryColor = (colorScheme: ColorSchemeName) => {
-  return colorScheme === "dark" ? colors.tint : colorsDark.tint;
+  return colorScheme === "dark"
+    ? colorsLight.global.inverted.primary
+    : colorsDark.global.inverted.primary;
 };
 
 export const badgeColor = (colorScheme: ColorSchemeName) => {
@@ -109,11 +118,15 @@ export const badgeColor = (colorScheme: ColorSchemeName) => {
 };
 
 export const dangerColor = (colorScheme: ColorSchemeName) => {
-  return colorScheme === "dark" ? colorsDark.error : colors.error;
+  return colorScheme === "dark"
+    ? colorsDark.global.danger
+    : colorsLight.global.danger;
 };
 
 export const requestsTextColor = (colorScheme: ColorSchemeName) => {
-  return colorScheme === "dark" ? colorsDark.requestsText : colors.requestsText;
+  return colorScheme === "dark"
+    ? colorsDark.requestsText
+    : colorsLight.requestsText;
 };
 
 export const MaterialLightTheme = {

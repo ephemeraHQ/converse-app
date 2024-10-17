@@ -16,8 +16,8 @@ import { StyleProp, useColorScheme } from "react-native";
 
 import { avatarSize, IAvatarSize } from "./avatar";
 import { borderRadius, IBorderRadius } from "./border-radius";
-import { colors, IColors } from "./colors";
 import { colorsDark } from "./colorsDark";
+import { colorsLight, IColors } from "./colorsLight";
 import { iconSize, IIconSize } from "./icon";
 import { ISpacing, spacing } from "./spacing";
 import { Timing, timing } from "./timing";
@@ -39,7 +39,7 @@ export interface Theme {
 
 // Here we define our themes.
 export const lightTheme: Theme = {
-  colors,
+  colors: colorsLight,
   spacing,
   typography,
   borderRadius,
@@ -104,7 +104,7 @@ const themeContextToTheme = (themeContext: ThemeContexts): Theme =>
   themeContext === "dark" ? darkTheme : lightTheme;
 
 const setImperativeThemeing = (theme: Theme) => {
-  SystemUI.setBackgroundColorAsync(theme.colors.background);
+  SystemUI.setBackgroundColorAsync(theme.colors.background.surface);
 };
 
 export const useThemeProvider = (initialTheme: ThemeContexts = undefined) => {
