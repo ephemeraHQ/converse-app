@@ -1,4 +1,4 @@
-package com.converse.dev
+package com.converse
 
 import android.util.Log
 import com.facebook.react.bridge.Arguments
@@ -7,7 +7,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.ArrayList
 import kotlin.coroutines.resume
-import com.converse.dev.PushNotificationsService.Companion as PushNotificationsService
+import com.converse.PushNotificationsService.Companion as PushNotificationsService
 
 fun getAsyncStorage(key: String): String? {
     val storageArguments = Arguments.createArray()

@@ -1,4 +1,4 @@
-package com.converse.dev
+package com.converse
 
 import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue

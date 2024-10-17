@@ -1,4 +1,4 @@
-package com.converse.dev
+package com.converse
 import android.content.Context
 import android.util.Log
 import com.beust.klaxon.Klaxon

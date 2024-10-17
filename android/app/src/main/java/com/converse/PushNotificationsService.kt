@@ -1,4 +1,4 @@
-package com.converse.dev
+package com.converse
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -7,16 +7,18 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.beust.klaxon.Klaxon
-import com.converse.dev.xmtp.NotificationDataResult
-import com.converse.dev.xmtp.getGroup
-import com.converse.dev.xmtp.getNewConversationFromEnvelope
-import com.converse.dev.xmtp.getNewGroup
-import com.converse.dev.xmtp.getXmtpClient
-import com.converse.dev.xmtp.handleGroupMessage
-import com.converse.dev.xmtp.handleGroupWelcome
-import com.converse.dev.xmtp.handleNewConversationFirstMessage
-import com.converse.dev.xmtp.handleOngoingConversationMessage
-import com.converse.dev.xmtp.initCodecs
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.converse.xmtp.NotificationDataResult
+import com.converse.xmtp.getGroup
+import com.converse.xmtp.getNewConversationFromEnvelope
+import com.converse.xmtp.getNewGroup
+import com.converse.xmtp.getXmtpClient
+import com.converse.xmtp.handleGroupMessage
+import com.converse.xmtp.handleGroupWelcome
+import com.converse.xmtp.handleNewConversationFirstMessage
+import com.converse.xmtp.handleOngoingConversationMessage
+import com.converse.xmtp.initCodecs
 import com.facebook.react.bridge.ReactApplicationContext
 import com.google.crypto.tink.subtle.Base64
 import com.google.firebase.messaging.FirebaseMessagingService
