@@ -1,5 +1,3 @@
-import { currentAccount } from "@data/store/accountsStore";
-
 /**
  * Naming Conventions:
  *
@@ -18,13 +16,11 @@ export class AccountsClient {
 
   static live(): AccountsClient {
     console.log("live baby live");
-    // import { currentAccount } from "@data/store/accountsStore";
-    // const { fetchGroupsQuery } = await import("@queries/useGroupsQuery");
-    // let currentAccount: () => string;
-    // import("@data/store/accountsStore").then((m) => {
-    //   console.log({ m });
-    //   currentAccount = m.currentAccount;
-    // });
+    let currentAccount: () => string;
+    import("@data/store/accountsStore").then((m) => {
+      console.log({ m });
+      currentAccount = m.currentAccount;
+    });
 
     const liveGetCurrentAddress = () => {
       const liveCurrentAccount = currentAccount();

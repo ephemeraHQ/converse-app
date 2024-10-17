@@ -17,6 +17,47 @@ i18n.translations = {
   // fr
 };
 
+/**
+ * Sets the default separator for nested translation keys.
+ *
+ * Note: This separator const is used to provide autocomplete
+ * and TypeScript support for nested strings in our translation
+ * file.
+ *
+ * Uses '::' to allow English sentences as keys while
+ * still supporting nested structures. This choice avoids
+ * conflicts with standard punctuation and is visually
+ * distinct.
+ *
+ * @example
+ * // With nested translations object:
+ * {
+ *   "menu": {
+ *     "File": "File",
+ *     "Open recent": {
+ *       "No recent files": "No recent files"
+ *     }
+ *   }
+ * }
+ * // Access nested key:
+ * i18n.t("menu::File") // Returns "File"
+ * i18n.t("menu::Open recent::No recent files")
+ * // Returns "No recent files"
+ *
+ * @example
+ * // Using English sentences as keys:
+ * i18n.t("Hello, how are you?") // Works as-is
+ * i18n.t("menu::Edit::Cut") // Nested structure
+ *
+ * @sideEffects
+ * - Changes how nested keys are accessed in translations
+ * - Existing translation key strings may need updating
+ * -- Regex to find foo.bar.strings: translate\(.*\..*"\)
+ */
+export const TranslationNestedSeparator = "::" as const;
+
+i18n.defaultSeparator = TranslationNestedSeparator;
+
 const fallbackLocale = "en-US";
 const systemLocale = Localization.getLocales()[0];
 const systemLocaleTag = systemLocale?.languageTag ?? "en-US";
@@ -55,7 +96,7 @@ type RecursiveKeyOf<TObj extends object> = {
 type RecursiveKeyOfInner<TObj extends object> = {
   [TKey in keyof TObj & (string | number)]: RecursiveKeyOfHandleValue<
     TObj[TKey],
-    `['${TKey}']` | `.${TKey}`
+    `['${TKey}']` | `${typeof TranslationNestedSeparator}${TKey}`
   >;
 }[keyof TObj & (string | number)];
 

@@ -1,5 +1,6 @@
 import Button from "@components/Button/Button";
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
+import { translate } from "@i18n";
 import { useNavigation } from "@react-navigation/native";
 import { createSkyInspector } from "@statelyai/inspect";
 import {
@@ -45,6 +46,15 @@ export default function EphemeralAccountBanner() {
     >
       <View style={styles.tempAccountBannerLeft}>
         <Text style={styles.tempAccountTitle}>This account is ephemeral</Text>
+        <Text style={styles.tempAccountTitle}>
+          {translate(
+            "Your request has been sent. Wait for the admin approve you"
+          )}
+        </Text>
+        <Text style={styles.tempAccountTitle}>
+          {translate("userProfile::title::profile")}
+        </Text>
+
         {/*<Text style={styles.tempAccountTitle}>*/}
         {/*  {loadedShims ? "Loaded" : "Not loaded"}*/}
         {/*</Text>*/}

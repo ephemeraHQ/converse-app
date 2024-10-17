@@ -9,7 +9,9 @@ import { AllowGroupProps } from "./GroupInvites.client";
 import { JoinGroupResult, JoinGroupResultType } from "./joinGroup.types";
 import { Controlled } from "../../dependencies/Environment/Environment";
 
-type JoinGroupMachineEvents = { type: "user.didTapJoinGroup" };
+type JoinGroupMachineEvents =
+  | { type: "user.didTapJoinGroup" }
+  | { type: "user.didTapOpenConversation" };
 
 type JoinGroupMachineErrorType =
   | "fetchGroupInviteError"
@@ -22,7 +24,7 @@ export type JoinGroupMachineContext = {
   // Context
   account: string;
   groupInviteMetadata?: GroupInvite;
-  groupsBeforeJoinAttempt?: GroupsDataEntity;
+  groupsBeforeJoinRequestAccepted?: GroupsDataEntity;
   newGroup?: GroupData;
   joinStatus: GroupJoinRequestStatus;
   // From Input
@@ -33,6 +35,7 @@ export type JoinGroupMachineContext = {
 
 type JoinGroupMachineInput = {
   groupInviteId: string;
+  account: string;
 };
 
 type JoinGroupMachineTags = "loading" | "polling" | "error";
@@ -158,15 +161,15 @@ export const joinGroupMachineLogic = setup({
     }),
 
     saveGroupsBeforeJoinAttempt: assign({
-      groupsBeforeJoinAttempt: (
+      groupsBeforeJoinRequestAccepted: (
         _,
-        params: { groupsBeforeJoinAttempt: GroupsDataEntity }
+        params: { groupsBeforeJoinRequestAccepted: GroupsDataEntity }
       ) => {
         console.log(
           `[saveGroupsBeforeJoinAttempt] Saving groups:`,
-          params.groupsBeforeJoinAttempt
+          params.groupsBeforeJoinRequestAccepted
         );
-        return params.groupsBeforeJoinAttempt;
+        return params.groupsBeforeJoinRequestAccepted;
       },
     }),
 
@@ -260,12 +263,28 @@ export const joinGroupMachineLogic = setup({
       console.log(`[hasUserNotBeenBlocked] Result:`, result);
       return result;
     },
+
+    isUserInGroup: (
+      _,
+      params: {
+        invitedGroupId: string | undefined;
+        groups: GroupsDataEntity | undefined;
+      }
+    ) => {
+      const { invitedGroupId, groups } = params;
+      if (invitedGroupId === undefined || groups === undefined) {
+        return false;
+      }
+
+      return groups.ids.includes(invitedGroupId);
+    },
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QCsD2BLAdgcQE6oFcAHAWQEMBjACyzADoAZVMiLKAAj0KPYElMAbugAuYdiTDCWZKQGIIqTPSwDUAa3oAzSdS7F+Q0QEEKw1LiZR0FANoAGALqJQRVLBHpFzkAA9EANgAWAHY6ACYAVgAOCIBOWOD-AGYk+OCAGhAAT0QAWkCk0MCCwLCCwojUhIBfasy0LD1SSholRmZWTA4mvkERMQkpCBkyWTBcfFw6IgAbGU1zAFs6bWFdfH0+41NzS2t7JyQQV3dhT0xvPwQARiiwun9YiOuk67jXsODrsMychFzotc6FE7ElQXYEsEImEolFavUMDgNs1qLQ6AB1MgeLrsABi5nYAFVYON2CYzopZAQSVNWBAACpkIgAKURTQO3hOHi8RyuwTC-jodii-kegWigVipSSv0QEWCsTowUCUVi10eURCwrC8JADSR3HIqLaABFJONFlg2JxkbB2KzaBB2AAhMALXBiIzCUSLIjCeSKZSCdRaHRUJqwV3usAOzBsDlHLkUi68xDBOz3YLBKLXN6BYWxKLBGXZRDfUJ2fzfCKVIvXKU6up6tnIo2tehm0S4S1xnER+2IyAut3mT3esC+-3jSbTObCd3LVbrbiRkce2PxxyctzclOgK7XbNC+sQsKpUWHqKy-7PYFVw-KoIqpKffy6-VNNtor0+v3WswDlgNrcAGbQqCGdAyL+wj0qgsZNOSuyoFYthbomO7Jpccr8sCYTXHYUIqjCcSxNeuaHnQLxnskCSxHYdiBG+TYfq2LTfuOk7-qggGYMBxCgUGqgaJBHF+rB8HIohFjIfs1yHC4GHnFhNyVHYwKqkkESiiK4oCmR+FJEKYQEcknzyv4-Lvi2hpsW0P4Tn+OIAbGfFEAJdDgcJUEOTBcHWcQUl7LYYTyccik8vuZaVIEQr+NC2YioelQRGRxkxTCnxfK8kp3MEVmNKxxr0PZnFOdxLlNO5nn0N5k7if5RCBTJthJKFSZKamKninQmkMZpTz+LCbypQklHqhlmrZkE+UGsQX52aJZxlTxrlVcGXmLfVBXcE1KE2IEbXhXuvhRa8QqxAKdFJERsSPGRVQPFEmn4YE6qwgqM2frZHbmt2Vo4gAcmAADuMxZDxQ6VQoYHraGaxUISRDDKIEARkYmhdhuXQJgppwdZFNxVkKsIxGqzxJDmJZ-PWeHAgR6YvKCjHCp9hXtnQnYWv9HBA6D4OxpDyJrUJcPUIjyOQGjGPjFjUA2HJ254xFJ0IDmMVJBZKS3TEYJnmR2aKnY5kWVpGYwqzNlFRzv09tavNgxDTqVdO5izvMSwrGG4syJLtro5jiKbodSvHVcuRgnQjHFq8GYXQqpRkcUanJJWUIRPRry3Bbc3fXQADCVBgBQajWrwmhEjS7AABJkHarpgLxzozKgxdDri+CLKtONhSHykwqELy3K9bxSqKoLXme+GxcWIp0RCQRJNnKLswXRclziZcV6SNd12ADcus3rdOu3qCd5V8vB7uymDYqqpPJEpR0f4kQTzH08U489G3QUS-zfQq-F1LuXYk29a5khmB6Fg-NBxOyFt3dqysrhhGQYZa4kpDyRH8HYW4ZFYQxXzLpWElQBS5l-rnAB68OCbxAbgauYCjAQLAFAx2XcFboV7p1ZB2DKIKiNsZE2aCJ6RFCPEKUt0FQUwIovZiDU-750LoAjewDK473AZAiA0DHRdxCorK+nVbjymBPWeU8oR5SgyKWBAyDDGiMlBZWIkjixkKtgABXwEIToHAaHsDzooEkmBhDsGcoiVa0NBIQSIO49AEAwA0N8ZgfxvkJLcHgUdPut4YjREiGUL44oLITywVESORY6zXVMUxBE20c6uKiZ4retD4mJKCeVEJzsJiu1mO7bs0xamxJpI0huSSGqpI4QTXIeEilSmiNEZ+9F6IJ0sWUUaRsNbphfE9NBFTmxVOXmiAASm6D0sBWjdCFmEjysM6Aek0Ec8MyIRl6IJp8WE4RCwCk1NCbBUIJ6aiKWEOOqQvj0SrFslilt2YHJuXAE5q0XZTE6fOD21zbnsjQrjR5KtcjKh6skV6hZlRZnwtcH5NYhTKjVNpWEjYmyYFQDE+ARwwXVPbLozCnVchYPuJpTU10qwMQYoEa8WL1RkqCLPf5ooXzOPZkwFg1oegGH6OISQ0gpCsvxiraIipIiky4ZWRiQrn5FPMiqUUUIghOJkTsuRmJsQcHxLQ7x5INUINDnKUaWlfnmqzF868GtBTrO+KCEimlAjSrRJzP6vZTkrhYVGUcZJFrqsQQECEDxkHJDiAxeUiQhWD3UszSUL41SlDyla2auyFrQS4itJoya3UIC1eEaZRrZlgivJYrMMV1SVhzM-SUTww3lq+lbSNttAYgwdgLWB3B63KSbTqrSMI20QlStikUnwUiPGQe88NbQKFAPqXQ3e+8m4tw0MfDurk52cKntYrBuYGIvFVEIyIkdIhG3TlKEE4o93-wUZQvgyjQF2gYeozRSgZ3EBvQTNBiRgQpFuFNfC-yqZlipZRCI4oKavilGgv9dA3GoA8dabxAyAnNNrciGDKtjJFPVMUQ84oEh4IsX8MoMQ6CqWuvRNKRYIgEchbc+V1H2EYqQdCXCmpH5PpVCKElhkjZvDuPECUiQCPeNUfXRuh8L14ivXWsTbLYNlDUikYybxXj8gMkIl8xTTJJRngJ4dbM0TeOndeozGqkHFkNtmp4ap+QmVwcUSO2aNZ0aeDEQTYAACOBA4CBOCUBHoBzkBFxRjRpB9ZBQ1iwxZnMPxLFBqBMQrMaoLqMbLZUitciSqOQ4Ml3iPR6ToEWEOAA8gQYQWXEB4TTU9OKsJrrxCLGhm4hR7i3R3fq6bzwCMAFF2m0NlXUhVWwwC9f+PWGKVK4p0WhKTO4QrTY9QFOKQEpr6yLeWzxETs6vMpqsaZyOVYs1iIFON74UocXP3lLdHLsIbuTHYKt+7xAGXouM5ih8lEll4TeFhoFgrLHhzM5qTlYJbjjSlMDgkY7ubsF5p5qH3m8gUwiEqLBQQ4pf1uFKROoWqwwnVMWtB+GXPgrREtkHRGSM4jI34wZW2ARYZ6hKXlL0BUT2eMasEmcvk32q9s2rucecEiE9C8HRARdRxxZ8Q83xKarsWaqdKXxEgqiuq8aRtQgA */
   id: "joinGroupMachine",
   context: ({ input }) => {
-    const account = Controlled.accountsClient.getCurrentAccountAddress();
+    // const account = Controlled.accountsClient.getCurrentAccountAddress();
+    const account = input.account;
     console.log(`[joinGroupMachine] Initial context:`, { account, input });
 
     const { groupInviteId } = input;
@@ -305,17 +324,7 @@ joiner will see when they land on the deep link page.
           };
         },
         onDone: {
-          description: `
-We should be able to check the invite status
-without creating a groupJoinRequest, but in GroupInvites.screen,
-that isn't how things are done, so I'm going to follow what's currently there.
-
-This requires that the user click the button before we check if they've already
-joined, so I think I'm missing some context.
-`,
-
-          // target/*TODO: can we create the ability to check an invite status without creating a groupJoinRequest?*/: "Checking Invite Status",
-          target: "Determining Groups Joined Before Attempt",
+          target: "Loading Initially Joined Groups",
 
           actions: [
             {
@@ -331,9 +340,8 @@ joined, so I think I'm missing some context.
                 )}`
             ),
           ],
-
-          reenter: true,
         },
+
         onError: {
           target: "Error Loading Group Invite",
           actions: [
@@ -358,6 +366,110 @@ joined, so I think I'm missing some context.
       exit: log(() => `[Loading Group Invite Metadata] Exiting state`),
     },
 
+    "Loading Initially Joined Groups": {
+      entry: log(() => `[Loading Initially Joined Groups] Entered state`),
+      invoke: {
+        id: "loadingInitiallyJoinedGroups",
+        src: "fetchGroupsByAccountActorLogic",
+        input: ({ context }) => ({
+          account: context.account,
+        }),
+        onDone: {
+          target:
+            "Checking If User Has Already Joined Group Before User Action",
+          actions: [
+            {
+              type: "saveGroupsBeforeJoinAttempt",
+              params: ({ context, event }) => {
+                // const groupId = context.groupInviteMetadata?.groupId;
+                const groups = event.output;
+                return {
+                  groupsBeforeJoinRequestAccepted: groups,
+                };
+              },
+            },
+            {
+              type: "saveNewGroup",
+              params: ({ context }) => {
+                const groupId = context.groupInviteMetadata!.groupId!;
+                const groups = context.groupsBeforeJoinRequestAccepted!;
+                const newGroup = groups.byId[groupId];
+                console.log(
+                  `[Loading Initially Joined Groups] New group:`,
+                  newGroup
+                );
+                return {
+                  newGroup,
+                };
+              },
+            },
+            log(
+              ({ event }) =>
+                `[Loading Initially Joined Groups] Completed: ${JSON.stringify(
+                  event.output
+                )}`
+            ),
+          ],
+        },
+        onError: {
+          target: "Error Loading Groups",
+          actions: [
+            {
+              type: "saveError",
+              params: ({ event }) => ({
+                error: {
+                  type: "fetchGroupsByAccountError",
+                  payload: JSON.stringify(event.error),
+                },
+              }),
+            },
+            log(
+              ({ event }) =>
+                `[Determining If User Already Joined Group] Error: ${JSON.stringify(
+                  event.error
+                )}`
+            ),
+          ],
+        },
+      },
+    },
+
+    "Checking If User Has Already Joined Group Before User Action": {
+      entry: [
+        log(
+          () =>
+            `[Checking If User Has Already Joined Group Before User Action] Entered state`
+        ),
+      ],
+      always: [
+        {
+          guard: {
+            type: "isUserInGroup",
+            params: ({ context }) => ({
+              invitedGroupId: context.groupInviteMetadata?.groupId,
+              groups: context.groupsBeforeJoinRequestAccepted,
+            }),
+          },
+          target: "User Was a Member Prior of Group Link Already",
+        },
+        {
+          target: "Waiting For User Action",
+        },
+      ],
+    },
+
+    "User Was a Member Prior of Group Link Already": {
+      type: "final",
+      entry: {
+        type: "navigateToGroupScreen",
+        params: ({ context }) => {
+          return {
+            topic: context.newGroup!.topic,
+          };
+        },
+      },
+    },
+
     "Waiting For User Action": {
       description: `
 In this state, the UI will display a button to the user
@@ -375,6 +487,19 @@ screen so I'm going to follow what's currently there.
           actions: log(
             () => `[Waiting For User Action] User tapped join group`
           ),
+        },
+        "user.didTapOpenConversation": {
+          actions: [
+            log(
+              () => `[Waiting For User Action] User tapped open conversation`
+            ),
+            {
+              type: "navigateToGroupScreen",
+              params: ({ context }) => ({
+                topic: context.newGroup?.topic!,
+              }),
+            },
+          ],
         },
       },
       exit: log(() => `[Waiting For User Action] Exiting state`),
@@ -413,7 +538,7 @@ user has joined.
             {
               type: "saveGroupsBeforeJoinAttempt",
               params: ({ event }) => ({
-                groupsBeforeJoinAttempt: event.output,
+                groupsBeforeJoinRequestAccepted: event.output,
               }),
             },
             log(
@@ -569,7 +694,7 @@ consent for the new group.
 `,
       entry: log(() => `[Determining Newly Joined Group] Entered state`),
       invoke: {
-        id: "fetchUpdatedGroupsAfterJoining",
+        id: "fetchGroupsAfterGroupInviteAccepted",
         src: "fetchGroupsByAccountActorLogic",
         input: ({ context }) => ({
           account: context.account,
@@ -604,7 +729,7 @@ consent for the new group.
                 type: "saveNewGroup",
                 params: ({ context, event }) => {
                   const oldGroupIds = new Set(
-                    context.groupsBeforeJoinAttempt!.ids
+                    context.groupsBeforeJoinRequestAccepted!.ids
                   );
                   const newGroupId = event.output.ids.find(
                     (id) => !oldGroupIds.has(id)
@@ -793,6 +918,7 @@ The user has been blocked from the group or the group is not active.
       `,
       type: "final",
       entry: [
+        log(() => `[User Has Been Blocked From Group] Entered state`),
         {
           type: "saveGroupJoinStatus",
           params: {
@@ -839,6 +965,10 @@ The user has been blocked from the group or the group is not active.
       type: "final",
     },
 
+    ///////////////////////////////////////////////////////////////////////////
+    // ERROR STATES
+    ///////////////////////////////////////////////////////////////////////////
+
     "Attempting to Join Group Timed Out": {
       entry: log(() => `[Attempting to Join Group Timed Out] Entered state`),
       description: `
@@ -857,10 +987,6 @@ The user has been blocked from the group or the group is not active.
   `,
       type: "final",
     },
-
-    ///////////////////////////////////////////////////////////////////////////
-    // ERROR STATES
-    ///////////////////////////////////////////////////////////////////////////
 
     "Error Loading Group Invite": {
       entry: log(() => `[Error Loading Group Invite] Entered state`),

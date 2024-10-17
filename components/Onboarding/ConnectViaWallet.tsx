@@ -86,7 +86,7 @@ export default function ConnectViaWallet({
     async (resetLoading = true, resetOnboard = true) => {
       if (inXmtpClientCreationFlow.current) {
         /*
-        Pretty edge case where user has started the XMTP flow 
+        Pretty edge case where user has started the XMTP flow
         i.e. user has done at least one signature but then decides
         to logout before going to the end of the flow. The XMTP SDK
         gets into a broken state
@@ -169,7 +169,7 @@ export default function ConnectViaWallet({
           handlingThirdwebSigner.current = a;
           if (getAccountsList().includes(a)) {
             Alert.alert(
-              translate("connectViaWallet.alreadyConnected.title"),
+              translate("connectViaWallet::alreadyConnected.title"),
               translate("connectViaWallet.alreadyConnected.message")
             );
             disconnect();

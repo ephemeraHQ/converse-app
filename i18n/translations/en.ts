@@ -280,7 +280,10 @@ const en = {
   group_join_error: "An error occurred",
   "An error occurred": "An error occurred",
   group_join_invite_invalid: "This invite is no longer valid",
+  "This invite is no longer valid": "This invite is no longer valid",
   group_finished_polling_unsuccessfully:
+    "Your request has been sent. Wait for the admin approve you",
+  "Your request has been sent. Wait for the admin approve you":
     "Your request has been sent. Wait for the admin approve you",
   group_already_joined: "This invite has already been accepted",
   "This invite has already been accepted":

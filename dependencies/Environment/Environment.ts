@@ -1,31 +1,31 @@
 import api from "@utils/api";
 
-import { AccountsClient } from "../../features/Accounts/Accounts.client";
+// import { AccountsClient } from "../../features/Accounts/Accounts.client";
 import { JoinGroupClient } from "../../features/GroupInvites/GroupInvites.client";
 import { NetworkMonitorClient } from "../NetworkMonitor/NetworkMonitor";
 
 export type Environment = {
   networkMonitorClient: NetworkMonitorClient;
   joinGroupClient: JoinGroupClient;
-  accountsClient: AccountsClient;
+  // accountsClient: AccountsClient;
 };
 
 export const LiveEnvironment = (): Environment => ({
   networkMonitorClient: NetworkMonitorClient.live(),
   joinGroupClient: JoinGroupClient.live({ api }),
-  accountsClient: AccountsClient.live(),
+  // accountsClient: AccountsClient.live(),
 });
 
 export const QaEnvironment = (): Environment => ({
   networkMonitorClient: NetworkMonitorClient.satisfied(),
   joinGroupClient: JoinGroupClient.live({ api }),
-  accountsClient: AccountsClient.live(),
+  // accountsClient: AccountsClient.live(),
 });
 
 export const UnimplementedEnvironment: Environment = {
   networkMonitorClient: NetworkMonitorClient.unimplemented(),
   joinGroupClient: JoinGroupClient.unimplemented(),
-  accountsClient: AccountsClient.unimplemented(),
+  // accountsClient: AccountsClient.unimplemented(),
 };
 
 const isTest = process.env.NODE_ENV === "test";

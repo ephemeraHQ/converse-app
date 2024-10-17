@@ -1,5 +1,6 @@
 import Avatar from "@components/Avatar";
 import Button from "@components/Button/Button";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { translate } from "@i18n";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation } from "@react-navigation/native";
@@ -37,17 +38,32 @@ interface UseJoinGroupResult {
 
 function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
   const navigation = useNavigation();
+  /**
+   * Current account should always be non-empty at this point in the application.
+   * Ideally, the account would be consumed from the machine directly via
+   * controlled dependencies. However, the way our dependencies are currently
+   * set up makes that prohibitive for testing. So we pass the account as input
+   * to the machine when it starts.
+   *
+   * This is not desirable and is a temporary workaround until we control more
+   * of the dependencies around the account state management. This avoids
+   * transitively importing native XMTP modules when we just want to import
+   * state global functions, such as current account. The reason we want
+   * to avoid transitively importing XMTP is because it litters our tests
+   * with unnecessary mocks and distracts from what we're actually testing.
+   */
+  const account = useCurrentAccount() ?? "";
   const [state, send] = useActor(
     joinGroupMachineLogic.provide({
       actions: {
         navigateToGroupScreen: (_, params: { topic: string }) => {
           // @ts-expect-error TODO: this should work why isn't TS happy?
-          navigation.replace("Group", { topic: params.topic });
+          navigation.replace("Conversation", { topic: params.topic });
         },
       },
     }),
     {
-      input: { groupInviteId },
+      input: { groupInviteId, account },
 
       // inspect: (inspectionEvent) => {
       //   if (inspectionEvent.type === "@xstate.snapshot") {
@@ -186,7 +202,9 @@ export function JoinGroupScreen({
           </Text>
           {pollingTimedOut && (
             <Text style={styles.notification}>
-              {translate("This is taking longer than expected")}
+              {translate(
+                "Your request has been sent. Wait for the admin approve you"
+              )}
             </Text>
           )}
         </>

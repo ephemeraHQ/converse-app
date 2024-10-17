@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import {
+  AnyGroup,
   ConverseXmtpClientType,
   GroupsEntity,
   GroupWithCodecsType,
@@ -10,7 +11,6 @@ import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { groupsQueryKey } from "./QueryKeys";
 import { entify, EntityObject } from "./entify";
 import { queryClient } from "./queryClient";
-import { AnyGroup } from "../utils/xmtpRN/client";
 
 type GroupMembersSelectData = EntityObject<GroupWithCodecsType>;
 

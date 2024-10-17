@@ -11,10 +11,7 @@ import {
 import { InboxId } from "@xmtp/react-native-sdk";
 import { AxiosInstance } from "axios";
 
-import {
-  getInviteJoinRequestId,
-  saveInviteJoinRequestId,
-} from "./groupInvites.utils";
+import {} from "./groupInvites.utils";
 import { JoinGroupResult } from "./joinGroup.types";
 
 const GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS = 10;
@@ -84,32 +81,24 @@ export class JoinGroupClient {
     ): Promise<GroupsDataEntity> => {
       const { fetchGroupsQuery } = await import("@queries/useGroupsQuery");
       const groupsEntity: GroupsDataEntity = await fetchGroupsQuery(account);
-      function findCircular(obj: any, seen = new Set()) {
-        if (obj && typeof obj === "object") {
-          if (seen.has(obj)) {
-            console.error("Circular reference detected:", obj);
-            return true;
-          }
-          seen.add(obj);
-          for (const key in obj) {
-            if (findCircular(obj[key], seen)) {
-              console.error(`Property causing circular reference: ${key}`);
-              return true;
-            }
-          }
-          seen.delete(obj);
-        }
-        return false;
-      }
+      // LOG  [fetchGroupsByAccountActorLogic] Fetched groups: {"byId": {"/xmtp/mls/1/g-eeff1e9058ee7fbbdb034837420be11d/proto": {"addedByInboxId": "155a86f747676bdbdde1e5b8f0b275a81e2787739b365a259d5652e753f64d2e", "client": undefined, "createdAt": 1729164750000, "creatorInboxId": "155a86f747676bdbdde1e5b8f0b275a81e2787739b365a259d5652e753f64d2e", "description": "", "id": "eeff1e9058ee7fbbdb034837420be11d", "imageUrlSquare": "", "isGroupActive": true, "members": [Array], "name": "Alice, yyy", "state": "unknown", "topic": "/xmtp/mls/1/g-eeff1e9058ee7fbbdb034837420be11d/proto", "version": "GROUP"}}, "ids": ["/xmtp/mls/1/g-eeff1e9058ee7fbbdb034837420be11d/proto"]}
+      // LOG  [hasGroupIdInMetadata] Result: true
+      // LOG  [Determining Newly Joined Group] Exiting state
+      // LOG  [saveNewGroup] Saving new group: undefined
+      // LOG  [Determining Newly Joined Group] Group ID in metadata: eeff1e9058ee7fbbdb034837420be11d
+      // LOG  [Checking If User Has Been Blocked From Group] Entered state
+      // LOG  7:39:36 AM | DEBUG : [hasUserNotBeenBlocked] newGroup: Undefined Message
+      // LOG  [hasUserNotBeenBlocked] Result: false
+      // LOG  [Checking If User Has Been Blocked From Group] Exiting state
       // Remove client from all values in groupsEntity
       const cleanedGroupsEntity = {
         byId: Object.fromEntries(
           Object.entries(groupsEntity.byId).map(([id, group]) => [
-            id,
+            [group.id],
             { ...group, client: undefined },
           ])
         ),
-        ids: groupsEntity.ids,
+        ids: Object.values(groupsEntity.byId).map((group) => group.id),
       };
 
       // Example usage (commented out to avoid errors)
@@ -170,25 +159,8 @@ export class JoinGroupClient {
         `[liveAttemptToJoinGroup] Before joining, group count = ${groupsBeforeJoining.ids.length}`
       );
 
-      let joinRequestId = getInviteJoinRequestId(account, groupInviteId);
-      if (!joinRequestId) {
-        logger.debug(
-          `[liveAttemptToJoinGroup] No existing join request found, creating new request`
-        );
-        const joinRequest = await createGroupJoinRequest(
-          account,
-          groupInviteId
-        );
-        joinRequestId = joinRequest.id;
-        saveInviteJoinRequestId(account, groupInviteId, joinRequestId);
-        logger.debug(
-          `[liveAttemptToJoinGroup] Created new join request with ID: ${joinRequestId}`
-        );
-      } else {
-        logger.debug(
-          `[liveAttemptToJoinGroup] Using existing join request with ID: ${joinRequestId}`
-        );
-      }
+      const joinRequest = await createGroupJoinRequest(account, groupInviteId);
+      const joinRequestId = joinRequest.id;
 
       let attemptsToRetryJoinGroup = 0;
       while (attemptsToRetryJoinGroup < GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS) {
@@ -307,7 +279,7 @@ export class JoinGroupClient {
     );
   }
 
-  static fixture(): JoinGroupClient {
+  static userAlreadyAMemberFixture(): JoinGroupClient {
     const fixtureGetGroupInvite = async (groupInviteId: string) => {
       const fixtureGroupInvite: GroupInvite = {
         id: "groupInviteId123",
