@@ -130,11 +130,36 @@ export class JoinGroupClient {
      * @param groupInviteId
      * @param groupIdFromInvite
      */
+    /**
+     * Attempts to join a group using the provided account and invite details.
+     *
+     * This function handles the process of joining a group, including
+     * creating a join request if necessary, and polling for the request status.
+     *
+     * @param {string} account - The account attempting to join the group
+     * @param {string} groupInviteId - The ID of the group invite
+     * @param {string} [groupIdFromInvite] - Optional group ID from the invite
+     * @returns {Promise<JoinGroupResult>} The result of the join attempt
+     *
+     * @example
+     * // Attempt to join a group
+     * const result = await liveAttemptToJoinGroup('user123', 'invite456')
+     * // Returns: { type: 'group-join-request.accepted', groupId: 'group789' }
+     *
+     * @example
+     * // Attempt to join with known group ID
+     * const result = await liveAttemptToJoinGroup('user123', 'invite456', 'group789')
+     * // Returns: { type: 'group-join-request.rejected' }
+     */
     const liveAttemptToJoinGroup = async (
       account: string,
       groupInviteId: string,
       groupIdFromInvite?: string
     ): Promise<JoinGroupResult> => {
+      logger.debug(
+        `[liveAttemptToJoinGroup] Starting join attempt for account: ${account}, groupInviteId: ${groupInviteId}`
+      );
+
       const sleep = (ms: number) =>
         new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -142,41 +167,70 @@ export class JoinGroupClient {
         ? { ids: [], byId: {} }
         : await liveFetchGroupsByAccount(account);
       logger.debug(
-        `[GroupInvite] Before joining, group count = ${groupsBeforeJoining.ids.length}`
+        `[liveAttemptToJoinGroup] Before joining, group count = ${groupsBeforeJoining.ids.length}`
       );
 
       let joinRequestId = getInviteJoinRequestId(account, groupInviteId);
       if (!joinRequestId) {
+        logger.debug(
+          `[liveAttemptToJoinGroup] No existing join request found, creating new request`
+        );
         const joinRequest = await createGroupJoinRequest(
           account,
           groupInviteId
         );
         joinRequestId = joinRequest.id;
         saveInviteJoinRequestId(account, groupInviteId, joinRequestId);
+        logger.debug(
+          `[liveAttemptToJoinGroup] Created new join request with ID: ${joinRequestId}`
+        );
+      } else {
+        logger.debug(
+          `[liveAttemptToJoinGroup] Using existing join request with ID: ${joinRequestId}`
+        );
       }
 
       let attemptsToRetryJoinGroup = 0;
       while (attemptsToRetryJoinGroup < GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS) {
+        logger.debug(
+          `[liveAttemptToJoinGroup] Polling attempt ${
+            attemptsToRetryJoinGroup + 1
+          } of ${GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS}`
+        );
         const joinRequestData = await getGroupJoinRequest(joinRequestId);
+        logger.debug(
+          `[liveAttemptToJoinGroup] Join request status: ${joinRequestData.status}`
+        );
 
         if (joinRequestData.status !== "PENDING") {
           switch (joinRequestData.status) {
             case "ACCEPTED":
+              logger.info(
+                `[liveAttemptToJoinGroup] Join request accepted for group: ${joinRequestData.groupId}`
+              );
               return {
                 type: "group-join-request.accepted",
                 groupId: joinRequestData.groupId as string,
               };
             case "REJECTED":
+              logger.info(`[liveAttemptToJoinGroup] Join request rejected`);
               return { type: "group-join-request.rejected" };
             case "ERROR":
+              logger.error(`[liveAttemptToJoinGroup] Error in join request`);
               return { type: "group-join-request.error" };
           }
         }
 
         attemptsToRetryJoinGroup += 1;
+        logger.debug(
+          `[liveAttemptToJoinGroup] Waiting ${GROUP_JOIN_REQUEST_POLL_INTERVAL_MS}ms before next poll`
+        );
         await sleep(GROUP_JOIN_REQUEST_POLL_INTERVAL_MS);
       }
 
+      logger.warn(
+        `[liveAttemptToJoinGroup] Join request timed out after ${GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS} attempts`
+      );
       return { type: "group-join-request.timed-out" };
     };
 
