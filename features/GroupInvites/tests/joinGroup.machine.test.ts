@@ -89,11 +89,14 @@ describe.only("Joining a Group from an Invite", () => {
   });
 
   it("Should transition to 'User Was Already a Member of Group Prior to Clicking Join Link' if the user has already joined the group before user action", async () => {
+    const GroupIdUserWasAlreadyAMemberOf = "AwesomeSupercoolGroupId";
     let navigateToGroupPayload: any = null;
     const navigateToGroupScreenSpy = jest.fn((payload) => {
       navigateToGroupPayload = payload;
     });
-    Controlled.joinGroupClient = JoinGroupClient.userAMemberOfGroupWithId();
+    Controlled.joinGroupClient = JoinGroupClient.userAMemberOfGroupWithId(
+      GroupIdUserWasAlreadyAMemberOf
+    );
 
     const input = { groupInviteId: "valid-invite-id", account: "0x123" };
     const joinGroupActor = createActor(
@@ -126,7 +129,7 @@ describe.only("Joining a Group from an Invite", () => {
 
     expect(navigateToGroupScreenSpy).toHaveBeenCalledTimes(1);
     expect(navigateToGroupPayload.context.groupInviteMetadata.groupId).toBe(
-      "groupId123"
+      GroupIdUserWasAlreadyAMemberOf
     );
   });
 });
