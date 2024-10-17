@@ -1,4 +1,4 @@
-package com.converse.dev
+package com.converse
 
 import android.util.Log
 import android.content.Context

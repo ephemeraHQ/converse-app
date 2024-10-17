@@ -103,7 +103,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.converse.dev'
+    namespace 'com.converse'
     defaultConfig {
         applicationId 'com.converse.dev'
         minSdkVersion rootProject.ext.minSdkVersion
@@ -122,6 +122,22 @@ android {
             }
         }
 
+    }
+
+    flavorDimensions "env"
+    productFlavors {
+        dev {
+            dimension "env"
+            applicationId "com.converse.dev"
+        }
+        prod {
+            dimension "env"
+            applicationId "com.converse.prod"
+        }
+        preview {
+            dimension "env"
+            applicationId "com.converse.preview"
+        }
     }
 
     signingConfigs {
