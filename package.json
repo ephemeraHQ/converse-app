@@ -2,7 +2,8 @@
   "name": "converse",
   "version": "1.0.0",
   "scripts": {
-    "android": "EXPO_ENV=dev expo start --android",
+    "android": "EXPO_ENV=dev expo run:android --variant devDebug",
+    "android:build:dev": "eas build -p android --profile development --local",
     "android:reverse": "adb reverse tcp:8081 tcp:8081 && adb reverse tcp:9875 tcp:9875",
     "build": "node scripts/build/build.js",
     "commit": "git show --format=\"%h\" --no-patch",

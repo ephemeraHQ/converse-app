@@ -3,10 +3,10 @@ import android.util.Log
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import com.converse.dev.containsURL
-import com.converse.dev.getAsyncStorage
-import com.converse.dev.getMmkv
-import com.converse.dev.xmtp.getContentTypeString
+import com.converse.containsURL
+import com.converse.getAsyncStorage
+import com.converse.getMmkv
+import com.converse.xmtp.getContentTypeString
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
