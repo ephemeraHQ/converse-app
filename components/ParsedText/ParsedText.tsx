@@ -1,35 +1,24 @@
-import { getTextStyle } from "@design-system/Text/Text.utils";
-import { useAppTheme } from "@theme/useAppTheme";
-import React, { forwardRef, memo, useMemo } from "react";
-import RNParsedText from "react-native-parsed-text";
+import React, { forwardRef, memo } from "react";
+import { TextProps as RNTextProps, StyleSheet } from "react-native";
+import RNParsedText, { ParsedTextProps } from "react-native-parsed-text";
 
-import { IParsedTextProps } from "./ParsedText.props";
+type IParsedTextProps = ParsedTextProps & {
+  parse: NonNullable<ParsedTextProps["parse"]>;
+  pressableStyle?: RNTextProps["style"];
+};
 
-const ParsedTextInner = forwardRef<RNParsedText, IParsedTextProps>(
-  (props, ref) => {
-    const { themed } = useAppTheme();
-    const styles = getTextStyle(themed, props);
-    const childThemedProps = useMemo(() => {
-      return {
-        ...props,
-        ...props.pressableStyle,
-      };
-    }, [props]);
-    const pressableStyles = getTextStyle(themed, childThemedProps);
-    const parseOptions = useMemo(
-      () =>
-        props.parse.map(({ onPress, ...rest }) => ({
-          ...rest,
-          onPress,
-          style: pressableStyles,
-        })),
-      [props.parse, pressableStyles]
-    );
+export const ParsedText = memo(
+  forwardRef<RNParsedText, IParsedTextProps>((props, ref) => {
+    const { parse, style, pressableStyle, ...rest } = props;
+
+    const parseOptions = parse.map(({ onPress, ...rest }) => ({
+      ...rest,
+      onPress,
+      style: StyleSheet.flatten([style, pressableStyle]),
+    }));
 
     return (
-      <RNParsedText {...props} parse={parseOptions} ref={ref} style={styles} />
+      <RNParsedText style={style} parse={parseOptions} ref={ref} {...rest} />
     );
-  }
+  })
 );
-
-export const ParsedText = memo(ParsedTextInner);
