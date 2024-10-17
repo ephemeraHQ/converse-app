@@ -27,6 +27,7 @@ import {
 } from "react-native";
 
 import { MessageToDisplay } from "./Message";
+import { useAppTheme } from "../../../theme/useAppTheme";
 
 const MAX_REACTORS_TO_SHOW = 3;
 const REACTOR_OFFSET = 10;
@@ -202,20 +203,21 @@ export default memo(ChatMessageReactions, (prevProps, nextProps) => {
 });
 
 const useStyles = () => {
+  const { theme } = useAppTheme();
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     reactionsWrapper: {
       flexDirection: "row",
       flexWrap: "wrap",
-      rowGap: 4,
-      columnGap: 5,
+      rowGap: theme.spacing.xxxs,
+      columnGap: theme.spacing.xxs,
     },
     reactionButton: {
       flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 4,
-      paddingVertical: 2,
-      borderRadius: 16,
+      paddingHorizontal: theme.spacing.xs,
+      paddingVertical: theme.spacing.xxs,
+      borderRadius: theme.spacing.md, // or change back to xs
       borderWidth: 0.25,
     },
     profileImage: {
