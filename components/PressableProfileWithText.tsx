@@ -1,17 +1,9 @@
-import { ITextStyleProps } from "@design-system/Text/Text.props";
-import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { memo, useCallback, useMemo } from "react";
-import { TextStyle } from "react-native";
 
+import { textFontWeightStyles } from "../design-system/Text/Text.styles";
+import { getTextStyle } from "../design-system/Text/Text.utils";
+import { useAppTheme } from "../theme/useAppTheme";
 import { ParsedText } from "./ParsedText/ParsedText";
-
-const $pressableStyle: ITextStyleProps = {
-  weight: "bold",
-};
-
-const $textStyle: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.fill.secondary,
-});
 
 const PressableProfileWithTextInner = ({
   profileAddress,
@@ -24,8 +16,6 @@ const PressableProfileWithTextInner = ({
   profileDisplay: string;
   profileAddress: string;
 }) => {
-  const { themed } = useAppTheme();
-
   const handlePress = useCallback(() => {
     return onPress(profileAddress);
   }, [profileAddress, onPress]);
@@ -44,13 +34,22 @@ const PressableProfileWithTextInner = ({
     [handlePress, pattern]
   );
 
+  const { themed } = useAppTheme();
+
+  const $pressableStyle = {
+    ...textFontWeightStyles.bold,
+  };
+
+  const $textStyle = getTextStyle(themed, {
+    preset: "smaller",
+    size: "xxs",
+  });
+
   return (
     <ParsedText
-      preset="smaller"
-      size="xxs"
-      style={themed($textStyle)}
-      pressableStyle={$pressableStyle}
       parse={parseOptions}
+      pressableStyle={$pressableStyle}
+      style={$textStyle}
     >
       {text}
     </ParsedText>
