@@ -1,0 +1,59 @@
+name: Automerge to Release and Feature Branches
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  find-and-rebase:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch all branches
+        run: git fetch --all
+
+      - name: Identify the lowest release branch
+        id: release_branch
+        run: |
+          release_branch=$(git branch -r | grep "release/" | sort -V | head -n 1 | sed 's|origin/||')
+          echo "release_branch=${release_branch}" >> $GITHUB_ENV
+
+      - name: Check out the lowest release branch
+        run: git checkout ${{ env.release_branch }}
+
+      - name: Rebase release branch onto main
+        run: |
+          git rebase main || (echo "Rebase failed on release branch" && exit 1)
+
+      - name: Push changes to release branch
+        if: success()
+        run: git push origin ${{ env.release_branch }} --force-with-lease
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Identify and rebase feature branches
+        if: success()
+        run: |
+          for branch in $(git branch -r | grep "feature/" | sed 's|origin/||'); do
+            git checkout $branch
+            git rebase ${{ env.release_branch }} || (echo "Rebase failed on feature branch: $branch" && exit 1)
+            git push origin $branch --force-with-lease
+          done
+
+      - name: Create GitHub Issue for Failed Rebase
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch_name=$(git rev-parse --abbrev-ref HEAD)
+          issue_body="The rebase failed on branch $branch_name. Please resolve conflicts manually and continue the rebase process."
+          gh issue create --title "Rebase Failure on $branch_name" --body "$issue_body" --label "rebase-failure"
