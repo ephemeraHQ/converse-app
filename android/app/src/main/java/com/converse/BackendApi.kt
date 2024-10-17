@@ -1,4 +1,4 @@
-package com.converse.dev
+package com.converse
 
 import com.android.volley.toolbox.JsonObjectRequest
 import kotlinx.coroutines.suspendCancellableCoroutine
