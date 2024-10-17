@@ -155,12 +155,19 @@ export function TransactionPreview() {
           close(transactionReceipt);
         }, 1000);
       }
-    } catch (e) {
+    } catch (e: any) {
       if (`${e}`.includes("User rejected the request")) {
         setTxState({ status: "pending" });
       } else {
         logger.error(e);
-        setTxState({ status: "failure", error: `${e}` });
+        let txError = e?.message;
+        if (!txError) {
+          try {
+            txError = JSON.stringify(e);
+          } catch {}
+        }
+        if (!txError) txError = e;
+        setTxState({ status: "failure", error: `${txError}` });
       }
     }
   }, [close, sendTransaction, transactionToPreview]);
