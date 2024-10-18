@@ -1,3 +1,5 @@
+import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
+import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -13,16 +15,15 @@ import {
   Share,
   StyleSheet,
   Text,
-  useColorScheme,
-  View,
   TouchableOpacity,
+  View,
+  useColorScheme,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
-import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Avatar from "../components/Avatar";
-import ConverseButton from "../components/Button/Button";
+import Button from "../components/Button/Button";
 import ActionButton from "../components/Chat/ActionButton";
 import Picto from "../components/Picto/Picto";
 import config from "../config";
@@ -30,14 +31,18 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../data/store/accountsStore";
+import { createBottomSheetModalRef } from "../design-system/BottomSheet/BottomSheet.utils";
+import { BottomSheetModal } from "../design-system/BottomSheet/BottomSheetModal";
+import { spacing } from "../theme";
 import { isDesktop } from "../utils/device";
 import {
-  getPreferredUsername,
   getPreferredAvatar,
   getPreferredName,
+  getPreferredUsername,
   getProfile,
 } from "../utils/profile";
 import { shortAddress } from "../utils/str";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 const ShareProfileContent = ({
   userAddress,
@@ -72,6 +77,10 @@ const ShareProfileContent = ({
       : "Share link";
 
   const handleShare = () => {
+    console.log("bottomSheetModalRef.current:", bottomSheetModalRef.current);
+    bottomSheetModalRef.current?.present();
+    return;
+
     if (Platform.OS === "web") {
       setCopiedLink(true);
       Clipboard.setString(profileUrl);
@@ -82,77 +91,89 @@ const ShareProfileContent = ({
       Share.share(shareDict);
     }
   };
+
   return (
-    <View style={compact ? styles.shareProfileCompact : styles.shareProfile}>
-      <View style={styles.shareProfileContent}>
-        <Avatar
-          uri={avatar}
-          name={displayName}
-          size={
-            compact ? AvatarSizes.shareProfileCompact : AvatarSizes.shareProfile
-          }
-          style={styles.avatar}
-        />
-        <Text style={[styles.identity, compact && styles.identityCompact]}>
-          {displayName || username || shortAddress(userAddress || "")}
-        </Text>
-        {displayName !== username && (
-          <Text style={styles.username}>
-            {username || shortAddress(userAddress || "")}
-          </Text>
-        )}
-        {username && (
-          <Text style={styles.address}>{shortAddress(userAddress || "")}</Text>
-        )}
-      </View>
-      <View style={[styles.qrCode, compact && styles.qrCodeCompact]}>
-        <QRCode
-          size={compact ? 200 : 220}
-          value={profileUrl}
-          backgroundColor={backgroundColor(colorScheme)}
-          color={textPrimaryColor(colorScheme)}
-        />
-      </View>
-      <View
-        style={[
-          styles.shareButtonContainer,
-          compact && styles.shareButtonContainerCompact,
-        ]}
-      >
-        {!compact ? (
-          <ConverseButton
-            variant="primary"
-            title={shareButtonText}
-            style={styles.shareButton}
-            picto={
-              Platform.OS === "web"
-                ? copiedLink
-                  ? "checkmark"
-                  : "doc.on.doc"
-                : "square.and.arrow.up"
+    <>
+      <View style={compact ? styles.shareProfileCompact : styles.shareProfile}>
+        <View style={styles.shareProfileContent}>
+          <Avatar
+            uri={avatar}
+            name={displayName}
+            size={
+              compact
+                ? AvatarSizes.shareProfileCompact
+                : AvatarSizes.shareProfile
             }
-            onPress={handleShare}
+            style={styles.avatar}
           />
-        ) : (
-          <TouchableOpacity
-            onPress={handleShare}
-            style={styles.shareButtonCompact}
-          >
-            <Picto
-              picto="square.and.arrow.up"
-              style={styles.shareButtonIconCompact}
-              size={Platform.OS === "android" ? 16 : 12}
+          <Text style={[styles.identity, compact && styles.identityCompact]}>
+            {displayName || username || shortAddress(userAddress || "")}
+          </Text>
+          {displayName !== username && (
+            <Text style={styles.username}>
+              {username || shortAddress(userAddress || "")}
+            </Text>
+          )}
+          {username && (
+            <Text style={styles.address}>
+              {shortAddress(userAddress || "")}
+            </Text>
+          )}
+        </View>
+        <View style={[styles.qrCode, compact && styles.qrCodeCompact]}>
+          <QRCode
+            size={compact ? 200 : 220}
+            value={profileUrl}
+            backgroundColor={backgroundColor(colorScheme)}
+            color={textPrimaryColor(colorScheme)}
+          />
+        </View>
+        <View
+          style={[
+            styles.shareButtonContainer,
+            compact && styles.shareButtonContainerCompact,
+          ]}
+        >
+          {!compact ? (
+            <Button
+              style={{
+                width: "100%",
+              }}
+              title={shareButtonText}
+              picto={
+                Platform.OS === "web"
+                  ? copiedLink
+                    ? "checkmark"
+                    : "doc.on.doc"
+                  : "square.and.arrow.up"
+              }
+              onPress={handleShare}
             />
-            <Text style={styles.shareButtonTextCompact}>{shareButtonText}</Text>
-          </TouchableOpacity>
-        )}
+          ) : (
+            <TouchableOpacity
+              onPress={handleShare}
+              style={styles.shareButtonCompact}
+            >
+              <Picto
+                picto="square.and.arrow.up"
+                style={styles.shareButtonIconCompact}
+                size={Platform.OS === "android" ? 16 : 12}
+              />
+              <Text style={styles.shareButtonTextCompact}>
+                {shareButtonText}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        {!compact && <View style={{ height: headerHeight }} />}
       </View>
-      {!compact && <View style={{ height: headerHeight }} />}
-    </View>
+    </>
   );
 };
 
 export { ShareProfileContent };
+
+const bottomSheetModalRef = createBottomSheetModalRef();
 
 export default function ShareProfileScreen({
   route,
@@ -191,13 +212,25 @@ export default function ShareProfileScreen({
   }`;
 
   return (
-    <ShareProfileContent
-      userAddress={userAddress}
-      username={username}
-      displayName={displayName}
-      avatar={avatar || ""}
-      profileUrl={profileUrl}
-    />
+    <>
+      <ShareProfileContent
+        userAddress={userAddress}
+        username={username}
+        displayName={displayName}
+        avatar={avatar || ""}
+        profileUrl={profileUrl}
+      />
+
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        snapPoints={["50%"]}
+        index={1}
+      >
+        <BottomSheetContentContainer>
+          <BottomSheetHeader title="Share profile" hasClose />
+        </BottomSheetContentContainer>
+      </BottomSheetModal>
+    </>
   );
 }
 
@@ -253,14 +286,10 @@ const useStyles = () => {
       flex: 1,
       justifyContent: "flex-end",
       alignItems: "center",
+      paddingHorizontal: spacing.lg,
     },
     shareButtonContainerCompact: {
       flex: 0,
-    },
-    shareButton: {
-      maxWidth: Platform.OS === "web" ? 300 : undefined,
-      borderRadius: 16,
-      marginHorizontal: 24,
     },
     shareButtonIconCompact: {
       marginRight: 8,

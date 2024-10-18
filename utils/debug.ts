@@ -56,3 +56,10 @@ export const useLogRenderCount = (componentName: string, id: string) => {
     );
   });
 };
+
+export function debugBorder() {
+  return {
+    borderWidth: 1,
+    borderColor: "red",
+  };
+}
