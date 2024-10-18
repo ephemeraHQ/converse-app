@@ -33,8 +33,6 @@ const isLowerEnvBuild = false;
 
 const getEnvironmentForFlavor = (): Environment => {
   let result: Environment = UnimplementedEnvironment;
-  console.log({ isLowerEnvBuild });
-  console.log({ isTest });
 
   if (isLowerEnvBuild) {
     result = QaEnvironment();
@@ -62,4 +60,3 @@ const EnvironmentForFlavor: Environment = getEnvironmentForFlavor();
  * }
  */
 export const Controlled: Environment = EnvironmentForFlavor;
-console.log("hello where are you");

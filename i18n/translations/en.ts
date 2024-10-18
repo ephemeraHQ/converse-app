@@ -290,6 +290,8 @@ const en = {
     "This invite has already been accepted",
   group_invite_default_group_name: "New Group",
   "New Group": "New Group",
+  open_conversation: "Open conversation",
+  "Open conversation": "Open conversation",
 
   // Group Overview
   change_profile_picture: "Change profile picture",

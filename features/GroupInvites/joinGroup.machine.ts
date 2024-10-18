@@ -95,10 +95,6 @@ export const joinGroupMachineLogic = setup({
       void,
       { account: string; group: GroupData }
     >(async ({ input }) => {
-      console.log(
-        `[provideUserConsentToJoinGroup] Starting with input:`,
-        input
-      );
       const { account, group } = input;
       const allowGroupProps: AllowGroupProps = {
         account,
@@ -114,10 +110,8 @@ export const joinGroupMachineLogic = setup({
 
     refreshGroup: fromPromise<void, { account: string; topic: string }>(
       async ({ input }) => {
-        console.log(`[refreshGroup] Starting with input:`, input);
         const { account, topic } = input;
         await Controlled.joinGroupClient.refreshGroup(account, topic);
-        console.log(`[refreshGroup] Group refreshed`);
       }
     ),
   },
@@ -151,27 +145,18 @@ export const joinGroupMachineLogic = setup({
         _,
         params: { groupsBeforeJoinRequestAccepted: GroupsDataEntity }
       ) => {
-        console.log(
-          `[saveGroupsBeforeJoinAttempt] Saving groups:`,
-          params.groupsBeforeJoinRequestAccepted
-        );
         return params.groupsBeforeJoinRequestAccepted;
       },
     }),
 
     saveNewGroup: assign({
       invitedGroup: (_, params: { invitedGroup?: GroupData }) => {
-        console.log(`[saveNewGroup] Saving new group:`, params.invitedGroup);
         return params.invitedGroup;
       },
     }),
 
     saveGroupJoinStatus: assign({
       joinStatus: (_, params: { joinStatus: GroupJoinRequestStatus }) => {
-        console.log(
-          `[saveGroupJoinStatus] Saving join status:`,
-          params.joinStatus
-        );
         return params.joinStatus;
       },
     }),
@@ -184,7 +169,6 @@ export const joinGroupMachineLogic = setup({
     ) => {
       const result =
         params.groupJoinRequestEventType === "group-join-request.accepted";
-      console.log(`[isGroupJoinRequestAccepted] Result:`, result);
       return result;
     },
 
@@ -195,7 +179,6 @@ export const joinGroupMachineLogic = setup({
       const result =
         params.groupJoinRequestEventType ===
         "group-join-request.already-joined";
-      console.log(`[isGroupJoinRequestAlreadyJoined] Result:`, result);
       return result;
     },
 
@@ -205,7 +188,6 @@ export const joinGroupMachineLogic = setup({
     ) => {
       const result =
         params.groupJoinRequestEventType === "group-join-request.rejected";
-      console.log(`[isGroupJoinRequestRejected] Result:`, result);
       return result;
     },
 
@@ -215,7 +197,6 @@ export const joinGroupMachineLogic = setup({
     ) => {
       const result =
         params.groupJoinRequestEventType === "group-join-request.error";
-      console.log(`[isGroupJoinRequestError] Result:`, result);
       return result;
     },
 
@@ -225,13 +206,11 @@ export const joinGroupMachineLogic = setup({
     ) => {
       const result =
         params.groupJoinRequestEventType === "group-join-request.timed-out";
-      console.log(`[isGroupJoinRequestTimedOut] Result:`, result);
       return result;
     },
 
     hasGroupIdInMetadata: (_, params: { groupInviteMetadata: GroupInvite }) => {
       const result = params.groupInviteMetadata.groupId !== undefined;
-      console.log(`[hasGroupIdInMetadata] Result:`, result);
       return result;
     },
 
@@ -240,7 +219,6 @@ export const joinGroupMachineLogic = setup({
       params: { invitedGroup: GroupData | undefined }
     ) => {
       const result = params.invitedGroup === undefined;
-      console.log(`[userHasAlreadyJoinedGroup] Result:`, result);
       return result;
     },
 
@@ -249,7 +227,6 @@ export const joinGroupMachineLogic = setup({
       params: { invitedGroup: GroupData | undefined }
     ) => {
       const result = params.invitedGroup?.isGroupActive === true;
-      console.log(`[hasUserNotBeenBlocked] Result:`, result);
       return result;
     },
 
@@ -274,7 +251,6 @@ export const joinGroupMachineLogic = setup({
   context: ({ input }) => {
     // const account = Controlled.accountsClient.getCurrentAccountAddress();
     const account = input.account;
-    console.log(`[joinGroupMachine] Initial context:`, { account, input });
 
     const { groupInviteId } = input;
 
@@ -295,17 +271,10 @@ This metadata contains information that a potential
 joiner will see when they land on the deep link page.
 `,
       tags: ["loading"],
-      entry: log(
-        ({ context }) => `[Loading Group Invite Metadata] Entered state`
-      ),
       invoke: {
         id: "fetchGroupInviteActorLogic",
         src: "fetchGroupInviteActorLogic",
         input: ({ context }) => {
-          console.log(
-            `[Loading Group Invite Metadata] Invoking fetchGroupInviteActorLogic with:`,
-            context
-          );
           return {
             groupInviteId: context.groupInviteId,
             account: context.account,
@@ -321,12 +290,6 @@ joiner will see when they land on the deep link page.
                 groupInviteMetadata: event.output,
               }),
             },
-            log(
-              ({ event }) =>
-                `[Loading Group Invite Metadata] Completed: ${JSON.stringify(
-                  event.output
-                )}`
-            ),
           ],
         },
 
@@ -342,16 +305,9 @@ joiner will see when they land on the deep link page.
                 },
               }),
             },
-            log(
-              ({ event }) =>
-                `[Loading Group Invite Metadata] Error: ${JSON.stringify(
-                  event.error
-                )}`
-            ),
           ],
         },
       },
-      exit: log(() => `[Loading Group Invite Metadata] Exiting state`),
     },
 
     "Loading Initially Joined Groups": {
@@ -381,7 +337,6 @@ joiner will see when they land on the deep link page.
                 const groups = context.groupsBeforeJoinRequestAccepted!;
                 const maybeInvitedGroup: GroupData | undefined =
                   groups.byId[groupId];
-                console.log(` New group:`, maybeInvitedGroup);
                 return {
                   invitedGroup: maybeInvitedGroup,
                 };
@@ -401,12 +356,6 @@ joiner will see when they land on the deep link page.
                 },
               }),
             },
-            log(
-              ({ event }) =>
-                `[Determining If User Already Joined Group] Error: ${JSON.stringify(
-                  event.error
-                )}`
-            ),
           ],
         },
       },
@@ -432,6 +381,12 @@ joiner will see when they land on the deep link page.
     },
 
     "User Was Already a Member of Group Prior to Clicking Join Link": {
+      entry: {
+        type: "saveGroupJoinStatus",
+        params: {
+          joinStatus: "ACCEPTED",
+        },
+      },
       description: `
 The user was already a member of the group they clicked the 
 link to join. In this case, we just want to allow them to 
@@ -462,19 +417,12 @@ prior where we check the status of the group join request, but
 that isn't how things are done in the current version of the
 screen so I'm going to follow what's currently there.
     `,
-      entry: log(() => `[Waiting For User Action] Entered state`),
       on: {
         "user.didTapJoinGroup": {
           target: "Attempting to Join Group",
-          actions: log(
-            () => `[Waiting For User Action] User tapped join group`
-          ),
         },
         "user.didTapOpenConversation": {
           actions: [
-            log(
-              () => `[Waiting For User Action] User tapped open conversation`
-            ),
             {
               type: "navigateToGroupScreen",
               params: ({ context }) => ({
@@ -484,7 +432,6 @@ screen so I'm going to follow what's currently there.
           ],
         },
       },
-      exit: log(() => `[Waiting For User Action] Exiting state`),
     },
 
     "Attempting to Join Group": {
@@ -504,15 +451,11 @@ and we are exploring ideas such as allowing more admins
 to accept the invite.
           `,
       tags: ["polling"],
-      entry: log(() => `[Attempting to Join Group] Entered state`),
+
       invoke: {
         id: "attemptToJoinGroupActorLogic",
         src: "attemptToJoinGroupActorLogic",
         input: ({ context }) => {
-          console.log(
-            `[Attempting to Join Group] Invoking attemptToJoinGroupActorLogic with:`,
-            context
-          );
           return {
             groupInviteId: context.groupInviteId,
             account: context.account,
@@ -685,10 +628,6 @@ providing a fallback method to determine the join status.
             }),
           },
           target: "User Joined Group",
-          actions: log(
-            () =>
-              `[Checking If User Has Already Joined Group] User already joined, transitioning to User Joined Group`
-          ),
         },
         {
           guard: {
@@ -698,17 +637,9 @@ providing a fallback method to determine the join status.
             }),
           },
           target: "Providing User Consent to Join Group",
-          actions: log(
-            () =>
-              `[Checking If User Has Already Joined Group] User not blocked, transitioning to Providing User Consent`
-          ),
         },
         {
           target: "User Has Been Blocked From Group",
-          actions: log(
-            () =>
-              `[Checking If User Has Already Joined Group] User blocked, transitioning to User Has Been Blocked From Group`
-          ),
         },
       ],
     },
@@ -744,7 +675,6 @@ providing a fallback method to determine the join status.
     },
 
     "Refreshing Group": {
-      entry: log(() => `[Refreshing Group] Entered state`),
       invoke: {
         id: "refreshGroup",
         src: "refreshGroup",
@@ -768,7 +698,6 @@ providing a fallback method to determine the join status.
           },
         },
       },
-      exit: log(() => `[Refreshing Group] Exiting state`),
     },
 
     "User Has Been Blocked From Group": {
@@ -777,31 +706,25 @@ The user has been blocked from the group or the group is not active.
       `,
       type: "final",
       entry: [
-        log(() => `[User Has Been Blocked From Group] Entered state`),
         {
           type: "saveGroupJoinStatus",
           params: {
             joinStatus: "REJECTED",
           },
         },
-        log(
-          () =>
-            `[User Has Been Blocked From Group] Saved group join status as REJECTED`
-        ),
       ],
     },
 
     "User Joined Group": {
       type: "final",
       entry: [
-        log(() => `[User Joined Group] Entered state`),
         {
           type: "saveGroupJoinStatus",
           params: {
             joinStatus: "ACCEPTED",
           },
         },
-        log(() => `[User Joined Group] Saved group join status as ACCEPTED`),
+
         {
           type: "navigateToGroupScreen",
           params: ({ context }) => {
@@ -810,17 +733,10 @@ The user has been blocked from the group or the group is not active.
             };
           },
         },
-        log(
-          ({ context }) =>
-            `[User Joined Group] Navigating to group screen with topic: ${
-              context.invitedGroup!.topic
-            }`
-        ),
       ],
     },
 
     "Request to Join Group Rejected": {
-      entry: log(() => `[Request to Join Group Rejected] Entered state`),
       type: "final",
     },
 
@@ -829,7 +745,6 @@ The user has been blocked from the group or the group is not active.
     ///////////////////////////////////////////////////////////////////////////
 
     "Attempting to Join Group Timed Out": {
-      entry: log(() => `[Attempting to Join Group Timed Out] Entered state`),
       description: `
   The invitor client has not yet automatically accepted the
   group join request. This is a known limitation of our current
@@ -848,33 +763,27 @@ The user has been blocked from the group or the group is not active.
     },
 
     "Error Loading Group Invite": {
-      entry: log(() => `[Error Loading Group Invite] Entered state`),
       tags: ["error"],
     },
 
     "Error Joining Group": {
-      entry: log(() => `[Error Joining Group] Entered state`),
       tags: ["error"],
       type: "final",
     },
 
     "Error Loading Groups": {
-      entry: log(() => `[Error Loading Groups] Entered state`),
       tags: ["error"],
     },
 
     "Error Determining New Group": {
-      entry: log(() => `[Error Determining New Group] Entered state`),
       tags: ["error"],
     },
 
     "Error Providing User Consent": {
-      entry: log(() => `[Error Providing User Consent] Entered state`),
       tags: ["error"],
     },
 
     "Error Refreshing Group": {
-      entry: log(() => `[Error Refreshing Group] Entered state`),
       tags: ["error"],
     },
   },

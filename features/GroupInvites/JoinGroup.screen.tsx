@@ -34,6 +34,8 @@ interface UseJoinGroupResult {
   pollingTimedOut: boolean;
   joinButtonEnabled: boolean;
   joinGroup: () => void;
+  openConversation: () => void;
+  openConversationButtonEnabled: boolean;
 }
 
 function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
@@ -82,6 +84,8 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
     }
   );
 
+  console.log(state.value);
+
   const isGroupInviteLoading = state.hasTag("loading");
   const polling = state.hasTag("polling");
 
@@ -91,7 +95,9 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
 
   const pollingTimedOut = state.value === "Attempting to Join Group Timed Out";
 
-  const joinButtonEnabled = !polling;
+  const joinButtonEnabled = !polling && joinStatus !== "ACCEPTED";
+  const openConversationButtonEnabled = !polling && joinStatus === "ACCEPTED";
+
   console.log(
     JSON.stringify(
       { joinButtonEnabled, joinStatus, polling, groupInvite },
@@ -104,6 +110,10 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
     send({ type: "user.didTapJoinGroup" });
   };
 
+  const openConversation = () => {
+    send({ type: "user.didTapOpenConversation" });
+  };
+
   return {
     isGroupInviteLoading,
     polling,
@@ -114,6 +124,8 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
     pollingTimedOut,
     joinButtonEnabled,
     joinGroup,
+    openConversation,
+    openConversationButtonEnabled,
   };
 }
 
@@ -132,6 +144,8 @@ export function JoinGroupScreen({
     pollingTimedOut,
     joinButtonEnabled,
     joinGroup,
+    openConversation,
+    openConversationButtonEnabled,
   } = useJoinGroup(groupInviteId);
 
   /**************************************************************
@@ -144,7 +158,6 @@ export function JoinGroupScreen({
 
   return (
     <View style={styles.groupInvite}>
-      <Text>Hi there testing</Text>
       {isGroupInviteLoading && (
         <ActivityIndicator color={textPrimaryColor(colorScheme)} size="large" />
       )}
@@ -165,11 +178,6 @@ export function JoinGroupScreen({
               <Text style={styles.description}>{groupInvite.description}</Text>
             )}
           </View>
-          {joinStatus === "ACCEPTED" && (
-            <Text style={styles.accepted}>
-              {translate("This invite has already been accepted")}
-            </Text>
-          )}
           {joinButtonEnabled && (
             <Button
               variant="primary"
@@ -178,13 +186,33 @@ export function JoinGroupScreen({
               onPress={joinGroup}
             />
           )}
+          {openConversationButtonEnabled && (
+            <>
+              <Text style={styles.accepted}>
+                {translate("This invite has already been accepted")}
+              </Text>
+              <Button
+                variant="primary"
+                title={translate("Open conversation")}
+                style={styles.cta}
+                onPress={openConversation}
+              />
+            </>
+          )}
           {polling && (
-            <Button
-              variant="primary"
-              title={translate("Joining...")}
-              style={styles.cta}
-              disabled
-            />
+            <>
+              <Button
+                variant="primary"
+                title={translate("Joining...")}
+                style={styles.cta}
+                disabled
+              />
+              <Text style={styles.notification}>
+                {translate(
+                  "A group admin may need to approve your membership prior to joining."
+                )}
+              </Text>
+            </>
           )}
           {/* We may want to add some way for a user to get out of this state, but it's not likely to happen */}
           {joinStatus === "ERROR" && (
@@ -195,11 +223,6 @@ export function JoinGroupScreen({
               {translate("This invite is no longer valid")}
             </Text>
           )}
-          <Text style={styles.notification}>
-            {translate(
-              "A group admin may need to approve your membership prior to joining."
-            )}
-          </Text>
           {pollingTimedOut && (
             <Text style={styles.notification}>
               {translate(
