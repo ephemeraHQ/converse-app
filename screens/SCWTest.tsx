@@ -1,21 +1,32 @@
 import { thirdwebClient } from "@utils/thirdweb";
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { useConnect, useSetActiveWallet } from "thirdweb/react";
+import { View, Text, StyleSheet, TouchableOpacity, Button } from "react-native";
+import { prepareTransaction } from "thirdweb";
+import { sepolia } from "thirdweb/chains";
+import {
+  useActiveAccount,
+  useConnect,
+  useSendTransaction,
+  useSetActiveWallet,
+  useSwitchActiveWalletChain,
+} from "thirdweb/react";
 import { createWallet } from "thirdweb/wallets";
 
 import config from "../config";
 
 const MainScreen: React.FC = () => {
   const { connect: thirdwebConnect } = useConnect();
+  const activeAccount = useActiveAccount();
+  const sendTransaction = useSendTransaction();
   const setActiveWallet = useSetActiveWallet();
+  const switchChain = useSwitchActiveWalletChain();
   const handleButtonPress = () => {
     thirdwebConnect(async () => {
       // instantiate wallet
       const coinbaseWallet = createWallet("com.coinbase.wallet", {
         appMetadata: config.walletConnectConfig.appMetadata,
         mobileConfig: {
-          callbackURL: `https://${config.websiteDomain}/coinbase`,
+          callbackURL: `converse-dev://mobile-wallet-protocol`,
         },
         walletConfig: {
           options: "smartWalletOnly",
@@ -32,11 +43,33 @@ const MainScreen: React.FC = () => {
       return coinbaseWallet;
     });
   };
+  const handleTransaction = async () => {
+    const transaction = prepareTransaction({
+      to: "0x2376e9C7C604D1827bA9aCb1293Dc8b4DA2f0DB3",
+      value: BigInt(1),
+      chain: sepolia,
+      client: thirdwebClient,
+    });
+    console.log("transaction", transaction);
+    try {
+      await switchChain(sepolia);
+      console.log("switched chain");
+      // await sendTransaction.mutateAsync(transaction);
+      // console.log("sent transaction");
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.button} onPress={handleButtonPress}>
-        <Text style={styles.buttonText}>Connect to wallet</Text>
+        {!activeAccount && (
+          <Text style={styles.buttonText}>Connect to wallet</Text>
+        )}
+        {activeAccount && (
+          <Button onPress={handleTransaction} title="TRIGGER TX" />
+        )}
       </TouchableOpacity>
     </View>
   );
