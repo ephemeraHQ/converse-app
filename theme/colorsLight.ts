@@ -1,0 +1,71 @@
+import { darkPalette, lightPalette } from "./palette";
+
+export const colorsLight = {
+  bubbles: {
+    bubble: darkPalette.dark4,
+    bubbleAccent: lightPalette.accent,
+    reply: darkPalette.dark4,
+    nestedReply: lightPalette.alpha15,
+    received: {
+      bubble: darkPalette.dark4,
+      reply: darkPalette.dark4,
+      nestedReply: lightPalette.light,
+    },
+  },
+  border: {
+    primary: darkPalette.dark,
+    secondary: darkPalette.dark30,
+    subtle: darkPalette.dark8,
+    edge: lightPalette.alpha4,
+    inverted: {
+      primary: lightPalette.light,
+      secondary: lightPalette.light15,
+      subtle: lightPalette.light15,
+      edge: lightPalette.alpha8,
+    },
+  },
+  fill: {
+    primary: darkPalette.dark,
+    secondary: darkPalette.dark60,
+    tertiary: darkPalette.dark30,
+    minimal: darkPalette.dark4,
+    accent: lightPalette.accent,
+    danger: lightPalette.danger,
+    inverted: {
+      primary: lightPalette.light,
+      secondary: lightPalette.light60,
+      tertiary: lightPalette.light30,
+      minimal: lightPalette.light8,
+    },
+  },
+  background: {
+    surface: lightPalette.light,
+    sunken: lightPalette.light96,
+    raised: lightPalette.light,
+  },
+  text: {
+    primary: darkPalette.dark,
+    secondary: darkPalette.dark60,
+    tertiary: darkPalette.dark30,
+    inactive: darkPalette.dark15,
+    inverted: {
+      primary: lightPalette.light,
+      secondary: lightPalette.light60,
+      tertiary: lightPalette.light30,
+      inactive: lightPalette.light15,
+    },
+  },
+  global: {
+    primary: lightPalette.light,
+    primaryAlpha60: lightPalette.alpha60,
+    danger: lightPalette.danger,
+    inverted: {
+      primary: darkPalette.dark,
+      primaryAlpha60: darkPalette.alpha60,
+    },
+  },
+} as const;
+
+export type IColorsKey = keyof typeof colorsLight;
+
+export type IColors = typeof colorsLight;

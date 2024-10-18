@@ -131,7 +131,7 @@ export default function OnboardingComponent({
             {primaryButtonText && (
               <Button
                 title={primaryButtonText}
-                variant="primary"
+                action="primary"
                 style={styles.primaryButton}
                 onPress={primaryButtonAction}
               />
@@ -162,6 +162,7 @@ const useStyles = (showTerms: boolean) => {
       backgroundColor: backgroundColor(colorScheme),
     },
     backButton: {
+      alignSelf: "flex-start",
       paddingVertical: 8,
       marginTop: insets.top,
       width: Platform.OS === "android" ? 100 : undefined,
