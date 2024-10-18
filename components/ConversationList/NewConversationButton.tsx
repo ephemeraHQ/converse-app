@@ -1,11 +1,11 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { primaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { converseEventEmitter } from "@utils/events";
 import React, { useCallback } from "react";
-import { Platform, TouchableOpacity, useColorScheme } from "react-native";
+import { Platform, useColorScheme } from "react-native";
 import { FAB } from "react-native-paper";
 
+import { IconButton } from "../../design-system/IconButton/IconButton";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { navigate } from "../../utils/navigation";
 import Picto from "../Picto/Picto";
@@ -26,18 +26,13 @@ export default function NewConversationButton({
 
   if (Platform.OS === "ios") {
     return (
-      <TouchableOpacity
-        activeOpacity={0.2}
+      <IconButton
+        variant="ghost"
+        iconName="square.and.pencil"
+        size="md"
         onPress={onPress}
         onLongPress={showDebug}
-      >
-        <Picto
-          picto="square.and.pencil"
-          color={primaryColor(colorScheme)}
-          size={PictoSizes.newConversationButton}
-          style={{ width: 32, height: 32 }}
-        />
-      </TouchableOpacity>
+      />
     );
   } else {
     return (

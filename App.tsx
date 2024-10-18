@@ -27,8 +27,8 @@ import {
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
-import "./utils/splash/splash";
 
+import "./utils/splash/splash";
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import { useAppStore } from "./data/store/appStore";
@@ -113,7 +113,7 @@ const AppKeyboardProvider =
 export default function AppWithProviders() {
   const colorScheme = useColorScheme();
 
-  const theme = useMemo(() => {
+  const paperTheme = useMemo(() => {
     return colorScheme === "dark" ? MaterialDarkTheme : MaterialLightTheme;
   }, [colorScheme]);
 
@@ -127,7 +127,7 @@ export default function AppWithProviders() {
           <AppKeyboardProvider>
             <ActionSheetProvider>
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                <PaperProvider theme={theme}>
+                <PaperProvider theme={paperTheme}>
                   <PortalProvider>
                     <App />
                   </PortalProvider>

@@ -31,7 +31,7 @@ export default function NotificationsScreen() {
       </Text>
       <Button
         title="Accept notifications"
-        variant="primary"
+        action="primary"
         onPress={async () => {
           // Open popup
           const newStatus = await requestPushNotificationsPermissions();

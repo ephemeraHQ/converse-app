@@ -14,8 +14,11 @@ import {
 } from "react";
 import { StyleProp, useColorScheme } from "react-native";
 
-import { colors, IColors } from "./colors";
+import { avatarSize, IAvatarSize } from "./avatar";
+import { borderRadius, IBorderRadius } from "./border-radius";
 import { colorsDark } from "./colorsDark";
+import { colorsLight, IColors } from "./colorsLight";
+import { iconSize, IIconSize } from "./icon";
 import { ISpacing, spacing } from "./spacing";
 import { Timing, timing } from "./timing";
 import { ITypography, typography } from "./typography";
@@ -26,6 +29,9 @@ export type ThemeContexts = "light" | "dark" | undefined;
 export interface Theme {
   colors: IColors;
   spacing: ISpacing;
+  borderRadius: IBorderRadius;
+  avatarSize: IAvatarSize;
+  iconSize: IIconSize;
   typography: ITypography;
   timing: Timing;
   isDark: boolean;
@@ -33,9 +39,12 @@ export interface Theme {
 
 // Here we define our themes.
 export const lightTheme: Theme = {
-  colors,
+  colors: colorsLight,
   spacing,
   typography,
+  borderRadius,
+  avatarSize,
+  iconSize,
   timing,
   isDark: false,
 };
@@ -43,6 +52,9 @@ export const darkTheme: Theme = {
   colors: colorsDark,
   spacing,
   typography,
+  borderRadius,
+  avatarSize,
+  iconSize,
   timing,
   isDark: true,
 };
@@ -92,7 +104,7 @@ const themeContextToTheme = (themeContext: ThemeContexts): Theme =>
   themeContext === "dark" ? darkTheme : lightTheme;
 
 const setImperativeThemeing = (theme: Theme) => {
-  SystemUI.setBackgroundColorAsync(theme.colors.background);
+  SystemUI.setBackgroundColorAsync(theme.colors.background.surface);
 };
 
 export const useThemeProvider = (initialTheme: ThemeContexts = undefined) => {
