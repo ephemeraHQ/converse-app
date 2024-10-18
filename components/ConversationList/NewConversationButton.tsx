@@ -5,9 +5,8 @@ import React, { useCallback } from "react";
 import { Platform, useColorScheme } from "react-native";
 import { FAB } from "react-native-paper";
 
-import { IconButton } from "../../design-system/IconButton";
+import { IconButton } from "../../design-system/IconButton/IconButton";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { iconSize } from "../../theme/icon";
 import { navigate } from "../../utils/navigation";
 import Picto from "../Picto/Picto";
 
@@ -28,8 +27,9 @@ export default function NewConversationButton({
   if (Platform.OS === "ios") {
     return (
       <IconButton
+        variant="ghost"
         iconName="square.and.pencil"
-        size={iconSize.sm}
+        size="md"
         onPress={onPress}
         onLongPress={showDebug}
       />

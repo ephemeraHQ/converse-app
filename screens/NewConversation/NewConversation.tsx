@@ -94,7 +94,7 @@ export default function NewConversation({
     navigation.setOptions({
       headerLeft: () =>
         Platform.OS === "ios" ? (
-          <Button variant="link" title="Cancel" onPress={handleBack} />
+          <Button variant="text" title="Cancel" onPress={handleBack} />
         ) : (
           <AndroidBackAction navigation={navigation} />
         ),
@@ -110,7 +110,7 @@ export default function NewConversation({
           } else {
             return (
               <Button
-                variant="link"
+                variant="text"
                 title={route.params?.addingToGroupTopic ? "Add" : "Next"}
                 onPress={handleRightAction}
                 style={{ marginRight: -10, padding: 10 }}
@@ -336,7 +336,7 @@ export default function NewConversation({
       >
         {!group.enabled && (
           <Button
-            variant="link"
+            variant="text"
             picto="person.2"
             title="New group"
             style={styles.newGroupButton}
@@ -355,7 +355,7 @@ export default function NewConversation({
               <Button
                 key={m.address}
                 title={preferredName}
-                variant="link"
+                variant="text"
                 picto="xmark"
                 style={styles.groupMemberButton}
                 textStyle={{

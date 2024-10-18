@@ -137,7 +137,7 @@ export const IconButton = memo(function IconButton({
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         icon={renderIcon}
-        mode={mode}
+        // mode={mode}
         iconColor={color}
         style={[$globalStyles.center, $globalStyles.flex1, styleOverride]}
         {...Platform.select({

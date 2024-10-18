@@ -91,7 +91,7 @@ export function GroupConsentPopup() {
       </Text>
       <View style={styles.buttonsContainer}>
         <Button
-          variant="link"
+          variant="text"
           title={translate("decline")}
           style={[styles.cta, styles.blockCta]}
           onPress={onBlock}

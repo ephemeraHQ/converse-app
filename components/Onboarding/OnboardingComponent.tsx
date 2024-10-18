@@ -79,7 +79,7 @@ export default function OnboardingComponent({
     <View style={{ flex: 1, flexDirection: "column" }}>
       {backButtonText && (
         <Button
-          variant="link"
+          variant="text"
           picto={
             backButtonText.toLowerCase().includes("back")
               ? "chevron.left"

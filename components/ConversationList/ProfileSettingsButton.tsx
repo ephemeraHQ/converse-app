@@ -75,7 +75,7 @@ export default function ProfileSettingsButton() {
     }
     return (
       <Button
-        variant="link"
+        variant="text"
         title={stringBalance}
         onPress={openProfile}
         style={{ marginTop: 3.5, marginRight: 16 }}

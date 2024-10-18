@@ -9,7 +9,12 @@ import {
 
 import { ITextProps } from "../Text";
 
-export type IButtonVariant = "outline" | "fill" | "link";
+export type IButtonVariant =
+  | "outline"
+  | "fill"
+  | "link"
+  /** @deprecated */
+  | "text";
 
 export type IButtonSize = "md" | "lg";
 

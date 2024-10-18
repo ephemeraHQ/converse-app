@@ -25,7 +25,7 @@ export default function DesktopConnect() {
       <Button
         title="Back to home screen"
         style={[styles.logout, { marginTop: "auto" }]}
-        variant="link"
+        variant="text"
         textStyle={{ fontWeight: "600" }}
         onPress={() => {
           setConnectionMethod(undefined);

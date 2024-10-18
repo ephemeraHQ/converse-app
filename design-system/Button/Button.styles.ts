@@ -69,9 +69,15 @@ export const getButtonViewStyle =
           break;
 
         case "link":
+        case "text":
           style.backgroundColor = "transparent";
+          // Put back when we're done refactoring all the variant="text" button
+          // if (pressed) {
+          //   style.backgroundColor = colors.fill.minimal;
+          // }
+          // Temporary opacity change for the variant="text" button
           if (pressed) {
-            style.backgroundColor = colors.fill.minimal;
+            style.opacity = 0.8;
           }
           break;
 
@@ -110,6 +116,7 @@ export const getButtonTextStyle =
           break;
 
         case "link":
+        case "text":
           style.color = colors.text.primary;
           if (disabled) {
             style.color = colors.fill.tertiary;

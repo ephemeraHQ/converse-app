@@ -76,7 +76,7 @@ const NewConversationModal = ({
         options={{
           headerBackTitle: "Back",
           headerTitle: "New group",
-          headerRight: () => <Button variant="link" title="Create" />, // Dummy button for style
+          headerRight: () => <Button variant="text" title="Create" />, // Dummy button for style
         }}
       />
     </ModalStack.Navigator>

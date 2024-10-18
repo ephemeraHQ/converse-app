@@ -1,10 +1,10 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 
 import { useAppTheme } from "../../theme/useAppTheme";
-import { debugBorder } from "../../utils/debug";
 import { HStack } from "../HStack";
-import { IconButton } from "../IconButton";
+import { IconButton } from "../IconButton/IconButton";
 import { Text } from "../Text";
+import { useBottomSheet } from "./BottomSheet.utils";
 
 export const BottomSheetHeader = memo(function BottomSheetHeader(props: {
   title: string;
@@ -12,11 +12,17 @@ export const BottomSheetHeader = memo(function BottomSheetHeader(props: {
 }) {
   const { title, hasClose = true } = props;
 
+  const { close } = useBottomSheet();
+
   const { theme } = useAppTheme();
+
+  const handleClose = useCallback(() => {
+    close();
+  }, [close]);
 
   return (
     <HStack
-      {...debugBorder()}
+      // {...debugBorder()}
       style={{
         justifyContent: "space-between",
         alignItems: "center",
@@ -27,9 +33,10 @@ export const BottomSheetHeader = memo(function BottomSheetHeader(props: {
       {hasClose && (
         <IconButton
           action="primary"
-          mode="outlined"
-          size={theme.iconSize.sm}
+          variant="outline"
+          size="md"
           iconName="xmark"
+          onPress={handleClose}
         />
       )}
     </HStack>

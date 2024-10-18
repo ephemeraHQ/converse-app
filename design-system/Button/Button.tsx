@@ -111,7 +111,7 @@ export function Button(props: IButtonProps) {
             <Picto
               picto={picto}
               color={
-                variant === "link"
+                variant === "text" || variant === "link"
                   ? theme.colors.text.primary
                   : theme.colors.text.inverted.primary
               }

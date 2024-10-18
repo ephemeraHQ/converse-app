@@ -1,3 +1,4 @@
+import { useBottomSheet as useGorhomBottomSheet } from "@gorhom/bottom-sheet";
 import { createRef, useRef } from "react";
 
 import { IBottomSheetModalRefType } from "./IBottomSheet.types";
@@ -8,3 +9,5 @@ export const useBottomSheetModalRef = () => {
 
 export const createBottomSheetModalRef = () =>
   createRef<IBottomSheetModalRefType>();
+
+export const useBottomSheet = useGorhomBottomSheet;

@@ -69,7 +69,7 @@ export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
         />
         {canEditGroupImage && (
           <Button
-            variant="link"
+            variant="text"
             title={
               groupPhoto
                 ? translate("change_profile_picture")

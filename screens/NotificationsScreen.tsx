@@ -49,7 +49,7 @@ export default function NotificationsScreen() {
       <Button
         title="Later"
         style={styles.later}
-        variant="link"
+        variant="text"
         textStyle={{ fontWeight: "600" }}
         onPress={() => {
           setNotificationsSettings({ showNotificationScreen: false });

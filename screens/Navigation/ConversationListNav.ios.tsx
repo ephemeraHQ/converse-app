@@ -5,15 +5,20 @@ import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import React, { useLayoutEffect } from "react";
 import {
   NativeSyntheticEvent,
-  StyleSheet,
   Text,
   TextInputChangeEventData,
-  TouchableOpacity,
   View,
   useColorScheme,
+  TouchableOpacity,
+  StyleSheet,
 } from "react-native";
 import { SearchBarCommands } from "react-native-screens";
 
+import {
+  NativeStack,
+  NavigationParamList,
+  navigationAnimation,
+} from "./Navigation";
 import Connecting, {
   useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
@@ -22,19 +27,11 @@ import NewConversationButton from "../../components/ConversationList/NewConversa
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { HStack } from "../../design-system/HStack";
-import { IconButton } from "../../design-system/IconButton";
-import { VStack } from "../../design-system/VStack";
-import { PictoSizes } from "../../styles/sizes";
+import { Button } from "../../design-system/Button/Button";
 import { isDesktop } from "../../utils/device";
 import { navigate } from "../../utils/navigation";
 import { getReadableProfile, shortDisplayName } from "../../utils/str";
 import ConversationList from "../ConversationList";
-import {
-  NativeStack,
-  NavigationParamList,
-  navigationAnimation,
-} from "./Navigation";
 
 type HeaderSearchBarProps = {
   searchBarRef: React.RefObject<any>;
@@ -127,17 +124,18 @@ export default function ConversationListNav() {
           ),
         headerBackTitle: getReadableProfile(currentAccount, currentAccount),
         headerRight: () => (
-          <HStack style={styles.headerRightContainer}>
-            <IconButton
-              iconName="qrcode"
-              size={PictoSizes.conversationNav}
+          <View style={styles.headerRightContainer}>
+            <Button
+              title=""
+              variant="text"
+              picto="qrcode"
               onPress={() => navigate("ShareProfile")}
               hitSlop={8}
             />
-            <VStack style={styles.offsetComposeIcon}>
+            <View style={styles.offsetComposeIcon}>
               <NewConversationButton navigation={navigation} route={route} />
-            </VStack>
-          </HStack>
+            </View>
+          </View>
         ),
         headerTintColor: textPrimaryColor(colorScheme),
         headerShadowVisible: false,
@@ -194,6 +192,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   headerRightContainer: {
+    flexDirection: "row",
     alignItems: "center",
     marginTop: -8,
   },

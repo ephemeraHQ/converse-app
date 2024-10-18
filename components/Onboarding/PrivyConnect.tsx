@@ -328,7 +328,7 @@ export default function PrivyConnect() {
                   ? textSecondaryColor(colorScheme)
                   : primaryColor(colorScheme),
             }}
-            variant="link"
+            variant="text"
             title={
               retrySeconds > 0
                 ? translate("privyConnect.resendCodeIn", {
