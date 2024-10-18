@@ -27,8 +27,8 @@ import {
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
-import "./utils/splash/splash";
 
+import "./utils/splash/splash";
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import { useAppStore } from "./data/store/appStore";

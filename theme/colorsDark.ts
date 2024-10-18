@@ -1,7 +1,5 @@
-import { Platform } from "react-native";
-
 import { IColors } from "./colorsLight";
-import { darkPalette, lightPalette, MaterialDarkColors } from "./palette";
+import { darkPalette, lightPalette } from "./palette";
 
 export const colorsDark: IColors = {
   bubbles: {
@@ -66,68 +64,4 @@ export const colorsDark: IColors = {
       primaryAlpha60: lightPalette.alpha60,
     },
   },
-
-  /**
-   * Old ones. Maybe need to rename/adjust them.
-   */
-  navigationSecondaryBackground: Platform.select({
-    android: MaterialDarkColors.surfaceVariant,
-    default: "#1C1C1E",
-  }),
-  textPrimary: Platform.select({
-    android: MaterialDarkColors.onBackground,
-    default: darkPalette.dark,
-  }),
-  textSecondary: Platform.select({
-    android: MaterialDarkColors.onSurfaceVariant,
-    default: darkPalette.dark8,
-  }),
-  actionSecondary: Platform.select({
-    android: MaterialDarkColors.secondaryContainer,
-    default: "rgba(235, 235, 245, 0.3)",
-  }),
-  clickedItemBackground: Platform.select({
-    android: MaterialDarkColors.surfaceVariant,
-    default: "#3A3A3B",
-  }),
-  listItemSeparator: Platform.select({
-    android: MaterialDarkColors.outlineVariant,
-    default: "#3A3A3B",
-  }),
-  itemSeparator: Platform.select({
-    android: MaterialDarkColors.outlineVariant,
-    default: "#3A3A3B",
-  }),
-  messageBubble: Platform.select({
-    android: MaterialDarkColors.surfaceVariant,
-    default: "#464648",
-  }),
-  messageInnerBubble: Platform.select({
-    android: MaterialDarkColors.surface,
-    default: "rgba(235, 235, 245, 0.3)",
-  }),
-  myMessageBubble: Platform.select({
-    android: MaterialDarkColors.primary,
-    default: "#FFF",
-  }),
-  messageHighlightedBubbleColor: Platform.select({
-    android: "#574642",
-    default: "#3e3e41",
-  }),
-  myMessageInnerBubble: Platform.select({
-    android: MaterialDarkColors.primaryContainer,
-    default: darkPalette.alpha8,
-  }),
-  tertiaryBackground: Platform.select({
-    android: MaterialDarkColors.tertiaryContainer,
-    default: "#1C1C1F",
-  }),
-  requestsText: Platform.select({
-    android: MaterialDarkColors.tertiary,
-    default: "rgba(126, 0, 204, 1)",
-  }),
-  badge: Platform.select({
-    android: MaterialDarkColors.primary,
-    default: darkPalette.dark,
-  }),
 };

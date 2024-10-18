@@ -71,18 +71,20 @@ export function Button({
   }, [variant]);
 
   const labelColor = useMemo(() => {
-    return action === "text" ? theme.colors.text : theme.colors.background;
+    return action === "text"
+      ? theme.colors.text.primary
+      : theme.colors.text.inverted.primary;
   }, [action, theme.colors]);
 
   const backgroundColor = useMemo(() => {
     if (variant === "solid") {
       switch (action) {
         case "primary":
-          return theme.colors.tint;
+          return theme.colors.fill.primary;
         case "secondary":
           return theme.colors.actionSecondary;
         case "danger":
-          return theme.colors.error;
+          return theme.colors.global.danger;
         default:
           return undefined;
       }
@@ -94,11 +96,11 @@ export function Button({
     if (variant === "outlined") {
       switch (action) {
         case "primary":
-          return theme.colors.tint;
+          return theme.colors.fill.primary;
         case "secondary":
           return theme.colors.actionSecondary;
         case "danger":
-          return theme.colors.error;
+          return theme.colors.global.danger;
         default:
           return undefined;
       }
@@ -107,7 +109,9 @@ export function Button({
   }, [variant, action, theme.colors]);
 
   const textColor = useMemo(() => {
-    return action === "text" ? theme.colors.tint : theme.colors.background;
+    return action === "text"
+      ? theme.colors.global.primary
+      : theme.colors.text.inverted.primary;
   }, [action, theme.colors]);
 
   return (

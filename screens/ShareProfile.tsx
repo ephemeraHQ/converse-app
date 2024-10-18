@@ -28,9 +28,14 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../data/store/accountsStore";
+import {
+  BottomSheetContentContainer,
+  BottomSheetHeader,
+  BottomSheetModal,
+  createBottomSheetModalRef,
+} from "../design-system/BottomSheet/BottomSheetModal";
 import { Button } from "../design-system/Button/Button";
 import { spacing } from "../theme";
-import { useAppTheme } from "../theme/useAppTheme";
 import { isDesktop } from "../utils/device";
 import {
   getPreferredAvatar,
@@ -74,6 +79,10 @@ const ShareProfileContent = ({
       : "Share link";
 
   const handleShare = () => {
+    console.log("bottomSheetModalRef.current:", bottomSheetModalRef.current);
+    bottomSheetModalRef.current?.present();
+    return;
+
     if (Platform.OS === "web") {
       setCopiedLink(true);
       Clipboard.setString(profileUrl);
@@ -85,81 +94,89 @@ const ShareProfileContent = ({
     }
   };
 
-  const { themed } = useAppTheme();
-
   return (
-    <View style={compact ? styles.shareProfileCompact : styles.shareProfile}>
-      <View style={styles.shareProfileContent}>
-        <Avatar
-          uri={avatar}
-          name={displayName}
-          size={
-            compact ? AvatarSizes.shareProfileCompact : AvatarSizes.shareProfile
-          }
-          style={styles.avatar}
-        />
-        <Text style={[styles.identity, compact && styles.identityCompact]}>
-          {displayName || username || shortAddress(userAddress || "")}
-        </Text>
-        {displayName !== username && (
-          <Text style={styles.username}>
-            {username || shortAddress(userAddress || "")}
-          </Text>
-        )}
-        {username && (
-          <Text style={styles.address}>{shortAddress(userAddress || "")}</Text>
-        )}
-      </View>
-      <View style={[styles.qrCode, compact && styles.qrCodeCompact]}>
-        <QRCode
-          size={compact ? 200 : 220}
-          value={profileUrl}
-          backgroundColor={backgroundColor(colorScheme)}
-          color={textPrimaryColor(colorScheme)}
-        />
-      </View>
-      <View
-        style={[
-          styles.shareButtonContainer,
-          compact && styles.shareButtonContainerCompact,
-        ]}
-      >
-        {!compact ? (
-          <Button
-            action="primary"
-            style={{
-              width: "100%",
-            }}
-            title={shareButtonText}
-            picto={
-              Platform.OS === "web"
-                ? copiedLink
-                  ? "checkmark"
-                  : "doc.on.doc"
-                : "square.and.arrow.up"
+    <>
+      <View style={compact ? styles.shareProfileCompact : styles.shareProfile}>
+        <View style={styles.shareProfileContent}>
+          <Avatar
+            uri={avatar}
+            name={displayName}
+            size={
+              compact
+                ? AvatarSizes.shareProfileCompact
+                : AvatarSizes.shareProfile
             }
-            onPress={handleShare}
+            style={styles.avatar}
           />
-        ) : (
-          <TouchableOpacity
-            onPress={handleShare}
-            style={styles.shareButtonCompact}
-          >
-            <Picto
-              picto="square.and.arrow.up"
-              style={styles.shareButtonIconCompact}
-              size={Platform.OS === "android" ? 16 : 12}
+          <Text style={[styles.identity, compact && styles.identityCompact]}>
+            {displayName || username || shortAddress(userAddress || "")}
+          </Text>
+          {displayName !== username && (
+            <Text style={styles.username}>
+              {username || shortAddress(userAddress || "")}
+            </Text>
+          )}
+          {username && (
+            <Text style={styles.address}>
+              {shortAddress(userAddress || "")}
+            </Text>
+          )}
+        </View>
+        <View style={[styles.qrCode, compact && styles.qrCodeCompact]}>
+          <QRCode
+            size={compact ? 200 : 220}
+            value={profileUrl}
+            backgroundColor={backgroundColor(colorScheme)}
+            color={textPrimaryColor(colorScheme)}
+          />
+        </View>
+        <View
+          style={[
+            styles.shareButtonContainer,
+            compact && styles.shareButtonContainerCompact,
+          ]}
+        >
+          {!compact ? (
+            <Button
+              action="primary"
+              style={{
+                width: "100%",
+              }}
+              title={shareButtonText}
+              picto={
+                Platform.OS === "web"
+                  ? copiedLink
+                    ? "checkmark"
+                    : "doc.on.doc"
+                  : "square.and.arrow.up"
+              }
+              onPress={handleShare}
             />
-            <Text style={styles.shareButtonTextCompact}>{shareButtonText}</Text>
-          </TouchableOpacity>
-        )}
+          ) : (
+            <TouchableOpacity
+              onPress={handleShare}
+              style={styles.shareButtonCompact}
+            >
+              <Picto
+                picto="square.and.arrow.up"
+                style={styles.shareButtonIconCompact}
+                size={Platform.OS === "android" ? 16 : 12}
+              />
+              <Text style={styles.shareButtonTextCompact}>
+                {shareButtonText}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        {!compact && <View style={{ height: headerHeight }} />}
       </View>
-      {!compact && <View style={{ height: headerHeight }} />}
-    </View>
+    </>
   );
 };
 
 export { ShareProfileContent };
+
+const bottomSheetModalRef = createBottomSheetModalRef();
 
 export default function ShareProfileScreen({
   route,
@@ -198,13 +215,25 @@ export default function ShareProfileScreen({
   }`;
 
   return (
-    <ShareProfileContent
-      userAddress={userAddress}
-      username={username}
-      displayName={displayName}
-      avatar={avatar || ""}
-      profileUrl={profileUrl}
-    />
+    <>
+      <ShareProfileContent
+        userAddress={userAddress}
+        username={username}
+        displayName={displayName}
+        avatar={avatar || ""}
+        profileUrl={profileUrl}
+      />
+
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        snapPoints={["50%"]}
+        index={1}
+      >
+        <BottomSheetContentContainer>
+          <BottomSheetHeader title="Share profile" hasClose />
+        </BottomSheetContentContainer>
+      </BottomSheetModal>
+    </>
   );
 }
 

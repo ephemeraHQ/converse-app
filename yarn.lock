@@ -4658,7 +4658,15 @@
     lit "^2.2.3"
     three "^0.146.0"
 
-"@gorhom/portal@^1.0.14", "@gorhom/portal@^1.0.3":
+"@gorhom/bottom-sheet@^5.0.2":
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@gorhom/bottom-sheet/-/bottom-sheet-5.0.2.tgz#28675943f24fa9787ba58bcf592028af171cdb41"
+  integrity sha512-bctrT0PDeVUdUG4xm/d9A7ikHFgQ9wchhU0oIE1vIBncFri501GTs/8Bf16ryyKHo3Q0220Dnj5CKm3Ed6ejEg==
+  dependencies:
+    "@gorhom/portal" "1.0.14"
+    invariant "^2.2.4"
+
+"@gorhom/portal@1.0.14", "@gorhom/portal@^1.0.14", "@gorhom/portal@^1.0.3":
   version "1.0.14"
   resolved "https://registry.yarnpkg.com/@gorhom/portal/-/portal-1.0.14.tgz#1953edb76aaba80fb24021dc774550194a18e111"
   integrity sha512-MXyL4xvCjmgaORr/rtryDNFy3kU4qUbKlwtQqqsygd0xX3mhKjOLn6mQK8wfu0RkoE0pBE0nAasRoHua+/QZ7A==

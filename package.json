@@ -39,6 +39,7 @@
     "@expo/react-native-action-sheet": "^4.0.1",
     "@expo/webpack-config": "~19.0.1",
     "@flyerhq/react-native-chat-ui": "^1.4.3",
+    "@gorhom/bottom-sheet": "^5.0.2",
     "@gorhom/portal": "^1.0.14",
     "@material-symbols/svg-400": "^0.5.0",
     "@mfellner/react-native-fast-create-hash": "^1.0.0-alpha.2",

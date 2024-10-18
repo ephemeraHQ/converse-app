@@ -13,7 +13,8 @@ export type IPresets =
   | "heading"
   | "subheading"
   | "formLabel"
-  | "formHelper";
+  | "formHelper"
+  | "bigBold";
 
 export const presets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
   default: [textBaseStyle],
@@ -27,4 +28,6 @@ export const presets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
   formLabel: [textBaseStyle, textFontWeightStyles.medium],
 
   formHelper: [textBaseStyle, textSizeStyles.sm, textFontWeightStyles.normal],
+
+  bigBold: [textBaseStyle, textSizeStyles.lg, textFontWeightStyles.bold],
 };
