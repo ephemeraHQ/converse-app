@@ -91,13 +91,13 @@ export function GroupConsentPopup() {
       </Text>
       <View style={styles.buttonsContainer}>
         <Button
-          action="text"
+          variant="link"
           title={translate("decline")}
           style={[styles.cta, styles.blockCta]}
           onPress={onBlock}
         />
         <Button
-          action="secondary"
+          variant="outline"
           picto="checkmark"
           title={translate("join_this_group")}
           style={styles.cta}

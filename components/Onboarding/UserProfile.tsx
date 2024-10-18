@@ -268,7 +268,7 @@ export const UserProfile = ({ onboarding, navigation }: Props) => {
         />
       </Pressable>
       <Button
-        action="text"
+        variant="link"
         title={
           profile?.avatar
             ? translate("userProfile.buttons.changeProfilePicture")

@@ -87,7 +87,7 @@ export default function ConsentPopup() {
           }}
         />
         <Button
-          action="secondary"
+          variant="outline"
           picto="checkmark"
           title={translate("accept")}
           style={styles.cta}

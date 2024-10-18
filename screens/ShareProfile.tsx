@@ -1,3 +1,5 @@
+import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
+import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -14,8 +16,8 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
@@ -28,12 +30,8 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../data/store/accountsStore";
-import {
-  BottomSheetContentContainer,
-  BottomSheetHeader,
-  BottomSheetModal,
-  createBottomSheetModalRef,
-} from "../design-system/BottomSheet/BottomSheetModal";
+import { createBottomSheetModalRef } from "../design-system/BottomSheet/BottomSheet.utils";
+import { BottomSheetModal } from "../design-system/BottomSheet/BottomSheetModal";
 import { Button } from "../design-system/Button/Button";
 import { spacing } from "../theme";
 import { isDesktop } from "../utils/device";
@@ -138,7 +136,6 @@ const ShareProfileContent = ({
         >
           {!compact ? (
             <Button
-              action="primary"
               style={{
                 width: "100%",
               }}

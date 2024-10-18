@@ -71,10 +71,8 @@ export function NavigationChatButton({
 
   return (
     <Button
-      action={
-        Platform.OS === "android" || Platform.OS === "web"
-          ? "text"
-          : "secondary"
+      variant={
+        Platform.OS === "android" || Platform.OS === "web" ? "link" : "outline"
       }
       title={groupMode ? (loading ? "Adding..." : "Add") : "Chat"}
       style={[styles.navigationButton, loading ? styles.loading : {}]}

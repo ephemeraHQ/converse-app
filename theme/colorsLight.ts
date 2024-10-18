@@ -30,6 +30,7 @@ export const colorsLight = {
     tertiary: darkPalette.dark30,
     minimal: darkPalette.dark4,
     accent: lightPalette.accent,
+    danger: lightPalette.danger,
     inverted: {
       primary: lightPalette.light,
       secondary: lightPalette.light60,

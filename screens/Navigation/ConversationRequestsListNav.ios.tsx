@@ -120,7 +120,7 @@ export default function ConversationRequestsListNav() {
       headerRight: () =>
         clearingAll ? undefined : (
           <Button
-            action="text"
+            variant="link"
             title={translate("clear_all")}
             onPress={clearAllSpam}
           />

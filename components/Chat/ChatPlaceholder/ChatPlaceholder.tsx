@@ -78,7 +78,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
           <View>
             <Text style={styles.chatPlaceholderText}>This user is blocked</Text>
             <Button
-              action="secondary"
+              variant="outline"
               picto="lock.open"
               title="Unblock"
               style={styles.cta}
@@ -124,7 +124,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
             )}
 
             <Button
-              action="secondary"
+              variant="outline"
               picto="hand.wave"
               title="Say hi"
               style={styles.cta}

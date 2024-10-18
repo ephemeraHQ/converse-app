@@ -182,7 +182,7 @@ export default function NewGroupSummary({
         creatingGroup || isUploadingGroupPhoto ? (
           <ActivityIndicator style={styles.activitySpinner} />
         ) : (
-          <Button action="text" title="Create" onPress={onCreateGroupPress} />
+          <Button variant="link" title="Create" onPress={onCreateGroupPress} />
         ),
     });
   }, [
@@ -238,7 +238,7 @@ export default function NewGroupSummary({
             excludeSelf={false}
           />
           <Button
-            action="text"
+            variant="link"
             title={
               groupPhoto ? "Change profile picture" : "Add profile picture"
             }

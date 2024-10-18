@@ -1,139 +1,142 @@
-import React, { useCallback, useMemo } from "react";
+import { useAppTheme } from "@theme/useAppTheme";
+import { useCallback } from "react";
 import {
-  GestureResponderEvent,
+  PressableStateCallbackType,
   StyleProp,
   TextStyle,
   ViewStyle,
 } from "react-native";
-import { Button as RNPButton } from "react-native-paper";
 
 import Picto from "../../components/Picto/Picto";
-import { useAppTheme } from "../../theme/useAppTheme";
+import { Pressable } from "../Pressable";
+import { Text } from "../Text";
+import { IButtonProps, IButtonVariant } from "./Button.props";
+import {
+  $buttonLeftAccessoryStyle,
+  $buttonRightAccessoryStyle,
+  getButtonTextStyle,
+  getButtonViewStyle,
+} from "./Button.styles";
 
-export type IButtonAction =
-  | "primary"
-  | "secondary"
-  | "positive"
-  | "negative"
-  | "danger"
-  /**
-   * @deprecated These action types are deprecated and will be removed in a future version.
-   */
-  | "warning"
-  | "text";
+export function Button(props: IButtonProps) {
+  const {
+    tx,
+    text,
+    txOptions,
+    style: $viewStyleOverride,
+    pressedStyle: $pressedViewStyleOverride,
+    textStyle: $textStyleOverride,
+    pressedTextStyle: $pressedTextStyleOverride,
+    disabledTextStyle: $disabledTextStyleOverride,
+    children,
+    RightAccessory,
+    LeftAccessory,
+    disabled,
+    disabledStyle: $disabledViewStyleOverride,
+    size = "lg",
+    // @deprecated,
+    title,
+    picto,
+    ...rest
+  } = props;
 
-export type IButtonVariant = "solid" | "link" | "outlined";
+  const { themed, theme } = useAppTheme();
 
-export type IButtonProps = {
-  title: string;
-  action?: IButtonAction;
-  variant?: IButtonVariant;
-  onPress?: (event: GestureResponderEvent) => void;
-  style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
-  picto?: string;
-  hitSlop?: number;
-};
+  const variant: IButtonVariant = props.variant ?? "fill";
 
-export function Button({
-  title,
-  onPress,
-  variant = "solid",
-  action = "primary",
-  textStyle,
-  picto,
-  hitSlop,
-  style,
-  ...rest
-}: IButtonProps) {
-  const { theme } = useAppTheme();
-
-  const renderIcon = useCallback(
-    ({ color, size }: { color: string; size: number }) => {
-      if (!picto) {
-        return null;
-      }
-      return <Picto picto={picto} color={color} size={size} />;
+  const $viewStyle = useCallback(
+    ({ pressed }: PressableStateCallbackType): StyleProp<ViewStyle> => {
+      return [
+        themed(
+          getButtonViewStyle({ variant, size, action: "primary", pressed })
+        ),
+        $viewStyleOverride,
+        pressed && $pressedViewStyleOverride,
+        disabled && $disabledViewStyleOverride,
+      ];
     },
-    [picto]
+    [
+      themed,
+      variant,
+      size,
+      $viewStyleOverride,
+      $pressedViewStyleOverride,
+      $disabledViewStyleOverride,
+      disabled,
+    ]
   );
 
-  const mode = useMemo(() => {
-    switch (variant) {
-      case "solid":
-        return "contained";
-      case "outlined":
-        return "outlined";
-      case "link":
-      default:
-        return "text";
-    }
-  }, [variant]);
-
-  const labelColor = useMemo(() => {
-    return action === "text"
-      ? theme.colors.text.primary
-      : theme.colors.text.inverted.primary;
-  }, [action, theme.colors]);
-
-  const backgroundColor = useMemo(() => {
-    if (variant === "solid") {
-      switch (action) {
-        case "primary":
-          return theme.colors.fill.primary;
-        case "secondary":
-          return theme.colors.actionSecondary;
-        case "danger":
-          return theme.colors.global.danger;
-        default:
-          return undefined;
-      }
-    }
-    return undefined;
-  }, [variant, action, theme.colors]);
-
-  const borderColor = useMemo(() => {
-    if (variant === "outlined") {
-      switch (action) {
-        case "primary":
-          return theme.colors.fill.primary;
-        case "secondary":
-          return theme.colors.actionSecondary;
-        case "danger":
-          return theme.colors.global.danger;
-        default:
-          return undefined;
-      }
-    }
-    return undefined;
-  }, [variant, action, theme.colors]);
-
-  const textColor = useMemo(() => {
-    return action === "text"
-      ? theme.colors.global.primary
-      : theme.colors.text.inverted.primary;
-  }, [action, theme.colors]);
+  const $textStyle = useCallback(
+    ({ pressed }: PressableStateCallbackType): StyleProp<TextStyle> => {
+      return [
+        themed(
+          getButtonTextStyle({ variant, size, action: "primary", pressed })
+        ),
+        $textStyleOverride,
+        pressed && $pressedTextStyleOverride,
+        disabled && $disabledTextStyleOverride,
+      ];
+    },
+    [
+      themed,
+      variant,
+      size,
+      $textStyleOverride,
+      $pressedTextStyleOverride,
+      $disabledTextStyleOverride,
+      disabled,
+    ]
+  );
 
   return (
-    <RNPButton
-      mode={mode}
-      onPress={onPress}
-      labelStyle={[{ color: labelColor }, textStyle]}
-      icon={renderIcon}
-      hitSlop={hitSlop}
-      style={[
-        {
-          borderRadius: theme.borderRadius.sm,
-          backgroundColor,
-          borderColor,
-        },
-        style,
-      ]}
-      textColor={textColor}
-      buttonColor={backgroundColor}
+    <Pressable
+      style={$viewStyle}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: !!disabled }}
       {...rest}
+      disabled={disabled}
     >
-      {title}
-    </RNPButton>
+      {(state) => (
+        <>
+          {!!LeftAccessory && (
+            <LeftAccessory
+              style={$buttonLeftAccessoryStyle}
+              pressableState={state}
+              disabled={disabled}
+            />
+          )}
+
+          {/* @deprecated stuff */}
+          {!!picto && (
+            <Picto
+              picto={picto}
+              color={
+                variant === "link"
+                  ? theme.colors.text.primary
+                  : theme.colors.text.inverted.primary
+              }
+              style={themed($buttonLeftAccessoryStyle)}
+            />
+          )}
+
+          <Text
+            tx={tx}
+            text={title ?? text}
+            txOptions={txOptions}
+            style={$textStyle(state)}
+          >
+            {children}
+          </Text>
+
+          {!!RightAccessory && (
+            <RightAccessory
+              style={$buttonRightAccessoryStyle}
+              pressableState={state}
+              disabled={disabled}
+            />
+          )}
+        </>
+      )}
+    </Pressable>
   );
 }

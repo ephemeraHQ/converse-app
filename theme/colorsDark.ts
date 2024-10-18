@@ -31,6 +31,7 @@ export const colorsDark: IColors = {
     tertiary: lightPalette.light30,
     minimal: lightPalette.light8,
     accent: darkPalette.accent,
+    danger: darkPalette.danger,
     inverted: {
       primary: darkPalette.dark,
       secondary: darkPalette.dark60,

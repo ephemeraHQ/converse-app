@@ -195,7 +195,7 @@ export default function Onboarding() {
       {addingNewAccount && (
         <Button
           title="Cancel"
-          action="text"
+          variant="link"
           style={styles.cancelButton}
           onPress={() => setAddingNewAccount(false)}
         />

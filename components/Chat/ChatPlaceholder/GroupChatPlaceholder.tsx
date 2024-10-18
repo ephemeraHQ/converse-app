@@ -87,7 +87,7 @@ export function GroupChatPlaceholder({ messagesCount }: Props) {
             </Text>
 
             <Button
-              action="secondary"
+              variant="outline"
               picto="hand.wave"
               title={translate("say_hi")}
               style={styles.cta}

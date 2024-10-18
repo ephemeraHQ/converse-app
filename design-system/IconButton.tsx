@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback, useMemo } from "react";
 import { GestureResponderEvent, Platform } from "react-native";
 import {
   IconButtonProps as IRNPIconButtonProps,
@@ -12,10 +12,23 @@ import { AnimatedVStack } from "./VStack";
 import Picto from "../components/Picto/Picto";
 import { usePressInOut } from "../hooks/usePressInOut";
 import { $globalStyles } from "../theme/styles";
+import { useAppTheme } from "../theme/useAppTheme";
 import { Haptics } from "../utils/haptics";
+
+type IIconButtonVariant = "solid" | "outlined" | "subtle";
+
+type IIconButtonAction =
+  | "primary"
+  | "secondary"
+  | "positive"
+  | "negative"
+  | "warning"
+  | "text";
 
 type IIconButtonProps = Omit<IRNPIconButtonProps, "icon"> & {
   withHaptics?: boolean;
+  variant?: IIconButtonVariant;
+  action?: IIconButtonAction;
 } & (
     | {
         icon:
@@ -27,14 +40,17 @@ type IIconButtonProps = Omit<IRNPIconButtonProps, "icon"> & {
   );
 
 export const IconButton = memo(function IconButton({
-  style: styleOveride,
+  style: styleOverride,
   icon,
   iconName,
   onPress: onPressProps,
   withHaptics = true,
+  variant,
+  action = "primary",
   ...rest
 }: IIconButtonProps) {
   const { handlePressIn, handlePressOut, pressedInAV } = usePressInOut();
+  const { theme } = useAppTheme();
 
   const renderIcon: RNPIconSource = useCallback(
     (props: { size: number; color: string }) => {
@@ -52,7 +68,6 @@ export const IconButton = memo(function IconButton({
 
       return null;
     },
-
     [icon, iconName]
   );
 
@@ -75,7 +90,6 @@ export const IconButton = memo(function IconButton({
   const onPress = useCallback(
     (e: GestureResponderEvent) => {
       if (onPressProps) {
-        // Only haptics if we actually have an onPress handler
         if (withHaptics) {
           Haptics.lightImpactAsync();
         }
@@ -85,6 +99,37 @@ export const IconButton = memo(function IconButton({
     [withHaptics, onPressProps]
   );
 
+  const mode = useMemo(() => {
+    switch (variant) {
+      case "outlined":
+        return "outlined";
+      case "subtle":
+        return "contained-tonal";
+      case "solid":
+        return "contained";
+      default:
+        // Will just render the icon, no background or border
+        return undefined;
+    }
+  }, [variant]);
+
+  const color = useMemo(() => {
+    switch (action) {
+      case "secondary":
+        return theme.colors.text.secondary;
+      case "positive":
+        return theme.colors.text.primary;
+      case "negative":
+        return theme.colors.global.danger;
+      case "warning":
+        return theme.colors.global.danger;
+      case "text":
+        return theme.colors.text.primary;
+      default:
+        return theme.colors.text.primary;
+    }
+  }, [action, theme.colors]);
+
   return (
     <AnimatedVStack style={animatedStyle}>
       <RNPIconButton
@@ -92,7 +137,9 @@ export const IconButton = memo(function IconButton({
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         icon={renderIcon}
-        style={[$globalStyles.center, $globalStyles.flex1, styleOveride]}
+        mode={mode}
+        iconColor={color}
+        style={[$globalStyles.center, $globalStyles.flex1, styleOverride]}
         {...Platform.select({
           ios: {
             underlayColor: "transparent",
