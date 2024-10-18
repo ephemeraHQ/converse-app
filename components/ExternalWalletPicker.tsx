@@ -21,9 +21,9 @@ import {
 } from "react-native";
 import { Account, createWallet, Wallet } from "thirdweb/wallets";
 
-import Button from "./Button/Button";
 import { Drawer, DrawerRef } from "./Drawer";
 import config from "../config";
+import Button from "./Button/Button";
 import {
   InstalledWallet,
   useInstalledWallets,
@@ -152,7 +152,7 @@ export default function ExternalWalletPicker() {
         ))}
         {wallets.length === 0 && <Text>{translate("no_wallet_detected")}</Text>}
         <Button
-          variant="primary"
+          action="primary"
           title={translate("cancel")}
           style={styles.cta}
           onPress={closeMenu}

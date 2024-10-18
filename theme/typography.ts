@@ -1,7 +1,4 @@
-// TODO: write documentation about fonts and typography along with guides on how to add custom fonts in own
-// markdown file and add links from here
-
-import { Platform } from "react-native";
+import { Platform, TextStyle } from "react-native";
 
 export const customFontsToLoad = {};
 
@@ -42,10 +39,6 @@ const fonts = {
 
 export const typography = {
   /**
-   * The fonts are available to use, but prefer using the semantic name.
-   */
-  fonts,
-  /**
    * The primary font. Used in most places.
    */
   primary: Platform.select({
@@ -53,14 +46,45 @@ export const typography = {
     android: fonts.roboto,
     default: fonts.sfPro,
   }),
-  /**
-   * An alternate font used for perhaps titles and stuff.
-   */
-  secondary: Platform.select({
-    ios: fonts.sfPro,
-    android: fonts.sansSerif,
-    default: fonts.sfPro,
-  }),
+};
+
+export const text: Record<string, TextStyle> = {
+  body: {
+    fontSize: 16,
+    lineHeight: 20,
+    letterSpacing: 0,
+    fontWeight: 400,
+  },
+  bodyBold: {
+    fontSize: 16,
+    lineHeight: 20,
+    letterSpacing: 0,
+    fontWeight: 700,
+  },
+  small: {
+    fontSize: 14,
+    lineHeight: 18,
+    letterSpacing: 0,
+    fontWeight: 400,
+  },
+  smaller: {
+    fontSize: 12,
+    lineHeight: 14,
+    letterSpacing: 0,
+    fontWeight: 400,
+  },
+  smallerBold: {
+    fontSize: 12,
+    lineHeight: 14,
+    letterSpacing: 0,
+    fontWeight: 700,
+  },
+  bigBold: {
+    fontSize: 24,
+    lineHeight: 34,
+    letterSpacing: 0,
+    fontWeight: 700,
+  },
 };
 
 export type ITypography = typeof typography;
