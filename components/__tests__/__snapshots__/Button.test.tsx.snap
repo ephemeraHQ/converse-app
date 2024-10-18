@@ -1,12 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Button Component Default (Android) Button renders correctly with picto 1`] = `
+exports[`Button Component Default (Android) Button renders correctly with danger variant 1`] = `
 <View
+  accessibilityRole="button"
   accessibilityState={
     {
       "busy": undefined,
       "checked": undefined,
-      "disabled": undefined,
+      "disabled": false,
       "expanded": undefined,
       "selected": undefined,
     }
@@ -20,9 +21,12 @@ exports[`Button Component Default (Android) Button renders correctly with picto 
     }
   }
   accessible={true}
+  action="danger"
   collapsable={false}
-  focusable={false}
+  focusable={true}
+  onBlur={[Function]}
   onClick={[Function]}
+  onFocus={[Function]}
   onResponderGrant={[Function]}
   onResponderMove={[Function]}
   onResponderRelease={[Function]}
@@ -30,112 +34,48 @@ exports[`Button Component Default (Android) Button renders correctly with picto 
   onResponderTerminationRequest={[Function]}
   onStartShouldSetResponder={[Function]}
   style={
-    {
-      "backgroundColor": "#EFEFF0",
-      "borderRadius": 100,
-      "opacity": 1,
-      "paddingHorizontal": 15,
-      "paddingVertical": 4,
-    }
-  }
->
-  <RNSfsymbols
-    iconColor={-1}
-    multicolor={false}
-    resizeMode="center"
-    scale="large"
-    size={13}
-    style={
-      [
-        {
-          "marginLeft": 10,
-          "marginRight": 15,
-        },
-        undefined,
-      ]
-    }
-    systemName="star"
-    weight="regular"
-  />
-  <Text
-    allowFontScaling={true}
-    style={
-      [
-        {
-          "color": "rgb(0,0,0)",
-          "fontSize": 17,
-          "fontWeight": "600",
-          "textAlign": "center",
-        },
-        undefined,
-      ]
-    }
-  >
-    Button with Picto
-  </Text>
-</View>
-`;
-
-exports[`Button Component Default (Android) Button renders correctly with secondary-danger variant 1`] = `
-<View
-  accessibilityState={
-    {
-      "busy": undefined,
-      "checked": undefined,
-      "disabled": undefined,
-      "expanded": undefined,
-      "selected": undefined,
-    }
-  }
-  accessibilityValue={
-    {
-      "max": undefined,
-      "min": undefined,
-      "now": undefined,
-      "text": undefined,
-    }
-  }
-  accessible={true}
-  collapsable={false}
-  focusable={false}
-  onClick={[Function]}
-  onResponderGrant={[Function]}
-  onResponderMove={[Function]}
-  onResponderRelease={[Function]}
-  onResponderTerminate={[Function]}
-  onResponderTerminationRequest={[Function]}
-  onStartShouldSetResponder={[Function]}
-  style={
-    {
-      "alignSelf": "stretch",
-      "backgroundColor": "rgb(186, 26, 26)",
-      "borderRadius": 100,
-      "display": "flex",
-      "flexDirection": "row",
-      "justifyContent": "center",
-      "marginHorizontal": 32,
-      "opacity": 1,
-      "paddingLeft": 15,
-      "paddingRight": 15,
-      "paddingVertical": 7,
-      "textAlign": "center",
-    }
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#000000",
+        "borderRadius": 16,
+        "flexDirection": "row",
+        "justifyContent": "center",
+        "overflow": "hidden",
+        "paddingHorizontal": 16,
+        "paddingVertical": 12,
+      },
+      undefined,
+      false,
+      undefined,
+    ]
   }
 >
   <Text
-    allowFontScaling={true}
     style={
       [
         {
-          "color": "rgb(255,255,255)",
-          "fontSize": 17,
-          "fontWeight": "600",
-          "textAlign": "center",
-        },
-        {
-          "fontWeight": "400",
+          "color": "#000000",
+          "fontFamily": "SFProText-Regular",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "lineHeight": 20,
         },
         undefined,
+        undefined,
+        [
+          {
+            "0": [Function],
+            "color": "#FFFFFF",
+            "flexGrow": 0,
+            "flexShrink": 1,
+            "textAlign": "center",
+            "zIndex": 2,
+          },
+          undefined,
+          false,
+          undefined,
+        ],
       ]
     }
   >
@@ -144,13 +84,14 @@ exports[`Button Component Default (Android) Button renders correctly with second
 </View>
 `;
 
-exports[`Button Component iOS Button renders correctly with primary variant 1`] = `
+exports[`Button Component Default (Android) Button renders correctly with picto 1`] = `
 <View
+  accessibilityRole="button"
   accessibilityState={
     {
       "busy": undefined,
       "checked": undefined,
-      "disabled": undefined,
+      "disabled": false,
       "expanded": undefined,
       "selected": undefined,
     }
@@ -165,8 +106,10 @@ exports[`Button Component iOS Button renders correctly with primary variant 1`] 
   }
   accessible={true}
   collapsable={false}
-  focusable={false}
+  focusable={true}
+  onBlur={[Function]}
   onClick={[Function]}
+  onFocus={[Function]}
   onResponderGrant={[Function]}
   onResponderMove={[Function]}
   onResponderRelease={[Function]}
@@ -174,31 +117,151 @@ exports[`Button Component iOS Button renders correctly with primary variant 1`] 
   onResponderTerminationRequest={[Function]}
   onStartShouldSetResponder={[Function]}
   style={
-    {
-      "alignSelf": "stretch",
-      "backgroundColor": "#000",
-      "borderRadius": 14,
-      "display": "flex",
-      "flexDirection": "row",
-      "justifyContent": "center",
-      "marginHorizontal": 32,
-      "opacity": 1,
-      "paddingVertical": 14,
-      "textAlign": "center",
-    }
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#000000",
+        "borderRadius": 16,
+        "flexDirection": "row",
+        "justifyContent": "center",
+        "overflow": "hidden",
+        "paddingHorizontal": 16,
+        "paddingVertical": 12,
+      },
+      undefined,
+      false,
+      undefined,
+    ]
   }
 >
-  <Text
-    allowFontScaling={true}
+  <RNSfsymbols
+    iconColor={-1}
+    multicolor={false}
+    resizeMode="center"
     style={
       [
         {
-          "color": "#FFF",
-          "fontSize": 17,
-          "fontWeight": "600",
-          "textAlign": "center",
+          "height": undefined,
+          "width": undefined,
+        },
+        {
+          "marginEnd": 12,
+          "zIndex": 1,
+        },
+      ]
+    }
+    systemName="star"
+    weight="regular"
+  />
+  <Text
+    style={
+      [
+        {
+          "color": "#000000",
+          "fontFamily": "SFProText-Regular",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "lineHeight": 20,
         },
         undefined,
+        undefined,
+        [
+          {
+            "0": [Function],
+            "color": "#FFFFFF",
+            "flexGrow": 0,
+            "flexShrink": 1,
+            "textAlign": "center",
+            "zIndex": 2,
+          },
+          undefined,
+          false,
+          undefined,
+        ],
+      ]
+    }
+  >
+    Button with Picto
+  </Text>
+</View>
+`;
+
+exports[`Button Component iOS Button renders correctly with primary variant 1`] = `
+<View
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  action="primary"
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#000000",
+        "borderRadius": 16,
+        "flexDirection": "row",
+        "justifyContent": "center",
+        "overflow": "hidden",
+        "paddingHorizontal": 16,
+        "paddingVertical": 12,
+      },
+      undefined,
+      false,
+      undefined,
+    ]
+  }
+>
+  <Text
+    style={
+      [
+        {
+          "color": "#000000",
+          "fontFamily": "SFProText-Regular",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "lineHeight": 20,
+        },
+        undefined,
+        undefined,
+        [
+          {
+            "0": [Function],
+            "color": "#FFFFFF",
+            "flexGrow": 0,
+            "flexShrink": 1,
+            "textAlign": "center",
+            "zIndex": 2,
+          },
+          undefined,
+          false,
+          undefined,
+        ],
       ]
     }
   >

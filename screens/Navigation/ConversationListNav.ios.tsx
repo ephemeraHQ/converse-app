@@ -19,7 +19,7 @@ import {
   NavigationParamList,
   navigationAnimation,
 } from "./Navigation";
-import Button from "../../components/Button/Button.ios";
+import Button from "../../components/Button/Button";
 import Connecting, {
   useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
