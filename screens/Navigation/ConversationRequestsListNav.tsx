@@ -24,13 +24,13 @@ import {
   NavigationParamList,
 } from "./Navigation";
 import AndroidBackAction from "../../components/AndroidBackAction";
+import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import {
   useChatStore,
   useCurrentAccount,
 } from "../../data/store/accountsStore";
-import { Button } from "../../design-system/Button/Button";
 import {
   consentToPeersOnProtocol,
   sortRequestsBySpamScore,

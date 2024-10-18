@@ -26,8 +26,8 @@ import { ActivityIndicator } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NavigationParamList } from "./Navigation/Navigation";
+import Button from "../components/Button/Button";
 import { useCurrentAccount } from "../data/store/accountsStore";
-import { Button } from "../design-system/Button/Button";
 import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export default function GroupInviteScreen({

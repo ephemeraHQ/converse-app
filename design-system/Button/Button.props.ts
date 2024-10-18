@@ -14,6 +14,8 @@ export type IButtonVariant =
   | "fill"
   | "link"
   /** @deprecated */
+  | "secondary"
+  | "secondary-danger"
   | "text";
 
 export type IButtonSize = "md" | "lg";

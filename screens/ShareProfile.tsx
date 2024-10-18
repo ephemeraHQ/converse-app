@@ -23,6 +23,7 @@ import QRCode from "react-native-qrcode-svg";
 
 import AndroidBackAction from "../components/AndroidBackAction";
 import Avatar from "../components/Avatar";
+import Button from "../components/Button/Button";
 import ActionButton from "../components/Chat/ActionButton";
 import Picto from "../components/Picto/Picto";
 import config from "../config";
@@ -32,7 +33,6 @@ import {
 } from "../data/store/accountsStore";
 import { createBottomSheetModalRef } from "../design-system/BottomSheet/BottomSheet.utils";
 import { BottomSheetModal } from "../design-system/BottomSheet/BottomSheetModal";
-import { Button } from "../design-system/Button/Button";
 import { spacing } from "../theme";
 import { isDesktop } from "../utils/device";
 import {

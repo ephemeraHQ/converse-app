@@ -21,6 +21,7 @@ import {
 import { NewConversationModalParams } from "./NewConversationModal";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../../components/AndroidBackAction";
+import ConverseButton from "../../components/Button/Button";
 import SearchBar from "../../components/NewConversation/SearchBar";
 import Recommendations from "../../components/Recommendations/Recommendations";
 import ProfileSearch from "../../components/Search/ProfileSearch";
@@ -35,7 +36,6 @@ import {
 } from "../../data/store/accountsStore";
 import { ProfileSocials } from "../../data/store/profilesStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { Button } from "../../design-system/Button/Button";
 import { useGroupMembers } from "../../hooks/useGroupMembers";
 import { searchProfiles } from "../../utils/api";
 import {
@@ -94,7 +94,7 @@ export default function NewConversation({
     navigation.setOptions({
       headerLeft: () =>
         Platform.OS === "ios" ? (
-          <Button variant="text" title="Cancel" onPress={handleBack} />
+          <ConverseButton variant="text" title="Cancel" onPress={handleBack} />
         ) : (
           <AndroidBackAction navigation={navigation} />
         ),
@@ -109,7 +109,7 @@ export default function NewConversation({
             return <ActivityIndicator style={styles.activityIndicator} />;
           } else {
             return (
-              <Button
+              <ConverseButton
                 variant="text"
                 title={route.params?.addingToGroupTopic ? "Add" : "Next"}
                 onPress={handleRightAction}
@@ -335,7 +335,7 @@ export default function NewConversation({
         ]}
       >
         {!group.enabled && (
-          <Button
+          <ConverseButton
             variant="text"
             picto="person.2"
             title="New group"
@@ -352,10 +352,10 @@ export default function NewConversation({
             const preferredName = getPreferredName(m, m.address);
 
             return (
-              <Button
+              <ConverseButton
                 key={m.address}
                 title={preferredName}
-                variant="text"
+                variant="secondary"
                 picto="xmark"
                 style={styles.groupMemberButton}
                 textStyle={{

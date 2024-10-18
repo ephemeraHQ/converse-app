@@ -1,6 +1,7 @@
 import { useAppTheme } from "@theme/useAppTheme";
 import { useCallback } from "react";
 import {
+  Pressable,
   PressableStateCallbackType,
   StyleProp,
   TextStyle,
@@ -8,7 +9,6 @@ import {
 } from "react-native";
 
 import Picto from "../../components/Picto/Picto";
-import { Pressable } from "../Pressable";
 import { Text } from "../Text";
 import { IButtonProps, IButtonVariant } from "./Button.props";
 import {

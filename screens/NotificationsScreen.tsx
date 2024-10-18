@@ -4,10 +4,10 @@ import * as Linking from "expo-linking";
 import React from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
+import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
 import { useSettingsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { Button } from "../design-system/Button/Button";
 import { requestPushNotificationsPermissions } from "../utils/notifications";
 
 export default function NotificationsScreen() {

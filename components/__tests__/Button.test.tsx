@@ -4,7 +4,7 @@ import { render, fireEvent } from "@testing-library/react-native";
 import React from "react";
 import { Platform } from "react-native";
 
-import { Button } from "../../design-system/Button/Button";
+import Button from "../Button/Button";
 
 // Mock useColorScheme for consistent testing
 jest.mock("react-native/Libraries/Utilities/useColorScheme", () => ({

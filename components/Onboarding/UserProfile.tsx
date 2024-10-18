@@ -29,7 +29,6 @@ import {
   useSettingsStore,
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { Button } from "../../design-system/Button/Button";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
 import { uploadFile } from "../../utils/attachment";
@@ -46,6 +45,7 @@ import {
   formatEphemeralDisplayName,
 } from "../../utils/str";
 import Avatar from "../Avatar";
+import Button from "../Button/Button";
 import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
 
 export type ProfileType = {

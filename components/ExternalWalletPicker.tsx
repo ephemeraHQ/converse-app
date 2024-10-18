@@ -23,12 +23,12 @@ import { Account, createWallet, Wallet } from "thirdweb/wallets";
 
 import { Drawer, DrawerRef } from "./Drawer";
 import config from "../config";
+import Button from "./Button/Button";
 import {
   InstalledWallet,
   useInstalledWallets,
 } from "./Onboarding/supportedWallets";
 import Picto from "./Picto/Picto";
-import { Button } from "../design-system/Button/Button";
 
 export default function ExternalWalletPicker() {
   const styles = useStyles();

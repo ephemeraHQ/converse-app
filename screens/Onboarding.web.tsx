@@ -13,6 +13,7 @@ import { ethers } from "ethers";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 
+import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
 import TableView from "../components/TableView/TableView";
 import {
@@ -28,7 +29,6 @@ import {
 } from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { Button } from "../design-system/Button/Button";
 import { saveXmtpKey } from "../utils/keychain/helpers";
 import { getXmtpBase64KeyFromSigner } from "../utils/xmtpRN/signIn";
 import { getXmtpClient } from "../utils/xmtpRN/sync";

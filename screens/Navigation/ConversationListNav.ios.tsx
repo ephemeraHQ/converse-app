@@ -19,6 +19,7 @@ import {
   NavigationParamList,
   navigationAnimation,
 } from "./Navigation";
+import Button from "../../components/Button/Button";
 import Connecting, {
   useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
@@ -27,7 +28,6 @@ import NewConversationButton from "../../components/ConversationList/NewConversa
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { Button } from "../../design-system/Button/Button";
 import { isDesktop } from "../../utils/device";
 import { navigate } from "../../utils/navigation";
 import { getReadableProfile, shortDisplayName } from "../../utils/str";

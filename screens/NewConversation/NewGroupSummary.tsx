@@ -24,6 +24,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NewConversationModalParams } from "./NewConversationModal";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
+import Button from "../../components/Button/Button";
 import GroupAvatar from "../../components/GroupAvatar";
 import TableView from "../../components/TableView/TableView";
 import {
@@ -31,7 +32,6 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../../data/store/accountsStore";
-import { Button } from "../../design-system/Button/Button";
 import { usePhotoSelect } from "../../hooks/usePhotoSelect";
 import { uploadFile } from "../../utils/attachment";
 import { navigate } from "../../utils/navigation";

@@ -17,13 +17,13 @@ import {
   useRecommendationsStore,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
-import { Button } from "../../../design-system/Button/Button";
 import { useConversationContext } from "../../../utils/conversation";
 import { sendMessage } from "../../../utils/message";
 import { getProfile, getProfileData } from "../../../utils/profile";
 import { conversationName } from "../../../utils/str";
 import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
+import Button from "../../Button/Button";
 import { Recommendation } from "../../Recommendations/Recommendation";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
@@ -78,7 +78,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
           <View>
             <Text style={styles.chatPlaceholderText}>This user is blocked</Text>
             <Button
-              variant="outline"
+              variant="secondary"
               picto="lock.open"
               title="Unblock"
               style={styles.cta}
@@ -124,7 +124,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
             )}
 
             <Button
-              variant="outline"
+              variant="secondary"
               picto="hand.wave"
               title="Say hi"
               style={styles.cta}

@@ -27,8 +27,8 @@ import OnboardingComponent from "./OnboardingComponent";
 import ValueProps from "./ValueProps";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { Button } from "../../design-system/Button/Button";
 import { usePrivyAccessToken, usePrivySigner } from "../../utils/evm/privy";
+import Button from "../Button/Button";
 import Picto from "../Picto/Picto";
 
 export default function PrivyConnect() {
