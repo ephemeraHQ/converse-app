@@ -3,7 +3,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
 import { Platform, useColorScheme } from "react-native";
 
-import { SplitScreenDrawerParams } from "./SplitScreenNavigation";
 import config from "../../../config";
 import { useAppStore } from "../../../data/store/appStore";
 import { isDesktop } from "../../../utils/device";
@@ -12,7 +11,6 @@ import ConversationNav, {
   ConversationNavParams,
   ConversationScreenConfig,
 } from "../ConversationNav";
-import EnableTransactionsNav from "../EnableTransactionsNav";
 import GroupInviteNav from "../GroupInviteNav";
 import GroupLinkNav, {
   GroupLinkNavParams,
@@ -40,12 +38,12 @@ import {
   getConverseStateFromPath,
   stackGroupScreenOptions,
 } from "../navHelpers";
+import { SplitScreenDrawerParams } from "./SplitScreenNavigation";
 
 export type NavigationParamList = {
   Conversation: ConversationNavParams;
   NewConversation: NewConversationNavParams;
   NewGroupSummary: undefined;
-  EnableTransactions: undefined;
   ShareProfile: undefined;
   ShareFrame: ShareFrameNavParams;
   TopUp: undefined;
@@ -113,7 +111,6 @@ export default function SplitRightStackNavigation({
           {UserProfileNav()}
           {GroupInviteNav()}
           {TopUpNav()}
-          {EnableTransactionsNav()}
         </NativeStack.Group>
       </NativeStack.Navigator>
     </NavigationContainer>

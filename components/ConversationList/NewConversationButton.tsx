@@ -1,4 +1,3 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { primaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { converseEventEmitter } from "@utils/events";
@@ -6,16 +5,10 @@ import React, { useCallback } from "react";
 import { Platform, TouchableOpacity, useColorScheme } from "react-native";
 import { FAB } from "react-native-paper";
 
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { navigate } from "../../utils/navigation";
 import Picto from "../Picto/Picto";
 
-export default function NewConversationButton({
-  navigation,
-}: NativeStackScreenProps<
-  NavigationParamList,
-  "Chats" | "Conversation" | "ShareFrame" | "Blocked"
->) {
+export default function NewConversationButton() {
   const colorScheme = useColorScheme();
   const onPress = useCallback(() => {
     navigate("NewConversation");
