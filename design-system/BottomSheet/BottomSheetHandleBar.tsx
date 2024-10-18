@@ -21,12 +21,13 @@ export const BottomSheetHandleBar = memo(function BottomSheetHandleBar(
       animatedPosition={animatedPosition}
       style={{
         // ...debugBorder(),
-        paddingTop: theme.spacing.xxxs,
+        paddingTop: theme.spacing.xxs,
         ...(isAbsolute && { position: "absolute", left: 0, right: 0 }),
       }}
       indicatorStyle={{
         backgroundColor: theme.colors.fill.tertiary,
-        height: 5,
+        height: theme.spacing.xxxs,
+        width: theme.spacing.xl,
       }}
     />
   );

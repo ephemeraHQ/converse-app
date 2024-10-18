@@ -1,11 +1,7 @@
 import { BottomSheetBackdropProps, useBottomSheet } from "@gorhom/bottom-sheet";
 import React, { memo, useCallback } from "react";
 import { StyleSheet } from "react-native";
-import {
-  Extrapolate,
-  interpolate,
-  useAnimatedStyle,
-} from "react-native-reanimated";
+import { interpolate, useAnimatedStyle } from "react-native-reanimated";
 
 import { BlurView } from "../BlurView";
 import { Pressable } from "../Pressable";
@@ -24,12 +20,7 @@ export const BottomSheetBlurBackdrop = memo(function BottomSheetBlurBackdrop(
   const { close } = useBottomSheet();
 
   const containerAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      animatedIndex.value,
-      [0, 1],
-      [0, 1],
-      Extrapolate.CLAMP
-    ),
+    opacity: interpolate(animatedIndex.value, [0, 1], [0, 1], "clamp"),
   }));
 
   const handlePressBackdrop = useCallback(() => {

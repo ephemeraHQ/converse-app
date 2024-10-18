@@ -1,4 +1,4 @@
-import { useRef, createRef } from "react";
+import { createRef, useRef } from "react";
 
 import { IBottomSheetModalRefType } from "./IBottomSheet.types";
 
