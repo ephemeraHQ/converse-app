@@ -9,7 +9,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./assets/web.css";
 import "./polyfills";
 
-import { XmtpCron } from "./components/XmtpEngine";
+import { xmtpCron, xmtpEngine } from "./components/XmtpEngine";
 import config from "./config";
 import Main from "./screens/Main";
 
@@ -28,6 +28,9 @@ createWeb3Modal({
   chains: [mainnet],
   projectId: config.walletConnectConfig.projectId,
 });
+
+xmtpEngine.start();
+xmtpCron.start();
 
 export default function App() {
   const colorScheme = useColorScheme();
@@ -58,7 +61,6 @@ export default function App() {
           >
             <>
               <Main />
-              <XmtpCron />
             </>
           </PrivyProvider>
         </PaperProvider>

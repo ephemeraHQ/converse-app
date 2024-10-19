@@ -26,7 +26,7 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
 
 import "./utils/splash/splash";
-import { XmtpCron } from "./components/XmtpEngine";
+import { xmtpCron, xmtpEngine } from "./components/XmtpEngine";
 import config from "./config";
 import { useAppStore } from "./data/store/appStore";
 import { useSelect } from "./data/store/storeHelpers";
@@ -54,6 +54,9 @@ configureCoinbase({
 initSentry();
 
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
+
+xmtpEngine.start();
+xmtpCron.start();
 
 const App = () => {
   const styles = useStyles();
@@ -95,7 +98,6 @@ const App = () => {
 
   return (
     <View style={styles.safe}>
-      <XmtpCron />
       <Main />
       <DebugButton ref={debugRef} />
     </View>
