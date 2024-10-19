@@ -5,7 +5,6 @@ import {
 import { appStateIsBlurredState } from "@utils/appState/appStateIsBlurred";
 import logger from "@utils/logger";
 import { stopStreamingAllMessage } from "@utils/xmtpRN/messages";
-import { useCallback, useEffect, useRef } from "react";
 import {
   AppState,
   AppStateStatus,
@@ -27,16 +26,22 @@ import { sendPendingMessages } from "../utils/xmtpRN/send";
 import { syncXmtpClient } from "../utils/xmtpRN/sync";
 
 class XmtpEngine {
-  appStoreSubscription: () => void;
-  appStateSubscription: NativeEventSubscription;
-  isInternetReachable: boolean;
-  hydrationDone: boolean;
-  syncedAccounts: { [account: string]: boolean };
-  syncingAccounts: { [account: string]: boolean };
-  appState: AppStateStatus;
+  appStoreSubscription: (() => void) | null = null;
+  appStateSubscription: NativeEventSubscription | null = null;
+  isInternetReachable: boolean = false;
+  hydrationDone: boolean = false;
+  syncedAccounts: { [account: string]: boolean } = {};
+  syncingAccounts: { [account: string]: boolean } = {};
+  appState: AppStateStatus = AppState.currentState;
+  started: boolean = false;
 
-  constructor() {
-    logger.debug("[XmtpEngine] Initializing");
+  start() {
+    logger.debug("[XmtpEngine] Starting");
+    if (this.started) {
+      return;
+    }
+
+    this.started = true;
     this.syncedAccounts = {};
     this.syncingAccounts = {};
 
@@ -138,28 +143,27 @@ class XmtpEngine {
   }
 
   destroy() {
-    // Normal app usage won't call this, but hot reloading will
     logger.debug("[XmtpEngine] Removing subscriptions");
-    this.appStoreSubscription();
-    this.appStateSubscription.remove();
+    this.appStoreSubscription?.();
+    this.appStateSubscription?.remove();
   }
 }
 
 export const xmtpEngine = new XmtpEngine();
 
-export function XmtpCron() {
-  // Cron
-  const lastCronTimestamp = useRef(0);
-  const runningCron = useRef(false);
+class XmtpCron {
+  private lastCronTimestamp: number = 0;
+  private runningCron: boolean = false;
+  private interval: NodeJS.Timeout | null = null;
 
-  const xmtpCron = useCallback(async () => {
+  private async xmtpCron() {
     if (
       !useAppStore.getState().splashScreenHidden ||
       AppState.currentState.match(/inactive|background/)
     ) {
       return;
     }
-    runningCron.current = true;
+    this.runningCron = true;
     const accounts = getAccountsList();
     for (const account of accounts) {
       if (
@@ -174,22 +178,25 @@ export function XmtpCron() {
         }
       }
     }
-    lastCronTimestamp.current = new Date().getTime();
-    runningCron.current = false;
-  }, []);
+    this.lastCronTimestamp = new Date().getTime();
+    this.runningCron = false;
+  }
 
-  useEffect(() => {
-    // Launch cron
-    const interval = setInterval(() => {
-      if (runningCron.current) return;
+  start() {
+    logger.debug("[XmtpCron] Starting");
+    this.interval = setInterval(() => {
+      if (this.runningCron) return;
       const now = new Date().getTime();
-      if (now - lastCronTimestamp.current > 1000) {
-        xmtpCron();
+      if (now - this.lastCronTimestamp > 1000) {
+        this.xmtpCron();
       }
     }, 300);
+  }
 
-    return () => clearInterval(interval);
-  }, [xmtpCron]);
-
-  return null;
+  destroy() {
+    logger.debug("[XmtpCron] Destroying");
+    this.interval && clearInterval(this.interval);
+  }
 }
+
+export const xmtpCron = new XmtpCron();
