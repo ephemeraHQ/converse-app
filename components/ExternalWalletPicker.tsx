@@ -6,7 +6,7 @@ import {
   textPrimaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import { waitUntilAppActive } from "@utils/appState";
+import { waitUntilAppActive } from "@utils/appState/waitUntilAppActive";
 import { converseEventEmitter } from "@utils/events";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Image } from "expo-image";
