@@ -26,7 +26,7 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
 
 import "./utils/splash/splash";
-import XmtpEngine from "./components/XmtpEngine";
+import { XmtpCron } from "./components/XmtpEngine";
 import config from "./config";
 import { useAppStore } from "./data/store/appStore";
 import { useSelect } from "./data/store/storeHelpers";
@@ -95,7 +95,7 @@ const App = () => {
 
   return (
     <View style={styles.safe}>
-      <XmtpEngine />
+      <XmtpCron />
       <Main />
       <DebugButton ref={debugRef} />
     </View>

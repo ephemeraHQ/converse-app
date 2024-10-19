@@ -9,7 +9,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./assets/web.css";
 import "./polyfills";
 
-import XmtpEngine from "./components/XmtpEngine";
+import { XmtpCron } from "./components/XmtpEngine";
 import config from "./config";
 import Main from "./screens/Main";
 
@@ -31,6 +31,7 @@ createWeb3Modal({
 
 export default function App() {
   const colorScheme = useColorScheme();
+
   return (
     <SafeAreaProvider key={`app-${colorScheme}`}>
       <ActionSheetProvider>
@@ -57,7 +58,7 @@ export default function App() {
           >
             <>
               <Main />
-              <XmtpEngine />
+              <XmtpCron />
             </>
           </PrivyProvider>
         </PaperProvider>

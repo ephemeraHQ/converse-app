@@ -2,19 +2,20 @@ import {
   dropConverseDbConnections,
   reconnectConverseDbConnections,
 } from "@data/db/driver";
+import { appStateIsBlurredState } from "@utils/appState/appStateIsBlurred";
 import logger from "@utils/logger";
 import { stopStreamingAllMessage } from "@utils/xmtpRN/messages";
 import { useCallback, useEffect, useRef } from "react";
-import { AppState, Platform } from "react-native";
+import {
+  AppState,
+  AppStateStatus,
+  NativeEventSubscription,
+  Platform,
+} from "react-native";
 
 import { getExistingDataSource } from "../data/db/datasource";
-import {
-  getAccountsList,
-  getChatStore,
-  useAccountsList,
-} from "../data/store/accountsStore";
+import { getAccountsList, getChatStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { useSelect } from "../data/store/storeHelpers";
 import { getTopicsData } from "../utils/api";
 import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
 import {
@@ -25,109 +26,129 @@ import {
 import { sendPendingMessages } from "../utils/xmtpRN/send";
 import { syncXmtpClient } from "../utils/xmtpRN/sync";
 
-export default function XmtpEngine() {
-  const appState = useRef(AppState.currentState);
-  const accounts = useAccountsList();
-  const syncedAccounts = useRef<{ [account: string]: boolean }>({});
-  const syncingAccounts = useRef<{ [account: string]: boolean }>({});
-  const { hydrationDone, isInternetReachable } = useAppStore(
-    useSelect(["hydrationDone", "isInternetReachable"])
-  );
+class XmtpEngine {
+  appStoreSubscription: () => void;
+  appStateSubscription: NativeEventSubscription;
+  isInternetReachable: boolean;
+  hydrationDone: boolean;
+  syncedAccounts: { [account: string]: boolean };
+  syncingAccounts: { [account: string]: boolean };
+  appState: AppStateStatus;
 
-  const syncAccounts = useCallback((accountsToSync: string[]) => {
-    accountsToSync.forEach((a) => {
-      if (!syncingAccounts.current[a]) {
-        getTopicsData(a).then((topicsData) => {
-          getChatStore(a).getState().setTopicsData(topicsData, true);
-        });
-        syncedAccounts.current[a] = true;
-        syncingAccounts.current[a] = true;
-        syncXmtpClient(a)
-          .then(() => {
-            syncingAccounts.current[a] = false;
-          })
-          .catch(() => {
-            syncingAccounts.current[a] = false;
-          });
-      }
-    });
-  }, []);
+  constructor() {
+    logger.debug("[XmtpEngine] Initializing");
+    this.syncedAccounts = {};
+    this.syncingAccounts = {};
 
-  // Sync accounts on load and when a new one is added
-  useEffect(() => {
-    // Let's remove accounts that dont exist anymore from ref
-    Object.keys(syncedAccounts.current).forEach((account) => {
-      if (!accounts.includes(account)) {
-        delete syncedAccounts.current[account];
-      }
-    });
-    if (hydrationDone) {
-      const unsyncedAccounts = accounts.filter(
-        (a) => !syncedAccounts.current[a]
-      );
-      syncAccounts(unsyncedAccounts);
-    }
-  }, [accounts, hydrationDone, syncAccounts]);
+    const { isInternetReachable, hydrationDone } = useAppStore.getState();
+    this.isInternetReachable = isInternetReachable;
+    this.hydrationDone = hydrationDone;
+    this.appStoreSubscription = useAppStore.subscribe(
+      (state, previousState) => {
+        this.isInternetReachable = state.isInternetReachable;
+        this.hydrationDone = state.hydrationDone;
 
-  const isInternetReachableRef = useRef(isInternetReachable);
-
-  // When app back active, resync all, in case we lost sync
-  // And also save data from notifications
-  useEffect(() => {
-    const subscription = AppState.addEventListener(
-      "change",
-      async (nextAppState) => {
-        logger.debug(
-          `[AppState] App is was ${appState.current} - now ${nextAppState}`
-        );
-        if (
-          nextAppState === "active" &&
-          appState.current.match(/inactive|background/)
-        ) {
-          reconnectConverseDbConnections();
-          if (hydrationDone) {
-            loadSavedNotificationMessagesToContext();
-            if (isInternetReachableRef.current) {
-              syncAccounts(accounts);
-            }
-          }
-        } else if (
-          nextAppState.match(/inactive|background/) &&
-          appState.current === "active"
-        ) {
-          for (const account of accounts) {
-            await Promise.all([
-              stopStreamingAllMessage(account),
-              stopStreamingConversations(account),
-              stopStreamingGroups(account),
-            ]);
-          }
-          dropConverseDbConnections();
+        if (previousState.isInternetReachable !== state.isInternetReachable) {
+          this.onInternetReachabilityChange(state.isInternetReachable);
         }
-        appState.current = nextAppState;
+        if (previousState.hydrationDone !== state.hydrationDone) {
+          this.onHydrationDone(state.hydrationDone);
+        }
       }
     );
 
-    return () => {
-      subscription.remove();
-    };
-  }, [syncAccounts, accounts, hydrationDone]);
+    this.appState = AppState.currentState;
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      (nextAppState: AppStateStatus) => {
+        const previousAppState = this.appState;
+        this.appState = nextAppState;
+        logger.debug(
+          `[XmtpEngine] App is now ${nextAppState} - was ${previousAppState}`
+        );
+        if (
+          nextAppState === "active" &&
+          appStateIsBlurredState(previousAppState)
+        ) {
+          this.onAppFocus();
+        } else if (
+          appStateIsBlurredState(nextAppState) &&
+          previousAppState === "active"
+        ) {
+          this.onAppBlur();
+        }
+      }
+    );
+  }
 
-  // If lost connection, resync
-  useEffect(() => {
-    if (
-      !isInternetReachableRef.current &&
-      isInternetReachable &&
-      hydrationDone
-    ) {
-      // We're back online!
-      syncAccounts(accounts);
+  onInternetReachabilityChange(isInternetReachable: boolean) {
+    logger.debug(
+      `[XmtpEngine]  Internet reachability changed: ${isInternetReachable}`
+    );
+    this.syncAccounts(getAccountsList());
+  }
+
+  onHydrationDone(hydrationDone: boolean) {
+    logger.debug(`[XmtpEngine] Hydration done changed: ${hydrationDone}`);
+    this.syncAccounts(getAccountsList());
+  }
+
+  onAppFocus() {
+    logger.debug("[XmtpEngine] App is now active, reconnecting db connections");
+    reconnectConverseDbConnections();
+    if (this.hydrationDone) {
+      loadSavedNotificationMessagesToContext();
+      if (this.isInternetReachable) {
+        this.syncAccounts(getAccountsList());
+      }
     }
-    isInternetReachableRef.current = isInternetReachable;
-  }, [accounts, hydrationDone, isInternetReachable, syncAccounts]);
+  }
 
+  async onAppBlur() {
+    logger.debug(
+      "[XmtpEngine] App is now inactive, stopping xmtp streams and db connections"
+    );
+    for (const account of getAccountsList()) {
+      await Promise.all([
+        stopStreamingAllMessage(account),
+        stopStreamingConversations(account),
+        stopStreamingGroups(account),
+      ]);
+    }
+    dropConverseDbConnections();
+  }
+
+  async syncAccounts(accountsToSync: string[]) {
+    accountsToSync.forEach((a) => {
+      if (!this.syncingAccounts[a]) {
+        getTopicsData(a).then((topicsData) => {
+          getChatStore(a).getState().setTopicsData(topicsData, true);
+        });
+        this.syncedAccounts[a] = true;
+        this.syncingAccounts[a] = true;
+        syncXmtpClient(a)
+          .then(() => {
+            this.syncingAccounts[a] = false;
+          })
+          .catch(() => {
+            this.syncingAccounts[a] = false;
+          });
+      }
+    });
+  }
+
+  destroy() {
+    // Normal app usage won't call this, but hot reloading will
+    logger.debug("[XmtpEngine] Removing subscriptions");
+    this.appStoreSubscription();
+    this.appStateSubscription.remove();
+  }
+}
+
+export const xmtpEngine = new XmtpEngine();
+
+export function XmtpCron() {
   // Cron
-
   const lastCronTimestamp = useRef(0);
   const runningCron = useRef(false);
 
