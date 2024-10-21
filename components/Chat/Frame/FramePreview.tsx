@@ -195,7 +195,6 @@ export default function FramePreview({
           !button.action
         ) {
           const payload = await framesClient.signFrameAction(actionInput);
-
           if (button.action === "tx") {
             const { buttonPostUrl, transactionReceipt } = await handleTxAction(
               frame,
@@ -211,7 +210,6 @@ export default function FramePreview({
               setPostingActionForButton(undefined);
               return;
             }
-
             payload.untrustedData.transactionId =
               transactionReceipt?.transactionHash;
             payload.untrustedData.address = transactionReceipt?.from;

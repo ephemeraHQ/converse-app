@@ -76,6 +76,7 @@
     "@xmtp/proto": "^3.60.0",
     "@xmtp/react-native-sdk": "^2.6.4",
     "@xmtp/xmtp-js": "11.5.0",
+    "alchemy-sdk": "^3.4.4",
     "amazon-cognito-identity-js": "^6.3.12",
     "axios": "^1.2.1",
     "babel-plugin-transform-remove-console": "^6.9.4",

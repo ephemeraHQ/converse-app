@@ -341,9 +341,10 @@ const en = {
   transaction_triggering: "Opening {{wallet}}...",
   transaction_triggered: "Transacting...",
   transaction_success: "Done!",
-  transaction_simulating: "Safely Simulating this Transaction",
   transaction_switch_chain: "Switch to chain {{chainName}}",
   transaction_pay_with: "Pay with",
+  simulation_pending: "Safely Simulating this Transaction",
+  simulation_failure: "We couldn't simulate the transaction: {{error}}",
 
   // New Conversation
   cannot_be_added_to_group_yet:

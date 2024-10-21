@@ -6,6 +6,7 @@ import { TouchableOpacity } from "@design-system/TouchableOpacity";
 import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
 import { spacing } from "@theme/spacing";
+import { simulateTransaction } from "@utils/api";
 import { converseEventEmitter } from "@utils/events";
 import { useExternalSigner } from "@utils/evm/external";
 import logger from "@utils/logger";
@@ -36,6 +37,12 @@ export type TransactionToTrigger = TransactionData & {
 
 type TransactionState = {
   status: "pending" | "triggering" | "triggered" | "success" | "failure";
+  error?: string;
+};
+
+type SimulationState = {
+  status: "pending" | "success" | "failure";
+  result?: any;
   error?: string;
 };
 
@@ -78,7 +85,7 @@ export function TransactionPreview() {
         );
         setTransactionToPreview(undefined);
       }
-      setSimulating(true);
+      setSimulation({ status: "pending" });
       setTxState({ status: "pending" });
     },
     [transactionToPreview]
@@ -101,27 +108,36 @@ export function TransactionPreview() {
     };
   }, [previewTransaction]);
 
-  const [simulating, setSimulating] = useState(true);
+  const [simulation, setSimulation] = useState<SimulationState>({
+    status: "pending",
+  });
   useEffect(() => {
     const simulate = async () => {
-      if (transactionToPreview && address) {
-        setSimulating(true);
+      if (transactionToPreview && address && simulation.status === "pending") {
         try {
-          await new Promise((r) => setTimeout(r, 1500));
-          // const simulation = await simulateTransaction(
-          //   account,
-          //   address,
-          //   transactionToPreview.chainId,
-          //   transactionToPreview
-          // );
-        } catch (e) {
-          console.log(e);
+          const simulationResult = await simulateTransaction(
+            account,
+            address,
+            transactionToPreview.chainId,
+            transactionToPreview
+          );
+          console.log("gas used:", simulationResult.gasUsed);
+          console.log("Simulation changes:");
+          simulationResult.changes.forEach((change) => {
+            console.log(`Asset: ${change.name}`);
+            console.log(`Logo: ${change.logo}`);
+            console.log(`Amount: ${change.amount}`);
+            console.log(`Type: ${change.changeType}`);
+            console.log("---");
+          });
+          setSimulation({ status: "success", result: simulation });
+        } catch (e: any) {
+          setSimulation({ status: "failure", error: e });
         }
-        setSimulating(false);
       }
     };
     simulate();
-  }, [account, address, transactionToPreview]);
+  }, [account, address, simulation, transactionToPreview]);
 
   const trigger = useCallback(async () => {
     console.log("clicked trigger");
@@ -132,8 +148,6 @@ export function TransactionPreview() {
       logger.debug(
         `[TxFrame] Switching to chain id ${transactionToPreview.chainId}`
       );
-
-      // await switchChain(transactionToPreview.chainId);
 
       const submittedTx = await sendTransaction(transactionToPreview);
       setTxState({ status: "triggered" });
@@ -174,20 +188,27 @@ export function TransactionPreview() {
 
   const txStatus = txState.status;
   const shouldSwitchChain =
-    !simulating &&
+    simulation.status !== "pending" &&
     transactionToPreview &&
-    transactionToPreview.chainId !== chainId;
+    transactionToPreview.chainId !== chainId &&
+    txStatus === "pending";
 
-  const showWalletSwitcher = !simulating && walletApp && txStatus === "pending";
+  const showWalletSwitcher =
+    simulation.status !== "pending" && walletApp && txStatus === "pending";
 
   const showTriggerButton =
-    !simulating && walletApp && !shouldSwitchChain && txStatus === "pending";
+    simulation.status !== "pending" &&
+    walletApp &&
+    !shouldSwitchChain &&
+    txStatus === "pending";
 
   const showTxLoader =
-    !simulating && (txStatus === "triggering" || txStatus === "triggered");
+    simulation.status !== "pending" &&
+    (txStatus === "triggering" || txStatus === "triggered");
 
   const showTxResult =
-    !simulating && (txStatus === "failure" || txStatus === "success");
+    simulation.status !== "pending" &&
+    (txStatus === "failure" || txStatus === "success");
 
   return (
     <Drawer visible={!!transactionToPreview} onClose={close}>
@@ -198,10 +219,17 @@ export function TransactionPreview() {
             <Text>Close</Text>
           </Pressable>
         </HStack>
-        {simulating && (
+        {simulation.status === "pending" && (
           <VStack style={styles.center}>
             <ActivityIndicator />
-            <Text>{translate("transaction_simulating")}</Text>
+            <Text>{translate("simulation_pending")}</Text>
+          </VStack>
+        )}
+        {simulation.status === "failure" && (
+          <VStack style={styles.center}>
+            <Text>
+              {translate("simulation_failure", { error: simulation.error })}
+            </Text>
           </VStack>
         )}
         {showWalletSwitcher && (

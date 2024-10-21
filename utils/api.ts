@@ -1,4 +1,5 @@
 import { TransactionData } from "@components/TransactionPreview";
+import type { SimulateAssetChangesResponse } from "alchemy-sdk";
 import axios from "axios";
 import * as Contacts from "expo-contacts";
 
@@ -538,7 +539,7 @@ export const simulateTransaction = async (
     "/api/transactions/simulate",
     {
       address: from,
-      network: "base", // @todo => use chainId
+      network: `eip155:${chainId}`,
       value: transaction.value,
       to: transaction.to,
       data: transaction.data,
@@ -547,7 +548,7 @@ export const simulateTransaction = async (
       headers: await getXmtpApiHeaders(account),
     }
   );
-  return data;
+  return data as SimulateAssetChangesResponse;
 };
 
 export default api;
