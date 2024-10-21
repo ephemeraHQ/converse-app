@@ -287,7 +287,7 @@ const en = {
   remove_group: "Remove group",
   actions_title: "ACTIONS",
   members_title: "MEMBERS",
-  pending_approval_title: "PENDING APPROVAL",
+  membership_requests_title: "MEMBERSHIP REQUESTS",
   group_invite_link_created_copied: "Invite link created and copied!",
   group_invite_link_copied: "Invite link copied!",
   group_invite_link_deleted: "Invite link deleted!",
