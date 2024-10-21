@@ -1,10 +1,10 @@
+import AccountsNav from "@features/accounts/AccountsNav";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
 import { Platform, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import AccountsNav from "./AccountsNav";
 import ConversationBlockedListNav from "./ConversationBlockedListNav";
 import ConversationListNav from "./ConversationListNav";
 import ConversationNav, {

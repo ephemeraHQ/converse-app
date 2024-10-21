@@ -1,3 +1,4 @@
+import AccountsNav from "@features/accounts/AccountsNav";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { memo } from "react";
@@ -5,7 +6,6 @@ import { Platform, useColorScheme } from "react-native";
 
 import { isDesktop } from "../../../utils/device";
 import { converseNavigations } from "../../../utils/navigation";
-import AccountsNav from "../AccountsNav";
 import ConversationBlockedListNav from "../ConversationBlockedListNav";
 import ConversationListNav from "../ConversationListNav";
 import ConversationRequestsListNav from "../ConversationRequestsListNav";

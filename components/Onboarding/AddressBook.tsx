@@ -1,7 +1,7 @@
+import { useSettingsStore } from "@features/accounts/accounts.store";
 import { Text } from "react-native";
 
 import OnboardingComponent from "./OnboardingComponent";
-import { useSettingsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { requestAddressBookPermissions } from "../../utils/addressBook";
 

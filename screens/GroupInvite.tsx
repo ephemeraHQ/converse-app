@@ -1,4 +1,5 @@
 import Avatar from "@components/Avatar";
+import { useCurrentAccount } from "@features/accounts/accounts.store";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
 import { useGroupInviteQuery } from "@queries/useGroupInviteQuery";
@@ -27,7 +28,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { NavigationParamList } from "./Navigation/Navigation";
 import Button from "../components/Button/Button";
-import { useCurrentAccount } from "../data/store/accountsStore";
 import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export default function GroupInviteScreen({
@@ -46,7 +46,7 @@ export default function GroupInviteScreen({
     setGroupJoinState,
   ] = useState<{
     polling: boolean;
-    /* Unsuccessfully here means that we have not yet received confirmation 
+    /* Unsuccessfully here means that we have not yet received confirmation
         from the invitee that we have been added to the group */
     finishedPollingUnsuccessfully: boolean;
     joinStatus: null | GroupJoinRequestStatus;

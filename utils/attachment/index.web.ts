@@ -1,3 +1,4 @@
+import { useCurrentAccount } from "@features/accounts/accounts.store";
 import logger from "@utils/logger";
 import {
   Attachment,
@@ -11,7 +12,6 @@ import mime from "mime";
 import { useCallback, useEffect, useState } from "react";
 
 import { MessageToDisplay } from "../../components/Chat/Message/Message";
-import { useCurrentAccount } from "../../data/store/accountsStore";
 import { getPresignedUriForUpload } from "../api";
 import { isImageMimetype } from "../media";
 import { sentryTrackMessage } from "../sentry";

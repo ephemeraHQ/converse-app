@@ -1,6 +1,5 @@
+import { currentAccount } from "@features/accounts/accounts.store";
 import { useGroupQuery } from "@queries/useGroupQuery";
-
-import { currentAccount } from "../data/store/accountsStore";
 
 export const useGroupCreator = (topic: string) => {
   const account = currentAccount();

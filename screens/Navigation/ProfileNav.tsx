@@ -1,3 +1,4 @@
+import { useCurrentAccount } from "@features/accounts/accounts.store";
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
@@ -10,7 +11,6 @@ import {
 
 import { NativeStack, navigationAnimation } from "./Navigation";
 import Picto from "../../components/Picto/Picto";
-import { useCurrentAccount } from "../../data/store/accountsStore";
 import { navigate } from "../../utils/navigation";
 import ProfileScreen from "../Profile";
 

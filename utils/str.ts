@@ -1,14 +1,14 @@
+import {
+  currentAccount,
+  getProfilesStore,
+  useAccountsList,
+} from "@features/accounts/accounts.store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, Platform, TextInput } from "react-native";
 
 import { getLensHandleFromConversationIdAndPeer } from "./lens";
 import logger from "./logger";
 import { getPreferredName, getProfile } from "./profile";
-import {
-  currentAccount,
-  getProfilesStore,
-  useAccountsList,
-} from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { ProfileSocials, ProfilesStoreType } from "../data/store/profilesStore";
 

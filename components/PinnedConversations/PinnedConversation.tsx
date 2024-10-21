@@ -1,4 +1,9 @@
 import { useSelect } from "@data/store/storeHelpers";
+import {
+  useChatStore,
+  useCurrentAccount,
+  useProfilesStore,
+} from "@features/accounts/accounts.store";
 import { useGroupNameQuery } from "@queries/useGroupNameQuery";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
 import { backgroundColor, textSecondaryColor } from "@styles/colors";
@@ -15,11 +20,6 @@ import {
 } from "react-native";
 
 import Avatar from "..//Avatar";
-import {
-  useChatStore,
-  useCurrentAccount,
-  useProfilesStore,
-} from "../../data/store/accountsStore";
 import { navigate } from "../../utils/navigation";
 import {
   getPreferredAvatar,

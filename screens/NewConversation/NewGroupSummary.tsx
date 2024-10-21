@@ -1,3 +1,8 @@
+import {
+  currentAccount,
+  useCurrentAccount,
+  useProfilesStore,
+} from "@features/accounts/accounts.store";
 import { translate } from "@i18n";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -27,11 +32,6 @@ import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndica
 import Button from "../../components/Button/Button";
 import GroupAvatar from "../../components/GroupAvatar";
 import TableView from "../../components/TableView/TableView";
-import {
-  currentAccount,
-  useCurrentAccount,
-  useProfilesStore,
-} from "../../data/store/accountsStore";
 import { usePhotoSelect } from "../../hooks/usePhotoSelect";
 import { uploadFile } from "../../utils/attachment";
 import { navigate } from "../../utils/navigation";

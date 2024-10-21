@@ -1,3 +1,8 @@
+import {
+  getSettingsStore,
+  useAccountsStore,
+  useHasOnePrivyAccount,
+} from "@features/accounts/accounts.store";
 import { translate } from "@i18n/index";
 import { ConnectedWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import {
@@ -22,11 +27,6 @@ import {
 } from "../components/TableView/TableViewImage";
 import config from "../config";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
-import {
-  getSettingsStore,
-  useAccountsStore,
-  useHasOnePrivyAccount,
-} from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { saveXmtpKey } from "../utils/keychain/helpers";

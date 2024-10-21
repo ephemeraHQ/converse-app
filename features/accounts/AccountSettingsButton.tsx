@@ -1,4 +1,14 @@
-import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
+import Picto from "@components/Picto/Picto";
+import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
+import { TableViewPicto } from "@components/TableView/TableViewImage";
+import { refreshProfileForAddress } from "@data/helpers/profiles/profilesUpdate";
+import { useAppStore } from "@data/store/appStore";
+import { useSelect } from "@data/store/storeHelpers";
+import {
+  useAccountsStore,
+  useErroredAccountsMap,
+} from "@features/accounts/accounts.store";
+import { useDisconnectActionSheet } from "@features/accounts/useDisconnectActionSheet";
 import { translate } from "@i18n";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NavigationProp } from "@react-navigation/native";
@@ -9,6 +19,12 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
+import { converseEventEmitter } from "@utils/events";
+import { navigate } from "@utils/navigation";
+import {
+  NotificationPermissionStatus,
+  requestPushNotificationsPermissions,
+} from "@utils/notifications";
 import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
 import {
@@ -17,23 +33,6 @@ import {
   TouchableOpacity,
   useColorScheme,
 } from "react-native";
-
-import Picto from "./Picto/Picto";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
-import { TableViewPicto } from "./TableView/TableViewImage";
-import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
-import {
-  useAccountsStore,
-  useErroredAccountsMap,
-} from "../data/store/accountsStore";
-import { useAppStore } from "../data/store/appStore";
-import { useSelect } from "../data/store/storeHelpers";
-import { converseEventEmitter } from "../utils/events";
-import { navigate } from "../utils/navigation";
-import {
-  NotificationPermissionStatus,
-  requestPushNotificationsPermissions,
-} from "../utils/notifications";
 
 type Props = {
   account: string;

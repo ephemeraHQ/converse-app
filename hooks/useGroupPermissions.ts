@@ -1,4 +1,5 @@
-import { currentAccount } from "../data/store/accountsStore";
+import { currentAccount } from "@features/accounts/accounts.store";
+
 import { useGroupPermissionsQuery } from "../queries/useGroupPermissionsQuery";
 
 export const useGroupPermissions = (topic: string) => {

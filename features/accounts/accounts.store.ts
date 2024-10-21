@@ -1,24 +1,29 @@
-import logger from "@utils/logger";
-import { v4 as uuidv4 } from "uuid";
-import { create, StoreApi, UseBoundStore } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
-
-import { ChatStoreType, initChatStore } from "./chatStore";
-import { InboxIdStoreType, initInboxIdStore } from "./inboxIdStore";
-import { initProfilesStore, ProfilesStoreType } from "./profilesStore";
+import { ChatStoreType, initChatStore } from "@data/store/chatStore";
+import { InboxIdStoreType, initInboxIdStore } from "@data/store/inboxIdStore";
+import {
+  initProfilesStore,
+  ProfilesStoreType,
+} from "@data/store/profilesStore";
 import {
   initRecommendationsStore,
   RecommendationsStoreType,
-} from "./recommendationsStore";
-import { initSettingsStore, SettingsStoreType } from "./settingsStore";
+} from "@data/store/recommendationsStore";
+import {
+  initSettingsStore,
+  SettingsStoreType,
+} from "@data/store/settingsStore";
 import {
   initTransactionsStore,
   TransactionsStoreType,
-} from "./transactionsStore";
-import { initWalletStore, WalletStoreType } from "./walletStore";
-import { removeLogoutTask } from "../../utils/logout";
-import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
-import { updateSteps } from "../updates/asyncUpdates";
+} from "@data/store/transactionsStore";
+import { initWalletStore, WalletStoreType } from "@data/store/walletStore";
+import { updateSteps } from "@data/updates/asyncUpdates";
+import logger from "@utils/logger";
+import mmkv, { zustandMMKVStorage } from "@utils/mmkv";
+import { removeLogoutTask } from "features/accounts/logout";
+import { v4 as uuidv4 } from "uuid";
+import { create, StoreApi, UseBoundStore } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 type AccountStoreType = {
   [K in keyof AccountStoreDataType]: UseBoundStore<

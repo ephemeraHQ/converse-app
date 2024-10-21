@@ -1,5 +1,14 @@
 import Picto from "@components/Picto/Picto";
-import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
+import {
+  currentAccount,
+  useCurrentAccount,
+  useLoggedWithPrivy,
+  useProfilesStore,
+  useRecommendationsStore,
+  useSettingsStore,
+  useWalletStore,
+} from "@features/accounts/accounts.store";
+import { useDisconnectActionSheet } from "@features/accounts/useDisconnectActionSheet";
 import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
 import { translate } from "@i18n";
 import Clipboard from "@react-native-clipboard/clipboard";
@@ -54,15 +63,6 @@ import {
   TableViewPicto,
 } from "../components/TableView/TableViewImage";
 import config from "../config";
-import {
-  currentAccount,
-  useCurrentAccount,
-  useLoggedWithPrivy,
-  useProfilesStore,
-  useRecommendationsStore,
-  useSettingsStore,
-  useWalletStore,
-} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useGroupMembers } from "../hooks/useGroupMembers";

@@ -1,3 +1,7 @@
+import {
+  useCurrentAccount,
+  useTransactionsStore,
+} from "@features/accounts/accounts.store";
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import { ethers } from "ethers";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -8,10 +12,6 @@ import logger from "./logger";
 import { sentryTrackError } from "./sentry";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { MessageToDisplay } from "../components/Chat/Message/Message";
-import {
-  useCurrentAccount,
-  useTransactionsStore,
-} from "../data/store/accountsStore";
 import { Transaction } from "../data/store/transactionsStore";
 
 export type TransactionContentType =

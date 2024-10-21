@@ -1,9 +1,9 @@
+import { useChatStore } from "@features/accounts/accounts.store";
 import { sentryTrackMessage } from "@utils/sentry";
 import { useEffect, useRef, useState } from "react";
 
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 import { useDebugEnabled } from "./DebugButton";
-import { useChatStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 

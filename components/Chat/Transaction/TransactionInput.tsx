@@ -1,3 +1,7 @@
+import {
+  currentAccount,
+  useWalletStore,
+} from "@features/accounts/accounts.store";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
@@ -24,10 +28,6 @@ import { v4 as uuidv4 } from "uuid";
 
 import SendButton from "../../../assets/send-button.svg";
 import config from "../../../config";
-import {
-  currentAccount,
-  useWalletStore,
-} from "../../../data/store/accountsStore";
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { postUSDCTransferAuthorization } from "../../../utils/api";
 import { useConversationContext } from "../../../utils/conversation";

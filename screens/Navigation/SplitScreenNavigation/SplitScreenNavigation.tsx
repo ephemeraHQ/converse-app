@@ -1,3 +1,7 @@
+import {
+  getChatStore,
+  useCurrentAccount,
+} from "@features/accounts/accounts.store";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
 import { listItemSeparatorColor } from "@styles/colors";
@@ -8,10 +12,6 @@ import { useColorScheme } from "react-native";
 import SplitLeftStackNavigation from "./SplitLeftStackNavigation";
 import SplitRightStackNavigation from "./SplitRightStackNavigation";
 import config from "../../../config";
-import {
-  getChatStore,
-  useCurrentAccount,
-} from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
 import { converseNavigations } from "../../../utils/navigation";
 import {

@@ -1,18 +1,18 @@
-import { useEffect, useRef } from "react";
-import { AppState } from "react-native";
-
 import {
   useAccountsList,
   useAccountsStore,
   useChatStoreForAccount,
   useCurrentAccount,
   useSettingsStoreForAccount,
-} from "../../data/store/accountsStore";
+} from "@features/accounts/accounts.store";
+import { useEffect, useRef } from "react";
+import { AppState } from "react-native";
+
 import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { executeLogoutTasks } from "../../features/accounts/logout";
 import { saveUser } from "../../utils/api";
 import { sortAndComputePreview } from "../../utils/conversation";
-import { executeLogoutTasks } from "../../utils/logout";
 import {
   resetNotifications,
   saveNotificationsStatus,

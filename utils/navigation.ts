@@ -1,10 +1,13 @@
+import {
+  currentAccount,
+  getChatStore,
+} from "@features/accounts/accounts.store";
 import * as Linking from "expo-linking";
 import { Linking as RNLinking } from "react-native";
 
 import logger from "./logger";
 import { loadSavedNotificationMessagesToContext } from "./notifications";
 import config from "../config";
-import { currentAccount, getChatStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 

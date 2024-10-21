@@ -1,3 +1,4 @@
+import { useChatStore } from "@features/accounts/accounts.store";
 import { translate } from "@i18n";
 import {
   chatInputBackgroundColor,
@@ -26,7 +27,6 @@ import {
 } from "../../components/Connecting";
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import Picto from "../../components/Picto/Picto";
-import { useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { converseEventEmitter } from "../../utils/events";
 import ConversationList from "../ConversationList";

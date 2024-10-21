@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@features/accounts/accounts.store";
 import { MutationOptions, useMutation } from "@tanstack/react-query";
 import { createGroupJoinRequest, GroupJoinRequest } from "@utils/api";
 

@@ -1,3 +1,10 @@
+import EphemeralAccountBanner from "@features/accounts/EphemeralAccountBanner";
+import {
+  currentAccount,
+  useChatStore,
+  useProfilesStore,
+  useSettingsStore,
+} from "@features/accounts/accounts.store";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -24,18 +31,11 @@ import ChatNullState from "../components/Chat/ChatNullState";
 import ConversationFlashList from "../components/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
 import RequestsButton from "../components/ConversationList/RequestsButton";
-import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
 import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
-import {
-  currentAccount,
-  useChatStore,
-  useProfilesStore,
-  useSettingsStore,
-} from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
 import {

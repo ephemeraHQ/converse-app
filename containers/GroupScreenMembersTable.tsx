@@ -1,6 +1,9 @@
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
-import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useProfilesStore,
+} from "@features/accounts/accounts.store";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { translate } from "@i18n";
 import { actionSheetColors, textSecondaryColor } from "@styles/colors";

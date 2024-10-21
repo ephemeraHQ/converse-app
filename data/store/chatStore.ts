@@ -1,3 +1,4 @@
+import { useSettingsStore } from "@features/accounts/accounts.store";
 import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
@@ -6,7 +7,6 @@ import { Platform } from "react-native";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import { useSettingsStore } from "./accountsStore";
 import {
   TopicSpamScores,
   computeConversationsSpamScores,

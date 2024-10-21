@@ -1,4 +1,5 @@
-import { currentAccount } from "../data/store/accountsStore";
+import { currentAccount } from "@features/accounts/accounts.store";
+
 import { useGroupNameMutation } from "../queries/useGroupNameMutation";
 import { useGroupNameQuery } from "../queries/useGroupNameQuery";
 

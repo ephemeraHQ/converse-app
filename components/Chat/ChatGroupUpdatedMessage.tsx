@@ -1,13 +1,13 @@
+import {
+  useInboxIdStore,
+  useProfilesStore,
+} from "@features/accounts/accounts.store";
 import { textSecondaryColor } from "@styles/colors";
 import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
 import { StyleSheet, Text, useColorScheme } from "react-native";
 
 import { MessageToDisplay } from "./Message/Message";
-import {
-  useInboxIdStore,
-  useProfilesStore,
-} from "../../data/store/accountsStore";
 import { getPreferredName, getProfile } from "../../utils/profile";
 
 export default function ChatGroupUpdatedMessage({

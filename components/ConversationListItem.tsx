@@ -1,4 +1,9 @@
 import { useSelect } from "@data/store/storeHelpers";
+import {
+  currentAccount,
+  useChatStore,
+  useSettingsStore,
+} from "@features/accounts/accounts.store";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
 import {
@@ -46,11 +51,6 @@ import { ConversationContextMenu } from "./ConversationContextMenu";
 import GroupAvatar from "./GroupAvatar";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
-import {
-  currentAccount,
-  useChatStore,
-  useSettingsStore,
-} from "../data/store/accountsStore";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import { saveTopicsData } from "../utils/api";
 import { getMinimalDate } from "../utils/date";

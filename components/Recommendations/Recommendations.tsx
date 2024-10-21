@@ -1,4 +1,9 @@
 import { ProfileByAddress, ProfileSocials } from "@data/store/profilesStore";
+import {
+  useAccountsStore,
+  useCurrentAccount,
+  useRecommendationsStore,
+} from "@features/accounts/accounts.store";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -22,11 +27,6 @@ import {
 
 import { Recommendation } from "./Recommendation";
 import config from "../../config";
-import {
-  useAccountsStore,
-  useCurrentAccount,
-  useRecommendationsStore,
-} from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { refreshRecommendationsForAccount } from "../../utils/recommendations";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";

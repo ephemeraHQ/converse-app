@@ -1,3 +1,9 @@
+import {
+  useAccountsStore,
+  useHasOnePrivyAccount,
+  useLoggedWithPrivy,
+  // useWalletStore,
+} from "@features/accounts/accounts.store";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
@@ -9,12 +15,6 @@ import {
   Alert,
 } from "react-native";
 
-import {
-  useAccountsStore,
-  useHasOnePrivyAccount,
-  useLoggedWithPrivy,
-  // useWalletStore,
-} from "../../../data/store/accountsStore";
 import { useOnboardingStore } from "../../../data/store/onboardingStore";
 import { useSelect } from "../../../data/store/storeHelpers";
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";

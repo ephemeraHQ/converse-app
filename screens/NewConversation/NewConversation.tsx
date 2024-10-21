@@ -1,3 +1,9 @@
+import {
+  currentAccount,
+  getProfilesStore,
+  useChatStore,
+  useRecommendationsStore,
+} from "@features/accounts/accounts.store";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -29,12 +35,6 @@ import ProfileSearch from "../../components/Search/ProfileSearch";
 import TableView from "../../components/TableView/TableView";
 import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import config from "../../config";
-import {
-  currentAccount,
-  getProfilesStore,
-  useChatStore,
-  useRecommendationsStore,
-} from "../../data/store/accountsStore";
 import { ProfileSocials } from "../../data/store/profilesStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { useGroupMembers } from "../../hooks/useGroupMembers";

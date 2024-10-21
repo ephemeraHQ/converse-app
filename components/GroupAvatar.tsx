@@ -1,4 +1,8 @@
 import {
+  useProfilesStore,
+  useCurrentAccount,
+} from "@features/accounts/accounts.store";
+import {
   actionSecondaryColor,
   inversePrimaryColor,
   textPrimaryColor,
@@ -18,10 +22,6 @@ import {
 
 import Avatar from "./Avatar";
 import { Indicator } from "./Indicator";
-import {
-  useProfilesStore,
-  useCurrentAccount,
-} from "../data/store/accountsStore";
 import { useGroupMembers } from "../hooks/useGroupMembers";
 import {
   getPreferredAvatar,

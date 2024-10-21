@@ -1,5 +1,12 @@
 import ExternalWalletPicker from "@components/ExternalWalletPicker";
 import UserProfile from "@components/Onboarding/UserProfile";
+import AccountsAndroid from "@features/accounts/AccountsAndroid";
+import AccountsDrawer from "@features/accounts/AccountsDrawer";
+import {
+  useCurrentAccount,
+  useProfilesStore,
+  useSettingsStore,
+} from "@features/accounts/accounts.store";
 import { backgroundColor } from "@styles/colors";
 import { useAutoConnectExternalWallet } from "@utils/evm/external";
 import { getProfile } from "@utils/profile";
@@ -8,8 +15,6 @@ import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useRef } from "react";
 import { Dimensions, Platform, useColorScheme } from "react-native";
 
-import AccountsAndroid from "./Accounts/AccountsAndroid";
-import AccountsDrawer from "./Accounts/AccountsDrawer";
 import Navigation from "./Navigation/Navigation";
 import SplitScreenNavigation from "./Navigation/SplitScreenNavigation/SplitScreenNavigation";
 import { useIsSplitScreen } from "./Navigation/navHelpers";
@@ -22,11 +27,6 @@ import MainIdentityStateHandler from "../components/StateHandlers/MainIdentitySt
 import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler";
 import ConversationsStateHandler from "../components/StateHandlers/NotificationsStateHandler";
 import WalletsStateHandler from "../components/StateHandlers/WalletsStateHandler";
-import {
-  useCurrentAccount,
-  useProfilesStore,
-  useSettingsStore,
-} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";

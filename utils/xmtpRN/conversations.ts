@@ -1,3 +1,7 @@
+import {
+  getChatStore,
+  getSettingsStore,
+} from "@features/accounts/accounts.store";
 import { entifyWithAddress } from "@queries/entify";
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
 import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
@@ -26,7 +30,6 @@ import { Conversation as DbConversation } from "../../data/db/entities/conversat
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
 import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
-import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
 import {
   XmtpConversation,
   XmtpGroupConversation,

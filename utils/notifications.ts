@@ -1,3 +1,11 @@
+import {
+  currentAccount,
+  getAccountsList,
+  getChatStore,
+  getProfilesStore,
+  getSettingsStore,
+  useAccountsStore,
+} from "@features/accounts/accounts.store";
 import { createHash } from "@mfellner/react-native-fast-create-hash";
 import { keystore } from "@xmtp/proto";
 import { buildUserInviteTopic } from "@xmtp/xmtp-js";
@@ -37,14 +45,6 @@ import {
   saveConversationsLastNotificationSubscribePeriod,
 } from "../data/helpers/conversations/upsertConversations";
 import { saveMessages } from "../data/helpers/messages";
-import {
-  currentAccount,
-  getAccountsList,
-  getChatStore,
-  getProfilesStore,
-  getSettingsStore,
-  useAccountsStore,
-} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { XmtpMessage } from "../data/store/chatStore";
 

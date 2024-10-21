@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@features/accounts/accounts.store";
 import { translate } from "@i18n";
 import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
 import { getXmtpClient } from "@utils/xmtpRN/sync";

@@ -1,6 +1,9 @@
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
-import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useProfilesStore,
+} from "@features/accounts/accounts.store";
 import { useGroupPendingRequests } from "@hooks/useGroupPendingRequests";
 import { translate } from "@i18n";
 import { useAddToGroupMutation } from "@queries/useAddToGroupMutation";

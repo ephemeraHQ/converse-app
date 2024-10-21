@@ -1,8 +1,11 @@
 import { Drawer, DrawerRef } from "@components/Drawer";
 import { EmojiRowList } from "@components/EmojiPicker/EmojiRowList";
 import { EmojiSearchBar } from "@components/EmojiPicker/EmojiSearchBar";
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
+import {
+  useChatStore,
+  useCurrentAccount,
+} from "@features/accounts/accounts.store";
 import { textSecondaryColor } from "@styles/colors";
 import { emojis } from "@utils/emojis/emojis";
 import { CategorizedEmojisRecord, Emoji } from "@utils/emojis/interfaces";

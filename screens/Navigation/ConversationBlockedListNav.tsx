@@ -1,3 +1,4 @@
+import { useChatStore } from "@features/accounts/accounts.store";
 import { RouteProp } from "@react-navigation/native";
 import {
   backgroundColor,
@@ -16,7 +17,6 @@ import {
 } from "./Navigation";
 import AndroidBackAction from "../../components/AndroidBackAction";
 import ConversationFlashList from "../../components/ConversationFlashList";
-import { useChatStore } from "../../data/store/accountsStore";
 
 export default function ConversationBlockedListNav() {
   const sortedConversationsWithPreview = useChatStore(

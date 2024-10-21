@@ -1,3 +1,7 @@
+import {
+  useCurrentAccount,
+  useSettingsStore,
+} from "@features/accounts/accounts.store";
 import logger from "@utils/logger";
 import { useState } from "react";
 import { Text } from "react-native";
@@ -5,10 +9,6 @@ import { Text } from "react-native";
 import OnboardingComponent from "./OnboardingComponent";
 import config from "../../config";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
-import {
-  useCurrentAccount,
-  useSettingsStore,
-} from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { notifyFarcasterLinked } from "../../utils/api";
 import { useLinkFarcaster } from "../../utils/evm/privy";

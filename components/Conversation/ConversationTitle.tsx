@@ -1,3 +1,4 @@
+import { useProfilesStore } from "@features/accounts/accounts.store";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { headerTitleStyle, textPrimaryColor } from "@styles/colors";
@@ -21,7 +22,6 @@ import {
   View,
 } from "react-native";
 
-import { useProfilesStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { useGroupName } from "../../hooks/useGroupName";
 import { useGroupPhoto } from "../../hooks/useGroupPhoto";

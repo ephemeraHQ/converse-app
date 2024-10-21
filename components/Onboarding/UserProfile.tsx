@@ -1,3 +1,8 @@
+import {
+  useCurrentAccount,
+  useProfilesStore,
+  useSettingsStore,
+} from "@features/accounts/accounts.store";
 import { translate } from "@i18n";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -23,17 +28,12 @@ import {
 import OnboardingComponent from "./OnboardingComponent";
 import config from "../../config";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
-import {
-  useCurrentAccount,
-  useProfilesStore,
-  useSettingsStore,
-} from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import { useLogoutFromConverse } from "../../features/accounts/logout";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
 import { uploadFile } from "../../utils/attachment";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
-import { useLogoutFromConverse } from "../../utils/logout";
 import {
   compressAndResizeImage,
   pickMediaFromLibrary,

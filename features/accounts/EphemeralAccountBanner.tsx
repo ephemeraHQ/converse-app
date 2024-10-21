@@ -1,4 +1,4 @@
-import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
+import { useDisconnectActionSheet } from "@features/accounts/useDisconnectActionSheet";
 import {
   itemSeparatorColor,
   messageBubbleColor,

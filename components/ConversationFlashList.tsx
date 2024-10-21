@@ -1,3 +1,9 @@
+import {
+  useChatStore,
+  useCurrentAccount,
+  useProfilesStore,
+  useSettingsStore,
+} from "@features/accounts/accounts.store";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import { backgroundColor } from "@styles/colors";
@@ -9,12 +15,6 @@ import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 import { GroupConversationItem } from "./ConversationList/GroupConversationItem";
 import HiddenRequestsButton from "./ConversationList/HiddenRequestsButton";
 import ConversationListItem from "./ConversationListItem";
-import {
-  useChatStore,
-  useCurrentAccount,
-  useProfilesStore,
-  useSettingsStore,
-} from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";

@@ -1,9 +1,9 @@
+import { useCurrentAccount } from "@features/accounts/accounts.store";
 import { useConversationContext } from "@utils/conversation";
 import { useCallback, useRef, useState } from "react";
 import { View } from "react-native";
 
 import FramePreview from "./FramePreview";
-import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { useFramesStore } from "../../../data/store/framesStore";
 import {
   FrameWithType,

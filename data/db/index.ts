@@ -1,3 +1,7 @@
+import {
+  TEMPORARY_ACCOUNT_NAME,
+  useAccountsStore,
+} from "@features/accounts/accounts.store";
 import { waitUntilAppActive } from "@utils/appState";
 import logger from "@utils/logger";
 import { AppState, Platform } from "react-native";
@@ -13,10 +17,6 @@ import { Conversation } from "./entities/conversationEntity";
 import { Message } from "./entities/messageEntity";
 import config from "../../config";
 import { sentryTrackError, sentryTrackMessage } from "../../utils/sentry";
-import {
-  TEMPORARY_ACCOUNT_NAME,
-  useAccountsStore,
-} from "../store/accountsStore";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 

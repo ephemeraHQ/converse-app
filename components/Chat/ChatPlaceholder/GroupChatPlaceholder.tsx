@@ -1,3 +1,4 @@
+import { useCurrentAccount } from "@features/accounts/accounts.store";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupName } from "@hooks/useGroupName";
 import { translate } from "@i18n";
@@ -14,7 +15,6 @@ import {
   View,
 } from "react-native";
 
-import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { useConversationContext } from "../../../utils/conversation";
 import { sendMessage } from "../../../utils/message";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";

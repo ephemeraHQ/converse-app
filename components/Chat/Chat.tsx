@@ -1,3 +1,9 @@
+import {
+  useCurrentAccount,
+  useProfilesStore,
+  useRecommendationsStore,
+  useChatStore,
+} from "@features/accounts/accounts.store";
 import { FlashList } from "@shopify/flash-list";
 import {
   backgroundColor,
@@ -30,12 +36,6 @@ import { GroupConsentPopup } from "./ConsentPopup/GroupConsentPopup";
 import ChatInput from "./Input/Input";
 import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
 import TransactionInput from "./Transaction/TransactionInput";
-import {
-  useCurrentAccount,
-  useProfilesStore,
-  useRecommendationsStore,
-  useChatStore,
-} from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
 import { useFramesStore } from "../../data/store/framesStore";
 import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";

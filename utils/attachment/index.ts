@@ -1,3 +1,7 @@
+import {
+  useCurrentAccount,
+  useChatStore,
+} from "@features/accounts/accounts.store";
 import logger from "@utils/logger";
 import {
   DecryptedLocalAttachment,
@@ -12,10 +16,6 @@ import RNFetchBlob from "rn-fetch-blob";
 import { MessageToDisplay } from "../../components/Chat/Message/Message";
 import { ConverseMessageMetadata } from "../../data/db/entities/messageEntity";
 import { saveMessageMetadata } from "../../data/helpers/messages";
-import {
-  useCurrentAccount,
-  useChatStore,
-} from "../../data/store/accountsStore";
 import { getPresignedUriForUpload } from "../api";
 import { moveFileAndReplace } from "../fileSystem";
 import { getImageSize, isImageMimetype } from "../media";

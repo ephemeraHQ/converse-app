@@ -1,7 +1,10 @@
+import {
+  getChatStore,
+  getSettingsStore,
+} from "@features/accounts/accounts.store";
 import logger from "@utils/logger";
 import { ConsentListEntry } from "@xmtp/react-native-sdk";
 
-import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
 import { deletePeersFromDb, getPeersStatus } from "../../utils/api";
 import { getCleanAddress } from "../../utils/evm/address";
 import { getXmtpClient } from "../../utils/xmtpRN/sync";

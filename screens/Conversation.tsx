@@ -1,3 +1,8 @@
+import {
+  currentAccount,
+  useChatStore,
+  useSettingsStore,
+} from "@features/accounts/accounts.store";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -20,11 +25,6 @@ import { NavigationParamList } from "./Navigation/Navigation";
 import { Chat } from "../components/Chat/Chat";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
 import { EmojiPicker } from "../containers/EmojiPicker";
-import {
-  currentAccount,
-  useChatStore,
-  useSettingsStore,
-} from "../data/store/accountsStore";
 import { ChatStoreType, MediaPreview } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
 import {

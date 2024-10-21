@@ -1,9 +1,12 @@
+import {
+  getAccountsList,
+  getSettingsStore,
+} from "@features/accounts/accounts.store";
 import logger from "@utils/logger";
 import Constants from "expo-constants";
 
 import { setConsent } from "./001-setConsent";
 import { setTopicsData } from "./002-setTopicsData";
-import { getAccountsList, getSettingsStore } from "../store/accountsStore";
 import { useAppStore } from "../store/appStore";
 
 type Step = {

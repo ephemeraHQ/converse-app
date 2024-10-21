@@ -1,3 +1,7 @@
+import {
+  useChatStore,
+  useCurrentAccount,
+} from "@features/accounts/accounts.store";
 import { translate } from "@i18n";
 import { RouteProp } from "@react-navigation/native";
 import {
@@ -27,10 +31,6 @@ import AndroidBackAction from "../../components/AndroidBackAction";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
-import {
-  useChatStore,
-  useCurrentAccount,
-} from "../../data/store/accountsStore";
 import {
   consentToPeersOnProtocol,
   sortRequestsBySpamScore,

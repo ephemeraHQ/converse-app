@@ -1,5 +1,8 @@
 import Avatar from "@components/Avatar";
-import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useProfilesStore,
+} from "@features/accounts/accounts.store";
 import {
   inversePrimaryColor,
   textPrimaryColor,

@@ -1,4 +1,8 @@
 import { ErroredHeader } from "@components/ErroredHeader";
+import {
+  useAccountsStore,
+  useChatStore,
+} from "@features/accounts/accounts.store";
 import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
@@ -26,7 +30,6 @@ import Connecting, {
 } from "../../components/Connecting";
 import NewConversationButton from "../../components/ConversationList/NewConversationButton";
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
-import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { isDesktop } from "../../utils/device";
 import { navigate } from "../../utils/navigation";

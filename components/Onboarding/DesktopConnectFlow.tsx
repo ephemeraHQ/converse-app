@@ -1,3 +1,4 @@
+import { useAccountsStore } from "@features/accounts/accounts.store";
 import {
   primaryColor,
   textPrimaryColor,
@@ -12,7 +13,6 @@ import { Platform, StyleSheet, Text, useColorScheme } from "react-native";
 import OnboardingComponent from "./OnboardingComponent";
 import { initDb } from "../../data/db";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
-import { useAccountsStore } from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import {

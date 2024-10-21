@@ -1,3 +1,7 @@
+import {
+  currentAccount,
+  useProfilesStore,
+} from "@features/accounts/accounts.store";
 import { translate } from "@i18n";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { backgroundColor, textSecondaryColor } from "@styles/colors";
@@ -6,10 +10,6 @@ import { useCallback, useState } from "react";
 import { Alert, Platform, StyleSheet, useColorScheme } from "react-native";
 import { useShallow } from "zustand/react/shallow";
 
-import {
-  currentAccount,
-  useProfilesStore,
-} from "../../data/store/accountsStore";
 import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
 import { navigate } from "../../utils/navigation";
 import { canGroupMessage } from "../../utils/xmtpRN/conversations";

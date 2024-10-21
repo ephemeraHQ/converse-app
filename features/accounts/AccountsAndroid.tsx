@@ -1,20 +1,19 @@
-import { NavigationProp } from "@react-navigation/native";
-import { backgroundColor, clickedItemBackgroundColor } from "@styles/colors";
-import { PictoSizes } from "@styles/sizes";
-import { Dimensions, Platform, StyleSheet, useColorScheme } from "react-native";
-import { Drawer } from "react-native-paper";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import AccountSettingsButton from "../../components/AccountSettingsButton";
-import Picto from "../../components/Picto/Picto";
+import Picto from "@components/Picto/Picto";
+import { useOnboardingStore } from "@data/store/onboardingStore";
+import { useSelect } from "@data/store/storeHelpers";
+import AccountSettingsButton from "@features/accounts/AccountSettingsButton";
 import {
   useAccountsList,
   useAccountsStore,
-} from "../../data/store/accountsStore";
-import { useOnboardingStore } from "../../data/store/onboardingStore";
-import { useSelect } from "../../data/store/storeHelpers";
-import { converseEventEmitter } from "../../utils/events";
-import { shortAddress, useAccountsProfiles } from "../../utils/str";
+} from "@features/accounts/accounts.store";
+import { NavigationProp } from "@react-navigation/native";
+import { backgroundColor, clickedItemBackgroundColor } from "@styles/colors";
+import { PictoSizes } from "@styles/sizes";
+import { converseEventEmitter } from "@utils/events";
+import { shortAddress, useAccountsProfiles } from "@utils/str";
+import { Dimensions, Platform, StyleSheet, useColorScheme } from "react-native";
+import { Drawer } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = {
   navigation?: NavigationProp<any> | undefined;
