@@ -97,6 +97,7 @@ function ChatMessageReactions({ message, reactions }: Props) {
         style={[
           styles.reactionButton,
           rolledUpReactions.userReacted && {
+            borderColor: theme.colors.fill.minimal,
             backgroundColor: theme.colors.fill.minimal,
           },
         ]}
