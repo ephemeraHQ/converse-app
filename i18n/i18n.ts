@@ -54,7 +54,8 @@ i18n.translations = {
  * - Existing translation key strings may need updating
  * -- Regex to find foo.bar.strings: translate\(.*\..*"\)
  */
-export const TranslationNestedSeparator = "::" as const;
+// export const TranslationNestedSeparator = "::" as const;
+export const TranslationNestedSeparator = "." as const;
 
 i18n.defaultSeparator = TranslationNestedSeparator;
 

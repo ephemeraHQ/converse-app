@@ -95,7 +95,8 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
 
   const pollingTimedOut = state.value === "Attempting to Join Group Timed Out";
 
-  const joinButtonEnabled = !polling && joinStatus !== "ACCEPTED";
+  const joinButtonEnabled =
+    !polling && joinStatus === "PENDING" && state.status === "active";
   const openConversationButtonEnabled = !polling && joinStatus === "ACCEPTED";
 
   console.log(
@@ -133,7 +134,7 @@ export function JoinGroupScreen({
   route,
 }: NativeStackScreenProps<NavigationParamList, "GroupInvite">) {
   // const groupInviteId = route.params.groupInviteId;
-  const groupInviteId = "GhN59pa6U85jtOdwCCNQr";
+  const groupInviteId = "_Tt-XSovVabVDfQ2fcT5R";
 
   const {
     isGroupInviteLoading,

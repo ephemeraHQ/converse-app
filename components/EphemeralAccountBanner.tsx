@@ -20,6 +20,9 @@ import React, {
 } from "react-native";
 import { createMachine } from "xstate";
 
+import { Controlled } from "../dependencies/Environment/Environment";
+import { JoinGroupResult } from "../features/GroupInvites/joinGroup.types";
+
 const simpleMachine = createMachine({
   id: "simpleMachine",
   context: { some: "stuff" },
@@ -63,10 +66,16 @@ export default function EphemeralAccountBanner() {
         <Button
           variant="primary"
           onPress={() => {
+            const timedOutResult: JoinGroupResult = {
+              type: "group-join-request.timed-out",
+            };
+
+            Controlled.joinGroupClient.attemptToJoinGroup = async () =>
+              timedOutResult;
             // @ts-expect-error
             navigation.navigate("GroupInvite");
           }}
-          title="Test Gruop Invite"
+          title="Test Gruop Invite (timed out) "
         />
         <Text style={styles.tempAccountSubtitle} numberOfLines={4}>
           Disconnect to permanently remove your device from these conversations
