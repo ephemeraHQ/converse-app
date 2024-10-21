@@ -83,7 +83,6 @@ export default function ConversationFlashList({
   const renderItem = useCallback(
     ({ item }: { item: ConversationFlatListItem | string }) => {
       if (typeof item === "string") {
-        console.log("here1111", item);
         return <V3GroupConversationListItem topic={item} />;
       }
       if (item.topic === "hiddenRequestsButton") {
@@ -165,7 +164,7 @@ export default function ConversationFlashList({
             onScrollBeginDrag={onScroll}
             alwaysBounceVertical={items.length > 0}
             contentInsetAdjustmentBehavior="automatic"
-            data={[...items, ...(data?.ids || [])]}
+            data={[...(data?.ids || []), ...items]}
             extraData={[
               colorScheme,
               navigation,
