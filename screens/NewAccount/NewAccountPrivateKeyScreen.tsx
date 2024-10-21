@@ -39,7 +39,7 @@ export const NewAccountPrivateKeyScreen = memo(function () {
           }}
         >
           <Button
-            variant="primary"
+            variant="fill"
             loading={loading}
             title={translate("privateKeyConnect.connectButton")}
             onPress={() => {

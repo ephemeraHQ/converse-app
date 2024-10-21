@@ -29,7 +29,7 @@ export const $textFontWeightStyles = Object.entries(typography.primary).reduce(
   {}
 ) as Record<IWeights, TextStyle>;
 
-export const textBaseStyle: ThemedStyle<TextStyle> = (theme) => ({
+export const $textBaseStyle: ThemedStyle<TextStyle> = (theme) => ({
   ...$textSizeStyles.sm,
   ...$textFontWeightStyles.normal,
   color: theme.colors.text.primary,

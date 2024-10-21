@@ -7,6 +7,7 @@ import {
   ViewStyle,
 } from "react-native";
 
+import { IPicto } from "../../components/Picto/Picto";
 import { ITextProps } from "../Text";
 
 export type IButtonVariant =
@@ -105,5 +106,5 @@ export interface IButtonProps extends RNPressableProps {
   /** @deprecated */
   title?: string;
   /** @deprecated */
-  picto?: string;
+  picto?: IPicto;
 }

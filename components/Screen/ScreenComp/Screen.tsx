@@ -87,7 +87,7 @@ function ScreenWithScrolling(props: IScreenProps) {
 export function Screen(props: IScreenProps) {
   const { theme } = useAppTheme();
   const {
-    backgroundColor = theme.colors.background,
+    backgroundColor = theme.colors.background.surface,
     safeAreaEdges,
     StatusBarProps,
     statusBarStyle = "dark",

@@ -8,14 +8,14 @@ import {
 
 export type IScreenHeaderModalCloseButtonProps = Optional<
   IScreenHeaderIconButtonProps,
-  "picto"
+  "iconName"
 >;
 
 export const ScreenHeaderModalCloseButton = memo(
   function ScreenHeaderModalCloseButton(
-    props: Optional<IScreenHeaderModalCloseButtonProps, "variant" | "title">
+    props: Optional<IScreenHeaderModalCloseButtonProps, "iconName">
   ) {
-    const { title, variant, ...rest } = props;
-    return <ScreenHeaderIconButton picto="chevron.left" {...rest} />;
+    const { ...rest } = props;
+    return <ScreenHeaderIconButton iconName="chevron.left" {...rest} />;
   }
 );

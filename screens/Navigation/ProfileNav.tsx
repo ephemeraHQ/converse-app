@@ -57,7 +57,7 @@ export default function ProfileNav() {
             }
             return (
               <ScreenHeaderIconButton
-                picto="square.and.pencil"
+                iconName="square.and.pencil"
                 onPress={() => {
                   navigate("UserProfile");
                 }}

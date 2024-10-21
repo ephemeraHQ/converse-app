@@ -108,7 +108,7 @@ export const PrivyPhoneEntry = memo(() => {
       <VStack style={{ rowGap: spacing.xs }}>
         <Button
           style={{ marginHorizontal: 0 }}
-          variant="primary"
+          variant="fill"
           title={translate("privyConnect.buttons.continue")}
           onPress={sendCode}
           loading={loading}

@@ -1,8 +1,8 @@
 import { memo } from "react";
 
+import { Button } from "../../design-system/Button/Button";
+import { IButtonProps } from "../../design-system/Button/Button.props";
 import { Optional } from "../../types/general";
-import Button from "../Button/Button";
-import { IButtonProps } from "../Button/Button.props";
 
 export const OnboardingPrimaryCtaButton = memo(
   function OnboardingPrimaryCtaButton(
@@ -17,7 +17,7 @@ export const OnboardingPrimaryCtaButton = memo(
           },
           style,
         ]}
-        variant={variant || "primary"}
+        variant={variant || "fill"}
         {...rest}
       />
     );
