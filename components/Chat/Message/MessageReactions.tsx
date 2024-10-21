@@ -1,35 +1,14 @@
-import Avatar from "@components/Avatar";
-import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
-import {
-  inversePrimaryColor,
-  textPrimaryColor,
-  primaryColor,
-} from "@styles/colors";
-import { AvatarSizes } from "@styles/sizes";
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getProfile,
-} from "@utils/profile";
+import { useCurrentAccount } from "@data/store/accountsStore";
+import { useAppTheme } from "@theme/useAppTheme";
 import {
   MessageReaction,
   addReactionToMessage,
   removeReactionFromMessage,
 } from "@utils/reactions";
 import { memo, useCallback, useMemo } from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { MessageToDisplay } from "./Message";
-import { useAppTheme } from "../../../theme/useAppTheme";
-
-const MAX_REACTORS_TO_SHOW = 3;
-const REACTOR_OFFSET = 10;
 
 type Props = {
   message: MessageToDisplay;
@@ -47,10 +26,8 @@ type ReactionCount = {
 };
 
 function ChatMessageReactions({ message, reactions }: Props) {
-  const colorScheme = useColorScheme();
   const styles = useStyles();
   const userAddress = useCurrentAccount();
-  const profiles = useProfilesStore((state) => state.profiles);
 
   const reactionsList = useMemo(() => {
     return Object.entries(reactions)
@@ -134,56 +111,9 @@ function ChatMessageReactions({ message, reactions }: Props) {
             ]}
           >
             <Text style={styles.emoji}>{reaction.content}</Text>
-            {reactorCount <= MAX_REACTORS_TO_SHOW ? (
-              <View
-                style={[
-                  styles.reactorContainer,
-                  { marginRight: (reactorCount - 1) * -REACTOR_OFFSET },
-                ]}
-              >
-                {reaction.reactors
-                  .slice(0, MAX_REACTORS_TO_SHOW)
-                  .map((reactor, index) => (
-                    <Avatar
-                      key={reactor}
-                      uri={getPreferredAvatar(
-                        getProfile(reactor, profiles)?.socials
-                      )}
-                      name={getPreferredName(
-                        getProfile(reactor, profiles)?.socials,
-                        reactor
-                      )}
-                      size={AvatarSizes.messageReactor}
-                      invertColor={message.fromMe}
-                      style={[
-                        styles.profileImage,
-                        {
-                          left: index * -REACTOR_OFFSET,
-                          zIndex: MAX_REACTORS_TO_SHOW - (index + 1),
-                        },
-                        reaction.userReacted
-                          ? message.fromMe
-                            ? styles.myReactionToMyMessageProfileImage
-                            : styles.myReactionToOtherMessageProfileImage
-                          : styles.otherProfileImage,
-                      ]}
-                    />
-                  ))}
-              </View>
-            ) : (
-              <View style={styles.reactorContainer}>
-                <Text
-                  style={[
-                    styles.reactorCount,
-                    reaction.userReacted
-                      ? { color: inversePrimaryColor(colorScheme) }
-                      : {},
-                  ]}
-                >
-                  {reactorCount}
-                </Text>
-              </View>
-            )}
+            <View style={styles.reactorContainer}>
+              <Text style={styles.reactorCount}>{reactorCount}</Text>
+            </View>
           </TouchableOpacity>
         );
       })}
@@ -203,13 +133,13 @@ export default memo(ChatMessageReactions, (prevProps, nextProps) => {
 
 const useStyles = () => {
   const { theme } = useAppTheme();
-  const colorScheme = useColorScheme();
+
   return StyleSheet.create({
     reactionsWrapper: {
       flexDirection: "row",
       flexWrap: "wrap",
-      rowGap: theme.spacing.xxxs,
-      columnGap: theme.spacing.xxs,
+      rowGap: theme.spacing["4xs"],
+      columnGap: theme.spacing["4xs"],
     },
     reactionButton: {
       flexDirection: "row",
@@ -228,35 +158,18 @@ const useStyles = () => {
       backgroundColor: theme.colors.fill.minimal,
     },
     // TODO: remove
-    profileImage: {
-      width: 22,
-      height: 22,
-      borderRadius: 22,
-      borderWidth: 1,
-    },
-    // TODO: remove
     otherReactionButton: {},
-    // TODO: remove
-    otherProfileImage: {},
-    // TODO: remove
-    myReactionToOtherMessageProfileImage: {},
-    // TODO: remove
-    myReactionToMyMessageProfileImage: {
-      borderColor: primaryColor(colorScheme),
-    },
     emoji: {
       fontSize: 14,
-      marginHorizontal: 2,
     },
     reactorContainer: {
       flexDirection: "row",
       alignItems: "center",
-      height: 22,
     },
     reactorCount: {
       fontSize: 12,
-      marginHorizontal: 2,
-      color: textPrimaryColor(colorScheme),
+      marginLeft: theme.spacing.xxxs,
+      color: theme.colors.text.secondary,
     },
   });
 };
