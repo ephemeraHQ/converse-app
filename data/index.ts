@@ -1,5 +1,9 @@
 import "reflect-metadata";
 
+import {
+  getChatStore,
+  getProfilesStore,
+} from "@features/accounts/accounts.store";
 import logger from "@utils/logger";
 import { getProfile } from "@utils/profile";
 
@@ -8,7 +12,6 @@ import { Conversation } from "./db/entities/conversationEntity";
 import { Message } from "./db/entities/messageEntity";
 import { refreshProfilesIfNeeded } from "./helpers/profiles/profilesUpdate";
 import { xmtpConversationFromDb } from "./mappers";
-import { getChatStore, getProfilesStore } from "./store/accountsStore";
 import { saveXmtpEnv, saveApiURI } from "../utils/sharedData";
 
 const getTypeormBoolValue = (value: number) => value === 1;

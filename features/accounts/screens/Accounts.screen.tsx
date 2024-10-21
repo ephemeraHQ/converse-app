@@ -1,25 +1,24 @@
+import TableView from "@components/TableView/TableView";
+import { TableViewPicto } from "@components/TableView/TableViewImage";
+import { useOnboardingStore } from "@data/store/onboardingStore";
+import {
+  useAccountsList,
+  useAccountsStore,
+  useErroredAccountsMap,
+} from "@features/accounts/accounts.store";
+import AccountSettingsButton from "@features/accounts/components/AccountSettingsButton";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { NavigationParamList } from "@screens/Navigation/Navigation";
 import {
   backgroundColor,
   dangerColor,
   primaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { shortAddress, useAccountsProfiles } from "@utils/str";
 import { ScrollView, StyleSheet, View, useColorScheme } from "react-native";
 
-import AccountSettingsButton from "../../components/AccountSettingsButton";
-import TableView from "../../components/TableView/TableView";
-import { TableViewPicto } from "../../components/TableView/TableViewImage";
-import {
-  useAccountsList,
-  useAccountsStore,
-  useErroredAccountsMap,
-} from "../../data/store/accountsStore";
-import { useOnboardingStore } from "../../data/store/onboardingStore";
-import { shortAddress, useAccountsProfiles } from "../../utils/str";
-import { NavigationParamList } from "../Navigation/Navigation";
-
-export default function Accounts({
+export default function AccountsScreen({
   navigation,
   route,
 }: NativeStackScreenProps<NavigationParamList, "Accounts">) {

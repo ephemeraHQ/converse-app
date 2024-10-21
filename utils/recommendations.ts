@@ -1,5 +1,6 @@
+import { getRecommendationsStore } from "@features/accounts/accounts.store";
+
 import { findFrens } from "./api";
-import { getRecommendationsStore } from "../data/store/accountsStore";
 
 export const refreshRecommendationsForAccount = async (account: string) => {
   const frens = await findFrens(account);

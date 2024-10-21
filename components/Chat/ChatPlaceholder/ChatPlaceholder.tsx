@@ -1,3 +1,9 @@
+import {
+  currentAccount,
+  useProfilesStore,
+  useRecommendationsStore,
+  useSettingsStore,
+} from "@features/accounts/accounts.store";
 import { translate } from "@i18n";
 import { actionSheetColors, textPrimaryColor } from "@styles/colors";
 import { isGroupTopic } from "@utils/groupUtils/groupId";
@@ -11,12 +17,6 @@ import {
   View,
 } from "react-native";
 
-import {
-  currentAccount,
-  useProfilesStore,
-  useRecommendationsStore,
-  useSettingsStore,
-} from "../../../data/store/accountsStore";
 import { useConversationContext } from "../../../utils/conversation";
 import { sendMessage } from "../../../utils/message";
 import { getProfile, getProfileData } from "../../../utils/profile";

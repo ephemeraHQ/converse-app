@@ -1,3 +1,7 @@
+import {
+  useCurrentAccount,
+  useWalletStore,
+} from "@features/accounts/accounts.store";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -21,7 +25,6 @@ import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 import OnboardingComponent from "../components/Onboarding/OnboardingComponent";
 import { getSignerFromPrivateKey } from "../components/Onboarding/PrivateKeyConnect";
-import { useCurrentAccount, useWalletStore } from "../data/store/accountsStore";
 import { converseEventEmitter } from "../utils/events";
 import { savePrivateKey } from "../utils/keychain/helpers";
 import { shortAddress } from "../utils/str";

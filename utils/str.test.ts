@@ -1,3 +1,4 @@
+import { getProfilesStore } from "@features/accounts/accounts.store";
 import { PixelRatio } from "react-native";
 
 import * as profileModule from "./profile";
@@ -12,7 +13,6 @@ import {
   shortAddress,
   strByteSize,
 } from "./str";
-import { getProfilesStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 
 jest.mock("react-native", () => ({
@@ -28,7 +28,7 @@ jest.mock("react-native", () => ({
   TextInput: jest.fn(),
 }));
 
-jest.mock("../data/store/accountsStore", () => ({
+jest.mock("@features/accounts/accounts.store", () => ({
   getProfilesStore: jest
     .fn()
     .mockReturnValue({ getState: jest.fn().mockReturnValue({ profiles: {} }) }),

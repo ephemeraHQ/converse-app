@@ -1,3 +1,7 @@
+import {
+  useChatStore,
+  useCurrentAccount,
+} from "@features/accounts/accounts.store";
 import { invalidateGroupConsentQuery } from "@queries/useGroupConsentQuery";
 import { invalidateGroupDescriptionQuery } from "@queries/useGroupDescriptionQuery";
 import { invalidateGroupMembersQuery } from "@queries/useGroupMembersQuery";
@@ -28,7 +32,6 @@ import { GroupScreenDescription } from "../containers/GroupScreenDescription";
 import { GroupScreenImage } from "../containers/GroupScreenImage";
 import { GroupScreenMembersTable } from "../containers/GroupScreenMembersTable";
 import { GroupScreenName } from "../containers/GroupScreenName";
-import { useChatStore, useCurrentAccount } from "../data/store/accountsStore";
 import { XmtpGroupConversation } from "../data/store/chatStore";
 
 export default function GroupScreen({

@@ -1,3 +1,4 @@
+import { getChatStore } from "@features/accounts/accounts.store";
 import logger from "@utils/logger";
 import { retryWithBackoff } from "@utils/retryWithBackoff";
 import { Client } from "@xmtp/xmtp-js";
@@ -27,7 +28,6 @@ import {
   syncGroupsMessages,
 } from "./messages";
 import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
-import { getChatStore } from "../../data/store/accountsStore";
 import { loadXmtpKey } from "../keychain/helpers";
 
 const instantiatingClientForAccount: {

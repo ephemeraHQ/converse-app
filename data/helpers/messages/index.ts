@@ -1,3 +1,4 @@
+import { getChatStore } from "@features/accounts/accounts.store";
 import isDeepEqual from "fast-deep-equal";
 import { Platform } from "react-native";
 
@@ -9,7 +10,6 @@ import {
 } from "../../db/entities/messageEntity";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpMessageFromDb, xmtpMessageToDb } from "../../mappers";
-import { getChatStore } from "../../store/accountsStore";
 import { XmtpMessage } from "../../store/chatStore";
 
 export { handleGroupUpdatedMessage } from "./handleGroupUpdatedMessage";

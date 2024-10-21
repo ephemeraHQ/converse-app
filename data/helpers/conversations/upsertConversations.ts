@@ -1,3 +1,4 @@
+import { getChatStore } from "@features/accounts/accounts.store";
 import logger from "@utils/logger";
 import { In } from "typeorm/browser";
 
@@ -12,7 +13,6 @@ import { getExistingDataSource } from "../../db/datasource";
 import { Conversation } from "../../db/entities/conversationEntity";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
-import { getChatStore } from "../../store/accountsStore";
 import {
   XmtpConversation,
   XmtpConversationWithUpdate,

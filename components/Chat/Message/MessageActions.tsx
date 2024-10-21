@@ -2,6 +2,7 @@ import { MessageContextMenu } from "@components/Chat/Message/MessageContextMenu"
 import { TableViewItemType } from "@components/TableView/TableView";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
 import { useSelect } from "@data/store/storeHelpers";
+import { useCurrentAccount } from "@features/accounts/accounts.store";
 import { translate } from "@i18n/index";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {
@@ -46,7 +47,6 @@ import Animated, {
 import { MessageToDisplay } from "./Message";
 import { MessageReactionsList } from "./MessageReactionsList";
 import MessageTail from "./MessageTail";
-import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
 import { useFramesStore } from "../../../data/store/framesStore";
 import { ReanimatedTouchableOpacity } from "../../../utils/animations";

@@ -1,3 +1,4 @@
+import { getChatStore, useChatStore } from "@features/accounts/accounts.store";
 import logger from "@utils/logger";
 import { InvitationContext } from "@xmtp/xmtp-js";
 import { Alert, Platform } from "react-native";
@@ -10,7 +11,6 @@ import { getRepository } from "../../db";
 import { Conversation } from "../../db/entities/conversationEntity";
 import { upsertRepository } from "../../db/upsert";
 import { xmtpConversationToDb } from "../../mappers";
-import { getChatStore, useChatStore } from "../../store/accountsStore";
 import { XmtpConversation } from "../../store/chatStore";
 
 export const cleanupPendingConversations = async (account: string) => {

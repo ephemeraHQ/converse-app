@@ -1,6 +1,9 @@
 import Picto from "@components/Picto/Picto";
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
+import {
+  useChatStore,
+  useCurrentAccount,
+} from "@features/accounts/accounts.store";
 import { useExistingGroupInviteLink } from "@hooks/useExistingGroupInviteLink";
 import { useGroupDescription } from "@hooks/useGroupDescription";
 import { useGroupMembers } from "@hooks/useGroupMembers";

@@ -1,16 +1,15 @@
-import { translate } from "@i18n";
-import { actionSheetColors } from "@styles/colors";
-import { useCallback } from "react";
-import { ColorSchemeName, Platform } from "react-native";
-
-import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
+import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import {
   useSettingsStore,
   useAccountsStore,
-} from "../data/store/accountsStore";
-import { useLogoutFromConverse } from "../utils/logout";
+} from "@features/accounts/accounts.store";
+import { translate } from "@i18n";
+import { actionSheetColors } from "@styles/colors";
+import { useLogoutFromConverse } from "features/accounts/logout";
+import { useCallback } from "react";
+import { ColorSchemeName, Platform } from "react-native";
 
-export const useDisconnectActionSheet = (account?: string) => {
+export const useDisconnectAccountActionSheet = (account?: string) => {
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const logout = useLogoutFromConverse(account || currentAccount);
   const { ephemeralAccount } = useSettingsStore((s) => ({

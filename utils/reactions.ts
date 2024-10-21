@@ -1,4 +1,4 @@
-import { getChatStore } from "@data/store/accountsStore";
+import { getChatStore } from "@features/accounts/accounts.store";
 import { translate } from "@i18n";
 import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 

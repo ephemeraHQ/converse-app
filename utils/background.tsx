@@ -1,8 +1,8 @@
 import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
 
-import { executeLogoutTasks } from "./logout";
 import { sentryTrackError } from "./sentry";
+import { executeLogoutTasks } from "../features/accounts/logout";
 
 const BACKGROUND_FETCH_TASK = "background-fetch";
 

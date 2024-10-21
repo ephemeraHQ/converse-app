@@ -1,4 +1,10 @@
 import {
+  currentAccount,
+  useChatStore,
+  useInboxIdStore,
+  useProfilesStore,
+} from "@features/accounts/accounts.store";
+import {
   inversePrimaryColor,
   messageInnerBubbleColor,
   myMessageInnerBubbleColor,
@@ -30,12 +36,6 @@ import Animated, {
 import ChatMessageActions from "./MessageActions";
 import ChatMessageReactions from "./MessageReactions";
 import MessageStatus from "./MessageStatus";
-import {
-  currentAccount,
-  useChatStore,
-  useInboxIdStore,
-  useProfilesStore,
-} from "../../../data/store/accountsStore";
 import { XmtpMessage } from "../../../data/store/chatStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import { getLocalizedTime, getRelativeDate } from "../../../utils/date";

@@ -1,4 +1,4 @@
-import { useChatStore } from "@data/store/accountsStore";
+import { useChatStore } from "@features/accounts/accounts.store";
 import { useShallow } from "zustand/react/shallow";
 
 export const useExistingGroupInviteLink = (

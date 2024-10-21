@@ -1,3 +1,4 @@
+import { useCurrentAccount } from "@features/accounts/accounts.store";
 import logger from "@utils/logger";
 import { FrameActionInputs } from "@xmtp/frames-client";
 import { ethers } from "ethers";
@@ -10,7 +11,6 @@ import { v4 as uuidv4 } from "uuid";
 import FrameBottom from "./FrameBottom";
 import FrameImage from "./FrameImage";
 import config from "../../../config";
-import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { cacheForMedia, fetchAndCacheMedia } from "../../../utils/cache/cache";
 import { useConversationContext } from "../../../utils/conversation";
 import { useExternalSigner } from "../../../utils/evm/external";

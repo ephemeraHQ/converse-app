@@ -1,4 +1,8 @@
 import { useSelect } from "@data/store/storeHelpers";
+import {
+  useCurrentAccount,
+  useSettingsStore,
+} from "@features/accounts/accounts.store";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { useGroupCreator } from "@hooks/useGroupCreator";
 import { useGroupMembers } from "@hooks/useGroupMembers";
@@ -11,10 +15,6 @@ import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import React, { useCallback, useMemo } from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
-import {
-  useCurrentAccount,
-  useSettingsStore,
-} from "../../../data/store/accountsStore";
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../../utils/conversation";
 import Button from "../../Button/Button";

@@ -1,3 +1,4 @@
+import { useSettingsStore } from "@features/accounts/accounts.store";
 import { textPrimaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import * as Linking from "expo-linking";
@@ -6,7 +7,6 @@ import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
-import { useSettingsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { requestPushNotificationsPermissions } from "../utils/notifications";
 

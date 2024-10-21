@@ -1,3 +1,4 @@
+import { useCurrentAccount } from "@features/accounts/accounts.store";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -25,7 +26,6 @@ import ConverseButton from "../components/Button/Button";
 import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
-import { useCurrentAccount } from "../data/store/accountsStore";
 
 export default function TopUp({
   route,

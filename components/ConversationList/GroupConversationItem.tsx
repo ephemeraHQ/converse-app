@@ -1,3 +1,7 @@
+import {
+  useChatStore,
+  useCurrentAccount,
+} from "@features/accounts/accounts.store";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { useGroupNameQuery } from "@queries/useGroupNameQuery";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
@@ -6,10 +10,6 @@ import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers
 import { FC, useCallback } from "react";
 import { useColorScheme } from "react-native";
 
-import {
-  useChatStore,
-  useCurrentAccount,
-} from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { ConversationWithLastMessagePreview } from "../../utils/conversation";
 import { conversationName } from "../../utils/str";

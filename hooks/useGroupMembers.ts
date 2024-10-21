@@ -1,6 +1,6 @@
+import { currentAccount } from "@features/accounts/accounts.store";
 import { QueryObserverOptions } from "@tanstack/react-query";
 
-import { currentAccount } from "../data/store/accountsStore";
 import { useAddToGroupMutation } from "../queries/useAddToGroupMutation";
 import {
   GroupMembersSelectData,

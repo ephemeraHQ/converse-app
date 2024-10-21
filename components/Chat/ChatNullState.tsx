@@ -1,5 +1,9 @@
 import Recommendations from "@components/Recommendations/Recommendations";
-import { useSettingsStore } from "@data/store/accountsStore";
+import {
+  useSettingsStore,
+  useProfilesStore,
+  useRecommendationsStore,
+} from "@features/accounts/accounts.store";
 import { translate } from "@i18n/index";
 import {
   backgroundColor,
@@ -14,10 +18,6 @@ import React from "react";
 import { View, Text, StyleSheet, useColorScheme, Platform } from "react-native";
 
 import config from "../../config";
-import {
-  useProfilesStore,
-  useRecommendationsStore,
-} from "../../data/store/accountsStore";
 import { ShareProfileContent } from "../../screens/ShareProfile";
 import {
   getPreferredUsername,

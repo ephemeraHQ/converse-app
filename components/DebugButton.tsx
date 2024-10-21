@@ -1,3 +1,7 @@
+import {
+  currentAccount,
+  useAccountsList,
+} from "@features/accounts/accounts.store";
 import Clipboard from "@react-native-clipboard/clipboard";
 import * as Sentry from "@sentry/react-native";
 import {
@@ -22,7 +26,6 @@ import { Platform, Alert } from "react-native";
 import config from "../config";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { getConverseDbPath } from "../data/db";
-import { currentAccount, useAccountsList } from "../data/store/accountsStore";
 import { getPresignedUriForUpload } from "../utils/api";
 import mmkv from "../utils/mmkv";
 

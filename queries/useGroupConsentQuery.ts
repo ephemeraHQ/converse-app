@@ -1,4 +1,4 @@
-import { useSettingsStore } from "@data/store/accountsStore";
+import { useSettingsStore } from "@features/accounts/accounts.store";
 import { QueryObserverOptions, useQuery } from "@tanstack/react-query";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import { useShallow } from "zustand/react/shallow";

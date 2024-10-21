@@ -4,10 +4,11 @@ import "@ethersproject/shims";
 import { useCallback, useEffect, useState } from "react";
 
 import config from "../../config";
+
 import {
   useAccountsStore,
   useCurrentAccount,
-} from "../../data/store/accountsStore";
+} from "@features/accounts/accounts.store";
 
 export const usePrivySigner = (onboarding: boolean = false) => {
   const currentAccount = useCurrentAccount();

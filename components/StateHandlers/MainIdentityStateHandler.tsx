@@ -1,10 +1,10 @@
-import { useEffect } from "react";
-
-import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import {
   useAccountsStore,
   useCurrentAccount,
-} from "../../data/store/accountsStore";
+} from "@features/accounts/accounts.store";
+import { useEffect } from "react";
+
+import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import { saveUser } from "../../utils/api";
 
 export default function MainIdentityStateHandler() {

@@ -1,11 +1,11 @@
 import GroupAvatar from "@components/GroupAvatar";
 import Picto from "@components/Picto/Picto";
+import { useSelect } from "@data/store/storeHelpers";
 import {
   useChatStore,
   useCurrentAccount,
   useProfilesStore,
-} from "@data/store/accountsStore";
-import { useSelect } from "@data/store/storeHelpers";
+} from "@features/accounts/accounts.store";
 import {
   backgroundColor,
   textPrimaryColor,

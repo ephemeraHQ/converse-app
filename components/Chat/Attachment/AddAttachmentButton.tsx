@@ -1,3 +1,4 @@
+import { useAccountsStore } from "@features/accounts/accounts.store";
 import { translate } from "@i18n";
 import { MenuView } from "@react-native-menu/menu";
 import { textPrimaryColor } from "@styles/colors";
@@ -9,7 +10,6 @@ import { useCallback, useEffect, useRef } from "react";
 import { Platform, StyleSheet, useColorScheme } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
-import { useAccountsStore } from "../../../data/store/accountsStore";
 import { uploadRemoteAttachment } from "../../../utils/attachment";
 import { useConversationContext } from "../../../utils/conversation";
 import { converseEventEmitter } from "../../../utils/events";

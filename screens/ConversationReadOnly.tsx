@@ -1,12 +1,12 @@
 import { ChatPreview } from "@components/Chat/Chat";
 import { EmojiPicker } from "@containers/EmojiPicker";
+import { MediaPreview } from "@data/store/chatStore";
+import { useSelect } from "@data/store/storeHelpers";
 import {
   currentAccount,
   useChatStore,
   useSettingsStore,
-} from "@data/store/accountsStore";
-import { MediaPreview } from "@data/store/chatStore";
-import { useSelect } from "@data/store/storeHelpers";
+} from "@features/accounts/accounts.store";
 import { backgroundColor, headerTitleStyle } from "@styles/colors";
 import { ConversationContext } from "@utils/conversation";
 import { setTopicToNavigateTo, topicToNavigateTo } from "@utils/navigation";

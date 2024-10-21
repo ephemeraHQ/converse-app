@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@features/accounts/accounts.store";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupName } from "@hooks/useGroupName";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";

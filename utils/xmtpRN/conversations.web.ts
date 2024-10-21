@@ -1,3 +1,7 @@
+import {
+  getChatStore,
+  getSettingsStore,
+} from "@features/accounts/accounts.store";
 import { ConversationWithLastMessagePreview } from "@utils/conversation";
 import logger from "@utils/logger";
 import { Client, ConsentListEntry, Conversation, Stream } from "@xmtp/xmtp-js";
@@ -5,7 +9,6 @@ import { Client, ConsentListEntry, Conversation, Stream } from "@xmtp/xmtp-js";
 import { syncConversationsMessages } from "./messages";
 import { getXmtpClient } from "./sync";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
-import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { getCleanAddress } from "../evm/address";

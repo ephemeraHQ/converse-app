@@ -1,9 +1,10 @@
+import { getChatStore } from "@features/accounts/accounts.store";
+
 import { getSendersSpamScores } from "../../../utils/api";
 import { URL_REGEX } from "../../../utils/regex";
 import { isContentType } from "../../../utils/xmtpRN/contentTypes";
 import { getRepository } from "../../db";
 import { maxVariableCount } from "../../db/upsert";
-import { getChatStore } from "../../store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../store/chatStore";
 
 export interface TopicSpamScores {

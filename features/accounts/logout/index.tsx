@@ -1,29 +1,35 @@
-import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
-import logger from "@utils/logger";
-import { ConverseXmtpClientType, dropXmtpClient } from "@utils/xmtpRN/client";
-import { getInboxId } from "@utils/xmtpRN/signIn";
-import { useCallback } from "react";
-
-import { useDisconnectFromPrivy } from "./privy";
-import { clearConverseDb, getConverseDbPath } from "../../data/db";
+import { clearConverseDb, getConverseDbPath } from "@data/db";
 import {
   getAccountsList,
   getChatStore,
   getWalletStore,
   useAccountsStore,
-} from "../../data/store/accountsStore";
-import { deleteSecureItemAsync } from "../keychain";
-import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
-import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
+} from "@features/accounts/accounts.store";
+import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
+import { deleteSecureItemAsync } from "@utils/keychain";
+import {
+  deleteAccountEncryptionKey,
+  deleteXmtpKey,
+} from "@utils/keychain/helpers";
+import logger from "@utils/logger";
+import mmkv, {
+  clearSecureMmkvForAccount,
+  secureMmkvByAccount,
+} from "@utils/mmkv";
 import {
   deleteSubscribedTopics,
   lastNotifSubscribeByAccount,
   unsubscribeFromNotifications,
-} from "../notifications";
-import { resetSharedData } from "../sharedData";
-import { getXmtpApiHeaders } from "../xmtpRN/api";
-import { importedTopicsDataForAccount } from "../xmtpRN/conversations";
-import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
+} from "@utils/notifications";
+import { resetSharedData } from "@utils/sharedData";
+import { getXmtpApiHeaders } from "@utils/xmtpRN/api";
+import { ConverseXmtpClientType, dropXmtpClient } from "@utils/xmtpRN/client";
+import { importedTopicsDataForAccount } from "@utils/xmtpRN/conversations";
+import { getInboxId } from "@utils/xmtpRN/signIn";
+import { deleteXmtpClient, getXmtpClient } from "@utils/xmtpRN/sync";
+import { useCallback } from "react";
+
+import { useDisconnectFromPrivy } from "./privy";
 
 type LogoutTasks = {
   [account: string]: {

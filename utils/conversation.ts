@@ -1,4 +1,5 @@
 import { PeersStatus, GroupStatus } from "@data/store/settingsStore";
+import { getChatStore, useChatStore } from "@features/accounts/accounts.store";
 import { Reaction } from "@xmtp/content-type-reaction";
 import { MutableRefObject, createRef } from "react";
 import { Alert, Platform } from "react-native";
@@ -22,7 +23,6 @@ import config from "../config";
 import { isOnXmtp } from "./xmtpRN/client";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
-import { getChatStore, useChatStore } from "../data/store/accountsStore";
 import {
   MediaPreview,
   TopicData,

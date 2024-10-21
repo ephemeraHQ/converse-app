@@ -1,14 +1,18 @@
+import {
+  getAccountsList,
+  useAccountsStore,
+} from "@features/accounts/accounts.store";
 import { translate } from "@i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { awaitableAlert } from "@utils/alert";
 import { getDatabaseFilesForInboxId } from "@utils/fileSystem";
 import logger from "@utils/logger";
-import { logoutAccount } from "@utils/logout";
 import { sentryTrackMessage } from "@utils/sentry";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Signer } from "ethers";
 import { reloadAppAsync } from "expo";
+import { logoutAccount } from "features/accounts/logout";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -28,10 +32,6 @@ import {
 
 import OnboardingComponent from "./OnboardingComponent";
 import ValueProps from "./ValueProps";
-import {
-  getAccountsList,
-  useAccountsStore,
-} from "../../data/store/accountsStore";
 import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { isOnXmtp } from "../../utils/xmtpRN/client";
@@ -86,7 +86,7 @@ export default function ConnectViaWallet({
     async (resetLoading = true, resetOnboard = true) => {
       if (inXmtpClientCreationFlow.current) {
         /*
-        Pretty edge case where user has started the XMTP flow 
+        Pretty edge case where user has started the XMTP flow
         i.e. user has done at least one signature but then decides
         to logout before going to the end of the flow. The XMTP SDK
         gets into a broken state

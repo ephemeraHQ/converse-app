@@ -1,5 +1,8 @@
-import { currentAccount, useSettingsStore } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
+import {
+  currentAccount,
+  useSettingsStore,
+} from "@features/accounts/accounts.store";
 import { useAllowGroupMutation } from "@queries/useAllowGroupMutation";
 import { useBlockGroupMutation } from "@queries/useBlockGroupMutation";
 import { useGroupConsentQuery } from "@queries/useGroupConsentQuery";

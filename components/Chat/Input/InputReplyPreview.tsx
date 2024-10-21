@@ -1,3 +1,4 @@
+import { useCurrentAccount } from "@features/accounts/accounts.store";
 import {
   backgroundColor,
   textPrimaryColor,
@@ -13,7 +14,6 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import { getRelativeDateTime } from "../../../utils/date";
 import { getReadableProfile } from "../../../utils/str";

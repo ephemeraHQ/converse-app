@@ -1,3 +1,7 @@
+import {
+  useCurrentAccount,
+  useProfilesStore,
+} from "@features/accounts/accounts.store";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -26,10 +30,6 @@ import ConverseButton from "../components/Button/Button";
 import ActionButton from "../components/Chat/ActionButton";
 import Picto from "../components/Picto/Picto";
 import config from "../config";
-import {
-  useCurrentAccount,
-  useProfilesStore,
-} from "../data/store/accountsStore";
 import { isDesktop } from "../utils/device";
 import {
   getPreferredUsername,

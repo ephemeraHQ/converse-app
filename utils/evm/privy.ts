@@ -8,11 +8,11 @@ import "@ethersproject/shims";
 import { useEffect, useState } from "react";
 
 import config from "../../config";
+
 import {
   useAccountsStore,
   useCurrentAccount,
-} from "../../data/store/accountsStore";
-
+} from "@features/accounts/accounts.store";
 import logger from "@utils/logger";
 
 export const usePrivySigner = (onboarding: boolean = false) => {

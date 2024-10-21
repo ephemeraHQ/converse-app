@@ -2,17 +2,17 @@ import {
   dropConverseDbConnections,
   reconnectConverseDbConnections,
 } from "@data/db/driver";
+import {
+  getAccountsList,
+  getChatStore,
+  useAccountsList,
+} from "@features/accounts/accounts.store";
 import logger from "@utils/logger";
 import { stopStreamingAllMessage } from "@utils/xmtpRN/messages";
 import { useCallback, useEffect, useRef } from "react";
 import { AppState, Platform } from "react-native";
 
 import { getExistingDataSource } from "../data/db/datasource";
-import {
-  getAccountsList,
-  getChatStore,
-  useAccountsList,
-} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { getTopicsData } from "../utils/api";

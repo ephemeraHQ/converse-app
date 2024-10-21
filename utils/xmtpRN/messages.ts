@@ -1,3 +1,4 @@
+import { getChatStore } from "@features/accounts/accounts.store";
 import { entifyWithAddress } from "@queries/entify";
 import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
 import { getCleanAddress } from "@utils/evm/address";
@@ -30,7 +31,6 @@ import {
   saveMessages,
 } from "../../data/helpers/messages";
 import { xmtpMessageFromDb } from "../../data/mappers";
-import { getChatStore } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { sentryTrackError } from "../sentry";
 

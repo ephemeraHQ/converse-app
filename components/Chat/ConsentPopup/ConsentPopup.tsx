@@ -1,3 +1,8 @@
+import {
+  currentAccount,
+  getSettingsStore,
+  useSettingsStore,
+} from "@features/accounts/accounts.store";
 import { translate } from "@i18n";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -9,11 +14,6 @@ import {
 import React from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
-import {
-  currentAccount,
-  getSettingsStore,
-  useSettingsStore,
-} from "../../../data/store/accountsStore";
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../../utils/conversation";
 import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";

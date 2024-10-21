@@ -1,4 +1,5 @@
-import { useCurrentAccount } from "../data/store/accountsStore";
+import { useCurrentAccount } from "@features/accounts/accounts.store";
+
 import { useGroupPhotoMutation } from "../queries/useGroupPhotoMutation";
 import { useGroupPhotoQuery } from "../queries/useGroupPhotoQuery";
 

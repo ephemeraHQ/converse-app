@@ -1,4 +1,4 @@
-import { useAccountsStore } from "@data/store/accountsStore";
+import { useAccountsStore } from "@features/accounts/accounts.store";
 import {
   open,
   OPSQLiteConnection,

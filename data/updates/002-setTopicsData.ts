@@ -1,7 +1,7 @@
+import { getChatStore } from "@features/accounts/accounts.store";
 import logger from "@utils/logger";
 
 import { saveTopicsData } from "../../utils/api";
-import { getChatStore } from "../store/accountsStore";
 import { TopicData } from "../store/chatStore";
 
 export const setTopicsData = async (account: string) => {

@@ -1,4 +1,8 @@
 import RequestsSegmentedController from "@components/ConversationList/RequestsSegmentedController";
+import {
+  useChatStore,
+  useCurrentAccount,
+} from "@features/accounts/accounts.store";
 import { translate } from "@i18n";
 import { RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -28,10 +32,6 @@ import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndica
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
-import {
-  useChatStore,
-  useCurrentAccount,
-} from "../../data/store/accountsStore";
 import {
   consentToPeersOnProtocol,
   sortRequestsBySpamScore,

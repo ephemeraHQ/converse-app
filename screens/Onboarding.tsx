@@ -1,3 +1,8 @@
+import {
+  getSettingsStore,
+  getWalletStore,
+  useAccountsStore,
+} from "@features/accounts/accounts.store";
 import { translate } from "@i18n/index";
 import { awaitableAlert } from "@utils/alert";
 import logger from "@utils/logger";
@@ -14,15 +19,13 @@ import PrivyConnect from "../components/Onboarding/PrivyConnect";
 import WalletSelector from "../components/Onboarding/WalletSelector";
 import { initDb } from "../data/db";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
-import {
-  getSettingsStore,
-  getWalletStore,
-  useAccountsStore,
-} from "../data/store/accountsStore";
 import { useOnboardingStore } from "../data/store/onboardingStore";
 import { useSelect } from "../data/store/storeHelpers";
+import {
+  logoutAccount,
+  waitForLogoutTasksDone,
+} from "../features/accounts/logout";
 import { saveXmtpKey } from "../utils/keychain/helpers";
-import { logoutAccount, waitForLogoutTasksDone } from "../utils/logout";
 import { getXmtpBase64KeyFromSigner } from "../utils/xmtpRN/signIn";
 import { getXmtpClient } from "../utils/xmtpRN/sync";
 

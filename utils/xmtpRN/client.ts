@@ -1,9 +1,8 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@features/accounts/accounts.store";
 import { translate } from "@i18n";
 import { awaitableAlert } from "@utils/alert";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
-import { useLogoutFromConverse } from "@utils/logout";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
@@ -15,6 +14,7 @@ import {
   StaticAttachmentCodec,
   TextCodec,
 } from "@xmtp/react-native-sdk";
+import { useLogoutFromConverse } from "features/accounts/logout";
 import { useEffect, useRef } from "react";
 
 import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";

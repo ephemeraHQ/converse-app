@@ -1,14 +1,14 @@
-import { AvatarSizes } from "@styles/sizes";
-import React, { useCallback, useEffect, useState } from "react";
-import { Platform, TouchableOpacity } from "react-native";
-
-import config from "../../config";
 import {
   currentAccount,
   useLoggedWithPrivy,
   useProfilesStore,
   useWalletStore,
-} from "../../data/store/accountsStore";
+} from "@features/accounts/accounts.store";
+import { AvatarSizes } from "@styles/sizes";
+import React, { useCallback, useEffect, useState } from "react";
+import { Platform, TouchableOpacity } from "react-native";
+
+import config from "../../config";
 import { evmHelpers } from "../../utils/evm/helpers";
 import { navigate } from "../../utils/navigation";
 import {
