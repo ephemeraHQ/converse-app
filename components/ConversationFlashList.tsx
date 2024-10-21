@@ -1,3 +1,4 @@
+import { useGroupsConversationListQuery } from "@queries/useGroupsConversationListQuery";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import { backgroundColor } from "@styles/colors";
@@ -9,6 +10,7 @@ import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 import { GroupConversationItem } from "./ConversationList/GroupConversationItem";
 import HiddenRequestsButton from "./ConversationList/HiddenRequestsButton";
 import ConversationListItem from "./ConversationListItem";
+import { V3GroupConversationListItem } from "./V3GroupConversationListItem";
 import {
   useChatStore,
   useCurrentAccount,
@@ -28,7 +30,7 @@ import { conversationName } from "../utils/str";
 
 type Props = {
   onScroll?: () => void;
-  items: ConversationFlatListItem[];
+  items: (ConversationFlatListItem | string)[];
   itemsForSearchQuery?: string;
   ListHeaderComponent?: React.ReactElement | null;
   ListFooterComponent?: React.ReactElement | null;
@@ -66,6 +68,7 @@ export default function ConversationFlashList({
     ])
   );
   const userAddress = useCurrentAccount() as string;
+  const { data } = useGroupsConversationListQuery(userAddress);
   const peersStatus = useSettingsStore((s) => s.peersStatus);
   const isSplitScreen = useIsSplitScreen();
   const profiles = useProfilesStore((state) => state.profiles);
@@ -85,7 +88,7 @@ export default function ConversationFlashList({
       openedConversationTopic
     ) {
       const topicIndex = items.findIndex(
-        (c) => c.topic === openedConversationTopic
+        (c) => typeof c !== "string" && c.topic === openedConversationTopic
       );
       if (topicIndex === -1) return;
       setTimeout(() => {
@@ -98,12 +101,19 @@ export default function ConversationFlashList({
     previousSearchQuery.current = itemsForSearchQuery;
   }, [isSplitScreen, items, openedConversationTopic, itemsForSearchQuery]);
 
-  const keyExtractor = useCallback((item: ConversationFlatListItem) => {
-    return item.topic;
-  }, []);
+  const keyExtractor = useCallback(
+    (item: ConversationFlatListItem | string) => {
+      return typeof item === "string" ? item : item.topic + "v2";
+    },
+    []
+  );
 
   const renderItem = useCallback(
-    ({ item }: { item: ConversationFlatListItem }) => {
+    ({ item }: { item: ConversationFlatListItem | string }) => {
+      if (typeof item === "string") {
+        console.log("here1111", item);
+        return <V3GroupConversationListItem topic={item} />;
+      }
       if (item.topic === "hiddenRequestsButton") {
         const hiddenRequestItem = item as ConversationFlatListHiddenRequestItem;
         return (
@@ -183,7 +193,7 @@ export default function ConversationFlashList({
             onScrollBeginDrag={onScroll}
             alwaysBounceVertical={items.length > 0}
             contentInsetAdjustmentBehavior="automatic"
-            data={items}
+            data={[...items, ...(data?.ids || [])]}
             extraData={[
               colorScheme,
               navigation,
