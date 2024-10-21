@@ -385,6 +385,137 @@ export class JoinGroupClient {
     );
   }
 
+  static userBlockedFromGroupWithId(blockedGroupId: string): JoinGroupClient {
+    const GroupIdUserWasBlockedFrom = blockedGroupId;
+
+    const fixtureGetGroupInvite = async (groupInviteId: string) => {
+      const fixtureGroupInvite: GroupInvite = {
+        id: "groupInviteId123",
+        inviteLink: "https://www.google.com",
+        createdByAddress: "0x123",
+        groupName: `Group Name from ${groupInviteId}`,
+        imageUrl: "https://www.google.com",
+        description: "Group Description",
+        groupId: GroupIdUserWasBlockedFrom,
+      } as const;
+
+      return fixtureGroupInvite;
+    };
+
+    const fixtureAttemptToJoinGroup = async (
+      account: string,
+      groupInviteId: string
+    ) => {
+      return {
+        type: "group-join-request.accepted",
+        groupId: GroupIdUserWasBlockedFrom,
+      } as const;
+    };
+
+    const fixtureFetchGroupsByAccount = async (
+      account: string
+    ): Promise<GroupsDataEntity> => {
+      const fixtureGroup: GroupData = {
+        id: GroupIdUserWasBlockedFrom,
+        createdAt: new Date().getTime(),
+        members: [],
+        topic: "topic123",
+        isGroupActive: false,
+        state: "allowed",
+        creatorInboxId: "0xabc" as InboxId,
+        name: "Group Name",
+        addedByInboxId: "0x123" as InboxId,
+        imageUrlSquare: "https://www.google.com",
+        description: "Group Description",
+      } as const;
+
+      const fixtureGroupsDataEntity: GroupsDataEntity = {
+        ids: [GroupIdUserWasBlockedFrom],
+        byId: {
+          [GroupIdUserWasBlockedFrom]: fixtureGroup,
+        },
+      } as const;
+
+      return fixtureGroupsDataEntity;
+    };
+
+    const fixtureAllowGroup = async () => {};
+
+    const fixtureRefreshGroup = async (account: string, topic: string) => {};
+
+    return new JoinGroupClient(
+      fixtureGetGroupInvite,
+      fixtureAttemptToJoinGroup,
+      fixtureFetchGroupsByAccount,
+      fixtureAllowGroup,
+      fixtureRefreshGroup
+    );
+  }
+
+  static userJoinGroupTimeout(attemptedJoinGroupId: string): JoinGroupClient {
+    const GroupIdUserWasNotAMemberOf = attemptedJoinGroupId;
+
+    const fixtureGetGroupInvite = async (groupInviteId: string) => {
+      const fixtureGroupInvite: GroupInvite = {
+        id: "groupInviteId123",
+        inviteLink: "https://www.google.com",
+        createdByAddress: "0x123",
+        groupName: `Group Name from ${groupInviteId}`,
+        imageUrl: "https://www.google.com",
+        description: "Group Description",
+        groupId: GroupIdUserWasNotAMemberOf,
+      } as const;
+
+      return fixtureGroupInvite;
+    };
+
+    const fixtureAttemptToJoinGroup = async (
+      account: string,
+      groupInviteId: string
+    ): Promise<JoinGroupResult> => {
+      return {
+        type: "group-join-request.timed-out",
+      } as const;
+    };
+
+    const fixtureFetchGroupsByAccount = async (
+      account: string
+    ): Promise<GroupsDataEntity> => {
+      // const fixtureGroup: GroupData = {
+      //   id: GroupIdUserWasNotAMemberOf,
+      //   createdAt: new Date().getTime(),
+      //   members: [],
+      //   topic: "topic123",
+      //   isGroupActive: true,
+      //   state: "allowed",
+      //   creatorInboxId: "0xabc" as InboxId,
+      //   name: "Group Name",
+      //   addedByInboxId: "0x123" as InboxId,
+      //   imageUrlSquare: "https://www.google.com",
+      //   description: "Group Description",
+      // } as const;
+
+      const fixtureGroupsDataEntity: GroupsDataEntity = {
+        ids: [],
+        byId: {},
+      } as const;
+
+      return fixtureGroupsDataEntity;
+    };
+
+    const fixtureAllowGroup = async () => {};
+
+    const fixtureRefreshGroup = async (account: string, topic: string) => {};
+
+    return new JoinGroupClient(
+      fixtureGetGroupInvite,
+      fixtureAttemptToJoinGroup,
+      fixtureFetchGroupsByAccount,
+      fixtureAllowGroup,
+      fixtureRefreshGroup
+    );
+  }
+
   static unimplemented(): JoinGroupClient {
     const unimplementedError = (method: string) => () => {
       const error = `

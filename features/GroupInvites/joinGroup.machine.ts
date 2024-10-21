@@ -211,6 +211,7 @@ export const joinGroupMachineLogic = setup({
 
     hasGroupIdInMetadata: (_, params: { groupInviteMetadata: GroupInvite }) => {
       const result = params.groupInviteMetadata.groupId !== undefined;
+      console.log({ result });
       return result;
     },
 
@@ -226,8 +227,20 @@ export const joinGroupMachineLogic = setup({
       _,
       params: { invitedGroup: GroupData | undefined }
     ) => {
-      const result = params.invitedGroup?.isGroupActive === true;
-      return result;
+      const invitedGroup: GroupData | undefined = params.invitedGroup;
+
+      const isNotBlocked = invitedGroup?.isGroupActive === true;
+
+      if (invitedGroup === undefined) {
+        // If the invited group is undefined, we can't
+        // determine if the user has been blocked or not.
+        // We'll be able to do so later in the process.
+        return true;
+      } else if (isNotBlocked) {
+        return true;
+      }
+
+      return false;
     },
 
     isUserInGroup: (
@@ -242,11 +255,15 @@ export const joinGroupMachineLogic = setup({
         return false;
       }
 
-      return groups.ids.includes(invitedGroupId);
+      const invitedGroup: GroupData | undefined = groups.byId[invitedGroupId];
+      const userHasNotBeenBlocked = invitedGroup?.isGroupActive === true;
+      const userIsInGroup = userHasNotBeenBlocked && invitedGroup !== undefined;
+      console.log({ invitedGroup, userHasNotBeenBlocked, userIsInGroup });
+      return userIsInGroup;
     },
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QCsD2BLAdgcQE6oFcAHAWQEMBjACyzADoAZVMiLKAAj0KPYElMAbugAuYdiTDCWZKQGIIqTPSwDUAa3oAzSdS7F+Q0QEEKw1LiZR0FANoAGALqJQRVLBHpFzkAA9EANgB2AEY6ACY7f38AZkCo4P8ADn8AVgAaEABPRABaaJT-OgBOIujg4LCQ6IAWIrtogF8GjLQsPVJKGiVGZlZMDna+QRExCSkIGTJZMFx8XDoiABsZTXMAWzptYV18fWHjU3NLa3snJBBXd2FPTG8-BGDEsLp-IpTgspTSipCwjOyEDkUolQol6uCioFAikwolEk0WhgcLsOtRaD0WGwhh4yItFpl2AApJGQTgo2DyRTKQTqeiLXpsfg4vGZYm0CDtWCnbyXDxec73IHBOx0RIlRIpaJFMLSp5xf6IYHRF52aofIJ1GWShEgVrI7jkNHdJiY-rY664-FEkkQMncCkzOYLZbCVa4Db001QJkWllspQc8nc8686780CC6KROjC6opQJysJBBIKwEfQIvaphapZgpZkFxnV69qGrr0ADCVDAFDUWN4mnYAFVYDN2AAJMiwdhGRa4MAsAn+0mDABCYDdYmbrZMYcwsmDLjcfNuAtyrxFdiTWeC1TswTeH1TwRSdgzUa+J6i0WiYW1zV1SJLnXRlertbN9abLdw7c73d7-YQIONp2sQ7BjhOX7TqYNzzsEZyLlcNx3Ig1SFEkkSVHCbxvP4qbXuUdCqtEURRHCTxFo+KKluiU4-gA6n+PZ9gO7BkOIYBrAARq2qANoMAAKuCeD+ZjsOWizWO+HD+uwDBYGosgEN+dCsBAAAqZBEAA8kQYCYOWigCDMsAyDcC4XEus4oQgkpEckiRQthF54VkiDXq8RHVCRpHkWElFtNRz7dIxHhmgAYuYUE-jOsHKTMqnoBpWn+u0Fmhshq4IIEYTKgm1RxPU0IpHGgRHmURR0JKaHJFCQSBEU8L3sWQVGvQoXXBFUV0d2MGKEpKlqZpOl6QZRkmWZijpVZmURog5SOeEUQpJK+SJOe+EJBmUIREUx61KVAX6sQNHdAAIpIMxrFgWKcta7LgeO5hiEYwiiGsRDCJS3QqLSmw6FQnIQc9-psNNSHhr4iCBHYIoFf4jzlCUXx2IkqbJIUiQFZu7wNUm-hHU+bV0BdojujdZp3UOtrA323ZvZxn3TLM5jOis6z-dsgPkrTYCg-04PLjZwQJkR+52NKUrxAmqZCqKCMi4EaE5utlQE81VEGsF9Cve9n1YmJsntN91KqBodAyHrwjqagqUojORyoFYtiODyM2Q-c8Yiu8e1qpUNQxNER4SoUe0gteULCnEjQa4FWvE7rjOdRwhtIqBRAm3Qv3m5bSc23b3AOxYTsnPBbsQyuc0PDCiRVY5WbZlCdgFMHWaipEq2RAmUqE61ZZ0InH3J+wqdYOnmfZ-QudD-nmvEEXxy2GECGWRXwuSqE0c1GhML5K8R5FDmRFJCV5Sns3Oa9-H-eD-rZqj5g48KD9NI5wzM+23PRALyXtjRCvGUPbzRKsqVUEo9xKyVljNGbkEARBIsUTczckxSlKMCK+J1tYD3fnfFOqB7qP2Ns-U2f1p6fVnnHeehxi7OxsNUAB7tK5Q2rrCOgDVTwFA+GKWGfxYFhA+JVNCsokFii+NUDBqJ+6kyuhTDgAA5MAAB3K01Mn5Uizq-LQANORGE0GTdoBgRgmAoGAT6kBBbWSyuUUWuF-CwlSCgrM+EozKnzDUfah94wSNOvQaR5NMBYgUco4CD0iHqMnpzHY9pdH6JRIYg4JizEQBsGXEMjDhYi1rrY+xMIYhOL4dKao4QcoSw8YdWOx1JHoj8ddAJZogkqJAsbR0rMljs3dJE7m0S9EzAMfsMAxjTGiGSa7NJa8rGZOKAUOxyRck1F4QCWEcRim7TKV4ipRN+6vhrHWBsPUOxdjHPpcC9IayknCvgNY48LGzWYbCIpTwSiRDeLDV4BV8KqkqhKT4URSj1HVoiShVTujbOknwPZ35fyHLAMckcpyNC2guagK5xsUkMPGVXJIGYvjQj2vwooy0igfNqKKDe0y-kkW8Vg0FuzopQv-CxICBDhwonnKMxCQssphG5SKLGOVojrRPN3IOfC7FFPFjKZIcZrwx0BZUnxdAaUfgha2A5DLAIhIDNc1JHLLFV3xbXRyIRMnAmsSKxZJRtoSnxsCYEDUqXEyVRwT8+ymIAVYqo1Fy9y6cqro8FaVURb+DVJeL4MCLWQjYda5aEpHJFAdf3ISqAhB9A4D1QymAWyYGECPfBRtWXEI0WbegRB8AprAHRDNWbrafyBTcoBcCSUrQFXtIqSs9rOOqLXf2wbyixATAmBN6Ik0pqxOmxQ1bc0EPHi0+YbTXQc1LcmpKFbvxVv0jWguxB61MMFNy0Ijc8aPKliUfCuVMZShzHueBUqh3dAAErjj7LALoAwC3hM0XQPsmhn1dO3ey1evq7kJhSMUAl14sxZjscEfCwJa6nnAS8-hMq730EfT+uAr6Z0sznS6N0Gxv2-rSgBwBu7cjLOWvkXcWMtrxlg4feWkQpVgjFCLJo95MCoAgHAbwLVr60B9Xq5hORhSRp3CRaEN59yxHSLAnIIRCinlSAKp49QPiyofEChVJpU3pyGIYUYkhpBSEE7cz2Ypwi2ulBESIaFZYzKqnELtURoTBsCBpvjmDiY6brAE30jTQnklMw2vJUyohoWKgVMqcmRbPDETKLuMz-Co1Q4qqsOzlV0rVcxDVzLbSjienTHqsVIakZsjkQ+lUaiowjheLt5r5pJlCAUdzJQqO3j2qlnqjEuw5dYuxCQ3FeL8RROwISIkp0SSkliWS8lMBqGC2RwEOFEGPGSwVeGdijwJiyZCZLFRbMhECKljqWJIo-mK31JhZWsoXiWqkVaSpm4wdgWfQofbuHHhsyEVLNTZHpy7Ko3m9MraLYyQg7yBqoylRiLLRu4QyjqhDeAgqqXb7DwfunMHt3khhaS3M-JAJjwfGKMrd4aoYZBH8hsvu1TLr+MCUogLWr2jY6rsCUO0ycmOIa3AvcRTg3gJqFjSVKRUtOvBVlv8RzH5wtQGcxFlysdjKA-cCIGZJa+UPkrXKvOZSpHCMKJ4XaHLR3F+lsFLrIXZfdUyz1KI2fMJ3ErKqZRbwkXeDEJMqYkz8NJ+CME64PipZHUlMdkL13Zqnfm7gju1fN3ltmVWJ4pT7jPbeOgZQEYSxBLeL4Hmv4KvQ7+26DuVdCbVyeKqSYTzJG17vejzx1ruZhAOvah8uvW+lzC2X8LzlK9Z+XszjWBVESjKjM+CZ0w+8hM8SoqySqeOOzT-j3Qer29j0PhtPa2Gbmlgh8oPvgTirqFGZLe56ipcfQARwIHAHNmPBiPuQNWYZcfED4qKe7rtOLHj1Fk0TofKEGUBKF2o1HGB8OIivl5jfDghjnmmnIMOpOgGsKSNpAQMIO-nAlHK7jvGqLuCjK5IsuUM8JAk8jmAkJCKlgAKI4ZyQMiUyjbxJgBYEiYMZwg151A1xhoLK5AFAig3jBorQFjJD7g0F0H8xvqb66rD5wK5S1zHgEotZSgYwAEf71DiowibhQglSqjNziFzD0FegA6sGKwxjZjSjlArQFSxiyxRiZ5YzJa5R7ggh2Id7QHAr0C0GGF-Z1LyJKLK4yENp5BwjHy3hgghBqYrQ+6PBFIqEc4VCJEF5aZYLeFRSh66bjqZobqmGfIxjeRBCSj4oybOJJDV57jHipBqgAqabyqpF0HF6Yal7SGAYV65BCIvDBqpDqbQiVB2awIkQ1BETxjVRJDZiX7sZAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QCsD2BLAdgcQE6oFcAHAWQEMBjACyzADoAZVMiLKAAj0KPYElMAbugAuYdiTDCWZKQGIIqTPSwDUAa3oAzSdS7F+Q0QEEKw1LiZR0FANoAGALqJQRVLBHpFzkAA9EAVgBmABY6O3C7QIA2ACZIgA54gEZ4gBoQAE8A-386GKSQgHZ-KMKATij-YKiAXxr0tCw9UkoaJUZmVkwOZr5BETEJKQgZMlkwXHxcOiIAGxlNcwBbOm1hXXx9fuNTc0treyckEFd3YU9Mbz8EINCIyNiE5LTMxCjg+Loo78egwKSSrV6iBGjhNi1qLQOiw2H0PGRZrMMuwAFIYJQQTjg2DyRTKQTqeizTpsfjwxEZNG0CDNWCHbynDxeY7XJJxT7vOxBeJRCrxYL+dJZBDvJJ5YJlMofWJFSV1Bro5rkSHtJgw7pw84IpGo9GQLHcHETKYzebCRa4FbE9VQMlailUjG0+nHRnnZmgVnsr7BLmBHl8gVCgKBQp0cpReKRQq8sqFcrykGK8HKtr0ADCVDAFDUsN4mnYAFVYBN2AAJMiwdhGWa4MAsZGO-W9ABCYAtYmLpZM7swshdLjcTMuLMQSUlYbshSjpRKZX8MWnwYQhRioQFgTsMTKMRCBTs8UToKVrShmezuY1+aLJdw5cr1dr9Ygjb1mNb7fMndv1dMF37SRHIOZwXFcY4TmE052LOvILkurwitOdAbkkBQ7hUgT5EeybcKmZ5ZjmeYFl2d4VlWNZ1g2urUgaxDsG2HY3t2f6KP2MRAScQ69mBCDjnGkEzsUsGLi8wqBDu4YSnGMSLv4B6RthTQpqe7QkewADqD4Uc+yJkOIYBLAARqWqAFr0AAKuCeHeZjsOmszWJeHCOuwDBYGosgELedCsBAAAqZBEAA8kQYCYOmigCBMsAyBcA6cSBHq+Igu6YT68QhPyUaBP4ZTLjkUSSROC7BDJdioYpYK4Sp9CaR4GoAGLmExd49v+XkTD56D+YFjrNPFbqgaOCCLjEnyFKVBQlPyvoxMupUxEVUpROE4kxJUwSVSeKq1WQ9UcE1d5qW1rEddMvkBcFoXhZF0WxYoA1cUNnopYEm50EkHz-JEMQ5NEy5roVEbxP4IPBG98SFEkW3KTtdBGMIohLEQ5warZLnNLi7QqISdAyEjKN+agfXgj2eyoFYtiOAyT1JdcIRVGEIMTdy2U5cuxSLWukqVFycn-ECCpKdVcMIwTqMcOj6K0UQWP4qoGh44jBmE8TOHEGTFgUwcgE04lI4vQgDN3MzG6JJE7MIXEoTc-OuVTnY1QVcCx6w2m8PK8jEvsFLWAy3LdA44r+Mq8IRMk9wmv7LY7F68OPHG0z-gs-6bOCghZTJEtmHVFOq6C0mwvEHh7Ri6HsK+5g-sKNjBLB57qsRxruxa5TNiBBxg104gicHsnZtp8uGVLVGjvQTlHwwyL7tl17FeoNRVeYzX8u4yHXvh+rRBR9rtjBJ3tMG8lRsCib-esxb6fCqVNtSe8UMFIU0T+FPxc1XQAAikgTEsWCwgAcmAAA7jqJs75wQByDloHQVBaRGE0KIXAzQDADBMBQMAKNICPX1jxDcuQkjvDXJ9OI3Ih4yXDOtUqyRpxJDsPOV+EJ3Zf0Qb-TAADgGgLfNXPEgc67QPWLA7E8DEHIO2GANBGDRAQBsLrV0h9cFBHwYQ4IxC-SiR7ruZCkoKi0NKPyccDCS70GYT-P+GpAEgNfDRTGxpzCmgWMsVYMC4EIImKIww4iKDoMwdI6mcicHDTwR9ZRqjSEIVXGUPIT9-Bsl+hPF+Lst5GLoOeQiV5iI-jIvRMAYV6LEhzPqBq+Alj+2wfHYaVRKh0DKJ9CUkQghrjmghRIhUHihnWrEMaMRDHv1SU5PgGTSxZLbLkls+SNCYiKagEpmMZEHwCYbSpuQanBDqTlHOTThT8jsGEaIAponxgyoeRJRdGH4QvERFq95yJPiomA0pfjgLlMWdUZZtSyj1I2cuTCgQtE810dOFRZQelwz6ZctSWTtJ3K4bM2RTzuIVNedU95nzGnLiiJ9ZCMYghTmTsUEF7swXpKuZC25L5F7NggTYWO-jnnHyWci1ZHz1looQsEco1TsULiiGtAE7KCVQksqgIQXQOBqQipgEsmBhA+wXhjCBK9eEK3oEQfAIqwAkQlVKsOatTllIRYbTpi1CjRmnPEaSY10WYpyJnHc5r8jxF+gK9oQqRWwnFYobVsrF7+1sdMOYDjLQzDVd1DVt4tVhR1U3Ig+rnrHyNeGU1iQLXqMQr80G-xxwlC3KDbpJyqpvzhgAJXbHWWAbQegKp4VAugdZNBlsEdwWN3cRT8kWpKMaiRygRCvm8cIdBNyZyjHJc1kpjlCwLWc9oJb61wArb6yYdiA3mkcXWht-VHkJTpdcSMpVql2q7R88IvaRTsroFGOM-p8hsklAk4EmBUAQDgN4V209aBxwNcfAAtFEZcX7lnaO2ZKN6pRwbOvoGqUVMs+geP0sMUYH643XFKvlf0H1oJQ3eAtechRwPQig3adA2orEYhlvAWln7rjJEWpyHln1jarPyqsj6R6fnxlDMnPDRKODXghVpMlJHKXcGyYxY6LEj5dyPqyD4YZ-RlH+OygE7wFxD3jNUkh8YFyoXEsC-N213ZqU0jcyi5K9ISCMiZMy4J2CWWst6+yjlYQuTcpgNQiGW0yQBOe8GpRFyZ2Tjy9FoM8iRAPGycI85Pp4bqt7Q6VyToSfkcNGSmjyidoxeJKoINvkfHFDzAUW5H7jsLpO5Js8Ubzx9c0dzUmUrzkWn3HkKRIirMtsKMa65tEmsjLyVC+K9NuyhCYy0ZiOAWM4dY8ENXcGO1+QQ30C5cpPyw-lLOUk4w8hjBKXDA233tG4wMklD4RlVzGagApkziky2mxU6CnxHV3fBikJ7Q9mMmoFsUWhT8sK7cLYSgi-TeOZP4yZwT4DuA3cWXQnZHwDyOwqKFwo80kIyW+OJR2v0ChJB2xO-TgqQ1QY9ZKyN3r5UQ4o0hgI05Ilbl9M9zCY0kj5X4nGXmIGuSLhxyVvH07S1zthNVinLbKjRAHfkDn5qeTlWZzsrkG2BTycBdDX7U76B8arCdvJ52JnsCmTMqbQvas3CEgO1ZRCgh2vmsF9llRH5zjenhtS9zBfwspyuWbXxpolBt-yecy4s15czlDFmy3iuvr+1CEtABHAgcAZWV2gyW5A2YpGQ+Pr6cGwSFu-UvStjOHL1sYuKDE5OCTceDdLg3b2Cfeh+XQEsfUQUCDCDT8hj382OdLb2cEb5mjC8Av0bp8ve36AAFFF13kgwL6zKDRCt8QNRn0496On0YwhUoOz3iYSnIDGTBdw+q7oOPqYi9p-k9dy2jPc3OSLdz2vrZYo5IRHkzlLcW48PH+alPjUtJ5+8TqchPkPGCkPfDNPlLlOGE-KGJ9FyOav1sPhHu0J-neMNqwuwkAtdobjxHJJGOenELuv8PyP8BzDEoHtUEUKDAKB-hPjZgTu6j+BGtKn-iLoVJhLQguJLitEzuvvOHQDaiDMmp2tBNQSfjOg2mfsQH-iapnpUJGN7jGL7iet8JEtODytzIDJuHejUEAA */
   id: "joinGroupMachine",
   context: ({ input }) => {
     // const account = Controlled.accountsClient.getCurrentAccountAddress();
@@ -317,33 +334,54 @@ joiner will see when they land on the deep link page.
         input: ({ context }) => ({
           account: context.account,
         }),
-        onDone: {
-          target:
-            "Checking If User Has Already Joined Group Before User Action",
-          actions: [
-            {
-              type: "saveGroupsBeforeJoinAttempt",
-              params: ({ event }) => {
-                const groups = event.output;
-                return {
-                  groupsBeforeJoinRequestAccepted: groups,
-                };
-              },
+        onDone: [
+          {
+            guard: {
+              type: "hasGroupIdInMetadata",
+              params: ({ context }) => ({
+                groupInviteMetadata: context.groupInviteMetadata!,
+              }),
             },
-            {
-              type: "saveNewGroup",
-              params: ({ context }) => {
-                const groupId = context.groupInviteMetadata!.groupId!;
-                const groups = context.groupsBeforeJoinRequestAccepted!;
-                const maybeInvitedGroup: GroupData | undefined =
-                  groups.byId[groupId];
-                return {
-                  invitedGroup: maybeInvitedGroup,
-                };
+            target: "Check User Group Join Status Before User Action",
+            actions: [
+              {
+                type: "saveGroupsBeforeJoinAttempt",
+                params: ({ event }) => {
+                  const groups = event.output;
+                  return {
+                    groupsBeforeJoinRequestAccepted: groups,
+                  };
+                },
               },
-            },
-          ],
-        },
+              {
+                type: "saveNewGroup",
+                params: ({ context }) => {
+                  const groupId = context.groupInviteMetadata!.groupId!;
+                  const groups = context.groupsBeforeJoinRequestAccepted!;
+                  const groupIfUserHasAlreadyJoined: GroupData | undefined =
+                    groups.byId[groupId];
+                  return {
+                    invitedGroup: groupIfUserHasAlreadyJoined,
+                  };
+                },
+              },
+            ],
+          },
+          {
+            target: "Waiting For User Action",
+            actions: [
+              {
+                type: "saveGroupsBeforeJoinAttempt",
+                params: ({ event }) => {
+                  const groups = event.output;
+                  return {
+                    groupsBeforeJoinRequestAccepted: groups,
+                  };
+                },
+              },
+            ],
+          },
+        ],
         onError: {
           target: "Error Loading Groups",
           actions: [
@@ -361,7 +399,7 @@ joiner will see when they land on the deep link page.
       },
     },
 
-    "Checking If User Has Already Joined Group Before User Action": {
+    "Check User Group Join Status Before User Action": {
       always: [
         {
           target:
@@ -376,6 +414,17 @@ joiner will see when they land on the deep link page.
         },
         {
           target: "Waiting For User Action",
+          guard: {
+            type: "hasUserNotBeenBlocked",
+            params: ({ context }) => {
+              return {
+                invitedGroup: context.invitedGroup,
+              };
+            },
+          },
+        },
+        {
+          target: "User Has Been Blocked From Group",
         },
       ],
     },
@@ -555,6 +604,7 @@ consent for the new group.
             target: "Checking If User Has Been Blocked From Group",
           },
           {
+            target: "Checking If User Has Already Joined Group",
             actions: [
               {
                 type: "saveNewGroup",
@@ -583,7 +633,6 @@ we assume the user has already joined the group indicated by the invite link.
 This approach allows us to handle cases where the groupId isn't available in the metadata,
 providing a fallback method to determine the join status.
             `,
-            target: "Checking If User Has Already Joined Group",
           },
         ],
         onError: {
@@ -704,7 +753,7 @@ providing a fallback method to determine the join status.
       description: `
 The user has been blocked from the group or the group is not active.
       `,
-      type: "final",
+
       entry: [
         {
           type: "saveGroupJoinStatus",
@@ -716,7 +765,6 @@ The user has been blocked from the group or the group is not active.
     },
 
     "User Joined Group": {
-      type: "final",
       entry: [
         {
           type: "saveGroupJoinStatus",
