@@ -66,6 +66,7 @@ function ChatMessageReactions({ message, reactions }: Props) {
           counts[reaction.content].userReacted = true;
           userReacted = true;
         }
+        // Keep track of the earliest reaction time for this emoji
         counts[reaction.content].firstReactionTime = Math.min(
           counts[reaction.content].firstReactionTime,
           reaction.sent
