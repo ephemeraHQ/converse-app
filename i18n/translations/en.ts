@@ -342,9 +342,16 @@ const en = {
   transaction_triggered: "Transacting...",
   transaction_success: "Done!",
   transaction_switch_chain: "Switch to chain {{chainName}}",
-  transaction_pay_with: "Pay with",
+  transaction_wallet: "Wallet",
+
+  // Transaction Simulation
   simulation_pending: "Safely Simulating this Transaction",
-  simulation_failure: "We couldn't simulate the transaction: {{error}}",
+  simulation_failure:
+    "We were unable to simulate this transaction. You may still trigger it in your wallet.",
+  simulation_will_revert: "Simulation shows that this transaction will revert",
+  transaction_asset_change_type_approve: "Approve",
+  transaction_asset_change_type_transfer: "Transfer",
+  transaction_asset_change_to: "To",
 
   // New Conversation
   cannot_be_added_to_group_yet:

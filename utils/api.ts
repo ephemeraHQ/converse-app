@@ -1,4 +1,4 @@
-import { TransactionData } from "@components/TransactionPreview";
+import { TransactionData } from "@components/TransactionPreview/TransactionPreview";
 import type { SimulateAssetChangesResponse } from "alchemy-sdk";
 import axios from "axios";
 import * as Contacts from "expo-contacts";

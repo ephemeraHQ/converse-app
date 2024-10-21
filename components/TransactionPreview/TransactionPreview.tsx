@@ -1,28 +1,35 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
 import { HStack } from "@design-system/Hstack";
 import { Pressable } from "@design-system/Pressable";
 import { Text } from "@design-system/Text";
 import { TouchableOpacity } from "@design-system/TouchableOpacity";
 import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
+import { borderRadius } from "@theme/border-radius";
+import { colors } from "@theme/colors";
 import { spacing } from "@theme/spacing";
 import { simulateTransaction } from "@utils/api";
 import { converseEventEmitter } from "@utils/events";
 import { useExternalSigner } from "@utils/evm/external";
 import logger from "@utils/logger";
+import { getPreferredName } from "@utils/profile";
 import { shortAddress } from "@utils/str";
+import {
+  SimulateChangeType,
+  type SimulateAssetChangesResponse,
+} from "alchemy-sdk";
 import { Image } from "expo-image";
 import { memo, useCallback, useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import { waitForReceipt } from "thirdweb";
 import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 
-import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
-import Button from "./Button/Button";
-import { CurrentAccount } from "./CurrentAccount";
-import { Drawer } from "./Drawer";
-import { installedWallets } from "./Onboarding/supportedWallets";
-import Picto from "./Picto/Picto";
+import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
+import Button from "../Button/Button";
+import { CurrentAccount } from "../CurrentAccount";
+import { Drawer } from "../Drawer";
+import { installedWallets } from "../Onboarding/supportedWallets";
+import Picto from "../Picto/Picto";
 
 export type TransactionData = {
   to: string;
@@ -42,7 +49,7 @@ type TransactionState = {
 
 type SimulationState = {
   status: "pending" | "success" | "failure";
-  result?: any;
+  result?: SimulateAssetChangesResponse;
   error?: string;
 };
 
@@ -130,7 +137,7 @@ export function TransactionPreview() {
             console.log(`Type: ${change.changeType}`);
             console.log("---");
           });
-          setSimulation({ status: "success", result: simulation });
+          setSimulation({ status: "success", result: simulationResult });
         } catch (e: any) {
           setSimulation({ status: "failure", error: e });
         }
@@ -225,20 +232,66 @@ export function TransactionPreview() {
             <Text>{translate("simulation_pending")}</Text>
           </VStack>
         )}
-        {simulation.status === "failure" && (
+        {showTxLoader && (
           <VStack style={styles.center}>
+            <ActivityIndicator />
             <Text>
-              {translate("simulation_failure", { error: simulation.error })}
+              {translate(
+                txStatus === "triggered"
+                  ? "transaction_triggered"
+                  : "transaction_triggering",
+                { wallet: walletApp?.name }
+              )}
             </Text>
           </VStack>
         )}
+
+        {simulation.status === "success" &&
+          simulation.result?.changes?.map((change) => (
+            <>
+              <TransactionPreviewRow
+                title={
+                  change.changeType === SimulateChangeType.APPROVE
+                    ? translate("transaction_asset_change_type_approve")
+                    : translate("transaction_asset_change_type_transfer")
+                }
+                subtitle={`${change.amount} ${change.symbol}`}
+                key={change.contractAddress}
+              />
+              <TransactionPreviewRow
+                title={translate("transaction_asset_change_to")}
+                subtitle={getPreferredName(
+                  useProfilesStore.getState().profiles[change.to]?.socials,
+                  change.to
+                )}
+                key={`${change.contractAddress}-to`}
+              />
+            </>
+          ))}
         {showWalletSwitcher && (
           <TransactionPreviewRow
             imageURI={walletApp.iconURL}
-            title={translate("transaction_pay_with")}
+            title={translate("transaction_wallet")}
             subtitle={`${walletApp.name} • ${shortAddress(address || "")}`}
             onPress={switchWallet}
           />
+        )}
+        {showTxResult && (
+          <VStack style={styles.center}>
+            <Text>
+              {translate(
+                txStatus === "failure"
+                  ? "transaction_failure"
+                  : "transaction_success",
+                { error: txState.error }
+              )}
+            </Text>
+          </VStack>
+        )}
+        {simulation.status === "failure" && (
+          <VStack style={[styles.center, styles.failure]}>
+            <Text>{translate("simulation_failure")}</Text>
+          </VStack>
         )}
         {shouldSwitchChain && (
           <Button
@@ -261,31 +314,6 @@ export function TransactionPreview() {
             variant="primary"
             onPress={trigger}
           />
-        )}
-        {showTxLoader && (
-          <VStack style={styles.center}>
-            <ActivityIndicator />
-            <Text>
-              {translate(
-                txStatus === "triggered"
-                  ? "transaction_triggered"
-                  : "transaction_triggering",
-                { wallet: walletApp?.name }
-              )}
-            </Text>
-          </VStack>
-        )}
-        {showTxResult && (
-          <VStack style={styles.center}>
-            <Text>
-              {translate(
-                txStatus === "failure"
-                  ? "transaction_failure"
-                  : "transaction_success",
-                { error: txState.error }
-              )}
-            </Text>
-          </VStack>
         )}
       </VStack>
     </Drawer>
@@ -319,6 +347,12 @@ const styles = StyleSheet.create({
   top: { alignItems: "center", marginVertical: spacing.md },
   account: { marginRight: "auto" },
   center: { alignItems: "center" },
+  failure: {
+    marginBottom: spacing.md,
+    padding: spacing.sm,
+    backgroundColor: colors.errorBackground,
+    borderRadius: borderRadius.lg,
+  },
   row: { alignItems: "center", paddingBottom: spacing.sm },
   leftImage: {
     width: 40,

@@ -1,5 +1,5 @@
 import { MessageToDisplay } from "@components/Chat/Message/Message";
-import { TransactionToTrigger } from "@components/TransactionPreview";
+import { TransactionToTrigger } from "@components/TransactionPreview/TransactionPreview";
 import { MediaPreview } from "@data/store/chatStore";
 import EventEmitter from "eventemitter3";
 import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
