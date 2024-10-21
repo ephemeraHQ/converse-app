@@ -110,7 +110,7 @@ function ChatMessageReactions({ message, reactions }: Props) {
                 : styles.otherReactionButton,
             ]}
           >
-            <Text style={styles.emoji}>{reaction.content}</Text>
+            <Text>{reaction.content}</Text>
             <View style={styles.reactorContainer}>
               <Text style={styles.reactorCount}>{reactorCount}</Text>
             </View>
@@ -146,8 +146,8 @@ const useStyles = () => {
       alignItems: "center",
       paddingHorizontal: theme.spacing.xs,
       paddingVertical: theme.spacing.xxs,
-      borderRadius: theme.spacing.sm,
-      borderWidth: 1,
+      borderRadius: theme.borderRadius.sm,
+      borderWidth: theme.borderWidth.sm,
       borderColor: theme.colors.border.subtle,
     },
     // TODO: merge
@@ -159,15 +159,11 @@ const useStyles = () => {
     },
     // TODO: remove
     otherReactionButton: {},
-    emoji: {
-      fontSize: 14,
-    },
     reactorContainer: {
       flexDirection: "row",
       alignItems: "center",
     },
     reactorCount: {
-      fontSize: 12,
       marginLeft: theme.spacing.xxxs,
       color: theme.colors.text.secondary,
     },
