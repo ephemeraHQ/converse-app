@@ -9,7 +9,7 @@ import { useLogoutFromConverse } from "features/accounts/logout";
 import { useCallback } from "react";
 import { ColorSchemeName, Platform } from "react-native";
 
-export const useDisconnectActionSheet = (account?: string) => {
+export const useDisconnectAccountActionSheet = (account?: string) => {
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const logout = useLogoutFromConverse(account || currentAccount);
   const { ephemeralAccount } = useSettingsStore((s) => ({

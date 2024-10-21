@@ -1,12 +1,12 @@
 import ExternalWalletPicker from "@components/ExternalWalletPicker";
 import UserProfile from "@components/Onboarding/UserProfile";
-import AccountsAndroid from "@features/accounts/AccountsAndroid";
-import AccountsDrawer from "@features/accounts/AccountsDrawer";
 import {
   useCurrentAccount,
   useProfilesStore,
   useSettingsStore,
 } from "@features/accounts/accounts.store";
+import AccountsAndroid from "@features/accounts/components/AccountsAndroid";
+import AccountsDrawer from "@features/accounts/components/AccountsDrawer";
 import { backgroundColor } from "@styles/colors";
 import { useAutoConnectExternalWallet } from "@utils/evm/external";
 import { getProfile } from "@utils/profile";

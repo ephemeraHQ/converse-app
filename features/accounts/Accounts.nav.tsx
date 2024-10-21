@@ -1,5 +1,5 @@
-import Accounts from "@features/accounts/Accounts";
-import AccountsAndroid from "@features/accounts/AccountsAndroid";
+import AccountsAndroid from "@features/accounts/components/AccountsAndroid";
+import AccountsScreen from "@features/accounts/screens/Accounts.screen";
 import { NativeStack } from "@screens/Navigation/Navigation";
 import { Platform } from "react-native";
 
@@ -17,7 +17,7 @@ export default function AccountsNav() {
         if (Platform.OS === "web") {
           return <AccountsAndroid navigation={navigation} />;
         } else {
-          return <Accounts navigation={navigation} route={route} />;
+          return <AccountsScreen navigation={navigation} route={route} />;
         }
       }}
     </NativeStack.Screen>

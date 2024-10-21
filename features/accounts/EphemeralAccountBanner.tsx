@@ -1,4 +1,4 @@
-import { useDisconnectActionSheet } from "@features/accounts/useDisconnectActionSheet";
+import { useDisconnectAccountActionSheet } from "@features/accounts/useDisconnectAccountActionSheet";
 import {
   itemSeparatorColor,
   messageBubbleColor,
@@ -17,7 +17,7 @@ import React, {
 export default function EphemeralAccountBanner() {
   const styles = useStyles();
   const colorScheme = useColorScheme();
-  const showDisconnectActionSheet = useDisconnectActionSheet();
+  const showDisconnectActionSheet = useDisconnectAccountActionSheet();
   return (
     <TouchableOpacity
       onPress={() => showDisconnectActionSheet(colorScheme)}

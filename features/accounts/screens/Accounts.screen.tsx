@@ -1,12 +1,12 @@
 import TableView from "@components/TableView/TableView";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
 import { useOnboardingStore } from "@data/store/onboardingStore";
-import AccountSettingsButton from "@features/accounts/AccountSettingsButton";
 import {
   useAccountsList,
   useAccountsStore,
   useErroredAccountsMap,
 } from "@features/accounts/accounts.store";
+import AccountSettingsButton from "@features/accounts/components/AccountSettingsButton";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { NavigationParamList } from "@screens/Navigation/Navigation";
 import {
@@ -18,7 +18,7 @@ import {
 import { shortAddress, useAccountsProfiles } from "@utils/str";
 import { ScrollView, StyleSheet, View, useColorScheme } from "react-native";
 
-export default function Accounts({
+export default function AccountsScreen({
   navigation,
   route,
 }: NativeStackScreenProps<NavigationParamList, "Accounts">) {

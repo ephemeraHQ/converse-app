@@ -1,4 +1,4 @@
-import AccountsNav from "@features/accounts/AccountsNav";
+import AccountsNav from "@features/accounts/Accounts.nav";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";

@@ -8,7 +8,7 @@ import {
   useSettingsStore,
   useWalletStore,
 } from "@features/accounts/accounts.store";
-import { useDisconnectActionSheet } from "@features/accounts/useDisconnectActionSheet";
+import { useDisconnectAccountActionSheet } from "@features/accounts/useDisconnectAccountActionSheet";
 import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
 import { translate } from "@i18n";
 import Clipboard from "@react-native-clipboard/clipboard";
@@ -205,7 +205,7 @@ export default function ProfileScreen({
   ];
 
   const isPrivy = useLoggedWithPrivy();
-  const showDisconnectActionSheet = useDisconnectActionSheet();
+  const showDisconnectActionSheet = useDisconnectAccountActionSheet();
 
   const getSocialItemsFromArray = useCallback(
     <T,>(

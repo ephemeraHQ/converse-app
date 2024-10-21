@@ -1,11 +1,11 @@
 import Picto from "@components/Picto/Picto";
 import { useOnboardingStore } from "@data/store/onboardingStore";
 import { useSelect } from "@data/store/storeHelpers";
-import AccountSettingsButton from "@features/accounts/AccountSettingsButton";
 import {
   useAccountsList,
   useAccountsStore,
 } from "@features/accounts/accounts.store";
+import AccountSettingsButton from "@features/accounts/components/AccountSettingsButton";
 import { NavigationProp } from "@react-navigation/native";
 import { backgroundColor, clickedItemBackgroundColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";

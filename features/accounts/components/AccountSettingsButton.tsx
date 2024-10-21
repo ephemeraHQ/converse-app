@@ -8,7 +8,7 @@ import {
   useAccountsStore,
   useErroredAccountsMap,
 } from "@features/accounts/accounts.store";
-import { useDisconnectActionSheet } from "@features/accounts/useDisconnectActionSheet";
+import { useDisconnectAccountActionSheet } from "@features/accounts/useDisconnectAccountActionSheet";
 import { translate } from "@i18n";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NavigationProp } from "@react-navigation/native";
@@ -57,7 +57,7 @@ export default function AccountSettingsButton({ account, navigation }: Props) {
   );
   const erroredAccountsMap = useErroredAccountsMap();
   const colorScheme = useColorScheme();
-  const showDisconnectActionSheet = useDisconnectActionSheet(account);
+  const showDisconnectActionSheet = useDisconnectAccountActionSheet(account);
 
   const onPress = useCallback(() => {
     Keyboard.dismiss();
