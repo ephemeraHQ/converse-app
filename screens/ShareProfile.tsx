@@ -1,5 +1,3 @@
-import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
-import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -31,8 +29,6 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../data/store/accountsStore";
-import { createBottomSheetModalRef } from "../design-system/BottomSheet/BottomSheet.utils";
-import { BottomSheetModal } from "../design-system/BottomSheet/BottomSheetModal";
 import { spacing } from "../theme";
 import { isDesktop } from "../utils/device";
 import {
@@ -77,10 +73,6 @@ const ShareProfileContent = ({
       : "Share link";
 
   const handleShare = () => {
-    console.log("bottomSheetModalRef.current:", bottomSheetModalRef.current);
-    bottomSheetModalRef.current?.present();
-    return;
-
     if (Platform.OS === "web") {
       setCopiedLink(true);
       Clipboard.setString(profileUrl);
@@ -173,8 +165,6 @@ const ShareProfileContent = ({
 
 export { ShareProfileContent };
 
-const bottomSheetModalRef = createBottomSheetModalRef();
-
 export default function ShareProfileScreen({
   route,
   navigation,
@@ -212,25 +202,13 @@ export default function ShareProfileScreen({
   }`;
 
   return (
-    <>
-      <ShareProfileContent
-        userAddress={userAddress}
-        username={username}
-        displayName={displayName}
-        avatar={avatar || ""}
-        profileUrl={profileUrl}
-      />
-
-      <BottomSheetModal
-        ref={bottomSheetModalRef}
-        snapPoints={["50%"]}
-        index={1}
-      >
-        <BottomSheetContentContainer>
-          <BottomSheetHeader title="Share profile" hasClose />
-        </BottomSheetContentContainer>
-      </BottomSheetModal>
-    </>
+    <ShareProfileContent
+      userAddress={userAddress}
+      username={username}
+      displayName={displayName}
+      avatar={avatar || ""}
+      profileUrl={profileUrl}
+    />
   );
 }
 
