@@ -6,6 +6,8 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { MessageToDisplay } from "./Message";
 
+const MAX_REACTION_EMOJIS_SHOWN = 5;
+
 type Props = {
   message: MessageToDisplay;
   reactions: {
@@ -26,8 +28,6 @@ type RolledUpReactions = {
   totalReactions: number;
   userReacted: boolean;
 };
-
-const MAX_REACTION_EMOJIS_SHOWN = 5;
 
 function ChatMessageReactions({ message, reactions }: Props) {
   const styles = useStyles();
