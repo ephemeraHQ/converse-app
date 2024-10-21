@@ -32,12 +32,10 @@ import {
 const MAIN_CIRCLE_RADIUS = 50;
 const MAX_VISIBLE_MEMBERS = 4;
 
-type Member = { uri?: string; name?: string };
 type Position = { x: number; y: number; size: number };
 type ColorSchemeType = "light" | "dark" | null | undefined;
 
 type GroupAvatarProps = {
-  members?: Member[];
   size?: number;
   style?: StyleProp<ViewStyle>;
   uri?: string | undefined;

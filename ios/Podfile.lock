@@ -1841,7 +1841,7 @@ PODS:
     - GzipSwift
     - LibXMTP (= 0.5.9-beta0)
     - web3.swift
-  - XMTPReactNative (2.6.4):
+  - XMTPReactNative (2.6.5):
     - ExpoModulesCore
     - MessagePacker
     - secp256k1.swift

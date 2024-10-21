@@ -2,10 +2,10 @@ import { entifyWithAddress } from "@queries/entify";
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
 import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
 import { setGroupQueryData } from "@queries/useGroupQuery";
+import { addGroupToGroupsConversationListQuery } from "@queries/useGroupsConversationListQuery";
 import { converseEventEmitter } from "@utils/events";
 import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
-import { areSetsEqual } from "@utils/set";
 import {
   ConsentListEntry,
   ConversationContext,
@@ -26,11 +26,8 @@ import { Conversation as DbConversation } from "../../data/db/entities/conversat
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
 import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
-import { getChatStore, getSettingsStore } from "../../data/store/accountsStore";
-import {
-  XmtpConversation,
-  XmtpGroupConversation,
-} from "../../data/store/chatStore";
+import { getSettingsStore } from "../../data/store/accountsStore";
+import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { setGroupNameQueryData } from "../../queries/useGroupNameQuery";
 import { setGroupPhotoQueryData } from "../../queries/useGroupPhotoQuery";
@@ -280,7 +277,9 @@ export const streamGroups = async (account: string) => {
   const cancelStreamGroupsForAccount = await client.conversations.streamGroups(
     async (group) => {
       logger.info("GOT A NEW GROUP CONVO");
+      // TODO: Add group to groups list query & set group query data as well
       handleNewConversation(client, group);
+      addGroupToGroupsConversationListQuery(account, group);
       converseEventEmitter.emit("newGroup", group);
       // Let's reset stream if new group
       // @todo => it should be part of the SDK
@@ -321,6 +320,7 @@ const listConversations = async (client: ConverseXmtpClientType) => {
   return conversations;
 };
 
+// TODO:// What is this doing? how to make it work with change
 const listGroups = async (client: ConverseXmtpClientType) => {
   // @todo => this will be adapted once we have a syncAllGroups method
   const beforeSyncGroups = await fetchGroupsQuery(client.address);
@@ -356,12 +356,7 @@ export const loadConversations = async (
       importedTopicsDataForAccount[account] = true;
       await importBackedTopicsData(client);
     }
-    const [conversations, groups] = await Promise.all([
-      listConversations(client),
-      listGroups(client),
-    ]);
-
-    const beforeCompareGroups = new Date().getTime();
+    const conversations = await listConversations(client);
 
     const knownTopicsSet = new Set(knownTopics);
     const newConversations: ConversationWithCodecsType[] = [];
@@ -375,69 +370,11 @@ export const loadConversations = async (
       }
     });
 
-    const newGroups: GroupWithCodecsType[] = [];
-    const knownGroups: GroupWithCodecsType[] = [];
-    const updatedGroups: GroupWithCodecsType[] = [];
-
-    groups.forEach((g) => {
-      if (!knownTopicsSet.has(g.topic)) {
-        newGroups.push(g);
-      } else {
-        knownGroups.push(g);
-        const existingGroup = getChatStore(account).getState().conversations[
-          g.topic
-        ] as XmtpGroupConversation;
-
-        if (!existingGroup) {
-          updatedGroups.push(g);
-        } else {
-          const currentMembersSet = new Set(existingGroup.groupMembers);
-          const newMembersSet = new Set(
-            g.members.map((m) => getCleanAddress(m.addresses[0]))
-          );
-
-          if (
-            existingGroup.groupName !== g.name ||
-            existingGroup.isActive !== g.isGroupActive ||
-            !areSetsEqual(currentMembersSet, newMembersSet)
-          ) {
-            updatedGroups.push(g);
-          }
-        }
-      }
-    });
-
-    const afterCompareGroups = new Date().getTime();
-
-    logger.debug(
-      `[XmtpRN] Handled new & updated groups for ${client.address} in ${
-        (afterCompareGroups - beforeCompareGroups) / 1000
-      } sec`
-    );
-
     const conversationsToSave = newConversations.map(
       protocolConversationToStateConversation
     );
-    const groupsToCreate = newGroups.map((g) =>
-      protocolGroupToStateConversation(account, g)
-    );
-    const groupsToUpdate = updatedGroups.map((g) =>
-      protocolGroupToStateConversation(account, g)
-    );
 
-    const afterMappedConvos = new Date().getTime();
-
-    logger.debug(
-      `[XmtpRN] Mapped groups & conversations for ${client.address} in ${
-        (afterMappedConvos - afterCompareGroups) / 1000
-      } sec`
-    );
-
-    saveConversations(client.address, [
-      ...conversationsToSave,
-      ...groupsToCreate,
-    ]);
-    saveConversations(client.address, groupsToUpdate, true); // Force update
+    saveConversations(client.address, conversationsToSave);
 
     backupTopicsData(
       client.address,
@@ -446,9 +383,6 @@ export const loadConversations = async (
     return {
       newConversations,
       knownConversations,
-      newGroups,
-      knownGroups,
-      groups,
     };
   } catch (e) {
     const error = new Error();
