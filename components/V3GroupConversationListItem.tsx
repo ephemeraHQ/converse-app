@@ -1,12 +1,11 @@
-import { HStack } from "@design-system/HStack";
-import { Text } from "@design-system/Text";
 import { useConversationListGroupItem } from "@hooks/useConversationListGroupItem";
 import { useProfilesSocials } from "@hooks/useProfilesSocials";
+import { navigate } from "@utils/navigation";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import { Member } from "@xmtp/react-native-sdk";
-import { useEffect, useMemo, useState } from "react";
-import { Swipeable } from "react-native-gesture-handler";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { ConversationListItem } from "./ConversationListItem/ConversationListItem";
 import GroupAvatar from "./GroupAvatar";
 
 type V3GroupConversationListItemProps = {
@@ -40,6 +39,10 @@ export function V3GroupConversationListItem({
     fetchMembers();
   }, [group]);
 
+  const onPress = useCallback(() => {
+    navigate("Conversation", { topic });
+  }, [topic]);
+
   const memberData: {
     address: string;
     uri?: string;
@@ -63,17 +66,21 @@ export function V3GroupConversationListItem({
   console.log("testing111 memberData", memberData);
 
   return (
-    <Swipeable>
-      <HStack>
+    <ConversationListItem.Container onPress={onPress}>
+      <ConversationListItem.Left>
         <GroupAvatar
           size={60}
           pendingGroupMembers={memberData}
           uri={group?.imageUrlSquare}
           style={{ marginRight: 8 }}
         />
-        <Text preset="subheading">{group?.name}</Text>
-        {/* <Text preset="subheading">{group?.?.content}</Text> */}
-      </HStack>
-    </Swipeable>
+      </ConversationListItem.Left>
+      <ConversationListItem.Center>
+        <ConversationListItem.Title>{group?.name}</ConversationListItem.Title>
+        <ConversationListItem.Subtitle>
+          Message example heheh aasdpfsadfaad kas dk asdf
+        </ConversationListItem.Subtitle>
+      </ConversationListItem.Center>
+    </ConversationListItem.Container>
   );
 }
