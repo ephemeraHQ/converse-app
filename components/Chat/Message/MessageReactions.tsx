@@ -6,7 +6,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { MessageToDisplay } from "./Message";
 
-const MAX_REACTION_EMOJIS_SHOWN = 5;
+const MAX_REACTION_EMOJIS_SHOWN = 3;
 
 type Props = {
   message: MessageToDisplay;
