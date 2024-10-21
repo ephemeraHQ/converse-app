@@ -1,34 +1,20 @@
-import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
-import { Button } from "@design-system/Button/Button";
-import { HStack } from "@design-system/HStack";
-import { Pressable } from "@design-system/Pressable";
-import { Text } from "@design-system/Text";
-import { TouchableOpacity } from "@design-system/TouchableOpacity";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
-import { spacing } from "@theme/spacing";
-import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { simulateTransaction } from "@utils/api";
 import { converseEventEmitter } from "@utils/events";
 import { useExternalSigner } from "@utils/evm/external";
 import logger from "@utils/logger";
-import { getPreferredName } from "@utils/profile";
-import { shortAddress } from "@utils/str";
-import {
-  SimulateChangeType,
-  type SimulateAssetChangesResponse,
-} from "alchemy-sdk";
-import { Image } from "expo-image";
-import { memo, useCallback, useEffect, useState } from "react";
-import { StyleSheet, TextStyle, View, ViewStyle } from "react-native";
+import { type SimulateAssetChangesResponse } from "alchemy-sdk";
+import { useCallback, useEffect, useState } from "react";
 import { waitForReceipt } from "thirdweb";
 import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 
-import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
-import { CurrentAccount } from "../CurrentAccount";
 import { Drawer } from "../Drawer";
+import { TransactionActions } from "./TransactionActions";
+import { TransactionContent } from "./TransactionContent";
+import { TransactionHeader } from "./TransactionHeader";
 import { installedWallets } from "../Onboarding/supportedWallets";
-import Picto from "../Picto/Picto";
 
 export type TransactionData = {
   to: string;
@@ -63,7 +49,6 @@ export function TransactionPreview() {
     sendTransaction,
     chainId,
   } = useExternalSigner();
-  const { themed } = useAppTheme();
   const walletApp = walletAppId
     ? installedWallets.find((w) => w.thirdwebId === walletAppId)
     : undefined;
@@ -75,12 +60,51 @@ export function TransactionPreview() {
     status: "pending",
   });
 
+  const [simulation, setSimulation] = useState<SimulationState>({
+    status: "pending",
+  });
+
   const previewTransaction = useCallback(
     (transactionData: TransactionToTrigger) => {
       setTransactionToPreview(transactionData);
     },
     []
   );
+  useEffect(() => {
+    converseEventEmitter.on("previewTransaction", previewTransaction);
+    return () => {
+      converseEventEmitter.off("previewTransaction", previewTransaction);
+    };
+  }, [previewTransaction]);
+
+  const simulateTx = useCallback(async () => {
+    if (transactionToPreview && address && simulation.status === "pending") {
+      try {
+        const simulationResult = await simulateTransaction(
+          account,
+          address,
+          transactionToPreview.chainId,
+          transactionToPreview
+        );
+        console.log("gas used:", simulationResult.gasUsed);
+        console.log("Simulation changes:");
+        simulationResult.changes.forEach((change) => {
+          console.log(`Asset: ${change.name}`);
+          console.log(`Logo: ${change.logo}`);
+          console.log(`Amount: ${change.amount}`);
+          console.log(`Type: ${change.changeType}`);
+          console.log("---");
+        });
+        setSimulation({ status: "success", result: simulationResult });
+      } catch (e: any) {
+        setSimulation({ status: "failure", error: e });
+      }
+    }
+  }, [account, address, simulation.status, transactionToPreview]);
+
+  useEffect(() => {
+    simulateTx();
+  }, [simulateTx]);
 
   const close = useCallback(
     (receipt?: TransactionReceipt | undefined) => {
@@ -99,7 +123,7 @@ export function TransactionPreview() {
   );
 
   const switchWallet = useCallback(async () => {
-    await resetExternalSigner();
+    resetExternalSigner();
     const newSigner = await getExternalSigner(
       translate("transactionalFrameConnectWallet")
     );
@@ -108,48 +132,9 @@ export function TransactionPreview() {
     }
   }, [resetExternalSigner, getExternalSigner, close]);
 
-  useEffect(() => {
-    converseEventEmitter.on("previewTransaction", previewTransaction);
-    return () => {
-      converseEventEmitter.off("previewTransaction", previewTransaction);
-    };
-  }, [previewTransaction]);
-
-  const [simulation, setSimulation] = useState<SimulationState>({
-    status: "pending",
-  });
-  useEffect(() => {
-    const simulate = async () => {
-      if (transactionToPreview && address && simulation.status === "pending") {
-        try {
-          const simulationResult = await simulateTransaction(
-            account,
-            address,
-            transactionToPreview.chainId,
-            transactionToPreview
-          );
-          console.log("gas used:", simulationResult.gasUsed);
-          console.log("Simulation changes:");
-          simulationResult.changes.forEach((change) => {
-            console.log(`Asset: ${change.name}`);
-            console.log(`Logo: ${change.logo}`);
-            console.log(`Amount: ${change.amount}`);
-            console.log(`Type: ${change.changeType}`);
-            console.log("---");
-          });
-          setSimulation({ status: "success", result: simulationResult });
-        } catch (e: any) {
-          setSimulation({ status: "failure", error: e });
-        }
-      }
-    };
-    simulate();
-  }, [account, address, simulation, transactionToPreview]);
-
   const trigger = useCallback(async () => {
     console.log("clicked trigger");
     if (!transactionToPreview) return;
-    // converseEventEmitter.emit("triggerTransaction", transactionToPreview.id);
     setTxState({ status: "triggering" });
     try {
       logger.debug(
@@ -200,180 +185,32 @@ export function TransactionPreview() {
     transactionToPreview.chainId !== chainId &&
     txStatus === "pending";
 
-  const showWalletSwitcher =
-    simulation.status !== "pending" && walletApp && txStatus === "pending";
-
   const showTriggerButton =
     simulation.status !== "pending" &&
     walletApp &&
     !shouldSwitchChain &&
     txStatus === "pending";
 
-  const showTxLoader =
-    simulation.status !== "pending" &&
-    (txStatus === "triggering" || txStatus === "triggered");
-
-  const showTxResult =
-    simulation.status !== "pending" &&
-    (txStatus === "failure" || txStatus === "success");
-
   return (
     <Drawer visible={!!transactionToPreview} onClose={close}>
       <VStack>
-        <HStack style={styles.top}>
-          <CurrentAccount style={styles.account} />
-          <Pressable onPress={() => close()}>
-            <Text>Close</Text>
-          </Pressable>
-        </HStack>
-        {simulation.status === "pending" && (
-          <VStack style={styles.center}>
-            <ActivityIndicator />
-            <Text>{translate("simulation_pending")}</Text>
-          </VStack>
-        )}
-        {showTxLoader && (
-          <VStack style={styles.center}>
-            <ActivityIndicator />
-            <Text>
-              {translate(
-                txStatus === "triggered"
-                  ? "transaction_triggered"
-                  : "transaction_triggering",
-                { wallet: walletApp?.name }
-              )}
-            </Text>
-          </VStack>
-        )}
-
-        {simulation.status === "success" &&
-          simulation.result?.changes?.map((change) => (
-            <View key={change.contractAddress}>
-              <TransactionPreviewRow
-                title={
-                  change.changeType === SimulateChangeType.APPROVE
-                    ? translate("transaction_asset_change_type_approve")
-                    : translate("transaction_asset_change_type_transfer")
-                }
-                subtitle={`${change.amount} ${change.symbol}`}
-              />
-              <TransactionPreviewRow
-                title={translate("transaction_asset_change_to")}
-                subtitle={getPreferredName(
-                  useProfilesStore.getState().profiles[change.to]?.socials,
-                  change.to
-                )}
-              />
-            </View>
-          ))}
-        {showWalletSwitcher && (
-          <TransactionPreviewRow
-            imageURI={walletApp.iconURL}
-            title={translate("transaction_wallet")}
-            subtitle={`${walletApp.name} • ${shortAddress(address || "")}`}
-            onPress={switchWallet}
-          />
-        )}
-        {showTxResult && (
-          <VStack style={styles.center}>
-            <Text>
-              {translate(
-                txStatus === "failure"
-                  ? "transaction_failure"
-                  : "transaction_success",
-                { error: txState.error }
-              )}
-            </Text>
-          </VStack>
-        )}
-        {simulation.status === "failure" && (
-          <VStack style={[styles.center, themed($failure)]}>
-            <Text>{translate("simulation_failure")}</Text>
-          </VStack>
-        )}
-        {shouldSwitchChain && (
-          <Button
-            variant="fill"
-            text={translate("transaction_switch_chain", {
-              chainName: transactionToPreview?.chainId,
-            })}
-            onPress={
-              transactionToPreview?.chainId
-                ? () => switchChain(transactionToPreview.chainId)
-                : undefined
-            }
-          />
-        )}
-        {showTriggerButton && (
-          <Button
-            text={translate("transaction_pending", {
-              wallet: walletApp?.name,
-            })}
-            variant="fill"
-            onPress={trigger}
-          />
-        )}
+        <TransactionHeader onClose={close} />
+        <TransactionContent
+          simulation={simulation}
+          txState={txState}
+          walletApp={walletApp}
+          address={address}
+          switchWallet={switchWallet}
+        />
+        <TransactionActions
+          shouldSwitchChain={shouldSwitchChain}
+          showTriggerButton={showTriggerButton}
+          transactionToPreview={transactionToPreview}
+          switchChain={switchChain}
+          trigger={trigger}
+          walletApp={walletApp}
+        />
       </VStack>
     </Drawer>
   );
 }
-
-type ITransactionPreviewRowProps = {
-  title: string;
-  subtitle: string;
-  imageURI?: string | undefined;
-  onPress?: () => void;
-};
-
-const TransactionPreviewRow = memo((props: ITransactionPreviewRowProps) => {
-  const { themed } = useAppTheme();
-  return (
-    <TouchableOpacity
-      activeOpacity={props.onPress ? 0.5 : 1}
-      onPress={props.onPress}
-    >
-      <HStack style={styles.row}>
-        <Image source={{ uri: props.imageURI }} style={styles.leftImage} />
-        <VStack>
-          <Text size="sm" style={themed($title)}>
-            {props.title}
-          </Text>
-          <Text>{props.subtitle}</Text>
-        </VStack>
-        {props.onPress && <Picto picto="chevron.right" style={styles.picto} />}
-      </HStack>
-    </TouchableOpacity>
-  );
-});
-
-const $failure: ThemedStyle<ViewStyle> = ({
-  spacing,
-  colors,
-  borderRadius,
-}) => ({
-  marginBottom: spacing.md,
-  padding: spacing.sm,
-  backgroundColor: colors.fill.danger,
-  borderRadius: borderRadius.sm,
-});
-
-const $title: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text.secondary,
-});
-
-const styles = StyleSheet.create({
-  top: { alignItems: "center", marginVertical: spacing.md },
-  account: { marginRight: "auto" },
-  center: { alignItems: "center" },
-  row: { alignItems: "center", paddingBottom: spacing.sm },
-  leftImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 5,
-    marginRight: spacing.sm,
-  },
-  picto: {
-    marginLeft: "auto",
-    marginRight: spacing.xs,
-  },
-});
