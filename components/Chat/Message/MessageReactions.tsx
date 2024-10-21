@@ -1,12 +1,8 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useAppTheme } from "@theme/useAppTheme";
-import {
-  MessageReaction,
-  addReactionToMessage,
-  removeReactionFromMessage,
-} from "@utils/reactions";
-import { memo, useCallback, useMemo } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { MessageReaction } from "@utils/reactions";
+import { memo, useMemo } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 import { MessageToDisplay } from "./Message";
 
@@ -25,8 +21,17 @@ type ReactionCount = {
   firstReactionTime: number;
 };
 
+type RolledUpReactions = {
+  emojis: string[];
+  totalReactions: number;
+  userReacted: boolean;
+};
+
+const MAX_REACTION_EMOJIS_SHOWN = 5;
+
 function ChatMessageReactions({ message, reactions }: Props) {
   const styles = useStyles();
+  const { theme } = useAppTheme();
   const userAddress = useCurrentAccount();
 
   const reactionsList = useMemo(() => {
@@ -37,8 +42,10 @@ function ChatMessageReactions({ message, reactions }: Props) {
       .sort((r1, r2) => r1.sent - r2.sent);
   }, [reactions]);
 
-  const reactionCounts = useMemo(() => {
+  const rolledUpReactions: RolledUpReactions = useMemo(() => {
     const counts: { [content: string]: ReactionCount } = {};
+    let totalReactions = 0;
+    let userReacted = false;
 
     Object.values(reactions).forEach((reactionArray) => {
       reactionArray.forEach((reaction) => {
@@ -57,34 +64,24 @@ function ChatMessageReactions({ message, reactions }: Props) {
           reaction.senderAddress.toLowerCase() === userAddress?.toLowerCase()
         ) {
           counts[reaction.content].userReacted = true;
+          userReacted = true;
         }
-        // Keep track of the earliest reaction time for this emoji
         counts[reaction.content].firstReactionTime = Math.min(
           counts[reaction.content].firstReactionTime,
           reaction.sent
         );
+        totalReactions++;
       });
     });
 
-    // Convert to array and sort
-    return Object.values(counts).sort((a, b) => {
-      // Sort by the time of the first reaction (ascending)
-      return a.firstReactionTime - b.firstReactionTime;
-    });
+    // Sort by the number of reactors in descending order
+    const sortedReactions = Object.values(counts)
+      .sort((a, b) => b.reactors.length - a.reactors.length)
+      .slice(0, MAX_REACTION_EMOJIS_SHOWN)
+      .map((reaction) => reaction.content);
+
+    return { emojis: sortedReactions, totalReactions, userReacted };
   }, [reactions, userAddress]);
-
-  const handleReactionPress = useCallback(
-    (reaction: ReactionCount) => {
-      if (!userAddress) return;
-
-      if (reaction.userReacted) {
-        removeReactionFromMessage(userAddress, message, reaction.content);
-      } else {
-        addReactionToMessage(userAddress, message, reaction.content);
-      }
-    },
-    [message, userAddress]
-  );
 
   if (reactionsList.length === 0) return null;
 
@@ -95,28 +92,25 @@ function ChatMessageReactions({ message, reactions }: Props) {
         message.fromMe && { justifyContent: "flex-end" },
       ]}
     >
-      {reactionCounts.map((reaction) => {
-        const reactorCount = reaction.reactors.length;
-        return (
-          <TouchableOpacity
-            key={reaction.content}
-            onPress={() => handleReactionPress(reaction)}
-            style={[
-              styles.reactionButton,
-              reaction.userReacted
-                ? message.fromMe
-                  ? styles.myReactionToMyMessageButton
-                  : styles.myReactionToOtherMessageButton
-                : styles.otherReactionButton,
-            ]}
-          >
-            <Text>{reaction.content}</Text>
-            <View style={styles.reactorContainer}>
-              <Text style={styles.reactorCount}>{reactorCount}</Text>
-            </View>
-          </TouchableOpacity>
-        );
-      })}
+      <View
+        style={[
+          styles.reactionButton,
+          rolledUpReactions.userReacted && {
+            backgroundColor: theme.colors.fill.minimal,
+          },
+        ]}
+      >
+        <View style={styles.emojiContainer}>
+          {rolledUpReactions.emojis.map((emoji, index) => (
+            <Text key={index}>{emoji}</Text>
+          ))}
+        </View>
+        {rolledUpReactions.totalReactions > 1 && (
+          <Text style={styles.reactorCount}>
+            {rolledUpReactions.totalReactions}
+          </Text>
+        )}
+      </View>
     </View>
   );
 }
@@ -138,8 +132,6 @@ const useStyles = () => {
     reactionsWrapper: {
       flexDirection: "row",
       flexWrap: "wrap",
-      rowGap: theme.spacing["4xs"],
-      columnGap: theme.spacing["4xs"],
     },
     reactionButton: {
       flexDirection: "row",
@@ -150,18 +142,10 @@ const useStyles = () => {
       borderWidth: theme.borderWidth.sm,
       borderColor: theme.colors.border.subtle,
     },
-    // TODO: merge
-    myReactionToOtherMessageButton: {
-      backgroundColor: theme.colors.fill.minimal,
-    },
-    myReactionToMyMessageButton: {
-      backgroundColor: theme.colors.fill.minimal,
-    },
-    // TODO: remove
-    otherReactionButton: {},
-    reactorContainer: {
+    emojiContainer: {
       flexDirection: "row",
-      alignItems: "center",
+      flexWrap: "wrap",
+      gap: theme.spacing.xxxs,
     },
     reactorCount: {
       marginLeft: theme.spacing.xxxs,
