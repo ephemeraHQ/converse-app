@@ -4,20 +4,52 @@
     "strict": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "baseUrl": ".",
     "paths": {
-      "@components/*": ["./components/*"],
-      "@containers/*": ["./containers/*"],
-      "@data/*": ["./data/*"],
-      "@hooks/*": ["./hooks/*"],
-      "@i18n/*": ["./i18n/*"],
-      "@i18n": ["./i18n/index"],
-      "@queries/*": ["./queries/*"],
-      "@screens/*": ["./screens/*"],
-      "@styles/*": ["./styles/*"],
-      "@utils/*": ["./utils/*"],
-      "@theme": ["./theme/*"],
-      "@design-system": ["./design-system/*"]
+      "@components/*": [
+        "./components/*"
+      ],
+      "@containers/*": [
+        "./containers/*"
+      ],
+      "@data/*": [
+        "./data/*"
+      ],
+      "@hooks/*": [
+        "./hooks/*"
+      ],
+      "@i18n/*": [
+        "./i18n/*"
+      ],
+      "@i18n": [
+        "./i18n/index"
+      ],
+      "@queries/*": [
+        "./queries/*"
+      ],
+      "@screens/*": [
+        "./screens/*"
+      ],
+      "@styles/*": [
+        "./styles/*"
+      ],
+      "@utils/*": [
+        "./utils/*"
+      ],
+      "@theme": [
+        "./theme/*"
+      ],
+      "@design-system": [
+        "./design-system/*"
+      ],
+      "@features/*": [
+        "./features/*"
+      ]
     }
   },
-  "exclude": ["./vendor/**/*", "./node_modules/**/*", "./dist/**/*"]
+  "exclude": [
+    "./vendor/**/*",
+    "./node_modules/**/*",
+    "./dist/**/*"
+  ]
 }

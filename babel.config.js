@@ -1,3 +1,23 @@
+const fs = require('fs');
+const path = require('path');
+
+// Function to get all feature directories
+const getFeatureDirectories = () => {
+  const featuresPath = path.join(__dirname, 'features');
+  return fs.readdirSync(featuresPath, { withFileTypes: true })
+    .filter(dirent => dirent.isDirectory())
+    .map(dirent => dirent.name);
+};
+
+// Generate aliases for features
+const generateFeatureAliases = () => {
+  const features = getFeatureDirectories();
+  return features.reduce((aliases, feature) => {
+    aliases[`@features/${feature}`] = `./features/${feature}`;
+    return aliases;
+  }, {});
+};
+
 module.exports = {
   presets: [
     [
@@ -31,7 +51,10 @@ module.exports = {
             "@web3modal/scaffold-utils/dist/esm/exports/ethers.js",
           "react-native-webview": "react-native-webview/src/index.ts",
 
-          // Folder aliases
+          // Add dynamic feature aliases
+          ...generateFeatureAliases(),
+
+          // Existing folder aliases
           "@components": "./components",
           "@containers": "./containers",
           "@data": "./data",
