@@ -3,7 +3,6 @@ import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
 import {
   inversePrimaryColor,
   textPrimaryColor,
-  tertiaryBackgroundColor,
   primaryColor,
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
@@ -217,33 +216,31 @@ const useStyles = () => {
       alignItems: "center",
       paddingHorizontal: theme.spacing.xs,
       paddingVertical: theme.spacing.xxs,
-      borderRadius: theme.spacing.md, // or change back to xs
-      borderWidth: 0.25,
+      borderRadius: theme.spacing.sm,
+      borderWidth: 1,
+      borderColor: theme.colors.border.subtle,
     },
+    // TODO: merge
+    myReactionToOtherMessageButton: {
+      backgroundColor: theme.colors.fill.minimal,
+    },
+    myReactionToMyMessageButton: {
+      backgroundColor: theme.colors.fill.minimal,
+    },
+    // TODO: remove
     profileImage: {
       width: 22,
       height: 22,
       borderRadius: 22,
       borderWidth: 1,
     },
-    otherReactionButton: {
-      backgroundColor: tertiaryBackgroundColor(colorScheme),
-      borderColor: tertiaryBackgroundColor(colorScheme),
-    },
-    otherProfileImage: {
-      borderColor: tertiaryBackgroundColor(colorScheme),
-    },
-    myReactionToOtherMessageButton: {
-      backgroundColor: primaryColor(colorScheme),
-      borderColor: primaryColor(colorScheme),
-    },
-    myReactionToOtherMessageProfileImage: {
-      borderColor: primaryColor(colorScheme),
-    },
-    myReactionToMyMessageButton: {
-      backgroundColor: primaryColor(colorScheme),
-      borderColor: tertiaryBackgroundColor(colorScheme),
-    },
+    // TODO: remove
+    otherReactionButton: {},
+    // TODO: remove
+    otherProfileImage: {},
+    // TODO: remove
+    myReactionToOtherMessageProfileImage: {},
+    // TODO: remove
     myReactionToMyMessageProfileImage: {
       borderColor: primaryColor(colorScheme),
     },
