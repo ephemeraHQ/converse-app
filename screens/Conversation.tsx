@@ -1,3 +1,4 @@
+import { V3Conversation } from "@components/Conversation/V3Conversation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -5,6 +6,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { isGroupTopic } from "@utils/groupUtils/groupId";
 import { isAddress } from "ethers/lib/utils";
 import React, {
   useCallback,
@@ -320,7 +322,17 @@ const Conversation = ({
   );
 };
 
-export default gestureHandlerRootHOC(Conversation);
+const ConversationHoc = ({
+  route,
+  navigation,
+}: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
+  if (route.params?.topic && isGroupTopic(route.params.topic)) {
+    return <V3Conversation />;
+  }
+  return <Conversation route={route} navigation={navigation} />;
+};
+
+export default gestureHandlerRootHOC(ConversationHoc);
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
