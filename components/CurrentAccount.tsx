@@ -1,5 +1,5 @@
 import { currentAccount, useProfilesStore } from "@data/store/accountsStore";
-import { HStack } from "@design-system/Hstack";
+import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { AvatarSizes } from "@styles/sizes";
 import { spacing } from "@theme/spacing";

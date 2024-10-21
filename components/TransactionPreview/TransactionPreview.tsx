@@ -1,13 +1,13 @@
 import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
-import { HStack } from "@design-system/Hstack";
+import { Button } from "@design-system/Button/Button";
+import { HStack } from "@design-system/HStack";
 import { Pressable } from "@design-system/Pressable";
 import { Text } from "@design-system/Text";
 import { TouchableOpacity } from "@design-system/TouchableOpacity";
 import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
-import { borderRadius } from "@theme/border-radius";
-import { colors } from "@theme/colors";
 import { spacing } from "@theme/spacing";
+import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { simulateTransaction } from "@utils/api";
 import { converseEventEmitter } from "@utils/events";
 import { useExternalSigner } from "@utils/evm/external";
@@ -20,12 +20,11 @@ import {
 } from "alchemy-sdk";
 import { Image } from "expo-image";
 import { memo, useCallback, useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, ViewStyle } from "react-native";
 import { waitForReceipt } from "thirdweb";
 import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
-import Button from "../Button/Button";
 import { CurrentAccount } from "../CurrentAccount";
 import { Drawer } from "../Drawer";
 import { installedWallets } from "../Onboarding/supportedWallets";
@@ -64,6 +63,7 @@ export function TransactionPreview() {
     sendTransaction,
     chainId,
   } = useExternalSigner();
+  const { themed } = useAppTheme();
   const walletApp = walletAppId
     ? installedWallets.find((w) => w.thirdwebId === walletAppId)
     : undefined;
@@ -289,14 +289,14 @@ export function TransactionPreview() {
           </VStack>
         )}
         {simulation.status === "failure" && (
-          <VStack style={[styles.center, styles.failure]}>
+          <VStack style={[styles.center, themed($failure)]}>
             <Text>{translate("simulation_failure")}</Text>
           </VStack>
         )}
         {shouldSwitchChain && (
           <Button
-            variant="primary"
-            title={translate("transaction_switch_chain", {
+            variant="fill"
+            text={translate("transaction_switch_chain", {
               chainName: transactionToPreview?.chainId,
             })}
             onPress={
@@ -308,10 +308,10 @@ export function TransactionPreview() {
         )}
         {showTriggerButton && (
           <Button
-            title={translate("transaction_pending", {
+            text={translate("transaction_pending", {
               wallet: walletApp?.name,
             })}
-            variant="primary"
+            variant="fill"
             onPress={trigger}
           />
         )}
@@ -343,16 +343,21 @@ const TransactionPreviewRow = memo((props: ITransactionPreviewRowProps) => (
   </TouchableOpacity>
 ));
 
+export const $failure: ThemedStyle<ViewStyle> = ({
+  spacing,
+  colors,
+  borderRadius,
+}) => ({
+  marginBottom: spacing.md,
+  padding: spacing.sm,
+  backgroundColor: colors.fill.danger,
+  borderRadius: borderRadius.sm,
+});
+
 const styles = StyleSheet.create({
   top: { alignItems: "center", marginVertical: spacing.md },
   account: { marginRight: "auto" },
   center: { alignItems: "center" },
-  failure: {
-    marginBottom: spacing.md,
-    padding: spacing.sm,
-    backgroundColor: colors.errorBackground,
-    borderRadius: borderRadius.lg,
-  },
   row: { alignItems: "center", paddingBottom: spacing.sm },
   leftImage: {
     width: 40,
