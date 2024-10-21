@@ -26,7 +26,6 @@ import {
   stopStreamingAllMessage,
   streamAllMessages,
   syncConversationsMessages,
-  syncGroupsMessages,
 } from "./messages";
 import {
   getChatStore,
@@ -150,25 +149,13 @@ const syncClient = async (account: string) => {
     knownTopics: knownTopics.length,
   });
   const queryConversationsFromTimestamp: { [topic: string]: number } = {};
-  const queryGroupsFromTimestamp: { [topic: string]: number } = {};
   knownTopics.forEach((topic) => {
-    if (getChatStore(account).getState().conversations[topic]?.isGroup) {
-      queryGroupsFromTimestamp[topic] = lastSyncedAt;
-    } else {
-      queryConversationsFromTimestamp[topic] = lastSyncedAt;
-    }
+    queryConversationsFromTimestamp[topic] = lastSyncedAt;
   });
   const now = new Date().getTime();
-  const {
-    newConversations,
-    groups,
-    newGroups = [],
-  } = await loadConversations(account, knownTopics);
+  const { newConversations } = await loadConversations(account, knownTopics);
   newConversations.forEach((c) => {
     queryConversationsFromTimestamp[c.topic] = 0;
-  });
-  newGroups.forEach((g) => {
-    queryGroupsFromTimestamp[g.topic] = 0;
   });
   // As soon as we have done one query we can hide reconnecting
   getChatStore(account).getState().setReconnecting(false);
@@ -217,10 +204,10 @@ const syncClient = async (account: string) => {
   streamingAccounts[account] = true;
 
   logger.debug("[XmtpRN] Syncing 1:1 messages & group messages...");
-  const [fetchedMessagesCount, fetchedGroupMessagesCount] = await Promise.all([
-    syncConversationsMessages(account, queryConversationsFromTimestamp),
-    syncGroupsMessages(account, groups, queryGroupsFromTimestamp),
-  ]);
+  const fetchedMessagesCount = await syncConversationsMessages(
+    account,
+    queryConversationsFromTimestamp
+  );
   logger.debug("[XmtpRN] Done syncing 1:1 messages & group messages");
 
   // Refresh spam scores after the initial load of conversation data is complete
@@ -234,17 +221,13 @@ const syncClient = async (account: string) => {
 
   // Only update when we have really fetched, this might mitigate
   // the case where we never fetch some messages
-  if (fetchedMessagesCount > 0 || fetchedGroupMessagesCount > 0) {
+  if (fetchedMessagesCount > 0) {
     const conversationTopicsToQuery = Object.keys(
       queryConversationsFromTimestamp
     );
-    const groupTopicsToQuery = Object.keys(queryGroupsFromTimestamp);
     getChatStore(account)
       .getState()
-      .setLastSyncedAt(now, [
-        ...conversationTopicsToQuery,
-        ...groupTopicsToQuery,
-      ]);
+      .setLastSyncedAt(now, conversationTopicsToQuery);
   }
   await updateConsentStatus(account);
   logger.info(`[XmtpRN] Finished syncing ${account}`);
