@@ -481,20 +481,6 @@ export class JoinGroupClient {
     const fixtureFetchGroupsByAccount = async (
       account: string
     ): Promise<GroupsDataEntity> => {
-      // const fixtureGroup: GroupData = {
-      //   id: GroupIdUserWasNotAMemberOf,
-      //   createdAt: new Date().getTime(),
-      //   members: [],
-      //   topic: "topic123",
-      //   isGroupActive: true,
-      //   state: "allowed",
-      //   creatorInboxId: "0xabc" as InboxId,
-      //   name: "Group Name",
-      //   addedByInboxId: "0x123" as InboxId,
-      //   imageUrlSquare: "https://www.google.com",
-      //   description: "Group Description",
-      // } as const;
-
       const fixtureGroupsDataEntity: GroupsDataEntity = {
         ids: [],
         byId: {},
