@@ -20,7 +20,7 @@ import {
 } from "alchemy-sdk";
 import { Image } from "expo-image";
 import { memo, useCallback, useEffect, useState } from "react";
-import { StyleSheet, ViewStyle } from "react-native";
+import { StyleSheet, TextStyle, View, ViewStyle } from "react-native";
 import { waitForReceipt } from "thirdweb";
 import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 
@@ -248,7 +248,7 @@ export function TransactionPreview() {
 
         {simulation.status === "success" &&
           simulation.result?.changes?.map((change) => (
-            <>
+            <View key={change.contractAddress}>
               <TransactionPreviewRow
                 title={
                   change.changeType === SimulateChangeType.APPROVE
@@ -256,7 +256,6 @@ export function TransactionPreview() {
                     : translate("transaction_asset_change_type_transfer")
                 }
                 subtitle={`${change.amount} ${change.symbol}`}
-                key={change.contractAddress}
               />
               <TransactionPreviewRow
                 title={translate("transaction_asset_change_to")}
@@ -264,9 +263,8 @@ export function TransactionPreview() {
                   useProfilesStore.getState().profiles[change.to]?.socials,
                   change.to
                 )}
-                key={`${change.contractAddress}-to`}
               />
-            </>
+            </View>
           ))}
         {showWalletSwitcher && (
           <TransactionPreviewRow
@@ -327,23 +325,28 @@ type ITransactionPreviewRowProps = {
   onPress?: () => void;
 };
 
-const TransactionPreviewRow = memo((props: ITransactionPreviewRowProps) => (
-  <TouchableOpacity
-    activeOpacity={props.onPress ? 0.5 : 1}
-    onPress={props.onPress}
-  >
-    <HStack style={styles.row}>
-      <Image source={{ uri: props.imageURI }} style={styles.leftImage} />
-      <VStack>
-        <Text>{props.title}</Text>
-        <Text>{props.subtitle}</Text>
-      </VStack>
-      {props.onPress && <Picto picto="chevron.right" style={styles.picto} />}
-    </HStack>
-  </TouchableOpacity>
-));
+const TransactionPreviewRow = memo((props: ITransactionPreviewRowProps) => {
+  const { themed } = useAppTheme();
+  return (
+    <TouchableOpacity
+      activeOpacity={props.onPress ? 0.5 : 1}
+      onPress={props.onPress}
+    >
+      <HStack style={styles.row}>
+        <Image source={{ uri: props.imageURI }} style={styles.leftImage} />
+        <VStack>
+          <Text size="sm" style={themed($title)}>
+            {props.title}
+          </Text>
+          <Text>{props.subtitle}</Text>
+        </VStack>
+        {props.onPress && <Picto picto="chevron.right" style={styles.picto} />}
+      </HStack>
+    </TouchableOpacity>
+  );
+});
 
-export const $failure: ThemedStyle<ViewStyle> = ({
+const $failure: ThemedStyle<ViewStyle> = ({
   spacing,
   colors,
   borderRadius,
@@ -352,6 +355,10 @@ export const $failure: ThemedStyle<ViewStyle> = ({
   padding: spacing.sm,
   backgroundColor: colors.fill.danger,
   borderRadius: borderRadius.sm,
+});
+
+const $title: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text.secondary,
 });
 
 const styles = StyleSheet.create({
