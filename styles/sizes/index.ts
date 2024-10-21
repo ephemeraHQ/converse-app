@@ -1,8 +1,10 @@
 import { Platform } from "react-native";
 
+/**
+ * @deprecated
+ */
 export enum AvatarSizes {
   default = 121,
-
   conversationListItem = Platform.OS === "ios" ? 56 : 47,
   conversationTitle = 30,
   listItemDisplay = 40,
@@ -15,6 +17,9 @@ export enum AvatarSizes {
   shareProfileCompact = 50,
 }
 
+/**
+ * @deprecated
+ */
 export enum PictoSizes {
   default = 48,
   accoutSettings = 24,
@@ -38,6 +43,9 @@ export enum PictoSizes {
   externalWallet = 14,
 }
 
+/**
+ * @deprecated
+ */
 export const BorderRadius = {
   default: 8,
   small: 4,
@@ -45,20 +53,20 @@ export const BorderRadius = {
   xLarge: 24,
 };
 
+/**
+ * @deprecated
+ */
 export const Paddings = {
   default: 16,
   small: 8,
   large: 24,
 };
 
+/**
+ * @deprecated
+ */
 export const Margins = {
   default: 16,
   small: 8,
   large: 24,
 };
-
-// Sizes, spaces, paddings, margins, etc.
-export const sizes = {};
-
-// Font sizes
-export const fontSizes = {};

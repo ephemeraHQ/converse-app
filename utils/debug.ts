@@ -63,3 +63,10 @@ export const componentKeyDebug = () => {
     key: getRandomId(),
   };
 };
+
+export function debugBorder() {
+  return {
+    borderWidth: 1,
+    borderColor: "red",
+  };
+}

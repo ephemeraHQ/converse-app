@@ -1,7 +1,7 @@
 import logger from "@utils/logger";
 import { ColorSchemeName } from "react-native";
 
-import { backgroundColor, rgbStringToHex } from ".";
+import { backgroundColor } from ".";
 
 export const setAndroidSystemColor = (color: string) => {
   const BackgroundColor = require("react-native-background-color");
@@ -27,4 +27,15 @@ export const setAndroidColors = (colorScheme: ColorSchemeName) => {
   ).catch((e: any) => {
     logger.error(e);
   });
+};
+
+const rgbStringToHex = (rgbString: string) => {
+  const splitted = rgbString.split("(")[1].split(")")[0].split(",");
+  const hexValue = splitted
+    .map((x: string) => {
+      x = parseInt(x, 10).toString(16);
+      return x.length === 1 ? "0" + x : x;
+    })
+    .join("");
+  return `#${hexValue}`;
 };

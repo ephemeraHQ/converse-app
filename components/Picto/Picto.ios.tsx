@@ -22,7 +22,7 @@ export default function Picto({ picto, style, size, weight, color }: Props) {
       size={size}
       multicolor={false}
       resizeMode="center"
-      style={style}
+      style={[{ width: size, height: size }, style]}
     />
   );
 }

@@ -29,6 +29,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
 
+import "./utils/splash/splash";
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import {
@@ -47,7 +48,6 @@ import { useThemeProvider } from "./theme/useAppTheme";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
-import "./utils/splash/splash";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -129,7 +129,7 @@ const AppKeyboardProvider =
 export default function AppWithProviders() {
   const colorScheme = useColorScheme();
 
-  const theme = useMemo(() => {
+  const paperTheme = useMemo(() => {
     return colorScheme === "dark" ? MaterialDarkTheme : MaterialLightTheme;
   }, [colorScheme]);
 
@@ -143,7 +143,7 @@ export default function AppWithProviders() {
           <AppKeyboardProvider>
             <ActionSheetProvider>
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                <PaperProvider theme={theme}>
+                <PaperProvider theme={paperTheme}>
                   <PortalProvider>
                     <App />
                   </PortalProvider>

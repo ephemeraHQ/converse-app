@@ -8,31 +8,23 @@ import {
 import { ThemedStyleArray } from "../../theme/useAppTheme";
 
 export type IPresets =
-  | "default"
-  | "bold"
-  | "heading"
-  | "subheading"
-  | "formLabel"
-  | "formHelper";
+  | "body"
+  | "bodyBold"
+  | "small"
+  | "smaller"
+  | "smallerBold"
+  | "bigBold";
 
-export const $presets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
-  default: [$textBaseStyle],
+export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
+  body: [$textBaseStyle],
 
-  bold: [$textBaseStyle, $textFontWeightStyles.bold],
+  bodyBold: [$textBaseStyle, $textFontWeightStyles.bold],
 
-  heading: [
-    $textBaseStyle,
-    $textSizeStyles.xxl,
-    $textFontWeightStyles.semiBold,
-  ],
+  small: [$textBaseStyle, $textSizeStyles.sm],
 
-  subheading: [$textBaseStyle, $textSizeStyles.sm, $textFontWeightStyles.light],
+  smaller: [$textBaseStyle, $textSizeStyles.xs],
 
-  formLabel: [$textBaseStyle, $textFontWeightStyles.medium],
+  smallerBold: [$textBaseStyle, $textSizeStyles.xs, $textFontWeightStyles.bold],
 
-  formHelper: [
-    $textBaseStyle,
-    $textSizeStyles.sm,
-    $textFontWeightStyles.normal,
-  ],
+  bigBold: [$textBaseStyle, $textSizeStyles.md, $textFontWeightStyles.bold],
 };
