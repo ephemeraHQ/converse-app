@@ -6,6 +6,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
+import { useAppTheme } from "@theme/useAppTheme";
 import * as Haptics from "expo-haptics";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
@@ -575,6 +576,8 @@ export default function CachedChatMessage({
 }
 
 const useStyles = () => {
+  const { theme } = useAppTheme();
+
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     messageContainer: {
@@ -676,7 +679,8 @@ const useStyles = () => {
       height: AvatarSizes.messageSender,
     },
     outsideContentRow: {
-      marginTop: 1,
+      marginTop: theme.spacing["4xs"],
+      marginBottom: theme.spacing.xxxs,
       flexDirection: "row",
       justifyContent: "flex-start",
       columnGap: 8,
