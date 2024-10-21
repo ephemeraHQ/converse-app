@@ -35,19 +35,13 @@ import {
   useProfilesStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
 import {
   ConversationFlatListItem,
-  LastMessagePreview,
   getFilteredConversationsWithSearch,
 } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
 import { sortRequestsBySpamScore } from "../utils/xmtpRN/conversations";
-
-type ConversationWithLastMessagePreview = XmtpConversation & {
-  lastMessagePreview?: LastMessagePreview;
-};
 
 type Props = {
   searchBarRef:
