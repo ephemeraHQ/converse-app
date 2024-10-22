@@ -18,7 +18,7 @@ import { usePrivySigner } from "@utils/evm/privy";
 import { useXmtpSigner } from "@utils/evm/xmtp";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { shortAddress } from "@utils/str";
-import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
+import { ConverseXmtpClientType } from "@utils/xmtpRN/client.types";
 import {
   getOtherInstallations,
   revokeOtherInstallations,

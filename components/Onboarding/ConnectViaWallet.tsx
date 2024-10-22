@@ -169,7 +169,7 @@ export default function ConnectViaWallet({
           handlingThirdwebSigner.current = a;
           if (getAccountsList().includes(a)) {
             Alert.alert(
-              translate("connectViaWallet::alreadyConnected.title"),
+              translate("connectViaWallet.alreadyConnected.title"),
               translate("connectViaWallet.alreadyConnected.message")
             );
             disconnect();
