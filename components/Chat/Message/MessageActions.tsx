@@ -279,7 +279,7 @@ export default function ChatMessageActions({
     message.isLatestSettledFromPeer ||
     ((message.status === "sending" || message.status === "prepared") &&
       UUID_REGEX.test(message.id));
-  const hasAnimatedIn = useRef(false);
+  const isAnimatingIn = useRef(false);
 
   const triggerReplyToMessage = useCallback(() => {
     converseEventEmitter.emit("triggerReplyToMessage", message);
@@ -375,11 +375,8 @@ export default function ChatMessageActions({
     translateY.value = 20;
 
     const timingConfig = {
-      duration: 100,
+      duration: 250,
       easing: Easing.inOut(Easing.quad),
-      onComplete: () => {
-        hasAnimatedIn.current = true;
-      },
     };
     const springConfig = {
       damping: 10,
@@ -396,7 +393,8 @@ export default function ChatMessageActions({
   }, [opacity, scale, translateY]);
 
   useEffect(() => {
-    if (shouldAnimateIn && !hasAnimatedIn.current) {
+    if (shouldAnimateIn && !isAnimatingIn.current) {
+      isAnimatingIn.current = true;
       animateIn();
     }
   }, [shouldAnimateIn, animateIn]);
