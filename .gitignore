@@ -19,8 +19,8 @@ builds
 
 # iOS
 ios/Converse.xcworkspace/xcshareddata/swiftpm/Package.resolved
-
 /.idea
+.aider*
 
 # Reassure output directory
 .reassure

@@ -1,10 +1,6 @@
 import { EntityObject } from "@queries/entify";
-import { getXmtpClientFromBase64Key } from "@utils/xmtpRN/client";
 import { Group } from "@xmtp/react-native-sdk";
-
-export type ConverseXmtpClientType = Awaited<
-  ReturnType<typeof getXmtpClientFromBase64Key>
->;
+import { ConverseXmtpClientType } from "./client";
 
 export type ConversationWithCodecsType = Awaited<
   ReturnType<ConverseXmtpClientType["conversations"]["newConversation"]>

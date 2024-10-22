@@ -1,16 +1,16 @@
 import logger from "@utils/logger";
 import { retryWithBackoff } from "@utils/retryWithBackoff";
-import { Client } from "@xmtp/xmtp-js";
-import { useEffect, useState } from "react";
-import { AppState } from "react-native";
-
-import { xmtpSignatureByAccount } from "./api";
 import {
   ConverseXmtpClientType,
   getXmtpClientFromAddress,
   reconnectXmtpClientsDbConnections,
   xmtpClientByAccount,
 } from "./client";
+import { Client } from "@xmtp/xmtp-js";
+import { useEffect, useState } from "react";
+import { AppState } from "react-native";
+
+import { xmtpSignatureByAccount } from "./api";
 import {
   stopStreamingConversations,
   streamConversations,

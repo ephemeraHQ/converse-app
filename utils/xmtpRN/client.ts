@@ -8,7 +8,6 @@ import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-refere
 import {
   Client,
   Conversation,
-  ConversationTopic,
   DecodedMessage,
   Dm,
   Group,

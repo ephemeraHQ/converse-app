@@ -1,9 +1,9 @@
 import { invalidateGroupMembersQuery } from "@queries/useGroupMembersQuery";
 import { invalidateGroupNameQuery } from "@queries/useGroupNameQuery";
 import { invalidateGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
+import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client.types";
 
 import { handleGroupUpdatedMessage } from "./handleGroupUpdatedMessage";
-import type { DecodedMessageWithCodecsType } from "../../../utils/xmtpRN/client";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 jest.mock("@queries/useGroupMembersQuery", () => ({

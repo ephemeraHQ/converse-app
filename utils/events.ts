@@ -1,10 +1,9 @@
 import { TransactionToTrigger } from "@components/TransactionPreview/TransactionPreview";
 import { MessageAttachment } from "@data/store/chatStore";
+import { GroupWithCodecsType } from "@utils/xmtpRN/client.types";
 import EventEmitter from "eventemitter3";
 import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 import { Account, Wallet } from "thirdweb/wallets";
-
-import { GroupWithCodecsType } from "./xmtpRN/client";
 
 type ShowActionSheetEvent<T extends string> = `showActionSheetForTxRef-${T}`;
 type OpenAttachmentMessage<T extends string> = `openAttachmentForMessage-${T}`;
