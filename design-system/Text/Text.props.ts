@@ -3,7 +3,7 @@ import { TextProps as RNTextProps, StyleProp, TextStyle } from "react-native";
 import { IPresets } from "./Text.presets";
 import { textSizeStyles } from "./Text.styles";
 import { i18n, TxKeyPath } from "../../i18n";
-import { typography } from "../../theme";
+import { IColors, typography } from "../../theme";
 
 export type ISizes = keyof typeof textSizeStyles;
 export type IWeights = keyof typeof typography.primary;
@@ -37,6 +37,10 @@ export interface ITextProps extends RNTextProps {
    * Text size modifier.
    */
   size?: ISizes;
+  /**
+   * Text color modifier.
+   */
+  color?: Exclude<keyof IColors["text"], "inverted">;
   /**
    * Children components.
    */

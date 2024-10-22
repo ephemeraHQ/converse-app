@@ -69,9 +69,9 @@ export const useExternalSigner = () => {
     [setActiveWallet]
   );
 
-  const resetExternalSigner = useCallback(() => {
+  const resetExternalSigner = useCallback(async () => {
     try {
-      activeWallet?.disconnect();
+      await activeWallet?.disconnect();
       if (activeWallet) {
         disconnect(activeWallet);
       }

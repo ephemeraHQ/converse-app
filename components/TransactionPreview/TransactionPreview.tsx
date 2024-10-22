@@ -6,7 +6,7 @@ import { converseEventEmitter } from "@utils/events";
 import { useExternalSigner } from "@utils/evm/external";
 import logger from "@utils/logger";
 import { type SimulateAssetChangesResponse } from "alchemy-sdk";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { waitForReceipt } from "thirdweb";
 import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 
@@ -39,6 +39,7 @@ type SimulationState = {
 };
 
 export function TransactionPreview() {
+  const simulatingTx = useRef(false);
   const account = useCurrentAccount() as string;
   const {
     address,
@@ -78,7 +79,8 @@ export function TransactionPreview() {
   }, [previewTransaction]);
 
   const simulateTx = useCallback(async () => {
-    if (transactionToPreview && address && simulation.status === "pending") {
+    if (transactionToPreview && address && !simulatingTx.current) {
+      simulatingTx.current = true;
       try {
         const simulationResult = await simulateTransaction(
           account,
@@ -99,14 +101,15 @@ export function TransactionPreview() {
       } catch (e: any) {
         setSimulation({ status: "failure", error: e });
       }
+      simulatingTx.current = false;
     }
-  }, [account, address, simulation.status, transactionToPreview]);
+  }, [account, address, transactionToPreview]);
 
   useEffect(() => {
     simulateTx();
   }, [simulateTx]);
 
-  const close = useCallback(
+  const closeWithReceipt = useCallback(
     (receipt?: TransactionReceipt | undefined) => {
       if (transactionToPreview) {
         converseEventEmitter.emit(
@@ -118,19 +121,24 @@ export function TransactionPreview() {
       }
       setSimulation({ status: "pending" });
       setTxState({ status: "pending" });
+      simulatingTx.current = false;
     },
     [transactionToPreview]
   );
 
+  const close = useCallback(() => {
+    closeWithReceipt(undefined);
+  }, [closeWithReceipt]);
+
   const switchWallet = useCallback(async () => {
-    resetExternalSigner();
+    await resetExternalSigner();
     const newSigner = await getExternalSigner(
       translate("transactionalFrameConnectWallet")
     );
     if (!newSigner) {
-      close();
+      closeWithReceipt();
     }
-  }, [resetExternalSigner, getExternalSigner, close]);
+  }, [resetExternalSigner, getExternalSigner, closeWithReceipt]);
 
   const trigger = useCallback(async () => {
     console.log("clicked trigger");
@@ -158,7 +166,7 @@ export function TransactionPreview() {
 
       if (transactionReceipt.status === "success") {
         setTimeout(() => {
-          close(transactionReceipt);
+          closeWithReceipt(transactionReceipt);
         }, 1000);
       }
     } catch (e: any) {
@@ -176,7 +184,7 @@ export function TransactionPreview() {
         setTxState({ status: "failure", error: `${txError}` });
       }
     }
-  }, [close, sendTransaction, transactionToPreview]);
+  }, [closeWithReceipt, sendTransaction, transactionToPreview]);
 
   const txStatus = txState.status;
   const shouldSwitchChain =

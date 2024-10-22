@@ -540,7 +540,9 @@ export const simulateTransaction = async (
     {
       address: from,
       network: `eip155:${chainId}`,
-      value: transaction.value,
+      value: transaction.value
+        ? `0x${BigInt(transaction.value).toString(16)}`
+        : undefined,
       to: transaction.to,
       data: transaction.data,
     },

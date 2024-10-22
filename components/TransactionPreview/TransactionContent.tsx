@@ -9,10 +9,12 @@ import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { getPreferredName } from "@utils/profile";
 import { shortAddress } from "@utils/str";
 import { SimulateChangeType, SimulateAssetChangesResponse } from "alchemy-sdk";
-import { Image } from "expo-image";
+import { Image, ImageSource } from "expo-image";
 import { memo } from "react";
 import { StyleSheet, TextStyle, View, ViewStyle } from "react-native";
 
+import TransactionSend from "../../assets/transaction-send.png";
+import TransactionTo from "../../assets/transaction-to.png";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
 import { InstalledWallet } from "../Onboarding/supportedWallets";
 import Picto from "../Picto/Picto";
@@ -71,27 +73,23 @@ export const TransactionContent = ({
     return <TransactionResult status={txState.status} error={txState.error} />;
   }
 
-  if (simulation.status === "success") {
-    return (
-      <>
+  return (
+    <>
+      {simulation.status === "success" ? (
         <SimulationResult changes={simulation.result?.changes} />
-        {walletApp && (
-          <TransactionPreviewRow
-            imageURI={walletApp.iconURL}
-            title={translate("transaction_wallet")}
-            subtitle={`${walletApp.name} • ${shortAddress(address || "")}`}
-            onPress={switchWallet}
-          />
-        )}
-      </>
-    );
-  }
-
-  if (simulation.status === "failure") {
-    return <SimulationFailure />;
-  }
-
-  return null;
+      ) : (
+        <SimulationFailure />
+      )}
+      {walletApp && (
+        <TransactionPreviewRow
+          imageSrc={{ uri: walletApp.iconURL }}
+          title={translate("transaction_wallet")}
+          subtitle={`${walletApp.name} • ${shortAddress(address || "")}`}
+          onPress={switchWallet}
+        />
+      )}
+    </>
+  );
 };
 
 const SimulationPending = () => (
@@ -137,6 +135,7 @@ const SimulationResult = ({ changes }: SimulationResultProps) => (
               : translate("transaction_asset_change_type_transfer")
           }
           subtitle={`${change.amount} ${change.symbol}`}
+          imageSrc={change.logo ? { uri: change.logo } : TransactionSend}
         />
         <TransactionPreviewRow
           title={translate("transaction_asset_change_to")}
@@ -144,6 +143,7 @@ const SimulationResult = ({ changes }: SimulationResultProps) => (
             useProfilesStore.getState().profiles[change.to]?.socials,
             change.to
           )}
+          imageSrc={TransactionTo}
         />
       </View>
     ))}
@@ -153,7 +153,8 @@ const SimulationResult = ({ changes }: SimulationResultProps) => (
 const SimulationFailure = () => {
   const { themed } = useAppTheme();
   return (
-    <VStack style={[styles.center, themed($failure)]}>
+    <VStack style={themed($failure)}>
+      <Text color="danger">Caution</Text>
       <Text>{translate("simulation_failure")}</Text>
     </VStack>
   );
@@ -162,7 +163,7 @@ const SimulationFailure = () => {
 type ITransactionPreviewRowProps = {
   title: string;
   subtitle: string;
-  imageURI?: string | undefined;
+  imageSrc?: ImageSource | undefined;
   onPress?: () => void;
 };
 
@@ -174,7 +175,7 @@ const TransactionPreviewRow = memo((props: ITransactionPreviewRowProps) => {
       onPress={props.onPress}
     >
       <HStack style={styles.row}>
-        <Image source={{ uri: props.imageURI }} style={styles.leftImage} />
+        <Image source={props.imageSrc} style={styles.leftImage} />
         <VStack>
           <Text size="sm" style={themed($title)}>
             {props.title}
@@ -187,15 +188,11 @@ const TransactionPreviewRow = memo((props: ITransactionPreviewRowProps) => {
   );
 });
 
-const $failure: ThemedStyle<ViewStyle> = ({
-  spacing,
-  colors,
-  borderRadius,
-}) => ({
+const $failure: ThemedStyle<ViewStyle> = ({ spacing, borderRadius }) => ({
   marginBottom: spacing.md,
   padding: spacing.sm,
-  backgroundColor: colors.fill.danger,
-  borderRadius: borderRadius.sm,
+  backgroundColor: "#FFF5F5",
+  borderRadius: borderRadius.xs,
 });
 
 const $title: ThemedStyle<TextStyle> = ({ colors }) => ({
