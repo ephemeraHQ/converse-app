@@ -14,14 +14,6 @@ import ConversationNav, {
 import ConversationRequestsListNav from "./ConversationRequestsListNav";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
 import EnableTransactionsNav from "./EnableTransactionsNav";
-import GroupInviteNav, {
-  GroupInviteNavParams,
-  GroupInviteScreenConfig,
-} from "./GroupInviteNav";
-import GroupLinkNav, {
-  GroupLinkNavParams,
-  GroupLinkScreenConfig,
-} from "./GroupLinkNav";
 import GroupNav, { GroupNavParams, GroupScreenConfig } from "./GroupNav";
 import NewConversationNav, {
   NewConversationNavParams,
@@ -47,6 +39,11 @@ import {
 } from "./navHelpers";
 import config from "../../config";
 import { useAppStore } from "../../data/store/appStore";
+import {
+  JoinGroupNavigation,
+  JoinGroupNavigationParams,
+  JoinGroupScreenConfig,
+} from "../../features/GroupInvites/joinGroup/JoinGroupNavigation";
 import { isDesktop } from "../../utils/device";
 import { converseNavigations } from "../../utils/navigation";
 
@@ -65,8 +62,7 @@ export type NavigationParamList = {
   TopUp: undefined;
   Profile: ProfileNavParams;
   Group: GroupNavParams;
-  GroupLink: GroupLinkNavParams;
-  GroupInvite: GroupInviteNavParams;
+  GroupInvite: JoinGroupNavigationParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
 };
@@ -83,8 +79,7 @@ const linking = {
       NewConversation: NewConversationScreenConfig,
       Profile: ProfileScreenConfig,
       Group: GroupScreenConfig,
-      GroupLink: GroupLinkScreenConfig,
-      GroupInvite: GroupInviteScreenConfig,
+      GroupInvite: JoinGroupScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
       WebviewPreview: WebviewPreviewScreenConfig,
     },
@@ -158,8 +153,7 @@ export default function Navigation() {
             {WebviewPreviewNav()}
             {ProfileNav()}
             {GroupNav()}
-            {GroupLinkNav()}
-            {GroupInviteNav()}
+            {JoinGroupNavigation()}
             {UserProfileNav()}
             {TopUpNav()}
             {EnableTransactionsNav()}

@@ -1,9 +1,8 @@
 import { MessageToDisplay } from "@components/Chat/Message/Message";
 import { MediaPreview } from "@data/store/chatStore";
+import { GroupWithCodecsType } from "@utils/xmtpRN/client.types";
 import EventEmitter from "eventemitter3";
 import { Account, Wallet } from "thirdweb/wallets";
-
-import { GroupWithCodecsType } from "./xmtpRN/client";
 
 type ShowActionSheetEvent<T extends string> = `showActionSheetForTxRef-${T}`;
 type OpenAttachmentMessage<T extends string> = `openAttachmentForMessage-${T}`;

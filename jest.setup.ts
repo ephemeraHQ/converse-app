@@ -46,10 +46,10 @@ jest.mock("react-native-fs", () => {
     touch: jest.fn(),
     MainBundlePath: jest.fn(),
     CachesDirectoryPath: jest.fn(),
-    DocumentDirectoryPath: jest.fn(),
+    DocumentDirectoryPath: "",
     ExternalDirectoryPath: jest.fn(),
     ExternalStorageDirectoryPath: jest.fn(),
-    TemporaryDirectoryPath: jest.fn(),
+    TemporaryDirectoryPath: "",
     LibraryDirectoryPath: jest.fn(),
     PicturesDirectoryPath: jest.fn(),
   };
@@ -67,5 +67,8 @@ jest.mock("rn-fetch-blob", () => {
   };
 });
 
-jest.mock("@sentry/react-native", () => ({}));
+jest.mock("@sentry/react-native", () => ({
+  init: jest.fn(),
+  addBreadcrumb: jest.fn(),
+}));
 jest.mock("expo-constants", () => ({}));

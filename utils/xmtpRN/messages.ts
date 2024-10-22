@@ -2,6 +2,11 @@ import { entifyWithAddress } from "@queries/entify";
 import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
 import { getCleanAddress } from "@utils/evm/address";
 import logger from "@utils/logger";
+import {
+  ConverseXmtpClientType,
+  DecodedMessageWithCodecsType,
+  GroupWithCodecsType,
+} from "@utils/xmtpRN/client.types";
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import {
   DecodedMessage,
@@ -14,11 +19,6 @@ import {
 } from "@xmtp/react-native-sdk";
 
 import { serializeRemoteAttachmentMessageContent } from "./attachments";
-import {
-  ConverseXmtpClientType,
-  DecodedMessageWithCodecsType,
-  GroupWithCodecsType,
-} from "./client";
 import { getMessageContentType, isContentType } from "./contentTypes";
 import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 import { getXmtpClient } from "./sync";
