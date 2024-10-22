@@ -28,7 +28,8 @@ jest.mock("./keychain", () => {
   };
 });
 
-describe.skip("GroupInviteLink", () => {
+// todo(lustig): incorporate these tests into JoinGroupClient#live
+describe("GroupInviteLink", () => {
   let client: Client;
 
   const groupName = "test";
