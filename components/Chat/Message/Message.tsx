@@ -29,7 +29,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import ChatMessageActions from "./MessageActions";
-import ChatMessageReactions from "./MessageReactions";
+import { ChatMessageReactions } from "./MessageReactions";
 import MessageStatus from "./MessageStatus";
 import {
   currentAccount,
