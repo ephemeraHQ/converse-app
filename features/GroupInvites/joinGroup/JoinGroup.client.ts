@@ -7,7 +7,7 @@ import { GroupData, GroupsDataEntity } from "@utils/xmtpRN/client.types";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { AxiosInstance } from "axios";
 
-import {} from "./groupInvites.utils";
+import {} from "../groupInvites.utils";
 import { JoinGroupResult } from "./joinGroup.types";
 
 const GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS = 10;

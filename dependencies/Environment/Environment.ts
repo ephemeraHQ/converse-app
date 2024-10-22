@@ -1,7 +1,7 @@
 import api from "@utils/api";
 
 // import { AccountsClient } from "../../features/Accounts/Accounts.client";
-import { JoinGroupClient } from "../../features/GroupInvites/JoinGroup.client";
+import { JoinGroupClient } from "../../features/GroupInvites/joinGroup/JoinGroup.client";
 import { NetworkMonitorClient } from "../NetworkMonitor/NetworkMonitor";
 
 export type Environment = {

@@ -7,7 +7,7 @@ import { assign, fromPromise, log, setup } from "xstate";
 
 import { AllowGroupProps } from "./JoinGroup.client";
 import { JoinGroupResult, JoinGroupResultType } from "./joinGroup.types";
-import { Controlled } from "../../dependencies/Environment/Environment";
+import { Controlled } from "../../../dependencies/Environment/Environment";
 
 type JoinGroupMachineEvents =
   | { type: "user.didTapJoinGroup" }

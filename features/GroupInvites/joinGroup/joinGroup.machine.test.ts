@@ -1,8 +1,8 @@
 import { createActor, waitFor } from "xstate";
 
+import { JoinGroupClient } from "./JoinGroup.client";
+import { joinGroupMachineLogic } from "./joinGroup.machine";
 import { Controlled } from "../../../dependencies/Environment/Environment";
-import { JoinGroupClient } from "../JoinGroup.client";
-import { joinGroupMachineLogic } from "../joinGroup.machine";
 
 jest.setTimeout(1);
 
