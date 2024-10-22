@@ -1,4 +1,8 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
+import { createBottomSheetModalRef } from "@design-system/BottomSheet/BottomSheet.utils";
+import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
+import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
+import { BottomSheetModal } from "@design-system/BottomSheet/BottomSheetModal";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
@@ -32,11 +36,17 @@ type RolledUpReactions = {
   userReacted: boolean;
 };
 
+const bottomSheetModalRef = createBottomSheetModalRef();
+
 export const ChatMessageReactions = memo(
   ({ message, reactions }: Props) => {
     const styles = useStyles();
     const { theme } = useAppTheme();
     const userAddress = useCurrentAccount();
+
+    const openReactionsDrawer = () => {
+      bottomSheetModalRef.current?.present();
+    };
 
     const reactionsList = useMemo(() => {
       return Object.entries(reactions)
@@ -108,7 +118,9 @@ export const ChatMessageReactions = memo(
         >
           <HStack style={styles.emojiContainer}>
             {rolledUpReactions.emojis.map((emoji, index) => (
-              <Text key={index}>{emoji}</Text>
+              <Text key={index} onPress={openReactionsDrawer}>
+                {emoji}
+              </Text>
             ))}
           </HStack>
           {rolledUpReactions.totalReactions > 1 && (
@@ -117,6 +129,15 @@ export const ChatMessageReactions = memo(
             </Text>
           )}
         </VStack>
+        <BottomSheetModal
+          ref={bottomSheetModalRef}
+          snapPoints={["50%"]}
+          index={1}
+        >
+          <BottomSheetContentContainer>
+            <BottomSheetHeader title="Reactions" hasClose />
+          </BottomSheetContentContainer>
+        </BottomSheetModal>
       </HStack>
     );
   },
