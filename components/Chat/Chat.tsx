@@ -109,7 +109,7 @@ const getItemType =
       const frame = framesStore[frameUrl];
       // Recycle frames with the same aspect ratio
       return `FRAME-${
-        frame?.frameInfo?.image?.aspectRatio || "1.91.1"
+        frame?.frameInfo?.image?.aspectRatio || "1.91:1"
       }-${fromMeString}`;
     } else if (
       (isContentType("attachment", item.contentType) ||
