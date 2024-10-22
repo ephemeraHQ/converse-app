@@ -11,7 +11,6 @@ import {
   myMessageHighlightedBubbleColor,
 } from "@styles/colors";
 import { useConversationContext } from "@utils/conversation";
-import { isFrameMessage } from "@utils/frames";
 import { navigate } from "@utils/navigation";
 import * as Haptics from "expo-haptics";
 import React, {
@@ -66,6 +65,7 @@ type Props = {
     [senderAddress: string]: MessageReaction[];
   };
   hideBackground: boolean;
+  isFrame: boolean;
 };
 
 enum ContextMenuActions {
@@ -79,6 +79,7 @@ export default function ChatMessageActions({
   message,
   reactions,
   hideBackground = false,
+  isFrame,
 }: Props) {
   const isAttachment = isAttachmentMessage(message.contentType);
   const isTransaction = isTransactionMessage(message.contentType);
@@ -286,7 +287,6 @@ export default function ChatMessageActions({
   }, [message]);
 
   const frameURL = useMemo(() => {
-    const isFrame = isFrameMessage(message);
     if (isFrame) {
       const frames = useFramesStore
         .getState()
@@ -294,7 +294,7 @@ export default function ChatMessageActions({
       return frames[0]?.url;
     }
     return null;
-  }, [message]);
+  }, [message, isFrame]);
 
   const animateInStyle = useAnimatedStyle(() => {
     return {
