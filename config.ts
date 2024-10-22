@@ -128,67 +128,6 @@ const ENV = {
 
 const getConfig = () => {
   if (__DEV__) {
-    console.log("dev");
-    console.log(ENV.dev);
-    console.log(Platform.OS);
-
-    /**
-     * Logs all environment variables starting with
-     * EXPO_PUBLIC_DEV_API_URI for debugging purposes.
-     *
-     * @example
-     * // Input: process.env with multiple variables
-     * // Output:
-     * // EXPO_PUBLIC_DEV_API_URI=http://localhost:9875
-     * // EXPO_PUBLIC_DEV_API_URI_ANDROID=http://10.0.2.2:9875
-     */
-    console.log(
-      "All EXPO_PUBLIC_DEV_API_URI variables:",
-      Object.entries(process.env)
-        .filter(([key]) => key.startsWith("EXPO_PUBLIC_DEV_API_URI"))
-        .map(([key, value]) => `${key}=${value}`)
-        .join("\n")
-    );
-
-    // Log the specific variable we're looking for
-    console.log(
-      "EXPO_PUBLIC_DEV_API_URI:",
-      process.env.EXPO_PUBLIC_DEV_API_URI
-    );
-
-    // Check if the variable exists using hasOwnProperty
-    console.log(
-      "Has EXPO_PUBLIC_DEV_API_URI:",
-      process.env.hasOwnProperty("EXPO_PUBLIC_DEV_API_URI")
-    );
-
-    if (process.env.EXPO_PUBLIC_DEV_API_URI === undefined) {
-      console.warn(
-        "EXPO_PUBLIC_DEV_API_URI is not set. " +
-          "Check your environment configuration."
-      );
-    }
-
-    if (process.env.EXPO_PUBLIC_DEV_API_URI === "") {
-      console.warn(
-        "EXPO_PUBLIC_DEV_API_URI is set to an empty string. " +
-          "Check your environment configuration."
-      );
-    }
-
-    console.log(
-      "Property descriptor:",
-      Object.getOwnPropertyDescriptor(process.env, "EXPO_PUBLIC_DEV_API_URI")
-        ?.value
-    );
-
-    console.log(
-      "Keys method:",
-      Object.keys(process.env).includes("EXPO_PUBLIC_DEV_API_URI")
-    );
-    console.log("In operator:", "EXPO_PUBLIC_DEV_API_URI" in process.env);
-    console.log("Direct access:", process.env["EXPO_PUBLIC_DEV_API_URI"]);
-
     return ENV.dev;
   } else if (Constants.expoConfig?.extra?.ENV === "preview") {
     console.log("preview");

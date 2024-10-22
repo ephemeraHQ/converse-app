@@ -2,26 +2,47 @@ import type { Config } from "jest";
 
 /**
  * Jest configuration for Expo projects with environment
- * variable preservation.
+ * variable preservation and additional setup.
  *
  * This config extends the default Expo preset and adds
- * a custom transformer to preserve environment variables
- * during testing.
+ * custom transformers and settings from package.json.
  */
 const config: Config = {
-  // Extend the Expo preset
+  /**
+   * Extends the Expo preset for Jest configuration.
+   * This includes default settings for React Native and Expo projects.
+   */
   preset: "jest-expo",
 
-  // Specify the root directory
+  /**
+   * Specifies the root directory for Jest to use when running tests.
+   * All paths in the config are relative to this directory.
+   * Example: If rootDir is ".", tests in "./src/components" will be found.
+   */
   rootDir: ".",
 
-  // Specify test environment
+  /**
+   * Specifies the test environment that will be used for testing.
+   * 'node' environment simulates Node.js environment.
+   */
   testEnvironment: "node",
 
-  // Specify file extensions to be treated as test files
+  /**
+   * Specifies glob patterns for locating test files.
+   * @example
+   * Matches:
+   * - "__tests__/MyComponent.test.js"
+   * - "src/utils/helper.spec.ts"
+   * Does not match:
+   * - "src/components/Button.js"
+   * - "tests/setup.js"
+   */
   testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
 
-  // Transform files
+  /**
+   * Specifies how files should be transformed before running tests.
+   * Uses babel-jest for JS/TS files, preserving environment variables.
+   */
   transform: {
     "^.+\\.(js|jsx|ts|tsx)$": [
       "babel-jest",
@@ -31,19 +52,53 @@ const config: Config = {
     ],
   },
 
-  // Module file extensions
+  /**
+   * Specifies file extensions Jest will look for when running tests.
+   * @example
+   * Will resolve: "MyComponent.tsx", "utils.js", "constants.json"
+   * Won't resolve: "styles.css", "image.png"
+   */
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
 
-  // Setup files
+  /**
+   * Specifies setup files to run before each test.
+   * These files can set up the testing environment.
+   */
   setupFiles: ["<rootDir>/jest.setup.ts"],
 
-  // Ignore paths
+  /**
+   * Specifies patterns for modules that should not be transformed.
+   * Typically used for node_modules, but allows exceptions for
+   * specific packages.
+   *
+   * @example
+   * Will transform: "@react-native-community/async-storage"
+   * Won't transform: "lodash", "moment"
+   */
   transformIgnorePatterns: [
-    "node_modules/(?!(jest-)?react-native|@react-native|@react-native-community|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|@sentry/.*)",
+    "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|rn-fetch-blob|@xmtp|typeorm|uuid|wagmi))",
   ],
 
-  // Verbose output
+  /**
+   * Enables verbose output, providing detailed information about each test.
+   */
   verbose: true,
+
+  /**
+   * Maps module names to file paths or other modules.
+   * Useful for resolving aliases or mocking modules.
+   * @example
+   * Import of 'typeorm' will resolve to the specified file.
+   */
+  moduleNameMapper: {
+    typeorm: "<rootDir>/node_modules/typeorm/index.js",
+  },
+
+  /**
+   * Specifies setup files to run after the test environment is set up
+   * but before tests are run.
+   */
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 };
 
 export default config;
