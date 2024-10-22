@@ -130,10 +130,8 @@ const getConfig = () => {
   if (__DEV__) {
     return ENV.dev;
   } else if (Constants.expoConfig?.extra?.ENV === "preview") {
-    console.log("preview");
     return ENV.preview;
   } else {
-    console.log("prod");
     return ENV.prod;
   }
 };
