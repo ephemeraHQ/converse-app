@@ -67,5 +67,8 @@ jest.mock("rn-fetch-blob", () => {
   };
 });
 
-jest.mock("@sentry/react-native", () => ({}));
+jest.mock("@sentry/react-native", () => ({
+  init: jest.fn(),
+  addBreadcrumb: jest.fn(),
+}));
 jest.mock("expo-constants", () => ({}));
