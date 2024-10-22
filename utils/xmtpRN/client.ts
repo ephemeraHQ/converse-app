@@ -4,6 +4,7 @@ import { awaitableAlert } from "@utils/alert";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { useLogoutFromConverse } from "@utils/logout";
+import { XmtpClientByAccount } from "@utils/xmtpRN/client.types";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
@@ -48,30 +49,12 @@ export const getXmtpClientFromBase64Key = async (base64Key: string) => {
   });
 };
 
-export type ConverseXmtpClientType = Awaited<
-  ReturnType<typeof getXmtpClientFromBase64Key>
->;
-
-export type ConversationWithCodecsType = Awaited<
-  ReturnType<ConverseXmtpClientType["conversations"]["newConversation"]>
->;
-
-export type GroupWithCodecsType = Awaited<
-  ReturnType<ConverseXmtpClientType["conversations"]["newGroup"]>
->;
-
-export type DecodedMessageWithCodecsType = Awaited<
-  ReturnType<ConversationWithCodecsType["messages"]>
->[number];
-
 export const isOnXmtp = async (address: string) =>
   Client.canMessage(getCleanAddress(address), {
     env,
   });
 
-export const xmtpClientByAccount: {
-  [account: string]: ConverseXmtpClientType;
-} = {};
+export const xmtpClientByAccount: XmtpClientByAccount = {};
 
 // On iOS, it's important to stop writing to SQLite database
 // when the app is going from BACKGROUNDED to SUSPENDED

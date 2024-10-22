@@ -1,4 +1,15 @@
+import {
+  markMessageAsPrepared,
+  markMessageAsSent,
+  updateMessagesIds,
+} from "@data/helpers/messages";
+import { getMessagesToSend } from "@data/helpers/messages/getMessagesToSend";
 import logger from "@utils/logger";
+import {
+  ConversationWithCodecsType,
+  ConverseXmtpClientType,
+  GroupWithCodecsType,
+} from "@utils/xmtpRN/client.types";
 import {
   ContentTypeTransactionReference,
   TransactionReference,
@@ -12,21 +23,10 @@ import { ConversationSendPayload } from "@xmtp/react-native-sdk/build/lib/types"
 import { DefaultContentTypes } from "@xmtp/react-native-sdk/build/lib/types/DefaultContentType";
 
 import { deserializeRemoteAttachmentMessageContent } from "./attachments";
-import {
-  ConversationWithCodecsType,
-  ConverseXmtpClientType,
-  GroupWithCodecsType,
-} from "./client";
 import { isContentType } from "./contentTypes";
 import { getConversationWithTopic } from "./conversations";
 import { getXmtpClient } from "./sync";
 import { Message as MessageEntity } from "../../data/db/entities/messageEntity";
-import {
-  markMessageAsPrepared,
-  markMessageAsSent,
-  updateMessagesIds,
-} from "../../data/helpers/messages";
-import { getMessagesToSend } from "../../data/helpers/messages/getMessagesToSend";
 
 let sendingPendingMessages = false;
 const sendingMessages: { [messageId: string]: boolean } = {};
