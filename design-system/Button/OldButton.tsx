@@ -84,7 +84,7 @@
 //         case "secondary":
 //           return theme.colors.fill.secondary;
 //         case "danger":
-//           return theme.colors.global.danger;
+//           return theme.colors.global.caution;
 //         default:
 //           return undefined;
 //       }
@@ -100,7 +100,7 @@
 //         case "secondary":
 //           return theme.colors.actionSecondary;
 //         case "danger":
-//           return theme.colors.global.danger;
+//           return theme.colors.global.caution;
 //         default:
 //           return undefined;
 //       }
