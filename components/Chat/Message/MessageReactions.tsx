@@ -6,10 +6,16 @@ import { BottomSheetModal } from "@design-system/BottomSheet/BottomSheetModal";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
+import {
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
+import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import { useAppTheme } from "@theme/useAppTheme";
 import { MessageReaction } from "@utils/reactions";
-import { memo, useMemo } from "react";
-import { StyleSheet } from "react-native";
+import { memo, useCallback, useMemo } from "react";
+import { StyleSheet, TouchableHighlight } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MessageToDisplay } from "./Message";
 
@@ -41,12 +47,26 @@ const bottomSheetModalRef = createBottomSheetModalRef();
 export const ChatMessageReactions = memo(
   ({ message, reactions }: Props) => {
     const styles = useStyles();
+    const { top } = useSafeAreaInsets();
     const { theme } = useAppTheme();
     const userAddress = useCurrentAccount();
 
     const openReactionsDrawer = () => {
       bottomSheetModalRef.current?.present();
     };
+
+    const renderBackdrop = useCallback(
+      (props: BottomSheetDefaultBackdropProps) => (
+        <BottomSheetBackdrop
+          {...props}
+          style={[
+            props.style,
+            { backgroundColor: theme.colors.background.scrim },
+          ]}
+        />
+      ),
+      [theme]
+    );
 
     const reactionsList = useMemo(() => {
       return Object.entries(reactions)
@@ -107,36 +127,49 @@ export const ChatMessageReactions = memo(
           message.fromMe && { justifyContent: "flex-end" },
         ]}
       >
-        <VStack
-          style={[
-            styles.reactionButton,
-            rolledUpReactions.userReacted && {
-              borderColor: theme.colors.fill.minimal,
-              backgroundColor: theme.colors.fill.minimal,
-            },
-          ]}
+        <TouchableHighlight
+          onPress={openReactionsDrawer}
+          underlayColor="transparent"
         >
-          <HStack style={styles.emojiContainer}>
-            {rolledUpReactions.emojis.map((emoji, index) => (
-              <Text key={index} onPress={openReactionsDrawer}>
-                {emoji}
+          <VStack
+            style={[
+              styles.reactionButton,
+              rolledUpReactions.userReacted && {
+                borderColor: theme.colors.fill.minimal,
+                backgroundColor: theme.colors.fill.minimal,
+              },
+            ]}
+          >
+            <HStack style={styles.emojiContainer}>
+              {rolledUpReactions.emojis.map((emoji, index) => (
+                <Text key={index}>{emoji}</Text>
+              ))}
+            </HStack>
+            {rolledUpReactions.totalReactions > 1 && (
+              <Text style={styles.reactorCount}>
+                {rolledUpReactions.totalReactions}
               </Text>
-            ))}
-          </HStack>
-          {rolledUpReactions.totalReactions > 1 && (
-            <Text style={styles.reactorCount}>
-              {rolledUpReactions.totalReactions}
-            </Text>
-          )}
-        </VStack>
+            )}
+          </VStack>
+        </TouchableHighlight>
         <BottomSheetModal
           ref={bottomSheetModalRef}
-          snapPoints={["50%"]}
+          snapPoints={["40%"]}
+          enableDynamicSizing
           index={1}
+          topInset={top}
+          backdropComponent={renderBackdrop}
         >
-          <BottomSheetContentContainer>
-            <BottomSheetHeader title="Reactions" hasClose />
-          </BottomSheetContentContainer>
+          <BottomSheetHeader title="Reactions" hasClose />
+          <BottomSheetScrollView
+            style={{
+              backgroundColor: theme.colors.background.raised,
+            }}
+          >
+            <BottomSheetContentContainer>
+              <Text>Reactions List</Text>
+            </BottomSheetContentContainer>
+          </BottomSheetScrollView>
         </BottomSheetModal>
       </HStack>
     );
