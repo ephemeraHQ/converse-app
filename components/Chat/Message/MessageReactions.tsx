@@ -1,8 +1,11 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
+import { HStack } from "@design-system/HStack";
+import { Text } from "@design-system/Text";
+import { VStack } from "@design-system/VStack";
 import { useAppTheme } from "@theme/useAppTheme";
 import { MessageReaction } from "@utils/reactions";
 import { memo, useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
 
 import { MessageToDisplay } from "./Message";
 
@@ -88,13 +91,13 @@ export const ChatMessageReactions = memo(
     if (reactionsList.length === 0) return null;
 
     return (
-      <View
+      <HStack
         style={[
           styles.reactionsWrapper,
           message.fromMe && { justifyContent: "flex-end" },
         ]}
       >
-        <View
+        <VStack
           style={[
             styles.reactionButton,
             rolledUpReactions.userReacted && {
@@ -103,18 +106,18 @@ export const ChatMessageReactions = memo(
             },
           ]}
         >
-          <View style={styles.emojiContainer}>
+          <HStack style={styles.emojiContainer}>
             {rolledUpReactions.emojis.map((emoji, index) => (
               <Text key={index}>{emoji}</Text>
             ))}
-          </View>
+          </HStack>
           {rolledUpReactions.totalReactions > 1 && (
             <Text style={styles.reactorCount}>
               {rolledUpReactions.totalReactions}
             </Text>
           )}
-        </View>
-      </View>
+        </VStack>
+      </HStack>
     );
   },
   (prevProps, nextProps) => {
