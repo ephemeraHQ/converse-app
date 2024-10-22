@@ -27,7 +27,7 @@ import Button from "./Button/Button";
 import {
   InstalledWallet,
   useInstalledWallets,
-} from "./Onboarding/supportedWallets";
+} from "./Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import Picto from "./Picto/Picto";
 
 export default function ExternalWalletPicker() {

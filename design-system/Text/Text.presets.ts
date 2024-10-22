@@ -13,7 +13,8 @@ export type IPresets =
   | "small"
   | "smaller"
   | "smallerBold"
-  | "bigBold";
+  | "bigBold"
+  | "title";
 
 export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
   body: [$textBaseStyle],
@@ -27,4 +28,6 @@ export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
   smallerBold: [$textBaseStyle, $textSizeStyles.xs, $textFontWeightStyles.bold],
 
   bigBold: [$textBaseStyle, $textSizeStyles.md, $textFontWeightStyles.bold],
+
+  title: [$textBaseStyle, $textSizeStyles.lg, $textFontWeightStyles.bold],
 };

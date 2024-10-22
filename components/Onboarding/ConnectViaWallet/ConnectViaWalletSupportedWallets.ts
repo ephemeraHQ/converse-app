@@ -1,9 +1,10 @@
 import * as Linking from "expo-linking";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { WalletId } from "thirdweb/wallets";
 
-import { isDesktop } from "../../utils/device";
-import { isEthOS } from "../../utils/ethos";
+import { useAppStateHandlers } from "../../../hooks/useAppStateHandlers";
+import { isDesktop } from "../../../utils/device";
+import { isEthOS } from "../../../utils/ethos";
 
 export const POPULAR_WALLETS = [
   {
@@ -44,17 +45,7 @@ export const POPULAR_WALLETS = [
   },
 ];
 
-export type InstalledWallet = {
-  name: string;
-  iconURL: string;
-  customScheme?: string;
-  universalLink?: string;
-  walletConnectId?: string;
-  platforms?: string[];
-  thirdwebId?: WalletId;
-};
-
-const SUPPORTED_WALLETS: InstalledWallet[] = [
+const SUPPORTED_WALLETS = [
   {
     name: "Coinbase Wallet",
     iconURL:
@@ -135,10 +126,24 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
   //   customScheme: "oneinch://",
   //   universalLink: "https://wallet.1inch.io",
   // },
-];
+] as const;
+
+type ISupportedWalletName =
+  | (typeof SUPPORTED_WALLETS)[number]["name"]
+  | "EthOS Wallet";
+
+export type InstalledWallet = {
+  name: ISupportedWalletName;
+  iconURL: string;
+  customScheme?: string;
+  universalLink?: string;
+  walletConnectId?: string;
+  platforms?: string[];
+  thirdwebId?: WalletId;
+};
 
 let hasCheckedInstalled = false;
-export let installedWallets: typeof SUPPORTED_WALLETS = [];
+export let installedWallets: InstalledWallet[] = [];
 
 export const getInstalledWallets = async (
   refresh: boolean
@@ -147,7 +152,7 @@ export const getInstalledWallets = async (
   const checkInstalled = await Promise.all(
     SUPPORTED_WALLETS.map((w) => Linking.canOpenURL(`${w.customScheme}wc`))
   );
-  const wallets: typeof SUPPORTED_WALLETS = [];
+  const wallets: InstalledWallet[] = [];
 
   const ethOS = await isEthOS();
   if (ethOS) {
@@ -164,9 +169,24 @@ export const getInstalledWallets = async (
 };
 
 export const useInstalledWallets = () => {
-  const [wallets, setWallets] = useState(installedWallets);
-  useEffect(() => {
-    getInstalledWallets(true).then(setWallets);
+  const [walletsInstalled, setWalletsInstalled] =
+    useState<InstalledWallet[]>(installedWallets);
+
+  const loadInstalledWallets = useCallback(async (refresh: boolean) => {
+    const list = await getInstalledWallets(refresh);
+    setWalletsInstalled(list);
   }, []);
-  return wallets;
+
+  useAppStateHandlers({
+    deps: [loadInstalledWallets],
+    onForeground: () => {
+      loadInstalledWallets(true);
+    },
+  });
+
+  useEffect(() => {
+    loadInstalledWallets(false);
+  }, [loadInstalledWallets]);
+
+  return walletsInstalled;
 };

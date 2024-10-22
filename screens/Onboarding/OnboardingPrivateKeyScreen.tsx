@@ -18,6 +18,7 @@ import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/Onboardi
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { initXmtpClient } from "../../components/Onboarding/init-xmtp-client";
 import { VStack } from "../../design-system/VStack";
+import { useRouter } from "../../navigation/useNavigation";
 import { sentryTrackError } from "../../utils/sentry";
 import { NavigationParamList } from "../Navigation/Navigation";
 
@@ -28,6 +29,20 @@ export function OnboardingPrivateKeyScreen(
 
   const { loading, loginWithPrivateKey } = useLoginWithPrivateKey();
   const [privateKey, setPrivateKey] = useState("");
+
+  const router = useRouter();
+
+  const handlePressConnect = useCallback(async () => {
+    try {
+      if (!privateKey || privateKey.trim().length === 0) {
+        return;
+      }
+      await loginWithPrivateKey(privateKey.trim());
+      router.navigate("OnboardingUserProfile");
+    } catch (error) {
+      sentryTrackError(error);
+    }
+  }, [loginWithPrivateKey, privateKey, router]);
 
   return (
     <OnboardingScreenComp preset="scroll">
@@ -52,10 +67,7 @@ export function OnboardingPrivateKeyScreen(
           <OnboardingPrimaryCtaButton
             loading={loading}
             title={translate("privateKeyConnect.connectButton")}
-            onPress={() => {
-              if (!privateKey || privateKey.trim().length === 0) return;
-              loginWithPrivateKey(privateKey.trim());
-            }}
+            onPress={handlePressConnect}
           />
           <Terms />
         </VStack>
@@ -93,9 +105,9 @@ export const useLoginWithPrivateKey = () => {
     setLoading(true);
     try {
       const signer = await getSignerFromPrivateKey(privateKey);
+
       if (!signer) {
-        setLoading(false);
-        return;
+        throw new Error("Couldnt get signer from private key");
       }
 
       await initXmtpClient({

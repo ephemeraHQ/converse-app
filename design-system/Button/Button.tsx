@@ -2,6 +2,7 @@ import { useAppTheme } from "@theme/useAppTheme";
 import { useCallback } from "react";
 import {
   ActivityIndicator,
+  GestureResponderEvent,
   Pressable,
   PressableStateCallbackType,
   StyleProp,
@@ -10,6 +11,7 @@ import {
 } from "react-native";
 
 import Picto from "../../components/Picto/Picto";
+import { Haptics } from "../../utils/haptics";
 import { Text } from "../Text";
 import { IButtonProps, IButtonVariant } from "./Button.props";
 import {
@@ -36,6 +38,8 @@ export function Button(props: IButtonProps) {
     disabledStyle: $disabledViewStyleOverride,
     size = "lg",
     loading,
+    withHapticFeedback = true,
+    onPress,
     // @deprecated,
     title,
     picto,
@@ -90,6 +94,17 @@ export function Button(props: IButtonProps) {
     ]
   );
 
+  const handlePress = useCallback(
+    (e: GestureResponderEvent) => {
+      console.log("withHapticFeedback:", withHapticFeedback);
+      if (withHapticFeedback) {
+        Haptics.softImpactAsync();
+      }
+      onPress?.(e);
+    },
+    [withHapticFeedback, onPress]
+  );
+
   return (
     <Pressable
       style={$viewStyle}
@@ -97,6 +112,7 @@ export function Button(props: IButtonProps) {
       accessibilityState={{ disabled: !!disabled }}
       {...rest}
       disabled={disabled}
+      onPress={handlePress}
     >
       {(state) => {
         if (loading) {

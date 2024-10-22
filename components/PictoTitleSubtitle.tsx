@@ -4,7 +4,6 @@ import { AnimatedVStack, IAnimatedVStackProps } from "@design-system/VStack";
 import { spacing } from "@theme/spacing";
 import React, { memo } from "react";
 
-import { PictoSizes } from "../styles/sizes";
 import { useAppTheme } from "../theme/useAppTheme";
 import { IPicto, IPictoProps } from "./Picto/Picto";
 
@@ -21,7 +20,7 @@ const TitleComponent = memo(function TitleComponent({
 }: IAnimatedTextProps) {
   return (
     <AnimatedText
-      preset="bigBold"
+      preset="title"
       style={[{ textAlign: "center" }, style]}
       {...rest}
     />
@@ -67,6 +66,8 @@ const PictoTitleSubtitleAll = memo(function (
 ) {
   const { picto, title, subtitle } = props;
 
+  const { theme } = useAppTheme();
+
   return (
     <PictoTitleSubtitle.Container
       style={{
@@ -77,7 +78,7 @@ const PictoTitleSubtitleAll = memo(function (
       {!!picto && (
         <PictoTitleSubtitle.Picto
           picto={picto}
-          size={PictoSizes.onboardingComponent} // Todo replace with new sizes later
+          size={theme.iconSize.lg} // Todo replace with new sizes later
         />
       )}
       <PictoTitleSubtitle.Title>{title}</PictoTitleSubtitle.Title>

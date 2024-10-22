@@ -2,13 +2,14 @@ import { Signer } from "ethers";
 import { createContext, memo, useContext, useRef } from "react";
 import { createStore, useStore } from "zustand";
 
-type IConnectViaWalletStoreProps = object;
+type IConnectViaWalletStoreProps = {
+  signer: Signer;
+};
 
 type IConnectViaWalletStoreProviderProps =
   React.PropsWithChildren<IConnectViaWalletStoreProps>;
 
-type IConnectViaWalletStoreState = {
-  signer: Signer | undefined;
+type IConnectViaWalletStoreState = IConnectViaWalletStoreProps & {
   address: string | undefined;
   loading: boolean;
   signaturesDone: number;
@@ -17,20 +18,16 @@ type IConnectViaWalletStoreState = {
   alreadyV3Db: boolean;
   clickedSignature: boolean;
   initiatingClientForAddress: string | undefined;
-  onboardingDone: boolean;
-  setSigner: (signer: Signer | undefined) => void;
   setAddress: (address: string | undefined) => void;
   setLoading: (loading: boolean) => void;
   setSignaturesDone: (signaturesDone: number) => void;
   setWaitingForNextSignature: (waiting: boolean) => void;
   setOnXmtp: (onXmtp: boolean) => void;
   setAlreadyV3Db: (alreadyV3Db: boolean) => void;
-  resetOnboarding: () => void;
   setClickedSignature: (clickedSignature: boolean) => void;
   setInitiatingClientForAddress: (
     initiatingClientForAddress: string | undefined
   ) => void;
-  setOnboardingDone: (onboardingDone: boolean) => void;
 };
 
 type IConnectViaWalletStore = ReturnType<typeof createConnectViaWalletStore>;
@@ -39,7 +36,7 @@ export const ConnectViaWalletStoreProvider = memo(
   ({ children, ...props }: IConnectViaWalletStoreProviderProps) => {
     const storeRef = useRef<IConnectViaWalletStore>();
     if (!storeRef.current) {
-      storeRef.current = createConnectViaWalletStore();
+      storeRef.current = createConnectViaWalletStore(props);
     }
     return (
       <ConnectViaWalletStoreContext.Provider value={storeRef.current}>
@@ -49,9 +46,9 @@ export const ConnectViaWalletStoreProvider = memo(
   }
 );
 
-const createConnectViaWalletStore = () =>
+const createConnectViaWalletStore = (props: IConnectViaWalletStoreProps) =>
   createStore<IConnectViaWalletStoreState>()((set) => ({
-    signer: undefined,
+    signer: props.signer,
     address: undefined,
     loading: false,
     signaturesDone: 0,
@@ -60,8 +57,6 @@ const createConnectViaWalletStore = () =>
     alreadyV3Db: false,
     clickedSignature: false,
     initiatingClientForAddress: undefined,
-    onboardingDone: false,
-    setSigner: (signer) => set({ signer }),
     setAddress: (address) => set({ address }),
     setLoading: (loading) => set({ loading }),
     setSignaturesDone: (signaturesDone) => set({ signaturesDone }),
@@ -72,18 +67,6 @@ const createConnectViaWalletStore = () =>
     setClickedSignature: (clickedSignature) => set({ clickedSignature }),
     setInitiatingClientForAddress: (initiatingClientForAddress) =>
       set({ initiatingClientForAddress }),
-    setOnboardingDone: (onboardingDone) => set({ onboardingDone }),
-    resetOnboarding: () =>
-      set({
-        signer: undefined,
-        clickedSignature: false,
-        address: undefined,
-        loading: false,
-        signaturesDone: 0,
-        waitingForNextSignature: false,
-        onXmtp: false,
-        alreadyV3Db: false,
-      }),
   }));
 
 const ConnectViaWalletStoreContext =

@@ -102,6 +102,10 @@ export interface IButtonProps extends RNPressableProps {
    * Whether the button is loading.
    */
   loading?: boolean;
+  /**
+   * Whether the button should trigger a haptic feedback.
+   */
+  withHapticFeedback?: boolean;
 
   /** @deprecated */
   title?: string;

@@ -73,7 +73,6 @@ export function useRouter(args?: {
 
   useEffect(() => {
     navigation.addListener("beforeRemove", (e) => {
-      console.log("e:", e);
       if (onBeforeRemove) {
         onBeforeRemove(e);
       }

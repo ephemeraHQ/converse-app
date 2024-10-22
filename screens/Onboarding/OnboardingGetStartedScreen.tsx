@@ -1,33 +1,24 @@
-import {
-  getInstalledWallets,
-  InstalledWallet,
-  installedWallets,
-  POPULAR_WALLETS,
-} from "@components/Onboarding/supportedWallets";
 import TableView from "@components/TableView/TableView";
-import {
-  TableViewEmoji,
-  TableViewImage,
-  TableViewPicto,
-} from "@components/TableView/TableViewImage";
 import { AnimatedVStack } from "@design-system/VStack";
 import { translate } from "@i18n";
-import { textSecondaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { animations } from "@theme/animations";
 import { isDesktop } from "@utils/device";
-import { getEthOSSigner } from "@utils/ethos";
-import logger from "@utils/logger";
-import { thirdwebClient } from "@utils/thirdweb";
-import * as Linking from "expo-linking";
-import React, { useEffect, useRef, useState } from "react";
-import { AppState, useColorScheme } from "react-native";
-import { useConnect, useSetActiveWallet } from "thirdweb/react";
-import { createWallet } from "thirdweb/wallets";
+import React from "react";
+import { Alert } from "react-native";
 
+import { ConnectViaWalletPopularWalletsTableView } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletPopularWalletsTableView";
+import { useInstalledWallets } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
+import {
+  getConnectViaWalletTableViewEphemeralItem,
+  getConnectViaWalletTableViewPhoneItem,
+  getConnectViaWalletTableViewPrivateKeyItem,
+  InstalledWalletsTableView,
+} from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletTableViewItems";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
-import config from "../../config";
+import { useAccountsStore } from "../../data/store/accountsStore";
+import { useAuthStore } from "../../data/store/authStore";
 import { useRouter } from "../../navigation/useNavigation";
 
 const animationDelays = [525, 550, 575, 800, 825, 850] as const;
@@ -35,9 +26,9 @@ const animationDelays = [525, 550, 575, 800, 825, 850] as const;
 export function OnboardingGetStartedScreen() {
   const router = useRouter();
 
-  const { walletsInstalled } = useInstalledWallets();
+  const walletsInstalled = useInstalledWallets();
 
-  const hasInstalledWallets = walletsInstalled.list.length > 0;
+  const hasInstalledWallets = walletsInstalled.length > 0;
 
   return (
     <OnboardingScreenComp safeAreaEdges={["top", "bottom"]}>
@@ -68,28 +59,16 @@ export function OnboardingGetStartedScreen() {
         <TableView
           title={translate("walletSelector.converseAccount.title")}
           items={[
-            {
-              id: "phone",
-              leftView: <TableViewEmoji emoji="📞" />,
-              title: translate(
-                "walletSelector.converseAccount.connectViaPhone"
-              ),
-              rightView: RightViewChevron(),
+            getConnectViaWalletTableViewPhoneItem({
               action: () => {
                 router.navigate("OnboardingPrivy");
               },
-            },
-            {
-              id: "ephemeral",
-              leftView: <TableViewEmoji emoji="☁️" />,
-              title: translate(
-                "walletSelector.converseAccount.createEphemeral"
-              ),
-              rightView: RightViewChevron(),
+            }),
+            getConnectViaWalletTableViewEphemeralItem({
               action: () => {
                 router.navigate("OnboardingEphemeral");
               },
-            },
+            }),
           ]}
         />
       </AnimatedVStack>
@@ -98,7 +77,19 @@ export function OnboardingGetStartedScreen() {
         <AnimatedVStack
           entering={animations.fadeInDownSlow().delay(animationDelays[4])}
         >
-          <InstalledWallets wallets={walletsInstalled.list} />
+          <InstalledWalletsTableView
+            onAccountExists={(arg) => {
+              // TODO: Add a better message
+              Alert.alert("Account already connected");
+              useAccountsStore.getState().setCurrentAccount(arg.address, false);
+              useAuthStore.setState({
+                status: "signedIn",
+              });
+            }}
+            onAccountDoesNotExist={({ signer }) => {
+              router.navigate("OnboardingConnectWallet", { signer });
+            }}
+          />
         </AnimatedVStack>
       )}
 
@@ -114,17 +105,11 @@ export function OnboardingGetStartedScreen() {
               : translate("walletSelector.connectionOptions.connectForDevs")
           }
           items={[
-            {
-              id: "privateKey",
-              leftView: <TableViewEmoji emoji="🔑" />,
-              title: translate(
-                "walletSelector.connectionOptions.connectViaKey"
-              ),
-              rightView: RightViewChevron(),
+            getConnectViaWalletTableViewPrivateKeyItem({
               action: () => {
                 router.navigate("OnboardingPrivateKey");
               },
-            },
+            }),
           ]}
         />
       </AnimatedVStack>
@@ -133,151 +118,9 @@ export function OnboardingGetStartedScreen() {
         <AnimatedVStack
           entering={animations.fadeInDownSlow().delay(animationDelays[5])}
         >
-          <PopularWallets />
+          <ConnectViaWalletPopularWalletsTableView />
         </AnimatedVStack>
       )}
     </OnboardingScreenComp>
   );
-}
-
-export function PopularWallets() {
-  return (
-    <TableView
-      title={translate("walletSelector.popularMobileApps.title")}
-      items={POPULAR_WALLETS.map((w) => ({
-        id: w.name,
-        title: w.name,
-        leftView: <TableViewImage imageURI={w.iconURL} />,
-        rightView: RightViewChevron(),
-        action: () => Linking.openURL(w.url),
-      }))}
-    />
-  );
-}
-
-export function RightViewChevron() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <TableViewPicto
-      symbol="chevron.right"
-      color={textSecondaryColor(colorScheme)}
-    />
-  );
-}
-
-export function InstalledWallets({ wallets }: { wallets: InstalledWallet[] }) {
-  const { connect: thirdwebConnect } = useConnect();
-
-  const setActiveWallet = useSetActiveWallet();
-
-  const router = useRouter();
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  return (
-    <TableView
-      title={translate("walletSelector.installedApps.title")}
-      items={wallets.map((w) => ({
-        id: w.name,
-        leftView: <TableViewImage imageURI={w.iconURL} />,
-        rightView: RightViewChevron(),
-        title: translate("walletSelector.installedApps.connectWallet", {
-          walletName: w.name,
-        }),
-        action: async () => {
-          setIsLoading(true);
-
-          logger.debug(
-            `[Onboarding] Clicked on wallet ${w.name} - opening external app`
-          );
-
-          try {
-            if (w.name === "Coinbase Wallet") {
-              const res = await thirdwebConnect(async () => {
-                const coinbaseWallet = createWallet("com.coinbase.wallet", {
-                  appMetadata: config.walletConnectConfig.appMetadata,
-                  mobileConfig: {
-                    callbackURL: `https://${config.websiteDomain}/coinbase`,
-                  },
-                });
-                await coinbaseWallet.connect({ client: thirdwebClient });
-                setActiveWallet(coinbaseWallet);
-                return coinbaseWallet;
-              });
-              if (!res) {
-                throw new Error("Failed to connect to Coinbase Wallet");
-              }
-              router.navigate("OnboardingConnectWallet", {});
-            }
-            //
-            else if (w.name === "EthOS Wallet") {
-              const signer = getEthOSSigner();
-              if (signer) {
-                const address = await signer.getAddress();
-                router.navigate("OnboardingConnectWallet", { address });
-              } else {
-                setIsLoading(false);
-              }
-            }
-            //
-            else if (w.thirdwebId) {
-              const walletConnectWallet = createWallet(w.thirdwebId);
-              const res = await walletConnectWallet.connect({
-                client: thirdwebClient,
-                walletConnect: config.walletConnectConfig,
-              });
-              setActiveWallet(walletConnectWallet);
-              if (!res) {
-                throw new Error("Failed to connect to wallet");
-              }
-              router.navigate("OnboardingConnectWallet", {});
-            }
-          } catch (e: any) {
-            logger.error("Error connecting to wallet:", e);
-          } finally {
-            setIsLoading(false);
-          }
-        },
-      }))}
-    />
-  );
-}
-
-export function useInstalledWallets() {
-  const [walletsInstalled, setWalletsInstalled] = useState<{
-    checked: boolean;
-    list: InstalledWallet[];
-  }>({
-    checked: false,
-    list: installedWallets as InstalledWallet[],
-  });
-
-  const appState = useRef(AppState.currentState);
-
-  useEffect(() => {
-    const loadInstalledWallets = async (refresh: boolean) => {
-      const list = await getInstalledWallets(refresh);
-      setWalletsInstalled({ checked: true, list });
-    };
-
-    loadInstalledWallets(false);
-
-    const subscription = AppState.addEventListener(
-      "change",
-      async (nextAppState) => {
-        if (
-          nextAppState === "active" &&
-          appState.current.match(/inactive|background/)
-        ) {
-          loadInstalledWallets(true);
-        }
-        appState.current = nextAppState;
-      }
-    );
-
-    return () => subscription.remove();
-  }, []);
-
-  return { walletsInstalled };
 }

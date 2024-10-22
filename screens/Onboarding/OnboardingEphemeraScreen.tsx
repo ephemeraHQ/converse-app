@@ -1,13 +1,12 @@
 import ValueProps from "@components/Onboarding/ValueProps";
-import { PictoTitleSubtitle } from "@components/PictoTitleSubtitle";
 import { translate } from "@i18n";
 import { utils } from "@noble/secp256k1";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { PictoSizes } from "@styles/sizes";
 import { spacing } from "@theme/spacing";
 import { Wallet } from "ethers";
 import { useCallback, useState } from "react";
 
+import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { Terms } from "../../components/Onboarding/Terms";
@@ -44,23 +43,15 @@ export function OnboardingEphemeraScreen(
 
   return (
     <OnboardingScreenComp>
-      <PictoTitleSubtitle.Container
-        style={{
-          // ...debugBorder(),
-          marginBottom: spacing.lg,
-        }}
-      >
-        <PictoTitleSubtitle.Picto
-          picto="cloud"
-          size={PictoSizes.onboardingComponent}
-        />
-        <PictoTitleSubtitle.Title>
+      <OnboardingPictoTitleSubtitle.Container>
+        <OnboardingPictoTitleSubtitle.Picto picto="cloud" />
+        <OnboardingPictoTitleSubtitle.Title>
           {translate("createEphemeral.title")}
-        </PictoTitleSubtitle.Title>
-        <PictoTitleSubtitle.Subtitle>
+        </OnboardingPictoTitleSubtitle.Title>
+        <OnboardingPictoTitleSubtitle.Subtitle>
           {translate("createEphemeral.subtitle")}
-        </PictoTitleSubtitle.Subtitle>
-      </PictoTitleSubtitle.Container>
+        </OnboardingPictoTitleSubtitle.Subtitle>
+      </OnboardingPictoTitleSubtitle.Container>
 
       <ValueProps />
 

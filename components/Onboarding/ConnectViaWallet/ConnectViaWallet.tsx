@@ -1,3 +1,4 @@
+import { Button } from "@design-system/Button/Button";
 import { translate } from "@i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { awaitableAlert } from "@utils/alert";
@@ -5,44 +6,42 @@ import { getDatabaseFilesForInboxId } from "@utils/fileSystem";
 import logger from "@utils/logger";
 import { logoutAccount } from "@utils/logout";
 import { sentryTrackError, sentryTrackMessage } from "@utils/sentry";
-import { thirdwebClient } from "@utils/thirdweb";
-import { Signer } from "ethers";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { Alert } from "react-native";
-import { ethers5Adapter } from "thirdweb/adapters/ethers5";
-import { ethereum } from "thirdweb/chains";
-import {
-  useActiveAccount,
-  useActiveWallet,
-  useDisconnect as useThirdwebDisconnect,
-} from "thirdweb/react";
+import { ActivityIndicator } from "react-native";
 
-import {
-  getAccountsList,
-  useAccountsStore,
-} from "../../../data/store/accountsStore";
+import { Center } from "../../../design-system/Center";
 import { VStack } from "../../../design-system/VStack";
-import { useAppStateHandlers } from "../../../hooks/useAppStateHandlers";
-import { useRouter } from "../../../navigation/useNavigation";
 import { spacing } from "../../../theme";
-import { isAppActive } from "../../../utils/appState";
+import { useAppTheme } from "../../../theme/useAppTheme";
 import { wait } from "../../../utils/general";
 import { isOnXmtp } from "../../../utils/xmtpRN/client";
 import {
   getInboxId,
   getXmtpBase64KeyFromSigner,
 } from "../../../utils/xmtpRN/signIn";
-import { OnboardingPictoTitleSubtitle } from "../OnboardingPictoTitleSubtitle";
-import { OnboardingPrimaryCtaButton } from "../OnboardingPrimaryCtaButton";
+import { PictoTitleSubtitle } from "../../PictoTitleSubtitle";
 import { Terms } from "../Terms";
 import ValueProps from "../ValueProps";
 import { connectWithBase64Key } from "../init-xmtp-client";
+import { useConnectViaWalletContext } from "./ConnectViaWallet.context";
 import {
   useConnectViaWalletStore,
   useConnectViaWalletStoreContext,
-} from "./connectViaWalletStore";
+} from "./ConnectViaWallet.store";
 
 export const ConnectViaWallet = memo(function ConnectViaWallet() {
+  const { isInitializing } = useInitSignerState();
+
+  if (isInitializing) {
+    return <ActivityIndicator />;
+  }
+
+  return <Content />;
+});
+
+const Content = memo(function Content() {
+  const { theme } = useAppTheme();
+
   const {
     address,
     loading,
@@ -62,33 +61,8 @@ export const ConnectViaWallet = memo(function ConnectViaWallet() {
   }));
 
   const connectViewWalletStore = useConnectViaWalletStore();
-  const disconnect = useDisconnect();
+
   const { initXmtpClient } = useXmtpConnection();
-  const { thirdwebSigner } = useThirdwebSigner();
-  const router = useRouter();
-
-  useAppStateHandlers({
-    deps: [thirdwebSigner],
-    onForeground: () => {
-      setTimeout(() => {
-        if (!thirdwebSigner) {
-          logger.debug("[Connect Wallet] Still no signer after 1.5 sec");
-          disconnect().catch(sentryTrackError);
-          router.goBack();
-        }
-      }, 1500);
-    },
-  });
-
-  useEffect(() => {
-    return () => {
-      // We don't want to disconnect while we're signing
-      if (isAppActive()) {
-        logger.debug("[Connect Wallet] Unmounting, disconnecting");
-        disconnect().catch(sentryTrackError);
-      }
-    };
-  }, [disconnect]);
 
   const primaryButtonAction = useCallback(() => {
     if (waitingForNextSignature) {
@@ -106,113 +80,76 @@ export const ConnectViaWallet = memo(function ConnectViaWallet() {
     return null;
   }
 
+  // Random for now until we have a better solution
+  if (loading) {
+    return (
+      <Center
+        style={{
+          paddingTop: theme.spacing["6xl"],
+        }}
+      >
+        <ActivityIndicator />
+      </Center>
+    );
+  }
+
+  // Determine the content based on the state
+  let title = "";
+  let subtitle = "";
+  let showValueProps = true;
+
+  // console.log("onXmtp:", onXmtp);
+  // console.log("alreadyV3Db:", alreadyV3Db);
+  // console.log("signaturesDone:", signaturesDone);
+  // console.log("waitingForNextSignature:", waitingForNextSignature);
+  // console.log("loading:", loading);
+
+  // On XMTP, needs V3 DB signature
   if (onXmtp && !alreadyV3Db) {
-    return (
-      <>
-        <OnboardingPictoTitleSubtitle.Container>
-          <OnboardingPictoTitleSubtitle.Picto picto="tray" />
-          <OnboardingPictoTitleSubtitle.Title>
-            {`${translate("connectViaWallet.sign")} (${signaturesDone + 1}/2)`}
-          </OnboardingPictoTitleSubtitle.Title>
-          <OnboardingPictoTitleSubtitle.Subtitle>
-            {translate("connectViaWallet.firstSignature.explanation")}
-          </OnboardingPictoTitleSubtitle.Subtitle>
-        </OnboardingPictoTitleSubtitle.Container>
-        <ValueProps />
-        <VStack
-          style={{
-            rowGap: spacing.sm,
-            marginTop: spacing.lg,
-          }}
-        >
-          <OnboardingPrimaryCtaButton
-            onPress={primaryButtonAction}
-            title={translate("connectViaWallet.sign")}
-          />
-          <Terms />
-        </VStack>
-      </>
-    );
+    title = `${translate("connectViaWallet.sign")} (${signaturesDone + 1}/2)`;
+    subtitle = translate("connectViaWallet.firstSignature.explanation");
   }
-
-  if (onXmtp && alreadyV3Db) {
-    return (
-      <>
-        <OnboardingPictoTitleSubtitle.Container>
-          <OnboardingPictoTitleSubtitle.Picto picto="tray" />
-          <OnboardingPictoTitleSubtitle.Title>
-            {translate("connectViaWallet.firstSignature.title")}
-          </OnboardingPictoTitleSubtitle.Title>
-          <OnboardingPictoTitleSubtitle.Subtitle>
-            {translate("connectViaWallet.secondSignature.explanation")}
-          </OnboardingPictoTitleSubtitle.Subtitle>
-        </OnboardingPictoTitleSubtitle.Container>
-        <ValueProps />
-        <VStack
-          style={{
-            rowGap: spacing.sm,
-            marginTop: spacing.lg,
-          }}
-        >
-          <OnboardingPrimaryCtaButton
-            onPress={primaryButtonAction}
-            title={translate("connectViaWallet.sign")}
-          />
-          <Terms />
-        </VStack>
-      </>
-    );
+  // On XMTP, has V3 DB signature
+  else if (onXmtp && alreadyV3Db) {
+    title = translate("connectViaWallet.firstSignature.title");
+    subtitle = translate("connectViaWallet.secondSignature.explanation");
   }
-
-  if (waitingForNextSignature && !loading) {
-    return (
-      <>
-        <OnboardingPictoTitleSubtitle.Container>
-          <OnboardingPictoTitleSubtitle.Picto picto="tray" />
-          <OnboardingPictoTitleSubtitle.Title>
-            {translate("connectViaWallet.secondSignature.title")}
-          </OnboardingPictoTitleSubtitle.Title>
-          <OnboardingPictoTitleSubtitle.Subtitle>
-            {translate("connectViaWallet.secondSignature.explanation")}
-          </OnboardingPictoTitleSubtitle.Subtitle>
-        </OnboardingPictoTitleSubtitle.Container>
-        <VStack
-          style={{
-            rowGap: spacing.sm,
-            marginTop: spacing.lg,
-          }}
-        >
-          <OnboardingPrimaryCtaButton
-            onPress={primaryButtonAction}
-            title={translate("connectViaWallet.sign")}
-          />
-          <Terms />
-        </VStack>
-      </>
-    );
+  // Waiting for second signature
+  else if (waitingForNextSignature && !loading) {
+    title = translate("connectViaWallet.secondSignature.title");
+    subtitle = translate("connectViaWallet.secondSignature.explanation");
+    showValueProps = false;
+  }
+  // Not on XMTP, needs first signature
+  else {
+    title = translate("connectViaWallet.firstSignature.title");
+    subtitle = translate("connectViaWallet.firstSignature.explanation");
   }
 
   return (
     <>
-      <OnboardingPictoTitleSubtitle.Container>
-        <OnboardingPictoTitleSubtitle.Picto picto="tray" />
-        <OnboardingPictoTitleSubtitle.Title>
-          {translate("connectViaWallet.firstSignature.title")}
-        </OnboardingPictoTitleSubtitle.Title>
-        <OnboardingPictoTitleSubtitle.Subtitle>
-          {translate("connectViaWallet.firstSignature.explanation")}
-        </OnboardingPictoTitleSubtitle.Subtitle>
-      </OnboardingPictoTitleSubtitle.Container>
-      <ValueProps />
+      <PictoTitleSubtitle.Container
+        // Not best to add those style here but okay for now until NewAccount and Onboarding have their own flow
+        style={{
+          paddingTop: theme.spacing.lg,
+          paddingBottom: theme.spacing.lg,
+        }}
+      >
+        <PictoTitleSubtitle.Picto picto="tray" />
+        <PictoTitleSubtitle.Title>{title}</PictoTitleSubtitle.Title>
+        <PictoTitleSubtitle.Subtitle>{subtitle}</PictoTitleSubtitle.Subtitle>
+      </PictoTitleSubtitle.Container>
+      {showValueProps && <ValueProps />}
       <VStack
         style={{
           rowGap: spacing.sm,
           marginTop: spacing.lg,
         }}
       >
-        <OnboardingPrimaryCtaButton
+        <Button
+          loading={loading}
           onPress={primaryButtonAction}
-          title={translate("connectViaWallet.sign")}
+          text={translate("connectViaWallet.sign")}
         />
         <Terms />
       </VStack>
@@ -220,9 +157,51 @@ export const ConnectViaWallet = memo(function ConnectViaWallet() {
   );
 });
 
+function useInitSignerState() {
+  const signer = useConnectViaWalletStoreContext((state) => state.signer);
+
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  const connectViewWalletStore = useConnectViaWalletStore();
+
+  // Init stuff based on signer
+  useEffect(() => {
+    const initializeWallet = async () => {
+      try {
+        setIsInitializing(true);
+
+        const [address, isOnNetwork, inboxId] = await Promise.all([
+          signer.getAddress(),
+          isOnXmtp(await signer.getAddress()),
+          getInboxId(await signer.getAddress()),
+        ]);
+
+        const v3Dbs = await getDatabaseFilesForInboxId(inboxId);
+        const hasV3 = v3Dbs.filter((n) => n.name.endsWith(".db3")).length > 0;
+
+        connectViewWalletStore.getState().setOnXmtp(isOnNetwork);
+        connectViewWalletStore.getState().setAlreadyV3Db(hasV3);
+        connectViewWalletStore.getState().setAddress(address);
+
+        logger.debug(
+          `[Connect Wallet] User connected wallet (${address}). ${
+            isOnNetwork ? "Already" : "Not yet"
+          } on XMTP. V3 database ${hasV3 ? "already" : "not"} present`
+        );
+      } catch (error) {
+        logger.error("Error initializing wallet:", error);
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    initializeWallet();
+  }, [signer, connectViewWalletStore, setIsInitializing]);
+
+  return { isInitializing };
+}
+
 function useDisconnect() {
-  const { disconnect: disconnectWallet } = useThirdwebDisconnect();
-  const thirdwebWallet = useActiveWallet();
   const connectViewWalletStore = useConnectViaWalletStore();
 
   return useCallback(
@@ -235,206 +214,68 @@ function useDisconnect() {
         logoutAccount(address, false, true, () => {});
       }
 
-      if (thirdwebWallet) {
-        disconnectWallet(thirdwebWallet);
-      }
-
       const storageKeys = await AsyncStorage.getAllKeys();
       const wcKeys = storageKeys.filter((k) => k.startsWith("wc@2:"));
       await AsyncStorage.multiRemove(wcKeys);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [thirdwebWallet]
+    []
   );
 }
 
-function useThirdwebSigner() {
-  const thirdwebWallet = useActiveWallet();
-  const thirdwebAccount = useActiveAccount();
-
-  const [thirdwebSigner, setThirdwebSigner] = useState<Signer | undefined>();
-
-  const disconnect = useDisconnect();
-
-  const connectViewWalletStore = useConnectViaWalletStore();
-
-  const handlingThirdwebSigner = useRef<string | undefined>(undefined);
-
-  const router = useRouter();
-
-  // Since we now keep a link to the connected wallet for
-  // key revocation and transactional frames, in onboarding we
-  // make sure that we disconnect the thirdweb signer before
-  // instantiating a new one
-  const readyToHandleThirdwebSigner = useRef(false);
-  useEffect(() => {
-    if (!readyToHandleThirdwebSigner.current) {
-      disconnect()
-        .then(() => {
-          readyToHandleThirdwebSigner.current = true;
-        })
-        .catch(sentryTrackError);
-    }
-  }, [disconnect]);
-
-  useEffect(() => {
-    if (readyToHandleThirdwebSigner.current && thirdwebAccount) {
-      ethers5Adapter.signer
-        .toEthers({
-          client: thirdwebClient,
-          chain: ethereum,
-          account: thirdwebAccount,
-        })
-        .then(setThirdwebSigner);
-    } else {
-      setThirdwebSigner(undefined);
-    }
-  }, [thirdwebAccount]);
-
-  useEffect(() => {
-    (async () => {
-      if (
-        thirdwebSigner &&
-        readyToHandleThirdwebSigner.current &&
-        !handlingThirdwebSigner.current
-      ) {
-        try {
-          const address = await thirdwebSigner.getAddress();
-          handlingThirdwebSigner.current = address;
-
-          if (getAccountsList().includes(address)) {
-            Alert.alert(
-              translate("connectViaWallet.alreadyConnected.title"),
-              translate("connectViaWallet.alreadyConnected.message")
-            );
-            try {
-              await disconnect();
-            } catch (error) {
-              // Handle the error appropriately, maybe show an alert to the user
-              logger.error(
-                "Error during disconnect and account activation:",
-                error
-              );
-            } finally {
-              // At least activate said wallet so user can logout again but not be stuck
-              useAccountsStore.getState().setCurrentAccount(address, false);
-              router.goBack();
-            }
-            return;
-          }
-          const isOnNetwork = await isOnXmtp(address);
-          connectViewWalletStore.getState().setOnXmtp(isOnNetwork);
-          const inboxId = await getInboxId(address);
-          const v3Dbs = await getDatabaseFilesForInboxId(inboxId);
-          connectViewWalletStore
-            .getState()
-            .setAlreadyV3Db(
-              v3Dbs.filter((n) => n.name.endsWith(".db3")).length > 0
-            );
-          connectViewWalletStore.getState().setSigner(thirdwebSigner);
-          connectViewWalletStore.getState().setAddress(address);
-          connectViewWalletStore.getState().setLoading(false);
-          logger.debug(
-            `[Connect Wallet] User connected wallet ${thirdwebWallet?.id} (${address}). ${
-              isOnNetwork ? "Already" : "Not yet"
-            } on XMTP. V3 database ${
-              v3Dbs.length > 0 ? "already" : "not"
-            } present`
-          );
-        } catch (e) {
-          logger.error(e, { context: "Handling thirdweb signer" });
-          handlingThirdwebSigner.current = undefined;
-        }
-      }
-    })();
-  }, [
-    disconnect,
-    thirdwebSigner,
-    connectViewWalletStore,
-    thirdwebWallet,
-    router,
-  ]);
-
-  return { thirdwebSigner };
-}
-
 function useXmtpConnection() {
-  const { signer, address, onXmtp, alreadyV3Db } =
-    useConnectViaWalletStoreContext((state) => ({
-      signer: state.signer,
-      address: state.address,
-      onXmtp: state.onXmtp,
-      alreadyV3Db: state.alreadyV3Db,
-    }));
-
+  const { onDoneConnecting, onErrorConnecting } = useConnectViaWalletContext();
   const connectViewWalletStore = useConnectViaWalletStore();
-
   const inXmtpClientCreationFlow = useRef(false);
-
   const disconnect = useDisconnect();
 
-  const router = useRouter();
-
-  const waitForClickSignature = useCallback(async () => {
-    while (!connectViewWalletStore.getState().clickedSignature) {
-      const clickedSignature =
-        connectViewWalletStore.getState().clickedSignature;
-      logger.debug(
-        `[Connect Wallet] Waiting for signature. Current clickedSignature value: ${clickedSignature}`
-      );
-      await wait(1000);
-    }
-  }, [connectViewWalletStore]);
+  const abortControllerRef = useRef(new AbortController());
+  const timeoutInitXmtpClientRef = useRef<NodeJS.Timeout | null>(null);
 
   const initXmtpClient = useCallback(async () => {
-    logger.debug("[Connect Wallet] starting initXmtpClient");
-
-    if (!signer) {
-      logger.debug(
-        "[Connect Wallet] ConnectViaWallet initXmtpClient: No signer available"
+    timeoutInitXmtpClientRef.current = setTimeout(() => {
+      sentryTrackMessage(
+        "Init XmtpClient via external wallet took more than 30 seconds"
       );
-      return;
-    }
-    if (!address) {
-      logger.debug(
-        "[Connect Wallet] ConnectViaWallet initXmtpClient: No address available"
-      );
-      return;
-    }
-    if (
-      connectViewWalletStore.getState().initiatingClientForAddress === address
-    ) {
-      logger.debug(
-        "[Connect Wallet] ConnectViaWallet initXmtpClient: Already initiating client for this address"
-      );
-      return;
-    }
-
-    logger.debug(
-      "[Connect Wallet] ConnectViaWallet initXmtpClient: Starting initiation process"
-    );
-
-    connectViewWalletStore.getState().setInitiatingClientForAddress(address);
-
-    connectViewWalletStore.getState().setOnboardingDone(false);
-
-    setTimeout(() => {
-      const onboardingDone = connectViewWalletStore.getState().onboardingDone;
-      if (!onboardingDone) {
-        sentryTrackMessage("Onboarding took more than 30 seconds");
-      }
     }, 30000);
 
-    const signaturesAsked = {
-      create: false,
-      enable: false,
-      authenticate: false,
-    };
-
     try {
-      logger.debug(
-        "[Connect Wallet] Connecting to XMTP using an external wallet"
-      );
+      const signer = connectViewWalletStore.getState().signer;
+      const address = connectViewWalletStore.getState().address!; // We can assume that address is set at this point
+      const onXmtp = connectViewWalletStore.getState().onXmtp;
+      const alreadyV3Db = connectViewWalletStore.getState().alreadyV3Db;
+
+      logger.debug("[Connect Wallet] starting initXmtpClient");
+
+      // Not sure we need this
+      // if (
+      //   connectViewWalletStore.getState().initiatingClientForAddress === address
+      // ) {
+      //   throw new Error("Already initiating client for this address");
+      // }
+
+      // Not sure we need this
+      // connectViewWalletStore.getState().setInitiatingClientForAddress(address);
+
+      const waitForClickSignature = async () => {
+        while (!connectViewWalletStore.getState().clickedSignature) {
+          if (abortControllerRef.current.signal.aborted) {
+            throw new Error("Operation aborted");
+          }
+          logger.debug(
+            "[Connect Wallet] Waiting for signature. Current clickedSignature value: false"
+          );
+          await wait(1000);
+        }
+      };
+
+      // Not sure why we have this?
+      const signaturesAsked = {
+        create: false,
+        enable: false,
+        authenticate: false,
+      };
+
       inXmtpClientCreationFlow.current = true;
 
       const base64Key = await getXmtpBase64KeyFromSigner(
@@ -450,7 +291,9 @@ function useXmtpConnection() {
           } catch (error) {
             sentryTrackError(error);
           } finally {
-            router.goBack();
+            onErrorConnecting({
+              error: new Error("Installation revoked"),
+            });
           }
         },
         async () => {
@@ -462,6 +305,7 @@ function useXmtpConnection() {
         },
         async () => {
           signaturesAsked.enable = true;
+
           if (signaturesAsked.create) {
             logger.debug("[Connect Wallet] Create signature success!");
           }
@@ -471,25 +315,24 @@ function useXmtpConnection() {
 
           if (waitingForNextSignature) {
             logger.debug("[Connect Wallet] waiting for next signature");
-          } else {
-            logger.debug("[Connect Wallet] not waiting for next signature");
-          }
 
-          if (waitingForNextSignature) {
             const currentSignaturesDone =
               connectViewWalletStore.getState().signaturesDone;
+
             connectViewWalletStore
               .getState()
               .setSignaturesDone(currentSignaturesDone + 1);
             connectViewWalletStore.getState().setLoading(false);
+
             logger.debug(
               "[Connect Wallet] Waiting until signature click for Enable"
             );
             await waitForClickSignature();
             logger.debug("[Connect Wallet] Click on Sign done for Enable");
+          } else {
+            logger.debug("[Connect Wallet] not waiting for next signature");
           }
 
-          logger.debug("[Connect Wallet] Triggering enable signature");
           if (onXmtp && !alreadyV3Db) {
             logger.debug(
               "[Connect Wallet] Already on XMTP, but no db present, will need a new signature"
@@ -531,42 +374,60 @@ function useXmtpConnection() {
       inXmtpClientCreationFlow.current = false;
 
       if (!base64Key) {
-        logger.debug("[Connect Wallet] No base64Key received, aborting");
-        return;
+        throw new Error("[Connect Wallet] No base64Key received");
       }
 
       logger.debug("[Connect Wallet] Got base64 key, now connecting");
+
       await connectWithBase64Key({
         address,
         base64Key,
       });
 
       logger.info("[Connect Wallet] Successfully logged in using a wallet");
-      connectViewWalletStore.getState().setOnboardingDone(true);
-      logger.debug(
-        "[Connect Wallet] ConnectViaWallet initXmtpClient: Function completed successfully"
-      );
-    } catch (e) {
-      logger.error("[Connect Wallet] Error in initXmtpClient:", e);
-      connectViewWalletStore
-        .getState()
-        .setInitiatingClientForAddress(undefined);
+
+      onDoneConnecting();
+    } catch (error: unknown) {
+      logger.error("[Connect Wallet] Error in initXmtpClient:", error);
+      onErrorConnecting({
+        error:
+          error instanceof Error
+            ? error
+            : typeof error === "string"
+            ? new Error(error)
+            : new Error("Something went wrong"),
+      });
+    } finally {
+      clearTimeout(timeoutInitXmtpClientRef.current);
+
+      // Not sure we need this
+      // connectViewWalletStore
+      //   .getState()
+      //   .setInitiatingClientForAddress(undefined);
+
+      // Restart the state to initial values
       connectViewWalletStore.getState().setLoading(false);
       connectViewWalletStore.getState().setClickedSignature(false);
       connectViewWalletStore.getState().setWaitingForNextSignature(false);
-      disconnect().catch(sentryTrackError);
-      router.goBack();
+      connectViewWalletStore.getState().setSignaturesDone(0);
     }
-  }, [
-    address,
-    alreadyV3Db,
-    disconnect,
-    onXmtp,
-    signer,
-    waitForClickSignature,
-    connectViewWalletStore,
-    router,
-  ]);
+  }, [disconnect, connectViewWalletStore, onDoneConnecting, onErrorConnecting]);
+
+  useEffect(() => {
+    const currentAbortController = abortControllerRef.current;
+
+    return () => {
+      if (timeoutInitXmtpClientRef.current) {
+        clearTimeout(timeoutInitXmtpClientRef.current);
+      }
+
+      // Making sure we clean everything when leaving the screen
+      disconnect();
+
+      // To leave the while loop waiting for signature
+      currentAbortController.abort();
+    };
+  }, [disconnect]);
 
   return { initXmtpClient };
 }

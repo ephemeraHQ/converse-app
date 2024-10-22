@@ -1,37 +1,54 @@
-import { memo, useEffect } from "react";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { memo, useCallback } from "react";
 
 import { ConnectViaWallet } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWallet";
 import {
-  ConnectViaWalletStoreProvider,
-  useConnectViaWalletStore,
-} from "../../components/Onboarding/ConnectViaWallet/connectViaWalletStore";
+  ConnectViaWalletContextProvider,
+  IConnectViaWalletContextType,
+} from "../../components/Onboarding/ConnectViaWallet/ConnectViaWallet.context";
+import { ConnectViaWalletStoreProvider } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWallet.store";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { useRouter } from "../../navigation/useNavigation";
+import { NavigationParamList } from "../Navigation/Navigation";
 
-export function OnboardingConnectWalletScreen() {
-  return (
-    <ConnectViaWalletStoreProvider>
-      <Main />
-    </ConnectViaWalletStoreProvider>
-  );
-}
+export const OnboardingConnectWalletScreen = memo(
+  function OnboardingConnectWalletScreen(
+    props: NativeStackScreenProps<
+      NavigationParamList,
+      "OnboardingConnectWallet"
+    >
+  ) {
+    const { signer } = props.route.params;
 
-const Main = memo(function Main() {
-  const store = useConnectViaWalletStore();
-  const router = useRouter();
+    const router = useRouter();
 
-  useEffect(() => {
-    const unsubscribe = store.subscribe((state) => {
-      if (state.onboardingDone) {
-        router.navigate("OnboardingUserProfile");
-      }
-    });
-    return () => unsubscribe();
-  }, [store, router]);
+    const handleDoneConnecthing = useCallback(() => {
+      router.navigate("OnboardingUserProfile");
+    }, [router]);
 
-  return (
-    <OnboardingScreenComp>
-      <ConnectViaWallet />
-    </OnboardingScreenComp>
-  );
-});
+    const handleErrorConnecting = useCallback(
+      (
+        args: Parameters<IConnectViaWalletContextType["onErrorConnecting"]>[0]
+      ) => {
+        const { error } = args;
+        console.log("error connecting", error);
+        router.goBack();
+      },
+      [router]
+    );
+
+    return (
+      <ConnectViaWalletStoreProvider signer={signer}>
+        <ConnectViaWalletContextProvider
+          onDoneConnecting={handleDoneConnecthing}
+          onErrorConnecting={handleErrorConnecting}
+        >
+          <OnboardingScreenComp>
+            {/* For now we don't need to have specific stuff for onboarding vs new account so we use this component to encapsulate the connect view wallet logic */}
+            <ConnectViaWallet />
+          </OnboardingScreenComp>
+        </ConnectViaWalletContextProvider>
+      </ConnectViaWalletStoreProvider>
+    );
+  }
+);

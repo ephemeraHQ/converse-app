@@ -1,9 +1,9 @@
 import React, { memo, useState } from "react";
 
-import Button from "../../components/Button/Button";
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
 import { NewAccountPictoTitleSubtitle } from "../../components/NewAccount/NewAccountTitleSubtitlePicto";
 import { Terms } from "../../components/Onboarding/Terms";
+import { Button } from "../../design-system/Button/Button";
 import { VStack } from "../../design-system/VStack";
 import { translate } from "../../i18n";
 import { spacing } from "../../theme";
@@ -41,7 +41,7 @@ export const NewAccountPrivateKeyScreen = memo(function () {
           <Button
             variant="fill"
             loading={loading}
-            title={translate("privateKeyConnect.connectButton")}
+            text={translate("privateKeyConnect.connectButton")}
             onPress={() => {
               if (!privateKey || privateKey.trim().length === 0) return;
               loginWithPrivateKey(privateKey.trim());

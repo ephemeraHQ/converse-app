@@ -1,26 +1,29 @@
+import { ConnectViaWalletPopularWalletsTableView } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletPopularWalletsTableView";
 import { memo } from "react";
+import { Alert } from "react-native";
 
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
 import { NewAccountPictoTitleSubtitle } from "../../components/NewAccount/NewAccountTitleSubtitlePicto";
+import { useInstalledWallets } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
+import {
+  InstalledWalletsTableView,
+  getConnectViaWalletTableViewEphemeralItem,
+  getConnectViaWalletTableViewPhoneItem,
+  getConnectViaWalletTableViewPrivateKeyItem,
+} from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletTableViewItems";
 import TableView from "../../components/TableView/TableView";
-import { TableViewEmoji } from "../../components/TableView/TableViewImage";
+import { useAccountsStore } from "../../data/store/accountsStore";
 import { translate } from "../../i18n";
 import { useRouter } from "../../navigation/useNavigation";
 import { spacing } from "../../theme";
 import { isDesktop } from "../../utils/device";
-import {
-  InstalledWallets,
-  PopularWallets,
-  RightViewChevron,
-  useInstalledWallets,
-} from "../Onboarding/OnboardingGetStartedScreen";
 
 export const NewAccountScreen = memo(function NewAccountScreen() {
   const router = useRouter();
 
-  const { walletsInstalled } = useInstalledWallets();
+  const walletsInstalled = useInstalledWallets();
 
-  const hasInstalledWallets = walletsInstalled.list.length > 0;
+  const hasInstalledWallets = walletsInstalled.length > 0;
 
   return (
     <NewAccountScreenComp
@@ -40,29 +43,31 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
       <TableView
         title={translate("walletSelector.converseAccount.title")}
         items={[
-          {
-            id: "phone",
-            leftView: <TableViewEmoji emoji="📞" />,
-            title: translate("walletSelector.converseAccount.connectViaPhone"),
-            rightView: RightViewChevron(),
+          getConnectViaWalletTableViewPhoneItem({
             action: () => {
               router.navigate("NewAccountPrivy");
             },
-          },
-          {
-            id: "ephemeral",
-            leftView: <TableViewEmoji emoji="☁️" />,
-            title: translate("walletSelector.converseAccount.createEphemeral"),
-            rightView: RightViewChevron(),
+          }),
+          getConnectViaWalletTableViewEphemeralItem({
             action: () => {
               router.navigate("NewAccountEphemera");
             },
-          },
+          }),
         ]}
       />
 
       {hasInstalledWallets && !isDesktop && (
-        <InstalledWallets wallets={walletsInstalled.list} />
+        <InstalledWalletsTableView
+          onAccountExists={(arg) => {
+            useAccountsStore.getState().setCurrentAccount(arg.address, false);
+            router.popToTop();
+            // TODO: Add a better message
+            Alert.alert("Account already connected");
+          }}
+          onAccountDoesNotExist={({ signer }) => {
+            router.navigate("NewAccountConnectWallet", { signer });
+          }}
+        />
       )}
 
       <TableView
@@ -74,19 +79,17 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
             : translate("walletSelector.connectionOptions.connectForDevs")
         }
         items={[
-          {
-            id: "privateKey",
-            leftView: <TableViewEmoji emoji="🔑" />,
-            title: translate("walletSelector.connectionOptions.connectViaKey"),
-            rightView: RightViewChevron(),
+          getConnectViaWalletTableViewPrivateKeyItem({
             action: () => {
               router.navigate("NewAccountPrivateKey");
             },
-          },
+          }),
         ]}
       />
 
-      {!hasInstalledWallets && !isDesktop && <PopularWallets />}
+      {!hasInstalledWallets && !isDesktop && (
+        <ConnectViaWalletPopularWalletsTableView />
+      )}
     </NewAccountScreenComp>
   );
 });

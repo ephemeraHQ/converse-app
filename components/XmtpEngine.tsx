@@ -78,7 +78,7 @@ export default function XmtpEngine() {
       "change",
       async (nextAppState) => {
         logger.debug(
-          `[AppState] App is was ${appState.current} - now ${nextAppState}`
+          `[AppState] App was '${appState.current}' and now '${nextAppState}'`
         );
         if (
           nextAppState === "active" &&

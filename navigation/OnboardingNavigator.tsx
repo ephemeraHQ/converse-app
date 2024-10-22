@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Signer } from "ethers";
 import { memo } from "react";
 import { useColorScheme } from "react-native";
 
@@ -16,7 +17,7 @@ type OnboardingParamList = {
   OnboardingGetStarted: undefined;
   OnboardingPrivy: undefined;
   OnboardingConnectWallet: {
-    address?: string;
+    signer: Signer;
   };
   OnboardingNotifications: undefined;
   OnboardingUserProfile: undefined;
