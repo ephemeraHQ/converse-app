@@ -8,12 +8,14 @@ AGREED
 
 - **Proposed**: 2024-09-30
 - **Decided**: 2024-10-01
-- **Work Began**: 2024-10-01
+- **Work Began**: 2024-09-26
 - **Work Completed**: [To be filled after completion]
 
 ## Context
 
-During our team offsite in Nashville from **September 23rd to 27th, 2024**, we discussed opportunities to improve our application's architecture. Michael, a new team member, brings experience in implementing patterns that increase testability and separate business logic from UI, enhancing code robustness. He also introduced a pattern for controlling dependencies and side effects in applications.
+During our team offsite in UNDISCLOSED LOCATION from 
+**September 
+23rd to 27th, 2024**, we discussed opportunities to improve our application's architecture. Michael, a new team member, brings experience in implementing patterns that increase testability and separate business logic from UI, enhancing code robustness. He also introduced a pattern for controlling dependencies and side effects in applications.
 
 Given the potential benefits, the mobile team **verbally agreed** that this was a good use of our time. However, since the proof of concept is estimated to take **2-4 weeks**, Naomi and Michael felt it was important to document the deliverables, provide a high-level overview of the pattern, and discuss alternatives, despite prior agreements on the approach during the offsite.
 
