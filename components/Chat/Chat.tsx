@@ -1,10 +1,7 @@
 import { useSelect } from "@data/store/storeHelpers";
 import { FlashList } from "@shopify/flash-list";
-import {
-  backgroundColor,
-  itemSeparatorColor,
-  tertiaryBackgroundColor,
-} from "@styles/colors";
+import { itemSeparatorColor, tertiaryBackgroundColor } from "@styles/colors";
+import { useAppTheme } from "@theme/useAppTheme";
 import { getCleanAddress } from "@utils/evm/address";
 import { FrameWithType, messageHasFrames } from "@utils/frames";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
@@ -617,31 +614,33 @@ export function ChatPreview() {
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
+
   return useMemo(
     () =>
       StyleSheet.create({
         chatContainer: {
           flex: 1,
           justifyContent: "flex-end",
-          backgroundColor: backgroundColor(colorScheme),
+          backgroundColor: theme.colors.background.surface,
         },
         chatContent: {
-          backgroundColor: backgroundColor(colorScheme),
+          backgroundColor: theme.colors.background.surface,
           flex: 1,
         },
         chatPreviewContent: {
-          backgroundColor: backgroundColor(colorScheme),
+          backgroundColor: theme.colors.background.surface,
           flex: 1,
           paddingBottom: 0,
         },
         chat: {
-          backgroundColor: backgroundColor(colorScheme),
+          backgroundColor: theme.colors.background.surface,
         },
         inputBottomFiller: {
           position: "absolute",
           width: "100%",
           bottom: 0,
-          backgroundColor: backgroundColor(colorScheme),
+          backgroundColor: theme.colors.background.surface,
           zIndex: 0,
         },
         inChatRecommendations: {
@@ -651,6 +650,6 @@ const useStyles = () => {
           marginBottom: 10,
         },
       }),
-    [colorScheme]
+    [colorScheme, theme]
   );
 };
