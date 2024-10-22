@@ -1,4 +1,3 @@
-import Avatar from "@components/Avatar";
 import Button from "@components/Button/Button";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { translate } from "@i18n";
@@ -12,13 +11,13 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import { AvatarSizes } from "@styles/sizes";
 import { GroupInvite } from "@utils/api.types";
 import { useActor } from "@xstate/react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { JoinGroupHeader } from "./components/JoinGroupHeader";
 import {
   joinGroupMachineLogic,
   JoinGroupMachineContext,
@@ -30,7 +29,7 @@ interface UseJoinGroupResult {
   groupInvite: GroupInvite | undefined;
   joinStatus: JoinGroupMachineContext["joinStatus"];
   error: JoinGroupMachineContext["error"];
-  groupInviteError: boolean;
+  groupJoinError: boolean;
   pollingTimedOut: boolean;
   joinButtonEnabled: boolean;
   joinGroup: () => void;
@@ -66,46 +65,20 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
     }),
     {
       input: { groupInviteId, account },
-
-      // inspect: (inspectionEvent) => {
-      //   if (inspectionEvent.type === "@xstate.snapshot") {
-      //     console.log(
-      //       "SNAPSHOT",
-      //       JSON.stringify(inspectionEvent.snapshot, null, 2)
-      //     );
-      //   }
-      // },
-
-      // inspect: createSkyInspector({
-      //   clientType: "node",
-      //   autoStart: true,
-      //   // WebSocket: WebSocket,
-      // }).inspect,
     }
   );
 
-  console.log(state.value);
-
   const isGroupInviteLoading = state.hasTag("loading");
   const polling = state.hasTag("polling");
+  const groupJoinError = state.hasTag("error");
 
   const { groupInviteMetadata: groupInvite, joinStatus, error } = state.context;
-
-  const groupInviteError = error?.type === "fetchGroupInviteError";
 
   const pollingTimedOut = state.value === "Attempting to Join Group Timed Out";
 
   const joinButtonEnabled =
     !polling && joinStatus === "PENDING" && state.status === "active";
   const openConversationButtonEnabled = !polling && joinStatus === "ACCEPTED";
-
-  console.log(
-    JSON.stringify(
-      { joinButtonEnabled, joinStatus, polling, groupInvite },
-      null,
-      2
-    )
-  );
 
   const joinGroup = () => {
     send({ type: "user.didTapJoinGroup" });
@@ -121,7 +94,7 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
     groupInvite,
     joinStatus,
     error,
-    groupInviteError,
+    groupJoinError,
     pollingTimedOut,
     joinButtonEnabled,
     joinGroup,
@@ -133,15 +106,15 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
 export function JoinGroupScreen({
   route,
 }: NativeStackScreenProps<NavigationParamList, "GroupInvite">) {
-  // const groupInviteId = route.params.groupInviteId;
-  const groupInviteId = "ywyT6AEm8iz3skNVRzN5i";
+  const groupInviteId = route.params.groupInviteId;
+  // const groupInviteId = "ywyT6AEm8iz3skNVRzN5i";
 
   const {
     isGroupInviteLoading,
     polling,
     groupInvite,
     joinStatus,
-    groupInviteError,
+    groupJoinError,
     pollingTimedOut,
     joinButtonEnabled,
     joinGroup,
@@ -158,27 +131,20 @@ export function JoinGroupScreen({
   const headerHeight = useHeaderHeight();
 
   return (
-    <View style={styles.groupInvite}>
+    <View style={styles.groupInviteContainer}>
       {isGroupInviteLoading && (
         <ActivityIndicator color={textPrimaryColor(colorScheme)} size="large" />
       )}
-      {groupInviteError && (
+      {groupJoinError && (
         <Text style={styles.error}>{translate("An error occurred")}</Text>
       )}
       {groupInvite && (
         <>
-          <View style={styles.groupInfo}>
-            <Avatar
-              size={AvatarSizes.default}
-              uri={groupInvite.imageUrl}
-              name={groupInvite.groupName}
-              style={styles.avatar}
-            />
-            <Text style={styles.title}>{groupInvite.groupName}</Text>
-            {groupInvite.description && (
-              <Text style={styles.description}>{groupInvite.description}</Text>
-            )}
-          </View>
+          <JoinGroupHeader
+            groupName={groupInvite.groupName}
+            imageUrl={groupInvite.imageUrl}
+            description={groupInvite.description}
+          />
           {joinButtonEnabled && (
             <Button
               variant="primary"
@@ -216,9 +182,6 @@ export function JoinGroupScreen({
             </>
           )}
           {/* We may want to add some way for a user to get out of this state, but it's not likely to happen */}
-          {joinStatus === "ERROR" && (
-            <Text style={styles.error}>{translate("An error occurred")}</Text>
-          )}
           {joinStatus === "REJECTED" && (
             <Text style={styles.error}>
               {translate("This invite is no longer valid")}
@@ -245,7 +208,7 @@ const useStyles = () => {
       alignSelf: "center",
       marginTop: 11,
     },
-    groupInvite: {
+    groupInviteContainer: {
       backgroundColor: backgroundColor(colorScheme),
       flex: 1,
       alignContent: "center",

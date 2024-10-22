@@ -227,7 +227,6 @@ export const joinGroupMachineLogic = setup({
       const invitedGroup: GroupData | undefined = groups.byId[invitedGroupId];
       const userHasNotBeenBlocked = invitedGroup?.isGroupActive === true;
       const userIsInGroup = userHasNotBeenBlocked && invitedGroup !== undefined;
-      console.log({ invitedGroup, userHasNotBeenBlocked, userIsInGroup });
       return userIsInGroup;
     },
   },

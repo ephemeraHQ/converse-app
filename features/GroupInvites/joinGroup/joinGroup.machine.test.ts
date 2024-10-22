@@ -40,12 +40,10 @@ describe("Joining a Group from an Invite", () => {
       }
     ).start();
 
-    // Initial state
     expect(joinGroupActor.getSnapshot().value).toBe(
       "Loading Group Invite Metadata"
     );
 
-    // Wait for metadata to load
     await waitFor(joinGroupActor, (state) =>
       state.matches("Loading Initially Joined Groups")
     );
@@ -58,7 +56,6 @@ describe("Joining a Group from an Invite", () => {
       state.matches("Waiting For User Action")
     );
 
-    // User taps join group
     joinGroupActor.send({ type: "user.didTapJoinGroup" });
     expect(joinGroupActor.getSnapshot().value).toBe("Attempting to Join Group");
 
@@ -166,45 +163,10 @@ describe("Joining a Group from an Invite", () => {
       joinGroupActor,
       (state) => !state.matches("Loading Initially Joined Groups")
     );
-    console.log(joinGroupActor.getSnapshot().value);
-    console.log(
-      joinGroupActor.getSnapshot().context.groupsBeforeJoinRequestAccepted
-        ?.byId[blockedGroupId].isGroupActive
-    );
 
     await waitFor(joinGroupActor, (state) =>
       state.matches("User Has Been Blocked From Group")
     );
-
-    // Controlled.joinGroupClient =
-    //   JoinGroupClient.userAMemberOfGroupWithId(blockedGroupId);
-    //
-    // // Nice utility for debugging state machines
-    // // await waitFor(
-    // //   joinGroupActor,
-    // //   (state) => !state.matches("Attempting to Join Group")
-    // // );
-    // // console.log(joinGroupActor.getSnapshot().value);
-    //
-    // // Wait for join attempt to complete
-    // await waitFor(joinGroupActor, (state) =>
-    //   state.matches("Determining Newly Joined Group")
-    // );
-    //
-    // await waitFor(joinGroupActor, (state) =>
-    //   state.matches("Providing User Consent to Join Group")
-    // );
-    //
-    // await waitFor(joinGroupActor, (state) => state.matches("Refreshing Group"));
-    //
-    // await waitFor(joinGroupActor, (state) =>
-    //   state.matches("User Joined Group")
-    // );
-    //
-    // expect(navigateToGroupScreenSpy).toHaveBeenCalledTimes(1);
-    // expect(navigateToGroupPayload.context.groupInviteMetadata.groupId).toBe(
-    //   blockedGroupId
-    // );
   });
 
   it("Should transition to Attempting to Join Group Timed Out if the attempt times out", async () => {
@@ -242,8 +204,6 @@ describe("Joining a Group from an Invite", () => {
       joinGroupActor,
       (state) => !state.matches("Loading Initially Joined Groups")
     );
-
-    console.log(joinGroupActor.getSnapshot().value);
 
     expect(
       joinGroupActor.getSnapshot().context.groupInviteMetadata
