@@ -12,14 +12,14 @@ import { getPrivyRequestHeaders } from "./evm/privy";
 import logger from "./logger";
 import type { TransactionDetails } from "./transaction";
 import type { ProfileType } from "../components/Onboarding/UserProfile";
-import config from "../config";
 import type { TopicData } from "../data/store/chatStore";
 import type { ProfileSocials } from "../data/store/profilesStore";
 import type { Frens } from "../data/store/recommendationsStore";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
 
 export const api = axios.create({
-  baseURL: config.apiURI,
+  // baseURL: config.apiURI,
+  baseURL: "http://localhost:9875",
 });
 
 // Better error handling
@@ -423,6 +423,8 @@ export const createGroupInvite = async (
     groupId: string;
   }
 ): Promise<CreateGroupInviteResult> => {
+  console.log("hi there");
+  console.log(api.getUri());
   const { data } = await api.post("/api/groupInvite", inputs, {
     headers: await getXmtpApiHeaders(account),
   });
