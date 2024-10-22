@@ -2,14 +2,12 @@ import Button from "@components/Button/Button";
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { translate } from "@i18n";
 import { useNavigation } from "@react-navigation/native";
-import { createSkyInspector } from "@statelyai/inspect";
 import {
   itemSeparatorColor,
   messageBubbleColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import { useActor } from "@xstate/react";
 import React, {
   Platform,
   StyleSheet,
@@ -18,22 +16,6 @@ import React, {
   useColorScheme,
   View,
 } from "react-native";
-import { createMachine } from "xstate";
-
-import { Controlled } from "../dependencies/Environment/Environment";
-import { JoinGroupResult } from "../features/GroupInvites/joinGroup.types";
-
-const simpleMachine = createMachine({
-  id: "simpleMachine",
-  context: { some: "stuff" },
-});
-
-const Thing = () => {
-  const [state, send] = useActor(simpleMachine, {
-    inspect: createSkyInspector({ clientType: "node" }).inspect,
-  });
-  return <Text>{JSON.stringify(state)}</Text>;
-};
 
 export default function EphemeralAccountBanner() {
   const styles = useStyles();
@@ -41,7 +23,6 @@ export default function EphemeralAccountBanner() {
   const showDisconnectActionSheet = useDisconnectActionSheet();
   const navigation = useNavigation();
 
-  // const loadedShims = useEnsureEventShimsAreLoaded();
   return (
     <TouchableOpacity
       onPress={() => showDisconnectActionSheet(colorScheme)}
@@ -66,12 +47,12 @@ export default function EphemeralAccountBanner() {
         <Button
           variant="primary"
           onPress={() => {
-            const timedOutResult: JoinGroupResult = {
-              type: "group-join-request.timed-out",
-            };
-
-            Controlled.joinGroupClient.attemptToJoinGroup = async () =>
-              timedOutResult;
+            // const timedOutResult: JoinGroupResult = {
+            //   type: "group-join-request.timed-out",
+            // };
+            //
+            // Controlled.joinGroupClient.attemptToJoinGroup = async () =>
+            //   timedOutResult;
             // @ts-expect-error
             navigation.navigate("GroupInvite");
           }}

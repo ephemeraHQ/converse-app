@@ -134,7 +134,7 @@ export function JoinGroupScreen({
   route,
 }: NativeStackScreenProps<NavigationParamList, "GroupInvite">) {
   // const groupInviteId = route.params.groupInviteId;
-  const groupInviteId = "_Tt-XSovVabVDfQ2fcT5R";
+  const groupInviteId = "ywyT6AEm8iz3skNVRzN5i";
 
   const {
     isGroupInviteLoading,

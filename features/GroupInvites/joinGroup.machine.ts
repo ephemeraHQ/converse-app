@@ -37,7 +37,6 @@ export type JoinGroupMachineContext = {
   // From Input
   /** The ID of the group invite - used to fetch the metadata */
   groupInviteId: string;
-
   error?: { type: JoinGroupMachineErrorType; payload: string };
 };
 
@@ -104,14 +103,13 @@ export const joinGroupMachineLogic = setup({
         },
         group,
       };
-
-      await Controlled.joinGroupClient.allowGroup(allowGroupProps);
+      return await Controlled.joinGroupClient.allowGroup(allowGroupProps);
     }),
 
     refreshGroup: fromPromise<void, { account: string; topic: string }>(
       async ({ input }) => {
         const { account, topic } = input;
-        await Controlled.joinGroupClient.refreshGroup(account, topic);
+        return await Controlled.joinGroupClient.refreshGroup(account, topic);
       }
     ),
   },
@@ -135,10 +133,10 @@ export const joinGroupMachineLogic = setup({
       },
     }),
 
-    navigateToGroupScreen: log((_, params: { topic: string }) => {
-      const logMessage = `[navigateToGroupScreen] Navigating to group screen with topic: ${params.topic}`;
-      return logMessage;
-    }),
+    navigateToGroupScreen: log(
+      (_, params: { topic: string }) =>
+        `[navigateToGroupScreen] Navigating to group screen with topic: ${params.topic}`
+    ),
 
     saveGroupsBeforeJoinAttempt: assign({
       groupsBeforeJoinRequestAccepted: (
@@ -163,58 +161,29 @@ export const joinGroupMachineLogic = setup({
   },
 
   guards: {
-    isGroupJoinRequestAccepted: (
+    isGroupJoinRequestType: (
       _,
-      params: { groupJoinRequestEventType: JoinGroupResultType }
-    ) => {
-      const result =
-        params.groupJoinRequestEventType === "group-join-request.accepted";
-      return result;
-    },
-
-    isGroupJoinRequestAlreadyJoined: (
-      _,
-      params: { groupJoinRequestEventType: JoinGroupResultType }
-    ) => {
-      const result =
-        params.groupJoinRequestEventType ===
-        "group-join-request.already-joined";
-      return result;
-    },
-
-    isGroupJoinRequestRejected: (
-      _,
-      params: { groupJoinRequestEventType: JoinGroupResultType }
-    ) => {
-      const result =
-        params.groupJoinRequestEventType === "group-join-request.rejected";
-      return result;
-    },
-
-    isGroupJoinRequestError: (
-      _,
-      params: { groupJoinRequestEventType: JoinGroupResultType }
-    ) => {
-      const result =
-        params.groupJoinRequestEventType === "group-join-request.error";
-      return result;
-    },
-
-    isGroupJoinRequestTimedOut: (
-      _,
-      params: { groupJoinRequestEventType: JoinGroupResultType }
-    ) => {
-      const result =
-        params.groupJoinRequestEventType === "group-join-request.timed-out";
-      return result;
-    },
+      params: {
+        groupJoinRequestEventType: JoinGroupResultType;
+        expectedType: JoinGroupResultType;
+      }
+    ) => params.groupJoinRequestEventType === params.expectedType,
 
     hasGroupIdInMetadata: (_, params: { groupInviteMetadata: GroupInvite }) => {
       const result = params.groupInviteMetadata.groupId !== undefined;
-      console.log({ result });
       return result;
     },
 
+    /**
+     *
+     * @param _ I need to refactor this to say the positive case
+     * where user is a member of group.
+     * the problem occurs because of all of these potentials for things
+     * to be undefined...
+     * todo: userIsAMemberOfGroup
+     * @param params
+     * @returns
+     */
     userHasAlreadyJoinedGroup: (
       _,
       params: { invitedGroup: GroupData | undefined }
@@ -265,18 +234,11 @@ export const joinGroupMachineLogic = setup({
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QCsD2BLAdgcQE6oFcAHAWQEMBjACyzADoAZVMiLKAAj0KPYElMAbugAuYdiTDCWZKQGIIqTPSwDUAa3oAzSdS7F+Q0QEEKw1LiZR0FANoAGALqJQRVLBHpFzkAA9EAVgBmABY6O3C7QIA2ACZIgA54gEZ4gBoQAE8A-386GKSQgHZ-KMKATij-YKiAXxr0tCw9UkoaJUZmVkwOZr5BETEJKQgZMlkwXHxcOiIAGxlNcwBbOm1hXXx9fuNTc0treyckEFd3YU9Mbz8EINCIyNiE5LTMxCjg+Loo78egwKSSrV6iBGjhNi1qLQOiw2H0PGRZrMMuwAFIYJQQTjg2DyRTKQTqeizTpsfjwxEZNG0CDNWCHbynDxeY7XJJxT7vOxBeJRCrxYL+dJZBDvJJ5YJlMofWJFSV1Bro5rkSHtJgw7pw84IpGo9GQLHcHETKYzebCRa4FbE9VQMlailUjG0+nHRnnZmgVnsr7BLmBHl8gVCgKBQp0cpReKRQq8sqFcrykGK8HKtr0ADCVDAFDUsN4mnYAFVYBN2AAJMiwdhGWa4MAsZGO-W9ABCYAtYmLpZM7swshdLjcTMuLMQSUlYbshSjpRKZX8MWnwYQhRioQFgTsMTKMRCBTs8UToKVrShmezuY1+aLJdw5cr1dr9Ygjb1mNb7fMndv1dMF37SRHIOZwXFcY4TmE052LOvILkurwitOdAbkkBQ7hUgT5EeybcKmZ5ZjmeYFl2d4VlWNZ1g2urUgaxDsG2HY3t2f6KP2MRAScQ69mBCDjnGkEzsUsGLi8wqBDu4YSnGMSLv4B6RthTQpqe7QkewADqD4Uc+yJkOIYBLAARqWqAFr0AAKuCeHeZjsOmszWJeHCOuwDBYGosgELedCsBAAAqZBEAA8kQYCYOmigCBMsAyBcA6cSBHq+Igu6YT68QhPyUaBP4ZTLjkUSSROC7BDJdioYpYK4Sp9CaR4GoAGLmExd49v+XkTD56D+YFjrNPFbqgaOCCLjEnyFKVBQlPyvoxMupUxEVUpROE4kxJUwSVSeKq1WQ9UcE1d5qW1rEddMvkBcFoXhZF0WxYoA1cUNnopYEm50EkHz-JEMQ5NEy5roVEbxP4IPBG98SFEkW3KTtdBGMIohLEQ5warZLnNLi7QqISdAyEjKN+agfXgj2eyoFYtiOAyT1JdcIRVGEIMTdy2U5cuxSLWukqVFycn-ECCpKdVcMIwTqMcOj6K0UQWP4qoGh44jBmE8TOHEGTFgUwcgE04lI4vQgDN3MzG6JJE7MIXEoTc-OuVTnY1QVcCx6w2m8PK8jEvsFLWAy3LdA44r+Mq8IRMk9wmv7LY7F68OPHG0z-gs-6bOCghZTJEtmHVFOq6C0mwvEHh7Ri6HsK+5g-sKNjBLB57qsRxruxa5TNiBBxg104gicHsnZtp8uGVLVGjvQTlHwwyL7tl17FeoNRVeYzX8u4yHXvh+rRBR9rtjBJ3tMG8lRsCib-esxb6fCqVNtSe8UMFIU0T+FPxc1XQAAikgTEsWCwgAcmAAA7jqJs75wQByDloHQVBaRGE0KIXAzQDADBMBQMAKNICPX1jxDcuQkjvDXJ9OI3Ih4yXDOtUqyRpxJDsPOV+EJ3Zf0Qb-TAADgGgLfNXPEgc67QPWLA7E8DEHIO2GANBGDRAQBsLrV0h9cFBHwYQ4IxC-SiR7ruZCkoKi0NKPyccDCS70GYT-P+GpAEgNfDRTGxpzCmgWMsVYMC4EIImKIww4iKDoMwdI6mcicHDTwR9ZRqjSEIVXGUPIT9-Bsl+hPF+Lst5GLoOeQiV5iI-jIvRMAYV6LEhzPqBq+Alj+2wfHYaVRKh0DKJ9CUkQghrjmghRIhUHihnWrEMaMRDHv1SU5PgGTSxZLbLkls+SNCYiKagEpmMZEHwCYbSpuQanBDqTlHOTThT8jsGEaIAponxgyoeRJRdGH4QvERFq95yJPiomA0pfjgLlMWdUZZtSyj1I2cuTCgQtE810dOFRZQelwz6ZctSWTtJ3K4bM2RTzuIVNedU95nzGnLiiJ9ZCMYghTmTsUEF7swXpKuZC25L5F7NggTYWO-jnnHyWci1ZHz1looQsEco1TsULiiGtAE7KCVQksqgIQXQOBqQipgEsmBhA+wXhjCBK9eEK3oEQfAIqwAkQlVKsOatTllIRYbTpi1CjRmnPEaSY10WYpyJnHc5r8jxF+gK9oQqRWwnFYobVsrF7+1sdMOYDjLQzDVd1DVt4tVhR1U3Ig+rnrHyNeGU1iQLXqMQr80G-xxwlC3KDbpJyqpvzhgAJXbHWWAbQegKp4VAugdZNBlsEdwWN3cRT8kWpKMaiRygRCvm8cIdBNyZyjHJc1kpjlCwLWc9oJb61wArb6yYdiA3mkcXWht-VHkJTpdcSMpVql2q7R88IvaRTsroFGOM-p8hsklAk4EmBUAQDgN4V209aBxwNcfAAtFEZcX7lnaO2ZKN6pRwbOvoGqUVMs+geP0sMUYH643XFKvlf0H1oJQ3eAtechRwPQig3adA2orEYhlvAWln7rjJEWpyHln1jarPyqsj6R6fnxlDMnPDRKODXghVpMlJHKXcGyYxY6LEj5dyPqyD4YZ-RlH+OygE7wFxD3jNUkh8YFyoXEsC-N213ZqU0jcyi5K9ISCMiZMy4J2CWWst6+yjlYQuTcpgNQiGW0yQBOe8GpRFyZ2Tjy9FoM8iRAPGycI85Pp4bqt7Q6VyToSfkcNGSmjyidoxeJKoINvkfHFDzAUW5H7jsLpO5Js8Ubzx9c0dzUmUrzkWn3HkKRIirMtsKMa65tEmsjLyVC+K9NuyhCYy0ZiOAWM4dY8ENXcGO1+QQ30C5cpPyw-lLOUk4w8hjBKXDA233tG4wMklD4RlVzGagApkziky2mxU6CnxHV3fBikJ7Q9mMmoFsUWhT8sK7cLYSgi-TeOZP4yZwT4DuA3cWXQnZHwDyOwqKFwo80kIyW+OJR2v0ChJB2xO-TgqQ1QY9ZKyN3r5UQ4o0hgI05Ilbl9M9zCY0kj5X4nGXmIGuSLhxyVvH07S1zthNVinLbKjRAHfkDn5qeTlWZzsrkG2BTycBdDX7U76B8arCdvJ52JnsCmTMqbQvas3CEgO1ZRCgh2vmsF9llRH5zjenhtS9zBfwspyuWbXxpolBt-yecy4s15czlDFmy3iuvr+1CEtABHAgcAZWV2gyW5A2YpGQ+Pr6cGwSFu-UvStjOHL1sYuKDE5OCTceDdLg3b2Cfeh+XQEsfUQUCDCDT8hj382OdLb2cEb5mjC8Av0bp8ve36AAFFF13kgwL6zKDRCt8QNRn0496On0YwhUoOz3iYSnIDGTBdw+q7oOPqYi9p-k9dy2jPc3OSLdz2vrZYo5IRHkzlLcW48PH+alPjUtJ5+8TqchPkPGCkPfDNPlLlOGE-KGJ9FyOav1sPhHu0J-neMNqwuwkAtdobjxHJJGOenELuv8PyP8BzDEoHtUEUKDAKB-hPjZgTu6j+BGtKn-iLoVJhLQguJLitEzuvvOHQDaiDMmp2tBNQSfjOg2mfsQH-iapnpUJGN7jGL7iet8JEtODytzIDJuHejUEAA */
   id: "joinGroupMachine",
-  context: ({ input }) => {
-    // const account = Controlled.accountsClient.getCurrentAccountAddress();
-    const account = input.account;
-
-    const { groupInviteId } = input;
-
-    return {
-      account,
-      groupInviteId,
-      joinStatus: "PENDING",
-    };
-  },
+  context: ({ input }) => ({
+    account: input.account,
+    groupInviteId: input.groupInviteId,
+    joinStatus: "PENDING",
+  }),
 
   initial: "Loading Group Invite Metadata",
 
@@ -309,7 +271,6 @@ joiner will see when they land on the deep link page.
             },
           ],
         },
-
         onError: {
           target: "Error Loading Group Invite",
           actions: [
@@ -500,7 +461,6 @@ and we are exploring ideas such as allowing more admins
 to accept the invite.
           `,
       tags: ["polling"],
-
       invoke: {
         id: "attemptToJoinGroupActorLogic",
         src: "attemptToJoinGroupActorLogic",
@@ -513,45 +473,50 @@ to accept the invite.
         onDone: [
           {
             guard: {
-              type: "isGroupJoinRequestAccepted",
+              type: "isGroupJoinRequestType",
               params: ({ event }) => ({
                 groupJoinRequestEventType: event.output.type,
+                expectedType: "group-join-request.accepted",
               }),
             },
             target: "Determining Newly Joined Group",
           },
           {
             guard: {
-              type: "isGroupJoinRequestAlreadyJoined",
+              type: "isGroupJoinRequestType",
               params: ({ event }) => ({
                 groupJoinRequestEventType: event.output.type,
+                expectedType: "group-join-request.already-joined",
               }),
             },
             target: "User Joined Group",
           },
           {
             guard: {
-              type: "isGroupJoinRequestRejected",
+              type: "isGroupJoinRequestType",
               params: ({ event }) => ({
                 groupJoinRequestEventType: event.output.type,
+                expectedType: "group-join-request.rejected",
               }),
             },
             target: "Request to Join Group Rejected",
           },
           {
             guard: {
-              type: "isGroupJoinRequestError",
+              type: "isGroupJoinRequestType",
               params: ({ event }) => ({
                 groupJoinRequestEventType: event.output.type,
+                expectedType: "group-join-request.error",
               }),
             },
             target: "Error Joining Group",
           },
           {
             guard: {
-              type: "isGroupJoinRequestTimedOut",
+              type: "isGroupJoinRequestType",
               params: ({ event }) => ({
                 groupJoinRequestEventType: event.output.type,
+                expectedType: "group-join-request.timed-out",
               }),
             },
             target: "Attempting to Join Group Timed Out",
@@ -772,7 +737,6 @@ The user has been blocked from the group or the group is not active.
             joinStatus: "ACCEPTED",
           },
         },
-
         {
           type: "navigateToGroupScreen",
           params: ({ context }) => {
