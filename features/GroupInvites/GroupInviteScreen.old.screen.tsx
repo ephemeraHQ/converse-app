@@ -1,10 +1,13 @@
 import Avatar from "@components/Avatar";
+import Button from "@components/Button/Button";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
 import { useGroupInviteQuery } from "@queries/useGroupInviteQuery";
 import { fetchGroupsQuery } from "@queries/useGroupsQuery";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { NavigationParamList } from "@screens/Navigation/Navigation";
 import {
   backgroundColor,
   dangerColor,
@@ -19,16 +22,12 @@ import {
 } from "@utils/api";
 import { getTopicFromGroupId } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
-import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { GroupWithCodecsType } from "@utils/xmtpRN/client.types";
+import { refreshGroup } from "@utils/xmtpRN/conversations";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import { NavigationParamList } from "./Navigation/Navigation";
-import Button from "../components/Button/Button";
-import { useCurrentAccount } from "../data/store/accountsStore";
-import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export default function GroupInviteScreen({
   route,
