@@ -1,3 +1,4 @@
+import { useSelect } from "@data/store/storeHelpers";
 import { FlashList } from "@shopify/flash-list";
 import {
   backgroundColor,
@@ -5,9 +6,11 @@ import {
   tertiaryBackgroundColor,
 } from "@styles/colors";
 import { getCleanAddress } from "@utils/evm/address";
+import { FrameWithType } from "@utils/frames";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
+  ColorSchemeName,
   Dimensions,
   FlatList,
   Platform,
@@ -73,9 +76,11 @@ const useRenderItem = ({
   colorScheme,
 }: {
   xmtpAddress: string;
-  conversation: any;
-  framesStore: any;
-  colorScheme: any;
+  conversation: XmtpConversationWithUpdate | undefined;
+  colorScheme: ColorSchemeName;
+  framesStore: {
+    [frameUrl: string]: FrameWithType;
+  };
 }) => {
   return useCallback(
     ({ item }: { item: MessageToDisplay }) => {
@@ -85,7 +90,7 @@ const useRenderItem = ({
           message={{ ...item }}
           colorScheme={colorScheme}
           isGroup={!!conversation?.isGroup}
-          isFrame={!!framesStore[item.content.toLowerCase()]}
+          isFrame={!!framesStore[item.content.toLowerCase().trim()]}
         />
       );
     },
@@ -376,7 +381,7 @@ export function Chat() {
     styles.inChatRecommendations,
   ]);
 
-  const framesStore = useFramesStore().frames;
+  const { frames } = useFramesStore(useSelect(["frames"]));
 
   const showPlaceholder = useIsShowingPlaceholder({
     messages: listArray,
@@ -387,7 +392,7 @@ export function Chat() {
   const renderItem = useRenderItem({
     xmtpAddress,
     conversation,
-    framesStore,
+    framesStore: frames,
     colorScheme,
   });
 
@@ -459,7 +464,7 @@ export function Chat() {
             }
             inverted
             keyExtractor={keyExtractor}
-            getItemType={getItemType(framesStore)}
+            getItemType={getItemType(frames)}
             keyboardShouldPersistTaps="handled"
             estimatedItemSize={80}
             // Size glitch on Android
@@ -532,7 +537,7 @@ export function ChatPreview() {
     ]
   );
 
-  const framesStore = useFramesStore().frames;
+  const { frames } = useFramesStore(useSelect(["frames"]));
 
   const showPlaceholder = useIsShowingPlaceholder({
     messages: listArray,
@@ -543,8 +548,8 @@ export function ChatPreview() {
   const renderItem = useRenderItem({
     xmtpAddress,
     conversation,
-    framesStore,
     colorScheme,
+    framesStore: frames,
   });
 
   const keyExtractor = useCallback((item: MessageToDisplay) => item.id, []);
@@ -586,7 +591,7 @@ export function ChatPreview() {
             estimatedListSize={Dimensions.get("screen")}
             inverted
             keyExtractor={keyExtractor}
-            getItemType={getItemType(framesStore)}
+            getItemType={getItemType(frames)}
             keyboardShouldPersistTaps="handled"
             estimatedItemSize={80}
             showsVerticalScrollIndicator={false}

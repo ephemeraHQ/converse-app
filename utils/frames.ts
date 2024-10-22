@@ -275,6 +275,6 @@ export const isFrameMessage = (message: MessageToDisplay): boolean => {
   return (
     isContentType("text", message.contentType) &&
     !!message.converseMetadata?.frames?.[0] &&
-    !!framesStore[message.converseMetadata.frames[0].toLowerCase()]
+    !!framesStore[message.converseMetadata.frames[0].toLowerCase().trim()]
   );
 };

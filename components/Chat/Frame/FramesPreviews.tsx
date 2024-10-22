@@ -1,5 +1,5 @@
 import { useConversationContext } from "@utils/conversation";
-import { useCallback, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 
 import FramePreview from "./FramePreview";
@@ -16,7 +16,7 @@ type Props = {
   message: MessageToDisplay;
 };
 
-export default function FramesPreviews({ message }: Props) {
+function FramesPreviews({ message }: Props) {
   const messageId = useRef<string | undefined>(undefined);
   const tagsFetchedOnceForMessage = useConversationContext(
     "tagsFetchedOnceForMessage"
@@ -41,18 +41,23 @@ export default function FramesPreviews({ message }: Props) {
     }
   }, [account, message, tagsFetchedOnceForMessage]);
 
-  // Components are recycled, let's fix when stuff changes
-  if (message.id !== messageId.current) {
-    messageId.current = message.id;
-    fetchTagsIfNeeded();
-    setFramesForMessage({
-      [message.id]: useFramesStore
-        .getState()
-        .getFramesForURLs(message.converseMetadata?.frames || []),
-    });
-  }
+  useEffect(() => {
+    if (message.id !== messageId.current) {
+      messageId.current = message.id;
+      fetchTagsIfNeeded();
+      setFramesForMessage({
+        [message.id]: useFramesStore
+          .getState()
+          .getFramesForURLs(message.converseMetadata?.frames || []),
+      });
+    }
+  }, [fetchTagsIfNeeded, message.converseMetadata?.frames, message.id]);
 
-  const framesToDisplay = framesForMessage[message.id] || [];
+  // Components are recycled, let's fix when stuff changes
+
+  const framesToDisplay = useMemo(() => {
+    return framesForMessage[message.id] || [];
+  }, [framesForMessage, message.id]);
 
   return (
     <View>
@@ -68,3 +73,5 @@ export default function FramesPreviews({ message }: Props) {
     </View>
   );
 }
+
+export default memo(FramesPreviews);

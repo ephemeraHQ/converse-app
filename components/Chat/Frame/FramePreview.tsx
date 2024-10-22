@@ -43,14 +43,16 @@ export default function FramePreview({
   const [postingActionForButton, setPostingActionForButton] = useState(
     undefined as undefined | number
   );
+  const frameRef = useRef<FrameToDisplay | null>(null);
   const [firstFrameLoaded, setFirstFrameLoaded] = useState(false);
   const [firstImageRefreshed, setFirstImageRefreshed] = useState(false);
   const [frame, setFrame] = useState({
     ...initialFrame,
-    frameImage: undefined,
+    frameImage: frameRef.current?.frameImage,
     isInitialFrame: true,
     uniqueId: uuidv4(),
   } as FrameToDisplay);
+  console.log("here1111", frame.frameImage);
   const [firstImageFailure, setFirstImageFailure] = useState(false);
   const buttons = getFrameButtons(frame);
   const textInput = frame.frameInfo?.textInput?.content;
@@ -96,6 +98,9 @@ export default function FramePreview({
           // These won't change so no cache to handle
           setFirstImageRefreshed(true);
           setFrame((s) => ({ ...s, frameImage: initialFrameImage }));
+          if (frameRef.current) {
+            frameRef.current.frameImage = initialFrameImage;
+          }
           setFirstFrameLoaded(true);
           return;
         } else if (Platform.OS === "web") {
@@ -120,6 +125,9 @@ export default function FramePreview({
           if (cachedImage) {
             setFirstImageRefreshed(true);
             setFrame((s) => ({ ...s, frameImage: cachedImage }));
+            if (frameRef.current) {
+              frameRef.current.frameImage = cachedImage;
+            }
           } else {
             setFirstImageFailure(true);
           }
@@ -135,6 +143,9 @@ export default function FramePreview({
             ...s,
             frameImage: `${imageCache}?refreshed=true`,
           }));
+          if (frameRef.current) {
+            frameRef.current.frameImage = `${imageCache}?refreshed=true`;
+          }
           setFirstImageRefreshed(true);
         }
         fetchingInitialForMessageId.current = undefined;
