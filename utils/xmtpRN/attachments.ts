@@ -1,12 +1,12 @@
+import { XmtpMessage } from "@data/store/chatStore";
+import { ConverseXmtpClientType } from "@utils/xmtpRN/client.types";
 import {
   DecryptedLocalAttachment,
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
 import RNFS from "react-native-fs";
 
-import { ConverseXmtpClientType } from "./client";
 import { getXmtpClient } from "./sync";
-import { XmtpMessage } from "../../data/store/chatStore";
 
 export const encryptRemoteAttachment = async (
   account: string,

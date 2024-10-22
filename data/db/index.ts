@@ -85,7 +85,7 @@ export const initDb = async (account: string): Promise<void> => {
       await waitUntilAppActive(1500);
       const migrationsResult = await dataSource.runMigrations();
       logger.debug(`Migrations done for ${account}`);
-      console.log(migrationsResult);
+      logger.debug(migrationsResult);
       repositories[account] = {
         conversation: dataSource.getRepository(Conversation),
         message: dataSource.getRepository(Message),
