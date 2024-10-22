@@ -7,6 +7,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
+import { useAppTheme } from "@theme/useAppTheme";
 import * as Haptics from "expo-haptics";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
@@ -30,7 +31,7 @@ import Animated, {
 import { useShallow } from "zustand/react/shallow";
 
 import ChatMessageActions from "./MessageActions";
-import ChatMessageReactions from "./MessageReactions";
+import { ChatMessageReactions } from "./MessageReactions";
 import MessageStatus from "./MessageStatus";
 import {
   currentAccount,
@@ -289,13 +290,7 @@ const ChatMessage = ({
   const reactions = useMemo(() => getMessageReactions(message), [message]);
   const hasReactions = Object.keys(reactions).length > 0;
   const isChatMessage = !isGroupUpdated;
-  const shouldShowReactionsOutside =
-    isChatMessage && (isAttachment || isFrame || isTransaction);
-  const shouldShowReactionsInside =
-    isChatMessage && !shouldShowReactionsOutside;
-  const shouldShowOutsideContentRow =
-    isChatMessage &&
-    (isTransaction || isFrame || (isAttachment && hasReactions));
+  const shouldShowOutsideContentRow = isChatMessage && hasReactions;
 
   let messageMaxWidth: DimensionValue;
   if (isDesktop) {
@@ -490,18 +485,6 @@ const ChatMessage = ({
                       </TouchableOpacity>
                     </View>
                   )}
-                  {shouldShowReactionsInside && (
-                    <View
-                      style={
-                        hasReactions ? styles.reactionsContainer : { flex: 1 }
-                      }
-                    >
-                      <ChatMessageReactions
-                        message={message}
-                        reactions={reactions}
-                      />
-                    </View>
-                  )}
                 </ChatMessageActions>
                 {shouldShowOutsideContentRow ? (
                   <View style={styles.outsideContentRow}>
@@ -516,14 +499,12 @@ const ChatMessage = ({
                         </Text>
                       </TouchableOpacity>
                     )}
-                    {shouldShowReactionsOutside && (
-                      <View style={styles.outsideReactionsContainer}>
-                        <ChatMessageReactions
-                          message={message}
-                          reactions={reactions}
-                        />
-                      </View>
-                    )}
+                    <View style={styles.outsideReactionsContainer}>
+                      <ChatMessageReactions
+                        message={message}
+                        reactions={reactions}
+                      />
+                    </View>
                     {isFrame && message.fromMe && !hasReactions && (
                       <MessageStatus message={message} />
                     )}
@@ -609,6 +590,8 @@ export default function CachedChatMessage({
 }
 
 const useStyles = () => {
+  const { theme } = useAppTheme();
+
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     messageContainer: {
@@ -710,7 +693,8 @@ const useStyles = () => {
       height: AvatarSizes.messageSender,
     },
     outsideContentRow: {
-      marginTop: 1,
+      marginTop: theme.spacing["4xs"],
+      marginBottom: theme.spacing.xxxs,
       flexDirection: "row",
       justifyContent: "flex-start",
       columnGap: 8,

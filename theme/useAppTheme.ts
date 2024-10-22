@@ -16,6 +16,7 @@ import { StyleProp, useColorScheme } from "react-native";
 
 import { avatarSize, IAvatarSize } from "./avatar";
 import { borderRadius, IBorderRadius } from "./border-radius";
+import { borderWidth, IBorderWidth } from "./borders";
 import { colorsDark } from "./colorsDark";
 import { colorsLight, IColors } from "./colorsLight";
 import { iconSize, IIconSize } from "./icon";
@@ -30,6 +31,7 @@ export interface Theme {
   colors: IColors;
   spacing: ISpacing;
   borderRadius: IBorderRadius;
+  borderWidth: IBorderWidth;
   avatarSize: IAvatarSize;
   iconSize: IIconSize;
   typography: ITypography;
@@ -43,6 +45,7 @@ export const lightTheme: Theme = {
   spacing,
   typography,
   borderRadius,
+  borderWidth,
   avatarSize,
   iconSize,
   timing,
@@ -53,6 +56,7 @@ export const darkTheme: Theme = {
   spacing,
   typography,
   borderRadius,
+  borderWidth,
   avatarSize,
   iconSize,
   timing,
