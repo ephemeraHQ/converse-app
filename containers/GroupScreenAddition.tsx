@@ -17,13 +17,6 @@ import {
 import { PictoSizes } from "@styles/sizes";
 import { createGroupInvite, deleteGroupInvite } from "@utils/api";
 import {
-  saveGroupInviteLink,
-  deleteGroupInviteLink as deleteLinkFromStore,
-  saveInviteIdByGroupId,
-  deleteInviteIdByGroupId,
-  getInviteIdByGroupId,
-} from "@utils/groupInvites";
-import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
 } from "@utils/groupUtils/adminUtils";
@@ -41,6 +34,14 @@ import {
   View,
 } from "react-native";
 import { Portal, Snackbar, Text } from "react-native-paper";
+
+import {
+  saveGroupInviteLink,
+  deleteGroupInviteLink as deleteLinkFromStore,
+  saveInviteIdByGroupId,
+  deleteInviteIdByGroupId,
+  getInviteIdByGroupId,
+} from "../features/GroupInvites/groupInvites.utils";
 
 interface GroupScreenAdditionProps {
   topic: string;
