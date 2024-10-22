@@ -1,4 +1,10 @@
 /**
+ * Note: This Client is not currently yet being used and requires some
+ * refactoring to synchronously access current state without
+ * transitively importing unwanted dependencies.
+ *
+ * Keeping it here for future use.
+ *
  * Naming Conventions:
  *
  * Fetch: fetches data from the server or over the network somehow
