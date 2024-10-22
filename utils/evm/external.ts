@@ -105,7 +105,7 @@ export const useExternalSigner = () => {
   }, [activeWallet?.id, wallets]);
 
   const switchChain = useCallback(
-    (chainId: number) => {
+    async (chainId: number) => {
       if (!supportedChains[chainId]) {
         Alert.alert(translate("external_wallet_chain_not_supported"));
         return;
