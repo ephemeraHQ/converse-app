@@ -6,7 +6,7 @@ import { Platform, useColorScheme } from "react-native";
 import { SplitScreenDrawerParams } from "./SplitScreenNavigation";
 import config from "../../../config";
 import { useAppStore } from "../../../data/store/appStore";
-import { JoinGroupNavigation } from "../../../features/GroupInvites/JoinGroupNavigation";
+import { JoinGroupNavigation } from "../../../features/GroupInvites/joinGroup/JoinGroupNavigation";
 import { isDesktop } from "../../../utils/device";
 import { converseNavigations } from "../../../utils/navigation";
 import ConversationNav, {

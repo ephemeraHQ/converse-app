@@ -43,7 +43,7 @@ import {
   JoinGroupNavigation,
   JoinGroupNavigationParams,
   JoinGroupScreenConfig,
-} from "../../features/GroupInvites/JoinGroupNavigation";
+} from "../../features/GroupInvites/joinGroup/JoinGroupNavigation";
 import { isDesktop } from "../../utils/device";
 import { converseNavigations } from "../../utils/navigation";
 
