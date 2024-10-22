@@ -1387,9 +1387,11 @@ PODS:
     - Yoga
   - react-native-netinfo (11.3.1):
     - React-Core
+  - react-native-passkey (2.1.1):
+    - React-Core
   - react-native-quick-base64 (2.0.8):
     - React-Core
-  - react-native-quick-crypto (0.7.1):
+  - react-native-quick-crypto (0.7.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1912,6 +1914,7 @@ DEPENDENCIES:
   - "react-native-menu (from `../node_modules/@react-native-menu/menu`)"
   - react-native-mmkv (from `../node_modules/react-native-mmkv`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
+  - react-native-passkey (from `../node_modules/react-native-passkey`)
   - react-native-quick-base64 (from `../node_modules/react-native-quick-base64`)
   - react-native-quick-crypto (from `../node_modules/react-native-quick-crypto`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -2158,6 +2161,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-mmkv"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
+  react-native-passkey:
+    :path: "../node_modules/react-native-passkey"
   react-native-quick-base64:
     :path: "../node_modules/react-native-quick-base64"
   react-native-quick-crypto:
@@ -2357,8 +2362,9 @@ SPEC CHECKSUMS:
   react-native-menu: d32728a357dfb360cf01cd5979cf7713c5acbb95
   react-native-mmkv: 6d8259f25b80397c99ad50e2d891e22465f65e09
   react-native-netinfo: bdb108d340cdb41875c9ced535977cac6d2ff321
+  react-native-passkey: 29ff814a83dfd4311478498e71a801dce68043ac
   react-native-quick-base64: 777057ea4286f806b00259ede65dc79c7c706320
-  react-native-quick-crypto: 09c5986efae9b05e31b0aba0be75fac9e4d8bd44
+  react-native-quick-crypto: 3b7e5dd28ddd76604b22377baa8135c306404be0
   react-native-safe-area-context: a240ad4b683349e48b1d51fed1611138d1bdad97
   react-native-sfsymbols: bd3a0d3eab185e80b571bae60753dcf5a0d57967
   react-native-sqlite-storage: f6d515e1c446d1e6d026aa5352908a25d4de3261

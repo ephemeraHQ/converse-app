@@ -1,11 +1,17 @@
+import {
+  DEFAULT_SUPPORTED_CHAINS,
+  useInstalledWallets,
+} from "@components/Onboarding/supportedWallets";
+import { translate } from "@i18n";
 import { converseEventEmitter, waitForConverseEvent } from "@utils/events";
 import logger from "@utils/logger";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Signer } from "ethers";
 import { useCallback, useEffect, useMemo } from "react";
+import { Alert } from "react-native";
 import { prepareTransaction, sendTransaction } from "thirdweb";
 import { ethers5Adapter } from "thirdweb/adapters/ethers5";
-import { base, Chain, ethereum, sepolia } from "thirdweb/chains";
+import { Chain, ethereum } from "thirdweb/chains";
 import {
   useActiveAccount,
   useActiveWallet,
@@ -31,6 +37,7 @@ export const useExternalSigner = () => {
   const activeWallet = useActiveWallet();
   const { disconnect } = useDisconnect();
   const switchActiveWalletChain = useSwitchActiveWalletChain();
+  const wallets = useInstalledWallets();
 
   useEffect(() => {
     accountSingleton = activeAccount;
@@ -83,17 +90,26 @@ export const useExternalSigner = () => {
 
   const supportedChains = useMemo(() => {
     const byId: { [chainId: number]: Chain } = {};
-    // @todo => support more here!
-    [ethereum, sepolia, base].forEach((chain) => {
+    const activeWalletId = activeWallet?.id;
+    let chains = DEFAULT_SUPPORTED_CHAINS;
+    if (activeWalletId) {
+      const wallet = wallets.find((w) => w.thirdwebId === activeWalletId);
+      if (wallet?.supportedChains) {
+        chains = wallet.supportedChains;
+      }
+    }
+    chains.forEach((chain) => {
       byId[chain.id] = chain;
     });
     return byId;
-  }, []);
+  }, [activeWallet?.id, wallets]);
 
   const switchChain = useCallback(
     (chainId: number) => {
-      if (!supportedChains[chainId])
-        throw new Error(`Chain ${chainId} is not supported`);
+      if (!supportedChains[chainId]) {
+        Alert.alert(translate("external_wallet_chain_not_supported"));
+        return;
+      }
       return switchActiveWalletChain(supportedChains[chainId]);
     },
     [supportedChains, switchActiveWalletChain]

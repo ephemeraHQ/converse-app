@@ -119,11 +119,7 @@ export default function ExternalWalletPicker() {
     };
   }, [displayExternalWalletPicker]);
 
-  const _wallets = useInstalledWallets();
-  // Temporary : only Coinbase Wallet because switch is broken
-  const wallets = _wallets.filter(
-    (w) => w.thirdwebId === "com.coinbase.wallet"
-  );
+  const wallets = useInstalledWallets();
 
   return (
     <Drawer

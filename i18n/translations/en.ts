@@ -352,6 +352,8 @@ const en = {
   transaction_asset_change_type_approve: "Approve",
   transaction_asset_change_type_transfer: "Transfer",
   transaction_asset_change_to: "To",
+  external_wallet_chain_not_supported:
+    "This chain is not supported by your wallet",
 
   // New Conversation
   cannot_be_added_to_group_yet:

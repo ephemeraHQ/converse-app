@@ -1,5 +1,27 @@
 import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
+import { Chain } from "thirdweb";
+import {
+  arbitrum,
+  avalanche,
+  base,
+  blast,
+  ethereum,
+  optimism,
+  polygon,
+  zora,
+  sepolia,
+  bsc,
+  fantom,
+  gnosis,
+  celo,
+  zkSync,
+  polygonZkEvm,
+  linea,
+  scroll,
+  mantaPacific,
+  xai,
+} from "thirdweb/chains";
 import { WalletId } from "thirdweb/wallets";
 
 import { isDesktop } from "../../utils/device";
@@ -52,7 +74,30 @@ export type InstalledWallet = {
   walletConnectId?: string;
   platforms?: string[];
   thirdwebId?: WalletId;
+  supportedChains?: Chain[];
 };
+
+export const DEFAULT_SUPPORTED_CHAINS = [
+  ethereum,
+  base,
+  optimism,
+  polygon,
+  arbitrum,
+  avalanche,
+  blast,
+  zora,
+  sepolia,
+  bsc,
+  fantom,
+  gnosis,
+  celo,
+  zkSync,
+  polygonZkEvm,
+  linea,
+  scroll,
+  mantaPacific,
+  xai,
+];
 
 const SUPPORTED_WALLETS: InstalledWallet[] = [
   {
@@ -79,6 +124,18 @@ const SUPPORTED_WALLETS: InstalledWallet[] = [
       "https://explorer-api.walletconnect.com/v3/logo/sm/7a33d7f1-3d12-4b5c-f3ee-5cd83cb1b500?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "rainbow://",
     thirdwebId: "me.rainbow",
+    // Rainbow Mobile does not support tesnets (even Sepolia)
+    // https://rainbow.me/en/support/app/testnets
+    supportedChains: [
+      ethereum,
+      base,
+      optimism,
+      polygon,
+      arbitrum,
+      avalanche,
+      blast,
+      zora,
+    ],
   },
   {
     name: "MetaMask",
