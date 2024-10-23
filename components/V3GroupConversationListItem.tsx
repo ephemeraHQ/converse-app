@@ -19,7 +19,7 @@ import { runOnJS } from "react-native-reanimated";
 import Avatar from "./Avatar";
 import { ConversationContextMenu } from "./ConversationContextMenu";
 import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
-import { GroupAvatarDumb } from "./GroupAvatar/GroupAvatar";
+import { GroupAvatarDumb } from "./GroupAvatar";
 import Picto from "./Picto/Picto";
 
 type V3GroupConversationListItemProps = {
