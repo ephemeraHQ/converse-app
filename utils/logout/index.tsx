@@ -1,6 +1,7 @@
 import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
 import logger from "@utils/logger";
-import { ConverseXmtpClientType, dropXmtpClient } from "@utils/xmtpRN/client";
+import { dropXmtpClient } from "@utils/xmtpRN/client";
+import { ConverseXmtpClientType } from "@utils/xmtpRN/client.types";
 import { getInboxId } from "@utils/xmtpRN/signIn";
 import { useCallback } from "react";
 

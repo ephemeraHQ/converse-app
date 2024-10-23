@@ -1,12 +1,12 @@
 import logger from "@utils/logger";
 import { retryWithBackoff } from "@utils/retryWithBackoff";
+import { ConverseXmtpClientType } from "@utils/xmtpRN/client.types";
 import { Client } from "@xmtp/xmtp-js";
 import intersect from "fast_array_intersect";
 import { AppState } from "react-native";
 
 import { xmtpSignatureByAccount } from "./api";
 import {
-  ConverseXmtpClientType,
   getXmtpClientFromBase64Key,
   reconnectXmtpClientsDbConnections,
   xmtpClientByAccount,

@@ -3,7 +3,7 @@ import { invalidateGroupIsActiveQuery } from "@queries/useGroupIsActive";
 import { invalidateGroupMembersQuery } from "@queries/useGroupMembersQuery";
 import { invalidateGroupNameQuery } from "@queries/useGroupNameQuery";
 import { invalidateGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
-import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
+import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client.types";
 import { refreshGroup } from "@utils/xmtpRN/conversations";
 import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
 
