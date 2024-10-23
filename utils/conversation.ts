@@ -220,11 +220,14 @@ export const openMainConversationWithPeer = async (
     }
   }, 5000);
   // First, resolve the peer to an address
-  let peerAddress = undefined;
+  let peerAddress: string | undefined = undefined;
   try {
     peerAddress = await getAddressForPeer(peerToCreateConvoWith);
   } catch (e) {
-    logger.warn(e);
+    logger.error(e, {
+      context: "Failed to resolve peer address",
+      peer: peerToCreateConvoWith,
+    });
   }
   if (!peerAddress) {
     isDone = true;
@@ -267,8 +270,8 @@ export const openMainConversationWithPeer = async (
     if (!onNetwork && !isDone) {
       isDone = true;
       Alert.alert(
-        "Not yet using XMTP",
-        "Your contact is not yet using XMTP. Tell them to download the app at converse.xyz and log in with their wallet.",
+        translate("identity_not_yet_xmtp_title"),
+        translate("identity_not_yet_xmtp", {}),
         [
           {
             text: "OK",
