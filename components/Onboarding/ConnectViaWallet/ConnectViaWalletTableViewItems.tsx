@@ -1,3 +1,4 @@
+// TODO: move out of ConnectViaWallet
 import { Signer } from "ethers";
 import { memo } from "react";
 import { ethers5Adapter } from "thirdweb/adapters/ethers5";
@@ -29,7 +30,7 @@ export function getConnectViaWalletTableViewPrivateKeyItem(
     id: "privateKey",
     leftView: <TableViewEmoji emoji="🔑" />,
     title: translate("walletSelector.connectionOptions.connectViaKey"),
-    rightView: RightViewChevron(),
+    rightView: <RightViewChevron />,
     ...args,
   };
 }
@@ -41,7 +42,7 @@ export function getConnectViaWalletTableViewPhoneItem(
     id: "phone",
     leftView: <TableViewEmoji emoji="📞" />,
     title: translate("walletSelector.converseAccount.connectViaPhone"),
-    rightView: RightViewChevron(),
+    rightView: <RightViewChevron />,
     ...args,
   };
 }
@@ -53,7 +54,7 @@ export function getConnectViaWalletTableViewEphemeralItem(
     id: "ephemeral",
     leftView: <TableViewEmoji emoji="☁️" />,
     title: translate("walletSelector.converseAccount.createEphemeral"),
-    rightView: RightViewChevron(),
+    rightView: <RightViewChevron />,
     ...args,
   };
 }
@@ -69,7 +70,7 @@ export function getConnectViaWalletInstalledWalletTableViewItem(args: {
     title: translate("walletSelector.installedApps.connectWallet", {
       walletName: wallet.name,
     }),
-    rightView: RightViewChevron(),
+    rightView: <RightViewChevron />,
     ...tableViewItemArgs,
   };
 }
@@ -92,7 +93,7 @@ export const InstalledWalletsTableView = memo(
         items={walletsInstalled.map((wallet) => ({
           id: wallet.name,
           leftView: <TableViewImage imageURI={wallet.iconURL} />,
-          rightView: RightViewChevron(),
+          rightView: <RightViewChevron />,
           title: translate("walletSelector.installedApps.connectWallet", {
             walletName: wallet.name,
           }),
@@ -106,7 +107,7 @@ export const InstalledWalletsTableView = memo(
 
               // Specific flow for Coinbase Wallet
               if (wallet.name === "Coinbase Wallet") {
-                thirdwebConnect(async () => {
+                const wallet = await thirdwebConnect(async () => {
                   const coinbaseWallet = createWallet("com.coinbase.wallet", {
                     appMetadata: config.walletConnectConfig.appMetadata,
                     mobileConfig: {
@@ -115,13 +116,21 @@ export const InstalledWalletsTableView = memo(
                   });
                   await coinbaseWallet.connect({ client: thirdwebClient });
                   setThirdwebActiveWallet(coinbaseWallet);
-                  const account = coinbaseWallet.getAccount();
-                  if (!account) {
-                    throw new Error("No coinbase account found");
-                  }
-                  walletAddress = account.address;
                   return coinbaseWallet;
                 });
+
+                if (!wallet) {
+                  throw new Error("No coinbase wallet");
+                }
+
+                const account = wallet.getAccount();
+
+                if (!account) {
+                  throw new Error("No coinbase account found");
+                }
+
+                console.log("account.address:", account.address);
+                walletAddress = account.address;
               }
               // EthOS Wallet
               else if (wallet.name === "EthOS Wallet") {
@@ -142,6 +151,8 @@ export const InstalledWalletsTableView = memo(
                 setThirdwebActiveWallet(walletConnectWallet);
                 walletAddress = account.address;
               }
+
+              console.log("walletAddress:", walletAddress);
 
               if (getAccountsList().includes(walletAddress)) {
                 onAccountExists({ address: walletAddress });

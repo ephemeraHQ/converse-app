@@ -1,3 +1,4 @@
+// TODO: move out of ConnectViaWallet
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useState } from "react";
 import { WalletId } from "thirdweb/wallets";

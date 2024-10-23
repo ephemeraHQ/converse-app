@@ -15,8 +15,11 @@ import { isOnXmtp } from "../../../utils/xmtpRN/client";
 import { getInboxId } from "../../../utils/xmtpRN/signIn";
 
 // For now let's keep Thirdweb and the hooks because I haven't found a better way to do it.
+// But ideally a lot of this it outside React.
 export function useInitConnectViaWalletState(args: { address: string }) {
   const { address } = args;
+
+  console.log("address:", address);
 
   const [isInitializing, setIsInitializing] = useState(true);
   const [onXmtp, setOnXmtp] = useState(false);
@@ -32,14 +35,15 @@ export function useInitConnectViaWalletState(args: { address: string }) {
 
   const handlingThirdwebSigner = useRef(false);
 
-  const readyToHandleThirdwebSigner = useRef(false);
-  useEffect(() => {
-    if (!readyToHandleThirdwebSigner.current) {
-      disconnect({ address }).then(() => {
-        readyToHandleThirdwebSigner.current = true;
-      });
-    }
-  }, [disconnect, address]);
+  // https://xmtp-labs.slack.com/archives/C07NSHXK693/p1729606215308819?thread_ts=1729559726.174059&cid=C07NSHXK693
+  //   const readyToHandleThirdwebSigner = useRef(false);
+  //   useEffect(() => {
+  //     if (!readyToHandleThirdwebSigner.current) {
+  //       disconnect({ address }).then(() => {
+  //         readyToHandleThirdwebSigner.current = true;
+  //       });
+  //     }
+  //   }, [disconnect, address]);
 
   useEffect(() => {
     if (!thirdwebAccount) {
@@ -49,12 +53,12 @@ export function useInitConnectViaWalletState(args: { address: string }) {
       return;
     }
 
-    if (!readyToHandleThirdwebSigner.current) {
-      logger.debug(
-        "[Connect Wallet] Not ready to get thirdweb signer from account yet"
-      );
-      return;
-    }
+    // if (!readyToHandleThirdwebSigner.current) {
+    //   logger.debug(
+    //     "[Connect Wallet] Not ready to get thirdweb signer from account yet"
+    //   );
+    //   return;
+    // }
 
     ethers5Adapter.signer
       .toEthers({
@@ -72,10 +76,10 @@ export function useInitConnectViaWalletState(args: { address: string }) {
       return;
     }
 
-    if (!readyToHandleThirdwebSigner.current) {
-      logger.debug("[Connect Wallet] Not ready to handle thirdweb signer yet");
-      return;
-    }
+    // if (!readyToHandleThirdwebSigner.current) {
+    //   logger.debug("[Connect Wallet] Not ready to handle thirdweb signer yet");
+    //   return;
+    // }
 
     if (handlingThirdwebSigner.current) {
       logger.debug("[Connect Wallet] Already handling thirdweb signer");
@@ -84,9 +88,13 @@ export function useInitConnectViaWalletState(args: { address: string }) {
 
     const initializeWallet = async () => {
       try {
+        logger.debug("[Connect Wallet] Initializing wallet");
+
         handlingThirdwebSigner.current = true;
 
         setIsInitializing(true);
+
+        console.log("address:", address);
 
         const [isOnNetwork, inboxId] = await Promise.all([
           isOnXmtp(address),

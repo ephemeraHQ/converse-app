@@ -16,14 +16,14 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
-import { Account, createWallet, Wallet } from "thirdweb/wallets";
+import { Account, Wallet, createWallet } from "thirdweb/wallets";
 
-import { Drawer, DrawerRef } from "./Drawer";
 import config from "../config";
 import Button from "./Button/Button";
+import { Drawer, DrawerRef } from "./Drawer";
 import {
   InstalledWallet,
   useInstalledWallets,

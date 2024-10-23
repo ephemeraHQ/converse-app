@@ -1,3 +1,4 @@
+// TODO: move out of ConnectViaWallet
 import { POPULAR_WALLETS } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import TableView from "@components/TableView/TableView";
 import { TableViewImage } from "@components/TableView/TableViewImage";

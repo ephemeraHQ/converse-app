@@ -1,32 +1,27 @@
 import { Button } from "@design-system/Button/Button";
 import { translate } from "@i18n";
-import { awaitableAlert } from "@utils/alert";
 import logger from "@utils/logger";
-import { sentryTrackError, sentryTrackMessage } from "@utils/sentry";
-import { memo, useCallback, useEffect, useRef } from "react";
+import { sentryTrackError } from "@utils/sentry";
+import { memo, useCallback } from "react";
 import { ActivityIndicator } from "react-native";
 
 import { Center } from "../../../design-system/Center";
 import { VStack } from "../../../design-system/VStack";
 import { spacing } from "../../../theme";
 import { useAppTheme } from "../../../theme/useAppTheme";
-import { wait } from "../../../utils/general";
-import { getXmtpBase64KeyFromSigner } from "../../../utils/xmtpRN/signIn";
 import { PictoTitleSubtitle } from "../../PictoTitleSubtitle";
 import { Terms } from "../Terms";
 import ValueProps from "../ValueProps";
-import { connectWithBase64Key } from "../init-xmtp-client";
-import {
-  ConnectViaWalletContextProvider,
-  useConnectViaWalletContext,
-} from "./ConnectViaWallet.context";
+import { ConnectViaWalletContextProvider } from "./ConnectViaWallet.context";
 import {
   ConnectViaWalletStoreProvider,
   useConnectViaWalletStore,
   useConnectViaWalletStoreContext,
 } from "./ConnectViaWallet.store";
 import { useConnectViaWalletDisconnect } from "./useConnectViaWalletDisconnect";
+import { useInitXmptClient } from "./useConnectViaWalletInitXmtpClient";
 import { useInitConnectViaWalletState } from "./useInitConnectViaWalletState";
+import { useAppStateHandlers } from "../../../hooks/useAppStateHandlers";
 
 type IConnectViaWalletProps = {
   address: string;
@@ -39,10 +34,9 @@ export const ConnectViaWallet = memo(function ConnectViaWallet(
 ) {
   const { address, onErrorConnecting, onDoneConnecting } = props;
 
-  const disconnect = useConnectViaWalletDisconnect();
+  console.log("address1:", address);
 
-  const { alreadyV3Db, isInitializing, onXmtp, signer } =
-    useInitConnectViaWalletState({ address });
+  const disconnect = useConnectViaWalletDisconnect();
 
   const handleDoneConnecting = useCallback(() => {
     onDoneConnecting();
@@ -57,33 +51,45 @@ export const ConnectViaWallet = memo(function ConnectViaWallet(
     [onErrorConnecting, disconnect, address]
   );
 
-  if (isInitializing) {
-    return <ActivityIndicator />;
-  }
-
-  if (!signer) {
-    // TODO: Empty state something went wrong
-    return null;
-  }
-
   return (
     <ConnectViaWalletContextProvider
       onDoneConnecting={handleDoneConnecting}
       onErrorConnecting={handleErrorConnecting}
     >
+      <ConnectViaWalletStateWrapper address={address} />
+    </ConnectViaWalletContextProvider>
+  );
+});
+
+// Wrapper to init the wallet state and then provide the data to the UI
+const ConnectViaWalletStateWrapper = memo(
+  function ConnectViaWalletStateWrapper({ address }: { address: string }) {
+    const { isInitializing, alreadyV3Db, onXmtp, signer } =
+      useInitConnectViaWalletState({ address });
+
+    if (isInitializing) {
+      return <ActivityIndicator />;
+    }
+
+    if (!signer) {
+      // TODO: Empty state something went wrong
+      return null;
+    }
+
+    return (
       <ConnectViaWalletStoreProvider
         address={address}
         alreadyV3Db={alreadyV3Db}
         onXmtp={onXmtp}
         signer={signer}
       >
-        <Content />;
+        <ConnectViaWalletUI />
       </ConnectViaWalletStoreProvider>
-    </ConnectViaWalletContextProvider>
-  );
-});
+    );
+  }
+);
 
-const Content = memo(function Content() {
+const ConnectViaWalletUI = memo(function ConnectViaWalletUI(props: object) {
   const { theme } = useAppTheme();
 
   const {
@@ -107,6 +113,13 @@ const Content = memo(function Content() {
   const connectViewWalletStore = useConnectViaWalletStore();
 
   const { initXmtpClient } = useInitXmptClient();
+
+  useAppStateHandlers({
+    deps: [signer],
+    onForeground: () => {
+      console.log("onForeground");
+    },
+  });
 
   const primaryButtonAction = useCallback(() => {
     if (waitingForNextSignature) {
@@ -200,196 +213,3 @@ const Content = memo(function Content() {
     </>
   );
 });
-
-function useInitXmptClient() {
-  const { onDoneConnecting, onErrorConnecting } = useConnectViaWalletContext();
-  const connectViewWalletStore = useConnectViaWalletStore();
-  const disconnect = useConnectViaWalletDisconnect();
-
-  const abortControllerRef = useRef(new AbortController());
-  const timeoutInitXmtpClientRef = useRef<NodeJS.Timeout | null>(null);
-
-  const initXmtpClient = useCallback(async () => {
-    timeoutInitXmtpClientRef.current = setTimeout(() => {
-      sentryTrackMessage(
-        "Init XmtpClient via external wallet took more than 30 seconds"
-      );
-    }, 30000);
-
-    try {
-      const signer = connectViewWalletStore.getState().signer!; // We can assume that signer is set at this point
-      const address = connectViewWalletStore.getState().address!; // We can assume that address is set at this point
-      const onXmtp = connectViewWalletStore.getState().onXmtp;
-      const alreadyV3Db = connectViewWalletStore.getState().alreadyV3Db;
-
-      logger.debug("[Connect Wallet] starting initXmtpClient");
-
-      // Not sure we need this
-      // if (
-      //   connectViewWalletStore.getState().initiatingClientForAddress === address
-      // ) {
-      //   throw new Error("Already initiating client for this address");
-      // }
-
-      const waitForClickSignature = async () => {
-        while (!connectViewWalletStore.getState().clickedSignature) {
-          if (abortControllerRef.current.signal.aborted) {
-            throw new Error("Operation aborted");
-          }
-          logger.debug(
-            "[Connect Wallet] Waiting for signature. Current clickedSignature value: false"
-          );
-          await wait(1000);
-        }
-      };
-
-      // Used for debugging and know which signature is asked
-      const signaturesAsked = {
-        create: false,
-        enable: false,
-        authenticate: false,
-      };
-
-      const base64Key = await getXmtpBase64KeyFromSigner(
-        signer,
-        async () => {
-          logger.debug("[Connect Wallet] Installation revoked, disconnecting");
-          try {
-            await awaitableAlert(
-              translate("current_installation_revoked"),
-              translate("current_installation_revoked_description")
-            );
-          } catch (error) {
-            sentryTrackError(error);
-          } finally {
-            onErrorConnecting({
-              error: new Error("Installation revoked"),
-            });
-          }
-        },
-        async () => {
-          signaturesAsked.create = true;
-          logger.debug("[Connect Wallet] Triggering create signature");
-          // Before calling "create" signature
-          connectViewWalletStore.getState().setWaitingForNextSignature(true);
-          connectViewWalletStore.getState().setClickedSignature(false);
-        },
-        async () => {
-          signaturesAsked.enable = true;
-
-          if (signaturesAsked.create) {
-            logger.debug("[Connect Wallet] Create signature success!");
-          }
-
-          // Before calling "enable" signature
-          const waitingForNextSignature =
-            connectViewWalletStore.getState().waitingForNextSignature;
-
-          if (waitingForNextSignature) {
-            logger.debug("[Connect Wallet] waiting for next signature");
-
-            const currentSignaturesDone =
-              connectViewWalletStore.getState().numberOfSignaturesDone;
-
-            connectViewWalletStore
-              .getState()
-              .setNumberOfSignaturesDone(currentSignaturesDone + 1);
-            connectViewWalletStore.getState().setLoading(false);
-
-            logger.debug(
-              "[Connect Wallet] Waiting until signature click for Enable"
-            );
-            await waitForClickSignature();
-            logger.debug("[Connect Wallet] Click on Sign done for Enable");
-          } else {
-            logger.debug("[Connect Wallet] not waiting for next signature");
-          }
-
-          if (onXmtp && !alreadyV3Db) {
-            logger.debug(
-              "[Connect Wallet] Already on XMTP, but no db present, will need a new signature"
-            );
-            connectViewWalletStore.getState().setWaitingForNextSignature(true);
-          } else {
-            logger.debug(
-              "[Connect Wallet] New to XMTP, or db already present, will not need a new signature"
-            );
-            connectViewWalletStore.getState().setWaitingForNextSignature(false);
-          }
-        },
-        async () => {
-          if (signaturesAsked.enable) {
-            logger.debug("[Connect Wallet] Enable signature success!");
-          }
-          if (connectViewWalletStore.getState().waitingForNextSignature) {
-            const currentSignaturesDone =
-              connectViewWalletStore.getState().numberOfSignaturesDone;
-            connectViewWalletStore
-              .getState()
-              .setNumberOfSignaturesDone(currentSignaturesDone + 1);
-            connectViewWalletStore.getState().setLoading(false);
-            logger.debug(
-              "[Connect Wallet] Waiting until signature click for Authenticate"
-            );
-            await waitForClickSignature();
-            logger.debug(
-              "[Connect Wallet] Click on Sign done for Authenticate"
-            );
-            connectViewWalletStore.getState().setWaitingForNextSignature(false);
-          }
-          logger.debug(
-            "[Connect Wallet] Triggering authenticate to inbox signature"
-          );
-        }
-      );
-
-      if (!base64Key) {
-        throw new Error("[Connect Wallet] No base64Key received");
-      }
-
-      logger.debug("[Connect Wallet] Got base64 key, now connecting");
-
-      await connectWithBase64Key({
-        address,
-        base64Key,
-      });
-
-      logger.info("[Connect Wallet] Successfully logged in using a wallet");
-
-      onDoneConnecting();
-    } catch (error: unknown) {
-      logger.error("[Connect Wallet] Error in initXmtpClient:", error);
-      onErrorConnecting({
-        error:
-          error instanceof Error
-            ? error
-            : typeof error === "string"
-            ? new Error(error)
-            : new Error("Something went wrong"),
-      });
-    } finally {
-      clearTimeout(timeoutInitXmtpClientRef.current);
-
-      // Restart the state to initial values
-      connectViewWalletStore.getState().setLoading(false);
-      connectViewWalletStore.getState().setClickedSignature(false);
-      connectViewWalletStore.getState().setWaitingForNextSignature(false);
-      connectViewWalletStore.getState().setNumberOfSignaturesDone(0);
-    }
-  }, [connectViewWalletStore, onDoneConnecting, onErrorConnecting]);
-
-  useEffect(() => {
-    const currentAbortController = abortControllerRef.current;
-
-    return () => {
-      if (timeoutInitXmtpClientRef.current) {
-        clearTimeout(timeoutInitXmtpClientRef.current);
-      }
-
-      // To leave the while loop waiting for signature
-      currentAbortController.abort();
-    };
-  }, []);
-
-  return { initXmtpClient };
-}
