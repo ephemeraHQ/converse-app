@@ -219,7 +219,11 @@ const ChatMessage = ({
   const contentType = getMessageContentType(message.contentType);
 
   const handleUrlPress = useCallback((url: string) => {
-    const uri = url.toLowerCase().startsWith("http") ? url : `https://${url}`;
+    const cleanedUrl = url.toLowerCase().trim();
+
+    const uri = cleanedUrl.startsWith("http")
+      ? cleanedUrl
+      : `https://${cleanedUrl}`;
 
     Linking.openURL(uri);
   }, []);
