@@ -96,7 +96,6 @@ export function Button(props: IButtonProps) {
 
   const handlePress = useCallback(
     (e: GestureResponderEvent) => {
-      console.log("withHapticFeedback:", withHapticFeedback);
       if (withHapticFeedback) {
         Haptics.softImpactAsync();
       }
@@ -110,9 +109,9 @@ export function Button(props: IButtonProps) {
       style={$viewStyle}
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
-      {...rest}
-      disabled={disabled}
       onPress={handlePress}
+      disabled={disabled}
+      {...rest}
     >
       {(state) => {
         if (loading) {

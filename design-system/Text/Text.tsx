@@ -3,7 +3,7 @@ import { Text as RNText, StyleProp, TextStyle } from "react-native";
 
 import { IPresets, textPresets } from "./Text.presets";
 import { ITextProps } from "./Text.props";
-import { $textFontWeightStyles, $textSizeStyles } from "./Text.styles";
+import { textFontWeightStyles, textSizeStyles } from "./Text.styles";
 import { translate } from "../../i18n";
 import { useAppTheme } from "../../theme/useAppTheme";
 
@@ -15,7 +15,7 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     txOptions,
     text,
     children,
-    style: $styleOverride,
+    style: styleProp,
     ...rest
   } = props;
 
@@ -28,9 +28,9 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
 
   const styles: StyleProp<TextStyle> = [
     themed(textPresets[preset]),
-    weight && $textFontWeightStyles[weight],
-    size && $textSizeStyles[size],
-    $styleOverride,
+    weight && textFontWeightStyles[weight],
+    size && textSizeStyles[size],
+    styleProp,
   ];
 
   return (

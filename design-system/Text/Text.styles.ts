@@ -4,9 +4,7 @@ import { IWeights } from "./Text.props";
 import { typography } from "../../theme";
 import { ThemedStyle } from "../../theme/useAppTheme";
 
-export const $textSizeStyles = {
-  xl: { fontSize: 32, lineHeight: 36 } satisfies TextStyle, // Made up, need to confirm with Andrew once we have the design
-  lg: { fontSize: 24, lineHeight: 28 } satisfies TextStyle, // Made up, need to confirm with Andrew once we have the design
+export const textSizeStyles = {
   md: { fontSize: 20, lineHeight: 20 } satisfies TextStyle,
   sm: { fontSize: 16, lineHeight: 20 } satisfies TextStyle,
   xs: { fontSize: 14, lineHeight: 18 } satisfies TextStyle,
@@ -21,7 +19,7 @@ const numericWeights: Record<IWeights, number> = {
   bold: 700,
 };
 
-export const $textFontWeightStyles = Object.entries(typography.primary).reduce(
+export const textFontWeightStyles = Object.entries(typography.primary).reduce(
   (acc, [weight, fontFamily]) => {
     return {
       ...acc,
@@ -31,8 +29,8 @@ export const $textFontWeightStyles = Object.entries(typography.primary).reduce(
   {}
 ) as Record<IWeights, TextStyle>;
 
-export const $textBaseStyle: ThemedStyle<TextStyle> = (theme) => ({
-  ...$textSizeStyles.sm,
-  ...$textFontWeightStyles.normal,
+export const textBaseStyle: ThemedStyle<TextStyle> = (theme) => ({
+  ...textSizeStyles.sm,
+  ...textFontWeightStyles.normal,
   color: theme.colors.text.primary,
 });

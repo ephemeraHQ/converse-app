@@ -1,9 +1,9 @@
 import { TextStyle } from "react-native";
 
 import {
-  $textBaseStyle,
-  $textFontWeightStyles,
-  $textSizeStyles,
+  textBaseStyle,
+  textFontWeightStyles,
+  textSizeStyles,
 } from "./Text.styles";
 import { ThemedStyleArray } from "../../theme/useAppTheme";
 
@@ -14,20 +14,31 @@ export type IPresets =
   | "smaller"
   | "smallerBold"
   | "bigBold"
-  | "title";
+  | "formHelper"
+  | "formLabel";
 
 export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
-  body: [$textBaseStyle],
+  body: [textBaseStyle],
 
-  bodyBold: [$textBaseStyle, $textFontWeightStyles.bold],
+  bodyBold: [textBaseStyle, textFontWeightStyles.bold],
 
-  small: [$textBaseStyle, $textSizeStyles.sm],
+  small: [textBaseStyle, textSizeStyles.sm],
 
-  smaller: [$textBaseStyle, $textSizeStyles.xs],
+  smaller: [textBaseStyle, textSizeStyles.xs],
 
-  smallerBold: [$textBaseStyle, $textSizeStyles.xs, $textFontWeightStyles.bold],
+  smallerBold: [textBaseStyle, textSizeStyles.xs, textFontWeightStyles.bold],
 
-  bigBold: [$textBaseStyle, $textSizeStyles.md, $textFontWeightStyles.bold],
+  bigBold: [textBaseStyle, textSizeStyles.md, textFontWeightStyles.bold],
 
-  title: [$textBaseStyle, $textSizeStyles.lg, $textFontWeightStyles.bold],
+  formHelper: [
+    textBaseStyle,
+    textSizeStyles.xs,
+    ({ colors }) => ({ color: colors.fill.secondary }),
+  ],
+
+  formLabel: [
+    textBaseStyle,
+    textSizeStyles.xs,
+    ({ colors }) => ({ color: colors.text.secondary }),
+  ],
 };
