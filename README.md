@@ -1,102 +1,112 @@
-# Building the App - iOS
+# Converse App Development Guide
 
-### Install JS/React Native Dependencies
+## Environment Configuration
 
-```
+The app can run in three environments:
+
+- Development (`dev`)
+- Preview/Staging (`preview`)
+- Production (`prod`)
+
+The environment is determined automatically:
+
+- `dev` environment when running in development mode (`__DEV__`)
+- `preview` when `Constants.expoConfig?.extra?.ENV === "preview"`
+- `prod` for all other cases
+
+## Building the App
+
+### Prerequisites
+
+```bash
+# Install dependencies
 yarn
 ```
 
-### Install iOS Dependencies
+### iOS Build
 
-```
+```bash
+# Install iOS dependencies
 npx pod-install
+
+# Open in Xcode and build
+open ios/Converse.xcworkspace
 ```
 
-### Build the iOS App
+### Android Build
 
-Open ios/Converse.xcworkspace in Xcode and Build
-
-# Building the App - Android
-
-### Install JS/React Native Dependencies
-
-```
-yarn
-```
-
-### Install submodules for Android patched fork
-
-```
+```bash
+# Install submodules
 git submodule update
+
+# Open in Android Studio
+# Sync gradle and build
+
+# Connect to local development server
+yarn android:connect
 ```
 
-### Build the Android App
+### Web Build
 
-Open Android Studio
-press the top right gradle icon to sync gradle
-Click the play/build button to build and install the app
-
-### Forward backend port
-
-if running the backend locally
-
-```
-adb reverse tcp:9875 tcp:9875
-```
-
-# Building the App - Web
-
-### Install JS/React Native Dependencies
-
-```
-yarn
-```
-
-### Building the Web App
-```
+```bash
+# Start development server
 yarn start
+# Press 'w' to launch web version
 ```
 
-Once the expo server starts press W to launch the web app
+## Environment-Specific Details
 
-### Please Note
+### Development Environment
 
-Currently Groups and V3 Identity is not supported on Web at the SDK layer, but is actively being worked on by the team
+- API: `http://localhost:9875` (web) or configured DEV_API_URI
+- XMTP Environment: `dev` (configurable)
+- Debug menu enabled
+- Bundle ID: `com.converse.dev`
+- Scheme: `converse-dev`
+- Domain: `dev.converse.xyz`
 
-Until then Converse web will only show 1 to 1 conversations and the majority of testing and development are native app focused.
+### Preview Environment
 
-Web support is an end goal and the team is happy to fix any issues that are reported
+- API: `https://backend-staging.converse.xyz`
+- XMTP Environment: `dev`
+- Debug menu enabled
+- Bundle ID: `com.converse.preview`
+- Scheme: `converse-preview`
+- Domain: `preview.converse.xyz`
 
-# Running the App
+### Production Environment
 
-Once the app builds it will open the Expo App
-this will ask what server port you are targetting, if none are found, you probably need to start the expo server
+- API: `https://backend-prod.converse.xyz`
+- XMTP Environment: `production`
+- Debug menu disabled
+- Bundle ID: `com.converse.prod` (Android) or `com.converse.native` (iOS)
+- Scheme: `converse`
+- Domain: `converse.xyz`
 
-### Start Expo Server
+## Additional Features
 
-```
-yarn start
-```
+### Transaction Support
 
-# Linting
+- Dev/Preview: Transaction frames enabled
+- Production: Transaction frames disabled
+- Uses Base Sepolia for dev/preview, Base Mainnet for production
 
-```
-yarn lint
-```
+### Testing
 
-# Testing
-
-Before running the tests make sure that you have a `.env` file setup with the variables variable set
-
-```sh
-# In the `converse-backend` repo
-yarn dev
-# Back in this repo
+```bash
+# Ensure .env is configured first
 yarn test
 ```
 
-# Frames
+### Linting
 
-Frames are expected to follow the Open Frames Standard https://github.com/open-frames/standard
+```bash
+yarn lint
+```
 
+## Notes
 
+- Web version has limited support for Groups and V3 Identity
+- Frames follow the Open Frames Standard (https://github.com/open-frames/standard)
+- Different environments use different USDC contract addresses and chains
+- Universal links are configured differently for each environment

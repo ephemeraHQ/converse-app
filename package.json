@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "android": "EXPO_ENV=dev expo start --android",
-    "android:reverse": "adb reverse tcp:8081 tcp:8081 && adb reverse tcp:9875 tcp:9875",
+    "android:connect": "adb reverse tcp:8081 tcp:8081 && adb reverse tcp:9875 tcp:9875",
     "build": "node scripts/build/build.js",
     "commit": "git show --format=\"%h\" --no-patch",
     "db": "ts-node scripts/migrations/db.ts",
