@@ -7,9 +7,9 @@ import { ConversationListContext } from "@utils/conversationList";
 import { useCallback, useEffect, useRef } from "react";
 import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
-import { GroupConversationItem } from "./ConversationList/GroupConversationItem";
 import HiddenRequestsButton from "./ConversationList/HiddenRequestsButton";
 import ConversationListItem from "./ConversationListItem";
+import { GroupConversationItem } from "./ConversationListItem/GroupConversationItem";
 import { V3GroupConversationListItem } from "./V3GroupConversationListItem";
 import {
   useChatStore,
