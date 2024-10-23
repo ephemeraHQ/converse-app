@@ -1,6 +1,6 @@
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { formatPhoneNumberToBeautifulFormat } from "@utils/phone";
-import React, { memo, useEffect, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   Keyboard,
   Platform,
@@ -38,6 +38,16 @@ export const PrivyPhoneVerification = memo(() => {
     };
   }, []);
 
+  const handleFilled = useCallback(
+    (text: string) => {
+      setOtpCode(text);
+      if (text.length === 6) {
+        loginWithCode();
+      }
+    },
+    [loginWithCode, setOtpCode]
+  );
+
   return (
     <>
       <Text style={styles.text}>
@@ -46,12 +56,7 @@ export const PrivyPhoneVerification = memo(() => {
       <Text style={[styles.text, { fontWeight: "600" }]}>{beautifulPhone}</Text>
       <OtpInput
         numberOfDigits={6}
-        onFilled={(text) => {
-          setOtpCode(text);
-          if (text.length === 6) {
-            loginWithCode();
-          }
-        }}
+        onFilled={handleFilled}
         ref={(r) => {
           if (r) {
             otpInputRef.current = r;

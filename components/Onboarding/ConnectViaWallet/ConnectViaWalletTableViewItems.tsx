@@ -129,7 +129,6 @@ export const InstalledWalletsTableView = memo(
                   throw new Error("No coinbase account found");
                 }
 
-                console.log("account.address:", account.address);
                 walletAddress = account.address;
               }
               // EthOS Wallet
@@ -151,8 +150,6 @@ export const InstalledWalletsTableView = memo(
                 setThirdwebActiveWallet(walletConnectWallet);
                 walletAddress = account.address;
               }
-
-              console.log("walletAddress:", walletAddress);
 
               if (getAccountsList().includes(walletAddress)) {
                 onAccountExists({ address: walletAddress });

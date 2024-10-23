@@ -1,4 +1,4 @@
-import { useLoginWithSMS } from "@privy-io/expo";
+import { useLoginWithSMS as useLoginWithSMSPrivy } from "@privy-io/expo";
 import {
   formatPhoneNumberToBeautifulFormat,
   isValidPhoneNumber,
@@ -8,11 +8,12 @@ import { Alert } from "react-native";
 
 import { usePrivyAuthStore } from "./privyAuthStore";
 import { translate } from "../../../i18n";
+import logger from "../../../utils/logger";
 import { sentryTrackError } from "../../../utils/sentry";
 
 export function usePrivySmsLogin() {
   const { loginWithCode: loginWithCodePrivy, sendCode: sendCodePrivy } =
-    useLoginWithSMS();
+    useLoginWithSMSPrivy();
 
   const privyAuthStore = usePrivyAuthStore();
 
@@ -50,7 +51,7 @@ export function usePrivySmsLogin() {
   }, [sendCodePrivy, privyAuthStore]);
 
   const loginWithCode = useCallback(async () => {
-    const { setLoading, setPrivyAccountId } = privyAuthStore.getState();
+    const { setLoading, setPrivyAccountId, phone } = privyAuthStore.getState();
 
     try {
       setLoading(true);
@@ -61,7 +62,9 @@ export function usePrivySmsLogin() {
         throw new Error("No code provided");
       }
 
-      const user = await loginWithCodePrivy({ code });
+      const user = await loginWithCodePrivy({ code, phone });
+
+      logger.debug("[Privy sms login] User logged in");
 
       if (!user) {
         Alert.alert(translate("privyConnect.errors.invalidCode"));

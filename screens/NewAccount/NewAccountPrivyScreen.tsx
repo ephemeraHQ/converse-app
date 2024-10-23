@@ -10,6 +10,7 @@ import {
 } from "../../features/onboarding/Privy/privyAuthStore";
 import { usePrivyConnection } from "../../features/onboarding/Privy/usePrivyConnection";
 import { translate } from "../../i18n";
+import { useRouter } from "../../navigation/useNavigation";
 import { PictoSizes } from "../../styles/sizes";
 
 export const NewAccountPrivyScreen = memo(function () {
@@ -23,7 +24,16 @@ export const NewAccountPrivyScreen = memo(function () {
 const Content = memo(function Content() {
   const status = usePrivyAuthStoreContext((state) => state.status);
 
-  usePrivyConnection();
+  const router = useRouter();
+
+  usePrivyConnection({
+    onConnectionDone: () => {
+      router.navigate("NewAccountUserProfile");
+    },
+    onConnectionError: (error) => {
+      router.goBack();
+    },
+  });
 
   return (
     <NewAccountScreenComp>

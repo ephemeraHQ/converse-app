@@ -21,7 +21,6 @@ import {
 import { useConnectViaWalletDisconnect } from "./useConnectViaWalletDisconnect";
 import { useInitXmptClient } from "./useConnectViaWalletInitXmtpClient";
 import { useInitConnectViaWalletState } from "./useInitConnectViaWalletState";
-import { useAppStateHandlers } from "../../../hooks/useAppStateHandlers";
 
 type IConnectViaWalletProps = {
   address: string;
@@ -33,8 +32,6 @@ export const ConnectViaWallet = memo(function ConnectViaWallet(
   props: IConnectViaWalletProps
 ) {
   const { address, onErrorConnecting, onDoneConnecting } = props;
-
-  console.log("address1:", address);
 
   const disconnect = useConnectViaWalletDisconnect();
 
@@ -114,13 +111,6 @@ const ConnectViaWalletUI = memo(function ConnectViaWalletUI(props: object) {
 
   const { initXmtpClient } = useInitXmptClient();
 
-  useAppStateHandlers({
-    deps: [signer],
-    onForeground: () => {
-      console.log("onForeground");
-    },
-  });
-
   const primaryButtonAction = useCallback(() => {
     if (waitingForNextSignature) {
       logger.debug("[Connect Wallet] User clicked on second sign button");
@@ -154,12 +144,6 @@ const ConnectViaWalletUI = memo(function ConnectViaWalletUI(props: object) {
   let title = "";
   let subtitle = "";
   let showValueProps = true;
-
-  // console.log("onXmtp:", onXmtp);
-  // console.log("alreadyV3Db:", alreadyV3Db);
-  // console.log("signaturesDone:", signaturesDone);
-  // console.log("waitingForNextSignature:", waitingForNextSignature);
-  // console.log("loading:", loading);
 
   // On XMTP, needs V3 DB signature
   if (onXmtp && !alreadyV3Db) {

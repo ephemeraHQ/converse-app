@@ -9,6 +9,7 @@ import {
   useActiveWallet as useThirdwebActiveWallet,
 } from "thirdweb/react";
 
+import { useConnectViaWalletContext } from "./ConnectViaWallet.context";
 import { useConnectViaWalletDisconnect } from "./useConnectViaWalletDisconnect";
 import { thirdwebClient } from "../../../utils/thirdweb";
 import { isOnXmtp } from "../../../utils/xmtpRN/client";
@@ -19,7 +20,7 @@ import { getInboxId } from "../../../utils/xmtpRN/signIn";
 export function useInitConnectViaWalletState(args: { address: string }) {
   const { address } = args;
 
-  console.log("address:", address);
+  const { onErrorConnecting } = useConnectViaWalletContext();
 
   const [isInitializing, setIsInitializing] = useState(true);
   const [onXmtp, setOnXmtp] = useState(false);
@@ -67,8 +68,8 @@ export function useInitConnectViaWalletState(args: { address: string }) {
         account: thirdwebAccount,
       })
       .then(setThirdwebSigner)
-      .catch(disconnect);
-  }, [thirdwebAccount, disconnect]);
+      .catch(onErrorConnecting);
+  }, [thirdwebAccount, onErrorConnecting]);
 
   useEffect(() => {
     if (!thirdwebSigner) {
@@ -93,8 +94,6 @@ export function useInitConnectViaWalletState(args: { address: string }) {
         handlingThirdwebSigner.current = true;
 
         setIsInitializing(true);
-
-        console.log("address:", address);
 
         const [isOnNetwork, inboxId] = await Promise.all([
           isOnXmtp(address),

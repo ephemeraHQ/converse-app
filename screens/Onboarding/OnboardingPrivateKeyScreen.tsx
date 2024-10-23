@@ -34,10 +34,9 @@ export function OnboardingPrivateKeyScreen(
 
   const handlePressConnect = useCallback(async () => {
     try {
-      if (!privateKey || privateKey.trim().length === 0) {
-        return;
-      }
-      await loginWithPrivateKey(privateKey.trim());
+      const trimmedPrivateKey = privateKey.trim();
+      if (!trimmedPrivateKey) return;
+      await loginWithPrivateKey(trimmedPrivateKey);
       router.navigate("OnboardingUserProfile");
     } catch (error) {
       sentryTrackError(error);
