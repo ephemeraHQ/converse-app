@@ -1,3 +1,4 @@
+import { useSelect } from "@data/store/storeHelpers";
 import { FlashList } from "@shopify/flash-list";
 import {
   backgroundColor,
@@ -5,7 +6,7 @@ import {
   tertiaryBackgroundColor,
 } from "@styles/colors";
 import { getCleanAddress } from "@utils/evm/address";
-import { FrameWithType, isFrameMessage } from "@utils/frames";
+import { FrameWithType } from "@utils/frames";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -89,7 +90,7 @@ const useRenderItem = ({
           message={{ ...item }}
           colorScheme={colorScheme}
           isGroup={!!conversation?.isGroup}
-          isFrame={isFrameMessage(item, framesStore)}
+          isFrame={!!framesStore[item.content.toLowerCase().trim()]}
         />
       );
     },
@@ -382,7 +383,7 @@ export function Chat() {
     styles.inChatRecommendations,
   ]);
 
-  const framesStore = useFramesStore().frames;
+  const { frames: framesStore } = useFramesStore(useSelect(["frames"]));
 
   const showPlaceholder = useIsShowingPlaceholder({
     messages: listArray,
@@ -538,7 +539,7 @@ export function ChatPreview() {
     ]
   );
 
-  const framesStore = useFramesStore().frames;
+  const { frames: framesStore } = useFramesStore(useSelect(["frames"]));
 
   const showPlaceholder = useIsShowingPlaceholder({
     messages: listArray,
