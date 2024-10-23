@@ -1,3 +1,4 @@
+import { useApprovedGroupsConversationList } from "@hooks/useApprovedGroupsConversationList";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -5,6 +6,7 @@ import {
   listItemSeparatorColor,
   textPrimaryColor,
 } from "@styles/colors";
+import { mergeOrderedLists } from "@utils/mergeLists";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Platform,
@@ -79,9 +81,10 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   );
   const profiles = useProfilesStore((s) => s.profiles);
   const pinnedConversations = useChatStore((s) => s.pinnedConversations);
+  const { data: approvedGroups } = useApprovedGroupsConversationList();
 
   const [flatListItems, setFlatListItems] = useState<{
-    items: ConversationFlatListItem[];
+    items: (ConversationFlatListItem | string)[];
     searchQuery: string;
   }>({ items: [], searchQuery: "" });
 
@@ -114,16 +117,27 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   }, [initialLoadDoneOnce]);
 
   useEffect(() => {
-    const listItems = getFilteredConversationsWithSearch(
+    const v2ListItems = getFilteredConversationsWithSearch(
       searchQuery,
       sortedConversationsWithPreview.conversationsInbox,
       profiles
+    );
+    const listItems = mergeOrderedLists(
+      v2ListItems,
+      approvedGroups?.ids ?? [],
+      (a) =>
+        "lastMessagePreview" in a
+          ? a.lastMessagePreview?.message?.sent ?? 0
+          : 0,
+      // TODO: Update when messages are being returned
+      (a: string) => 0
     );
     setFlatListItems({ items: listItems, searchQuery });
   }, [
     searchQuery,
     sortedConversationsWithPreview.conversationsInbox,
     profiles,
+    approvedGroups,
   ]);
 
   // Search bar hook
