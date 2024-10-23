@@ -15,9 +15,12 @@ export type IPresets =
   | "smallerBold"
   | "bigBold"
   | "formHelper"
-  | "formLabel";
+  | "formLabel"
+  | "title";
 
 export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
+  title: [textBaseStyle, textSizeStyles.xl, textFontWeightStyles.bold],
+
   body: [textBaseStyle],
 
   bodyBold: [textBaseStyle, textFontWeightStyles.bold],

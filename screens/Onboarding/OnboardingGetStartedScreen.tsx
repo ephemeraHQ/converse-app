@@ -86,8 +86,8 @@ export function OnboardingGetStartedScreen() {
                 status: "signedIn",
               });
             }}
-            onAccountDoesNotExist={({ signer }) => {
-              router.navigate("OnboardingConnectWallet", { signer });
+            onAccountDoesNotExist={({ address }) => {
+              router.navigate("OnboardingConnectWallet", { address });
             }}
           />
         </AnimatedVStack>

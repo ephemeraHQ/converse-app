@@ -64,8 +64,8 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
             // TODO: Add a better message
             Alert.alert("Account already connected");
           }}
-          onAccountDoesNotExist={({ signer }) => {
-            router.navigate("NewAccountConnectWallet", { signer });
+          onAccountDoesNotExist={({ address }) => {
+            router.navigate("NewAccountConnectWallet", { address });
           }}
         />
       )}

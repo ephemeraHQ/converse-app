@@ -3,6 +3,9 @@ import { createContext, memo, useContext, useRef } from "react";
 import { createStore, useStore } from "zustand";
 
 type IConnectViaWalletStoreProps = {
+  address: string;
+  alreadyV3Db: boolean;
+  onXmtp: boolean;
   signer: Signer;
 };
 
@@ -10,24 +13,14 @@ type IConnectViaWalletStoreProviderProps =
   React.PropsWithChildren<IConnectViaWalletStoreProps>;
 
 type IConnectViaWalletStoreState = IConnectViaWalletStoreProps & {
-  address: string | undefined;
   loading: boolean;
-  signaturesDone: number;
+  numberOfSignaturesDone: number;
   waitingForNextSignature: boolean;
-  onXmtp: boolean;
-  alreadyV3Db: boolean;
   clickedSignature: boolean;
-  initiatingClientForAddress: string | undefined;
-  setAddress: (address: string | undefined) => void;
   setLoading: (loading: boolean) => void;
-  setSignaturesDone: (signaturesDone: number) => void;
+  setNumberOfSignaturesDone: (signaturesDone: number) => void;
   setWaitingForNextSignature: (waiting: boolean) => void;
-  setOnXmtp: (onXmtp: boolean) => void;
-  setAlreadyV3Db: (alreadyV3Db: boolean) => void;
   setClickedSignature: (clickedSignature: boolean) => void;
-  setInitiatingClientForAddress: (
-    initiatingClientForAddress: string | undefined
-  ) => void;
 };
 
 type IConnectViaWalletStore = ReturnType<typeof createConnectViaWalletStore>;
@@ -48,25 +41,20 @@ export const ConnectViaWalletStoreProvider = memo(
 
 const createConnectViaWalletStore = (props: IConnectViaWalletStoreProps) =>
   createStore<IConnectViaWalletStoreState>()((set) => ({
+    address: props.address,
     signer: props.signer,
-    address: undefined,
+    onXmtp: props.onXmtp,
+    alreadyV3Db: props.alreadyV3Db,
     loading: false,
-    signaturesDone: 0,
+    numberOfSignaturesDone: 0,
     waitingForNextSignature: false,
-    onXmtp: false,
-    alreadyV3Db: false,
     clickedSignature: false,
-    initiatingClientForAddress: undefined,
-    setAddress: (address) => set({ address }),
     setLoading: (loading) => set({ loading }),
-    setSignaturesDone: (signaturesDone) => set({ signaturesDone }),
+    setNumberOfSignaturesDone: (signaturesDone) =>
+      set({ numberOfSignaturesDone: signaturesDone }),
     setWaitingForNextSignature: (waiting) =>
       set({ waitingForNextSignature: waiting }),
-    setOnXmtp: (onXmtp) => set({ onXmtp }),
-    setAlreadyV3Db: (alreadyV3Db) => set({ alreadyV3Db }),
     setClickedSignature: (clickedSignature) => set({ clickedSignature }),
-    setInitiatingClientForAddress: (initiatingClientForAddress) =>
-      set({ initiatingClientForAddress }),
   }));
 
 const ConnectViaWalletStoreContext =

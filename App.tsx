@@ -19,14 +19,13 @@ import {
   LogBox,
   Platform,
   StyleSheet,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
 
-import "./utils/splash/splash";
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import {
@@ -44,6 +43,7 @@ import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
+import "./utils/splash/splash";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy

@@ -2,8 +2,11 @@ import { Signer } from "ethers";
 import { memo } from "react";
 import { ethers5Adapter } from "thirdweb/adapters/ethers5";
 import { ethereum } from "thirdweb/chains";
-import { useConnect as useThirdwebConnect } from "thirdweb/react";
-import { createWallet, WalletId } from "thirdweb/wallets";
+import {
+  useSetActiveWallet as useSetThirdwebActiveWallet,
+  useConnect as useThirdwebConnect,
+} from "thirdweb/react";
+import { WalletId, createWallet } from "thirdweb/wallets";
 
 import {
   InstalledWallet,
@@ -74,13 +77,14 @@ export function getConnectViaWalletInstalledWalletTableViewItem(args: {
 export const InstalledWalletsTableView = memo(
   function InstalledWalletsTableView(props: {
     onAccountExists: (arg: { address: string }) => void;
-    onAccountDoesNotExist: (arg: { signer: Signer }) => void;
+    onAccountDoesNotExist: (arg: { address: string }) => void;
   }) {
     const { onAccountExists, onAccountDoesNotExist } = props;
 
     const walletsInstalled = useInstalledWallets();
 
     const { connect: thirdwebConnect } = useThirdwebConnect();
+    const setThirdwebActiveWallet = useSetThirdwebActiveWallet();
 
     return (
       <TableView
@@ -98,27 +102,51 @@ export const InstalledWalletsTableView = memo(
             );
 
             try {
-              let walletData: InstalledWalletSignerAndAddress;
+              let walletAddress: string = "";
 
+              // Specific flow for Coinbase Wallet
               if (wallet.name === "Coinbase Wallet") {
-                walletData = await getCoinbaseSignerAndAddress(thirdwebConnect);
-              } else if (wallet.name === "EthOS Wallet") {
-                walletData = await getEthOSWalletSignerAndAddress();
-              } else if (wallet.thirdwebId) {
-                walletData = await getThirdwebSignerAndAddress(
-                  wallet.thirdwebId
-                );
-              } else {
-                throw new Error("Unsupported wallet");
+                thirdwebConnect(async () => {
+                  const coinbaseWallet = createWallet("com.coinbase.wallet", {
+                    appMetadata: config.walletConnectConfig.appMetadata,
+                    mobileConfig: {
+                      callbackURL: `https://${config.websiteDomain}/coinbase`,
+                    },
+                  });
+                  await coinbaseWallet.connect({ client: thirdwebClient });
+                  setThirdwebActiveWallet(coinbaseWallet);
+                  const account = coinbaseWallet.getAccount();
+                  if (!account) {
+                    throw new Error("No coinbase account found");
+                  }
+                  walletAddress = account.address;
+                  return coinbaseWallet;
+                });
+              }
+              // EthOS Wallet
+              else if (wallet.name === "EthOS Wallet") {
+                const signer = getEthOSSigner();
+                if (!signer) {
+                  throw new Error("No EthOS signer found");
+                }
+                walletAddress = await signer.getAddress();
+              }
+              // Generic flow for all other wallets
+              else if (wallet.thirdwebId) {
+                const walletConnectWallet = createWallet(wallet.thirdwebId);
+                const account = await walletConnectWallet.connect({
+                  client: thirdwebClient,
+                  walletConnect: config.walletConnectConfig,
+                });
+                walletConnectWallet.getAccount();
+                setThirdwebActiveWallet(walletConnectWallet);
+                walletAddress = account.address;
               }
 
-              if (getAccountsList().includes(walletData.address)) {
-                onAccountExists({ address: walletData.address });
+              if (getAccountsList().includes(walletAddress)) {
+                onAccountExists({ address: walletAddress });
               } else {
-                onAccountDoesNotExist({ signer: walletData.signer });
-                //   router.navigate("NewAccountConnectWallet", {
-                //     signer: walletData.signer,
-                //   });
+                onAccountDoesNotExist({ address: walletAddress });
               }
             } catch (e: any) {
               logger.error("Error connecting to wallet:", e);
