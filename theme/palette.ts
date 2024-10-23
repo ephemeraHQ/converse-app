@@ -1,3 +1,9 @@
+const paletteShared = {
+  scrim: "rgba(0, 0, 0, 0.5)",
+  red: "#E30C00",
+  transparent: "transparent",
+};
+
 export const lightPalette = {
   accent: "#7E00CC",
 
@@ -18,7 +24,7 @@ export const lightPalette = {
 
   edge: "rgba(255, 255, 255, 0.15)",
 
-  danger: "#FF3B30",
+  ...paletteShared,
 };
 
 export const darkPalette = {
@@ -41,7 +47,7 @@ export const darkPalette = {
 
   edge: "rgba(0, 0, 0, 0.15)",
 
-  danger: "#FF3B30",
+  ...paletteShared,
 }; // Generated using https://callstack.github.io/react-native-paper/docs/guides/theming#theme-properties
 
 export const MaterialLightColors = {
