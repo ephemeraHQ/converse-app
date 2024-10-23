@@ -1,18 +1,15 @@
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
-import { PictoSizes } from "@styles/sizes";
-import {
-  Button,
-  Platform,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native";
+import { Platform, useColorScheme } from "react-native";
 
-import { NativeStack, navigationAnimation } from "./Navigation";
-import Picto from "../../components/Picto/Picto";
+import { ScreenHeaderButton } from "../../components/Screen/ScreenHeaderButton/ScreenHeaderButton";
+import { ScreenHeaderIconButton } from "../../components/Screen/ScreenHeaderIconButton/ScreenHeaderIconButton";
+import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
 import { useCurrentAccount } from "../../data/store/accountsStore";
+import { useRouter } from "../../navigation/useNavigation";
 import { navigate } from "../../utils/navigation";
 import ProfileScreen from "../Profile";
+import { NativeStack, navigationAnimation } from "./Navigation";
 
 export type ProfileNavParams = {
   address: string;
@@ -24,6 +21,8 @@ export const ProfileScreenConfig = {
 };
 
 export default function ProfileNav() {
+  const router = useRouter();
+
   const colorScheme = useColorScheme();
   const account = useCurrentAccount();
   const options: NativeStackNavigationOptions = {
@@ -33,23 +32,23 @@ export default function ProfileNav() {
         : textPrimaryColor(colorScheme),
     animation: navigationAnimation,
   };
-  if (Platform.OS === "web") {
-    options.headerTitleStyle = { left: -20 } as any;
-  }
+
   return (
     <NativeStack.Screen
       name="Profile"
       component={ProfileScreen}
       options={({ route }) => ({
-        headerBackTitle: "Back",
-        headerTitle: "Profile",
+        presentation: "modal",
+        headerTitle: "",
+        headerLeft: () => (
+          <ScreenHeaderModalCloseButton onPress={router.goBack} />
+        ),
         headerRight: () => {
           if (route.params.address === account) {
             if (Platform.OS === "ios") {
               return (
-                <Button
+                <ScreenHeaderButton
                   title="Modify"
-                  color={textPrimaryColor(colorScheme)}
                   onPress={() => {
                     navigate("UserProfile");
                   }}
@@ -57,18 +56,12 @@ export default function ProfileNav() {
               );
             }
             return (
-              <TouchableOpacity
+              <ScreenHeaderIconButton
+                iconName="square.and.pencil"
                 onPress={() => {
                   navigate("UserProfile");
                 }}
-              >
-                <Picto
-                  picto="square.and.pencil"
-                  size={PictoSizes.navItem}
-                  color={textSecondaryColor(colorScheme)}
-                  style={{ marginRight: Platform.OS === "web" ? 30 : 0 }}
-                />
-              </TouchableOpacity>
+              />
             );
           }
           return null;

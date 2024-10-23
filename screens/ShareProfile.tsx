@@ -24,6 +24,7 @@ import Avatar from "../components/Avatar";
 import Button from "../components/Button/Button";
 import ActionButton from "../components/Chat/ActionButton";
 import Picto from "../components/Picto/Picto";
+import { Screen } from "../components/Screen/ScreenComp/Screen";
 import config from "../config";
 import {
   useCurrentAccount,
@@ -56,9 +57,10 @@ const ShareProfileContent = ({
   compact?: boolean;
 }) => {
   const colorScheme = useColorScheme();
-  const headerHeight = useHeaderHeight();
   const styles = useStyles();
   const [copiedLink, setCopiedLink] = useState(false);
+
+  const headerHeight = useHeaderHeight();
 
   const shareDict =
     Platform.OS === "ios" && !isDesktop
@@ -202,13 +204,15 @@ export default function ShareProfileScreen({
   }`;
 
   return (
-    <ShareProfileContent
-      userAddress={userAddress}
-      username={username}
-      displayName={displayName}
-      avatar={avatar || ""}
-      profileUrl={profileUrl}
-    />
+    <Screen safeAreaEdges={["bottom"]} contentContainerStyle={{ flex: 1 }}>
+      <ShareProfileContent
+        userAddress={userAddress}
+        username={username}
+        displayName={displayName}
+        avatar={avatar || ""}
+        profileUrl={profileUrl}
+      />
+    </Screen>
   );
 }
 

@@ -1,11 +1,11 @@
 import { memo } from "react";
 
 import { Center } from "../Center";
+import { IconButton } from "../IconButton/IconButton";
+import { Text } from "../Text/Text";
 import { VStack } from "../VStack";
 import { TextField } from "./TextField";
 import { TextFieldSimple } from "./TextFieldSimple";
-import { IconButton } from "../IconButton/IconButton";
-import { Text } from "../Text/Text";
 
 export const TextFieldExample = memo(function TextFieldExample() {
   return (
@@ -36,7 +36,7 @@ export const TextFieldExample = memo(function TextFieldExample() {
         autoCapitalize="none"
         LeftAccessory={({ style }) => (
           <Center style={style}>
-            <IconButton variant="ghost" iconName="envelope" />
+            <IconButton variant="ghost" iconName="link" />
           </Center>
         )}
       />
@@ -47,7 +47,7 @@ export const TextFieldExample = memo(function TextFieldExample() {
         helper="Must be at least 8 characters long"
         RightAccessory={({ style }) => (
           <Center style={style}>
-            <IconButton variant="ghost" iconName="eye" />
+            <IconButton variant="ghost" iconName="eyes" />
           </Center>
         )}
       />

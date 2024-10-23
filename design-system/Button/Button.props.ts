@@ -7,6 +7,7 @@ import {
   ViewStyle,
 } from "react-native";
 
+import { IPicto } from "../../components/Picto/Picto";
 import { ITextProps } from "../Text";
 
 export type IButtonVariant =
@@ -97,9 +98,17 @@ export interface IButtonProps extends RNPressableProps {
    * An optional size for the button.
    */
   size?: IButtonSize;
+  /**
+   * Whether the button is loading.
+   */
+  loading?: boolean;
+  /**
+   * Whether the button should trigger a haptic feedback.
+   */
+  withHapticFeedback?: boolean;
 
   /** @deprecated */
   title?: string;
   /** @deprecated */
-  picto?: string;
+  picto?: IPicto;
 }

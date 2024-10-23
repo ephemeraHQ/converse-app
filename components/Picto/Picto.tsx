@@ -42,6 +42,7 @@ import Search from "@material-symbols/svg-400/outlined/search.svg";
 import Send from "@material-symbols/svg-400/outlined/send.svg";
 import Settings from "@material-symbols/svg-400/outlined/settings.svg";
 import Signature from "@material-symbols/svg-400/outlined/signature.svg";
+import Star from "@material-symbols/svg-400/outlined/star.svg";
 import WavingHand from "@material-symbols/svg-400/outlined/waving_hand.svg";
 import { primaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
@@ -53,21 +54,11 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { SvgProps } from "react-native-svg";
 
+import Exclamationmark from "../../assets/exclamationmark.triangle.svg";
 import Reply from "../../assets/reply.svg";
 
-type Props = {
-  picto: string;
-  style?: StyleProp<ViewStyle>;
-  color?: ColorValue;
-  size?: number;
-  weight?: string;
-};
-
-const pictoMapping: {
-  [key: string]: React.FC<SvgProps> | undefined;
-} = {
+const pictoMapping = {
   xmark: Close,
   "xmark.circle.fill": Close,
   plus: Add,
@@ -117,6 +108,19 @@ const pictoMapping: {
   "person.crop.circle.badge.plus": GroupAdd,
   tray: Inbox,
   cloud: Cloud,
+  "exclamationmark.triangle": Exclamationmark,
+  magnifyingglass: Search,
+  star: Star,
+} as const;
+
+export type IPicto = keyof typeof pictoMapping;
+
+export type IPictoProps = {
+  picto: IPicto;
+  style?: StyleProp<ViewStyle>;
+  color?: ColorValue;
+  size?: number;
+  weight?: string;
 };
 
 export default function Picto({
@@ -124,7 +128,7 @@ export default function Picto({
   style,
   size = PictoSizes.default,
   color,
-}: Props) {
+}: IPictoProps) {
   const SvgPicto = pictoMapping[picto];
   const colorScheme = useColorScheme();
   if (SvgPicto) {

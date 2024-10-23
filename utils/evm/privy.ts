@@ -15,13 +15,13 @@ import {
 
 import logger from "@utils/logger";
 
-export const usePrivySigner = (onboarding: boolean = false) => {
+export const usePrivySigner = (isOnboarding: boolean = false) => {
   const currentAccount = useCurrentAccount();
   const privyAccountId = useAccountsStore((s) => s.privyAccountId);
   const { isReady: privyReady, user: privyUser } = usePrivy();
   const embeddedWallet = useEmbeddedWallet();
   const [hasSwitchedNetwork, setHasSwitchedNetwork] = useState(false);
-  if (!onboarding && (!currentAccount || !privyAccountId[currentAccount])) {
+  if (!isOnboarding && (!currentAccount || !privyAccountId[currentAccount])) {
     // Except during onboarding, we need to be
     // logged in a privy account to access a privy signer
     return undefined;

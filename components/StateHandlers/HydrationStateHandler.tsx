@@ -9,7 +9,7 @@ import { getAccountsList } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { loadSavedNotificationMessagesToContext } from "../../utils/notifications";
 import { getXmtpClient } from "../../utils/xmtpRN/sync";
-import { getInstalledWallets } from "../Onboarding/supportedWallets";
+import { getInstalledWallets } from "../Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 
 export default function HydrationStateHandler() {
   // Initial hydration
