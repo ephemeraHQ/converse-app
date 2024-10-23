@@ -89,9 +89,9 @@ export default function ChatMessageActions({
     useSelect(["setContextMenuShown"])
   );
   const inputRef = useConversationContext("inputRef");
-  const opacity = useSharedValue(0);
-  const scale = useSharedValue(0.7);
-  const translateY = useSharedValue(20);
+  const opacity = useSharedValue(1);
+  const scale = useSharedValue(1);
+  const translateY = useSharedValue(0);
   const itemRectY = useSharedValue(0);
   const itemRectX = useSharedValue(0);
   const itemRectHeight = useSharedValue(0);
@@ -279,7 +279,7 @@ export default function ChatMessageActions({
     message.isLatestSettledFromPeer ||
     ((message.status === "sending" || message.status === "prepared") &&
       UUID_REGEX.test(message.id));
-  const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
+  const isAnimatingIn = useRef(false);
 
   const triggerReplyToMessage = useCallback(() => {
     converseEventEmitter.emit("triggerReplyToMessage", message);
@@ -368,38 +368,36 @@ export default function ChatMessageActions({
     onContextClose,
   ]);
 
+  const animateIn = useCallback(() => {
+    "worklet";
+    opacity.value = 0;
+    scale.value = 0.7;
+    translateY.value = 20;
+
+    const timingConfig = {
+      duration: 250,
+      easing: Easing.inOut(Easing.quad),
+    };
+    const springConfig = {
+      damping: 10,
+      stiffness: 200,
+      mass: 0.2,
+      overshootClamping: false,
+      restSpeedThreshold: 0.001,
+      restDisplacementThreshold: 0.001,
+    };
+
+    opacity.value = withTiming(1, timingConfig);
+    scale.value = withSpring(1, springConfig);
+    translateY.value = withSpring(0, springConfig);
+  }, [opacity, scale, translateY]);
+
   useEffect(() => {
-    if (shouldAnimateIn && !hasAnimatedIn) {
-      opacity.value = 0;
-      scale.value = 0.7;
-      translateY.value = 20;
-
-      const timingConfig = {
-        duration: 100,
-        easing: Easing.inOut(Easing.quad),
-        onComplete: () => {
-          runOnJS(setHasAnimatedIn)(true);
-        },
-      };
-
-      const springConfig = {
-        damping: 10,
-        stiffness: 200,
-        mass: 0.2,
-        overshootClamping: false,
-        restSpeedThreshold: 0.001,
-        restDisplacementThreshold: 0.001,
-      };
-
-      opacity.value = withTiming(1, timingConfig);
-      scale.value = withSpring(1, springConfig);
-      translateY.value = withSpring(0, springConfig);
-    } else {
-      opacity.value = 1;
-      scale.value = 1;
-      translateY.value = 0;
+    if (shouldAnimateIn && !isAnimatingIn.current) {
+      isAnimatingIn.current = true;
+      animateIn();
     }
-  }, [shouldAnimateIn, hasAnimatedIn, opacity, scale, translateY]);
+  }, [shouldAnimateIn, animateIn]);
 
   // We use a mix of Gesture Detector AND TouchableOpacity
   // because GestureDetector is better for dual tap but if
