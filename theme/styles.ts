@@ -5,6 +5,8 @@ export const $globalStyles = {
   row: { flexDirection: "row" } as ViewStyle,
   flex1: { flex: 1 } as ViewStyle,
   flexWrap: { flexWrap: "wrap" } as ViewStyle,
+  alignCenter: { alignItems: "center" } as ViewStyle,
+  justifyCenter: { justifyContent: "center" } as ViewStyle,
   center: {
     justifyContent: "center",
     alignItems: "center",

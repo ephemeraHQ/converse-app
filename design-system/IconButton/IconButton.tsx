@@ -6,7 +6,11 @@ import { useAppTheme } from "../../theme/useAppTheme";
 import { Icon } from "../Icon/Icon";
 import { Pressable } from "../Pressable";
 import { IIconButtonProps } from "./IconButton.props";
-import { getIconButtonViewStyle, getIconStyle } from "./IconButton.styles";
+import {
+  getIconButtonViewStyle,
+  getIconProps,
+  getIconStyle,
+} from "./IconButton.styles";
 
 export function IconButton(props: IIconButtonProps) {
   const {
@@ -65,6 +69,21 @@ export function IconButton(props: IIconButtonProps) {
     [themed, variant, size, action, disabled]
   );
 
+  // For now until we fix Icon
+  const iconProps = useCallback(
+    ({ pressed }: PressableStateCallbackType) =>
+      themed(
+        getIconProps({
+          variant,
+          size,
+          action,
+          pressed,
+          disabled,
+        })
+      ),
+    [themed, variant, size, action, disabled]
+  );
+
   return (
     <Pressable
       style={viewStyle}
@@ -75,7 +94,13 @@ export function IconButton(props: IIconButtonProps) {
     >
       {({ pressed }) => {
         if (iconName) {
-          return <Icon picto={iconName} style={iconStyle({ pressed })} />;
+          return (
+            <Icon
+              picto={iconName}
+              style={iconStyle({ pressed })}
+              {...iconProps({ pressed })}
+            />
+          );
         }
 
         return icon;
