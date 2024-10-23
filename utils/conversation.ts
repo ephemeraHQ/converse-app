@@ -257,7 +257,7 @@ export const openMainConversationWithPeer = async (
   // Then, check if we already have a main conversation with this address
   const alreadyConversationWithAddress = Object.values(conversations).find(
     (c) =>
-      c.peerAddress?.toLowerCase() === peerAddress.toLowerCase() &&
+      c.peerAddress?.toLowerCase() === peerAddress?.toLowerCase() &&
       (!c.context || !c.context?.conversationId)
   );
   if (alreadyConversationWithAddress && !isDone) {
