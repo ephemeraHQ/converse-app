@@ -415,6 +415,7 @@ const ChatMessage = ({
                   message={message}
                   reactions={reactions}
                   hideBackground={hideBackground}
+                  isFrame={isFrame}
                 >
                   {isContentType("text", message.contentType) && (
                     <FramesPreviews message={message} />
