@@ -209,6 +209,11 @@ const en = {
   do_you_trust_this_contact: "Do you trust this contact?",
   do_you_want_to_join_this_group: "Do you want to join this group?",
   join_this_group: "Join this group",
+  identity_not_found_title: "Identity not found",
+  identity_not_found:
+    "Identity {{identity}} not found or invalid. Please try again",
+  identity_not_found_timeout:
+    "Identity {{identity}} took too long to resolve. Please try again",
 
   // Conversation Context Menu
   pin: "Pin",
