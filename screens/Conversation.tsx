@@ -327,7 +327,7 @@ const ConversationHoc = ({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
   if (route.params?.topic && isGroupTopic(route.params.topic)) {
-    return <V3Conversation />;
+    return <V3Conversation route={route} navigation={navigation} />;
   }
   return <Conversation route={route} navigation={navigation} />;
 };

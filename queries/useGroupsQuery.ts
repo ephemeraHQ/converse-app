@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { QueryObserverOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 
@@ -13,6 +13,7 @@ import {
 type GroupMembersSelectData = EntityObject<GroupWithCodecsType, string>;
 
 const groupsQueryFn = async (account: string) => {
+  console.log("here2222");
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   if (!client) {
     return {
@@ -38,8 +39,12 @@ const groupsQueryFn = async (account: string) => {
   return entify(groups, (group) => group.topic);
 };
 
-export const useGroupsQuery = (account: string) => {
+export const useGroupsQuery = (
+  account: string,
+  queryOptions?: Partial<QueryObserverOptions<any>>
+) => {
   return useQuery<GroupMembersSelectData>({
+    ...queryOptions,
     queryKey: groupsQueryKey(account),
     queryFn: () => groupsQueryFn(account),
     enabled: !!account,
