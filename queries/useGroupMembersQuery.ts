@@ -10,7 +10,10 @@ import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 import { groupMembersQueryKey } from "./QueryKeys";
 import { entifyWithAddress, EntityObjectWithAddress } from "./entify";
 import { queryClient } from "./queryClient";
-import { useGroupQuery } from "./useGroupQuery";
+import {
+  useGroupConversationScreenQuery,
+  useGroupQuery,
+} from "./useGroupQuery";
 
 export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
 
@@ -20,6 +23,35 @@ export const useGroupMembersQuery = (
   queryOptions?: Partial<QueryObserverOptions<GroupMembersSelectData>>
 ) => {
   const { data: group } = useGroupQuery(account, topic);
+  return useQuery<GroupMembersSelectData>({
+    queryKey: groupMembersQueryKey(account, topic),
+    queryFn: async () => {
+      if (!group) {
+        return {
+          byId: {},
+          byAddress: {},
+          ids: [],
+        };
+      }
+      const updatedMembers = await group.membersList();
+      return entifyWithAddress(
+        updatedMembers,
+        (member) => member.inboxId,
+        // TODO: Multiple addresses support
+        (member) => getCleanAddress(member.addresses[0])
+      );
+    },
+    enabled: !!group,
+    ...queryOptions,
+  });
+};
+
+export const useGroupMembersConversationScreenQuery = (
+  account: string,
+  topic: string,
+  queryOptions?: Partial<QueryObserverOptions<GroupMembersSelectData>>
+) => {
+  const { data: group } = useGroupConversationScreenQuery(account, topic);
   return useQuery<GroupMembersSelectData>({
     queryKey: groupMembersQueryKey(account, topic),
     queryFn: async () => {

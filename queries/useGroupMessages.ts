@@ -2,17 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 
 import { groupMessagesQueryKey } from "./QueryKeys";
 import { entify } from "./entify";
-import { useGroupQuery } from "./useGroupQuery";
+import { useGroupConversationScreenQuery } from "./useGroupQuery";
 
 export const useGroupMessages = (account: string, topic: string) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupConversationScreenQuery(account, topic);
   return useQuery({
     queryKey: groupMessagesQueryKey(account, topic),
     queryFn: async () => {
       if (!group) {
         return {
           ids: [],
-          entities: {},
+          byId: {},
         };
       }
       const messages = await group.messages();

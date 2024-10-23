@@ -12,11 +12,15 @@ type ConversationListItemContainerProps = {
   renderLeftActions?: () => React.ReactNode;
   containerStyle?: StyleProp<ViewStyle>;
   onPress?: () => void;
+  onLongPress?: () => void;
+  onLeftSwipe?: () => void;
+  onRightSwipe?: () => void;
 };
 
 const defaultContainerStyle: ThemedStyle<ViewStyle> = (theme) => ({
   marginHorizontal: theme.spacing.sm,
   marginVertical: theme.spacing.xs,
+  flex: 1,
   width: "100%",
 });
 
@@ -27,21 +31,33 @@ const ContainerComponent = memo(
     renderLeftActions,
     containerStyle,
     onPress,
+    onLongPress,
+    onLeftSwipe,
+    onRightSwipe,
   }: ConversationListItemContainerProps) => {
     const { themed } = useAppTheme();
     const style = containerStyle ?? themed(defaultContainerStyle);
     return (
-      <Swipeable
-        renderRightActions={renderRightActions}
-        renderLeftActions={renderLeftActions}
-        leftThreshold={10000} // Never trigger opening
-        overshootFriction={4}
-        containerStyle={style}
-      >
-        <Pressable onPress={onPress}>
-          <HStack>{children}</HStack>
-        </Pressable>
-      </Swipeable>
+      <View style={style}>
+        <Swipeable
+          renderRightActions={renderRightActions}
+          renderLeftActions={renderLeftActions}
+          leftThreshold={10000}
+          overshootFriction={4}
+          containerStyle={style}
+          onSwipeableWillClose={(direction) => {
+            if (direction === "left") {
+              onLeftSwipe?.();
+            } else {
+              onRightSwipe?.();
+            }
+          }}
+        >
+          <Pressable onPress={onPress} onLongPress={onLongPress}>
+            <HStack>{children}</HStack>
+          </Pressable>
+        </Swipeable>
+      </View>
     );
   }
 );
@@ -70,7 +86,11 @@ const SubtitleComponent = memo(
   }
 );
 
-const CenterComponent = memo(({ children }: { children: React.ReactNode }) => {
+type CenterComponentProps = {
+  children: React.ReactNode;
+};
+
+const CenterComponent = memo(({ children }: CenterComponentProps) => {
   return <View>{children}</View>;
 });
 

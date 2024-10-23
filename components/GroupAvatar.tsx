@@ -48,6 +48,12 @@ type GroupAvatarProps = {
   showIndicator?: boolean;
 };
 
+type GroupAvatarDumbProps = {
+  size?: number;
+  style?: StyleProp<ViewStyle>;
+  members?: { address: string; uri?: string; name?: string }[];
+};
+
 const calculatePositions = (
   memberCount: number,
   mainCircleRadius: number
@@ -125,6 +131,63 @@ const ExtraMembersIndicator: React.FC<{
   );
 };
 
+export const GroupAvatarDumb: React.FC<GroupAvatarDumbProps> = ({
+  size = AvatarSizes.default,
+  style,
+  members = [],
+}) => {
+  const colorScheme = useColorScheme();
+  const styles = getStyles(colorScheme);
+
+  const memberCount = members?.length || 0;
+
+  const positions = useMemo(
+    () => calculatePositions(memberCount, MAIN_CIRCLE_RADIUS),
+    [memberCount]
+  );
+
+  return (
+    <View style={[styles.container, { width: size, height: size }, style]}>
+      <View style={[styles.container, { width: size, height: size }]}>
+        <View style={styles.overlay} />
+        <View style={styles.content}>
+          {positions.map((pos, index) => {
+            if (index < MAX_VISIBLE_MEMBERS && index < memberCount) {
+              return (
+                <Avatar
+                  key={`avatar-${index}`}
+                  uri={members[index].uri}
+                  name={members[index].name}
+                  size={(pos.size / 100) * size}
+                  style={{
+                    left: (pos.x / 100) * size,
+                    top: (pos.y / 100) * size,
+                    position: "absolute",
+                  }}
+                />
+              );
+            } else if (
+              index === MAX_VISIBLE_MEMBERS &&
+              memberCount > MAX_VISIBLE_MEMBERS
+            ) {
+              return (
+                <ExtraMembersIndicator
+                  key={`extra-${index}`}
+                  pos={pos}
+                  extraMembersCount={memberCount - MAX_VISIBLE_MEMBERS}
+                  colorScheme={colorScheme}
+                  size={size}
+                />
+              );
+            }
+            return null;
+          })}
+        </View>
+      </View>
+    </View>
+  );
+};
+
 const GroupAvatar: React.FC<GroupAvatarProps> = ({
   size = AvatarSizes.default,
   style,
@@ -146,6 +209,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
           refetchOnReconnect: false,
           refetchInterval: false,
           staleTime: Infinity,
+          enabled: !!topic && !pendingGroupMembers,
         }
       : undefined
   );
