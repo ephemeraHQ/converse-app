@@ -20,6 +20,7 @@ type Props = {
   textStyle?: StyleProp<TextStyle>;
   allowFontScaling?: boolean;
   picto?: string;
+  disabled?: boolean;
 };
 
 export default function Button({
@@ -30,6 +31,7 @@ export default function Button({
   textStyle,
   picto,
   allowFontScaling = true,
+  disabled = false,
 }: Props) {
   return (
     <View
@@ -43,6 +45,7 @@ export default function Button({
       ]}
     >
       <MaterialButton
+        disabled={disabled}
         mode={
           variant === "primary" || variant === "secondary"
             ? "contained"
