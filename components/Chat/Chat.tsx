@@ -1,3 +1,4 @@
+import { useSelect } from "@data/store/storeHelpers";
 import { FlashList } from "@shopify/flash-list";
 import {
   backgroundColor,
@@ -382,7 +383,7 @@ export function Chat() {
     styles.inChatRecommendations,
   ]);
 
-  const framesStore = useFramesStore().frames;
+  const { frames: framesStore } = useFramesStore(useSelect(["frames"]));
 
   const showPlaceholder = useIsShowingPlaceholder({
     messages: listArray,
@@ -538,7 +539,7 @@ export function ChatPreview() {
     ]
   );
 
-  const framesStore = useFramesStore().frames;
+  const { frames: framesStore } = useFramesStore(useSelect(["frames"]));
 
   const showPlaceholder = useIsShowingPlaceholder({
     messages: listArray,
