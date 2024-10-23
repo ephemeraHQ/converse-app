@@ -51,7 +51,7 @@ export const getAddressForPeer = async (peer: string) => {
     : isLens
     ? await getLensOwner(peer)
     : peer;
-  return resolvedAddress;
+  return resolvedAddress || undefined;
 };
 
 export const getCleanAddress = (address: string) => {
