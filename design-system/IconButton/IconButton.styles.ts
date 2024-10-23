@@ -144,3 +144,53 @@ export const getIconStyle =
 
     return style;
   };
+
+export const getIconProps =
+  ({
+    variant,
+    size,
+    action,
+    pressed = false,
+    disabled = false,
+  }: IconButtonStyleProps) =>
+  (theme: Theme) =>
+    // TODO: fix once we fixed IconProps
+    // : Partial<IIconProps>
+    {
+      const { colors, spacing } = theme;
+
+      const props: any =
+        // :Partial<IIconProps>
+        {};
+
+      // Set icon size
+      const sizeMap = {
+        md: spacing.md,
+        lg: spacing.lg,
+      };
+
+      props.size = sizeMap[size];
+
+      if (disabled) {
+        props.color = colors.text.tertiary;
+        return props;
+      }
+
+      if (action === "primary") {
+        switch (variant) {
+          case "fill":
+            props.color = colors.text.inverted.primary;
+            break;
+
+          case "outline":
+          case "ghost":
+            props.color = colors.text.primary;
+            break;
+
+          default:
+            break;
+        }
+      }
+
+      return props;
+    };

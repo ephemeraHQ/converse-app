@@ -1,8 +1,8 @@
 import { TextStyle } from "react-native";
 
 import { IWeights } from "./Text.props";
-import { IColors, typography } from "../../theme";
-import { Theme, ThemedStyle } from "../../theme/useAppTheme";
+import { typography } from "../../theme";
+import { ThemedStyle } from "../../theme/useAppTheme";
 
 export const textSizeStyles = {
   md: { fontSize: 20, lineHeight: 20 } satisfies TextStyle,
@@ -10,11 +10,6 @@ export const textSizeStyles = {
   xs: { fontSize: 14, lineHeight: 18 } satisfies TextStyle,
   xxs: { fontSize: 12, lineHeight: 14 } satisfies TextStyle,
 };
-
-export const textColorStyle = (
-  theme: Theme,
-  color: Exclude<keyof IColors["text"], "inverted">
-) => ({ color: theme.colors.text[color] as string });
 
 const numericWeights: Record<IWeights, number> = {
   light: 300,

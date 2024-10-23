@@ -3,3 +3,5 @@ export const borderWidth = {
   md: 2,
   lg: 3,
 } as const;
+
+export type IBorderWidth = typeof borderWidth;

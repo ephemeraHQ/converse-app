@@ -31,7 +31,7 @@ export const colorsDark: IColors = {
     tertiary: lightPalette.light30,
     minimal: lightPalette.light8,
     accent: darkPalette.accent,
-    danger: darkPalette.danger,
+    caution: darkPalette.red,
     inverted: {
       primary: darkPalette.dark,
       secondary: darkPalette.dark60,
@@ -49,7 +49,6 @@ export const colorsDark: IColors = {
     secondary: lightPalette.light60,
     tertiary: lightPalette.light30,
     inactive: lightPalette.light15,
-    danger: darkPalette.danger,
     inverted: {
       primary: darkPalette.dark,
       secondary: darkPalette.dark60,
@@ -60,7 +59,8 @@ export const colorsDark: IColors = {
   global: {
     primary: darkPalette.dark,
     primaryAlpha60: darkPalette.alpha60,
-    danger: darkPalette.danger,
+    caution: darkPalette.red,
+    transparent: darkPalette.transparent,
     inverted: {
       primary: lightPalette.light,
       primaryAlpha60: lightPalette.alpha60,
