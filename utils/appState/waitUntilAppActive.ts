@@ -1,6 +1,5 @@
+import logger from "@utils/logger";
 import { AppState } from "react-native";
-
-import logger from "./logger";
 
 /*
 Method to wait until the app is in Foreground (Active)

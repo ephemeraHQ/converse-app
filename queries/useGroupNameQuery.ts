@@ -6,7 +6,7 @@ import {
 
 import { groupNameQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
-import { useGroupQuery } from "./useGroupQuery";
+import { useGroupConversationScreenQuery } from "./useGroupQuery";
 
 export const useGroupNameQuery = (
   account: string,
@@ -15,7 +15,7 @@ export const useGroupNameQuery = (
     UseQueryOptions<string | undefined, Error, string | undefined>
   >
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupConversationScreenQuery(account, topic);
   return useQuery({
     queryKey: groupNameQueryKey(account, topic),
     queryFn: async () => {

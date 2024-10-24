@@ -2,6 +2,7 @@ export enum QueryKeys {
   // Conversations
   GROUPS = "groupsv2", // When changing the shape of response, update the keys as persistance will break
   GROUP = "group",
+  GROUP_CONVERSATION_LIST = "groupConversationList",
 
   // Messages
   GROUP_MESSAGES = "groupMessages",

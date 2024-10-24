@@ -6,7 +6,7 @@ import {
 
 import { groupPhotoQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
-import { useGroupQuery } from "./useGroupQuery";
+import { useGroupConversationScreenQuery } from "./useGroupQuery";
 
 export const useGroupPhotoQuery = (
   account: string,
@@ -15,7 +15,7 @@ export const useGroupPhotoQuery = (
     UseQueryOptions<string | undefined, Error, string | undefined>
   >
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupConversationScreenQuery(account, topic);
   return useQuery({
     queryKey: groupPhotoQueryKey(account, topic),
     queryFn: async () => {

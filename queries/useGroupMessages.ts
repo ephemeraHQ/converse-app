@@ -2,17 +2,19 @@ import { useQuery } from "@tanstack/react-query";
 
 import { groupMessagesQueryKey } from "./QueryKeys";
 import { entify } from "./entify";
-import { useGroupQuery } from "./useGroupQuery";
+import { useGroupConversationScreenQuery } from "./useGroupQuery";
+import { useRefreshOnFocus } from "./useRefreshOnFocus";
 
 export const useGroupMessages = (account: string, topic: string) => {
-  const { data: group } = useGroupQuery(account, topic);
-  return useQuery({
+  const { data: group } = useGroupConversationScreenQuery(account, topic);
+
+  const queryData = useQuery({
     queryKey: groupMessagesQueryKey(account, topic),
     queryFn: async () => {
       if (!group) {
         return {
           ids: [],
-          entities: {},
+          byId: {},
         };
       }
       const messages = await group.messages();
@@ -20,4 +22,8 @@ export const useGroupMessages = (account: string, topic: string) => {
     },
     enabled: !!group,
   });
+
+  useRefreshOnFocus(queryData.refetch);
+
+  return queryData;
 };

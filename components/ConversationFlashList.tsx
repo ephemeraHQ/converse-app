@@ -6,9 +6,9 @@ import { ConversationListContext } from "@utils/conversationList";
 import { useCallback, useEffect, useRef } from "react";
 import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
-import { GroupConversationItem } from "./ConversationList/GroupConversationItem";
 import HiddenRequestsButton from "./ConversationList/HiddenRequestsButton";
 import ConversationListItem from "./ConversationListItem";
+import { V3GroupConversationListItem } from "./V3GroupConversationListItem";
 import {
   useChatStore,
   useCurrentAccount,
@@ -28,7 +28,7 @@ import { conversationName } from "../utils/str";
 
 type Props = {
   onScroll?: () => void;
-  items: ConversationFlatListItem[];
+  items: (ConversationFlatListItem | string)[];
   itemsForSearchQuery?: string;
   ListHeaderComponent?: React.ReactElement | null;
   ListFooterComponent?: React.ReactElement | null;
@@ -85,7 +85,7 @@ export default function ConversationFlashList({
       openedConversationTopic
     ) {
       const topicIndex = items.findIndex(
-        (c) => c.topic === openedConversationTopic
+        (c) => typeof c !== "string" && c.topic === openedConversationTopic
       );
       if (topicIndex === -1) return;
       setTimeout(() => {
@@ -98,12 +98,18 @@ export default function ConversationFlashList({
     previousSearchQuery.current = itemsForSearchQuery;
   }, [isSplitScreen, items, openedConversationTopic, itemsForSearchQuery]);
 
-  const keyExtractor = useCallback((item: ConversationFlatListItem) => {
-    return item.topic;
-  }, []);
+  const keyExtractor = useCallback(
+    (item: ConversationFlatListItem | string) => {
+      return typeof item === "string" ? item : item.topic + "v2";
+    },
+    []
+  );
 
   const renderItem = useCallback(
-    ({ item }: { item: ConversationFlatListItem }) => {
+    ({ item }: { item: ConversationFlatListItem | string }) => {
+      if (typeof item === "string") {
+        return <V3GroupConversationListItem topic={item} />;
+      }
       if (item.topic === "hiddenRequestsButton") {
         const hiddenRequestItem = item as ConversationFlatListHiddenRequestItem;
         return (
@@ -119,7 +125,7 @@ export default function ConversationFlashList({
         ? getProfile(conversation.peerAddress, profiles)?.socials
         : undefined;
       if (conversation.isGroup) {
-        return <GroupConversationItem conversation={conversation} />;
+        return null;
       }
       return (
         <ConversationListItem
