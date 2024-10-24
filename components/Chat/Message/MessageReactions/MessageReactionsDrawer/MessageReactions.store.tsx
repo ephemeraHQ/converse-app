@@ -1,13 +1,26 @@
 import { create } from "zustand";
 
-import { MessageToDisplay } from "../../Message";
+import { RolledUpReactions } from "../MessageReactions.types";
 
 export interface IMessageReactionsStore {
-  message: MessageToDisplay | null;
+  rolledUpReactions: RolledUpReactions;
 }
+
+export const initialMessageReactionsState: IMessageReactionsStore = {
+  rolledUpReactions: {
+    emojis: [],
+    totalReactions: 0,
+    userReacted: false,
+    details: {},
+  },
+};
 
 export const useMessageReactionsStore = create<IMessageReactionsStore>(
   (set, get) => ({
-    message: null,
+    ...initialMessageReactionsState,
   })
 );
+
+export const resetMessageReactionsStore = () => {
+  useMessageReactionsStore.setState(initialMessageReactionsState);
+};
