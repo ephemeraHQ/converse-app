@@ -42,6 +42,7 @@ export const colorsLight = {
     surface: lightPalette.light,
     sunken: lightPalette.light96,
     raised: lightPalette.light,
+    scrim: lightPalette.scrim,
   },
   text: {
     primary: darkPalette.dark,

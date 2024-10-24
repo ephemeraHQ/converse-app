@@ -1,11 +1,22 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
+import { createBottomSheetModalRef } from "@design-system/BottomSheet/BottomSheet.utils";
+import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
+import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
+import { BottomSheetModal } from "@design-system/BottomSheet/BottomSheetModal";
 import { HStack } from "@design-system/HStack";
+import { ScrollView } from "@design-system/ScrollView";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
+import {
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
+import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import { useAppTheme } from "@theme/useAppTheme";
 import { MessageReaction } from "@utils/reactions";
-import { memo, useMemo } from "react";
-import { StyleSheet } from "react-native";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { StyleSheet, TouchableHighlight } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MessageToDisplay } from "./Message";
 
@@ -18,7 +29,7 @@ type Props = {
   };
 };
 
-type ReactionCount = {
+type ReactionDetails = {
   content: string;
   count: number;
   userReacted: boolean;
@@ -30,31 +41,65 @@ type RolledUpReactions = {
   emojis: string[];
   totalReactions: number;
   userReacted: boolean;
+  details: { [content: string]: ReactionDetails };
 };
 
 export const ChatMessageReactions = memo(
   ({ message, reactions }: Props) => {
     const styles = useStyles();
+    const { top } = useSafeAreaInsets();
     const { theme } = useAppTheme();
     const userAddress = useCurrentAccount();
+    const bottomSheetModalRef = createBottomSheetModalRef();
+    const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
 
-    const reactionsList = useMemo(() => {
-      return Object.entries(reactions)
-        .flatMap(([senderAddress, reactions]) =>
-          reactions.map((reaction) => ({ ...reaction, senderAddress }))
-        )
-        .sort((r1, r2) => r1.sent - r2.sent);
-    }, [reactions]);
+    const openReactionsDrawer = () => {
+      setBottomSheetVisible(true);
+    };
+
+    const onReactionsDrawerDismiss = () => {
+      setBottomSheetVisible(false);
+    };
+
+    const onReactionDrawerChange = useCallback(
+      (index: number) => {
+        // Dismiss when index 0 (open but not visible)
+        if (index === 0) {
+          setBottomSheetVisible(false);
+          bottomSheetModalRef.current?.dismiss();
+        }
+      },
+      [bottomSheetModalRef]
+    );
+
+    useEffect(() => {
+      if (isBottomSheetVisible) {
+        bottomSheetModalRef.current?.present();
+      }
+    }, [isBottomSheetVisible, bottomSheetModalRef]);
+
+    const renderBackdrop = useCallback(
+      (props: BottomSheetDefaultBackdropProps) => (
+        <BottomSheetBackdrop
+          {...props}
+          style={[
+            props.style,
+            { backgroundColor: theme.colors.background.scrim },
+          ]}
+        />
+      ),
+      [theme]
+    );
 
     const rolledUpReactions: RolledUpReactions = useMemo(() => {
-      const counts: { [content: string]: ReactionCount } = {};
+      const details: { [content: string]: ReactionDetails } = {};
       let totalReactions = 0;
       let userReacted = false;
 
       Object.values(reactions).forEach((reactionArray) => {
         reactionArray.forEach((reaction) => {
-          if (!counts[reaction.content]) {
-            counts[reaction.content] = {
+          if (!details[reaction.content]) {
+            details[reaction.content] = {
               content: reaction.content,
               count: 0,
               userReacted: false,
@@ -62,17 +107,17 @@ export const ChatMessageReactions = memo(
               firstReactionTime: reaction.sent,
             };
           }
-          counts[reaction.content].count++;
-          counts[reaction.content].reactors.push(reaction.senderAddress);
+          details[reaction.content].count++;
+          details[reaction.content].reactors.push(reaction.senderAddress);
           if (
             reaction.senderAddress.toLowerCase() === userAddress?.toLowerCase()
           ) {
-            counts[reaction.content].userReacted = true;
+            details[reaction.content].userReacted = true;
             userReacted = true;
           }
           // Keep track of the earliest reaction time for this emoji
-          counts[reaction.content].firstReactionTime = Math.min(
-            counts[reaction.content].firstReactionTime,
+          details[reaction.content].firstReactionTime = Math.min(
+            details[reaction.content].firstReactionTime,
             reaction.sent
           );
           totalReactions++;
@@ -80,15 +125,15 @@ export const ChatMessageReactions = memo(
       });
 
       // Sort by the number of reactors in descending order
-      const sortedReactions = Object.values(counts)
+      const sortedReactions = Object.values(details)
         .sort((a, b) => b.reactors.length - a.reactors.length)
         .slice(0, MAX_REACTION_EMOJIS_SHOWN)
         .map((reaction) => reaction.content);
 
-      return { emojis: sortedReactions, totalReactions, userReacted };
+      return { emojis: sortedReactions, totalReactions, userReacted, details };
     }, [reactions, userAddress]);
 
-    if (reactionsList.length === 0) return null;
+    if (rolledUpReactions.totalReactions === 0) return null;
 
     return (
       <HStack
@@ -97,26 +142,90 @@ export const ChatMessageReactions = memo(
           message.fromMe && { justifyContent: "flex-end" },
         ]}
       >
-        <VStack
-          style={[
-            styles.reactionButton,
-            rolledUpReactions.userReacted && {
-              borderColor: theme.colors.fill.minimal,
-              backgroundColor: theme.colors.fill.minimal,
-            },
-          ]}
+        <TouchableHighlight
+          onPress={openReactionsDrawer}
+          underlayColor="transparent"
         >
-          <HStack style={styles.emojiContainer}>
-            {rolledUpReactions.emojis.map((emoji, index) => (
-              <Text key={index}>{emoji}</Text>
-            ))}
-          </HStack>
-          {rolledUpReactions.totalReactions > 1 && (
-            <Text style={styles.reactorCount}>
-              {rolledUpReactions.totalReactions}
-            </Text>
-          )}
-        </VStack>
+          <VStack
+            style={[
+              styles.reactionButton,
+              rolledUpReactions.userReacted && {
+                borderColor: theme.colors.fill.minimal,
+                backgroundColor: theme.colors.fill.minimal,
+              },
+            ]}
+          >
+            <HStack style={styles.emojiContainer}>
+              {rolledUpReactions.emojis.map((emoji, index) => (
+                <Text key={index}>{emoji}</Text>
+              ))}
+            </HStack>
+            {rolledUpReactions.totalReactions > 1 && (
+              <Text style={styles.reactorCount}>
+                {rolledUpReactions.totalReactions}
+              </Text>
+            )}
+          </VStack>
+        </TouchableHighlight>
+        {isBottomSheetVisible && (
+          <BottomSheetModal
+            ref={bottomSheetModalRef}
+            onDismiss={onReactionsDrawerDismiss}
+            onChange={onReactionDrawerChange}
+            snapPoints={["40%"]}
+            enablePanDownToClose
+            enableDynamicSizing
+            index={1}
+            topInset={top}
+            backdropComponent={renderBackdrop}
+            backgroundStyle={{
+              backgroundColor: theme.colors.background.raised,
+            }}
+          >
+            <BottomSheetHeader title="Reactions" hasClose />
+            <BottomSheetScrollView
+              style={{
+                backgroundColor: theme.colors.background.raised,
+              }}
+            >
+              <BottomSheetContentContainer>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={{
+                    paddingLeft: theme.spacing.lg,
+                    flexDirection: "row",
+                    gap: 20,
+                  }}
+                >
+                  <Text>All {rolledUpReactions.totalReactions}</Text>
+                  {Object.entries(rolledUpReactions.details).map(
+                    ([emoji, details]) => (
+                      <TouchableHighlight
+                        key={emoji}
+                        style={{
+                          marginRight: 8,
+                          padding: 8,
+                          borderRadius: theme.borderRadius.sm,
+                          backgroundColor: details.userReacted
+                            ? theme.colors.fill.minimal
+                            : theme.colors.background.raised,
+                        }}
+                        underlayColor={theme.colors.border.subtle}
+                      >
+                        <HStack style={{ alignItems: "center" }}>
+                          <Text>{emoji}</Text>
+                          <Text>{details.count}</Text>
+                        </HStack>
+                      </TouchableHighlight>
+                    )
+                  )}
+                  <HStack style={{ width: theme.spacing.xxl }} />
+                </ScrollView>
+              </BottomSheetContentContainer>
+            </BottomSheetScrollView>
+          </BottomSheetModal>
+        )}
       </HStack>
     );
   },
