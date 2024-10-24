@@ -78,7 +78,7 @@ export const EmojiSearchBar = ({
           />
         </View>
       )}
-      {(Platform.OS === "android" || Platform.OS === "web") && (
+      {Platform.OS === "android" && (
         <Searchbar
           placeholder={translate("search_emojis")}
           onChangeText={setValue}

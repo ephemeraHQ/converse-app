@@ -2,7 +2,6 @@ import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import isDeepEqual from "fast-deep-equal";
-import { Platform } from "react-native";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -539,14 +538,6 @@ export const initChatStore = (account: string) => {
                       referencedMessage.reactions.set(message.id, message);
                       referencedMessage.lastUpdateAt = now();
                     }
-                  } else if (Platform.OS === "web") {
-                    isUpdated = true;
-                    newState.conversations[topic].lastUpdateAt = now();
-                    conversation.messages.set(message.referencedMessageId, {
-                      id: message.referencedMessageId,
-                      reactions: new Map().set(message.id, message),
-                      lastUpdateAt: now(),
-                    } as XmtpMessage);
                   }
                 }
 
@@ -850,9 +841,7 @@ export const initChatStore = (account: string) => {
         // Only persisting the information we want
         partialize: (state) => {
           // Persist nothing in web
-          if (Platform.OS === "web") {
-            return undefined;
-          }
+
           const persistedState: Partial<ChatStoreType> = {
             initialLoadDoneOnce: state.initialLoadDoneOnce,
             lastSyncedAt: state.lastSyncedAt,
@@ -861,21 +850,7 @@ export const initChatStore = (account: string) => {
             pinnedConversations: state.pinnedConversations,
             groupInviteLinks: state.groupInviteLinks,
           };
-          // if (Platform.OS === "web" && state.conversations) {
-          //   // On web, we persist convos without messages
-          //   persistedState.conversations = {} as {
-          //     [topic: string]: XmtpConversationWithUpdate;
-          //   };
-          //   Object.keys(state.conversations).forEach((topic) => {
-          //     if (persistedState.conversations) {
-          //       persistedState.conversations[topic] = {
-          //         ...state.conversations[topic],
-          //         messages: new Map(),
-          //         messagesIds: [],
-          //       };
-          //     }
-          //   });
-          // }
+
           return persistedState;
         },
         version: 2,

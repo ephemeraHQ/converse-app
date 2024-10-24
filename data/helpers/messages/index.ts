@@ -1,5 +1,4 @@
 import isDeepEqual from "fast-deep-equal";
-import { Platform } from "react-native";
 
 import { moveAssetsForMessage } from "../../../utils/fileSystem";
 import { getRepository } from "../../db";
@@ -89,29 +88,16 @@ export const updateMessagesIds = async (
       messageToUpdate.newMessageId
     );
 
-    if (Platform.OS === "web") {
-      messagesToDispatch.push({
-        topic: messageToUpdate.message.conversationId,
-        message: {
-          ...messageToUpdate.message,
-          id: messageToUpdate.newMessageId,
-          sent: messageToUpdate.newMessageSent,
-          topic: messageToUpdate.message.conversationId,
-        },
-        oldId,
-      });
-    } else {
-      const updatedMessage = await messageRepository.findOneBy({
-        id: messageToUpdate.newMessageId,
-      });
+    const updatedMessage = await messageRepository.findOneBy({
+      id: messageToUpdate.newMessageId,
+    });
 
-      if (!updatedMessage) throw new Error("Updated message does not exist");
-      messagesToDispatch.push({
-        topic: messageToUpdate.message.conversationId,
-        message: xmtpMessageFromDb(updatedMessage),
-        oldId,
-      });
-    }
+    if (!updatedMessage) throw new Error("Updated message does not exist");
+    messagesToDispatch.push({
+      topic: messageToUpdate.message.conversationId,
+      message: xmtpMessageFromDb(updatedMessage),
+      oldId,
+    });
   }
   getChatStore(account).getState().updateMessagesIds(messagesToDispatch);
 };

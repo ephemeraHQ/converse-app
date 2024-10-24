@@ -1,12 +1,8 @@
-import {
-  listItemSeparatorColor,
-  navigationSecondaryBackgroundColor,
-  backgroundColor,
-} from "@styles/colors";
-import { Platform, useColorScheme } from "react-native";
+import { backgroundColor } from "@styles/colors";
+import { useColorScheme } from "react-native";
 
-import { NativeStack, navigationAnimation } from "./Navigation";
 import ShareProfileScreen from "../ShareProfile";
+import { NativeStack, navigationAnimation } from "./Navigation";
 
 export const ShareProfileScreenConfig = {
   path: "/shareProfile",
@@ -23,14 +19,7 @@ export default function ShareProfileNav() {
         presentation: "modal",
         headerShadowVisible: false,
         headerStyle: {
-          backgroundColor:
-            Platform.OS === "web"
-              ? navigationSecondaryBackgroundColor(colorScheme)
-              : backgroundColor(colorScheme),
-          borderBottomColor:
-            Platform.OS === "web"
-              ? listItemSeparatorColor(colorScheme)
-              : undefined,
+          backgroundColor: backgroundColor(colorScheme),
         } as any,
         animation: navigationAnimation,
       }}

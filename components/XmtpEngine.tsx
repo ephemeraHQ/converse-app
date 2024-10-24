@@ -5,7 +5,7 @@ import {
 import logger from "@utils/logger";
 import { stopStreamingAllMessage } from "@utils/xmtpRN/messages";
 import { useCallback, useEffect, useRef } from "react";
-import { AppState, Platform } from "react-native";
+import { AppState } from "react-native";
 
 import { getExistingDataSource } from "../data/db/datasource";
 import {
@@ -143,7 +143,7 @@ export default function XmtpEngine() {
     for (const account of accounts) {
       if (
         getChatStore(account).getState().localClientConnected &&
-        (Platform.OS === "web" || getExistingDataSource(account))
+        getExistingDataSource(account)
       ) {
         try {
           await createPendingConversations(account);

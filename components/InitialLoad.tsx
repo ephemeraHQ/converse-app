@@ -5,8 +5,8 @@ import {
   Platform,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
@@ -39,7 +39,6 @@ const useStyles = () => {
       flex: 1,
       justifyContent: "center",
       backgroundColor: backgroundColor(colorScheme),
-      marginTop: Platform.OS === "web" ? 60 : undefined,
     },
     welcome: {
       marginTop: 15,

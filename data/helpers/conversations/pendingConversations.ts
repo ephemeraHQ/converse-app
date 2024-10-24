@@ -1,6 +1,6 @@
 import logger from "@utils/logger";
 import { InvitationContext } from "@xmtp/xmtp-js";
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 import { In } from "typeorm/browser";
 import { v4 as uuidv4 } from "uuid";
 
@@ -103,18 +103,10 @@ export const upgradePendingConversationsIfNeeded = async (
 
   const peerAddresses = conversations.map((c) => c.peerAddress);
   let pendingConversationsWithPeers: Conversation[] = [];
-  if (Platform.OS === "web") {
-    // On web, we don't have a database to query, we'll go over the local store
-    pendingConversationsWithPeers = Object.values(
-      getChatStore(account).getState().conversations
-    )
-      .filter((c) => c.pending && peerAddresses.includes(c.peerAddress))
-      .map(xmtpConversationToDb);
-  } else {
-    pendingConversationsWithPeers = await conversationRepository.find({
-      where: { pending: true, peerAddress: In(peerAddresses) },
-    });
-  }
+
+  pendingConversationsWithPeers = await conversationRepository.find({
+    where: { pending: true, peerAddress: In(peerAddresses) },
+  });
 
   // If we get back a conversation from XMTP that corresponds
   // to a conversation that we have locally pending, we need

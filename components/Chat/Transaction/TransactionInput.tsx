@@ -17,8 +17,8 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
@@ -31,7 +31,6 @@ import {
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { postUSDCTransferAuthorization } from "../../../utils/api";
 import { useConversationContext } from "../../../utils/conversation";
-import { isDesktop } from "../../../utils/device";
 import { getTransferAuthorization } from "../../../utils/evm/erc20";
 import {
   evmHelpers,
@@ -276,10 +275,6 @@ export default function TransactionInput() {
               style={styles.moneyInput}
               value={inputValue}
               maxLength={10}
-              // On desktop, we modified React Native RCTUITextView.m
-              // to handle key Shift + Enter to add new line
-              // This disables the flickering on Desktop when hitting Enter
-              blurOnSubmit={isDesktop}
               // Mainly used on Desktop so that Enter sends the message
               onSubmitEditing={() => {
                 triggerTx();

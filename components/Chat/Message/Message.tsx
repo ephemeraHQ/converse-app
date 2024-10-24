@@ -40,7 +40,6 @@ import {
 import { XmtpMessage } from "../../../data/store/chatStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import { getLocalizedTime, getRelativeDate } from "../../../utils/date";
-import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";
 import {
   getUrlToRender,
@@ -283,20 +282,13 @@ const ChatMessage = ({
   const shouldShowOutsideContentRow = isChatMessage && hasReactions;
 
   let messageMaxWidth: DimensionValue;
-  if (isDesktop) {
-    if (isAttachment) {
-      messageMaxWidth = 366;
-    } else {
-      messageMaxWidth = 588;
-    }
+
+  if (isAttachment) {
+    messageMaxWidth = "60%";
   } else {
-    if (isAttachment) {
-      messageMaxWidth = "60%";
-    } else {
-      if (isFrame) {
-        messageMaxWidth = "100%";
-      } else messageMaxWidth = "85%";
-    }
+    if (isFrame) {
+      messageMaxWidth = "100%";
+    } else messageMaxWidth = "85%";
   }
 
   const showStatus =
@@ -382,11 +374,9 @@ const ChatMessage = ({
           onSwipeableWillClose={() => {
             const translation = swipeableRef.current?.state.rowTranslation;
             if (translation && (translation as any)._value > 70) {
-              if (Platform.OS !== "web") {
-                Haptics.notificationAsync(
-                  Haptics.NotificationFeedbackType.Success
-                );
-              }
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success
+              );
               converseEventEmitter.emit("triggerReplyToMessage", message);
             }
           }}

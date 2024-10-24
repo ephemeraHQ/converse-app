@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { WalletId } from "thirdweb/wallets";
 
 import { useAppStateHandlers } from "../../../hooks/useAppStateHandlers";
-import { isDesktop } from "../../../utils/device";
 import { isEthOS } from "../../../utils/ethos";
 
 export const POPULAR_WALLETS = [
@@ -149,7 +148,7 @@ export let installedWallets: InstalledWallet[] = [];
 export const getInstalledWallets = async (
   refresh: boolean
 ): Promise<InstalledWallet[]> => {
-  if ((hasCheckedInstalled && !refresh) || isDesktop) return installedWallets;
+  if (hasCheckedInstalled && !refresh) return installedWallets;
   const checkInstalled = await Promise.all(
     SUPPORTED_WALLETS.map((w) => Linking.canOpenURL(`${w.customScheme}wc`))
   );
