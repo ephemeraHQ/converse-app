@@ -34,11 +34,7 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
       topInset={insets.top}
       snapPoints={["50%", "100%"]}
     >
-      <BottomSheetContentContainer
-        style={{
-          height: 400,
-        }}
-      >
+      <BottomSheetContentContainer>
         <BottomSheetHeader title="Reactions" hasClose />
         <BottomSheetScrollView
           style={{
