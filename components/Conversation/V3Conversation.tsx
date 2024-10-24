@@ -1,9 +1,9 @@
 import Avatar from "@components/Avatar";
 import { ChatDumb } from "@components/Chat/ChatDumb";
+import { TextMessage } from "@components/Chat/Message/TextMessage";
 import { useDebugEnabled } from "@components/DebugButton";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
 import { useCurrentAccount } from "@data/store/accountsStore";
-import { Text } from "@design-system/Text";
 import { useProfilesSocials } from "@hooks/useProfilesSocials";
 import { useGroupMembersConversationScreenQuery } from "@queries/useGroupMembersQuery";
 import { useGroupMessages } from "@queries/useGroupMessages";
@@ -23,6 +23,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
+import { isAllEmojisAndMaxThree } from "@utils/messageContent";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 import { getMessageContentType } from "@utils/xmtpRN/contentTypes";
@@ -214,7 +215,7 @@ export const V3Conversation = ({
   } = useData({
     topic,
   });
-  console.log("messages", messages);
+  const currentAccount = useCurrentAccount()!;
   const styles = useStyles();
   const { headerTintColor, displayAvatar } = useDisplayInfo({
     group,
@@ -231,19 +232,41 @@ export const V3Conversation = ({
   const renderItem: ListRenderItem<string> = useCallback(
     ({ item }) => {
       const message = messages?.byId[item];
+      const fromMe =
+        message?.senderAddress.toLowerCase() === currentAccount.toLowerCase();
       if (!message) return null;
+
       const contentType = getMessageContentType(message?.contentTypeId);
-      console.log("here1113", message?.contentTypeId);
       switch (contentType) {
         // case "groupUpdated":
         //   return <ChatGroupUpdatedMessage message={message} />;
-        // case "text":
-        //   return <Text preset="body">{message?.contentTypeId}</Text>;
+        case "text":
+          let content = "";
+          let hideBackground = false;
+          try {
+            content = message.content() as string;
+            hideBackground = isAllEmojisAndMaxThree(content);
+          } catch {
+            content = message.fallback ?? "";
+          }
+          return (
+            <TextMessage
+              fromMe={fromMe}
+              hideBackground={hideBackground}
+              content={content}
+            />
+          );
         default:
-          return <Text preset="body">{message?.contentTypeId}</Text>;
+          return (
+            <TextMessage
+              fromMe={fromMe}
+              hideBackground={false}
+              content={contentType}
+            />
+          );
       }
     },
-    [messages]
+    [currentAccount, messages?.byId]
   );
 
   const showPlaceholder = (messages?.ids.length ?? 0) === 0 || !group;

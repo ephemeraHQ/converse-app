@@ -18,6 +18,14 @@ export function mergeOrderedLists<L1, L2>(
       j++;
     }
   }
+  while (i < list1.length) {
+    merged.push(list1[i]);
+    i++;
+  }
+  while (j < list2.length) {
+    merged.push(list2[j]);
+    j++;
+  }
 
   return merged;
 }

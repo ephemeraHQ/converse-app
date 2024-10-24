@@ -1,4 +1,3 @@
-import { useGroupsConversationListQuery } from "@queries/useGroupsConversationListQuery";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import { backgroundColor } from "@styles/colors";
@@ -9,7 +8,6 @@ import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
 import HiddenRequestsButton from "./ConversationList/HiddenRequestsButton";
 import ConversationListItem from "./ConversationListItem";
-import { GroupConversationItem } from "./ConversationListItem/GroupConversationItem";
 import { V3GroupConversationListItem } from "./V3GroupConversationListItem";
 import {
   useChatStore,
@@ -68,7 +66,6 @@ export default function ConversationFlashList({
     ])
   );
   const userAddress = useCurrentAccount() as string;
-  const { data } = useGroupsConversationListQuery(userAddress);
   const peersStatus = useSettingsStore((s) => s.peersStatus);
   const isSplitScreen = useIsSplitScreen();
   const profiles = useProfilesStore((state) => state.profiles);
@@ -128,7 +125,7 @@ export default function ConversationFlashList({
         ? getProfile(conversation.peerAddress, profiles)?.socials
         : undefined;
       if (conversation.isGroup) {
-        return <GroupConversationItem conversation={conversation} />;
+        return null;
       }
       return (
         <ConversationListItem
@@ -192,7 +189,7 @@ export default function ConversationFlashList({
             onScrollBeginDrag={onScroll}
             alwaysBounceVertical={items.length > 0}
             contentInsetAdjustmentBehavior="automatic"
-            data={[...(data?.ids || []), ...items]}
+            data={items}
             extraData={[
               colorScheme,
               navigation,

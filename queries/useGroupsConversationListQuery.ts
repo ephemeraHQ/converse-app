@@ -9,6 +9,9 @@ import { getXmtpClient } from "@utils/xmtpRN/sync";
 
 import { entify, EntityObject } from "./entify";
 import { queryClient } from "./queryClient";
+import { setGroupIsActiveQueryData } from "./useGroupIsActive";
+import { setGroupNameQueryData } from "./useGroupNameQuery";
+import { setGroupPhotoQueryData } from "./useGroupPhotoQuery";
 
 export const groupConversationListKey = (account: string) => [
   QueryKeys.GROUP_CONVERSATION_LIST,
@@ -40,6 +43,11 @@ const groupsQueryFn = async (account: string) => {
     },
     "lastMessage"
   );
+  for (const group of groups) {
+    setGroupNameQueryData(account, group.topic, group.name);
+    setGroupPhotoQueryData(account, group.topic, group.imageUrlSquare);
+    setGroupIsActiveQueryData(account, group.topic, group.isGroupActive);
+  }
   return entify(groups, (group) => group.topic);
 };
 
