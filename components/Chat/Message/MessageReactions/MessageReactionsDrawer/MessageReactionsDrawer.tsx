@@ -36,11 +36,7 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
     >
       <BottomSheetContentContainer>
         <BottomSheetHeader title="Reactions" hasClose />
-        <BottomSheetScrollView
-          style={{
-            backgroundColor: theme.colors.background.raised,
-          }}
-        >
+        <BottomSheetScrollView>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
