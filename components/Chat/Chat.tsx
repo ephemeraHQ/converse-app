@@ -52,6 +52,7 @@ import { getProfile, getProfileData } from "../../utils/profile";
 import { UUID_REGEX } from "../../utils/regex";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { Recommendation } from "../Recommendations/Recommendation";
+import { MessageReactionsDrawer } from "./Message/MessageReactions/MessageReactionsDrawer/MessageReactionsDrawer";
 
 const usePeerSocials = () => {
   const conversation = useConversationContext("conversation");
@@ -430,81 +431,86 @@ export function Chat() {
   }, [onReadyToFocus]);
 
   return (
-    <View
-      style={styles.chatContainer}
-      key={`chat-${
-        conversation?.isGroup ? conversation?.topic : conversation?.peerAddress
-      }-${conversation?.context?.conversationId || ""}-${isBlockedPeer}`}
-    >
-      <Animated.View style={chatContentStyle}>
-        {conversation && listArray.length > 0 && !isBlockedPeer && (
-          <AnimatedListView
-            contentContainerStyle={styles.chat}
-            data={listArray}
-            refreshing={conversation?.pending}
-            extraData={[peerSocials]}
-            renderItem={renderItem}
-            onLayout={handleOnLayout}
-            ref={(r) => {
-              if (r) {
-                messageListRef.current = r;
+    <>
+      <View
+        style={styles.chatContainer}
+        key={`chat-${
+          conversation?.isGroup
+            ? conversation?.topic
+            : conversation?.peerAddress
+        }-${conversation?.context?.conversationId || ""}-${isBlockedPeer}`}
+      >
+        <Animated.View style={chatContentStyle}>
+          {conversation && listArray.length > 0 && !isBlockedPeer && (
+            <AnimatedListView
+              contentContainerStyle={styles.chat}
+              data={listArray}
+              refreshing={conversation?.pending}
+              extraData={[peerSocials]}
+              renderItem={renderItem}
+              onLayout={handleOnLayout}
+              ref={(r) => {
+                if (r) {
+                  messageListRef.current = r;
+                }
+              }}
+              keyboardDismissMode="interactive"
+              automaticallyAdjustContentInsets={false}
+              contentInsetAdjustmentBehavior="never"
+              // Causes a glitch on Android, no sure we need it for now
+              // maintainVisibleContentPosition={{
+              //   minIndexForVisible: 0,
+              //   autoscrollToTopThreshold: 100,
+              // }}
+              estimatedListSize={
+                isSplitScreen ? undefined : Dimensions.get("screen")
               }
-            }}
-            keyboardDismissMode="interactive"
-            automaticallyAdjustContentInsets={false}
-            contentInsetAdjustmentBehavior="never"
-            // Causes a glitch on Android, no sure we need it for now
-            // maintainVisibleContentPosition={{
-            //   minIndexForVisible: 0,
-            //   autoscrollToTopThreshold: 100,
-            // }}
-            estimatedListSize={
-              isSplitScreen ? undefined : Dimensions.get("screen")
-            }
-            inverted
-            keyExtractor={keyExtractor}
-            getItemType={getItemType(framesStore)}
-            keyboardShouldPersistTaps="handled"
-            estimatedItemSize={80}
-            // Size glitch on Android
-            showsVerticalScrollIndicator={Platform.OS === "ios"}
-            pointerEvents="auto"
-            ListFooterComponent={ListFooterComponent}
-          />
+              inverted
+              keyExtractor={keyExtractor}
+              getItemType={getItemType(framesStore)}
+              keyboardShouldPersistTaps="handled"
+              estimatedItemSize={80}
+              // Size glitch on Android
+              showsVerticalScrollIndicator={Platform.OS === "ios"}
+              pointerEvents="auto"
+              ListFooterComponent={ListFooterComponent}
+            />
+          )}
+          {showPlaceholder && !conversation?.isGroup && (
+            <ChatPlaceholder messagesCount={listArray.length} />
+          )}
+          {showPlaceholder && conversation?.isGroup && (
+            <GroupChatPlaceholder messagesCount={listArray.length} />
+          )}
+          {conversation?.isGroup ? <GroupConsentPopup /> : <ConsentPopup />}
+        </Animated.View>
+        {showChatInput && (
+          <>
+            <ReanimatedView
+              style={[
+                textInputStyle,
+                {
+                  display:
+                    frameTextInputFocused && hideInputIfFrameFocused
+                      ? "none"
+                      : "flex",
+                },
+              ]}
+            >
+              {!transactionMode && <ChatInput inputHeight={chatInputHeight} />}
+              {transactionMode && <TransactionInput />}
+            </ReanimatedView>
+            <View
+              style={[
+                styles.inputBottomFiller,
+                { height: insets.bottom + DEFAULT_INPUT_HEIGHT },
+              ]}
+            />
+          </>
         )}
-        {showPlaceholder && !conversation?.isGroup && (
-          <ChatPlaceholder messagesCount={listArray.length} />
-        )}
-        {showPlaceholder && conversation?.isGroup && (
-          <GroupChatPlaceholder messagesCount={listArray.length} />
-        )}
-        {conversation?.isGroup ? <GroupConsentPopup /> : <ConsentPopup />}
-      </Animated.View>
-      {showChatInput && (
-        <>
-          <ReanimatedView
-            style={[
-              textInputStyle,
-              {
-                display:
-                  frameTextInputFocused && hideInputIfFrameFocused
-                    ? "none"
-                    : "flex",
-              },
-            ]}
-          >
-            {!transactionMode && <ChatInput inputHeight={chatInputHeight} />}
-            {transactionMode && <TransactionInput />}
-          </ReanimatedView>
-          <View
-            style={[
-              styles.inputBottomFiller,
-              { height: insets.bottom + DEFAULT_INPUT_HEIGHT },
-            ]}
-          />
-        </>
-      )}
-    </View>
+      </View>
+      <MessageReactionsDrawer />
+    </>
   );
 }
 

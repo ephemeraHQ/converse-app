@@ -10,6 +10,7 @@ import { FullWindowOverlay } from "react-native-screens";
 
 import { BottomSheetBackdropOpacity } from "./BottomSheetBackdropOpacity";
 import { BottomSheetHandleBar } from "./BottomSheetHandleBar";
+import { useAppTheme } from "../../theme/useAppTheme";
 
 export type IBottomSheetModalProps = GorhomBottomSheetModalProps & {
   absoluteHandleBar?: boolean;
@@ -18,7 +19,9 @@ export type IBottomSheetModalProps = GorhomBottomSheetModalProps & {
 export const BottomSheetModal = memo(
   forwardRef<GorhomBottomSheetModalMethods, IBottomSheetModalProps>(
     function BottomSheetModal(props, ref) {
-      const { absoluteHandleBar = true, ...rest } = props;
+      const { absoluteHandleBar = true, backgroundStyle, ...rest } = props;
+
+      const { theme } = useAppTheme();
 
       // https://github.com/gorhom/react-native-bottom-sheet/issues/1644#issuecomment-1949019839
       const renderContainerComponent = useCallback((props: any) => {
@@ -40,8 +43,15 @@ export const BottomSheetModal = memo(
           containerComponent={
             Platform.OS === "ios" ? renderContainerComponent : undefined
           }
+          enableDynamicSizing={false} // By default we don't want enable dynamic sizing
           backdropComponent={BottomSheetBackdropOpacity}
           handleComponent={renderHandleComponent}
+          backgroundStyle={[
+            {
+              backgroundColor: theme.colors.background.raised,
+            },
+            backgroundStyle,
+          ]}
           {...rest}
         />
       );
