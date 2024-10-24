@@ -178,6 +178,10 @@ export const streamAllMessages = async (account: string) => {
       text: config.env === "prod" ? "Redacted" : message.nativeContent.text,
       topic: message.topic,
     });
+    // if (isGroupConversation(message.topic)) {
+    //   handleGroupMessage(client.address, message.topic, message);
+    //   return;
+    // }
     saveMessages(client.address, protocolMessagesToStateMessages([message]));
     if (message.contentTypeId.includes("group_updated")) {
       handleGroupUpdatedMessage(client.address, message.topic, message);

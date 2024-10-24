@@ -5,9 +5,7 @@ import {
   actionSheetColors,
   backgroundColor,
   badgeColor,
-  clickedItemBackgroundColor,
   dangerColor,
-  inversePrimaryColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
@@ -29,20 +27,18 @@ import {
   Platform,
   StyleSheet,
   Text,
-  TouchableHighlight,
   View,
 } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
-import { TouchableRipple } from "react-native-paper";
-import Animated, {
-  runOnJS,
-  useAnimatedRef,
+import {
   useSharedValue,
+  useAnimatedRef,
+  runOnJS,
 } from "react-native-reanimated";
 
 import Avatar from "./Avatar";
 import { ConversationContextMenu } from "./ConversationContextMenu";
+import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
 import GroupAvatar from "./GroupAvatar";
 import {
   currentAccount,
@@ -309,11 +305,6 @@ const ConversationListItem = memo(function ConversationListItem({
   }, []);
 
   const handleDelete = useCallback(() => {
-    if (onRightActionPress) {
-      onRightActionPress(closeSwipeable);
-      return;
-    }
-
     const showOptions = (
       options: string[],
       title: string,
@@ -405,49 +396,10 @@ const ConversationListItem = memo(function ConversationListItem({
     colorScheme,
     conversationPeerAddress,
     conversationTopic,
-    onRightActionPress,
     setPeersStatus,
     setTopicsData,
     isBlockedChatView,
   ]);
-
-  const renderRightActions = useCallback(() => {
-    if (isBlockedChatView) {
-      return (
-        <RectButton style={styles.rightAction} onPress={handleDelete}>
-          <Picto
-            picto="checkmark"
-            color={inversePrimaryColor(colorScheme)}
-            size={PictoSizes.swipableItem}
-          />
-        </RectButton>
-      );
-    } else {
-      return (
-        <RectButton style={styles.rightActionRed} onPress={handleDelete}>
-          <Picto picto="trash" color="white" size={PictoSizes.swipableItem} />
-        </RectButton>
-      );
-    }
-  }, [
-    styles.rightAction,
-    styles.rightActionRed,
-    handleDelete,
-    isBlockedChatView,
-    colorScheme,
-  ]);
-
-  const renderLeftActions = useCallback(() => {
-    return (
-      <RectButton style={styles.leftAction}>
-        <Picto
-          picto={showUnread ? "checkmark.message" : "message.badge"}
-          color={inversePrimaryColor(colorScheme)}
-          size={PictoSizes.swipableItem}
-        />
-      </RectButton>
-    );
-  }, [showUnread, styles.leftAction, colorScheme]);
 
   const toggleReadStatus = useCallback(() => {
     const newStatus = showUnread ? "read" : "unread";
@@ -505,39 +457,7 @@ const ConversationListItem = memo(function ConversationListItem({
     ]
   );
 
-  const rowItem = (
-    <Animated.View ref={containerRef} onLayout={onLayoutView}>
-      {Platform.OS === "ios" ? (
-        <TouchableHighlight
-          underlayColor={clickedItemBackgroundColor(colorScheme)}
-          delayPressIn={75}
-          onPress={openConversation}
-          onLongPress={onLongPress}
-          style={{
-            backgroundColor: selected
-              ? clickedItemBackgroundColor(colorScheme)
-              : backgroundColor(colorScheme),
-            height: 76,
-          }}
-        >
-          {listItemContent}
-        </TouchableHighlight>
-      ) : (
-        <TouchableRipple
-          unstable_pressDelay={75}
-          onPress={openConversation}
-          onLongPress={onLongPress}
-          style={styles.rippleRow}
-          rippleColor={clickedItemBackgroundColor(colorScheme)}
-        >
-          {listItemContent}
-        </TouchableRipple>
-      )}
-    </Animated.View>
-  );
-
   const toggleUnreadStatusOnClose = useRef(false);
-  const [swipeableKey, setSwipeableKey] = useState(0);
 
   const contextMenuComponent = useMemo(
     () => (
@@ -556,44 +476,40 @@ const ConversationListItem = memo(function ConversationListItem({
     ]
   );
 
+  const onWillLeftSwipe = useCallback(() => {
+    const translation = swipeableRef.current?.state.rowTranslation;
+    if (translation && (translation as any)._value > 100) {
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+      toggleUnreadStatusOnClose.current = true;
+    }
+  }, []);
+
+  const onLeftSwipe = useCallback(() => {
+    toggleUnreadStatusOnClose.current = false;
+    toggleReadStatus();
+  }, [toggleReadStatus]);
+
   return (
-    <View style={styles.rowSeparator}>
-      <Swipeable
-        key={swipeableKey}
-        renderRightActions={renderRightActions}
-        renderLeftActions={renderLeftActions}
-        leftThreshold={10000} // Never trigger opening
-        overshootFriction={4}
-        ref={swipeableRef}
-        onSwipeableWillOpen={() => {
-          converseEventEmitter.on("conversationList-scroll", closeSwipeable);
-        }}
-        onSwipeableWillClose={(direction) => {
-          converseEventEmitter.off("conversationList-scroll", closeSwipeable);
-          if (direction === "left") {
-            const translation = swipeableRef.current?.state.rowTranslation;
-            if (translation && (translation as any)._value > 100) {
-              Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success
-              );
-              toggleUnreadStatusOnClose.current = true;
-            }
-          }
-        }}
-        onSwipeableClose={(direction) => {
-          if (direction === "left" && toggleUnreadStatusOnClose.current) {
-            toggleUnreadStatusOnClose.current = false;
-            toggleReadStatus();
-          }
-        }}
-        hitSlop={{ left: -6 }}
-      >
-        {rowItem}
-        {contextMenuComponent}
-      </Swipeable>
-      {/* Hide part of the border to mimic margin*/}
-      {Platform.OS === "ios" && <View style={styles.rowSeparatorMargin} />}
-    </View>
+    <ConversationListItemDumb
+      avatarComponent={avatarComponent}
+      ref={swipeableRef}
+      isUnread={showUnread}
+      showError={false}
+      showImagePreview={!!hasImagePreview}
+      imagePreviewUrl={lastMessageImageUrl}
+      title={conversationName}
+      subtitle={`${timeToShow} ⋅ ${lastMessagePreview}`}
+      onPress={openConversation}
+      onRightActionPress={handleDelete}
+      onLongPress={onLongPress}
+      onWillLeftSwipe={onWillLeftSwipe}
+      onLeftSwipe={onLeftSwipe}
+      rightIsDestructive={isBlockedChatView}
+      contextMenuComponent={contextMenuComponent}
+      leftActionPicto={showUnread ? "checkmark.message" : "message.badge"}
+    />
   );
 });
 export default ConversationListItem;
