@@ -1,3 +1,4 @@
+import { refreshProfileForAddress } from "@data/helpers/profiles/profilesUpdate";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
@@ -88,7 +89,18 @@ export function TransactionPreview() {
           transactionToPreview.chainId,
           transactionToPreview
         );
-        setSimulation({ status: "success", result: simulationResult });
+        if (simulationResult.error) {
+          setSimulation({
+            status: "failure",
+            error: simulationResult.error.message,
+          });
+        } else {
+          // Let's refresh profile data for the addresses involved in the transaction
+          simulationResult?.changes?.forEach((change) => {
+            refreshProfileForAddress(account, change.to);
+          });
+          setSimulation({ status: "success", result: simulationResult });
+        }
       } catch (e: any) {
         console.log(e);
         setSimulation({ status: "failure", error: e });

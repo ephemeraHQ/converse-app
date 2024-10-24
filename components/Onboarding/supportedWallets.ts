@@ -99,6 +99,14 @@ export const DEFAULT_SUPPORTED_CHAINS = [
   xai,
 ];
 
+export const CHAIN_BY_ID = DEFAULT_SUPPORTED_CHAINS.reduce(
+  (acc, chain) => {
+    acc[chain.id] = chain;
+    return acc;
+  },
+  {} as Record<number, (typeof DEFAULT_SUPPORTED_CHAINS)[number]>
+);
+
 const SUPPORTED_WALLETS: InstalledWallet[] = [
   {
     name: "Coinbase Wallet",

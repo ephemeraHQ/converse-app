@@ -6,7 +6,11 @@ import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
 import { spacing } from "@theme/spacing";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
-import { getPreferredName } from "@utils/profile";
+import {
+  getPreferredAvatar,
+  getPreferredName,
+  getProfile,
+} from "@utils/profile";
 import { shortAddress } from "@utils/str";
 import { SimulateChangeType, SimulateAssetChangesResponse } from "alchemy-sdk";
 import { Image, ImageSource } from "expo-image";
@@ -69,7 +73,7 @@ export const TransactionContent = ({
     );
   }
 
-  if (txState.status === "failure" || txState.status === "success") {
+  if (txState.status !== "pending") {
     return <TransactionResult status={txState.status} error={txState.error} />;
   }
 
@@ -78,7 +82,7 @@ export const TransactionContent = ({
       {simulation.status === "success" ? (
         <SimulationResult changes={simulation.result?.changes} />
       ) : (
-        <SimulationFailure />
+        <SimulationFailure error={simulation.error} />
       )}
       {walletApp && (
         <TransactionPreviewRow
@@ -95,14 +99,16 @@ export const TransactionContent = ({
 const SimulationPending = () => (
   <VStack style={styles.center}>
     <ActivityIndicator />
-    <Text>{translate("simulation_pending")}</Text>
+    <Text style={{ marginTop: spacing.xs }}>
+      {translate("simulation_pending")}
+    </Text>
   </VStack>
 );
 
 const TransactionLoader = ({ status, walletName }: TransactionLoaderProps) => (
   <VStack style={styles.center}>
     <ActivityIndicator />
-    <Text>
+    <Text style={{ marginTop: spacing.xs }}>
       {translate(
         status === "triggered"
           ? "transaction_triggered"
@@ -113,51 +119,64 @@ const TransactionLoader = ({ status, walletName }: TransactionLoaderProps) => (
   </VStack>
 );
 
-const TransactionResult = ({ status, error }: TransactionResultProps) => (
-  <VStack style={styles.center}>
-    <Text>
-      {translate(
-        status === "failure" ? "transaction_failure" : "transaction_success",
-        { error }
+const TransactionResult = ({ status, error }: TransactionResultProps) => {
+  const { themed } = useAppTheme();
+  return (
+    <VStack style={status === "failure" ? themed($failure) : styles.center}>
+      {status === "failure" && (
+        <Text color="danger">{translate("transaction_failure")}</Text>
       )}
-    </Text>
-  </VStack>
-);
+      <Text>
+        {status === "failure" ? error : translate("transaction_success")}
+      </Text>
+    </VStack>
+  );
+};
 
-const SimulationResult = ({ changes }: SimulationResultProps) => (
-  <>
-    {changes?.map((change) => (
-      <View key={change.contractAddress}>
-        <TransactionPreviewRow
-          title={
-            change.changeType === SimulateChangeType.APPROVE
-              ? translate("transaction_asset_change_type_approve")
-              : translate("transaction_asset_change_type_transfer")
-          }
-          subtitle={`${change.amount} ${change.symbol}`}
-          imageSrc={change.logo ? { uri: change.logo } : TransactionSend}
-          imagePlaceholder={TransactionSend}
-        />
-        <TransactionPreviewRow
-          title={translate("transaction_asset_change_to")}
-          subtitle={getPreferredName(
-            useProfilesStore.getState().profiles[change.to]?.socials,
-            change.to
-          )}
-          imageSrc={TransactionTo}
-          imagePlaceholder={TransactionTo}
-        />
-      </View>
-    ))}
-  </>
-);
+const SimulationResult = ({ changes }: SimulationResultProps) => {
+  const profiles = useProfilesStore((s) => s.profiles);
+  return (
+    <>
+      {changes?.map((change, index) => (
+        <View key={`${change.contractAddress}-${index}`}>
+          <TransactionPreviewRow
+            title={
+              change.changeType === SimulateChangeType.APPROVE
+                ? translate("transaction_asset_change_type_approve")
+                : translate("transaction_asset_change_type_transfer")
+            }
+            subtitle={`${change.amount} ${change.symbol}`}
+            imageSrc={change.logo ? { uri: change.logo } : TransactionSend}
+            imagePlaceholder={TransactionSend}
+          />
+          <TransactionPreviewRow
+            title={translate("transaction_asset_change_to")}
+            subtitle={getPreferredName(
+              getProfile(change.to, profiles)?.socials,
+              change.to
+            )}
+            imageSrc={
+              getPreferredAvatar(getProfile(change.to, profiles)?.socials) ||
+              TransactionTo
+            }
+            imagePlaceholder={TransactionTo}
+          />
+        </View>
+      ))}
+    </>
+  );
+};
 
-const SimulationFailure = () => {
+const SimulationFailure = ({ error }: { error?: string | undefined }) => {
   const { themed } = useAppTheme();
   return (
     <VStack style={themed($failure)}>
-      <Text color="danger">Caution</Text>
-      <Text>{translate("simulation_failure")}</Text>
+      <Text color="danger">{translate("simulation_caution")}</Text>
+      <Text>
+        {error
+          ? translate("simulation_will_revert")
+          : translate("simulation_failure")}
+      </Text>
     </VStack>
   );
 };

@@ -336,19 +336,21 @@ export const en = {
   // Transactional frames
   transactionalFrameConnectWallet:
     "Connect to a wallet app to trigger a transaction",
-  transaction_failure: "Transaction failed with error: {{error}}",
-  transaction_pending: "Trigger in {{wallet}}",
+  transaction_failure: "Transaction failed",
+  transaction_pending: "Confirm in {{wallet}}",
   transaction_triggering: "Opening {{wallet}}...",
-  transaction_triggered: "Transacting...",
+  transaction_triggered: "Your transaction is being executed...",
   transaction_success: "Done!",
-  transaction_switch_chain: "Switch to chain {{chainName}}",
+  transaction_switch_chain: "Switch Chain to {{chainName}} in {{wallet}}",
   transaction_wallet: "Wallet",
 
   // Transaction Simulation
   simulation_pending: "Safely Simulating this Transaction",
   simulation_failure:
     "We were unable to simulate this transaction. You may still trigger it in your wallet.",
-  simulation_will_revert: "Simulation shows that this transaction will revert",
+  simulation_will_revert:
+    "Simulation shows that this transaction will revert. You may still try to trigger it in your wallet.",
+  simulation_caution: "Caution",
   transaction_asset_change_type_approve: "Approve",
   transaction_asset_change_type_transfer: "Transfer",
   transaction_asset_change_to: "To",
