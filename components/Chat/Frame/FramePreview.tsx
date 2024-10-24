@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
 import FrameBottom from "./FrameBottom";
@@ -98,20 +98,6 @@ export default function FramePreview({
           setFrame((s) => ({ ...s, frameImage: initialFrameImage }));
           setFirstFrameLoaded(true);
           return;
-        } else if (Platform.OS === "web") {
-          // No caching on web for now
-          setFirstImageRefreshed(true);
-          const prefetched = await Image.prefetch(
-            proxiedInitialImage,
-            "memory"
-          );
-          if (prefetched) {
-            setFrame((s) => ({ ...s, frameImage: proxiedInitialImage }));
-          } else {
-            setFirstImageFailure(true);
-          }
-          setFirstFrameLoaded(true);
-          return;
         }
         const initialImageCache = await cacheForMedia(proxiedInitialImage);
         if (!initialImageCache) {
@@ -199,7 +185,7 @@ export default function FramePreview({
           const payload = await framesClient.signFrameAction(actionInput);
 
           if (button.action === "tx") {
-            if (Platform.OS !== "web" || !config.enableTransactionFrames) {
+            if (!config.enableTransactionFrames) {
               alert("Transaction frames are not supported yet.");
               throw new Error("Transaction frames not supported yet");
             }
@@ -350,7 +336,7 @@ export default function FramePreview({
               frame.frameInfo?.image?.aspectRatio || "1.91:1"
             }
             linkToOpen={initialFrame.url}
-            useMemoryCache={!frame.isInitialFrame || Platform.OS === "web"}
+            useMemoryCache={!frame.isInitialFrame}
           />
         </View>
       )}

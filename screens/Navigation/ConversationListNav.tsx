@@ -12,14 +12,12 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  View,
   useColorScheme,
   useWindowDimensions,
-  View,
 } from "react-native";
 import { Searchbar as MaterialSearchBar } from "react-native-paper";
 
-import { NativeStack, navigationAnimation } from "./Navigation";
-import { useIsSplitScreen } from "./navHelpers";
 import {
   useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
@@ -29,6 +27,8 @@ import Picto from "../../components/Picto/Picto";
 import { useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import ConversationList from "../ConversationList";
+import { NativeStack, navigationAnimation } from "./Navigation";
+import { useIsSplitScreen } from "./navHelpers";
 
 export const useHeaderSearchBar = (props: any) => {
   // No-op
@@ -114,8 +114,13 @@ export default function ConversationListNav() {
                   <Picto picto="menu" size={PictoSizes.navItem} color={color} />
                 )}
                 onIconPress={() => {
+<<<<<<< HEAD
                   if (Platform.OS === "web") {
                     navigation.goBack();
+=======
+                  if (Platform.OS === "android") {
+                    converseEventEmitter.emit("toggle-navigation-drawer", true);
+>>>>>>> ff99fe25 (remove web)
                   }
                 }}
                 mode="bar"

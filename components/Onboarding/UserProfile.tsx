@@ -1,3 +1,4 @@
+import { translate } from "@i18n";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   actionSheetColors,
@@ -8,7 +9,6 @@ import {
 } from "@styles/colors";
 import logger from "@utils/logger";
 import { getProfile } from "@utils/profile";
-import { ImagePickerAsset } from "expo-image-picker";
 import React, { useCallback, useRef, useState } from "react";
 import {
   Platform,
@@ -19,39 +19,33 @@ import {
   View,
   useColorScheme,
 } from "react-native";
-
-import Avatar from "../../components/Avatar";
-import Button from "../../components/Button/Button";
-import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
-import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
-import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
-import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import config from "../../config";
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import {
-  getCurrentAccount,
   useCurrentAccount,
   useProfilesStore,
   useSettingsStore,
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { VStack } from "../../design-system/VStack";
-import { translate } from "../../i18n";
-import { spacing } from "../../theme";
+import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
 import { uploadFile } from "../../utils/attachment";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
+import { useLogoutFromConverse } from "../../utils/logout";
 import {
   compressAndResizeImage,
   pickMediaFromLibrary,
   takePictureFromCamera,
 } from "../../utils/media";
-import { sentryTrackError } from "../../utils/sentry";
 import {
   formatEphemeralDisplayName,
   formatEphemeralUsername,
+  useLoopTxt,
 } from "../../utils/str";
-import { NavigationParamList } from "../Navigation/Navigation";
+import Avatar from "../Avatar";
+import Button from "../Button/Button";
+import { showActionSheetWithOptions } from "../StateHandlers/ActionSheetStateHandler";
+import OnboardingComponent from "./OnboardingComponent";
 
 export type ProfileType = {
   avatar?: string;
@@ -59,49 +53,205 @@ export type ProfileType = {
   displayName?: string;
 };
 
-export const OnboardingUserProfileScreen = (
-  props: NativeStackScreenProps<NavigationParamList, "OnboardingUserProfile">
-) => {
-  const { navigation } = props;
+type OwnProps = {
+  onboarding?: boolean;
+};
+type NavProps = NativeStackScreenProps<NavigationParamList, "UserProfile">;
 
+type Props = OwnProps & Partial<NavProps>;
+
+const LOADING_SENTENCES = Object.values(
+  translate("userProfile.loadingSentences")
+);
+
+export const UserProfile = ({ onboarding, navigation }: Props) => {
+  const address = useCurrentAccount() as string;
+  const profiles = useProfilesStore((state) => state.profiles);
+  const currentUserUsername = getProfile(
+    address,
+    profiles
+  )?.socials?.userNames?.find((u) => u.isPrimary);
+
+  const [errorMessage, setErrorMessage] = useState("");
   const colorScheme = useColorScheme();
+  const styles = useStyles(colorScheme, errorMessage);
 
-  const { profile, setProfile } = useProfile();
+  const { ephemeralAccount } = useSettingsStore(
+    useSelect(["ephemeralAccount"])
+  );
+  const usernameWithoutSuffix = currentUserUsername?.name?.replace(
+    config.usernameSuffix,
+    ""
+  );
+  const defaultEphemeralUsername = formatEphemeralUsername(
+    address,
+    usernameWithoutSuffix
+  );
+  const defaultEphemeralDisplayName = formatEphemeralDisplayName(
+    address,
+    currentUserUsername?.displayName
+  );
 
-  const { createOrUpdateProfile, loading, errorMessage } =
-    useCreateOrUpdateProfileInfo();
+  const [profile, setProfile] = useState<ProfileType>({
+    username: ephemeralAccount
+      ? defaultEphemeralUsername
+      : usernameWithoutSuffix || "",
+    avatar: currentUserUsername?.avatar || "",
+    displayName: ephemeralAccount
+      ? defaultEphemeralDisplayName
+      : currentUserUsername?.displayName || "",
+  });
+  const [loading, setLoading] = useState(false);
+  const logout = useLogoutFromConverse(address);
 
-  const styles = useUserProfileStyles(colorScheme, errorMessage);
+  const loadingSubtitle = useLoopTxt(2000, LOADING_SENTENCES, loading, false);
 
   const handleContinue = useCallback(async () => {
-    try {
-      await createOrUpdateProfile({ profile });
-      navigation.push("OnboardingNotifications");
-    } catch (error) {
-      sentryTrackError(error);
+    if (
+      profile.displayName &&
+      profile.displayName.length > 0 &&
+      (profile.displayName.length < 3 || profile.displayName.length > 32)
+    ) {
+      setErrorMessage(translate("userProfile.errors.displayNameLength"));
+      return;
     }
-  }, [createOrUpdateProfile, profile, navigation]);
+
+    // Allow only alphanumeric and limit to 30 chars
+    if (!/^[a-zA-Z0-9]*$/.test(profile.username)) {
+      setErrorMessage(translate("userProfile.errors.usernameAlphanumeric"));
+      return;
+    }
+    // Only allow usernames between 3-30 characters long
+    if (profile.username.length < 3 || profile.username.length > 30) {
+      setErrorMessage(translate("userProfile.errors.usernameLength"));
+      return;
+    }
+
+    setLoading(true);
+
+    // First check username availability
+    try {
+      await checkUsernameValid(address, profile.username);
+    } catch (e: any) {
+      logger.error(e, { context: "UserProfile: Checking username valid" });
+      setLoading(false);
+      setErrorMessage(e?.response?.data?.message || "An unknown error occured");
+      return;
+    }
+
+    let publicAvatar = "";
+    if (profile.avatar) {
+      if (profile.avatar.startsWith("https://")) {
+        publicAvatar = profile.avatar;
+      } else {
+        // Let's upload the image to our server
+        const resizedImage = await compressAndResizeImage(profile.avatar, true);
+
+        try {
+          publicAvatar = await uploadFile({
+            account: address,
+            filePath: resizedImage.uri,
+            contentType: "image/jpeg",
+          });
+        } catch (e: any) {
+          logger.error(e, { context: "UserProfile: uploading profile pic" });
+          setErrorMessage(
+            e?.response?.data?.message || "An unknown error occured"
+          );
+          setLoading(false);
+          return;
+        }
+      }
+    }
+
+    try {
+      await claimProfile({
+        account: address,
+        profile: { ...profile, avatar: publicAvatar },
+      });
+      await refreshProfileForAddress(address, address);
+    } catch (e: any) {
+      logger.error(e, { context: "UserProfile: claiming and refreshing" });
+      setErrorMessage(e?.response?.data?.message || "An unknown error occured");
+      setLoading(false);
+      return;
+    }
+    if (!onboarding && navigation) {
+      navigation.goBack();
+    }
+  }, [address, navigation, onboarding, profile]);
+
+  const pickMedia = useCallback(async () => {
+    const asset = await pickMediaFromLibrary({
+      allowsEditing: true,
+      aspect: [1, 1],
+    });
+    if (!asset) return;
+    setProfile({ ...profile, avatar: asset.uri });
+  }, [profile, setProfile]);
+
+  const openCamera = useCallback(async () => {
+    const asset = await takePictureFromCamera({
+      allowsEditing: true,
+      aspect: [1, 1],
+    });
+    if (!asset) return;
+    setProfile({ ...profile, avatar: asset.uri });
+  }, [profile, setProfile]);
+
+  const addPFP = useCallback(() => {
+    const showOptions = () =>
+      showActionSheetWithOptions(
+        {
+          options: [
+            translate("userProfile.mediaOptions.takePhoto"),
+            translate("userProfile.mediaOptions.chooseFromLibrary"),
+            translate("userProfile.mediaOptions.cancel"),
+          ],
+          cancelButtonIndex: 2,
+          ...actionSheetColors(colorScheme),
+        },
+        async (selectedIndex?: number) => {
+          switch (selectedIndex) {
+            case 0: // Camera
+              openCamera();
+              break;
+            case 1: // Media Library
+              pickMedia();
+              break;
+
+            default:
+              break;
+          }
+        }
+      );
+
+    executeAfterKeyboardClosed(showOptions);
+  }, [colorScheme, openCamera, pickMedia]);
 
   const usernameRef = useRef<TextInput>();
 
-  const { addPFP, asset } = useAddPfp();
-
   return (
-    <OnboardingScreenComp contentContainerStyle={{ alignItems: "center" }}>
-      <OnboardingPictoTitleSubtitle.Container>
-        <OnboardingPictoTitleSubtitle.Title>
-          {translate("userProfile.title.profile")}
-        </OnboardingPictoTitleSubtitle.Title>
-      </OnboardingPictoTitleSubtitle.Container>
-
+    <OnboardingComponent
+      title={translate("userProfile.title.profile")}
+      primaryButtonText={translate("userProfile.buttons.continue")}
+      primaryButtonAction={handleContinue}
+      backButtonText={
+        onboarding ? translate("userProfile.buttons.cancel") : undefined
+      }
+      backButtonAction={onboarding ? () => logout(false) : undefined}
+      isLoading={loading}
+      loadingSubtitle={loadingSubtitle}
+      shrinkWithKeyboard
+      inNav={!onboarding}
+    >
       <Pressable onPress={addPFP}>
         <Avatar
-          uri={profile?.avatar || asset?.uri}
+          uri={profile?.avatar}
           style={styles.avatar}
           name={profile.displayName || profile.username}
         />
       </Pressable>
-
       <Button
         variant="text"
         title={
@@ -109,9 +259,9 @@ export const OnboardingUserProfileScreen = (
             ? translate("userProfile.buttons.changeProfilePicture")
             : translate("userProfile.buttons.addProfilePicture")
         }
+        textStyle={{ fontWeight: "500" }}
         onPress={addPFP}
       />
-
       <View style={styles.usernameInputContainer}>
         <TextInput
           style={styles.profileInput}
@@ -156,22 +306,10 @@ export const OnboardingUserProfileScreen = (
           autoComplete="off"
         />
       </View>
-
-      <VStack
-        style={{
-          rowGap: spacing.sm,
-        }}
-      >
-        <Text style={styles.p}>
-          {errorMessage || translate("userProfile.converseProfiles")}
-        </Text>
-        <OnboardingPrimaryCtaButton
-          title={translate("userProfile.buttons.continue")}
-          onPress={handleContinue}
-          loading={loading}
-        />
-      </VStack>
-    </OnboardingScreenComp>
+      <Text style={styles.p}>
+        {errorMessage || translate("userProfile.converseProfiles")}
+      </Text>
+    </OnboardingComponent>
   );
 };
 
@@ -441,3 +579,5 @@ export const useUserProfileStyles = (colorScheme: any, errorMessage: any) => {
     },
   });
 };
+
+export default UserProfile;

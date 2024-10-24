@@ -1,4 +1,3 @@
-import Clipboard from "@react-native-clipboard/clipboard";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -31,7 +30,6 @@ import {
   useProfilesStore,
 } from "../data/store/accountsStore";
 import { spacing } from "../theme";
-import { isDesktop } from "../utils/device";
 import {
   getPreferredAvatar,
   getPreferredName,
@@ -63,27 +61,12 @@ const ShareProfileContent = ({
   const headerHeight = useHeaderHeight();
 
   const shareDict =
-    Platform.OS === "ios" && !isDesktop
-      ? { url: profileUrl }
-      : { message: profileUrl };
+    Platform.OS === "ios" ? { url: profileUrl } : { message: profileUrl };
 
-  const shareButtonText =
-    Platform.OS === "web"
-      ? copiedLink
-        ? "Link copied"
-        : "Copy link"
-      : "Share link";
+  const shareButtonText = copiedLink ? "Link copied" : "Copy link";
 
   const handleShare = () => {
-    if (Platform.OS === "web") {
-      setCopiedLink(true);
-      Clipboard.setString(profileUrl);
-      setTimeout(() => {
-        setCopiedLink(false);
-      }, 1000);
-    } else {
-      Share.share(shareDict);
-    }
+    Share.share(shareDict);
   };
 
   return (
@@ -134,13 +117,7 @@ const ShareProfileContent = ({
                 width: "100%",
               }}
               title={shareButtonText}
-              picto={
-                Platform.OS === "web"
-                  ? copiedLink
-                    ? "checkmark"
-                    : "doc.on.doc"
-                  : "square.and.arrow.up"
-              }
+              picto={copiedLink ? "checkmark" : "doc.on.doc"}
               onPress={handleShare}
             />
           ) : (

@@ -5,7 +5,6 @@ import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { Platform, useColorScheme } from "react-native";
-
 import ExternalWalletPicker from "../components/ExternalWalletPicker";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
@@ -131,18 +130,12 @@ const NavigationContent = () => {
 // Bunch of handlers. Not really react components
 const Initializer = () => {
   const colorScheme = useColorScheme();
-  const isWeb = Platform.OS === "web";
-  const isAndroid = Platform.OS === "android";
 
   return (
     <>
-      {!isWeb && (
-        <>
-          <HydrationStateHandler />
-          <InitialStateHandler />
-        </>
-      )}
-      {isAndroid && (
+      <HydrationStateHandler />
+      <InitialStateHandler />
+      {Platform.OS === "android" && (
         <StatusBar backgroundColor={backgroundColor(colorScheme)} />
       )}
       <NetworkStateHandler />
