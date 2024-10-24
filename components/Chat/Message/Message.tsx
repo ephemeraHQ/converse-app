@@ -5,7 +5,6 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import { AvatarSizes } from "@styles/sizes";
 import { useAppTheme } from "@theme/useAppTheme";
 import * as Haptics from "expo-haptics";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
@@ -30,12 +29,13 @@ import Animated, {
 
 import ChatMessageActions from "./MessageActions";
 import { ChatMessageReactions } from "./MessageReactions";
+import { MessageSender } from "./MessageSender";
+import { MessageSenderAvatar } from "./MessageSenderAvatar";
 import MessageStatus from "./MessageStatus";
+import { TextMessage } from "./TextMessage";
 import {
   currentAccount,
   useChatStore,
-  useInboxIdStore,
-  useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { XmtpMessage } from "../../../data/store/chatStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
@@ -45,22 +45,13 @@ import {
   getUrlToRender,
   isAllEmojisAndMaxThree,
 } from "../../../utils/messageContent";
-import { navigate } from "../../../utils/navigation";
 import { LimitedMap } from "../../../utils/objects";
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getProfile,
-} from "../../../utils/profile";
 import { getMessageReactions } from "../../../utils/reactions";
 import { getReadableProfile } from "../../../utils/str";
-import { isTransactionMessage } from "../../../utils/transaction";
 import {
   getMessageContentType,
   isContentType,
 } from "../../../utils/xmtpRN/contentTypes";
-import Avatar from "../../Avatar";
-import ClickableText from "../../ClickableText";
 import ActionButton from "../ActionButton";
 import AttachmentMessagePreview from "../Attachment/AttachmentMessagePreview";
 import { ChatGroupUpdatedMessage } from "../ChatGroupUpdatedMessage";
@@ -100,51 +91,6 @@ const platformTouchableOnLongPress = Platform.select({
   ios: noop,
   default: undefined,
 });
-
-const MessageSender = ({ message }: { message: MessageToDisplay }) => {
-  const address = useInboxIdStore(
-    (s) => s.byInboxId[message.senderAddress]?.[0] ?? message.senderAddress
-  );
-  const senderSocials = useProfilesStore(
-    (s) => getProfile(address, s.profiles)?.socials
-  );
-  const styles = useStyles();
-  return (
-    <View style={styles.groupSenderWrapper}>
-      <Text style={styles.groupSender}>
-        {getPreferredName(senderSocials, message.senderAddress)}
-      </Text>
-    </View>
-  );
-};
-
-const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
-  const address = useInboxIdStore(
-    (s) => s.byInboxId[message.senderAddress]?.[0] ?? message.senderAddress
-  );
-  const senderSocials = useProfilesStore(
-    (s) => getProfile(address, s.profiles)?.socials
-  );
-  const styles = useStyles();
-  const openProfile = useCallback(() => {
-    navigate("Profile", { address: message.senderAddress });
-  }, [message.senderAddress]);
-  return (
-    <View style={styles.groupSenderAvatarWrapper}>
-      {!message.hasNextMessageInSeries ? (
-        <TouchableOpacity onPress={openProfile}>
-          <Avatar
-            size={AvatarSizes.messageSender}
-            uri={getPreferredAvatar(senderSocials)}
-            name={getPreferredName(senderSocials, message.senderAddress)}
-          />
-        </TouchableOpacity>
-      ) : (
-        <View style={styles.avatarPlaceholder} />
-      )}
-    </View>
-  );
-};
 
 const ChatMessage = ({
   account,
@@ -260,24 +206,17 @@ const ChatMessage = ({
       messageContent =
         // Don't show URL as part of message bubble if this is a frame
         !isFrame && (
-          <View style={styles.messageContentContainer}>
-            <ClickableText
-              style={[
-                styles.messageText,
-                message.fromMe ? styles.messageTextMe : undefined,
-                hideBackground ? styles.allEmojisAndMaxThree : undefined,
-              ]}
-            >
-              {message.content || message.contentFallback}
-            </ClickableText>
-          </View>
+          <TextMessage
+            fromMe={message.fromMe}
+            hideBackground={hideBackground}
+            content={message.content || message.contentFallback}
+          />
         );
       break;
     }
   }
 
   const isAttachment = isAttachmentMessage(message.contentType);
-  const isTransaction = isTransactionMessage(message.contentType);
   const isGroupUpdated = isContentType("groupUpdated", message.contentType);
 
   const reactions = useMemo(() => getMessageReactions(message), [message]);
@@ -387,12 +326,19 @@ const ChatMessage = ({
           ref={swipeableRef}
         >
           <View style={styles.messageContainer}>
-            {!message.fromMe && <MessageSenderAvatar message={message} />}
+            {!message.fromMe && (
+              <MessageSenderAvatar
+                senderAddress={message.senderAddress}
+                hasNextMessageInSeries={message.hasNextMessageInSeries}
+              />
+            )}
             <View style={{ flex: 1 }}>
               {isGroup &&
                 !message.fromMe &&
                 !message.hasPreviousMessageInSeries &&
-                isChatMessage && <MessageSender message={message} />}
+                isChatMessage && (
+                  <MessageSender senderAddress={message.senderAddress} />
+                )}
               <View
                 style={{
                   alignSelf: message.fromMe ? "flex-end" : "flex-start",
@@ -635,10 +581,6 @@ const useStyles = () => {
       paddingVertical: 0,
       paddingHorizontal: 0,
     },
-    messageContentContainer: {
-      paddingHorizontal: 13,
-      paddingVertical: 6,
-    },
     messageText: {
       color: textPrimaryColor(colorScheme),
       fontSize: 17,
@@ -646,32 +588,11 @@ const useStyles = () => {
     messageTextMe: {
       color: inversePrimaryColor(colorScheme),
     },
-    allEmojisAndMaxThree: {
-      fontSize: 64,
-      paddingHorizontal: 0,
-    },
     messageTextReply: {
       color: textPrimaryColor(colorScheme),
     },
     messageTextReplyMe: {
       color: inversePrimaryColor(colorScheme),
-    },
-    groupSenderAvatarWrapper: {
-      marginRight: 6,
-    },
-    groupSenderWrapper: {
-      flexDirection: "row",
-      flexBasis: "100%",
-    },
-    groupSender: {
-      fontSize: 12,
-      color: textSecondaryColor(colorScheme),
-      marginLeft: 10,
-      marginVertical: 4,
-    },
-    avatarPlaceholder: {
-      width: AvatarSizes.messageSender,
-      height: AvatarSizes.messageSender,
     },
     outsideContentRow: {
       marginTop: theme.spacing["4xs"],

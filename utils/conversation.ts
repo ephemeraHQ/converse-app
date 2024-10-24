@@ -425,9 +425,10 @@ export async function sortAndComputePreview(
   await Promise.all(
     Object.values(conversations).map(
       async (conversation: ConversationWithLastMessagePreview, i) => {
-        const isNotReady =
-          (conversation.isGroup && !conversation.groupMembers) ||
-          (!conversation.isGroup && !conversation.peerAddress);
+        if (conversation.isGroup) {
+          return;
+        }
+        const isNotReady = !conversation.isGroup && !conversation.peerAddress;
         if (isNotReady) return;
 
         if (
@@ -477,9 +478,7 @@ export function getFilteredConversationsWithSearch(
     const matchedPeerAddresses = getMatchedPeerAddresses(profiles, searchQuery);
     const filteredConversations = sortedConversations.filter((conversation) => {
       if (conversation.isGroup) {
-        return conversation.groupName
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase().trim());
+        return false;
       } else {
         return (
           conversation.peerAddress &&
