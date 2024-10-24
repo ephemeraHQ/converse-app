@@ -70,30 +70,18 @@
     "production": {
       "android": {
         "track": "internal"
-      }
-    },
-    "production-ios": {
-      "extends": "production",
+      },
       "ios": {
         "ascAppId": "1658819514"
       }
     },
-    "production-android": {
-      "extends": "production"
-    },
     "preview": {
       "android": {
         "track": "internal"
-      }
-    },
-    "preview-ios": {
-      "extends": "production",
+      },
       "ios": {
         "ascAppId": "6478027666"
       }
-    },
-    "preview-android": {
-      "extends": "production"
-    }
+    }Ø
   }
 }
