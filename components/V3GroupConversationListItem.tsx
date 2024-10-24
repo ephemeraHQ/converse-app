@@ -3,24 +3,30 @@ import { useSelect } from "@data/store/storeHelpers";
 import { useConversationListGroupItem } from "@hooks/useConversationListGroupItem";
 import { useProfilesSocials } from "@hooks/useProfilesSocials";
 import { translate } from "@i18n/index";
-import { inversePrimaryColor } from "@styles/colors";
-import { AvatarSizes, PictoSizes } from "@styles/sizes";
+import { AvatarSizes } from "@styles/sizes";
 import { saveTopicsData } from "@utils/api";
 import { getMinimalDate } from "@utils/date";
+import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
 import { Haptics } from "@utils/haptics";
 import { navigate } from "@utils/navigation";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import { Member } from "@xmtp/react-native-sdk";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useColorScheme } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
+import { Swipeable } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 
 import Avatar from "./Avatar";
 import { ConversationContextMenu } from "./ConversationContextMenu";
 import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
 import { GroupAvatarDumb } from "./GroupAvatar";
-import Picto from "./Picto/Picto";
 
 type V3GroupConversationListItemProps = {
   topic: string;
@@ -32,13 +38,13 @@ type UseDataProps = {
 
 const useData = ({ topic }: UseDataProps) => {
   // TODO Items
-  const timestamp = new Date().getTime();
-  const isUnread = true;
+  const timestamp = new Date(2024, 9, 10).getTime();
   const isBlockedChatView = false;
 
+  const colorScheme = useColorScheme();
   const currentAccount = useCurrentAccount()!;
-  const { setTopicsData, setPinnedConversations } = useChatStore(
-    useSelect(["setTopicsData", "setPinnedConversations"])
+  const { topicsData, setTopicsData, setPinnedConversations } = useChatStore(
+    useSelect(["topicsData", "setTopicsData", "setPinnedConversations"])
   );
 
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
@@ -47,6 +53,17 @@ const useData = ({ topic }: UseDataProps) => {
   }, []);
 
   const group = useConversationListGroupItem(topic);
+
+  const isUnread = useMemo(() => {
+    if (!group) return false;
+    // if (!group.message) return false;
+    if (topicsData[topic]?.status === "unread") {
+      return true;
+    }
+    // if (message.from === currentAccount) return false;
+    const readUntil = topicsData[topic]?.readUntil || 0;
+    return readUntil < timestamp;
+  }, [topicsData, topic, timestamp, group]);
 
   const [members, setMembers] = useState<Member[]>([]);
   const memberAddresses = useMemo(() => {
@@ -154,6 +171,22 @@ const useData = ({ topic }: UseDataProps) => {
     ]
   );
 
+  const handleRemoveRestore = useCallback(
+    (callback: () => void) => {
+      groupRemoveRestoreHandler(
+        group?.state,
+        colorScheme,
+        group?.name,
+        () => {},
+        () => {}
+      )((success: boolean) => {
+        // If not successful, do nothing (user canceled)
+        callback();
+      });
+    },
+    [group?.state, colorScheme, group?.name]
+  );
+
   return {
     group,
     memberData,
@@ -165,19 +198,24 @@ const useData = ({ topic }: UseDataProps) => {
     closeContextMenu,
     isUnread,
     isBlockedChatView,
+    handleRemoveRestore,
   };
 };
 
 type UseUserInteractionsProps = {
   topic: string;
+  ref: RefObject<Swipeable>;
   showContextMenu: () => void;
   toggleReadStatus: () => void;
+  handleRemoveRestore: (callback: () => void) => void;
 };
 
 const useUserInteractions = ({
   topic,
+  ref,
   showContextMenu,
   toggleReadStatus,
+  handleRemoveRestore,
 }: UseUserInteractionsProps) => {
   const onPress = useCallback(() => {
     navigate("Conversation", { topic });
@@ -194,11 +232,21 @@ const useUserInteractions = ({
 
   const onLeftPress = useCallback(() => {}, []);
 
-  const onRightPress = useCallback(() => {}, []);
+  const onRightPress = useCallback(() => {
+    handleRemoveRestore(() => ref.current?.close());
+  }, [handleRemoveRestore, ref]);
 
-  const onLeftSwipe = useCallback(() => {}, []);
+  const onLeftSwipe = useCallback(() => {
+    toggleReadStatus();
+  }, [toggleReadStatus]);
+
+  const onWillLeftSwipe = useCallback(() => {
+    Haptics.successNotificationAsync();
+  }, []);
 
   const onRightSwipe = useCallback(() => {}, []);
+
+  const onWillRightSwipe = useCallback(() => {}, []);
 
   return {
     onPress,
@@ -207,16 +255,20 @@ const useUserInteractions = ({
     onRightPress,
     onLeftSwipe,
     onRightSwipe,
+    onWillLeftSwipe,
+    onWillRightSwipe,
   };
 };
 
 type UseDisplayInfoProps = {
   timestamp: number;
+  isUnread: boolean;
 };
-const useDisplayInfo = ({ timestamp }: UseDisplayInfoProps) => {
+const useDisplayInfo = ({ timestamp, isUnread }: UseDisplayInfoProps) => {
   const timeToShow = getMinimalDate(timestamp);
   const colorScheme = useColorScheme();
-  return { timeToShow, colorScheme };
+  const leftActionPicto = isUnread ? "checkmark.message" : "message.badge";
+  return { timeToShow, colorScheme, leftActionPicto };
 };
 
 export function V3GroupConversationListItem({
@@ -233,7 +285,9 @@ export function V3GroupConversationListItem({
     isUnread,
     isBlockedChatView,
     toggleReadStatus,
+    handleRemoveRestore,
   } = useData({ topic });
+  const ref = useRef<Swipeable>(null);
   const {
     onPress,
     onLongPress,
@@ -241,12 +295,19 @@ export function V3GroupConversationListItem({
     onRightPress,
     onLeftSwipe,
     onRightSwipe,
+    onWillLeftSwipe,
+    onWillRightSwipe,
   } = useUserInteractions({
+    ref,
     topic,
     showContextMenu,
     toggleReadStatus,
+    handleRemoveRestore,
   });
-  const { timeToShow, colorScheme } = useDisplayInfo({ timestamp });
+  const { timeToShow, leftActionPicto } = useDisplayInfo({
+    timestamp,
+    isUnread,
+  });
 
   const contextMenuComponent = useMemo(
     () => (
@@ -259,38 +320,6 @@ export function V3GroupConversationListItem({
     ),
     [isContextMenuVisible, closeContextMenu, contextMenuItems, topic]
   );
-
-  const renderRightActions = useCallback(() => {
-    if (isBlockedChatView) {
-      return (
-        <RectButton onPress={onRightPress}>
-          <Picto
-            picto="checkmark"
-            color={inversePrimaryColor(colorScheme)}
-            size={PictoSizes.swipableItem}
-          />
-        </RectButton>
-      );
-    } else {
-      return (
-        <RectButton onPress={onRightPress}>
-          <Picto picto="trash" color="white" size={PictoSizes.swipableItem} />
-        </RectButton>
-      );
-    }
-  }, [isBlockedChatView, onRightPress, colorScheme]);
-
-  const renderLeftActions = useCallback(() => {
-    return (
-      <RectButton>
-        <Picto
-          picto={isUnread ? "checkmark.message" : "message.badge"}
-          color={inversePrimaryColor(colorScheme)}
-          size={PictoSizes.swipableItem}
-        />
-      </RectButton>
-    );
-  }, [isUnread, colorScheme]);
 
   const avatarComponent = useMemo(() => {
     return group?.imageUrlSquare ? (
@@ -307,23 +336,27 @@ export function V3GroupConversationListItem({
       />
     );
   }, [group?.imageUrlSquare, memberData]);
+
   return (
     <ConversationListItemDumb
+      ref={ref}
       onPress={onPress}
+      onRightActionPress={onRightPress}
       onLongPress={onLongPress}
-      renderRightActions={renderRightActions}
-      renderLeftActions={renderLeftActions}
+      onRightSwipe={onRightSwipe}
       onLeftSwipe={onLeftSwipe}
-      selected={false}
+      onWillRightSwipe={onWillRightSwipe}
+      onWillLeftSwipe={onWillLeftSwipe}
+      leftActionPicto={leftActionPicto}
       showError={false}
       showImagePreview={false}
       imagePreviewUrl={undefined}
-      onRightSwipe={onRightSwipe}
       avatarComponent={avatarComponent}
       title={group?.name}
       subtitle={`${timeToShow} ⋅ Message exam`}
       contextMenuComponent={contextMenuComponent}
       isUnread={isUnread}
+      rightIsDestructive={isBlockedChatView}
     />
   );
 }
