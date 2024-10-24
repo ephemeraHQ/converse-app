@@ -25,14 +25,17 @@ import {
   handleTxAction,
   validateFrame,
 } from "../../../utils/frames";
-import { MessageToDisplay } from "../Message/Message";
 
 export default function FramePreview({
   initialFrame,
-  message,
+  messageId,
+  messageTopic,
+  messageFromMe,
 }: {
   initialFrame: FrameWithType;
-  message: MessageToDisplay;
+  messageId: string;
+  messageTopic: string;
+  messageFromMe: boolean;
 }) {
   const styles = useStyles();
   const conversation = useConversationContext("conversation");
@@ -55,14 +58,14 @@ export default function FramePreview({
   const buttons = getFrameButtons(frame);
   const textInput = frame.frameInfo?.textInput?.content;
   const [frameTextInputValue, setFrameTextInputValue] = useState("");
-  const messageId = useRef(message.id);
+  const messageIdRef = useRef(messageId);
   const fetchingInitialForMessageId = useRef(undefined as undefined | string);
 
   const { getExternalSigner } = useExternalSigner();
 
   // Components are recycled, let's fix when stuff changes
-  if (message.id !== messageId.current) {
-    messageId.current = message.id;
+  if (messageId !== messageIdRef.current) {
+    messageIdRef.current = messageId;
     setFirstFrameLoaded(false);
     setFirstImageRefreshed(false);
     setFrame({
@@ -82,7 +85,7 @@ export default function FramePreview({
         !firstFrameLoaded &&
         !fetchingInitialForMessageId.current
       ) {
-        fetchingInitialForMessageId.current = message.id;
+        fetchingInitialForMessageId.current = messageId;
         const initialFrameImage = getFrameImage(frame);
         // We don't display anything until the frame
         // initial image is loaded !
@@ -91,7 +94,8 @@ export default function FramePreview({
           return;
         }
         const proxiedInitialImage = framesProxy.mediaUrl(initialFrameImage);
-        if (fetchingInitialForMessageId.current !== messageId.current) return;
+        if (fetchingInitialForMessageId.current !== messageIdRef.current)
+          return;
         if (initialFrameImage.startsWith("data:")) {
           // These won't change so no cache to handle
           setFirstImageRefreshed(true);
@@ -102,7 +106,8 @@ export default function FramePreview({
         const initialImageCache = await cacheForMedia(proxiedInitialImage);
         if (!initialImageCache) {
           const cachedImage = await fetchAndCacheMedia(proxiedInitialImage);
-          if (fetchingInitialForMessageId.current !== messageId.current) return;
+          if (fetchingInitialForMessageId.current !== messageIdRef.current)
+            return;
           if (cachedImage) {
             setFirstImageRefreshed(true);
             setFrame((s) => ({ ...s, frameImage: cachedImage }));
@@ -113,7 +118,8 @@ export default function FramePreview({
         } else {
           setFrame((s) => ({ ...s, frameImage: initialImageCache }));
           setFirstFrameLoaded(true);
-          if (fetchingInitialForMessageId.current !== messageId.current) return;
+          if (fetchingInitialForMessageId.current !== messageIdRef.current)
+            return;
           // Now let's refresh
           const imageCache = await fetchAndCacheMedia(proxiedInitialImage);
           // Now let's display the new one
@@ -131,7 +137,7 @@ export default function FramePreview({
       .catch(() => {
         fetchingInitialForMessageId.current = undefined;
       });
-  }, [firstFrameLoaded, frame, message.id]);
+  }, [firstFrameLoaded, frame, messageId]);
 
   const onButtonPress = useCallback(
     async (button: FrameButtonType) => {
@@ -168,7 +174,7 @@ export default function FramePreview({
         const actionInput: FrameActionInputs = {
           frameUrl: actionPostUrl,
           buttonIndex: button.index,
-          conversationTopic: message.topic,
+          conversationTopic: messageTopic,
           participantAccountAddresses,
           state: frame.frameInfo?.state,
         };
@@ -277,7 +283,7 @@ export default function FramePreview({
       frameTextInputValue,
       getExternalSigner,
       initialFrame.url,
-      message.topic,
+      messageTopic,
       setFrameTextInputFocused,
       textInput,
     ]
@@ -324,7 +330,7 @@ export default function FramePreview({
           style={{
             opacity:
               postingActionForButton !== undefined || !firstImageRefreshed
-                ? message.fromMe
+                ? messageFromMe
                   ? 0.8
                   : 0.4
                 : 1,
@@ -343,7 +349,7 @@ export default function FramePreview({
 
       {showBottom && (
         <FrameBottom
-          message={message}
+          messageFromMe={messageFromMe}
           frame={frame}
           textInput={textInput}
           buttons={buttons}
