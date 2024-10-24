@@ -33,10 +33,13 @@ export const BottomSheetHeader = memo(function BottomSheetHeader(props: {
       {hasClose && (
         <IconButton
           action="primary"
-          variant="outline"
+          variant="subtle"
           size="md"
           iconName="xmark"
           onPress={handleClose}
+          style={{
+            borderRadius: theme.borderRadius.md,
+          }}
         />
       )}
     </HStack>
