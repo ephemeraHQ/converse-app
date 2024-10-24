@@ -9,10 +9,9 @@ import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import FrameButton from "./FrameButton";
 import FrameTextInput from "./FrameTextInput";
 import { FrameButtonType, FrameToDisplay } from "../../../utils/frames";
-import { MessageToDisplay } from "../Message/Message";
 
 export default function FrameBottom({
-  message,
+  messageFromMe,
   frame,
   textInput,
   buttons,
@@ -22,7 +21,7 @@ export default function FrameBottom({
   postingActionForButton,
   onButtonPress,
 }: {
-  message: MessageToDisplay;
+  messageFromMe: boolean;
   frame: FrameToDisplay;
   textInput: string | undefined;
   buttons: FrameButtonType[];
@@ -55,7 +54,7 @@ export default function FrameBottom({
               setFrameTextInputFocused={setFrameTextInputFocused}
               setFrameTextInputValue={setFrameTextInputValue}
               frameTextInputValue={frameTextInputValue}
-              messageFromMe={message.fromMe}
+              messageFromMe={messageFromMe}
             />
           )}
           {buttons.length > 0 &&
@@ -72,7 +71,7 @@ export default function FrameBottom({
                   Haptics.impactAsync();
                   onButtonPress(button);
                 }}
-                messageFromMe={message.fromMe}
+                messageFromMe={messageFromMe}
               />
             ))}
         </>
@@ -82,7 +81,7 @@ export default function FrameBottom({
           style={[
             styles.frameBottomText,
             {
-              color: message.fromMe ? "white" : textPrimaryColor(colorScheme),
+              color: messageFromMe ? "white" : textPrimaryColor(colorScheme),
               fontWeight: frame.type === "PREVIEW" ? "600" : "400",
             },
           ]}
