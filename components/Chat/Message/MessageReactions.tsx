@@ -28,7 +28,7 @@ type Props = {
   };
 };
 
-type ReactionCount = {
+type ReactionDetails = {
   content: string;
   count: number;
   userReacted: boolean;
@@ -40,6 +40,7 @@ type RolledUpReactions = {
   emojis: string[];
   totalReactions: number;
   userReacted: boolean;
+  details: { [content: string]: ReactionDetails };
 };
 
 const bottomSheetModalRef = createBottomSheetModalRef();
@@ -77,14 +78,14 @@ export const ChatMessageReactions = memo(
     }, [reactions]);
 
     const rolledUpReactions: RolledUpReactions = useMemo(() => {
-      const counts: { [content: string]: ReactionCount } = {};
+      const details: { [content: string]: ReactionDetails } = {};
       let totalReactions = 0;
       let userReacted = false;
 
       Object.values(reactions).forEach((reactionArray) => {
         reactionArray.forEach((reaction) => {
-          if (!counts[reaction.content]) {
-            counts[reaction.content] = {
+          if (!details[reaction.content]) {
+            details[reaction.content] = {
               content: reaction.content,
               count: 0,
               userReacted: false,
@@ -92,17 +93,17 @@ export const ChatMessageReactions = memo(
               firstReactionTime: reaction.sent,
             };
           }
-          counts[reaction.content].count++;
-          counts[reaction.content].reactors.push(reaction.senderAddress);
+          details[reaction.content].count++;
+          details[reaction.content].reactors.push(reaction.senderAddress);
           if (
             reaction.senderAddress.toLowerCase() === userAddress?.toLowerCase()
           ) {
-            counts[reaction.content].userReacted = true;
+            details[reaction.content].userReacted = true;
             userReacted = true;
           }
           // Keep track of the earliest reaction time for this emoji
-          counts[reaction.content].firstReactionTime = Math.min(
-            counts[reaction.content].firstReactionTime,
+          details[reaction.content].firstReactionTime = Math.min(
+            details[reaction.content].firstReactionTime,
             reaction.sent
           );
           totalReactions++;
@@ -110,12 +111,12 @@ export const ChatMessageReactions = memo(
       });
 
       // Sort by the number of reactors in descending order
-      const sortedReactions = Object.values(counts)
+      const sortedReactions = Object.values(details)
         .sort((a, b) => b.reactors.length - a.reactors.length)
         .slice(0, MAX_REACTION_EMOJIS_SHOWN)
         .map((reaction) => reaction.content);
 
-      return { emojis: sortedReactions, totalReactions, userReacted };
+      return { emojis: sortedReactions, totalReactions, userReacted, details };
     }, [reactions, userAddress]);
 
     if (reactionsList.length === 0) return null;
@@ -170,7 +171,35 @@ export const ChatMessageReactions = memo(
             }}
           >
             <BottomSheetContentContainer>
-              <Text>Reactions List</Text>
+              <HStack
+                style={{
+                  padding: 32,
+                  flexDirection: "row",
+                  overflow: "scroll",
+                }}
+              >
+                {Object.entries(rolledUpReactions.details).map(
+                  ([emoji, details]) => (
+                    <TouchableHighlight
+                      key={emoji}
+                      style={{
+                        marginRight: 8,
+                        padding: 8,
+                        borderRadius: theme.borderRadius.sm,
+                        backgroundColor: details.userReacted
+                          ? theme.colors.fill.minimal
+                          : theme.colors.background.raised,
+                      }}
+                      underlayColor={theme.colors.border.subtle}
+                    >
+                      <VStack style={{ alignItems: "center" }}>
+                        <Text>{emoji}</Text>
+                        <Text>{details.count}</Text>
+                      </VStack>
+                    </TouchableHighlight>
+                  )
+                )}
+              </HStack>
             </BottomSheetContentContainer>
           </BottomSheetScrollView>
         </BottomSheetModal>
