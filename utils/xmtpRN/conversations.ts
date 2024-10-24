@@ -277,8 +277,6 @@ export const streamGroups = async (account: string) => {
   const cancelStreamGroupsForAccount = await client.conversations.streamGroups(
     async (group) => {
       logger.info("GOT A NEW GROUP CONVO");
-      // TODO: Add group to groups list query & set group query data as well
-      handleNewConversation(client, group);
       addGroupToGroupsConversationListQuery(account, group);
       converseEventEmitter.emit("newGroup", group);
       // Let's reset stream if new group
