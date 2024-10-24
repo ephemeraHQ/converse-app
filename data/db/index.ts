@@ -1,4 +1,4 @@
-import { waitUntilAppActive } from "@utils/appState";
+import { waitUntilAppActive } from "@utils/appState/waitUntilAppActive";
 import logger from "@utils/logger";
 import { AppState, Platform } from "react-native";
 import RNFS from "react-native-fs";
