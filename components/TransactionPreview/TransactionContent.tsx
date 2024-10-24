@@ -136,6 +136,7 @@ const SimulationResult = ({ changes }: SimulationResultProps) => (
           }
           subtitle={`${change.amount} ${change.symbol}`}
           imageSrc={change.logo ? { uri: change.logo } : TransactionSend}
+          imagePlaceholder={TransactionSend}
         />
         <TransactionPreviewRow
           title={translate("transaction_asset_change_to")}
@@ -144,6 +145,7 @@ const SimulationResult = ({ changes }: SimulationResultProps) => (
             change.to
           )}
           imageSrc={TransactionTo}
+          imagePlaceholder={TransactionTo}
         />
       </View>
     ))}
@@ -164,6 +166,7 @@ type ITransactionPreviewRowProps = {
   title: string;
   subtitle: string;
   imageSrc?: ImageSource | undefined;
+  imagePlaceholder?: ImageSource | undefined;
   onPress?: () => void;
 };
 
@@ -175,7 +178,11 @@ const TransactionPreviewRow = memo((props: ITransactionPreviewRowProps) => {
       onPress={props.onPress}
     >
       <HStack style={styles.row}>
-        <Image source={props.imageSrc} style={styles.leftImage} />
+        <Image
+          source={props.imageSrc}
+          placeholder={props.imagePlaceholder}
+          style={styles.leftImage}
+        />
         <VStack>
           <Text size="sm" style={themed($title)}>
             {props.title}
