@@ -5,35 +5,26 @@ import { ScrollView } from "@design-system/ScrollView";
 import { Text } from "@design-system/Text";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useAppTheme } from "@theme/useAppTheme";
-import { getMessageReactions } from "@utils/reactions";
 import { memo, useCallback } from "react";
 import { TouchableHighlight } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useCurrentAccount } from "../../../../../data/store/accountsStore";
+import {
+  bottomSheetModalRef,
+  resetMessageReactionsDrawer,
+  useMessageReactionsRolledUpReactions,
+} from "./MessageReactionsDrawer.service";
 import { BottomSheetContentContainer } from "../../../../../design-system/BottomSheet/BottomSheetContentContainer";
-import { useMessageReactionsRolledup } from "../useMessageReactionsRolledup";
-import { useMessageReactionsStore } from "./MessageReactions.store";
-import { bottomSheetModalRef } from "./MessageReactionsDrawer.utils";
 
 export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
   const { theme } = useAppTheme();
 
-  const userAddress = useCurrentAccount();
-
-  const message = useMessageReactionsStore((state) => state.message);
-
   const insets = useSafeAreaInsets();
 
-  const reactions = message ? getMessageReactions(message) : {};
-
-  const rolledUpReactions = useMessageReactionsRolledup({
-    reactions,
-    userAddress: userAddress!, // ! If we are here, the user is logged in
-  });
+  const rolledUpReactions = useMessageReactionsRolledUpReactions();
 
   const handleDismiss = useCallback(() => {
-    useMessageReactionsStore.setState({ message: null });
+    resetMessageReactionsDrawer();
   }, []);
 
   return (
