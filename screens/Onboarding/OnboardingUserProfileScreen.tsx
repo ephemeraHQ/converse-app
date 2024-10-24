@@ -16,8 +16,8 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 
 import Avatar from "../../components/Avatar";
@@ -265,11 +265,8 @@ export function useAddPfp() {
           }
         }
       );
-    if (Platform.OS === "web") {
-      pickMedia();
-    } else {
-      executeAfterKeyboardClosed(showOptions);
-    }
+
+    executeAfterKeyboardClosed(showOptions);
   }, [colorScheme, openCamera, pickMedia]);
 
   return { addPFP, asset };
@@ -328,21 +325,11 @@ export function useCreateOrUpdateProfileInfo() {
           );
 
           try {
-            publicAvatar =
-              Platform.OS === "web"
-                ? await uploadFile({
-                    account: address,
-                    contentType: "image/jpeg",
-                    blob: new Blob(
-                      [Buffer.from(resizedImage.base64 as string, "base64")],
-                      { type: "image/png" }
-                    ),
-                  })
-                : await uploadFile({
-                    account: address,
-                    filePath: resizedImage.uri,
-                    contentType: "image/jpeg",
-                  });
+            publicAvatar = await uploadFile({
+              account: address,
+              filePath: resizedImage.uri,
+              contentType: "image/jpeg",
+            });
           } catch (e: any) {
             logger.error(e, { context: "UserProfile: uploading profile pic" });
             setErrorMessage(

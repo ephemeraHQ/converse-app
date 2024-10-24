@@ -48,7 +48,6 @@ import { primaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import {
   ColorValue,
-  Platform,
   StyleProp,
   useColorScheme,
   View,
@@ -132,7 +131,7 @@ export default function Picto({
   const SvgPicto = pictoMapping[picto];
   const colorScheme = useColorScheme();
   if (SvgPicto) {
-    const pictoSize = size + (Platform.OS === "web" ? 6 : 0);
+    const pictoSize = size;
     return (
       <View style={style}>
         <SvgPicto

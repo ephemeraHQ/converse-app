@@ -4,7 +4,6 @@ import {
 } from "@react-navigation/native-stack";
 import {
   headerTitleStyle,
-  listItemSeparatorColor,
   navigationSecondaryBackgroundColor,
   textPrimaryColor,
 } from "@styles/colors";
@@ -39,10 +38,6 @@ const NewConversationModal = ({
         headerShown: true,
         headerStyle: {
           backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
-          borderBottomColor:
-            Platform.OS === "web"
-              ? listItemSeparatorColor(colorScheme)
-              : undefined,
         } as any,
         headerTitleStyle: Platform.select({
           default: headerTitleStyle(colorScheme),

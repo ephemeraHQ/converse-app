@@ -25,7 +25,7 @@ export default function GroupLinkNav() {
       options={({ route }) => ({
         headerTitle: "Loading...",
         headerTintColor:
-          Platform.OS === "android" || Platform.OS === "web"
+          Platform.OS === "android"
             ? textSecondaryColor(colorScheme)
             : textPrimaryColor(colorScheme),
         animation: navigationAnimation,

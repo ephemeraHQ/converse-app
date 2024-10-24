@@ -36,16 +36,14 @@ import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { TouchableRipple } from "react-native-paper";
 import Animated, {
-  useSharedValue,
-  useAnimatedRef,
   runOnJS,
+  useAnimatedRef,
+  useSharedValue,
 } from "react-native-reanimated";
 
 import Avatar from "./Avatar";
 import { ConversationContextMenu } from "./ConversationContextMenu";
 import GroupAvatar from "./GroupAvatar";
-import Picto from "./Picto/Picto";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import {
   currentAccount,
   useChatStore,
@@ -54,9 +52,10 @@ import {
 import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import { saveTopicsData } from "../utils/api";
 import { getMinimalDate } from "../utils/date";
-import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { navigate } from "../utils/navigation";
+import Picto from "./Picto/Picto";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 
 type ConversationListItemProps = {
@@ -196,11 +195,6 @@ const ConversationListItem = memo(function ConversationListItem({
         "setCurrentConversationInputValue",
         routeParams.frameURL
       );
-    }
-    if (isDesktop) {
-      converseEventEmitter.emit("openingConversation", {
-        topic: conversationTopic,
-      });
     }
     navigate("Conversation", {
       topic: conversationTopic,
@@ -518,10 +512,10 @@ const ConversationListItem = memo(function ConversationListItem({
 
   const rowItem = (
     <Animated.View ref={containerRef} onLayout={onLayoutView}>
-      {Platform.OS === "ios" || Platform.OS === "web" ? (
+      {Platform.OS === "ios" ? (
         <TouchableHighlight
           underlayColor={clickedItemBackgroundColor(colorScheme)}
-          delayPressIn={isDesktop ? 0 : 75}
+          delayPressIn={75}
           onLongPress={onLongPress}
           onPressIn={() => {
             if (!isSplitScreen) return;
@@ -544,7 +538,7 @@ const ConversationListItem = memo(function ConversationListItem({
         </TouchableHighlight>
       ) : (
         <TouchableRipple
-          unstable_pressDelay={isDesktop || isSplitScreen ? 0 : 75}
+          unstable_pressDelay={75}
           onPressIn={() => {
             if (!isSplitScreen) return;
             openConversation();
@@ -600,11 +594,9 @@ const ConversationListItem = memo(function ConversationListItem({
           if (direction === "left") {
             const translation = swipeableRef.current?.state.rowTranslation;
             if (translation && (translation as any)._value > 100) {
-              if (Platform.OS !== "web") {
-                Haptics.notificationAsync(
-                  Haptics.NotificationFeedbackType.Success
-                );
-              }
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success
+              );
               toggleUnreadStatusOnClose.current = true;
             }
           }
@@ -613,9 +605,6 @@ const ConversationListItem = memo(function ConversationListItem({
           if (direction === "left" && toggleUnreadStatusOnClose.current) {
             toggleUnreadStatusOnClose.current = false;
             toggleReadStatus();
-          }
-          if (Platform.OS === "web") {
-            setSwipeableKey(new Date().getTime());
           }
         }}
         hitSlop={{ left: isSplitScreen ? 0 : -6 }}

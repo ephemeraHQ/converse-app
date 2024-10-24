@@ -5,7 +5,6 @@ import { Platform, useColorScheme } from "react-native";
 
 import config from "../../../config";
 import { useAppStore } from "../../../data/store/appStore";
-import { isDesktop } from "../../../utils/device";
 import { converseNavigations } from "../../../utils/navigation";
 import ConversationNav, {
   ConversationNavParams,
@@ -98,7 +97,7 @@ export default function SplitRightStackNavigation({
         // is not meant for this one
       }}
     >
-      <NativeStack.Navigator screenOptions={{ gestureEnabled: !isDesktop }}>
+      <NativeStack.Navigator>
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
           {ConversationNav(route.params)}
           {NewConversationNav()}

@@ -1,6 +1,5 @@
 import logger from "@utils/logger";
 import { InboxId } from "@xmtp/react-native-sdk";
-import { Platform } from "react-native";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -61,8 +60,7 @@ export const initSettingsStore = (account: string) => {
     persist(
       (set) => ({
         notifications: {
-          // On web we never show notifications screen
-          showNotificationScreen: Platform.OS !== "web",
+          showNotificationScreen: true,
         },
         peersStatus: {},
         setPeersStatus: (peersStatus: {

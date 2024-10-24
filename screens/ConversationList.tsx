@@ -250,9 +250,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
         ListFooterComponent={ListFooterComponent}
       />
       <Recommendations visibility="HIDDEN" />
-      {(Platform.OS === "android" || Platform.OS === "web") && !sharingMode && (
-        <NewConversationButton />
-      )}
+      {Platform.OS === "android" && !sharingMode && <NewConversationButton />}
     </>
   );
 }

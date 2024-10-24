@@ -131,17 +131,13 @@ const NavigationContent = () => {
 // Bunch of handlers. Not really react components
 const Initializer = () => {
   const colorScheme = useColorScheme();
-  const isWeb = Platform.OS === "web";
   const isAndroid = Platform.OS === "android";
 
   return (
     <>
-      {!isWeb && (
-        <>
-          <HydrationStateHandler />
-          <InitialStateHandler />
-        </>
-      )}
+      <HydrationStateHandler />
+      <InitialStateHandler />
+
       {isAndroid && (
         <StatusBar backgroundColor={backgroundColor(colorScheme)} />
       )}

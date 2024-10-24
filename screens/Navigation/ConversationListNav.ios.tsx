@@ -5,20 +5,15 @@ import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import React, { useLayoutEffect } from "react";
 import {
   NativeSyntheticEvent,
+  StyleSheet,
   Text,
   TextInputChangeEventData,
+  TouchableOpacity,
   View,
   useColorScheme,
-  TouchableOpacity,
-  StyleSheet,
 } from "react-native";
 import { SearchBarCommands } from "react-native-screens";
 
-import {
-  NativeStack,
-  NavigationParamList,
-  navigationAnimation,
-} from "./Navigation";
 import Button from "../../components/Button/Button";
 import Connecting, {
   useShouldShowConnecting,
@@ -28,10 +23,14 @@ import NewConversationButton from "../../components/ConversationList/NewConversa
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { isDesktop } from "../../utils/device";
 import { navigate } from "../../utils/navigation";
 import { getReadableProfile, shortDisplayName } from "../../utils/str";
 import ConversationList from "../ConversationList";
+import {
+  NativeStack,
+  NavigationParamList,
+  navigationAnimation,
+} from "./Navigation";
 
 type HeaderSearchBarProps = {
   searchBarRef: React.RefObject<any>;
@@ -64,8 +63,8 @@ export const useHeaderSearchBar = ({
     navigation.setOptions({
       headerSearchBarOptions: {
         ref: searchBarRef as React.RefObject<SearchBarCommands>,
-        hideNavigationBar: autoHide && !isDesktop,
-        hideWhenScrolling: autoHide && !isDesktop,
+        hideNavigationBar: autoHide,
+        hideWhenScrolling: autoHide,
         autoFocus: false,
         placeholder: "Search",
         onChangeText: (

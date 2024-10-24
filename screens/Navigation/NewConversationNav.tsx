@@ -1,11 +1,9 @@
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import {
   headerTitleStyle,
-  listItemSeparatorColor,
   navigationSecondaryBackgroundColor,
-  textPrimaryColor,
 } from "@styles/colors";
-import { Platform, useColorScheme } from "react-native";
+import { useColorScheme } from "react-native";
 
 import { NativeStack, navigationAnimation } from "./Navigation";
 import NewConversationModal from "../NewConversation/NewConversationModal";
@@ -32,17 +30,10 @@ export default function NewConversationNav() {
     presentation: "modal",
     headerStyle: {
       backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
-      borderBottomColor:
-        Platform.OS === "web" ? listItemSeparatorColor(colorScheme) : undefined,
     } as any,
     animation: navigationAnimation,
   };
-  if (Platform.OS === "web") {
-    options.headerTitleStyle = {
-      left: -20,
-      color: textPrimaryColor(colorScheme),
-    } as any;
-  }
+
   return (
     <NativeStack.Screen
       name="NewConversation"
