@@ -159,6 +159,9 @@ export const ChatMessageReactions = memo(
           index={1}
           topInset={top}
           backdropComponent={renderBackdrop}
+          backgroundStyle={{
+            backgroundColor: theme.colors.background.raised,
+          }}
         >
           <BottomSheetHeader title="Reactions" hasClose />
           <BottomSheetScrollView
