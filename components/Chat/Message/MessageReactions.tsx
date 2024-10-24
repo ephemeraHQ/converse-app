@@ -4,6 +4,7 @@ import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSh
 import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
 import { BottomSheetModal } from "@design-system/BottomSheet/BottomSheetModal";
 import { HStack } from "@design-system/HStack";
+import { ScrollView } from "@design-system/ScrollView";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
 import {
@@ -56,9 +57,20 @@ export const ChatMessageReactions = memo(
       setBottomSheetVisible(true);
     };
 
-    const onDismissReactionsDrawer = () => {
+    const onReactionsDrawerDismiss = () => {
       setBottomSheetVisible(false);
     };
+
+    const onReactionDrawerChange = useCallback(
+      (index: number) => {
+        // Dismiss when index 0 (open but not visible)
+        if (index === 0) {
+          setBottomSheetVisible(false);
+          bottomSheetModalRef.current?.dismiss();
+        }
+      },
+      [bottomSheetModalRef]
+    );
 
     useEffect(() => {
       if (isBottomSheetVisible) {
@@ -158,8 +170,10 @@ export const ChatMessageReactions = memo(
         {isBottomSheetVisible && (
           <BottomSheetModal
             ref={bottomSheetModalRef}
-            onDismiss={onDismissReactionsDrawer}
+            onDismiss={onReactionsDrawerDismiss}
+            onChange={onReactionDrawerChange}
             snapPoints={["40%"]}
+            enablePanDownToClose
             enableDynamicSizing
             index={1}
             topInset={top}
@@ -175,14 +189,16 @@ export const ChatMessageReactions = memo(
               }}
             >
               <BottomSheetContentContainer>
-                <HStack
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
                   style={{
-                    padding: 32,
+                    paddingLeft: theme.spacing.lg,
                     flexDirection: "row",
-                    overflow: "scroll",
+                    gap: 20,
                   }}
                 >
-                  <Text>{rolledUpReactions.totalReactions}</Text>
+                  <Text>All {rolledUpReactions.totalReactions}</Text>
                   {Object.entries(rolledUpReactions.details).map(
                     ([emoji, details]) => (
                       <TouchableHighlight
@@ -197,14 +213,15 @@ export const ChatMessageReactions = memo(
                         }}
                         underlayColor={theme.colors.border.subtle}
                       >
-                        <VStack style={{ alignItems: "center" }}>
+                        <HStack style={{ alignItems: "center" }}>
                           <Text>{emoji}</Text>
                           <Text>{details.count}</Text>
-                        </VStack>
+                        </HStack>
                       </TouchableHighlight>
                     )
                   )}
-                </HStack>
+                  <HStack style={{ width: theme.spacing.xxl }} />
+                </ScrollView>
               </BottomSheetContentContainer>
             </BottomSheetScrollView>
           </BottomSheetModal>
