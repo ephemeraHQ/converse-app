@@ -13,7 +13,7 @@ import {
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import { useAppTheme } from "@theme/useAppTheme";
 import { MessageReaction } from "@utils/reactions";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { StyleSheet, TouchableHighlight } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -43,18 +43,28 @@ type RolledUpReactions = {
   details: { [content: string]: ReactionDetails };
 };
 
-const bottomSheetModalRef = createBottomSheetModalRef();
-
 export const ChatMessageReactions = memo(
   ({ message, reactions }: Props) => {
     const styles = useStyles();
     const { top } = useSafeAreaInsets();
     const { theme } = useAppTheme();
     const userAddress = useCurrentAccount();
+    const bottomSheetModalRef = createBottomSheetModalRef();
+    const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
 
     const openReactionsDrawer = () => {
-      bottomSheetModalRef.current?.present();
+      setBottomSheetVisible(true);
     };
+
+    const onDismissReactionsDrawer = () => {
+      setBottomSheetVisible(false);
+    };
+
+    useEffect(() => {
+      if (isBottomSheetVisible) {
+        bottomSheetModalRef.current?.present();
+      }
+    }, [isBottomSheetVisible, bottomSheetModalRef]);
 
     const renderBackdrop = useCallback(
       (props: BottomSheetDefaultBackdropProps) => (
@@ -153,56 +163,60 @@ export const ChatMessageReactions = memo(
             )}
           </VStack>
         </TouchableHighlight>
-        <BottomSheetModal
-          ref={bottomSheetModalRef}
-          snapPoints={["40%"]}
-          enableDynamicSizing
-          index={1}
-          topInset={top}
-          backdropComponent={renderBackdrop}
-          backgroundStyle={{
-            backgroundColor: theme.colors.background.raised,
-          }}
-        >
-          <BottomSheetHeader title="Reactions" hasClose />
-          <BottomSheetScrollView
-            style={{
+        {isBottomSheetVisible && (
+          <BottomSheetModal
+            ref={bottomSheetModalRef}
+            onDismiss={onDismissReactionsDrawer}
+            snapPoints={["40%"]}
+            enableDynamicSizing
+            index={1}
+            topInset={top}
+            backdropComponent={renderBackdrop}
+            backgroundStyle={{
               backgroundColor: theme.colors.background.raised,
             }}
           >
-            <BottomSheetContentContainer>
-              <HStack
-                style={{
-                  padding: 32,
-                  flexDirection: "row",
-                  overflow: "scroll",
-                }}
-              >
-                {Object.entries(rolledUpReactions.details).map(
-                  ([emoji, details]) => (
-                    <TouchableHighlight
-                      key={emoji}
-                      style={{
-                        marginRight: 8,
-                        padding: 8,
-                        borderRadius: theme.borderRadius.sm,
-                        backgroundColor: details.userReacted
-                          ? theme.colors.fill.minimal
-                          : theme.colors.background.raised,
-                      }}
-                      underlayColor={theme.colors.border.subtle}
-                    >
-                      <VStack style={{ alignItems: "center" }}>
-                        <Text>{emoji}</Text>
-                        <Text>{details.count}</Text>
-                      </VStack>
-                    </TouchableHighlight>
-                  )
-                )}
-              </HStack>
-            </BottomSheetContentContainer>
-          </BottomSheetScrollView>
-        </BottomSheetModal>
+            <BottomSheetHeader title="Reactions" hasClose />
+            <BottomSheetScrollView
+              style={{
+                backgroundColor: theme.colors.background.raised,
+              }}
+            >
+              <BottomSheetContentContainer>
+                <HStack
+                  style={{
+                    padding: 32,
+                    flexDirection: "row",
+                    overflow: "scroll",
+                  }}
+                >
+                  <Text>{rolledUpReactions.totalReactions}</Text>
+                  {Object.entries(rolledUpReactions.details).map(
+                    ([emoji, details]) => (
+                      <TouchableHighlight
+                        key={emoji}
+                        style={{
+                          marginRight: 8,
+                          padding: 8,
+                          borderRadius: theme.borderRadius.sm,
+                          backgroundColor: details.userReacted
+                            ? theme.colors.fill.minimal
+                            : theme.colors.background.raised,
+                        }}
+                        underlayColor={theme.colors.border.subtle}
+                      >
+                        <VStack style={{ alignItems: "center" }}>
+                          <Text>{emoji}</Text>
+                          <Text>{details.count}</Text>
+                        </VStack>
+                      </TouchableHighlight>
+                    )
+                  )}
+                </HStack>
+              </BottomSheetContentContainer>
+            </BottomSheetScrollView>
+          </BottomSheetModal>
+        )}
       </HStack>
     );
   },
