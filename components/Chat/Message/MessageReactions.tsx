@@ -79,14 +79,6 @@ export const ChatMessageReactions = memo(
       [theme]
     );
 
-    const reactionsList = useMemo(() => {
-      return Object.entries(reactions)
-        .flatMap(([senderAddress, reactions]) =>
-          reactions.map((reaction) => ({ ...reaction, senderAddress }))
-        )
-        .sort((r1, r2) => r1.sent - r2.sent);
-    }, [reactions]);
-
     const rolledUpReactions: RolledUpReactions = useMemo(() => {
       const details: { [content: string]: ReactionDetails } = {};
       let totalReactions = 0;
@@ -129,7 +121,7 @@ export const ChatMessageReactions = memo(
       return { emojis: sortedReactions, totalReactions, userReacted, details };
     }, [reactions, userAddress]);
 
-    if (reactionsList.length === 0) return null;
+    if (rolledUpReactions.totalReactions === 0) return null;
 
     return (
       <HStack
