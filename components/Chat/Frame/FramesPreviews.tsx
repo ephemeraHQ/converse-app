@@ -51,7 +51,9 @@ export function FramesPreviews({ message }: Props) {
       {framesToDisplay.map((frameToDisplay) => {
         return (
           <FramePreview
-            message={message}
+            messageId={message.id}
+            messageTopic={message.topic}
+            messageFromMe={message.fromMe}
             initialFrame={frameToDisplay}
             key={frameToDisplay.url}
           />
