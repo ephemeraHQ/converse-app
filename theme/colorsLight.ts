@@ -48,6 +48,7 @@ export const colorsLight = {
     secondary: darkPalette.dark60,
     tertiary: darkPalette.dark30,
     inactive: darkPalette.dark15,
+    danger: darkPalette.danger,
     inverted: {
       primary: lightPalette.light,
       secondary: lightPalette.light60,

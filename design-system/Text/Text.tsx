@@ -10,6 +10,7 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
   const {
     weight,
     size,
+    color,
     tx,
     txOptions,
     text,
@@ -26,6 +27,7 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
   const styles: StyleProp<TextStyle> = getTextStyle(themed, {
     weight,
     size,
+    color,
     style: styleProp,
     ...props,
   });

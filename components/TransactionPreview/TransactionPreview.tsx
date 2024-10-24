@@ -88,17 +88,9 @@ export function TransactionPreview() {
           transactionToPreview.chainId,
           transactionToPreview
         );
-        console.log("gas used:", simulationResult.gasUsed);
-        console.log("Simulation changes:");
-        simulationResult.changes.forEach((change) => {
-          console.log(`Asset: ${change.name}`);
-          console.log(`Logo: ${change.logo}`);
-          console.log(`Amount: ${change.amount}`);
-          console.log(`Type: ${change.changeType}`);
-          console.log("---");
-        });
         setSimulation({ status: "success", result: simulationResult });
       } catch (e: any) {
+        console.log(e);
         setSimulation({ status: "failure", error: e });
       }
       simulatingTx.current = false;

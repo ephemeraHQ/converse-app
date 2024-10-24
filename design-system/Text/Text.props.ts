@@ -3,11 +3,11 @@ import { TextProps as RNTextProps, StyleProp, TextStyle } from "react-native";
 import { IPresets } from "./Text.presets";
 import { textSizeStyles } from "./Text.styles";
 import { i18n, TxKeyPath } from "../../i18n";
-import { typography } from "../../theme";
+import { IColors, typography } from "../../theme";
 
 export type ISizes = keyof typeof textSizeStyles;
 export type IWeights = keyof typeof typography.primary;
-
+export type ITextColors = Exclude<keyof IColors["text"], "inverted">;
 export interface ITextStyleProps {
   /**
    * An optional style override useful for padding & margin.
@@ -25,6 +25,10 @@ export interface ITextStyleProps {
    * Text size modifier.
    */
   size?: ISizes;
+  /**
+   * Text color modifier.
+   */
+  color?: ITextColors;
 }
 
 export interface ITextProps extends RNTextProps, ITextStyleProps {
