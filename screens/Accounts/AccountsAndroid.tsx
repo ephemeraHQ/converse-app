@@ -35,7 +35,7 @@ export default function AccountsAndroid({ navigation }: Props) {
 
   return (
     <Drawer.Section
-      title={Platform.OS === "web" ? undefined : "Accounts"}
+      title="Accounts"
       style={{
         marginTop: insets.top,
         ...Platform.select({

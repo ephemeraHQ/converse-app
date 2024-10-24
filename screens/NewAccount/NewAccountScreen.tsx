@@ -16,7 +16,6 @@ import { useAccountsStore } from "../../data/store/accountsStore";
 import { translate } from "../../i18n";
 import { useRouter } from "../../navigation/useNavigation";
 import { spacing } from "../../theme";
-import { isDesktop } from "../../utils/device";
 
 export const NewAccountScreen = memo(function NewAccountScreen() {
   const router = useRouter();
@@ -56,7 +55,7 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
         ]}
       />
 
-      {hasInstalledWallets && !isDesktop && (
+      {hasInstalledWallets && (
         <InstalledWalletsTableView
           onAccountExists={(arg) => {
             useAccountsStore.getState().setCurrentAccount(arg.address, false);
@@ -72,9 +71,7 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
 
       <TableView
         title={
-          isDesktop
-            ? translate("walletSelector.connectionOptions.title")
-            : hasInstalledWallets
+          hasInstalledWallets
             ? translate("walletSelector.connectionOptions.otherOptions")
             : translate("walletSelector.connectionOptions.connectForDevs")
         }
@@ -87,9 +84,7 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
         ]}
       />
 
-      {!hasInstalledWallets && !isDesktop && (
-        <ConnectViaWalletPopularWalletsTableView />
-      )}
+      {!hasInstalledWallets && <ConnectViaWalletPopularWalletsTableView />}
     </NewAccountScreenComp>
   );
 });

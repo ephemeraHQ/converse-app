@@ -26,7 +26,7 @@ export default function GroupInviteNav() {
         headerShadowVisible: false,
         headerTitle: "",
         headerTintColor:
-          Platform.OS === "android" || Platform.OS === "web"
+          Platform.OS === "android"
             ? textSecondaryColor(colorScheme)
             : textPrimaryColor(colorScheme),
         animation: navigationAnimation,

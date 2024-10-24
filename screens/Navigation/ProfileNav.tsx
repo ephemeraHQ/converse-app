@@ -27,7 +27,7 @@ export default function ProfileNav() {
   const account = useCurrentAccount();
   const options: NativeStackNavigationOptions = {
     headerTintColor:
-      Platform.OS === "android" || Platform.OS === "web"
+      Platform.OS === "android"
         ? textSecondaryColor(colorScheme)
         : textPrimaryColor(colorScheme),
     animation: navigationAnimation,

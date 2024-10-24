@@ -15,10 +15,9 @@
     "start:preview": "EXPO_ENV=preview expo start",
     "test": "echo \"➜ Running tests...\" && jest --testPathIgnorePatterns='.*\\.perf-test\\.tsx$'",
     "test:perf": "echo \"➜ Running tests with performance...\" && echo \"➜ Capture baseline performance tests...\" && yarn reassure --baseline && echo \"➜ Running current performance tests...\" && jest --testPathIgnorePatterns='.*\\.perf-test\\.tsx$'",
-    "test-deep-linking": "node scripts/test-deep-linking.js",
+    "test-deep-linking": "node sØcripts/test-deep-linking.js",
     "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit",
-    "update": "node scripts/build/update.js",
-    "web:preview": "EXPO_ENV=preview expo export -p web"
+    "update": "node scripts/build/update.js"
   },
   "cross-os": {
     "postinstall": {
@@ -41,7 +40,6 @@
     "@expo/metro-config": "~0.18.11",
     "@expo/metro-runtime": "~3.2.3",
     "@expo/react-native-action-sheet": "^4.0.1",
-    "@expo/webpack-config": "~19.0.1",
     "@flyerhq/react-native-chat-ui": "^1.4.3",
     "@gorhom/bottom-sheet": "^5.0.2",
     "@gorhom/portal": "^1.0.14",
@@ -70,7 +68,6 @@
     "@tanstack/react-query": "^5.45.0",
     "@tanstack/react-query-persist-client": "^5.45.0",
     "@thirdweb-dev/react-native-adapter": "^1.2.0",
-    "@web3modal/ethers5": "^3.5.5",
     "@xmtp/content-type-reaction": "^1.1.7",
     "@xmtp/content-type-read-receipt": "^1.1.9",
     "@xmtp/content-type-remote-attachment": "^1.1.8",
@@ -183,7 +180,6 @@
     "react-native-system-navigation-bar": "^2.6.4",
     "react-native-tableview-simple": "^4.4.0",
     "react-native-url-polyfill": "^1.3.0",
-    "react-native-web": "~0.19.10",
     "react-native-webview": "13.8.6",
     "react-refresh": "0.14.0",
     "readable-stream": "^4.3.0",
@@ -203,7 +199,6 @@
     "uuid": "^9.0.1",
     "wagmi": "^2.5.11",
     "walletsdk-ethos": "0.1.0-no-web3j",
-    "web-streams-polyfill": "^3.2.1",
     "web3": "^1.8.1",
     "web3.storage": "^4.5.5",
     "zustand": "^4.4.7"

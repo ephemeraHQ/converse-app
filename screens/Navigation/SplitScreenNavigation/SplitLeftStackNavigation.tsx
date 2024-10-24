@@ -5,7 +5,6 @@ import { Platform, useColorScheme } from "react-native";
 
 import { ScreenHeaderModalCloseButton } from "../../../components/Screen/ScreenHeaderModalCloseButton";
 import { useRouter } from "../../../navigation/useNavigation";
-import { isDesktop } from "../../../utils/device";
 import { converseNavigations } from "../../../utils/navigation";
 import Accounts from "../../Accounts/Accounts";
 import ConversationBlockedListNav from "../ConversationBlockedListNav";
@@ -56,7 +55,7 @@ const SplitLeftStackNavigation = memo(function SplitLeftStackNavigation() {
         // is not meant for this one
       }}
     >
-      <NativeStack.Navigator screenOptions={{ gestureEnabled: !isDesktop }}>
+      <NativeStack.Navigator>
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
           <NativeStack.Screen
             name="Accounts"

@@ -15,12 +15,11 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { NavigationParamList } from "./Navigation/Navigation";
 import { GroupPendingRequestsTable } from "../containers/GroupPendingRequestsTable";
 import { GroupScreenAddition } from "../containers/GroupScreenAddition";
 import { GroupScreenConsentTable } from "../containers/GroupScreenConsentTable";
@@ -28,6 +27,7 @@ import { GroupScreenDescription } from "../containers/GroupScreenDescription";
 import { GroupScreenImage } from "../containers/GroupScreenImage";
 import { GroupScreenMembersTable } from "../containers/GroupScreenMembersTable";
 import { GroupScreenName } from "../containers/GroupScreenName";
+import { NavigationParamList } from "./Navigation/Navigation";
 import { useChatStore, useCurrentAccount } from "../data/store/accountsStore";
 import { XmtpGroupConversation } from "../data/store/chatStore";
 
@@ -92,8 +92,7 @@ const useStyles = () => {
       backgroundColor: backgroundColor(colorScheme),
     },
     groupContent: {
-      paddingHorizontal:
-        Platform.OS === "ios" || Platform.OS === "web" ? 18 : 0,
+      paddingHorizontal: Platform.OS === "ios" ? 18 : 0,
     },
     tableViewRight: {
       flexDirection: "row",

@@ -8,10 +8,10 @@ import {
 import { useAppTheme } from "@theme/useAppTheme";
 import React, {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
-  useEffect,
 } from "react";
 import {
   Platform,
@@ -21,17 +21,16 @@ import {
   View,
 } from "react-native";
 import Animated, {
-  useAnimatedStyle,
   SharedValue,
-  withSpring,
+  useAnimatedStyle,
   useSharedValue,
+  withSpring,
 } from "react-native-reanimated";
 
 import ChatInputReplyPreview from "./InputReplyPreview";
 import { SendButton } from "./SendButton";
 import { MediaPreview } from "../../../data/store/chatStore";
 import { useConversationContext } from "../../../utils/conversation";
-import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";
 import { AttachmentSelectedStatus } from "../../../utils/media";
 import { sendMessage, SendMessageInput } from "../../../utils/message";
@@ -409,47 +408,29 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
             )}
           </Animated.View>
           <TextInput
-            autoCorrect={isDesktop ? false : undefined}
-            autoComplete={isDesktop ? "off" : undefined}
             style={styles.chatInputField}
             value={inputValue}
-            // On desktop, we modified React Native RCTUITextView.m
-            // to handle key Shift + Enter to add new line
-            // This disables the flickering on Desktop when hitting Enter
-            blurOnSubmit={isDesktop}
-            // Mainly used on Desktop so that Enter sends the message
             onSubmitEditing={() => {
               onValidate();
-              // But we still want to refocus on Desktop when we
-              // hit Enter so let's force it
-              if (isDesktop) {
-                setTimeout(() => {
-                  inputRef.current?.focus();
-                }, 100);
-              }
             }}
             onChangeText={(t: string) => {
               inputIsFocused.current = true;
               setInputValue(t);
             }}
-            onKeyPress={
-              Platform.OS === "web"
-                ? (event: any) => {
-                    if (
-                      event.nativeEvent.key === "Enter" &&
-                      !event.altKey &&
-                      !event.metaKey &&
-                      !event.shiftKey
-                    ) {
-                      event.preventDefault();
-                      onValidate();
-                      setTimeout(() => {
-                        inputRef.current?.focus();
-                      }, 100);
-                    }
-                  }
-                : undefined
-            }
+            onKeyPress={(event: any) => {
+              if (
+                event.nativeEvent.key === "Enter" &&
+                !event.altKey &&
+                !event.metaKey &&
+                !event.shiftKey
+              ) {
+                event.preventDefault();
+                onValidate();
+                setTimeout(() => {
+                  inputRef.current?.focus();
+                }, 100);
+              }
+            }}
             onFocus={() => {
               inputIsFocused.current = true;
             }}

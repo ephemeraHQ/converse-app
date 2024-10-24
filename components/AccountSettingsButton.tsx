@@ -68,9 +68,6 @@ export default function AccountSettingsButton({ account }: Props) {
         if (account) {
           refreshProfileForAddress(account, account);
           setCurrentAccount(account, false);
-          if (Platform.OS === "web") {
-            await new Promise((r) => setTimeout(r, 200));
-          }
           router.navigate("Chats");
           navigate("Profile", {
             address: account,
@@ -127,7 +124,7 @@ export default function AccountSettingsButton({ account }: Props) {
         />
       );
     }
-    if (notificationsPermissionStatus === "granted" || Platform.OS === "web") {
+    if (notificationsPermissionStatus === "granted") {
       options.splice(options.indexOf(translate("turn_on_notifications")), 1);
     }
 
