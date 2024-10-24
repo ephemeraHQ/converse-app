@@ -9,7 +9,7 @@ import {
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { Image } from "expo-image";
-import React, { memo, useCallback, useMemo, useRef } from "react";
+import React, { forwardRef, memo, useCallback, useMemo } from "react";
 import {
   LayoutChangeEvent,
   Platform,
@@ -27,28 +27,25 @@ import Animated, {
   useAnimatedRef,
 } from "react-native-reanimated";
 
-import { isDesktop } from "../../utils/device";
-import Picto from "../Picto/Picto";
+import Picto, { IPicto } from "../Picto/Picto";
 
 export type ConversationListItemDumbProps = {
   title?: string;
   subtitle?: string;
   avatarComponent?: React.ReactNode;
+  rightIsDestructive?: boolean;
   rightComponent?: React.ReactNode;
-  renderRightActions: () => React.JSX.Element;
-  renderLeftActions: () => React.JSX.Element;
+  leftActionPicto: IPicto;
   onLeftSwipe?: () => void;
   onRightSwipe?: () => void;
   onPress?: () => void;
   onLongPress?: () => void;
   onLeftActionPress?: () => void;
   onWillLeftSwipe?: () => void;
-  onRightActionPress?: (defaultAction: () => void) => void;
+  onRightActionPress?: () => void;
   onWillRightSwipe?: () => void;
   contextMenuComponent: React.JSX.Element;
   isUnread: boolean;
-  isBlockedChatView: boolean;
-  selected: boolean;
   showError: boolean;
   showImagePreview: boolean;
   imagePreviewUrl: string | undefined;
@@ -204,198 +201,207 @@ const useDisplayInfo = () => {
   };
 };
 
-export const ConversationListItemDumb = memo(function ConversationListItemDumb({
-  onRightActionPress,
-  onLeftActionPress,
-  onPress,
-  onLongPress,
-  onLeftSwipe,
-  onWillLeftSwipe,
-  onRightSwipe,
-  onWillRightSwipe,
-  isUnread,
-  isBlockedChatView,
-  title,
-  subtitle,
-  avatarComponent,
-  contextMenuComponent,
-  selected,
-  showError,
-  showImagePreview,
-  imagePreviewUrl,
-  renderLeftActions,
-}: ConversationListItemDumbProps) {
-  const styles = useStyles();
-  const {
-    displayRowSeparator,
-    themedDangerColor,
-    themedInversePrimaryColor,
-    themedClickedItemBackgroundColor,
-    themedBackgroundColor,
-  } = useDisplayInfo();
+export const ConversationListItemDumb = memo(
+  forwardRef<Swipeable, ConversationListItemDumbProps>(
+    function ConversationListItemDumb(
+      {
+        onRightActionPress,
+        onLeftActionPress,
+        onPress,
+        onLongPress,
+        onLeftSwipe,
+        onWillLeftSwipe,
+        onRightSwipe,
+        onWillRightSwipe,
+        leftActionPicto,
+        isUnread,
+        title,
+        subtitle,
+        avatarComponent,
+        contextMenuComponent,
+        showError,
+        showImagePreview,
+        imagePreviewUrl,
+        rightIsDestructive,
+      },
+      swipeableRef
+    ) {
+      const styles = useStyles();
+      const {
+        displayRowSeparator,
+        themedDangerColor,
+        themedInversePrimaryColor,
+        themedClickedItemBackgroundColor,
+        themedBackgroundColor,
+      } = useDisplayInfo();
 
-  const itemRect = useSharedValue({ x: 0, y: 0, width: 0, height: 0 });
-  const containerRef = useAnimatedRef<View>();
+      const itemRect = useSharedValue({ x: 0, y: 0, width: 0, height: 0 });
+      const containerRef = useAnimatedRef<View>();
 
-  const onLayoutView = useCallback(
-    (event: LayoutChangeEvent) => {
-      const { x, y, width, height } = event.nativeEvent.layout;
-      itemRect.value = { x, y, width, height };
-    },
-    [itemRect]
-  );
+      const onLayoutView = useCallback(
+        (event: LayoutChangeEvent) => {
+          const { x, y, width, height } = event.nativeEvent.layout;
+          itemRect.value = { x, y, width, height };
+        },
+        [itemRect]
+      );
 
-  const listItemContent = (
-    <View style={styles.conversationListItem}>
-      {avatarComponent}
-      <View style={styles.messagePreviewContainer}>
-        <Text style={styles.conversationName} numberOfLines={1}>
-          {title}
-        </Text>
-        <Text style={styles.messagePreview} numberOfLines={2}>
-          {subtitle}
-        </Text>
-      </View>
-      {showImagePreview && (
-        <View style={styles.imagePreviewContainer}>
-          <Image
-            source={{ uri: imagePreviewUrl }}
-            style={styles.imagePreview}
-            contentFit="cover"
-          />
-        </View>
-      )}
-      {(isUnread || showError) && (
-        <View style={styles.unreadContainer}>
-          <View
-            style={[
-              styles.unread,
-              (!isUnread || showError) && styles.placeholder,
-            ]}
-          >
-            {showError && (
-              <Picto
-                picto="info.circle"
-                color={themedDangerColor}
-                size={PictoSizes.button}
-              />
-            )}
+      const listItemContent = (
+        <View style={styles.conversationListItem}>
+          {avatarComponent}
+          <View style={styles.messagePreviewContainer}>
+            <Text style={styles.conversationName} numberOfLines={1}>
+              {title}
+            </Text>
+            <Text style={styles.messagePreview} numberOfLines={2}>
+              {subtitle}
+            </Text>
           </View>
+          {showImagePreview && (
+            <View style={styles.imagePreviewContainer}>
+              <Image
+                source={{ uri: imagePreviewUrl }}
+                style={styles.imagePreview}
+                contentFit="cover"
+              />
+            </View>
+          )}
+          {(isUnread || showError) && (
+            <View style={styles.unreadContainer}>
+              <View
+                style={[
+                  styles.unread,
+                  (!isUnread || showError) && styles.placeholder,
+                ]}
+              >
+                {showError && (
+                  <Picto
+                    picto="info.circle"
+                    color={themedDangerColor}
+                    size={PictoSizes.button}
+                  />
+                )}
+              </View>
+            </View>
+          )}
         </View>
-      )}
-    </View>
-  );
-
-  const swipeableRef = useRef<Swipeable | null>(null);
-  const closeSwipeable = useCallback(() => {
-    swipeableRef.current?.close();
-  }, []);
-
-  const handleRightActionPress = useCallback(() => {
-    if (onRightActionPress) {
-      onRightActionPress(closeSwipeable);
-    }
-  }, [closeSwipeable, onRightActionPress]);
-
-  const renderRightActions = useCallback(() => {
-    if (isBlockedChatView) {
-      return (
-        <RectButton style={styles.rightAction} onPress={handleRightActionPress}>
-          <Picto
-            picto="checkmark"
-            color={themedInversePrimaryColor}
-            size={PictoSizes.swipableItem}
-          />
-        </RectButton>
       );
-    } else {
+
+      const renderLeftActions = useCallback(() => {
+        return (
+          <RectButton style={styles.leftAction}>
+            <Picto
+              picto={leftActionPicto}
+              color={themedInversePrimaryColor}
+              size={PictoSizes.swipableItem}
+            />
+          </RectButton>
+        );
+      }, [leftActionPicto, styles.leftAction, themedInversePrimaryColor]);
+
+      const renderRightActions = useCallback(() => {
+        if (rightIsDestructive) {
+          return (
+            <RectButton style={styles.rightAction} onPress={onRightActionPress}>
+              <Picto
+                picto="checkmark"
+                color={themedInversePrimaryColor}
+                size={PictoSizes.swipableItem}
+              />
+            </RectButton>
+          );
+        } else {
+          return (
+            <RectButton
+              style={styles.rightActionRed}
+              onPress={onRightActionPress}
+            >
+              <Picto
+                picto="trash"
+                color="white"
+                size={PictoSizes.swipableItem}
+              />
+            </RectButton>
+          );
+        }
+      }, [
+        rightIsDestructive,
+        styles.rightAction,
+        styles.rightActionRed,
+        onRightActionPress,
+        themedInversePrimaryColor,
+      ]);
+
+      const rowItem = (
+        <Animated.View ref={containerRef} onLayout={onLayoutView}>
+          {Platform.OS === "ios" ? (
+            <TouchableHighlight
+              underlayColor={themedClickedItemBackgroundColor}
+              delayPressIn={75}
+              onLongPress={onLongPress}
+              onPress={onPress}
+              style={{
+                backgroundColor: themedBackgroundColor,
+                height: 76,
+              }}
+            >
+              {listItemContent}
+            </TouchableHighlight>
+          ) : (
+            <TouchableRipple
+              unstable_pressDelay={75}
+              onPress={onPress}
+              onLongPress={onLongPress}
+              style={styles.rippleRow}
+              rippleColor={themedClickedItemBackgroundColor}
+            >
+              {listItemContent}
+            </TouchableRipple>
+          )}
+        </Animated.View>
+      );
+
+      const onSwipeableWillClose = useCallback(
+        (direction: "left" | "right") => {
+          if (direction === "left") {
+            onWillLeftSwipe?.();
+          } else {
+            onWillRightSwipe?.();
+          }
+        },
+        [onWillLeftSwipe, onWillRightSwipe]
+      );
+
+      const onSwipeableClose = useCallback(
+        (direction: "left" | "right") => {
+          if (direction === "left") {
+            onLeftSwipe?.();
+          } else {
+            onRightSwipe?.();
+          }
+        },
+        [onLeftSwipe, onRightSwipe]
+      );
+
       return (
-        <RectButton
-          style={styles.rightActionRed}
-          onPress={handleRightActionPress}
-        >
-          <Picto picto="trash" color="white" size={PictoSizes.swipableItem} />
-        </RectButton>
+        <View style={styles.rowSeparator}>
+          <Swipeable
+            renderRightActions={renderRightActions}
+            renderLeftActions={renderLeftActions}
+            leftThreshold={10000} // Never trigger opening
+            overshootFriction={4}
+            ref={swipeableRef}
+            onSwipeableWillClose={onSwipeableWillClose}
+            onSwipeableClose={onSwipeableClose}
+            hitSlop={{ left: -6 }}
+          >
+            {rowItem}
+            {contextMenuComponent}
+          </Swipeable>
+          {/* Hide part of the border to mimic margin*/}
+          {displayRowSeparator && <View style={styles.rowSeparatorMargin} />}
+        </View>
       );
     }
-  }, [
-    isBlockedChatView,
-    styles.rightAction,
-    styles.rightActionRed,
-    handleRightActionPress,
-    themedInversePrimaryColor,
-  ]);
-
-  const rowItem = (
-    <Animated.View ref={containerRef} onLayout={onLayoutView}>
-      {Platform.OS === "ios" || Platform.OS === "web" ? (
-        <TouchableHighlight
-          underlayColor={themedClickedItemBackgroundColor}
-          delayPressIn={isDesktop ? 0 : 75}
-          onLongPress={onLongPress}
-          onPress={onPress}
-          style={{
-            backgroundColor: selected
-              ? themedClickedItemBackgroundColor
-              : themedBackgroundColor,
-            height: 76,
-          }}
-        >
-          {listItemContent}
-        </TouchableHighlight>
-      ) : (
-        <TouchableRipple
-          unstable_pressDelay={75}
-          onPress={onPress}
-          onLongPress={onLongPress}
-          style={styles.rippleRow}
-          rippleColor={themedClickedItemBackgroundColor}
-        >
-          {listItemContent}
-        </TouchableRipple>
-      )}
-    </Animated.View>
-  );
-
-  const onSwipeableWillClose = useCallback(
-    (direction: "left" | "right") => {
-      if (direction === "left") {
-        onWillLeftSwipe?.();
-      } else {
-        onWillRightSwipe?.();
-      }
-    },
-    [onWillLeftSwipe, onWillRightSwipe]
-  );
-
-  const onSwipeableClose = useCallback(
-    (direction: "left" | "right") => {
-      if (direction === "left") {
-        onLeftSwipe?.();
-      } else {
-        onRightSwipe?.();
-      }
-    },
-    [onLeftSwipe, onRightSwipe]
-  );
-
-  return (
-    <View style={styles.rowSeparator}>
-      <Swipeable
-        renderRightActions={renderRightActions}
-        renderLeftActions={renderLeftActions}
-        leftThreshold={10000} // Never trigger opening
-        overshootFriction={4}
-        ref={swipeableRef}
-        onSwipeableWillClose={onSwipeableWillClose}
-        onSwipeableClose={onSwipeableClose}
-        hitSlop={{ left: -6 }}
-      >
-        {rowItem}
-        {contextMenuComponent}
-      </Swipeable>
-      {/* Hide part of the border to mimic margin*/}
-      {displayRowSeparator && <View style={styles.rowSeparatorMargin} />}
-    </View>
-  );
-});
+  )
+);
