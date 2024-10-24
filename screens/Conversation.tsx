@@ -33,6 +33,7 @@ import {
 } from "../utils/conversation";
 import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
+import logger from "../utils/logger";
 import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
 import { TextInputWithValue } from "../utils/str";
 import { loadOlderMessages } from "../utils/xmtpRN/messages";
@@ -42,13 +43,17 @@ const conversationSelectKeys: (keyof ChatStoreType)[] = [
   "conversationsMapping",
   "setConversationMessageDraft",
   "setConversationMediaPreview",
-  "lastUpdateAt", // Added even if unused to trigger a rerender
+  "lastUpdateAt",
 ];
 
 const Conversation = ({
   route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
+  logger.debug("[Conversation] Rendering Conversation screen", {
+    routeParams: route.params,
+  });
+
   const colorScheme = useColorScheme();
   const peersStatus = useSettingsStore((s) => s.peersStatus);
   const [transactionMode, setTransactionMode] = useState(false);
@@ -64,35 +69,31 @@ const Conversation = ({
     setConversationMediaPreview,
   } = useChatStore(useSelect(conversationSelectKeys));
 
-  // Initial conversation topic will be set only if in route params
   const [_conversationTopic, setConversationTopic] = useState(
     route.params?.topic
   );
 
-  // When we set the conversation topic, we check if it has been mapped
-  // to a new one (for pending conversations)
   const conversationTopic =
     _conversationTopic && conversationsMapping[_conversationTopic]
       ? conversationsMapping[_conversationTopic]
       : _conversationTopic;
 
-  // Initial conversation will be set only if topic in route params
   const [conversation, setConversation] = useState(
     conversationTopic ? conversations[conversationTopic] : undefined
   );
 
-  // Initial peer address will be set from the route params
-  // for main convo or through the found convo if exists
   const [peerAddress, setPeerAddress] = useState(
     isAddress(route.params?.mainConversationWithPeer || "")
       ? route.params?.mainConversationWithPeer
       : conversation?.peerAddress
   );
 
-  // When we set the conversation, we set the peer address
-  // and preload the local convo for faster sending
   useEffect(() => {
     if (conversation && conversation.peerAddress !== peerAddress) {
+      logger.debug("[Conversation] Updating peer address", {
+        oldAddress: peerAddress,
+        newAddress: conversation.peerAddress,
+      });
       setPeerAddress(conversation.peerAddress);
     }
   }, [conversation, peerAddress]);
@@ -100,7 +101,6 @@ const Conversation = ({
   const openedMainConvo = useRef(false);
   const isActive = conversation?.isGroup ? conversation.isActive : true;
 
-  // When the conversation topic changes, we set the conversation object
   const conversationTopicRef = useRef(conversationTopic);
   const currentLastUpdateAt = conversation?.lastUpdateAt;
   useEffect(() => {
@@ -111,12 +111,19 @@ const Conversation = ({
     ) {
       const foundConversation = conversations[conversationTopic];
       if (foundConversation) {
+        logger.debug("[Conversation] Updating conversation", {
+          topic: conversationTopic,
+          lastUpdateAt: foundConversation.lastUpdateAt,
+        });
         setConversation(foundConversation);
       }
     } else if (
       route.params?.mainConversationWithPeer &&
       !openedMainConvo.current
     ) {
+      logger.debug("[Conversation] Opening main conversation with peer", {
+        peer: route.params.mainConversationWithPeer,
+      });
       openedMainConvo.current = true;
       openMainConversationWithPeer(
         currentAccount(),
@@ -136,6 +143,9 @@ const Conversation = ({
 
   useEffect(() => {
     if (!isActive) {
+      logger.debug(
+        "[Conversation] Conversation not active, navigating back to Chats"
+      );
       return navigation.navigate("Chats");
     }
   }, [isActive, navigation]);
@@ -168,6 +178,7 @@ const Conversation = ({
     if (focusOnLayout.current && !chatLayoutDone.current) {
       chatLayoutDone.current = true;
       alreadyAutomaticallyFocused.current = true;
+      logger.debug("[Conversation] Automatically focusing text input");
       textInputRef.current?.focus();
     } else {
       chatLayoutDone.current = true;
@@ -181,6 +192,9 @@ const Conversation = ({
       if (autofocus) {
         if (chatLayoutDone.current && !alreadyAutomaticallyFocused.current) {
           alreadyAutomaticallyFocused.current = true;
+          logger.debug(
+            "[Conversation] Automatically focusing text input after transition"
+          );
           textInputRef.current?.focus();
         } else {
           focusOnLayout.current = true;
@@ -204,6 +218,10 @@ const Conversation = ({
   const styles = useStyles();
 
   useEffect(() => {
+    logger.debug("[Conversation] Setting navigation options", {
+      peerAddress,
+      isBlockedPeer,
+    });
     navigation.setOptions({
       headerTitle: () => (
         <ConversationTitle
@@ -229,14 +247,18 @@ const Conversation = ({
 
   useEffect(() => {
     if (conversation) {
-      // On load, we mark the conversation as read and as opened
+      logger.debug("[Conversation] Setting conversation as opened and read", {
+        topic: conversation.topic,
+      });
       useChatStore.getState().setOpenedConversationTopic(conversation.topic);
 
-      // On Web this loads them from network, on mobile from local db
+      logger.debug("[Conversation] Loading older messages", {
+        topic: conversation.topic,
+      });
       loadOlderMessages(currentAccount(), conversation.topic);
 
-      // If we are navigating to a conversation, we reset the topic to navigate to
       if (topicToNavigateTo === conversation.topic) {
+        logger.debug("[Conversation] Resetting topic to navigate to");
         setTopicToNavigateTo("");
       }
     }
@@ -245,6 +267,12 @@ const Conversation = ({
   const onLeaveScreen = useCallback(async () => {
     if (!conversation) return;
 
+    logger.debug(
+      "[Conversation] Leaving screen, saving draft and media preview",
+      {
+        topic: conversation.topic,
+      }
+    );
     useChatStore.getState().setOpenedConversationTopic(null);
     if (textInputRef.current) {
       setConversationMessageDraft(
@@ -261,6 +289,13 @@ const Conversation = ({
   const onOpeningConversation = useCallback(
     ({ topic }: { topic: string }) => {
       if (topic !== conversationTopic) {
+        logger.debug(
+          "[Conversation] Opening new conversation, saving current",
+          {
+            currentTopic: conversationTopic,
+            newTopic: topic,
+          }
+        );
         onLeaveScreen();
       }
     },
@@ -268,6 +303,7 @@ const Conversation = ({
   );
 
   useEffect(() => {
+    logger.debug("[Conversation] Setting up navigation listeners");
     const unsubscribeBeforeRemove = navigation.addListener(
       "beforeRemove",
       onLeaveScreen
@@ -314,6 +350,11 @@ const Conversation = ({
       tagsFetchedOnceForMessage,
     ]
   );
+
+  logger.debug("[Conversation] Rendering conversation component", {
+    hasTopic: !!route.params?.topic,
+    hasMainConversationWithPeer: !!route.params?.mainConversationWithPeer,
+  });
 
   return (
     <View style={styles.container} key={`conversation-${colorScheme}`}>

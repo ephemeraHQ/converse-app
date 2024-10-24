@@ -34,6 +34,8 @@ export const updateLastVersionOpen = () => {
 };
 
 export const runAsyncUpdates = async () => {
+  // todo investigate this looks like it never stops getting called at least
+  // during onboarding
   if (isRunning) {
     await waitForAsyncUpdatesToFinish();
     return;

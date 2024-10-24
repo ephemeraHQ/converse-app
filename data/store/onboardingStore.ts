@@ -1,3 +1,4 @@
+import logger from "@utils/logger";
 import { Signer } from "ethers";
 import { create } from "zustand";
 
@@ -71,9 +72,11 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
   signer: undefined,
   address: undefined,
   setSigner: async (s) => {
+    logger.debug("[OnboardingStore] Setting new signer");
     let address = undefined as string | undefined;
     if (s) {
       address = await s.getAddress();
+      logger.debug("[OnboardingStore] New signer address:", address);
     }
     return set(() => ({
       signer: s,
@@ -82,16 +85,16 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
   },
 
   loading: false,
-  setLoading: (l) =>
-    set(() => ({
-      loading: l,
-    })),
+  setLoading: (l) => {
+    logger.debug("[OnboardingStore] Setting loading state:", l);
+    set(() => ({ loading: l }));
+  },
 
   isEphemeral: false,
-  setIsEphemeral: (e) =>
-    set(() => ({
-      isEphemeral: e,
-    })),
+  setIsEphemeral: (e) => {
+    logger.debug("[OnboardingStore] Setting ephemeral state:", e);
+    set(() => ({ isEphemeral: e }));
+  },
 
   privyAccountId: undefined,
   setPrivyAccountId: (id) => set(() => ({ privyAccountId: id })),
@@ -108,7 +111,8 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
   step: "login",
   setStep: (s: OnboardingStep) => set(() => ({ step: s })),
 
-  resetOnboarding: () =>
+  resetOnboarding: () => {
+    logger.debug("[OnboardingStore] Resetting onboarding state");
     set(() => ({
       addingNewAccount: false,
       desktopConnectSessionId: null,
@@ -127,5 +131,6 @@ export const useOnboardingStore = create<OnboardingStoreType>()((set) => ({
         displayName: "",
         avatar: "",
       },
-    })),
+    }));
+  },
 }));

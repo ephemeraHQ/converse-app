@@ -129,7 +129,17 @@ export const useAccountsStore = create<AccountsStoreStype>()(
         }),
       setCurrentAccount: (account, createIfNew) =>
         set((state) => {
-          if (state.currentAccount === account) return state;
+          logger.debug("[AccountsStore] Setting current account", {
+            account,
+            createIfNew,
+            isNew: !state.accounts.includes(account),
+          });
+
+          if (state.currentAccount === account) {
+            logger.debug("[AccountsStore] Account already current, skipping");
+            return state;
+          }
+
           const accounts = [...state.accounts];
           const isNew = !accounts.includes(account);
           if (isNew && !createIfNew) {
@@ -166,6 +176,11 @@ export const useAccountsStore = create<AccountsStoreStype>()(
         }),
       removeAccount: (accountToRemove) =>
         set((state) => {
+          logger.debug("[AccountsStore] Removing account", {
+            accountToRemove,
+            remainingAccounts: state.accounts.length - 1,
+          });
+
           const newAccounts = [
             ...state.accounts.filter((a) => a !== accountToRemove),
           ];
@@ -196,14 +211,11 @@ export const useAccountsStore = create<AccountsStoreStype>()(
       onRehydrateStorage: () => {
         return (state, error) => {
           if (error) {
-            logger.warn("An error happened during hydration", error);
+            logger.error("[AccountsStore] Hydration error:", error);
           } else {
-            if (state?.accounts && state.accounts.length > 0) {
-              state.accounts.map(initStores);
-            } else if (state) {
-              state.currentAccount = TEMPORARY_ACCOUNT_NAME;
-              state.accounts = [TEMPORARY_ACCOUNT_NAME];
-            }
+            logger.debug("[AccountsStore] Store hydrated successfully", {
+              accountCount: state?.accounts?.length,
+            });
           }
         };
       },
@@ -225,35 +237,133 @@ type AccountStoreDataType = {
   inboxId: InboxIdStoreType;
 };
 
+/**
+ * Retrieves the account store for a given account.
+ *
+ * @param {string} account - The account identifier
+ * @returns {AccountStoreType} The account store
+ *
+ * @example
+ * // Input:
+ * const store = getAccountStore('user123')
+ * // Output:
+ * // Returns the store for 'user123' or TEMPORARY_ACCOUNT_NAME
+ */
 const getAccountStore = (account: string) => {
+  // logger.debug(`[getAccountStore] Retrieving store for account: ${account}`);
   if (account in storesByAccount) {
+    // logger.debug(`[getAccountStore] Found store for account: ${account}`);
     return storesByAccount[account];
   } else {
+    // logger.warn(
+    //   `[getAccountStore] Store not found for account: ${account}. Using temporary account store.`
+    // );
     return storesByAccount[TEMPORARY_ACCOUNT_NAME];
   }
 };
 
-export const currentAccount = () => useAccountsStore.getState().currentAccount;
+/**
+ * Returns the current account from the store state.
+ *
+ * @returns {string} The current account
+ *
+ * @example
+ * // Usage:
+ * const account = currentAccount()
+ * // Output:
+ * // Returns the current account string
+ */
+export const currentAccount = () => {
+  const account = useAccountsStore.getState().currentAccount;
+  // logger.debug(`[currentAccount] Current account: ${account}`);
+  return account;
+};
+
+/**
+ * Hook to get the current account, returns undefined if temporary.
+ *
+ * @returns {string | undefined} The current account or undefined
+ *
+ * @example
+ * // Usage in a component:
+ * const account = useCurrentAccount()
+ * // Output:
+ * // Returns the current account or undefined if temporary
+ */
 export const useCurrentAccount = () => {
   const currentAccount = useAccountsStore((s) => s.currentAccount);
-  return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
+  const result =
+    currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
+  // logger.debug(`[useCurrentAccount] Current account: ${result}`);
+  return result;
 };
 
+/**
+ * Checks if the current account is logged in with Privy.
+ *
+ * @returns {boolean} True if logged with Privy, false otherwise
+ *
+ * @example
+ * // Usage:
+ * const isPrivy = loggedWithPrivy()
+ * // Output:
+ * // Returns true if current account is a Privy account
+ */
 export const loggedWithPrivy = () => {
   const account = currentAccount();
-  return isPrivyAccount(account);
+  const result = isPrivyAccount(account);
+  logger.debug(`[loggedWithPrivy] Is Privy account: ${result}`);
+  return result;
 };
 
+/**
+ * Checks if a given account is a Privy account.
+ *
+ * @param {string} account - The account to check
+ * @returns {boolean} True if it's a Privy account, false otherwise
+ *
+ * @example
+ * // Usage:
+ * const isPrivy = isPrivyAccount('user123')
+ * // Output:
+ * // Returns true if 'user123' is a Privy account
+ */
 export const isPrivyAccount = (account: string) => {
-  return !!useAccountsStore.getState().privyAccountId[account];
+  const result = !!useAccountsStore.getState().privyAccountId[account];
+  logger.debug(`[isPrivyAccount] Account ${account} is Privy: ${result}`);
+  return result;
 };
 
+/**
+ * Hook to check if the current account is logged in with Privy.
+ *
+ * @returns {boolean} True if logged with Privy, false otherwise
+ *
+ * @example
+ * // Usage in a component:
+ * const isPrivy = useLoggedWithPrivy()
+ * // Output:
+ * // Returns true if current account is a Privy account
+ */
 export const useLoggedWithPrivy = () => {
   const account = useCurrentAccount();
   const privyAccountId = useAccountsStore((s) => s.privyAccountId);
-  return account ? !!privyAccountId[account] : false;
+  const result = account ? !!privyAccountId[account] : false;
+  // logger.debug(`[useLoggedWithPrivy] Is Privy account: ${result}`);
+  return result;
 };
 
+/**
+ * Hook to check if there's at least one Privy account.
+ *
+ * @returns {string | undefined} The first Privy account found or undefined
+ *
+ * @example
+ * // Usage in a component:
+ * const privyAccount = useHasOnePrivyAccount()
+ * // Output:
+ * // Returns the first Privy account found or undefined
+ */
 export const useHasOnePrivyAccount = () => {
   const accountsState = useAccountsStore();
   let hasOne = undefined as string | undefined;
@@ -262,18 +372,34 @@ export const useHasOnePrivyAccount = () => {
       hasOne = a;
     }
   });
+  logger.debug(`[useHasOnePrivyAccount] Found Privy account: ${hasOne}`);
   return hasOne;
 };
 
 // This enables us to use account-based substores for the current selected user automatically,
 // Just call export useSubStore = accountStoreHook("subStoreName") in the substore definition
 
+/**
+ * Creates a hook for accessing the current account's substore.
+ *
+ * @param {T} key - The key of the substore
+ * @returns {Function} A hook to access the substore
+ *
+ * @example
+ * // Usage:
+ * const useProfileStore = currentAccountStoreHook('profiles')
+ * // Then in a component:
+ * const profile = useProfileStore(state => state.profile)
+ */
 const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
   key: T
 ) => {
   const _useStore = <U>(selector: (state: AccountStoreDataType[T]) => U) => {
     const currentAccount = useAccountsStore((s) => s.currentAccount);
     const accountStore = getAccountStore(currentAccount);
+    // logger.debug(
+    //   `[currentAccountStoreHook] Accessing ${key} store for account: ${currentAccount}`
+    // );
     return accountStore[key](selector);
   };
 
@@ -282,23 +408,45 @@ const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
     const currentAccountState = useAccountsStore.getState();
     const currentAccount = currentAccountState.currentAccount;
     const accountStore = getAccountStore(currentAccount);
+    // logger.debug(
+    //   `[currentAccountStoreHook.getState] Getting ${key} state for account: ${currentAccount}`
+    // );
     return accountStore[key].getState();
   };
   return use;
 };
 
+/**
+ * Creates a hook for accessing a specific account's substore.
+ *
+ * @param {T} key - The key of the substore
+ * @param {string} account - The account to access
+ * @returns {Function} A hook to access the substore
+ *
+ * @example
+ * // Usage:
+ * const useProfileStore = accountStoreHook('profiles', 'user123')
+ * // Then in a component:
+ * const profile = useProfileStore(state => state.profile)
+ */
 const accountStoreHook = <T extends keyof AccountStoreDataType>(
   key: T,
   account: string
 ) => {
   const _useStore = <U>(selector: (state: AccountStoreDataType[T]) => U) => {
     const accountStore = getAccountStore(account);
+    logger.debug(
+      `[accountStoreHook] Accessing ${key} store for account: ${account}`
+    );
     return accountStore[key](selector);
   };
 
   const use = _useStore as AccountStoreType[T];
   use.getState = () => {
     const accountStore = getAccountStore(account);
+    logger.debug(
+      `[accountStoreHook.getState] Getting ${key} state for account: ${account}`
+    );
     return accountStore[key].getState();
   };
   return use;

@@ -10,7 +10,6 @@ import {
 import { v4 as uuidv4 } from "uuid";
 
 import { sentryAddBreadcrumb, sentryTrackError } from "./sentry";
-import config from "../config";
 
 export let loggingFilePath: string;
 
@@ -54,9 +53,9 @@ export const rotateLoggingFile = async () => {
 
 const converseTransport: transportFunctionType = async (props) => {
   // Logs are subperformant, so only in dev
-  if (config.env === "dev") {
-    consoleTransport(props);
-  }
+  // if (config.env === "dev") {
+  consoleTransport(props);
+  // }
   if (props.level.severity >= 3) {
     sentryTrackError(props.rawMsg?.[0], props.rawMsg?.[1]);
   } else {

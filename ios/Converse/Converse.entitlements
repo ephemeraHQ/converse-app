@@ -4,20 +4,21 @@
 <dict>
 	<key>aps-environment</key>
 	<string>development</string>
-	<key>com.apple.security.application-groups</key>
-	<array>
-		<string>group.com.converse.dev</string>
-	</array>
-	<key>keychain-access-groups</key>
-	<array>
-		<string>$(AppIdentifierPrefix)com.converse.dev</string>
-	</array>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:dev.converse.xyz</string>
 		<string>applinks:dev.getconverse.app</string>
 	</array>
 	<key>com.apple.developer.usernotifications.communication</key>
-    <true/>
+	<true/>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.converse.dev</string>
+		<string>group.com.converse.native</string>
+	</array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)com.converse.dev</string>
+	</array>
 </dict>
 </plist>

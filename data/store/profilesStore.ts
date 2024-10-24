@@ -59,45 +59,110 @@ export type ProfilesStoreType = {
 };
 
 export const initProfilesStore = (account: string) => {
+  logger.debug("[ProfilesStore] Initializing store for account", { account });
+
   const profilesStore = create<ProfilesStoreType>()(
     persist(
       (set) => ({
         profiles: {},
-        // Setter keeps existing profiles but upserts new ones
-        setProfiles: (profiles) =>
-          set((state) => ({ profiles: { ...state.profiles, ...profiles } })),
-        saveSocials: (socials) =>
+
+        setProfiles: (profiles) => {
+          logger.debug("[ProfilesStore] Setting profiles", {
+            profileCount: Object.keys(profiles).length,
+            addresses: Object.keys(profiles),
+          });
+
+          set((state) => {
+            const newProfiles = { ...state.profiles, ...profiles };
+            logger.debug("[ProfilesStore] Updated profiles state", {
+              totalProfiles: Object.keys(newProfiles).length,
+            });
+            return { profiles: newProfiles };
+          });
+        },
+
+        saveSocials: (socials) => {
+          logger.debug("[ProfilesStore] Saving socials", {
+            addressCount: Object.keys(socials).length,
+          });
+
           set((state) => {
             const newState = { ...state };
             const now = new Date().getTime();
+
             Object.keys(socials).forEach((address) => {
-              newState.profiles[getCleanAddress(address)] = {
+              const cleanAddress = getCleanAddress(address);
+              logger.debug("[ProfilesStore] Processing social for address", {
+                originalAddress: address,
+                cleanAddress,
+                socialTypes: Object.keys(socials[address]),
+              });
+
+              newState.profiles[cleanAddress] = {
                 socials: socials[address],
                 updatedAt: now,
               };
             });
+
+            logger.debug("[ProfilesStore] Socials save complete", {
+              totalProfiles: Object.keys(newState.profiles).length,
+            });
             return newState;
-          }),
-        refreshFromStorage: () =>
+          });
+        },
+
+        refreshFromStorage: () => {
+          logger.debug("[ProfilesStore] Attempting to refresh from storage", {
+            account,
+          });
+
           set((state) => {
             const mmkvState = mmkv.getString(`store-${account}-profiles`);
-            if (!mmkvState) return state;
+
+            if (!mmkvState) {
+              logger.debug("[ProfilesStore] No stored state found");
+              return state;
+            }
+
             try {
               const parsed = JSON.parse(mmkvState);
+              logger.debug("[ProfilesStore] Successfully loaded stored state", {
+                profileCount: Object.keys(parsed.state.profiles || {}).length,
+              });
               return parsed.state;
             } catch (error) {
-              logger.error(error, {
-                context: "Could not refresh profiles from storage",
-              });
+              logger.error(
+                "[ProfilesStore] Failed to refresh from storage:",
+                error,
+                {
+                  context: "Could not refresh profiles from storage",
+                  account,
+                }
+              );
             }
             return state;
-          }),
+          });
+        },
       }),
       {
-        name: `store-${account}-profiles`, // Account-based storage so each account can have its own recos
+        name: `store-${account}-profiles`,
         storage: createJSONStorage(() => zustandMMKVStorage),
+        onRehydrateStorage: () => (state) => {
+          if (state) {
+            logger.debug("[ProfilesStore] Store rehydrated successfully", {
+              account,
+              profileCount: Object.keys(state.profiles || {}).length,
+            });
+          } else {
+            logger.warn("[ProfilesStore] Store rehydrated with no state", {
+              account,
+            });
+          }
+        },
       }
     )
   );
+
+  logger.debug("[ProfilesStore] Store initialization complete", { account });
   return profilesStore;
 };

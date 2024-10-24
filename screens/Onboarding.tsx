@@ -27,6 +27,8 @@ import { getXmtpBase64KeyFromSigner } from "../utils/xmtpRN/signIn";
 import { getXmtpClient } from "../utils/xmtpRN/sync";
 
 export default function Onboarding() {
+  logger.debug("[Onboarding] Screen mounted");
+
   const {
     connectionMethod,
     desktopConnectSessionId,
@@ -110,26 +112,40 @@ export default function Onboarding() {
   // (seedphrase / privy)
   const initXmtpClient = useCallback(async () => {
     if (!signer || !address || initiatingClientFor.current === address) {
+      logger.debug("[Onboarding] Skipping XMTP init - missing requirements", {
+        hasSigner: !!signer,
+        hasAddress: !!address,
+        currentInitAddress: initiatingClientFor.current,
+      });
       return;
     }
+
     initiatingClientFor.current = address;
+    logger.debug("[Onboarding] Starting XMTP client initialization");
 
     try {
       const base64Key = await getXmtpBase64KeyFromSigner(signer, async () => {
+        logger.warn("[Onboarding] Installation revoked");
         await awaitableAlert(
           translate("current_installation_revoked"),
           translate("current_installation_revoked_description")
         );
         resetOnboarding();
       });
-      if (!base64Key) return;
+
+      if (!base64Key) {
+        logger.warn("[Onboarding] No base64Key returned");
+        return;
+      }
+
       await connectWithBase64Key(base64Key, async () => {
+        logger.error("[Onboarding] Connection failed, logging out account");
         logoutAccount(await signer.getAddress(), false, true, () => {});
       });
     } catch (e) {
       initiatingClientFor.current = undefined;
       setLoading(false);
-      logger.error(e);
+      logger.error("[Onboarding] XMTP initialization failed:", e);
     }
   }, [address, connectWithBase64Key, resetOnboarding, setLoading, signer]);
 

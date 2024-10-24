@@ -5,6 +5,7 @@ import {
   tertiaryBackgroundColor,
 } from "@styles/colors";
 import { getCleanAddress } from "@utils/evm/address";
+import logger from "@utils/logger";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -55,6 +56,10 @@ import { Recommendation } from "../Recommendations/Recommendation";
 
 const usePeerSocials = () => {
   const conversation = useConversationContext("conversation");
+  logger.debug("[Chat] Getting peer socials", {
+    peerAddress: conversation?.peerAddress,
+  });
+
   const peerSocials = useProfilesStore(
     useShallow((s) =>
       conversation?.peerAddress
@@ -79,6 +84,12 @@ const useRenderItem = ({
 }) => {
   return useCallback(
     ({ item }: { item: MessageToDisplay }) => {
+      logger.debug("[Chat] 📱 Rendering message", {
+        messageId: item.id,
+        fromMe: item.fromMe,
+        contentType: item.contentType,
+      });
+
       return (
         <CachedChatMessage
           account={xmtpAddress}
@@ -124,15 +135,25 @@ const getItemType = (framesStore: any) => (item: MessageToDisplay) => {
 const getListArray = (
   xmtpAddress?: string,
   conversation?: XmtpConversationWithUpdate,
-  lastMessages?: number // Optional parameter to limit the number of messages
+  lastMessages?: number
 ) => {
+  logger.debug("[Chat] ⏰ Processing message list", {
+    xmtpAddress,
+    conversationId: conversation?.topic,
+    messageLimit: lastMessages,
+  });
+
   const messageAttachments = useChatStore.getState().messageAttachments;
   const isAttachmentLoading = (messageId: string) => {
     const attachment = messageAttachments && messageAttachments[messageId];
     return attachment?.loading;
   };
 
-  if (!conversation) return [];
+  if (!conversation) {
+    logger.debug("[Chat] No conversation found for message list");
+    return [];
+  }
+
   const reverseArray = [];
   // Filter out unwanted content types before list or reactions out of order can mess up the logic
   const filteredMessageIds = conversation.messagesIds.filter((messageId) => {
@@ -152,6 +173,11 @@ const getListArray = (
     return !notDisplayedContentTypes.some((c) =>
       message.contentType.startsWith(c)
     );
+  });
+
+  logger.debug("[Chat] 📥 Filtered message IDs", {
+    total: conversation.messagesIds.length,
+    filtered: filteredMessageIds.length,
   });
 
   let latestSettledFromMeIndex = -1;
@@ -236,11 +262,22 @@ const getListArray = (
         isAttachmentMessage(nextMessage?.contentType) &&
         isAttachmentLoading(nextMessageId);
     }
+
+    logger.debug("[Chat] 🔄 Processed message", {
+      messageId,
+      index,
+      hasPrevInSeries: message.hasPreviousMessageInSeries,
+      hasNextInSeries: message.hasNextMessageInSeries,
+    });
+
     reverseArray.push(message);
   }
 
-  // If lastMessages is defined, slice the array to return only the last n messages
   if (lastMessages !== undefined) {
+    logger.debug("[Chat] ⏰ Limiting messages", {
+      total: reverseArray.length,
+      limit: lastMessages,
+    });
     return reverseArray.slice(0, lastMessages);
   }
 
@@ -276,6 +313,8 @@ const useIsShowingPlaceholder = ({
 const keyExtractor = (item: MessageToDisplay) => item.id;
 
 export function Chat() {
+  logger.debug("[Chat] 📱 Component mounting");
+
   const conversation = useConversationContext("conversation");
   const AnimatedListView = useAnimatedListView(conversation);
   const isBlockedPeer = useConversationContext("isBlockedPeer");
@@ -413,17 +452,26 @@ export function Chat() {
   );
 
   useEffect(() => {
+    logger.debug("[Chat] 🔄 Setting up scroll listener");
     converseEventEmitter.on("scrollChatToMessage", scrollToMessage);
     return () => {
+      logger.debug("[Chat] 🔄 Cleaning up scroll listener");
       converseEventEmitter.off("scrollChatToMessage", scrollToMessage);
     };
   }, [scrollToMessage]);
 
   const handleOnLayout = useCallback(() => {
+    logger.debug("[Chat] ⚡️ Layout complete, preparing focus");
     setTimeout(() => {
       onReadyToFocus();
     }, 50);
   }, [onReadyToFocus]);
+
+  logger.debug("[Chat] 📱 Rendering chat component", {
+    hasConversation: !!conversation,
+    messageCount: listArray.length,
+    isBlocked: isBlockedPeer,
+  });
 
   return (
     <View
@@ -506,6 +554,8 @@ export function Chat() {
 
 // Lightweight chat preview component used for longpress on chat
 export function ChatPreview() {
+  logger.debug("[Chat] 📱 Mounting preview component");
+
   const conversation = useConversationContext("conversation");
   const AnimatedListView = useAnimatedListView(conversation);
   const isBlockedPeer = useConversationContext("isBlockedPeer");
@@ -558,6 +608,11 @@ export function ChatPreview() {
       onReadyToFocus();
     }, 50);
   }, [onReadyToFocus]);
+
+  logger.debug("[Chat] 📱 Rendering preview", {
+    messageCount: listArray.length,
+    isPreview: true,
+  });
 
   return (
     <View

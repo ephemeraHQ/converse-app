@@ -1,4 +1,5 @@
 import { getCleanAddress } from "@utils/evm/address";
+import logger from "@utils/logger";
 
 import { getProfilesForAddresses } from "../../../utils/api";
 import { getProfile } from "../../../utils/profile";
@@ -10,16 +11,31 @@ export const updateProfilesForConvos = async (
   account: string,
   profilesWithGroups: Map<string, XmtpConversation[]>
 ) => {
+  logger.debug("[ProfilesUpdate] Starting profiles update", {
+    account,
+    profileCount: profilesWithGroups.size,
+  });
+
   let batch: string[] = [];
   let rest = Array.from(profilesWithGroups.keys());
 
   while (rest.length > 0) {
     batch = rest.slice(0, 150);
     rest = rest.slice(150);
+    logger.debug("[ProfilesUpdate] Processing batch", {
+      batchSize: batch.length,
+      remaining: rest.length,
+    });
+
     const addressesSet = new Set(batch);
     const profilesByAddress = await getProfilesForAddresses(
       Array.from(addressesSet)
     );
+
+    logger.debug("[ProfilesUpdate] Profiles fetched", {
+      fetchedCount: Object.keys(profilesByAddress).length,
+    });
+
     const now = new Date().getTime();
     // Dispatching the profile to state
     const socialsToDispatch: {
@@ -39,18 +55,29 @@ export const refreshProfileForAddress = async (
   account: string,
   address: string
 ) => {
-  const now = new Date().getTime();
-  const profilesByAddress = await getProfilesForAddresses([address]);
-  // Save profiles to db
+  logger.debug("[ProfilesUpdate] Refreshing single profile", {
+    account,
+    address,
+  });
 
-  getProfilesStore(account)
-    .getState()
-    .setProfiles({
-      [address]: {
-        socials: profilesByAddress[address],
-        updatedAt: now,
-      },
-    });
+  try {
+    const now = new Date().getTime();
+    const profilesByAddress = await getProfilesForAddresses([address]);
+    logger.debug("[ProfilesUpdate] Profile fetched successfully");
+
+    // Save profiles to db
+
+    getProfilesStore(account)
+      .getState()
+      .setProfiles({
+        [address]: {
+          socials: profilesByAddress[address],
+          updatedAt: now,
+        },
+      });
+  } catch (error) {
+    logger.error("[ProfilesUpdate] Error refreshing profile:", error);
+  }
 };
 
 export const refreshProfilesIfNeeded = async (account: string) => {
