@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 7.0.0",
+    "version": ">=12.6.0",
     "appVersionSource": "local"
   },
   "build": {
@@ -34,6 +34,10 @@
         "cocoapods": "1.14.3"
       }
     },
+    "production-android": {
+      "extends": "production",
+      "autoIncrement": false
+    },
     "preview": {
       "extends": "production",
       "channel": "preview",
@@ -46,6 +50,10 @@
       "ios": {
         "resourceClass": "medium"
       }
+    },
+    "preview-android": {
+      "extends": "preview",
+      "autoIncrement": false
     },
     "ios-simulator": {
       "extends": "development",
@@ -76,6 +84,9 @@
         "ascAppId": "1658819514"
       }
     },
+    "production-android": {
+      "extends": "production"
+    },
     "preview": {
       "android": {
         "track": "internal"
@@ -83,6 +94,9 @@
       "ios": {
         "ascAppId": "6478027666"
       }
+    },
+    "preview-android": {
+      "extends": "preview"
     }
   }
 }
