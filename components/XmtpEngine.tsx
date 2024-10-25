@@ -55,6 +55,7 @@ class XmtpEngine {
     this.hydrationDone = hydrationDone;
     this.accountsStoreSubscription = useAccountsStore.subscribe(
       (state, previousState) => {
+        if (!previousState?.accounts || !state?.accounts) return;
         if (previousState.accounts !== state.accounts) {
           const previousAccounts = new Set(previousState.accounts);
           const newAccounts = new Set(state.accounts);
