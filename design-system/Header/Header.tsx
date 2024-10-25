@@ -86,7 +86,7 @@ export type HeaderProps = {
   /**
    * What happens when you press the left icon or text action.
    */
-  onLeftPress?: TouchableOpacityProps["onPress"];
+  onLeftPress?: ITouchableOpacityProps["onPress"];
   /**
    * Icon that should appear on the right.
    * Can be used with `onRightPress`.
@@ -172,7 +172,7 @@ export function Header(props: HeaderProps) {
         $containerStyleOverride,
       ]}
     >
-      <HStack style={[$styles.row, $wrapper, $styleOverride]}>
+      <HStack style={[$wrapper, $styleOverride]}>
         <HeaderAction
           tx={leftTx}
           text={leftText}

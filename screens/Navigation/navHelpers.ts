@@ -6,11 +6,10 @@ import {
   textPrimaryColor,
 } from "@styles/colors";
 import { converseEventEmitter } from "@utils/events";
-import { ColorSchemeName, Platform, useWindowDimensions } from "react-native";
+import { ColorSchemeName, Platform } from "react-native";
 
 import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
 import config from "../../config";
-import { isDesktop } from "../../utils/device";
 
 export const getConverseStateFromPath =
   (navigationName: string) => (path: string, options: any) => {
@@ -187,9 +186,3 @@ export const screenListeners =
       navigationStates[navigationName] = e.data;
     },
   });
-
-export const useIsSplitScreen = () => {
-  const dimensions = useWindowDimensions();
-
-  return dimensions.width > config.splitScreenThreshold || isDesktop;
-};

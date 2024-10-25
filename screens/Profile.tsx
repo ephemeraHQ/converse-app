@@ -34,14 +34,11 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ConversationNavParams } from "./Navigation/ConversationNav";
-import { NavigationParamList } from "./Navigation/Navigation";
-import { useIsSplitScreen } from "./Navigation/navHelpers";
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import Avatar from "../components/Avatar";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
@@ -80,11 +77,13 @@ import {
 import {
   getPreferredAvatar,
   getPreferredName,
-  getProfile,
   getPreferredUsername,
+  getProfile,
 } from "../utils/profile";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
+import { ConversationNavParams } from "./Navigation/ConversationNav";
+import { NavigationParamList } from "./Navigation/Navigation";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 
 export default function ProfileScreen({
@@ -120,7 +119,7 @@ export default function ProfileScreen({
   const { permissions: groupPermissions } = useGroupPermissions(
     groupTopic ?? ""
   );
-  const isSplitScreen = useIsSplitScreen();
+
   const { getXmtpSigner } = useXmtpSigner();
   const privySigner = usePrivySigner();
 
@@ -322,39 +321,35 @@ export default function ProfileScreen({
         title: translate("send_a_message"),
         titleColor: primaryColor(colorScheme),
         action: () => {
-          setTimeout(
-            () => {
-              const isPreviouslyInNavStack = navigation
-                .getState()
-                .routes.some((route) => {
-                  if (route.name !== "Conversation") {
-                    return false;
-                  }
-                  const params = route.params as ConversationNavParams;
-                  return (
-                    params?.mainConversationWithPeer ===
-                    peerAddress.toLowerCase()
-                  );
-                });
-              if (isPreviouslyInNavStack) {
-                navigation.navigate({
-                  name: "Conversation",
-                  params: {
-                    mainConversationWithPeer: peerAddress,
-                    focus: true,
-                  },
-                });
-              } else {
-                navigation.dispatch(
-                  StackActions.push("Conversation", {
-                    mainConversationWithPeer: peerAddress,
-                    focus: true,
-                  })
+          setTimeout(() => {
+            const isPreviouslyInNavStack = navigation
+              .getState()
+              .routes.some((route) => {
+                if (route.name !== "Conversation") {
+                  return false;
+                }
+                const params = route.params as ConversationNavParams;
+                return (
+                  params?.mainConversationWithPeer === peerAddress.toLowerCase()
                 );
-              }
-            },
-            isSplitScreen ? 0 : 300
-          );
+              });
+            if (isPreviouslyInNavStack) {
+              navigation.navigate({
+                name: "Conversation",
+                params: {
+                  mainConversationWithPeer: peerAddress,
+                  focus: true,
+                },
+              });
+            } else {
+              navigation.dispatch(
+                StackActions.push("Conversation", {
+                  mainConversationWithPeer: peerAddress,
+                  focus: true,
+                })
+              );
+            }
+          }, 300);
         },
         leftView:
           Platform.OS === "android" ? (
@@ -587,7 +582,6 @@ export default function ProfileScreen({
     groupPermissions?.removeAdminPolicy,
     setPeersStatus,
     navigation,
-    isSplitScreen,
     removeMember,
     promoteToAdmin,
     promoteToSuperAdmin,

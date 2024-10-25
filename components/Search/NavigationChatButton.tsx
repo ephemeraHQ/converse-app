@@ -10,7 +10,6 @@ import {
   currentAccount,
   useProfilesStore,
 } from "../../data/store/accountsStore";
-import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
 import { navigate } from "../../utils/navigation";
 import { canGroupMessage } from "../../utils/xmtpRN/conversations";
 import Button from "../Button/Button";
@@ -29,7 +28,6 @@ export function NavigationChatButton({
   addToGroup,
 }: NavigationChatProps) {
   const styles = useStyles();
-  const isSplitScreen = useIsSplitScreen();
   const [loading, setLoading] = useState(false);
   const profile = useProfilesStore(
     useShallow((s) => getProfile(address, s.profiles))
@@ -41,16 +39,13 @@ export function NavigationChatButton({
       const parent = navigation.getParent();
       parent?.goBack();
     }
-    setTimeout(
-      () => {
-        navigate("Conversation", {
-          mainConversationWithPeer: address,
-          focus: true,
-        });
-      },
-      isSplitScreen ? 0 : 300
-    );
-  }, [address, isSplitScreen, navigation]);
+    setTimeout(() => {
+      navigate("Conversation", {
+        mainConversationWithPeer: address,
+        focus: true,
+      });
+    }, 300);
+  }, [address, navigation]);
 
   const addToGroupIfPossible = useCallback(async () => {
     if (loading) return;

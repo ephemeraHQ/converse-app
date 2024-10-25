@@ -25,7 +25,6 @@ import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
 import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 import { NavigationParamList } from "./Navigation/Navigation";
-import { useIsSplitScreen } from "./Navigation/navHelpers";
 import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
@@ -97,7 +96,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     !initialLoadDoneOnce && flatListItems.items.length <= 1;
   const showNoResult = flatListItems.items.length === 0 && !!searchQuery;
 
-  const isSplit = useIsSplitScreen();
   const sharingMode = !!route.params?.frameURL;
 
   const requestsCount = useMemo(() => {
@@ -164,10 +162,10 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   useEffect(() => {
     // In split screen, when selecting a convo with search active,
     // let's clear the search
-    if (isSplit && openedConversationTopic) {
+    if (openedConversationTopic) {
       clearSearch();
     }
-  }, [clearSearch, isSplit, openedConversationTopic]);
+  }, [clearSearch, openedConversationTopic]);
 
   const ListHeaderComponents: React.ReactElement[] = [
     <PinnedConversations
