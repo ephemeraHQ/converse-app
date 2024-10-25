@@ -1,4 +1,4 @@
-import { useProfilesStore } from "@data/store/accountsStore";
+import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { TouchableOpacity } from "@design-system/TouchableOpacity";
@@ -14,7 +14,7 @@ import {
 import { shortAddress } from "@utils/str";
 import { SimulateChangeType, SimulateAssetChangesResponse } from "alchemy-sdk";
 import { Image, ImageSource } from "expo-image";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { StyleSheet, TextStyle, View, ViewStyle } from "react-native";
 
 import TransactionSend from "../../assets/transaction-send.png";
@@ -46,12 +46,14 @@ type TransactionResultProps = {
 
 type SimulationResultProps = {
   changes: SimulateAssetChangesResponse["changes"] | undefined;
+  walletAddress: string | undefined;
 };
 
 type ITransactionContentProps = {
   simulation: SimulationState;
   txState: TransactionState;
   walletApp: InstalledWallet | undefined;
+  walletAddress: string | undefined;
   address: string | undefined;
   switchWallet: () => Promise<void>;
 };
@@ -60,6 +62,7 @@ export const TransactionContent = ({
   simulation,
   txState,
   walletApp,
+  walletAddress,
   address,
   switchWallet,
 }: ITransactionContentProps) => {
@@ -80,7 +83,10 @@ export const TransactionContent = ({
   return (
     <>
       {simulation.status === "success" ? (
-        <SimulationResult changes={simulation.result?.changes} />
+        <SimulationResult
+          changes={simulation.result?.changes}
+          walletAddress={walletAddress}
+        />
       ) : (
         <SimulationFailure error={simulation.error} />
       )}
@@ -133,11 +139,27 @@ const TransactionResult = ({ status, error }: TransactionResultProps) => {
   );
 };
 
-const SimulationResult = ({ changes }: SimulationResultProps) => {
+const SimulationResult = ({
+  changes,
+  walletAddress,
+}: SimulationResultProps) => {
   const profiles = useProfilesStore((s) => s.profiles);
+  const accountAddress = useCurrentAccount() as string;
+  const myChanges = useMemo(() => {
+    const myAddresses = [accountAddress.toLowerCase()];
+    if (walletAddress) {
+      myAddresses.push(walletAddress.toLowerCase());
+    }
+    return changes?.filter((change) =>
+      myAddresses.some(
+        (a) => a === change.to.toLowerCase() || a === change.from.toLowerCase()
+      )
+    );
+  }, [accountAddress, changes, walletAddress]);
+
   return (
     <>
-      {changes?.map((change, index) => (
+      {myChanges?.map((change, index) => (
         <View key={`${change.contractAddress}-${index}`}>
           <TransactionPreviewRow
             title={

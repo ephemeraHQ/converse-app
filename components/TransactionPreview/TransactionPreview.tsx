@@ -211,6 +211,7 @@ export function TransactionPreview() {
           simulation={simulation}
           txState={txState}
           walletApp={walletApp}
+          walletAddress={address}
           address={address}
           switchWallet={switchWallet}
         />

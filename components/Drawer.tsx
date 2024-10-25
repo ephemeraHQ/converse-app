@@ -1,3 +1,4 @@
+import { AnimatedScrollView } from "@design-system/ScrollView";
 import { backgroundColor } from "@styles/colors";
 import { ReanimatedView } from "@utils/animations";
 import { useKeyboardAnimation } from "@utils/animations/keyboardAnimation";
@@ -155,7 +156,7 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
   const { height: keyboardHeight } = useKeyboardAnimation();
   const { bottom } = useSafeAreaInsets();
 
-  const animtedStyle = useAnimatedStyle(() => ({
+  const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translation.value }],
     paddingBottom: Platform.OS === "ios" ? keyboardHeight.value + bottom : 0,
   }));
@@ -173,13 +174,14 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
             <ReanimatedView style={[styles.backdrop, backgroundStyle]} />
           </TouchableWithoutFeedback>
           <GestureDetector gesture={composed}>
-            <ReanimatedView
-              style={[styles.trayContainer, animtedStyle, style]}
+            <AnimatedScrollView
+              style={[styles.trayContainer, animatedStyle, style]}
               layout={LinearTransition.springify()}
+              alwaysBounceVertical={false}
             >
               {showHandle && <View style={styles.handle} />}
               {children}
-            </ReanimatedView>
+            </AnimatedScrollView>
           </GestureDetector>
         </GestureHandlerRootView>
       </Portal>
