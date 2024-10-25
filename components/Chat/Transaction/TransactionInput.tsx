@@ -2,12 +2,12 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   actionSecondaryColor,
-  backgroundColor,
   dangerColor,
   itemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { useAppTheme } from "@theme/useAppTheme";
 import { Signer } from "ethers";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -356,9 +356,11 @@ export default function TransactionInput() {
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
+
   return StyleSheet.create({
     transactionInputContainer: {
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: theme.colors.background.surface,
       flexDirection: "row",
       height: 88,
     },
@@ -371,7 +373,7 @@ const useStyles = () => {
     moneyInputContainer: {
       flexDirection: "row",
       alignSelf: "center",
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: theme.colors.background.surface,
       height: 50,
       marginVertical: 6,
       paddingLeft: 12,

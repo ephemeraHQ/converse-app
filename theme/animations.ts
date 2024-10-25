@@ -24,8 +24,7 @@ export const animations = {
       .stiffness(SICK_STIFFNESS)
       .damping(SICK_DAMPING),
 
-  fadeInUpSlow: () => FadeInUp.duration(timing.medium).easing(SICK_EASE_OUT),
+  fadeInUpSlow: () => FadeInUp.duration(timing.slow).easing(SICK_EASE_OUT),
 
-  fadeInDownSlow: () =>
-    FadeInDown.duration(timing.medium).easing(SICK_EASE_OUT),
+  fadeInDownSlow: () => FadeInDown.duration(timing.slow).easing(SICK_EASE_OUT),
 };

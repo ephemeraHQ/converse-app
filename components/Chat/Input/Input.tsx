@@ -4,8 +4,8 @@ import {
   itemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
-  backgroundColor,
 } from "@styles/colors";
+import { useAppTheme } from "@theme/useAppTheme";
 import React, {
   useCallback,
   useMemo,
@@ -484,9 +484,11 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
+
   return StyleSheet.create({
     chatInputWrapper: {
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: theme.colors.background.surface,
       width: "100%",
       bottom: 0,
     },
@@ -495,7 +497,7 @@ const useStyles = () => {
       paddingVertical: 8,
       borderTopWidth: 0.5,
       borderTopColor: itemSeparatorColor(colorScheme),
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: theme.colors.background.surface,
     },
     chatInputContainer: {
       flexDirection: "row",

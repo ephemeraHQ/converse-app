@@ -26,7 +26,6 @@ const update = async () => {
   try {
     await executeCommand("node", ["scripts/build/eas.js", "--env", env]);
     await executeCommand("node", [`scripts/build/ios/${env}.js`]);
-    await executeCommand("node", [`scripts/build/android/${env}.js`]);
     const updateEnv = { ...process.env };
     if (env === "preview") {
       updateEnv.EXPO_ENV = "preview";

@@ -1,9 +1,6 @@
-import {
-  backgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "@styles/colors";
+import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
+import { useAppTheme } from "@theme/useAppTheme";
 import {
   Platform,
   StyleSheet,
@@ -78,6 +75,8 @@ export default function ChatInputReplyPreview({
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
+
   return StyleSheet.create({
     replyContainer: {
       ...Platform.select({
@@ -85,7 +84,7 @@ const useStyles = () => {
         android: {},
         web: {},
       }),
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: theme.colors.background.surface,
       alignItems: "center",
       flexDirection: "row",
     },

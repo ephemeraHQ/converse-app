@@ -1,4 +1,4 @@
-const en = {
+export const en = {
   // Onboarding
   walletSelector: {
     title: "Your messages.\nYour privacy.",
@@ -344,7 +344,14 @@ const en = {
   // New Conversation
   cannot_be_added_to_group_yet:
     "{{name}} needs to update Converse to be added to a group",
-};
 
-export default en;
+  // Group Updated Message
+  group_name_changed: '{{name}} changed the group name to "{{newValue}}".',
+  group_member_joined: "{{name}} joined the conversation",
+  group_member_left: "{{name}} left the conversation",
+  group_photo_changed: "{{name}} changed the group photo.",
+  group_description_changed:
+    '{{name}} changed the group description to "{{newValue}}".',
+  group_name_changed_to: '{{name}} changed the group name to "{{newValue}}".',
+};
 export type Translations = typeof en;

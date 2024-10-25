@@ -52,7 +52,7 @@ export default function ProfileSettingsButton() {
     if (Platform.OS === "android" || Platform.OS === "web") {
       return (
         <Button
-          variant="primary"
+          action="primary"
           title={stringBalance}
           onPress={openProfile}
           style={{

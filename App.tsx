@@ -7,12 +7,9 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PortalProvider } from "@gorhom/portal";
 import { PrivyProvider } from "@privy-io/expo";
 import { queryClient } from "@queries/queryClient";
-import {
-  backgroundColor,
-  MaterialDarkTheme,
-  MaterialLightTheme,
-} from "@styles/colors";
+import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { useAppTheme, useThemeProvider } from "@theme/useAppTheme";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
@@ -27,8 +24,8 @@ import {
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
-import "./utils/splash/splash";
 
+import "./utils/splash/splash";
 import XmtpEngine from "./components/XmtpEngine";
 import config from "./config";
 import { useAppStore } from "./data/store/appStore";
@@ -38,7 +35,6 @@ import {
   updateLastVersionOpen,
 } from "./data/updates/asyncUpdates";
 import Main from "./screens/Main";
-import { useThemeProvider } from "./theme/useAppTheme";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
@@ -113,7 +109,7 @@ const AppKeyboardProvider =
 export default function AppWithProviders() {
   const colorScheme = useColorScheme();
 
-  const theme = useMemo(() => {
+  const paperTheme = useMemo(() => {
     return colorScheme === "dark" ? MaterialDarkTheme : MaterialLightTheme;
   }, [colorScheme]);
 
@@ -127,7 +123,7 @@ export default function AppWithProviders() {
           <AppKeyboardProvider>
             <ActionSheetProvider>
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                <PaperProvider theme={theme}>
+                <PaperProvider theme={paperTheme}>
                   <PortalProvider>
                     <App />
                   </PortalProvider>
@@ -142,15 +138,16 @@ export default function AppWithProviders() {
 }
 
 const useStyles = () => {
-  const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
+
   return useMemo(
     () =>
       StyleSheet.create({
         safe: {
           flex: 1,
-          backgroundColor: backgroundColor(colorScheme),
+          backgroundColor: theme.colors.background.surface,
         },
       }),
-    [colorScheme]
+    [theme]
   );
 };

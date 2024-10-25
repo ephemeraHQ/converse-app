@@ -97,7 +97,7 @@ export default function GroupScreen({
           )}
           {!errorMessage && (
             <Button
-              variant="primary"
+              action="primary"
               title={joining ? "Joining..." : "Join group"}
               style={[
                 {

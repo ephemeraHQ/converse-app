@@ -214,7 +214,7 @@ export default function GroupInviteScreen({
             joinStatus !== "ACCEPTED" &&
             joinStatus !== "REJECTED" && (
               <Button
-                variant="primary"
+                action="primary"
                 title={translate("join_group")}
                 style={styles.cta}
                 onPress={joinGroup}
@@ -222,7 +222,7 @@ export default function GroupInviteScreen({
             )}
           {polling && (
             <Button
-              variant="primary"
+              action="primary"
               title={translate("joining")}
               style={styles.cta}
             />

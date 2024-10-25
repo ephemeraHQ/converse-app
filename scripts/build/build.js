@@ -1,5 +1,4 @@
 const { spawn, execSync } = require("child_process");
-const fs = require("fs");
 const isClean = require("git-is-clean");
 const path = require("path");
 const prompts = require("prompts");
