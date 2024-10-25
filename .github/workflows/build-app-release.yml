@@ -48,13 +48,13 @@ jobs:
           echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> .env.production
 
       - name: Update EAS config with env variables
-        run: node scripts/build/eas.js --env production
+        run: node scripts/Øbuild/eas.js --env production
 
       - name: Update Android Files
         run: node scripts/build/android/build.js
 
       - name: Build for Android
-        run: eas build --profile production-android --platform android --non-interactive --auto-submit --no-wait
+        run: eas build --profile production --platform android --non-interactive --auto-submit --no-wait
 
   build-ios:
     runs-on: ubuntu-latest

@@ -43,6 +43,7 @@ module.exports = {
           "@utils": "./utils",
           "@theme": "./theme",
           "@design-system": "./design-system",
+          "@navigation": "./navigation",
         },
       },
     ],

@@ -3,15 +3,15 @@ import { useSettingsStore } from "@data/store/accountsStore";
 import { translate } from "@i18n/index";
 import {
   backgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-  tertiaryBackgroundColor,
   itemSeparatorColor,
   primaryColor,
+  tertiaryBackgroundColor,
+  textPrimaryColor,
+  textSecondaryColor,
 } from "@styles/colors";
-import { BorderRadius, Paddings, Margins } from "@styles/sizes";
+import { BorderRadius, Margins, Paddings } from "@styles/sizes";
 import React from "react";
-import { View, Text, StyleSheet, useColorScheme, Platform } from "react-native";
+import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import config from "../../config";
 import {
@@ -20,9 +20,9 @@ import {
 } from "../../data/store/accountsStore";
 import { ShareProfileContent } from "../../screens/ShareProfile";
 import {
-  getPreferredUsername,
-  getPreferredName,
   getPreferredAvatar,
+  getPreferredName,
+  getPreferredUsername,
   getProfile,
 } from "../../utils/profile";
 import NewConversationButton from "../ConversationList/NewConversationButton";
@@ -105,11 +105,7 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
         </View>
         {hasRecommendations ? (
           <View style={styles.recommendationsContainer}>
-            <Recommendations
-              navigation={navigation}
-              visibility="EMBEDDED"
-              showTitle={false}
-            />
+            <Recommendations visibility="EMBEDDED" showTitle={false} />
           </View>
         ) : (
           <View style={styles.qrCodeContainer}>
@@ -124,9 +120,7 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
           </View>
         )}
       </View>
-      {Platform.OS === "android" && (
-        <NewConversationButton navigation={navigation} route={route} />
-      )}
+      {Platform.OS === "android" && <NewConversationButton />}
     </View>
   );
 };

@@ -2,8 +2,12 @@ import { NavigationProp } from "@react-navigation/native";
 import { textPrimaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { useCallback } from "react";
-import { Platform, StyleSheet, useColorScheme } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import {
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native";
 import { StackAnimationTypes } from "react-native-screens";
 
 import {
