@@ -1,7 +1,7 @@
 {
   "cli": {
     "version": ">= 7.0.0",
-    "appVersionSource": "remote"
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
@@ -21,6 +21,7 @@
       }
     },
     "production": {
+      "autoIncrement": true,
       "channel": "production",
       "android": {
         "buildType": "app-bundle",
@@ -44,18 +45,6 @@
       },
       "ios": {
         "resourceClass": "medium"
-      }
-    },
-    "preview-android": {
-      "extends": "preview",
-      "env": {
-        "EXPO_PLATFORM": "android"
-      }
-    },
-    "preview-ios": {
-      "extends": "preview",
-      "env": {
-        "EXPO_PLATFORM": "ios"
       }
     },
     "ios-simulator": {
