@@ -247,11 +247,15 @@ export const useHandleTxAction = () => {
   return { handleTxAction };
 };
 
-export const isFrameMessage = (message: MessageToDisplay): boolean => {
-  const framesStore = useFramesStore.getState().frames;
+export const isFrameMessage = (
+  message: MessageToDisplay,
+  framesStore: {
+    [frameUrl: string]: FrameWithType;
+  }
+): boolean => {
   return (
     isContentType("text", message.contentType) &&
     !!message.converseMetadata?.frames?.[0] &&
-    !!framesStore[message.converseMetadata.frames[0].toLowerCase()]
+    !!framesStore[message.converseMetadata.frames[0].toLowerCase().trim()]
   );
 };

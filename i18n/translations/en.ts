@@ -209,6 +209,14 @@ export const en = {
   do_you_trust_this_contact: "Do you trust this contact?",
   do_you_want_to_join_this_group: "Do you want to join this group?",
   join_this_group: "Join this group",
+  identity_not_found_title: "Identity not found",
+  identity_not_found:
+    "Identity {{identity}} not found or invalid. Please check it and try again",
+  identity_not_found_timeout:
+    "Identity {{identity}} took too long to resolve. Please check your connection and try again",
+  identity_not_yet_xmtp_title: "Not yet using XMTP",
+  identity_not_yet_xmtp:
+    "{{identity}} is not yet using XMTP. Tell them to download the app at converse.xyz and log in with their wallet",
 
   // Conversation Context Menu
   pin: "Pin",

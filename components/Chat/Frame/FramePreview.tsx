@@ -344,7 +344,7 @@ export default function FramePreview({
           <FrameImage
             frameImage={frame.frameImage}
             frameImageAspectRatio={
-              frame.frameInfo?.image?.aspectRatio || "1.91.1"
+              frame.frameInfo?.image?.aspectRatio || "1.91:1"
             }
             linkToOpen={initialFrame.url}
             useMemoryCache={!frame.isInitialFrame || Platform.OS === "web"}
