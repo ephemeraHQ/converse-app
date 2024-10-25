@@ -25,7 +25,7 @@ export const ChatMessageReactions = memo(
     const { theme } = useAppTheme();
     const userAddress = useCurrentAccount();
 
-    const rolledUpReactions = useMessageReactionsRolledup({
+    const rolledUpReactions = useMessageReactionsRolledUp({
       reactions,
       userAddress: userAddress!, // ! If we are here, the user is logged in
     });
@@ -43,7 +43,12 @@ export const ChatMessageReactions = memo(
           message.fromMe && { justifyContent: "flex-end" },
         ]}
       >
-        <TouchableHighlight onPress={handlePress} underlayColor="transparent">
+        <TouchableHighlight
+          onPress={handlePress}
+          underlayColor="transparent"
+          accessibilityRole="button"
+          accessibilityLabel="View reactions"
+        >
           <VStack
             style={[
               styles.reactionButton,
@@ -73,6 +78,10 @@ export const ChatMessageReactions = memo(
       return false;
     }
     if (prevProps.message.lastUpdateAt !== nextProps.message.lastUpdateAt) {
+      return false;
+    }
+    // Compare reactions to ensure updates are not missed
+    if (prevProps.reactions !== nextProps.reactions) {
       return false;
     }
     return true;
@@ -110,7 +119,7 @@ const useStyles = () => {
 
 const MAX_REACTION_EMOJIS_SHOWN = 3;
 
-function useMessageReactionsRolledup(arg: {
+function useMessageReactionsRolledUp(arg: {
   reactions: MessageReactions;
   userAddress: string;
 }) {
