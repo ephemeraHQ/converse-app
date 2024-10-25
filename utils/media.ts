@@ -3,7 +3,7 @@ import Big from "big.js";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useCallback, useState } from "react";
-import { Alert, Image, Linking, Platform, useColorScheme } from "react-native";
+import { Alert, Image, Linking, useColorScheme } from "react-native";
 
 import logger from "./logger";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
@@ -346,11 +346,8 @@ export const useMediaSelect = (payload?: MediaSelect) => {
           }
         }
       );
-    if (Platform.OS === "web") {
-      pickMedia();
-    } else {
-      executeAfterKeyboardClosed(showOptions);
-    }
+
+    executeAfterKeyboardClosed(showOptions);
   }, [colorScheme, openCamera, pickMedia]);
 
   return { media, addMedia };
@@ -431,7 +428,7 @@ export const compressAndResizeImage = async (
     `[ImageUtils] Resizing and compressing image to ${newSize.height}x${newSize.width} (was ${imageSize.height}x${imageSize.width})`
   );
   const manipResult = await manipulateAsync(imageURI, [{ resize: newSize }], {
-    base64: Platform.OS === "web",
+    base64: false,
     compress: avatar ? 0.6 : 0.3,
     format: SaveFormat.JPEG,
   });

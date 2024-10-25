@@ -29,7 +29,7 @@ export default function UserProfileNav() {
           />
         ),
         headerTintColor:
-          Platform.OS === "android" || Platform.OS === "web"
+          Platform.OS === "android"
             ? textSecondaryColor(colorScheme)
             : textPrimaryColor(colorScheme),
       }}
