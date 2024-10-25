@@ -2,7 +2,7 @@ import { createBottomSheetModalRef } from "@design-system/BottomSheet/BottomShee
 
 import { RolledUpReactions } from "../MessageReactions.types";
 import {
-  initialMessageReactionsState,
+  resetMessageReactionsStore,
   useMessageReactionsStore,
 } from "./MessageReactions.store";
 
@@ -11,8 +11,16 @@ export const bottomSheetModalRef = createBottomSheetModalRef();
 export function openMessageReactionsDrawer(
   rolledUpReactions: RolledUpReactions
 ) {
-  bottomSheetModalRef.current?.present();
-  useMessageReactionsStore.setState({ rolledUpReactions });
+  try {
+    if (!bottomSheetModalRef.current) {
+      throw new Error("Modal reference not initialized");
+    }
+    useMessageReactionsStore.getState().setRolledUpReactions(rolledUpReactions);
+    bottomSheetModalRef.current.present();
+  } catch (error) {
+    console.error("Failed to open message reactions drawer:", error);
+    resetMessageReactionsDrawer();
+  }
 }
 
 export function closeMessageReactionsDrawer(arg?: { resetStore?: boolean }) {
@@ -24,7 +32,7 @@ export function closeMessageReactionsDrawer(arg?: { resetStore?: boolean }) {
 }
 
 export function resetMessageReactionsDrawer() {
-  useMessageReactionsStore.setState(initialMessageReactionsState);
+  resetMessageReactionsStore();
 }
 
 export function useMessageReactionsRolledUpReactions() {
