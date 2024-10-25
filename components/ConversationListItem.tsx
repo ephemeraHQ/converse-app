@@ -511,6 +511,7 @@ const ConversationListItem = memo(function ConversationListItem({
         <TouchableHighlight
           underlayColor={clickedItemBackgroundColor(colorScheme)}
           delayPressIn={75}
+          onPress={openConversation}
           onLongPress={onLongPress}
           style={{
             backgroundColor: selected
