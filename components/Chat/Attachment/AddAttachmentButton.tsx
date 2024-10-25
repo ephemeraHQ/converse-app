@@ -14,10 +14,10 @@ import { uploadRemoteAttachment } from "../../../utils/attachment";
 import { useConversationContext } from "../../../utils/conversation";
 import { converseEventEmitter } from "../../../utils/events";
 import {
+  AttachmentSelectedStatus,
   compressAndResizeImage,
   pickMediaFromLibrary,
   takePictureFromCamera,
-  AttachmentSelectedStatus,
 } from "../../../utils/media";
 import { sentryTrackMessage } from "../../../utils/sentry";
 import { encryptRemoteAttachment } from "../../../utils/xmtpRN/attachments";
@@ -92,7 +92,7 @@ export default function AddAttachmentButton({
         });
         const resizedImage = await compressAndResizeImage(asset.uri);
         let mimeType = mime.getType(resizedImage.uri);
-        if (!mimeType && Platform.OS === "web") {
+        if (!mimeType) {
           const match = resizedImage.uri.match(DATA_MIMETYPE_REGEX);
           if (match && match[1]) {
             mimeType = match[1];
@@ -110,18 +110,15 @@ export default function AddAttachmentButton({
             encryptedAttachment
           );
           const selectedAttachment: SelectedAttachment = {
-            attachmentToSave:
-              Platform.OS === "web"
-                ? undefined
-                : {
-                    filePath: resizedImage.uri,
-                    fileName: asset.uri.split("/").pop() || `${uuidv4()}`,
-                    mimeType,
-                    dimensions: {
-                      height: resizedImage.height,
-                      width: resizedImage.width,
-                    },
-                  },
+            attachmentToSave: {
+              filePath: resizedImage.uri,
+              fileName: asset.uri.split("/").pop() || `${uuidv4()}`,
+              mimeType,
+              dimensions: {
+                height: resizedImage.height,
+                width: resizedImage.width,
+              },
+            },
             uploadedAttachment,
           };
           onSelectionStatusChange("uploaded", selectedAttachment);
@@ -180,9 +177,6 @@ export default function AddAttachmentButton({
             break;
         }
         assetRef.current = undefined;
-        if (Platform.OS === "web") {
-          pickMedia();
-        }
       }}
       actions={[
         {

@@ -23,9 +23,6 @@ import NewConversationButton from "../components/ConversationList/NewConversatio
 import RequestsButton from "../components/ConversationList/RequestsButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
-import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
-import { NavigationParamList } from "./Navigation/Navigation";
-import { useIsSplitScreen } from "./Navigation/navHelpers";
 import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
@@ -45,6 +42,9 @@ import {
 } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
 import { sortRequestsBySpamScore } from "../utils/xmtpRN/conversations";
+import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
+import { NavigationParamList } from "./Navigation/Navigation";
+import { useIsSplitScreen } from "./Navigation/navHelpers";
 
 type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;
@@ -250,9 +250,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
         ListFooterComponent={ListFooterComponent}
       />
       <Recommendations visibility="HIDDEN" />
-      {(Platform.OS === "android" || Platform.OS === "web") && !sharingMode && (
-        <NewConversationButton />
-      )}
+      {Platform.OS === "android" && !sharingMode && <NewConversationButton />}
     </>
   );
 }

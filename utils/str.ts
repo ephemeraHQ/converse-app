@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Dimensions, PixelRatio, Platform, TextInput } from "react-native";
+import { Dimensions, PixelRatio, TextInput } from "react-native";
 
 import { getLensHandleFromConversationIdAndPeer } from "./lens";
 import logger from "./logger";
@@ -24,7 +24,6 @@ export const shortAddress = (address: string) =>
 
 export const shortDisplayName = (displayName: string | undefined): string => {
   if (!displayName) return "";
-  if (Platform.OS === "web") return displayName;
 
   const screenWidth = Dimensions.get("window").width;
   let maxLength;
