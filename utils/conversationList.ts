@@ -1,5 +1,5 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { NavigationParamList } from "@screens/Navigation/Navigation";
 import { MutableRefObject } from "react";
 import { createContext, useContextSelector } from "use-context-selector";
 

@@ -3,6 +3,7 @@ import { useGroupConsent } from "@hooks/useGroupConsent";
 import { useGroupCreator } from "@hooks/useGroupCreator";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { translate } from "@i18n";
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { backgroundColor, textPrimaryColor } from "@styles/colors";
@@ -15,7 +16,6 @@ import {
   useCurrentAccount,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
-import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../../utils/conversation";
 import Button from "../../Button/Button";
 

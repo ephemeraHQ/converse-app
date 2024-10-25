@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { memo, useCallback, useRef } from "react";
 import { TextInput, useColorScheme, View } from "react-native";
@@ -13,7 +14,6 @@ import { translate } from "../../i18n";
 import { textSecondaryColor } from "../../styles/colors";
 import { spacing } from "../../theme";
 import { sentryTrackError } from "../../utils/sentry";
-import { NavigationParamList } from "../Navigation/Navigation";
 import {
   useAddPfp,
   useCreateOrUpdateProfileInfo,

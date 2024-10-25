@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -37,7 +38,6 @@ import {
   getProfile,
 } from "../utils/profile";
 import { shortAddress } from "../utils/str";
-import { NavigationParamList } from "./Navigation/Navigation";
 
 const ShareProfileContent = ({
   userAddress,

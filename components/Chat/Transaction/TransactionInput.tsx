@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
@@ -28,7 +29,6 @@ import {
   currentAccount,
   useWalletStore,
 } from "../../../data/store/accountsStore";
-import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { postUSDCTransferAuthorization } from "../../../utils/api";
 import { useConversationContext } from "../../../utils/conversation";
 import { getTransferAuthorization } from "../../../utils/evm/erc20";

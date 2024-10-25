@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -14,7 +15,6 @@ import {
   View,
   useColorScheme,
 } from "react-native";
-import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
 import ChatNullState from "../components/Chat/ChatNullState";
@@ -23,8 +23,6 @@ import NewConversationButton from "../components/ConversationList/NewConversatio
 import RequestsButton from "../components/ConversationList/RequestsButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
-import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
-import { NavigationParamList } from "./Navigation/Navigation";
 import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
@@ -35,19 +33,14 @@ import {
   useProfilesStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
+import { useHeaderSearchBar } from "../navigation/Navigation/ConversationListNav";
 import {
   ConversationFlatListItem,
-  LastMessagePreview,
   getFilteredConversationsWithSearch,
 } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
 import { sortRequestsBySpamScore } from "../utils/xmtpRN/conversations";
-
-type ConversationWithLastMessagePreview = XmtpConversation & {
-  lastMessagePreview?: LastMessagePreview;
-};
 
 type Props = {
   searchBarRef:
@@ -58,7 +51,11 @@ type Props = {
   "Chats" | "ShareFrame" | "Blocked"
 >;
 
-function ConversationList({ navigation, route, searchBarRef }: Props) {
+export function ConversationListScreen({
+  navigation,
+  route,
+  searchBarRef,
+}: Props) {
   const styles = useStyles();
   const {
     searchQuery,
@@ -252,8 +249,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     </>
   );
 }
-
-export default gestureHandlerRootHOC(ConversationList);
 
 const useStyles = () => {
   const colorScheme = useColorScheme();

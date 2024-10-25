@@ -5,8 +5,8 @@ import {
 } from "@styles/colors";
 import { useColorScheme } from "react-native";
 
-import { NativeStack, navigationAnimation } from "./Navigation";
-import NewConversationModal from "../NewConversation/NewConversationModal";
+import NewConversationModal from "../../screens/NewConversation/NewConversationModal";
+import { NativeStack, navigationAnimation } from "../Navigation";
 
 export type NewConversationNavParams = {
   peer?: string;

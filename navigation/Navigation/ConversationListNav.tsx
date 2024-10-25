@@ -26,8 +26,8 @@ import ProfileSettingsButton from "../../components/ConversationList/ProfileSett
 import Picto from "../../components/Picto/Picto";
 import { useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import ConversationList from "../ConversationList";
-import { NativeStack, navigationAnimation } from "./Navigation";
+import ConversationList from "../../screens/ConversationListScreen";
+import { NativeStack, navigationAnimation } from "../Navigation";
 
 export const useHeaderSearchBar = (props: any) => {
   // No-op

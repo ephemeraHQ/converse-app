@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import {
   NativeStackScreenProps,
   createNativeStackNavigator,
@@ -13,11 +14,8 @@ import NewConversation from "./NewConversation";
 import NewGroupSummary from "./NewGroupSummary";
 import Button from "../../components/Button/Button";
 import { ProfileSocials } from "../../data/store/profilesStore";
-import {
-  NavigationParamList,
-  navigationAnimation,
-} from "../Navigation/Navigation";
-import { NewConversationNavParams } from "../Navigation/NewConversationNav";
+import { navigationAnimation } from "../../navigation/Navigation";
+import { NewConversationNavParams } from "../../navigation/Navigation/NewConversationNav";
 
 export type NewConversationModalParams = {
   NewConversationScreen: NewConversationNavParams;

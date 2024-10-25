@@ -2,6 +2,7 @@ import Picto from "@components/Picto/Picto";
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
 import { translate } from "@i18n";
+import { NavigationParamList } from "@navigation/Navigation.types";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { StackActions } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -64,6 +65,7 @@ import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useGroupMembers } from "../hooks/useGroupMembers";
 import { useGroupPermissions } from "../hooks/useGroupPermissions";
+import { ConversationNavParams } from "../navigation/Navigation/ConversationNav";
 import { evmHelpers } from "../utils/evm/helpers";
 import {
   getAddressIsAdmin,
@@ -82,8 +84,6 @@ import {
 } from "../utils/profile";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
-import { ConversationNavParams } from "./Navigation/ConversationNav";
-import { NavigationParamList } from "./Navigation/Navigation";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 
 export default function ProfileScreen({

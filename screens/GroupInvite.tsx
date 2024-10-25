@@ -1,6 +1,7 @@
 import Avatar from "@components/Avatar";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { useGroupInviteQuery } from "@queries/useGroupInviteQuery";
 import { fetchGroupsQuery } from "@queries/useGroupsQuery";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -25,7 +26,6 @@ import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { NavigationParamList } from "./Navigation/Navigation";
 import Button from "../components/Button/Button";
 import { useCurrentAccount } from "../data/store/accountsStore";
 import { refreshGroup } from "../utils/xmtpRN/conversations";

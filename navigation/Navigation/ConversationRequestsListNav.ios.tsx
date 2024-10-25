@@ -1,12 +1,14 @@
+import RequestsSegmentedController from "@components/ConversationList/RequestsSegmentedController";
 import { translate } from "@i18n";
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { RouteProp } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   actionSheetColors,
   backgroundColor,
   textPrimaryColor,
+  textSecondaryColor,
 } from "@styles/colors";
-import { ConversationFlatListItem } from "@utils/conversation";
-import { converseEventEmitter } from "@utils/events";
 import React, {
   useCallback,
   useEffect,
@@ -14,16 +16,11 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Platform, StyleSheet, useColorScheme, View } from "react-native";
+import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
 
-import {
-  NativeStack,
-  navigationAnimation,
-  NavigationParamList,
-} from "./Navigation";
-import AndroidBackAction from "../../components/AndroidBackAction";
+import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
@@ -36,10 +33,7 @@ import {
   sortRequestsBySpamScore,
   updateConsentStatus,
 } from "../../utils/xmtpRN/conversations";
-
-// TODO: Remove iOS-specific code due to the existence of a .ios file
-// TODO: Alternatively, implement an Android equivalent for the segmented controller
-// See issue: https://github.com/ephemeraHQ/converse-app/issues/659
+import { NativeStack, navigationAnimation } from "../Navigation";
 
 export default function ConversationRequestsListNav() {
   const sortedConversationsWithPreview = useChatStore(
@@ -50,7 +44,7 @@ export default function ConversationRequestsListNav() {
   const navRef = useRef<any>();
   const [clearingAll, setClearingAll] = useState(false);
 
-  const [isSpamToggleEnabled, setIsSpamToggleEnabled] = useState(false);
+  const [selectedSegment, setSelectedSegment] = useState(0);
   const allRequests = sortedConversationsWithPreview.conversationsRequests;
   const { likelySpam, likelyNotSpam } = useMemo(
     () => sortRequestsBySpamScore(allRequests),
@@ -101,14 +95,25 @@ export default function ConversationRequestsListNav() {
 
   const navigationOptions = useCallback(
     ({
+      route,
       navigation,
     }: {
       route: RouteProp<NavigationParamList, "ChatsRequests">;
-      navigation: any;
+      navigation: NativeStackNavigationProp<
+        NavigationParamList,
+        "ChatsRequests"
+      >;
     }) => ({
       animation: navigationAnimation as StackAnimationTypes,
-      headerTitle: clearingAll ? "Clearing..." : "Requests",
-      headerLeft: () => <AndroidBackAction navigation={navigation} />,
+      headerTitle: clearingAll
+        ? () => (
+            <View style={styles.headerContainer}>
+              <ActivityIndicator />
+              <Text style={styles.headerText}>{translate("clearing")}</Text>
+            </View>
+          )
+        : "Message requests",
+      headerLeft: undefined,
       headerRight: () =>
         clearingAll ? undefined : (
           <Button
@@ -118,19 +123,8 @@ export default function ConversationRequestsListNav() {
           />
         ),
     }),
-    [clearAllSpam, clearingAll]
+    [clearAllSpam, clearingAll, styles.headerContainer, styles.headerText]
   );
-
-  const toggleSpamRequests = useCallback(() => {
-    setIsSpamToggleEnabled((prev) => !prev);
-  }, []);
-
-  useEffect(() => {
-    converseEventEmitter.on("toggleSpamRequests", toggleSpamRequests);
-    return () => {
-      converseEventEmitter.off("toggleSpamRequests", toggleSpamRequests);
-    };
-  }, [toggleSpamRequests]);
 
   // Navigate back to the main screen when no request to display
   useEffect(() => {
@@ -142,36 +136,65 @@ export default function ConversationRequestsListNav() {
     return unsubscribe;
   }, [allRequests]);
 
+  const hasLikelyNotSpam = likelyNotSpam.length > 0;
+  const hasSpam = likelySpam.length > 0;
+  const hasBothTypesOfRequests = true;
+
+  const handleSegmentChange = (index: number) => {
+    setSelectedSegment(index);
+  };
+
+  const renderSegmentedController = () => {
+    return (
+      <RequestsSegmentedController
+        options={[translate("you_might_know"), translate("hidden_requests")]}
+        selectedIndex={selectedSegment}
+        onSelect={handleSegmentChange}
+      />
+    );
+  };
+
+  const renderContent = (navigationProps: {
+    route: RouteProp<NavigationParamList, "ChatsRequests">;
+    navigation: NativeStackNavigationProp<NavigationParamList, "ChatsRequests">;
+  }) => {
+    const showSuggestionText = selectedSegment === 0 && hasLikelyNotSpam;
+    const showNoSuggestionsText = selectedSegment === 0 && !hasLikelyNotSpam;
+    const showSpamWarning = selectedSegment === 1;
+    const itemsToShow = selectedSegment === 0 ? likelyNotSpam : likelySpam;
+
+    return (
+      <>
+        {renderSegmentedController()}
+        {showSuggestionText && (
+          <Text style={styles.suggestionText}>
+            {translate("suggestion_text")}
+          </Text>
+        )}
+        {showNoSuggestionsText && (
+          <Text style={styles.suggestionText}>
+            {translate("no_suggestions_text")}
+          </Text>
+        )}
+        {showSpamWarning && (
+          <Text style={styles.suggestionText}>
+            {translate("hidden_requests_warn")}
+          </Text>
+        )}
+        <ConversationFlashList {...navigationProps} items={itemsToShow} />
+      </>
+    );
+  };
+
   return (
     <NativeStack.Screen name="ChatsRequests" options={navigationOptions}>
       {(navigationProps) => {
         navRef.current = navigationProps.navigation;
-        let items: ConversationFlatListItem[] = likelyNotSpam;
-        if (likelySpam.length > 0) {
-          items = isSpamToggleEnabled
-            ? [
-                ...likelyNotSpam,
-                {
-                  topic: "hiddenRequestsButton",
-                  toggleActivated: true,
-                  spamCount: likelySpam.length,
-                },
-                ...likelySpam,
-              ]
-            : [
-                ...likelyNotSpam,
-                {
-                  topic: "hiddenRequestsButton",
-                  toggleActivated: false,
-                  spamCount: likelySpam.length,
-                },
-              ];
-        }
         return (
           <>
             <GestureHandlerRootView style={styles.root}>
               <View style={styles.container}>
-                <ConversationFlashList {...navigationProps} items={items} />
+                {renderContent(navigationProps)}
               </View>
             </GestureHandlerRootView>
           </>
@@ -185,25 +208,36 @@ const useStyles = () => {
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     container: {
+      paddingTop: 4,
       flex: 1,
     },
     root: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
     },
-
     headerContainer: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      width: 130,
+      width: 110,
     },
     headerText: {
       marginLeft: 10,
       color: textPrimaryColor(colorScheme),
-      ...Platform.select({
-        android: { fontSize: 22, fontFamily: "Roboto" },
-      }),
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    suggestionText: {
+      fontSize: 12,
+      color: textSecondaryColor(colorScheme),
+      textAlign: "center",
+      paddingHorizontal: 16,
+      marginTop: 14,
+      marginBottom: 12,
+      marginHorizontal: 16,
     },
   });
 };

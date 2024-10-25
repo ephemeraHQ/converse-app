@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -19,7 +20,6 @@ import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { Chat } from "../components/Chat/Chat";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
 import { EmojiPicker } from "../containers/EmojiPicker";
-import { NavigationParamList } from "./Navigation/Navigation";
 import {
   currentAccount,
   useChatStore,

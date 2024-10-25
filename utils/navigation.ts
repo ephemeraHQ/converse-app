@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import * as Linking from "expo-linking";
 import { Linking as RNLinking } from "react-native";
 
@@ -6,7 +7,6 @@ import { loadSavedNotificationMessagesToContext } from "./notifications";
 import config from "../config";
 import { currentAccount, getChatStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
-import { NavigationParamList } from "../screens/Navigation/Navigation";
 
 export const converseNavigations: { [navigationName: string]: any } = {};
 

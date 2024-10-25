@@ -1,10 +1,10 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { memo, useCallback } from "react";
 
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
 import { ConnectViaWallet } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWallet";
 import { useRouter } from "../../navigation/useNavigation";
-import { NavigationParamList } from "../Navigation/Navigation";
 
 export const NewAccountConnectWalletScreen = memo(
   function NewAccountConnectWalletScreen({

@@ -5,88 +5,40 @@ import {
 import { memo } from "react";
 import { Platform, useColorScheme } from "react-native";
 
-import ConversationBlockedListNav from "./ConversationBlockedListNav";
-import Accounts from "../Accounts/Accounts";
-import { IdleScreen } from "../IdleScreen";
-import { OnboardingEphemeraScreen } from "../Onboarding/OnboardingEphemeraScreen";
-import { OnboardingGetStartedScreen } from "../Onboarding/OnboardingGetStartedScreen";
-import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificationsScreen";
-import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
-import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
-import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
-import ConversationListNav from "./ConversationListNav";
-import ConversationNav, { ConversationNavParams } from "./ConversationNav";
-import ConversationRequestsListNav from "./ConversationRequestsListNav";
-import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
-import { useRouter } from "../../navigation/useNavigation";
-import GroupInviteNav, { GroupInviteNavParams } from "./GroupInviteNav";
-import GroupLinkNav, { GroupLinkNavParams } from "./GroupLinkNav";
-import GroupNav, { GroupNavParams } from "./GroupNav";
-import NewConversationNav, {
-  NewConversationNavParams,
-} from "./NewConversationNav";
-import ProfileNav, { ProfileNavParams } from "./ProfileNav";
-import ShareFrameNav, { ShareFrameNavParams } from "./ShareFrameNav";
-import ShareProfileNav from "./ShareProfileNav";
-import TopUpNav from "./TopUpNav";
-import UserProfileNav from "./UserProfileNav";
-import WebviewPreviewNav, {
-  WebviewPreviewNavParams,
-} from "./WebviewPreviewNav";
+import { OnboardingEphemeraScreen } from "../screens/Onboarding/OnboardingEphemeraScreen";
+import { OnboardingGetStartedScreen } from "../screens/Onboarding/OnboardingGetStartedScreen";
+import { OnboardingNotificationsScreen } from "../screens/Onboarding/OnboardingNotificationsScreen";
+import { OnboardingPrivateKeyScreen } from "../screens/Onboarding/OnboardingPrivateKeyScreen";
+import { OnboardingPrivyScreen } from "../screens/Onboarding/OnboardingPrivyScreen";
+import { OnboardingUserProfileScreen } from "../screens/Onboarding/OnboardingUserProfileScreen";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
-import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
-import { NewAccountConnectWalletScreen } from "../NewAccount/NewAccountConnectWalletScreen";
-import { NewAccountEphemeraScreen } from "../NewAccount/NewAccountEphemeraScreen";
-import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeyScreen";
-import { NewAccountPrivyScreen } from "../NewAccount/NewAccountPrivyScreen";
-import { NewAccountScreen } from "../NewAccount/NewAccountScreen";
-import { NewAccountUserProfileScreen } from "../NewAccount/NewAccountUserProfileScreen";
-import { OnboardingConnectWalletScreen } from "../Onboarding/OnboardingConnectWalletScreen";
-
-export type NavigationParamList = {
-  Idle: undefined;
-
-  // Auth / Onboarding
-  OnboardingGetStarted: undefined;
-  OnboardingPrivy: undefined;
-  OnboardingConnectWallet: {
-    address: string;
-  };
-  OnboardingPrivateKey: undefined;
-  OnboardingNotifications: undefined;
-  OnboardingEphemeral: undefined;
-  OnboardingUserProfile: undefined;
-
-  // Nwe account
-  NewAccountNavigator: undefined;
-  NewAccountUserProfile: undefined;
-  NewAccountConnectWallet: {
-    address: string;
-  };
-  NewAccountPrivy: undefined;
-  NewAccountPrivateKey: undefined;
-  NewAccountEphemera: undefined;
-
-  // Main
-  Accounts: undefined;
-  Blocked: undefined;
-  Chats: undefined;
-  ChatsRequests: undefined;
-  Conversation: ConversationNavParams;
-  NewConversation: NewConversationNavParams;
-  NewGroupSummary: undefined;
-  ConverseMatchMaker: undefined;
-  ShareProfile: undefined;
-  ShareFrame: ShareFrameNavParams;
-  TopUp: undefined;
-  Profile: ProfileNavParams;
-  Group: GroupNavParams;
-  GroupLink: GroupLinkNavParams;
-  GroupInvite: GroupInviteNavParams;
-  UserProfile: undefined;
-  WebviewPreview: WebviewPreviewNavParams;
-  NewAccount: undefined;
-};
+import { NavigationParamList } from "./Navigation.types";
+import { ScreenHeaderModalCloseButton } from "../components/Screen/ScreenHeaderModalCloseButton";
+import Accounts from "../screens/Accounts/Accounts";
+import { IdleScreen } from "../screens/IdleScreen";
+import ConversationBlockedListNav from "./Navigation/ConversationBlockedListNav";
+import ConversationListNav from "./Navigation/ConversationListNav";
+import ConversationNav from "./Navigation/ConversationNav";
+import ConversationRequestsListNav from "./Navigation/ConversationRequestsListNav";
+import ConverseMatchMakerNav from "./Navigation/ConverseMatchMakerNav";
+import GroupInviteNav from "./Navigation/GroupInviteNav";
+import GroupLinkNav from "./Navigation/GroupLinkNav";
+import GroupNav from "./Navigation/GroupNav";
+import NewConversationNav from "./Navigation/NewConversationNav";
+import ProfileNav from "./Navigation/ProfileNav";
+import ShareFrameNav from "./Navigation/ShareFrameNav";
+import ShareProfileNav from "./Navigation/ShareProfileNav";
+import TopUpNav from "./Navigation/TopUpNav";
+import UserProfileNav from "./Navigation/UserProfileNav";
+import WebviewPreviewNav from "./Navigation/WebviewPreviewNav";
+import { useRouter } from "./useNavigation";
+import { NewAccountConnectWalletScreen } from "../screens/NewAccount/NewAccountConnectWalletScreen";
+import { NewAccountEphemeraScreen } from "../screens/NewAccount/NewAccountEphemeraScreen";
+import { NewAccountPrivateKeyScreen } from "../screens/NewAccount/NewAccountPrivateKeyScreen";
+import { NewAccountPrivyScreen } from "../screens/NewAccount/NewAccountPrivyScreen";
+import { NewAccountScreen } from "../screens/NewAccount/NewAccountScreen";
+import { NewAccountUserProfileScreen } from "../screens/NewAccount/NewAccountUserProfileScreen";
+import { OnboardingConnectWalletScreen } from "../screens/Onboarding/OnboardingConnectWalletScreen";
 
 export const authScreensSharedScreenOptions: NativeStackNavigationOptions = {
   headerTitle: "",

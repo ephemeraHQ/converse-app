@@ -6,7 +6,7 @@ import {
 } from "@react-navigation/native";
 import { useEffect, useMemo } from "react";
 
-import { NavigationParamList } from "../screens/Navigation/Navigation";
+import { NavigationParamList } from "./Navigation.types";
 
 // Wrapper around useNavigation to add some useful hooks.
 // Also, expo-router syntax is useRouter so if we want to migrate towards that later it's useful to call it useRouter now.

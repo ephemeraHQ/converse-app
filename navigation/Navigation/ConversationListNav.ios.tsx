@@ -1,5 +1,6 @@
 import { ErroredHeader } from "@components/ErroredHeader";
 import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import React, { useLayoutEffect } from "react";
@@ -23,14 +24,10 @@ import NewConversationButton from "../../components/ConversationList/NewConversa
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
+import ConversationList from "../../screens/ConversationListScreen";
 import { navigate } from "../../utils/navigation";
 import { getReadableProfile, shortDisplayName } from "../../utils/str";
-import ConversationList from "../ConversationList";
-import {
-  NativeStack,
-  NavigationParamList,
-  navigationAnimation,
-} from "./Navigation";
+import { NativeStack, navigationAnimation } from "../Navigation";
 
 type HeaderSearchBarProps = {
   searchBarRef: React.RefObject<any>;

@@ -6,10 +6,10 @@ import { ScreenHeaderButton } from "../../components/Screen/ScreenHeaderButton/S
 import { ScreenHeaderIconButton } from "../../components/Screen/ScreenHeaderIconButton/ScreenHeaderIconButton";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
 import { useCurrentAccount } from "../../data/store/accountsStore";
-import { useRouter } from "../../navigation/useNavigation";
+import ProfileScreen from "../../screens/Profile";
 import { navigate } from "../../utils/navigation";
-import ProfileScreen from "../Profile";
-import { NativeStack, navigationAnimation } from "./Navigation";
+import { NativeStack, navigationAnimation } from "../Navigation";
+import { useRouter } from "../useNavigation";
 
 export type ProfileNavParams = {
   address: string;

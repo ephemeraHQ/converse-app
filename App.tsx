@@ -8,7 +8,11 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PortalProvider } from "@gorhom/portal";
 import { PrivyProvider } from "@privy-io/expo";
 import { queryClient } from "@queries/queryClient";
-import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
+import {
+  MaterialDarkTheme,
+  MaterialLightTheme,
+  backgroundColor,
+} from "@styles/colors";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useAppTheme, useThemeProvider } from "@theme/useAppTheme";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
@@ -18,6 +22,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   LogBox,
   Platform,
+  StatusBar,
   StyleSheet,
   View,
   useColorScheme,
@@ -26,7 +31,13 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
 
-import "./utils/splash/splash";
+import ActionSheetStateHandler from "./components/StateHandlers/ActionSheetStateHandler";
+import HydrationStateHandler from "./components/StateHandlers/HydrationStateHandler";
+import InitialStateHandler from "./components/StateHandlers/InitialStateHandler";
+import MainIdentityStateHandler from "./components/StateHandlers/MainIdentityStateHandler";
+import NetworkStateHandler from "./components/StateHandlers/NetworkStateHandler";
+import ConversationsStateHandler from "./components/StateHandlers/NotificationsStateHandler";
+import WalletsStateHandler from "./components/StateHandlers/WalletsStateHandler";
 import { xmtpCron, xmtpEngine } from "./components/XmtpEngine";
 import config from "./config";
 import {
@@ -40,10 +51,15 @@ import {
   runAsyncUpdates,
   updateLastVersionOpen,
 } from "./data/updates/asyncUpdates";
-import Main from "./screens/Main";
+import { AppNavigator } from "./navigation/AppNavigator";
+import { useAddressBookStateHandler } from "./utils/addressBook";
 import { registerBackgroundFetchTask } from "./utils/background";
+import { useAutoConnectExternalWallet } from "./utils/evm/external";
+import { usePrivyAccessToken } from "./utils/evm/privy";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
+import "./utils/splash/splash";
+import { useCheckCurrentInstallation } from "./utils/xmtpRN/client";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -68,6 +84,10 @@ const App = () => {
   const styles = useStyles();
   const debugRef = useRef();
 
+  usePrivyAccessToken(); // Makes sure we have a Privy token ready to make API calls
+  useAddressBookStateHandler();
+  useCheckCurrentInstallation();
+  useAutoConnectExternalWallet();
   useCoinbaseWalletListener(true, coinbaseUrl);
 
   useEffect(() => {
@@ -114,8 +134,9 @@ const App = () => {
 
   return (
     <View style={styles.safe}>
-      <Main />
+      <AppNavigator />
       <DebugButton ref={debugRef} />
+      <Initializer />
     </View>
   );
 };
@@ -154,6 +175,26 @@ export default function AppWithProviders() {
     </QueryClientProvider>
   );
 }
+
+// Bunch of handlers. Not really react components
+const Initializer = () => {
+  const colorScheme = useColorScheme();
+
+  return (
+    <>
+      <HydrationStateHandler />
+      <InitialStateHandler />
+      {Platform.OS === "android" && (
+        <StatusBar backgroundColor={backgroundColor(colorScheme)} />
+      )}
+      <NetworkStateHandler />
+      <MainIdentityStateHandler />
+      <ConversationsStateHandler />
+      <ActionSheetStateHandler />
+      <WalletsStateHandler />
+    </>
+  );
+};
 
 const useStyles = () => {
   const { theme } = useAppTheme();

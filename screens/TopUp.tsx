@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -23,7 +24,6 @@ import ConverseButton from "../components/Button/Button";
 import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
-import { NavigationParamList } from "./Navigation/Navigation";
 import { useCurrentAccount } from "../data/store/accountsStore";
 
 export default function TopUp({

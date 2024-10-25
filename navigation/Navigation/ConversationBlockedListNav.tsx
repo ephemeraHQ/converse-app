@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { RouteProp } from "@react-navigation/native";
 import {
   backgroundColor,
@@ -9,14 +10,10 @@ import { Platform, StyleSheet, useColorScheme, View, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
 
-import {
-  NativeStack,
-  navigationAnimation,
-  NavigationParamList,
-} from "./Navigation";
 import AndroidBackAction from "../../components/AndroidBackAction";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { useChatStore } from "../../data/store/accountsStore";
+import { NativeStack, navigationAnimation } from "../Navigation";
 
 export default function ConversationBlockedListNav() {
   const sortedConversationsWithPreview = useChatStore(

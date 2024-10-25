@@ -5,25 +5,25 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import { NativeStack, navigationAnimation } from "./Navigation";
-import GroupScreen from "../Group";
+import GroupLinkScreen from "../../screens/GroupLink";
+import { NativeStack, navigationAnimation } from "../Navigation";
 
-export type GroupNavParams = {
-  topic: string;
+export type GroupLinkNavParams = {
+  groupLinkId: string;
 };
 
-export const GroupScreenConfig = {
-  path: "/group",
+export const GroupLinkScreenConfig = {
+  path: "/groupLink/:groupLinkId",
 };
 
-export default function GroupNav() {
+export default function GroupLinkNav() {
   const colorScheme = useColorScheme();
   return (
     <NativeStack.Screen
-      name="Group"
-      component={GroupScreen}
+      name="GroupLink"
+      component={GroupLinkScreen}
       options={({ route }) => ({
-        headerTitle: "Group info",
+        headerTitle: "Loading...",
         headerTintColor:
           Platform.OS === "android"
             ? textSecondaryColor(colorScheme)

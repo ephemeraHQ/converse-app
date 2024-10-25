@@ -2,8 +2,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { memo } from "react";
 import { useColorScheme } from "react-native";
 
-import { authScreensSharedScreenOptions } from "../screens/Navigation/Navigation";
-import { stackGroupScreenOptions } from "../screens/Navigation/navHelpers";
+import { authScreensSharedScreenOptions } from "./Navigation";
+import { stackGroupScreenOptions } from "./navHelpers";
 import { OnboardingConnectWalletScreen } from "../screens/Onboarding/OnboardingConnectWalletScreen";
 import { OnboardingEphemeraScreen } from "../screens/Onboarding/OnboardingEphemeraScreen";
 import { OnboardingGetStartedScreen } from "../screens/Onboarding/OnboardingGetStartedScreen";
@@ -12,7 +12,7 @@ import { OnboardingPrivateKeyScreen } from "../screens/Onboarding/OnboardingPriv
 import { OnboardingPrivyScreen } from "../screens/Onboarding/OnboardingPrivyScreen";
 import { OnboardingUserProfileScreen } from "../screens/Onboarding/OnboardingUserProfileScreen";
 
-type OnboardingParamList = {
+export type OnboardingParamList = {
   OnboardingGetStarted: undefined;
   OnboardingPrivy: undefined;
   OnboardingConnectWallet: {
@@ -26,9 +26,6 @@ type OnboardingParamList = {
 
 const OnboardingNativeStack = createNativeStackNavigator<OnboardingParamList>();
 
-/**
- * Used for split screen layout
- */
 export const OnboardingNavigator = memo(function OnboardingNavigator() {
   const colorScheme = useColorScheme();
 
