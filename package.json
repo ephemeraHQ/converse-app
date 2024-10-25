@@ -42,7 +42,7 @@
     "@expo/react-native-action-sheet": "^4.0.1",
     "@expo/webpack-config": "~19.0.1",
     "@flyerhq/react-native-chat-ui": "^1.4.3",
-    "@gorhom/bottom-sheet": "^5.0.2",
+    "@gorhom/bottom-sheet": "^5.0.4",
     "@gorhom/portal": "^1.0.14",
     "@material-symbols/svg-400": "^0.5.0",
     "@mfellner/react-native-fast-create-hash": "^1.0.0-alpha.2",
@@ -160,7 +160,7 @@
     "react-native-keyboard-controller": "^1.12.4",
     "react-native-localize": "^3.0.2",
     "react-native-logs": "^5.1.0",
-    "react-native-mmkv": "^2.12.2",
+    "react-native-mmkv": "^3.1.0",
     "react-native-otp-entry": "^1.2.0",
     "react-native-paper": "^5.10.6",
     "react-native-parsed-text": "^0.0.22",
@@ -281,6 +281,11 @@
       "exclude": [
         "@sentry/react-native"
       ]
+    },
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "enabled": true
+      }
     }
   },
   "engines": {
