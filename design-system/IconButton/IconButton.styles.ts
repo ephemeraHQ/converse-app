@@ -45,6 +45,7 @@ export const getIconButtonViewStyle =
         height: spacing.xxl,
       },
     };
+
     Object.assign(style, sizeStyles[size]);
 
     if (action === "primary") {
@@ -65,9 +66,10 @@ export const getIconButtonViewStyle =
           style.backgroundColor = "transparent";
           if (pressed) {
             style.backgroundColor = colors.fill.minimal;
+            style.borderColor = colors.fill.minimal;
           }
           if (disabled) {
-            style.borderColor = colors.border.secondary;
+            style.borderColor = colors.border.subtle;
             style.backgroundColor = "transparent";
           }
           break;
@@ -171,7 +173,7 @@ export const getIconProps =
 
       props.size = sizeMap[size];
 
-      if (disabled) {
+      if (disabled && variant !== "fill") {
         props.color = colors.text.tertiary;
         return props;
       }

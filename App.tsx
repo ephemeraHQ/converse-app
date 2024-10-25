@@ -26,7 +26,8 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
 
-import XmtpEngine from "./components/XmtpEngine";
+import "./utils/splash/splash";
+import { xmtpCron, xmtpEngine } from "./components/XmtpEngine";
 import config from "./config";
 import {
   TEMPORARY_ACCOUNT_NAME,
@@ -43,7 +44,6 @@ import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
-import "./utils/splash/splash";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -60,6 +60,9 @@ configureCoinbase({
 initSentry();
 
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
+
+xmtpEngine.start();
+xmtpCron.start();
 
 const App = () => {
   const styles = useStyles();
@@ -111,7 +114,6 @@ const App = () => {
 
   return (
     <View style={styles.safe}>
-      <XmtpEngine />
       <Main />
       <DebugButton ref={debugRef} />
     </View>

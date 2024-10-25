@@ -63,6 +63,9 @@ jobs:
             node scripts/build/eas.js --env preview
           fi
 
+      - name: Update Android Files
+        run: node scripts/build/android/build.js
+
       - name: Build for Android
         run: |
           if [ "${{ github.event.inputs.environment || 'Production' }}" == "Production" ]; then

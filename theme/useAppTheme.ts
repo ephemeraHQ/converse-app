@@ -151,6 +151,8 @@ interface UseAppThemeValue {
   ) => T;
 }
 
+export type IThemed = ReturnType<typeof useAppTheme>["themed"];
+
 /**
  * Custom hook that provides the app theme and utility functions for theming.
  *

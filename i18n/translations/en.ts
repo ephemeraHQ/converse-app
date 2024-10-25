@@ -1,4 +1,4 @@
-const en = {
+export const en = {
   // Onboarding
   walletSelector: {
     title: "Your messages.\nYour privacy.",
@@ -209,6 +209,14 @@ const en = {
   do_you_trust_this_contact: "Do you trust this contact?",
   do_you_want_to_join_this_group: "Do you want to join this group?",
   join_this_group: "Join this group",
+  identity_not_found_title: "Identity not found",
+  identity_not_found:
+    "Identity {{identity}} not found or invalid. Please check it and try again",
+  identity_not_found_timeout:
+    "Identity {{identity}} took too long to resolve. Please check your connection and try again",
+  identity_not_yet_xmtp_title: "Not yet using XMTP",
+  identity_not_yet_xmtp:
+    "{{identity}} is not yet using XMTP. Tell them to download the app at converse.xyz and log in with their wallet",
 
   // Conversation Context Menu
   pin: "Pin",
@@ -336,7 +344,14 @@ const en = {
   // New Conversation
   cannot_be_added_to_group_yet:
     "{{name}} needs to update Converse to be added to a group",
-};
 
-export default en;
+  // Group Updated Message
+  group_name_changed: '{{name}} changed the group name to "{{newValue}}".',
+  group_member_joined: "{{name}} joined the conversation",
+  group_member_left: "{{name}} left the conversation",
+  group_photo_changed: "{{name}} changed the group photo.",
+  group_description_changed:
+    '{{name}} changed the group description to "{{newValue}}".',
+  group_name_changed_to: '{{name}} changed the group name to "{{newValue}}".',
+};
 export type Translations = typeof en;

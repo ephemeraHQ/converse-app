@@ -64,7 +64,7 @@ import Avatar from "../../Avatar";
 import ClickableText from "../../ClickableText";
 import ActionButton from "../ActionButton";
 import AttachmentMessagePreview from "../Attachment/AttachmentMessagePreview";
-import ChatGroupUpdatedMessage from "../ChatGroupUpdatedMessage";
+import { ChatGroupUpdatedMessage } from "../ChatGroupUpdatedMessage";
 import FramesPreviews from "../Frame/FramesPreviews";
 import ChatInputReplyBubble from "../Input/InputReplyBubble";
 import TransactionPreview from "../Transaction/TransactionPreview";
@@ -220,7 +220,11 @@ const ChatMessage = ({
   const contentType = getMessageContentType(message.contentType);
 
   const handleUrlPress = useCallback((url: string) => {
-    const uri = url.toLowerCase().startsWith("http") ? url : `https://${url}`;
+    const cleanedUrl = url.toLowerCase().trim();
+
+    const uri = cleanedUrl.startsWith("http")
+      ? cleanedUrl
+      : `https://${cleanedUrl}`;
 
     Linking.openURL(uri);
   }, []);
@@ -410,6 +414,7 @@ const ChatMessage = ({
                   message={message}
                   reactions={reactions}
                   hideBackground={hideBackground}
+                  isFrame={isFrame}
                 >
                   {isContentType("text", message.contentType) && (
                     <FramesPreviews message={message} />

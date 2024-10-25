@@ -19,13 +19,13 @@ type AppStoreType = {
   ) => void;
 
   splashScreenHidden: boolean;
-  setSplashScreenHidden: (hidden: boolean) => void;
+  setSplashScreenHidden: (hidden: true) => void;
 
   isInternetReachable: boolean;
   setIsInternetReachable: (reachable: boolean) => void;
 
   hydrationDone: boolean;
-  setHydrationDone: (done: boolean) => void;
+  setHydrationDone: (done: true) => void;
 
   lastVersionOpen: string;
   setLastVersionOpen: (version: string) => void;
