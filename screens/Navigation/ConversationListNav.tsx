@@ -12,14 +12,12 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  View,
   useColorScheme,
   useWindowDimensions,
-  View,
 } from "react-native";
 import { Searchbar as MaterialSearchBar } from "react-native-paper";
 
-import { NativeStack, navigationAnimation } from "./Navigation";
-import { useIsSplitScreen } from "./navHelpers";
 import {
   useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
@@ -28,8 +26,8 @@ import ProfileSettingsButton from "../../components/ConversationList/ProfileSett
 import Picto from "../../components/Picto/Picto";
 import { useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { converseEventEmitter } from "../../utils/events";
 import ConversationList from "../ConversationList";
+import { NativeStack, navigationAnimation } from "./Navigation";
 
 export const useHeaderSearchBar = (props: any) => {
   // No-op
@@ -114,13 +112,6 @@ export default function ConversationListNav() {
                 icon={({ color }) => (
                   <Picto picto="menu" size={PictoSizes.navItem} color={color} />
                 )}
-                onIconPress={() => {
-                  if (Platform.OS === "android") {
-                    converseEventEmitter.emit("toggle-navigation-drawer", true);
-                  } else if (Platform.OS === "web") {
-                    navigation.goBack();
-                  }
-                }}
                 mode="bar"
                 autoCapitalize="none"
                 autoFocus={false}
@@ -155,7 +146,6 @@ export default function ConversationListNav() {
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
-  const isSplitScreen = useIsSplitScreen();
   const dimensions = useWindowDimensions();
   return StyleSheet.create({
     rightButtonContainer: {
@@ -170,7 +160,7 @@ const useStyles = () => {
       web: {
         flexDirection: "row",
         justifyContent: "flex-start",
-        width: isSplitScreen ? 400 : dimensions.width,
+        width: dimensions.width,
         marginLeft: 16,
       },
     }),

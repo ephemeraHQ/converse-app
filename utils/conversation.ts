@@ -1,14 +1,15 @@
-import { PeersStatus, GroupStatus } from "@data/store/settingsStore";
+import { GroupStatus, PeersStatus } from "@data/store/settingsStore";
 import { translate } from "@i18n";
 import { Reaction } from "@xmtp/content-type-reaction";
 import { MutableRefObject, createRef } from "react";
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 import { createContext, useContextSelector } from "use-context-selector";
 
+import config from "../config";
 import { saveTopicsData } from "./api";
 import {
-  isAttachmentMessage,
   fetchLocalAttachmentUrl,
+  isAttachmentMessage,
 } from "./attachment/helpers";
 import { getAddressForPeer } from "./evm/address";
 import { getGroupIdFromTopic } from "./groupUtils/groupId";
@@ -18,7 +19,6 @@ import { getReactionsContentPreview } from "./reactions";
 import { getMatchedPeerAddresses } from "./search";
 import { TextInputWithValue, addressPrefix } from "./str";
 import { isTransactionMessage } from "./transaction";
-import config from "../config";
 import { isOnXmtp } from "./xmtpRN/client";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { createPendingConversation } from "../data/helpers/conversations/pendingConversations";
@@ -85,23 +85,7 @@ export const conversationLastMessagePreview = async (
       } else if (isContentType("reaction", lastMessage?.contentType)) {
         try {
           const reactionContent = JSON.parse(lastMessage.content) as Reaction;
-          if (Platform.OS === "web") {
-            if (reactionContent.action === "removed") {
-              return {
-                contentPreview: "Removed a reaction to a message",
-                message: lastMessage,
-              };
-            } else if (reactionContent.schema === "unicode") {
-              return {
-                contentPreview: `Reacted ${reactionContent.content} to a message`,
-                message: lastMessage,
-              };
-            }
-            return {
-              contentPreview: "Reacted to a message",
-              message: lastMessage,
-            };
-          }
+
           const message = conversation.messages.get(reactionContent.reference);
           if (!message || message.senderAddress !== myAddress) continue;
           if (reactionContent.action === "removed") {
@@ -246,13 +230,7 @@ export const openMainConversationWithPeer = async (
   }
   // We need to wait for initial load to be done on web because there is
   // no hydration !
-  if (Platform.OS === "web") {
-    let initialLoadDone = getChatStore(account).getState().initialLoadDone;
-    while (!initialLoadDone) {
-      await new Promise((r) => setTimeout(r, 250));
-      initialLoadDone = getChatStore(account).getState().initialLoadDone;
-    }
-  }
+
   const conversations = getChatStore(account).getState().conversations;
   // Then, check if we already have a main conversation with this address
   const alreadyConversationWithAddress = Object.values(conversations).find(

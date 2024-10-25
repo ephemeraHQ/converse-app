@@ -23,22 +23,14 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useShallow } from "zustand/react/shallow";
 
-import ChatPlaceholder from "./ChatPlaceholder/ChatPlaceholder";
-import { GroupChatPlaceholder } from "./ChatPlaceholder/GroupChatPlaceholder";
-import ConsentPopup from "./ConsentPopup/ConsentPopup";
-import { GroupConsentPopup } from "./ConsentPopup/GroupConsentPopup";
-import ChatInput from "./Input/Input";
-import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
-import TransactionInput from "./Transaction/TransactionInput";
 import {
+  useChatStore,
   useCurrentAccount,
   useProfilesStore,
   useRecommendationsStore,
-  useChatStore,
 } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
 import { useFramesStore } from "../../data/store/framesStore";
-import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
 import {
   ReanimatedFlashList,
   ReanimatedFlatList,
@@ -52,6 +44,13 @@ import { getProfile, getProfileData } from "../../utils/profile";
 import { UUID_REGEX } from "../../utils/regex";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { Recommendation } from "../Recommendations/Recommendation";
+import ChatPlaceholder from "./ChatPlaceholder/ChatPlaceholder";
+import { GroupChatPlaceholder } from "./ChatPlaceholder/GroupChatPlaceholder";
+import ConsentPopup from "./ConsentPopup/ConsentPopup";
+import { GroupConsentPopup } from "./ConsentPopup/GroupConsentPopup";
+import ChatInput from "./Input/Input";
+import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
+import TransactionInput from "./Transaction/TransactionInput";
 
 const usePeerSocials = () => {
   const conversation = useConversationContext("conversation");
@@ -259,9 +258,7 @@ const useAnimatedListView = (
   // that need great perf.
   return useMemo(() => {
     const isConversationNotPending = conversation && !conversation.pending;
-    return isConversationNotPending && Platform.OS !== "web"
-      ? ReanimatedFlashList
-      : ReanimatedFlatList;
+    return isConversationNotPending ? ReanimatedFlashList : ReanimatedFlatList;
   }, [conversation]);
 };
 
@@ -289,7 +286,6 @@ export function Chat() {
 
   const xmtpAddress = useCurrentAccount() as string;
   const peerSocials = usePeerSocials();
-  const isSplitScreen = useIsSplitScreen();
   const recommendationsData = useRecommendationsStore(
     useShallow((s) =>
       conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined
@@ -313,12 +309,10 @@ export function Chat() {
     ]
   );
 
-  const hideInputIfFrameFocused = Platform.OS !== "web";
-
   const DEFAULT_INPUT_HEIGHT = 58;
   const chatInputHeight = useSharedValue(0);
   const chatInputDisplayedHeight = useDerivedValue(() => {
-    return frameTextInputFocused && hideInputIfFrameFocused
+    return frameTextInputFocused
       ? 0
       : chatInputHeight.value + DEFAULT_INPUT_HEIGHT;
   });
@@ -458,9 +452,7 @@ export function Chat() {
             //   minIndexForVisible: 0,
             //   autoscrollToTopThreshold: 100,
             // }}
-            estimatedListSize={
-              isSplitScreen ? undefined : Dimensions.get("screen")
-            }
+            estimatedListSize={Dimensions.get("screen")}
             inverted
             keyExtractor={keyExtractor}
             getItemType={getItemType(framesStore)}
@@ -486,10 +478,7 @@ export function Chat() {
             style={[
               textInputStyle,
               {
-                display:
-                  frameTextInputFocused && hideInputIfFrameFocused
-                    ? "none"
-                    : "flex",
+                display: frameTextInputFocused ? "none" : "flex",
               },
             ]}
           >

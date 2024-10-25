@@ -1,4 +1,3 @@
-import Clipboard from "@react-native-clipboard/clipboard";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -24,13 +23,13 @@ import Avatar from "../components/Avatar";
 import Button from "../components/Button/Button";
 import ActionButton from "../components/Chat/ActionButton";
 import Picto from "../components/Picto/Picto";
+import { Screen } from "../components/Screen/ScreenComp/Screen";
 import config from "../config";
 import {
   useCurrentAccount,
   useProfilesStore,
 } from "../data/store/accountsStore";
 import { spacing } from "../theme";
-import { isDesktop } from "../utils/device";
 import {
   getPreferredAvatar,
   getPreferredName,
@@ -56,32 +55,18 @@ const ShareProfileContent = ({
   compact?: boolean;
 }) => {
   const colorScheme = useColorScheme();
-  const headerHeight = useHeaderHeight();
   const styles = useStyles();
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const shareDict =
-    Platform.OS === "ios" && !isDesktop
-      ? { url: profileUrl }
-      : { message: profileUrl };
+  const headerHeight = useHeaderHeight();
 
-  const shareButtonText =
-    Platform.OS === "web"
-      ? copiedLink
-        ? "Link copied"
-        : "Copy link"
-      : "Share link";
+  const shareDict =
+    Platform.OS === "ios" ? { url: profileUrl } : { message: profileUrl };
+
+  const shareButtonText = copiedLink ? "Link copied" : "Copy link";
 
   const handleShare = () => {
-    if (Platform.OS === "web") {
-      setCopiedLink(true);
-      Clipboard.setString(profileUrl);
-      setTimeout(() => {
-        setCopiedLink(false);
-      }, 1000);
-    } else {
-      Share.share(shareDict);
-    }
+    Share.share(shareDict);
   };
 
   return (
@@ -132,13 +117,7 @@ const ShareProfileContent = ({
                 width: "100%",
               }}
               title={shareButtonText}
-              picto={
-                Platform.OS === "web"
-                  ? copiedLink
-                    ? "checkmark"
-                    : "doc.on.doc"
-                  : "square.and.arrow.up"
-              }
+              picto={copiedLink ? "checkmark" : "doc.on.doc"}
               onPress={handleShare}
             />
           ) : (
@@ -202,13 +181,15 @@ export default function ShareProfileScreen({
   }`;
 
   return (
-    <ShareProfileContent
-      userAddress={userAddress}
-      username={username}
-      displayName={displayName}
-      avatar={avatar || ""}
-      profileUrl={profileUrl}
-    />
+    <Screen safeAreaEdges={["bottom"]} contentContainerStyle={{ flex: 1 }}>
+      <ShareProfileContent
+        userAddress={userAddress}
+        username={username}
+        displayName={displayName}
+        avatar={avatar || ""}
+        profileUrl={profileUrl}
+      />
+    </Screen>
   );
 }
 

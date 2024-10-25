@@ -6,9 +6,6 @@ import { ConversationListContext } from "@utils/conversationList";
 import { useCallback, useEffect, useRef } from "react";
 import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
-import { GroupConversationItem } from "./ConversationList/GroupConversationItem";
-import HiddenRequestsButton from "./ConversationList/HiddenRequestsButton";
-import ConversationListItem from "./ConversationListItem";
 import {
   useChatStore,
   useCurrentAccount,
@@ -17,7 +14,6 @@ import {
 } from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import {
   ConversationFlatListHiddenRequestItem,
   ConversationFlatListItem,
@@ -25,6 +21,9 @@ import {
 } from "../utils/conversation";
 import { getPreferredAvatar, getProfile } from "../utils/profile";
 import { conversationName } from "../utils/str";
+import { GroupConversationItem } from "./ConversationList/GroupConversationItem";
+import HiddenRequestsButton from "./ConversationList/HiddenRequestsButton";
+import ConversationListItem from "./ConversationListItem";
 
 type Props = {
   onScroll?: () => void;
@@ -67,36 +66,9 @@ export default function ConversationFlashList({
   );
   const userAddress = useCurrentAccount() as string;
   const peersStatus = useSettingsStore((s) => s.peersStatus);
-  const isSplitScreen = useIsSplitScreen();
   const profiles = useProfilesStore((state) => state.profiles);
 
   const listRef = useRef<FlashList<any> | undefined>();
-
-  const previousSearchQuery = useRef(itemsForSearchQuery);
-
-  useEffect(() => {
-    // In Split screen, when we click on a convo with search active
-    // the search clears and the selected convo may be out of screen
-    // so we scroll back to it
-    if (
-      isSplitScreen &&
-      previousSearchQuery.current &&
-      !itemsForSearchQuery &&
-      openedConversationTopic
-    ) {
-      const topicIndex = items.findIndex(
-        (c) => c.topic === openedConversationTopic
-      );
-      if (topicIndex === -1) return;
-      setTimeout(() => {
-        listRef.current?.scrollToIndex({
-          index: topicIndex,
-          viewPosition: 0.5,
-        });
-      }, 10);
-    }
-    previousSearchQuery.current = itemsForSearchQuery;
-  }, [isSplitScreen, items, openedConversationTopic, itemsForSearchQuery]);
 
   const keyExtractor = useCallback((item: ConversationFlatListItem) => {
     return item.topic;
