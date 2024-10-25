@@ -31,7 +31,6 @@ import {
 } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
 import { useFramesStore } from "../../data/store/framesStore";
-import { useIsSplitScreen } from "../../screens/Navigation/navHelpers";
 import {
   ReanimatedFlashList,
   ReanimatedFlatList,
@@ -287,7 +286,6 @@ export function Chat() {
 
   const xmtpAddress = useCurrentAccount() as string;
   const peerSocials = usePeerSocials();
-  const isSplitScreen = useIsSplitScreen();
   const recommendationsData = useRecommendationsStore(
     useShallow((s) =>
       conversation?.peerAddress ? s.frens[conversation.peerAddress] : undefined
@@ -456,9 +454,7 @@ export function Chat() {
             //   minIndexForVisible: 0,
             //   autoscrollToTopThreshold: 100,
             // }}
-            estimatedListSize={
-              isSplitScreen ? undefined : Dimensions.get("screen")
-            }
+            estimatedListSize={Dimensions.get("screen")}
             inverted
             keyExtractor={keyExtractor}
             getItemType={getItemType(framesStore)}

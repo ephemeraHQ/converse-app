@@ -28,7 +28,6 @@ import { useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import ConversationList from "../ConversationList";
 import { NativeStack, navigationAnimation } from "./Navigation";
-import { useIsSplitScreen } from "./navHelpers";
 
 export const useHeaderSearchBar = (props: any) => {
   // No-op
@@ -147,7 +146,6 @@ export default function ConversationListNav() {
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
-  const isSplitScreen = useIsSplitScreen();
   const dimensions = useWindowDimensions();
   return StyleSheet.create({
     rightButtonContainer: {
@@ -162,7 +160,7 @@ const useStyles = () => {
       web: {
         flexDirection: "row",
         justifyContent: "flex-start",
-        width: isSplitScreen ? 400 : dimensions.width,
+        width: dimensions.width,
         marginLeft: 16,
       },
     }),
