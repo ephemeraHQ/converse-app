@@ -3,7 +3,6 @@ import { AnimatedVStack } from "@design-system/VStack";
 import { translate } from "@i18n";
 import { PictoSizes } from "@styles/sizes";
 import { animations } from "@theme/animations";
-import { isDesktop } from "@utils/device";
 import React from "react";
 import { Alert } from "react-native";
 
@@ -73,7 +72,7 @@ export function OnboardingGetStartedScreen() {
         />
       </AnimatedVStack>
 
-      {hasInstalledWallets && !isDesktop && (
+      {hasInstalledWallets && (
         <AnimatedVStack
           entering={animations.fadeInDownSlow().delay(animationDelays[4])}
         >
@@ -98,9 +97,7 @@ export function OnboardingGetStartedScreen() {
       >
         <TableView
           title={
-            isDesktop
-              ? translate("walletSelector.connectionOptions.title")
-              : hasInstalledWallets
+            hasInstalledWallets
               ? translate("walletSelector.connectionOptions.otherOptions")
               : translate("walletSelector.connectionOptions.connectForDevs")
           }
@@ -114,7 +111,7 @@ export function OnboardingGetStartedScreen() {
         />
       </AnimatedVStack>
 
-      {!hasInstalledWallets && !isDesktop && (
+      {!hasInstalledWallets && (
         <AnimatedVStack
           entering={animations.fadeInDownSlow().delay(animationDelays[5])}
         >

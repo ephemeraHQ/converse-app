@@ -37,10 +37,10 @@ export function NavigationChatButton({
   const preferredName = getPreferredName(profile?.socials, address);
   const openChat = useCallback(() => {
     // On Android the accounts are not in the navigation but in a drawer
-    if (Platform.OS !== "web") {
-      const parent = navigation.getParent();
-      parent?.goBack();
-    }
+
+    const parent = navigation.getParent();
+    parent?.goBack();
+
     setTimeout(
       () => {
         navigate("Conversation", {
@@ -71,9 +71,7 @@ export function NavigationChatButton({
 
   return (
     <Button
-      variant={
-        Platform.OS === "android" || Platform.OS === "web" ? "link" : "outline"
-      }
+      variant={Platform.OS === "android" ? "link" : "outline"}
       title={groupMode ? (loading ? "Adding..." : "Add") : "Chat"}
       style={[styles.navigationButton, loading ? styles.loading : {}]}
       textStyle={loading ? styles.loadingText : undefined}

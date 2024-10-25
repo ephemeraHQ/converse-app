@@ -4,7 +4,7 @@ import {
   textPrimaryColor,
 } from "@styles/colors";
 import * as Haptics from "expo-haptics";
-import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import FrameButton from "./FrameButton";
 import FrameTextInput from "./FrameTextInput";
@@ -69,10 +69,7 @@ export default function FrameBottom({
                   (button.index === 3 && buttons.length === 3)
                 }
                 onPress={() => {
-                  if (Platform.OS !== "web") {
-                    // Immediate haptic feedback
-                    Haptics.impactAsync();
-                  }
+                  Haptics.impactAsync();
                   onButtonPress(button);
                 }}
                 messageFromMe={message.fromMe}
