@@ -41,7 +41,6 @@ import {
   getProfile,
 } from "../../utils/profile";
 import { createGroup } from "../../utils/xmtpRN/conversations";
-import { useIsSplitScreen } from "../Navigation/navHelpers";
 
 const getPendingGroupMembers = (
   members: any[],
@@ -71,7 +70,6 @@ export default function NewGroupSummary({
   const styles = useStyles();
   const insets = useSafeAreaInsets();
   const [creatingGroup, setCreatingGroup] = useState(false);
-  const isSplitScreen = useIsSplitScreen();
   const [permissionPolicySet, setPermissionPolicySet] =
     useState<PermissionPolicySet>({
       addMemberPolicy: "allow",
@@ -152,15 +150,12 @@ export default function NewGroupSummary({
 
       navigation.getParent()?.goBack();
 
-      setTimeout(
-        () => {
-          navigate("Conversation", {
-            topic: groupTopic,
-            focus: true,
-          });
-        },
-        isSplitScreen ? 0 : 300
-      );
+      setTimeout(() => {
+        navigate("Conversation", {
+          topic: groupTopic,
+          focus: true,
+        });
+      }, 300);
     } catch (e) {
       logger.error(e);
       Alert.alert("An error occurred");
@@ -170,7 +165,6 @@ export default function NewGroupSummary({
     groupDescription,
     groupName,
     permissionPolicySet,
-    isSplitScreen,
     navigation,
     remotePhotoUrl,
     route.params.members,
