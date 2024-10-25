@@ -77,7 +77,7 @@ const build = async () => {
   const buildCommand = "eas";
   const buildProfile =
     env === "production" || env === "preview"
-      ? `${env}${buildInternalProduction ? "-internal" : ""}`
+      ? `${env}-${platform}${buildInternalProduction ? "-internal" : ""}`
       : env;
   const buildArgs = [
     "build",
