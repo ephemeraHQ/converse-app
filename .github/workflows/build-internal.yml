@@ -69,9 +69,9 @@ jobs:
       - name: Build for Android
         run: |
           if [ "${{ github.event.inputs.environment || 'Production' }}" == "Production" ]; then
-            eas build --profile production --platform android --non-interactive --auto-submit --no-wait
+            eas build --profile production-android --platform android --non-interactive --auto-submit --no-wait
           else
-            eas build --profile preview --platform android --non-interactive --auto-submit --no-wait
+            eas build --profile preview-android --platform android --non-interactive --auto-submit --no-wait
           fi
 
   build-ios:
