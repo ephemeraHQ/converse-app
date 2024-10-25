@@ -1,3 +1,4 @@
+import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
 import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
 import { BottomSheetModal } from "@design-system/BottomSheet/BottomSheetModal";
 import { HStack } from "@design-system/HStack";
@@ -14,7 +15,6 @@ import {
   resetMessageReactionsDrawer,
   useMessageReactionsRolledUpReactions,
 } from "./MessageReactionsDrawer.service";
-import { BottomSheetContentContainer } from "../../../../../design-system/BottomSheet/BottomSheetContentContainer";
 
 export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
   const { theme } = useAppTheme();
@@ -43,7 +43,6 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
             style={{
               paddingLeft: theme.spacing.lg,
               flexDirection: "row",
-              gap: 20,
             }}
           >
             <Text>All {rolledUpReactions.totalReactions}</Text>
@@ -60,6 +59,9 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
                       : theme.colors.background.raised,
                   }}
                   underlayColor={theme.colors.border.subtle}
+                  accessible
+                  accessibilityRole="button"
+                  accessibilityLabel={`${details.count} ${emoji} reactions`}
                 >
                   <HStack style={{ alignItems: "center" }}>
                     <Text>{emoji}</Text>
