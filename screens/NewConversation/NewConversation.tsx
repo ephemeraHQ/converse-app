@@ -296,11 +296,10 @@ export default function NewConversation({
       if (!initialFocus.current) {
         initialFocus.current = true;
         if (
-          (!value &&
-            !recommendationsLoading &&
-            recommendationsLoadedOnce &&
-            recommendationsFrensCount === 0) ||
-          Platform.OS === "web" // On web, always focus
+          !value &&
+          !recommendationsLoading &&
+          recommendationsLoadedOnce &&
+          recommendationsFrensCount === 0
         ) {
           setTimeout(() => {
             r?.focus();
@@ -554,7 +553,6 @@ const useStyles = () => {
     searchContainer: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
-      paddingHorizontal: Platform.OS === "web" ? 20 : undefined,
     },
     newGroupButton: {
       marginLeft: 7,

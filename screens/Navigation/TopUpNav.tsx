@@ -1,8 +1,5 @@
-import {
-  listItemSeparatorColor,
-  navigationSecondaryBackgroundColor,
-} from "@styles/colors";
-import { Platform, useColorScheme } from "react-native";
+import { navigationSecondaryBackgroundColor } from "@styles/colors";
+import { useColorScheme } from "react-native";
 
 import { NativeStack, navigationAnimation } from "./Navigation";
 import TopUpScreen from "../TopUp";
@@ -18,10 +15,6 @@ export default function TopUpNav() {
         presentation: "modal",
         headerStyle: {
           backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
-          borderBottomColor:
-            Platform.OS === "web"
-              ? listItemSeparatorColor(colorScheme)
-              : undefined,
         } as any,
         animation: navigationAnimation,
       }}

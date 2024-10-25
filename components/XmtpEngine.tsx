@@ -9,7 +9,6 @@ import {
   AppState,
   AppStateStatus,
   NativeEventSubscription,
-  Platform,
 } from "react-native";
 
 import { getExistingDataSource } from "../data/db/datasource";
@@ -168,7 +167,7 @@ class XmtpCron {
     for (const account of accounts) {
       if (
         getChatStore(account).getState().localClientConnected &&
-        (Platform.OS === "web" || getExistingDataSource(account))
+        getExistingDataSource(account)
       ) {
         try {
           await createPendingConversations(account);

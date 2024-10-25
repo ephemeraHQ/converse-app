@@ -51,7 +51,7 @@ export default function SearchBar({
           clearButtonMode="always"
         />
       )}
-      {(Platform.OS === "android" || Platform.OS === "web") && (
+      {Platform.OS === "android" && (
         <MaterialSearchBar
           placeholder={inputPlaceholder}
           onChangeText={(query) => setValue(query.trim())}

@@ -14,10 +14,10 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
-  TextInput,
-  useColorScheme,
-  View,
   Text,
+  TextInput,
+  View,
+  useColorScheme,
 } from "react-native";
 import { List } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -36,8 +36,8 @@ import { usePhotoSelect } from "../../hooks/usePhotoSelect";
 import { uploadFile } from "../../utils/attachment";
 import { navigate } from "../../utils/navigation";
 import {
-  getPreferredName,
   getPreferredAvatar,
+  getPreferredName,
   getProfile,
 } from "../../utils/profile";
 import { createGroup } from "../../utils/xmtpRN/conversations";
@@ -149,9 +149,9 @@ export default function NewGroupSummary({
         remotePhotoUrl,
         groupDescription
       );
-      if (Platform.OS !== "web") {
-        navigation.getParent()?.goBack();
-      }
+
+      navigation.getParent()?.goBack();
+
       setTimeout(
         () => {
           navigate("Conversation", {
@@ -325,8 +325,7 @@ const useStyles = () => {
           backgroundColor: backgroundColor(colorScheme),
         },
         groupContent: {
-          paddingHorizontal:
-            Platform.OS === "ios" || Platform.OS === "web" ? 18 : 0,
+          paddingHorizontal: Platform.OS === "ios" ? 18 : 0,
         },
         sectionTitle: {
           marginBottom: -8,

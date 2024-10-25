@@ -169,7 +169,6 @@ const useStyles = () => {
       borderRadius: 16,
       width: "100%",
       zIndex: 1,
-      minWidth: Platform.OS === "web" ? 250 : undefined,
       justifyContent: "center",
       alignItems: "center",
       backgroundColor: backgroundColor(colorScheme),

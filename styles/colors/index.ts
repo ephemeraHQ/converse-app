@@ -27,10 +27,10 @@ export const navigationSecondaryBackgroundColor = (
   colorScheme: ColorSchemeName
 ) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? backgroundColor(colorScheme)
       : NAVIGATION_SECONDARY_BACKGROUND_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? backgroundColor(colorScheme)
     : NAVIGATION_SECONDARY_BACKGROUND_LIGHT;
 };
@@ -38,10 +38,10 @@ export const navigationSecondaryBackgroundColor = (
 /** @deprecated */
 export const chatInputBackgroundColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? MaterialDarkColors.surfaceVariant
       : NAVIGATION_SECONDARY_BACKGROUND_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? MaterialLightColors.surfaceVariant
     : NAVIGATION_SECONDARY_BACKGROUND_LIGHT;
 };
@@ -54,10 +54,10 @@ export const TEXT_PRIMARY_COLOR_DARK = "#FFF";
 /** @deprecated */
 export const textPrimaryColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? MaterialDarkColors.onBackground
       : TEXT_PRIMARY_COLOR_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? MaterialLightColors.onBackground
     : TEXT_PRIMARY_COLOR_LIGHT;
 };
@@ -70,10 +70,10 @@ const TEXT_SECONDARY_COLOR_DARK = "#EBEBEB";
 /** @deprecated */
 export const textSecondaryColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? MaterialDarkColors.onSurfaceVariant
       : TEXT_SECONDARY_COLOR_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? MaterialLightColors.onSurfaceVariant
     : TEXT_SECONDARY_COLOR_LIGHT;
 };
@@ -119,10 +119,10 @@ const ITEM_SEPARATOR_DARK = "#3A3A3B";
 /** @deprecated */
 export const itemSeparatorColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? MaterialDarkColors.outline
       : ITEM_SEPARATOR_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? MaterialLightColors.outline
     : ITEM_SEPARATOR_LIGHT;
 };
@@ -135,10 +135,10 @@ const MESSAGE_BUBBLE_DARK = "#464648";
 /** @deprecated */
 export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? MaterialDarkColors.surfaceVariant
       : MESSAGE_BUBBLE_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? MaterialLightColors.surfaceVariant
     : MESSAGE_BUBBLE_LIGHT;
 };
@@ -151,10 +151,10 @@ const MESSAGE_INNER_BUBBLE_DARK = "rgba(235, 235, 245, 0.3)";
 /** @deprecated */
 export const messageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? MaterialDarkColors.inverseOnSurface
       : MESSAGE_INNER_BUBBLE_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? MaterialLightColors.inverseSurface
     : MESSAGE_INNER_BUBBLE_LIGHT;
 };
@@ -162,12 +162,8 @@ export const messageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
 /** @deprecated */
 export const messageHighlightedBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
-      ? "#574642"
-      : "#3e3e41";
-  return Platform.OS === "android" || Platform.OS === "web"
-    ? "#e7cbce"
-    : "#c9c9cf";
+    return Platform.OS === "android" ? "#574642" : "#3e3e41";
+  return Platform.OS === "android" ? "#e7cbce" : "#c9c9cf";
 };
 
 /** @deprecated */
@@ -219,7 +215,7 @@ export const primaryColor = (colorScheme: ColorSchemeName) => {
       return "#000";
     }
   }
-  if (Platform.OS === "android" || Platform.OS === "web") {
+  if (Platform.OS === "android") {
     if (colorScheme === "dark") {
       return MaterialDarkColors.primary;
     } else {
@@ -230,7 +226,7 @@ export const primaryColor = (colorScheme: ColorSchemeName) => {
 
 /** @deprecated */
 export const inversePrimaryColor = (colorScheme: ColorSchemeName) => {
-  if (Platform.OS === "android" || Platform.OS === "web") {
+  if (Platform.OS === "android") {
     if (colorScheme === "dark") {
       return MaterialLightColors.primary;
     } else {
@@ -242,7 +238,7 @@ export const inversePrimaryColor = (colorScheme: ColorSchemeName) => {
 
 /** @deprecated */
 export const badgeColor = (colorScheme: ColorSchemeName) => {
-  if (Platform.OS === "android" || Platform.OS === "web") {
+  if (Platform.OS === "android") {
     return "#004692";
   }
   return primaryColor(colorScheme);
@@ -250,7 +246,7 @@ export const badgeColor = (colorScheme: ColorSchemeName) => {
 
 /** @deprecated */
 export const dangerColor = (colorScheme: ColorSchemeName) => {
-  if (Platform.OS === "android" || Platform.OS === "web") {
+  if (Platform.OS === "android") {
     if (colorScheme === "dark") {
       return MaterialDarkColors.error;
     } else {
@@ -388,11 +384,6 @@ export const headerTitleStyle = (colorScheme: ColorSchemeName) =>
       left: -15,
       fontFamily: "Roboto",
     },
-    web: {
-      color: textPrimaryColor(colorScheme),
-      fontSize: 17,
-      fontWeight: "600" as any,
-    },
   });
 
 /** @deprecated */
@@ -409,7 +400,7 @@ export const rgbStringToHex = (rgbString: string) => {
 
 /** @deprecated */
 export const actionSheetColors = (colorScheme: ColorSchemeName) =>
-  Platform.OS === "android" || Platform.OS === "web"
+  Platform.OS === "android"
     ? {
         containerStyle: {
           backgroundColor:
