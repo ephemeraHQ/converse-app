@@ -1,6 +1,6 @@
 const BOUNDARY_START_LOOKBEHIND = /(\s|\()/.source; // Either a space or a (
 const BOUNDARY_START = new RegExp(`(?<=${BOUNDARY_START_LOOKBEHIND})|^`).source; // It must be start of the line or be preceded by lookbehind
-const BOUNDARY_END_LOOKAHEAD = /(\s|\)|$|\.|!|\?|\r\n|\r|\n)/.source; // Either a space, the end of the text, or a ), a ., a !, a ?, a line break
+const BOUNDARY_END_LOOKAHEAD = /(\s|\)|$|\.|!|\?|\r\n|\r|\n|"|')/.source; // Either a space, the end of the text, or a ), a ., a !, a ?, a line break
 const BOUNDARY_END = new RegExp(`(?=${BOUNDARY_END_LOOKAHEAD})`).source;
 const WORD_CONTENT = /[^()/\s]/.source; // Not a space, not a ( or ), not a /
 

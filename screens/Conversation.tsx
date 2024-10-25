@@ -115,7 +115,8 @@ const Conversation = ({
       }
     } else if (
       route.params?.mainConversationWithPeer &&
-      !openedMainConvo.current
+      !openedMainConvo.current &&
+      !conversationTopicRef.current
     ) {
       openedMainConvo.current = true;
       openMainConversationWithPeer(
@@ -286,6 +287,7 @@ const Conversation = ({
 
   const conversationContextValue = useMemo(
     () => ({
+      topic: conversationTopic,
       conversation,
       messageToPrefill,
       inputRef: textInputRef,
@@ -300,6 +302,7 @@ const Conversation = ({
       tagsFetchedOnceForMessage,
     }),
     [
+      conversationTopic,
       conversation,
       messageToPrefill,
       textInputRef,
