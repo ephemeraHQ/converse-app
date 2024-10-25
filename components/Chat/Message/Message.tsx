@@ -418,7 +418,7 @@ const ChatMessage = ({
                         ]}
                         delayLongPress={platformTouchableLongPressDelay}
                         onLongPress={platformTouchableOnLongPress}
-                        delayPressIn={isDesktop ? 0 : 75}
+                        delayPressIn={75}
                         onPress={() => {
                           converseEventEmitter.emit("scrollChatToMessage", {
                             messageId: replyingToMessage.id,

@@ -131,7 +131,7 @@
     "ipfs-car": "^1.0.0",
     "libphonenumber-js": "^1.10.49",
     "match-sorter": "^6.3.4",
-    "mime": "^3.0.0",
+    "mime": "^4.0.4",
     "os-browserify": "^0.3.0",
     "patch-package": "^6.5.1",
     "perfect-debounce": "^1.0.0",

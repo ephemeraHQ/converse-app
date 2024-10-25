@@ -482,10 +482,7 @@ export function Chat() {
             style={[
               textInputStyle,
               {
-                display:
-                  frameTextInputFocused && hideInputIfFrameFocused
-                    ? "none"
-                    : "flex",
+                display: frameTextInputFocused ? "none" : "flex",
               },
             ]}
           >

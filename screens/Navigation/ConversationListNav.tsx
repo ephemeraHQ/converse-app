@@ -113,16 +113,6 @@ export default function ConversationListNav() {
                 icon={({ color }) => (
                   <Picto picto="menu" size={PictoSizes.navItem} color={color} />
                 )}
-                onIconPress={() => {
-<<<<<<< HEAD
-                  if (Platform.OS === "web") {
-                    navigation.goBack();
-=======
-                  if (Platform.OS === "android") {
-                    converseEventEmitter.emit("toggle-navigation-drawer", true);
->>>>>>> ff99fe25 (remove web)
-                  }
-                }}
                 mode="bar"
                 autoCapitalize="none"
                 autoFocus={false}
