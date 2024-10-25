@@ -1,6 +1,6 @@
 import { Alert, AlertButton } from "react-native";
 
-import { waitUntilAppActive } from "./appState";
+import { waitUntilAppActive } from "./appState/waitUntilAppActive";
 
 export const awaitableAlert = (
   title: string,
