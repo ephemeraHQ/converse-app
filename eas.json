@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 7.0.0",
+    "version": ">=12.6.0",
     "appVersionSource": "local"
   },
   "build": {
@@ -21,6 +21,7 @@
       }
     },
     "production": {
+      "autoIncrement": true,
       "channel": "production",
       "android": {
         "buildType": "app-bundle",
@@ -32,6 +33,10 @@
         "resourceClass": "large",
         "cocoapods": "1.14.3"
       }
+    },
+    "production-android": {
+      "extends": "production",
+      "autoIncrement": false
     },
     "preview": {
       "extends": "production",
@@ -45,6 +50,10 @@
       "ios": {
         "resourceClass": "medium"
       }
+    },
+    "preview-android": {
+      "extends": "preview",
+      "autoIncrement": false
     },
     "ios-simulator": {
       "extends": "development",
@@ -70,10 +79,7 @@
     "production": {
       "android": {
         "track": "internal"
-      }
-    },
-    "production-ios": {
-      "extends": "production",
+      },
       "ios": {
         "ascAppId": "1658819514"
       }
@@ -84,16 +90,13 @@
     "preview": {
       "android": {
         "track": "internal"
-      }
-    },
-    "preview-ios": {
-      "extends": "production",
+      },
       "ios": {
         "ascAppId": "6478027666"
       }
     },
     "preview-android": {
-      "extends": "production"
+      "extends": "preview"
     }
   }
 }

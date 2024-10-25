@@ -8,6 +8,7 @@ import { IColors, typography } from "../../theme";
 export type ISizes = keyof typeof textSizeStyles;
 export type IWeights = keyof typeof typography.primary;
 export type ITextColors = Exclude<keyof IColors["text"], "inverted">;
+
 export interface ITextStyleProps {
   /**
    * An optional style override useful for padding & margin.
