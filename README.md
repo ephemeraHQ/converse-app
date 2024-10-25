@@ -100,3 +100,44 @@ yarn test
 Frames are expected to follow the Open Frames Standard https://github.com/open-frames/standard
 
 
+
+# Release Processes
+
+### Main Branch
+Represents the current production code.
+
+### Release Branches
+Each release branch is based off of `main` or the release branch before it. It is used to prepare and stabilize the code for a specific release version (e.g., `release/2.0.8`).
+
+### Feature Branches
+Feature branches are longer-lived features or refactors expected to take additional time. They should be based off of the targeted feature release branch.
+
+This structure allows code to flow **from `main` to release branches to feature branches**.
+
+
+![Merge Diagram](docs/image.png)
+
+---
+
+## Rebasing Branches
+
+Assuming your branch is `feature/scw`, and your feature is targeted for release `2.1.0`, follow these steps to rebase:
+
+1. First, checkout the feature branch:
+   ```bash
+   git fetch origin
+   git branch feature/scw -D
+   git checkout feature/scw origin/feature/scw
+   ```
+
+2. Then, rebase onto the targeted release branch:
+   ```bash
+   git pull origin/release/2.1.0 --rebase
+   git push origin feature/scw --force-with-lease
+   ```
+
+### Exceptions
+There are certain times where this flow does not work as intended. For example:
+* Build scripts: These may need to be run off of the default main branch instead of feature or release branches.
+* Read me updates: These are not required to be on a branch and can be committed directly to main.
+* Bug fixes that can be OTA updated: These can be committed directly to main to perform an OTA update.
