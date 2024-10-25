@@ -37,14 +37,15 @@ export const getIconButtonViewStyle =
     // Set size
     const sizeStyles = {
       md: {
+        width: spacing.xl,
+        height: spacing.xl,
+      },
+      lg: {
         width: spacing.xxl,
         height: spacing.xxl,
       },
-      lg: {
-        width: spacing["3xl"],
-        height: spacing["3xl"],
-      },
     };
+
     Object.assign(style, sizeStyles[size]);
 
     if (action === "primary") {

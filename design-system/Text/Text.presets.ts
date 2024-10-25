@@ -8,6 +8,7 @@ import {
 import { ThemedStyleArray } from "../../theme/useAppTheme";
 
 export type IPresets =
+  | "title"
   | "body"
   | "bodyBold"
   | "small"
@@ -18,6 +19,8 @@ export type IPresets =
   | "formLabel";
 
 export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
+  title: [textBaseStyle, textSizeStyles.xl, textFontWeightStyles.bold],
+
   body: [textBaseStyle],
 
   bodyBold: [textBaseStyle, textFontWeightStyles.bold],

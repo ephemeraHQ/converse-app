@@ -14,12 +14,12 @@ import {
 } from "react";
 import { StyleProp, useColorScheme } from "react-native";
 
-import { avatarSize, IAvatarSize } from "./avatar";
-import { borderRadius, IBorderRadius } from "./border-radius";
-import { borderWidth, IBorderWidth } from "./borders";
+import { IAvatarSize, avatarSize } from "./avatar";
+import { IBorderRadius, borderRadius } from "./border-radius";
+import { IBorderWidth, borderWidth } from "./borders";
 import { colorsDark } from "./colorsDark";
-import { colorsLight, IColors } from "./colorsLight";
-import { iconSize, IIconSize } from "./icon";
+import { IColors, colorsLight } from "./colorsLight";
+import { IIconSize, iconSize } from "./icon";
 import { ISpacing, spacing } from "./spacing";
 import { Timing, timing } from "./timing";
 import { ITypography, typography } from "./typography";
