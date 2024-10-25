@@ -413,7 +413,6 @@ export default function NewConversation({
         >
           <Recommendations
             visibility="EMBEDDED"
-            navigation={navigation}
             profiles={profiles}
             groupMode={group.enabled}
             groupMembers={group.members}

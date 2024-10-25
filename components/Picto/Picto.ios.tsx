@@ -12,6 +12,7 @@ type Props = {
 
 export default function Picto({ picto, style, size, weight, color }: Props) {
   const colorScheme = useColorScheme();
+
   return (
     <SFSymbol
       name={picto}
