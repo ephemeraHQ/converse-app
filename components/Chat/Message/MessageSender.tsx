@@ -8,7 +8,7 @@ type MessageSenderDumbProps = {
   name: string;
 };
 
-const MessageSenderDumb = ({ name }: MessageSenderDumbProps) => {
+export const MessageSenderDumb = ({ name }: MessageSenderDumbProps) => {
   const styles = useStyles();
   return (
     <View style={styles.groupSenderWrapper}>
