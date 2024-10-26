@@ -382,5 +382,14 @@ export const en = {
   group_description_changed:
     '{{name}} changed the group description to "{{newValue}}".',
   group_name_changed_to: '{{name}} changed the group name to "{{newValue}}".',
+
+  message_status: {
+    sent: "Sent",
+    delivered: "Sent",
+    error: "Failed",
+    sending: "Sending",
+    prepared: "Sending",
+    seen: "Read",
+  },
 };
 export type Translations = typeof en;
