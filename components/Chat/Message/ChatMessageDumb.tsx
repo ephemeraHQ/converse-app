@@ -1,3 +1,4 @@
+import { currentAccount, useChatStore } from "@data/store/accountsStore";
 import {
   inversePrimaryColor,
   messageInnerBubbleColor,
@@ -8,6 +9,9 @@ import {
 import { useAppTheme } from "@theme/useAppTheme";
 import { converseEventEmitter } from "@utils/events";
 import { Haptics } from "@utils/haptics";
+import { getUrlToRender } from "@utils/messageContent";
+import { getMessageReactions } from "@utils/reactions";
+import { getReadableProfile } from "@utils/str";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
   Linking,
@@ -30,6 +34,7 @@ import Animated, {
 import { MessageSenderAvatarDumb } from "./MessageSenderAvatar";
 import { MessageStatusDumb } from "./MessageStatusDumb";
 import ActionButton from "../ActionButton";
+import { MessageToDisplay } from "./Message";
 import ChatMessageActions from "./MessageActions";
 
 const platformTouchableLongPressDelay = Platform.select({
@@ -62,6 +67,8 @@ type ChatMessageDumbProps = {
   messageSenderComponent: ReactNode;
   displayMessageSender: boolean;
   displayFramesPreviews: boolean;
+  isGroupUpdated: boolean;
+  isChatMessage: boolean;
   displayMessageStatus: boolean;
 };
 
@@ -82,6 +89,8 @@ export const ChatMessageDumb = ({
   displayMessageSender,
   messageSenderComponent,
   displayFramesPreviews,
+  isGroupUpdated,
+  isChatMessage,
   displayMessageStatus,
 }: ChatMessageDumbProps) => {
   const styles = useStyles();
@@ -158,11 +167,8 @@ export const ChatMessageDumb = ({
       : undefined
   );
 
-  const isGroupUpdated = isContentType("groupUpdated", message.contentType);
-
   const reactions = useMemo(() => getMessageReactions(message), [message]);
   const hasReactions = Object.keys(reactions).length > 0;
-  const isChatMessage = !isGroupUpdated;
   const shouldShowOutsideContentRow = isChatMessage && hasReactions;
 
   let messageMaxWidth: DimensionValue;
