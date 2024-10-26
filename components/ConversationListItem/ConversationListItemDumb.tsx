@@ -291,7 +291,7 @@ export const ConversationListItemDumb = memo(
         return (
           <RectButton style={styles.leftAction}>
             <Picto
-              picto={leftActionPicto}
+              picto={leftActionPicto as IPicto}
               color={themedInversePrimaryColor}
               size={PictoSizes.swipableItem}
             />
