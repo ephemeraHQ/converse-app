@@ -72,13 +72,13 @@ const usePeerSocials = () => {
 const useRenderItem = ({
   xmtpAddress,
   conversation,
-  framesStore,
+  messageFramesMap,
   colorScheme,
 }: {
   xmtpAddress: string;
   conversation: XmtpConversationWithUpdate | undefined;
-  framesStore: {
-    [frameUrl: string]: FrameWithType;
+  messageFramesMap: {
+    [messageId: string]: FrameWithType[];
   };
   colorScheme: ColorSchemeName;
 }) => {
@@ -90,11 +90,11 @@ const useRenderItem = ({
           message={{ ...item }}
           colorScheme={colorScheme}
           isGroup={!!conversation?.isGroup}
-          isFrame={!!framesStore[item.content.toLowerCase().trim()]}
+          hasFrames={messageFramesMap[item.id]?.length > 0}
         />
       );
     },
-    [colorScheme, xmtpAddress, conversation?.isGroup, framesStore]
+    [colorScheme, xmtpAddress, conversation?.isGroup, messageFramesMap]
   );
 };
 
@@ -383,7 +383,9 @@ export function Chat() {
     styles.inChatRecommendations,
   ]);
 
-  const { frames: framesStore } = useFramesStore(useSelect(["frames"]));
+  const { messageFramesMap, frames: framesStore } = useFramesStore(
+    useSelect(["messageFramesMap", "frames"])
+  );
 
   const showPlaceholder = useIsShowingPlaceholder({
     messages: listArray,
@@ -394,7 +396,7 @@ export function Chat() {
   const renderItem = useRenderItem({
     xmtpAddress,
     conversation,
-    framesStore,
+    messageFramesMap,
     colorScheme,
   });
 
@@ -539,7 +541,9 @@ export function ChatPreview() {
     ]
   );
 
-  const { frames: framesStore } = useFramesStore(useSelect(["frames"]));
+  const { frames: framesStore, messageFramesMap } = useFramesStore(
+    useSelect(["frames", "messageFramesMap"])
+  );
 
   const showPlaceholder = useIsShowingPlaceholder({
     messages: listArray,
@@ -550,7 +554,7 @@ export function ChatPreview() {
   const renderItem = useRenderItem({
     xmtpAddress,
     conversation,
-    framesStore,
+    messageFramesMap,
     colorScheme,
   });
 

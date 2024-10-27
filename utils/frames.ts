@@ -122,6 +122,7 @@ export const fetchFramesForMessage = async (
       };
       // Save frame to store
       useFramesStore.getState().setFrames(framesToSave);
+      useFramesStore.getState().setMessageFramesMap(message.id, fetchedFrames);
       // Then update message to reflect change
       saveMessageMetadata(account, message, messageMetadataToSave);
 
