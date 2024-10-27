@@ -13,7 +13,10 @@ type FramesStoreType = {
   messageFramesMap: {
     [messageId: string]: FrameWithType[];
   };
-  setFrames: (framesToSet: { [frameUrl: string]: FrameWithType }) => void;
+  setFrames: (
+    messageId: string,
+    framesToSet: { [frameUrl: string]: FrameWithType }
+  ) => void;
   getFramesForURLs: (urls: string[]) => FrameWithType[];
   setMessageFramesMap: (messageId: string, framesUrls: FrameWithType[]) => void;
 };
@@ -23,11 +26,22 @@ export const useFramesStore = create<FramesStoreType>()(
     (set, get) => ({
       frames: {},
       messageFramesMap: {},
-      setFrames: (framesToSet: { [frameUrl: string]: FrameWithType }) =>
+      setFrames: (
+        messageId: string,
+        framesToSet: { [frameUrl: string]: FrameWithType }
+      ) =>
         set((state) => {
           const existingFrames = pick(state.frames, Object.keys(framesToSet));
+
           if (isDeepEqual(existingFrames, framesToSet)) return {};
-          return { ...state, frames: { ...state.frames, ...framesToSet } };
+          return {
+            ...state,
+            frames: { ...state.frames, ...framesToSet },
+            messageFramesMap: {
+              ...state.messageFramesMap,
+              [messageId]: Object.values(framesToSet),
+            },
+          };
         }),
       getFramesForURLs: (urls: string[]) => {
         const framesToReturn: FrameWithType[] = [];

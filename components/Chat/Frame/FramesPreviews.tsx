@@ -1,3 +1,4 @@
+import { useSelect } from "@data/store/storeHelpers";
 import { useConversationContext } from "@utils/conversation";
 import { useCallback, useEffect, useRef } from "react";
 import { View } from "react-native";
@@ -22,19 +23,20 @@ export function FramesPreviews({ message }: Props) {
   const framesToDisplay = useFramesStore(
     useShallow((s) => s.messageFramesMap[message.id] ?? [])
   );
+  const { setMessageFramesMap } = useFramesStore(
+    useSelect(["setMessageFramesMap"])
+  );
 
   const fetchTagsIfNeeded = useCallback(() => {
     if (!tagsFetchedOnceForMessage.current[message.id]) {
       tagsFetchedOnceForMessage.current[message.id] = true;
       fetchFramesForMessage(account, message).then(
         (frames: FramesForMessage) => {
-          useFramesStore
-            .getState()
-            .setMessageFramesMap(frames.messageId, frames.frames);
+          setMessageFramesMap(frames.messageId, frames.frames);
         }
       );
     }
-  }, [account, message, tagsFetchedOnceForMessage]);
+  }, [account, message, tagsFetchedOnceForMessage, setMessageFramesMap]);
 
   // Components are recycled, let's fix when stuff changes
   useEffect(() => {
@@ -42,7 +44,7 @@ export function FramesPreviews({ message }: Props) {
       messageId.current = message.id;
       fetchTagsIfNeeded();
     }
-  }, [message.id, fetchTagsIfNeeded, message.converseMetadata?.frames]);
+  }, [message.id, fetchTagsIfNeeded]);
 
   return (
     <View>

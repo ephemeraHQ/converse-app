@@ -6,7 +6,7 @@ import {
   tertiaryBackgroundColor,
 } from "@styles/colors";
 import { getCleanAddress } from "@utils/evm/address";
-import { FrameWithType } from "@utils/frames";
+import { FrameWithType, messageHasFrames } from "@utils/frames";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -90,7 +90,7 @@ const useRenderItem = ({
           message={{ ...item }}
           colorScheme={colorScheme}
           isGroup={!!conversation?.isGroup}
-          hasFrames={messageFramesMap[item.id]?.length > 0}
+          hasFrames={messageHasFrames(item.id, messageFramesMap)}
         />
       );
     },
