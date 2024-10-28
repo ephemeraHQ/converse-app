@@ -117,8 +117,11 @@ export const InstalledWalletsTableView = memo(
             walletName: wallet.name,
           }),
           action: async () => {
+            const isSCW = wallet?.isSmartContractWallet;
             logger.debug(
-              `[Onboarding] Clicked on wallet ${wallet.name} - opening external app`
+              `[Onboarding] Clicked on wallet ${wallet.name} - ${
+                isSCW ? "Opening web page" : "opening external app"
+              }`
             );
 
             setIsProcessingWalletId(wallet.name);
@@ -131,12 +134,17 @@ export const InstalledWalletsTableView = memo(
               let walletAddress: string = "";
 
               // Specific flow for Coinbase Wallet
-              if (wallet.name === "Coinbase Wallet") {
+              if (wallet.thirdwebId === "com.coinbase.wallet") {
                 const wallet = await thirdwebConnect(async () => {
                   const coinbaseWallet = createWallet("com.coinbase.wallet", {
                     appMetadata: config.walletConnectConfig.appMetadata,
                     mobileConfig: {
-                      callbackURL: `https://${config.websiteDomain}/coinbase`,
+                      callbackURL: isSCW
+                        ? `converse-dev://mobile-wallet-protocol`
+                        : `https://${config.websiteDomain}/coinbase`,
+                    },
+                    walletConfig: {
+                      options: isSCW ? "smartWalletOnly" : "eoaOnly",
                     },
                   });
                   await coinbaseWallet.connect({ client: thirdwebClient });
