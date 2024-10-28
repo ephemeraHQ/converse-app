@@ -17,15 +17,14 @@ import {
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
-import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
-import { NavigationParamList } from "./Navigation/Navigation";
-import { useIsSplitScreen } from "./Navigation/navHelpers";
 import ChatNullState from "../components/Chat/ChatNullState";
 import ConversationFlashList from "../components/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
 import RequestsButton from "../components/ConversationList/RequestsButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
+import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
+import { NavigationParamList } from "./Navigation/Navigation";
 import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "../components/Search/NoResult";
@@ -97,7 +96,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     !initialLoadDoneOnce && flatListItems.items.length <= 1;
   const showNoResult = flatListItems.items.length === 0 && !!searchQuery;
 
-  const isSplit = useIsSplitScreen();
   const sharingMode = !!route.params?.frameURL;
 
   const requestsCount = useMemo(() => {
@@ -164,10 +162,10 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   useEffect(() => {
     // In split screen, when selecting a convo with search active,
     // let's clear the search
-    if (isSplit && openedConversationTopic) {
+    if (openedConversationTopic) {
       clearSearch();
     }
-  }, [clearSearch, isSplit, openedConversationTopic]);
+  }, [clearSearch, openedConversationTopic]);
 
   const ListHeaderComponents: React.ReactElement[] = [
     <PinnedConversations
@@ -195,12 +193,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     ListHeaderComponents.push(
       <View key="search" style={styles.headerTitleContainer}>
         <Text style={styles.headerTitle}>Messages</Text>
-        <RequestsButton
-          key="requests"
-          navigation={navigation}
-          route={route}
-          requestsCount={requestsCount}
-        />
+        <RequestsButton key="requests" requestsCount={requestsCount} />
       </View>
     );
   } else if (!sharingMode) {
@@ -223,7 +216,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     ListHeaderComponents.push(<EphemeralAccountBanner key="ephemeral" />);
   }
   if (showNoResult) {
-    ListFooterComponent = <NoResult navigation={navigation} />;
+    ListFooterComponent = <NoResult />;
   }
 
   if (showChatNullState) {
@@ -254,10 +247,8 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
         }
         ListFooterComponent={ListFooterComponent}
       />
-      <Recommendations navigation={navigation} visibility="HIDDEN" />
-      {(Platform.OS === "android" || Platform.OS === "web") && !sharingMode && (
-        <NewConversationButton navigation={navigation} route={route} />
-      )}
+      <Recommendations visibility="HIDDEN" />
+      {Platform.OS === "android" && !sharingMode && <NewConversationButton />}
     </>
   );
 }

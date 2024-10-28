@@ -1,9 +1,12 @@
 import { ColorSchemeName, Platform } from "react-native";
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 
+/** @deprecated */
 export const BACKGROUND_LIGHT = "#FFF";
+/** @deprecated */
 export const BACKGROUND_DARK = "#111";
 
+/** @deprecated */
 export const backgroundColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
     return Platform.OS === "android"
@@ -14,160 +17,196 @@ export const backgroundColor = (colorScheme: ColorSchemeName) => {
     : BACKGROUND_LIGHT;
 };
 
+/** @deprecated */
 const NAVIGATION_SECONDARY_BACKGROUND_LIGHT = "#F9F9F9";
+/** @deprecated */
 const NAVIGATION_SECONDARY_BACKGROUND_DARK = "#1C1C1E";
 
+/** @deprecated */
 export const navigationSecondaryBackgroundColor = (
   colorScheme: ColorSchemeName
 ) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? backgroundColor(colorScheme)
       : NAVIGATION_SECONDARY_BACKGROUND_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? backgroundColor(colorScheme)
     : NAVIGATION_SECONDARY_BACKGROUND_LIGHT;
 };
 
+/** @deprecated */
 export const chatInputBackgroundColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? MaterialDarkColors.surfaceVariant
       : NAVIGATION_SECONDARY_BACKGROUND_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? MaterialLightColors.surfaceVariant
     : NAVIGATION_SECONDARY_BACKGROUND_LIGHT;
 };
 
+/** @deprecated */
 export const TEXT_PRIMARY_COLOR_LIGHT = "#000";
+/** @deprecated */
 export const TEXT_PRIMARY_COLOR_DARK = "#FFF";
 
+/** @deprecated */
 export const textPrimaryColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? MaterialDarkColors.onBackground
       : TEXT_PRIMARY_COLOR_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? MaterialLightColors.onBackground
     : TEXT_PRIMARY_COLOR_LIGHT;
 };
 
+/** @deprecated */
 const TEXT_SECONDARY_COLOR_LIGHT = "#666";
+/** @deprecated */
 const TEXT_SECONDARY_COLOR_DARK = "#EBEBEB";
 
+/** @deprecated */
 export const textSecondaryColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? MaterialDarkColors.onSurfaceVariant
       : TEXT_SECONDARY_COLOR_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? MaterialLightColors.onSurfaceVariant
     : TEXT_SECONDARY_COLOR_LIGHT;
 };
 
+/** @deprecated */
 const ACTION_SECONDARY_COLOR_LIGHT = "rgba(60, 60, 67, 0.3)";
+/** @deprecated */
 const ACTION_SECONDARY_COLOR_DARK = "rgba(235, 235, 245, 0.3)";
 
+/** @deprecated */
 export const actionSecondaryColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return ACTION_SECONDARY_COLOR_DARK;
   return ACTION_SECONDARY_COLOR_LIGHT;
 };
 
+/** @deprecated */
 const CLICKED_ITEM_BACKGROUND_LIGHT = "#D1D1D5";
+/** @deprecated */
 const CLICKED_ITEM_BACKGROUND_DARK = "#3A3A3B";
 
+/** @deprecated */
 export const clickedItemBackgroundColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return CLICKED_ITEM_BACKGROUND_DARK;
   return CLICKED_ITEM_BACKGROUND_LIGHT;
 };
 
+/** @deprecated */
 const LIST_ITEM_SEPARATOR_LIGHT = "#b2b2b2";
+/** @deprecated */
 const LIST_ITEM_SEPARATOR_DARK = "#3A3A3B";
 
+/** @deprecated */
 export const listItemSeparatorColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return LIST_ITEM_SEPARATOR_DARK;
   return LIST_ITEM_SEPARATOR_LIGHT;
 };
 
+/** @deprecated */
 const ITEM_SEPARATOR_LIGHT = "#D1D1D5";
+/** @deprecated */
 const ITEM_SEPARATOR_DARK = "#3A3A3B";
 
+/** @deprecated */
 export const itemSeparatorColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? MaterialDarkColors.outline
       : ITEM_SEPARATOR_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? MaterialLightColors.outline
     : ITEM_SEPARATOR_LIGHT;
 };
 
+/** @deprecated */
 const MESSAGE_BUBBLE_LIGHT = "#E9E9EB";
+/** @deprecated */
 const MESSAGE_BUBBLE_DARK = "#464648";
 
+/** @deprecated */
 export const messageBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? MaterialDarkColors.surfaceVariant
       : MESSAGE_BUBBLE_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? MaterialLightColors.surfaceVariant
     : MESSAGE_BUBBLE_LIGHT;
 };
 
+/** @deprecated */
 const MESSAGE_INNER_BUBBLE_LIGHT = "rgba(255, 255, 255, 0.6)";
+/** @deprecated */
 const MESSAGE_INNER_BUBBLE_DARK = "rgba(235, 235, 245, 0.3)";
 
+/** @deprecated */
 export const messageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
+    return Platform.OS === "android"
       ? MaterialDarkColors.inverseOnSurface
       : MESSAGE_INNER_BUBBLE_DARK;
-  return Platform.OS === "android" || Platform.OS === "web"
+  return Platform.OS === "android"
     ? MaterialLightColors.inverseSurface
     : MESSAGE_INNER_BUBBLE_LIGHT;
 };
 
+/** @deprecated */
 export const messageHighlightedBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark")
-    return Platform.OS === "android" || Platform.OS === "web"
-      ? "#574642"
-      : "#3e3e41";
-  return Platform.OS === "android" || Platform.OS === "web"
-    ? "#e7cbce"
-    : "#c9c9cf";
+    return Platform.OS === "android" ? "#574642" : "#3e3e41";
+  return Platform.OS === "android" ? "#e7cbce" : "#c9c9cf";
 };
 
+/** @deprecated */
 const MY_MESSAGE_BUBBLE_LIGHT = "#000";
+/** @deprecated */
 const MY_MESSAGE_BUBBLE_DARK = "#FFF";
 
+/** @deprecated */
 export const myMessageBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return MY_MESSAGE_BUBBLE_DARK;
   return MY_MESSAGE_BUBBLE_LIGHT;
 };
 
+/** @deprecated */
 const MY_MESSAGE_INNER_BUBBLE_LIGHT = "rgba(255, 255, 255, 0.3)";
+/** @deprecated */
 const MY_MESSAGE_INNER_BUBBLE_DARK = "rgba(0, 0, 0, 0.08)";
 
+/** @deprecated */
 export const myMessageInnerBubbleColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return MY_MESSAGE_INNER_BUBBLE_DARK;
   return MY_MESSAGE_INNER_BUBBLE_LIGHT;
 };
 
+/** @deprecated */
 export const myMessageHighlightedBubbleColor = (
   colorScheme: ColorSchemeName
 ) => {
   return "#b4402f";
 };
 
+/** @deprecated */
 const TERTIARY_BACKGROUND_LIGHT = "#EFEFF0";
+/** @deprecated */
 const TERTIARY_BACKGROUND_DARK = "#1C1C1F";
 
+/** @deprecated */
 export const tertiaryBackgroundColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return TERTIARY_BACKGROUND_DARK;
   return TERTIARY_BACKGROUND_LIGHT;
 };
 
+/** @deprecated */
 export const primaryColor = (colorScheme: ColorSchemeName) => {
   if (Platform.OS === "ios") {
     if (colorScheme === "dark") {
@@ -176,7 +215,7 @@ export const primaryColor = (colorScheme: ColorSchemeName) => {
       return "#000";
     }
   }
-  if (Platform.OS === "android" || Platform.OS === "web") {
+  if (Platform.OS === "android") {
     if (colorScheme === "dark") {
       return MaterialDarkColors.primary;
     } else {
@@ -185,8 +224,9 @@ export const primaryColor = (colorScheme: ColorSchemeName) => {
   }
 };
 
+/** @deprecated */
 export const inversePrimaryColor = (colorScheme: ColorSchemeName) => {
-  if (Platform.OS === "android" || Platform.OS === "web") {
+  if (Platform.OS === "android") {
     if (colorScheme === "dark") {
       return MaterialLightColors.primary;
     } else {
@@ -196,15 +236,17 @@ export const inversePrimaryColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark" ? "#000" : "#FFF";
 };
 
+/** @deprecated */
 export const badgeColor = (colorScheme: ColorSchemeName) => {
-  if (Platform.OS === "android" || Platform.OS === "web") {
+  if (Platform.OS === "android") {
     return "#004692";
   }
   return primaryColor(colorScheme);
 };
 
+/** @deprecated */
 export const dangerColor = (colorScheme: ColorSchemeName) => {
-  if (Platform.OS === "android" || Platform.OS === "web") {
+  if (Platform.OS === "android") {
     if (colorScheme === "dark") {
       return MaterialDarkColors.error;
     } else {
@@ -214,9 +256,12 @@ export const dangerColor = (colorScheme: ColorSchemeName) => {
   return colorScheme === "dark" ? "#FF453A" : "#FF3B30";
 };
 
+/** @deprecated */
 const REQUESTS_TEXT_LIGHT = "rgba(126, 0, 204, 1)";
+/** @deprecated */
 const REQUESTS_TEXT_DARK = "rgba(126, 0, 204, 1)";
 
+/** @deprecated */
 export const requestsTextColor = (colorScheme: ColorSchemeName) => {
   if (colorScheme === "dark") return REQUESTS_TEXT_DARK;
   return REQUESTS_TEXT_LIGHT;
@@ -224,6 +269,7 @@ export const requestsTextColor = (colorScheme: ColorSchemeName) => {
 
 // Generated using https://callstack.github.io/react-native-paper/docs/guides/theming#theme-properties
 
+/** @deprecated */
 const MaterialLightColors = {
   primary: "rgb(0,0,0)",
   onPrimary: "rgb(255, 255, 255)",
@@ -267,6 +313,7 @@ const MaterialLightColors = {
   backdrop: "rgba(52, 46, 55, 0.4)",
 };
 
+/** @deprecated */
 const MaterialDarkColors = {
   primary: "rgb(255,255,255)",
   onPrimary: "rgb(0,0,0)",
@@ -310,16 +357,19 @@ const MaterialDarkColors = {
   backdrop: "rgba(52, 46, 55, 0.4)",
 };
 
+/** @deprecated */
 export const MaterialLightTheme = {
   ...MD3LightTheme,
   colors: MaterialLightColors,
 };
 
+/** @deprecated */
 export const MaterialDarkTheme = {
   ...MD3DarkTheme,
   colors: MaterialDarkColors,
 };
 
+/** @deprecated */
 export const headerTitleStyle = (colorScheme: ColorSchemeName) =>
   Platform.select({
     default: {
@@ -334,13 +384,9 @@ export const headerTitleStyle = (colorScheme: ColorSchemeName) =>
       left: -15,
       fontFamily: "Roboto",
     },
-    web: {
-      color: textPrimaryColor(colorScheme),
-      fontSize: 17,
-      fontWeight: "600" as any,
-    },
   });
 
+/** @deprecated */
 export const rgbStringToHex = (rgbString: string) => {
   const splitted = rgbString.split("(")[1].split(")")[0].split(",");
   const hexValue = splitted
@@ -352,8 +398,9 @@ export const rgbStringToHex = (rgbString: string) => {
   return `#${hexValue}`;
 };
 
+/** @deprecated */
 export const actionSheetColors = (colorScheme: ColorSchemeName) =>
-  Platform.OS === "android" || Platform.OS === "web"
+  Platform.OS === "android"
     ? {
         containerStyle: {
           backgroundColor:
@@ -367,6 +414,7 @@ export const actionSheetColors = (colorScheme: ColorSchemeName) =>
       }
     : {};
 
+/** @deprecated */
 export const textInputStyle = (colorScheme: ColorSchemeName) =>
   ({
     ...Platform.select({

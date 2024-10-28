@@ -25,7 +25,7 @@ export default function GroupNav() {
       options={({ route }) => ({
         headerTitle: "Group info",
         headerTintColor:
-          Platform.OS === "android" || Platform.OS === "web"
+          Platform.OS === "android"
             ? textSecondaryColor(colorScheme)
             : textPrimaryColor(colorScheme),
         animation: navigationAnimation,

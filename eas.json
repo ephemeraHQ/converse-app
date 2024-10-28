@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 7.0.0",
+    "version": ">=12.6.0",
     "appVersionSource": "local"
   },
   "build": {
@@ -11,80 +11,22 @@
       "env": {
         "EXPO_ENV": "dev"
       },
-      "node": "20.15.1"
-    },
-    "ios-simulator": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "channel": "development",
-      "env": {
-        "EXPO_ENV": "dev"
-      },
-      "ios": {
-        "simulator": true,
-        "cocoapods": "1.14.3"
-      },
-      "node": "20.15.1"
-    },
-    "preview-ios": {
-      "autoIncrement": true,
-      "channel": "preview",
-      "env": {
-        "EXPO_ENV": "preview",
-        "EXPO_PLATFORM": "ios"
-      },
-      "node": "20.15.1",
-      "ios": {
-        "cocoapods": "1.14.3"
-      }
-    },
-    "preview-ios-internal": {
-      "distribution": "internal",
-      "autoIncrement": true,
-      "channel": "preview",
-      "env": {
-        "EXPO_ENV": "preview",
-        "EXPO_PLATFORM": "ios"
-      },
-      "node": "20.15.1",
-      "ios": {
-        "cocoapods": "1.14.3"
-      }
-    },
-    "preview-android": {
-      "distribution": "internal",
-      "autoIncrement": true,
-      "channel": "preview",
-      "env": {
-        "EXPO_ENV": "preview",
-        "EXPO_PLATFORM": "android"
-      },
       "node": "20.15.1",
       "ios": {
         "cocoapods": "1.14.3"
       },
       "android": {
-        "buildType": "app-bundle"
+        "gradleCommand": ":app:assembleDevDebug",
+        "resourceClass": "medium"
       }
     },
-    "production-ios-internal": {
-      "distribution": "internal",
-      "channel": "production",
+    "production": {
       "autoIncrement": true,
-      "env": {
-        "EXPO_PLATFORM": "ios"
-      },
-      "node": "20.15.1",
-      "ios": {
-        "resourceClass": "large",
-        "cocoapods": "1.14.3"
-      }
-    },
-    "production-ios": {
       "channel": "production",
-      "autoIncrement": true,
-      "env": {
-        "EXPO_PLATFORM": "ios"
+      "android": {
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleProdRelease",
+        "resourceClass": "large"
       },
       "node": "20.15.1",
       "ios": {
@@ -93,40 +35,51 @@
       }
     },
     "production-android": {
-      "channel": "production",
-      "autoIncrement": true,
-      "env": {
-        "EXPO_PLATFORM": "android"
-      },
-      "node": "20.15.1",
-      "ios": {
-        "cocoapods": "1.14.3"
-      },
+      "extends": "production",
+      "autoIncrement": false
+    },
+    "preview": {
+      "extends": "production",
+      "channel": "preview",
       "android": {
-        "resourceClass": "large"
+        "gradleCommand": ":app:bundlePreviewRelease"
+      },
+      "env": {
+        "EXPO_ENV": "preview"
+      },
+      "ios": {
+        "resourceClass": "medium"
       }
     },
-    "production-android-internal": {
+    "preview-android": {
+      "extends": "preview",
+      "autoIncrement": false
+    },
+    "ios-simulator": {
+      "extends": "development",
+      "developmentClient": true,
       "distribution": "internal",
-      "channel": "production",
-      "autoIncrement": true,
-      "node": "20.15.1",
-      "ios": {
-        "cocoapods": "1.14.3"
+      "env": {
+        "EXPO_ENV": "dev"
       },
-      "android": {
-        "resourceClass": "large"
+      "ios": {
+        "simulator": true
       }
+    },
+    "preview-internal": {
+      "extends": "preview",
+      "distribution": "internal"
+    },
+    "production-internal": {
+      "extends": "production",
+      "distribution": "internal"
     }
   },
   "submit": {
     "production": {
       "android": {
         "track": "internal"
-      }
-    },
-    "production-ios": {
-      "extends": "production",
+      },
       "ios": {
         "ascAppId": "1658819514"
       }
@@ -137,16 +90,13 @@
     "preview": {
       "android": {
         "track": "internal"
-      }
-    },
-    "preview-ios": {
-      "extends": "production",
+      },
       "ios": {
         "ascAppId": "6478027666"
       }
     },
     "preview-android": {
-      "extends": "production"
+      "extends": "preview"
     }
   }
 }

@@ -2,22 +2,20 @@ import { StackActions, getStateFromPath } from "@react-navigation/native";
 import {
   backgroundColor,
   headerTitleStyle,
-  listItemSeparatorColor,
   textPrimaryColor,
 } from "@styles/colors";
 import { converseEventEmitter } from "@utils/events";
-import { ColorSchemeName, Platform, useWindowDimensions } from "react-native";
+import { ColorSchemeName, Platform } from "react-native";
 
 import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
 import config from "../../config";
-import { isDesktop } from "../../utils/device";
 
 export const getConverseStateFromPath =
   (navigationName: string) => (path: string, options: any) => {
     // dm method must link to the Conversation Screen as well
     // but prefilling the parameters
     let pathForState = path as string | undefined;
-    if (Platform.OS === "web" && pathForState?.startsWith("/")) {
+    if (pathForState?.startsWith("/")) {
       pathForState = pathForState.slice(1);
     }
     if (pathForState?.startsWith("dm?peer=")) {
@@ -123,8 +121,6 @@ export const getConverseInitialURL = () => {
 export const stackGroupScreenOptions = (colorScheme: ColorSchemeName) => ({
   headerStyle: {
     backgroundColor: backgroundColor(colorScheme),
-    borderBottomColor:
-      Platform.OS === "web" ? listItemSeparatorColor(colorScheme) : undefined,
   },
   headerTitleStyle: headerTitleStyle(colorScheme),
   headerTintColor:
@@ -187,9 +183,3 @@ export const screenListeners =
       navigationStates[navigationName] = e.data;
     },
   });
-
-export const useIsSplitScreen = () => {
-  const dimensions = useWindowDimensions();
-
-  return dimensions.width > config.splitScreenThreshold || isDesktop;
-};

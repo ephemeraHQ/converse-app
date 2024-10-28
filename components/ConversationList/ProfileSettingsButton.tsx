@@ -49,10 +49,10 @@ export default function ProfileSettingsButton() {
   }, [USDCBalance]);
   // Disabled with "false" until payments UX sorted
   if (isPrivy && false) {
-    if (Platform.OS === "android" || Platform.OS === "web") {
+    if (Platform.OS === "android") {
       return (
         <Button
-          variant="primary"
+          action="primary"
           title={stringBalance}
           onPress={openProfile}
           style={{

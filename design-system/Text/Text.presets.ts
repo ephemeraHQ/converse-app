@@ -8,23 +8,40 @@ import {
 import { ThemedStyleArray } from "../../theme/useAppTheme";
 
 export type IPresets =
-  | "default"
-  | "bold"
-  | "heading"
-  | "subheading"
-  | "formLabel"
-  | "formHelper";
+  | "title"
+  | "body"
+  | "bodyBold"
+  | "small"
+  | "smaller"
+  | "smallerBold"
+  | "bigBold"
+  | "formHelper"
+  | "formLabel";
 
-export const presets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
-  default: [textBaseStyle],
+export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
+  title: [textBaseStyle, textSizeStyles.xl, textFontWeightStyles.bold],
 
-  bold: [textBaseStyle, textFontWeightStyles.bold],
+  body: [textBaseStyle],
 
-  heading: [textBaseStyle, textSizeStyles.xxl, textFontWeightStyles.semiBold],
+  bodyBold: [textBaseStyle, textFontWeightStyles.bold],
 
-  subheading: [textBaseStyle, textSizeStyles.sm, textFontWeightStyles.light],
+  small: [textBaseStyle, textSizeStyles.sm],
 
-  formLabel: [textBaseStyle, textFontWeightStyles.medium],
+  smaller: [textBaseStyle, textSizeStyles.xs],
 
-  formHelper: [textBaseStyle, textSizeStyles.sm, textFontWeightStyles.normal],
+  smallerBold: [textBaseStyle, textSizeStyles.xs, textFontWeightStyles.bold],
+
+  bigBold: [textBaseStyle, textSizeStyles.md, textFontWeightStyles.bold],
+
+  formHelper: [
+    textBaseStyle,
+    textSizeStyles.xs,
+    ({ colors }) => ({ color: colors.fill.secondary }),
+  ],
+
+  formLabel: [
+    textBaseStyle,
+    textSizeStyles.xs,
+    ({ colors }) => ({ color: colors.text.secondary }),
+  ],
 };

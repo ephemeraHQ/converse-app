@@ -9,7 +9,6 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
-  Button,
   Platform,
   ScrollView,
   StyleSheet,
@@ -95,11 +94,7 @@ export default function NewConversation({
     navigation.setOptions({
       headerLeft: () =>
         Platform.OS === "ios" ? (
-          <Button
-            title="Cancel"
-            color={textPrimaryColor(colorScheme)}
-            onPress={handleBack}
-          />
+          <ConverseButton variant="text" title="Cancel" onPress={handleBack} />
         ) : (
           <AndroidBackAction navigation={navigation} />
         ),
@@ -301,11 +296,10 @@ export default function NewConversation({
       if (!initialFocus.current) {
         initialFocus.current = true;
         if (
-          (!value &&
-            !recommendationsLoading &&
-            recommendationsLoadedOnce &&
-            recommendationsFrensCount === 0) ||
-          Platform.OS === "web" // On web, always focus
+          !value &&
+          !recommendationsLoading &&
+          recommendationsLoadedOnce &&
+          recommendationsFrensCount === 0
         ) {
           setTimeout(() => {
             r?.focus();
@@ -345,7 +339,6 @@ export default function NewConversation({
             picto="person.2"
             title="New group"
             style={styles.newGroupButton}
-            textStyle={{ fontWeight: "500" }}
             onPress={() => {
               setGroup({ enabled: true, members: [] });
             }}
@@ -419,7 +412,6 @@ export default function NewConversation({
         >
           <Recommendations
             visibility="EMBEDDED"
-            navigation={navigation}
             profiles={profiles}
             groupMode={group.enabled}
             groupMembers={group.members}
@@ -561,7 +553,6 @@ const useStyles = () => {
     searchContainer: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
-      paddingHorizontal: Platform.OS === "web" ? 20 : undefined,
     },
     newGroupButton: {
       marginLeft: 7,

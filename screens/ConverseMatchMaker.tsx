@@ -37,7 +37,7 @@ export default function ConverseMatchMaker({
 
   return (
     <View style={styles.modal}>
-      <Recommendations navigation={navigation} visibility="FULL" />
+      <Recommendations visibility="FULL" />
     </View>
   );
 }

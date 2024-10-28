@@ -36,27 +36,25 @@ import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { TouchableRipple } from "react-native-paper";
 import Animated, {
-  useSharedValue,
-  useAnimatedRef,
   runOnJS,
+  useAnimatedRef,
+  useSharedValue,
 } from "react-native-reanimated";
 
 import Avatar from "./Avatar";
 import { ConversationContextMenu } from "./ConversationContextMenu";
 import GroupAvatar from "./GroupAvatar";
-import Picto from "./Picto/Picto";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import {
   currentAccount,
   useChatStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
-import { useIsSplitScreen } from "../screens/Navigation/navHelpers";
 import { saveTopicsData } from "../utils/api";
 import { getMinimalDate } from "../utils/date";
-import { isDesktop } from "../utils/device";
 import { converseEventEmitter } from "../utils/events";
 import { navigate } from "../utils/navigation";
+import Picto from "./Picto/Picto";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 
 type ConversationListItemProps = {
@@ -104,7 +102,6 @@ const ConversationListItem = memo(function ConversationListItem({
     useSelect(["setTopicsData", "setPinnedConversations"])
   );
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
-  const isSplitScreen = useIsSplitScreen();
   const [selected, setSelected] = useState(false);
   const resetSelected = useCallback(() => {
     setSelected(false);
@@ -144,7 +141,7 @@ const ConversationListItem = memo(function ConversationListItem({
           });
           // Take the user back to wherever the conversation was restored "to"
           // https://github.com/ephemeraHQ/converse-app/issues/315#issuecomment-2312903441
-          navigationRef.current?.pop(isSplitScreen ? 1 : 2);
+          navigationRef.current?.pop(2);
         },
         [translate("cancel")]: () => {},
       };
@@ -186,21 +183,14 @@ const ConversationListItem = memo(function ConversationListItem({
     if (routeParams?.frameURL) {
       // Sharing a frame !!
       navigationRef.current?.goBack();
-      if (!isSplitScreen) {
-        await new Promise((r) =>
-          setTimeout(r, Platform.OS === "ios" ? 300 : 20)
-        );
-      }
+
+      await new Promise((r) => setTimeout(r, Platform.OS === "ios" ? 300 : 20));
+
       // This handle the case where the conversation is already opened
       converseEventEmitter.emit(
         "setCurrentConversationInputValue",
         routeParams.frameURL
       );
-    }
-    if (isDesktop) {
-      converseEventEmitter.emit("openingConversation", {
-        topic: conversationTopic,
-      });
     }
     navigate("Conversation", {
       topic: conversationTopic,
@@ -213,7 +203,6 @@ const ConversationListItem = memo(function ConversationListItem({
     conversationTopic,
     allowGroup,
     navigationRef,
-    isSplitScreen,
     colorScheme,
   ]);
 
@@ -518,25 +507,16 @@ const ConversationListItem = memo(function ConversationListItem({
 
   const rowItem = (
     <Animated.View ref={containerRef} onLayout={onLayoutView}>
-      {Platform.OS === "ios" || Platform.OS === "web" ? (
+      {Platform.OS === "ios" ? (
         <TouchableHighlight
           underlayColor={clickedItemBackgroundColor(colorScheme)}
-          delayPressIn={isDesktop ? 0 : 75}
+          delayPressIn={75}
+          onPress={openConversation}
           onLongPress={onLongPress}
-          onPressIn={() => {
-            if (!isSplitScreen) return;
-            openConversation();
-          }}
-          onPress={() => {
-            if (isSplitScreen) return;
-            openConversation();
-            setSelected(true);
-          }}
           style={{
-            backgroundColor:
-              selected || (isSplitScreen && conversationOpened)
-                ? clickedItemBackgroundColor(colorScheme)
-                : backgroundColor(colorScheme),
+            backgroundColor: selected
+              ? clickedItemBackgroundColor(colorScheme)
+              : backgroundColor(colorScheme),
             height: 76,
           }}
         >
@@ -544,15 +524,7 @@ const ConversationListItem = memo(function ConversationListItem({
         </TouchableHighlight>
       ) : (
         <TouchableRipple
-          unstable_pressDelay={isDesktop || isSplitScreen ? 0 : 75}
-          onPressIn={() => {
-            if (!isSplitScreen) return;
-            openConversation();
-          }}
-          onPress={() => {
-            if (isSplitScreen) return;
-            openConversation();
-          }}
+          unstable_pressDelay={75}
           onLongPress={onLongPress}
           style={styles.rippleRow}
           rippleColor={clickedItemBackgroundColor(colorScheme)}
@@ -600,11 +572,9 @@ const ConversationListItem = memo(function ConversationListItem({
           if (direction === "left") {
             const translation = swipeableRef.current?.state.rowTranslation;
             if (translation && (translation as any)._value > 100) {
-              if (Platform.OS !== "web") {
-                Haptics.notificationAsync(
-                  Haptics.NotificationFeedbackType.Success
-                );
-              }
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success
+              );
               toggleUnreadStatusOnClose.current = true;
             }
           }
@@ -614,11 +584,8 @@ const ConversationListItem = memo(function ConversationListItem({
             toggleUnreadStatusOnClose.current = false;
             toggleReadStatus();
           }
-          if (Platform.OS === "web") {
-            setSwipeableKey(new Date().getTime());
-          }
         }}
-        hitSlop={{ left: isSplitScreen ? 0 : -6 }}
+        hitSlop={{ left: -6 }}
       >
         {rowItem}
         {contextMenuComponent}

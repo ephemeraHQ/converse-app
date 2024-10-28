@@ -1,3 +1,4 @@
+import "expo-dev-client";
 import "reflect-metadata";
 import "./polyfills";
 
@@ -7,12 +8,9 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PortalProvider } from "@gorhom/portal";
 import { PrivyProvider } from "@privy-io/expo";
 import { queryClient } from "@queries/queryClient";
-import {
-  backgroundColor,
-  MaterialDarkTheme,
-  MaterialLightTheme,
-} from "@styles/colors";
+import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { useAppTheme, useThemeProvider } from "@theme/useAppTheme";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
@@ -21,24 +19,28 @@ import {
   LogBox,
   Platform,
   StyleSheet,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
-import "./utils/splash/splash";
 
-import XmtpEngine from "./components/XmtpEngine";
+import "./utils/splash/splash";
+import { xmtpCron, xmtpEngine } from "./components/XmtpEngine";
 import config from "./config";
+import {
+  TEMPORARY_ACCOUNT_NAME,
+  useAccountsStore,
+} from "./data/store/accountsStore";
 import { useAppStore } from "./data/store/appStore";
+import { setAuthStatus } from "./data/store/authStore";
 import { useSelect } from "./data/store/storeHelpers";
 import {
   runAsyncUpdates,
   updateLastVersionOpen,
 } from "./data/updates/asyncUpdates";
 import Main from "./screens/Main";
-import { useThemeProvider } from "./theme/useAppTheme";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
@@ -58,6 +60,9 @@ configureCoinbase({
 initSentry();
 
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
+
+xmtpEngine.start();
+xmtpCron.start();
 
 const App = () => {
   const styles = useStyles();
@@ -97,9 +102,18 @@ const App = () => {
     }
   }, [isInternetReachable, hydrationDone]);
 
+  // For now we use persit with zustand to get the accounts when the app launch so here is okay to see if we're logged in or not
+  useEffect(() => {
+    const currentAccount = useAccountsStore.getState().currentAccount;
+    if (currentAccount && currentAccount !== TEMPORARY_ACCOUNT_NAME) {
+      setAuthStatus("signedIn");
+    } else {
+      setAuthStatus("signedOut");
+    }
+  }, []);
+
   return (
     <View style={styles.safe}>
-      <XmtpEngine />
       <Main />
       <DebugButton ref={debugRef} />
     </View>
@@ -113,7 +127,7 @@ const AppKeyboardProvider =
 export default function AppWithProviders() {
   const colorScheme = useColorScheme();
 
-  const theme = useMemo(() => {
+  const paperTheme = useMemo(() => {
     return colorScheme === "dark" ? MaterialDarkTheme : MaterialLightTheme;
   }, [colorScheme]);
 
@@ -127,7 +141,7 @@ export default function AppWithProviders() {
           <AppKeyboardProvider>
             <ActionSheetProvider>
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                <PaperProvider theme={theme}>
+                <PaperProvider theme={paperTheme}>
                   <PortalProvider>
                     <App />
                   </PortalProvider>
@@ -142,15 +156,16 @@ export default function AppWithProviders() {
 }
 
 const useStyles = () => {
-  const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
+
   return useMemo(
     () =>
       StyleSheet.create({
         safe: {
           flex: 1,
-          backgroundColor: backgroundColor(colorScheme),
+          backgroundColor: theme.colors.background.surface,
         },
       }),
-    [colorScheme]
+    [theme]
   );
 };

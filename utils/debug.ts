@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 
+import { getRandomId } from "./general";
 import logger from "./logger";
 
 const timestamps: { [timestampId: string]: { start: number; last: number } } =
@@ -56,3 +57,16 @@ export const useLogRenderCount = (componentName: string, id: string) => {
     );
   });
 };
+
+export const componentKeyDebug = () => {
+  return {
+    key: getRandomId(),
+  };
+};
+
+export function debugBorder() {
+  return {
+    borderWidth: 1,
+    borderColor: "red",
+  };
+}

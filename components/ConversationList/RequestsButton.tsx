@@ -1,5 +1,4 @@
 import { translate } from "@i18n";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   actionSecondaryColor,
   requestsTextColor,
@@ -14,19 +13,22 @@ import {
   View,
 } from "react-native";
 
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
+import { useRouter } from "../../navigation/useNavigation";
 
-type Props = { requestsCount: number } & NativeStackScreenProps<
-  NavigationParamList,
-  "Chats" | "ShareFrame" | "Blocked"
->;
-export default function RequestsButton({ navigation, requestsCount }: Props) {
+type IRequestsButtonProps = {
+  requestsCount: number;
+};
+
+export default function RequestsButton({
+  requestsCount,
+}: IRequestsButtonProps) {
+  const router = useRouter();
   const styles = useStyles();
 
   return (
     <Pressable
       key="requests"
-      onPress={() => navigation.push("ChatsRequests")}
+      onPress={() => router.navigate("ChatsRequests")}
       style={styles.requestsHeader}
     >
       {({ pressed }) => (

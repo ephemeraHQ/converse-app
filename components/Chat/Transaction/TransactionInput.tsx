@@ -2,12 +2,12 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   actionSecondaryColor,
-  backgroundColor,
   dangerColor,
   itemSeparatorColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { useAppTheme } from "@theme/useAppTheme";
 import { Signer } from "ethers";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -17,8 +17,8 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
@@ -31,7 +31,6 @@ import {
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { postUSDCTransferAuthorization } from "../../../utils/api";
 import { useConversationContext } from "../../../utils/conversation";
-import { isDesktop } from "../../../utils/device";
 import { getTransferAuthorization } from "../../../utils/evm/erc20";
 import {
   evmHelpers,
@@ -276,10 +275,6 @@ export default function TransactionInput() {
               style={styles.moneyInput}
               value={inputValue}
               maxLength={10}
-              // On desktop, we modified React Native RCTUITextView.m
-              // to handle key Shift + Enter to add new line
-              // This disables the flickering on Desktop when hitting Enter
-              blurOnSubmit={isDesktop}
               // Mainly used on Desktop so that Enter sends the message
               onSubmitEditing={() => {
                 triggerTx();
@@ -356,9 +351,11 @@ export default function TransactionInput() {
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
+
   return StyleSheet.create({
     transactionInputContainer: {
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: theme.colors.background.surface,
       flexDirection: "row",
       height: 88,
     },
@@ -371,7 +368,7 @@ const useStyles = () => {
     moneyInputContainer: {
       flexDirection: "row",
       alignSelf: "center",
-      backgroundColor: backgroundColor(colorScheme),
+      backgroundColor: theme.colors.background.surface,
       height: 50,
       marginVertical: 6,
       paddingLeft: 12,

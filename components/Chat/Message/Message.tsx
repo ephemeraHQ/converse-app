@@ -6,6 +6,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
+import { useAppTheme } from "@theme/useAppTheme";
 import * as Haptics from "expo-haptics";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
@@ -28,7 +29,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import ChatMessageActions from "./MessageActions";
-import ChatMessageReactions from "./MessageReactions";
+import { ChatMessageReactions } from "./MessageReactions";
 import MessageStatus from "./MessageStatus";
 import {
   currentAccount,
@@ -39,7 +40,6 @@ import {
 import { XmtpMessage } from "../../../data/store/chatStore";
 import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import { getLocalizedTime, getRelativeDate } from "../../../utils/date";
-import { isDesktop } from "../../../utils/device";
 import { converseEventEmitter } from "../../../utils/events";
 import {
   getUrlToRender,
@@ -63,7 +63,7 @@ import Avatar from "../../Avatar";
 import ClickableText from "../../ClickableText";
 import ActionButton from "../ActionButton";
 import AttachmentMessagePreview from "../Attachment/AttachmentMessagePreview";
-import ChatGroupUpdatedMessage from "../ChatGroupUpdatedMessage";
+import { ChatGroupUpdatedMessage } from "../ChatGroupUpdatedMessage";
 import FramesPreviews from "../Frame/FramesPreviews";
 import ChatInputReplyBubble from "../Input/InputReplyBubble";
 import TransactionPreview from "../Transaction/TransactionPreview";
@@ -283,29 +283,16 @@ const ChatMessage = ({
   const reactions = useMemo(() => getMessageReactions(message), [message]);
   const hasReactions = Object.keys(reactions).length > 0;
   const isChatMessage = !isGroupUpdated;
-  const shouldShowReactionsOutside =
-    isChatMessage && (isAttachment || isFrame || isTransaction);
-  const shouldShowReactionsInside =
-    isChatMessage && !shouldShowReactionsOutside;
-  const shouldShowOutsideContentRow =
-    isChatMessage &&
-    (isTransaction || isFrame || (isAttachment && hasReactions));
+  const shouldShowOutsideContentRow = isChatMessage && hasReactions;
 
   let messageMaxWidth: DimensionValue;
-  if (isDesktop) {
-    if (isAttachment) {
-      messageMaxWidth = 366;
-    } else {
-      messageMaxWidth = 588;
-    }
+
+  if (isAttachment) {
+    messageMaxWidth = "60%";
   } else {
-    if (isAttachment) {
-      messageMaxWidth = "60%";
-    } else {
-      if (isFrame) {
-        messageMaxWidth = "100%";
-      } else messageMaxWidth = "85%";
-    }
+    if (isFrame) {
+      messageMaxWidth = "100%";
+    } else messageMaxWidth = "85%";
   }
 
   const showStatus =
@@ -391,11 +378,9 @@ const ChatMessage = ({
           onSwipeableWillClose={() => {
             const translation = swipeableRef.current?.state.rowTranslation;
             if (translation && (translation as any)._value > 70) {
-              if (Platform.OS !== "web") {
-                Haptics.notificationAsync(
-                  Haptics.NotificationFeedbackType.Success
-                );
-              }
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success
+              );
               converseEventEmitter.emit("triggerReplyToMessage", message);
             }
           }}
@@ -433,7 +418,7 @@ const ChatMessage = ({
                         ]}
                         delayLongPress={platformTouchableLongPressDelay}
                         onLongPress={platformTouchableOnLongPress}
-                        delayPressIn={isDesktop ? 0 : 75}
+                        delayPressIn={75}
                         onPress={() => {
                           converseEventEmitter.emit("scrollChatToMessage", {
                             messageId: replyingToMessage.id,
@@ -481,18 +466,6 @@ const ChatMessage = ({
                       </TouchableOpacity>
                     </View>
                   )}
-                  {shouldShowReactionsInside && (
-                    <View
-                      style={
-                        hasReactions ? styles.reactionsContainer : { flex: 1 }
-                      }
-                    >
-                      <ChatMessageReactions
-                        message={message}
-                        reactions={reactions}
-                      />
-                    </View>
-                  )}
                 </ChatMessageActions>
                 {shouldShowOutsideContentRow ? (
                   <View style={styles.outsideContentRow}>
@@ -507,14 +480,12 @@ const ChatMessage = ({
                         </Text>
                       </TouchableOpacity>
                     )}
-                    {shouldShowReactionsOutside && (
-                      <View style={styles.outsideReactionsContainer}>
-                        <ChatMessageReactions
-                          message={message}
-                          reactions={reactions}
-                        />
-                      </View>
-                    )}
+                    <View style={styles.outsideReactionsContainer}>
+                      <ChatMessageReactions
+                        message={message}
+                        reactions={reactions}
+                      />
+                    </View>
                     {isFrame && message.fromMe && !hasReactions && (
                       <MessageStatus message={message} />
                     )}
@@ -600,6 +571,8 @@ export default function CachedChatMessage({
 }
 
 const useStyles = () => {
+  const { theme } = useAppTheme();
+
   const colorScheme = useColorScheme();
   return StyleSheet.create({
     messageContainer: {
@@ -701,7 +674,8 @@ const useStyles = () => {
       height: AvatarSizes.messageSender,
     },
     outsideContentRow: {
-      marginTop: 1,
+      marginTop: theme.spacing["4xs"],
+      marginBottom: theme.spacing.xxxs,
       flexDirection: "row",
       justifyContent: "flex-start",
       columnGap: 8,

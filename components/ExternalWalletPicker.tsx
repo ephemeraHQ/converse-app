@@ -6,7 +6,7 @@ import {
   textPrimaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import { waitUntilAppActive } from "@utils/appState";
+import { waitUntilAppActive } from "@utils/appState/waitUntilAppActive";
 import { converseEventEmitter } from "@utils/events";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Image } from "expo-image";
@@ -16,18 +16,18 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
-import { Account, createWallet, Wallet } from "thirdweb/wallets";
+import { Account, Wallet, createWallet } from "thirdweb/wallets";
 
+import config from "../config";
 import Button from "./Button/Button";
 import { Drawer, DrawerRef } from "./Drawer";
-import config from "../config";
 import {
   InstalledWallet,
   useInstalledWallets,
-} from "./Onboarding/supportedWallets";
+} from "./Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import Picto from "./Picto/Picto";
 
 export default function ExternalWalletPicker() {
@@ -152,7 +152,7 @@ export default function ExternalWalletPicker() {
         ))}
         {wallets.length === 0 && <Text>{translate("no_wallet_detected")}</Text>}
         <Button
-          variant="primary"
+          action="primary"
           title={translate("cancel")}
           style={styles.cta}
           onPress={closeMenu}

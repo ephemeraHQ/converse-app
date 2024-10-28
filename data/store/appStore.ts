@@ -1,4 +1,3 @@
-import { Platform } from "react-native";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -19,13 +18,13 @@ type AppStoreType = {
   ) => void;
 
   splashScreenHidden: boolean;
-  setSplashScreenHidden: (hidden: boolean) => void;
+  setSplashScreenHidden: (hidden: true) => void;
 
   isInternetReachable: boolean;
   setIsInternetReachable: (reachable: boolean) => void;
 
   hydrationDone: boolean;
-  setHydrationDone: (done: boolean) => void;
+  setHydrationDone: (done: true) => void;
 
   lastVersionOpen: string;
   setLastVersionOpen: (version: string) => void;
@@ -53,7 +52,7 @@ export const useAppStore = create<AppStoreType>()(
         })),
 
       // On web no splash screen at all
-      splashScreenHidden: Platform.OS === "web",
+      splashScreenHidden: false,
       setSplashScreenHidden: (hidden) =>
         set(() => ({ splashScreenHidden: hidden })),
 
@@ -62,7 +61,7 @@ export const useAppStore = create<AppStoreType>()(
         set(() => ({ isInternetReachable: reachable })),
 
       // No hydration on web
-      hydrationDone: Platform.OS === "web",
+      hydrationDone: false,
       setHydrationDone: (done) => set(() => ({ hydrationDone: done })),
 
       lastVersionOpen: "",
