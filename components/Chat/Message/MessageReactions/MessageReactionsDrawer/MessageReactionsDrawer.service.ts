@@ -13,9 +13,13 @@ export function openMessageReactionsDrawer(
 ) {
   try {
     if (!bottomSheetModalRef.current) {
-      throw new Error("Modal reference not initialized");
+      throw new Error(
+        "Bottom sheet modal reference is not initialized. Ensure the component is mounted."
+      );
     }
-    useMessageReactionsStore.getState().setRolledUpReactions(rolledUpReactions);
+    const setReactions =
+      useMessageReactionsStore.getState().setRolledUpReactions;
+    setReactions(rolledUpReactions);
     bottomSheetModalRef.current.present();
   } catch (error) {
     console.error("Failed to open message reactions drawer:", error);

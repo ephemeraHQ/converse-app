@@ -14,6 +14,7 @@ import {
   StyleSheet,
   View,
   useColorScheme,
+  Keyboard,
 } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -50,8 +51,9 @@ import ConsentPopup from "./ConsentPopup/ConsentPopup";
 import { GroupConsentPopup } from "./ConsentPopup/GroupConsentPopup";
 import ChatInput from "./Input/Input";
 import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
-import TransactionInput from "./Transaction/TransactionInput";
+import { useMessageReactionsStore } from "./Message/MessageReactions/MessageReactionsDrawer/MessageReactions.store";
 import { MessageReactionsDrawer } from "./Message/MessageReactions/MessageReactionsDrawer/MessageReactionsDrawer";
+import TransactionInput from "./Transaction/TransactionInput";
 
 const usePeerSocials = () => {
   const conversation = useConversationContext("conversation");
@@ -284,6 +286,8 @@ export function Chat() {
   const onReadyToFocus = useConversationContext("onReadyToFocus");
   const transactionMode = useConversationContext("transactionMode");
   const frameTextInputFocused = useConversationContext("frameTextInputFocused");
+  const rolledUpReactions =
+    useMessageReactionsStore.getState().rolledUpReactions;
 
   const xmtpAddress = useCurrentAccount() as string;
   const peerSocials = usePeerSocials();
@@ -343,6 +347,15 @@ export function Chat() {
     }),
     [keyboardHeight, tertiary, insets.bottom]
   );
+
+  useEffect(() => {
+    const unsubscribe = useMessageReactionsStore.subscribe((state) => {
+      if (state.rolledUpReactions) {
+        Keyboard.dismiss();
+      }
+    });
+    return unsubscribe;
+  }, [rolledUpReactions]);
 
   const chatContentStyle = useAnimatedStyle(
     () => ({
