@@ -121,7 +121,7 @@ export const fetchFramesForMessage = async (
         frames: fetchedFrames.map((f) => f.url),
       };
       // Save frame to store
-      useFramesStore.getState().setFrames(framesToSave);
+      useFramesStore.getState().setFrames(message.id, framesToSave);
       // Then update message to reflect change
       saveMessageMetadata(account, message, messageMetadataToSave);
 
@@ -281,4 +281,13 @@ export const isFrameMessage = (
     !!message.converseMetadata?.frames?.[0] &&
     !!framesStore[message.converseMetadata.frames[0].toLowerCase().trim()]
   );
+};
+
+export const messageHasFrames = (
+  messageId: string,
+  messageFramesMap: {
+    [messageId: string]: FrameWithType[];
+  }
+) => {
+  return (messageFramesMap[messageId]?.length ?? 0) > 0;
 };
