@@ -107,7 +107,7 @@ export interface IButtonProps extends RNPressableProps {
    */
   withHapticFeedback?: boolean;
 
-  /** @deprecated */
+  /** @deprecated - use text instead */
   title?: string;
   /** @deprecated */
   picto?: IPicto;

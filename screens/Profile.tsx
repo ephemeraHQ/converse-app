@@ -707,8 +707,9 @@ export default function ProfileScreen({
             items={[
               {
                 id: "blocked",
-                title: "View removed chats",
+                title: translate("view_removed_chats"),
                 action: () => {
+                  navigation.popToTop();
                   navigate("Blocked");
                 },
                 titleColor:
@@ -718,7 +719,7 @@ export default function ProfileScreen({
               },
               {
                 id: "accounts",
-                title: "Change or add account",
+                title: translate("change_or_add_account"),
                 action: () => {
                   navigation.push("Accounts");
                 },
@@ -729,7 +730,7 @@ export default function ProfileScreen({
               },
               {
                 id: "notifications",
-                title: "Turn on notifications",
+                title: translate("turn_on_notifications"),
                 action: () => {
                   // @todo => move that to a helper because also used in AccountSettingsButton
                   if (notificationsPermissionStatus === "denied") {

@@ -1,3 +1,4 @@
+import { Button } from "@design-system/Button/Button";
 import { translate } from "@i18n";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -17,7 +18,6 @@ import {
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../../utils/conversation";
 import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
-import Button from "../../Button/Button";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
 export default function ConsentPopup() {
@@ -59,9 +59,10 @@ export default function ConsentPopup() {
       <Text style={styles.info}>{translate("do_you_trust_this_contact")}</Text>
       <View style={styles.buttonsContainer}>
         <Button
-          variant="secondary-danger"
+          variant="text"
+          action="danger"
           picto="xmark"
-          title={translate("block")}
+          text={translate("block")}
           style={styles.cta}
           onPress={() => {
             showActionSheetWithOptions(
@@ -87,9 +88,9 @@ export default function ConsentPopup() {
           }}
         />
         <Button
-          variant="secondary"
+          variant="fill"
           picto="checkmark"
-          title={translate("accept")}
+          text={translate("accept")}
           style={styles.cta}
           onPress={() => {
             if (!conversation.peerAddress) return;
