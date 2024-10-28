@@ -1,4 +1,5 @@
 import { PeersStatus, GroupStatus } from "@data/store/settingsStore";
+import { translate } from "@i18n";
 import { Reaction } from "@xmtp/content-type-reaction";
 import { MutableRefObject, createRef } from "react";
 import { Alert, Platform } from "react-native";
@@ -15,7 +16,6 @@ import logger from "./logger";
 import { subscribeToNotifications } from "./notifications";
 import { getReactionsContentPreview } from "./reactions";
 import { getMatchedPeerAddresses } from "./search";
-import { sentryTrackMessage } from "./sentry";
 import { TextInputWithValue, addressPrefix } from "./str";
 import { isTransactionMessage } from "./transaction";
 import config from "../config";
@@ -200,15 +200,40 @@ export const openMainConversationWithPeer = async (
   onSuccess: (topic: string) => void,
   onError: () => void
 ) => {
+  let isDone = false;
+  setTimeout(() => {
+    if (!isDone) {
+      isDone = true;
+      Alert.alert(
+        translate("identity_not_found_title"),
+        translate("identity_not_found_timeout", {
+          identity: peerToCreateConvoWith,
+        }),
+        [
+          {
+            text: "OK",
+            onPress: onError,
+            isPreferred: true,
+          },
+        ]
+      );
+    }
+  }, 5000);
   // First, resolve the peer to an address
-  const peerAddress = await getAddressForPeer(peerToCreateConvoWith);
-  if (!peerAddress) {
-    sentryTrackMessage("CREATE_CONVERSATION_ERROR", {
-      error: "Identity not found",
+  let peerAddress: string | undefined = undefined;
+  try {
+    peerAddress = await getAddressForPeer(peerToCreateConvoWith);
+  } catch (e) {
+    logger.error(e, {
+      context: "Failed to resolve peer address",
+      peer: peerToCreateConvoWith,
     });
+  }
+  if (!peerAddress) {
+    isDone = true;
     Alert.alert(
-      "Identity not found",
-      `We could not find the address attached to ${peerToCreateConvoWith}`,
+      translate("identity_not_found_title"),
+      translate("identity_not_found", { identity: peerToCreateConvoWith }),
       [
         {
           text: "OK",
@@ -232,19 +257,21 @@ export const openMainConversationWithPeer = async (
   // Then, check if we already have a main conversation with this address
   const alreadyConversationWithAddress = Object.values(conversations).find(
     (c) =>
-      c.peerAddress?.toLowerCase() === peerAddress.toLowerCase() &&
+      c.peerAddress?.toLowerCase() === peerAddress?.toLowerCase() &&
       (!c.context || !c.context?.conversationId)
   );
-  if (alreadyConversationWithAddress) {
+  if (alreadyConversationWithAddress && !isDone) {
+    isDone = true;
     onSuccess(alreadyConversationWithAddress.topic);
   } else {
     // We don't have a convo with this peer, let's check if we
     // can create a new one
     const onNetwork = await isOnXmtp(peerAddress);
-    if (!onNetwork) {
+    if (!onNetwork && !isDone) {
+      isDone = true;
       Alert.alert(
-        "Not yet using XMTP",
-        "Your contact is not yet using XMTP. Tell them to download the app at converse.xyz and log in with their wallet.",
+        translate("identity_not_yet_xmtp_title"),
+        translate("identity_not_yet_xmtp", {}),
         [
           {
             text: "OK",
@@ -253,13 +280,14 @@ export const openMainConversationWithPeer = async (
           },
         ]
       );
-    } else {
+    } else if (!isDone) {
       // Creating the conversation locally in a lazy manner
       const topic = await createPendingConversation(
         account,
         peerAddress,
         undefined
       );
+      isDone = true;
       if (topic) {
         onSuccess(topic);
       } else {

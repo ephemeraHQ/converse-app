@@ -1,3 +1,4 @@
+import { useSelect } from "@data/store/storeHelpers";
 import { FlashList } from "@shopify/flash-list";
 import {
   backgroundColor,
@@ -5,9 +6,11 @@ import {
   tertiaryBackgroundColor,
 } from "@styles/colors";
 import { getCleanAddress } from "@utils/evm/address";
+import { FrameWithType } from "@utils/frames";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
+  ColorSchemeName,
   Dimensions,
   FlatList,
   Platform,
@@ -73,9 +76,11 @@ const useRenderItem = ({
   colorScheme,
 }: {
   xmtpAddress: string;
-  conversation: any;
-  framesStore: any;
-  colorScheme: any;
+  conversation: XmtpConversationWithUpdate | undefined;
+  framesStore: {
+    [frameUrl: string]: FrameWithType;
+  };
+  colorScheme: ColorSchemeName;
 }) => {
   return useCallback(
     ({ item }: { item: MessageToDisplay }) => {
@@ -85,7 +90,7 @@ const useRenderItem = ({
           message={{ ...item }}
           colorScheme={colorScheme}
           isGroup={!!conversation?.isGroup}
-          isFrame={!!framesStore[item.content.toLowerCase()]}
+          isFrame={!!framesStore[item.content.toLowerCase().trim()]}
         />
       );
     },
@@ -93,33 +98,35 @@ const useRenderItem = ({
   );
 };
 
-const getItemType = (framesStore: any) => (item: MessageToDisplay) => {
-  const fromMeString = item.fromMe ? "fromMe" : "notFromMe";
-  if (
-    isContentType("text", item.contentType) &&
-    item.converseMetadata?.frames?.[0]
-  ) {
-    const frameUrl = item.converseMetadata?.frames?.[0];
-    const frame = framesStore[frameUrl];
-    // Recycle frames with the same aspect ratio
-    return `FRAME-${
-      frame?.frameInfo?.image?.aspectRatio || "1.91.1"
-    }-${fromMeString}`;
-  } else if (
-    (isContentType("attachment", item.contentType) ||
-      isContentType("remoteAttachment", item.contentType)) &&
-    item.converseMetadata?.attachment?.size?.height &&
-    item.converseMetadata?.attachment?.size?.width
-  ) {
-    const aspectRatio = (
-      item.converseMetadata.attachment.size.width /
-      item.converseMetadata.attachment.size.height
-    ).toFixed(2);
-    return `ATTACHMENT-${aspectRatio}-${fromMeString}`;
-  } else {
-    return `${item.contentType}-${fromMeString}`;
-  }
-};
+const getItemType =
+  (framesStore: { [frameUrl: string]: FrameWithType }) =>
+  (item: MessageToDisplay) => {
+    const fromMeString = item.fromMe ? "fromMe" : "notFromMe";
+    if (
+      isContentType("text", item.contentType) &&
+      item.converseMetadata?.frames?.[0]
+    ) {
+      const frameUrl = item.converseMetadata?.frames?.[0];
+      const frame = framesStore[frameUrl];
+      // Recycle frames with the same aspect ratio
+      return `FRAME-${
+        frame?.frameInfo?.image?.aspectRatio || "1.91:1"
+      }-${fromMeString}`;
+    } else if (
+      (isContentType("attachment", item.contentType) ||
+        isContentType("remoteAttachment", item.contentType)) &&
+      item.converseMetadata?.attachment?.size?.height &&
+      item.converseMetadata?.attachment?.size?.width
+    ) {
+      const aspectRatio = (
+        item.converseMetadata.attachment.size.width /
+        item.converseMetadata.attachment.size.height
+      ).toFixed(2);
+      return `ATTACHMENT-${aspectRatio}-${fromMeString}`;
+    } else {
+      return `${item.contentType}-${fromMeString}`;
+    }
+  };
 
 const getListArray = (
   xmtpAddress?: string,
@@ -376,7 +383,7 @@ export function Chat() {
     styles.inChatRecommendations,
   ]);
 
-  const framesStore = useFramesStore().frames;
+  const { frames: framesStore } = useFramesStore(useSelect(["frames"]));
 
   const showPlaceholder = useIsShowingPlaceholder({
     messages: listArray,
@@ -532,7 +539,7 @@ export function ChatPreview() {
     ]
   );
 
-  const framesStore = useFramesStore().frames;
+  const { frames: framesStore } = useFramesStore(useSelect(["frames"]));
 
   const showPlaceholder = useIsShowingPlaceholder({
     messages: listArray,
