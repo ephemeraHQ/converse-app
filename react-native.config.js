@@ -15,11 +15,6 @@ module.exports = {
         ios: null,
       },
     },
-    "react-native-system-navigation-bar": {
-      platforms: {
-        ios: null,
-      },
-    },
     "walletsdk-ethos": {
       platforms: {
         ios: null,
