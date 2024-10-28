@@ -271,7 +271,7 @@ export const openMainConversationWithPeer = async (
       isDone = true;
       Alert.alert(
         translate("identity_not_yet_xmtp_title"),
-        translate("identity_not_yet_xmtp", {}),
+        translate("identity_not_yet_xmtp", { identity: peerToCreateConvoWith }),
         [
           {
             text: "OK",
