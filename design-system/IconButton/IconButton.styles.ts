@@ -177,7 +177,7 @@ export const getIconProps =
 
       // Set icon size
       const sizeMap = {
-        md: spacing.md,
+        md: spacing.sm,
         lg: spacing.lg,
       };
 
