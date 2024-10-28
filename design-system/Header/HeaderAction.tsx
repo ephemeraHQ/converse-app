@@ -80,8 +80,8 @@ const $actionIconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexGrow: 0,
   alignItems: "center",
   justifyContent: "center",
-  height: 40,
-  width: 40,
+  height: spacing.xxl,
+  width: spacing.xxl,
   zIndex: 2,
 });
 

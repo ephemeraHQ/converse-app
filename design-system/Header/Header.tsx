@@ -99,8 +99,9 @@ export function Header(props: HeaderProps) {
             ActionComponent={LeftActionComponent}
           />
 
-          {!!titleComponent && titleComponent}
-          {!!titleContent && (
+          {titleComponent ? (
+            titleComponent
+          ) : titleContent ? (
             <VStack
               style={[themed($titleContainer), $titleContainerStyleOverride]}
               pointerEvents="none"
@@ -111,7 +112,7 @@ export function Header(props: HeaderProps) {
                 style={$titleStyleOverride}
               />
             </VStack>
-          )}
+          ) : null}
         </HStack>
 
         {isCollapsible && (
