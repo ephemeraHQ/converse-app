@@ -1,3 +1,4 @@
+import { useFramesStore } from "@data/store/framesStore";
 import {
   inversePrimaryColor,
   messageInnerBubbleColor,
@@ -26,6 +27,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
+import { useShallow } from "zustand/react/shallow";
 
 import ChatMessageActions from "./MessageActions";
 import ChatMessageReactions from "./MessageReactions";
@@ -64,7 +66,7 @@ import ClickableText from "../../ClickableText";
 import ActionButton from "../ActionButton";
 import AttachmentMessagePreview from "../Attachment/AttachmentMessagePreview";
 import ChatGroupUpdatedMessage from "../ChatGroupUpdatedMessage";
-import FramesPreviews from "../Frame/FramesPreviews";
+import { FramesPreviews } from "../Frame/FramesPreviews";
 import ChatInputReplyBubble from "../Input/InputReplyBubble";
 import TransactionPreview from "../Transaction/TransactionPreview";
 
@@ -84,7 +86,7 @@ type Props = {
   message: MessageToDisplay;
   colorScheme: ColorSchemeName;
   isGroup: boolean;
-  isFrame: boolean;
+  hasFrames: boolean;
 };
 
 // On iOS, the native context menu view handles the long press, but could potentially trigger the onPress event
@@ -151,7 +153,7 @@ const ChatMessage = ({
   message,
   colorScheme,
   isGroup,
-  isFrame,
+  hasFrames,
 }: Props) => {
   const styles = useStyles();
 
@@ -162,6 +164,10 @@ const ChatMessage = ({
   const messageTime = useMemo(
     () => getLocalizedTime(message.sent),
     [message.sent]
+  );
+  // The content is completely a frame so a larger full width frame will be shown
+  const isFrame = useFramesStore(
+    useShallow((s) => !!s.frames[message.content.toLowerCase().trim()])
   );
 
   // Reanimated shared values for time and date-time animations
@@ -325,6 +331,37 @@ const ChatMessage = ({
 
   const swipeableRef = useRef<Swipeable | null>(null);
 
+  const renderLeftActions = useCallback(
+    (
+      progressAnimatedValue: RNAnimated.AnimatedInterpolation<string | number>
+    ) => {
+      return (
+        <RNAnimated.View
+          style={{
+            opacity: progressAnimatedValue.interpolate({
+              inputRange: [0, 0.7, 1],
+              outputRange: [0, 0, 1],
+            }),
+            height: "100%",
+            justifyContent: "center",
+            transform: [
+              {
+                translateX: progressAnimatedValue.interpolate({
+                  inputRange: [0, 0.8, 1],
+                  outputRange: [0, 0, 8],
+                  extrapolate: "clamp",
+                }),
+              },
+            ],
+          }}
+        >
+          <ActionButton picto="arrowshape.turn.up.left" />
+        </RNAnimated.View>
+      );
+    },
+    []
+  );
+
   return (
     <View
       style={[
@@ -358,35 +395,7 @@ const ChatMessage = ({
           overshootFriction={1.5}
           containerStyle={styles.messageSwipeable}
           childrenContainerStyle={styles.messageSwipeableChildren}
-          renderLeftActions={(
-            progressAnimatedValue: RNAnimated.AnimatedInterpolation<
-              string | number
-            >
-          ) => {
-            return (
-              <RNAnimated.View
-                style={{
-                  opacity: progressAnimatedValue.interpolate({
-                    inputRange: [0, 0.7, 1],
-                    outputRange: [0, 0, 1],
-                  }),
-                  height: "100%",
-                  justifyContent: "center",
-                  transform: [
-                    {
-                      translateX: progressAnimatedValue.interpolate({
-                        inputRange: [0, 0.8, 1],
-                        outputRange: [0, 0, 8],
-                        extrapolate: "clamp",
-                      }),
-                    },
-                  ],
-                }}
-              >
-                <ActionButton picto="arrowshape.turn.up.left" />
-              </RNAnimated.View>
-            );
-          }}
+          renderLeftActions={renderLeftActions}
           leftThreshold={10000} // Never trigger opening
           onSwipeableWillClose={() => {
             const translation = swipeableRef.current?.state.rowTranslation;
@@ -543,7 +552,7 @@ type RenderedChatMessage = {
   message: MessageToDisplay;
   colorScheme: ColorSchemeName;
   isGroup: boolean;
-  isFrame: boolean;
+  hasFrames: boolean;
 };
 
 const renderedMessages = new LimitedMap<string, RenderedChatMessage>(50);
@@ -567,7 +576,7 @@ export default function CachedChatMessage({
   message,
   colorScheme,
   isGroup,
-  isFrame = false,
+  hasFrames = false,
 }: Props) {
   const alreadyRenderedMessage = renderedMessages.get(
     `${account}-${message.id}`
@@ -584,14 +593,14 @@ export default function CachedChatMessage({
       message,
       colorScheme,
       isGroup,
-      isFrame,
+      hasFrames,
     });
     renderedMessages.set(`${account}-${message.id}`, {
       message,
       renderedMessage,
       colorScheme,
       isGroup,
-      isFrame,
+      hasFrames,
     });
     return renderedMessage;
   } else {
