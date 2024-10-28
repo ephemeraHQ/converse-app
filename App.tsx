@@ -61,6 +61,8 @@ import { initSentry } from "./utils/sentry";
 import "./utils/splash/splash";
 import { useCheckCurrentInstallation } from "./utils/xmtpRN/client";
 
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
   "Error destroying session", // Privy
@@ -163,9 +165,11 @@ export default function AppWithProviders() {
             <ActionSheetProvider>
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
                 <PaperProvider theme={paperTheme}>
-                  <PortalProvider>
-                    <App />
-                  </PortalProvider>
+                  <GestureHandlerRootView>
+                    <PortalProvider>
+                      <App />
+                    </PortalProvider>
+                  </GestureHandlerRootView>
                 </PaperProvider>
               </ThemeProvider>
             </ActionSheetProvider>

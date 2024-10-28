@@ -121,7 +121,7 @@ export const stackGroupScreenOptions = (colorScheme: ColorSchemeName) => ({
   headerShadowVisible: Platform.OS !== "android",
 });
 
-export const screenListeners = ({ navigation }: ScreenListeners<any, any>) => ({
+export const screenListeners: ScreenListeners<any, any> = {
   state: (e: any) => {
     // This function handles navigation state changes and deep linking
 
@@ -178,4 +178,4 @@ export const screenListeners = ({ navigation }: ScreenListeners<any, any>) => ({
       }
     }
   },
-});
+};
