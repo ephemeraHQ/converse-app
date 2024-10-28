@@ -9,7 +9,7 @@ import { interpolate, useAnimatedStyle } from "react-native-reanimated";
 
 import { TOUCHABLE_OPACITY_ACTIVE_OPACITY } from "./TouchableOpacity";
 import { AnimatedVStack } from "./VStack";
-import Picto from "../components/Picto/Picto";
+import Picto, { IPicto } from "../components/Picto/Picto";
 import { usePressInOut } from "../hooks/usePressInOut";
 import { $globalStyles } from "../theme/styles";
 import { useAppTheme } from "../theme/useAppTheme";
@@ -59,11 +59,19 @@ export const IconButton = memo(function IconButton({
       } else if (typeof icon === "function") {
         return icon(props);
       } else if (typeof icon === "string") {
-        return <Picto picto={icon} color={props.color} size={props.size} />;
+        return (
+          <Picto picto={icon as IPicto} color={props.color} size={props.size} />
+        );
       }
 
       if (iconName) {
-        return <Picto picto={iconName} color={props.color} size={props.size} />;
+        return (
+          <Picto
+            picto={iconName as IPicto}
+            color={props.color}
+            size={props.size}
+          />
+        );
       }
 
       return null;
@@ -120,9 +128,9 @@ export const IconButton = memo(function IconButton({
       case "positive":
         return theme.colors.text.primary;
       case "negative":
-        return theme.colors.global.danger;
+        return theme.colors.global.caution;
       case "warning":
-        return theme.colors.global.danger;
+        return theme.colors.global.caution;
       case "text":
         return theme.colors.text.primary;
       default:

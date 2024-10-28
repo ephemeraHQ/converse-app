@@ -13,13 +13,13 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Platform, StyleSheet, useColorScheme, View } from "react-native";
+import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 
-import { NavigationParamList } from "./Navigation/Navigation";
 import { Chat } from "../components/Chat/Chat";
 import ConversationTitle from "../components/Conversation/ConversationTitle";
 import { EmojiPicker } from "../containers/EmojiPicker";
+import { NavigationParamList } from "./Navigation/Navigation";
 import {
   currentAccount,
   useChatStore,
@@ -31,8 +31,6 @@ import {
   ConversationContext,
   openMainConversationWithPeer,
 } from "../utils/conversation";
-import { isDesktop } from "../utils/device";
-import { converseEventEmitter } from "../utils/events";
 import { setTopicToNavigateTo, topicToNavigateTo } from "../utils/navigation";
 import { TextInputWithValue } from "../utils/str";
 import { loadOlderMessages } from "../utils/xmtpRN/messages";
@@ -115,7 +113,8 @@ const Conversation = ({
       }
     } else if (
       route.params?.mainConversationWithPeer &&
-      !openedMainConvo.current
+      !openedMainConvo.current &&
+      !conversationTopicRef.current
     ) {
       openedMainConvo.current = true;
       openMainConversationWithPeer(
@@ -174,7 +173,7 @@ const Conversation = ({
     }
   }, []);
 
-  const autofocus = route.params?.focus || isDesktop || Platform.OS === "web";
+  const autofocus = route.params?.focus;
 
   useEffect(() => {
     const handleAutoFocus = () => {
@@ -193,10 +192,6 @@ const Conversation = ({
         handleAutoFocus();
       }
     });
-
-    if (Platform.OS === "web" || isDesktop) {
-      handleAutoFocus();
-    }
 
     return unsubscribe;
   }, [navigation, autofocus]);
@@ -272,20 +267,15 @@ const Conversation = ({
       "beforeRemove",
       onLeaveScreen
     );
-    if (isDesktop) {
-      converseEventEmitter.on("openingConversation", onOpeningConversation);
-    }
 
     return () => {
-      if (isDesktop) {
-        converseEventEmitter.off("openingConversation", onOpeningConversation);
-      }
       unsubscribeBeforeRemove();
     };
   }, [navigation, onLeaveScreen, onOpeningConversation]);
 
   const conversationContextValue = useMemo(
     () => ({
+      topic: conversationTopic,
       conversation,
       messageToPrefill,
       inputRef: textInputRef,
@@ -300,6 +290,7 @@ const Conversation = ({
       tagsFetchedOnceForMessage,
     }),
     [
+      conversationTopic,
       conversation,
       messageToPrefill,
       textInputRef,

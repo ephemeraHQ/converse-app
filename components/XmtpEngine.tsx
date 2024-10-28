@@ -9,11 +9,14 @@ import {
   AppState,
   AppStateStatus,
   NativeEventSubscription,
-  Platform,
 } from "react-native";
 
 import { getExistingDataSource } from "../data/db/datasource";
-import { getAccountsList, getChatStore } from "../data/store/accountsStore";
+import {
+  getAccountsList,
+  getChatStore,
+  useAccountsStore,
+} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { getTopicsData } from "../utils/api";
 import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
@@ -26,6 +29,7 @@ import { sendPendingMessages } from "../utils/xmtpRN/send";
 import { syncXmtpClient } from "../utils/xmtpRN/sync";
 
 class XmtpEngine {
+  accountsStoreSubscription: (() => void) | null = null;
   appStoreSubscription: (() => void) | null = null;
   appStateSubscription: NativeEventSubscription | null = null;
   isInternetReachable: boolean = false;
@@ -48,6 +52,21 @@ class XmtpEngine {
     const { isInternetReachable, hydrationDone } = useAppStore.getState();
     this.isInternetReachable = isInternetReachable;
     this.hydrationDone = hydrationDone;
+    this.accountsStoreSubscription = useAccountsStore.subscribe(
+      (state, previousState) => {
+        if (!previousState?.accounts || !state?.accounts) return;
+        if (previousState.accounts !== state.accounts) {
+          const previousAccounts = new Set(previousState.accounts);
+          const newAccounts = new Set(state.accounts);
+          const accountsToSync = [...newAccounts].filter(
+            (account) => !previousAccounts.has(account)
+          );
+          if (accountsToSync.length > 0) {
+            this.syncAccounts(accountsToSync);
+          }
+        }
+      }
+    );
     this.appStoreSubscription = useAppStore.subscribe(
       (state, previousState) => {
         this.isInternetReachable = state.isInternetReachable;
@@ -126,6 +145,7 @@ class XmtpEngine {
   async syncAccounts(accountsToSync: string[]) {
     accountsToSync.forEach((a) => {
       if (!this.syncingAccounts[a]) {
+        logger.info(`[XmtpEngine] Syncing account ${a}`);
         getTopicsData(a).then((topicsData) => {
           getChatStore(a).getState().setTopicsData(topicsData, true);
         });
@@ -144,6 +164,7 @@ class XmtpEngine {
 
   destroy() {
     logger.debug("[XmtpEngine] Removing subscriptions");
+    this.accountsStoreSubscription?.();
     this.appStoreSubscription?.();
     this.appStateSubscription?.remove();
   }
@@ -168,7 +189,7 @@ class XmtpCron {
     for (const account of accounts) {
       if (
         getChatStore(account).getState().localClientConnected &&
-        (Platform.OS === "web" || getExistingDataSource(account))
+        getExistingDataSource(account)
       ) {
         try {
           await createPendingConversations(account);

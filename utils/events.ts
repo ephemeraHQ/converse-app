@@ -15,7 +15,6 @@ type AttachmentMessageProcessed<T extends string> =
 type ConverseEvents = {
   newGroup: (group: GroupWithCodecsType) => void;
   showDebugMenu: () => void;
-  "toggle-navigation-drawer": (open: boolean) => void;
   "conversationList-scroll": () => void;
   "enable-transaction-mode": (enabled: boolean) => void;
   openingConversation: (payload: { topic: string }) => void;

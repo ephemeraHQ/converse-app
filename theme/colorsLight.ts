@@ -48,7 +48,7 @@ export const colorsLight = {
     secondary: darkPalette.dark60,
     tertiary: darkPalette.dark30,
     inactive: darkPalette.dark15,
-    danger: darkPalette.danger,
+    caution: darkPalette.red,
     inverted: {
       primary: lightPalette.light,
       secondary: lightPalette.light60,
@@ -61,7 +61,6 @@ export const colorsLight = {
     primaryAlpha60: lightPalette.alpha60,
     caution: lightPalette.red,
     transparent: lightPalette.transparent,
-    danger: lightPalette.danger,
     inverted: {
       primary: darkPalette.dark,
       primaryAlpha60: darkPalette.alpha60,

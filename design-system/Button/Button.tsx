@@ -1,6 +1,8 @@
 import { useAppTheme } from "@theme/useAppTheme";
 import { useCallback } from "react";
 import {
+  ActivityIndicator,
+  GestureResponderEvent,
   Pressable,
   PressableStateCallbackType,
   StyleProp,
@@ -9,6 +11,7 @@ import {
 } from "react-native";
 
 import Picto from "../../components/Picto/Picto";
+import { Haptics } from "../../utils/haptics";
 import { Text } from "../Text";
 import { IButtonProps, IButtonVariant } from "./Button.props";
 import {
@@ -34,6 +37,9 @@ export function Button(props: IButtonProps) {
     disabled,
     disabledStyle: $disabledViewStyleOverride,
     size = "lg",
+    loading,
+    withHapticFeedback = true,
+    onPress,
     // @deprecated,
     title,
     picto,
@@ -88,55 +94,72 @@ export function Button(props: IButtonProps) {
     ]
   );
 
+  const handlePress = useCallback(
+    (e: GestureResponderEvent) => {
+      if (withHapticFeedback) {
+        Haptics.softImpactAsync();
+      }
+      onPress?.(e);
+    },
+    [withHapticFeedback, onPress]
+  );
+
   return (
     <Pressable
       style={$viewStyle}
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
-      {...rest}
+      onPress={handlePress}
       disabled={disabled}
+      {...rest}
     >
-      {(state) => (
-        <>
-          {!!LeftAccessory && (
-            <LeftAccessory
-              style={$buttonLeftAccessoryStyle}
-              pressableState={state}
-              disabled={disabled}
-            />
-          )}
+      {(state) => {
+        if (loading) {
+          return <ActivityIndicator />;
+        }
 
-          {/* @deprecated stuff */}
-          {!!picto && (
-            <Picto
-              picto={picto}
-              color={
-                variant === "text" || variant === "link"
-                  ? theme.colors.text.primary
-                  : theme.colors.text.inverted.primary
-              }
-              style={themed($buttonLeftAccessoryStyle)}
-            />
-          )}
+        return (
+          <>
+            {!!LeftAccessory && (
+              <LeftAccessory
+                style={$buttonLeftAccessoryStyle}
+                pressableState={state}
+                disabled={disabled}
+              />
+            )}
 
-          <Text
-            tx={tx}
-            text={title ?? text}
-            txOptions={txOptions}
-            style={$textStyle(state)}
-          >
-            {children}
-          </Text>
+            {/* @deprecated stuff */}
+            {!!picto && (
+              <Picto
+                picto={picto}
+                color={
+                  variant === "text" || variant === "link"
+                    ? theme.colors.text.primary
+                    : theme.colors.text.inverted.primary
+                }
+                style={themed($buttonLeftAccessoryStyle)}
+              />
+            )}
 
-          {!!RightAccessory && (
-            <RightAccessory
-              style={$buttonRightAccessoryStyle}
-              pressableState={state}
-              disabled={disabled}
-            />
-          )}
-        </>
-      )}
+            <Text
+              tx={tx}
+              text={title ?? text}
+              txOptions={txOptions}
+              style={$textStyle(state)}
+            >
+              {children}
+            </Text>
+
+            {!!RightAccessory && (
+              <RightAccessory
+                style={$buttonRightAccessoryStyle}
+                pressableState={state}
+                disabled={disabled}
+              />
+            )}
+          </>
+        );
+      }}
     </Pressable>
   );
 }

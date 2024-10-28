@@ -11,9 +11,8 @@ import {
   useAccountsList,
   useAccountsStore,
 } from "../../data/store/accountsStore";
-import { useOnboardingStore } from "../../data/store/onboardingStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { converseEventEmitter } from "../../utils/events";
+import { useRouter } from "../../navigation/useNavigation";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
 
 type Props = {
@@ -28,12 +27,15 @@ export default function AccountsAndroid({ navigation }: Props) {
   const { currentAccount, setCurrentAccount } = useAccountsStore(
     useSelect(["currentAccount", "setCurrentAccount"])
   );
-  const setAddingNewAccount = useOnboardingStore((s) => s.setAddingNewAccount);
+
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
+
+  const router = useRouter();
+
   return (
     <Drawer.Section
-      title={Platform.OS === "web" ? undefined : "Accounts"}
+      title="Accounts"
       style={{
         marginTop: insets.top,
         ...Platform.select({
@@ -54,11 +56,7 @@ export default function AccountsAndroid({ navigation }: Props) {
           active={currentAccount === a}
           onPress={() => {
             setCurrentAccount(a, false);
-            if (Platform.OS === "android") {
-              converseEventEmitter.emit("toggle-navigation-drawer", false);
-            } else {
-              navigation?.navigate("Chats");
-            }
+            navigation?.navigate("Chats");
           }}
           icon={({ color }) => (
             <Picto
@@ -67,9 +65,7 @@ export default function AccountsAndroid({ navigation }: Props) {
               color={color}
             />
           )}
-          right={({ color }) => (
-            <AccountSettingsButton account={a} navigation={navigation} />
-          )}
+          right={({ color }) => <AccountSettingsButton account={a} />}
           rippleColor={
             currentAccount === a
               ? undefined
@@ -83,7 +79,7 @@ export default function AccountsAndroid({ navigation }: Props) {
           <Picto picto="plus" size={PictoSizes.navItem} color={color} />
         )}
         onPress={() => {
-          setAddingNewAccount(true);
+          router.navigate("NewAccountNavigator");
         }}
         rippleColor={clickedItemBackgroundColor(colorScheme)}
       />

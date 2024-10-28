@@ -1,3 +1,4 @@
+import { installedWallets } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import { refreshProfileForAddress } from "@data/helpers/profiles/profilesUpdate";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { VStack } from "@design-system/VStack";
@@ -15,7 +16,6 @@ import { Drawer } from "../Drawer";
 import { TransactionActions } from "./TransactionActions";
 import { TransactionContent } from "./TransactionContent";
 import { TransactionHeader } from "./TransactionHeader";
-import { installedWallets } from "../Onboarding/supportedWallets";
 
 export type TransactionData = {
   to: string;

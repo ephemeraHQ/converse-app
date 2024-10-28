@@ -1,4 +1,4 @@
-import { DEFAULT_SUPPORTED_CHAINS } from "@components/Onboarding/supportedWallets";
+import { DEFAULT_SUPPORTED_CHAINS } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { base, baseSepolia } from "wagmi/chains";
@@ -56,10 +56,7 @@ const ENV = {
     ...defaultConfig,
     env: "dev",
     xmtpEnv: process.env.EXPO_PUBLIC_DEV_XMTP_ENV || "dev",
-    apiURI:
-      Platform.OS === "web"
-        ? "http://localhost:9875"
-        : process.env.EXPO_PUBLIC_DEV_API_URI || "",
+    apiURI: process.env.EXPO_PUBLIC_DEV_API_URI || "",
     debugMenu: true,
     bundleId: "com.converse.dev",
     appleAppGroup: "group.com.converse.dev",

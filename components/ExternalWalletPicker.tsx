@@ -16,18 +16,18 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
-import { Account, createWallet, Wallet } from "thirdweb/wallets";
+import { Account, Wallet, createWallet } from "thirdweb/wallets";
 
+import Button from "./Button/Button";
 import { Drawer } from "./Drawer";
 import config from "../config";
-import Button from "./Button/Button";
 import {
   InstalledWallet,
   useInstalledWallets,
-} from "./Onboarding/supportedWallets";
+} from "./Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import Picto from "./Picto/Picto";
 
 export default function ExternalWalletPicker() {

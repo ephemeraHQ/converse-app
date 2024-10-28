@@ -1,24 +1,23 @@
 import { AnimatedBlurView } from "@components/AnimatedBlurView";
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
 import { ConversationReadOnly } from "@screens/ConversationReadOnly";
-import { useIsSplitScreen } from "@screens/Navigation/navHelpers";
 import { backgroundColor } from "@styles/colors";
 import {
-  SIDE_MARGIN,
   AUXILIARY_VIEW_MIN_HEIGHT,
-  HOLD_ITEM_TRANSFORM_DURATION,
-  contextMenuStyleGuide,
   BACKDROP_DARK_BACKGROUND_COLOR,
   BACKDROP_LIGHT_BACKGROUND_COLOR,
+  HOLD_ITEM_TRANSFORM_DURATION,
   ITEM_WIDTH,
+  SIDE_MARGIN,
+  contextMenuStyleGuide,
 } from "@utils/contextMenu/constants";
 import React, { FC, memo, useCallback, useEffect } from "react";
 import {
   Platform,
   StyleSheet,
+  View,
   useColorScheme,
   useWindowDimensions,
-  View,
 } from "react-native";
 import {
   Gesture,
@@ -50,7 +49,6 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   const activeValue = useSharedValue(false);
   const opacityValue = useSharedValue(0);
   const intensityValue = useSharedValue(0);
-  const isSplitScreen = useIsSplitScreen();
   const { height, width } = useWindowDimensions();
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -143,12 +141,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
                 <View style={styles.previewContainer}>
                   <GestureDetector
                     gesture={Gesture.Tap().onEnd(() => {
-                      if (isSplitScreen) {
-                        runOnJS(closeMenu)();
-                      } else {
-                        // Navigate to conversation
-                        runOnJS(onClose)(true);
-                      }
+                      runOnJS(onClose)(true);
                     })}
                   >
                     <ConversationReadOnly topic={conversationTopic} />

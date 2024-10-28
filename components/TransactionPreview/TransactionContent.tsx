@@ -1,3 +1,4 @@
+import { InstalledWallet } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
@@ -20,7 +21,6 @@ import { StyleSheet, TextStyle, View, ViewStyle } from "react-native";
 import TransactionSend from "../../assets/transaction-send.png";
 import TransactionTo from "../../assets/transaction-to.png";
 import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
-import { InstalledWallet } from "../Onboarding/supportedWallets";
 import Picto from "../Picto/Picto";
 
 type TransactionState = {
@@ -130,7 +130,7 @@ const TransactionResult = ({ status, error }: TransactionResultProps) => {
   return (
     <VStack style={status === "failure" ? themed($failure) : styles.center}>
       {status === "failure" && (
-        <Text color="danger">{translate("transaction_failure")}</Text>
+        <Text color="caution">{translate("transaction_failure")}</Text>
       )}
       <Text>
         {status === "failure" ? error : translate("transaction_success")}
@@ -193,7 +193,7 @@ const SimulationFailure = ({ error }: { error?: string | undefined }) => {
   const { themed } = useAppTheme();
   return (
     <VStack style={themed($failure)}>
-      <Text color="danger">{translate("simulation_caution")}</Text>
+      <Text color="caution">{translate("simulation_caution")}</Text>
       <Text>
         {error
           ? translate("simulation_will_revert")

@@ -1,7 +1,7 @@
 import {
   DEFAULT_SUPPORTED_CHAINS,
   useInstalledWallets,
-} from "@components/Onboarding/supportedWallets";
+} from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import { translate } from "@i18n";
 import { converseEventEmitter, waitForConverseEvent } from "@utils/events";
 import logger from "@utils/logger";

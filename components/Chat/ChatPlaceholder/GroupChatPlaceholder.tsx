@@ -3,6 +3,7 @@ import { useGroupName } from "@hooks/useGroupName";
 import { translate } from "@i18n";
 import { useGroupQuery } from "@queries/useGroupQuery";
 import { textPrimaryColor } from "@styles/colors";
+import { isGroupTopic } from "@utils/groupUtils/groupId";
 import { useCallback, useMemo } from "react";
 import {
   Keyboard,
@@ -25,6 +26,7 @@ type Props = {
 };
 
 export function GroupChatPlaceholder({ messagesCount }: Props) {
+  const topic = useConversationContext("topic");
   const conversation = useConversationContext("conversation");
   const onReadyToFocus = useConversationContext("onReadyToFocus");
 
@@ -74,9 +76,13 @@ export function GroupChatPlaceholder({ messagesCount }: Props) {
       <View onLayout={onLayout} style={styles.chatPlaceholder}>
         {!conversation && (
           <View>
-            <ActivityIndicator style={styles.activitySpinner} />
+            {!topic && <ActivityIndicator style={{ marginBottom: 20 }} />}
             <Text style={styles.chatPlaceholderText}>
-              {translate("opening_conversation")}
+              {topic
+                ? isGroupTopic(topic)
+                  ? translate("group_not_found")
+                  : translate("conversation_not_found")
+                : translate("opening_conversation")}
             </Text>
           </View>
         )}
