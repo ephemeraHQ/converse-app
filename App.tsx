@@ -5,6 +5,7 @@ import "./polyfills";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { PortalProvider } from "@gorhom/portal";
 import { PrivyProvider } from "@privy-io/expo";
 import { queryClient } from "@queries/queryClient";
@@ -44,6 +45,8 @@ import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
+
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -142,9 +145,13 @@ export default function AppWithProviders() {
             <ActionSheetProvider>
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
                 <PaperProvider theme={paperTheme}>
-                  <PortalProvider>
-                    <App />
-                  </PortalProvider>
+                  <GestureHandlerRootView>
+                    <BottomSheetModalProvider>
+                      <PortalProvider>
+                        <App />
+                      </PortalProvider>
+                    </BottomSheetModalProvider>
+                  </GestureHandlerRootView>
                 </PaperProvider>
               </ThemeProvider>
             </ActionSheetProvider>
