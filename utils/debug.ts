@@ -64,9 +64,9 @@ export const componentKeyDebug = () => {
   };
 };
 
-export function debugBorder() {
+export function debugBorder(color: string = "red") {
   return {
     borderWidth: 1,
-    borderColor: "red",
+    borderColor: color,
   };
 }
