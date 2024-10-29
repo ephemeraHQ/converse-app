@@ -1,7 +1,7 @@
+import { IPicto } from "@components/Picto/Picto.types";
 import { ReactElement } from "react";
 import { TextStyle, View, ViewStyle } from "react-native";
 
-import { IPicto } from "../../components/Picto/Picto";
 import { translate } from "../../i18n";
 import { ThemedStyle, useAppTheme } from "../../theme/useAppTheme";
 import { Icon } from "../Icon/Icon";

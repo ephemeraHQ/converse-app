@@ -1,3 +1,4 @@
+import { IPicto } from "@components/Picto/Picto.types";
 import { textSecondaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import { Image } from "expo-image";
@@ -14,7 +15,7 @@ import {
 } from "react-native";
 
 import IconLoading from "../../assets/icon-loading.png";
-import Picto, { IPicto } from "../Picto/Picto";
+import Picto from "../Picto/Picto";
 import SvgImageUri from "../SvgImageUri";
 
 const IMAGE_SIZE = Platform.OS === "android" ? 24 : 30;
