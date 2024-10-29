@@ -310,6 +310,10 @@ export const en = {
   // Wallet selector
   no_wallet_detected: "No wallet detected",
 
+  // Profile
+  view_removed_chats: "View removed chats",
+  change_or_add_account: "Change or add account",
+
   // Revocation
   current_installation_revoked: "Logged out",
   current_installation_revoked_description:
