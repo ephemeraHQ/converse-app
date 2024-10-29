@@ -2,13 +2,13 @@ import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSh
 import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
 import { BottomSheetModal } from "@design-system/BottomSheet/BottomSheetModal";
 import { HStack } from "@design-system/HStack";
-import { ScrollView } from "@design-system/ScrollView";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useAppTheme } from "@theme/useAppTheme";
 import { memo, useCallback, useState } from "react";
 import { TouchableHighlight } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -26,6 +26,7 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
 
   const handleDismiss = useCallback(() => {
     resetMessageReactionsDrawer();
+    setFilterReactions(null);
   }, []);
 
   // State for managing the active filter, e.g., ❤️, 👍, etc.
@@ -42,72 +43,69 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
         <BottomSheetHeader title="Reactions" hasClose />
 
         {/* Preview of all reactions with counts and filter buttons */}
-        <BottomSheetScrollView>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{
+            paddingLeft: theme.spacing.lg,
+            flexDirection: "row",
+          }}
+          scrollEnabled
+        >
+          {/* "All" button to clear the filter */}
+          <TouchableHighlight
+            onPress={() => setFilterReactions(null)}
             style={{
-              paddingLeft: theme.spacing.lg,
-              flexDirection: "row",
+              marginRight: 8,
+              padding: 8,
+              borderRadius: theme.borderRadius.sm,
+              backgroundColor:
+                filterReactions === null
+                  ? theme.colors.fill.minimal
+                  : theme.colors.background.raised,
             }}
+            underlayColor={theme.colors.border.subtle}
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel="Show all reactions"
           >
-            {/* "All" button to clear the filter */}
+            <HStack style={{ alignItems: "center" }}>
+              <Text>All</Text>
+              <Text>{rolledUpReactions.totalCount}</Text>
+            </HStack>
+          </TouchableHighlight>
+
+          {/* Buttons for each unique reaction type with counts */}
+          {rolledUpReactions.preview.map((reaction, index) => (
             <TouchableHighlight
-              onPress={() => setFilterReactions(null)}
+              key={index}
+              onPress={() =>
+                setFilterReactions(
+                  reaction.content === filterReactions ? null : reaction.content
+                )
+              }
               style={{
                 marginRight: 8,
                 padding: 8,
                 borderRadius: theme.borderRadius.sm,
                 backgroundColor:
-                  filterReactions === null
+                  filterReactions === reaction.content
                     ? theme.colors.fill.minimal
                     : theme.colors.background.raised,
               }}
               underlayColor={theme.colors.border.subtle}
               accessible
               accessibilityRole="button"
-              accessibilityLabel="Show all reactions"
+              accessibilityLabel={`${reaction.count} ${reaction.content} reactions`}
             >
               <HStack style={{ alignItems: "center" }}>
-                <Text>All</Text>
-                <Text>{rolledUpReactions.totalCount}</Text>
+                <Text>{reaction.content}</Text>
+                <Text>{reaction.count}</Text>
               </HStack>
             </TouchableHighlight>
-
-            {/* Buttons for each unique reaction type with counts */}
-            {rolledUpReactions.preview.map((reaction, index) => (
-              <TouchableHighlight
-                key={index}
-                onPress={() =>
-                  setFilterReactions(
-                    reaction.content === filterReactions
-                      ? null
-                      : reaction.content
-                  )
-                }
-                style={{
-                  marginRight: 8,
-                  padding: 8,
-                  borderRadius: theme.borderRadius.sm,
-                  backgroundColor:
-                    filterReactions === reaction.content
-                      ? theme.colors.fill.minimal
-                      : theme.colors.background.raised,
-                }}
-                underlayColor={theme.colors.border.subtle}
-                accessible
-                accessibilityRole="button"
-                accessibilityLabel={`${reaction.count} ${reaction.content} reactions`}
-              >
-                <HStack style={{ alignItems: "center" }}>
-                  <Text>{reaction.content}</Text>
-                  <Text>{reaction.count}</Text>
-                </HStack>
-              </TouchableHighlight>
-            ))}
-            <HStack style={{ width: theme.spacing.xxl }} />
-          </ScrollView>
-        </BottomSheetScrollView>
+          ))}
+          <HStack style={{ width: theme.spacing.xxl }} />
+        </ScrollView>
 
         {/* Detailed list of each reaction, sorted with all OWN reactions on top, filtered by content */}
         <BottomSheetScrollView>
