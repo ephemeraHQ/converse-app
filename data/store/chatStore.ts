@@ -94,7 +94,7 @@ export type XmtpMessage = XmtpProtocolMessage & {
   localMediaURI?: string;
 };
 
-type ConversationsListItems = {
+export type ConversationsListItems = {
   conversationsInbox: ConversationWithLastMessagePreview[];
   conversationsRequests: ConversationWithLastMessagePreview[];
   conversationsBlocked: ConversationWithLastMessagePreview[];
