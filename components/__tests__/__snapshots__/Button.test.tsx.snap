@@ -63,6 +63,7 @@ exports[`Button Component Default (Android) Button renders correctly with danger
         },
         undefined,
         undefined,
+        undefined,
         [
           {
             "0": [Function],
@@ -165,6 +166,7 @@ exports[`Button Component Default (Android) Button renders correctly with picto 
         },
         undefined,
         undefined,
+        undefined,
         [
           {
             "0": [Function],
@@ -247,6 +249,7 @@ exports[`Button Component iOS Button renders correctly with primary variant 1`] 
           "fontWeight": 400,
           "lineHeight": 20,
         },
+        undefined,
         undefined,
         undefined,
         [
