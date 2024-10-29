@@ -19,10 +19,15 @@ import {
 } from "react-native";
 import { AvoidSoftInput } from "react-native-avoid-softinput";
 
+import {
+  isMissingConverseProfile,
+  needToShowNotificationsPermissions,
+} from "./Onboarding.utils";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { initXmtpClient } from "../../components/Onboarding/init-xmtp-client";
+import { setAuthStatus } from "../../data/store/authStore";
 import { VStack } from "../../design-system/VStack";
 import { useRouter } from "../../navigation/useNavigation";
 import { sentryTrackError } from "../../utils/sentry";
@@ -45,7 +50,13 @@ export function OnboardingPrivateKeyScreen(
       const trimmedPrivateKey = privateKey.trim();
       if (!trimmedPrivateKey) return;
       await loginWithPrivateKey(trimmedPrivateKey);
-      router.navigate("OnboardingUserProfile");
+      if (isMissingConverseProfile()) {
+        router.navigate("OnboardingUserProfile");
+      } else if (needToShowNotificationsPermissions()) {
+        router.navigate("OnboardingNotifications");
+      } else {
+        setAuthStatus("signedIn");
+      }
     } catch (error) {
       sentryTrackError(error);
     }

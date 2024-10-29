@@ -2,8 +2,13 @@ import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { memo, useCallback, useRef } from "react";
 
+import {
+  isMissingConverseProfile,
+  needToShowNotificationsPermissions,
+} from "./Onboarding.utils";
 import { ConnectViaWallet } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWallet";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
+import { setAuthStatus } from "../../data/store/authStore";
 import { useRouter } from "../../navigation/useNavigation";
 import { NavigationParamList } from "../Navigation/Navigation";
 
@@ -30,8 +35,14 @@ export const OnboardingConnectWalletScreen = memo(
     );
 
     const handleDoneConnecting = useCallback(() => {
-      router.navigate("OnboardingUserProfile");
       finishedConnecting.current = true;
+      if (isMissingConverseProfile()) {
+        router.navigate("OnboardingUserProfile");
+      } else if (needToShowNotificationsPermissions()) {
+        router.navigate("OnboardingNotifications");
+      } else {
+        setAuthStatus("signedIn");
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
