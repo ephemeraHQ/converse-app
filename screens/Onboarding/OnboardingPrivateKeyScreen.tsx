@@ -10,7 +10,13 @@ import {
 import { spacing } from "@theme/spacing";
 import { Wallet } from "ethers";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, StyleSheet, TextInput, useColorScheme } from "react-native";
+import {
+  Alert,
+  Platform,
+  StyleSheet,
+  TextInput,
+  useColorScheme,
+} from "react-native";
 import { AvoidSoftInput } from "react-native-avoid-softinput";
 
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
@@ -32,6 +38,8 @@ export function OnboardingPrivateKeyScreen(
 
   const router = useRouter();
 
+  useAvoidInputEffect();
+
   const handlePressConnect = useCallback(async () => {
     try {
       const trimmedPrivateKey = privateKey.trim();
@@ -51,7 +59,13 @@ export function OnboardingPrivateKeyScreen(
           {translate("privateKeyConnect.title")}
         </OnboardingPictoTitleSubtitle.Title>
         <OnboardingPictoTitleSubtitle.Subtitle>
-          {translate("privateKeyConnect.subtitle")}
+          {translate("privateKeyConnect.subtitle", {
+            storage: translate(
+              `privateKeyConnect.storage.${
+                Platform.OS === "ios" ? "ios" : "android"
+              }`
+            ),
+          })}
         </OnboardingPictoTitleSubtitle.Subtitle>
       </OnboardingPictoTitleSubtitle.Container>
 

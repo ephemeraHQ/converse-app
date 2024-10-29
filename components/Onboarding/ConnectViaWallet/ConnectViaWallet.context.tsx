@@ -15,9 +15,16 @@ const ConnectViaWalletContext = createContext<IConnectViaWalletContextType>(
 
 export function ConnectViaWalletContextProvider({
   children,
-  ...contextValue
+  onDoneConnecting,
+  onErrorConnecting,
 }: IConnectViaWalletContextProps) {
-  const value = useMemo(() => contextValue, [contextValue]);
+  const value = useMemo(
+    () => ({
+      onDoneConnecting,
+      onErrorConnecting,
+    }),
+    [onDoneConnecting, onErrorConnecting]
+  );
 
   return (
     <ConnectViaWalletContext.Provider value={value}>

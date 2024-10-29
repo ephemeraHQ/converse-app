@@ -10,7 +10,6 @@ import {
 } from "thirdweb/react";
 
 import { useConnectViaWalletContext } from "./ConnectViaWallet.context";
-import { useConnectViaWalletDisconnect } from "./useConnectViaWalletDisconnect";
 import { thirdwebClient } from "../../../utils/thirdweb";
 import { isOnXmtp } from "../../../utils/xmtpRN/client";
 import { getInboxId } from "../../../utils/xmtpRN/signIn";
@@ -30,21 +29,9 @@ export function useInitConnectViaWalletState(args: { address: string }) {
   const thirdwebWallet = useThirdwebActiveWallet();
   const thirdwebAccount = useThirdwebActiveAccount();
 
-  const disconnect = useConnectViaWalletDisconnect();
-
   const [thirdwebSigner, setThirdwebSigner] = useState<Signer | undefined>();
 
   const handlingThirdwebSigner = useRef(false);
-
-  // https://xmtp-labs.slack.com/archives/C07NSHXK693/p1729606215308819?thread_ts=1729559726.174059&cid=C07NSHXK693
-  //   const readyToHandleThirdwebSigner = useRef(false);
-  //   useEffect(() => {
-  //     if (!readyToHandleThirdwebSigner.current) {
-  //       disconnect({ address }).then(() => {
-  //         readyToHandleThirdwebSigner.current = true;
-  //       });
-  //     }
-  //   }, [disconnect, address]);
 
   useEffect(() => {
     if (!thirdwebAccount) {
@@ -54,12 +41,7 @@ export function useInitConnectViaWalletState(args: { address: string }) {
       return;
     }
 
-    // if (!readyToHandleThirdwebSigner.current) {
-    //   logger.debug(
-    //     "[Connect Wallet] Not ready to get thirdweb signer from account yet"
-    //   );
-    //   return;
-    // }
+    logger.debug("[Connect Wallet] Getting thirdweb signer");
 
     ethers5Adapter.signer
       .toEthers({
@@ -69,18 +51,13 @@ export function useInitConnectViaWalletState(args: { address: string }) {
       })
       .then(setThirdwebSigner)
       .catch(onErrorConnecting);
-  }, [thirdwebAccount, onErrorConnecting]);
+  }, [onErrorConnecting, thirdwebAccount]);
 
   useEffect(() => {
     if (!thirdwebSigner) {
       logger.debug("[Connect Wallet] No thirdweb signer available yet");
       return;
     }
-
-    // if (!readyToHandleThirdwebSigner.current) {
-    //   logger.debug("[Connect Wallet] Not ready to handle thirdweb signer yet");
-    //   return;
-    // }
 
     if (handlingThirdwebSigner.current) {
       logger.debug("[Connect Wallet] Already handling thirdweb signer");
