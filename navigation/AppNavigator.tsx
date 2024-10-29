@@ -11,7 +11,7 @@ import ExternalWalletPicker from "../components/ExternalWalletPicker";
 import { TransactionPreview } from "../components/TransactionPreview/TransactionPreview";
 import config from "../config";
 import { useAuthStatus } from "../data/store/authStore";
-import ConversationList from "../features/Conversation/ConversationList/ConversationList.screen";
+import { ConversationListScreen } from "../features/Conversation/ConversationList/ConversationList.screen";
 import { ConversationScreenConfig } from "../screens/Navigation/ConversationNav";
 import { GroupInviteScreenConfig } from "../screens/Navigation/GroupInviteNav";
 import { GroupLinkScreenConfig } from "../screens/Navigation/GroupLinkNav";
@@ -203,7 +203,7 @@ const AppStack = memo(() => {
         <>
           {/* Main */}
           <Stack.Group>
-            <Stack.Screen name="Chats" component={ConversationList} />
+            <Stack.Screen name="Chats" component={ConversationListScreen} />
             {/* <Stack.Screen
               name="ChatsRequests"
               component={ConversationRequestsListNav}
