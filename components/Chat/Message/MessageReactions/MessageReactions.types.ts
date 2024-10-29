@@ -10,21 +10,21 @@ export type MessageReactions = {
 export type RolledUpReactions = {
   totalCount: number;
   userReacted: boolean;
-  detailed: DetailedReaction[];
   preview: {
     content: string;
+    count: number;
   }[];
+  detailed: SortedReaction[];
 };
 
 /**
  * Details for each individual reaction emoji, including reactors and timing.
  */
-export type DetailedReaction = {
+export type SortedReaction = {
   content: string;
   isOwnReaction: boolean;
   firstReactionTime: number;
-  reactors: ReactorDetails[];
-  count: number;
+  reactor: ReactorDetails;
 };
 
 /**

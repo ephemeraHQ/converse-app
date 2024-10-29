@@ -46,16 +46,14 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
             }}
           >
             <Text>All {rolledUpReactions.totalCount}</Text>
-            {rolledUpReactions.detailed.map((reaction, index) => (
+            {rolledUpReactions.preview.map((reaction, index) => (
               <TouchableHighlight
                 key={index}
                 style={{
                   marginRight: 8,
                   padding: 8,
                   borderRadius: theme.borderRadius.sm,
-                  backgroundColor: reaction.isOwnReaction
-                    ? theme.colors.fill.minimal
-                    : theme.colors.background.raised,
+                  backgroundColor: theme.colors.background.raised,
                 }}
                 underlayColor={theme.colors.border.subtle}
                 accessible

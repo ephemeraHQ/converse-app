@@ -13,9 +13,9 @@ import { StyleSheet, TouchableHighlight } from "react-native";
 
 import { MessageToDisplay } from "../Message";
 import {
-  DetailedReaction,
   MessageReactions,
   RolledUpReactions,
+  SortedReaction,
 } from "./MessageReactions.types";
 import { openMessageReactionsDrawer } from "./MessageReactionsDrawer/MessageReactionsDrawer.service";
 
@@ -66,9 +66,11 @@ export const ChatMessageReactions = memo(
             ]}
           >
             <HStack style={styles.emojiContainer}>
-              {rolledUpReactions.preview.map((reaction, index) => (
-                <Text key={index}>{reaction.content}</Text>
-              ))}
+              {rolledUpReactions.preview
+                .slice(0, MAX_REACTION_EMOJIS_SHOWN)
+                .map((reaction, index) => (
+                  <Text key={index}>{reaction.content}</Text>
+                ))}
             </HStack>
             {rolledUpReactions.totalCount > 1 && (
               <Text style={styles.reactorCount}>
@@ -113,7 +115,7 @@ const useMessageReactionsRolledUp = (arg: {
   );
 
   return useMemo((): RolledUpReactions => {
-    const detailed: DetailedReaction[] = [];
+    const detailed: SortedReaction[] = [];
     let totalCount = 0;
     let userReacted = false;
 
@@ -126,57 +128,51 @@ const useMessageReactionsRolledUp = (arg: {
       membersSocials.map((social) => [social.address, social])
     );
 
-    // Map to keep track of each unique reaction content
-    const reactionMap = new Map<string, DetailedReaction>();
+    // Track reaction counts for preview
+    const previewCounts = new Map<string, number>();
 
     flatReactions.forEach((reaction) => {
-      if (!reactionMap.has(reaction.content)) {
-        reactionMap.set(reaction.content, {
-          content: reaction.content,
-          isOwnReaction: false,
-          firstReactionTime: Infinity, // for min comparison
-          reactors: [],
-          count: 0,
-        });
-      }
+      const isOwnReaction =
+        reaction.senderAddress.toLowerCase() === userAddress?.toLowerCase();
+      if (isOwnReaction) userReacted = true;
 
-      const detailEntry = reactionMap.get(reaction.content)!;
-      const socialDetails = socialsMap.get(reaction.senderAddress);
-
-      detailEntry.reactors.push({
-        address: reaction.senderAddress,
-        userName: socialDetails?.name, // TODO: fallback with short address
-        avatar: socialDetails?.uri, // TODO: fallback avatar with initials
-        reactionTime: reaction.sent,
-      });
-
-      detailEntry.count += 1;
-
-      // Track if the user reacted and the earliest reaction time
-      if (reaction.senderAddress.toLowerCase() === userAddress?.toLowerCase()) {
-        detailEntry.isOwnReaction = true;
-        userReacted = true;
-      }
-      detailEntry.firstReactionTime = Math.min(
-        detailEntry.firstReactionTime,
-        reaction.sent
+      // Count reactions for the preview
+      previewCounts.set(
+        reaction.content,
+        (previewCounts.get(reaction.content) || 0) + 1
       );
+
+      // Add to detailed array
+      const socialDetails = socialsMap.get(reaction.senderAddress);
+      detailed.push({
+        content: reaction.content,
+        isOwnReaction,
+        firstReactionTime: reaction.sent,
+        reactor: {
+          address: reaction.senderAddress,
+          userName: socialDetails?.name, // TODO: fallback with short address
+          avatar: socialDetails?.uri, // TODO: fallback avatar with initials
+          reactionTime: reaction.sent,
+        },
+      });
     });
 
-    // Convert the map values to an array for the final detailed output
-    detailed.push(...reactionMap.values());
+    // Sort detailed array to place all OWN reactions at the beginning
+    detailed.sort((a, b) =>
+      a.isOwnReaction === b.isOwnReaction ? 0 : a.isOwnReaction ? -1 : 1
+    );
 
-    // Generate reactions preview by selecting top n reactions
-    const preview = Array.from(reactionMap.values())
-      .sort((a, b) => b.reactors.length - a.reactors.length)
-      .slice(0, MAX_REACTION_EMOJIS_SHOWN)
-      .map((reaction) => ({ content: reaction.content }));
+    // Convert previewCounts map to array with content and count
+    const preview = Array.from(previewCounts, ([content, count]) => ({
+      content,
+      count,
+    }));
 
     return {
       totalCount,
       userReacted,
-      detailed,
       preview,
+      detailed,
     };
   }, [reactions, userAddress, membersSocials]);
 };
