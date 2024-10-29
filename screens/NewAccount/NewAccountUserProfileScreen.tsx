@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { memo, useCallback, useRef } from "react";
-import { TextInput, useColorScheme, View } from "react-native";
+import { TextInput, View, useColorScheme } from "react-native";
 
 import Avatar from "../../components/Avatar";
 import Button from "../../components/Button/Button";

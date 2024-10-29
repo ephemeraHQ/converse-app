@@ -1,13 +1,13 @@
 // TODO: move out of ConnectViaWallet
-import { Signer } from "ethers";
-import { memo } from "react";
-import { ethers5Adapter } from "thirdweb/adapters/ethers5";
-import { ethereum } from "thirdweb/chains";
+import { memo, useState } from "react";
+import { ActivityIndicator } from "react-native";
 import {
+  useDisconnect as useThirdwebDisconnect,
   useSetActiveWallet as useSetThirdwebActiveWallet,
   useConnect as useThirdwebConnect,
+  useActiveWallet as useThirdwebActiveWallet,
 } from "thirdweb/react";
-import { WalletId, createWallet } from "thirdweb/wallets";
+import { createWallet } from "thirdweb/wallets";
 
 import {
   InstalledWallet,
@@ -15,6 +15,7 @@ import {
 } from "./ConnectViaWalletSupportedWallets";
 import config from "../../../config";
 import { getAccountsList } from "../../../data/store/accountsStore";
+import { useAppStateHandlers } from "../../../hooks/useAppStateHandlers";
 import { translate } from "../../../i18n";
 import { getEthOSSigner } from "../../../utils/ethos";
 import logger from "../../../utils/logger";
@@ -85,7 +86,20 @@ export const InstalledWalletsTableView = memo(
     const walletsInstalled = useInstalledWallets();
 
     const { connect: thirdwebConnect } = useThirdwebConnect();
+    const { disconnect: disconnectThirdweb } = useThirdwebDisconnect();
+    const thirdwebActiveWallet = useThirdwebActiveWallet();
     const setThirdwebActiveWallet = useSetThirdwebActiveWallet();
+
+    const [isProcessingWalletId, setIsProcessingWalletId] = useState<
+      string | null
+    >(null);
+
+    // In case the user came back to the app themselves
+    useAppStateHandlers({
+      onForeground: () => {
+        setIsProcessingWalletId(null);
+      },
+    });
 
     return (
       <TableView
@@ -93,7 +107,12 @@ export const InstalledWalletsTableView = memo(
         items={walletsInstalled.map((wallet) => ({
           id: wallet.name,
           leftView: <TableViewImage imageURI={wallet.iconURL} />,
-          rightView: <RightViewChevron />,
+          rightView:
+            isProcessingWalletId === wallet.name ? (
+              <ActivityIndicator />
+            ) : (
+              <RightViewChevron />
+            ),
           title: translate("walletSelector.installedApps.connectWallet", {
             walletName: wallet.name,
           }),
@@ -101,6 +120,12 @@ export const InstalledWalletsTableView = memo(
             logger.debug(
               `[Onboarding] Clicked on wallet ${wallet.name} - opening external app`
             );
+
+            setIsProcessingWalletId(wallet.name);
+
+            if (thirdwebActiveWallet) {
+              disconnectThirdweb(thirdwebActiveWallet);
+            }
 
             try {
               let walletAddress: string = "";
@@ -158,6 +183,8 @@ export const InstalledWalletsTableView = memo(
               }
             } catch (e: any) {
               logger.error("Error connecting to wallet:", e);
+            } finally {
+              setIsProcessingWalletId(null);
             }
           },
         }))}
@@ -165,68 +192,3 @@ export const InstalledWalletsTableView = memo(
     );
   }
 );
-
-export type InstalledWalletSignerAndAddress = {
-  signer: Signer;
-  address: string;
-};
-
-// TODO: find a way to use thirdwebConnect without having to pass it as a arg...
-export const getCoinbaseSignerAndAddress = async (thirdwebConnect: any) => {
-  const res = await thirdwebConnect(async () => {
-    const coinbaseWallet = createWallet("com.coinbase.wallet", {
-      appMetadata: config.walletConnectConfig.appMetadata,
-      mobileConfig: {
-        callbackURL: `https://dev.converse.xyz/coinbase`,
-      },
-    });
-    await coinbaseWallet.connect({ client: thirdwebClient });
-    return coinbaseWallet;
-  });
-
-  if (!res) {
-    throw new Error("Failed to connect to Coinbase Wallet");
-  }
-
-  const account = res.getAccount();
-  if (!account) {
-    throw new Error("No coinbase account found");
-  }
-
-  const signer = await ethers5Adapter.signer.toEthers({
-    client: thirdwebClient,
-    chain: ethereum,
-    account,
-  });
-
-  return {
-    signer,
-    address: account.address,
-  } as InstalledWalletSignerAndAddress;
-};
-
-export const getEthOSWalletSignerAndAddress = async () => {
-  const signer = getEthOSSigner();
-  if (!signer) {
-    throw new Error("No EthOS signer found");
-  }
-  const address = await signer.getAddress();
-  return { signer, address } as InstalledWalletSignerAndAddress;
-};
-
-export const getThirdwebSignerAndAddress = async (thirdwebId: WalletId) => {
-  const walletConnectWallet = createWallet(thirdwebId);
-  const account = await walletConnectWallet.connect({
-    client: thirdwebClient,
-    walletConnect: config.walletConnectConfig,
-  });
-  const signer = await ethers5Adapter.signer.toEthers({
-    client: thirdwebClient,
-    chain: ethereum,
-    account,
-  });
-  return {
-    signer,
-    address: account.address,
-  } as InstalledWalletSignerAndAddress;
-};
