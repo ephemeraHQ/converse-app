@@ -23,6 +23,7 @@ import {
   View,
   useColorScheme,
 } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
@@ -45,8 +46,6 @@ import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
-
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy

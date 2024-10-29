@@ -157,9 +157,7 @@ const useMessageReactionsRolledUp = (arg: {
     });
 
     // Sort detailed array to place all OWN reactions at the beginning
-    detailed.sort((a, b) =>
-      a.isOwnReaction === b.isOwnReaction ? 0 : a.isOwnReaction ? -1 : 1
-    );
+    detailed.sort((a, b) => Number(b.isOwnReaction) - Number(a.isOwnReaction));
 
     // Convert previewCounts map to array with content and count
     const preview = Array.from(previewCounts, ([content, count]) => ({
