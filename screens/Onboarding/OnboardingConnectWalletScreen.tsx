@@ -1,6 +1,5 @@
-import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { memo, useCallback, useRef } from "react";
+import { memo, useCallback } from "react";
 
 import {
   isMissingConverseProfile,
@@ -20,22 +19,10 @@ export const OnboardingConnectWalletScreen = memo(
     >
   ) {
     const { address } = props.route.params;
+
     const router = useRouter();
 
-    const finishedConnecting = useRef(false);
-
-    useFocusEffect(
-      useCallback(() => {
-        // User already connected wallet but decided to come back here, so we need to go back to get started screen
-        if (finishedConnecting.current) {
-          router.goBack();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [])
-    );
-
     const handleDoneConnecting = useCallback(() => {
-      finishedConnecting.current = true;
       if (isMissingConverseProfile()) {
         router.navigate("OnboardingUserProfile");
       } else if (needToShowNotificationsPermissions()) {

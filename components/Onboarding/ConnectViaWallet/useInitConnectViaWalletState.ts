@@ -10,6 +10,7 @@ import {
 } from "thirdweb/react";
 
 import { useConnectViaWalletContext } from "./ConnectViaWallet.context";
+import { ensureError } from "../../../utils/error";
 import { thirdwebClient } from "../../../utils/thirdweb";
 import { isOnXmtp } from "../../../utils/xmtpRN/client";
 import { getInboxId } from "../../../utils/xmtpRN/signIn";
@@ -50,7 +51,9 @@ export function useInitConnectViaWalletState(args: { address: string }) {
         account: thirdwebAccount,
       })
       .then(setThirdwebSigner)
-      .catch(onErrorConnecting);
+      .catch((error) => {
+        onErrorConnecting({ error: ensureError(error) });
+      });
   }, [onErrorConnecting, thirdwebAccount]);
 
   useEffect(() => {
@@ -90,7 +93,8 @@ export function useInitConnectViaWalletState(args: { address: string }) {
           } on XMTP. V3 database ${hasV3 ? "already" : "not"} present`
         );
       } catch (error) {
-        logger.error("Error initializing wallet:", error);
+        logger.error("[Connect Wallet] Error initializing wallet:", error);
+        onErrorConnecting({ error: ensureError(error) });
       } finally {
         handlingThirdwebSigner.current = false;
         setIsInitializing(false);
@@ -98,7 +102,13 @@ export function useInitConnectViaWalletState(args: { address: string }) {
     };
 
     initializeWallet();
-  }, [address, setIsInitializing, thirdwebWallet, thirdwebSigner]);
+  }, [
+    address,
+    setIsInitializing,
+    thirdwebWallet,
+    thirdwebSigner,
+    onErrorConnecting,
+  ]);
 
   return { isInitializing, onXmtp, alreadyV3Db, signer };
 }

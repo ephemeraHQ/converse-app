@@ -1,12 +1,14 @@
 import { Button } from "@design-system/Button/Button";
 import { translate } from "@i18n";
+import { useFocusEffect } from "@react-navigation/native";
 import logger from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useRef } from "react";
 import { ActivityIndicator } from "react-native";
 
 import { Center } from "../../../design-system/Center";
 import { VStack } from "../../../design-system/VStack";
+import { useRouter } from "../../../navigation/useNavigation";
 import { spacing } from "../../../theme";
 import { useAppTheme } from "../../../theme/useAppTheme";
 import { PictoTitleSubtitle } from "../../PictoTitleSubtitle";
@@ -33,10 +35,34 @@ export const ConnectViaWallet = memo(function ConnectViaWallet(
 ) {
   const { address, onErrorConnecting, onDoneConnecting } = props;
 
+  const router = useRouter();
+
+  const finishedConnecting = useRef(false);
+
   const disconnect = useConnectViaWalletDisconnect();
+
+  // Before we leave, make sure the user completed the flow otherwise disconnect
+  useRouter({
+    onBeforeRemove: () => {
+      if (!finishedConnecting.current) {
+        disconnect({ address });
+      }
+    },
+  });
+
+  useFocusEffect(
+    useCallback(() => {
+      // User already connected wallet but decided to come back here, so we need to go back to get started screen
+      if (finishedConnecting.current) {
+        router.goBack();
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+  );
 
   const handleDoneConnecting = useCallback(() => {
     onDoneConnecting();
+    finishedConnecting.current = true;
   }, [onDoneConnecting]);
 
   const handleErrorConnecting = useCallback(
@@ -65,7 +91,7 @@ const ConnectViaWalletStateWrapper = memo(
       useInitConnectViaWalletState({ address });
 
     if (isInitializing) {
-      return <ActivityIndicator />;
+      return <LoadingState />;
     }
 
     if (!signer) {
@@ -129,15 +155,7 @@ const ConnectViaWalletUI = memo(function ConnectViaWalletUI(props: object) {
 
   // Random for now until we have a better solution
   if (loading) {
-    return (
-      <Center
-        style={{
-          paddingTop: theme.spacing["6xl"],
-        }}
-      >
-        <ActivityIndicator />
-      </Center>
-    );
+    return <LoadingState />;
   }
 
   // Determine the content based on the state
@@ -195,5 +213,15 @@ const ConnectViaWalletUI = memo(function ConnectViaWalletUI(props: object) {
         <Terms />
       </VStack>
     </>
+  );
+});
+
+const LoadingState = memo(function LoadingState() {
+  const { theme } = useAppTheme();
+
+  return (
+    <Center style={{ paddingTop: theme.spacing["6xl"] }}>
+      <ActivityIndicator />
+    </Center>
   );
 });
