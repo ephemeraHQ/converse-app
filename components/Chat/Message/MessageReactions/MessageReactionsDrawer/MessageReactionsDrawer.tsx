@@ -7,7 +7,7 @@ import { VStack } from "@design-system/VStack";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useAppTheme } from "@theme/useAppTheme";
 import { memo, useCallback, useState } from "react";
-import { TouchableHighlight } from "react-native";
+import { StyleSheet, TouchableHighlight } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -18,10 +18,9 @@ import {
 } from "./MessageReactionsDrawer.service";
 
 export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
+  const styles = useStyles();
   const { theme } = useAppTheme();
-
   const insets = useSafeAreaInsets();
-
   const rolledUpReactions = useMessageReactionsRolledUpReactions();
 
   const handleDismiss = useCallback(() => {
@@ -31,6 +30,19 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
 
   // State for managing the active filter, e.g., ❤️, 👍, etc.
   const [filterReactions, setFilterReactions] = useState<string | null>(null);
+
+  // Chip styling
+  const getChipStyle = (reactionContent: string | null) => [
+    styles.chip,
+    filterReactions === reactionContent
+      ? { backgroundColor: theme.colors.border.subtle }
+      : null,
+  ];
+
+  const getChipTextColor = (reactionContent: string | null) =>
+    filterReactions === reactionContent
+      ? { color: theme.colors.text.primary }
+      : { color: theme.colors.text.secondary };
 
   return (
     <BottomSheetModal
@@ -55,23 +67,16 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
           {/* "All" button to clear the filter */}
           <TouchableHighlight
             onPress={() => setFilterReactions(null)}
-            style={{
-              marginRight: 8,
-              padding: 8,
-              borderRadius: theme.borderRadius.sm,
-              backgroundColor:
-                filterReactions === null
-                  ? theme.colors.fill.minimal
-                  : theme.colors.background.raised,
-            }}
+            style={getChipStyle(null)}
             underlayColor={theme.colors.border.subtle}
             accessible
             accessibilityRole="button"
             accessibilityLabel="Show all reactions"
           >
             <HStack style={{ alignItems: "center" }}>
-              <Text>All</Text>
-              <Text>{rolledUpReactions.totalCount}</Text>
+              <Text style={getChipTextColor(null)}>
+                All {rolledUpReactions.totalCount}
+              </Text>
             </HStack>
           </TouchableHighlight>
 
@@ -84,24 +89,15 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
                   reaction.content === filterReactions ? null : reaction.content
                 )
               }
-              style={{
-                marginRight: 8,
-                padding: 8,
-                borderRadius: theme.borderRadius.sm,
-                backgroundColor:
-                  filterReactions === reaction.content
-                    ? theme.colors.fill.minimal
-                    : theme.colors.background.raised,
-              }}
+              style={getChipStyle(reaction.content)}
               underlayColor={theme.colors.border.subtle}
               accessible
               accessibilityRole="button"
               accessibilityLabel={`${reaction.count} ${reaction.content} reactions`}
             >
-              <HStack style={{ alignItems: "center" }}>
-                <Text>{reaction.content}</Text>
-                <Text>{reaction.count}</Text>
-              </HStack>
+              <Text style={getChipTextColor(reaction.content)}>
+                {reaction.content} {reaction.count}
+              </Text>
             </TouchableHighlight>
           ))}
           <HStack style={{ width: theme.spacing.xxl }} />
@@ -117,15 +113,14 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
               .map((item, idx) => (
                 <HStack
                   key={`${item.content}-${item.reactor.address}-${idx}`}
-                  style={{
-                    alignItems: "center",
-                    paddingVertical: theme.spacing.sm,
-                    borderBottomWidth: 1,
-                    borderBottomColor: theme.colors.border.subtle,
-                    backgroundColor: item.isOwnReaction
-                      ? theme.colors.fill.minimal
-                      : theme.colors.background.sunken,
-                  }}
+                  style={[
+                    styles.reaction,
+                    {
+                      backgroundColor: item.isOwnReaction
+                        ? theme.colors.fill.minimal
+                        : theme.colors.background.sunken,
+                    },
+                  ]}
                 >
                   <Text style={{ marginRight: theme.spacing.sm }}>
                     {item.content}
@@ -147,3 +142,24 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
     </BottomSheetModal>
   );
 });
+
+const useStyles = () => {
+  const { theme } = useAppTheme();
+
+  return StyleSheet.create({
+    chip: {
+      marginRight: theme.spacing.xxs,
+      paddingVertical: theme.spacing.xxs,
+      paddingHorizontal: theme.spacing.xs,
+      borderRadius: theme.borderRadius.sm,
+      borderWidth: theme.borderWidth.sm,
+      borderColor: theme.colors.border.subtle,
+    },
+    reaction: {
+      alignItems: "center",
+      paddingVertical: theme.spacing.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border.subtle,
+    },
+  });
+};
