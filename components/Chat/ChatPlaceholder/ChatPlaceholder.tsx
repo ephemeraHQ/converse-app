@@ -1,3 +1,4 @@
+import { Button } from "@design-system/Button/Button";
 import { translate } from "@i18n";
 import { actionSheetColors, textPrimaryColor } from "@styles/colors";
 import { isGroupTopic } from "@utils/groupUtils/groupId";
@@ -23,7 +24,6 @@ import { getProfile, getProfileData } from "../../../utils/profile";
 import { conversationName } from "../../../utils/str";
 import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
-import Button from "../../Button/Button";
 import { Recommendation } from "../../Recommendations/Recommendation";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 
@@ -78,9 +78,9 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
           <View>
             <Text style={styles.chatPlaceholderText}>This user is blocked</Text>
             <Button
-              variant="secondary"
+              variant="fill"
               picto="lock.open"
-              title="Unblock"
+              text="Unblock"
               style={styles.cta}
               onPress={() => {
                 showActionSheetWithOptions(
@@ -124,9 +124,9 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
             )}
 
             <Button
-              variant="secondary"
+              variant="fill"
               picto="hand.wave"
-              title="Say hi"
+              text="Say hi"
               style={styles.cta}
               onPress={() => {
                 sendMessage({
