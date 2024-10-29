@@ -8,19 +8,31 @@ export type MessageReactions = {
  * Aggregated reaction data including top emojis, total count, and detailed breakdown.
  */
 export type RolledUpReactions = {
-  emojis: string[];
-  totalReactions: number;
+  totalCount: number;
   userReacted: boolean;
-  details: Record<string, ReactionDetails>;
+  detailed: DetailedReaction[];
+  preview: {
+    content: string;
+  }[];
 };
 
 /**
- * Details for a specific reaction emoji, including count, reactors, and timing.
+ * Details for each individual reaction emoji, including reactors and timing.
  */
-export type ReactionDetails = {
+export type DetailedReaction = {
   content: string;
-  count: number;
-  userReacted: boolean;
-  reactors: string[];
+  isOwnReaction: boolean;
   firstReactionTime: number;
+  reactors: ReactorDetails[];
+  count: number;
+};
+
+/**
+ * Details of each reactor for a specific emoji.
+ */
+export type ReactorDetails = {
+  address: string;
+  userName?: string;
+  avatar?: string;
+  reactionTime: number;
 };

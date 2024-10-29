@@ -45,31 +45,29 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
               flexDirection: "row",
             }}
           >
-            <Text>All {rolledUpReactions.totalReactions}</Text>
-            {Object.entries(rolledUpReactions.details).map(
-              ([emoji, details]) => (
-                <TouchableHighlight
-                  key={emoji}
-                  style={{
-                    marginRight: 8,
-                    padding: 8,
-                    borderRadius: theme.borderRadius.sm,
-                    backgroundColor: details.userReacted
-                      ? theme.colors.fill.minimal
-                      : theme.colors.background.raised,
-                  }}
-                  underlayColor={theme.colors.border.subtle}
-                  accessible
-                  accessibilityRole="button"
-                  accessibilityLabel={`${details.count} ${emoji} reactions`}
-                >
-                  <HStack style={{ alignItems: "center" }}>
-                    <Text>{emoji}</Text>
-                    <Text>{details.count}</Text>
-                  </HStack>
-                </TouchableHighlight>
-              )
-            )}
+            <Text>All {rolledUpReactions.totalCount}</Text>
+            {rolledUpReactions.detailed.map((reaction, index) => (
+              <TouchableHighlight
+                key={index}
+                style={{
+                  marginRight: 8,
+                  padding: 8,
+                  borderRadius: theme.borderRadius.sm,
+                  backgroundColor: reaction.isOwnReaction
+                    ? theme.colors.fill.minimal
+                    : theme.colors.background.raised,
+                }}
+                underlayColor={theme.colors.border.subtle}
+                accessible
+                accessibilityRole="button"
+                accessibilityLabel={`${reaction.count} ${reaction.content} reactions`}
+              >
+                <HStack style={{ alignItems: "center" }}>
+                  <Text>{reaction.content}</Text>
+                  <Text>{reaction.count}</Text>
+                </HStack>
+              </TouchableHighlight>
+            ))}
             <HStack style={{ width: theme.spacing.xxl }} />
           </ScrollView>
         </BottomSheetScrollView>

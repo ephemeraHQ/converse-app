@@ -3,10 +3,10 @@ import { create } from "zustand";
 import { RolledUpReactions } from "../MessageReactions.types";
 
 const initialMessageReactionsState: RolledUpReactions = {
-  emojis: [],
-  totalReactions: 0,
+  totalCount: 0,
   userReacted: false,
-  details: {},
+  preview: [],
+  detailed: [],
 };
 
 export interface IMessageReactionsStore {

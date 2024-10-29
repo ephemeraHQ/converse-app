@@ -1,15 +1,20 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
 import { useAppTheme } from "@theme/useAppTheme";
+import {
+  getPreferredAvatar,
+  getPreferredName,
+  getProfile,
+} from "@utils/profile";
 import { memo, useCallback, useMemo } from "react";
 import { StyleSheet, TouchableHighlight } from "react-native";
 
 import { MessageToDisplay } from "../Message";
 import {
+  DetailedReaction,
   MessageReactions,
-  ReactionDetails,
   RolledUpReactions,
 } from "./MessageReactions.types";
 import { openMessageReactionsDrawer } from "./MessageReactionsDrawer/MessageReactionsDrawer.service";
@@ -18,6 +23,8 @@ type Props = {
   message: MessageToDisplay;
   reactions: MessageReactions;
 };
+
+const MAX_REACTION_EMOJIS_SHOWN = 3;
 
 export const ChatMessageReactions = memo(
   ({ message, reactions }: Props) => {
@@ -34,7 +41,7 @@ export const ChatMessageReactions = memo(
       openMessageReactionsDrawer(rolledUpReactions);
     }, [rolledUpReactions]);
 
-    if (rolledUpReactions.totalReactions === 0) return null;
+    if (rolledUpReactions.totalCount === 0) return null;
 
     return (
       <HStack
@@ -59,13 +66,13 @@ export const ChatMessageReactions = memo(
             ]}
           >
             <HStack style={styles.emojiContainer}>
-              {rolledUpReactions.emojis.map((emoji, index) => (
-                <Text key={index}>{emoji}</Text>
+              {rolledUpReactions.preview.map((reaction, index) => (
+                <Text key={index}>{reaction.content}</Text>
               ))}
             </HStack>
-            {rolledUpReactions.totalReactions > 1 && (
+            {rolledUpReactions.totalCount > 1 && (
               <Text style={styles.reactorCount}>
-                {rolledUpReactions.totalReactions}
+                {rolledUpReactions.totalCount}
               </Text>
             )}
           </VStack>
@@ -87,6 +94,101 @@ export const ChatMessageReactions = memo(
     return true;
   }
 );
+
+const useMessageReactionsRolledUp = (arg: {
+  reactions: MessageReactions;
+  userAddress: string;
+}) => {
+  const { reactions, userAddress } = arg;
+
+  // Get social details for all unique addresses
+  const addresses = Array.from(
+    new Set(
+      Object.values(reactions)
+        .flat()
+        .map((reaction) => reaction.senderAddress)
+    )
+  );
+
+  const membersSocials = useProfilesStore((s) =>
+    addresses.map((address) => {
+      const socials = getProfile(address, s.profiles)?.socials;
+      return {
+        address,
+        uri: getPreferredAvatar(socials),
+        name: getPreferredName(socials, address),
+      };
+    })
+  );
+
+  return useMemo((): RolledUpReactions => {
+    const detailed: DetailedReaction[] = [];
+    let totalCount = 0;
+    let userReacted = false;
+
+    // Flatten reactions for more efficient iteration
+    const flatReactions = Object.values(reactions).flat();
+    totalCount = flatReactions.length;
+
+    // Create a map to efficiently access social details by address
+    const socialsMap = new Map(
+      membersSocials.map((social) => [social.address, social])
+    );
+
+    // Map to keep track of each unique reaction content
+    const reactionMap = new Map<string, DetailedReaction>();
+
+    flatReactions.forEach((reaction) => {
+      if (!reactionMap.has(reaction.content)) {
+        reactionMap.set(reaction.content, {
+          content: reaction.content,
+          isOwnReaction: false,
+          firstReactionTime: Infinity, // for min comparison
+          reactors: [],
+          count: 0,
+        });
+      }
+
+      const detailEntry = reactionMap.get(reaction.content)!;
+      const socialDetails = socialsMap.get(reaction.senderAddress);
+
+      detailEntry.reactors.push({
+        address: reaction.senderAddress,
+        userName: socialDetails?.name, // TODO: fallback with short address
+        avatar: socialDetails?.uri, // TODO: fallback avatar with initials
+        reactionTime: reaction.sent,
+      });
+
+      detailEntry.count += 1;
+
+      // Track if the user reacted and the earliest reaction time
+      if (reaction.senderAddress.toLowerCase() === userAddress?.toLowerCase()) {
+        detailEntry.isOwnReaction = true;
+        userReacted = true;
+      }
+      detailEntry.firstReactionTime = Math.min(
+        detailEntry.firstReactionTime,
+        reaction.sent
+      );
+    });
+
+    // Convert the map values to an array for the final detailed output
+    detailed.push(...reactionMap.values());
+
+    // Generate reactions preview by selecting top n reactions
+    const preview = Array.from(reactionMap.values())
+      .sort((a, b) => b.reactors.length - a.reactors.length)
+      .slice(0, MAX_REACTION_EMOJIS_SHOWN)
+      .map((reaction) => ({ content: reaction.content }));
+
+    return {
+      totalCount,
+      userReacted,
+      detailed,
+      preview,
+    };
+  }, [reactions, userAddress, membersSocials]);
+};
 
 const useStyles = () => {
   const { theme } = useAppTheme();
@@ -116,54 +218,3 @@ const useStyles = () => {
     },
   });
 };
-
-const MAX_REACTION_EMOJIS_SHOWN = 3;
-
-function useMessageReactionsRolledUp(arg: {
-  reactions: MessageReactions;
-  userAddress: string;
-}) {
-  const { reactions, userAddress } = arg;
-
-  return useMemo((): RolledUpReactions => {
-    const details: { [content: string]: ReactionDetails } = {};
-    let totalReactions = 0;
-    let userReacted = false;
-
-    Object.values(reactions).forEach((reactionArray) => {
-      reactionArray.forEach((reaction) => {
-        if (!details[reaction.content]) {
-          details[reaction.content] = {
-            content: reaction.content,
-            count: 0,
-            userReacted: false,
-            reactors: [],
-            firstReactionTime: reaction.sent,
-          };
-        }
-        details[reaction.content].count++;
-        details[reaction.content].reactors.push(reaction.senderAddress);
-        if (
-          reaction.senderAddress.toLowerCase() === userAddress?.toLowerCase()
-        ) {
-          details[reaction.content].userReacted = true;
-          userReacted = true;
-        }
-        // Keep track of the earliest reaction time for this emoji
-        details[reaction.content].firstReactionTime = Math.min(
-          details[reaction.content].firstReactionTime,
-          reaction.sent
-        );
-        totalReactions++;
-      });
-    });
-
-    // Sort by the number of reactors in descending order
-    const sortedReactions = Object.values(details)
-      .sort((a, b) => b.reactors.length - a.reactors.length)
-      .slice(0, MAX_REACTION_EMOJIS_SHOWN)
-      .map((reaction) => reaction.content);
-
-    return { emojis: sortedReactions, totalReactions, userReacted, details };
-  }, [reactions, userAddress]);
-}
