@@ -1,4 +1,5 @@
 import { useSelect } from "@data/store/storeHelpers";
+import { Button } from "@design-system/Button/Button";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { useGroupCreator } from "@hooks/useGroupCreator";
 import { useGroupMembers } from "@hooks/useGroupMembers";
@@ -17,7 +18,6 @@ import {
 } from "../../../data/store/accountsStore";
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../../utils/conversation";
-import Button from "../../Button/Button";
 
 export function GroupConsentPopup() {
   const conversation = useConversationContext("conversation");
@@ -92,14 +92,14 @@ export function GroupConsentPopup() {
       <View style={styles.buttonsContainer}>
         <Button
           variant="text"
-          title={translate("decline")}
+          text={translate("decline")}
           style={[styles.cta, styles.blockCta]}
           onPress={onBlock}
         />
         <Button
-          variant="secondary"
+          variant="fill"
           picto="checkmark"
-          title={translate("join_this_group")}
+          text={translate("join_this_group")}
           style={styles.cta}
           onPress={onAccept}
         />

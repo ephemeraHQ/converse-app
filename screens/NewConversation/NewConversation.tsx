@@ -1,3 +1,4 @@
+import { Button } from "@design-system/Button/Button";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -21,7 +22,6 @@ import {
 import { NewConversationModalParams } from "./NewConversationModal";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../../components/AndroidBackAction";
-import ConverseButton from "../../components/Button/Button";
 import SearchBar from "../../components/NewConversation/SearchBar";
 import Recommendations from "../../components/Recommendations/Recommendations";
 import ProfileSearch from "../../components/Search/ProfileSearch";
@@ -94,7 +94,7 @@ export default function NewConversation({
     navigation.setOptions({
       headerLeft: () =>
         Platform.OS === "ios" ? (
-          <ConverseButton variant="text" title="Cancel" onPress={handleBack} />
+          <Button variant="text" text="Cancel" onPress={handleBack} />
         ) : (
           <AndroidBackAction navigation={navigation} />
         ),
@@ -109,9 +109,9 @@ export default function NewConversation({
             return <ActivityIndicator style={styles.activityIndicator} />;
           } else {
             return (
-              <ConverseButton
+              <Button
                 variant="text"
-                title={route.params?.addingToGroupTopic ? "Add" : "Next"}
+                text={route.params?.addingToGroupTopic ? "Add" : "Next"}
                 onPress={handleRightAction}
                 style={{ marginRight: -10, padding: 10 }}
               />
@@ -334,10 +334,10 @@ export default function NewConversation({
         ]}
       >
         {!group.enabled && (
-          <ConverseButton
+          <Button
             variant="text"
             picto="person.2"
-            title="New group"
+            text="New group"
             style={styles.newGroupButton}
             onPress={() => {
               setGroup({ enabled: true, members: [] });
@@ -351,16 +351,13 @@ export default function NewConversation({
             const preferredName = getPreferredName(m, m.address);
 
             return (
-              <ConverseButton
+              <Button
                 key={m.address}
-                title={preferredName}
-                variant="secondary"
+                text={preferredName}
+                variant="fill"
+                size="md"
                 picto="xmark"
                 style={styles.groupMemberButton}
-                textStyle={{
-                  lineHeight: 17,
-                  top: Platform.OS === "ios" ? undefined : 1,
-                }}
                 onPress={() =>
                   setGroup((g) => {
                     const members = [...g.members];
@@ -544,7 +541,7 @@ const useStyles = () => {
       padding: 0,
       marginHorizontal: 0,
       marginRight: 10,
-      height: Platform.OS === "ios" ? 30 : undefined,
+      // height: Platform.OS === "ios" ? 30 : undefined,
       marginTop: 10,
     },
     activityIndicator: {
