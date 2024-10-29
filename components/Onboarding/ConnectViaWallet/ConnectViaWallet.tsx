@@ -1,6 +1,5 @@
 import { Button } from "@design-system/Button/Button";
 import { translate } from "@i18n";
-import { useFocusEffect } from "@react-navigation/native";
 import logger from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
 import { memo, useCallback, useRef } from "react";
@@ -48,21 +47,17 @@ export const ConnectViaWallet = memo(function ConnectViaWallet(
         disconnect({ address });
       }
     },
-  });
-
-  useFocusEffect(
-    useCallback(() => {
+    onFocus() {
       // User already connected wallet but decided to come back here, so we need to go back to get started screen
       if (finishedConnecting.current) {
         router.goBack();
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-  );
+    },
+  });
 
   const handleDoneConnecting = useCallback(() => {
-    onDoneConnecting();
     finishedConnecting.current = true;
+    onDoneConnecting();
   }, [onDoneConnecting]);
 
   const handleErrorConnecting = useCallback(

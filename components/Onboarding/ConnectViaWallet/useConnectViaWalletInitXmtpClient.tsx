@@ -32,12 +32,6 @@ export function useInitXmptClient() {
 
       logger.debug("[Connect Wallet] starting initXmtpClient");
 
-      // Not sure we need this
-      // if (
-      //   connectViewWalletStore.getState().initiatingClientForAddress === address
-      // ) {
-      //   throw new Error("Already initiating client for this address");
-      // }
       const waitForClickSignature = async () => {
         while (!connectViewWalletStore.getState().clickedSignature) {
           if (abortControllerRef.current.signal.aborted) {

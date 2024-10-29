@@ -15,8 +15,11 @@ import { thirdwebClient } from "../../../utils/thirdweb";
 import { isOnXmtp } from "../../../utils/xmtpRN/client";
 import { getInboxId } from "../../../utils/xmtpRN/signIn";
 
-// For now let's keep Thirdweb and the hooks because I haven't found a better way to do it.
-// But ideally a lot of this it outside React.
+/**
+ * For now let's keep Thirdweb and the hooks because I haven't found a better way to do it.
+ * But ideally a lot of this it outside React.
+ * This function is for initializing the state of the wallet. V3? XMTP? etc...
+ */
 export function useInitConnectViaWalletState(args: { address: string }) {
   const { address } = args;
 
