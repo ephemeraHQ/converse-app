@@ -84,10 +84,14 @@ export function useRouter(args?: {
     };
   }, [onBeforeRemove, navigation]);
 
-  return useMemo(() => {
-    return {
-      popToTop: () => navigation.dispatch(StackActions.popToTop()),
-      ...navigation,
-    };
-  }, [navigation]);
+  return useMemo(
+    () => {
+      return {
+        popToTop: () => navigation.dispatch(StackActions.popToTop()),
+        ...navigation,
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 }

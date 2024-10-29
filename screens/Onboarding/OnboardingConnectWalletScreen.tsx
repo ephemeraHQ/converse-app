@@ -1,5 +1,6 @@
+import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useRef } from "react";
 
 import { ConnectViaWallet } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWallet";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
@@ -16,16 +17,28 @@ export const OnboardingConnectWalletScreen = memo(
     const { address } = props.route.params;
     const router = useRouter();
 
+    const finishedConnecting = useRef(false);
+
+    useFocusEffect(
+      useCallback(() => {
+        // User already connected wallet but decided to come back here, so we need to go back to get started screen
+        if (finishedConnecting.current) {
+          router.goBack();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [])
+    );
+
     const handleDoneConnecting = useCallback(() => {
       router.navigate("OnboardingUserProfile");
-    }, [router]);
+      finishedConnecting.current = true;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-    const handleErrorConnecting = useCallback(
-      (arg: { error: Error }) => {
-        router.goBack();
-      },
-      [router]
-    );
+    const handleErrorConnecting = useCallback((arg: { error: Error }) => {
+      router.goBack();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
       <OnboardingScreenComp>
