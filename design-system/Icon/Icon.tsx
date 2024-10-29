@@ -71,7 +71,12 @@ export function Icon(props: IIconProps) {
     color = theme.colors.fill.primary,
   } = props;
 
-  const iconName = icon ? iconRegistry[icon] : picto ? iconRegistry[picto] : "";
+  let iconName = "";
+  if (icon) {
+    iconName = iconRegistry[icon];
+  } else if (picto) {
+    iconName = iconRegistry[picto];
+  }
 
   if (!iconName) {
     logger.warn(`No icon name found for picto with ${icon || picto}`);
