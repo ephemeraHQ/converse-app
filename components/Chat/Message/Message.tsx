@@ -7,7 +7,7 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
-import { useAppTheme } from "@theme/useAppTheme";
+import { isFrameMessage } from "@utils/frames";
 import * as Haptics from "expo-haptics";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
@@ -167,7 +167,13 @@ const ChatMessage = ({
   );
   // The content is completely a frame so a larger full width frame will be shown
   const isFrame = useFramesStore(
-    useShallow((s) => !!s.frames[message.content.toLowerCase().trim()])
+    useShallow((s) =>
+      isFrameMessage(
+        isContentType("text", message.contentType),
+        message.content,
+        s.frames
+      )
+    )
   );
 
   // Reanimated shared values for time and date-time animations

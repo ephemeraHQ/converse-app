@@ -271,16 +271,18 @@ export const handleTxAction = async (
 };
 
 export const isFrameMessage = (
-  message: MessageToDisplay,
+  messageIsText: boolean,
+  messageContent: string,
   framesStore: {
     [frameUrl: string]: FrameWithType;
   }
 ): boolean => {
-  return (
-    isContentType("text", message.contentType) &&
-    !!message.converseMetadata?.frames?.[0] &&
-    !!framesStore[message.converseMetadata.frames[0].toLowerCase().trim()]
-  );
+  if (!messageIsText) return false;
+  const content = messageContent.toLowerCase().trim();
+  const sanitizedContent = content.endsWith("/")
+    ? content.slice(0, -1)
+    : content;
+  return !!framesStore[sanitizedContent];
 };
 
 export const messageHasFrames = (
