@@ -103,7 +103,7 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
           <HStack style={{ width: theme.spacing.xxl }} />
         </ScrollView>
 
-        {/* Detailed list of each reaction, sorted with all OWN reactions on top, filtered by content */}
+        {/* Detailed list of each reaction, sorted and filtered with all own reactions on top */}
         <BottomSheetScrollView>
           <VStack style={{ padding: theme.spacing.md }}>
             {rolledUpReactions.detailed

@@ -10,11 +10,16 @@ export type MessageReactions = {
 export type RolledUpReactions = {
   totalCount: number;
   userReacted: boolean;
-  preview: {
-    content: string;
-    count: number;
-  }[];
+  preview: ReactionPreview[];
   detailed: SortedReaction[];
+};
+
+/**
+ * Basic reaction information for preview displays.
+ */
+export type ReactionPreview = {
+  content: string;
+  count: number;
 };
 
 /**
