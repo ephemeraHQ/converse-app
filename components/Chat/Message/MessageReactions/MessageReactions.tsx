@@ -80,19 +80,10 @@ export const ChatMessageReactions = memo(
       </HStack>
     );
   },
-  (prevProps, nextProps) => {
-    if (prevProps.message.id !== nextProps.message.id) {
-      return false;
-    }
-    if (prevProps.message.lastUpdateAt !== nextProps.message.lastUpdateAt) {
-      return false;
-    }
-    // Compare reactions to ensure updates are not missed
-    if (prevProps.reactions !== nextProps.reactions) {
-      return false;
-    }
-    return true;
-  }
+  (prevProps, nextProps) =>
+    prevProps.message.id === nextProps.message.id &&
+    prevProps.message.lastUpdateAt === nextProps.message.lastUpdateAt &&
+    prevProps.reactions === nextProps.reactions
 );
 
 const useMessageReactionsRolledUp = (arg: {
