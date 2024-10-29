@@ -1,4 +1,8 @@
-import { StackActions, getStateFromPath } from "@react-navigation/native";
+import {
+  StackActions,
+  createNavigationContainerRef,
+  getStateFromPath,
+} from "@react-navigation/native";
 import {
   backgroundColor,
   headerTitleStyle,
@@ -9,6 +13,8 @@ import { ColorSchemeName, Platform } from "react-native";
 
 import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
 import config from "../../config";
+
+export const navigationRef = createNavigationContainerRef();
 
 export const getConverseStateFromPath =
   (navigationName: string) => (path: string, options: any) => {
