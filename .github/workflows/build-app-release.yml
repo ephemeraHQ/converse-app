@@ -53,9 +53,6 @@ jobs:
       - name: Update Android Files
         run: node scripts/build/android/build.js
 
-      - name: Update Android Files
-        run: node scripts/build/android/build.js
-
       - name: Build for Android
         run: eas build --profile production-android --platform android --non-interactive --auto-submit --no-wait
 
