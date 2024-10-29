@@ -1,3 +1,4 @@
+import ExternalWalletPicker from "@components/ExternalWalletPicker";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { backgroundColor } from "@styles/colors";
 import { useCheckCurrentInstallation } from "@utils/xmtpRN/client";
@@ -6,7 +7,6 @@ import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { Platform, useColorScheme } from "react-native";
 
-import ExternalWalletPicker from "../components/ExternalWalletPicker";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";

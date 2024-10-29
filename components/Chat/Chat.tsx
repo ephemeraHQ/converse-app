@@ -3,7 +3,7 @@ import { FlashList } from "@shopify/flash-list";
 import { itemSeparatorColor, tertiaryBackgroundColor } from "@styles/colors";
 import { useAppTheme } from "@theme/useAppTheme";
 import { getCleanAddress } from "@utils/evm/address";
-import { FrameWithType } from "@utils/frames";
+import { FrameWithType, messageHasFrames } from "@utils/frames";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -68,13 +68,13 @@ const usePeerSocials = () => {
 const useRenderItem = ({
   xmtpAddress,
   conversation,
-  framesStore,
+  messageFramesMap,
   colorScheme,
 }: {
   xmtpAddress: string;
   conversation: XmtpConversationWithUpdate | undefined;
-  framesStore: {
-    [frameUrl: string]: FrameWithType;
+  messageFramesMap: {
+    [messageId: string]: FrameWithType[];
   };
   colorScheme: ColorSchemeName;
 }) => {
@@ -86,11 +86,11 @@ const useRenderItem = ({
           message={{ ...item }}
           colorScheme={colorScheme}
           isGroup={!!conversation?.isGroup}
-          isFrame={!!framesStore[item.content.toLowerCase().trim()]}
+          hasFrames={messageHasFrames(item.id, messageFramesMap)}
         />
       );
     },
-    [colorScheme, xmtpAddress, conversation?.isGroup, framesStore]
+    [colorScheme, xmtpAddress, conversation?.isGroup, messageFramesMap]
   );
 };
 
@@ -374,7 +374,9 @@ export function Chat() {
     styles.inChatRecommendations,
   ]);
 
-  const { frames: framesStore } = useFramesStore(useSelect(["frames"]));
+  const { messageFramesMap, frames: framesStore } = useFramesStore(
+    useSelect(["messageFramesMap", "frames"])
+  );
 
   const showPlaceholder = useIsShowingPlaceholder({
     messages: listArray,
@@ -385,7 +387,7 @@ export function Chat() {
   const renderItem = useRenderItem({
     xmtpAddress,
     conversation,
-    framesStore,
+    messageFramesMap,
     colorScheme,
   });
 
@@ -525,7 +527,9 @@ export function ChatPreview() {
     ]
   );
 
-  const { frames: framesStore } = useFramesStore(useSelect(["frames"]));
+  const { frames: framesStore, messageFramesMap } = useFramesStore(
+    useSelect(["frames", "messageFramesMap"])
+  );
 
   const showPlaceholder = useIsShowingPlaceholder({
     messages: listArray,
@@ -536,7 +540,7 @@ export function ChatPreview() {
   const renderItem = useRenderItem({
     xmtpAddress,
     conversation,
-    framesStore,
+    messageFramesMap,
     colorScheme,
   });
 
