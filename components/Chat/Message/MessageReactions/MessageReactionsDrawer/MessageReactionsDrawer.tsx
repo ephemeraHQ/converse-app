@@ -1,9 +1,9 @@
+import Avatar from "@components/Avatar";
 import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
 import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
 import { BottomSheetModal } from "@design-system/BottomSheet/BottomSheetModal";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
-import { VStack } from "@design-system/VStack";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useAppTheme } from "@theme/useAppTheme";
 import { memo, useCallback, useState } from "react";
@@ -105,38 +105,24 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
 
         {/* Detailed list of each reaction, sorted and filtered with all own reactions on top */}
         <BottomSheetScrollView>
-          <VStack style={{ padding: theme.spacing.md }}>
-            {rolledUpReactions.detailed
-              .filter(
-                (item) => !filterReactions || item.content === filterReactions
-              )
-              .map((item, idx) => (
-                <HStack
-                  key={`${item.content}-${item.reactor.address}-${idx}`}
-                  style={[
-                    styles.reaction,
-                    {
-                      backgroundColor: item.isOwnReaction
-                        ? theme.colors.fill.minimal
-                        : theme.colors.background.sunken,
-                    },
-                  ]}
-                >
-                  <Text style={{ marginRight: theme.spacing.sm }}>
-                    {item.content}
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      marginRight: theme.spacing.sm,
-                    }}
-                  >
-                    {item.reactor.userName}
-                  </Text>
-                  <Text>{item.reactor.address}</Text>
-                </HStack>
-              ))}
-          </VStack>
+          {rolledUpReactions.detailed
+            .filter(
+              (item) => !filterReactions || item.content === filterReactions
+            )
+            .map((item, idx) => (
+              <HStack
+                key={`${item.content}-${item.reactor.address}-${idx}`}
+                style={styles.reaction}
+              >
+                <Avatar
+                  size={theme.avatarSize.md}
+                  uri={item.reactor.avatar}
+                  name={item.reactor.userName}
+                />
+                <Text style={styles.userName}>{item.reactor.userName}</Text>
+                <Text style={styles.reactionContent}>{item.content}</Text>
+              </HStack>
+            ))}
         </BottomSheetScrollView>
       </BottomSheetContentContainer>
     </BottomSheetModal>
@@ -149,6 +135,7 @@ const useStyles = () => {
   return StyleSheet.create({
     chip: {
       marginRight: theme.spacing.xxs,
+      marginBottom: theme.spacing.xs,
       paddingVertical: theme.spacing.xxs,
       paddingHorizontal: theme.spacing.xs,
       borderRadius: theme.borderRadius.sm,
@@ -156,10 +143,21 @@ const useStyles = () => {
       borderColor: theme.colors.border.subtle,
     },
     reaction: {
+      display: "flex",
+      paddingVertical: theme.spacing.xs,
+      paddingHorizontal: theme.spacing.lg,
       alignItems: "center",
-      paddingVertical: theme.spacing.sm,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border.subtle,
+      gap: theme.spacing.xs,
+    },
+    userName: {
+      flex: 1,
+      display: "flex",
+      alignItems: "flex-end",
+      gap: theme.spacing.xxxs,
+      overflow: "hidden",
+    },
+    reactionContent: {
+      padding: theme.spacing.xxxs,
     },
   });
 };

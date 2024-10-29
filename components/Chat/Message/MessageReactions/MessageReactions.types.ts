@@ -28,7 +28,6 @@ export type ReactionPreview = {
 export type SortedReaction = {
   content: string;
   isOwnReaction: boolean;
-  firstReactionTime: number;
   reactor: ReactorDetails;
 };
 

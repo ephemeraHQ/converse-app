@@ -147,11 +147,10 @@ const useMessageReactionsRolledUp = (arg: {
       detailed.push({
         content: reaction.content,
         isOwnReaction,
-        firstReactionTime: reaction.sent,
         reactor: {
           address: reaction.senderAddress,
-          userName: socialDetails?.name, // TODO: fallback with short address
-          avatar: socialDetails?.uri, // TODO: fallback avatar with initials
+          userName: socialDetails?.name,
+          avatar: socialDetails?.uri,
           reactionTime: reaction.sent,
         },
       });
