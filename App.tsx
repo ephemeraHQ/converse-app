@@ -14,7 +14,8 @@ import { useAppTheme, useThemeProvider } from "@theme/useAppTheme";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { StatusBar } from "expo-status-bar";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import {
   LogBox,
   Platform,
@@ -26,7 +27,13 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
 
-import "./utils/splash/splash";
+import ActionSheetStateHandler from "./components/StateHandlers/ActionSheetStateHandler";
+import HydrationStateHandler from "./components/StateHandlers/HydrationStateHandler";
+import InitialStateHandler from "./components/StateHandlers/InitialStateHandler";
+import MainIdentityStateHandler from "./components/StateHandlers/MainIdentityStateHandler";
+import NetworkStateHandler from "./components/StateHandlers/NetworkStateHandler";
+import ConversationsStateHandler from "./components/StateHandlers/NotificationsStateHandler";
+import WalletsStateHandler from "./components/StateHandlers/WalletsStateHandler";
 import { xmtpCron, xmtpEngine } from "./components/XmtpEngine";
 import config from "./config";
 import {
@@ -40,10 +47,15 @@ import {
   runAsyncUpdates,
   updateLastVersionOpen,
 } from "./data/updates/asyncUpdates";
-import Main from "./screens/Main";
+import { AppNavigator } from "./navigation/AppNavigator";
+import { useAddressBookStateHandler } from "./utils/addressBook";
 import { registerBackgroundFetchTask } from "./utils/background";
+import { useAutoConnectExternalWallet } from "./utils/evm/external";
+import { usePrivyAccessToken } from "./utils/evm/privy";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
+import "./utils/splash/splash";
+import { useCheckCurrentInstallation } from "./utils/xmtpRN/client";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -67,6 +79,11 @@ xmtpCron.start();
 const App = () => {
   const styles = useStyles();
   const debugRef = useRef();
+
+  usePrivyAccessToken();
+  useAddressBookStateHandler();
+  useCheckCurrentInstallation();
+  useAutoConnectExternalWallet();
 
   useCoinbaseWalletListener(true, coinbaseUrl);
 
@@ -114,11 +131,27 @@ const App = () => {
 
   return (
     <View style={styles.safe}>
-      <Main />
+      <StatusBar />
+      <AppNavigator />
       <DebugButton ref={debugRef} />
+      <Initializer />
     </View>
   );
 };
+
+const Initializer = memo(function Initializer() {
+  return (
+    <>
+      <HydrationStateHandler />
+      <InitialStateHandler />
+      <NetworkStateHandler />
+      <MainIdentityStateHandler />
+      <ConversationsStateHandler />
+      <ActionSheetStateHandler />
+      <WalletsStateHandler />
+    </>
+  );
+});
 
 // On Android we use the default keyboard "animation"
 const AppKeyboardProvider =

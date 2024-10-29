@@ -8,14 +8,25 @@ import { useEffect, useMemo } from "react";
 
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 
+type IUseRouterArgs = {
+  onTransitionEnd?: (isClosing: boolean) => void;
+  onBeforeRemove?: {
+    callback: (e: { data: { action: NavigationAction } }) => void;
+    deps?: any[];
+  };
+  onBlur?: {
+    callback: () => void;
+    deps?: any[];
+  };
+  onFocus?: {
+    callback: () => void;
+    deps?: any[];
+  };
+};
+
 // Wrapper around useNavigation to add some useful hooks.
 // Also, expo-router syntax is useRouter so if we want to migrate towards that later it's useful to call it useRouter now.
-export function useRouter(args?: {
-  onTransitionEnd?: (isClosing: boolean) => void;
-  onBeforeRemove?: (e: { data: { action: NavigationAction } }) => void;
-  onBlur?: () => void;
-  onFocus?: () => void;
-}) {
+export function useRouter(args?: IUseRouterArgs) {
   const { onTransitionEnd, onFocus, onBeforeRemove, onBlur } = args || {};
 
   const navigation = useNavigation<NavigationProp<NavigationParamList>>();
@@ -45,8 +56,8 @@ export function useRouter(args?: {
 
   useEffect(() => {
     navigation.addListener("focus", () => {
-      if (onFocus) {
-        onFocus();
+      if (onFocus?.callback) {
+        onFocus.callback();
       }
     });
 
@@ -55,12 +66,13 @@ export function useRouter(args?: {
         console.log("focus listener removed");
       });
     };
-  }, [onFocus, navigation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigation, onFocus?.callback, ...(onFocus?.deps || [])]);
 
   useEffect(() => {
     navigation.addListener("blur", () => {
-      if (onBlur) {
-        onBlur();
+      if (onBlur?.callback) {
+        onBlur.callback();
       }
     });
 
@@ -69,12 +81,13 @@ export function useRouter(args?: {
         console.log("blur listener removed");
       });
     };
-  }, [onBlur, navigation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigation, onBlur?.callback, ...(onBlur?.deps || [])]);
 
   useEffect(() => {
     navigation.addListener("beforeRemove", (e) => {
-      if (onBeforeRemove) {
-        onBeforeRemove(e);
+      if (onBeforeRemove?.callback) {
+        onBeforeRemove.callback(e);
       }
     });
     return () => {
@@ -82,7 +95,8 @@ export function useRouter(args?: {
         console.log("beforeRemove listener removed");
       });
     };
-  }, [onBeforeRemove, navigation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigation, onBeforeRemove?.callback, ...(onBeforeRemove?.deps || [])]);
 
   return useMemo(() => {
     return {

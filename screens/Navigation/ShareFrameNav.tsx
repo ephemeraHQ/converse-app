@@ -3,7 +3,7 @@ import { Button, Platform, TextInput } from "react-native";
 
 import { NativeStack } from "./Navigation";
 import AndroidBackAction from "../../components/AndroidBackAction";
-import ConversationList from "../ConversationList";
+import ConversationList from "../../features/Conversation/ConversationList/ConversationList.screen";
 
 export type ShareFrameNavParams = {
   frameURL: string;
