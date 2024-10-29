@@ -10,14 +10,12 @@ function useIsIos() {
   return Platform.OS === "ios";
 }
 
-type IExampleStyledComponentProps = {
+type IExampleFullProps = {
   isBeautiful: boolean;
 };
 
 // Main exported component at the top
-export const ExampleStyledComponent = memo(function ExampleStyledComponent(
-  props: IExampleStyledComponentProps
-) {
+export const ExampleFull = memo(function ExampleFull(props: IExampleFullProps) {
   const { isBeautiful } = props;
 
   const { themed, theme } = useAppTheme();

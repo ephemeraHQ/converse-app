@@ -1,9 +1,9 @@
 import { memo } from "react";
 import { ActivityIndicator } from "react-native";
 
-import { Text } from "../../design-system/Text";
-import { VStack } from "../../design-system/VStack";
-import { useHeader } from "../../navigation/useHeader";
+import { Text } from "../design-system/Text";
+import { VStack } from "../design-system/VStack";
+import { useHeader } from "../navigation/useHeader";
 
 function useIsLoading() {
   return false;
