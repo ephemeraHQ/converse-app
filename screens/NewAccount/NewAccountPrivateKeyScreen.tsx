@@ -10,6 +10,7 @@ import { translate } from "../../i18n";
 import { useRouter } from "../../navigation/useNavigation";
 import { spacing } from "../../theme";
 import { sentryTrackError } from "../../utils/sentry";
+import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
 import {
   PrivateKeyInput,
   useAvoidInputEffect,
@@ -29,7 +30,11 @@ export const NewAccountPrivateKeyScreen = memo(function () {
       const trimmedPrivateKey = privateKey.trim();
       if (!trimmedPrivateKey) return;
       await loginWithPrivateKey(trimmedPrivateKey);
-      router.navigate("NewAccountUserProfile");
+      if (isMissingConverseProfile()) {
+        router.navigate("NewAccountUserProfile");
+      } else {
+        router.navigate("Chats");
+      }
     } catch (error) {
       sentryTrackError(error);
     }

@@ -6,6 +6,7 @@ import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScre
 import { ConnectViaWallet } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWallet";
 import { useRouter } from "../../navigation/useNavigation";
 import { NavigationParamList } from "../Navigation/Navigation";
+import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
 
 export const NewAccountConnectWalletScreen = memo(
   function NewAccountConnectWalletScreen({
@@ -32,8 +33,13 @@ export const NewAccountConnectWalletScreen = memo(
 
     const handleDoneConnecthing = useCallback(
       () => {
-        router.navigate("NewAccountUserProfile");
         finishedConnecting.current = true;
+
+        if (isMissingConverseProfile()) {
+          router.navigate("NewAccountUserProfile");
+        } else {
+          router.navigate("Chats");
+        }
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
       []
