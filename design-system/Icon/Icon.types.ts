@@ -54,18 +54,32 @@ export type IIconName =
   | "magnifyingglass"
   | "star";
 
+/**
+ * Props for the Icon component.
+ * @example
+ * <Icon icon="search" size={24} color="blue" />
+ */
 export type IIconProps = {
   icon?: IIconName;
   style?: StyleProp<ViewStyle>;
   color?: ColorValue;
-  size?: number;
+  /**
+   * Icon size in pixels (positive number)
+   * @default 24
+   */
+  size?: Exclude<number, 0>;
 
   /**
    * @deprecated
+   * Weight property is no longer supported and will be removed in the next major version.
+   * @see Use different icon names for different weights instead.
    */
   weight?: string;
   /**
    * @deprecated Use icon instead
+   * @example
+   * Before: <Icon picto="search" />
+   * After: <Icon icon="search" />
    */
   picto?: IIconName;
 };
