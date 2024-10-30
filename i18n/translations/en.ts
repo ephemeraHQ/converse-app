@@ -63,11 +63,7 @@ export const en = {
   privateKeyConnect: {
     title: "Connect via key",
     subtitle:
-      "Enter the private key for the address you are connecting.\n\nYour private key will only be stored locally in {{storage}}.",
-    storage: {
-      ios: "your iPhone's Secure Enclave",
-      android: "the Android Keystore system",
-    },
+      "Enter the private key for the address you are connecting.\n\nYour private key is not stored.",
     connectButton: "Connect",
     backButton: "Back",
     privateKeyPlaceholder: "Enter a private key",
