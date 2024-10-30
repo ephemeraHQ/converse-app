@@ -55,18 +55,18 @@ export const getXmtpClientFromV2Key = async (v2Key: string) => {
 export const getXmtpV3Client = async (account: string) => {
   const dbDirectory = await getDbDirectory();
   const dbEncryptionKey = await getDbEncryptionKey();
-
-  // @todo => use account in some way
-  return Client.createV3(null, {
+  const v3Client = (await Client.buildV3(account, {
     ...defaultConfig,
     dbDirectory,
     dbEncryptionKey,
-  });
+  })) as ConverseXmtpClientType;
+  v3Client.v3Only = true;
+  return v3Client;
 };
 
 export type ConverseXmtpClientType = Awaited<
   ReturnType<typeof getXmtpClientFromV2Key>
->;
+> & { v3Only?: boolean };
 
 export type ConversationWithCodecsType = Awaited<
   ReturnType<ConverseXmtpClientType["conversations"]["newConversation"]>

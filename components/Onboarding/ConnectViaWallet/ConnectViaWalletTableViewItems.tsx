@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 // TODO: move out of ConnectViaWallet
 import { memo, useState } from "react";
 import { ActivityIndicator } from "react-native";
@@ -136,6 +137,13 @@ export const InstalledWalletsTableView = memo(
 
               // Specific flow for Coinbase Wallet
               if (wallet.thirdwebId === "com.coinbase.wallet") {
+                // @todo => this is a hack to remove the smart wallet key from AsyncStorage
+                // because it's not being removed by the wallet itself
+                const storageKeys = await AsyncStorage.getAllKeys();
+                const wcKeys = storageKeys.filter((k) =>
+                  k.startsWith("-Coinbase Smart Wallet:")
+                );
+                await AsyncStorage.multiRemove(wcKeys);
                 const wallet = await thirdwebConnect(async () => {
                   const coinbaseWallet = createWallet("com.coinbase.wallet", {
                     appMetadata: config.walletConnectConfig.appMetadata,

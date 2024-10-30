@@ -304,6 +304,7 @@ export const stopStreamingGroups = async (account: string) => {
 };
 
 const listConversations = async (client: ConverseXmtpClientType) => {
+  if (client.v3Only) return [];
   const beforeList = new Date().getTime();
   const conversations = await client.conversations.list();
   conversations.forEach((c) => {
