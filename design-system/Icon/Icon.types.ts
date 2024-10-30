@@ -67,7 +67,7 @@ export type IIconProps = {
    * Icon size in pixels (positive number)
    * @default 24
    */
-  size?: Exclude<number, 0>;
+  size?: number;
 
   /**
    * @deprecated
