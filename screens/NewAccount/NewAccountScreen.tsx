@@ -1,6 +1,7 @@
 import { ConnectViaWalletPopularWalletsTableView } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletPopularWalletsTableView";
 import { memo } from "react";
 import { Alert } from "react-native";
+
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
 import { NewAccountPictoTitleSubtitle } from "../../components/NewAccount/NewAccountTitleSubtitlePicto";
 import { useInstalledWallets } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
@@ -62,8 +63,8 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
             // TODO: Add a better message
             Alert.alert("Account already connected");
           }}
-          onAccountDoesNotExist={({ address }) => {
-            router.navigate("NewAccountConnectWallet", { address });
+          onAccountDoesNotExist={({ address, isSCW }) => {
+            router.navigate("NewAccountConnectWallet", { address, isSCW });
           }}
         />
       )}

@@ -6,19 +6,11 @@ import { memo } from "react";
 import { Platform, useColorScheme } from "react-native";
 
 import ConversationBlockedListNav from "./ConversationBlockedListNav";
-import Accounts from "../Accounts/Accounts";
 import { IdleScreen } from "../IdleScreen";
-import { OnboardingEphemeraScreen } from "../Onboarding/OnboardingEphemeraScreen";
-import { OnboardingGetStartedScreen } from "../Onboarding/OnboardingGetStartedScreen";
-import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificationsScreen";
-import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
-import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
-import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
 import ConversationListNav from "./ConversationListNav";
 import ConversationNav, { ConversationNavParams } from "./ConversationNav";
 import ConversationRequestsListNav from "./ConversationRequestsListNav";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
-import { useRouter } from "../../navigation/useNavigation";
 import GroupInviteNav, { GroupInviteNavParams } from "./GroupInviteNav";
 import GroupLinkNav, { GroupLinkNavParams } from "./GroupLinkNav";
 import GroupNav, { GroupNavParams } from "./GroupNav";
@@ -35,6 +27,8 @@ import WebviewPreviewNav, {
 } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
+import { useRouter } from "../../navigation/useNavigation";
+import Accounts from "../Accounts/Accounts";
 import { NewAccountConnectWalletScreen } from "../NewAccount/NewAccountConnectWalletScreen";
 import { NewAccountEphemeraScreen } from "../NewAccount/NewAccountEphemeraScreen";
 import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeyScreen";
@@ -42,6 +36,12 @@ import { NewAccountPrivyScreen } from "../NewAccount/NewAccountPrivyScreen";
 import { NewAccountScreen } from "../NewAccount/NewAccountScreen";
 import { NewAccountUserProfileScreen } from "../NewAccount/NewAccountUserProfileScreen";
 import { OnboardingConnectWalletScreen } from "../Onboarding/OnboardingConnectWalletScreen";
+import { OnboardingEphemeraScreen } from "../Onboarding/OnboardingEphemeraScreen";
+import { OnboardingGetStartedScreen } from "../Onboarding/OnboardingGetStartedScreen";
+import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificationsScreen";
+import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
+import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
+import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -51,6 +51,7 @@ export type NavigationParamList = {
   OnboardingPrivy: undefined;
   OnboardingConnectWallet: {
     address: string;
+    isSCW: boolean;
   };
   OnboardingPrivateKey: undefined;
   OnboardingNotifications: undefined;
@@ -62,6 +63,7 @@ export type NavigationParamList = {
   NewAccountUserProfile: undefined;
   NewAccountConnectWallet: {
     address: string;
+    isSCW: boolean;
   };
   NewAccountPrivy: undefined;
   NewAccountPrivateKey: undefined;

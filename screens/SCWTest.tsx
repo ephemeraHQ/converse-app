@@ -64,7 +64,7 @@ const MainScreen: React.FC = () => {
       } catch (e) {
         console.log(e);
       }
-      if (connected) return;
+      if (connected) return coinbaseWallet;
       try {
         console.log("connecting");
         await coinbaseWallet.connect({ client: thirdwebClient });

@@ -1,6 +1,7 @@
 // TODO: move out of ConnectViaWallet
 import { memo, useState } from "react";
 import { ActivityIndicator } from "react-native";
+import { ethereum } from "thirdweb/chains";
 import {
   useDisconnect as useThirdwebDisconnect,
   useSetActiveWallet as useSetThirdwebActiveWallet,
@@ -79,7 +80,7 @@ export function getConnectViaWalletInstalledWalletTableViewItem(args: {
 export const InstalledWalletsTableView = memo(
   function InstalledWalletsTableView(props: {
     onAccountExists: (arg: { address: string }) => void;
-    onAccountDoesNotExist: (arg: { address: string }) => void;
+    onAccountDoesNotExist: (arg: { address: string; isSCW: boolean }) => void;
   }) {
     const { onAccountExists, onAccountDoesNotExist } = props;
 
@@ -117,7 +118,7 @@ export const InstalledWalletsTableView = memo(
             walletName: wallet.name,
           }),
           action: async () => {
-            const isSCW = wallet?.isSmartContractWallet;
+            const isSCW = !!wallet?.isSmartContractWallet;
             logger.debug(
               `[Onboarding] Clicked on wallet ${wallet.name} - ${
                 isSCW ? "Opening web page" : "opening external app"
@@ -138,6 +139,8 @@ export const InstalledWalletsTableView = memo(
                 const wallet = await thirdwebConnect(async () => {
                   const coinbaseWallet = createWallet("com.coinbase.wallet", {
                     appMetadata: config.walletConnectConfig.appMetadata,
+                    // Important to match the chain id of our ethersSignerToXmtpSigner when using SCWs
+                    chains: [ethereum],
                     mobileConfig: {
                       callbackURL: isSCW
                         ? `converse-dev://mobile-wallet-protocol`
@@ -187,7 +190,10 @@ export const InstalledWalletsTableView = memo(
               if (getAccountsList().includes(walletAddress)) {
                 onAccountExists({ address: walletAddress });
               } else {
-                onAccountDoesNotExist({ address: walletAddress });
+                onAccountDoesNotExist({
+                  address: walletAddress,
+                  isSCW,
+                });
               }
             } catch (e: any) {
               logger.error("Error connecting to wallet:", e);

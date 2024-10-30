@@ -16,8 +16,11 @@ import { getInboxId } from "../../../utils/xmtpRN/signIn";
 
 // For now let's keep Thirdweb and the hooks because I haven't found a better way to do it.
 // But ideally a lot of this it outside React.
-export function useInitConnectViaWalletState(args: { address: string }) {
-  const { address } = args;
+export function useInitConnectViaWalletState(args: {
+  address: string;
+  isSCW: boolean;
+}) {
+  const { address, isSCW } = args;
 
   const { onErrorConnecting } = useConnectViaWalletContext();
 
@@ -85,7 +88,9 @@ export function useInitConnectViaWalletState(args: { address: string }) {
         setSigner(thirdwebSigner);
 
         logger.debug(
-          `[Connect Wallet] User connected wallet ${thirdwebWallet?.id} (${address}). ${
+          `[Connect Wallet] User connected ${
+            isSCW ? "SCW" : "EOA"
+          } wallet ${thirdwebWallet?.id} (${address}). ${
             isOnNetwork ? "Already" : "Not yet"
           } on XMTP. V3 database ${hasV3 ? "already" : "not"} present`
         );
@@ -98,7 +103,7 @@ export function useInitConnectViaWalletState(args: { address: string }) {
     };
 
     initializeWallet();
-  }, [address, setIsInitializing, thirdwebWallet, thirdwebSigner]);
+  }, [address, setIsInitializing, thirdwebWallet, thirdwebSigner, isSCW]);
 
   return { isInitializing, onXmtp, alreadyV3Db, signer };
 }

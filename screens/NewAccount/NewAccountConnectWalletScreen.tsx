@@ -11,7 +11,7 @@ export const NewAccountConnectWalletScreen = memo(
   function NewAccountConnectWalletScreen({
     route,
   }: NativeStackScreenProps<NavigationParamList, "NewAccountConnectWallet">) {
-    const { address } = route.params;
+    const { address, isSCW } = route.params;
 
     const router = useRouter();
 
@@ -52,6 +52,7 @@ export const NewAccountConnectWalletScreen = memo(
         {/* For now we don't need to have specific stuff for onboarding vs new account so we use this component to encapsulate the connect view wallet logic */}
         <ConnectViaWallet
           address={address}
+          isSCW={isSCW}
           onDoneConnecting={handleDoneConnecthing}
           onErrorConnecting={handleErrorConnecting}
         />

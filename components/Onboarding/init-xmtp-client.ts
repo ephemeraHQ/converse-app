@@ -1,3 +1,4 @@
+import { signInUsingSigner } from "@utils/xmtpRN/signIn";
 import { Signer } from "ethers";
 import { Alert } from "react-native";
 
@@ -14,7 +15,6 @@ import { saveXmtpKey } from "../../utils/keychain/helpers";
 import logger from "../../utils/logger";
 import { logoutAccount, waitForLogoutTasksDone } from "../../utils/logout";
 import { sentryTrackMessage } from "../../utils/sentry";
-import { getXmtpBase64KeyFromSigner } from "../../utils/xmtpRN/signIn";
 import { getXmtpClient } from "../../utils/xmtpRN/sync";
 
 export async function initXmtpClient(args: {
@@ -31,19 +31,23 @@ export async function initXmtpClient(args: {
   }
 
   try {
-    const base64Key = await getXmtpBase64KeyFromSigner(signer, async () => {
-      await awaitableAlert(
-        translate("current_installation_revoked"),
-        translate("current_installation_revoked_description")
-      );
-      throw new Error("Current installation revoked");
+    const v2Key = await signInUsingSigner({
+      signer,
+      isSCW: false,
+      onInstallationRevoked: async () => {
+        await awaitableAlert(
+          translate("current_installation_revoked"),
+          translate("current_installation_revoked_description")
+        );
+        throw new Error("Current installation revoked");
+      },
     });
 
-    if (!base64Key) return;
+    if (!v2Key) return;
 
-    await connectWithBase64Key({
+    await finalizeWalletXMTPOnboarding({
       address,
-      base64Key,
+      v2Key,
       ...restArgs,
     });
   } catch (e) {
@@ -55,7 +59,7 @@ export async function initXmtpClient(args: {
 
 type IBaseArgs = {
   address: string;
-  base64Key: string;
+  v2Key?: string | undefined;
 };
 
 type IPrivyArgs = IBaseArgs & {
@@ -72,16 +76,18 @@ type IPrivateKeyArgs = IBaseArgs & {
 
 type IStandardArgs = IBaseArgs;
 
-type IConnectWithBase64KeyArgs =
+type IFinalizeXMTPOnboardingArgs =
   | IPrivyArgs
   | IEphemeralArgs
   | IPrivateKeyArgs
   | IStandardArgs;
 
-export async function connectWithBase64Key(args: IConnectWithBase64KeyArgs) {
-  const { address, base64Key } = args;
+export async function finalizeWalletXMTPOnboarding(
+  args: IFinalizeXMTPOnboardingArgs
+) {
+  const { address, v2Key } = args;
 
-  logger.debug("In connectWithBase64Key");
+  logger.debug("In finalizeXMTPOnboarding");
 
   if (!address) {
     sentryTrackMessage("Could not connect because no address");
@@ -89,7 +95,7 @@ export async function connectWithBase64Key(args: IConnectWithBase64KeyArgs) {
   }
 
   try {
-    await performLogoutAndSaveKey(address, base64Key);
+    await performLogoutAndSaveKey(address, v2Key);
 
     useAccountsStore.getState().setCurrentAccount(address, true);
 
@@ -103,12 +109,17 @@ export async function connectWithBase64Key(args: IConnectWithBase64KeyArgs) {
   }
 }
 
-async function performLogoutAndSaveKey(address: string, base64Key: string) {
+async function performLogoutAndSaveKey(
+  address: string,
+  v2Key?: string | undefined
+) {
   logger.debug("Waiting for logout tasks");
   await waitForLogoutTasksDone(500);
-  logger.debug("Logout tasks done, saving xmtp key");
-  await saveXmtpKey(address, base64Key);
-  logger.debug("XMTP Key saved");
+  if (v2Key) {
+    logger.debug("Logout tasks done, saving xmtp key");
+    await saveXmtpKey(address, v2Key);
+    logger.debug("XMTP Key saved");
+  }
 }
 
 async function initializeDatabase(address: string) {
@@ -118,7 +129,7 @@ async function initializeDatabase(address: string) {
   await refreshProfileForAddress(address, address);
 }
 
-async function finalizeAccountSetup(args: IConnectWithBase64KeyArgs) {
+async function finalizeAccountSetup(args: IFinalizeXMTPOnboardingArgs) {
   logger.debug("Finalizing account setup");
 
   const { address } = args;
