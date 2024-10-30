@@ -10,6 +10,7 @@
   ],
   "rules": {
     "import/no-default-export": "warn",
+    "import/order": "off", // Because we use @ for our imports
     "@typescript-eslint/no-unused-vars": "warn",
     "unused-imports/no-unused-imports": "error",
     "react-hooks/rules-of-hooks": "error",

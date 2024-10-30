@@ -113,6 +113,6 @@ export interface IButtonProps extends RNPressableProps {
 
   /** @deprecated use text instead */
   title?: string;
-  /** @deprecated use LeftAccessory instead */
-  picto?: IPicto;
+  /** @deprecated use icon instead */
+  picto?: IIconName;
 }
