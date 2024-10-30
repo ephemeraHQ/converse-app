@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { thirdwebClient } from "@utils/thirdweb";
 import React, { useCallback } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
@@ -6,7 +7,10 @@ import { ethers5Adapter } from "thirdweb/adapters/ethers5";
 import { base } from "thirdweb/chains";
 import {
   useActiveAccount,
+  useActiveWallet,
+  useAutoConnect,
   useConnect,
+  useDisconnect,
   useSendTransaction,
   useSetActiveWallet,
   useSwitchActiveWalletChain,
@@ -18,9 +22,25 @@ import config from "../config";
 const MainScreen: React.FC = () => {
   const { connect: thirdwebConnect } = useConnect();
   const activeAccount = useActiveAccount();
+  const activeWallet = useActiveWallet();
+  const { disconnect: thirdwebDisconnect } = useDisconnect();
   const sendTransaction = useSendTransaction();
   const setActiveWallet = useSetActiveWallet();
+  const { data: autoConnected, isLoading } = useAutoConnect({
+    client: thirdwebClient,
+  });
+  console.log({ autoConnected, isLoading });
   const switchChain = useSwitchActiveWalletChain();
+
+  const disconnectWithoutLogin = useCallback(async () => {
+    const storageKeys = await AsyncStorage.getAllKeys();
+    const wcKeys = storageKeys.filter((k) =>
+      k.startsWith("-Coinbase Smart Wallet:")
+    );
+    await AsyncStorage.multiRemove(wcKeys);
+
+    console.log("DONE!");
+  }, []);
 
   const handleButtonPress = useCallback(() => {
     thirdwebConnect(async () => {
@@ -34,6 +54,17 @@ const MainScreen: React.FC = () => {
           options: "smartWalletOnly",
         },
       });
+      let connected = false;
+      try {
+        console.log("auto-connecting");
+        await coinbaseWallet.autoConnect({ client: thirdwebClient });
+        connected = true;
+        console.log("auto-connected");
+        setActiveWallet(coinbaseWallet);
+      } catch (e) {
+        console.log(e);
+      }
+      if (connected) return;
       try {
         console.log("connecting");
         await coinbaseWallet.connect({ client: thirdwebClient });
@@ -81,13 +112,27 @@ const MainScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       {!activeAccount && (
-        <TouchableOpacity style={styles.button} onPress={handleButtonPress}>
-          <Text style={styles.buttonText}>Connect to wallet</Text>
-        </TouchableOpacity>
+        <>
+          <TouchableOpacity style={styles.button} onPress={handleButtonPress}>
+            <Text style={styles.buttonText}>Connect to wallet</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={disconnectWithoutLogin}
+          >
+            <Text style={styles.buttonText}>DISCONNECT WITHOUT LOGIN</Text>
+          </TouchableOpacity>
+        </>
       )}
-      {activeAccount && (
+      {activeAccount && activeWallet && (
         <>
           <Text>Address: {activeAccount.address}</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => thirdwebDisconnect(activeWallet)}
+          >
+            <Text style={styles.buttonText}>DISCONNECT</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={handleTransaction}>
             <Text style={styles.buttonText}>Trigger tx!</Text>
           </TouchableOpacity>
