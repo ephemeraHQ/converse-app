@@ -7,6 +7,7 @@ import DebugButton from "@components/DebugButton";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { PortalProvider } from "@gorhom/portal";
+import { useAppStateHandlers } from "@hooks/useAppStateHandlers";
 import { PrivyProvider } from "@privy-io/expo";
 import { queryClient } from "@queries/queryClient";
 import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
@@ -113,6 +114,18 @@ const App = () => {
       setAuthStatus("signedOut");
     }
   }, []);
+
+  useAppStateHandlers({
+    onBackground() {
+      logger.debug("App is in background");
+    },
+    onForeground() {
+      logger.debug("App is in foreground");
+    },
+    onInactive() {
+      logger.debug("App is inactive");
+    },
+  });
 
   return (
     <View style={styles.safe}>

@@ -34,29 +34,27 @@ export const ConnectViaWallet = memo(function ConnectViaWallet(
 ) {
   const { address, onErrorConnecting, onDoneConnecting } = props;
 
-  const router = useRouter();
-
-  const finishedConnecting = useRef(false);
+  const finishedConnectingRef = useRef(false);
 
   const disconnect = useConnectViaWalletDisconnect();
 
-  // Before we leave, make sure the user completed the flow otherwise disconnect
   useRouter({
     onBeforeRemove: () => {
-      if (!finishedConnecting.current) {
+      // Before we leave, make sure the user completed the flow otherwise disconnect
+      if (!finishedConnectingRef.current) {
         disconnect({ address });
       }
     },
     onFocus() {
-      // User already connected wallet but decided to come back here, so we need to go back to get started screen
-      if (finishedConnecting.current) {
-        router.goBack();
+      // Edge case: User already connected wallet and finished the flow but decided to come back here
+      if (finishedConnectingRef.current) {
+        onErrorConnecting({ error: new Error("User went back") });
       }
     },
   });
 
   const handleDoneConnecting = useCallback(() => {
-    finishedConnecting.current = true;
+    finishedConnectingRef.current = true;
     onDoneConnecting();
   }, [onDoneConnecting]);
 

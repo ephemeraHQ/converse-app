@@ -35,7 +35,8 @@ export function useInitConnectViaWalletState(args: { address: string }) {
 
   const [thirdwebSigner, setThirdwebSigner] = useState<Signer | undefined>();
 
-  const handlingThirdwebSigner = useRef(false);
+  const isInitializingRef = useRef(false);
+  const hasInitizalizedRef = useRef(false);
 
   useEffect(() => {
     if (!thirdwebAccount) {
@@ -65,8 +66,13 @@ export function useInitConnectViaWalletState(args: { address: string }) {
       return;
     }
 
-    if (handlingThirdwebSigner.current) {
-      logger.debug("[Connect Wallet] Already handling thirdweb signer");
+    if (isInitializingRef.current) {
+      logger.debug("[Connect Wallet] Already initializing wallet");
+      return;
+    }
+
+    if (hasInitizalizedRef.current) {
+      logger.debug("[Connect Wallet] Already initialized wallet");
       return;
     }
 
@@ -74,7 +80,7 @@ export function useInitConnectViaWalletState(args: { address: string }) {
       try {
         logger.debug("[Connect Wallet] Initializing wallet");
 
-        handlingThirdwebSigner.current = true;
+        isInitializingRef.current = true;
 
         setIsInitializing(true);
 
@@ -99,7 +105,8 @@ export function useInitConnectViaWalletState(args: { address: string }) {
         logger.error("[Connect Wallet] Error initializing wallet:", error);
         onErrorConnecting({ error: ensureError(error) });
       } finally {
-        handlingThirdwebSigner.current = false;
+        hasInitizalizedRef.current = true;
+        isInitializingRef.current = false;
         setIsInitializing(false);
       }
     };

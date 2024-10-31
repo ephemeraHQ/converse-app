@@ -1,4 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import logger from "@utils/logger";
 import { memo, useCallback } from "react";
 
 import {
@@ -34,6 +35,7 @@ export const OnboardingConnectWalletScreen = memo(
     }, []);
 
     const handleErrorConnecting = useCallback((arg: { error: Error }) => {
+      logger.debug("[Onboarding] Error connecting wallet", arg.error);
       router.goBack();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

@@ -38,49 +38,42 @@ export function useRouter(args?: {
 
     return () => {
       unsubscribe();
-      // @ts-ignore
-      navigation.removeListener("transitionEnd");
     };
   }, [onTransitionEnd, navigation]);
 
   useEffect(() => {
-    navigation.addListener("focus", () => {
+    const focusListener = navigation.addListener("focus", () => {
       if (onFocus) {
         onFocus();
       }
     });
 
     return () => {
-      navigation.removeListener("focus", () => {
-        console.log("focus listener removed");
-      });
+      focusListener();
     };
   }, [onFocus, navigation]);
 
   useEffect(() => {
-    navigation.addListener("blur", () => {
+    const blurListener = navigation.addListener("blur", () => {
       if (onBlur) {
         onBlur();
       }
     });
 
     return () => {
-      navigation.removeListener("blur", () => {
-        console.log("blur listener removed");
-      });
+      blurListener();
     };
   }, [onBlur, navigation]);
 
   useEffect(() => {
-    navigation.addListener("beforeRemove", (e) => {
+    const beforeRemoveListener = navigation.addListener("beforeRemove", (e) => {
       if (onBeforeRemove) {
         onBeforeRemove(e);
       }
     });
+
     return () => {
-      navigation.removeListener("beforeRemove", () => {
-        console.log("beforeRemove listener removed");
-      });
+      beforeRemoveListener();
     };
   }, [onBeforeRemove, navigation]);
 
