@@ -25,6 +25,9 @@ export const lightPalette = {
   edge: "rgba(255, 255, 255, 0.15)",
 
   ...paletteShared,
+
+  danger: "#FF3B30",
+  scrim: "rgb(0, 0, 0)",
 };
 
 export const darkPalette = {
@@ -48,6 +51,9 @@ export const darkPalette = {
   edge: "rgba(0, 0, 0, 0.15)",
 
   ...paletteShared,
+
+  danger: "#FF3B30",
+  scrim: "rgb(0, 0, 0)",
 }; // Generated using https://callstack.github.io/react-native-paper/docs/guides/theming#theme-properties
 
 export const MaterialLightColors = {

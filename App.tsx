@@ -5,6 +5,7 @@ import "./polyfills";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { PortalProvider } from "@gorhom/portal";
 import { PrivyProvider } from "@privy-io/expo";
 import { queryClient } from "@queries/queryClient";
@@ -22,6 +23,7 @@ import {
   View,
   useColorScheme,
 } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
@@ -142,9 +144,13 @@ export default function AppWithProviders() {
             <ActionSheetProvider>
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
                 <PaperProvider theme={paperTheme}>
-                  <PortalProvider>
-                    <App />
-                  </PortalProvider>
+                  <GestureHandlerRootView style={{ flex: 1 }}>
+                    <BottomSheetModalProvider>
+                      <PortalProvider>
+                        <App />
+                      </PortalProvider>
+                    </BottomSheetModalProvider>
+                  </GestureHandlerRootView>
                 </PaperProvider>
               </ThemeProvider>
             </ActionSheetProvider>

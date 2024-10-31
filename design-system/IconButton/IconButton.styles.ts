@@ -74,6 +74,15 @@ export const getIconButtonViewStyle =
           }
           break;
 
+        case "subtle":
+          style.borderWidth = 1;
+          style.borderColor = colors.border.subtle;
+          style.backgroundColor = "transparent";
+          if (pressed) {
+            style.backgroundColor = colors.fill.minimal;
+          }
+          break;
+
         case "ghost":
           style.backgroundColor = "transparent";
           // TODO: put back when we're done refactoring all the iconButton and buttons
@@ -126,6 +135,7 @@ export const getIconStyle =
           break;
 
         case "outline":
+        case "subtle":
           style.color = colors.text.primary;
           if (disabled) {
             style.color = colors.fill.tertiary;
@@ -167,7 +177,7 @@ export const getIconProps =
 
       // Set icon size
       const sizeMap = {
-        md: spacing.md,
+        md: spacing.sm,
         lg: spacing.lg,
       };
 
@@ -185,6 +195,7 @@ export const getIconProps =
             break;
 
           case "outline":
+          case "subtle":
           case "ghost":
             props.color = colors.text.primary;
             break;
