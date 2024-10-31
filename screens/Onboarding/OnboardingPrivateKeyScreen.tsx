@@ -10,13 +10,7 @@ import {
 import { spacing } from "@theme/spacing";
 import { Wallet } from "ethers";
 import { useCallback, useEffect, useState } from "react";
-import {
-  Alert,
-  Platform,
-  StyleSheet,
-  TextInput,
-  useColorScheme,
-} from "react-native";
+import { Alert, StyleSheet, TextInput, useColorScheme } from "react-native";
 import { AvoidSoftInput } from "react-native-avoid-softinput";
 
 import {
@@ -70,13 +64,7 @@ export function OnboardingPrivateKeyScreen(
           {translate("privateKeyConnect.title")}
         </OnboardingPictoTitleSubtitle.Title>
         <OnboardingPictoTitleSubtitle.Subtitle>
-          {translate("privateKeyConnect.subtitle", {
-            storage: translate(
-              `privateKeyConnect.storage.${
-                Platform.OS === "ios" ? "ios" : "android"
-              }`
-            ),
-          })}
+          {translate("privateKeyConnect.subtitle")}
         </OnboardingPictoTitleSubtitle.Subtitle>
       </OnboardingPictoTitleSubtitle.Container>
 
@@ -157,6 +145,23 @@ export const PrivateKeyInput = ({ value, onChange }: IPrivateKeyInputProps) => {
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
+  const handleChangeText = useCallback(
+    (content: string) => {
+      onChange(content.replace(/\n/g, " "));
+    },
+    [onChange]
+  );
+
+  const handleFocus = useCallback(() => {
+    onChange(value.trim());
+  }, [onChange, value]);
+
+  const handleKeyPress = useCallback((e: any) => {
+    if (e.nativeEvent.key === "Enter") {
+      e.currentTarget.blur();
+    }
+  }, []);
+
   return (
     <TextInput
       multiline
@@ -164,18 +169,10 @@ export const PrivateKeyInput = ({ value, onChange }: IPrivateKeyInputProps) => {
       style={styles.textInput}
       placeholder={translate("privateKeyConnect.privateKeyPlaceholder")}
       placeholderTextColor={textSecondaryColor(colorScheme)}
-      onChangeText={(content) => {
-        onChange(content.replace(/\n/g, " "));
-      }}
-      onFocus={() => {
-        onChange(value.trim());
-      }}
+      onChangeText={handleChangeText}
+      onFocus={handleFocus}
       value={value}
-      onKeyPress={(e) => {
-        if (e.nativeEvent.key === "Enter") {
-          e.currentTarget.blur();
-        }
-      }}
+      onKeyPress={handleKeyPress}
     />
   );
 };
