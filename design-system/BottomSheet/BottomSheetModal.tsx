@@ -4,7 +4,7 @@ import {
   BottomSheetModalProps as GorhomBottomSheetModalProps,
 } from "@gorhom/bottom-sheet";
 import { BottomSheetModalMethods as GorhomBottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import { forwardRef, memo, useCallback } from "react";
+import { forwardRef, memo, useCallback, useMemo } from "react";
 import { Platform } from "react-native";
 import { FullWindowOverlay } from "react-native-screens";
 
@@ -37,6 +37,16 @@ export const BottomSheetModal = memo(
         [absoluteHandleBar]
       );
 
+      const combinedBackgroundStyle = useMemo(
+        () => [
+          {
+            backgroundColor: theme.colors.background.raised,
+          },
+          backgroundStyle,
+        ],
+        [theme.colors.background.raised, backgroundStyle]
+      );
+
       return (
         <GorhomBottomSheetModal
           ref={ref}
@@ -46,12 +56,7 @@ export const BottomSheetModal = memo(
           enableDynamicSizing={false} // By default we don't want enable dynamic sizing
           backdropComponent={BottomSheetBackdropOpacity}
           handleComponent={renderHandleComponent}
-          backgroundStyle={[
-            {
-              backgroundColor: theme.colors.background.raised,
-            },
-            backgroundStyle,
-          ]}
+          backgroundStyle={combinedBackgroundStyle}
           {...rest}
         />
       );
