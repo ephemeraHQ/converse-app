@@ -1,16 +1,16 @@
+import RequestsButton from "@components/ConversationList/RequestsButton";
+import EphemeralAccountBanner from "@components/EphemeralAccountBanner";
+import PinnedConversations from "@components/PinnedConversations/PinnedConversations";
+import { HStack } from "@design-system/HStack";
+import { Text } from "@design-system/Text";
+import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { sortRequestsBySpamScore } from "@utils/xmtpRN/conversations";
 import React, { memo, useMemo } from "react";
 import { Platform, ViewStyle } from "react-native";
 
 import { useConversationListContextMultiple } from "./ConversationList.context";
-import RequestsButton from "../../../components/ConversationList/RequestsButton";
-import EphemeralAccountBanner from "../../../components/EphemeralAccountBanner";
-import PinnedConversations from "../../../components/PinnedConversations/PinnedConversations";
-import { HStack } from "../../../design-system/HStack";
-import { Text } from "../../../design-system/Text";
-import { ThemedStyle, useAppTheme } from "../../../theme/useAppTheme";
-import { sortRequestsBySpamScore } from "../../../utils/xmtpRN/conversations";
 
-export const ListHeader = memo(function ListHeader() {
+export const ConversationListHeader = memo(function ConversationListHeader() {
   const { themed } = useAppTheme();
 
   const {
@@ -20,14 +20,14 @@ export const ListHeader = memo(function ListHeader() {
     sharingMode,
     ephemeralAccount,
     showNoResult,
-  } = useConversationListContextMultiple((state) => ({
-    sortedConversationsWithPreview: state.sortedConversationsWithPreview,
-    pinnedConversations: state.pinnedConversations,
-    showSearchTitleHeader: state.showSearchTitleHeader,
-    sharingMode: state.sharingMode,
-    ephemeralAccount: state.ephemeralAccount,
-    showNoResult: state.showNoResult,
-  }));
+  } = useConversationListContextMultiple([
+    "sortedConversationsWithPreview",
+    "pinnedConversations",
+    "showSearchTitleHeader",
+    "sharingMode",
+    "ephemeralAccount",
+    "showNoResult",
+  ]);
 
   const hasRequests =
     sortedConversationsWithPreview.conversationsRequests.length > 0;

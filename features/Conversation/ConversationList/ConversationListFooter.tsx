@@ -4,12 +4,9 @@ import { useConversationListContextMultiple } from "./ConversationList.context";
 import InitialLoad from "../../../components/InitialLoad";
 import NoResult from "../../../components/Search/NoResult";
 
-export const ListFooter = memo(function ListFooter() {
+export const ConversationListFooter = memo(function ConversationListFooter() {
   const { showInitialLoading, showNoResult } =
-    useConversationListContextMultiple((state) => ({
-      showInitialLoading: state.showInitialLoading,
-      showNoResult: state.showNoResult,
-    }));
+    useConversationListContextMultiple(["showInitialLoading", "showNoResult"]);
 
   if (showInitialLoading) {
     return <InitialLoad />;

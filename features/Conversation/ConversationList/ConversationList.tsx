@@ -1,21 +1,27 @@
+import { useRouter } from "@navigation/useNavigation";
+import { useRoute } from "@react-navigation/native";
 import React, { memo } from "react";
 
 import { useConversationListContextMultiple } from "./ConversationList.context";
-import { ListFooter } from "./ConversationListFooter";
-import { ListHeader } from "./ConversationListHeader";
+import { ConversationListFooter } from "./ConversationListFooter";
+import { ConversationListHeader } from "./ConversationListHeader";
 import ChatNullState from "../../../components/Chat/ChatNullState";
 import ConversationFlashList from "../../../components/ConversationFlashList";
 import Recommendations from "../../../components/Recommendations/Recommendations";
 import { currentAccount } from "../../../data/store/accountsStore";
 
 export const ConversationList = memo(function ConversationList() {
+  // TODO: remove when ConversationFlashList fixed
+  const navigation = useRouter();
+  const route = useRoute();
+
   const { showChatNullState, handleScroll, showInitialLoading, flatListItems } =
-    useConversationListContextMultiple((state) => ({
-      showChatNullState: state.showChatNullState,
-      handleScroll: state.handleScroll,
-      showInitialLoading: state.showInitialLoading,
-      flatListItems: state.flatListItems,
-    }));
+    useConversationListContextMultiple([
+      "showChatNullState",
+      "handleScroll",
+      "showInitialLoading",
+      "flatListItems",
+    ]);
 
   if (showChatNullState) {
     return <ChatNullState currentAccount={currentAccount()} />;
@@ -24,12 +30,14 @@ export const ConversationList = memo(function ConversationList() {
   return (
     <>
       <ConversationFlashList
-        // route={route}
-        // navigation={navigation}
+        // @ts-ignore we'll remove this later anyway
+        route={route}
+        // @ts-ignore we'll remove this later anyway
+        navigation={navigation}
         onScroll={handleScroll}
         items={showInitialLoading ? [] : flatListItems.items}
-        ListHeaderComponent={<ListHeader />}
-        ListFooterComponent={<ListFooter />}
+        ListHeaderComponent={<ConversationListHeader />}
+        ListFooterComponent={<ConversationListFooter />}
       />
       <Recommendations visibility="HIDDEN" />
     </>

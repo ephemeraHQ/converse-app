@@ -19,6 +19,16 @@ export type NavigationParamList = {
   OnboardingEphemeral: undefined;
   OnboardingUserProfile: undefined;
 
+  // New account
+  NewAccountNavigator: undefined;
+  NewAccountUserProfile: undefined;
+  NewAccountConnectWallet: {
+    address: string;
+  };
+  NewAccountPrivy: undefined;
+  NewAccountPrivateKey: undefined;
+  NewAccountEphemera: undefined;
+
   // Main
   ConversationList: undefined;
   Accounts: undefined;
@@ -40,3 +50,5 @@ export type NavigationParamList = {
   WebviewPreview: WebviewPreviewNavParams;
   NewAccount: undefined;
 };
+
+export type IScreenName = keyof NavigationParamList;

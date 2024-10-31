@@ -37,10 +37,7 @@ describe("getConverseStateFromPath", () => {
   };
 
   it("should parse simple dm deeplink", () => {
-    const state = getConverseStateFromPath("testNav")(
-      "dm?peer=0xno12.eth",
-      navConfig
-    );
+    const state = getConverseStateFromPath("dm?peer=0xno12.eth", navConfig);
     const route = state?.routes[state.routes.length - 1];
     expect(route?.name).toBe("Conversation");
     expect((route?.params as any).mainConversationWithPeer).toBe("0xno12.eth");
@@ -48,10 +45,7 @@ describe("getConverseStateFromPath", () => {
   });
 
   it("should parse simple dm universal link", () => {
-    const state = getConverseStateFromPath("testNav")(
-      "dm/0xno12.eth",
-      navConfig
-    );
+    const state = getConverseStateFromPath("dm/0xno12.eth", navConfig);
     const route = state?.routes[state.routes.length - 1];
     expect(route?.name).toBe("Conversation");
     expect((route?.params as any).mainConversationWithPeer).toBe("0xno12.eth");
@@ -59,7 +53,7 @@ describe("getConverseStateFromPath", () => {
   });
 
   it("should parse simple group deeplink", () => {
-    const state = getConverseStateFromPath("testNav")(
+    const state = getConverseStateFromPath(
       "group?groupId=f7349f84925aaeee5816d02b7798efbc",
       navConfig
     );
@@ -72,7 +66,7 @@ describe("getConverseStateFromPath", () => {
   });
 
   it("should parse simple group universal link", () => {
-    const state = getConverseStateFromPath("testNav")(
+    const state = getConverseStateFromPath(
       "group/f7349f84925aaeee5816d02b7798efbc",
       navConfig
     );
@@ -85,7 +79,7 @@ describe("getConverseStateFromPath", () => {
   });
 
   it("should parse simple dm deeplink with text", () => {
-    const state = getConverseStateFromPath("testNav")(
+    const state = getConverseStateFromPath(
       "dm?peer=0xno12.eth&text=hello",
       navConfig
     );
@@ -96,7 +90,7 @@ describe("getConverseStateFromPath", () => {
   });
 
   it("should parse simple dm universal link with text", () => {
-    const state = getConverseStateFromPath("testNav")(
+    const state = getConverseStateFromPath(
       "dm/0xno12.eth?text=hello",
       navConfig
     );
@@ -107,7 +101,7 @@ describe("getConverseStateFromPath", () => {
   });
 
   it("should parse simple group deeplink with text", () => {
-    const state = getConverseStateFromPath("testNav")(
+    const state = getConverseStateFromPath(
       "group?groupId=f7349f84925aaeee5816d02b7798efbc&text=hello",
       navConfig
     );
@@ -120,7 +114,7 @@ describe("getConverseStateFromPath", () => {
   });
 
   it("should parse simple group universal link with text", () => {
-    const state = getConverseStateFromPath("testNav")(
+    const state = getConverseStateFromPath(
       "group/f7349f84925aaeee5816d02b7798efbc?text=hello",
       navConfig
     );

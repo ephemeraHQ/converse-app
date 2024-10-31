@@ -59,6 +59,8 @@ import { initSentry } from "./utils/sentry";
 import "./utils/splash/splash";
 import { useCheckCurrentInstallation } from "./utils/xmtpRN/client";
 
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
   "Error destroying session", // Privy
@@ -159,6 +161,7 @@ const Initializer = memo(function Initializer() {
 const AppKeyboardProvider =
   Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
 
+// eslint-disable-next-line import/no-default-export
 export default function AppWithProviders() {
   const colorScheme = useColorScheme();
 
@@ -175,6 +178,7 @@ export default function AppWithProviders() {
         <ThirdwebProvider>
           <AppKeyboardProvider>
             <ActionSheetProvider>
+<<<<<<< HEAD
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
                 <PaperProvider theme={paperTheme}>
                   <GestureHandlerRootView style={{ flex: 1 }}>
@@ -186,6 +190,21 @@ export default function AppWithProviders() {
                   </GestureHandlerRootView>
                 </PaperProvider>
               </ThemeProvider>
+=======
+              <GestureHandlerRootView
+                style={{
+                  flex: 1,
+                }}
+              >
+                <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
+                  <PaperProvider theme={paperTheme}>
+                    <PortalProvider>
+                      <App />
+                    </PortalProvider>
+                  </PaperProvider>
+                </ThemeProvider>
+              </GestureHandlerRootView>
+>>>>>>> ceda3957 (wip)
             </ActionSheetProvider>
           </AppKeyboardProvider>
         </ThirdwebProvider>

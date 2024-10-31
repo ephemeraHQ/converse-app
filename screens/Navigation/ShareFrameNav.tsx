@@ -1,7 +1,7 @@
+import { NativeStack } from "@navigation/AppNavigator";
 import { useRef } from "react";
 import { Button, Platform, TextInput } from "react-native";
 
-import { NativeStack } from "./Navigation";
 import AndroidBackAction from "../../components/AndroidBackAction";
 import ConversationList from "../../features/Conversation/ConversationList/ConversationList.screen";
 

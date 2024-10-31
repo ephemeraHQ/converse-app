@@ -1,7 +1,8 @@
+import { NativeStack } from "@navigation/AppNavigator";
 import { navigationSecondaryBackgroundColor } from "@styles/colors";
 import { useColorScheme } from "react-native";
 
-import { NativeStack, navigationAnimation } from "./Navigation";
+import { navigationAnimation } from "./Navigation";
 import TopUpScreen from "../TopUp";
 
 export default function TopUpNav() {

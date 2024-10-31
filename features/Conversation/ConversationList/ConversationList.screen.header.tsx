@@ -1,4 +1,5 @@
-import React, { memo, useLayoutEffect } from "react";
+import { $globalStyles } from "@theme/styles";
+import React, { memo, useCallback, useLayoutEffect } from "react";
 import {
   NativeSyntheticEvent,
   TextInputChangeEventData,
@@ -34,19 +35,19 @@ export function useConversationListHeader() {
     setSearchQuery,
     setSearchBarFocused,
     showChatNullState,
-  } = useConversationListContextMultiple((state) => ({
-    searchBarRef: state.searchBarRef,
-    sharingMode: state.sharingMode,
-    setSearchQuery: state.setSearchQuery,
-    setSearchBarFocused: state.setSearchBarFocused,
-    showChatNullState: state.showChatNullState,
-  }));
+  } = useConversationListContextMultiple([
+    "searchBarRef",
+    "sharingMode",
+    "showChatNullState",
+    "setSearchQuery",
+    "setSearchBarFocused",
+  ]);
 
   const autoHide = !sharingMode;
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      header: (
+      header: () => (
         <Header
           titleComponent={<HeaderTitle />}
           LeftActionComponent={<HeaderLeft />}
@@ -82,25 +83,22 @@ export function useConversationListHeader() {
 }
 
 const HeaderLeft = memo(function HeaderLeft() {
-  const { theme } = useAppTheme();
-
   const shouldShowConnecting = useShouldShowConnecting();
-
   const shouldShowError = useShouldShowErrored();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const name = getReadableProfile(currentAccount, currentAccount);
   const navigation = useRouter();
 
+  const handlePress = useCallback(() => {
+    navigation.navigate("Profile", {
+      address: currentAccount,
+    });
+  }, [navigation, currentAccount]);
+
   return (
-    <HStack style={{ alignItems: "flex-end", marginTop: -10 }}>
+    <HStack style={$globalStyles.alignCenter}>
       <ProfileSettingsButton />
-      <Pressable
-        onPress={() => {
-          navigation.navigate("Profile", {
-            address: currentAccount,
-          });
-        }}
-      >
+      <Pressable onPress={handlePress} withHaptic>
         <HStack
           style={{
             alignItems: "center",

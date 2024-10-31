@@ -1,9 +1,9 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { memo } from "react";
 
+import { NativeStack } from "./AppNavigator";
 import { useRouter } from "./useNavigation";
 import { ScreenHeaderModalCloseButton } from "../components/Screen/ScreenHeaderModalCloseButton";
-import { NativeStack } from "../screens/Navigation/Navigation";
 import { NewAccountConnectWalletScreen } from "../screens/NewAccount/NewAccountConnectWalletScreen";
 import { NewAccountEphemeraScreen } from "../screens/NewAccount/NewAccountEphemeraScreen";
 import { NewAccountPrivateKeyScreen } from "../screens/NewAccount/NewAccountPrivateKeyScreen";

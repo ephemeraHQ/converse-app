@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { headerTitleStyle, textPrimaryColor } from "@styles/colors";
@@ -25,7 +26,6 @@ import { useProfilesStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { useGroupName } from "../../hooks/useGroupName";
 import { useGroupPhoto } from "../../hooks/useGroupPhoto";
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
 import { getPreferredAvatar, getProfile } from "../../utils/profile";
 import { conversationName, getTitleFontScale } from "../../utils/str";
 import Avatar from "../Avatar";

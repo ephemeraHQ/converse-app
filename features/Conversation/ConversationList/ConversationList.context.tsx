@@ -1,6 +1,5 @@
 import { RouteProp, useRoute } from "@react-navigation/native";
 import React, {
-  createContext,
   useCallback,
   useEffect,
   useMemo,
@@ -9,7 +8,7 @@ import React, {
 } from "react";
 import { Platform } from "react-native";
 import { SearchBarCommands } from "react-native-screens";
-import { useContextSelector } from "use-context-selector";
+import { createContext, useContextSelector } from "use-context-selector";
 
 import { refreshProfileForAddress } from "../../../data/helpers/profiles/profilesUpdate";
 import {
@@ -239,8 +238,15 @@ export function useConversationListContext<
   return useContextSelector(ConversationListContext, select);
 }
 
-export function useConversationListContextMultiple<
-  T extends Partial<IConversationListContextType>,
->(select: (state: IConversationListContextType) => T): T {
-  return useContextSelector(ConversationListContext, select);
+export function useConversationListContextMultiple(
+  keys: (keyof IConversationListContextType)[]
+): IConversationListContextType {
+  return useContextSelector(ConversationListContext, (state) =>
+    keys.reduce((selected, key) => {
+      return {
+        ...selected,
+        [key]: state[key],
+      };
+    }, {} as IConversationListContextType)
+  );
 }

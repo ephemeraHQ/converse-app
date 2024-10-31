@@ -1,5 +1,6 @@
 import { Terms } from "@components/Onboarding/Terms";
 import { translate } from "@i18n";
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -26,7 +27,6 @@ import { initXmtpClient } from "../../components/Onboarding/init-xmtp-client";
 import { VStack } from "../../design-system/VStack";
 import { useRouter } from "../../navigation/useNavigation";
 import { sentryTrackError } from "../../utils/sentry";
-import { NavigationParamList } from "../Navigation/Navigation";
 
 export function OnboardingPrivateKeyScreen(
   props: NativeStackScreenProps<NavigationParamList, "OnboardingPrivateKey">

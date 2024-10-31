@@ -6,7 +6,7 @@ import {
 } from "@react-navigation/native";
 import { useEffect, useMemo } from "react";
 
-import { NavigationParamList } from "../screens/Navigation/Navigation";
+import { NavigationParamList } from "./Navigation.types";
 
 type IUseRouterArgs = {
   onTransitionEnd?: (isClosing: boolean) => void;

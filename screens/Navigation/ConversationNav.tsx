@@ -1,3 +1,5 @@
+import { NativeStack } from "@navigation/AppNavigator";
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { NavigationProp } from "@react-navigation/native";
 import { textPrimaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
@@ -12,11 +14,7 @@ import { StackAnimationTypes } from "react-native-screens";
 
 import Picto from "../../components/Picto/Picto";
 import Conversation from "../Conversation";
-import {
-  NativeStack,
-  NavigationParamList,
-  navigationAnimation,
-} from "./Navigation";
+import { navigationAnimation } from "./Navigation";
 
 export type ConversationNavParams = {
   topic?: string;

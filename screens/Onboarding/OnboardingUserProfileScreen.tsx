@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   actionSheetColors,
@@ -51,7 +52,6 @@ import {
   formatEphemeralDisplayName,
   formatEphemeralUsername,
 } from "../../utils/str";
-import { NavigationParamList } from "../Navigation/Navigation";
 
 export type ProfileType = {
   avatar?: string;

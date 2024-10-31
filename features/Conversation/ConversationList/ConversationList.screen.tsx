@@ -1,3 +1,4 @@
+import { $globalStyles } from "@theme/styles";
 import React, { memo } from "react";
 
 import { ConversationList } from "./ConversationList";
@@ -17,7 +18,7 @@ const Content = memo(function Content() {
   useConversationListHeader();
 
   return (
-    <Screen>
+    <Screen contentContainerStyle={$globalStyles.flex1}>
       <ConversationList />
     </Screen>
   );

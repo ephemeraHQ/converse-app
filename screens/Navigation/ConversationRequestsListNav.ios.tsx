@@ -1,5 +1,7 @@
 import RequestsSegmentedController from "@components/ConversationList/RequestsSegmentedController";
 import { translate } from "@i18n";
+import { NativeStack } from "@navigation/AppNavigator";
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
@@ -19,11 +21,7 @@ import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
 
-import {
-  NativeStack,
-  navigationAnimation,
-  NavigationParamList,
-} from "./Navigation";
+import { navigationAnimation } from "./Navigation";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
