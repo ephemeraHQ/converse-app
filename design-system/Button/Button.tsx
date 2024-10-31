@@ -1,5 +1,7 @@
+import { Icon } from "@design-system/Icon/Icon";
+import { IIconSizeKey } from "@theme/icon";
 import { useAppTheme } from "@theme/useAppTheme";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import {
   ActivityIndicator,
   GestureResponderEvent,
@@ -10,7 +12,6 @@ import {
   ViewStyle,
 } from "react-native";
 
-import Picto from "../../components/Picto/Picto";
 import { Haptics } from "../../utils/haptics";
 import { Text } from "../Text";
 import { IButtonProps, IButtonVariant } from "./Button.props";
@@ -40,6 +41,7 @@ export function Button(props: IButtonProps) {
     loading,
     withHapticFeedback = true,
     onPress,
+    icon,
     // @deprecated,
     title,
     picto,
@@ -104,6 +106,15 @@ export function Button(props: IButtonProps) {
     [withHapticFeedback, onPress]
   );
 
+  const _icon = icon ?? picto;
+
+  const iconSize = useMemo((): IIconSizeKey => {
+    if (size === "lg") {
+      return "sm";
+    }
+    return "xs";
+  }, [size]);
+
   return (
     <Pressable
       style={$viewStyle}
@@ -129,9 +140,10 @@ export function Button(props: IButtonProps) {
             )}
 
             {/* @deprecated stuff */}
-            {!!picto && (
-              <Picto
-                picto={picto}
+            {!!_icon && (
+              <Icon
+                icon={_icon}
+                size={theme.iconSize[iconSize]}
                 color={
                   variant === "text" || variant === "link"
                     ? theme.colors.text.primary
