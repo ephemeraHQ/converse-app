@@ -5,9 +5,9 @@ import {
   ViewStyle,
 } from "react-native";
 
-import { IPicto } from "../../components/Picto/Picto";
+import { IPicto } from "@components/Picto/Picto";
 
-export type IIconButtonVariant = "outline" | "fill" | "ghost";
+export type IIconButtonVariant = "outline" | "subtle" | "fill" | "ghost";
 export type IIconButtonSize = "md" | "lg";
 export type IIconButtonAction = "primary" | "danger";
 

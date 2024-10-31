@@ -31,7 +31,7 @@ import Animated, {
 import { useShallow } from "zustand/react/shallow";
 
 import ChatMessageActions from "./MessageActions";
-import { ChatMessageReactions } from "./MessageReactions";
+import { ChatMessageReactions } from "./MessageReactions/MessageReactions";
 import MessageStatus from "./MessageStatus";
 import {
   currentAccount,
