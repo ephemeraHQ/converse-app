@@ -144,7 +144,7 @@ export default function AppWithProviders() {
             <ActionSheetProvider>
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
                 <PaperProvider theme={paperTheme}>
-                  <GestureHandlerRootView>
+                  <GestureHandlerRootView style={{ flex: 1 }}>
                     <BottomSheetModalProvider>
                       <PortalProvider>
                         <App />
