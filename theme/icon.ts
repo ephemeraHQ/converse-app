@@ -5,4 +5,6 @@ export const iconSize = {
   lg: 32,
 } as const;
 
+export type IIconSizeKey = keyof typeof iconSize;
+
 export type IIconSize = typeof iconSize;
