@@ -238,12 +238,23 @@ suspend fun handleGroupMessage(
     envelope: Envelope,
     remoteMessage: RemoteMessage,
 ): NotificationDataResult {
-    val groups = xmtpClient.conversations.listGroups()
-    val group = groups.find { it.topic == envelope.contentTopic }
+    // No need to sync groups here, because it's already a known group
+    val group = xmtpClient.findGroup(getGroupIdFromTopic(envelope.contentTopic))
     if (group == null) {
         Log.d("PushNotificationsService", "No group found for ${envelope.contentTopic}")
         return NotificationDataResult()
     }
+    sentryTrackMessage(
+        "[NotificationExtension] Found group",
+        mapOf()
+    )
+
+    group.sync()
+
+    sentryTrackMessage(
+        "[NotificationExtension] Done syncing group",
+        mapOf()
+    )
 
     val decodedMessage = group.processMessage(envelope.message.toByteArray()).decode()
 
