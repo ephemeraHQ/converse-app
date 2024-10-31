@@ -525,6 +525,7 @@ const ConversationListItem = memo(function ConversationListItem({
       ) : (
         <TouchableRipple
           unstable_pressDelay={75}
+          onPress={openConversation}
           onLongPress={onLongPress}
           style={styles.rippleRow}
           rippleColor={clickedItemBackgroundColor(colorScheme)}
