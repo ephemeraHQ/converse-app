@@ -5,6 +5,7 @@ import { BottomSheetModal } from "@design-system/BottomSheet/BottomSheetModal";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { FlashList } from "@shopify/flash-list";
 import { useAppTheme } from "@theme/useAppTheme";
 import { memo, useCallback, useState } from "react";
 import { StyleSheet, TouchableHighlight } from "react-native";
@@ -102,29 +103,38 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
           ))}
           <HStack style={{ width: theme.spacing.xxl }} />
         </ScrollView>
-
-        {/* Detailed list of each reaction, sorted and filtered with all own reactions on top */}
-        <BottomSheetScrollView>
-          {rolledUpReactions.detailed
-            .filter(
-              (item) => !filterReactions || item.content === filterReactions
-            )
-            .map((item, idx) => (
-              <HStack
-                key={`${item.content}-${item.reactor.address}-${idx}`}
-                style={styles.reaction}
-              >
-                <Avatar
-                  size={theme.avatarSize.md}
-                  uri={item.reactor.avatar}
-                  name={item.reactor.userName}
-                />
-                <Text style={styles.userName}>{item.reactor.userName}</Text>
-                <Text style={styles.reactionContent}>{item.content}</Text>
-              </HStack>
-            ))}
-        </BottomSheetScrollView>
       </BottomSheetContentContainer>
+
+      {/* Detailed list of each reaction, sorted and filtered with all own reactions on top */}
+      <BottomSheetScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <FlashList
+          estimatedItemSize={rolledUpReactions.totalCount}
+          contentContainerStyle={{ paddingBottom: insets.bottom }}
+          data={rolledUpReactions.detailed.filter(
+            (item) => !filterReactions || item.content === filterReactions
+          )}
+          renderItem={({ item, index }) => (
+            <HStack
+              key={`${item.content}-${item.reactor.address}-${index}`}
+              style={styles.reaction}
+            >
+              <Avatar
+                size={theme.avatarSize.md}
+                uri={item.reactor.avatar}
+                name={item.reactor.userName}
+              />
+              <Text style={styles.userName}>{item.reactor.userName}</Text>
+              <Text style={styles.reactionContent}>{item.content}</Text>
+            </HStack>
+          )}
+          keyExtractor={(item, index) =>
+            `${item.content}-${item.reactor.address}-${index}`
+          }
+        />
+      </BottomSheetScrollView>
     </BottomSheetModal>
   );
 });
