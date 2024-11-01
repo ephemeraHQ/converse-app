@@ -1,4 +1,6 @@
 import { translate } from "@i18n";
+import { NativeStack } from "@navigation/AppNavigator";
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { RouteProp } from "@react-navigation/native";
 import {
   actionSheetColors,
@@ -18,11 +20,7 @@ import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
 
-import {
-  NativeStack,
-  navigationAnimation,
-  NavigationParamList,
-} from "./Navigation";
+import { navigationAnimation } from "./Navigation";
 import AndroidBackAction from "../../components/AndroidBackAction";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";

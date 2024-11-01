@@ -1,8 +1,9 @@
+import { NativeStack } from "@navigation/AppNavigator";
 import { navigationSecondaryBackgroundColor } from "@styles/colors";
 import { useColorScheme } from "react-native";
 
 import WebviewPreview from "../WebviewPreview";
-import { NativeStack, navigationAnimation } from "./Navigation";
+import { navigationAnimation } from "./Navigation";
 
 export type WebviewPreviewNavParams = {
   uri: string;

@@ -1,3 +1,4 @@
+import { NativeStack } from "@navigation/AppNavigator";
 import {
   headerTitleStyle,
   textPrimaryColor,
@@ -8,7 +9,6 @@ import { Platform, useColorScheme } from "react-native";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
 import { useRouter } from "../../navigation/useNavigation";
 import { UserProfileScreen } from "../UserProfileScreen";
-import { NativeStack } from "./Navigation";
 
 export default function UserProfileNav() {
   const colorScheme = useColorScheme();

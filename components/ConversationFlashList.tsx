@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import { backgroundColor } from "@styles/colors";
@@ -13,7 +14,6 @@ import {
   useSettingsStore,
 } from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { NavigationParamList } from "../screens/Navigation/Navigation";
 import {
   ConversationFlatListHiddenRequestItem,
   ConversationFlatListItem,

@@ -1,11 +1,5 @@
-import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
-import {
-  headerTitleStyle,
-  navigationSecondaryBackgroundColor,
-} from "@styles/colors";
-import { useColorScheme } from "react-native";
+import { NativeStack } from "@navigation/AppNavigator";
 
-import { NativeStack, navigationAnimation } from "./Navigation";
 import NewConversationModal from "../NewConversation/NewConversationModal";
 
 export type NewConversationNavParams = {
@@ -24,16 +18,6 @@ export const NewConversationScreenConfig = {
 };
 
 export default function NewConversationNav() {
-  const colorScheme = useColorScheme();
-  const options: NativeStackNavigationOptions = {
-    headerTitle: "New conversation",
-    presentation: "modal",
-    headerStyle: {
-      backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
-    } as any,
-    animation: navigationAnimation,
-  };
-
   return (
     <NativeStack.Screen
       name="NewConversation"
@@ -41,7 +25,6 @@ export default function NewConversationNav() {
       options={{
         headerShown: false,
         presentation: "modal",
-        headerTitleStyle: headerTitleStyle(colorScheme),
       }}
     />
   );

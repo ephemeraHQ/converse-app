@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { invalidateGroupConsentQuery } from "@queries/useGroupConsentQuery";
 import { invalidateGroupDescriptionQuery } from "@queries/useGroupDescriptionQuery";
 import { invalidateGroupMembersQuery } from "@queries/useGroupMembersQuery";
@@ -27,7 +28,6 @@ import { GroupScreenDescription } from "../containers/GroupScreenDescription";
 import { GroupScreenImage } from "../containers/GroupScreenImage";
 import { GroupScreenMembersTable } from "../containers/GroupScreenMembersTable";
 import { GroupScreenName } from "../containers/GroupScreenName";
-import { NavigationParamList } from "./Navigation/Navigation";
 import { useChatStore, useCurrentAccount } from "../data/store/accountsStore";
 import { XmtpGroupConversation } from "../data/store/chatStore";
 

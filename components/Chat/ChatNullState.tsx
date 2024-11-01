@@ -29,15 +29,9 @@ import NewConversationButton from "../ConversationList/NewConversationButton";
 
 interface ChatNullStateProps {
   currentAccount: string;
-  navigation: any;
-  route: any;
 }
 
-const ChatNullState: React.FC<ChatNullStateProps> = ({
-  currentAccount,
-  navigation,
-  route,
-}) => {
+const ChatNullState: React.FC<ChatNullStateProps> = ({ currentAccount }) => {
   const colorScheme = useColorScheme();
   const styles = useStyles();
 

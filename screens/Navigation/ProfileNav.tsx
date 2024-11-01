@@ -1,3 +1,4 @@
+import { NativeStack } from "@navigation/AppNavigator";
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
@@ -9,7 +10,7 @@ import { useCurrentAccount } from "../../data/store/accountsStore";
 import { useRouter } from "../../navigation/useNavigation";
 import { navigate } from "../../utils/navigation";
 import ProfileScreen from "../Profile";
-import { NativeStack, navigationAnimation } from "./Navigation";
+import { navigationAnimation } from "./Navigation";
 
 export type ProfileNavParams = {
   address: string;

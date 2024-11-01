@@ -61,7 +61,7 @@ export function Header(props: HeaderProps) {
     rightText,
     rightTx,
     rightTxOptions,
-    safeAreaEdges = [],
+    safeAreaEdges = ["top"],
     title,
     titleComponent,
     titleTx,

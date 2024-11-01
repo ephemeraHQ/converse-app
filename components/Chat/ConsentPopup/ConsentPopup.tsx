@@ -1,5 +1,6 @@
 import { Button } from "@design-system/Button/Button";
 import { translate } from "@i18n";
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
@@ -15,7 +16,6 @@ import {
   getSettingsStore,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
-import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../../utils/conversation";
 import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";

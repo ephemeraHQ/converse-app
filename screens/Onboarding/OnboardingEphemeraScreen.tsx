@@ -1,5 +1,6 @@
 import ValueProps from "@components/Onboarding/ValueProps";
 import { translate } from "@i18n";
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { utils } from "@noble/secp256k1";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { spacing } from "@theme/spacing";
@@ -15,7 +16,6 @@ import { Text } from "../../design-system/Text/Text";
 import { VStack } from "../../design-system/VStack";
 import { useRouter } from "../../navigation/useNavigation";
 import { sentryTrackError } from "../../utils/sentry";
-import { NavigationParamList } from "../Navigation/Navigation";
 
 export function OnboardingEphemeraScreen(
   props: NativeStackScreenProps<NavigationParamList, "OnboardingEphemeral">

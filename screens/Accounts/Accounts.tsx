@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -17,7 +18,6 @@ import {
 } from "../../data/store/accountsStore";
 import { useRouter } from "../../navigation/useNavigation";
 import { shortAddress, useAccountsProfiles } from "../../utils/str";
-import { NavigationParamList } from "../Navigation/Navigation";
 
 export default function Accounts(
   props: NativeStackScreenProps<NavigationParamList, "Accounts">

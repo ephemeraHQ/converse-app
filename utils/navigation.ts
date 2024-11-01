@@ -1,16 +1,15 @@
+import { IScreenName, NavigationParamList } from "@navigation/Navigation.types";
+import { navigationRef } from "@screens/Navigation/navHelpers";
 import * as Linking from "expo-linking";
 import { Linking as RNLinking } from "react-native";
 
+import config from "../config";
 import logger from "./logger";
 import { loadSavedNotificationMessagesToContext } from "./notifications";
-import config from "../config";
 import { currentAccount, getChatStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
-import { NavigationParamList } from "../screens/Navigation/Navigation";
 
-export const converseNavigations: { [navigationName: string]: any } = {};
-
-export const navigate = async <T extends keyof NavigationParamList>(
+export const navigate = async <T extends IScreenName>(
   screen: T,
   params?: NavigationParamList[T]
 ) => {
@@ -19,11 +18,14 @@ export const navigate = async <T extends keyof NavigationParamList>(
       params ? JSON.stringify(params) : ""
     }`
   );
-  // Navigate to a screen in all navigators
-  // like Linking.openURL but without redirect on web
-  Object.values(converseNavigations).forEach((navigation) => {
-    navigation.navigate(screen, params);
-  });
+
+  if (!navigationRef.current) {
+    logger.error("[Navigation] Navigation ref is not set");
+    return;
+  }
+
+  // @ts-expect-error
+  navigationRef.current.navigate(screen, params);
 };
 
 export let topicToNavigateTo = "";

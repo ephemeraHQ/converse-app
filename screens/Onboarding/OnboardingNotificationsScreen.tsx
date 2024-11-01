@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { PictoSizes } from "@styles/sizes";
 import * as Linking from "expo-linking";
@@ -15,7 +16,6 @@ import { VStack } from "../../design-system/VStack";
 import { spacing } from "../../theme";
 import { requestPushNotificationsPermissions } from "../../utils/notifications";
 import { sentryTrackError } from "../../utils/sentry";
-import { NavigationParamList } from "../Navigation/Navigation";
 
 export function OnboardingNotificationsScreen(
   props: NativeStackScreenProps<NavigationParamList, "OnboardingNotifications">

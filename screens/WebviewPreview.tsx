@@ -1,3 +1,4 @@
+import { NavigationParamList } from "@navigation/Navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   setAndroidColors,
@@ -7,7 +8,6 @@ import { useEffect, useState } from "react";
 import { Button, Platform, useColorScheme } from "react-native";
 import { WebView } from "react-native-webview";
 
-import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 
 export default function WebviewPreview({

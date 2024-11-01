@@ -17,7 +17,8 @@
       "@utils/*": ["./utils/*"],
       "@theme/*": ["./theme/*"],
       "@design-system/*": ["./design-system/*"],
-      "@navigation/*": ["./navigation/*"]
+      "@navigation/*": ["./navigation/*"],
+      "@features/*": ["./features/*"]
     }
   },
   "exclude": ["./vendor/**/*", "./node_modules/**/*", "./dist/**/*"]
