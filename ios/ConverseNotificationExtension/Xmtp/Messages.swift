@@ -283,12 +283,13 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
   // If topic is MLS, the conversation should already be there
   // @todo except if it's new convo => call sync before?
   if (isGroupMessageTopic(topic: envelope.contentTopic)) {
-    let groupList = try! await xmtpClient.conversations.groups()
-    if let group = groupList.first(where: { $0.topic == envelope.contentTopic }) {
+  
+    if let group = try! xmtpClient.findGroup(groupId: getGroupIdFromTopic(topic: envelope.contentTopic) ) {
       do {
-        print("[NotificationExtension] Decoding group message...")
+        sentryTrackMessage(message: "[NotificationExtension] Syncing Group", extras: [:])
+        try await group.sync()
+        sentryTrackMessage(message: "[NotificationExtension] Done Syncing Group", extras: [:])
         let envelopeBytes = envelope.message
-        let _ = try await group.processMessageDecrypted(envelopeBytes: envelopeBytes)
         let decodedMessage = try await group.processMessage(envelopeBytes: envelopeBytes)
         print("[NotificationExtension] Group message decoded!")
         return decodedMessage
