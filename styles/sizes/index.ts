@@ -40,7 +40,6 @@ export enum PictoSizes {
   tableViewImage = 24,
   textButton = 15,
   cancelAttachmentButton = 6,
-  externalWallet = 14,
 }
 
 /**

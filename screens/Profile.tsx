@@ -2,9 +2,9 @@ import Picto from "@components/Picto/Picto";
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
 import { translate } from "@i18n";
+import { useRoute, useRouter } from "@navigation/useNavigation";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { StackActions } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   actionSheetColors,
   backgroundColor,
@@ -17,16 +17,17 @@ import { PictoSizes } from "@styles/sizes";
 import { usePrivySigner } from "@utils/evm/privy";
 import { useXmtpSigner } from "@utils/evm/xmtp";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
+import { sentryTrackError } from "@utils/sentry";
 import { shortAddress } from "@utils/str";
 import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
 import {
   getOtherInstallations,
   revokeOtherInstallations,
 } from "@utils/xmtpRN/revoke";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { getXmtpClient, useCurrentAccountXmtpClient } from "@utils/xmtpRN/sync";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Platform,
@@ -51,6 +52,7 @@ import {
   TableViewPicto,
 } from "../components/TableView/TableViewImage";
 import config from "../config";
+import { ConversationNavParams } from "./Navigation/ConversationNav";
 import {
   currentAccount,
   useCurrentAccount,
@@ -62,6 +64,8 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
+import { ExternalWalletPicker } from "../features/ExternalWalletPicker/ExternalWalletPicker";
+import { ExternalWalletPickerContextProvider } from "../features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { useGroupMembers } from "../hooks/useGroupMembers";
 import { useGroupPermissions } from "../hooks/useGroupPermissions";
 import { evmHelpers } from "../utils/evm/helpers";
@@ -82,14 +86,41 @@ import {
 } from "../utils/profile";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
-import { ConversationNavParams } from "./Navigation/ConversationNav";
-import { NavigationParamList } from "./Navigation/Navigation";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 
-export default function ProfileScreen({
-  route,
-  navigation,
-}: NativeStackScreenProps<NavigationParamList, "Profile">) {
+export default function ProfileScreen() {
+  return (
+    <ExternalWalletPickerContextProvider>
+      <ProfileScreenImpl />
+      <ExternalWalletPickerWrapper />
+    </ExternalWalletPickerContextProvider>
+  );
+}
+
+const ExternalWalletPickerWrapper = memo(
+  function ExternalWalletPickerWrapper() {
+    const profiles = useProfilesStore((state) => state.profiles);
+    const peerAddress = useRoute<"Profile">().params.address;
+    const socials = getProfile(peerAddress, profiles)?.socials;
+    const { client } = useCurrentAccountXmtpClient();
+
+    return (
+      <ExternalWalletPicker
+        title={translate("revoke_wallet_picker_title")}
+        subtitle={translate("revoke_wallet_picker_description", {
+          wallet:
+            getPreferredUsername(socials) ||
+            (client ? shortAddress(client.address) : ""),
+        })}
+      />
+    );
+  }
+);
+
+function ProfileScreenImpl() {
+  const navigation = useRouter();
+  const route = useRoute<"Profile">();
+
   const userAddress = useCurrentAccount() as string;
   const USDCBalance = useWalletStore((s) => s.USDCBalance);
   const colorScheme = useColorScheme();
@@ -773,41 +804,39 @@ export default function ProfileScreen({
                     ? undefined
                     : primaryColor(colorScheme),
                 action: async () => {
-                  const client = (await getXmtpClient(
-                    userAddress
-                  )) as ConverseXmtpClientType;
-                  const otherInstallations = await getOtherInstallations(
-                    client
-                  );
-                  if (otherInstallations.length === 0) {
-                    Alert.alert(
-                      translate("revoke_done_title"),
-                      translate("revoke_empty")
+                  try {
+                    const client = (await getXmtpClient(
+                      userAddress
+                    )) as ConverseXmtpClientType;
+                    const otherInstallations = await getOtherInstallations(
+                      client
                     );
-                    return;
-                  }
-                  const signer = await getXmtpSigner(
-                    translate("revoke_wallet_picker_title"),
-                    translate("revoke_wallet_picker_description", {
-                      wallet:
-                        getPreferredUsername(socials) ||
-                        shortAddress(client.address),
-                    })
-                  );
-                  if (!signer) return;
+                    if (otherInstallations.length === 0) {
+                      Alert.alert(
+                        translate("revoke_done_title"),
+                        translate("revoke_empty")
+                      );
+                      return;
+                    }
+                    const signer = await getXmtpSigner();
+                    if (!signer) return;
 
-                  const revoked = await revokeOtherInstallations(
-                    signer,
-                    client,
-                    otherInstallations.length
-                  );
-                  if (revoked) {
-                    Alert.alert(
-                      translate("revoke_done_title"),
-                      translate("revoke_done_description", {
-                        count: otherInstallations.length,
-                      })
+                    const revoked = await revokeOtherInstallations(
+                      signer,
+                      client,
+                      otherInstallations.length
                     );
+                    if (revoked) {
+                      Alert.alert(
+                        translate("revoke_done_title"),
+                        translate("revoke_done_description", {
+                          count: otherInstallations.length,
+                        })
+                      );
+                    }
+                  } catch (error) {
+                    // TODO: Show error feedback to user
+                    sentryTrackError(error);
                   }
                 },
               },

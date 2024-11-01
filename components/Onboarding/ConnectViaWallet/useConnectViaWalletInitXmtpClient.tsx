@@ -4,7 +4,7 @@ import { awaitableAlert } from "@utils/alert";
 import { ensureError } from "@utils/error";
 import logger from "@utils/logger";
 import { sentryTrackError, sentryTrackMessage } from "@utils/sentry";
-import { reloadAppAsync } from "expo";
+import { reloadAsync } from "expo-updates";
 import { useCallback, useEffect, useRef } from "react";
 
 import { wait } from "../../../utils/general";
@@ -37,7 +37,7 @@ export function useInitXmptClient() {
         logger.debug(
           "[Connect Wallet] User left the XMTP flow before finishing, reloading the app"
         );
-        reloadAppAsync().catch(sentryTrackError);
+        reloadAsync().catch(sentryTrackError);
       }
     },
   });

@@ -4,8 +4,8 @@ import "./polyfills";
 
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
+import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { PortalProvider } from "@gorhom/portal";
 import { useAppStateHandlers } from "@hooks/useAppStateHandlers";
 import { PrivyProvider } from "@privy-io/expo";
@@ -29,7 +29,6 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
 
-import "./utils/splash/splash";
 import { xmtpCron, xmtpEngine } from "./components/XmtpEngine";
 import config from "./config";
 import {
@@ -47,6 +46,7 @@ import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
+import "./utils/splash/splash";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy

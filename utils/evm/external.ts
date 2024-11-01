@@ -1,7 +1,7 @@
 import { useInstalledWallets } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import { translate } from "@i18n";
-import { converseEventEmitter, waitForConverseEvent } from "@utils/events";
 import logger from "@utils/logger";
+import { sentryTrackError } from "@utils/sentry";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Signer } from "ethers";
 import { useCallback, useEffect, useMemo } from "react";
@@ -19,6 +19,7 @@ import {
   useSwitchActiveWalletChain,
 } from "thirdweb/react";
 import { Account } from "thirdweb/wallets";
+import { useExternalWalletPickerContext } from "../../features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { DEFAULT_SUPPORTED_CHAINS } from "./wallets";
 
 let signerSingleton: Signer | undefined = undefined;
@@ -36,6 +37,7 @@ export const useExternalSigner = () => {
   const { disconnect } = useDisconnect();
   const switchActiveWalletChain = useSwitchActiveWalletChain();
   const wallets = useInstalledWallets();
+  const { openAndWaitForWalletPicked } = useExternalWalletPickerContext();
 
   useEffect(() => {
     accountSingleton = activeAccount;
@@ -43,35 +45,35 @@ export const useExternalSigner = () => {
 
   const getExternalSigner = useCallback(
     async (title?: string, subtitle?: string) => {
-      if (signerSingleton) {
-        return signerSingleton;
-      }
-      if (accountSingleton) {
+      try {
+        if (signerSingleton) {
+          return signerSingleton;
+        }
+        if (accountSingleton) {
+          const signer = await ethers5Adapter.signer.toEthers({
+            client: thirdwebClient,
+            chain: ethereum,
+            account: accountSingleton,
+          });
+          signerSingleton = signer;
+
+          return signer;
+        }
+        const { wallet, account } = await openAndWaitForWalletPicked();
+        setActiveWallet(wallet);
         const signer = await ethers5Adapter.signer.toEthers({
           client: thirdwebClient,
           chain: ethereum,
-          account: accountSingleton,
+          account,
         });
         signerSingleton = signer;
 
         return signer;
+      } catch (error) {
+        sentryTrackError(error);
       }
-      converseEventEmitter.emit("displayExternalWalletPicker", title, subtitle);
-      const [{ wallet, account }] = await waitForConverseEvent(
-        "externalWalletPicked"
-      );
-      if (!wallet || !account) return;
-      setActiveWallet(wallet);
-      const signer = await ethers5Adapter.signer.toEthers({
-        client: thirdwebClient,
-        chain: ethereum,
-        account,
-      });
-      signerSingleton = signer;
-
-      return signer;
     },
-    [setActiveWallet]
+    [setActiveWallet, openAndWaitForWalletPicked]
   );
 
   const resetExternalSigner = useCallback(async () => {
