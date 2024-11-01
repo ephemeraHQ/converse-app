@@ -10,7 +10,7 @@ import { waitUntilAppActive } from "@utils/appState/waitUntilAppActive";
 import { converseEventEmitter } from "@utils/events";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Image } from "expo-image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -21,9 +21,9 @@ import {
 } from "react-native";
 import { Account, Wallet, createWallet } from "thirdweb/wallets";
 
-import config from "../config";
 import Button from "./Button/Button";
-import { Drawer, DrawerRef } from "./Drawer";
+import { Drawer } from "./Drawer";
+import config from "../config";
 import {
   InstalledWallet,
   useInstalledWallets,
@@ -33,7 +33,6 @@ import Picto from "./Picto/Picto";
 export default function ExternalWalletPicker() {
   const styles = useStyles();
   const colorScheme = useColorScheme();
-  const drawerRef = useRef<DrawerRef>(null);
   const [visible, setVisible] = useState(false);
   const [title, setTitle] = useState<string | undefined>(undefined);
   const [subtitle, setSubtitle] = useState<string | undefined>(undefined);
@@ -126,8 +125,8 @@ export default function ExternalWalletPicker() {
     <Drawer
       visible={visible}
       onClose={closeMenu}
-      ref={drawerRef}
       style={styles.drawer}
+      showHandle
     >
       <ScrollView style={styles.wallets} alwaysBounceVertical={false}>
         {title && <Text style={styles.title}>{title}</Text>}

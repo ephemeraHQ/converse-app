@@ -114,7 +114,7 @@ export const EmojiPicker = () => {
   );
 
   return (
-    <Drawer visible={visible} onClose={closeMenu} ref={drawerRef}>
+    <Drawer visible={visible} onClose={closeMenu} ref={drawerRef} showHandle>
       <EmojiSearchBar value={searchInput} setValue={setSearchInput} />
       <View style={styles.container}>
         {searchInput.length > 0 ? (

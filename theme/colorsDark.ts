@@ -50,6 +50,7 @@ export const colorsDark: IColors = {
     secondary: lightPalette.light60,
     tertiary: lightPalette.light30,
     inactive: lightPalette.light15,
+    caution: lightPalette.red,
     inverted: {
       primary: darkPalette.dark,
       secondary: darkPalette.dark60,

@@ -1,7 +1,19 @@
 // TODO: move out of ConnectViaWallet
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useState } from "react";
+import { Chain } from "thirdweb";
+import {
+  arbitrum,
+  avalanche,
+  base,
+  blast,
+  ethereum,
+  optimism,
+  polygon,
+  zora,
+} from "thirdweb/chains";
 import { WalletId } from "thirdweb/wallets";
+
 import { useAppStateHandlers } from "../../../hooks/useAppStateHandlers";
 import { isEthOS } from "../../../utils/ethos";
 
@@ -69,6 +81,18 @@ const SUPPORTED_WALLETS = [
       "https://explorer-api.walletconnect.com/v3/logo/sm/7a33d7f1-3d12-4b5c-f3ee-5cd83cb1b500?projectId=2f05ae7f1116030fde2d36508f472bfb",
     customScheme: "rainbow://",
     thirdwebId: "me.rainbow",
+    // Rainbow Mobile does not support tesnets (even Sepolia)
+    // https://rainbow.me/en/support/app/testnets
+    supportedChains: [
+      ethereum,
+      base,
+      optimism,
+      polygon,
+      arbitrum,
+      avalanche,
+      blast,
+      zora,
+    ],
   },
   {
     name: "MetaMask",
@@ -125,7 +149,7 @@ const SUPPORTED_WALLETS = [
   //   customScheme: "oneinch://",
   //   universalLink: "https://wallet.1inch.io",
   // },
-] as const;
+];
 
 type ISupportedWalletName =
   | (typeof SUPPORTED_WALLETS)[number]["name"]
@@ -139,6 +163,7 @@ export type InstalledWallet = {
   walletConnectId?: string;
   platforms?: string[];
   thirdwebId?: WalletId;
+  supportedChains?: Chain[];
 };
 
 let hasCheckedInstalled = false;
@@ -161,7 +186,11 @@ export const getInstalledWallets = async (
     });
   }
 
-  wallets.push(...SUPPORTED_WALLETS.filter((w, i) => checkInstalled[i]));
+  wallets.push(
+    ...(SUPPORTED_WALLETS as InstalledWallet[]).filter(
+      (w, i) => checkInstalled[i]
+    )
+  );
   installedWallets = wallets;
   hasCheckedInstalled = true;
   return installedWallets;
