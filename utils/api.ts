@@ -1,3 +1,5 @@
+import { TransactionData } from "@components/TransactionPreview/TransactionPreview";
+import type { SimulateAssetChangesResponse } from "alchemy-sdk";
 import axios from "axios";
 import * as Contacts from "expo-contacts";
 
@@ -525,6 +527,30 @@ export const getPendingGroupJoinRequests = async (
     headers: await getXmtpApiHeaders(account),
   });
   return data;
+};
+
+export const simulateTransaction = async (
+  account: string,
+  from: string,
+  chainId: number,
+  transaction: TransactionData
+) => {
+  const { data } = await api.post(
+    "/api/transactions/simulate",
+    {
+      address: from,
+      network: `eip155:${chainId}`,
+      value: transaction.value
+        ? `0x${BigInt(transaction.value).toString(16)}`
+        : undefined,
+      to: transaction.to,
+      data: transaction.data,
+    },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
+  return data as SimulateAssetChangesResponse;
 };
 
 export default api;

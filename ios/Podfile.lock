@@ -1334,6 +1334,27 @@ PODS:
     - React-debug
   - react-native-aes-gcm-crypto (0.2.2):
     - React-Core
+  - react-native-compat (2.17.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-context-menu-view (1.16.0):
     - React
   - react-native-fast-create-hash (1.0.0-alpha.2):
@@ -1387,9 +1408,11 @@ PODS:
     - Yoga
   - react-native-netinfo (11.3.1):
     - React-Core
+  - react-native-passkey (2.1.1):
+    - React-Core
   - react-native-quick-base64 (2.0.8):
     - React-Core
-  - react-native-quick-crypto (0.7.1):
+  - react-native-quick-crypto (0.7.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1905,6 +1928,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - react-native-aes-gcm-crypto (from `../node_modules/react-native-aes-gcm-crypto`)
+  - "react-native-compat (from `../node_modules/@walletconnect/react-native-compat`)"
   - react-native-context-menu-view (from `../node_modules/react-native-context-menu-view`)
   - "react-native-fast-create-hash (from `../node_modules/@mfellner/react-native-fast-create-hash`)"
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
@@ -1912,6 +1936,7 @@ DEPENDENCIES:
   - "react-native-menu (from `../node_modules/@react-native-menu/menu`)"
   - react-native-mmkv (from `../node_modules/react-native-mmkv`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
+  - react-native-passkey (from `../node_modules/react-native-passkey`)
   - react-native-quick-base64 (from `../node_modules/react-native-quick-base64`)
   - react-native-quick-crypto (from `../node_modules/react-native-quick-crypto`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -2144,6 +2169,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   react-native-aes-gcm-crypto:
     :path: "../node_modules/react-native-aes-gcm-crypto"
+  react-native-compat:
+    :path: "../node_modules/@walletconnect/react-native-compat"
   react-native-context-menu-view:
     :path: "../node_modules/react-native-context-menu-view"
   react-native-fast-create-hash:
@@ -2158,6 +2185,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-mmkv"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
+  react-native-passkey:
+    :path: "../node_modules/react-native-passkey"
   react-native-quick-base64:
     :path: "../node_modules/react-native-quick-base64"
   react-native-quick-crypto:
@@ -2350,6 +2379,7 @@ SPEC CHECKSUMS:
   React-logger: 257858bd55f3a4e1bc0cf07ddc8fb9faba6f8c7c
   React-Mapbuffer: dce508662b995ffefd29e278a16b78217039d43d
   react-native-aes-gcm-crypto: f1bade1824458569b0e0f27ef4bc647ffe48ebbc
+  react-native-compat: 8c5b1daecd32eb81aaf358ad6275b28019d78850
   react-native-context-menu-view: 30915369a9b5887904c571b616653acf3f1c8edb
   react-native-fast-create-hash: 0d0f0ec146f12feadace675164f881bbe692f8bd
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
@@ -2357,8 +2387,9 @@ SPEC CHECKSUMS:
   react-native-menu: d32728a357dfb360cf01cd5979cf7713c5acbb95
   react-native-mmkv: 6d8259f25b80397c99ad50e2d891e22465f65e09
   react-native-netinfo: bdb108d340cdb41875c9ced535977cac6d2ff321
+  react-native-passkey: 29ff814a83dfd4311478498e71a801dce68043ac
   react-native-quick-base64: 777057ea4286f806b00259ede65dc79c7c706320
-  react-native-quick-crypto: 09c5986efae9b05e31b0aba0be75fac9e4d8bd44
+  react-native-quick-crypto: 3b7e5dd28ddd76604b22377baa8135c306404be0
   react-native-safe-area-context: a240ad4b683349e48b1d51fed1611138d1bdad97
   react-native-sfsymbols: bd3a0d3eab185e80b571bae60753dcf5a0d57967
   react-native-sqlite-storage: f6d515e1c446d1e6d026aa5352908a25d4de3261
@@ -2418,7 +2449,7 @@ SPEC CHECKSUMS:
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
   XMTP: 09faa347569b092005997364f7fe787ccc33f3d5
   XMTPReactNative: 0c92d55c576ac6ff0775357fa60e90ea8e73afc2
-  Yoga: 33622183a85805e12703cd618b2c16bfd18bfffb
+  Yoga: 1ab23c1835475da69cf14e211a560e73aab24cb0
 
 PODFILE CHECKSUM: 137cb0cd2dafbfb3e5b9343435f9db8e28690806
 

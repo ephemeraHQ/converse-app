@@ -1,3 +1,4 @@
+import { DEFAULT_SUPPORTED_CHAINS } from "@utils/evm/wallets";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { base, baseSepolia } from "wagmi/chains";
@@ -27,6 +28,7 @@ const defaultConfig = {
       logoUrl: "https://converse.xyz/icon.png",
       icons: [],
     },
+    optionalChains: DEFAULT_SUPPORTED_CHAINS,
   },
   thirdwebClientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
   expoProjectId: process.env.EXPO_PUBLIC_EXPO_PROJECT_ID,
@@ -64,7 +66,6 @@ const ENV = {
     universalLinks: ["dev.converse.xyz/", "dev.getconverse.app/"].flatMap(
       (domain) => [`https://${domain}`, `http://${domain}`, domain]
     ),
-    enableTransactionFrames: true,
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/UDv3aYZONQGc6_XPJY6Ch",
   },
@@ -83,7 +84,6 @@ const ENV = {
       "preview.converse.xyz/",
       "preview.getconverse.app/",
     ].flatMap((domain) => [`https://${domain}`, `http://${domain}`, domain]),
-    enableTransactionFrames: true,
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
   },
@@ -117,7 +117,6 @@ const ENV = {
       },
       rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     },
-    enableTransactionFrames: false,
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
   },

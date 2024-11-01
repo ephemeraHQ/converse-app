@@ -345,6 +345,30 @@ export const en = {
   joinAlphaGroup: "Join Converse VIP Alpha Chat",
   linkCopied: "Link copied",
 
+  // Transactional frames
+  transactionalFrameConnectWallet:
+    "Connect to a wallet app to trigger a transaction",
+  transaction_failure: "Transaction failed",
+  transaction_pending: "Confirm in {{wallet}}",
+  transaction_triggering: "Opening {{wallet}}...",
+  transaction_triggered: "Your transaction is being executed...",
+  transaction_success: "Done!",
+  transaction_switch_chain: "Switch Chain to {{chainName}} in {{wallet}}",
+  transaction_wallet: "Wallet",
+
+  // Transaction Simulation
+  simulation_pending: "Safely Simulating this Transaction",
+  simulation_failure:
+    "We were unable to simulate this transaction. You may still trigger it in your wallet.",
+  simulation_will_revert:
+    "Simulation shows that this transaction will revert. You may still try to trigger it in your wallet.",
+  simulation_caution: "Caution",
+  transaction_asset_change_type_approve: "Approve",
+  transaction_asset_change_type_transfer: "Transfer",
+  transaction_asset_change_to: "To",
+  external_wallet_chain_not_supported:
+    "This chain is not supported by your wallet",
+
   // New Conversation
   cannot_be_added_to_group_yet:
     "{{name}} needs to update Converse to be added to a group",
