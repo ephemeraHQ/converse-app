@@ -16,7 +16,7 @@ import PhoneInput, { PhoneInputProps } from "react-native-phone-number-input";
 import { usePrivyAuthStoreContext } from "./privyAuthStore";
 import { usePrivySmsLogin } from "./usePrivySmsLogin";
 import { Terms } from "../../../components/Onboarding/Terms";
-import Picto from "../../../components/Picto";
+import Picto from "../../../components/Picto/Picto";
 import { VStack } from "../../../design-system/VStack";
 import { translate } from "../../../i18n";
 import { PictoSizes } from "../../../styles/sizes";

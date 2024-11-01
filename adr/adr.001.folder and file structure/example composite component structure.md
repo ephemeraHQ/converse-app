@@ -1,6 +1,6 @@
 # Example Composite Component Structure
 
-Thierry initially pressented this pattern as part of a design overhaul discussion. This is a great pattern to avoid "leaking" component names into the global namespace. 
+Thierry initially pressented this pattern as part of a design overhaul discussion. This is a great pattern to avoid "leaking" component names into the global namespace.
 
 We wanted to present this as part of our file/folder structure organiziation as the pattern greatly aids in keeping components organized and usable only within their feature only.
 
@@ -18,12 +18,8 @@ Hey guys! I made a Loom video going through some of my thoughts on design system
 
 [View Slack thread](https://xmtp-labs.slack.com/archives/C07NSHXK693/p1728316993186399)
 
-
-
-
-
 ```tsx
-import Picto from "@components/Picto";
+import Picto from "@components/Picto/Picto";
 import { AnimatedText, IAnimatedTextProps } from "@design-system/Text";
 import { ITitleProps, Title } from "@design-system/Title";
 import { AnimatedVStack, IAnimatedVStackProps } from "@design-system/VStack";

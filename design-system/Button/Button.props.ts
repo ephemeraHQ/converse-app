@@ -1,3 +1,4 @@
+import { IIconName } from "@design-system/Icon/Icon.types";
 import { ComponentType } from "react";
 import {
   PressableStateCallbackType,
@@ -7,7 +8,6 @@ import {
   ViewStyle,
 } from "react-native";
 
-import { IPicto } from "../../components/Picto/Picto";
 import { ITextProps } from "../Text";
 
 export type IButtonVariant =
@@ -106,9 +106,13 @@ export interface IButtonProps extends RNPressableProps {
    * Whether the button should trigger a haptic feedback.
    */
   withHapticFeedback?: boolean;
+  /**
+   * Replace the deprecated `picto` prop.
+   */
+  icon?: IIconName;
 
-  /** @deprecated - use text instead */
+  /** @deprecated use text instead */
   title?: string;
-  /** @deprecated */
-  picto?: IPicto;
+  /** @deprecated use icon instead */
+  picto?: IIconName;
 }

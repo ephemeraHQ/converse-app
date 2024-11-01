@@ -43,6 +43,7 @@ export const colorsDark: IColors = {
     surface: darkPalette.dark,
     sunken: darkPalette.dark85,
     raised: darkPalette.dark85,
+    scrim: darkPalette.scrim,
   },
   text: {
     primary: lightPalette.light,

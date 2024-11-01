@@ -1,7 +1,7 @@
+import { IPicto } from "@components/Picto/Picto.types";
 import { ReactElement } from "react";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
 
-import { IPicto } from "../../components/Picto/Picto";
 import {
   ExtendedEdge,
   useSafeAreaInsetsStyle,

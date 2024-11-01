@@ -139,11 +139,12 @@ exports[`Button Component Default (Android) Button renders correctly with picto 
     iconColor={-1}
     multicolor={false}
     resizeMode="center"
+    size={16}
     style={
       [
         {
-          "height": undefined,
-          "width": undefined,
+          "height": 16,
+          "width": 16,
         },
         {
           "marginEnd": 12,
@@ -152,7 +153,6 @@ exports[`Button Component Default (Android) Button renders correctly with picto 
       ]
     }
     systemName="star"
-    weight="regular"
   />
   <Text
     style={

@@ -1,3 +1,4 @@
+import { IPicto } from "@components/Picto/Picto.types";
 import { messageBubbleColor, textSecondaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import {
@@ -8,7 +9,7 @@ import {
   ViewStyle,
 } from "react-native";
 
-import Picto, { IPicto } from "../Picto/Picto";
+import Picto from "../Picto/Picto";
 
 type ChatActionProps = {
   picto: IPicto;
