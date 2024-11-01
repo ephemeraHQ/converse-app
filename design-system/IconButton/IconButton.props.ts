@@ -60,4 +60,9 @@ export interface IIconButtonProps extends RNPressableProps {
    * Whether the button is disabled.
    */
   disabled?: boolean;
+
+  /**
+   * Haptic or not
+   */
+  withHaptics?: boolean;
 }
