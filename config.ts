@@ -1,4 +1,4 @@
-import { DEFAULT_SUPPORTED_CHAINS } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
+import { DEFAULT_SUPPORTED_CHAINS } from "@utils/evm/wallets";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { base, baseSepolia } from "wagmi/chains";

@@ -1,7 +1,4 @@
-import {
-  CHAIN_BY_ID,
-  InstalledWallet,
-} from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
+import { InstalledWallet } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import { Text } from "@design-system/Text";
 import { TouchableOpacity } from "@design-system/TouchableOpacity";
 import { VStack } from "@design-system/VStack";
@@ -10,6 +7,7 @@ import { spacing } from "@theme/spacing";
 
 import { TransactionToTrigger } from "./TransactionPreview";
 import TransactionNext from "../../assets/transaction-next.svg";
+import { CHAIN_BY_ID } from "@utils/evm/wallets";
 
 type ITransactionActionsProps = {
   shouldSwitchChain?: boolean;

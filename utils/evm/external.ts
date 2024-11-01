@@ -1,7 +1,4 @@
-import {
-  DEFAULT_SUPPORTED_CHAINS,
-  useInstalledWallets,
-} from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
+import { useInstalledWallets } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import { translate } from "@i18n";
 import { converseEventEmitter, waitForConverseEvent } from "@utils/events";
 import logger from "@utils/logger";
@@ -22,6 +19,7 @@ import {
   useSwitchActiveWalletChain,
 } from "thirdweb/react";
 import { Account } from "thirdweb/wallets";
+import { DEFAULT_SUPPORTED_CHAINS } from "./wallets";
 
 let signerSingleton: Signer | undefined = undefined;
 let accountSingleton: Account | undefined = undefined;
