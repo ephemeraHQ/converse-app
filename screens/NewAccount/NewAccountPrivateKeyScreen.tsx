@@ -12,7 +12,6 @@ import { sentryTrackError } from "../../utils/sentry";
 import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
 import {
   PrivateKeyInput,
-  useAvoidInputEffect,
   useLoginWithPrivateKey,
 } from "../Onboarding/OnboardingPrivateKeyScreen";
 
@@ -21,8 +20,6 @@ export const NewAccountPrivateKeyScreen = memo(function () {
   const [privateKey, setPrivateKey] = useState("");
 
   const router = useRouter();
-
-  useAvoidInputEffect();
 
   const onConnect = useCallback(async () => {
     try {

@@ -18844,11 +18844,6 @@ react-native-aes-gcm-crypto@^0.2.2:
   resolved "https://registry.yarnpkg.com/react-native-aes-gcm-crypto/-/react-native-aes-gcm-crypto-0.2.2.tgz#e2c355e94a88ef52179dc22ae81988637b9ba7f1"
   integrity sha512-vUwkh2zBiIQMRY191IfZhDmhHVT+nV4sxet/A0V8J35lVShCA4kuFzBL+QVB06RM2EF8oZSnNMt/uvFkKAx6QQ==
 
-react-native-avoid-softinput@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/react-native-avoid-softinput/-/react-native-avoid-softinput-4.0.1.tgz#c08802f66c46ddc91f72d05d1b80644102f80a30"
-  integrity sha512-feMt+Pb/wEcuobbIRDHXj1leXT15uC8CekgwMb/t8s61kWy5ifCGtX/YqDZMDRiD0sqeFLZx0gykLQOSrCpybA==
-
 react-native-background-color@^0.0.8:
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/react-native-background-color/-/react-native-background-color-0.0.8.tgz#661f737156a18a86ece362126e9c97e33fa42ed2"

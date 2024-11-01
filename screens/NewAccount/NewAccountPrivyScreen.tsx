@@ -1,3 +1,4 @@
+import { sentryTrackError } from "@utils/sentry";
 import React, { memo } from "react";
 
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
@@ -36,6 +37,7 @@ const Content = memo(function Content() {
       }
     },
     onConnectionError: (error) => {
+      sentryTrackError(error);
       router.goBack();
     },
   });

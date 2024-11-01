@@ -9,9 +9,8 @@ import {
 } from "@styles/colors";
 import { spacing } from "@theme/spacing";
 import { Wallet } from "ethers";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Alert, StyleSheet, TextInput, useColorScheme } from "react-native";
-import { AvoidSoftInput } from "react-native-avoid-softinput";
 
 import {
   isMissingConverseProfile,
@@ -30,14 +29,10 @@ import { NavigationParamList } from "../Navigation/Navigation";
 export function OnboardingPrivateKeyScreen(
   props: NativeStackScreenProps<NavigationParamList, "OnboardingPrivateKey">
 ) {
-  useAvoidInputEffect();
-
   const { loading, loginWithPrivateKey } = useLoginWithPrivateKey();
   const [privateKey, setPrivateKey] = useState("");
 
   const router = useRouter();
-
-  useAvoidInputEffect();
 
   const handlePressConnect = useCallback(async () => {
     try {
@@ -95,19 +90,6 @@ const getSignerFromPrivateKey = async (privateKey: string) => {
   } catch (e: any) {
     Alert.alert(translate("privateKeyConnect.invalidPrivateKey"));
   }
-};
-
-export const useAvoidInputEffect = () => {
-  useEffect(() => {
-    AvoidSoftInput.setHideAnimationDelay(0);
-    AvoidSoftInput.setShowAnimationDelay(0);
-    AvoidSoftInput.setShouldMimicIOSBehavior(true);
-    AvoidSoftInput.setEnabled(true);
-    return () => {
-      AvoidSoftInput.setEnabled(false);
-      AvoidSoftInput.setShouldMimicIOSBehavior(false);
-    };
-  }, []);
 };
 
 export const useLoginWithPrivateKey = () => {
