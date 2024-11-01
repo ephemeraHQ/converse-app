@@ -28,7 +28,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
-
 import ActionSheetStateHandler from "./components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "./components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "./components/StateHandlers/InitialStateHandler";
@@ -58,8 +57,6 @@ import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
 import "./utils/splash/splash";
 import { useCheckCurrentInstallation } from "./utils/xmtpRN/client";
-
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -178,7 +175,6 @@ export default function AppWithProviders() {
         <ThirdwebProvider>
           <AppKeyboardProvider>
             <ActionSheetProvider>
-<<<<<<< HEAD
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
                 <PaperProvider theme={paperTheme}>
                   <GestureHandlerRootView style={{ flex: 1 }}>
@@ -190,21 +186,6 @@ export default function AppWithProviders() {
                   </GestureHandlerRootView>
                 </PaperProvider>
               </ThemeProvider>
-=======
-              <GestureHandlerRootView
-                style={{
-                  flex: 1,
-                }}
-              >
-                <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                  <PaperProvider theme={paperTheme}>
-                    <PortalProvider>
-                      <App />
-                    </PortalProvider>
-                  </PaperProvider>
-                </ThemeProvider>
-              </GestureHandlerRootView>
->>>>>>> ceda3957 (wip)
             </ActionSheetProvider>
           </AppKeyboardProvider>
         </ThirdwebProvider>

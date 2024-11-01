@@ -6,56 +6,40 @@ import { ConversationListScreen } from "@features/Conversation/ConversationList/
 import { useRouter } from "@navigation/useNavigation";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-<<<<<<< HEAD
+import Accounts from "@screens/Accounts/Accounts";
+import ConversationBlockedListNav from "@screens/Navigation/ConversationBlockedListNav";
+import ConversationNav from "@screens/Navigation/ConversationNav";
+import ConversationRequestsListNav from "@screens/Navigation/ConversationRequestsListNav";
+import ConverseMatchMakerNav from "@screens/Navigation/ConverseMatchMakerNav";
+import GroupInviteNav from "@screens/Navigation/GroupInviteNav";
+import GroupLinkNav from "@screens/Navigation/GroupLinkNav";
+import GroupNav from "@screens/Navigation/GroupNav";
+import ProfileNav from "@screens/Navigation/ProfileNav";
+import ShareFrameNav from "@screens/Navigation/ShareFrameNav";
+import TopUpNav from "@screens/Navigation/TopUpNav";
+import UserProfileNav from "@screens/Navigation/UserProfileNav";
+import WebviewPreviewNav from "@screens/Navigation/WebviewPreviewNav";
+import { NewAccountUserProfileScreen } from "@screens/NewAccount/NewAccountUserProfileScreen";
+import NewConversationModal from "@screens/NewConversation/NewConversationModal";
+import { ShareProfileScreen } from "@screens/ShareProfile";
 import * as Linking from "expo-linking";
-import React, { memo } from "react";
-
-import ExternalWalletPicker from "../components/ExternalWalletPicker";
+import React, { memo, useEffect } from "react";
+import { Platform } from "react-native";
 import { TransactionPreview } from "../components/TransactionPreview/TransactionPreview";
 import config from "../config";
-import { useAuthStatus } from "../data/store/authStore";
-import { ConversationListScreen } from "../features/Conversation/ConversationList/ConversationList.screen";
 import { ConversationScreenConfig } from "../screens/Navigation/ConversationNav";
 import { GroupInviteScreenConfig } from "../screens/Navigation/GroupInviteNav";
 import { GroupLinkScreenConfig } from "../screens/Navigation/GroupLinkNav";
 import { GroupScreenConfig } from "../screens/Navigation/GroupNav";
-import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { NewConversationScreenConfig } from "../screens/Navigation/NewConversationNav";
 import { ProfileScreenConfig } from "../screens/Navigation/ProfileNav";
 import { ShareProfileScreenConfig } from "../screens/Navigation/ShareProfileNav";
 import { WebviewPreviewScreenConfig } from "../screens/Navigation/WebviewPreviewNav";
-=======
-import Accounts from "@screens/Accounts/Accounts";
-import ConversationBlockedListNav from "@screens/Navigation/ConversationBlockedListNav";
-import ConversationNav, {
-  ConversationScreenConfig,
-} from "@screens/Navigation/ConversationNav";
-import ConversationRequestsListNav from "@screens/Navigation/ConversationRequestsListNav";
-import ConverseMatchMakerNav from "@screens/Navigation/ConverseMatchMakerNav";
-import GroupInviteNav, {
-  GroupInviteScreenConfig,
-} from "@screens/Navigation/GroupInviteNav";
-import GroupLinkNav, {
-  GroupLinkScreenConfig,
-} from "@screens/Navigation/GroupLinkNav";
-import GroupNav, { GroupScreenConfig } from "@screens/Navigation/GroupNav";
-import { NewConversationScreenConfig } from "@screens/Navigation/NewConversationNav";
-import ProfileNav, {
-  ProfileScreenConfig,
-} from "@screens/Navigation/ProfileNav";
-import ShareFrameNav from "@screens/Navigation/ShareFrameNav";
-import { ShareProfileScreenConfig } from "@screens/Navigation/ShareProfileNav";
-import TopUpNav from "@screens/Navigation/TopUpNav";
-import UserProfileNav from "@screens/Navigation/UserProfileNav";
-import WebviewPreviewNav, {
-  WebviewPreviewScreenConfig,
-} from "@screens/Navigation/WebviewPreviewNav";
->>>>>>> ceda3957 (wip)
 import {
   getConverseInitialURL,
   getConverseStateFromPath,
   navigationRef,
-<<<<<<< HEAD
+  screenListeners,
 } from "../screens/Navigation/navHelpers";
 import { OnboardingConnectWalletScreen } from "../screens/Onboarding/OnboardingConnectWalletScreen";
 import { OnboardingEphemeraScreen } from "../screens/Onboarding/OnboardingEphemeraScreen";
@@ -65,27 +49,6 @@ import { OnboardingPrivateKeyScreen } from "../screens/Onboarding/OnboardingPriv
 import { OnboardingPrivyScreen } from "../screens/Onboarding/OnboardingPrivyScreen";
 import { OnboardingUserProfileScreen } from "../screens/Onboarding/OnboardingUserProfileScreen";
 import { useAppTheme, useThemeProvider } from "../theme/useAppTheme";
-import { converseEventEmitter } from "../utils/events";
-=======
-  screenListeners,
-} from "@screens/Navigation/navHelpers";
-import { NewAccountUserProfileScreen } from "@screens/NewAccount/NewAccountUserProfileScreen";
-import NewConversationModal from "@screens/NewConversation/NewConversationModal";
-import { OnboardingConnectWalletScreen } from "@screens/Onboarding/OnboardingConnectWalletScreen";
-import { OnboardingEphemeraScreen } from "@screens/Onboarding/OnboardingEphemeraScreen";
-import { OnboardingGetStartedScreen } from "@screens/Onboarding/OnboardingGetStartedScreen";
-import { OnboardingNotificationsScreen } from "@screens/Onboarding/OnboardingNotificationsScreen";
-import { OnboardingPrivateKeyScreen } from "@screens/Onboarding/OnboardingPrivateKeyScreen";
-import { OnboardingPrivyScreen } from "@screens/Onboarding/OnboardingPrivyScreen";
-import { OnboardingUserProfileScreen } from "@screens/Onboarding/OnboardingUserProfileScreen";
-import { ShareProfileScreen } from "@screens/ShareProfile";
-import { useAppTheme, useThemeProvider } from "@theme/useAppTheme";
-import * as Linking from "expo-linking";
-import React, { memo, useEffect } from "react";
-import { Platform } from "react-native";
-import config from "../config";
-import { NavigationParamList } from "./Navigation.types";
->>>>>>> ceda3957 (wip)
 import { NewAccountNavigator } from "./NewAccountNavigator";
 
 const prefix = Linking.createURL("/");
