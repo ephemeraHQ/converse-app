@@ -125,7 +125,7 @@ export function ExternalWalletPicker(props: IExternalWalletPickerProps) {
         {!!subtitle && (
           <HStack
             style={{
-              paddingHorizontal: theme.spacing.md,
+              paddingHorizontal: theme.spacing.lg,
               paddingBottom: theme.spacing.xs,
             }}
           >
@@ -143,7 +143,7 @@ export function ExternalWalletPicker(props: IExternalWalletPickerProps) {
         variant="outline"
         text={translate("back")}
         style={{
-          marginHorizontal: theme.spacing.md,
+          marginHorizontal: theme.spacing.lg,
           marginTop: theme.spacing.md,
           marginBottom: theme.spacing.xs,
         }}
@@ -156,7 +156,7 @@ export function ExternalWalletPicker(props: IExternalWalletPickerProps) {
     return (
       <HStack
         style={{
-          paddingHorizontal: theme.spacing.md,
+          paddingHorizontal: theme.spacing.lg,
         }}
       >
         <Text>{translate("no_wallet_detected")}</Text>
