@@ -1,5 +1,5 @@
 import logger from "@utils/logger";
-import { FrameActionInputs } from "@xmtp/frames-client";
+import { FrameActionInputs, FramePostPayload } from "@xmtp/frames-client";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -180,26 +180,35 @@ export default function FramePreview({
           button.action === "tx" ||
           !button.action
         ) {
-          const payload = await framesClient.signFrameAction(actionInput);
+          let payload: FramePostPayload | undefined = undefined;
           if (button.action === "tx") {
-            const { buttonPostUrl, transactionReceipt } = await handleTxAction(
-              frame,
-              button,
-              payload
-            );
-
+            const { buttonPostUrl, transactionReceipt, fromAddress } =
+              await handleTxAction({
+                frame,
+                button,
+                actionInput,
+                framesClient,
+              });
             if (
               !transactionReceipt ||
-              transactionReceipt.status === "reverted"
+              transactionReceipt.status === "reverted" ||
+              !transactionReceipt?.transactionHash
             ) {
               // error, let's fail
               setPostingActionForButton(undefined);
               return;
             }
-            payload.untrustedData.transactionId =
-              transactionReceipt?.transactionHash;
-            payload.untrustedData.address = transactionReceipt?.from;
+            // The payload includes address used for the tx and
+            // the transaction hash to display transaction success frames
+            payload = await framesClient.signFrameAction({
+              ...actionInput,
+              address: fromAddress,
+              transactionId: transactionReceipt.transactionHash,
+            });
             actionPostUrl = buttonPostUrl;
+          } else {
+            // Regular payload for post action
+            payload = await framesClient.signFrameAction(actionInput);
           }
 
           const frameResponse = await framesProxy.post(actionPostUrl, payload);

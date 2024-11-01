@@ -6,6 +6,7 @@ import {
   OpenFrameButtonResult,
 } from "@open-frames/proxy-types";
 import {
+  FrameActionInputs,
   FramesApiResponse,
   FramesClient,
   OPEN_FRAMES_PROXY_URL,
@@ -203,7 +204,17 @@ export const useHandleTxAction = () => {
   const { getExternalSigner } = useExternalSigner();
 
   const handleTxAction = useCallback(
-    async (frame: FrameToDisplay, button: FrameButtonType, payload: any) => {
+    async ({
+      frame,
+      button,
+      actionInput,
+      framesClient,
+    }: {
+      frame: FrameToDisplay;
+      button: FrameButtonType;
+      actionInput: FrameActionInputs;
+      framesClient: FramesClient;
+    }) => {
       const externalSigner = await getExternalSigner(
         translate("transactionalFrameConnectWallet")
       );
@@ -214,8 +225,16 @@ export const useHandleTxAction = () => {
       const buttonTarget = button.target;
       if (!buttonPostUrl || !buttonTarget)
         throw new Error("Missing postUrl or target");
-
-      const txData = await framesProxy.postTransaction(buttonTarget, payload);
+      const address = await externalSigner.getAddress();
+      // Include the address that's doing the transaction inside the payload
+      const postTransactionPayload = await framesClient.signFrameAction({
+        ...actionInput,
+        address,
+      });
+      const txData = await framesProxy.postTransaction(
+        buttonTarget,
+        postTransactionPayload
+      );
       if (txData.method !== "eth_sendTransaction") {
         throw new Error("method should be eth_sendTransaction");
       }
@@ -240,7 +259,9 @@ export const useHandleTxAction = () => {
       const transactionReceipt =
         transactionId === transactionData.id ? receipt : undefined;
 
-      return { buttonPostUrl, transactionReceipt };
+      // Return the fromAddress & transaction receipt to include in
+      // the transaction success frame payload
+      return { buttonPostUrl, transactionReceipt, fromAddress: address };
     },
     [getExternalSigner]
   );

@@ -102,7 +102,7 @@ export function TransactionPreview() {
           setSimulation({ status: "success", result: simulationResult });
         }
       } catch (e: any) {
-        console.log(e);
+        logger.error(e);
         setSimulation({ status: "failure", error: e });
       }
       simulatingTx.current = false;
