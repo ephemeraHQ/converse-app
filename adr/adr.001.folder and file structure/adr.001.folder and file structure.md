@@ -4,9 +4,9 @@
 Proposed
 
 ## Date
-- **Proposed**: 2024-10-16
-- **Decided**: 
-- **Work Began**: 
+- **Proposed**: [2024-10-16](https://github.com/ephemeraHQ/converse-app/pull/1005)
+- **Decided**:  2024-10-17 (during standup/[in Slack](https://xmtp-labs.slack.com/archives/C07NSHXK693/p1729107402644529))
+- **Work Began**: [2024-10-21](https://github.com/ephemeraHQ/converse-app/pull/1042)
 - **Work Completed**: 
 
 ## Context
