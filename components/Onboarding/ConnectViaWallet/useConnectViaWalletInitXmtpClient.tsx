@@ -1,7 +1,10 @@
 import { translate } from "@i18n";
+import { useRouter } from "@navigation/useNavigation";
 import { awaitableAlert } from "@utils/alert";
+import { ensureError } from "@utils/error";
 import logger from "@utils/logger";
 import { sentryTrackError, sentryTrackMessage } from "@utils/sentry";
+import { reloadAsync } from "expo-updates";
 import { useCallback, useEffect, useRef } from "react";
 
 import { wait } from "../../../utils/general";
@@ -16,6 +19,28 @@ export function useInitXmptClient() {
 
   const abortControllerRef = useRef(new AbortController());
   const timeoutInitXmtpClientRef = useRef<NodeJS.Timeout | null>(null);
+  const hasStartedXmtpClientFlowRef = useRef(false);
+  const hasFinishedXmtpClientFlowRef = useRef(false);
+
+  useRouter({
+    onBeforeRemove() {
+      /*
+        Pretty edge case where user has started the XMTP flow 
+        i.e. user has done at least one signature but then decides
+        to leave before going to the end of the flow. The XMTP SDK
+        gets into a broken state
+        */
+      if (
+        hasStartedXmtpClientFlowRef.current &&
+        !hasFinishedXmtpClientFlowRef.current
+      ) {
+        logger.debug(
+          "[Connect Wallet] User left the XMTP flow before finishing, reloading the app"
+        );
+        reloadAsync().catch(sentryTrackError);
+      }
+    },
+  });
 
   const initXmtpClient = useCallback(async () => {
     timeoutInitXmtpClientRef.current = setTimeout(() => {
@@ -30,32 +55,19 @@ export function useInitXmptClient() {
       const onXmtp = connectViewWalletStore.getState().onXmtp;
       const alreadyV3Db = connectViewWalletStore.getState().alreadyV3Db;
 
-      logger.debug("[Connect Wallet] starting initXmtpClient");
-
-      // Not sure we need this
-      // if (
-      //   connectViewWalletStore.getState().initiatingClientForAddress === address
-      // ) {
-      //   throw new Error("Already initiating client for this address");
-      // }
       const waitForClickSignature = async () => {
         while (!connectViewWalletStore.getState().clickedSignature) {
           if (abortControllerRef.current.signal.aborted) {
-            throw new Error("Operation aborted");
+            return;
           }
-          logger.debug(
-            "[Connect Wallet] Waiting for signature. Current clickedSignature value: false"
-          );
+          logger.debug("[Connect Wallet] Waiting for clicked signature");
           await wait(1000);
         }
       };
 
-      // Used for debugging and know which signature is asked
-      const signaturesAsked = {
-        create: false,
-        enable: false,
-        authenticate: false,
-      };
+      logger.debug("[Connect Wallet] starting initXmtpClient");
+
+      hasStartedXmtpClientFlowRef.current = true;
 
       const base64Key = await getXmtpBase64KeyFromSigner(
         signer,
@@ -75,26 +87,17 @@ export function useInitXmptClient() {
           }
         },
         async () => {
-          signaturesAsked.create = true;
           logger.debug("[Connect Wallet] Triggering create signature");
           // Before calling "create" signature
           connectViewWalletStore.getState().setWaitingForNextSignature(true);
           connectViewWalletStore.getState().setClickedSignature(false);
         },
         async () => {
-          signaturesAsked.enable = true;
-
-          if (signaturesAsked.create) {
-            logger.debug("[Connect Wallet] Create signature success!");
-          }
-
           // Before calling "enable" signature
           const waitingForNextSignature =
             connectViewWalletStore.getState().waitingForNextSignature;
 
           if (waitingForNextSignature) {
-            logger.debug("[Connect Wallet] waiting for next signature");
-
             const currentSignaturesDone =
               connectViewWalletStore.getState().numberOfSignaturesDone;
 
@@ -125,9 +128,6 @@ export function useInitXmptClient() {
           }
         },
         async () => {
-          if (signaturesAsked.enable) {
-            logger.debug("[Connect Wallet] Enable signature success!");
-          }
           if (connectViewWalletStore.getState().waitingForNextSignature) {
             const currentSignaturesDone =
               connectViewWalletStore.getState().numberOfSignaturesDone;
@@ -163,18 +163,16 @@ export function useInitXmptClient() {
 
       logger.info("[Connect Wallet] Successfully logged in using a wallet");
 
+      hasFinishedXmtpClientFlowRef.current = true;
+
       onDoneConnecting();
     } catch (error: unknown) {
       logger.error("[Connect Wallet] Error in initXmtpClient:", error);
       onErrorConnecting({
-        error:
-          error instanceof Error
-            ? error
-            : typeof error === "string"
-            ? new Error(error)
-            : new Error("Something went wrong"),
+        error: ensureError(error),
       });
     } finally {
+      hasStartedXmtpClientFlowRef.current = false;
       clearTimeout(timeoutInitXmtpClientRef.current);
 
       // Restart the state to initial values

@@ -1,11 +1,11 @@
-import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { memo, useCallback, useRef } from "react";
+import { memo, useCallback } from "react";
 
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
 import { ConnectViaWallet } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWallet";
 import { useRouter } from "../../navigation/useNavigation";
 import { NavigationParamList } from "../Navigation/Navigation";
+import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
 
 export const NewAccountConnectWalletScreen = memo(
   function NewAccountConnectWalletScreen({
@@ -15,25 +15,13 @@ export const NewAccountConnectWalletScreen = memo(
 
     const router = useRouter();
 
-    const finishedConnecting = useRef(false);
-
-    useFocusEffect(
-      useCallback(
-        () => {
-          // User already connected wallet but decided to come back here, so we need to go back to new account screen
-          if (finishedConnecting.current) {
-            router.goBack();
-          }
-        },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        []
-      )
-    );
-
     const handleDoneConnecthing = useCallback(
       () => {
-        router.navigate("NewAccountUserProfile");
-        finishedConnecting.current = true;
+        if (isMissingConverseProfile()) {
+          router.navigate("NewAccountUserProfile");
+        } else {
+          router.navigate("Chats");
+        }
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
       []

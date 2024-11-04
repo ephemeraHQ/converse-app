@@ -16,31 +16,28 @@ export const useXmtpSigner = () => {
   const account = useCurrentAccount() as string;
   const privySigner = usePrivySigner();
   const { getExternalSigner, resetExternalSigner } = useExternalSigner();
-  const getXmtpSigner = useCallback(
-    async (title?: string, subtitle?: string) => {
-      const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const getXmtpSigner = useCallback(async () => {
+    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
 
-      if (privySigner) {
-        const privyAddress = await privySigner.getAddress();
-        if (privyAddress.toLowerCase() === client.address.toLowerCase()) {
-          return privySigner;
-        }
+    if (privySigner) {
+      const privyAddress = await privySigner.getAddress();
+      if (privyAddress.toLowerCase() === client.address.toLowerCase()) {
+        return privySigner;
       }
+    }
 
-      const externalSigner = await getExternalSigner(title, subtitle);
-      if (!externalSigner) return;
-      const externalAddress = await externalSigner.getAddress();
-      if (externalAddress.toLowerCase() !== client.address.toLowerCase()) {
-        Alert.alert(
-          translate("xmtp_wrong_signer"),
-          translate("xmtp_wrong_signer_description")
-        );
-        resetExternalSigner();
-        return;
-      }
-      return externalSigner;
-    },
-    [account, getExternalSigner, privySigner, resetExternalSigner]
-  );
+    const externalSigner = await getExternalSigner();
+    if (!externalSigner) return;
+    const externalAddress = await externalSigner.getAddress();
+    if (externalAddress.toLowerCase() !== client.address.toLowerCase()) {
+      Alert.alert(
+        translate("xmtp_wrong_signer"),
+        translate("xmtp_wrong_signer_description")
+      );
+      resetExternalSigner();
+      return;
+    }
+    return externalSigner;
+  }, [account, getExternalSigner, privySigner, resetExternalSigner]);
   return { getXmtpSigner };
 };

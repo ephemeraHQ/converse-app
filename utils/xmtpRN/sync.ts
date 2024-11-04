@@ -1,7 +1,9 @@
+import { refreshAllSpamScores } from "@data/helpers/conversations/spamScore";
 import logger from "@utils/logger";
 import { retryWithBackoff } from "@utils/retryWithBackoff";
 import { Client } from "@xmtp/xmtp-js";
 import intersect from "fast_array_intersect";
+import { useEffect, useState } from "react";
 import { AppState } from "react-native";
 
 import { xmtpSignatureByAccount } from "./api";
@@ -26,8 +28,10 @@ import {
   syncConversationsMessages,
   syncGroupsMessages,
 } from "./messages";
-import { refreshAllSpamScores } from "../../data/helpers/conversations/spamScore";
-import { getChatStore } from "../../data/store/accountsStore";
+import {
+  getChatStore,
+  useCurrentAccount,
+} from "../../data/store/accountsStore";
 import { loadXmtpKey } from "../keychain/helpers";
 
 const instantiatingClientForAccount: {
@@ -77,6 +81,22 @@ export const getXmtpClient = async (
     ConverseXmtpClientType | Client
   >;
 };
+
+export function useCurrentAccountXmtpClient() {
+  const address = useCurrentAccount();
+
+  const [client, setClient] = useState<ConverseXmtpClientType | Client>();
+
+  useEffect(() => {
+    if (!address) {
+      setClient(undefined);
+      return;
+    }
+    getXmtpClient(address).then(setClient);
+  }, [address]);
+
+  return { client };
+}
 
 export const onSyncLost = async (account: string, error: any) => {
   // If there is an error let's show it

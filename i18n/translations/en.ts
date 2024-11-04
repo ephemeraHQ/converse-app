@@ -63,7 +63,7 @@ export const en = {
   privateKeyConnect: {
     title: "Connect via key",
     subtitle:
-      "Enter the private key for the address you are connecting.\n\nYour private key will only be stored locally in {{storage}}.",
+      "Enter the private key for the address you are connecting.\n\nYour private key is not stored.",
     storage: {
       ios: "your iPhone's Secure Enclave",
       android: "the Android Keystore system",
@@ -169,6 +169,7 @@ export const en = {
   restore_and_unblock_inviter: "Restore and unblock inviter",
   unblock_and_restore: "Unblock and restore",
   cancel: "Cancel",
+  back: "Back",
   view_only: "View only",
   view_and_restore: "View and Restore",
   view_removed_group_chat: "View removed group chat?",

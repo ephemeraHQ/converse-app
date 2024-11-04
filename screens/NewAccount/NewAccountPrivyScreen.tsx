@@ -1,3 +1,4 @@
+import { sentryTrackError } from "@utils/sentry";
 import React, { memo } from "react";
 
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
@@ -12,6 +13,7 @@ import { usePrivyConnection } from "../../features/onboarding/Privy/usePrivyConn
 import { translate } from "../../i18n";
 import { useRouter } from "../../navigation/useNavigation";
 import { PictoSizes } from "../../styles/sizes";
+import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
 
 export const NewAccountPrivyScreen = memo(function () {
   return (
@@ -28,9 +30,14 @@ const Content = memo(function Content() {
 
   usePrivyConnection({
     onConnectionDone: () => {
-      router.navigate("NewAccountUserProfile");
+      if (isMissingConverseProfile()) {
+        router.navigate("NewAccountUserProfile");
+      } else {
+        router.navigate("Chats");
+      }
     },
     onConnectionError: (error) => {
+      sentryTrackError(error);
       router.goBack();
     },
   });

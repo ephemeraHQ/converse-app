@@ -1,4 +1,3 @@
-import ExternalWalletPicker from "@components/ExternalWalletPicker";
 import { TransactionPreview } from "@components/TransactionPreview/TransactionPreview";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { backgroundColor } from "@styles/colors";
@@ -100,7 +99,6 @@ export default function Main() {
         >
           <NavigationContent />
         </NavigationContainer>
-        <ExternalWalletPicker />
         <TransactionPreview />
       </ThemeProvider>
     </>
