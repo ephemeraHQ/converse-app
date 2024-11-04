@@ -1,7 +1,12 @@
 import React, { memo } from "react";
 
+import {
+  needToShowNotificationsPermissions,
+  isMissingConverseProfile,
+} from "./Onboarding.utils";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
+import { setAuthStatus } from "../../data/store/authStore";
 import { PrivyPhoneEntry } from "../../features/onboarding/Privy/PrivyPhoneEntry";
 import { PrivyPhoneVerification } from "../../features/onboarding/Privy/PrivyPhoneVerification";
 import {
@@ -28,7 +33,13 @@ const Content = memo(function Content() {
 
   usePrivyConnection({
     onConnectionDone: () => {
-      router.navigate("OnboardingUserProfile");
+      if (isMissingConverseProfile()) {
+        router.navigate("OnboardingUserProfile");
+      } else if (needToShowNotificationsPermissions()) {
+        router.navigate("OnboardingNotifications");
+      } else {
+        setAuthStatus("signedIn");
+      }
     },
     onConnectionError: (error) => {
       router.goBack();

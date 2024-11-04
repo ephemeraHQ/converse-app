@@ -147,7 +147,6 @@
     "react-dom": "18.2.0",
     "react-native": "0.74.5",
     "react-native-aes-gcm-crypto": "^0.2.2",
-    "react-native-avoid-softinput": "^4.0.1",
     "react-native-background-color": "^0.0.8",
     "react-native-bootsplash": "^4.5.3",
     "react-native-context-menu-view": "^1.16.0",

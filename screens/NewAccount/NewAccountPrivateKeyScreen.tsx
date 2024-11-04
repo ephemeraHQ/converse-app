@@ -1,5 +1,4 @@
 import React, { memo, useCallback, useState } from "react";
-import { Platform } from "react-native";
 
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
 import { NewAccountPictoTitleSubtitle } from "../../components/NewAccount/NewAccountTitleSubtitlePicto";
@@ -10,9 +9,9 @@ import { translate } from "../../i18n";
 import { useRouter } from "../../navigation/useNavigation";
 import { spacing } from "../../theme";
 import { sentryTrackError } from "../../utils/sentry";
+import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
 import {
   PrivateKeyInput,
-  useAvoidInputEffect,
   useLoginWithPrivateKey,
 } from "../Onboarding/OnboardingPrivateKeyScreen";
 
@@ -22,14 +21,16 @@ export const NewAccountPrivateKeyScreen = memo(function () {
 
   const router = useRouter();
 
-  useAvoidInputEffect();
-
   const onConnect = useCallback(async () => {
     try {
       const trimmedPrivateKey = privateKey.trim();
       if (!trimmedPrivateKey) return;
       await loginWithPrivateKey(trimmedPrivateKey);
-      router.navigate("NewAccountUserProfile");
+      if (isMissingConverseProfile()) {
+        router.navigate("NewAccountUserProfile");
+      } else {
+        router.navigate("Chats");
+      }
     } catch (error) {
       sentryTrackError(error);
     }
@@ -43,13 +44,7 @@ export const NewAccountPrivateKeyScreen = memo(function () {
           {translate("privateKeyConnect.title")}
         </NewAccountPictoTitleSubtitle.Title>
         <NewAccountPictoTitleSubtitle.Subtitle>
-          {translate("privateKeyConnect.subtitle", {
-            storage: translate(
-              `privateKeyConnect.storage.${
-                Platform.OS === "ios" ? "ios" : "android"
-              }`
-            ),
-          })}
+          {translate("privateKeyConnect.subtitle")}
         </NewAccountPictoTitleSubtitle.Subtitle>
       </NewAccountPictoTitleSubtitle.Container>
 

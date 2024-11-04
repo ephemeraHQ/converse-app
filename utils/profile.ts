@@ -1,5 +1,9 @@
 import { getCleanAddress } from "./evm/address";
 import { shortAddress } from "./str";
+import {
+  getCurrentAccount,
+  getProfilesStore,
+} from "../data/store/accountsStore";
 import { ProfileByAddress, ProfileSocials } from "../data/store/profilesStore";
 import { RecommendationData } from "../data/store/recommendationsStore";
 
@@ -121,3 +125,22 @@ export const getProfile = (
     profilesByAddress[address.toLowerCase()]
   );
 };
+
+export function getCurrentAccountPrimaryProfile() {
+  const userAddress = getCurrentAccount();
+
+  if (!userAddress) {
+    return undefined;
+  }
+
+  const socials = getProfile(
+    userAddress,
+    getProfilesStore(userAddress).getState().profiles
+  )?.socials;
+
+  if (!socials) {
+    return undefined;
+  }
+
+  return socials.userNames?.find((e) => e.isPrimary);
+}

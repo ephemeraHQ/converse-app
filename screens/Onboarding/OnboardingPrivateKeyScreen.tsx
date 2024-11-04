@@ -9,20 +9,18 @@ import {
 } from "@styles/colors";
 import { spacing } from "@theme/spacing";
 import { Wallet } from "ethers";
-import { useCallback, useEffect, useState } from "react";
-import {
-  Alert,
-  Platform,
-  StyleSheet,
-  TextInput,
-  useColorScheme,
-} from "react-native";
-import { AvoidSoftInput } from "react-native-avoid-softinput";
+import { useCallback, useState } from "react";
+import { Alert, StyleSheet, TextInput, useColorScheme } from "react-native";
 
+import {
+  isMissingConverseProfile,
+  needToShowNotificationsPermissions,
+} from "./Onboarding.utils";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { initXmtpClient } from "../../components/Onboarding/init-xmtp-client";
+import { setAuthStatus } from "../../data/store/authStore";
 import { VStack } from "../../design-system/VStack";
 import { useRouter } from "../../navigation/useNavigation";
 import { sentryTrackError } from "../../utils/sentry";
@@ -31,21 +29,23 @@ import { NavigationParamList } from "../Navigation/Navigation";
 export function OnboardingPrivateKeyScreen(
   props: NativeStackScreenProps<NavigationParamList, "OnboardingPrivateKey">
 ) {
-  useAvoidInputEffect();
-
   const { loading, loginWithPrivateKey } = useLoginWithPrivateKey();
   const [privateKey, setPrivateKey] = useState("");
 
   const router = useRouter();
-
-  useAvoidInputEffect();
 
   const handlePressConnect = useCallback(async () => {
     try {
       const trimmedPrivateKey = privateKey.trim();
       if (!trimmedPrivateKey) return;
       await loginWithPrivateKey(trimmedPrivateKey);
-      router.navigate("OnboardingUserProfile");
+      if (isMissingConverseProfile()) {
+        router.navigate("OnboardingUserProfile");
+      } else if (needToShowNotificationsPermissions()) {
+        router.navigate("OnboardingNotifications");
+      } else {
+        setAuthStatus("signedIn");
+      }
     } catch (error) {
       sentryTrackError(error);
     }
@@ -59,13 +59,7 @@ export function OnboardingPrivateKeyScreen(
           {translate("privateKeyConnect.title")}
         </OnboardingPictoTitleSubtitle.Title>
         <OnboardingPictoTitleSubtitle.Subtitle>
-          {translate("privateKeyConnect.subtitle", {
-            storage: translate(
-              `privateKeyConnect.storage.${
-                Platform.OS === "ios" ? "ios" : "android"
-              }`
-            ),
-          })}
+          {translate("privateKeyConnect.subtitle")}
         </OnboardingPictoTitleSubtitle.Subtitle>
       </OnboardingPictoTitleSubtitle.Container>
 
@@ -96,19 +90,6 @@ const getSignerFromPrivateKey = async (privateKey: string) => {
   } catch (e: any) {
     Alert.alert(translate("privateKeyConnect.invalidPrivateKey"));
   }
-};
-
-export const useAvoidInputEffect = () => {
-  useEffect(() => {
-    AvoidSoftInput.setHideAnimationDelay(0);
-    AvoidSoftInput.setShowAnimationDelay(0);
-    AvoidSoftInput.setShouldMimicIOSBehavior(true);
-    AvoidSoftInput.setEnabled(true);
-    return () => {
-      AvoidSoftInput.setEnabled(false);
-      AvoidSoftInput.setShouldMimicIOSBehavior(false);
-    };
-  }, []);
 };
 
 export const useLoginWithPrivateKey = () => {
@@ -146,6 +127,23 @@ export const PrivateKeyInput = ({ value, onChange }: IPrivateKeyInputProps) => {
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
+  const handleChangeText = useCallback(
+    (content: string) => {
+      onChange(content.replace(/\n/g, " "));
+    },
+    [onChange]
+  );
+
+  const handleFocus = useCallback(() => {
+    onChange(value.trim());
+  }, [onChange, value]);
+
+  const handleKeyPress = useCallback((e: any) => {
+    if (e.nativeEvent.key === "Enter") {
+      e.currentTarget.blur();
+    }
+  }, []);
+
   return (
     <TextInput
       multiline
@@ -153,18 +151,10 @@ export const PrivateKeyInput = ({ value, onChange }: IPrivateKeyInputProps) => {
       style={styles.textInput}
       placeholder={translate("privateKeyConnect.privateKeyPlaceholder")}
       placeholderTextColor={textSecondaryColor(colorScheme)}
-      onChangeText={(content) => {
-        onChange(content.replace(/\n/g, " "));
-      }}
-      onFocus={() => {
-        onChange(value.trim());
-      }}
+      onChangeText={handleChangeText}
+      onFocus={handleFocus}
       value={value}
-      onKeyPress={(e) => {
-        if (e.nativeEvent.key === "Enter") {
-          e.currentTarget.blur();
-        }
-      }}
+      onKeyPress={handleKeyPress}
     />
   );
 };

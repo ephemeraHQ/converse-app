@@ -10,11 +10,11 @@ import {
   ColorSchemeName,
   Dimensions,
   FlatList,
+  Keyboard,
   Platform,
   StyleSheet,
   View,
   useColorScheme,
-  Keyboard,
 } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -32,6 +32,8 @@ import {
 } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
 import { useFramesStore } from "../../data/store/framesStore";
+import { ExternalWalletPicker } from "../../features/ExternalWalletPicker/ExternalWalletPicker";
+import { ExternalWalletPickerContextProvider } from "../../features/ExternalWalletPicker/ExternalWalletPicker.context";
 import {
   ReanimatedFlashList,
   ReanimatedFlatList,
@@ -440,7 +442,7 @@ export function Chat() {
   }, [onReadyToFocus]);
 
   return (
-    <>
+    <ExternalWalletPickerContextProvider>
       <View
         style={styles.chatContainer}
         key={`chat-${
@@ -514,7 +516,8 @@ export function Chat() {
         )}
       </View>
       <MessageReactionsDrawer />
-    </>
+      <ExternalWalletPicker title="Choose a wallet" />
+    </ExternalWalletPickerContextProvider>
   );
 }
 
