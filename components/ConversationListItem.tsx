@@ -508,7 +508,7 @@ const ConversationListItem = memo(function ConversationListItem({
       onLeftSwipe={onLeftSwipe}
       rightIsDestructive={isBlockedChatView}
       contextMenuComponent={contextMenuComponent}
-      leftActionPicto={showUnread ? "checkmark.message" : "message.badge"}
+      leftActionIcon={showUnread ? "checkmark.message" : "message.badge"}
     />
   );
 });

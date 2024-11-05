@@ -6,13 +6,9 @@ export const useApprovedGroupsConversationList = () => {
   const userAddress = useCurrentAccount()!;
   const { data, ...rest } = useGroupsConversationListQuery(userAddress);
   const filtered = useMemo(() => {
-    return {
-      ids: data?.ids?.filter((a) => {
-        const group = data.byId[a];
-        return group?.state === "allowed";
-      }),
-      byId: data?.byId,
-    };
+    return data?.filter((group) => {
+      return group?.state === "allowed";
+    });
   }, [data]);
 
   return { data: filtered, ...rest };
