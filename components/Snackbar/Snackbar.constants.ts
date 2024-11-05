@@ -9,7 +9,8 @@ export const SNACKBARS_MAX_VISIBLE = 3;
 
 export const SNACKBAR_SPACE_BETWEEN_SNACKBARS = spacing.sm;
 
-export const SNACKBAR_BACKDROP_ADDITIONAL_HEIGHT = 90;
+export const SNACKBAR_BACKDROP_ADDITIONAL_HEIGHT =
+  SNACKBAR_LARGE_TEXT_HEIGHT * 2;
 
 export const SNACKBAR_BOTTOM_OFFSET =
   initialWindowMetrics?.insets.bottom ?? spacing.md;

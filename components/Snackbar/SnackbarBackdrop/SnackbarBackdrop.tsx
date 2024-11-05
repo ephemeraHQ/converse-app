@@ -48,7 +48,7 @@ export const SnackbarBackdrop = memo(() => {
           />
         }
         style={{
-          height: SNACKBAR_BACKDROP_MAX_HEIGHT,
+          height: Math.min(gradientHeight * 1.5, SNACKBAR_BACKDROP_MAX_HEIGHT),
           width: "100%",
         }}
       >

@@ -155,7 +155,7 @@ export const Snackbar = memo(
             scale: interpolate(
               firstSnackbarRenderProgressAV.value,
               [0, 1],
-              [0.8, 1]
+              [0.9, 1]
             ),
           },
         ],
@@ -203,8 +203,8 @@ export const Snackbar = memo(
             >
               <HStack
                 style={{
+                  flex: 1,
                   paddingHorizontal: theme.spacing.xs,
-                  ...(!snackbar.isMultiLine && { flex: 1 }),
                   ...(snackbar.isMultiLine && { paddingTop: theme.spacing.xs }),
                 }}
               >
@@ -219,10 +219,15 @@ export const Snackbar = memo(
 
               <HStack
                 style={{
+                  // ...debugBorder(),
                   alignSelf: "flex-end",
                   columnGap: theme.spacing.xxxs,
                   alignItems: "center",
                   ...(!snackbar.isMultiLine && { height: "100%" }),
+                  ...(snackbar.isMultiLine && {
+                    flex: 1,
+                    paddingBottom: theme.spacing.xxxs,
+                  }),
                 }}
               >
                 {snackbar.actions?.map((action) => (
