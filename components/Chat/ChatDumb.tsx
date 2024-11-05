@@ -20,15 +20,13 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import ChatInput from "./Input/Input";
-import TransactionInput from "./Transaction/TransactionInput";
 import { ReanimatedFlashList, ReanimatedView } from "../../utils/animations";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
 import { converseEventEmitter } from "../../utils/events";
+import { ChatInputDumb } from "./Input/InputDumb";
 
 type ChatDumbProps<T> = {
   onReadyToFocus: () => void;
-  transactionMode: boolean;
   frameTextInputFocused: boolean;
   items: T[];
   renderItem: ListRenderItem<T>;
@@ -47,6 +45,7 @@ type ChatDumbProps<T> = {
   placeholderComponent: React.JSX.Element | null;
   extraData?: any;
   itemToId: (id: T) => string;
+  onSend: (payload: { text: string; referencedMessageId?: string }) => void;
 };
 
 const useStyles = () => {
@@ -91,7 +90,6 @@ const useStyles = () => {
 
 export function ChatDumb<T>({
   onReadyToFocus,
-  transactionMode,
   frameTextInputFocused,
   items,
   renderItem,
@@ -106,6 +104,7 @@ export function ChatDumb<T>({
   placeholderComponent,
   extraData,
   itemToId,
+  onSend,
 }: ChatDumbProps<T>) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
@@ -192,11 +191,6 @@ export function ChatDumb<T>({
             extraData={extraData}
             renderItem={renderItem}
             onLayout={handleOnLayout}
-            ref={(r) => {
-              // if (r) {
-              //   messageListRef.current = r;
-              // }
-            }}
             keyboardDismissMode="interactive"
             automaticallyAdjustContentInsets={false}
             contentInsetAdjustmentBehavior="never"
@@ -232,8 +226,7 @@ export function ChatDumb<T>({
               },
             ]}
           >
-            {!transactionMode && <ChatInput inputHeight={chatInputHeight} />}
-            {transactionMode && <TransactionInput />}
+            <ChatInputDumb onSend={onSend} inputHeight={chatInputHeight} />
           </ReanimatedView>
           <View
             style={[

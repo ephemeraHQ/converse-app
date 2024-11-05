@@ -24,10 +24,11 @@ import {
 } from "../utils/conversation";
 import { getPreferredAvatar, getProfile } from "../utils/profile";
 import { conversationName } from "../utils/str";
+import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 
 type Props = {
   onScroll?: () => void;
-  items: (ConversationFlatListItem | string)[];
+  items: (ConversationFlatListItem | GroupWithCodecsType)[];
   itemsForSearchQuery?: string;
   ListHeaderComponent?: React.ReactElement | null;
   ListFooterComponent?: React.ReactElement | null;
@@ -36,12 +37,18 @@ type Props = {
   "Chats" | "ShareFrame" | "ChatsRequests" | "Blocked"
 >;
 
+const keyExtractor = (item: ConversationFlatListItem | GroupWithCodecsType) => {
+  if ("lastMessage" in item) {
+    return item.topic;
+  }
+  return typeof item === "string" ? item : item.topic + "v2";
+};
+
 export default function ConversationFlashList({
   onScroll,
   navigation,
   route,
   items,
-  itemsForSearchQuery,
   ListHeaderComponent,
   ListFooterComponent,
 }: Props) {
@@ -70,17 +77,10 @@ export default function ConversationFlashList({
 
   const listRef = useRef<FlashList<any> | undefined>();
 
-  const keyExtractor = useCallback(
-    (item: ConversationFlatListItem | string) => {
-      return typeof item === "string" ? item : item.topic + "v2";
-    },
-    []
-  );
-
   const renderItem = useCallback(
-    ({ item }: { item: ConversationFlatListItem | string }) => {
-      if (typeof item === "string") {
-        return <V3GroupConversationListItem topic={item} />;
+    ({ item }: { item: ConversationFlatListItem | GroupWithCodecsType }) => {
+      if ("lastMessage" in item) {
+        return <V3GroupConversationListItem group={item} />;
       }
       if (item.topic === "hiddenRequestsButton") {
         const hiddenRequestItem = item as ConversationFlatListHiddenRequestItem;

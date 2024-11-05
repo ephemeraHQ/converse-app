@@ -1,4 +1,3 @@
-import { useApprovedGroupsConversationList } from "@hooks/useApprovedGroupsConversationList";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -6,8 +5,7 @@ import {
   listItemSeparatorColor,
   textPrimaryColor,
 } from "@styles/colors";
-import { mergeOrderedLists } from "@utils/mergeLists";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Platform,
   StyleSheet,
@@ -27,23 +25,23 @@ import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
 import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 import { NavigationParamList } from "./Navigation/Navigation";
-import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
+import { PinnedConversations } from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "@search/components/NoResult";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
-  currentAccount,
   useChatStore,
+  useCurrentAccount,
   useProfilesStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
-import {
-  ConversationFlatListItem,
-  getFilteredConversationsWithSearch,
-} from "../utils/conversation";
+import { ConversationFlatListItem } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
-import { sortRequestsBySpamScore } from "../utils/xmtpRN/conversations";
+import { useIsSharingMode } from "../features/conversation-list/useIsSharingMode";
+import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
+import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
+import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 
 type Props = {
   searchBarRef:
@@ -75,69 +73,55 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       "openedConversationTopic",
     ])
   );
+  const sharingMode = useIsSharingMode();
 
   const { ephemeralAccount } = useSettingsStore(
     useSelect(["peersStatus", "ephemeralAccount"])
   );
   const profiles = useProfilesStore((s) => s.profiles);
-  const pinnedConversations = useChatStore((s) => s.pinnedConversations);
-  const { data: approvedGroups } = useApprovedGroupsConversationList();
-
+  const pinnedConversations = useChatStore((s) => s.pinnedConversationTopics);
+  const currentAccount = useCurrentAccount();
+  const { data: items, isLoading: showInitialLoad } =
+    useConversationListItems();
   const [flatListItems, setFlatListItems] = useState<{
-    items: (ConversationFlatListItem | string)[];
+    items: (ConversationFlatListItem | GroupWithCodecsType)[];
     searchQuery: string;
   }>({ items: [], searchQuery: "" });
 
   // Display logic
-  const showInitialLoad =
-    !initialLoadDoneOnce && flatListItems.items.length <= 1;
   const showNoResult = flatListItems.items.length === 0 && !!searchQuery;
 
-  const sharingMode = !!route.params?.frameURL;
-
-  const requestsCount = useMemo(() => {
-    const { likelyNotSpam } = sortRequestsBySpamScore(
-      sortedConversationsWithPreview.conversationsRequests
-    );
-    return likelyNotSpam.length;
-  }, [sortedConversationsWithPreview.conversationsRequests]);
-
-  const conversationsCount = useChatStore(
-    (s) => Object.keys(s.conversations).length
-  );
+  const requestsCount = useConversationListRequestCount();
 
   const showChatNullState =
-    conversationsCount === 0 && !searchQuery && initialLoadDoneOnce;
+    items.length === 0 && !searchQuery && !showInitialLoad;
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
       // First login, let's refresh the profile
-      refreshProfileForAddress(currentAccount(), currentAccount());
+      refreshProfileForAddress(currentAccount!, currentAccount!);
     }
-  }, [initialLoadDoneOnce]);
+  }, [initialLoadDoneOnce, currentAccount]);
 
   useEffect(() => {
-    const v2ListItems = getFilteredConversationsWithSearch(
-      searchQuery,
-      sortedConversationsWithPreview.conversationsInbox,
-      profiles
-    );
-    const listItems = mergeOrderedLists(
-      v2ListItems,
-      approvedGroups?.ids ?? [],
-      (a) =>
-        "lastMessagePreview" in a
-          ? a.lastMessagePreview?.message?.sent ?? 0
-          : 0,
-      // TODO: Update when messages are being returned
-      (a: string) => 0
-    );
-    setFlatListItems({ items: listItems, searchQuery });
+    // const v2ListItems = getFilteredConversationsWithSearch(
+    //   searchQuery,
+    //   sortedConversationsWithPreview.conversationsInbox,
+    //   profiles
+    // );
+    // const filteredApprovedGroupIds = groups?.filter((group) => {
+    //   if (group?.state !== "allowed") {
+    //     return false;
+    //   }
+    //   return group?.name.toLowerCase().includes(searchQuery.toLowerCase());
+    // });
+    // TODO:
+    setFlatListItems({ items, searchQuery });
   }, [
     searchQuery,
     sortedConversationsWithPreview.conversationsInbox,
     profiles,
-    approvedGroups,
+    items,
   ]);
 
   // Search bar hook
@@ -177,7 +161,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
 
   const ListHeaderComponents: React.ReactElement[] = [
     <PinnedConversations
-      convos={pinnedConversations}
+      topics={pinnedConversations}
       key="pinnedConversations"
     />,
   ];
@@ -194,10 +178,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
         <Text style={styles.searchTitle}>Messages</Text>
       </View>
     );
-  } else if (
-    sortedConversationsWithPreview.conversationsRequests.length > 0 &&
-    !sharingMode
-  ) {
+  } else if (requestsCount > 0 && !sharingMode) {
     ListHeaderComponents.push(
       <View key="search" style={styles.headerTitleContainer}>
         <Text style={styles.headerTitle}>Messages</Text>
@@ -230,7 +211,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   if (showChatNullState) {
     return (
       <ChatNullState
-        currentAccount={currentAccount()}
+        currentAccount={currentAccount!}
         navigation={navigation}
         route={route}
       />

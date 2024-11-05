@@ -31,6 +31,7 @@ import {
   XmtpConversationWithUpdate,
   XmtpMessage,
 } from "../data/store/chatStore";
+import { ProfileByAddress } from "@data/store/profilesStore";
 
 export type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;
@@ -333,7 +334,7 @@ const conversationsSortMethod = (
 export const conversationShouldBeDisplayed = (
   conversation: ConversationWithLastMessagePreview,
   topicsData: TopicsData,
-  pinnedConversations?: ConversationFlatListItem[]
+  pinnedConversations?: string[]
 ) => {
   const isNotReady =
     (conversation.isGroup && !conversation.groupMembers) ||
@@ -346,7 +347,7 @@ export const conversationShouldBeDisplayed = (
   const isV1 = conversation.version === "v1";
   const isForbidden = conversation.topic.includes("\x00"); // Forbidden character that breaks
   const isPinned = pinnedConversations?.find(
-    (convo) => convo.topic === conversation.topic
+    (convo) => convo === conversation.topic
   );
   return (
     (!isPending || isNotEmpty) &&
@@ -417,7 +418,7 @@ export async function sortAndComputePreview(
   topicsData: TopicsData,
   peersStatus: PeersStatus,
   groupStatus: GroupStatus,
-  pinnedConversations?: ConversationFlatListItem[]
+  pinnedConversations?: string[]
 ) {
   const conversationsRequests: ConversationWithLastMessagePreview[] = [];
   const conversationsInbox: ConversationWithLastMessagePreview[] = [];
@@ -472,7 +473,7 @@ export async function sortAndComputePreview(
 export function getFilteredConversationsWithSearch(
   searchQuery: string,
   sortedConversations: ConversationWithLastMessagePreview[],
-  profiles: Record<string, any>
+  profiles: ProfileByAddress
 ): ConversationFlatListItem[] {
   if (searchQuery && sortedConversations) {
     const matchedPeerAddresses = getMatchedPeerAddresses(profiles, searchQuery);
