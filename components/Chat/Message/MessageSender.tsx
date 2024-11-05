@@ -1,6 +1,8 @@
-import { useInboxIdStore, useProfilesStore } from "@data/store/accountsStore";
+import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
+import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
 import { textSecondaryColor } from "@styles/colors";
 import { getPreferredName, getProfile } from "@utils/profile";
+import { InboxId } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
 import { StyleSheet, useColorScheme, View, Text } from "react-native";
 
@@ -30,15 +32,19 @@ export const MessageSender = ({ senderAddress }: MessageSenderProps) => {
 };
 
 type V3MessageSenderProps = {
-  inboxId: string;
+  inboxId: InboxId;
 };
 
 export const V3MessageSender = ({ inboxId }: V3MessageSenderProps) => {
-  const address = useInboxIdStore((s) => s.byInboxId[inboxId]?.[0]);
-  const senderSocials = useProfilesStore(
-    (s) => getProfile(address, s.profiles)?.socials
+  const currentAccount = useCurrentAccount();
+  const { data: senderSocials } = useInboxProfileSocialsQuery(
+    currentAccount!,
+    inboxId
   );
-  const name = getPreferredName(senderSocials, address);
+  const name = getPreferredName(
+    senderSocials?.[0],
+    senderSocials?.[0]?.address ?? ""
+  );
   return <MessageSenderDumb name={name} />;
 };
 

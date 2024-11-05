@@ -4,7 +4,7 @@ import { useCallback, useMemo } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 import {
-  useInboxIdStore,
+  useCurrentAccount,
   useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { navigate } from "../../../utils/navigation";
@@ -13,6 +13,8 @@ import {
   getPreferredName,
   getProfile,
 } from "../../../utils/profile";
+import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 type MessageSenderAvatarDumbProps = {
   hasNextMessageInSeries: boolean;
@@ -55,11 +57,8 @@ export const MessageSenderAvatar = ({
   senderAddress,
   hasNextMessageInSeries,
 }: MessageSenderAvatarProps) => {
-  const address = useInboxIdStore(
-    (s) => s.byInboxId[senderAddress]?.[0] ?? senderAddress
-  );
   const senderSocials = useProfilesStore(
-    (s) => getProfile(address, s.profiles)?.socials
+    (s) => getProfile(senderAddress, s.profiles)?.socials
   );
 
   const openProfile = useCallback(() => {
@@ -77,17 +76,23 @@ export const MessageSenderAvatar = ({
 };
 
 type V3MessageSenderAvatarProps = {
-  inboxId: string;
+  inboxId: InboxId;
 };
 
 export const V3MessageSenderAvatar = ({
   inboxId,
 }: V3MessageSenderAvatarProps) => {
-  const address = useInboxIdStore((s) => s.byInboxId[inboxId]?.[0]);
-  const senderSocials = useProfilesStore(
-    (s) => getProfile(address, s.profiles)?.socials
+  const currentAccount = useCurrentAccount();
+  const { data: senderSocials } = useInboxProfileSocialsQuery(
+    currentAccount!,
+    inboxId
   );
-
+  const address = senderSocials?.[0].address ?? "";
+  const name = getPreferredName(
+    senderSocials?.[0],
+    senderSocials?.[0]?.address ?? ""
+  );
+  const avatarUri = getPreferredAvatar(senderSocials?.[0]);
   const openProfile = useCallback(() => {
     navigate("Profile", { address });
   }, [address]);
@@ -96,8 +101,8 @@ export const V3MessageSenderAvatar = ({
     <MessageSenderAvatarDumb
       hasNextMessageInSeries={false}
       onPress={openProfile}
-      avatarUri={getPreferredAvatar(senderSocials)}
-      avatarName={getPreferredName(senderSocials, address)}
+      avatarUri={avatarUri}
+      avatarName={name}
     />
   );
 };
