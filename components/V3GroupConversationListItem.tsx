@@ -1,7 +1,5 @@
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
-import { useConversationListGroupItem } from "@hooks/useConversationListGroupItem";
-import { useProfilesSocials } from "@hooks/useProfilesSocials";
 import { translate } from "@i18n/index";
 import { AvatarSizes } from "@styles/sizes";
 import { saveTopicsData } from "@utils/api";
@@ -9,16 +7,7 @@ import { getMinimalDate } from "@utils/date";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
 import { Haptics } from "@utils/haptics";
 import { navigate } from "@utils/navigation";
-import { getPreferredAvatar, getPreferredName } from "@utils/profile";
-import { Member } from "@xmtp/react-native-sdk";
-import {
-  RefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { RefObject, useCallback, useMemo, useRef, useState } from "react";
 import { useColorScheme } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
@@ -27,18 +16,22 @@ import Avatar from "./Avatar";
 import { ConversationContextMenu } from "./ConversationContextMenu";
 import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
 import { GroupAvatarDumb } from "./GroupAvatar";
+import { getMessageContentType } from "@utils/xmtpRN/contentTypes";
+import logger from "@utils/logger";
+import { useGroupConversationListAvatarInfo } from "../features/conversation-list/useGroupConversationListAvatarInfo";
+import { IIconName } from "@design-system/Icon/Icon.types";
+import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 
 type V3GroupConversationListItemProps = {
-  topic: string;
+  group: GroupWithCodecsType;
 };
 
 type UseDataProps = {
-  topic: string;
+  group: GroupWithCodecsType;
 };
 
-const useData = ({ topic }: UseDataProps) => {
+const useData = ({ group }: UseDataProps) => {
   // TODO Items
-  const timestamp = new Date(2024, 9, 10).getTime();
   const isBlockedChatView = false;
 
   const colorScheme = useColorScheme();
@@ -52,61 +45,33 @@ const useData = ({ topic }: UseDataProps) => {
     setIsContextMenuVisible(true);
   }, []);
 
-  const group = useConversationListGroupItem(topic);
+  const groupExists = !!group;
+  const topic = group?.topic;
+  const timestamp = group?.lastMessage?.sent ?? 0;
 
   const isUnread = useMemo(() => {
-    if (!group) return false;
-    // if (!group.message) return false;
+    if (!groupExists) return false;
     if (topicsData[topic]?.status === "unread") {
       return true;
     }
-    // if (message.from === currentAccount) return false;
+    if (group.lastMessage?.senderAddress === group?.client.inboxId) {
+      return false;
+    }
     const readUntil = topicsData[topic]?.readUntil || 0;
-    return readUntil < timestamp;
-  }, [topicsData, topic, timestamp, group]);
+    return readUntil < (timestamp ?? 0);
+  }, [
+    groupExists,
+    topicsData,
+    topic,
+    group.lastMessage?.senderAddress,
+    group?.client.inboxId,
+    timestamp,
+  ]);
 
-  const [members, setMembers] = useState<Member[]>([]);
-  const memberAddresses = useMemo(() => {
-    const addresses: string[] = [];
-    for (const member of members) {
-      if (member.addresses[0].toLowerCase() !== currentAccount?.toLowerCase()) {
-        addresses.push(member.addresses[0]);
-      }
-    }
-    return addresses;
-  }, [members, currentAccount]);
-
-  const data = useProfilesSocials(memberAddresses);
-  useEffect(() => {
-    if (group?.imageUrlSquare) {
-      return;
-    }
-    const fetchMembers = async () => {
-      const members = await group?.membersList();
-      setMembers(members || []);
-    };
-    fetchMembers();
-  }, [group]);
-
-  const memberData: {
-    address: string;
-    uri?: string;
-    name?: string;
-  }[] = useMemo(() => {
-    return data.map(({ data: socials }, index) =>
-      socials
-        ? {
-            address: memberAddresses[index],
-            uri: getPreferredAvatar(socials),
-            name: getPreferredName(socials, memberAddresses[index]),
-          }
-        : {
-            address: memberAddresses[index],
-            uri: undefined,
-            name: memberAddresses[index],
-          }
-    );
-  }, [data, memberAddresses]);
+  const { memberData } = useGroupConversationListAvatarInfo(
+    currentAccount,
+    group
+  );
 
   const toggleReadStatus = useCallback(() => {
     const newStatus = isUnread ? "read" : "unread";
@@ -187,6 +152,29 @@ const useData = ({ topic }: UseDataProps) => {
     [group?.state, colorScheme, group?.name]
   );
 
+  const messageText = useMemo(() => {
+    const lastMessage = group?.lastMessage;
+    if (!lastMessage) return "";
+    try {
+      const content = group?.lastMessage?.content();
+      const contentType = getMessageContentType(lastMessage.contentTypeId);
+      if (contentType === "groupUpdated") {
+        //  TODO: Update this
+        return "Group updated";
+      }
+      if (typeof content === "string") {
+        return content;
+      }
+      return group?.lastMessage?.fallback;
+    } catch (e) {
+      logger.error("Error getting message text", {
+        error: e,
+        contentTypeId: lastMessage?.contentTypeId,
+      });
+      return group?.lastMessage?.fallback;
+    }
+  }, [group?.lastMessage]);
+
   return {
     group,
     memberData,
@@ -199,6 +187,7 @@ const useData = ({ topic }: UseDataProps) => {
     isUnread,
     isBlockedChatView,
     handleRemoveRestore,
+    messageText,
   };
 };
 
@@ -218,7 +207,9 @@ const useUserInteractions = ({
   handleRemoveRestore,
 }: UseUserInteractionsProps) => {
   const onPress = useCallback(() => {
-    navigate("Conversation", { topic });
+    navigate("Conversation", {
+      topic,
+    });
   }, [topic]);
 
   const triggerHapticFeedback = useCallback(() => {
@@ -267,15 +258,16 @@ type UseDisplayInfoProps = {
 const useDisplayInfo = ({ timestamp, isUnread }: UseDisplayInfoProps) => {
   const timeToShow = getMinimalDate(timestamp);
   const colorScheme = useColorScheme();
-  const leftActionPicto = isUnread ? "checkmark.message" : "message.badge";
-  return { timeToShow, colorScheme, leftActionPicto };
+  const leftActionIcon: IIconName = isUnread
+    ? "checkmark.message"
+    : "message.badge";
+  return { timeToShow, colorScheme, leftActionIcon };
 };
 
 export function V3GroupConversationListItem({
-  topic,
+  group,
 }: V3GroupConversationListItemProps) {
   const {
-    group,
     memberData,
     timestamp,
     isContextMenuVisible,
@@ -286,7 +278,8 @@ export function V3GroupConversationListItem({
     isBlockedChatView,
     toggleReadStatus,
     handleRemoveRestore,
-  } = useData({ topic });
+    messageText,
+  } = useData({ group });
   const ref = useRef<Swipeable>(null);
   const {
     onPress,
@@ -299,12 +292,12 @@ export function V3GroupConversationListItem({
     onWillRightSwipe,
   } = useUserInteractions({
     ref,
-    topic,
+    topic: group?.topic,
     showContextMenu,
     toggleReadStatus,
     handleRemoveRestore,
   });
-  const { timeToShow, leftActionPicto } = useDisplayInfo({
+  const { timeToShow, leftActionIcon } = useDisplayInfo({
     timestamp,
     isUnread,
   });
@@ -315,10 +308,10 @@ export function V3GroupConversationListItem({
         isVisible={isContextMenuVisible}
         onClose={closeContextMenu}
         items={contextMenuItems}
-        conversationTopic={topic}
+        conversationTopic={group?.topic}
       />
     ),
-    [isContextMenuVisible, closeContextMenu, contextMenuItems, topic]
+    [isContextMenuVisible, closeContextMenu, contextMenuItems, group?.topic]
   );
 
   const avatarComponent = useMemo(() => {
@@ -347,13 +340,13 @@ export function V3GroupConversationListItem({
       onLeftSwipe={onLeftSwipe}
       onWillRightSwipe={onWillRightSwipe}
       onWillLeftSwipe={onWillLeftSwipe}
-      leftActionPicto={leftActionPicto}
+      leftActionIcon={leftActionIcon}
       showError={false}
       showImagePreview={false}
       imagePreviewUrl={undefined}
       avatarComponent={avatarComponent}
       title={group?.name}
-      subtitle={`${timeToShow} ⋅ Message exam`}
+      subtitle={`${timeToShow} ⋅ ${messageText}`}
       contextMenuComponent={contextMenuComponent}
       isUnread={isUnread}
       rightIsDestructive={isBlockedChatView}

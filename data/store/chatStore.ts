@@ -140,7 +140,7 @@ export type ChatStoreType = {
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
   };
-  pinnedConversations: XmtpConversation[];
+  pinnedConversationTopics: string[];
   openedConversationTopic: string | null;
   setOpenedConversationTopic: (topic: string | null) => void;
   conversationsMapping: {
@@ -243,7 +243,7 @@ export const initChatStore = (account: string) => {
       (set) =>
         ({
           conversations: {},
-          pinnedConversations: [],
+          pinnedConversationTopics: [],
           lastSyncedAt: 0,
           lastSyncedTopics: [],
           topicsData: {},
@@ -338,11 +338,11 @@ export const initChatStore = (account: string) => {
           setPinnedConversations: (conversationsTopics: string[]) =>
             set((state) => {
               const pinnedConversations = [
-                ...(state.pinnedConversations || []),
+                ...(state.pinnedConversationTopics || []),
               ];
               conversationsTopics.forEach((topic) => {
                 const alreadyPinnedIndex = pinnedConversations.findIndex(
-                  (item) => item.topic === topic
+                  (item) => item === topic
                 );
                 const isGroup = isGroupTopic(topic);
                 if (
@@ -356,12 +356,11 @@ export const initChatStore = (account: string) => {
                 if (alreadyPinnedIndex !== -1) {
                   pinnedConversations.splice(alreadyPinnedIndex, 1);
                 } else {
-                  const conversation = state.conversations[topic];
-                  pinnedConversations.push(conversation);
+                  pinnedConversations.push(topic);
                 }
               });
               return {
-                pinnedConversations,
+                pinnedConversationTopics: pinnedConversations,
               };
             }),
 
@@ -847,13 +846,13 @@ export const initChatStore = (account: string) => {
             lastSyncedAt: state.lastSyncedAt,
             lastSyncedTopics: state.lastSyncedTopics,
             topicsData: state.topicsData,
-            pinnedConversations: state.pinnedConversations,
+            pinnedConversationTopics: state.pinnedConversationTopics,
             groupInviteLinks: state.groupInviteLinks,
           };
 
           return persistedState;
         },
-        version: 2,
+        version: 3,
         migrate: (persistedState: any, version: number): ChatStoreType => {
           logger.debug("Zustand migration version:", version);
           // Migration from version 0: Convert 'deletedTopics' to 'topicsStatus'
@@ -878,6 +877,13 @@ export const initChatStore = (account: string) => {
               };
             }
             delete persistedState.topicsStatus;
+          }
+          if (version < 3) {
+            const fullConversations: XmtpConversation[] =
+              persistedState.pinnedConversations;
+            persistedState.pinnedConversationTopics =
+              fullConversations?.map((it) => it.topic) ?? [];
+            delete persistedState.pinnedConversations;
           }
           return persistedState as ChatStoreType;
         },

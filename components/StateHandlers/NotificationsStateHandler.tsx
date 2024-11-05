@@ -79,13 +79,13 @@ export default function ConversationsStateHandler() {
 
 const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
   const hydrationDone = useAppStore((s) => s.hydrationDone);
-  const { conversations, topicsData, lastUpdateAt, pinnedConversations } =
+  const { conversations, topicsData, lastUpdateAt, pinnedConversationTopics } =
     useChatStoreForAccount(account)(
       useSelect([
         "conversations",
         "topicsData",
         "lastUpdateAt",
-        "pinnedConversations",
+        "pinnedConversationTopics",
       ])
     );
   const { peersStatus, groupStatus } = useSettingsStoreForAccount(account)(
@@ -113,7 +113,7 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
           .map((peer) => `${peer}-${peersStatus[peer]}`)
           .join(","),
         lastUpdateAt,
-        pinnedConversations: pinnedConversations.length,
+        pinnedConversations: pinnedConversationTopics.length,
         groupStatus: Object.keys(groupStatus)
           .map((groupId) => `${groupId}-${groupStatus[groupId]}`)
           .join(","),
@@ -137,7 +137,7 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
           topicsData,
           peersStatus,
           groupStatus,
-          pinnedConversations
+          pinnedConversationTopics
         );
       }
     };
@@ -149,8 +149,8 @@ const AccountNotificationsStateHandler = ({ account }: { account: string }) => {
     peersStatus,
     topicsData,
     lastUpdateAt,
-    pinnedConversations,
     groupStatus,
+    pinnedConversationTopics,
   ]);
   return null;
 };

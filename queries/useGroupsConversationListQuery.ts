@@ -3,11 +3,11 @@ import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import {
   ConverseXmtpClientType,
+  DecodedMessageWithCodecsType,
   GroupWithCodecsType,
 } from "@utils/xmtpRN/client";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 
-import { entify, EntityObject } from "./entify";
 import { queryClient } from "./queryClient";
 import { setGroupIsActiveQueryData } from "./useGroupIsActive";
 import { setGroupNameQueryData } from "./useGroupNameQuery";
@@ -18,11 +18,12 @@ export const groupConversationListKey = (account: string) => [
   account,
 ];
 
-type GroupConversationListType = EntityObject<GroupWithCodecsType, string>;
+type GroupConversationListType = GroupWithCodecsType[];
 
 const groupsQueryFn = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   const beforeSync = new Date().getTime();
+  await client.conversations.syncGroups();
   await client.conversations.syncGroups();
   const afterSync = new Date().getTime();
   logger.debug(
@@ -48,7 +49,7 @@ const groupsQueryFn = async (account: string) => {
     setGroupPhotoQueryData(account, group.topic, group.imageUrlSquare);
     setGroupIsActiveQueryData(account, group.topic, group.isGroupActive);
   }
-  return entify(groups, (group) => group.topic);
+  return groups;
 };
 
 export const useGroupsConversationListQuery = (
@@ -95,13 +96,29 @@ export const addGroupToGroupsConversationListQuery = (
 ) => {
   const previousGroupsData = getGroupsConversationListQueryData(account);
   if (!previousGroupsData) {
+    setGroupsConversationListQueryData(account, [group]);
     return;
   }
-  setGroupsConversationListQueryData(account, {
-    byId: {
-      ...previousGroupsData.byId,
-      [group.topic]: group,
-    },
-    ids: [group.topic, ...previousGroupsData.ids],
-  });
+  setGroupsConversationListQueryData(account, [group, ...previousGroupsData]);
+};
+
+export const updateMessageToGroupsConversationListQuery = (
+  account: string,
+  message: DecodedMessageWithCodecsType
+) => {
+  const previousGroupsData = getGroupsConversationListQueryData(account);
+  if (!previousGroupsData) return;
+  const group = previousGroupsData.find((g) => g.topic === message.topic);
+  if (!group) return;
+  const newGroups: GroupConversationListType = previousGroupsData.map(
+    (g) => {
+      if (g.topic === message.topic) {
+        g.lastMessage = message;
+        return g;
+      }
+      return g;
+    }
+    // g.topic === message.topic ? { ...g, lastMessage: message } : g
+  );
+  setGroupsConversationListQueryData(account, newGroups);
 };

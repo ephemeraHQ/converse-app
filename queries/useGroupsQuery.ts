@@ -12,7 +12,6 @@ import {
 type GroupMembersSelectData = EntityObject<GroupWithCodecsType, string>;
 
 const groupsQueryFn = async (account: string) => {
-  console.log("here2222");
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   // if (!client) {
   return {

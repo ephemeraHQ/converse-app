@@ -9,5 +9,8 @@ export const useConversationListGroupItem = (topic: string) => {
     refetchOnMount: false,
   });
 
-  return useMemo(() => data?.byId[topic], [data, topic]);
+  return useMemo(
+    () => data?.find((group) => group.topic === topic),
+    [data, topic]
+  );
 };
