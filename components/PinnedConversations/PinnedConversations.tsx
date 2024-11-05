@@ -1,20 +1,34 @@
 import { StyleSheet, View } from "react-native";
 
-import { PinnedConversation } from "./PinnedConversation";
-import { XmtpConversation } from "../../data/store/chatStore";
+import { PinnedV2Conversation } from "./PinnedV2Conversation";
+import { isGroupTopic } from "@utils/groupUtils/groupId";
+import { PinnedV3Conversation } from "./PinnedV3Conversation";
+import { useGroupsConversationListQuery } from "@queries/useGroupsConversationListQuery";
+import { useCurrentAccount } from "@data/store/accountsStore";
 
 type Props = {
-  convos?: XmtpConversation[];
+  topics?: string[];
 };
 
-export default function PinnedConversations({ convos }: Props) {
-  const pinnedConvos = !convos
+export const PinnedConversations = ({ topics }: Props) => {
+  const currentAccount = useCurrentAccount();
+  const { isLoading } = useGroupsConversationListQuery(currentAccount!, {
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  if (isLoading) return null;
+
+  const pinnedConvos = !topics
     ? []
-    : convos?.map((convo) => {
-        return <PinnedConversation conversation={convo} key={convo.topic} />;
+    : topics?.map((topic) => {
+        if (isGroupTopic(topic)) {
+          return <PinnedV3Conversation topic={topic} key={topic} />;
+        }
+        return <PinnedV2Conversation topic={topic} key={topic} />;
       });
   return <View style={styles.container}>{pinnedConvos}</View>;
-}
+};
 
 const styles = StyleSheet.create({
   container: {

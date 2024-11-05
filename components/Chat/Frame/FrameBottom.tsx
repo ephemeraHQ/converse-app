@@ -38,7 +38,7 @@ export default function FrameBottom({
       style={[
         styles.frameBottom,
         {
-          backgroundColor: message.fromMe
+          backgroundColor: messageFromMe
             ? myMessageInnerBubbleColor(colorScheme)
             : messageInnerBubbleColor(colorScheme),
           paddingVertical:

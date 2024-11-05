@@ -150,11 +150,10 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
   var messageIntent: INSendMessageIntent? = nil
   
   do {
-    let groups = try await xmtpClient.conversations.groups()
-    if let group = groups.first(where: { $0.topic == contentTopic }) {
+    
+    if let group = try xmtpClient.findGroup(groupId: getGroupIdFromTopic(topic: envelope.contentTopic)) {
       try await group.sync()
       if var decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope) {
-        
         // For now, use the group member linked address as "senderAddress"
         // @todo => make inboxId a first class citizen
         if let senderAddresses = try await group.members.first(where: {$0.inboxId == decodedMessage.senderAddress})?.addresses {
@@ -288,10 +287,9 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
       do {
         print("[NotificationExtension] Decoding group message...")
         let envelopeBytes = envelope.message
-        let _ = try await group.processMessageDecrypted(envelopeBytes: envelopeBytes)
         let decodedMessage = try await group.processMessage(envelopeBytes: envelopeBytes)
         print("[NotificationExtension] Group message decoded!")
-        return decodedMessage
+        return try decodedMessage.decode()
       } catch {
         sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
         print("[NotificationExtension] ERROR WHILE DECODING \(error)")
