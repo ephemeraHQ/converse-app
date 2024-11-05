@@ -5,9 +5,10 @@ import {
 import React, { memo } from "react";
 import { Snackbar } from "./Snackbar";
 import { SnackbarBackdrop } from "@components/Snackbar/SnackbarBackdrop/SnackbarBackdrop";
+import { ISnackbar } from "@components/Snackbar/Snackbar.types";
 
 export type InternalSnackbarContextType = {
-  snackbars: SnackbarType[];
+  snackbars: ISnackbar[];
 };
 
 export const InternalSnackbarContext =
