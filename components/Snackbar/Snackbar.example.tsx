@@ -1,13 +1,16 @@
 import { Screen } from "@components/Screen/ScreenComp/Screen";
 import { showSnackbar } from "@components/Snackbar/Snackbar.service";
 import { Button } from "@design-system/Button/Button";
-import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
 import { useAppTheme } from "@theme/useAppTheme";
+import { Image } from "expo-image";
 import { memo } from "react";
+import { Dimensions } from "react-native";
 
 export const SnackbarExample = memo(function SnackbarExample() {
   const { theme } = useAppTheme();
+
+  const windowWidth = Dimensions.get("window").width;
 
   return (
     <Screen safeAreaEdges={["bottom", "top"]}>
@@ -76,24 +79,14 @@ export const SnackbarExample = memo(function SnackbarExample() {
             })
           }
         />
-
-        <Text>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum. Sed ut
-          perspiciatis unde omnis iste natus error sit voluptatem accusantium
-          doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo
-          inventore veritatis et quasi architecto beatae vitae dicta sunt
-          explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut
-          odit aut fugit. Nemo enim ipsam voluptatem quia voluptas sit
-          aspernatur aut odit aut fugit. Nemo enim ipsam voluptatem quia
-          voluptas sit aspernatur aut odit aut fugit.
-        </Text>
       </VStack>
+
+      <Image
+        source={{
+          uri: `https://picsum.photos/500/500`,
+        }}
+        style={{ width: 500, height: 500 }}
+      />
     </Screen>
   );
 });

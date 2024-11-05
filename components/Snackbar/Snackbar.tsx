@@ -15,11 +15,13 @@ import { AnimatedHStack, HStack } from "@design-system/HStack";
 import { IconButton } from "@design-system/IconButton/IconButton";
 import { Text } from "@design-system/Text";
 import { AnimatedVStack } from "@design-system/VStack";
+import { SICK_SPRING_CONFIG } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
 import { memo, useCallback, useEffect } from "react";
 import { useWindowDimensions } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
+  interpolate,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
@@ -27,14 +29,6 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { SNACKBAR_SPACE_BETWEEN_SNACKBARS } from "./Snackbar.constants";
-
-const withSpringConfig = {
-  duration: 500,
-  dampingRatio: 1.5,
-  stiffness: 1,
-  overshootClamping: false,
-  restSpeedThreshold: 50,
-};
 
 type SnackbarProps = {
   snackbar: ISnackbar;
@@ -49,17 +43,22 @@ export const Snackbar = memo(
 
     const isFirstSnack = getNumberOfSnackbars() === 1;
     const initialBottomPosition = isFirstSnack
-      ? -SNACKBAR_HEIGHT
+      ? -SNACKBAR_HEIGHT / 2
       : SNACKBAR_BOTTOM_OFFSET;
 
     const snackbarIndexAV = useSharedValue(0);
     const bottomAV = useSharedValue(initialBottomPosition);
     const translateXAV = useSharedValue(0);
     const isSwipingAV = useSharedValue(false);
+    const firstSnackbarRenderProgressAV = useSharedValue(
+      // We only want the first snackbar to animate in with a special animation
+      isFirstSnack ? 0 : 1
+    );
 
     useEffect(() => {
-      bottomAV.value = withSpring(SNACKBAR_BOTTOM_OFFSET, withSpringConfig);
-    }, [bottomAV]);
+      bottomAV.value = withSpring(SNACKBAR_BOTTOM_OFFSET, SICK_SPRING_CONFIG);
+      firstSnackbarRenderProgressAV.value = withSpring(1, SICK_SPRING_CONFIG);
+    }, [bottomAV, firstSnackbarRenderProgressAV]);
 
     useEffect(() => {
       const unsubscribe = onSnackbarsChange((snackbars) => {
@@ -67,10 +66,8 @@ export const Snackbar = memo(
           (item) => item.key === snackbar.key
         );
 
-        console.log("snackbarIndex:", snackbarIndex);
-
         // Set the new new index of the current snackbar
-        snackbarIndexAV.value = snackbarIndex;
+        snackbarIndexAV.value = withSpring(snackbarIndex, SICK_SPRING_CONFIG);
 
         if (snackbarIndex === -1) {
           return;
@@ -87,7 +84,7 @@ export const Snackbar = memo(
 
         bottomAV.value = withSpring(
           SNACKBAR_BOTTOM_OFFSET + totalHeightBeforeThisSnackbar,
-          withSpringConfig
+          SICK_SPRING_CONFIG
         );
       });
 
@@ -134,21 +131,34 @@ export const Snackbar = memo(
         // Animate shadow radius based on snackbar position in stack
         // - Starts at 16 for first snackbar and decreases by 2.5 for each subsequent one
         // - Has minimum value of 2 to maintain some depth
-        shadowRadius: withTiming(Math.max(16 - snackbarIndexAV.value * 2.5, 2)),
+        shadowRadius: interpolate(snackbarIndexAV.value, [0, 10], [16, 2]),
         // Animate shadow opacity based on snackbar position
         // - First 3 snackbars have opacity of 1
         // - After 3rd snackbar, opacity decreases linearly by 0.05
         // - This creates a nice fading effect for stacked snackbars
-        shadowOpacity: withTiming(
-          snackbarIndexAV.value > 3 ? 1 - snackbarIndexAV.value * 0.15 : 1
+        shadowOpacity: interpolate(
+          snackbarIndexAV.value,
+          [0, 3, 10],
+          [1, 1, 0]
         ),
         // The content of the first two StackedToasts is visible
         // The content of the other StackedToasts is hidden
-        opacity: withTiming(
-          snackbarIndexAV.value < SNACKBARS_MAX_VISIBLE ? 1 : 0
+        opacity: interpolate(
+          snackbarIndexAV.value,
+          [0, SNACKBARS_MAX_VISIBLE - 1, SNACKBARS_MAX_VISIBLE],
+          [1, 1, 0]
         ),
-        // For the dragging animation
-        transform: [{ translateX: translateXAV.value }],
+        transform: [
+          // For the dragging animation
+          { translateX: translateXAV.value },
+          {
+            scale: interpolate(
+              firstSnackbarRenderProgressAV.value,
+              [0, 1],
+              [0.8, 1]
+            ),
+          },
+        ],
       }),
       []
     );

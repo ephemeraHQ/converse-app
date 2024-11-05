@@ -1,18 +1,15 @@
-import {
-  SNACKBARS_MAX_VISIBLE,
-  SNACKBAR_LARGE_TEXT_HEIGHT,
-  SNACKBAR_SPACE_BETWEEN_SNACKBARS,
-} from "@components/Snackbar/Snackbar.constants";
+import { SNACKBAR_BACKDROP_MAX_HEIGHT } from "@components/Snackbar/Snackbar.constants";
 import { useSnackbars } from "@components/Snackbar/Snackbar.service";
 import { useGradientHeight } from "@components/Snackbar/SnackbarBackdrop/SnackbarBackdrop.utils";
 import MaskedView from "@react-native-masked-view/masked-view";
+import { SICK_SPRING_CONFIG } from "@theme/animations";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { memo } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
 import Animated, {
   useAnimatedStyle,
-  withTiming,
+  withSpring,
 } from "react-native-reanimated";
 
 // The Backdrop component creates a visually appealing background for stacked snackbars.
@@ -29,9 +26,7 @@ export const SnackbarBackdrop = memo(() => {
   const rAnimatedStyle = useAnimatedStyle(() => {
     const top = windowHeight - gradientHeight;
     return {
-      top: withTiming(top, {
-        duration: 500,
-      }),
+      top: withSpring(top, SICK_SPRING_CONFIG),
     };
   }, [windowHeight, snackbars.length]);
 
@@ -53,10 +48,7 @@ export const SnackbarBackdrop = memo(() => {
           />
         }
         style={{
-          height:
-            (SNACKBAR_LARGE_TEXT_HEIGHT + SNACKBAR_SPACE_BETWEEN_SNACKBARS) *
-              SNACKBARS_MAX_VISIBLE +
-            90,
+          height: SNACKBAR_BACKDROP_MAX_HEIGHT,
           width: "100%",
         }}
       >
