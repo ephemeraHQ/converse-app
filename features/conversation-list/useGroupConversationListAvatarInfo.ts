@@ -1,7 +1,7 @@
-import { useProfilesSocials } from "@hooks/useProfilesSocials";
+import { useInboxProfileSocialsQueries } from "@queries/useInboxProfileSocialsQuery";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
-import { Member } from "@xmtp/react-native-sdk";
+import { InboxId, Member } from "@xmtp/react-native-sdk";
 import { useEffect, useMemo, useState } from "react";
 
 export const useGroupConversationListAvatarInfo = (
@@ -22,37 +22,37 @@ export const useGroupConversationListAvatarInfo = (
     fetchMembers();
   }, [group]);
 
-  const memberAddresses = useMemo(() => {
-    const addresses: string[] = [];
+  const memberInboxIds = useMemo(() => {
+    const inboxIds: InboxId[] = [];
     for (const member of members) {
       if (member.addresses[0].toLowerCase() !== currentAccount?.toLowerCase()) {
-        addresses.push(member.addresses[0]);
+        inboxIds.push(member.inboxId);
       }
     }
-    return addresses;
+    return inboxIds;
   }, [members, currentAccount]);
 
-  const data = useProfilesSocials(memberAddresses);
+  const data = useInboxProfileSocialsQueries(currentAccount, memberInboxIds);
 
-  const memberData: {
-    address: string;
-    uri?: string;
-    name?: string;
-  }[] = useMemo(() => {
-    return data.map(({ data: socials }, index) =>
-      socials
-        ? {
-            address: memberAddresses[index],
-            uri: getPreferredAvatar(socials),
-            name: getPreferredName(socials, memberAddresses[index]),
-          }
-        : {
-            address: memberAddresses[index],
-            uri: undefined,
-            name: memberAddresses[index],
-          }
-    );
-  }, [data, memberAddresses]);
+  const memberData = useMemo(() => {
+    const returnData: {
+      inboxId: InboxId;
+      address: string;
+      uri?: string;
+      name?: string;
+    }[] = [];
+    data.forEach(({ data: socials }, index) => {
+      if (socials) {
+        returnData.push({
+          inboxId: memberInboxIds[index],
+          address: socials[0].address ?? "",
+          uri: getPreferredAvatar(socials[0]),
+          name: getPreferredName(socials[0], socials[0].address ?? ""),
+        });
+      }
+    });
+    return returnData;
+  }, [data, memberInboxIds]);
 
   return {
     memberData,
