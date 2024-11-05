@@ -2,7 +2,7 @@ import { ConnectViaWalletPopularWalletsTableView } from "@components/Onboarding/
 import { useInstalledWallets } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import { memo } from "react";
 import { Alert } from "react-native";
-
+import { useAppTheme } from "@theme/useAppTheme";
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
 import { NewAccountPictoTitleSubtitle } from "../../components/NewAccount/NewAccountTitleSubtitlePicto";
 import {
@@ -15,9 +15,10 @@ import TableView from "../../components/TableView/TableView";
 import { useAccountsStore } from "../../data/store/accountsStore";
 import { translate } from "../../i18n";
 import { useRouter } from "../../navigation/useNavigation";
-import { spacing } from "../../theme";
 
 export const NewAccountScreen = memo(function NewAccountScreen() {
+  const { theme } = useAppTheme();
+
   const router = useRouter();
 
   const walletsInstalled = useInstalledWallets();
@@ -29,7 +30,7 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
       safeAreaEdges={["bottom"]}
       preset="scroll"
       contentContainerStyle={{
-        paddingHorizontal: spacing.md,
+        paddingHorizontal: theme.spacing.md,
       }}
     >
       <NewAccountPictoTitleSubtitle.Container>

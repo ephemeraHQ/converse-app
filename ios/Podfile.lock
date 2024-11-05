@@ -277,6 +277,8 @@ PODS:
     - ExpoModulesCore
   - ExpoKeepAwake (13.0.2):
     - ExpoModulesCore
+  - ExpoLinearGradient (13.0.2):
+    - ExpoModulesCore
   - ExpoLocalization (15.0.3):
     - ExpoModulesCore
   - ExpoModulesCore (1.12.23):
@@ -1691,8 +1693,6 @@ PODS:
     - React-logger (= 0.74.5)
     - React-perflogger (= 0.74.5)
     - React-utils (= 0.74.5)
-  - ReactNativeAvoidSoftinput (4.0.1):
-    - React-Core
   - ReactNativeIosContextMenu (2.5.1):
     - ContextMenuAuxiliaryPreview (~> 0.3)
     - DGSwiftUtilities
@@ -1709,6 +1709,8 @@ PODS:
   - RNCAsyncStorage (1.23.1):
     - React-Core
   - RNCClipboard (1.14.1):
+    - React-Core
+  - RNCMaskedView (0.3.1):
     - React-Core
   - RNDeviceInfo (10.9.0):
     - React-Core
@@ -1882,6 +1884,7 @@ DEPENDENCIES:
   - ExpoImageManipulator (from `../node_modules/expo-image-manipulator/ios`)
   - ExpoImagePicker (from `../node_modules/expo-image-picker/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
+  - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
   - ExpoLocalization (from `../node_modules/expo-localization/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
@@ -1966,13 +1969,13 @@ DEPENDENCIES:
   - React-runtimescheduler (from `../node_modules/react-native/ReactCommon/react/renderer/runtimescheduler`)
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
-  - ReactNativeAvoidSoftinput (from `../node_modules/react-native-avoid-softinput`)
   - ReactNativeIosContextMenu (from `../node_modules/react-native-ios-context-menu`)
   - ReactNativeIosUtilities (from `../node_modules/react-native-ios-utilities`)
   - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
   - RNAWSCognito (from `../node_modules/amazon-cognito-identity-js`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
+  - "RNCMaskedView (from `../node_modules/@react-native-masked-view/masked-view`)"
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - "RNFlashList (from `../node_modules/@shopify/flash-list`)"
   - RNFS (from `../node_modules/react-native-fs`)
@@ -2088,6 +2091,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-image-picker/ios"
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
+  ExpoLinearGradient:
+    :path: "../node_modules/expo-linear-gradient/ios"
   ExpoLocalization:
     :path: "../node_modules/expo-localization/ios"
   ExpoModulesCore:
@@ -2245,8 +2250,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/utils"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
-  ReactNativeAvoidSoftinput:
-    :path: "../node_modules/react-native-avoid-softinput"
   ReactNativeIosContextMenu:
     :path: "../node_modules/react-native-ios-context-menu"
   ReactNativeIosUtilities:
@@ -2259,6 +2262,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCClipboard:
     :path: "../node_modules/@react-native-clipboard/clipboard"
+  RNCMaskedView:
+    :path: "../node_modules/@react-native-masked-view/masked-view"
   RNDeviceInfo:
     :path: "../node_modules/react-native-device-info"
   RNFlashList:
@@ -2326,6 +2331,7 @@ SPEC CHECKSUMS:
   ExpoImageManipulator: aea99205c66043a00a0af90e345395637b9902fa
   ExpoImagePicker: 12a420923383ae38dccb069847218f27a3b87816
   ExpoKeepAwake: 3b8815d9dd1d419ee474df004021c69fdd316d08
+  ExpoLinearGradient: 8cec4a09426d8934c433e83cb36262d72c667fce
   ExpoLocalization: f04eeec2e35bed01ab61c72ee1768ec04d093d01
   ExpoModulesCore: e3c518e094990b3ad960edbd19c291f2a1b56b0a
   ExpoSecureStore: 060cebcb956b80ddae09821610ac1aa9e1ac74cd
@@ -2417,13 +2423,13 @@ SPEC CHECKSUMS:
   React-runtimescheduler: db7189185a2e5912b0d17194302e501f801a381e
   React-utils: 3f1fcffc14893afb9a7e5b7c736353873cc5fc95
   ReactCommon: f79ae672224dc1e6c2d932062176883c98eebd57
-  ReactNativeAvoidSoftinput: a096aae8faf85c0f3225c2179bccdab00b8b6354
   ReactNativeIosContextMenu: e5f972174bd78ab3a552bd6ee4745762ffaa42b3
   ReactNativeIosUtilities: 8ea45df073a05d24b9fd75e4ec5fe1de19051466
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNAWSCognito: fe0c870c7cd9970a2efefc075b3f2d75eac913c7
   RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c
   RNCClipboard: 0a720adef5ec193aa0e3de24c3977222c7e52a37
+  RNCMaskedView: 090213d32d8b3bb83a4dcb7d12c18f0152591906
   RNDeviceInfo: 02ea8b23e2280fa18e00a06d7e62804d74028579
   RNFlashList: b521ebdd7f9352673817f1d98e8bdc0c8cf8545b
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
@@ -2449,7 +2455,7 @@ SPEC CHECKSUMS:
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
   XMTP: 09faa347569b092005997364f7fe787ccc33f3d5
   XMTPReactNative: 0c92d55c576ac6ff0775357fa60e90ea8e73afc2
-  Yoga: 1ab23c1835475da69cf14e211a560e73aab24cb0
+  Yoga: 33622183a85805e12703cd618b2c16bfd18bfffb
 
 PODFILE CHECKSUM: 137cb0cd2dafbfb3e5b9343435f9db8e28690806
 

@@ -47,6 +47,7 @@ import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
 import "./utils/splash/splash";
+import { Snackbars } from "@components/Snackbar/Snackbars";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -161,6 +162,7 @@ export default function AppWithProviders() {
                     <BottomSheetModalProvider>
                       <PortalProvider>
                         <App />
+                        <Snackbars />
                       </PortalProvider>
                     </BottomSheetModalProvider>
                   </GestureHandlerRootView>

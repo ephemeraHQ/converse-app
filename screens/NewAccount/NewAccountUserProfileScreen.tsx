@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { memo, useCallback, useRef } from "react";
 import { TextInput, View, useColorScheme } from "react-native";
 
+import { useAppTheme } from "@theme/useAppTheme";
 import Avatar from "../../components/Avatar";
 import Button from "../../components/Button/Button";
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
@@ -11,7 +12,6 @@ import { Text } from "../../design-system/Text";
 import { VStack } from "../../design-system/VStack";
 import { translate } from "../../i18n";
 import { textSecondaryColor } from "../../styles/colors";
-import { spacing } from "../../theme";
 import { sentryTrackError } from "../../utils/sentry";
 import { NavigationParamList } from "../Navigation/Navigation";
 import {
@@ -26,6 +26,8 @@ export const NewAccountUserProfileScreen = memo(
     props: NativeStackScreenProps<NavigationParamList, "NewAccountUserProfile">
   ) {
     const { navigation } = props;
+
+    const { theme } = useAppTheme();
 
     const colorScheme = useColorScheme();
 
@@ -118,7 +120,7 @@ export const NewAccountUserProfileScreen = memo(
 
         <VStack
           style={{
-            rowGap: spacing.sm,
+            rowGap: theme.spacing.sm,
           }}
         >
           <Text style={styles.p}>
