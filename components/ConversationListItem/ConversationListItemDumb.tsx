@@ -27,7 +27,8 @@ import Animated, {
   useAnimatedRef,
 } from "react-native-reanimated";
 
-import Picto, { IPicto } from "../Picto/Picto";
+import { IIconName } from "@design-system/Icon/Icon.types";
+import { Icon } from "@design-system/Icon/Icon";
 
 export type ConversationListItemDumbProps = {
   title?: string;
@@ -35,7 +36,7 @@ export type ConversationListItemDumbProps = {
   avatarComponent?: React.ReactNode;
   rightIsDestructive?: boolean;
   rightComponent?: React.ReactNode;
-  leftActionPicto: IPicto;
+  leftActionIcon: IIconName;
   onLeftSwipe?: () => void;
   onRightSwipe?: () => void;
   onPress?: () => void;
@@ -213,7 +214,7 @@ export const ConversationListItemDumb = memo(
         onWillLeftSwipe,
         onRightSwipe,
         onWillRightSwipe,
-        leftActionPicto,
+        leftActionIcon,
         isUnread,
         title,
         subtitle,
@@ -275,8 +276,8 @@ export const ConversationListItemDumb = memo(
                 ]}
               >
                 {showError && (
-                  <Picto
-                    picto="info.circle"
+                  <Icon
+                    icon="info.circle"
                     color={themedDangerColor}
                     size={PictoSizes.button}
                   />
@@ -290,21 +291,21 @@ export const ConversationListItemDumb = memo(
       const renderLeftActions = useCallback(() => {
         return (
           <RectButton style={styles.leftAction}>
-            <Picto
-              picto={leftActionPicto as IPicto}
+            <Icon
+              icon={leftActionIcon as IIconName}
               color={themedInversePrimaryColor}
               size={PictoSizes.swipableItem}
             />
           </RectButton>
         );
-      }, [leftActionPicto, styles.leftAction, themedInversePrimaryColor]);
+      }, [leftActionIcon, styles.leftAction, themedInversePrimaryColor]);
 
       const renderRightActions = useCallback(() => {
         if (rightIsDestructive) {
           return (
             <RectButton style={styles.rightAction} onPress={onRightActionPress}>
-              <Picto
-                picto="checkmark"
+              <Icon
+                icon="checkmark"
                 color={themedInversePrimaryColor}
                 size={PictoSizes.swipableItem}
               />
@@ -316,11 +317,7 @@ export const ConversationListItemDumb = memo(
               style={styles.rightActionRed}
               onPress={onRightActionPress}
             >
-              <Picto
-                picto="trash"
-                color="white"
-                size={PictoSizes.swipableItem}
-              />
+              <Icon icon="trash" color="white" size={PictoSizes.swipableItem} />
             </RectButton>
           );
         }

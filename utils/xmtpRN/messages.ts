@@ -33,6 +33,9 @@ import { xmtpMessageFromDb } from "../../data/mappers";
 import { getChatStore } from "../../data/store/accountsStore";
 import { XmtpMessage } from "../../data/store/chatStore";
 import { sentryTrackError } from "../sentry";
+import { isGroupTopic } from "@utils/groupUtils/groupId";
+import { addGroupMessage } from "@queries/useGroupMessages";
+import { updateMessageToGroupsConversationListQuery } from "@queries/useGroupsConversationListQuery";
 
 const BATCH_QUERY_PAGE_SIZE = 30;
 
@@ -178,14 +181,15 @@ export const streamAllMessages = async (account: string) => {
       text: config.env === "prod" ? "Redacted" : message.nativeContent.text,
       topic: message.topic,
     });
-    // if (isGroupConversation(message.topic)) {
-    //   handleGroupMessage(client.address, message.topic, message);
-    //   return;
-    // }
-    saveMessages(client.address, protocolMessagesToStateMessages([message]));
-    if (message.contentTypeId.includes("group_updated")) {
-      handleGroupUpdatedMessage(client.address, message.topic, message);
+    if (isGroupTopic(message.topic)) {
+      if (message.contentTypeId.includes("group_updated")) {
+        handleGroupUpdatedMessage(client.address, message.topic, message);
+      }
+      addGroupMessage(client.address, message.topic, message);
+      updateMessageToGroupsConversationListQuery(client.address, message);
+      return;
     }
+    saveMessages(client.address, protocolMessagesToStateMessages([message]));
   }, true);
 };
 

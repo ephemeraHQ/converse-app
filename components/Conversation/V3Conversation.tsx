@@ -37,6 +37,7 @@ import {
 } from "react-native";
 
 import { ConversationTitleDumb } from "./ConversationTitleDumb";
+import { GroupChatPlaceholder } from "@components/Chat/ChatPlaceholder/GroupChatPlaceholder";
 
 type UseDataProps = {
   topic: string;
@@ -65,10 +66,11 @@ const useData = ({ topic }: UseDataProps) => {
   useEffect(() => {
     const checkActive = async () => {
       const isActive = await group?.isActive();
-      console.log("group1111", isActive);
+      // If not active leave the screen
     };
     checkActive();
   }, [group]);
+
   const memberAddresses = useMemo(() => {
     const addresses: string[] = [];
     for (const memberId of members?.ids ?? []) {
@@ -253,7 +255,7 @@ export const V3Conversation = ({
             <TextMessage
               fromMe={fromMe}
               hideBackground={hideBackground}
-              content={content}
+              content={content + message.deliveryStatus}
             />
           );
         default:
@@ -261,7 +263,7 @@ export const V3Conversation = ({
             <TextMessage
               fromMe={fromMe}
               hideBackground={false}
-              content={contentType}
+              content={contentType + message.deliveryStatus}
             />
           );
       }
@@ -310,6 +312,56 @@ export const V3Conversation = ({
     avatarComponent,
   ]);
 
+  const onSend = useCallback(
+    async ({
+      text,
+      referencedMessageId,
+    }: {
+      text: string;
+      referencedMessageId?: string;
+    }) => {
+      // const waitForUploadToComplete = () => {
+      //   return new Promise<void>((resolve) => {
+      //     const interval = setInterval(() => {
+      //       if (mediaPreviewRef.current?.status === "uploaded") {
+      //         clearInterval(interval);
+      //         resolve();
+      //       }
+      //     }, 200);
+      //   });
+      // };
+      // if (mediaPreviewRef.current) {
+      //   if (mediaPreviewRef.current?.status === "uploading") {
+      //     await waitForUploadToComplete();
+      //   }
+      //   setReplyingToMessage(null);
+      //   replyingToMessageRef.current = null;
+      //   setInputValue("");
+      //   numberOfLinesRef.current = 1;
+      //   handleAttachmentClosed();
+      //   mediaPreviewRef.current = {
+      //     ...mediaPreviewRef.current,
+      //     status: "sending",
+      //   };
+
+      //   setMediaPreview((prev) =>
+      //     prev ? { ...prev, status: "sending" } : null
+      //   );
+
+      //   if (preparedAttachmentMessageRef.current) {
+      //     await sendMessage(preparedAttachmentMessageRef.current);
+      //     preparedAttachmentMessageRef.current = null;
+      //   }
+      // }
+      await group?.send(text);
+    },
+    [group]
+  );
+
+  const placeholderComponent = useMemo(() => {
+    return <GroupChatPlaceholder messagesCount={messages?.ids.length ?? 0} />;
+  }, [messages?.ids.length]);
+
   return (
     <View style={styles.container}>
       <View style={styles.chatContainer}>
@@ -318,16 +370,16 @@ export const V3Conversation = ({
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           onReadyToFocus={onReadyToFocus}
-          transactionMode={false}
           frameTextInputFocused={false}
           showChatInput={showChatInput}
           showPlaceholder={showPlaceholder}
+          placeholderComponent={placeholderComponent}
           displayList={displayList}
           refreshing={isRefetching}
           getItemType={getItemTypeCallback}
           itemToId={keyExtractor}
           ListFooterComponent={null}
-          placeholderComponent={null}
+          onSend={onSend}
         />
       </View>
     </View>
