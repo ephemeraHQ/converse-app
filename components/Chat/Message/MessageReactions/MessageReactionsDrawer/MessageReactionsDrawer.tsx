@@ -112,7 +112,6 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
       >
         <FlashList
           estimatedItemSize={rolledUpReactions.totalCount}
-          contentContainerStyle={{ paddingBottom: insets.bottom }}
           data={rolledUpReactions.detailed.filter(
             (item) => !filterReactions || item.content === filterReactions
           )}
