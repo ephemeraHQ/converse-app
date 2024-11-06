@@ -137,7 +137,7 @@ fun persistNewConversation(appContext:Context, account: String, conversation: Co
 
 suspend fun getNewGroup(xmtpClient: Client, contentTopic: String): Group? {
     return try {
-        if (isGroupWelcomeTopic(contentTopic)) {
+        if (isV3WelcomeTopic(contentTopic)) {
             // Welcome envelopes are too large to send in a push, so a bit of a hack to get the latest group
             xmtpClient.conversations.syncGroups()
             val groups = xmtpClient.conversations.listGroups()

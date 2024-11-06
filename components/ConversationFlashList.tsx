@@ -19,16 +19,19 @@ import { useSelect } from "../data/store/storeHelpers";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import {
   ConversationFlatListHiddenRequestItem,
-  ConversationFlatListItem,
   ConversationWithLastMessagePreview,
 } from "../utils/conversation";
 import { getPreferredAvatar, getProfile } from "../utils/profile";
 import { conversationName } from "../utils/str";
-import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { FlatListItemType } from "../features/conversation-list/ConversationList.types";
+import { unwrapConversationContainer } from "@utils/groupUtils/conversationContainerHelpers";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
+import { DmWithCodecsType, GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { V3DMListItem } from "./V3DMListItem";
 
 type Props = {
   onScroll?: () => void;
-  items: (ConversationFlatListItem | GroupWithCodecsType)[];
+  items: FlatListItemType[];
   itemsForSearchQuery?: string;
   ListHeaderComponent?: React.ReactElement | null;
   ListFooterComponent?: React.ReactElement | null;
@@ -37,7 +40,7 @@ type Props = {
   "Chats" | "ShareFrame" | "ChatsRequests" | "Blocked"
 >;
 
-const keyExtractor = (item: ConversationFlatListItem | GroupWithCodecsType) => {
+const keyExtractor = (item: FlatListItemType) => {
   if ("lastMessage" in item) {
     return item.topic;
   }
@@ -78,9 +81,20 @@ export default function ConversationFlashList({
   const listRef = useRef<FlashList<any> | undefined>();
 
   const renderItem = useCallback(
-    ({ item }: { item: ConversationFlatListItem | GroupWithCodecsType }) => {
+    ({ item }: { item: FlatListItemType }) => {
       if ("lastMessage" in item) {
-        return <V3GroupConversationListItem group={item} />;
+        const conversation = unwrapConversationContainer(item);
+        if (conversation.version === ConversationVersion.GROUP) {
+          return (
+            <V3GroupConversationListItem
+              group={conversation as GroupWithCodecsType}
+            />
+          );
+        } else {
+          return (
+            <V3DMListItem conversation={conversation as DmWithCodecsType} />
+          );
+        }
       }
       if (item.topic === "hiddenRequestsButton") {
         const hiddenRequestItem = item as ConversationFlatListHiddenRequestItem;

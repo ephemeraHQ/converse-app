@@ -30,7 +30,7 @@ func getNewConversationFromEnvelope(xmtpClient: XMTP.Client, envelope: XMTP.Enve
 
 func getNewGroup(xmtpClient: XMTP.Client, contentTopic: String) async -> XMTP.Group? {
   do {
-    if (isGroupWelcomeTopic(topic: contentTopic)) {
+    if (isV3WelcomeTopic(topic: contentTopic)) {
       // Weclome envelopes are too large to send in a push, so a bit of a hack to get the latest group
       try await xmtpClient.conversations.sync()
       let groups = try await xmtpClient.conversations.groups()
@@ -138,7 +138,7 @@ func persistDecodedConversation(account: String, conversation: Conversation) {
   }
 }
 
-func getGroupIdFromTopic(topic: String) -> String {
+func getV3IdFromTopic(topic: String) -> String {
     return topic.replacingOccurrences(of: "/xmtp/mls/1/g-", with: "").replacingOccurrences(of: "/proto", with: "")
 }
 

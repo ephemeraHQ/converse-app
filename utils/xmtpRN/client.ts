@@ -60,6 +60,14 @@ export type GroupWithCodecsType = Awaited<
   ReturnType<ConverseXmtpClientType["conversations"]["newGroup"]>
 >;
 
+export type DmWithCodecsType = Awaited<
+  ReturnType<ConverseXmtpClientType["conversations"]["newConversation"]>
+>;
+
+export type ConversationContainerWithCodecsType = Awaited<
+  ReturnType<ConverseXmtpClientType["conversations"]["listConversations"]>
+>[number];
+
 export type DecodedMessageWithCodecsType = Awaited<
   ReturnType<ConversationWithCodecsType["messages"]>
 >[number];

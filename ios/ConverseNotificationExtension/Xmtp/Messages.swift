@@ -151,7 +151,7 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
   
   do {
     
-    if let group = try xmtpClient.findGroup(groupId: getGroupIdFromTopic(topic: envelope.contentTopic)) {
+    if let group = try xmtpClient.findGroup(groupId: getV3IdFromTopic(topic: envelope.contentTopic)) {
       try await group.sync()
       if var decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope) {
         // For now, use the group member linked address as "senderAddress"
@@ -281,7 +281,7 @@ func saveMessage(account: String, topic: String, sent: Date, senderAddress: Stri
 func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throws -> DecodedMessage? {
   // If topic is MLS, the conversation should already be there
   // @todo except if it's new convo => call sync before?
-  if (isGroupMessageTopic(topic: envelope.contentTopic)) {
+  if (isV3MessageTopic(topic: envelope.contentTopic)) {
     let groupList = try! await xmtpClient.conversations.groups()
     if let group = groupList.first(where: { $0.topic == envelope.contentTopic }) {
       do {
@@ -371,7 +371,7 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
       }
       
       // For groups: notify reactions to messages from me only
-      if (isGroupMessageTopic(topic: decodedMessage.topic) && referencedMessageId != nil) {
+      if (isV3MessageTopic(topic: decodedMessage.topic) && referencedMessageId != nil) {
         forceIgnore = !(try isGroupMessageFromMe(xmtpClient: xmtpClient, messageId: referencedMessageId!))
       }
       
