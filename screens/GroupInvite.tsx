@@ -28,7 +28,7 @@ import { NavigationParamList } from "./Navigation/Navigation";
 import Button from "../components/Button/Button";
 import { useCurrentAccount } from "../data/store/accountsStore";
 import { refreshGroup } from "../utils/xmtpRN/conversations";
-import { fetchGroupsConversationListQuery } from "@queries/useGroupsConversationListQuery";
+import { fetchGroupsConversationListQuery } from "@queries/useV3ConversationListQuery";
 
 export default function GroupInviteScreen({
   route,
@@ -98,7 +98,7 @@ export default function GroupInviteScreen({
       : null;
     if (groupId && groupBeforeJoining) {
       // User has already been added to the group
-      handleNewGroup(groupBeforeJoining);
+      handleNewGroup(groupBeforeJoining as GroupWithCodecsType);
       return;
     }
     logger.debug(
@@ -136,7 +136,9 @@ export default function GroupInviteScreen({
       if (groupId) {
         logger.debug(`[GroupInvite] Group ID exists`);
         const group = groupId
-          ? groupsBeforeJoining.find((group) => group.id === groupId)
+          ? (groupsBeforeJoining.find(
+              (group) => group.id === groupId
+            ) as GroupWithCodecsType)
           : null;
         if (group) {
           logger.debug(`[GroupInvite] Group found`);

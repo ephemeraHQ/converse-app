@@ -4,7 +4,7 @@ import { useGroupName } from "@hooks/useGroupName";
 import { translate } from "@i18n";
 import { useGroupQuery } from "@queries/useGroupQuery";
 import { textPrimaryColor } from "@styles/colors";
-import { isGroupTopic } from "@utils/groupUtils/groupId";
+import { isV3Topic } from "@utils/groupUtils/groupId";
 import { useCallback, useMemo } from "react";
 import {
   Keyboard,
@@ -79,7 +79,7 @@ export function GroupChatPlaceholder({ messagesCount }: Props) {
             {!topic && <ActivityIndicator style={{ marginBottom: 20 }} />}
             <Text style={styles.chatPlaceholderText}>
               {topic
-                ? isGroupTopic(topic)
+                ? isV3Topic(topic)
                   ? translate("group_not_found")
                   : translate("conversation_not_found")
                 : translate("opening_conversation")}

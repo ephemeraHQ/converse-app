@@ -43,15 +43,15 @@ fun isIntroTopic(topic: String): Boolean {
     return topic.startsWith("/xmtp/0/intro-")
 }
 
-fun isGroupMessageTopic(topic: String): Boolean {
+fun isV3MessageTopic(topic: String): Boolean {
     return topic.startsWith("/xmtp/mls/1/g-")
 }
 
-fun getGroupIdFromTopic(topic: String): String {
+fun getV3IdFromTopic(topic: String): String {
     return topic.replace("/xmtp/mls/1/g-", "").replace("/proto", "")
 }
 
-fun isGroupWelcomeTopic(topic: String): Boolean {
+fun isV3WelcomeTopic(topic: String): Boolean {
     return topic.startsWith("/xmtp/mls/1/w-")
 }
 

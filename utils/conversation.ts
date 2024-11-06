@@ -12,7 +12,7 @@ import {
   isAttachmentMessage,
 } from "./attachment/helpers";
 import { getAddressForPeer } from "./evm/address";
-import { getGroupIdFromTopic } from "./groupUtils/groupId";
+import { getV3IdFromTopic } from "./groupUtils/groupId";
 import logger from "./logger";
 import { subscribeToNotifications } from "./notifications";
 import { getReactionsContentPreview } from "./reactions";
@@ -366,7 +366,7 @@ export const conversationShouldBeInInbox = (
   groupStatus: GroupStatus
 ) => {
   if (conversation.isGroup) {
-    const groupId = getGroupIdFromTopic(conversation.topic);
+    const groupId = getV3IdFromTopic(conversation.topic);
     const isGroupBlocked = groupStatus[groupId] === "denied";
     const isGroupAllowed = groupStatus[groupId] === "allowed";
     const isCreatorAllowed =
@@ -402,7 +402,7 @@ export const isConversationBlocked = (
   groupStatus: GroupStatus
 ) => {
   if (conversation.isGroup) {
-    const groupId = getGroupIdFromTopic(conversation.topic);
+    const groupId = getV3IdFromTopic(conversation.topic);
     const isGroupBlocked = groupStatus[groupId] === "denied";
     return isGroupBlocked;
   } else {

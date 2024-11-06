@@ -5,7 +5,7 @@ import { useBlockGroupMutation } from "@queries/useBlockGroupMutation";
 import { useGroupConsentQuery } from "@queries/useGroupConsentQuery";
 import { useGroupQuery } from "@queries/useGroupQuery";
 import { QueryObserverOptions } from "@tanstack/react-query";
-import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
+import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import { consentToInboxIdsOnProtocol } from "@utils/xmtpRN/conversations";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
@@ -44,7 +44,7 @@ export const useGroupConsent = (
   const allowGroup = useCallback(
     async (options: OnConsentOptions) => {
       await allowGroupMutation();
-      setGroupStatus({ [getGroupIdFromTopic(topic).toLowerCase()]: "allowed" });
+      setGroupStatus({ [getV3IdFromTopic(topic).toLowerCase()]: "allowed" });
       const inboxIdsToAllow: InboxId[] = [];
       const inboxIds: { [inboxId: string]: "allowed" } = {};
       if (options.includeAddedBy && group?.addedByInboxId) {
@@ -74,7 +74,7 @@ export const useGroupConsent = (
   const blockGroup = useCallback(
     async (options: OnConsentOptions) => {
       await blockGroupMutation();
-      setGroupStatus({ [getGroupIdFromTopic(topic).toLowerCase()]: "denied" });
+      setGroupStatus({ [getV3IdFromTopic(topic).toLowerCase()]: "denied" });
       const inboxIdsToDeny: InboxId[] = [];
       const inboxIds: { [inboxId: string]: "denied" } = {};
       if (options.includeAddedBy && group?.addedByInboxId) {

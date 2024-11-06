@@ -91,11 +91,11 @@ func isIntroTopic(topic: String) -> Bool {
   return topic.starts(with: "/xmtp/0/intro-")
 }
 
-func isGroupMessageTopic(topic: String) -> Bool {
+func isV3MessageTopic(topic: String) -> Bool {
   return topic.starts(with: "/xmtp/mls/1/g-")
 }
 
-func isGroupWelcomeTopic(topic: String) -> Bool {
+func isV3WelcomeTopic(topic: String) -> Bool {
   return topic.starts(with: "/xmtp/mls/1/w-")
 }
 

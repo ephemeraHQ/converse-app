@@ -14,7 +14,7 @@ import {
   conversationShouldBeDisplayed,
   conversationShouldBeInInbox,
 } from "./conversation";
-import { getGroupIdFromTopic, getTopicFromGroupId } from "./groupUtils/groupId";
+import { getV3IdFromTopic, getTopicFromV3Id } from "./groupUtils/groupId";
 import { savePushToken } from "./keychain/helpers";
 import logger from "./logger";
 import mmkv from "./mmkv";
@@ -123,7 +123,7 @@ const _subscribeToNotifications = async (account: string): Promise<void> => {
 
       const isNotBlocked = c.peerAddress
         ? !isBlocked(c.peerAddress)
-        : !isGroupBlocked(getGroupIdFromTopic(c.topic));
+        : !isGroupBlocked(getV3IdFromTopic(c.topic));
       const isTopicNotDeleted = topicsData[c.topic]?.status !== "deleted";
       const isTopicInInbox =
         conversationShouldBeDisplayed(c, topicsData) &&
@@ -499,7 +499,7 @@ export const onInteractWithNotification = (
       const groupId = payload["groupId"] as string;
       if (typeof groupId === "string") {
         return navigate("Group", {
-          topic: getTopicFromGroupId(groupId),
+          topic: getTopicFromV3Id(groupId),
         });
       } else {
         return;
