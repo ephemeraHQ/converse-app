@@ -3,7 +3,6 @@ import { Dimensions, PixelRatio, TextInput } from "react-native";
 
 import { getLensHandleFromConversationIdAndPeer } from "@search/utils/lens";
 import logger from "./logger";
-import { getPreferredName, getProfile } from "./profile";
 import {
   currentAccount,
   getProfilesStore,
@@ -11,16 +10,11 @@ import {
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { ProfileSocials, ProfilesStoreType } from "../data/store/profilesStore";
+import { getProfile } from "./profile/getProfile";
+import { getPreferredName } from "./profile/getPreferredName";
+import { shortAddress } from "./strings/shortAddress";
 
 const { humanize } = require("../vendor/humanhash");
-
-export const shortAddress = (address: string) =>
-  address && address.length > 7
-    ? `${address.slice(0, 6)}...${address.slice(
-        address.length - 4,
-        address.length
-      )}`
-    : address || "";
 
 export const shortDisplayName = (displayName: string | undefined): string => {
   if (!displayName) return "";

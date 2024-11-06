@@ -4,15 +4,20 @@ import { useCallback, useMemo } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 import {
-  useInboxIdStore,
+  useCurrentAccount,
   useProfilesStore,
 } from "../../../data/store/accountsStore";
 import { navigate } from "../../../utils/navigation";
 import {
   getPreferredAvatar,
+  getPreferredInboxAvatar,
   getPreferredName,
   getProfile,
 } from "../../../utils/profile";
+import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
+import { InboxId } from "@xmtp/react-native-sdk";
+import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
+import { usePreferredInboxAddress } from "@hooks/usePreferredInboxAddress";
 
 type MessageSenderAvatarDumbProps = {
   hasNextMessageInSeries: boolean;
@@ -55,11 +60,8 @@ export const MessageSenderAvatar = ({
   senderAddress,
   hasNextMessageInSeries,
 }: MessageSenderAvatarProps) => {
-  const address = useInboxIdStore(
-    (s) => s.byInboxId[senderAddress]?.[0] ?? senderAddress
-  );
   const senderSocials = useProfilesStore(
-    (s) => getProfile(address, s.profiles)?.socials
+    (s) => getProfile(senderAddress, s.profiles)?.socials
   );
 
   const openProfile = useCallback(() => {
@@ -77,27 +79,32 @@ export const MessageSenderAvatar = ({
 };
 
 type V3MessageSenderAvatarProps = {
-  inboxId: string;
+  inboxId: InboxId;
 };
 
 export const V3MessageSenderAvatar = ({
   inboxId,
 }: V3MessageSenderAvatarProps) => {
-  const address = useInboxIdStore((s) => s.byInboxId[inboxId]?.[0]);
-  const senderSocials = useProfilesStore(
-    (s) => getProfile(address, s.profiles)?.socials
+  const currentAccount = useCurrentAccount();
+  const { data: senderSocials } = useInboxProfileSocialsQuery(
+    currentAccount!,
+    inboxId
   );
-
+  const address = usePreferredInboxAddress(inboxId);
+  const name = usePreferredInboxName(inboxId);
+  const avatarUri = getPreferredInboxAvatar(senderSocials);
   const openProfile = useCallback(() => {
-    navigate("Profile", { address });
+    if (address) {
+      navigate("Profile", { address });
+    }
   }, [address]);
 
   return (
     <MessageSenderAvatarDumb
       hasNextMessageInSeries={false}
       onPress={openProfile}
-      avatarUri={getPreferredAvatar(senderSocials)}
-      avatarName={getPreferredName(senderSocials, address)}
+      avatarUri={avatarUri}
+      avatarName={name}
     />
   );
 };

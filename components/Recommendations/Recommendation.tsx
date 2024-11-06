@@ -21,7 +21,7 @@ import {
   getPreferredName,
   getPrimaryNames,
 } from "@utils/profile";
-import { shortAddress } from "@utils/str";
+import { shortAddress } from "@utils/strings/shortAddress";
 import Avatar from "../Avatar";
 import { NavigationChatButton } from "@search/components/NavigationChatButton";
 
