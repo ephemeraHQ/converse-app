@@ -1,12 +1,8 @@
-import { entifyWithAddress } from "@queries/entify";
-import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
-import { getCleanAddress } from "@utils/evm/address";
 import logger from "@utils/logger";
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import {
   DecodedMessage,
   GroupUpdatedContent,
-  Member,
   ReactionContent,
   RemoteAttachmentContent,
   ReplyContent,
@@ -14,16 +10,11 @@ import {
 } from "@xmtp/react-native-sdk";
 
 import { serializeRemoteAttachmentMessageContent } from "./attachments";
-import {
-  ConverseXmtpClientType,
-  DecodedMessageWithCodecsType,
-  GroupWithCodecsType,
-} from "./client";
+import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
 import { getMessageContentType, isContentType } from "./contentTypes";
 import { CoinbaseMessagingPaymentContent } from "./contentTypes/coinbasePayment";
 import { getXmtpClient } from "./sync";
 import config from "../../config";
-import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
 import {
   getOrderedMessages,
   handleGroupUpdatedMessage,
@@ -125,17 +116,7 @@ const protocolMessageToStateMessage = (
       supportedContentType ? message.content() : undefined
     );
 
-  // For now, use the group member linked address as "senderAddress"
-  // @todo => make inboxId a first class citizen
-  let senderAddress = message.senderAddress;
-  if (message.topic.startsWith("/xmtp/mls/1/g-")) {
-    const groupMember = groupMembers[message.topic]?.find(
-      (m) => m.inboxId === message.senderAddress
-    );
-    if (groupMember) {
-      senderAddress = getCleanAddress(groupMember.addresses[0]);
-    }
-  }
+  const senderAddress = message.senderAddress;
 
   return {
     id: message.id,
@@ -197,67 +178,6 @@ export const stopStreamingAllMessage = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   logger.debug(`[XmtpRN] Stopped streaming messages for ${client.address}`);
   client.conversations.cancelStreamAllMessages();
-};
-
-// export const streamAllGroupMessages = async (account: string) => {
-//   await stopStreamingAllGroupMessage(account);
-//   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-//   logger.debug(`[XmtpRN] Streaming group messages for ${client.address}`);
-//   await client.conversations.streamAllGroupMessages(async (message) => {
-//     logger.debug(
-//       `[XmtpRN] Received a group message for ${client.address}`,
-//       message.nativeContent.text,
-//       message.id
-//     );
-//     saveMessages(client.address, protocolMessagesToStateMessages([message]));
-//   });
-// };
-
-// export const stopStreamingAllGroupMessage = async (account: string) => {
-//   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-//   logger.debug(
-//     `[XmtpRN] Stopped streaming group messages for ${client.address}`
-//   );
-//   client.conversations.cancelStreamAllGroupMessages();
-// };
-
-const groupMembers: { [topic: string]: Member[] } = {};
-
-export const syncGroupsMessages = async (
-  account: string,
-  groups: GroupWithCodecsType[],
-  queryGroupsFromTimestamp: { [topic: string]: number }
-) => {
-  for (const group of groups) {
-    // No need to group.sync here as syncGroupsMessages is called either
-    // from handleNewConversation which syncs before, or on groups returned
-    // by listGroups which syncs also
-    setGroupMembersQueryData(
-      account,
-      group.topic,
-      entifyWithAddress(
-        group.members,
-        (member) => member.inboxId,
-        // TODO: Multiple addresses support
-        (member) => getCleanAddress(member.addresses[0])
-      )
-    );
-    groupMembers[group.topic] = group.members;
-    saveMemberInboxIds(account, group.members);
-  }
-  const newMessages = (
-    await Promise.all(
-      groups.map((g) =>
-        g.messages({
-          after: queryGroupsFromTimestamp[g.topic],
-          direction: "SORT_DIRECTION_ASCENDING",
-        })
-      )
-    )
-  ).flat();
-  logger.info(`${newMessages.length} groups messages pulled`);
-  saveMessages(account, protocolMessagesToStateMessages(newMessages));
-  return newMessages.length;
 };
 
 export const syncConversationsMessages = async (
