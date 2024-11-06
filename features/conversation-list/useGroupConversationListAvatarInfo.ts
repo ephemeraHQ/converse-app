@@ -1,13 +1,18 @@
-import { useProfilesSocials } from "@hooks/useProfilesSocials";
-import { getPreferredAvatar, getPreferredName } from "@utils/profile";
+import { useInboxProfileSocialsQueries } from "@queries/useInboxProfileSocialsQuery";
+import {
+  getPreferredInboxAddress,
+  getPreferredInboxAvatar,
+  getPreferredInboxName,
+} from "@utils/profile";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
-import { Member } from "@xmtp/react-native-sdk";
+import { InboxId, Member } from "@xmtp/react-native-sdk";
 import { useEffect, useMemo, useState } from "react";
 
 export const useGroupConversationListAvatarInfo = (
   currentAccount: string,
   group?: GroupWithCodecsType
 ) => {
+  // TODO: Move this to a query to get persistence
   const [members, setMembers] = useState<Member[]>([]);
 
   useEffect(() => {
@@ -22,37 +27,33 @@ export const useGroupConversationListAvatarInfo = (
     fetchMembers();
   }, [group]);
 
-  const memberAddresses = useMemo(() => {
-    const addresses: string[] = [];
+  const memberInboxIds = useMemo(() => {
+    const inboxIds: InboxId[] = [];
     for (const member of members) {
       if (member.addresses[0].toLowerCase() !== currentAccount?.toLowerCase()) {
-        addresses.push(member.addresses[0]);
+        inboxIds.push(member.inboxId);
       }
     }
-    return addresses;
+    return inboxIds;
   }, [members, currentAccount]);
 
-  const data = useProfilesSocials(memberAddresses);
+  const data = useInboxProfileSocialsQueries(currentAccount, memberInboxIds);
 
-  const memberData: {
-    address: string;
-    uri?: string;
-    name?: string;
-  }[] = useMemo(() => {
-    return data.map(({ data: socials }, index) =>
-      socials
-        ? {
-            address: memberAddresses[index],
-            uri: getPreferredAvatar(socials),
-            name: getPreferredName(socials, memberAddresses[index]),
-          }
-        : {
-            address: memberAddresses[index],
-            uri: undefined,
-            name: memberAddresses[index],
-          }
-    );
-  }, [data, memberAddresses]);
+  const memberData = useMemo(
+    () =>
+      data
+        .map(
+          ({ data: socials }, index) =>
+            socials && {
+              inboxId: memberInboxIds[index],
+              address: getPreferredInboxAddress(socials) ?? "",
+              uri: getPreferredInboxAvatar(socials),
+              name: getPreferredInboxName(socials),
+            }
+        )
+        .filter(Boolean),
+    [data, memberInboxIds]
+  );
 
   return {
     memberData,

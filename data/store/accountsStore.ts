@@ -4,7 +4,6 @@ import { create, StoreApi, UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { ChatStoreType, initChatStore } from "./chatStore";
-import { InboxIdStoreType, initInboxIdStore } from "./inboxIdStore";
 import { initProfilesStore, ProfilesStoreType } from "./profilesStore";
 import {
   initRecommendationsStore,
@@ -43,7 +42,6 @@ export const initStores = (account: string) => {
       chat: initChatStore(account),
       wallet: initWalletStore(account),
       transactions: initTransactionsStore(account),
-      inboxId: initInboxIdStore(account),
     };
   }
 };
@@ -223,7 +221,6 @@ type AccountStoreDataType = {
   chat: ChatStoreType;
   wallet: WalletStoreType;
   transactions: TransactionsStoreType;
-  inboxId: InboxIdStoreType;
 };
 
 const getAccountStore = (account: string) => {
@@ -352,9 +349,3 @@ export const useTransactionsStoreForAccount = (account: string) =>
   accountStoreHook("transactions", account);
 export const getTransactionsStore = (account: string) =>
   getAccountStore(account).transactions;
-
-export const useInboxIdStore = currentAccountStoreHook("inboxId");
-export const useInboxIdStoreForAccount = (account: string) =>
-  accountStoreHook("inboxId", account);
-export const getInboxIdStore = (account: string) =>
-  getAccountStore(account).inboxId;

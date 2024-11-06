@@ -24,7 +24,7 @@ const groupsQueryFn = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   const beforeSync = new Date().getTime();
   await client.conversations.syncGroups();
-  await client.conversations.syncGroups();
+  await client.conversations.syncAllGroups();
   const afterSync = new Date().getTime();
   logger.debug(
     `[Groups] Fetching group list from network took ${

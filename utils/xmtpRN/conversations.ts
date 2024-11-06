@@ -20,21 +20,17 @@ import {
   ConverseXmtpClientType,
   GroupWithCodecsType,
 } from "./client";
-import { syncConversationsMessages, syncGroupsMessages } from "./messages";
+import { syncConversationsMessages } from "./messages";
 import { getXmtpClient } from "./sync";
 import { Conversation as DbConversation } from "../../data/db/entities/conversationEntity";
 import { getPendingConversationsToCreate } from "../../data/helpers/conversations/pendingConversations";
 import { saveConversations } from "../../data/helpers/conversations/upsertConversations";
-import { saveMemberInboxIds } from "../../data/helpers/inboxId/saveInboxIds";
 import { getSettingsStore } from "../../data/store/accountsStore";
 import { XmtpConversation } from "../../data/store/chatStore";
 import { SettingsStoreType } from "../../data/store/settingsStore";
 import { setGroupNameQueryData } from "../../queries/useGroupNameQuery";
 import { setGroupPhotoQueryData } from "../../queries/useGroupPhotoQuery";
-import {
-  addGroupToGroupsQuery,
-  fetchGroupsQuery,
-} from "../../queries/useGroupsQuery";
+import { fetchGroupsQuery } from "../../queries/useGroupsQuery";
 import { ConversationWithLastMessagePreview } from "../conversation";
 import { getCleanAddress } from "../evm/address";
 import { getTopicDataFromKeychain } from "../keychain/helpers";
@@ -196,11 +192,7 @@ const handleNewConversation = async (
 
   // Temporary fix to stop receiving messages for groups
   // we are not member of
-  const shouldSkip =
-    isGroup &&
-    !(conversation as GroupWithCodecsType).members.some(
-      (m) => m.addresses[0].toLowerCase() === client.address.toLowerCase()
-    );
+  const shouldSkip = isGroup;
   if (shouldSkip) {
     logger.warn(
       `Skipping group; ${client.address} is not a member of ${
@@ -237,18 +229,6 @@ const handleNewConversation = async (
     syncConversationsMessages(client.address, { [conversation.topic]: 0 });
     setTimeout(() => {
       syncConversationsMessages(client.address, { [conversation.topic]: 0 });
-    }, 3000);
-  } else if (isGroup) {
-    const group = conversation as GroupWithCodecsType;
-    await group.sync();
-    addGroupToGroupsQuery(client.address, group);
-    syncGroupsMessages(client.address, [group], {
-      [conversation.topic]: 0,
-    });
-    setTimeout(() => {
-      syncGroupsMessages(client.address, [group], {
-        [conversation.topic]: 0,
-      });
     }, 3000);
   }
 
@@ -612,7 +592,6 @@ export const createGroup = async (
   if (groupDescription) {
     setGroupDescriptionQueryData(account, group.topic, groupDescription);
   }
-  saveMemberInboxIds(account, group.members);
   await handleNewConversation(client, group);
   return group.topic;
 };
@@ -630,8 +609,6 @@ export const refreshGroup = async (account: string, topic: string) => {
     [protocolGroupToStateConversation(account, group)],
     true
   );
-  const updatedMembers = await group.membersList();
-  saveMemberInboxIds(account, updatedMembers);
 };
 
 export const loadConversationsHmacKeys = async (account: string) => {
