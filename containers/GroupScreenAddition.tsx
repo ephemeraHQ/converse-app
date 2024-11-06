@@ -27,7 +27,7 @@ import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
 } from "@utils/groupUtils/adminUtils";
-import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
+import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { navigate } from "@utils/navigation";
 import * as Haptics from "expo-haptics";
@@ -96,11 +96,11 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
       groupName: groupName ?? translate("group_invite_default_group_name"),
       imageUrl: groupPhoto,
       description: groupDescription,
-      groupId: getGroupIdFromTopic(topic),
+      groupId: getV3IdFromTopic(topic),
     })
       .then((groupInvite) => {
-        saveInviteIdByGroupId(getGroupIdFromTopic(topic), groupInvite.id);
-        saveGroupInviteLink(groupInvite.id, getGroupIdFromTopic(topic));
+        saveInviteIdByGroupId(getV3IdFromTopic(topic), groupInvite.id);
+        saveGroupInviteLink(groupInvite.id, getV3IdFromTopic(topic));
         setGroupInviteLink(topic, groupInvite.inviteLink);
         Clipboard.setString(groupInvite.inviteLink);
         setSnackMessage(translate("group_invite_link_created_copied"));
@@ -120,7 +120,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
 
   const onDeleteInviteLink = useCallback(() => {
     Haptics.impactAsync();
-    const groupId = getGroupIdFromTopic(topic);
+    const groupId = getV3IdFromTopic(topic);
     const inviteId = getInviteIdByGroupId(groupId);
     if (!inviteId) {
       return;

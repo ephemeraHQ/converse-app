@@ -1,11 +1,18 @@
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
-import { useGroupsConversationListQuery } from "@queries/useGroupsConversationListQuery";
+import { useV3ConversationListQuery } from "@queries/useV3ConversationListQuery";
 import { useMemo } from "react";
 
 export const useV3ConversationItems = () => {
   const currentAccount = useCurrentAccount();
-  const { data, ...rest } = useGroupsConversationListQuery(currentAccount!);
+  const { data, ...rest } = useV3ConversationListQuery(
+    currentAccount!,
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    },
+    "useV3ConversationItems"
+  );
   const { pinnedConversationTopics } = useChatStore(
     useSelect(["pinnedConversationTopics"])
   );

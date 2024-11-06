@@ -2,9 +2,9 @@ import { entifyWithAddress } from "@queries/entify";
 import { setGroupDescriptionQueryData } from "@queries/useGroupDescriptionQuery";
 import { setGroupMembersQueryData } from "@queries/useGroupMembersQuery";
 import { setGroupQueryData } from "@queries/useGroupQuery";
-import { addGroupToGroupsConversationListQuery } from "@queries/useGroupsConversationListQuery";
+import { addGroupToGroupsConversationListQuery } from "@queries/useV3ConversationListQuery";
 import { converseEventEmitter } from "@utils/events";
-import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
+import { getV3IdFromTopic, isV3Topic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import {
   ConsentListEntry,
@@ -501,10 +501,8 @@ export const getConversationWithTopic = async (
   const alreadyConversation = openedConversations[account]?.[topic];
   if (alreadyConversation) return alreadyConversation;
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  if (isGroupTopic(topic)) {
-    const group = await client.conversations.findGroup(
-      getGroupIdFromTopic(topic)
-    );
+  if (isV3Topic(topic)) {
+    const group = await client.conversations.findGroup(getV3IdFromTopic(topic));
     if (group) {
       setOpenedConversation(client.address, group);
     }
@@ -599,9 +597,7 @@ export const createGroup = async (
 export const refreshGroup = async (account: string, topic: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   await client.conversations.syncGroups();
-  const group = await client.conversations.findGroup(
-    getGroupIdFromTopic(topic)
-  );
+  const group = await client.conversations.findGroup(getV3IdFromTopic(topic));
   if (!group) throw new Error(`Group ${topic} not found, cannot refresh`);
   await group.sync();
   saveConversations(

@@ -1,13 +1,13 @@
-const GROUP_TOPIC_PREFIX = "/xmtp/mls/1/g-";
+const V3_TOPIC_PREFIX = "/xmtp/mls/1/g-";
 
-export const getGroupIdFromTopic = (topic: string) => {
-  return topic.replace(GROUP_TOPIC_PREFIX, "").replace("/proto", "");
+export const getV3IdFromTopic = (topic: string) => {
+  return topic.replace(V3_TOPIC_PREFIX, "").replace("/proto", "");
 };
 
-export const isGroupTopic = (topic: string) => {
-  return topic.startsWith(GROUP_TOPIC_PREFIX);
+export const isV3Topic = (topic: string) => {
+  return topic.startsWith(V3_TOPIC_PREFIX);
 };
 
-export const getTopicFromGroupId = (groupId: string) => {
-  return `${GROUP_TOPIC_PREFIX}${groupId}/proto`;
+export const getTopicFromV3Id = (conversationId: string) => {
+  return `${V3_TOPIC_PREFIX}${conversationId}/proto`;
 };
