@@ -1,43 +1,63 @@
 import { PressableProfileWithText } from "@components/PressableProfileWithText";
-import { InboxIdStoreType } from "@data/store/inboxIdStore";
-import { ProfilesStoreType } from "@data/store/profilesStore";
-import { useSelect } from "@data/store/storeHelpers";
 import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
 import { textSecondaryColor } from "@styles/colors";
 import { navigate } from "@utils/navigation";
-import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
+import { GroupUpdatedContent, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback, useMemo } from "react";
 import { StyleSheet, useColorScheme } from "react-native";
 
 import { MessageToDisplay } from "./Message/Message";
-import {
-  useInboxIdStore,
-  useProfilesStore,
-} from "../../data/store/accountsStore";
-import { getPreferredName, getProfile } from "../../utils/profile";
+import { getPreferredName } from "@utils/profile";
+import { useInboxProfileSocialsQueries } from "@queries/useInboxProfileSocialsQuery";
+import { useCurrentAccount } from "@data/store/accountsStore";
+import { ProfileSocials } from "@data/store/profilesStore";
 
-const inboxIdStoreSelectedKeys: (keyof InboxIdStoreType)[] = ["byInboxId"];
-const profilesStoreSelectedKeys: (keyof ProfilesStoreType)[] = ["profiles"];
 export function ChatGroupUpdatedMessage({
   message,
 }: {
   message: MessageToDisplay;
 }) {
+  const currentAccount = useCurrentAccount();
   const styles = useStyles();
-  const { byInboxId } = useInboxIdStore(useSelect(inboxIdStoreSelectedKeys));
-  const { profiles } = useProfilesStore(useSelect(profilesStoreSelectedKeys));
+
   // JSON Parsing is heavy so useMemo
   const parsedContent = useMemo(
     () => JSON.parse(message.content) as GroupUpdatedContent,
     [message.content]
   );
 
+  const inboxIds = useMemo(() => {
+    const ids: InboxId[] = [];
+    ids.push(parsedContent.initiatedByInboxId as InboxId);
+    parsedContent.membersAdded.forEach((entry) => {
+      ids.push(entry.inboxId as InboxId);
+    });
+    parsedContent.membersRemoved.forEach((entry) => {
+      ids.push(entry.inboxId as InboxId);
+    });
+
+    return ids;
+  }, [parsedContent]);
+
+  const inboxSocials = useInboxProfileSocialsQueries(currentAccount!, inboxIds);
+  const mappedSocials = useMemo(() => {
+    const map: Record<InboxId, ProfileSocials[]> = {};
+    inboxSocials.forEach((it, index) => {
+      if (it.data) {
+        const inboxId = inboxIds[index];
+        map[inboxId] = it.data;
+      }
+    });
+    return map;
+  }, [inboxIds, inboxSocials]);
+
   // TODO: Feat: handle multiple members
-  const initiatedByAddress = byInboxId[parsedContent.initiatedByInboxId]?.[0];
-  const initiatedByProfile = getProfile(initiatedByAddress, profiles)?.socials;
+  const initiatedByAddress =
+    mappedSocials[parsedContent.initiatedByInboxId as InboxId]?.[0]?.address ??
+    "";
   const initiatedByReadableName = getPreferredName(
-    initiatedByProfile,
+    mappedSocials[parsedContent.initiatedByInboxId as InboxId]?.[0],
     initiatedByAddress
   );
   const membersActions: {
@@ -46,14 +66,11 @@ export function ChatGroupUpdatedMessage({
     readableName: string;
   }[] = [];
   parsedContent.membersAdded.forEach((m) => {
-    // TODO: Feat: handle multiple members
-    const firstAddress = byInboxId[m.inboxId]?.[0];
+    const socials = mappedSocials[m.inboxId as InboxId]?.[0];
+    const firstAddress = socials?.address;
     // We haven't synced yet the members
-    if (!firstAddress) return;
-    const readableName = getPreferredName(
-      getProfile(firstAddress, profiles)?.socials,
-      firstAddress
-    );
+    if (!socials || !firstAddress) return;
+    const readableName = getPreferredName(socials, socials.address ?? "");
     membersActions.push({
       address: firstAddress,
       content: translate(`group_member_joined`, {
@@ -63,14 +80,12 @@ export function ChatGroupUpdatedMessage({
     });
   });
   parsedContent.membersRemoved.forEach((m) => {
+    const socials = mappedSocials[m.inboxId as InboxId]?.[0];
+    const firstAddress = socials?.address;
     // TODO: Feat: handle multiple members
-    const firstAddress = byInboxId[m.inboxId]?.[0];
     // We haven't synced yet the members
     if (!firstAddress) return;
-    const readableName = getPreferredName(
-      getProfile(firstAddress, profiles)?.socials,
-      firstAddress
-    );
+    const readableName = getPreferredName(socials, firstAddress);
     membersActions.push({
       address: firstAddress,
       content: translate(`group_member_left`, {

@@ -17,7 +17,6 @@ import {
   getGroupJoinRequest,
   GroupJoinRequestStatus,
 } from "@utils/api";
-import { getTopicFromGroupId } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -29,6 +28,7 @@ import { NavigationParamList } from "./Navigation/Navigation";
 import Button from "../components/Button/Button";
 import { useCurrentAccount } from "../data/store/accountsStore";
 import { refreshGroup } from "../utils/xmtpRN/conversations";
+import { fetchGroupsConversationListQuery } from "@queries/useGroupsConversationListQuery";
 
 export default function GroupInviteScreen({
   route,
@@ -92,14 +92,17 @@ export default function GroupInviteScreen({
     });
     const groupId = groupInvite.groupId;
     // Group ID is not available on previous versions of the app, so we need to fetch the groups
-    const groupsBeforeJoining = await fetchGroupsQuery(account);
-    if (groupId && groupsBeforeJoining.byId[getTopicFromGroupId(groupId)]) {
+    const groupsBeforeJoining = await fetchGroupsConversationListQuery(account);
+    const groupBeforeJoining = groupId
+      ? groupsBeforeJoining.find((group) => group.id === groupId)
+      : null;
+    if (groupId && groupBeforeJoining) {
       // User has already been added to the group
-      handleNewGroup(groupsBeforeJoining.byId[getTopicFromGroupId(groupId)]);
+      handleNewGroup(groupBeforeJoining);
       return;
     }
     logger.debug(
-      `[GroupInvite] Before joining, group count = ${groupsBeforeJoining.ids.length}`
+      `[GroupInvite] Before joining, group count = ${groupsBeforeJoining.length}`
     );
     logger.debug(
       `[GroupInvite] Sending the group join request to Converse backend`
@@ -132,8 +135,9 @@ export default function GroupInviteScreen({
       // Group ID was not on original invites, so we need to handle it separately
       if (groupId) {
         logger.debug(`[GroupInvite] Group ID exists`);
-        const groupTopic = getTopicFromGroupId(groupId);
-        const group = groupsAfterJoining.byId[groupTopic];
+        const group = groupId
+          ? groupsBeforeJoining.find((group) => group.id === groupId)
+          : null;
         if (group) {
           logger.debug(`[GroupInvite] Group found`);
           // Check if the user has been removed from the group
@@ -159,7 +163,7 @@ export default function GroupInviteScreen({
         return;
       }
 
-      const oldGroupIds = new Set(groupsBeforeJoining.ids);
+      const oldGroupIds = new Set(groupsBeforeJoining.map((group) => group.id));
       const newGroupId = groupsAfterJoining.ids.find(
         (id) => !oldGroupIds.has(id)
       );

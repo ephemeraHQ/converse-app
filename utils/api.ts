@@ -18,6 +18,7 @@ import type { ProfileSocials } from "../data/store/profilesStore";
 import type { Frens } from "../data/store/recommendationsStore";
 import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 const api = axios.create({
   baseURL: config.apiURI,
@@ -164,6 +165,18 @@ export const getProfilesForAddresses = async (
 ): Promise<{ [address: string]: ProfileSocials }> => {
   const { data } = await api.post("/api/profile/batch", {
     addresses,
+  });
+  return data;
+};
+
+export const getProfilesForInboxIds = async ({
+  inboxIds,
+}: {
+  inboxIds: string[];
+}): Promise<{ [inboxId: InboxId]: ProfileSocials[] }> => {
+  logger.info("Fetching profiles for inboxIds", inboxIds);
+  const { data } = await api.get("/api/inbox/", {
+    params: { ids: inboxIds.join(",") },
   });
   return data;
 };

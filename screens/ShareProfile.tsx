@@ -30,14 +30,12 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../data/store/accountsStore";
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getPreferredUsername,
-  getProfile,
-} from "../utils/profile";
-import { shortAddress } from "../utils/str";
+import { shortAddress } from "@utils/strings/shortAddress";
 import { NavigationParamList } from "./Navigation/Navigation";
+import { getProfile } from "@utils/profile/getProfile";
+import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
+import { getPreferredName } from "@utils/profile/getPreferredName";
+import { getPreferredAvatar } from "@utils/profile/getPreferredAvatar";
 
 const ShareProfileContent = ({
   userAddress,
