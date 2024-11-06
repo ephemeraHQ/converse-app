@@ -22,7 +22,7 @@ import Clock from "../../../assets/clock.svg";
 import Exclamationmark from "../../../assets/exclamationmark.triangle.svg";
 import { useConversationContext } from "../../../utils/conversation";
 import { converseEventEmitter } from "../../../utils/events";
-import { shortAddress } from "../../../utils/str";
+import { shortAddress } from "@utils/strings/shortAddress";
 import { useTransactionForMessage } from "../../../utils/transaction";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
 import { MessageToDisplay } from "../Message/Message";

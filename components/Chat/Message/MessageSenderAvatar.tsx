@@ -10,11 +10,14 @@ import {
 import { navigate } from "../../../utils/navigation";
 import {
   getPreferredAvatar,
+  getPreferredInboxAvatar,
   getPreferredName,
   getProfile,
 } from "../../../utils/profile";
 import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
 import { InboxId } from "@xmtp/react-native-sdk";
+import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
+import { usePreferredInboxAddress } from "@hooks/usePreferredInboxAddress";
 
 type MessageSenderAvatarDumbProps = {
   hasNextMessageInSeries: boolean;
@@ -87,14 +90,13 @@ export const V3MessageSenderAvatar = ({
     currentAccount!,
     inboxId
   );
-  const address = senderSocials?.[0].address ?? "";
-  const name = getPreferredName(
-    senderSocials?.[0],
-    senderSocials?.[0]?.address ?? ""
-  );
-  const avatarUri = getPreferredAvatar(senderSocials?.[0]);
+  const address = usePreferredInboxAddress(inboxId);
+  const name = usePreferredInboxName(inboxId);
+  const avatarUri = getPreferredInboxAvatar(senderSocials);
   const openProfile = useCallback(() => {
-    navigate("Profile", { address });
+    if (address) {
+      navigate("Profile", { address });
+    }
   }, [address]);
 
   return (

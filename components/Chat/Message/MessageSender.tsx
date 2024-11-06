@@ -1,5 +1,5 @@
-import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
-import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
+import { useProfilesStore } from "@data/store/accountsStore";
+import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
 import { textSecondaryColor } from "@styles/colors";
 import { getPreferredName, getProfile } from "@utils/profile";
 import { InboxId } from "@xmtp/react-native-sdk";
@@ -36,15 +36,7 @@ type V3MessageSenderProps = {
 };
 
 export const V3MessageSender = ({ inboxId }: V3MessageSenderProps) => {
-  const currentAccount = useCurrentAccount();
-  const { data: senderSocials } = useInboxProfileSocialsQuery(
-    currentAccount!,
-    inboxId
-  );
-  const name = getPreferredName(
-    senderSocials?.[0],
-    senderSocials?.[0]?.address ?? ""
-  );
+  const name = usePreferredInboxName(inboxId);
   return <MessageSenderDumb name={name} />;
 };
 

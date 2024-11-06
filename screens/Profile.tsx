@@ -17,7 +17,7 @@ import { PictoSizes } from "@styles/sizes";
 import { usePrivySigner } from "@utils/evm/privy";
 import { useXmtpSigner } from "@utils/evm/xmtp";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
-import { shortAddress } from "@utils/str";
+import { shortAddress } from "@utils/strings/shortAddress";
 import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
 import {
   getOtherInstallations,
@@ -74,17 +74,15 @@ import {
   NotificationPermissionStatus,
   requestPushNotificationsPermissions,
 } from "../utils/notifications";
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getPreferredUsername,
-  getProfile,
-} from "../utils/profile";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
 import { ConversationNavParams } from "./Navigation/ConversationNav";
 import { NavigationParamList } from "./Navigation/Navigation";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
+import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
+import { getPreferredName } from "@utils/profile/getPreferredName";
+import { getPreferredAvatar } from "@utils/profile/getPreferredAvatar";
+import { getProfile } from "@utils/profile/getProfile";
 
 export default function ProfileScreen({
   route,

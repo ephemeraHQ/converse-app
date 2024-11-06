@@ -8,7 +8,7 @@ import { useCallback, useMemo } from "react";
 import { StyleSheet, useColorScheme } from "react-native";
 
 import { MessageToDisplay } from "./Message/Message";
-import { getPreferredName } from "../../utils/profile";
+import { getPreferredName } from "@utils/profile";
 import { useInboxProfileSocialsQueries } from "@queries/useInboxProfileSocialsQuery";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { ProfileSocials } from "@data/store/profilesStore";

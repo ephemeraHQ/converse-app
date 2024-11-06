@@ -1,5 +1,9 @@
 import { useInboxProfileSocialsQueries } from "@queries/useInboxProfileSocialsQuery";
-import { getPreferredAvatar, getPreferredName } from "@utils/profile";
+import {
+  getPreferredInboxAddress,
+  getPreferredInboxAvatar,
+  getPreferredInboxName,
+} from "@utils/profile";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 import { InboxId, Member } from "@xmtp/react-native-sdk";
 import { useEffect, useMemo, useState } from "react";
@@ -8,6 +12,7 @@ export const useGroupConversationListAvatarInfo = (
   currentAccount: string,
   group?: GroupWithCodecsType
 ) => {
+  // TODO: Move this to a query to get persistence
   const [members, setMembers] = useState<Member[]>([]);
 
   useEffect(() => {
@@ -45,9 +50,9 @@ export const useGroupConversationListAvatarInfo = (
       if (socials) {
         returnData.push({
           inboxId: memberInboxIds[index],
-          address: socials[0].address ?? "",
-          uri: getPreferredAvatar(socials[0]),
-          name: getPreferredName(socials[0], socials[0].address ?? ""),
+          address: getPreferredInboxAddress(socials) ?? "",
+          uri: getPreferredInboxAvatar(socials),
+          name: getPreferredInboxName(socials),
         });
       }
     });
