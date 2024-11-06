@@ -8,7 +8,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { backgroundColor, textPrimaryColor } from "@styles/colors";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
-import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
+import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import React, { useCallback, useMemo } from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
@@ -39,7 +39,7 @@ export function GroupConsentPopup() {
   const { groupCreator } = useGroupCreator(topic);
   const { groupStatus } = useSettingsStore(useSelect(["groupStatus"]));
   const { members } = useGroupMembers(topic);
-  const groupId = getGroupIdFromTopic(topic);
+  const groupId = getV3IdFromTopic(topic);
   const groupStatusForTopic = groupStatus[groupId];
 
   const isCreator = useMemo(() => {

@@ -1,4 +1,3 @@
-import { InboxId } from "@xmtp/react-native-sdk";
 import { getSendersSpamScores } from "../../../utils/api";
 import { URL_REGEX } from "../../../utils/regex";
 import { isContentType } from "../../../utils/xmtpRN/contentTypes";
@@ -111,13 +110,11 @@ export const computeConversationsSpamScores = async (
 type V3SpameScoreParams = {
   message: string;
   contentType: string;
-  adderInboxId: InboxId;
 };
 
 export const getV3SpamScore = async ({
   message,
   contentType,
-  adderInboxId,
 }: V3SpameScoreParams): Promise<number> => {
   // TODO: Check if adder has been approved already
 
