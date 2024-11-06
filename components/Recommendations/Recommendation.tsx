@@ -21,8 +21,8 @@ import {
   getPreferredAvatar,
   getPreferredName,
   getPrimaryNames,
-} from "../../utils/profile";
-import { shortAddress } from "../../utils/str";
+} from "@utils/profile";
+import { shortAddress } from "@utils/strings/shortAddress";
 import Avatar from "../Avatar";
 import { NavigationChatButton } from "../Search/NavigationChatButton";
 

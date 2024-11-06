@@ -13,8 +13,8 @@ import {
 } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { useRouter } from "../../navigation/useNavigation";
-import { shortAddress, useAccountsProfiles } from "../../utils/str";
-
+import { useAccountsProfiles } from "../../utils/str";
+import { shortAddress } from "@utils/strings/shortAddress";
 type Props = {
   navigation?: NavigationProp<any> | undefined;
 };

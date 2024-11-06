@@ -1,6 +1,5 @@
 import { PixelRatio } from "react-native";
 
-import * as profileModule from "./profile";
 import {
   addressPrefix,
   capitalize,
@@ -9,7 +8,6 @@ import {
   getReadableProfile,
   getTitleFontScale,
   shortDisplayName,
-  shortAddress,
   strByteSize,
 } from "./str";
 import { getProfilesStore } from "../data/store/accountsStore";
@@ -53,24 +51,6 @@ jest.mock("../data/store/chatStore", () => ({
 jest.mock("../data/store/profilesStore", () => ({
   ProfilesStoreType: jest.fn(),
 }));
-
-jest
-  .spyOn(profileModule, "getPreferredName")
-  .mockImplementation((socials, address) => address);
-
-describe("shortAddress", () => {
-  it("should shorten the address correctly", () => {
-    expect(shortAddress("0x1234567890abcdef")).toBe("0x1234...cdef");
-  });
-
-  it("should return the original address if shorter than 7 characters", () => {
-    expect(shortAddress("0x123")).toBe("0x123");
-  });
-
-  it("should return an empty string if address is empty", () => {
-    expect(shortAddress("")).toBe("");
-  });
-});
 
 describe("shortDisplayName", () => {
   it("should shorten the domain correctly based on screen width", () => {

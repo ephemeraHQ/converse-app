@@ -40,6 +40,7 @@ export type ConverseUserName = {
 };
 
 export type ProfileSocials = {
+  address?: string;
   ensNames?: EnsName[];
   farcasterUsernames?: FarcasterUsername[];
   lensHandles?: LensHandle[];
