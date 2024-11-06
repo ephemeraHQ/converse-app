@@ -1,4 +1,4 @@
-import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
+import { getV3IdFromTopic, isV3Topic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import isDeepEqual from "fast-deep-equal";
@@ -344,11 +344,11 @@ export const initChatStore = (account: string) => {
                 const alreadyPinnedIndex = pinnedConversations.findIndex(
                   (item) => item === topic
                 );
-                const isGroup = isGroupTopic(topic);
+                const isGroup = isV3Topic(topic);
                 if (
                   isGroup &&
                   useSettingsStore.getState().groupStatus[
-                    getGroupIdFromTopic(topic)
+                    getV3IdFromTopic(topic)
                   ] === "denied"
                 ) {
                   return;

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
+import { getV3IdFromTopic, isV3Topic } from "@utils/groupUtils/groupId";
 import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { Group } from "@xmtp/react-native-sdk";
@@ -19,12 +19,12 @@ export const useGroupQuery = (account: string, topic: string) => {
         return null;
       }
       const group = await client.conversations.findGroup(
-        getGroupIdFromTopic(topic)
+        getV3IdFromTopic(topic)
       );
 
       return group;
     },
-    enabled: isGroupTopic(topic),
+    enabled: isV3Topic(topic),
   });
 };
 
@@ -43,13 +43,13 @@ export const useGroupConversationScreenQuery = (
         return null;
       }
       const group = await client.conversations.findGroup(
-        getGroupIdFromTopic(topic)
+        getV3IdFromTopic(topic)
       );
       await group?.sync();
 
       return group;
     },
-    enabled: isGroupTopic(topic),
+    enabled: isV3Topic(topic),
   });
 };
 

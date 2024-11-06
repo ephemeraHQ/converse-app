@@ -6,7 +6,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import { isGroupTopic } from "@utils/groupUtils/groupId";
+import { isV3Topic } from "@utils/groupUtils/groupId";
 import { isAddress } from "ethers/lib/utils";
 import React, {
   useCallback,
@@ -326,7 +326,7 @@ const ConversationHoc = ({
   route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
-  if (route.params?.topic && isGroupTopic(route.params.topic)) {
+  if (route.params?.topic && isV3Topic(route.params.topic)) {
     return <V3Conversation route={route} navigation={navigation} />;
   }
   return <Conversation route={route} navigation={navigation} />;

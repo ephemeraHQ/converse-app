@@ -1,7 +1,7 @@
 import { Button } from "@design-system/Button/Button";
 import { translate } from "@i18n";
 import { actionSheetColors, textPrimaryColor } from "@styles/colors";
-import { isGroupTopic } from "@utils/groupUtils/groupId";
+import { isV3Topic } from "@utils/groupUtils/groupId";
 import {
   Keyboard,
   Platform,
@@ -67,7 +67,7 @@ export default function ChatPlaceholder({ messagesCount }: Props) {
             {!topic && <ActivityIndicator style={{ marginBottom: 20 }} />}
             <Text style={styles.chatPlaceholderText}>
               {topic
-                ? isGroupTopic(topic)
+                ? isV3Topic(topic)
                   ? translate("group_not_found")
                   : translate("conversation_not_found")
                 : translate("opening_conversation")}

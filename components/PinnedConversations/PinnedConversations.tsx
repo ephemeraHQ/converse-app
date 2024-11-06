@@ -1,9 +1,9 @@
 import { StyleSheet, View } from "react-native";
 
 import { PinnedV2Conversation } from "./PinnedV2Conversation";
-import { isGroupTopic } from "@utils/groupUtils/groupId";
+import { isV3Topic } from "@utils/groupUtils/groupId";
 import { PinnedV3Conversation } from "./PinnedV3Conversation";
-import { useGroupsConversationListQuery } from "@queries/useGroupsConversationListQuery";
+import { useV3ConversationListQuery } from "@queries/useV3ConversationListQuery";
 import { useCurrentAccount } from "@data/store/accountsStore";
 
 type Props = {
@@ -12,17 +12,21 @@ type Props = {
 
 export const PinnedConversations = ({ topics }: Props) => {
   const currentAccount = useCurrentAccount();
-  const { isLoading } = useGroupsConversationListQuery(currentAccount!, {
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  });
+  const { isLoading } = useV3ConversationListQuery(
+    currentAccount!,
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    },
+    "PinnedConversations"
+  );
 
   if (isLoading) return null;
 
   const pinnedConvos = !topics
     ? []
     : topics?.map((topic) => {
-        if (isGroupTopic(topic)) {
+        if (isV3Topic(topic)) {
           return <PinnedV3Conversation topic={topic} key={topic} />;
         }
         return <PinnedV2Conversation topic={topic} key={topic} />;
