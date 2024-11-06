@@ -39,25 +39,21 @@ export const useGroupConversationListAvatarInfo = (
 
   const data = useInboxProfileSocialsQueries(currentAccount, memberInboxIds);
 
-  const memberData = useMemo(() => {
-    const returnData: {
-      inboxId: InboxId;
-      address: string;
-      uri?: string;
-      name?: string;
-    }[] = [];
-    data.forEach(({ data: socials }, index) => {
-      if (socials) {
-        returnData.push({
-          inboxId: memberInboxIds[index],
-          address: getPreferredInboxAddress(socials) ?? "",
-          uri: getPreferredInboxAvatar(socials),
-          name: getPreferredInboxName(socials),
-        });
-      }
-    });
-    return returnData;
-  }, [data, memberInboxIds]);
+  const memberData = useMemo(
+    () =>
+      data
+        .map(
+          ({ data: socials }, index) =>
+            socials && {
+              inboxId: memberInboxIds[index],
+              address: getPreferredInboxAddress(socials) ?? "",
+              uri: getPreferredInboxAvatar(socials),
+              name: getPreferredInboxName(socials),
+            }
+        )
+        .filter(Boolean),
+    [data, memberInboxIds]
+  );
 
   return {
     memberData,
