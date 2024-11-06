@@ -357,7 +357,7 @@ fun handleMessageByContentType(
                 val schema = reaction?.schema?.javaClass?.simpleName?.lowercase()
                 val content = reaction?.content
                 referencedMessageId = reaction?.reference
-                forceIgnore = action == "removed" || (isGroupMessageTopic(decodedMessage.topic) && referencedMessageId !== null && !isGroupMessageFromMe(xmtpClient, referencedMessageId))
+                forceIgnore = action == "removed" || (isV3MessageTopic(decodedMessage.topic) && referencedMessageId !== null && !isGroupMessageFromMe(xmtpClient, referencedMessageId))
                 contentToSave = getJsonReaction(decodedMessage)
                 contentToReturn = when {
                     action != "removed" && schema == "unicode" && content != null -> "Reacted $content to a message"

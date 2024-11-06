@@ -1,61 +1,25 @@
 import { useConversationListGroupItem } from "@hooks/useConversationListGroupItem";
-import { PinnedConversation } from "./PinnedConversation";
-import { usePinnedConversationLongPress } from "../../features/conversation-list/usePinnedConversationLongPress";
-import { useCallback, useEffect, useMemo } from "react";
-import { navigate } from "@utils/navigation";
-import Avatar from "@components/Avatar";
-import { AvatarSizes } from "@styles/sizes";
-import { useGroupConversationListAvatarInfo } from "../../features/conversation-list/useGroupConversationListAvatarInfo";
-import { useCurrentAccount } from "@data/store/accountsStore";
-import { GroupAvatarDumb } from "@components/GroupAvatar";
+import { conversationIsGroup } from "@utils/groupUtils/conversationContainerHelpers";
+import { DmWithCodecsType, GroupWithCodecsType } from "@utils/xmtpRN/client";
+import React from "react";
+import { PinnedV3GroupConversation } from "./PinnedV3GroupConversation";
+import { PinnedV3DMConversation } from "./PinnedV3DMConversation";
 
-export const PinnedV3Conversation = ({ topic }: { topic: string }) => {
-  const group = useConversationListGroupItem(topic);
-  const currentAccount = useCurrentAccount();
-  const { memberData } = useGroupConversationListAvatarInfo(
-    currentAccount!,
-    group
-  );
+type PinnedV3ConversationProps = {
+  topic: string;
+};
 
-  const onLongPress = usePinnedConversationLongPress(topic);
-  const onPress = useCallback(() => {
-    navigate("Conversation", { topic });
-  }, [topic]);
-
-  const title = group?.name;
-  const showUnread = false;
-
-  useEffect(() => {
-    if (!group) return;
-    if (group.imageUrlSquare) return;
-  }, [group]);
-
-  const avatarComponent = useMemo(() => {
-    if (group?.imageUrlSquare) {
-      return (
-        <Avatar
-          key={group?.topic}
-          uri={group?.imageUrlSquare}
-          size={AvatarSizes.pinnedConversation}
-        />
-      );
-    }
+export const PinnedV3Conversation = ({ topic }: PinnedV3ConversationProps) => {
+  const conversation = useConversationListGroupItem(topic);
+  if (!conversation) {
+    return null;
+  }
+  if (conversationIsGroup(conversation)) {
     return (
-      <GroupAvatarDumb
-        size={AvatarSizes.pinnedConversation}
-        members={memberData}
-        style={{ marginLeft: 16, alignSelf: "center" }}
-      />
+      <PinnedV3GroupConversation group={conversation as GroupWithCodecsType} />
     );
-  }, [group?.imageUrlSquare, group?.topic, memberData]);
-
+  }
   return (
-    <PinnedConversation
-      avatarComponent={avatarComponent}
-      onLongPress={onLongPress}
-      onPress={onPress}
-      showUnread={showUnread}
-      title={title ?? ""}
-    />
+    <PinnedV3DMConversation conversation={conversation as DmWithCodecsType} />
   );
 };

@@ -59,7 +59,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           conversation: conversation,
           bestAttemptContent: &content
         )
-      } else if isGroupWelcomeTopic(topic: contentTopic) {
+      } else if isV3WelcomeTopic(topic: contentTopic) {
         guard let group = await getNewGroup(xmtpClient: xmtpClient, contentTopic: contentTopic)else {
           contentHandler(UNNotificationContent())
           return
@@ -73,7 +73,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           welcomeTopic: contentTopic,
           bestAttemptContent: &content
         )
-      } else if isGroupMessageTopic(topic: contentTopic) {
+      } else if isV3MessageTopic(topic: contentTopic) {
         let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
         let envelope = XMTP.Envelope.with { envelope in
           envelope.message = encryptedMessageData
@@ -210,7 +210,7 @@ func handleConverseNotification(contentHandler: ((UNNotificationContent) -> Void
 
   func handleGroupSyncNotification(contentTopic: String, account: String) async {
     do {
-      let groupId = getGroupIdFromTopic(topic: contentTopic)
+      let groupId = getV3IdFromTopic(topic: contentTopic)
       let mmkv = getMmkv()
       if let xmtpClient = await getXmtpClient(account: account) {
         if let group = await getGroup(xmtpClient: xmtpClient, groupId: groupId) {

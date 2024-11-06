@@ -155,7 +155,7 @@ class PushNotificationsService : FirebaseMessagingService() {
                             val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
                             remoteMessage.data["body"] = newNotificationDataJson
                         }
-                    } else if (isGroupWelcomeTopic(notificationData.contentTopic)) {
+                    } else if (isV3WelcomeTopic(notificationData.contentTopic)) {
                         val group = getNewGroup(xmtpClient, notificationData.contentTopic)
                         if (group != null) {
                             result = handleGroupWelcome(
@@ -168,7 +168,7 @@ class PushNotificationsService : FirebaseMessagingService() {
                                 shouldShowNotification = result.shouldShowNotification
                             }
                         }
-                    } else if (isGroupMessageTopic(notificationData.contentTopic)) {
+                    } else if (isV3MessageTopic(notificationData.contentTopic)) {
                         Log.d(TAG, "Handling an ongoing group message notification")
                         result = handleGroupMessage(
                             applicationContext,
@@ -289,7 +289,7 @@ class PushNotificationsService : FirebaseMessagingService() {
                     )
                     return@launch
                 }
-                val groupId = getGroupIdFromTopic(notification.contentTopic)
+                val groupId = getV3IdFromTopic(notification.contentTopic)
                 val group = getGroup(xmtpClient, groupId)
                 if (group != null) {
                     group.sync()
