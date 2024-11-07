@@ -98,7 +98,7 @@ export default [
       "typescript-eslint/consistent-type-definitions": ["warn", "type"],
 
       "padding-line-between-statements": [
-        "warn",
+        "off", // Off for now until we all agree on best practices
         {
           blankLine: "always",
           prev: "multiline-const",

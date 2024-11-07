@@ -9,7 +9,8 @@ module.exports = {
     fixable: "whitespace",
     schema: [],
     messages: {
-      blankLineBefore: "Expected a blank line before this React hook initialization.",
+      blankLineBefore:
+        "Expected a blank line before this React hook initialization.",
     },
   },
 
@@ -26,7 +27,13 @@ module.exports = {
         // Check if the initializer is a call to useMemo, useEffect, or useCallback
         const isReactHookInitialization =
           init.type === "CallExpression" &&
-          ["useMemo", "useEffect", "useCallback", "useAnimatedStyle", "useAnimatedProps"].includes(init.callee.name);
+          [
+            "useMemo",
+            "useEffect",
+            "useCallback",
+            "useAnimatedStyle",
+            "useAnimatedProps",
+          ].includes(init.callee.name);
 
         if (!isReactHookInitialization) return;
 
