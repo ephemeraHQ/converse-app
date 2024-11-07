@@ -16,7 +16,8 @@ export type IPresets =
   | "smallerBold"
   | "bigBold"
   | "formHelper"
-  | "formLabel";
+  | "formLabel"
+  | "emojiItem";
 
 export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
   title: [textBaseStyle, textSizeStyles.xl, textFontWeightStyles.bold],
@@ -44,4 +45,6 @@ export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
     textSizeStyles.xs,
     ({ colors }) => ({ color: colors.text.secondary }),
   ],
+
+  emojiItem: [textBaseStyle, { fontSize: 22, lineHeight: 28 }],
 };

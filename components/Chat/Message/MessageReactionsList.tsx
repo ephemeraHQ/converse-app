@@ -152,7 +152,7 @@ const EmojiItem: FC<{
           alreadySelected && styles.selectedEmojiText,
         ]}
       >
-        <Text style={{ fontSize: 22, lineHeight: 28 }}>{content}</Text>
+        <Text preset="emojiItem">{content}</Text>
       </View>
     </TouchableOpacity>
   );
