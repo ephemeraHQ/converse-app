@@ -6,6 +6,7 @@ import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { useGroupPhoto } from "@hooks/useGroupPhoto";
 import { usePhotoSelect } from "@hooks/usePhotoSelect";
 import { translate } from "@i18n";
+import { uploadFile } from "@utils/attachment/uploadFile";
 import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
@@ -14,8 +15,6 @@ import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { FC, useCallback, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { List } from "react-native-paper";
-
-import { uploadFile } from "../utils/attachment";
 
 interface GroupScreenImageProps {
   topic: string;

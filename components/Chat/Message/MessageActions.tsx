@@ -49,7 +49,6 @@ import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { useAppStore } from "../../../data/store/appStore";
 import { useFramesStore } from "../../../data/store/framesStore";
 import { ReanimatedTouchableOpacity } from "../../../utils/animations";
-import { isAttachmentMessage } from "../../../utils/attachment/helpers";
 import { converseEventEmitter } from "../../../utils/events";
 import {
   MessageReaction,
@@ -57,6 +56,7 @@ import {
 } from "../../../utils/reactions";
 import { UUID_REGEX } from "../../../utils/regex";
 import { isTransactionMessage } from "../../../utils/transaction";
+import { isAttachmentMessage } from "@utils/attachment/isAttachmentMessage";
 
 type Props = {
   children: React.ReactNode;

@@ -41,7 +41,7 @@ import {
   useChatStore,
 } from "../../../data/store/accountsStore";
 import { XmtpMessage } from "../../../data/store/chatStore";
-import { isAttachmentMessage } from "../../../utils/attachment/helpers";
+import { isAttachmentMessage } from "@utils/attachment/isAttachmentMessage";
 import { getLocalizedTime, getRelativeDate } from "../../../utils/date";
 import { converseEventEmitter } from "../../../utils/events";
 import {
