@@ -2,12 +2,12 @@ import { getChatStore } from "@data/store/accountsStore";
 import { translate } from "@i18n";
 import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 
-import { isAttachmentMessage } from "./attachment/helpers";
 import { emojis } from "./emojis/emojis";
 import logger from "./logger";
 import { sendMessage } from "./message";
 import { getMessageContentType } from "./xmtpRN/contentTypes";
 import { XmtpMessage } from "../data/store/chatStore";
+import { isAttachmentMessage } from "./attachment/isAttachmentMessage";
 
 export type MessageReaction = {
   action: "added" | "removed";

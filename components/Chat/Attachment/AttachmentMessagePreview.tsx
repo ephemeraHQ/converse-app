@@ -16,13 +16,13 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import { useAttachmentForMessage } from "../../../utils/attachment";
 import { converseEventEmitter } from "../../../utils/events";
 import { navigate } from "../../../utils/navigation";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
 import Picto from "../../Picto/Picto";
 import { MessageToDisplay } from "../Message/Message";
 import MessageTimestamp from "../Message/MessageTimestamp";
+import { useAttachmentForMessage } from "@utils/attachment/useAttachmentForMessage";
 
 type Props = {
   message: MessageToDisplay;

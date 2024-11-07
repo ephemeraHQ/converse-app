@@ -33,7 +33,6 @@ import {
   useProfilesStore,
 } from "../../data/store/accountsStore";
 import { usePhotoSelect } from "../../hooks/usePhotoSelect";
-import { uploadFile } from "../../utils/attachment";
 import { navigate } from "../../utils/navigation";
 import {
   getPreferredAvatar,
@@ -41,6 +40,7 @@ import {
   getProfile,
 } from "../../utils/profile";
 import { createGroup } from "../../utils/xmtpRN/conversations";
+import { uploadFile } from "@utils/attachment/uploadFile";
 
 const getPendingGroupMembers = (
   members: any[],

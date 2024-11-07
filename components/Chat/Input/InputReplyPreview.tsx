@@ -11,7 +11,7 @@ import {
 } from "react-native";
 
 import { useCurrentAccount } from "../../../data/store/accountsStore";
-import { isAttachmentMessage } from "../../../utils/attachment/helpers";
+import { isAttachmentMessage } from "@utils/attachment/isAttachmentMessage";
 import { getRelativeDateTime } from "../../../utils/date";
 import { getReadableProfile } from "../../../utils/str";
 import { isTransactionMessage } from "../../../utils/transaction";
