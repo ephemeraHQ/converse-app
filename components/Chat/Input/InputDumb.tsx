@@ -75,20 +75,21 @@ const getSendButtonType = (input: string): "DEFAULT" | "HIGHER" => {
 interface ChatInputDumbProps {
   inputHeight: SharedValue<number>;
   messageToPrefill?: string;
+  mediaPreviewToPrefill?: MediaPreview;
+  mediaPreview?: MediaPreview;
   onSend: (payload: { text: string; referencedMessageId?: string }) => void;
 }
 
 export const ChatInputDumb = memo(
   forwardRef<TextInput, ChatInputDumbProps>(function ChatInputDumb(
-    { inputHeight, messageToPrefill, onSend }: ChatInputDumbProps,
+    {
+      inputHeight,
+      messageToPrefill,
+      mediaPreviewToPrefill,
+      onSend,
+    }: ChatInputDumbProps,
     inputRef
   ) {
-    // const conversation = useConversationContext("conversation");
-    // const mediaPreviewRef = useConversationContext("mediaPreviewRef");
-    // const mediaPreviewToPrefill = useConversationContext(
-    //   "mediaPreviewToPrefill"
-    // );
-
     const colorScheme = useColorScheme();
     const styles = useStyles();
 
@@ -96,7 +97,9 @@ export const ChatInputDumb = memo(
     const [replyingToMessage, setReplyingToMessage] =
       useState<MessageToDisplay | null>(null);
     const replyingToMessageRef = useRef<MessageToDisplay | null>(null);
-    const [mediaPreview, setMediaPreview] = useState<MediaPreview | null>(null);
+    const [mediaPreview, setMediaPreview] = useState<MediaPreview | null>(
+      mediaPreviewToPrefill ?? null
+    );
     const preparedAttachmentMessageRef = useRef<SendMessageInput | null>(null);
     const isAnimatingHeightRef = useRef(false);
 
@@ -107,23 +110,6 @@ export const ChatInputDumb = memo(
       [inputValue]
     );
     const canSend = inputValue.length > 0 || !!mediaPreview?.mediaURI;
-
-    // useEffect(() => {
-    //   if (!mediaPreviewRef.current) {
-    //     mediaPreviewRef.current = mediaPreviewToPrefill;
-    //   }
-    //   // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [mediaPreviewToPrefill]);
-
-    // useEffect(() => {
-    //   if (transactionMode) {
-    //     setInputValue("");
-    //   }
-    // }, [transactionMode]);
-
-    // useEffect(() => {
-    //   mediaPreviewRef.current = mediaPreview;
-    // }, [mediaPreviewRef, mediaPreview]);
 
     useEffect(() => {
       replyingToMessageRef.current = replyingToMessage;
@@ -256,23 +242,18 @@ export const ChatInputDumb = memo(
       [calculateInputHeight, inputHeight]
     );
 
-    const handleAttachmentClosed = useCallback(
-      () => {
-        // mediaPreviewRef.current = null;
-        // mediaPreviewAnimation.value = withSpring(0, PREVIEW_SPRING_CONFIG);
-        // updateInputHeightWithAnimation(calculateInputHeight());
-        // setTimeout(() => {
-        //   setMediaPreview(null);
-        //   preparedAttachmentMessageRef.current = null;
-        // }, 300);
-      },
-      [
-        // mediaPreviewRef,
-        // calculateInputHeight,
-        // updateInputHeightWithAnimation,
-        // mediaPreviewAnimation,
-      ]
-    );
+    const handleAttachmentClosed = useCallback(() => {
+      mediaPreviewAnimation.value = withSpring(0, PREVIEW_SPRING_CONFIG);
+      updateInputHeightWithAnimation(calculateInputHeight());
+      setTimeout(() => {
+        setMediaPreview(null);
+        preparedAttachmentMessageRef.current = null;
+      }, 300);
+    }, [
+      calculateInputHeight,
+      mediaPreviewAnimation,
+      updateInputHeightWithAnimation,
+    ]);
 
     const handleAttachmentSelection = (
       status: AttachmentSelectedStatus,

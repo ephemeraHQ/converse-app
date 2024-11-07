@@ -40,7 +40,7 @@ import {
   ReanimatedView,
 } from "../../utils/animations";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
-import { isAttachmentMessage } from "../../utils/attachment/helpers";
+import { isAttachmentMessage } from "@utils/attachment/isAttachmentMessage";
 import { useConversationContext } from "../../utils/conversation";
 import { converseEventEmitter } from "../../utils/events";
 import { getProfile, getProfileData } from "../../utils/profile";
