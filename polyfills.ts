@@ -1,4 +1,5 @@
-// Random values must be imported first for security.
+// IMPORTANT: DO NOT CHANGE THE ORDER OF THESE IMPORTS
+// These imports must be in this specific order for polyfills to work correctly
 import "@ethersproject/shims";
 import "@walletconnect/react-native-compat";
 import "react-native-get-random-values";
@@ -13,7 +14,6 @@ import "text-encoding";
 if (!global.Buffer) {
   global.Buffer = require("safe-buffer").Buffer;
 }
-
 if (!global.crypto.subtle) {
   // Only polyfill SubtleCrypto as we prefer `react-native-get-random-values` for getRandomValues.
   const webCrypto = new WebCrypto();
