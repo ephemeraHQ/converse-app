@@ -1691,8 +1691,6 @@ PODS:
     - React-logger (= 0.74.5)
     - React-perflogger (= 0.74.5)
     - React-utils (= 0.74.5)
-  - ReactNativeAvoidSoftinput (4.0.1):
-    - React-Core
   - ReactNativeIosContextMenu (2.5.1):
     - ContextMenuAuxiliaryPreview (~> 0.3)
     - DGSwiftUtilities
@@ -1966,7 +1964,6 @@ DEPENDENCIES:
   - React-runtimescheduler (from `../node_modules/react-native/ReactCommon/react/renderer/runtimescheduler`)
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
-  - ReactNativeAvoidSoftinput (from `../node_modules/react-native-avoid-softinput`)
   - ReactNativeIosContextMenu (from `../node_modules/react-native-ios-context-menu`)
   - ReactNativeIosUtilities (from `../node_modules/react-native-ios-utilities`)
   - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
@@ -2245,8 +2242,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/utils"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
-  ReactNativeAvoidSoftinput:
-    :path: "../node_modules/react-native-avoid-softinput"
   ReactNativeIosContextMenu:
     :path: "../node_modules/react-native-ios-context-menu"
   ReactNativeIosUtilities:
@@ -2417,7 +2412,6 @@ SPEC CHECKSUMS:
   React-runtimescheduler: db7189185a2e5912b0d17194302e501f801a381e
   React-utils: 3f1fcffc14893afb9a7e5b7c736353873cc5fc95
   ReactCommon: f79ae672224dc1e6c2d932062176883c98eebd57
-  ReactNativeAvoidSoftinput: a096aae8faf85c0f3225c2179bccdab00b8b6354
   ReactNativeIosContextMenu: e5f972174bd78ab3a552bd6ee4745762ffaa42b3
   ReactNativeIosUtilities: 8ea45df073a05d24b9fd75e4ec5fe1de19051466
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba

@@ -51,7 +51,12 @@ export const useGroupConversationListAvatarInfo = (
               name: getPreferredInboxName(socials),
             }
         )
-        .filter(Boolean),
+        .filter(Boolean) as {
+        inboxId: InboxId;
+        address: string;
+        uri: string | undefined;
+        name: string;
+      }[],
     [data, memberInboxIds]
   );
 
