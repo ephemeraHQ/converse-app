@@ -47,6 +47,7 @@ export const PrivyPhoneEntry = memo(() => {
             RNLocalize.getCountry() as PhoneInputProps["defaultCode"]
           }
           layout="first"
+          // @ts-ignore
           formatter={(t) => {
             const countryCode = phoneInputRef.current?.getCountryCode();
             const callingCode = phoneInputRef.current?.getCallingCode();
