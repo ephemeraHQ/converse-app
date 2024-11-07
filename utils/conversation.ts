@@ -7,10 +7,6 @@ import { createContext, useContextSelector } from "use-context-selector";
 
 import config from "../config";
 import { saveTopicsData } from "./api";
-import {
-  fetchLocalAttachmentUrl,
-  isAttachmentMessage,
-} from "./attachment/helpers";
 import { getAddressForPeer } from "./evm/address";
 import { getV3IdFromTopic } from "./groupUtils/groupId";
 import logger from "./logger";
@@ -32,6 +28,8 @@ import {
   XmtpMessage,
 } from "../data/store/chatStore";
 import { ProfileByAddress } from "@data/store/profilesStore";
+import { isAttachmentMessage } from "./attachment/isAttachmentMessage";
+import { fetchLocalAttachmentUrl } from "./attachment/fetchLocalAttachmentUrl";
 
 export type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;

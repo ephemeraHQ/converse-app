@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
 
-import { saveAttachmentForPendingMessage } from "./attachment";
 import { createUniformTransaction } from "./transaction";
 import { isContentType } from "./xmtpRN/contentTypes";
 import { sendPendingMessages } from "./xmtpRN/send";
@@ -10,6 +9,7 @@ import {
   getTransactionsStore,
 } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
+import { saveAttachmentForPendingMessage } from "./attachment/saveAttachmentForPendingMessage";
 
 export type SendMessageInput = {
   conversation: XmtpConversation;

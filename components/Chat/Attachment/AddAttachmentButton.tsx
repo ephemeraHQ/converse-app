@@ -10,7 +10,6 @@ import { Platform, StyleSheet, useColorScheme } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
 import { useAccountsStore } from "../../../data/store/accountsStore";
-import { uploadRemoteAttachment } from "../../../utils/attachment";
 import { useConversationContext } from "../../../utils/conversation";
 import { converseEventEmitter } from "../../../utils/events";
 import {
@@ -22,6 +21,7 @@ import {
 import { sentryTrackMessage } from "../../../utils/sentry";
 import { encryptRemoteAttachment } from "../../../utils/xmtpRN/attachments";
 import ActionButton from "../ActionButton";
+import { uploadRemoteAttachment } from "@utils/attachment/uploadRemoteAttachment";
 
 const DATA_MIMETYPE_REGEX = /data:(.*?);/;
 

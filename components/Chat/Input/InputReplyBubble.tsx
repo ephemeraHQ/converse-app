@@ -2,7 +2,7 @@ import { View, StyleSheet, Text, useColorScheme } from "react-native";
 
 import { XmtpMessage } from "../../../data/store/chatStore";
 import { textPrimaryColor, inversePrimaryColor } from "../../../styles/colors";
-import { isAttachmentMessage } from "../../../utils/attachment/helpers";
+import { isAttachmentMessage } from "@utils/attachment/isAttachmentMessage";
 import { getRelativeDateTime } from "../../../utils/date";
 import { isTransactionMessage } from "../../../utils/transaction";
 

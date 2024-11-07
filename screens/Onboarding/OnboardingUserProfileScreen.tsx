@@ -40,7 +40,6 @@ import { useSelect } from "../../data/store/storeHelpers";
 import { VStack } from "../../design-system/VStack";
 import { translate } from "../../i18n";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
-import { uploadFile } from "../../utils/attachment";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
 import {
   compressAndResizeImage,
@@ -54,6 +53,7 @@ import {
 } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";
 import { needToShowNotificationsPermissions } from "./Onboarding.utils";
+import { uploadFile } from "@utils/attachment/uploadFile";
 
 export type ProfileType = {
   avatar?: string;
