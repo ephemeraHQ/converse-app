@@ -7,38 +7,33 @@ import { GroupUpdatedContent, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback, useMemo } from "react";
 import { StyleSheet, useColorScheme } from "react-native";
 
-import { MessageToDisplay } from "./Message/Message";
 import { getPreferredName } from "@utils/profile";
 import { useInboxProfileSocialsQueries } from "@queries/useInboxProfileSocialsQuery";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { ProfileSocials } from "@data/store/profilesStore";
 
+type ChatGroupUpdatedMessageProps = {
+  content: GroupUpdatedContent;
+};
+
 export function ChatGroupUpdatedMessage({
-  message,
-}: {
-  message: MessageToDisplay;
-}) {
+  content,
+}: ChatGroupUpdatedMessageProps) {
   const currentAccount = useCurrentAccount();
   const styles = useStyles();
 
-  // JSON Parsing is heavy so useMemo
-  const parsedContent = useMemo(
-    () => JSON.parse(message.content) as GroupUpdatedContent,
-    [message.content]
-  );
-
   const inboxIds = useMemo(() => {
     const ids: InboxId[] = [];
-    ids.push(parsedContent.initiatedByInboxId as InboxId);
-    parsedContent.membersAdded.forEach((entry) => {
+    ids.push(content.initiatedByInboxId as InboxId);
+    content.membersAdded.forEach((entry) => {
       ids.push(entry.inboxId as InboxId);
     });
-    parsedContent.membersRemoved.forEach((entry) => {
+    content.membersRemoved.forEach((entry) => {
       ids.push(entry.inboxId as InboxId);
     });
 
     return ids;
-  }, [parsedContent]);
+  }, [content]);
 
   const inboxSocials = useInboxProfileSocialsQueries(currentAccount!, inboxIds);
   const mappedSocials = useMemo(() => {
@@ -54,10 +49,9 @@ export function ChatGroupUpdatedMessage({
 
   // TODO: Feat: handle multiple members
   const initiatedByAddress =
-    mappedSocials[parsedContent.initiatedByInboxId as InboxId]?.[0]?.address ??
-    "";
+    mappedSocials[content.initiatedByInboxId as InboxId]?.[0]?.address ?? "";
   const initiatedByReadableName = getPreferredName(
-    mappedSocials[parsedContent.initiatedByInboxId as InboxId]?.[0],
+    mappedSocials[content.initiatedByInboxId as InboxId]?.[0],
     initiatedByAddress
   );
   const membersActions: {
@@ -65,7 +59,7 @@ export function ChatGroupUpdatedMessage({
     content: string;
     readableName: string;
   }[] = [];
-  parsedContent.membersAdded.forEach((m) => {
+  content.membersAdded.forEach((m) => {
     const socials = mappedSocials[m.inboxId as InboxId]?.[0];
     const firstAddress = socials?.address;
     // We haven't synced yet the members
@@ -79,7 +73,7 @@ export function ChatGroupUpdatedMessage({
       readableName,
     });
   });
-  parsedContent.membersRemoved.forEach((m) => {
+  content.membersRemoved.forEach((m) => {
     const socials = mappedSocials[m.inboxId as InboxId]?.[0];
     const firstAddress = socials?.address;
     // TODO: Feat: handle multiple members
@@ -94,7 +88,7 @@ export function ChatGroupUpdatedMessage({
       readableName,
     });
   });
-  parsedContent.metadataFieldsChanged.forEach((f) => {
+  content.metadataFieldsChanged.forEach((f) => {
     if (f.fieldName === "group_name") {
       membersActions.push({
         address: initiatedByAddress,
