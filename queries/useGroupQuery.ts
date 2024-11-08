@@ -1,11 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { getV3IdFromTopic, isV3Topic } from "@utils/groupUtils/groupId";
-import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
+import {
+  ConverseXmtpClientType,
+  GroupWithCodecsType,
+} from "@utils/xmtpRN/client";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { Group } from "@xmtp/react-native-sdk";
 
 import { groupQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
+import logger from "@utils/logger";
 
 export const useGroupQuery = (account: string, topic: string) => {
   return useQuery({
@@ -30,11 +34,14 @@ export const useGroupQuery = (account: string, topic: string) => {
 
 export const useGroupConversationScreenQuery = (
   account: string,
-  topic: string
+  topic: string,
+  options?: Partial<UseQueryOptions<GroupWithCodecsType | null | undefined>>
 ) => {
   return useQuery({
+    ...options,
     queryKey: groupQueryKey(account, topic),
     queryFn: async () => {
+      logger.info("[Crash Debug] queryFn fetching group");
       if (!topic) {
         return null;
       }

@@ -24,6 +24,7 @@ import { ReanimatedFlashList, ReanimatedView } from "../../utils/animations";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
 import { converseEventEmitter } from "../../utils/events";
 import { ChatInputDumb } from "./Input/InputDumb";
+import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 
 type ChatDumbProps<T> = {
   onReadyToFocus: () => void;
@@ -45,7 +46,11 @@ type ChatDumbProps<T> = {
   placeholderComponent: React.JSX.Element | null;
   extraData?: any;
   itemToId: (id: T) => string;
-  onSend: (payload: { text: string; referencedMessageId?: string }) => void;
+  onSend: (payload: {
+    text?: string;
+    referencedMessageId?: string;
+    attachment?: RemoteAttachmentContent;
+  }) => Promise<void>;
 };
 
 const useStyles = () => {
