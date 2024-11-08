@@ -100,7 +100,7 @@ const BackdropComponent: FC<{
     return { backgroundColor };
   }, []);
 
-  // Reactions
+  // Attribution Panel + Emoji Picker
   const animatedAuxiliaryViewStyle = useAnimatedStyle(() => {
     const getTransformValue = () => {
       if (itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top) {
@@ -315,8 +315,6 @@ const useStyles = () => {
     container: {
       ...StyleSheet.absoluteFillObject,
       zIndex: 0,
-      borderWidth: 1,
-      borderColor: "red",
     },
     gestureHandlerContainer: {
       flex: 1,

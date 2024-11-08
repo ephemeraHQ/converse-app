@@ -6,13 +6,9 @@ import {
   useProfilesStore,
 } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
-import {
-  backgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-  tertiaryBackgroundColor,
-} from "@styles/colors";
-import { AvatarSizes, BorderRadius, Paddings, Margins } from "@styles/sizes";
+import { backgroundColor, textSecondaryColor } from "@styles/colors";
+import { AvatarSizes, BorderRadius } from "@styles/sizes";
+
 import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
 import {
   getPreferredAvatar,
@@ -28,7 +24,6 @@ import {
 import React, { FC, useMemo, useEffect, useCallback } from "react";
 import {
   ListRenderItem,
-  Text,
   useColorScheme,
   View,
   StyleSheet,
@@ -44,9 +39,12 @@ import Animated, {
   withDelay,
   withTiming,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MessageToDisplay } from "./Message";
+
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAppTheme } from "@theme/useAppTheme";
+import { Text } from "@design-system/Text";
 
 interface MessageReactionsListProps {
   reactions: {
@@ -118,6 +116,7 @@ const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
   );
 };
 
+// Small emoji picker
 const EmojiItem: FC<{
   content: string;
   message: MessageToDisplay;
@@ -153,7 +152,7 @@ const EmojiItem: FC<{
           alreadySelected && styles.selectedEmojiText,
         ]}
       >
-        <Text style={styles.emojiText}>{content}</Text>
+        <Text preset="emojiSymbol">{content}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -216,6 +215,8 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
     });
   }, [dismissMenu, message.id, message.topic, setReactingToMessage]);
 
+  const { theme } = useAppTheme();
+
   return (
     <View style={styles.container}>
       {list.length !== 0 ? (
@@ -265,11 +266,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
           onPress={handlePlusPress}
         >
           <View style={styles.plusContainer}>
-            <Picto
-              picto="plus"
-              size={10}
-              color={textPrimaryColor(colorScheme)}
-            />
+            <Picto picto="plus" size={24} color={theme.colors.text.secondary} />
           </View>
         </TouchableOpacity>
       </View>
@@ -282,6 +279,8 @@ export const MessageReactionsList = React.memo(MessageReactionsListInner);
 const useStyles = () => {
   const colorScheme = useColorScheme();
   const safeAreaInsets = useSafeAreaInsets();
+
+  const { theme } = useAppTheme();
 
   return StyleSheet.create({
     itemContainer: {
@@ -299,15 +298,6 @@ const useStyles = () => {
     flexGrow: {
       flexGrow: 1,
       height: "auto",
-    },
-    emojiText: {
-      textAlignVertical: "center",
-      fontSize: 24,
-    },
-    selectedEmojiText: {
-      backgroundColor: "rgba(0, 0, 0, 0.1)",
-      borderRadius: 10,
-      overflow: "hidden",
     },
     container: {
       flex: 1,
@@ -329,14 +319,14 @@ const useStyles = () => {
     flex1: {
       flex: 1,
     },
+    // Emoji picker
     emojiListContainer: {
       flexDirection: "row",
       justifyContent: "space-around",
       alignItems: "center",
-      borderRadius: BorderRadius.large,
-      padding: Paddings.small,
-      marginVertical: Margins.small,
-      backgroundColor: backgroundColor(colorScheme),
+      borderRadius: theme.spacing.lg,
+      padding: theme.spacing.xxs,
+      backgroundColor: theme.colors.background.raised,
     },
     emojiListContainerFromMe: {
       alignSelf: "flex-end",
@@ -345,19 +335,22 @@ const useStyles = () => {
       alignSelf: "flex-start",
     },
     emojiContainer: {
-      height: 32,
-      width: 32,
+      height: theme.spacing.xxl,
+      width: theme.spacing.xxl,
       justifyContent: "center",
       alignItems: "center",
-      marginRight: 4,
+      marginRight: theme.spacing["4xs"],
+    },
+    selectedEmojiText: {
+      backgroundColor: theme.colors.fill.minimal,
+      borderRadius: theme.spacing.sm,
     },
     plusContainer: {
-      borderRadius: 32,
-      backgroundColor: tertiaryBackgroundColor(colorScheme),
+      height: theme.spacing.xxl,
+      width: theme.spacing.xxl,
+      borderRadius: theme.spacing.sm,
       justifyContent: "center",
       alignItems: "center",
-      height: 32,
-      width: 32,
     },
   });
 };
