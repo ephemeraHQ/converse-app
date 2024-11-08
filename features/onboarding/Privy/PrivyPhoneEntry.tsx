@@ -7,19 +7,20 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { spacing } from "@theme/spacing";
-import { AsYouType, CountryCode } from "libphonenumber-js";
+import type { CountryCode } from "libphonenumber-js";
+import { AsYouType } from "libphonenumber-js";
 import React, { memo, useRef } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import * as RNLocalize from "react-native-localize";
 import PhoneInput, { PhoneInputProps } from "react-native-phone-number-input";
 
-import { usePrivyAuthStoreContext } from "./privyAuthStore";
-import { usePrivySmsLogin } from "./usePrivySmsLogin";
 import { Terms } from "../../../components/Onboarding/Terms";
 import Picto from "../../../components/Picto/Picto";
 import { VStack } from "../../../design-system/VStack";
 import { translate } from "../../../i18n";
 import { PictoSizes } from "../../../styles/sizes";
+import { usePrivyAuthStoreContext } from "./privyAuthStore";
+import { usePrivySmsLogin } from "./usePrivySmsLogin";
 
 export const PrivyPhoneEntry = memo(() => {
   const styles = useStyles();
@@ -46,6 +47,7 @@ export const PrivyPhoneEntry = memo(() => {
             RNLocalize.getCountry() as PhoneInputProps["defaultCode"]
           }
           layout="first"
+          // @ts-ignore
           formatter={(t) => {
             const countryCode = phoneInputRef.current?.getCountryCode();
             const callingCode = phoneInputRef.current?.getCallingCode();

@@ -103,6 +103,7 @@ const getItemType =
   (framesStore: { [frameUrl: string]: FrameWithType }) =>
   (item: MessageToDisplay) => {
     const fromMeString = item.fromMe ? "fromMe" : "notFromMe";
+
     if (
       isContentType("text", item.contentType) &&
       item.converseMetadata?.frames?.[0]
@@ -135,6 +136,7 @@ const getListArray = (
   lastMessages?: number // Optional parameter to limit the number of messages
 ) => {
   const messageAttachments = useChatStore.getState().messageAttachments;
+
   const isAttachmentLoading = (messageId: string) => {
     const attachment = messageAttachments && messageAttachments[messageId];
     return attachment?.loading;
@@ -179,9 +181,11 @@ const getListArray = (
     if (index > 0) {
       const previousMessageId = filteredMessageIds[index - 1];
       const previousMessage = conversation.messages.get(previousMessageId);
+
       if (previousMessage) {
         message.dateChange =
           differenceInCalendarDays(message.sent, previousMessage.sent) > 0;
+
         if (
           previousMessage.senderAddress.toLowerCase() ===
             message.senderAddress.toLowerCase() &&
@@ -198,10 +202,12 @@ const getListArray = (
     if (index < filteredMessageIds.length - 1) {
       const nextMessageId = filteredMessageIds[index + 1];
       const nextMessage = conversation.messages.get(nextMessageId);
+
       if (nextMessage) {
         // Here we need to check if next message has a date change
         const nextMessageDateChange =
           differenceInCalendarDays(nextMessage.sent, message.sent) > 0;
+
         if (
           nextMessage.senderAddress.toLowerCase() ===
             message.senderAddress.toLowerCase() &&
@@ -244,6 +250,7 @@ const getListArray = (
         isAttachmentMessage(nextMessage?.contentType) &&
         isAttachmentLoading(nextMessageId);
     }
+
     reverseArray.push(message);
   }
 
@@ -301,6 +308,7 @@ export function Chat() {
 
   const colorScheme = useColorScheme();
   const styles = useStyles();
+
   const messageAttachmentsLength = useChatStore(
     useShallow((s) => Object.keys(s.messageAttachments).length)
   );
@@ -347,7 +355,7 @@ export function Chat() {
         { translateY: -Math.max(insets.bottom, keyboardHeight.value) },
       ] as any,
     }),
-    [keyboardHeight, tertiary, insets.bottom]
+    [keyboardHeight, insets.bottom]
   );
 
   useEffect(() => {
@@ -414,9 +422,11 @@ export function Chat() {
   const scrollToMessage = useCallback(
     (data: { messageId?: string; index?: number; animated?: boolean }) => {
       let index = data.index;
+
       if (index === undefined && data.messageId) {
         index = listArray.findIndex((m) => m.id === data.messageId);
       }
+
       if (index !== undefined) {
         messageListRef.current?.scrollToIndex({
           index,
@@ -430,6 +440,7 @@ export function Chat() {
 
   useEffect(() => {
     converseEventEmitter.on("scrollChatToMessage", scrollToMessage);
+
     return () => {
       converseEventEmitter.off("scrollChatToMessage", scrollToMessage);
     };

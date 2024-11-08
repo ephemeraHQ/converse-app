@@ -1,5 +1,5 @@
 import * as Contacts from "expo-contacts";
-import { CountryCode } from "libphonenumber-js";
+import type { CountryCode } from "libphonenumber-js";
 import { useEffect, useRef } from "react";
 import { AppState } from "react-native";
 import * as RNLocalize from "react-native-localize";
@@ -21,6 +21,7 @@ const getAddressBookPermissionStatus = async (): Promise<
 
 export const saveAddressBookPermissionsStatus = async () => {
   const addressBookStatus = await getAddressBookPermissionStatus();
+
   if (
     addressBookStatus === "undetermined" ||
     addressBookStatus === "granted" ||
@@ -28,6 +29,7 @@ export const saveAddressBookPermissionsStatus = async () => {
   ) {
     useAppStore.getState().setAddressBookPermissionStatus(addressBookStatus);
   }
+
   return addressBookStatus;
 };
 
@@ -58,6 +60,7 @@ export const useAddressBookStateHandler = () => {
           stateHasBeenActiveOnce.current = true;
           const permission = await saveAddressBookPermissionsStatus();
           const timeSpent = new Date().getTime() - lastUpdate;
+
           if (
             timeSpent >= 86400000 &&
             currentAccount &&
@@ -67,6 +70,7 @@ export const useAddressBookStateHandler = () => {
             shareAddressBook(currentAccount);
           }
         }
+
         appState.current = nextAppState;
       }
     );
@@ -92,6 +96,7 @@ export const useAddressBookStateHandler = () => {
         refreshRecommendationsForAccount(currentAccount);
       });
     }
+
     previousPermissionStatus.current = addressBookPermissionStatus;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addressBookPermissionStatus]);

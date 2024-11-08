@@ -1,5 +1,5 @@
 import { BlurView, BlurViewProps } from "expo-blur";
-import { View, ViewProps, Platform } from "react-native";
+import { Platform, View, ViewProps } from "react-native";
 import Animated, { AnimatedProps } from "react-native-reanimated";
 
 type AnimatedBlurProps = {
@@ -17,9 +17,9 @@ const AnimatedBlurViewComponent = Animated.createAnimatedComponent(
   Platform.OS === "ios" ? BlurView : View
 );
 
-export const AnimatedBlurView: React.FC<AnimatedBlurViewProps> = ({
-  animatedProps,
-  ...props
-}) => {
+export const AnimatedBlurView: React.FC<AnimatedBlurViewProps> = (
+  args: AnimatedBlurViewProps
+) => {
+  const { animatedProps, ...props } = args;
   return <AnimatedBlurViewComponent {...props} animatedProps={animatedProps} />;
 };

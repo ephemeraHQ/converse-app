@@ -1,4 +1,5 @@
-// Random values must be imported first for security.
+// IMPORTANT: DO NOT CHANGE THE ORDER OF THESE IMPORTS
+// These imports must be in this specific order for polyfills to work correctly
 import "@walletconnect/react-native-compat";
 import "react-native-get-random-values";
 import "@ethersproject/shims";
@@ -8,8 +9,6 @@ import "@azure/core-asynciterator-polyfill";
 import "react-native-polyfill-globals/auto";
 import { Crypto as WebCrypto } from "@peculiar/webcrypto";
 import "@stardazed/streams-polyfill";
-import ViewReactNativeStyleAttributes from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
-ViewReactNativeStyleAttributes.scaleY = true;
 
 // Necessary for @peculiar/webcrypto.
 if (!global.Buffer) {
