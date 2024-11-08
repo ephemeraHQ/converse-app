@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 
 import { groupMessagesQueryKey } from "./QueryKeys";
 import { entify, EntityObject } from "./entify";
@@ -6,15 +6,24 @@ import { useGroupConversationScreenQuery } from "./useGroupQuery";
 import { useRefreshOnFocus } from "./useRefreshOnFocus";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import { queryClient } from "./queryClient";
+import logger from "@utils/logger";
 
 export type EntifiedMessagesType = EntityObject<DecodedMessageWithCodecsType>;
 
-export const useGroupMessages = (account: string, topic: string) => {
-  const { data: group } = useGroupConversationScreenQuery(account, topic);
+export const useGroupMessages = (
+  account: string,
+  topic: string,
+  options?: Partial<UseQueryOptions<EntifiedMessagesType>>
+) => {
+  const { data: group } = useGroupConversationScreenQuery(account, topic, {
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
 
   const queryData = useQuery({
     queryKey: groupMessagesQueryKey(account, topic),
     queryFn: async () => {
+      logger.info("[Crash Debug] queryFn fetching messages");
       if (!group) {
         return {
           ids: [],
@@ -25,6 +34,7 @@ export const useGroupMessages = (account: string, topic: string) => {
       return entify(messages, (message) => message.id);
     },
     enabled: !!group,
+    ...options,
   });
 
   useRefreshOnFocus(queryData.refetch);

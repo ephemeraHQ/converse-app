@@ -8,12 +8,10 @@ import {
 import { useAppTheme } from "@theme/useAppTheme";
 import React, {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
-  useEffect,
-  forwardRef,
-  memo,
 } from "react";
 import {
   Platform,
@@ -23,23 +21,25 @@ import {
   View,
 } from "react-native";
 import Animated, {
-  useAnimatedStyle,
   SharedValue,
-  withSpring,
+  useAnimatedStyle,
   useSharedValue,
+  withSpring,
 } from "react-native-reanimated";
 
 import ChatInputReplyPreview from "./InputReplyPreview";
 import { SendButton } from "./SendButton";
 import { MediaPreview } from "../../../data/store/chatStore";
+import { useConversationContext } from "../../../utils/conversation";
 import { converseEventEmitter } from "../../../utils/events";
 import { AttachmentSelectedStatus } from "../../../utils/media";
-import { SendMessageInput } from "../../../utils/message";
+import { TextInputWithValue } from "../../../utils/str";
 import AddAttachmentButton, {
   SelectedAttachment,
 } from "../Attachment/AddAttachmentButton";
 import SendAttachmentPreview from "../Attachment/SendAttachmentPreview";
 import { MessageToDisplay } from "../Message/Message";
+import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 
 const DEFAULT_MEDIA_PREVIEW_HEIGHT = { PORTRAIT: 120, LANDSCAPE: 90 };
 const MEDIA_PREVIEW_PADDING = Platform.OS === "android" ? 9 : 14;
@@ -72,361 +72,397 @@ const getSendButtonType = (input: string): "DEFAULT" | "HIGHER" => {
   return "DEFAULT";
 };
 
-interface ChatInputDumbProps {
+interface ChatInputProps {
   inputHeight: SharedValue<number>;
-  messageToPrefill?: string;
-  mediaPreviewToPrefill?: MediaPreview;
-  mediaPreview?: MediaPreview;
-  onSend: (payload: { text: string; referencedMessageId?: string }) => void;
+  onSend: (payload: {
+    text?: string;
+    referencedMessageId?: string;
+    attachment?: RemoteAttachmentContent;
+  }) => Promise<void>;
 }
 
-export const ChatInputDumb = memo(
-  forwardRef<TextInput, ChatInputDumbProps>(function ChatInputDumb(
-    {
-      inputHeight,
-      messageToPrefill,
-      mediaPreviewToPrefill,
-      onSend,
-    }: ChatInputDumbProps,
-    inputRef
-  ) {
-    const colorScheme = useColorScheme();
-    const styles = useStyles();
+export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
+  const inputRef = useConversationContext("inputRef");
+  const transactionMode = useConversationContext("transactionMode");
+  const messageToPrefill = useConversationContext("messageToPrefill");
+  const mediaPreviewRef = useConversationContext("mediaPreviewRef");
+  const mediaPreviewToPrefill = useConversationContext("mediaPreviewToPrefill");
 
-    const [inputValue, setInputValue] = useState(messageToPrefill ?? "");
-    const [replyingToMessage, setReplyingToMessage] =
-      useState<MessageToDisplay | null>(null);
-    const replyingToMessageRef = useRef<MessageToDisplay | null>(null);
-    const [mediaPreview, setMediaPreview] = useState<MediaPreview | null>(
-      mediaPreviewToPrefill ?? null
-    );
-    const preparedAttachmentMessageRef = useRef<SendMessageInput | null>(null);
-    const isAnimatingHeightRef = useRef(false);
+  const colorScheme = useColorScheme();
+  const styles = useStyles();
 
-    const numberOfLinesRef = useRef(1);
+  const [inputValue, setInputValue] = useState(messageToPrefill);
+  const [replyingToMessage, setReplyingToMessage] =
+    useState<MessageToDisplay | null>(null);
+  const replyingToMessageRef = useRef<MessageToDisplay | null>(null);
+  const [mediaPreview, setMediaPreview] = useState(mediaPreviewToPrefill);
+  const preparedAttachmentMessageRef = useRef<RemoteAttachmentContent | null>(
+    null
+  );
+  const isAnimatingHeightRef = useRef(false);
 
-    const sendButtonType = useMemo(
-      () => getSendButtonType(inputValue),
-      [inputValue]
-    );
-    const canSend = inputValue.length > 0 || !!mediaPreview?.mediaURI;
+  const numberOfLinesRef = useRef(1);
 
-    useEffect(() => {
-      replyingToMessageRef.current = replyingToMessage;
-    }, [replyingToMessage]);
+  const sendButtonType = useMemo(
+    () => getSendButtonType(inputValue),
+    [inputValue]
+  );
+  const canSend = inputValue.length > 0 || !!mediaPreview?.mediaURI;
 
-    useEffect(() => {
-      converseEventEmitter.on(
-        "triggerReplyToMessage",
-        (message: MessageToDisplay) => {
-          if (inputRef && inputRef instanceof TextInput) {
-            inputRef.focus();
-          }
-          setReplyingToMessage(message);
-          replyingToMessageRef.current = message;
+  useEffect(() => {
+    if (!mediaPreviewRef.current) {
+      mediaPreviewRef.current = mediaPreviewToPrefill;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mediaPreviewToPrefill]);
+
+  useEffect(() => {
+    if (transactionMode) {
+      setInputValue("");
+    }
+  }, [transactionMode]);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.currentValue = inputValue;
+    }
+  }, [inputRef, inputValue]);
+
+  useEffect(() => {
+    mediaPreviewRef.current = mediaPreview;
+  }, [mediaPreviewRef, mediaPreview]);
+
+  useEffect(() => {
+    replyingToMessageRef.current = replyingToMessage;
+  }, [replyingToMessage]);
+
+  useEffect(() => {
+    converseEventEmitter.on(
+      "triggerReplyToMessage",
+      (message: MessageToDisplay) => {
+        if (inputRef.current) {
+          inputRef.current?.focus();
         }
-      );
-      return () => {
-        converseEventEmitter.off("triggerReplyToMessage");
-      };
-    }, [inputRef]);
+        setReplyingToMessage(message);
+        replyingToMessageRef.current = message;
+      }
+    );
+    return () => {
+      converseEventEmitter.off("triggerReplyToMessage");
+    };
+  }, [inputRef]);
 
-    useEffect(() => {
-      converseEventEmitter.on(
+  useEffect(() => {
+    converseEventEmitter.on("setCurrentConversationInputValue", setInputValue);
+    return () => {
+      converseEventEmitter.off(
         "setCurrentConversationInputValue",
         setInputValue
       );
-      return () => {
-        converseEventEmitter.off(
-          "setCurrentConversationInputValue",
-          setInputValue
-        );
-      };
-    }, []);
+    };
+  }, []);
 
-    useEffect(() => {
-      const handleMediaPreviewChange = (newMediaPreview: MediaPreview) => {
-        setMediaPreview(newMediaPreview);
-      };
-      converseEventEmitter.on(
+  useEffect(() => {
+    const handleMediaPreviewChange = (newMediaPreview: MediaPreview) => {
+      setMediaPreview(newMediaPreview);
+    };
+    converseEventEmitter.on(
+      "setCurrentConversationMediaPreviewValue",
+      handleMediaPreviewChange
+    );
+    return () => {
+      converseEventEmitter.off(
         "setCurrentConversationMediaPreviewValue",
         handleMediaPreviewChange
       );
-      return () => {
-        converseEventEmitter.off(
-          "setCurrentConversationMediaPreviewValue",
-          handleMediaPreviewChange
-        );
-      };
-    }, []);
-
-    const calculateInputHeight = useCallback(() => {
-      const textContentHeight = (numberOfLinesRef.current - 1) * LINE_HEIGHT;
-      // const isLandscape =
-      //   mediaPreviewRef.current?.dimensions?.height &&
-      //   mediaPreviewRef.current?.dimensions?.width &&
-      //   mediaPreviewRef.current.dimensions.width >
-      //     mediaPreviewRef.current.dimensions.height;
-      // const mediaPreviewHeight =
-      //   mediaPreviewRef.current &&
-      //   (mediaPreviewRef.current.status === "picked" ||
-      //     mediaPreviewRef.current.status === "uploading" ||
-      //     mediaPreviewRef.current.status === "uploaded")
-      //     ? isLandscape
-      //       ? DEFAULT_MEDIA_PREVIEW_HEIGHT.LANDSCAPE
-      //       : DEFAULT_MEDIA_PREVIEW_HEIGHT.PORTRAIT + MEDIA_PREVIEW_PADDING
-      //     : 0;
-      const replyingToMessageHeight = replyingToMessageRef.current
-        ? REPLYING_TO_MESSAGE_HEIGHT
-        : 0;
-      return Math.min(
-        textContentHeight +
-          // mediaPreviewHeight +
-          replyingToMessageHeight,
-        MAX_INPUT_HEIGHT
-      );
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-      numberOfLinesRef.current,
-      replyingToMessageRef.current,
-      // mediaPreviewRef.current?.mediaURI,
-    ]);
-
-    const updateInputHeightWithAnimation = useCallback(
-      (newHeight: number) => {
-        if (isAnimatingHeightRef.current || inputHeight.value === newHeight) {
-          return;
-        }
-        isAnimatingHeightRef.current = true;
-        requestAnimationFrame(() => {
-          inputHeight.value = withSpring(newHeight, HEIGHT_SPRING_CONFIG);
-          isAnimatingHeightRef.current = false;
-        });
-      },
-      [inputHeight]
-    );
-
-    useEffect(() => {
-      updateInputHeightWithAnimation(calculateInputHeight());
-    }, [calculateInputHeight, updateInputHeightWithAnimation]);
-
-    const mediaPreviewAnimation = useSharedValue(
-      // mediaPreviewToPrefill ? 1 : 0
-      0
-    );
-
-    const inputHeightAnimatedStyle = useAnimatedStyle(() => {
-      return {
-        maxHeight: inputHeight.value,
-      };
-    });
-
-    const mediaPreviewAnimatedStyle = useAnimatedStyle(() => {
-      const scale = mediaPreviewAnimation.value;
-      return {
-        transform: [{ scale }],
-        opacity: scale,
-      };
-    });
-
-    const handleTextContentSizeChange = useCallback(
-      (event: { nativeEvent: { contentSize: { height: number } } }) => {
-        const textContentHeight = event.nativeEvent.contentSize.height;
-        const newNumberOfLines = Math.ceil(textContentHeight / LINE_HEIGHT);
-
-        if (newNumberOfLines !== numberOfLinesRef.current) {
-          numberOfLinesRef.current = newNumberOfLines;
-          inputHeight.value = calculateInputHeight();
-        }
-      },
-      [calculateInputHeight, inputHeight]
-    );
-
-    const handleAttachmentClosed = useCallback(() => {
-      mediaPreviewAnimation.value = withSpring(0, PREVIEW_SPRING_CONFIG);
-      updateInputHeightWithAnimation(calculateInputHeight());
-      setTimeout(() => {
-        setMediaPreview(null);
-        preparedAttachmentMessageRef.current = null;
-      }, 300);
-    }, [
-      calculateInputHeight,
-      mediaPreviewAnimation,
-      updateInputHeightWithAnimation,
-    ]);
-
-    const handleAttachmentSelection = (
-      status: AttachmentSelectedStatus,
-      attachment: SelectedAttachment
-    ) => {
-      // if (status === "picked" && attachment.uri) {
-      //   setMediaPreview({
-      //     mediaURI: attachment.uri,
-      //     status,
-      //     dimensions: attachment.attachmentToSave?.dimensions,
-      //   });
-      //   mediaPreviewRef.current = {
-      //     mediaURI: attachment.uri,
-      //     status,
-      //     dimensions: attachment.attachmentToSave?.dimensions,
-      //   };
-      //   mediaPreviewAnimation.value = withSpring(1, PREVIEW_SPRING_CONFIG);
-      // } else if (
-      //   status === "uploaded" &&
-      //   attachment.uploadedAttachment
-      // ) {
-      //   preparedAttachmentMessageRef.current = {
-      //     conversation,
-      //     content: serializeRemoteAttachmentMessageContent(
-      //       attachment.uploadedAttachment
-      //     ),
-      //     contentType: "xmtp.org/remoteStaticAttachment:1.0",
-      //   };
-      // }
     };
+  }, []);
 
-    const onValidate = useCallback(async () => {
-      // const waitForUploadToComplete = () => {
-      //   return new Promise<void>((resolve) => {
-      //     const interval = setInterval(() => {
-      //       if (mediaPreviewRef.current?.status === "uploaded") {
-      //         clearInterval(interval);
-      //         resolve();
-      //       }
-      //     }, 200);
-      //   });
-      // };
-      // if (mediaPreviewRef.current) {
-      //   if (mediaPreviewRef.current?.status === "uploading") {
-      //     await waitForUploadToComplete();
-      //   }
-      //   setReplyingToMessage(null);
-      //   replyingToMessageRef.current = null;
-      //   setInputValue("");
-      //   numberOfLinesRef.current = 1;
-      //   handleAttachmentClosed();
-      //   mediaPreviewRef.current = {
-      //     ...mediaPreviewRef.current,
-      //     status: "sending",
-      //   };
+  const calculateInputHeight = useCallback(() => {
+    const textContentHeight = (numberOfLinesRef.current - 1) * LINE_HEIGHT;
+    const isLandscape =
+      mediaPreviewRef.current?.dimensions?.height &&
+      mediaPreviewRef.current?.dimensions?.width &&
+      mediaPreviewRef.current.dimensions.width >
+        mediaPreviewRef.current.dimensions.height;
+    const mediaPreviewHeight =
+      mediaPreviewRef.current &&
+      (mediaPreviewRef.current.status === "picked" ||
+        mediaPreviewRef.current.status === "uploading" ||
+        mediaPreviewRef.current.status === "uploaded")
+        ? isLandscape
+          ? DEFAULT_MEDIA_PREVIEW_HEIGHT.LANDSCAPE
+          : DEFAULT_MEDIA_PREVIEW_HEIGHT.PORTRAIT + MEDIA_PREVIEW_PADDING
+        : 0;
+    const replyingToMessageHeight = replyingToMessageRef.current
+      ? REPLYING_TO_MESSAGE_HEIGHT
+      : 0;
+    return Math.min(
+      textContentHeight + mediaPreviewHeight + replyingToMessageHeight,
+      MAX_INPUT_HEIGHT
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    numberOfLinesRef.current,
+    replyingToMessageRef.current,
+    mediaPreviewRef.current?.mediaURI,
+  ]);
 
-      //   setMediaPreview((prev) =>
-      //     prev ? { ...prev, status: "sending" } : null
-      //   );
-
-      //   if (preparedAttachmentMessageRef.current) {
-      //     await sendMessage(preparedAttachmentMessageRef.current);
-      //     preparedAttachmentMessageRef.current = null;
-      //   }
-      // }
-
-      if (inputValue.length > 0) {
-        const messageToSend = {
-          // conversation,
-          text: inputValue,
-          contentType: "xmtp.org/text:1.0",
-          referencedMessageId: replyingToMessage
-            ? replyingToMessage.id
-            : undefined,
-        };
-        setInputValue("");
-        setReplyingToMessage(null);
-        numberOfLinesRef.current = 1;
-        await new Promise((r) => setTimeout(r, 5));
-        onSend(messageToSend);
+  const updateInputHeightWithAnimation = useCallback(
+    (newHeight: number) => {
+      if (isAnimatingHeightRef.current || inputHeight.value === newHeight) {
+        return;
       }
-
-      converseEventEmitter.emit("scrollChatToMessage", {
-        index: 0,
+      isAnimatingHeightRef.current = true;
+      requestAnimationFrame(() => {
+        inputHeight.value = withSpring(newHeight, HEIGHT_SPRING_CONFIG);
+        isAnimatingHeightRef.current = false;
       });
-    }, [inputValue, replyingToMessage, onSend]);
+    },
+    [inputHeight]
+  );
 
-    const inputIsFocused = useRef(false);
+  useEffect(() => {
+    updateInputHeightWithAnimation(calculateInputHeight());
+  }, [calculateInputHeight, updateInputHeightWithAnimation]);
 
-    return (
-      <View style={styles.chatInputWrapper}>
-        {replyingToMessage && (
-          <View style={styles.replyToMessagePreview}>
-            <ChatInputReplyPreview
-              replyingToMessage={replyingToMessage}
-              onDismiss={() => {
-                setReplyingToMessage(null);
-                replyingToMessageRef.current = null;
-              }}
-            />
-          </View>
-        )}
-        <View style={styles.chatInputContainer}>
-          <AddAttachmentButton
-            onSelectionStatusChange={handleAttachmentSelection}
-          />
-          <View style={styles.chatInput}>
-            <Animated.View style={inputHeightAnimatedStyle}>
-              {mediaPreview?.mediaURI && (
-                <Animated.View
-                  style={[
-                    styles.attachmentPreviewWrapper,
-                    mediaPreviewAnimatedStyle,
-                  ]}
-                >
-                  <SendAttachmentPreview
-                    currentAttachmentMediaURI={mediaPreview.mediaURI}
-                    onClose={handleAttachmentClosed}
-                    error={mediaPreview.status === "error"}
-                    isLoading={mediaPreview.status === "uploading"}
-                    scale={mediaPreviewAnimation}
-                    isLandscape={
-                      !!(
-                        mediaPreview.dimensions?.height &&
-                        mediaPreview.dimensions?.width &&
-                        mediaPreview.dimensions.width >
-                          mediaPreview.dimensions.height
-                      )
-                    }
-                  />
-                </Animated.View>
-              )}
-            </Animated.View>
-            <TextInput
-              style={styles.chatInputField}
-              value={inputValue}
-              // Mainly used on Desktop so that Enter sends the message
-              onSubmitEditing={() => {
-                onValidate();
-                // But we still want to refocus on Desktop when we
-                // hit Enter so let's force it
-              }}
-              onChangeText={(t: string) => {
-                inputIsFocused.current = true;
-                setInputValue(t);
-              }}
-              onFocus={() => {
-                inputIsFocused.current = true;
-              }}
-              onBlur={() => {
-                inputIsFocused.current = false;
-              }}
-              onContentSizeChange={handleTextContentSizeChange}
-              multiline
-              ref={inputRef}
-              placeholder="Message"
-              placeholderTextColor={
-                Platform.OS === "android"
-                  ? textSecondaryColor(colorScheme)
-                  : actionSecondaryColor(colorScheme)
-              }
-            />
-          </View>
-          <SendButton
-            canSend={canSend}
-            onPress={onValidate}
-            sendButtonType={sendButtonType}
+  const mediaPreviewAnimation = useSharedValue(mediaPreviewToPrefill ? 1 : 0);
+
+  const inputHeightAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      maxHeight: inputHeight.value,
+    };
+  });
+
+  const mediaPreviewAnimatedStyle = useAnimatedStyle(() => {
+    const scale = mediaPreviewAnimation.value;
+    return {
+      transform: [{ scale }],
+      opacity: scale,
+    };
+  });
+
+  const handleTextContentSizeChange = useCallback(
+    (event: { nativeEvent: { contentSize: { height: number } } }) => {
+      const textContentHeight = event.nativeEvent.contentSize.height;
+      const newNumberOfLines = Math.ceil(textContentHeight / LINE_HEIGHT);
+
+      if (newNumberOfLines !== numberOfLinesRef.current) {
+        numberOfLinesRef.current = newNumberOfLines;
+        inputHeight.value = calculateInputHeight();
+      }
+    },
+    [calculateInputHeight, inputHeight]
+  );
+
+  const handleAttachmentClosed = useCallback(() => {
+    mediaPreviewRef.current = null;
+    mediaPreviewAnimation.value = withSpring(0, PREVIEW_SPRING_CONFIG);
+
+    updateInputHeightWithAnimation(calculateInputHeight());
+    setTimeout(() => {
+      setMediaPreview(null);
+      preparedAttachmentMessageRef.current = null;
+    }, 300);
+  }, [
+    mediaPreviewRef,
+    calculateInputHeight,
+    updateInputHeightWithAnimation,
+    mediaPreviewAnimation,
+  ]);
+
+  const handleAttachmentSelection = (
+    status: AttachmentSelectedStatus,
+    attachment: SelectedAttachment
+  ) => {
+    if (status === "picked" && attachment.uri) {
+      setMediaPreview({
+        mediaURI: attachment.uri,
+        status,
+        dimensions: attachment.attachmentToSave?.dimensions,
+      });
+      mediaPreviewRef.current = {
+        mediaURI: attachment.uri,
+        status,
+        dimensions: attachment.attachmentToSave?.dimensions,
+      };
+      mediaPreviewAnimation.value = withSpring(1, PREVIEW_SPRING_CONFIG);
+    } else if (status === "uploaded" && attachment.uploadedAttachment) {
+      preparedAttachmentMessageRef.current = attachment.uploadedAttachment;
+    }
+  };
+
+  const onValidate = useCallback(async () => {
+    const waitForUploadToComplete = () => {
+      return new Promise<void>((resolve) => {
+        const interval = setInterval(() => {
+          if (mediaPreviewRef.current?.status === "uploaded") {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 200);
+      });
+    };
+    if (mediaPreviewRef.current) {
+      if (mediaPreviewRef.current?.status === "uploading") {
+        await waitForUploadToComplete();
+      }
+      setReplyingToMessage(null);
+      replyingToMessageRef.current = null;
+      setInputValue("");
+      numberOfLinesRef.current = 1;
+      handleAttachmentClosed();
+      mediaPreviewRef.current = {
+        ...mediaPreviewRef.current,
+        status: "sending",
+      };
+
+      setMediaPreview((prev) => (prev ? { ...prev, status: "sending" } : null));
+
+      if (preparedAttachmentMessageRef.current) {
+        // const messageId = uuidv4();
+        // await saveAttachmentForPendingMessage(
+        //   messageId,
+        //   preparedAttachmentMessageRef.current.attachmentToSave.filePath,
+        //   preparedAttachmentMessageRef.current.attachmentToSave.fileName,
+        //   preparedAttachmentMessageRef.current.attachmentToSave.mimeType
+        // );
+        await onSend({
+          attachment: preparedAttachmentMessageRef.current,
+        });
+        preparedAttachmentMessageRef.current = null;
+      }
+    }
+
+    if (inputValue.length > 0) {
+      const messageToSend = {
+        content: inputValue,
+        contentType: "xmtp.org/text:1.0",
+        referencedMessageId: replyingToMessage
+          ? replyingToMessage.id
+          : undefined,
+      };
+      setInputValue("");
+      setReplyingToMessage(null);
+      numberOfLinesRef.current = 1;
+      await new Promise((r) => setTimeout(r, 5));
+      await onSend({
+        text: messageToSend.content,
+      });
+    }
+
+    converseEventEmitter.emit("scrollChatToMessage", {
+      index: 0,
+    });
+  }, [
+    mediaPreviewRef,
+    inputValue,
+    handleAttachmentClosed,
+    onSend,
+    replyingToMessage,
+  ]);
+
+  const inputIsFocused = useRef(false);
+
+  return (
+    <View style={styles.chatInputWrapper}>
+      {replyingToMessage && (
+        <View style={styles.replyToMessagePreview}>
+          <ChatInputReplyPreview
+            replyingToMessage={replyingToMessage}
+            onDismiss={() => {
+              setReplyingToMessage(null);
+              replyingToMessageRef.current = null;
+            }}
           />
         </View>
+      )}
+      <View style={styles.chatInputContainer}>
+        <AddAttachmentButton
+          onSelectionStatusChange={handleAttachmentSelection}
+        />
+        <View style={styles.chatInput}>
+          <Animated.View style={inputHeightAnimatedStyle}>
+            {mediaPreview?.mediaURI && (
+              <Animated.View
+                style={[
+                  styles.attachmentPreviewWrapper,
+                  mediaPreviewAnimatedStyle,
+                ]}
+              >
+                <SendAttachmentPreview
+                  currentAttachmentMediaURI={mediaPreview.mediaURI}
+                  onClose={handleAttachmentClosed}
+                  error={mediaPreview.status === "error"}
+                  isLoading={mediaPreview.status === "uploading"}
+                  scale={mediaPreviewAnimation}
+                  isLandscape={
+                    !!(
+                      mediaPreview.dimensions?.height &&
+                      mediaPreview.dimensions?.width &&
+                      mediaPreview.dimensions.width >
+                        mediaPreview.dimensions.height
+                    )
+                  }
+                />
+              </Animated.View>
+            )}
+          </Animated.View>
+          <TextInput
+            style={styles.chatInputField}
+            value={inputValue}
+            onSubmitEditing={() => {
+              onValidate();
+            }}
+            onChangeText={(t: string) => {
+              inputIsFocused.current = true;
+              setInputValue(t);
+            }}
+            onKeyPress={(event: any) => {
+              if (
+                event.nativeEvent.key === "Enter" &&
+                !event.altKey &&
+                !event.metaKey &&
+                !event.shiftKey
+              ) {
+                event.preventDefault();
+                onValidate();
+                setTimeout(() => {
+                  inputRef.current?.focus();
+                }, 100);
+              }
+            }}
+            onFocus={() => {
+              inputIsFocused.current = true;
+            }}
+            onBlur={() => {
+              inputIsFocused.current = false;
+            }}
+            onContentSizeChange={handleTextContentSizeChange}
+            multiline
+            ref={(r) => {
+              if (r && !inputRef.current) {
+                inputRef.current = r as TextInputWithValue;
+                inputRef.current.currentValue = messageToPrefill;
+              }
+            }}
+            placeholder="Message"
+            placeholderTextColor={
+              Platform.OS === "android"
+                ? textSecondaryColor(colorScheme)
+                : actionSecondaryColor(colorScheme)
+            }
+          />
+        </View>
+        <SendButton
+          canSend={canSend}
+          onPress={onValidate}
+          sendButtonType={sendButtonType}
+        />
       </View>
-    );
-  })
-);
+    </View>
+  );
+}
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
