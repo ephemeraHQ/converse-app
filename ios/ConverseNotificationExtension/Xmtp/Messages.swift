@@ -282,7 +282,7 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
   // If topic is MLS, the conversation should already be there
   // @todo except if it's new convo => call sync before?
   if (isV3MessageTopic(topic: envelope.contentTopic)) {
-    if let group = try! xmtpClient.findGroup(groupId: getGroupIdFromTopic(topic: envelope.contentTopic) ) {
+    if let group = try! xmtpClient.findGroup(groupId: getV3IdFromTopic(topic: envelope.contentTopic) ) {
       do {
         sentryTrackMessage(message: "[NotificationExtension] Syncing Group", extras: [:])
         try await group.sync()
