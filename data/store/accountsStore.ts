@@ -77,9 +77,11 @@ export const useErroredAccountsMap = () => {
   return accounts.reduce(
     (acc, a) => {
       const errored = getChatStore(a).getState().errored;
+
       if (errored) {
         acc[a] = errored;
       }
+
       return acc;
     },
     {} as { [account: string]: boolean }
@@ -132,17 +134,22 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           if (state.currentAccount === account) return state;
           const accounts = [...state.accounts];
           const isNew = !accounts.includes(account);
+
           if (isNew && !createIfNew) {
             logger.warn(
               `[AccountsStore] Account ${account} is new but createIfNew is false`
             );
             return state;
           }
+
           logger.debug(`[AccountsStore] Setting current account: ${account}`);
+
           if (!storesByAccount[account]) {
             initStores(account);
           }
+
           const databaseId = { ...state.databaseId };
+
           if (isNew) {
             accounts.push(account);
             databaseId[account] = uuidv4();
@@ -158,6 +165,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
               databaseId,
             };
           }
+
           return {
             currentAccount: account,
             accounts,
@@ -169,9 +177,11 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           const newAccounts = [
             ...state.accounts.filter((a) => a !== accountToRemove),
           ];
+
           if (newAccounts.length === 0) {
             newAccounts.push(TEMPORARY_ACCOUNT_NAME);
           }
+
           const newDatabaseId = { ...state.databaseId };
           delete newDatabaseId[accountToRemove];
           deleteStores(accountToRemove);
@@ -225,10 +235,12 @@ const getAccountStore = (account: string) => {
 };
 
 export const currentAccount = () => useAccountsStore.getState().currentAccount;
+
 export const useCurrentAccount = () => {
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
 };
+
 export function getCurrentAccount() {
   const currentAccount = useAccountsStore.getState().currentAccount;
   return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
@@ -267,18 +279,22 @@ const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
   key: T
 ) => {
   const _useStore = <U>(selector: (state: AccountStoreDataType[T]) => U) => {
+    // TODO: Rename the hook above to useCurrentAccountStore?
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const currentAccount = useAccountsStore((s) => s.currentAccount);
     const accountStore = getAccountStore(currentAccount);
     return accountStore[key](selector);
   };
 
   const use = _useStore as AccountStoreType[T];
+
   use.getState = () => {
     const currentAccountState = useAccountsStore.getState();
     const currentAccount = currentAccountState.currentAccount;
     const accountStore = getAccountStore(currentAccount);
     return accountStore[key].getState();
   };
+
   return use;
 };
 
@@ -292,10 +308,12 @@ const accountStoreHook = <T extends keyof AccountStoreDataType>(
   };
 
   const use = _useStore as AccountStoreType[T];
+
   use.getState = () => {
     const accountStore = getAccountStore(account);
     return accountStore[key].getState();
   };
+
   return use;
 };
 
