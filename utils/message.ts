@@ -11,6 +11,7 @@ import {
 import { XmtpConversation } from "../data/store/chatStore";
 import { saveAttachmentForPendingMessage } from "./attachment/saveAttachmentForPendingMessage";
 
+// @deprecated
 export type SendMessageInput = {
   conversation: XmtpConversation;
   content: string;
