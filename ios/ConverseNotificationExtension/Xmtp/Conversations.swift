@@ -83,7 +83,7 @@ func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) asy
           let data = try Xmtp_KeystoreApi_V1_TopicMap.TopicData(
             serializedData: Data(base64Encoded: topicData)!
           )
-          let conversation = await xmtpClient.conversations.importTopicData(data: data)
+          let conversation = await try xmtpClient.conversations.importTopicData(data: data)
           return conversation
         } catch {
           sentryTrackError(error: error, extras: ["message": "Could not import topic data in XMTP Client"])
@@ -106,7 +106,7 @@ func getPersistedConversation(xmtpClient: XMTP.Client, contentTopic: String) asy
       let data = try Xmtp_KeystoreApi_V1_TopicMap.TopicData(
         serializedData: Data(base64Encoded: Data(persistedTopicData!.utf8))!
       )
-      let conversation = await xmtpClient.conversations.importTopicData(data: data)
+      let conversation = await try xmtpClient.conversations.importTopicData(data: data)
       return conversation
     } catch {
       sentryTrackError(error: error, extras: ["message": "Could not import topic data in XMTP Client"])

@@ -36,7 +36,7 @@ export function GroupConsentPopup() {
   const styles = useStyles();
   const colorScheme = useColorScheme();
   const { consent, blockGroup, allowGroup } = useGroupConsent(topic);
-  const { groupCreator } = useGroupCreator(topic);
+  const { data: groupCreator } = useGroupCreator(topic);
   const { groupStatus } = useSettingsStore(useSelect(["groupStatus"]));
   const { members } = useGroupMembers(topic);
   const groupId = getGroupIdFromTopic(topic);
