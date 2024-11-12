@@ -249,6 +249,23 @@ export const getTopicsData = async (account: string) => {
   return data as { [topic: string]: TopicData };
 };
 
+export const pinTopics = async (account: string, topics: string[]) => {
+  await api.post(
+    "/api/topics/pin",
+    { topics },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
+};
+
+export const unpinTopics = async (account: string, topics: string[]) => {
+  await api.delete("/api/topics/pin", {
+    data: { topics },
+    headers: await getXmtpApiHeaders(account),
+  });
+};
+
 export const postUSDCTransferAuthorization = async (
   account: string,
   message: TransferAuthorizationMessage,

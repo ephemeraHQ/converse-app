@@ -26,7 +26,6 @@ export const ConversationReadOnly: React.FC<{
 }> = ({ topic }) => {
   const colorScheme = useColorScheme();
   const peersStatus = useSettingsStore((s) => s.peersStatus);
-  const [transactionMode, setTransactionMode] = useState(false);
   const [frameTextInputFocused, setFrameTextInputFocused] = useState(false);
   const tagsFetchedOnceForMessage = useRef<{ [messageId: string]: boolean }>(
     {}
@@ -142,8 +141,6 @@ export const ConversationReadOnly: React.FC<{
             mediaPreviewRef,
             isBlockedPeer,
             onReadyToFocus,
-            transactionMode,
-            setTransactionMode,
             frameTextInputFocused,
             setFrameTextInputFocused,
             tagsFetchedOnceForMessage,

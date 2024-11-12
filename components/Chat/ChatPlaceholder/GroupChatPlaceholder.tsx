@@ -1,11 +1,8 @@
 import { Button } from "@design-system/Button/Button";
-import { useGroupMembers } from "@hooks/useGroupMembers";
-import { useGroupName } from "@hooks/useGroupName";
 import { translate } from "@i18n";
-import { useGroupQuery } from "@queries/useGroupQuery";
 import { textPrimaryColor } from "@styles/colors";
 import { isV3Topic } from "@utils/groupUtils/groupId";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import {
   Keyboard,
   Platform,
@@ -16,65 +13,48 @@ import {
   View,
 } from "react-native";
 
-import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { useConversationContext } from "../../../utils/conversation";
-import { sendMessage } from "../../../utils/message";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
+import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 
-type Props = {
+type GroupChatPlaceholderProps = {
   messagesCount: number;
+  group: GroupWithCodecsType | null | undefined;
+  onSend: (payload: { text?: string }) => void;
 };
 
-export function GroupChatPlaceholder({ messagesCount }: Props) {
+export function GroupChatPlaceholder({
+  messagesCount,
+  group,
+  onSend,
+}: GroupChatPlaceholderProps) {
   const topic = useConversationContext("topic");
-  const conversation = useConversationContext("conversation");
   const onReadyToFocus = useConversationContext("onReadyToFocus");
 
-  const currentAccount = useCurrentAccount();
-  const { data: group } = useGroupQuery(
-    currentAccount ?? "",
-    conversation?.topic ?? ""
-  );
-  const { groupName } = useGroupName(conversation?.topic ?? "");
-  const { members } = useGroupMembers(conversation?.topic ?? "");
+  const groupName = group?.name;
 
   const styles = useStyles();
-  const groupCreatedByUser = useMemo(() => {
-    if (!group || !currentAccount) {
-      return false;
-    }
-    const creatorInfo = members?.byId[group.creatorInboxId];
-
-    return creatorInfo?.addresses.some(
-      (a) => a.toLowerCase() === currentAccount.toLowerCase()
-    );
-  }, [group, currentAccount, members?.byId]);
 
   const handleSend = useCallback(() => {
-    if (!conversation) {
-      return;
-    }
-    sendMessage({
-      conversation,
-      content: "👋",
-      contentType: "xmtp.org/text:1.0",
+    onSend({
+      text: "👋",
     });
-  }, [conversation]);
+  }, [onSend]);
 
   const handleDismiss = useCallback(() => {
     Keyboard.dismiss();
   }, []);
 
   const onLayout = useCallback(() => {
-    if (conversation && messagesCount === 0) {
+    if (group && messagesCount === 0) {
       onReadyToFocus();
     }
-  }, [conversation, messagesCount, onReadyToFocus]);
+  }, [group, messagesCount, onReadyToFocus]);
 
   return (
     <TouchableWithoutFeedback onPress={handleDismiss}>
       <View onLayout={onLayout} style={styles.chatPlaceholder}>
-        {!conversation && (
+        {!group && (
           <View>
             {!topic && <ActivityIndicator style={{ marginBottom: 20 }} />}
             <Text style={styles.chatPlaceholderText}>
@@ -86,10 +66,12 @@ export function GroupChatPlaceholder({ messagesCount }: Props) {
             </Text>
           </View>
         )}
-        {conversation && messagesCount === 0 && !groupCreatedByUser && (
+        {group && messagesCount === 0 && (
           <View>
             <Text style={styles.chatPlaceholderText}>
-              This is the beginning of your{"\n"}conversation in {groupName}
+              {translate("group_placeholder.placeholder_text", {
+                groupName,
+              })}
             </Text>
 
             <Button

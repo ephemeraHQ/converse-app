@@ -190,8 +190,6 @@ const handleNewConversation = async (
   const isGroup = conversation.version === ConversationVersion.GROUP;
   const isDMConversation = !!(conversation as any).peerAddress;
 
-  // Temporary fix to stop receiving messages for groups
-  // we are not member of
   const shouldSkip = isGroup;
   if (shouldSkip) {
     logger.warn(

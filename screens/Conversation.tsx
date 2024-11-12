@@ -51,7 +51,6 @@ const Conversation = ({
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
   const colorScheme = useColorScheme();
   const peersStatus = useSettingsStore((s) => s.peersStatus);
-  const [transactionMode, setTransactionMode] = useState(false);
   const [frameTextInputFocused, setFrameTextInputFocused] = useState(false);
   const tagsFetchedOnceForMessage = useRef<{ [messageId: string]: boolean }>(
     {}
@@ -285,8 +284,6 @@ const Conversation = ({
       mediaPreviewRef,
       isBlockedPeer,
       onReadyToFocus,
-      transactionMode,
-      setTransactionMode,
       frameTextInputFocused,
       setFrameTextInputFocused,
       tagsFetchedOnceForMessage,
@@ -300,8 +297,6 @@ const Conversation = ({
       mediaPreviewRef,
       isBlockedPeer,
       onReadyToFocus,
-      transactionMode,
-      setTransactionMode,
       frameTextInputFocused,
       setFrameTextInputFocused,
       tagsFetchedOnceForMessage,

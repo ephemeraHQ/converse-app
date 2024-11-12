@@ -2,7 +2,6 @@ import { getV3SpamScore } from "@data/helpers/conversations/spamScore";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useV3ConversationListQuery } from "@queries/useV3ConversationListQuery";
 import { ConversationContainerWithCodecsType } from "@utils/xmtpRN/client";
-import { getMessageContentType } from "@utils/xmtpRN/contentTypes";
 import { useEffect, useState } from "react";
 
 export const useV3RequestItems = () => {
@@ -47,10 +46,8 @@ export const useV3RequestItems = () => {
 
           const spamScore = await getV3SpamScore({
             message: content,
-            contentType:
-              getMessageContentType(lastMessage?.contentTypeId ?? "") ?? "",
+            contentType: lastMessage?.contentTypeId ?? "",
           });
-
           if (spamScore > 1) {
             likelySpam.push(conversation);
           } else {
