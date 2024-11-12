@@ -286,16 +286,17 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
   
     if let group = try! xmtpClient.findGroup(groupId: getGroupIdFromTopic(topic: envelope.contentTopic) ) {
       do {
-        sentryTrackMessage(message: "[NotificationExtension] Syncing Group", extras: [:])
+        sentryAddBreadcrumb(message: "[NotificationExtension] Syncing Group", extras: [:])
         try await group.sync()
-        sentryTrackMessage(message: "[NotificationExtension] Done Syncing Group", extras: [:])
+        sentryAddBreadcrumb(message: "[NotificationExtension] Decoding group message...")
         let envelopeBytes = envelope.message
-        let decodedMessage = try await group.processMessage(envelopeBytes: envelopeBytes)
-        print("[NotificationExtension] Group message decoded!")
+        let message = try await group.processMessage(envelopeBytes: envelopeBytes)
+        let decodedMessage = try message.decode()
+        sentryAddBreadcrumb(message:"[NotificationExtension] Group message decoded!")
         return decodedMessage
       } catch {
         sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
-        print("[NotificationExtension] ERROR WHILE DECODING \(error)")
+        sentryAddBreadcrumb(message: "[NotificationExtension] ERROR WHILE DECODING \(error)")
         return nil
       }
     } else {

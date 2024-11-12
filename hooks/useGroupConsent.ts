@@ -12,10 +12,10 @@ import { useCallback } from "react";
 
 import { useGroupCreator } from "./useGroupCreator";
 
-interface OnConsentOptions {
+type OnConsentOptions = {
   includeCreator?: boolean;
   includeAddedBy?: boolean;
-}
+};
 
 export const useGroupConsent = (
   topic: string,
@@ -23,7 +23,7 @@ export const useGroupConsent = (
 ) => {
   const account = currentAccount();
   const { data: group } = useGroupQuery(account, topic);
-  const { groupCreator } = useGroupCreator(topic);
+  const { data: groupCreator } = useGroupCreator(topic);
   const { data, isLoading, isError } = useGroupConsentQuery(
     account,
     topic,

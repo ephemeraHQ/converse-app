@@ -66,20 +66,22 @@ const protocolConversationToStateConversation = (
   isGroup: false,
 });
 
-const protocolGroupToStateConversation = (
+const protocolGroupToStateConversation = async (
   account: string,
   group: GroupWithCodecsType
-): XmtpConversation => {
+): Promise<XmtpConversation> => {
   // We'll pre-cache some queries since we know
   // this data is up to date - was just queried!
   setGroupQueryData(account, group.topic, group as Group);
   setGroupNameQueryData(account, group.topic, group.name);
   setGroupPhotoQueryData(account, group.topic, group.imageUrlSquare);
+  const members = await group.members();
+  const creatorInboxId = await group.creatorInboxId();
   setGroupMembersQueryData(
     account,
     group.topic,
     entifyWithAddress(
-      group.members,
+      members,
       (member) => member.inboxId,
       // TODO: Multiple addresses support
       (member) => getCleanAddress(member.addresses[0])
@@ -90,11 +92,11 @@ const protocolGroupToStateConversation = (
   let groupCreator: string | undefined;
   let groupAddedBy: string | undefined;
 
-  group.members.forEach((m) => {
+  members.forEach((m) => {
     const firstAddress = getCleanAddress(m.addresses[0]);
     if (firstAddress) {
       groupMembersAddresses.push(firstAddress);
-      if (m.inboxId === group.creatorInboxId) {
+      if (m.inboxId === creatorInboxId) {
         groupCreator = firstAddress;
       }
       if (m.inboxId === groupAddedByInboxId) {
@@ -196,12 +198,14 @@ const handleNewConversation = async (
   setOpenedConversation(client.address, conversation);
   const isGroup = conversation.version === ConversationVersion.GROUP;
   const isDMConversation = !!(conversation as any).peerAddress;
-
+  const members = isGroup
+    ? await (conversation as GroupWithCodecsType).members()
+    : [];
   // Temporary fix to stop receiving messages for groups
   // we are not member of
   const shouldSkip =
     isGroup &&
-    !(conversation as GroupWithCodecsType).members.some(
+    !members.some(
       (m) => m.addresses[0].toLowerCase() === client.address.toLowerCase()
     );
   if (shouldSkip) {
@@ -219,7 +223,7 @@ const handleNewConversation = async (
         ? protocolConversationToStateConversation(
             conversation as ConversationWithCodecsType
           )
-        : protocolGroupToStateConversation(
+        : await protocolGroupToStateConversation(
             client.address,
             conversation as GroupWithCodecsType
           ),
@@ -379,7 +383,7 @@ export const loadConversations = async (
     const knownGroups: GroupWithCodecsType[] = [];
     const updatedGroups: GroupWithCodecsType[] = [];
 
-    groups.forEach((g) => {
+    groups.forEach(async (g) => {
       if (!knownTopicsSet.has(g.topic)) {
         newGroups.push(g);
       } else {
@@ -392,8 +396,9 @@ export const loadConversations = async (
           updatedGroups.push(g);
         } else {
           const currentMembersSet = new Set(existingGroup.groupMembers);
+          const newMembers = await g.members();
           const newMembersSet = new Set(
-            g.members.map((m) => getCleanAddress(m.addresses[0]))
+            newMembers.map((m) => getCleanAddress(m.addresses[0]))
           );
 
           if (
@@ -415,14 +420,24 @@ export const loadConversations = async (
       } sec`
     );
 
-    const conversationsToSave = newConversations.map(
-      protocolConversationToStateConversation
+    const conversationsToSave = await Promise.all(
+      newConversations.map(async (c) => {
+        const conversation = await protocolConversationToStateConversation(c);
+        return conversation;
+      })
     );
-    const groupsToCreate = newGroups.map((g) =>
-      protocolGroupToStateConversation(account, g)
+    const groupsToCreate = await Promise.all(
+      newGroups.map(async (g) => {
+        const group = await protocolGroupToStateConversation(account, g);
+        return group;
+      })
     );
-    const groupsToUpdate = updatedGroups.map((g) =>
-      protocolGroupToStateConversation(account, g)
+
+    const groupsToUpdate = await Promise.all(
+      updatedGroups.map(async (g) => {
+        const group = await protocolGroupToStateConversation(account, g);
+        return group;
+      })
     );
 
     const afterMappedConvos = new Date().getTime();
@@ -680,7 +695,8 @@ export const createGroup = async (
   if (groupDescription) {
     setGroupDescriptionQueryData(account, group.topic, groupDescription);
   }
-  saveMemberInboxIds(account, group.members);
+  const members = await group.members();
+  saveMemberInboxIds(account, members);
   await handleNewConversation(client, group);
   return group.topic;
 };
@@ -695,10 +711,10 @@ export const refreshGroup = async (account: string, topic: string) => {
   await group.sync();
   saveConversations(
     client.address,
-    [protocolGroupToStateConversation(account, group)],
+    [await protocolGroupToStateConversation(account, group)],
     true
   );
-  const updatedMembers = await group.membersList();
+  const updatedMembers = await group.members();
   saveMemberInboxIds(account, updatedMembers);
 };
 

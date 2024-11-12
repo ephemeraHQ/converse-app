@@ -10,6 +10,7 @@ import { Client } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
 
 import { isClientInstallationValid } from "./client";
+import { ethersSignerToXmtpSigner } from "./signer";
 import config from "../../config";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
@@ -42,7 +43,7 @@ export const getXmtpBase64KeyFromSigner = async (
 
   logger.debug("Instantiating client from signer");
 
-  const client = await Client.create(signer, {
+  const client = await Client.create(ethersSignerToXmtpSigner(signer), {
     ...options,
     preCreateIdentityCallback,
     preEnableIdentityCallback,
