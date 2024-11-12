@@ -1,4 +1,3 @@
-import { Screen } from "@components/Screen/ScreenComp/Screen";
 import { showSnackbar } from "@components/Snackbar/Snackbar.service";
 import { Button } from "@design-system/Button/Button";
 import { VStack } from "@design-system/VStack";
@@ -13,8 +12,8 @@ export const SnackbarExample = memo(function SnackbarExample() {
   const windowWidth = Dimensions.get("window").width;
 
   return (
-    <Screen safeAreaEdges={["bottom", "top"]}>
-      <VStack style={{ padding: theme.spacing.md, rowGap: theme.spacing.md }}>
+    <VStack style={{ rowGap: theme.spacing.lg }}>
+      <VStack style={{ rowGap: theme.spacing.md }}>
         <Button
           text="Show Basic"
           onPress={() => showSnackbar({ message: "This is a basic snackbar" })}
@@ -83,10 +82,10 @@ export const SnackbarExample = memo(function SnackbarExample() {
 
       <Image
         source={{
-          uri: `https://picsum.photos/500/500`,
+          uri: `https://picsum.photos/600/600`,
         }}
-        style={{ width: 500, height: 500 }}
+        style={{ width: windowWidth - theme.spacing.lg * 2, height: 500 }}
       />
-    </Screen>
+    </VStack>
   );
 });

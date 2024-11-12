@@ -29,6 +29,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
 
+import { Snackbars } from "@components/Snackbar/Snackbars";
 import { xmtpCron, xmtpEngine } from "./components/XmtpEngine";
 import config from "./config";
 import {
@@ -47,7 +48,6 @@ import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
 import "./utils/splash/splash";
-import { Snackbars } from "@components/Snackbar/Snackbars";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy

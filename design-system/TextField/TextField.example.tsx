@@ -1,20 +1,20 @@
 import { memo } from "react";
-
 import { Center } from "../Center";
 import { IconButton } from "../IconButton/IconButton";
 import { Text } from "../Text/Text";
 import { VStack } from "../VStack";
 import { TextField } from "./TextField";
 import { TextFieldSimple } from "./TextFieldSimple";
+import { useAppTheme } from "@theme/useAppTheme";
 
 export const TextFieldExample = memo(function TextFieldExample() {
+  const { theme } = useAppTheme();
+
   return (
     <VStack
       // {...debugBorder()}
       style={{
-        paddingTop: 100,
-        paddingHorizontal: 24,
-        rowGap: 24,
+        rowGap: theme.spacing.xl,
       }}
     >
       <TextField

@@ -1,4 +1,5 @@
 import { ColorValue, StyleProp, ViewStyle } from "react-native";
+import { RequireExactlyOne } from "../../types/general";
 
 export type IIconName =
   | "xmark"
@@ -59,8 +60,16 @@ export type IIconName =
  * @example
  * <Icon icon="search" size={24} color="blue" />
  */
-export type IIconProps = {
-  icon?: IIconName;
+export type IIconProps = RequireExactlyOne<{
+  icon: IIconName;
+  /**
+   * @deprecated Use icon instead
+   * @example
+   * Before: <Icon picto="search" />
+   * After: <Icon icon="search" />
+   */
+  picto: IIconName;
+}> & {
   style?: StyleProp<ViewStyle>;
   color?: ColorValue;
   /**
@@ -75,11 +84,4 @@ export type IIconProps = {
    * @see Use different icon names for different weights instead.
    */
   weight?: string;
-  /**
-   * @deprecated Use icon instead
-   * @example
-   * Before: <Icon picto="search" />
-   * After: <Icon icon="search" />
-   */
-  picto?: IIconName;
 };
