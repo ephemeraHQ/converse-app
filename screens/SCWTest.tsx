@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { thirdwebClient } from "@utils/thirdweb";
+import { thirdwebClient, thirdwebWallets } from "@utils/thirdweb";
 import React, { useCallback } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { prepareTransaction } from "thirdweb";
@@ -14,7 +14,6 @@ import {
   useSetActiveWallet,
   useSwitchActiveWalletChain,
 } from "thirdweb/react";
-import { createWallet } from "thirdweb/wallets";
 
 import config from "../config";
 
@@ -40,15 +39,7 @@ const MainScreen: React.FC = () => {
   const handleButtonPress = useCallback(() => {
     thirdwebConnect(async () => {
       // instantiate wallet
-      const coinbaseWallet = createWallet("com.coinbase.wallet", {
-        appMetadata: config.walletConnectConfig.appMetadata,
-        mobileConfig: {
-          callbackURL: `converse-dev://mobile-wallet-protocol`,
-        },
-        walletConfig: {
-          options: "smartWalletOnly",
-        },
-      });
+      const coinbaseWallet = thirdwebWallets["Coinbase Smart Wallet"];
       let connected = false;
       try {
         console.log("auto-connecting");

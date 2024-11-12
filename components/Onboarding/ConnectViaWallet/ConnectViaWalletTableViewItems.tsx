@@ -9,22 +9,19 @@ import {
   useConnect as useThirdwebConnect,
   useActiveWallet as useThirdwebActiveWallet,
 } from "thirdweb/react";
-import { createWallet } from "thirdweb/wallets";
 
-import {
-  InstalledWallet,
-  useInstalledWallets,
-} from "./ConnectViaWalletSupportedWallets";
+import { useInstalledWallets } from "./ConnectViaWalletSupportedWallets";
 import config from "../../../config";
 import { getAccountsList } from "../../../data/store/accountsStore";
 import { useAppStateHandlers } from "../../../hooks/useAppStateHandlers";
 import { translate } from "../../../i18n";
 import { getEthOSSigner } from "../../../utils/ethos";
 import logger from "../../../utils/logger";
-import { thirdwebClient } from "../../../utils/thirdweb";
+import { thirdwebClient, thirdwebWallets } from "../../../utils/thirdweb";
 import TableView, { TableViewItemType } from "../../TableView/TableView";
 import { TableViewEmoji, TableViewImage } from "../../TableView/TableViewImage";
 import { RightViewChevron } from "../../TableView/TableViewRightChevron";
+import { InstalledWallet, ISupportedWalletName } from "@utils/evm/wallets";
 
 export function getConnectViaWalletTableViewPrivateKeyItem(
   args: Partial<TableViewItemType>
@@ -144,30 +141,19 @@ export const InstalledWalletsTableView = memo(
                   k.startsWith("-Coinbase Smart Wallet:")
                 );
                 await AsyncStorage.multiRemove(wcKeys);
-                const wallet = await thirdwebConnect(async () => {
-                  const coinbaseWallet = createWallet("com.coinbase.wallet", {
-                    appMetadata: config.walletConnectConfig.appMetadata,
-                    // Important to match the chain id of our ethersSignerToXmtpSigner when using SCWs
-                    chains: [ethereum],
-                    mobileConfig: {
-                      callbackURL: isSCW
-                        ? `converse-dev://mobile-wallet-protocol`
-                        : `https://${config.websiteDomain}/coinbase`,
-                    },
-                    walletConfig: {
-                      options: isSCW ? "smartWalletOnly" : "eoaOnly",
-                    },
-                  });
+                const thirdwebWallet = await thirdwebConnect(async () => {
+                  const coinbaseWallet =
+                    thirdwebWallets[wallet.name as ISupportedWalletName];
                   await coinbaseWallet.connect({ client: thirdwebClient });
                   setThirdwebActiveWallet(coinbaseWallet);
                   return coinbaseWallet;
                 });
 
-                if (!wallet) {
+                if (!thirdwebWallet) {
                   throw new Error("No coinbase wallet");
                 }
 
-                const account = wallet.getAccount();
+                const account = thirdwebWallet.getAccount();
 
                 if (!account) {
                   throw new Error("No coinbase account found");
@@ -185,7 +171,8 @@ export const InstalledWalletsTableView = memo(
               }
               // Generic flow for all other wallets
               else if (wallet.thirdwebId) {
-                const walletConnectWallet = createWallet(wallet.thirdwebId);
+                const walletConnectWallet =
+                  thirdwebWallets[wallet.name as ISupportedWalletName];
                 const account = await walletConnectWallet.connect({
                   client: thirdwebClient,
                   walletConnect: config.walletConnectConfig,

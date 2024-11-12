@@ -2,7 +2,7 @@ import { useInstalledWallets } from "@components/Onboarding/ConnectViaWallet/Con
 import { translate } from "@i18n";
 import logger from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
-import { thirdwebClient } from "@utils/thirdweb";
+import { thirdwebClient, thirdwebWallets } from "@utils/thirdweb";
 import { Signer } from "ethers";
 import { useCallback, useEffect, useMemo } from "react";
 import { Alert } from "react-native";
@@ -18,7 +18,7 @@ import {
   useSetActiveWallet,
   useSwitchActiveWalletChain,
 } from "thirdweb/react";
-import { Account, createWallet } from "thirdweb/wallets";
+import { Account } from "thirdweb/wallets";
 import { useExternalWalletPickerContext } from "../../features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { DEFAULT_SUPPORTED_CHAINS } from "./wallets";
 import config from "../../config";
@@ -183,25 +183,6 @@ export const useAutoConnectExternalWallet = () => {
   // thirdweb external wallet
   useAutoConnect({
     client: thirdwebClient,
-    wallets: [
-      createWallet("com.coinbase.wallet", {
-        appMetadata: config.walletConnectConfig.appMetadata,
-        mobileConfig: {
-          callbackURL: `converse-dev://mobile-wallet-protocol`,
-        },
-        walletConfig: {
-          options: "smartWalletOnly",
-        },
-      }),
-      createWallet("com.coinbase.wallet", {
-        appMetadata: config.walletConnectConfig.appMetadata,
-        mobileConfig: {
-          callbackURL: `https://${config.websiteDomain}/coinbase`,
-        },
-        walletConfig: {
-          options: "eoaOnly",
-        },
-      }),
-    ],
+    wallets: Object.values(thirdwebWallets),
   });
 };
