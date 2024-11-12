@@ -8,7 +8,6 @@ import { base } from "thirdweb/chains";
 import {
   useActiveAccount,
   useActiveWallet,
-  useAutoConnect,
   useConnect,
   useDisconnect,
   useSendTransaction,
@@ -26,10 +25,6 @@ const MainScreen: React.FC = () => {
   const { disconnect: thirdwebDisconnect } = useDisconnect();
   const sendTransaction = useSendTransaction();
   const setActiveWallet = useSetActiveWallet();
-  const { data: autoConnected, isLoading } = useAutoConnect({
-    client: thirdwebClient,
-  });
-  console.log({ autoConnected, isLoading });
   const switchChain = useSwitchActiveWalletChain();
 
   const disconnectWithoutLogin = useCallback(async () => {

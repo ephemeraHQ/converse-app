@@ -18,9 +18,10 @@ import {
   useSetActiveWallet,
   useSwitchActiveWalletChain,
 } from "thirdweb/react";
-import { Account } from "thirdweb/wallets";
+import { Account, createWallet } from "thirdweb/wallets";
 import { useExternalWalletPickerContext } from "../../features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { DEFAULT_SUPPORTED_CHAINS } from "./wallets";
+import config from "../../config";
 
 let signerSingleton: Signer | undefined = undefined;
 let accountSingleton: Account | undefined = undefined;
@@ -182,5 +183,25 @@ export const useAutoConnectExternalWallet = () => {
   // thirdweb external wallet
   useAutoConnect({
     client: thirdwebClient,
+    wallets: [
+      createWallet("com.coinbase.wallet", {
+        appMetadata: config.walletConnectConfig.appMetadata,
+        mobileConfig: {
+          callbackURL: `converse-dev://mobile-wallet-protocol`,
+        },
+        walletConfig: {
+          options: "smartWalletOnly",
+        },
+      }),
+      createWallet("com.coinbase.wallet", {
+        appMetadata: config.walletConnectConfig.appMetadata,
+        mobileConfig: {
+          callbackURL: `https://${config.websiteDomain}/coinbase`,
+        },
+        walletConfig: {
+          options: "eoaOnly",
+        },
+      }),
+    ],
   });
 };
