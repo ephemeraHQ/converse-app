@@ -28,6 +28,8 @@ target 'Converse' do
   config = use_native_modules!
 
   use_frameworks! :linkage => :static
+  $RNFirebaseAsStaticFramework = true
+
   pod 'MMKV', $mmkvVersion, :linkage => :dynamic
   pod 'MMKVCore', $mmkvVersion, :linkage => :dynamic
   pod 'XMTP', $xmtpVersion, :modular_headers => true
