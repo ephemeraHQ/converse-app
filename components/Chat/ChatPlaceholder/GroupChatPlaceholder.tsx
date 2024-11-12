@@ -40,10 +40,10 @@ export function GroupChatPlaceholder({ messagesCount }: Props) {
 
   const styles = useStyles();
   const groupCreatedByUser = useMemo(() => {
-    if (!group || !currentAccount) {
+    if (!group || !currentAccount || !group.addedByInboxId) {
       return false;
     }
-    const creatorInfo = members?.byId[group.creatorInboxId];
+    const creatorInfo = members?.byId[group.addedByInboxId];
 
     return creatorInfo?.addresses.some(
       (a) => a.toLowerCase() === currentAccount.toLowerCase()

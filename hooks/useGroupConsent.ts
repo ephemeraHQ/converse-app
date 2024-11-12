@@ -23,7 +23,7 @@ export const useGroupConsent = (
 ) => {
   const account = currentAccount();
   const { data: group } = useGroupQuery(account, topic);
-  const { groupCreator } = useGroupCreator(topic);
+  const { data: groupCreator } = useGroupCreator(topic);
   const { data, isLoading, isError } = useGroupConsentQuery(
     account,
     topic,
