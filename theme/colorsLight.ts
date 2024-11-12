@@ -42,12 +42,14 @@ export const colorsLight = {
     surface: lightPalette.light,
     sunken: lightPalette.light96,
     raised: lightPalette.light,
+    scrim: lightPalette.scrim,
   },
   text: {
     primary: darkPalette.dark,
     secondary: darkPalette.dark60,
     tertiary: darkPalette.dark30,
     inactive: darkPalette.dark15,
+    caution: darkPalette.red,
     inverted: {
       primary: lightPalette.light,
       secondary: lightPalette.light60,

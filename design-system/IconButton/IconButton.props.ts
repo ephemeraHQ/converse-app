@@ -1,17 +1,16 @@
 // IconButton.props.ts
+import { IIconName } from "@design-system/Icon/Icon.types";
 import {
   PressableProps as RNPressableProps,
   StyleProp,
   ViewStyle,
 } from "react-native";
 
-import { IPicto } from "../../components/Picto/Picto";
-
-export type IIconButtonVariant = "outline" | "fill" | "ghost";
+export type IIconButtonVariant = "outline" | "subtle" | "fill" | "ghost";
 export type IIconButtonSize = "md" | "lg";
 export type IIconButtonAction = "primary" | "danger";
 
-export interface IIconButtonProps extends RNPressableProps {
+export type IIconButtonProps = {
   /**
    * The icon component to render.
    * If provided, it will be rendered inside the button.
@@ -22,7 +21,7 @@ export interface IIconButtonProps extends RNPressableProps {
    * The name of the icon to render (if using an icon library).
    * This is useful if you're using a predefined set of icons.
    */
-  iconName?: IPicto;
+  iconName?: IIconName;
 
   /**
    * The variant of the button.
@@ -61,4 +60,9 @@ export interface IIconButtonProps extends RNPressableProps {
    * Whether the button is disabled.
    */
   disabled?: boolean;
-}
+
+  /**
+   * Haptic or not
+   */
+  withHaptics?: boolean;
+} & RNPressableProps;

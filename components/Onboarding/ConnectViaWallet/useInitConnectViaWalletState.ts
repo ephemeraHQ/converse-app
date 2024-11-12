@@ -10,12 +10,16 @@ import {
 } from "thirdweb/react";
 
 import { useConnectViaWalletContext } from "./ConnectViaWallet.context";
+import { ensureError } from "../../../utils/error";
 import { thirdwebClient } from "../../../utils/thirdweb";
 import { isOnXmtp } from "../../../utils/xmtpRN/client";
 import { getInboxId } from "../../../utils/xmtpRN/signIn";
 
-// For now let's keep Thirdweb and the hooks because I haven't found a better way to do it.
-// But ideally a lot of this it outside React.
+/**
+ * For now let's keep Thirdweb and the hooks because I haven't found a better way to do it.
+ * But ideally a lot of this it outside React.
+ * This function is for initializing the state of the wallet. V3? XMTP? etc...
+ */
 export function useInitConnectViaWalletState(args: {
   address: string;
   isSCW: boolean;
@@ -34,7 +38,8 @@ export function useInitConnectViaWalletState(args: {
 
   const [thirdwebSigner, setThirdwebSigner] = useState<Signer | undefined>();
 
-  const handlingThirdwebSigner = useRef(false);
+  const isInitializingRef = useRef(false);
+  const hasInitizalizedRef = useRef(false);
 
   useEffect(() => {
     if (!thirdwebAccount) {
@@ -53,7 +58,9 @@ export function useInitConnectViaWalletState(args: {
         account: thirdwebAccount,
       })
       .then(setThirdwebSigner)
-      .catch(onErrorConnecting);
+      .catch((error) => {
+        onErrorConnecting({ error: ensureError(error) });
+      });
   }, [onErrorConnecting, thirdwebAccount]);
 
   useEffect(() => {
@@ -62,8 +69,13 @@ export function useInitConnectViaWalletState(args: {
       return;
     }
 
-    if (handlingThirdwebSigner.current) {
-      logger.debug("[Connect Wallet] Already handling thirdweb signer");
+    if (isInitializingRef.current) {
+      logger.debug("[Connect Wallet] Already initializing wallet");
+      return;
+    }
+
+    if (hasInitizalizedRef.current) {
+      logger.debug("[Connect Wallet] Already initialized wallet");
       return;
     }
 
@@ -71,7 +83,7 @@ export function useInitConnectViaWalletState(args: {
       try {
         logger.debug("[Connect Wallet] Initializing wallet");
 
-        handlingThirdwebSigner.current = true;
+        isInitializingRef.current = true;
 
         setIsInitializing(true);
 
@@ -95,15 +107,24 @@ export function useInitConnectViaWalletState(args: {
           } on XMTP. V3 database ${hasV3 ? "already" : "not"} present`
         );
       } catch (error) {
-        logger.error("Error initializing wallet:", error);
+        logger.error("[Connect Wallet] Error initializing wallet:", error);
+        onErrorConnecting({ error: ensureError(error) });
       } finally {
-        handlingThirdwebSigner.current = false;
+        hasInitizalizedRef.current = true;
+        isInitializingRef.current = false;
         setIsInitializing(false);
       }
     };
 
     initializeWallet();
-  }, [address, setIsInitializing, thirdwebWallet, thirdwebSigner, isSCW]);
+  }, [
+    address,
+    setIsInitializing,
+    thirdwebWallet,
+    thirdwebSigner,
+    isSCW,
+    onErrorConnecting,
+  ]);
 
   return { isInitializing, onXmtp, alreadyV3Db, signer };
 }

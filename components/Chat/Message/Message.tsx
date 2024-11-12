@@ -8,6 +8,7 @@ import {
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import { useAppTheme } from "@theme/useAppTheme";
+import { isFrameMessage } from "@utils/frames";
 import * as Haptics from "expo-haptics";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 import {
@@ -31,7 +32,7 @@ import Animated, {
 import { useShallow } from "zustand/react/shallow";
 
 import ChatMessageActions from "./MessageActions";
-import { ChatMessageReactions } from "./MessageReactions";
+import { ChatMessageReactions } from "./MessageReactions/MessageReactions";
 import MessageStatus from "./MessageStatus";
 import {
   currentAccount,
@@ -128,6 +129,7 @@ const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
     (s) => getProfile(address, s.profiles)?.socials
   );
   const styles = useStyles();
+
   const openProfile = useCallback(() => {
     navigate("Profile", { address: message.senderAddress });
   }, [message.senderAddress]);
@@ -161,19 +163,27 @@ const ChatMessage = ({
     () => getRelativeDate(message.sent),
     [message.sent]
   );
+
   const messageTime = useMemo(
     () => getLocalizedTime(message.sent),
     [message.sent]
   );
   // The content is completely a frame so a larger full width frame will be shown
   const isFrame = useFramesStore(
-    useShallow((s) => !!s.frames[message.content.toLowerCase().trim()])
+    useShallow((s) =>
+      isFrameMessage(
+        isContentType("text", message.contentType),
+        message.content,
+        s.frames
+      )
+    )
   );
 
   // Reanimated shared values for time and date-time animations
   const timeHeight = useSharedValue(0);
   const timeTranslateY = useSharedValue(20);
   const timeOpacity = useSharedValue(0);
+
   const timeAnimatedStyle = useAnimatedStyle(() => ({
     height: timeHeight.value,
     overflow: "hidden",
@@ -183,6 +193,7 @@ const ChatMessage = ({
   }));
 
   const dateTimeDisplay = useSharedValue<"none" | "flex">("none");
+
   const dateTimeAnimatedStyle = useAnimatedStyle(() => ({
     display: dateTimeDisplay.value,
   }));
@@ -190,6 +201,7 @@ const ChatMessage = ({
   // Handle showTime animation
   const showTime = useRef<boolean>(false);
   const showDateTime = useRef<boolean>(false);
+
   const animateTime = useCallback(() => {
     if (isAttachmentMessage()) {
       return;

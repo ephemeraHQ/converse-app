@@ -2,11 +2,12 @@ import { Button } from "@design-system/Button/Button";
 import { translate } from "@i18n";
 import logger from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useRef } from "react";
 import { ActivityIndicator } from "react-native";
 
 import { Center } from "../../../design-system/Center";
 import { VStack } from "../../../design-system/VStack";
+import { useRouter } from "../../../navigation/useNavigation";
 import { spacing } from "../../../theme";
 import { useAppTheme } from "../../../theme/useAppTheme";
 import { PictoTitleSubtitle } from "../../PictoTitleSubtitle";
@@ -34,9 +35,27 @@ export const ConnectViaWallet = memo(function ConnectViaWallet(
 ) {
   const { address, isSCW, onErrorConnecting, onDoneConnecting } = props;
 
+  const finishedConnectingRef = useRef(false);
+
   const disconnect = useConnectViaWalletDisconnect();
 
+  useRouter({
+    onBeforeRemove: () => {
+      // Before we leave, make sure the user completed the flow otherwise disconnect
+      if (!finishedConnectingRef.current) {
+        disconnect({ address });
+      }
+    },
+    onFocus() {
+      // Edge case: User already connected wallet and finished the flow but decided to come back here
+      if (finishedConnectingRef.current) {
+        onErrorConnecting({ error: new Error("User went back") });
+      }
+    },
+  });
+
   const handleDoneConnecting = useCallback(() => {
+    finishedConnectingRef.current = true;
     onDoneConnecting();
   }, [onDoneConnecting]);
 
@@ -72,7 +91,7 @@ const ConnectViaWalletStateWrapper = memo(
       useInitConnectViaWalletState({ address, isSCW });
 
     if (isInitializing) {
-      return <ActivityIndicator />;
+      return <LoadingState />;
     }
 
     if (!signer) {
@@ -137,15 +156,7 @@ const ConnectViaWalletUI = memo(function ConnectViaWalletUI(props: object) {
 
   // Random for now until we have a better solution
   if (loading) {
-    return (
-      <Center
-        style={{
-          paddingTop: theme.spacing["6xl"],
-        }}
-      >
-        <ActivityIndicator />
-      </Center>
-    );
+    return <LoadingState />;
   }
 
   // Determine the content based on the state
@@ -203,5 +214,15 @@ const ConnectViaWalletUI = memo(function ConnectViaWalletUI(props: object) {
         <Terms />
       </VStack>
     </>
+  );
+});
+
+const LoadingState = memo(function LoadingState() {
+  const { theme } = useAppTheme();
+
+  return (
+    <Center style={{ paddingTop: theme.spacing["6xl"] }}>
+      <ActivityIndicator />
+    </Center>
   );
 });

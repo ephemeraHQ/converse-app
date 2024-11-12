@@ -7,7 +7,7 @@ import { Text } from "../Text";
 import { useBottomSheet } from "./BottomSheet.utils";
 
 export const BottomSheetHeader = memo(function BottomSheetHeader(props: {
-  title: string;
+  title?: string;
   hasClose?: boolean;
 }) {
   const { title, hasClose = true } = props;
@@ -22,21 +22,24 @@ export const BottomSheetHeader = memo(function BottomSheetHeader(props: {
 
   return (
     <HStack
-      // {...debugBorder()}
       style={{
+        // ...debugBorder(),
         justifyContent: "space-between",
         alignItems: "center",
         padding: theme.spacing.lg,
       }}
     >
-      <Text preset="bigBold">{title}</Text>
+      {!!title && <Text preset="bigBold">{title}</Text>}
       {hasClose && (
         <IconButton
           action="primary"
-          variant="outline"
+          variant="subtle"
           size="md"
           iconName="xmark"
           onPress={handleClose}
+          style={{
+            borderRadius: theme.borderRadius.md,
+          }}
         />
       )}
     </HStack>

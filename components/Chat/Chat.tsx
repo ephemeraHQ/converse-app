@@ -10,6 +10,7 @@ import {
   ColorSchemeName,
   Dimensions,
   FlatList,
+  Keyboard,
   Platform,
   StyleSheet,
   View,
@@ -31,6 +32,8 @@ import {
 } from "../../data/store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../data/store/chatStore";
 import { useFramesStore } from "../../data/store/framesStore";
+import { ExternalWalletPicker } from "../../features/ExternalWalletPicker/ExternalWalletPicker";
+import { ExternalWalletPickerContextProvider } from "../../features/ExternalWalletPicker/ExternalWalletPicker.context";
 import {
   ReanimatedFlashList,
   ReanimatedFlatList,
@@ -50,6 +53,8 @@ import ConsentPopup from "./ConsentPopup/ConsentPopup";
 import { GroupConsentPopup } from "./ConsentPopup/GroupConsentPopup";
 import ChatInput from "./Input/Input";
 import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
+import { useMessageReactionsStore } from "./Message/MessageReactions/MessageReactionsDrawer/MessageReactions.store";
+import { MessageReactionsDrawer } from "./Message/MessageReactions/MessageReactionsDrawer/MessageReactionsDrawer";
 import TransactionInput from "./Transaction/TransactionInput";
 
 const usePeerSocials = () => {
@@ -98,6 +103,7 @@ const getItemType =
   (framesStore: { [frameUrl: string]: FrameWithType }) =>
   (item: MessageToDisplay) => {
     const fromMeString = item.fromMe ? "fromMe" : "notFromMe";
+
     if (
       isContentType("text", item.contentType) &&
       item.converseMetadata?.frames?.[0]
@@ -130,6 +136,7 @@ const getListArray = (
   lastMessages?: number // Optional parameter to limit the number of messages
 ) => {
   const messageAttachments = useChatStore.getState().messageAttachments;
+
   const isAttachmentLoading = (messageId: string) => {
     const attachment = messageAttachments && messageAttachments[messageId];
     return attachment?.loading;
@@ -174,9 +181,11 @@ const getListArray = (
     if (index > 0) {
       const previousMessageId = filteredMessageIds[index - 1];
       const previousMessage = conversation.messages.get(previousMessageId);
+
       if (previousMessage) {
         message.dateChange =
           differenceInCalendarDays(message.sent, previousMessage.sent) > 0;
+
         if (
           previousMessage.senderAddress.toLowerCase() ===
             message.senderAddress.toLowerCase() &&
@@ -193,10 +202,12 @@ const getListArray = (
     if (index < filteredMessageIds.length - 1) {
       const nextMessageId = filteredMessageIds[index + 1];
       const nextMessage = conversation.messages.get(nextMessageId);
+
       if (nextMessage) {
         // Here we need to check if next message has a date change
         const nextMessageDateChange =
           differenceInCalendarDays(nextMessage.sent, message.sent) > 0;
+
         if (
           nextMessage.senderAddress.toLowerCase() ===
             message.senderAddress.toLowerCase() &&
@@ -239,6 +250,7 @@ const getListArray = (
         isAttachmentMessage(nextMessage?.contentType) &&
         isAttachmentLoading(nextMessageId);
     }
+
     reverseArray.push(message);
   }
 
@@ -283,6 +295,8 @@ export function Chat() {
   const onReadyToFocus = useConversationContext("onReadyToFocus");
   const transactionMode = useConversationContext("transactionMode");
   const frameTextInputFocused = useConversationContext("frameTextInputFocused");
+  const rolledUpReactions =
+    useMessageReactionsStore.getState().rolledUpReactions;
 
   const xmtpAddress = useCurrentAccount() as string;
   const peerSocials = usePeerSocials();
@@ -294,6 +308,7 @@ export function Chat() {
 
   const colorScheme = useColorScheme();
   const styles = useStyles();
+
   const messageAttachmentsLength = useChatStore(
     useShallow((s) => Object.keys(s.messageAttachments).length)
   );
@@ -340,8 +355,17 @@ export function Chat() {
         { translateY: -Math.max(insets.bottom, keyboardHeight.value) },
       ] as any,
     }),
-    [keyboardHeight, tertiary, insets.bottom]
+    [keyboardHeight, insets.bottom]
   );
+
+  useEffect(() => {
+    const unsubscribe = useMessageReactionsStore.subscribe((state) => {
+      if (state.rolledUpReactions) {
+        Keyboard.dismiss();
+      }
+    });
+    return unsubscribe;
+  }, [rolledUpReactions]);
 
   const chatContentStyle = useAnimatedStyle(
     () => ({
@@ -398,9 +422,11 @@ export function Chat() {
   const scrollToMessage = useCallback(
     (data: { messageId?: string; index?: number; animated?: boolean }) => {
       let index = data.index;
+
       if (index === undefined && data.messageId) {
         index = listArray.findIndex((m) => m.id === data.messageId);
       }
+
       if (index !== undefined) {
         messageListRef.current?.scrollToIndex({
           index,
@@ -414,6 +440,7 @@ export function Chat() {
 
   useEffect(() => {
     converseEventEmitter.on("scrollChatToMessage", scrollToMessage);
+
     return () => {
       converseEventEmitter.off("scrollChatToMessage", scrollToMessage);
     };
@@ -426,76 +453,82 @@ export function Chat() {
   }, [onReadyToFocus]);
 
   return (
-    <View
-      style={styles.chatContainer}
-      key={`chat-${
-        conversation?.isGroup ? conversation?.topic : conversation?.peerAddress
-      }-${conversation?.context?.conversationId || ""}-${isBlockedPeer}`}
-    >
-      <Animated.View style={chatContentStyle}>
-        {conversation && listArray.length > 0 && !isBlockedPeer && (
-          <AnimatedListView
-            contentContainerStyle={styles.chat}
-            data={listArray}
-            refreshing={conversation?.pending}
-            extraData={[peerSocials]}
-            renderItem={renderItem}
-            onLayout={handleOnLayout}
-            ref={(r) => {
-              if (r) {
-                messageListRef.current = r;
-              }
-            }}
-            keyboardDismissMode="interactive"
-            automaticallyAdjustContentInsets={false}
-            contentInsetAdjustmentBehavior="never"
-            // Causes a glitch on Android, no sure we need it for now
-            // maintainVisibleContentPosition={{
-            //   minIndexForVisible: 0,
-            //   autoscrollToTopThreshold: 100,
-            // }}
-            estimatedListSize={Dimensions.get("screen")}
-            inverted
-            keyExtractor={keyExtractor}
-            getItemType={getItemType(framesStore)}
-            keyboardShouldPersistTaps="handled"
-            estimatedItemSize={80}
-            // Size glitch on Android
-            showsVerticalScrollIndicator={Platform.OS === "ios"}
-            pointerEvents="auto"
-            ListFooterComponent={ListFooterComponent}
-          />
+    <ExternalWalletPickerContextProvider>
+      <View
+        style={styles.chatContainer}
+        key={`chat-${
+          conversation?.isGroup
+            ? conversation?.topic
+            : conversation?.peerAddress
+        }-${conversation?.context?.conversationId || ""}-${isBlockedPeer}`}
+      >
+        <Animated.View style={chatContentStyle}>
+          {conversation && listArray.length > 0 && !isBlockedPeer && (
+            <AnimatedListView
+              contentContainerStyle={styles.chat}
+              data={listArray}
+              refreshing={conversation?.pending}
+              extraData={[peerSocials]}
+              renderItem={renderItem}
+              onLayout={handleOnLayout}
+              ref={(r) => {
+                if (r) {
+                  messageListRef.current = r;
+                }
+              }}
+              keyboardDismissMode="interactive"
+              automaticallyAdjustContentInsets={false}
+              contentInsetAdjustmentBehavior="never"
+              // Causes a glitch on Android, no sure we need it for now
+              // maintainVisibleContentPosition={{
+              //   minIndexForVisible: 0,
+              //   autoscrollToTopThreshold: 100,
+              // }}
+              estimatedListSize={Dimensions.get("screen")}
+              inverted
+              keyExtractor={keyExtractor}
+              getItemType={getItemType(framesStore)}
+              keyboardShouldPersistTaps="handled"
+              estimatedItemSize={80}
+              // Size glitch on Android
+              showsVerticalScrollIndicator={Platform.OS === "ios"}
+              pointerEvents="auto"
+              ListFooterComponent={ListFooterComponent}
+            />
+          )}
+          {showPlaceholder && !conversation?.isGroup && (
+            <ChatPlaceholder messagesCount={listArray.length} />
+          )}
+          {showPlaceholder && conversation?.isGroup && (
+            <GroupChatPlaceholder messagesCount={listArray.length} />
+          )}
+          {conversation?.isGroup ? <GroupConsentPopup /> : <ConsentPopup />}
+        </Animated.View>
+        {showChatInput && (
+          <>
+            <ReanimatedView
+              style={[
+                textInputStyle,
+                {
+                  display: frameTextInputFocused ? "none" : "flex",
+                },
+              ]}
+            >
+              {!transactionMode && <ChatInput inputHeight={chatInputHeight} />}
+              {transactionMode && <TransactionInput />}
+            </ReanimatedView>
+            <View
+              style={[
+                styles.inputBottomFiller,
+                { height: insets.bottom + DEFAULT_INPUT_HEIGHT },
+              ]}
+            />
+          </>
         )}
-        {showPlaceholder && !conversation?.isGroup && (
-          <ChatPlaceholder messagesCount={listArray.length} />
-        )}
-        {showPlaceholder && conversation?.isGroup && (
-          <GroupChatPlaceholder messagesCount={listArray.length} />
-        )}
-        {conversation?.isGroup ? <GroupConsentPopup /> : <ConsentPopup />}
-      </Animated.View>
-      {showChatInput && (
-        <>
-          <ReanimatedView
-            style={[
-              textInputStyle,
-              {
-                display: frameTextInputFocused ? "none" : "flex",
-              },
-            ]}
-          >
-            {!transactionMode && <ChatInput inputHeight={chatInputHeight} />}
-            {transactionMode && <TransactionInput />}
-          </ReanimatedView>
-          <View
-            style={[
-              styles.inputBottomFiller,
-              { height: insets.bottom + DEFAULT_INPUT_HEIGHT },
-            ]}
-          />
-        </>
-      )}
-    </View>
+      </View>
+      <MessageReactionsDrawer />
+      <ExternalWalletPicker title="Choose a wallet" />
+    </ExternalWalletPickerContextProvider>
   );
 }
 

@@ -1,5 +1,5 @@
+import type { CountryCode } from "libphonenumber-js";
 import {
-  CountryCode,
   getCountryCallingCode,
   parsePhoneNumberFromString,
 } from "libphonenumber-js";

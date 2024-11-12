@@ -14,3 +14,10 @@ export function ensureErrorHandler<T>(
 ): (error: unknown) => T {
   return (error: unknown) => handler(ensureError(error));
 }
+
+export class UserCancelledError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UserCancelledError";
+  }
+}

@@ -1,11 +1,11 @@
-import Picto from "@components/Picto";
+import Picto from "@components/Picto/Picto";
 import { AnimatedText, IAnimatedTextProps } from "@design-system/Text";
 import { AnimatedVStack, IAnimatedVStackProps } from "@design-system/VStack";
 import { spacing } from "@theme/spacing";
 import React, { memo } from "react";
 
 import { useAppTheme } from "../theme/useAppTheme";
-import { IPicto, IPictoProps } from "./Picto/Picto";
+import { IPicto, IPictoProps } from "./Picto/Picto.types";
 
 const SubtitleComponent = memo(function SubtitleComponent({
   style,

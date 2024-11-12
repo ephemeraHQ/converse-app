@@ -1,3 +1,4 @@
+import { AnimatedScrollView } from "@design-system/ScrollView";
 import { backgroundColor } from "@styles/colors";
 import { ReanimatedView } from "@utils/animations";
 import { useKeyboardAnimation } from "@utils/animations/keyboardAnimation";
@@ -37,12 +38,13 @@ const DRAWER_ANIMATION_DURATION = 300;
 const DRAWER_THRESHOLD = 100;
 const TRANSLATION = 1000;
 
-export interface DrawerProps {
+export type DrawerProps = {
   visible: boolean;
   children: React.ReactNode;
   onClose?: () => void;
   style?: ViewStyle;
-}
+  showHandle?: boolean;
+};
 
 export const DrawerContext = React.createContext<{
   closeDrawer: () => void;
@@ -50,16 +52,16 @@ export const DrawerContext = React.createContext<{
   closeDrawer: () => {},
 });
 
-export interface DrawerRef {
+export type DrawerRef = {
   /**
    * Will tell the drawer to close, but still needs
    * @returns
    */
   closeDrawer: (callback: () => void) => void;
-}
+};
 
 export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
-  { children, visible, onClose, style },
+  { children, visible, onClose, style, showHandle },
   ref
 ) {
   const styles = useStyles();
@@ -154,7 +156,7 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
   const { height: keyboardHeight } = useKeyboardAnimation();
   const { bottom } = useSafeAreaInsets();
 
-  const animtedStyle = useAnimatedStyle(() => ({
+  const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translation.value }],
     paddingBottom: Platform.OS === "ios" ? keyboardHeight.value + bottom : 0,
   }));
@@ -172,13 +174,14 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
             <ReanimatedView style={[styles.backdrop, backgroundStyle]} />
           </TouchableWithoutFeedback>
           <GestureDetector gesture={composed}>
-            <ReanimatedView
-              style={[styles.trayContainer, animtedStyle, style]}
+            <AnimatedScrollView
+              style={[styles.trayContainer, animatedStyle, style]}
               layout={LinearTransition.springify()}
+              alwaysBounceVertical={false}
             >
-              <View style={styles.handle} />
+              {showHandle && <View style={styles.handle} />}
               {children}
-            </ReanimatedView>
+            </AnimatedScrollView>
           </GestureDetector>
         </GestureHandlerRootView>
       </Portal>

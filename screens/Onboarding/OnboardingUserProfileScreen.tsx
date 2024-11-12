@@ -20,6 +20,7 @@ import {
   useColorScheme,
 } from "react-native";
 
+import { needToShowNotificationsPermissions } from "./Onboarding.utils";
 import Avatar from "../../components/Avatar";
 import Button from "../../components/Button/Button";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
@@ -34,6 +35,7 @@ import {
   useProfilesStore,
   useSettingsStore,
 } from "../../data/store/accountsStore";
+import { setAuthStatus } from "../../data/store/authStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { VStack } from "../../design-system/VStack";
 import { translate } from "../../i18n";
@@ -76,7 +78,11 @@ export const OnboardingUserProfileScreen = (
   const handleContinue = useCallback(async () => {
     try {
       await createOrUpdateProfile({ profile });
-      navigation.push("OnboardingNotifications");
+      if (needToShowNotificationsPermissions()) {
+        navigation.push("OnboardingNotifications");
+      } else {
+        setAuthStatus("signedIn");
+      }
     } catch (error) {
       sentryTrackError(error);
     }

@@ -6,11 +6,16 @@ import { spacing } from "@theme/spacing";
 import { Wallet } from "ethers";
 import { useCallback, useState } from "react";
 
+import {
+  isMissingConverseProfile,
+  needToShowNotificationsPermissions,
+} from "./Onboarding.utils";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { Terms } from "../../components/Onboarding/Terms";
 import { initXmtpClient } from "../../components/Onboarding/init-xmtp-client";
+import { setAuthStatus } from "../../data/store/authStore";
 import { Text } from "../../design-system/Text/Text";
 import { VStack } from "../../design-system/VStack";
 import { useRouter } from "../../navigation/useNavigation";
@@ -33,7 +38,13 @@ export function OnboardingEphemeraScreen(
         address: await signer.getAddress(),
         isEphemeral: true,
       });
-      router.navigate("OnboardingUserProfile");
+      if (isMissingConverseProfile()) {
+        router.navigate("OnboardingUserProfile");
+      } else if (needToShowNotificationsPermissions()) {
+        router.navigate("OnboardingNotifications");
+      } else {
+        setAuthStatus("signedIn");
+      }
     } catch (error) {
       sentryTrackError(error);
     } finally {

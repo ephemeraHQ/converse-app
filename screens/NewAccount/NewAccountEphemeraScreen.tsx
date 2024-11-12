@@ -16,6 +16,7 @@ import { VStack } from "../../design-system/VStack";
 import { useRouter } from "../../navigation/useNavigation";
 import { sentryTrackError } from "../../utils/sentry";
 import { NavigationParamList } from "../Navigation/Navigation";
+import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
 
 export function NewAccountEphemeraScreen(
   props: NativeStackScreenProps<NavigationParamList, "NewAccountEphemera">
@@ -33,7 +34,11 @@ export function NewAccountEphemeraScreen(
         address: await signer.getAddress(),
         isEphemeral: true,
       });
-      router.navigate("NewAccountUserProfile");
+      if (isMissingConverseProfile()) {
+        router.navigate("NewAccountUserProfile");
+      } else {
+        router.navigate("Chats");
+      }
     } catch (error) {
       sentryTrackError(error);
     } finally {

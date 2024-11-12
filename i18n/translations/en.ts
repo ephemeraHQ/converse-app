@@ -63,7 +63,7 @@ export const en = {
   privateKeyConnect: {
     title: "Connect via key",
     subtitle:
-      "Enter the private key for the address you are connecting.\n\nYour private key will only be stored locally in {{storage}}.",
+      "Enter the private key for the address you are connecting.\n\nYour private key is not stored.",
     storage: {
       ios: "your iPhone's Secure Enclave",
       android: "the Android Keystore system",
@@ -169,6 +169,7 @@ export const en = {
   restore_and_unblock_inviter: "Restore and unblock inviter",
   unblock_and_restore: "Unblock and restore",
   cancel: "Cancel",
+  back: "Back",
   view_only: "View only",
   view_and_restore: "View and Restore",
   view_removed_group_chat: "View removed group chat?",
@@ -344,6 +345,30 @@ export const en = {
     "Share your feedback and ideas with the Converse team and other alpha testers.",
   joinAlphaGroup: "Join Converse VIP Alpha Chat",
   linkCopied: "Link copied",
+
+  // Transactional frames
+  transactionalFrameConnectWallet:
+    "Connect to a wallet app to trigger a transaction",
+  transaction_failure: "Transaction failed",
+  transaction_pending: "Confirm in {{wallet}}",
+  transaction_triggering: "Opening {{wallet}}...",
+  transaction_triggered: "Your transaction is being executed...",
+  transaction_success: "Done!",
+  transaction_switch_chain: "Switch Chain to {{chainName}} in {{wallet}}",
+  transaction_wallet: "Wallet",
+
+  // Transaction Simulation
+  simulation_pending: "Safely Simulating this Transaction",
+  simulation_failure:
+    "We were unable to simulate this transaction. You may still trigger it in your wallet.",
+  simulation_will_revert:
+    "Simulation shows that this transaction will revert. You may still try to trigger it in your wallet.",
+  simulation_caution: "Caution",
+  transaction_asset_change_type_approve: "Approve",
+  transaction_asset_change_type_transfer: "Transfer",
+  transaction_asset_change_to: "To",
+  external_wallet_chain_not_supported:
+    "This chain is not supported by your wallet",
 
   // New Conversation
   cannot_be_added_to_group_yet:

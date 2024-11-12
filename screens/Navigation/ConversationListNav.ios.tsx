@@ -125,7 +125,6 @@ export default function ConversationListNav() {
         headerRight: () => (
           <View style={styles.headerRightContainer}>
             <Button
-              title=""
               variant="text"
               picto="qrcode"
               onPress={() => navigate("ShareProfile")}

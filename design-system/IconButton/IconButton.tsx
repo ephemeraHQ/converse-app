@@ -1,6 +1,11 @@
 // IconButton.tsx
 import React, { useCallback } from "react";
-import { PressableStateCallbackType, StyleProp, ViewStyle } from "react-native";
+import {
+  GestureResponderEvent,
+  PressableStateCallbackType,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
 
 import { useAppTheme } from "../../theme/useAppTheme";
 import { Icon } from "../Icon/Icon";
@@ -11,6 +16,7 @@ import {
   getIconProps,
   getIconStyle,
 } from "./IconButton.styles";
+import { Haptics } from "@utils/haptics";
 
 export function IconButton(props: IIconButtonProps) {
   const {
@@ -23,6 +29,8 @@ export function IconButton(props: IIconButtonProps) {
     pressedStyle: pressedStyleOverride,
     disabledStyle: disabledStyleOverride,
     disabled,
+    withHaptics = true,
+    onPress,
     ...rest
   } = props;
 
@@ -70,6 +78,7 @@ export function IconButton(props: IIconButtonProps) {
   );
 
   // For now until we fix Icon
+
   const iconProps = useCallback(
     ({ pressed }: PressableStateCallbackType) =>
       themed(
@@ -84,12 +93,23 @@ export function IconButton(props: IIconButtonProps) {
     [themed, variant, size, action, disabled]
   );
 
+  const handlePress = useCallback(
+    (e: GestureResponderEvent) => {
+      if (withHaptics) {
+        Haptics.softImpactAsync();
+      }
+      onPress?.(e);
+    },
+    [withHaptics, onPress]
+  );
+
   return (
     <Pressable
       style={viewStyle}
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
+      onPress={handlePress}
       {...rest}
     >
       {({ pressed }) => {

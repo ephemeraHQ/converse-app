@@ -54,6 +54,13 @@ jest.mock("../data/store/profilesStore", () => ({
   ProfilesStoreType: jest.fn(),
 }));
 
+jest.mock(
+  "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets",
+  () => ({
+    DEFAULT_SUPPORTED_CHAINS: [],
+  })
+);
+
 jest
   .spyOn(profileModule, "getPreferredName")
   .mockImplementation((socials, address) => address);

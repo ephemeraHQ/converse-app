@@ -1,9 +1,14 @@
-import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { memo, useCallback, useRef } from "react";
+import logger from "@utils/logger";
+import { memo, useCallback } from "react";
 
+import {
+  isMissingConverseProfile,
+  needToShowNotificationsPermissions,
+} from "./Onboarding.utils";
 import { ConnectViaWallet } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWallet";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
+import { setAuthStatus } from "../../data/store/authStore";
 import { useRouter } from "../../navigation/useNavigation";
 import { NavigationParamList } from "../Navigation/Navigation";
 
@@ -17,25 +22,19 @@ export const OnboardingConnectWalletScreen = memo(
     const { address, isSCW } = props.route.params;
     const router = useRouter();
 
-    const finishedConnecting = useRef(false);
-
-    useFocusEffect(
-      useCallback(() => {
-        // User already connected wallet but decided to come back here, so we need to go back to get started screen
-        if (finishedConnecting.current) {
-          router.goBack();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [])
-    );
-
     const handleDoneConnecting = useCallback(() => {
-      router.navigate("OnboardingUserProfile");
-      finishedConnecting.current = true;
+      if (isMissingConverseProfile()) {
+        router.navigate("OnboardingUserProfile");
+      } else if (needToShowNotificationsPermissions()) {
+        router.navigate("OnboardingNotifications");
+      } else {
+        setAuthStatus("signedIn");
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleErrorConnecting = useCallback((arg: { error: Error }) => {
+      logger.debug("[Onboarding] Error connecting wallet", arg.error);
       router.goBack();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

@@ -4,8 +4,7 @@ import { logoutAccount } from "@utils/logout";
 import { useCallback } from "react";
 import { useActiveWallet as useThirdwebActiveWallet } from "thirdweb/react";
 
-// Keep as a hook for now because we need to use thirdweb hooks
-// Didn't find ways to manage active wallet outside React
+// Notes: Keep as a hook for now because we need to use thirdweb hooks. Didn't find ways to manage active wallet outside React
 export function useConnectViaWalletDisconnect() {
   const thirdwebWallet = useThirdwebActiveWallet();
 
@@ -32,7 +31,7 @@ export function useConnectViaWalletDisconnect() {
 
       logger.debug("[Connect Wallet] Disconnected");
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [thirdwebWallet]
   );
 }
