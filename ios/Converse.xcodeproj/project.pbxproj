@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		11C4BAB72CE3B75400915C95 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11C4BAB62CE3B75400915C95 /* GoogleService-Info.plist */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
@@ -62,6 +63,7 @@
 
 /* Begin PBXFileReference section */
 		000A3CED54C850EE71144470 /* Pods-Converse.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Converse.debug.xcconfig"; path = "Target Support Files/Pods-Converse/Pods-Converse.debug.xcconfig"; sourceTree = "<group>"; };
+		11C4BAB62CE3B75400915C95 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Converse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Converse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Converse/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = Converse/AppDelegate.mm; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				11C4BAB62CE3B75400915C95 /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* Converse */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				4C65044B295C7C1F00C5A40F /* ConverseNotificationExtension */,
@@ -342,6 +345,7 @@
 			files = (
 				4CFB3F322BCE878300A47FFE /* PrivacyInfo.xcprivacy in Resources */,
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
+				11C4BAB72CE3B75400915C95 /* GoogleService-Info.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 			);
