@@ -1,4 +1,10 @@
-import React, { forwardRef, Ref, useImperativeHandle, useRef } from "react";
+import React, {
+  forwardRef,
+  Ref,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+} from "react";
 import { TextInput, TextStyle, ViewStyle } from "react-native";
 
 import { translate } from "@i18n";
