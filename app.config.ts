@@ -33,9 +33,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   version: appBuildNumbers.expo.version,
   assetBundlePatterns: ["**/*"],
+  plugins: [
+    "@react-native-firebase/app-check",
+    ["expo-build-properties", { ios: { useFrameworks: "static" } }],
+  ],
   ios: {
     supportsTablet: true,
     buildNumber: appBuildNumbers.expo.ios.buildNumber,
+    googleServicesFile: "./GoogleService-Info.plist",
     config: {
       usesNonExemptEncryption: false,
     },
@@ -46,6 +51,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#FFFFFF",
     },
     versionCode: appBuildNumbers.expo.android.versionCode,
+    googleServicesFile: "./google-services.json",
   },
   web: {
     favicon: "./assets/favicon.png",
