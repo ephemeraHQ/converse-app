@@ -168,7 +168,7 @@
     "react-native-localize": "^3.0.2",
     "react-native-logs": "^5.1.0",
     "react-native-mmkv": "^2.12.2",
-    "react-native-otp-entry": "^1.2.0",
+    "react-native-otp-entry": "^1.7.3",
     "react-native-paper": "^5.10.6",
     "react-native-parsed-text": "^0.0.22",
     "react-native-passkey": "^2.1.1",

@@ -19326,10 +19326,10 @@ react-native-mmkv@^2.12.2:
   resolved "https://registry.yarnpkg.com/react-native-mmkv/-/react-native-mmkv-2.12.2.tgz#4bba0f5f04e2cf222494cce3a9794ba6a4894dee"
   integrity sha512-6058Aq0p57chPrUutLGe9fYoiDVDNMU2PKV+lLFUJ3GhoHvUrLdsS1PDSCLr00yqzL4WJQ7TTzH+V8cpyrNcfg==
 
-react-native-otp-entry@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/react-native-otp-entry/-/react-native-otp-entry-1.2.0.tgz#8c2c972e56fa4b78ff743b08292d3650a4c5592b"
-  integrity sha512-jH0iHNths34bOPvQnflxhqtMd+dyuucI2u7UVcAOvqoynVjrkamF7QpGFnEWV+d3VHTZmwsh1VPMKwIk8rEMSg==
+react-native-otp-entry@^1.7.3:
+  version "1.7.3"
+  resolved "https://registry.yarnpkg.com/react-native-otp-entry/-/react-native-otp-entry-1.7.3.tgz#16bc161eb9f30ab60840973fdaad629cb260e610"
+  integrity sha512-BN/oEpNMfA0cnw9tB9Oq6PZZQztOiq1Ow/M+rAFd0Nll9aO1gwfCwymgIGI89/+63FkmMbv39LcgsfkZNAYzWw==
 
 react-native-paper@^5.10.6:
   version "5.10.6"
