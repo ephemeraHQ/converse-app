@@ -1,11 +1,43 @@
 {
   "expo": {
-    "version": "2.0.8",
+    "version": "3.0.0",
     "ios": {
-      "buildNumber": "29"
+      "buildNumber": "29",
+      "supportsTablet": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
-      "versionCode": 226
-    }
+      "versionCode": 226,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "slug": "converse",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": ["**/*"],
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/49a65fae-3895-4487-8e8a-5bd8bee3a401"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "49a65fae-3895-4487-8e8a-5bd8bee3a401"
+      }
+    },
+    "owner": "converse",
+    "jsEngine": "hermes"
   }
 }
