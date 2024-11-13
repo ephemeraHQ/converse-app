@@ -1,4 +1,5 @@
 import { DEFAULT_SUPPORTED_CHAINS } from "@utils/evm/wallets";
+import { XmtpEnv } from "@xmtp/xmtp-js";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { base, baseSepolia } from "wagmi/chains";
@@ -55,7 +56,7 @@ const ENV = {
   dev: {
     ...defaultConfig,
     env: "dev",
-    xmtpEnv: process.env.EXPO_PUBLIC_DEV_XMTP_ENV || "dev",
+    xmtpEnv: (process.env.EXPO_PUBLIC_DEV_XMTP_ENV || "dev") as XmtpEnv,
     apiURI: process.env.EXPO_PUBLIC_DEV_API_URI || "",
     debugMenu: true,
     bundleId: "com.converse.dev",
@@ -120,7 +121,7 @@ const ENV = {
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
   },
-};
+} as const;
 
 const getConfig = () => {
   if (__DEV__) {
