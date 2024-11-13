@@ -2,7 +2,7 @@ import Avatar from "@components/Avatar";
 import { ChatDumb } from "@components/Chat/ChatDumb";
 import { useDebugEnabled } from "@components/DebugButton";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useProfilesSocials } from "@hooks/useProfilesSocials";
 import { useGroupMembersConversationScreenQuery } from "@queries/useGroupMembersQuery";
 import { useGroupMessages } from "@queries/useGroupMessages";
@@ -40,6 +40,11 @@ import { ConversationContext } from "@utils/conversation";
 import { TextInputWithValue } from "@utils/str";
 import { MediaPreview } from "@data/store/chatStore";
 import { V3Message } from "@components/Chat/Message/V3Message";
+import { navigate } from "@utils/navigation";
+import {
+  getDraftMessage,
+  setDraftMessage,
+} from "../../features/conversations/utils/textDrafts";
 
 type UseDataProps = {
   topic: string;
@@ -53,7 +58,10 @@ const useData = ({ topic }: UseDataProps) => {
     isRefetching,
   } = useGroupConversationScreenQuery(currentAccount, topic!);
 
-  const { data: messages } = useGroupMessages(currentAccount, topic!);
+  const { data: messages, isLoading: messagesLoading } = useGroupMessages(
+    currentAccount,
+    topic!
+  );
   const { data: groupName, isLoading: groupNameLoading } = useGroupNameQuery(
     currentAccount,
     topic!
@@ -67,8 +75,12 @@ const useData = ({ topic }: UseDataProps) => {
 
   useEffect(() => {
     const checkActive = async () => {
+      if (!group) return;
       const isActive = await group?.isActive();
       // If not active leave the screen
+      if (!isActive) {
+        navigate("Chats");
+      }
     };
     checkActive();
   }, [group]);
@@ -113,6 +125,7 @@ const useData = ({ topic }: UseDataProps) => {
   return {
     group,
     messages,
+    messagesLoading,
     groupName,
     groupNameLoading,
     groupPhoto,
@@ -208,6 +221,7 @@ export const V3Conversation = ({
   const {
     group,
     messages,
+    messagesLoading,
     groupName,
     groupPhoto,
     groupPhotoLoading,
@@ -216,6 +230,7 @@ export const V3Conversation = ({
     isRefetching,
     debugEnabled,
     memberData,
+    isLoading,
   } = useData({
     topic,
   });
@@ -245,7 +260,9 @@ export const V3Conversation = ({
     [currentAccount, topic]
   );
 
-  const showPlaceholder = (messages?.ids.length ?? 0) === 0 || !group;
+  const showPlaceholder =
+    ((messages?.ids.length ?? 0) === 0 && !messagesLoading) ||
+    (!group && !isLoading);
   const displayList = !showPlaceholder;
 
   const avatarComponent = useMemo(() => {
@@ -327,13 +344,36 @@ export const V3Conversation = ({
     [group]
   );
 
-  const placeholderComponent = useMemo(() => {
-    return <GroupChatPlaceholder messagesCount={messages?.ids.length ?? 0} />;
-  }, [messages?.ids.length]);
+  const onLeaveScreen = useCallback(() => {
+    useChatStore.getState().setOpenedConversationTopic(null);
+    setDraftMessage(topic, textInputRef.current?.currentValue ?? "");
+  }, [topic]);
+
+  useEffect(() => {
+    const unsubscribeBeforeRemove = navigation.addListener(
+      "beforeRemove",
+      onLeaveScreen
+    );
+
+    return () => {
+      unsubscribeBeforeRemove();
+    };
+  }, [navigation, onLeaveScreen]);
+
+  const placeholderComponent = useMemo(
+    () => (
+      <GroupChatPlaceholder
+        messagesCount={messages?.ids.length ?? 0}
+        onSend={onSend}
+        group={group}
+      />
+    ),
+    [group, messages?.ids.length, onSend]
+  );
 
   const messageToPrefill = useMemo(
-    () => route.params?.text ?? "",
-    [route.params?.text]
+    () => route.params?.text ?? getDraftMessage(topic) ?? "",
+    [route.params?.text, topic]
   );
 
   const textInputRef = useRef<TextInputWithValue>();
@@ -353,8 +393,6 @@ export const V3Conversation = ({
       mediaPreviewRef,
       isBlockedPeer: false,
       onReadyToFocus,
-      transactionMode: false,
-      setTransactionMode: () => {},
       frameTextInputFocused,
       setFrameTextInputFocused,
       tagsFetchedOnceForMessage,

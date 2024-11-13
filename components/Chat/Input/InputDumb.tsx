@@ -83,7 +83,6 @@ interface ChatInputProps {
 
 export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
   const inputRef = useConversationContext("inputRef");
-  const transactionMode = useConversationContext("transactionMode");
   const messageToPrefill = useConversationContext("messageToPrefill");
   const mediaPreviewRef = useConversationContext("mediaPreviewRef");
   const mediaPreviewToPrefill = useConversationContext("mediaPreviewToPrefill");
@@ -115,12 +114,6 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mediaPreviewToPrefill]);
-
-  useEffect(() => {
-    if (transactionMode) {
-      setInputValue("");
-    }
-  }, [transactionMode]);
 
   useEffect(() => {
     if (inputRef.current) {

@@ -391,5 +391,17 @@ export const en = {
     prepared: "Sending",
     seen: "Read",
   },
+
+  group_placeholder: {
+    placeholder_text:
+      "This is the beginning of your conversation in {{groupName}}",
+  },
+
+  removed_chats: {
+    removed_chats: "Removed Chats",
+    eyes: "👀",
+    no_removed_chats:
+      "We could not find any removed group chat in your existing conversations.",
+  },
 };
 export type Translations = typeof en;

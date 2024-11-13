@@ -9,24 +9,15 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import { AvatarSizes, PictoSizes } from "@styles/sizes";
+import { AvatarSizes } from "@styles/sizes";
 import { useConversationListContext } from "@utils/conversationList";
 import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { memo, useCallback, useMemo, useRef, useState } from "react";
 import {
   ColorSchemeName,
   LayoutChangeEvent,
   Platform,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
@@ -39,7 +30,6 @@ import {
 import Avatar from "./Avatar";
 import { ConversationContextMenu } from "./ConversationContextMenu";
 import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
-import GroupAvatar from "./GroupAvatar";
 import {
   currentAccount,
   useChatStore,
@@ -49,7 +39,6 @@ import { saveTopicsData } from "../utils/api";
 import { getMinimalDate } from "../utils/date";
 import { converseEventEmitter } from "../utils/events";
 import { navigate } from "../utils/navigation";
-import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
 
@@ -98,10 +87,6 @@ const ConversationListItem = memo(function ConversationListItem({
     useSelect(["setTopicsData", "setPinnedConversations"])
   );
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
-  const [selected, setSelected] = useState(false);
-  const resetSelected = useCallback(() => {
-    setSelected(false);
-  }, []);
   const hasImagePreview = lastMessageImageUrl && lastMessagePreview;
   const showError = lastMessageFromMe && lastMessageStatus === "error";
   const routeName = useConversationListContext("routeName");
@@ -169,7 +154,6 @@ const ConversationListItem = memo(function ConversationListItem({
     if (isGroupConversation && isBlockedChatView) {
       const userAction = await getUserAction();
       if (userAction === null) {
-        setSelected(false);
         return; // User canceled, stop further execution
       }
       userAction();
@@ -225,24 +209,8 @@ const ConversationListItem = memo(function ConversationListItem({
     runOnJS(showContextMenu)();
   }, [triggerHapticFeedback, showContextMenu]);
 
-  useEffect(() => {
-    const navRef = navigationRef.current;
-    navRef?.addListener("transitionEnd", resetSelected);
-    return () => {
-      navRef?.removeListener("transitionEnd", resetSelected);
-    };
-  }, [navigationRef, resetSelected]);
-
   const avatarComponent = useMemo(() => {
-    return isGroupConversation ? (
-      <GroupAvatar
-        size={AvatarSizes.conversationListItem}
-        style={styles.avatarWrapper}
-        uri={conversationPeerAvatar}
-        topic={conversationTopic}
-        onConversationListScreen
-      />
-    ) : (
+    return (
       <Avatar
         size={AvatarSizes.conversationListItem}
         style={styles.avatarWrapper}
@@ -250,54 +218,7 @@ const ConversationListItem = memo(function ConversationListItem({
         name={conversationName}
       />
     );
-  }, [
-    conversationName,
-    conversationPeerAvatar,
-    conversationTopic,
-    isGroupConversation,
-    styles.avatarWrapper,
-  ]);
-
-  const listItemContent = (
-    <View style={styles.conversationListItem}>
-      {avatarComponent}
-      <View style={styles.messagePreviewContainer}>
-        <Text style={styles.conversationName} numberOfLines={1}>
-          {conversationName}
-        </Text>
-        <Text style={styles.messagePreview} numberOfLines={2}>
-          {timeToShow} ⋅ {lastMessagePreview}
-        </Text>
-      </View>
-      {hasImagePreview && (
-        <View style={styles.imagePreviewContainer}>
-          <Image
-            source={{ uri: lastMessageImageUrl }}
-            style={styles.imagePreview}
-            contentFit="cover"
-          />
-        </View>
-      )}
-      {(showUnread || showError) && (
-        <View style={styles.unreadContainer}>
-          <View
-            style={[
-              styles.unread,
-              (!showUnread || showError) && styles.placeholder,
-            ]}
-          >
-            {showError && (
-              <Picto
-                picto="info.circle"
-                color={dangerColor(colorScheme)}
-                size={PictoSizes.button}
-              />
-            )}
-          </View>
-        </View>
-      )}
-    </View>
-  );
+  }, [conversationName, conversationPeerAvatar, styles.avatarWrapper]);
 
   const swipeableRef = useRef<Swipeable | null>(null);
   const closeSwipeable = useCallback(() => {
