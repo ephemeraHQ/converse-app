@@ -6,7 +6,6 @@ import {
 } from "@styles/colors";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
-  Dimensions,
   FlatList,
   Platform,
   StyleSheet,
@@ -204,12 +203,12 @@ export function ChatDumb<T>({
             //   minIndexForVisible: 0,
             //   autoscrollToTopThreshold: 100,
             // }}
-            estimatedListSize={Dimensions.get("screen")}
+            // estimatedListSize={Dimensions.get("screen")}
             inverted
             keyExtractor={keyExtractor}
             getItemType={getItemType}
             keyboardShouldPersistTaps="handled"
-            estimatedItemSize={80}
+            estimatedItemSize={34}
             // Size glitch on Android
             showsVerticalScrollIndicator={Platform.OS === "ios"}
             pointerEvents="auto"

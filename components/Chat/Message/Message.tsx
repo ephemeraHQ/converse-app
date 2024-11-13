@@ -61,6 +61,7 @@ import { ChatGroupUpdatedMessage } from "../ChatGroupUpdatedMessage";
 import { FramesPreviews } from "../Frame/FramesPreviews";
 import ChatInputReplyBubble from "../Input/InputReplyBubble";
 import TransactionPreview from "../Transaction/TransactionPreview";
+import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
 
 export type MessageToDisplay = XmtpMessage & {
   hasPreviousMessageInSeries: boolean;
@@ -213,7 +214,11 @@ const ChatMessage = ({
       messageContent = <TransactionPreview message={message} />;
       break;
     case "groupUpdated":
-      messageContent = <ChatGroupUpdatedMessage message={message} />;
+      messageContent = (
+        <ChatGroupUpdatedMessage
+          content={JSON.parse(message.content) as GroupUpdatedContent}
+        />
+      );
       break;
     default: {
       messageContent =

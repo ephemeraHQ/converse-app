@@ -1,10 +1,13 @@
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
+import {
+  useChatStore,
+  useCurrentAccount,
+  useSettingsStore,
+} from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { translate } from "@i18n/index";
 import { AvatarSizes } from "@styles/sizes";
 import { saveTopicsData } from "@utils/api";
 import { getMinimalDate } from "@utils/date";
-import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
 import { Haptics } from "@utils/haptics";
 import { navigate } from "@utils/navigation";
 import { RefObject, useCallback, useMemo, useRef, useState } from "react";
@@ -21,6 +24,10 @@ import logger from "@utils/logger";
 import { useGroupConversationListAvatarInfo } from "../features/conversation-list/useGroupConversationListAvatarInfo";
 import { IIconName } from "@design-system/Icon/Icon.types";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { useRoute } from "@navigation/useNavigation";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
+import { actionSheetColors } from "@styles/colors";
+import { consentToInboxIdsOnProtocol } from "@utils/xmtpRN/conversations";
 
 type V3GroupConversationListItemProps = {
   group: GroupWithCodecsType;
@@ -32,7 +39,8 @@ type UseDataProps = {
 
 const useData = ({ group }: UseDataProps) => {
   // TODO Items
-  const isBlockedChatView = false;
+  const { name: routeName } = useRoute();
+  const isBlockedChatView = routeName === "Blocked";
 
   const colorScheme = useColorScheme();
   const currentAccount = useCurrentAccount()!;
@@ -97,6 +105,116 @@ const useData = ({ group }: UseDataProps) => {
     }
   }, []);
 
+  const { setInboxIdPeerStatus } = useSettingsStore(
+    useSelect(["setInboxIdPeerStatus"])
+  );
+
+  const handleDelete = useCallback(() => {
+    const options = [
+      translate("delete"),
+      translate("delete_and_block"),
+      translate("cancel"),
+    ];
+    const title = `${translate("delete_chat_with")} ${group?.name}?`;
+    const actions = [
+      () => {
+        saveTopicsData(currentAccount, {
+          [topic]: {
+            status: "deleted",
+            timestamp: new Date().getTime(),
+          },
+        }),
+          setTopicsData({
+            [topic]: {
+              status: "deleted",
+              timestamp: new Date().getTime(),
+            },
+          });
+      },
+      async () => {
+        saveTopicsData(currentAccount, {
+          [topic]: { status: "deleted" },
+        });
+        setTopicsData({
+          [topic]: {
+            status: "deleted",
+            timestamp: new Date().getTime(),
+          },
+        });
+        await group.updateConsent("denied");
+        await consentToInboxIdsOnProtocol(
+          currentAccount,
+          [group.addedByInboxId],
+          "deny"
+        );
+        setInboxIdPeerStatus({
+          [group.addedByInboxId]: "denied",
+        });
+      },
+    ];
+    // TODO: Implement
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex: options.length - 1,
+        destructiveButtonIndex: [0, 1],
+        title,
+        ...actionSheetColors(colorScheme),
+      },
+      async (selectedIndex?: number) => {
+        if (selectedIndex !== undefined && selectedIndex < actions.length) {
+          actions[selectedIndex]();
+        }
+      }
+    );
+  }, [
+    colorScheme,
+    currentAccount,
+    group,
+    setInboxIdPeerStatus,
+    setTopicsData,
+    topic,
+  ]);
+
+  const handleRestore = useCallback(() => {
+    // TODO: Implement
+    const options = [
+      translate("restore"),
+      translate("restore_and_unblock_inviter"),
+      translate("cancel"),
+    ];
+    const title = `${translate("restore")} ${group?.name}?`;
+    const actions = [
+      async () => {
+        await group.updateConsent("allowed");
+      },
+      async () => {
+        await group.updateConsent("allowed");
+        await consentToInboxIdsOnProtocol(
+          currentAccount,
+          [group.addedByInboxId],
+          "allow"
+        );
+        setInboxIdPeerStatus({
+          [group.addedByInboxId]: "allowed",
+        });
+      },
+    ];
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex: options.length - 1,
+        title,
+        ...actionSheetColors(colorScheme),
+      },
+      async (selectedIndex?: number) => {
+        if (selectedIndex !== undefined && selectedIndex < actions.length) {
+          actions[selectedIndex]();
+        }
+      }
+    );
+  }, [colorScheme, currentAccount, group, setInboxIdPeerStatus]);
+
   const contextMenuItems = useMemo(
     () => [
       {
@@ -120,7 +238,7 @@ const useData = ({ group }: UseDataProps) => {
       {
         title: translate("delete"),
         action: () => {
-          // handleDelete();
+          handleDelete();
           closeContextMenu();
         },
         id: "delete",
@@ -129,27 +247,11 @@ const useData = ({ group }: UseDataProps) => {
     [
       topic,
       setPinnedConversations,
-      // handleDelete,
+      handleDelete,
       closeContextMenu,
       isUnread,
       toggleReadStatus,
     ]
-  );
-
-  const handleRemoveRestore = useCallback(
-    (callback: () => void) => {
-      groupRemoveRestoreHandler(
-        group?.state,
-        colorScheme,
-        group?.name,
-        () => {},
-        () => {}
-      )((success: boolean) => {
-        // If not successful, do nothing (user canceled)
-        callback();
-      });
-    },
-    [group?.state, colorScheme, group?.name]
   );
 
   const messageText = useMemo(() => {
@@ -186,7 +288,8 @@ const useData = ({ group }: UseDataProps) => {
     closeContextMenu,
     isUnread,
     isBlockedChatView,
-    handleRemoveRestore,
+    handleDelete,
+    handleRestore,
     messageText,
   };
 };
@@ -196,7 +299,9 @@ type UseUserInteractionsProps = {
   ref: RefObject<Swipeable>;
   showContextMenu: () => void;
   toggleReadStatus: () => void;
-  handleRemoveRestore: (callback: () => void) => void;
+  handleDelete: () => void;
+  handleRestore: () => void;
+  isBlockedChatView: boolean;
 };
 
 const useUserInteractions = ({
@@ -204,7 +309,9 @@ const useUserInteractions = ({
   ref,
   showContextMenu,
   toggleReadStatus,
-  handleRemoveRestore,
+  handleDelete,
+  handleRestore,
+  isBlockedChatView,
 }: UseUserInteractionsProps) => {
   const onPress = useCallback(() => {
     navigate("Conversation", {
@@ -224,8 +331,13 @@ const useUserInteractions = ({
   const onLeftPress = useCallback(() => {}, []);
 
   const onRightPress = useCallback(() => {
-    handleRemoveRestore(() => ref.current?.close());
-  }, [handleRemoveRestore, ref]);
+    if (isBlockedChatView) {
+      handleRestore();
+    } else {
+      handleDelete();
+    }
+    ref.current?.close();
+  }, [isBlockedChatView, handleRestore, handleDelete, ref]);
 
   const onLeftSwipe = useCallback(() => {
     toggleReadStatus();
@@ -277,7 +389,8 @@ export function V3GroupConversationListItem({
     isUnread,
     isBlockedChatView,
     toggleReadStatus,
-    handleRemoveRestore,
+    handleDelete,
+    handleRestore,
     messageText,
   } = useData({ group });
   const ref = useRef<Swipeable>(null);
@@ -295,7 +408,9 @@ export function V3GroupConversationListItem({
     topic: group?.topic,
     showContextMenu,
     toggleReadStatus,
-    handleRemoveRestore,
+    handleDelete,
+    handleRestore,
+    isBlockedChatView,
   });
   const { timeToShow, leftActionIcon } = useDisplayInfo({
     timestamp,

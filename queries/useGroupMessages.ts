@@ -7,6 +7,7 @@ import { useRefreshOnFocus } from "./useRefreshOnFocus";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import { queryClient } from "./queryClient";
 import logger from "@utils/logger";
+import { cacheOnlyQueryOptions } from "./cacheOnlyQueryOptions";
 
 export type EntifiedMessagesType = EntityObject<DecodedMessageWithCodecsType>;
 
@@ -15,10 +16,11 @@ export const useGroupMessages = (
   topic: string,
   options?: Partial<UseQueryOptions<EntifiedMessagesType>>
 ) => {
-  const { data: group } = useGroupConversationScreenQuery(account, topic, {
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-  });
+  const { data: group } = useGroupConversationScreenQuery(
+    account,
+    topic,
+    cacheOnlyQueryOptions
+  );
 
   const queryData = useQuery({
     queryKey: groupMessagesQueryKey(account, topic),
@@ -36,8 +38,11 @@ export const useGroupMessages = (
     enabled: !!group,
     ...options,
   });
-
-  useRefreshOnFocus(queryData.refetch);
+  useRefreshOnFocus(async (): Promise<void> => {
+    if (options?.refetchOnWindowFocus) {
+      await queryData.refetch();
+    }
+  });
 
   return queryData;
 };

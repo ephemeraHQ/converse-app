@@ -13,15 +13,25 @@ export const useV3ConversationItems = () => {
     },
     "useV3ConversationItems"
   );
-  const { pinnedConversationTopics } = useChatStore(
-    useSelect(["pinnedConversationTopics"])
+  const { pinnedConversationTopics, topicsData } = useChatStore(
+    useSelect(["pinnedConversationTopics", "topicsData"])
   );
   const groups = useMemo(() => {
     const pinnedSet = new Set(pinnedConversationTopics);
+    const deletedTopicsSet = new Set();
+    for (const topic in topicsData) {
+      const topicData = topicsData[topic];
+      if (topicData?.status === "deleted") {
+        deletedTopicsSet.add(topic);
+      }
+    }
     return data?.filter(
-      (group) => group.state === "allowed" && !pinnedSet.has(group.topic)
+      (group) =>
+        group.state === "allowed" &&
+        !pinnedSet.has(group.topic) &&
+        !deletedTopicsSet.has(group.topic)
     );
-  }, [data, pinnedConversationTopics]);
+  }, [data, pinnedConversationTopics, topicsData]);
 
   return { data: groups, ...rest };
 };
