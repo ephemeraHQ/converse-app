@@ -4,11 +4,11 @@ import { useDebugEnabled } from "@components/DebugButton";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useProfilesSocials } from "@hooks/useProfilesSocials";
-import { useGroupMembersConversationScreenQuery } from "@queries/useGroupMembersQuery";
 import { useConversationMessages } from "@queries/useConversationMessages";
+import { useConversationScreenQuery } from "@queries/useConversationQuery";
+import { useGroupMembersConversationScreenQuery } from "@queries/useGroupMembersQuery";
 import { useGroupNameQuery } from "@queries/useGroupNameQuery";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
-import { useConversationScreenQuery } from "@queries/useConversationQuery";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {
   NativeStackNavigationProp,
@@ -29,27 +29,27 @@ import {
   Alert,
   Platform,
   StyleSheet,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 
-import { ConversationTitleDumb } from "./ConversationTitleDumb";
 import { GroupChatPlaceholder } from "@components/Chat/ChatPlaceholder/GroupChatPlaceholder";
+import { V3Message } from "@components/Chat/Message/V3Message";
+import { MediaPreview } from "@data/store/chatStore";
+import { ConversationContext } from "@utils/conversation";
+import { navigate } from "@utils/navigation";
+import { TextInputWithValue } from "@utils/str";
 import {
   ConversationTopic,
   ConversationVersion,
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
-import { ConversationContext } from "@utils/conversation";
-import { TextInputWithValue } from "@utils/str";
-import { MediaPreview } from "@data/store/chatStore";
-import { V3Message } from "@components/Chat/Message/V3Message";
-import { navigate } from "@utils/navigation";
 import {
   getDraftMessage,
   setDraftMessage,
 } from "../../features/conversations/utils/textDrafts";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
+import { ConversationTitleDumb } from "./ConversationTitleDumb";
 
 type UseDataProps = {
   topic: ConversationTopic;
@@ -257,15 +257,23 @@ export const V3Conversation = ({
   });
 
   const renderItem: ListRenderItem<string> = useCallback(
-    ({ item, index }) => (
-      <V3Message
-        item={item}
-        index={index}
-        currentAccount={currentAccount}
-        topic={topic}
-      />
-    ),
-    [currentAccount, topic]
+    ({ item: messageId, index }) => {
+      if (!messages) return null;
+      return (
+        <V3Message
+          messageId={messageId}
+          currentAccount={currentAccount}
+          previousMessageId={index > 0 ? messages.ids[index + 1] : undefined}
+          nextMessageId={
+            index < messages.ids.length - 1
+              ? messages.ids[index - 1]
+              : undefined
+          }
+          topic={topic}
+        />
+      );
+    },
+    [currentAccount, topic, messages]
   );
 
   const showPlaceholder =
