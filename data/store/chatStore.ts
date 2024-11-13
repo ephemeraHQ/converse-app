@@ -104,6 +104,7 @@ export type TopicData = {
   status: "deleted" | "unread" | "read";
   readUntil?: number;
   timestamp?: number;
+  isPinned?: boolean;
 };
 
 export type TopicsData = {

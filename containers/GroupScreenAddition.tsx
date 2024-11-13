@@ -1,6 +1,6 @@
-import Picto from "@components/Picto/Picto";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
+import { Icon } from "@design-system/Icon/Icon";
 import { useExistingGroupInviteLink } from "@hooks/useExistingGroupInviteLink";
 import { useGroupDescription } from "@hooks/useGroupDescription";
 import { useGroupMembers } from "@hooks/useGroupMembers";
@@ -141,19 +141,16 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
     return null;
   }
 
-  const pictoSize =
-    Platform.OS === "ios" ? undefined : PictoSizes.accoutSettings;
-
   return (
     <View style={styles.container}>
       <TouchableOpacity
         onPress={onAddMemberPress}
         style={[styles.itemContainer, styles.addContainer]}
       >
-        <Picto
-          size={pictoSize}
+        <Icon
+          size={PictoSizes.accoutSettings}
           style={styles.icon}
-          picto="person.crop.circle.badge.plus"
+          icon="person.crop.circle.badge.plus"
         />
         <Text numberOfLines={2} style={styles.text}>
           {translate("add_more_members")}
@@ -165,7 +162,11 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
           style={[styles.itemContainer, styles.inviteContainer]}
           onLongPress={onDeleteInviteLink}
         >
-          <Picto size={pictoSize} style={styles.icon} picto="link" />
+          <Icon
+            size={PictoSizes.accoutSettings}
+            style={styles.icon}
+            icon="link"
+          />
           <Text style={styles.text}>{translate("copy_invite_link")}</Text>
         </TouchableOpacity>
       ) : (
@@ -174,18 +175,22 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
           onLongPress={noop}
           style={[styles.itemContainer, styles.inviteContainer]}
         >
-          <Picto size={pictoSize} style={styles.icon} picto="link" />
+          <Icon
+            size={PictoSizes.accoutSettings}
+            style={styles.icon}
+            icon="link"
+          />
           <Text style={styles.text}>{translate("create_invite_link")}</Text>
         </TouchableOpacity>
       )}
       <Portal>
         <Snackbar visible={!!snackMessage} onDismiss={dismissSnackBar}>
           <View style={styles.snackContainer}>
-            <Picto
-              size={pictoSize}
+            <Icon
+              size={PictoSizes.accoutSettings}
               color={inversePrimaryColor(colorScheme)}
               style={styles.icon}
-              picto="link"
+              icon="link"
             />
             <Text style={styles.snackText}>{snackMessage}</Text>
           </View>

@@ -283,8 +283,6 @@ export type ConversationContextType = {
   onReadyToFocus: () => void;
   messageToPrefill: string;
   mediaPreviewToPrefill: MediaPreview;
-  transactionMode: boolean;
-  setTransactionMode: (b: boolean) => void;
   frameTextInputFocused: boolean;
   setFrameTextInputFocused: (b: boolean) => void;
   tagsFetchedOnceForMessage: MutableRefObject<{
@@ -301,8 +299,6 @@ export const ConversationContext = createContext<ConversationContextType>({
   onReadyToFocus: () => {},
   messageToPrefill: "",
   mediaPreviewToPrefill: null,
-  transactionMode: false,
-  setTransactionMode: () => {},
   frameTextInputFocused: false,
   setFrameTextInputFocused: () => {},
   tagsFetchedOnceForMessage: createRef() as MutableRefObject<{
