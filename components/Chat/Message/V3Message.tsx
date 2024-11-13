@@ -1,4 +1,5 @@
 import { SimpleMessage } from "@components/Chat/Message/SimpleMessage";
+import { SwipeableMessageWrapper } from "@components/Chat/Message/SwipeableMessageWrapper";
 import { MessageContextStoreProvider } from "@components/Chat/Message/messageContextStore";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { VStack } from "@design-system/VStack";
@@ -30,11 +31,12 @@ type V3MessageProps = {
   topic: ConversationTopic;
 };
 
+// TMP until we move this into an account store or something like that
 function useCurrentAccountInboxId() {
   const currentAccount = useCurrentAccount();
   return useQuery({
     queryKey: ["inboxId", currentAccount],
-    queryFn: () => getOrCreateInboxId(currentAccount!, config.env),
+    queryFn: () => getOrCreateInboxId(currentAccount!, config.xmtpEnv),
     enabled: !!currentAccount,
   });
 }
@@ -115,7 +117,7 @@ export const V3MessageContent = memo(function V3MessageContent({
       nextMessage,
     });
 
-  const dateChangeValue =
+  const showDateChange =
     !!previousMessage &&
     messageShouldShowDateChange({
       message,
@@ -167,7 +169,14 @@ export const V3MessageContent = memo(function V3MessageContent({
           hasNextMessageInSeries={hasNextMessageInSeriesValue}
           fromMe={fromMeValue}
         >
-          <SimpleMessage content={textContent} />
+          {showDateChange && <DateChangeIndicator />}
+          <SwipeableMessageWrapper
+            onReply={() => {
+              console.log("reply");
+            }}
+          >
+            <SimpleMessage content={textContent} />
+          </SwipeableMessageWrapper>
         </MessageContextStoreProvider>
       );
 
@@ -179,6 +188,7 @@ export const V3MessageContent = memo(function V3MessageContent({
     case "remoteAttachment":
     case "attachment":
     default:
+      console.log("COULDN'T HANDLE THIS MESSAGE TYPE", contentType);
       return null;
       // const _ensureNever: never = contentType;
       return (
@@ -191,4 +201,8 @@ export const V3MessageContent = memo(function V3MessageContent({
         </VStack>
       );
   }
+});
+
+const DateChangeIndicator = memo(function DateChangeIndicator() {
+  return null;
 });
