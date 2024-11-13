@@ -1,61 +1,37 @@
 // __tests__/Text.performance.test.tsx
 import { jest, test } from "@jest/globals";
-import { render, screen } from "@testing-library/react-native";
+import { screen } from "@testing-library/react-native";
 import React from "react";
 import { measureRenders } from "reassure";
 
 import { Text } from "../Text";
-import { useThemeProvider } from "@theme/useAppTheme";
+import { renderWithThemeProvider } from "@design-system/test-utils/renderWithThemeProvider";
 
 jest.setTimeout(600_000);
 
-const TestApp = ({ children }: { children: React.ReactNode }) => {
-  const { themeScheme, setThemeContextOverride, ThemeProvider } =
-    useThemeProvider();
-
-  return (
-    <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-      {children}
-    </ThemeProvider>
-  );
-};
-
 test("Text Component with default props - 10 runs", async () => {
   const scenario = async () => {
-    render(
-      <TestApp>
-        <Text>Default Text</Text>
-      </TestApp>
-    );
+    renderWithThemeProvider(<Text>Default Text</Text>);
     await screen.findByText("Default Text");
   };
 
-  await measureRenders(
-    <TestApp>
-      <Text>Default Text</Text>
-    </TestApp>,
-    { scenario, runs: 10 }
-  );
+  await measureRenders(<Text>Default Text</Text>, { scenario, runs: 10 });
 });
 
 test("Text Component with weight and size - 10 runs", async () => {
   const scenario = async () => {
-    render(
-      <TestApp>
-        <Text weight="bold" size="lg">
-          Styled Text
-        </Text>
-      </TestApp>
+    renderWithThemeProvider(
+      <Text weight="bold" size="lg">
+        Styled Text
+      </Text>
     );
     await screen.findByText("Styled Text");
   };
 
   await measureRenders(
-    <TestApp>
-      <Text weight="bold" size="lg">
-        Styled Text
-      </Text>
-    </TestApp>,
+    <Text weight="bold" size="lg">
+      Styled Text
+    </Text>,
     { scenario, runs: 10 }
   );
 });
@@ -64,36 +40,21 @@ test("Text Component with translation key - 10 runs", async () => {
   const translatedText = "Accept"; // Ensure this matches your translation file
 
   const scenario = async () => {
-    render(
-      <TestApp>
-        <Text tx="accept" />
-      </TestApp>
-    );
+    renderWithThemeProvider(<Text tx="accept" />);
     await screen.findByText(translatedText);
   };
 
-  await measureRenders(
-    <TestApp>
-      <Text tx="accept" />
-    </TestApp>,
-    { scenario, runs: 10 }
-  );
+  await measureRenders(<Text tx="accept" />, { scenario, runs: 10 });
 });
 
 test("Text Component with color prop - 10 runs", async () => {
   const scenario = async () => {
-    render(
-      <TestApp>
-        <Text color="primary">Colored Text</Text>
-      </TestApp>
-    );
+    renderWithThemeProvider(<Text color="primary">Colored Text</Text>);
     await screen.findByText("Colored Text");
   };
 
-  await measureRenders(
-    <TestApp>
-      <Text color="primary">Colored Text</Text>
-    </TestApp>,
-    { scenario, runs: 10 }
-  );
+  await measureRenders(<Text color="primary">Colored Text</Text>, {
+    scenario,
+    runs: 10,
+  });
 });

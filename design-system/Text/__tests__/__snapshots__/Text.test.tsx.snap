@@ -4,12 +4,18 @@ exports[`Text Component applies color style 1`] = `
 <Text
   style={
     [
-      [
-        [Function],
-      ],
+      {
+        "color": "#000000",
+        "fontFamily": "SFProText-Regular",
+        "fontSize": 16,
+        "fontWeight": 400,
+        "lineHeight": 20,
+      },
       undefined,
       undefined,
-      [Function],
+      {
+        "color": "#000000",
+      },
       undefined,
     ]
   }
@@ -22,9 +28,13 @@ exports[`Text Component applies weight and size styles 1`] = `
 <Text
   style={
     [
-      [
-        [Function],
-      ],
+      {
+        "color": "#000000",
+        "fontFamily": "SFProText-Regular",
+        "fontSize": 16,
+        "fontWeight": 400,
+        "lineHeight": 20,
+      },
       {
         "fontFamily": "SFProText-Bold",
         "fontWeight": 700,
@@ -46,9 +56,13 @@ exports[`Text Component renders correctly with default props 1`] = `
 <Text
   style={
     [
-      [
-        [Function],
-      ],
+      {
+        "color": "#000000",
+        "fontFamily": "SFProText-Regular",
+        "fontSize": 16,
+        "fontWeight": 400,
+        "lineHeight": 20,
+      },
       undefined,
       undefined,
       undefined,
@@ -64,9 +78,13 @@ exports[`Text Component renders correctly with translation key 1`] = `
 <Text
   style={
     [
-      [
-        [Function],
-      ],
+      {
+        "color": "#000000",
+        "fontFamily": "SFProText-Regular",
+        "fontSize": 16,
+        "fontWeight": 400,
+        "lineHeight": 20,
+      },
       undefined,
       undefined,
       undefined,
