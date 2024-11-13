@@ -13,6 +13,7 @@ import { ChatGroupUpdatedMessage } from "../ChatGroupUpdatedMessage";
 import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
 import { V3MessageToDisplay } from "../../../features/conversations/Messages.types";
 import { VStack } from "@design-system/VStack";
+import { cacheOnlyQueryOptions } from "@queries/cacheOnlyQueryOptions";
 
 type V3MessageProps = {
   item: string;
@@ -23,7 +24,11 @@ type V3MessageProps = {
 
 export const V3Message = memo(
   ({ item, index, currentAccount, topic }: V3MessageProps) => {
-    const { data: messages } = useGroupMessages(currentAccount, topic);
+    const { data: messages } = useGroupMessages(
+      currentAccount,
+      topic,
+      cacheOnlyQueryOptions
+    );
     const message = messages?.byId[item];
     // Messages are inverted in the list
     const previousMessage = messages?.byId[index + 1];
@@ -82,6 +87,7 @@ export const V3Message = memo(
             />
           </VStack>
         );
+
       case "text":
         const textContent = content as string;
         const hideBackground = isAllEmojisAndMaxThree(textContent as string);

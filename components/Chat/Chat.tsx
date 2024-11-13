@@ -48,14 +48,12 @@ import { UUID_REGEX } from "../../utils/regex";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
 import { Recommendation } from "../Recommendations/Recommendation";
 import ChatPlaceholder from "./ChatPlaceholder/ChatPlaceholder";
-import { GroupChatPlaceholder } from "./ChatPlaceholder/GroupChatPlaceholder";
 import ConsentPopup from "./ConsentPopup/ConsentPopup";
 import { GroupConsentPopup } from "./ConsentPopup/GroupConsentPopup";
 import ChatInput from "./Input/Input";
 import CachedChatMessage, { MessageToDisplay } from "./Message/Message";
 import { useMessageReactionsStore } from "./Message/MessageReactions/MessageReactionsDrawer/MessageReactions.store";
 import { MessageReactionsDrawer } from "./Message/MessageReactions/MessageReactionsDrawer/MessageReactionsDrawer";
-import TransactionInput from "./Transaction/TransactionInput";
 
 const usePeerSocials = () => {
   const conversation = useConversationContext("conversation");
@@ -293,7 +291,6 @@ export function Chat() {
   const AnimatedListView = useAnimatedListView(conversation);
   const isBlockedPeer = useConversationContext("isBlockedPeer");
   const onReadyToFocus = useConversationContext("onReadyToFocus");
-  const transactionMode = useConversationContext("transactionMode");
   const frameTextInputFocused = useConversationContext("frameTextInputFocused");
   const rolledUpReactions =
     useMessageReactionsStore.getState().rolledUpReactions;
@@ -499,9 +496,6 @@ export function Chat() {
           {showPlaceholder && !conversation?.isGroup && (
             <ChatPlaceholder messagesCount={listArray.length} />
           )}
-          {showPlaceholder && conversation?.isGroup && (
-            <GroupChatPlaceholder messagesCount={listArray.length} />
-          )}
           {conversation?.isGroup ? <GroupConsentPopup /> : <ConsentPopup />}
         </Animated.View>
         {showChatInput && (
@@ -514,8 +508,7 @@ export function Chat() {
                 },
               ]}
             >
-              {!transactionMode && <ChatInput inputHeight={chatInputHeight} />}
-              {transactionMode && <TransactionInput />}
+              <ChatInput inputHeight={chatInputHeight} />
             </ReanimatedView>
             <View
               style={[
@@ -625,9 +618,6 @@ export function ChatPreview() {
         )}
         {showPlaceholder && !conversation?.isGroup && (
           <ChatPlaceholder messagesCount={listArray.length} />
-        )}
-        {showPlaceholder && conversation?.isGroup && (
-          <GroupChatPlaceholder messagesCount={listArray.length} />
         )}
       </Animated.View>
     </View>

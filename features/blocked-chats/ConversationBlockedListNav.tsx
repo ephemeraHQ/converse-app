@@ -13,17 +13,15 @@ import {
   NativeStack,
   navigationAnimation,
   NavigationParamList,
-} from "./Navigation";
+} from "../../screens/Navigation/Navigation";
 import AndroidBackAction from "../../components/AndroidBackAction";
 import ConversationFlashList from "../../components/ConversationFlashList";
-import { useChatStore } from "../../data/store/accountsStore";
+import { translate } from "@i18n/index";
+import { useAllBlockedChats } from "./useAllBlockedChats";
 
-export default function ConversationBlockedListNav() {
-  const sortedConversationsWithPreview = useChatStore(
-    (s) => s.sortedConversationsWithPreview
-  );
+export function ConversationBlockedListNav() {
+  const allBlockedChats = useAllBlockedChats();
   const navRef = useRef<any>();
-  const allBlockedChats = sortedConversationsWithPreview.conversationsBlocked;
   const styles = useStyles();
 
   const navigationOptions = useCallback(
@@ -34,7 +32,7 @@ export default function ConversationBlockedListNav() {
       navigation: any;
     }) => ({
       animation: navigationAnimation as StackAnimationTypes,
-      headerTitle: "Removed Chats",
+      headerTitle: translate("removed_chats.removed_chats"),
       headerLeft:
         Platform.OS === "ios"
           ? undefined
@@ -73,12 +71,9 @@ const NoResult = () => {
 
   return (
     <>
-      <Text style={styles.emoji}>👀</Text>
+      <Text style={styles.emoji}>{translate("removed_chats.eyes")}</Text>
       <Text style={styles.title}>
-        <Text>
-          We could not find any removed group chat in your existing
-          conversations.
-        </Text>
+        <Text>{translate("removed_chats.no_removed_chats")}</Text>
       </Text>
     </>
   );
