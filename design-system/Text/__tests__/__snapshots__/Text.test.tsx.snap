@@ -1,0 +1,80 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Text Component applies color style 1`] = `
+<Text
+  style={
+    [
+      [
+        [Function],
+      ],
+      undefined,
+      undefined,
+      [Function],
+      undefined,
+    ]
+  }
+>
+  Colored Text
+</Text>
+`;
+
+exports[`Text Component applies weight and size styles 1`] = `
+<Text
+  style={
+    [
+      [
+        [Function],
+      ],
+      {
+        "fontFamily": "SFProText-Bold",
+        "fontWeight": 700,
+      },
+      {
+        "fontSize": 24,
+        "lineHeight": 28,
+      },
+      undefined,
+      undefined,
+    ]
+  }
+>
+  Styled Text
+</Text>
+`;
+
+exports[`Text Component renders correctly with default props 1`] = `
+<Text
+  style={
+    [
+      [
+        [Function],
+      ],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ]
+  }
+>
+  Default Text
+</Text>
+`;
+
+exports[`Text Component renders correctly with translation key 1`] = `
+<Text
+  style={
+    [
+      [
+        [Function],
+      ],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ]
+  }
+>
+  Your messages.
+Your privacy.
+</Text>
+`;
