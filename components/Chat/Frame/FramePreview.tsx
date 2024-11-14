@@ -4,11 +4,12 @@ import { ethers } from "ethers";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View, Linking as RNLinking } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 
 import FrameBottom from "./FrameBottom";
 import FrameImage from "./FrameImage";
+import { AUTHORIZED_URL_PROTOCOLS } from "./urlProtocols";
 import config from "../../../config";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { cacheForMedia, fetchAndCacheMedia } from "../../../utils/cache/cache";
@@ -26,7 +27,6 @@ import {
   validateFrame,
 } from "../../../utils/frames";
 import { MessageToDisplay } from "../Message/Message";
-import { AUTHORIZED_URL_PROTOCOLS } from "./urlProtocols";
 
 export default function FramePreview({
   initialFrame,
@@ -155,6 +155,11 @@ export default function FramePreview({
         const link = button.target;
         try {
           const url = new URL(link);
+          if (url.protocol === "ethereum:") {
+            // ethereum: links are not ethereum:// and break expo canOpenURL
+            RNLinking.openURL(link);
+            return;
+          }
           if (
             AUTHORIZED_URL_PROTOCOLS.has(url.protocol) &&
             (await Linking.canOpenURL(link))
