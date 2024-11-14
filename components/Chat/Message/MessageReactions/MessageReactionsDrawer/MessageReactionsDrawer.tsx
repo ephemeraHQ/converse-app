@@ -164,6 +164,7 @@ const useStyles = () => {
       alignItems: "flex-end",
       gap: theme.spacing.xxxs,
       overflow: "hidden",
+      color: theme.colors.text.primary,
     },
     reactionContent: {
       padding: theme.spacing.xxxs,
