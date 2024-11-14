@@ -40,18 +40,20 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     buildNumber: appBuildNumbers.expo.ios.buildNumber,
-    googleServicesFile: "./GoogleService-Info.plist",
+    googleServicesFile: "./ios/GoogleService-Info.plist",
+    bundleIdentifier: "com.converse.dev",
     config: {
       usesNonExemptEncryption: false,
     },
   },
   android: {
+    package: "com.converse.dev",
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#FFFFFF",
     },
     versionCode: appBuildNumbers.expo.android.versionCode,
-    googleServicesFile: "./google-services.json",
+    googleServicesFile: "./android/google-services.json",
   },
   web: {
     favicon: "./assets/favicon.png",
