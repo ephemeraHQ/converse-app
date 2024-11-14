@@ -140,6 +140,39 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
   );
 });
 
+const useStyles = () => {
+  const { theme } = useAppTheme();
+
+  return StyleSheet.create({
+    chip: {
+      marginRight: theme.spacing.xxs,
+      marginBottom: theme.spacing.xs,
+      paddingVertical: theme.spacing.xxs,
+      paddingHorizontal: theme.spacing.xs,
+      borderRadius: theme.borderRadius.sm,
+      borderWidth: theme.borderWidth.sm,
+      borderColor: theme.colors.border.subtle,
+    },
+    reaction: {
+      display: "flex",
+      paddingVertical: theme.spacing.xs,
+      paddingHorizontal: theme.spacing.lg,
+      alignItems: "center",
+      gap: theme.spacing.xs,
+    },
+    userName: {
+      flex: 1,
+      display: "flex",
+      alignItems: "flex-end",
+      gap: theme.spacing.xxxs,
+      overflow: "hidden",
+      color: theme.colors.text.primary,
+    },
+    reactionContent: {
+      padding: theme.spacing.xxxs,
+    },
+  });
+};
 const $chip: ThemedStyle<ViewStyle> = ({
   spacing,
   borderRadius,

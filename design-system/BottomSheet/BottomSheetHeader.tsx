@@ -29,7 +29,11 @@ export const BottomSheetHeader = memo(function BottomSheetHeader(props: {
         padding: theme.spacing.lg,
       }}
     >
-      {!!title && <Text preset="bigBold">{title}</Text>}
+      {!!title && (
+        <Text preset="bigBold" style={{ color: theme.colors.text.primary }}>
+          {title}
+        </Text>
+      )}
       {hasClose && (
         <IconButton
           action="primary"
