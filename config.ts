@@ -45,6 +45,7 @@ const defaultConfig = {
     rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
   },
   splitScreenThreshold: 600,
+  framesAllowedSchemes: ["http", "https", "ethereum"],
 };
 
 const isAndroid = Platform.OS === "android";

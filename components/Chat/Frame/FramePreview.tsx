@@ -26,6 +26,7 @@ import {
   validateFrame,
 } from "../../../utils/frames";
 import { MessageToDisplay } from "../Message/Message";
+import { AUTHORIZED_URL_PROTOCOLS } from "./urlProtocols";
 
 export default function FramePreview({
   initialFrame,
@@ -155,9 +156,7 @@ export default function FramePreview({
         try {
           const url = new URL(link);
           if (
-            (url.protocol === "http:" ||
-              url.protocol === "https:" ||
-              url.protocol === `${config.scheme}:`) &&
+            AUTHORIZED_URL_PROTOCOLS.has(url.protocol) &&
             (await Linking.canOpenURL(link))
           ) {
             Linking.openURL(link);
