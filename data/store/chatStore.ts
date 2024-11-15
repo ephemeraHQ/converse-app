@@ -16,8 +16,8 @@ import {
   getTopicsUpdatesAsRead,
   markConversationsAsReadIfNecessary,
 } from "../../utils/conversation";
-import { zustandMMKVStorage } from "../../utils/mmkv";
-import { subscribeToNotifications } from "../../utils/notifications";
+import { zustandMMKVStorage } from "@utils/mmkv";
+import { subscribeToNotifications } from "../../features/notifications/utils/subscribeToNotifications";
 import { omit } from "../../utils/objects";
 import { refreshBalanceForAccount } from "../../utils/wallet";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";

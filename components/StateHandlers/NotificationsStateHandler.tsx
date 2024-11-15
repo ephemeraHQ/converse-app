@@ -13,10 +13,8 @@ import { useSelect } from "../../data/store/storeHelpers";
 import { saveUser } from "../../utils/api";
 import { sortAndComputePreview } from "../../utils/conversation";
 import { executeLogoutTasks } from "../../utils/logout";
-import {
-  resetNotifications,
-  saveNotificationsStatus,
-} from "../../utils/notifications";
+import { resetNotifications } from "../../features/notifications/utils/resetNotifications";
+import { saveNotificationsStatus } from "../../features/notifications/utils/saveNotificationsStatus";
 
 export default function ConversationsStateHandler() {
   // This handler checks conversations that it needs to show

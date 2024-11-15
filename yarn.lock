@@ -4005,6 +4005,11 @@
   resolved "https://registry.yarnpkg.com/@nolyfill/is-core-module/-/is-core-module-1.0.39.tgz#3dc35ba0f1e66b403c00b39344f870298ebb1c8e"
   integrity sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==
 
+"@notifee/react-native@^9.1.2":
+  version "9.1.2"
+  resolved "https://registry.yarnpkg.com/@notifee/react-native/-/react-native-9.1.2.tgz#e82a6007cf6350e7f5b55883f682fbb833336942"
+  integrity sha512-oUabHwBtu7Zkos898mZkFb3t1by7PPJmXAWS5Kl5VQSxjNUyVA9kk6a1p31TUDKCkV083tN33scT+cyLnyKMzw==
+
 "@npmcli/fs@^1.0.0":
   version "1.1.1"
   resolved "https://registry.npmjs.org/@npmcli/fs/-/fs-1.1.1.tgz"

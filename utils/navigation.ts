@@ -2,11 +2,11 @@ import * as Linking from "expo-linking";
 import { Linking as RNLinking } from "react-native";
 
 import logger from "./logger";
-import { loadSavedNotificationMessagesToContext } from "./notifications";
 import config from "../config";
 import { currentAccount, getChatStore } from "../data/store/accountsStore";
 import { XmtpConversation } from "../data/store/chatStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
+import { loadSavedNotificationMessagesToContext } from "../features/notifications/utils/loadSavedNotificationMessagesToContext";
 
 export const converseNavigations: { [navigationName: string]: any } = {};
 
@@ -40,8 +40,8 @@ export const navigateToConversation = async (
 
 export const navigateToTopicWithRetry = async () => {
   if (!topicToNavigateTo) return;
-  let conversationToNavigateTo = getChatStore(currentAccount()).getState()
-    .conversations[topicToNavigateTo];
+  let conversationToNavigateTo =
+    getChatStore(currentAccount()).getState().conversations[topicToNavigateTo];
   let currentAttempt = 0;
 
   while (
@@ -51,8 +51,10 @@ export const navigateToTopicWithRetry = async () => {
   ) {
     currentAttempt += 1;
     await new Promise((r) => setTimeout(r, 250));
-    conversationToNavigateTo = getChatStore(currentAccount()).getState()
-      .conversations[topicToNavigateTo];
+    conversationToNavigateTo =
+      getChatStore(currentAccount()).getState().conversations[
+        topicToNavigateTo
+      ];
   }
 
   if (topicToNavigateTo && conversationToNavigateTo) {

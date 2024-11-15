@@ -14,7 +14,6 @@ import {
 import { getAddressForPeer } from "./evm/address";
 import { getGroupIdFromTopic } from "./groupUtils/groupId";
 import logger from "./logger";
-import { subscribeToNotifications } from "./notifications";
 import { getReactionsContentPreview } from "./reactions";
 import { getMatchedPeerAddresses } from "@search/utils/search";
 import { TextInputWithValue, addressPrefix } from "./str";
@@ -31,6 +30,7 @@ import {
   XmtpConversationWithUpdate,
   XmtpMessage,
 } from "../data/store/chatStore";
+import { subscribeToNotifications } from "../features/notifications/utils/subscribeToNotifications";
 
 export type ConversationWithLastMessagePreview = XmtpConversation & {
   lastMessagePreview?: LastMessagePreview;

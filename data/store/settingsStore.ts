@@ -3,8 +3,8 @@ import { InboxId } from "@xmtp/react-native-sdk";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import { zustandMMKVStorage } from "../../utils/mmkv";
-import { subscribeToNotifications } from "../../utils/notifications";
+import { subscribeToNotifications } from "../../features/notifications/utils/subscribeToNotifications";
+import { zustandMMKVStorage } from "@utils/mmkv";
 
 // Settings for each account setup in the app
 // not all of them are really settings selected
