@@ -1,3 +1,5 @@
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+
 export enum QueryKeys {
   // Conversations
   GROUPS = "groupsv2", // When changing the shape of response, update the keys as persistance will break
@@ -6,8 +8,6 @@ export enum QueryKeys {
 
   // Messages
   GROUP_MESSAGES = "groupMessages",
-  GROUP_FIRST_MESSAGE = "groupFirstMessage",
-  GROUP_PENDING_MESSAGES = "groupPendingMessages",
 
   // Members
   GROUP_MEMBERS = "groupMembersv2",
@@ -42,22 +42,16 @@ export const groupQueryKey = (account: string, topic: string) => [
   topic,
 ];
 
-export const groupMessagesQueryKey = (account: string, topic: string) => [
-  QueryKeys.GROUP_MESSAGES,
-  account,
-  topic,
-];
+export const conversationMessagesQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.GROUP_MESSAGES, account, topic];
 
 export const groupFirstMessageQueryKey = (account: string, topic: string) => [
   QueryKeys.GROUP_FIRST_MESSAGE,
   account,
   topic,
 ];
-
-export const groupPendingMessagesQueryKey = (
-  account: string,
-  topic: string
-) => [QueryKeys.GROUP_PENDING_MESSAGES, account, topic];
 
 export const groupMembersQueryKey = (account: string, topic: string) => [
   QueryKeys.GROUP_MEMBERS,

@@ -22,7 +22,6 @@ import { useConversationContext } from "../../../utils/conversation";
 import { sendMessage } from "../../../utils/message";
 import { getProfile, getProfileData } from "../../../utils/profile";
 import { conversationName } from "../../../utils/str";
-import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
 import { Recommendation } from "../../Recommendations/Recommendation";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";

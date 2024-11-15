@@ -2,21 +2,22 @@ import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 
 import { groupMessagesQueryKey } from "./QueryKeys";
 import { entify, EntityObject } from "./entify";
-import { useGroupConversationScreenQuery } from "./useGroupQuery";
+import { useConversationQuery } from "./useGroupQuery";
 import { useRefreshOnFocus } from "./useRefreshOnFocus";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import { queryClient } from "./queryClient";
 import logger from "@utils/logger";
 import { cacheOnlyQueryOptions } from "./cacheOnlyQueryOptions";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export type EntifiedMessagesType = EntityObject<DecodedMessageWithCodecsType>;
 
-export const useGroupMessages = (
+export const useConversationMessages = (
   account: string,
-  topic: string,
+  topic: ConversationTopic,
   options?: Partial<UseQueryOptions<EntifiedMessagesType>>
 ) => {
-  const { data: group } = useGroupConversationScreenQuery(
+  const { data: conversation } = useConversationQuery(
     account,
     topic,
     cacheOnlyQueryOptions

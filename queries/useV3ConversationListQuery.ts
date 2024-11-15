@@ -2,10 +2,9 @@ import { QueryKeys } from "@queries/QueryKeys";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import {
-  ConversationContainerWithCodecsType,
+  ConversationWithCodecsType,
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
-  GroupWithCodecsType,
 } from "@utils/xmtpRN/client";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 
@@ -15,32 +14,36 @@ import { setGroupNameQueryData } from "./useGroupNameQuery";
 import { setGroupPhotoQueryData } from "./useGroupPhotoQuery";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
 
-export const groupConversationListKey = (account: string) => [
+export const conversationListKey = (account: string) => [
   QueryKeys.V3_CONVERSATION_LIST,
   account,
 ];
 
-type V3ConversationListType = ConversationContainerWithCodecsType[];
+type V3ConversationListType = ConversationWithCodecsType[];
 
-const v3ConversationListQueryFn = async (account: string, context: string) => {
+const v3ConversationListQueryFn = async (
+  account: string,
+  context: string,
+  includeSync: boolean = true
+) => {
   try {
     logger.debug(
-      `[ConversationListQuery] Fetching group list from network ${context}`
+      `[ConversationListQuery] Fetching conversation list from network ${context}`
     );
     const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
     const beforeSync = new Date().getTime();
-    await client.conversations.syncGroups();
-    await client.conversations.syncAllGroups();
+    if (includeSync) {
+      await client.conversations.sync();
+      await client.conversations.syncAllConversations();
+    }
     const afterSync = new Date().getTime();
     logger.debug(
-      `[Groups] Fetching group list from network took ${
+      `[ConversationListQuery] Fetching conversation list from network took ${
         (afterSync - beforeSync) / 1000
       } sec`
     );
-    const conversations = await client.conversations.listGroups(
+    const conversations = await client.conversations.list(
       {
-        members: false,
-        creatorInboxId: true,
         isActive: true,
         addedByInboxId: true,
         name: true,
@@ -52,16 +55,23 @@ const v3ConversationListQueryFn = async (account: string, context: string) => {
     );
     for (const conversation of conversations) {
       if (conversation.version === ConversationVersion.GROUP) {
-        const group = conversation as GroupWithCodecsType;
-        setGroupNameQueryData(account, group.topic, group.name);
-        setGroupPhotoQueryData(account, group.topic, group.imageUrlSquare);
-        setGroupIsActiveQueryData(account, group.topic, group.isGroupActive);
+        setGroupNameQueryData(account, conversation.topic, conversation.name);
+        setGroupPhotoQueryData(
+          account,
+          conversation.topic,
+          conversation.imageUrlSquare
+        );
+        setGroupIsActiveQueryData(
+          account,
+          conversation.topic,
+          conversation.isGroupActive
+        );
       }
     }
     return conversations;
   } catch (error) {
     logger.error(
-      `[ConversationListQuery] Error fetching group list from network ${context}`,
+      `[ConversationListQuery] Error fetching conversation list from network ${context}`,
       error
     );
     throw error;
@@ -76,65 +86,91 @@ export const useV3ConversationListQuery = (
   return useQuery<V3ConversationListType>({
     staleTime: 2000,
     ...queryOptions,
-    queryKey: groupConversationListKey(account),
+    queryKey: conversationListKey(account),
     queryFn: () => v3ConversationListQueryFn(account, context ?? ""),
     enabled: !!account,
   });
 };
 
-export const fetchGroupsConversationListQuery = (account: string) => {
+export const fetchPersistedConversationListQuery = (account: string) => {
   return queryClient.fetchQuery({
-    queryKey: groupConversationListKey(account),
+    queryKey: conversationListKey(account),
+    queryFn: () =>
+      v3ConversationListQueryFn(
+        account,
+        "fetchPersistedConversationListQuery",
+        false
+      ),
+  });
+};
+
+export const fetchConversationListQuery = (account: string) => {
+  return queryClient.fetchQuery({
+    queryKey: conversationListKey(account),
     queryFn: () =>
       v3ConversationListQueryFn(account, "fetchGroupsConversationListQuery"),
   });
 };
 
-export const invalidateGroupsConversationListQuery = (account: string) => {
-  return queryClient.invalidateQueries({
-    queryKey: groupConversationListKey(account),
+export const prefetchConversationListQuery = (account: string) => {
+  return queryClient.prefetchQuery({
+    queryKey: conversationListKey(account),
+    queryFn: () =>
+      v3ConversationListQueryFn(account, "prefetchConversationListQuery"),
   });
 };
 
-const getGroupsConversationListQueryData = (
+export const invalidateGroupsConversationListQuery = (account: string) => {
+  return queryClient.invalidateQueries({
+    queryKey: conversationListKey(account),
+  });
+};
+
+const getConversationListQueryData = (
   account: string
 ): V3ConversationListType | undefined => {
-  return queryClient.getQueryData(groupConversationListKey(account));
+  return queryClient.getQueryData(conversationListKey(account));
 };
 
-const setGroupsConversationListQueryData = (
+const setConversationListQueryData = (
   account: string,
-  groups: V3ConversationListType
+  conversations: V3ConversationListType
 ) => {
-  queryClient.setQueryData(groupConversationListKey(account), groups);
+  queryClient.setQueryData(conversationListKey(account), conversations);
 };
 
-export const addGroupToGroupsConversationListQuery = (
+export const addConversationToConversationListQuery = (
   account: string,
-  group: GroupWithCodecsType
+  conversation: ConversationWithCodecsType
 ) => {
-  const previousGroupsData = getGroupsConversationListQueryData(account);
-  if (!previousGroupsData) {
-    setGroupsConversationListQueryData(account, [group]);
+  const previousConversationsData = getConversationListQueryData(account);
+  if (!previousConversationsData) {
+    setConversationListQueryData(account, [conversation]);
     return;
   }
-  setGroupsConversationListQueryData(account, [group, ...previousGroupsData]);
+  setConversationListQueryData(account, [
+    conversation,
+    ...previousConversationsData,
+  ]);
 };
 
-export const updateMessageToGroupsConversationListQuery = (
+export const updateMessageToConversationListQuery = (
   account: string,
   message: DecodedMessageWithCodecsType
 ) => {
-  const previousGroupsData = getGroupsConversationListQueryData(account);
-  if (!previousGroupsData) return;
-  const group = previousGroupsData.find((g) => g.topic === message.topic);
-  if (!group) return;
-  const newGroups: V3ConversationListType = previousGroupsData.map((g) => {
-    if (g.topic === message.topic) {
-      g.lastMessage = message;
-      return g;
-    }
-    return g;
-  });
-  setGroupsConversationListQueryData(account, newGroups);
+  const previousConversationsData = getConversationListQueryData(account);
+  if (!previousConversationsData) return;
+  const conversation = previousConversationsData.find(
+    (c) => c.topic === message.topic
+  );
+  if (!conversation) return;
+  const newConversations: V3ConversationListType =
+    previousConversationsData.map((c) => {
+      if (c.topic === message.topic) {
+        c.lastMessage = message;
+        return c;
+      }
+      return c;
+    });
+  setConversationListQueryData(account, newConversations);
 };

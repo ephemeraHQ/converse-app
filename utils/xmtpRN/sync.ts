@@ -1,8 +1,6 @@
-import { refreshAllSpamScores } from "@data/helpers/conversations/spamScore";
 import logger from "@utils/logger";
 import { retryWithBackoff } from "@utils/retryWithBackoff";
 import { Client } from "@xmtp/xmtp-js";
-import intersect from "fast_array_intersect";
 import { useEffect, useState } from "react";
 import { AppState } from "react-native";
 
@@ -14,24 +12,16 @@ import {
   xmtpClientByAccount,
 } from "./client";
 import {
-  deleteOpenedConversations,
-  loadConversations,
   stopStreamingConversations,
-  stopStreamingGroups,
   streamConversations,
-  streamGroups,
-  updateConsentStatus,
 } from "./conversations";
-import {
-  stopStreamingAllMessage,
-  streamAllMessages,
-  syncConversationsMessages,
-} from "./messages";
-import {
-  getChatStore,
-  useCurrentAccount,
-} from "../../data/store/accountsStore";
+import { stopStreamingAllMessage, streamAllMessages } from "./messages";
+import { getChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { loadXmtpKey } from "../keychain/helpers";
+import {
+  fetchPersistedConversationListQuery,
+  prefetchConversationListQuery,
+} from "@queries/useV3ConversationListQuery";
 
 const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;
@@ -128,114 +118,52 @@ export const onSyncLost = async (account: string, error: any) => {
 
 const streamingAccounts: { [account: string]: boolean } = {};
 
-const syncClient = async (account: string) => {
-  const lastSyncedAt = getChatStore(account).getState().lastSyncedAt || 0;
-
-  // Last synced topics enable us not to miss messages from new conversations
-  // That we didn't get through notifications
-  const _lastSyncedTopics =
-    getChatStore(account).getState().lastSyncedTopics || [];
-  // Making sure we know about those convos in case of database issue
-  const lastSyncedTopics = intersect([
-    _lastSyncedTopics,
-    Object.keys(getChatStore(account).getState().conversations),
-  ]);
-  const knownTopics =
-    lastSyncedTopics.length > 0
-      ? lastSyncedTopics
-      : Object.keys(getChatStore(account).getState().conversations);
-  logger.info(`[XmtpRN] Syncing ${account}`, {
-    lastSyncedAt,
-    knownTopics: knownTopics.length,
-  });
-  const queryConversationsFromTimestamp: { [topic: string]: number } = {};
-  knownTopics.forEach((topic) => {
-    queryConversationsFromTimestamp[topic] = lastSyncedAt;
-  });
-  const now = new Date().getTime();
-  const { newConversations } = await loadConversations(account, knownTopics);
-  newConversations.forEach((c) => {
-    queryConversationsFromTimestamp[c.topic] = 0;
-  });
-  // As soon as we have done one query we can hide reconnecting
-  getChatStore(account).getState().setReconnecting(false);
-
-  // Streaming conversations
-  retryWithBackoff({
-    fn: () => streamConversations(account),
-    retries: 5,
-    delay: 1000,
-    factor: 2,
-    maxDelay: 30000,
-    context: `streaming conversations for ${account}`,
-  }).catch((e) => {
-    // Streams are good to have, but should not prevent the app from working
-    logger.error(e, {
-      context: `Failed to stream conversations for ${account} no longer retrying`,
+export const syncClientConversationList = async (account: string) => {
+  try {
+    // Load the persisted conversation list
+    await fetchPersistedConversationListQuery(account);
+    // Streaming conversations
+    retryWithBackoff({
+      fn: () => streamConversations(account),
+      retries: 5,
+      delay: 1000,
+      factor: 2,
+      maxDelay: 30000,
+      context: `streaming conversations for ${account}`,
+    }).catch((e) => {
+      // Streams are good to have, but should not prevent the app from working
+      logger.error(e, {
+        context: `Failed to stream conversations for ${account} no longer retrying`,
+      });
     });
-  });
-  retryWithBackoff({
-    fn: () => streamGroups(account),
-    retries: 5,
-    delay: 1000,
-    factor: 2,
-    maxDelay: 30000,
-    context: `streaming groups for ${account}`,
-  }).catch((e) => {
-    // Streams are good to have, but should not prevent the app from working
-    logger.error(e, {
-      context: `Failed to stream groups for ${account} no longer retrying`,
+    // Streaming all dm messages (not groups because buggy)
+    retryWithBackoff({
+      fn: () => streamAllMessages(account),
+      retries: 5,
+      delay: 1000,
+      factor: 2,
+      maxDelay: 30000,
+      context: `streaming all messages for ${account}`,
+    }).catch((e) => {
+      // Streams are good to have, but should not prevent the app from working
+      logger.error(e, {
+        context: `Failed to stream all messages for ${account} no longer retrying`,
+      });
     });
-  });
-  // Streaming all dm messages (not groups because buggy)
-  retryWithBackoff({
-    fn: () => streamAllMessages(account),
-    retries: 5,
-    delay: 1000,
-    factor: 2,
-    maxDelay: 30000,
-    context: `streaming all messages for ${account}`,
-  }).catch((e) => {
-    // Streams are good to have, but should not prevent the app from working
+    // Prefetch the conversation list so when we land on the conversation list
+    // we have it ready, this will include syncing all groups
+    const conversationList = await prefetchConversationListQuery(account);
+    // TODO: Update notification topics
+  } catch (e) {
     logger.error(e, {
-      context: `Failed to stream all messages for ${account} no longer retrying`,
+      context: `Failed to fetch persisted conversation list for ${account}`,
     });
-  });
-  streamingAccounts[account] = true;
-
-  logger.debug("[XmtpRN] Syncing 1:1 messages & group messages...");
-  const fetchedMessagesCount = await syncConversationsMessages(
-    account,
-    queryConversationsFromTimestamp
-  );
-  logger.debug("[XmtpRN] Done syncing 1:1 messages & group messages");
-
-  // Refresh spam scores after the initial load of conversation data is complete
-  // Ensure spam scores are current, reflecting any new messages received since the last sync
-  if (!getChatStore(account).getState().initialLoadDone) {
-    await refreshAllSpamScores(account);
   }
-
-  // Need to save initial load is done
-  getChatStore(account).getState().setInitialLoadDone();
-
-  // Only update when we have really fetched, this might mitigate
-  // the case where we never fetch some messages
-  if (fetchedMessagesCount > 0) {
-    const conversationTopicsToQuery = Object.keys(
-      queryConversationsFromTimestamp
-    );
-    getChatStore(account)
-      .getState()
-      .setLastSyncedAt(now, conversationTopicsToQuery);
-  }
-  await updateConsentStatus(account);
-  logger.info(`[XmtpRN] Finished syncing ${account}`);
 };
 
-export const syncXmtpClient = async (account: string) => {
+export const syncConversationListXmtpClient = async (account: string) => {
   return retryWithBackoff({
-    fn: () => syncClient(account),
+    fn: () => syncClientConversationList(account),
     retries: 5,
     delay: 1000,
     factor: 2,
@@ -251,10 +179,8 @@ export const deleteXmtpClient = async (account: string) => {
   if (account in xmtpClientByAccount) {
     stopStreamingAllMessage(account);
     stopStreamingConversations(account);
-    stopStreamingGroups(account);
   }
   delete xmtpClientByAccount[account];
-  deleteOpenedConversations(account);
   delete xmtpSignatureByAccount[account];
   delete instantiatingClientForAccount[account];
   delete streamingAccounts[account];
