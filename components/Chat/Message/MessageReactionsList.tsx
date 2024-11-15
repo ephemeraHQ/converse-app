@@ -6,8 +6,6 @@ import {
   useProfilesStore,
 } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
-import { backgroundColor, textSecondaryColor } from "@styles/colors";
-import { AvatarSizes, BorderRadius } from "@styles/sizes";
 
 import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
 import {
@@ -24,7 +22,6 @@ import {
 import React, { FC, useMemo, useEffect, useCallback } from "react";
 import {
   ListRenderItem,
-  useColorScheme,
   View,
   StyleSheet,
   TouchableOpacity,
@@ -45,6 +42,7 @@ import { MessageToDisplay } from "./Message";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppTheme } from "@theme/useAppTheme";
 import { Text } from "@design-system/Text";
+import { OUTTER_SPACING } from "@utils/contextMenu/constants";
 
 type MessageReactionsListProps = {
   reactions: {
@@ -68,6 +66,7 @@ const keyExtractor = (item: [string, string[]]) => item[0];
 
 const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
   const styles = useStyles();
+  const { theme } = useAppTheme();
   const animatedValue = useSharedValue(0);
   const membersSocials = useProfilesStore((s) =>
     addresses.map((address) => {
@@ -99,14 +98,14 @@ const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
     <Animated.View style={[styles.itemContainer, animatedStyle]}>
       <View
         style={{
-          height: AvatarSizes.reactionsOverlay,
+          height: theme.avatarSize.lg,
           justifyContent: "center",
           alignItems: "center",
         }}
       >
         <GroupAvatar
           pendingGroupMembers={membersSocials}
-          size={AvatarSizes.reactionsOverlay}
+          size={theme.avatarSize.lg}
         />
       </View>
       <Text style={styles.itemText}>
@@ -169,7 +168,6 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   );
   const currentUser = useCurrentAccount() as string;
   const styles = useStyles();
-  const colorScheme = useColorScheme();
 
   const list = useMemo(() => {
     const reactionMap: Record<string, string[]> = {};
@@ -224,14 +222,20 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
         <Portal>
           <View style={styles.portalContainer}>
             <GestureHandlerRootView>
-              <FlatList
-                contentContainerStyle={styles.reactionsContainer}
-                data={list}
-                horizontal
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
-                showsHorizontalScrollIndicator={false}
-              />
+              <View
+                style={{
+                  borderRadius: theme.spacing.sm,
+                  backgroundColor: theme.colors.background.raised,
+                }}
+              >
+                <FlatList
+                  data={list}
+                  horizontal
+                  renderItem={renderItem}
+                  keyExtractor={keyExtractor}
+                  showsHorizontalScrollIndicator={false}
+                />
+              </View>
             </GestureHandlerRootView>
           </View>
         </Portal>
@@ -277,7 +281,6 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
 export const MessageReactionsList = React.memo(MessageReactionsListInner);
 
 const useStyles = () => {
-  const colorScheme = useColorScheme();
   const safeAreaInsets = useSafeAreaInsets();
 
   const { theme } = useAppTheme();
@@ -290,7 +293,7 @@ const useStyles = () => {
       height: 119.5,
     },
     itemText: {
-      color: textSecondaryColor(colorScheme),
+      color: theme.colors.text.primary,
       fontSize: 16,
       lineHeight: 20,
       marginTop: 20,
@@ -300,17 +303,12 @@ const useStyles = () => {
     },
     portalContainer: {
       position: "absolute",
-      top: safeAreaInsets.top + 10,
+      top: safeAreaInsets.top + OUTTER_SPACING,
       left: 0,
       right: 0,
       justifyContent: "center",
       alignItems: "center",
       pointerEvents: "box-none",
-    },
-    reactionsContainer: {
-      borderRadius: BorderRadius.large,
-      backgroundColor: backgroundColor(colorScheme),
-      height: 120,
     },
     flex1: {
       flex: 1,
