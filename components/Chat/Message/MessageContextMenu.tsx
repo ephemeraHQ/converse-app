@@ -11,7 +11,8 @@ import {
   OUTTER_SPACING,
   SIDE_MARGIN,
   SPRING_CONFIGURATION,
-  STATUS_BAR_HEIGHT,
+  MENU_GAP,
+  AUXILIARY_VIEW_GAP,
 } from "@utils/contextMenu/constants";
 import { ConversationContext } from "@utils/conversation";
 import React, { FC, memo, useEffect, useMemo } from "react";
@@ -101,67 +102,9 @@ const BackdropComponent: FC<{
   }, []);
 
   // Attribution Panel + Emoji Picker
+
   const animatedAuxiliaryViewStyle = useAnimatedStyle(() => {
     const getTransformValue = () => {
-      if (itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top) {
-        const spacing = 16;
-        const totalHeight =
-          itemRectY.value +
-          itemRectHeight.value +
-          menuHeight +
-          spacing +
-          STATUS_BAR_HEIGHT +
-          safeAreaInsets.bottom;
-        const overflow = totalHeight - height;
-
-        if (overflow > 0) {
-          // If there is overflow, we need to move the bubble up
-          let adjustedTopTransform = -overflow; // Move up by the overflow amount
-          const topEdgeAfterAdjustment = itemRectY.value + adjustedTopTransform;
-
-          // Ensure the top of the bubble does not go above the top of the screen
-          if (topEdgeAfterAdjustment < safeAreaInsets.top) {
-            adjustedTopTransform = safeAreaInsets.top - itemRectY.value;
-          }
-
-          return adjustedTopTransform;
-        } else {
-          // No overflow, no adjustment needed
-          return 0;
-        }
-      } else {
-        return (
-          -1 *
-          (itemRectY.value - AUXILIARY_VIEW_MIN_HEIGHT - safeAreaInsets.top)
-        );
-      }
-    };
-    const tY = getTransformValue();
-    return {
-      position: "absolute",
-      // This allows the emoji picker to reach the selected message
-      bottom:
-        height -
-        Math.max(
-          itemRectY.value - OUTTER_SPACING + tY,
-          AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top
-        ),
-      height: Math.max(
-        itemRectY.value - itemRectHeight.value - safeAreaInsets.top + tY,
-        AUXILIARY_VIEW_MIN_HEIGHT
-      ),
-      width: width - 2 * SIDE_MARGIN,
-      left: fromMe ? undefined : itemRectX.value,
-      right: fromMe ? width - itemRectX.value - itemRectWidth.value : undefined,
-      marginRight: fromMe ? 0 : SIDE_MARGIN,
-      marginLeft: fromMe ? SIDE_MARGIN : 0,
-    };
-  });
-
-  // Context menu
-  const animatedMenuStyle = useAnimatedStyle(() => {
-    const getTransformValue = () => {
-      // Calculate the vertical position of the context menu
       const topTransform =
         // Y position of the message
         itemRectY.value +
@@ -176,18 +119,29 @@ const BackdropComponent: FC<{
 
       // Adjust positioning when message height exceeds half the screen
       if (itemRectHeight.value > height / 2) {
-        return height - topTransform;
+        // Calculate offset based on whether reactions are present
+        const offset =
+          itemRectHeight.value > AUXILIARY_VIEW_MIN_HEIGHT
+            ? AUXILIARY_VIEW_MIN_HEIGHT
+            : safeAreaInsets.top;
+        return -itemRectY.value + offset;
       } else if (
         itemRectY.value >
         AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top
       ) {
         // General case for shorter messages
-        return topTransform > height ? height - topTransform : 0;
+        return topTransform > height
+          ? height - topTransform - AUXILIARY_VIEW_GAP
+          : -AUXILIARY_VIEW_GAP;
       } else {
         // Short message near the top of the screen, requires downward adjustment
         return (
           -1 *
-          (itemRectY.value - AUXILIARY_VIEW_MIN_HEIGHT - safeAreaInsets.top - 5)
+          (itemRectY.value -
+            AUXILIARY_VIEW_MIN_HEIGHT -
+            safeAreaInsets.top +
+            AUXILIARY_VIEW_GAP -
+            OUTTER_SPACING)
         );
       }
     };
@@ -199,7 +153,65 @@ const BackdropComponent: FC<{
         : withTiming(0, { duration: HOLD_ITEM_TRANSFORM_DURATION });
     return {
       position: "absolute",
-      top: itemRectY.value + itemRectHeight.value,
+      top: itemRectY.value,
+      left: fromMe ? undefined : itemRectX.value,
+      right: fromMe ? width - itemRectX.value - itemRectWidth.value : undefined,
+      width: width - 2 * SIDE_MARGIN,
+      transform: [
+        {
+          translateY: transformAnimation(),
+        },
+      ],
+    };
+  });
+
+  // Context menu
+
+  const animatedMenuStyle = useAnimatedStyle(() => {
+    const getTransformValue = () => {
+      // Calculate the vertical position of the menu (same as message)
+      const topTransform =
+        // Y position of the message
+        itemRectY.value +
+        // Height of the message
+        itemRectHeight.value +
+        // Height of the context menu
+        menuHeight +
+        // Add spacing between menu and message
+        OUTTER_SPACING +
+        // Account for bottom safe area (messages aligned from bottom)
+        (safeAreaInsets?.bottom || 0);
+
+      // Use same logic as message positioning
+      if (itemRectHeight.value > height / 2) {
+        return height - topTransform - safeAreaInsets.bottom;
+      } else if (
+        itemRectY.value >
+        AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top
+      ) {
+        // General case for shorter messages
+        return topTransform > height ? height - topTransform : 0;
+      } else {
+        // Short message near the top of the screen
+        return (
+          -1 *
+          (itemRectY.value -
+            OUTTER_SPACING -
+            AUXILIARY_VIEW_MIN_HEIGHT -
+            safeAreaInsets.top)
+        );
+      }
+    };
+
+    const tY = getTransformValue();
+    const transformAnimation = () =>
+      isActive
+        ? withSpring(tY, SPRING_CONFIGURATION)
+        : withTiming(0, { duration: HOLD_ITEM_TRANSFORM_DURATION });
+
+    return {
+      position: "absolute",
+      top: itemRectY.value + itemRectHeight.value + MENU_GAP,
       left: fromMe ? undefined : itemRectX.value,
       right: fromMe ? width - itemRectX.value - itemRectWidth.value : undefined,
       width: ITEM_WIDTH,
@@ -212,6 +224,7 @@ const BackdropComponent: FC<{
   });
 
   // Message
+
   const animatedPortalStyle = useAnimatedStyle(() => {
     const animateOpacity = () =>
       withDelay(HOLD_ITEM_TRANSFORM_DURATION, withTiming(0, { duration: 0 }));

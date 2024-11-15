@@ -46,19 +46,19 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppTheme } from "@theme/useAppTheme";
 import { Text } from "@design-system/Text";
 
-interface MessageReactionsListProps {
+type MessageReactionsListProps = {
   reactions: {
     [senderAddress: string]: MessageReaction[];
   };
   message: MessageToDisplay;
   dismissMenu?: () => void;
-}
+};
 
-interface MessageReactionsItemProps {
+type MessageReactionsItemProps = {
   content: string;
   addresses: string[];
   index: number;
-}
+};
 
 const INITIAL_DELAY = 0;
 const ITEM_DELAY = 200;
@@ -125,6 +125,7 @@ const EmojiItem: FC<{
   currentUser: string;
 }> = ({ content, message, alreadySelected, dismissMenu, currentUser }) => {
   const styles = useStyles();
+
   const handlePress = useCallback(() => {
     if (alreadySelected) {
       removeReactionFromMessage(currentUser, message, content);
@@ -169,6 +170,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   const currentUser = useCurrentAccount() as string;
   const styles = useStyles();
   const colorScheme = useColorScheme();
+
   const list = useMemo(() => {
     const reactionMap: Record<string, string[]> = {};
     Object.entries(reactions).forEach(([senderAddress, reactions]) => {
@@ -184,7 +186,6 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
     });
     return Object.entries(reactionMap);
   }, [reactions]);
-  const hasEmojiOverlay = list.length !== 0;
 
   const currentUserEmojiMap = useMemo(() => {
     const emojiSet: Record<string, boolean> = {};
@@ -237,7 +238,6 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
       ) : (
         <View style={styles.flex1} />
       )}
-      {hasEmojiOverlay && <View style={styles.flexGrow} />}
       <View
         style={[
           styles.emojiListContainer,
@@ -294,10 +294,6 @@ const useStyles = () => {
       fontSize: 16,
       lineHeight: 20,
       marginTop: 20,
-    },
-    flexGrow: {
-      flexGrow: 1,
-      height: "auto",
     },
     container: {
       flex: 1,

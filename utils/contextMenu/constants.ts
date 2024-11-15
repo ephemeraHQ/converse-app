@@ -15,15 +15,22 @@ const SIDE_MARGIN = 20;
 const ITEM_WIDTH = 180;
 const AUXILIARY_VIEW_MIN_HEIGHT = 205;
 
+const MENU_GAP = Platform.select({
+  default: 6,
+  android: 16,
+});
+
+const AUXILIARY_VIEW_GAP = 75;
+
 const BACKDROP_LIGHT_BACKGROUND_COLOR =
   Platform.OS === "ios" ? "rgba(0,0,0,0.2)" : "rgba(19, 19, 19, 0.95)";
 const BACKDROP_DARK_BACKGROUND_COLOR =
   Platform.OS === "ios" ? "rgba(0,0,0,0.75)" : "rgba(120,120,120,0.2)";
 
 const STATUS_BAR_HEIGHT =
-  Platform.OS === "android" ? StatusBar.currentHeight ?? 0 : 0;
+  Platform.OS === "android" ? (StatusBar.currentHeight ?? 0) : 0;
 
-const OUTTER_SPACING = 8;
+const OUTTER_SPACING = 10;
 
 export {
   SIDE_MARGIN,
@@ -36,6 +43,8 @@ export {
   BACKDROP_DARK_BACKGROUND_COLOR,
   STATUS_BAR_HEIGHT,
   OUTTER_SPACING,
+  MENU_GAP,
+  AUXILIARY_VIEW_GAP,
 };
 
 export const contextMenuStyleGuide = {
