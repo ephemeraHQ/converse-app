@@ -4824,11 +4824,6 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/netinfo/-/netinfo-11.3.1.tgz#4539371a2f4bd402d932031be82c2449ed63a1a5"
   integrity sha512-UBnJxyV0b7i9Moa97Av+HKho1ByzX0DtbJXzUQS5E3xhQs6P2D/Os0iw3ouy7joY1TVd6uIhplPbr7l1SJNaNQ==
 
-"@react-native-masked-view/masked-view@0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@react-native-masked-view/masked-view/-/masked-view-0.3.1.tgz#5bd76f17004a6ccbcec03856893777ee91f23d29"
-  integrity sha512-uVm8U6nwFIlUd1iDIB5cS+lDadApKR+l8k4k84d9hn+GN4lzAIJhUZ9syYX7c022MxNgAlbxoFLt0pqKoyaAGg==
-
 "@react-native-menu/menu@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@react-native-menu/menu/-/menu-1.1.2.tgz#972406d25296a0d01614dc36fae7884c2a08dafd"

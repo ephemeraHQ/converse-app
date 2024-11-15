@@ -1,9 +1,7 @@
-import { SNACKBAR_BACKDROP_MAX_HEIGHT } from "@components/Snackbar/Snackbar.constants";
 import { useSnackbars } from "@components/Snackbar/Snackbar.service";
 import { useGradientHeight } from "@components/Snackbar/SnackbarBackdrop/SnackbarBackdrop.utils";
-import MaskedView from "@react-native-masked-view/masked-view";
+// import MaskedView from "@react-native-masked-view/masked-view";
 import { SICK_SPRING_CONFIG } from "@theme/animations";
-import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { memo } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
@@ -38,7 +36,13 @@ export const SnackbarBackdrop = memo(() => {
         // debugBorder()
       ]}
     >
-      <MaskedView
+      <LinearGradient
+        locations={[0, 0.55]}
+        colors={["rgba(255, 255,255,0.0)", "rgba(255, 255,255,1)"]}
+        style={StyleSheet.absoluteFill}
+      />
+      {/* TODO: Maybe add back later. For now masked view can be a litte unstable and buggy */}
+      {/* <MaskedView
         pointerEvents="none"
         maskElement={
           <LinearGradient
@@ -57,7 +61,7 @@ export const SnackbarBackdrop = memo(() => {
           tint="systemChromeMaterialLight"
           style={StyleSheet.absoluteFill}
         />
-      </MaskedView>
+      </MaskedView> */}
     </Animated.View>
   );
 });
