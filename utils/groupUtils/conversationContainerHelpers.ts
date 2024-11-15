@@ -1,12 +1,12 @@
 import {
-  ConversationContainerWithCodecsType,
+  ConversationWithCodecsType,
   DmWithCodecsType,
   GroupWithCodecsType,
 } from "@utils/xmtpRN/client";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
 
 export const unwrapConversationContainer = (
-  conversation: ConversationContainerWithCodecsType
+  conversation: ConversationWithCodecsType
 ) => {
   if (conversationIsGroup(conversation)) {
     return conversation as GroupWithCodecsType;
@@ -15,7 +15,7 @@ export const unwrapConversationContainer = (
 };
 
 export const conversationIsGroup = (
-  conversation: ConversationContainerWithCodecsType
+  conversation: ConversationWithCodecsType
 ) => {
   return conversation.version === ConversationVersion.GROUP;
 };

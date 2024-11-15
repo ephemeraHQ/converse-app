@@ -41,7 +41,7 @@ import { converseEventEmitter } from "../utils/events";
 import { useIsSharingMode } from "../features/conversation-list/useIsSharingMode";
 import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
 import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
-import { ConversationContainerWithCodecsType } from "@utils/xmtpRN/client";
+import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
 
 type Props = {
   searchBarRef:
@@ -52,9 +52,7 @@ type Props = {
   "Chats" | "ShareFrame" | "Blocked"
 >;
 
-type FlatListItemType =
-  | ConversationFlatListItem
-  | ConversationContainerWithCodecsType;
+type FlatListItemType = ConversationFlatListItem | ConversationWithCodecsType;
 
 function ConversationList({ navigation, route, searchBarRef }: Props) {
   const styles = useStyles();

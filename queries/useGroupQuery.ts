@@ -1,38 +1,43 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { getV3IdFromTopic, isV3Topic } from "@utils/groupUtils/groupId";
 import {
+  ConversationWithCodecsType,
   ConverseXmtpClientType,
   GroupWithCodecsType,
 } from "@utils/xmtpRN/client";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
-import { Group } from "@xmtp/react-native-sdk";
+import { ConversationTopic, Group } from "@xmtp/react-native-sdk";
 
 import { groupQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
 import logger from "@utils/logger";
+import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
 
-export const useGroupQuery = (account: string, topic: string) => {
+export const useConversationQuery = (
+  account: string,
+  topic: ConversationTopic,
+  options?: Partial<
+    UseQueryOptions<ConversationWithCodecsType | null | undefined>
+  >
+) => {
   return useQuery({
+    ...options,
     queryKey: groupQueryKey(account, topic),
     queryFn: async () => {
       if (!topic) {
         return null;
       }
-      const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-      if (!client) {
-        return null;
-      }
-      const group = await client.conversations.findGroup(
-        getV3IdFromTopic(topic)
-      );
-
-      return group;
+      return getConversationByTopicByAccount({
+        account,
+        topic,
+        includeSync: false,
+      });
     },
-    enabled: isV3Topic(topic),
+    enabled: !!topic,
   });
 };
 
-export const useGroupConversationScreenQuery = (
+export const useConversationScreenQuery = (
   account: string,
   topic: string,
   options?: Partial<UseQueryOptions<GroupWithCodecsType | null | undefined>>

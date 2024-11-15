@@ -1,11 +1,8 @@
 import {
   QueryKeys,
   groupDescriptionQueryKey,
-  groupFirstMessageQueryKey,
   groupMembersQueryKey,
-  groupMessagesQueryKey,
   groupNameQueryKey,
-  groupPendingMessagesQueryKey,
   groupPermissionsQueryKey,
   groupPhotoQueryKey,
   groupPinnedFrameQueryKey,
@@ -31,21 +28,6 @@ describe("Query Key Functions", () => {
   it("groupQueryKey should return the correct array", () => {
     const result = groupQueryKey(account, topic);
     expect(result).toEqual([QueryKeys.GROUP, account, topic]);
-  });
-
-  it("groupMessagesQueryKey should return the correct array", () => {
-    const result = groupMessagesQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.GROUP_MESSAGES, account, topic]);
-  });
-
-  it("groupFirstMessageQueryKey should return the correct array", () => {
-    const result = groupFirstMessageQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.GROUP_FIRST_MESSAGE, account, topic]);
-  });
-
-  it("groupPendingMessagesQueryKey should return the correct array", () => {
-    const result = groupPendingMessagesQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.GROUP_PENDING_MESSAGES, account, topic]);
   });
 
   it("groupMembersQueryKey should return the correct array", () => {

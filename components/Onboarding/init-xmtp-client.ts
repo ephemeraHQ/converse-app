@@ -14,7 +14,7 @@ import { saveXmtpKey } from "../../utils/keychain/helpers";
 import logger from "../../utils/logger";
 import { logoutAccount, waitForLogoutTasksDone } from "../../utils/logout";
 import { sentryTrackMessage } from "../../utils/sentry";
-import { getXmtpBase64KeyFromSigner } from "../../utils/xmtpRN/signIn";
+import { createXmtpClientFromSigner } from "../../utils/xmtpRN/signIn";
 import { getXmtpClient } from "../../utils/xmtpRN/sync";
 
 export async function initXmtpClient(args: {
@@ -31,7 +31,7 @@ export async function initXmtpClient(args: {
   }
 
   try {
-    const base64Key = await getXmtpBase64KeyFromSigner(signer, async () => {
+    const base64Key = await createXmtpClientFromSigner(signer, async () => {
       await awaitableAlert(
         translate("current_installation_revoked"),
         translate("current_installation_revoked_description")
