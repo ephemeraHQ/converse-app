@@ -6,9 +6,9 @@ import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
-import { useAppTheme } from "@theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { memo, useCallback, useState } from "react";
-import { StyleSheet, TouchableHighlight } from "react-native";
+import { TextStyle, TouchableHighlight, ViewStyle } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -19,8 +19,7 @@ import {
 } from "./MessageReactionsDrawer.service";
 
 export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
-  const styles = useStyles();
-  const { theme } = useAppTheme();
+  const { theme, themed } = useAppTheme();
   const insets = useSafeAreaInsets();
   const rolledUpReactions = useMessageReactionsRolledUpReactions();
 
@@ -31,19 +30,6 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
 
   // State for managing the active filter, e.g., ❤️, 👍, etc.
   const [filterReactions, setFilterReactions] = useState<string | null>(null);
-
-  // Chip styling
-  const getChipStyle = (reactionContent: string | null) => [
-    styles.chip,
-    filterReactions === reactionContent
-      ? { backgroundColor: theme.colors.border.subtle }
-      : null,
-  ];
-
-  const getChipTextColor = (reactionContent: string | null) =>
-    filterReactions === reactionContent
-      ? { color: theme.colors.text.primary }
-      : { color: theme.colors.text.secondary };
 
   return (
     <BottomSheetModal
@@ -68,14 +54,21 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
           {/* "All" button to clear the filter */}
           <TouchableHighlight
             onPress={() => setFilterReactions(null)}
-            style={getChipStyle(null)}
+            style={[
+              themed($chip),
+              filterReactions === null && themed($chipActive),
+            ]}
             underlayColor={theme.colors.border.subtle}
             accessible
             accessibilityRole="button"
             accessibilityLabel="Show all reactions"
           >
             <HStack style={{ alignItems: "center" }}>
-              <Text style={getChipTextColor(null)}>
+              <Text
+                style={themed(
+                  filterReactions === null ? $chipTextActive : $chipText
+                )}
+              >
                 All {rolledUpReactions.totalCount}
               </Text>
             </HStack>
@@ -90,13 +83,22 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
                   reaction.content === filterReactions ? null : reaction.content
                 )
               }
-              style={getChipStyle(reaction.content)}
+              style={[
+                themed($chip),
+                filterReactions === reaction.content && themed($chipActive),
+              ]}
               underlayColor={theme.colors.border.subtle}
               accessible
               accessibilityRole="button"
               accessibilityLabel={`${reaction.count} ${reaction.content} reactions`}
             >
-              <Text style={getChipTextColor(reaction.content)}>
+              <Text
+                style={themed(
+                  filterReactions === reaction.content
+                    ? $chipTextActive
+                    : $chipText
+                )}
+              >
                 {reaction.content} {reaction.count}
               </Text>
             </TouchableHighlight>
@@ -118,15 +120,15 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
           renderItem={({ item, index }) => (
             <HStack
               key={`${item.content}-${item.reactor.address}-${index}`}
-              style={styles.reaction}
+              style={themed($reaction)}
             >
               <Avatar
                 size={theme.avatarSize.md}
                 uri={item.reactor.avatar}
                 name={item.reactor.userName}
               />
-              <Text style={styles.userName}>{item.reactor.userName}</Text>
-              <Text style={styles.reactionContent}>{item.content}</Text>
+              <Text style={themed($userName)}>{item.reactor.userName}</Text>
+              <Text style={themed($reactionContent)}>{item.content}</Text>
             </HStack>
           )}
           keyExtractor={(item, index) =>
@@ -138,35 +140,50 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
   );
 });
 
-const useStyles = () => {
-  const { theme } = useAppTheme();
+const $chip: ThemedStyle<ViewStyle> = ({
+  spacing,
+  borderRadius,
+  borderWidth,
+  colors,
+}) => ({
+  marginRight: spacing.xxs,
+  marginBottom: spacing.xs,
+  paddingVertical: spacing.xxs,
+  paddingHorizontal: spacing.xs,
+  borderRadius: borderRadius.sm,
+  borderWidth: borderWidth.sm,
+  borderColor: colors.border.subtle,
+});
 
-  return StyleSheet.create({
-    chip: {
-      marginRight: theme.spacing.xxs,
-      marginBottom: theme.spacing.xs,
-      paddingVertical: theme.spacing.xxs,
-      paddingHorizontal: theme.spacing.xs,
-      borderRadius: theme.borderRadius.sm,
-      borderWidth: theme.borderWidth.sm,
-      borderColor: theme.colors.border.subtle,
-    },
-    reaction: {
-      display: "flex",
-      paddingVertical: theme.spacing.xs,
-      paddingHorizontal: theme.spacing.lg,
-      alignItems: "center",
-      gap: theme.spacing.xs,
-    },
-    userName: {
-      flex: 1,
-      display: "flex",
-      alignItems: "flex-end",
-      gap: theme.spacing.xxxs,
-      overflow: "hidden",
-    },
-    reactionContent: {
-      padding: theme.spacing.xxxs,
-    },
-  });
-};
+const $chipActive: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.border.subtle,
+});
+
+const $reaction: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  display: "flex",
+  paddingVertical: spacing.xs,
+  paddingHorizontal: spacing.lg,
+  alignItems: "center",
+  gap: spacing.xs,
+});
+
+const $userName: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
+  flex: 1,
+  display: "flex",
+  alignItems: "flex-end",
+  gap: spacing.xxxs,
+  overflow: "hidden",
+  color: colors.text.primary,
+});
+
+const $reactionContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  padding: spacing.xxxs,
+});
+
+const $chipText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text.secondary,
+});
+
+const $chipTextActive: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text.primary,
+});
