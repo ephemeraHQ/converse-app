@@ -15,6 +15,7 @@ const SIDE_MARGIN = 20;
 const ITEM_WIDTH = 180;
 const AUXILIARY_VIEW_MIN_HEIGHT = 210;
 
+// Context menu gap per platform due to menu shape/size differences
 const MENU_GAP = Platform.select({
   default: 6,
   android: 16,

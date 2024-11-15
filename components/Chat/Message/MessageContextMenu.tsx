@@ -2,6 +2,7 @@ import TableView, { TableViewItemType } from "@components/TableView/TableView";
 import { BlurView } from "@design-system/BlurView";
 import { useAppTheme } from "@theme/useAppTheme";
 import { calculateMenuHeight } from "@utils/contextMenu/calculateMenuHeight";
+// TODO migrate constants to theme
 import {
   AUXILIARY_VIEW_MIN_HEIGHT,
   HOLD_ITEM_TRANSFORM_DURATION,

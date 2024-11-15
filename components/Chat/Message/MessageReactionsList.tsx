@@ -108,7 +108,7 @@ const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
           size={theme.avatarSize.lg}
         />
       </View>
-      <Text style={styles.itemText}>
+      <Text style={{ marginTop: 20 }}>
         {content} {addresses.length}
       </Text>
     </Animated.View>
@@ -291,12 +291,6 @@ const useStyles = () => {
       alignItems: "center",
       width: 76,
       height: 119.5,
-    },
-    itemText: {
-      color: theme.colors.text.primary,
-      fontSize: 16,
-      lineHeight: 20,
-      marginTop: 20,
     },
     container: {
       flex: 1,
