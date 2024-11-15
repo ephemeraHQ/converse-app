@@ -13,7 +13,7 @@ import {
   useState,
 } from "react";
 import { StyleProp, useColorScheme } from "react-native";
-
+import { IAnimation, animation } from "@theme/animations";
 import { ILayout, layout } from "@theme/layout";
 import { IAvatarSize, avatarSize } from "./avatar";
 import { IBorderRadius, borderRadius } from "./border-radius";
@@ -28,7 +28,7 @@ import { ITypography, typography } from "./typography";
 export type ThemeContexts = "light" | "dark" | undefined;
 
 // The overall Theme object should contain all of the data you need to style your app.
-export interface Theme {
+export type Theme = {
   colors: IColors;
   spacing: ISpacing;
   borderRadius: IBorderRadius;
@@ -38,8 +38,9 @@ export interface Theme {
   typography: ITypography;
   timing: Timing;
   layout: ILayout;
+  animation: IAnimation;
   isDark: boolean;
-}
+};
 
 // Here we define our themes.
 export const lightTheme: Theme = {
@@ -52,6 +53,7 @@ export const lightTheme: Theme = {
   iconSize,
   timing,
   layout,
+  animation,
   isDark: false,
 };
 export const darkTheme: Theme = {
@@ -64,6 +66,7 @@ export const darkTheme: Theme = {
   iconSize,
   timing,
   layout,
+  animation,
   isDark: true,
 };
 
@@ -138,7 +141,7 @@ export const useThemeProvider = (initialTheme: ThemeContexts = undefined) => {
   };
 };
 
-interface UseAppThemeValue {
+type UseAppThemeValue = {
   // The theme object from react-navigation
   navTheme: typeof DefaultTheme;
   // A function to set the theme context override (for switching modes)
@@ -153,7 +156,7 @@ interface UseAppThemeValue {
   themed: <T>(
     styleOrStyleFn: ThemedStyle<T> | StyleProp<T> | ThemedStyleArray<T>
   ) => T;
-}
+};
 
 export type IThemed = ReturnType<typeof useAppTheme>["themed"];
 

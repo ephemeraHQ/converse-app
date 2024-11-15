@@ -1,4 +1,9 @@
-import { Easing, FadeInDown, FadeInUp } from "react-native-reanimated";
+import {
+  Easing,
+  FadeInDown,
+  FadeInUp,
+  LinearTransition,
+} from "react-native-reanimated";
 
 import { timing } from "./timing";
 
@@ -8,11 +13,15 @@ export const SICK_DAMPING = 80;
 
 export const SICK_STIFFNESS = 200;
 
-export const animations = {
+export const animation = {
   spring: {
     damping: SICK_DAMPING,
     stiffness: SICK_STIFFNESS,
   },
+
+  springLayoutTransition: LinearTransition.springify()
+    .damping(SICK_DAMPING)
+    .stiffness(SICK_STIFFNESS),
 
   fadeInDownSpring: () =>
     FadeInDown.easing(SICK_EASE_OUT)
@@ -28,3 +37,5 @@ export const animations = {
 
   fadeInDownSlow: () => FadeInDown.duration(timing.slow).easing(SICK_EASE_OUT),
 };
+
+export type IAnimation = typeof animation;

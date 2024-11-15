@@ -1,10 +1,12 @@
 import { useProfilesStore } from "@data/store/accountsStore";
+import { Text } from "@design-system/Text";
+import { VStack } from "@design-system/VStack";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
-import { textSecondaryColor } from "@styles/colors";
+import { useAppTheme } from "@theme/useAppTheme";
 import { getPreferredName, getProfile } from "@utils/profile";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
-import { StyleSheet, useColorScheme, View, Text } from "react-native";
+import { StyleSheet } from "react-native";
 
 type MessageSenderDumbProps = {
   name: string;
@@ -13,9 +15,11 @@ type MessageSenderDumbProps = {
 export const MessageSenderDumb = ({ name }: MessageSenderDumbProps) => {
   const styles = useStyles();
   return (
-    <View style={styles.groupSenderWrapper}>
-      <Text style={styles.groupSender}>{name}</Text>
-    </View>
+    <VStack style={styles.groupSenderContainer}>
+      <Text preset="smaller" color="secondary">
+        {name}
+      </Text>
+    </VStack>
   );
 };
 
@@ -41,21 +45,18 @@ export const V3MessageSender = ({ inboxId }: V3MessageSenderProps) => {
 };
 
 const useStyles = () => {
-  const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
+
   return useMemo(
     () =>
       StyleSheet.create({
-        groupSenderWrapper: {
+        groupSenderContainer: {
           flexDirection: "row",
           flexBasis: "100%",
-        },
-        groupSender: {
-          fontSize: 12,
-          color: textSecondaryColor(colorScheme),
-          marginLeft: 10,
-          marginVertical: 4,
+          marginLeft: theme.spacing.xs,
+          marginBottom: theme.spacing.xxxs,
         },
       }),
-    [colorScheme]
+    [theme]
   );
 };

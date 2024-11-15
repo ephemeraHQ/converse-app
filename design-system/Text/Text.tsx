@@ -1,10 +1,9 @@
 import React from "react";
 import { Text as RNText, StyleProp, TextStyle } from "react-native";
-
-import { ITextProps } from "./Text.props";
-import { getTextStyle } from "./Text.utils";
 import { translate } from "../../i18n";
 import { useAppTheme } from "../../theme/useAppTheme";
+import { ITextProps } from "./Text.props";
+import { getTextStyle } from "./Text.utils";
 
 export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
   const {
@@ -33,7 +32,12 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
   });
 
   return (
-    <RNText ref={ref} {...rest} style={styles}>
+    <RNText
+      ref={ref}
+      style={styles}
+      suppressHighlighting={true} // Don't like the default highlight on press
+      {...rest}
+    >
       {content}
     </RNText>
   );
