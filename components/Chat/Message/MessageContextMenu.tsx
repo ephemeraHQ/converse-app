@@ -1,11 +1,9 @@
-import { AnimatedBlurView } from "@components/AnimatedBlurView";
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
-import { backgroundColor } from "@styles/colors";
+import { BlurView } from "@design-system/BlurView";
+import { useAppTheme } from "@theme/useAppTheme";
 import { calculateMenuHeight } from "@utils/contextMenu/calculateMenuHeight";
 import {
   AUXILIARY_VIEW_MIN_HEIGHT,
-  BACKDROP_DARK_BACKGROUND_COLOR,
-  BACKDROP_LIGHT_BACKGROUND_COLOR,
   HOLD_ITEM_TRANSFORM_DURATION,
   ITEM_WIDTH,
   OUTTER_SPACING,
@@ -27,7 +25,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Portal } from "react-native-paper";
 import Animated, {
   SharedValue,
-  useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -63,13 +60,13 @@ const BackdropComponent: FC<{
   /* Portal is eating the context so passing down context values
     If it causes too many rerenders we could just pass down a
     few needed context values but painful to maintain */
+  const { theme } = useAppTheme();
   const conversationContext = useContext(ConversationContext);
   const activeValue = useSharedValue(false);
   const opacityValue = useSharedValue(0);
   const intensityValue = useSharedValue(0);
   const { height, width } = useWindowDimensions();
   const safeAreaInsets = useSafeAreaInsets();
-  const styles = useStyles();
 
   useEffect(() => {
     activeValue.value = isActive;
@@ -85,21 +82,7 @@ const BackdropComponent: FC<{
     return calculateMenuHeight(items.length);
   }, [items]);
 
-  const animatedContainerProps = useAnimatedProps(() => {
-    return {
-      intensity: intensityValue.value,
-    };
-  });
   const colorScheme = useColorScheme();
-
-  const animatedInnerContainerStyle = useAnimatedStyle(() => {
-    const backgroundColor =
-      colorScheme === "dark"
-        ? BACKDROP_DARK_BACKGROUND_COLOR
-        : BACKDROP_LIGHT_BACKGROUND_COLOR;
-
-    return { backgroundColor };
-  }, []);
 
   // Attribution Panel + Emoji Picker
 
@@ -294,16 +277,10 @@ const BackdropComponent: FC<{
     <Portal>
       {/* Portal is eating the context so passing down context values */}
       <ConversationContext.Provider value={conversationContext}>
-        <GestureHandlerRootView style={styles.gestureHandlerContainer}>
-          <AnimatedBlurView
-            tint="default"
-            style={styles.flex}
-            animatedProps={animatedContainerProps}
-          >
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <BlurView isAbsolute>
             <TouchableWithoutFeedback onPress={onClose}>
-              <Animated.View
-                style={[StyleSheet.absoluteFill, animatedInnerContainerStyle]}
-              >
+              <Animated.View style={StyleSheet.absoluteFill}>
                 <Animated.View style={animatedPortalStyle}>
                   {children}
                 </Animated.View>
@@ -311,37 +288,25 @@ const BackdropComponent: FC<{
                   {auxiliaryView}
                 </Animated.View>
                 <Animated.View style={animatedMenuStyle}>
-                  <TableView style={styles.table} items={items} />
+                  <TableView
+                    items={items}
+                    style={{
+                      width: ITEM_WIDTH,
+                      backgroundColor:
+                        Platform.OS === "android"
+                          ? theme.colors.background.raised
+                          : undefined,
+                      borderRadius: Platform.OS === "android" ? 10 : undefined,
+                    }}
+                  />
                 </Animated.View>
               </Animated.View>
             </TouchableWithoutFeedback>
-          </AnimatedBlurView>
+          </BlurView>
         </GestureHandlerRootView>
       </ConversationContext.Provider>
     </Portal>
   );
-};
-
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    container: {
-      ...StyleSheet.absoluteFillObject,
-      zIndex: 0,
-    },
-    gestureHandlerContainer: {
-      flex: 1,
-    },
-    flex: {
-      flex: 1,
-    },
-    table: {
-      width: ITEM_WIDTH,
-      backgroundColor:
-        Platform.OS === "android" ? backgroundColor(colorScheme) : undefined,
-      borderRadius: Platform.OS === "android" ? 10 : undefined,
-    },
-  });
 };
 
 export const MessageContextMenu = memo(BackdropComponent);
