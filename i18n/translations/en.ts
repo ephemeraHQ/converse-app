@@ -330,7 +330,9 @@ export const en = {
     "Connect the wallet associated with your XMTP account: {{wallet}}",
 
   // Emoji Picker
+  choose_reaction: "Choose a reaction",
   search_emojis: "Search emojis",
+  emoji_picker_all: "All",
 
   // Chat null state
   connectWithYourNetwork: "Find your frens",
