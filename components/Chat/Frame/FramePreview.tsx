@@ -36,7 +36,7 @@ export default function FramePreview({
   messageFromMe: boolean;
 }) {
   const styles = useStyles();
-  const conversation = useConversationContext("conversation");
+  // const conversation = useConversationContext("conversation");
   const setFrameTextInputFocused = useConversationContext(
     "setFrameTextInputFocused"
   );
@@ -157,7 +157,7 @@ export default function FramePreview({
         }
         return;
       }
-      if (!conversation) return;
+      // if (!conversation) return;
       setPostingActionForButton(button.index);
       // https://github.com/open-frames/standard?tab=readme-ov-file#determining-the-post_url
       let actionPostUrl =
@@ -166,14 +166,15 @@ export default function FramePreview({
         frame.frameInfo?.postUrl ||
         initialFrame.url;
       try {
-        const participantAccountAddresses: string[] = conversation.isGroup
-          ? conversation.groupMembers || []
-          : [account, conversation.peerAddress];
+        // const participantAccountAddresses: string[] = conversation.isGroup
+        //   ? conversation.groupMembers || []
+        //   : [account, conversation.peerAddress];
+        // TODO: Frames when supported by V3
         const actionInput: FrameActionInputs = {
           frameUrl: actionPostUrl,
           buttonIndex: button.index,
           conversationTopic: messageTopic,
-          participantAccountAddresses,
+          participantAccountAddresses: [],
           state: frame.frameInfo?.state,
         };
         if (textInput) {
@@ -284,7 +285,6 @@ export default function FramePreview({
     },
     [
       account,
-      conversation,
       frame,
       frameTextInputValue,
       handleTxAction,

@@ -10,6 +10,7 @@ import {
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import logger from "@utils/logger";
 import { formatGroupName } from "@utils/str";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import React, { FC, useCallback, useMemo, useState } from "react";
 import {
   StyleSheet,
@@ -20,9 +21,9 @@ import {
   Pressable,
 } from "react-native";
 
-interface GroupScreenNameProps {
-  topic: string;
-}
+type GroupScreenNameProps = {
+  topic: ConversationTopic;
+};
 
 export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
   const styles = useStyles();

@@ -1,17 +1,13 @@
-import { ChatPreview } from "@components/Chat/Chat";
+// import { ChatPreview } from "@components/Chat/Chat";
 import { EmojiPicker } from "@containers/EmojiPicker";
-import {
-  currentAccount,
-  useChatStore,
-  useSettingsStore,
-} from "@data/store/accountsStore";
+import { useChatStore, useSettingsStore } from "@data/store/accountsStore";
 import { MediaPreview } from "@data/store/chatStore";
 import { useSelect } from "@data/store/storeHelpers";
+import { Text } from "@design-system/Text";
 import { backgroundColor, headerTitleStyle } from "@styles/colors";
 import { ConversationContext } from "@utils/conversation";
 import { setTopicToNavigateTo, topicToNavigateTo } from "@utils/navigation";
 import { TextInputWithValue } from "@utils/str";
-import { loadOlderMessages } from "@utils/xmtpRN/messages";
 import React, {
   useCallback,
   useEffect,
@@ -29,14 +25,6 @@ export const ConversationReadOnly: React.FC<{
   const [frameTextInputFocused, setFrameTextInputFocused] = useState(false);
   const tagsFetchedOnceForMessage = useRef<{ [messageId: string]: boolean }>(
     {}
-  );
-
-  const { conversations, conversationsMapping } = useChatStore(
-    useSelect([
-      "conversations",
-      "conversationsMapping",
-      "lastUpdateAt", // Added even if unused to trigger a rerender
-    ])
   );
 
   // Initial conversation topic is be set from the 'topic' prop
@@ -117,10 +105,7 @@ export const ConversationReadOnly: React.FC<{
   useEffect(() => {
     if (conversation) {
       // On load, we mark the conversation as read and as opened
-      useChatStore.getState().setOpenedConversationTopic(conversation.topic);
-
-      // On Web this loads them from network, on mobile from local db
-      loadOlderMessages(currentAccount(), conversation.topic);
+      // useChatStore.getState().setOpenedConversationTopic(conversation.topic);
 
       // If we are navigating to a conversation, we reset the topic to navigate to
       if (topicToNavigateTo === conversation.topic) {
@@ -134,7 +119,6 @@ export const ConversationReadOnly: React.FC<{
       {conversationTopic ? (
         <ConversationContext.Provider
           value={{
-            conversation,
             messageToPrefill,
             inputRef: textInputRef,
             mediaPreviewToPrefill,
@@ -146,7 +130,9 @@ export const ConversationReadOnly: React.FC<{
             tagsFetchedOnceForMessage,
           }}
         >
-          <ChatPreview />
+          <Text>Conversation Read Only</Text>
+          {/* TODO: Add the conversation preview */}
+          {/* <ChatPreview /> */}
         </ConversationContext.Provider>
       ) : (
         <View style={styles.filler} />

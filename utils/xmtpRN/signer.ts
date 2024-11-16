@@ -1,11 +1,16 @@
 import type { Signer as XmtpSigner } from "@xmtp/react-native-sdk";
 import type { Signer } from "ethers";
-export const convertEthersSignerToXmtpSigner = (signer: Signer): XmtpSigner => {
+import { ethereum } from "thirdweb/chains";
+
+export const convertEthersSignerToXmtpSigner = (
+  signer: Signer,
+  isSCW: boolean = false
+): XmtpSigner => {
   return {
-    getAddress: signer.getAddress,
-    signMessage: signer.signMessage,
-    getChainId: () => undefined,
+    getAddress: () => signer.getAddress(),
+    signMessage: (message: string) => signer.signMessage(message),
+    getChainId: () => ethereum.id,
     getBlockNumber: () => undefined,
-    walletType: () => "EOA",
+    walletType: () => (isSCW ? "SCW" : "EOA"),
   };
 };

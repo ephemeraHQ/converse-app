@@ -1,7 +1,7 @@
 import { InboxId } from "@xmtp/react-native-sdk";
 
 import { getXmtpClient } from "./sync";
-import { ConverseXmtpClientType } from "./client";
+import { ConverseXmtpClientType, DmWithCodecsType } from "./client";
 import logger from "@utils/logger";
 
 type ConsentType = "allow" | "deny";
@@ -85,11 +85,17 @@ export const consentToAddressesOnProtocol = async ({
   );
 };
 
-export const consentToAddressesOnProtocolByAccount = async (
-  account: string,
-  addresses: string[],
-  consent: ConsentType
-) => {
+type ConsentToAddressesOnProtocolByAccountParams = {
+  account: string;
+  addresses: string[];
+  consent: ConsentType;
+};
+
+export const consentToAddressesOnProtocolByAccount = async ({
+  account,
+  addresses,
+  consent,
+}: ConsentToAddressesOnProtocolByAccountParams) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   if (!client) {
     throw new Error("Client not found");
@@ -141,11 +147,17 @@ export const consentToInboxIdsOnProtocol = async ({
   );
 };
 
-export const consentToInboxIdsOnProtocolByAccount = async (
-  account: string,
-  inboxIds: InboxId[],
-  consent: ConsentType
-) => {
+type ConsentToInboxIdsOnProtocolByAccountParams = {
+  account: string;
+  inboxIds: InboxId[];
+  consent: ConsentType;
+};
+
+export const consentToInboxIdsOnProtocolByAccount = async ({
+  account,
+  inboxIds,
+  consent,
+}: ConsentToInboxIdsOnProtocolByAccountParams) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   if (!client) {
     throw new Error("Client not found");
@@ -222,7 +234,7 @@ export const canMessage = async ({ peer, client }: CanMessageParams) => {
       (end - start) / 1000
     } sec`
   );
-  return canMessage;
+  return canMessage[peer.toLowerCase()];
 };
 
 type CanMessageByAccountParams = {
@@ -239,4 +251,8 @@ export const canMessageByAccount = async ({
     throw new Error("Client not found");
   }
   return canMessage({ client, peer });
+};
+
+export const getDmPeerInbox = async (dm: DmWithCodecsType) => {
+  return dm.peerInboxId();
 };

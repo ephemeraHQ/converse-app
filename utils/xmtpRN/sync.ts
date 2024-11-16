@@ -7,7 +7,7 @@ import { AppState } from "react-native";
 import { xmtpSignatureByAccount } from "./api";
 import {
   ConverseXmtpClientType,
-  getXmtpClientFromBase64Key,
+  getXmtpClientFromAddress,
   reconnectXmtpClientsDbConnections,
   xmtpClientByAccount,
 } from "./client";
@@ -46,19 +46,13 @@ export const getXmtpClient = async (
   }
   instantiatingClientForAccount[account] = (async () => {
     try {
-      logger.debug("[XmtpRN] Loading base64 key");
-      const base64Key = await loadXmtpKey(account);
-      if (base64Key) {
-        logger.debug("[XmtpRN] Getting client from base64 key");
-        const client = await getXmtpClientFromBase64Key(base64Key);
-        logger.info(`[XmtpRN] Instantiated client for ${client.address}`);
-        getChatStore(account).getState().setLocalClientConnected(true);
-        getChatStore(account).getState().setErrored(false);
-        xmtpClientByAccount[client.address] = client;
-        return client;
-      } else {
-        throw new Error(`[XmtpRN] No client found for ${account}`);
-      }
+      logger.debug("[XmtpRN] Getting client from address");
+      const client = await getXmtpClientFromAddress(account);
+      logger.info(`[XmtpRN] Instantiated client for ${client.address}`);
+      getChatStore(account).getState().setLocalClientConnected(true);
+      getChatStore(account).getState().setErrored(false);
+      xmtpClientByAccount[client.address] = client;
+      return client;
     } catch (e: any) {
       getChatStore(account).getState().setErrored(true);
       throw e;
@@ -118,7 +112,7 @@ export const onSyncLost = async (account: string, error: any) => {
 
 const streamingAccounts: { [account: string]: boolean } = {};
 
-export const syncClientConversationList = async (account: string) => {
+const syncClientConversationList = async (account: string) => {
   try {
     // Load the persisted conversation list
     await fetchPersistedConversationListQuery(account);

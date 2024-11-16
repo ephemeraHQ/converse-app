@@ -1,19 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { groupPinnedFrameQueryKey } from "./QueryKeys";
-import { useGroupQuery } from "./useGroupQuery";
+import { useGroupQuery } from "@queries/useGroupQuery";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
-export const useGroupPinnedFrameQuery = (account: string, topic: string) => {
+export const useGroupPinnedFrameQuery = (
+  account: string,
+  topic: ConversationTopic | undefined
+) => {
   const { data: group } = useGroupQuery(account, topic);
   return useQuery({
-    queryKey: groupPinnedFrameQueryKey(account, topic),
+    queryKey: groupPinnedFrameQueryKey(account, topic!),
     queryFn: async () => {
-      if (!group) {
+      if (!group || !topic) {
         return;
       }
       return "";
       // return group.groupPinnedFrame();
     },
-    enabled: !!group,
+    enabled: !!group && !!topic,
   });
 };

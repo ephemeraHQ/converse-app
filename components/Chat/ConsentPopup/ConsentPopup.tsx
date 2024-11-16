@@ -17,13 +17,18 @@ import {
 } from "../../../data/store/accountsStore";
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../../utils/conversation";
-import { consentToPeersOnProtocol } from "../../../utils/xmtpRN/conversations";
+import {
+  consentToAddressesOnProtocolByAccount,
+  consentToInboxIdsOnProtocolByAccount,
+} from "../../../utils/xmtpRN/contacts";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
+import { DmWithCodecsType } from "@utils/xmtpRN/client";
 
-export default function ConsentPopup() {
-  const conversation = useConversationContext("conversation");
-  const isBlockedPeer = useConversationContext("isBlockedPeer");
+type ConsentPopupProps = {
+  conversation: DmWithCodecsType;
+};
 
+export default function ConsentPopup({ conversation }: ConsentPopupProps) {
   const navigation = useNavigation() as NativeStackNavigationProp<
     NavigationParamList,
     "Chats",
@@ -34,21 +39,10 @@ export default function ConsentPopup() {
   const colorScheme = useColorScheme();
 
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
-  const { peersStatus } = getSettingsStore(currentAccount()).getState();
-  const thisPeerStatus = conversation?.peerAddress
-    ? peersStatus[conversation.peerAddress.toLowerCase()]
-    : "";
+  const thisPeerStatus = conversation.state;
 
   // Determine whether to show the consent window based on various conditions
-  const shouldShowConsentWindow =
-    conversation &&
-    conversation.messages.size > 0 &&
-    thisPeerStatus !== "consented" &&
-    !isBlockedPeer &&
-    !conversation.pending &&
-    !conversation.hasOneMessageFromMe &&
-    !conversation.isGroup;
-
+  const shouldShowConsentWindow = conversation && thisPeerStatus !== "allowed";
   if (!shouldShowConsentWindow) {
     // Consent window will not be displayed
     return null;
@@ -73,14 +67,14 @@ export default function ConsentPopup() {
                 title: translate("if_you_block_contact"),
                 ...actionSheetColors(colorScheme),
               },
-              (selectedIndex?: number) => {
-                if (selectedIndex === 0 && conversation.peerAddress) {
-                  consentToPeersOnProtocol(
-                    currentAccount(),
-                    [conversation.peerAddress],
-                    "deny"
-                  );
-                  setPeersStatus({ [conversation.peerAddress]: "blocked" });
+              async (selectedIndex?: number) => {
+                if (selectedIndex === 0) {
+                  const inboxId = await conversation.peerInboxId();
+                  consentToInboxIdsOnProtocolByAccount({
+                    account: currentAccount(),
+                    inboxIds: [inboxId],
+                    consent: "deny",
+                  });
                   navigation.pop();
                 }
               }
@@ -92,14 +86,13 @@ export default function ConsentPopup() {
           picto="checkmark"
           text={translate("accept")}
           style={styles.cta}
-          onPress={() => {
-            if (!conversation.peerAddress) return;
-            consentToPeersOnProtocol(
-              currentAccount(),
-              [conversation.peerAddress],
-              "allow"
-            );
-            setPeersStatus({ [conversation.peerAddress]: "consented" });
+          onPress={async () => {
+            const inboxId = await conversation.peerInboxId();
+            consentToInboxIdsOnProtocolByAccount({
+              account: currentAccount(),
+              inboxIds: [inboxId],
+              consent: "allow",
+            });
           }}
         />
       </View>

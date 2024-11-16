@@ -1,6 +1,6 @@
 import { ConversationFlatListItem } from "@utils/conversation";
-import { ConversationContainerWithCodecsType } from "@utils/xmtpRN/client";
+import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
 
 export type FlatListItemType =
   | ConversationFlatListItem
-  | ConversationContainerWithCodecsType;
+  | ConversationWithCodecsType;

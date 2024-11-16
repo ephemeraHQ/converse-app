@@ -45,11 +45,11 @@ const codecs = [
 
 export type SupportedCodecsType = typeof codecs;
 
-export const getXmtpClientFromBase64Key = async (base64Key: string) => {
+export const getXmtpClientFromAddress = async (address: string) => {
   const dbDirectory = await getDbDirectory();
   const dbEncryptionKey = await getDbEncryptionKey();
 
-  return Client.build(base64Key, {
+  return Client.build(address, {
     env,
     codecs,
     dbDirectory,

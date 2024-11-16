@@ -17,7 +17,6 @@ import {
 import { initWalletStore, WalletStoreType } from "./walletStore";
 import { removeLogoutTask } from "../../utils/logout";
 import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
-import { updateSteps } from "../updates/asyncUpdates";
 
 type AccountStoreType = {
   [K in keyof AccountStoreDataType]: UseBoundStore<
@@ -153,9 +152,9 @@ export const useAccountsStore = create<AccountsStoreStype>()(
             databaseId[account] = uuidv4();
             removeLogoutTask(account);
             // Init lastAsyncUpdate so no async migration is run for new accounts
-            getSettingsStore(account)
-              .getState()
-              .setLastAsyncUpdate(updateSteps.length);
+            // getSettingsStore(account)
+            //   .getState()
+            //   .setLastAsyncUpdate(updateSteps.length);
             return {
               // No setting anymore because we want to refresh profile first
               // currentAccount: account,

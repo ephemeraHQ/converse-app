@@ -4,11 +4,11 @@ import { invalidateGroupMembersQuery } from "@queries/useGroupMembersQuery";
 import { invalidateGroupNameQuery } from "@queries/useGroupNameQuery";
 import { invalidateGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
-import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
+import { ConversationTopic, GroupUpdatedContent } from "@xmtp/react-native-sdk";
 
 export const handleGroupUpdatedMessage = async (
   account: string,
-  topic: string,
+  topic: ConversationTopic,
   message: DecodedMessageWithCodecsType
 ) => {
   if (!message.contentTypeId.includes("group_updated")) return;

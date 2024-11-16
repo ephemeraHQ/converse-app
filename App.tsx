@@ -1,5 +1,4 @@
 import "expo-dev-client";
-import "reflect-metadata";
 import "./polyfills";
 
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
@@ -29,7 +28,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
 
-import { xmtpCron, xmtpEngine } from "./components/XmtpEngine";
+import { xmtpEngine } from "./components/XmtpEngine";
 import config from "./config";
 import {
   TEMPORARY_ACCOUNT_NAME,
@@ -38,10 +37,6 @@ import {
 import { useAppStore } from "./data/store/appStore";
 import { setAuthStatus } from "./data/store/authStore";
 import { useSelect } from "./data/store/storeHelpers";
-import {
-  runAsyncUpdates,
-  updateLastVersionOpen,
-} from "./data/updates/asyncUpdates";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
@@ -65,7 +60,6 @@ initSentry();
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
 
 xmtpEngine.start();
-xmtpCron.start();
 
 const App = () => {
   const styles = useStyles();
@@ -90,20 +84,6 @@ const App = () => {
       converseEventEmitter.off("showDebugMenu", showDebugMenu);
     };
   }, [showDebugMenu]);
-
-  const { isInternetReachable, hydrationDone } = useAppStore(
-    useSelect(["isInternetReachable", "hydrationDone"])
-  );
-
-  useEffect(updateLastVersionOpen, []);
-
-  useEffect(() => {
-    if (isInternetReachable && hydrationDone) {
-      runAsyncUpdates().catch((e) => {
-        logger.error(e);
-      });
-    }
-  }, [isInternetReachable, hydrationDone]);
 
   // For now we use persit with zustand to get the accounts when the app launch so here is okay to see if we're logged in or not
   useEffect(() => {

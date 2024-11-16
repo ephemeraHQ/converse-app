@@ -1,18 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, TextInput } from "react-native";
 
-import { getLensHandleFromConversationIdAndPeer } from "./lens";
 import logger from "./logger";
-import {
-  currentAccount,
-  getProfilesStore,
-  useAccountsList,
-} from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
-import { ProfileSocials, ProfilesStoreType } from "../data/store/profilesStore";
+import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
+import { ProfilesStoreType } from "../data/store/profilesStore";
 import { getProfile } from "./profile/getProfile";
 import { getPreferredName } from "./profile/getPreferredName";
-import { shortAddress } from "./strings/shortAddress";
 
 const { humanize } = require("../vendor/humanhash");
 
@@ -42,42 +35,6 @@ export const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
 
 export const addressPrefix = (address: string) =>
   (address && address.length >= 6 ? address.slice(0, 6) : address) || "";
-
-export const conversationName = (
-  conversation: XmtpConversation,
-  _socials?: ProfileSocials
-) => {
-  if (conversation.isGroup) {
-    return (
-      conversation.groupName ||
-      capitalize(humanize(conversation.topic.slice(14, 46), 3, " "))
-    );
-  }
-
-  const socials =
-    _socials ||
-    getProfile(
-      conversation.peerAddress,
-      getProfilesStore(currentAccount()).getState().profiles
-    )?.socials;
-
-  if (socials) {
-    if (conversation.context?.conversationId?.startsWith("lens.dev")) {
-      const lensHandle = getLensHandleFromConversationIdAndPeer(
-        conversation.context.conversationId,
-        socials.lensHandles
-      );
-      if (lensHandle) {
-        return lensHandle;
-      }
-    }
-    const preferredName = getPreferredName(socials, conversation.peerAddress);
-    return preferredName;
-  }
-
-  const short = shortAddress(conversation.peerAddress);
-  return short;
-};
 
 export const formatGroupName = (topic: string, groupName?: string) =>
   groupName || capitalize(humanize(topic.slice(14, 46), 3, " "));

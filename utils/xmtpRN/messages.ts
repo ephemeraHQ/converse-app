@@ -5,9 +5,10 @@ import { getXmtpClient } from "./sync";
 
 import config from "../../config";
 
-import { addGroupMessage } from "@queries/useGroupMessages";
+import { addConversationMessage } from "@queries/useConversationMessages";
 import { updateMessageToConversationListQuery } from "@queries/useV3ConversationListQuery";
 import { handleGroupUpdatedMessage } from "@data/helpers/messages/handleGroupUpdatedMessage";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const streamAllMessages = async (account: string) => {
   await stopStreamingAllMessage(account);
@@ -20,9 +21,17 @@ export const streamAllMessages = async (account: string) => {
       topic: message.topic,
     });
     if (message.contentTypeId.includes("group_updated")) {
-      handleGroupUpdatedMessage(client.address, message.topic, message);
+      handleGroupUpdatedMessage(
+        client.address,
+        message.topic as ConversationTopic,
+        message
+      );
     }
-    addGroupMessage(client.address, message.topic, message);
+    addConversationMessage(
+      client.address,
+      message.topic as ConversationTopic,
+      message
+    );
     updateMessageToConversationListQuery(client.address, message);
     return;
   });

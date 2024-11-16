@@ -12,8 +12,8 @@ import {
 import { useConnectViaWalletContext } from "./ConnectViaWallet.context";
 import { ensureError } from "../../../utils/error";
 import { thirdwebClient } from "../../../utils/thirdweb";
-import { isOnXmtp } from "../../../utils/xmtpRN/client";
 import { getInboxId } from "../../../utils/xmtpRN/signIn";
+import { canMessageByAccount } from "@utils/xmtpRN/contacts";
 
 /**
  * For now let's keep Thirdweb and the hooks because I haven't found a better way to do it.
@@ -85,7 +85,7 @@ export function useInitConnectViaWalletState(args: { address: string }) {
         setIsInitializing(true);
 
         const [isOnNetwork, inboxId] = await Promise.all([
-          isOnXmtp(address),
+          canMessageByAccount({ account: address, peer: address }),
           getInboxId(address),
         ]);
 

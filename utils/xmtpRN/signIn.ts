@@ -37,7 +37,8 @@ export const createXmtpClientFromSigner = async (
   await copyDatabasesToTemporaryDirectory(tempDirectory, inboxId);
 
   logger.debug("Instantiating client from signer");
-  const client = await Client.create(convertEthersSignerToXmtpSigner(signer), {
+  const xmtpSigner = convertEthersSignerToXmtpSigner(signer, false);
+  const client = await Client.create(xmtpSigner, {
     ...options,
     preAuthenticateToInboxCallback,
   });
