@@ -6,38 +6,40 @@ import {
 
 import { groupNameQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
-import { useGroupConversationScreenQuery } from "./useGroupQuery";
+import { useConversationScreenQuery } from "./useConversationQuery";
+import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 
 export const useGroupNameQuery = (
   account: string,
-  topic: string,
-  queryOptions?: Partial<
-    UseQueryOptions<string | undefined, Error, string | undefined>
-  >
+  topic: ConversationTopic,
+  queryOptions?: Partial<UseQueryOptions<string | null, Error, string | null>>
 ) => {
-  const { data: group } = useGroupConversationScreenQuery(account, topic);
+  const { data: conversation } = useConversationScreenQuery(account, topic);
   return useQuery({
     queryKey: groupNameQueryKey(account, topic),
     queryFn: async () => {
-      if (!group) {
-        return;
+      if (!conversation || conversation.version !== ConversationVersion.GROUP) {
+        return null;
       }
-      return group.groupName();
+      return conversation.groupName();
     },
-    enabled: !!group && !!account,
+    enabled:
+      !!conversation &&
+      conversation.version === ConversationVersion.GROUP &&
+      !!account,
     ...queryOptions,
   });
 };
 
 export const getGroupNameQueryData = (
   account: string,
-  topic: string
+  topic: ConversationTopic
 ): string | undefined =>
   queryClient.getQueryData(groupNameQueryKey(account, topic));
 
 export const setGroupNameQueryData = (
   account: string,
-  topic: string,
+  topic: ConversationTopic,
   groupName: string,
   options?: SetDataOptions
 ) => {
@@ -48,7 +50,10 @@ export const setGroupNameQueryData = (
   );
 };
 
-export const cancelGroupNameQuery = async (account: string, topic: string) => {
+export const cancelGroupNameQuery = async (
+  account: string,
+  topic: ConversationTopic
+) => {
   await queryClient.cancelQueries({
     queryKey: groupNameQueryKey(account, topic),
   });
@@ -56,7 +61,7 @@ export const cancelGroupNameQuery = async (account: string, topic: string) => {
 
 export const invalidateGroupNameQuery = async (
   account: string,
-  topic: string
+  topic: ConversationTopic
 ) => {
   return queryClient.invalidateQueries({
     queryKey: groupNameQueryKey(account, topic),

@@ -4,10 +4,11 @@ import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 
 import { emojis } from "./emojis/emojis";
 import logger from "./logger";
-import { sendMessage } from "./message";
+// import { sendMessage } from "./message";
 import { getMessageContentType } from "./xmtpRN/contentTypes";
 import { XmtpMessage } from "../data/store/chatStore";
 import { isAttachmentMessage } from "./attachment/isAttachmentMessage";
+import { sendMessage } from "./xmtpRN/send";
 
 export type MessageReaction = {
   action: "added" | "removed";
@@ -137,22 +138,22 @@ export const addReactionToMessage = (
   message: XmtpMessage,
   emoji: string
 ) => {
-  const conversation =
-    getChatStore(account).getState().conversations[message.topic];
-  if (!conversation) throw new Error("No conversation found");
-  const contentFallback = getReactionsContentPreview(message, emoji);
-  sendMessage({
-    conversation,
-    content: JSON.stringify({
-      reference: message.id,
-      action: "added",
-      content: emoji,
-      schema: "unicode",
-    }),
-    contentType: ContentTypeReaction.toString(),
-    contentFallback,
-    referencedMessageId: message.id,
-  });
+  // const conversation =
+  //   getChatStore(account).getState().conversations[message.topic];
+  // if (!conversation) throw new Error("No conversation found");
+  // const contentFallback = getReactionsContentPreview(message, emoji);
+  // sendMessage({
+  //   conversation,
+  //   content: JSON.stringify({
+  //     reference: message.id,
+  //     action: "added",
+  //     content: emoji,
+  //     schema: "unicode",
+  //   }),
+  //   contentType: ContentTypeReaction.toString(),
+  //   contentFallback,
+  //   referencedMessageId: message.id,
+  // });
 };
 
 export const removeReactionFromMessage = (
@@ -160,24 +161,24 @@ export const removeReactionFromMessage = (
   message: XmtpMessage,
   emoji: string
 ) => {
-  const conversation =
-    getChatStore(account).getState().conversations[message.topic];
-  if (!conversation) throw new Error("No conversation found");
-  const isAttachment = isAttachmentMessage(message.contentType);
-  sendMessage({
-    conversation,
-    content: JSON.stringify({
-      reference: message.id,
-      action: "removed",
-      content: emoji,
-      schema: "unicode",
-    }),
-    contentType: ContentTypeReaction.toString(),
-    contentFallback: isAttachment
-      ? translate("removed_reaction_to_attachment")
-      : translate("removed_reaction_to", {
-          content: message.content,
-        }),
-    referencedMessageId: message.id,
-  });
+  // const conversation =
+  //   getChatStore(account).getState().conversations[message.topic];
+  // if (!conversation) throw new Error("No conversation found");
+  // const isAttachment = isAttachmentMessage(message.contentType);
+  // sendMessage({
+  //   conversation,
+  //   content: JSON.stringify({
+  //     reference: message.id,
+  //     action: "removed",
+  //     content: emoji,
+  //     schema: "unicode",
+  //   }),
+  //   contentType: ContentTypeReaction.toString(),
+  //   contentFallback: isAttachment
+  //     ? translate("removed_reaction_to_attachment")
+  //     : translate("removed_reaction_to", {
+  //         content: message.content,
+  //       }),
+  //   referencedMessageId: message.id,
+  // });
 };

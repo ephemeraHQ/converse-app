@@ -23,10 +23,7 @@ import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "../../data/store/accountsStore";
-import {
-  consentToPeersOnProtocol,
-  updateConsentStatus,
-} from "../../utils/xmtpRN/conversations";
+import { consentToAddressesOnProtocolByAccount } from "../../utils/xmtpRN/contacts";
 import { useRequestItems } from "../../features/conversation-requests-list/useRequestItems";
 
 export default function ConversationRequestsListNav() {
@@ -57,8 +54,11 @@ export default function ConversationRequestsListNav() {
             )
           )
         ).filter((peer) => !!peer) as string[];
-        await consentToPeersOnProtocol(account, peers, "deny");
-        await updateConsentStatus(account);
+        await consentToAddressesOnProtocolByAccount({
+          account,
+          addresses: peers,
+          consent: "deny",
+        });
         setClearingAll(false);
         navRef.current?.goBack();
       },

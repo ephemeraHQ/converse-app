@@ -21,11 +21,9 @@ import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "../../data/store/accountsStore";
-import {
-  consentToPeersOnProtocol,
-  updateConsentStatus,
-} from "../../utils/xmtpRN/conversations";
+import { consentToAddressesOnProtocolByAccount } from "../../utils/xmtpRN/contacts";
 import { useRequestItems } from "../../features/conversation-requests-list/useRequestItems";
+import { FlatListItemType } from "../../features/conversation-list/ConversationList.types";
 
 // TODO: Remove iOS-specific code due to the existence of a .ios file
 // TODO: Alternatively, implement an Android equivalent for the segmented controller
@@ -59,8 +57,11 @@ export default function ConversationRequestsListNav() {
             )
           )
         ).filter((peer) => !!peer) as string[];
-        await consentToPeersOnProtocol(account, peers, "deny");
-        await updateConsentStatus(account);
+        await consentToAddressesOnProtocolByAccount({
+          account,
+          addresses: peers,
+          consent: "deny",
+        });
         setClearingAll(false);
         navRef.current?.goBack();
       },
@@ -134,7 +135,7 @@ export default function ConversationRequestsListNav() {
     <NativeStack.Screen name="ChatsRequests" options={navigationOptions}>
       {(navigationProps) => {
         navRef.current = navigationProps.navigation;
-        let items = likelyNotSpam;
+        let items: FlatListItemType[] = likelyNotSpam;
         if (likelySpam.length > 0) {
           items = isSpamToggleEnabled
             ? [

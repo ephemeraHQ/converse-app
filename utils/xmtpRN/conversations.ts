@@ -8,6 +8,7 @@ import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/Perm
 
 import { ConversationWithCodecsType, ConverseXmtpClientType } from "./client";
 import { getXmtpClient } from "./sync";
+import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 
 export const streamConversations = async (account: string) => {
   await stopStreamingConversations(account);
@@ -166,6 +167,131 @@ export const getConversationByTopic = async ({
     } sec`
   );
   return conversation;
+};
+
+type GetDmByAddressParams = {
+  client: ConverseXmtpClientType;
+  address: string;
+  includeSync?: boolean;
+};
+
+export const getDmByAddress = async ({
+  client,
+  address,
+  includeSync = false,
+}: GetDmByAddressParams) => {
+  logger.debug(`[XMTPRN Conversations] Getting Dm by address: ${address}`);
+  const start = new Date().getTime();
+  let dm = await client.conversations.findDmByAddress(address);
+  if (!dm) {
+    logger.debug(
+      `[XMTPRN Conversations] Dm ${address} not found, syncing conversations`
+    );
+    const syncStart = new Date().getTime();
+    await client.conversations.sync();
+    const syncEnd = new Date().getTime();
+    logger.debug(
+      `[XMTPRN Conversations] Synced conversations in ${
+        (syncEnd - syncStart) / 1000
+      } sec`
+    );
+    dm = await client.conversations.findDmByAddress(address);
+  }
+  if (!dm) {
+    throw new Error(`Dm ${address} not found`);
+  }
+  if (includeSync) {
+    const syncStart = new Date().getTime();
+    await dm.sync();
+    const syncEnd = new Date().getTime();
+    logger.debug(
+      `[XMTPRN Conversations] Synced DM in ${(syncEnd - syncStart) / 1000} sec`
+    );
+  }
+  const end = new Date().getTime();
+  logger.debug(
+    `[XMTPRN Conversations] Got dm by address in ${(end - start) / 1000} sec`
+  );
+  return dm;
+};
+
+type GetDmByAddressByAccountParams = {
+  account: string;
+  address: string;
+  includeSync?: boolean;
+};
+
+export const getDmByAddressByAccount = async ({
+  account,
+  address,
+  includeSync = false,
+}: GetDmByAddressByAccountParams) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  if (!client) {
+    throw new Error("Client not found");
+  }
+  return getDmByAddress({ client, address, includeSync });
+};
+
+type GetGroupByTopicParams = {
+  client: ConverseXmtpClientType;
+  topic: ConversationTopic;
+  includeSync?: boolean;
+};
+
+export const getGroupByTopic = async ({
+  client,
+  topic,
+  includeSync = false,
+}: GetGroupByTopicParams) => {
+  logger.debug(`[XMTPRN Conversations] Getting group by topic: ${topic}`);
+  const start = new Date().getTime();
+  let group = await client.conversations.findGroup(getV3IdFromTopic(topic));
+  if (!group) {
+    logger.debug(
+      `[XMTPRN Conversations] Group ${topic} not found, syncing conversations`
+    );
+    const syncStart = new Date().getTime();
+    await client.conversations.sync();
+    const syncEnd = new Date().getTime();
+    logger.debug(
+      `[XMTPRN Conversations] Synced conversations in ${
+        (syncEnd - syncStart) / 1000
+      } sec`
+    );
+    group = await client.conversations.findGroup(getV3IdFromTopic(topic));
+  }
+  if (!group) {
+    throw new Error(`Group ${topic} not found`);
+  }
+  if (includeSync) {
+    const syncStart = new Date().getTime();
+    await group.sync();
+    const syncEnd = new Date().getTime();
+    logger.debug(
+      `[XMTPRN Conversations] Synced group in ${(syncEnd - syncStart) / 1000} sec`
+    );
+  }
+  const end = new Date().getTime();
+  logger.debug(
+    `[XMTPRN Conversations] Got dm by address in ${(end - start) / 1000} sec`
+  );
+  return group;
+};
+
+type GetGroupByTopicByAccountParams = {
+  account: string;
+  topic: ConversationTopic;
+  includeSync?: boolean;
+};
+
+export const getGroupByTopicByAccount = async ({
+  account,
+  topic,
+  includeSync = false,
+}: GetGroupByTopicByAccountParams) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  return getGroupByTopic({ client, topic, includeSync });
 };
 
 type CreateConversationParams = {

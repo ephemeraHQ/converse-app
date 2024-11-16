@@ -6,12 +6,9 @@ import { useCallback, useState } from "react";
 import { Alert, Platform, StyleSheet, useColorScheme } from "react-native";
 import { useShallow } from "zustand/react/shallow";
 
-import {
-  currentAccount,
-  useProfilesStore,
-} from "../../data/store/accountsStore";
-import { navigate } from "../../utils/navigation";
-import { canGroupMessage } from "../../utils/xmtpRN/conversations";
+import { currentAccount, useProfilesStore } from "@data/store/accountsStore";
+import { navigate } from "@utils/navigation";
+import { canMessageByAccount } from "@utils/xmtpRN/contacts";
 import Button from "../Button/Button";
 
 type NavigationChatProps = {
@@ -50,10 +47,13 @@ export function NavigationChatButton({
   const addToGroupIfPossible = useCallback(async () => {
     if (loading) return;
     setLoading(true);
-    const allowed = await canGroupMessage(currentAccount(), address);
+    const allowed = await canMessageByAccount({
+      account: currentAccount(),
+      peer: address,
+    });
     setLoading(false);
     // canGroupMessage() returns lowercase addresses
-    if (!allowed[address.toLowerCase()]) {
+    if (!allowed) {
       Alert.alert(
         translate("cannot_be_added_to_group_yet", {
           name: preferredName,

@@ -28,6 +28,7 @@ import {
   getPreferredName,
   getProfile,
 } from "../utils/profile";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 const MAIN_CIRCLE_RADIUS = 50;
 const MAX_VISIBLE_MEMBERS = 4;
@@ -39,7 +40,7 @@ type GroupAvatarProps = {
   size?: number;
   style?: StyleProp<ViewStyle>;
   uri?: string | undefined;
-  topic?: string | undefined;
+  topic?: ConversationTopic | undefined;
   pendingGroupMembers?: { address: string; uri?: string; name?: string }[];
   excludeSelf?: boolean;
   // Converstion List should not make requests across the bridge
@@ -201,7 +202,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { members: groupMembers } = useGroupMembers(
-    topic || "",
+    topic,
     onConversationListScreen
       ? {
           refetchOnWindowFocus: false,

@@ -22,18 +22,18 @@ import { GroupScreenImage } from "../containers/GroupScreenImage";
 import { GroupScreenMembersTable } from "../containers/GroupScreenMembersTable";
 import { GroupScreenName } from "../containers/GroupScreenName";
 import { NavigationParamList } from "./Navigation/Navigation";
-import { useChatStore } from "../data/store/accountsStore";
-import { XmtpGroupConversation } from "../data/store/chatStore";
+import { useCurrentAccount } from "../data/store/accountsStore";
+import { useGroupQuery } from "@queries/useGroupQuery";
 
 export default function GroupScreen({
   route,
 }: NativeStackScreenProps<NavigationParamList, "Group">) {
   const styles = useStyles();
-  const group = useChatStore(
-    (s) => s.conversations[route.params.topic]
-  ) as XmtpGroupConversation;
+  const currentAccount = useCurrentAccount() as string;
+  const topic = route.params.topic;
+
+  const { data: group } = useGroupQuery(currentAccount, topic, true);
   const insets = useSafeAreaInsets();
-  const topic = group.topic;
 
   return (
     <ScrollView
@@ -45,11 +45,8 @@ export default function GroupScreen({
       <GroupScreenDescription topic={topic} />
       <GroupScreenAddition topic={topic} />
       <GroupPendingRequestsTable topic={topic} />
-      <GroupScreenMembersTable
-        topic={topic}
-        groupPermissionLevel={group.groupPermissionLevel}
-      />
-      <GroupScreenConsentTable topic={topic} groupName={group.groupName} />
+      <GroupScreenMembersTable topic={topic} group={group} />
+      <GroupScreenConsentTable topic={topic} group={group} />
       <View style={{ height: insets.bottom }} />
     </ScrollView>
   );

@@ -1,3 +1,4 @@
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import {
   QueryKeys,
   groupDescriptionQueryKey,
@@ -6,8 +7,8 @@ import {
   groupPermissionsQueryKey,
   groupPhotoQueryKey,
   groupPinnedFrameQueryKey,
-  groupQueryKey,
-  groupsQueryKey,
+  conversationQueryKey,
+  conversationsQueryKey,
 } from "./QueryKeys";
 
 describe("QueryKeys", () => {
@@ -18,16 +19,16 @@ describe("QueryKeys", () => {
 
 describe("Query Key Functions", () => {
   const account = "testAccount";
-  const topic = "testTopic";
+  const topic = "testTopic" as ConversationTopic;
 
-  it("groupsQueryKey should return the correct array", () => {
-    const result = groupsQueryKey(account);
-    expect(result).toEqual([QueryKeys.GROUPS, account]);
+  it("conversationsQueryKey should return the correct array", () => {
+    const result = conversationsQueryKey(account);
+    expect(result).toEqual([QueryKeys.CONVERSATIONS, account]);
   });
 
-  it("groupQueryKey should return the correct array", () => {
-    const result = groupQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.GROUP, account, topic]);
+  it("conversationQueryKey should return the correct array", () => {
+    const result = conversationQueryKey(account, topic);
+    expect(result).toEqual([QueryKeys.CONVERSATION, account, topic]);
   });
 
   it("groupMembersQueryKey should return the correct array", () => {
