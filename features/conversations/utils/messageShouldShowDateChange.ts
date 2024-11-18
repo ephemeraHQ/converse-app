@@ -16,5 +16,5 @@ export const messageShouldShowDateChange = ({
   if (!previousMessage) {
     return true;
   }
-  return differenceInCalendarDays(message.sent, previousMessage.sent) > 0;
+  return differenceInCalendarDays(message.sentNs, previousMessage.sentNs) > 0;
 };

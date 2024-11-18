@@ -11,9 +11,10 @@ import { usePromoteToSuperAdminMutation } from "../queries/usePromoteToSuperAdmi
 import { useRemoveFromGroupMutation } from "../queries/useRemoveFromGroupMutation";
 import { useRevokeAdminMutation } from "../queries/useRevokeAdminMutation";
 import { useRevokeSuperAdminMutation } from "../queries/useRevokeSuperAdminMutation";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const useGroupMembers = (
-  topic: string,
+  topic: ConversationTopic | undefined,
   queryOptions?: Partial<QueryObserverOptions<GroupMembersSelectData>>
 ) => {
   const account = currentAccount();

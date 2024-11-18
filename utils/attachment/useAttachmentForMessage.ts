@@ -1,5 +1,4 @@
 import { MessageToDisplay } from "@components/Chat/Message/Message";
-import { saveMessageMetadata } from "@data/helpers/messages";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -10,7 +9,6 @@ import { sentryTrackError, sentryTrackMessage } from "@utils/sentry";
 import { isContentType } from "@utils/xmtpRN/contentTypes";
 import mime from "mime";
 import { isImageMimetype } from "@utils/media";
-import { ConverseMessageMetadata } from "@data/db/entities/messageEntity";
 import { SerializedAttachmentContent } from "./types";
 import { handleStaticAttachment } from "./handleStaticAttachment";
 import { handleDecryptedRemoteAttachment } from "./handleDecryptedRemoteAttachment";
@@ -201,12 +199,7 @@ export const useAttachmentForMessage = (message: MessageToDisplay) => {
 
   useEffect(() => {
     if (messageAttachment && messageAttachment.imageSize) {
-      const messageMetadataToSave: ConverseMessageMetadata = {
-        attachment: {
-          size: messageAttachment.imageSize,
-        },
-      };
-      saveMessageMetadata(currentAccount, message, messageMetadataToSave);
+      // TODO:
     }
   }, [messageAttachment, currentAccount, message]);
 

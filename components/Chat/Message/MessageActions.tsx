@@ -283,18 +283,17 @@ export default function ChatMessageActions({
   const isAnimatingIn = useRef(false);
 
   const triggerReplyToMessage = useCallback(() => {
-    converseEventEmitter.emit("triggerReplyToMessage", message);
+    converseEventEmitter.emit("triggerReplyToMessage", message.id);
   }, [message]);
 
   const frameURL = useMemo(() => {
     if (isFrame) {
-      const frames = useFramesStore
-        .getState()
-        .getFramesForURLs(message.converseMetadata?.frames || []);
+      // TODO: Implement frames
+      const frames: any[] = [];
       return frames[0]?.url;
     }
     return null;
-  }, [message, isFrame]);
+  }, [isFrame]);
 
   const animateInStyle = useAnimatedStyle(() => {
     return {

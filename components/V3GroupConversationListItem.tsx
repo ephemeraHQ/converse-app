@@ -27,7 +27,9 @@ import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 import { useRoute } from "@navigation/useNavigation";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { actionSheetColors } from "@styles/colors";
-import { consentToInboxIdsOnProtocol } from "@utils/xmtpRN/conversations";
+import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { prefetchConversationMessages } from "@queries/useConversationMessages";
 
 type V3GroupConversationListItemProps = {
   group: GroupWithCodecsType;
@@ -41,7 +43,6 @@ const useData = ({ group }: UseDataProps) => {
   // TODO Items
   const { name: routeName } = useRoute();
   const isBlockedChatView = routeName === "Blocked";
-
   const colorScheme = useColorScheme();
   const currentAccount = useCurrentAccount()!;
   const { topicsData, setTopicsData, setPinnedConversations } = useChatStore(
@@ -49,13 +50,14 @@ const useData = ({ group }: UseDataProps) => {
   );
 
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
+
   const showContextMenu = useCallback(() => {
     setIsContextMenuVisible(true);
   }, []);
 
   const groupExists = !!group;
   const topic = group?.topic;
-  const timestamp = group?.lastMessage?.sent ?? 0;
+  const timestamp = group?.lastMessage?.sentNs ?? 0;
 
   const isUnread = useMemo(() => {
     if (!groupExists) return false;
@@ -142,11 +144,11 @@ const useData = ({ group }: UseDataProps) => {
           },
         });
         await group.updateConsent("denied");
-        await consentToInboxIdsOnProtocol(
-          currentAccount,
-          [group.addedByInboxId],
-          "deny"
-        );
+        await consentToInboxIdsOnProtocolByAccount({
+          account: currentAccount,
+          inboxIds: [group.addedByInboxId],
+          consent: "deny",
+        });
         setInboxIdPeerStatus({
           [group.addedByInboxId]: "denied",
         });
@@ -190,11 +192,11 @@ const useData = ({ group }: UseDataProps) => {
       },
       async () => {
         await group.updateConsent("allowed");
-        await consentToInboxIdsOnProtocol(
-          currentAccount,
-          [group.addedByInboxId],
-          "allow"
-        );
+        await consentToInboxIdsOnProtocolByAccount({
+          account: currentAccount,
+          inboxIds: [group.addedByInboxId],
+          consent: "allow",
+        });
         setInboxIdPeerStatus({
           [group.addedByInboxId]: "allowed",
         });
@@ -295,7 +297,7 @@ const useData = ({ group }: UseDataProps) => {
 };
 
 type UseUserInteractionsProps = {
-  topic: string;
+  topic: ConversationTopic;
   ref: RefObject<Swipeable>;
   showContextMenu: () => void;
   toggleReadStatus: () => void;
@@ -313,11 +315,13 @@ const useUserInteractions = ({
   handleRestore,
   isBlockedChatView,
 }: UseUserInteractionsProps) => {
+  const currentAccount = useCurrentAccount()!;
   const onPress = useCallback(() => {
+    prefetchConversationMessages(currentAccount, topic);
     navigate("Conversation", {
       topic,
     });
-  }, [topic]);
+  }, [topic, currentAccount]);
 
   const triggerHapticFeedback = useCallback(() => {
     return Haptics.mediumImpactAsync();

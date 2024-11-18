@@ -21,7 +21,7 @@ export const useGroupConversationListAvatarInfo = (
       return;
     }
     const fetchMembers = async () => {
-      const members = await group?.membersList();
+      const members = await group.members();
       setMembers(members || []);
     };
     fetchMembers();

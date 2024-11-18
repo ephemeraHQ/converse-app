@@ -4,8 +4,11 @@ import { useMemo } from "react";
 
 import { useExistingGroupInviteLink } from "./useExistingGroupInviteLink";
 import { useGroupMembers } from "./useGroupMembers";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
-export const useGroupPendingRequests = (topic: string) => {
+export const useGroupPendingRequests = (
+  topic: ConversationTopic | undefined
+) => {
   const { data } = usePendingRequestsQuery();
   const { members } = useGroupMembers(topic);
   const groupInviteLink = useExistingGroupInviteLink(topic);

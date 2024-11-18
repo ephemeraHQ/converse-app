@@ -20,7 +20,7 @@ import { translate } from "@i18n/index";
 import { useAllBlockedChats } from "./useAllBlockedChats";
 
 export function ConversationBlockedListNav() {
-  const allBlockedChats = useAllBlockedChats();
+  const { data: allBlockedChats = [] } = useAllBlockedChats();
   const navRef = useRef<any>();
   const styles = useStyles();
 

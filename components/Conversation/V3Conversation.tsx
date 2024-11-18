@@ -2,13 +2,13 @@ import Avatar from "@components/Avatar";
 import { ChatDumb } from "@components/Chat/ChatDumb";
 import { useDebugEnabled } from "@components/DebugButton";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { useProfilesSocials } from "@hooks/useProfilesSocials";
 import { useGroupMembersConversationScreenQuery } from "@queries/useGroupMembersQuery";
-import { useGroupMessages } from "@queries/useGroupMessages";
+import { useConversationMessages } from "@queries/useConversationMessages";
 import { useGroupNameQuery } from "@queries/useGroupNameQuery";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
-import { useGroupConversationScreenQuery } from "@queries/useGroupQuery";
+import { useConversationScreenQuery } from "@queries/useConversationQuery";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {
   NativeStackNavigationProp,
@@ -23,7 +23,7 @@ import {
 } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
-import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
@@ -35,7 +35,11 @@ import {
 
 import { ConversationTitleDumb } from "./ConversationTitleDumb";
 import { GroupChatPlaceholder } from "@components/Chat/ChatPlaceholder/GroupChatPlaceholder";
-import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
+import {
+  ConversationTopic,
+  ConversationVersion,
+  RemoteAttachmentContent,
+} from "@xmtp/react-native-sdk";
 import { ConversationContext } from "@utils/conversation";
 import { TextInputWithValue } from "@utils/str";
 import { MediaPreview } from "@data/store/chatStore";
@@ -45,23 +49,22 @@ import {
   getDraftMessage,
   setDraftMessage,
 } from "../../features/conversations/utils/textDrafts";
+// import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
 
 type UseDataProps = {
-  topic: string;
+  topic: ConversationTopic;
 };
 
 const useData = ({ topic }: UseDataProps) => {
   const currentAccount = useCurrentAccount()!;
   const {
-    data: group,
+    data: conversation,
     isLoading,
     isRefetching,
-  } = useGroupConversationScreenQuery(currentAccount, topic!);
+  } = useConversationScreenQuery(currentAccount, topic!);
 
-  const { data: messages, isLoading: messagesLoading } = useGroupMessages(
-    currentAccount,
-    topic!
-  );
+  const { data: messages, isLoading: messagesLoading } =
+    useConversationMessages(currentAccount, topic!);
   const { data: groupName, isLoading: groupNameLoading } = useGroupNameQuery(
     currentAccount,
     topic!
@@ -75,15 +78,17 @@ const useData = ({ topic }: UseDataProps) => {
 
   useEffect(() => {
     const checkActive = async () => {
-      if (!group) return;
-      const isActive = await group?.isActive();
-      // If not active leave the screen
-      if (!isActive) {
-        navigate("Chats");
+      if (!conversation) return;
+      if (conversation.version === ConversationVersion.GROUP) {
+        const isActive = conversation.isGroupActive;
+        // If not active leave the screen
+        if (!isActive) {
+          navigate("Chats");
+        }
       }
     };
     checkActive();
-  }, [group]);
+  }, [conversation]);
 
   const memberAddresses = useMemo(() => {
     const addresses: string[] = [];
@@ -123,7 +128,7 @@ const useData = ({ topic }: UseDataProps) => {
   const debugEnabled = useDebugEnabled();
 
   return {
-    group,
+    conversation,
     messages,
     messagesLoading,
     groupName,
@@ -162,23 +167,26 @@ const useStyles = () => {
 };
 
 type UseDisplayInfoProps = {
-  group: GroupWithCodecsType | undefined | null;
+  conversation: ConversationWithCodecsType | undefined | null;
   groupPhotoLoading: boolean;
 };
 
-const useDisplayInfo = ({ group, groupPhotoLoading }: UseDisplayInfoProps) => {
+const useDisplayInfo = ({
+  conversation,
+  groupPhotoLoading,
+}: UseDisplayInfoProps) => {
   const colorScheme = useColorScheme();
   const headerTintColor =
     Platform.OS === "android"
       ? textSecondaryColor(colorScheme)
       : textPrimaryColor(colorScheme);
-  const displayAvatar = !group || groupPhotoLoading;
+  const displayAvatar = !conversation || groupPhotoLoading;
   return { headerTintColor, displayAvatar };
 };
 
 type UseUserInteractionProps = {
   debugEnabled: boolean;
-  topic: string;
+  topic: ConversationTopic;
   navigation: NativeStackNavigationProp<NavigationParamList, "Conversation">;
 };
 
@@ -219,7 +227,7 @@ export const V3Conversation = ({
   const topic = route.params.topic!;
 
   const {
-    group,
+    conversation,
     messages,
     messagesLoading,
     groupName,
@@ -237,7 +245,7 @@ export const V3Conversation = ({
   const currentAccount = useCurrentAccount()!;
   const styles = useStyles();
   const { headerTintColor, displayAvatar } = useDisplayInfo({
-    group,
+    conversation,
     groupPhotoLoading,
   });
 
@@ -262,7 +270,7 @@ export const V3Conversation = ({
 
   const showPlaceholder =
     ((messages?.ids.length ?? 0) === 0 && !messagesLoading) ||
-    (!group && !isLoading);
+    (!conversation && !isLoading);
   const displayList = !showPlaceholder;
 
   const avatarComponent = useMemo(() => {
@@ -315,7 +323,7 @@ export const V3Conversation = ({
     }) => {
       if (referencedMessageId) {
         if (attachment) {
-          await group?.send({
+          await conversation?.send({
             reply: {
               reference: referencedMessageId,
               content: { remoteAttachment: attachment },
@@ -323,7 +331,7 @@ export const V3Conversation = ({
           });
         }
         if (text) {
-          await group?.send({
+          await conversation?.send({
             reply: {
               reference: referencedMessageId,
               content: { text },
@@ -333,19 +341,19 @@ export const V3Conversation = ({
         return;
       }
       if (attachment) {
-        await group?.send({
+        await conversation?.send({
           remoteAttachment: attachment,
         });
       }
       if (text) {
-        await group?.send(text);
+        await conversation?.send(text);
       }
     },
-    [group]
+    [conversation]
   );
 
   const onLeaveScreen = useCallback(() => {
-    useChatStore.getState().setOpenedConversationTopic(null);
+    // useChatStore.getState().setOpenedConversationTopic(null);
     setDraftMessage(topic, textInputRef.current?.currentValue ?? "");
   }, [topic]);
 
@@ -360,16 +368,27 @@ export const V3Conversation = ({
     };
   }, [navigation, onLeaveScreen]);
 
-  const placeholderComponent = useMemo(
-    () => (
-      <GroupChatPlaceholder
-        messagesCount={messages?.ids.length ?? 0}
-        onSend={onSend}
-        group={group}
-      />
-    ),
-    [group, messages?.ids.length, onSend]
-  );
+  const placeholderComponent = useMemo(() => {
+    if (!conversation) return null;
+    if (conversation.version == ConversationVersion.GROUP) {
+      return (
+        <GroupChatPlaceholder
+          messagesCount={messages?.ids.length ?? 0}
+          onSend={onSend}
+          group={conversation}
+        />
+      );
+    }
+    // TODO: Add DM placeholder
+    return null;
+    // return (
+    //   <ChatPlaceholder
+    //     messagesCount={messages?.ids.length ?? 0}
+    //     onSend={onSend}
+    //     conversation={conversation}
+    //   />
+    // );
+  }, [conversation, messages?.ids.length, onSend]);
 
   const messageToPrefill = useMemo(
     () => route.params?.text ?? getDraftMessage(topic) ?? "",

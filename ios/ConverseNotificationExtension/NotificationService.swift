@@ -37,52 +37,30 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     
     if let xmtpClient = await getXmtpClient(account: account), !isIntroTopic(topic: contentTopic) {
       
-      if isInviteTopic(topic: contentTopic) {
-        let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
-        let envelope = XMTP.Envelope.with { envelope in
-          envelope.message = encryptedMessageData
-          envelope.contentTopic = contentTopic
-        }
-        sentryAddBreadcrumb(message: "topic \(contentTopic) is invite topic")
-        guard let conversation = await getNewConversationFromEnvelope(
-          xmtpClient: xmtpClient,
-          envelope: envelope
-        ) else {
+    if isV3WelcomeTopic(topic: contentTopic) {
+        guard let conversation = await getNewConversation(xmtpClient: xmtpClient, contentTopic: contentTopic)else {
           contentHandler(UNNotificationContent())
           return
         }
         
-        (shouldShowNotification, messageId) = await handleNewConversationFirstMessage(
+        (shouldShowNotification, messageId) = await handleV3Welcome(
           xmtpClient: xmtpClient,
           apiURI: apiURI,
           pushToken: pushToken,
           conversation: conversation,
-          bestAttemptContent: &content
-        )
-      } else if isV3WelcomeTopic(topic: contentTopic) {
-        guard let group = await getNewGroup(xmtpClient: xmtpClient, contentTopic: contentTopic)else {
-          contentHandler(UNNotificationContent())
-          return
-        }
-        
-        (shouldShowNotification, messageId) = await handleGroupWelcome(
-          xmtpClient: xmtpClient,
-          apiURI: apiURI,
-          pushToken: pushToken,
-          group: group,
           welcomeTopic: contentTopic,
           bestAttemptContent: &content
         )
       } else if isV3MessageTopic(topic: contentTopic) {
         let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
-        let envelope = XMTP.Envelope.with { envelope in
+        let envelope = XMTP.Xmtp_MessageApi_V1_Envelope .with { envelope in
           envelope.message = encryptedMessageData
           envelope.contentTopic = contentTopic
         }
-        (shouldShowNotification, messageId, messageIntent) = await handleGroupMessage(xmtpClient: xmtpClient, envelope: envelope, apiURI: apiURI, bestAttemptContent: &content)
+        (shouldShowNotification, messageId, messageIntent) = await handleV3Message(xmtpClient: xmtpClient, envelope: envelope, apiURI: apiURI, bestAttemptContent: &content)
       } else {
         let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
-        let envelope = XMTP.Envelope.with { envelope in
+        let envelope = XMTP.Xmtp_MessageApi_V1_Envelope.with { envelope in
           envelope.message = encryptedMessageData
           envelope.contentTopic = contentTopic
         }

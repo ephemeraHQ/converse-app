@@ -7,10 +7,11 @@ import { useColorScheme } from "react-native";
 
 import { NativeStack, navigationAnimation } from "./Navigation";
 import NewConversationModal from "../NewConversation/NewConversationModal";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export type NewConversationNavParams = {
   peer?: string;
-  addingToGroupTopic?: string;
+  addingToGroupTopic?: ConversationTopic;
 };
 
 export const NewConversationScreenConfig = {
