@@ -2,7 +2,6 @@ import Avatar from "@components/Avatar";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
 import { useGroupInviteQuery } from "@queries/useGroupInviteQuery";
-import { fetchGroupsQuery } from "@queries/useGroupsQuery";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -27,8 +26,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NavigationParamList } from "./Navigation/Navigation";
 import Button from "../components/Button/Button";
 import { useCurrentAccount } from "../data/store/accountsStore";
-import { refreshGroup } from "../utils/xmtpRN/conversations";
-import { fetchGroupsConversationListQuery } from "@queries/useV3ConversationListQuery";
+import { fetchConversationListQuery } from "@queries/useV3ConversationListQuery";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
 
 export default function GroupInviteScreen({
   route,
@@ -59,7 +58,7 @@ export default function GroupInviteScreen({
   const [newGroup, setNewGroup] = useState<GroupWithCodecsType | undefined>(
     undefined
   );
-  const { allowGroup } = useGroupConsent(newGroup?.topic || "");
+  const { allowGroup } = useGroupConsent(newGroup?.topic);
   const handlingNewGroup = useRef(false);
 
   const handleNewGroup = useCallback(
@@ -70,7 +69,7 @@ export default function GroupInviteScreen({
           includeCreator: false,
           includeAddedBy: false,
         });
-        await refreshGroup(account, group.topic);
+        // await refreshGroup(account, group.topic);
         navigation.replace("Conversation", { topic: group.topic });
       }
     },
@@ -92,7 +91,7 @@ export default function GroupInviteScreen({
     });
     const groupId = groupInvite.groupId;
     // Group ID is not available on previous versions of the app, so we need to fetch the groups
-    const groupsBeforeJoining = await fetchGroupsConversationListQuery(account);
+    const groupsBeforeJoining = await fetchConversationListQuery(account);
     const groupBeforeJoining = groupId
       ? groupsBeforeJoining.find((group) => group.id === groupId)
       : null;
@@ -131,7 +130,7 @@ export default function GroupInviteScreen({
         joinStatus: "PENDING",
       });
     } else if (status === "ACCEPTED") {
-      const groupsAfterJoining = await fetchGroupsQuery(account);
+      const groupsAfterJoining = await fetchConversationListQuery(account);
       // Group ID was not on original invites, so we need to handle it separately
       if (groupId) {
         logger.debug(`[GroupInvite] Group ID exists`);
@@ -166,11 +165,11 @@ export default function GroupInviteScreen({
       }
 
       const oldGroupIds = new Set(groupsBeforeJoining.map((group) => group.id));
-      const newGroupId = groupsAfterJoining.ids.find(
-        (id) => !oldGroupIds.has(id)
+      const newGroup = groupsAfterJoining.find(
+        (conversation) => !oldGroupIds.has(conversation.id)
       );
-      if (newGroupId) {
-        setNewGroup(groupsAfterJoining.byId[newGroupId]);
+      if (newGroup && newGroup.version === ConversationVersion.GROUP) {
+        setNewGroup(newGroup);
       } else {
         setGroupJoinState({
           polling: false,

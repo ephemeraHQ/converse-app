@@ -1,4 +1,4 @@
-import { useGroupMessages } from "@queries/useGroupMessages";
+import { useConversationMessages } from "@queries/useConversationMessages";
 import { isAllEmojisAndMaxThree } from "@utils/messageContent";
 import { TextMessage } from "./TextMessage";
 import { getMessageContentType } from "@utils/xmtpRN/contentTypes";
@@ -10,7 +10,7 @@ import { isLatestSettledFromCurrentUser } from "../../../features/conversations/
 import { isLatestMessageSettledFromPeer } from "../../../features/conversations/utils/isLatestMessageSettledFromPeer";
 import { messageShouldShowDateChange } from "../../../features/conversations/utils/messageShouldShowDateChange";
 import { ChatGroupUpdatedMessage } from "../ChatGroupUpdatedMessage";
-import { GroupUpdatedContent } from "@xmtp/react-native-sdk";
+import { ConversationTopic, GroupUpdatedContent } from "@xmtp/react-native-sdk";
 import { V3MessageToDisplay } from "../../../features/conversations/Messages.types";
 import { VStack } from "@design-system/VStack";
 import { cacheOnlyQueryOptions } from "@queries/cacheOnlyQueryOptions";
@@ -19,12 +19,12 @@ type V3MessageProps = {
   item: string;
   index: number;
   currentAccount: string;
-  topic: string;
+  topic: ConversationTopic;
 };
 
 export const V3Message = memo(
   ({ item, index, currentAccount, topic }: V3MessageProps) => {
-    const { data: messages } = useGroupMessages(
+    const { data: messages } = useConversationMessages(
       currentAccount,
       topic,
       cacheOnlyQueryOptions

@@ -18,7 +18,7 @@ import type { ProfileSocials } from "../data/store/profilesStore";
 import type { Frens } from "../data/store/recommendationsStore";
 import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
-import { InboxId } from "@xmtp/react-native-sdk";
+import type { InboxId } from "@xmtp/react-native-sdk";
 
 const api = axios.create({
   baseURL: config.apiURI,

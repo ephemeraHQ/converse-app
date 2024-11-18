@@ -13,10 +13,11 @@ export const useV3BlockedChats = () => {
     },
     "useV3BlockedChats"
   );
+
   const blockedConversations = useMemo(() => {
     return data?.filter((convo) => {
       const topicData = topicsData[convo.topic];
-      return topicData?.status === "deleted";
+      return topicData?.status === "deleted" || convo.state === "denied";
     });
   }, [data, topicsData]);
 

@@ -4,24 +4,24 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { getCleanAddress } from "@utils/evm/address";
-import { Member } from "@xmtp/react-native-sdk";
+import { ConversationTopic, Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
 import { groupMembersQueryKey } from "./QueryKeys";
 import { entifyWithAddress, EntityObjectWithAddress } from "./entify";
 import { queryClient } from "./queryClient";
-import { useGroupConversationScreenQuery } from "./useGroupQuery";
+import { useGroupQuery } from "./useGroupQuery";
 
 export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
 
 export const useGroupMembersQuery = (
   account: string,
-  topic: string,
+  topic: ConversationTopic | undefined,
   queryOptions?: Partial<QueryObserverOptions<GroupMembersSelectData>>
 ) => {
-  const { data: group } = useGroupConversationScreenQuery(account, topic);
+  const { data: group } = useGroupQuery(account, topic);
   return useQuery<GroupMembersSelectData>({
-    queryKey: groupMembersQueryKey(account, topic),
+    queryKey: groupMembersQueryKey(account, topic!),
     queryFn: async () => {
       if (!group) {
         return {
@@ -30,7 +30,7 @@ export const useGroupMembersQuery = (
           ids: [],
         };
       }
-      const updatedMembers = await group.membersList();
+      const updatedMembers = await group.members();
       return entifyWithAddress(
         updatedMembers,
         (member) => member.inboxId,
@@ -38,17 +38,17 @@ export const useGroupMembersQuery = (
         (member) => getCleanAddress(member.addresses[0])
       );
     },
-    enabled: !!group,
+    enabled: !!group && !!topic,
     ...queryOptions,
   });
 };
 
 export const useGroupMembersConversationScreenQuery = (
   account: string,
-  topic: string,
+  topic: ConversationTopic,
   queryOptions?: Partial<QueryObserverOptions<GroupMembersSelectData>>
 ) => {
-  const { data: group } = useGroupConversationScreenQuery(account, topic);
+  const { data: group } = useGroupQuery(account, topic);
   return useQuery<GroupMembersSelectData>({
     queryKey: groupMembersQueryKey(account, topic),
     queryFn: async () => {
@@ -59,7 +59,7 @@ export const useGroupMembersConversationScreenQuery = (
           ids: [],
         };
       }
-      const updatedMembers = await group.membersList();
+      const updatedMembers = await group.members();
       return entifyWithAddress(
         updatedMembers,
         (member) => member.inboxId,
@@ -74,13 +74,13 @@ export const useGroupMembersConversationScreenQuery = (
 
 export const getGroupMembersQueryData = (
   account: string,
-  topic: string
+  topic: ConversationTopic
 ): GroupMembersSelectData | undefined =>
   queryClient.getQueryData(groupMembersQueryKey(account, topic));
 
 export const setGroupMembersQueryData = (
   account: string,
-  topic: string,
+  topic: ConversationTopic,
   members: GroupMembersSelectData,
   options?: SetDataOptions
 ) => {
@@ -93,14 +93,17 @@ export const setGroupMembersQueryData = (
 
 export const cancelGroupMembersQuery = async (
   account: string,
-  topic: string
+  topic: ConversationTopic
 ) => {
   return queryClient.cancelQueries({
     queryKey: groupMembersQueryKey(account, topic),
   });
 };
 
-export const invalidateGroupMembersQuery = (account: string, topic: string) => {
+export const invalidateGroupMembersQuery = (
+  account: string,
+  topic: ConversationTopic
+) => {
   return queryClient.invalidateQueries({
     queryKey: groupMembersQueryKey(account, topic),
   });

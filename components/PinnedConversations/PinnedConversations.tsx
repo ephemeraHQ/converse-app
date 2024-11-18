@@ -1,7 +1,5 @@
 import { StyleSheet, View } from "react-native";
 
-import { PinnedV2Conversation } from "./PinnedV2Conversation";
-import { isV3Topic } from "@utils/groupUtils/groupId";
 import { PinnedV3Conversation } from "./PinnedV3Conversation";
 import { useV3ConversationListQuery } from "@queries/useV3ConversationListQuery";
 import { useCurrentAccount } from "@data/store/accountsStore";
@@ -26,10 +24,7 @@ export const PinnedConversations = ({ topics }: Props) => {
   const pinnedConvos = !topics
     ? []
     : topics?.map((topic) => {
-        if (isV3Topic(topic)) {
-          return <PinnedV3Conversation topic={topic} key={topic} />;
-        }
-        return <PinnedV2Conversation topic={topic} key={topic} />;
+        return <PinnedV3Conversation topic={topic} key={topic} />;
       });
   return <View style={styles.container}>{pinnedConvos}</View>;
 };

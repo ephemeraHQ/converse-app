@@ -12,13 +12,14 @@ import {
   getAddressIsSuperAdmin,
 } from "@utils/groupUtils/adminUtils";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { FC, useCallback, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { List } from "react-native-paper";
 
-interface GroupScreenImageProps {
-  topic: string;
-}
+type GroupScreenImageProps = {
+  topic: ConversationTopic;
+};
 
 export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
   const currentAccount = useCurrentAccount() as string;

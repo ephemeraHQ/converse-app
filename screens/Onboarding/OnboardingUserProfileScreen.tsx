@@ -28,7 +28,6 @@ import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/Onboardi
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import config from "../../config";
-import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import {
   getCurrentAccount,
   useCurrentAccount,
@@ -388,7 +387,7 @@ export function useCreateOrUpdateProfileInfo() {
           account: address,
           profile: { ...profile, avatar: publicAvatar },
         });
-        await refreshProfileForAddress(address, address);
+        // await refreshProfileForAddress(address, address);
         return { success: true };
       } catch (e: any) {
         logger.error(e, { context: "UserProfile: claiming and refreshing" });

@@ -159,13 +159,14 @@ export const ChatMessageDumb = ({
 
   // maybe using useChatStore inside ChatMessage
   // leads to bad perf? Let's be cautious
-  const replyingToMessage = useChatStore((s) =>
-    message.referencedMessageId
-      ? s.conversations[message.topic]?.messages.get(
-          message.referencedMessageId
-        )
-      : undefined
-  );
+  const replyingToMessage = undefined;
+  // const replyingToMessage = useChatStore((s) =>
+  //   message.referencedMessageId
+  //     ? s.conversations[message.topic]?.messages.get(
+  //         message.referencedMessageId
+  //       )
+  //     : undefined
+  // );
 
   const reactions = useMemo(() => getMessageReactions(message), [message]);
   const hasReactions = Object.keys(reactions).length > 0;
@@ -182,13 +183,14 @@ export const ChatMessageDumb = ({
   }
 
   const replyingToProfileName = useMemo(() => {
-    if (!replyingToMessage?.senderAddress) return "";
-    if (replyingToMessage.senderAddress === currentAccount()) return "You";
-    return getReadableProfile(
-      currentAccount(),
-      replyingToMessage.senderAddress
-    );
-  }, [replyingToMessage?.senderAddress]);
+    // if (!replyingToMessage?.senderAddress) return "";
+    // if (replyingToMessage.senderAddress === currentAccount()) return "You";
+    // return getReadableProfile(
+    //   currentAccount(),
+    //   replyingToMessage.senderAddress
+    // );
+    return undefined;
+  }, []);
 
   const swipeableRef = useRef<Swipeable | null>(null);
 
@@ -259,7 +261,7 @@ export const ChatMessageDumb = ({
             const translation = swipeableRef.current?.state.rowTranslation;
             if (translation && (translation as any)._value > 70) {
               Haptics.successNotificationAsync();
-              converseEventEmitter.emit("triggerReplyToMessage", message);
+              converseEventEmitter.emit("triggerReplyToMessage", message.id);
             }
           }}
           ref={swipeableRef}
@@ -303,16 +305,16 @@ export const ChatMessageDumb = ({
                         onLongPress={platformTouchableOnLongPress}
                         delayPressIn={75}
                         onPress={() => {
-                          converseEventEmitter.emit("scrollChatToMessage", {
-                            messageId: replyingToMessage.id,
-                            animated: false,
-                          });
-                          setTimeout(() => {
-                            converseEventEmitter.emit(
-                              "highlightMessage",
-                              replyingToMessage.id
-                            );
-                          }, 350);
+                          // converseEventEmitter.emit("scrollChatToMessage", {
+                          //   messageId: replyingToMessage.id,
+                          //   animated: false,
+                          // });
+                          // setTimeout(() => {
+                          //   converseEventEmitter.emit(
+                          //     "highlightMessage",
+                          //     replyingToMessage.id
+                          //   );
+                          // }, 350);
                         }}
                       >
                         <Text

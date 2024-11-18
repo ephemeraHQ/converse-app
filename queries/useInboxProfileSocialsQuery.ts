@@ -35,11 +35,11 @@ const fetchInboxProfileSocials = async (inboxIds: InboxId) => {
 
 const inboxProfileSocialesQueryConfig = (
   account: string,
-  inboxId: InboxId
+  inboxId: InboxId | undefined
 ) => ({
-  queryKey: profileSocialsQueryKey(account, inboxId),
-  queryFn: () => fetchInboxProfileSocials(inboxId),
-  enabled: !!account,
+  queryKey: profileSocialsQueryKey(account, inboxId!),
+  queryFn: () => fetchInboxProfileSocials(inboxId!),
+  enabled: !!account && !!inboxId,
   // Store for 30 days
   gcTime: 1000 * 60 * 60 * 24 * 30,
   refetchIntervalInBackground: false,
@@ -52,7 +52,7 @@ const inboxProfileSocialesQueryConfig = (
 
 export const useInboxProfileSocialsQuery = (
   account: string,
-  inboxId: InboxId
+  inboxId: InboxId | undefined
 ) => {
   return useQuery(inboxProfileSocialesQueryConfig(account, inboxId));
 };

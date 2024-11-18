@@ -40,6 +40,7 @@ import AddAttachmentButton, {
 import SendAttachmentPreview from "../Attachment/SendAttachmentPreview";
 import { MessageToDisplay } from "../Message/Message";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
+import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 
 const DEFAULT_MEDIA_PREVIEW_HEIGHT = { PORTRAIT: 120, LANDSCAPE: 90 };
 const MEDIA_PREVIEW_PADDING = Platform.OS === "android" ? 9 : 14;
@@ -91,9 +92,10 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
   const styles = useStyles();
 
   const [inputValue, setInputValue] = useState(messageToPrefill);
-  const [replyingToMessage, setReplyingToMessage] =
-    useState<MessageToDisplay | null>(null);
-  const replyingToMessageRef = useRef<MessageToDisplay | null>(null);
+  const [replyingToMessage, setReplyingToMessage] = useState<string | null>(
+    null
+  );
+  const replyingToMessageRef = useRef<string | null>(null);
   const [mediaPreview, setMediaPreview] = useState(mediaPreviewToPrefill);
   const preparedAttachmentMessageRef = useRef<RemoteAttachmentContent | null>(
     null
@@ -130,16 +132,13 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
   }, [replyingToMessage]);
 
   useEffect(() => {
-    converseEventEmitter.on(
-      "triggerReplyToMessage",
-      (message: MessageToDisplay) => {
-        if (inputRef.current) {
-          inputRef.current?.focus();
-        }
-        setReplyingToMessage(message);
-        replyingToMessageRef.current = message;
+    converseEventEmitter.on("triggerReplyToMessage", (messageId: string) => {
+      if (inputRef.current) {
+        inputRef.current?.focus();
       }
-    );
+      setReplyingToMessage(messageId);
+      replyingToMessageRef.current = messageId;
+    });
     return () => {
       converseEventEmitter.off("triggerReplyToMessage");
     };
@@ -331,9 +330,7 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
       const messageToSend = {
         content: inputValue,
         contentType: "xmtp.org/text:1.0",
-        referencedMessageId: replyingToMessage
-          ? replyingToMessage.id
-          : undefined,
+        referencedMessageId: replyingToMessage,
       };
       setInputValue("");
       setReplyingToMessage(null);
@@ -361,13 +358,14 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
     <View style={styles.chatInputWrapper}>
       {replyingToMessage && (
         <View style={styles.replyToMessagePreview}>
-          <ChatInputReplyPreview
-            replyingToMessage={replyingToMessage}
+          {/* <ChatInputReplyPreview
+            // TODO:
+            replyingToMessage={undefined}
             onDismiss={() => {
               setReplyingToMessage(null);
               replyingToMessageRef.current = null;
             }}
-          />
+          /> */}
         </View>
       )}
       <View style={styles.chatInputContainer}>

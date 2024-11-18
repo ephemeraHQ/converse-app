@@ -16,7 +16,8 @@ export const useV3ConversationItems = () => {
   const { pinnedConversationTopics, topicsData } = useChatStore(
     useSelect(["pinnedConversationTopics", "topicsData"])
   );
-  const groups = useMemo(() => {
+
+  const conversations = useMemo(() => {
     const pinnedSet = new Set(pinnedConversationTopics);
     const deletedTopicsSet = new Set();
     for (const topic in topicsData) {
@@ -33,5 +34,5 @@ export const useV3ConversationItems = () => {
     );
   }, [data, pinnedConversationTopics, topicsData]);
 
-  return { data: groups, ...rest };
+  return { data: conversations, ...rest };
 };

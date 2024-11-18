@@ -5,8 +5,10 @@ import { navigate } from "@utils/navigation";
 import Avatar from "@components/Avatar";
 import { AvatarSizes } from "@styles/sizes";
 import { DmWithCodecsType } from "@utils/xmtpRN/client";
-import { usePreferredName } from "@hooks/usePreferredName";
-import { usePreferredAvatarUri } from "@hooks/usePreferredAvatarUri";
+import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
+import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
+import { useDmPeerInboxOnConversationList } from "@queries/useDmPeerInboxOnConversationList";
+import { useCurrentAccount } from "@data/store/accountsStore";
 
 type PinnedV3DMConversationProps = {
   conversation: DmWithCodecsType;
@@ -15,11 +17,16 @@ type PinnedV3DMConversationProps = {
 export const PinnedV3DMConversation = ({
   conversation,
 }: PinnedV3DMConversationProps) => {
-  const peer = conversation.peerAddress;
-  const preferredName = usePreferredName(peer);
-  const preferredAvatar = usePreferredAvatarUri(peer);
+  const currentAccount = useCurrentAccount();
+  const { data: peerInboxId } = useDmPeerInboxOnConversationList(
+    currentAccount!,
+    conversation
+  );
+  const preferredName = usePreferredInboxName(peerInboxId);
+  const preferredAvatar = usePreferredInboxAvatar(peerInboxId);
 
   const onLongPress = usePinnedConversationLongPress(conversation.topic);
+
   const onPress = useCallback(() => {
     navigate("Conversation", { topic: conversation.topic });
   }, [conversation.topic]);
@@ -30,13 +37,13 @@ export const PinnedV3DMConversation = ({
   const avatarComponent = useMemo(() => {
     return (
       <Avatar
-        key={peer}
+        key={peerInboxId}
         uri={preferredAvatar ?? undefined}
         name={preferredName}
         size={AvatarSizes.pinnedConversation}
       />
     );
-  }, [peer, preferredAvatar, preferredName]);
+  }, [peerInboxId, preferredAvatar, preferredName]);
 
   return (
     <PinnedConversation

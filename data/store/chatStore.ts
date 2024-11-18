@@ -1,18 +1,11 @@
-import { getV3IdFromTopic, isV3Topic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import isDeepEqual from "fast-deep-equal";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import { useSettingsStore } from "./accountsStore";
-import {
-  TopicSpamScores,
-  computeConversationsSpamScores,
-} from "../../data/helpers/conversations/spamScore";
 import { saveTopicsData } from "../../utils/api";
 import {
-  ConversationWithLastMessagePreview,
   getTopicsUpdatesAsRead,
   markConversationsAsReadIfNecessary,
 } from "../../utils/conversation";
@@ -21,7 +14,6 @@ import { subscribeToNotifications } from "../../utils/notifications";
 import { omit } from "../../utils/objects";
 import { refreshBalanceForAccount } from "../../utils/wallet";
 import { isContentType } from "../../utils/xmtpRN/contentTypes";
-import { ConverseMessageMetadata } from "../db/entities/messageEntity";
 
 // Chat data for each user
 
@@ -58,6 +50,9 @@ export type XmtpDMConversation = XmtpConversationShared & {
   groupAddedBy?: undefined;
 };
 
+/**
+ * @deprecated - Use the conversation from query instead
+ */
 export type XmtpGroupConversation = XmtpConversationShared & {
   isGroup: true;
   peerAddress?: undefined;
@@ -69,8 +64,14 @@ export type XmtpGroupConversation = XmtpConversationShared & {
   isActive?: boolean;
 };
 
+/**
+ * @deprecated - Use the conversation from query instead
+ */
 export type XmtpConversation = XmtpDMConversation | XmtpGroupConversation;
 
+/**
+ * @deprecated - Use the conversation from query instead
+ */
 export type XmtpConversationWithUpdate = XmtpConversation & {
   lastUpdateAt: number;
 };
@@ -84,20 +85,16 @@ type XmtpProtocolMessage = {
   topic: string;
 };
 
+/**
+ * @deprecated - Use DecodedMessageWithCodeca instead
+ */
 export type XmtpMessage = XmtpProtocolMessage & {
   status: "delivered" | "error" | "seen" | "sending" | "sent" | "prepared";
   reactions?: Map<string, XmtpMessage>;
   contentFallback?: string;
   referencedMessageId?: string;
   lastUpdateAt?: number;
-  converseMetadata?: ConverseMessageMetadata;
   localMediaURI?: string;
-};
-
-type ConversationsListItems = {
-  conversationsInbox: ConversationWithLastMessagePreview[];
-  conversationsRequests: ConversationWithLastMessagePreview[];
-  conversationsBlocked: ConversationWithLastMessagePreview[];
 };
 
 export type TopicData = {
@@ -138,15 +135,15 @@ export type Attachment = {
 };
 
 export type ChatStoreType = {
+  /**
+   * @deprecated - Use the conversation from query instead
+   */
   conversations: {
     [topic: string]: XmtpConversationWithUpdate;
   };
   pinnedConversationTopics: string[];
   openedConversationTopic: string | null;
-  setOpenedConversationTopic: (topic: string | null) => void;
-  conversationsMapping: {
-    [oldTopic: string]: string;
-  };
+  // setOpenedConversationTopic: (topic: string | null) => void;
   lastUpdateAt: number;
   lastSyncedAt: number;
   lastSyncedTopics: string[];
@@ -160,38 +157,15 @@ export type ChatStoreType = {
   topicsDataFetchedOnce: boolean | undefined;
 
   conversationsSortedOnce: boolean;
-  sortedConversationsWithPreview: ConversationsListItems;
-  setSortedConversationsWithPreview: (items: ConversationsListItems) => void;
 
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   searchBarFocused: boolean;
   setSearchBarFocused: (focused: boolean) => void;
 
-  setConversations: (conversations: XmtpConversation[]) => void;
   setPinnedConversations: (conversationsTopics: string[]) => void;
 
-  deleteConversations: (topics: string[]) => void;
-  updateConversationTopic: (
-    oldTopic: string,
-    conversation: XmtpConversation
-  ) => void;
-  setConversationMessageDraft: (topic: string, draft: string) => void;
-  setConversationMediaPreview: (
-    topic: string,
-    mediaPreview: MediaPreview
-  ) => void;
-
   setInitialLoadDone: () => void;
-  setMessages: (messagesToSet: XmtpMessage[]) => void;
-  updateMessagesIds: (
-    updates: { topic: string; oldId: string; message: XmtpMessage }[]
-  ) => void;
-  updateMessageStatus: (
-    topic: string,
-    messageId: string,
-    status: "delivered" | "error" | "seen" | "sending" | "sent" | "prepared"
-  ) => void;
 
   setLocalClientConnected: (connected: boolean) => void;
   setResyncing: (syncing: boolean) => void;
@@ -204,21 +178,10 @@ export type ChatStoreType = {
     markAsFetchedOnce?: boolean
   ) => void;
 
-  setSpamScores: (topicSpamScores: TopicSpamScores) => void;
-
-  // METHOD ONLY USED TEMPORARILY FOR WHEN WE SEND GROP MESSAGES
-  deleteMessage: (topic: string, messageId: string) => void;
-
-  setMessageMetadata: (
-    topic: string,
-    messageId: string,
-    metadata: ConverseMessageMetadata
-  ) => void;
-
-  setConversationsLastNotificationSubscribePeriod: (
-    topics: string[],
-    period: number
-  ) => void;
+  // setConversationsLastNotificationSubscribePeriod: (
+  //   topics: string[],
+  //   period: number
+  // ) => void;
 
   messageAttachments: Record<string, Attachment>;
 
@@ -250,92 +213,41 @@ export const initChatStore = (account: string) => {
           topicsData: {},
           topicsDataFetchedOnce: false,
           openedConversationTopic: "",
-          setOpenedConversationTopic: (topic) =>
-            set((state) => {
-              const newState = { ...state, openedConversationTopic: topic };
-              if (topic && newState.conversations[topic]) {
-                const conversation = newState.conversations[topic];
-                const lastMessageId =
-                  conversation.messagesIds.length > 0
-                    ? conversation.messagesIds[
-                        conversation.messagesIds.length - 1
-                      ]
-                    : undefined;
-                if (lastMessageId) {
-                  const lastMessage = conversation.messages.get(lastMessageId);
-                  if (lastMessage) {
-                    const newData = {
-                      status: "read",
-                      readUntil: lastMessage.sent,
-                      timestamp: now(),
-                    } as TopicData;
-                    newState.topicsData[topic] = newData;
-                    saveTopicsData(account, {
-                      [topic]: newData,
-                    });
-                  }
-                }
-              }
-              return newState;
-            }),
+          // setOpenedConversationTopic: (topic) =>
+          //   set((state) => {
+          //     const newState = { ...state, openedConversationTopic: topic };
+          //     if (topic && newState.conversations[topic]) {
+          //       const conversation = newState.conversations[topic];
+          //       const lastMessageId =
+          //         conversation.messagesIds.length > 0
+          //           ? conversation.messagesIds[
+          //               conversation.messagesIds.length - 1
+          //             ]
+          //           : undefined;
+          //       if (lastMessageId) {
+          //         const lastMessage = conversation.messages.get(lastMessageId);
+          //         if (lastMessage) {
+          //           const newData = {
+          //             status: "read",
+          //             readUntil: lastMessage.sent,
+          //             timestamp: now(),
+          //           } as TopicData;
+          //           newState.topicsData[topic] = newData;
+          //           saveTopicsData(account, {
+          //             [topic]: newData,
+          //           });
+          //         }
+          //       }
+          //     }
+          //     return newState;
+          //   }),
           conversationsMapping: {},
           conversationsSortedOnce: false,
-          sortedConversationsWithPreview: {
-            conversationsInbox: [],
-            conversationsRequests: [],
-            conversationsBlocked: [],
-          },
-          setSortedConversationsWithPreview: (items) =>
-            set(() => ({
-              sortedConversationsWithPreview: items,
-              conversationsSortedOnce: true,
-            })),
           lastUpdateAt: 0,
           searchQuery: "",
           setSearchQuery: (q) => set(() => ({ searchQuery: q })),
           searchBarFocused: false,
           setSearchBarFocused: (f) => set(() => ({ searchBarFocused: f })),
-          setConversations: (conversationsToSet) =>
-            set((state) => {
-              const conversations = { ...state.conversations };
-
-              conversationsToSet.forEach((c) => {
-                conversations[c.topic] = {
-                  ...c,
-                  messagesIds:
-                    c.messagesIds && c.messagesIds.length > 0
-                      ? c.messagesIds
-                      : state.conversations[c.topic]?.messagesIds || [],
-                  messages:
-                    c.messages && c.messages.size > 0
-                      ? c.messages
-                      : state.conversations[c.topic]?.messages || new Map(),
-                  readUntil:
-                    c.readUntil || state.conversations[c.topic]?.readUntil || 0,
-                  pending:
-                    c.pending || state.conversations[c.topic]?.pending || false,
-                  lastUpdateAt: now(),
-                  hasOneMessageFromMe:
-                    c.hasOneMessageFromMe ||
-                    state.conversations[c.topic]?.hasOneMessageFromMe ||
-                    false,
-                  spamScore:
-                    c.spamScore === undefined
-                      ? state.conversations[c.topic]?.spamScore
-                      : c.spamScore,
-                };
-              });
-
-              setImmediate(() => {
-                subscribeToNotifications(account);
-              });
-
-              return {
-                ...state,
-                conversations,
-                lastUpdateAt: now(),
-              };
-            }),
           setPinnedConversations: (conversationsTopics: string[]) =>
             set((state) => {
               const pinnedConversations = [
@@ -345,15 +257,6 @@ export const initChatStore = (account: string) => {
                 const alreadyPinnedIndex = pinnedConversations.findIndex(
                   (item) => item === topic
                 );
-                const isGroup = isV3Topic(topic);
-                if (
-                  isGroup &&
-                  useSettingsStore.getState().groupStatus[
-                    getV3IdFromTopic(topic)
-                  ] === "denied"
-                ) {
-                  return;
-                }
                 if (alreadyPinnedIndex !== -1) {
                   pinnedConversations.splice(alreadyPinnedIndex, 1);
                 } else {
@@ -365,217 +268,6 @@ export const initChatStore = (account: string) => {
               };
             }),
 
-          deleteConversations: (topics) =>
-            set(
-              ({ conversations }) =>
-                setImmediate(() => {
-                  subscribeToNotifications(account);
-                }) && {
-                  conversations: omit(conversations, topics),
-                }
-            ),
-          updateConversationTopic: (oldTopic, conversation) =>
-            set((state) => {
-              if (oldTopic in state.conversations) {
-                logger.debug(
-                  `TOPIC UPDATE: old topic ${oldTopic} to new topic ${conversation.topic}`
-                );
-                const newState = { ...state };
-                const existingConversation = state.conversations[oldTopic];
-                const oldMessages = existingConversation.messages;
-                const oldMessagesIds = existingConversation.messagesIds;
-                const oldHasOneMessageFromMe =
-                  existingConversation.hasOneMessageFromMe;
-                newState.conversations[conversation.topic] = {
-                  ...conversation,
-                  lastUpdateAt: now(),
-                  messages: oldMessages,
-                  messagesIds: oldMessagesIds,
-                  hasOneMessageFromMe: oldHasOneMessageFromMe,
-                };
-                newState.lastUpdateAt = now();
-                delete newState.conversations[oldTopic];
-                newState.conversationsMapping[oldTopic] = conversation.topic;
-                setImmediate(() => {
-                  subscribeToNotifications(account);
-                });
-                return newState;
-              } else {
-                return state;
-              }
-            }),
-          setConversationMessageDraft: (topic, messageDraft) =>
-            set((state) => {
-              if (!state.conversations[topic]) {
-                logger.warn(
-                  "[Error] Tried to set message draft on non existent conversation",
-                  topic
-                );
-                return state;
-              }
-              const newState = { ...state };
-              newState.conversations[topic].messageDraft = messageDraft;
-              return newState;
-            }),
-          setConversationMediaPreview: (topic, mediaPreview) =>
-            set((state) => {
-              if (!state.conversations[topic]) {
-                logger.warn(
-                  "[Error] Tried to set media preview on non existent conversation",
-                  topic
-                );
-                return state;
-              }
-              const newState = { ...state };
-              newState.conversations[topic].mediaPreview = mediaPreview;
-              return newState;
-            }),
-          setMessages: (messagesToSet) =>
-            set((state) => {
-              let isUpdated = false;
-              let shouldResubscribe = false;
-              let shouldRefreshBalance = false;
-              const newState = {
-                ...state,
-              };
-
-              const conversationsToHandleSpamScore: {
-                [topic: string]: XmtpConversationWithUpdate;
-              } = {};
-
-              for (const message of messagesToSet) {
-                const topic = message.topic;
-                if (!newState.conversations[topic]) {
-                  newState.conversations[topic] = {
-                    messages: new Map(),
-                    topic,
-                    lastUpdateAt: now(),
-                  } as XmtpConversationWithUpdate;
-                  isUpdated = true;
-                }
-                if (
-                  (isContentType("text", message.contentType) &&
-                    message.content &&
-                    message.content.includes("💸💸💸  just sent you $")) ||
-                  isContentType("transactionReference", message.contentType) ||
-                  isContentType("coinbasePayment", message.contentType)
-                ) {
-                  shouldRefreshBalance = true;
-                }
-                const conversation = newState.conversations[topic];
-                if (
-                  message.senderAddress === account &&
-                  !conversation.hasOneMessageFromMe
-                ) {
-                  conversation.hasOneMessageFromMe = true;
-                  conversation.lastUpdateAt = now();
-                  isUpdated = true;
-                  shouldResubscribe = true;
-                }
-
-                // Default message status is sent
-                if (!message.status) message.status = "sent";
-                const alreadyMessage = conversation.messages.get(message.id);
-                // Do not override reactions when saving a message
-                if (alreadyMessage) {
-                  const newMessage = {
-                    ...message,
-                    reactions: alreadyMessage.reactions,
-                  } as XmtpMessage;
-                  // Existing message, let's see if we can consider it's updated
-                  const messageUpdated = isMessageUpdated(
-                    alreadyMessage,
-                    newMessage
-                  );
-
-                  isUpdated = isUpdated || messageUpdated;
-                  if (messageUpdated) {
-                    newState.conversations[topic].lastUpdateAt = now();
-                  }
-                  insertMessageIdAtRightIndex(conversation, newMessage);
-                } else {
-                  // New message, it's updated
-                  isUpdated = true;
-                  newState.conversations[topic].lastUpdateAt = now();
-                  insertMessageIdAtRightIndex(conversation, message);
-                  if (state.openedConversationTopic === topic) {
-                    const newReadUntil = Math.max(
-                      message.sent,
-                      newState.topicsData[topic]?.readUntil
-                        ? (newState.topicsData[topic]?.readUntil as number)
-                        : 0
-                    );
-
-                    const newData = {
-                      status: "read",
-                      readUntil: newReadUntil,
-                      timestamp: now(),
-                    } as TopicData;
-                    newState.topicsData[topic] = newData;
-
-                    saveTopicsData(account, {
-                      [topic]: newData,
-                    });
-                  }
-                }
-
-                // Let's check if it's a reaction to a message
-                if (
-                  message.referencedMessageId &&
-                  isContentType("reaction", message.contentType)
-                ) {
-                  const referencedMessage = conversation.messages.get(
-                    message.referencedMessageId
-                  );
-                  // On web we are reading backwards so let's create the
-                  // referencedMessage if it does not exist
-                  if (referencedMessage) {
-                    referencedMessage.reactions =
-                      referencedMessage.reactions || new Map();
-                    isUpdated = true;
-                    newState.conversations[topic].lastUpdateAt = now();
-                    if (!referencedMessage.reactions.has(message.id)) {
-                      referencedMessage.reactions.set(message.id, message);
-                      referencedMessage.lastUpdateAt = now();
-                    }
-                  }
-                }
-
-                // Set spamScore if needed, only after initial load is done
-                if (
-                  conversation.spamScore === undefined &&
-                  state.initialLoadDoneOnce
-                ) {
-                  conversationsToHandleSpamScore[conversation.topic] =
-                    conversation;
-                }
-              }
-
-              const updateSpamScoreFor = Object.values(
-                conversationsToHandleSpamScore
-              );
-              if (updateSpamScoreFor.length > 0) {
-                setImmediate(() => {
-                  computeConversationsSpamScores(account, updateSpamScoreFor);
-                });
-              }
-
-              if (isUpdated) {
-                newState.lastUpdateAt = now();
-              }
-
-              if (shouldResubscribe) {
-                setImmediate(() => {
-                  subscribeToNotifications(account);
-                });
-              }
-
-              if (shouldRefreshBalance) {
-                refreshBalanceForAccount(account);
-              }
-
-              return newState;
-            }),
           initialLoadDone: false,
           initialLoadDoneOnce: false,
           setInitialLoadDone: () =>
@@ -587,22 +279,22 @@ export const initChatStore = (account: string) => {
                 initialLoadDoneOnce: true,
                 lastUpdateAt: now(),
               };
-              if (!state.initialLoadDoneOnce) {
-                if (
-                  state.topicsDataFetchedOnce &&
-                  Object.keys(state.topicsData).length === 0
-                ) {
-                  const topicsUpdates = getTopicsUpdatesAsRead(
-                    newState.conversations
-                  );
-                  newState.topicsData = topicsUpdates;
-                  saveTopicsData(account, topicsUpdates);
-                } else {
-                  setTimeout(() => {
-                    markConversationsAsReadIfNecessary(account);
-                  }, 100);
-                }
-              }
+              // if (!state.initialLoadDoneOnce) {
+              //   if (
+              //     state.topicsDataFetchedOnce &&
+              //     Object.keys(state.topicsData).length === 0
+              //   ) {
+              //     const topicsUpdates = getTopicsUpdatesAsRead(
+              //       newState.conversations
+              //     );
+              //     newState.topicsData = topicsUpdates;
+              //     saveTopicsData(account, topicsUpdates);
+              //   } else {
+              //     setTimeout(() => {
+              //       markConversationsAsReadIfNecessary(account);
+              //     }, 100);
+              //   }
+              // }
               return newState;
             }),
           localClientConnected: false,
@@ -614,89 +306,6 @@ export const initChatStore = (account: string) => {
           setReconnecting: (reconnecting) => set(() => ({ reconnecting })),
           errored: false,
           setErrored: (errored) => set(() => ({ errored })),
-          updateMessagesIds: (updates) =>
-            set((state) => {
-              if (updates.length === 0) return state;
-              const newState = {
-                ...state,
-                lastUpdateAt: now(),
-              };
-              updates.forEach((messageToUpdate) => {
-                if (newState.conversations[messageToUpdate.topic]) {
-                  const conversation =
-                    newState.conversations[messageToUpdate.topic];
-                  conversation.lastUpdateAt = now();
-                  const oldMessage = conversation.messages.get(
-                    messageToUpdate.oldId
-                  );
-                  conversation.messages.delete(messageToUpdate.oldId);
-                  // Avoid duplicate reactions saved in db
-                  if (oldMessage && oldMessage.referencedMessageId) {
-                    const referencedOldMessage = conversation.messages.get(
-                      oldMessage.referencedMessageId
-                    );
-                    if (
-                      referencedOldMessage &&
-                      referencedOldMessage?.reactions?.get(oldMessage.id)
-                    ) {
-                      const oldReaction = referencedOldMessage.reactions.get(
-                        oldMessage.id
-                      );
-                      if (oldReaction) {
-                        referencedOldMessage?.reactions?.delete(oldMessage.id);
-                        referencedOldMessage.reactions.set(
-                          messageToUpdate.message.id,
-                          messageToUpdate.message
-                        );
-                        referencedOldMessage.lastUpdateAt = now();
-                      }
-                    }
-                  }
-                  // // Transfer attachment URL to the new message
-                  // if (oldMessage && state.messageAttachments[oldMessage.id]) {
-                  //   const oldAttachment = state.messageAttachments[oldMessage.id];
-                  //   const updatedAttachment = {
-                  //     ...oldAttachment,
-                  //     mediaURL: oldAttachment.mediaURL?.replace(oldMessage.id, messageToUpdate.message.id)
-                  //   };
-                  //   newState.messageAttachments[messageToUpdate.topic] = {
-                  //     ...newState.messageAttachments[messageToUpdate.topic],
-                  //     [messageToUpdate.message.id]: updatedAttachment
-                  //   };
-                  //   delete newState.messageAttachments[oldMessage.id];
-                  // }
-
-                  insertMessageIdAtRightIndex(
-                    conversation,
-                    messageToUpdate.message,
-                    oldMessage?.id
-                  );
-                }
-              });
-
-              return newState;
-            }),
-          updateMessageStatus: (topic, messageId, status) =>
-            set((state) => {
-              if (
-                !state.conversations[topic] ||
-                !state.conversations[topic].messages.has(messageId)
-              ) {
-                return state;
-              }
-              const newState = {
-                ...state,
-                lastUpdateAt: now(),
-              };
-              const conversation = newState.conversations[topic];
-              conversation.lastUpdateAt = now();
-              const message = conversation.messages.get(messageId);
-              if (message) {
-                message.status = status;
-              }
-
-              return newState;
-            }),
           setLastSyncedAt: (synced: number, topics: string[]) =>
             set(() => ({ lastSyncedAt: synced, lastSyncedTopics: topics })),
           setTopicsData: (
@@ -743,70 +352,20 @@ export const initChatStore = (account: string) => {
                 lastUpdateAt: now(),
               };
             }),
-          setSpamScores: (topicSpamScores: Record<string, number>) =>
-            set((state) => {
-              const newState = {
-                ...state,
-                lastUpdateAt: now(),
-              };
-              Object.entries(topicSpamScores).forEach(([topic, spamScore]) => {
-                // This is indicative of an issue, how are we setting spam scores for non existent conversations?
-                if (newState.conversations[topic]) {
-                  newState.conversations[topic].spamScore = spamScore;
-                  newState.conversations[topic].lastUpdateAt = now();
-                }
-              });
-              return newState;
-            }),
-          // METHOD ONLY USED TEMPORARILY FOR WHEN WE SEND GROP MESSAGES
-          deleteMessage: (topic: string, messageId: string) =>
-            set((state) => {
-              // We do not use lastUpdateAt so it should not show an update
-              // until we get back the "real" message
-              const newState = { ...state };
-              if (newState.conversations[topic]) {
-                const indexOf =
-                  newState.conversations[topic]?.messagesIds.indexOf(messageId);
-                if (indexOf > -1) {
-                  newState.conversations[topic].messagesIds.splice(indexOf, 1);
-                  newState.conversations[topic].messages.delete(messageId);
-                }
-              }
-              return newState;
-            }),
-          setMessageMetadata: (
-            topic: string,
-            messageId: string,
-            metadata: ConverseMessageMetadata
-          ) =>
-            set((state) => {
-              const conversation = state.conversations[topic];
-              if (!conversation) return state;
-              const message = conversation.messages.get(messageId);
-              if (!message) return state;
-              const newState = { ...state };
-              newState.conversations[topic].lastUpdateAt = now();
-              newState.conversations[topic].messages.set(messageId, {
-                ...message,
-                converseMetadata: metadata,
-                lastUpdateAt: now(),
-              });
-              return newState;
-            }),
-          setConversationsLastNotificationSubscribePeriod: (
-            topics: string[],
-            period: number
-          ) =>
-            set((state) => {
-              const newConversations = { ...state.conversations };
-              topics.forEach((topic) => {
-                if (newConversations[topic]) {
-                  newConversations[topic].lastNotificationsSubscribedPeriod =
-                    period;
-                }
-              });
-              return { conversations: newConversations };
-            }),
+          // setConversationsLastNotificationSubscribePeriod: (
+          //   topics: string[],
+          //   period: number
+          // ) =>
+          //   set((state) => {
+          //     const newConversations = { ...state.conversations };
+          //     topics.forEach((topic) => {
+          //       if (newConversations[topic]) {
+          //         newConversations[topic].lastNotificationsSubscribedPeriod =
+          //           period;
+          //       }
+          //     });
+          //     return { conversations: newConversations };
+          //   }),
           messageAttachments: {},
           setMessageAttachment(messageId, attachment) {
             set((state) => {
@@ -880,10 +439,11 @@ export const initChatStore = (account: string) => {
             delete persistedState.topicsStatus;
           }
           if (version < 3) {
-            const fullConversations: XmtpConversation[] =
+            const fullConversations: unknown[] =
               persistedState.pinnedConversations;
             persistedState.pinnedConversationTopics =
-              fullConversations?.map((it) => it.topic) ?? [];
+              fullConversations?.map((it) => (it as { topic: string }).topic) ??
+              [];
             delete persistedState.pinnedConversations;
           }
           return persistedState as ChatStoreType;
@@ -892,78 +452,4 @@ export const initChatStore = (account: string) => {
     )
   );
   return chatStore;
-};
-
-const isMessageUpdated = (oldMessage: XmtpMessage, newMessage: XmtpMessage) => {
-  const keysChangesToRerender: (keyof XmtpMessage)[] = ["id", "sent", "status"];
-  return keysChangesToRerender.some((k) => {
-    const keyUpdated = oldMessage[k] !== newMessage[k];
-    return keyUpdated;
-  });
-};
-
-const reverseRemoveElement = (array: string[], element: string) => {
-  for (let index = array.length - 1; index >= 0; index--) {
-    const sortedElement = array[index];
-    if (sortedElement === element) {
-      array.splice(index, 1);
-      break;
-    }
-  }
-};
-
-const insertMessageIdAtRightIndex = (
-  conversation: XmtpConversation,
-  newMessage: XmtpMessage,
-  replacingMessageId?: string
-) => {
-  conversation.messagesIds = conversation.messagesIds || [];
-  const currentMessages = conversation.messages;
-  const alreadyMessage = currentMessages.get(newMessage.id);
-  if (alreadyMessage) {
-    if (newMessage.sent === alreadyMessage.sent) {
-      // Just update in place
-      conversation.messages.set(newMessage.id, newMessage);
-      return;
-    } else {
-      // If date change, let's remove existing position, it will
-      // be reinserted at the right position
-      reverseRemoveElement(conversation.messagesIds, newMessage.id);
-    }
-  }
-  if (replacingMessageId) {
-    reverseRemoveElement(conversation.messagesIds, replacingMessageId);
-  }
-  const lastMessageId =
-    conversation.messagesIds.length > 0
-      ? conversation.messagesIds[conversation.messagesIds.length - 1]
-      : undefined;
-  const lastMessage = lastMessageId
-    ? currentMessages.get(lastMessageId)
-    : undefined;
-  if (lastMessageId && !lastMessage) {
-    console.warn(`Message id ${lastMessageId} exists but no matching message`);
-  }
-  // Basic case is just push the message at the end
-  if (!lastMessage || newMessage.sent >= lastMessage.sent) {
-    conversation.messagesIds.push(newMessage.id);
-    conversation.messages.set(newMessage.id, newMessage);
-    return;
-  }
-  // More complicated case, we loop in reverse (since usually it will be one of
-  // the last messages) and we find out the right position to insert
-  for (let index = conversation.messagesIds.length - 1; index >= 0; index--) {
-    const sortedMessageId = conversation.messagesIds[index];
-    const sortedMessage = conversation.messages.get(sortedMessageId);
-    if (sortedMessage && sortedMessage.sent < newMessage.sent) {
-      // When we find an older message, we're ready to insert after it
-      conversation.messagesIds.splice(index + 1, 0, newMessage.id);
-      conversation.messages.set(newMessage.id, newMessage);
-      return;
-    }
-  }
-  // If the message to insert is the first (happens on web)
-  // we push it at the beginning
-  conversation.messagesIds.unshift(newMessage.id);
-  conversation.messages.set(newMessage.id, newMessage);
 };
