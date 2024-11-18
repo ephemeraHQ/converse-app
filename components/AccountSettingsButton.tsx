@@ -17,7 +17,6 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
   useAccountsStore,
   useErroredAccountsMap,
@@ -66,7 +65,7 @@ export default function AccountSettingsButton({ account }: Props) {
     const methods = {
       [translate("your_profile_page")]: async () => {
         if (account) {
-          refreshProfileForAddress(account, account);
+          // refreshProfileForAddress(account, account);
           setCurrentAccount(account, false);
           router.navigate("Chats");
           navigate("Profile", {

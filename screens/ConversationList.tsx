@@ -28,7 +28,6 @@ import { NavigationParamList } from "./Navigation/Navigation";
 import { PinnedConversations } from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "@search/components/NoResult";
-import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
   useChatStore,
   useCurrentAccount,
@@ -41,7 +40,7 @@ import { converseEventEmitter } from "../utils/events";
 import { useIsSharingMode } from "../features/conversation-list/useIsSharingMode";
 import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
 import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
-import { ConversationContainerWithCodecsType } from "@utils/xmtpRN/client";
+import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
 
 type Props = {
   searchBarRef:
@@ -52,9 +51,7 @@ type Props = {
   "Chats" | "ShareFrame" | "Blocked"
 >;
 
-type FlatListItemType =
-  | ConversationFlatListItem
-  | ConversationContainerWithCodecsType;
+type FlatListItemType = ConversationFlatListItem | ConversationWithCodecsType;
 
 function ConversationList({ navigation, route, searchBarRef }: Props) {
   const styles = useStyles();
@@ -63,7 +60,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     searchBarFocused,
     setSearchBarFocused,
     initialLoadDoneOnce,
-    sortedConversationsWithPreview,
     openedConversationTopic,
     setSearchQuery,
   } = useChatStore(
@@ -73,7 +69,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       "setSearchQuery",
       "searchBarFocused",
       "setSearchBarFocused",
-      "sortedConversationsWithPreview",
       "openedConversationTopic",
     ])
   );
@@ -98,35 +93,19 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const requestsCount = useConversationListRequestCount();
 
   const showChatNullState =
-    items.length === 0 && !searchQuery && !showInitialLoad;
+    items?.length === 0 && !searchQuery && !showInitialLoad;
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
       // First login, let's refresh the profile
-      refreshProfileForAddress(currentAccount!, currentAccount!);
+      // refreshProfileForAddress(currentAccount!, currentAccount!);
     }
   }, [initialLoadDoneOnce, currentAccount]);
 
   useEffect(() => {
-    // const v2ListItems = getFilteredConversationsWithSearch(
-    //   searchQuery,
-    //   sortedConversationsWithPreview.conversationsInbox,
-    //   profiles
-    // );
-    // const filteredApprovedGroupIds = groups?.filter((group) => {
-    //   if (group?.state !== "allowed") {
-    //     return false;
-    //   }
-    //   return group?.name.toLowerCase().includes(searchQuery.toLowerCase());
-    // });
     // TODO:
-    setFlatListItems({ items, searchQuery });
-  }, [
-    searchQuery,
-    sortedConversationsWithPreview.conversationsInbox,
-    profiles,
-    items,
-  ]);
+    setFlatListItems({ items: items ?? [], searchQuery });
+  }, [searchQuery, profiles, items]);
 
   // Search bar hook
   useHeaderSearchBar({

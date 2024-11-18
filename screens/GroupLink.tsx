@@ -16,7 +16,8 @@ import Button from "../components/Button/Button";
 import { useCurrentAccount } from "../data/store/accountsStore";
 import { GroupLink, getGroupLink, joinGroupFromLink } from "../utils/api";
 import { navigate } from "../utils/navigation";
-import { refreshGroup } from "../utils/xmtpRN/conversations";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+// import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export default function GroupScreen({
   route,
@@ -26,6 +27,7 @@ export default function GroupScreen({
   const account = useCurrentAccount() as string;
   const [errorMessage, setErrorMessage] = useState("");
   const [groupLink, setGroupLink] = useState<GroupLink | undefined>(undefined);
+
   const loadGroup = useCallback(async (groupLinkId: string) => {
     const result = await getGroupLink(groupLinkId);
     setGroupLink(result);
@@ -38,6 +40,7 @@ export default function GroupScreen({
   }, [groupLink, navigation]);
   const colorScheme = useColorScheme();
   const [joining, setJoining] = useState(false);
+
   const joinGroup = useCallback(async () => {
     if (!groupLink?.id) return;
     setJoining(true);
@@ -62,7 +65,7 @@ export default function GroupScreen({
         while (!foundGroup && tries < 10) {
           try {
             tries += 1;
-            await refreshGroup(account, topic);
+            // await refreshGroup(account, topic);
             foundGroup = true;
           } catch (e) {
             logger.warn(e);
@@ -76,7 +79,7 @@ export default function GroupScreen({
         } else {
           navigation.goBack();
           setTimeout(() => {
-            navigate("Conversation", { topic });
+            navigate("Conversation", { topic: topic as ConversationTopic });
           }, 300);
         }
       }
@@ -85,6 +88,7 @@ export default function GroupScreen({
       setJoining(false);
     }
   }, [account, groupLink?.id, navigation]);
+
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   return (

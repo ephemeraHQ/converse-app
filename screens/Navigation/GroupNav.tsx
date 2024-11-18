@@ -7,9 +7,10 @@ import { Platform, useColorScheme } from "react-native";
 
 import { NativeStack, navigationAnimation } from "./Navigation";
 import GroupScreen from "../Group";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export type GroupNavParams = {
-  topic: string;
+  topic: ConversationTopic;
 };
 
 export const GroupScreenConfig = {

@@ -30,6 +30,7 @@ import {
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { navigate } from "@utils/navigation";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import * as Haptics from "expo-haptics";
 import { FC, useCallback, useMemo, useState } from "react";
 import {
@@ -42,9 +43,9 @@ import {
 } from "react-native";
 import { Portal, Snackbar, Text } from "react-native-paper";
 
-interface GroupScreenAdditionProps {
-  topic: string;
-}
+type GroupScreenAdditionProps = {
+  topic: ConversationTopic;
+};
 
 const noop = () => {};
 
@@ -54,6 +55,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
   const colorScheme = useColorScheme();
   const currentAccount = useCurrentAccount() as string;
   const { members } = useGroupMembers(topic);
+
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
       currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
@@ -64,6 +66,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
     }),
     [currentAccount, members]
   );
+
   const styles = useStyles();
   const [snackMessage, setSnackMessage] = useState<string | null>(null);
   const { permissions } = useGroupPermissions(topic);

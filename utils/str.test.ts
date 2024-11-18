@@ -3,7 +3,6 @@ import { PixelRatio } from "react-native";
 import {
   addressPrefix,
   capitalize,
-  conversationName,
   formatGroupName,
   getReadableProfile,
   getTitleFontScale,
@@ -11,7 +10,6 @@ import {
   strByteSize,
 } from "./str";
 import { getProfilesStore } from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
 
 jest.mock("react-native", () => ({
   Dimensions: {
@@ -81,38 +79,6 @@ describe("addressPrefix", () => {
 
   it("should return the original address if shorter than 6 characters", () => {
     expect(addressPrefix("0x123")).toBe("0x123");
-  });
-});
-
-describe("conversationName", () => {
-  it("should return the group name if it is a group conversation", () => {
-    const conversation = {
-      isGroup: true,
-      groupName: "Group Name",
-      topic: "",
-      peerAddress: "",
-    } as unknown as XmtpConversation;
-    expect(conversationName(conversation)).toBe("Group Name");
-  });
-
-  it("should return the humanized topic if group name is not provided", () => {
-    const conversation = {
-      isGroup: true,
-      groupName: "",
-      topic: "/xmtp/mls/1/g-dab181fefd94578cc791bcc42d3b207c/proto",
-      peerAddress: "",
-    } as unknown as XmtpConversation;
-    expect(conversationName(conversation)).toBe("Utah bluebird delta");
-  });
-
-  it("should return the short address if it is not a group conversation", () => {
-    const conversation = {
-      isGroup: false,
-      groupName: "",
-      topic: "",
-      peerAddress: "0x1234567890abcdef",
-    } as unknown as XmtpConversation;
-    expect(conversationName(conversation)).toBe("0x1234...cdef");
   });
 });
 

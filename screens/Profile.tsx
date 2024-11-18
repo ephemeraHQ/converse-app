@@ -80,7 +80,10 @@ import {
 } from "../utils/notifications";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
-import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
+import {
+  consentToAddressesOnProtocolByAccount,
+  consentToGroupsOnProtocol,
+} from "../utils/xmtpRN/contacts";
 import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
 import { getPreferredName } from "@utils/profile/getPreferredName";
 import { getPreferredAvatar } from "@utils/profile/getPreferredAvatar";
@@ -144,10 +147,8 @@ function ProfileScreenImpl() {
     revokeSuperAdmin,
     promoteToAdmin,
     promoteToSuperAdmin,
-  } = useGroupMembers(groupTopic ?? "");
-  const { permissions: groupPermissions } = useGroupPermissions(
-    groupTopic ?? ""
-  );
+  } = useGroupMembers(groupTopic);
+  const { permissions: groupPermissions } = useGroupPermissions(groupTopic);
 
   const { getXmtpSigner } = useXmtpSigner();
   const privySigner = usePrivySigner();
@@ -397,8 +398,8 @@ function ProfileScreenImpl() {
         Platform.OS === "android"
           ? undefined
           : isBlockedPeer
-          ? primaryColor(colorScheme)
-          : dangerColor(colorScheme),
+            ? primaryColor(colorScheme)
+            : dangerColor(colorScheme),
       leftView:
         Platform.OS === "android" ? (
           <TableViewPicto
@@ -424,11 +425,11 @@ function ProfileScreenImpl() {
             if (selectedIndex === 0 && peerAddress) {
               const newStatus = isBlockedPeer ? "consented" : "blocked";
               const consentOnProtocol = isBlockedPeer ? "allow" : "deny";
-              consentToPeersOnProtocol(
-                currentAccount(),
-                [peerAddress],
-                consentOnProtocol
-              );
+              consentToAddressesOnProtocolByAccount({
+                account: currentAccount(),
+                addresses: [peerAddress],
+                consent: consentOnProtocol,
+              });
               setPeersStatus({ [peerAddress]: newStatus });
 
               // Pop to conversation list, antepenultimate screen in stack
@@ -806,9 +807,8 @@ function ProfileScreenImpl() {
                     const client = (await getXmtpClient(
                       userAddress
                     )) as ConverseXmtpClientType;
-                    const otherInstallations = await getOtherInstallations(
-                      client
-                    );
+                    const otherInstallations =
+                      await getOtherInstallations(client);
                     if (otherInstallations.length === 0) {
                       Alert.alert(
                         translate("revoke_done_title"),

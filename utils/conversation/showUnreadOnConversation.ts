@@ -1,14 +1,14 @@
 import { TopicsData } from "@data/store/chatStore";
 import {
-  ConversationWithLastMessagePreview,
-  LastMessagePreview,
-} from "@utils/conversation";
+  ConversationWithCodecsType,
+  DecodedMessageWithCodecsType,
+} from "@utils/xmtpRN/client";
 
 export const showUnreadOnConversation = (
   initialLoadDoneOnce: boolean,
-  lastMessagePreview: LastMessagePreview | undefined,
+  lastMessagePreview: DecodedMessageWithCodecsType | undefined,
   topicsData: TopicsData,
-  conversation: ConversationWithLastMessagePreview,
+  conversation: ConversationWithCodecsType,
   userAddress: string
 ) => {
   if (!initialLoadDoneOnce) return false;
@@ -18,10 +18,9 @@ export const showUnreadOnConversation = (
   // If not manually markes as unread, we only show badge if last message
   // not from me
   if (
-    lastMessagePreview.message.senderAddress.toLowerCase() ===
-    userAddress.toLowerCase()
+    lastMessagePreview.senderAddress.toLowerCase() === userAddress.toLowerCase()
   )
     return false;
   const readUntil = topicsData[conversation.topic]?.readUntil || 0;
-  return readUntil < lastMessagePreview.message.sent;
+  return readUntil < lastMessagePreview.sentNs;
 };

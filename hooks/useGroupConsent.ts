@@ -1,29 +1,27 @@
-import { currentAccount, useSettingsStore } from "@data/store/accountsStore";
-import { useSelect } from "@data/store/storeHelpers";
+import { currentAccount } from "@data/store/accountsStore";
 import { useAllowGroupMutation } from "@queries/useAllowGroupMutation";
 import { useBlockGroupMutation } from "@queries/useBlockGroupMutation";
 import { useGroupConsentQuery } from "@queries/useGroupConsentQuery";
 import { useGroupQuery } from "@queries/useGroupQuery";
 import { QueryObserverOptions } from "@tanstack/react-query";
-import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
-import { consentToInboxIdsOnProtocol } from "@utils/xmtpRN/conversations";
-import { InboxId } from "@xmtp/react-native-sdk";
+import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 
 import { useGroupCreator } from "./useGroupCreator";
 
-interface OnConsentOptions {
+type OnConsentOptions = {
   includeCreator?: boolean;
   includeAddedBy?: boolean;
-}
+};
 
 export const useGroupConsent = (
-  topic: string,
+  topic: ConversationTopic | undefined,
   queryOptions?: Partial<QueryObserverOptions<"allowed" | "denied" | "unknown">>
 ) => {
   const account = currentAccount();
   const { data: group } = useGroupQuery(account, topic);
-  const { groupCreator } = useGroupCreator(topic);
+  const { data: groupCreator } = useGroupCreator(topic);
   const { data, isLoading, isError } = useGroupConsentQuery(
     account,
     topic,
@@ -31,20 +29,16 @@ export const useGroupConsent = (
   );
   const { mutateAsync: allowGroupMutation } = useAllowGroupMutation(
     account,
-    topic
+    topic!
   );
   const { mutateAsync: blockGroupMutation } = useBlockGroupMutation(
     account,
-    topic
-  );
-  const { setGroupStatus, setInboxIdPeerStatus } = useSettingsStore(
-    useSelect(["setGroupStatus", "setInboxIdPeerStatus"])
+    topic!
   );
 
   const allowGroup = useCallback(
     async (options: OnConsentOptions) => {
       await allowGroupMutation();
-      setGroupStatus({ [getV3IdFromTopic(topic).toLowerCase()]: "allowed" });
       const inboxIdsToAllow: InboxId[] = [];
       const inboxIds: { [inboxId: string]: "allowed" } = {};
       if (options.includeAddedBy && group?.addedByInboxId) {
@@ -57,24 +51,19 @@ export const useGroupConsent = (
         inboxIdsToAllow.push(groupCreator);
       }
       if (inboxIdsToAllow.length > 0) {
-        consentToInboxIdsOnProtocol(currentAccount(), inboxIdsToAllow, "allow");
-        setInboxIdPeerStatus(inboxIds);
+        consentToInboxIdsOnProtocolByAccount({
+          account,
+          inboxIds: inboxIdsToAllow,
+          consent: "allow",
+        });
       }
     },
-    [
-      allowGroupMutation,
-      setGroupStatus,
-      topic,
-      groupCreator,
-      group,
-      setInboxIdPeerStatus,
-    ]
+    [allowGroupMutation, group?.addedByInboxId, groupCreator, account]
   );
 
   const blockGroup = useCallback(
     async (options: OnConsentOptions) => {
       await blockGroupMutation();
-      setGroupStatus({ [getV3IdFromTopic(topic).toLowerCase()]: "denied" });
       const inboxIdsToDeny: InboxId[] = [];
       const inboxIds: { [inboxId: string]: "denied" } = {};
       if (options.includeAddedBy && group?.addedByInboxId) {
@@ -87,18 +76,14 @@ export const useGroupConsent = (
         inboxIdsToDeny.push(groupCreator);
       }
       if (inboxIdsToDeny.length > 0) {
-        consentToInboxIdsOnProtocol(currentAccount(), inboxIdsToDeny, "deny");
-        setInboxIdPeerStatus(inboxIds);
+        consentToInboxIdsOnProtocolByAccount({
+          account,
+          inboxIds: inboxIdsToDeny,
+          consent: "deny",
+        });
       }
     },
-    [
-      blockGroupMutation,
-      setGroupStatus,
-      topic,
-      groupCreator,
-      group,
-      setInboxIdPeerStatus,
-    ]
+    [blockGroupMutation, group?.addedByInboxId, groupCreator, account]
   );
 
   return {

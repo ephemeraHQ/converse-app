@@ -21,15 +21,17 @@ import { Alert, StyleSheet, Text, useColorScheme, View } from "react-native";
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 
-interface GroupScreenMembersTableProps {
-  topic: string;
-  groupPermissionLevel: string;
-}
+type GroupScreenMembersTableProps = {
+  topic: ConversationTopic | undefined;
+  group: GroupWithCodecsType | undefined | null;
+};
 
 export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = ({
   topic,
-  groupPermissionLevel,
+  group,
 }) => {
   const colorScheme = useColorScheme();
   const currentAccount = useCurrentAccount() as string;
@@ -69,6 +71,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = ({
         id: a.inboxId,
         title: `${preferredName}${isCurrentUser ? " (you)" : ""}`,
         action: () => {
+          // const groupPermissionLevel = await getGroupPermissionLevel(topic);
           const {
             options,
             cancelButtonIndex,
@@ -172,7 +175,6 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = ({
     currentAccount,
     currentAccountIsAdmin,
     currentAccountIsSuperAdmin,
-    groupPermissionLevel,
     members,
     profiles,
     promoteToAdmin,

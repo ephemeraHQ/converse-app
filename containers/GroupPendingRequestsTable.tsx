@@ -14,10 +14,11 @@ import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
-interface GroupPendingRequestsTableProps {
-  topic: string;
-}
+type GroupPendingRequestsTableProps = {
+  topic: ConversationTopic;
+};
 
 export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
   topic,
