@@ -18,6 +18,11 @@ import {
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
+import { getPreferredAvatar } from "@utils/profile/getPreferredAvatar";
+import { getPreferredName } from "@utils/profile/getPreferredName";
+import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
+import { getProfile } from "@utils/profile/getProfile";
+import { shortAddress } from "@utils/strings/shortAddress";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Avatar from "../components/Avatar";
 import Button from "../components/Button/Button";
@@ -29,13 +34,8 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../data/store/accountsStore";
-import { spacing } from "../theme";
-import { shortAddress } from "@utils/strings/shortAddress";
+import { spacing } from "../theme/spacing";
 import { NavigationParamList } from "./Navigation/Navigation";
-import { getProfile } from "@utils/profile/getProfile";
-import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
-import { getPreferredName } from "@utils/profile/getPreferredName";
-import { getPreferredAvatar } from "@utils/profile/getPreferredAvatar";
 
 const ShareProfileContent = ({
   userAddress,

@@ -3,6 +3,7 @@ import { createContext, memo, useContext, useEffect, useRef } from "react";
 import { createStore, useStore } from "zustand";
 
 type IMessageContextStoreProps = {
+  messageId: string;
   hasNextMessageInSeries: boolean;
   hasPreviousMessageInSeries: boolean;
   fromMe: boolean;
@@ -40,6 +41,7 @@ export const MessageContextStoreProvider = memo(
 
 const createMessageContextStore = (initProps: IMessageContextStoreProps) => {
   const DEFAULT_PROPS: IMessageContextStoreProps = {
+    messageId: "",
     hasNextMessageInSeries: false,
     hasPreviousMessageInSeries: false,
     fromMe: false,

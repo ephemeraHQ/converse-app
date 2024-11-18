@@ -17,8 +17,8 @@ import {
   Platform,
   StyleSheet,
   TextInput,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 import Animated, {
   SharedValue,
@@ -27,8 +27,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-import ChatInputReplyPreview from "./InputReplyPreview";
-import { SendButton } from "./SendButton";
+import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import { MediaPreview } from "../../../data/store/chatStore";
 import { useConversationContext } from "../../../utils/conversation";
 import { converseEventEmitter } from "../../../utils/events";
@@ -38,9 +37,7 @@ import AddAttachmentButton, {
   SelectedAttachment,
 } from "../Attachment/AddAttachmentButton";
 import SendAttachmentPreview from "../Attachment/SendAttachmentPreview";
-import { MessageToDisplay } from "../Message/Message";
-import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
-import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
+import { SendButton } from "./SendButton";
 
 const DEFAULT_MEDIA_PREVIEW_HEIGHT = { PORTRAIT: 120, LANDSCAPE: 90 };
 const MEDIA_PREVIEW_PADDING = Platform.OS === "android" ? 9 : 14;
@@ -73,14 +70,14 @@ const getSendButtonType = (input: string): "DEFAULT" | "HIGHER" => {
   return "DEFAULT";
 };
 
-interface ChatInputProps {
+type ChatInputProps = {
   inputHeight: SharedValue<number>;
   onSend: (payload: {
     text?: string;
     referencedMessageId?: string;
     attachment?: RemoteAttachmentContent;
   }) => Promise<void>;
-}
+};
 
 export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
   const inputRef = useConversationContext("inputRef");
@@ -338,6 +335,7 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
       await new Promise((r) => setTimeout(r, 5));
       await onSend({
         text: messageToSend.content,
+        referencedMessageId: messageToSend.referencedMessageId,
       });
     }
 
