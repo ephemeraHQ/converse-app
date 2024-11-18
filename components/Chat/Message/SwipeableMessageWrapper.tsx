@@ -9,6 +9,8 @@ import { Swipeable } from "react-native-gesture-handler";
 
 // TODO: Once we have Expo SDK 52, let's redo to be more performant and use SharedValue to trigger the onReply etc...
 
+// TODO: When we'll use ReanimatedSwipeable, we'll be able to listen to progress and trigger haptic once the treshold to reply is reached
+
 type IProps = {
   children: React.ReactNode;
   onReply: () => void;
@@ -21,15 +23,17 @@ export const SwipeableMessageWrapper = memo(function SwipeableMessageWrapper({
   const { themed, theme } = useAppTheme();
 
   const swipeableRef = useRef<Swipeable>(null);
-  const leftXThreshold = theme.spacing["4xl"];
+  const xTresholdToReply = theme.spacing["4xl"];
 
   return (
     <Swipeable
       overshootLeft
       hitSlop={{ left: -theme.spacing.md }}
-      overshootFriction={8}
+      overshootFriction={8} // 8 makes it feel more real
       containerStyle={themed($container)}
       childrenContainerStyle={themed($childrenContainer)}
+      dragOffsetFromLeftEdge={0}
+      leftThreshold={10000} // Never trigger opening
       renderLeftActions={(progressAV) => {
         return (
           // TODO: Switch to AnimatedVStack once we upgrade to Expo SDK 52
@@ -64,13 +68,10 @@ export const SwipeableMessageWrapper = memo(function SwipeableMessageWrapper({
           </Animated.View>
         );
       }}
-      onSwipeableOpen={() => {
-        Haptics.successNotificationAsync();
-      }}
-      leftThreshold={leftXThreshold}
       onSwipeableWillClose={() => {
         const translation = swipeableRef.current?.state.rowTranslation;
-        if (translation && (translation as any)._value > leftXThreshold) {
+        if (translation && (translation as any)._value > xTresholdToReply) {
+          Haptics.successNotificationAsync();
           onReply();
         }
       }}

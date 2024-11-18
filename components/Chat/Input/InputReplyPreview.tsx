@@ -17,14 +17,24 @@ import { getReadableProfile } from "../../../utils/str";
 import { isTransactionMessage } from "../../../utils/transaction";
 import Picto from "../../Picto/Picto";
 import { MessageToDisplay } from "../Message/Message";
+import { getGroupMessages, useGroupMessages } from "@queries/useGroupMessages";
+import { useGroupMessage } from "@queries/useGroupMessage";
 
 export default function ChatInputReplyPreview({
   replyingToMessage,
+  replyingToMessageId,
   onDismiss,
 }: {
   replyingToMessage: MessageToDisplay;
+  replyingToMessageId: string;
   onDismiss: () => void;
 }) {
+  const message = useGroupMessage({
+    account: currentAccount,
+    topic: topic,
+    messageId: replyingToMessageId,
+  });
+
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const currentAccount = useCurrentAccount() as string;
@@ -47,10 +57,10 @@ export default function ChatInputReplyPreview({
           {isAttachmentMessage(replyingToMessage.contentType)
             ? `📎 Media from ${getRelativeDateTime(replyingToMessage.sent)}`
             : isTransactionMessage(replyingToMessage.contentType)
-            ? `💸 Transaction from ${getRelativeDateTime(
-                replyingToMessage.sent
-              )}`
-            : replyingToMessage.content || replyingToMessage.contentFallback}
+              ? `💸 Transaction from ${getRelativeDateTime(
+                  replyingToMessage.sent
+                )}`
+              : replyingToMessage.content || replyingToMessage.contentFallback}
         </Text>
       </View>
       <TouchableOpacity

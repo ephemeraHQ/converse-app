@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-bind */
 import { MessageBubble } from "@components/Chat/Message/MessageBubble";
 import {
   MessageContextProvider,
@@ -60,6 +61,7 @@ import { isLatestSettledFromCurrentUser } from "../../../features/conversations/
 import { messageIsFromCurrentUserV3 } from "../../../features/conversations/utils/messageIsFromCurrentUser";
 import { messageShouldShowDateChange } from "../../../features/conversations/utils/messageShouldShowDateChange";
 import { ChatGroupUpdatedMessage } from "../ChatGroupUpdatedMessage";
+import { converseEventEmitter } from "@utils/events";
 
 type V3MessageProps = {
   messageId: string;
@@ -177,12 +179,18 @@ export const V3MessageContent = memo(function V3MessageContent({
       nextMessage,
     });
 
+  if (isReplyMessage(message)) {
+    console.log("REPLY MESSAGE");
+    return null;
+  }
+
   if (isTextMessage(message)) {
     const messageTyped = message as DecodedMessage<[TextCodec]>;
 
     const textContent = messageTyped.content();
     return (
       <MessageContextStoreProvider
+        messageId={message.id}
         hasNextMessageInSeries={_hasNextMessageInSeries}
         fromMe={fromMe}
         sentAt={message.sent}
@@ -216,6 +224,7 @@ export const V3MessageContent = memo(function V3MessageContent({
 
     return (
       <MessageContextStoreProvider
+        messageId={message.id}
         hasNextMessageInSeries={_hasNextMessageInSeries}
         fromMe={fromMe}
         sentAt={message.sent}
@@ -231,10 +240,6 @@ export const V3MessageContent = memo(function V3MessageContent({
         </MessageContextProvider>
       </MessageContextStoreProvider>
     );
-  }
-
-  if (isReplyMessage(message)) {
-    return null;
   }
 
   if (isRemoteAttachmentMessage(message)) {
@@ -263,6 +268,8 @@ export const V3MessageContent = memo(function V3MessageContent({
 
   // Need DecodedMessageAllTypes to work
   // const _ensureNever: never = message;
+  throw new Error("Unknown message type");
+  return null;
 });
 
 const SimpleMessage = memo(function SimpleMessage({
@@ -273,6 +280,7 @@ const SimpleMessage = memo(function SimpleMessage({
   const { theme } = useAppTheme();
 
   const [
+    messageId,
     showDateChange,
     hasNextMessageInSeries,
     hasPreviousMessageInSeries,
@@ -281,6 +289,7 @@ const SimpleMessage = memo(function SimpleMessage({
     fromMe,
   ] = useMessageContextStoreContext(
     useShallow((s) => [
+      s.messageId,
       s.showDateChange,
       s.hasNextMessageInSeries,
       s.hasPreviousMessageInSeries,
@@ -322,6 +331,7 @@ const SimpleMessage = memo(function SimpleMessage({
       <SwipeableMessageWrapper
         onReply={() => {
           console.log("reply");
+          converseEventEmitter.emit("triggerReplyToMessage", messageId);
         }}
       >
         {fromMe ? (
