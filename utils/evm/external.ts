@@ -18,7 +18,7 @@ import {
   useSetActiveWallet,
   useSwitchActiveWalletChain,
 } from "thirdweb/react";
-import { Account } from "thirdweb/wallets";
+import { Account, createWallet } from "thirdweb/wallets";
 import { useExternalWalletPickerContext } from "../../features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { DEFAULT_SUPPORTED_CHAINS } from "./wallets";
 import config from "../../config";
