@@ -8,13 +8,17 @@ import {
   getGroupDescriptionQueryData,
   setGroupDescriptionQueryData,
 } from "./useGroupDescriptionQuery";
-import { useGroupQuery } from "./useGroupQuery";
-import { refreshGroup } from "../utils/xmtpRN/conversations";
+import { useGroupQuery } from "@queries/useGroupQuery";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+// import { refreshGroup } from "../utils/xmtpRN/conversations";
 
-export const useGroupDescriptionMutation = (account: string, topic: string) => {
+export const useGroupDescriptionMutation = (
+  account: string,
+  topic: ConversationTopic | undefined
+) => {
   const { data: group } = useGroupQuery(account, topic);
   return useMutation({
-    mutationKey: setGroupDescriptionMutationKey(account, topic),
+    mutationKey: setGroupDescriptionMutationKey(account, topic!),
     mutationFn: async (groupDescription: string) => {
       if (!group || !account || !topic) {
         return;
@@ -23,6 +27,9 @@ export const useGroupDescriptionMutation = (account: string, topic: string) => {
       return groupDescription;
     },
     onMutate: async (groupDescription: string) => {
+      if (!topic) {
+        return;
+      }
       await cancelGroupDescriptionQuery(account, topic);
       const previousGroupDescription = getGroupDescriptionQueryData(
         account,
@@ -37,6 +44,9 @@ export const useGroupDescriptionMutation = (account: string, topic: string) => {
       if (context?.previousGroupDescription === undefined) {
         return;
       }
+      if (!topic) {
+        return;
+      }
       setGroupDescriptionQueryData(
         account,
         topic,
@@ -45,7 +55,7 @@ export const useGroupDescriptionMutation = (account: string, topic: string) => {
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess useGroupDescriptionMutation");
-      refreshGroup(account, topic);
+      // refreshGroup(account, topic);
     },
   });
 };

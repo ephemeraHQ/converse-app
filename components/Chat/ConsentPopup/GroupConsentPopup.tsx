@@ -18,50 +18,35 @@ import {
 } from "../../../data/store/accountsStore";
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 import { useConversationContext } from "../../../utils/conversation";
+import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 
-export function GroupConsentPopup() {
-  const conversation = useConversationContext("conversation");
+type GroupConsentPopupProps = {
+  group: GroupWithCodecsType;
+};
 
+export function GroupConsentPopup({ group }: GroupConsentPopupProps) {
   const navigation = useNavigation() as NativeStackNavigationProp<
     NavigationParamList,
     "Chats",
     undefined
   >;
-  const currentAccount = useCurrentAccount();
-  if (!conversation?.isGroup || !conversation?.topic || !currentAccount) {
-    throw new Error("This component should only be used for group chats");
-  }
-  const topic = conversation.topic;
+
+  const topic = group.topic;
+  const isAllowed = group.state === "allowed";
 
   const styles = useStyles();
   const colorScheme = useColorScheme();
-  const { consent, blockGroup, allowGroup } = useGroupConsent(topic);
-  const { groupCreator } = useGroupCreator(topic);
-  const { groupStatus } = useSettingsStore(useSelect(["groupStatus"]));
-  const { members } = useGroupMembers(topic);
-  const groupId = getV3IdFromTopic(topic);
-  const groupStatusForTopic = groupStatus[groupId];
-
-  const isCreator = useMemo(() => {
-    if (!members || !currentAccount) {
-      return true;
-    }
-    return groupCreator === members?.byAddress[currentAccount];
-  }, [currentAccount, groupCreator, members]);
+  const { blockGroup, allowGroup } = useGroupConsent(topic);
 
   // Determine whether to show the consent window based on various conditions
-  const shouldShowConsentWindow =
-    conversation &&
-    groupStatusForTopic !== "allowed" &&
-    consent !== "allowed" &&
-    !conversation.pending &&
-    !isCreator;
+  const shouldShowConsentWindow = group && !isAllowed;
 
-  const onBlock = useCallback(() => {
+  const onBlock = useCallback(async () => {
+    const name = await group.groupName();
     groupRemoveRestoreHandler(
       "unknown", // To display "Remove & Block inviter"
       colorScheme,
-      conversation.groupName,
+      name,
       allowGroup,
       blockGroup
     )((success: boolean) => {
@@ -70,7 +55,7 @@ export function GroupConsentPopup() {
       }
       // If not successful, do nothing (user canceled)
     });
-  }, [blockGroup, allowGroup, conversation.groupName, colorScheme, navigation]);
+  }, [group, colorScheme, allowGroup, blockGroup, navigation]);
 
   const onAccept = useCallback(() => {
     allowGroup({

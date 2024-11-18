@@ -17,9 +17,10 @@ import {
   NavigationParamList,
   navigationAnimation,
 } from "./Navigation";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export type ConversationNavParams = {
-  topic?: string;
+  topic?: ConversationTopic;
   text?: string;
   focus?: boolean;
   mainConversationWithPeer?: string;

@@ -7,10 +7,11 @@ import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import {
   getSchemedURLFromUniversalURL,
-  navigateToTopicWithRetry,
+  navigateToTopic,
   topicToNavigateTo,
 } from "../../utils/navigation";
 import { hideSplashScreen } from "../../utils/splash/splash";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 const isDevelopmentClientURL = (url: string) => {
   return url.includes("expo-development-client");
@@ -51,7 +52,7 @@ export default function InitialStateHandler() {
         // If app was loaded by clicking on notification,
         // let's navigate
         if (topicToNavigateTo) {
-          navigateToTopicWithRetry();
+          navigateToTopic(topicToNavigateTo as ConversationTopic);
         } else if (initialURL) {
           if (isDevelopmentClientURL(initialURL)) {
             return;

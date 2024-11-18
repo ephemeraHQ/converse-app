@@ -1,4 +1,3 @@
-import { MessageToDisplay } from "@components/Chat/Message/Message";
 import { TransactionToTrigger } from "@components/TransactionPreview/TransactionPreview";
 import { MediaPreview } from "@data/store/chatStore";
 import EventEmitter from "eventemitter3";
@@ -21,7 +20,7 @@ type ConverseEvents = {
   setCurrentConversationMediaPreviewValue: (mediaPreview: MediaPreview) => void;
   highlightMessage: (messageId: string) => void;
   setCurrentConversationInputValue: (value: string) => void;
-  triggerReplyToMessage: (message: MessageToDisplay) => void;
+  triggerReplyToMessage: (messageId: string) => void;
   scrollChatToMessage: (value: {
     index?: number;
     messageId?: string;

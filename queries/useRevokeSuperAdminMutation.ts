@@ -9,14 +9,18 @@ import {
   getGroupMembersQueryData,
   setGroupMembersQueryData,
 } from "./useGroupMembersQuery";
-import { useGroupQuery } from "./useGroupQuery";
-import { refreshGroup } from "../utils/xmtpRN/conversations";
+import { useGroupQuery } from "@queries/useGroupQuery";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+// import { refreshGroup } from "../utils/xmtpRN/conversations";
 
-export const useRevokeSuperAdminMutation = (account: string, topic: string) => {
+export const useRevokeSuperAdminMutation = (
+  account: string,
+  topic: ConversationTopic | undefined
+) => {
   const { data: group } = useGroupQuery(account, topic);
 
   return useMutation({
-    mutationKey: revokeSuperAdminMutationKey(account, topic),
+    mutationKey: revokeSuperAdminMutationKey(account, topic!),
     mutationFn: async (inboxId: InboxId) => {
       if (!group || !account || !topic) {
         return;
@@ -25,6 +29,9 @@ export const useRevokeSuperAdminMutation = (account: string, topic: string) => {
       return inboxId;
     },
     onMutate: async (inboxId: InboxId) => {
+      if (!topic) {
+        return;
+      }
       await cancelGroupMembersQuery(account, topic);
 
       const previousGroupMembers = getGroupMembersQueryData(account, topic);
@@ -43,6 +50,9 @@ export const useRevokeSuperAdminMutation = (account: string, topic: string) => {
     onError: (error, _variables, context) => {
       logger.warn("onError useRevokeSuperAdminMutation");
       sentryTrackError(error);
+      if (!topic) {
+        return;
+      }
       if (context?.previousGroupMembers === undefined) {
         return;
       }
@@ -50,7 +60,7 @@ export const useRevokeSuperAdminMutation = (account: string, topic: string) => {
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess useRevokeSuperAdminMutation");
-      refreshGroup(account, topic);
+      // refreshGroup(account, topic);
     },
   });
 };

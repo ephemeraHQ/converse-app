@@ -1,5 +1,6 @@
 import { AnimatedBlurView } from "@components/AnimatedBlurView";
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
+import { Text } from "@design-system/Text";
 import { ConversationReadOnly } from "@screens/ConversationReadOnly";
 import { backgroundColor } from "@styles/colors";
 import {
@@ -144,7 +145,8 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
                       runOnJS(onClose)(true);
                     })}
                   >
-                    <ConversationReadOnly topic={conversationTopic} />
+                    <Text>TODO: Add Conversation Read Only</Text>
+                    {/* <ConversationReadOnly topic={conversationTopic} /> */}
                   </GestureDetector>
                 </View>
                 <View style={styles.menuContainer}>

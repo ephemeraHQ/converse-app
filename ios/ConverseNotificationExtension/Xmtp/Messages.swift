@@ -10,121 +10,30 @@ import XMTP
 import Alamofire
 import Intents
 
-func handleNewConversationFirstMessage(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, conversation: XMTP.Conversation, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
-  // @todo => handle new group first messages?
-  var shouldShowNotification = false
-  var attempts = 0
-  var messageId: String? = nil
-  
-  while attempts < 5 { // 5 attempts * 4s = 20s
-    do {
-      let messages = try await conversation.messages(limit: 1, direction: .ascending)
-      if !messages.isEmpty {
-        let message = messages[0]
-        messageId = message.id
-        let contentType = getContentTypeString(type: message.encodedContent.type)
-        
-        var messageContent: String? = nil
-        if (contentType.starts(with: "xmtp.org/text:")) {
-          messageContent = String(data: message.encodedContent.content, encoding: .utf8)
-        }
-        
-        // @todo => handle group messages here (conversation.peerAddress)
-        let spamScore = try await computeSpamScoreConversation(
-          address: conversation.peerAddress,
-          message: messageContent,
-          contentType: contentType,
-          apiURI: apiURI
-        )
-        
-        do {
-          if case .v2(let conversationV2) = conversation {
-            try saveConversation(
-              account: xmtpClient.address,
-              topic: conversationV2.topic,
-              peerAddress: conversationV2.peerAddress,
-              createdAt: Int(conversationV2.createdAt.timeIntervalSince1970 * 1000),
-              context: ConversationContext(
-                conversationId: conversationV2.context.conversationID,
-                metadata: conversationV2.context.metadata
-              ),
-              spamScore: spamScore
-            )
-          }
-          let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient);
-          
-          if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
-            // Message is from me or a reaction removal, let's drop it
-            print("[NotificationExtension] Not showing a notification")
-            break
-          } else if let content = decodedMessageResult.content {
-            let senderAddress = try conversation.peerAddress
-            let conversationTitle: String? = nil
-            if let senderProfile = await getProfile(account: xmtpClient.address, address: senderAddress) {
-              bestAttemptContent.title = getPreferredName(address: senderAddress, socials: senderProfile.socials)
-            } else {
-              bestAttemptContent.title = shortAddress(address: senderAddress)
-            }
-            bestAttemptContent.body = content
-            shouldShowNotification = true
-            messageId = decodedMessageResult.id // @todo probably remove this?
-            if let body = bestAttemptContent.userInfo["body"] as? [String: Any] {
-              var updatedBody = body
-              updatedBody["contentTopic"] = conversation.topic
-              bestAttemptContent.userInfo.updateValue(updatedBody, forKey: "body")
-            }
-          }
-        } catch {
-          sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_1", "topic": conversation.topic])
-          print("[NotificationExtension] ERROR WHILE SAVING MESSAGE \(error)")
-          attempts += 1
-          continue
-        }
-        if spamScore >= 1 {
-          print("[NotificationExtension] Not showing a notification because considered spam")
-          shouldShowNotification = false
-        } else {
-          // Let's import the conversation so we can get hmac keys
-          try await xmtpClient.conversations.importTopicData(data: conversation.toTopicData())
-          var request = Xmtp_KeystoreApi_V1_GetConversationHmacKeysRequest()
-          request.topics = [conversation.topic]
-          let hmacKeys = await xmtpClient.conversations.getHmacKeys(request: request);
-          let conversationHmacKeys = try hmacKeys.hmacKeys[conversation.topic]?.serializedData().base64EncodedString()
-          subscribeToTopic(apiURI: apiURI, account: xmtpClient.address, pushToken: pushToken, topic: conversation.topic, hmacKeys: conversationHmacKeys)
-          shouldShowNotification = true
-        }
-        break
-      }
-    } catch {
-      sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_2", "topic": conversation.topic])
-      print("[NotificationExtension] Error fetching messages: \(error)")
-    }
-    
-    // Wait for 4 seconds before the next attempt
-    _ = try? await Task.sleep(nanoseconds: UInt64(4 * 1_000_000_000))
-    attempts += 1
-  }
-  
-  return (shouldShowNotification, messageId)
-}
 
-func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, group: XMTP.Group, welcomeTopic: String, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
+func handleV3Welcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String?, conversation: XMTP.Conversation, welcomeTopic: String, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?) {
   var shouldShowNotification = false
-  let messageId = "welcome-" + group.topic
+  let messageId = "welcome-" + conversation.topic
   do {
     // group is already synced in getNewGroup method
-
-    let groupName = try group.groupName()
-    let spamScore = await computeSpamScoreGroupWelcome(client: xmtpClient, group: group, apiURI: apiURI)
+    let spamScore = await computeSpamScoreV3Welcome(client: xmtpClient, conversation: conversation, apiURI: apiURI)
     if spamScore < 0 { // Message is going to main inbox
       // Consent list is loaded in computeSpamScoreGroupWelcome
-      let groupAllowed = try await xmtpClient.contacts.isGroupAllowed(groupId: group.id)
-      let groupDenied = try await xmtpClient.contacts.isGroupDenied(groupId: group.id)
+      let convoAllowed = try await xmtpClient.preferences.consentList.conversationState(conversationId: conversation.id) == .allowed
+      let convoDenied = try await xmtpClient.preferences.consentList.conversationState(conversationId: conversation.id) == .denied
       // If group is already consented (either way) then don't show a notification for welcome as this will likely be a second+ installation
-      if !groupAllowed && !groupDenied {
+      if !convoAllowed && !convoDenied {
+        
         shouldShowNotification = true
-        bestAttemptContent.title = groupName
-        bestAttemptContent.body = "You have been added to a new group"
+        if case .group(let group) = conversation {
+          let groupName = try group.groupName()
+          bestAttemptContent.title = groupName
+          bestAttemptContent.body = "You have been added to a new group"
+        } else if case .dm(let dm) = conversation {
+          bestAttemptContent.title = "New DM"
+          bestAttemptContent.body = "You have a new direct message"
+        }
+
       } else {
         shouldShowNotification = false
       }
@@ -136,14 +45,14 @@ func handleGroupWelcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: Str
     }
     
   } catch {
-    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_3", "topic": group.topic])
+    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_SAVE_MESSAGE_ERROR_3", "topic": conversation.topic])
     print("[NotificationExtension] Error handling group invites: \(error)")
   }
   
   return (shouldShowNotification, messageId)
 }
 
-func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI: String?, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?, messageIntent: INSendMessageIntent?) {
+func handleV3Message(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_Envelope, apiURI: String?, bestAttemptContent: inout UNMutableNotificationContent) async -> (shouldShowNotification: Bool, messageId: String?, messageIntent: INSendMessageIntent?) {
   var shouldShowNotification = false
   let contentTopic = envelope.contentTopic
   var messageId: String? = nil
@@ -151,12 +60,12 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
   
   do {
     
-    if let group = try xmtpClient.findGroup(groupId: getV3IdFromTopic(topic: envelope.contentTopic)) {
-      try await group.sync()
+    if let conversation = try xmtpClient.findConversationByTopic(topic: envelope.contentTopic) {
+      try await conversation.sync()
       if var decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope) {
         // For now, use the group member linked address as "senderAddress"
         // @todo => make inboxId a first class citizen
-        if let senderAddresses = try await group.members.first(where: {$0.inboxId == decodedMessage.senderAddress})?.addresses {
+        if let senderAddresses = try await conversation.members().first(where: {$0.inboxId == decodedMessage.senderAddress})?.addresses {
           decodedMessage.senderAddress = senderAddresses[0]
         }
 
@@ -164,25 +73,30 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
         messageId = decodedMessageResult.id
         if decodedMessageResult.senderAddress?.lowercased() == xmtpClient.inboxID.lowercased() || decodedMessageResult.senderAddress?.lowercased() == xmtpClient.address.lowercased() || decodedMessageResult.forceIgnore {
         } else {
-          let spamScore = await computeSpamScoreGroupMessage(client: xmtpClient, group: group, decodedMessage: decodedMessage, apiURI: apiURI)
+          let spamScore = await computeSpamScoreV3Message(client: xmtpClient, conversation: conversation, decodedMessage: decodedMessage, apiURI: apiURI)
           
           if spamScore < 0 { // Message is going to main inbox
             shouldShowNotification = true
-            if let groupName = try? group.groupName() {
-              bestAttemptContent.title = groupName
-            }
-            // We replaced decodedMessage.senderAddress from inboxId to actual address
-            // so it appears well in the app until inboxId is a first class citizen
-            if let senderProfile = await getProfile(account: xmtpClient.address, address: decodedMessage.senderAddress) {
-              bestAttemptContent.subtitle = getPreferredName(address: decodedMessage.senderAddress, socials: senderProfile.socials)
-            }
+            if case .group(let group) = conversation {
+              if let groupName = try? group.groupName() {
+                bestAttemptContent.title = groupName
+              }
+              // We replaced decodedMessage.senderAddress from inboxId to actual address
+              // so it appears well in the app until inboxId is a first class citizen
+              if let senderProfile = await getProfile(account: xmtpClient.address, address: decodedMessage.senderAddress) {
+                bestAttemptContent.subtitle = getPreferredName(address: decodedMessage.senderAddress, socials: senderProfile.socials)
+              }
 
-            if let content = decodedMessageResult.content {
-              bestAttemptContent.body = content
+              if let content = decodedMessageResult.content {
+                bestAttemptContent.body = content
+              }
+              
+              let groupImage = try? group.groupImageUrlSquare()
+              messageIntent = getIncomingGroupMessageIntent(group: group, content: bestAttemptContent.body, senderId: decodedMessage.senderAddress, senderName: bestAttemptContent.subtitle)
+            } else if case .dm(let dm) = conversation {
+                print("It's a DM with details: \(dm)")
             }
             
-            let groupImage = try? group.groupImageUrlSquare()
-            messageIntent = getIncomingGroupMessageIntent(group: group, content: bestAttemptContent.body, senderId: decodedMessage.senderAddress, senderName: bestAttemptContent.subtitle)
           } else if spamScore == 0 { // Message is Request
             shouldShowNotification = false
           } else { // Message is Spam
@@ -200,7 +114,7 @@ func handleGroupMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, apiURI
 }
 
 
-func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope, bestAttemptContent: inout UNMutableNotificationContent, body: [String: Any]) async -> (shouldShowNotification: Bool, messageId: String?, messageIntent: INSendMessageIntent?) {
+func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_Envelope, bestAttemptContent: inout UNMutableNotificationContent, body: [String: Any]) async -> (shouldShowNotification: Bool, messageId: String?, messageIntent: INSendMessageIntent?) {
   var shouldShowNotification = false
   let contentTopic = envelope.contentTopic
   var conversationTitle: String? = nil
@@ -278,19 +192,20 @@ func saveMessage(account: String, topic: String, sent: Date, senderAddress: Stri
   }
 }
 
-func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throws -> DecodedMessage? {
+func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_Envelope) async throws -> DecodedMessage? {
   // If topic is MLS, the conversation should already be there
   // @todo except if it's new convo => call sync before?
   if (isV3MessageTopic(topic: envelope.contentTopic)) {
-    if let group = try! xmtpClient.findGroup(groupId: getV3IdFromTopic(topic: envelope.contentTopic) ) {
+    if let conversation = try! xmtpClient.findConversationByTopic(topic: envelope.contentTopic) {
       do {
         sentryTrackMessage(message: "[NotificationExtension] Syncing Group", extras: [:])
-        try await group.sync()
+        try await conversation.sync()
         sentryTrackMessage(message: "[NotificationExtension] Done Syncing Group", extras: [:])
         let envelopeBytes = envelope.message
-        let decodedMessage = try await group.processMessage(envelopeBytes: envelopeBytes)
+        let decodedMessage = try await conversation.processMessage(messageBytes: envelopeBytes)
         print("[NotificationExtension] Group message decoded!")
-        return try decodedMessage.decode()
+        let decoded = try decodedMessage.decode()
+        return decoded
       } catch {
         sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
         print("[NotificationExtension] ERROR WHILE DECODING \(error)")
@@ -301,23 +216,7 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
       return nil
     }
   }
-  
-  // V1/V2 convos 1:1, will be deprecated once 1:1 are migrated to MLS
-  
-  guard let conversation = await getPersistedConversation(xmtpClient: xmtpClient, contentTopic: envelope.contentTopic) else {
-    sentryTrackMessage(message: "NOTIFICATION_CONVERSATION_NOT_FOUND", extras: ["envelope": envelope])
-    return nil
-  }
-  
-  do {
-    print("[NotificationExtension] Decoding message...")
-    let decodedMessage = try conversation.decode(envelope)
-    print("[NotificationExtension] Message decoded!")
-    return decodedMessage
-  } catch {
-    sentryTrackError(error: error, extras: ["message": "NOTIFICATION_DECODING_ERROR", "envelope": envelope])
-    return nil
-  }
+  return nil
 }
 
 func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP.Client) -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {

@@ -1,8 +1,8 @@
-import { useGroupId } from "@hooks/useGroupId";
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
-import { consentToGroupsOnProtocol } from "@utils/xmtpRN/conversations";
+import { consentToGroupsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 import { allowGroupMutationKey } from "./MutationKeys";
 import {
@@ -10,16 +10,23 @@ import {
   getGroupConsentQueryData,
   setGroupConsentQueryData,
 } from "./useGroupConsentQuery";
+import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 
-export const useAllowGroupMutation = (account: string, topic: string) => {
-  const { groupId } = useGroupId(topic);
+export const useAllowGroupMutation = (
+  account: string,
+  topic: ConversationTopic
+) => {
   return useMutation({
     mutationKey: allowGroupMutationKey(account, topic),
     mutationFn: async () => {
-      if (!groupId || !account) {
+      if (!topic || !account) {
         return;
       }
-      await consentToGroupsOnProtocol(account, [groupId], "allow");
+      await consentToGroupsOnProtocolByAccount(
+        account,
+        [getV3IdFromTopic(topic)],
+        "allow"
+      );
       return "allowed";
     },
     onMutate: async () => {

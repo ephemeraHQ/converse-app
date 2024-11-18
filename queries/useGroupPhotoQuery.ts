@@ -6,16 +6,17 @@ import {
 
 import { groupPhotoQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
-import { useGroupConversationScreenQuery } from "./useGroupQuery";
+import { useGroupQuery } from "./useGroupQuery";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const useGroupPhotoQuery = (
   account: string,
-  topic: string,
+  topic: ConversationTopic,
   queryOptions?: Partial<
     UseQueryOptions<string | undefined, Error, string | undefined>
   >
 ) => {
-  const { data: group } = useGroupConversationScreenQuery(account, topic);
+  const { data: group } = useGroupQuery(account, topic);
   return useQuery({
     queryKey: groupPhotoQueryKey(account, topic),
     queryFn: async () => {
@@ -31,13 +32,13 @@ export const useGroupPhotoQuery = (
 
 export const getGroupPhotoQueryData = (
   account: string,
-  topic: string
+  topic: ConversationTopic
 ): string | undefined =>
   queryClient.getQueryData(groupPhotoQueryKey(account, topic));
 
 export const setGroupPhotoQueryData = (
   account: string,
-  topic: string,
+  topic: ConversationTopic,
   groupPhoto: string,
   options?: SetDataOptions
 ) => {
@@ -48,7 +49,10 @@ export const setGroupPhotoQueryData = (
   );
 };
 
-export const cancelGroupPhotoQuery = async (account: string, topic: string) => {
+export const cancelGroupPhotoQuery = async (
+  account: string,
+  topic: ConversationTopic
+) => {
   await queryClient.cancelQueries({
     queryKey: groupPhotoQueryKey(account, topic),
   });
@@ -56,7 +60,7 @@ export const cancelGroupPhotoQuery = async (account: string, topic: string) => {
 
 export const invalidateGroupPhotoQuery = async (
   account: string,
-  topic: string
+  topic: ConversationTopic
 ) => {
   return queryClient.invalidateQueries({
     queryKey: groupPhotoQueryKey(account, topic),

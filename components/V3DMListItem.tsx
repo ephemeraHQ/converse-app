@@ -1,16 +1,20 @@
 import { DmWithCodecsType } from "@utils/xmtpRN/client";
 import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { getMessageContentType } from "@utils/xmtpRN/contentTypes";
 import logger from "@utils/logger";
 import Avatar from "./Avatar";
-import { useProfilesStore } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { AvatarSizes } from "@styles/sizes";
-import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import { getMinimalDate } from "@utils/date";
 import { useColorScheme } from "react-native";
 import { IIconName } from "@design-system/Icon/Icon.types";
 import { ConversationContextMenu } from "./ConversationContextMenu";
+import { useDmPeerInboxOnConversationList } from "@queries/useDmPeerInboxOnConversationList";
+import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
+import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
+import { navigate } from "@utils/navigation";
+import { Swipeable } from "react-native-gesture-handler";
 
 type V3DMListItemProps = {
   conversation: DmWithCodecsType;
@@ -30,13 +34,17 @@ const useDisplayInfo = ({ timestamp, isUnread }: UseDisplayInfoProps) => {
 };
 
 export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
-  const peer = conversation.peerAddress;
+  const currentAccount = useCurrentAccount();
+  const { data: peer } = useDmPeerInboxOnConversationList(
+    currentAccount!,
+    conversation
+  );
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
-  const peerProfile = useProfilesStore((state) => state.profiles[peer]);
-  const { timeToShow, colorScheme, leftActionIcon } = useDisplayInfo({
+  const { timeToShow, leftActionIcon } = useDisplayInfo({
     timestamp: conversation.createdAt,
     isUnread: false,
   });
+
   const messageText = useMemo(() => {
     const lastMessage = conversation?.lastMessage;
     if (!lastMessage) return "";
@@ -60,18 +68,19 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
     }
   }, [conversation?.lastMessage]);
 
-  const prefferedName = getPreferredName(peerProfile?.socials, peer);
+  const prefferedName = usePreferredInboxName(peer);
+  const avatarUri = usePreferredInboxAvatar(peer);
 
   const avatarComponent = useMemo(() => {
     return (
       <Avatar
         size={AvatarSizes.conversationListItem}
-        uri={getPreferredAvatar(peerProfile?.socials)}
+        uri={avatarUri}
         name={prefferedName}
         style={{ marginLeft: 16, alignSelf: "center" }}
       />
     );
-  }, [peerProfile?.socials, prefferedName]);
+  }, [avatarUri, prefferedName]);
 
   const contextMenuComponent = useMemo(
     () => (
@@ -84,11 +93,17 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
     ),
     [isContextMenuVisible, conversation.topic]
   );
+  const ref = useRef<Swipeable>(null);
+  const onPress = useCallback(() => {
+    navigate("Conversation", {
+      topic: conversation.topic,
+    });
+  }, [conversation.topic]);
 
   return (
     <ConversationListItemDumb
-      // ref={ref}
-      // onPress={onPress}
+      ref={ref}
+      onPress={onPress}
       // onRightActionPress={onRightPress}
       // onLongPress={onLongPress}
       // onRightSwipe={onRightSwipe}

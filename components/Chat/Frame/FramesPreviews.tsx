@@ -30,11 +30,14 @@ export function FramesPreviews({ message }: Props) {
   const fetchTagsIfNeeded = useCallback(() => {
     if (!tagsFetchedOnceForMessage.current[message.id]) {
       tagsFetchedOnceForMessage.current[message.id] = true;
-      fetchFramesForMessage(account, message).then(
-        (frames: FramesForMessage) => {
-          setMessageFramesMap(frames.messageId, frames.frames);
-        }
-      );
+      fetchFramesForMessage(
+        account,
+        message.id,
+        message.contentType,
+        message.content
+      ).then((frames: FramesForMessage) => {
+        setMessageFramesMap(frames.messageId, frames.frames);
+      });
     }
   }, [account, message, tagsFetchedOnceForMessage, setMessageFramesMap]);
 

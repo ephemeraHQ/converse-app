@@ -1,7 +1,7 @@
 import { getV3SpamScore } from "@data/helpers/conversations/spamScore";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useV3ConversationListQuery } from "@queries/useV3ConversationListQuery";
-import { ConversationContainerWithCodecsType } from "@utils/xmtpRN/client";
+import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
 import { useEffect, useState } from "react";
 
 export const useV3RequestItems = () => {
@@ -15,16 +15,16 @@ export const useV3RequestItems = () => {
     "useV3RequestItems"
   );
   const [likelyNotSpam, setLikelyNotSpam] = useState<
-    ConversationContainerWithCodecsType[]
+    ConversationWithCodecsType[]
   >([]);
-  const [likelySpam, setLikelySpam] = useState<
-    ConversationContainerWithCodecsType[]
-  >([]);
+  const [likelySpam, setLikelySpam] = useState<ConversationWithCodecsType[]>(
+    []
+  );
 
   useEffect(() => {
     const fetchGroups = async () => {
-      const likelyNotSpam: ConversationContainerWithCodecsType[] = [];
-      const likelySpam: ConversationContainerWithCodecsType[] = [];
+      const likelyNotSpam: ConversationWithCodecsType[] = [];
+      const likelySpam: ConversationWithCodecsType[] = [];
       await Promise.allSettled(
         (data ?? []).map(async (conversation) => {
           if (conversation.state !== "unknown") {

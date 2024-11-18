@@ -39,7 +39,10 @@ import {
   getPreferredName,
   getProfile,
 } from "../../utils/profile";
-import { createGroup } from "../../utils/xmtpRN/conversations";
+import {
+  createGroup,
+  createGroupByAccount,
+} from "../../utils/xmtpRN/conversations";
 import { uploadFile } from "@utils/attachment/uploadFile";
 
 const getPendingGroupMembers = (
@@ -139,20 +142,20 @@ export default function NewGroupSummary({
   const onCreateGroupPress = useCallback(async () => {
     setCreatingGroup(true);
     try {
-      const groupTopic = await createGroup(
-        currentAccount(),
-        route.params.members.map((m) => m.address),
+      const group = await createGroupByAccount({
+        account: currentAccount(),
+        peers: route.params.members.map((m) => m.address),
         permissionPolicySet,
         groupName,
-        remotePhotoUrl,
-        groupDescription
-      );
+        groupPhoto: remotePhotoUrl,
+        groupDescription,
+      });
 
       navigation.getParent()?.goBack();
 
       setTimeout(() => {
         navigate("Conversation", {
-          topic: groupTopic,
+          topic: group.topic,
           focus: true,
         });
       }, 300);
