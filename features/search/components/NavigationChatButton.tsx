@@ -67,7 +67,13 @@ export function NavigationChatButton({
     <Button
       variant={Platform.OS === "android" ? "link" : "outline"}
       style={{ marginRight: theme.spacing.xs }}
-      text={groupMode ? (loading ? "Adding..." : "Add") : "Chat"}
+      text={
+        groupMode
+          ? loading
+            ? translate("add_loading")
+            : translate("add")
+          : translate("chat")
+      }
       onPress={
         groupMode ? (loading ? undefined : addToGroupIfPossible) : openChat
       }

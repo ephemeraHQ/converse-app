@@ -373,6 +373,9 @@ export const en = {
   // New Conversation
   cannot_be_added_to_group_yet:
     "{{name}} needs to update Converse to be added to a group",
+  add: "Add",
+  add_loading: "Adding...",
+  chat: "Chat",
 
   // Group Updated Message
   group_name_changed: '{{name}} changed the group name to "{{newValue}}".',
@@ -383,4 +386,5 @@ export const en = {
     '{{name}} changed the group description to "{{newValue}}".',
   group_name_changed_to: '{{name}} changed the group name to "{{newValue}}".',
 };
+
 export type Translations = typeof en;
