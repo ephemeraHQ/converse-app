@@ -17,10 +17,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { EmojiRow } from "./EmojiRow";
-import {
-  BottomSheetFlashList,
-  BottomSheetFlatList,
-} from "@gorhom/bottom-sheet";
+import { BottomSheetFlashList } from "@design-system/BottomSheet/BottomSheetFlashList";
+import { BottomSheetFlatList } from "@design-system/BottomSheet/BottomSheetFlatList";
 
 type EmojiRowListProps = {
   emojis: CategorizedEmojisRecord[];
@@ -66,10 +64,14 @@ export const EmojiRowList: FC<EmojiRowListProps> = ({
     };
   });
 
+  const ListHeaderComponent = useCallback(() => {
+    return ListHeader;
+  }, [ListHeader]);
+
   return (
     <ReanimatedView style={[animatedStyle, styles.container]}>
       <ListRenderer
-        ListHeaderComponent={() => ListHeader}
+        ListHeaderComponent={ListHeaderComponent}
         showsVerticalScrollIndicator={false}
         data={emojis}
         scrollEnabled={emojis.length > 1}

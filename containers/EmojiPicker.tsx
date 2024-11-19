@@ -7,6 +7,7 @@ import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader"
 import { BottomSheetModal } from "@design-system/BottomSheet/BottomSheetModal";
 import { Text } from "@design-system/Text";
 import { TextField } from "@design-system/TextField/TextField";
+import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { emojis } from "@utils/emojis/emojis";
@@ -20,7 +21,7 @@ import {
 import { matchSorter } from "match-sorter";
 import { debounce } from "perfect-debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, TextInput, ViewStyle, TextStyle } from "react-native";
+import { TextInput, ViewStyle, TextStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const flatEmojis = emojis.flatMap((category) => category.data);
@@ -169,7 +170,6 @@ export const EmojiPicker = () => {
     <BottomSheetModal
       onClose={closeMenu}
       ref={bottomSheetRef}
-      enableDynamicSizing
       topInset={insets.top}
       snapPoints={["40%", "100%"]}
     >
@@ -180,11 +180,11 @@ export const EmojiPicker = () => {
           onChangeText={onTextInputChange}
           placeholder={translate("search_emojis")}
           clearButtonMode="always"
-          containerStyle={$inputContainer}
+          containerStyle={themed($inputContainer)}
         />
       </BottomSheetContentContainer>
 
-      <View style={themed($container)}>
+      <VStack style={themed($container)}>
         {hasInput ? (
           <EmojiRowList emojis={filteredReactions} onPress={handleReaction} />
         ) : (
@@ -198,15 +198,15 @@ export const EmojiPicker = () => {
             }
           />
         )}
-      </View>
+      </VStack>
     </BottomSheetModal>
   );
 };
 
-const $inputContainer = {
-  marginVertical: 8,
-  marginHorizontal: 8,
-};
+const $inputContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginVertical: spacing.xxs,
+  marginHorizontal: spacing.xxs,
+});
 
 const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginHorizontal: spacing.xxs,
