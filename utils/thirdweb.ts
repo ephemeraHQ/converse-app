@@ -34,7 +34,7 @@ export const thirdwebWallets: Record<ISupportedWalletName, Wallet> =
         wallet = createWallet("com.coinbase.wallet", {
           appMetadata: config.walletConnectConfig.appMetadata,
           mobileConfig: {
-            callbackURL: `https://${config.websiteDomain}/mobile-wallet-protocol`,
+            callbackURL: `https://${config.websiteDomain}`,
           },
           walletConfig: {
             options: "smartWalletOnly",
