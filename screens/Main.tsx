@@ -112,6 +112,12 @@ const NavigationContent = () => {
     useSelect(["notificationsPermissionStatus", "splashScreenHidden"])
   );
 
+  // return (
+  //   <NativeStack.Navigator>
+  //     <NativeStack.Screen name="Examples" component={Examples} />
+  //   </NativeStack.Navigator>
+  // );
+
   if (!splashScreenHidden) {
     // TODO: Add a loading screen
     return null;

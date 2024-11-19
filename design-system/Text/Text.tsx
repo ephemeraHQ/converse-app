@@ -1,10 +1,10 @@
 import React from "react";
 import { Text as RNText, StyleProp, TextStyle } from "react-native";
 
-import { ITextProps } from "./Text.props";
-import { getTextStyle } from "./Text.utils";
 import { translate } from "../../i18n";
 import { useAppTheme } from "../../theme/useAppTheme";
+import { ITextProps } from "./Text.props";
+import { getTextStyle } from "./Text.utils";
 
 export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
   const {
@@ -16,6 +16,7 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     text,
     children,
     style: styleProp,
+    preset,
     ...rest
   } = props;
 
@@ -29,7 +30,7 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     size,
     color,
     style: styleProp,
-    ...props,
+    preset,
   });
 
   return (

@@ -19,7 +19,7 @@ export type IButtonVariant =
   | "secondary-danger"
   | "text";
 
-export type IButtonSize = "md" | "lg";
+export type IButtonSize = "sm" | "md" | "lg";
 
 export type IButtonAction = "primary" | "danger";
 
