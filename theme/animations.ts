@@ -39,6 +39,9 @@ const easings = {
   easeInOutExpo: [1, 0, 0, 1],
   easeInOutCirc: [0.785, 0.135, 0.15, 0.86],
 };
+export const SICK_MASS = 1.03;
+
+export const HOLD_ITEM_TRANSFORM_DURATION = 280;
 
 export const animations = {
   spring: {
@@ -47,6 +50,16 @@ export const animations = {
   },
 
   easings,
+  
+  contextMenuSpring: {
+    damping: SICK_DAMPING,
+    stiffness: SICK_STIFFNESS,
+    mass: SICK_MASS,
+    restDisplacementThreshold: 0.001,
+    restSpeedThreshold: 0.001,
+  },
+
+  contextMenuHoldDuration: HOLD_ITEM_TRANSFORM_DURATION,
 
   fadeInDownSpring: () =>
     FadeInDown.easing(SICK_EASE_OUT)

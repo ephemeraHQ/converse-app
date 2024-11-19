@@ -6,8 +6,6 @@ import {
   useProfilesStore,
 } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
-import { backgroundColor, textSecondaryColor } from "@styles/colors";
-import { AvatarSizes, BorderRadius } from "@styles/sizes";
 
 import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
 import {
@@ -24,7 +22,6 @@ import {
 import React, { FC, useMemo, useEffect, useCallback } from "react";
 import {
   ListRenderItem,
-  useColorScheme,
   View,
   StyleSheet,
   TouchableOpacity,
@@ -46,19 +43,19 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppTheme } from "@theme/useAppTheme";
 import { Text } from "@design-system/Text";
 
-interface MessageReactionsListProps {
+type MessageReactionsListProps = {
   reactions: {
     [senderAddress: string]: MessageReaction[];
   };
   message: MessageToDisplay;
   dismissMenu?: () => void;
-}
+};
 
-interface MessageReactionsItemProps {
+type MessageReactionsItemProps = {
   content: string;
   addresses: string[];
   index: number;
-}
+};
 
 const INITIAL_DELAY = 0;
 const ITEM_DELAY = 200;
@@ -68,6 +65,7 @@ const keyExtractor = (item: [string, string[]]) => item[0];
 
 const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
   const styles = useStyles();
+  const { theme } = useAppTheme();
   const animatedValue = useSharedValue(0);
   const membersSocials = useProfilesStore((s) =>
     addresses.map((address) => {
@@ -99,17 +97,17 @@ const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
     <Animated.View style={[styles.itemContainer, animatedStyle]}>
       <View
         style={{
-          height: AvatarSizes.reactionsOverlay,
+          height: theme.avatarSize.lg,
           justifyContent: "center",
           alignItems: "center",
         }}
       >
         <GroupAvatar
           pendingGroupMembers={membersSocials}
-          size={AvatarSizes.reactionsOverlay}
+          size={theme.avatarSize.lg}
         />
       </View>
-      <Text style={styles.itemText}>
+      <Text style={{ marginTop: 20 }}>
         {content} {addresses.length}
       </Text>
     </Animated.View>
@@ -125,6 +123,7 @@ const EmojiItem: FC<{
   currentUser: string;
 }> = ({ content, message, alreadySelected, dismissMenu, currentUser }) => {
   const styles = useStyles();
+
   const handlePress = useCallback(() => {
     if (alreadySelected) {
       removeReactionFromMessage(currentUser, message, content);
@@ -168,7 +167,7 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   );
   const currentUser = useCurrentAccount() as string;
   const styles = useStyles();
-  const colorScheme = useColorScheme();
+
   const list = useMemo(() => {
     const reactionMap: Record<string, string[]> = {};
     Object.entries(reactions).forEach(([senderAddress, reactions]) => {
@@ -184,7 +183,6 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
     });
     return Object.entries(reactionMap);
   }, [reactions]);
-  const hasEmojiOverlay = list.length !== 0;
 
   const currentUserEmojiMap = useMemo(() => {
     const emojiSet: Record<string, boolean> = {};
@@ -223,21 +221,26 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
         <Portal>
           <View style={styles.portalContainer}>
             <GestureHandlerRootView>
-              <FlatList
-                contentContainerStyle={styles.reactionsContainer}
-                data={list}
-                horizontal
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
-                showsHorizontalScrollIndicator={false}
-              />
+              <View
+                style={{
+                  borderRadius: theme.spacing.sm,
+                  backgroundColor: theme.colors.background.raised,
+                }}
+              >
+                <FlatList
+                  data={list}
+                  horizontal
+                  renderItem={renderItem}
+                  keyExtractor={keyExtractor}
+                  showsHorizontalScrollIndicator={false}
+                />
+              </View>
             </GestureHandlerRootView>
           </View>
         </Portal>
       ) : (
         <View style={styles.flex1} />
       )}
-      {hasEmojiOverlay && <View style={styles.flexGrow} />}
       <View
         style={[
           styles.emojiListContainer,
@@ -277,7 +280,6 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
 export const MessageReactionsList = React.memo(MessageReactionsListInner);
 
 const useStyles = () => {
-  const colorScheme = useColorScheme();
   const safeAreaInsets = useSafeAreaInsets();
 
   const { theme } = useAppTheme();
@@ -289,32 +291,17 @@ const useStyles = () => {
       width: 76,
       height: 119.5,
     },
-    itemText: {
-      color: textSecondaryColor(colorScheme),
-      fontSize: 16,
-      lineHeight: 20,
-      marginTop: 20,
-    },
-    flexGrow: {
-      flexGrow: 1,
-      height: "auto",
-    },
     container: {
       flex: 1,
     },
     portalContainer: {
       position: "absolute",
-      top: safeAreaInsets.top + 10,
+      top: safeAreaInsets.top + theme.spacing.xs,
       left: 0,
       right: 0,
       justifyContent: "center",
       alignItems: "center",
       pointerEvents: "box-none",
-    },
-    reactionsContainer: {
-      borderRadius: BorderRadius.large,
-      backgroundColor: backgroundColor(colorScheme),
-      height: 120,
     },
     flex1: {
       flex: 1,
