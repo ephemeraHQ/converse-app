@@ -1,25 +1,18 @@
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
 import { BlurView } from "@design-system/BlurView";
 import { useAppTheme } from "@theme/useAppTheme";
-import { calculateMenuHeight } from "@utils/contextMenu/calculateMenuHeight";
-// TODO migrate constants to theme
+import { animations } from "@theme/animations";
 import {
-  AUXILIARY_VIEW_MIN_HEIGHT,
-  HOLD_ITEM_TRANSFORM_DURATION,
-  ITEM_WIDTH,
-  OUTTER_SPACING,
-  SIDE_MARGIN,
-  SPRING_CONFIGURATION,
   MENU_GAP,
   AUXILIARY_VIEW_GAP,
-} from "@utils/contextMenu/constants";
+} from "@design-system/ContextMenu/ContextMenu.constants";
+import { calculateMenuHeight } from "@design-system/ContextMenu/ContextMenu.utils";
 import { ConversationContext } from "@utils/conversation";
 import React, { FC, memo, useEffect, useMemo } from "react";
 import {
   Platform,
   StyleSheet,
   TouchableWithoutFeedback,
-  useColorScheme,
   useWindowDimensions,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -69,21 +62,21 @@ const BackdropComponent: FC<{
   const { height, width } = useWindowDimensions();
   const safeAreaInsets = useSafeAreaInsets();
 
+  const AUXILIARY_VIEW_MIN_HEIGHT = 210;
+
   useEffect(() => {
     activeValue.value = isActive;
     opacityValue.value = withTiming(isActive ? 1 : 0, {
-      duration: HOLD_ITEM_TRANSFORM_DURATION,
+      duration: animations.contextMenuHoldDuration,
     });
     intensityValue.value = withTiming(isActive ? 50 : 0, {
-      duration: HOLD_ITEM_TRANSFORM_DURATION,
+      duration: animations.contextMenuHoldDuration,
     });
   }, [activeValue, isActive, opacityValue, intensityValue]);
 
   const menuHeight = useMemo(() => {
     return calculateMenuHeight(items.length);
   }, [items]);
-
-  const colorScheme = useColorScheme();
 
   // Attribution Panel + Emoji Picker
 
@@ -97,7 +90,7 @@ const BackdropComponent: FC<{
         // Height of the context menu
         menuHeight +
         // Space between the message and the context menu
-        OUTTER_SPACING +
+        theme.spacing.xs +
         // Account for safe area at the bottom of the screen
         (safeAreaInsets?.bottom || 0);
 
@@ -125,7 +118,7 @@ const BackdropComponent: FC<{
             AUXILIARY_VIEW_MIN_HEIGHT -
             safeAreaInsets.top +
             AUXILIARY_VIEW_GAP -
-            OUTTER_SPACING)
+            theme.spacing.xs)
         );
       }
     };
@@ -133,14 +126,13 @@ const BackdropComponent: FC<{
     const tY = getTransformValue();
     const transformAnimation = () =>
       isActive
-        ? withSpring(tY, SPRING_CONFIGURATION)
-        : withTiming(0, { duration: HOLD_ITEM_TRANSFORM_DURATION });
+        ? withSpring(tY, animations.contextMenuSpring)
+        : withTiming(0, { duration: animations.contextMenuHoldDuration });
     return {
       position: "absolute",
       top: itemRectY.value,
       left: fromMe ? undefined : itemRectX.value,
       right: fromMe ? width - itemRectX.value - itemRectWidth.value : undefined,
-      width: width - 2 * SIDE_MARGIN,
       transform: [
         {
           translateY: transformAnimation(),
@@ -162,7 +154,7 @@ const BackdropComponent: FC<{
         // Height of the context menu
         menuHeight +
         // Add spacing between menu and message
-        OUTTER_SPACING +
+        theme.spacing.xs +
         // Account for bottom safe area (messages aligned from bottom)
         (safeAreaInsets?.bottom || 0);
 
@@ -180,7 +172,7 @@ const BackdropComponent: FC<{
         return (
           -1 *
           (itemRectY.value -
-            OUTTER_SPACING -
+            theme.spacing.xs -
             AUXILIARY_VIEW_MIN_HEIGHT -
             safeAreaInsets.top)
         );
@@ -190,15 +182,15 @@ const BackdropComponent: FC<{
     const tY = getTransformValue();
     const transformAnimation = () =>
       isActive
-        ? withSpring(tY, SPRING_CONFIGURATION)
-        : withTiming(0, { duration: HOLD_ITEM_TRANSFORM_DURATION });
+        ? withSpring(tY, animations.contextMenuSpring)
+        : withTiming(0, { duration: animations.contextMenuHoldDuration });
 
     return {
       position: "absolute",
       top: itemRectY.value + itemRectHeight.value + MENU_GAP,
       left: fromMe ? undefined : itemRectX.value,
       right: fromMe ? width - itemRectX.value - itemRectWidth.value : undefined,
-      width: ITEM_WIDTH,
+      width: 180,
       transform: [
         {
           translateY: transformAnimation(),
@@ -211,7 +203,10 @@ const BackdropComponent: FC<{
 
   const animatedPortalStyle = useAnimatedStyle(() => {
     const animateOpacity = () =>
-      withDelay(HOLD_ITEM_TRANSFORM_DURATION, withTiming(0, { duration: 0 }));
+      withDelay(
+        animations.contextMenuHoldDuration,
+        withTiming(0, { duration: 0 })
+      );
     const getTransformValue = () => {
       // Calculate the vertical position of the message bubble
       const topTransform =
@@ -222,7 +217,7 @@ const BackdropComponent: FC<{
         // Height of the context menu
         menuHeight +
         // Add spacing between menu and message
-        OUTTER_SPACING +
+        theme.spacing.xs +
         // Account for bottom safe area (messages aligned from bottom)
         (safeAreaInsets?.bottom || 0);
 
@@ -240,7 +235,7 @@ const BackdropComponent: FC<{
         return (
           -1 *
           (itemRectY.value -
-            OUTTER_SPACING -
+            theme.spacing.xs -
             AUXILIARY_VIEW_MIN_HEIGHT -
             safeAreaInsets.top)
         );
@@ -250,8 +245,8 @@ const BackdropComponent: FC<{
     const tY = getTransformValue();
     const transformAnimation = () =>
       isActive
-        ? withSpring(tY, SPRING_CONFIGURATION)
-        : withTiming(-0.1, { duration: HOLD_ITEM_TRANSFORM_DURATION });
+        ? withSpring(tY, animations.contextMenuSpring)
+        : withTiming(-0.1, { duration: animations.contextMenuHoldDuration });
     return {
       position: "absolute",
       top: itemRectY.value,
@@ -292,7 +287,7 @@ const BackdropComponent: FC<{
                   <TableView
                     items={items}
                     style={{
-                      width: ITEM_WIDTH,
+                      width: 180,
                       backgroundColor:
                         Platform.OS === "android"
                           ? theme.colors.background.raised

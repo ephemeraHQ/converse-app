@@ -42,7 +42,6 @@ import { MessageToDisplay } from "./Message";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppTheme } from "@theme/useAppTheme";
 import { Text } from "@design-system/Text";
-import { OUTTER_SPACING } from "@utils/contextMenu/constants";
 
 type MessageReactionsListProps = {
   reactions: {
@@ -297,7 +296,7 @@ const useStyles = () => {
     },
     portalContainer: {
       position: "absolute",
-      top: safeAreaInsets.top + OUTTER_SPACING,
+      top: safeAreaInsets.top + theme.spacing.xs,
       left: 0,
       right: 0,
       justifyContent: "center",
