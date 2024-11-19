@@ -7,7 +7,6 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-
 import { getTitleFontScale } from "../../utils/str";
 
 type ConversationTitleDumbProps = {

@@ -1,22 +1,28 @@
-import { TouchableOpacity, StyleSheet, useColorScheme } from "react-native";
-
+import { TouchableOpacity } from "@design-system/TouchableOpacity";
+import { useAppTheme } from "@theme/useAppTheme";
+import { memo } from "react";
+import { StyleSheet, useColorScheme } from "react-native";
 import SendButtonDefaultDark from "../../../assets/send-button-dark.svg";
 import SendButtonHigher from "../../../assets/send-button-higher.svg";
 import SendButtonDefaultLight from "../../../assets/send-button-light.svg";
 
 type SendButtonProps = {
-  canSend: boolean;
   onPress: () => void;
-  sendButtonType: "DEFAULT" | "HIGHER";
 };
 
-export const SendButton = ({
-  canSend,
-  onPress,
-  sendButtonType,
-}: SendButtonProps) => {
+export const SendButton = memo(function SendButton(props: SendButtonProps) {
+  const { onPress } = props;
+
   const styles = useStyles();
   const colorScheme = useColorScheme();
+
+  const inputValue = "";
+  const mediaPreview = null;
+
+  const canSend = inputValue.length > 0 || !!mediaPreview?.mediaURI;
+
+  const sendButtonType = getSendButtonType(inputValue);
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -44,9 +50,18 @@ export const SendButton = ({
       )}
     </TouchableOpacity>
   );
+});
+
+const getSendButtonType = (input: string): "DEFAULT" | "HIGHER" => {
+  if (input.match(/\bhigher\b/gi)) {
+    return "HIGHER";
+  }
+  return "DEFAULT";
 };
 
 const useStyles = () => {
+  const { theme } = useAppTheme();
+
   return StyleSheet.create({
     sendButtonContainer: {
       width: 60,

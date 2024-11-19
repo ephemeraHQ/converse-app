@@ -18,12 +18,10 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import { ReanimatedFlashList, ReanimatedView } from "../../utils/animations";
+import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
+import { ReanimatedFlashList } from "../../utils/animations";
 import { useKeyboardAnimation } from "../../utils/animations/keyboardAnimation";
 import { converseEventEmitter } from "../../utils/events";
-import { ChatInputDumb } from "./Input/InputDumb";
-import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 
 type ChatDumbProps<T> = {
   onReadyToFocus: () => void;
@@ -217,29 +215,29 @@ export function ChatDumb<T>({
         )}
         {showPlaceholder && placeholderComponent}
       </Animated.View>
-      {showChatInput && (
-        <>
-          <ReanimatedView
-            style={[
-              textInputStyle,
-              {
-                display:
-                  frameTextInputFocused && hideInputIfFrameFocused
-                    ? "none"
-                    : "flex",
-              },
-            ]}
-          >
-            <ChatInputDumb onSend={onSend} inputHeight={chatInputHeight} />
-          </ReanimatedView>
-          <View
-            style={[
-              styles.inputBottomFiller,
-              { height: insets.bottom + DEFAULT_INPUT_HEIGHT },
-            ]}
-          />
-        </>
-      )}
+      {/* {showChatInput && (
+          <>
+            <ReanimatedView
+              style={[
+                textInputStyle,
+                {
+                  display:
+                    frameTextInputFocused && hideInputIfFrameFocused
+                      ? "none"
+                      : "flex",
+                },
+              ]}
+            >
+              <ChatInputDumb onSend={onSend} inputHeight={chatInputHeight} />
+            </ReanimatedView>
+            <View
+              style={[
+                styles.inputBottomFiller,
+                { height: insets.bottom + DEFAULT_INPUT_HEIGHT },
+              ]}
+            />
+          </>
+        )} */}
     </View>
   );
 }

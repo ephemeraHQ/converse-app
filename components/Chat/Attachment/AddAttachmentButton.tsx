@@ -48,7 +48,7 @@ type AddAttachmentButtonProps = {
   ) => void;
 };
 
-export default function AddAttachmentButton({
+export function AddAttachmentButton({
   onSelectionStatusChange,
 }: AddAttachmentButtonProps) {
   const colorScheme = useColorScheme();

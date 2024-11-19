@@ -7,6 +7,7 @@ export enum QueryKeys {
   V3_CONVERSATION_LIST = "v3ConversationList",
 
   // Messages
+  CONVERSATION_MESSAGE = "conversationMessage",
   CONVERSATION_MESSAGES = "conversationMessages",
 
   // Members
@@ -33,6 +34,12 @@ export enum QueryKeys {
   GROUP_JOIN_REQUEST = "groupJoinRequest",
   PENDING_JOIN_REQUESTS = "pendingJoinRequests",
 }
+
+export const conversationMessageQueryKey = (
+  account: string,
+  topic: ConversationTopic,
+  messageId: string
+) => [QueryKeys.CONVERSATION_MESSAGE, account.toLowerCase(), topic, messageId];
 
 export const conversationsQueryKey = (account: string) => [
   QueryKeys.CONVERSATIONS,

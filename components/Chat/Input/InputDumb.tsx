@@ -1,12 +1,11 @@
 import {
-  actionSecondaryColor,
   chatInputBackgroundColor,
   itemSeparatorColor,
   textPrimaryColor,
-  textSecondaryColor,
 } from "@styles/colors";
 import { useAppTheme } from "@theme/useAppTheme";
 import React, {
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -15,8 +14,8 @@ import React, {
 } from "react";
 import {
   Platform,
+  TextInput as RNTextInput,
   StyleSheet,
-  TextInput,
   View,
   useColorScheme,
 } from "react-native";
@@ -27,17 +26,20 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
+import ChatInputReplyPreview from "@components/Chat/Input/InputReplyPreview";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import { MediaPreview } from "../../../data/store/chatStore";
-import { useConversationContext } from "../../../utils/conversation";
 import { converseEventEmitter } from "../../../utils/events";
 import { AttachmentSelectedStatus } from "../../../utils/media";
-import { TextInputWithValue } from "../../../utils/str";
-import AddAttachmentButton, {
+import  {
+  AddAttachmentButton,
   SelectedAttachment,
 } from "../Attachment/AddAttachmentButton";
 import SendAttachmentPreview from "../Attachment/SendAttachmentPreview";
 import { SendButton } from "./SendButton";
+import { useConversationContext } from "../../../features/conversation/conversation-context";
+import { HStack } from "@design-system/HStack";
+import { AnimatedVStack, VStack } from "@design-system/VStack";
 
 const DEFAULT_MEDIA_PREVIEW_HEIGHT = { PORTRAIT: 120, LANDSCAPE: 90 };
 const MEDIA_PREVIEW_PADDING = Platform.OS === "android" ? 9 : 14;
@@ -71,25 +73,28 @@ const getSendButtonType = (input: string): "DEFAULT" | "HIGHER" => {
 };
 
 type ChatInputProps = {
-  inputHeight: SharedValue<number>;
-  onSend: (payload: {
-    text?: string;
-    referencedMessageId?: string;
-    attachment?: RemoteAttachmentContent;
-  }) => Promise<void>;
+  
 };
 
-export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
-  const inputRef = useConversationContext("inputRef");
+export function ChatInputDumb() {
+  const styles = useStyles();
+
+  const sendMessage = useConversationContext("sendMessage");
+
+  const composerHeightAV = useConversationContext("composerHeightAV");
+
   const messageToPrefill = useConversationContext("messageToPrefill");
   const mediaPreviewRef = useConversationContext("mediaPreviewRef");
   const mediaPreviewToPrefill = useConversationContext("mediaPreviewToPrefill");
 
-  const colorScheme = useColorScheme();
-  const styles = useStyles();
+  const inputValueRef = useRef(messageToPrefill);
 
-  const [inputValue, setInputValue] = useState(messageToPrefill);
-  const [replyingToMessage, setReplyingToMessage] = useState<string | null>(
+  // In case the messageToPrefill changes
+  useEffect(() => {
+    inputValueRef.current = messageToPrefill;
+  }, [messageToPrefill]);
+
+  const [replyingToMessageId, setReplyingToMessageId] = useState<string | null>(
     null
   );
   const replyingToMessageRef = useRef<string | null>(null);
@@ -101,55 +106,34 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
 
   const numberOfLinesRef = useRef(1);
 
-  const sendButtonType = useMemo(
-    () => getSendButtonType(inputValue),
-    [inputValue]
-  );
-  const canSend = inputValue.length > 0 || !!mediaPreview?.mediaURI;
+  const textInputHeightAV = useSharedValue(0);
 
-  useEffect(() => {
-    if (!mediaPreviewRef.current) {
-      mediaPreviewRef.current = mediaPreviewToPrefill;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mediaPreviewToPrefill]);
+  // useEffect(() => {
+  //   replyingToMessageRef.current = replyingToMessageId;
+  // }, [replyingToMessageId]);
 
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.currentValue = inputValue;
-    }
-  }, [inputRef, inputValue]);
+  // useEffect(() => {
+  //   converseEventEmitter.on("triggerReplyToMessage", (messageId: string) => {
+  //     if (inputRef.current) {
+  //       inputRef.current?.focus();
+  //     }
+  //     setReplyingToMessageId(messageId);
+  //     replyingToMessageRef.current = messageId;
+  //   });
+  //   return () => {
+  //     converseEventEmitter.off("triggerReplyToMessage");
+  //   };
+  // }, [inputRef]);
 
-  useEffect(() => {
-    mediaPreviewRef.current = mediaPreview;
-  }, [mediaPreviewRef, mediaPreview]);
-
-  useEffect(() => {
-    replyingToMessageRef.current = replyingToMessage;
-  }, [replyingToMessage]);
-
-  useEffect(() => {
-    converseEventEmitter.on("triggerReplyToMessage", (messageId: string) => {
-      if (inputRef.current) {
-        inputRef.current?.focus();
-      }
-      setReplyingToMessage(messageId);
-      replyingToMessageRef.current = messageId;
-    });
-    return () => {
-      converseEventEmitter.off("triggerReplyToMessage");
-    };
-  }, [inputRef]);
-
-  useEffect(() => {
-    converseEventEmitter.on("setCurrentConversationInputValue", setInputValue);
-    return () => {
-      converseEventEmitter.off(
-        "setCurrentConversationInputValue",
-        setInputValue
-      );
-    };
-  }, []);
+  // useEffect(() => {
+  //   converseEventEmitter.on("setCurrentConversationInputValue", setInputValue);
+  //   return () => {
+  //     converseEventEmitter.off(
+  //       "setCurrentConversationInputValue",
+  //       setInputValue
+  //     );
+  //   };
+  // }, []);
 
   useEffect(() => {
     const handleMediaPreviewChange = (newMediaPreview: MediaPreview) => {
@@ -199,16 +183,16 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
 
   const updateInputHeightWithAnimation = useCallback(
     (newHeight: number) => {
-      if (isAnimatingHeightRef.current || inputHeight.value === newHeight) {
+      if (isAnimatingHeightRef.current || composerHeightAV.value === newHeight) {
         return;
       }
       isAnimatingHeightRef.current = true;
       requestAnimationFrame(() => {
-        inputHeight.value = withSpring(newHeight, HEIGHT_SPRING_CONFIG);
+        composerHeightAV.value = withSpring(newHeight, HEIGHT_SPRING_CONFIG);
         isAnimatingHeightRef.current = false;
       });
     },
-    [inputHeight]
+    [composerHeightAV]
   );
 
   useEffect(() => {
@@ -219,7 +203,7 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
 
   const inputHeightAnimatedStyle = useAnimatedStyle(() => {
     return {
-      maxHeight: inputHeight.value,
+      maxHeight: composerHeightAV.value,
     };
   });
 
@@ -238,10 +222,10 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
 
       if (newNumberOfLines !== numberOfLinesRef.current) {
         numberOfLinesRef.current = newNumberOfLines;
-        inputHeight.value = calculateInputHeight();
+        composerHeightAV.value = calculateInputHeight();
       }
     },
-    [calculateInputHeight, inputHeight]
+    [calculateInputHeight, composerHeightAV]
   );
 
   const handleAttachmentClosed = useCallback(() => {
@@ -296,7 +280,7 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
       if (mediaPreviewRef.current?.status === "uploading") {
         await waitForUploadToComplete();
       }
-      setReplyingToMessage(null);
+      setReplyingToMessageId(null);
       replyingToMessageRef.current = null;
       setInputValue("");
       numberOfLinesRef.current = 1;
@@ -316,7 +300,7 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
         //   preparedAttachmentMessageRef.current.attachmentToSave.fileName,
         //   preparedAttachmentMessageRef.current.attachmentToSave.mimeType
         // );
-        await onSend({
+        await sendMessage({
           attachment: preparedAttachmentMessageRef.current,
         });
         preparedAttachmentMessageRef.current = null;
@@ -327,15 +311,17 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
       const messageToSend = {
         content: inputValue,
         contentType: "xmtp.org/text:1.0",
-        referencedMessageId: replyingToMessage,
+        referencedMessageId: replyingToMessageId,
       };
       setInputValue("");
-      setReplyingToMessage(null);
+      setReplyingToMessageId(null);
       numberOfLinesRef.current = 1;
       await new Promise((r) => setTimeout(r, 5));
-      await onSend({
+      await sendMessage({
         text: messageToSend.content,
-        referencedMessageId: messageToSend.referencedMessageId,
+        ...(messageToSend.referencedMessageId && {
+          referencedMessageId: messageToSend.referencedMessageId,
+        }),
       });
     }
 
@@ -344,114 +330,108 @@ export function ChatInputDumb({ inputHeight, onSend }: ChatInputProps) {
     });
   }, [
     mediaPreviewRef,
-    inputValue,
+    inputValueRef,
     handleAttachmentClosed,
-    onSend,
-    replyingToMessage,
+    sendMessage,
+    replyingToMessageId,
   ]);
 
-  const inputIsFocused = useRef(false);
-
   return (
-    <View style={styles.chatInputWrapper}>
-      {replyingToMessage && (
-        <View style={styles.replyToMessagePreview}>
-          {/* <ChatInputReplyPreview
-            // TODO:
-            replyingToMessage={undefined}
-            onDismiss={() => {
-              setReplyingToMessage(null);
-              replyingToMessageRef.current = null;
-            }}
-          /> */}
-        </View>
-      )}
-      <View style={styles.chatInputContainer}>
+    <VStack style={styles.chatInputWrapper}>
+      <ReplyPreview />
+      <HStack style={styles.chatInputContainer}>
         <AddAttachmentButton
           onSelectionStatusChange={handleAttachmentSelection}
         />
-        <View style={styles.chatInput}>
-          <Animated.View style={inputHeightAnimatedStyle}>
-            {mediaPreview?.mediaURI && (
-              <Animated.View
-                style={[
-                  styles.attachmentPreviewWrapper,
-                  mediaPreviewAnimatedStyle,
-                ]}
-              >
-                <SendAttachmentPreview
-                  currentAttachmentMediaURI={mediaPreview.mediaURI}
-                  onClose={handleAttachmentClosed}
-                  error={mediaPreview.status === "error"}
-                  isLoading={mediaPreview.status === "uploading"}
-                  scale={mediaPreviewAnimation}
-                  isLandscape={
-                    !!(
-                      mediaPreview.dimensions?.height &&
-                      mediaPreview.dimensions?.width &&
-                      mediaPreview.dimensions.width >
-                        mediaPreview.dimensions.height
-                    )
-                  }
-                />
-              </Animated.View>
-            )}
-          </Animated.View>
-          <TextInput
-            style={styles.chatInputField}
-            value={inputValue}
-            onSubmitEditing={() => {
-              onValidate();
-            }}
-            onChangeText={(t: string) => {
-              inputIsFocused.current = true;
-              setInputValue(t);
-            }}
-            onKeyPress={(event: any) => {
-              if (
-                event.nativeEvent.key === "Enter" &&
-                !event.altKey &&
-                !event.metaKey &&
-                !event.shiftKey
-              ) {
-                event.preventDefault();
-                onValidate();
-                setTimeout(() => {
-                  inputRef.current?.focus();
-                }, 100);
-              }
-            }}
-            onFocus={() => {
-              inputIsFocused.current = true;
-            }}
-            onBlur={() => {
-              inputIsFocused.current = false;
-            }}
-            onContentSizeChange={handleTextContentSizeChange}
-            multiline
-            ref={(r) => {
-              if (r && !inputRef.current) {
-                inputRef.current = r as TextInputWithValue;
-                inputRef.current.currentValue = messageToPrefill;
-              }
-            }}
-            placeholder="Message"
-            placeholderTextColor={
-              Platform.OS === "android"
-                ? textSecondaryColor(colorScheme)
-                : actionSecondaryColor(colorScheme)
-            }
-          />
-        </View>
-        <SendButton
-          canSend={canSend}
-          onPress={onValidate}
-          sendButtonType={sendButtonType}
-        />
-      </View>
-    </View>
+        <VStack style={styles.chatInput}>
+          <AnimatedVStack style={inputHeightAnimatedStyle}>
+            <AttachmentsPreview/>
+            
+          </AnimatedVStack>
+          <TextInput />
+        </VStack>
+        <SendButton onPress={onValidate} />
+      </HStack>
+    </VStack>
   );
 }
+
+ const ReplyPreview = memo(function ReplyPreview() {
+  return <View style={styles.replyToMessagePreview}>
+  <ChatInputReplyPreview
+    replyingToMessageId={replyingToMessageId}
+    onDismiss={() => {
+      setReplyingToMessageId(null);
+      replyingToMessageRef.current = null;
+    }}
+  />
+</View>
+})
+
+ const AttachmentsPreview = memo(function AttachmentsPreview() {
+  return {mediaPreview?.mediaURI && (
+    <Animated.View
+      style={[
+        styles.attachmentPreviewWrapper,
+        mediaPreviewAnimatedStyle,
+      ]}
+    >
+      <SendAttachmentPreview
+        currentAttachmentMediaURI={mediaPreview.mediaURI}
+        onClose={handleAttachmentClosed}
+        error={mediaPreview.status === "error"}
+        isLoading={mediaPreview.status === "uploading"}
+        scale={mediaPreviewAnimation}
+        isLandscape={
+          !!(
+            mediaPreview.dimensions?.height &&
+            mediaPreview.dimensions?.width &&
+            mediaPreview.dimensions.width >
+              mediaPreview.dimensions.height
+          )
+        }
+      />
+    </Animated.View>
+  )}
+});
+
+const TextInput = memo(function TextInput() {
+  const styles = useStyles();
+
+  const { theme } = useAppTheme();
+
+  const messageToPrefill = useConversationContext("messageToPrefill");
+
+  const handleChangeText = useCallback((t: string) => {
+    inputIsFocused.current = true;
+    setInputValue(t);
+  }, []);
+
+  const handleSubmitEditing = useCallback(() => {
+    onValidate();
+  }, [onValidate]);
+
+  const handleTextContentSizeChange = useCallback(
+    (event: { nativeEvent: { contentSize: { height: number } } }) => {
+      const textContentHeight = event.nativeEvent.contentSize.height;
+      const newNumberOfLines = Math.ceil(textContentHeight / LINE_HEIGHT);
+    },
+    []
+  );
+
+  return (
+    <RNTextInput
+      style={styles.chatInputField}
+      onSubmitEditing={handleSubmitEditing}
+      onChangeText={handleChangeText}
+      onContentSizeChange={handleTextContentSizeChange}
+      multiline
+      defaultValue={messageToPrefill}
+      placeholder="Message"
+      placeholderTextColor={theme.colors.text.tertiary}
+    />
+  );
+});
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
