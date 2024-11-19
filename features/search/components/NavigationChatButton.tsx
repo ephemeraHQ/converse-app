@@ -1,15 +1,15 @@
 import { translate } from "@i18n";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { backgroundColor, textSecondaryColor } from "@styles/colors";
 import { getPreferredName, getProfile } from "@utils/profile";
 import { useCallback, useState } from "react";
-import { Alert, Platform, StyleSheet, useColorScheme } from "react-native";
+import { Alert, Platform } from "react-native";
 import { useShallow } from "zustand/react/shallow";
 
 import { currentAccount, useProfilesStore } from "@data/store/accountsStore";
 import { navigate } from "@utils/navigation";
 import { canGroupMessage } from "@utils/xmtpRN/conversations";
-import Button from "@components/Button/Button";
+import { Button } from "@design-system/Button/Button";
+import { useAppTheme } from "@theme/useAppTheme";
 
 type NavigationChatProps = {
   navigation: NativeStackNavigationProp<any>;
@@ -24,7 +24,8 @@ export function NavigationChatButton({
   groupMode,
   addToGroup,
 }: NavigationChatProps) {
-  const styles = useStyles();
+  const { theme } = useAppTheme();
+
   const [loading, setLoading] = useState(false);
   const profile = useProfilesStore(
     useShallow((s) => getProfile(address, s.profiles))
@@ -65,30 +66,11 @@ export function NavigationChatButton({
   return (
     <Button
       variant={Platform.OS === "android" ? "link" : "outline"}
-      title={groupMode ? (loading ? "Adding..." : "Add") : "Chat"}
-      style={[styles.navigationButton, loading ? styles.loading : {}]}
-      textStyle={loading ? styles.loadingText : undefined}
+      style={{ marginRight: theme.spacing.xs }}
+      text={groupMode ? (loading ? "Adding..." : "Add") : "Chat"}
       onPress={
         groupMode ? (loading ? undefined : addToGroupIfPossible) : openChat
       }
     />
   );
 }
-
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    navigationButton: {
-      paddingHorizontal: 5,
-      marginLeft: 0,
-      marginRight: 16,
-    },
-    loading: {
-      backgroundColor: textSecondaryColor(colorScheme),
-      borderRadius: 20,
-    },
-    loadingText: {
-      color: Platform.OS === "ios" ? undefined : backgroundColor(colorScheme),
-    },
-  });
-};
