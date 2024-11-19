@@ -97,8 +97,10 @@ export type XmtpMessage = XmtpProtocolMessage & {
   localMediaURI?: string;
 };
 
+export type TopicStatus = "deleted" | "unread" | "read";
+
 export type TopicData = {
-  status: "deleted" | "unread" | "read";
+  status: TopicStatus;
   readUntil?: number;
   timestamp?: number;
   isPinned?: boolean;
