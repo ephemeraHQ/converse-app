@@ -10,15 +10,13 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { isAttachmentMessage } from "@utils/attachment/isAttachmentMessage";
+import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { getRelativeDateTime } from "../../../utils/date";
 import { getReadableProfile } from "../../../utils/str";
 import { isTransactionMessage } from "../../../utils/transaction";
 import Picto from "../../Picto/Picto";
 import { MessageToDisplay } from "../Message/Message";
-import { getGroupMessages, useGroupMessages } from "@queries/useGroupMessages";
-import { useGroupMessage } from "@queries/useGroupMessage";
 
 export default function ChatInputReplyPreview({
   replyingToMessage,
@@ -29,12 +27,6 @@ export default function ChatInputReplyPreview({
   replyingToMessageId: string;
   onDismiss: () => void;
 }) {
-  const message = useGroupMessage({
-    account: currentAccount,
-    topic: topic,
-    messageId: replyingToMessageId,
-  });
-
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const currentAccount = useCurrentAccount() as string;

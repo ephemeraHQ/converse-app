@@ -83,6 +83,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const currentAccount = useCurrentAccount();
   const { data: items, isLoading: showInitialLoad } =
     useConversationListItems();
+
   const [flatListItems, setFlatListItems] = useState<{
     items: FlatListItemType[];
     searchQuery: string;

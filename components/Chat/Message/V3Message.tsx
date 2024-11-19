@@ -1,3 +1,4 @@
+/* eslint-disable typescript-eslint/no-explicit-any */
 /* eslint-disable react/jsx-no-bind */
 import { MessageBubble } from "@components/Chat/Message/MessageBubble";
 import {
@@ -18,15 +19,13 @@ import { Pressable } from "@design-system/Pressable";
 import { AnimatedText, Text } from "@design-system/Text";
 import { getTextStyle } from "@design-system/Text/Text.utils";
 import { AnimatedVStack, VStack } from "@design-system/VStack";
-import {
-  getGroupMessages,
-  subscribeToGroupMessages,
-} from "@queries/useGroupMessages";
+import { getConversationMessages } from "@queries/useConversationMessages";
 import { useQuery } from "@tanstack/react-query";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
 import { getLocalizedTime, getRelativeDate } from "@utils/date";
 import { debugBorder } from "@utils/debug-style";
+import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
 import { flattenStyles } from "@utils/styles";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
@@ -35,7 +34,6 @@ import { CoinbaseMessagingPaymentCodec } from "@utils/xmtpRN/contentTypes/coinba
 import { getInboxId } from "@utils/xmtpRN/signIn";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
-  ConversationTopic,
   DecodedMessage,
   GroupUpdatedCodec,
   InboxId,
@@ -54,6 +52,7 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import { useShallow } from "zustand/react/shallow";
+import { useConversationContext } from "../../../features/conversation/conversation-context";
 import { hasNextMessageInSeries } from "../../../features/conversations/utils/hasNextMessageInSeries";
 import { hasPreviousMessageInSeries } from "../../../features/conversations/utils/hasPreviousMessageInSeries";
 import { isLatestMessageSettledFromPeer } from "../../../features/conversations/utils/isLatestMessageSettledFromPeer";
@@ -61,14 +60,11 @@ import { isLatestSettledFromCurrentUser } from "../../../features/conversations/
 import { messageIsFromCurrentUserV3 } from "../../../features/conversations/utils/messageIsFromCurrentUser";
 import { messageShouldShowDateChange } from "../../../features/conversations/utils/messageShouldShowDateChange";
 import { ChatGroupUpdatedMessage } from "../ChatGroupUpdatedMessage";
-import { converseEventEmitter } from "@utils/events";
 
 type V3MessageProps = {
   messageId: string;
   nextMessageId: string | undefined;
   previousMessageId: string | undefined;
-  currentAccount: string;
-  topic: ConversationTopic;
 };
 
 // TMP until we move this into an account store or something like that
@@ -82,14 +78,10 @@ function useCurrentAccountInboxId() {
 }
 
 export const V3Message = memo(
-  ({
-    messageId,
-    nextMessageId,
-    previousMessageId,
-    currentAccount,
-    topic,
-  }: V3MessageProps) => {
-    const messages = getGroupMessages(currentAccount, topic);
+  ({ messageId, nextMessageId, previousMessageId }: V3MessageProps) => {
+    const currentAccount = useCurrentAccount()!;
+    const topic = useConversationContext("topic");
+    const messages = getConversationMessages(currentAccount, topic);
 
     const message = messages?.byId[messageId];
     const previousMessage = messages?.byId[previousMessageId ?? ""];
@@ -97,22 +89,21 @@ export const V3Message = memo(
 
     // We only want to update the message data if something changed with current, previous, or next
     useEffect(() => {
-      const unsubscribe = subscribeToGroupMessages({
-        account: currentAccount,
-        topic,
-        callback: ({ data }) => {
-          if (data) {
-            const message = data.byId[messageId];
-            const nextMessage = data.byId[nextMessageId];
-            const previousMessage = data.byId[previousMessageId];
-            // If the updated at changed, update the message
-          }
-        },
-      });
-
-      return () => {
-        unsubscribe();
-      };
+      // const unsubscribe = subscribeToGroupMessages({
+      //   account: currentAccount,
+      //   topic,
+      //   callback: ({ data }) => {
+      //     if (data) {
+      //       const message = data.byId[messageId];
+      //       const nextMessage = data.byId[nextMessageId];
+      //       const previousMessage = data.byId[previousMessageId];
+      //       // If the updated at changed, update the message
+      //     }
+      //   },
+      // });
+      // return () => {
+      //   unsubscribe();
+      // };
     }, [currentAccount, topic, messageId, nextMessageId, previousMessageId]);
 
     if (!message) {
@@ -193,7 +184,7 @@ export const V3MessageContent = memo(function V3MessageContent({
         messageId={message.id}
         hasNextMessageInSeries={_hasNextMessageInSeries}
         fromMe={fromMe}
-        sentAt={message.sent}
+        sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
         hasPreviousMessageInSeries={_hasPreviousMessageInSeries}
         showDateChange={showDateChange}
         senderAddress={messageTyped.senderAddress as InboxId}
@@ -214,8 +205,6 @@ export const V3MessageContent = memo(function V3MessageContent({
     const messageTyped = message as DecodedMessage<[GroupUpdatedCodec]>;
     const content = messageTyped.content();
 
-    console.log("showDateChange:", showDateChange);
-
     if (typeof content === "string") {
       // TODO
       console.error("group updated message is a string");
@@ -227,7 +216,7 @@ export const V3MessageContent = memo(function V3MessageContent({
         messageId={message.id}
         hasNextMessageInSeries={_hasNextMessageInSeries}
         fromMe={fromMe}
-        sentAt={message.sent}
+        sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
         showDateChange={showDateChange}
         hasPreviousMessageInSeries={_hasPreviousMessageInSeries}
         senderAddress={messageTyped.senderAddress as InboxId}
@@ -394,7 +383,7 @@ const MessageTime = memo(function MessageTime() {
     });
   });
 
-  const messageTime = getLocalizedTime(sentAt);
+  const messageTime = sentAt ? getLocalizedTime(sentAt) : "";
 
   const textHeight = flattenStyles(
     getTextStyle(themed, { preset: "smaller" })
@@ -578,4 +567,8 @@ function isCoinbasePaymentMessage(
   message: any
 ): message is DecodedMessage<[CoinbaseMessagingPaymentCodec]> {
   return getMessageContentType(message.contentTypeId) === "coinbasePayment";
+}
+
+function convertNanosecondsToMilliseconds(nanoseconds: number) {
+  return nanoseconds / 1000000;
 }

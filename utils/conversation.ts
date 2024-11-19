@@ -1,18 +1,5 @@
-import { MutableRefObject, createRef } from "react";
-import { createContext, useContextSelector } from "use-context-selector";
-
-import config from "../config";
-import { saveTopicsData } from "./api";
-import { TextInputWithValue, addressPrefix } from "./str";
-import { getChatStore, useChatStore } from "../data/store/accountsStore";
-import {
-  MediaPreview,
-  TopicData,
-  TopicsData,
-  XmtpMessage,
-} from "../data/store/chatStore";
-import { canMessageByAccount } from "./xmtpRN/contacts";
-import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
+import { TopicData, TopicsData } from "../data/store/chatStore";
 import { ConversationWithCodecsType } from "./xmtpRN/client";
 
 export type ConversationFlatListHiddenRequestItem = {
@@ -23,39 +10,39 @@ export type ConversationFlatListHiddenRequestItem = {
 
 export type ConversationFlatListItem = ConversationFlatListHiddenRequestItem;
 
-export type ConversationContextType = {
-  topic?: ConversationTopic;
-  inputRef: MutableRefObject<TextInputWithValue | undefined>;
-  mediaPreviewRef: MutableRefObject<MediaPreview | undefined>;
-  isBlockedPeer: boolean;
-  onReadyToFocus: () => void;
-  messageToPrefill: string;
-  mediaPreviewToPrefill: MediaPreview;
-  frameTextInputFocused: boolean;
-  setFrameTextInputFocused: (b: boolean) => void;
-  tagsFetchedOnceForMessage: MutableRefObject<{
-    [messageId: string]: boolean;
-  }>;
-};
+// export type ConversationContextType = {
+//   topic?: ConversationTopic;
+//   inputRef: MutableRefObject<TextInputWithValue | undefined>;
+//   mediaPreviewRef: MutableRefObject<MediaPreview | undefined>;
+//   isBlockedPeer: boolean;
+//   onReadyToFocus: () => void;
+//   messageToPrefill: string;
+//   mediaPreviewToPrefill: MediaPreview;
+//   frameTextInputFocused: boolean;
+//   setFrameTextInputFocused: (b: boolean) => void;
+//   tagsFetchedOnceForMessage: MutableRefObject<{
+//     [messageId: string]: boolean;
+//   }>;
+// };
 
-export const ConversationContext = createContext<ConversationContextType>({
-  topic: undefined,
-  inputRef: createRef() as MutableRefObject<TextInputWithValue | undefined>,
-  mediaPreviewRef: createRef() as MutableRefObject<MediaPreview | undefined>,
-  isBlockedPeer: false,
-  onReadyToFocus: () => {},
-  messageToPrefill: "",
-  mediaPreviewToPrefill: null,
-  frameTextInputFocused: false,
-  setFrameTextInputFocused: () => {},
-  tagsFetchedOnceForMessage: createRef() as MutableRefObject<{
-    [messageId: string]: boolean;
-  }>,
-});
+// export const ConversationContext = createContext<ConversationContextType>({
+//   topic: undefined,
+//   inputRef: createRef() as MutableRefObject<TextInputWithValue | undefined>,
+//   mediaPreviewRef: createRef() as MutableRefObject<MediaPreview | undefined>,
+//   isBlockedPeer: false,
+//   onReadyToFocus: () => {},
+//   messageToPrefill: "",
+//   mediaPreviewToPrefill: null,
+//   frameTextInputFocused: false,
+//   setFrameTextInputFocused: () => {},
+//   tagsFetchedOnceForMessage: createRef() as MutableRefObject<{
+//     [messageId: string]: boolean;
+//   }>,
+// });
 
-export const useConversationContext = <K extends keyof ConversationContextType>(
-  key: K
-) => useContextSelector(ConversationContext, (s) => s[key]);
+// export const useConversationContext = <K extends keyof ConversationContextType>(
+//   key: K
+// ) => useContextSelector(ConversationContext, (s) => s[key]);
 
 // Whether a conversation should appear in Inbox OR Requests
 // or just be totally hidden (blocked peer, deleted convo)

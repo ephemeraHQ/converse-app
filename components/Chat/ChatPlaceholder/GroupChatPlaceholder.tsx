@@ -1,74 +1,75 @@
 import { Button } from "@design-system/Button/Button";
+import { Text } from "@design-system/Text";
+import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
-import { textPrimaryColor } from "@styles/colors";
+import { useAppTheme } from "@theme/useAppTheme";
 import { isV3Topic } from "@utils/groupUtils/groupId";
 import { useCallback } from "react";
-import {
-  Keyboard,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  useColorScheme,
-  View,
-} from "react-native";
-
-import { useConversationContext } from "../../../utils/conversation";
+import { Keyboard, TouchableWithoutFeedback } from "react-native";
+import { useConversationGroupContext } from "../../../features/conversation/conversation-group-context";
+import { useConversationContext } from "../../../features/conversation/conversation-context";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
-import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 
-type GroupChatPlaceholderProps = {
-  messagesCount: number;
-  group: GroupWithCodecsType | null | undefined;
-  onSend: (payload: { text?: string }) => void;
-};
+export function GroupChatPlaceholder() {
+  const { theme } = useAppTheme();
 
-export function GroupChatPlaceholder({
-  messagesCount,
-  group,
-  onSend,
-}: GroupChatPlaceholderProps) {
   const topic = useConversationContext("topic");
   const onReadyToFocus = useConversationContext("onReadyToFocus");
-
-  const groupName = group?.name;
-
-  const styles = useStyles();
+  const numberOfMessages = useConversationContext("numberOfMessages");
+  const sendMessage = useConversationContext("sendMessage");
+  const conversationNotFound = useConversationContext("conversationNotFound");
+  const groupName = useConversationGroupContext("groupName");
 
   const handleSend = useCallback(() => {
-    onSend({
+    sendMessage({
       text: "👋",
     });
-  }, [onSend]);
+  }, [sendMessage]);
 
   const handleDismiss = useCallback(() => {
     Keyboard.dismiss();
   }, []);
 
   const onLayout = useCallback(() => {
-    if (group && messagesCount === 0) {
+    if (!conversationNotFound && numberOfMessages === 0) {
       onReadyToFocus();
     }
-  }, [group, messagesCount, onReadyToFocus]);
+  }, [conversationNotFound, numberOfMessages, onReadyToFocus]);
 
   return (
     <TouchableWithoutFeedback onPress={handleDismiss}>
-      <View onLayout={onLayout} style={styles.chatPlaceholder}>
-        {!group && (
-          <View>
-            {!topic && <ActivityIndicator style={{ marginBottom: 20 }} />}
-            <Text style={styles.chatPlaceholderText}>
+      <VStack
+        onLayout={onLayout}
+        style={{
+          flex: 1,
+          justifyContent: "center",
+        }}
+      >
+        {conversationNotFound && (
+          <VStack>
+            {!topic && (
+              <ActivityIndicator style={{ marginBottom: theme.spacing.md }} />
+            )}
+            <Text
+              style={{
+                textAlign: "center",
+              }}
+            >
               {topic
                 ? isV3Topic(topic)
                   ? translate("group_not_found")
                   : translate("conversation_not_found")
                 : translate("opening_conversation")}
             </Text>
-          </View>
+          </VStack>
         )}
-        {group && messagesCount === 0 && (
-          <View>
-            <Text style={styles.chatPlaceholderText}>
+        {numberOfMessages === 0 && (
+          <VStack>
+            <Text
+              style={{
+                textAlign: "center",
+              }}
+            >
               {translate("group_placeholder.placeholder_text", {
                 groupName,
               })}
@@ -78,38 +79,15 @@ export function GroupChatPlaceholder({
               variant="fill"
               picto="hand.wave"
               text={translate("say_hi")}
-              style={styles.cta}
+              style={{
+                alignSelf: "center",
+                marginTop: theme.spacing.md,
+              }}
               onPress={handleSend}
             />
-          </View>
+          </VStack>
         )}
-      </View>
+      </VStack>
     </TouchableWithoutFeedback>
   );
 }
-
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    chatPlaceholder: {
-      flex: 1,
-      justifyContent: "center",
-    },
-    chatPlaceholderContent: {
-      paddingVertical: 20,
-      flex: 1,
-    },
-    chatPlaceholderText: {
-      textAlign: "center",
-      fontSize: Platform.OS === "android" ? 16 : 17,
-      color: textPrimaryColor(colorScheme),
-    },
-    cta: {
-      alignSelf: "center",
-      marginTop: 20,
-    },
-    activitySpinner: {
-      marginBottom: 20,
-    },
-  });
-};
