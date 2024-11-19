@@ -2385,14 +2385,11 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - BigInt
     - CoinbaseWalletSDK
     - ComputableLayout
     - Connect-Swift
     - ContextMenuAuxiliaryPreview
     - DGSwiftUtilities
-    - GenericJSON
-    - GzipSwift
     - libavif
     - libdav1d
     - libwebp
