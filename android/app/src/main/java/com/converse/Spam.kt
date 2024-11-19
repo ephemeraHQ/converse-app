@@ -17,6 +17,7 @@ import java.util.HashMap
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import org.web3j.crypto.Keys
+import org.xmtp.android.library.Dm
 
 val restrictedWords = listOf(
     "Coinbase",
@@ -53,7 +54,7 @@ fun getMessageSpamScore(message: String?, contentType: String): Int {
     return spamScore
 }
 
-fun computeSpamScore(address: String, message: String?, contentType: String, apiURI: String?, appContext: Context): Double {
+fun computeDmSpamScore(address: String, message: String?, contentType: String, apiURI: String?, appContext: Context): Double {
     var senderScore = runBlocking {
         getSenderSpamScore(appContext, address, apiURI);
     }
@@ -63,27 +64,28 @@ fun computeSpamScore(address: String, message: String?, contentType: String, api
 suspend fun computeSpamScoreGroupMessage(client: Client, group: Group, decodedMessage: DecodedMessage, apiURI: String?): Int {
     val senderSpamScore = 0
     try {
-        client.contacts.refreshConsentList()
-        val groupDenied = client.contacts.isGroupDenied(group.id)
-        if (groupDenied) {
+        client.syncConsent()
+        val consentList = client.preferences.consentList
+        val groupBlocked = isConversationIdBlocked(group.id, consentList)
+        if (groupBlocked) {
             // Network consent will override other checks
             return 1
         }
 
         val senderInboxId = decodedMessage.senderAddress
-        val senderDenied = client.contacts.isInboxDenied(senderInboxId)
-        if (senderDenied) {
+        val senderBlocked = isInboxIdBlocked(senderInboxId, consentList)
+        if (senderBlocked) {
             // Network consent will override other checks
             return 1
         }
 
-        val senderAllowed = client.contacts.isInboxAllowed(senderInboxId)
+        val senderAllowed = isInboxIdAllowed(senderInboxId, consentList)
         if (senderAllowed) {
             // Network consent will override other checks
             return -1
         }
 
-        val groupAllowed = client.contacts.isGroupAllowed(group.id)
+        val groupAllowed = isConversationIdAllowed(group.id, consentList)
         if (groupAllowed) {
             // Network consent will override other checks
             return -1
@@ -92,12 +94,12 @@ suspend fun computeSpamScoreGroupMessage(client: Client, group: Group, decodedMe
         val senderAddresses = group.members().find { it.inboxId == senderInboxId }?.addresses
         if (senderAddresses != null) {
             for (address in senderAddresses) {
-                if (client.contacts.isDenied(Keys.toChecksumAddress(address))) {
+                if (isAddressBlocked(Keys.toChecksumAddress(address), consentList)) {
                     return 1
                 }
             }
             for (address in senderAddresses) {
-                if (client.contacts.isAllowed(Keys.toChecksumAddress(address))) {
+                if (isAddressAllowed(Keys.toChecksumAddress(address), consentList)) {
                     return -1
                 }
             }
@@ -121,22 +123,60 @@ suspend fun computeSpamScoreGroupMessage(client: Client, group: Group, decodedMe
     return senderSpamScore + messageSpamScore
 }
 
+suspend fun computeSpamScoreDmWelcome(appContext: Context, client: Client, dm: Dm, apiURI: String?): Double {
+    try {
+        val consentList = client.preferences.consentList
+        // Probably an unlikely case until consent proofs for groups exist
+        val groupAllowed = isConversationIdAllowed(dm.id, consentList)
+        if (groupAllowed) {
+            return -1.0
+        }
+
+        val peerInboxId = dm.peerInboxId
+        val peerAllowed = isInboxIdAllowed(peerInboxId, consentList)
+        if (peerAllowed) {
+            return -1.0
+        }
+
+        val peerDenied = isInboxIdBlocked(peerInboxId, consentList)
+        if (peerDenied) {
+            return 1.0
+        }
+        val members = dm.members()
+        for (member in members) {
+            if (member.inboxId == peerInboxId) {
+                val firstAddress = member.addresses.first()
+                val senderSpamScore = getSenderSpamScore(
+                    appContext = appContext,
+                    address = Keys.toChecksumAddress(firstAddress),
+                    apiURI = apiURI
+                )
+                return senderSpamScore
+            }
+        }
+        return 0.0
+    } catch (e: Exception) {
+        return 0.0
+    }
+}
+
+
 suspend fun computeSpamScoreGroupWelcome(appContext: Context, client: Client, group: Group, apiURI: String?): Double {
     try {
-        client.contacts.refreshConsentList()
+        val consentList = client.preferences.consentList
         // Probably an unlikely case until consent proofs for groups exist
-        val groupAllowed = client.contacts.isGroupAllowed(groupId = group.id)
+        val groupAllowed = isConversationIdAllowed(group.id, consentList)
         if (groupAllowed) {
             return -1.0
         }
 
         val inviterInboxId = group.addedByInboxId()
-        val inviterAllowed = client.contacts.isInboxAllowed(inboxId = inviterInboxId)
+        val inviterAllowed = isInboxIdAllowed(inviterInboxId, consentList)
         if (inviterAllowed) {
             return -1.0
         }
 
-        val inviterDenied = client.contacts.isInboxDenied(inboxId = inviterInboxId)
+        val inviterDenied = isInboxIdBlocked(inviterInboxId, consentList)
         if (inviterDenied) {
             return 1.0
         }
@@ -146,14 +186,14 @@ suspend fun computeSpamScoreGroupWelcome(appContext: Context, client: Client, gr
             if (member.inboxId == inviterInboxId) {
                 member.addresses?.forEach { address ->
                     val ethereumAddress = Keys.toChecksumAddress(address)
-                    if (client.contacts.isDenied(ethereumAddress)) {
+                    if (isAddressBlocked(ethereumAddress, consentList)) {
                         return 1.0
                     }
                 }
 
                 member.addresses?.forEach { address ->
                     val ethereumAddress = Keys.toChecksumAddress(address)
-                    if (client.contacts.isAllowed(ethereumAddress)) {
+                    if (isAddressAllowed(ethereumAddress, consentList)) {
                         return -1.0
                     }
                 }
@@ -168,8 +208,6 @@ suspend fun computeSpamScoreGroupWelcome(appContext: Context, client: Client, gr
                 }
             }
         }
-
-
     } catch (e: Exception) {
         return 0.0
     }

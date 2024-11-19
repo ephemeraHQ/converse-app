@@ -7,17 +7,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.beust.klaxon.Klaxon
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.converse.xmtp.NotificationDataResult
 import com.converse.xmtp.getGroup
-import com.converse.xmtp.getNewConversationFromEnvelope
-import com.converse.xmtp.getNewGroup
 import com.converse.xmtp.getXmtpClient
-import com.converse.xmtp.handleGroupMessage
-import com.converse.xmtp.handleGroupWelcome
-import com.converse.xmtp.handleNewConversationFirstMessage
-import com.converse.xmtp.handleOngoingConversationMessage
 import com.converse.xmtp.initCodecs
 import com.facebook.react.bridge.ReactApplicationContext
 import com.google.crypto.tink.subtle.Base64
@@ -32,18 +24,11 @@ import expo.modules.kotlin.ModulesProvider
 import expo.modules.kotlin.modules.Module
 import expo.modules.notifications.notifications.JSONNotificationContentBuilder
 import expo.modules.notifications.notifications.model.Notification
-import expo.modules.notifications.notifications.model.NotificationAction
 import expo.modules.notifications.notifications.model.NotificationContent
 import expo.modules.notifications.notifications.model.NotificationRequest
-import expo.modules.notifications.notifications.model.NotificationResponse
 import expo.modules.notifications.notifications.model.triggers.FirebaseNotificationTrigger
 import expo.modules.notifications.notifications.presentation.builders.CategoryAwareNotificationBuilder
 import expo.modules.notifications.notifications.presentation.builders.ExpoNotificationBuilder
-import expo.modules.notifications.service.NotificationsService.Companion.EVENT_TYPE_KEY
-import expo.modules.notifications.service.NotificationsService.Companion.NOTIFICATION_ACTION_KEY
-import expo.modules.notifications.service.NotificationsService.Companion.NOTIFICATION_EVENT_ACTION
-import expo.modules.notifications.service.NotificationsService.Companion.NOTIFICATION_KEY
-import expo.modules.notifications.service.NotificationsService.Companion.findDesignatedBroadcastReceiver
 import expo.modules.notifications.service.delegates.SharedPreferencesNotificationCategoriesStore
 import expo.modules.securestore.AuthenticationHelper
 import expo.modules.securestore.SecureStoreModule
@@ -51,7 +36,6 @@ import expo.modules.securestore.encryptors.AESEncryptor
 import expo.modules.securestore.encryptors.HybridAESEncryptor
 import kotlinx.coroutines.*
 import org.json.JSONObject
-import org.xmtp.android.library.messages.EnvelopeBuilder
 import java.lang.ref.WeakReference
 import java.security.KeyStore
 import java.util.*
@@ -60,6 +44,12 @@ import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaField
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.converse.xmtp.getNewConversation
+import com.converse.xmtp.handleV3Message
+import com.converse.xmtp.handleV3Welcome
+import com.google.protobuf.kotlin.toByteString
+import org.xmtp.proto.message.api.v1.MessageApiOuterClass
+import org.xmtp.proto.message.api.v1.MessageApiOuterClass.Envelope
 
 class PushNotificationsService : FirebaseMessagingService() {
     companion object {
@@ -110,11 +100,11 @@ class PushNotificationsService : FirebaseMessagingService() {
             Log.d(TAG, "INSTANTIATED XMTP CLIENT FOR ${notificationData.contentTopic}")
 
             val encryptedMessageData = Base64.decode(notificationData.message, Base64.NO_WRAP)
-            val envelope = EnvelopeBuilder.buildFromString(
-                notificationData.contentTopic,
-                Date(notificationData.timestampNs.toLong() / 1000000),
-                encryptedMessageData
-            )
+            val envelope = Envelope.newBuilder().apply {
+                timestampNs = notificationData.timestampNs.toLong() / 1_000_000
+                message = encryptedMessageData.toByteString()// Convert ByteString to byte array
+                contentTopic = notificationData.contentTopic
+            }.build()
 
             var shouldShowNotification = false
             var result = NotificationDataResult()
@@ -130,38 +120,13 @@ class PushNotificationsService : FirebaseMessagingService() {
                         )
                         return@launch
                     }
-                    if (isInviteTopic(notificationData.contentTopic)) {
-                        Log.d(TAG, "Handling a new conversation notification")
-                        val conversation =
-                            getNewConversationFromEnvelope(applicationContext, xmtpClient, envelope)
-                        if (conversation != null) {
-                            result = handleNewConversationFirstMessage(
+                    if (isV3WelcomeTopic(notificationData.contentTopic)) {
+                        val convo = getNewConversation(xmtpClient, notificationData.contentTopic)
+                        if (convo != null) {
+                            result = handleV3Welcome(
                                 applicationContext,
                                 xmtpClient,
-                                conversation,
-                                remoteMessage
-                            )
-                            if (result != NotificationDataResult()) {
-                                shouldShowNotification = result.shouldShowNotification
-                            }
-
-                            // Replace invite-topic with the topic in the notification content
-                            val newNotificationData = NotificationData(
-                                notificationData.message,
-                                notificationData.timestampNs,
-                                conversation.topic,
-                                notificationData.account,
-                            )
-                            val newNotificationDataJson = Klaxon().toJsonString(newNotificationData)
-                            remoteMessage.data["body"] = newNotificationDataJson
-                        }
-                    } else if (isV3WelcomeTopic(notificationData.contentTopic)) {
-                        val group = getNewGroup(xmtpClient, notificationData.contentTopic)
-                        if (group != null) {
-                            result = handleGroupWelcome(
-                                applicationContext,
-                                xmtpClient,
-                                group,
+                                convo,
                                 remoteMessage
                             )
                             if (result != NotificationDataResult()) {
@@ -170,22 +135,11 @@ class PushNotificationsService : FirebaseMessagingService() {
                         }
                     } else if (isV3MessageTopic(notificationData.contentTopic)) {
                         Log.d(TAG, "Handling an ongoing group message notification")
-                        result = handleGroupMessage(
+                        result = handleV3Message(
                             applicationContext,
                             xmtpClient,
                             envelope,
-                            remoteMessage
-                        )
-                        if (result != NotificationDataResult()) {
-                            shouldShowNotification = result.shouldShowNotification
-                        }
-                    } else {
-                        Log.d(TAG, "Handling an ongoing conversation message notification")
-                        result = handleOngoingConversationMessage(
-                            applicationContext,
-                            xmtpClient,
-                            envelope,
-                            remoteMessage
+                            remoteMessage,
                         )
                         if (result != NotificationDataResult()) {
                             shouldShowNotification = result.shouldShowNotification

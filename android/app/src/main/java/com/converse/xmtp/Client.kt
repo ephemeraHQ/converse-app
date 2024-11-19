@@ -12,7 +12,6 @@ import org.xmtp.android.library.codecs.AttachmentCodec
 import org.xmtp.android.library.codecs.ReactionCodec
 import org.xmtp.android.library.codecs.RemoteAttachmentCodec
 import org.xmtp.android.library.codecs.ReplyCodec
-import org.xmtp.android.library.messages.PrivateKeyBundleV1Builder
 
 fun initCodecs() {
     Client.register(codec = AttachmentCodec())
@@ -20,22 +19,6 @@ fun initCodecs() {
     Client.register(codec = ReactionCodec())
     Client.register(codec = ReplyCodec())
 }
-
-fun getXmtpKeyForAccount(appContext: Context, account: String): String? {
-    val legacyKey = getKeychainValue("XMTP_BASE64_KEY")
-    if (legacyKey != null && legacyKey.isNotEmpty()) {
-        Log.d("XmtpClient", "Legacy Key Found: ${legacyKey} ${legacyKey.length}")
-        return legacyKey
-    }
-
-    val accountKey = getKeychainValue("XMTP_KEY_${account}")
-    if (accountKey != null && accountKey.isNotEmpty()) {
-        Log.d("XmtpClient", "Found key for account: ${account}")
-        return accountKey
-    }
-    return null
-}
-
 fun getDbEncryptionKey(): ByteArray? {
     val key = getKeychainValue("LIBXMTP_DB_ENCRYPTION_KEY")
     if (key != null) {
@@ -46,9 +29,6 @@ fun getDbEncryptionKey(): ByteArray? {
 }
 
 suspend fun getXmtpClient(appContext: Context, account: String): Client? {
-    val keyString = getXmtpKeyForAccount(appContext, account) ?: return null
-    val keyByteArray = Base64.decode(keyString)
-    val keys = PrivateKeyBundleV1Builder.buildFromBundle(keyByteArray)
     val mmkv = getMmkv(appContext)
     var xmtpEnvString = mmkv?.decodeString("xmtp-env")
     // TODO => stop using async storage
@@ -60,8 +40,11 @@ suspend fun getXmtpClient(appContext: Context, account: String): Client? {
 
     val dbDirectory = "/data/data/${appContext.packageName}/databases"
     val dbEncryptionKey = getDbEncryptionKey()
+    if (dbEncryptionKey == null) {
+        throw Error("Missing dbEncryptionKey")
+    }
 
-    val options = ClientOptions(api = ClientOptions.Api(env = xmtpEnv, isSecure = true), enableV3 = true, dbEncryptionKey = dbEncryptionKey,  dbDirectory = dbDirectory, appContext = appContext)
+    val options = ClientOptions(api = ClientOptions.Api(env = xmtpEnv, isSecure = true), dbEncryptionKey = dbEncryptionKey,  dbDirectory = dbDirectory, appContext = appContext)
 
-    return Client().buildFrom(bundle = keys, options = options)
+    return Client().build(address = account, options = options)
 }
