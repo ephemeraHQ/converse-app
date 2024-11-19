@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { spacing } from "../../theme";
+import { useAppTheme } from "@theme/useAppTheme";
 import { Screen } from "../Screen/ScreenComp/Screen";
 import { IScreenProps } from "../Screen/ScreenComp/Screen.props";
 
@@ -9,13 +9,15 @@ export const OnboardingScreenComp = memo(function OnboardingScreenComp(
 ) {
   const { contentContainerStyle, ...rest } = props;
 
+  const { theme } = useAppTheme();
+
   return (
     <Screen
       preset="scroll"
       safeAreaEdges={["bottom"]}
       contentContainerStyle={[
         {
-          paddingHorizontal: spacing.lg,
+          paddingHorizontal: theme.spacing.lg,
         },
         contentContainerStyle,
       ]}

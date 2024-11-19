@@ -64,6 +64,7 @@ export function Icon(props: IIconProps) {
   const { theme } = useAppTheme();
 
   const defaultSize = useMemo(() => theme.iconSize.lg, [theme]);
+
   const defaultColor = useMemo(() => theme.colors.fill.primary, [theme]);
 
   const {
@@ -79,6 +80,7 @@ export function Icon(props: IIconProps) {
   if (!icon && !picto) {
     throw new Error("Either 'icon' or 'picto' must be provided");
   }
+
   if (icon && picto) {
     logger.warn(
       "Both 'icon' and 'picto' provided, 'icon' will take precedence"
@@ -88,8 +90,8 @@ export function Icon(props: IIconProps) {
   const iconName = icon
     ? iconRegistry[icon]
     : picto
-    ? iconRegistry[picto]
-    : null;
+      ? iconRegistry[picto]
+      : null;
 
   if (!iconName) {
     logger.warn(

@@ -4,6 +4,7 @@ import * as Linking from "expo-linking";
 import React from "react";
 import { Platform } from "react-native";
 
+import { useAppTheme } from "@theme/useAppTheme";
 import Button from "../../components/Button/Button";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
@@ -12,7 +13,6 @@ import { useSettingsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { setAuthStatus } from "../../data/store/authStore";
 import { VStack } from "../../design-system/VStack";
-import { spacing } from "../../theme";
 import { requestPushNotificationsPermissions } from "../../utils/notifications";
 import { sentryTrackError } from "../../utils/sentry";
 import { NavigationParamList } from "../Navigation/Navigation";
@@ -20,6 +20,8 @@ import { NavigationParamList } from "../Navigation/Navigation";
 export function OnboardingNotificationsScreen(
   props: NativeStackScreenProps<NavigationParamList, "OnboardingNotifications">
 ) {
+  const { theme } = useAppTheme();
+
   const setNotificationsSettings = useSettingsStore(
     (s) => s.setNotificationsSettings
   );
@@ -56,7 +58,7 @@ export function OnboardingNotificationsScreen(
 
       <VStack
         style={{
-          rowGap: spacing.lg,
+          rowGap: theme.spacing.lg,
           width: "100%",
           alignItems: "center",
         }}

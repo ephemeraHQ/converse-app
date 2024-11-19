@@ -29,6 +29,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
 
+import { Snackbars } from "@components/Snackbar/Snackbars";
 import { xmtpCron, xmtpEngine } from "./components/XmtpEngine";
 import config from "./config";
 import {
@@ -161,6 +162,7 @@ export default function AppWithProviders() {
                     <BottomSheetModalProvider>
                       <PortalProvider>
                         <App />
+                        <Snackbars />
                       </PortalProvider>
                     </BottomSheetModalProvider>
                   </GestureHandlerRootView>

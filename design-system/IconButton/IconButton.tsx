@@ -1,4 +1,3 @@
-// IconButton.tsx
 import React, { useCallback } from "react";
 import {
   GestureResponderEvent,
@@ -6,7 +5,6 @@ import {
   StyleProp,
   ViewStyle,
 } from "react-native";
-
 import { useAppTheme } from "../../theme/useAppTheme";
 import { Icon } from "../Icon/Icon";
 import { Pressable } from "../Pressable";
@@ -78,6 +76,7 @@ export function IconButton(props: IIconButtonProps) {
   );
 
   // For now until we fix Icon
+
   const iconProps = useCallback(
     ({ pressed }: PressableStateCallbackType) =>
       themed(

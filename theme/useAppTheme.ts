@@ -14,6 +14,7 @@ import {
 } from "react";
 import { StyleProp, useColorScheme } from "react-native";
 
+import { IShadow, shadow } from "@theme/shadow";
 import { IAvatarSize, avatarSize } from "./avatar";
 import { IBorderRadius, borderRadius } from "./border-radius";
 import { IBorderWidth, borderWidth } from "./borders";
@@ -36,6 +37,7 @@ export interface Theme {
   iconSize: IIconSize;
   typography: ITypography;
   timing: Timing;
+  shadow: IShadow;
   isDark: boolean;
 }
 
@@ -49,6 +51,7 @@ export const lightTheme: Theme = {
   avatarSize,
   iconSize,
   timing,
+  shadow,
   isDark: false,
 };
 export const darkTheme: Theme = {
@@ -60,6 +63,7 @@ export const darkTheme: Theme = {
   avatarSize,
   iconSize,
   timing,
+  shadow,
   isDark: true,
 };
 
@@ -205,3 +209,20 @@ export const useAppTheme = (): UseAppThemeValue => {
     themed,
   };
 };
+
+export function flattenThemedStyles<T>(args: {
+  styles: ThemedStyle<T> | StyleProp<T> | ThemedStyleArray<T>;
+  theme: Theme;
+}): T {
+  const { styles, theme } = args;
+  const flatStyles = [styles].flat(3);
+
+  const processedStyles = flatStyles.map((style) => {
+    if (typeof style === "function") {
+      return (style as ThemedStyle<T>)(theme);
+    }
+    return style;
+  });
+
+  return Object.assign({}, ...processedStyles);
+}
