@@ -31,6 +31,8 @@ export function NavigationChatButton({
     useShallow((s) => getProfile(address, s.profiles))
   );
   const preferredName = getPreferredName(profile?.socials, address);
+  const isCurrentUser =
+    address.toLowerCase() === currentAccount().toLowerCase();
 
   const openChat = useCallback(() => {
     // On Android the accounts are not in the navigation but in a drawer
@@ -65,18 +67,31 @@ export function NavigationChatButton({
 
   return (
     <Button
-      variant={Platform.OS === "android" ? "link" : "outline"}
-      style={{ marginRight: theme.spacing.xs }}
+      variant={
+        isCurrentUser ? "fill" : Platform.OS === "android" ? "link" : "outline"
+      }
+      style={{
+        marginRight: theme.spacing.xs,
+      }}
       text={
-        groupMode
-          ? loading
-            ? translate("add_loading")
-            : translate("add")
-          : translate("chat")
+        isCurrentUser
+          ? "You"
+          : groupMode
+            ? loading
+              ? translate("add_loading")
+              : translate("add")
+            : translate("chat")
       }
       onPress={
-        groupMode ? (loading ? undefined : addToGroupIfPossible) : openChat
+        isCurrentUser
+          ? undefined
+          : groupMode
+            ? loading
+              ? undefined
+              : addToGroupIfPossible
+            : openChat
       }
+      disabled={isCurrentUser}
     />
   );
 }
