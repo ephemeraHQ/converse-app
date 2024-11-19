@@ -65,6 +65,22 @@ export function NavigationChatButton({
     addToGroup?.();
   }, [loading, address, addToGroup, preferredName]);
 
+  const getButtonText = () => {
+    if (isCurrentUser) return translate("you");
+    if (groupMode) {
+      return loading ? translate("add_loading") : translate("add");
+    }
+    return translate("chat");
+  };
+
+  const getButtonAction = () => {
+    if (isCurrentUser) return undefined;
+    if (groupMode) {
+      return loading ? undefined : addToGroupIfPossible;
+    }
+    return openChat;
+  };
+
   return (
     <Button
       variant={
@@ -73,24 +89,8 @@ export function NavigationChatButton({
       style={{
         marginRight: theme.spacing.xs,
       }}
-      text={
-        isCurrentUser
-          ? "You"
-          : groupMode
-            ? loading
-              ? translate("add_loading")
-              : translate("add")
-            : translate("chat")
-      }
-      onPress={
-        isCurrentUser
-          ? undefined
-          : groupMode
-            ? loading
-              ? undefined
-              : addToGroupIfPossible
-            : openChat
-      }
+      text={getButtonText()}
+      onPress={getButtonAction()}
       disabled={isCurrentUser}
     />
   );

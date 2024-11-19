@@ -376,6 +376,7 @@ export const en = {
   add: "Add",
   add_loading: "Adding...",
   chat: "Chat",
+  you: "You",
 
   // Group Updated Message
   group_name_changed: '{{name}} changed the group name to "{{newValue}}".',
