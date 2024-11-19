@@ -39,6 +39,7 @@ module.exports = {
           "@theme": "./theme",
           "@design-system": "./design-system",
           "@navigation": "./navigation",
+          "@features": "./features",
         },
       },
     ],

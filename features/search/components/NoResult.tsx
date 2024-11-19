@@ -6,7 +6,7 @@ import React, {
   useColorScheme,
 } from "react-native";
 
-import { useRouter } from "../../navigation/useNavigation";
+import { useRouter } from "@navigation/useNavigation";
 
 export default function NoResult() {
   const styles = useStyles();

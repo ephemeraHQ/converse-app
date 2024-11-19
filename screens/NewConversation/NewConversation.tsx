@@ -22,9 +22,9 @@ import {
 import { NewConversationModalParams } from "./NewConversationModal";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../../components/AndroidBackAction";
-import SearchBar from "../../components/NewConversation/SearchBar";
+import SearchBar from "../../features/search/components/SearchBar";
 import Recommendations from "../../components/Recommendations/Recommendations";
-import ProfileSearch from "../../components/Search/ProfileSearch";
+import ProfileSearch from "../../features/search/screens/ProfileSearch";
 import TableView from "../../components/TableView/TableView";
 import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import config from "../../config";
@@ -69,6 +69,7 @@ export default function NewConversation({
       : undefined
   );
   const [loading, setLoading] = useState(false);
+
   const handleBack = useCallback(() => navigation.goBack(), [navigation]);
   const styles = useStyles();
 
@@ -291,6 +292,7 @@ export default function NewConversation({
   const profiles = getProfilesStore(currentAccount()).getState().profiles;
 
   const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
+
   const onRef = useCallback(
     (r: TextInput | null) => {
       if (!initialFocus.current) {

@@ -16,8 +16,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ProfileSearchItem } from "./ProfileSearchItem";
-import { ProfileSocials } from "../../data/store/profilesStore";
+import { ProfileSearchItem } from "../components/ProfileSearchItem";
+import { ProfileSocials } from "@data/store/profilesStore";
 
 export default function ProfileSearch({
   navigation,
@@ -32,6 +32,7 @@ export default function ProfileSearch({
 }) {
   const insets = useSafeAreaInsets();
   const styles = useStyles();
+
   const keyExtractor = useCallback((address: string) => address, []);
 
   const renderItem = useCallback(

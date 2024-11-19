@@ -6,13 +6,10 @@ import { useCallback, useState } from "react";
 import { Alert, Platform, StyleSheet, useColorScheme } from "react-native";
 import { useShallow } from "zustand/react/shallow";
 
-import {
-  currentAccount,
-  useProfilesStore,
-} from "../../data/store/accountsStore";
-import { navigate } from "../../utils/navigation";
-import { canGroupMessage } from "../../utils/xmtpRN/conversations";
-import Button from "../Button/Button";
+import { currentAccount, useProfilesStore } from "@data/store/accountsStore";
+import { navigate } from "@utils/navigation";
+import { canGroupMessage } from "@utils/xmtpRN/conversations";
+import Button from "@components/Button/Button";
 
 type NavigationChatProps = {
   navigation: NativeStackNavigationProp<any>;
@@ -33,6 +30,7 @@ export function NavigationChatButton({
     useShallow((s) => getProfile(address, s.profiles))
   );
   const preferredName = getPreferredName(profile?.socials, address);
+
   const openChat = useCallback(() => {
     // On Android the accounts are not in the navigation but in a drawer
 

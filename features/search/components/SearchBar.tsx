@@ -18,7 +18,7 @@ import {
   Searchbar as MaterialSearchBar,
 } from "react-native-paper";
 
-import Picto from "../Picto/Picto";
+import Picto from "@components/Picto/Picto";
 
 type Props = {
   inputPlaceholder: string;

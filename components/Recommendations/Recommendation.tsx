@@ -24,7 +24,7 @@ import {
 } from "../../utils/profile";
 import { shortAddress } from "../../utils/str";
 import Avatar from "../Avatar";
-import { NavigationChatButton } from "../Search/NavigationChatButton";
+import { NavigationChatButton } from "../../features/search/components/NavigationChatButton";
 
 export function Recommendation({
   address,

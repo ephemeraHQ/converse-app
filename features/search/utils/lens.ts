@@ -1,8 +1,8 @@
 import axios from "axios";
 
-import logger from "./logger";
-import config from "../config";
-import { LensHandle } from "../data/store/profilesStore";
+import logger from "@utils/logger";
+import config from "../../../config";
+import { LensHandle } from "@data/store/profilesStore";
 
 const LENS_CONVERSATION_ID_REGEX = /^lens\.dev\/dm\/(.*?)-(.*)$/;
 

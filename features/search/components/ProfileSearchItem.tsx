@@ -7,15 +7,15 @@ import {
 import { AvatarSizes } from "@styles/sizes";
 import { Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
 
-import { ProfileSocials } from "../../data/store/profilesStore";
+import { ProfileSocials } from "@data/store/profilesStore";
 import {
   getPreferredAvatar,
   getPreferredName,
   getPrimaryNames,
-} from "../../utils/profile";
-import { shortAddress } from "../../utils/str";
-import Avatar from "../Avatar";
-import { NavigationChatButton } from "../Search/NavigationChatButton";
+} from "@utils/profile";
+import { shortAddress } from "@utils/str";
+import Avatar from "@components/Avatar";
+import { NavigationChatButton } from "./NavigationChatButton";
 
 export function ProfileSearchItem({
   address,
