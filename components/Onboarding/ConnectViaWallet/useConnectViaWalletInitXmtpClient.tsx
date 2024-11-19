@@ -8,8 +8,8 @@ import { reloadAsync } from "expo-updates";
 import { useCallback, useEffect, useRef } from "react";
 
 import { wait } from "../../../utils/general";
-import { getXmtpBase64KeyFromSigner } from "../../../utils/xmtpRN/signIn";
-import { connectWithBase64Key } from "../init-xmtp-client";
+import { signInUsingSigner } from "../../../utils/xmtpRN/signIn";
+import { finalizeWalletXMTPOnboarding } from "../init-xmtp-client";
 import { useConnectViaWalletContext } from "./ConnectViaWallet.context";
 import { useConnectViaWalletStore } from "./ConnectViaWallet.store";
 
@@ -53,6 +53,7 @@ export function useInitXmptClient() {
       const signer = connectViewWalletStore.getState().signer!; // We can assume that signer is set at this point
       const address = connectViewWalletStore.getState().address!; // We can assume that address is set at this point
       const onXmtp = connectViewWalletStore.getState().onXmtp;
+      const isSCW = connectViewWalletStore.getState().isSCW;
       const alreadyV3Db = connectViewWalletStore.getState().alreadyV3Db;
 
       const waitForClickSignature = async () => {
@@ -69,9 +70,10 @@ export function useInitXmptClient() {
 
       hasStartedXmtpClientFlowRef.current = true;
 
-      const base64Key = await getXmtpBase64KeyFromSigner(
+      const xmtpV2Key = await signInUsingSigner({
         signer,
-        async () => {
+        isSCW,
+        onInstallationRevoked: async () => {
           logger.debug("[Connect Wallet] Installation revoked, disconnecting");
           try {
             await awaitableAlert(
@@ -86,13 +88,13 @@ export function useInitXmptClient() {
             });
           }
         },
-        async () => {
+        preCreateIdentityCallback: async () => {
           logger.debug("[Connect Wallet] Triggering create signature");
           // Before calling "create" signature
           connectViewWalletStore.getState().setWaitingForNextSignature(true);
           connectViewWalletStore.getState().setClickedSignature(false);
         },
-        async () => {
+        preEnableIdentityCallback: async () => {
           // Before calling "enable" signature
           const waitingForNextSignature =
             connectViewWalletStore.getState().waitingForNextSignature;
@@ -127,7 +129,7 @@ export function useInitXmptClient() {
             connectViewWalletStore.getState().setWaitingForNextSignature(false);
           }
         },
-        async () => {
+        preAuthenticateToInboxCallback: async () => {
           if (connectViewWalletStore.getState().waitingForNextSignature) {
             const currentSignaturesDone =
               connectViewWalletStore.getState().numberOfSignaturesDone;
@@ -147,18 +149,16 @@ export function useInitXmptClient() {
           logger.debug(
             "[Connect Wallet] Triggering authenticate to inbox signature"
           );
-        }
-      );
+        },
+      });
 
-      if (!base64Key) {
-        throw new Error("[Connect Wallet] No base64Key received");
+      if (!xmtpV2Key && !isSCW) {
+        throw new Error("[Connect Wallet] EOA expects to get back a v2 key");
       }
 
-      logger.debug("[Connect Wallet] Got base64 key, now connecting");
-
-      await connectWithBase64Key({
+      await finalizeWalletXMTPOnboarding({
         address,
-        base64Key,
+        v2Key: xmtpV2Key,
       });
 
       logger.info("[Connect Wallet] Successfully logged in using a wallet");

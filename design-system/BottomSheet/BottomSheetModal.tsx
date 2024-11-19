@@ -32,6 +32,7 @@ export const BottomSheetModal = memo(
       const { theme } = useAppTheme();
 
       // https://github.com/gorhom/react-native-bottom-sheet/issues/1644#issuecomment-1949019839
+
       const renderContainerComponent = useCallback((props: any) => {
         return <FullWindowOverlay {...props} />;
       }, []);

@@ -1,4 +1,3 @@
-import { InstalledWallet } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import { translate } from "@i18n";
 
 import { shortAddress } from "@utils/str";
@@ -10,6 +9,7 @@ import { TransactionLoader } from "./TransactionContentLoader";
 import { TransactionPreviewRow } from "./TransactionPreviewRow";
 import { SimulationResult } from "./TransactionSimulationResult";
 import { TransactionResult } from "./TransactionResult";
+import { InstalledWallet } from "@utils/evm/wallets";
 
 type TransactionState = {
   status: "pending" | "triggering" | "triggered" | "success" | "failure";

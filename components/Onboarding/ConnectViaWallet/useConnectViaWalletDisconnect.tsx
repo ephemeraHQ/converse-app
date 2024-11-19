@@ -31,7 +31,7 @@ export function useConnectViaWalletDisconnect() {
 
       logger.debug("[Connect Wallet] Disconnected");
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [thirdwebWallet]
   );
 }

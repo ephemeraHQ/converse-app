@@ -38,13 +38,13 @@ const DRAWER_ANIMATION_DURATION = 300;
 const DRAWER_THRESHOLD = 100;
 const TRANSLATION = 1000;
 
-export interface DrawerProps {
+export type DrawerProps = {
   visible: boolean;
   children: React.ReactNode;
   onClose?: () => void;
   style?: ViewStyle;
   showHandle?: boolean;
-}
+};
 
 export const DrawerContext = React.createContext<{
   closeDrawer: () => void;
@@ -52,13 +52,13 @@ export const DrawerContext = React.createContext<{
   closeDrawer: () => {},
 });
 
-export interface DrawerRef {
+export type DrawerRef = {
   /**
    * Will tell the drawer to close, but still needs
    * @returns
    */
   closeDrawer: (callback: () => void) => void;
-}
+};
 
 export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
   { children, visible, onClose, style, showHandle },

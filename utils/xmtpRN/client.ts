@@ -25,32 +25,48 @@ import { getCleanAddress } from "../evm/address";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
-export const getXmtpClientFromBase64Key = async (base64Key: string) => {
+const defaultConfig = {
+  env,
+  codecs: [
+    new TextCodec(),
+    new ReactionCodec(),
+    new ReadReceiptCodec(),
+    new GroupUpdatedCodec(),
+    new ReplyCodec(),
+    new RemoteAttachmentCodec(),
+    new StaticAttachmentCodec(),
+    new TransactionReferenceCodec(),
+    new CoinbaseMessagingPaymentCodec(),
+  ],
+};
+
+export const getXmtpClientFromV2Key = async (v2Key: string) => {
   const dbDirectory = await getDbDirectory();
   const dbEncryptionKey = await getDbEncryptionKey();
 
-  return Client.createFromKeyBundle(base64Key, {
-    env,
-    codecs: [
-      new TextCodec(),
-      new ReactionCodec(),
-      new ReadReceiptCodec(),
-      new GroupUpdatedCodec(),
-      new ReplyCodec(),
-      new RemoteAttachmentCodec(),
-      new StaticAttachmentCodec(),
-      new TransactionReferenceCodec(),
-      new CoinbaseMessagingPaymentCodec(),
-    ],
+  return Client.createFromKeyBundle(v2Key, {
+    ...defaultConfig,
     enableV3: true,
     dbDirectory,
     dbEncryptionKey,
   });
 };
 
+export const getXmtpV3Client = async (account: string) => {
+  const dbDirectory = await getDbDirectory();
+  const dbEncryptionKey = await getDbEncryptionKey();
+  const v3Client = (await Client.buildV3(account, {
+    ...defaultConfig,
+    dbDirectory,
+    dbEncryptionKey,
+  })) as ConverseXmtpClientType;
+  v3Client.v3Only = true;
+  return v3Client;
+};
+
 export type ConverseXmtpClientType = Awaited<
-  ReturnType<typeof getXmtpClientFromBase64Key>
->;
+  ReturnType<typeof getXmtpClientFromV2Key>
+> & { v3Only?: boolean };
 
 export type ConversationWithCodecsType = Awaited<
   ReturnType<ConverseXmtpClientType["conversations"]["newConversation"]>

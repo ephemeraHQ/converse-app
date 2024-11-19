@@ -11,19 +11,17 @@ import { $globalStyles } from "@theme/styles";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { waitUntilAppActive } from "@utils/appState/waitUntilAppActive";
 import { ensureError } from "@utils/error";
-import { thirdwebClient } from "@utils/thirdweb";
+import { thirdwebClient, thirdwebWallets } from "@utils/thirdweb";
 import { Image } from "expo-image";
 import { useCallback } from "react";
 import { Alert, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Account, createWallet, Wallet } from "thirdweb/wallets";
+import { Account, Wallet } from "thirdweb/wallets";
 
 import { useExternalWalletPickerContext } from "./ExternalWalletPicker.context";
-import {
-  InstalledWallet,
-  useInstalledWallets,
-} from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
+import { useInstalledWallets } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import config from "../../config";
+import { InstalledWallet, ISupportedWalletName } from "@utils/evm/wallets";
 
 type IExternalWalletPickerProps = {
   title?: string;
@@ -50,19 +48,9 @@ export function ExternalWalletPicker(props: IExternalWalletPickerProps) {
             throw new Error("No installed wallet could be found");
           }
 
-          let wallet: Wallet | undefined;
+          const wallet =
+            thirdwebWallets[installedWallet.name as ISupportedWalletName];
           let account: Account | undefined;
-
-          if (installedWallet.name === "Coinbase Wallet") {
-            wallet = createWallet("com.coinbase.wallet", {
-              appMetadata: config.walletConnectConfig.appMetadata,
-              mobileConfig: {
-                callbackURL: `https://${config.websiteDomain}/coinbase`,
-              },
-            });
-          } else if (installedWallet.thirdwebId) {
-            wallet = createWallet(installedWallet.thirdwebId);
-          }
 
           if (!wallet) {
             throw new Error("Wallet could not be created");

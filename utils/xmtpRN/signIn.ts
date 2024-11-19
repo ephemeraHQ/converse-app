@@ -10,6 +10,7 @@ import { Client } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
 
 import { isClientInstallationValid } from "./client";
+import { ethersSignerToXmtpSigner } from "./signer";
 import config from "../../config";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
@@ -17,13 +18,23 @@ const env = config.xmtpEnv as "dev" | "production" | "local";
 export const getInboxId = (address: string) =>
   Client.getOrCreateInboxId(address, { env });
 
-export const getXmtpBase64KeyFromSigner = async (
-  signer: Signer,
-  onInstallationRevoked: () => Promise<void>,
-  preCreateIdentityCallback?: () => Promise<void>,
-  preEnableIdentityCallback?: () => Promise<void>,
-  preAuthenticateToInboxCallback?: () => Promise<void>
-) => {
+type SignInUsingSignerParams = {
+  signer: Signer;
+  isSCW: boolean;
+  onInstallationRevoked: () => Promise<void>;
+  preCreateIdentityCallback?: () => Promise<void>;
+  preEnableIdentityCallback?: () => Promise<void>;
+  preAuthenticateToInboxCallback?: () => Promise<void>;
+};
+
+export const signInUsingSigner = async ({
+  signer,
+  isSCW,
+  onInstallationRevoked,
+  preCreateIdentityCallback,
+  preEnableIdentityCallback,
+  preAuthenticateToInboxCallback,
+}: SignInUsingSignerParams) => {
   const tempDirectory = await createTemporaryDirectory();
   const dbEncryptionKey = await getDbEncryptionKey();
 
@@ -41,13 +52,19 @@ export const getXmtpBase64KeyFromSigner = async (
   await copyDatabasesToTemporaryDirectory(tempDirectory, inboxId);
 
   logger.debug("Instantiating client from signer");
-
-  const client = await Client.create(signer, {
+  const createParams = {
     ...options,
     preCreateIdentityCallback,
     preEnableIdentityCallback,
     preAuthenticateToInboxCallback,
-  });
+  };
+
+  const client = isSCW
+    ? await Client.createV3(
+        ethersSignerToXmtpSigner(signer, true),
+        createParams
+      )
+    : await Client.create(ethersSignerToXmtpSigner(signer), createParams);
 
   if (client.inboxId !== inboxId) {
     throw new Error("Inbox ids don't match");
@@ -62,9 +79,13 @@ export const getXmtpBase64KeyFromSigner = async (
     onInstallationRevoked();
     return;
   }
+  let v2Base64Key: string | undefined;
+  if (!isSCW) {
+    logger.debug("Instantiated client from signer, exporting key bundle");
+    v2Base64Key = await client.exportKeyBundle();
+    logger.debug("Exported key bundle");
+  }
 
-  logger.debug("Instantiated client from signer, exporting key bundle");
-  const base64Key = await client.exportKeyBundle();
   // This Client is only be used to extract the key, we can disconnect
   // it to prevent locks happening during Onboarding
   await client.dropLocalDatabaseConnection();
@@ -72,6 +93,5 @@ export const getXmtpBase64KeyFromSigner = async (
     tempDirectory,
     client.inboxId
   );
-  logger.debug("Exported key bundle");
-  return base64Key;
+  return v2Base64Key;
 };

@@ -9,7 +9,7 @@ export type ISizes = keyof typeof textSizeStyles;
 export type IWeights = keyof typeof typography.primary;
 export type ITextColors = Exclude<keyof IColors["text"], "inverted">;
 
-export interface ITextStyleProps {
+export type ITextStyleProps = {
   /**
    * An optional style override useful for padding & margin.
    */
@@ -30,9 +30,9 @@ export interface ITextStyleProps {
    * Text color modifier.
    */
   color?: ITextColors;
-}
+};
 
-export interface ITextProps extends RNTextProps, ITextStyleProps {
+export type ITextProps = {
   /**
    * Text which is looked up via i18n.
    */
@@ -50,4 +50,5 @@ export interface ITextProps extends RNTextProps, ITextStyleProps {
    * Children components.
    */
   children?: React.ReactNode;
-}
+} & RNTextProps &
+  ITextStyleProps;

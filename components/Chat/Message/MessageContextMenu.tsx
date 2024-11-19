@@ -101,6 +101,7 @@ const BackdropComponent: FC<{
   }, []);
 
   // Attribution Panel + Emoji Picker
+
   const animatedAuxiliaryViewStyle = useAnimatedStyle(() => {
     const getTransformValue = () => {
       if (itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top) {
@@ -159,6 +160,7 @@ const BackdropComponent: FC<{
   });
 
   // Context menu
+
   const animatedMenuStyle = useAnimatedStyle(() => {
     const getTransformValue = () => {
       // Calculate the vertical position of the context menu
@@ -212,6 +214,7 @@ const BackdropComponent: FC<{
   });
 
   // Message
+
   const animatedPortalStyle = useAnimatedStyle(() => {
     const animateOpacity = () =>
       withDelay(HOLD_ITEM_TRANSFORM_DURATION, withTiming(0, { duration: 0 }));

@@ -78,6 +78,7 @@ export function IconButton(props: IIconButtonProps) {
   );
 
   // For now until we fix Icon
+
   const iconProps = useCallback(
     ({ pressed }: PressableStateCallbackType) =>
       themed(

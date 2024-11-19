@@ -9,13 +9,13 @@ const initialMessageReactionsState: RolledUpReactions = {
   detailed: [],
 };
 
-export interface IMessageReactionsStore {
+export type IMessageReactionsStore = {
   rolledUpReactions: RolledUpReactions;
   setRolledUpReactions: (reactions: RolledUpReactions) => void;
 
   // TODO: update state when new reactions come up and drawer is open
   // updateReactions: (updates: Partial<RolledUpReactions>) => void;
-}
+};
 
 export const useMessageReactionsStore = create<IMessageReactionsStore>(
   (set) => ({

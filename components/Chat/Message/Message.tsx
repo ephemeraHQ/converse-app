@@ -129,6 +129,7 @@ const MessageSenderAvatar = ({ message }: { message: MessageToDisplay }) => {
     (s) => getProfile(address, s.profiles)?.socials
   );
   const styles = useStyles();
+
   const openProfile = useCallback(() => {
     navigate("Profile", { address: message.senderAddress });
   }, [message.senderAddress]);
@@ -162,6 +163,7 @@ const ChatMessage = ({
     () => getRelativeDate(message.sent),
     [message.sent]
   );
+
   const messageTime = useMemo(
     () => getLocalizedTime(message.sent),
     [message.sent]
@@ -181,6 +183,7 @@ const ChatMessage = ({
   const timeHeight = useSharedValue(0);
   const timeTranslateY = useSharedValue(20);
   const timeOpacity = useSharedValue(0);
+
   const timeAnimatedStyle = useAnimatedStyle(() => ({
     height: timeHeight.value,
     overflow: "hidden",
@@ -190,6 +193,7 @@ const ChatMessage = ({
   }));
 
   const dateTimeDisplay = useSharedValue<"none" | "flex">("none");
+
   const dateTimeAnimatedStyle = useAnimatedStyle(() => ({
     display: dateTimeDisplay.value,
   }));
@@ -197,6 +201,7 @@ const ChatMessage = ({
   // Handle showTime animation
   const showTime = useRef<boolean>(false);
   const showDateTime = useRef<boolean>(false);
+
   const animateTime = useCallback(() => {
     if (isAttachmentMessage()) {
       return;

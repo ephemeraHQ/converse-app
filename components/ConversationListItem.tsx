@@ -103,6 +103,7 @@ const ConversationListItem = memo(function ConversationListItem({
   );
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const [selected, setSelected] = useState(false);
+
   const resetSelected = useCallback(() => {
     setSelected(false);
   }, []);
@@ -304,6 +305,7 @@ const ConversationListItem = memo(function ConversationListItem({
   );
 
   const swipeableRef = useRef<Swipeable | null>(null);
+
   const closeSwipeable = useCallback(() => {
     swipeableRef.current?.close();
   }, []);

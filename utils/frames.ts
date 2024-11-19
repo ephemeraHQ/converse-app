@@ -253,9 +253,8 @@ export const useHandleTxAction = () => {
         data: txData.params.data,
       };
       converseEventEmitter.emit("previewTransaction", transactionData);
-      const [transactionId, receipt] = await waitForConverseEvent(
-        "transactionResult"
-      );
+      const [transactionId, receipt] =
+        await waitForConverseEvent("transactionResult");
       const transactionReceipt =
         transactionId === transactionData.id ? receipt : undefined;
 

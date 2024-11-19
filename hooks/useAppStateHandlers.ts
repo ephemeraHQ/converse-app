@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
 import { AppState, AppStateStatus } from "react-native";
 
-export interface AppStateHookSettings {
+export type AppStateHookSettings = {
   onChange?: (status: AppStateStatus) => void;
   onForeground?: () => void;
   onBackground?: () => void;
   onInactive?: () => void;
   deps?: React.DependencyList;
-}
+};
 
 type Handler = (state: AppStateStatus) => void;
 

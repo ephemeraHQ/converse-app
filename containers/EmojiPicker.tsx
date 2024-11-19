@@ -65,6 +65,7 @@ export const EmojiPicker = () => {
       ? conversation.messages.get(reactingToMessage.messageId)
       : undefined
   );
+
   const reactions = useMemo(() => {
     return message ? getMessageReactions(message) : {};
   }, [message]);
@@ -95,10 +96,12 @@ export const EmojiPicker = () => {
       })
     );
   }, [searchInput]);
+
   const closeMenu = useCallback(() => {
     setReactingToMessage(null);
     setSearchInput("");
   }, [setReactingToMessage]);
+
   const handleReaction = useCallback(
     (emoji: string) => {
       if (!conversation || !message) return;

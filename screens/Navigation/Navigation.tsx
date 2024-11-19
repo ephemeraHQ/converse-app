@@ -51,6 +51,7 @@ export type NavigationParamList = {
   OnboardingPrivy: undefined;
   OnboardingConnectWallet: {
     address: string;
+    isSCW: boolean;
   };
   OnboardingPrivateKey: undefined;
   OnboardingNotifications: undefined;
@@ -62,6 +63,7 @@ export type NavigationParamList = {
   NewAccountUserProfile: undefined;
   NewAccountConnectWallet: {
     address: string;
+    isSCW: boolean;
   };
   NewAccountPrivy: undefined;
   NewAccountPrivateKey: undefined;
