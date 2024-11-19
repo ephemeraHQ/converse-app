@@ -202,11 +202,6 @@ const BackdropComponent: FC<{
   // Message
 
   const animatedPortalStyle = useAnimatedStyle(() => {
-    const animateOpacity = () =>
-      withDelay(
-        animations.contextMenuHoldDuration,
-        withTiming(0, { duration: 0 })
-      );
     const getTransformValue = () => {
       // Calculate the vertical position of the message bubble
       const topTransform =
@@ -247,13 +242,16 @@ const BackdropComponent: FC<{
       isActive
         ? withSpring(tY, animations.contextMenuSpring)
         : withTiming(-0.1, { duration: animations.contextMenuHoldDuration });
+
     return {
       position: "absolute",
       top: itemRectY.value,
       left: itemRectX.value,
       height: itemRectHeight.value,
       width: itemRectWidth.value,
-      opacity: isActive ? 1 : animateOpacity(),
+      opacity: withTiming(isActive ? 1 : 0, {
+        duration: animations.contextMenuHoldDuration,
+      }),
       transform: [
         {
           translateY: transformAnimation(),
