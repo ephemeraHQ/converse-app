@@ -1,24 +1,12 @@
-import {
-  backgroundColor,
-  itemSeparatorColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "@styles/colors";
-import { PictoSizes } from "@styles/sizes";
 import React from "react";
-import {
-  Platform,
-  StyleSheet,
-  TextInput,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Platform, TextInput, View, ViewStyle, TextStyle } from "react-native";
 import {
   IconButton as MaterialIconButton,
   Searchbar as MaterialSearchBar,
 } from "react-native-paper";
-
-import Picto from "@components/Picto/Picto";
+import { Icon } from "@design-system/Icon/Icon";
+import { useAppTheme, ThemedStyle } from "@theme/useAppTheme";
+import { textSizeStyles } from "@design-system/Text/Text.styles";
 
 type Props = {
   inputPlaceholder: string;
@@ -33,33 +21,32 @@ export default function SearchBar({
   setValue,
   onRef,
 }: Props) {
-  const styles = useStyles();
-  const colorScheme = useColorScheme();
+  const { theme, themed } = useAppTheme();
+
   return (
-    <View style={styles.inputContainer}>
-      {Platform.OS === "ios" && (
+    <View style={themed($inputContainer)}>
+      {Platform.OS === "ios" ? (
         <TextInput
-          style={styles.input}
+          style={themed($input)}
           placeholder={inputPlaceholder}
           autoCapitalize="none"
           autoFocus={false}
           autoCorrect={false}
           value={value}
           ref={onRef}
-          placeholderTextColor={textSecondaryColor(colorScheme)}
+          placeholderTextColor={theme.colors.text.secondary}
           onChangeText={(text) => setValue(text.trim())}
           clearButtonMode="always"
         />
-      )}
-      {Platform.OS === "android" && (
+      ) : (
         <MaterialSearchBar
           placeholder={inputPlaceholder}
           onChangeText={(query) => setValue(query.trim())}
           value={value}
           icon={({ color }) => (
-            <Picto
-              picto="search"
-              size={PictoSizes.searchBar}
+            <Icon
+              icon="search"
+              size={theme.iconSize.md}
               color={color}
               style={{ top: 1 }}
             />
@@ -69,25 +56,17 @@ export default function SearchBar({
           autoFocus={false}
           autoCorrect={false}
           ref={onRef}
-          placeholderTextColor={textSecondaryColor(colorScheme)}
-          selectionColor={textPrimaryColor(colorScheme)}
-          style={{
-            backgroundColor: backgroundColor(colorScheme),
-          }}
+          placeholderTextColor={theme.colors.text.secondary}
+          selectionColor={theme.colors.text.primary}
+          style={themed($androidSearchBar)}
           right={() => {
             if (!value) return null;
             return (
               <MaterialIconButton
                 icon={({ color }) => (
-                  <Picto
-                    picto="xmark"
-                    size={PictoSizes.searchBar}
-                    color={color}
-                  />
+                  <Icon icon="xmark" size={theme.iconSize.md} color={color} />
                 )}
-                onPress={() => {
-                  setValue("");
-                }}
+                onPress={() => setValue("")}
               />
             );
           }}
@@ -98,21 +77,20 @@ export default function SearchBar({
   );
 }
 
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    inputContainer: {
-      borderBottomWidth: Platform.OS === "android" ? 1 : 0.5,
-      borderBottomColor: itemSeparatorColor(colorScheme),
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    input: {
-      height: 46,
-      paddingLeft: 16,
-      paddingRight: 8,
-      marginRight: 8,
-      fontSize: 17,
-      color: textPrimaryColor(colorScheme),
-    },
-  });
-};
+const $inputContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  borderBottomWidth: Platform.OS === "android" ? 1 : 0.5,
+  borderBottomColor: colors.border.subtle,
+});
+
+const $input: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  height: spacing["3xl"],
+  paddingLeft: spacing.sm,
+  paddingRight: spacing.base,
+  marginRight: spacing.base,
+  color: colors.text.primary,
+  ...textSizeStyles.sm,
+});
+
+const $androidSearchBar: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: "transparent",
+});
