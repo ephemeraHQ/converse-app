@@ -25,11 +25,11 @@ import {
   useAccountsStore,
   useCurrentAccount,
   useRecommendationsStore,
-} from "../../data/store/accountsStore";
+} from "@data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { useRouter } from "../../navigation/useNavigation";
-import { refreshRecommendationsForAccount } from "../../utils/recommendations";
-import ActivityIndicator from "../ActivityIndicator/ActivityIndicator";
+import { useRouter } from "@navigation/useNavigation";
+import { refreshRecommendationsForAccount } from "@utils/recommendations";
+import ActivityIndicator from "@components/ActivityIndicator/ActivityIndicator";
 
 const EXPIRE_AFTER = 86400000; // 1 DAY
 
@@ -74,6 +74,7 @@ export default function Recommendations({
       "https://converseapp.notion.site/Converse-MM-signals-af014ca135c04ce1aae362e536712461?pvs=4"
     );
   }, []);
+
   const contactPol = useCallback(() => {
     navigation.popToTop();
     setTimeout(() => {
@@ -119,6 +120,7 @@ export default function Recommendations({
   ]);
 
   const keyExtractor = useCallback((address: string) => address, []);
+
   const renderItem = useCallback(
     ({ item }: { item: string }) => {
       if (item === "title") {
@@ -156,6 +158,7 @@ export default function Recommendations({
       return (
         <Recommendation
           address={item}
+          navigation={navigation}
           recommendationData={frens[item]}
           isVisible={!!viewableItems[item]}
           socials={getProfile(item, profiles)?.socials}
@@ -178,6 +181,7 @@ export default function Recommendations({
       groupMode,
       addToGroup,
       showTitle,
+      navigation,
     ]
   );
 
