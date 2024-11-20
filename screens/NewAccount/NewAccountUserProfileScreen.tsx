@@ -40,8 +40,10 @@ export const NewAccountUserProfileScreen = memo(
 
     const handleContinue = useCallback(async () => {
       try {
-        await createOrUpdateProfile({ profile });
-        navigation.navigate("Chats");
+        const { success } = await createOrUpdateProfile({ profile });
+        if (success) {
+          navigation.navigate("Chats");
+        }
       } catch (error) {
         sentryTrackError(error);
       }
