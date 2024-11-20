@@ -1,75 +1,57 @@
-import { primaryColor, textPrimaryColor } from "@styles/colors";
-import React, {
-  Platform,
-  StyleSheet,
-  Text,
-  useColorScheme,
-} from "react-native";
-
+import React from "react";
+import { Platform, TextStyle } from "react-native";
+import { useAppTheme, ThemedStyle } from "@theme/useAppTheme";
 import { useRouter } from "@navigation/useNavigation";
+import { translate } from "@i18n";
+import { Text } from "@design-system/Text";
 
 export default function NoResult() {
-  const styles = useStyles();
-
+  const { themed } = useAppTheme();
   const router = useRouter();
 
   return (
     <>
-      <Text style={styles.emoji}>👀</Text>
-      <Text style={styles.title}>
-        <Text>
-          We could not find any result in your existing conversations. You might
-          want to{" "}
-        </Text>
+      <Text preset="bigEmojiSymbol" style={themed($bigEmoji)}>
+        👀
+      </Text>
+      <Text preset="small" style={themed($notFoundText)}>
+        <Text>{translate("no_results")} </Text>
         <Text
-          style={styles.clickableText}
+          preset="clickableText"
           onPress={() => {
             router.navigate("NewConversation", {});
           }}
         >
-          start a new conversation
+          translate("no_results_start_convo")
         </Text>
       </Text>
     </>
   );
 }
 
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    emoji: {
-      ...Platform.select({
-        default: {
-          textAlign: "center",
-          marginTop: 150,
-          fontSize: 34,
-          marginBottom: 12,
-        },
-        android: {
-          display: "none",
-        },
-      }),
+const $bigEmoji: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  ...Platform.select({
+    default: {
+      textAlign: "center",
+      marginTop: spacing["6xl"],
+      marginBottom: spacing.sm,
     },
-    title: {
-      color: textPrimaryColor(colorScheme),
-      ...Platform.select({
-        default: {
-          textAlign: "center",
-          fontSize: 17,
-          paddingHorizontal: 32,
-        },
-        android: {
-          textAlign: "left",
-          fontSize: 16,
-          lineHeight: 22,
-          paddingTop: 10,
-          paddingHorizontal: 16,
-        },
-      }),
+    android: {
+      display: "none",
     },
-    clickableText: {
-      color: primaryColor(colorScheme),
-      fontWeight: "500",
+  }),
+});
+
+const $notFoundText: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  ...Platform.select({
+    default: {
+      textAlign: "center",
+      paddingHorizontal: spacing.xl,
     },
-  });
-};
+    android: {
+      textAlign: "left",
+      paddingTop: spacing.xs,
+      paddingHorizontal: spacing.md,
+    },
+  }),
+});

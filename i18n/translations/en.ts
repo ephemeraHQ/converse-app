@@ -176,6 +176,9 @@ export const en = {
   connecting: "Connecting…",
   syncing: "Syncing…",
   search_chats: "Search chats",
+  no_results:
+    "We could not find any result in your existing conversations. You might want to",
+  no_results_start_convo: "start a new conversation",
 
   // Requests
   requests: "Requests",
