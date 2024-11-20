@@ -45,16 +45,12 @@ export function ProfileSearchItem({
           style={themed($avatar)}
           name={preferredName}
         />
-        <View>
-          <Text preset="bodyBold" style={{ marginBottom: theme.spacing.xs }}>
+        <View style={themed($textContainer)}>
+          <Text preset="bodyBold" numberOfLines={1}>
             {preferredName || shortAddress(address)}
           </Text>
           {primaryNamesDisplay.length > 0 && (
-            <Text
-              preset="formLabel"
-              numberOfLines={1}
-              style={{ marginRight: theme.spacing.lg }}
-            >
+            <Text preset="formLabel" numberOfLines={1}>
               {primaryNamesDisplay.join(" | ")}
             </Text>
           )}
@@ -95,11 +91,16 @@ const $left: ThemedStyle<ViewStyle> = () => ({
   alignItems: "center",
 });
 
+const $textContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flex: 1,
+  minWidth: 0,
+});
+
 const $avatar: ThemedStyle<ImageStyle> = ({ spacing }) => ({
   marginRight: spacing.sm,
 });
 
 const $right: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   justifyContent: "center",
-  marginLeft: Platform.OS === "ios" ? spacing.xl : 0,
+  marginLeft: Platform.OS === "ios" ? spacing.md : 0,
 });

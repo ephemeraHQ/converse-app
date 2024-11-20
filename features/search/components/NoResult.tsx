@@ -22,7 +22,7 @@ export default function NoResult() {
             router.navigate("NewConversation", {});
           }}
         >
-          translate("no_results_start_convo")
+          {translate("no_results_start_convo")}
         </Text>
       </Text>
     </>

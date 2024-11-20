@@ -4,28 +4,30 @@ import {
   FlatList,
   Keyboard,
   Platform,
-  Text,
   TextStyle,
   View,
   ViewStyle,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+import { Text } from "@design-system/Text";
+import { translate } from "@i18n";
 import { ProfileSearchItem } from "../components/ProfileSearchItem";
 import { ProfileSocials } from "@data/store/profilesStore";
 import { useAppTheme, ThemedStyle } from "@theme/useAppTheme";
+
+type ProfileSearchProps = {
+  navigation: NativeStackNavigationProp<any>;
+  profiles: { [address: string]: ProfileSocials };
+  groupMode?: boolean;
+  addToGroup?: (member: ProfileSocials & { address: string }) => void;
+};
 
 export default function ProfileSearch({
   navigation,
   profiles,
   groupMode,
   addToGroup,
-}: {
-  navigation: NativeStackNavigationProp<any>;
-  profiles: { [address: string]: ProfileSocials };
-  groupMode?: boolean;
-  addToGroup?: (member: ProfileSocials & { address: string }) => void;
-}) {
+}: ProfileSearchProps) {
   const insets = useSafeAreaInsets();
   const { theme, themed } = useAppTheme();
 
@@ -44,19 +46,31 @@ export default function ProfileSearch({
     [profiles, navigation, groupMode, addToGroup]
   );
 
-  const renderHeader = () => (
-    <View style={themed($sectionTitleContainer)}>
-      <Text style={themed($sectionTitle)}>RESULTS</Text>
-    </View>
+  const renderHeader = useCallback(
+    () => (
+      <View style={themed($sectionTitleContainer)}>
+        <Text preset="formLabel" style={themed($sectionTitleSpacing)}>
+          {translate("search_results")}
+        </Text>
+      </View>
+    ),
+    [themed]
   );
 
-  const renderFooter = () => (
-    <View style={[themed($footer), { marginBottom: insets.bottom + 55 }]}>
-      <Text style={themed($message)}>
-        If you don't see your contact in the list, try typing their full address
-        (with .converse.xyz, .eth, .lens, .fc, .x etc…)
-      </Text>
-    </View>
+  const renderFooter = useCallback(
+    () => (
+      <View style={[themed($footer), { marginBottom: insets.bottom + 55 }]}>
+        <Text
+          preset={Platform.OS === "ios" ? "body" : "small"}
+          style={themed($footerText)}
+        >
+          {translate("full_address_hint", {
+            providers: ".converse.xyz, .eth, .lens, .fc, .x",
+          })}
+        </Text>
+      </View>
+    ),
+    [themed, insets.bottom]
   );
 
   return (
@@ -74,26 +88,26 @@ export default function ProfileSearch({
   );
 }
 
-const $sectionTitleContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $sectionTitleContainer: ThemedStyle<ViewStyle> = ({
+  colors,
+  borderWidth,
+}) => ({
   ...Platform.select({
     default: {
-      borderBottomWidth: 0.5,
+      borderBottomWidth: borderWidth.sm,
       borderBottomColor: colors.border.subtle,
     },
     android: {},
   }),
 });
 
-const $sectionTitle: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  color: colors.text.secondary,
+const $sectionTitleSpacing: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   ...Platform.select({
     default: {
-      fontSize: 12,
       marginBottom: spacing.sm,
       marginTop: spacing.xl,
     },
     android: {
-      fontSize: 11,
       marginBottom: spacing.md,
       marginTop: spacing.lg,
     },
@@ -114,15 +128,6 @@ const $footer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   }),
 });
 
-const $message: ThemedStyle<TextStyle> = ({ colors }) => ({
-  ...Platform.select({
-    default: {
-      fontSize: 17,
-      textAlign: "center",
-    },
-    android: {
-      fontSize: 14,
-    },
-  }),
-  color: colors.text.secondary,
+const $footerText: ThemedStyle<TextStyle> = () => ({
+  textAlign: Platform.OS === "ios" ? "center" : "left",
 });

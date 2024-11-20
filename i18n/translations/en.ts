@@ -380,6 +380,9 @@ export const en = {
   add_loading: "Adding...",
   chat: "Chat",
   you: "You",
+  search_results: "RESULTS",
+  full_address_hint:
+    "If you don't see your contact in the list, try typing their full address (with {{providers}} etc…)",
 
   // Group Updated Message
   group_name_changed: '{{name}} changed the group name to "{{newValue}}".',
