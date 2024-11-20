@@ -1,5 +1,5 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
-import { MediaPreview } from "@data/store/chatStore";
+import { MessageAttachment } from "@data/store/chatStore";
 import { useConversationQuery } from "@queries/useConversationQuery";
 import { navigate } from "@utils/navigation";
 import { TextInputWithValue } from "@utils/str";
@@ -16,6 +16,7 @@ import React, {
 } from "react";
 import { SharedValue, useSharedValue } from "react-native-reanimated";
 import { createContext, useContextSelector } from "use-context-selector";
+import { useConversationCurrentTopic } from "./conversation-service";
 
 type ISendMessageParams = {
   text?: string;
@@ -30,11 +31,11 @@ export type IConversationContextType = {
   numberOfMessages: number;
   topic?: ConversationTopic;
   inputRef: MutableRefObject<TextInputWithValue | undefined>;
-  mediaPreviewRef: MutableRefObject<MediaPreview | undefined>;
+  mediaPreviewRef: MutableRefObject<MessageAttachment | undefined>;
   isBlockedPeer: boolean;
   onReadyToFocus: () => void;
   messageToPrefill: string;
-  mediaPreviewToPrefill: MediaPreview;
+  mediaPreviewToPrefill: MessageAttachment;
   frameTextInputFocused: boolean;
   setFrameTextInputFocused: (b: boolean) => void;
   tagsFetchedOnceForMessage: MutableRefObject<{
@@ -45,8 +46,6 @@ export type IConversationContextType = {
 
 type IConversationContextProps = {
   children: React.ReactNode;
-  topic: ConversationTopic;
-  messageToPrefill: string;
 };
 
 const ConversationContext = createContext<IConversationContextType>(
@@ -56,8 +55,9 @@ const ConversationContext = createContext<IConversationContextType>(
 export const ConversationContextProvider = (
   props: IConversationContextProps
 ) => {
-  const { children, topic } = props;
+  const { children } = props;
 
+  const topic = useConversationCurrentTopic();
   const currentAccount = useCurrentAccount()!;
 
   const { data: conversation } = useConversationQuery(currentAccount, topic);
@@ -79,8 +79,11 @@ export const ConversationContextProvider = (
   }, [conversation]);
 
   const sendMessage = useCallback(
-    // TODO: use Type Discrimination
     async ({ text, referencedMessageId, attachment }: ISendMessageParams) => {
+      if (!conversation) {
+        return;
+      }
+
       if (referencedMessageId) {
         if (attachment) {
           await conversation?.send({
@@ -100,11 +103,13 @@ export const ConversationContextProvider = (
         }
         return;
       }
+
       if (attachment) {
         await conversation?.send({
           remoteAttachment: attachment,
         });
       }
+
       if (text) {
         await conversation?.send(text);
       }

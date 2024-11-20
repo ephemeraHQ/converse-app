@@ -1,27 +1,27 @@
+import { Icon } from "@design-system/Icon/Icon";
+import { Pressable } from "@design-system/Pressable";
 import { translate } from "@i18n";
 import { MenuView } from "@react-native-menu/menu";
-import { textPrimaryColor } from "@styles/colors";
+import { useAppTheme } from "@theme/useAppTheme";
+import { uploadRemoteAttachment } from "@utils/attachment/uploadRemoteAttachment";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import * as ImagePicker from "expo-image-picker";
 import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
-import { useCallback, useEffect, useRef } from "react";
-import { Platform, StyleSheet, useColorScheme } from "react-native";
-import { v4 as uuidv4 } from "uuid";
-
-import { useAccountsStore } from "../../../data/store/accountsStore";
-import { useConversationContext } from "../../../utils/conversation";
-import { converseEventEmitter } from "../../../utils/events";
+import { Platform } from "react-native";
+import { getCurrentAccount } from "../../../data/store/accountsStore";
 import {
-  AttachmentSelectedStatus,
+  setComposerMediaPreview,
+  setComposerMediaPreviewStatus,
+  setUploadedRemoteAttachment,
+} from "../../../features/conversation/conversation-service";
+import {
   compressAndResizeImage,
   pickMediaFromLibrary,
   takePictureFromCamera,
 } from "../../../utils/media";
-import { sentryTrackMessage } from "../../../utils/sentry";
+import { sentryTrackError, sentryTrackMessage } from "../../../utils/sentry";
 import { encryptRemoteAttachment } from "../../../utils/xmtpRN/attachments";
-import ActionButton from "../ActionButton";
-import { uploadRemoteAttachment } from "@utils/attachment/uploadRemoteAttachment";
 
 const DATA_MIMETYPE_REGEX = /data:(.*?);/;
 
@@ -41,130 +41,15 @@ export type SelectedAttachment = {
   uri?: string;
 };
 
-type AddAttachmentButtonProps = {
-  onSelectionStatusChange: (
-    status: AttachmentSelectedStatus,
-    attachment: SelectedAttachment
-  ) => void;
-};
-
-export function AddAttachmentButton({
-  onSelectionStatusChange,
-}: AddAttachmentButtonProps) {
-  const colorScheme = useColorScheme();
-  const mediaPreviewRef = useConversationContext("mediaPreviewRef");
-  const currentAccount = useAccountsStore((s) => s.currentAccount);
-
-  const styles = useStyles();
-  const currentAttachmentMediaURI = useRef(mediaPreviewRef.current?.mediaURI);
-  const assetRef = useRef<ImagePicker.ImagePickerAsset | undefined>(undefined);
-
-  useEffect(() => {
-    currentAttachmentMediaURI.current = mediaPreviewRef.current?.mediaURI;
-  }, [mediaPreviewRef, mediaPreviewRef.current?.mediaURI]);
-
-  useEffect(() => {
-    if (!assetRef.current) {
-      assetRef.current = mediaPreviewRef.current?.mediaURI
-        ? ({
-            uri: mediaPreviewRef.current?.mediaURI,
-          } as ImagePicker.ImagePickerAsset)
-        : undefined;
-    }
-  }, [mediaPreviewRef, mediaPreviewRef.current?.mediaURI, assetRef]);
-
-  const handleAttachmentSelected = useCallback(
-    async (
-      asset: ImagePicker.ImagePickerAsset,
-      status: AttachmentSelectedStatus
-    ) => {
-      if (asset) {
-        onSelectionStatusChange("picked", { uri: asset.uri });
-        assetRef.current = asset;
-
-        converseEventEmitter.emit("setCurrentConversationMediaPreviewValue", {
-          mediaURI: asset.uri,
-          status: "uploading",
-          dimensions: {
-            height: asset.height,
-            width: asset.width,
-          },
-        });
-        const resizedImage = await compressAndResizeImage(asset.uri);
-        let mimeType = mime.getType(resizedImage.uri);
-        if (!mimeType) {
-          const match = resizedImage.uri.match(DATA_MIMETYPE_REGEX);
-          if (match && match[1]) {
-            mimeType = match[1];
-          }
-        }
-        const encryptedAttachment = await encryptRemoteAttachment(
-          currentAccount,
-          resizedImage.uri,
-          mimeType || undefined
-        );
-
-        try {
-          const uploadedAttachment = await uploadRemoteAttachment(
-            currentAccount,
-            encryptedAttachment
-          );
-          const selectedAttachment: SelectedAttachment = {
-            attachmentToSave: {
-              filePath: resizedImage.uri,
-              fileName: asset.uri.split("/").pop() || `${uuidv4()}`,
-              mimeType,
-              dimensions: {
-                height: resizedImage.height,
-                width: resizedImage.width,
-              },
-            },
-            uploadedAttachment,
-          };
-          onSelectionStatusChange("uploaded", selectedAttachment);
-          converseEventEmitter.emit("setCurrentConversationMediaPreviewValue", {
-            mediaURI: asset.uri,
-            status: "uploaded",
-            dimensions: {
-              height: resizedImage.height,
-              width: resizedImage.width,
-            },
-          });
-        } catch (error) {
-          sentryTrackMessage("ATTACHMENT_UPLOAD_ERROR", { error });
-          converseEventEmitter.emit("setCurrentConversationMediaPreviewValue", {
-            mediaURI: asset.uri,
-            status: "error",
-          });
-        }
-      }
-    },
-    [currentAccount, onSelectionStatusChange]
-  );
-
-  const pickMedia = useCallback(async () => {
-    if (Platform.OS === "ios") {
-      setStatusBarHidden(true, "fade");
-    }
-    const asset = await pickMediaFromLibrary();
-    if (Platform.OS === "ios") {
-      setStatusBarHidden(false, "fade");
-    }
-    if (!asset) return;
-    assetRef.current = asset;
-    handleAttachmentSelected(asset, "picked");
-  }, [handleAttachmentSelected]);
-
-  const openCamera = useCallback(async () => {
-    const asset = await takePictureFromCamera();
-    if (!asset) return;
-    assetRef.current = asset;
-    handleAttachmentSelected(asset, "picked");
-  }, [handleAttachmentSelected]);
+export function AddAttachmentButton() {
+  const { theme } = useAppTheme();
 
   return (
     <MenuView
-      style={styles.menuButton}
+      style={{
+        margin: theme.spacing.xxxs,
+        alignSelf: "flex-end",
+      }}
       onPressAction={async ({ nativeEvent }) => {
         switch (nativeEvent.event) {
           case "camera":
@@ -176,16 +61,15 @@ export function AddAttachmentButton({
           default:
             break;
         }
-        assetRef.current = undefined;
       }}
       actions={[
         {
           id: "mediaLibrary",
           title: translate("photo_library"),
-          titleColor: textPrimaryColor(colorScheme),
+          titleColor: theme.colors.text.primary,
           imageColor: Platform.select({
             ios: undefined,
-            android: textPrimaryColor(colorScheme),
+            android: theme.colors.text.primary,
           }),
           image: Platform.select({
             ios: "square.and.arrow.up",
@@ -195,10 +79,10 @@ export function AddAttachmentButton({
         {
           id: "camera",
           title: translate("camera"),
-          titleColor: textPrimaryColor(colorScheme),
+          titleColor: theme.colors.text.primary,
           imageColor: Platform.select({
             ios: undefined,
-            android: textPrimaryColor(colorScheme),
+            android: theme.colors.text.primary,
           }),
           image: Platform.select({
             ios: "camera",
@@ -208,30 +92,90 @@ export function AddAttachmentButton({
       ]}
       shouldOpenOnLongPress={false}
     >
-      <ActionButton picto="plus" />
+      <Pressable
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
+          height: 36, // Value from Figma
+          width: 36, // Value from Figma
+          backgroundColor: theme.colors.fill.minimal,
+          borderRadius: 36,
+        }}
+      >
+        <Icon
+          color={theme.colors.text.secondary}
+          icon="plus"
+          size={20} // Value from figma
+        />
+      </Pressable>
     </MenuView>
   );
 }
 
-const useStyles = () => {
-  return StyleSheet.create({
-    menuButton: {
-      justifyContent: "center",
-      alignItems: "flex-end",
-      flexDirection: "row",
-      marginLeft: 16,
-      ...Platform.select({
-        default: {
-          paddingBottom: 6,
-          width: 27,
-          height: 48,
+async function pickMedia() {
+  if (Platform.OS === "ios") {
+    setStatusBarHidden(true, "fade");
+  }
+  const asset = await pickMediaFromLibrary();
+  if (Platform.OS === "ios") {
+    setStatusBarHidden(false, "fade");
+  }
+  if (!asset) return;
+  handleAttachmentSelected(asset);
+}
+
+async function openCamera() {
+  const asset = await takePictureFromCamera();
+  if (!asset) return;
+  handleAttachmentSelected(asset);
+}
+
+async function handleAttachmentSelected(asset: ImagePicker.ImagePickerAsset) {
+  if (asset) {
+    try {
+      setComposerMediaPreview({
+        mediaURI: asset.uri,
+        status: "picked",
+        mimeType: null,
+        dimensions: {
+          height: asset.height,
+          width: asset.width,
         },
-        android: {
-          paddingBottom: 6,
-          width: 27,
-          height: 27,
-        },
-      }),
-    },
-  });
-};
+      });
+
+      setComposerMediaPreviewStatus("uploading");
+
+      const resizedImage = await compressAndResizeImage(asset.uri);
+
+      let mimeType = mime.getType(resizedImage.uri);
+      if (!mimeType) {
+        const match = resizedImage.uri.match(DATA_MIMETYPE_REGEX);
+        if (match && match[1]) {
+          mimeType = match[1];
+        }
+      }
+
+      const currentAccount = getCurrentAccount()!;
+
+      const encryptedAttachment = await encryptRemoteAttachment(
+        currentAccount,
+        resizedImage.uri,
+        mimeType || undefined
+      );
+
+      try {
+        const uploadedAttachment = await uploadRemoteAttachment(
+          currentAccount,
+          encryptedAttachment
+        );
+
+        setUploadedRemoteAttachment(uploadedAttachment);
+        setComposerMediaPreviewStatus("uploaded");
+      } catch (error) {
+        sentryTrackMessage("ATTACHMENT_UPLOAD_ERROR", { error });
+      }
+    } catch (error) {
+      sentryTrackError(error);
+    }
+  }
+}

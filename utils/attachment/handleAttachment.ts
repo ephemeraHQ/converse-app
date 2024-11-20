@@ -1,10 +1,11 @@
 import RNFS from "react-native-fs";
+import { Nullable } from "../../types/general";
 import { getImageSize, isImageMimetype } from "../media";
 
 export const handleAttachment = async (
   messageId: string,
   filename: string,
-  mimeType?: string
+  mimeType: Nullable<string>
 ) => {
   const messageFolder = `${RNFS.DocumentDirectoryPath}/messages/${messageId}`;
   const attachmentPath = `${messageFolder}/${filename}`;
