@@ -19,6 +19,8 @@ import Avatar from "./Avatar";
 import { ConversationContextMenu } from "./ConversationContextMenu";
 import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
 import { GroupAvatarDumb } from "./GroupAvatar";
+import { getMessageContentType } from "@utils/xmtpRN/contentTypes";
+import logger from "@utils/logger";
 import { useGroupConversationListAvatarInfo } from "../features/conversation-list/useGroupConversationListAvatarInfo";
 import { IIconName } from "@design-system/Icon/Icon.types";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
@@ -28,9 +30,6 @@ import { actionSheetColors } from "@styles/colors";
 import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { prefetchConversationMessages } from "@queries/useConversationMessages";
-import { useToggleReadStatus } from "../features/conversation-list/hooks/useToggleReadStatus";
-import { useMessageText } from "../features/conversation-list/hooks/useMessageText";
-import { useConversationIsUnread } from "../features/conversation-list/hooks/useMessageIsUnread";
 
 type V3GroupConversationListItemProps = {
   group: GroupWithCodecsType;
@@ -41,6 +40,7 @@ type UseDataProps = {
 };
 
 const useData = ({ group }: UseDataProps) => {
+  // TODO Items
   const { name: routeName } = useRoute();
   const isBlockedChatView = routeName === "Blocked";
   const colorScheme = useColorScheme();
@@ -55,28 +55,50 @@ const useData = ({ group }: UseDataProps) => {
     setIsContextMenuVisible(true);
   }, []);
 
+  const groupExists = !!group;
   const topic = group?.topic;
   const timestamp = group?.lastMessage?.sentNs ?? 0;
 
-  const isUnread = useConversationIsUnread({
+  const isUnread = useMemo(() => {
+    if (!groupExists) return false;
+    if (topicsData[topic]?.status === "unread") {
+      return true;
+    }
+    if (group.lastMessage?.senderAddress === group?.client.inboxId) {
+      return false;
+    }
+    const readUntil = topicsData[topic]?.readUntil || 0;
+    return readUntil < (timestamp ?? 0);
+  }, [
+    groupExists,
     topicsData,
     topic,
-    lastMessage: group.lastMessage,
-    conversation: group,
+    group.lastMessage?.senderAddress,
+    group?.client.inboxId,
     timestamp,
-  });
+  ]);
 
   const { memberData } = useGroupConversationListAvatarInfo(
     currentAccount,
     group
   );
 
-  const toggleReadStatus = useToggleReadStatus({
-    setTopicsData,
-    topic,
-    isUnread,
-    currentAccount,
-  });
+  const toggleReadStatus = useCallback(() => {
+    const newStatus = isUnread ? "read" : "unread";
+    const timestamp = new Date().getTime();
+    setTopicsData({
+      [topic]: {
+        status: newStatus,
+        timestamp,
+      },
+    });
+    saveTopicsData(currentAccount, {
+      [topic]: {
+        status: newStatus,
+        timestamp,
+      },
+    });
+  }, [setTopicsData, topic, isUnread, currentAccount]);
 
   const closeContextMenu = useCallback((openConversationOnClose = false) => {
     setIsContextMenuVisible(false);
@@ -234,7 +256,28 @@ const useData = ({ group }: UseDataProps) => {
     ]
   );
 
-  const messageText = useMessageText(group.lastMessage);
+  const messageText = useMemo(() => {
+    const lastMessage = group?.lastMessage;
+    if (!lastMessage) return "";
+    try {
+      const content = group?.lastMessage?.content();
+      const contentType = getMessageContentType(lastMessage.contentTypeId);
+      if (contentType === "groupUpdated") {
+        //  TODO: Update this
+        return "Group updated";
+      }
+      if (typeof content === "string") {
+        return content;
+      }
+      return group?.lastMessage?.fallback;
+    } catch (e) {
+      logger.error("Error getting message text", {
+        error: e,
+        contentTypeId: lastMessage?.contentTypeId,
+      });
+      return group?.lastMessage?.fallback;
+    }
+  }, [group?.lastMessage]);
 
   return {
     group,
@@ -273,7 +316,6 @@ const useUserInteractions = ({
   isBlockedChatView,
 }: UseUserInteractionsProps) => {
   const currentAccount = useCurrentAccount()!;
-
   const onPress = useCallback(() => {
     prefetchConversationMessages(currentAccount, topic);
     navigate("Conversation", {

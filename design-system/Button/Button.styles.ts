@@ -1,10 +1,6 @@
 import { TextStyle, ViewStyle } from "react-native";
 
-import {
-  Theme,
-  ThemedStyle,
-  flattenThemedStyles,
-} from "../../theme/useAppTheme";
+import { Theme, ThemedStyle } from "../../theme/useAppTheme";
 import { textPresets } from "./../Text/Text.presets";
 import { IButtonAction, IButtonSize, IButtonVariant } from "./Button.props";
 
@@ -47,10 +43,8 @@ export const getButtonViewStyle =
       alignItems: "center",
       borderRadius: borderRadius.sm,
       overflow: "hidden",
-      paddingVertical:
-        size === "md" || size === "sm" ? spacing.xxs : spacing.xs,
-      paddingHorizontal:
-        size === "md" || size === "sm" ? spacing.xs : spacing.sm,
+      paddingVertical: size === "md" ? spacing.xxs : spacing.xs,
+      paddingHorizontal: size === "md" ? spacing.xs : spacing.sm,
     };
 
     if (action === "primary") {
@@ -96,23 +90,12 @@ export const getButtonViewStyle =
   };
 
 export const getButtonTextStyle =
-  ({
-    size,
-    variant,
-    action,
-    pressed = false,
-    disabled = false,
-  }: IButtonStyleProps) =>
+  ({ variant, action, pressed = false, disabled = false }: IButtonStyleProps) =>
   (theme: Theme): TextStyle => {
     const { colors } = theme;
 
     const style: TextStyle = {
-      // ...(size === "sm" ? textPresets.title.flat(3) : textPresets.body.flat(3)),
-      ...flattenThemedStyles({
-        styles:
-          size === "sm" || size === "md" ? textPresets.small : textPresets.body,
-        theme,
-      }),
+      ...textPresets.body,
       textAlign: "center",
       flexShrink: 1,
       flexGrow: 0,

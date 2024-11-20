@@ -1,21 +1,19 @@
-import React, {
-  forwardRef,
-  Ref,
-  useCallback,
-  useImperativeHandle,
-  useRef,
-} from "react";
+import React, { forwardRef, Ref, useImperativeHandle, useRef } from "react";
 import { TextInput, TextStyle, ViewStyle } from "react-native";
 
-import { translate } from "@i18n";
-import { $globalStyles } from "@theme/styles";
-import { ThemedStyle, ThemedStyleArray, useAppTheme } from "@theme/useAppTheme";
+import { $globalStyles } from "../../theme/styles";
+import {
+  ThemedStyle,
+  ThemedStyleArray,
+  useAppTheme,
+} from "../../theme/useAppTheme";
 import { HStack } from "../HStack";
 import { Text } from "../Text/Text";
 import { textPresets } from "../Text/Text.presets";
 import { TouchableOpacity } from "../TouchableOpacity";
 import { VStack } from "../VStack";
 import { TextFieldProps } from "./TextField.props";
+import { translate } from "../../i18n";
 
 export const TextField = forwardRef(function TextField(
   props: TextFieldProps,
@@ -87,10 +85,10 @@ export const TextField = forwardRef(function TextField(
     !(label || labelTx) && $globalStyles.justifyCenter,
   ];
 
-  const onFocus = useCallback(() => {
+  function focusInput() {
     if (disabled) return;
     input.current?.focus();
-  }, [disabled]);
+  }
 
   useImperativeHandle(ref, () => input.current as TextInput);
 
@@ -98,16 +96,13 @@ export const TextField = forwardRef(function TextField(
     <TouchableOpacity
       activeOpacity={1}
       style={themed($containerStyles)}
-      onPress={onFocus}
+      onPress={focusInput}
       accessibilityState={{ disabled }}
     >
       <HStack style={themed($inputWrapperStyles)}>
         {!!LeftAccessory && (
           <LeftAccessory
-            style={themed([
-              $leftAccessoryStyle,
-              TextInputProps.multiline && { alignItems: "flex-start" },
-            ])}
+            style={themed($leftAccessoryStyle)}
             status={status}
             editable={!disabled}
             multiline={TextInputProps.multiline ?? false}

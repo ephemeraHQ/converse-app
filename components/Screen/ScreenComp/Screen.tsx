@@ -5,8 +5,6 @@ import { ScrollView, View, ViewStyle } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { VStack } from "../../../design-system/VStack";
-import { useAppTheme } from "../../../theme/useAppTheme";
 import {
   isNonScrolling,
   useAutoPreset,
@@ -17,6 +15,9 @@ import {
   IScreenProps,
   ScrollScreenProps,
 } from "./Screen.props";
+import { VStack } from "../../../design-system/VStack";
+import { spacing } from "../../../theme";
+import { useAppTheme } from "../../../theme/useAppTheme";
 
 function ScreenWithoutScrolling(props: IScreenProps) {
   const { style, contentContainerStyle, children } = props;
@@ -29,7 +30,6 @@ function ScreenWithoutScrolling(props: IScreenProps) {
 
 function ScreenWithScrolling(props: IScreenProps) {
   const insets = useSafeAreaInsets();
-  const { theme } = useAppTheme();
 
   const {
     children,
@@ -38,7 +38,7 @@ function ScreenWithScrolling(props: IScreenProps) {
     ScrollViewProps,
     keyboardOffset = insets.bottom +
       // By default we never want the input hugging the keyboard
-      theme.spacing.xs,
+      spacing.xs,
     style,
   } = props as ScrollScreenProps;
 

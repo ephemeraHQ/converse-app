@@ -2,14 +2,14 @@ import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
-import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@theme/useAppTheme";
 import {
   getPreferredAvatar,
   getPreferredName,
   getProfile,
 } from "@utils/profile";
 import { memo, useCallback, useMemo } from "react";
-import { TouchableHighlight, ViewStyle } from "react-native";
+import { StyleSheet, TouchableHighlight } from "react-native";
 
 import { MessageToDisplay } from "../Message";
 import {
@@ -28,7 +28,8 @@ const MAX_REACTION_EMOJIS_SHOWN = 3;
 
 export const ChatMessageReactions = memo(
   ({ message, reactions }: Props) => {
-    const { themed } = useAppTheme();
+    const styles = useStyles();
+    const { theme } = useAppTheme();
     const userAddress = useCurrentAccount();
 
     const rolledUpReactions = useMessageReactionsRolledUp({
@@ -45,10 +46,7 @@ export const ChatMessageReactions = memo(
     return (
       <HStack
         style={[
-          {
-            flexDirection: "row",
-            flexWrap: "wrap",
-          },
+          styles.reactionsWrapper,
           message.fromMe && { justifyContent: "flex-end" },
         ]}
       >
@@ -60,11 +58,14 @@ export const ChatMessageReactions = memo(
         >
           <VStack
             style={[
-              themed($reactionButton),
-              rolledUpReactions.userReacted && themed($reactionButtonActive),
+              styles.reactionButton,
+              rolledUpReactions.userReacted && {
+                borderColor: theme.colors.fill.minimal,
+                backgroundColor: theme.colors.fill.minimal,
+              },
             ]}
           >
-            <HStack style={themed($emojiContainer)}>
+            <HStack style={styles.emojiContainer}>
               {rolledUpReactions.preview
                 .slice(0, MAX_REACTION_EMOJIS_SHOWN)
                 .map((reaction, index) => (
@@ -72,7 +73,7 @@ export const ChatMessageReactions = memo(
                 ))}
             </HStack>
             {rolledUpReactions.totalCount > 1 && (
-              <Text style={themed($reactorCount)}>
+              <Text style={styles.reactorCount}>
                 {rolledUpReactions.totalCount}
               </Text>
             )}
@@ -173,33 +174,31 @@ const useMessageReactionsRolledUp = (arg: {
   }, [reactions, userAddress, membersSocials]);
 };
 
-const $reactionButton: ThemedStyle<ViewStyle> = ({
-  colors,
-  spacing,
-  borderRadius,
-  borderWidth,
-}) => ({
-  flexDirection: "row",
-  alignItems: "center",
-  paddingHorizontal: spacing.xs,
-  paddingVertical: spacing.xxs,
-  borderRadius: borderRadius.sm,
-  borderWidth: borderWidth.sm,
-  borderColor: colors.border.subtle,
-});
+const useStyles = () => {
+  const { theme } = useAppTheme();
 
-const $reactionButtonActive: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  borderColor: colors.fill.minimal,
-  backgroundColor: colors.fill.minimal,
-});
-
-const $emojiContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  flexDirection: "row",
-  flexWrap: "wrap",
-  gap: spacing.xxxs,
-});
-
-const $reactorCount: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  marginLeft: spacing.xxxs,
-  color: colors.text.secondary,
-});
+  return StyleSheet.create({
+    reactionsWrapper: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+    },
+    reactionButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: theme.spacing.xs,
+      paddingVertical: theme.spacing.xxs,
+      borderRadius: theme.borderRadius.sm,
+      borderWidth: theme.borderWidth.sm,
+      borderColor: theme.colors.border.subtle,
+    },
+    emojiContainer: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: theme.spacing.xxxs,
+    },
+    reactorCount: {
+      marginLeft: theme.spacing.xxxs,
+      color: theme.colors.text.secondary,
+    },
+  });
+};

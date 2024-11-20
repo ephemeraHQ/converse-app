@@ -28,14 +28,15 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
 
-import { Snackbars } from "@components/Snackbar/Snackbars";
 import { xmtpEngine } from "./components/XmtpEngine";
 import config from "./config";
 import {
   TEMPORARY_ACCOUNT_NAME,
   useAccountsStore,
 } from "./data/store/accountsStore";
+import { useAppStore } from "./data/store/appStore";
 import { setAuthStatus } from "./data/store/authStore";
+import { useSelect } from "./data/store/storeHelpers";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
@@ -140,7 +141,6 @@ export default function AppWithProviders() {
                     <BottomSheetModalProvider>
                       <PortalProvider>
                         <App />
-                        <Snackbars />
                       </PortalProvider>
                     </BottomSheetModalProvider>
                   </GestureHandlerRootView>

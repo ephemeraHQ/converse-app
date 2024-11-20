@@ -2,28 +2,40 @@ package com.converse.xmtp
 
 import android.content.Context
 import android.util.Log
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.beust.klaxon.Klaxon
 
 import com.converse.*
 import com.converse.PushNotificationsService.Companion.TAG
+import android.util.Base64
+import android.util.Base64.NO_WRAP
+import androidx.core.app.Person
 import com.google.firebase.messaging.RemoteMessage
-import computeSpamScoreDmWelcome
+import computeSpamScore
 import computeSpamScoreGroupMessage
 import computeSpamScoreGroupWelcome
-import isConversationAllowed
-import isConversationBlocked
-
+import expo.modules.notifications.service.delegates.encodedInBase64
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
 import org.xmtp.android.library.Client
+import org.xmtp.android.library.ConsentState
 import org.xmtp.android.library.Conversation
 import org.xmtp.android.library.DecodedMessage
+import org.xmtp.android.library.Group
 import org.xmtp.android.library.codecs.Reaction
 import org.xmtp.android.library.codecs.RemoteAttachment
 import org.xmtp.android.library.codecs.Reply
+import org.xmtp.android.library.messages.Envelope
+import org.xmtp.proto.keystore.api.v1.Keystore
 import org.xmtp.proto.message.api.v1.MessageApiOuterClass
-
 import org.xmtp.proto.message.contents.Content
-
+import java.util.HashMap
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 data class NotificationDataResult(
     val title: String = "",
@@ -43,60 +55,148 @@ data class DecodedMessageResult(
     val id: String? = null
 )
 
-suspend fun handleV3Message(
+suspend fun handleNewConversationFirstMessage(
     appContext: Context,
     xmtpClient: Client,
-    envelope: MessageApiOuterClass.Envelope,
-    remoteMessage: RemoteMessage,
-): NotificationDataResult {
-    val conversation = xmtpClient.findConversationByTopic(envelope.contentTopic)
-    if (conversation == null) {
-        Log.d("PushNotificationsService", "No conversation found for ${envelope.contentTopic}")
-        return NotificationDataResult()
-    }
-    sentryTrackMessage(
-        "[NotificationExtension] Found conversation",
-        mapOf()
-    )
-
-    conversation.sync()
-
-    sentryTrackMessage(
-        "[NotificationExtension] Done syncing group",
-        mapOf()
-    )
-
-    val decodedMessage = conversation.processMessage(envelope.message.toByteArray()).decode()
-    when (conversation) {
-        is Conversation.Group -> {
-            // Handle the Group case
-            return handleGroupMessage(appContext, conversation, decodedMessage, xmtpClient, remoteMessage)
-        }
-        is Conversation.Dm -> {
-            // Handle the Dm case
-            return handleDmMessage(appContext, conversation, decodedMessage, xmtpClient, remoteMessage)
-        }
-    }
-}
-
-suspend fun handleDmMessage(
-    appContext: Context,
-    conversation: Conversation.Dm,
-    decodedMessage: DecodedMessage,
-    xmtpClient: Client,
+    conversation: Conversation,
     remoteMessage: RemoteMessage
 ): NotificationDataResult {
-// For now, use the conversation member linked address as "senderAddress"
-    val dm = conversation.dm
-    // @todo => make inboxId a first class citizen
-    dm.members().firstOrNull { it.inboxId == decodedMessage.senderAddress }?.addresses?.get(0)?.let { senderAddress ->
-        decodedMessage.senderAddress = senderAddress
+
+    var shouldShowNotification = false
+    var attempts = 0
+    var messageId: String? = null
+    var body = ""
+
+    while (attempts < 5) {
+        try {
+            val messages = conversation.messages(limit = 1, direction = MessageApiOuterClass.SortDirection.SORT_DIRECTION_ASCENDING)
+            if (messages.isNotEmpty()) {
+                val message = messages[0]
+                messageId = message.id
+                var conversationContext: ConversationContext? = null
+                val contentType = getContentTypeString(message.encodedContent.type)
+
+                var messageContent: String? = null
+                if (contentType.startsWith("xmtp.org/text:")) {
+                    messageContent = message.encodedContent.content.toStringUtf8()
+                }
+
+                val mmkv = getMmkv(appContext)
+                var apiURI = mmkv?.decodeString("api-uri")
+                if (apiURI == null) {
+                    apiURI = getAsyncStorage("api-uri")
+                }
+
+                val spamScore = computeSpamScore(
+                    address = conversation.peerAddress,
+                    message = messageContent,
+                    contentType = contentType,
+                    appContext = appContext,
+                    apiURI = apiURI
+                )
+
+                when (conversation) {
+                    is Conversation.V1 -> {
+                        // Nothing to do
+                    }
+                    is Conversation.V2 -> {
+                        val conversationV2 = conversation.conversationV2
+
+                        conversationContext = ConversationContext(
+                            conversationV2.context.conversationId,
+                            conversationV2.context.metadataMap
+                        )
+
+                        // Save conversation and its spamScore to mmkv
+                        saveConversationToStorage(
+                            appContext,
+                            xmtpClient.address,
+                            conversationV2.topic,
+                            conversationV2.peerAddress,
+                            conversationV2.createdAt.time,
+                            conversationContext,
+                            spamScore,
+                        )
+                    }
+                    else -> {
+                        // Nothing to do (group)
+                    }
+                }
+
+                val decodedMessageResult = handleMessageByContentType(
+                    appContext,
+                    message,
+                    xmtpClient,
+                )
+
+                if (decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore) {
+                    // Drop the message
+                    Log.d(TAG, "Not showing a notification")
+                } else if (decodedMessageResult.content != null) {
+                    shouldShowNotification = true
+                    body = decodedMessageResult.content
+                }
+
+                if (spamScore >= 1) {
+                    Log.d(TAG, "Not showing a notification because considered spam")
+                    shouldShowNotification = false
+                } else {
+                    val pushToken = getKeychainValue("PUSH_TOKEN")
+
+                    if (apiURI != null && pushToken !== null) {
+                        Log.d(TAG, "Subscribing to new topic at api: $apiURI")
+                        xmtpClient.conversations.importTopicData(conversation.toTopicData())
+                        val request = Keystore.GetConversationHmacKeysRequest.newBuilder().addTopics(conversation.topic).build()
+                        val hmacKeys = xmtpClient.conversations.getHmacKeys(request)
+                        var conversationHmacKeys  = hmacKeys.hmacKeysMap[conversation.topic]?.let {
+                            Base64.encodeToString(it.toByteArray(), NO_WRAP)
+                        }
+                        subscribeToTopic(appContext, apiURI, xmtpClient.address, pushToken, conversation.topic, conversationHmacKeys)
+                        shouldShowNotification = true
+                    }
+                }
+                break
+            } else {
+                Log.d(TAG, "No message found in conversation, for now.")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching messages: $e")
+            break
+        }
+
+        // Wait for 4 seconds before the next attempt
+        delay(4000)
+
+        attempts++
     }
+
+    return NotificationDataResult(
+        title = shortAddress(conversation.peerAddress),
+        body = body,
+        remoteMessage = remoteMessage,
+        messageId = messageId,
+        shouldShowNotification = shouldShowNotification
+    )
+}
+
+suspend fun handleOngoingConversationMessage(
+    appContext: Context,
+    xmtpClient: Client,
+    envelope: Envelope,
+    remoteMessage: RemoteMessage,
+): NotificationDataResult {
+    val conversation = getPersistedConversation(appContext, xmtpClient, envelope.contentTopic)
+        ?: run {
+            Log.d("PushNotificationsService", "No conversation found for ${envelope.contentTopic}")
+            return NotificationDataResult()
+        }
+
+    val message = conversation.decode(envelope)
     var conversationTitle = ""
 
     val decodedMessageResult = handleMessageByContentType(
         appContext,
-        decodedMessage,
+        message,
         xmtpClient,
     )
 
@@ -134,17 +234,35 @@ suspend fun handleDmMessage(
 
 suspend fun handleGroupMessage(
     appContext: Context,
-    convoGroup: Conversation.Group,
-    decodedMessage: DecodedMessage,
     xmtpClient: Client,
-    remoteMessage: RemoteMessage
+    envelope: Envelope,
+    remoteMessage: RemoteMessage,
 ): NotificationDataResult {
-// For now, use the conversation member linked address as "senderAddress"
-    val group = convoGroup.group
+    val group = xmtpClient.findGroup(getV3IdFromTopic(envelope.contentTopic))
+    if (group == null) {
+        Log.d("PushNotificationsService", "No group found for ${envelope.contentTopic}")
+        return NotificationDataResult()
+    }
+    sentryTrackMessage(
+        "[NotificationExtension] Found group",
+        mapOf()
+    )
+
+    group.sync()
+
+    sentryTrackMessage(
+        "[NotificationExtension] Done syncing group",
+        mapOf()
+    )
+
+    val decodedMessage = group.processMessage(envelope.message.toByteArray()).decode()
+
+    // For now, use the group member linked address as "senderAddress"
     // @todo => make inboxId a first class citizen
     group.members().firstOrNull { it.inboxId == decodedMessage.senderAddress }?.addresses?.get(0)?.let { senderAddress ->
         decodedMessage.senderAddress = senderAddress
     }
+
     val decodedMessageResult = handleMessageByContentType(
         appContext,
         decodedMessage,
@@ -353,10 +471,10 @@ fun getJsonReaction(decodedMessage: DecodedMessage): String {
 }
 
 
-suspend fun handleV3Welcome(
+suspend fun handleGroupWelcome(
     appContext: Context,
     xmtpClient: Client,
-    conversation: Conversation,
+    group: Group,
     remoteMessage: RemoteMessage
 ): NotificationDataResult {
     var shouldShowNotification = false
@@ -366,30 +484,11 @@ suspend fun handleV3Welcome(
         if (apiURI == null) {
             apiURI = getAsyncStorage("api-uri")
         }
-        xmtpClient.syncConsent()
-        val consentList = xmtpClient.preferences.consentList
-        var spamScore = 1.0
-        when (conversation) {
-            is Conversation.Group -> {
-                // Handle the Group case
-                spamScore =
-                    computeSpamScoreGroupWelcome(appContext, xmtpClient, conversation.group, apiURI)
-            }
-
-            is Conversation.Dm -> {
-                // Handle the Dm case
-                spamScore = computeSpamScoreDmWelcome(
-                    appContext,
-                    xmtpClient,
-                    conversation.dm,
-                    apiURI
-                )
-            }
-        }
+        val spamScore = computeSpamScoreGroupWelcome(appContext, xmtpClient, group, apiURI)
         if (spamScore < 0) { // Message is going to main inbox
             // consent list loaded in computeSpamScoreGroupWelcome
-            val groupAllowed = isConversationAllowed(conversation, consentList)
-            val groupDenied = isConversationBlocked(conversation, consentList)
+            val groupAllowed = xmtpClient.contacts.isGroupAllowed(groupId = group.id)
+            val groupDenied = xmtpClient.contacts.isGroupDenied(groupId = group.id)
             // If group is already consented (either way) then don't show a notification for welcome as this will likely be a second+ installation
             if (!groupAllowed && !groupDenied) {
                 shouldShowNotification = true
@@ -405,31 +504,14 @@ suspend fun handleV3Welcome(
     } catch (e: Exception) {
 
     }
-    conversation.sync()
-    when (conversation) {
-        is Conversation.Group -> {
-            // Handle the Group case
-            return NotificationDataResult(
-                title = conversation.group.name,
-                body = "You have been added to a new group",
-                remoteMessage = remoteMessage,
-                messageId = "welcome-${conversation.topic}",
-                shouldShowNotification = shouldShowNotification
-            )
-        }
-        is Conversation.Dm -> {
-            // TODO:
-            // Handle the Dm case
-            return NotificationDataResult(
-                title = conversation.dm.peerInboxId,
-                body = "You have a new DM",
-                remoteMessage = remoteMessage,
-                messageId = "welcome-${conversation.topic}",
-                shouldShowNotification = shouldShowNotification
-            )
-        }
-    }
-
+    group.sync()
+    return NotificationDataResult(
+        title = group.name,
+        body = "You have been added to a new group",
+        remoteMessage = remoteMessage,
+        messageId = "welcome-${group.topic}",
+        shouldShowNotification = shouldShowNotification
+    )
 }
 
 fun isGroupMessageFromMe(xmtpClient: Client, messageId: String): Boolean {

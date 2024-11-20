@@ -18,7 +18,11 @@ import {
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
-import { useAppTheme } from "@theme/useAppTheme";
+import { getPreferredAvatar } from "@utils/profile/getPreferredAvatar";
+import { getPreferredName } from "@utils/profile/getPreferredName";
+import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
+import { getProfile } from "@utils/profile/getProfile";
+import { shortAddress } from "@utils/strings/shortAddress";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Avatar from "../components/Avatar";
 import Button from "../components/Button/Button";
@@ -30,12 +34,8 @@ import {
   useCurrentAccount,
   useProfilesStore,
 } from "../data/store/accountsStore";
-import { shortAddress } from "@utils/strings/shortAddress";
+import { spacing } from "../theme/spacing";
 import { NavigationParamList } from "./Navigation/Navigation";
-import { getProfile } from "@utils/profile/getProfile";
-import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
-import { getPreferredName } from "@utils/profile/getPreferredName";
-import { getPreferredAvatar } from "@utils/profile/getPreferredAvatar";
 
 const ShareProfileContent = ({
   userAddress,
@@ -193,8 +193,6 @@ export default function ShareProfileScreen({
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
-  const { theme } = useAppTheme();
-
   return StyleSheet.create({
     shareProfile: {
       flex: 1,
@@ -245,7 +243,7 @@ const useStyles = () => {
       flex: 1,
       justifyContent: "flex-end",
       alignItems: "center",
-      paddingHorizontal: theme.spacing.lg,
+      paddingHorizontal: spacing.lg,
     },
     shareButtonContainerCompact: {
       flex: 0,

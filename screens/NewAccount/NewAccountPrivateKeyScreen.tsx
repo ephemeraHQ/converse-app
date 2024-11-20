@@ -7,17 +7,15 @@ import { Button } from "../../design-system/Button/Button";
 import { VStack } from "../../design-system/VStack";
 import { translate } from "../../i18n";
 import { useRouter } from "../../navigation/useNavigation";
+import { spacing } from "../../theme";
 import { sentryTrackError } from "../../utils/sentry";
 import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
 import {
   PrivateKeyInput,
   useLoginWithPrivateKey,
 } from "../Onboarding/OnboardingPrivateKeyScreen";
-import { useAppTheme } from "@theme/useAppTheme";
 
 export const NewAccountPrivateKeyScreen = memo(function () {
-  const { theme } = useAppTheme();
-
   const { loading, loginWithPrivateKey } = useLoginWithPrivateKey();
   const [privateKey, setPrivateKey] = useState("");
 
@@ -50,11 +48,11 @@ export const NewAccountPrivateKeyScreen = memo(function () {
         </NewAccountPictoTitleSubtitle.Subtitle>
       </NewAccountPictoTitleSubtitle.Container>
 
-      <VStack style={{ rowGap: theme.spacing.md }}>
+      <VStack style={{ rowGap: spacing.md }}>
         <PrivateKeyInput value={privateKey} onChange={setPrivateKey} />
         <VStack
           style={{
-            rowGap: theme.spacing.xs,
+            rowGap: spacing.xs,
           }}
         >
           <Button

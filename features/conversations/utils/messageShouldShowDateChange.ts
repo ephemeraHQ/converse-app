@@ -2,8 +2,8 @@ import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 
 type MessageShouldShowDateChangePayload = {
-  message?: DecodedMessageWithCodecsType;
-  previousMessage?: DecodedMessageWithCodecsType;
+  message: DecodedMessageWithCodecsType | undefined;
+  previousMessage: DecodedMessageWithCodecsType | undefined;
 };
 
 export const messageShouldShowDateChange = ({

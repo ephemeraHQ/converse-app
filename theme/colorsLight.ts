@@ -2,7 +2,7 @@ import { darkPalette, lightPalette } from "./palette";
 
 export const colorsLight = {
   bubbles: {
-    bubble: darkPalette.dark4,
+    bubble: darkPalette.dark,
     bubbleAccent: lightPalette.accent,
     reply: darkPalette.dark4,
     nestedReply: lightPalette.alpha15,

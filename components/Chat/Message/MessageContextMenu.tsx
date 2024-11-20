@@ -1,24 +1,32 @@
+import { AnimatedBlurView } from "@components/AnimatedBlurView";
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
-import { BlurView } from "@design-system/BlurView";
-import { useAppTheme } from "@theme/useAppTheme";
-import { animations } from "@theme/animations";
+import { backgroundColor } from "@styles/colors";
+import { calculateMenuHeight } from "@utils/contextMenu/calculateMenuHeight";
 import {
-  MENU_GAP,
-  AUXILIARY_VIEW_GAP,
-} from "@design-system/ContextMenu/ContextMenu.constants";
-import { calculateMenuHeight } from "@design-system/ContextMenu/ContextMenu.utils";
+  AUXILIARY_VIEW_MIN_HEIGHT,
+  BACKDROP_DARK_BACKGROUND_COLOR,
+  BACKDROP_LIGHT_BACKGROUND_COLOR,
+  HOLD_ITEM_TRANSFORM_DURATION,
+  ITEM_WIDTH,
+  OUTTER_SPACING,
+  SIDE_MARGIN,
+  SPRING_CONFIGURATION,
+  STATUS_BAR_HEIGHT,
+} from "@utils/contextMenu/constants";
 import { ConversationContext } from "@utils/conversation";
 import React, { FC, memo, useEffect, useMemo } from "react";
 import {
   Platform,
   StyleSheet,
   TouchableWithoutFeedback,
+  useColorScheme,
   useWindowDimensions,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Portal } from "react-native-paper";
 import Animated, {
   SharedValue,
+  useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -54,23 +62,21 @@ const BackdropComponent: FC<{
   /* Portal is eating the context so passing down context values
     If it causes too many rerenders we could just pass down a
     few needed context values but painful to maintain */
-  const { theme } = useAppTheme();
   const conversationContext = useContext(ConversationContext);
   const activeValue = useSharedValue(false);
   const opacityValue = useSharedValue(0);
   const intensityValue = useSharedValue(0);
   const { height, width } = useWindowDimensions();
   const safeAreaInsets = useSafeAreaInsets();
-
-  const AUXILIARY_VIEW_MIN_HEIGHT = 210;
+  const styles = useStyles();
 
   useEffect(() => {
     activeValue.value = isActive;
     opacityValue.value = withTiming(isActive ? 1 : 0, {
-      duration: animations.contextMenuHoldDuration,
+      duration: HOLD_ITEM_TRANSFORM_DURATION,
     });
     intensityValue.value = withTiming(isActive ? 50 : 0, {
-      duration: animations.contextMenuHoldDuration,
+      duration: HOLD_ITEM_TRANSFORM_DURATION,
     });
   }, [activeValue, isActive, opacityValue, intensityValue]);
 
@@ -78,10 +84,84 @@ const BackdropComponent: FC<{
     return calculateMenuHeight(items.length);
   }, [items]);
 
-  // Attribution Panel + Emoji Picker
+  const animatedContainerProps = useAnimatedProps(() => {
+    return {
+      intensity: intensityValue.value,
+    };
+  });
+  const colorScheme = useColorScheme();
 
+  const animatedInnerContainerStyle = useAnimatedStyle(() => {
+    const backgroundColor =
+      colorScheme === "dark"
+        ? BACKDROP_DARK_BACKGROUND_COLOR
+        : BACKDROP_LIGHT_BACKGROUND_COLOR;
+
+    return { backgroundColor };
+  }, []);
+
+  // Attribution Panel + Emoji Picker
   const animatedAuxiliaryViewStyle = useAnimatedStyle(() => {
     const getTransformValue = () => {
+      if (itemRectY.value > AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top) {
+        const spacing = 16;
+        const totalHeight =
+          itemRectY.value +
+          itemRectHeight.value +
+          menuHeight +
+          spacing +
+          STATUS_BAR_HEIGHT +
+          safeAreaInsets.bottom;
+        const overflow = totalHeight - height;
+
+        if (overflow > 0) {
+          // If there is overflow, we need to move the bubble up
+          let adjustedTopTransform = -overflow; // Move up by the overflow amount
+          const topEdgeAfterAdjustment = itemRectY.value + adjustedTopTransform;
+
+          // Ensure the top of the bubble does not go above the top of the screen
+          if (topEdgeAfterAdjustment < safeAreaInsets.top) {
+            adjustedTopTransform = safeAreaInsets.top - itemRectY.value;
+          }
+
+          return adjustedTopTransform;
+        } else {
+          // No overflow, no adjustment needed
+          return 0;
+        }
+      } else {
+        return (
+          -1 *
+          (itemRectY.value - AUXILIARY_VIEW_MIN_HEIGHT - safeAreaInsets.top)
+        );
+      }
+    };
+    const tY = getTransformValue();
+    return {
+      position: "absolute",
+      // This allows the emoji picker to reach the selected message
+      bottom:
+        height -
+        Math.max(
+          itemRectY.value - OUTTER_SPACING + tY,
+          AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top
+        ),
+      height: Math.max(
+        itemRectY.value - itemRectHeight.value - safeAreaInsets.top + tY,
+        AUXILIARY_VIEW_MIN_HEIGHT
+      ),
+      width: width - 2 * SIDE_MARGIN,
+      left: fromMe ? undefined : itemRectX.value,
+      right: fromMe ? width - itemRectX.value - itemRectWidth.value : undefined,
+      marginRight: fromMe ? 0 : SIDE_MARGIN,
+      marginLeft: fromMe ? SIDE_MARGIN : 0,
+    };
+  });
+
+  // Context menu
+  const animatedMenuStyle = useAnimatedStyle(() => {
+    const getTransformValue = () => {
+      // Calculate the vertical position of the context menu
       const topTransform =
         // Y position of the message
         itemRectY.value +
@@ -90,77 +170,13 @@ const BackdropComponent: FC<{
         // Height of the context menu
         menuHeight +
         // Space between the message and the context menu
-        theme.spacing.xs +
+        OUTTER_SPACING +
         // Account for safe area at the bottom of the screen
         (safeAreaInsets?.bottom || 0);
 
       // Adjust positioning when message height exceeds half the screen
       if (itemRectHeight.value > height / 2) {
-        // Calculate offset based on whether reactions are present
-        const offset =
-          itemRectHeight.value > AUXILIARY_VIEW_MIN_HEIGHT
-            ? AUXILIARY_VIEW_MIN_HEIGHT
-            : safeAreaInsets.top;
-        return -itemRectY.value + offset;
-      } else if (
-        itemRectY.value >
-        AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top
-      ) {
-        // General case for shorter messages
-        return topTransform > height
-          ? height - topTransform - AUXILIARY_VIEW_GAP
-          : -AUXILIARY_VIEW_GAP;
-      } else {
-        // Short message near the top of the screen, requires downward adjustment
-        return (
-          -1 *
-          (itemRectY.value -
-            AUXILIARY_VIEW_MIN_HEIGHT -
-            safeAreaInsets.top +
-            AUXILIARY_VIEW_GAP -
-            theme.spacing.xs)
-        );
-      }
-    };
-
-    const tY = getTransformValue();
-    const transformAnimation = () =>
-      isActive
-        ? withSpring(tY, animations.contextMenuSpring)
-        : withTiming(0, { duration: animations.contextMenuHoldDuration });
-    return {
-      position: "absolute",
-      top: itemRectY.value,
-      left: fromMe ? undefined : itemRectX.value,
-      right: fromMe ? width - itemRectX.value - itemRectWidth.value : undefined,
-      transform: [
-        {
-          translateY: transformAnimation(),
-        },
-      ],
-    };
-  });
-
-  // Context menu
-
-  const animatedMenuStyle = useAnimatedStyle(() => {
-    const getTransformValue = () => {
-      // Calculate the vertical position of the menu (same as message)
-      const topTransform =
-        // Y position of the message
-        itemRectY.value +
-        // Height of the message
-        itemRectHeight.value +
-        // Height of the context menu
-        menuHeight +
-        // Add spacing between menu and message
-        theme.spacing.xs +
-        // Account for bottom safe area (messages aligned from bottom)
-        (safeAreaInsets?.bottom || 0);
-
-      // Use same logic as message positioning
-      if (itemRectHeight.value > height / 2) {
-        return height - topTransform - safeAreaInsets.bottom;
+        return height - topTransform;
       } else if (
         itemRectY.value >
         AUXILIARY_VIEW_MIN_HEIGHT + safeAreaInsets.top
@@ -168,13 +184,10 @@ const BackdropComponent: FC<{
         // General case for shorter messages
         return topTransform > height ? height - topTransform : 0;
       } else {
-        // Short message near the top of the screen
+        // Short message near the top of the screen, requires downward adjustment
         return (
           -1 *
-          (itemRectY.value -
-            theme.spacing.xs -
-            AUXILIARY_VIEW_MIN_HEIGHT -
-            safeAreaInsets.top)
+          (itemRectY.value - AUXILIARY_VIEW_MIN_HEIGHT - safeAreaInsets.top - 5)
         );
       }
     };
@@ -182,15 +195,14 @@ const BackdropComponent: FC<{
     const tY = getTransformValue();
     const transformAnimation = () =>
       isActive
-        ? withSpring(tY, animations.contextMenuSpring)
-        : withTiming(0, { duration: animations.contextMenuHoldDuration });
-
+        ? withSpring(tY, SPRING_CONFIGURATION)
+        : withTiming(0, { duration: HOLD_ITEM_TRANSFORM_DURATION });
     return {
       position: "absolute",
-      top: itemRectY.value + itemRectHeight.value + MENU_GAP,
+      top: itemRectY.value + itemRectHeight.value,
       left: fromMe ? undefined : itemRectX.value,
       right: fromMe ? width - itemRectX.value - itemRectWidth.value : undefined,
-      width: 180,
+      width: ITEM_WIDTH,
       transform: [
         {
           translateY: transformAnimation(),
@@ -200,8 +212,9 @@ const BackdropComponent: FC<{
   });
 
   // Message
-
   const animatedPortalStyle = useAnimatedStyle(() => {
+    const animateOpacity = () =>
+      withDelay(HOLD_ITEM_TRANSFORM_DURATION, withTiming(0, { duration: 0 }));
     const getTransformValue = () => {
       // Calculate the vertical position of the message bubble
       const topTransform =
@@ -212,7 +225,7 @@ const BackdropComponent: FC<{
         // Height of the context menu
         menuHeight +
         // Add spacing between menu and message
-        theme.spacing.xs +
+        OUTTER_SPACING +
         // Account for bottom safe area (messages aligned from bottom)
         (safeAreaInsets?.bottom || 0);
 
@@ -230,7 +243,7 @@ const BackdropComponent: FC<{
         return (
           -1 *
           (itemRectY.value -
-            theme.spacing.xs -
+            OUTTER_SPACING -
             AUXILIARY_VIEW_MIN_HEIGHT -
             safeAreaInsets.top)
         );
@@ -240,18 +253,15 @@ const BackdropComponent: FC<{
     const tY = getTransformValue();
     const transformAnimation = () =>
       isActive
-        ? withSpring(tY, animations.contextMenuSpring)
-        : withTiming(-0.1, { duration: animations.contextMenuHoldDuration });
-
+        ? withSpring(tY, SPRING_CONFIGURATION)
+        : withTiming(-0.1, { duration: HOLD_ITEM_TRANSFORM_DURATION });
     return {
       position: "absolute",
       top: itemRectY.value,
       left: itemRectX.value,
       height: itemRectHeight.value,
       width: itemRectWidth.value,
-      opacity: withTiming(isActive ? 1 : 0, {
-        duration: animations.contextMenuHoldDuration,
-      }),
+      opacity: isActive ? 1 : animateOpacity(),
       transform: [
         {
           translateY: transformAnimation(),
@@ -271,10 +281,16 @@ const BackdropComponent: FC<{
     <Portal>
       {/* Portal is eating the context so passing down context values */}
       <ConversationContext.Provider value={conversationContext}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <BlurView isAbsolute>
+        <GestureHandlerRootView style={styles.gestureHandlerContainer}>
+          <AnimatedBlurView
+            tint="default"
+            style={styles.flex}
+            animatedProps={animatedContainerProps}
+          >
             <TouchableWithoutFeedback onPress={onClose}>
-              <Animated.View style={StyleSheet.absoluteFill}>
+              <Animated.View
+                style={[StyleSheet.absoluteFill, animatedInnerContainerStyle]}
+              >
                 <Animated.View style={animatedPortalStyle}>
                   {children}
                 </Animated.View>
@@ -282,25 +298,37 @@ const BackdropComponent: FC<{
                   {auxiliaryView}
                 </Animated.View>
                 <Animated.View style={animatedMenuStyle}>
-                  <TableView
-                    items={items}
-                    style={{
-                      width: 180,
-                      backgroundColor:
-                        Platform.OS === "android"
-                          ? theme.colors.background.raised
-                          : undefined,
-                      borderRadius: Platform.OS === "android" ? 10 : undefined,
-                    }}
-                  />
+                  <TableView style={styles.table} items={items} />
                 </Animated.View>
               </Animated.View>
             </TouchableWithoutFeedback>
-          </BlurView>
+          </AnimatedBlurView>
         </GestureHandlerRootView>
       </ConversationContext.Provider>
     </Portal>
   );
+};
+
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    container: {
+      ...StyleSheet.absoluteFillObject,
+      zIndex: 0,
+    },
+    gestureHandlerContainer: {
+      flex: 1,
+    },
+    flex: {
+      flex: 1,
+    },
+    table: {
+      width: ITEM_WIDTH,
+      backgroundColor:
+        Platform.OS === "android" ? backgroundColor(colorScheme) : undefined,
+      borderRadius: Platform.OS === "android" ? 10 : undefined,
+    },
+  });
 };
 
 export const MessageContextMenu = memo(BackdropComponent);

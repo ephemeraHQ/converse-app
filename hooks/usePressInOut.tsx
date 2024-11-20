@@ -1,15 +1,13 @@
 import { useCallback } from "react";
 import {
-  useAnimatedReaction,
   useSharedValue,
+  useAnimatedReaction,
   withTiming,
 } from "react-native-reanimated";
 
-import { useAppTheme } from "@theme/useAppTheme";
+import { timing } from "../theme";
 
 export function usePressInOut() {
-  const { theme } = useAppTheme();
-
   const pressedInAV = useSharedValue(0);
 
   const hasTriggeredHapticAV = useSharedValue(false);
@@ -24,12 +22,12 @@ export function usePressInOut() {
   );
 
   const handlePressIn = useCallback(() => {
-    pressedInAV.value = withTiming(1, { duration: theme.timing.veryFast });
-  }, [pressedInAV, theme]);
+    pressedInAV.value = withTiming(1, { duration: timing.veryFast });
+  }, [pressedInAV]);
 
   const handlePressOut = useCallback(() => {
-    pressedInAV.value = withTiming(0, { duration: theme.timing.veryFast });
-  }, [pressedInAV, theme]);
+    pressedInAV.value = withTiming(0, { duration: timing.veryFast });
+  }, [pressedInAV]);
 
   return {
     pressedInAV,

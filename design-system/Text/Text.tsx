@@ -1,6 +1,5 @@
 import React from "react";
 import { Text as RNText, StyleProp, TextStyle } from "react-native";
-
 import { translate } from "../../i18n";
 import { useAppTheme } from "../../theme/useAppTheme";
 import { ITextProps } from "./Text.props";
@@ -16,7 +15,6 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     text,
     children,
     style: styleProp,
-    preset,
     ...rest
   } = props;
 
@@ -30,11 +28,16 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     size,
     color,
     style: styleProp,
-    preset,
+    ...props,
   });
 
   return (
-    <RNText ref={ref} {...rest} style={styles}>
+    <RNText
+      ref={ref}
+      style={styles}
+      suppressHighlighting={true} // Don't like the default highlight on press
+      {...rest}
+    >
       {content}
     </RNText>
   );

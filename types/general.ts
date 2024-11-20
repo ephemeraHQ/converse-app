@@ -74,8 +74,3 @@ export type MyReactNode =
   | (() => ReactElement)
   | number
   | string;
-
-export type RequireExactlyOne<T, Keys extends keyof T = keyof T> = {
-  [K in Keys]: Required<Pick<T, K>> & { [P in Exclude<Keys, K>]?: undefined };
-}[Keys] &
-  Omit<T, Keys>;

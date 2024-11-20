@@ -1,7 +1,7 @@
 import ClickableText from "@components/ClickableText";
-import { inversePrimaryColor, textPrimaryColor } from "@styles/colors";
+import { useAppTheme } from "@theme/useAppTheme";
 import { useMemo } from "react";
-import { StyleSheet, useColorScheme, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 type TextMessageProps = {
   fromMe: boolean;
@@ -31,7 +31,8 @@ export const TextMessage = ({
 };
 
 const useStyles = () => {
-  const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
+
   return useMemo(
     () =>
       StyleSheet.create({
@@ -40,17 +41,14 @@ const useStyles = () => {
           paddingVertical: 6,
         },
         messageText: {
-          color: textPrimaryColor(colorScheme),
           fontSize: 17,
         },
-        messageTextMe: {
-          color: inversePrimaryColor(colorScheme),
-        },
+        messageTextMe: {},
         allEmojisAndMaxThree: {
           fontSize: 64,
           paddingHorizontal: 0,
         },
       }),
-    [colorScheme]
+    [theme]
   );
 };

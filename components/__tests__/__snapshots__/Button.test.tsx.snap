@@ -66,13 +66,10 @@ exports[`Button Component Default (Android) Button renders correctly with danger
         undefined,
         [
           {
+            "0": [Function],
             "color": "#FFFFFF",
             "flexGrow": 0,
             "flexShrink": 1,
-            "fontFamily": "SFProText-Regular",
-            "fontSize": 16,
-            "fontWeight": 400,
-            "lineHeight": 20,
             "textAlign": "center",
             "zIndex": 2,
           },
@@ -172,13 +169,10 @@ exports[`Button Component Default (Android) Button renders correctly with picto 
         undefined,
         [
           {
+            "0": [Function],
             "color": "#FFFFFF",
             "flexGrow": 0,
             "flexShrink": 1,
-            "fontFamily": "SFProText-Regular",
-            "fontSize": 16,
-            "fontWeight": 400,
-            "lineHeight": 20,
             "textAlign": "center",
             "zIndex": 2,
           },
@@ -260,13 +254,10 @@ exports[`Button Component iOS Button renders correctly with primary variant 1`] 
         undefined,
         [
           {
+            "0": [Function],
             "color": "#FFFFFF",
             "flexGrow": 0,
             "flexShrink": 1,
-            "fontFamily": "SFProText-Regular",
-            "fontSize": 16,
-            "fontWeight": 400,
-            "lineHeight": 20,
             "textAlign": "center",
             "zIndex": 2,
           },

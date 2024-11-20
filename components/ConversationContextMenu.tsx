@@ -3,12 +3,15 @@ import TableView, { TableViewItemType } from "@components/TableView/TableView";
 import { Text } from "@design-system/Text";
 import { ConversationReadOnly } from "@screens/ConversationReadOnly";
 import { backgroundColor } from "@styles/colors";
-import { animations } from "@theme/animations";
 import {
+  AUXILIARY_VIEW_MIN_HEIGHT,
   BACKDROP_DARK_BACKGROUND_COLOR,
   BACKDROP_LIGHT_BACKGROUND_COLOR,
+  HOLD_ITEM_TRANSFORM_DURATION,
+  ITEM_WIDTH,
+  SIDE_MARGIN,
   contextMenuStyleGuide,
-} from "@design-system/ContextMenu/ContextMenu.constants";
+} from "@utils/contextMenu/constants";
 import React, { FC, memo, useCallback, useEffect } from "react";
 import {
   Platform,
@@ -30,7 +33,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { useAppTheme } from "@theme/useAppTheme";
 
 type ConversationContextMenuProps = {
   isVisible: boolean;
@@ -55,10 +57,10 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   useEffect(() => {
     activeValue.value = isVisible;
     opacityValue.value = withTiming(isVisible ? 1 : 0, {
-      duration: animations.contextMenuHoldDuration,
+      duration: HOLD_ITEM_TRANSFORM_DURATION,
     });
     intensityValue.value = withTiming(isVisible ? 50 : 0, {
-      duration: animations.contextMenuHoldDuration,
+      duration: HOLD_ITEM_TRANSFORM_DURATION,
     });
   }, [activeValue, isVisible, opacityValue, intensityValue]);
 
@@ -66,7 +68,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
 
   useEffect(() => {
     translateY.value = withTiming(isVisible ? 0 : height, {
-      duration: animations.contextMenuHoldDuration,
+      duration: HOLD_ITEM_TRANSFORM_DURATION,
     });
   }, [isVisible, translateY, height]);
 
@@ -92,7 +94,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   const closeMenu = useCallback(() => {
     translateY.value = withTiming(
       height,
-      { duration: animations.contextMenuHoldDuration },
+      { duration: HOLD_ITEM_TRANSFORM_DURATION },
       () => {
         runOnJS(onClose)();
       }
@@ -109,7 +111,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
           runOnJS(closeMenu)();
         } else {
           translateY.value = withTiming(0, {
-            duration: animations.contextMenuHoldDuration,
+            duration: HOLD_ITEM_TRANSFORM_DURATION,
           });
         }
       }),
@@ -161,9 +163,6 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
-
-  const { theme } = useAppTheme();
-
   return StyleSheet.create({
     overlay: {
       ...StyleSheet.absoluteFillObject,
@@ -184,11 +183,11 @@ const useStyles = () => {
     },
     previewContainer: {
       flex: 1,
-      margin: theme.spacing.md,
+      margin: SIDE_MARGIN,
       paddingBottom: contextMenuStyleGuide.spacing,
       overflow: "hidden",
       justifyContent: "flex-start",
-      minHeight: 210,
+      minHeight: AUXILIARY_VIEW_MIN_HEIGHT,
       backgroundColor: backgroundColor(colorScheme),
       borderRadius: 16,
     },
@@ -205,7 +204,7 @@ const useStyles = () => {
           : contextMenuStyleGuide.palette.common.black,
     },
     menuContainer: {
-      marginHorizontal: theme.spacing.md,
+      marginHorizontal: SIDE_MARGIN,
       minHeight: 300,
       borderRadius: 16,
       overflow: "hidden",
@@ -214,7 +213,7 @@ const useStyles = () => {
       flex: 1,
     },
     table: {
-      width: 180,
+      width: ITEM_WIDTH,
       backgroundColor:
         Platform.OS === "android" ? backgroundColor(colorScheme) : undefined,
       borderRadius: Platform.OS === "android" ? 10 : undefined,

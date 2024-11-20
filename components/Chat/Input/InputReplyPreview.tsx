@@ -10,8 +10,8 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { isAttachmentMessage } from "@utils/attachment/isAttachmentMessage";
+import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { getRelativeDateTime } from "../../../utils/date";
 import { getReadableProfile } from "../../../utils/str";
 import { isTransactionMessage } from "../../../utils/transaction";
@@ -20,9 +20,11 @@ import { MessageToDisplay } from "../Message/Message";
 
 export default function ChatInputReplyPreview({
   replyingToMessage,
+  replyingToMessageId,
   onDismiss,
 }: {
   replyingToMessage: MessageToDisplay;
+  replyingToMessageId: string;
   onDismiss: () => void;
 }) {
   const colorScheme = useColorScheme();
@@ -47,10 +49,10 @@ export default function ChatInputReplyPreview({
           {isAttachmentMessage(replyingToMessage.contentType)
             ? `📎 Media from ${getRelativeDateTime(replyingToMessage.sent)}`
             : isTransactionMessage(replyingToMessage.contentType)
-            ? `💸 Transaction from ${getRelativeDateTime(
-                replyingToMessage.sent
-              )}`
-            : replyingToMessage.content || replyingToMessage.contentFallback}
+              ? `💸 Transaction from ${getRelativeDateTime(
+                  replyingToMessage.sent
+                )}`
+              : replyingToMessage.content || replyingToMessage.contentFallback}
         </Text>
       </View>
       <TouchableOpacity

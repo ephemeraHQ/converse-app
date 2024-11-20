@@ -1,11 +1,11 @@
-import { useAppTheme } from "@theme/useAppTheme";
 import { memo } from "react";
+
+import { spacing } from "../../theme";
 import { Screen } from "../Screen/ScreenComp/Screen";
 import { IScreenProps } from "../Screen/ScreenComp/Screen.props";
 
 export const NewAccountScreenComp = memo(function (props: IScreenProps) {
   const { contentContainerStyle, ...restProps } = props;
-  const { theme } = useAppTheme();
 
   return (
     <Screen
@@ -13,7 +13,7 @@ export const NewAccountScreenComp = memo(function (props: IScreenProps) {
       safeAreaEdges={["bottom"]}
       contentContainerStyle={[
         {
-          paddingHorizontal: theme.spacing.md,
+          paddingHorizontal: spacing.md,
         },
         contentContainerStyle,
       ]}

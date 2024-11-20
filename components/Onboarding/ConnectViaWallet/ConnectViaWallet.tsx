@@ -8,6 +8,7 @@ import { ActivityIndicator } from "react-native";
 import { Center } from "../../../design-system/Center";
 import { VStack } from "../../../design-system/VStack";
 import { useRouter } from "../../../navigation/useNavigation";
+import { spacing } from "../../../theme";
 import { useAppTheme } from "../../../theme/useAppTheme";
 import { PictoTitleSubtitle } from "../../PictoTitleSubtitle";
 import { Terms } from "../Terms";
@@ -193,8 +194,8 @@ const ConnectViaWalletUI = memo(function ConnectViaWalletUI(props: object) {
       {showValueProps && <ValueProps />}
       <VStack
         style={{
-          rowGap: theme.spacing.sm,
-          marginTop: theme.spacing.lg,
+          rowGap: spacing.sm,
+          marginTop: spacing.lg,
         }}
       >
         <Button

@@ -9,6 +9,7 @@ export const iconRegistry: Record<IIconName, string> = {
   xmark: "xmark",
   "xmark.circle.fill": "xmark.circle.fill",
   plus: "plus",
+  "arrow.up": "arrow.up",
   "arrow.up.right": "arrow.up.right",
   "arrow.down": "arrow.down",
   link: "link",
@@ -64,7 +65,6 @@ export function Icon(props: IIconProps) {
   const { theme } = useAppTheme();
 
   const defaultSize = useMemo(() => theme.iconSize.lg, [theme]);
-
   const defaultColor = useMemo(() => theme.colors.fill.primary, [theme]);
 
   const {
@@ -80,7 +80,6 @@ export function Icon(props: IIconProps) {
   if (!icon && !picto) {
     throw new Error("Either 'icon' or 'picto' must be provided");
   }
-
   if (icon && picto) {
     logger.warn(
       "Both 'icon' and 'picto' provided, 'icon' will take precedence"
