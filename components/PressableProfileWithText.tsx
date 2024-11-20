@@ -30,9 +30,15 @@ const PressableProfileWithTextInner = ({
   }, [profileAddress, onPress]);
 
   const pattern = useMemo(
-    () => new RegExp(profileDisplay, "g"),
+    () =>
+      !!profileDisplay
+        ? new RegExp(profileDisplay, "g")
+        : // Small hack to make sure the text is not empty, otherwise the regex will match everything
+          // The library should handle this better and says it does, but it doesn't
+          new RegExp("profileDisplay", "g"),
     [profileDisplay]
   );
+
   const parseOptions = useMemo(
     () => [
       {
@@ -56,6 +62,7 @@ const PressableProfileWithTextInner = ({
       parse={parseOptions}
       pressableStyle={$pressableStyle}
       style={$textStyle}
+      // testID="pressable-profile-with-text"
     >
       {text}
     </ParsedText>
