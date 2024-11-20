@@ -9,7 +9,7 @@ export interface ISnackBarStore {
 }
 
 export const useSnackBarStore = create<ISnackBarStore>()(
-  subscribeWithSelector((set, get) => ({
+  subscribeWithSelector((set) => ({
     snackbars: [],
     showSnackbar: (snackbar) => {
       set((state) => ({
@@ -21,3 +21,6 @@ export const useSnackBarStore = create<ISnackBarStore>()(
     },
   }))
 );
+
+// Initialize store
+useSnackBarStore.getState();
