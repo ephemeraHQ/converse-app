@@ -11,11 +11,8 @@ import { useCallback, useMemo } from "react";
 import { StyleSheet, useColorScheme } from "react-native";
 
 import { MessageToDisplay } from "./Message/Message";
-import {
-  useInboxIdStore,
-  useProfilesStore,
-} from "../../data/store/accountsStore";
-import { getPreferredName, getProfile } from "../../utils/profile";
+import { useInboxIdStore, useProfilesStore } from "@data/store/accountsStore";
+import { getPreferredName, getProfile } from "@utils/profile";
 
 const inboxIdStoreSelectedKeys: (keyof InboxIdStoreType)[] = ["byInboxId"];
 const profilesStoreSelectedKeys: (keyof ProfilesStoreType)[] = ["profiles"];
@@ -28,6 +25,7 @@ export function ChatGroupUpdatedMessage({
   const { byInboxId } = useInboxIdStore(useSelect(inboxIdStoreSelectedKeys));
   const { profiles } = useProfilesStore(useSelect(profilesStoreSelectedKeys));
   // JSON Parsing is heavy so useMemo
+
   const parsedContent = useMemo(
     () => JSON.parse(message.content) as GroupUpdatedContent,
     [message.content]
@@ -117,9 +115,9 @@ export function ChatGroupUpdatedMessage({
 
   return (
     <VStack style={styles.textContainer}>
-      {membersActions.map((a) => (
+      {membersActions.map((a, index) => (
         <PressableProfileWithText
-          key={a.address}
+          key={index + a.address}
           text={a.content}
           profileDisplay={a.readableName}
           profileAddress={a.address}
