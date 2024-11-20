@@ -1,12 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import {
-  itemSeparatorColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "@styles/colors";
-import { AvatarSizes } from "@styles/sizes";
-import { Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
-
+import { Platform, View, ViewStyle, ImageStyle } from "react-native";
+import { useAppTheme, ThemedStyle } from "@theme/useAppTheme";
 import { ProfileSocials } from "@data/store/profilesStore";
 import {
   getPreferredAvatar,
@@ -16,6 +10,15 @@ import {
 import { shortAddress } from "@utils/str";
 import Avatar from "@components/Avatar";
 import { NavigationChatButton } from "./NavigationChatButton";
+import { Text } from "@design-system/Text";
+
+type ProfileSearchItemProps = {
+  address: string;
+  socials: ProfileSocials;
+  navigation?: NativeStackNavigationProp<any>;
+  groupMode?: boolean;
+  addToGroup?: (member: ProfileSocials & { address: string }) => void;
+};
 
 export function ProfileSearchItem({
   address,
@@ -23,14 +26,8 @@ export function ProfileSearchItem({
   navigation,
   groupMode,
   addToGroup,
-}: {
-  address: string;
-  socials: ProfileSocials;
-  navigation?: NativeStackNavigationProp<any>;
-  groupMode?: boolean;
-  addToGroup?: (member: ProfileSocials & { address: string }) => void;
-}) {
-  const styles = useStyles();
+}: ProfileSearchItemProps) {
+  const { theme, themed } = useAppTheme();
   const preferredName = getPreferredName(socials, address);
   const preferredAvatar = getPreferredAvatar(socials);
   const primaryNames = getPrimaryNames(socials);
@@ -40,27 +37,31 @@ export function ProfileSearchItem({
   ];
 
   return (
-    <View key={address} style={styles.container}>
-      <View style={styles.left}>
+    <View key={address} style={themed($container)}>
+      <View style={themed($left)}>
         <Avatar
           uri={preferredAvatar}
-          size={AvatarSizes.listItemDisplay}
-          style={styles.avatar}
+          size={theme.spacing["3xl"]}
+          style={themed($avatar)}
           name={preferredName}
         />
         <View>
-          <Text style={styles.title}>
+          <Text preset="bodyBold" style={{ marginBottom: theme.spacing.xs }}>
             {preferredName || shortAddress(address)}
           </Text>
           {primaryNamesDisplay.length > 0 && (
-            <Text numberOfLines={1} style={styles.text}>
+            <Text
+              preset="formLabel"
+              numberOfLines={1}
+              style={{ marginRight: theme.spacing.lg }}
+            >
               {primaryNamesDisplay.join(" | ")}
             </Text>
           )}
         </View>
       </View>
       {navigation && (
-        <View style={styles.right}>
+        <View style={themed($right)}>
           <NavigationChatButton
             navigation={navigation}
             address={address}
@@ -75,39 +76,30 @@ export function ProfileSearchItem({
   );
 }
 
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    container: {
-      borderBottomWidth: 0.5,
-      borderBottomColor: itemSeparatorColor(colorScheme),
-      paddingVertical: 16,
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    left: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    avatar: {
-      marginRight: 13,
-    },
-    right: {
-      justifyContent: "center",
-      marginLeft: Platform.OS === "ios" ? 30 : 0,
-    },
-    title: {
-      fontSize: 17,
-      fontWeight: "600",
-      color: textPrimaryColor(colorScheme),
-      marginBottom: 3,
-    },
-    text: {
-      fontSize: 15,
-      color: textSecondaryColor(colorScheme),
-      marginRight: 20,
-    },
-  });
-};
+const $container: ThemedStyle<ViewStyle> = ({
+  colors,
+  spacing,
+  borderWidth,
+}) => ({
+  borderBottomWidth: borderWidth.sm,
+  borderBottomColor: colors.border.subtle,
+  paddingVertical: spacing.base,
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+});
+
+const $left: ThemedStyle<ViewStyle> = () => ({
+  flex: 1,
+  flexDirection: "row",
+  alignItems: "center",
+});
+
+const $avatar: ThemedStyle<ImageStyle> = ({ spacing }) => ({
+  marginRight: spacing.sm,
+});
+
+const $right: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  justifyContent: "center",
+  marginLeft: Platform.OS === "ios" ? spacing.xl : 0,
+});
