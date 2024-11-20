@@ -10,7 +10,7 @@ import { useAnimatedStyle, withTiming } from "react-native-reanimated";
  * On Android, blur doesn't work
  */
 
-export const Backdrop = () => {
+export const SnackbarBackdrop = () => {
   const snackbars = useSnackbars();
 
   const { height: windowHeight } = useWindowDimensions();
@@ -25,6 +25,11 @@ export const Backdrop = () => {
       }),
     };
   }, [windowHeight, snackbars.length]);
+
+  // Don't render if there are no snackbars
+  if (snackbars.length === 0) {
+    return null;
+  }
 
   return (
     <AnimatedVStack
