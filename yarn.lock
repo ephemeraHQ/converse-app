@@ -8002,9 +8002,9 @@
     undici "^5.8.1"
 
 "@xmtp/react-native-sdk@^2.6.4":
-  version "2.6.4"
-  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-2.6.4.tgz#dad2f2b8b1f2e012857083ad2d86998e4abbd6e0"
-  integrity sha512-xOsWZjyepkpoOnIM4FynBzdq1UMiTSQfUvcfGrIwQcmTuvTAa3e2uCqd7/4syRbHR3ZDHDSvjThzQdOuOQf8xg==
+  version "2.8.4"
+  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-2.8.4.tgz#8b5ad7511532ddcd95a1b04550481307bc6c5c18"
+  integrity sha512-bz78axcaS+onx1WKUu0b3j5cR1oFK6ji+h3JW9WV6vEqMqM58K72c1s6mhw41yUyNuTAuOLxZBqNTcEIHezTAg==
   dependencies:
     "@ethersproject/bytes" "^5.7.0"
     "@msgpack/msgpack" "^3.0.0-beta2"

@@ -2,8 +2,9 @@ import { currentAccount } from "@data/store/accountsStore";
 import { resetNotifications } from "./resetNotifications";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import logger from "@utils/logger";
 
-const handleiOSNotification = async (
+const handleiOSForegroundNotification = async (
   notification: Notifications.Notification
 ) => {
   resetNotifications();
@@ -23,7 +24,7 @@ const handleiOSNotification = async (
   }
 };
 
-const handleDefaultNotification = async (
+const handleDefaultForegroundNotification = async (
   notification: Notifications.Notification
 ) => {
   resetNotifications();
@@ -43,13 +44,12 @@ const handleDefaultNotification = async (
   }
 };
 
-export const handleNotification = async (
+export const handleForegroundNotification = async (
   notification: Notifications.Notification
 ) => {
-  console.log("here1111 shouldShowNotificationForeground", notification);
-
+  logger.info("A NOTIFICATION WAS RECEIVED WHILE THE APP WAS FOREGROUNDED");
   return Platform.select({
-    ios: handleiOSNotification(notification),
-    default: handleDefaultNotification(notification),
+    ios: handleiOSForegroundNotification(notification),
+    default: handleDefaultForegroundNotification(notification),
   });
 };

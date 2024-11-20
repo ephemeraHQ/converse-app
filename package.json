@@ -210,6 +210,7 @@
     "walletsdk-ethos": "0.1.0-no-web3j",
     "web3": "^1.8.1",
     "web3.storage": "^4.5.5",
+    "zod": "^3.23.8",
     "zustand": "^4.4.7"
   },
   "devDependencies": {

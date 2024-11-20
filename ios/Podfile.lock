@@ -1739,6 +1739,11 @@ PODS:
     - Yoga
   - RNLocalize (3.0.2):
     - React-Core
+  - RNNotifee (9.1.2):
+    - React-Core
+    - RNNotifee/NotifeeCore (= 9.1.2)
+  - RNNotifee/NotifeeCore (9.1.2):
+    - React-Core
   - RNReactNativeSharedGroupPreferences (1.1.23):
     - React
   - RNReanimated (3.10.1):
@@ -1978,6 +1983,7 @@ DEPENDENCIES:
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNLocalize (from `../node_modules/react-native-localize`)
+  - "RNNotifee (from `../node_modules/@notifee/react-native`)"
   - RNReactNativeSharedGroupPreferences (from `../node_modules/react-native-shared-group-preferences`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
@@ -2269,6 +2275,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-gesture-handler"
   RNLocalize:
     :path: "../node_modules/react-native-localize"
+  RNNotifee:
+    :path: "../node_modules/@notifee/react-native"
   RNReactNativeSharedGroupPreferences:
     :path: "../node_modules/react-native-shared-group-preferences"
   RNReanimated:
@@ -2429,6 +2437,7 @@ SPEC CHECKSUMS:
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 20a4307fd21cbff339abfcfa68192f3f0a6a518b
   RNLocalize: dbea38dcb344bf80ff18a1757b1becf11f70cae4
+  RNNotifee: bc20a5e3d581f629db988075944fdd944d363dfe
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
   RNReanimated: d51431fd3597a8f8320319dce8e42cee82a5445f
   RNScreens: 30249f9331c3b00ae7cb7922e11f58b3ed369c07
