@@ -20,7 +20,7 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { needToShowNotificationsPermissions } from "./Onboarding.utils";
+import { useAppTheme } from "@theme/useAppTheme";
 import Avatar from "../../components/Avatar";
 import Button from "../../components/Button/Button";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
@@ -39,7 +39,6 @@ import { setAuthStatus } from "../../data/store/authStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { VStack } from "../../design-system/VStack";
 import { translate } from "../../i18n";
-import { spacing } from "../../theme";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
 import { uploadFile } from "../../utils/attachment";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
@@ -54,6 +53,7 @@ import {
   formatEphemeralUsername,
 } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";
+import { needToShowNotificationsPermissions } from "./Onboarding.utils";
 
 export type ProfileType = {
   avatar?: string;
@@ -65,6 +65,8 @@ export const OnboardingUserProfileScreen = (
   props: NativeStackScreenProps<NavigationParamList, "OnboardingUserProfile">
 ) => {
   const { navigation } = props;
+
+  const { theme } = useAppTheme();
 
   const colorScheme = useColorScheme();
 
@@ -165,7 +167,7 @@ export const OnboardingUserProfileScreen = (
 
       <VStack
         style={{
-          rowGap: spacing.sm,
+          rowGap: theme.spacing.sm,
         }}
       >
         <Text style={styles.p}>

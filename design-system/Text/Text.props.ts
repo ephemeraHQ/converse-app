@@ -1,9 +1,10 @@
 import { TextProps as RNTextProps, StyleProp, TextStyle } from "react-native";
 
+import { IColors } from "@theme/colorsLight";
+import { typography } from "@theme/typography";
+import { i18n, TxKeyPath } from "../../i18n";
 import { IPresets } from "./Text.presets";
 import { textSizeStyles } from "./Text.styles";
-import { i18n, TxKeyPath } from "../../i18n";
-import { IColors, typography } from "../../theme";
 
 export type ISizes = keyof typeof textSizeStyles;
 export type IWeights = keyof typeof typography.primary;
