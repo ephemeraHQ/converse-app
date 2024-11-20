@@ -79,11 +79,13 @@ export const OnboardingUserProfileScreen = (
 
   const handleContinue = useCallback(async () => {
     try {
-      await createOrUpdateProfile({ profile });
-      if (needToShowNotificationsPermissions()) {
-        navigation.push("OnboardingNotifications");
-      } else {
-        setAuthStatus("signedIn");
+      const { success } = await createOrUpdateProfile({ profile });
+      if (success) {
+        if (needToShowNotificationsPermissions()) {
+          navigation.push("OnboardingNotifications");
+        } else {
+          setAuthStatus("signedIn");
+        }
       }
     } catch (error) {
       sentryTrackError(error);
@@ -280,12 +282,27 @@ export function useAddPfp() {
   return { addPFP, asset };
 }
 
+type CreateOrUpdateProfileError = {
+  success: false;
+  errorMessage: string;
+};
+
+type CreateOrUpdateProfileSuccess = {
+  success: true;
+};
+
+type CreateOrUpdateProfileResponse =
+  | CreateOrUpdateProfileError
+  | CreateOrUpdateProfileSuccess;
+
 export function useCreateOrUpdateProfileInfo() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
 
   const createOrUpdateProfile = useCallback(
-    async (args: { profile: ProfileType }) => {
+    async (args: {
+      profile: ProfileType;
+    }): Promise<CreateOrUpdateProfileResponse> => {
       const { profile } = args;
 
       const address = getCurrentAccount()!;
@@ -296,17 +313,26 @@ export function useCreateOrUpdateProfileInfo() {
         (profile.displayName.length < 3 || profile.displayName.length > 32)
       ) {
         setErrorMessage(translate("userProfile.errors.displayNameLength"));
-        return;
+        return {
+          success: false,
+          errorMessage: translate("userProfile.errors.displayNameLength"),
+        };
       }
 
       if (!/^[a-zA-Z0-9]*$/.test(profile.username)) {
         setErrorMessage(translate("userProfile.errors.usernameAlphanumeric"));
-        return;
+        return {
+          success: false,
+          errorMessage: translate("userProfile.errors.usernameAlphanumeric"),
+        };
       }
 
       if (profile.username.length < 3 || profile.username.length > 30) {
         setErrorMessage(translate("userProfile.errors.usernameLength"));
-        return;
+        return {
+          success: false,
+          errorMessage: translate("userProfile.errors.usernameLength"),
+        };
       }
 
       setLoading(true);
@@ -319,7 +345,11 @@ export function useCreateOrUpdateProfileInfo() {
         setErrorMessage(
           e?.response?.data?.message || "An unknown error occurred"
         );
-        return;
+        return {
+          success: false,
+          errorMessage:
+            e?.response?.data?.message || "An unknown error occurred",
+        };
       }
 
       let publicAvatar = "";
@@ -344,7 +374,11 @@ export function useCreateOrUpdateProfileInfo() {
               e?.response?.data?.message || "An unknown error occurred"
             );
             setLoading(false);
-            return;
+            return {
+              success: false,
+              errorMessage:
+                e?.response?.data?.message || "An unknown error occurred",
+            };
           }
         }
       }
@@ -355,12 +389,18 @@ export function useCreateOrUpdateProfileInfo() {
           profile: { ...profile, avatar: publicAvatar },
         });
         await refreshProfileForAddress(address, address);
+        return { success: true };
       } catch (e: any) {
         logger.error(e, { context: "UserProfile: claiming and refreshing" });
         setErrorMessage(
           e?.response?.data?.message || "An unknown error occurred"
         );
         setLoading(false);
+        return {
+          success: false,
+          errorMessage:
+            e?.response?.data?.message || "An unknown error occurred",
+        };
       }
     },
     [setLoading, setErrorMessage]
