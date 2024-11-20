@@ -11,10 +11,12 @@ import { Alert, Platform } from "react-native";
 
 import { GroupChatPlaceholder } from "@components/Chat/ChatPlaceholder/GroupChatPlaceholder";
 import { V3Message } from "@components/Chat/Message/V3Message";
-import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
+import { ChatInputDumb } from "@components/Chat/Input/InputDumb";
 import { useDebugEnabled } from "@components/DebugButton";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
+import { Screen } from "@components/Screen/ScreenComp/Screen";
 import {
   AnimatedVStack,
   IAnimatedVStackProps,
@@ -25,6 +27,7 @@ import { useRouter } from "@navigation/useNavigation";
 import { useGroupMembersConversationScreenQuery } from "@queries/useGroupMembersQuery";
 import { useAppTheme } from "@theme/useAppTheme";
 import { ReanimatedFlashList } from "@utils/animations";
+import { debugBorder } from "@utils/debug-style";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import {
   useAnimatedKeyboard,
@@ -38,9 +41,8 @@ import {
   useConversationContext,
 } from "../../features/conversation/conversation-context";
 import { useConversationGroupContext } from "../../features/conversation/conversation-group-context";
+import { initializeCurrentConversation } from "../../features/conversation/conversation-service";
 import { ConversationTitleDumb } from "./ConversationTitleDumb";
-import { debugBorder } from "@utils/debug-style";
-import { ChatInputDumb } from "@components/Chat/Input/InputDumb";
 
 // type UseDataProps = {
 //   topic: ConversationTopic;
@@ -159,12 +161,17 @@ const keyExtractor = (item: string) => item;
 export const V3Conversation = ({
   route,
 }: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
+  // TODO: Handle when topic is not defined
+  const topic = route.params.topic!;
+  const messageToPrefill = route.params.text ?? "";
+
+  initializeCurrentConversation({ topic, inputValue: messageToPrefill });
+
   return (
-    <ConversationContextProvider
-      topic={route.params.topic!}
-      messageToPrefill={route.params.text ?? ""}
-    >
-      <Content />
+    <ConversationContextProvider>
+      <Screen contentContainerStyle={{ flex: 1 }}>
+        <Content />
+      </Screen>
     </ConversationContextProvider>
   );
 };
@@ -322,7 +329,8 @@ const Content = memo(function Content() {
                   },
                 ]}
               > */}
-      <ChatInputDumb onSend={onSend} inputHeight={chatInputHeight} />
+      <ChatInputDumb />
+      <KeyboardFiller />
       {/* </AnimatedVStack> */}
       {/* <View
                 style={[
@@ -332,6 +340,17 @@ const Content = memo(function Content() {
               /> */}
     </VStack>
   );
+});
+
+const KeyboardFiller = memo(function KeyboardFiller() {
+  const { height: keyboardHeightAV } = useAnimatedKeyboard();
+  const insets = useSafeAreaInsets();
+
+  const as = useAnimatedStyle(() => ({
+    height: Math.max(keyboardHeightAV.value - insets.bottom, 0),
+  }));
+
+  return <AnimatedVStack style={as} />;
 });
 
 const ChatListContainer = memo(function ChatListContainer(
@@ -359,10 +378,11 @@ const ChatListContainer = memo(function ChatListContainer(
   const chatContentStyle = useAnimatedStyle(
     () => ({
       flex: 1,
-      paddingBottom: showChatInput
-        ? chatInputDisplayedHeight.value +
-          Math.max(insets.bottom, keyboardHeightAV.value)
-        : insets.bottom,
+      paddingBottom: 0,
+      // paddingBottom: showChatInput
+      //   ? chatInputDisplayedHeight.value +
+      //     Math.max(insets.bottom, keyboardHeightAV.value)
+      //   : insets.bottom,
     }),
     [showChatInput, keyboardHeightAV, chatInputDisplayedHeight, insets.bottom]
   );

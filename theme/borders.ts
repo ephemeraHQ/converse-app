@@ -1,4 +1,7 @@
+import { StyleSheet } from "react-native";
+
 export const borderWidth = {
+  hairline: StyleSheet.hairlineWidth,
   sm: 1,
   md: 2,
   lg: 3,

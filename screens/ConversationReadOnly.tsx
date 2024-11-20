@@ -1,7 +1,7 @@
 // import { ChatPreview } from "@components/Chat/Chat";
 import { EmojiPicker } from "@containers/EmojiPicker";
 import { useChatStore, useSettingsStore } from "@data/store/accountsStore";
-import { MediaPreview } from "@data/store/chatStore";
+import { MessageAttachment } from "@data/store/chatStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { Text } from "@design-system/Text";
 import { backgroundColor, headerTitleStyle } from "@styles/colors";
@@ -81,7 +81,7 @@ export const ConversationReadOnly: React.FC<{
   );
 
   const textInputRef = useRef<TextInputWithValue>();
-  const mediaPreviewRef = useRef<MediaPreview>();
+  const mediaPreviewRef = useRef<MessageAttachment>();
 
   const messageToPrefill = "";
   const mediaPreviewToPrefill = null;

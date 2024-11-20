@@ -2,6 +2,7 @@ import {
   Easing,
   FadeInDown,
   FadeInUp,
+  Keyframe,
   LinearTransition,
 } from "react-native-reanimated";
 
@@ -84,6 +85,28 @@ export const animation = {
   fadeInUpSlow: () => FadeInUp.duration(timing.slow).easing(SICK_EASE_OUT),
 
   fadeInDownSlow: () => FadeInDown.duration(timing.slow).easing(SICK_EASE_OUT),
+
+  reanimatedFadeOutScaleOut: new Keyframe({
+    0: {
+      opacity: 1,
+      transform: [{ scale: 1 }],
+    },
+    100: {
+      opacity: 0,
+      transform: [{ scale: 0 }],
+    },
+  }).duration(500),
+
+  reanimatedFadeInScaleIn: new Keyframe({
+    0: {
+      opacity: 0,
+      transform: [{ scale: 0 }],
+    },
+    100: {
+      opacity: 1,
+      transform: [{ scale: 1 }],
+    },
+  }).duration(500),
 };
 
 export type IAnimation = typeof animation;

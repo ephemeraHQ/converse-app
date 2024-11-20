@@ -5,6 +5,7 @@ export type IIconName =
   | "xmark"
   | "xmark.circle.fill"
   | "plus"
+  | "arrow.up"
   | "arrow.up.right"
   | "arrow.down"
   | "link"

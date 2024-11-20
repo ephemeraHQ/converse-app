@@ -9,6 +9,7 @@ export const iconRegistry: Record<IIconName, string> = {
   xmark: "xmark",
   "xmark.circle.fill": "xmark.circle.fill",
   plus: "plus",
+  "arrow.up": "arrow.up",
   "arrow.up.right": "arrow.up.right",
   "arrow.down": "arrow.down",
   link: "link",
