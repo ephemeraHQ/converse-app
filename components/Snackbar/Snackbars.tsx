@@ -28,7 +28,7 @@ export const Snackbars = memo(function Snackbars() {
           onDismiss={() => dismissSnackbar(snackbar.key)}
         />
       ))}
-      <SnackbarBackdrop />
+      {typeof SnackbarBackdrop !== "undefined" && <SnackbarBackdrop />}
     </>
   );
 });
