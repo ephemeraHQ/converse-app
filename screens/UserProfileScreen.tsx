@@ -39,8 +39,10 @@ export const UserProfileScreen = memo(function UserProfileScreen(
 
   const handleSave = useCallback(async () => {
     try {
-      await createOrUpdateProfile({ profile });
-      navigation.goBack();
+      const { success } = await createOrUpdateProfile({ profile });
+      if (success) {
+        navigation.goBack();
+      }
     } catch (error) {
       sentryTrackError(error);
     }
