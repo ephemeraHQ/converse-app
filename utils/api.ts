@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TransactionData } from "@components/TransactionPreview/TransactionPreview";
 import type { SimulateAssetChangesResponse } from "alchemy-sdk";
 import { GroupInvite } from "@utils/api.types";
@@ -18,9 +19,11 @@ import type { TopicData } from "../data/store/chatStore";
 import type { ProfileSocials } from "../data/store/profilesStore";
 import type { Frens } from "../data/store/recommendationsStore";
 import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
-import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
 import type { InboxId } from "@xmtp/react-native-sdk";
 import { evmHelpers } from "./evm/helpers";
+import { getXmtpClient } from "./xmtpRN/sync";
+import { ConverseXmtpClientType } from "./xmtpRN/client";
+import { getInboxId } from "./xmtpRN/signIn";
 
 export const api = axios.create({
   baseURL: config.apiURI,
@@ -56,6 +59,101 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export type AuthResponse = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+type AuthParams = {
+  inboxId: string;
+  installationPublicKey: string;
+  installationKeySignature: string;
+  appCheckToken?: string;
+};
+
+export async function createAccessToken({
+  inboxId,
+  installationPublicKey,
+  installationKeySignature,
+  appCheckToken,
+}: AuthParams): Promise<AuthResponse> {
+  const { data } = await api.post<AuthResponse>("/api/authenticate", {
+    inboxId,
+    installationKeySignature,
+    installationPublicKey,
+    appCheckToken,
+  });
+
+  if (!data.accessToken) throw new Error("No access token");
+  if (!data.refreshToken) throw new Error("No refresh token");
+
+  return data;
+}
+
+export const xmtpSignatureByAccount: { [account: string]: string } = {};
+
+async function getInstallationKeySignature(
+  account: string,
+  message: string
+): Promise<
+  Pick<AuthParams, "installationPublicKey" | "installationKeySignature">
+> {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  if (!client) throw new Error("Client not found");
+
+  const raw = await client.signWithInstallationKey(message);
+
+  return {
+    installationPublicKey: client.installationId,
+    installationKeySignature: Buffer.from(raw).toString("hex"),
+  };
+}
+
+type XmtpApiHeaders = {
+  authorization: string;
+  ["xmtp-api-address"]: string;
+};
+
+export async function getXmtpApiHeaders(
+  account: string
+): Promise<XmtpApiHeaders> {
+  let accessToken = await AsyncStorage.getItem("CONVERSE_ACCESS_TOKEN");
+
+  if (!accessToken) {
+    // TODO: cache signature
+    // xmtpSignatureByAccount[account]
+    // const xmtpApiSignature = await getXmtpApiSignature(account, "XMTP_IDENTITY");
+    // xmtpSignatureByAccount[account] = xmtpApiSignature;
+
+    try {
+      const inboxId = await getInboxId(account);
+      const installation = await getInstallationKeySignature(
+        account,
+        "XMTP_IDENTITY"
+      );
+      console.log(installation);
+      const result = await createAccessToken({ inboxId, ...installation });
+      if (!result) throw new Error("Could not create access token");
+
+      console.log(result);
+      await Promise.all([
+        AsyncStorage.setItem("CONVERSE_ACCESS_TOKEN", result.accessToken),
+        AsyncStorage.setItem("CONVERSE_REFRESH_TOKEN", result.refreshToken),
+      ]);
+
+      accessToken = result.accessToken;
+    } catch (error) {
+      console.log("Error while getting access token");
+      console.log(error);
+    }
+  }
+
+  return {
+    authorization: `Bearer ${accessToken}`,
+    ["xmtp-api-address"]: account,
+  };
+}
 
 const lastSaveUser: { [address: string]: number } = {};
 
