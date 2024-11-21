@@ -49,6 +49,7 @@ export type IIconName =
   | "info.circle"
   | "person.2"
   | "arrowshape.turn.up.left"
+  | "arrowshape.turn.up.left.fill"
   | "person.crop.circle.badge.plus"
   | "tray"
   | "cloud"

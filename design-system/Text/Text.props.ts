@@ -9,8 +9,9 @@ import { textSizeStyles } from "./Text.styles";
 export type ISizes = keyof typeof textSizeStyles;
 export type IWeights = keyof typeof typography.primary;
 export type ITextColors = Exclude<keyof IColors["text"], "inverted">;
+export type IInvertedTextColors = keyof IColors["text"]["inverted"];
 
-export interface ITextStyleProps {
+export type ITextStyleProps = {
   /**
    * An optional style override useful for padding & margin.
    */
@@ -30,25 +31,30 @@ export interface ITextStyleProps {
   /**
    * Text color modifier.
    */
-  color?: ITextColors;
-}
+  color?: ITextColors | IInvertedTextColors;
+  /**
+   * Inverted text color.
+   */
+  inverted?: boolean;
+};
 
-export interface ITextProps extends RNTextProps, ITextStyleProps {
-  /**
-   * Text which is looked up via i18n.
-   */
-  tx?: TxKeyPath;
-  /**
-   * The text to display if not using `tx` or nested components.
-   */
-  text?: string;
-  /**
-   * Optional options to pass to i18n. Useful for interpolation
-   * as well as explicitly setting locale or translation fallbacks.
-   */
-  txOptions?: i18n.TranslateOptions;
-  /**
-   * Children components.
-   */
-  children?: React.ReactNode;
-}
+export type ITextProps = RNTextProps &
+  ITextStyleProps & {
+    /**
+     * Text which is looked up via i18n.
+     */
+    tx?: TxKeyPath;
+    /**
+     * The text to display if not using `tx` or nested components.
+     */
+    text?: string;
+    /**
+     * Optional options to pass to i18n. Useful for interpolation
+     * as well as explicitly setting locale or translation fallbacks.
+     */
+    txOptions?: i18n.TranslateOptions;
+    /**
+     * Children components.
+     */
+    children?: React.ReactNode;
+  };

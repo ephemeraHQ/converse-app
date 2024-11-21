@@ -37,9 +37,8 @@ export enum QueryKeys {
 
 export const conversationMessageQueryKey = (
   account: string,
-  topic: ConversationTopic,
   messageId: string
-) => [QueryKeys.CONVERSATION_MESSAGE, account.toLowerCase(), topic, messageId];
+) => [QueryKeys.CONVERSATION_MESSAGE, account.toLowerCase(), messageId];
 
 export const conversationsQueryKey = (account: string) => [
   QueryKeys.CONVERSATIONS,

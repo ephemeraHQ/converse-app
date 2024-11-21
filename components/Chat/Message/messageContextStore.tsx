@@ -1,9 +1,9 @@
-import { InboxId } from "@xmtp/react-native-sdk";
+import { InboxId, MessageId } from "@xmtp/react-native-sdk";
 import { createContext, memo, useContext, useEffect, useRef } from "react";
 import { createStore, useStore } from "zustand";
 
 type IMessageContextStoreProps = {
-  messageId: string;
+  messageId: MessageId;
   hasNextMessageInSeries: boolean;
   hasPreviousMessageInSeries: boolean;
   fromMe: boolean;

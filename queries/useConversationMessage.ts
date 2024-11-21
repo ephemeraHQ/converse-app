@@ -1,34 +1,47 @@
-import { useQuery } from "@tanstack/react-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { UseQueryOptions, useQuery } from "@tanstack/react-query";
+import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
+import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { MessageId, findMessage } from "@xmtp/react-native-sdk";
 import { conversationMessageQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
-import { getConversationMessages } from "./useConversationMessages";
 
-type ConversationMessage = ReturnType<typeof fetchConversationMessage>;
+type ConversationMessage = Awaited<ReturnType<typeof fetchConversationMessage>>;
 
 type IArgs = {
   account: string;
-  topic: ConversationTopic;
-  messageId: string;
+  messageId: MessageId;
 };
 
-function fetchConversationMessage(args: IArgs) {
-  const { account, topic, messageId } = args;
-  const messages = getConversationMessages(account, topic);
-  return messages?.byId[messageId];
+async function fetchConversationMessage(args: IArgs) {
+  const { account, messageId } = args;
+
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+
+  if (!client) {
+    return null;
+  }
+
+  const message = await findMessage(client, messageId);
+
+  return message;
 }
 
 export const useConversationMessage = (args: IArgs) => {
-  const { account, topic, messageId } = args;
-  return useQuery({
-    queryKey: conversationMessageQueryKey(account, topic, messageId),
-    queryFn: () => fetchConversationMessage(args),
-  });
+  return useQuery(getConversationMessageQueryOptions(args));
 };
 
+export function getConversationMessageQueryOptions(
+  args: IArgs
+): UseQueryOptions<ConversationMessage> {
+  return {
+    queryKey: conversationMessageQueryKey(args.account, args.messageId),
+    queryFn: () => fetchConversationMessage(args),
+    enabled: !!args.messageId && !!args.account,
+  };
+}
+
 export const getConversationMessage = (args: IArgs) => {
-  const { account, topic, messageId } = args;
   return queryClient.getQueryData<ConversationMessage>(
-    conversationMessageQueryKey(account, topic, messageId)
+    getConversationMessageQueryOptions(args).queryKey
   );
 };

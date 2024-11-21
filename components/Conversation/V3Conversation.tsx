@@ -8,32 +8,23 @@ import { NavigationParamList } from "@screens/Navigation/Navigation";
 import { ListRenderItem } from "@shopify/flash-list";
 import { memo, useCallback, useEffect, useMemo } from "react";
 import { Alert, Platform } from "react-native";
-
 import { GroupChatPlaceholder } from "@components/Chat/ChatPlaceholder/GroupChatPlaceholder";
 import { V3Message } from "@components/Chat/Message/V3Message";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
-import { ChatInputDumb } from "@components/Chat/Input/InputDumb";
+import { ChatInputDumb } from "../../features/conversation/composer/composer";
 import { useDebugEnabled } from "@components/DebugButton";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
 import { Screen } from "@components/Screen/ScreenComp/Screen";
-import {
-  AnimatedVStack,
-  IAnimatedVStackProps,
-  VStack,
-} from "@design-system/VStack";
+import { AnimatedVStack } from "@design-system/VStack";
 import { useProfilesSocials } from "@hooks/useProfilesSocials";
 import { useRouter } from "@navigation/useNavigation";
 import { useGroupMembersConversationScreenQuery } from "@queries/useGroupMembersQuery";
 import { useAppTheme } from "@theme/useAppTheme";
-import { ReanimatedFlashList } from "@utils/animations";
-import { debugBorder } from "@utils/debug-style";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
-import {
+import Animated, {
   useAnimatedKeyboard,
   useAnimatedStyle,
-  useDerivedValue,
-  useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -178,9 +169,9 @@ export const V3Conversation = ({
 
 const Content = memo(function Content() {
   const currentAccount = useCurrentAccount()!;
-  console.log("currentAccount:", currentAccount);
   const topic = useConversationContext("topic")!;
-  console.log("topic:", topic);
+
+  const { theme } = useAppTheme();
 
   const {
     data: messages,
@@ -212,15 +203,22 @@ const Content = memo(function Content() {
     ({ item: messageId, index }) => {
       if (!messages) return null;
       return (
-        <V3Message
-          messageId={messageId}
-          previousMessageId={index > 0 ? messages.ids[index + 1] : undefined}
-          nextMessageId={
-            index < messages.ids.length - 1
-              ? messages.ids[index - 1]
-              : undefined
-          }
-        />
+        <AnimatedVStack
+          {...(index === 0 &&
+            {
+              // entering: theme.animation.reanimatedFadeInDownSpring,
+            })}
+        >
+          <V3Message
+            messageId={messageId}
+            previousMessageId={index > 0 ? messages.ids[index + 1] : undefined}
+            nextMessageId={
+              index < messages.ids.length - 1
+                ? messages.ids[index - 1]
+                : undefined
+            }
+          />
+        </AnimatedVStack>
       );
     },
     [messages]
@@ -263,10 +261,9 @@ const Content = memo(function Content() {
 
   const isEmptyList = messages?.ids.length === 0 && !messagesLoading;
 
-  console.log("messages?.ids:", messages?.ids);
-
   return (
-    <VStack
+    <AnimatedVStack
+      layout={theme.animation.reanimatedSpringLayoutTransition}
       style={{
         flex: 1,
       }}
@@ -287,36 +284,40 @@ const Content = memo(function Content() {
                 ListFooterComponent={null}
                 onSend={onSend}
               /> */}
-      <ChatListContainer>
-        {isEmptyList ? (
-          <ListEmptyComponent />
-        ) : (
-          <ReanimatedFlashList
-            inverted
-            data={messages?.ids ?? []}
-            refreshing={isRefetchingMessages}
-            renderItem={renderItem}
-            ListEmptyComponent={<ListEmptyComponent />}
-            keyboardDismissMode="interactive"
-            automaticallyAdjustContentInsets={false}
-            contentInsetAdjustmentBehavior="never"
-            keyExtractor={keyExtractor}
-            keyboardShouldPersistTaps="handled"
-            estimatedItemSize={34} // TODO
-            showsVerticalScrollIndicator={Platform.OS === "ios"} // Size glitch on Android
-            pointerEvents="auto"
+      {/* <ChatListContainer> */}
+      {isEmptyList ? (
+        <ListEmptyComponent />
+      ) : (
+        // Need FlatList for itemLayoutAnimation
+        <Animated.FlatList
+          inverted
+          // @ts-ignore It says error but it works
+          // layout={theme.animation.springLayoutTransition}
+          itemLayoutAnimation={theme.animation.reanimatedSpringLayoutTransition}
+          data={messages?.ids ?? []}
+          refreshing={isRefetchingMessages}
+          renderItem={renderItem}
+          ListEmptyComponent={<ListEmptyComponent />}
+          keyboardDismissMode="interactive"
+          automaticallyAdjustContentInsets={false}
+          contentInsetAdjustmentBehavior="never"
+          keyExtractor={keyExtractor}
+          keyboardShouldPersistTaps="handled"
+          estimatedItemSize={34} // TODO
+          showsVerticalScrollIndicator={Platform.OS === "ios"} // Size glitch on Android
+          pointerEvents="auto"
 
-            /**
-             * Causes a glitch on Android, no sure we need it for now
-             */
-            // maintainVisibleContentPosition={{
-            //   minIndexForVisible: 0,
-            //   autoscrollToTopThreshold: 100,
-            // }}
-            // estimatedListSize={Dimensions.get("screen")}
-          />
-        )}
-      </ChatListContainer>
+          /**
+           * Causes a glitch on Android, no sure we need it for now
+           */
+          // maintainVisibleContentPosition={{
+          //   minIndexForVisible: 0,
+          //   autoscrollToTopThreshold: 100,
+          // }}
+          // estimatedListSize={Dimensions.get("screen")}
+        />
+      )}
+      {/* </ChatListContainer> */}
 
       {/* <AnimatedVStack
                 style={[
@@ -338,7 +339,7 @@ const Content = memo(function Content() {
                   { height: insets.bottom + DEFAULT_INPUT_HEIGHT },
                 ]}
               /> */}
-    </VStack>
+    </AnimatedVStack>
   );
 });
 
@@ -351,45 +352,6 @@ const KeyboardFiller = memo(function KeyboardFiller() {
   }));
 
   return <AnimatedVStack style={as} />;
-});
-
-const ChatListContainer = memo(function ChatListContainer(
-  props: IAnimatedVStackProps
-) {
-  const showChatInput = true; // TODO
-
-  const { height: keyboardHeightAV } = useAnimatedKeyboard();
-  const insets = useSafeAreaInsets();
-  const composerHeightAV = useConversationContext("composerHeightAV")!;
-
-  const frameTextInputFocusedAV = useSharedValue(false); // TODO
-
-  const chatInputDisplayedHeight = useDerivedValue(() => {
-    if (frameTextInputFocusedAV.value) {
-      return 0;
-    }
-    return (
-      composerHeightAV.value +
-      // TODO: Not sure why
-      58
-    );
-  });
-
-  const chatContentStyle = useAnimatedStyle(
-    () => ({
-      flex: 1,
-      paddingBottom: 0,
-      // paddingBottom: showChatInput
-      //   ? chatInputDisplayedHeight.value +
-      //     Math.max(insets.bottom, keyboardHeightAV.value)
-      //   : insets.bottom,
-    }),
-    [showChatInput, keyboardHeightAV, chatInputDisplayedHeight, insets.bottom]
-  );
-
-  return (
-    <AnimatedVStack style={[chatContentStyle, debugBorder()]} {...props} />
-  );
 });
 
 const ListEmptyComponent = memo(function ListEmptyComponent() {

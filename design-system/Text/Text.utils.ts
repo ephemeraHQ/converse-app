@@ -1,9 +1,9 @@
 import { IThemed } from "@theme/useAppTheme";
 import { StyleProp, TextStyle } from "react-native";
-
 import { textPresets } from "./Text.presets";
 import { ITextStyleProps } from "./Text.props";
 import {
+  invertedTextColorStyle,
   textColorStyle,
   textFontWeightStyles,
   textSizeStyles,
@@ -16,14 +16,24 @@ export const getTextStyle = (
     size,
     color,
     style,
+    inverted,
     preset = "body",
-  }: Pick<ITextStyleProps, "weight" | "size" | "color" | "style" | "preset">
+    ...props
+  }: ITextStyleProps
 ): StyleProp<TextStyle> => {
   const $styles: StyleProp<TextStyle> = [
     themed(textPresets[preset]),
+    inverted &&
+      themed((theme) => ({ color: theme.colors.text.inverted.primary })),
     weight && textFontWeightStyles[weight],
     size && textSizeStyles[size],
-    color && themed((theme) => textColorStyle(theme, color)),
+    color &&
+      themed((theme) => {
+        if (inverted) {
+          return invertedTextColorStyle(theme, color);
+        }
+        return textColorStyle(theme, color);
+      }),
     style,
   ];
 

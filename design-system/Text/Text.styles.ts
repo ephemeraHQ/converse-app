@@ -1,8 +1,8 @@
 import { TextStyle } from "react-native";
 
-import { ITextColors, IWeights } from "./Text.props";
+import { typography } from "../../theme";
 import { Theme, ThemedStyle } from "../../theme/useAppTheme";
-import { typography } from "@theme/typography";
+import { IInvertedTextColors, ITextColors, IWeights } from "./Text.props";
 
 export const textSizeStyles = {
   xl: { fontSize: 32, lineHeight: 36 } satisfies TextStyle, // Made up, need to confirm with Andrew once we have the design
@@ -39,4 +39,11 @@ export const textBaseStyle: ThemedStyle<TextStyle> = (theme) => ({
 
 export const textColorStyle = (theme: Theme, color: ITextColors) => ({
   color: theme.colors.text[color],
+});
+
+export const invertedTextColorStyle = (
+  theme: Theme,
+  color: IInvertedTextColors
+) => ({
+  color: theme.colors.text.inverted[color],
 });
