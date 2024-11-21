@@ -73,9 +73,9 @@ const getSendButtonType = (input: string): "DEFAULT" | "HIGHER" => {
   return "DEFAULT";
 };
 
-interface ChatInputProps {
+type ChatInputProps = {
   inputHeight: SharedValue<number>;
-}
+};
 
 export default function ChatInput({ inputHeight }: ChatInputProps) {
   const conversation = useConversationContext("conversation");
@@ -410,14 +410,16 @@ export default function ChatInput({ inputHeight }: ChatInputProps) {
           <TextInput
             style={styles.chatInputField}
             value={inputValue}
-            onSubmitEditing={() => {
-              onValidate();
-            }}
+            onSubmitEditing={onValidate}
             onChangeText={(t: string) => {
               inputIsFocused.current = true;
               setInputValue(t);
             }}
             onKeyPress={(event: any) => {
+              // Maybe want a better check here, but web/tablet is not the focus right now
+              if (Platform.OS !== "web") {
+                return;
+              }
               if (
                 event.nativeEvent.key === "Enter" &&
                 !event.altKey &&
