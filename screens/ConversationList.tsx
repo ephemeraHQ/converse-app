@@ -27,7 +27,7 @@ import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 import { NavigationParamList } from "./Navigation/Navigation";
 import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
-import NoResult from "@features/search/components/NoResult";
+import NoResult from "@search/components/NoResult";
 import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
   currentAccount,

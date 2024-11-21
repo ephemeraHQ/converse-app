@@ -40,6 +40,7 @@ module.exports = {
           "@design-system": "./design-system",
           "@navigation": "./navigation",
           "@features": "./features",
+          "@search": "./features/search",
         },
       },
     ],

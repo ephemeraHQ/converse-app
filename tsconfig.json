@@ -18,7 +18,8 @@
       "@theme/*": ["./theme/*"],
       "@design-system/*": ["./design-system/*"],
       "@navigation/*": ["./navigation/*"],
-      "@features/*": ["./features/*"]
+      "@features/*": ["./features/*"],
+      "@search/*": ["./features/search/*"]
     }
   },
   "exclude": ["./vendor/**/*", "./node_modules/**/*", "./dist/**/*"]

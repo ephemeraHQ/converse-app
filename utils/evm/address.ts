@@ -3,7 +3,7 @@ import {
   resolveUnsDomain,
   resolveFarcasterUsername,
 } from "@utils/api";
-import { getLensOwner } from "@features/search/utils/lens";
+import { getLensOwner } from "@search/utils/lens";
 import { isUNSAddress } from "@utils/uns";
 import { isAddress, getAddress } from "ethers/lib/utils";
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, TextInput } from "react-native";
 
-import { getLensHandleFromConversationIdAndPeer } from "@features/search/utils/lens";
+import { getLensHandleFromConversationIdAndPeer } from "@search/utils/lens";
 import logger from "./logger";
 import { getPreferredName, getProfile } from "./profile";
 import {
