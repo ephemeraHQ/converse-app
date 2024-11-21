@@ -383,7 +383,7 @@ export const loadConversations = async (
     const knownGroups: GroupWithCodecsType[] = [];
     const updatedGroups: GroupWithCodecsType[] = [];
 
-    groups.forEach(async (g) => {
+    for (const g of groups) {
       if (!knownTopicsSet.has(g.topic)) {
         newGroups.push(g);
       } else {
@@ -410,7 +410,7 @@ export const loadConversations = async (
           }
         }
       }
-    });
+    }
 
     const afterCompareGroups = new Date().getTime();
 
