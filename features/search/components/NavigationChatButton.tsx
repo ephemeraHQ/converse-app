@@ -10,6 +10,7 @@ import { canGroupMessage } from "@utils/xmtpRN/conversations";
 import { Button } from "@design-system/Button/Button";
 import { useAppTheme } from "@theme/useAppTheme";
 import { useRouter } from "@navigation/useNavigation";
+import { isCurrentUser } from "@shared/utils/user";
 
 type NavigationChatProps = {
   address: string;
@@ -31,8 +32,7 @@ export function NavigationChatButton({
     useShallow((s) => getProfile(address, s.profiles))
   );
   const preferredName = getPreferredName(profile?.socials, address);
-  const isCurrentUser =
-    address.toLowerCase() === currentAccount().toLowerCase();
+  const isCurrentUserAddress = isCurrentUser(address);
 
   const openChat = useCallback(() => {
     // On Android the accounts are not in the navigation but in a drawer
@@ -64,7 +64,7 @@ export function NavigationChatButton({
   }, [loading, address, addToGroup, preferredName]);
 
   const getButtonText = () => {
-    if (isCurrentUser) return translate("you");
+    if (isCurrentUserAddress) return translate("you");
     if (groupMode) {
       return loading ? translate("add_loading") : translate("add");
     }
@@ -72,7 +72,7 @@ export function NavigationChatButton({
   };
 
   const getButtonAction = () => {
-    if (isCurrentUser) return undefined;
+    if (isCurrentUserAddress) return undefined;
     if (groupMode) {
       return loading ? undefined : addToGroupIfPossible;
     }
@@ -82,14 +82,18 @@ export function NavigationChatButton({
   return (
     <Button
       variant={
-        isCurrentUser ? "fill" : Platform.OS === "android" ? "link" : "outline"
+        isCurrentUserAddress
+          ? "fill"
+          : Platform.OS === "android"
+            ? "link"
+            : "outline"
       }
       style={{
         marginRight: theme.spacing.xs,
       }}
       text={getButtonText()}
       onPress={getButtonAction()}
-      disabled={isCurrentUser}
+      disabled={isCurrentUserAddress}
     />
   );
 }

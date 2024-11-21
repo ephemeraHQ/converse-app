@@ -23,6 +23,7 @@
       "@design-system/*": ["./design-system/*"],
       "@navigation/*": ["./navigation/*"],
       "@features/*": ["./features/*"],
+      "@shared/*": ["./features/shared/*"],
       "@search/*": ["./features/search/*"]
     }
   },

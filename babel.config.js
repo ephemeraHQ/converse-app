@@ -29,7 +29,7 @@ module.exports = {
           // Folder aliases
           '@': './',
           "@components": "./components",
-          '@config': './config',
+          "@config": "./config",
           "@containers": "./containers",
           "@data": "./data",
           "@hooks": "./hooks",
@@ -43,6 +43,7 @@ module.exports = {
           "@design-system": "./design-system",
           "@navigation": "./navigation",
           "@features": "./features",
+          "@shared": "./features/shared",
           "@search": "./features/search",
         },
       },
