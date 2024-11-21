@@ -1,19 +1,11 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
-import { MessageAttachment } from "@data/store/chatStore";
 import { useConversationQuery } from "@queries/useConversationQuery";
 import { navigate } from "@utils/navigation";
-import { TextInputWithValue } from "@utils/str";
 import {
-  ConversationTopic,
   ConversationVersion,
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
-import React, {
-  MutableRefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-} from "react";
+import React, { useCallback, useEffect } from "react";
 import { SharedValue, useSharedValue } from "react-native-reanimated";
 import { createContext, useContextSelector } from "use-context-selector";
 import { useConversationCurrentTopic } from "./conversation-service";
@@ -27,20 +19,8 @@ type ISendMessageParams = {
 export type IConversationContextType = {
   composerHeightAV: SharedValue<number>;
   conversationNotFound: boolean;
-  conversationVersion: ConversationVersion;
-  numberOfMessages: number;
-  topic?: ConversationTopic;
-  inputRef: MutableRefObject<TextInputWithValue | undefined>;
-  mediaPreviewRef: MutableRefObject<MessageAttachment | undefined>;
+  conversationVersion: ConversationVersion | undefined;
   isBlockedPeer: boolean;
-  onReadyToFocus: () => void;
-  messageToPrefill: string;
-  mediaPreviewToPrefill: MessageAttachment;
-  frameTextInputFocused: boolean;
-  setFrameTextInputFocused: (b: boolean) => void;
-  tagsFetchedOnceForMessage: MutableRefObject<{
-    [messageId: string]: boolean;
-  }>;
   sendMessage: (message: ISendMessageParams) => Promise<void>;
 };
 
@@ -121,13 +101,16 @@ export const ConversationContextProvider = (
     [conversation]
   );
 
-  const value = useMemo(
-    () => ({ sendMessage, composerHeightAV, topic }),
-    [sendMessage, composerHeightAV, topic]
-  );
-
   return (
-    <ConversationContext.Provider value={value}>
+    <ConversationContext.Provider
+      value={{
+        isBlockedPeer: false, // TODO: implement this
+        sendMessage,
+        composerHeightAV,
+        conversationVersion: conversation?.version,
+        conversationNotFound: !conversation,
+      }}
+    >
       {children}
     </ConversationContext.Provider>
   );

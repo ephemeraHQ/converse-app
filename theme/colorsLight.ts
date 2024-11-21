@@ -5,7 +5,8 @@ export const colorsLight = {
     bubble: darkPalette.dark,
     bubbleAccent: lightPalette.accent,
     reply: darkPalette.dark4,
-    nestedReply: lightPalette.alpha15,
+    nestedReply: lightPalette.light,
+    nestedReplyFromMe: lightPalette.light15,
     received: {
       bubble: darkPalette.dark4,
       reply: darkPalette.dark4,

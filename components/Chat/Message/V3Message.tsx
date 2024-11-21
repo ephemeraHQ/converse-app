@@ -1,7 +1,6 @@
 import {
   BubbleContainer,
   BubbleContentContainer,
-  MessageBubble,
 } from "@components/Chat/Message/MessageBubble";
 import {
   MessageContextProvider,
@@ -23,7 +22,6 @@ import { AnimatedText, Text } from "@design-system/Text";
 import { getTextStyle } from "@design-system/Text/Text.utils";
 import { AnimatedVStack, VStack } from "@design-system/VStack";
 import { getConversationMessageQueryOptions } from "@queries/useConversationMessage";
-import { getConversationMessages } from "@queries/useConversationMessages";
 import { useQuery } from "@tanstack/react-query";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
@@ -48,12 +46,14 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import { useShallow } from "zustand/react/shallow";
-import { useConversationContext } from "../../../features/conversation/conversation-context";
-import { setCurrentConversationReplyToMessageId } from "../../../features/conversation/conversation-service";
+import { useMessageText } from "../../../features/conversation-list/hooks/useMessageText";
+import {
+  getCurrentConversationMessages,
+  setCurrentConversationReplyToMessageId,
+  useConversationCurrentTopic,
+} from "../../../features/conversation/conversation-service";
 import { hasNextMessageInSeries } from "../../../features/conversations/utils/hasNextMessageInSeries";
 import { hasPreviousMessageInSeries } from "../../../features/conversations/utils/hasPreviousMessageInSeries";
-import { isLatestMessageSettledFromPeer } from "../../../features/conversations/utils/isLatestMessageSettledFromPeer";
-import { isLatestSettledFromCurrentUser } from "../../../features/conversations/utils/isLatestSettledFromCurrentUser";
 import { messageIsFromCurrentUserV3 } from "../../../features/conversations/utils/messageIsFromCurrentUser";
 import { messageShouldShowDateChange } from "../../../features/conversations/utils/messageShouldShowDateChange";
 import { ChatGroupUpdatedMessage } from "../ChatGroupUpdatedMessage";
@@ -67,7 +67,6 @@ import {
   isStaticAttachmentMessage,
   isTextMessage,
   isTransactionReferenceMessage,
-  useCurrentAccountInboxId,
 } from "./Message.utils";
 
 type V3MessageProps = {
@@ -79,8 +78,8 @@ type V3MessageProps = {
 export const V3Message = memo(
   ({ messageId, nextMessageId, previousMessageId }: V3MessageProps) => {
     const currentAccount = useCurrentAccount()!;
-    const topic = useConversationContext("topic");
-    const messages = getConversationMessages(currentAccount, topic);
+    const topic = useConversationCurrentTopic();
+    const messages = getCurrentConversationMessages();
 
     const message = messages?.byId[messageId];
     const previousMessage = messages?.byId[previousMessageId ?? ""];
@@ -156,18 +155,18 @@ export const V3MessageContent = memo(function V3MessageContent({
     message,
   });
 
-  const isLatestSettledFromMe = isLatestSettledFromCurrentUser({
-    message,
-    currentAccount,
-  });
+  // const isLatestSettledFromMe = isLatestSettledFromCurrentUser({
+  //   message,
+  //   currentAccount,
+  // });
 
-  const isLatestSettledFromPeer =
-    !!nextMessage &&
-    isLatestMessageSettledFromPeer({
-      message,
-      currentAccount,
-      nextMessage,
-    });
+  // const isLatestSettledFromPeer =
+  //   !!nextMessage &&
+  //   isLatestMessageSettledFromPeer({
+  //     message,
+  //     currentAccount,
+  //     nextMessage,
+  //   });
 
   if (isReplyMessage(message)) {
     return (
@@ -274,9 +273,9 @@ export const V3MessageContent = memo(function V3MessageContent({
 function useConversationMessageForReplyMessage(
   messageId: MessageId
 ): DecodedMessage<[ReplyCodec]> | undefined {
-  const topic = useConversationContext("topic")!;
+  const topic = useConversationCurrentTopic();
   const currentAccount = useCurrentAccount()!;
-  const messages = getConversationMessages(currentAccount, topic);
+  const messages = getCurrentConversationMessages();
 
   const cachedReplyMessage = messages?.byId[messageId] as
     | DecodedMessage<[ReplyCodec]>
@@ -316,27 +315,24 @@ const ReplyMessage = memo(function ReplyMessage() {
     showDateChange: s.showDateChange,
   }));
 
-  const { data: currentAccountInboxId } = useCurrentAccountInboxId();
-  const currentAccount = useCurrentAccount()!;
-
   const replyMessage = useConversationMessageForReplyMessage(messageId);
 
   if (!replyMessage) {
     return null;
   }
 
-  const content = replyMessage.content();
+  const replyMessageContent = replyMessage?.content();
 
-  if (typeof content === "string") {
+  if (!replyMessageContent) {
+    // TODO
+    return null;
+  }
+
+  if (typeof replyMessageContent === "string") {
     // TODO. Render simple bubble message with the content?
     console.error("reply message is a string");
     return null;
   }
-
-  const readableProfile =
-    currentAccountInboxId === replyMessage.senderAddress
-      ? "You"
-      : getReadableProfile(currentAccount, replyMessage.senderAddress);
 
   return (
     <>
@@ -345,82 +341,130 @@ const ReplyMessage = memo(function ReplyMessage() {
           setCurrentConversationReplyToMessageId(messageId);
         }}
       >
-        {fromMe ? (
-          <BubbleContainer fromMe={fromMe}>
-            <BubbleContentContainer
-              fromMe={fromMe}
-              hasNextMessageInSeries={hasNextMessageInSeries}
-              showDateChange={showDateChange}
-              hasPreviousMessageInSeries={hasPreviousMessageInSeries}
-            >
-              <Pressable
-                onPress={() => {
-                  console.log("handle press bubble");
-                }}
-                style={{
-                  rowGap: theme.spacing.xxs,
-                  marginTop: theme.spacing.xxxs, // Because for reply bubble we want the padding to be same for horizontal and vertial
-                }}
+        <MessageContainer fromMe={fromMe}>
+          {!fromMe && <V3MessageSenderAvatar inboxId={senderAddress} />}
+          {!fromMe && <VStack style={{ width: theme.spacing.xxs }} />}
+
+          <VStack>
+            {!fromMe && !hasPreviousMessageInSeries && (
+              <V3MessageSender inboxId={senderAddress} />
+            )}
+
+            <BubbleContainer fromMe={fromMe}>
+              <BubbleContentContainer
+                fromMe={fromMe}
+                hasNextMessageInSeries={hasNextMessageInSeries}
+                showDateChange={showDateChange}
+                hasPreviousMessageInSeries={hasPreviousMessageInSeries}
               >
-                <VStack
+                <Pressable
+                  onPress={() => {
+                    console.log("handle press bubble");
+                  }}
                   style={{
-                    rowGap: theme.spacing.xxxs,
-                    flex: 1,
-                    backgroundColor: theme.colors.bubbles.nestedReply,
-                    borderRadius: theme.spacing.sm - theme.spacing.xs / 2, // - theme.spacing.xs / 2 so the border fits the border radius of BubbleContentContainer
-                    paddingHorizontal: theme.spacing.xs,
-                    paddingVertical: theme.spacing.xxs,
+                    rowGap: theme.spacing.xxs,
+                    marginTop: theme.spacing.xxxs, // Because for reply bubble we want the padding to be same for horizontal and vertial
                   }}
                 >
-                  <HStack
-                    style={{
-                      alignItems: "center",
-                      columnGap: theme.spacing.xxxs,
-                    }}
-                  >
-                    <Icon
-                      size={theme.iconSize.xs}
-                      icon="arrowshape.turn.up.left.fill"
-                      color={theme.colors.text.inverted.secondary}
-                    />
-                    <Text preset="smaller" color="secondary" inverted>
-                      {readableProfile}
-                    </Text>
-                  </HStack>
-                  <Text numberOfLines={1} inverted>
-                    test
-                    {/* {isAttachmentMessage(replyMessage?.contentType)
-            ? `📎 Media from ${getRelativeDateTime(replyMessage?.sent)}`
-            : isTransactionMessage(replyMessage?.contentType)
-              ? `💸 Transaction from ${getRelativeDateTime(
-                  replyingToMessage.sent
-                )}`
-              : replyMessage?.content || replyMessage?.contentFallback} */}
-                  </Text>
-                </VStack>
-                <MessageText inverted>{content.content.text}</MessageText>
-              </Pressable>
-            </BubbleContentContainer>
-          </BubbleContainer>
-        ) : (
-          <BubbleContainer fromMe={fromMe}>
-            <V3MessageSenderAvatar inboxId={senderAddress} />
-            <VStack style={{ paddingLeft: theme.spacing.xxs }}>
-              {!fromMe && !hasPreviousMessageInSeries && (
-                <V3MessageSender inboxId={senderAddress} />
-              )}
-              <Pressable
-                onPress={() => {
-                  console.log("handle press bubble");
-                }}
-              >
-                <MessageBubble content={content.content.text} />
-              </Pressable>
-            </VStack>
-          </BubbleContainer>
-        )}
+                  <ReplyMessageReference
+                    referenceMessageId={
+                      replyMessageContent.reference as MessageId
+                    }
+                  />
+                  <MessageText inverted={fromMe}>
+                    {replyMessageContent.content.text}
+                  </MessageText>
+                </Pressable>
+              </BubbleContentContainer>
+            </BubbleContainer>
+          </VStack>
+        </MessageContainer>
       </RepliableMessageWrapper>
+      <MessageSeparator />
     </>
+  );
+});
+
+const MessageContainer = memo(function MessageContainer(props: {
+  children: React.ReactNode;
+  fromMe: boolean;
+}) {
+  const { children, fromMe } = props;
+
+  const { theme } = useAppTheme();
+
+  return (
+    <HStack
+      style={{
+        // ...debugBorder("red"),
+        flex: 1,
+        alignItems: "flex-end",
+        ...(fromMe
+          ? { paddingRight: theme.spacing.sm, justifyContent: "flex-end" }
+          : { paddingLeft: theme.spacing.sm, justifyContent: "flex-start" }),
+      }}
+    >
+      {children}
+    </HStack>
+  );
+});
+
+const ReplyMessageReference = memo(function ReplyMessageReference(props: {
+  referenceMessageId: MessageId;
+}) {
+  const { referenceMessageId } = props;
+
+  const { theme } = useAppTheme();
+
+  const fromMe = useMessageContextStoreContext((s) => s.fromMe);
+
+  const currentAccount = useCurrentAccount()!;
+
+  const replyMessageReference =
+    useConversationMessageForReplyMessage(referenceMessageId);
+
+  const replyMessageReferenceText = useMessageText(replyMessageReference);
+
+  const readableProfile = replyMessageReference
+    ? getReadableProfile(currentAccount, replyMessageReference.senderAddress)
+    : null;
+
+  return (
+    <VStack
+      style={{
+        rowGap: theme.spacing.xxxs,
+        flex: 1,
+        backgroundColor: fromMe
+          ? theme.colors.bubbles.nestedReplyFromMe
+          : theme.colors.bubbles.nestedReply,
+        borderRadius: theme.spacing.sm - theme.spacing.xs / 2, // - theme.spacing.xs / 2 so the border fits the border radius of BubbleContentContainer
+        paddingHorizontal: theme.spacing.xs,
+        paddingVertical: theme.spacing.xxs,
+      }}
+    >
+      <HStack
+        style={{
+          alignItems: "center",
+          columnGap: theme.spacing.xxxs,
+        }}
+      >
+        <Icon
+          size={theme.iconSize.xs}
+          icon="arrowshape.turn.up.left.fill"
+          color={
+            fromMe
+              ? theme.colors.text.inverted.secondary
+              : theme.colors.text.secondary
+          }
+        />
+        <Text preset="smaller" color="secondary" inverted={fromMe}>
+          {readableProfile}
+        </Text>
+      </HStack>
+      <Text numberOfLines={1} inverted={fromMe}>
+        {replyMessageReferenceText}
+      </Text>
+    </VStack>
   );
 });
 
@@ -436,7 +480,6 @@ const SimpleMessage = memo(function SimpleMessage({
     showDateChange,
     hasNextMessageInSeries,
     hasPreviousMessageInSeries,
-    sentAt,
     senderAddress,
     fromMe,
   ] = useMessageContextStoreContext(
@@ -445,7 +488,6 @@ const SimpleMessage = memo(function SimpleMessage({
       s.showDateChange,
       s.hasNextMessageInSeries,
       s.hasPreviousMessageInSeries,
-      s.sentAt,
       s.senderAddress,
       s.fromMe,
     ])
@@ -461,65 +503,39 @@ const SimpleMessage = memo(function SimpleMessage({
     <>
       <MessageTime />
 
-      {/* Maybe place in List separator instead? Not sure */}
-      {hasNextMessageInSeries && (
-        <VStack
-          style={{
-            // ...debugBorder(),
-            height: theme.spacing["4xs"],
-          }}
-        />
-      )}
-
-      {!hasNextMessageInSeries && (
-        <VStack
-          style={{
-            // ...debugBorder("yellow"),
-            height: theme.spacing.sm,
-          }}
-        />
-      )}
-
       <RepliableMessageWrapper
         onReply={() => {
           setCurrentConversationReplyToMessageId(messageId);
         }}
       >
-        {fromMe ? (
-          <BubbleContainer fromMe={fromMe}>
-            <BubbleContentContainer
-              fromMe
-              hasNextMessageInSeries={hasNextMessageInSeries}
-              showDateChange={showDateChange}
-              hasPreviousMessageInSeries={hasPreviousMessageInSeries}
-            >
-              <Pressable onPress={handlePressBubble}>
-                <MessageText inverted>{message}</MessageText>
-              </Pressable>
-            </BubbleContentContainer>
-          </BubbleContainer>
-        ) : (
+        <MessageContainer fromMe={fromMe}>
+          {!fromMe && <V3MessageSenderAvatar inboxId={senderAddress} />}
+
           <VStack>
-            {!hasPreviousMessageInSeries && (
-              <V3MessageSender inboxId={senderAddress} />
-            )}
-            <BubbleContainer fromMe={false}>
+            <BubbleContainer fromMe={fromMe}>
               <BubbleContentContainer
-                fromMe={false}
+                fromMe={fromMe}
                 hasNextMessageInSeries={hasNextMessageInSeries}
                 showDateChange={showDateChange}
                 hasPreviousMessageInSeries={hasPreviousMessageInSeries}
               >
                 <Pressable onPress={handlePressBubble}>
-                  <MessageText>{message}</MessageText>
+                  <MessageText inverted={fromMe}>{message}</MessageText>
                 </Pressable>
               </BubbleContentContainer>
             </BubbleContainer>
           </VStack>
-        )}
+        </MessageContainer>
       </RepliableMessageWrapper>
+
+      <MessageSeparator />
     </>
   );
+});
+
+const MessageSeparator = memo(function MessageSeparator() {
+  const { theme } = useAppTheme();
+  return <VStack style={{ height: theme.spacing["4xs"] }} />;
 });
 
 const MessageTime = memo(function MessageTime() {
