@@ -1,14 +1,15 @@
+import { getCurrentAccount } from "@data/store/accountsStore";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 
 type MessageFromCurrentUserPayload = {
   message?: DecodedMessageWithCodecsType;
-  currentAccount: string;
 };
 
-export const messageFromCurrentUser = ({
+export const messageIsFromCurrentUser = ({
   message,
-  currentAccount,
 }: MessageFromCurrentUserPayload) => {
   if (!message) return false;
+  const currentAccount = getCurrentAccount();
+  if (!currentAccount) return false;
   return message.senderAddress.toLowerCase() === currentAccount.toLowerCase();
 };

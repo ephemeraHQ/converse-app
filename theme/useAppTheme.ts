@@ -15,6 +15,7 @@ import {
 import { StyleProp, useColorScheme } from "react-native";
 
 import { IShadow, shadow } from "@theme/shadow";
+
 import { IAvatarSize, avatarSize } from "./avatar";
 import { IBorderRadius, borderRadius } from "./border-radius";
 import { IBorderWidth, borderWidth } from "./borders";
@@ -38,6 +39,7 @@ export interface Theme {
   typography: ITypography;
   timing: Timing;
   shadow: IShadow;
+  layout: ILayout;
   isDark: boolean;
 }
 
@@ -52,6 +54,7 @@ export const lightTheme: Theme = {
   iconSize,
   timing,
   shadow,
+  layout,
   isDark: false,
 };
 export const darkTheme: Theme = {
@@ -64,6 +67,7 @@ export const darkTheme: Theme = {
   iconSize,
   timing,
   shadow,
+  layout,
   isDark: true,
 };
 

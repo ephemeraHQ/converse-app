@@ -1,9 +1,8 @@
 import { V3Conversation } from "@components/Conversation/V3Conversation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { backgroundColor, headerTitleStyle } from "@styles/colors";
 import { isV3Topic } from "@utils/groupUtils/groupId";
 import React from "react";
-import { StyleSheet, View, useColorScheme } from "react-native";
+import { View } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { NavigationParamList } from "./Navigation/Navigation";
 
