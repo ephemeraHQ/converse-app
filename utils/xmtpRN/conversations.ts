@@ -3,10 +3,15 @@ import {
   ConversationOrder,
   ConversationOptions,
   ConversationTopic,
+  ConversationVersion,
 } from "@xmtp/react-native-sdk";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 
-import { ConversationWithCodecsType, ConverseXmtpClientType } from "./client";
+import {
+  ConversationWithCodecsType,
+  ConverseXmtpClientType,
+  DmWithCodecsType,
+} from "./client";
 import { getXmtpClient } from "./sync";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 
@@ -167,6 +172,71 @@ export const getConversationByTopic = async ({
     } sec`
   );
   return conversation;
+};
+
+type GetConversationByPeerParams = {
+  client: ConverseXmtpClientType;
+  peer: string;
+  includeSync?: boolean;
+};
+
+export const getConversationByPeer = async ({
+  client,
+  peer,
+  includeSync = false,
+}: GetConversationByPeerParams) => {
+  logger.debug(`[XMTPRN Conversations] Getting conversation by peer: ${peer}`);
+  const start = new Date().getTime();
+  let conversation = await client.conversations.findDmByAddress(peer);
+  if (!conversation) {
+    logger.debug(
+      `[XMTPRN Conversations] Conversation ${peer} not found, syncing conversations`
+    );
+    const syncStart = new Date().getTime();
+    await client.conversations.sync();
+    const syncEnd = new Date().getTime();
+    logger.debug(
+      `[XMTPRN Conversations] Synced conversations in ${
+        (syncEnd - syncStart) / 1000
+      } sec`
+    );
+    conversation = await client.conversations.findDmByAddress(peer);
+  }
+  if (!conversation) {
+    throw new Error(`Conversation with peer ${peer} not found`);
+  }
+  if (includeSync) {
+    const syncStart = new Date().getTime();
+    await conversation.sync();
+    const syncEnd = new Date().getTime();
+    logger.debug(
+      `[XMTPRN Conversations] Synced conversation in ${
+        (syncEnd - syncStart) / 1000
+      } sec`
+    );
+  }
+  const end = new Date().getTime();
+  logger.debug(
+    `[XMTPRN Conversations] Got conversation by topic in ${
+      (end - start) / 1000
+    } sec`
+  );
+  return conversation;
+};
+
+type GetConversationByPeerByAccountParams = {
+  account: string;
+  peer: string;
+  includeSync?: boolean;
+};
+
+export const getConversationByPeerByAccount = async ({
+  account,
+  peer,
+  includeSync = false,
+}: GetConversationByPeerByAccountParams) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  return getConversationByPeer({ client, peer, includeSync });
 };
 
 type GetDmByAddressParams = {
@@ -408,4 +478,28 @@ export const refreshProtocolConversationByAccount = async ({
 }: RefreshProtocolConversationByAccountParams) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   return refreshProtocolConversation({ client, topic });
+};
+
+export const getPeerAddressDm = async (dm: DmWithCodecsType) => {
+  const peerInboxId = await dm.peerInboxId();
+  const peerAddress = (await dm.members()).find(
+    (member) => member.inboxId === peerInboxId
+  )?.addresses[0];
+  return peerAddress;
+};
+
+export const getPeerAddressFromTopic = async (
+  account: string,
+  topic: ConversationTopic
+) => {
+  const dm = await getConversationByTopicByAccount({
+    account,
+    topic,
+    includeSync: false,
+  });
+  if (dm.version === ConversationVersion.DM) {
+    const peerAddress = await getPeerAddressDm(dm);
+    return peerAddress;
+  }
+  throw new Error("Conversation is not a DM");
 };

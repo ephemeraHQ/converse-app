@@ -7,10 +7,16 @@ import {
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
-import { conversationQueryKey } from "./QueryKeys";
+import {
+  conversationQueryKey,
+  conversationWithPeerQueryKey,
+} from "./QueryKeys";
 import { queryClient } from "./queryClient";
 import logger from "@utils/logger";
-import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
+import {
+  getConversationByPeerByAccount,
+  getConversationByTopicByAccount,
+} from "@utils/xmtpRN/conversations";
 
 export const useConversationQuery = (
   account: string,
@@ -36,32 +42,55 @@ export const useConversationQuery = (
   });
 };
 
-export const useConversationScreenQuery = (
+export const useConversationWithPeerQuery = (
   account: string,
-  topic: ConversationTopic,
+  peer: string | undefined,
   options?: Partial<
     UseQueryOptions<ConversationWithCodecsType | null | undefined>
   >
 ) => {
   return useQuery({
     ...options,
-    queryKey: conversationQueryKey(account, topic),
+    queryKey: conversationWithPeerQueryKey(account, peer!),
+    queryFn: async () => {
+      logger.info("[Crash Debug] queryFn fetching conversation with peer");
+      if (!peer) {
+        return null;
+      }
+      const conversation = await getConversationByPeerByAccount({
+        account,
+        peer,
+        includeSync: true,
+      });
+      return conversation;
+    },
+    enabled: !!peer,
+  });
+};
+
+export const useConversationScreenQuery = (
+  account: string,
+  topic: ConversationTopic | undefined,
+  options?: Partial<
+    UseQueryOptions<ConversationWithCodecsType | null | undefined>
+  >
+) => {
+  return useQuery({
+    ...options,
+    queryKey: conversationQueryKey(account, topic!),
     queryFn: async () => {
       logger.info("[Crash Debug] queryFn fetching group");
       if (!topic) {
         return null;
       }
-      const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-      if (!client) {
-        return null;
-      }
-      const conversation =
-        await client.conversations.findConversationByTopic(topic);
-      await conversation?.sync();
-
+      const conversation = await getConversationByTopicByAccount({
+        account,
+        topic,
+        includeSync: true,
+      });
       return conversation;
     },
-    enabled: isV3Topic(topic),
+    enabled: !!topic,
   });
 };
 

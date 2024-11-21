@@ -45,40 +45,48 @@ const useDisplayInfo = ({ timestamp, isUnread }: UseDisplayInfoProps) => {
 };
 
 export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
-  console.log("conversationMessageDebug111", conversation);
   const currentAccount = useCurrentAccount()!;
+
   const { name: routeName } = useRoute();
+
   const isBlockedChatView = routeName === "Blocked";
+
   const { theme } = useAppTheme();
+
   const colorScheme = theme.isDark ? "dark" : "light";
+
   const topic = conversation.topic;
+
   const ref = useRef<Swipeable>(null);
-  const { topicsData, setTopicsData, setPinnedConversations } = useChatStore(
-    useSelect(["topicsData", "setTopicsData", "setPinnedConversations"])
+
+  const { setTopicsData, setPinnedConversations } = useChatStore(
+    useSelect(["setTopicsData", "setPinnedConversations"])
   );
+
   const { data: peer } = useDmPeerInboxOnConversationList(
     currentAccount!,
     conversation
   );
+
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
+
+  const timestamp = conversation?.lastMessage?.sentNs ?? 0;
+
+  const isUnread = useConversationIsUnread({
+    topic,
+    lastMessage: conversation.lastMessage,
+    conversation: conversation,
+    timestamp,
+  });
+
   const { timeToShow, leftActionIcon } = useDisplayInfo({
-    timestamp: conversation.createdAt,
-    isUnread: false,
+    timestamp,
+    isUnread,
   });
 
   const messageText = useMessageText(conversation.lastMessage);
   const prefferedName = usePreferredInboxName(peer);
   const avatarUri = usePreferredInboxAvatar(peer);
-
-  const timestamp = conversation?.lastMessage?.sentNs ?? 0;
-
-  const isUnread = useConversationIsUnread({
-    topicsData,
-    topic,
-    lastMessage: conversation.lastMessage,
-    conversation,
-    timestamp,
-  });
 
   const toggleReadStatus = useToggleReadStatus({
     setTopicsData,

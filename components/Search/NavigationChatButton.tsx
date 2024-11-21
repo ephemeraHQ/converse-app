@@ -30,6 +30,7 @@ export function NavigationChatButton({
     useShallow((s) => getProfile(address, s.profiles))
   );
   const preferredName = getPreferredName(profile?.socials, address);
+
   const openChat = useCallback(() => {
     // On Android the accounts are not in the navigation but in a drawer
 
@@ -40,6 +41,7 @@ export function NavigationChatButton({
       navigate("Conversation", {
         mainConversationWithPeer: address,
         focus: true,
+        skipLoading: true,
       });
     }, 300);
   }, [address, navigation]);

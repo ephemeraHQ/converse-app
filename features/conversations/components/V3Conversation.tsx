@@ -1,7 +1,10 @@
 import { ChatDumb } from "@components/Chat/ChatDumb";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationMessages } from "@queries/useConversationMessages";
-import { useConversationScreenQuery } from "@queries/useConversationQuery";
+import {
+  setConversationQueryData,
+  useConversationScreenQuery,
+} from "@queries/useConversationQuery";
 import { ListRenderItem } from "@shopify/flash-list";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -18,14 +21,12 @@ import { TextInputWithValue } from "@utils/str";
 import { MediaPreview } from "@data/store/chatStore";
 import { V3Message } from "@components/Chat/Message/V3Message";
 import { navigate } from "@utils/navigation";
-import {
-  getDraftMessage,
-  setDraftMessage,
-} from "../../features/conversations/utils/textDrafts";
+import { getDraftMessage, setDraftMessage } from "../utils/textDrafts";
 import { useRouter } from "@navigation/useNavigation";
-import { GroupConversationTitle } from "../../features/conversations/components/GroupConversationTitle";
-import { DmConversationTitle } from "../../features/conversations/components/DmConversationTitle";
+import { GroupConversationTitle } from "./GroupConversationTitle";
+import { DmConversationTitle } from "./DmConversationTitle";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { createConversationByAccount } from "@utils/xmtpRN/conversations";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
 
 type UseDataProps = {
@@ -91,11 +92,16 @@ const getItemTypeCallback = () => {
 };
 
 type V3ConversationProps = {
-  topic: ConversationTopic;
+  topic?: ConversationTopic;
+  peerAddress?: string;
   textPrefill?: string;
 };
 
-export const V3Conversation = ({ topic, textPrefill }: V3ConversationProps) => {
+export const V3Conversation = ({
+  topic,
+  peerAddress,
+  textPrefill,
+}: V3ConversationProps) => {
   // TODO Update values
   const navigation = useRouter();
   const showChatInput = true;
@@ -116,7 +122,7 @@ export const V3Conversation = ({ topic, textPrefill }: V3ConversationProps) => {
         item={item}
         index={index}
         currentAccount={currentAccount}
-        topic={topic}
+        topic={topic!}
       />
     ),
     [currentAccount, topic]
@@ -132,13 +138,34 @@ export const V3Conversation = ({ topic, textPrefill }: V3ConversationProps) => {
       headerTitle: () => {
         if (!conversation) return null;
         if (conversation.version === ConversationVersion.GROUP) {
-          return <GroupConversationTitle topic={topic} />;
+          return <GroupConversationTitle topic={topic!} />;
         }
-        return <DmConversationTitle topic={topic} />;
+        return <DmConversationTitle topic={topic!} />;
       },
       headerTintColor,
     });
   }, [headerTintColor, navigation, conversation, topic]);
+
+  const handleSend = useCallback(
+    async (sendContent: SendContent) => {
+      if (!conversation && peerAddress) {
+        const conversation = await createConversationByAccount(
+          currentAccount,
+          peerAddress
+        );
+        setConversationQueryData(
+          currentAccount,
+          conversation.topic,
+          conversation
+        );
+        navigation.setParams({ topic: conversation.topic });
+        await conversation.send(sendContent);
+        return;
+      }
+      await conversation?.send(sendContent);
+    },
+    [conversation, currentAccount, navigation, peerAddress]
+  );
 
   const onSend = useCallback(
     async ({
@@ -152,7 +179,7 @@ export const V3Conversation = ({ topic, textPrefill }: V3ConversationProps) => {
     }) => {
       if (referencedMessageId) {
         if (attachment) {
-          await conversation?.send({
+          await handleSend({
             reply: {
               reference: referencedMessageId,
               content: { remoteAttachment: attachment },
@@ -160,7 +187,7 @@ export const V3Conversation = ({ topic, textPrefill }: V3ConversationProps) => {
           });
         }
         if (text) {
-          await conversation?.send({
+          await handleSend({
             reply: {
               reference: referencedMessageId,
               content: { text },
@@ -170,20 +197,20 @@ export const V3Conversation = ({ topic, textPrefill }: V3ConversationProps) => {
         return;
       }
       if (attachment) {
-        await conversation?.send({
+        await handleSend({
           remoteAttachment: attachment,
         });
       }
       if (text) {
-        await conversation?.send(text);
+        await handleSend(text);
       }
     },
-    [conversation]
+    [handleSend]
   );
 
   const onLeaveScreen = useCallback(() => {
     // useChatStore.getState().setOpenedConversationTopic(null);
-    setDraftMessage(topic, textInputRef.current?.currentValue ?? "");
+    setDraftMessage(topic!, textInputRef.current?.currentValue ?? "");
   }, [topic]);
 
   useEffect(() => {
@@ -220,7 +247,7 @@ export const V3Conversation = ({ topic, textPrefill }: V3ConversationProps) => {
   }, [conversation, messages?.ids.length, onSend]);
 
   const messageToPrefill = useMemo(
-    () => textPrefill ?? getDraftMessage(topic) ?? "",
+    () => textPrefill ?? getDraftMessage(topic!) ?? "",
     [textPrefill, topic]
   );
 
