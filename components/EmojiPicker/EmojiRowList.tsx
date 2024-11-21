@@ -1,5 +1,5 @@
 import { ListRenderItem as FlashListRenderItem } from "@shopify/flash-list";
-import { ReanimatedView, ReanimatedFlashList } from "@utils/animations";
+import { ReanimatedView } from "@utils/animations";
 import { CategorizedEmojisRecord } from "@utils/emojis/interfaces";
 import React, { FC, useCallback, useEffect } from "react";
 import {
@@ -9,7 +9,6 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
 import {
   useAnimatedStyle,
   useSharedValue,
@@ -18,17 +17,20 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { EmojiRow } from "./EmojiRow";
+import { BottomSheetFlashList } from "@design-system/BottomSheet/BottomSheetFlashList";
+import { BottomSheetFlatList } from "@design-system/BottomSheet/BottomSheetFlatList";
 
-interface EmojiRowListProps {
+type EmojiRowListProps = {
   emojis: CategorizedEmojisRecord[];
   ListHeader?: React.ReactNode;
   onPress: (emoji: string) => void;
-}
+};
 
 const keyExtractor = (_: unknown, index: number) => String(index);
 
 // Works around issue with Android not picking up scrolls
-const ListRenderer = Platform.OS === "ios" ? ReanimatedFlashList : FlatList;
+const ListRenderer =
+  Platform.OS === "ios" ? BottomSheetFlashList : BottomSheetFlatList;
 
 export const EmojiRowList: FC<EmojiRowListProps> = ({
   emojis,
@@ -62,17 +64,21 @@ export const EmojiRowList: FC<EmojiRowListProps> = ({
     };
   });
 
+  const ListHeaderComponent = useCallback(() => {
+    return ListHeader;
+  }, [ListHeader]);
+
   return (
     <ReanimatedView style={[animatedStyle, styles.container]}>
       <ListRenderer
-        ListHeaderComponent={() => ListHeader}
+        ListHeaderComponent={ListHeaderComponent}
         showsVerticalScrollIndicator={false}
-        estimatedItemSize={50}
         data={emojis}
         scrollEnabled={emojis.length > 1}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         keyboardShouldPersistTaps="handled"
+        estimatedItemSize={49}
         ListFooterComponent={() => <View style={styles.bottom} />}
       />
     </ReanimatedView>
