@@ -1,12 +1,12 @@
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
 import { BlurView } from "@design-system/BlurView";
-import { useAppTheme } from "@theme/useAppTheme";
-import { animations } from "@theme/animations";
 import {
-  MENU_GAP,
   AUXILIARY_VIEW_GAP,
+  MENU_GAP,
 } from "@design-system/ContextMenu/ContextMenu.constants";
 import { calculateMenuHeight } from "@design-system/ContextMenu/ContextMenu.utils";
+import { animation } from "@theme/animations";
+import { useAppTheme } from "@theme/useAppTheme";
 import { ConversationContext } from "@utils/conversation";
 import React, { FC, memo, useEffect, useMemo } from "react";
 import {
@@ -21,7 +21,6 @@ import Animated, {
   SharedValue,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
@@ -67,10 +66,10 @@ const BackdropComponent: FC<{
   useEffect(() => {
     activeValue.value = isActive;
     opacityValue.value = withTiming(isActive ? 1 : 0, {
-      duration: animations.contextMenuHoldDuration,
+      duration: animation.contextMenuHoldDuration,
     });
     intensityValue.value = withTiming(isActive ? 50 : 0, {
-      duration: animations.contextMenuHoldDuration,
+      duration: animation.contextMenuHoldDuration,
     });
   }, [activeValue, isActive, opacityValue, intensityValue]);
 
@@ -126,8 +125,8 @@ const BackdropComponent: FC<{
     const tY = getTransformValue();
     const transformAnimation = () =>
       isActive
-        ? withSpring(tY, animations.contextMenuSpring)
-        : withTiming(0, { duration: animations.contextMenuHoldDuration });
+        ? withSpring(tY, animation.contextMenuSpring)
+        : withTiming(0, { duration: animation.contextMenuHoldDuration });
     return {
       position: "absolute",
       top: itemRectY.value,
@@ -182,8 +181,8 @@ const BackdropComponent: FC<{
     const tY = getTransformValue();
     const transformAnimation = () =>
       isActive
-        ? withSpring(tY, animations.contextMenuSpring)
-        : withTiming(0, { duration: animations.contextMenuHoldDuration });
+        ? withSpring(tY, animation.contextMenuSpring)
+        : withTiming(0, { duration: animation.contextMenuHoldDuration });
 
     return {
       position: "absolute",
@@ -240,8 +239,8 @@ const BackdropComponent: FC<{
     const tY = getTransformValue();
     const transformAnimation = () =>
       isActive
-        ? withSpring(tY, animations.contextMenuSpring)
-        : withTiming(-0.1, { duration: animations.contextMenuHoldDuration });
+        ? withSpring(tY, animation.contextMenuSpring)
+        : withTiming(-0.1, { duration: animation.contextMenuHoldDuration });
 
     return {
       position: "absolute",
@@ -250,7 +249,7 @@ const BackdropComponent: FC<{
       height: itemRectHeight.value,
       width: itemRectWidth.value,
       opacity: withTiming(isActive ? 1 : 0, {
-        duration: animations.contextMenuHoldDuration,
+        duration: animation.contextMenuHoldDuration,
       }),
       transform: [
         {

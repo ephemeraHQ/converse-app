@@ -84,13 +84,10 @@ export const SwipeableMessageWrapper = memo(function SwipeableMessageWrapper({
 const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   width: "100%",
   flexDirection: "row",
-  paddingLeft: 12,
-  paddingRight: 15,
   overflow: "visible",
 });
 
 const $childrenContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   width: "100%",
   flexDirection: "row",
-  flexWrap: "wrap",
 });

@@ -26,13 +26,13 @@ export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
 
   bodyBold: [textBaseStyle, textFontWeightStyles.bold],
 
-  small: [textBaseStyle, textSizeStyles.sm],
+  small: [textBaseStyle, textSizeStyles.xs],
 
-  smaller: [textBaseStyle, textSizeStyles.xs],
+  smaller: [textBaseStyle, textSizeStyles.xxs],
 
-  smallerBold: [textBaseStyle, textSizeStyles.xs, textFontWeightStyles.bold],
+  smallerBold: [textBaseStyle, textSizeStyles.xxs, textFontWeightStyles.bold],
 
-  bigBold: [textBaseStyle, textSizeStyles.md, textFontWeightStyles.bold],
+  bigBold: [textBaseStyle, textSizeStyles.xs, textFontWeightStyles.bold],
 
   formHelper: [
     textBaseStyle,

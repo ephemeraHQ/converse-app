@@ -34,7 +34,12 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
   });
 
   return (
-    <RNText ref={ref} {...rest} style={styles}>
+    <RNText
+      ref={ref}
+      style={styles}
+      suppressHighlighting={true} // Don't like the default highlight on press
+      {...rest}
+    >
       {content}
     </RNText>
   );

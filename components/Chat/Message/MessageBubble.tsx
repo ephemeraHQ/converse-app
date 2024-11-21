@@ -1,17 +1,15 @@
-import { MessageSenderAvatarDumb } from "@components/Chat/Message/MessageSenderAvatar";
 import { useMessageContextStoreContext } from "@components/Chat/Message/messageContextStore";
 import ClickableText from "@components/ClickableText";
 import { HStack } from "@design-system/HStack";
-import { VStack } from "@design-system/VStack";
 import { useAppTheme } from "@theme/useAppTheme";
-import { memo, useMemo } from "react";
+import { useMemo } from "react";
 import { StyleSheet, useColorScheme } from "react-native";
 
-type SimpleMessageProps = {
+type MessageBubbleProps = {
   content?: string;
 };
 
-export const SimpleMessage = ({ content }: SimpleMessageProps) => {
+export const MessageBubble = ({ content }: MessageBubbleProps) => {
   const styles = useStyles();
 
   const { theme } = useAppTheme();
@@ -19,6 +17,12 @@ export const SimpleMessage = ({ content }: SimpleMessageProps) => {
   const fromMe = useMessageContextStoreContext((state) => state.fromMe);
   const hasNextMessageInSeries = useMessageContextStoreContext(
     (state) => state.hasNextMessageInSeries
+  );
+  const showDateChange = useMessageContextStoreContext(
+    (state) => state.showDateChange
+  );
+  const hasPreviousMessageInSeries = useMessageContextStoreContext(
+    (state) => state.hasPreviousMessageInSeries
   );
 
   return (
@@ -32,23 +36,21 @@ export const SimpleMessage = ({ content }: SimpleMessageProps) => {
         },
       ]}
     >
-      <MessageAvatarWrapper />
       <HStack
         style={[
           //   debugBorder("red"),
           styles.messageBubble,
           fromMe && styles.messageBubbleMe,
           !hasNextMessageInSeries && styles.messageBubbleTail,
-          fromMe && !hasNextMessageInSeries && styles.messageBubbleTailMe,
+          fromMe &&
+            (!hasNextMessageInSeries ||
+              showDateChange ||
+              hasPreviousMessageInSeries) &&
+            styles.messageBubbleTailMe,
         ]}
       >
         <ClickableText
-          style={
-            [
-              // styles.messageText,
-              // fromMe ? styles.messageTextMe : undefined,
-            ]
-          }
+          style={[styles.messageText, fromMe && styles.messageTextMe]}
         >
           {content}
         </ClickableText>
@@ -57,30 +59,8 @@ export const SimpleMessage = ({ content }: SimpleMessageProps) => {
   );
 };
 
-export const MessageAvatarWrapper = memo(function MessageAvatarWrapper() {
-  const { theme } = useAppTheme();
-
-  const hasNextMessageInSeries = useMessageContextStoreContext(
-    (state) => state.hasNextMessageInSeries
-  );
-
-  if (hasNextMessageInSeries) {
-    return (
-      <VStack
-        style={{
-          width: theme.layout.chat.messageSenderAvatar.width,
-          height: theme.layout.chat.messageSenderAvatar.height,
-        }}
-      />
-    );
-  }
-
-  return <MessageSenderAvatarDumb avatarName="TS" />;
-});
-
 const useStyles = () => {
   const { theme } = useAppTheme();
-  const colorScheme = useColorScheme();
 
   return useMemo(
     () =>
@@ -88,8 +68,7 @@ const useStyles = () => {
         container: {
           alignSelf: "flex-start",
           alignItems: "flex-end",
-          maxWidth: "85%",
-          paddingHorizontal: theme.spacing.sm,
+          // maxWidth: "85%", // Not sure
         },
         containerMe: {
           alignSelf: "flex-end",
@@ -104,23 +83,23 @@ const useStyles = () => {
           backgroundColor: theme.colors.bubbles.bubble,
         },
         messageBubbleTail: {
-          borderBottomLeftRadius: theme.borderRadius.xs,
+          borderBottomLeftRadius: theme.spacing["4xs"],
         },
         messageBubbleTailMe: {
-          borderBottomRightRadius: theme.borderRadius.xs,
+          borderBottomLeftRadius: theme.spacing.sm,
+          borderBottomRightRadius: theme.spacing["4xs"],
         },
-        // messageText: {
-        //   fontSize: 17,
-        //   color: textPrimaryColor(colorScheme),
-        // },
-        // messageTextMe: {
-        //   color: inversePrimaryColor(colorScheme),
-        // },
+        messageText: {
+          color: theme.colors.text.primary,
+        },
+        messageTextMe: {
+          color: theme.colors.text.inverted.primary,
+        },
         allEmojisAndMaxThree: {
           fontSize: 64,
           paddingHorizontal: 0,
         },
       }),
-    [theme, colorScheme]
+    [theme]
   );
 };

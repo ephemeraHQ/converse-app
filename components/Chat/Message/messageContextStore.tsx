@@ -1,9 +1,14 @@
+import { InboxId } from "@xmtp/react-native-sdk";
 import { createContext, memo, useContext, useEffect, useRef } from "react";
 import { createStore, useStore } from "zustand";
 
 type IMessageContextStoreProps = {
   hasNextMessageInSeries: boolean;
+  hasPreviousMessageInSeries: boolean;
   fromMe: boolean;
+  sentAt: number;
+  showDateChange: boolean;
+  senderAddress: InboxId;
 };
 
 type IMessageContextStoreState = IMessageContextStoreProps & {};
@@ -36,7 +41,11 @@ export const MessageContextStoreProvider = memo(
 const createMessageContextStore = (initProps: IMessageContextStoreProps) => {
   const DEFAULT_PROPS: IMessageContextStoreProps = {
     hasNextMessageInSeries: false,
+    hasPreviousMessageInSeries: false,
     fromMe: false,
+    sentAt: 0,
+    showDateChange: false,
+    senderAddress: "" as InboxId,
   };
   return createStore<IMessageContextStoreState>()((set) => ({
     ...DEFAULT_PROPS,
@@ -57,7 +66,7 @@ export function useMessageContextStoreContext<T>(
   return useStore(store, selector);
 }
 
-function useMessageContextStore() {
+export function useMessageContextStore() {
   const store = useContext(MessageContextStoreContext);
   if (!store) throw new Error();
   return store;
