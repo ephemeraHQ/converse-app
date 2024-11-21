@@ -12,7 +12,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { StyleProp, useColorScheme } from "react-native";
+import { Appearance, Platform, StyleProp, useColorScheme } from "react-native";
 
 import { IShadow, shadow } from "@theme/shadow";
 import { IAvatarSize, avatarSize } from "./avatar";
@@ -25,10 +25,12 @@ import { ISpacing, spacing } from "./spacing";
 import { Timing, timing } from "./timing";
 import { ITypography, typography } from "./typography";
 
+import logger from "@utils/logger";
+
 export type ThemeContexts = "light" | "dark" | undefined;
 
 // The overall Theme object should contain all of the data you need to style your app.
-export interface Theme {
+export type Theme = {
   colors: IColors;
   spacing: ISpacing;
   borderRadius: IBorderRadius;
@@ -39,7 +41,7 @@ export interface Theme {
   timing: Timing;
   shadow: IShadow;
   isDark: boolean;
-}
+};
 
 // Here we define our themes.
 export const lightTheme: Theme = {
@@ -138,7 +140,7 @@ export const useThemeProvider = (initialTheme: ThemeContexts = undefined) => {
   };
 };
 
-interface UseAppThemeValue {
+type UseAppThemeValue = {
   // The theme object from react-navigation
   navTheme: typeof DefaultTheme;
   // A function to set the theme context override (for switching modes)
@@ -153,7 +155,7 @@ interface UseAppThemeValue {
   themed: <T>(
     styleOrStyleFn: ThemedStyle<T> | StyleProp<T> | ThemedStyleArray<T>
   ) => T;
-}
+};
 
 export type IThemed = ReturnType<typeof useAppTheme>["themed"];
 
@@ -181,6 +183,18 @@ export const useAppTheme = (): UseAppThemeValue => {
     () => themeContextToTheme(themeContext),
     [themeContext]
   );
+
+  // TODO: Remove after debugging is done
+  // Light/dark mode color scheme logging
+  useEffect(() => {
+    logger.debug("=== Theme Debug ===", {
+      systemColorScheme: Appearance.getColorScheme(),
+      platformVersion: Platform.Version,
+      themeContext: themeContext,
+      isDarkTheme: themeVariant.isDark,
+      navThemeDark: navTheme.dark,
+    });
+  }, [themeContext, themeVariant, navTheme]);
 
   const themed = useCallback(
     <T>(
