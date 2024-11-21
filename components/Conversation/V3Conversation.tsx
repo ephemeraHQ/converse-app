@@ -1,153 +1,52 @@
 import Avatar from "@components/Avatar";
+import { V3Message } from "@components/Chat/Message/V3Message";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationMessages } from "@queries/useConversationMessages";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { NavigationParamList } from "@screens/Navigation/Navigation";
-import { ListRenderItem } from "@shopify/flash-list";
-import { memo, useCallback, useEffect, useMemo } from "react";
-import { Alert, Platform } from "react-native";
-import { GroupChatPlaceholder } from "@components/Chat/ChatPlaceholder/GroupChatPlaceholder";
-import { V3Message } from "@components/Chat/Message/V3Message";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
+import { memo, useCallback, useEffect, useMemo } from "react";
+import { Alert, FlatListProps, Platform } from "react-native";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
-import { ChatInputDumb } from "../../features/conversation/composer/composer";
 import { useDebugEnabled } from "@components/DebugButton";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
 import { Screen } from "@components/Screen/ScreenComp/Screen";
-import { AnimatedVStack } from "@design-system/VStack";
+import { Button } from "@design-system/Button/Button";
+import { Center } from "@design-system/Center";
+import { Text } from "@design-system/Text";
+import { AnimatedVStack, VStack } from "@design-system/VStack";
 import { useProfilesSocials } from "@hooks/useProfilesSocials";
+import { translate } from "@i18n/translate";
 import { useRouter } from "@navigation/useNavigation";
 import { useGroupMembersConversationScreenQuery } from "@queries/useGroupMembersQuery";
 import { useAppTheme } from "@theme/useAppTheme";
+import { isV3Topic } from "@utils/groupUtils/groupId";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import Animated, {
+  AnimatedProps,
   useAnimatedKeyboard,
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ChatInputDumb } from "../../features/conversation/composer/composer";
 import {
   ConversationContextProvider,
   useConversationContext,
 } from "../../features/conversation/conversation-context";
-import { useConversationGroupContext } from "../../features/conversation/conversation-group-context";
-import { initializeCurrentConversation } from "../../features/conversation/conversation-service";
+import {
+  ConversationGroupContextProvider,
+  useConversationGroupContext,
+} from "../../features/conversation/conversation-group-context";
+import {
+  getCurrentConversationMessages,
+  initializeCurrentConversation,
+  useConversationCurrentTopic,
+} from "../../features/conversation/conversation-service";
 import { ConversationTitleDumb } from "./ConversationTitleDumb";
 
-// type UseDataProps = {
-//   topic: ConversationTopic;
-// };
-
-// const useData = ({ topic }: UseDataProps) => {
-//   // const currentAccount = useCurrentAccount()!;
-//   // const {
-//   //   data: conversation,
-//   //   isLoading,
-//   //   isRefetching,
-//   // } = useConversationScreenQuery(currentAccount, topic!);
-
-//   // const { data: messages, isLoading: messagesLoading } =
-//   //   useConversationMessages(currentAccount, topic!);
-//   // const { data: groupName, isLoading: groupNameLoading } = useGroupNameQuery(
-//   //   currentAccount,
-//   //   topic!
-//   // );
-//   // const { data: groupPhoto, isLoading: groupPhotoLoading } = useGroupPhotoQuery(
-//   //   currentAccount,
-//   //   topic!
-//   // );
-//   // const { data: members, isLoading: membersLoading } =
-//   //   useGroupMembersConversationScreenQuery(currentAccount, topic!);
-
-//   // useEffect(() => {
-//   //   const checkActive = async () => {
-//   //     if (!conversation) return;
-//   //     if (conversation.version === ConversationVersion.GROUP) {
-//   //       const isActive = conversation.isGroupActive;
-//   //       // If not active leave the screen
-//   //       if (!isActive) {
-//   //         navigate("Chats");
-//   //       }
-//   //     }
-//   //   };
-//   //   checkActive();
-//   // }, [conversation]);
-
-//   // const memberAddresses = useMemo(() => {
-//   //   const addresses: string[] = [];
-//   //   for (const memberId of members?.ids ?? []) {
-//   //     const member = members?.byId[memberId];
-//   //     if (
-//   //       member?.addresses[0] &&
-//   //       member?.addresses[0].toLowerCase() !== currentAccount?.toLowerCase()
-//   //     ) {
-//   //       addresses.push(member?.addresses[0]);
-//   //     }
-//   //   }
-//   //   return addresses;
-//   // }, [members, currentAccount]);
-//   // const data = useProfilesSocials(memberAddresses);
-
-//   // const memberData: {
-//   //   address: string;
-//   //   uri?: string;
-//   //   name?: string;
-//   // }[] = useMemo(() => {
-//   //   return data.map(({ data: socials }, index) =>
-//   //     socials
-//   //       ? {
-//   //           address: memberAddresses[index],
-//   //           uri: getPreferredAvatar(socials),
-//   //           name: getPreferredName(socials, memberAddresses[index]),
-//   //         }
-//   //       : {
-//   //           address: memberAddresses[index],
-//   //           uri: undefined,
-//   //           name: memberAddresses[index],
-//   //         }
-//   //   );
-//   // }, [data, memberAddresses]);
-
-//   // const debugEnabled = useDebugEnabled();
-
-//   return {
-//     conversation,
-//     messages,
-//     messagesLoading,
-//     groupName,
-//     groupNameLoading,
-//     groupPhoto,
-//     groupPhotoLoading,
-//     members,
-//     membersLoading,
-//     isLoading,
-//     isRefetching,
-//     debugEnabled,
-//     memberData,
-//   };
-// };
-
-// const useStyles = () => {
-//   const colorScheme = useColorScheme();
-//   return useMemo(
-//     () =>
-//       StyleSheet.create({
-
-//         avatar: {
-//           marginRight: Platform.OS === "android" ? 24 : 7,
-//           marginLeft: Platform.OS === "ios" ? 0 : -9,
-//         },
-//       }),
-//     [colorScheme]
-//   );
-// };
-
 const keyExtractor = (item: string) => item;
-
-// const getItemTypeCallback = () => {
-//   return "MESSAGE";
-// };
 
 export const V3Conversation = ({
   route,
@@ -168,98 +67,9 @@ export const V3Conversation = ({
 };
 
 const Content = memo(function Content() {
-  const currentAccount = useCurrentAccount()!;
-  const topic = useConversationContext("topic")!;
-
   const { theme } = useAppTheme();
 
-  const {
-    data: messages,
-    isLoading: messagesLoading,
-    isRefetching: isRefetchingMessages,
-    error: messagesError,
-  } = useConversationMessages(currentAccount, topic!);
-
-  // const {
-  //   conversation,
-  //   messages,
-  //   messagesLoading,
-  //   groupName,
-  //   groupPhoto,
-  //   groupPhotoLoading,
-  //   groupNameLoading,
-  //   members,
-  //   isRefetching,
-  //   debugEnabled,
-  //   memberData,
-  //   isLoading,
-  // } = useData({
-  //   topic,
-  // });
-
-  // const styles = useStyles();
-
-  const renderItem: ListRenderItem<string> = useCallback(
-    ({ item: messageId, index }) => {
-      if (!messages) return null;
-      return (
-        <AnimatedVStack
-          {...(index === 0 &&
-            {
-              // entering: theme.animation.reanimatedFadeInDownSpring,
-            })}
-        >
-          <V3Message
-            messageId={messageId}
-            previousMessageId={index > 0 ? messages.ids[index + 1] : undefined}
-            nextMessageId={
-              index < messages.ids.length - 1
-                ? messages.ids[index - 1]
-                : undefined
-            }
-          />
-        </AnimatedVStack>
-      );
-    },
-    [messages]
-  );
-
-  // const showPlaceholder =
-  //   ((messages?.ids.length ?? 0) === 0 && !messagesLoading) ||
-  //   (!conversation && !isLoading);
-  // const displayList = !showPlaceholder;
-
-  useHeader();
-
-  // const onLeaveScreen = useCallback(() => {
-  //   // useChatStore.getState().setOpenedConversationTopic(null);
-  //   setDraftMessage(topic, textInputRef.current?.currentValue ?? "");
-  // }, [topic]);
-
-  // useEffect(() => {
-  //   const unsubscribeBeforeRemove = navigation.addListener(
-  //     "beforeRemove",
-  //     onLeaveScreen
-  //   );
-
-  //   return () => {
-  //     unsubscribeBeforeRemove();
-  //   };
-  // }, [navigation, onLeaveScreen]);
-
-  // const messageToPrefill = useMemo(
-  //   () => route.params?.text ?? getDraftMessage(topic) ?? "",
-  //   [route.params?.text, topic]
-  // );
-
-  // const textInputRef = useRef<TextInputWithValue>();
-  // const mediaPreviewRef = useRef<MediaPreview>();
-  // const [frameTextInputFocused, setFrameTextInputFocused] = useState(false);
-  // const tagsFetchedOnceForMessage = useRef<{ [messageId: string]: boolean }>(
-  //   {}
-  // );
-
-  const isEmptyList = messages?.ids.length === 0 && !messagesLoading;
+  const conversationVersion = useConversationContext("conversationVersion");
 
   return (
     <AnimatedVStack
@@ -268,77 +78,143 @@ const Content = memo(function Content() {
         flex: 1,
       }}
     >
-      {/* <ChatDumb
-                items={messages?.ids ?? []}
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
-                onReadyToFocus={onReadyToFocus}
-                frameTextInputFocused={false}
-                showChatInput={showChatInput}
-                showPlaceholder={showPlaceholder}
-                placeholderComponent={placeholderComponent}
-                displayList={displayList}
-                refreshing={isRefetching}
-                getItemType={getItemTypeCallback}
-                itemToId={keyExtractor}
-                ListFooterComponent={null}
-                onSend={onSend}
-              /> */}
-      {/* <ChatListContainer> */}
-      {isEmptyList ? (
-        <ListEmptyComponent />
-      ) : (
-        // Need FlatList for itemLayoutAnimation
-        <Animated.FlatList
-          inverted
-          // @ts-ignore It says error but it works
-          // layout={theme.animation.springLayoutTransition}
-          itemLayoutAnimation={theme.animation.reanimatedSpringLayoutTransition}
-          data={messages?.ids ?? []}
-          refreshing={isRefetchingMessages}
-          renderItem={renderItem}
-          ListEmptyComponent={<ListEmptyComponent />}
-          keyboardDismissMode="interactive"
-          automaticallyAdjustContentInsets={false}
-          contentInsetAdjustmentBehavior="never"
-          keyExtractor={keyExtractor}
-          keyboardShouldPersistTaps="handled"
-          estimatedItemSize={34} // TODO
-          showsVerticalScrollIndicator={Platform.OS === "ios"} // Size glitch on Android
-          pointerEvents="auto"
-
-          /**
-           * Causes a glitch on Android, no sure we need it for now
-           */
-          // maintainVisibleContentPosition={{
-          //   minIndexForVisible: 0,
-          //   autoscrollToTopThreshold: 100,
-          // }}
-          // estimatedListSize={Dimensions.get("screen")}
+      {!conversationVersion ? (
+        <VStack
+          style={{
+            flex: 1,
+          }}
         />
+      ) : conversationVersion === ConversationVersion.DM ? (
+        <DmContent />
+      ) : (
+        <ConversationGroupContextProvider>
+          <GroupContent />
+        </ConversationGroupContextProvider>
       )}
-      {/* </ChatListContainer> */}
-
-      {/* <AnimatedVStack
-                style={[
-                  textInputStyle,
-                  {
-                    display:
-                      frameTextInputFocused && hideInputIfFrameFocused
-                        ? "none"
-                        : "flex",
-                  },
-                ]}
-              > */}
       <ChatInputDumb />
       <KeyboardFiller />
-      {/* </AnimatedVStack> */}
-      {/* <View
-                style={[
-                  styles.inputBottomFiller,
-                  { height: insets.bottom + DEFAULT_INPUT_HEIGHT },
-                ]}
-              /> */}
+    </AnimatedVStack>
+  );
+});
+
+const DmContent = memo(function DmContent() {
+  const currentAccount = useCurrentAccount()!;
+  const topic = useConversationCurrentTopic();
+  const conversationNotFound = useConversationContext("conversationNotFound");
+
+  const {
+    data: messages,
+    isLoading: messagesLoading,
+    isRefetching: isRefetchingMessages,
+  } = useConversationMessages(currentAccount, topic!);
+
+  // TODO: Add DM header
+  // useDmHeader();
+
+  if (conversationNotFound) {
+    // TODO: Add DM placeholder
+    return null;
+  }
+
+  if (messages?.ids.length === 0 && !messagesLoading) {
+    // TODO: Add DM placeholder
+    return null;
+  }
+
+  return (
+    <MessagesList
+      data={messages?.ids ?? []}
+      refreshing={isRefetchingMessages}
+    />
+  );
+});
+
+const GroupContent = memo(function GroupContent() {
+  const currentAccount = useCurrentAccount()!;
+  const topic = useConversationCurrentTopic();
+  const conversationNotFound = useConversationContext("conversationNotFound");
+
+  const {
+    data: messages,
+    isLoading: messagesLoading,
+    isRefetching: isRefetchingMessages,
+  } = useConversationMessages(currentAccount, topic!);
+
+  useGroupHeader();
+
+  if (conversationNotFound) {
+    return <GroupConversationMissing />;
+  }
+
+  if (messages?.ids.length === 0 && !messagesLoading) {
+    return <GroupConversationEmpty />;
+  }
+
+  return (
+    <MessagesList
+      data={messages?.ids ?? []}
+      refreshing={isRefetchingMessages}
+    />
+  );
+});
+
+const MessagesList = memo(function MessagesList(
+  props: Omit<AnimatedProps<FlatListProps<string>>, "renderItem">
+) {
+  const { theme } = useAppTheme();
+
+  return (
+    <Animated.FlatList
+      inverted
+      // @ts-ignore It says error but it works
+      // layout={theme.animation.springLayoutTransition}
+      itemLayoutAnimation={theme.animation.reanimatedSpringLayoutTransition}
+      renderItem={({ item, index }) => (
+        <Message messageId={item} index={index} />
+      )}
+      keyboardDismissMode="interactive"
+      automaticallyAdjustContentInsets={false}
+      contentInsetAdjustmentBehavior="never"
+      keyExtractor={keyExtractor}
+      keyboardShouldPersistTaps="handled"
+      // estimatedItemSize={34} // TODO
+      showsVerticalScrollIndicator={Platform.OS === "ios"} // Size glitch on Android
+      pointerEvents="auto"
+      /**
+       * Causes a glitch on Android, no sure we need it for now
+       */
+      // maintainVisibleContentPosition={{
+      //   minIndexForVisible: 0,
+      //   autoscrollToTopThreshold: 100,
+      // }}
+      // estimatedListSize={Dimensions.get("screen")}
+      {...props}
+    />
+  );
+});
+
+const Message = memo(function Message(props: {
+  messageId: string;
+  index: number;
+}) {
+  const { messageId, index } = props;
+
+  const messages = getCurrentConversationMessages()!;
+
+  return (
+    <AnimatedVStack
+      {...(index === 0 &&
+        {
+          // entering: theme.animation.reanimatedFadeInDownSpring,
+        })}
+    >
+      <V3Message
+        messageId={messageId}
+        previousMessageId={index > 0 ? messages.ids[index + 1] : undefined}
+        nextMessageId={
+          index < messages.ids.length - 1 ? messages.ids[index - 1] : undefined
+        }
+      />
     </AnimatedVStack>
   );
 });
@@ -354,41 +230,19 @@ const KeyboardFiller = memo(function KeyboardFiller() {
   return <AnimatedVStack style={as} />;
 });
 
-const ListEmptyComponent = memo(function ListEmptyComponent() {
-  const conversationVersion = useConversationContext("conversationVersion");
-
-  if (!conversationVersion) {
-    return null;
-  }
-
-  if (conversationVersion == ConversationVersion.GROUP) {
-    return <GroupChatPlaceholder />;
-  }
-
-  // TODO: Add DM placeholder
-  return null;
-  // return (
-  //   <ChatPlaceholder
-  //     messagesCount={messages?.ids.length ?? 0}
-  //     onSend={onSend}
-  //     conversation={conversation}
-  //   />
-  // );
-});
-
-function useHeader() {
+function useGroupHeader() {
   const { theme } = useAppTheme();
 
   const navigation = useRouter();
 
-  const topic = useConversationContext("topic")!;
+  const topic = useConversationCurrentTopic();
   const currentAccount = useCurrentAccount()!;
 
   const groupName = useConversationGroupContext("groupName");
 
   const { data: groupPhoto, isLoading: groupPhotoLoading } = useGroupPhotoQuery(
     currentAccount,
-    topic!
+    topic
   );
 
   const avatarComponent = useMemo(() => {
@@ -443,7 +297,7 @@ function useHeader() {
 const GroupAvatarWrapper = memo(function GroupAvatarWrapper() {
   const { theme } = useAppTheme();
 
-  const topic = useConversationContext("topic")!;
+  const topic = useConversationCurrentTopic();
   const currentAccount = useCurrentAccount()!;
 
   const { data: members } = useGroupMembersConversationScreenQuery(
@@ -489,5 +343,68 @@ const GroupAvatarWrapper = memo(function GroupAvatarWrapper() {
       size={theme.avatarSize.sm}
       // style={styles.avatar}
     />
+  );
+});
+
+const GroupConversationMissing = memo(() => {
+  const topic = useConversationCurrentTopic();
+
+  return (
+    <VStack>
+      <Text
+        style={{
+          textAlign: "center",
+        }}
+      >
+        {topic
+          ? isV3Topic(topic)
+            ? translate("group_not_found")
+            : translate("conversation_not_found")
+          : translate("opening_conversation")}
+      </Text>
+    </VStack>
+  );
+});
+
+const GroupConversationEmpty = memo(() => {
+  const { theme } = useAppTheme();
+
+  const groupName = useConversationGroupContext("groupName");
+  const sendMessage = useConversationContext("sendMessage");
+
+  const handleSend = useCallback(() => {
+    sendMessage({
+      text: "👋",
+    });
+  }, [sendMessage]);
+
+  return (
+    <Center
+      style={{
+        flexGrow: 1,
+        flexDirection: "column",
+      }}
+    >
+      <Text
+        style={{
+          textAlign: "center",
+        }}
+      >
+        {translate("group_placeholder.placeholder_text", {
+          groupName,
+        })}
+      </Text>
+
+      <Button
+        variant="fill"
+        icon="hand.wave"
+        text={translate("say_hi")}
+        onPress={handleSend}
+        style={{
+          alignSelf: "center",
+          marginTop: theme.spacing.md,
+        }}
+      />
+    </Center>
   );
 });

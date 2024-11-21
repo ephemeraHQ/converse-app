@@ -4,10 +4,10 @@ import {
   UseQueryOptions,
 } from "@tanstack/react-query";
 
-import { groupPhotoQueryKey } from "./QueryKeys";
-import { queryClient } from "./queryClient";
-import { useGroupQuery } from "./useGroupQuery";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { queryClient } from "./queryClient";
+import { groupPhotoQueryKey } from "./QueryKeys";
+import { useGroupQuery } from "./useGroupQuery";
 
 export const useGroupPhotoQuery = (
   account: string,

@@ -12,6 +12,11 @@ import {
   useCurrentConversationPersistedStoreState,
 } from "./conversation-persisted-stores";
 import { useConversationStore } from "./conversation-store";
+import {
+  getCurrentAccount,
+  useCurrentAccount,
+} from "@data/store/accountsStore";
+import { getConversationMessages } from "@queries/useConversationMessages";
 
 export function initializeCurrentConversation(args: {
   topic: ConversationTopic;
@@ -181,9 +186,18 @@ export function getCurrentConversationReplyToMessageId() {
 export function useConversationCurrentTopic() {
   return useConversationStore((state) => state.topic);
 }
+export function getCurrentConversationTopic() {
+  return useConversationStore.getState().topic;
+}
 
 export function useConversationComposerMediaPreview() {
   return useCurrentConversationPersistedStoreState(
     (state) => state.composerMediaPreview
   );
+}
+
+export function getCurrentConversationMessages() {
+  const currentAccount = getCurrentAccount()!;
+  const topic = getCurrentConversationTopic();
+  return getConversationMessages(currentAccount, topic);
 }

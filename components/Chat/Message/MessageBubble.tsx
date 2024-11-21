@@ -21,8 +21,9 @@ export const BubbleContainer = ({
       style={{
         // ...debugBorder("red"),
         flex: 1,
-        justifyContent: fromMe ? "flex-end" : "flex-start",
-        paddingRight: theme.spacing.sm,
+        ...(fromMe
+          ? { justifyContent: "flex-end" }
+          : { justifyContent: "flex-start" }),
       }}
     >
       {children}
