@@ -7,7 +7,7 @@ import {
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useEffect } from "react";
 
-import { NavigationParamList } from "../screens/Navigation/Navigation";
+import { NavigationParamList } from "@screens/Navigation/Navigation";
 
 // Extend global namespace for type safety
 declare global {

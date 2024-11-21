@@ -176,6 +176,9 @@ export const en = {
   connecting: "Connecting…",
   syncing: "Syncing…",
   search_chats: "Search chats",
+  no_results:
+    "We could not find any result in your existing conversations. You might want to",
+  no_results_start_convo: "start a new conversation",
 
   // Requests
   requests: "Requests",
@@ -373,6 +376,13 @@ export const en = {
   // New Conversation
   cannot_be_added_to_group_yet:
     "{{name}} needs to update Converse to be added to a group",
+  add: "Add",
+  add_loading: "Adding...",
+  chat: "Chat",
+  you: "You",
+  search_results: "RESULTS",
+  full_address_hint:
+    "If you don't see your contact in the list, try typing their full address (with {{providers}} etc…)",
 
   // Group Updated Message
   group_name_changed: '{{name}} changed the group name to "{{newValue}}".',
@@ -383,4 +393,5 @@ export const en = {
     '{{name}} changed the group description to "{{newValue}}".',
   group_name_changed_to: '{{name}} changed the group name to "{{newValue}}".',
 };
+
 export type Translations = typeof en;

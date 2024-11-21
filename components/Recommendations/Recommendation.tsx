@@ -1,5 +1,4 @@
 import { ProfileSocials } from "@data/store/profilesStore";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   itemSeparatorColor,
   textPrimaryColor,
@@ -15,22 +14,21 @@ import {
   View,
 } from "react-native";
 
-import IconLoading from "../../assets/icon-loading.png";
-import { RecommendationData } from "../../data/store/recommendationsStore";
+import IconLoading from "@assets/icon-loading.png";
+import { RecommendationData } from "@data/store/recommendationsStore";
 import {
   getPreferredAvatar,
   getPreferredName,
   getPrimaryNames,
-} from "../../utils/profile";
-import { shortAddress } from "../../utils/str";
+} from "@utils/profile";
+import { shortAddress } from "@utils/str";
 import Avatar from "../Avatar";
-import { NavigationChatButton } from "../Search/NavigationChatButton";
+import { NavigationChatButton } from "@search/components/NavigationChatButton";
 
 export function Recommendation({
   address,
   // @todo => use only profile
   recommendationData: { ens, farcasterUsernames, lensHandles, tags, profile },
-  navigation,
   embedInChat,
   isVisible,
   socials,
@@ -39,7 +37,6 @@ export function Recommendation({
 }: {
   address: string;
   recommendationData: RecommendationData;
-  navigation?: NativeStackNavigationProp<any>;
   embedInChat?: boolean;
   isVisible: boolean;
   socials?: ProfileSocials;
@@ -122,10 +119,9 @@ export function Recommendation({
           </View>
         ))}
       </View>
-      {!embedInChat && navigation && (
+      {!embedInChat && (
         <View style={styles.recommendationRight}>
           <NavigationChatButton
-            navigation={navigation}
             address={address}
             groupMode={groupMode}
             addToGroup={

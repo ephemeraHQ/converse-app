@@ -3,7 +3,7 @@ import {
   resolveUnsDomain,
   resolveFarcasterUsername,
 } from "@utils/api";
-import { getLensOwner } from "@utils/lens";
+import { getLensOwner } from "@search/utils/lens";
 import { isUNSAddress } from "@utils/uns";
 import { isAddress, getAddress } from "ethers/lib/utils";
 
@@ -45,12 +45,12 @@ export const getAddressForPeer = async (peer: string) => {
   const resolvedAddress = isENSCompatible
     ? await resolveEnsName(peer)
     : isUNS
-    ? await resolveUnsDomain(peer)
-    : isFarcaster
-    ? await resolveFarcasterUsername(peer.slice(0, peer.length - 3))
-    : isLens
-    ? await getLensOwner(peer)
-    : peer;
+      ? await resolveUnsDomain(peer)
+      : isFarcaster
+        ? await resolveFarcasterUsername(peer.slice(0, peer.length - 3))
+        : isLens
+          ? await getLensOwner(peer)
+          : peer;
   return resolvedAddress || undefined;
 };
 
