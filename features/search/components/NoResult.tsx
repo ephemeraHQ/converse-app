@@ -11,13 +11,14 @@ export default function NoResult() {
 
   return (
     <>
-      <Text preset="bigEmojiSymbol" style={themed($bigEmoji)}>
+      <Text size="xl" style={themed($bigEmoji)}>
         👀
       </Text>
       <Text preset="small" style={themed($notFoundText)}>
         <Text>{translate("no_results")} </Text>
         <Text
-          preset="clickableText"
+          weight="bold"
+          size="sm"
           onPress={() => {
             router.navigate("NewConversation", {});
           }}

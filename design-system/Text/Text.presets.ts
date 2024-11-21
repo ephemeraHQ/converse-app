@@ -17,9 +17,7 @@ export type IPresets =
   | "bigBold"
   | "formHelper"
   | "formLabel"
-  | "emojiSymbol"
-  | "bigEmojiSymbol"
-  | "clickableText";
+  | "emojiSymbol";
 
 export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
   title: [textBaseStyle, textSizeStyles.xl, textFontWeightStyles.bold],
@@ -49,8 +47,4 @@ export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
   ],
 
   emojiSymbol: [textBaseStyle, { fontSize: 22, lineHeight: 28 }],
-
-  bigEmojiSymbol: [textSizeStyles.xl],
-
-  clickableText: [textSizeStyles.sm, textFontWeightStyles.bold],
 };
