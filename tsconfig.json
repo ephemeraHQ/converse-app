@@ -5,7 +5,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
+      "@/*": ["./*"],
       "@components/*": ["./components/*"],
+      "@config": ["./config"],
+      "@config/*": ["./config/*"],
       "@containers/*": ["./containers/*"],
       "@data/*": ["./data/*"],
       "@hooks/*": ["./hooks/*"],
@@ -16,8 +19,12 @@
       "@styles/*": ["./styles/*"],
       "@utils/*": ["./utils/*"],
       "@theme/*": ["./theme/*"],
+      "@assets/*": ["./assets/*"],
       "@design-system/*": ["./design-system/*"],
-      "@navigation/*": ["./navigation/*"]
+      "@navigation/*": ["./navigation/*"],
+      "@features/*": ["./features/*"],
+      "@shared/*": ["./features/shared/*"],
+      "@search/*": ["./features/search/*"]
     }
   },
   "exclude": ["./vendor/**/*", "./node_modules/**/*", "./dist/**/*"]

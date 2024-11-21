@@ -12,7 +12,7 @@ import {
 } from "react-native";
 
 import { useAppTheme } from "@theme/useAppTheme";
-import IconLoading from "../../assets/icon-loading.png";
+import IconLoading from "@assets/icon-loading.png";
 import Picto from "../Picto/Picto";
 import SvgImageUri from "../SvgImageUri";
 

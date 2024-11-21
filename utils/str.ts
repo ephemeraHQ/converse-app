@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, TextInput } from "react-native";
 
-import { getLensHandleFromConversationIdAndPeer } from "./lens";
+import { getLensHandleFromConversationIdAndPeer } from "@search/utils/lens";
 import logger from "./logger";
 import { getPreferredName, getProfile } from "./profile";
 import {
@@ -163,6 +163,7 @@ export const useLoopTxt = (
 ) => {
   const [step, setStep] = useState(0);
   const interval = useRef<NodeJS.Timeout | undefined>();
+
   const stopInterval = useCallback(() => {
     if (interval.current) {
       clearInterval(interval.current);

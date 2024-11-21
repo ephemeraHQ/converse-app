@@ -5,7 +5,7 @@ import {
   UnstoppableDomain,
   ConverseUserName,
   ProfileByAddress,
-} from "../data/store/profilesStore";
+} from "@data/store/profilesStore";
 
 export const getMatchedPeerAddresses = (
   profiles: ProfileByAddress,
