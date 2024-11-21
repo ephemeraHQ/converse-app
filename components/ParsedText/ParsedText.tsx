@@ -46,12 +46,41 @@ export const ParsedText = forwardRef<RNText, ParsedTextProps>((props, ref) => {
     if (!parse) {
       return props.children;
     }
+
+    // From the patch in case we need it
+    //     let stringChild = null;
+    // +    let prefix = null;
+    // +    let suffix = null;
+    // +    if (typeof this.props.children === 'string') {
+    // +      stringChild = this.props.children;
+    // +    } else if (Array.isArray(this.props.children)) {
+    // +      if (typeof this.props.children[0] === "string") {
+    // +        stringChild = this.props.children[0];
+    // +        suffix = this.props.children.slice(1);
+    // +      } else if (typeof this.props.children[this.props.children.length - 1] === "string") {
+    // +        stringChild = this.props.children[this.props.children.length - 1];
+    // +        prefix = this.props.children.slice(0, this.props.children.length - 1);
+    // +      }
+    // +    }
+
     if (typeof props.children !== "string") {
       return props.children;
     }
 
     const patterns = getPatterns();
     const parsedParts = parseText({ text: props.children, patterns });
+
+    // From the patch in case we need it
+    //     return [prefix, ...textExtraction.parse().map((props, index) => {
+    //       const { style: parentStyle } = this.props;
+    //       const { style, ...remainder } = props;
+    //       return (
+    // @@ -118,7 +132,7 @@ class ParsedText extends React.Component {
+    //           {...remainder}
+    //         />
+    //       );
+    // -    });
+    // +    }), suffix];
 
     return parsedParts.map((parsedProps, index) => {
       const { style: parentStyle } = props;
