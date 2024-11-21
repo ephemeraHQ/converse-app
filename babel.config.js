@@ -27,7 +27,9 @@ module.exports = {
           "react-native-webview": "react-native-webview/src/index.ts",
 
           // Folder aliases
+          '@': './',
           "@components": "./components",
+          '@config': './config',
           "@containers": "./containers",
           "@data": "./data",
           "@hooks": "./hooks",
@@ -37,6 +39,7 @@ module.exports = {
           "@styles": "./styles",
           "@utils": "./utils",
           "@theme": "./theme",
+          "@assets": "./assets",
           "@design-system": "./design-system",
           "@navigation": "./navigation",
           "@features": "./features",

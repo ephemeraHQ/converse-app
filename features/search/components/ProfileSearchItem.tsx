@@ -47,7 +47,7 @@ export function ProfileSearchItem({
         />
         <View style={themed($textContainer)}>
           <Text preset="bodyBold" numberOfLines={1}>
-            {preferredName || shortAddress(address)}
+            {preferredName}
           </Text>
           {primaryNamesDisplay.length > 0 && (
             <Text preset="formLabel" numberOfLines={1}>
@@ -59,7 +59,6 @@ export function ProfileSearchItem({
       {navigation && (
         <View style={themed($right)}>
           <NavigationChatButton
-            navigation={navigation}
             address={address}
             groupMode={groupMode}
             addToGroup={

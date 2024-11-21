@@ -22,9 +22,9 @@ import {
 import { NewConversationModalParams } from "./NewConversationModal";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../../components/AndroidBackAction";
-import SearchBar from "../../features/search/components/SearchBar";
+import SearchBar from "@search/components/SearchBar";
 import Recommendations from "../../components/Recommendations/Recommendations";
-import ProfileSearch from "../../features/search/screens/ProfileSearch";
+import ProfileSearch from "@search/screens/ProfileSearch";
 import TableView from "../../components/TableView/TableView";
 import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import config from "../../config";

@@ -16,7 +16,7 @@ import { getGroupIdFromTopic } from "./groupUtils/groupId";
 import logger from "./logger";
 import { subscribeToNotifications } from "./notifications";
 import { getReactionsContentPreview } from "./reactions";
-import { getMatchedPeerAddresses } from "../features/search/utils/search";
+import { getMatchedPeerAddresses } from "@search/utils/search";
 import { TextInputWithValue, addressPrefix } from "./str";
 import { isTransactionMessage } from "./transaction";
 import { isOnXmtp } from "./xmtpRN/client";

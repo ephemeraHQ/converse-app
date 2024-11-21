@@ -1,5 +1,4 @@
 import { translate } from "@i18n";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { getPreferredName, getProfile } from "@utils/profile";
 import { useCallback, useState } from "react";
 import { Alert, Platform } from "react-native";
@@ -10,21 +9,22 @@ import { navigate } from "@utils/navigation";
 import { canGroupMessage } from "@utils/xmtpRN/conversations";
 import { Button } from "@design-system/Button/Button";
 import { useAppTheme } from "@theme/useAppTheme";
+import { useRouter } from "@navigation/useNavigation";
 
 type NavigationChatProps = {
-  navigation: NativeStackNavigationProp<any>;
   address: string;
   groupMode?: boolean;
   addToGroup?: () => void;
 };
 
 export function NavigationChatButton({
-  navigation,
   address,
   groupMode,
   addToGroup,
 }: NavigationChatProps) {
   const { theme } = useAppTheme();
+
+  const navigation = useRouter();
 
   const [loading, setLoading] = useState(false);
   const profile = useProfilesStore(
@@ -36,9 +36,7 @@ export function NavigationChatButton({
 
   const openChat = useCallback(() => {
     // On Android the accounts are not in the navigation but in a drawer
-
-    const parent = navigation.getParent();
-    parent?.goBack();
+    navigation.popToTop();
 
     setTimeout(() => {
       navigate("Conversation", {

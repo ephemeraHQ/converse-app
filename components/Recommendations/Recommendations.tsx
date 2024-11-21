@@ -20,13 +20,13 @@ import {
 } from "react-native";
 
 import { Recommendation } from "./Recommendation";
-import config from "../../config";
+import config from "@config";
 import {
   useAccountsStore,
   useCurrentAccount,
   useRecommendationsStore,
 } from "@data/store/accountsStore";
-import { useSelect } from "../../data/store/storeHelpers";
+import { useSelect } from "@data/store/storeHelpers";
 import { useRouter } from "@navigation/useNavigation";
 import { refreshRecommendationsForAccount } from "@utils/recommendations";
 import ActivityIndicator from "@components/ActivityIndicator/ActivityIndicator";
@@ -158,7 +158,6 @@ export default function Recommendations({
       return (
         <Recommendation
           address={item}
-          navigation={navigation}
           recommendationData={frens[item]}
           isVisible={!!viewableItems[item]}
           socials={getProfile(item, profiles)?.socials}
@@ -181,7 +180,6 @@ export default function Recommendations({
       groupMode,
       addToGroup,
       showTitle,
-      navigation,
     ]
   );
 
