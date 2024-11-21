@@ -20,6 +20,10 @@ export const onInteractWithNotification = (
   ) {
     notificationData = JSON.parse(notificationData.body);
   }
+  // Handling notifee notifications which look a bit different
+  if ("notifee_event_type" in notificationData) {
+    notificationData = notificationData.notification.data;
+  }
   // Handling for data/silent notifications
   if (!notificationData) {
     const payload =

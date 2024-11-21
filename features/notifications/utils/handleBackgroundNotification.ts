@@ -1,8 +1,12 @@
+import notifee, { AndroidVisibility } from "@notifee/react-native";
 import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { z } from "zod";
+import { androidChannel } from "./setupAndroidNotificationChannel";
+import { getProfilesStore } from "@data/store/accountsStore";
+import { getPreferredName, getProfile } from "@utils/profile";
 
 const BackgroundNotificationBodySchema = z.object({
   account: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
@@ -45,6 +49,33 @@ export const handleBackgroundNotification = async (
     if (!group) throw new Error("Group not found");
   }
   await group.sync();
+  const groupName = await group.groupName();
   const message = await group.processMessage(notification.message);
-  console.log("messages is", { message });
+  const senderAddress = (await group.members()).find(
+    (m) => m.inboxId === message.senderAddress
+  )?.addresses[0];
+  const senderSocials = getProfile(
+    senderAddress,
+    getProfilesStore(notification.account).getState().profiles
+  )?.socials;
+  const sender = senderAddress
+    ? getPreferredName(senderSocials, senderAddress)
+    : undefined;
+
+  const messageContent = message.nativeContent.text;
+  if (!messageContent) return;
+
+  await notifee.displayNotification({
+    title: groupName,
+    subtitle: sender,
+    body: messageContent,
+    data: notification,
+    android: {
+      channelId: androidChannel.id,
+      pressAction: {
+        id: "default",
+      },
+      visibility: AndroidVisibility.PUBLIC,
+    },
+  });
 };

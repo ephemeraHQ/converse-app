@@ -2,6 +2,11 @@ import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import notifee from "@notifee/react-native";
 
+export const androidChannel = {
+  id: "converse-notifications",
+  name: "Converse Notifications",
+};
+
 export const setupAndroidNotificationChannel = async () => {
   if (Platform.OS !== "android") return;
 
@@ -15,8 +20,7 @@ export const setupAndroidNotificationChannel = async () => {
   //   showBadge: true,
   // });
   await notifee.createChannel({
-    id: "converse-notifications",
-    name: "Converse Notifications",
+    ...androidChannel,
     lights: false,
     vibration: true,
     // importance: AndroidImportance.DEFAULT,

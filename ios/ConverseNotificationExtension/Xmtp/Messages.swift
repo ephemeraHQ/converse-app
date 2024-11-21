@@ -286,7 +286,7 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Envelope) async throw
   
     if let group = try! xmtpClient.findGroup(groupId: getGroupIdFromTopic(topic: envelope.contentTopic) ) {
       do {
-        sentryAddBreadcrumb(message: "[NotificationExtension] Syncing Group", extras: [:])
+        sentryAddBreadcrumb(message: "[NotificationExtension] Syncing Group")
         try await group.sync()
         sentryAddBreadcrumb(message: "[NotificationExtension] Decoding group message...")
         let envelopeBytes = envelope.message

@@ -6,6 +6,7 @@ import logger from "@utils/logger";
 import { handleForegroundNotification } from "./handleForegroundNotification";
 import { onInteractWithNotification } from "./onInteractWithNotification";
 import { handleBackgroundNotification } from "./handleBackgroundNotification";
+import notifee, { EventType } from "@notifee/react-native";
 
 const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
 
@@ -33,7 +34,7 @@ if (Platform.OS === "android") {
       );
       return;
     }
-    // if (AppState.currentState === "active") return;
+    if (AppState.currentState === "active") return;
     const notificationBody = (data as any).notification.data.body as
       | string
       | undefined;
@@ -49,35 +50,11 @@ if (Platform.OS === "android") {
     .catch((reason) => {
       logger.error(`Notifications registerTaskAsync failed: ${reason}`);
     });
+
+  notifee.onBackgroundEvent(async () => {
+    // This will get triggered for all background events,
+    // including displaying & clicking on notifications
+    // which is currently handled in onInteractWithNotification
+    // However this will silence the notifee warning so keeping it
+  });
 }
-
-// const displaySampleNotification = async (data: unknown) => {
-//   try {
-//     const channelId = await notifee.createChannel({
-//       id: "default",
-//       name: "Default Channel",
-//     });
-//     console.log("Channel created:", channelId);
-
-//     try {
-//       // Display a notification
-//       await notifee.displayNotification({
-//         title: `The stat is ${AppState.currentState}`,
-//         body: "Main body content of the notification",
-//         android: {
-//           channelId,
-//           smallIcon: "ic_launcher", // optional, defaults to 'ic_launcher'.
-//           pressAction: {
-//             id: "default",
-//           },
-//           visibility: AndroidVisibility.PUBLIC,
-//         },
-//       });
-//       console.log("displayNotification success");
-//     } catch (displayError) {
-//       console.log("displayNotification error:", displayError);
-//     }
-//   } catch (channelError) {
-//     console.log("createChannel error:", channelError);
-//   }
-// };
