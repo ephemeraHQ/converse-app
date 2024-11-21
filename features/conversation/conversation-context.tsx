@@ -84,6 +84,10 @@ export const ConversationContextProvider = (
         return;
       }
 
+      console.log("referencedMessageId:", referencedMessageId);
+      console.log("text:", text);
+      console.log("attachment:", attachment);
+
       if (referencedMessageId) {
         if (attachment) {
           await conversation?.send({

@@ -1,7 +1,9 @@
 import {
   Easing,
+  FadeIn,
   FadeInDown,
   FadeInUp,
+  FadeOut,
   Keyframe,
   LinearTransition,
 } from "react-native-reanimated";
@@ -20,19 +22,26 @@ export const animation = {
     stiffness: SICK_STIFFNESS,
   },
 
-  springLayoutTransition: LinearTransition.springify()
+  reanimatedSpringLayoutTransition: LinearTransition.springify()
     .damping(SICK_DAMPING)
     .stiffness(SICK_STIFFNESS),
 
-  fadeInDownSpring: () =>
-    FadeInDown.easing(SICK_EASE_OUT)
-      .stiffness(SICK_STIFFNESS)
-      .damping(SICK_DAMPING),
+  reanimatedFadeInDownSpring: FadeInDown.easing(SICK_EASE_OUT)
+    .stiffness(SICK_STIFFNESS)
+    .damping(SICK_DAMPING),
 
   fadeInUpSpring: () =>
     FadeInUp.easing(SICK_EASE_OUT)
       .stiffness(SICK_STIFFNESS)
       .damping(SICK_DAMPING),
+
+  reanimatedFadeInSpring: FadeIn.springify()
+    .stiffness(SICK_STIFFNESS)
+    .damping(SICK_DAMPING),
+
+  reanimatedFadeOutSpring: FadeOut.springify()
+    .stiffness(SICK_STIFFNESS)
+    .damping(SICK_DAMPING),
 
   fadeInUpSlow: () => FadeInUp.duration(timing.slow).easing(SICK_EASE_OUT),
 

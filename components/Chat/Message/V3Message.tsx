@@ -1,47 +1,43 @@
-/* eslint-disable typescript-eslint/no-explicit-any */
-/* eslint-disable react/jsx-no-bind */
-import { MessageBubble } from "@components/Chat/Message/MessageBubble";
+import {
+  BubbleContainer,
+  BubbleContentContainer,
+  MessageBubble,
+} from "@components/Chat/Message/MessageBubble";
 import {
   MessageContextProvider,
   useMessageContext,
 } from "@components/Chat/Message/MessageContext";
 import { V3MessageSender } from "@components/Chat/Message/MessageSender";
 import { V3MessageSenderAvatar } from "@components/Chat/Message/MessageSenderAvatar";
-import { MessageStatusDumb } from "@components/Chat/Message/MessageStatusDumb";
-import { SwipeableMessageWrapper } from "@components/Chat/Message/SwipeableMessageWrapper";
+import { RepliableMessageWrapper } from "@components/Chat/Message/RepliableMessageWrapper";
+import { MessageText } from "@components/Chat/Message/TextMessage";
 import {
   MessageContextStoreProvider,
   useMessageContextStoreContext,
 } from "@components/Chat/Message/messageContextStore";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { AnimatedHStack, HStack } from "@design-system/HStack";
+import { Icon } from "@design-system/Icon/Icon";
 import { Pressable } from "@design-system/Pressable";
 import { AnimatedText, Text } from "@design-system/Text";
 import { getTextStyle } from "@design-system/Text/Text.utils";
 import { AnimatedVStack, VStack } from "@design-system/VStack";
+import { getConversationMessageQueryOptions } from "@queries/useConversationMessage";
 import { getConversationMessages } from "@queries/useConversationMessages";
 import { useQuery } from "@tanstack/react-query";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
 import { getLocalizedTime, getRelativeDate } from "@utils/date";
-import { debugBorder } from "@utils/debug-style";
-import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
+import { getReadableProfile } from "@utils/str";
 import { flattenStyles } from "@utils/styles";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
-import { getMessageContentType } from "@utils/xmtpRN/contentTypes";
-import { CoinbaseMessagingPaymentCodec } from "@utils/xmtpRN/contentTypes/coinbasePayment";
-import { getInboxId } from "@utils/xmtpRN/signIn";
-import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   DecodedMessage,
   GroupUpdatedCodec,
   InboxId,
-  ReactionCodec,
-  ReadReceiptCodec,
-  RemoteAttachmentCodec,
+  MessageId,
   ReplyCodec,
-  StaticAttachmentCodec,
   TextCodec,
 } from "@xmtp/react-native-sdk";
 import { memo, useCallback, useEffect } from "react";
@@ -53,6 +49,7 @@ import {
 } from "react-native-reanimated";
 import { useShallow } from "zustand/react/shallow";
 import { useConversationContext } from "../../../features/conversation/conversation-context";
+import { setCurrentConversationReplyToMessageId } from "../../../features/conversation/conversation-service";
 import { hasNextMessageInSeries } from "../../../features/conversations/utils/hasNextMessageInSeries";
 import { hasPreviousMessageInSeries } from "../../../features/conversations/utils/hasPreviousMessageInSeries";
 import { isLatestMessageSettledFromPeer } from "../../../features/conversations/utils/isLatestMessageSettledFromPeer";
@@ -60,22 +57,24 @@ import { isLatestSettledFromCurrentUser } from "../../../features/conversations/
 import { messageIsFromCurrentUserV3 } from "../../../features/conversations/utils/messageIsFromCurrentUser";
 import { messageShouldShowDateChange } from "../../../features/conversations/utils/messageShouldShowDateChange";
 import { ChatGroupUpdatedMessage } from "../ChatGroupUpdatedMessage";
+import {
+  isCoinbasePaymentMessage,
+  isGroupUpdatedMessage,
+  isReactionMessage,
+  isReadReceiptMessage,
+  isRemoteAttachmentMessage,
+  isReplyMessage,
+  isStaticAttachmentMessage,
+  isTextMessage,
+  isTransactionReferenceMessage,
+  useCurrentAccountInboxId,
+} from "./Message.utils";
 
 type V3MessageProps = {
   messageId: string;
   nextMessageId: string | undefined;
   previousMessageId: string | undefined;
 };
-
-// TMP until we move this into an account store or something like that
-function useCurrentAccountInboxId() {
-  const currentAccount = useCurrentAccount();
-  return useQuery({
-    queryKey: ["inboxId", currentAccount],
-    queryFn: () => getInboxId(currentAccount!),
-    enabled: !!currentAccount,
-  });
-}
 
 export const V3Message = memo(
   ({ messageId, nextMessageId, previousMessageId }: V3MessageProps) => {
@@ -171,8 +170,19 @@ export const V3MessageContent = memo(function V3MessageContent({
     });
 
   if (isReplyMessage(message)) {
-    console.log("REPLY MESSAGE");
-    return null;
+    return (
+      <MessageContextStoreProvider
+        messageId={message.id}
+        hasNextMessageInSeries={_hasNextMessageInSeries}
+        fromMe={fromMe}
+        sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
+        showDateChange={showDateChange}
+        hasPreviousMessageInSeries={_hasPreviousMessageInSeries}
+        senderAddress={message.senderAddress as InboxId}
+      >
+        <ReplyMessage />
+      </MessageContextStoreProvider>
+    );
   }
 
   if (isTextMessage(message)) {
@@ -191,11 +201,11 @@ export const V3MessageContent = memo(function V3MessageContent({
       >
         <MessageContextProvider>
           <SimpleMessage message={textContent} />
-          <MessageStatusDumb
+          {/* <MessageStatusDumb
             shouldDisplay={true}
             isLatestSettledFromMe={isLatestSettledFromMe}
             status={"sent"}
-          />
+          /> */}
         </MessageContextProvider>
       </MessageContextStoreProvider>
     );
@@ -261,6 +271,159 @@ export const V3MessageContent = memo(function V3MessageContent({
   return null;
 });
 
+function useConversationMessageForReplyMessage(
+  messageId: MessageId
+): DecodedMessage<[ReplyCodec]> | undefined {
+  const topic = useConversationContext("topic")!;
+  const currentAccount = useCurrentAccount()!;
+  const messages = getConversationMessages(currentAccount, topic);
+
+  const cachedReplyMessage = messages?.byId[messageId] as
+    | DecodedMessage<[ReplyCodec]>
+    | undefined;
+
+  // Only fetch the message if it's in the list of messages of the conversation
+  const { data: replyMessage } = useQuery({
+    ...getConversationMessageQueryOptions({
+      account: currentAccount,
+      messageId,
+    }),
+    enabled: !cachedReplyMessage,
+  });
+
+  return (
+    (replyMessage as DecodedMessage<[ReplyCodec]> | undefined) ??
+    cachedReplyMessage
+  );
+}
+
+const ReplyMessage = memo(function ReplyMessage() {
+  const { theme } = useAppTheme();
+
+  const {
+    messageId,
+    fromMe,
+    senderAddress,
+    hasPreviousMessageInSeries,
+    hasNextMessageInSeries,
+    showDateChange,
+  } = useMessageContextStoreContext((s) => ({
+    messageId: s.messageId,
+    fromMe: s.fromMe,
+    senderAddress: s.senderAddress,
+    hasPreviousMessageInSeries: s.hasPreviousMessageInSeries,
+    hasNextMessageInSeries: s.hasNextMessageInSeries,
+    showDateChange: s.showDateChange,
+  }));
+
+  const { data: currentAccountInboxId } = useCurrentAccountInboxId();
+  const currentAccount = useCurrentAccount()!;
+
+  const replyMessage = useConversationMessageForReplyMessage(messageId);
+
+  if (!replyMessage) {
+    return null;
+  }
+
+  const content = replyMessage.content();
+
+  if (typeof content === "string") {
+    // TODO. Render simple bubble message with the content?
+    console.error("reply message is a string");
+    return null;
+  }
+
+  const readableProfile =
+    currentAccountInboxId === replyMessage.senderAddress
+      ? "You"
+      : getReadableProfile(currentAccount, replyMessage.senderAddress);
+
+  return (
+    <>
+      <RepliableMessageWrapper
+        onReply={() => {
+          setCurrentConversationReplyToMessageId(messageId);
+        }}
+      >
+        {fromMe ? (
+          <BubbleContainer fromMe={fromMe}>
+            <BubbleContentContainer
+              fromMe={fromMe}
+              hasNextMessageInSeries={hasNextMessageInSeries}
+              showDateChange={showDateChange}
+              hasPreviousMessageInSeries={hasPreviousMessageInSeries}
+            >
+              <Pressable
+                onPress={() => {
+                  console.log("handle press bubble");
+                }}
+                style={{
+                  rowGap: theme.spacing.xxs,
+                  marginTop: theme.spacing.xxxs, // Because for reply bubble we want the padding to be same for horizontal and vertial
+                }}
+              >
+                <VStack
+                  style={{
+                    rowGap: theme.spacing.xxxs,
+                    flex: 1,
+                    backgroundColor: theme.colors.bubbles.nestedReply,
+                    borderRadius: theme.spacing.sm - theme.spacing.xs / 2, // - theme.spacing.xs / 2 so the border fits the border radius of BubbleContentContainer
+                    paddingHorizontal: theme.spacing.xs,
+                    paddingVertical: theme.spacing.xxs,
+                  }}
+                >
+                  <HStack
+                    style={{
+                      alignItems: "center",
+                      columnGap: theme.spacing.xxxs,
+                    }}
+                  >
+                    <Icon
+                      size={theme.iconSize.xs}
+                      icon="arrowshape.turn.up.left.fill"
+                      color={theme.colors.text.inverted.secondary}
+                    />
+                    <Text preset="smaller" color="secondary" inverted>
+                      {readableProfile}
+                    </Text>
+                  </HStack>
+                  <Text numberOfLines={1} inverted>
+                    test
+                    {/* {isAttachmentMessage(replyMessage?.contentType)
+            ? `📎 Media from ${getRelativeDateTime(replyMessage?.sent)}`
+            : isTransactionMessage(replyMessage?.contentType)
+              ? `💸 Transaction from ${getRelativeDateTime(
+                  replyingToMessage.sent
+                )}`
+              : replyMessage?.content || replyMessage?.contentFallback} */}
+                  </Text>
+                </VStack>
+                <MessageText inverted>{content.content.text}</MessageText>
+              </Pressable>
+            </BubbleContentContainer>
+          </BubbleContainer>
+        ) : (
+          <BubbleContainer fromMe={fromMe}>
+            <V3MessageSenderAvatar inboxId={senderAddress} />
+            <VStack style={{ paddingLeft: theme.spacing.xxs }}>
+              {!fromMe && !hasPreviousMessageInSeries && (
+                <V3MessageSender inboxId={senderAddress} />
+              )}
+              <Pressable
+                onPress={() => {
+                  console.log("handle press bubble");
+                }}
+              >
+                <MessageBubble content={content.content.text} />
+              </Pressable>
+            </VStack>
+          </BubbleContainer>
+        )}
+      </RepliableMessageWrapper>
+    </>
+  );
+});
+
 const SimpleMessage = memo(function SimpleMessage({
   message,
 }: {
@@ -302,7 +465,7 @@ const SimpleMessage = memo(function SimpleMessage({
       {hasNextMessageInSeries && (
         <VStack
           style={{
-            ...debugBorder(),
+            // ...debugBorder(),
             height: theme.spacing["4xs"],
           }}
         />
@@ -311,57 +474,50 @@ const SimpleMessage = memo(function SimpleMessage({
       {!hasNextMessageInSeries && (
         <VStack
           style={{
-            ...debugBorder("yellow"),
+            // ...debugBorder("yellow"),
             height: theme.spacing.sm,
           }}
         />
       )}
 
-      <SwipeableMessageWrapper
+      <RepliableMessageWrapper
         onReply={() => {
-          console.log("reply");
-          converseEventEmitter.emit("triggerReplyToMessage", messageId);
+          setCurrentConversationReplyToMessageId(messageId);
         }}
       >
         {fromMe ? (
-          <HStack
-            style={{
-              ...debugBorder("red"),
-              flex: 1,
-              paddingHorizontal: theme.spacing.sm,
-              justifyContent: "flex-end",
-            }}
-          >
-            <VStack style={{ paddingLeft: theme.spacing.xxs }}>
-              {!fromMe && !hasPreviousMessageInSeries && (
-                <V3MessageSender inboxId={senderAddress} />
-              )}
+          <BubbleContainer fromMe={fromMe}>
+            <BubbleContentContainer
+              fromMe
+              hasNextMessageInSeries={hasNextMessageInSeries}
+              showDateChange={showDateChange}
+              hasPreviousMessageInSeries={hasPreviousMessageInSeries}
+            >
               <Pressable onPress={handlePressBubble}>
-                <MessageBubble content={message} />
+                <MessageText inverted>{message}</MessageText>
               </Pressable>
-            </VStack>
-          </HStack>
+            </BubbleContentContainer>
+          </BubbleContainer>
         ) : (
-          <HStack
-            style={{
-              ...debugBorder("red"),
-              flex: 1,
-              paddingHorizontal: theme.spacing.sm,
-              alignItems: "flex-end",
-            }}
-          >
-            <V3MessageSenderAvatar inboxId={senderAddress} />
-            <VStack style={{ paddingLeft: theme.spacing.xxs }}>
-              {!fromMe && !hasPreviousMessageInSeries && (
-                <V3MessageSender inboxId={senderAddress} />
-              )}
-              <Pressable onPress={handlePressBubble}>
-                <MessageBubble content={message} />
-              </Pressable>
-            </VStack>
-          </HStack>
+          <VStack>
+            {!hasPreviousMessageInSeries && (
+              <V3MessageSender inboxId={senderAddress} />
+            )}
+            <BubbleContainer fromMe={false}>
+              <BubbleContentContainer
+                fromMe={false}
+                hasNextMessageInSeries={hasNextMessageInSeries}
+                showDateChange={showDateChange}
+                hasPreviousMessageInSeries={hasPreviousMessageInSeries}
+              >
+                <Pressable onPress={handlePressBubble}>
+                  <MessageText>{message}</MessageText>
+                </Pressable>
+              </BubbleContentContainer>
+            </BubbleContainer>
+          </VStack>
         )}
-      </SwipeableMessageWrapper>
+      </RepliableMessageWrapper>
     </>
   );
 });
@@ -427,7 +583,7 @@ const MessageTime = memo(function MessageTime() {
 
     return (
       <AnimatedHStack
-        layout={theme.animation.springLayoutTransition}
+        layout={theme.animation.reanimatedSpringLayoutTransition}
         style={{
           // ...debugBorder("red"),
           alignSelf: "center",
@@ -495,79 +651,6 @@ const MessageTime = memo(function MessageTime() {
     </AnimatedVStack>
   );
 });
-
-// type DecodedMessageAllTypes =
-//   | DecodedMessage<[TextCodec]>
-//   | DecodedMessage<[ReactionCodec]>
-//   | DecodedMessage<[ReadReceiptCodec]>
-//   | DecodedMessage<[GroupUpdatedCodec]>
-//   | DecodedMessage<[ReplyCodec]>
-//   | DecodedMessage<[RemoteAttachmentCodec]>
-//   | DecodedMessage<[StaticAttachmentCodec]>
-//   | DecodedMessage<[TransactionReferenceCodec]>
-//   | DecodedMessage<[CoinbaseMessagingPaymentCodec]>;
-
-function isTextMessage(message: any): message is DecodedMessage<[TextCodec]> {
-  return getMessageContentType(message.contentTypeId) === "text";
-}
-
-function isReactionMessage(
-  // message: DecodedMessageWithCodecsType
-  message: any
-): message is DecodedMessage<[ReactionCodec]> {
-  return getMessageContentType(message.contentTypeId) === "reaction";
-}
-
-function isReadReceiptMessage(
-  // message: DecodedMessageWithCodecsType
-  message: any
-): message is DecodedMessage<[ReadReceiptCodec]> {
-  return getMessageContentType(message.contentTypeId) === "readReceipt";
-}
-
-function isGroupUpdatedMessage(
-  // message: DecodedMessageWithCodecsType
-  message: any
-): message is DecodedMessage<[GroupUpdatedCodec]> {
-  return getMessageContentType(message.contentTypeId) === "groupUpdated";
-}
-
-function isReplyMessage(
-  // message: DecodedMessageWithCodecsType
-  message: any
-): message is DecodedMessage<[ReplyCodec]> {
-  return getMessageContentType(message.contentTypeId) === "reply";
-}
-
-function isRemoteAttachmentMessage(
-  // message: DecodedMessageWithCodecsType
-  message: any
-): message is DecodedMessage<[RemoteAttachmentCodec]> {
-  return getMessageContentType(message.contentTypeId) === "remoteAttachment";
-}
-
-function isStaticAttachmentMessage(
-  // message: DecodedMessageWithCodecsType
-  message: any
-): message is DecodedMessage<[StaticAttachmentCodec]> {
-  return getMessageContentType(message.contentTypeId) === "remoteAttachment";
-}
-
-function isTransactionReferenceMessage(
-  // message: DecodedMessageWithCodecsType
-  message: any
-): message is DecodedMessage<[TransactionReferenceCodec]> {
-  return (
-    getMessageContentType(message.contentTypeId) === "transactionReference"
-  );
-}
-
-function isCoinbasePaymentMessage(
-  // message: DecodedMessageWithCodecsType
-  message: any
-): message is DecodedMessage<[CoinbaseMessagingPaymentCodec]> {
-  return getMessageContentType(message.contentTypeId) === "coinbasePayment";
-}
 
 function convertNanosecondsToMilliseconds(nanoseconds: number) {
   return nanoseconds / 1000000;

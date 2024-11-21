@@ -16,14 +16,15 @@ type IProps = {
   onReply: () => void;
 };
 
-export const SwipeableMessageWrapper = memo(function SwipeableMessageWrapper({
+export const RepliableMessageWrapper = memo(function RepliableMessageWrapper({
   children,
   onReply,
 }: IProps) {
   const { themed, theme } = useAppTheme();
 
   const swipeableRef = useRef<Swipeable>(null);
-  const xTresholdToReply = theme.spacing["4xl"];
+  const dragOffsetFromLeftEdge = theme.spacing.xs;
+  const xTresholdToReply = theme.spacing["3xl"];
 
   return (
     <Swipeable
@@ -32,8 +33,8 @@ export const SwipeableMessageWrapper = memo(function SwipeableMessageWrapper({
       overshootFriction={8} // 8 makes it feel more real
       containerStyle={themed($container)}
       childrenContainerStyle={themed($childrenContainer)}
-      dragOffsetFromLeftEdge={0}
-      leftThreshold={10000} // Never trigger opening
+      dragOffsetFromLeftEdge={dragOffsetFromLeftEdge} // Default is 10
+      leftThreshold={500} // Never trigger opening
       renderLeftActions={(progressAV) => {
         return (
           // TODO: Switch to AnimatedVStack once we upgrade to Expo SDK 52
@@ -64,13 +65,20 @@ export const SwipeableMessageWrapper = memo(function SwipeableMessageWrapper({
               ],
             }}
           >
-            <Icon size={theme.iconSize.sm} icon="arrowshape.turn.up.left" />
+            <Icon
+              size={theme.iconSize.sm}
+              icon="arrowshape.turn.up.left.fill"
+            />
           </Animated.View>
         );
       }}
       onSwipeableWillClose={() => {
         const translation = swipeableRef.current?.state.rowTranslation;
-        if (translation && (translation as any)._value > xTresholdToReply) {
+        console.log("translation:", translation?._value);
+        console.log("xTresholdToReply:", xTresholdToReply);
+        const translationValue = (translation as any)._value;
+        const v = translationValue - dragOffsetFromLeftEdge;
+        if (translation && v > xTresholdToReply) {
           Haptics.successNotificationAsync();
           onReply();
         }

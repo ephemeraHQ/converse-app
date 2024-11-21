@@ -10,7 +10,7 @@ import { IconButton } from "@design-system/IconButton/IconButton";
 import { AnimatedVStack, VStack } from "@design-system/VStack";
 import { useAppTheme } from "@theme/useAppTheme";
 import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
-import { FadeOut, Keyframe } from "react-native-reanimated";
+import { FadeIn, FadeOut, Keyframe } from "react-native-reanimated";
 
 type SendAttachmentPreviewProps = {
   uri: string;
@@ -39,17 +39,7 @@ export function SendAttachmentPreview({
 
   return (
     <AnimatedVStack
-      // entering={new Keyframe({
-      //   0: {
-      //     transform: [{ translateY: 60 }],
-      //     // height: 0,
-      //   },
-      //   100: {
-      //     transform: [{ translateY: 0 }],
-      //     // height: isLandscape ? 90 : 120,
-      //   },
-      // }).duration(200)}
-      exiting={FadeOut.delay(150)}
+      entering={theme.animation.reanimatedFadeInSpring}
       style={{
         borderRadius: theme.borderRadius.sm,
         position: "relative",
@@ -57,18 +47,15 @@ export function SendAttachmentPreview({
         ...(isLandscape
           ? {
               aspectRatio: 1.33,
-              maxHeight: 90,
             }
           : {
               aspectRatio: 0.75,
-              maxHeight: 120,
             }),
       }}
     >
       <VStack
         style={{
           position: "relative",
-          maxHeight: isLandscape ? 90 : 120,
         }}
       >
         <Image
@@ -76,7 +63,6 @@ export function SendAttachmentPreview({
           style={{
             width: "100%",
             height: "100%",
-            maxHeight: isLandscape ? 90 : 120,
           }}
           contentFit="cover"
         />

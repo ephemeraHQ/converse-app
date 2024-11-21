@@ -53,6 +53,7 @@ export const iconRegistry: Record<IIconName, string> = {
   "info.circle": "info.circle",
   "person.2": "person.2",
   "arrowshape.turn.up.left": "arrowshape.turn.up.left",
+  "arrowshape.turn.up.left.fill": "arrowshape.turn.up.left.fill",
   "person.crop.circle.badge.plus": "person.crop.circle.badge.plus",
   tray: "tray",
   cloud: "cloud",
@@ -65,6 +66,7 @@ export function Icon(props: IIconProps) {
   const { theme } = useAppTheme();
 
   const defaultSize = useMemo(() => theme.iconSize.lg, [theme]);
+
   const defaultColor = useMemo(() => theme.colors.fill.primary, [theme]);
 
   const {

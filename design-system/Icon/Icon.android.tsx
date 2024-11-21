@@ -54,6 +54,7 @@ export const iconRegistry: Record<
   "info.circle": "info",
   "person.2": "group",
   "arrowshape.turn.up.left": "reply",
+  "arrowshape.turn.up.left.fill": "reply",
   "person.crop.circle.badge.plus": "group-add",
   tray: "inbox",
   cloud: "cloud",
@@ -80,8 +81,8 @@ export function Icon(props: IIconProps) {
   const iconName = icon
     ? iconRegistry[icon]
     : picto
-    ? iconRegistry[picto]
-    : null;
+      ? iconRegistry[picto]
+      : null;
 
   if (!iconName) {
     logger.warn(`Invalid icon name ${icon || picto}`);
