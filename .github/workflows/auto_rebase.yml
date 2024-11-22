@@ -1,0 +1,33 @@
+name: Auto Rebase Branches
+
+on:
+  push:
+    branches:
+      - "release/*"
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  auto-rebase:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history so we can work with all branches
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: |
+          npm install simple-git@^3.21.0
+
+      - name: Run Auto Rebase Script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/git/auto_rebase.js
