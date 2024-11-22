@@ -1,41 +1,52 @@
 import logger from "@utils/logger";
 import RNFS from "react-native-fs";
-
 import { isImageMimetype } from "../media";
+import {
+  getLocalAttachmentMetaData,
+  getMessageAttachmentLocalMetadataPath,
+  getMessageAttachmentLocalPath,
+} from "./attachment.utils";
 
-export const getLocalAttachment = async (messageId: string) => {
-  const messageFolder = `${RNFS.DocumentDirectoryPath}/messages/${messageId}`;
-  const attachmentJsonPath = `${messageFolder}/attachment.json`;
+export const getLocalAttachmentForMessageId = async (messageId: string) => {
+  const attachmentJsonPath = getMessageAttachmentLocalMetadataPath(messageId);
+
   const attachmentExists = await RNFS.exists(attachmentJsonPath);
+
   if (attachmentExists) {
     try {
-      const attachmentJsonContent = await RNFS.readFile(
-        attachmentJsonPath,
-        "utf8"
+      const attachmentMetaData = await getLocalAttachmentMetaData(messageId);
+
+      // Check if attachment is an image
+      const supportedMediaType = isImageMimetype(attachmentMetaData.mimeType);
+
+      // Get path to actual attachment file
+      const attachmentLocalPath = getMessageAttachmentLocalPath(
+        messageId,
+        attachmentMetaData.filename
       );
-      const messageAttachmentData = JSON.parse(attachmentJsonContent);
-      const supportedMediaType = isImageMimetype(
-        messageAttachmentData.mimeType
-      );
-      const attachmentPath = `${messageFolder}/${messageAttachmentData.filename}`;
-      const fileExists = await RNFS.exists(attachmentPath);
+
+      const fileExists = await RNFS.exists(attachmentLocalPath);
+
       if (fileExists) {
-        // If we have the file locally let's display
-        // it or have a link
+        // Return attachment metadata and local file path if file exists
         return {
           mediaType: (supportedMediaType ? "IMAGE" : "UNSUPPORTED") as
             | "IMAGE"
             | "UNSUPPORTED"
             | undefined,
-          mimeType: messageAttachmentData.mimeType,
-          imageSize: messageAttachmentData.imageSize,
-          mediaURL: `file://${attachmentPath}`,
+          mimeType: attachmentMetaData.mimeType,
+          imageSize: attachmentMetaData.imageSize,
+          mediaURL: `file://${attachmentLocalPath}`,
           contentLength: 0,
-          filename: messageAttachmentData.filename,
+          filename: attachmentMetaData.filename,
         };
+      } else {
+        logger.debug(`Attachment file does not exist: ${attachmentLocalPath}`);
       }
     } catch (e) {
       logger.warn(e);
     }
+  } else {
+    logger.debug(`No attachment metadata found for messageId: ${messageId}`);
   }
 };

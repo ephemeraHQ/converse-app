@@ -16,5 +16,14 @@ export const messageShouldShowDateChange = ({
   if (!previousMessage) {
     return true;
   }
-  return differenceInCalendarDays(message.sentNs, previousMessage.sentNs) > 0;
+  return (
+    differenceInCalendarDays(
+      convertNanosecondsToMilliseconds(message.sentNs),
+      convertNanosecondsToMilliseconds(previousMessage.sentNs)
+    ) > 0
+  );
 };
+
+function convertNanosecondsToMilliseconds(nanoseconds: number) {
+  return nanoseconds / 1000000;
+}

@@ -1,21 +1,31 @@
+import {
+  getMessageAttachmentLocalPath,
+  getMessagesAttachmentsLocalFolderPath,
+} from "@utils/attachment/attachment.utils";
 import RNFS from "react-native-fs";
-
-import { handleAttachment } from "./handleAttachment";
+import { getLocalAttachment } from "./handleAttachment";
 import { SerializedAttachmentContent } from "./types";
 
+// TOD: Rename to something like "writeAttachmentToDisk"?
 export const handleStaticAttachment = async (
   messageId: string,
   staticAttachment: SerializedAttachmentContent
 ) => {
-  const messageFolder = `${RNFS.DocumentDirectoryPath}/messages/${messageId}`;
+  const messageFolder = getMessagesAttachmentsLocalFolderPath(messageId);
+
   // Create folder
   await RNFS.mkdir(messageFolder, {
     NSURLIsExcludedFromBackupKey: true,
   });
-  const attachmentPath = `${messageFolder}/${staticAttachment.filename}`;
-  // Let's cache the file and decoded information
+
+  const attachmentPath = getMessageAttachmentLocalPath(
+    messageId,
+    staticAttachment.filename
+  );
+
   await RNFS.writeFile(attachmentPath, staticAttachment.data, "base64");
-  return handleAttachment(
+
+  return getLocalAttachment(
     messageId,
     staticAttachment.filename,
     staticAttachment.mimeType

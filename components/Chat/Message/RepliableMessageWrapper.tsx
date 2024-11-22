@@ -74,8 +74,6 @@ export const RepliableMessageWrapper = memo(function RepliableMessageWrapper({
       }}
       onSwipeableWillClose={() => {
         const translation = swipeableRef.current?.state.rowTranslation;
-        console.log("translation:", translation?._value);
-        console.log("xTresholdToReply:", xTresholdToReply);
         const translationValue = (translation as any)._value;
         const v = translationValue - dragOffsetFromLeftEdge;
         if (translation && v > xTresholdToReply) {

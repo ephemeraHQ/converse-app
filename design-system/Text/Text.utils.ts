@@ -1,7 +1,11 @@
 import { IThemed } from "@theme/useAppTheme";
 import { StyleProp, TextStyle } from "react-native";
 import { textPresets } from "./Text.presets";
-import { ITextStyleProps } from "./Text.props";
+import {
+  IInvertedTextColors,
+  ITextColors,
+  ITextStyleProps,
+} from "./Text.props";
 import {
   invertedTextColorStyle,
   textColorStyle,
@@ -30,9 +34,9 @@ export const getTextStyle = (
     color &&
       themed((theme) => {
         if (inverted) {
-          return invertedTextColorStyle(theme, color);
+          return invertedTextColorStyle(theme, color as IInvertedTextColors);
         }
-        return textColorStyle(theme, color);
+        return textColorStyle(theme, color as ITextColors);
       }),
     style,
   ];

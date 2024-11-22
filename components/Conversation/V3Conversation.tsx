@@ -210,10 +210,8 @@ const Message = memo(function Message(props: {
     >
       <V3Message
         messageId={messageId}
-        previousMessageId={index > 0 ? messages.ids[index + 1] : undefined}
-        nextMessageId={
-          index < messages.ids.length - 1 ? messages.ids[index - 1] : undefined
-        }
+        previousMessageId={messages.ids[index + 1]}
+        nextMessageId={messages.ids[index - 1]}
       />
     </AnimatedVStack>
   );
@@ -282,14 +280,14 @@ function useGroupHeader() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: () => (
-        <ConversationTitleDumb
-          title={groupName}
-          avatarComponent={avatarComponent}
-          onLongPress={onLongPress}
-          onPress={onPress}
-        />
-      ),
+      // headerTitle: () => (
+      //   <ConversationTitleDumb
+      //     title={groupName}
+      //     avatarComponent={avatarComponent}
+      //     onLongPress={onLongPress}
+      //     onPress={onPress}
+      //   />
+      // ),
     });
   }, [groupName, navigation, onLongPress, onPress, avatarComponent]);
 }

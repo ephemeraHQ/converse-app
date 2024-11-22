@@ -1,5 +1,12 @@
+import { getCurrentAccount } from "@data/store/accountsStore";
 import { MessageAttachmentStatus } from "@data/store/chatStore";
-import { saveAttachmentForPendingMessage } from "@utils/attachment/saveAttachmentForPendingMessage";
+import { getConversationMessages } from "@queries/useConversationMessages";
+import {
+  createFolderForMessage,
+  getMessageAttachmentLocalPath,
+  saveLocalAttachmentMetaData,
+} from "@utils/attachment/attachment.utils";
+import { moveFileAndReplace } from "@utils/fileSystem";
 import {
   ConversationTopic,
   RemoteAttachmentContent,
@@ -12,11 +19,7 @@ import {
   useCurrentConversationPersistedStoreState,
 } from "./conversation-persisted-stores";
 import { useConversationStore } from "./conversation-store";
-import {
-  getCurrentAccount,
-  useCurrentAccount,
-} from "@data/store/accountsStore";
-import { getConversationMessages } from "@queries/useConversationMessages";
+import { getLocalAttachment } from "@utils/attachment/handleAttachment";
 
 export function initializeCurrentConversation(args: {
   topic: ConversationTopic;
@@ -67,27 +70,30 @@ export function handleAttachmentSelected(asset: ImagePicker.ImagePickerAsset) {
 
 export async function saveAttachmentLocally() {
   const mediaPreview = getComposerMediaPreview();
+
   if (!mediaPreview) {
     throw new Error("No media preview found");
   }
+
   const messageId = uuidv4();
-  await saveAttachmentForPendingMessage({
-    pendingMessageId: messageId,
-    filePath: mediaPreview.mediaURI,
-    fileName: mediaPreview.mediaURI.split("/").pop() || `${uuidv4()}`,
-    mimeType: mediaPreview.mimeType,
+
+  await createFolderForMessage(messageId);
+
+  const filename = mediaPreview.mediaURI.split("/").pop() || `${uuidv4()}`;
+
+  const attachmentLocalPath = getMessageAttachmentLocalPath(
+    messageId,
+    filename
+  );
+
+  await moveFileAndReplace(mediaPreview.mediaURI, attachmentLocalPath);
+
+  await saveLocalAttachmentMetaData({
+    messageId,
+    filename,
+    mimeType: mediaPreview.mimeType || undefined,
   });
 }
-
-// export function handleAttachmentUploaded(
-//   uploadedAttachment: RemoteAttachmentContent
-// ) {
-//   const conversationStore = getCurrentConversationStore();
-//   conversationStore.setState((state) => ({
-//     ...state,
-//     mediaPreview: undefined,
-//   }));
-// }
 
 export function useReplyToMessageId() {
   return useCurrentConversationPersistedStoreState(

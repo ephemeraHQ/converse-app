@@ -17,6 +17,7 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     children,
     style: styleProp,
     preset,
+    inverted,
     ...rest
   } = props;
 
@@ -31,6 +32,7 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     color,
     style: styleProp,
     preset,
+    inverted,
   });
 
   return (

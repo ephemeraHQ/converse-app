@@ -2,6 +2,7 @@ import { useMessageContextStoreContext } from "@components/Chat/Message/messageC
 import { ClickableText } from "@components/ClickableText";
 import { HStack } from "@design-system/HStack";
 import { useAppTheme } from "@theme/useAppTheme";
+import { useMemo } from "react";
 
 type IMessageBubbleProps = {
   content?: string;
@@ -35,46 +36,38 @@ type IBubbleContentContainerProps = {
   children: React.ReactNode;
   fromMe: boolean;
   hasNextMessageInSeries: boolean;
-  showDateChange: boolean;
-  hasPreviousMessageInSeries: boolean;
 };
 
 export const BubbleContentContainer = (args: IBubbleContentContainerProps) => {
-  const {
-    children,
-    fromMe,
-    hasNextMessageInSeries,
-    showDateChange,
-    hasPreviousMessageInSeries,
-  } = args;
+  const { children, fromMe, hasNextMessageInSeries } = args;
   const { theme } = useAppTheme();
 
-  return (
-    <HStack
-      style={[
-        {
-          backgroundColor: fromMe
-            ? theme.colors.bubbles.bubble
-            : theme.colors.bubbles.received.bubble,
-          borderRadius: theme.borderRadius.sm,
-          paddingHorizontal: theme.spacing.xs,
-          paddingVertical: theme.spacing.xxs,
-        },
-        !hasNextMessageInSeries && {
-          borderBottomLeftRadius: theme.spacing["4xs"],
-        },
-        fromMe &&
-          (!hasNextMessageInSeries ||
-            showDateChange ||
-            hasPreviousMessageInSeries) && {
-            borderBottomLeftRadius: theme.spacing.sm,
-            borderBottomRightRadius: theme.spacing["4xs"],
-          },
-      ]}
-    >
-      {children}
-    </HStack>
-  );
+  const bubbleStyle = useMemo(() => {
+    const baseStyle = {
+      backgroundColor: fromMe
+        ? theme.colors.bubbles.bubble
+        : theme.colors.bubbles.received.bubble,
+      borderRadius: theme.borderRadius.sm,
+      paddingHorizontal: theme.spacing.xs,
+      paddingVertical: theme.spacing.xxs,
+    };
+
+    if (!hasNextMessageInSeries) {
+      return {
+        ...baseStyle,
+        borderBottomLeftRadius: fromMe
+          ? theme.borderRadius.sm
+          : theme.spacing["4xs"],
+        borderBottomRightRadius: fromMe
+          ? theme.spacing["4xs"]
+          : theme.borderRadius.sm,
+      };
+    }
+
+    return baseStyle;
+  }, [fromMe, hasNextMessageInSeries, theme]);
+
+  return <HStack style={bubbleStyle}>{children}</HStack>;
 };
 
 export const MessageBubble = ({ content }: IMessageBubbleProps) => {

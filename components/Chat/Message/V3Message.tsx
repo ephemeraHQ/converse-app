@@ -1,3 +1,4 @@
+import { RemoteAttachmentMessagePreview } from "@components/Chat/Attachment/AttachmentMessagePreview";
 import {
   BubbleContainer,
   BubbleContentContainer,
@@ -26,15 +27,16 @@ import { useQuery } from "@tanstack/react-query";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
 import { getLocalizedTime, getRelativeDate } from "@utils/date";
+import { debugBorder } from "@utils/debug-style";
 import logger from "@utils/logger";
 import { getReadableProfile } from "@utils/str";
 import { flattenStyles } from "@utils/styles";
-import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import {
   DecodedMessage,
   GroupUpdatedCodec,
   InboxId,
   MessageId,
+  RemoteAttachmentCodec,
   ReplyCodec,
   TextCodec,
 } from "@xmtp/react-native-sdk";
@@ -81,11 +83,13 @@ export const V3Message = memo(
     const topic = useConversationCurrentTopic();
     const messages = getCurrentConversationMessages();
 
+    const { theme } = useAppTheme();
+
     const message = messages?.byId[messageId];
     const previousMessage = messages?.byId[previousMessageId ?? ""];
     const nextMessage = messages?.byId[nextMessageId ?? ""];
 
-    // We only want to update the message data if something changed with current, previous, or next
+    // Not sure it's needed. We only want to update the message data if something changed with current, previous, or next
     useEffect(() => {
       // const unsubscribe = subscribeToGroupMessages({
       //   account: currentAccount,
@@ -104,171 +108,179 @@ export const V3Message = memo(
       // };
     }, [currentAccount, topic, messageId, nextMessageId, previousMessageId]);
 
-    if (!message) {
-      logger.error("[Message] message is undefined");
-      return null;
-    }
+    const _hasPreviousMessageInSeries =
+      !!previousMessage &&
+      hasPreviousMessageInSeries({
+        currentMessage: message,
+        previousMessage,
+      });
 
-    return (
-      <V3MessageContent
-        message={message}
-        previousMessage={previousMessage}
-        nextMessage={nextMessage}
-      />
-    );
-  }
-);
+    const _hasNextMessageInSeries =
+      !!nextMessage &&
+      hasNextMessageInSeries({
+        currentMessage: message,
+        nextMessage,
+      });
 
-export const V3MessageContent = memo(function V3MessageContent({
-  message,
-  previousMessage,
-  nextMessage,
-}: {
-  message: DecodedMessageWithCodecsType;
-  previousMessage: DecodedMessageWithCodecsType | undefined;
-  nextMessage: DecodedMessageWithCodecsType | undefined;
-}) {
-  const { theme } = useAppTheme();
-
-  const currentAccount = useCurrentAccount();
-
-  const _hasPreviousMessageInSeries =
-    !!previousMessage &&
-    hasPreviousMessageInSeries({
-      currentMessage: message,
+    const showDateChange = messageShouldShowDateChange({
+      message,
       previousMessage,
     });
 
-  const _hasNextMessageInSeries =
-    !!nextMessage &&
-    hasNextMessageInSeries({
-      currentMessage: message,
-      nextMessage,
+    const fromMe = messageIsFromCurrentUserV3({
+      message,
     });
 
-  const showDateChange = messageShouldShowDateChange({
-    message,
-    previousMessage,
-  });
+    // const isLatestSettledFromMe = isLatestSettledFromCurrentUser({
+    //   message,
+    //   currentAccount,
+    // });
 
-  const fromMe = messageIsFromCurrentUserV3({
-    message,
-  });
+    // const isLatestSettledFromPeer =
+    //   !!nextMessage &&
+    //   isLatestMessageSettledFromPeer({
+    //     message,
+    //     currentAccount,
+    //     nextMessage,
+    //   });
 
-  // const isLatestSettledFromMe = isLatestSettledFromCurrentUser({
-  //   message,
-  //   currentAccount,
-  // });
+    if (isReplyMessage(message)) {
+      return (
+        <MessageContextStoreProvider
+          messageId={message.id}
+          hasNextMessageInSeries={_hasNextMessageInSeries}
+          fromMe={fromMe}
+          sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
+          showDateChange={showDateChange}
+          hasPreviousMessageInSeries={_hasPreviousMessageInSeries}
+          senderAddress={message.senderAddress as InboxId}
+        >
+          <MessageContextProvider>
+            <ReplyMessage />
+          </MessageContextProvider>
+        </MessageContextStoreProvider>
+      );
+    }
 
-  // const isLatestSettledFromPeer =
-  //   !!nextMessage &&
-  //   isLatestMessageSettledFromPeer({
-  //     message,
-  //     currentAccount,
-  //     nextMessage,
-  //   });
+    if (isTextMessage(message)) {
+      const messageTyped = message as DecodedMessage<[TextCodec]>;
 
-  if (isReplyMessage(message)) {
-    return (
-      <MessageContextStoreProvider
-        messageId={message.id}
-        hasNextMessageInSeries={_hasNextMessageInSeries}
-        fromMe={fromMe}
-        sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
-        showDateChange={showDateChange}
-        hasPreviousMessageInSeries={_hasPreviousMessageInSeries}
-        senderAddress={message.senderAddress as InboxId}
-      >
-        <ReplyMessage />
-      </MessageContextStoreProvider>
-    );
-  }
-
-  if (isTextMessage(message)) {
-    const messageTyped = message as DecodedMessage<[TextCodec]>;
-
-    const textContent = messageTyped.content();
-    return (
-      <MessageContextStoreProvider
-        messageId={message.id}
-        hasNextMessageInSeries={_hasNextMessageInSeries}
-        fromMe={fromMe}
-        sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
-        hasPreviousMessageInSeries={_hasPreviousMessageInSeries}
-        showDateChange={showDateChange}
-        senderAddress={messageTyped.senderAddress as InboxId}
-      >
-        <MessageContextProvider>
-          <SimpleMessage message={textContent} />
-          {/* <MessageStatusDumb
+      const textContent = messageTyped.content();
+      return (
+        <MessageContextStoreProvider
+          messageId={message.id}
+          hasNextMessageInSeries={_hasNextMessageInSeries}
+          fromMe={fromMe}
+          sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
+          hasPreviousMessageInSeries={_hasPreviousMessageInSeries}
+          showDateChange={showDateChange}
+          senderAddress={messageTyped.senderAddress as InboxId}
+        >
+          <MessageContextProvider>
+            <SimpleMessage message={textContent} />
+            {/* <MessageStatusDumb
             shouldDisplay={true}
             isLatestSettledFromMe={isLatestSettledFromMe}
             status={"sent"}
           /> */}
-        </MessageContextProvider>
-      </MessageContextStoreProvider>
-    );
-  }
+          </MessageContextProvider>
+        </MessageContextStoreProvider>
+      );
+    }
 
-  if (isGroupUpdatedMessage(message)) {
-    const messageTyped = message as DecodedMessage<[GroupUpdatedCodec]>;
-    const content = messageTyped.content();
+    if (isGroupUpdatedMessage(message)) {
+      const messageTyped = message as DecodedMessage<[GroupUpdatedCodec]>;
+      const content = messageTyped.content();
 
-    if (typeof content === "string") {
-      // TODO
-      console.error("group updated message is a string");
+      if (typeof content === "string") {
+        // TODO
+        console.error("group updated message is a string");
+        return null;
+      }
+
+      return (
+        <MessageContextStoreProvider
+          messageId={message.id}
+          hasNextMessageInSeries={_hasNextMessageInSeries}
+          fromMe={fromMe}
+          sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
+          showDateChange={showDateChange}
+          hasPreviousMessageInSeries={_hasPreviousMessageInSeries}
+          senderAddress={messageTyped.senderAddress as InboxId}
+        >
+          <MessageContextProvider>
+            <VStack style={{ paddingVertical: theme.spacing.sm }}>
+              <MessageTime />
+              <ChatGroupUpdatedMessage content={content} />
+            </VStack>
+          </MessageContextProvider>
+        </MessageContextStoreProvider>
+      );
+    }
+
+    if (isRemoteAttachmentMessage(message)) {
+      logger.debug(`isRemoteAttachmentMessage message`);
+
+      return (
+        <MessageContextStoreProvider
+          messageId={message.id}
+          hasNextMessageInSeries={_hasNextMessageInSeries}
+          fromMe={fromMe}
+          sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
+          showDateChange={showDateChange}
+          hasPreviousMessageInSeries={_hasPreviousMessageInSeries}
+          senderAddress={message.senderAddress as InboxId}
+        >
+          <MessageContextProvider>
+            <RemoteAttachmentMessage message={message} />
+          </MessageContextProvider>
+        </MessageContextStoreProvider>
+      );
+    }
+
+    if (isStaticAttachmentMessage(message)) {
+      logger.debug(`isStaticAttachmentMessage message`);
       return null;
     }
 
-    return (
-      <MessageContextStoreProvider
-        messageId={message.id}
-        hasNextMessageInSeries={_hasNextMessageInSeries}
-        fromMe={fromMe}
-        sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
-        showDateChange={showDateChange}
-        hasPreviousMessageInSeries={_hasPreviousMessageInSeries}
-        senderAddress={messageTyped.senderAddress as InboxId}
-      >
-        <MessageContextProvider>
-          <VStack style={{ paddingVertical: theme.spacing.sm }}>
-            <MessageTime />
-            <ChatGroupUpdatedMessage content={content} />
-          </VStack>
-        </MessageContextProvider>
-      </MessageContextStoreProvider>
-    );
-  }
+    if (isTransactionReferenceMessage(message)) {
+      logger.debug(`isTransactionReferenceMessage message`);
+      return null;
+    }
 
-  if (isRemoteAttachmentMessage(message)) {
+    if (isCoinbasePaymentMessage(message)) {
+      logger.debug(`isCoinbasePaymentMessage message`);
+      return null;
+    }
+
+    if (isReadReceiptMessage(message)) {
+      logger.debug(`isReadReceiptMessage message`);
+      return null;
+    }
+
+    if (isReactionMessage(message)) {
+      logger.debug(`isReactionMessage message`);
+      return null;
+    }
+
+    // Need DecodedMessageAllTypes to work
+    // const _ensureNever: never = message;
+    throw new Error("Unknown message type");
     return null;
   }
+);
 
-  if (isStaticAttachmentMessage(message)) {
-    return null;
-  }
+// export const V3MessageContent = memo(function V3MessageContent({
+//   message,
+//   previousMessage,
+//   nextMessage,
+// }: {
+//   message: DecodedMessageWithCodecsType;
+//   previousMessage: DecodedMessageWithCodecsType | undefined;
+//   nextMessage: DecodedMessageWithCodecsType | undefined;
+// }) {
 
-  if (isTransactionReferenceMessage(message)) {
-    return null;
-  }
-
-  if (isCoinbasePaymentMessage(message)) {
-    return null;
-  }
-
-  if (isReadReceiptMessage(message)) {
-    return null;
-  }
-
-  if (isReactionMessage(message)) {
-    return null;
-  }
-
-  // Need DecodedMessageAllTypes to work
-  // const _ensureNever: never = message;
-  throw new Error("Unknown message type");
-  return null;
-});
+// });
 
 function useConversationMessageForReplyMessage(
   messageId: MessageId
@@ -296,6 +308,26 @@ function useConversationMessageForReplyMessage(
   );
 }
 
+const RemoteAttachmentMessage = memo(function RemoteAttachmentMessage({
+  message,
+}: {
+  message: DecodedMessage<[RemoteAttachmentCodec]>;
+}) {
+  return (
+    <VStack>
+      <MessageTime />
+      <RepliableMessageWrapper onReply={() => {}}>
+        <MessageContainer fromMe={true}>
+          <MessageContentContainer fromMe={true}>
+            <RemoteAttachmentMessagePreview message={message} />
+          </MessageContentContainer>
+        </MessageContainer>
+      </RepliableMessageWrapper>
+      <MessageSeparator />
+    </VStack>
+  );
+});
+
 const ReplyMessage = memo(function ReplyMessage() {
   const { theme } = useAppTheme();
 
@@ -314,6 +346,8 @@ const ReplyMessage = memo(function ReplyMessage() {
     hasNextMessageInSeries: s.hasNextMessageInSeries,
     showDateChange: s.showDateChange,
   }));
+
+  const { toggleTime } = useMessageContext();
 
   const replyMessage = useConversationMessageForReplyMessage(messageId);
 
@@ -335,53 +369,55 @@ const ReplyMessage = memo(function ReplyMessage() {
   }
 
   return (
-    <>
+    <VStack>
+      <MessageTime />
+
       <RepliableMessageWrapper
         onReply={() => {
           setCurrentConversationReplyToMessageId(messageId);
         }}
       >
         <MessageContainer fromMe={fromMe}>
-          {!fromMe && <V3MessageSenderAvatar inboxId={senderAddress} />}
-          {!fromMe && <VStack style={{ width: theme.spacing.xxs }} />}
+          <MessageContentContainer fromMe={fromMe}>
+            {!fromMe && <V3MessageSenderAvatar inboxId={senderAddress} />}
+            {!fromMe && <VStack style={{ width: theme.spacing.xxs }} />}
 
-          <VStack>
             {!fromMe && !hasPreviousMessageInSeries && (
               <V3MessageSender inboxId={senderAddress} />
             )}
-
-            <BubbleContainer fromMe={fromMe}>
-              <BubbleContentContainer
-                fromMe={fromMe}
-                hasNextMessageInSeries={hasNextMessageInSeries}
-                showDateChange={showDateChange}
-                hasPreviousMessageInSeries={hasPreviousMessageInSeries}
-              >
-                <Pressable
-                  onPress={() => {
-                    console.log("handle press bubble");
-                  }}
-                  style={{
-                    rowGap: theme.spacing.xxs,
-                    marginTop: theme.spacing.xxxs, // Because for reply bubble we want the padding to be same for horizontal and vertial
-                  }}
+            <Pressable
+              onPress={() => {
+                toggleTime();
+              }}
+            >
+              <BubbleContainer fromMe={fromMe}>
+                <BubbleContentContainer
+                  fromMe={fromMe}
+                  hasNextMessageInSeries={hasNextMessageInSeries}
                 >
-                  <ReplyMessageReference
-                    referenceMessageId={
-                      replyMessageContent.reference as MessageId
-                    }
-                  />
-                  <MessageText inverted={fromMe}>
-                    {replyMessageContent.content.text}
-                  </MessageText>
-                </Pressable>
-              </BubbleContentContainer>
-            </BubbleContainer>
-          </VStack>
+                  <VStack
+                    style={{
+                      rowGap: theme.spacing.xxs,
+                      marginTop: theme.spacing.xxxs, // Because for reply bubble we want the padding to be same for horizontal and vertial
+                    }}
+                  >
+                    <ReplyMessageReference
+                      referenceMessageId={
+                        replyMessageContent.reference as MessageId
+                      }
+                    />
+                    <MessageText inverted={fromMe}>
+                      {replyMessageContent.content.text}
+                    </MessageText>
+                  </VStack>
+                </BubbleContentContainer>
+              </BubbleContainer>
+            </Pressable>
+          </MessageContentContainer>
         </MessageContainer>
       </RepliableMessageWrapper>
       <MessageSeparator />
-    </>
+    </VStack>
   );
 });
 
@@ -396,9 +432,35 @@ const MessageContainer = memo(function MessageContainer(props: {
   return (
     <HStack
       style={{
-        // ...debugBorder("red"),
+        // ...debugBorder("blue"),
         flex: 1,
         alignItems: "flex-end",
+        ...(fromMe
+          ? { justifyContent: "flex-end" }
+          : { justifyContent: "flex-start" }),
+      }}
+    >
+      {children}
+    </HStack>
+  );
+});
+
+const MessageContentContainer = memo(function MessageContentContainer(props: {
+  children: React.ReactNode;
+  fromMe: boolean;
+}) {
+  const { children, fromMe } = props;
+
+  const { theme } = useAppTheme();
+
+  return (
+    <HStack
+      style={{
+        // ...debugBorder("red"),
+        flex: 1,
+        // alignSelf: fromMe ? "flex-end" : "flex-start",
+        alignItems: "flex-end",
+        maxWidth: "75%",
         ...(fromMe
           ? { paddingRight: theme.spacing.sm, justifyContent: "flex-end" }
           : { paddingLeft: theme.spacing.sm, justifyContent: "flex-start" }),
@@ -509,22 +571,25 @@ const SimpleMessage = memo(function SimpleMessage({
         }}
       >
         <MessageContainer fromMe={fromMe}>
-          {!fromMe && <V3MessageSenderAvatar inboxId={senderAddress} />}
+          <MessageContentContainer fromMe={fromMe}>
+            {!fromMe && <V3MessageSenderAvatar inboxId={senderAddress} />}
+            {!fromMe && <VStack style={{ width: theme.spacing.xxs }} />}
 
-          <VStack>
-            <BubbleContainer fromMe={fromMe}>
-              <BubbleContentContainer
-                fromMe={fromMe}
-                hasNextMessageInSeries={hasNextMessageInSeries}
-                showDateChange={showDateChange}
-                hasPreviousMessageInSeries={hasPreviousMessageInSeries}
-              >
-                <Pressable onPress={handlePressBubble}>
-                  <MessageText inverted={fromMe}>{message}</MessageText>
-                </Pressable>
-              </BubbleContentContainer>
-            </BubbleContainer>
-          </VStack>
+            <VStack>
+              <BubbleContainer fromMe={fromMe}>
+                <BubbleContentContainer
+                  fromMe={fromMe}
+                  hasNextMessageInSeries={hasNextMessageInSeries}
+                  showDateChange={showDateChange}
+                  hasPreviousMessageInSeries={hasPreviousMessageInSeries}
+                >
+                  <Pressable onPress={handlePressBubble}>
+                    <MessageText inverted={fromMe}>{message}</MessageText>
+                  </Pressable>
+                </BubbleContentContainer>
+              </BubbleContainer>
+            </VStack>
+          </MessageContentContainer>
         </MessageContainer>
       </RepliableMessageWrapper>
 

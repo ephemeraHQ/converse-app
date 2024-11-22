@@ -1,14 +1,12 @@
 import RNFS from "react-native-fs";
-
 import { moveFileAndReplace } from "../fileSystem";
-import { handleAttachment } from "./handleAttachment";
-import { Nullable } from "../../types/general";
+import { getLocalAttachment } from "./handleAttachment";
 
 export const saveAttachmentForPendingMessage = async (args: {
   pendingMessageId: string;
   filePath: string;
   fileName: string;
-  mimeType: Nullable<string>;
+  mimeType: string | undefined;
 }) => {
   const { pendingMessageId, filePath, fileName, mimeType } = args;
   const messageFolder = `${RNFS.DocumentDirectoryPath}/messages/${args.pendingMessageId}`;
@@ -18,5 +16,5 @@ export const saveAttachmentForPendingMessage = async (args: {
   });
   const attachmentPath = `${messageFolder}/${fileName}`;
   await moveFileAndReplace(filePath, attachmentPath);
-  await handleAttachment(pendingMessageId, fileName, mimeType || undefined);
+  await getLocalAttachment(pendingMessageId, fileName, mimeType || undefined);
 };
