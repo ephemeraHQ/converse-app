@@ -37,9 +37,7 @@ const conversationPersistedStores = new Map<
   ReturnType<typeof createConversationPersistedStore>
 >();
 
-// Custom persistence logic
-// Factory function to create a store for each conversation with persistence
-const createConversationPersistedStore = (conversationTopic: string) =>
+const creatConversationStore = (name: string) =>
   createStore<IConversationPersistedStore>()(
     subscribeWithSelector(
       persist(
@@ -50,7 +48,7 @@ const createConversationPersistedStore = (conversationTopic: string) =>
         }),
         {
           storage: createJSONStorage(() => zustandMMKVStorage),
-          name: `conversation_${conversationTopic}`, // unique storage key for each conversation
+          name, // unique storage key for each conversation
           partialize: (state) => ({
             inputValue: state.inputValue,
             replyingToMessageId: state.replyingToMessageId,
@@ -60,6 +58,13 @@ const createConversationPersistedStore = (conversationTopic: string) =>
       )
     )
   );
+
+const newConversationStore = creatConversationStore("new_conversation");
+
+// Custom persistence logic
+// Factory function to create a store for each conversation with persistence
+const createConversationPersistedStore = (conversationTopic: string) =>
+  creatConversationStore(`conversation_${conversationTopic}`);
 
 // Hook to get or create the store for a conversation
 export const getConversationPersistedStore = (conversationTopic: string) => {
@@ -74,16 +79,18 @@ export const getConversationPersistedStore = (conversationTopic: string) => {
 
 export function useConversationPersistedStore(topic: string) {
   if (!topic) {
-    throw new Error("Topic is not defined");
+    return newConversationStore;
   }
   return getConversationPersistedStore(topic);
 }
 
 export function useConversationPersistedStoreState<T>(
-  conversationTopic: string,
+  conversationTopic: string | undefined,
   selector: (state: IConversationPersistedStore) => T
 ) {
-  const store = getConversationPersistedStore(conversationTopic);
+  const store = conversationTopic
+    ? getConversationPersistedStore(conversationTopic)
+    : newConversationStore;
   return useStore(store, selector);
 }
 
@@ -91,7 +98,7 @@ export function useConversationPersistedStoreState<T>(
 export function getCurrentConversationPersistedStore() {
   const topic = useConversationStore.getState().topic;
   if (!topic) {
-    throw new Error("Topic is not defined");
+    return newConversationStore;
   }
   return getConversationPersistedStore(topic);
 }
@@ -101,8 +108,5 @@ export function useCurrentConversationPersistedStoreState<T>(
   selector: (state: IConversationPersistedStore) => T
 ) {
   const topic = useConversationStore((state) => state.topic);
-  if (!topic) {
-    throw new Error("Topic is not defined");
-  }
   return useConversationPersistedStoreState(topic, selector);
 }

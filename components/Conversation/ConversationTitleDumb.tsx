@@ -5,9 +5,10 @@ import {
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
 } from "react-native";
 import { getTitleFontScale } from "../../utils/str";
+import { AnimatedHStack } from "@design-system/HStack";
+import { animation } from "@theme/animations";
 
 type ConversationTitleDumbProps = {
   title?: string;
@@ -25,7 +26,10 @@ export function ConversationTitleDumb({
   const styles = useStyles();
 
   return (
-    <View style={styles.container}>
+    <AnimatedHStack
+      style={styles.container}
+      entering={animation.fadeInUpSlow()}
+    >
       <TouchableOpacity
         onLongPress={onLongPress}
         onPress={onPress}
@@ -36,7 +40,7 @@ export function ConversationTitleDumb({
           {title}
         </Text>
       </TouchableOpacity>
-    </View>
+    </AnimatedHStack>
   );
 }
 

@@ -81,8 +81,11 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const profiles = useProfilesStore((s) => s.profiles);
   const pinnedConversations = useChatStore((s) => s.pinnedConversationTopics);
   const currentAccount = useCurrentAccount();
-  const { data: items, isLoading: showInitialLoad } =
-    useConversationListItems();
+  const {
+    data: items,
+    isLoading: showInitialLoad,
+    refetch,
+  } = useConversationListItems();
 
   const [flatListItems, setFlatListItems] = useState<{
     items: FlatListItemType[];
@@ -220,6 +223,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
           ) : undefined
         }
         ListFooterComponent={ListFooterComponent}
+        refetch={refetch}
       />
       <Recommendations visibility="HIDDEN" />
       {Platform.OS === "android" && !sharingMode && <NewConversationButton />}

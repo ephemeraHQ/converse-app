@@ -22,16 +22,22 @@ import { useConversationStore } from "./conversation-store";
 import { getLocalAttachment } from "@utils/attachment/handleAttachment";
 
 export function initializeCurrentConversation(args: {
-  topic: ConversationTopic;
+  topic: ConversationTopic | undefined;
+  peerAddress: string | undefined;
   inputValue: string;
 }) {
-  const { topic, inputValue } = args;
-  useConversationStore.setState({ topic });
+  const { topic, peerAddress, inputValue } = args;
+  useConversationStore.setState({ topic, peerAddress });
   setCurrentConversationInputValue(inputValue);
 }
 
 export function resetCurrentConversation() {
   useConversationStore.setState({ topic: "" as ConversationTopic });
+}
+
+export function updateNewConversation(newTopic: ConversationTopic) {
+  setCurrentConversationInputValue("");
+  useConversationStore.setState({ topic: newTopic, peerAddress: undefined });
 }
 
 export function getComposerMediaPreview() {
@@ -192,6 +198,11 @@ export function getCurrentConversationReplyToMessageId() {
 export function useConversationCurrentTopic() {
   return useConversationStore((state) => state.topic);
 }
+
+export function useConversationCurrentPeerAddress() {
+  return useConversationStore((state) => state.peerAddress);
+}
+
 export function getCurrentConversationTopic() {
   return useConversationStore.getState().topic;
 }
@@ -205,5 +216,11 @@ export function useConversationComposerMediaPreview() {
 export function getCurrentConversationMessages() {
   const currentAccount = getCurrentAccount()!;
   const topic = getCurrentConversationTopic();
+  if (!topic) {
+    return {
+      byId: {},
+      ids: [],
+    };
+  }
   return getConversationMessages(currentAccount, topic);
 }

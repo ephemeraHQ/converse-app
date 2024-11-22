@@ -1,29 +1,18 @@
-import Avatar from "@components/Avatar";
 import { V3Message } from "@components/Chat/Message/V3Message";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationMessages } from "@queries/useConversationMessages";
-import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
-import Clipboard from "@react-native-clipboard/clipboard";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { NavigationParamList } from "@screens/Navigation/Navigation";
-import { ConversationVersion } from "@xmtp/react-native-sdk";
-import { memo, useCallback, useEffect, useMemo } from "react";
-import { Alert, FlatListProps, Platform } from "react-native";
+import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
+import { memo, useCallback, useEffect } from "react";
+import { FlatListProps, Platform } from "react-native";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
-import { useDebugEnabled } from "@components/DebugButton";
-import { GroupAvatarDumb } from "@components/GroupAvatar";
 import { Screen } from "@components/Screen/ScreenComp/Screen";
 import { Button } from "@design-system/Button/Button";
 import { Center } from "@design-system/Center";
 import { Text } from "@design-system/Text";
 import { AnimatedVStack, VStack } from "@design-system/VStack";
-import { useProfilesSocials } from "@hooks/useProfilesSocials";
 import { translate } from "@i18n/translate";
 import { useRouter } from "@navigation/useNavigation";
-import { useGroupMembersConversationScreenQuery } from "@queries/useGroupMembersQuery";
 import { useAppTheme } from "@theme/useAppTheme";
-import { isV3Topic } from "@utils/groupUtils/groupId";
-import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import Animated, {
   AnimatedProps,
   useAnimatedKeyboard,
@@ -44,18 +33,31 @@ import {
   initializeCurrentConversation,
   useConversationCurrentTopic,
 } from "../../features/conversation/conversation-service";
-import { ConversationTitleDumb } from "./ConversationTitleDumb";
+import { getDraftMessage } from "../../features/conversations/utils/textDrafts";
+import { GroupConversationTitle } from "../../features/conversations/components/GroupConversationTitle";
+import { DmConversationTitle } from "../../features/conversations/components/DmConversationTitle";
+import { NewConversationTitle } from "../../features/conversations/components/NewConversationTitle";
 
 const keyExtractor = (item: string) => item;
 
-export const V3Conversation = ({
-  route,
-}: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
-  // TODO: Handle when topic is not defined
-  const topic = route.params.topic!;
-  const messageToPrefill = route.params.text ?? "";
+type V3ConversationProps = {
+  topic: ConversationTopic | undefined;
+  peerAddress?: string;
+  textPrefill?: string;
+};
 
-  initializeCurrentConversation({ topic, inputValue: messageToPrefill });
+export const V3Conversation = ({
+  topic,
+  peerAddress,
+  textPrefill,
+}: V3ConversationProps) => {
+  // TODO: Handle when topic is not defined
+  const messageToPrefill = textPrefill ?? getDraftMessage(topic) ?? "";
+  initializeCurrentConversation({
+    topic,
+    peerAddress,
+    inputValue: messageToPrefill,
+  });
 
   return (
     <ConversationContextProvider>
@@ -68,7 +70,7 @@ export const V3Conversation = ({
 
 const Content = memo(function Content() {
   const { theme } = useAppTheme();
-
+  const isNewConversation = useConversationContext("isNewConversation");
   const conversationVersion = useConversationContext("conversationVersion");
 
   return (
@@ -78,12 +80,8 @@ const Content = memo(function Content() {
         flex: 1,
       }}
     >
-      {!conversationVersion ? (
-        <VStack
-          style={{
-            flex: 1,
-          }}
-        />
+      {isNewConversation ? (
+        <NewConversationContent />
       ) : conversationVersion === ConversationVersion.DM ? (
         <DmContent />
       ) : (
@@ -97,6 +95,13 @@ const Content = memo(function Content() {
   );
 });
 
+const NewConversationContent = memo(function NewConversationContent() {
+  const peerAddress = useConversationContext("peerAddress");
+  useNewConversationHeader();
+
+  return <MessagesList data={[]} refreshing={false} />;
+});
+
 const DmContent = memo(function DmContent() {
   const currentAccount = useCurrentAccount()!;
   const topic = useConversationCurrentTopic();
@@ -106,10 +111,10 @@ const DmContent = memo(function DmContent() {
     data: messages,
     isLoading: messagesLoading,
     isRefetching: isRefetchingMessages,
+    refetch: refetchMessages,
   } = useConversationMessages(currentAccount, topic!);
 
-  // TODO: Add DM header
-  // useDmHeader();
+  useDmHeader();
 
   if (conversationNotFound) {
     // TODO: Add DM placeholder
@@ -125,6 +130,7 @@ const DmContent = memo(function DmContent() {
     <MessagesList
       data={messages?.ids ?? []}
       refreshing={isRefetchingMessages}
+      onRefresh={refetchMessages}
     />
   );
 });
@@ -138,6 +144,7 @@ const GroupContent = memo(function GroupContent() {
     data: messages,
     isLoading: messagesLoading,
     isRefetching: isRefetchingMessages,
+    refetch,
   } = useConversationMessages(currentAccount, topic!);
 
   useGroupHeader();
@@ -154,6 +161,7 @@ const GroupContent = memo(function GroupContent() {
     <MessagesList
       data={messages?.ids ?? []}
       refreshing={isRefetchingMessages}
+      onRefresh={refetch}
     />
   );
 });
@@ -228,121 +236,41 @@ const KeyboardFiller = memo(function KeyboardFiller() {
   return <AnimatedVStack style={as} />;
 });
 
-function useGroupHeader() {
-  const { theme } = useAppTheme();
-
+function useNewConversationHeader() {
   const navigation = useRouter();
 
-  const topic = useConversationCurrentTopic();
-  const currentAccount = useCurrentAccount()!;
-
-  const groupName = useConversationGroupContext("groupName");
-
-  const { data: groupPhoto, isLoading: groupPhotoLoading } = useGroupPhotoQuery(
-    currentAccount,
-    topic
-  );
-
-  const avatarComponent = useMemo(() => {
-    if (!groupName || groupPhotoLoading) {
-      return null;
-    }
-
-    if (groupPhoto) {
-      return (
-        <Avatar
-          uri={groupPhoto}
-          size={theme.avatarSize.sm}
-          // style={styles.avatar}
-        />
-      );
-    }
-
-    return <GroupAvatarWrapper />;
-  }, [groupName, groupPhoto, groupPhotoLoading, theme.avatarSize.sm]);
-
-  const debugEnabled = useDebugEnabled();
-
-  const onPress = useCallback(() => {
-    // textInputRef?.current?.blur();
-    navigation.push("Group", { topic });
-  }, [navigation, topic]);
-
-  const onLongPress = useCallback(() => {
-    if (!debugEnabled) return;
-    Clipboard.setString(
-      JSON.stringify({
-        topic: topic || "",
-      })
-    );
-    Alert.alert("Conversation details copied");
-  }, [debugEnabled, topic]);
+  const peerAddress = useConversationContext("peerAddress");
 
   useEffect(() => {
     navigation.setOptions({
-      // headerTitle: () => (
-      //   <ConversationTitleDumb
-      //     title={groupName}
-      //     avatarComponent={avatarComponent}
-      //     onLongPress={onLongPress}
-      //     onPress={onPress}
-      //   />
-      // ),
+      headerTitle: () => <NewConversationTitle peerAddress={peerAddress!} />,
     });
-  }, [groupName, navigation, onLongPress, onPress, avatarComponent]);
+  }, [peerAddress, navigation]);
 }
 
-const GroupAvatarWrapper = memo(function GroupAvatarWrapper() {
-  const { theme } = useAppTheme();
+function useDmHeader() {
+  const navigation = useRouter();
 
   const topic = useConversationCurrentTopic();
-  const currentAccount = useCurrentAccount()!;
 
-  const { data: members } = useGroupMembersConversationScreenQuery(
-    currentAccount,
-    topic!
-  );
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => <DmConversationTitle topic={topic!} />,
+    });
+  }, [topic, navigation]);
+}
 
-  const memberAddresses = useMemo(() => {
-    const addresses: string[] = [];
-    for (const memberId of members?.ids ?? []) {
-      const member = members?.byId[memberId];
-      if (
-        member?.addresses[0] &&
-        member?.addresses[0].toLowerCase() !== currentAccount?.toLowerCase()
-      ) {
-        addresses.push(member?.addresses[0]);
-      }
-    }
-    return addresses;
-  }, [members, currentAccount]);
+function useGroupHeader() {
+  const navigation = useRouter();
 
-  const profilesSocialsQueries = useProfilesSocials(memberAddresses);
+  const topic = useConversationCurrentTopic();
 
-  const memberData = useMemo(() => {
-    return profilesSocialsQueries.map(({ data: socials }, index) =>
-      socials
-        ? {
-            address: memberAddresses[index],
-            uri: getPreferredAvatar(socials),
-            name: getPreferredName(socials, memberAddresses[index]),
-          }
-        : {
-            address: memberAddresses[index],
-            uri: undefined,
-            name: memberAddresses[index],
-          }
-    );
-  }, [profilesSocialsQueries, memberAddresses]);
-
-  return (
-    <GroupAvatarDumb
-      members={memberData}
-      size={theme.avatarSize.sm}
-      // style={styles.avatar}
-    />
-  );
-});
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => <GroupConversationTitle topic={topic!} />,
+    });
+  }, [topic, navigation]);
+}
 
 const GroupConversationMissing = memo(() => {
   const topic = useConversationCurrentTopic();
@@ -355,9 +283,7 @@ const GroupConversationMissing = memo(() => {
         }}
       >
         {topic
-          ? isV3Topic(topic)
-            ? translate("group_not_found")
-            : translate("conversation_not_found")
+          ? translate("group_not_found")
           : translate("opening_conversation")}
       </Text>
     </VStack>

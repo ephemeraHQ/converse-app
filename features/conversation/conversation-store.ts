@@ -5,11 +5,13 @@ import {
 import { create } from "zustand";
 
 export type IConversationStore = {
-  topic: ConversationTopic;
+  topic: ConversationTopic | undefined;
+  peerAddress: string | undefined;
   uploadedRemoteAttachment: RemoteAttachmentContent | null;
 };
 
-export const useConversationStore = create<IConversationStore>((set, get) => ({
-  topic: "" as ConversationTopic,
+export const useConversationStore = create<IConversationStore>(() => ({
+  topic: undefined,
+  peerAddress: undefined,
   uploadedRemoteAttachment: null,
 }));

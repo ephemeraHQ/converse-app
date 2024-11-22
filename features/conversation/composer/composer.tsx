@@ -195,7 +195,7 @@ const ReplyPreview = memo(function ReplyPreview() {
   const topic = useConversationCurrentTopic();
 
   const replyMessage = replyingToMessageId
-    ? getConversationMessages(currentAccount, topic)?.byId[replyingToMessageId]
+    ? getConversationMessages(currentAccount, topic!)?.byId[replyingToMessageId]
     : undefined;
 
   const readableProfile = replyMessage

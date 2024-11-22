@@ -114,7 +114,6 @@ export const prefetchConversationMessages = (
   account: string,
   topic: ConversationTopic
 ) => {
-  console.log("prefetchConversationMessages111", account, topic);
   queryClient.prefetchQuery({
     queryKey: conversationMessagesQueryKey(account.toLowerCase(), topic),
     queryFn: () => {
