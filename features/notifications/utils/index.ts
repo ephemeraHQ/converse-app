@@ -5,7 +5,7 @@ import { AppState, Platform } from "react-native";
 import logger from "@utils/logger";
 import { handleForegroundNotification } from "./handleForegroundNotification";
 import { onInteractWithNotification } from "./onInteractWithNotification";
-import { handleBackgroundNotification } from "./handleBackgroundNotification";
+import { handleBackgroundNotification } from "./background/handleBackgroundNotification";
 import notifee, { EventType } from "@notifee/react-native";
 
 const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
