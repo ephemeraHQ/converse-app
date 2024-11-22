@@ -59,6 +59,11 @@ async function cherryPickCommits() {
         min: 1,
       });
 
+      if (!selectedCommits || selectedCommits.length === 0) {
+        console.log("No commits selected. Exiting.");
+        return;
+      }
+
       commitsToCherryPick = commitList.filter((commit) =>
         selectedCommits.includes(commit.hash)
       );
@@ -115,13 +120,27 @@ async function cherryPickCommits() {
   }
 }
 
-function executeCommand(command, args) {
+function executeCommand(command, args, options = { captureOutput: false }) {
   return new Promise((resolve, reject) => {
-    const cmd = spawn(command, args, { stdio: "inherit", shell: true });
+    let output = "";
+    const spawnOptions = options.captureOutput
+      ? { shell: true }
+      : { stdio: "inherit", shell: true };
+    const cmd = spawn(command, args, spawnOptions);
+
+    if (options.captureOutput) {
+      cmd.stdout.on("data", (data) => {
+        output += data.toString();
+      });
+
+      cmd.stderr.on("data", (data) => {
+        output += data.toString();
+      });
+    }
 
     cmd.on("close", (code) => {
       if (code === 0) {
-        resolve();
+        resolve(output.trim());
       } else {
         reject(
           new Error(
@@ -139,11 +158,11 @@ function executeCommand(command, args) {
 
 async function getCommitsNotInTarget(sourceBranch, targetBranch) {
   // Get commits in sourceBranch not in targetBranch
-  const commitsOutput = await executeGitCommand([
-    "log",
-    `${targetBranch}..${sourceBranch}`,
-    "--pretty=format:%H %s",
-  ]);
+  const commitsOutput = await executeCommand(
+    "git",
+    ["log", `${targetBranch}..${sourceBranch}`, "--pretty=format:%H %s"],
+    { captureOutput: true }
+  );
 
   const commits = commitsOutput
     .split("\n")
@@ -154,37 +173,6 @@ async function getCommitsNotInTarget(sourceBranch, targetBranch) {
     });
 
   return commits;
-}
-
-function executeGitCommand(args) {
-  return new Promise((resolve, reject) => {
-    let output = "";
-    const cmd = spawn("git", args, { shell: true });
-
-    cmd.stdout.on("data", (data) => {
-      output += data.toString();
-    });
-
-    cmd.stderr.on("data", (data) => {
-      output += data.toString();
-    });
-
-    cmd.on("close", (code) => {
-      if (code === 0) {
-        resolve(output.trim());
-      } else {
-        reject(
-          new Error(
-            `Git command "git ${args.join(" ")}" exited with code ${code}`
-          )
-        );
-      }
-    });
-
-    cmd.on("error", (error) => {
-      reject(error);
-    });
-  });
 }
 
 cherryPickCommits();

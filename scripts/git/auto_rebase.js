@@ -97,7 +97,8 @@ async function rebaseBranch(baseBranch, targetBranch) {
 
     return true;
   } catch (error) {
-    if (error.message.includes("CONFLICT")) {
+    const status = await git.status();
+    if (status.conflicts.length > 0) {
       console.error(
         `Conflicts occurred while rebasing ${targetBranch} onto ${baseBranch}`
       );
