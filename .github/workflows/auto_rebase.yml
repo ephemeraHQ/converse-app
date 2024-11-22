@@ -5,6 +5,10 @@ on:
     branches:
       - "release/*"
 
+permissions:
+  contents: write
+  issues: write
+
 jobs:
   auto-rebase:
     runs-on: ubuntu-22.04

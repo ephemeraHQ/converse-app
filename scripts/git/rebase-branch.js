@@ -87,4 +87,7 @@ function executeCommand(command, args) {
   });
 }
 
-rebaseBranch();
+rebaseBranch().catch((error) => {
+  console.error("Fatal error:", error);
+  process.exit(1);
+});
