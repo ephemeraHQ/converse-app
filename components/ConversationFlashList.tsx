@@ -45,6 +45,7 @@ export default function ConversationFlashList({
   ListHeaderComponent,
   ListFooterComponent,
   refetch,
+  isRefetching,
 }: Props) {
   const navigationRef = useRef(navigation);
   useEffect(() => {
@@ -95,6 +96,7 @@ export default function ConversationFlashList({
         <View style={styles.conversationList}>
           <FlashList
             onRefresh={refetch}
+            refreshing={isRefetching}
             keyboardShouldPersistTaps="handled"
             onMomentumScrollBegin={onScroll}
             onScrollBeginDrag={onScroll}

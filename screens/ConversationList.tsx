@@ -84,6 +84,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     data: items,
     isLoading: showInitialLoad,
     refetch,
+    isRefetching,
   } = useConversationListItems();
 
   const [flatListItems, setFlatListItems] = useState<{
@@ -223,6 +224,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
         }
         ListFooterComponent={ListFooterComponent}
         refetch={refetch}
+        isRefetching={isRefetching}
       />
       <Recommendations visibility="HIDDEN" />
       {Platform.OS === "android" && !sharingMode && <NewConversationButton />}
