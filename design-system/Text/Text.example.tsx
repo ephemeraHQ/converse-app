@@ -15,11 +15,24 @@ export const TextExample = memo(function TextExample() {
     >
       {/* Preset examples */}
       <VStack style={{ rowGap: theme.spacing.sm }}>
-        <Text preset="title">Title Preset</Text>
-        <Text preset="body">Body Preset - Main content text</Text>
-        <Text preset="bodyBold">Body Bold Preset</Text>
-        <Text preset="small">Small Preset</Text>
-        <Text preset="smaller">Smaller Preset</Text>
+        <Text preset="title">Title Preset - Large Headers</Text>
+        <Text preset="body">
+          Body Preset - Main content text that flows naturally in paragraphs
+        </Text>
+        <Text preset="bodyBold">Body Bold Preset - Emphasized content</Text>
+        <Text preset="small">Small Preset - Less prominent information</Text>
+        <Text preset="smaller">
+          Smaller Preset - Fine print and subtle details
+        </Text>
+        <Text preset="smallerBold">
+          Smaller Bold Preset - Important fine print
+        </Text>
+        <Text preset="bigBold">Big Bold Preset - Strong emphasis</Text>
+        <Text preset="formLabel">Form Label Preset - Input field labels</Text>
+        <Text preset="formHelper">
+          Form Helper Preset - Additional form context
+        </Text>
+        <Text preset="emojiSymbol">👋</Text>
       </VStack>
 
       {/* Preset with color overrides */}
@@ -40,6 +53,11 @@ export const TextExample = memo(function TextExample() {
         <Text preset="bigBold">Big Bold Text</Text>
         <Text preset="formLabel">Form Label Text</Text>
         <Text preset="formHelper">Form Helper Text</Text>
+        <Text preset="formLabel">Password</Text>
+        <Text preset="body">••••••••</Text>
+        <Text preset="formHelper" color="error">
+          Password must be at least 8 characters
+        </Text>
       </VStack>
 
       {/* Common use cases */}
@@ -50,6 +68,41 @@ export const TextExample = memo(function TextExample() {
         </Text>
         <Text preset="body">High-quality product with amazing features</Text>
         <Text preset="formHelper">In stock - Ships in 2-3 days</Text>
+      </VStack>
+
+      {/* Product Card Example */}
+      <VStack style={{ rowGap: theme.spacing.sm }}>
+        <Text preset="bigBold">Premium Package</Text>
+        <Text preset="body">Access to all premium features</Text>
+        <Text preset="smallerBold" color="primary">
+          SAVE 20%
+        </Text>
+        <Text preset="small" color="secondary">
+          Valid until Dec 31, 2024
+        </Text>
+      </VStack>
+
+      {/* Alert Examples */}
+      <VStack style={{ rowGap: theme.spacing.sm }}>
+        <Text preset="bodyBold" color="primary">
+          ✓ Payment Successful
+        </Text>
+        <Text preset="bodyBold" color="secondary">
+          ⚠ Connection Lost
+        </Text>
+        <Text preset="bodyBold" color="caution">
+          ⚡ Low Battery
+        </Text>
+        <Text preset="smaller" color="tertiary">
+          Last updated: 5 mins ago
+        </Text>
+      </VStack>
+
+      {/* Emoji Usage */}
+      <VStack style={{ rowGap: theme.spacing.sm }}>
+        <Text preset="emojiSymbol">🎉 Congratulations!</Text>
+        <Text preset="emojiSymbol">⭐️ New Achievement</Text>
+        <Text preset="emojiSymbol">🎮 Gaming Mode</Text>
       </VStack>
     </VStack>
   );
