@@ -1,10 +1,11 @@
 import { translate } from "@i18n";
-import { Image } from "expo-image";
+import { Image, ImageProps } from "expo-image";
 import prettyBytes from "pretty-bytes";
 import { memo } from "react";
 import { ActivityIndicator } from "react-native";
 
 import { getCurrentAccount } from "@data/store/accountsStore";
+import { Center } from "@design-system/Center";
 import { Icon } from "@design-system/Icon/Icon";
 import { Text } from "@design-system/Text";
 import { IVStackProps, VStack } from "@design-system/VStack";
@@ -14,41 +15,77 @@ import { useAppTheme } from "@theme/useAppTheme";
 import { getLocalAttachmentForMessageId } from "@utils/attachment/getLocalAttachment";
 import { handleDecryptedLocalAttachment } from "@utils/attachment/handleDecryptedLocalAttachment";
 import {
-  MAX_SMALL_ATTACHMENT_SIZE,
+  MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE,
   fetchAndDecodeRemoteAttachment,
 } from "@utils/xmtpRN/attachments";
-import {
-  DecodedMessage,
-  RemoteAttachmentCodec,
-  RemoteAttachmentContent,
-} from "@xmtp/react-native-sdk";
+import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 
-type Props = {
-  message: DecodedMessage<[RemoteAttachmentCodec]>;
-};
-
-export function RemoteAttachmentMessagePreview({ message }: Props) {
-  const { theme } = useAppTheme();
-
-  const content = message.content();
-
-  if (typeof content === "string") {
-    // TODO
-    return null;
-  }
-
-  return (
-    <RemoteAttachmentPreview
-      messageId={message.id}
-      remoteMessageContent={content}
-    />
-  );
+export function useRemoteAttachment(
+  messageId: string,
+  remoteMessageContent: RemoteAttachmentContent
+) {
+  return useQuery({
+    queryKey: ["attachment", messageId],
+    queryFn: () => fetchAttachment(messageId, remoteMessageContent),
+  });
 }
 
-const RemoteAttachmentPreview = memo(function RemoteAttachmentPreview(props: {
+type IRemoteImageProps = ImageProps & {
   messageId: string;
   remoteMessageContent: RemoteAttachmentContent;
-}) {
+  fitAspectRatio?: boolean;
+};
+
+export const RemoteImage = memo(function RemoteImage(props: IRemoteImageProps) {
+  const { messageId, remoteMessageContent, fitAspectRatio, ...imageProps } =
+    props;
+
+  const {
+    data: attachment,
+    isLoading: attachmentLoading,
+    error: attachmentError,
+  } = useRemoteAttachment(messageId, remoteMessageContent);
+
+  if (attachmentLoading) {
+    return (
+      <Center>
+        <ActivityIndicator />
+      </Center>
+    );
+  }
+
+  if (attachmentError || !attachment) {
+    return (
+      <Center>
+        <Text>Error loading attachment</Text>
+      </Center>
+    );
+  }
+
+  const aspectRatio =
+    fitAspectRatio && attachment.imageSize
+      ? attachment.imageSize.width / attachment.imageSize.height
+      : undefined;
+
+  const { style, ...rest } = imageProps;
+
+  return (
+    <Image
+      source={{ uri: attachment.mediaURL }}
+      style={[{ aspectRatio }, style]}
+      {...rest}
+    />
+  );
+});
+
+type IRemoteAttachmentPreviewProps = {
+  messageId: string;
+  remoteMessageContent: RemoteAttachmentContent;
+};
+
+export const RemoteAttachmentPreview = memo(function RemoteAttachmentPreview(
+  props: IRemoteAttachmentPreviewProps
+) {
   const { messageId, remoteMessageContent } = props;
 
   const { theme } = useAppTheme();
@@ -62,8 +99,6 @@ const RemoteAttachmentPreview = memo(function RemoteAttachmentPreview(props: {
     queryKey: ["attachment", messageId],
     queryFn: () => fetchAttachment(messageId, remoteMessageContent),
   });
-
-  console.log("attachment:", attachment);
 
   if (!attachment && attachmentLoading) {
     return (
@@ -154,8 +189,6 @@ const RemoteAttachmentPreview = memo(function RemoteAttachmentPreview(props: {
   const aspectRatio = attachment.imageSize
     ? attachment.imageSize.width / attachment.imageSize.height
     : undefined;
-
-  console.log("aspectRatio:", aspectRatio);
 
   return (
     <AttachmentPreviewContainer
@@ -269,10 +302,9 @@ async function fetchAttachment(
     return localAttachment;
   }
 
-  // Only the ones smaller than
   if (
     content.contentLength &&
-    parseFloat(content.contentLength) <= MAX_SMALL_ATTACHMENT_SIZE
+    parseFloat(content.contentLength) <= MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE
   ) {
     const decryptedLocalAttachment = await fetchAndDecodeRemoteAttachment({
       account: getCurrentAccount()!,

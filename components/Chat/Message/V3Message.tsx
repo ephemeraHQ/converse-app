@@ -1,4 +1,7 @@
-import { RemoteAttachmentMessagePreview } from "@components/Chat/Attachment/AttachmentMessagePreview";
+import {
+  RemoteAttachmentPreview,
+  RemoteImage,
+} from "@components/Chat/Attachment/AttachmentMessagePreview";
 import {
   BubbleContainer,
   BubbleContentContainer,
@@ -27,8 +30,8 @@ import { useQuery } from "@tanstack/react-query";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
 import { getLocalizedTime, getRelativeDate } from "@utils/date";
-import { debugBorder } from "@utils/debug-style";
 import logger from "@utils/logger";
+import { sentryTrackError } from "@utils/sentry";
 import { getReadableProfile } from "@utils/str";
 import { flattenStyles } from "@utils/styles";
 import {
@@ -48,7 +51,6 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import { useShallow } from "zustand/react/shallow";
-import { useMessageText } from "../../../features/conversation-list/hooks/useMessageText";
 import {
   getCurrentConversationMessages,
   setCurrentConversationReplyToMessageId,
@@ -285,7 +287,6 @@ export const V3Message = memo(
 function useConversationMessageForReplyMessage(
   messageId: MessageId
 ): DecodedMessage<[ReplyCodec]> | undefined {
-  const topic = useConversationCurrentTopic();
   const currentAccount = useCurrentAccount()!;
   const messages = getCurrentConversationMessages();
 
@@ -313,13 +314,23 @@ const RemoteAttachmentMessage = memo(function RemoteAttachmentMessage({
 }: {
   message: DecodedMessage<[RemoteAttachmentCodec]>;
 }) {
+  const content = message.content();
+
+  if (typeof content === "string") {
+    // TODO
+    return null;
+  }
+
   return (
     <VStack>
       <MessageTime />
       <RepliableMessageWrapper onReply={() => {}}>
         <MessageContainer fromMe={true}>
           <MessageContentContainer fromMe={true}>
-            <RemoteAttachmentMessagePreview message={message} />
+            <RemoteAttachmentPreview
+              messageId={message.id}
+              remoteMessageContent={content}
+            />
           </MessageContentContainer>
         </MessageContainer>
       </RepliableMessageWrapper>
@@ -406,9 +417,37 @@ const ReplyMessage = memo(function ReplyMessage() {
                         replyMessageContent.reference as MessageId
                       }
                     />
-                    <MessageText inverted={fromMe}>
-                      {replyMessageContent.content.text}
-                    </MessageText>
+
+                    {!!replyMessageContent.content.remoteAttachment && (
+                      <VStack
+                        style={{
+                          marginTop: theme.spacing.xxxs,
+                          marginBottom: theme.spacing.xxxs,
+                        }}
+                      >
+                        <RemoteImage
+                          fitAspectRatio
+                          messageId={replyMessageContent.reference}
+                          remoteMessageContent={
+                            replyMessageContent.content.remoteAttachment
+                          }
+                          style={{
+                            width: "100%",
+                            borderRadius:
+                              theme.borderRadius.message.attachment -
+                              theme.spacing.message.replyMessage
+                                .horizontalPadding /
+                                2,
+                          }}
+                        />
+                      </VStack>
+                    )}
+
+                    {!!replyMessageContent.content.text && (
+                      <MessageText inverted={fromMe}>
+                        {replyMessageContent.content.text}
+                      </MessageText>
+                    )}
                   </VStack>
                 </BubbleContentContainer>
               </BubbleContainer>
@@ -485,8 +524,6 @@ const ReplyMessageReference = memo(function ReplyMessageReference(props: {
   const replyMessageReference =
     useConversationMessageForReplyMessage(referenceMessageId);
 
-  const replyMessageReferenceText = useMessageText(replyMessageReference);
-
   const readableProfile = replyMessageReference
     ? getReadableProfile(currentAccount, replyMessageReference.senderAddress)
     : null;
@@ -499,7 +536,9 @@ const ReplyMessageReference = memo(function ReplyMessageReference(props: {
         backgroundColor: fromMe
           ? theme.colors.bubbles.nestedReplyFromMe
           : theme.colors.bubbles.nestedReply,
-        borderRadius: theme.spacing.sm - theme.spacing.xs / 2, // - theme.spacing.xs / 2 so the border fits the border radius of BubbleContentContainer
+        borderRadius:
+          theme.borderRadius.message.bubble -
+          theme.spacing.message.replyMessage.horizontalPadding / 2, // / 2 so the border fits the border radius of BubbleContentContainer
         paddingHorizontal: theme.spacing.xs,
         paddingVertical: theme.spacing.xxs,
       }}
@@ -523,12 +562,77 @@ const ReplyMessageReference = memo(function ReplyMessageReference(props: {
           {readableProfile}
         </Text>
       </HStack>
-      <Text numberOfLines={1} inverted={fromMe}>
-        {replyMessageReferenceText}
-      </Text>
+      {!!replyMessageReference && (
+        <ReplyMessageReferenceMessageContent
+          replyMessage={replyMessageReference}
+        />
+      )}
     </VStack>
   );
 });
+
+const ReplyMessageReferenceMessageContent = memo(
+  function ReplyMessageReferenceMessageContent(props: {
+    replyMessage: DecodedMessage<[ReplyCodec]>;
+  }) {
+    const { replyMessage } = props;
+
+    const { theme } = useAppTheme();
+
+    const fromMe = useMessageContextStoreContext((s) => s.fromMe);
+
+    const content = replyMessage.content();
+
+    if (typeof content === "string") {
+      return (
+        <Text numberOfLines={1} inverted={fromMe}>
+          {content}
+        </Text>
+      );
+    }
+
+    if (content.content.remoteAttachment) {
+      return (
+        <RemoteImage
+          messageId={replyMessage.id}
+          remoteMessageContent={content.content.remoteAttachment}
+          style={{
+            height: theme.avatarSize.md,
+            width: theme.avatarSize.md,
+            marginBottom: theme.spacing.xxxs, // Because with text our lineHeight is 20 so we don't need it but with attachment we need to put that missing 4px (16+4)
+            borderRadius:
+              theme.borderRadius.message.attachment -
+              theme.spacing.message.replyMessage.horizontalPadding / 2 -
+              theme.spacing.message.replyMessage.horizontalPadding / 2,
+          }}
+        />
+      );
+    }
+
+    const replyMessageSafeText = getReplyMessageSafeText(replyMessage);
+    sentryTrackError(
+      `Reply message reference message content is not handled with default text ${replyMessageSafeText}`
+    );
+    return (
+      <Text numberOfLines={1} inverted={fromMe}>
+        {replyMessageSafeText}
+      </Text>
+    );
+  }
+);
+
+function getReplyMessageSafeText(replyMessage: DecodedMessage<[ReplyCodec]>) {
+  try {
+    const content = replyMessage.content();
+    if (typeof content === "string") {
+      return content;
+    }
+    return content.content.text;
+  } catch (error) {
+    sentryTrackError(error);
+    return replyMessage.fallback;
+  }
+}
 
 const SimpleMessage = memo(function SimpleMessage({
   message,

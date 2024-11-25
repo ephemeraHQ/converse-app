@@ -3,7 +3,7 @@ import RNFS from "react-native-fs";
 import { ConverseXmtpClientType } from "./client";
 import { getXmtpClient } from "./sync";
 
-export const MAX_SMALL_ATTACHMENT_SIZE = 10000000;
+export const MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE = 10000000; // 10MB
 
 export const encryptRemoteAttachment = async (
   account: string,

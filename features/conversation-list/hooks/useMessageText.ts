@@ -1,4 +1,7 @@
-import { isReplyMessage } from "@components/Chat/Message/Message.utils";
+import {
+  isReplyMessage,
+  isStaticAttachmentMessage,
+} from "@components/Chat/Message/Message.utils";
 import logger from "@utils/logger";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import { getMessageContentType } from "@utils/xmtpRN/contentTypes";
@@ -15,10 +18,15 @@ export const useMessageText = (
       if (isReplyMessage(message)) {
         const messageTyped = message as DecodedMessage<[ReplyCodec]>;
         const content = messageTyped.content();
+
         if (typeof content === "string") {
           return content;
         }
         return content.content.text;
+      }
+
+      if (isStaticAttachmentMessage(message)) {
+        return "Attachment";
       }
 
       const content = message?.content();
