@@ -22,7 +22,8 @@ import {
 import { List } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { NewConversationModalParams } from "./NewConversationModal";
+import { ensureError } from "@/utils/error";
+import { uploadFile } from "@utils/attachment/uploadFile";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import Button from "../../components/Button/Button";
 import GroupAvatar from "../../components/GroupAvatar";
@@ -39,11 +40,8 @@ import {
   getPreferredName,
   getProfile,
 } from "../../utils/profile";
-import {
-  createGroup,
-  createGroupByAccount,
-} from "../../utils/xmtpRN/conversations";
-import { uploadFile } from "@utils/attachment/uploadFile";
+import { createGroupByAccount } from "../../utils/xmtpRN/conversations";
+import { NewConversationModalParams } from "./NewConversationModal";
 
 const getPendingGroupMembers = (
   members: any[],
@@ -96,6 +94,7 @@ export default function NewGroupSummary({
     remotePhotoUrl: undefined,
     isLoading: false,
   });
+
   const defaultGroupName = useMemo(() => {
     if (!account) return "";
     const members = route.params.members.slice(0, 3);
@@ -131,7 +130,10 @@ export default function NewGroupSummary({
         });
       })
       .catch((e) => {
-        Alert.alert(translate("upload_group_photo_error"), e.message);
+        Alert.alert(
+          translate("upload_group_photo_error"),
+          ensureError(e).message
+        );
         setRemotePhotUrl({
           remotePhotoUrl: undefined,
           isLoading: false,

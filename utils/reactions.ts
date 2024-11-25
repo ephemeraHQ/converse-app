@@ -1,14 +1,10 @@
-import { getChatStore } from "@data/store/accountsStore";
 import { translate } from "@i18n";
-import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 
 import { emojis } from "./emojis/emojis";
 import logger from "./logger";
 // import { sendMessage } from "./message";
-import { getMessageContentType } from "./xmtpRN/contentTypes";
 import { XmtpMessage } from "../data/store/chatStore";
-import { isAttachmentMessage } from "./attachment/isAttachmentMessage";
-import { sendMessage } from "./xmtpRN/send";
+import { getMessageContentType } from "./xmtpRN/contentTypes";
 
 export type MessageReaction = {
   action: "added" | "removed";
@@ -25,6 +21,7 @@ export const getMessageReactions = (message: XmtpMessage) => {
     const reactions = Array.from(message.reactions.values()).map(
       (c) =>
         ({
+          // @ts-ignore TODO
           ...JSON.parse(c.content),
           senderAddress: c.senderAddress,
           sent: c.sent,

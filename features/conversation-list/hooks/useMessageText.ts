@@ -31,7 +31,7 @@ export const useMessageText = (
 
       const content = message?.content();
       const contentType = getMessageContentType(message.contentTypeId);
-      if (contentType === "conversationUpdated") {
+      if (contentType === "groupUpdated") {
         //  TODO: Update this
         return "conversation updated";
       }

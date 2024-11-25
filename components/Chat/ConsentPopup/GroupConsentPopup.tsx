@@ -1,24 +1,14 @@
-import { useSelect } from "@data/store/storeHelpers";
 import { Button } from "@design-system/Button/Button";
 import { useGroupConsent } from "@hooks/useGroupConsent";
-import { useGroupCreator } from "@hooks/useGroupCreator";
-import { useGroupMembers } from "@hooks/useGroupMembers";
 import { translate } from "@i18n";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { backgroundColor, textPrimaryColor } from "@styles/colors";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
-import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
-import React, { useCallback, useMemo } from "react";
-import { StyleSheet, Text, useColorScheme, View } from "react-native";
-
-import {
-  useCurrentAccount,
-  useSettingsStore,
-} from "../../../data/store/accountsStore";
-import { NavigationParamList } from "../../../screens/Navigation/Navigation";
-import { useConversationContext } from "../../../utils/conversation";
+import React, { useCallback } from "react";
+import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 
 type GroupConsentPopupProps = {
   group: GroupWithCodecsType;

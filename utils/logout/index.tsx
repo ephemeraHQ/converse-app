@@ -19,9 +19,9 @@ import {
   lastNotifSubscribeByAccount,
   unsubscribeFromNotifications,
 } from "../notifications";
-import { useDisconnectFromPrivy } from "./privy";
 import { getXmtpApiHeaders } from "../xmtpRN/api";
 import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
+import { useDisconnectFromPrivy } from "./privy";
 
 type LogoutTasks = {
   [account: string]: {
@@ -35,7 +35,7 @@ export const getLogoutTasks = (): LogoutTasks => {
   const logoutTasksString = mmkv.getString("converse-logout-tasks");
   if (logoutTasksString) {
     try {
-      return JSON.parse(logoutTasksString);
+      return JSON.parse(logoutTasksString) as LogoutTasks;
     } catch (e) {
       logger.warn(e);
       return {};
@@ -234,6 +234,7 @@ export const logoutAccount = async (
 
 export const useLogoutFromConverse = (account: string) => {
   const privyLogout = useDisconnectFromPrivy();
+
   const logout = useCallback(
     async (dropLocalDatabase: boolean, isV3Enabled: boolean = true) => {
       logoutAccount(account, dropLocalDatabase, isV3Enabled, privyLogout);

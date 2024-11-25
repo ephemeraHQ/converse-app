@@ -7,17 +7,9 @@ import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
 import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
 import { useAppTheme } from "@theme/useAppTheme";
 import { InboxId } from "@xmtp/react-native-sdk";
-import {
-  useCurrentAccount,
-  useProfilesStore,
-} from "../../../data/store/accountsStore";
+import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { navigate } from "../../../utils/navigation";
-import {
-  getPreferredAvatar,
-  getPreferredInboxAvatar,
-  getPreferredName,
-  getProfile,
-} from "../../../utils/profile";
+import { getPreferredInboxAvatar } from "../../../utils/profile";
 
 type MessageSenderAvatarDumbProps = {
   // hasNextMessageInSeries: boolean;
@@ -52,32 +44,32 @@ export const MessageSenderAvatarDumb = ({
   );
 };
 
-type MessageSenderAvatarProps = {
-  senderAddress: string;
-  hasNextMessageInSeries: boolean;
-};
+// type MessageSenderAvatarProps = {
+//   senderAddress: string;
+//   hasNextMessageInSeries: boolean;
+// };
 
-export const MessageSenderAvatar = ({
-  senderAddress,
-  hasNextMessageInSeries,
-}: MessageSenderAvatarProps) => {
-  const senderSocials = useProfilesStore(
-    (s) => getProfile(senderAddress, s.profiles)?.socials
-  );
+// export const MessageSenderAvatar = ({
+//   senderAddress,
+//   // hasNextMessageInSeries,
+// }: MessageSenderAvatarProps) => {
+//   const senderSocials = useProfilesStore(
+//     (s) => getProfile(senderAddress, s.profiles)?.socials
+//   );
 
-  const openProfile = useCallback(() => {
-    navigate("Profile", { address: senderAddress });
-  }, [senderAddress]);
+//   const openProfile = useCallback(() => {
+//     navigate("Profile", { address: senderAddress });
+//   }, [senderAddress]);
 
-  return (
-    <MessageSenderAvatarDumb
-      hasNextMessageInSeries={hasNextMessageInSeries}
-      onPress={openProfile}
-      avatarUri={getPreferredAvatar(senderSocials)}
-      avatarName={getPreferredName(senderSocials, senderAddress)}
-    />
-  );
-};
+//   return (
+//     <MessageSenderAvatarDumb
+//       // hasNextMessageInSeries={hasNextMessageInSeries}
+//       onPress={openProfile}
+//       avatarUri={getPreferredAvatar(senderSocials)}
+//       avatarName={getPreferredName(senderSocials, senderAddress)}
+//     />
+//   );
+// };
 
 type V3MessageSenderAvatarProps = {
   inboxId: InboxId;
@@ -94,6 +86,7 @@ export const V3MessageSenderAvatar = ({
   const address = usePreferredInboxAddress(inboxId);
   const name = usePreferredInboxName(inboxId);
   const avatarUri = getPreferredInboxAvatar(senderSocials);
+
   const openProfile = useCallback(() => {
     if (address) {
       navigate("Profile", { address });
@@ -122,6 +115,6 @@ const useStyles = () => {
           height: theme.avatarSize.sm,
         },
       }),
-    []
+    [theme]
   );
 };

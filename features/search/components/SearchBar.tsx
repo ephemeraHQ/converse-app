@@ -1,12 +1,12 @@
+import { Icon } from "@design-system/Icon/Icon";
+import { textSizeStyles } from "@design-system/Text/Text.styles";
+import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import React from "react";
-import { Platform, TextInput, View, ViewStyle, TextStyle } from "react-native";
+import { Platform, TextInput, TextStyle, View, ViewStyle } from "react-native";
 import {
   IconButton as MaterialIconButton,
   Searchbar as MaterialSearchBar,
 } from "react-native-paper";
-import { Icon } from "@design-system/Icon/Icon";
-import { useAppTheme, ThemedStyle } from "@theme/useAppTheme";
-import { textSizeStyles } from "@design-system/Text/Text.styles";
 
 type Props = {
   inputPlaceholder: string;
@@ -85,8 +85,8 @@ const $inputContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
 const $input: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   height: spacing["3xl"],
   paddingLeft: spacing.sm,
-  paddingRight: spacing.base,
-  marginRight: spacing.base,
+  paddingRight: spacing.sm,
+  marginRight: spacing.sm,
   color: colors.text.primary,
   ...textSizeStyles.sm,
 });

@@ -534,7 +534,7 @@ const ComposerTextInput = memo(function ComposerTextInput(props: {
 
   const { theme } = useAppTheme();
 
-  const messageToPrefill = useConversationContext("messageToPrefill");
+  const inputDefaultValue = getCurrentConversationInputValue();
 
   const handleChangeText = useCallback((text: string) => {
     setCurrentConversationInputValue(text);
@@ -588,7 +588,7 @@ const ComposerTextInput = memo(function ComposerTextInput(props: {
       onSubmitEditing={handleSubmitEditing}
       onChangeText={handleChangeText}
       multiline
-      defaultValue={messageToPrefill}
+      defaultValue={inputDefaultValue}
       placeholder="Message"
       placeholderTextColor={theme.colors.text.tertiary}
     />
