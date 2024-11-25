@@ -10,6 +10,9 @@ import { TextFieldExample } from "@design-system/TextField/TextField.example";
 import { VStack } from "@design-system/VStack";
 import { useAppTheme } from "@theme/useAppTheme";
 import { useState } from "react";
+import { Switch, useColorScheme } from "react-native";
+import { Text } from "@design-system/Text/Text";
+import { HStack } from "./HStack";
 
 type IDesignSystemComponent =
   | "buttons"
@@ -22,7 +25,8 @@ type IDesignSystemComponent =
   | "snackbar";
 
 export function Examples() {
-  const { theme } = useAppTheme();
+  const { theme, toggleTheme, themeContext } = useAppTheme();
+  const colorScheme = useColorScheme();
 
   const [selectedComponent, setSelectedComponent] =
     useState<IDesignSystemComponent | null>(null);
@@ -36,6 +40,18 @@ export function Examples() {
         paddingHorizontal: theme.spacing.lg,
       }}
     >
+      <VStack style={{ gap: theme.spacing.xl }}>
+        <HStack
+          style={{
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingVertical: theme.spacing.sm,
+          }}
+        >
+          <Text preset="body">Toggle Dark Mode</Text>
+          <Switch value={themeContext === "dark"} onValueChange={toggleTheme} />
+        </HStack>
+      </VStack>
       {selectedComponent ? (
         <VStack style={{ gap: theme.spacing.lg }}>
           <Button
