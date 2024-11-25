@@ -1,446 +1,334 @@
-import Avatar from "@components/Avatar";
-import { ChatDumb } from "@components/Chat/ChatDumb";
-import { useDebugEnabled } from "@components/DebugButton";
-import { GroupAvatarDumb } from "@components/GroupAvatar";
-import { useCurrentAccount } from "@data/store/accountsStore";
-import { useProfilesSocials } from "@hooks/useProfilesSocials";
-import { useGroupMembersConversationScreenQuery } from "@queries/useGroupMembersQuery";
-import { useConversationMessages } from "@queries/useConversationMessages";
-import { useGroupNameQuery } from "@queries/useGroupNameQuery";
-import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
-import { useConversationScreenQuery } from "@queries/useConversationQuery";
-import Clipboard from "@react-native-clipboard/clipboard";
-import {
-  NativeStackNavigationProp,
-  NativeStackScreenProps,
-} from "@react-navigation/native-stack";
-import { NavigationParamList } from "@screens/Navigation/Navigation";
-import { ListRenderItem } from "@shopify/flash-list";
-import {
-  backgroundColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "@styles/colors";
-import { AvatarSizes } from "@styles/sizes";
-import { getPreferredAvatar, getPreferredName } from "@utils/profile";
-import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Alert,
-  Platform,
-  StyleSheet,
-  useColorScheme,
-  View,
-} from "react-native";
-
-import { ConversationTitleDumb } from "./ConversationTitleDumb";
-import { GroupChatPlaceholder } from "@components/Chat/ChatPlaceholder/GroupChatPlaceholder";
-import {
-  ConversationTopic,
-  ConversationVersion,
-  RemoteAttachmentContent,
-} from "@xmtp/react-native-sdk";
-import { ConversationContext } from "@utils/conversation";
-import { TextInputWithValue } from "@utils/str";
-import { MediaPreview } from "@data/store/chatStore";
 import { V3Message } from "@components/Chat/Message/V3Message";
-import { navigate } from "@utils/navigation";
-import {
-  getDraftMessage,
-  setDraftMessage,
-} from "../../features/conversations/utils/textDrafts";
+import { useCurrentAccount } from "@data/store/accountsStore";
+import { useConversationMessages } from "@queries/useConversationMessages";
+import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
+import { memo, useCallback, useEffect } from "react";
+import { FlatListProps, Platform } from "react-native";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
-
-type UseDataProps = {
-  topic: ConversationTopic;
-};
-
-const useData = ({ topic }: UseDataProps) => {
-  const currentAccount = useCurrentAccount()!;
-  const {
-    data: conversation,
-    isLoading,
-    isRefetching,
-  } = useConversationScreenQuery(currentAccount, topic!);
-
-  const { data: messages, isLoading: messagesLoading } =
-    useConversationMessages(currentAccount, topic!);
-  const { data: groupName, isLoading: groupNameLoading } = useGroupNameQuery(
-    currentAccount,
-    topic!
-  );
-  const { data: groupPhoto, isLoading: groupPhotoLoading } = useGroupPhotoQuery(
-    currentAccount,
-    topic!
-  );
-  const { data: members, isLoading: membersLoading } =
-    useGroupMembersConversationScreenQuery(currentAccount, topic!);
-
-  useEffect(() => {
-    const checkActive = async () => {
-      if (!conversation) return;
-      if (conversation.version === ConversationVersion.GROUP) {
-        const isActive = conversation.isGroupActive;
-        // If not active leave the screen
-        if (!isActive) {
-          navigate("Chats");
-        }
-      }
-    };
-    checkActive();
-  }, [conversation]);
-
-  const memberAddresses = useMemo(() => {
-    const addresses: string[] = [];
-    for (const memberId of members?.ids ?? []) {
-      const member = members?.byId[memberId];
-      if (
-        member?.addresses[0] &&
-        member?.addresses[0].toLowerCase() !== currentAccount?.toLowerCase()
-      ) {
-        addresses.push(member?.addresses[0]);
-      }
-    }
-    return addresses;
-  }, [members, currentAccount]);
-  const data = useProfilesSocials(memberAddresses);
-
-  const memberData: {
-    address: string;
-    uri?: string;
-    name?: string;
-  }[] = useMemo(() => {
-    return data.map(({ data: socials }, index) =>
-      socials
-        ? {
-            address: memberAddresses[index],
-            uri: getPreferredAvatar(socials),
-            name: getPreferredName(socials, memberAddresses[index]),
-          }
-        : {
-            address: memberAddresses[index],
-            uri: undefined,
-            name: memberAddresses[index],
-          }
-    );
-  }, [data, memberAddresses]);
-
-  const debugEnabled = useDebugEnabled();
-
-  return {
-    conversation,
-    messages,
-    messagesLoading,
-    groupName,
-    groupNameLoading,
-    groupPhoto,
-    groupPhotoLoading,
-    members,
-    membersLoading,
-    isLoading,
-    isRefetching,
-    debugEnabled,
-    memberData,
-  };
-};
-
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return useMemo(
-    () =>
-      StyleSheet.create({
-        container: {
-          flex: 1,
-        },
-        chatContainer: {
-          flex: 1,
-          justifyContent: "flex-end",
-          backgroundColor: backgroundColor(colorScheme),
-        },
-        avatar: {
-          marginRight: Platform.OS === "android" ? 24 : 7,
-          marginLeft: Platform.OS === "ios" ? 0 : -9,
-        },
-      }),
-    [colorScheme]
-  );
-};
-
-type UseDisplayInfoProps = {
-  conversation: ConversationWithCodecsType | undefined | null;
-  groupPhotoLoading: boolean;
-};
-
-const useDisplayInfo = ({
-  conversation,
-  groupPhotoLoading,
-}: UseDisplayInfoProps) => {
-  const colorScheme = useColorScheme();
-  const headerTintColor =
-    Platform.OS === "android"
-      ? textSecondaryColor(colorScheme)
-      : textPrimaryColor(colorScheme);
-  const displayAvatar = !conversation || groupPhotoLoading;
-  return { headerTintColor, displayAvatar };
-};
-
-type UseUserInteractionProps = {
-  debugEnabled: boolean;
-  topic: ConversationTopic;
-  navigation: NativeStackNavigationProp<NavigationParamList, "Conversation">;
-};
-
-const useUserInteraction = ({
-  debugEnabled,
-  navigation,
-  topic,
-}: UseUserInteractionProps) => {
-  const onPress = useCallback(() => {
-    // textInputRef?.current?.blur();
-    navigation.push("Group", { topic });
-  }, [navigation, topic]);
-
-  const onLongPress = useCallback(() => {
-    if (!debugEnabled) return;
-    Clipboard.setString(
-      JSON.stringify({
-        topic: topic || "",
-      })
-    );
-    Alert.alert("Conversation details copied");
-  }, [debugEnabled, topic]);
-
-  return { onPress, onLongPress };
-};
+import { Screen } from "@components/Screen/ScreenComp/Screen";
+import { Button } from "@design-system/Button/Button";
+import { Center } from "@design-system/Center";
+import { Text } from "@design-system/Text";
+import { AnimatedVStack, VStack } from "@design-system/VStack";
+import { translate } from "@i18n/translate";
+import { useRouter } from "@navigation/useNavigation";
+import { useAppTheme } from "@theme/useAppTheme";
+import Animated, {
+  AnimatedProps,
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ChatInputDumb } from "../../features/conversation/composer/composer";
+import {
+  ConversationContextProvider,
+  useConversationContext,
+} from "../../features/conversation/conversation-context";
+import {
+  ConversationGroupContextProvider,
+  useConversationGroupContext,
+} from "../../features/conversation/conversation-group-context";
+import {
+  getCurrentConversationMessages,
+  initializeCurrentConversation,
+  useConversationCurrentTopic,
+} from "../../features/conversation/conversation-service";
+import { getDraftMessage } from "../../features/conversations/utils/textDrafts";
+import { GroupConversationTitle } from "../../features/conversations/components/GroupConversationTitle";
+import { DmConversationTitle } from "../../features/conversations/components/DmConversationTitle";
+import { NewConversationTitle } from "../../features/conversations/components/NewConversationTitle";
 
 const keyExtractor = (item: string) => item;
-const getItemTypeCallback = () => {
-  return "MESSAGE";
+
+type V3ConversationProps = {
+  topic: ConversationTopic | undefined;
+  peerAddress?: string;
+  textPrefill?: string;
 };
 
 export const V3Conversation = ({
-  route,
-  navigation,
-}: NativeStackScreenProps<NavigationParamList, "Conversation">) => {
-  // TODO Update values
-  const showChatInput = true;
-  const topic = route.params.topic!;
+  topic,
+  peerAddress,
+  textPrefill,
+}: V3ConversationProps) => {
+  // TODO: Handle when topic is not defined
+  const messageToPrefill = textPrefill ?? getDraftMessage(topic) ?? "";
+  initializeCurrentConversation({
+    topic,
+    peerAddress,
+    inputValue: messageToPrefill,
+  });
+
+  return (
+    <ConversationContextProvider>
+      <Screen contentContainerStyle={{ flex: 1 }}>
+        <Content />
+      </Screen>
+    </ConversationContextProvider>
+  );
+};
+
+const Content = memo(function Content() {
+  const { theme } = useAppTheme();
+  const isNewConversation = useConversationContext("isNewConversation");
+  const conversationVersion = useConversationContext("conversationVersion");
+
+  return (
+    <AnimatedVStack
+      layout={theme.animation.reanimatedSpringLayoutTransition}
+      style={{
+        flex: 1,
+      }}
+    >
+      {isNewConversation ? (
+        <NewConversationContent />
+      ) : conversationVersion === ConversationVersion.DM ? (
+        <DmContent />
+      ) : (
+        <ConversationGroupContextProvider>
+          <GroupContent />
+        </ConversationGroupContextProvider>
+      )}
+      <ChatInputDumb />
+      <KeyboardFiller />
+    </AnimatedVStack>
+  );
+});
+
+const NewConversationContent = memo(function NewConversationContent() {
+  const peerAddress = useConversationContext("peerAddress");
+  useNewConversationHeader();
+
+  return <MessagesList data={[]} refreshing={false} />;
+});
+
+const DmContent = memo(function DmContent() {
+  const currentAccount = useCurrentAccount()!;
+  const topic = useConversationCurrentTopic();
+  const conversationNotFound = useConversationContext("conversationNotFound");
 
   const {
-    conversation,
-    messages,
-    messagesLoading,
-    groupName,
-    groupPhoto,
-    groupPhotoLoading,
-    groupNameLoading,
-    members,
-    isRefetching,
-    debugEnabled,
-    memberData,
-    isLoading,
-  } = useData({
-    topic,
-  });
-  const currentAccount = useCurrentAccount()!;
-  const styles = useStyles();
-  const { headerTintColor, displayAvatar } = useDisplayInfo({
-    conversation,
-    groupPhotoLoading,
-  });
+    data: messages,
+    isLoading: messagesLoading,
+    isRefetching: isRefetchingMessages,
+    refetch: refetchMessages,
+  } = useConversationMessages(currentAccount, topic!);
 
-  const onReadyToFocus = useCallback(() => {}, []);
-  const { onPress, onLongPress } = useUserInteraction({
-    debugEnabled,
-    topic,
-    navigation,
-  });
+  useDmHeader();
 
-  const renderItem: ListRenderItem<string> = useCallback(
-    ({ item, index }) => (
-      <V3Message
-        item={item}
-        index={index}
-        currentAccount={currentAccount}
-        topic={topic}
-      />
-    ),
-    [currentAccount, topic]
+  if (conversationNotFound) {
+    // TODO: Add DM placeholder
+    return null;
+  }
+
+  if (messages?.ids.length === 0 && !messagesLoading) {
+    // TODO: Add DM placeholder
+    return null;
+  }
+
+  return (
+    <MessagesList
+      data={messages?.ids ?? []}
+      refreshing={isRefetchingMessages}
+      onRefresh={refetchMessages}
+    />
   );
+});
 
-  const showPlaceholder =
-    ((messages?.ids.length ?? 0) === 0 && !messagesLoading) ||
-    (!conversation && !isLoading);
-  const displayList = !showPlaceholder;
+const GroupContent = memo(function GroupContent() {
+  const currentAccount = useCurrentAccount()!;
+  const topic = useConversationCurrentTopic();
+  const conversationNotFound = useConversationContext("conversationNotFound");
 
-  const avatarComponent = useMemo(() => {
-    if (displayAvatar) return null;
-    return groupPhoto ? (
-      <Avatar
-        uri={groupPhoto}
-        size={AvatarSizes.conversationTitle}
-        style={styles.avatar}
+  const {
+    data: messages,
+    isLoading: messagesLoading,
+    isRefetching: isRefetchingMessages,
+    refetch,
+  } = useConversationMessages(currentAccount, topic!);
+
+  useGroupHeader();
+
+  if (conversationNotFound) {
+    return <GroupConversationMissing />;
+  }
+
+  if (messages?.ids.length === 0 && !messagesLoading) {
+    return <GroupConversationEmpty />;
+  }
+
+  return (
+    <MessagesList
+      data={messages?.ids ?? []}
+      refreshing={isRefetchingMessages}
+      onRefresh={refetch}
+    />
+  );
+});
+
+const MessagesList = memo(function MessagesList(
+  props: Omit<AnimatedProps<FlatListProps<string>>, "renderItem">
+) {
+  const { theme } = useAppTheme();
+
+  return (
+    <Animated.FlatList
+      inverted
+      // @ts-ignore It says error but it works
+      // layout={theme.animation.springLayoutTransition}
+      itemLayoutAnimation={theme.animation.reanimatedSpringLayoutTransition}
+      renderItem={({ item, index }) => (
+        <Message messageId={item} index={index} />
+      )}
+      keyboardDismissMode="interactive"
+      automaticallyAdjustContentInsets={false}
+      contentInsetAdjustmentBehavior="never"
+      keyExtractor={keyExtractor}
+      keyboardShouldPersistTaps="handled"
+      // estimatedItemSize={34} // TODO
+      showsVerticalScrollIndicator={Platform.OS === "ios"} // Size glitch on Android
+      pointerEvents="auto"
+      /**
+       * Causes a glitch on Android, no sure we need it for now
+       */
+      // maintainVisibleContentPosition={{
+      //   minIndexForVisible: 0,
+      //   autoscrollToTopThreshold: 100,
+      // }}
+      // estimatedListSize={Dimensions.get("screen")}
+      {...props}
+    />
+  );
+});
+
+const Message = memo(function Message(props: {
+  messageId: string;
+  index: number;
+}) {
+  const { messageId, index } = props;
+
+  const messages = getCurrentConversationMessages()!;
+
+  return (
+    <AnimatedVStack
+      {...(index === 0 &&
+        {
+          // entering: theme.animation.reanimatedFadeInDownSpring,
+        })}
+    >
+      <V3Message
+        messageId={messageId}
+        previousMessageId={messages.ids[index + 1]}
+        nextMessageId={messages.ids[index - 1]}
       />
-    ) : (
-      <GroupAvatarDumb
-        members={memberData}
-        size={AvatarSizes.conversationTitle}
-        style={styles.avatar}
-      />
-    );
-  }, [displayAvatar, groupPhoto, styles.avatar, memberData]);
+    </AnimatedVStack>
+  );
+});
+
+const KeyboardFiller = memo(function KeyboardFiller() {
+  const { height: keyboardHeightAV } = useAnimatedKeyboard();
+  const insets = useSafeAreaInsets();
+
+  const as = useAnimatedStyle(() => ({
+    height: Math.max(keyboardHeightAV.value - insets.bottom, 0),
+  }));
+
+  return <AnimatedVStack style={as} />;
+});
+
+function useNewConversationHeader() {
+  const navigation = useRouter();
+
+  const peerAddress = useConversationContext("peerAddress");
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: () => (
-        <ConversationTitleDumb
-          title={groupName}
-          avatarComponent={avatarComponent}
-          onLongPress={onLongPress}
-          onPress={onPress}
-        />
-      ),
-      headerTintColor,
+      headerTitle: () => <NewConversationTitle peerAddress={peerAddress!} />,
     });
-  }, [
-    groupName,
-    headerTintColor,
-    navigation,
-    onLongPress,
-    onPress,
-    avatarComponent,
-  ]);
+  }, [peerAddress, navigation]);
+}
 
-  const onSend = useCallback(
-    async ({
-      text,
-      referencedMessageId,
-      attachment,
-    }: {
-      text?: string;
-      referencedMessageId?: string;
-      attachment?: RemoteAttachmentContent;
-    }) => {
-      if (referencedMessageId) {
-        if (attachment) {
-          await conversation?.send({
-            reply: {
-              reference: referencedMessageId,
-              content: { remoteAttachment: attachment },
-            },
-          });
-        }
-        if (text) {
-          await conversation?.send({
-            reply: {
-              reference: referencedMessageId,
-              content: { text },
-            },
-          });
-        }
-        return;
-      }
-      if (attachment) {
-        await conversation?.send({
-          remoteAttachment: attachment,
-        });
-      }
-      if (text) {
-        await conversation?.send(text);
-      }
-    },
-    [conversation]
-  );
+function useDmHeader() {
+  const navigation = useRouter();
 
-  const onLeaveScreen = useCallback(() => {
-    // useChatStore.getState().setOpenedConversationTopic(null);
-    setDraftMessage(topic, textInputRef.current?.currentValue ?? "");
-  }, [topic]);
+  const topic = useConversationCurrentTopic();
 
   useEffect(() => {
-    const unsubscribeBeforeRemove = navigation.addListener(
-      "beforeRemove",
-      onLeaveScreen
-    );
+    navigation.setOptions({
+      headerTitle: () => <DmConversationTitle topic={topic!} />,
+    });
+  }, [topic, navigation]);
+}
 
-    return () => {
-      unsubscribeBeforeRemove();
-    };
-  }, [navigation, onLeaveScreen]);
+function useGroupHeader() {
+  const navigation = useRouter();
 
-  const placeholderComponent = useMemo(() => {
-    if (!conversation) return null;
-    if (conversation.version == ConversationVersion.GROUP) {
-      return (
-        <GroupChatPlaceholder
-          messagesCount={messages?.ids.length ?? 0}
-          onSend={onSend}
-          group={conversation}
-        />
-      );
-    }
-    // TODO: Add DM placeholder
-    return null;
-    // return (
-    //   <ChatPlaceholder
-    //     messagesCount={messages?.ids.length ?? 0}
-    //     onSend={onSend}
-    //     conversation={conversation}
-    //   />
-    // );
-  }, [conversation, messages?.ids.length, onSend]);
+  const topic = useConversationCurrentTopic();
 
-  const messageToPrefill = useMemo(
-    () => route.params?.text ?? getDraftMessage(topic) ?? "",
-    [route.params?.text, topic]
-  );
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => <GroupConversationTitle topic={topic!} />,
+    });
+  }, [topic, navigation]);
+}
 
-  const textInputRef = useRef<TextInputWithValue>();
-  const mediaPreviewRef = useRef<MediaPreview>();
-  const [frameTextInputFocused, setFrameTextInputFocused] = useState(false);
-  const tagsFetchedOnceForMessage = useRef<{ [messageId: string]: boolean }>(
-    {}
-  );
-
-  const conversationContextValue = useMemo(
-    () => ({
-      topic,
-      conversation: undefined,
-      messageToPrefill,
-      inputRef: textInputRef,
-      mediaPreviewToPrefill: null,
-      mediaPreviewRef,
-      isBlockedPeer: false,
-      onReadyToFocus,
-      frameTextInputFocused,
-      setFrameTextInputFocused,
-      tagsFetchedOnceForMessage,
-    }),
-    [topic, messageToPrefill, onReadyToFocus, frameTextInputFocused]
-  );
+const GroupConversationMissing = memo(() => {
+  const topic = useConversationCurrentTopic();
 
   return (
-    <ConversationContext.Provider value={conversationContextValue}>
-      <View style={styles.container}>
-        <View style={styles.chatContainer}>
-          <ChatDumb
-            items={messages?.ids ?? []}
-            renderItem={renderItem}
-            keyExtractor={keyExtractor}
-            onReadyToFocus={onReadyToFocus}
-            frameTextInputFocused={false}
-            showChatInput={showChatInput}
-            showPlaceholder={showPlaceholder}
-            placeholderComponent={placeholderComponent}
-            displayList={displayList}
-            refreshing={isRefetching}
-            getItemType={getItemTypeCallback}
-            itemToId={keyExtractor}
-            ListFooterComponent={null}
-            onSend={onSend}
-          />
-        </View>
-      </View>
-    </ConversationContext.Provider>
+    <VStack>
+      <Text
+        style={{
+          textAlign: "center",
+        }}
+      >
+        {topic
+          ? translate("group_not_found")
+          : translate("opening_conversation")}
+      </Text>
+    </VStack>
   );
-};
+});
+
+const GroupConversationEmpty = memo(() => {
+  const { theme } = useAppTheme();
+
+  const groupName = useConversationGroupContext("groupName");
+  const sendMessage = useConversationContext("sendMessage");
+
+  const handleSend = useCallback(() => {
+    sendMessage({
+      text: "👋",
+    });
+  }, [sendMessage]);
+
+  return (
+    <Center
+      style={{
+        flexGrow: 1,
+        flexDirection: "column",
+      }}
+    >
+      <Text
+        style={{
+          textAlign: "center",
+        }}
+      >
+        {translate("group_placeholder.placeholder_text", {
+          groupName,
+        })}
+      </Text>
+
+      <Button
+        variant="fill"
+        icon="hand.wave"
+        text={translate("say_hi")}
+        onPress={handleSend}
+        style={{
+          alignSelf: "center",
+          marginTop: theme.spacing.md,
+        }}
+      />
+    </Center>
+  );
+});

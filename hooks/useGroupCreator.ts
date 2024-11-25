@@ -12,7 +12,7 @@ export const useGroupCreator = (topic: ConversationTopic | undefined) => {
     queryKey: [account, "groupCreator", topic],
     queryFn: () => {
       if (!data) return null;
-      data?.creatorInboxId;
+      return data.creatorInboxId();
     },
     enabled: !!topic && !!data,
     refetchOnWindowFocus: false,

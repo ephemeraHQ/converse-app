@@ -15,6 +15,9 @@ import {
 import { Appearance, Platform, StyleProp, useColorScheme } from "react-native";
 
 import { IShadow, shadow } from "@theme/shadow";
+
+import { IAnimation, animation } from "@theme/animations";
+import { ILayout, layout } from "@theme/layout";
 import { IAvatarSize, avatarSize } from "./avatar";
 import { IBorderRadius, borderRadius } from "./border-radius";
 import { IBorderWidth, borderWidth } from "./borders";
@@ -40,6 +43,8 @@ export type Theme = {
   typography: ITypography;
   timing: Timing;
   shadow: IShadow;
+  layout: ILayout;
+  animation: IAnimation;
   isDark: boolean;
 };
 
@@ -54,6 +59,8 @@ export const lightTheme: Theme = {
   iconSize,
   timing,
   shadow,
+  layout,
+  animation,
   isDark: false,
 };
 export const darkTheme: Theme = {
@@ -66,6 +73,8 @@ export const darkTheme: Theme = {
   iconSize,
   timing,
   shadow,
+  layout,
+  animation,
   isDark: true,
 };
 

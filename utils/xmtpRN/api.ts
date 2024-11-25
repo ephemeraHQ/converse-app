@@ -41,6 +41,10 @@ const getXmtpApiSignature = async (account: string, message: string) => {
 };
 
 export const getXmtpApiHeaders = async (account: string) => {
+  return {
+    "xmtp-api-signature": "123",
+    "xmtp-api-address": account,
+  };
   if (account in xmtpSignatureByAccount)
     return {
       "xmtp-api-signature": xmtpSignatureByAccount[account],

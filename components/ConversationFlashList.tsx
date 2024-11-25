@@ -23,6 +23,8 @@ type Props = {
   itemsForSearchQuery?: string;
   ListHeaderComponent?: React.ReactElement | null;
   ListFooterComponent?: React.ReactElement | null;
+  refetch?: () => void;
+  isRefetching?: boolean;
 } & NativeStackScreenProps<
   NavigationParamList,
   "Chats" | "ShareFrame" | "ChatsRequests" | "Blocked"
@@ -42,6 +44,7 @@ export default function ConversationFlashList({
   items,
   ListHeaderComponent,
   ListFooterComponent,
+  refetch,
 }: Props) {
   const navigationRef = useRef(navigation);
   useEffect(() => {
@@ -91,6 +94,7 @@ export default function ConversationFlashList({
       <View style={styles.container}>
         <View style={styles.conversationList}>
           <FlashList
+            onRefresh={refetch}
             keyboardShouldPersistTaps="handled"
             onMomentumScrollBegin={onScroll}
             onScrollBeginDrag={onScroll}

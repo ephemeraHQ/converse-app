@@ -6439,6 +6439,11 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-2.0.0.tgz#f544a148d3ab35801c1f633a7441fd87c2e484bf"
   integrity sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==
 
+"@total-typescript/ts-reset@^0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@total-typescript/ts-reset/-/ts-reset-0.6.1.tgz#aebb29b6a79bb404e4cf618da6a392c94ed73a45"
+  integrity sha512-cka47fVSo6lfQDIATYqb/vO1nvFfbPw7uWLayIXIhGETj0wcOOlrlkobOMDNQOFr9QOafegUPq13V2+6vtD7yg==
+
 "@trysound/sax@0.2.0":
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/@trysound/sax/-/sax-0.2.0.tgz#cccaab758af56761eb7bf37af6f03f326dd798ad"
@@ -7991,10 +7996,10 @@
     rxjs "^7.8.0"
     undici "^5.8.1"
 
-"@xmtp/react-native-sdk@^3.0.0":
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-3.0.2.tgz#14c0691ac780d45d48936002bb42ab6ecacbe538"
-  integrity sha512-7Er5F2sj7L7xJ7o2hAe3Q6UIf64Tyyd+MaKmFmrlS0yeEpGc7E8rr+pgS5Ak3eFFzlBjonm0EmCztfwk450s7g==
+"@xmtp/react-native-sdk@^3.0.6":
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/@xmtp/react-native-sdk/-/react-native-sdk-3.0.6.tgz#7044b6e59dcb4c77ba8c13f494190e182a5eba11"
+  integrity sha512-EIdy+AhmgFiYnQ9pJPdp7vGp30sAxJJ6rVGiQ/Z7TfbWcaruEgV5Etrn4Ju6BksXf8xw3o1ZgXmez2QZ0yi4XQ==
   dependencies:
     "@ethersproject/bytes" "^5.7.0"
     "@msgpack/msgpack" "^3.0.0-beta2"

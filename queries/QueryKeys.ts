@@ -4,9 +4,11 @@ export enum QueryKeys {
   // Conversations
   CONVERSATIONS = "conversations", // When changing the shape of response, update the keys as persistance will break
   CONVERSATION = "conversation",
+  CONVERSATION_WITH_PEER = "conversationWithPeer",
   V3_CONVERSATION_LIST = "v3ConversationList",
 
   // Messages
+  CONVERSATION_MESSAGE = "conversationMessage",
   CONVERSATION_MESSAGES = "conversationMessages",
 
   // Members
@@ -34,6 +36,11 @@ export enum QueryKeys {
   PENDING_JOIN_REQUESTS = "pendingJoinRequests",
 }
 
+export const conversationMessageQueryKey = (
+  account: string,
+  messageId: string
+) => [QueryKeys.CONVERSATION_MESSAGE, account.toLowerCase(), messageId];
+
 export const conversationsQueryKey = (account: string) => [
   QueryKeys.CONVERSATIONS,
   account.toLowerCase(),
@@ -43,6 +50,12 @@ export const conversationQueryKey = (
   account: string,
   topic: ConversationTopic
 ) => [QueryKeys.CONVERSATION, account.toLowerCase(), topic];
+
+export const conversationWithPeerQueryKey = (account: string, peer: string) => [
+  QueryKeys.CONVERSATION_WITH_PEER,
+  account.toLowerCase(),
+  peer,
+];
 
 export const conversationMessagesQueryKey = (
   account: string,

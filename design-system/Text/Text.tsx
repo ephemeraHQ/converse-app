@@ -17,6 +17,7 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     children,
     style: styleProp,
     preset,
+    inverted,
     ...rest
   } = props;
 
@@ -31,10 +32,16 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     color,
     style: styleProp,
     preset,
+    inverted,
   });
 
   return (
-    <RNText ref={ref} {...rest} style={styles}>
+    <RNText
+      ref={ref}
+      style={styles}
+      suppressHighlighting={true} // Don't like the default highlight on press
+      {...rest}
+    >
       {content}
     </RNText>
   );

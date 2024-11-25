@@ -75,7 +75,7 @@ export default [
       "react/react-in-jsx-scope": "off", // Disable since we use React 18
       "react/jsx-key": "error",
       "react/jsx-no-bind": [
-        "warn",
+        "off", // Until we finish the HUGEEEE refactor
         {
           ignoreRefs: true,
           allowArrowFunctions: false,

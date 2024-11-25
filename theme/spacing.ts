@@ -19,11 +19,6 @@ export const spacing = {
   "5xl": 80,
   "6xl": 96,
   "7xl": 128,
-  base: 8,
 } as const;
-
-export const layout = {
-  onboardingScreenPadding: spacing.lg,
-};
 
 export type ISpacing = typeof spacing;

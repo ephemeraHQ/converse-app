@@ -3,7 +3,7 @@ import TableView, { TableViewItemType } from "@components/TableView/TableView";
 import { Text } from "@design-system/Text";
 import { ConversationReadOnly } from "@screens/ConversationReadOnly";
 import { backgroundColor } from "@styles/colors";
-import { animations } from "@theme/animations";
+import { animation } from "@theme/animations";
 import {
   BACKDROP_DARK_BACKGROUND_COLOR,
   BACKDROP_LIGHT_BACKGROUND_COLOR,
@@ -55,10 +55,10 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   useEffect(() => {
     activeValue.value = isVisible;
     opacityValue.value = withTiming(isVisible ? 1 : 0, {
-      duration: animations.contextMenuHoldDuration,
+      duration: animation.contextMenuHoldDuration,
     });
     intensityValue.value = withTiming(isVisible ? 50 : 0, {
-      duration: animations.contextMenuHoldDuration,
+      duration: animation.contextMenuHoldDuration,
     });
   }, [activeValue, isVisible, opacityValue, intensityValue]);
 
@@ -66,7 +66,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
 
   useEffect(() => {
     translateY.value = withTiming(isVisible ? 0 : height, {
-      duration: animations.contextMenuHoldDuration,
+      duration: animation.contextMenuHoldDuration,
     });
   }, [isVisible, translateY, height]);
 
@@ -92,7 +92,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   const closeMenu = useCallback(() => {
     translateY.value = withTiming(
       height,
-      { duration: animations.contextMenuHoldDuration },
+      { duration: animation.contextMenuHoldDuration },
       () => {
         runOnJS(onClose)();
       }
@@ -109,7 +109,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
           runOnJS(closeMenu)();
         } else {
           translateY.value = withTiming(0, {
-            duration: animations.contextMenuHoldDuration,
+            duration: animation.contextMenuHoldDuration,
           });
         }
       }),
