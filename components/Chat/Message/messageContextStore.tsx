@@ -41,7 +41,7 @@ export const MessageContextStoreProvider = memo(
 
 const createMessageContextStore = (initProps: IMessageContextStoreProps) => {
   const DEFAULT_PROPS: IMessageContextStoreProps = {
-    messageId: "",
+    messageId: "" as MessageId,
     hasNextMessageInSeries: false,
     hasPreviousMessageInSeries: false,
     fromMe: false,

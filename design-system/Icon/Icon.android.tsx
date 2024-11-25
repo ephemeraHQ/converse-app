@@ -11,6 +11,7 @@ export const iconRegistry: Record<
   xmark: "close",
   "xmark.circle.fill": "cancel",
   plus: "add",
+  "arrow.up": "arrow-upward",
   "arrow.up.right": "north-east",
   "arrow.down": "arrow-downward",
   link: "link",

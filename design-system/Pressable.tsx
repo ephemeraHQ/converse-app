@@ -1,6 +1,7 @@
 import { Haptics } from "@utils/haptics";
 import { memo, useCallback } from "react";
 import {
+  GestureResponderEvent,
   Pressable as RNPressable,
   PressableProps as RNPressableProps,
 } from "react-native";

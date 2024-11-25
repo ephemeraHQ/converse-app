@@ -117,12 +117,14 @@ export const V3Message = memo(
         previousMessage,
       });
 
-    const _hasNextMessageInSeries =
+    const _hasNextMessageInSeries = Boolean(
       !!nextMessage &&
-      hasNextMessageInSeries({
-        currentMessage: message,
-        nextMessage,
-      });
+        message &&
+        hasNextMessageInSeries({
+          currentMessage: message,
+          nextMessage,
+        })
+    );
 
     const showDateChange = messageShouldShowDateChange({
       message,
@@ -149,7 +151,7 @@ export const V3Message = memo(
     if (isReplyMessage(message)) {
       return (
         <MessageContextStoreProvider
-          messageId={message.id}
+          messageId={message.id as MessageId}
           hasNextMessageInSeries={_hasNextMessageInSeries}
           fromMe={fromMe}
           sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
@@ -170,7 +172,7 @@ export const V3Message = memo(
       const textContent = messageTyped.content();
       return (
         <MessageContextStoreProvider
-          messageId={message.id}
+          messageId={message.id as MessageId}
           hasNextMessageInSeries={_hasNextMessageInSeries}
           fromMe={fromMe}
           sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
@@ -202,7 +204,7 @@ export const V3Message = memo(
 
       return (
         <MessageContextStoreProvider
-          messageId={message.id}
+          messageId={message.id as MessageId}
           hasNextMessageInSeries={_hasNextMessageInSeries}
           fromMe={fromMe}
           sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
@@ -225,7 +227,7 @@ export const V3Message = memo(
 
       return (
         <MessageContextStoreProvider
-          messageId={message.id}
+          messageId={message.id as MessageId}
           hasNextMessageInSeries={_hasNextMessageInSeries}
           fromMe={fromMe}
           sentAt={convertNanosecondsToMilliseconds(message.sentNs)}
@@ -684,8 +686,6 @@ const SimpleMessage = memo(function SimpleMessage({
                 <BubbleContentContainer
                   fromMe={fromMe}
                   hasNextMessageInSeries={hasNextMessageInSeries}
-                  showDateChange={showDateChange}
-                  hasPreviousMessageInSeries={hasPreviousMessageInSeries}
                 >
                   <Pressable onPress={handlePressBubble}>
                     <MessageText inverted={fromMe}>{message}</MessageText>

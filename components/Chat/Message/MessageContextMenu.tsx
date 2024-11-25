@@ -7,7 +7,6 @@ import {
 import { calculateMenuHeight } from "@design-system/ContextMenu/ContextMenu.utils";
 import { animation } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
-import { ConversationContext } from "@utils/conversation";
 import React, { FC, memo, useEffect, useMemo } from "react";
 import {
   Platform,
@@ -25,7 +24,6 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useContext } from "use-context-selector";
 
 const BackdropComponent: FC<{
   isActive: boolean;
@@ -54,7 +52,6 @@ const BackdropComponent: FC<{
     If it causes too many rerenders we could just pass down a
     few needed context values but painful to maintain */
   const { theme } = useAppTheme();
-  const conversationContext = useContext(ConversationContext);
   const activeValue = useSharedValue(false);
   const opacityValue = useSharedValue(0);
   const intensityValue = useSharedValue(0);
@@ -268,36 +265,33 @@ const BackdropComponent: FC<{
 
   return (
     <Portal>
-      {/* Portal is eating the context so passing down context values */}
-      <ConversationContext.Provider value={conversationContext}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <BlurView isAbsolute>
-            <TouchableWithoutFeedback onPress={onClose}>
-              <Animated.View style={StyleSheet.absoluteFill}>
-                <Animated.View style={animatedPortalStyle}>
-                  {children}
-                </Animated.View>
-                <Animated.View style={animatedAuxiliaryViewStyle}>
-                  {auxiliaryView}
-                </Animated.View>
-                <Animated.View style={animatedMenuStyle}>
-                  <TableView
-                    items={items}
-                    style={{
-                      width: 180,
-                      backgroundColor:
-                        Platform.OS === "android"
-                          ? theme.colors.background.raised
-                          : undefined,
-                      borderRadius: Platform.OS === "android" ? 10 : undefined,
-                    }}
-                  />
-                </Animated.View>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <BlurView isAbsolute>
+          <TouchableWithoutFeedback onPress={onClose}>
+            <Animated.View style={StyleSheet.absoluteFill}>
+              <Animated.View style={animatedPortalStyle}>
+                {children}
               </Animated.View>
-            </TouchableWithoutFeedback>
-          </BlurView>
-        </GestureHandlerRootView>
-      </ConversationContext.Provider>
+              <Animated.View style={animatedAuxiliaryViewStyle}>
+                {auxiliaryView}
+              </Animated.View>
+              <Animated.View style={animatedMenuStyle}>
+                <TableView
+                  items={items}
+                  style={{
+                    width: 180,
+                    backgroundColor:
+                      Platform.OS === "android"
+                        ? theme.colors.background.raised
+                        : undefined,
+                    borderRadius: Platform.OS === "android" ? 10 : undefined,
+                  }}
+                />
+              </Animated.View>
+            </Animated.View>
+          </TouchableWithoutFeedback>
+        </BlurView>
+      </GestureHandlerRootView>
     </Portal>
   );
 };

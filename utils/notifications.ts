@@ -1,31 +1,14 @@
-import { createHash } from "@mfellner/react-native-fast-create-hash";
 import * as Notifications from "expo-notifications";
 import { debounce } from "perfect-debounce";
 import { Platform } from "react-native";
 
-import api, {
-  getLastNotificationsSubscribeHash,
-  saveNotificationsSubscribe,
-} from "./api";
-import {
-  conversationShouldBeDisplayed,
-  conversationShouldBeInInbox,
-} from "./conversation";
-import { getV3IdFromTopic, getTopicFromV3Id } from "./groupUtils/groupId";
-import { savePushToken } from "./keychain/helpers";
-import logger from "./logger";
-import mmkv from "./mmkv";
-import { navigate, navigateToTopic, setTopicToNavigateTo } from "./navigation";
-import { ConverseXmtpClientType } from "./xmtpRN/client";
-import { getXmtpClient } from "./xmtpRN/sync";
-import {
-  currentAccount,
-  getChatStore,
-  getSettingsStore,
-  useAccountsStore,
-} from "../data/store/accountsStore";
-import { useAppStore } from "../data/store/appStore";
 import { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
+import { currentAccount, useAccountsStore } from "../data/store/accountsStore";
+import { useAppStore } from "../data/store/appStore";
+import api from "./api";
+import { getTopicFromV3Id } from "./groupUtils/groupId";
+import mmkv from "./mmkv";
+import { navigate, navigateToTopic } from "./navigation";
 
 let nativePushToken: string | null;
 
@@ -282,6 +265,7 @@ export const onInteractWithNotification = (
     "body" in notificationData &&
     typeof notificationData["body"] === "string"
   ) {
+    // @ts-ignore TODO
     notificationData = JSON.parse(notificationData.body);
   }
   // Handling for data/silent notifications

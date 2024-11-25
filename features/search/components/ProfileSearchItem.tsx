@@ -1,16 +1,16 @@
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Platform, View, ViewStyle, ImageStyle } from "react-native";
-import { useAppTheme, ThemedStyle } from "@theme/useAppTheme";
+import { shortAddress } from "@/utils/strings/shortAddress";
+import Avatar from "@components/Avatar";
 import { ProfileSocials } from "@data/store/profilesStore";
+import { Text } from "@design-system/Text";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import {
   getPreferredAvatar,
   getPreferredName,
   getPrimaryNames,
 } from "@utils/profile";
-import { shortAddress } from "@utils/str";
-import Avatar from "@components/Avatar";
+import { ImageStyle, Platform, View, ViewStyle } from "react-native";
 import { NavigationChatButton } from "./NavigationChatButton";
-import { Text } from "@design-system/Text";
 
 type ProfileSearchItemProps = {
   address: string;
@@ -78,7 +78,7 @@ const $container: ThemedStyle<ViewStyle> = ({
 }) => ({
   borderBottomWidth: borderWidth.sm,
   borderBottomColor: colors.border.subtle,
-  paddingVertical: spacing.base,
+  paddingVertical: spacing.md,
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",

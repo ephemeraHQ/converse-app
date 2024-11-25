@@ -1,12 +1,6 @@
-import { useMessageContextStoreContext } from "@components/Chat/Message/messageContextStore";
-import { ClickableText } from "@components/ClickableText";
 import { HStack } from "@design-system/HStack";
 import { useAppTheme } from "@theme/useAppTheme";
 import { useMemo } from "react";
-
-type IMessageBubbleProps = {
-  content?: string;
-};
 
 export const BubbleContainer = ({
   children,
@@ -15,8 +9,6 @@ export const BubbleContainer = ({
   children: React.ReactNode;
   fromMe: boolean;
 }) => {
-  const { theme } = useAppTheme();
-
   return (
     <HStack
       style={{
@@ -68,40 +60,4 @@ export const BubbleContentContainer = (args: IBubbleContentContainerProps) => {
   }, [fromMe, hasNextMessageInSeries, theme]);
 
   return <HStack style={bubbleStyle}>{children}</HStack>;
-};
-
-export const MessageBubble = ({ content }: IMessageBubbleProps) => {
-  const { theme } = useAppTheme();
-  const {
-    fromMe,
-    hasNextMessageInSeries,
-    showDateChange,
-    hasPreviousMessageInSeries,
-  } = useMessageContextStoreContext((state) => ({
-    fromMe: state.fromMe,
-    hasNextMessageInSeries: state.hasNextMessageInSeries,
-    showDateChange: state.showDateChange,
-    hasPreviousMessageInSeries: state.hasPreviousMessageInSeries,
-  }));
-
-  return (
-    <BubbleContainer fromMe={fromMe}>
-      <BubbleContentContainer
-        fromMe={fromMe}
-        hasNextMessageInSeries={hasNextMessageInSeries}
-        showDateChange={showDateChange}
-        hasPreviousMessageInSeries={hasPreviousMessageInSeries}
-      >
-        <ClickableText
-          style={{
-            color: fromMe
-              ? theme.colors.text.inverted.primary
-              : theme.colors.text.primary,
-          }}
-        >
-          {content}
-        </ClickableText>
-      </BubbleContentContainer>
-    </BubbleContainer>
-  );
 };
