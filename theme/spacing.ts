@@ -19,6 +19,13 @@ export const spacing = {
   "5xl": 80,
   "6xl": 96,
   "7xl": 128,
+
+  message: {
+    replyMessage: {
+      horizontalPadding: 12,
+      verticalPadding: 8,
+    },
+  },
 } as const;
 
 export type ISpacing = typeof spacing;

@@ -1,6 +1,8 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationQuery } from "@queries/useConversationQuery";
+import { addConversationToConversationListQuery } from "@queries/useV3ConversationListQuery";
 import { navigate } from "@utils/navigation";
+import { createConversationByAccount } from "@utils/xmtpRN/conversations";
 import {
   ConversationVersion,
   RemoteAttachmentContent,
@@ -13,8 +15,6 @@ import {
   useConversationCurrentPeerAddress,
   useConversationCurrentTopic,
 } from "./conversation-service";
-import { createConversationByAccount } from "@utils/xmtpRN/conversations";
-import { addConversationToConversationListQuery } from "@queries/useV3ConversationListQuery";
 
 type ISendMessageParams = {
   text?: string;

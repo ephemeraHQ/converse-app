@@ -1,5 +1,16 @@
+import { RemoteImage } from "@components/Chat/Attachment/AttachmentMessagePreview";
 import { SendAttachmentPreview } from "@components/Chat/Attachment/SendAttachmentPreview";
-import { useCurrentAccountInboxId } from "@components/Chat/Message/Message.utils";
+import {
+  isCoinbasePaymentMessage,
+  isGroupUpdatedMessage,
+  isReactionMessage,
+  isReadReceiptMessage,
+  isRemoteAttachmentMessage,
+  isReplyMessage,
+  isStaticAttachmentMessage,
+  isTransactionReferenceMessage,
+  useCurrentAccountInboxId,
+} from "@components/Chat/Message/Message.utils";
 import { HStack } from "@design-system/HStack";
 import { Icon } from "@design-system/Icon/Icon";
 import { IconButton } from "@design-system/IconButton/IconButton";
@@ -11,6 +22,13 @@ import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
 import { Haptics } from "@utils/haptics";
 import { sentryTrackError } from "@utils/sentry";
+import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
+import {
+  DecodedMessage,
+  RemoteAttachmentCodec,
+  ReplyCodec,
+  StaticAttachmentCodec,
+} from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useRef } from "react";
 import { Platform, TextInput as RNTextInput } from "react-native";
 import {
@@ -19,7 +37,9 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AddAttachmentButton } from "../../../components/Chat/Attachment/AddAttachmentButton";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
+import { getReadableProfile } from "../../../utils/str";
 import { useMessageText } from "../../conversation-list/hooks/useMessageText";
 import { useConversationContext } from "../conversation-context";
 import { useCurrentConversationPersistedStoreState } from "../conversation-persisted-stores";
@@ -42,9 +62,6 @@ import {
   useReplyToMessageId,
   waitUntilMediaPreviewIsUploaded,
 } from "../conversation-service";
-import { converseEventEmitter } from "../../../utils/events";
-import { getReadableProfile } from "../../../utils/str";
-import { AddAttachmentButton } from "../../../components/Chat/Attachment/AddAttachmentButton";
 
 export function ChatInputDumb() {
   const { theme } = useAppTheme();
@@ -53,6 +70,8 @@ export function ChatInputDumb() {
 
   const send = useCallback(async () => {
     const mediaPreview = getComposerMediaPreview();
+
+    const replyingToMessageId = getCurrentConversationReplyToMessageId();
 
     if (mediaPreview) {
       if (mediaPreview?.status === "uploading") {
@@ -71,6 +90,9 @@ export function ChatInputDumb() {
 
       await sendMessage({
         attachment: uploadedRemoteAttachment,
+        ...(replyingToMessageId && {
+          referencedMessageId: replyingToMessageId,
+        }),
       });
 
       resetUploadedRemoteAttachment();
@@ -80,8 +102,6 @@ export function ChatInputDumb() {
     const inputValue = getCurrentConversationInputValue();
 
     if (inputValue.length > 0) {
-      const replyingToMessageId = getCurrentConversationReplyToMessageId();
-
       await sendMessage({
         text: inputValue,
         // contentType: "xmtp.org/text:1.0",
@@ -89,15 +109,16 @@ export function ChatInputDumb() {
           referencedMessageId: replyingToMessageId,
         }),
       });
-
-      // Reset stuff
-      setCurrentConversationInputValue("");
-      setCurrentConversationReplyToMessageId(null);
     }
 
-    converseEventEmitter.emit("scrollChatToMessage", {
-      index: 0,
-    });
+    // Reset stuff
+    setCurrentConversationInputValue("");
+    setCurrentConversationReplyToMessageId(null);
+
+    // TODO: Fix with function in context
+    // converseEventEmitter.emit("scrollChatToMessage", {
+    //   index: 0,
+    // });
   }, [sendMessage]);
 
   const insets = useSafeAreaInsets();
@@ -210,8 +231,6 @@ const ReplyPreview = memo(function ReplyPreview() {
         : "Replying"
     : "";
 
-  const message = useMessageText(replyMessage);
-
   const contentHeightAV = useSharedValue(0);
 
   const containerAS = useAnimatedStyle(() => {
@@ -245,7 +264,7 @@ const ReplyPreview = memo(function ReplyPreview() {
         containerAS,
       ]}
     >
-      {!!message && (
+      {!!replyMessage && (
         <AnimatedVStack
           entering={theme.animation.reanimatedFadeInSpring}
           exiting={theme.animation.reanimatedFadeOutSpring}
@@ -269,7 +288,7 @@ const ReplyPreview = memo(function ReplyPreview() {
             style={{
               // ...debugBorder("blue"),
               alignItems: "center",
-              columnGap: theme.spacing.xxxs,
+              columnGap: theme.spacing.xs,
             }}
           >
             <VStack
@@ -293,17 +312,11 @@ const ReplyPreview = memo(function ReplyPreview() {
                   {replyingTo}
                 </Text>
               </HStack>
-              <Text numberOfLines={1}>
-                {message}
-                {/* {isAttachmentMessage(replyMessage?.contentType)
-            ? `📎 Media from ${getRelativeDateTime(replyMessage?.sent)}`
-            : isTransactionMessage(replyMessage?.contentType)
-              ? `💸 Transaction from ${getRelativeDateTime(
-                  replyingToMessage.sent
-                )}`
-              : replyMessage?.content || replyMessage?.contentFallback} */}
-              </Text>
+              {!!replyMessage && (
+                <ReplyPreviewMessageContent replyMessage={replyMessage} />
+              )}
             </VStack>
+            <ReplyPreviewEndContent replyMessage={replyMessage} />
             <IconButton
               iconName="xmark"
               onPress={handleDismiss}
@@ -316,6 +329,143 @@ const ReplyPreview = memo(function ReplyPreview() {
     </AnimatedVStack>
   );
 });
+
+export const ReplyPreviewEndContent = memo(
+  function ReplyPreviewEndContent(props: {
+    replyMessage: DecodedMessageWithCodecsType;
+  }) {
+    const { replyMessage } = props;
+
+    const { theme } = useAppTheme();
+
+    if (isReplyMessage(replyMessage)) {
+      const replyTyped = replyMessage as DecodedMessage<[ReplyCodec]>;
+
+      const content = replyTyped.content();
+
+      if (typeof content === "string") {
+        return null;
+      }
+
+      if (content.content.remoteAttachment) {
+        return (
+          <RemoteImage
+            messageId={content.reference}
+            remoteMessageContent={content.content.remoteAttachment}
+            style={{
+              height: theme.avatarSize.md,
+              width: theme.avatarSize.md,
+              borderRadius: theme.borderRadius.xs,
+            }}
+          />
+        );
+      }
+    }
+
+    if (isRemoteAttachmentMessage(replyMessage)) {
+      const messageTyped = replyMessage as DecodedMessage<
+        [RemoteAttachmentCodec]
+      >;
+
+      const content = messageTyped.content();
+
+      if (typeof content === "string") {
+        return null;
+      }
+
+      return (
+        <RemoteImage
+          messageId={messageTyped.id}
+          remoteMessageContent={content}
+          style={{
+            height: theme.avatarSize.md,
+            width: theme.avatarSize.md,
+            borderRadius: theme.borderRadius.xs,
+          }}
+        />
+      );
+    }
+
+    return null;
+  }
+);
+
+const ReplyPreviewMessageContent = memo(
+  function ReplyPreviewMessageContent(props: {
+    replyMessage: DecodedMessageWithCodecsType;
+  }) {
+    const { replyMessage } = props;
+
+    const { theme } = useAppTheme();
+
+    const messageText = useMessageText(replyMessage);
+    const clearedMessage = messageText?.replace(/(\n)/gm, " ");
+
+    if (isStaticAttachmentMessage(replyMessage)) {
+      const messageTyped = replyMessage as DecodedMessage<
+        [StaticAttachmentCodec]
+      >;
+
+      const content = messageTyped.content();
+
+      if (typeof content === "string") {
+        return <Text>{content}</Text>;
+      }
+
+      // TODO
+      return <Text>Static attachment</Text>;
+    }
+
+    if (isTransactionReferenceMessage(replyMessage)) {
+      return <Text>Transaction</Text>;
+    }
+
+    if (isReactionMessage(replyMessage)) {
+      return <Text>Reaction</Text>;
+    }
+
+    if (isReadReceiptMessage(replyMessage)) {
+      return <Text>Read Receipt</Text>;
+    }
+
+    if (isGroupUpdatedMessage(replyMessage)) {
+      return <Text>Group updates</Text>;
+    }
+
+    if (isRemoteAttachmentMessage(replyMessage)) {
+      return <Text>Remote Attachment</Text>;
+    }
+
+    if (isCoinbasePaymentMessage(replyMessage)) {
+      return <Text>Coinbase Payment</Text>;
+    }
+
+    if (isReplyMessage(replyMessage)) {
+      const messageTyped = replyMessage as DecodedMessage<[ReplyCodec]>;
+      const content = messageTyped.content();
+
+      if (typeof content === "string") {
+        return <Text>{content}</Text>;
+      }
+
+      if (content.content.attachment) {
+        return <Text>Reply with attachment</Text>;
+      }
+
+      if (content.content.text) {
+        return <Text>{content.content.text}</Text>;
+      }
+
+      if (content.content.remoteAttachment) {
+        return <Text>Image</Text>;
+      }
+
+      return <Text>Reply</Text>;
+    }
+
+    return <Text numberOfLines={1}>{clearedMessage}</Text>;
+  }
+);
 
 const AttachmentsPreview = memo(function AttachmentsPreview() {
   const { theme } = useAppTheme();

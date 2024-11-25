@@ -1,5 +1,4 @@
 import {
-  currentAccount,
   getCurrentAccount,
   useCurrentAccount,
 } from "@data/store/accountsStore";
@@ -76,7 +75,7 @@ export function isStaticAttachmentMessage(
   // message: DecodedMessageWithCodecsType
   message: any
 ): message is DecodedMessage<[StaticAttachmentCodec]> {
-  return getMessageContentType(message.contentTypeId) === "remoteAttachment";
+  return getMessageContentType(message.contentTypeId) === "attachment";
 }
 export function isTransactionReferenceMessage(
   // message: DecodedMessageWithCodecsType
