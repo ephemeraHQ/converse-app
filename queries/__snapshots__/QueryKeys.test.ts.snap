@@ -3,22 +3,22 @@
 exports[`QueryKeys should match the snapshot 1`] = `
 {
   "ADDED_BY": "addedBy",
-  "GROUP": "group",
-  "GROUPS": "groupsv2",
+  "CONVERSATION": "conversation",
+  "CONVERSATIONS": "conversations",
+  "CONVERSATION_MESSAGE": "conversationMessage",
+  "CONVERSATION_MESSAGES": "conversationMessages",
+  "CONVERSATION_WITH_PEER": "conversationWithPeer",
   "GROUP_ACTIVE": "groupActive",
   "GROUP_CONSENT": "groupConsent",
-  "GROUP_CONVERSATION_LIST": "groupConversationList",
   "GROUP_DESCRIPTION": "groupDescription",
-  "GROUP_FIRST_MESSAGE": "groupFirstMessage",
   "GROUP_INVITE": "groupInvite",
   "GROUP_JOIN_REQUEST": "groupJoinRequest",
   "GROUP_MEMBERS": "groupMembersv2",
-  "GROUP_MESSAGES": "groupMessages",
   "GROUP_NAME": "groupName",
-  "GROUP_PENDING_MESSAGES": "groupPendingMessages",
   "GROUP_PERMISSIONS": "groupPermissions",
   "GROUP_PHOTO": "groupPhoto",
   "PENDING_JOIN_REQUESTS": "pendingJoinRequests",
   "PINNED_FRAME": "pinnedFrame",
+  "V3_CONVERSATION_LIST": "v3ConversationList",
 }
 `;
