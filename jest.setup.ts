@@ -67,5 +67,12 @@ jest.mock("rn-fetch-blob", () => {
   };
 });
 
-jest.mock("@sentry/react-native", () => ({}));
 jest.mock("expo-constants", () => ({}));
+
+jest.mock("uuid", () => ({
+  v4: jest.fn(() => "uuidv4"),
+}));
+
+jest.mock("path", () => ({
+  join: jest.fn(() => ""),
+}));
