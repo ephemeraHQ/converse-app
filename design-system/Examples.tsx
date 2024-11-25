@@ -13,6 +13,7 @@ import { useState } from "react";
 import { Switch, useColorScheme } from "react-native";
 import { Text } from "@design-system/Text/Text";
 import { HStack } from "./HStack";
+import { HeaderExample } from "./Header/Header.example";
 
 type IDesignSystemComponent =
   | "buttons"
@@ -22,7 +23,8 @@ type IDesignSystemComponent =
   | "icon"
   | "header"
   | "bottom-sheet"
-  | "snackbar";
+  | "snackbar"
+  | "header";
 
 export function Examples() {
   const { theme, toggleTheme, themeContext } = useAppTheme();
@@ -66,7 +68,7 @@ export function Examples() {
             {selectedComponent === "text-field" && <TextFieldExample />}
             {selectedComponent === "icon" && <IconExample />}
             {selectedComponent === "snackbar" && <SnackbarExample />}
-            {/* {selectedComponent === "header" && <HeaderExample />} */}
+            {selectedComponent === "header" && <HeaderExample />}
             {selectedComponent === "bottom-sheet" && <BottomSheetExample />}
           </VStack>
         </VStack>
@@ -90,10 +92,12 @@ export function Examples() {
             onPress={() => setSelectedComponent("text-field")}
           />
           <Button text="Icon" onPress={() => setSelectedComponent("icon")} />
-          {/* <Button
-            text="Header"
-            onPress={() => setSelectedComponent("header")}
-          /> */}
+          {
+            <Button
+              text="Header"
+              onPress={() => setSelectedComponent("header")}
+            />
+          }
           <Button
             text="Bottom Sheet"
             onPress={() => setSelectedComponent("bottom-sheet")}
