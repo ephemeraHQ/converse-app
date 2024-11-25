@@ -20,6 +20,7 @@ export enum QueryKeys {
   GROUP_DESCRIPTION = "groupDescription",
   GROUP_PHOTO = "groupPhoto",
   PINNED_FRAME = "pinnedFrame",
+  GROUP_PERMISSION_POLICY = "groupPermissionPolicy",
 
   // Permissions
   GROUP_PERMISSIONS = "groupPermissions",
@@ -123,3 +124,8 @@ export const pendingJoinRequestsQueryKey = (account: string) => [
   QueryKeys.PENDING_JOIN_REQUESTS,
   account.toLowerCase(),
 ];
+
+export const groupPermissionPolicyQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.GROUP_PERMISSION_POLICY, account.toLowerCase(), topic];

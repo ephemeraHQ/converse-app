@@ -414,6 +414,16 @@ export const en = {
     no_removed_chats:
       "We could not find any removed group chat in your existing conversations.",
   },
+
+  group_screen_member_actions: {
+    profile_page: "Profile page",
+    promote_to_admin: "Promote to admin",
+    promote_to_super_admin: "Promote to super admin",
+    revoke_admin: "Revoke admin",
+    revoke_super_admin: "Revoke super admin",
+    remove_member: "Remove from group",
+    cancel: "Cancel",
+  },
 };
 
 export type Translations = typeof en;
