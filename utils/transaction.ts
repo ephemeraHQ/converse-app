@@ -1,24 +1,16 @@
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import { ethers } from "ethers";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { getCoinbaseTransactionDetails, getTransactionDetails } from "./api";
 import { evmHelpers } from "./evm/helpers";
 import logger from "./logger";
-import { sentryTrackError } from "./sentry";
-import { isContentType } from "./xmtpRN/contentTypes";
 // import { MessageToDisplay } from "../components/Chat/Message/Message";
-import {
-  useCurrentAccount,
-  useTransactionsStore,
-} from "../data/store/accountsStore";
 import { Transaction } from "../data/store/transactionsStore";
 
 export type TransactionContentType =
   | "transactionReference"
   | "coinbaseRegular"
   | "coinbaseSponsored";
-export interface TransactionEvent {
+export type TransactionEvent = {
   amount: number;
   contractAddress: string;
   currency: string;
@@ -26,22 +18,16 @@ export interface TransactionEvent {
   from: string;
   to: string;
   type: string;
-}
+};
 
-export interface TransactionDetails {
+export type TransactionDetails = {
   blockExplorerURL: string;
   chainName: string;
   events: TransactionEvent[];
   sponsored: boolean;
   status: "PENDING" | "FAILURE" | "SUCCESS";
   transactionHash: string;
-}
-
-export const isTransactionMessage = (contentType?: string) =>
-  contentType
-    ? isContentType("transactionReference", contentType) ||
-      isContentType("coinbasePayment", contentType)
-    : false;
+};
 
 export const mergeTransactionRefData = (
   transactionType: TransactionContentType,

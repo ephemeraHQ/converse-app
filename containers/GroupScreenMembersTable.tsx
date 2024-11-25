@@ -16,13 +16,13 @@ import logger from "@utils/logger";
 import { navigate } from "@utils/navigation";
 import { getPreferredName, getProfile } from "@utils/profile";
 import { FC, useMemo } from "react";
-import { Alert, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { Alert, StyleSheet, Text, View, useColorScheme } from "react-native";
 
+import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 
 type GroupScreenMembersTableProps = {
   topic: ConversationTopic | undefined;
@@ -45,10 +45,12 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = ({
     removeMember,
   } = useGroupMembers(topic);
   const profiles = useProfilesStore((s) => s.profiles);
+
   const currentAccountIsAdmin = useMemo(
     () => getAddressIsAdmin(members, currentAccount),
     [currentAccount, members]
   );
+
   const currentAccountIsSuperAdmin = useMemo(
     () => getAddressIsSuperAdmin(members, currentAccount),
     [currentAccount, members]
@@ -71,7 +73,12 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = ({
         id: a.inboxId,
         title: `${preferredName}${isCurrentUser ? " (you)" : ""}`,
         action: () => {
-          // const groupPermissionLevel = await getGroupPermissionLevel(topic);
+          // const groupPermissionLevel = getGroupPermissionLevel({
+          //   account: currentAccount,
+          //   topic: topic!,
+          //   group,
+          // });
+
           const {
             options,
             cancelButtonIndex,
@@ -82,7 +89,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = ({
             removeIndex,
             destructiveButtonIndex,
           } = getGroupMemberActions(
-            groupPermissionLevel,
+            "", // TODO
             isCurrentUser,
             isSuperAdmin,
             isAdmin,

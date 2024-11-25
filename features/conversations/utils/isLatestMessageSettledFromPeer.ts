@@ -16,7 +16,6 @@ export const isLatestMessageSettledFromPeer = ({
   if (
     !messageIsFromCurrentUser({
       message,
-      currentAccount,
     })
   )
     return false;

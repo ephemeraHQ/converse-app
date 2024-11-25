@@ -1,14 +1,14 @@
 import { AnimatedBlurView } from "@components/AnimatedBlurView";
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
-import { Text } from "@design-system/Text";
-import { ConversationReadOnly } from "@screens/ConversationReadOnly";
-import { backgroundColor } from "@styles/colors";
-import { animation } from "@theme/animations";
 import {
   BACKDROP_DARK_BACKGROUND_COLOR,
   BACKDROP_LIGHT_BACKGROUND_COLOR,
   contextMenuStyleGuide,
 } from "@design-system/ContextMenu/ContextMenu.constants";
+import { Text } from "@design-system/Text";
+import { backgroundColor } from "@styles/colors";
+import { animation } from "@theme/animations";
+import { useAppTheme } from "@theme/useAppTheme";
 import React, { FC, memo, useCallback, useEffect } from "react";
 import {
   Platform,
@@ -30,7 +30,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { useAppTheme } from "@theme/useAppTheme";
 
 type ConversationContextMenuProps = {
   isVisible: boolean;

@@ -7,22 +7,16 @@ import {
   backgroundColor,
   textPrimaryColor,
 } from "@styles/colors";
+import { DmWithCodecsType } from "@utils/xmtpRN/client";
 import React from "react";
-import { StyleSheet, Text, useColorScheme, View } from "react-native";
-
+import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import {
   currentAccount,
-  getSettingsStore,
   useSettingsStore,
 } from "../../../data/store/accountsStore";
 import { NavigationParamList } from "../../../screens/Navigation/Navigation";
-import { useConversationContext } from "../../../utils/conversation";
-import {
-  consentToAddressesOnProtocolByAccount,
-  consentToInboxIdsOnProtocolByAccount,
-} from "../../../utils/xmtpRN/contacts";
+import { consentToInboxIdsOnProtocolByAccount } from "../../../utils/xmtpRN/contacts";
 import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
-import { DmWithCodecsType } from "@utils/xmtpRN/client";
 
 type ConsentPopupProps = {
   conversation: DmWithCodecsType;

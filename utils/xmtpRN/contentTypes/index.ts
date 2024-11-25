@@ -12,11 +12,11 @@ export const contentTypesPrefixes = {
   groupUpdated: "xmtp.org/group_updated:",
 };
 
-type IConvosContentType = keyof typeof contentTypesPrefixes;
+export type IConvosContentType = keyof typeof contentTypesPrefixes;
 
 export function isContentType(args: {
   type: IConvosContentType;
-  contentType?: string;
+  contentType?: IConvosContentType;
 }) {
   const { type, contentType } = args;
   if (!contentType) {
