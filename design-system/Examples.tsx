@@ -23,8 +23,7 @@ type IDesignSystemComponent =
   | "icon"
   | "header"
   | "bottom-sheet"
-  | "snackbar"
-  | "header";
+  | "snackbar";
 
 export function Examples() {
   const { theme, toggleTheme, themeContext } = useAppTheme();

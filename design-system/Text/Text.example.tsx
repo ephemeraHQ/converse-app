@@ -55,7 +55,7 @@ export const TextExample = memo(function TextExample() {
         <Text preset="formHelper">Form Helper Text</Text>
         <Text preset="formLabel">Password</Text>
         <Text preset="body">••••••••</Text>
-        <Text preset="formHelper" color="error">
+        <Text preset="formHelper" color="caution">
           Password must be at least 8 characters
         </Text>
       </VStack>
