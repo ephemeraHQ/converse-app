@@ -1,56 +1,26 @@
-import ClickableText from "@components/ClickableText";
-import { inversePrimaryColor, textPrimaryColor } from "@styles/colors";
-import { useMemo } from "react";
-import { StyleSheet, useColorScheme, View } from "react-native";
+import { ClickableText } from "@components/ClickableText";
+import { useAppTheme } from "@theme/useAppTheme";
+import { memo } from "react";
 
-type TextMessageProps = {
-  fromMe: boolean;
-  hideBackground?: boolean;
-  content?: string;
+type IMessageTextProps = {
+  children: React.ReactNode;
+  inverted?: boolean;
 };
 
-export const TextMessage = ({
-  fromMe,
-  hideBackground,
-  content,
-}: TextMessageProps) => {
-  const styles = useStyles();
+export const MessageText = memo(function MessageText(args: IMessageTextProps) {
+  const { children, inverted } = args;
+
+  const { theme } = useAppTheme();
+
   return (
-    <View style={styles.messageContentContainer}>
-      <ClickableText
-        style={[
-          styles.messageText,
-          fromMe ? styles.messageTextMe : undefined,
-          hideBackground ? styles.allEmojisAndMaxThree : undefined,
-        ]}
-      >
-        {content}
-      </ClickableText>
-    </View>
+    <ClickableText
+      style={{
+        color: inverted
+          ? theme.colors.text.inverted.primary
+          : theme.colors.text.primary,
+      }}
+    >
+      {children}
+    </ClickableText>
   );
-};
-
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return useMemo(
-    () =>
-      StyleSheet.create({
-        messageContentContainer: {
-          paddingHorizontal: 13,
-          paddingVertical: 6,
-        },
-        messageText: {
-          color: textPrimaryColor(colorScheme),
-          fontSize: 17,
-        },
-        messageTextMe: {
-          color: inversePrimaryColor(colorScheme),
-        },
-        allEmojisAndMaxThree: {
-          fontSize: 64,
-          paddingHorizontal: 0,
-        },
-      }),
-    [colorScheme]
-  );
-};
+});

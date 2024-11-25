@@ -1,19 +1,12 @@
 import logger from "@utils/logger";
-import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import isDeepEqual from "fast-deep-equal";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import { saveTopicsData } from "../../utils/api";
-import {
-  getTopicsUpdatesAsRead,
-  markConversationsAsReadIfNecessary,
-} from "../../utils/conversation";
+import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
+import { Nullable } from "../../types/general";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import { subscribeToNotifications } from "../../utils/notifications";
-import { omit } from "../../utils/objects";
-import { refreshBalanceForAccount } from "../../utils/wallet";
-import { isContentType } from "../../utils/xmtpRN/contentTypes";
 
 // Chat data for each user
 
@@ -31,7 +24,7 @@ type XmtpConversationShared = {
   messages: Map<string, XmtpMessage>;
   messagesIds: string[];
   messageDraft?: string;
-  mediaPreview?: MediaPreview;
+  mediaPreview?: MessageAttachment;
   readUntil: number; // UNUSED
   hasOneMessageFromMe?: boolean;
   pending: boolean;
@@ -110,22 +103,31 @@ export type TopicsData = {
   [topic: string]: TopicData | undefined;
 };
 
-export type MediaPreview = {
+export type MessageAttachmentStatus =
+  | "picked"
+  | "uploading"
+  | "uploaded"
+  | "error"
+  | "sending";
+
+export type MessageAttachmentPreview = {
   mediaURI: string;
-  status: "picked" | "uploading" | "uploaded" | "error" | "sending";
+  mimeType: Nullable<string>;
   dimensions?: {
     width: number;
     height: number;
   };
-  uploadedAttachment?: RemoteAttachmentContent | null;
-  attachmentToSave?: {
-    filePath: string;
-    mimeType: string | null;
-    fileName: string;
-  };
-} | null;
+};
 
-export type Attachment = {
+export type MessageAttachmentUploaded = MessageAttachmentPreview &
+  RemoteAttachmentContent;
+
+export type MessageAttachment =
+  | MessageAttachmentPreview
+  | MessageAttachmentUploaded
+  | null;
+
+export type MessageAttachmentTodo = {
   loading: boolean;
   error: boolean;
   mediaType: "IMAGE" | "UNSUPPORTED" | undefined;
@@ -185,9 +187,12 @@ export type ChatStoreType = {
   //   period: number
   // ) => void;
 
-  messageAttachments: Record<string, Attachment>;
+  messageAttachments: Record<string, MessageAttachmentTodo>;
 
-  setMessageAttachment: (messageId: string, attachment: Attachment) => void;
+  setMessageAttachment: (
+    messageId: string,
+    attachment: MessageAttachmentTodo
+  ) => void;
 
   groupInviteLinks: {
     [topic: string]: string;

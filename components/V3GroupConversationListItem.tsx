@@ -45,8 +45,8 @@ const useData = ({ group }: UseDataProps) => {
   const isBlockedChatView = routeName === "Blocked";
   const colorScheme = useColorScheme();
   const currentAccount = useCurrentAccount()!;
-  const { topicsData, setTopicsData, setPinnedConversations } = useChatStore(
-    useSelect(["topicsData", "setTopicsData", "setPinnedConversations"])
+  const { setTopicsData, setPinnedConversations } = useChatStore(
+    useSelect(["setTopicsData", "setPinnedConversations"])
   );
 
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
@@ -59,7 +59,6 @@ const useData = ({ group }: UseDataProps) => {
   const timestamp = group?.lastMessage?.sentNs ?? 0;
 
   const isUnread = useConversationIsUnread({
-    topicsData,
     topic,
     lastMessage: group.lastMessage,
     conversation: group,

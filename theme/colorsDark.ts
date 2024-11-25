@@ -44,6 +44,7 @@ export const colorsDark: IColors = {
     sunken: darkPalette.dark85,
     raised: darkPalette.dark85,
     scrim: darkPalette.scrim,
+    blurred: darkPalette.dark90,
   },
   text: {
     primary: lightPalette.light,

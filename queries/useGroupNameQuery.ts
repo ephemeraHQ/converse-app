@@ -1,25 +1,20 @@
-import {
-  SetDataOptions,
-  useQuery,
-  UseQueryOptions,
-} from "@tanstack/react-query";
+import { SetDataOptions, useQuery } from "@tanstack/react-query";
 
-import { groupNameQueryKey } from "./QueryKeys";
-import { queryClient } from "./queryClient";
-import { useConversationScreenQuery } from "./useConversationQuery";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
+import { queryClient } from "./queryClient";
+import { groupNameQueryKey } from "./QueryKeys";
+import { useConversationScreenQuery } from "./useConversationQuery";
 
 export const useGroupNameQuery = (
   account: string,
-  topic: ConversationTopic,
-  queryOptions?: Partial<UseQueryOptions<string | null, Error, string | null>>
+  topic: ConversationTopic
 ) => {
   const { data: conversation } = useConversationScreenQuery(account, topic);
   return useQuery({
     queryKey: groupNameQueryKey(account, topic),
     queryFn: async () => {
       if (!conversation || conversation.version !== ConversationVersion.GROUP) {
-        return null;
+        return undefined;
       }
       return conversation.groupName();
     },
@@ -27,7 +22,6 @@ export const useGroupNameQuery = (
       !!conversation &&
       conversation.version === ConversationVersion.GROUP &&
       !!account,
-    ...queryOptions,
   });
 };
 

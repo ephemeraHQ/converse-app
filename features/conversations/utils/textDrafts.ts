@@ -2,7 +2,10 @@ import mmkv from "@utils/mmkv";
 
 export const DRAFT_MESSAGE_KEY = "draftMessage";
 
-export const getDraftMessage = (topic: string) => {
+export const getDraftMessage = (topic: string | undefined) => {
+  if (!topic) {
+    return "";
+  }
   return mmkv.getString(`${DRAFT_MESSAGE_KEY}-${topic}`);
 };
 

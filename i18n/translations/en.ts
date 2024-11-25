@@ -387,13 +387,12 @@ export const en = {
     "If you don't see your contact in the list, try typing their full address (with {{providers}} etc…)",
 
   // Group Updated Message
-  group_name_changed: '{{name}} changed the group name to "{{newValue}}".',
-  group_member_joined: "{{name}} joined the conversation",
-  group_member_left: "{{name}} left the conversation",
-  group_photo_changed: "{{name}} changed the group photo.",
-  group_description_changed:
-    '{{name}} changed the group description to "{{newValue}}".',
-  group_name_changed_to: '{{name}} changed the group name to "{{newValue}}".',
+  group_name_changed: 'changed the group name to "{{newValue}}".',
+  group_member_joined: "joined the conversation",
+  group_member_left: "left the conversation",
+  group_photo_changed: "changed the group photo.",
+  group_description_changed: 'changed the group description to "{{newValue}}".',
+  group_name_changed_to: 'changed the group name to "{{newValue}}".',
 
   message_status: {
     sent: "Sent",

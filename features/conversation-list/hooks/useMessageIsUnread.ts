@@ -1,25 +1,29 @@
 import { useMemo } from "react";
-import { TopicsData } from "@data/store/chatStore";
+import { ChatStoreType, TopicsData } from "@data/store/chatStore";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
 } from "@utils/xmtpRN/client";
+import { useChatStore } from "@data/store/accountsStore";
+import { useSelect } from "@data/store/storeHelpers";
 
 type UseConversationIsUnreadProps = {
-  topicsData: TopicsData;
   topic: string;
   lastMessage: DecodedMessageWithCodecsType | undefined;
   conversation: ConversationWithCodecsType;
   timestamp: number;
 };
 
+const chatStoreSelectKeys: (keyof ChatStoreType)[] = ["topicsData"];
+
 export const useConversationIsUnread = ({
-  topicsData,
   topic,
   lastMessage,
   conversation,
   timestamp,
 }: UseConversationIsUnreadProps) => {
+  const { topicsData } = useChatStore(useSelect(chatStoreSelectKeys));
+
   return useMemo(() => {
     if (topicsData[topic]?.status === "unread") {
       return true;

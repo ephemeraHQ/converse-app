@@ -1,19 +1,18 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 
-import { conversationMessagesQueryKey } from "./QueryKeys";
-import { entify, EntityObject } from "./entify";
-import { useRefreshOnFocus } from "./useRefreshOnFocus";
+import logger from "@utils/logger";
 import {
   ConversationWithCodecsType,
-  ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
 } from "@utils/xmtpRN/client";
-import { queryClient } from "./queryClient";
-import logger from "@utils/logger";
-import { cacheOnlyQueryOptions } from "./cacheOnlyQueryOptions";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useConversationQuery } from "./useConversationQuery";
 import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { cacheOnlyQueryOptions } from "./cacheOnlyQueryOptions";
+import { entify, EntityObject } from "./entify";
+import { queryClient } from "./queryClient";
+import { conversationMessagesQueryKey } from "./QueryKeys";
+import { useConversationQuery } from "./useConversationQuery";
+import { useRefreshOnFocus } from "./useRefreshOnFocus";
 
 export type EntifiedMessagesType = EntityObject<DecodedMessageWithCodecsType>;
 
@@ -115,7 +114,6 @@ export const prefetchConversationMessages = (
   account: string,
   topic: ConversationTopic
 ) => {
-  console.log("prefetchConversationMessages111", account, topic);
   queryClient.prefetchQuery({
     queryKey: conversationMessagesQueryKey(account.toLowerCase(), topic),
     queryFn: () => {
