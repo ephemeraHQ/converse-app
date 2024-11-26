@@ -21,7 +21,8 @@ export const getNotificationContent = async (
   let referencedMessageId: string | undefined;
   if (isContentType("reply", contentType)) {
     const replyContent = messageContent as ReplyContent;
-    console.log({ replyContent });
+    // @todo => implement replies when https://github.com/xmtp/xmtp-node-go/issues/409
+    // is done
     // referencedMessageId = replyContent.reference;
     return "REPLY";
   }
