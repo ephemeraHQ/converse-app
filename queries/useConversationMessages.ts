@@ -6,28 +6,90 @@ import {
   DecodedMessageWithCodecsType,
 } from "@utils/xmtpRN/client";
 import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import type {
+  ConversationTopic,
+  ReactionContent,
+} from "@xmtp/react-native-sdk";
 import { cacheOnlyQueryOptions } from "./cacheOnlyQueryOptions";
-import { entify, EntityObject } from "./entify";
 import { queryClient } from "./queryClient";
 import { conversationMessagesQueryKey } from "./QueryKeys";
 import { useConversationQuery } from "./useConversationQuery";
 import { useRefreshOnFocus } from "./useRefreshOnFocus";
+import { MessagesOptions } from "@xmtp/react-native-sdk/build/lib/types";
 
-export type EntifiedMessagesType = EntityObject<DecodedMessageWithCodecsType>;
+export type ConversationMessagesQueryData = {
+  ids: string[];
+  byId: Record<string, DecodedMessageWithCodecsType>;
+  reactions: Record<
+    string,
+    {
+      bySender: Record<string, string[]>;
+      byReactionContent: Record<string, string[]>;
+    }
+  >;
+};
 
-const conversationMessagesQueryFn = async (
-  conversation: ConversationWithCodecsType
-) => {
+export const conversationMessagesQueryFn = async (
+  conversation: ConversationWithCodecsType,
+  options?: MessagesOptions
+): Promise<ConversationMessagesQueryData> => {
   logger.info("[useConversationMessages] queryFn fetching messages");
   if (!conversation) {
     return {
       ids: [],
       byId: {},
+      reactions: {},
     };
   }
-  const messages = await conversation.messages();
-  return entify(messages, (message) => message.id);
+  const messages = await conversation.messages(options);
+  const ids: string[] = [];
+  const byId: Record<string, DecodedMessageWithCodecsType> = {};
+  const reactions: Record<
+    string,
+    {
+      bySender: Record<string, string[]>;
+      byReactionContent: Record<string, string[]>;
+    }
+  > = {};
+
+  for (const message of messages) {
+    ids.push(message.id);
+    byId[message.id] = message;
+    if (message.contentTypeId.includes("reaction:")) {
+      const reactionContent = message.content() as ReactionContent;
+      if (!reactionContent) {
+        continue;
+      }
+      const referenceMessageId = reactionContent.reference;
+      if (!referenceMessageId) {
+        continue;
+      }
+      if (!reactions[referenceMessageId]) {
+        reactions[referenceMessageId] = {
+          bySender: {},
+          byReactionContent: {},
+        };
+      }
+      reactions[referenceMessageId].byReactionContent[reactionContent.content] =
+        [
+          ...(reactions[referenceMessageId].byReactionContent[
+            reactionContent.content
+          ] || []),
+          message.senderAddress,
+        ];
+      reactions[referenceMessageId].bySender[message.senderAddress] = [
+        ...(reactions[referenceMessageId].bySender[message.senderAddress] ||
+          []),
+        reactionContent.content,
+      ];
+    }
+  }
+
+  return {
+    ids,
+    byId,
+    reactions,
+  };
 };
 
 const conversationMessagesByTopicQueryFn = async (
@@ -45,7 +107,7 @@ const conversationMessagesByTopicQueryFn = async (
 export const useConversationMessages = (
   account: string,
   topic: ConversationTopic,
-  options?: Partial<UseQueryOptions<EntifiedMessagesType>>
+  options?: Partial<UseQueryOptions<ConversationMessagesQueryData>>
 ) => {
   const { data: conversation } = useConversationQuery(
     account,
@@ -74,7 +136,7 @@ export const getConversationMessages = (
   account: string,
   topic: ConversationTopic
 ) => {
-  return queryClient.getQueryData<EntifiedMessagesType>(
+  return queryClient.getQueryData<ConversationMessagesQueryData>(
     conversationMessagesQueryKey(account, topic)
   );
 };
@@ -82,7 +144,7 @@ export const getConversationMessages = (
 const setConversationMessages = (
   account: string,
   topic: ConversationTopic,
-  messages: EntifiedMessagesType
+  messages: ConversationMessagesQueryData
 ) => {
   queryClient.setQueryData(
     conversationMessagesQueryKey(account, topic),
@@ -100,6 +162,7 @@ export const addConversationMessage = (
     setConversationMessages(account, topic, {
       ids: [message.id],
       byId: { [message.id]: message },
+      reactions: {},
     });
     return;
   }
@@ -107,14 +170,15 @@ export const addConversationMessage = (
   setConversationMessages(account, topic, {
     ids: [message.id, ...previousMessages.ids],
     byId: previousMessages.byId,
+    reactions: previousMessages.reactions,
   });
 };
 
-export const prefetchConversationMessages = (
+export const prefetchConversationMessages = async (
   account: string,
   topic: ConversationTopic
 ) => {
-  queryClient.prefetchQuery({
+  return queryClient.prefetchQuery({
     queryKey: conversationMessagesQueryKey(account.toLowerCase(), topic),
     queryFn: () => {
       logger.info("[prefetchConversationMessages] prefetching messages");

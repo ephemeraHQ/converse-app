@@ -1,159 +1,56 @@
-/**
- *
- * TODO: Refactor with new v3 conversation
- *
- */
-// // import { ChatPreview } from "@components/Chat/Chat";
-// import { EmojiPicker } from "@containers/EmojiPicker";
-// import { useChatStore, useSettingsStore } from "@data/store/accountsStore";
-// import { MessageAttachment } from "@data/store/chatStore";
-// import { useSelect } from "@data/store/storeHelpers";
-// import { Text } from "@design-system/Text";
-// import { backgroundColor, headerTitleStyle } from "@styles/colors";
-// import { ConversationContext } from "@utils/conversation";
-// import { setTopicToNavigateTo, topicToNavigateTo } from "@utils/navigation";
-// import { TextInputWithValue } from "@utils/str";
-// import React, {
-//   useCallback,
-//   useEffect,
-//   useMemo,
-//   useRef,
-//   useState,
-// } from "react";
-// import { StyleSheet, useColorScheme, View } from "react-native";
+import { MessagesList } from "@/components/Conversation/V3Conversation";
+import { useCurrentAccount } from "@/data/store/accountsStore";
+import { AnimatedVStack } from "@/design-system/VStack";
+import { ConversationContextProvider } from "@/features/conversation/conversation-context";
+import {
+  initializeCurrentConversation,
+  useConversationCurrentTopic,
+} from "@/features/conversation/conversation-service";
+import { useConversationPreviewMessages } from "@/queries/useConversationPreviewMessages";
+import { useAppTheme } from "@/theme/useAppTheme";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import React, { memo } from "react";
 
-// export const ConversationReadOnly: React.FC<{
-//   topic?: string;
-// }> = ({ topic }) => {
-//   const colorScheme = useColorScheme();
-//   const peersStatus = useSettingsStore((s) => s.peersStatus);
-//   const [frameTextInputFocused, setFrameTextInputFocused] = useState(false);
-//   const tagsFetchedOnceForMessage = useRef<{ [messageId: string]: boolean }>(
-//     {}
-//   );
+type ConversationReadOnlyProps = {
+  topic: ConversationTopic;
+};
 
-//   // Initial conversation topic is be set from the 'topic' prop
-//   const [_conversationTopic, setConversationTopic] = useState(topic);
+export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
+  initializeCurrentConversation({
+    topic,
+    peerAddress: undefined,
+    inputValue: "",
+  });
 
-//   // When we set the conversation topic, we check if it has been mapped
-//   // to a new one (for pending conversations)
-//   const conversationTopic =
-//     _conversationTopic && conversationsMapping[_conversationTopic]
-//       ? conversationsMapping[_conversationTopic]
-//       : _conversationTopic;
+  return (
+    <ConversationContextProvider>
+      <Content />
+    </ConversationContextProvider>
+  );
+};
 
-//   // Initial conversation will be set only if topic exists
-//   const [conversation, setConversation] = useState(
-//     conversationTopic ? conversations[conversationTopic] : undefined
-//   );
+const Content = memo(function Content() {
+  const currentAccount = useCurrentAccount()!;
 
-//   // Initial peer address will be set from the conversation object if it exists
-//   const [peerAddress, setPeerAddress] = useState(
-//     conversation?.peerAddress || ""
-//   );
+  const { theme } = useAppTheme();
 
-//   // When we set the conversation, we set the peer address
-//   // and preload the local convo for faster sending
-//   useEffect(() => {
-//     if (conversation && conversation.peerAddress !== peerAddress) {
-//       setPeerAddress(conversation.peerAddress || "");
-//     }
-//   }, [conversation, peerAddress]);
+  const topic = useConversationCurrentTopic();
 
-//   // When the conversation topic changes, we set the conversation object
-//   const conversationTopicRef = useRef(conversationTopic);
-//   const currentLastUpdateAt = conversation?.lastUpdateAt;
-//   useEffect(() => {
-//     if (
-//       conversationTopic &&
-//       (conversationTopicRef.current !== conversationTopic ||
-//         conversations[conversationTopic]?.lastUpdateAt !== currentLastUpdateAt)
-//     ) {
-//       const foundConversation = conversations[conversationTopic];
-//       if (foundConversation) {
-//         setConversation(foundConversation);
-//       }
-//     }
-//     conversationTopicRef.current = conversationTopic;
-//   }, [currentLastUpdateAt, conversationTopic, conversations]);
+  const { data: messages, isLoading: isLoadingMessages } =
+    useConversationPreviewMessages(currentAccount, topic!);
 
-//   const isBlockedPeer = useMemo(
-//     () =>
-//       conversation?.peerAddress
-//         ? peersStatus[conversation.peerAddress.toLowerCase()] === "blocked"
-//         : false,
-//     [conversation?.peerAddress, peersStatus]
-//   );
+  if (isLoadingMessages) {
+    return null;
+  }
 
-//   const textInputRef = useRef<TextInputWithValue>();
-//   const mediaPreviewRef = useRef<MessageAttachment>();
-
-//   const messageToPrefill = "";
-//   const mediaPreviewToPrefill = null;
-//   const focusOnLayout = useRef(false);
-//   const chatLayoutDone = useRef(false);
-//   const alreadyAutomaticallyFocused = useRef(false);
-
-//   const onReadyToFocus = useCallback(() => {
-//     if (alreadyAutomaticallyFocused.current) return;
-//     if (focusOnLayout.current && !chatLayoutDone.current) {
-//       chatLayoutDone.current = true;
-//       alreadyAutomaticallyFocused.current = true;
-//       textInputRef.current?.focus();
-//     } else {
-//       chatLayoutDone.current = true;
-//     }
-//   }, []);
-
-//   const styles = useStyles();
-
-//   useEffect(() => {
-//     if (conversation) {
-//       // On load, we mark the conversation as read and as opened
-//       // useChatStore.getState().setOpenedConversationTopic(conversation.topic);
-
-//       // If we are navigating to a conversation, we reset the topic to navigate to
-//       if (topicToNavigateTo === conversation.topic) {
-//         setTopicToNavigateTo("");
-//       }
-//     }
-//   }, [conversation]);
-
-//   return (
-//     <View style={styles.container} key={`conversation-${colorScheme}`}>
-//       {conversationTopic ? (
-//         <ConversationContext.Provider
-//           value={{
-//             messageToPrefill,
-//             inputRef: textInputRef,
-//             mediaPreviewToPrefill,
-//             mediaPreviewRef,
-//             isBlockedPeer,
-//             onReadyToFocus,
-//             frameTextInputFocused,
-//             setFrameTextInputFocused,
-//             tagsFetchedOnceForMessage,
-//           }}
-//         >
-//           <Text>Conversation Read Only</Text>
-//           {/* TODO: Add the conversation preview */}
-//           {/* <ChatPreview /> */}
-//         </ConversationContext.Provider>
-//       ) : (
-//         <View style={styles.filler} />
-//       )}
-//       <EmojiPicker />
-//     </View>
-//   );
-// };
-
-// const useStyles = () => {
-//   const colorScheme = useColorScheme();
-//   return StyleSheet.create({
-//     container: {
-//       flex: 1,
-//     },
-//     title: headerTitleStyle(colorScheme),
-//     filler: { flex: 1, backgroundColor: backgroundColor(colorScheme) },
-//   });
-// };
+  return (
+    <AnimatedVStack
+      layout={theme.animation.reanimatedSpringLayoutTransition}
+      style={{
+        flex: 1,
+      }}
+    >
+      <MessagesList data={messages?.ids} />
+    </AnimatedVStack>
+  );
+});

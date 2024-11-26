@@ -40,7 +40,7 @@ export const streamAllMessages = async (account: string) => {
 export const stopStreamingAllMessage = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   logger.debug(`[XmtpRN] Stopped streaming messages for ${client.address}`);
-  client.conversations.cancelStreamAllMessages();
+  await client.conversations.cancelStreamAllMessages();
 };
 
 export const getUrlToRender = (url: string) => {

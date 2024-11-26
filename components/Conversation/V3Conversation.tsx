@@ -3,7 +3,7 @@ import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationMessages } from "@queries/useConversationMessages";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 import { memo, useCallback, useEffect } from "react";
-import { FlatListProps, Platform } from "react-native";
+import { FlatListProps, ListRenderItem, Platform } from "react-native";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
 import { Screen } from "@components/Screen/ScreenComp/Screen";
 import { Button } from "@design-system/Button/Button";
@@ -33,7 +33,6 @@ import {
   initializeCurrentConversation,
   useConversationCurrentTopic,
 } from "../../features/conversation/conversation-service";
-import { getDraftMessage } from "../../features/conversations/utils/textDrafts";
 import { GroupConversationTitle } from "../../features/conversations/components/GroupConversationTitle";
 import { DmConversationTitle } from "../../features/conversations/components/DmConversationTitle";
 import { NewConversationTitle } from "../../features/conversations/components/NewConversationTitle";
@@ -52,7 +51,7 @@ export const V3Conversation = ({
   textPrefill,
 }: V3ConversationProps) => {
   // TODO: Handle when topic is not defined
-  const messageToPrefill = textPrefill ?? getDraftMessage(topic) ?? "";
+  const messageToPrefill = textPrefill ?? "";
   initializeCurrentConversation({
     topic,
     peerAddress,
@@ -166,7 +165,11 @@ const GroupContent = memo(function GroupContent() {
   );
 });
 
-const MessagesList = memo(function MessagesList(
+const renderItem: ListRenderItem<string> = ({ item, index }) => {
+  return <Message messageId={item} index={index} />;
+};
+
+export const MessagesList = memo(function MessagesList(
   props: Omit<AnimatedProps<FlatListProps<string>>, "renderItem">
 ) {
   const { theme } = useAppTheme();
@@ -177,9 +180,7 @@ const MessagesList = memo(function MessagesList(
       // @ts-ignore It says error but it works
       // layout={theme.animation.springLayoutTransition}
       itemLayoutAnimation={theme.animation.reanimatedSpringLayoutTransition}
-      renderItem={({ item, index }) => (
-        <Message messageId={item} index={index} />
-      )}
+      renderItem={renderItem}
       keyboardDismissMode="interactive"
       automaticallyAdjustContentInsets={false}
       contentInsetAdjustmentBehavior="never"
@@ -218,8 +219,8 @@ const Message = memo(function Message(props: {
     >
       <V3Message
         messageId={messageId}
-        previousMessageId={messages.ids[index + 1]}
-        nextMessageId={messages.ids[index - 1]}
+        previousMessageId={messages?.ids[index + 1]}
+        nextMessageId={messages?.ids[index - 1]}
       />
     </AnimatedVStack>
   );

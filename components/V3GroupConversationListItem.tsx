@@ -10,13 +10,12 @@ import { saveTopicsData } from "@utils/api";
 import { getMinimalDate } from "@utils/date";
 import { Haptics } from "@utils/haptics";
 import { navigate } from "@utils/navigation";
-import { RefObject, useCallback, useMemo, useRef, useState } from "react";
+import { RefObject, useCallback, useMemo, useRef } from "react";
 import { useColorScheme } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 
 import Avatar from "./Avatar";
-import { ConversationContextMenu } from "./ConversationContextMenu";
 import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
 import { GroupAvatarDumb } from "./GroupAvatar";
 import { useGroupConversationListAvatarInfo } from "../features/conversation-list/useGroupConversationListAvatarInfo";
@@ -31,6 +30,10 @@ import { prefetchConversationMessages } from "@queries/useConversationMessages";
 import { useToggleReadStatus } from "../features/conversation-list/hooks/useToggleReadStatus";
 import { useMessageText } from "../features/conversation-list/hooks/useMessageText";
 import { useConversationIsUnread } from "../features/conversation-list/hooks/useMessageIsUnread";
+import {
+  resetConversationListContextMenuStore,
+  setConversationListContextMenuConversationData,
+} from "@/features/conversation-list/ConversationListContextMenu.store";
 
 type V3GroupConversationListItemProps = {
   group: GroupWithCodecsType;
@@ -40,20 +43,22 @@ type UseDataProps = {
   group: GroupWithCodecsType;
 };
 
+const closeContextMenu = () => {
+  resetConversationListContextMenuStore();
+};
+
 const useData = ({ group }: UseDataProps) => {
   const { name: routeName } = useRoute();
+
   const isBlockedChatView = routeName === "Blocked";
+
   const colorScheme = useColorScheme();
+
   const currentAccount = useCurrentAccount()!;
+
   const { setTopicsData, setPinnedConversations } = useChatStore(
     useSelect(["setTopicsData", "setPinnedConversations"])
   );
-
-  const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
-
-  const showContextMenu = useCallback(() => {
-    setIsContextMenuVisible(true);
-  }, []);
 
   const topic = group?.topic;
   const timestamp = group?.lastMessage?.sentNs ?? 0;
@@ -71,18 +76,10 @@ const useData = ({ group }: UseDataProps) => {
   );
 
   const toggleReadStatus = useToggleReadStatus({
-    setTopicsData,
     topic,
     isUnread,
     currentAccount,
   });
-
-  const closeContextMenu = useCallback((openConversationOnClose = false) => {
-    setIsContextMenuVisible(false);
-    if (openConversationOnClose) {
-      // openConversation();
-    }
-  }, []);
 
   const { setInboxIdPeerStatus } = useSettingsStore(
     useSelect(["setInboxIdPeerStatus"])
@@ -223,15 +220,15 @@ const useData = ({ group }: UseDataProps) => {
         id: "delete",
       },
     ],
-    [
-      topic,
-      setPinnedConversations,
-      handleDelete,
-      closeContextMenu,
-      isUnread,
-      toggleReadStatus,
-    ]
+    [topic, setPinnedConversations, handleDelete, isUnread, toggleReadStatus]
   );
+
+  const showContextMenu = useCallback(() => {
+    setConversationListContextMenuConversationData(
+      group.topic,
+      contextMenuItems
+    );
+  }, [contextMenuItems, group.topic]);
 
   const messageText = useMessageText(group.lastMessage);
 
@@ -239,11 +236,9 @@ const useData = ({ group }: UseDataProps) => {
     group,
     memberData,
     timestamp,
-    isContextMenuVisible,
     contextMenuItems,
     showContextMenu,
     toggleReadStatus,
-    closeContextMenu,
     isUnread,
     isBlockedChatView,
     handleDelete,
@@ -343,10 +338,7 @@ export function V3GroupConversationListItem({
   const {
     memberData,
     timestamp,
-    isContextMenuVisible,
     showContextMenu,
-    contextMenuItems,
-    closeContextMenu,
     isUnread,
     isBlockedChatView,
     toggleReadStatus,
@@ -377,18 +369,6 @@ export function V3GroupConversationListItem({
     timestamp,
     isUnread,
   });
-
-  const contextMenuComponent = useMemo(
-    () => (
-      <ConversationContextMenu
-        isVisible={isContextMenuVisible}
-        onClose={closeContextMenu}
-        items={contextMenuItems}
-        conversationTopic={group?.topic}
-      />
-    ),
-    [isContextMenuVisible, closeContextMenu, contextMenuItems, group?.topic]
-  );
 
   const avatarComponent = useMemo(() => {
     return group?.imageUrlSquare ? (
@@ -423,7 +403,6 @@ export function V3GroupConversationListItem({
       avatarComponent={avatarComponent}
       title={group?.name}
       subtitle={`${timeToShow} ⋅ ${messageText}`}
-      contextMenuComponent={contextMenuComponent}
       isUnread={isUnread}
       rightIsDestructive={isBlockedChatView}
     />

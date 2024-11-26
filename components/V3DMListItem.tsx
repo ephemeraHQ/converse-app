@@ -1,47 +1,44 @@
 import { DmWithCodecsType } from "@utils/xmtpRN/client";
 import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import Avatar from "./Avatar";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { AvatarSizes } from "@styles/sizes";
 import { getMinimalDate } from "@utils/date";
 import { useColorScheme } from "react-native";
 import { IIconName } from "@design-system/Icon/Icon.types";
-import { ConversationContextMenu } from "./ConversationContextMenu";
 import { useDmPeerInboxOnConversationList } from "@queries/useDmPeerInboxOnConversationList";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
 import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
 import { navigate } from "@utils/navigation";
 import { Swipeable } from "react-native-gesture-handler";
-import { saveTopicsData } from "@utils/api";
 import { useSelect } from "@data/store/storeHelpers";
 import { Haptics } from "@utils/haptics";
 import { runOnJS } from "react-native-reanimated";
 import { translate } from "@i18n/index";
-import { actionSheetColors } from "@styles/colors";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
-import { useAppTheme } from "@theme/useAppTheme";
-import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
 import { useToggleReadStatus } from "../features/conversation-list/hooks/useToggleReadStatus";
 import { useMessageText } from "../features/conversation-list/hooks/useMessageText";
 import { useRoute } from "@navigation/useNavigation";
 import { useConversationIsUnread } from "../features/conversation-list/hooks/useMessageIsUnread";
+import {
+  resetConversationListContextMenuStore,
+  setConversationListContextMenuConversationData,
+} from "@/features/conversation-list/ConversationListContextMenu.store";
+import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
 
 type V3DMListItemProps = {
   conversation: DmWithCodecsType;
 };
 
 type UseDisplayInfoProps = {
-  timestamp: number;
   isUnread: boolean;
 };
-const useDisplayInfo = ({ timestamp, isUnread }: UseDisplayInfoProps) => {
-  const timeToShow = getMinimalDate(timestamp);
+const useDisplayInfo = ({ isUnread }: UseDisplayInfoProps) => {
   const colorScheme = useColorScheme();
   const leftActionIcon: IIconName = isUnread
     ? "checkmark.message"
     : "message.badge";
-  return { timeToShow, colorScheme, leftActionIcon };
+  return { colorScheme, leftActionIcon };
 };
 
 export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
@@ -51,16 +48,12 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
 
   const isBlockedChatView = routeName === "Blocked";
 
-  const { theme } = useAppTheme();
-
-  const colorScheme = theme.isDark ? "dark" : "light";
-
   const topic = conversation.topic;
 
   const ref = useRef<Swipeable>(null);
 
-  const { setTopicsData, setPinnedConversations } = useChatStore(
-    useSelect(["setTopicsData", "setPinnedConversations"])
+  const { setPinnedConversations } = useChatStore(
+    useSelect(["setPinnedConversations"])
   );
 
   const { data: peer } = useDmPeerInboxOnConversationList(
@@ -68,9 +61,8 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
     conversation
   );
 
-  const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
-
   const timestamp = conversation?.lastMessage?.sentNs ?? 0;
+  const timeToShow = getMinimalDate(timestamp);
 
   const isUnread = useConversationIsUnread({
     topic,
@@ -79,93 +71,29 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
     timestamp,
   });
 
-  const { timeToShow, leftActionIcon } = useDisplayInfo({
-    timestamp,
+  const { leftActionIcon } = useDisplayInfo({
     isUnread,
   });
 
   const messageText = useMessageText(conversation.lastMessage);
-  const prefferedName = usePreferredInboxName(peer);
+  const preferredName = usePreferredInboxName(peer);
   const avatarUri = usePreferredInboxAvatar(peer);
 
   const toggleReadStatus = useToggleReadStatus({
-    setTopicsData,
     topic,
     isUnread,
     currentAccount,
   });
 
-  const closeContextMenu = useCallback((openConversationOnClose = false) => {
-    setIsContextMenuVisible(false);
-    if (openConversationOnClose) {
-      // openConversation();
-    }
-  }, []);
-
-  const handleDelete = useCallback(() => {
-    const options = [
-      translate("delete"),
-      translate("delete_and_block"),
-      translate("cancel"),
-    ];
-    const title = `${translate("delete_chat_with")} ${prefferedName}?`;
-    const actions = [
-      () => {
-        saveTopicsData(currentAccount, {
-          [topic]: {
-            status: "deleted",
-            timestamp: new Date().getTime(),
-          },
-        }),
-          setTopicsData({
-            [topic]: {
-              status: "deleted",
-              timestamp: new Date().getTime(),
-            },
-          });
-      },
-      async () => {
-        saveTopicsData(currentAccount, {
-          [topic]: { status: "deleted" },
-        });
-        setTopicsData({
-          [topic]: {
-            status: "deleted",
-            timestamp: new Date().getTime(),
-          },
-        });
-        await conversation.updateConsent("denied");
-        const peerInboxId = await conversation.peerInboxId();
-        await consentToInboxIdsOnProtocolByAccount({
-          account: currentAccount,
-          inboxIds: [peerInboxId],
-          consent: "deny",
-        });
-      },
-    ];
-
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex: options.length - 1,
-        destructiveButtonIndex: [0, 1],
-        title,
-        ...actionSheetColors(colorScheme),
-      },
-      async (selectedIndex?: number) => {
-        if (selectedIndex !== undefined && selectedIndex < actions.length) {
-          actions[selectedIndex]();
-        }
-      }
-    );
-  }, [
-    colorScheme,
-    conversation,
-    currentAccount,
-    prefferedName,
-    setTopicsData,
+  const handleDelete = useHandleDeleteDm({
     topic,
-  ]);
+    preferredName,
+    conversation,
+  });
+
+  const closeContextMenu = useCallback(() => {
+    resetConversationListContextMenuStore();
+  }, []);
 
   const contextMenuItems = useMemo(
     () => [
@@ -211,23 +139,11 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
       <Avatar
         size={AvatarSizes.conversationListItem}
         uri={avatarUri}
-        name={prefferedName}
+        name={preferredName}
         style={{ marginLeft: 16, alignSelf: "center" }}
       />
     );
-  }, [avatarUri, prefferedName]);
-
-  const contextMenuComponent = useMemo(
-    () => (
-      <ConversationContextMenu
-        isVisible={isContextMenuVisible}
-        onClose={() => setIsContextMenuVisible(false)}
-        items={contextMenuItems}
-        conversationTopic={topic}
-      />
-    ),
-    [isContextMenuVisible, topic, contextMenuItems]
-  );
+  }, [avatarUri, preferredName]);
 
   const onPress = useCallback(() => {
     navigate("Conversation", {
@@ -244,8 +160,8 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
   }, []);
 
   const showContextMenu = useCallback(() => {
-    setIsContextMenuVisible(true);
-  }, []);
+    setConversationListContextMenuConversationData(topic, contextMenuItems);
+  }, [contextMenuItems, topic]);
 
   const onLongPress = useCallback(() => {
     runOnJS(triggerHapticFeedback)();
@@ -275,10 +191,9 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
       showImagePreview={false}
       imagePreviewUrl={undefined}
       avatarComponent={avatarComponent}
-      title={prefferedName}
+      title={preferredName}
       subtitle={`${timeToShow} ⋅ ${messageText}`}
-      isUnread={false}
-      contextMenuComponent={contextMenuComponent}
+      isUnread={isUnread}
       rightIsDestructive={isBlockedChatView}
     />
   );

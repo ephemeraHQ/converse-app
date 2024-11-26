@@ -220,6 +220,7 @@ export function getCurrentConversationMessages() {
     return {
       byId: {},
       ids: [],
+      reactions: {},
     };
   }
   return getConversationMessages(currentAccount, topic);

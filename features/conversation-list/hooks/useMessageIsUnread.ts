@@ -6,6 +6,7 @@ import {
 } from "@utils/xmtpRN/client";
 import { useChatStore } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
+import { normalizeTimestamp } from "@/utils/date";
 
 type UseConversationIsUnreadProps = {
   topic: string;
@@ -20,7 +21,7 @@ export const useConversationIsUnread = ({
   topic,
   lastMessage,
   conversation,
-  timestamp,
+  timestamp: timestampNs,
 }: UseConversationIsUnreadProps) => {
   const { topicsData } = useChatStore(useSelect(chatStoreSelectKeys));
 
@@ -31,6 +32,7 @@ export const useConversationIsUnread = ({
     if (lastMessage?.senderAddress === conversation?.client.inboxId) {
       return false;
     }
+    const timestamp = normalizeTimestamp(timestampNs);
     const readUntil = topicsData[topic]?.readUntil || 0;
     return readUntil < (timestamp ?? 0);
   }, [
@@ -38,6 +40,6 @@ export const useConversationIsUnread = ({
     topic,
     lastMessage?.senderAddress,
     conversation?.client.inboxId,
-    timestamp,
+    timestampNs,
   ]);
 };

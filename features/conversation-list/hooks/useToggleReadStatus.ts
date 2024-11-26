@@ -1,22 +1,21 @@
-import { TopicStatus } from "@data/store/chatStore";
+import { useChatStore } from "@/data/store/accountsStore";
+import { useSelect } from "@/data/store/storeHelpers";
 import { saveTopicsData } from "@utils/api";
 import { useCallback } from "react";
 
 type UseToggleReadStatusProps = {
-  setTopicsData: (
-    data: Record<string, { status: TopicStatus; timestamp: number }>
-  ) => void;
   topic: string;
   isUnread: boolean;
   currentAccount: string;
 };
 
 export const useToggleReadStatus = ({
-  setTopicsData,
   topic,
   isUnread,
   currentAccount,
 }: UseToggleReadStatusProps) => {
+  const { setTopicsData } = useChatStore(useSelect(["setTopicsData"]));
+
   return useCallback(() => {
     const newStatus = isUnread ? "read" : "unread";
     const timestamp = new Date().getTime();
