@@ -63,6 +63,11 @@ export const conversationMessagesQueryKey = (
   topic: ConversationTopic
 ) => [QueryKeys.CONVERSATION_MESSAGES, account.toLowerCase(), topic];
 
+export const conversationPreviewMessagesQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.CONVERSATION_MESSAGES, account.toLowerCase(), topic];
+
 export const groupMembersQueryKey = (
   account: string,
   topic: ConversationTopic

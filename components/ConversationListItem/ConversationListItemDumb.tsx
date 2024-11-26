@@ -45,7 +45,6 @@ export type ConversationListItemDumbProps = {
   onWillLeftSwipe?: () => void;
   onRightActionPress?: () => void;
   onWillRightSwipe?: () => void;
-  contextMenuComponent: React.JSX.Element;
   isUnread: boolean;
   showError: boolean;
   showImagePreview: boolean;
@@ -219,7 +218,6 @@ export const ConversationListItemDumb = memo(
         title,
         subtitle,
         avatarComponent,
-        contextMenuComponent,
         showError,
         showImagePreview,
         imagePreviewUrl,
@@ -393,7 +391,6 @@ export const ConversationListItemDumb = memo(
             hitSlop={{ left: -6 }}
           >
             {rowItem}
-            {contextMenuComponent}
           </Swipeable>
           {/* Hide part of the border to mimic margin*/}
           {displayRowSeparator && <View style={styles.rowSeparatorMargin} />}
