@@ -3,6 +3,7 @@ import { getSecureMmkvForAccount } from "@utils/mmkv";
 import { privateKey, signature } from "@xmtp/proto";
 
 import { loadXmtpKey } from "../keychain/helpers";
+import { evmHelpers } from "../evm/helpers";
 
 export const xmtpSignatureByAccount: { [account: string]: string } = {};
 
@@ -43,7 +44,7 @@ const getXmtpApiSignature = async (account: string, message: string) => {
 export const getXmtpApiHeaders = async (account: string) => {
   return {
     "xmtp-api-signature": "123",
-    "xmtp-api-address": account,
+    "xmtp-api-address": evmHelpers.toChecksumAddress(account),
   };
   if (account in xmtpSignatureByAccount)
     return {

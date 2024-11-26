@@ -17,11 +17,11 @@ import {
 } from "./conversations";
 import { stopStreamingAllMessage, streamAllMessages } from "./messages";
 import { getChatStore, useCurrentAccount } from "@data/store/accountsStore";
-import { loadXmtpKey } from "../keychain/helpers";
 import {
+  fetchConversationListQuery,
   fetchPersistedConversationListQuery,
-  prefetchConversationListQuery,
 } from "@queries/useV3ConversationListQuery";
+import { subscribeToNotifications } from "../notifications";
 
 const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;
@@ -146,8 +146,8 @@ const syncClientConversationList = async (account: string) => {
     });
     // Prefetch the conversation list so when we land on the conversation list
     // we have it ready, this will include syncing all groups
-    const conversationList = await prefetchConversationListQuery(account);
-    // TODO: Update notification topics
+    const conversationList = await fetchConversationListQuery(account);
+    subscribeToNotifications({ conversations: conversationList, account });
   } catch (e) {
     logger.error(e, {
       context: `Failed to fetch persisted conversation list for ${account}`,

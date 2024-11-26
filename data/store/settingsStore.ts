@@ -4,7 +4,6 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { zustandMMKVStorage } from "../../utils/mmkv";
-import { subscribeToNotifications } from "../../utils/notifications";
 
 // Settings for each account setup in the app
 // not all of them are really settings selected
@@ -67,9 +66,6 @@ export const initSettingsStore = (account: string) => {
           [peerAddress: string]: "blocked" | "consented";
         }) =>
           set((state) => {
-            setImmediate(() => {
-              subscribeToNotifications(account);
-            });
             return {
               peersStatus: {
                 ...state.peersStatus,
