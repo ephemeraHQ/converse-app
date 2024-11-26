@@ -1,4 +1,4 @@
-import { getCurrentUserAccountInboxId } from "@components/Chat/Message/Message.utils";
+import { getCurrentUserAccountInboxId } from "@/components/Chat/Message/message-utils";
 import { getCurrentAccount } from "@data/store/accountsStore";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 

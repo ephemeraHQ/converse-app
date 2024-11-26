@@ -16,7 +16,7 @@ type IProps = {
   onReply: () => void;
 };
 
-export const RepliableMessageWrapper = memo(function RepliableMessageWrapper({
+export const MessageRepliable = memo(function MessageRepliable({
   children,
   onReply,
 }: IProps) {

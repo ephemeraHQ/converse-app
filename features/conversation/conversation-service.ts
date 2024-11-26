@@ -19,7 +19,6 @@ import {
   useCurrentConversationPersistedStoreState,
 } from "./conversation-persisted-stores";
 import { useConversationStore } from "./conversation-store";
-import { getLocalAttachment } from "@utils/attachment/handleAttachment";
 
 export function initializeCurrentConversation(args: {
   topic: ConversationTopic | undefined;
