@@ -122,3 +122,6 @@ export function getCurrentUserAccountInboxId() {
     getCurrentAccountInboxIdQueryOptions().queryKey
   );
 }
+export function convertNanosecondsToMilliseconds(nanoseconds: number) {
+  return nanoseconds / 1000000;
+}

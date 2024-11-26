@@ -1,27 +1,27 @@
+import { getCurrentAccount } from "@data/store/accountsStore";
 import { Icon } from "@design-system/Icon/Icon";
 import { Pressable } from "@design-system/Pressable";
 import { translate } from "@i18n";
 import { MenuView } from "@react-native-menu/menu";
 import { useAppTheme } from "@theme/useAppTheme";
 import { uploadRemoteAttachment } from "@utils/attachment/uploadRemoteAttachment";
+import {
+  compressAndResizeImage,
+  pickMediaFromLibrary,
+  takePictureFromCamera,
+} from "@utils/media";
+import { sentryTrackError, sentryTrackMessage } from "@utils/sentry";
+import { encryptRemoteAttachment } from "@utils/xmtpRN/attachments";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import * as ImagePicker from "expo-image-picker";
 import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
 import { Platform } from "react-native";
-import { getCurrentAccount } from "../../../data/store/accountsStore";
 import {
   setComposerMediaPreview,
   setComposerMediaPreviewStatus,
   setUploadedRemoteAttachment,
-} from "../../../features/conversation/conversation-service";
-import {
-  compressAndResizeImage,
-  pickMediaFromLibrary,
-  takePictureFromCamera,
-} from "../../../utils/media";
-import { sentryTrackError, sentryTrackMessage } from "../../../utils/sentry";
-import { encryptRemoteAttachment } from "../../../utils/xmtpRN/attachments";
+} from "../conversation-service";
 
 const DATA_MIMETYPE_REGEX = /data:(.*?);/;
 
@@ -35,7 +35,7 @@ type AttachmentToSave = {
   };
 };
 
-export type SelectedAttachment = {
+type SelectedAttachment = {
   uploadedAttachment?: RemoteAttachmentContent;
   attachmentToSave?: AttachmentToSave;
   uri?: string;
