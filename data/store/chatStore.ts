@@ -6,7 +6,6 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import { Nullable } from "../../types/general";
 import { zustandMMKVStorage } from "../../utils/mmkv";
-import { subscribeToNotifications } from "../../utils/notifications";
 
 // Chat data for each user
 
@@ -348,9 +347,6 @@ export const initChatStore = (account: string) => {
                 state.topicsDataFetchedOnce
               )
                 return state;
-              setImmediate(() => {
-                subscribeToNotifications(account);
-              });
               return {
                 topicsData: newTopicsData,
                 topicsDataFetchedOnce: markAsFetchedOnce
