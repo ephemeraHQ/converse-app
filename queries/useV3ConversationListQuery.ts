@@ -19,7 +19,7 @@ export const conversationListKey = (account: string) => [
   account,
 ];
 
-type V3ConversationListType = ConversationWithCodecsType[];
+export type V3ConversationListType = ConversationWithCodecsType[];
 
 const v3ConversationListQueryFn = async (
   account: string,

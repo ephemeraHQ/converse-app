@@ -1,16 +1,14 @@
+import { Loader } from "@/design-system/loader";
+import { IconButton } from "@design-system/IconButton/IconButton";
+import { AnimatedVStack, VStack } from "@design-system/VStack";
 import {
   setAndroidColors,
   setAndroidSystemColor,
 } from "@styles/colors/helpers";
+import { useAppTheme } from "@theme/useAppTheme";
 import { Image } from "expo-image";
 import { useEffect } from "react";
-import { StyleSheet, View, useColorScheme } from "react-native";
-
-import { IconButton } from "@design-system/IconButton/IconButton";
-import { AnimatedVStack, VStack } from "@design-system/VStack";
-import { useAppTheme } from "@theme/useAppTheme";
-import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
-import { FadeIn, FadeOut, Keyframe } from "react-native-reanimated";
+import { StyleSheet, useColorScheme } from "react-native";
 
 type SendAttachmentPreviewProps = {
   uri: string;
@@ -75,7 +73,7 @@ export function SendAttachmentPreview({
               alignItems: "center",
             }}
           >
-            <ActivityIndicator
+            <Loader
               size="small"
               color="#ffffff"
               style={{

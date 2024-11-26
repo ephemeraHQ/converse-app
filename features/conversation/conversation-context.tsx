@@ -76,6 +76,7 @@ export const ConversationContextProvider = (
         if (!conversation && !peerAddress) {
           return;
         }
+
         if (!conversation && peerAddress) {
           const newConversation = await createConversationByAccount(
             currentAccount,
@@ -89,6 +90,7 @@ export const ConversationContextProvider = (
           );
           return;
         }
+
         await conversation?.send(payload);
       };
 

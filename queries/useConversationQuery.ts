@@ -62,6 +62,7 @@ export const useConversationWithPeerQuery = (
         peer,
         includeSync: true,
       });
+
       return conversation;
     },
     enabled: !!peer,

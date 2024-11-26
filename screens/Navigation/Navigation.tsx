@@ -1,34 +1,15 @@
+import { DmConversationScreen } from "@/features/conversation/dm-conversation.screen";
 import {
   createNativeStackNavigator,
   NativeStackNavigationOptions,
 } from "@react-navigation/native-stack";
 import { memo } from "react";
 import { Platform, useColorScheme } from "react-native";
-
-import { ConversationBlockedListNav } from "../../features/blocked-chats/ConversationBlockedListNav";
-import { IdleScreen } from "../IdleScreen";
-import ConversationListNav from "./ConversationListNav";
-import ConversationNav, { ConversationNavParams } from "./ConversationNav";
-import ConversationRequestsListNav from "./ConversationRequestsListNav";
-import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
-import GroupInviteNav, { GroupInviteNavParams } from "./GroupInviteNav";
-import GroupLinkNav, { GroupLinkNavParams } from "./GroupLinkNav";
-import GroupNav, { GroupNavParams } from "./GroupNav";
-import NewConversationNav, {
-  NewConversationNavParams,
-} from "./NewConversationNav";
-import ProfileNav, { ProfileNavParams } from "./ProfileNav";
-import ShareFrameNav, { ShareFrameNavParams } from "./ShareFrameNav";
-import ShareProfileNav from "./ShareProfileNav";
-import TopUpNav from "./TopUpNav";
-import UserProfileNav from "./UserProfileNav";
-import WebviewPreviewNav, {
-  WebviewPreviewNavParams,
-} from "./WebviewPreviewNav";
-import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
+import { ConversationBlockedListNav } from "../../features/blocked-chats/ConversationBlockedListNav";
 import { useRouter } from "../../navigation/useNavigation";
 import Accounts from "../Accounts/Accounts";
+import { IdleScreen } from "../IdleScreen";
 import { NewAccountConnectWalletScreen } from "../NewAccount/NewAccountConnectWalletScreen";
 import { NewAccountEphemeraScreen } from "../NewAccount/NewAccountEphemeraScreen";
 import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeyScreen";
@@ -42,6 +23,25 @@ import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificat
 import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
 import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
 import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
+import ConversationListNav from "./ConversationListNav";
+import ConversationNav, { ConversationNavParams } from "./ConversationNav";
+import ConversationRequestsListNav from "./ConversationRequestsListNav";
+import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
+import GroupInviteNav, { GroupInviteNavParams } from "./GroupInviteNav";
+import GroupLinkNav, { GroupLinkNavParams } from "./GroupLinkNav";
+import GroupNav, { GroupNavParams } from "./GroupNav";
+import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
+import NewConversationNav, {
+  NewConversationNavParams,
+} from "./NewConversationNav";
+import ProfileNav, { ProfileNavParams } from "./ProfileNav";
+import ShareFrameNav, { ShareFrameNavParams } from "./ShareFrameNav";
+import ShareProfileNav from "./ShareProfileNav";
+import TopUpNav from "./TopUpNav";
+import UserProfileNav from "./UserProfileNav";
+import WebviewPreviewNav, {
+  WebviewPreviewNavParams,
+} from "./WebviewPreviewNav";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -74,6 +74,9 @@ export type NavigationParamList = {
   ChatsRequests: undefined;
   Conversation: ConversationNavParams;
   NewConversation: NewConversationNavParams;
+  DmConversation: {
+    peerAddress: string;
+  };
   NewGroupSummary: undefined;
   ConverseMatchMaker: undefined;
   ShareProfile: undefined;
@@ -139,6 +142,11 @@ export function SignedInNavigation() {
           {GroupLinkNav()}
           {GroupInviteNav()}
           {TopUpNav()}
+
+          <NativeStack.Screen
+            name="DmConversation"
+            component={DmConversationScreen}
+          />
         </NativeStack.Group>
 
         {/* Modals */}

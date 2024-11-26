@@ -38,12 +38,16 @@ export function NavigationChatButton({
     // On Android the accounts are not in the navigation but in a drawer
     navigation.popToTop();
 
-    setTimeout(() => {
-      navigate("Conversation", {
-        mainConversationWithPeer: address,
-        focus: true,
-      });
-    }, 300);
+    navigate("DmConversation", {
+      peerAddress: address,
+    });
+
+    // setTimeout(() => {
+    //   navigate("Conversation", {
+    //     mainConversationWithPeer: address,
+    //     focus: true,
+    //   });
+    // }, 300);
   }, [address, navigation]);
 
   const addToGroupIfPossible = useCallback(async () => {
