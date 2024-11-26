@@ -19,6 +19,7 @@ import type { Frens } from "../data/store/recommendationsStore";
 import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
 import type { InboxId } from "@xmtp/react-native-sdk";
+import { evmHelpers } from "./evm/helpers";
 
 const api = axios.create({
   baseURL: config.apiURI,
@@ -195,7 +196,7 @@ export const searchProfiles = async (
 export const findFrens = async (account: string) => {
   const { data } = await api.get("/api/frens/find", {
     headers: await getXmtpApiHeaders(account),
-    params: { address: account },
+    params: { address: evmHelpers.toChecksumAddress(account) },
   });
 
   return data.frens as Frens;

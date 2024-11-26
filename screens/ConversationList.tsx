@@ -41,6 +41,7 @@ import { useIsSharingMode } from "../features/conversation-list/useIsSharingMode
 import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
 import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
 import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
+import { ConversationContextMenu } from "@/components/ConversationContextMenu";
 
 type Props = {
   searchBarRef:
@@ -228,6 +229,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       />
       <Recommendations visibility="HIDDEN" />
       {Platform.OS === "android" && !sharingMode && <NewConversationButton />}
+      <ConversationContextMenu />
     </>
   );
 }

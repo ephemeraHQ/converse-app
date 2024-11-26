@@ -224,6 +224,7 @@ export const en = {
 
   // Conversation Context Menu
   pin: "Pin",
+  unpin: "Unpin",
   mark_as_read: "Mark as read",
   mark_as_unread: "Mark as unread",
 
