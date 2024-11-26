@@ -7,6 +7,10 @@ import {
   handleGroupMessageNotification,
   isGroupMessageContentTopic,
 } from "./groupMessageNotification";
+import {
+  handleGroupWelcomeNotification,
+  isGroupWelcomeContentTopic,
+} from "./groupWelcomeNotification";
 
 export const ProtocolNotificationSchema = z.object({
   account: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
@@ -38,5 +42,7 @@ export const handleProtocolNotification = async (
   )) as ConverseXmtpClientType;
   if (isGroupMessageContentTopic(notification.contentTopic)) {
     handleGroupMessageNotification(xmtpClient, notification);
+  } else if (isGroupWelcomeContentTopic(notification.contentTopic)) {
+    handleGroupWelcomeNotification(xmtpClient, notification);
   }
 };
