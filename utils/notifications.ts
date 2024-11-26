@@ -1,14 +1,20 @@
 import * as Notifications from "expo-notifications";
-import { debounce } from "perfect-debounce";
 import { Platform } from "react-native";
 
 import { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
 import { currentAccount, useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import api from "./api";
+import api, { saveNotificationsSubscribe } from "./api";
 import { getTopicFromV3Id } from "./groupUtils/groupId";
 import mmkv from "./mmkv";
 import { navigate, navigateToTopic } from "./navigation";
+import { getXmtpClient } from "./xmtpRN/sync";
+import {
+  ConversationWithCodecsType,
+  ConverseXmtpClientType,
+} from "./xmtpRN/client";
+import logger from "./logger";
+import { savePushToken } from "./keychain/helpers";
 
 let nativePushToken: string | null;
 
@@ -20,8 +26,8 @@ export type NotificationPermissionStatus =
 const subscribingByAccount: { [account: string]: boolean } = {};
 const subscribedOnceByAccount: { [account: string]: boolean } = {};
 
-const buildUserGroupInviteTopic = (account: string): string => {
-  return `/xmtp/mls/1/w-${account}/proto`;
+const buildUserV3InviteTopic = (installationId: string): string => {
+  return `/xmtp/mls/1/w-${installationId}/proto`;
 };
 
 export const deleteSubscribedTopics = (account: string) => {
@@ -40,161 +46,98 @@ export const lastNotifSubscribeByAccount: {
   };
 } = {};
 
-const _subscribeToNotifications = async (account: string): Promise<void> => {
-  //   const thirtyDayPeriodsSinceEpoch = Math.floor(
-  //     Date.now() / 1000 / 60 / 60 / 24 / 30
-  //   );
-  //   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  //   if (!client) {
-  //     return;
-  //   }
-  //   const { conversations, conversationsSortedOnce, topicsData } =
-  //     getChatStore(account).getState();
-  //   const notificationsPermissionStatus =
-  //     useAppStore.getState().notificationsPermissionStatus;
-  //   if (notificationsPermissionStatus !== "granted") return;
-  //   if (subscribingByAccount[account] || !conversationsSortedOnce) {
-  //     await new Promise((r) => setTimeout(r, 1000));
-  //     logger.debug("Resubscribing to notifications in 1sec");
-  //     await _subscribeToNotifications(account);
-  //     return;
-  //   }
-  //   try {
-  //     subscribingByAccount[account] = true;
-  //     const { peersStatus, groupStatus } = getSettingsStore(account).getState();
-  //     const isBlocked = (peerAddress: string) =>
-  //       peersStatus[peerAddress.toLowerCase()] === "blocked";
-  //     const isGroupBlocked = (groupId: string) =>
-  //       peersStatus[groupId] === "blocked";
-  //     const needToUpdateConversationSubscription = (
-  //       c: ConversationWithLastMessagePreview
-  //     ) => {
-  //       const hasValidPeer = c.peerAddress || c.isGroup;
-  //       const isPending = !!c.pending;
-  //       if (!hasValidPeer || isPending) {
-  //         return {
-  //           topic: c.topic,
-  //           update: false,
-  //         };
-  //       }
-  //       const isNotBlocked = c.peerAddress
-  //         ? !isBlocked(c.peerAddress)
-  //         : !isGroupBlocked(getV3IdFromTopic(c.topic));
-  //       const isTopicNotDeleted = topicsData[c.topic]?.status !== "deleted";
-  //       const isTopicInInbox =
-  //         conversationShouldBeDisplayed(c, topicsData) &&
-  //         conversationShouldBeInInbox(c, peersStatus, groupStatus);
-  //       const status =
-  //         isNotBlocked && isTopicNotDeleted && isTopicInInbox ? "PUSH" : "MUTED";
-  //       const period = status === "PUSH" ? thirtyDayPeriodsSinceEpoch : -1;
-  //       return {
-  //         topic: c.topic,
-  //         // update: period !== c.lastNotificationsSubscribedPeriod,
-  //         update: true,
-  //         status,
-  //         period,
-  //       };
-  //     };
-  //     const topicsToUpdateForPeriod: {
-  //       [topic: string]: {
-  //         status: "PUSH" | "MUTED";
-  //         hmacKeys?: any;
-  //       };
-  //     } = {};
-  //     const conversationTopicsToUpdate = Object.values(conversations)
-  //       .map(needToUpdateConversationSubscription)
-  //       .filter((n) => n.update);
-  //     const dataToHash = {
-  //       push: [] as string[],
-  //       muted: [] as string[],
-  //       period: thirtyDayPeriodsSinceEpoch,
-  //     };
-  //     if (conversationTopicsToUpdate.length > 0) {
-  //       conversationTopicsToUpdate.forEach((c) => {
-  //         if (c.status === "PUSH") {
-  //           dataToHash.push.push(c.topic);
-  //         } else {
-  //           dataToHash.muted.push(c.topic);
-  //         }
-  //         topicsToUpdateForPeriod[c.topic] = {
-  //           status: c.status as "PUSH" | "MUTED",
-  //         };
-  //       });
-  //     } else if (subscribedOnceByAccount[account]) {
-  //       delete subscribingByAccount[account];
-  //       // No need to even make a query for invite topic if we already did!
-  //       return;
-  //     }
-  //     const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
-  //     nativePushToken = nativeTokenQuery.data;
-  //     if (nativePushToken) {
-  //       savePushToken(nativePushToken);
-  //     } else {
-  //       delete subscribingByAccount[account];
-  //       return;
-  //     }
-  //     const userGroupInviteTopic = buildUserGroupInviteTopic(
-  //       client.installationId || ""
-  //     );
-  //     topicsToUpdateForPeriod[userGroupInviteTopic] = {
-  //       status: "PUSH",
-  //     };
-  //     dataToHash.push.push(userGroupInviteTopic);
-  //     dataToHash.push.sort();
-  //     dataToHash.muted.sort();
-  //     const stringToHash = `${dataToHash.period}-push-${dataToHash.push.join(
-  //       ","
-  //     )}-muted-${dataToHash.muted.join(",")}`;
-  //     lastNotifSubscribeByAccount[account] =
-  //       lastNotifSubscribeByAccount[account] || {};
-  //     const lastStringToHash = lastNotifSubscribeByAccount[account]?.stringToHash;
-  //     if (stringToHash === lastStringToHash) {
-  //       delete subscribingByAccount[account];
-  //       return;
-  //     }
-  //     const hash = (
-  //       await createHash(Buffer.from(stringToHash), "sha256")
-  //     ).toString("hex");
-  //     if (!lastNotifSubscribeByAccount[account]?.serverHash) {
-  //       lastNotifSubscribeByAccount[account].serverHash =
-  //         await getLastNotificationsSubscribeHash(account, nativePushToken);
-  //     }
-  //     if (
-  //       lastNotifSubscribeByAccount[account] &&
-  //       lastNotifSubscribeByAccount[account]?.serverHash === hash
-  //     ) {
-  //       lastNotifSubscribeByAccount[account].stringToHash = stringToHash;
-  //       // We're already up to date!
-  //       delete subscribingByAccount[account];
-  //       return;
-  //     }
-  //     logger.info(
-  //       `[Notifications] Subscribing to ${
-  //         Object.keys(topicsToUpdateForPeriod).length
-  //       } topic for ${account}`
-  //     );
-  //     lastNotifSubscribeByAccount[account].serverHash =
-  //       await saveNotificationsSubscribe(
-  //         account,
-  //         nativePushToken,
-  //         nativeTokenQuery.type,
-  //         nativeTokenQuery.type === "android" ? "converse-notifications" : null,
-  //         topicsToUpdateForPeriod
-  //       );
-  //     // Also saved the hashed string so we don't hash it again with no reason
-  //     lastNotifSubscribeByAccount[account].stringToHash = stringToHash;
-  //     subscribedOnceByAccount[account] = true;
-  //   } catch (e) {
-  //     logger.error(e, { context: "Error while subscribing to notifications" });
-  //   }
-  //   delete subscribingByAccount[account];
+type SubscribeToNotificationsParams = {
+  conversations: ConversationWithCodecsType[];
+  account: string;
 };
 
-// Don't call twice in 1 sec
-export const subscribeToNotifications = debounce(
-  _subscribeToNotifications,
-  1000
-);
+export const subscribeToNotifications = async ({
+  conversations,
+  account,
+}: SubscribeToNotificationsParams): Promise<void> => {
+  try {
+    logger.info(
+      "[subscribeToNotifications] start",
+      account,
+      conversations.length
+    );
+    const thirtyDayPeriodsSinceEpoch = Math.floor(
+      Date.now() / 1000 / 60 / 60 / 24 / 30
+    );
+    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    if (!client) {
+      logger.error("[subscribeToNotifications] no client");
+      return;
+    }
+    logger.info("[subscribeToNotifications] client exists");
+    const notificationsPermissionStatus =
+      useAppStore.getState().notificationsPermissionStatus;
+    logger.info(
+      "[subscribeToNotifications] notificationsPermissionStatus",
+      notificationsPermissionStatus
+    );
+    if (notificationsPermissionStatus !== "granted") {
+      const newStatus = await requestPushNotificationsPermissions();
+      logger.info(
+        "[subscribeToNotifications] notificationsPermissionStatus new status",
+        newStatus
+      );
+      if (newStatus !== "granted") return;
+    }
+
+    const topicsToUpdateForPeriod: {
+      [topic: string]: {
+        status: "PUSH" | "MUTED";
+        hmacKeys?: any;
+      };
+    } = {};
+    const dataToHash = {
+      push: [] as string[],
+      muted: [] as string[],
+      period: thirtyDayPeriodsSinceEpoch,
+    };
+    for (const conversation of conversations) {
+      const topic = conversation.topic;
+      const conversationState = conversation.state;
+      if (conversationState === "allowed") {
+        dataToHash.push.push(topic);
+        topicsToUpdateForPeriod[topic] = {
+          status: "PUSH",
+        };
+      }
+    }
+    logger.info("[subscribeToNotifications] getting native push token");
+    const nativeTokenQuery = await Notifications.getDevicePushTokenAsync();
+    nativePushToken = nativeTokenQuery.data;
+    if (nativePushToken) {
+      savePushToken(nativePushToken);
+    } else {
+      logger.error("[subscribeToNotifications] no native push token");
+      delete subscribingByAccount[account];
+      return;
+    }
+    const userGroupInviteTopic = buildUserV3InviteTopic(
+      client.installationId || ""
+    );
+    topicsToUpdateForPeriod[userGroupInviteTopic] = {
+      status: "PUSH",
+    };
+
+    logger.info("[subscribeToNotifications] saving notifications subscribe");
+    await saveNotificationsSubscribe(
+      account,
+      nativePushToken,
+      nativeTokenQuery.type,
+      nativeTokenQuery.type === "android" ? "converse-notifications" : null,
+      topicsToUpdateForPeriod
+    );
+  } catch (e) {
+    logger.error(e, {
+      context:
+        "[subscribeToNotifications] Error while subscribing to notifications",
+    });
+  }
+};
 
 export const unsubscribeFromNotifications = async (apiHeaders: {
   [key: string]: string;
