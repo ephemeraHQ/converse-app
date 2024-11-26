@@ -33,7 +33,7 @@ const fetchInboxProfileSocials = async (inboxIds: InboxId) => {
   return data;
 };
 
-const inboxProfileSocialesQueryConfig = (
+const inboxProfileSocialsQueryConfig = (
   account: string,
   inboxId: InboxId | undefined
 ) => ({
@@ -54,7 +54,7 @@ export const useInboxProfileSocialsQuery = (
   account: string,
   inboxId: InboxId | undefined
 ) => {
-  return useQuery(inboxProfileSocialesQueryConfig(account, inboxId));
+  return useQuery(inboxProfileSocialsQueryConfig(account, inboxId));
 };
 
 export const useInboxProfileSocialsQueries = (
@@ -63,7 +63,7 @@ export const useInboxProfileSocialsQueries = (
 ) => {
   return useQueries({
     queries: inboxIds.map((inboxId) =>
-      inboxProfileSocialesQueryConfig(account, inboxId)
+      inboxProfileSocialsQueryConfig(account, inboxId)
     ),
   });
 };
@@ -73,7 +73,7 @@ export const fetchInboxProfileSocialsQuery = (
   inboxId: InboxId
 ) => {
   return queryClient.fetchQuery(
-    inboxProfileSocialesQueryConfig(account, inboxId)
+    inboxProfileSocialsQueryConfig(account, inboxId)
   );
 };
 
@@ -84,10 +84,21 @@ export const setInboxProfileSocialsQueryData = (
   updatedAt?: number
 ) => {
   return queryClient.setQueryData(
-    profileSocialsQueryKey(account, inboxId),
+    inboxProfileSocialsQueryConfig(account, inboxId).queryKey,
     data,
     {
       updatedAt,
     }
+  );
+};
+
+export const getInboxProfileSocialsQueryData = (
+  account: string,
+  inboxId: InboxId
+): ProfileSocials[] | null => {
+  return (
+    queryClient.getQueryData(
+      inboxProfileSocialsQueryConfig(account, inboxId).queryKey
+    ) ?? null
   );
 };
