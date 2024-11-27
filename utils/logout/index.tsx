@@ -16,16 +16,15 @@ import { setAuthStatus } from "../../data/store/authStore";
 import { deleteSecureItemAsync } from "../keychain";
 import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
 import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
-import {
-  deleteSubscribedTopics,
-  lastNotifSubscribeByAccount,
-  unsubscribeFromNotifications,
-} from "../notifications";
-import { resetSharedData } from "../sharedData";
+
+import { resetSharedData } from "@utils/sharedData";
 import { useDisconnectFromPrivy } from "./privy";
 import { getXmtpApiHeaders } from "../xmtpRN/api";
 import { importedTopicsDataForAccount } from "../xmtpRN/conversations";
 import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
+import { unsubscribeFromNotifications } from "../../features/notifications/utils/unsubscribeFromNotifications";
+import { deleteSubscribedTopics } from "../../features/notifications/utils/deleteSubscribedTopics";
+import { lastNotifSubscribeByAccount } from "../../features/notifications/utils/lastNotifSubscribeByAccount";
 
 type LogoutTasks = {
   [account: string]: {
@@ -245,6 +244,7 @@ export const logoutAccount = async (
 
 export const useLogoutFromConverse = (account: string) => {
   const privyLogout = useDisconnectFromPrivy();
+
   const logout = useCallback(
     async (dropLocalDatabase: boolean, isV3Enabled: boolean = true) => {
       logoutAccount(account, dropLocalDatabase, isV3Enabled, privyLogout);

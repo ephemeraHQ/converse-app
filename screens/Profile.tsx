@@ -74,10 +74,7 @@ import {
   getAddressIsSuperAdmin,
 } from "../utils/groupUtils/adminUtils";
 import { navigate } from "../utils/navigation";
-import {
-  NotificationPermissionStatus,
-  requestPushNotificationsPermissions,
-} from "../utils/notifications";
+
 import {
   getPreferredAvatar,
   getPreferredName,
@@ -87,6 +84,8 @@ import {
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
 import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
+import { requestPushNotificationsPermissions } from "../features/notifications/utils/requestPushNotificationsPermissions";
+import { NotificationPermissionStatus } from "../features/notifications/types/Notifications.types";
 
 export default function ProfileScreen() {
   return (
@@ -161,6 +160,7 @@ function ProfileScreenImpl() {
   }, [userAddress]);
 
   const [refreshingBalance, setRefreshingBalance] = useState(false);
+
   const manuallyRefreshBalance = useCallback(async () => {
     setRefreshingBalance(true);
     const now = new Date().getTime();
@@ -399,8 +399,8 @@ function ProfileScreenImpl() {
         Platform.OS === "android"
           ? undefined
           : isBlockedPeer
-          ? primaryColor(colorScheme)
-          : dangerColor(colorScheme),
+            ? primaryColor(colorScheme)
+            : dangerColor(colorScheme),
       leftView:
         Platform.OS === "android" ? (
           <TableViewPicto
@@ -808,9 +808,8 @@ function ProfileScreenImpl() {
                     const client = (await getXmtpClient(
                       userAddress
                     )) as ConverseXmtpClientType;
-                    const otherInstallations = await getOtherInstallations(
-                      client
-                    );
+                    const otherInstallations =
+                      await getOtherInstallations(client);
                     if (otherInstallations.length === 0) {
                       Alert.alert(
                         translate("revoke_done_title"),

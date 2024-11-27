@@ -19,7 +19,7 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { getTopicsData } from "../utils/api";
-import { loadSavedNotificationMessagesToContext } from "../utils/notifications";
+import { loadSavedNotificationMessagesToContext } from "../features/notifications/utils/loadSavedNotificationMessagesToContext";
 import {
   createPendingConversations,
   stopStreamingConversations,

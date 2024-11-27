@@ -7,7 +7,7 @@ import { cleanupPendingConversations } from "../../data/helpers/conversations/pe
 import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import { getAccountsList } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
-import { loadSavedNotificationMessagesToContext } from "../../utils/notifications";
+import { loadSavedNotificationMessagesToContext } from "../../features/notifications/utils/loadSavedNotificationMessagesToContext";
 import { getXmtpClient } from "../../utils/xmtpRN/sync";
 import { getInstalledWallets } from "../Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 
