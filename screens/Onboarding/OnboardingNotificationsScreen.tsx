@@ -13,7 +13,7 @@ import { useSettingsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { setAuthStatus } from "../../data/store/authStore";
 import { VStack } from "../../design-system/VStack";
-import { requestPushNotificationsPermissions } from "../../utils/notifications";
+import { requestPushNotificationsPermissions } from "../../features/notifications/utils/requestPushNotificationsPermissions";
 import { sentryTrackError } from "../../utils/sentry";
 import { NavigationParamList } from "../Navigation/Navigation";
 

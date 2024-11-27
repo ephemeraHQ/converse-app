@@ -26,13 +26,11 @@ import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useRouter } from "../navigation/useNavigation";
 import { navigate } from "../utils/navigation";
-import {
-  NotificationPermissionStatus,
-  requestPushNotificationsPermissions,
-} from "../utils/notifications";
+import { requestPushNotificationsPermissions } from "../features/notifications/utils/requestPushNotificationsPermissions";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "./TableView/TableViewImage";
+import { NotificationPermissionStatus } from "../features/notifications/types/Notifications.types";
 
 type Props = {
   account: string;

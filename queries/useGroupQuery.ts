@@ -47,11 +47,12 @@ export const useGroupQuery = (account: string, topic: string) => {
       setGroupPhotoQueryData(account, topic, group.imageUrlSquare, {
         updatedAt: groupDataUpdatedAt,
       });
+      const members = await group.members();
       setGroupMembersQueryData(
         account,
         topic,
         entifyWithAddress(
-          group.members,
+          members,
           (member) => member.inboxId,
           // TODO: Multiple addresses support
           (member) => getCleanAddress(member.addresses[0])

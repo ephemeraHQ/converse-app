@@ -6,9 +6,9 @@ import { maxVariableCount } from "../../db/upsert";
 import { getChatStore } from "../../store/accountsStore";
 import { XmtpConversationWithUpdate } from "../../store/chatStore";
 
-export interface TopicSpamScores {
+export type TopicSpamScores = {
   [topic: string]: number;
-}
+};
 
 export const saveSpamScores = async (
   account: string,
@@ -94,7 +94,7 @@ export const computeConversationsSpamScores = async (
 
     const firstMessage = conversation.messages.get(conversation.messagesIds[0]);
     if (firstMessage) {
-      const firstMessageSpamScore = computeSpamScore(
+      const firstMessageSpamScore = computeMessageContentSpamScore(
         firstMessage.content,
         firstMessage.contentType
       );
@@ -107,13 +107,40 @@ export const computeConversationsSpamScores = async (
   await saveSpamScores(account, topicSpamScores);
 };
 
-const computeSpamScore = (message: string, contentType: string): number => {
+const restrictedWords = [
+  "Coinbase",
+  "Airdrop",
+  "voucher",
+  "offer",
+  "restriction",
+  "Congrats",
+  "$SHIB",
+  "$AERO",
+];
+
+const containsRestrictedWords = (searchString: string): boolean => {
+  const lowercasedSearchString = searchString.toLowerCase();
+  return restrictedWords.some((word) =>
+    lowercasedSearchString.includes(word.toLowerCase())
+  );
+};
+
+export const computeMessageContentSpamScore = (
+  message: string,
+  contentType: string
+): number => {
   let spamScore: number = 0.0;
 
   URL_REGEX.lastIndex = 0;
 
-  if (isContentType("text", contentType) && URL_REGEX.test(message)) {
-    spamScore += 1;
+  if (isContentType("text", contentType)) {
+    if (URL_REGEX.test(message)) {
+      spamScore += 1;
+    }
+    if (containsRestrictedWords(message)) {
+      spamScore += 1;
+    }
   }
+
   return spamScore;
 };
