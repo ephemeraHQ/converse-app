@@ -29,7 +29,7 @@ export const handleGroupJoinRequestNotification = async (
 
   // Don't handle if stored on different device
   if (!groupId) {
-    return false;
+    return;
   }
 
   try {
@@ -79,6 +79,4 @@ export const handleGroupJoinRequestNotification = async (
       account: notification.account,
     },
   });
-
-  return false; // Don't show notification if any error occurs
 };
