@@ -66,8 +66,8 @@ import { AddAttachmentButton } from "./add-attachment-button";
 
 export type IComposerSendArgs = {
   text?: string;
-  remoteAttachment?: RemoteAttachmentContent | null;
-  referencedMessageId?: MessageId | null;
+  remoteAttachment?: RemoteAttachmentContent;
+  referencedMessageId?: MessageId;
 };
 
 type IComposerProps = {

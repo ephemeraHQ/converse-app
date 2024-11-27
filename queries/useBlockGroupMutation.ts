@@ -62,11 +62,11 @@ export const useBlockGroupMutation = (
       if (!topic || !account) {
         return;
       }
-      await consentToGroupsOnProtocolByAccount(
+      await consentToGroupsOnProtocolByAccount({
         account,
-        [getV3IdFromTopic(topic)],
-        "deny"
-      );
+        groupIds: [getV3IdFromTopic(topic)],
+        consent: "deny",
+      });
       return "denied";
     },
     onMutate: async () => {

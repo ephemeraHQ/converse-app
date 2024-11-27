@@ -1,8 +1,8 @@
 import { InboxId } from "@xmtp/react-native-sdk";
 
-import { getXmtpClient } from "./sync";
-import { ConverseXmtpClientType, DmWithCodecsType } from "./client";
 import logger from "@utils/logger";
+import { ConverseXmtpClientType, DmWithCodecsType } from "./client";
+import { getXmtpClient } from "./sync";
 
 type ConsentType = "allow" | "deny";
 
@@ -207,11 +207,12 @@ export const consentToGroupsOnProtocol = async ({
   );
 };
 
-export const consentToGroupsOnProtocolByAccount = async (
-  account: string,
-  groupIds: string[],
-  consent: "allow" | "deny"
-) => {
+export const consentToGroupsOnProtocolByAccount = async (args: {
+  account: string;
+  groupIds: string[];
+  consent: "allow" | "deny";
+}) => {
+  const { account, groupIds, consent } = args;
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   if (!client) {
     throw new Error("Client not found");

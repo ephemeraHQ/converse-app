@@ -1,16 +1,15 @@
+import { useGroupQuery } from "@queries/useGroupQuery";
 import { QueryObserverOptions, useQuery } from "@tanstack/react-query";
-
+import type { ConsentState, ConversationTopic } from "@xmtp/react-native-sdk";
 import { groupConsentQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
-import { useGroupQuery } from "@queries/useGroupQuery";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
-export type Consent = "allowed" | "denied" | "unknown";
+type GroupConsentQueryData = ConsentState;
 
 export const useGroupConsentQuery = (
   account: string,
-  topic: ConversationTopic | undefined,
-  queryOptions?: Partial<QueryObserverOptions<"allowed" | "denied" | "unknown">>
+  topic: ConversationTopic,
+  queryOptions?: Partial<QueryObserverOptions<ConsentState>>
 ) => {
   const { data: group } = useGroupQuery(account, topic);
   return useQuery({
@@ -28,15 +27,17 @@ export const useGroupConsentQuery = (
 export const getGroupConsentQueryData = (
   account: string,
   topic: ConversationTopic
-): Consent | undefined =>
-  queryClient.getQueryData(groupConsentQueryKey(account, topic));
+) => queryClient.getQueryData(groupConsentQueryKey(account, topic));
 
 export const setGroupConsentQueryData = (
   account: string,
   topic: ConversationTopic,
-  consent: Consent
+  consent: ConsentState
 ) => {
-  queryClient.setQueryData(groupConsentQueryKey(account, topic), consent);
+  queryClient.setQueryData<GroupConsentQueryData>(
+    groupConsentQueryKey(account, topic),
+    consent
+  );
 };
 
 export const cancelGroupConsentQuery = async (

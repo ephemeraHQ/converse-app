@@ -1,15 +1,14 @@
 import { SetDataOptions, useQuery } from "@tanstack/react-query";
-
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
-import { queryClient } from "./queryClient";
 import { groupNameQueryKey } from "./QueryKeys";
-import { useConversationScreenQuery } from "./useConversationQuery";
+import { queryClient } from "./queryClient";
+import { useConversationQuery } from "./useConversationQuery";
 
 export const useGroupNameQuery = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const { data: conversation } = useConversationScreenQuery(account, topic);
+  const { data: conversation } = useConversationQuery(account, topic);
   return useQuery({
     queryKey: groupNameQueryKey(account, topic),
     queryFn: async () => {

@@ -19,6 +19,7 @@ import {
   useCurrentConversationPersistedStoreState,
 } from "./conversation-persisted-stores";
 import { useConversationStore } from "./conversation-store";
+import logger from "@/utils/logger";
 
 export function initializeCurrentConversation(args: {
   topic: ConversationTopic | undefined;
@@ -216,6 +217,7 @@ export function getCurrentConversationMessages() {
   const currentAccount = getCurrentAccount()!;
   const topic = getCurrentConversationTopic();
   if (!topic) {
+    logger.error("No topic in getCurrentConversationMessages");
     return {
       byId: {},
       ids: [],

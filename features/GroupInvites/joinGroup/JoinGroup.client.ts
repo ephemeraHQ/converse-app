@@ -1,4 +1,4 @@
-import { OnConsentOptions } from "@hooks/useGroupConsent";
+import { IGroupConsentOptions } from "@hooks/useGroupConsent";
 import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
 import { GroupInvite } from "@utils/api.types";
 // import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
@@ -49,7 +49,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export type AllowGroupProps = {
   account: string;
   conversation: ConversationWithCodecsType;
-  options: OnConsentOptions;
+  options: IGroupConsentOptions;
 };
 
 export class JoinGroupClient {
