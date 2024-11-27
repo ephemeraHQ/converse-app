@@ -553,4 +553,23 @@ export const simulateTransaction = async (
   return data as SimulateAssetChangesResponse;
 };
 
+export const putGroupInviteRequest = async ({
+  account,
+  status,
+  joinRequestId,
+}: {
+  account: string;
+  status: string;
+  joinRequestId: string;
+}): Promise<void> => {
+  const { data } = await api.put(
+    `/api/groupJoinRequest/${joinRequestId}`,
+    { status },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
+  return data;
+};
+
 export default api;

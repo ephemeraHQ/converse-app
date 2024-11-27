@@ -1,17 +1,15 @@
-import notifee, { AndroidVisibility } from "@notifee/react-native";
-import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
-import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
-import { z } from "zod";
-import { androidChannel } from "../setupAndroidNotificationChannel";
-import { getProfilesStore } from "@data/store/accountsStore";
-import { getPreferredName, getProfile } from "@utils/profile";
 import {
   handleProtocolNotification,
   ProtocolNotification,
   ProtocolNotificationSchema,
 } from "./protocolNotification";
+import {
+  ConverseNotification,
+  ConverseNotificationSchema,
+  handleConverseNotification,
+} from "./converseNotification";
+import { AppState } from "react-native";
 
 export const handleBackgroundNotification = async (
   rawBody: string | undefined
@@ -25,13 +23,22 @@ export const handleBackgroundNotification = async (
       return;
     }
   }
-  const parsedBody = ProtocolNotificationSchema.safeParse(objectBody);
+  const protocolNotificationBody =
+    ProtocolNotificationSchema.safeParse(objectBody);
 
-  if (!parsedBody.success) {
-    logger.error(`Invalid notification body received: ${parsedBody.error}`);
+  if (protocolNotificationBody.success) {
+    // XMTP protocol notifications are handled by the XMTP SDK if foregrounded
+    if (AppState.currentState === "active") return;
+    const notification: ProtocolNotification = protocolNotificationBody.data;
+    handleProtocolNotification(notification);
     return;
   }
 
-  const notification: ProtocolNotification = parsedBody.data;
-  handleProtocolNotification(notification);
+  const converseNotificationBody =
+    ConverseNotificationSchema.safeParse(objectBody);
+  if (converseNotificationBody.success) {
+    const notification: ConverseNotification = converseNotificationBody.data;
+    handleConverseNotification(notification);
+    return;
+  }
 };

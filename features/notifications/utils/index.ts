@@ -1,12 +1,12 @@
 import * as Notifications from "expo-notifications";
 import { defineTask } from "expo-task-manager";
 import { registerTaskAsync } from "expo-notifications";
-import { AppState, Platform } from "react-native";
+import { Platform } from "react-native";
 import logger from "@utils/logger";
 import { handleForegroundNotification } from "./handleForegroundNotification";
 import { onInteractWithNotification } from "./onInteractWithNotification";
 import { handleBackgroundNotification } from "./background/handleBackgroundNotification";
-import notifee, { EventType } from "@notifee/react-native";
+import notifee from "@notifee/react-native";
 
 const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
 
@@ -34,10 +34,9 @@ if (Platform.OS === "android") {
       );
       return;
     }
-    if (AppState.currentState === "active") return;
-    const notificationBody = (data as any).notification.data.body as
-      | string
-      | undefined;
+    const notificationBody =
+      ((data as any).notification.data.body as string | undefined) || // Protocol notifications use body (legacy, to support older versions of the app)
+      ((data as any).notification.data.data as string | undefined); // Converse notifications use data (legacy, to support older versions of the app)
     handleBackgroundNotification(notificationBody);
   });
 
