@@ -39,7 +39,7 @@ import { ConversationWithCodecsType } from "@/utils/xmtpRN/client";
 import { createConversationByAccount } from "@/utils/xmtpRN/conversations";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMutation } from "@tanstack/react-query";
-import { MessageId } from "@xmtp/react-native-sdk";
+import { MessageId, RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect } from "react";
 
 export const DmConversationScreen = memo(function DmConversationScreen(
@@ -130,7 +130,7 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
       mutationFn: async (args: {
         conversation: ConversationWithCodecsType;
         text?: string;
-        remoteAttachment?: RemoteAttachmentContentt;
+        remoteAttachment?: RemoteAttachmentContent;
         referencedMessageId?: MessageId;
       }) => {
         const { conversation, text, remoteAttachment, referencedMessageId } =

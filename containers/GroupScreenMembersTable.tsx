@@ -30,7 +30,7 @@ type GroupScreenMembersTableProps = {
 };
 
 export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
-  ({ topic }) => {
+  ({ topic, group }) => {
     const colorScheme = useColorScheme();
     const currentAccount = useCurrentAccount() as string;
     const styles = useStyles();
@@ -42,10 +42,10 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
       revokeAdmin,
       revokeSuperAdmin,
       removeMember,
-    } = useGroupMembers(topic);
+    } = useGroupMembers((topic ?? group?.topic)!);
     const { data: groupPermissionPolicy } = useGroupPermissionPolicyQuery(
       currentAccount,
-      topic
+      (topic ?? group?.topic)!
     );
     const profiles = useProfilesStore((s) => s.profiles);
 

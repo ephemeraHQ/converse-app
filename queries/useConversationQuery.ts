@@ -41,7 +41,10 @@ export const setConversationQueryData = (
   topic: ConversationTopic,
   conversation: ConversationQueryData
 ) => {
-  queryClient.setQueryData(conversationQueryKey(account, topic), conversation);
+  queryClient.setQueryData<ConversationQueryData>(
+    conversationQueryKey(account, topic),
+    conversation
+  );
 };
 
 export function refetchConversationQuery(
