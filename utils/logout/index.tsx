@@ -13,7 +13,11 @@ import {
 import { setAuthStatus } from "../../data/store/authStore";
 import { deleteSecureItemAsync } from "../keychain";
 import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
-import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
+import mmkv, {
+  authMMKVStorage,
+  clearSecureMmkvForAccount,
+  secureMmkvByAccount,
+} from "../mmkv";
 
 import { useDisconnectFromPrivy } from "./privy";
 import { getXmtpApiHeaders } from "../xmtpRN/api";
@@ -152,6 +156,7 @@ export const logoutAccount = async (
         logger.debug("[Logout] successfully deleted libxmp db");
         // Manual delete database files
         await deleteLibXmtpDatabaseForInboxId(client.inboxId);
+        authMMKVStorage.clear();
       }
     } catch (error) {
       logger.warn("Could not get XMTP Client while logging out", {
