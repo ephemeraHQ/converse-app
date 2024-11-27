@@ -19,10 +19,6 @@ import {
 import QRCode from "react-native-qrcode-svg";
 
 import { useAppTheme } from "@theme/useAppTheme";
-import { getPreferredAvatar } from "@utils/profile/getPreferredAvatar";
-import { getPreferredName } from "@utils/profile/getPreferredName";
-import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
-import { getProfile } from "@utils/profile/getProfile";
 import { shortAddress } from "@utils/strings/shortAddress";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Avatar from "../components/Avatar";

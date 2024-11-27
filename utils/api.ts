@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TransactionData } from "@components/TransactionPreview/TransactionPreview";
 import type { SimulateAssetChangesResponse } from "alchemy-sdk";
 import { GroupInvite } from "@utils/api.types";
@@ -24,6 +23,8 @@ import { evmHelpers } from "./evm/helpers";
 import { getXmtpClient } from "./xmtpRN/sync";
 import { ConverseXmtpClientType } from "./xmtpRN/client";
 import { getInboxId } from "./xmtpRN/signIn";
+import { createDedupedFetcher } from "./api.utils";
+import { authMMKVStorage } from "./mmkv";
 
 export const api = axios.create({
   baseURL: config.apiURI,
@@ -31,10 +32,10 @@ export const api = axios.create({
 
 // Better error handling
 api.interceptors.response.use(
-  function (response) {
+  function axiosSuccessResponse(response) {
     return response;
   },
-  function (error) {
+  async function axiosErrorResponse(error) {
     if (error.response) {
       logger.warn(
         `[API] HTTP Error ${error.response.status} - ${error.request._url}`,
@@ -44,6 +45,11 @@ api.interceptors.response.use(
           2
         )
       );
+
+      if (error.response.status === 403) {
+        // TODO: need to bring back full retry logic here from stash
+        await rotateAccessToken();
+      }
     } else if (error.request) {
       logger.warn(
         `[API] HTTP Error - No response received - ${error.request._url}`,
@@ -69,33 +75,70 @@ type AuthParams = {
   appCheckToken?: string;
 };
 
+const { fetch: dedupedFetch } = createDedupedFetcher();
+
 export async function createAccessToken({
   inboxId,
   installationPublicKey,
   installationKeySignature,
   appCheckToken,
 }: AuthParams): Promise<AuthResponse> {
-  const { data } = await api.post<AuthResponse>("/api/authenticate", {
-    inboxId,
-    installationKeySignature,
-    installationPublicKey,
-    appCheckToken,
-  });
+  const { data } = await dedupedFetch("/api/authenticate", () =>
+    api.post<AuthResponse>("/api/authenticate", {
+      inboxId,
+      installationKeySignature,
+      installationPublicKey,
+      appCheckToken,
+    })
+  );
 
-  if (!data.accessToken) throw new Error("No access token");
-  if (!data.refreshToken) throw new Error("No refresh token");
+  // TODO: remove, these are just for debugging
+  if (!data.accessToken) throw new Error("No access token in auth response");
+  if (!data.refreshToken) throw new Error("No refresh token in auth response");
 
   return data;
 }
 
-export const xmtpSignatureByAccount: { [account: string]: string } = {};
+export async function rotateAccessToken(): Promise<AuthResponse> {
+  const accessToken = authMMKVStorage.get("CONVERSE_ACCESS_TOKEN");
+  const refreshToken = authMMKVStorage.get("CONVERSE_REFRESH_TOKEN");
+
+  if (!(accessToken && refreshToken)) {
+    throw new Error(
+      "Can't request new access token without current token and refresh token"
+    );
+  }
+
+  const { data } = await dedupedFetch("/api/authenticate/token", () =>
+    api.post<AuthResponse>("/api/authenticate/token", {
+      accessToken,
+      refreshToken,
+    })
+  );
+
+  // TODO: remove, these are just for debugging
+  if (!data) throw new Error("Could not create access token");
+  if (!data.accessToken) throw new Error("No access token in auth response");
+  if (!data.refreshToken) throw new Error("No refresh token in auth response");
+
+  authMMKVStorage.set("CONVERSE_ACCESS_TOKEN", data.accessToken);
+  authMMKVStorage.set("CONVERSE_REFRESH_TOKEN", data.refreshToken);
+  return data;
+}
+
+export const xmtpSignatureByAccount: {
+  [account: string]: InstallationSignature;
+} = {};
+
+type InstallationSignature = Pick<
+  AuthParams,
+  "installationPublicKey" | "installationKeySignature"
+>;
 
 async function getInstallationKeySignature(
   account: string,
   message: string
-): Promise<
-  Pick<AuthParams, "installationPublicKey" | "installationKeySignature">
-> {
+): Promise<InstallationSignature> {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   if (!client) throw new Error("Client not found");
 
@@ -108,37 +151,37 @@ async function getInstallationKeySignature(
 }
 
 type XmtpApiHeaders = {
-  authorization: string;
+  /** TODO: remove this when conversion is complete */
   ["xmtp-api-address"]: string;
+
+  /** Bearer <jwt access token>*/
+  authorization: `Bearer ${string}`;
 };
 
 export async function getXmtpApiHeaders(
   account: string
 ): Promise<XmtpApiHeaders> {
-  let accessToken = await AsyncStorage.getItem("CONVERSE_ACCESS_TOKEN");
+  let accessToken = authMMKVStorage.get("CONVERSE_ACCESS_TOKEN");
 
   if (!accessToken) {
-    // TODO: cache signature
-    // xmtpSignatureByAccount[account]
-    // const xmtpApiSignature = await getXmtpApiSignature(account, "XMTP_IDENTITY");
-    // xmtpSignatureByAccount[account] = xmtpApiSignature;
+    const installation =
+      xmtpSignatureByAccount[account] ||
+      (await getInstallationKeySignature(account, "XMTP_IDENTITY"));
+
+    if (!xmtpSignatureByAccount[account]) {
+      xmtpSignatureByAccount[account] = installation;
+    }
 
     try {
       const inboxId = await getInboxId(account);
-      const installation = await getInstallationKeySignature(
-        account,
-        "XMTP_IDENTITY"
-      );
-      console.log(installation);
       const result = await createAccessToken({ inboxId, ...installation });
-      if (!result) throw new Error("Could not create access token");
 
-      console.log(result);
-      await Promise.all([
-        AsyncStorage.setItem("CONVERSE_ACCESS_TOKEN", result.accessToken),
-        AsyncStorage.setItem("CONVERSE_REFRESH_TOKEN", result.refreshToken),
-      ]);
+      if (!result) {
+        throw new Error("Could not create access token");
+      }
 
+      authMMKVStorage.set("CONVERSE_ACCESS_TOKEN", result.accessToken);
+      authMMKVStorage.set("CONVERSE_REFRESH_TOKEN", result.refreshToken);
       accessToken = result.accessToken;
     } catch (error) {
       console.log("Error while getting access token");
@@ -147,8 +190,8 @@ export async function getXmtpApiHeaders(
   }
 
   return {
-    authorization: `Bearer ${accessToken}`,
     ["xmtp-api-address"]: account,
+    authorization: `Bearer ${accessToken}`,
   };
 }
 
