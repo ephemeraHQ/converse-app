@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "23052121755",
+    "project_id": "converse-appcheck",
+    "storage_bucket": "converse-appcheck.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:23052121755:android:1787e5971de11f3d13f83e",
+        "android_client_info": {
+          "package_name": "com.converse.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYQ3mVhPmGWFYvX9SpEKN4cA6XpdsOC9I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

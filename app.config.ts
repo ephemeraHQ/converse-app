@@ -33,19 +33,27 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   version: appBuildNumbers.expo.version,
   assetBundlePatterns: ["**/*"],
+  plugins: [
+    "@react-native-firebase/app-check",
+    ["expo-build-properties", { ios: { useFrameworks: "static" } }],
+  ],
   ios: {
     supportsTablet: true,
     buildNumber: appBuildNumbers.expo.ios.buildNumber,
+    googleServicesFile: "./ios/GoogleService-Info.plist",
+    bundleIdentifier: "com.converse.dev",
     config: {
       usesNonExemptEncryption: false,
     },
   },
   android: {
+    package: "com.converse.dev",
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#FFFFFF",
     },
     versionCode: appBuildNumbers.expo.android.versionCode,
+    googleServicesFile: "./android/google-services.json",
   },
   web: {
     favicon: "./assets/favicon.png",
