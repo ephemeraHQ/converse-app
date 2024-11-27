@@ -42,6 +42,11 @@ import { useConversationListRequestCount } from "../features/conversation-list/u
 import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
 import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
 import { ConversationContextMenu } from "@/components/ConversationContextMenu";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
+import {
+  dmMatchesSearchQuery,
+  groupMatchesSearchQuery,
+} from "@/features/conversations/utils/search";
 
 type Props = {
   searchBarRef:
@@ -109,9 +114,39 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   }, [initialLoadDoneOnce, currentAccount]);
 
   useEffect(() => {
-    // TODO:
-    setFlatListItems({ items: items ?? [], searchQuery });
-  }, [searchQuery, profiles, items]);
+    const getFilteredItems = async () => {
+      const filteredItems: FlatListItemType[] = [];
+      for (const item of items ?? []) {
+        if (item.version === ConversationVersion.GROUP) {
+          const groupMatches = await groupMatchesSearchQuery({
+            account: currentAccount!,
+            searchQuery,
+            group: item,
+          });
+          if (groupMatches) {
+            filteredItems.push(item);
+          }
+        } else if (item.version === ConversationVersion.DM) {
+          const dmMatches = await dmMatchesSearchQuery({
+            account: currentAccount!,
+            searchQuery,
+            dm: item,
+          });
+          if (dmMatches) {
+            filteredItems.push(item);
+          }
+        }
+      }
+      return filteredItems ?? [];
+    };
+    if (searchQuery.trim().length > 0) {
+      getFilteredItems().then((filteredItems) => {
+        setFlatListItems({ items: filteredItems, searchQuery });
+      });
+    } else {
+      setFlatListItems({ items: items ?? [], searchQuery });
+    }
+  }, [searchQuery, profiles, items, currentAccount]);
 
   // Search bar hook
   useHeaderSearchBar({

@@ -16,6 +16,7 @@ exports[`QueryKeys should match the snapshot 1`] = `
   "GROUP_MEMBERS": "groupMembersv2",
   "GROUP_NAME": "groupName",
   "GROUP_PERMISSIONS": "groupPermissions",
+  "GROUP_PERMISSION_POLICY": "groupPermissionPolicy",
   "GROUP_PHOTO": "groupPhoto",
   "PENDING_JOIN_REQUESTS": "pendingJoinRequests",
   "PINNED_FRAME": "pinnedFrame",
