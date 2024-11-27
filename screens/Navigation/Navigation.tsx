@@ -74,9 +74,16 @@ export type NavigationParamList = {
   ChatsRequests: undefined;
   Conversation: ConversationNavParams;
   NewConversation: NewConversationNavParams;
-  DmConversation: {
-    peerAddress: string;
-  };
+
+  // WIP
+  DmConversation:
+    | {
+        peerAddress: string;
+      }
+    | {
+        topic: string;
+      };
+
   NewGroupSummary: undefined;
   ConverseMatchMaker: undefined;
   ShareProfile: undefined;

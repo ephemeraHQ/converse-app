@@ -4,6 +4,9 @@ import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 import { memo, useCallback, useEffect } from "react";
 import { FlatListProps, Platform } from "react-native";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
+import { DmConsentPopup } from "@/components/Chat/ConsentPopup/dm-consent-popup";
+import { GroupConsentPopup } from "@/components/Chat/ConsentPopup/group-consent-popup";
+import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { V3Message } from "@components/Chat/Message/V3Message";
 import { Screen } from "@components/Screen/ScreenComp/Screen";
 import { Button } from "@design-system/Button/Button";
@@ -96,10 +99,15 @@ const Content = memo(function Content() {
   );
 });
 
-export const ComposerWrapper = memo(function ComposerWrapper() {
-  const handleSend = useCallback(async (args: IComposerSendArgs) => {
-    console.log("handleSend:", args);
-  }, []);
+const ComposerWrapper = memo(function ComposerWrapper() {
+  const sendMessage = useConversationContext("sendMessage");
+
+  const handleSend = useCallback(
+    async (args: IComposerSendArgs) => {
+      sendMessage(args);
+    },
+    [sendMessage]
+  );
 
   return <Composer onSend={handleSend} />;
 });
@@ -113,15 +121,22 @@ const NewConversationContent = memo(function NewConversationContent() {
 
 const DmContent = memo(function DmContent() {
   const currentAccount = useCurrentAccount()!;
-  const topic = useConversationCurrentTopic();
+  const topic = useConversationCurrentTopic()!;
   const conversationNotFound = useConversationContext("conversationNotFound");
-
+  const isAllowedConversation = useConversationContext("isAllowedConversation");
+  // const peerAddress = useConversationContext("peerAddress")!;
+  const conversationId = useConversationContext("conversationId")!;
+  const isLoadingConversationConsent = useConversationContext(
+    "isLoadingConversationConsent"
+  );
   const {
     data: messages,
     isLoading: messagesLoading,
     isRefetching: isRefetchingMessages,
     refetch: refetchMessages,
   } = useConversationMessages(currentAccount, topic!);
+
+  const { data: peerInboxId } = useDmPeerInboxId(currentAccount, topic!);
 
   useDmHeader();
 
@@ -135,19 +150,37 @@ const DmContent = memo(function DmContent() {
     return null;
   }
 
+  console.log("isAllowedConversation:", isAllowedConversation);
+  console.log("isLoadingConversationConsent:", isLoadingConversationConsent);
+
   return (
     <MessagesList
       messageIds={messages?.ids ?? []}
       refreshing={isRefetchingMessages}
       onRefresh={refetchMessages}
+      ListHeaderComponent={
+        !isAllowedConversation &&
+        peerInboxId &&
+        !isLoadingConversationConsent ? (
+          <DmConsentPopup
+            peerInboxId={peerInboxId}
+            topic={topic}
+            conversationId={conversationId}
+          />
+        ) : undefined
+      }
     />
   );
 });
 
 const GroupContent = memo(function GroupContent() {
   const currentAccount = useCurrentAccount()!;
-  const topic = useConversationCurrentTopic();
+  const topic = useConversationCurrentTopic()!;
   const conversationNotFound = useConversationContext("conversationNotFound");
+  const isAllowedConversation = useConversationContext("isAllowedConversation");
+  const isLoadingConversationConsent = useConversationContext(
+    "isLoadingConversationConsent"
+  );
 
   const {
     data: messages,
@@ -166,11 +199,19 @@ const GroupContent = memo(function GroupContent() {
     return <GroupConversationEmpty />;
   }
 
+  console.log("isLoadingConversationConsent:", isLoadingConversationConsent);
+  console.log("isAllowedConversation:", isAllowedConversation);
+
   return (
     <MessagesList
       messageIds={messages?.ids ?? []}
       refreshing={isRefetchingMessages}
       onRefresh={refetch}
+      ListHeaderComponent={
+        !isAllowedConversation && !isLoadingConversationConsent ? (
+          <GroupConsentPopup topic={topic} />
+        ) : undefined
+      }
     />
   );
 });

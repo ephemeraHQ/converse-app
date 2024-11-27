@@ -1,80 +1,135 @@
+import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
+import { translate } from "@/i18n";
+import { captureError } from "@/utils/capture-error";
+import { getV3IdFromTopic } from "@/utils/groupUtils/groupId";
 import { currentAccount } from "@data/store/accountsStore";
-import { useAllowGroupMutation } from "@queries/useAllowGroupMutation";
 import { useBlockGroupMutation } from "@queries/useBlockGroupMutation";
-import { useGroupConsentQuery } from "@queries/useGroupConsentQuery";
+import {
+  cancelGroupConsentQuery,
+  getGroupConsentQueryData,
+  setGroupConsentQueryData,
+  useGroupConsentQuery,
+} from "@queries/useGroupConsentQuery";
 import { useGroupQuery } from "@queries/useGroupQuery";
-import { QueryObserverOptions } from "@tanstack/react-query";
-import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import { useMutation } from "@tanstack/react-query";
+import {
+  consentToGroupsOnProtocolByAccount,
+  consentToInboxIdsOnProtocolByAccount,
+} from "@utils/xmtpRN/contacts";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
-
 import { useGroupCreator } from "./useGroupCreator";
 
-type OnConsentOptions = {
+type IGroupConsentOptions = {
   includeCreator?: boolean;
   includeAddedBy?: boolean;
 };
 
-export const useGroupConsent = (
-  topic: ConversationTopic | undefined,
-  queryOptions?: Partial<QueryObserverOptions<"allowed" | "denied" | "unknown">>
-) => {
+export const useGroupConsent = (topic: ConversationTopic) => {
   const account = currentAccount();
-  const { data: group } = useGroupQuery(account, topic);
-  const { data: groupCreator } = useGroupCreator(topic);
-  const { data, isLoading, isError } = useGroupConsentQuery(
+
+  const { data: group, isLoading: isGroupLoading } = useGroupQuery(
     account,
-    topic,
-    queryOptions
-  );
-  const { mutateAsync: allowGroupMutation } = useAllowGroupMutation(
-    account,
-    topic!
-  );
-  const { mutateAsync: blockGroupMutation } = useBlockGroupMutation(
-    account,
-    topic!
+    topic
   );
 
+  const { data: groupCreator, isLoading: isGroupCreatorLoading } =
+    useGroupCreator(topic);
+
+  const {
+    data: groupConsent,
+    isLoading: isGroupConsentLoading,
+    isError,
+  } = useGroupConsentQuery(account, topic);
+
+  const { mutateAsync: allowGroupMutation, isPending: isAllowingGroup } =
+    useMutation({
+      mutationFn: async (args: {
+        includeAddedBy?: boolean;
+        includeCreator?: boolean;
+      }) => {
+        const { includeAddedBy, includeCreator } = args;
+
+        const inboxIdsToAllow: InboxId[] = [];
+
+        if (includeAddedBy && group?.addedByInboxId) {
+          inboxIdsToAllow.push(group.addedByInboxId);
+        }
+
+        if (includeCreator && groupCreator) {
+          inboxIdsToAllow.push(groupCreator);
+        }
+
+        await Promise.all([
+          consentToGroupsOnProtocolByAccount({
+            account,
+            groupIds: [getV3IdFromTopic(topic)],
+            consent: "allow",
+          }),
+          ...(inboxIdsToAllow.length > 0
+            ? [
+                consentToInboxIdsOnProtocolByAccount({
+                  account,
+                  inboxIds: inboxIdsToAllow,
+                  consent: "allow",
+                }),
+              ]
+            : []),
+        ]);
+
+        return "allowed";
+      },
+      onMutate: async () => {
+        await cancelGroupConsentQuery(account, topic);
+        setGroupConsentQueryData(account, topic, "allowed");
+        const previousConsent = getGroupConsentQueryData(account, topic);
+        return { previousConsent };
+      },
+      onError: (error, _variables, context) => {
+        captureError(error);
+        if (context?.previousConsent === undefined) {
+          return;
+        }
+        setGroupConsentQueryData(account, topic, context.previousConsent);
+      },
+    });
+
+  const { mutateAsync: blockGroupMutation, isPending: isBlockingGroup } =
+    useBlockGroupMutation(account, topic!);
+
   const allowGroup = useCallback(
-    async (options: OnConsentOptions) => {
-      await allowGroupMutation();
-      const inboxIdsToAllow: InboxId[] = [];
-      const inboxIds: { [inboxId: string]: "allowed" } = {};
-      if (options.includeAddedBy && group?.addedByInboxId) {
-        const addedBy = group.addedByInboxId;
-        inboxIds[addedBy as string] = "allowed";
-        inboxIdsToAllow.push(addedBy);
-      }
-      if (options.includeCreator && groupCreator) {
-        inboxIds[groupCreator] = "allowed";
-        inboxIdsToAllow.push(groupCreator);
-      }
-      if (inboxIdsToAllow.length > 0) {
-        consentToInboxIdsOnProtocolByAccount({
-          account,
-          inboxIds: inboxIdsToAllow,
-          consent: "allow",
-        });
-      }
+    async (args: IGroupConsentOptions) => {
+      const { includeAddedBy, includeCreator } = args;
+
+      await allowGroupMutation({ includeAddedBy, includeCreator });
     },
-    [allowGroupMutation, group?.addedByInboxId, groupCreator, account]
+    [allowGroupMutation]
   );
 
   const blockGroup = useCallback(
-    async (options: OnConsentOptions) => {
-      await blockGroupMutation();
-      const inboxIdsToDeny: InboxId[] = [];
-      const inboxIds: { [inboxId: string]: "denied" } = {};
-      if (options.includeAddedBy && group?.addedByInboxId) {
-        const addedBy = group.addedByInboxId;
-        inboxIds[addedBy] = "denied";
-        inboxIdsToDeny.push(addedBy);
+    async (args: IGroupConsentOptions) => {
+      const { includeAddedBy, includeCreator } = args;
+
+      if (!group) {
+        showSnackbar({
+          type: "error",
+          message: translate("group_not_found"),
+        });
+        return;
       }
-      if (options.includeCreator && groupCreator) {
-        inboxIds[groupCreator] = "denied";
+
+      await blockGroupMutation();
+
+      const inboxIdsToDeny: InboxId[] = [];
+
+      if (includeAddedBy && group.addedByInboxId) {
+        inboxIdsToDeny.push(group.addedByInboxId);
+      }
+
+      if (includeCreator && groupCreator) {
         inboxIdsToDeny.push(groupCreator);
       }
+
       if (inboxIdsToDeny.length > 0) {
         consentToInboxIdsOnProtocolByAccount({
           account,
@@ -83,14 +138,19 @@ export const useGroupConsent = (
         });
       }
     },
-    [blockGroupMutation, group?.addedByInboxId, groupCreator, account]
+    [blockGroupMutation, groupCreator, account, group]
   );
 
+  const isLoading =
+    isGroupLoading || isGroupCreatorLoading || isGroupConsentLoading;
+
   return {
-    consent: data,
+    consent: groupConsent,
     isLoading,
     isError,
     allowGroup,
     blockGroup,
+    isAllowingGroup,
+    isBlockingGroup,
   };
 };

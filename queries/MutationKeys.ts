@@ -84,11 +84,6 @@ export const setPinnedFrameMutationKey = (
   topic: ConversationTopic
 ) => [MutationKeys.SET_PINNED_FRAME, account, topic];
 
-export const allowGroupMutationKey = (
-  account: string,
-  topic: ConversationTopic
-) => [MutationKeys.ALLOW_GROUP, account, topic];
-
 export const blockGroupMutationKey = (
   account: string,
   topic: ConversationTopic

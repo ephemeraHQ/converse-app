@@ -75,6 +75,11 @@ export const V3Message = memo(
     //     nextMessage,
     //   });
 
+    if (!message) {
+      console.log("no message found", messageId);
+      return null;
+    }
+
     return (
       <VStack
         style={

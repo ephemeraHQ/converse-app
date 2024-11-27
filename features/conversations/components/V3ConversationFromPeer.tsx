@@ -1,4 +1,4 @@
-import { useConversationWithPeerQuery } from "@queries/useConversationQuery";
+import { useConversationWithPeerQuery } from "@/queries/useConversationWithPeerQuery";
 import ActivityIndicator from "@components/ActivityIndicator/ActivityIndicator";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { memo } from "react";
