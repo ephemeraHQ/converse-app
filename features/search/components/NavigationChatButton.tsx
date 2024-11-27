@@ -5,11 +5,11 @@ import { Alert, Platform } from "react-native";
 import { useShallow } from "zustand/react/shallow";
 
 import { currentAccount, useProfilesStore } from "@data/store/accountsStore";
-import { navigate } from "@utils/navigation";
 import { Button } from "@design-system/Button/Button";
-import { useAppTheme } from "@theme/useAppTheme";
 import { useRouter } from "@navigation/useNavigation";
 import { isCurrentUser } from "@shared/utils/user";
+import { useAppTheme } from "@theme/useAppTheme";
+import { navigate } from "@utils/navigation";
 import { canMessageByAccount } from "@utils/xmtpRN/contacts";
 
 type NavigationChatProps = {
@@ -38,16 +38,9 @@ export function NavigationChatButton({
     // On Android the accounts are not in the navigation but in a drawer
     navigation.popToTop();
 
-    navigate("DmConversation", {
-      peerAddress: address,
+    navigate("Conversation", {
+      mainConversationWithPeer: address,
     });
-
-    // setTimeout(() => {
-    //   navigate("Conversation", {
-    //     mainConversationWithPeer: address,
-    //     focus: true,
-    //   });
-    // }, 300);
   }, [address, navigation]);
 
   const addToGroupIfPossible = useCallback(async () => {

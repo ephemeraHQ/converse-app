@@ -27,6 +27,7 @@ export enum QueryKeys {
 
   // Group Consent
   GROUP_CONSENT = "groupConsent",
+  DM_CONSENT = "dmConsent",
 
   // Group info
   GROUP_ACTIVE = "groupActive",
@@ -102,6 +103,11 @@ export const groupConsentQueryKey = (
   account: string,
   topic: ConversationTopic
 ) => [QueryKeys.GROUP_CONSENT, account.toLowerCase(), topic];
+
+export const dmConsentQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.DM_CONSENT, account.toLowerCase(), topic];
 
 export const addedByQueryKey = (account: string, topic: ConversationTopic) => [
   QueryKeys.ADDED_BY,

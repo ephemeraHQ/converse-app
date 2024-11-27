@@ -1,3 +1,9 @@
+/**
+ *
+ * WORK IN PROGRESS!
+ * This is to decouple group conversations from DM conversations and maybe even new DM conversation
+ *
+ */
 import {
   KeyboardFiller,
   MessagesList,
@@ -24,15 +30,13 @@ import {
   conversationsQueryKey,
 } from "@/queries/QueryKeys";
 import { queryClient } from "@/queries/queryClient";
-import {
-  addConversationMessage,
-  useConversationMessages,
-} from "@/queries/useConversationMessages";
-import { useConversationWithPeerQuery } from "@/queries/useConversationQuery";
+import { useConversationMessages } from "@/queries/useConversationMessages";
+import { useConversationWithPeerQuery } from "@/queries/useConversationWithPeerQuery";
 import { V3ConversationListType } from "@/queries/useV3ConversationListQuery";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { sentryTrackError } from "@/utils/sentry";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/client";
+import { createConversationByAccount } from "@/utils/xmtpRN/conversations";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMutation } from "@tanstack/react-query";
 import { MessageId } from "@xmtp/react-native-sdk";
@@ -41,6 +45,7 @@ import React, { memo, useCallback, useEffect } from "react";
 export const DmConversationScreen = memo(function DmConversationScreen(
   props: NativeStackScreenProps<NavigationParamList, "DmConversation">
 ) {
+  // @ts-ignore
   const { peerAddress } = props.route.params;
 
   const currentAccount = useCurrentAccount()!;
@@ -52,9 +57,6 @@ export const DmConversationScreen = memo(function DmConversationScreen(
       enabled: !!peerAddress,
     }
   );
-
-  console.log("isLoading:", isLoading);
-  console.log("conversation:", conversation);
 
   if (isLoading) {
     return (
@@ -83,8 +85,6 @@ export const DmConversationScreen = memo(function DmConversationScreen(
   );
 });
 
-const RANDOM_TOPIC = `RANDOM_TOPIC_${Math.random()}`;
-
 const ComposerWrapper = memo(function ComposerWrapper(props: {
   peerAddress: string;
 }) {
@@ -96,10 +96,7 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
   } = useMutation({
     mutationFn: async (peerAddress: string) => {
       const currentAccount = getCurrentAccount()!;
-      return {
-        topic: RANDOM_TOPIC,
-      };
-      // return createConversationByAccount(currentAccount, peerAddress!);
+      return createConversationByAccount(currentAccount, peerAddress!);
     },
     onSuccess: (newConversation) => {
       const currentAccount = getCurrentAccount()!;
@@ -116,15 +113,16 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
         (conversations) => [...(conversations || []), newConversation]
       );
     },
-    onMutate: (peerAddress) => {
-      const currentAccount = getCurrentAccount()!;
-      queryClient.setQueryData<ConversationWithCodecsType>(
-        conversationWithPeerQueryKey(currentAccount, peerAddress),
-        () => ({
-          topic: RANDOM_TOPIC,
-        })
-      );
-    },
+    // TODO: Add this for optimistic update and faster UX
+    // onMutate: (peerAddress) => {
+    //   const currentAccount = getCurrentAccount()!;
+    //   queryClient.setQueryData<ConversationWithCodecsType>(
+    //     conversationWithPeerQueryKey(currentAccount, peerAddress),
+    //     () => ({
+    //       topic: `RANDOM_TOPIC_${Math.random()}`,
+    //     } satisfies DmWithCodecsType)
+    //   );
+    // },
   });
 
   const { mutateAsync: sendMessageAsync, status: sendMessageStatus } =
@@ -137,8 +135,6 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
       }) => {
         const { conversation, text, remoteAttachment, referencedMessageId } =
           args;
-
-        return;
 
         if (referencedMessageId) {
           if (remoteAttachment) {
@@ -170,18 +166,19 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
           await conversation.send(text);
         }
       },
-      onMutate: (args) => {
-        try {
-          const { conversation } = args;
-          const currentAccount = getCurrentAccount()!;
-          addConversationMessage(currentAccount, conversation.topic!, {
-            id: "RANDOM_MESSAGE_ID",
-            content: { text: "RANDOM_MESSAGE_TEXT" },
-          });
-        } catch (error) {
-          console.log("error:", error);
-        }
-      },
+      // TODO: Add this for optimistic update and faster UX
+      // onMutate: (args) => {
+      //   try {
+      //     const { conversation } = args;
+      //     const currentAccount = getCurrentAccount()!;
+      //     addConversationMessage(currentAccount, conversation.topic!, {
+      //       id: "RANDOM_MESSAGE_ID",
+      //       content: { text: "RANDOM_MESSAGE_TEXT" },
+      //     });
+      //   } catch (error) {
+      //     console.log("error:", error);
+      //   }
+      // },
     });
 
   const handleSendMessage = useCallback(
@@ -204,9 +201,6 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
     },
     [sendMessageAsync, peerAddress, createNewConversationAsync]
   );
-
-  console.log("createNewConversationStatus:", createNewConversationStatus);
-  console.log("sendMessageStatus:", sendMessageStatus);
 
   return <Composer onSend={handleSendMessage} />;
 });
@@ -253,9 +247,6 @@ const ExistingDmConversation = memo(function ExistingDmConversation(props: {
   } = useConversationMessages(currentAccount, conversation.topic!);
 
   useDmHeader();
-
-  console.log("messagesLoading:", messagesLoading);
-  console.log("messages:", messages);
 
   if (messages?.ids.length === 0 && !messagesLoading) {
     // TODO: Add empty state

@@ -1,12 +1,12 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { getGroupByTopicByAccount } from "@utils/xmtpRN/conversations";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
-import { getGroupByTopicByAccount } from "@utils/xmtpRN/conversations";
 
 export const useGroupQuery = (
   account: string,
-  topic: ConversationTopic | undefined,
+  topic: ConversationTopic,
   includeSync = false,
   options?: Partial<UseQueryOptions<GroupWithCodecsType | null | undefined>>
 ) => {
