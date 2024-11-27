@@ -11,18 +11,41 @@ const storage = new MMKV();
 
 export default storage;
 
+const authMMKV = new MMKV({ id: "converse-auth" });
+
+type AuthStorageKey = "CONVERSE_REFRESH_TOKEN" | "CONVERSE_ACCESS_TOKEN";
+
+export const authMMKVStorage = {
+  set(name: AuthStorageKey, value: string) {
+    // Deleting before setting to avoid memory leak
+    // https://github.com/mrousavy/react-native-mmkv/issues/440
+    authMMKV.delete(name);
+    return authMMKV.set(name, value);
+  },
+  get(name: AuthStorageKey) {
+    const value = authMMKV.getString(name);
+    return value ?? null;
+  },
+  delete(name: AuthStorageKey) {
+    return authMMKV.delete(name);
+  },
+  clear() {
+    return authMMKV.clearAll();
+  },
+};
+
 export const zustandMMKVStorage: StateStorage = {
-  setItem: (name, value) => {
+  setItem(name, value) {
     // Deleting before setting to avoid memory leak
     // https://github.com/mrousavy/react-native-mmkv/issues/440
     storage.delete(name);
     return storage.set(name, value);
   },
-  getItem: (name) => {
+  getItem(name) {
     const value = storage.getString(name);
     return value ?? null;
   },
-  removeItem: (name) => {
+  removeItem(name) {
     return storage.delete(name);
   },
 };
