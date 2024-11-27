@@ -17,9 +17,6 @@ export const dmMatchesSearchQuery = async ({
   searchQuery,
   dm,
 }: DmSearchParams): Promise<boolean> => {
-  if (!dm) {
-    return false;
-  }
   const inboxId = await dm.peerInboxId();
   if (await inboxIdMatchesSearchQuery({ account, searchQuery, inboxId })) {
     return true;
@@ -27,7 +24,7 @@ export const dmMatchesSearchQuery = async ({
   const members = await dm.members();
   for (const member of members) {
     if (
-      await addressMatchesSearchQuery({
+      addressMatchesSearchQuery({
         searchQuery,
         address: member.addresses[0],
       })
@@ -49,9 +46,6 @@ export const groupMatchesSearchQuery = async ({
   searchQuery,
   group,
 }: GroupSearchParams): Promise<boolean> => {
-  if (!group) {
-    return false;
-  }
   if (group.name.toLowerCase().includes(searchQuery.toLowerCase())) {
     return true;
   }
@@ -67,7 +61,7 @@ export const groupMatchesSearchQuery = async ({
       return true;
     }
     if (
-      await addressMatchesSearchQuery({
+      addressMatchesSearchQuery({
         searchQuery,
         address: member.addresses[0],
       })
@@ -111,10 +105,10 @@ type AddressSearchParams = {
   address: string;
 };
 
-const addressMatchesSearchQuery = async ({
+const addressMatchesSearchQuery = ({
   searchQuery,
   address,
-}: AddressSearchParams): Promise<boolean> => {
+}: AddressSearchParams): boolean => {
   if (!address) {
     return false;
   }

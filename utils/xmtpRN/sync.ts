@@ -117,7 +117,7 @@ const syncClientConversationList = async (account: string) => {
     // Load the persisted conversation list
     await fetchPersistedConversationListQuery(account);
     // Streaming conversations
-    await retryWithBackoff({
+    retryWithBackoff({
       fn: () => streamConversations(account),
       retries: 5,
       delay: 1000,
@@ -131,7 +131,7 @@ const syncClientConversationList = async (account: string) => {
       });
     });
     // Streaming all dm messages (not groups because buggy)
-    await retryWithBackoff({
+    retryWithBackoff({
       fn: () => streamAllMessages(account),
       retries: 5,
       delay: 1000,
