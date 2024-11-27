@@ -34,7 +34,7 @@ export const getDmConsentQueryData = (args: {
 export const setDmConsentQueryData = (args: {
   account: string;
   topic: ConversationTopic;
-  consent: Consent;
+  consent: DmConsentQueryData;
 }) => {
   const { account, topic, consent } = args;
   queryClient.setQueryData<DmConsentQueryData>(

@@ -145,8 +145,8 @@ function ProfileScreenImpl() {
     revokeSuperAdmin,
     promoteToAdmin,
     promoteToSuperAdmin,
-  } = useGroupMembers(groupTopic);
-  const { permissions: groupPermissions } = useGroupPermissions(groupTopic);
+  } = useGroupMembers(groupTopic!);
+  const { permissions: groupPermissions } = useGroupPermissions(groupTopic!);
 
   const { getXmtpSigner } = useXmtpSigner();
   const privySigner = usePrivySigner();

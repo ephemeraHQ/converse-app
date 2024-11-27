@@ -27,8 +27,10 @@ export const useGroupConsentQuery = (
 export const getGroupConsentQueryData = (
   account: string,
   topic: ConversationTopic
-): ConsentState | undefined =>
-  queryClient.getQueryData(groupConsentQueryKey(account, topic));
+) =>
+  queryClient.getQueryData<GroupConsentQueryData>(
+    groupConsentQueryKey(account, topic)
+  );
 
 export const setGroupConsentQueryData = (
   account: string,
