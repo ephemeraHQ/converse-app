@@ -50,7 +50,7 @@ const Content = memo(function Content() {
         flex: 1,
       }}
     >
-      <MessagesList data={messages?.ids} />
+      <MessagesList messageIds={messages?.ids ?? []} />
     </AnimatedVStack>
   );
 });

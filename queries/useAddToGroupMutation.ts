@@ -13,7 +13,7 @@ import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const useAddToGroupMutation = (
   account: string,
-  topic: ConversationTopic | undefined
+  topic: ConversationTopic
 ) => {
   const { data: group } = useGroupQuery(account, topic);
 

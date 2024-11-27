@@ -58,7 +58,7 @@ export default function GroupInviteScreen({
   const [newGroup, setNewGroup] = useState<GroupWithCodecsType | undefined>(
     undefined
   );
-  const { allowGroup } = useGroupConsent(newGroup?.topic);
+  const { allowGroup } = useGroupConsent(newGroup?.topic!);
   const handlingNewGroup = useRef(false);
 
   const handleNewGroup = useCallback(

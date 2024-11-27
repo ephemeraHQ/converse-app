@@ -5,7 +5,7 @@ import { useGroupQuery } from "./useGroupQuery";
 
 export const useGroupPermissionPolicyQuery = (
   account: string,
-  topic: ConversationTopic | undefined
+  topic: ConversationTopic
 ) => {
   const { data: group } = useGroupQuery(account, topic);
   return useQuery({

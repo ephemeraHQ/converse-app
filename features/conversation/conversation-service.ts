@@ -9,6 +9,7 @@ import {
 import { moveFileAndReplace } from "@utils/fileSystem";
 import {
   ConversationTopic,
+  MessageId,
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
 import * as ImagePicker from "expo-image-picker";
@@ -108,7 +109,7 @@ export function useReplyToMessageId() {
 }
 
 export function setCurrentConversationReplyToMessageId(
-  replyingToMessageId: string | null
+  replyingToMessageId: MessageId | null
 ) {
   const conversationStore = getCurrentConversationPersistedStore();
   conversationStore.setState((state) => ({

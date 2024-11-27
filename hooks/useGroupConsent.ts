@@ -1,5 +1,9 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { translate } from "@/i18n";
+import {
+  getConversationQueryData,
+  setConversationQueryData,
+} from "@/queries/useConversationQuery";
 import { captureError } from "@/utils/capture-error";
 import { getV3IdFromTopic } from "@/utils/groupUtils/groupId";
 import { currentAccount } from "@data/store/accountsStore";
@@ -83,14 +87,33 @@ export const useGroupConsent = (topic: ConversationTopic) => {
         await cancelGroupConsentQuery(account, topic);
         setGroupConsentQueryData(account, topic, "allowed");
         const previousConsent = getGroupConsentQueryData(account, topic);
-        return { previousConsent };
+
+        const previousConversation = getConversationQueryData(account, topic);
+
+        if (previousConversation) {
+          previousConversation.state = "allowed";
+          setConversationQueryData(account, topic, previousConversation);
+        }
+
+        return { previousConsent, previousConversation };
       },
       onError: (error, _variables, context) => {
         captureError(error);
-        if (context?.previousConsent === undefined) {
+        if (!context) {
           return;
         }
-        setGroupConsentQueryData(account, topic, context.previousConsent);
+
+        if (context.previousConsent) {
+          setGroupConsentQueryData(account, topic, context.previousConsent);
+        }
+
+        if (context.previousConversation) {
+          setConversationQueryData(
+            account,
+            topic,
+            context.previousConversation
+          );
+        }
       },
     });
 
