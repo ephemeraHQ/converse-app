@@ -83,9 +83,6 @@ const inboxIdMatchesSearchQuery = async ({
   searchQuery,
   inboxId,
 }: InboxIdSearchParams): Promise<boolean> => {
-  if (!inboxId) {
-    return false;
-  }
   if (inboxId.toLowerCase().includes(searchQuery.toLowerCase())) {
     return true;
   }
