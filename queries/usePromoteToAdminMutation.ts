@@ -9,14 +9,18 @@ import {
   getGroupMembersQueryData,
   setGroupMembersQueryData,
 } from "./useGroupMembersQuery";
-import { useGroupQuery } from "./useGroupQuery";
-import { refreshGroup } from "../utils/xmtpRN/conversations";
+import { useGroupQuery } from "@queries/useGroupQuery";
+// import { refreshGroup } from "../utils/xmtpRN/conversations";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
-export const usePromoteToAdminMutation = (account: string, topic: string) => {
+export const usePromoteToAdminMutation = (
+  account: string,
+  topic: ConversationTopic | undefined
+) => {
   const { data: group } = useGroupQuery(account, topic);
 
   return useMutation({
-    mutationKey: promoteAdminMutationKey(account, topic),
+    mutationKey: promoteAdminMutationKey(account, topic!),
     // The actual function that will be called to promote a member to admin
     mutationFn: async (inboxId: InboxId) => {
       if (!group || !account || !topic) {
@@ -29,6 +33,9 @@ export const usePromoteToAdminMutation = (account: string, topic: string) => {
     // onMutation will happen before the mutation is executed
     // So this is where we can optimistically update the cache
     onMutate: async (inboxId: InboxId) => {
+      if (!topic) {
+        return;
+      }
       await cancelGroupMembersQuery(account, topic);
 
       const previousGroupMembers = getGroupMembersQueryData(account, topic);
@@ -51,12 +58,15 @@ export const usePromoteToAdminMutation = (account: string, topic: string) => {
       if (context?.previousGroupMembers === undefined) {
         return;
       }
+      if (!topic) {
+        return;
+      }
       setGroupMembersQueryData(account, topic, context.previousGroupMembers);
     },
     // For now we need to make sure the group is updated for handling on the conversation screen
     onSuccess: () => {
       logger.debug("onSuccess usePromoteToAdminMutation");
-      refreshGroup(account, topic);
+      // refreshGroup(account, topic);
     },
   });
 };

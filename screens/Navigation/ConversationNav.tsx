@@ -17,12 +17,14 @@ import {
   NavigationParamList,
   navigationAnimation,
 } from "./Navigation";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export type ConversationNavParams = {
-  topic?: string;
+  topic?: ConversationTopic;
   text?: string;
   focus?: boolean;
   mainConversationWithPeer?: string;
+  skipLoading?: boolean;
 };
 
 export const ConversationScreenConfig = {
@@ -39,10 +41,12 @@ export default function ConversationNav(
   routeParams?: ConversationNavParams | undefined
 ) {
   const colorScheme = useColorScheme();
+
   const navigationOptions = useCallback(
     ({ navigation }: { navigation: NavigationProp<NavigationParamList> }) => ({
       headerShadowVisible: false,
       animation: navigationAnimation as StackAnimationTypes,
+      title: "",
       headerLeft: () => {
         const handleBack = () => {
           navigation.canGoBack() && navigation.goBack();

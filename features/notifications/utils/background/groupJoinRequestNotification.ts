@@ -1,11 +1,13 @@
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/client";
 import { z } from "zod";
 import mmkv from "@/utils/mmkv";
-import { getGroup } from "./getGroup";
 import { sentryTrackError, sentryTrackMessage } from "@/utils/sentry";
 import notifee, { AndroidVisibility } from "@notifee/react-native";
 import { androidChannel } from "../setupAndroidNotificationChannel";
 import { putGroupInviteRequest } from "@/utils/api";
+import { getGroupByTopic } from "@/utils/xmtpRN/conversations";
+import { getTopicFromV3Id } from "@/utils/groupUtils/groupId";
+import { ConversationId } from "@xmtp/react-native-sdk";
 export const GroupJoinRequestNotificationSchema = z.object({
   type: z.literal("group_join_request"),
   groupId: z.string(),
@@ -33,7 +35,10 @@ export const handleGroupJoinRequestNotification = async (
   }
 
   try {
-    const group = await getGroup(client, groupId);
+    const group = await getGroupByTopic({
+      client,
+      topic: getTopicFromV3Id(groupId as ConversationId),
+    });
 
     if (group) {
       await group.addMembers([notification.address]);

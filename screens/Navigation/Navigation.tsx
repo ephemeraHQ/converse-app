@@ -5,7 +5,7 @@ import {
 import { memo } from "react";
 import { Platform, useColorScheme } from "react-native";
 
-import ConversationBlockedListNav from "./ConversationBlockedListNav";
+import { ConversationBlockedListNav } from "../../features/blocked-chats/ConversationBlockedListNav";
 import { IdleScreen } from "../IdleScreen";
 import ConversationListNav from "./ConversationListNav";
 import ConversationNav, { ConversationNavParams } from "./ConversationNav";

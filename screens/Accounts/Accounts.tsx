@@ -16,8 +16,9 @@ import {
   useErroredAccountsMap,
 } from "../../data/store/accountsStore";
 import { useRouter } from "../../navigation/useNavigation";
-import { shortAddress, useAccountsProfiles } from "../../utils/str";
+import { useAccountsProfiles } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";
+import { shortAddress } from "@utils/strings/shortAddress";
 
 export default function Accounts(
   props: NativeStackScreenProps<NavigationParamList, "Accounts">

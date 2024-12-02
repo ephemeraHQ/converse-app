@@ -46,7 +46,9 @@ import {
 import { navigate } from "../../utils/navigation";
 import { isEmptyObject } from "../../utils/objects";
 import { getPreferredName } from "../../utils/profile";
-import { isOnXmtp } from "../../utils/xmtpRN/client";
+import { canMessageByAccount } from "@utils/xmtpRN/contacts";
+import { useGroupQuery } from "@queries/useGroupQuery";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 export default function NewConversation({
   route,
@@ -56,27 +58,31 @@ export default function NewConversation({
   "NewConversationScreen"
 >) {
   const colorScheme = useColorScheme();
+  const { data: existingGroup } = useGroupQuery(
+    currentAccount(),
+    route.params?.addingToGroupTopic,
+    false
+  );
   const [group, setGroup] = useState({
     enabled: !!route.params?.addingToGroupTopic,
     members: [] as (ProfileSocials & { address: string })[],
   });
-  const { addMembers } = useGroupMembers(
-    route.params?.addingToGroupTopic ?? ""
-  );
-  const existingGroup = useChatStore((s) =>
+
+  const { addMembers, members } = useGroupMembers(
     route.params?.addingToGroupTopic
-      ? s.conversations[route.params.addingToGroupTopic]
-      : undefined
   );
+
   const [loading, setLoading] = useState(false);
 
   const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+
   const styles = useStyles();
 
   const handleRightAction = useCallback(async () => {
     if (route.params?.addingToGroupTopic) {
       setLoading(true);
       try {
+        //  TODO: Support multiple addresses
         await addMembers(group.members.map((m) => m.address));
         navigation.goBack();
       } catch (e) {
@@ -206,7 +212,10 @@ export default function NewConversation({
               return;
             }
             const address = getCleanAddress(resolvedAddress);
-            const addressIsOnXmtp = await isOnXmtp(address);
+            const addressIsOnXmtp = await canMessageByAccount({
+              account: currentAccount(),
+              peer: address,
+            });
             if (searchingForValue.current === value) {
               if (addressIsOnXmtp) {
                 // Let's search with the exact address!
@@ -386,9 +395,11 @@ export default function NewConversation({
                   delete searchResultsToShow[member.address];
                 });
               }
-              if (existingGroup) {
-                existingGroup.groupMembers?.forEach((a) => {
-                  delete searchResultsToShow[a];
+              if (members) {
+                members?.ids?.forEach((memberId: InboxId) => {
+                  const member = members.byId[memberId];
+                  const address = getCleanAddress(member.addresses[0]);
+                  delete searchResultsToShow[address];
                 });
               }
               return searchResultsToShow;

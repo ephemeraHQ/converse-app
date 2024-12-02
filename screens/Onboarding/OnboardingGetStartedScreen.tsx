@@ -2,7 +2,7 @@ import TableView from "@components/TableView/TableView";
 import { AnimatedVStack } from "@design-system/VStack";
 import { translate } from "@i18n";
 import { PictoSizes } from "@styles/sizes";
-import { animations } from "@theme/animations";
+import { animation } from "@theme/animations";
 import React from "react";
 import { Alert } from "react-native";
 
@@ -33,7 +33,7 @@ export function OnboardingGetStartedScreen() {
     <OnboardingScreenComp safeAreaEdges={["top", "bottom"]}>
       <OnboardingPictoTitleSubtitle.Container>
         <AnimatedVStack
-          entering={animations.fadeInUpSlow().delay(animationDelays[2])}
+          entering={animation.fadeInUpSlow().delay(animationDelays[2])}
         >
           <OnboardingPictoTitleSubtitle.Picto
             picto="message.circle.fill"
@@ -41,19 +41,19 @@ export function OnboardingGetStartedScreen() {
           />
         </AnimatedVStack>
         <OnboardingPictoTitleSubtitle.Title
-          entering={animations.fadeInUpSlow().delay(animationDelays[1])}
+          entering={animation.fadeInUpSlow().delay(animationDelays[1])}
         >
           {translate("walletSelector.title")}
         </OnboardingPictoTitleSubtitle.Title>
         <OnboardingPictoTitleSubtitle.Subtitle
-          entering={animations.fadeInUpSlow().delay(animationDelays[0])}
+          entering={animation.fadeInUpSlow().delay(animationDelays[0])}
         >
           {translate("walletSelector.subtitle")}
         </OnboardingPictoTitleSubtitle.Subtitle>
       </OnboardingPictoTitleSubtitle.Container>
 
       <AnimatedVStack
-        entering={animations.fadeInDownSlow().delay(animationDelays[3])}
+        entering={animation.fadeInDownSlow().delay(animationDelays[3])}
       >
         <TableView
           title={translate("walletSelector.converseAccount.title")}
@@ -74,7 +74,7 @@ export function OnboardingGetStartedScreen() {
 
       {hasInstalledWallets && (
         <AnimatedVStack
-          entering={animations.fadeInDownSlow().delay(animationDelays[4])}
+          entering={animation.fadeInDownSlow().delay(animationDelays[4])}
         >
           <InstalledWalletsTableView
             onAccountExists={(arg) => {
@@ -93,7 +93,7 @@ export function OnboardingGetStartedScreen() {
       )}
 
       <AnimatedVStack
-        entering={animations.fadeInDownSlow().delay(animationDelays[5])}
+        entering={animation.fadeInDownSlow().delay(animationDelays[5])}
       >
         <TableView
           title={
@@ -113,7 +113,7 @@ export function OnboardingGetStartedScreen() {
 
       {!hasInstalledWallets && (
         <AnimatedVStack
-          entering={animations.fadeInDownSlow().delay(animationDelays[5])}
+          entering={animation.fadeInDownSlow().delay(animationDelays[5])}
         >
           <ConnectViaWalletPopularWalletsTableView />
         </AnimatedVStack>

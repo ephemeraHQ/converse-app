@@ -1,6 +1,6 @@
-import Picto from "@components/Picto/Picto";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
+import { Icon } from "@design-system/Icon/Icon";
 import { useExistingGroupInviteLink } from "@hooks/useExistingGroupInviteLink";
 import { useGroupDescription } from "@hooks/useGroupDescription";
 import { useGroupMembers } from "@hooks/useGroupMembers";
@@ -27,9 +27,10 @@ import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
 } from "@utils/groupUtils/adminUtils";
-import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
+import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { navigate } from "@utils/navigation";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import * as Haptics from "expo-haptics";
 import { FC, useCallback, useMemo, useState } from "react";
 import {
@@ -42,9 +43,9 @@ import {
 } from "react-native";
 import { Portal, Snackbar, Text } from "react-native-paper";
 
-interface GroupScreenAdditionProps {
-  topic: string;
-}
+type GroupScreenAdditionProps = {
+  topic: ConversationTopic;
+};
 
 const noop = () => {};
 
@@ -54,6 +55,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
   const colorScheme = useColorScheme();
   const currentAccount = useCurrentAccount() as string;
   const { members } = useGroupMembers(topic);
+
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
       currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
@@ -64,6 +66,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
     }),
     [currentAccount, members]
   );
+
   const styles = useStyles();
   const [snackMessage, setSnackMessage] = useState<string | null>(null);
   const { permissions } = useGroupPermissions(topic);
@@ -79,6 +82,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
   const groupInviteLink = useExistingGroupInviteLink(topic);
   const { setGroupInviteLink, deleteGroupInviteLink: deleteLinkFromState } =
     useChatStore(useSelect(["setGroupInviteLink", "deleteGroupInviteLink"]));
+
   const onAddMemberPress = useCallback(() => {
     navigate("NewConversation", { addingToGroupTopic: topic });
   }, [topic]);
@@ -96,11 +100,11 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
       groupName: groupName ?? translate("group_invite_default_group_name"),
       imageUrl: groupPhoto,
       description: groupDescription,
-      groupId: getGroupIdFromTopic(topic),
+      groupId: getV3IdFromTopic(topic),
     })
       .then((groupInvite) => {
-        saveInviteIdByGroupId(getGroupIdFromTopic(topic), groupInvite.id);
-        saveGroupInviteLink(groupInvite.id, getGroupIdFromTopic(topic));
+        saveInviteIdByGroupId(getV3IdFromTopic(topic), groupInvite.id);
+        saveGroupInviteLink(groupInvite.id, getV3IdFromTopic(topic));
         setGroupInviteLink(topic, groupInvite.inviteLink);
         Clipboard.setString(groupInvite.inviteLink);
         setSnackMessage(translate("group_invite_link_created_copied"));
@@ -120,7 +124,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
 
   const onDeleteInviteLink = useCallback(() => {
     Haptics.impactAsync();
-    const groupId = getGroupIdFromTopic(topic);
+    const groupId = getV3IdFromTopic(topic);
     const inviteId = getInviteIdByGroupId(groupId);
     if (!inviteId) {
       return;
@@ -141,19 +145,16 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
     return null;
   }
 
-  const pictoSize =
-    Platform.OS === "ios" ? undefined : PictoSizes.accoutSettings;
-
   return (
     <View style={styles.container}>
       <TouchableOpacity
         onPress={onAddMemberPress}
         style={[styles.itemContainer, styles.addContainer]}
       >
-        <Picto
-          size={pictoSize}
+        <Icon
+          size={PictoSizes.accoutSettings}
           style={styles.icon}
-          picto="person.crop.circle.badge.plus"
+          icon="person.crop.circle.badge.plus"
         />
         <Text numberOfLines={2} style={styles.text}>
           {translate("add_more_members")}
@@ -165,7 +166,11 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
           style={[styles.itemContainer, styles.inviteContainer]}
           onLongPress={onDeleteInviteLink}
         >
-          <Picto size={pictoSize} style={styles.icon} picto="link" />
+          <Icon
+            size={PictoSizes.accoutSettings}
+            style={styles.icon}
+            icon="link"
+          />
           <Text style={styles.text}>{translate("copy_invite_link")}</Text>
         </TouchableOpacity>
       ) : (
@@ -174,18 +179,22 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
           onLongPress={noop}
           style={[styles.itemContainer, styles.inviteContainer]}
         >
-          <Picto size={pictoSize} style={styles.icon} picto="link" />
+          <Icon
+            size={PictoSizes.accoutSettings}
+            style={styles.icon}
+            icon="link"
+          />
           <Text style={styles.text}>{translate("create_invite_link")}</Text>
         </TouchableOpacity>
       )}
       <Portal>
         <Snackbar visible={!!snackMessage} onDismiss={dismissSnackBar}>
           <View style={styles.snackContainer}>
-            <Picto
-              size={pictoSize}
+            <Icon
+              size={PictoSizes.accoutSettings}
               color={inversePrimaryColor(colorScheme)}
               style={styles.icon}
-              picto="link"
+              icon="link"
             />
             <Text style={styles.snackText}>{snackMessage}</Text>
           </View>

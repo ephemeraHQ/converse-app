@@ -1,13 +1,12 @@
 import TableView, { TableViewItemType } from "@components/TableView/TableView";
 import { BlurView } from "@design-system/BlurView";
-import { useAppTheme } from "@theme/useAppTheme";
-import { animations } from "@theme/animations";
 import {
-  MENU_GAP,
   AUXILIARY_VIEW_GAP,
+  MENU_GAP,
 } from "@design-system/ContextMenu/ContextMenu.constants";
 import { calculateMenuHeight } from "@design-system/ContextMenu/ContextMenu.utils";
-import { ConversationContext } from "@utils/conversation";
+import { animation } from "@theme/animations";
+import { useAppTheme } from "@theme/useAppTheme";
 import React, { FC, memo, useEffect, useMemo } from "react";
 import {
   Platform,
@@ -21,12 +20,10 @@ import Animated, {
   SharedValue,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useContext } from "use-context-selector";
 
 const BackdropComponent: FC<{
   isActive: boolean;
@@ -55,7 +52,6 @@ const BackdropComponent: FC<{
     If it causes too many rerenders we could just pass down a
     few needed context values but painful to maintain */
   const { theme } = useAppTheme();
-  const conversationContext = useContext(ConversationContext);
   const activeValue = useSharedValue(false);
   const opacityValue = useSharedValue(0);
   const intensityValue = useSharedValue(0);
@@ -67,10 +63,10 @@ const BackdropComponent: FC<{
   useEffect(() => {
     activeValue.value = isActive;
     opacityValue.value = withTiming(isActive ? 1 : 0, {
-      duration: animations.contextMenuHoldDuration,
+      duration: animation.contextMenuHoldDuration,
     });
     intensityValue.value = withTiming(isActive ? 50 : 0, {
-      duration: animations.contextMenuHoldDuration,
+      duration: animation.contextMenuHoldDuration,
     });
   }, [activeValue, isActive, opacityValue, intensityValue]);
 
@@ -126,8 +122,8 @@ const BackdropComponent: FC<{
     const tY = getTransformValue();
     const transformAnimation = () =>
       isActive
-        ? withSpring(tY, animations.contextMenuSpring)
-        : withTiming(0, { duration: animations.contextMenuHoldDuration });
+        ? withSpring(tY, animation.contextMenuSpring)
+        : withTiming(0, { duration: animation.contextMenuHoldDuration });
     return {
       position: "absolute",
       top: itemRectY.value,
@@ -182,8 +178,8 @@ const BackdropComponent: FC<{
     const tY = getTransformValue();
     const transformAnimation = () =>
       isActive
-        ? withSpring(tY, animations.contextMenuSpring)
-        : withTiming(0, { duration: animations.contextMenuHoldDuration });
+        ? withSpring(tY, animation.contextMenuSpring)
+        : withTiming(0, { duration: animation.contextMenuHoldDuration });
 
     return {
       position: "absolute",
@@ -240,8 +236,8 @@ const BackdropComponent: FC<{
     const tY = getTransformValue();
     const transformAnimation = () =>
       isActive
-        ? withSpring(tY, animations.contextMenuSpring)
-        : withTiming(-0.1, { duration: animations.contextMenuHoldDuration });
+        ? withSpring(tY, animation.contextMenuSpring)
+        : withTiming(-0.1, { duration: animation.contextMenuHoldDuration });
 
     return {
       position: "absolute",
@@ -250,7 +246,7 @@ const BackdropComponent: FC<{
       height: itemRectHeight.value,
       width: itemRectWidth.value,
       opacity: withTiming(isActive ? 1 : 0, {
-        duration: animations.contextMenuHoldDuration,
+        duration: animation.contextMenuHoldDuration,
       }),
       transform: [
         {
@@ -269,36 +265,33 @@ const BackdropComponent: FC<{
 
   return (
     <Portal>
-      {/* Portal is eating the context so passing down context values */}
-      <ConversationContext.Provider value={conversationContext}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <BlurView isAbsolute>
-            <TouchableWithoutFeedback onPress={onClose}>
-              <Animated.View style={StyleSheet.absoluteFill}>
-                <Animated.View style={animatedPortalStyle}>
-                  {children}
-                </Animated.View>
-                <Animated.View style={animatedAuxiliaryViewStyle}>
-                  {auxiliaryView}
-                </Animated.View>
-                <Animated.View style={animatedMenuStyle}>
-                  <TableView
-                    items={items}
-                    style={{
-                      width: 180,
-                      backgroundColor:
-                        Platform.OS === "android"
-                          ? theme.colors.background.raised
-                          : undefined,
-                      borderRadius: Platform.OS === "android" ? 10 : undefined,
-                    }}
-                  />
-                </Animated.View>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <BlurView isAbsolute>
+          <TouchableWithoutFeedback onPress={onClose}>
+            <Animated.View style={StyleSheet.absoluteFill}>
+              <Animated.View style={animatedPortalStyle}>
+                {children}
               </Animated.View>
-            </TouchableWithoutFeedback>
-          </BlurView>
-        </GestureHandlerRootView>
-      </ConversationContext.Provider>
+              <Animated.View style={animatedAuxiliaryViewStyle}>
+                {auxiliaryView}
+              </Animated.View>
+              <Animated.View style={animatedMenuStyle}>
+                <TableView
+                  items={items}
+                  style={{
+                    width: 180,
+                    backgroundColor:
+                      Platform.OS === "android"
+                        ? theme.colors.background.raised
+                        : undefined,
+                    borderRadius: Platform.OS === "android" ? 10 : undefined,
+                  }}
+                />
+              </Animated.View>
+            </Animated.View>
+          </TouchableWithoutFeedback>
+        </BlurView>
+      </GestureHandlerRootView>
     </Portal>
   );
 };

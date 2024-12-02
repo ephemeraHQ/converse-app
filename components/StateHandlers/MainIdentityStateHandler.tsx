@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
+// import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import {
   useAccountsStore,
   useCurrentAccount,
@@ -14,7 +14,7 @@ export default function MainIdentityStateHandler() {
   useEffect(() => {
     if (userAddress) {
       saveUser(userAddress, privyAccountId[userAddress] as string);
-      refreshProfileForAddress(userAddress, userAddress);
+      // refreshProfileForAddress(userAddress, userAddress);
     }
   }, [privyAccountId, userAddress]);
 

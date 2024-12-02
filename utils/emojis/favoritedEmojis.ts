@@ -10,7 +10,7 @@ class FavoritedEmojis {
   constructor() {
     const savedEmojis = mmkv.getString(FAVORITED_EMOJIS);
     if (savedEmojis) {
-      this.emojis = JSON.parse(savedEmojis);
+      this.emojis = JSON.parse(savedEmojis) as string[];
     } else {
       this.emojis = DEFAULT_EMOJIS;
     }

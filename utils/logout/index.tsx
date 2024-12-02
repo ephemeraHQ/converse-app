@@ -4,10 +4,8 @@ import { ConverseXmtpClientType, dropXmtpClient } from "@utils/xmtpRN/client";
 import { getInboxId } from "@utils/xmtpRN/signIn";
 import { useCallback } from "react";
 
-import { clearConverseDb, getConverseDbPath } from "../../data/db";
 import {
   getAccountsList,
-  getChatStore,
   getWalletStore,
   TEMPORARY_ACCOUNT_NAME,
   useAccountsStore,
@@ -17,14 +15,12 @@ import { deleteSecureItemAsync } from "../keychain";
 import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
 import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
 
-import { resetSharedData } from "@utils/sharedData";
 import { useDisconnectFromPrivy } from "./privy";
 import { getXmtpApiHeaders } from "../xmtpRN/api";
-import { importedTopicsDataForAccount } from "../xmtpRN/conversations";
 import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
-import { unsubscribeFromNotifications } from "../../features/notifications/utils/unsubscribeFromNotifications";
-import { deleteSubscribedTopics } from "../../features/notifications/utils/deleteSubscribedTopics";
-import { lastNotifSubscribeByAccount } from "../../features/notifications/utils/lastNotifSubscribeByAccount";
+import { unsubscribeFromNotifications } from "@features/notifications/utils/unsubscribeFromNotifications";
+import { deleteSubscribedTopics } from "@features/notifications/utils/deleteSubscribedTopics";
+import { lastNotifSubscribeByAccount } from "@features/notifications/utils/lastNotifSubscribeByAccount";
 
 type LogoutTasks = {
   [account: string]: {
@@ -38,7 +34,7 @@ export const getLogoutTasks = (): LogoutTasks => {
   const logoutTasksString = mmkv.getString("converse-logout-tasks");
   if (logoutTasksString) {
     try {
-      return JSON.parse(logoutTasksString);
+      return JSON.parse(logoutTasksString) as LogoutTasks;
     } catch (e) {
       logger.warn(e);
       return {};
@@ -116,7 +112,6 @@ export const executeLogoutTasks = async () => {
         await deleteSecureItemAsync(task.pkPath);
       }
       assertNotLogged(account);
-      resetSharedData(task.topics || []);
       assertNotLogged(account);
       if (task.apiHeaders) {
         unsubscribeFromNotifications(task.apiHeaders);
@@ -168,15 +163,15 @@ export const logoutAccount = async (
   if (isPrivyAccount) {
     privyLogout();
   }
-  const topicsByAccount: { [a: string]: string[] } = {};
+  // const topicsByAccount: { [a: string]: string[] } = {};
   const accounts = getAccountsList();
-  accounts.forEach((a) => {
-    topicsByAccount[a] = Object.keys(getChatStore(a).getState().conversations);
-  });
+  // accounts.forEach((a) => {
+  //   topicsByAccount[a] = Object.keys(getChatStore(a).getState().conversations);
+  // });
 
   // We need to delete topics that are in this account and not other accounts
   // so we start with topics from this account and we'll remove topics we find in others
-  const topicsToDelete = topicsByAccount[account] || [];
+  // const topicsToDelete = topicsByAccount[account] || [];
   const pkPath = getWalletStore(account).getState().privateKeyPath;
 
   let apiHeaders: { [key: string]: string } | undefined;
@@ -191,19 +186,16 @@ export const logoutAccount = async (
     });
   }
 
-  accounts.forEach((a) => {
-    if (a !== account) {
-      topicsByAccount[a].forEach((topic) => {
-        const topicIndex = topicsToDelete.indexOf(topic);
-        if (topicIndex > -1) {
-          topicsToDelete.splice(topicIndex, 1);
-        }
-      });
-    }
-  });
-
-  // Get converse db path before deleting account
-  const converseDbPath = await getConverseDbPath(account);
+  // accounts.forEach((a) => {
+  //   if (a !== account) {
+  //     topicsByAccount[a].forEach((topic) => {
+  //       const topicIndex = topicsToDelete.indexOf(topic);
+  //       if (topicIndex > -1) {
+  //         topicsToDelete.splice(topicIndex, 1);
+  //       }
+  //     });
+  //   }
+  // });
 
   // Remove account so we don't use it anymore
   useAccountsStore.getState().removeAccount(account);
@@ -226,16 +218,13 @@ export const logoutAccount = async (
     }
   }
 
-  // This clears the Converse sqlite database (v2)
-  clearConverseDb(account, converseDbPath);
-
   deleteXmtpClient(account);
   deleteSubscribedTopics(account);
-  delete importedTopicsDataForAccount[account];
   delete secureMmkvByAccount[account];
   delete lastNotifSubscribeByAccount[account];
 
-  saveLogoutTask(account, apiHeaders, topicsToDelete, pkPath);
+  // TODO: Set topics to delete
+  saveLogoutTask(account, apiHeaders, [], pkPath);
 
   setTimeout(() => {
     executeLogoutTasks();

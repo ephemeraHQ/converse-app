@@ -10,6 +10,7 @@ import {
 } from "@utils/groupUtils/adminUtils";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import logger from "@utils/logger";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { FC, useCallback, useMemo, useState } from "react";
 import {
   Alert,
@@ -20,15 +21,16 @@ import {
   useColorScheme,
 } from "react-native";
 
-interface GroupScreenDescriptionProps {
-  topic: string;
-}
+type GroupScreenDescriptionProps = {
+  topic: ConversationTopic;
+};
 
 export const GroupScreenDescription: FC<GroupScreenDescriptionProps> = ({
   topic,
 }) => {
   const currentAccount = useCurrentAccount() as string;
   const { members } = useGroupMembers(topic);
+
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
       currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),

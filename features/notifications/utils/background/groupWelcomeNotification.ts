@@ -14,7 +14,7 @@ export const isGroupWelcomeContentTopic = (contentTopic: string) => {
 
 const getNewGroup = async (xmtpClient: ConverseXmtpClientType) => {
   // Welcome envelopes are too large to send in a push, so sync to get latest group
-  await xmtpClient.conversations.syncGroups();
+  await xmtpClient.conversations.sync();
   const groups = await xmtpClient.conversations.listGroups();
   if (groups.length === 0) return;
   const mostRecentGroup = groups.reduce((latest, current) => {
@@ -37,8 +37,9 @@ export const handleGroupWelcomeNotification = async (
   if (notificationAlreadyShown(`welcome-${group.id}`)) return;
   const spamScore = await computeSpamScoreGroupWelcome(xmtpClient, group);
   if (spamScore >= 0) return;
-  const groupAllowed = await xmtpClient.contacts.isGroupAllowed(group.id);
-  const groupDenied = await xmtpClient.contacts.isGroupDenied(group.id);
+  const groupState = await group.consentState();
+  const groupAllowed = groupState === "allowed";
+  const groupDenied = groupState === "denied";
 
   // If group is already consented (either way) then don't show a notification
   // for welcome as this will likely be a second+ installation

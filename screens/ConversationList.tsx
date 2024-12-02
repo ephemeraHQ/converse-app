@@ -5,7 +5,7 @@ import {
   listItemSeparatorColor,
   textPrimaryColor,
 } from "@styles/colors";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Platform,
   StyleSheet,
@@ -25,29 +25,28 @@ import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
 import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
 import { NavigationParamList } from "./Navigation/Navigation";
-import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
+import { PinnedConversations } from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
 import NoResult from "@search/components/NoResult";
-import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
 import {
-  currentAccount,
   useChatStore,
+  useCurrentAccount,
   useProfilesStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
-import {
-  ConversationFlatListItem,
-  LastMessagePreview,
-  getFilteredConversationsWithSearch,
-} from "../utils/conversation";
+import { ConversationFlatListItem } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
-import { sortRequestsBySpamScore } from "../utils/xmtpRN/conversations";
-
-type ConversationWithLastMessagePreview = XmtpConversation & {
-  lastMessagePreview?: LastMessagePreview;
-};
+import { useIsSharingMode } from "../features/conversation-list/useIsSharingMode";
+import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
+import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
+import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
+import { ConversationContextMenu } from "@/components/ConversationContextMenu";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
+import {
+  dmMatchesSearchQuery,
+  groupMatchesSearchQuery,
+} from "@/features/conversations/utils/search";
 
 type Props = {
   searchBarRef:
@@ -58,6 +57,8 @@ type Props = {
   "Chats" | "ShareFrame" | "Blocked"
 >;
 
+type FlatListItemType = ConversationFlatListItem | ConversationWithCodecsType;
+
 function ConversationList({ navigation, route, searchBarRef }: Props) {
   const styles = useStyles();
   const {
@@ -65,7 +66,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     searchBarFocused,
     setSearchBarFocused,
     initialLoadDoneOnce,
-    sortedConversationsWithPreview,
     openedConversationTopic,
     setSearchQuery,
   } = useChatStore(
@@ -75,62 +75,78 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       "setSearchQuery",
       "searchBarFocused",
       "setSearchBarFocused",
-      "sortedConversationsWithPreview",
       "openedConversationTopic",
     ])
   );
+  const sharingMode = useIsSharingMode();
 
   const { ephemeralAccount } = useSettingsStore(
     useSelect(["peersStatus", "ephemeralAccount"])
   );
   const profiles = useProfilesStore((s) => s.profiles);
-  const pinnedConversations = useChatStore((s) => s.pinnedConversations);
+  const pinnedConversations = useChatStore((s) => s.pinnedConversationTopics);
+  const currentAccount = useCurrentAccount();
+  const {
+    data: items,
+    isLoading: showInitialLoad,
+    refetch,
+    isRefetching,
+  } = useConversationListItems();
 
   const [flatListItems, setFlatListItems] = useState<{
-    items: ConversationFlatListItem[];
+    items: FlatListItemType[];
     searchQuery: string;
   }>({ items: [], searchQuery: "" });
 
   // Display logic
-  const showInitialLoad =
-    !initialLoadDoneOnce && flatListItems.items.length <= 1;
   const showNoResult = flatListItems.items.length === 0 && !!searchQuery;
 
-  const sharingMode = !!route.params?.frameURL;
-
-  const requestsCount = useMemo(() => {
-    const { likelyNotSpam } = sortRequestsBySpamScore(
-      sortedConversationsWithPreview.conversationsRequests
-    );
-    return likelyNotSpam.length;
-  }, [sortedConversationsWithPreview.conversationsRequests]);
-
-  const conversationsCount = useChatStore(
-    (s) => Object.keys(s.conversations).length
-  );
+  const requestsCount = useConversationListRequestCount();
 
   const showChatNullState =
-    conversationsCount === 0 && !searchQuery && initialLoadDoneOnce;
+    items?.length === 0 && !searchQuery && !showInitialLoad;
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {
       // First login, let's refresh the profile
-      refreshProfileForAddress(currentAccount(), currentAccount());
+      // refreshProfileForAddress(currentAccount!, currentAccount!);
     }
-  }, [initialLoadDoneOnce]);
+  }, [initialLoadDoneOnce, currentAccount]);
 
   useEffect(() => {
-    const listItems = getFilteredConversationsWithSearch(
-      searchQuery,
-      sortedConversationsWithPreview.conversationsInbox,
-      profiles
-    );
-    setFlatListItems({ items: listItems, searchQuery });
-  }, [
-    searchQuery,
-    sortedConversationsWithPreview.conversationsInbox,
-    profiles,
-  ]);
+    const getFilteredItems = async () => {
+      const filteredItems: FlatListItemType[] = [];
+      for (const item of items ?? []) {
+        if (item.version === ConversationVersion.GROUP) {
+          const groupMatches = await groupMatchesSearchQuery({
+            account: currentAccount!,
+            searchQuery,
+            group: item,
+          });
+          if (groupMatches) {
+            filteredItems.push(item);
+          }
+        } else if (item.version === ConversationVersion.DM) {
+          const dmMatches = await dmMatchesSearchQuery({
+            account: currentAccount!,
+            searchQuery,
+            dm: item,
+          });
+          if (dmMatches) {
+            filteredItems.push(item);
+          }
+        }
+      }
+      return filteredItems ?? [];
+    };
+    if (searchQuery.trim().length > 0) {
+      getFilteredItems().then((filteredItems) => {
+        setFlatListItems({ items: filteredItems, searchQuery });
+      });
+    } else {
+      setFlatListItems({ items: items ?? [], searchQuery });
+    }
+  }, [searchQuery, profiles, items, currentAccount]);
 
   // Search bar hook
   useHeaderSearchBar({
@@ -169,7 +185,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
 
   const ListHeaderComponents: React.ReactElement[] = [
     <PinnedConversations
-      convos={pinnedConversations}
+      topics={pinnedConversations}
       key="pinnedConversations"
     />,
   ];
@@ -186,10 +202,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
         <Text style={styles.searchTitle}>Messages</Text>
       </View>
     );
-  } else if (
-    sortedConversationsWithPreview.conversationsRequests.length > 0 &&
-    !sharingMode
-  ) {
+  } else if (requestsCount > 0 && !sharingMode) {
     ListHeaderComponents.push(
       <View key="search" style={styles.headerTitleContainer}>
         <Text style={styles.headerTitle}>Messages</Text>
@@ -222,7 +235,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   if (showChatNullState) {
     return (
       <ChatNullState
-        currentAccount={currentAccount()}
+        currentAccount={currentAccount!}
         navigation={navigation}
         route={route}
       />
@@ -246,9 +259,12 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
           ) : undefined
         }
         ListFooterComponent={ListFooterComponent}
+        refetch={refetch}
+        isRefetching={isRefetching}
       />
       <Recommendations visibility="HIDDEN" />
       {Platform.OS === "android" && !sharingMode && <NewConversationButton />}
+      <ConversationContextMenu />
     </>
   );
 }

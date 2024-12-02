@@ -7,7 +7,13 @@ import { useLogoutFromConverse } from "@utils/logout";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
+  Conversation,
+  ConversationTopic,
+  DecodedMessage,
+  Dm,
+  Group,
   GroupUpdatedCodec,
+  InboxId,
   ReactionCodec,
   ReadReceiptCodec,
   RemoteAttachmentCodec,
@@ -25,49 +31,45 @@ import { getCleanAddress } from "../evm/address";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
-export const getXmtpClientFromBase64Key = async (base64Key: string) => {
+const codecs = [
+  new TextCodec(),
+  new ReactionCodec(),
+  new ReadReceiptCodec(),
+  new GroupUpdatedCodec(),
+  new ReplyCodec(),
+  new RemoteAttachmentCodec(),
+  new StaticAttachmentCodec(),
+  new TransactionReferenceCodec(),
+  new CoinbaseMessagingPaymentCodec(),
+];
+
+export type SupportedCodecsType = typeof codecs;
+
+export const getXmtpClientFromAddress = async (address: string) => {
   const dbDirectory = await getDbDirectory();
   const dbEncryptionKey = await getDbEncryptionKey();
 
-  return Client.createFromKeyBundle(base64Key, {
+  return Client.build(address, {
     env,
-    codecs: [
-      new TextCodec(),
-      new ReactionCodec(),
-      new ReadReceiptCodec(),
-      new GroupUpdatedCodec(),
-      new ReplyCodec(),
-      new RemoteAttachmentCodec(),
-      new StaticAttachmentCodec(),
-      new TransactionReferenceCodec(),
-      new CoinbaseMessagingPaymentCodec(),
-    ],
-    enableV3: true,
+    codecs,
     dbDirectory,
     dbEncryptionKey,
   });
 };
 
-export type ConverseXmtpClientType = Awaited<
-  ReturnType<typeof getXmtpClientFromBase64Key>
+export type ConverseXmtpClientType = Client<SupportedCodecsType>;
+
+export type ConversationWithCodecsType = Conversation<SupportedCodecsType>;
+
+export type GroupWithCodecsType = Group<SupportedCodecsType>;
+
+export type DmWithCodecsType = Dm<SupportedCodecsType>;
+
+export type DecodedMessageWithCodecsType = DecodedMessage<SupportedCodecsType>;
+
+export type SendMessageWithCodecs = Parameters<
+  ConversationWithCodecsType["send"]
 >;
-
-export type ConversationWithCodecsType = Awaited<
-  ReturnType<ConverseXmtpClientType["conversations"]["newConversation"]>
->;
-
-export type GroupWithCodecsType = Awaited<
-  ReturnType<ConverseXmtpClientType["conversations"]["newGroup"]>
->;
-
-export type DecodedMessageWithCodecsType = Awaited<
-  ReturnType<ConversationWithCodecsType["messages"]>
->[number];
-
-export const isOnXmtp = async (address: string) =>
-  Client.canMessage(getCleanAddress(address), {
-    env,
-  });
 
 export const xmtpClientByAccount: {
   [account: string]: ConverseXmtpClientType;
@@ -151,4 +153,16 @@ export const useCheckCurrentInstallation = () => {
   }, [account, logout]);
 };
 
-export const dropXmtpClient = (inboxId: string) => Client.dropClient(inboxId);
+export const dropXmtpClient = (inboxId: InboxId) => Client.dropClient(inboxId);
+
+export const requestMessageHistorySync = async (
+  client: ConverseXmtpClientType
+) => client.requestMessageHistorySync();
+
+export const requestMessageHistorySyncByAccount = async (account: string) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  if (!client) {
+    throw new Error("Client not found");
+  }
+  await requestMessageHistorySync(client);
+};

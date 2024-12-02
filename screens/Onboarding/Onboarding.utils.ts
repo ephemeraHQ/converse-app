@@ -2,7 +2,7 @@ import { Platform } from "react-native";
 
 import { useSettingsStore } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
-import { getCurrentAccountPrimaryProfile } from "../../utils/profile";
+import { getCurrentAccountPrimaryProfile } from "@utils/profile/getCurrentAccountPrimaryProfile";
 
 export function isMissingConverseProfile() {
   return !getCurrentAccountPrimaryProfile();

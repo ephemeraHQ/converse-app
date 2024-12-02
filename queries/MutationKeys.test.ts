@@ -1,3 +1,4 @@
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import {
   addMemberMutationKey,
   MutationKeys,
@@ -21,7 +22,7 @@ describe("MutationKeys", () => {
 
 describe("Mutation Key Functions", () => {
   const account = "testAccount";
-  const topic = "testTopic";
+  const topic = "testTopic" as ConversationTopic;
   const messageId = "testMessageId";
 
   it("sendMessageMutationKey should return the correct array", () => {
