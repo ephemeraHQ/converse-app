@@ -1,4 +1,3 @@
-import { debugEnabled } from "@components/DebugButton";
 import { translate } from "@i18n";
 import { OpenFramesProxy } from "@open-frames/proxy-client";
 import {
@@ -16,15 +15,9 @@ import { v4 as uuidv4 } from "uuid";
 
 import { converseEventEmitter, waitForConverseEvent } from "./events";
 import { useExternalSigner } from "./evm/external";
-import logger from "./logger";
-import { URL_REGEX } from "./regex";
 import { strByteSize } from "./str";
-import { isContentType } from "./xmtpRN/contentTypes";
+import { ConverseXmtpClientType } from "./xmtpRN/client";
 import { getXmtpClient } from "./xmtpRN/sync";
-import { MessageToDisplay } from "../components/Chat/Message/Message";
-import { ConverseMessageMetadata } from "../data/db/entities/messageEntity";
-import { saveMessageMetadata } from "../data/helpers/messages";
-import { useFramesStore } from "../data/store/framesStore";
 
 export type FrameWithType = FramesApiResponse & {
   type: "FARCASTER_FRAME" | "XMTP_FRAME" | "PREVIEW";
@@ -71,68 +64,63 @@ export const validateFrame = (
   return undefined;
 };
 
-export const fetchFramesForMessage = async (
-  account: string,
-  message: MessageToDisplay
-): Promise<FramesForMessage> => {
-  // OG Preview / Frames are only for text content type
-  if (isContentType("text", message.contentType)) {
-    const urls = (message.content.match(URL_REGEX) || []).filter((u) => {
-      const lower = u.toLowerCase();
-      return lower.startsWith("http://") || lower.startsWith("https://");
-    });
-    const fetchedFrames: FrameWithType[] = [];
-    if (urls.length > 0) {
-      logger.debug(
-        `[FramesMetadata] Fetching Open Graph tags for ${
-          debugEnabled(account) ? urls : "<redacted>"
-        }`
-      );
-      const uniqueUrls = Array.from(new Set(urls));
-      const framesClient = await getFramesClient(account);
-      const urlsMetadata = await Promise.all(
-        uniqueUrls.map((u) =>
-          framesClient.proxy
-            .readMetadata(u)
-            .catch((e) => logger.warn(`[FramesMetadata] ${e}`))
-        )
-      );
+// export const fetchFramesForMessage = async (
+//   account: string,
+//   messageId: string,
+//   messageContentType: string,
+//   messageContent: string
+// ): Promise<FramesForMessage> => {
+//   // OG Preview / Frames are only for text content type
+//   if (isContentType("text", messageContentType)) {
+//     const urls = (messageContent.match(URL_REGEX) || []).filter((u: string) => {
+//       const lower = u.toLowerCase();
+//       return lower.startsWith("http://") || lower.startsWith("https://");
+//     });
+//     const fetchedFrames: FrameWithType[] = [];
+//     if (urls.length > 0) {
+//       logger.debug(
+//         `[FramesMetadata] Fetching Open Graph tags for ${
+//           debugEnabled(account) ? urls : "<redacted>"
+//         }`
+//       );
+//       const uniqueUrls = Array.from(new Set(urls));
+//       const framesClient = await getFramesClient(account);
+//       const urlsMetadata = await Promise.all(
+//         uniqueUrls.map((u) =>
+//           framesClient.proxy
+//             .readMetadata(u)
+//             .catch((e) => logger.warn(`[FramesMetadata] ${e}`))
+//         )
+//       );
 
-      const framesToSave: { [url: string]: FrameWithType } = {};
+//       const framesToSave: { [url: string]: FrameWithType } = {};
 
-      urlsMetadata.forEach((response) => {
-        if (
-          response?.extractedTags &&
-          Object.keys(response.extractedTags).length > 0
-        ) {
-          const validatedFrame = validateFrame(response);
-          if (validatedFrame) {
-            fetchedFrames.push(validatedFrame);
-            // Save lowercased frame url
-            framesToSave[response.url.toLowerCase()] = validatedFrame;
-            // Save lowercase frame url with slash if no slash already
-            const lastCharacter = response.url.charAt(response.url.length - 1);
-            if (lastCharacter === "/") {
-              framesToSave[`${response.url.toLowerCase()}/`] = validatedFrame;
-            }
-          }
-        }
-      });
+//       urlsMetadata.forEach((response) => {
+//         if (
+//           response?.extractedTags &&
+//           Object.keys(response.extractedTags).length > 0
+//         ) {
+//           const validatedFrame = validateFrame(response);
+//           if (validatedFrame) {
+//             fetchedFrames.push(validatedFrame);
+//             // Save lowercased frame url
+//             framesToSave[response.url.toLowerCase()] = validatedFrame;
+//             // Save lowercase frame url with slash if no slash already
+//             const lastCharacter = response.url.charAt(response.url.length - 1);
+//             if (lastCharacter === "/") {
+//               framesToSave[`${response.url.toLowerCase()}/`] = validatedFrame;
+//             }
+//           }
+//         }
+//       });
 
-      // Save frames urls list on message
-      const messageMetadataToSave: ConverseMessageMetadata = {
-        frames: fetchedFrames.map((f) => f.url),
-      };
-      // Save frame to store
-      useFramesStore.getState().setFrames(message.id, framesToSave);
-      // Then update message to reflect change
-      saveMessageMetadata(account, message, messageMetadataToSave);
-
-      return { messageId: message.id, frames: fetchedFrames };
-    }
-  }
-  return { messageId: message.id, frames: [] };
-};
+//       // Save frame to store
+//       useFramesStore.getState().setFrames(messageId, framesToSave);
+//       return { messageId, frames: fetchedFrames };
+//     }
+//   }
+//   return { messageId, frames: [] };
+// };
 
 export type FrameButtonType = OpenFrameButtonResult & {
   index: number;
@@ -176,11 +164,12 @@ export const getFramesClient = async (account: string) => {
   if (frameClientByAccount[account]) return frameClientByAccount[account];
   try {
     creatingFramesClientForAccount[account] = true;
-    const client = await getXmtpClient(account);
-    frameClientByAccount[account] = new FramesClient(
-      client,
-      framesProxy as any
-    );
+    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    // TODO: Fix this when V3 Clients support Frames
+    // frameClientByAccount[account] = new FramesClient(
+    //   client,
+    //   framesProxy as any
+    // );
     delete creatingFramesClientForAccount[account];
     return frameClientByAccount[account];
   } catch (e) {
@@ -253,9 +242,8 @@ export const useHandleTxAction = () => {
         data: txData.params.data,
       };
       converseEventEmitter.emit("previewTransaction", transactionData);
-      const [transactionId, receipt] = await waitForConverseEvent(
-        "transactionResult"
-      );
+      const [transactionId, receipt] =
+        await waitForConverseEvent("transactionResult");
       const transactionReceipt =
         transactionId === transactionData.id ? receipt : undefined;
 

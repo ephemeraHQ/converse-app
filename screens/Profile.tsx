@@ -18,7 +18,7 @@ import { usePrivySigner } from "@utils/evm/privy";
 import { useXmtpSigner } from "@utils/evm/xmtp";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { sentryTrackError } from "@utils/sentry";
-import { shortAddress } from "@utils/str";
+import { shortAddress } from "@utils/strings/shortAddress";
 import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
 import {
   getOtherInstallations,
@@ -74,18 +74,15 @@ import {
   getAddressIsSuperAdmin,
 } from "../utils/groupUtils/adminUtils";
 import { navigate } from "../utils/navigation";
-
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getPreferredUsername,
-  getProfile,
-} from "../utils/profile";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
-import { consentToPeersOnProtocol } from "../utils/xmtpRN/conversations";
-import { requestPushNotificationsPermissions } from "../features/notifications/utils/requestPushNotificationsPermissions";
-import { NotificationPermissionStatus } from "../features/notifications/types/Notifications.types";
+import { consentToAddressesOnProtocolByAccount } from "../utils/xmtpRN/contacts";
+import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
+import { getPreferredName } from "@utils/profile/getPreferredName";
+import { getPreferredAvatar } from "@utils/profile/getPreferredAvatar";
+import { getProfile } from "@utils/profile/getProfile";
+import { requestPushNotificationsPermissions } from "@/features/notifications/utils/requestPushNotificationsPermissions";
+import { NotificationPermissionStatus } from "@/features/notifications/types/Notifications.types";
 
 export default function ProfileScreen() {
   return (
@@ -145,10 +142,8 @@ function ProfileScreenImpl() {
     revokeSuperAdmin,
     promoteToAdmin,
     promoteToSuperAdmin,
-  } = useGroupMembers(groupTopic ?? "");
-  const { permissions: groupPermissions } = useGroupPermissions(
-    groupTopic ?? ""
-  );
+  } = useGroupMembers(groupTopic);
+  const { permissions: groupPermissions } = useGroupPermissions(groupTopic);
 
   const { getXmtpSigner } = useXmtpSigner();
   const privySigner = usePrivySigner();
@@ -426,11 +421,11 @@ function ProfileScreenImpl() {
             if (selectedIndex === 0 && peerAddress) {
               const newStatus = isBlockedPeer ? "consented" : "blocked";
               const consentOnProtocol = isBlockedPeer ? "allow" : "deny";
-              consentToPeersOnProtocol(
-                currentAccount(),
-                [peerAddress],
-                consentOnProtocol
-              );
+              consentToAddressesOnProtocolByAccount({
+                account: currentAccount(),
+                addresses: [peerAddress],
+                consent: consentOnProtocol,
+              });
               setPeersStatus({ [peerAddress]: newStatus });
 
               // Pop to conversation list, antepenultimate screen in stack

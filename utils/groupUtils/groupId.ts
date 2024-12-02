@@ -1,13 +1,17 @@
-const GROUP_TOPIC_PREFIX = "/xmtp/mls/1/g-";
+import { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
 
-export const getGroupIdFromTopic = (topic: string) => {
-  return topic.replace(GROUP_TOPIC_PREFIX, "").replace("/proto", "");
+const V3_TOPIC_PREFIX = "/xmtp/mls/1/g-";
+
+export const getV3IdFromTopic = (topic: ConversationTopic) => {
+  return topic
+    .replace(V3_TOPIC_PREFIX, "")
+    .replace("/proto", "") as ConversationId;
 };
 
-export const isGroupTopic = (topic: string) => {
-  return topic.startsWith(GROUP_TOPIC_PREFIX);
+export const isV3Topic = (topic: ConversationTopic) => {
+  return topic.startsWith(V3_TOPIC_PREFIX);
 };
 
-export const getTopicFromGroupId = (groupId: string) => {
-  return `${GROUP_TOPIC_PREFIX}${groupId}/proto`;
+export const getTopicFromV3Id = (conversationId: ConversationId) => {
+  return `${V3_TOPIC_PREFIX}${conversationId}/proto` as ConversationTopic;
 };

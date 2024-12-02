@@ -4,7 +4,6 @@ import { create, StoreApi, UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { ChatStoreType, initChatStore } from "./chatStore";
-import { InboxIdStoreType, initInboxIdStore } from "./inboxIdStore";
 import { initProfilesStore, ProfilesStoreType } from "./profilesStore";
 import {
   initRecommendationsStore,
@@ -18,7 +17,6 @@ import {
 import { initWalletStore, WalletStoreType } from "./walletStore";
 import { removeLogoutTask } from "../../utils/logout";
 import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
-import { updateSteps } from "../updates/asyncUpdates";
 
 type AccountStoreType = {
   [K in keyof AccountStoreDataType]: UseBoundStore<
@@ -43,7 +41,6 @@ export const initStores = (account: string) => {
       chat: initChatStore(account),
       wallet: initWalletStore(account),
       transactions: initTransactionsStore(account),
-      inboxId: initInboxIdStore(account),
     };
   }
 };
@@ -155,9 +152,9 @@ export const useAccountsStore = create<AccountsStoreStype>()(
             databaseId[account] = uuidv4();
             removeLogoutTask(account);
             // Init lastAsyncUpdate so no async migration is run for new accounts
-            getSettingsStore(account)
-              .getState()
-              .setLastAsyncUpdate(updateSteps.length);
+            // getSettingsStore(account)
+            //   .getState()
+            //   .setLastAsyncUpdate(updateSteps.length);
             return {
               // No setting anymore because we want to refresh profile first
               // currentAccount: account,
@@ -223,7 +220,6 @@ type AccountStoreDataType = {
   chat: ChatStoreType;
   wallet: WalletStoreType;
   transactions: TransactionsStoreType;
-  inboxId: InboxIdStoreType;
 };
 
 const getAccountStore = (account: string) => {
@@ -352,9 +348,3 @@ export const useTransactionsStoreForAccount = (account: string) =>
   accountStoreHook("transactions", account);
 export const getTransactionsStore = (account: string) =>
   getAccountStore(account).transactions;
-
-export const useInboxIdStore = currentAccountStoreHook("inboxId");
-export const useInboxIdStoreForAccount = (account: string) =>
-  accountStoreHook("inboxId", account);
-export const getInboxIdStore = (account: string) =>
-  getAccountStore(account).inboxId;

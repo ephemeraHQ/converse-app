@@ -1,7 +1,3 @@
-import {
-  dropConverseDbConnections,
-  reconnectConverseDbConnections,
-} from "@data/db/driver";
 import { appStateIsBlurredState } from "@utils/appState/appStateIsBlurred";
 import logger from "@utils/logger";
 import { stopStreamingAllMessage } from "@utils/xmtpRN/messages";
@@ -11,7 +7,6 @@ import {
   NativeEventSubscription,
 } from "react-native";
 
-import { getExistingDataSource } from "../data/db/datasource";
 import {
   getAccountsList,
   getChatStore,
@@ -19,14 +14,8 @@ import {
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { getTopicsData } from "../utils/api";
-import { loadSavedNotificationMessagesToContext } from "../features/notifications/utils/loadSavedNotificationMessagesToContext";
-import {
-  createPendingConversations,
-  stopStreamingConversations,
-  stopStreamingGroups,
-} from "../utils/xmtpRN/conversations";
-import { sendPendingMessages } from "../utils/xmtpRN/send";
-import { syncXmtpClient } from "../utils/xmtpRN/sync";
+import { stopStreamingConversations } from "../utils/xmtpRN/conversations";
+import { syncConversationListXmtpClient } from "../utils/xmtpRN/sync";
 
 class XmtpEngine {
   accountsStoreSubscription: (() => void) | null = null;
@@ -119,9 +108,7 @@ class XmtpEngine {
 
   onAppFocus() {
     logger.debug("[XmtpEngine] App is now active, reconnecting db connections");
-    reconnectConverseDbConnections();
     if (this.hydrationDone) {
-      loadSavedNotificationMessagesToContext();
       if (this.isInternetReachable) {
         this.syncAccounts(getAccountsList());
       }
@@ -136,10 +123,8 @@ class XmtpEngine {
       await Promise.all([
         stopStreamingAllMessage(account),
         stopStreamingConversations(account),
-        stopStreamingGroups(account),
       ]);
     }
-    dropConverseDbConnections();
   }
 
   async syncAccounts(accountsToSync: string[]) {
@@ -151,7 +136,7 @@ class XmtpEngine {
         });
         this.syncedAccounts[a] = true;
         this.syncingAccounts[a] = true;
-        syncXmtpClient(a)
+        syncConversationListXmtpClient(a)
           .then(() => {
             this.syncingAccounts[a] = false;
           })
@@ -171,53 +156,3 @@ class XmtpEngine {
 }
 
 export const xmtpEngine = new XmtpEngine();
-
-class XmtpCron {
-  private lastCronTimestamp: number = 0;
-  private runningCron: boolean = false;
-  private interval: NodeJS.Timeout | null = null;
-
-  private async xmtpCron() {
-    if (
-      !useAppStore.getState().splashScreenHidden ||
-      AppState.currentState.match(/inactive|background/)
-    ) {
-      return;
-    }
-    this.runningCron = true;
-    const accounts = getAccountsList();
-    for (const account of accounts) {
-      if (
-        getChatStore(account).getState().localClientConnected &&
-        getExistingDataSource(account)
-      ) {
-        try {
-          await createPendingConversations(account);
-          await sendPendingMessages(account);
-        } catch (e) {
-          logger.error(e);
-        }
-      }
-    }
-    this.lastCronTimestamp = new Date().getTime();
-    this.runningCron = false;
-  }
-
-  start() {
-    logger.debug("[XmtpCron] Starting");
-    this.interval = setInterval(() => {
-      if (this.runningCron) return;
-      const now = new Date().getTime();
-      if (now - this.lastCronTimestamp > 1000) {
-        this.xmtpCron();
-      }
-    }, 300);
-  }
-
-  destroy() {
-    logger.debug("[XmtpCron] Destroying");
-    this.interval && clearInterval(this.interval);
-  }
-}
-
-export const xmtpCron = new XmtpCron();

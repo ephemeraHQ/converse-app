@@ -21,9 +21,7 @@ import { Platform, Alert } from "react-native";
 
 import config from "../config";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
-import { getConverseDbPath } from "../data/db";
-import { currentAccount, useAccountsList } from "../data/store/accountsStore";
-import { getPresignedUriForUpload } from "../utils/api";
+import { useAccountsList } from "../data/store/accountsStore";
 import mmkv from "../utils/mmkv";
 
 export const useDebugEnabled = (address?: string) => {
@@ -76,38 +74,6 @@ const DebugButton = forwardRef((props, ref) => {
           } catch (error) {
             alert(error);
           }
-        },
-        "Export db file": async () => {
-          const dbPath = await getConverseDbPath(currentAccount());
-          const RNFS = require("react-native-fs");
-          const dbExists = await RNFS.exists(dbPath);
-          if (!dbExists) {
-            alert(`SQlite file does not exist`);
-            return;
-          }
-          const fileContent = await RNFS.readFile(dbPath, "base64");
-          const { url } = await getPresignedUriForUpload(currentAccount());
-          await axios.put(url, Buffer.from(fileContent, "base64"), {
-            headers: {
-              "content-type": "application/octet-stream",
-              "x-amz-acl": "public-read",
-            },
-          });
-          const fileURL = new URL(url);
-          const publicURL = fileURL.origin + fileURL.pathname;
-          const [dbEncryptionKey, dbEncryptionSalt] = await Promise.all([
-            getDbEncryptionKey(),
-            getDbEncryptionSalt(),
-          ]);
-
-          Clipboard.setString(
-            `Database URL: ${publicURL}\n\nPRAGMA key = '${Buffer.from(
-              dbEncryptionKey
-            ).toString(
-              "base64"
-            )}';\nPRAGMA cipher_plaintext_header_size = 32;\nPRAGMA cipher_salt = "x'${dbEncryptionSalt}'";`
-          );
-          alert("Database information copied to clipboard");
         },
         "Clear logout tasks": () => {
           mmkv.delete("converse-logout-tasks");

@@ -3,10 +3,11 @@ import { darkPalette, lightPalette } from "./palette";
 
 export const colorsDark: IColors = {
   bubbles: {
-    bubble: lightPalette.light15,
+    bubble: lightPalette.light,
     bubbleAccent: darkPalette.accent,
     reply: lightPalette.light96,
     nestedReply: darkPalette.alpha4,
+    nestedReplyFromMe: darkPalette.dark85,
     received: {
       bubble: lightPalette.light15,
       reply: lightPalette.light15,
@@ -44,6 +45,7 @@ export const colorsDark: IColors = {
     sunken: darkPalette.dark85,
     raised: darkPalette.dark85,
     scrim: darkPalette.scrim,
+    blurred: darkPalette.dark90,
   },
   text: {
     primary: lightPalette.light,

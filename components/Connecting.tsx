@@ -66,8 +66,8 @@ export const useShouldShowConnecting = () => {
 };
 
 export const useShouldShowConnectingOrSyncing = () => {
-  const { initialLoadDoneOnce, conversations } = useChatStore(
-    useSelect(["initialLoadDoneOnce", "conversations"])
+  const { initialLoadDoneOnce } = useChatStore(
+    useSelect(["initialLoadDoneOnce"])
   );
   const shouldShowConnecting = useShouldShowConnecting();
 
@@ -76,7 +76,7 @@ export const useShouldShowConnectingOrSyncing = () => {
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined = undefined;
 
-    if (!initialLoadDoneOnce && Object.keys(conversations).length > 0) {
+    if (!initialLoadDoneOnce) {
       if (conditionTrueTime.current === 0) {
         conditionTrueTime.current = Date.now();
       }
@@ -97,12 +97,9 @@ export const useShouldShowConnectingOrSyncing = () => {
     }
 
     return () => clearInterval(interval);
-  }, [conversations, initialLoadDoneOnce]);
+  }, [initialLoadDoneOnce]);
 
-  return (
-    shouldShowConnecting.shouldShow ||
-    (!initialLoadDoneOnce && Object.keys(conversations).length > 0)
-  );
+  return shouldShowConnecting.shouldShow || !initialLoadDoneOnce;
 };
 
 export default function Connecting() {

@@ -10,10 +10,11 @@ import { useRouter } from "../../navigation/useNavigation";
 import { navigate } from "../../utils/navigation";
 import ProfileScreen from "../Profile";
 import { NativeStack, navigationAnimation } from "./Navigation";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export type ProfileNavParams = {
   address: string;
-  fromGroupTopic?: string;
+  fromGroupTopic?: ConversationTopic;
 };
 
 export const ProfileScreenConfig = {

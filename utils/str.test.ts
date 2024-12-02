@@ -1,19 +1,15 @@
 import { PixelRatio } from "react-native";
 
-import * as profileModule from "./profile";
 import {
   addressPrefix,
   capitalize,
-  conversationName,
   formatGroupName,
   getReadableProfile,
   getTitleFontScale,
   shortDisplayName,
-  shortAddress,
   strByteSize,
 } from "./str";
 import { getProfilesStore } from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
 
 jest.mock("react-native", () => ({
   Dimensions: {
@@ -54,31 +50,6 @@ jest.mock("../data/store/profilesStore", () => ({
   ProfilesStoreType: jest.fn(),
 }));
 
-jest.mock(
-  "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets",
-  () => ({
-    DEFAULT_SUPPORTED_CHAINS: [],
-  })
-);
-
-jest
-  .spyOn(profileModule, "getPreferredName")
-  .mockImplementation((socials, address) => address);
-
-describe("shortAddress", () => {
-  it("should shorten the address correctly", () => {
-    expect(shortAddress("0x1234567890abcdef")).toBe("0x1234...cdef");
-  });
-
-  it("should return the original address if shorter than 7 characters", () => {
-    expect(shortAddress("0x123")).toBe("0x123");
-  });
-
-  it("should return an empty string if address is empty", () => {
-    expect(shortAddress("")).toBe("");
-  });
-});
-
 describe("shortDisplayName", () => {
   it("should shorten the domain correctly based on screen width", () => {
     expect(shortDisplayName("thisisaverylongdomainname.com")).toBe(
@@ -108,38 +79,6 @@ describe("addressPrefix", () => {
 
   it("should return the original address if shorter than 6 characters", () => {
     expect(addressPrefix("0x123")).toBe("0x123");
-  });
-});
-
-describe("conversationName", () => {
-  it("should return the group name if it is a group conversation", () => {
-    const conversation = {
-      isGroup: true,
-      groupName: "Group Name",
-      topic: "",
-      peerAddress: "",
-    } as unknown as XmtpConversation;
-    expect(conversationName(conversation)).toBe("Group Name");
-  });
-
-  it("should return the humanized topic if group name is not provided", () => {
-    const conversation = {
-      isGroup: true,
-      groupName: "",
-      topic: "/xmtp/mls/1/g-dab181fefd94578cc791bcc42d3b207c/proto",
-      peerAddress: "",
-    } as unknown as XmtpConversation;
-    expect(conversationName(conversation)).toBe("Utah bluebird delta");
-  });
-
-  it("should return the short address if it is not a group conversation", () => {
-    const conversation = {
-      isGroup: false,
-      groupName: "",
-      topic: "",
-      peerAddress: "0x1234567890abcdef",
-    } as unknown as XmtpConversation;
-    expect(conversationName(conversation)).toBe("0x1234...cdef");
   });
 });
 

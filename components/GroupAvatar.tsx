@@ -28,26 +28,31 @@ import {
   getPreferredName,
   getProfile,
 } from "../utils/profile";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 const MAIN_CIRCLE_RADIUS = 50;
 const MAX_VISIBLE_MEMBERS = 4;
 
-type Member = { uri?: string; name?: string };
 type Position = { x: number; y: number; size: number };
 type ColorSchemeType = "light" | "dark" | null | undefined;
 
 type GroupAvatarProps = {
-  members?: Member[];
   size?: number;
   style?: StyleProp<ViewStyle>;
   uri?: string | undefined;
-  topic?: string | undefined;
+  topic?: ConversationTopic | undefined;
   pendingGroupMembers?: { address: string; uri?: string; name?: string }[];
   excludeSelf?: boolean;
   // Converstion List should not make requests across the bridge
   // Use data from the initial sync, and as the query gets updated
   onConversationListScreen?: boolean;
   showIndicator?: boolean;
+};
+
+type GroupAvatarDumbProps = {
+  size?: number;
+  style?: StyleProp<ViewStyle>;
+  members?: { address: string; uri?: string; name?: string }[];
 };
 
 const calculatePositions = (
@@ -127,6 +132,63 @@ const ExtraMembersIndicator: React.FC<{
   );
 };
 
+export const GroupAvatarDumb: React.FC<GroupAvatarDumbProps> = ({
+  size = AvatarSizes.default,
+  style,
+  members = [],
+}) => {
+  const colorScheme = useColorScheme();
+  const styles = getStyles(colorScheme);
+
+  const memberCount = members?.length || 0;
+
+  const positions = useMemo(
+    () => calculatePositions(memberCount, MAIN_CIRCLE_RADIUS),
+    [memberCount]
+  );
+
+  return (
+    <View style={[styles.container, { width: size, height: size }, style]}>
+      <View style={[styles.container, { width: size, height: size }]}>
+        <View style={styles.overlay} />
+        <View style={styles.content}>
+          {positions.map((pos, index) => {
+            if (index < MAX_VISIBLE_MEMBERS && index < memberCount) {
+              return (
+                <Avatar
+                  key={`avatar-${index}`}
+                  uri={members[index].uri}
+                  name={members[index].name}
+                  size={(pos.size / 100) * size}
+                  style={{
+                    left: (pos.x / 100) * size,
+                    top: (pos.y / 100) * size,
+                    position: "absolute",
+                  }}
+                />
+              );
+            } else if (
+              index === MAX_VISIBLE_MEMBERS &&
+              memberCount > MAX_VISIBLE_MEMBERS
+            ) {
+              return (
+                <ExtraMembersIndicator
+                  key={`extra-${index}`}
+                  pos={pos}
+                  extraMembersCount={memberCount - MAX_VISIBLE_MEMBERS}
+                  colorScheme={colorScheme}
+                  size={size}
+                />
+              );
+            }
+            return null;
+          })}
+        </View>
+      </View>
+    </View>
+  );
+};
+
 const GroupAvatar: React.FC<GroupAvatarProps> = ({
   size = AvatarSizes.default,
   style,
@@ -140,7 +202,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { members: groupMembers } = useGroupMembers(
-    topic || "",
+    topic,
     onConversationListScreen
       ? {
           refetchOnWindowFocus: false,
@@ -148,6 +210,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
           refetchOnReconnect: false,
           refetchInterval: false,
           staleTime: Infinity,
+          enabled: !!topic && !pendingGroupMembers,
         }
       : undefined
   );

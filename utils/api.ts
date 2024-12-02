@@ -18,6 +18,8 @@ import type { ProfileSocials } from "../data/store/profilesStore";
 import type { Frens } from "../data/store/recommendationsStore";
 import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
 import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
+import type { InboxId } from "@xmtp/react-native-sdk";
+import { evmHelpers } from "./evm/helpers";
 
 const api = axios.create({
   baseURL: config.apiURI,
@@ -168,6 +170,18 @@ export const getProfilesForAddresses = async (
   return data;
 };
 
+export const getProfilesForInboxIds = async ({
+  inboxIds,
+}: {
+  inboxIds: string[];
+}): Promise<{ [inboxId: InboxId]: ProfileSocials[] }> => {
+  logger.info("Fetching profiles for inboxIds", inboxIds);
+  const { data } = await api.get("/api/inbox/", {
+    params: { ids: inboxIds.join(",") },
+  });
+  return data;
+};
+
 export const searchProfiles = async (
   query: string,
   account: string
@@ -182,7 +196,7 @@ export const searchProfiles = async (
 export const findFrens = async (account: string) => {
   const { data } = await api.get("/api/frens/find", {
     headers: await getXmtpApiHeaders(account),
-    params: { address: account },
+    params: { address: evmHelpers.toChecksumAddress(account) },
   });
 
   return data.frens as Frens;
@@ -234,6 +248,23 @@ export const getTopicsData = async (account: string) => {
     headers: await getXmtpApiHeaders(account),
   });
   return data as { [topic: string]: TopicData };
+};
+
+export const pinTopics = async (account: string, topics: string[]) => {
+  await api.post(
+    "/api/topics/pin",
+    { topics },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
+};
+
+export const unpinTopics = async (account: string, topics: string[]) => {
+  await api.delete("/api/topics/pin", {
+    data: { topics },
+    headers: await getXmtpApiHeaders(account),
+  });
 };
 
 export const postUSDCTransferAuthorization = async (

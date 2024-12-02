@@ -4,9 +4,9 @@ import { Linking as RNLinking } from "react-native";
 import logger from "./logger";
 import config from "../config";
 import { currentAccount, getChatStore } from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import { loadSavedNotificationMessagesToContext } from "../features/notifications/utils/loadSavedNotificationMessagesToContext";
+import type { ConversationWithCodecsType } from "./xmtpRN/client";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const converseNavigations: { [navigationName: string]: any } = {};
 
@@ -31,35 +31,8 @@ export const setTopicToNavigateTo = (topic: string) => {
   topicToNavigateTo = topic;
 };
 
-export const navigateToConversation = async (
-  conversation: XmtpConversation
-) => {
-  await loadSavedNotificationMessagesToContext();
-  navigate("Conversation", { topic: conversation.topic });
-};
-
-export const navigateToTopicWithRetry = async () => {
-  if (!topicToNavigateTo) return;
-  let conversationToNavigateTo =
-    getChatStore(currentAccount()).getState().conversations[topicToNavigateTo];
-  let currentAttempt = 0;
-
-  while (
-    !conversationToNavigateTo &&
-    currentAttempt < 10 &&
-    topicToNavigateTo
-  ) {
-    currentAttempt += 1;
-    await new Promise((r) => setTimeout(r, 250));
-    conversationToNavigateTo =
-      getChatStore(currentAccount()).getState().conversations[
-        topicToNavigateTo
-      ];
-  }
-
-  if (topicToNavigateTo && conversationToNavigateTo) {
-    navigateToConversation(conversationToNavigateTo);
-  }
+export const navigateToTopic = async (topic: ConversationTopic) => {
+  navigate("Conversation", { topic });
 };
 
 export const getSchemedURLFromUniversalURL = (url: string) => {
