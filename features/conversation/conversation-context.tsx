@@ -20,11 +20,17 @@ import {
   useConversationCurrentTopic,
 } from "./conversation-service";
 
-type ISendMessageParams = {
-  text?: string;
+export type ISendMessageParams = {
+  content: {
+    text?: string;
+    remoteAttachment?: RemoteAttachmentContent;
+  };
   referencedMessageId?: MessageId;
-  attachment?: RemoteAttachmentContent;
-};
+} & (
+  | { content: { text: string; remoteAttachment?: RemoteAttachmentContent } }
+  | { content: { text?: string; remoteAttachment: RemoteAttachmentContent } }
+);
+
 export type IConversationContextType = {
   isAllowedConversation: boolean;
   isBlockedConversation: boolean;
@@ -83,7 +89,7 @@ export const ConversationContextProvider = (
   }, [conversation]);
 
   const sendMessage = useCallback(
-    async ({ text, referencedMessageId, attachment }: ISendMessageParams) => {
+    async ({ referencedMessageId, content }: ISendMessageParams) => {
       const sendCallback = async (payload: any) => {
         if (!conversation && !peerAddress) {
           return;
@@ -103,37 +109,39 @@ export const ConversationContextProvider = (
           return;
         }
 
+        console.log("payload:", payload);
+
         await conversation?.send(payload);
       };
 
       if (referencedMessageId) {
-        if (attachment) {
+        if (content.remoteAttachment) {
           await sendCallback({
             reply: {
               reference: referencedMessageId,
-              content: { remoteAttachment: attachment },
+              content: { remoteAttachment: content.remoteAttachment },
             },
           });
         }
-        if (text) {
+        if (content.text) {
           await sendCallback({
             reply: {
               reference: referencedMessageId,
-              content: { text },
+              content: { text: content.text },
             },
           });
         }
         return;
       }
 
-      if (attachment) {
+      if (content.remoteAttachment) {
         await sendCallback({
-          remoteAttachment: attachment,
+          remoteAttachment: content.remoteAttachment,
         });
       }
 
-      if (text) {
-        await sendCallback(text);
+      if (content.text) {
+        await sendCallback(content.text);
       }
     },
     [conversation, currentAccount, peerAddress]
