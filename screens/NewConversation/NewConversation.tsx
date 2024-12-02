@@ -38,17 +38,14 @@ import { ProfileSocials } from "../../data/store/profilesStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { useGroupMembers } from "../../hooks/useGroupMembers";
 import { searchProfiles } from "../../utils/api";
-import {
-  getAddressForPeer,
-  getCleanAddress,
-  isSupportedPeer,
-} from "../../utils/evm/address";
+import { getAddressForPeer, isSupportedPeer } from "../../utils/evm/address";
 import { navigate } from "../../utils/navigation";
 import { isEmptyObject } from "../../utils/objects";
 import { getPreferredName } from "../../utils/profile";
 import { canMessageByAccount } from "@utils/xmtpRN/contacts";
 import { useGroupQuery } from "@queries/useGroupQuery";
 import { InboxId } from "@xmtp/react-native-sdk";
+import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 
 export default function NewConversation({
   route,

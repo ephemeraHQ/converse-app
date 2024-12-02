@@ -175,6 +175,7 @@ export const MessagesList = memo(function MessagesList(
   const { theme } = useAppTheme();
 
   return (
+    // @ts-ignore
     <Animated.FlatList
       inverted
       // @ts-ignore It says error but it works

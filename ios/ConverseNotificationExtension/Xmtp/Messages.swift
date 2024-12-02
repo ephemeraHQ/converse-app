@@ -199,10 +199,10 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_En
     if let conversation = try! xmtpClient.findConversationByTopic(topic: envelope.contentTopic) {
       do {
         sentryAddBreadcrumb(message: "[NotificationExtension] Syncing Group")
-        try await group.sync()
+        try await conversation.sync()
         sentryAddBreadcrumb(message: "[NotificationExtension] Decoding group message...")
-        let envelopeBytes = envelope.message
-        let message = try await group.processMessage(envelopeBytes: envelopeBytes)
+        let messageBytes = envelope.message
+        let message = try await conversation.processMessage(messageBytes: messageBytes)
         let decodedMessage = try message.decode()
         sentryAddBreadcrumb(message:"[NotificationExtension] Group message decoded!")
         return decodedMessage

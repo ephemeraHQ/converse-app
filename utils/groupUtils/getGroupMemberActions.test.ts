@@ -61,7 +61,7 @@ describe("getGroupMemberActions", () => {
   test("should return correct actions when user can remove from group", () => {
     const result = getGroupMemberActions(
       {
-        addAdminPolicy: "allow",
+        removeMemberPolicy: "allow",
       } as PermissionPolicySet,
       false, // isCurrentUser
       false, // isSuperAdmin
