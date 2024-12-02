@@ -63,12 +63,9 @@ import {
   waitUntilMediaPreviewIsUploaded,
 } from "../conversation-service";
 import { AddAttachmentButton } from "./add-attachment-button";
+import { ISendMessageParams } from "@/features/conversation/conversation-context";
 
-export type IComposerSendArgs = {
-  text?: string;
-  remoteAttachment?: RemoteAttachmentContent;
-  referencedMessageId?: MessageId;
-};
+export type IComposerSendArgs = ISendMessageParams;
 
 type IComposerProps = {
   onSend: (args: IComposerSendArgs) => Promise<void>;
@@ -100,7 +97,9 @@ export function Composer(props: IComposerProps) {
       const uploadedRemoteAttachment = getUploadedRemoteAttachment()!;
 
       await onSend({
-        remoteAttachment: uploadedRemoteAttachment,
+        content: {
+          remoteAttachment: uploadedRemoteAttachment,
+        },
         ...(replyingToMessageId && {
           referencedMessageId: replyingToMessageId,
         }),
@@ -114,7 +113,9 @@ export function Composer(props: IComposerProps) {
 
     if (inputValue.length > 0) {
       await onSend({
-        text: inputValue,
+        content: {
+          text: inputValue,
+        },
         ...(replyingToMessageId && {
           referencedMessageId: replyingToMessageId,
         }),
