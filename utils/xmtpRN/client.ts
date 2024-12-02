@@ -27,7 +27,6 @@ import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
 import { getXmtpClient } from "./sync";
 import config from "../../config";
 import { getDbDirectory } from "../../data/db";
-import { getCleanAddress } from "../evm/address";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
