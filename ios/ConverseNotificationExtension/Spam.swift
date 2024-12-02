@@ -8,7 +8,6 @@
 import Foundation
 import XMTP
 import Alamofire
-import web3
 
 func getSenderSpamScore(address: String, apiURI: String?) async -> Double {
   var senderSpamScore: Double = 0.0
@@ -116,7 +115,7 @@ func computeSpamScoreV3Welcome(client: XMTP.Client, conversation: XMTP.Conversat
       if let inviterAddresses = members.first(where: {$0.inboxId == inviterInboxId})?.addresses {
 
         for address in inviterAddresses {
-          let addressState = try await consentList.addressState(address: EthereumAddress(address).toChecksumAddress())
+          let addressState = try await consentList.addressState(address: address)
           if addressState == .denied {
             anyDenied = true
           }
@@ -133,7 +132,7 @@ func computeSpamScoreV3Welcome(client: XMTP.Client, conversation: XMTP.Conversat
         }
 
         if let firstAddress = inviterAddresses.first {
-          let senderSpamScore = await getSenderSpamScore(address: EthereumAddress(firstAddress).toChecksumAddress(), apiURI: apiURI)
+          let senderSpamScore = await getSenderSpamScore(address: firstAddress, apiURI: apiURI)
             return senderSpamScore
         }
       }
@@ -183,12 +182,12 @@ func computeSpamScoreV3Message(client: XMTP.Client, conversation: XMTP.Conversat
 
       if let senderAddresses = try await group.members.first(where: {$0.inboxId == senderInboxId})?.addresses {
         for address in senderAddresses {
-          if try await consentList.addressState(address: EthereumAddress(address).toChecksumAddress()) == .denied {
+          if try await consentList.addressState(address: address) == .denied {
             return 1
           }
         }
         for address in senderAddresses {
-          if try await consentList.addressState(address: EthereumAddress(address).toChecksumAddress()) == .allowed {
+          if try await consentList.addressState(address: address) == .allowed {
             return -1
           }
         }
