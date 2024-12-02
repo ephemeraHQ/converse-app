@@ -1,7 +1,11 @@
-import { Easing, FadeInDown, FadeInUp } from "react-native-reanimated";
+import {
+  Easing,
+  FadeInDown,
+  FadeInUp,
+  type WithSpringConfig,
+} from "react-native-reanimated";
 
 import { timing } from "./timing";
-import { SpringConfig } from "react-native-reanimated/lib/typescript/reanimated2/animation/springUtils";
 
 export const SICK_EASE_OUT = Easing.out(Easing.cubic);
 
@@ -9,7 +13,7 @@ export const SICK_DAMPING = 80;
 
 export const SICK_STIFFNESS = 200;
 
-export const SICK_SPRING_CONFIG: SpringConfig = {
+export const SICK_SPRING_CONFIG: WithSpringConfig = {
   damping: SICK_DAMPING,
   stiffness: SICK_STIFFNESS,
 };
@@ -50,7 +54,7 @@ export const animations = {
   },
 
   easings,
-  
+
   contextMenuSpring: {
     damping: SICK_DAMPING,
     stiffness: SICK_STIFFNESS,
