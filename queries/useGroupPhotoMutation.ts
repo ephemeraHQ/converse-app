@@ -8,10 +8,14 @@ import {
   getGroupPhotoQueryData,
   setGroupPhotoQueryData,
 } from "./useGroupPhotoQuery";
-import { useGroupQuery } from "./useGroupQuery";
-import { refreshGroup } from "../utils/xmtpRN/conversations";
+import { useGroupQuery } from "@queries/useGroupQuery";
+// import { refreshGroup } from "../utils/xmtpRN/conversations";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
-export const useGroupPhotoMutation = (account: string, topic: string) => {
+export const useGroupPhotoMutation = (
+  account: string,
+  topic: ConversationTopic
+) => {
   const { data: group } = useGroupQuery(account, topic);
   return useMutation({
     mutationKey: setGroupPhotoMutationKey(account, topic),
@@ -38,7 +42,7 @@ export const useGroupPhotoMutation = (account: string, topic: string) => {
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess useGroupPhotoMutation");
-      refreshGroup(account, topic);
+      // refreshGroup(account, topic);
     },
   });
 };

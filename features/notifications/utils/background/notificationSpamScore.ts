@@ -13,22 +13,25 @@ export const computeSpamScoreGroupWelcome = async (
   group: GroupWithCodecsType
 ): Promise<number> => {
   try {
-    await xmtpClient.contacts.refreshConsentList();
+    await xmtpClient.preferences.syncConsent();
 
-    const groupAllowed = await xmtpClient.contacts.isGroupAllowed(group.id);
-    if (groupAllowed) {
+    const groupAllowed = await xmtpClient.preferences.conversationConsentState(
+      group.id
+    );
+    if (groupAllowed === "allowed") {
       return -1;
     }
 
     const inviterInboxId = await group.addedByInboxId;
-    const inviterAllowed =
-      await xmtpClient.contacts.isInboxAllowed(inviterInboxId);
+    const inviterConsentState =
+      await xmtpClient.preferences.inboxIdConsentState(inviterInboxId);
+    const inviterAllowed = inviterConsentState === "allowed";
+    const inviterDenied = inviterConsentState === "denied";
+
     if (inviterAllowed) {
       return -1;
     }
 
-    const inviterDenied =
-      await xmtpClient.contacts.isInboxDenied(inviterInboxId);
     if (inviterDenied) {
       return 1;
     }
@@ -38,13 +41,17 @@ export const computeSpamScoreGroupWelcome = async (
 
     if (inviter?.addresses?.length) {
       for (const address of inviter.addresses) {
-        if (await xmtpClient.contacts.isDenied(address)) {
+        const addressConsentState =
+          await xmtpClient.preferences.addressConsentState(address);
+        if (addressConsentState === "denied") {
           return 1;
         }
       }
 
       for (const address of inviter.addresses) {
-        if (await xmtpClient.contacts.isAllowed(address)) {
+        const addressConsentState =
+          await xmtpClient.preferences.addressConsentState(address);
+        if (addressConsentState === "allowed") {
           return -1;
         }
       }
@@ -73,26 +80,27 @@ export const computeSpamScoreGroupMessage = async (
   let senderSpamScore = 0;
 
   try {
-    await xmtpClient.contacts.refreshConsentList();
+    await xmtpClient.preferences.syncConsent();
 
-    const groupDenied = await xmtpClient.contacts.isGroupDenied(group.id);
-    if (groupDenied) {
+    const groupConsentState =
+      await xmtpClient.preferences.conversationConsentState(group.id);
+    if (groupConsentState === "denied") {
       return 1;
     }
 
     const senderInboxId = decodedMessage.senderAddress as InboxId;
-    const senderDenied = await xmtpClient.contacts.isInboxDenied(senderInboxId);
-    if (senderDenied) {
+    const senderConsentState =
+      await xmtpClient.preferences.inboxIdConsentState(senderInboxId);
+    if (senderConsentState === "denied") {
       return 1;
     }
 
-    const senderAllowed =
-      await xmtpClient.contacts.isInboxAllowed(senderInboxId);
+    const senderAllowed = senderConsentState === "allowed";
     if (senderAllowed) {
       return -1;
     }
 
-    const groupAllowed = await xmtpClient.contacts.isGroupAllowed(group.id);
+    const groupAllowed = groupConsentState === "allowed";
     if (groupAllowed) {
       return -1;
     }
@@ -102,13 +110,17 @@ export const computeSpamScoreGroupMessage = async (
 
     if (sender?.addresses?.length) {
       for (const address of sender.addresses) {
-        if (await xmtpClient.contacts.isDenied(address)) {
+        const addressConsentState =
+          await xmtpClient.preferences.addressConsentState(address);
+        if (addressConsentState === "denied") {
           return 1;
         }
       }
 
       for (const address of sender.addresses) {
-        if (await xmtpClient.contacts.isAllowed(address)) {
+        const addressConsentState =
+          await xmtpClient.preferences.addressConsentState(address);
+        if (addressConsentState === "allowed") {
           return -1;
         }
       }
@@ -120,12 +132,15 @@ export const computeSpamScoreGroupMessage = async (
   let messageSpamScore = 0;
 
   if (
-    isContentType("text", decodedMessage.contentTypeId) &&
+    isContentType({
+      type: "text",
+      contentType: decodedMessage.contentTypeId,
+    }) &&
     decodedMessage.nativeContent.text
   ) {
     messageSpamScore = computeMessageContentSpamScore(
       decodedMessage.nativeContent.text,
-      decodedMessage.contentTypeId
+      "text"
     );
   }
 

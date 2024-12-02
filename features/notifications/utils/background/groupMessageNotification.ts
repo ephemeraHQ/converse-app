@@ -5,12 +5,14 @@ import notifee, {
   AndroidStyle,
   AndroidVisibility,
 } from "@notifee/react-native";
-import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
+import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import { getProfile, getPreferredName } from "@utils/profile";
 import { androidChannel } from "../setupAndroidNotificationChannel";
 import { getNotificationContent } from "./notificationContent";
 import { computeSpamScoreGroupMessage } from "./notificationSpamScore";
 import { notificationAlreadyShown } from "./alreadyShown";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { normalizeTimestamp } from "@/utils/date";
 
 export const isGroupMessageContentTopic = (contentTopic: string) => {
   return contentTopic.startsWith("/xmtp/mls/1/g-");
@@ -20,10 +22,12 @@ export const handleGroupMessageNotification = async (
   xmtpClient: ConverseXmtpClientType,
   notification: ProtocolNotification
 ) => {
-  const groupId = getGroupIdFromTopic(notification.contentTopic);
+  const groupId = getV3IdFromTopic(
+    notification.contentTopic as ConversationTopic
+  );
   let group = await xmtpClient.conversations.findGroup(groupId);
   if (!group) {
-    await xmtpClient.conversations.syncGroups();
+    await xmtpClient.conversations.sync();
     group = await xmtpClient.conversations.findGroup(groupId);
     if (!group) throw new Error("Group not found");
   }
@@ -83,7 +87,7 @@ export const handleGroupMessageNotification = async (
             // Notifee doesn't handle more complex messages with a group name & image + a person name & image
             // so handling it manually by concatenating sender name & message
             text: `${senderName}: ${notificationContent}`,
-            timestamp: message.sent,
+            timestamp: normalizeTimestamp(message.sentNs),
           },
         ],
         group: true, // todo => handle 1:1 DM MLS groups

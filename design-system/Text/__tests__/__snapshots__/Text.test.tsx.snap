@@ -13,12 +13,14 @@ exports[`Text Component applies color style 1`] = `
       },
       undefined,
       undefined,
+      undefined,
       {
         "color": "#000000",
       },
       undefined,
     ]
   }
+  suppressHighlighting={true}
 >
   Colored Text
 </Text>
@@ -35,6 +37,7 @@ exports[`Text Component applies weight and size styles 1`] = `
         "fontWeight": 400,
         "lineHeight": 20,
       },
+      undefined,
       {
         "fontFamily": "SFProText-Bold",
         "fontWeight": 700,
@@ -47,6 +50,7 @@ exports[`Text Component applies weight and size styles 1`] = `
       undefined,
     ]
   }
+  suppressHighlighting={true}
 >
   Styled Text
 </Text>
@@ -67,8 +71,10 @@ exports[`Text Component renders correctly with default props 1`] = `
       undefined,
       undefined,
       undefined,
+      undefined,
     ]
   }
+  suppressHighlighting={true}
 >
   Default Text
 </Text>
@@ -89,8 +95,10 @@ exports[`Text Component renders correctly with translation key 1`] = `
       undefined,
       undefined,
       undefined,
+      undefined,
     ]
   }
+  suppressHighlighting={true}
 >
   Your messages.
 Your privacy.

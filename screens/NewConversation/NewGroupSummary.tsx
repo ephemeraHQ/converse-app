@@ -22,7 +22,8 @@ import {
 import { List } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { NewConversationModalParams } from "./NewConversationModal";
+import { ensureError } from "@/utils/error";
+import { uploadFile } from "@utils/attachment/uploadFile";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import Button from "../../components/Button/Button";
 import GroupAvatar from "../../components/GroupAvatar";
@@ -33,14 +34,14 @@ import {
   useProfilesStore,
 } from "../../data/store/accountsStore";
 import { usePhotoSelect } from "../../hooks/usePhotoSelect";
-import { uploadFile } from "../../utils/attachment";
 import { navigate } from "../../utils/navigation";
 import {
   getPreferredAvatar,
   getPreferredName,
   getProfile,
 } from "../../utils/profile";
-import { createGroup } from "../../utils/xmtpRN/conversations";
+import { createGroupByAccount } from "../../utils/xmtpRN/conversations";
+import { NewConversationModalParams } from "./NewConversationModal";
 
 const getPendingGroupMembers = (
   members: any[],
@@ -93,6 +94,7 @@ export default function NewGroupSummary({
     remotePhotoUrl: undefined,
     isLoading: false,
   });
+
   const defaultGroupName = useMemo(() => {
     if (!account) return "";
     const members = route.params.members.slice(0, 3);
@@ -128,7 +130,10 @@ export default function NewGroupSummary({
         });
       })
       .catch((e) => {
-        Alert.alert(translate("upload_group_photo_error"), e.message);
+        Alert.alert(
+          translate("upload_group_photo_error"),
+          ensureError(e).message
+        );
         setRemotePhotUrl({
           remotePhotoUrl: undefined,
           isLoading: false,
@@ -139,20 +144,20 @@ export default function NewGroupSummary({
   const onCreateGroupPress = useCallback(async () => {
     setCreatingGroup(true);
     try {
-      const groupTopic = await createGroup(
-        currentAccount(),
-        route.params.members.map((m) => m.address),
+      const group = await createGroupByAccount({
+        account: currentAccount(),
+        peers: route.params.members.map((m) => m.address),
         permissionPolicySet,
         groupName,
-        remotePhotoUrl,
-        groupDescription
-      );
+        groupPhoto: remotePhotoUrl,
+        groupDescription,
+      });
 
       navigation.getParent()?.goBack();
 
       setTimeout(() => {
         navigate("Conversation", {
-          topic: groupTopic,
+          topic: group.topic,
           focus: true,
         });
       }, 300);

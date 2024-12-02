@@ -1,8 +1,7 @@
 import { Signer } from "ethers";
 import { Alert } from "react-native";
 
-import { initDb } from "../../data/db";
-import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
+// import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import {
   getSettingsStore,
   getWalletStore,
@@ -14,7 +13,7 @@ import { saveXmtpKey } from "../../utils/keychain/helpers";
 import logger from "../../utils/logger";
 import { logoutAccount, waitForLogoutTasksDone } from "../../utils/logout";
 import { sentryTrackMessage } from "../../utils/sentry";
-import { getXmtpBase64KeyFromSigner } from "../../utils/xmtpRN/signIn";
+import { createXmtpClientFromSigner } from "../../utils/xmtpRN/signIn";
 import { getXmtpClient } from "../../utils/xmtpRN/sync";
 
 export async function initXmtpClient(args: {
@@ -31,7 +30,7 @@ export async function initXmtpClient(args: {
   }
 
   try {
-    const base64Key = await getXmtpBase64KeyFromSigner(signer, async () => {
+    await createXmtpClientFromSigner(signer, async () => {
       await awaitableAlert(
         translate("current_installation_revoked"),
         translate("current_installation_revoked_description")
@@ -39,11 +38,8 @@ export async function initXmtpClient(args: {
       throw new Error("Current installation revoked");
     });
 
-    if (!base64Key) return;
-
-    await connectWithBase64Key({
+    await connectWithAddress({
       address,
-      base64Key,
       ...restArgs,
     });
   } catch (e) {
@@ -55,7 +51,6 @@ export async function initXmtpClient(args: {
 
 type IBaseArgs = {
   address: string;
-  base64Key: string;
 };
 
 type IPrivyArgs = IBaseArgs & {
@@ -72,16 +67,16 @@ type IPrivateKeyArgs = IBaseArgs & {
 
 type IStandardArgs = IBaseArgs;
 
-type IConnectWithBase64KeyArgs =
+type IConnectWithAddressKeyArgs =
   | IPrivyArgs
   | IEphemeralArgs
   | IPrivateKeyArgs
   | IStandardArgs;
 
-export async function connectWithBase64Key(args: IConnectWithBase64KeyArgs) {
-  const { address, base64Key } = args;
+export async function connectWithAddress(args: IConnectWithAddressKeyArgs) {
+  const { address } = args;
 
-  logger.debug("In connectWithBase64Key");
+  logger.debug("In connectWithAddress");
 
   if (!address) {
     sentryTrackMessage("Could not connect because no address");
@@ -89,36 +84,26 @@ export async function connectWithBase64Key(args: IConnectWithBase64KeyArgs) {
   }
 
   try {
-    await performLogoutAndSaveKey(address, base64Key);
+    await performLogoutAndSaveKey(address);
 
     useAccountsStore.getState().setCurrentAccount(address, true);
-
-    await initializeDatabase(address);
     await finalizeAccountSetup(args);
     sentryTrackMessage("Connecting done!");
   } catch (e) {
-    logger.error(e, { context: "Onboarding - connectWithBase64Key" });
+    logger.error(e, { context: "Onboarding - connectWithAddress" });
     Alert.alert(translate("onboarding_error"));
     throw e;
   }
 }
 
-async function performLogoutAndSaveKey(address: string, base64Key: string) {
+async function performLogoutAndSaveKey(address: string) {
   logger.debug("Waiting for logout tasks");
   await waitForLogoutTasksDone(500);
   logger.debug("Logout tasks done, saving xmtp key");
-  await saveXmtpKey(address, base64Key);
   logger.debug("XMTP Key saved");
 }
 
-async function initializeDatabase(address: string) {
-  logger.debug("Initiating converse db");
-  await initDb(address);
-  logger.debug("Refreshing profiles");
-  await refreshProfileForAddress(address, address);
-}
-
-async function finalizeAccountSetup(args: IConnectWithBase64KeyArgs) {
+async function finalizeAccountSetup(args: IConnectWithAddressKeyArgs) {
   logger.debug("Finalizing account setup");
 
   const { address } = args;

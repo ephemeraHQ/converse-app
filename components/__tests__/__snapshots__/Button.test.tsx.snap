@@ -64,6 +64,7 @@ exports[`Button Component Default (Android) Button renders correctly with danger
         undefined,
         undefined,
         undefined,
+        undefined,
         [
           {
             "color": "#FFFFFF",
@@ -82,6 +83,7 @@ exports[`Button Component Default (Android) Button renders correctly with danger
         ],
       ]
     }
+    suppressHighlighting={true}
   >
     Secondary Danger Button
   </Text>
@@ -170,6 +172,7 @@ exports[`Button Component Default (Android) Button renders correctly with picto 
         undefined,
         undefined,
         undefined,
+        undefined,
         [
           {
             "color": "#FFFFFF",
@@ -188,6 +191,7 @@ exports[`Button Component Default (Android) Button renders correctly with picto 
         ],
       ]
     }
+    suppressHighlighting={true}
   >
     Button with Picto
   </Text>
@@ -258,6 +262,7 @@ exports[`Button Component iOS Button renders correctly with primary variant 1`] 
         undefined,
         undefined,
         undefined,
+        undefined,
         [
           {
             "color": "#FFFFFF",
@@ -276,6 +281,7 @@ exports[`Button Component iOS Button renders correctly with primary variant 1`] 
         ],
       ]
     }
+    suppressHighlighting={true}
   >
     Primary Button
   </Text>

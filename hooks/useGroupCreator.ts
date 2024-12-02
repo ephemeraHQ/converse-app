@@ -2,21 +2,20 @@ import { useGroupQuery } from "@queries/useGroupQuery";
 import { useQuery } from "@tanstack/react-query";
 
 import { currentAccount } from "../data/store/accountsStore";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
-export const useGroupCreator = (topic: string) => {
+export const useGroupCreator = (topic: ConversationTopic | undefined) => {
   const account = currentAccount();
   const { data } = useGroupQuery(account, topic);
 
   return useQuery({
-    queryKey: ["groupCreator", account, topic],
-    queryFn: async () => {
-      const creatorInboxId = await data?.creatorInboxId();
-      return creatorInboxId ?? null;
+    queryKey: [account, "groupCreator", topic],
+    queryFn: () => {
+      if (!data) return null;
+      return data.creatorInboxId();
     },
-    enabled: !!account && !!topic && !!data,
+    enabled: !!topic && !!data,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    refetchOnReconnect: false,
-    staleTime: Infinity,
   });
 };

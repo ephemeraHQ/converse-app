@@ -1,16 +1,10 @@
-import { invalidateGroupConsentQuery } from "@queries/useGroupConsentQuery";
-import { invalidateGroupDescriptionQuery } from "@queries/useGroupDescriptionQuery";
-import { invalidateGroupMembersQuery } from "@queries/useGroupMembersQuery";
-import { invalidateGroupNameQuery } from "@queries/useGroupNameQuery";
-import { invalidateGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
-import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import {
   Platform,
   ScrollView,
@@ -28,36 +22,18 @@ import { GroupScreenImage } from "../containers/GroupScreenImage";
 import { GroupScreenMembersTable } from "../containers/GroupScreenMembersTable";
 import { GroupScreenName } from "../containers/GroupScreenName";
 import { NavigationParamList } from "./Navigation/Navigation";
-import { useChatStore, useCurrentAccount } from "../data/store/accountsStore";
-import { XmtpGroupConversation } from "../data/store/chatStore";
+import { useCurrentAccount } from "../data/store/accountsStore";
+import { useGroupQuery } from "@queries/useGroupQuery";
 
 export default function GroupScreen({
   route,
 }: NativeStackScreenProps<NavigationParamList, "Group">) {
-  const isFirstRun = useRef(false);
   const styles = useStyles();
-  const group = useChatStore(
-    (s) => s.conversations[route.params.topic]
-  ) as XmtpGroupConversation;
-  const insets = useSafeAreaInsets();
   const currentAccount = useCurrentAccount() as string;
-  const topic = group.topic;
+  const topic = route.params.topic;
 
-  useFocusEffect(
-    useCallback(() => {
-      // This can be changed to use AppState for the focus manager instead, but would need some additional checks to make sure it's not hitting the native bridge too often
-      if (!isFirstRun.current) {
-        isFirstRun.current = true;
-        return;
-      }
-      // Favoring invalidating individual queries
-      invalidateGroupNameQuery(currentAccount, topic);
-      invalidateGroupDescriptionQuery(currentAccount, topic);
-      invalidateGroupPhotoQuery(currentAccount, topic);
-      invalidateGroupMembersQuery(currentAccount, topic);
-      invalidateGroupConsentQuery(currentAccount, topic);
-    }, [currentAccount, topic])
-  );
+  const { data: group } = useGroupQuery(currentAccount, topic, true);
+  const insets = useSafeAreaInsets();
 
   return (
     <ScrollView
@@ -69,11 +45,8 @@ export default function GroupScreen({
       <GroupScreenDescription topic={topic} />
       <GroupScreenAddition topic={topic} />
       <GroupPendingRequestsTable topic={topic} />
-      <GroupScreenMembersTable
-        topic={topic}
-        groupPermissionLevel={group.groupPermissionLevel}
-      />
-      <GroupScreenConsentTable topic={topic} groupName={group.groupName} />
+      <GroupScreenMembersTable topic={topic} group={group} />
+      <GroupScreenConsentTable topic={topic} group={group} />
       <View style={{ height: insets.bottom }} />
     </ScrollView>
   );

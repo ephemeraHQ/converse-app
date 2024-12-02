@@ -15,180 +15,187 @@ import { sortGroupMembersByAdminStatus } from "@utils/groupUtils/sortGroupMember
 import logger from "@utils/logger";
 import { navigate } from "@utils/navigation";
 import { getPreferredName, getProfile } from "@utils/profile";
-import { FC, useMemo } from "react";
+import { FC, memo, useMemo } from "react";
 import { Alert, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import type { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { useGroupPermissionPolicyQuery } from "@queries/useGroupPermissionPolicyQuery";
 
-interface GroupScreenMembersTableProps {
-  topic: string;
-  groupPermissionLevel: string;
-}
+type GroupScreenMembersTableProps = {
+  topic: ConversationTopic | undefined;
+  group: GroupWithCodecsType | undefined | null;
+};
 
-export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = ({
-  topic,
-  groupPermissionLevel,
-}) => {
-  const colorScheme = useColorScheme();
-  const currentAccount = useCurrentAccount() as string;
-  const styles = useStyles();
-  const {
-    members,
-    promoteToSuperAdmin,
-    promoteToAdmin,
-    revokeAdmin,
-    revokeSuperAdmin,
-    removeMember,
-  } = useGroupMembers(topic);
-  const profiles = useProfilesStore((s) => s.profiles);
-  const currentAccountIsAdmin = useMemo(
-    () => getAddressIsAdmin(members, currentAccount),
-    [currentAccount, members]
-  );
-  const currentAccountIsSuperAdmin = useMemo(
-    () => getAddressIsSuperAdmin(members, currentAccount),
-    [currentAccount, members]
-  );
+export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
+  ({ topic }) => {
+    const colorScheme = useColorScheme();
+    const currentAccount = useCurrentAccount() as string;
+    const styles = useStyles();
 
-  const tableViewItems = useMemo(() => {
-    const items: TableViewItemType[] = [];
+    const {
+      members,
+      promoteToSuperAdmin,
+      promoteToAdmin,
+      revokeAdmin,
+      revokeSuperAdmin,
+      removeMember,
+    } = useGroupMembers(topic);
+    const { data: groupPermissionPolicy } = useGroupPermissionPolicyQuery(
+      currentAccount,
+      topic
+    );
+    const profiles = useProfilesStore((s) => s.profiles);
 
-    const groupMembers = sortGroupMembersByAdminStatus(members, currentAccount);
-    groupMembers.forEach((a) => {
-      const isSuperAdmin = getAccountIsSuperAdmin(members, a.inboxId);
-      const isAdmin = getAccountIsAdmin(members, a.inboxId);
-      const isCurrentUser =
-        a.address.toLowerCase() === currentAccount.toLowerCase();
-      const preferredName = getPreferredName(
-        getProfile(a.address, profiles)?.socials,
-        a.address
+    const currentAccountIsSuperAdmin = useMemo(
+      () => getAddressIsSuperAdmin(members, currentAccount),
+      [currentAccount, members]
+    );
+
+    const tableViewItems = useMemo(() => {
+      const items: TableViewItemType[] = [];
+
+      const groupMembers = sortGroupMembersByAdminStatus(
+        members,
+        currentAccount
       );
-      items.push({
-        id: a.inboxId,
-        title: `${preferredName}${isCurrentUser ? " (you)" : ""}`,
-        action: () => {
-          const {
-            options,
-            cancelButtonIndex,
-            promoteAdminIndex,
-            promoteSuperAdminIndex,
-            revokeAdminIndex,
-            revokeSuperAdminIndex,
-            removeIndex,
-            destructiveButtonIndex,
-          } = getGroupMemberActions(
-            groupPermissionLevel,
-            isCurrentUser,
-            isSuperAdmin,
-            isAdmin,
-            currentAccountIsSuperAdmin,
-            currentAccountIsAdmin
-          );
-          showActionSheetWithOptions(
-            {
+      groupMembers.forEach((a) => {
+        const isSuperAdmin = getAccountIsSuperAdmin(members, a.inboxId);
+        const isAdmin = getAccountIsAdmin(members, a.inboxId);
+        const isCurrentUser =
+          a.address.toLowerCase() === currentAccount.toLowerCase();
+        const preferredName = getPreferredName(
+          getProfile(a.address, profiles)?.socials,
+          a.address
+        );
+        items.push({
+          id: a.inboxId,
+          title: `${preferredName}${isCurrentUser ? " (you)" : ""}`,
+          action: () => {
+            const {
               options,
               cancelButtonIndex,
+              promoteAdminIndex,
+              promoteSuperAdminIndex,
+              revokeAdminIndex,
+              revokeSuperAdminIndex,
+              removeIndex,
               destructiveButtonIndex,
-              title: preferredName,
-              ...actionSheetColors(colorScheme),
-            },
-            async (selectedIndex?: number) => {
-              switch (selectedIndex) {
-                case 0:
-                  navigate("Profile", {
-                    address: a.address,
-                    fromGroupTopic: topic,
-                  });
-                  break;
-                case promoteSuperAdminIndex:
-                  logger.debug("Promoting super admin...");
-                  try {
-                    await promoteToSuperAdmin(a.inboxId);
-                  } catch (e) {
-                    logger.error(e);
-                    Alert.alert("An error occurred");
-                  }
-                  break;
-                case revokeSuperAdminIndex:
-                  logger.debug("Revoking super admin...");
-                  try {
-                    await revokeSuperAdmin(a.inboxId);
-                  } catch (e) {
-                    logger.error(e);
-                    Alert.alert("An error occurred");
-                  }
-                  break;
-                case promoteAdminIndex:
-                  logger.debug("Promoting member...");
-                  try {
-                    await promoteToAdmin(a.inboxId);
-                  } catch (e) {
-                    logger.error(e);
-                    Alert.alert("An error occurred");
-                  }
-                  break;
-                case revokeAdminIndex:
-                  logger.debug("Revoking admin...");
-                  try {
-                    await revokeAdmin(a.inboxId);
-                  } catch (e) {
-                    logger.error(e);
-                    Alert.alert("An error occurred");
-                  }
-                  break;
-                case removeIndex:
-                  logger.debug("Removing member...");
-                  try {
-                    await removeMember([a.inboxId]);
-                  } catch (e) {
-                    logger.error(e);
-                    Alert.alert("An error occurred");
-                  }
-                  break;
-                default:
+            } = getGroupMemberActions(
+              groupPermissionPolicy,
+              isCurrentUser,
+              isSuperAdmin,
+              isAdmin,
+              currentAccountIsSuperAdmin
+            );
+            showActionSheetWithOptions(
+              {
+                options,
+                cancelButtonIndex,
+                destructiveButtonIndex,
+                title: preferredName,
+                ...actionSheetColors(colorScheme),
+              },
+              async (selectedIndex?: number) => {
+                switch (selectedIndex) {
+                  case 0:
+                    navigate("Profile", {
+                      address: a.address,
+                      fromGroupTopic: topic,
+                    });
+                    break;
+                  case promoteSuperAdminIndex:
+                    logger.debug("Promoting super admin...");
+                    try {
+                      await promoteToSuperAdmin(a.inboxId);
+                    } catch (e) {
+                      logger.error(e);
+                      Alert.alert("An error occurred");
+                    }
+                    break;
+                  case revokeSuperAdminIndex:
+                    logger.debug("Revoking super admin...");
+                    try {
+                      await revokeSuperAdmin(a.inboxId);
+                    } catch (e) {
+                      logger.error(e);
+                      Alert.alert("An error occurred");
+                    }
+                    break;
+                  case promoteAdminIndex:
+                    logger.debug("Promoting member...");
+                    try {
+                      await promoteToAdmin(a.inboxId);
+                    } catch (e) {
+                      logger.error(e);
+                      Alert.alert("An error occurred");
+                    }
+                    break;
+                  case revokeAdminIndex:
+                    logger.debug("Revoking admin...");
+                    try {
+                      await revokeAdmin(a.inboxId);
+                    } catch (e) {
+                      logger.error(e);
+                      Alert.alert("An error occurred");
+                    }
+                    break;
+                  case removeIndex:
+                    logger.debug("Removing member...");
+                    try {
+                      await removeMember([a.inboxId]);
+                    } catch (e) {
+                      logger.error(e);
+                      Alert.alert("An error occurred");
+                    }
+                    break;
+                  default:
+                }
               }
-            }
-          );
-        },
-        rightView: (
-          <View style={styles.tableViewRight}>
-            {isSuperAdmin && <Text style={styles.adminText}>Super Admin</Text>}
-            {isAdmin && !isSuperAdmin && (
-              <Text style={styles.adminText}>Admin</Text>
-            )}
-            <TableViewPicto
-              symbol="chevron.right"
-              color={textSecondaryColor(colorScheme)}
-            />
-          </View>
-        ),
+            );
+          },
+          rightView: (
+            <View style={styles.tableViewRight}>
+              {isSuperAdmin && (
+                <Text style={styles.adminText}>Super Admin</Text>
+              )}
+              {isAdmin && !isSuperAdmin && (
+                <Text style={styles.adminText}>Admin</Text>
+              )}
+              <TableViewPicto
+                symbol="chevron.right"
+                color={textSecondaryColor(colorScheme)}
+              />
+            </View>
+          ),
+        });
       });
-    });
-    return items;
-  }, [
-    colorScheme,
-    currentAccount,
-    currentAccountIsAdmin,
-    currentAccountIsSuperAdmin,
-    groupPermissionLevel,
-    members,
-    profiles,
-    promoteToAdmin,
-    promoteToSuperAdmin,
-    removeMember,
-    revokeAdmin,
-    revokeSuperAdmin,
-    styles.adminText,
-    styles.tableViewRight,
-    topic,
-  ]);
+      return items;
+    }, [
+      colorScheme,
+      currentAccount,
+      currentAccountIsSuperAdmin,
+      groupPermissionPolicy,
+      members,
+      profiles,
+      promoteToAdmin,
+      promoteToSuperAdmin,
+      removeMember,
+      revokeAdmin,
+      revokeSuperAdmin,
+      styles.adminText,
+      styles.tableViewRight,
+      topic,
+    ]);
 
-  return (
-    <TableView items={tableViewItems} title={translate("members_title")} />
-  );
-};
+    return (
+      <TableView items={tableViewItems} title={translate("members_title")} />
+    );
+  }
+);
 
 const useStyles = () => {
   const colorScheme = useColorScheme();

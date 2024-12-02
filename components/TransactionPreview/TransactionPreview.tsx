@@ -1,5 +1,5 @@
 import { installedWallets } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
-import { refreshProfileForAddress } from "@data/helpers/profiles/profilesUpdate";
+// import { refreshProfileForAddress } from "@data/helpers/profiles/profilesUpdate";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
@@ -97,7 +97,7 @@ export function TransactionPreview() {
         } else {
           // Let's refresh profile data for the addresses involved in the transaction
           simulationResult?.changes?.forEach((change) => {
-            refreshProfileForAddress(account, change.to);
+            // refreshProfileForAddress(account, change.to);
           });
           setSimulation({ status: "success", result: simulationResult });
         }

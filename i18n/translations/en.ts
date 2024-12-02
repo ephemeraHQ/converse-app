@@ -224,6 +224,7 @@ export const en = {
 
   // Conversation Context Menu
   pin: "Pin",
+  unpin: "Unpin",
   mark_as_read: "Mark as read",
   mark_as_unread: "Mark as unread",
 
@@ -387,13 +388,43 @@ export const en = {
     "If you don't see your contact in the list, try typing their full address (with {{providers}} etc…)",
 
   // Group Updated Message
-  group_name_changed: '{{name}} changed the group name to "{{newValue}}".',
-  group_member_joined: "{{name}} joined the conversation",
-  group_member_left: "{{name}} left the conversation",
-  group_photo_changed: "{{name}} changed the group photo.",
-  group_description_changed:
-    '{{name}} changed the group description to "{{newValue}}".',
-  group_name_changed_to: '{{name}} changed the group name to "{{newValue}}".',
+  group_name_changed: 'changed the group name to "{{newValue}}".',
+  group_member_joined: "joined the conversation",
+  group_member_left: "left the conversation",
+  group_photo_changed: "changed the group photo.",
+  group_description_changed: 'changed the group description to "{{newValue}}".',
+  group_name_changed_to: 'changed the group name to "{{newValue}}".',
+
+  message_status: {
+    sent: "Sent",
+    delivered: "Sent",
+    error: "Failed",
+    sending: "Sending",
+    prepared: "Sending",
+    seen: "Read",
+  },
+
+  group_placeholder: {
+    placeholder_text:
+      "This is the beginning of your conversation in {{groupName}}",
+  },
+
+  removed_chats: {
+    removed_chats: "Removed Chats",
+    eyes: "👀",
+    no_removed_chats:
+      "We could not find any removed group chat in your existing conversations.",
+  },
+
+  group_screen_member_actions: {
+    profile_page: "Profile page",
+    promote_to_admin: "Promote to admin",
+    promote_to_super_admin: "Promote to super admin",
+    revoke_admin: "Revoke admin",
+    revoke_super_admin: "Revoke super admin",
+    remove_member: "Remove from group",
+    cancel: "Cancel",
+  },
 };
 
 export type Translations = typeof en;

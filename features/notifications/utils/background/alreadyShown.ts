@@ -4,7 +4,7 @@ const getShownNotificationIds = (): string[] => {
   const jsonData = mmkv.getString("notification-ids");
   if (jsonData) {
     try {
-      return JSON.parse(jsonData);
+      return JSON.parse(jsonData) as string[];
     } catch {
       return [];
     }

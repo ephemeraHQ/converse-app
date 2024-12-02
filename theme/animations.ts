@@ -1,7 +1,11 @@
 import {
   Easing,
+  FadeIn,
   FadeInDown,
   FadeInUp,
+  FadeOut,
+  Keyframe,
+  LinearTransition,
   type WithSpringConfig,
 } from "react-native-reanimated";
 
@@ -43,11 +47,12 @@ const easings = {
   easeInOutExpo: [1, 0, 0, 1],
   easeInOutCirc: [0.785, 0.135, 0.15, 0.86],
 };
+
 export const SICK_MASS = 1.03;
 
 export const HOLD_ITEM_TRANSFORM_DURATION = 280;
 
-export const animations = {
+export const animation = {
   spring: {
     damping: SICK_DAMPING,
     stiffness: SICK_STIFFNESS,
@@ -65,17 +70,54 @@ export const animations = {
 
   contextMenuHoldDuration: HOLD_ITEM_TRANSFORM_DURATION,
 
-  fadeInDownSpring: () =>
-    FadeInDown.easing(SICK_EASE_OUT)
-      .stiffness(SICK_STIFFNESS)
-      .damping(SICK_DAMPING),
+  springLayoutTransition: LinearTransition.springify(),
+
+  reanimatedSpringLayoutTransition: LinearTransition.springify()
+    .damping(SICK_DAMPING)
+    .stiffness(SICK_STIFFNESS),
+
+  reanimatedFadeInDownSpring: FadeInDown.easing(SICK_EASE_OUT)
+    .stiffness(SICK_STIFFNESS)
+    .damping(SICK_DAMPING),
 
   fadeInUpSpring: () =>
     FadeInUp.easing(SICK_EASE_OUT)
       .stiffness(SICK_STIFFNESS)
       .damping(SICK_DAMPING),
 
+  reanimatedFadeInSpring: FadeIn.springify()
+    .stiffness(SICK_STIFFNESS)
+    .damping(SICK_DAMPING),
+
+  reanimatedFadeOutSpring: FadeOut.springify()
+    .stiffness(SICK_STIFFNESS)
+    .damping(SICK_DAMPING),
+
   fadeInUpSlow: () => FadeInUp.duration(timing.slow).easing(SICK_EASE_OUT),
 
   fadeInDownSlow: () => FadeInDown.duration(timing.slow).easing(SICK_EASE_OUT),
+
+  reanimatedFadeOutScaleOut: new Keyframe({
+    0: {
+      opacity: 1,
+      transform: [{ scale: 1 }],
+    },
+    100: {
+      opacity: 0,
+      transform: [{ scale: 0 }],
+    },
+  }).duration(500),
+
+  reanimatedFadeInScaleIn: new Keyframe({
+    0: {
+      opacity: 0,
+      transform: [{ scale: 0 }],
+    },
+    100: {
+      opacity: 1,
+      transform: [{ scale: 1 }],
+    },
+  }).duration(500),
 };
+
+export type IAnimation = typeof animation;

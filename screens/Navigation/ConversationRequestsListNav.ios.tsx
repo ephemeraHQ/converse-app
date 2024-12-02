@@ -8,13 +8,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
@@ -28,31 +22,19 @@ import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndica
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
-import {
-  useChatStore,
-  useCurrentAccount,
-} from "../../data/store/accountsStore";
-import {
-  consentToPeersOnProtocol,
-  sortRequestsBySpamScore,
-  updateConsentStatus,
-} from "../../utils/xmtpRN/conversations";
+import { useCurrentAccount } from "../../data/store/accountsStore";
+import { consentToAddressesOnProtocolByAccount } from "../../utils/xmtpRN/contacts";
+import { useRequestItems } from "../../features/conversation-requests-list/useRequestItems";
 
 export default function ConversationRequestsListNav() {
-  const sortedConversationsWithPreview = useChatStore(
-    (s) => s.sortedConversationsWithPreview
-  );
   const colorScheme = useColorScheme();
   const account = useCurrentAccount() as string;
   const navRef = useRef<any>();
   const [clearingAll, setClearingAll] = useState(false);
 
   const [selectedSegment, setSelectedSegment] = useState(0);
-  const allRequests = sortedConversationsWithPreview.conversationsRequests;
-  const { likelySpam, likelyNotSpam } = useMemo(
-    () => sortRequestsBySpamScore(allRequests),
-    [allRequests]
-  );
+  const { likelySpam, likelyNotSpam } = useRequestItems();
+
   const styles = useStyles();
 
   const clearAllSpam = useCallback(() => {
@@ -66,10 +48,17 @@ export default function ConversationRequestsListNav() {
         setClearingAll(true);
         // @todo => handle groups here
         const peers = Array.from(
-          new Set(allRequests.map((c) => c.peerAddress))
+          new Set(
+            likelyNotSpam.map((c) =>
+              "addedByInboxId" in c ? c.addedByInboxId : undefined
+            )
+          )
         ).filter((peer) => !!peer) as string[];
-        await consentToPeersOnProtocol(account, peers, "deny");
-        await updateConsentStatus(account);
+        await consentToAddressesOnProtocolByAccount({
+          account,
+          addresses: peers,
+          consent: "deny",
+        });
         setClearingAll(false);
         navRef.current?.goBack();
       },
@@ -94,7 +83,7 @@ export default function ConversationRequestsListNav() {
         }
       }
     );
-  }, [account, colorScheme, allRequests]);
+  }, [account, colorScheme, likelyNotSpam]);
 
   const navigationOptions = useCallback(
     ({
@@ -132,16 +121,14 @@ export default function ConversationRequestsListNav() {
   // Navigate back to the main screen when no request to display
   useEffect(() => {
     const unsubscribe = navRef.current?.addListener("focus", () => {
-      if (allRequests.length === 0) {
+      if (likelyNotSpam.length === 0 && likelySpam.length === 0) {
         navRef.current?.goBack();
       }
     });
     return unsubscribe;
-  }, [allRequests]);
+  }, [likelyNotSpam.length, likelySpam.length]);
 
   const hasLikelyNotSpam = likelyNotSpam.length > 0;
-  const hasSpam = likelySpam.length > 0;
-  const hasBothTypesOfRequests = true;
 
   const handleSegmentChange = (index: number) => {
     setSelectedSegment(index);

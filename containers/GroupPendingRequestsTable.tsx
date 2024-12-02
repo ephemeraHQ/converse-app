@@ -14,10 +14,11 @@ import { StyleSheet, Text, useColorScheme, View } from "react-native";
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
-interface GroupPendingRequestsTableProps {
-  topic: string;
-}
+type GroupPendingRequestsTableProps = {
+  topic: ConversationTopic;
+};
 
 export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
   topic,
@@ -26,12 +27,14 @@ export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
   const currentAccount = useCurrentAccount() as string;
   const styles = useStyles();
   const requests = useGroupPendingRequests(topic);
+
   const addresses = useMemo(() => requests.map((a) => a[0]), [requests]);
   const preferredNames = usePreferredNames(addresses);
   const { mutateAsync: addToGroup } = useAddToGroupMutation(
     currentAccount,
     topic
   );
+
   const tableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
     requests.forEach((a, id) => {
