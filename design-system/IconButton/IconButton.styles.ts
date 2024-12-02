@@ -8,13 +8,13 @@ import {
 } from "./IconButton.props";
 import { Theme } from "../../theme/useAppTheme";
 
-interface IconButtonStyleProps {
+type IconButtonStyleProps = {
   variant: IIconButtonVariant;
   size: IIconButtonSize;
   action: IIconButtonAction;
   pressed?: boolean;
   disabled?: boolean;
-}
+};
 
 export const getIconButtonViewStyle =
   ({
@@ -36,6 +36,10 @@ export const getIconButtonViewStyle =
 
     // Set size
     const sizeStyles = {
+      sm: {
+        width: spacing.lg,
+        height: spacing.lg,
+      },
       md: {
         width: spacing.xl,
         height: spacing.xl,
@@ -118,11 +122,14 @@ export const getIconStyle =
 
     // Set icon size
     const sizeStyles = {
+      sm: {
+        fontSize: spacing.md,
+      },
       md: {
-        fontSize: spacing.lg, // Adjust as needed
+        fontSize: spacing.lg,
       },
       lg: {
-        fontSize: spacing.xl, // Adjust as needed
+        fontSize: spacing.xl,
       },
     };
 
@@ -177,6 +184,7 @@ export const getIconProps =
 
       // Set icon size
       const sizeMap = {
+        sm: spacing.xs,
         md: spacing.sm,
         lg: spacing.lg,
       };

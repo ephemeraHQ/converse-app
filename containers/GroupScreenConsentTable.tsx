@@ -8,15 +8,17 @@ import { useColorScheme } from "react-native";
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { GroupWithCodecsType } from "@utils/xmtpRN/client";
 
-interface GroupScreenConsentTableProps {
-  topic: string;
-  groupName?: string;
-}
+type GroupScreenConsentTableProps = {
+  topic: ConversationTopic;
+  group: GroupWithCodecsType | null | undefined;
+};
 
 export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
   topic,
-  groupName,
+  group,
 }) => {
   const colorScheme = useColorScheme();
   const { consent, allowGroup, blockGroup } = useGroupConsent(topic);
@@ -29,7 +31,8 @@ export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
         id: "restore_group",
         title: translate("restore_group"),
         titleColor: primaryColor(colorScheme),
-        action: () => {
+        action: async () => {
+          const groupName = await group?.groupName();
           groupRemoveRestoreHandler(
             consent,
             colorScheme,
@@ -47,7 +50,8 @@ export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
         id: "remove_group",
         title: translate("remove_group"),
         titleColor: dangerColor(colorScheme),
-        action: () => {
+        action: async () => {
+          const groupName = await group?.groupName();
           groupRemoveRestoreHandler(
             consent,
             colorScheme,
@@ -62,7 +66,7 @@ export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
     }
 
     return items;
-  }, [consent, allowGroup, blockGroup, colorScheme, groupName]);
+  }, [consent, allowGroup, blockGroup, colorScheme, group]);
 
   return (
     <TableView

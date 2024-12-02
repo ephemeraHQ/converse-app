@@ -28,7 +28,6 @@ import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/Onboardi
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import config from "../../config";
-import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import {
   getCurrentAccount,
   useCurrentAccount,
@@ -40,7 +39,6 @@ import { useSelect } from "../../data/store/storeHelpers";
 import { VStack } from "../../design-system/VStack";
 import { translate } from "../../i18n";
 import { checkUsernameValid, claimProfile } from "../../utils/api";
-import { uploadFile } from "../../utils/attachment";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
 import {
   compressAndResizeImage,
@@ -54,6 +52,7 @@ import {
 } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";
 import { needToShowNotificationsPermissions } from "./Onboarding.utils";
+import { uploadFile } from "@utils/attachment/uploadFile";
 
 export type ProfileType = {
   avatar?: string;
@@ -388,7 +387,7 @@ export function useCreateOrUpdateProfileInfo() {
           account: address,
           profile: { ...profile, avatar: publicAvatar },
         });
-        await refreshProfileForAddress(address, address);
+        // await refreshProfileForAddress(address, address);
         return { success: true };
       } catch (e: any) {
         logger.error(e, { context: "UserProfile: claiming and refreshing" });

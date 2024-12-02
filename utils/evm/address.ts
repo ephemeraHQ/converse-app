@@ -5,7 +5,7 @@ import {
 } from "@utils/api";
 import { getLensOwner } from "@search/utils/lens";
 import { isUNSAddress } from "@utils/uns";
-import { isAddress, getAddress } from "ethers/lib/utils";
+import { isAddress } from "ethers/lib/utils";
 
 import config from "../../config";
 
@@ -52,12 +52,4 @@ export const getAddressForPeer = async (peer: string) => {
           ? await getLensOwner(peer)
           : peer;
   return resolvedAddress || undefined;
-};
-
-export const getCleanAddress = (address: string) => {
-  const lowercased = address.toLowerCase();
-  if (isAddress(lowercased)) {
-    return getAddress(lowercased);
-  }
-  return address;
 };

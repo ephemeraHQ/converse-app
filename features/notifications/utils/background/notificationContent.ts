@@ -1,4 +1,3 @@
-import { XmtpGroupConversation } from "@data/store/chatStore";
 import {
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
@@ -8,7 +7,11 @@ import {
   getMessageContentType,
   isContentType,
 } from "@utils/xmtpRN/contentTypes";
-import { ReactionContent, ReplyContent } from "@xmtp/react-native-sdk";
+import type {
+  MessageId,
+  ReactionContent,
+  ReplyContent,
+} from "@xmtp/react-native-sdk";
 
 export const getNotificationContent = async (
   group: GroupWithCodecsType,
@@ -19,7 +22,7 @@ export const getNotificationContent = async (
   let contentType = message.contentTypeId;
   const messageContent = message.content();
   let referencedMessageId: string | undefined;
-  if (isContentType("reply", contentType)) {
+  if (isContentType({ type: "reply", contentType })) {
     const replyContent = messageContent as ReplyContent;
     // @todo => implement replies when https://github.com/xmtp/xmtp-node-go/issues/409
     // is done
@@ -27,13 +30,13 @@ export const getNotificationContent = async (
     return "REPLY";
   }
 
-  if (isContentType("text", contentType)) {
+  if (isContentType({ type: "text", contentType })) {
     return messageContent as string;
-  } else if (isContentType("remoteAttachment", contentType)) {
+  } else if (isContentType({ type: "remoteAttachment", contentType })) {
     return "📎 Media";
-  } else if (isContentType("transactionReference", contentType)) {
+  } else if (isContentType({ type: "transactionReference", contentType })) {
     return "💸 Transaction";
-  } else if (isContentType("reaction", contentType)) {
+  } else if (isContentType({ type: "reaction", contentType })) {
     let { action, reference, schema, content } =
       messageContent as ReactionContent;
     referencedMessageId = reference;
@@ -49,7 +52,7 @@ export const getNotificationContent = async (
         ? `Reacted ${content} to a message`
         : "Reacted to a message";
     }
-  } else if (isContentType("readReceipt", contentType)) {
+  } else if (isContentType({ type: "readReceipt", contentType })) {
     return;
   }
 };
@@ -58,6 +61,8 @@ const isGroupMessageFromMe = async (
   client: ConverseXmtpClientType,
   messageId: string
 ) => {
-  const message = await client.conversations.findV3Message(messageId);
+  const message = await client.conversations.findMessage(
+    messageId as MessageId
+  );
   return message?.senderAddress === client.inboxId;
 };

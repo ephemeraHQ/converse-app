@@ -1,3 +1,5 @@
+import { ObjectTyped } from "@utils/objectTyped";
+
 export const contentTypesPrefixes = {
   text: "xmtp.org/text:",
   remoteAttachment: "xmtp.org/remoteStaticAttachment:",
@@ -10,19 +12,22 @@ export const contentTypesPrefixes = {
   groupUpdated: "xmtp.org/group_updated:",
 };
 
-export const isContentType = (
-  type: keyof typeof contentTypesPrefixes,
-  contentType?: string | undefined
-) => {
-  if (!contentType) return false;
+export type IConvosContentType = keyof typeof contentTypesPrefixes;
+
+export function isContentType(args: {
+  type: IConvosContentType;
+  contentType?: string;
+}) {
+  const { type, contentType } = args;
+  if (!contentType) {
+    return false;
+  }
   const prefix = contentTypesPrefixes[type];
   return contentType.startsWith(prefix);
-};
+}
 
-export const getMessageContentType = (contentType: string) => {
-  return Object.keys(contentTypesPrefixes).find((key) =>
-    contentType.startsWith(
-      contentTypesPrefixes[key as keyof typeof contentTypesPrefixes]
-    )
+export function getMessageContentType(contentType: string) {
+  return ObjectTyped.keys(contentTypesPrefixes).find((key) =>
+    contentType.startsWith(contentTypesPrefixes[key])
   );
-};
+}

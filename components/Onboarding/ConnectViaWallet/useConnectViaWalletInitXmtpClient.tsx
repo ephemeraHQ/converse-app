@@ -8,8 +8,8 @@ import { reloadAsync } from "expo-updates";
 import { useCallback, useEffect, useRef } from "react";
 
 import { wait } from "../../../utils/general";
-import { getXmtpBase64KeyFromSigner } from "../../../utils/xmtpRN/signIn";
-import { connectWithBase64Key } from "../init-xmtp-client";
+import { createXmtpClientFromSigner } from "../../../utils/xmtpRN/signIn";
+import { connectWithAddress } from "../init-xmtp-client";
 import { useConnectViaWalletContext } from "./ConnectViaWallet.context";
 import { useConnectViaWalletStore } from "./ConnectViaWallet.store";
 
@@ -69,7 +69,7 @@ export function useInitXmptClient() {
 
       hasStartedXmtpClientFlowRef.current = true;
 
-      const base64Key = await getXmtpBase64KeyFromSigner(
+      await createXmtpClientFromSigner(
         signer,
         async () => {
           logger.debug("[Connect Wallet] Installation revoked, disconnecting");
@@ -84,47 +84,6 @@ export function useInitXmptClient() {
             onErrorConnecting({
               error: new Error("Installation revoked"),
             });
-          }
-        },
-        async () => {
-          logger.debug("[Connect Wallet] Triggering create signature");
-          // Before calling "create" signature
-          connectViewWalletStore.getState().setWaitingForNextSignature(true);
-          connectViewWalletStore.getState().setClickedSignature(false);
-        },
-        async () => {
-          // Before calling "enable" signature
-          const waitingForNextSignature =
-            connectViewWalletStore.getState().waitingForNextSignature;
-
-          if (waitingForNextSignature) {
-            const currentSignaturesDone =
-              connectViewWalletStore.getState().numberOfSignaturesDone;
-
-            connectViewWalletStore
-              .getState()
-              .setNumberOfSignaturesDone(currentSignaturesDone + 1);
-            connectViewWalletStore.getState().setLoading(false);
-
-            logger.debug(
-              "[Connect Wallet] Waiting until signature click for Enable"
-            );
-            await waitForClickSignature();
-            logger.debug("[Connect Wallet] Click on Sign done for Enable");
-          } else {
-            logger.debug("[Connect Wallet] not waiting for next signature");
-          }
-
-          if (onXmtp && !alreadyV3Db) {
-            logger.debug(
-              "[Connect Wallet] Already on XMTP, but no db present, will need a new signature"
-            );
-            connectViewWalletStore.getState().setWaitingForNextSignature(true);
-          } else {
-            logger.debug(
-              "[Connect Wallet] New to XMTP, or db already present, will not need a new signature"
-            );
-            connectViewWalletStore.getState().setWaitingForNextSignature(false);
           }
         },
         async () => {
@@ -150,15 +109,10 @@ export function useInitXmptClient() {
         }
       );
 
-      if (!base64Key) {
-        throw new Error("[Connect Wallet] No base64Key received");
-      }
-
       logger.debug("[Connect Wallet] Got base64 key, now connecting");
 
-      await connectWithBase64Key({
+      await connectWithAddress({
         address,
-        base64Key,
       });
 
       logger.info("[Connect Wallet] Successfully logged in using a wallet");

@@ -1,13 +1,8 @@
 import logger from "@utils/logger";
 import { useEffect } from "react";
-
-import { loadDataToContext } from "../../data";
-import { initDb } from "../../data/db";
-import { cleanupPendingConversations } from "../../data/helpers/conversations/pendingConversations";
-import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
+// import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import { getAccountsList } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
-import { loadSavedNotificationMessagesToContext } from "../../features/notifications/utils/loadSavedNotificationMessagesToContext";
 import { getXmtpClient } from "../../utils/xmtpRN/sync";
 import { getInstalledWallets } from "../Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 
@@ -23,16 +18,11 @@ export default function HydrationStateHandler() {
       } else {
         getInstalledWallets(false);
       }
-      await Promise.all(accounts.map((a) => initDb(a)));
-      accounts.map((a) => cleanupPendingConversations(a));
       accounts.map((a) => getXmtpClient(a));
-      await loadSavedNotificationMessagesToContext();
 
-      await Promise.all(accounts.map((a) => loadDataToContext(a)));
-
-      accounts.map((address) => {
-        refreshProfileForAddress(address, address);
-      });
+      // accounts.map((address) => {
+      //   refreshProfileForAddress(address, address);
+      // });
 
       useAppStore.getState().setHydrationDone(true);
       logger.debug(

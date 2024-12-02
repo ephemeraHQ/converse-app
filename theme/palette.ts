@@ -10,6 +10,7 @@ export const lightPalette = {
   light: "#FFFFFF",
   light98: "#FAFAFA",
   light96: "#F5F5F5",
+  light90: "#EBEBEB",
   light60: "#999999",
   light30: "#4D4D4D",
   light15: "#333333",
@@ -35,6 +36,7 @@ export const darkPalette = {
 
   dark: "#000000",
   dark96: "#141414",
+  dark90: "#1A1A1A",
   dark85: "#262626",
   dark60: "#666666",
   dark30: "#B2B2B2",

@@ -8,6 +8,7 @@ import { Alert, Image, Linking, useColorScheme } from "react-native";
 import logger from "./logger";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import { executeAfterKeyboardClosed } from "../utils/keyboard";
+import { Nullable } from "../types/general";
 
 const imageMimeTypes = [
   "image/cgm",
@@ -291,11 +292,11 @@ const allowedMimeTypes = [
   ...videoMimeTypes,
 ];
 
-interface MediaSelect {
+type MediaSelect = {
   initialMedia?: string;
   onMediaAdd?: (newUrl: string) => void;
   isAvatar?: boolean;
-}
+};
 
 export const useMediaSelect = (payload?: MediaSelect) => {
   const { initialMedia, onMediaAdd, isAvatar } = payload ?? {};
@@ -360,13 +361,13 @@ export type AttachmentSelectedStatus =
   | "uploaded"
   | "sending";
 
-export const isImageMimetype = (mimeType?: string) =>
+export const isImageMimetype = (mimeType: Nullable<string>) =>
   !!mimeType && imageMimeTypes.includes(mimeType.toLowerCase());
-export const isAudioMimeType = (mimeType?: string) =>
+export const isAudioMimeType = (mimeType: Nullable<string>) =>
   !!mimeType && audioMimeTypes.includes(mimeType.toLowerCase());
-export const isVideoMimeType = (mimeType?: string) =>
+export const isVideoMimeType = (mimeType: Nullable<string>) =>
   !!mimeType && videoMimeTypes.includes(mimeType.toLowerCase());
-export const isAllowedMimeType = (mimeType?: string) =>
+export const isAllowedMimeType = (mimeType: Nullable<string>) =>
   !!mimeType && allowedMimeTypes.includes(mimeType.toLowerCase());
 
 export const getImageSize = (

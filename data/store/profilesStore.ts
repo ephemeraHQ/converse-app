@@ -1,7 +1,7 @@
-import { getCleanAddress } from "@utils/evm/address";
+import { getCleanAddress } from "@utils/evm/getCleanAddress";
 import logger from "@utils/logger";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
 
@@ -40,6 +40,7 @@ export type ConverseUserName = {
 };
 
 export type ProfileSocials = {
+  address?: string;
   ensNames?: EnsName[];
   farcasterUsernames?: FarcasterUsername[];
   lensHandles?: LensHandle[];
@@ -83,8 +84,8 @@ export const initProfilesStore = (account: string) => {
             const mmkvState = mmkv.getString(`store-${account}-profiles`);
             if (!mmkvState) return state;
             try {
-              const parsed = JSON.parse(mmkvState);
-              return parsed.state;
+              const state = JSON.parse(mmkvState) as ProfilesStoreType;
+              return state;
             } catch (error) {
               logger.error(error, {
                 context: "Could not refresh profiles from storage",

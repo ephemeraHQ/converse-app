@@ -1,13 +1,21 @@
+import {
+  resetConversationListContextMenuStore,
+  useConversationListContextMenuConversationTopic,
+  useConversationListContextMenuIsVisible,
+  useConversationListContextMenuItems,
+} from "@/features/conversation-list/ConversationListContextMenu.store";
+import { ConversationReadOnly } from "@/screens/ConversationReadOnly";
 import { AnimatedBlurView } from "@components/AnimatedBlurView";
-import TableView, { TableViewItemType } from "@components/TableView/TableView";
-import { ConversationReadOnly } from "@screens/ConversationReadOnly";
-import { backgroundColor } from "@styles/colors";
-import { animations } from "@theme/animations";
+import TableView from "@components/TableView/TableView";
 import {
   BACKDROP_DARK_BACKGROUND_COLOR,
   BACKDROP_LIGHT_BACKGROUND_COLOR,
   contextMenuStyleGuide,
 } from "@design-system/ContextMenu/ContextMenu.constants";
+import { backgroundColor } from "@styles/colors";
+import { animation } from "@theme/animations";
+import { useAppTheme } from "@theme/useAppTheme";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 import React, { FC, memo, useCallback, useEffect } from "react";
 import {
   Platform,
@@ -29,35 +37,25 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { useAppTheme } from "@theme/useAppTheme";
 
-type ConversationContextMenuProps = {
-  isVisible: boolean;
-  onClose: (openConversationOnClose?: boolean) => void;
-  items: TableViewItemType[];
-  conversationTopic: string;
-};
-
-const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
-  isVisible,
-  onClose,
-  items,
-  conversationTopic,
-}) => {
+const ConversationContextMenuComponent: FC = () => {
+  const isVisible = useConversationListContextMenuIsVisible();
+  const conversationTopic = useConversationListContextMenuConversationTopic();
+  const contextMenuItems = useConversationListContextMenuItems();
   const activeValue = useSharedValue(false);
   const opacityValue = useSharedValue(0);
   const intensityValue = useSharedValue(0);
-  const { height, width } = useWindowDimensions();
+  const { height } = useWindowDimensions();
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
   useEffect(() => {
     activeValue.value = isVisible;
     opacityValue.value = withTiming(isVisible ? 1 : 0, {
-      duration: animations.contextMenuHoldDuration,
+      duration: animation.contextMenuHoldDuration,
     });
     intensityValue.value = withTiming(isVisible ? 50 : 0, {
-      duration: animations.contextMenuHoldDuration,
+      duration: animation.contextMenuHoldDuration,
     });
   }, [activeValue, isVisible, opacityValue, intensityValue]);
 
@@ -65,7 +63,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
 
   useEffect(() => {
     translateY.value = withTiming(isVisible ? 0 : height, {
-      duration: animations.contextMenuHoldDuration,
+      duration: animation.contextMenuHoldDuration,
     });
   }, [isVisible, translateY, height]);
 
@@ -91,12 +89,12 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   const closeMenu = useCallback(() => {
     translateY.value = withTiming(
       height,
-      { duration: animations.contextMenuHoldDuration },
+      { duration: animation.contextMenuHoldDuration },
       () => {
-        runOnJS(onClose)();
+        runOnJS(resetConversationListContextMenuStore)();
       }
     );
-  }, [height, onClose, translateY]);
+  }, [height, translateY]);
 
   const gesture = Gesture.Simultaneous(
     Gesture.Pan()
@@ -108,7 +106,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
           runOnJS(closeMenu)();
         } else {
           translateY.value = withTiming(0, {
-            duration: animations.contextMenuHoldDuration,
+            duration: animation.contextMenuHoldDuration,
           });
         }
       }),
@@ -139,14 +137,16 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
                 <View style={styles.previewContainer}>
                   <GestureDetector
                     gesture={Gesture.Tap().onEnd(() => {
-                      runOnJS(onClose)(true);
+                      runOnJS(resetConversationListContextMenuStore)();
                     })}
                   >
-                    <ConversationReadOnly topic={conversationTopic} />
+                    <ConversationReadOnly
+                      topic={conversationTopic as ConversationTopic}
+                    />
                   </GestureDetector>
                 </View>
                 <View style={styles.menuContainer}>
-                  <TableView style={styles.table} items={items} />
+                  <TableView style={styles.table} items={contextMenuItems} />
                 </View>
               </Animated.View>
             </View>

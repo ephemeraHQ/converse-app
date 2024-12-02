@@ -3,7 +3,8 @@ import { invalidateGroupNameQuery } from "@queries/useGroupNameQuery";
 import { invalidateGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
 
 import { handleGroupUpdatedMessage } from "./handleGroupUpdatedMessage";
-import { DecodedMessageWithCodecsType } from "../../../utils/xmtpRN/client";
+import type { DecodedMessageWithCodecsType } from "../../../utils/xmtpRN/client";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 jest.mock("@queries/useGroupMembersQuery", () => ({
   invalidateGroupMembersQuery: jest.fn(),
@@ -39,7 +40,7 @@ jest.mock("@queries/useGroupPhotoQuery", () => ({
 
 describe("handleGroupUpdatedMessage", () => {
   const account = "testAccount";
-  const topic = "testTopic";
+  const topic = "testTopic" as ConversationTopic;
 
   const createMessage = (contentTypeId: string, content: any) =>
     ({

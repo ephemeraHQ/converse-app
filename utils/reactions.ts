@@ -1,13 +1,10 @@
-import { getChatStore } from "@data/store/accountsStore";
 import { translate } from "@i18n";
-import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 
-import { isAttachmentMessage } from "./attachment/helpers";
 import { emojis } from "./emojis/emojis";
 import logger from "./logger";
-import { sendMessage } from "./message";
-import { getMessageContentType } from "./xmtpRN/contentTypes";
+// import { sendMessage } from "./message";
 import { XmtpMessage } from "../data/store/chatStore";
+import { getMessageContentType } from "./xmtpRN/contentTypes";
 
 export type MessageReaction = {
   action: "added" | "removed";
@@ -24,6 +21,7 @@ export const getMessageReactions = (message: XmtpMessage) => {
     const reactions = Array.from(message.reactions.values()).map(
       (c) =>
         ({
+          // @ts-ignore TODO
           ...JSON.parse(c.content),
           senderAddress: c.senderAddress,
           sent: c.sent,
@@ -137,22 +135,22 @@ export const addReactionToMessage = (
   message: XmtpMessage,
   emoji: string
 ) => {
-  const conversation =
-    getChatStore(account).getState().conversations[message.topic];
-  if (!conversation) throw new Error("No conversation found");
-  const contentFallback = getReactionsContentPreview(message, emoji);
-  sendMessage({
-    conversation,
-    content: JSON.stringify({
-      reference: message.id,
-      action: "added",
-      content: emoji,
-      schema: "unicode",
-    }),
-    contentType: ContentTypeReaction.toString(),
-    contentFallback,
-    referencedMessageId: message.id,
-  });
+  // const conversation =
+  //   getChatStore(account).getState().conversations[message.topic];
+  // if (!conversation) throw new Error("No conversation found");
+  // const contentFallback = getReactionsContentPreview(message, emoji);
+  // sendMessage({
+  //   conversation,
+  //   content: JSON.stringify({
+  //     reference: message.id,
+  //     action: "added",
+  //     content: emoji,
+  //     schema: "unicode",
+  //   }),
+  //   contentType: ContentTypeReaction.toString(),
+  //   contentFallback,
+  //   referencedMessageId: message.id,
+  // });
 };
 
 export const removeReactionFromMessage = (
@@ -160,24 +158,24 @@ export const removeReactionFromMessage = (
   message: XmtpMessage,
   emoji: string
 ) => {
-  const conversation =
-    getChatStore(account).getState().conversations[message.topic];
-  if (!conversation) throw new Error("No conversation found");
-  const isAttachment = isAttachmentMessage(message.contentType);
-  sendMessage({
-    conversation,
-    content: JSON.stringify({
-      reference: message.id,
-      action: "removed",
-      content: emoji,
-      schema: "unicode",
-    }),
-    contentType: ContentTypeReaction.toString(),
-    contentFallback: isAttachment
-      ? translate("removed_reaction_to_attachment")
-      : translate("removed_reaction_to", {
-          content: message.content,
-        }),
-    referencedMessageId: message.id,
-  });
+  // const conversation =
+  //   getChatStore(account).getState().conversations[message.topic];
+  // if (!conversation) throw new Error("No conversation found");
+  // const isAttachment = isAttachmentMessage(message.contentType);
+  // sendMessage({
+  //   conversation,
+  //   content: JSON.stringify({
+  //     reference: message.id,
+  //     action: "removed",
+  //     content: emoji,
+  //     schema: "unicode",
+  //   }),
+  //   contentType: ContentTypeReaction.toString(),
+  //   contentFallback: isAttachment
+  //     ? translate("removed_reaction_to_attachment")
+  //     : translate("removed_reaction_to", {
+  //         content: message.content,
+  //       }),
+  //   referencedMessageId: message.id,
+  // });
 };

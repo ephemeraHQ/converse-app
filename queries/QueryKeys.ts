@@ -1,22 +1,26 @@
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+
 export enum QueryKeys {
   // Conversations
-  GROUPS = "groupsv2", // When changing the shape of response, update the keys as persistance will break
-  GROUP = "group",
+  CONVERSATIONS = "conversations", // When changing the shape of response, update the keys as persistance will break
+  CONVERSATION = "conversation",
+  CONVERSATION_WITH_PEER = "conversationWithPeer",
+  V3_CONVERSATION_LIST = "v3ConversationList",
 
   // Messages
-  GROUP_MESSAGES = "groupMessages",
-  GROUP_FIRST_MESSAGE = "groupFirstMessage",
-  GROUP_PENDING_MESSAGES = "groupPendingMessages",
+  CONVERSATION_MESSAGE = "conversationMessage",
+  CONVERSATION_MESSAGES = "conversationMessages",
 
   // Members
   GROUP_MEMBERS = "groupMembersv2",
   ADDED_BY = "addedBy",
 
-  // Mutable Metadata
+  // Group Mutable Metadata
   GROUP_NAME = "groupName",
   GROUP_DESCRIPTION = "groupDescription",
   GROUP_PHOTO = "groupPhoto",
   PINNED_FRAME = "pinnedFrame",
+  GROUP_PERMISSION_POLICY = "groupPermissionPolicy",
 
   // Permissions
   GROUP_PERMISSIONS = "groupPermissions",
@@ -33,97 +37,100 @@ export enum QueryKeys {
   PENDING_JOIN_REQUESTS = "pendingJoinRequests",
 }
 
-export const groupsQueryKey = (account: string) => [QueryKeys.GROUPS, account];
-
-export const groupQueryKey = (account: string, topic: string) => [
-  QueryKeys.GROUP,
-  account,
-  topic,
-];
-
-export const groupMessagesQueryKey = (account: string, topic: string) => [
-  QueryKeys.GROUP_MESSAGES,
-  account,
-  topic,
-];
-
-export const groupFirstMessageQueryKey = (account: string, topic: string) => [
-  QueryKeys.GROUP_FIRST_MESSAGE,
-  account,
-  topic,
-];
-
-export const groupPendingMessagesQueryKey = (
+export const conversationMessageQueryKey = (
   account: string,
-  topic: string
-) => [QueryKeys.GROUP_PENDING_MESSAGES, account, topic];
+  messageId: string
+) => [QueryKeys.CONVERSATION_MESSAGE, account.toLowerCase(), messageId];
 
-export const groupMembersQueryKey = (account: string, topic: string) => [
-  QueryKeys.GROUP_MEMBERS,
-  account,
-  topic,
+export const conversationsQueryKey = (account: string) => [
+  QueryKeys.CONVERSATIONS,
+  account.toLowerCase(),
 ];
 
-export const groupNameQueryKey = (account: string, topic: string) => [
-  QueryKeys.GROUP_NAME,
-  account,
-  topic,
+export const conversationQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.CONVERSATION, account.toLowerCase(), topic];
+
+export const conversationWithPeerQueryKey = (account: string, peer: string) => [
+  QueryKeys.CONVERSATION_WITH_PEER,
+  account.toLowerCase(),
+  peer,
 ];
 
-export const groupDescriptionQueryKey = (account: string, topic: string) => [
-  QueryKeys.GROUP_DESCRIPTION,
-  account,
-  topic,
-];
+export const conversationMessagesQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.CONVERSATION_MESSAGES, account.toLowerCase(), topic];
 
-export const groupPhotoQueryKey = (account: string, topic: string) => [
-  QueryKeys.GROUP_PHOTO,
-  account,
-  topic,
-];
+export const conversationPreviewMessagesQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.CONVERSATION_MESSAGES, account.toLowerCase(), topic];
 
-export const groupPinnedFrameQueryKey = (account: string, topic: string) => [
-  QueryKeys.PINNED_FRAME,
-  account,
-  topic,
-];
+export const groupMembersQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.GROUP_MEMBERS, account.toLowerCase(), topic];
 
-export const groupPermissionsQueryKey = (account: string, topic: string) => [
-  QueryKeys.GROUP_PERMISSIONS,
-  account,
-  topic,
-];
+export const groupNameQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.GROUP_NAME, account.toLowerCase(), topic];
 
-export const groupConsentQueryKey = (account: string, topic: string) => [
-  QueryKeys.GROUP_CONSENT,
-  account,
-  topic,
-];
+export const groupDescriptionQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.GROUP_DESCRIPTION, account.toLowerCase(), topic];
 
-export const addedByQueryKey = (account: string, topic: string) => [
+export const groupPhotoQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.GROUP_PHOTO, account.toLowerCase(), topic];
+
+export const groupPinnedFrameQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.PINNED_FRAME, account.toLowerCase(), topic];
+
+export const groupPermissionsQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.GROUP_PERMISSIONS, account.toLowerCase(), topic];
+
+export const groupConsentQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.GROUP_CONSENT, account.toLowerCase(), topic];
+
+export const addedByQueryKey = (account: string, topic: ConversationTopic) => [
   QueryKeys.ADDED_BY,
-  account,
+  account.toLowerCase(),
   topic,
 ];
 
-export const groupIsActiveQueryKey = (account: string, topic: string) => [
-  QueryKeys.GROUP_ACTIVE,
-  account,
-  topic,
-];
+export const groupIsActiveQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.GROUP_ACTIVE, account.toLowerCase(), topic];
 
 export const groupInviteQueryKey = (account: string, inviteId: string) => [
   QueryKeys.GROUP_INVITE,
-  account,
+  account.toLowerCase(),
   inviteId,
 ];
 
 export const groupJoinRequestQueryKey = (
   account: string,
   requestId: string
-) => [QueryKeys.GROUP_JOIN_REQUEST, account, requestId];
+) => [QueryKeys.GROUP_JOIN_REQUEST, account.toLowerCase(), requestId];
 
 export const pendingJoinRequestsQueryKey = (account: string) => [
   QueryKeys.PENDING_JOIN_REQUESTS,
-  account,
+  account.toLowerCase(),
 ];
+
+export const groupPermissionPolicyQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.GROUP_PERMISSION_POLICY, account.toLowerCase(), topic];

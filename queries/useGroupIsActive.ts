@@ -2,9 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 
 import { groupIsActiveQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
-import { useGroupQuery } from "./useGroupQuery";
+import { useGroupQuery } from "@queries/useGroupQuery";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
-export const useGroupIsActiveQuery = (account: string, topic: string) => {
+export const useGroupIsActiveQuery = (
+  account: string,
+  topic: ConversationTopic
+) => {
   const { data: group } = useGroupQuery(account, topic);
   return useQuery({
     queryKey: groupIsActiveQueryKey(account, topic),
@@ -20,13 +24,13 @@ export const useGroupIsActiveQuery = (account: string, topic: string) => {
 
 export const getGroupIsActiveQueryData = (
   account: string,
-  topic: string
+  topic: ConversationTopic
 ): boolean | undefined =>
   queryClient.getQueryData(groupIsActiveQueryKey(account, topic));
 
 export const setGroupIsActiveQueryData = (
   account: string,
-  topic: string,
+  topic: ConversationTopic,
   isActive: boolean
 ) => {
   queryClient.setQueryData(groupIsActiveQueryKey(account, topic), isActive);
@@ -34,7 +38,7 @@ export const setGroupIsActiveQueryData = (
 
 export const cancelGroupIsActiveQuery = async (
   account: string,
-  topic: string
+  topic: ConversationTopic
 ) => {
   await queryClient.cancelQueries({
     queryKey: groupIsActiveQueryKey(account, topic),
@@ -43,7 +47,7 @@ export const cancelGroupIsActiveQuery = async (
 
 export const invalidateGroupIsActiveQuery = async (
   account: string,
-  topic: string
+  topic: ConversationTopic
 ) => {
   return queryClient.invalidateQueries({
     queryKey: groupIsActiveQueryKey(account, topic),

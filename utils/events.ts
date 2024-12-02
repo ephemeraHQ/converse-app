@@ -1,6 +1,5 @@
-import { MessageToDisplay } from "@components/Chat/Message/Message";
 import { TransactionToTrigger } from "@components/TransactionPreview/TransactionPreview";
-import { MediaPreview } from "@data/store/chatStore";
+import { MessageAttachment } from "@data/store/chatStore";
 import EventEmitter from "eventemitter3";
 import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 import { Account, Wallet } from "thirdweb/wallets";
@@ -18,10 +17,12 @@ type ConverseEvents = {
   "conversationList-scroll": () => void;
   "enable-transaction-mode": (enabled: boolean) => void;
   openingConversation: (payload: { topic: string }) => void;
-  setCurrentConversationMediaPreviewValue: (mediaPreview: MediaPreview) => void;
+  setCurrentConversationMediaPreviewValue: (
+    mediaPreview: MessageAttachment
+  ) => void;
   highlightMessage: (messageId: string) => void;
   setCurrentConversationInputValue: (value: string) => void;
-  triggerReplyToMessage: (message: MessageToDisplay) => void;
+  triggerReplyToMessage: (messageId: string) => void;
   scrollChatToMessage: (value: {
     index?: number;
     messageId?: string;

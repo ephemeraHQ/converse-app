@@ -10,16 +10,17 @@ import {
   setGroupMembersQueryData,
 } from "./useGroupMembersQuery";
 import { useGroupQuery } from "./useGroupQuery";
-import { refreshGroup } from "../utils/xmtpRN/conversations";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+// import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const usePromoteToSuperAdminMutation = (
   account: string,
-  topic: string
+  topic: ConversationTopic | undefined
 ) => {
   const { data: group } = useGroupQuery(account, topic);
 
   return useMutation({
-    mutationKey: promoteSuperAdminMutationKey(account, topic),
+    mutationKey: promoteSuperAdminMutationKey(account, topic!),
     mutationFn: async (inboxId: InboxId) => {
       if (!group || !account || !topic) {
         return;
@@ -28,6 +29,9 @@ export const usePromoteToSuperAdminMutation = (
       return inboxId;
     },
     onMutate: async (inboxId: InboxId) => {
+      if (!topic) {
+        throw new Error("Topic is required");
+      }
       await cancelGroupMembersQuery(account, topic);
 
       const previousGroupMembers = getGroupMembersQueryData(account, topic);
@@ -49,11 +53,14 @@ export const usePromoteToSuperAdminMutation = (
       if (context?.previousGroupMembers === undefined) {
         return;
       }
+      if (!topic) {
+        return;
+      }
       setGroupMembersQueryData(account, topic, context.previousGroupMembers);
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess usePromoteToSuperAdminMutation");
-      refreshGroup(account, topic);
+      // refreshGroup(account, topic);
     },
   });
 };

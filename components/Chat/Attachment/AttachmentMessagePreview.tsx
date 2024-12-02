@@ -1,223 +1,355 @@
 import { translate } from "@i18n";
-import {
-  backgroundColor,
-  textPrimaryColor,
-  tertiaryBackgroundColor,
-} from "@styles/colors";
-import { Image } from "expo-image";
+import { Image, ImageProps } from "expo-image";
 import prettyBytes from "pretty-bytes";
-import { useCallback, useEffect } from "react";
+import { memo } from "react";
+import { ActivityIndicator } from "react-native";
+
+import { getCurrentAccount } from "@data/store/accountsStore";
+import { Center } from "@design-system/Center";
+import { Icon } from "@design-system/Icon/Icon";
+import { Text } from "@design-system/Text";
+import { IVStackProps, VStack } from "@design-system/VStack";
+import { PressableScale } from "@design-system/pressable-scale";
+import { useQuery } from "@tanstack/react-query";
+import { useAppTheme } from "@theme/useAppTheme";
+import { getLocalAttachmentForMessageId } from "@utils/attachment/getLocalAttachment";
+import { handleDecryptedLocalAttachment } from "@utils/attachment/handleDecryptedLocalAttachment";
 import {
-  Platform,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-  TouchableOpacity,
-} from "react-native";
+  MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE,
+  fetchAndDecodeRemoteAttachment,
+} from "@utils/xmtpRN/attachments";
+import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 
-import { useAttachmentForMessage } from "../../../utils/attachment";
-import { converseEventEmitter } from "../../../utils/events";
-import { navigate } from "../../../utils/navigation";
-import ActivityIndicator from "../../ActivityIndicator/ActivityIndicator";
-import Picto from "../../Picto/Picto";
-import { MessageToDisplay } from "../Message/Message";
-import MessageTimestamp from "../Message/MessageTimestamp";
-
-type Props = {
-  message: MessageToDisplay;
-};
-
-export default function AttachmentMessagePreview({ message }: Props) {
-  const colorScheme = useColorScheme();
-  const styles = useStyles();
-
-  const { attachment, fetch } = useAttachmentForMessage(message);
-
-  const openInWebview = useCallback(async () => {
-    if (
-      !attachment.mediaURL ||
-      attachment.loading ||
-      attachment.error ||
-      !attachment.mediaURL
-    )
-      return;
-    navigate("WebviewPreview", { uri: attachment.mediaURL });
-  }, [attachment.error, attachment.loading, attachment.mediaURL]);
-  const clickedOnAttachmentBubble = useCallback(() => {
-    if (attachment.mediaType !== "UNSUPPORTED") {
-      openInWebview();
-    }
-  }, [attachment.mediaType, openInWebview]);
-
-  const showing =
-    !attachment.loading &&
-    !!attachment.mediaURL &&
-    attachment.mediaType !== "UNSUPPORTED";
-
-  const metadataView = <MessageTimestamp message={message} white={showing} />;
-  const filesize = prettyBytes(attachment.contentLength);
-  const textStyle = [
-    styles.text,
-    { color: textPrimaryColor(colorScheme), fontSize: 12 },
-  ];
-
-  useEffect(() => {
-    converseEventEmitter.on(
-      `openAttachmentForMessage-${message.id}`,
-      clickedOnAttachmentBubble
-    );
-    return () => {
-      converseEventEmitter.off(
-        `openAttachmentForMessage-${message.id}`,
-        clickedOnAttachmentBubble
-      );
-    };
-  }, [message.id, clickedOnAttachmentBubble]);
-
-  if (attachment.loading) {
-    return (
-      <View
-        style={[
-          styles.imagePreview,
-          {
-            aspectRatio: 1.5,
-            backgroundColor: tertiaryBackgroundColor(colorScheme),
-          },
-        ]}
-      >
-        <ActivityIndicator />
-      </View>
-    );
-  } else if (attachment.error) {
-    return (
-      <View
-        style={[
-          styles.imagePreview,
-          {
-            aspectRatio: 1.5,
-            backgroundColor: tertiaryBackgroundColor(colorScheme),
-          },
-        ]}
-      >
-        <Text style={textStyle}>
-          {translate("attachment_message_error_download")}
-        </Text>
-      </View>
-    );
-  } else if (!attachment.mediaURL) {
-    // Either unsupported type or too big
-    return (
-      <View
-        style={[
-          styles.imagePreview,
-          {
-            aspectRatio: 1.5,
-            backgroundColor: tertiaryBackgroundColor(colorScheme),
-          },
-        ]}
-      >
-        <TouchableOpacity onPress={fetch} style={styles.downloadButton}>
-          <Picto picto="arrow.down" size={14} color="white" />
-          <Text style={styles.downloadText}>{filesize}</Text>
-        </TouchableOpacity>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </View>
-    );
-  } else if (attachment.mediaType === "UNSUPPORTED") {
-    // Downloaded but unsupported
-    return (
-      <View
-        style={[
-          styles.imagePreview,
-          {
-            aspectRatio: 1.5,
-            backgroundColor: tertiaryBackgroundColor(colorScheme),
-          },
-        ]}
-      >
-        <Text style={[textStyle, styles.textUnderline]} onPress={openInWebview}>
-          {translate("attachment_message_view_in_browser")}
-        </Text>
-        <View style={{ opacity: 0 }}>{metadataView}</View>
-      </View>
-    );
-  } else {
-    // Downloaded and supported
-    converseEventEmitter.emit(
-      `attachmentMessageProcessed-${attachment.filename}`
-    );
-    const aspectRatio = attachment.imageSize
-      ? attachment.imageSize.width / attachment.imageSize.height
-      : undefined;
-    return (
-      <>
-        <Image
-          source={{ uri: attachment.mediaURL }}
-          contentFit="cover"
-          style={[styles.imagePreview, { aspectRatio }]}
-        />
-      </>
-    );
-  }
+export function useRemoteAttachment(
+  messageId: string,
+  remoteMessageContent: RemoteAttachmentContent
+) {
+  return useQuery({
+    queryKey: ["attachment", messageId],
+    queryFn: () => fetchAttachment(messageId, remoteMessageContent),
+  });
 }
 
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    imagePreview: {
-      borderRadius: 16,
-      width: "100%",
-      zIndex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    text: {
-      paddingHorizontal: 8,
-      paddingVertical: Platform.OS === "android" ? 2 : 3,
-      fontSize: 17,
-      color: textPrimaryColor(colorScheme),
-    },
-    textUnderline: {
-      textDecorationLine: "underline",
-    },
-    metadataContainer: {
-      position: "absolute",
-      bottom: 5,
-      right: 10,
-      backgroundColor: "rgba(24, 24, 24, 0.5)",
-      borderRadius: 18,
-      paddingLeft: 1,
-      paddingRight: 2,
-      zIndex: 2,
-      ...Platform.select({
-        default: {
-          paddingBottom: 1,
-          paddingTop: 1,
-        },
-        android: { paddingBottom: 3, paddingTop: 2 },
-      }),
-    },
-    sendingIndicator: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    downloadButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      borderRadius: 14,
-      padding: 10,
-      paddingLeft: 16,
-      backgroundColor: "black",
-      color: "white",
-    },
-    downloadText: {
-      color: "white",
-      fontSize: 16,
-      fontWeight: "bold",
-      marginLeft: 16,
-    },
-  });
+type IRemoteImageProps = ImageProps & {
+  messageId: string;
+  remoteMessageContent: RemoteAttachmentContent;
+  fitAspectRatio?: boolean;
 };
+
+export const RemoteImage = memo(function RemoteImage(props: IRemoteImageProps) {
+  const { messageId, remoteMessageContent, fitAspectRatio, ...imageProps } =
+    props;
+
+  const {
+    data: attachment,
+    isLoading: attachmentLoading,
+    error: attachmentError,
+  } = useRemoteAttachment(messageId, remoteMessageContent);
+
+  if (attachmentLoading) {
+    return (
+      <Center>
+        <ActivityIndicator />
+      </Center>
+    );
+  }
+
+  if (attachmentError || !attachment) {
+    return (
+      <Center>
+        <Text>Error loading attachment</Text>
+      </Center>
+    );
+  }
+
+  const aspectRatio =
+    fitAspectRatio && attachment.imageSize
+      ? attachment.imageSize.width / attachment.imageSize.height
+      : undefined;
+
+  const { style, ...rest } = imageProps;
+
+  return (
+    <Image
+      source={{ uri: attachment.mediaURL }}
+      style={[{ aspectRatio }, style]}
+      {...rest}
+    />
+  );
+});
+
+type IRemoteAttachmentPreviewProps = {
+  messageId: string;
+  remoteMessageContent: RemoteAttachmentContent;
+};
+
+export const RemoteAttachmentPreview = memo(function RemoteAttachmentPreview(
+  props: IRemoteAttachmentPreviewProps
+) {
+  const { messageId, remoteMessageContent } = props;
+
+  const { theme } = useAppTheme();
+
+  const {
+    data: attachment,
+    isLoading: attachmentLoading,
+    error: attachmentError,
+    refetch: refetchAttachment,
+  } = useQuery({
+    queryKey: ["attachment", messageId],
+    queryFn: () => fetchAttachment(messageId, remoteMessageContent),
+  });
+
+  if (!attachment && attachmentLoading) {
+    return (
+      <AttachmentPreviewContainer>
+        <ActivityIndicator color={theme.colors.text.inverted.primary} />
+      </AttachmentPreviewContainer>
+    );
+  }
+
+  if (attachmentError || !attachment) {
+    return (
+      <AttachmentPreviewContainer>
+        <Text>{translate("attachment_message_error_download")}</Text>
+      </AttachmentPreviewContainer>
+    );
+  }
+
+  // const openInWebview = useCallback(async () => {
+  //   if (
+  //     !attachment.mediaURL ||
+  //     attachment.loading ||
+  //     attachment.error ||
+  //     !attachment.mediaURL
+  //   )
+  //     return;
+  //   navigate("WebviewPreview", { uri: attachment.mediaURL });
+  // }, [attachment.error, attachment.loading, attachment.mediaURL]);
+
+  // const clickedOnAttachmentBubble = useCallback(() => {
+  //   if (attachment.mediaType !== "UNSUPPORTED") {
+  //     openInWebview();
+  //   }
+  // }, [attachment.mediaType, openInWebview]);
+
+  // const showing =
+  //   !attachment.loading &&
+  //   !!attachment.mediaURL &&
+  //   attachment.mediaType !== "UNSUPPORTED";
+
+  // useEffect(() => {
+  //   converseEventEmitter.on(
+  //     `openAttachmentForMessage-${message.id}`,
+  //     clickedOnAttachmentBubble
+  //   );
+  //   return () => {
+  //     converseEventEmitter.off(
+  //       `openAttachmentForMessage-${message.id}`,
+  //       clickedOnAttachmentBubble
+  //     );
+  //   };
+  // }, [message.id, clickedOnAttachmentBubble]);
+
+  // const metadataView = <MessageTimestamp message={message} white={showing} />;
+
+  if (!attachment.mediaURL) {
+    return (
+      <PressableScale onPress={() => refetchAttachment()}>
+        <AttachmentPreviewContainer>
+          <Icon icon="arrow.down" size={14} color="white" />
+          <Text inverted weight="bold">
+            {prettyBytes(attachment.contentLength)}
+          </Text>
+        </AttachmentPreviewContainer>
+      </PressableScale>
+    );
+  }
+
+  if (attachment.mediaType === "UNSUPPORTED") {
+    return (
+      <PressableScale
+        onPress={() => {
+          // openInWebview
+        }}
+      >
+        <AttachmentPreviewContainer>
+          <Text
+            style={{
+              textDecorationLine: "underline",
+            }}
+          >
+            {translate("attachment_message_view_in_browser")}
+          </Text>
+        </AttachmentPreviewContainer>
+      </PressableScale>
+    );
+  }
+
+  const aspectRatio = attachment.imageSize
+    ? attachment.imageSize.width / attachment.imageSize.height
+    : undefined;
+
+  return (
+    <AttachmentPreviewContainer
+      style={{
+        aspectRatio,
+      }}
+    >
+      <Image
+        source={{ uri: attachment.mediaURL }}
+        contentFit="cover"
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+      />
+    </AttachmentPreviewContainer>
+  );
+});
+
+const AttachmentPreviewContainer = memo(function AttachmentPreviewContainer(
+  props: IVStackProps
+) {
+  const { style, ...rest } = props;
+
+  const { theme } = useAppTheme();
+
+  return (
+    <VStack
+      style={[
+        {
+          overflow: "hidden",
+          borderRadius: theme.borderRadius.sm,
+          width: "100%",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: theme.colors.fill.tertiary,
+          aspectRatio: 1.5, // Default aspect ratio for attachments
+        },
+        style,
+      ]}
+      {...rest}
+    />
+  );
+});
+
+// const DEFAULT_ATTACHMENT = {
+//   loading: true,
+//   error: false,
+//   mediaType: undefined as undefined | "IMAGE" | "UNSUPPORTED",
+//   mediaURL: undefined as undefined | string,
+//   filename: "",
+//   mimeType: "",
+//   contentLength: 0,
+//   imageSize: undefined as undefined | { height: number; width: number },
+// };
+
+// export const useAttachmentForMessage = (
+//   message: DecodedMessage<[RemoteAttachmentCodec]>
+// ) => {
+//   const currentAccount = useCurrentAccount()!;
+
+//   // const messageId = useRef(message.id);
+
+//   // const [messageAttachment, setMessageAttachment] = useChatStore((state) => [
+//   //   state.messageAttachments[message.id] || DEFAULT_ATTACHMENT,
+//   //   state.setMessageAttachment,
+//   // ]);
+
+//   const { data: attachmentData, refetch: refetchAttachment } = useQuery({
+//     queryKey: ["attachment", message.id],
+//     queryFn: () => fetchAttachment(message),
+//   });
+
+//   return { attachment: attachmentData, fetch: refetchAttachment };
+// };
+
+// async function saveAndDisplayLocalAttachment(
+//   messageId: string,
+//   attachmentContent: SerializedAttachmentContent
+// ) {
+//   // setMessageAttachment(messageId, {
+//   //     ...DEFAULT_ATTACHMENT,
+//   //     loading: true,
+//   //   });
+//   try {
+//     const result = await handleStaticAttachment(message.id, attachmentContent);
+//     // setMessageAttachment(message.id, {
+//     //   ...result,
+//     //   loading: false,
+//     //   error: false,
+//     // });
+//   } catch (error) {
+//     logger.error(error, { context: "Error handling static attachment" });
+//     // setMessageAttachment(message.id, {
+//     //   ...DEFAULT_ATTACHMENT,
+//     //   loading: false,
+//     //   error: true,
+//     // });
+//   }
+// }
+
+async function fetchAttachment(
+  messageId: string,
+  content: RemoteAttachmentContent
+) {
+  const localAttachment = await getLocalAttachmentForMessageId(messageId);
+
+  console.log("localAttachment:", localAttachment);
+
+  if (localAttachment) {
+    return localAttachment;
+  }
+
+  if (
+    content.contentLength &&
+    parseFloat(content.contentLength) <= MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE
+  ) {
+    const decryptedLocalAttachment = await fetchAndDecodeRemoteAttachment({
+      account: getCurrentAccount()!,
+      messageId: messageId,
+      remoteAttachmentContent: content,
+    });
+
+    console.log("decryptedLocalAttachment", decryptedLocalAttachment);
+
+    const result = await handleDecryptedLocalAttachment({
+      messageId: messageId,
+      decryptedLocalAttachment: decryptedLocalAttachment,
+    });
+
+    console.log("result:", result);
+
+    return result;
+  }
+
+  // if (isRemoteAttachment) {
+  // const contentLength = parsedEncodedContent.contentLength;
+
+  // setMessageAttachment(message.id, {
+  //   mediaType:
+  //     parsedType && isImageMimetype(parsedType) ? "IMAGE" : "UNSUPPORTED",
+  //   loading: contentLength <= 10000000,
+  //   mediaURL: undefined,
+  //   imageSize: undefined,
+  //   contentLength,
+  //   mimeType: parsedType || "",
+  //   filename: parsedEncodedContent.filename,
+  //   error: false,
+  // });
+
+  // } else {
+  //   await saveAndDisplayLocalAttachment(parsedEncodedContent);
+  // }
+  // } catch (e) {
+  //   logger.error(e, { context: "Error parsing message content" });
+  //   // setMessageAttachment(message.id, {
+  //   //   ...DEFAULT_ATTACHMENT,
+  //   //   loading: false,
+  //   //   error: true,
+  //   // });
+  // }
+}
+
+// await saveAndDisplayRemoteAttachment(result);

@@ -1,11 +1,9 @@
+import { ParsedText } from "@components/ParsedText/ParsedText";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { actionSheetColors } from "@styles/colors";
 import * as Linking from "expo-linking";
 import { useCallback } from "react";
 import { StyleProp, StyleSheet, TextStyle, useColorScheme } from "react-native";
-import ParsedText from "react-native-parsed-text";
-
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { navigate } from "../utils/navigation";
 import {
   ADDRESS_REGEX,
@@ -17,25 +15,28 @@ import {
   UNS_REGEX,
   URL_REGEX,
 } from "../utils/regex";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type Props = {
   children: React.ReactNode;
   style?: StyleProp<TextStyle>;
 };
 
-export default function ClickableText({ children, style }: Props) {
+export function ClickableText({ children, style }: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
+
   const handleEmailPress = useCallback((email: string) => {
     try {
       Linking.openURL(`mailto:${email}`);
     } catch {}
   }, []);
+
   const handleUrlPress = useCallback((url: string) => {
     const uri = url.toLowerCase().startsWith("http") ? url : `https://${url}`;
-
     Linking.openURL(uri);
   }, []);
+
   const handleNewConversationPress = useCallback((peer: string) => {
     navigate("NewConversation", { peer });
   }, []);
@@ -69,6 +70,7 @@ export default function ClickableText({ children, style }: Props) {
     },
     [colorScheme]
   );
+
   return (
     <ParsedText
       accessibilityRole="link"
