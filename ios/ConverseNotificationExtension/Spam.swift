@@ -89,17 +89,16 @@ func containsRestrictedWords(in searchString: String) -> Bool {
 
 func computeSpamScoreV3Welcome(client: XMTP.Client, conversation: XMTP.Conversation, apiURI: String?) async -> Double {
   do {
-    try await client.syncConsent()
-    let consentList = await client.preferences.consentList
+    try await client.preferences.syncConsent()
     // Probably an unlikely case until consent proofs for groups exist
-    let convoState = try await consentList.conversationState(conversationId: conversation.id)
+    let convoState = try await client.preferences.conversationState(conversationId: conversation.id)
     let convoAllowed = convoState == .allowed
     if convoAllowed {
       return -1
     }
     if case .group(let group) = conversation {
       let inviterInboxId = try group.addedByInboxId()
-      let inviterState = try await consentList.inboxIdState(inboxId: inviterInboxId)
+      let inviterState = try await client.preferences.inboxIdState(inboxId: inviterInboxId)
 
       let inviterAllowed = inviterState == .allowed
       if inviterAllowed {
@@ -115,7 +114,7 @@ func computeSpamScoreV3Welcome(client: XMTP.Client, conversation: XMTP.Conversat
       if let inviterAddresses = members.first(where: {$0.inboxId == inviterInboxId})?.addresses {
 
         for address in inviterAddresses {
-          let addressState = try await consentList.addressState(address: address)
+          let addressState = try await client.preferences.addressState(address: address)
           if addressState == .denied {
             anyDenied = true
           }
@@ -151,28 +150,28 @@ func computeSpamScoreV3Message(client: XMTP.Client, conversation: XMTP.Conversat
   var senderSpamScore: Double = 0
   do {
     
-    try await client.syncConsent()
-    let consentList = await client.preferences.consentList
-    let groupDenied = try await consentList.conversationState(conversationId: conversation.id) == .denied
+    try await client.preferences.syncConsent()
+//    let consentList = await client.preferences.consentList
+    let groupDenied = try await client.preferences.conversationState(conversationId: conversation.id) == .denied
     if groupDenied {
       // Network consent will override other checks
       return 1
     }
     let senderInboxId = decodedMessage.senderAddress
-    let senderDenied = try await consentList.inboxIdState(inboxId: senderInboxId) == .denied
+    let senderDenied = try await client.preferences.inboxIdState(inboxId: senderInboxId) == .denied
     if senderDenied {
       // Network consent will override other checks
       return 1
     }
     
-    let senderAllowed = try await consentList.inboxIdState(inboxId: senderInboxId) == .allowed
+    let senderAllowed = try await client.preferences.inboxIdState(inboxId: senderInboxId) == .allowed
     if senderAllowed {
       // Network consent will override other checks
       return -1
     }
     
     
-    let convoAllowed = try await consentList.conversationState(conversationId: conversation.id) == .allowed
+    let convoAllowed = try await client.preferences.conversationState(conversationId: conversation.id) == .allowed
     if convoAllowed {
       // Network consent will override other checks
       return -1
@@ -182,12 +181,12 @@ func computeSpamScoreV3Message(client: XMTP.Client, conversation: XMTP.Conversat
 
       if let senderAddresses = try await group.members.first(where: {$0.inboxId == senderInboxId})?.addresses {
         for address in senderAddresses {
-          if try await consentList.addressState(address: address) == .denied {
+          if try await client.preferences.addressState(address: address) == .denied {
             return 1
           }
         }
         for address in senderAddresses {
-          if try await consentList.addressState(address: address) == .allowed {
+          if try await client.preferences.addressState(address: address) == .allowed {
             return -1
           }
         }
@@ -195,10 +194,10 @@ func computeSpamScoreV3Message(client: XMTP.Client, conversation: XMTP.Conversat
     } else if case .dm(let dm) = conversation {
       let peer = try dm.peerInboxId
       
-      if try await consentList.inboxIdState(inboxId: peer) == .allowed {
+      if try await client.preferences.inboxIdState(inboxId: peer) == .allowed {
         return -1
       }
-      if try await consentList.inboxIdState(inboxId: peer) == .denied {
+      if try await client.preferences.inboxIdState(inboxId: peer) == .denied {
         return 1
       }
     }
