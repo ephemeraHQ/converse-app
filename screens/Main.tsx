@@ -40,6 +40,7 @@ import {
   getConverseInitialURL,
   getConverseStateFromPath,
 } from "./Navigation/navHelpers";
+import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
 
 const prefix = Linking.createURL("/");
 
@@ -53,8 +54,7 @@ const linking: LinkingOptions<NavigationParamList> = {
       NewConversation: NewConversationScreenConfig,
       Profile: ProfileScreenConfig,
       Group: GroupScreenConfig,
-      GroupLink: GroupLinkScreenConfig,
-      GroupInvite: GroupInviteScreenConfig,
+      GroupInvite: JoinGroupScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
       WebviewPreview: WebviewPreviewScreenConfig,
     },

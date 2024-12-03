@@ -10,6 +10,44 @@ import { ColorSchemeName, Platform } from "react-native";
 import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
 import config from "../../config";
 
+/**
+ * Creates a custom state object from a given path for
+ * navigation in a Converse app.
+ *
+ * This higher-order function returns a function that
+ * processes various URL formats and generates appropriate
+ * navigation states. It handles special cases for direct
+ * messages (DM), group chats, and text-only parameters.
+ *
+ * @param {string} navigationName - The name of the
+ *                                  navigation context
+ * @returns {Function} A function that takes a path and
+ *                     options to generate a state object
+ *
+ * @example
+ * // Input:
+ * getConverseStateFromPath('MainNav')('dm?peer=0x123&text=Hello')
+ * // Output:
+ * // State object for navigating to a DM conversation
+ * // with peer '0x123' and prefilled text 'Hello'
+ *
+ * @example
+ * // Input:
+ * getConverseStateFromPath('MainNav')('group/abc123?text=Hi all')
+ * // Output:
+ * // State object for navigating to group 'abc123'
+ * // with prefilled text 'Hi all'
+ *
+ * @example
+ * // Input:
+ * getConverseStateFromPath('MainNav')('?text=Hello world')
+ * // Output:
+ * // null (prevents navigation, but sets conversation text)
+ *
+ * @sideEffects
+ * - May modify the conversation input value via event emission
+ * - Logs errors if URL parsing fails
+ */
 export const getConverseStateFromPath =
   (navigationName: string) => (path: string, options: any) => {
     // dm method must link to the Conversation Screen as well
