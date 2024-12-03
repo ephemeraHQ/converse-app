@@ -1,7 +1,7 @@
-import { useGroupQuery } from "@queries/useGroupQuery";
 import { useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { currentAccount } from "../data/store/accountsStore";
+import { useGroupQuery } from "../queries/useGroupQuery";
 
 export const useGroupCreator = (topic: ConversationTopic) => {
   const account = currentAccount();
