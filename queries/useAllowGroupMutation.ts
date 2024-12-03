@@ -1,4 +1,3 @@
-import { useGroupId } from "@hooks/useGroupId";
 import { queryClient } from "@queries/queryClient";
 import { useMutation, MutationObserver } from "@tanstack/react-query";
 import logger from "@utils/logger";
@@ -7,7 +6,6 @@ import {
   consentToGroupsOnProtocol,
   consentToGroupsOnProtocolByAccount,
 } from "@utils/xmtpRN/contacts";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 import { allowGroupMutationKey } from "./MutationKeys";
 import {
@@ -61,8 +59,6 @@ export const createAllowGroupMutationObserver = ({
 };
 
 export const useAllowGroupMutation = (account: string, topic: string) => {
-  const { groupId } = useGroupId(topic);
-  // >>>>>>> bd191fb2 (feat: Add Dependency Control Pattern)
   return useMutation({
     mutationKey: allowGroupMutationKey(account, topic),
     mutationFn: async () => {
