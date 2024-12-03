@@ -184,7 +184,10 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
   const handleSendMessage = useCallback(
     async (args: IComposerSendArgs) => {
       try {
-        const { text, remoteAttachment, referencedMessageId } = args;
+        const {
+          content: { text, remoteAttachment },
+          referencedMessageId,
+        } = args;
         const newConversation = await createNewConversationAsync(peerAddress);
         await sendMessageAsync({
           conversation: newConversation,

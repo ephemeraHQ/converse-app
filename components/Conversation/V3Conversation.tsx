@@ -333,7 +333,9 @@ const GroupConversationEmpty = memo(() => {
 
   const handleSend = useCallback(() => {
     sendMessage({
-      text: "👋",
+      content: {
+        text: "👋",
+      },
     });
   }, [sendMessage]);
 
