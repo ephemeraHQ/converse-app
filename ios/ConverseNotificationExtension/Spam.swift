@@ -180,7 +180,7 @@ func computeSpamScoreV3Message(client: XMTP.Client, conversation: XMTP.Conversat
 
       if let senderAddresses = try await group.members.first(where: {$0.inboxId == senderInboxId})?.addresses {
         for address in senderAddresses {
-          if try await client.preferences.addressState(address:address) == .denied {
+          if try await client.preferences.addressState(address: address) == .denied {
             return 1
           }
         }
