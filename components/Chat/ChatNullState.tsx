@@ -1,5 +1,9 @@
 import Recommendations from "@components/Recommendations/Recommendations";
-import { useSettingsStore } from "@data/store/accountsStore";
+import {
+  useSettingsStore,
+  useProfilesStore,
+  useRecommendationsStore,
+} from "@data/store/accountsStore";
 import { translate } from "@i18n/index";
 import {
   backgroundColor,
@@ -14,10 +18,6 @@ import React from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import config from "../../config";
-import {
-  useProfilesStore,
-  useRecommendationsStore,
-} from "../../data/store/accountsStore";
 import { ShareProfileContent } from "../../screens/ShareProfile";
 import {
   getPreferredAvatar,
@@ -27,11 +27,11 @@ import {
 } from "../../utils/profile";
 import NewConversationButton from "../ConversationList/NewConversationButton";
 
-interface ChatNullStateProps {
+type ChatNullStateProps = {
   currentAccount: string;
   navigation: any;
   route: any;
-}
+};
 
 const ChatNullState: React.FC<ChatNullStateProps> = ({
   currentAccount,

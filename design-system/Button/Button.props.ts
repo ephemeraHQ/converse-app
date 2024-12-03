@@ -23,13 +23,13 @@ export type IButtonSize = "sm" | "md" | "lg";
 
 export type IButtonAction = "primary" | "danger";
 
-export interface IButtonAccessoryProps {
+export type IButtonAccessoryProps = {
   style: StyleProp<any>;
   pressableState: PressableStateCallbackType;
   disabled?: boolean;
-}
+};
 
-export interface IButtonProps extends RNPressableProps {
+export type IButtonProps = {
   /**
    * Text which is looked up via i18n.
    */
@@ -115,4 +115,4 @@ export interface IButtonProps extends RNPressableProps {
   title?: string;
   /** @deprecated use icon instead */
   picto?: IIconName;
-}
+} & RNPressableProps;
