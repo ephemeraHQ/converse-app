@@ -57,7 +57,6 @@ import {
   currentAccount,
   useCurrentAccount,
   useLoggedWithPrivy,
-  useProfilesStore,
   useRecommendationsStore,
   useSettingsStore,
   useWalletStore,
@@ -689,7 +688,6 @@ function ProfileScreenImpl() {
               title: translate("send_a_message"),
               titleColor: primaryColor(colorScheme),
               action: () => {
-                console.log("here1111 popping to 3");
                 navigation.pop(3);
                 // @todo => check if this is the right timing on split screen / web / android
                 setTimeout(() => {
