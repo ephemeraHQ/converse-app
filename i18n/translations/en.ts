@@ -291,6 +291,7 @@ export const en = {
     "Your request has been sent. Wait for the admin approve you",
   group_already_joined: "This invite has already been accepted",
   group_invite_default_group_name: "New Group",
+  open_conversation: "Open conversation",
 
   // Group Overview
   change_profile_picture: "Change profile picture",
