@@ -1,4 +1,3 @@
-import { useGroupId } from "@hooks/useGroupId";
 import { queryClient } from "@queries/queryClient";
 import { useMutation, MutationObserver } from "@tanstack/react-query";
 import logger from "@utils/logger";
@@ -58,7 +57,6 @@ const createBlockGroupMutationObserver = ({
 };
 
 export const useBlockGroupMutation = (account: string, topic: string) => {
-  const { groupId } = useGroupId(topic);
   return useMutation({
     mutationKey: blockGroupMutationKey(account, topic!),
     mutationFn: async () => {
