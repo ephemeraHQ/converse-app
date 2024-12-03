@@ -11,9 +11,7 @@ import ConversationListNav from "./ConversationListNav";
 import ConversationNav, { ConversationNavParams } from "./ConversationNav";
 import ConversationRequestsListNav from "./ConversationRequestsListNav";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
-import GroupInviteNav, { GroupInviteNavParams } from "./GroupInviteNav";
-import GroupLinkNav, { GroupLinkNavParams } from "./GroupLinkNav";
-import GroupNav, { GroupNavParams } from "./GroupNav";
+import GroupNav, { GroupNavParams, GroupScreenConfig } from "./GroupNav";
 import NewConversationNav, {
   NewConversationNavParams,
 } from "./NewConversationNav";
@@ -42,6 +40,10 @@ import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificat
 import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
 import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
 import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
+import {
+  JoinGroupNavigation,
+  JoinGroupNavigationParams,
+} from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -81,8 +83,7 @@ export type NavigationParamList = {
   TopUp: undefined;
   Profile: ProfileNavParams;
   Group: GroupNavParams;
-  GroupLink: GroupLinkNavParams;
-  GroupInvite: GroupInviteNavParams;
+  GroupInvite: JoinGroupNavigationParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
   NewAccount: undefined;
@@ -136,8 +137,7 @@ export function SignedInNavigation() {
           {WebviewPreviewNav()}
           {ProfileNav()}
           {GroupNav()}
-          {GroupLinkNav()}
-          {GroupInviteNav()}
+          {JoinGroupNavigation()}
           {TopUpNav()}
         </NativeStack.Group>
 

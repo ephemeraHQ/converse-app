@@ -9,6 +9,7 @@ import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 
 import { useGroupCreator } from "./useGroupCreator";
+import logger from "@/utils/logger";
 
 type OnConsentOptions = {
   includeCreator?: boolean;
