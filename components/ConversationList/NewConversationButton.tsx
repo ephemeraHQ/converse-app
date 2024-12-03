@@ -10,9 +10,11 @@ import Picto from "../Picto/Picto";
 
 export default function NewConversationButton() {
   const colorScheme = useColorScheme();
+
   const onPress = useCallback(() => {
     navigate("NewConversation");
   }, []);
+
   const showDebug = useCallback(() => {
     converseEventEmitter.emit("showDebugMenu");
   }, []);

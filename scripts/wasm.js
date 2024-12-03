@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 
-// eslint-disable-next-line no-undef
+ 
 const PROJECT_ROOT = path.join(__dirname, "..");
 const WASM_FOLDER = path.join(PROJECT_ROOT, "public", "wasm");
 

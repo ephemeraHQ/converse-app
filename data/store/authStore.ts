@@ -3,9 +3,9 @@ import { subscribeWithSelector } from "zustand/middleware";
 
 export type IAuthStatus = "idle" | "signedOut" | "signedIn";
 
-export interface IAuthStore {
+export type IAuthStore = {
   status: IAuthStatus;
-}
+};
 
 export const useAuthStore = create<IAuthStore>()(
   subscribeWithSelector((set, get) => ({

@@ -10,14 +10,14 @@ import {
 
 import { ITextProps } from "../Text/Text.props";
 
-export interface TextFieldAccessoryProps {
+export type TextFieldAccessoryProps = {
   style: StyleProp<ViewStyle | TextStyle | ImageStyle>;
   status: TextFieldProps["status"];
   multiline: boolean;
   editable: boolean;
-}
+};
 
-export interface TextFieldProps extends Omit<TextInputProps, "ref"> {
+export type TextFieldProps = {
   /**
    * A style modifier for different input states.
    */
@@ -93,4 +93,4 @@ export interface TextFieldProps extends Omit<TextInputProps, "ref"> {
    * Note: It is a good idea to memoize this.
    */
   LeftAccessory?: ComponentType<TextFieldAccessoryProps>;
-}
+} & Omit<TextInputProps, "ref">;

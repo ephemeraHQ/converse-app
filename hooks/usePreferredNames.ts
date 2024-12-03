@@ -10,6 +10,7 @@ import { useProfilesSocials } from "./useProfilesSocials";
  */
 export const usePreferredNames = (peerAddresses: string[]) => {
   const data = useProfilesSocials(peerAddresses);
+
   const names = useMemo(() => {
     // Not sure how performant this will be, or if we can safely rely on the index
     // If we can't, we should probably use a Map instead

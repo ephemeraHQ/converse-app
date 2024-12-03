@@ -34,9 +34,7 @@ export type SettingsStoreType = {
   }) => void;
 
   groupStatus: GroupStatus;
-  setGroupStatus: (groupStatus: {
-    [groupId: string]: "allowed" | "denied";
-  }) => void;
+  setGroupStatus: (groupStatus: GroupStatus) => void;
 
   ephemeralAccount: boolean;
   setEphemeralAccount: (ephemeral: boolean) => void;

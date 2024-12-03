@@ -12,11 +12,11 @@ import {
   useColorScheme,
 } from "react-native";
 
-interface SegmentedControllerProps {
+type SegmentedControllerProps = {
   options: string[];
   selectedIndex: number;
   onSelect: (index: number) => void;
-}
+};
 
 const RequestsSegmentedController: React.FC<SegmentedControllerProps> = ({
   options,
