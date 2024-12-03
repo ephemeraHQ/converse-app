@@ -152,8 +152,11 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
   }, [topic]);
 
   const onLeftSwipe = useCallback(() => {
-    toggleReadStatus();
-  }, [toggleReadStatus]);
+    const translation = ref.current?.state.rowTranslation;
+    if (translation && (translation as any)._value > 100) {
+      toggleReadStatus();
+    }
+  }, [toggleReadStatus, ref]);
 
   const triggerHapticFeedback = useCallback(() => {
     return Haptics.mediumImpactAsync();
