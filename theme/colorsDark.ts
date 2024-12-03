@@ -7,7 +7,7 @@ export const colorsDark: IColors = {
     bubbleAccent: darkPalette.accent,
     reply: lightPalette.light96,
     nestedReply: darkPalette.alpha4,
-    nestedReplyFromMe: darkPalette.dark85,
+    nestedReplyFromMe: darkPalette.alpha4,
     received: {
       bubble: lightPalette.light15,
       reply: lightPalette.light15,
