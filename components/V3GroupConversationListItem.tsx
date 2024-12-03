@@ -296,8 +296,11 @@ const useUserInteractions = ({
   }, [isBlockedChatView, handleRestore, handleDelete, ref]);
 
   const onLeftSwipe = useCallback(() => {
-    toggleReadStatus();
-  }, [toggleReadStatus]);
+    const translation = ref.current?.state.rowTranslation;
+    if (translation && (translation as any)._value > 100) {
+      toggleReadStatus();
+    }
+  }, [ref, toggleReadStatus]);
 
   const onWillLeftSwipe = useCallback(() => {
     Haptics.successNotificationAsync();
