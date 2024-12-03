@@ -1,5 +1,4 @@
-import { format } from "date-fns";
-import { enUS, fr } from "date-fns/locale";
+import { format, enUS, fr } from "date-fns";
 import { getLocales } from "react-native-localize";
 
 import { getMinimalDate, getRelativeDate, getRelativeDateTime } from "./date";

@@ -88,14 +88,14 @@ export async function getErc20TokenSymbol(
   return symbol;
 }
 
-export interface TransferAuthorizationMessage {
+export type TransferAuthorizationMessage = {
   from: string;
   to: string;
   value: any;
   validAfter: number;
   validBefore: number;
   nonce: string;
-}
+};
 
 /**
  * Computes the domain separator for a given ERC20 contract

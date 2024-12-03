@@ -20,12 +20,12 @@ class MessageTailComponent extends React.Component<SvgProps> {
 const MessageTailAnimated =
   Reanimated.createAnimatedComponent(MessageTailComponent);
 
-interface MessageTailProps {
+type MessageTailProps = {
   fromMe: boolean;
   colorScheme: ColorSchemeName;
   hideBackground: boolean;
   style?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
-}
+};
 
 const MessageTail: React.FC<MessageTailProps> = ({
   fromMe,
@@ -40,8 +40,8 @@ const MessageTail: React.FC<MessageTailProps> = ({
         hideBackground
           ? "transparent"
           : fromMe
-          ? myMessageBubbleColor(colorScheme)
-          : messageBubbleColor(colorScheme)
+            ? myMessageBubbleColor(colorScheme)
+            : messageBubbleColor(colorScheme)
       }
     />
   );

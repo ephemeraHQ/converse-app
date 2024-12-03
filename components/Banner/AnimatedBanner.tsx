@@ -11,14 +11,14 @@ import Reanimated, {
 
 import Banner from "./Banner";
 
-interface AnimatedBannerProps {
+type AnimatedBannerProps = {
   title: string;
   description: string;
   cta?: string;
   onButtonPress?: () => void;
   onDismiss?: () => void;
   style?: StyleProp<ViewStyle>;
-}
+};
 
 const VERTICAL_MARGIN = Margins.default;
 
@@ -66,8 +66,8 @@ const AnimatedBanner: React.FC<AnimatedBannerProps> = React.memo((props) => {
     height: isAnimating
       ? height.value
       : measuredHeight.current !== null
-      ? height.value
-      : "auto",
+        ? height.value
+        : "auto",
     overflow: "hidden",
   }));
 

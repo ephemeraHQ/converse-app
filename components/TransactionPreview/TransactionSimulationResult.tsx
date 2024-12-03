@@ -24,6 +24,7 @@ export const SimulationResult = ({
 }: SimulationResultProps) => {
   const profiles = useProfilesStore((s) => s.profiles);
   const accountAddress = useCurrentAccount() as string;
+
   const myChanges = useMemo(() => {
     const myAddresses = [accountAddress.toLowerCase()];
     if (walletAddress) {

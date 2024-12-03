@@ -3,7 +3,7 @@ const isClean = require("git-is-clean");
 const path = require("path");
 const prompts = require("prompts");
 
-// eslint-disable-next-line no-undef
+ 
 const PROJECT_ROOT = path.join(__dirname, "..", "..");
 
 const update = async () => {

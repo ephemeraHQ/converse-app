@@ -9,13 +9,17 @@ import {
   initRecommendationsStore,
   RecommendationsStoreType,
 } from "./recommendationsStore";
-import { initSettingsStore, SettingsStoreType } from "./settingsStore";
+import {
+  GroupStatus,
+  initSettingsStore,
+  SettingsStoreType,
+} from "./settingsStore";
 import {
   initTransactionsStore,
   TransactionsStoreType,
 } from "./transactionsStore";
 import { initWalletStore, WalletStoreType } from "./walletStore";
-import { removeLogoutTask } from "../../utils/logout";
+import { removeLogoutTask } from "@utils/logout";
 import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
 
 type AccountStoreType = {
@@ -230,8 +234,37 @@ const getAccountStore = (account: string) => {
   }
 };
 
-export const currentAccount = () => useAccountsStore.getState().currentAccount;
+export const currentAccount = (): string =>
+  (useAccountsStore.getState() as AccountsStoreStype).currentAccount;
 
+//
+/**
+ * TODO: determine if this is the way we want to transition to imperatively
+ * calling our Zustand store.
+ * TODO: move this to a different file
+ *
+ * It isn't very ergonomic and mocking things seems a little difficult.
+ *
+ * We might want to look into creating a subscription to our stores and a
+ * behavior subject by which to observe it across the app.
+ *
+ * Set the group status for the current account
+ * @param groupStatus The group status to set
+ */
+export const setGroupStatus = (groupStatus: GroupStatus) => {
+  const account = currentAccount();
+  if (!account) {
+    logger.warn("[setGroupStatus] No current account");
+    return;
+  }
+  const setGroupStatus = getSettingsStore(account).getState().setGroupStatus;
+  setGroupStatus(groupStatus);
+};
+
+// we'll be able to create a subscription to our stores and a behavior subject
+// by which to observe it across the app
+// We'll seed the behaviorsubject with the getState.value api
+// export const _currentAccount = () => useAccountsStore.subscribe((s) => s.);
 export const useCurrentAccount = () => {
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;

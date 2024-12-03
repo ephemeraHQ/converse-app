@@ -1,5 +1,6 @@
 import { TransactionData } from "@components/TransactionPreview/TransactionPreview";
 import type { SimulateAssetChangesResponse } from "alchemy-sdk";
+import { GroupInvite } from "@utils/api.types";
 import axios from "axios";
 import * as Contacts from "expo-contacts";
 
@@ -21,7 +22,7 @@ import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
 import type { InboxId } from "@xmtp/react-native-sdk";
 import { evmHelpers } from "./evm/helpers";
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: config.apiURI,
 });
 
@@ -443,16 +444,6 @@ export const joinGroupFromLink = async (
   return data as JoinGroupLinkResult;
 };
 
-export type GroupInvite = {
-  id: string;
-  inviteLink: string;
-  createdByAddress: string;
-  groupName: string;
-  imageUrl?: string;
-  description?: string;
-  groupId?: string;
-};
-
 export type CreateGroupInviteResult = Pick<GroupInvite, "id" | "inviteLink">;
 
 // Create a group invite. The invite will be associated with the account used.
@@ -517,6 +508,7 @@ export const createGroupJoinRequest = async (
       headers: await getXmtpApiHeaders(account),
     }
   );
+  logger.debug("[API] Group join request created", data);
   return data;
 };
 
