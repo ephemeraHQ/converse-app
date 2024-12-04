@@ -16,11 +16,7 @@ export const PinnedV3Conversation = ({ topic }: PinnedV3ConversationProps) => {
     return null;
   }
   if (conversationIsGroup(conversation)) {
-    return (
-      <PinnedV3GroupConversation group={conversation as GroupWithCodecsType} />
-    );
+    return <PinnedV3GroupConversation group={conversation} />;
   }
-  return (
-    <PinnedV3DMConversation conversation={conversation as DmWithCodecsType} />
-  );
+  return <PinnedV3DMConversation conversation={conversation} />;
 };

@@ -2,7 +2,6 @@ import { PinnedConversation } from "./PinnedConversation";
 import { useCallback, useMemo } from "react";
 import { navigate } from "@utils/navigation";
 import Avatar from "@components/Avatar";
-import { AvatarSizes } from "@styles/sizes";
 import { useGroupConversationListAvatarInfo } from "../../features/conversation-list/useGroupConversationListAvatarInfo";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
@@ -16,6 +15,7 @@ import { useSelect } from "@/data/store/storeHelpers";
 import { useHandleDeleteGroup } from "@/features/conversation-list/hooks/useHandleDeleteGroup";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
+import { useAppTheme } from "@/theme/useAppTheme";
 
 type PinnedV3GroupConversationProps = {
   group: GroupWithCodecsType;
@@ -101,7 +101,8 @@ export const PinnedV3GroupConversation = ({
   }, [group.topic]);
 
   const title = group?.name;
-  const showUnread = false;
+
+  const { theme } = useAppTheme();
 
   const avatarComponent = useMemo(() => {
     if (group?.imageUrlSquare) {
@@ -109,25 +110,19 @@ export const PinnedV3GroupConversation = ({
         <Avatar
           key={group?.topic}
           uri={group?.imageUrlSquare}
-          size={AvatarSizes.pinnedConversation}
+          size={theme.spacing["6xl"]}
         />
       );
     }
-    return (
-      <GroupAvatarDumb
-        size={AvatarSizes.pinnedConversation}
-        members={memberData}
-        style={{ marginLeft: 16, alignSelf: "center" }}
-      />
-    );
-  }, [group?.imageUrlSquare, group?.topic, memberData]);
+    return <GroupAvatarDumb size={theme.spacing["6xl"]} members={memberData} />;
+  }, [group?.imageUrlSquare, group?.topic, memberData, theme.spacing]);
 
   return (
     <PinnedConversation
       avatarComponent={avatarComponent}
       onLongPress={onLongPress}
       onPress={onPress}
-      showUnread={showUnread}
+      showUnread={isUnread}
       title={title ?? ""}
     />
   );

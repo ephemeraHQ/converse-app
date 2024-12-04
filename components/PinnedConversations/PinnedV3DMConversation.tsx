@@ -17,6 +17,7 @@ import { translate } from "@i18n";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
 import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
+import { useAppTheme } from "@/theme/useAppTheme";
 
 type PinnedV3DMConversationProps = {
   conversation: DmWithCodecsType;
@@ -108,7 +109,8 @@ export const PinnedV3DMConversation = ({
   }, [conversation.topic]);
 
   const title = preferredName;
-  const showUnread = false;
+
+  const { theme } = useAppTheme();
 
   const avatarComponent = useMemo(() => {
     return (
@@ -116,17 +118,17 @@ export const PinnedV3DMConversation = ({
         key={peerInboxId}
         uri={preferredAvatar ?? undefined}
         name={preferredName}
-        size={AvatarSizes.pinnedConversation}
+        size={theme.spacing["6xl"]}
       />
     );
-  }, [peerInboxId, preferredAvatar, preferredName]);
+  }, [peerInboxId, preferredAvatar, preferredName, theme.spacing]);
 
   return (
     <PinnedConversation
       avatarComponent={avatarComponent}
       onLongPress={onLongPress}
       onPress={onPress}
-      showUnread={showUnread}
+      showUnread={isUnread}
       title={title ?? ""}
     />
   );
