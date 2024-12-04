@@ -5,7 +5,6 @@ import { GroupInvite } from "@utils/api.types";
 import { getV3IdFromTopic } from "@/utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import {
-  AnyGroup,
   ConversationDataEntity,
   ConversationWithCodecsType,
   GroupData,
@@ -15,7 +14,7 @@ import {
   Conversation,
   ConversationId,
   ConversationTopic,
-  Group,
+  ConversationVersion,
   InboxId,
 } from "@xmtp/react-native-sdk";
 import { AxiosInstance } from "axios";
@@ -49,7 +48,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export type AllowGroupProps = {
   account: string;
-  group: GroupData;
+  conversation: ConversationWithCodecsType;
   options: OnConsentOptions;
 };
 
@@ -198,7 +197,7 @@ export class JoinGroupClient {
 
     const liveAllowGroup = async ({
       account,
-      group,
+      conversation,
       options,
     }: AllowGroupProps) => {
       // Dynamically import dependencies to avoid the need for mocking in tests
@@ -210,7 +209,7 @@ export class JoinGroupClient {
         "@queries/useAllowGroupMutation"
       );
 
-      const { topic, id: groupId } = group;
+      const { topic, id: groupId } = conversation;
       logger.debug(`[JoinGroupClient] Allowing group ${topic}`);
       const allowGroupMutationObserver = createAllowGroupMutationObserver({
         account,
@@ -226,8 +225,12 @@ export class JoinGroupClient {
 
       const inboxIdsToAllow: InboxId[] = [];
       const inboxIds: { [inboxId: string]: "allowed" } = {};
-      if (options.includeAddedBy && group?.addedByInboxId) {
-        const addedBy = group.addedByInboxId;
+      if (
+        options.includeAddedBy &&
+        conversation.version === ConversationVersion.GROUP &&
+        conversation.addedByInboxId
+      ) {
+        const addedBy = conversation.addedByInboxId;
         inboxIds[addedBy as string] = "allowed";
         inboxIdsToAllow.push(addedBy);
       }
@@ -298,6 +301,8 @@ export class JoinGroupClient {
         description: "Group Description",
       } as const;
 
+      // todo(lustig): how do you create a well typed fixture of the plain conversation type?
+      // @ts-expect-error
       const conversationFixture: Conversation = {
         id: GroupIdUserAlreadyWasAMemberOf,
         createdAt: new Date().getTime(),
@@ -314,18 +319,22 @@ export class JoinGroupClient {
 
       const fixtureConversationDataEntity: ConversationDataEntity = {
         ids: [GroupIdUserAlreadyWasAMemberOf],
+        // todo(lustig): how do you create a well typed fixture of the plain conversation type?
+        // @ts-expect-error
         byId: {
           [GroupIdUserAlreadyWasAMemberOf]: conversationFixture,
         },
       } as const;
 
+      // todo(lustig): how do you create a well typed fixture of the plain conversation type?
+      // @ts-expect-error
       return fixtureGroupsDataEntity;
     };
 
     const fixtureAllowGroup = async ({
       account,
       options,
-      group,
+      conversation,
     }: AllowGroupProps) => {};
 
     const fixtureRefreshGroup = async (account: string, topic: string) => {};
@@ -401,7 +410,7 @@ export class JoinGroupClient {
     const fixtureAllowGroup = async ({
       account,
       options,
-      group,
+      conversation,
     }: AllowGroupProps) => {};
 
     const fixtureRefreshGroup = async (account: string, topic: string) => {};
@@ -409,6 +418,8 @@ export class JoinGroupClient {
     return new JoinGroupClient(
       fixtureGetGroupInvite,
       fixtureAttemptToJoinGroup,
+      // todo(lustig): how do you create a well typed fixture of the plain conversation type?
+      // @ts-expect-error
       fixtureFetchGroupsByAccount,
       fixtureAllowGroup,
       fixtureRefreshGroup
@@ -479,6 +490,8 @@ export class JoinGroupClient {
     return new JoinGroupClient(
       fixtureGetGroupInvite,
       fixtureAttemptToJoinGroup,
+      // todo(lustig): how do you create a well typed fixture of the plain conversation type?
+      // @ts-expect-error
       fixtureFetchGroupsByAccount,
       fixtureAllowGroup,
       fixtureRefreshGroup
@@ -530,6 +543,8 @@ export class JoinGroupClient {
     return new JoinGroupClient(
       fixtureGetGroupInvite,
       fixtureAttemptToJoinGroup,
+      // todo(lustig): how do you create a well typed fixture of the plain conversation type?
+      // @ts-expect-error
       fixtureFetchGroupsByAccount,
       fixtureAllowGroup,
       fixtureRefreshGroup

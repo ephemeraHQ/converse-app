@@ -41,17 +41,17 @@ export type GroupData = Pick<
   | "state"
 >;
 
-export type ConversationData = Pick<
-  ConversationWithCodecsType,
-  "conversationVersion"
-  // | "createdAt"
-  // | "members"
-  // | "topic"
-  // | "addedByInboxId"
-  // | "imageUrlSquare"
-  // | "description"
-  // | "state"
->;
+// export type ConversationData = Pick<
+//   ConversationWithCodecsType,
+//   "conversationVersion"
+//   // | "createdAt"
+//   // | "members"
+//   // | "topic"
+//   // | "addedByInboxId"
+//   // | "imageUrlSquare"
+//   // | "description"
+//   // | "state"
+// >;
 
 export type GroupsDataEntity = EntityObject<GroupData>;
 export type ConversationDataEntity = EntityObject<

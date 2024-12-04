@@ -2,12 +2,16 @@
 /// Figma: TODO
 import { GroupJoinRequestStatus } from "@utils/api";
 import { GroupInvite } from "@utils/api.types";
-import { GroupData, GroupsDataEntity } from "@utils/xmtpRN/client.types";
+import {
+  ConversationDataEntity,
+  ConversationWithCodecsType,
+} from "@utils/xmtpRN/client.types";
 import { assign, fromPromise, log, setup } from "xstate";
 
 import { AllowGroupProps } from "./JoinGroup.client";
 import { JoinGroupResult, JoinGroupResultType } from "./joinGroup.types";
 import { Controlled } from "../../../dependencies/Environment/Environment";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
 
 type JoinGroupMachineEvents =
   | { type: "user.didTapJoinGroup" }
@@ -26,11 +30,11 @@ export type JoinGroupMachineContext = {
   account: string;
   /** Group invite metadata, includes info such as group name, group ID, etc */
   groupInviteMetadata?: GroupInvite;
-  /** Contains a snapshot of the groups a user was a member of prior to
+  /** Contains a snapshot of the conversation a user was a member of prior to
    * attempting to join this group from the Deeplink */
-  groupsBeforeJoinRequestAccepted?: GroupsDataEntity;
+  groupsBeforeJoinRequestAccepted?: ConversationDataEntity;
   /** The group that the user has been invited to join */
-  invitedGroup?: GroupData;
+  invitedGroup?: ConversationWithCodecsType;
   /** The status of the group join request (accepted, rejected, pending) */
   joinStatus: GroupJoinRequestStatus;
 
@@ -67,13 +71,13 @@ export const joinGroupMachineLogic = setup({
     }),
 
     fetchGroupsByAccountActorLogic: fromPromise<
-      GroupsDataEntity,
+      ConversationDataEntity,
       { account: string }
     >(async ({ input }) => {
       const { account } = input;
-      const groups =
+      const conversation =
         await Controlled.joinGroupClient.fetchGroupsByAccount(account);
-      return groups;
+      return conversation;
     }),
 
     attemptToJoinGroupActorLogic: fromPromise<
@@ -90,16 +94,16 @@ export const joinGroupMachineLogic = setup({
 
     provideUserConsentToJoinGroup: fromPromise<
       void,
-      { account: string; group: GroupData }
+      { account: string; conversation: ConversationWithCodecsType }
     >(async ({ input }) => {
-      const { account, group } = input;
+      const { account, conversation } = input;
       const allowGroupProps: AllowGroupProps = {
         account,
         options: {
           includeCreator: false,
           includeAddedBy: false,
         },
-        group,
+        conversation,
       };
       return await Controlled.joinGroupClient.allowGroup(allowGroupProps);
     }),
@@ -136,17 +140,20 @@ export const joinGroupMachineLogic = setup({
         `[navigateToGroupScreen] Navigating to group screen with topic: ${params.topic}`
     ),
 
-    saveGroupsBeforeJoinAttempt: assign({
+    saveConversationsBeforeJoinAttempt: assign({
       groupsBeforeJoinRequestAccepted: (
         _,
-        params: { groupsBeforeJoinRequestAccepted: GroupsDataEntity }
+        params: { groupsBeforeJoinRequestAccepted: ConversationDataEntity }
       ) => {
         return params.groupsBeforeJoinRequestAccepted;
       },
     }),
 
     saveNewGroup: assign({
-      invitedGroup: (_, params: { invitedGroup?: GroupData }) => {
+      invitedGroup: (
+        _,
+        params: { invitedGroup?: ConversationWithCodecsType }
+      ) => {
         return params.invitedGroup;
       },
     }),
@@ -184,7 +191,7 @@ export const joinGroupMachineLogic = setup({
      */
     userHasAlreadyJoinedGroup: (
       _,
-      params: { invitedGroup: GroupData | undefined }
+      params: { invitedGroup: ConversationWithCodecsType | undefined }
     ) => {
       const result = params.invitedGroup === undefined;
       return result;
@@ -192,39 +199,52 @@ export const joinGroupMachineLogic = setup({
 
     hasUserNotBeenBlocked: (
       _,
-      params: { invitedGroup: GroupData | undefined }
+      params: { invitedGroup: ConversationWithCodecsType | undefined }
     ) => {
-      const invitedGroup: GroupData | undefined = params.invitedGroup;
-
-      const isNotBlocked = invitedGroup?.isGroupActive === true;
+      const invitedGroup: ConversationWithCodecsType | undefined =
+        params.invitedGroup;
 
       if (invitedGroup === undefined) {
         // If the invited group is undefined, we can't
         // determine if the user has been blocked or not.
         // We'll be able to do so later in the process.
         return true;
-      } else if (isNotBlocked) {
-        return true;
       }
 
-      return false;
+      // const isNotBlocked = invitedGroup?.isGroupActive === true;
+      const isBlocked =
+        invitedGroup?.version === ConversationVersion.GROUP &&
+        invitedGroup?.isGroupActive === false;
+
+      return !isBlocked;
     },
 
     isUserInGroup: (
       _,
       params: {
-        invitedGroupId: string | undefined;
-        groups: GroupsDataEntity | undefined;
+        invitedConversationId: string | undefined;
+        conversation: ConversationDataEntity | undefined;
       }
     ) => {
-      const { invitedGroupId, groups } = params;
-      if (invitedGroupId === undefined || groups === undefined) {
+      const { invitedConversationId, conversation } = params;
+      if (invitedConversationId === undefined || conversation === undefined) {
         return false;
       }
 
-      const invitedGroup: GroupData | undefined = groups.byId[invitedGroupId];
-      const userHasNotBeenBlocked = invitedGroup?.isGroupActive === true;
-      const userIsInGroup = userHasNotBeenBlocked && invitedGroup !== undefined;
+      const invitedConversation: ConversationWithCodecsType | undefined =
+        conversation.byId[invitedConversationId];
+      // if this conversation is a DM, we assume the user has membership
+      // if this conversation is a Group, we check isGroupActive === true
+      if (invitedConversation.version === ConversationVersion.DM) {
+        return true;
+      }
+
+      const userHasBeenBlocked =
+        invitedConversation?.version === ConversationVersion.GROUP &&
+        invitedConversation?.isGroupActive === false;
+
+      const userIsInGroup =
+        !userHasBeenBlocked && invitedConversation !== undefined;
       return userIsInGroup;
     },
   },
@@ -303,11 +323,11 @@ joiner will see when they land on the deep link page.
             target: "Check User Group Join Status Before User Action",
             actions: [
               {
-                type: "saveGroupsBeforeJoinAttempt",
+                type: "saveConversationsBeforeJoinAttempt",
                 params: ({ event }) => {
-                  const groups = event.output;
+                  const conversation = event.output;
                   return {
-                    groupsBeforeJoinRequestAccepted: groups,
+                    groupsBeforeJoinRequestAccepted: conversation,
                   };
                 },
               },
@@ -315,9 +335,10 @@ joiner will see when they land on the deep link page.
                 type: "saveNewGroup",
                 params: ({ context }) => {
                   const groupId = context.groupInviteMetadata!.groupId!;
-                  const groups = context.groupsBeforeJoinRequestAccepted!;
-                  const groupIfUserHasAlreadyJoined: GroupData | undefined =
-                    groups.byId[groupId];
+                  const conversation = context.groupsBeforeJoinRequestAccepted!;
+                  const groupIfUserHasAlreadyJoined:
+                    | ConversationWithCodecsType
+                    | undefined = conversation.byId[groupId];
                   return {
                     invitedGroup: groupIfUserHasAlreadyJoined,
                   };
@@ -329,11 +350,11 @@ joiner will see when they land on the deep link page.
             target: "Waiting For User Action",
             actions: [
               {
-                type: "saveGroupsBeforeJoinAttempt",
+                type: "saveConversationsBeforeJoinAttempt",
                 params: ({ event }) => {
-                  const groups = event.output;
+                  const conversation = event.output;
                   return {
-                    groupsBeforeJoinRequestAccepted: groups,
+                    groupsBeforeJoinRequestAccepted: conversation,
                   };
                 },
               },
@@ -365,8 +386,8 @@ joiner will see when they land on the deep link page.
           guard: {
             type: "isUserInGroup",
             params: ({ context }) => ({
-              invitedGroupId: context.groupInviteMetadata?.groupId,
-              groups: context.groupsBeforeJoinRequestAccepted,
+              invitedConversationId: context.groupInviteMetadata?.groupId,
+              conversation: context.groupsBeforeJoinRequestAccepted,
             }),
           },
         },
@@ -531,15 +552,15 @@ to accept the invite.
 
     "Determining Newly Joined Group": {
       description: `
-Immediately upon entering this state, we fetch the groups
-query to determine our groups after receiving the accepted
+Immediately upon entering this state, we fetch the conversation
+query to determine our conversation after receiving the accepted
 status. Our logic then splits based on whether we have a
 group ID in our group invite metadata:
 1. If we have a group ID, we can use it to look up the new
    group directly.
 2. If we don't have a group ID, we need to compare the
-   groups before joining (stored in our context) with the
-   newly fetched groups. We perform a diff between the old
+   conversation before joining (stored in our context) with the
+   newly fetched conversation. We perform a diff between the old
    IDs and the new IDs to identify the new group.
 If the list of IDs are identical, it indicates that the user
 has already joined this group.
@@ -594,10 +615,10 @@ consent for the new group.
             ],
             description: `
 This branch handles the case where we don't have a groupId in our metadata.
-We need to determine if a new group was joined by comparing the groups before and after the join attempt.
+We need to determine if a new group was joined by comparing the conversation before and after the join attempt.
 This method is less certain than when we have a groupId, as there's a possibility
 that no new group was actually joined (e.g., if the user was already a member).
-If we don't find a new group (i.e., old groups === new groups),
+If we don't find a new group (i.e., old conversation === new conversation),
 we assume the user has already joined the group indicated by the invite link.
 This approach allows us to handle cases where the groupId isn't available in the metadata,
 providing a fallback method to determine the join status.
@@ -668,7 +689,7 @@ providing a fallback method to determine the join status.
         src: "provideUserConsentToJoinGroup",
         input: ({ context }) => ({
           account: context.account,
-          group: context.invitedGroup!,
+          conversation: context.invitedGroup!,
           options: {
             includeCreator: false,
             includeAddedBy: false,
