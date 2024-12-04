@@ -321,58 +321,6 @@
 //     onContextCloseAnimation();
 //   }, [onContextCloseAnimation]);
 
-//   const contextMenuItems = useMemo(() => {
-//     const items: TableViewItemType[] = [];
-//     items.push({
-//       title: translate("reply"),
-//       action: () => {
-//         triggerReplyToMessage();
-//         onContextClose();
-//       },
-//       id: ContextMenuActions.REPLY,
-//       rightView: <TableViewPicto symbol="arrowshape.turn.up.left" />,
-//     });
-//     if (!isAttachment && !isTransaction) {
-//       items.push({
-//         title: translate("copy"),
-//         rightView: <TableViewPicto symbol="doc.on.doc" />,
-//         id: ContextMenuActions.COPY_MESSAGE,
-//         action: () => {
-//           if (message.content) {
-//             Clipboard.setString(message.content);
-//           } else if (message.contentFallback) {
-//             Clipboard.setString(message.contentFallback);
-//           }
-//           setTimeout(() => {
-//             onContextClose();
-//           }, 200);
-//         },
-//       });
-//     }
-//     if (frameURL) {
-//       items.push({
-//         title: translate("share"),
-//         rightView: <TableViewPicto symbol="square.and.arrow.up" />,
-//         id: ContextMenuActions.SHARE_FRAME,
-//         action: () => {
-//           if (frameURL) {
-//             navigate("ShareFrame", { frameURL });
-//           }
-//           onContextClose();
-//         },
-//       });
-//     }
-//     return items;
-//   }, [
-//     frameURL,
-//     isAttachment,
-//     isTransaction,
-//     message.content,
-//     message.contentFallback,
-//     triggerReplyToMessage,
-//     onContextClose,
-//   ]);
-
 //   const animateIn = useCallback(() => {
 //     "worklet";
 //     opacity.value = 0;

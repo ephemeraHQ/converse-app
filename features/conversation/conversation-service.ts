@@ -19,7 +19,7 @@ import {
   getCurrentConversationPersistedStore,
   useCurrentConversationPersistedStoreState,
 } from "./conversation-persisted-stores";
-import { useConversationStore } from "./conversation-store";
+import { IConversationStore, useConversationStore } from "./conversation-store";
 import logger from "@/utils/logger";
 
 export function initializeCurrentConversation(args: {
@@ -226,4 +226,22 @@ export function getCurrentConversationMessages() {
     };
   }
   return getConversationMessages(currentAccount, topic);
+}
+
+export function setMessageContextMenuData(
+  data: IConversationStore["messageContextMenuData"]
+) {
+  useConversationStore.setState({
+    messageContextMenuData: data,
+  });
+}
+
+export function getMessageContextMenuData() {
+  return useConversationStore.getState().messageContextMenuData;
+}
+
+export function resetMessageContextMenuData() {
+  useConversationStore.setState({
+    messageContextMenuData: null,
+  });
 }

@@ -1,5 +1,3 @@
-import { useDmConsentQuery } from "@/queries/useDmConstentStateQuery";
-import { useGroupConsentQuery } from "@/queries/useGroupConsentQuery";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationQuery } from "@queries/useConversationQuery";
 import { addConversationToConversationListQuery } from "@queries/useV3ConversationListQuery";
@@ -63,14 +61,6 @@ export const ConversationContextProvider = (
 
   const { data: conversation, isLoading: isLoadingConversation } =
     useConversationQuery(currentAccount, topic);
-
-  const { data: groupConsent, isLoading: isLoadingGroupConsent } =
-    useGroupConsentQuery(currentAccount, topic!);
-
-  const { data: dmConsent, isLoading: isLoadingDmConsent } = useDmConsentQuery({
-    account: currentAccount,
-    topic,
-  });
 
   const composerHeightAV = useSharedValue(0);
 
@@ -147,21 +137,12 @@ export const ConversationContextProvider = (
     [conversation, currentAccount, peerAddress]
   );
 
-  const isGroup = conversation?.version === ConversationVersion.GROUP;
-  const isDm = conversation?.version === ConversationVersion.DM;
-
   const isAllowedConversation = useMemo(() => {
     if (!conversation) {
       return false;
     }
-    if (isGroup) {
-      return groupConsent === "allowed";
-    }
-    if (isDm) {
-      return dmConsent === "allowed";
-    }
-    return false;
-  }, [conversation, dmConsent, groupConsent, isDm, isGroup]);
+    return conversation.state === "allowed";
+  }, [conversation]);
 
   return (
     <ConversationContext.Provider
@@ -172,8 +153,7 @@ export const ConversationContextProvider = (
         conversationVersion: conversation?.version,
         isAllowedConversation,
         isBlockedConversation: conversation?.state === "denied", // TODO: implement this
-        isLoadingConversationConsent:
-          isLoadingGroupConsent || isLoadingDmConsent || isLoadingConversation,
+        isLoadingConversationConsent: isLoadingConversation,
         isNewConversation: !topic && !!peerAddress,
         peerAddress,
         sendMessage,

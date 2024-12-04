@@ -1,5 +1,7 @@
 import { MessageContextProvider } from "@/components/Chat/Message/contexts/message-context";
+import { MessageStaticAttachment } from "@/components/Chat/Message/message-content-types/message-static-attachment";
 import { MessageContextStoreProvider } from "@/components/Chat/Message/stores/message-store";
+import { VStack } from "@/design-system/VStack";
 import { InboxId, MessageId } from "@xmtp/react-native-sdk";
 import { memo } from "react";
 import { getCurrentConversationMessages } from "../../../features/conversation/conversation-service";
@@ -8,6 +10,9 @@ import { hasPreviousMessageInSeries } from "../../../features/conversations/util
 import { messageIsFromCurrentUserV3 } from "../../../features/conversations/utils/messageIsFromCurrentUser";
 import { messageShouldShowDateChange } from "../../../features/conversations/utils/messageShouldShowDateChange";
 import { ChatGroupUpdatedMessage } from "../ChatGroupUpdatedMessage";
+import { MessageRemoteAttachment } from "./message-content-types/message-remote-attachment";
+import { MessageReply } from "./message-content-types/message-reply";
+import { MessageSimpleText } from "./message-content-types/message-simple-text";
 import {
   convertNanosecondsToMilliseconds,
   isGroupUpdatedMessage,
@@ -16,12 +21,6 @@ import {
   isStaticAttachmentMessage,
   isTextMessage,
 } from "./message-utils";
-import { MessageReply } from "./message-content-types/message-reply";
-import { MessageSimpleText } from "./message-content-types/message-simple-text";
-import { MessageRemoteAttachment } from "./message-content-types/message-remote-attachment";
-import { MessageStaticAttachment } from "@/components/Chat/Message/message-content-types/message-static-attachment";
-import { VStack } from "@/design-system/VStack";
-import { debugBorder } from "@/utils/debug-style";
 
 type V3MessageProps = {
   messageId: string;
@@ -80,6 +79,10 @@ export const V3Message = memo(
       return null;
     }
 
+    const reactions = messages.reactions[message.id];
+
+    console.log("reactions:", reactions);
+
     return (
       <VStack
         style={
@@ -96,13 +99,14 @@ export const V3Message = memo(
           showDateChange={showDateChange}
           hasPreviousMessageInSeries={_hasPreviousMessageInSeries}
           senderAddress={message.senderAddress as InboxId}
+          isHighlighted={false}
         >
           <MessageContextProvider>
+            {isTextMessage(message) && <MessageSimpleText message={message} />}
             {isGroupUpdatedMessage(message) && (
               <ChatGroupUpdatedMessage message={message} />
             )}
             {isReplyMessage(message) && <MessageReply message={message} />}
-            {isTextMessage(message) && <MessageSimpleText message={message} />}
             {isRemoteAttachmentMessage(message) && (
               <MessageRemoteAttachment message={message} />
             )}

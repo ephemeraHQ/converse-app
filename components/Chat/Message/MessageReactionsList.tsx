@@ -1,3 +1,5 @@
+import { HStack } from "@/design-system/HStack";
+import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import GroupAvatar from "@components/GroupAvatar";
 import Picto from "@components/Picto/Picto";
 import {
@@ -6,167 +8,56 @@ import {
   useProfilesStore,
 } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
-
+import { Text } from "@design-system/Text";
+import { useAppTheme } from "@theme/useAppTheme";
 import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
 import {
   getPreferredAvatar,
   getPreferredName,
   getProfile,
 } from "@utils/profile";
+import { MessageReaction, getReactionContent } from "@utils/reactions";
+import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
+import React, { FC, useCallback, useEffect, useMemo } from "react";
 import {
-  addReactionToMessage,
-  getReactionContent,
-  MessageReaction,
-  removeReactionFromMessage,
-} from "@utils/reactions";
-import React, { FC, useMemo, useEffect, useCallback } from "react";
-import {
-  ListRenderItem,
-  View,
-  StyleSheet,
-  TouchableOpacity,
   InteractionManager,
+  ListRenderItem,
+  TouchableOpacity,
 } from "react-native";
 import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 import { Portal } from "react-native-paper";
-import Animated, {
+import {
   Easing,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withTiming,
 } from "react-native-reanimated";
-
-import { MessageToDisplay } from "./Message";
-
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAppTheme } from "@theme/useAppTheme";
-import { Text } from "@design-system/Text";
 
 type MessageReactionsListProps = {
   reactions: {
     [senderAddress: string]: MessageReaction[];
   };
-  message: MessageToDisplay;
+  messageTopic: ConversationTopic;
+  messageId: MessageId;
+  messageFromMe: boolean;
   dismissMenu?: () => void;
 };
 
-type MessageReactionsItemProps = {
-  content: string;
-  addresses: string[];
-  index: number;
-};
-
-const INITIAL_DELAY = 0;
-const ITEM_DELAY = 200;
-const ITEM_ANIMATION_DURATION = 500;
-
-const keyExtractor = (item: [string, string[]]) => item[0];
-
-const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
-  const styles = useStyles();
-  const { theme } = useAppTheme();
-  const animatedValue = useSharedValue(0);
-  const membersSocials = useProfilesStore((s) =>
-    addresses.map((address) => {
-      const socials = getProfile(address, s.profiles)?.socials;
-      return {
-        address,
-        uri: getPreferredAvatar(socials),
-        name: getPreferredName(socials, address),
-      };
-    })
-  );
-
-  useEffect(() => {
-    animatedValue.value = withDelay(
-      index * ITEM_DELAY + INITIAL_DELAY,
-      withTiming(1, {
-        duration: ITEM_ANIMATION_DURATION,
-        easing: Easing.out(Easing.exp),
-      })
-    );
-  }, [animatedValue, index]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: animatedValue.value,
-    transform: [{ scale: animatedValue.value }],
-  }));
-
-  return (
-    <Animated.View style={[styles.itemContainer, animatedStyle]}>
-      <View
-        style={{
-          height: theme.avatarSize.lg,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <GroupAvatar
-          pendingGroupMembers={membersSocials}
-          size={theme.avatarSize.lg}
-        />
-      </View>
-      <Text style={{ marginTop: 20 }}>
-        {content} {addresses.length}
-      </Text>
-    </Animated.View>
-  );
-};
-
-// Small emoji picker
-const EmojiItem: FC<{
-  content: string;
-  message: MessageToDisplay;
-  alreadySelected: boolean;
-  dismissMenu?: () => void;
-  currentUser: string;
-}> = ({ content, message, alreadySelected, dismissMenu, currentUser }) => {
-  const styles = useStyles();
-
-  const handlePress = useCallback(() => {
-    if (alreadySelected) {
-      removeReactionFromMessage(currentUser, message, content);
-    } else {
-      addReactionToMessage(currentUser, message, content);
-    }
-    InteractionManager.runAfterInteractions(() => {
-      dismissMenu?.();
-    });
-  }, [alreadySelected, content, currentUser, message, dismissMenu]);
-
-  return (
-    <TouchableOpacity
-      hitSlop={{
-        top: 10,
-        bottom: 10,
-        left: 10,
-        right: 10,
-      }}
-      onPress={handlePress}
-    >
-      <View
-        style={[
-          styles.emojiContainer,
-          alreadySelected && styles.selectedEmojiText,
-        ]}
-      >
-        <Text preset="emojiSymbol">{content}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-};
-
-const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
+export const MessageReactionsList: FC<MessageReactionsListProps> = ({
   reactions,
-  message,
+  messageTopic,
+  messageId,
+  messageFromMe,
   dismissMenu,
 }) => {
   const { setReactingToMessage } = useChatStore(
     useSelect(["setReactingToMessage"])
   );
   const currentUser = useCurrentAccount() as string;
-  const styles = useStyles();
+  const safeAreaInsets = useSafeAreaInsets();
+  const { theme } = useAppTheme();
 
   const list = useMemo(() => {
     const reactionMap: Record<string, string[]> = {};
@@ -207,21 +98,33 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
   );
 
   const handlePlusPress = useCallback(() => {
-    setReactingToMessage({ topic: message.topic, messageId: message.id });
+    setReactingToMessage({ topic: messageTopic, messageId });
     InteractionManager.runAfterInteractions(() => {
       dismissMenu?.();
     });
-  }, [dismissMenu, message.id, message.topic, setReactingToMessage]);
-
-  const { theme } = useAppTheme();
+  }, [dismissMenu, messageTopic, messageId, setReactingToMessage]);
 
   return (
-    <View style={styles.container}>
+    <VStack
+      style={{
+        flex: 1,
+      }}
+    >
       {list.length !== 0 ? (
         <Portal>
-          <View style={styles.portalContainer}>
+          <VStack
+            style={{
+              position: "absolute",
+              top: safeAreaInsets.top + theme.spacing.xs,
+              left: 0,
+              right: 0,
+              justifyContent: "center",
+              alignItems: "center",
+              pointerEvents: "box-none",
+            }}
+          >
             <GestureHandlerRootView>
-              <View
+              <VStack
                 style={{
                   borderRadius: theme.spacing.sm,
                   backgroundColor: theme.colors.background.raised,
@@ -234,19 +137,29 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
                   keyExtractor={keyExtractor}
                   showsHorizontalScrollIndicator={false}
                 />
-              </View>
+              </VStack>
             </GestureHandlerRootView>
-          </View>
+          </VStack>
         </Portal>
       ) : (
-        <View style={styles.flex1} />
+        <VStack
+          style={{
+            flex: 1,
+          }}
+        />
       )}
-      <View
+      <HStack
         style={[
-          styles.emojiListContainer,
-          message.fromMe
-            ? styles.emojiListContainerFromMe
-            : styles.emojiListContainerFromOther,
+          {
+            justifyContent: "space-around",
+            alignItems: "center",
+            borderRadius: theme.spacing.lg,
+            padding: theme.spacing.xxs,
+            backgroundColor: theme.colors.background.raised,
+          },
+          messageFromMe
+            ? { alignSelf: "flex-end" }
+            : { alignSelf: "flex-start" },
         ]}
       >
         {favoritedEmojis.getEmojis().map((emoji) => (
@@ -254,7 +167,6 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
             key={emoji}
             content={emoji}
             alreadySelected={currentUserEmojiMap[emoji]}
-            message={message}
             currentUser={currentUser}
             dismissMenu={dismissMenu}
           />
@@ -268,76 +180,143 @@ const MessageReactionsListInner: FC<MessageReactionsListProps> = ({
           }}
           onPress={handlePlusPress}
         >
-          <View style={styles.plusContainer}>
+          <VStack
+            style={{
+              height: theme.spacing.xxl,
+              width: theme.spacing.xxl,
+              borderRadius: theme.spacing.sm,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <Picto picto="plus" size={24} color={theme.colors.text.secondary} />
-          </View>
+          </VStack>
         </TouchableOpacity>
-      </View>
-    </View>
+      </HStack>
+    </VStack>
   );
 };
 
-export const MessageReactionsList = React.memo(MessageReactionsListInner);
+type MessageReactionsItemProps = {
+  content: string;
+  addresses: string[];
+  index: number;
+};
 
-const useStyles = () => {
-  const safeAreaInsets = useSafeAreaInsets();
+const INITIAL_DELAY = 0;
+const ITEM_DELAY = 200;
+const ITEM_ANIMATION_DURATION = 500;
 
+const keyExtractor = (item: [string, string[]]) => item[0];
+
+const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
+  const { theme } = useAppTheme();
+  const animatedValue = useSharedValue(0);
+  const membersSocials = useProfilesStore((s) =>
+    addresses.map((address) => {
+      const socials = getProfile(address, s.profiles)?.socials;
+      return {
+        address,
+        uri: getPreferredAvatar(socials),
+        name: getPreferredName(socials, address),
+      };
+    })
+  );
+
+  useEffect(() => {
+    animatedValue.value = withDelay(
+      index * ITEM_DELAY + INITIAL_DELAY,
+      withTiming(1, {
+        duration: ITEM_ANIMATION_DURATION,
+        easing: Easing.out(Easing.exp),
+      })
+    );
+  }, [animatedValue, index]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: animatedValue.value,
+    transform: [{ scale: animatedValue.value }],
+  }));
+
+  return (
+    <AnimatedVStack
+      style={[
+        {
+          justifyContent: "center",
+          alignItems: "center",
+          width: 76,
+          height: 119.5,
+        },
+        animatedStyle,
+      ]}
+    >
+      <VStack
+        style={{
+          height: theme.avatarSize.lg,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <GroupAvatar
+          pendingGroupMembers={membersSocials}
+          size={theme.avatarSize.lg}
+        />
+      </VStack>
+      <Text style={{ marginTop: 20 }}>
+        {content} {addresses.length}
+      </Text>
+    </AnimatedVStack>
+  );
+};
+
+// Small emoji picker
+const EmojiItem: FC<{
+  content: string;
+
+  alreadySelected: boolean;
+  dismissMenu?: () => void;
+  currentUser: string;
+}> = ({ content, alreadySelected, dismissMenu, currentUser }) => {
   const { theme } = useAppTheme();
 
-  return StyleSheet.create({
-    itemContainer: {
-      justifyContent: "center",
-      alignItems: "center",
-      width: 76,
-      height: 119.5,
-    },
-    container: {
-      flex: 1,
-    },
-    portalContainer: {
-      position: "absolute",
-      top: safeAreaInsets.top + theme.spacing.xs,
-      left: 0,
-      right: 0,
-      justifyContent: "center",
-      alignItems: "center",
-      pointerEvents: "box-none",
-    },
-    flex1: {
-      flex: 1,
-    },
-    // Emoji picker
-    emojiListContainer: {
-      flexDirection: "row",
-      justifyContent: "space-around",
-      alignItems: "center",
-      borderRadius: theme.spacing.lg,
-      padding: theme.spacing.xxs,
-      backgroundColor: theme.colors.background.raised,
-    },
-    emojiListContainerFromMe: {
-      alignSelf: "flex-end",
-    },
-    emojiListContainerFromOther: {
-      alignSelf: "flex-start",
-    },
-    emojiContainer: {
-      height: theme.spacing.xxl,
-      width: theme.spacing.xxl,
-      justifyContent: "center",
-      alignItems: "center",
-      marginRight: theme.spacing["4xs"],
-    },
-    selectedEmojiText: {
-      backgroundColor: theme.colors.fill.minimal,
-      borderRadius: theme.spacing.sm,
-    },
-    plusContainer: {
-      height: theme.spacing.xxl,
-      width: theme.spacing.xxl,
-      borderRadius: theme.spacing.sm,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-  });
+  const handlePress = useCallback(() => {
+    if (alreadySelected) {
+      // removeReactionFromMessage(currentUser, message, content);
+    } else {
+      // addReactionToMessage(currentUser, message, content);
+    }
+    InteractionManager.runAfterInteractions(() => {
+      dismissMenu?.();
+    });
+  }, [alreadySelected, dismissMenu]);
+
+  return (
+    <TouchableOpacity
+      hitSlop={{
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+      }}
+      onPress={handlePress}
+    >
+      <VStack
+        style={[
+          {
+            height: theme.spacing.xxl,
+            width: theme.spacing.xxl,
+            justifyContent: "center",
+            alignItems: "center",
+            marginRight: theme.spacing["4xs"],
+          },
+          alreadySelected && {
+            backgroundColor: theme.colors.fill.minimal,
+            borderRadius: theme.spacing.sm,
+          },
+        ]}
+      >
+        <Text preset="emojiSymbol">{content}</Text>
+      </VStack>
+    </TouchableOpacity>
+  );
 };

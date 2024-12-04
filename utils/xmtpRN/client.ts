@@ -14,6 +14,8 @@ import {
   Group,
   GroupUpdatedCodec,
   InboxId,
+  NativeContentCodec,
+  NativeMessageContent,
   ReactionCodec,
   ReadReceiptCodec,
   RemoteAttachmentCodec,

@@ -1,6 +1,6 @@
 import { BlurViewProps, BlurView as RNBlurView } from "expo-blur";
 import { memo } from "react";
-import Animated, { AnimatedProps } from "react-native-reanimated";
+import Animated, { AnimatedProps, FadeIn } from "react-native-reanimated";
 
 import { IVStackProps } from "./VStack";
 
