@@ -65,6 +65,5 @@ const $indicator: ThemedStyle<ViewStyle> = (theme) => ({
 const $text: ThemedStyle<TextStyle> = (theme) => ({
   color: theme.colors.text.secondary,
   textAlign: "center",
-  flexWrap: "wrap",
   maxWidth: 100,
 });
