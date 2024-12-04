@@ -20,6 +20,7 @@ export const getInboxId = (address: string) =>
 
 export const createXmtpClientFromSigner = async (
   signer: Signer,
+  isSCW: boolean,
   onInstallationRevoked: () => Promise<void>,
   preAuthenticateToInboxCallback?: () => Promise<void>
 ) => {
@@ -32,13 +33,14 @@ export const createXmtpClientFromSigner = async (
     dbDirectory: tempDirectory,
     dbEncryptionKey,
   };
+
   const inboxId = await getInboxId(await signer.getAddress());
 
   await copyDatabasesToTemporaryDirectory(tempDirectory, inboxId);
 
   logger.debug("Instantiating client from signer");
 
-  const client = await Client.create(ethersSignerToXmtpSigner(signer), {
+  const client = await Client.create(ethersSignerToXmtpSigner(signer, isSCW), {
     ...options,
     preAuthenticateToInboxCallback,
   });

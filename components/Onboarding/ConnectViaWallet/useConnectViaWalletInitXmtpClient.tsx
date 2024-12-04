@@ -54,6 +54,7 @@ export function useInitXmptClient() {
       const address = connectViewWalletStore.getState().address!; // We can assume that address is set at this point
       const onXmtp = connectViewWalletStore.getState().onXmtp;
       const alreadyV3Db = connectViewWalletStore.getState().alreadyV3Db;
+      const isSCW = connectViewWalletStore.getState().isSCW;
 
       const waitForClickSignature = async () => {
         while (!connectViewWalletStore.getState().clickedSignature) {
@@ -71,6 +72,7 @@ export function useInitXmptClient() {
 
       await createXmtpClientFromSigner(
         signer,
+        isSCW,
         async () => {
           logger.debug("[Connect Wallet] Installation revoked, disconnecting");
           try {
