@@ -1,4 +1,3 @@
-import Button from "@components/Button/Button";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { translate } from "@i18n";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -22,6 +21,7 @@ import {
   joinGroupMachineLogic,
   JoinGroupMachineContext,
 } from "./joinGroup.machine";
+import { Button } from "@/design-system/Button/Button";
 
 type UseJoinGroupResult = {
   isGroupInviteLoading: boolean;
@@ -57,7 +57,7 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
   const [state, send] = useActor(
     joinGroupMachineLogic.provide({
       actions: {
-        navigateToGroupScreen: (_, params: { topic: string }) => {
+        navigateToGroupScreen: (_: any, params: { topic: string }) => {
           // @ts-expect-error TODO: this should work why isn't TS happy?
           navigation.replace("Conversation", { topic: params.topic });
         },
@@ -147,8 +147,8 @@ export function JoinGroupScreen({
           />
           {joinButtonEnabled && (
             <Button
-              variant="primary"
-              title={translate("join_group")}
+              variant="fill"
+              text={translate("join_group")}
               style={styles.cta}
               onPress={joinGroup}
             />
@@ -159,8 +159,8 @@ export function JoinGroupScreen({
                 {translate("group_already_joined")}
               </Text>
               <Button
-                variant="primary"
-                title={translate("open_conversation")}
+                variant="fill"
+                text={translate("open_conversation")}
                 style={styles.cta}
                 onPress={openConversation}
               />
@@ -169,8 +169,8 @@ export function JoinGroupScreen({
           {polling && (
             <>
               <Button
-                variant="primary"
-                title={translate("joining")}
+                variant="fill"
+                text={translate("joining")}
                 style={styles.cta}
                 disabled
               />

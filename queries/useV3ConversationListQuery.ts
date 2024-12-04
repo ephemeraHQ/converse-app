@@ -19,13 +19,13 @@ export const conversationListKey = (account: string) => [
   account,
 ];
 
-type V3ConversationListType = ConversationWithCodecsType[];
+export type V3ConversationListType = ConversationWithCodecsType[];
 
 const v3ConversationListQueryFn = async (
   account: string,
   context: string,
   includeSync: boolean = true
-) => {
+): Promise<V3ConversationListType> => {
   try {
     logger.debug(
       `[ConversationListQuery] Fetching conversation list from network ${context}`

@@ -4,6 +4,7 @@ import { JoinGroupClient } from "./JoinGroup.client";
 import { joinGroupMachineLogic } from "./joinGroup.machine";
 import { Controlled } from "../../../dependencies/Environment/Environment";
 import { GroupInvite } from "@utils/api.types";
+import { ConversationId } from "@xmtp/react-native-sdk";
 
 jest.setTimeout(1);
 
@@ -21,7 +22,7 @@ describe("Joining a Group from an Invite", () => {
   });
 
   it("Should Successfully allow an Invited user to join with a valid group invite", async () => {
-    const newlyInvitedGroupId = "groupIdAbc";
+    const newlyInvitedGroupId = "groupIdAbc" as ConversationId;
     let navigateToGroupPayload: any = null;
     const navigateToGroupScreenSpy = jest.fn((payload) => {
       navigateToGroupPayload = payload;
@@ -85,7 +86,8 @@ describe("Joining a Group from an Invite", () => {
   });
 
   it("Should transition to 'User Was Already a Member of Group Prior to Clicking Join Link' if the user has already joined the group before user action", async () => {
-    const GroupIdUserWasAlreadyAMemberOf = "AwesomeSupercoolGroupId";
+    const GroupIdUserWasAlreadyAMemberOf =
+      "AwesomeSupercoolGroupId" as ConversationId;
     let navigateToGroupPayload: any = null;
     const navigateToGroupScreenSpy = jest.fn((payload) => {
       navigateToGroupPayload = payload;
@@ -130,7 +132,7 @@ describe("Joining a Group from an Invite", () => {
   });
 
   it("It should transition to 'User Has Been Blocked From Group' if User was blocked from group", async () => {
-    const blockedGroupId = "groupIdAbc";
+    const blockedGroupId = "groupIdAbc" as ConversationId;
     let navigateToGroupPayload: any = null;
     const navigateToGroupScreenSpy = jest.fn((payload) => {
       navigateToGroupPayload = payload;
@@ -167,7 +169,7 @@ describe("Joining a Group from an Invite", () => {
 
   it("Should transition to Attempting to Join Group Timed Out if the attempt times out", async () => {
     jest.useFakeTimers();
-    const newlyInvitedGroupId = "groupIdAbc";
+    const newlyInvitedGroupId = "groupIdAbc" as ConversationId;
     let navigateToGroupPayload: any = null;
     const navigateToGroupScreenSpy = jest.fn((payload) => {
       navigateToGroupPayload = payload;

@@ -1,13 +1,9 @@
-import { useGroupId } from "@hooks/useGroupId";
 import { queryClient } from "@queries/queryClient";
 import { useMutation, MutationObserver } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
-import {
-  consentToGroupsOnProtocol,
-  consentToGroupsOnProtocolByAccount,
-} from "@utils/xmtpRN/contacts";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { consentToGroupsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import type { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
 
 import { allowGroupMutationKey } from "./MutationKeys";
 import {
@@ -16,11 +12,12 @@ import {
   setGroupConsentQueryData,
 } from "./useGroupConsentQuery";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
+import { useConversationQuery } from "./useConversationQuery";
 
 export type AllowGroupMutationProps = {
   account: string;
-  topic: string;
-  groupId: string;
+  topic: ConversationTopic;
+  groupId: ConversationId;
 };
 
 export const createAllowGroupMutationObserver = ({
@@ -31,12 +28,7 @@ export const createAllowGroupMutationObserver = ({
   const allowGroupMutationObserver = new MutationObserver(queryClient, {
     mutationKey: allowGroupMutationKey(account, topic),
     mutationFn: async () => {
-      //       export const consentToGroupsOnProtocol = async ({
-      //   client,
-      //   groupIds,
-      //   consent,
-      // }: ConsentToGroupsOnProtocolParams) => {
-      await consentToGroupsOnProtocol(account, [groupId], "allow");
+      await consentToGroupsOnProtocolByAccount(account, [groupId], "allow");
       return "allowed";
     },
     onMutate: async () => {
@@ -60,9 +52,10 @@ export const createAllowGroupMutationObserver = ({
   return allowGroupMutationObserver;
 };
 
-export const useAllowGroupMutation = (account: string, topic: string) => {
-  const { groupId } = useGroupId(topic);
-  // >>>>>>> bd191fb2 (feat: Add Dependency Control Pattern)
+export const useAllowGroupMutation = (
+  account: string,
+  topic: ConversationTopic
+) => {
   return useMutation({
     mutationKey: allowGroupMutationKey(account, topic),
     mutationFn: async () => {
