@@ -1,6 +1,7 @@
 import { InboxId, MessageId } from "@xmtp/react-native-sdk";
 import { createContext, memo, useContext, useEffect, useRef } from "react";
 import { createStore, useStore } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
 
 type IMessageContextStoreProps = {
   messageId: MessageId;
@@ -10,6 +11,8 @@ type IMessageContextStoreProps = {
   sentAt: number;
   showDateChange: boolean;
   senderAddress: InboxId;
+  isHighlighted: boolean;
+  isShowingTime: boolean;
 };
 
 type IMessageContextStoreState = IMessageContextStoreProps & {};
@@ -40,9 +43,11 @@ export const MessageContextStoreProvider = memo(
 );
 
 const createMessageContextStore = (initProps: IMessageContextStoreProps) => {
-  return createStore<IMessageContextStoreState>()((set) => ({
-    ...initProps,
-  }));
+  return createStore<IMessageContextStoreState>()(
+    subscribeWithSelector((set) => ({
+      ...initProps,
+    }))
+  );
 };
 
 const MessageContextStoreContext = createContext<IMessageContextStore | null>(

@@ -412,6 +412,11 @@ PODS:
     - fmt (= 9.1.0)
     - glog
     - RCT-Folly/Default (= 2024.01.01.00)
+  - RCT-Folly/Default (2024.01.01.00):
+    - boost
+    - DoubleConversion
+    - fmt (= 9.1.0)
+    - glog
   - RCT-Folly/Fabric (2024.01.01.00):
     - boost
     - DoubleConversion
@@ -2022,12 +2027,12 @@ PODS:
     - React-logger (= 0.75.4)
     - React-perflogger (= 0.75.4)
     - React-utils (= 0.75.4)
-  - ReactNativeIosContextMenu (2.5.1):
+  - ReactNativeIosContextMenu (2.5.2):
     - ContextMenuAuxiliaryPreview (~> 0.3)
     - DGSwiftUtilities
     - ExpoModulesCore
     - ReactNativeIosUtilities
-  - ReactNativeIosUtilities (4.5.0):
+  - ReactNativeIosUtilities (4.5.1):
     - ComputableLayout (~> 0.7)
     - DGSwiftUtilities (~> 0.27)
     - ExpoModulesCore
@@ -2695,14 +2700,14 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   BigInt: 74b4d88367b0e819d9f77393549226d36faeb0d8
-  boost: 1dca942403ed9342f98334bf4c3621f011aa7946
+  boost: 4cb898d0bf20404aab1850c656dcea009429d6c1
   CoinbaseWalletSDK: ea1f37512bbc69ebe07416e3b29bf840f5cc3152
   CoinbaseWalletSDKExpo: fc6cc756974827763d7a0decf7140c2902dafca2
   ComputableLayout: c50faffac4ed9f8f05b0ce5e6f3a60df1f6042c8
   Connect-Swift: 1de2ef4a548c59ecaeb9120812dfe0d6e07a0d47
   ContextMenuAuxiliaryPreview: 484e47f66bcb9ffe485b5e7e34cc968ff3218a9f
   DGSwiftUtilities: 1f2722e8b2442dc11c17b66818f62b93780e95fd
-  DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
+  DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
   EASClient: 1509a9a6b48b932ec61667644634daf2562983b8
   EXApplication: c08200c34daca7af7fd76ac4b9d606077410e8ad
   EXConstants: 409690fbfd5afea964e5e9d6c4eb2c2b59222c59
@@ -2743,9 +2748,9 @@ SPEC CHECKSUMS:
   EXUpdates: 60b8b9b0d6e8cb7699ebd375a4deada231b9f5ca
   EXUpdatesInterface: 996527fd7d1a5d271eb523258d603f8f92038f24
   FBLazyVector: 430e10366de01d1e3d57374500b1b150fe482e6d
-  fmt: 10c6e61f4be25dc963c36bd73fc7b1705fe975be
+  fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   GenericJSON: 79a840eeb77030962e8cf02a62d36bd413b67626
-  glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
+  glog: fdfdfe5479092de0c4bdbebedd9056951f092c4f
   GzipSwift: 893f3e48e597a1a4f62fafcb6514220fcf8287fa
   hermes-engine: ea92f60f37dba025e293cbe4b4a548fd26b610a0
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
@@ -2759,7 +2764,7 @@ SPEC CHECKSUMS:
   MMKVCore: d26e4d3edd5cb8588c2569222cbd8be4231374e9
   op-sqlite: 7720c6cc59e76c983263edc07420e642b45fa288
   OpenSSL-Universal: 6e1ae0555546e604dbc632a2b9a24a9c46c41ef6
-  RCT-Folly: bf5c0376ffe4dd2cf438dcf86db385df9fdce648
+  RCT-Folly: 02617c592a293bd6d418e0a88ff4ee1f88329b47
   RCTDeprecation: 726d24248aeab6d7180dac71a936bbca6a994ed1
   RCTRequired: a94e7febda6db0345d207e854323c37e3a31d93b
   RCTTypeSafety: 28e24a6e44f5cbf912c66dde6ab7e07d1059a205
@@ -2831,8 +2836,8 @@ SPEC CHECKSUMS:
   React-utils: d1bae5ac6a5fb94a772ebfc7a7e1aba3a6706a3a
   ReactCodegen: 99b435b58bd874bb0626b3fb16437d2e8735d370
   ReactCommon: 1007c09a406a451ddbd874e51511aa541d6034f6
-  ReactNativeIosContextMenu: e5f972174bd78ab3a552bd6ee4745762ffaa42b3
-  ReactNativeIosUtilities: 8ea45df073a05d24b9fd75e4ec5fe1de19051466
+  ReactNativeIosContextMenu: 3e0880f9bd20af2905b57ace99b69a36be125d1a
+  ReactNativeIosUtilities: 4980803356bff7906929d5d034da58bfc9bb824a
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNAWSCognito: fe0c870c7cd9970a2efefc075b3f2d75eac913c7
   RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c
@@ -2863,7 +2868,7 @@ SPEC CHECKSUMS:
   web3.swift: 2263d1e12e121b2c42ffb63a5a7beb1acaf33959
   XMTP: 48d0c71ef732ac4d79c2942902a132bf71661029
   XMTPReactNative: 080300cc2cb53ffd117d2808c4d9922357ce1d34
-  Yoga: a9ef4f5c2cd79ad812110525ef61048be6a582a4
+  Yoga: b05994d1933f507b0a28ceaa4fdb968dc18da178
 
 PODFILE CHECKSUM: 8de80dcb8fc027dda19e4b9af8900634e49f9b40
 

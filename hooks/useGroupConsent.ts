@@ -85,11 +85,10 @@ export const useGroupConsent = (topic: ConversationTopic) => {
       },
       onMutate: async () => {
         await cancelGroupConsentQuery(account, topic);
-        setGroupConsentQueryData(account, topic, "allowed");
         const previousConsent = getGroupConsentQueryData(account, topic);
+        setGroupConsentQueryData(account, topic, "allowed");
 
         const previousConversation = getConversationQueryData(account, topic);
-
         if (previousConversation) {
           previousConversation.state = "allowed";
           setConversationQueryData(account, topic, previousConversation);
@@ -123,7 +122,6 @@ export const useGroupConsent = (topic: ConversationTopic) => {
   const allowGroup = useCallback(
     async (args: IGroupConsentOptions) => {
       const { includeAddedBy, includeCreator } = args;
-
       await allowGroupMutation({ includeAddedBy, includeCreator });
     },
     [allowGroupMutation]

@@ -6,6 +6,8 @@ import { FlatListProps, Platform } from "react-native";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
 import { DmConsentPopup } from "@/components/Chat/ConsentPopup/dm-consent-popup";
 import { GroupConsentPopup } from "@/components/Chat/ConsentPopup/group-consent-popup";
+import { MessageContextMenu } from "@/components/Chat/Message/MessageContextMenu";
+import { useConversationStore } from "@/features/conversation/conversation-store";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { V3Message } from "@components/Chat/Message/V3Message";
 import { Screen } from "@components/Screen/ScreenComp/Screen";
@@ -95,7 +97,31 @@ const Content = memo(function Content() {
       )}
       <ComposerWrapper />
       <KeyboardFiller />
+      <MessageContextMenuWrapper />
     </AnimatedVStack>
+  );
+});
+
+const MessageContextMenuWrapper = memo(function MessageContextMenuWrapper() {
+  const { theme } = useAppTheme();
+
+  const messageContextMenuData = useConversationStore(
+    (state) => state.messageContextMenuData
+  );
+
+  if (!messageContextMenuData) {
+    return null;
+  }
+
+  return (
+    <MessageContextMenu
+      {...messageContextMenuData}
+      onClose={() => {
+        useConversationStore.setState({
+          messageContextMenuData: null,
+        });
+      }}
+    />
   );
 });
 
@@ -198,9 +224,6 @@ const GroupContent = memo(function GroupContent() {
   if (messages?.ids.length === 0 && !messagesLoading) {
     return <GroupConversationEmpty />;
   }
-
-  console.log("isLoadingConversationConsent:", isLoadingConversationConsent);
-  console.log("isAllowedConversation:", isAllowedConversation);
 
   return (
     <MessagesList

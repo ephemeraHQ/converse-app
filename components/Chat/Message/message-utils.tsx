@@ -1,3 +1,4 @@
+import { getCurrentConversationMessages } from "@/features/conversation/conversation-service";
 import {
   getCurrentAccount,
   useCurrentAccount,
@@ -7,17 +8,30 @@ import { useQuery } from "@tanstack/react-query";
 import { getReadableProfile } from "@utils/str";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import { getMessageContentType } from "@utils/xmtpRN/contentTypes";
-import { CoinbaseMessagingPaymentCodec } from "@utils/xmtpRN/contentTypes/coinbasePayment";
+import {
+  CoinbaseMessagingPaymentCodec,
+  CoinbaseMessagingPaymentContent,
+} from "@utils/xmtpRN/contentTypes/coinbasePayment";
 import { getInboxId } from "@utils/xmtpRN/signIn";
-import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
+import {
+  TransactionReference,
+  TransactionReferenceCodec,
+} from "@xmtp/content-type-transaction-reference";
 import {
   DecodedMessage,
   GroupUpdatedCodec,
+  GroupUpdatedContent,
+  MessageId,
+  NativeMessageContent,
   ReactionCodec,
+  ReactionContent,
   ReadReceiptCodec,
   RemoteAttachmentCodec,
+  RemoteAttachmentContent,
   ReplyCodec,
+  ReplyContent,
   StaticAttachmentCodec,
+  StaticAttachmentContent,
   TextCodec,
 } from "@xmtp/react-native-sdk";
 
@@ -124,4 +138,80 @@ export function getCurrentUserAccountInboxId() {
 }
 export function convertNanosecondsToMilliseconds(nanoseconds: number) {
   return nanoseconds / 1000000;
+}
+
+export function getMessageById(messageId: MessageId) {
+  const conversationMessages = getCurrentConversationMessages();
+  if (!conversationMessages) {
+    return null;
+  }
+  return conversationMessages.byId[messageId];
+}
+
+export function getMessageStringContent(
+  message: DecodedMessageWithCodecsType
+): string | undefined {
+  const content = message.content();
+
+  if (typeof content === "string") {
+    return content;
+  }
+
+  if (isTextMessage(message)) {
+    return message.content() as string;
+  }
+
+  if (isRemoteAttachmentMessage(message)) {
+    const content = message.content() as RemoteAttachmentContent;
+    return content.url;
+  }
+
+  if (isStaticAttachmentMessage(message)) {
+    const content = message.content() as StaticAttachmentContent;
+    return content.filename;
+  }
+
+  if (isTransactionReferenceMessage(message)) {
+    return "Transaction";
+  }
+
+  if (isReactionMessage(message)) {
+    const content = message.content() as ReactionContent;
+    return content.content || "";
+  }
+
+  if (isReplyMessage(message)) {
+    const content = message.content() as ReplyContent;
+    if (content.content.text) {
+      return content.content.text;
+    }
+
+    if (content.content.reply?.content.text) {
+      return content.content.reply.content.text;
+    }
+
+    if (content.content.attachment?.filename) {
+      return content.content.attachment.filename;
+    }
+
+    if (content.content.remoteAttachment?.url) {
+      return content.content.remoteAttachment.url;
+    }
+
+    if (content.content.groupUpdated) {
+      return "Group updated";
+    }
+
+    return "";
+  }
+
+  if (isGroupUpdatedMessage(message)) {
+    return "Group updated";
+  }
+
+  if (isCoinbasePaymentMessage(message)) {
+    return "Coinbase payment";
+  }
+
+  return "";
 }
