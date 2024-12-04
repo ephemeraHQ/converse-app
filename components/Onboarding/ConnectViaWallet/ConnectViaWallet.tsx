@@ -79,7 +79,7 @@ export const ConnectViaWallet = memo(function ConnectViaWallet(
 // Wrapper to init the wallet state and then provide the data to the UI
 const ConnectViaWalletStateWrapper = memo(
   function ConnectViaWalletStateWrapper({ address }: { address: string }) {
-    const { isInitializing, alreadyV3Db, onXmtp, signer } =
+    const { isInitializing, alreadyV3Db, signer } =
       useInitConnectViaWalletState({ address });
 
     if (isInitializing) {
@@ -95,7 +95,6 @@ const ConnectViaWalletStateWrapper = memo(
       <ConnectViaWalletStoreProvider
         address={address}
         alreadyV3Db={alreadyV3Db}
-        onXmtp={onXmtp}
         signer={signer}
       >
         <ConnectViaWalletUI />
@@ -112,7 +111,6 @@ const ConnectViaWalletUI = memo(function ConnectViaWalletUI(props: object) {
     loading,
     waitingForNextSignature,
     signer,
-    onXmtp,
     alreadyV3Db,
     signaturesDone,
   } = useConnectViaWalletStoreContext((state) => ({
@@ -120,7 +118,6 @@ const ConnectViaWalletUI = memo(function ConnectViaWalletUI(props: object) {
     loading: state.loading,
     waitingForNextSignature: state.waitingForNextSignature,
     signer: state.signer,
-    onXmtp: state.onXmtp,
     alreadyV3Db: state.alreadyV3Db,
     signaturesDone: state.numberOfSignaturesDone,
   }));
@@ -156,23 +153,12 @@ const ConnectViaWalletUI = memo(function ConnectViaWalletUI(props: object) {
   let showValueProps = true;
 
   // On XMTP, needs V3 DB signature
-  if (onXmtp && !alreadyV3Db) {
-    title = `${translate("connectViaWallet.sign")} (${signaturesDone + 1}/2)`;
+  if (!alreadyV3Db) {
+    title = translate("connectViaWallet.sign");
     subtitle = translate("connectViaWallet.firstSignature.explanation");
   }
   // On XMTP, has V3 DB signature
-  else if (onXmtp && alreadyV3Db) {
-    title = translate("connectViaWallet.firstSignature.title");
-    subtitle = translate("connectViaWallet.secondSignature.explanation");
-  }
-  // Waiting for second signature
-  else if (waitingForNextSignature && !loading) {
-    title = translate("connectViaWallet.secondSignature.title");
-    subtitle = translate("connectViaWallet.secondSignature.explanation");
-    showValueProps = false;
-  }
-  // Not on XMTP, needs first signature
-  else {
+  else if (alreadyV3Db) {
     title = translate("connectViaWallet.firstSignature.title");
     subtitle = translate("connectViaWallet.firstSignature.explanation");
   }
