@@ -3,7 +3,6 @@ import { useMutation, MutationObserver } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
 import { consentToGroupsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
-import type { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
 
 import { allowGroupMutationKey } from "./MutationKeys";
 import {
@@ -12,7 +11,7 @@ import {
   setGroupConsentQueryData,
 } from "./useGroupConsentQuery";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
-import { useConversationQuery } from "./useConversationQuery";
+import { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
 
 export type AllowGroupMutationProps = {
   account: string;

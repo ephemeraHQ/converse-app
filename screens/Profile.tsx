@@ -57,7 +57,6 @@ import {
   currentAccount,
   useCurrentAccount,
   useLoggedWithPrivy,
-  useProfilesStore,
   useRecommendationsStore,
   useSettingsStore,
   useWalletStore,
@@ -73,16 +72,18 @@ import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
 } from "../utils/groupUtils/adminUtils";
-import { navigate } from "../utils/navigation";
+
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
 import { consentToAddressesOnProtocolByAccount } from "../utils/xmtpRN/contacts";
 import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
-import { getPreferredName } from "@utils/profile/getPreferredName";
-import { getPreferredAvatar } from "@utils/profile/getPreferredAvatar";
-import { getProfile } from "@utils/profile/getProfile";
+
 import { requestPushNotificationsPermissions } from "@/features/notifications/utils/requestPushNotificationsPermissions";
 import { NotificationPermissionStatus } from "@/features/notifications/types/Notifications.types";
+import { useProfileSocials } from "@/hooks/useProfileSocials";
+import { usePreferredName } from "@/hooks/usePreferredName";
+import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
+import { Icon } from "@/design-system/Icon/Icon";
 
 export default function ProfileScreen() {
   return (
@@ -95,18 +96,19 @@ export default function ProfileScreen() {
 
 const ExternalWalletPickerWrapper = memo(
   function ExternalWalletPickerWrapper() {
-    const profiles = useProfilesStore((state) => state.profiles);
     const peerAddress = useRoute<"Profile">().params.address;
-    const socials = getProfile(peerAddress, profiles)?.socials;
+    const { data: socials } = useProfileSocials(peerAddress);
     const { client } = useCurrentAccountXmtpClient();
 
     return (
       <ExternalWalletPicker
         title={translate("revoke_wallet_picker_title")}
         subtitle={translate("revoke_wallet_picker_description", {
-          wallet:
-            getPreferredUsername(socials) ||
-            (client ? shortAddress(client.address) : ""),
+          wallet: socials
+            ? getPreferredUsername(socials)
+            : client
+              ? shortAddress(client.address)
+              : "",
         })}
       />
     );
@@ -128,12 +130,13 @@ function ProfileScreenImpl() {
   const recommendationTags = useRecommendationsStore(
     (s) => s.frens[peerAddress]?.tags
   );
-  const profiles = useProfilesStore((state) => state.profiles);
   const isBlockedPeer = useSettingsStore(
     (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
   );
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
-  const socials = getProfile(peerAddress, profiles)?.socials;
+  const { data: socials } = useProfileSocials(peerAddress);
+  const preferredUserName = usePreferredName(peerAddress);
+  const preferredAvatarUri = usePreferredAvatarUri(peerAddress);
   const groupTopic = route.params.fromGroupTopic;
   const {
     members: groupMembers,
@@ -360,18 +363,18 @@ function ProfileScreenImpl() {
                 );
               });
             if (isPreviouslyInNavStack) {
+              navigation.popToTop();
               navigation.navigate({
                 name: "Conversation",
                 params: {
                   mainConversationWithPeer: peerAddress,
-                  focus: true,
                 },
               });
             } else {
+              navigation.popToTop();
               navigation.dispatch(
                 StackActions.push("Conversation", {
                   mainConversationWithPeer: peerAddress,
-                  focus: true,
                 })
               );
             }
@@ -621,15 +624,15 @@ function ProfileScreenImpl() {
       contentContainerStyle={styles.profileContent}
     >
       <Avatar
-        uri={getPreferredAvatar(socials)}
+        uri={preferredAvatarUri ?? undefined}
         style={styles.avatar}
-        name={getPreferredName(socials, peerAddress)}
+        name={preferredUserName}
       />
-      <Text style={styles.title}>{getPreferredName(socials, peerAddress)}</Text>
+      <Text style={styles.title}>{preferredUserName}</Text>
       {isMyProfile && shouldShowError && (
         <View style={styles.errorContainer}>
-          <Picto
-            picto="exclamationmark.triangle"
+          <Icon
+            icon="exclamationmark.triangle"
             color={dangerColor(colorScheme)}
             size={PictoSizes.textButton}
             style={styles.errorIcon}
@@ -682,13 +685,13 @@ function ProfileScreenImpl() {
           items={[
             {
               id: "message",
-              title: "Send a message",
+              title: translate("send_a_message"),
               titleColor: primaryColor(colorScheme),
               action: () => {
                 navigation.pop(3);
                 // @todo => check if this is the right timing on split screen / web / android
                 setTimeout(() => {
-                  navigate("Conversation", {
+                  navigation.navigate("Conversation", {
                     mainConversationWithPeer: route.params.address,
                   });
                 }, 300);
@@ -736,7 +739,7 @@ function ProfileScreenImpl() {
                 title: translate("view_removed_chats"),
                 action: () => {
                   navigation.popToTop();
-                  navigate("Blocked");
+                  navigation.navigate("Blocked");
                 },
                 titleColor:
                   Platform.OS === "android"
