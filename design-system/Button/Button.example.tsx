@@ -1,6 +1,7 @@
 import { VStack } from "@design-system/VStack";
 import { useAppTheme } from "@theme/useAppTheme";
 import { Button } from "./Button";
+import { Icon } from "../Icon/Icon";
 
 type IExampleProps = {
   onPress?: () => void;
@@ -36,14 +37,27 @@ export function ButtonExample(args: IExampleProps) {
       <Button text="Button with Icon" icon="search" onPress={onPress} />
 
       {/* Custom Accessories */}
-      {/* <Button
+      <Button
         size="sm"
         text="Custom Left Accessory"
         LeftAccessory={({ style }) => (
-          <Icon icon="chevron.left" color="white" style={style} />
+          <Icon
+            icon="chevron.left"
+            size={theme.iconSize.md}
+            color={theme.colors.global.primary}
+            style={style}
+          />
+        )}
+        RightAccessory={({ style }) => (
+          <Icon
+            icon="chevron.right"
+            size={theme.iconSize.md}
+            color={theme.colors.global.primary}
+            style={style}
+          />
         )}
         onPress={onPress}
-      /> */}
+      />
 
       {/* i18n Example */}
       {/* <Button tx="cancel" txOptions={{ name: "John" }} onPress={onPress} /> */}
