@@ -1,4 +1,3 @@
-import { InstalledWallet } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import { translate } from "@i18n";
 
 import { SimulateAssetChangesResponse } from "alchemy-sdk";
@@ -10,6 +9,7 @@ import { TransactionPreviewRow } from "./TransactionPreviewRow";
 import { SimulationResult } from "./TransactionSimulationResult";
 import { TransactionResult } from "./TransactionResult";
 import { shortAddress } from "@utils/strings/shortAddress";
+import { InstalledWallet } from "@/utils/evm/wallets";
 
 type TransactionState = {
   status: "pending" | "triggering" | "triggered" | "success" | "failure";

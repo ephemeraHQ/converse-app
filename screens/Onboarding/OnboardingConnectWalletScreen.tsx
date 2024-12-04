@@ -19,8 +19,7 @@ export const OnboardingConnectWalletScreen = memo(
       "OnboardingConnectWallet"
     >
   ) {
-    const { address } = props.route.params;
-
+    const { address, isSCW } = props.route.params;
     const router = useRouter();
 
     const handleDoneConnecting = useCallback(() => {
@@ -45,6 +44,7 @@ export const OnboardingConnectWalletScreen = memo(
         {/* For now we don't need to have specific stuff for onboarding vs new account so we use this component to encapsulate the connect view wallet logic */}
         <ConnectViaWallet
           address={address}
+          isSCW={isSCW}
           onDoneConnecting={handleDoneConnecting}
           onErrorConnecting={handleErrorConnecting}
         />

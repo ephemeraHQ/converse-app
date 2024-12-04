@@ -24,6 +24,7 @@ import { useInitConnectViaWalletState } from "./useInitConnectViaWalletState";
 
 type IConnectViaWalletProps = {
   address: string;
+  isSCW: boolean;
   onDoneConnecting: () => void;
   onErrorConnecting: (arg: { error: Error }) => void;
 };
@@ -31,7 +32,7 @@ type IConnectViaWalletProps = {
 export const ConnectViaWallet = memo(function ConnectViaWallet(
   props: IConnectViaWalletProps
 ) {
-  const { address, onErrorConnecting, onDoneConnecting } = props;
+  const { address, isSCW, onErrorConnecting, onDoneConnecting } = props;
 
   const finishedConnectingRef = useRef(false);
 
@@ -71,16 +72,22 @@ export const ConnectViaWallet = memo(function ConnectViaWallet(
       onDoneConnecting={handleDoneConnecting}
       onErrorConnecting={handleErrorConnecting}
     >
-      <ConnectViaWalletStateWrapper address={address} />
+      <ConnectViaWalletStateWrapper address={address} isSCW={isSCW} />
     </ConnectViaWalletContextProvider>
   );
 });
 
 // Wrapper to init the wallet state and then provide the data to the UI
 const ConnectViaWalletStateWrapper = memo(
-  function ConnectViaWalletStateWrapper({ address }: { address: string }) {
+  function ConnectViaWalletStateWrapper({
+    address,
+    isSCW,
+  }: {
+    address: string;
+    isSCW: boolean;
+  }) {
     const { isInitializing, alreadyV3Db, onXmtp, signer } =
-      useInitConnectViaWalletState({ address });
+      useInitConnectViaWalletState({ address, isSCW });
 
     if (isInitializing) {
       return <LoadingState />;
@@ -94,6 +101,7 @@ const ConnectViaWalletStateWrapper = memo(
     return (
       <ConnectViaWalletStoreProvider
         address={address}
+        isSCW={isSCW}
         alreadyV3Db={alreadyV3Db}
         onXmtp={onXmtp}
         signer={signer}
