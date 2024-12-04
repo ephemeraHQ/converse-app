@@ -41,7 +41,6 @@ export function NavigationChatButton({
     setTimeout(() => {
       navigate("Conversation", {
         mainConversationWithPeer: address,
-        focus: true,
       });
     }, 300);
   }, [address, navigation]);

@@ -477,7 +477,9 @@ export const getConversationByPeerByAccount = async ({
   return getConversationByPeer({ client, peer, includeSync });
 };
 
-export const getPeerAddressDm = async (dm: DmWithCodecsType) => {
+export const getPeerAddressDm = async (
+  dm: DmWithCodecsType
+): Promise<string | undefined> => {
   const peerInboxId = await dm.peerInboxId();
   const peerAddress = (await dm.members()).find(
     (member) => member.inboxId === peerInboxId
@@ -488,7 +490,7 @@ export const getPeerAddressDm = async (dm: DmWithCodecsType) => {
 export const getPeerAddressFromTopic = async (
   account: string,
   topic: ConversationTopic
-) => {
+): Promise<string | undefined> => {
   const dm = await getConversationByTopicByAccount({
     account,
     topic,
