@@ -110,12 +110,12 @@ export const PinnedV3GroupConversation = ({
         <Avatar
           key={group?.topic}
           uri={group?.imageUrlSquare}
-          size={theme.spacing["6xl"]}
+          size={theme.avatarSize.xxl}
         />
       );
     }
-    return <GroupAvatarDumb size={theme.spacing["6xl"]} members={memberData} />;
-  }, [group?.imageUrlSquare, group?.topic, memberData, theme.spacing]);
+    return <GroupAvatarDumb size={theme.avatarSize.xxl} members={memberData} />;
+  }, [group?.imageUrlSquare, group?.topic, memberData, theme.avatarSize.xxl]);
 
   return (
     <PinnedConversation

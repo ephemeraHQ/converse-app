@@ -118,10 +118,10 @@ export const PinnedV3DMConversation = ({
         key={peerInboxId}
         uri={preferredAvatar ?? undefined}
         name={preferredName}
-        size={theme.spacing["6xl"]}
+        size={theme.avatarSize.xxl}
       />
     );
-  }, [peerInboxId, preferredAvatar, preferredName, theme.spacing]);
+  }, [peerInboxId, preferredAvatar, preferredName, theme.avatarSize.xxl]);
 
   return (
     <PinnedConversation
