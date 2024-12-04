@@ -1,9 +1,9 @@
 import { EntityObject } from "@queries/entify";
-import { getXmtpClientFromBase64Key } from "@utils/xmtpRN/client";
-import { Group } from "@xmtp/react-native-sdk";
+import { getXmtpClientFromAddress } from "@utils/xmtpRN/client";
+import { ConversationId, Group } from "@xmtp/react-native-sdk";
 
 export type ConverseXmtpClientType = Awaited<
-  ReturnType<typeof getXmtpClientFromBase64Key>
+  ReturnType<typeof getXmtpClientFromAddress>
 >;
 
 export type ConversationWithCodecsType = Awaited<
@@ -26,10 +26,6 @@ export type DecodedMessageWithCodecsType = Awaited<
   ReturnType<ConversationWithCodecsType["messages"]>
 >[number];
 
-export type XmtpClientByAccount = {
-  [account: string]: ConverseXmtpClientType;
-};
-
 export type GroupData = Pick<
   AnyGroup,
   | "id"
@@ -45,6 +41,25 @@ export type GroupData = Pick<
   | "state"
 >;
 
+// export type ConversationData = Pick<
+//   ConversationWithCodecsType,
+//   "conversationVersion"
+//   // | "createdAt"
+//   // | "members"
+//   // | "topic"
+//   // | "addedByInboxId"
+//   // | "imageUrlSquare"
+//   // | "description"
+//   // | "state"
+// >;
+
 export type GroupsDataEntity = EntityObject<GroupData>;
+export type ConversationDataEntity = EntityObject<
+  // todo(lustig) fix this type so that it is serializable and plays nicely with xstate inspection
+  // when omitting client, typescript complains in JoinGroup.client.ts
+  // Omit<ConversationWithCodecsType, "client">,
+  ConversationWithCodecsType,
+  string
+>;
 
 export type GroupsEntity = EntityObject<AnyGroup>;
