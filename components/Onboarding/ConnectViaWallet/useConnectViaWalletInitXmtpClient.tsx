@@ -52,7 +52,6 @@ export function useInitXmptClient() {
     try {
       const signer = connectViewWalletStore.getState().signer!; // We can assume that signer is set at this point
       const address = connectViewWalletStore.getState().address!; // We can assume that address is set at this point
-      const onXmtp = connectViewWalletStore.getState().onXmtp;
       const alreadyV3Db = connectViewWalletStore.getState().alreadyV3Db;
 
       const waitForClickSignature = async () => {
