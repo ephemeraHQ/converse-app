@@ -158,7 +158,6 @@ export default function NewGroupSummary({
       setTimeout(() => {
         navigate("Conversation", {
           topic: group.topic,
-          focus: true,
         });
       }, 300);
     } catch (e) {
