@@ -57,7 +57,7 @@ const $bottomContainer: ThemedStyle<ViewStyle> = (theme) => ({
 const $indicator: ThemedStyle<ViewStyle> = (theme) => ({
   width: theme.spacing.xxs,
   height: theme.spacing.xxs,
-  backgroundColor: "black",
+  backgroundColor: theme.colors.text.primary,
   borderRadius: theme.spacing.xxxs,
   paddingLeft: theme.spacing.xxxs,
 });
