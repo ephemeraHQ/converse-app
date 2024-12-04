@@ -1,7 +1,8 @@
-import { format, enUS, fr } from "date-fns";
+import { format } from "date-fns";
 import { getLocales } from "react-native-localize";
 
 import { getMinimalDate, getRelativeDate, getRelativeDateTime } from "./date";
+import { enUS, fr } from "date-fns/locale";
 
 jest.mock("react-native-localize", () => ({
   getLocales: jest.fn(),
