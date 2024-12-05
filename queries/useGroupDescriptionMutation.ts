@@ -8,9 +8,8 @@ import { setGroupDescriptionMutationKey } from "./MutationKeys";
 import {
   cancelGroupDescriptionQuery,
   getGroupDescriptionQueryData,
-  setGroupDescriptionQueryData,
 } from "./useGroupDescriptionQuery";
-// import { refreshGroup } from "../utils/xmtpRN/conversations";
+import { handleGroupDescriptionUpdate } from "@/utils/groupUtils/handleGroupDescriptionUpdate";
 
 export const useGroupDescriptionMutation = (
   account: string,
@@ -35,7 +34,11 @@ export const useGroupDescriptionMutation = (
         account,
         topic
       );
-      setGroupDescriptionQueryData(account, topic, groupDescription);
+      handleGroupDescriptionUpdate({
+        account,
+        topic,
+        description: groupDescription,
+      });
       return { previousGroupDescription };
     },
     onError: (error, _variables, context) => {
@@ -47,11 +50,11 @@ export const useGroupDescriptionMutation = (
       if (!topic) {
         return;
       }
-      setGroupDescriptionQueryData(
+      handleGroupDescriptionUpdate({
         account,
         topic,
-        context.previousGroupDescription
-      );
+        description: context.previousGroupDescription,
+      });
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess useGroupDescriptionMutation");
