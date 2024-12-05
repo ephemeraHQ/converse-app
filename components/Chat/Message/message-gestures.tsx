@@ -1,4 +1,6 @@
+import { AnimatedHStack } from "@/design-system/HStack";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { debugBorder } from "@/utils/debug-style";
 import { Haptics } from "@/utils/haptics";
 import { memo } from "react";
 import { View } from "react-native";
@@ -21,7 +23,7 @@ import Animated, {
 // Super fast because it's better UX to have a quick response
 // Also, we can't use onBegin to start the scaling as soon as the gesture starts because we also have a tap handler
 // So for example if we had onBegin, and the user just tapped, it would still start the scaling animation which is weird
-export const MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION = 200;
+export const MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION = 300;
 
 export const MESSAGE_GESTURE_LONG_PRESS_SCALE = 1.025;
 
@@ -39,14 +41,19 @@ export type IMessageGesturesOnLongPressArgs =
 export type IMessageGesturesProps = {
   children: React.ReactNode;
   onTap?: () => void;
-  onDoubleTap?: () => void;
+  //   onDoubleTap?: () => void;
   onLongPress?: (e: IMessageGesturesOnLongPressArgs) => void;
 };
 
 export const MessageGestures = memo(function MessageGestures(
   args: IMessageGesturesProps
 ) {
-  const { children, onTap, onDoubleTap, onLongPress } = args;
+  const {
+    children,
+    onTap,
+    //    onDoubleTap,
+    onLongPress,
+  } = args;
 
   const containerRef = useAnimatedRef<View>();
 
@@ -61,17 +68,16 @@ export const MessageGestures = memo(function MessageGestures(
     })
     .runOnJS(true);
 
-  const doubleTap = Gesture.Tap()
-    .numberOfTaps(2)
-    .onEnd(() => {
-      if (onDoubleTap) {
-        onDoubleTap();
-      }
-    })
-    .runOnJS(true);
+  //   const doubleTap = Gesture.Tap()
+  //     .numberOfTaps(2)
+  //     .onEnd(() => {
+  //       if (onDoubleTap) {
+  //         onDoubleTap();
+  //       }
+  //     })
+  //     .runOnJS(true);
 
   const longPress = Gesture.LongPress()
-
     .onStart((e) => {
       Haptics.softImpactAsyncAnimated();
       scaleAV.value = withTiming(MESSAGE_GESTURE_LONG_PRESS_SCALE, {
@@ -92,7 +98,11 @@ export const MessageGestures = memo(function MessageGestures(
     })
     .minDuration(MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION);
 
-  const composed = Gesture.Simultaneous(doubleTap, tap, longPress);
+  const composed = Gesture.Simultaneous(
+    //   doubleTap,
+    tap,
+    longPress
+  );
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -102,9 +112,13 @@ export const MessageGestures = memo(function MessageGestures(
 
   return (
     <GestureDetector gesture={composed}>
-      <Animated.View ref={containerRef} style={animatedStyle}>
+      <AnimatedHStack
+        // {...debugBorder("orange")}
+        ref={containerRef}
+        style={animatedStyle}
+      >
         {children}
-      </Animated.View>
+      </AnimatedHStack>
     </GestureDetector>
   );
 });

@@ -1,4 +1,9 @@
-import { getCurrentConversationMessages } from "@/features/conversation/conversation-service";
+import {
+  getCurrentConversationMessages,
+  getCurrentConversationTopic,
+} from "@/features/conversation/conversation-service";
+import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
+import { useConversationMessages } from "@/queries/useConversationMessages";
 import {
   getCurrentAccount,
   useCurrentAccount,
@@ -11,21 +16,13 @@ import {
   SupportedCodecsType,
 } from "@utils/xmtpRN/client";
 import { getMessageContentType } from "@utils/xmtpRN/contentTypes";
-import {
-  CoinbaseMessagingPaymentCodec,
-  CoinbaseMessagingPaymentContent,
-} from "@utils/xmtpRN/contentTypes/coinbasePayment";
+import { CoinbaseMessagingPaymentCodec } from "@utils/xmtpRN/contentTypes/coinbasePayment";
 import { getInboxId } from "@utils/xmtpRN/signIn";
-import {
-  TransactionReference,
-  TransactionReferenceCodec,
-} from "@xmtp/content-type-transaction-reference";
+import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   DecodedMessage,
   GroupUpdatedCodec,
-  GroupUpdatedContent,
   MessageId,
-  NativeMessageContent,
   ReactionCodec,
   ReactionContent,
   ReadReceiptCodec,
@@ -199,4 +196,39 @@ export function getMessageStringContent(
   }
 
   return "";
+}
+
+export function useConversationMessageById(messageId: MessageId) {
+  const currentAccount = useCurrentAccount()!;
+  const messages = getCurrentConversationMessages();
+
+  const cachedMessage = messages?.byId[messageId];
+
+  // Only fetch the message if it's not already in the conversation messages
+  const { data: message, isLoading: isLoadingMessage } = useQuery({
+    ...getConversationMessageQueryOptions({
+      account: currentAccount,
+      messageId,
+    }),
+    enabled: !cachedMessage,
+  });
+
+  return {
+    message: message ?? cachedMessage,
+    isLoading: !cachedMessage && isLoadingMessage,
+  };
+}
+
+export function useConversationMessageReactions(messageId: MessageId) {
+  const currentAccount = useCurrentAccount()!;
+  const topic = getCurrentConversationTopic()!;
+
+  const { data: messages } = useConversationMessages(currentAccount, topic);
+
+  // TODO: Add another fallback query to fetch single message reactions. Coming in the SDK later
+
+  return {
+    bySender: messages?.reactions[messageId]?.bySender,
+    byReactionContent: messages?.reactions[messageId]?.byReactionContent,
+  };
 }

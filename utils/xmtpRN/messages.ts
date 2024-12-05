@@ -5,10 +5,10 @@ import { getXmtpClient } from "./sync";
 
 import config from "../../config";
 
-import { addConversationMessage } from "@queries/useConversationMessages";
-import { updateMessageToConversationListQuery } from "@queries/useV3ConversationListQuery";
 import { handleGroupUpdatedMessage } from "@data/helpers/messages/handleGroupUpdatedMessage";
+import { addConversationMessage } from "@queries/useConversationMessages";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { updateMessageToConversationListQuery } from "@/queries/useV3ConversationListQuery";
 
 export const streamAllMessages = async (account: string) => {
   await stopStreamingAllMessage(account);

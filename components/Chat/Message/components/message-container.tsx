@@ -14,7 +14,7 @@ export const MessageContainer = memo(function MessageContainer(props: {
     <HStack
       style={{
         // ...debugBorder("blue"),
-        flex: 1,
+        width: "100%",
         alignItems: "flex-end",
         ...(fromMe
           ? { justifyContent: "flex-end" }
