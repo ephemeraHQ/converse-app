@@ -5,7 +5,8 @@ import { useMemo } from "react";
 
 export const useV3ConversationItems = () => {
   const currentAccount = useCurrentAccount();
-  const { data, ...rest } = useV3ConversationListQuery(
+
+  const { data: conversations, ...rest } = useV3ConversationListQuery(
     currentAccount!,
     {
       refetchOnWindowFocus: false,
@@ -13,26 +14,27 @@ export const useV3ConversationItems = () => {
     },
     "useV3ConversationItems"
   );
+
   const { pinnedConversationTopics, topicsData } = useChatStore(
     useSelect(["pinnedConversationTopics", "topicsData"])
   );
 
-  const conversations = useMemo(() => {
-    const pinnedSet = new Set(pinnedConversationTopics);
-    const deletedTopicsSet = new Set();
-    for (const topic in topicsData) {
-      const topicData = topicsData[topic];
-      if (topicData?.status === "deleted") {
-        deletedTopicsSet.add(topic);
-      }
-    }
-    return data?.filter(
-      (group) =>
-        group.state === "allowed" &&
-        !pinnedSet.has(group.topic) &&
-        !deletedTopicsSet.has(group.topic)
+  const conversationsFiltered = useMemo(() => {
+    const pinnedTopics = new Set(pinnedConversationTopics);
+    const deletedTopics = new Set(
+      Object.entries(topicsData)
+        .filter(([_, data]) => data?.status === "deleted")
+        .map(([topic]) => topic)
     );
-  }, [data, pinnedConversationTopics, topicsData]);
 
-  return { data: conversations, ...rest };
+    return conversations?.filter((conversation) => {
+      const isAllowed = conversation.state === "allowed";
+      const isNotPinned = !pinnedTopics.has(conversation.topic);
+      const isNotDeleted = !deletedTopics.has(conversation.topic);
+
+      return isAllowed && isNotPinned && isNotDeleted;
+    });
+  }, [conversations, pinnedConversationTopics, topicsData]);
+
+  return { data: conversationsFiltered, ...rest };
 };

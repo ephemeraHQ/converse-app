@@ -14,7 +14,7 @@ import { useRevokeSuperAdminMutation } from "../queries/useRevokeSuperAdminMutat
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const useGroupMembers = (
-  topic: ConversationTopic | undefined,
+  topic: ConversationTopic,
   queryOptions?: Partial<QueryObserverOptions<GroupMembersSelectData>>
 ) => {
   const account = currentAccount();

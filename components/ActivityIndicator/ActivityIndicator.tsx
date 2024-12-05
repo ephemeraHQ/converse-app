@@ -1,3 +1,6 @@
-import { ActivityIndicator } from "react-native";
+import { Loader } from "@design-system/loader";
 
-export default ActivityIndicator;
+/**
+ * @deprecated Use the Loader component from @design-system instead
+ */
+export default Loader;

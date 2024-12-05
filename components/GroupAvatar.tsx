@@ -39,7 +39,7 @@ type GroupAvatarProps = {
   size?: number;
   style?: StyleProp<ViewStyle>;
   uri?: string | undefined;
-  topic?: ConversationTopic | undefined;
+  topic?: ConversationTopic;
   pendingGroupMembers?: { address: string; uri?: string; name?: string }[];
   excludeSelf?: boolean;
   // Converstion List should not make requests across the bridge
@@ -199,7 +199,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { members: groupMembers } = useGroupMembers(
-    topic,
+    topic!,
     onConversationListScreen
       ? {
           refetchOnWindowFocus: false,

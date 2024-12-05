@@ -8,7 +8,7 @@ import { ConversationTopic, Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
 import { groupMembersQueryKey } from "./QueryKeys";
-import { entifyWithAddress, EntityObjectWithAddress } from "./entify";
+import { EntityObjectWithAddress, entifyWithAddress } from "./entify";
 import { queryClient } from "./queryClient";
 import { useGroupQuery } from "./useGroupQuery";
 
@@ -16,7 +16,7 @@ export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
 
 export const useGroupMembersQuery = (
   account: string,
-  topic: ConversationTopic | undefined,
+  topic: ConversationTopic,
   queryOptions?: Partial<QueryObserverOptions<GroupMembersSelectData>>
 ) => {
   const { data: group } = useGroupQuery(account, topic);

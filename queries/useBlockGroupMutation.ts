@@ -28,7 +28,11 @@ const createBlockGroupMutationObserver = ({
   const blockGroupMutationObserver = new MutationObserver(queryClient, {
     mutationKey: blockGroupMutationKey(account, topic),
     mutationFn: async () => {
-      await consentToGroupsOnProtocolByAccount(account, [groupId], "deny");
+      await consentToGroupsOnProtocolByAccount({
+        account,
+        groupIds: [groupId],
+        consent: "deny",
+      });
       return "denied";
     },
     onMutate: async () => {
@@ -62,11 +66,11 @@ export const useBlockGroupMutation = (
       if (!topic || !account) {
         return;
       }
-      await consentToGroupsOnProtocolByAccount(
+      await consentToGroupsOnProtocolByAccount({
         account,
-        [getV3IdFromTopic(topic)],
-        "deny"
-      );
+        groupIds: [getV3IdFromTopic(topic)],
+        consent: "deny",
+      });
       return "denied";
     },
     onMutate: async () => {
