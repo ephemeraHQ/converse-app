@@ -67,6 +67,7 @@ export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
           uri={localGroupPhoto}
           style={styles.avatar}
           topic={topic}
+          excludeSelf={false}
         />
         {canEditGroupImage && (
           <Button
