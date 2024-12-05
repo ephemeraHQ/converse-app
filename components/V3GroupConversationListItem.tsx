@@ -203,6 +203,7 @@ const useData = ({ group }: UseDataProps) => {
           closeContextMenu();
         },
         id: "pin",
+        rightView: <ContextMenuIcon icon="pin" />,
       },
       {
         title: isUnread

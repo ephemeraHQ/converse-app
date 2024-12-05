@@ -108,6 +108,7 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
           closeContextMenu();
         },
         id: "pin",
+        rightView: <ContextMenuIcon icon="pin" />,
       },
       {
         title: isUnread

@@ -18,7 +18,6 @@ import { useConversationIsUnread } from "@/features/conversation-list/hooks/useM
 import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
-import { Icon } from "@/design-system/Icon/Icon";
 
 type PinnedV3DMConversationProps = {
   conversation: DmWithCodecsType;
@@ -80,7 +79,7 @@ export const PinnedV3DMConversation = ({
           closeContextMenu();
         },
         id: "pin",
-        // rightView: <ContextMenuIcon icon="menu" />,
+        rightView: <ContextMenuIcon icon="pin.slash" />,
       },
       {
         title: isUnread

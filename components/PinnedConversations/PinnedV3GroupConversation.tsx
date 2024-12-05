@@ -70,6 +70,7 @@ export const PinnedV3GroupConversation = ({
           closeContextMenu();
         },
         id: "pin",
+        rightView: <ContextMenuIcon icon="pin.slash" />,
       },
       {
         title: isUnread
