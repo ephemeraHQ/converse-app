@@ -6,11 +6,10 @@ import { setGroupNameMutationKey } from "./MutationKeys";
 import {
   cancelGroupNameQuery,
   getGroupNameQueryData,
-  setGroupNameQueryData,
 } from "./useGroupNameQuery";
 import { useGroupQuery } from "@queries/useGroupQuery";
-// import { refreshGroup } from "../utils/xmtpRN/conversations";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { handleGroupNameUpdate } from "@/utils/groupUtils/handleGroupNameUpdate";
 
 export const useGroupNameMutation = (
   account: string,
@@ -29,7 +28,7 @@ export const useGroupNameMutation = (
     onMutate: async (groupName: string) => {
       await cancelGroupNameQuery(account, topic);
       const previousGroupName = getGroupNameQueryData(account, topic);
-      setGroupNameQueryData(account, topic, groupName);
+      handleGroupNameUpdate({ account, topic, name: groupName });
       return { previousGroupName };
     },
     onError: (error, _variables, context) => {
@@ -38,7 +37,11 @@ export const useGroupNameMutation = (
       if (context?.previousGroupName === undefined) {
         return;
       }
-      setGroupNameQueryData(account, topic, context.previousGroupName);
+      handleGroupNameUpdate({
+        account,
+        topic,
+        name: context.previousGroupName,
+      });
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess useGroupNameMutation");
