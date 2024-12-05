@@ -14,7 +14,6 @@ import {
   View,
 } from "react-native";
 
-import { Indicator } from "./Indicator";
 import Picto from "./Picto/Picto";
 
 export type AvatarProps = {
@@ -23,7 +22,6 @@ export type AvatarProps = {
   style?: StyleProp<ImageStyle>;
   color?: boolean;
   name?: string | undefined;
-  showIndicator?: boolean;
   // Inverts the color of the place holder
   invertColor?: boolean;
 };
@@ -34,7 +32,6 @@ function Avatar({
   style,
   color,
   name,
-  showIndicator,
   invertColor,
 }: AvatarProps) {
   const colorScheme = useColorScheme();
@@ -60,9 +57,7 @@ function Avatar({
         imageStyle={styles.image}
         cachePolicy="memory-disk"
         testID="avatar-image"
-      >
-        {showIndicator && <Indicator size={size} testID="avatar-indicator" />}
-      </ImageBackground>
+      ></ImageBackground>
     </>
   ) : (
     <View
@@ -81,9 +76,6 @@ function Avatar({
           size={Platform.OS === "ios" ? size / 3 : size / 2}
           color="white"
         />
-      )}
-      {showIndicator && (
-        <Indicator size={size} testID="avatar-placeholder-indicator" />
       )}
     </View>
   );
@@ -112,8 +104,8 @@ const getStyles = (
             ? actionSecondaryColor("light")
             : textSecondaryColor(colorScheme)
           : invertColor
-          ? textSecondaryColor("dark")
-          : actionSecondaryColor(colorScheme),
+            ? textSecondaryColor("dark")
+            : actionSecondaryColor(colorScheme),
       justifyContent: "center",
       alignItems: "center",
     },
