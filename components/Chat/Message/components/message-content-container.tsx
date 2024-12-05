@@ -1,6 +1,5 @@
 import { HStack } from "@/design-system/HStack";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { debugBorder } from "@/utils/debug-style";
 import { memo } from "react";
 
 export const MessageContentContainer = memo(

@@ -1,6 +1,4 @@
 import { AnimatedHStack } from "@/design-system/HStack";
-import { useAppTheme } from "@/theme/useAppTheme";
-import { debugBorder } from "@/utils/debug-style";
 import { Haptics } from "@/utils/haptics";
 import { memo } from "react";
 import { View } from "react-native";
@@ -10,7 +8,7 @@ import {
   GestureStateChangeEvent,
   LongPressGestureHandlerEventPayload,
 } from "react-native-gesture-handler";
-import Animated, {
+import {
   Easing,
   measure,
   runOnJS,
@@ -23,9 +21,9 @@ import Animated, {
 // Super fast because it's better UX to have a quick response
 // Also, we can't use onBegin to start the scaling as soon as the gesture starts because we also have a tap handler
 // So for example if we had onBegin, and the user just tapped, it would still start the scaling animation which is weird
-export const MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION = 300;
+const MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION = 300;
 
-export const MESSAGE_GESTURE_LONG_PRESS_SCALE = 1.025;
+const MESSAGE_GESTURE_LONG_PRESS_SCALE = 1.025;
 
 type IContainerMeasure = {
   width: number;
@@ -61,7 +59,6 @@ export const MessageGestures = memo(function MessageGestures(
 
   const tap = Gesture.Tap()
     .onEnd(() => {
-      console.log("tap");
       if (onTap) {
         onTap();
       }
