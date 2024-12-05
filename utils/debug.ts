@@ -63,10 +63,3 @@ export const componentKeyDebug = () => {
     key: getRandomId(),
   };
 };
-
-export function debugBorder(color: string = "red") {
-  return {
-    borderWidth: 1,
-    borderColor: color,
-  };
-}
