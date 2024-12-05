@@ -28,14 +28,8 @@ export const useGroupConversationListAvatarInfo = (
   }, [group]);
 
   const memberInboxIds = useMemo(() => {
-    const inboxIds: InboxId[] = [];
-    for (const member of members) {
-      if (member.addresses[0].toLowerCase() !== currentAccount?.toLowerCase()) {
-        inboxIds.push(member.inboxId);
-      }
-    }
-    return inboxIds;
-  }, [members, currentAccount]);
+    return members.map((member) => member.inboxId);
+  }, [members]);
 
   const data = useInboxProfileSocialsQueries(currentAccount, memberInboxIds);
 
