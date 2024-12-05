@@ -2,10 +2,10 @@ import { CategorizedEmojisRecord, Emoji } from "@utils/emojis/interfaces";
 import { FC, memo, useMemo } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
-interface EmojiRowProps {
+type EmojiRowProps = {
   item: CategorizedEmojisRecord;
   onPress: (emoji: string) => void;
-}
+};
 
 export const EmojiRow: FC<EmojiRowProps> = memo(({ item, onPress }) => {
   const items = useMemo(() => {
@@ -15,6 +15,7 @@ export const EmojiRow: FC<EmojiRowProps> = memo(({ item, onPress }) => {
     }
     return sliced;
   }, [item.emojis]);
+
   return (
     <View style={styles.rowContainer}>
       {items.map((emoji, id) => {
