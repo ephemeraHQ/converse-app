@@ -171,17 +171,19 @@ export const addConversationMessage = (
       if (isReactionMessage(message)) {
         const reactionContent = message.content() as ReactionContent;
         const reactionContentString = reactionContent.content;
-        const messageId = message.id as MessageId;
+        const referenceMessageId = reactionContent.reference as MessageId;
         const senderAddress = message.senderAddress as InboxId;
 
-        const existingReactions = previousMessages.reactions[messageId] || {
+        const existingReactions = previousMessages.reactions[
+          referenceMessageId
+        ] || {
           bySender: {},
           byReactionContent: {},
         };
 
         newPreviousMessages.reactions = {
           ...previousMessages.reactions,
-          [messageId]: {
+          [referenceMessageId]: {
             bySender: {
               ...existingReactions.bySender,
               [senderAddress]: [
