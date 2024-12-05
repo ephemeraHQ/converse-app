@@ -1,8 +1,11 @@
 import { Pressable } from "@design-system/Pressable";
 import { Text } from "@design-system/Text";
-import { backgroundColor, textSecondaryColor } from "@styles/colors";
 import { FC } from "react";
-import { StyleSheet, useColorScheme } from "react-native";
+import { TextStyle, ViewStyle } from "react-native";
+import { HStack } from "@design-system/HStack";
+import { Center } from "@design-system/Center";
+import { VStack } from "@design-system/VStack";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 
 type PinnedConversationProps = {
   avatarComponent: React.ReactNode;
@@ -19,37 +22,48 @@ export const PinnedConversation: FC<PinnedConversationProps> = ({
   showUnread,
   title,
 }) => {
-  const styles = useStyles();
+  const { themed } = useAppTheme();
 
   return (
-    <Pressable
-      style={styles.container}
-      onPress={onPress}
-      onLongPress={onLongPress}
-    >
-      {avatarComponent}
-      <Text style={styles.text}>{title}</Text>
+    <Pressable onPress={onPress} onLongPress={onLongPress}>
+      <VStack style={themed($container)}>
+        {avatarComponent}
+        <HStack style={themed($bottomContainer)}>
+          <Text numberOfLines={1} style={themed($text)}>
+            {title}
+          </Text>
+          {showUnread && <Center style={themed($indicator)} />}
+        </HStack>
+      </VStack>
     </Pressable>
   );
 };
 
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    safe: {
-      flex: 1,
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    container: {
-      margin: 8,
-      padding: 4,
-    },
-    avatar: { margin: 8 },
-    text: {
-      color: textSecondaryColor(colorScheme),
-      textAlign: "center",
-      flexWrap: "wrap",
-      maxWidth: 100,
-    },
-  });
-};
+const $container: ThemedStyle<ViewStyle> = (theme) => ({
+  gap: theme.spacing.xxs,
+  justifyContent: "center",
+  alignItems: "center",
+  width: theme.spacing["6xl"],
+});
+
+const $bottomContainer: ThemedStyle<ViewStyle> = (theme) => ({
+  flex: 1,
+  alignItems: "center",
+  justifyContent: "center",
+  gap: theme.spacing.xxxs,
+  width: theme.spacing["6xl"],
+});
+
+const $indicator: ThemedStyle<ViewStyle> = (theme) => ({
+  width: theme.spacing.xxs,
+  height: theme.spacing.xxs,
+  backgroundColor: theme.colors.text.primary,
+  borderRadius: theme.spacing.xxxs,
+  paddingLeft: theme.spacing.xxxs,
+});
+
+const $text: ThemedStyle<TextStyle> = (theme) => ({
+  color: theme.colors.text.secondary,
+  textAlign: "center",
+  maxWidth: 100,
+});
