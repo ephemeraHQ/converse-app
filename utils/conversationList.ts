@@ -11,7 +11,7 @@ export type ConversationListContextType = {
       >["navigation"]
     | undefined
   >;
-  routeName: "Chats" | "ShareFrame" | "ChatsRequests" | "Blocked";
+  routeName: "Chats" | "ShareFrame" | "ChatsRequests" | "Blocked" | "Examples";
   routeParams: NativeStackScreenProps<
     NavigationParamList,
     "Chats" | "ShareFrame" | "ChatsRequests" | "Blocked"

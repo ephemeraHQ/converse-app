@@ -10,19 +10,15 @@ import {
   getGroupConsentQueryData,
   setGroupConsentQueryData,
 } from "./useGroupConsentQuery";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import type { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
+import { useConversationQuery } from "./useConversationQuery";
 
 export type BlockGroupMutationProps = {
   account: string;
-  topic: string;
-  groupId: string;
+  topic: ConversationTopic;
+  groupId: ConversationId;
 };
-
-// export const useBlockGroupMutation = (
-//   account: string,
-//   topic: ConversationTopic | undefined
-// ) => {
 
 const createBlockGroupMutationObserver = ({
   account,
@@ -32,7 +28,7 @@ const createBlockGroupMutationObserver = ({
   const blockGroupMutationObserver = new MutationObserver(queryClient, {
     mutationKey: blockGroupMutationKey(account, topic),
     mutationFn: async () => {
-      await consentToGroupsOnProtocol(account, [groupId], "deny");
+      await consentToGroupsOnProtocolByAccount(account, [groupId], "deny");
       return "denied";
     },
     onMutate: async () => {
@@ -56,7 +52,10 @@ const createBlockGroupMutationObserver = ({
   return blockGroupMutationObserver;
 };
 
-export const useBlockGroupMutation = (account: string, topic: string) => {
+export const useBlockGroupMutation = (
+  account: string,
+  topic: ConversationTopic
+) => {
   return useMutation({
     mutationKey: blockGroupMutationKey(account, topic!),
     mutationFn: async () => {

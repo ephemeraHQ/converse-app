@@ -80,11 +80,6 @@ export const en = {
       explanation:
         "The secure inbox you own.\nConverse is built on XMTP, an open-source secure messaging protocol.",
     },
-    secondSignature: {
-      title: "Allow Converse",
-      explanation:
-        "Converse needs your permission\nto send and receive messages.\nYou can revoke this anytime.",
-    },
     valueProps: {
       e2eEncryption: {
         title: "End-to-end encrypted with MLS",

@@ -89,6 +89,9 @@ export type NavigationParamList = {
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
   NewAccount: undefined;
+
+  // UI Tests
+  Examples: undefined;
 };
 
 export const authScreensSharedScreenOptions: NativeStackNavigationOptions = {

@@ -1,6 +1,7 @@
 // @ts-ignore
 import mockRNDeviceInfo from "react-native-device-info/jest/react-native-device-info-mock";
-require("dotenv").config();
+// todo(lustig): figure out how to use dotenv in jest - this was working before I left
+// require("dotenv").config();
 
 jest.mock("react-native-webview", () => {
   const { View } = require("react-native");

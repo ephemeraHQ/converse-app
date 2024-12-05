@@ -23,8 +23,6 @@ import { useAutoConnectExternalWallet } from "../utils/evm/external";
 import { usePrivyAccessToken } from "../utils/evm/privy";
 import { converseNavigations } from "../utils/navigation";
 import { ConversationScreenConfig } from "./Navigation/ConversationNav";
-import { GroupInviteScreenConfig } from "./Navigation/GroupInviteNav";
-import { GroupLinkScreenConfig } from "./Navigation/GroupLinkNav";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
 import {
   IdleNavigation,
@@ -111,6 +109,7 @@ const NavigationContent = () => {
     useSelect(["notificationsPermissionStatus", "splashScreenHidden"])
   );
 
+  // Uncomment to test design system components
   // return (
   //   <NativeStack.Navigator>
   //     <NativeStack.Screen name="Examples" component={Examples} />

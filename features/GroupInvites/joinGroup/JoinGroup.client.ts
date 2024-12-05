@@ -1,14 +1,28 @@
 import { OnConsentOptions } from "@hooks/useGroupConsent";
 import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
 import { GroupInvite } from "@utils/api.types";
-import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
+// import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
+import { getV3IdFromTopic } from "@/utils/groupUtils/groupId";
 import logger from "@utils/logger";
-import { GroupData, GroupsDataEntity } from "@utils/xmtpRN/client.types";
-import { InboxId } from "@xmtp/react-native-sdk";
+import {
+  ConversationDataEntity,
+  ConversationWithCodecsType,
+  GroupData,
+  GroupsDataEntity,
+} from "@utils/xmtpRN/client.types";
+import {
+  Conversation,
+  ConversationId,
+  ConversationTopic,
+  ConversationVersion,
+  InboxId,
+} from "@xmtp/react-native-sdk";
 import { AxiosInstance } from "axios";
 
 import {} from "../groupInvites.utils";
 import { JoinGroupResult } from "./joinGroup.types";
+import { V3ConversationListType } from "@queries/useV3ConversationListQuery";
+import { entify } from "@/queries/entify";
 
 const GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS = 10;
 const GROUP_JOIN_REQUEST_POLL_INTERVAL_MS = 1000;
@@ -34,7 +48,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export type AllowGroupProps = {
   account: string;
-  group: GroupData;
+  conversation: ConversationWithCodecsType;
   options: OnConsentOptions;
 };
 
@@ -44,7 +58,7 @@ export class JoinGroupClient {
     account: string,
     groupInviteId: string
   ) => Promise<JoinGroupResult>;
-  fetchGroupsByAccount: (account: string) => Promise<GroupsDataEntity>;
+  fetchGroupsByAccount: (account: string) => Promise<ConversationDataEntity>;
   allowGroup: (props: AllowGroupProps) => Promise<void>;
   refreshGroup: (account: string, topic: string) => Promise<void>;
 
@@ -54,7 +68,7 @@ export class JoinGroupClient {
       account: string,
       groupInviteId: string
     ) => Promise<JoinGroupResult>,
-    fetchGroupsByAccount: (account: string) => Promise<GroupsDataEntity>,
+    fetchGroupsByAccount: (account: string) => Promise<ConversationDataEntity>,
     allowGroup: (props: AllowGroupProps) => Promise<void>,
     refreshGroup: (account: string, topic: string) => Promise<void>
   ) {
@@ -75,20 +89,20 @@ export class JoinGroupClient {
 
     const liveFetchGroupsByAccount = async (
       account: string
-    ): Promise<GroupsDataEntity> => {
-      const { fetchGroupsQuery } = await import("@queries/useGroupsQuery");
-      const groupsEntity: GroupsDataEntity = await fetchGroupsQuery(account);
-      const cleanedGroupsEntity = {
-        byId: Object.fromEntries(
-          Object.entries(groupsEntity.byId).map(([id, group]) => [
-            [group.id],
-            { ...group, client: undefined },
-          ])
-        ),
-        ids: Object.values(groupsEntity.byId).map((group) => group.id),
-      };
+    ): Promise<ConversationDataEntity> => {
+      const { fetchConversationListQuery } = await import(
+        "@queries/useV3ConversationListQuery"
+      );
 
-      return cleanedGroupsEntity;
+      const conversationList: V3ConversationListType =
+        await fetchConversationListQuery(account);
+
+      const conversationEntity: ConversationDataEntity = entify(
+        conversationList,
+        (conversation) => conversation.id as ConversationId
+      );
+
+      return conversationEntity;
     };
 
     /**
@@ -183,7 +197,7 @@ export class JoinGroupClient {
 
     const liveAllowGroup = async ({
       account,
-      group,
+      conversation,
       options,
     }: AllowGroupProps) => {
       // Dynamically import dependencies to avoid the need for mocking in tests
@@ -195,7 +209,7 @@ export class JoinGroupClient {
         "@queries/useAllowGroupMutation"
       );
 
-      const { topic, id: groupId } = group;
+      const { topic, id: groupId } = conversation;
       logger.debug(`[JoinGroupClient] Allowing group ${topic}`);
       const allowGroupMutationObserver = createAllowGroupMutationObserver({
         account,
@@ -205,12 +219,18 @@ export class JoinGroupClient {
       await allowGroupMutationObserver.mutate();
 
       // Dynamically import setGroupStatus
-      setGroupStatus({ [getGroupIdFromTopic(topic).toLowerCase()]: "allowed" });
+      setGroupStatus({
+        [getV3IdFromTopic(topic).toLowerCase()]: "allowed",
+      });
 
       const inboxIdsToAllow: InboxId[] = [];
       const inboxIds: { [inboxId: string]: "allowed" } = {};
-      if (options.includeAddedBy && group?.addedByInboxId) {
-        const addedBy = group.addedByInboxId;
+      if (
+        options.includeAddedBy &&
+        conversation.version === ConversationVersion.GROUP &&
+        conversation.addedByInboxId
+      ) {
+        const addedBy = conversation.addedByInboxId;
         inboxIds[addedBy as string] = "allowed";
         inboxIdsToAllow.push(addedBy);
       }
@@ -221,8 +241,8 @@ export class JoinGroupClient {
       // and to make this client more flexible. This allows the tests to run
       // without mocking these dependencies, which would be necessary if they
       // were imported at the top level of this module.
-      const { refreshGroup } = await import("@utils/xmtpRN/conversations");
-      await refreshGroup(account, topic);
+      // const { refreshGroup } = await import("@utils/xmtpRN/conversations");
+      // await refreshGroup(account, topic);
     };
 
     return new JoinGroupClient(
@@ -235,7 +255,7 @@ export class JoinGroupClient {
   }
 
   static userAMemberOfGroupWithId(
-    alreadyAMemberGroupId: string
+    alreadyAMemberGroupId: ConversationId
   ): JoinGroupClient {
     const GroupIdUserAlreadyWasAMemberOf = alreadyAMemberGroupId;
 
@@ -265,36 +285,56 @@ export class JoinGroupClient {
 
     const fixtureFetchGroupsByAccount = async (
       account: string
-    ): Promise<GroupsDataEntity> => {
+    ): Promise<ConversationDataEntity> => {
       const fixtureGroup: GroupData = {
         id: GroupIdUserAlreadyWasAMemberOf,
         createdAt: new Date().getTime(),
-        members: [],
-        topic: "topic123",
+        members: async () => [],
+        topic: "topic123" as ConversationTopic,
         // has user been blocked?
         isGroupActive: true,
         state: "allowed",
-        creatorInboxId: "0xabc" as InboxId,
+        creatorInboxId: async () => "0xabc" as InboxId,
         name: "Group Name",
         addedByInboxId: "0x123" as InboxId,
         imageUrlSquare: "https://www.google.com",
         description: "Group Description",
       } as const;
 
-      const fixtureGroupsDataEntity: GroupsDataEntity = {
+      // todo(lustig): how do you create a well typed fixture of the plain conversation type?
+      // @ts-expect-error
+      const conversationFixture: Conversation = {
+        id: GroupIdUserAlreadyWasAMemberOf,
+        createdAt: new Date().getTime(),
+        members: async () => [],
+        topic: "topic123" as ConversationTopic,
+        isGroupActive: true,
+        state: "allowed",
+        creatorInboxId: async () => "0xabc" as InboxId,
+        name: "Group Name",
+        addedByInboxId: "0x123" as InboxId,
+        imageUrlSquare: "https://www.google.com",
+        description: "Group Description",
+      };
+
+      const fixtureConversationDataEntity: ConversationDataEntity = {
         ids: [GroupIdUserAlreadyWasAMemberOf],
+        // todo(lustig): how do you create a well typed fixture of the plain conversation type?
+        // @ts-expect-error
         byId: {
-          [GroupIdUserAlreadyWasAMemberOf]: fixtureGroup,
+          [GroupIdUserAlreadyWasAMemberOf]: conversationFixture,
         },
       } as const;
 
+      // todo(lustig): how do you create a well typed fixture of the plain conversation type?
+      // @ts-expect-error
       return fixtureGroupsDataEntity;
     };
 
     const fixtureAllowGroup = async ({
       account,
       options,
-      group,
+      conversation,
     }: AllowGroupProps) => {};
 
     const fixtureRefreshGroup = async (account: string, topic: string) => {};
@@ -309,10 +349,10 @@ export class JoinGroupClient {
   }
 
   static userNotAMemberOfGroupWithId(
-    notJoinedGroupId: string
+    notJoinedGroupId: ConversationId
   ): JoinGroupClient {
     const GroupIdUserIsNewTo = notJoinedGroupId;
-    const GroupIdUserIsAlreadyAMemberOf = "groupId123";
+    const GroupIdUserIsAlreadyAMemberOf = "groupId123" as ConversationId;
 
     const fixtureGetGroupInvite = async (groupInviteId: string) => {
       const fixtureGroupInvite: GroupInvite = {
@@ -344,11 +384,11 @@ export class JoinGroupClient {
       const fixtureGroup: GroupData = {
         id: GroupIdUserIsAlreadyAMemberOf,
         createdAt: new Date().getTime(),
-        members: [],
-        topic: "topic123",
+        members: async () => [],
+        topic: "topic123" as ConversationTopic,
         isGroupActive: true,
         state: "allowed",
-        creatorInboxId: "0xabc" as InboxId,
+        creatorInboxId: async () => "0xabc" as InboxId,
         name: "Group Name",
         addedByInboxId: "0x123" as InboxId,
         imageUrlSquare: "https://www.google.com",
@@ -370,7 +410,7 @@ export class JoinGroupClient {
     const fixtureAllowGroup = async ({
       account,
       options,
-      group,
+      conversation,
     }: AllowGroupProps) => {};
 
     const fixtureRefreshGroup = async (account: string, topic: string) => {};
@@ -378,13 +418,17 @@ export class JoinGroupClient {
     return new JoinGroupClient(
       fixtureGetGroupInvite,
       fixtureAttemptToJoinGroup,
+      // todo(lustig): how do you create a well typed fixture of the plain conversation type?
+      // @ts-expect-error
       fixtureFetchGroupsByAccount,
       fixtureAllowGroup,
       fixtureRefreshGroup
     );
   }
 
-  static userBlockedFromGroupWithId(blockedGroupId: string): JoinGroupClient {
+  static userBlockedFromGroupWithId(
+    blockedGroupId: ConversationId
+  ): JoinGroupClient {
     const GroupIdUserWasBlockedFrom = blockedGroupId;
     const UserWasBlockedFromGroupActiveValue = false;
 
@@ -418,11 +462,11 @@ export class JoinGroupClient {
       const fixtureGroup: GroupData = {
         id: GroupIdUserWasBlockedFrom,
         createdAt: new Date().getTime(),
-        members: [],
-        topic: "topic123",
+        members: async () => [],
+        topic: "topic123" as ConversationTopic,
         isGroupActive: UserWasBlockedFromGroupActiveValue,
         state: "allowed",
-        creatorInboxId: "0xabc" as InboxId,
+        creatorInboxId: async () => "0xabc" as InboxId,
         name: "Group Name",
         addedByInboxId: "0x123" as InboxId,
         imageUrlSquare: "https://www.google.com",
@@ -446,6 +490,8 @@ export class JoinGroupClient {
     return new JoinGroupClient(
       fixtureGetGroupInvite,
       fixtureAttemptToJoinGroup,
+      // todo(lustig): how do you create a well typed fixture of the plain conversation type?
+      // @ts-expect-error
       fixtureFetchGroupsByAccount,
       fixtureAllowGroup,
       fixtureRefreshGroup
@@ -497,6 +543,8 @@ export class JoinGroupClient {
     return new JoinGroupClient(
       fixtureGetGroupInvite,
       fixtureAttemptToJoinGroup,
+      // todo(lustig): how do you create a well typed fixture of the plain conversation type?
+      // @ts-expect-error
       fixtureFetchGroupsByAccount,
       fixtureAllowGroup,
       fixtureRefreshGroup
