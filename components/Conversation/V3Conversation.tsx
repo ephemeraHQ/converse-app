@@ -1,15 +1,30 @@
-import { V3Message } from "@components/Chat/Message/V3Message";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationMessages } from "@queries/useConversationMessages";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 import { memo, useCallback, useEffect } from "react";
-import { FlatListProps, ListRenderItem, Platform } from "react-native";
+import { FlatListProps, Platform } from "react-native";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
+import { DmConsentPopup } from "@/components/Chat/ConsentPopup/dm-consent-popup";
+import { GroupConsentPopup } from "@/components/Chat/ConsentPopup/group-consent-popup";
+import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
+import { V3Message } from "@components/Chat/Message/V3Message";
 import { Screen } from "@components/Screen/ScreenComp/Screen";
 import { Button } from "@design-system/Button/Button";
 import { Center } from "@design-system/Center";
 import { Text } from "@design-system/Text";
 import { AnimatedVStack, VStack } from "@design-system/VStack";
+import {
+  Composer,
+  IComposerSendArgs,
+} from "@features/conversation/composer/composer";
+import {
+  ConversationContextProvider,
+  useConversationContext,
+} from "@features/conversation/conversation-context";
+import {
+  ConversationGroupContextProvider,
+  useConversationGroupContext,
+} from "@features/conversation/conversation-group-context";
 import { translate } from "@i18n/translate";
 import { useRouter } from "@navigation/useNavigation";
 import { useAppTheme } from "@theme/useAppTheme";
@@ -19,22 +34,12 @@ import Animated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ChatInputDumb } from "../../features/conversation/composer/composer";
 import {
-  ConversationContextProvider,
-  useConversationContext,
-} from "../../features/conversation/conversation-context";
-import {
-  ConversationGroupContextProvider,
-  useConversationGroupContext,
-} from "../../features/conversation/conversation-group-context";
-import {
-  getCurrentConversationMessages,
   initializeCurrentConversation,
   useConversationCurrentTopic,
 } from "../../features/conversation/conversation-service";
-import { GroupConversationTitle } from "../../features/conversations/components/GroupConversationTitle";
 import { DmConversationTitle } from "../../features/conversations/components/DmConversationTitle";
+import { GroupConversationTitle } from "../../features/conversations/components/GroupConversationTitle";
 import { NewConversationTitle } from "../../features/conversations/components/NewConversationTitle";
 
 const keyExtractor = (item: string) => item;
@@ -88,30 +93,50 @@ const Content = memo(function Content() {
           <GroupContent />
         </ConversationGroupContextProvider>
       )}
-      <ChatInputDumb />
+      <ComposerWrapper />
       <KeyboardFiller />
     </AnimatedVStack>
   );
+});
+
+const ComposerWrapper = memo(function ComposerWrapper() {
+  const sendMessage = useConversationContext("sendMessage");
+
+  const handleSend = useCallback(
+    async (args: IComposerSendArgs) => {
+      sendMessage(args);
+    },
+    [sendMessage]
+  );
+
+  return <Composer onSend={handleSend} />;
 });
 
 const NewConversationContent = memo(function NewConversationContent() {
   const peerAddress = useConversationContext("peerAddress");
   useNewConversationHeader();
 
-  return <MessagesList data={[]} refreshing={false} />;
+  return <MessagesList messageIds={[]} />;
 });
 
 const DmContent = memo(function DmContent() {
   const currentAccount = useCurrentAccount()!;
-  const topic = useConversationCurrentTopic();
+  const topic = useConversationCurrentTopic()!;
   const conversationNotFound = useConversationContext("conversationNotFound");
-
+  const isAllowedConversation = useConversationContext("isAllowedConversation");
+  // const peerAddress = useConversationContext("peerAddress")!;
+  const conversationId = useConversationContext("conversationId")!;
+  const isLoadingConversationConsent = useConversationContext(
+    "isLoadingConversationConsent"
+  );
   const {
     data: messages,
     isLoading: messagesLoading,
     isRefetching: isRefetchingMessages,
     refetch: refetchMessages,
   } = useConversationMessages(currentAccount, topic!);
+
+  const { data: peerInboxId } = useDmPeerInboxId(currentAccount, topic!);
 
   useDmHeader();
 
@@ -125,19 +150,37 @@ const DmContent = memo(function DmContent() {
     return null;
   }
 
+  console.log("isAllowedConversation:", isAllowedConversation);
+  console.log("isLoadingConversationConsent:", isLoadingConversationConsent);
+
   return (
     <MessagesList
-      data={messages?.ids ?? []}
+      messageIds={messages?.ids ?? []}
       refreshing={isRefetchingMessages}
       onRefresh={refetchMessages}
+      ListHeaderComponent={
+        !isAllowedConversation &&
+        peerInboxId &&
+        !isLoadingConversationConsent ? (
+          <DmConsentPopup
+            peerInboxId={peerInboxId}
+            topic={topic}
+            conversationId={conversationId}
+          />
+        ) : undefined
+      }
     />
   );
 });
 
 const GroupContent = memo(function GroupContent() {
   const currentAccount = useCurrentAccount()!;
-  const topic = useConversationCurrentTopic();
+  const topic = useConversationCurrentTopic()!;
   const conversationNotFound = useConversationContext("conversationNotFound");
+  const isAllowedConversation = useConversationContext("isAllowedConversation");
+  const isLoadingConversationConsent = useConversationContext(
+    "isLoadingConversationConsent"
+  );
 
   const {
     data: messages,
@@ -156,32 +199,46 @@ const GroupContent = memo(function GroupContent() {
     return <GroupConversationEmpty />;
   }
 
+  console.log("isLoadingConversationConsent:", isLoadingConversationConsent);
+  console.log("isAllowedConversation:", isAllowedConversation);
+
   return (
     <MessagesList
-      data={messages?.ids ?? []}
+      messageIds={messages?.ids ?? []}
       refreshing={isRefetchingMessages}
       onRefresh={refetch}
+      ListHeaderComponent={
+        !isAllowedConversation && !isLoadingConversationConsent ? (
+          <GroupConsentPopup topic={topic} />
+        ) : undefined
+      }
     />
   );
 });
 
-const renderItem: ListRenderItem<string> = ({ item, index }) => {
-  return <Message messageId={item} index={index} />;
-};
-
 export const MessagesList = memo(function MessagesList(
-  props: Omit<AnimatedProps<FlatListProps<string>>, "renderItem">
+  props: Omit<AnimatedProps<FlatListProps<string>>, "renderItem" | "data"> & {
+    messageIds: string[];
+  }
 ) {
+  const { messageIds, ...rest } = props;
+
   const { theme } = useAppTheme();
 
   return (
     // @ts-ignore
     <Animated.FlatList
       inverted
-      // @ts-ignore It says error but it works
-      // layout={theme.animation.springLayoutTransition}
-      itemLayoutAnimation={theme.animation.reanimatedSpringLayoutTransition}
-      renderItem={renderItem}
+      data={messageIds}
+      renderItem={({ item, index }) => {
+        return (
+          <V3Message
+            nextMessageId={messageIds[index - 1]}
+            previousMessageId={messageIds[index + 1]}
+            messageId={item}
+          />
+        );
+      }}
       keyboardDismissMode="interactive"
       automaticallyAdjustContentInsets={false}
       contentInsetAdjustmentBehavior="never"
@@ -198,36 +255,12 @@ export const MessagesList = memo(function MessagesList(
       //   autoscrollToTopThreshold: 100,
       // }}
       // estimatedListSize={Dimensions.get("screen")}
-      {...props}
+      {...rest}
     />
   );
 });
 
-const Message = memo(function Message(props: {
-  messageId: string;
-  index: number;
-}) {
-  const { messageId, index } = props;
-
-  const messages = getCurrentConversationMessages()!;
-
-  return (
-    <AnimatedVStack
-      {...(index === 0 &&
-        {
-          // entering: theme.animation.reanimatedFadeInDownSpring,
-        })}
-    >
-      <V3Message
-        messageId={messageId}
-        previousMessageId={messages?.ids[index + 1]}
-        nextMessageId={messages?.ids[index - 1]}
-      />
-    </AnimatedVStack>
-  );
-});
-
-const KeyboardFiller = memo(function KeyboardFiller() {
+export const KeyboardFiller = memo(function KeyboardFiller() {
   const { height: keyboardHeightAV } = useAnimatedKeyboard();
   const insets = useSafeAreaInsets();
 
@@ -300,7 +333,9 @@ const GroupConversationEmpty = memo(() => {
 
   const handleSend = useCallback(() => {
     sendMessage({
-      text: "👋",
+      content: {
+        text: "👋",
+      },
     });
   }, [sendMessage]);
 

@@ -2,19 +2,19 @@ import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
 
+import { useGroupQuery } from "@queries/useGroupQuery";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { setGroupDescriptionMutationKey } from "./MutationKeys";
 import {
   cancelGroupDescriptionQuery,
   getGroupDescriptionQueryData,
   setGroupDescriptionQueryData,
 } from "./useGroupDescriptionQuery";
-import { useGroupQuery } from "@queries/useGroupQuery";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const useGroupDescriptionMutation = (
   account: string,
-  topic: ConversationTopic | undefined
+  topic: ConversationTopic
 ) => {
   const { data: group } = useGroupQuery(account, topic);
   return useMutation({

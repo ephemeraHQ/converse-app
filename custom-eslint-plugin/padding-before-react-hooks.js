@@ -44,6 +44,15 @@ module.exports = {
 
         if (!tokenBefore) return;
 
+        // Check if the node is the first statement in the function
+        const parentFunction = node.parent;
+        if (
+          parentFunction.type === "BlockStatement" &&
+          parentFunction.body[0] === node
+        ) {
+          return;
+        }
+
         const linesBetween = node.loc.start.line - tokenBefore.loc.end.line - 1;
 
         if (linesBetween === 0) {

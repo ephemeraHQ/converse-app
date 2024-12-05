@@ -57,8 +57,7 @@ export default function NewConversation({
   const colorScheme = useColorScheme();
   const { data: existingGroup } = useGroupQuery(
     currentAccount(),
-    route.params?.addingToGroupTopic,
-    false
+    route.params?.addingToGroupTopic!
   );
   const [group, setGroup] = useState({
     enabled: !!route.params?.addingToGroupTopic,
@@ -66,7 +65,7 @@ export default function NewConversation({
   });
 
   const { addMembers, members } = useGroupMembers(
-    route.params?.addingToGroupTopic
+    route.params?.addingToGroupTopic!
   );
 
   const [loading, setLoading] = useState(false);

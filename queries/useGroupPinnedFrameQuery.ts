@@ -6,7 +6,7 @@ import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const useGroupPinnedFrameQuery = (
   account: string,
-  topic: ConversationTopic | undefined
+  topic: ConversationTopic
 ) => {
   const { data: group } = useGroupQuery(account, topic);
   return useQuery({

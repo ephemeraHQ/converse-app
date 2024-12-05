@@ -7,7 +7,6 @@ import { actionSheetColors, textSecondaryColor } from "@styles/colors";
 import {
   getAccountIsAdmin,
   getAccountIsSuperAdmin,
-  getAddressIsAdmin,
   getAddressIsSuperAdmin,
 } from "@utils/groupUtils/adminUtils";
 import { getGroupMemberActions } from "@utils/groupUtils/getGroupMemberActions";
@@ -16,14 +15,14 @@ import logger from "@utils/logger";
 import { navigate } from "@utils/navigation";
 import { getPreferredName, getProfile } from "@utils/profile";
 import { FC, memo, useMemo } from "react";
-import { Alert, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { Alert, StyleSheet, Text, View, useColorScheme } from "react-native";
 
+import { useGroupPermissionPolicyQuery } from "@queries/useGroupPermissionPolicyQuery";
+import type { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import type { GroupWithCodecsType } from "@utils/xmtpRN/client";
-import { useGroupPermissionPolicyQuery } from "@queries/useGroupPermissionPolicyQuery";
 
 type GroupScreenMembersTableProps = {
   topic: ConversationTopic | undefined;
@@ -31,7 +30,7 @@ type GroupScreenMembersTableProps = {
 };
 
 export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
-  ({ topic }) => {
+  ({ topic, group }) => {
     const colorScheme = useColorScheme();
     const currentAccount = useCurrentAccount() as string;
     const styles = useStyles();
@@ -43,10 +42,10 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
       revokeAdmin,
       revokeSuperAdmin,
       removeMember,
-    } = useGroupMembers(topic);
+    } = useGroupMembers((topic ?? group?.topic)!);
     const { data: groupPermissionPolicy } = useGroupPermissionPolicyQuery(
       currentAccount,
-      topic
+      (topic ?? group?.topic)!
     );
     const profiles = useProfilesStore((s) => s.profiles);
 

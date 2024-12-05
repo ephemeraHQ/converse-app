@@ -3,6 +3,7 @@ import logger from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { promoteSuperAdminMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
@@ -10,12 +11,11 @@ import {
   setGroupMembersQueryData,
 } from "./useGroupMembersQuery";
 import { useGroupQuery } from "./useGroupQuery";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const usePromoteToSuperAdminMutation = (
   account: string,
-  topic: ConversationTopic | undefined
+  topic: ConversationTopic
 ) => {
   const { data: group } = useGroupQuery(account, topic);
 
