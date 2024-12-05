@@ -1,13 +1,17 @@
+import { useDmConsentQuery } from "@/queries/useDmConstentStateQuery";
+import { useGroupConsentQuery } from "@/queries/useGroupConsentQuery";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationQuery } from "@queries/useConversationQuery";
 import { addConversationToConversationListQuery } from "@queries/useV3ConversationListQuery";
 import { navigate } from "@utils/navigation";
 import { createConversationByAccount } from "@utils/xmtpRN/conversations";
 import {
+  ConversationId,
   ConversationVersion,
+  MessageId,
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { SharedValue, useSharedValue } from "react-native-reanimated";
 import { createContext, useContextSelector } from "use-context-selector";
 import {
@@ -16,19 +20,27 @@ import {
   useConversationCurrentTopic,
 } from "./conversation-service";
 
-type ISendMessageParams = {
-  text?: string;
-  referencedMessageId?: string;
-  attachment?: RemoteAttachmentContent;
-};
+export type ISendMessageParams = {
+  content: {
+    text?: string;
+    remoteAttachment?: RemoteAttachmentContent;
+  };
+  referencedMessageId?: MessageId;
+} & (
+  | { content: { text: string; remoteAttachment?: RemoteAttachmentContent } }
+  | { content: { text?: string; remoteAttachment: RemoteAttachmentContent } }
+);
 
 export type IConversationContextType = {
-  composerHeightAV: SharedValue<number>;
+  isAllowedConversation: boolean;
+  isBlockedConversation: boolean;
+  isLoadingConversationConsent: boolean;
+  isNewConversation: boolean;
   conversationNotFound: boolean;
   conversationVersion: ConversationVersion | undefined;
-  isNewConversation: boolean;
+  conversationId: ConversationId | undefined;
   peerAddress: string | undefined;
-  isBlockedConversation: boolean;
+  composerHeightAV: SharedValue<number>;
   sendMessage: (message: ISendMessageParams) => Promise<void>;
 };
 
@@ -49,10 +61,16 @@ export const ConversationContextProvider = (
   const peerAddress = useConversationCurrentPeerAddress();
   const currentAccount = useCurrentAccount()!;
 
-  const { data: conversation, isLoading } = useConversationQuery(
-    currentAccount,
-    topic
-  );
+  const { data: conversation, isLoading: isLoadingConversation } =
+    useConversationQuery(currentAccount, topic);
+
+  const { data: groupConsent, isLoading: isLoadingGroupConsent } =
+    useGroupConsentQuery(currentAccount, topic!);
+
+  const { data: dmConsent, isLoading: isLoadingDmConsent } = useDmConsentQuery({
+    account: currentAccount,
+    topic,
+  });
 
   const composerHeightAV = useSharedValue(0);
 
@@ -71,11 +89,12 @@ export const ConversationContextProvider = (
   }, [conversation]);
 
   const sendMessage = useCallback(
-    async ({ text, referencedMessageId, attachment }: ISendMessageParams) => {
+    async ({ referencedMessageId, content }: ISendMessageParams) => {
       const sendCallback = async (payload: any) => {
         if (!conversation && !peerAddress) {
           return;
         }
+
         if (!conversation && peerAddress) {
           const newConversation = await createConversationByAccount(
             currentAccount,
@@ -89,52 +108,75 @@ export const ConversationContextProvider = (
           );
           return;
         }
+
+        console.log("payload:", payload);
+
         await conversation?.send(payload);
       };
 
       if (referencedMessageId) {
-        if (attachment) {
+        if (content.remoteAttachment) {
           await sendCallback({
             reply: {
               reference: referencedMessageId,
-              content: { remoteAttachment: attachment },
+              content: { remoteAttachment: content.remoteAttachment },
             },
           });
         }
-        if (text) {
+        if (content.text) {
           await sendCallback({
             reply: {
               reference: referencedMessageId,
-              content: { text },
+              content: { text: content.text },
             },
           });
         }
         return;
       }
 
-      if (attachment) {
+      if (content.remoteAttachment) {
         await sendCallback({
-          remoteAttachment: attachment,
+          remoteAttachment: content.remoteAttachment,
         });
       }
 
-      if (text) {
-        await sendCallback(text);
+      if (content.text) {
+        await sendCallback(content.text);
       }
     },
     [conversation, currentAccount, peerAddress]
   );
 
+  const isGroup = conversation?.version === ConversationVersion.GROUP;
+  const isDm = conversation?.version === ConversationVersion.DM;
+
+  const isAllowedConversation = useMemo(() => {
+    if (!conversation) {
+      return false;
+    }
+    if (isGroup) {
+      return groupConsent === "allowed";
+    }
+    if (isDm) {
+      return dmConsent === "allowed";
+    }
+    return false;
+  }, [conversation, dmConsent, groupConsent, isDm, isGroup]);
+
   return (
     <ConversationContext.Provider
       value={{
+        composerHeightAV,
+        conversationId: conversation?.id,
+        conversationNotFound: !conversation && !isLoadingConversation,
+        conversationVersion: conversation?.version,
+        isAllowedConversation,
+        isBlockedConversation: conversation?.state === "denied", // TODO: implement this
+        isLoadingConversationConsent:
+          isLoadingGroupConsent || isLoadingDmConsent || isLoadingConversation,
         isNewConversation: !topic && !!peerAddress,
         peerAddress,
-        isBlockedConversation: conversation?.state === "denied", // TODO: implement this
         sendMessage,
-        composerHeightAV,
-        conversationVersion: conversation?.version,
-        conversationNotFound: !conversation && !isLoading,
       }}
     >
       {children}

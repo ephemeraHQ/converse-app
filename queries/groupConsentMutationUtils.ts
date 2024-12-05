@@ -5,11 +5,14 @@ import { consentToGroupsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
 
 import {
   cancelGroupConsentQuery,
-  Consent,
   getGroupConsentQueryData,
   setGroupConsentQueryData,
 } from "./useGroupConsentQuery";
-import { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
+import {
+  ConsentState,
+  ConversationId,
+  ConversationTopic,
+} from "@xmtp/react-native-sdk";
 
 export type GroupConsentAction = "allow" | "deny";
 
@@ -30,7 +33,11 @@ export const createGroupConsentMutationObserver = (
   return new MutationObserver(queryClient, {
     mutationKey,
     mutationFn: async () => {
-      await consentToGroupsOnProtocolByAccount(account, [groupId], action);
+      await consentToGroupsOnProtocolByAccount({
+        account,
+        groupIds: [groupId],
+        consent: action,
+      });
       return consentStatus;
     },
     onMutate: async () => {
@@ -74,7 +81,11 @@ export const getGroupConsentMutationOptions = ({
       if (!groupId || !account) {
         return;
       }
-      await consentToGroupsOnProtocolByAccount(account, [groupId], action);
+      await consentToGroupsOnProtocolByAccount({
+        account,
+        groupIds: [groupId],
+        consent: action,
+      });
       return consentStatus;
     },
     onMutate: async () => {
@@ -86,7 +97,7 @@ export const getGroupConsentMutationOptions = ({
     onError: (
       error: unknown,
       _variables: unknown,
-      context: { previousConsent?: Consent }
+      context: { previousConsent?: ConsentState }
     ) => {
       logger.warn(
         `onError use${

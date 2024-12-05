@@ -425,7 +425,15 @@ export const getConversationByPeer = async ({
 }: GetConversationByPeerParams) => {
   logger.debug(`[XMTPRN Conversations] Getting conversation by peer: ${peer}`);
   const start = new Date().getTime();
+
+  logger.debug(`[XMTPRN Conversations] Finding DM by address: ${peer}`);
+  const findStart = new Date().getTime();
   let conversation = await client.conversations.findDmByAddress(peer);
+  const findEnd = new Date().getTime();
+  logger.debug(
+    `[XMTPRN Conversations] Find DM took ${(findEnd - findStart) / 1000} sec`
+  );
+
   if (!conversation) {
     logger.debug(
       `[XMTPRN Conversations] Conversation ${peer} not found, syncing conversations`
@@ -438,12 +446,29 @@ export const getConversationByPeer = async ({
         (syncEnd - syncStart) / 1000
       } sec`
     );
+
+    logger.debug(`[XMTPRN Conversations] Retrying find DM by address: ${peer}`);
+    const retryFindStart = new Date().getTime();
     conversation = await client.conversations.findDmByAddress(peer);
+    const retryFindEnd = new Date().getTime();
+    logger.debug(
+      `[XMTPRN Conversations] Retry find DM took ${
+        (retryFindEnd - retryFindStart) / 1000
+      } sec`
+    );
   }
+
   if (!conversation) {
+    logger.error(
+      `[XMTPRN Conversations] Conversation with peer ${peer} not found after sync`
+    );
     throw new Error(`Conversation with peer ${peer} not found`);
   }
+
   if (includeSync) {
+    logger.debug(
+      `[XMTPRN Conversations] Syncing conversation with peer ${peer}`
+    );
     const syncStart = new Date().getTime();
     await conversation.sync();
     const syncEnd = new Date().getTime();
@@ -453,9 +478,10 @@ export const getConversationByPeer = async ({
       } sec`
     );
   }
+
   const end = new Date().getTime();
   logger.debug(
-    `[XMTPRN Conversations] Got conversation by topic in ${
+    `[XMTPRN Conversations] Total time to get conversation by peer: ${
       (end - start) / 1000
     } sec`
   );

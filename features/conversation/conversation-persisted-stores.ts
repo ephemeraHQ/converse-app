@@ -7,6 +7,7 @@ import {
 } from "zustand/middleware";
 import { Nullable } from "../../types/general";
 import { useConversationStore } from "./conversation-store";
+import { MessageId } from "@xmtp/react-native-sdk";
 
 export type IComposerMediaPreviewStatus =
   | "picked"
@@ -27,7 +28,7 @@ export type IComposerMediaPreview = {
 
 type IConversationPersistedStore = {
   inputValue: string;
-  replyingToMessageId: string | null;
+  replyingToMessageId: MessageId | null;
   composerMediaPreview: IComposerMediaPreview;
 };
 

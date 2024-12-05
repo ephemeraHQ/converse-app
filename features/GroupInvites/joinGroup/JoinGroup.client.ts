@@ -1,4 +1,4 @@
-import { OnConsentOptions } from "@hooks/useGroupConsent";
+import { IGroupConsentOptions } from "@hooks/useGroupConsent";
 import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
 import { GroupInvite } from "@utils/api.types";
 // import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
@@ -23,6 +23,7 @@ import {} from "../groupInvites.utils";
 import { JoinGroupResult } from "./joinGroup.types";
 import { V3ConversationListType } from "@queries/useV3ConversationListQuery";
 import { entify } from "@/queries/entify";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client";
 
 const GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS = 10;
 const GROUP_JOIN_REQUEST_POLL_INTERVAL_MS = 1000;
@@ -49,7 +50,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export type AllowGroupProps = {
   account: string;
   conversation: ConversationWithCodecsType;
-  options: OnConsentOptions;
+  options: IGroupConsentOptions;
 };
 
 export class JoinGroupClient {
@@ -216,7 +217,10 @@ export class JoinGroupClient {
         topic,
         groupId,
       });
-      await allowGroupMutationObserver.mutate();
+      await allowGroupMutationObserver.mutate({
+        group: conversation as GroupWithCodecsType,
+        account,
+      });
 
       // Dynamically import setGroupStatus
       setGroupStatus({
