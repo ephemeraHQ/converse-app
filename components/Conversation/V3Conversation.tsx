@@ -41,6 +41,8 @@ import {
 import { DmConversationTitle } from "../../features/conversations/components/DmConversationTitle";
 import { GroupConversationTitle } from "../../features/conversations/components/GroupConversationTitle";
 import { NewConversationTitle } from "../../features/conversations/components/NewConversationTitle";
+import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
+import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
 
 const keyExtractor = (item: string) => item;
 
@@ -137,6 +139,28 @@ const DmContent = memo(function DmContent() {
   } = useConversationMessages(currentAccount, topic!);
 
   const { data: peerInboxId } = useDmPeerInboxId(currentAccount, topic!);
+
+  // Check if conversation is unread
+  const isUnread = useConversationIsUnread({
+    topic,
+    lastMessage: messages?.byId[messages?.ids[0]], // Get latest message
+    timestamp: messages?.byId[messages?.ids[0]]?.sentNs ?? 0,
+  });
+
+  // Add hook to toggle read status
+  const toggleReadStatus = useToggleReadStatus({
+    topic,
+    isUnread,
+    currentAccount,
+  });
+
+  // Effect to mark as read when entering chat
+  useEffect(() => {
+    if (isUnread && !messagesLoading && messages?.ids.length) {
+      console.log("== Mark as read?");
+      toggleReadStatus();
+    }
+  }, [isUnread, messagesLoading, messages?.ids.length, toggleReadStatus]);
 
   useDmHeader();
 

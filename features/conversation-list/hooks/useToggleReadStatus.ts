@@ -16,8 +16,11 @@ export const useToggleReadStatus = ({
 }: UseToggleReadStatusProps) => {
   const { setTopicsData } = useChatStore(useSelect(["setTopicsData"]));
 
+  console.log("useToggleReadStatus", topic, isUnread);
+
   return useCallback(() => {
     const newStatus = isUnread ? "read" : "unread";
+    console.log("newStatus:", newStatus);
     const timestamp = new Date().getTime();
     setTopicsData({
       [topic]: {
