@@ -16,6 +16,7 @@ import { useHandleDeleteGroup } from "@/features/conversation-list/hooks/useHand
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
 
 type PinnedV3GroupConversationProps = {
   group: GroupWithCodecsType;
@@ -43,6 +44,8 @@ export const PinnedV3GroupConversation = ({
 
   const timestamp = group?.lastMessage?.sentNs ?? 0;
 
+  const { theme } = useAppTheme();
+
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: group.lastMessage,
@@ -58,7 +61,7 @@ export const PinnedV3GroupConversation = ({
 
   const handleDelete = useHandleDeleteGroup(group);
 
-  const contextMenuItems = useMemo(() => {
+  const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     return [
       {
         title: translate("unpin"),
@@ -77,6 +80,11 @@ export const PinnedV3GroupConversation = ({
           closeContextMenu();
         },
         id: "markAsUnread",
+        rightView: (
+          <ContextMenuIcon
+            icon={isUnread ? "checkmark.message" : "message.badge"}
+          />
+        ),
       },
       {
         title: translate("delete"),
@@ -85,9 +93,22 @@ export const PinnedV3GroupConversation = ({
           closeContextMenu();
         },
         id: "delete",
+        titleStyle: {
+          color: theme.colors.global.caution,
+        },
+        rightView: (
+          <ContextMenuIcon icon="trash" color={theme.colors.global.caution} />
+        ),
       },
     ];
-  }, [handleDelete, isUnread, setPinnedConversations, toggleReadStatus, topic]);
+  }, [
+    handleDelete,
+    isUnread,
+    setPinnedConversations,
+    theme.colors.global.caution,
+    toggleReadStatus,
+    topic,
+  ]);
 
   const onLongPress = useCallback(() => {
     setConversationListContextMenuConversationData(
@@ -101,8 +122,6 @@ export const PinnedV3GroupConversation = ({
   }, [group.topic]);
 
   const title = group?.name;
-
-  const { theme } = useAppTheme();
 
   const avatarComponent = useMemo(() => {
     if (group?.imageUrlSquare) {
