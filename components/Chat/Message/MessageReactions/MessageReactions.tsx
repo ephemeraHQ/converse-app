@@ -10,95 +10,83 @@ import {
 } from "@utils/profile";
 import { memo, useCallback, useMemo } from "react";
 import { TouchableHighlight, ViewStyle } from "react-native";
-
-import { MessageToDisplay } from "../Message";
-import {
-  MessageReactions,
-  RolledUpReactions,
-  SortedReaction,
-} from "./MessageReactions.types";
+import { useConversationMessageReactions } from "@/components/Chat/Message/message-utils";
+import { useMessageContextStoreContext } from "@/components/Chat/Message/stores/message-store";
+import { useSelect } from "@/data/store/storeHelpers";
+import { RolledUpReactions, SortedReaction } from "./MessageReactions.types";
 import { openMessageReactionsDrawer } from "./MessageReactionsDrawer/MessageReactionsDrawer.service";
-
-type Props = {
-  message: MessageToDisplay;
-  reactions: MessageReactions;
-};
 
 const MAX_REACTION_EMOJIS_SHOWN = 3;
 
-export const ChatMessageReactions = memo(
-  ({ message, reactions }: Props) => {
-    const { themed } = useAppTheme();
-    const userAddress = useCurrentAccount();
+export const MessageReactions = memo(function MessageReactions() {
+  const { themed, theme } = useAppTheme();
 
-    const rolledUpReactions = useMessageReactionsRolledUp({
-      reactions,
-      userAddress: userAddress!, // ! If we are here, the user is logged in
-    });
+  const { fromMe } = useMessageContextStoreContext(
+    useSelect(["messageId", "fromMe"])
+  );
 
-    const handlePress = useCallback(() => {
-      openMessageReactionsDrawer(rolledUpReactions);
-    }, [rolledUpReactions]);
+  const rolledUpReactions = useMessageReactionsRolledUp();
 
-    if (rolledUpReactions.totalCount === 0) return null;
+  const handlePressContainer = useCallback(() => {
+    openMessageReactionsDrawer(rolledUpReactions);
+  }, [rolledUpReactions]);
 
-    return (
-      <HStack
-        style={[
-          {
-            flexDirection: "row",
-            flexWrap: "wrap",
-          },
-          message.fromMe && { justifyContent: "flex-end" },
-        ]}
+  if (rolledUpReactions.totalCount === 0) {
+    return null;
+  }
+
+  return (
+    <HStack
+      style={[
+        {
+          flexDirection: "row",
+          flexWrap: "wrap",
+          marginBottom: theme.spacing.xxxs,
+        },
+        fromMe && { justifyContent: "flex-end" },
+      ]}
+    >
+      <TouchableHighlight
+        onPress={handlePressContainer}
+        underlayColor="transparent"
+        accessibilityRole="button"
+        accessibilityLabel="View reactions"
       >
-        <TouchableHighlight
-          onPress={handlePress}
-          underlayColor="transparent"
-          accessibilityRole="button"
-          accessibilityLabel="View reactions"
+        <VStack
+          style={[
+            themed($reactionButton),
+            rolledUpReactions.userReacted && themed($reactionButtonActive),
+          ]}
         >
-          <VStack
-            style={[
-              themed($reactionButton),
-              rolledUpReactions.userReacted && themed($reactionButtonActive),
-            ]}
-          >
-            <HStack style={themed($emojiContainer)}>
-              {rolledUpReactions.preview
-                .slice(0, MAX_REACTION_EMOJIS_SHOWN)
-                .map((reaction, index) => (
-                  <Text key={index}>{reaction.content}</Text>
-                ))}
-            </HStack>
-            {rolledUpReactions.totalCount > 1 && (
-              <Text style={themed($reactorCount)}>
-                {rolledUpReactions.totalCount}
-              </Text>
-            )}
-          </VStack>
-        </TouchableHighlight>
-      </HStack>
-    );
-  },
-  (prevProps, nextProps) =>
-    prevProps.message.id === nextProps.message.id &&
-    prevProps.message.lastUpdateAt === nextProps.message.lastUpdateAt &&
-    prevProps.reactions === nextProps.reactions
-);
+          <HStack style={themed($emojiContainer)}>
+            {rolledUpReactions.preview
+              .slice(0, MAX_REACTION_EMOJIS_SHOWN)
+              .map((reaction, index) => (
+                <Text key={index}>{reaction.content}</Text>
+              ))}
+          </HStack>
+          {rolledUpReactions.totalCount > 1 && (
+            <Text style={themed($reactorCount)}>
+              {rolledUpReactions.totalCount}
+            </Text>
+          )}
+        </VStack>
+      </TouchableHighlight>
+    </HStack>
+  );
+});
 
-const useMessageReactionsRolledUp = (arg: {
-  reactions: MessageReactions;
-  userAddress: string;
-}) => {
-  const { reactions, userAddress } = arg;
+function useMessageReactionsRolledUp() {
+  const { messageId } = useMessageContextStoreContext(useSelect(["messageId"]));
+
+  const { bySender: reactions } = useConversationMessageReactions(messageId);
+
+  const userAddress = useCurrentAccount();
 
   // Get social details for all unique addresses
   const addresses = Array.from(
     new Set(
-      Object.values(reactions)
-        .flat()
-        .map((reaction) => reaction.senderAddress)
+      Object.entries(reactions ?? {}).map(([senderAddress]) => senderAddress)
     )
   );
 
@@ -118,8 +106,11 @@ const useMessageReactionsRolledUp = (arg: {
     let totalCount = 0;
     let userReacted = false;
 
-    // Flatten reactions for more efficient iteration
-    const flatReactions = Object.values(reactions).flat();
+    // Flatten reactions and track sender addresses
+    const flatReactions = Object.entries(reactions ?? {}).flatMap(
+      ([senderAddress, senderReactions]) =>
+        senderReactions.map((reaction) => ({ senderAddress, ...reaction }))
+    );
     totalCount = flatReactions.length;
 
     // Create a map to efficiently access social details by address
@@ -150,7 +141,7 @@ const useMessageReactionsRolledUp = (arg: {
           address: reaction.senderAddress,
           userName: socialDetails?.name,
           avatar: socialDetails?.uri,
-          reactionTime: reaction.sent,
+          // reactionTime: reaction.timestamp,
         },
       });
     });
@@ -171,7 +162,7 @@ const useMessageReactionsRolledUp = (arg: {
       detailed,
     };
   }, [reactions, userAddress, membersSocials]);
-};
+}
 
 const $reactionButton: ThemedStyle<ViewStyle> = ({
   colors,

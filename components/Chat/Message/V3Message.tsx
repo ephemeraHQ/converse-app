@@ -1,4 +1,3 @@
-import { MessageContextProvider } from "@/components/Chat/Message/contexts/message-context";
 import { MessageStaticAttachment } from "@/components/Chat/Message/message-content-types/message-static-attachment";
 import { MessageContextStoreProvider } from "@/components/Chat/Message/stores/message-store";
 import { VStack } from "@/design-system/VStack";
@@ -23,9 +22,9 @@ import {
 } from "./message-utils";
 
 type V3MessageProps = {
-  messageId: string;
-  previousMessageId: string;
-  nextMessageId: string;
+  messageId: MessageId;
+  previousMessageId: MessageId;
+  nextMessageId: MessageId;
 };
 
 export const V3Message = memo(
@@ -79,10 +78,6 @@ export const V3Message = memo(
       return null;
     }
 
-    const reactions = messages.reactions[message.id];
-
-    console.log("reactions:", reactions);
-
     return (
       <VStack
         style={
@@ -99,44 +94,20 @@ export const V3Message = memo(
           showDateChange={showDateChange}
           hasPreviousMessageInSeries={_hasPreviousMessageInSeries}
           senderAddress={message.senderAddress as InboxId}
-          isHighlighted={false}
         >
-          <MessageContextProvider>
-            {isTextMessage(message) && <MessageSimpleText message={message} />}
-            {isGroupUpdatedMessage(message) && (
-              <ChatGroupUpdatedMessage message={message} />
-            )}
-            {isReplyMessage(message) && <MessageReply message={message} />}
-            {isRemoteAttachmentMessage(message) && (
-              <MessageRemoteAttachment message={message} />
-            )}
-            {isStaticAttachmentMessage(message) && (
-              <MessageStaticAttachment message={message} />
-            )}
-          </MessageContextProvider>
+          {isTextMessage(message) && <MessageSimpleText message={message} />}
+          {isGroupUpdatedMessage(message) && (
+            <ChatGroupUpdatedMessage message={message} />
+          )}
+          {isReplyMessage(message) && <MessageReply message={message} />}
+          {isRemoteAttachmentMessage(message) && (
+            <MessageRemoteAttachment message={message} />
+          )}
+          {isStaticAttachmentMessage(message) && (
+            <MessageStaticAttachment message={message} />
+          )}
         </MessageContextStoreProvider>
       </VStack>
     );
   }
 );
-
-// function useConversationMessageById(messageId: MessageId) {
-//   const currentAccount = useCurrentAccount()!;
-//   const messages = getCurrentConversationMessages();
-
-//   const cachedMessage = messages?.byId[messageId];
-
-//   // Only fetch the message if it's not already in the conversation messages
-//   const { data: message, isLoading: isLoadingMessage } = useQuery({
-//     ...getConversationMessageQueryOptions({
-//       account: currentAccount,
-//       messageId,
-//     }),
-//     enabled: !cachedMessage,
-//   });
-
-//   return {
-//     message: message ?? cachedMessage,
-//     isLoading: !cachedMessage && isLoadingMessage,
-//   };
-// }

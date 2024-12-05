@@ -1,5 +1,6 @@
 import { HStack } from "@/design-system/HStack";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { debugBorder } from "@/utils/debug-style";
 import { memo } from "react";
 
 export const MessageContentContainer = memo(
@@ -14,11 +15,8 @@ export const MessageContentContainer = memo(
     return (
       <HStack
         style={{
-          // ...debugBorder("red"),
-          flex: 1,
-          // alignSelf: fromMe ? "flex-end" : "flex-start",
+          // ...debugBorder("yellow"),
           alignItems: "flex-end",
-          maxWidth: "75%",
           ...(fromMe
             ? { paddingRight: theme.spacing.sm, justifyContent: "flex-end" }
             : { paddingLeft: theme.spacing.sm, justifyContent: "flex-start" }),

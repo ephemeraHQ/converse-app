@@ -1,7 +1,7 @@
-import { MessageReaction } from "@utils/reactions";
+import { ReactionContent } from "@xmtp/react-native-sdk";
 
 export type MessageReactions = {
-  [senderAddress: string]: MessageReaction[];
+  [senderAddress: string]: ReactionContent[];
 };
 
 /**
@@ -38,5 +38,5 @@ export type ReactorDetails = {
   address: string;
   userName?: string;
   avatar?: string;
-  reactionTime: number;
+  // reactionTime: number; // TODO
 };

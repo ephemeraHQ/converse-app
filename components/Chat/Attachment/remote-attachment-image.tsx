@@ -124,6 +124,7 @@ const AttachmentPreviewContainer = memo(function AttachmentPreviewContainer(
     <VStack
       style={[
         {
+          // ...debugBorder(),
           overflow: "hidden",
           borderRadius: theme.borderRadius.sm,
           width: "100%",

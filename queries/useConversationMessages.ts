@@ -1,87 +1,98 @@
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
+import { isReactionMessage } from "@/components/Chat/Message/message-utils";
 import logger from "@utils/logger";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
 } from "@utils/xmtpRN/client";
 import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
-import type {
-  ConversationTopic,
-  ReactionContent,
+import {
+  InboxId,
+  type ConversationTopic,
+  type ReactionContent,
 } from "@xmtp/react-native-sdk";
+import {
+  MessageId,
+  MessagesOptions,
+} from "@xmtp/react-native-sdk/build/lib/types";
+import { conversationMessagesQueryKey } from "./QueryKeys";
 import { cacheOnlyQueryOptions } from "./cacheOnlyQueryOptions";
 import { queryClient } from "./queryClient";
-import { conversationMessagesQueryKey } from "./QueryKeys";
 import { useConversationQuery } from "./useConversationQuery";
-import { useRefreshOnFocus } from "./useRefreshOnFocus";
-import { MessagesOptions } from "@xmtp/react-native-sdk/build/lib/types";
 
-export type ConversationMessagesQueryData = {
-  ids: string[];
-  byId: Record<string, DecodedMessageWithCodecsType>;
-  reactions: Record<
-    string,
-    {
-      bySender: Record<string, string[]>;
-      byReactionContent: Record<string, string[]>;
-    }
-  >;
-};
+export type ConversationMessagesQueryData = Awaited<
+  ReturnType<typeof conversationMessagesQueryFn>
+>;
 
 export const conversationMessagesQueryFn = async (
   conversation: ConversationWithCodecsType,
   options?: MessagesOptions
-): Promise<ConversationMessagesQueryData> => {
+) => {
   logger.info("[useConversationMessages] queryFn fetching messages");
+
   if (!conversation) {
-    return {
-      ids: [],
-      byId: {},
-      reactions: {},
-    };
+    throw new Error("Conversation not found in conversationMessagesQueryFn");
   }
+
   const messages = await conversation.messages(options);
-  const ids: string[] = [];
-  const byId: Record<string, DecodedMessageWithCodecsType> = {};
+  const ids: MessageId[] = [];
+  const byId: Record<MessageId, DecodedMessageWithCodecsType> = {};
   const reactions: Record<
-    string,
+    MessageId,
     {
-      bySender: Record<string, string[]>;
-      byReactionContent: Record<string, string[]>;
+      bySender: Record<InboxId, ReactionContent[]>;
+      byReactionContent: Record<string, InboxId[]>;
     }
   > = {};
 
   for (const message of messages) {
-    ids.push(message.id);
-    byId[message.id] = message;
-    if (message.contentTypeId.includes("reaction:")) {
-      const reactionContent = message.content() as ReactionContent;
-      if (!reactionContent) {
-        continue;
-      }
-      const referenceMessageId = reactionContent.reference;
-      if (!referenceMessageId) {
-        continue;
-      }
-      if (!reactions[referenceMessageId]) {
-        reactions[referenceMessageId] = {
-          bySender: {},
-          byReactionContent: {},
-        };
-      }
-      reactions[referenceMessageId].byReactionContent[reactionContent.content] =
-        [
-          ...(reactions[referenceMessageId].byReactionContent[
-            reactionContent.content
-          ] || []),
-          message.senderAddress,
-        ];
-      reactions[referenceMessageId].bySender[message.senderAddress] = [
-        ...(reactions[referenceMessageId].bySender[message.senderAddress] ||
-          []),
-        reactionContent.content,
+    ids.push(message.id as MessageId);
+    byId[message.id as MessageId] = message;
+
+    if (!message.contentTypeId.includes("reaction:")) {
+      continue;
+    }
+
+    const reactionContent = message.content() as ReactionContent;
+    const referenceMessageId = reactionContent?.reference as MessageId;
+
+    if (!reactionContent || !referenceMessageId) {
+      continue;
+    }
+
+    if (!reactions[referenceMessageId]) {
+      reactions[referenceMessageId] = {
+        bySender: {},
+        byReactionContent: {},
+      };
+    }
+
+    const messageReactions = reactions[referenceMessageId];
+    const senderAddress = message.senderAddress as InboxId;
+
+    if (reactionContent.action === "added") {
+      // Add sender to the list of users who used this reaction
+      messageReactions.byReactionContent[reactionContent.content] = [
+        ...(messageReactions.byReactionContent[reactionContent.content] || []),
+        senderAddress,
       ];
+
+      // Add reaction to sender's list of reactions
+      messageReactions.bySender[senderAddress] = [
+        ...(messageReactions.bySender[senderAddress] || []),
+        reactionContent,
+      ];
+    } else if (reactionContent.action === "removed") {
+      // Remove sender from the list of users who used this reaction
+      messageReactions.byReactionContent[reactionContent.content] = (
+        messageReactions.byReactionContent[reactionContent.content] || []
+      ).filter((id) => id !== senderAddress);
+
+      // Remove reaction from sender's list of reactions
+      messageReactions.bySender[senderAddress] = (
+        messageReactions.bySender[senderAddress] || []
+      ).filter((reaction) => reaction.content !== reactionContent.content);
     }
   }
 
@@ -106,8 +117,7 @@ const conversationMessagesByTopicQueryFn = async (
 
 export const useConversationMessages = (
   account: string,
-  topic: ConversationTopic,
-  options?: Partial<UseQueryOptions<ConversationMessagesQueryData>>
+  topic: ConversationTopic
 ) => {
   const { data: conversation } = useConversationQuery(
     account,
@@ -115,21 +125,13 @@ export const useConversationMessages = (
     cacheOnlyQueryOptions
   );
 
-  const queryData = useQuery({
+  return useQuery({
     queryKey: conversationMessagesQueryKey(account, topic),
     queryFn: async () => {
       return conversationMessagesQueryFn(conversation!);
     },
     enabled: !!conversation,
-    ...options,
   });
-  useRefreshOnFocus(async (): Promise<void> => {
-    if (options?.refetchOnWindowFocus) {
-      await queryData.refetch();
-    }
-  });
-
-  return queryData;
 };
 
 export const getConversationMessages = (
@@ -141,37 +143,68 @@ export const getConversationMessages = (
   );
 };
 
-const setConversationMessages = (
-  account: string,
-  topic: ConversationTopic,
-  messages: ConversationMessagesQueryData
-) => {
-  queryClient.setQueryData(
-    conversationMessagesQueryKey(account, topic),
-    messages
-  );
-};
-
 export const addConversationMessage = (
   account: string,
   topic: ConversationTopic,
   message: DecodedMessageWithCodecsType
 ) => {
-  const previousMessages = getConversationMessages(account, topic);
-  if (!previousMessages) {
-    setConversationMessages(account, topic, {
-      ids: [message.id],
-      byId: { [message.id]: message },
-      reactions: {},
-    });
-    return;
-  }
-  previousMessages.byId[message.id] = message;
-  setConversationMessages(account, topic, {
-    ids: [message.id, ...previousMessages.ids],
-    byId: previousMessages.byId,
-    reactions: previousMessages.reactions,
-  });
+  queryClient.setQueryData<ConversationMessagesQueryData>(
+    conversationMessagesQueryKey(account, topic),
+    (previousMessages) => {
+      if (!previousMessages) {
+        return {
+          ids: [message.id as MessageId],
+          byId: { [message.id]: message },
+          reactions: {},
+        };
+      }
+
+      const newPreviousMessages = {
+        ...previousMessages,
+        byId: {
+          ...previousMessages.byId,
+          [message.id as MessageId]: message,
+        },
+        ids: [message.id as MessageId, ...previousMessages.ids],
+      };
+
+      if (isReactionMessage(message)) {
+        const reactionContent = message.content() as ReactionContent;
+        const reactionContentString = reactionContent.content;
+        const messageId = message.id as MessageId;
+        const senderAddress = message.senderAddress as InboxId;
+
+        const existingReactions = previousMessages.reactions[messageId] || {
+          bySender: {},
+          byReactionContent: {},
+        };
+
+        newPreviousMessages.reactions = {
+          ...previousMessages.reactions,
+          [messageId]: {
+            bySender: {
+              ...existingReactions.bySender,
+              [senderAddress]: [
+                ...(existingReactions.bySender[senderAddress] || []),
+                reactionContent,
+              ],
+            },
+            byReactionContent: {
+              ...existingReactions.byReactionContent,
+              [reactionContentString]: [
+                ...(existingReactions.byReactionContent[
+                  reactionContentString
+                ] || []),
+                senderAddress,
+              ],
+            },
+          },
+        };
+      }
+
+      return newPreviousMessages;
+    }
+  );
 };
 
 export const prefetchConversationMessages = async (

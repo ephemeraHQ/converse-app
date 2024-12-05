@@ -11,11 +11,12 @@ type IMessageContextStoreProps = {
   sentAt: number;
   showDateChange: boolean;
   senderAddress: InboxId;
+};
+
+type IMessageContextStoreState = IMessageContextStoreProps & {
   isHighlighted: boolean;
   isShowingTime: boolean;
 };
-
-type IMessageContextStoreState = IMessageContextStoreProps & {};
 
 type IMessageContextStoreProviderProps =
   React.PropsWithChildren<IMessageContextStoreProps>;
@@ -46,6 +47,8 @@ const createMessageContextStore = (initProps: IMessageContextStoreProps) => {
   return createStore<IMessageContextStoreState>()(
     subscribeWithSelector((set) => ({
       ...initProps,
+      isHighlighted: false,
+      isShowingTime: false,
     }))
   );
 };

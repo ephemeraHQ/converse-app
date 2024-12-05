@@ -245,3 +245,7 @@ export function resetMessageContextMenuData() {
     messageContextMenuData: null,
   });
 }
+
+export function useMessageContextMenuData() {
+  return useConversationStore((state) => state.messageContextMenuData);
+}
