@@ -26,8 +26,8 @@ export const navigate = async <T extends keyof NavigationParamList>(
   });
 };
 
-export let topicToNavigateTo = "";
-export const setTopicToNavigateTo = (topic: string) => {
+export let topicToNavigateTo: string | undefined = undefined;
+export const setTopicToNavigateTo = (topic: string | undefined) => {
   topicToNavigateTo = topic;
 };
 

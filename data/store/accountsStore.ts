@@ -201,8 +201,12 @@ export const useAccountsStore = create<AccountsStoreStype>()(
             logger.warn("An error happened during hydration", error);
           } else {
             if (state?.accounts && state.accounts.length > 0) {
+              logger.debug("Accounts found in hydration, initializing stores");
               state.accounts.map(initStores);
             } else if (state) {
+              logger.debug(
+                "No accounts found in hydration, initializing temporary account"
+              );
               state.currentAccount = TEMPORARY_ACCOUNT_NAME;
               state.accounts = [TEMPORARY_ACCOUNT_NAME];
             }
