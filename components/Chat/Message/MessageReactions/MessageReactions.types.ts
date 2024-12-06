@@ -38,5 +38,4 @@ export type ReactorDetails = {
   address: string;
   userName?: string;
   avatar?: string;
-  // reactionTime: number; // TODO
 };
