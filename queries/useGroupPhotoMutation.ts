@@ -6,11 +6,10 @@ import { setGroupPhotoMutationKey } from "./MutationKeys";
 import {
   cancelGroupPhotoQuery,
   getGroupPhotoQueryData,
-  setGroupPhotoQueryData,
 } from "./useGroupPhotoQuery";
 import { useGroupQuery } from "@queries/useGroupQuery";
-// import { refreshGroup } from "../utils/xmtpRN/conversations";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { handleGroupImageUpdate } from "@/utils/groupUtils/handleGroupImageUpdate";
 
 export const useGroupPhotoMutation = (
   account: string,
@@ -29,7 +28,7 @@ export const useGroupPhotoMutation = (
     onMutate: async (groupPhoto: string) => {
       await cancelGroupPhotoQuery(account, topic);
       const previousGroupPhoto = getGroupPhotoQueryData(account, topic);
-      setGroupPhotoQueryData(account, topic, groupPhoto);
+      handleGroupImageUpdate({ account, topic, image: groupPhoto });
       return { previousGroupPhoto };
     },
     onError: (error, _variables, context) => {
@@ -38,7 +37,11 @@ export const useGroupPhotoMutation = (
       if (context?.previousGroupPhoto === undefined) {
         return;
       }
-      setGroupPhotoQueryData(account, topic, context.previousGroupPhoto);
+      handleGroupImageUpdate({
+        account,
+        topic,
+        image: context.previousGroupPhoto,
+      });
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess useGroupPhotoMutation");

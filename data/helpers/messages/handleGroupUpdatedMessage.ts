@@ -1,8 +1,8 @@
-import { invalidateGroupDescriptionQuery } from "@queries/useGroupDescriptionQuery";
+import { handleGroupDescriptionUpdate } from "@/utils/groupUtils/handleGroupDescriptionUpdate";
+import { handleGroupImageUpdate } from "@/utils/groupUtils/handleGroupImageUpdate";
+import { handleGroupNameUpdate } from "@/utils/groupUtils/handleGroupNameUpdate";
 import { invalidateGroupIsActiveQuery } from "@queries/useGroupIsActive";
 import { invalidateGroupMembersQuery } from "@queries/useGroupMembersQuery";
-import { invalidateGroupNameQuery } from "@queries/useGroupNameQuery";
-import { invalidateGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import { ConversationTopic, GroupUpdatedContent } from "@xmtp/react-native-sdk";
 
@@ -18,26 +18,30 @@ export const handleGroupUpdatedMessage = async (
     invalidateGroupMembersQuery(account, topic);
   }
   if (content.metadataFieldsChanged.length > 0) {
-    let groupNameChanged = false;
-    let groupPhotoChanged = false;
-    let groupDescriptionChanged = false;
+    let newGroupName = "";
+    let newGroupPhotoUrl = "";
+    let newGroupDescription = "";
     for (const field of content.metadataFieldsChanged) {
       if (field.fieldName === "group_name") {
-        groupNameChanged = true;
+        newGroupName = field.newValue;
       } else if (field.fieldName === "group_image_url_square") {
-        groupPhotoChanged = true;
+        newGroupPhotoUrl = field.newValue;
       } else if (field.fieldName === "description") {
-        groupDescriptionChanged = true;
+        newGroupDescription = field.newValue;
       }
     }
-    if (groupNameChanged) {
-      invalidateGroupNameQuery(account, topic);
+    if (!!newGroupName) {
+      handleGroupNameUpdate({ account, topic, name: newGroupName });
     }
-    if (groupPhotoChanged) {
-      invalidateGroupPhotoQuery(account, topic);
+    if (!!newGroupPhotoUrl) {
+      handleGroupImageUpdate({ account, topic, image: newGroupPhotoUrl });
     }
-    if (groupDescriptionChanged) {
-      invalidateGroupDescriptionQuery(account, topic);
+    if (!!newGroupDescription) {
+      handleGroupDescriptionUpdate({
+        account,
+        topic,
+        description: newGroupDescription,
+      });
     }
   }
   // Admin Update
