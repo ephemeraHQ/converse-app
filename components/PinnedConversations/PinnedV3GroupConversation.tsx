@@ -2,7 +2,7 @@ import { PinnedConversation } from "./PinnedConversation";
 import { useCallback, useMemo } from "react";
 import { navigate } from "@utils/navigation";
 import Avatar from "@components/Avatar";
-import { useGroupConversationListAvatarInfo } from "../../features/conversation-list/useGroupConversationListAvatarInfo";
+import { useGroupConversationListAvatarInfo } from "@features/conversation-list/useGroupConversationListAvatarInfo";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
@@ -17,6 +17,9 @@ import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggl
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
+import { isTextMessage } from "../Chat/Message/message-utils";
+import { VStack } from "@/design-system/VStack";
+import { PinnedMessagePreview } from "./PinnedMessagePreview";
 
 type PinnedV3GroupConversationProps = {
   group: GroupWithCodecsType;
@@ -124,6 +127,8 @@ export const PinnedV3GroupConversation = ({
 
   const title = group?.name;
 
+  const displayMessagePreview = isTextMessage(group.lastMessage) && isUnread;
+
   const avatarComponent = useMemo(() => {
     if (group?.imageUrlSquare) {
       return (
@@ -138,12 +143,17 @@ export const PinnedV3GroupConversation = ({
   }, [group?.imageUrlSquare, group?.topic, memberData, theme.avatarSize.xxl]);
 
   return (
-    <PinnedConversation
-      avatarComponent={avatarComponent}
-      onLongPress={onLongPress}
-      onPress={onPress}
-      showUnread={isUnread}
-      title={title ?? ""}
-    />
+    <VStack>
+      <PinnedConversation
+        avatarComponent={avatarComponent}
+        onLongPress={onLongPress}
+        onPress={onPress}
+        showUnread={isUnread}
+        title={title ?? ""}
+      />
+      {displayMessagePreview && (
+        <PinnedMessagePreview message={group.lastMessage!} />
+      )}
+    </VStack>
   );
 };

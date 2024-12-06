@@ -18,6 +18,9 @@ import { useConversationIsUnread } from "@/features/conversation-list/hooks/useM
 import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
+import { isTextMessage } from "../Chat/Message/message-utils";
+import { VStack } from "@/design-system/VStack";
+import { PinnedMessagePreview } from "./PinnedMessagePreview";
 
 type PinnedV3DMConversationProps = {
   conversation: DmWithCodecsType;
@@ -131,6 +134,9 @@ export const PinnedV3DMConversation = ({
 
   const title = preferredName;
 
+  const displayMessagePreview =
+    isTextMessage(conversation.lastMessage) && isUnread;
+
   const avatarComponent = useMemo(() => {
     return (
       <Avatar
@@ -143,12 +149,17 @@ export const PinnedV3DMConversation = ({
   }, [peerInboxId, preferredAvatar, preferredName, theme.avatarSize.xxl]);
 
   return (
-    <PinnedConversation
-      avatarComponent={avatarComponent}
-      onLongPress={onLongPress}
-      onPress={onPress}
-      showUnread={isUnread}
-      title={title ?? ""}
-    />
+    <VStack>
+      <PinnedConversation
+        avatarComponent={avatarComponent}
+        onLongPress={onLongPress}
+        onPress={onPress}
+        showUnread={isUnread}
+        title={title ?? ""}
+      />
+      {displayMessagePreview && (
+        <PinnedMessagePreview message={conversation.lastMessage!} />
+      )}
+    </VStack>
   );
 };
