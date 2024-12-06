@@ -20,7 +20,7 @@ import { memo } from "react";
 import { ViewStyle } from "react-native";
 
 type IChatGroupUpdatedMessageProps = {
-  message: DecodedMessage<[GroupUpdatedCodec]>;
+  message: DecodedMessage<GroupUpdatedCodec>;
 };
 
 export function ChatGroupUpdatedMessage({

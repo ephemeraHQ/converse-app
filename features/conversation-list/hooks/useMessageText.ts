@@ -16,7 +16,7 @@ export const useMessageText = (
 
     try {
       if (isReplyMessage(message)) {
-        const messageTyped = message as DecodedMessage<[ReplyCodec]>;
+        const messageTyped = message as DecodedMessage<ReplyCodec>;
         const content = messageTyped.content();
 
         if (typeof content === "string") {

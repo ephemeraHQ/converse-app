@@ -10,7 +10,7 @@ import { DecodedMessage, TextCodec } from "@xmtp/react-native-sdk";
 import { memo } from "react";
 
 export const MessageSimpleText = memo(function MessageSimpleText(props: {
-  message: DecodedMessage<[TextCodec]>;
+  message: DecodedMessage<TextCodec>;
 }) {
   const { message } = props;
 

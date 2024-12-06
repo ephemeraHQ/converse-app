@@ -14,10 +14,11 @@ import { setGroupIsActiveQueryData } from "./useGroupIsActive";
 import { setGroupNameQueryData } from "./useGroupNameQuery";
 import { setGroupPhotoQueryData } from "./useGroupPhotoQuery";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
+import { useAppStore } from "@/data/store/appStore";
 
 export const conversationListKey = (account: string) => [
   QueryKeys.V3_CONVERSATION_LIST,
-  account.toLowerCase(), // All queries are case sensitive, sometimes we use checksum, but the SDK use lowercase, always use lowercase
+  account?.toLowerCase(), // All queries are case sensitive, sometimes we use checksum, but the SDK use lowercase, always use lowercase
 ];
 
 export type V3ConversationListType = ConversationWithCodecsType[];

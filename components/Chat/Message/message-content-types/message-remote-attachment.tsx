@@ -4,7 +4,7 @@ import { DecodedMessage, RemoteAttachmentCodec } from "@xmtp/react-native-sdk";
 import { memo } from "react";
 
 type IMessageRemoteAttachmentProps = {
-  message: DecodedMessage<[RemoteAttachmentCodec]>;
+  message: DecodedMessage<RemoteAttachmentCodec>;
 };
 
 export const MessageRemoteAttachment = memo(function MessageRemoteAttachment({

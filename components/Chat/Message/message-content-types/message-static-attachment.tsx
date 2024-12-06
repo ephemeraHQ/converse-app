@@ -18,7 +18,7 @@ import { memo } from "react";
 import RNFS from "react-native-fs";
 
 type IMessageStaticAttachmentProps = {
-  message: DecodedMessage<[StaticAttachmentCodec]>;
+  message: DecodedMessage<StaticAttachmentCodec>;
 };
 
 export const MessageStaticAttachment = memo(function MessageStaticAttachment({

@@ -324,7 +324,6 @@ export class JoinGroupClient {
       const fixtureConversationDataEntity: ConversationDataEntity = {
         ids: [GroupIdUserAlreadyWasAMemberOf],
         // todo(lustig): how do you create a well typed fixture of the plain conversation type?
-        // @ts-expect-error
         byId: {
           [GroupIdUserAlreadyWasAMemberOf]: conversationFixture,
         },
