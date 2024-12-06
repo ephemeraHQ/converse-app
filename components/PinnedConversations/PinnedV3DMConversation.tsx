@@ -135,7 +135,9 @@ export const PinnedV3DMConversation = ({
   const title = preferredName;
 
   const displayMessagePreview =
-    isTextMessage(conversation.lastMessage) && isUnread;
+    conversation.lastMessage &&
+    isTextMessage(conversation.lastMessage) &&
+    isUnread;
 
   const avatarComponent = useMemo(() => {
     return (
