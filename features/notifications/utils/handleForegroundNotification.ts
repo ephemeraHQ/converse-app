@@ -7,9 +7,16 @@ import logger from "@utils/logger";
 const handleiOSForegroundNotification = async (
   notification: Notifications.Notification
 ) => {
+  logger.debug("[Notifications] Handling iOS foreground notification");
   resetNotifications();
-  const account = notification.request.content.data?.["account"];
-  if (account && account !== currentAccount()) {
+  // note(lustig): this is not the senderAddress, but the account to which
+  // the notification is targeted.
+  const recipientAccount = notification.request.content.data?.["account"];
+  // TODO const senderAccount = notification.request.content.data?.["sender"];
+  const userIsLoggedIntoOtherAccount = recipientAccount !== currentAccount();
+  const userIsNotSender = senderAccount !== currentAccount();
+  const shouldShowAlert = userIsLoggedIntoOtherAccount || userIsNotSender;
+  if (recipientAccount && recipientAccount !== currentAccount()) {
     return {
       shouldShowAlert: true,
       shouldPlaySound: true,

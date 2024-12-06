@@ -14,6 +14,9 @@ export const handleGroupUpdatedMessage = async (
   if (!message.contentTypeId.includes("group_updated")) return;
   const content = message.content() as GroupUpdatedContent;
   if (content.membersAdded.length > 0 || content.membersRemoved.length > 0) {
+    // note(lustig): we could set the query data with the new information
+    // rather than refetch. Refetching will be costly for larger groups
+
     // This will refresh members
     invalidateGroupMembersQuery(account, topic);
   }

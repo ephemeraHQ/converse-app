@@ -5,10 +5,12 @@ import {
   setTopicToNavigateTo,
 } from "@utils/navigation";
 import { getTopicFromV3Id } from "@utils/groupUtils/groupId";
-import { useAccountsStore, getChatStore } from "@data/store/accountsStore";
+import { useAccountsStore } from "@data/store/accountsStore";
 import type { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
+import { fetchPersistedConversationListQuery } from "@/queries/useV3ConversationListQuery";
+import { resetNotifications } from "./resetNotifications";
 
-export const onInteractWithNotification = (
+export const onInteractWithNotification = async (
   event: Notifications.NotificationResponse
 ) => {
   let notificationData = event.notification.request.content.data;
@@ -51,18 +53,18 @@ export const onInteractWithNotification = (
   const conversationTopic = notificationData["contentTopic"] as
     | string
     | undefined;
-  const account =
-    notificationData["account"] || useAccountsStore.getState().currentAccount;
 
   if (conversationTopic) {
-    useAccountsStore.getState().setCurrentAccount(account, false);
-    const conversations = getChatStore(account).getState().conversations;
+    const account =
+      notificationData["account"] || useAccountsStore.getState().currentAccount;
 
-    if (conversations[conversationTopic]) {
-      navigateToTopic(conversationTopic as ConversationTopic);
-    } else {
-      // App was probably not loaded!
-      setTopicToNavigateTo(conversationTopic);
-    }
+    // Fetch the conversation list to ensure we have the latest conversation list
+    // before navigating to the conversation
+    const _ = await fetchPersistedConversationListQuery(account);
+    useAccountsStore.getState().setCurrentAccount(account, false);
+
+    navigateToTopic(conversationTopic as ConversationTopic);
+    setTopicToNavigateTo(undefined);
+    resetNotifications();
   }
 };

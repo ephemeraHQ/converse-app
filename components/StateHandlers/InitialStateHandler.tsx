@@ -8,10 +8,13 @@ import { useSelect } from "../../data/store/storeHelpers";
 import {
   getSchemedURLFromUniversalURL,
   navigateToTopic,
+  setTopicToNavigateTo,
   topicToNavigateTo,
+  // topicToNavigateTo,
 } from "../../utils/navigation";
 import { hideSplashScreen } from "../../utils/splash/splash";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import logger from "@utils/logger";
 
 const isDevelopmentClientURL = (url: string) => {
   return url.includes("expo-development-client");
@@ -32,6 +35,7 @@ export default function InitialStateHandler() {
 
   useEffect(() => {
     const handleInitialDeeplink = async () => {
+      logger.debug("[InitialStateHandler] Handling initial deeplink");
       let openedViaURL = (await Linking.getInitialURL()) || "";
       // Handling universal links by saving a schemed URI
       openedViaURL = getSchemedURLFromUniversalURL(openedViaURL);
@@ -49,10 +53,17 @@ export default function InitialStateHandler() {
         setSplashScreenHidden(true);
         await hideSplashScreen();
 
-        // If app was loaded by clicking on notification,
+        // note(noe): If app was loaded by clicking on notification,
         // let's navigate
+        // note(lustig): This effect triggers once when initially mounted and only
+        // again when hydrationDone changes
+        // so I don't believe it's the right place to handle navigation
+        // payloads.
+        logger.debug("wa wa wee whow");
+        logger.debug("Topic to navigate to: ", topicToNavigateTo);
         if (topicToNavigateTo) {
           navigateToTopic(topicToNavigateTo as ConversationTopic);
+          setTopicToNavigateTo(undefined);
         } else if (initialURL) {
           if (isDevelopmentClientURL(initialURL)) {
             return;
