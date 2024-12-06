@@ -19,8 +19,8 @@ func handleV3Welcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String
     let spamScore = await computeSpamScoreV3Welcome(client: xmtpClient, conversation: conversation, apiURI: apiURI)
     if spamScore < 0 { // Message is going to main inbox
       // Consent list is loaded in computeSpamScoreGroupWelcome
-      let convoAllowed = try await xmtpClient.preferences.consentList.conversationState(conversationId: conversation.id) == .allowed
-      let convoDenied = try await xmtpClient.preferences.consentList.conversationState(conversationId: conversation.id) == .denied
+      let convoAllowed = try await xmtpClient.preferences.conversationState(conversationId: conversation.id) == .allowed
+      let convoDenied = try await xmtpClient.preferences.conversationState(conversationId: conversation.id) == .denied
       // If group is already consented (either way) then don't show a notification for welcome as this will likely be a second+ installation
       if !convoAllowed && !convoDenied {
         

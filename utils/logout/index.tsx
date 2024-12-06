@@ -13,14 +13,18 @@ import {
 import { setAuthStatus } from "../../data/store/authStore";
 import { deleteSecureItemAsync } from "../keychain";
 import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
-import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
+import mmkv, {
+  authMMKVStorage,
+  clearSecureMmkvForAccount,
+  secureMmkvByAccount,
+} from "../mmkv";
 
 import { useDisconnectFromPrivy } from "./privy";
-import { getXmtpApiHeaders } from "../xmtpRN/api";
 import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
 import { unsubscribeFromNotifications } from "@features/notifications/utils/unsubscribeFromNotifications";
 import { deleteSubscribedTopics } from "@features/notifications/utils/deleteSubscribedTopics";
 import { lastNotifSubscribeByAccount } from "@features/notifications/utils/lastNotifSubscribeByAccount";
+import { getXmtpApiHeaders } from "@utils/api";
 
 type LogoutTasks = {
   [account: string]: {
@@ -227,7 +231,7 @@ export const logoutAccount = async (
   saveLogoutTask(account, apiHeaders, [], pkPath);
 
   setTimeout(() => {
-    executeLogoutTasks();
+    executeLogoutTasks().then(authMMKVStorage.clear);
   }, 500);
 };
 
