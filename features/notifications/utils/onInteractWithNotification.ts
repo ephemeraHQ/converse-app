@@ -60,7 +60,7 @@ export const onInteractWithNotification = async (
 
     // Fetch the conversation list to ensure we have the latest conversation list
     // before navigating to the conversation
-    const _ = await fetchPersistedConversationListQuery(account);
+    await fetchPersistedConversationListQuery(account);
     useAccountsStore.getState().setCurrentAccount(account, false);
 
     navigateToTopic(conversationTopic as ConversationTopic);

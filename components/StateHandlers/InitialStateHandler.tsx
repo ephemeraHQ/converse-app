@@ -52,28 +52,14 @@ export default function InitialStateHandler() {
         splashScreenHidden.current = true;
         setSplashScreenHidden(true);
         await hideSplashScreen();
-
-        // note(noe): If app was loaded by clicking on notification,
-        // let's navigate
-        // note(lustig): This effect triggers once when initially mounted and only
-        // again when hydrationDone changes
-        // so I don't believe it's the right place to handle navigation
-        // payloads.
-        logger.debug("wa wa wee whow");
-        logger.debug("Topic to navigate to: ", topicToNavigateTo);
-        if (topicToNavigateTo) {
-          navigateToTopic(topicToNavigateTo as ConversationTopic);
-          setTopicToNavigateTo(undefined);
-        } else if (initialURL) {
-          if (isDevelopmentClientURL(initialURL)) {
-            return;
-          }
-
-          Linking.openURL(initialURL);
-          // Once opened, let's remove so we don't navigate twice
-          // when logging out / relogging in
-          initialURL = "";
+        if (isDevelopmentClientURL(initialURL)) {
+          return;
         }
+
+        Linking.openURL(initialURL);
+        // Once opened, let's remove so we don't navigate twice
+        // when logging out / relogging in
+        initialURL = "";
       }
     };
     hideSplashScreenIfReady();

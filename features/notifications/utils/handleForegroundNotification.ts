@@ -4,19 +4,30 @@ import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import logger from "@utils/logger";
 
+// note(lustig): these two handlers are the same - do we need both?
 const handleiOSForegroundNotification = async (
   notification: Notifications.Notification
 ) => {
   logger.debug("[Notifications] Handling iOS foreground notification");
   resetNotifications();
   // note(lustig): this is not the senderAddress, but the account to which
-  // the notification is targeted.
+  // the notification is to be received.
   const recipientAccount = notification.request.content.data?.["account"];
-  // TODO const senderAccount = notification.request.content.data?.["sender"];
-  const userIsLoggedIntoOtherAccount = recipientAccount !== currentAccount();
+
+  const senderAccount =
+    /* TODO notification.request.content.data?.["sender"]; */ "todo";
   const userIsNotSender = senderAccount !== currentAccount();
-  const shouldShowAlert = userIsLoggedIntoOtherAccount || userIsNotSender;
-  if (recipientAccount && recipientAccount !== currentAccount()) {
+
+  const isViewingNotifiedConversation = /* TODO */ false;
+  const hackSoWeDontShowNotificationToSender =
+    /* todo(lustig): remove once we get senderAddress */ recipientAccount !==
+    currentAccount();
+  const shouldShowAlert =
+    userIsNotSender &&
+    !isViewingNotifiedConversation &&
+    hackSoWeDontShowNotificationToSender;
+
+  if (shouldShowAlert) {
     return {
       shouldShowAlert: true,
       shouldPlaySound: true,

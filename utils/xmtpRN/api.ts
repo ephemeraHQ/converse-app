@@ -3,45 +3,49 @@ import { getSecureMmkvForAccount } from "@utils/mmkv";
 import { privateKey, signature } from "@xmtp/proto";
 
 import { loadXmtpKey } from "../keychain/helpers";
+import { evmHelpers } from "../evm/helpers";
 
 export const xmtpSignatureByAccount: { [account: string]: string } = {};
 
 const getXmtpApiSignature = async (account: string, message: string) => {
-  return "";
-  // const messageToSign = Buffer.from(message);
-  // const base64Key = await loadXmtpKey(account);
-  // if (!base64Key)
-  //   throw new Error(`Cannot create signature for ${account}: no key found`);
+  const messageToSign = Buffer.from(message);
+  const base64Key = await loadXmtpKey(account);
+  if (!base64Key)
+    throw new Error(`Cannot create signature for ${account}: no key found`);
 
-  // const privateKeyBundle = privateKey.PrivateKeyBundle.decode(
-  //   Buffer.from(base64Key, "base64")
-  // );
-  // const privateKeySecp256k1 =
-  //   privateKeyBundle.v1?.identityKey?.secp256k1 ||
-  //   privateKeyBundle.v2?.identityKey?.secp256k1;
-  // if (!privateKeySecp256k1)
-  //   throw new Error("Could not extract private key from private key bundle");
+  const privateKeyBundle = privateKey.PrivateKeyBundle.decode(
+    Buffer.from(base64Key, "base64")
+  );
+  const privateKeySecp256k1 =
+    privateKeyBundle.v1?.identityKey?.secp256k1 ||
+    privateKeyBundle.v2?.identityKey?.secp256k1;
+  if (!privateKeySecp256k1)
+    throw new Error("Could not extract private key from private key bundle");
 
-  // const [signedBytes, recovery] = await secp.sign(
-  //   messageToSign,
-  //   privateKeySecp256k1.bytes,
-  //   {
-  //     recovered: true,
-  //     der: false,
-  //   }
-  // );
-  // const signatureProto = signature.Signature.fromPartial({
-  //   ecdsaCompact: { bytes: signedBytes, recovery },
-  // });
-  // const encodedSignature = Buffer.from(
-  //   signature.Signature.encode(signatureProto).finish()
-  // ).toString("base64");
-  // const secureMmkv = await getSecureMmkvForAccount(account);
-  // secureMmkv.set("CONVERSE_API_KEY", encodedSignature);
-  // return encodedSignature;
+  const [signedBytes, recovery] = await secp.sign(
+    messageToSign,
+    privateKeySecp256k1.bytes,
+    {
+      recovered: true,
+      der: false,
+    }
+  );
+  const signatureProto = signature.Signature.fromPartial({
+    ecdsaCompact: { bytes: signedBytes, recovery },
+  });
+  const encodedSignature = Buffer.from(
+    signature.Signature.encode(signatureProto).finish()
+  ).toString("base64");
+  const secureMmkv = await getSecureMmkvForAccount(account);
+  secureMmkv.set("CONVERSE_API_KEY", encodedSignature);
+  return encodedSignature;
 };
 
 export const getXmtpApiHeaders = async (account: string) => {
+  return {
+    "xmtp-api-signature": "123",
+    "xmtp-api-address": evmHelpers.toChecksumAddress(account),
+  };
   if (account in xmtpSignatureByAccount)
     return {
       "xmtp-api-signature": xmtpSignatureByAccount[account],
@@ -50,7 +54,7 @@ export const getXmtpApiHeaders = async (account: string) => {
   const xmtpApiSignature = await getXmtpApiSignature(account, "XMTP_IDENTITY");
   xmtpSignatureByAccount[account] = xmtpApiSignature;
   return {
-    "xmtp-api-signature": "xmtpApiSignature",
-    "xmtp-api-address": "account",
+    "xmtp-api-signature": xmtpApiSignature,
+    "xmtp-api-address": account,
   };
 };

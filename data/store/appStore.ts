@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 import { zustandMMKVStorage } from "../../utils/mmkv";
-import logger from "@utils/logger";
 
 // A app-wide store to store settings that don't depend on
 // an account like if notifications are accepted
