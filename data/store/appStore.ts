@@ -77,12 +77,6 @@ export const useAppStore = create<AppStoreType>()(
     }),
     {
       name: "store-app",
-      onRehydrateStorage: (_state) => {
-        return (state) => {
-          // logger.debug("AppStore rehydrated");
-          // console.log(JSON.stringify(state, null, 2));
-        };
-      },
       storage: createJSONStorage(() => zustandMMKVStorage),
       partialize: (state) => ({
         lastVersionOpen: state.lastVersionOpen,
