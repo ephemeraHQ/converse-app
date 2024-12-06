@@ -17,6 +17,7 @@ type OnboardingParamList = {
   OnboardingPrivy: undefined;
   OnboardingConnectWallet: {
     address: string;
+    isSCW: boolean;
   };
   OnboardingNotifications: undefined;
   OnboardingUserProfile: undefined;

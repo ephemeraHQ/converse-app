@@ -30,7 +30,7 @@ export async function initXmtpClient(args: {
   }
 
   try {
-    await createXmtpClientFromSigner(signer, async () => {
+    await createXmtpClientFromSigner(signer, false, async () => {
       await awaitableAlert(
         translate("current_installation_revoked"),
         translate("current_installation_revoked_description")

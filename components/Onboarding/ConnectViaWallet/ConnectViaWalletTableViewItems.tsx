@@ -1,5 +1,6 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 // TODO: move out of ConnectViaWallet
-import { memo, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import {
   useDisconnect as useThirdwebDisconnect,
@@ -7,22 +8,19 @@ import {
   useConnect as useThirdwebConnect,
   useActiveWallet as useThirdwebActiveWallet,
 } from "thirdweb/react";
-import { createWallet } from "thirdweb/wallets";
 
-import {
-  InstalledWallet,
-  useInstalledWallets,
-} from "./ConnectViaWalletSupportedWallets";
+import { useInstalledWallets } from "./ConnectViaWalletSupportedWallets";
 import config from "../../../config";
 import { getAccountsList } from "../../../data/store/accountsStore";
 import { useAppStateHandlers } from "../../../hooks/useAppStateHandlers";
 import { translate } from "../../../i18n";
 import { getEthOSSigner } from "../../../utils/ethos";
 import logger from "../../../utils/logger";
-import { thirdwebClient } from "../../../utils/thirdweb";
+import { thirdwebClient, thirdwebWallets } from "../../../utils/thirdweb";
 import TableView, { TableViewItemType } from "../../TableView/TableView";
 import { TableViewEmoji, TableViewImage } from "../../TableView/TableViewImage";
 import { RightViewChevron } from "../../TableView/TableViewRightChevron";
+import { InstalledWallet, ISupportedWalletName } from "@utils/evm/wallets";
 
 export function getConnectViaWalletTableViewPrivateKeyItem(
   args: Partial<TableViewItemType>
@@ -79,7 +77,7 @@ export function getConnectViaWalletInstalledWalletTableViewItem(args: {
 export const InstalledWalletsTableView = memo(
   function InstalledWalletsTableView(props: {
     onAccountExists: (arg: { address: string }) => void;
-    onAccountDoesNotExist: (arg: { address: string }) => void;
+    onAccountDoesNotExist: (arg: { address: string; isSCW: boolean }) => void;
   }) {
     const { onAccountExists, onAccountDoesNotExist } = props;
 
@@ -87,8 +85,23 @@ export const InstalledWalletsTableView = memo(
 
     const { connect: thirdwebConnect } = useThirdwebConnect();
     const { disconnect: disconnectThirdweb } = useThirdwebDisconnect();
+
     const thirdwebActiveWallet = useThirdwebActiveWallet();
+    const thirdwebActiveWalletRef = useRef(thirdwebActiveWallet);
+    useEffect(() => {
+      thirdwebActiveWalletRef.current = thirdwebActiveWallet;
+    }, [thirdwebActiveWallet]);
+
     const setThirdwebActiveWallet = useSetThirdwebActiveWallet();
+
+    const disconnectActiveThirdweb = useCallback(async () => {
+      if (!thirdwebActiveWalletRef.current) return;
+      disconnectThirdweb(thirdwebActiveWalletRef.current);
+      // Wait for the disconnect to complete
+      while (!!thirdwebActiveWalletRef.current) {
+        await new Promise((r) => setTimeout(r, 100));
+      }
+    }, [disconnectThirdweb]);
 
     const [isProcessingWalletId, setIsProcessingWalletId] = useState<
       string | null
@@ -117,38 +130,35 @@ export const InstalledWalletsTableView = memo(
             walletName: wallet.name,
           }),
           action: async () => {
+            const isSCW = !!wallet?.isSmartContractWallet;
             logger.debug(
-              `[Onboarding] Clicked on wallet ${wallet.name} - opening external app`
+              `[Onboarding] Clicked on wallet ${wallet.name} - ${
+                isSCW ? "Opening web page" : "opening external app"
+              }`
             );
 
             setIsProcessingWalletId(wallet.name);
 
-            if (thirdwebActiveWallet) {
-              disconnectThirdweb(thirdwebActiveWallet);
-            }
+            await disconnectActiveThirdweb();
 
             try {
               let walletAddress: string = "";
 
               // Specific flow for Coinbase Wallet
-              if (wallet.name === "Coinbase Wallet") {
-                const wallet = await thirdwebConnect(async () => {
-                  const coinbaseWallet = createWallet("com.coinbase.wallet", {
-                    appMetadata: config.walletConnectConfig.appMetadata,
-                    mobileConfig: {
-                      callbackURL: `https://${config.websiteDomain}/coinbase`,
-                    },
-                  });
+              if (wallet.thirdwebId === "com.coinbase.wallet") {
+                const thirdwebWallet = await thirdwebConnect(async () => {
+                  const coinbaseWallet =
+                    thirdwebWallets[wallet.name as ISupportedWalletName];
                   await coinbaseWallet.connect({ client: thirdwebClient });
                   setThirdwebActiveWallet(coinbaseWallet);
                   return coinbaseWallet;
                 });
 
-                if (!wallet) {
+                if (!thirdwebWallet) {
                   throw new Error("No coinbase wallet");
                 }
 
-                const account = wallet.getAccount();
+                const account = thirdwebWallet.getAccount();
 
                 if (!account) {
                   throw new Error("No coinbase account found");
@@ -166,7 +176,8 @@ export const InstalledWalletsTableView = memo(
               }
               // Generic flow for all other wallets
               else if (wallet.thirdwebId) {
-                const walletConnectWallet = createWallet(wallet.thirdwebId);
+                const walletConnectWallet =
+                  thirdwebWallets[wallet.name as ISupportedWalletName];
                 const account = await walletConnectWallet.connect({
                   client: thirdwebClient,
                   walletConnect: config.walletConnectConfig,
@@ -179,7 +190,10 @@ export const InstalledWalletsTableView = memo(
               if (getAccountsList().includes(walletAddress)) {
                 onAccountExists({ address: walletAddress });
               } else {
-                onAccountDoesNotExist({ address: walletAddress });
+                onAccountDoesNotExist({
+                  address: walletAddress,
+                  isSCW,
+                });
               }
             } catch (e: any) {
               logger.error("Error connecting to wallet:", e);

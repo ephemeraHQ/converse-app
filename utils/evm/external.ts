@@ -2,7 +2,7 @@ import { useInstalledWallets } from "@components/Onboarding/ConnectViaWallet/Con
 import { translate } from "@i18n";
 import logger from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
-import { thirdwebClient } from "@utils/thirdweb";
+import { thirdwebClient, thirdwebWallets } from "@utils/thirdweb";
 import { Signer } from "ethers";
 import { useCallback, useEffect, useMemo } from "react";
 import { Alert } from "react-native";
@@ -183,15 +183,6 @@ export const useAutoConnectExternalWallet = () => {
   // thirdweb external wallet
   useAutoConnect({
     client: thirdwebClient,
-    // The Coinbase wallet callbackURL needs to be set
-    // here also for autoconnect to work
-    wallets: [
-      createWallet("com.coinbase.wallet", {
-        appMetadata: config.walletConnectConfig.appMetadata,
-        mobileConfig: {
-          callbackURL: `https://${config.websiteDomain}/coinbase`,
-        },
-      }),
-    ],
+    wallets: Object.values(thirdwebWallets),
   });
 };

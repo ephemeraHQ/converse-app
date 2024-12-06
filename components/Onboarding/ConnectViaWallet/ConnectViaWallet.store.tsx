@@ -6,6 +6,7 @@ type IConnectViaWalletStoreProps = {
   address: string;
   alreadyV3Db: boolean;
   signer: Signer;
+  isSCW: boolean;
 };
 
 type IConnectViaWalletStoreProviderProps =
@@ -42,6 +43,7 @@ const createConnectViaWalletStore = (props: IConnectViaWalletStoreProps) =>
   createStore<IConnectViaWalletStoreState>()((set) => ({
     address: props.address,
     signer: props.signer,
+    isSCW: props.isSCW,
     alreadyV3Db: props.alreadyV3Db,
     loading: false,
     numberOfSignaturesDone: 0,

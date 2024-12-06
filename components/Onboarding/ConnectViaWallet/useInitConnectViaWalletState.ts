@@ -19,8 +19,11 @@ import { getInboxId } from "@utils/xmtpRN/signIn";
  * But ideally a lot of this it outside React.
  * This function is for initializing the state of the wallet. V3? XMTP? etc...
  */
-export function useInitConnectViaWalletState(args: { address: string }) {
-  const { address } = args;
+export function useInitConnectViaWalletState(args: {
+  address: string;
+  isSCW: boolean;
+}) {
+  const { address, isSCW } = args;
 
   const { onErrorConnecting } = useConnectViaWalletContext();
 
@@ -91,7 +94,9 @@ export function useInitConnectViaWalletState(args: { address: string }) {
         setSigner(thirdwebSigner);
 
         logger.debug(
-          `[Connect Wallet] User connected wallet ${thirdwebWallet?.id} (${address}). V3 database ${hasV3 ? "already" : "not"} present`
+          `[Connect Wallet] User connected  ${
+            isSCW ? "SCW" : "EOA"
+          } wallet ${thirdwebWallet?.id} (${address}). V3 database ${hasV3 ? "already" : "not"} present`
         );
       } catch (error) {
         logger.error("[Connect Wallet] Error initializing wallet:", error);
@@ -109,6 +114,7 @@ export function useInitConnectViaWalletState(args: { address: string }) {
     setIsInitializing,
     thirdwebWallet,
     thirdwebSigner,
+    isSCW,
     onErrorConnecting,
   ]);
 
