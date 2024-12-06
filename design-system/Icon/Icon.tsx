@@ -60,6 +60,8 @@ export const iconRegistry: Record<IIconName, string> = {
   "exclamationmark.triangle": "exclamationmark.triangle",
   magnifyingglass: "magnifyingglass",
   star: "star",
+  pin: "pin",
+  "pin.slash": "pin.slash",
 };
 
 export function Icon(props: IIconProps) {

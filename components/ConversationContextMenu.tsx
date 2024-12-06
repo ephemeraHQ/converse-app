@@ -6,13 +6,10 @@ import {
 } from "@/features/conversation-list/ConversationListContextMenu.store";
 import { ConversationReadOnly } from "@/screens/ConversationReadOnly";
 import { AnimatedBlurView } from "@components/AnimatedBlurView";
-import TableView from "@components/TableView/TableView";
 import {
   BACKDROP_DARK_BACKGROUND_COLOR,
   BACKDROP_LIGHT_BACKGROUND_COLOR,
-  contextMenuStyleGuide,
 } from "@design-system/ContextMenu/ContextMenu.constants";
-import { backgroundColor } from "@styles/colors";
 import { animation } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -37,6 +34,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { ContextMenuItems } from "./ContextMenuItems";
 
 const ConversationContextMenuComponent: FC = () => {
   const isVisible = useConversationListContextMenuIsVisible();
@@ -133,7 +131,6 @@ const ConversationContextMenuComponent: FC = () => {
           >
             <View style={styles.overlay}>
               <Animated.View style={[styles.container, animatedStyle]}>
-                <View style={styles.handle} />
                 <View style={styles.previewContainer}>
                   <GestureDetector
                     gesture={Gesture.Tap().onEnd(() => {
@@ -146,7 +143,10 @@ const ConversationContextMenuComponent: FC = () => {
                   </GestureDetector>
                 </View>
                 <View style={styles.menuContainer}>
-                  <TableView style={styles.table} items={contextMenuItems} />
+                  <ContextMenuItems
+                    containerStyle={styles.table}
+                    items={contextMenuItems}
+                  />
                 </View>
               </Animated.View>
             </View>
@@ -158,8 +158,6 @@ const ConversationContextMenuComponent: FC = () => {
 };
 
 const useStyles = () => {
-  const colorScheme = useColorScheme();
-
   const { theme } = useAppTheme();
 
   return StyleSheet.create({
@@ -171,36 +169,17 @@ const useStyles = () => {
       flex: 1,
       justifyContent: "flex-end",
     },
-    handle: {
-      marginTop: 70,
-      marginBottom: 10,
-      width: 36,
-      height: 5,
-      backgroundColor: contextMenuStyleGuide.palette.secondary,
-      alignSelf: "center",
-      borderRadius: 2.5,
-    },
     previewContainer: {
       flex: 1,
-      margin: theme.spacing.md,
-      paddingBottom: contextMenuStyleGuide.spacing,
+      marginHorizontal: theme.spacing.md,
+      marginTop: theme.spacing["5xl"],
+      marginBottom: theme.spacing.zero,
+      paddingBottom: theme.spacing.xxs,
       overflow: "hidden",
       justifyContent: "flex-start",
       minHeight: 210,
-      backgroundColor: backgroundColor(colorScheme),
-      borderRadius: 16,
-    },
-    conversationName: {
-      ...contextMenuStyleGuide.typography.body,
-      fontWeight: "600",
-      marginBottom: contextMenuStyleGuide.spacing,
-    },
-    lastMessagePreview: {
-      ...contextMenuStyleGuide.typography.callout,
-      color:
-        Platform.OS === "ios"
-          ? contextMenuStyleGuide.palette.secondary
-          : contextMenuStyleGuide.palette.common.black,
+      backgroundColor: theme.colors.background.raised,
+      borderRadius: theme.borderRadius.sm,
     },
     menuContainer: {
       marginHorizontal: theme.spacing.md,
@@ -214,7 +193,7 @@ const useStyles = () => {
     table: {
       width: 180,
       backgroundColor:
-        Platform.OS === "android" ? backgroundColor(colorScheme) : undefined,
+        Platform.OS === "android" ? theme.colors.background.raised : undefined,
       borderRadius: Platform.OS === "android" ? 10 : undefined,
     },
   });
