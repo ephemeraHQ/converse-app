@@ -23,37 +23,34 @@ export const thirdwebClient = createThirdwebClient({
 
 export const thirdwebWallets: Record<ISupportedWalletName, Wallet> =
   Object.fromEntries(
-    Object.entries(SUPPORTED_WALLETS).map(([walletName, walletConfig]) => {
-      if (!walletConfig.thirdwebId) {
-        return [walletName, undefined];
-      }
+    Object.entries(SUPPORTED_WALLETS)
+      .filter(([_, walletConfig]) => !!walletConfig.thirdwebId)
+      .map(([walletName, walletConfig]) => {
+        let wallet: Wallet;
+        if (walletName === "Coinbase Smart Wallet") {
+          wallet = createWallet("com.coinbase.wallet", {
+            appMetadata: config.walletConnectConfig.appMetadata,
+            mobileConfig: {
+              callbackURL: `https://${config.websiteDomain}`,
+            },
+            walletConfig: {
+              options: "smartWalletOnly",
+            },
+          });
+        } else if (walletName === "Coinbase Wallet") {
+          wallet = createWallet("com.coinbase.wallet", {
+            appMetadata: config.walletConnectConfig.appMetadata,
+            mobileConfig: {
+              callbackURL: `https://${config.websiteDomain}/coinbase`,
+            },
+            walletConfig: {
+              options: "eoaOnly",
+            },
+          });
+        } else {
+          wallet = createWallet(walletConfig.thirdwebId!);
+        }
 
-      let wallet: Wallet;
-
-      if (walletName === "Coinbase Smart Wallet") {
-        wallet = createWallet("com.coinbase.wallet", {
-          appMetadata: config.walletConnectConfig.appMetadata,
-          mobileConfig: {
-            callbackURL: `https://${config.websiteDomain}`,
-          },
-          walletConfig: {
-            options: "smartWalletOnly",
-          },
-        });
-      } else if (walletName === "Coinbase Wallet") {
-        wallet = createWallet("com.coinbase.wallet", {
-          appMetadata: config.walletConnectConfig.appMetadata,
-          mobileConfig: {
-            callbackURL: `https://${config.websiteDomain}/coinbase`,
-          },
-          walletConfig: {
-            options: "eoaOnly",
-          },
-        });
-      } else {
-        wallet = createWallet(walletConfig.thirdwebId);
-      }
-
-      return [walletName, wallet];
-    })
+        return [walletName, wallet];
+      })
   ) as Record<ISupportedWalletName, Wallet>;

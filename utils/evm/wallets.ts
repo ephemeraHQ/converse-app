@@ -135,14 +135,6 @@ const _SUPPORTED_WALLETS = {
     universalLink: "https://exodus.com/m",
     thirdwebId: "com.exodus",
   },
-  // "1inch Wallet": {
-  //   walletConnectId:
-  //     "c286eebc742a537cd1d6818363e9dc53b21759a1e8e5d9b263d0c03ec7703576",
-  //   iconURL:
-  //     "https://explorer-api.walletconnect.com/v3/logo/sm/52b1da3c-9e72-40ae-5dac-6142addd9c00?projectId=2f05ae7f1116030fde2d36508f472bfb",
-  //   customScheme: "oneinch://",
-  //   universalLink: "https://wallet.1inch.io",
-  // },
 };
 
 export type ISupportedWalletName =
