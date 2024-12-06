@@ -141,7 +141,6 @@ function useMessageReactionsRolledUp() {
           address: reaction.senderAddress,
           userName: socialDetails?.name,
           avatar: socialDetails?.uri,
-          // reactionTime: reaction.timestamp,
         },
       });
     });
