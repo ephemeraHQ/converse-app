@@ -1,8 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // TODO: move out of ConnectViaWallet
-import { memo, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator } from "react-native";
-import { ethereum } from "thirdweb/chains";
 import {
   useDisconnect as useThirdwebDisconnect,
   useSetActiveWallet as useSetThirdwebActiveWallet,
@@ -86,8 +85,23 @@ export const InstalledWalletsTableView = memo(
 
     const { connect: thirdwebConnect } = useThirdwebConnect();
     const { disconnect: disconnectThirdweb } = useThirdwebDisconnect();
+
     const thirdwebActiveWallet = useThirdwebActiveWallet();
+    const thirdwebActiveWalletRef = useRef(thirdwebActiveWallet);
+    useEffect(() => {
+      thirdwebActiveWalletRef.current = thirdwebActiveWallet;
+    }, [thirdwebActiveWallet]);
+
     const setThirdwebActiveWallet = useSetThirdwebActiveWallet();
+
+    const disconnectActiveThirdweb = useCallback(async () => {
+      if (!thirdwebActiveWalletRef.current) return;
+      disconnectThirdweb(thirdwebActiveWalletRef.current);
+      // Wait for the disconnect to complete
+      while (!!thirdwebActiveWalletRef.current) {
+        await new Promise((r) => setTimeout(r, 100));
+      }
+    }, [disconnectThirdweb]);
 
     const [isProcessingWalletId, setIsProcessingWalletId] = useState<
       string | null
@@ -125,22 +139,13 @@ export const InstalledWalletsTableView = memo(
 
             setIsProcessingWalletId(wallet.name);
 
-            if (thirdwebActiveWallet) {
-              disconnectThirdweb(thirdwebActiveWallet);
-            }
+            await disconnectActiveThirdweb();
 
             try {
               let walletAddress: string = "";
 
               // Specific flow for Coinbase Wallet
               if (wallet.thirdwebId === "com.coinbase.wallet") {
-                // @todo => this is a hack to remove the smart wallet key from AsyncStorage
-                // because it's not being removed by the wallet itself
-                const storageKeys = await AsyncStorage.getAllKeys();
-                const wcKeys = storageKeys.filter((k) =>
-                  k.startsWith("-Coinbase Smart Wallet:")
-                );
-                await AsyncStorage.multiRemove(wcKeys);
                 const thirdwebWallet = await thirdwebConnect(async () => {
                   const coinbaseWallet =
                     thirdwebWallets[wallet.name as ISupportedWalletName];
