@@ -34,6 +34,8 @@ import {
   resetConversationListContextMenuStore,
   setConversationListContextMenuConversationData,
 } from "@/features/conversation-list/ConversationListContextMenu.store";
+import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
+import { useAppTheme } from "@/theme/useAppTheme";
 
 type V3GroupConversationListItemProps = {
   group: GroupWithCodecsType;
@@ -61,6 +63,7 @@ const useData = ({ group }: UseDataProps) => {
   );
 
   const topic = group?.topic;
+  const { theme } = useAppTheme();
   const timestamp = group?.lastMessage?.sentNs ?? 0;
 
   const isUnread = useConversationIsUnread({
@@ -191,7 +194,7 @@ const useData = ({ group }: UseDataProps) => {
     );
   }, [colorScheme, currentAccount, group, setInboxIdPeerStatus]);
 
-  const contextMenuItems = useMemo(
+  const contextMenuItems: ContextMenuItem[] = useMemo(
     () => [
       {
         title: translate("pin"),
@@ -200,6 +203,7 @@ const useData = ({ group }: UseDataProps) => {
           closeContextMenu();
         },
         id: "pin",
+        rightView: <ContextMenuIcon icon="pin" />,
       },
       {
         title: isUnread
@@ -210,6 +214,11 @@ const useData = ({ group }: UseDataProps) => {
           closeContextMenu();
         },
         id: "markAsUnread",
+        rightView: (
+          <ContextMenuIcon
+            icon={isUnread ? "checkmark.message" : "message.badge"}
+          />
+        ),
       },
       {
         title: translate("delete"),
@@ -218,9 +227,22 @@ const useData = ({ group }: UseDataProps) => {
           closeContextMenu();
         },
         id: "delete",
+        titleStyle: {
+          color: theme.colors.global.caution,
+        },
+        rightView: (
+          <ContextMenuIcon icon="trash" color={theme.colors.global.caution} />
+        ),
       },
     ],
-    [topic, setPinnedConversations, handleDelete, isUnread, toggleReadStatus]
+    [
+      isUnread,
+      theme.colors.global.caution,
+      setPinnedConversations,
+      topic,
+      toggleReadStatus,
+      handleDelete,
+    ]
   );
 
   const showContextMenu = useCallback(() => {
