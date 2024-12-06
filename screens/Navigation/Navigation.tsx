@@ -44,6 +44,7 @@ import UserProfileNav from "./UserProfileNav";
 import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
+import { translate } from "@/i18n";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -104,7 +105,7 @@ export type NavigationParamList = {
 
 export const authScreensSharedScreenOptions: NativeStackNavigationOptions = {
   headerTitle: "",
-  headerBackTitle: "Back",
+  headerBackTitle: translate("back"),
   headerBackTitleVisible: false,
   headerShadowVisible: false,
 };
@@ -185,7 +186,7 @@ export function SignedInNavigation() {
               headerLeft: () => (
                 <ScreenHeaderModalCloseButton onPress={router.goBack} />
               ),
-              headerTitle: "Modify profile",
+              headerTitle: translate("profile.modify_profile"),
             }}
           />
           <NativeStack.Screen
@@ -264,7 +265,7 @@ const NewAccountNavigator = memo(function NewAccountNavigator() {
       <NewAccountStack.Group
         screenOptions={{
           headerTitle: "",
-          headerBackTitle: "Back",
+          headerBackTitle: translate("back"),
           ...stackGroupScreenOptions(colorScheme),
         }}
       >
@@ -272,10 +273,10 @@ const NewAccountNavigator = memo(function NewAccountNavigator() {
           name="NewAccount"
           component={NewAccountScreen}
           options={{
-            headerTitle: "New account",
+            headerTitle: translate("new_account"),
             headerLeft: () => (
               <ScreenHeaderModalCloseButton
-                title="Cancel"
+                title={translate("cancel")}
                 onPress={router.goBack}
               />
             ),

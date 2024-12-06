@@ -2,6 +2,7 @@ import { AttachmentContainer } from "@/components/Chat/Attachment/attachment-con
 import { AttachmentLoading } from "@/components/Chat/Attachment/attachment-loading";
 import { MessageLayout } from "@/components/Chat/Message/components/message-layout";
 import { Text } from "@/design-system/Text";
+import { translate } from "@/i18n";
 import { getLocalAttachment } from "@/utils/attachment/handleAttachment";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -84,7 +85,7 @@ const Content = memo(function Content(props: {
   if (attachmentError || !attachment) {
     return (
       <AttachmentContainer>
-        <Text>Couldn't find attachment</Text>
+        <Text>{translate("attachment_not_found")}</Text>
       </AttachmentContainer>
     );
   }

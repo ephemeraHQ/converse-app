@@ -96,7 +96,7 @@ export default function ConversationRequestsListNav() {
       navigation: any;
     }) => ({
       animation: navigationAnimation as StackAnimationTypes,
-      headerTitle: clearingAll ? "Clearing..." : "Requests",
+      headerTitle: clearingAll ? translate("clearing") : translate("requests"),
       headerLeft: () => <AndroidBackAction navigation={navigation} />,
       headerRight: () =>
         clearingAll ? undefined : (
