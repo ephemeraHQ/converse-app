@@ -55,7 +55,9 @@ export type IIconName =
   | "cloud"
   | "exclamationmark.triangle"
   | "magnifyingglass"
-  | "star";
+  | "star"
+  | "pin"
+  | "pin.slash";
 
 /**
  * Props for the Icon component.

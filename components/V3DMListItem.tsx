@@ -25,6 +25,8 @@ import {
   setConversationListContextMenuConversationData,
 } from "@/features/conversation-list/ConversationListContextMenu.store";
 import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
+import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
+import { useAppTheme } from "@/theme/useAppTheme";
 
 type V3DMListItemProps = {
   conversation: DmWithCodecsType;
@@ -75,6 +77,8 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
     isUnread,
   });
 
+  const { theme } = useAppTheme();
+
   const messageText = useMessageText(conversation.lastMessage);
   const preferredName = usePreferredInboxName(peer);
   const avatarUri = usePreferredInboxAvatar(peer);
@@ -95,7 +99,7 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
     resetConversationListContextMenuStore();
   }, []);
 
-  const contextMenuItems = useMemo(
+  const contextMenuItems: ContextMenuItem[] = useMemo(
     () => [
       {
         title: translate("pin"),
@@ -104,6 +108,7 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
           closeContextMenu();
         },
         id: "pin",
+        rightView: <ContextMenuIcon icon="pin" />,
       },
       {
         title: isUnread
@@ -114,6 +119,11 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
           closeContextMenu();
         },
         id: "markAsUnread",
+        rightView: (
+          <ContextMenuIcon
+            icon={isUnread ? "checkmark.message" : "message.badge"}
+          />
+        ),
       },
       {
         title: translate("delete"),
@@ -122,15 +132,22 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
           closeContextMenu();
         },
         id: "delete",
+        titleStyle: {
+          color: theme.colors.global.caution,
+        },
+        rightView: (
+          <ContextMenuIcon icon="trash" color={theme.colors.global.caution} />
+        ),
       },
     ],
     [
-      topic,
-      setPinnedConversations,
-      handleDelete,
-      closeContextMenu,
       isUnread,
+      theme.colors.global.caution,
+      setPinnedConversations,
+      topic,
+      closeContextMenu,
       toggleReadStatus,
+      handleDelete,
     ]
   );
 
