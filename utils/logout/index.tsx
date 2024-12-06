@@ -20,12 +20,12 @@ import mmkv, {
 } from "../mmkv";
 
 import { useDisconnectFromPrivy } from "./privy";
-import { getXmtpApiHeaders } from "../xmtpRN/api";
 import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
 import { unsubscribeFromNotifications } from "@features/notifications/utils/unsubscribeFromNotifications";
 import { deleteSubscribedTopics } from "@features/notifications/utils/deleteSubscribedTopics";
 import { lastNotifSubscribeByAccount } from "@features/notifications/utils/lastNotifSubscribeByAccount";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
+import { getXmtpApiHeaders } from "@utils/api";
 
 type LogoutTasks = {
   [account: string]: {
@@ -156,7 +156,6 @@ export const logoutAccount = async (
         logger.debug("[Logout] successfully deleted libxmp db");
         // Manual delete database files
         await deleteLibXmtpDatabaseForInboxId(client.inboxId);
-        authMMKVStorage.clear();
       }
     } catch (error) {
       logger.warn("Could not get XMTP Client while logging out", {
@@ -233,7 +232,7 @@ export const logoutAccount = async (
   saveLogoutTask(account, apiHeaders, [], pkPath);
 
   setTimeout(() => {
-    executeLogoutTasks();
+    executeLogoutTasks().then(authMMKVStorage.clear);
   }, 500);
 };
 
