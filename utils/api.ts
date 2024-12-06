@@ -1,7 +1,7 @@
 import { TransactionData } from "@components/TransactionPreview/TransactionPreview";
 import type { SimulateAssetChangesResponse } from "alchemy-sdk";
 import { GroupInvite } from "@utils/api.types";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import * as Contacts from "expo-contacts";
 
 import {
@@ -30,12 +30,18 @@ export const api = axios.create({
   baseURL: config.apiURI,
 });
 
+type PatchedAxiosError = Omit<AxiosError, "config"> & {
+  config: AxiosError["config"] & { _retry: boolean };
+};
+
 // Better error handling
 api.interceptors.response.use(
   function axiosSuccessResponse(response) {
     return response;
   },
-  async function axiosErrorResponse(error) {
+  async function axiosErrorResponse(error: PatchedAxiosError) {
+    const req = error.config;
+
     if (error.response) {
       logger.warn(
         `[API] HTTP Error ${error.response.status} - ${error.request._url}`,
@@ -45,10 +51,29 @@ api.interceptors.response.use(
           2
         )
       );
+      const refreshToken = authMMKVStorage.get("CONVERSE_REFRESH_TOKEN");
 
-      if (error.response.status === 403) {
-        // TODO: need to bring back full retry logic here from stash
-        await rotateAccessToken();
+      if (
+        error.response?.status === 401 &&
+        req &&
+        // Prevent multiple simultaneous refresh attempts
+        !req._retry &&
+        // If no refresh token is stored, than token rotation will not be possible
+        refreshToken
+      ) {
+        try {
+          const { accessToken } = await rotateAccessToken(refreshToken);
+          req._retry = true;
+          req.headers = {
+            ...req.headers,
+            authorization: `Bearer ${accessToken}`,
+          };
+
+          return api(req);
+        } catch (refreshError) {
+          // Token rotation failed - this is a legitimate authentication failure
+          return Promise.reject(refreshError);
+        }
       }
     } else if (error.request) {
       logger.warn(
@@ -92,37 +117,36 @@ export async function createAccessToken({
     })
   );
 
-  // TODO: remove, these are just for debugging
-  if (!data.accessToken) throw new Error("No access token in auth response");
-  if (!data.refreshToken) throw new Error("No refresh token in auth response");
-
+  if (!data.accessToken) {
+    throw new Error("No access token in auth response");
+  }
+  if (!data.refreshToken) {
+    throw new Error("No refresh token in auth response");
+  }
   return data;
 }
 
-export async function rotateAccessToken(): Promise<AuthResponse> {
-  const accessToken = authMMKVStorage.get("CONVERSE_ACCESS_TOKEN");
-  const refreshToken = authMMKVStorage.get("CONVERSE_REFRESH_TOKEN");
-
-  if (!(accessToken && refreshToken)) {
+export async function rotateAccessToken(
+  refreshToken?: string
+): Promise<AuthResponse> {
+  if (!refreshToken) {
     throw new Error(
       "Can't request new access token without current token and refresh token"
     );
   }
 
   const { data } = await dedupedFetch("/api/authenticate/token", () =>
-    api.post<AuthResponse>("/api/authenticate/token", {
-      accessToken,
-      refreshToken,
-    })
+    api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
   );
 
-  // TODO: remove, these are just for debugging
-  if (!data) throw new Error("Could not create access token");
-  if (!data.accessToken) throw new Error("No access token in auth response");
-  if (!data.refreshToken) throw new Error("No refresh token in auth response");
+  if (!data) {
+    throw new Error("Could not rotate access token");
+  }
+  if (!data.accessToken) {
+    throw new Error("No access token in token rotate response");
+  }
 
   authMMKVStorage.set("CONVERSE_ACCESS_TOKEN", data.accessToken);
-  authMMKVStorage.set("CONVERSE_REFRESH_TOKEN", data.refreshToken);
   return data;
 }
 
@@ -184,8 +208,7 @@ export async function getXmtpApiHeaders(
       authMMKVStorage.set("CONVERSE_REFRESH_TOKEN", result.refreshToken);
       accessToken = result.accessToken;
     } catch (error) {
-      console.log("Error while getting access token");
-      console.log(error);
+      logger.error("Error while getting access token", error);
     }
   }
 

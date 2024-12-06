@@ -17,7 +17,10 @@ import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 
 export const conversationListKey = (account: string) => [
   QueryKeys.V3_CONVERSATION_LIST,
-  account.toLowerCase(), // All queries are case sensitive, sometimes we use checksum, but the SDK use lowercase, always use lowercase
+  // NOTE:
+  // - All queries are case sensitive, sometimes we use checksum, but the SDK use lowercase, always use lowercase
+  // - Using the default 0 address so the app doesn't crash on empty account (happens in dev during reloads mostly)
+  account?.toLowerCase() ?? "0x0",
 ];
 
 export type V3ConversationListType = ConversationWithCodecsType[];
