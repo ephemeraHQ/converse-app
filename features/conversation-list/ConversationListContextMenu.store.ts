@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { TableViewItemType } from "@/components/TableView/TableView";
+import { ContextMenuItem } from "@/components/ContextMenuItems";
 
 type IConversationListContextMenuState = {
   conversationTopic: ConversationTopic | undefined;
-  menuItems: TableViewItemType[];
+  menuItems: ContextMenuItem[];
 };
 
 const initialMessageReactionsState: IConversationListContextMenuState = {
@@ -27,7 +28,7 @@ export const resetConversationListContextMenuStore = () => {
 
 export const setConversationListContextMenuConversationData = (
   conversationTopic: ConversationTopic,
-  menuItems: TableViewItemType[]
+  menuItems: ContextMenuItem[]
 ) => {
   useConversationListContextMenuStore.setState({
     conversationTopic,

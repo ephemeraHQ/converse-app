@@ -62,6 +62,8 @@ export const iconRegistry: Record<
   "exclamationmark.triangle": "warning",
   magnifyingglass: "search",
   star: "star",
+  pin: "push-pin",
+  "pin.slash": "push-pin", // Doesn't seem like there's a pin.slash icon
 };
 
 export function Icon(props: IIconProps) {
