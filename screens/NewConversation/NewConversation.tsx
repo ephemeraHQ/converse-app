@@ -46,6 +46,7 @@ import { canMessageByAccount } from "@utils/xmtpRN/contacts";
 import { useGroupQuery } from "@queries/useGroupQuery";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
+import { translate } from "@/i18n";
 
 export default function NewConversation({
   route,
@@ -103,9 +104,9 @@ export default function NewConversation({
         ),
       headerTitle: group.enabled
         ? route.params?.addingToGroupTopic
-          ? "Add members"
-          : "New group"
-        : "New conversation",
+          ? translate("new_conversation.add_members")
+          : translate("new_conversation.create_group")
+        : translate("new_conversation.new_conversation"),
       headerRight: () => {
         if (group.enabled && group.members.length > 0) {
           if (loading) {
@@ -461,7 +462,7 @@ export default function NewConversation({
               {
                 id: "inviteToConverse",
                 leftView: <TableViewPicto symbol="link" />,
-                title: "Invite them to Converse",
+                title: translate("new_conversation.invite_to_converse"),
                 subtitle: "",
                 action: () => {
                   navigation.goBack();

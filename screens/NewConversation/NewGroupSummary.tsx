@@ -42,6 +42,10 @@ import {
 } from "../../utils/profile";
 import { createGroupByAccount } from "../../utils/xmtpRN/conversations";
 import { NewConversationModalParams } from "./NewConversationModal";
+import {
+  captureErrorWithFriendlyToast,
+  captureErrorWithToast,
+} from "@/utils/capture-error";
 
 const getPendingGroupMembers = (
   members: any[],
@@ -130,10 +134,9 @@ export default function NewGroupSummary({
         });
       })
       .catch((e) => {
-        Alert.alert(
-          translate("upload_group_photo_error"),
-          ensureError(e).message
-        );
+        captureErrorWithToast(e, {
+          message: translate("upload_group_photo_error"),
+        });
         setRemotePhotUrl({
           remotePhotoUrl: undefined,
           isLoading: false,
@@ -275,12 +278,12 @@ export default function NewGroupSummary({
           id: a.address,
           title: getPreferredName(a, a.address),
         }))}
-        title="MEMBERS"
+        title={translate("members_title")}
       />
       <TableView
         items={[
           {
-            title: "Add members",
+            title: translate("new_group.add_members"),
             id: "addMembers",
             rightView: (
               <Switch
@@ -290,7 +293,7 @@ export default function NewGroupSummary({
             ),
           },
           {
-            title: "Edit group info",
+            title: translate("new_group.edit_group_info"),
             id: "editGroupInfo",
             rightView: (
               <Switch
@@ -300,7 +303,7 @@ export default function NewGroupSummary({
             ),
           },
         ]}
-        title="MEMBERS CAN"
+        title={translate("new_group.members_can")}
       />
       <Text style={styles.p}>
         {translate("promote_to_admin_to_manage_group")}

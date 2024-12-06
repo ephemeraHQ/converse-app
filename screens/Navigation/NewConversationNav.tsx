@@ -8,6 +8,7 @@ import { useColorScheme } from "react-native";
 import { NativeStack, navigationAnimation } from "./Navigation";
 import NewConversationModal from "../NewConversation/NewConversationModal";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { translate } from "@/i18n";
 
 export type NewConversationNavParams = {
   peer?: string;
@@ -27,7 +28,7 @@ export const NewConversationScreenConfig = {
 export default function NewConversationNav() {
   const colorScheme = useColorScheme();
   const options: NativeStackNavigationOptions = {
-    headerTitle: "New conversation",
+    headerTitle: translate("new_conversation.new_conversation"),
     presentation: "modal",
     headerStyle: {
       backgroundColor: navigationSecondaryBackgroundColor(colorScheme),

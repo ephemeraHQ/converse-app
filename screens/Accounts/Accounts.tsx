@@ -19,6 +19,7 @@ import { useRouter } from "../../navigation/useNavigation";
 import { useAccountsProfiles } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";
 import { shortAddress } from "@utils/strings/shortAddress";
+import { translate } from "@/i18n";
 
 export default function Accounts(
   props: NativeStackScreenProps<NavigationParamList, "Accounts">
@@ -67,7 +68,7 @@ export default function Accounts(
         items={[
           {
             id: "add",
-            title: "Add an account",
+            title: translate("add_an_account"),
             titleColor: primaryColor(colorScheme),
             action: () => {
               router.navigate("NewAccountNavigator");

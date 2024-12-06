@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
+import { translate } from "@/i18n";
 
 export default function InitialLoad() {
   const headerHeight = useHeaderHeight();
@@ -22,11 +23,8 @@ export default function InitialLoad() {
       ]}
     >
       <ActivityIndicator />
-      <Text style={styles.welcome}>Welcome to Converse!</Text>
-      <Text style={styles.p}>
-        We’re checking if you already own{"\n"}conversations on the XMTP
-        network.
-      </Text>
+      <Text style={styles.welcome}>{translate("initial_load.title")}</Text>
+      <Text style={styles.p}>{translate("initial_load.subtitle")}</Text>
     </View>
   );
 }
