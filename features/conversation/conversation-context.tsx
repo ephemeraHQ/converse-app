@@ -1,5 +1,4 @@
-import { useDmConsentQuery } from "@/queries/useDmConstentStateQuery";
-import { useGroupConsentQuery } from "@/queries/useGroupConsentQuery";
+import { captureErrorWithToast } from "@/utils/capture-error";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationQuery } from "@queries/useConversationQuery";
 import { addConversationToConversationListQuery } from "@queries/useV3ConversationListQuery";
@@ -37,11 +36,19 @@ export type IConversationContextType = {
   isLoadingConversationConsent: boolean;
   isNewConversation: boolean;
   conversationNotFound: boolean;
-  conversationVersion: ConversationVersion | undefined;
-  conversationId: ConversationId | undefined;
-  peerAddress: string | undefined;
+  conversationVersion: ConversationVersion | null;
+  conversationId: ConversationId | null;
+  peerAddress: string | null;
   composerHeightAV: SharedValue<number>;
   sendMessage: (message: ISendMessageParams) => Promise<void>;
+  reactOnMessage: (args: {
+    messageId: MessageId;
+    emoji: string;
+  }) => Promise<void>;
+  removeReactionFromMessage: (args: {
+    messageId: MessageId;
+    emoji: string;
+  }) => Promise<void>;
 };
 
 type IConversationContextProps = {
@@ -62,15 +69,7 @@ export const ConversationContextProvider = (
   const currentAccount = useCurrentAccount()!;
 
   const { data: conversation, isLoading: isLoadingConversation } =
-    useConversationQuery(currentAccount, topic);
-
-  const { data: groupConsent, isLoading: isLoadingGroupConsent } =
-    useGroupConsentQuery(currentAccount, topic!);
-
-  const { data: dmConsent, isLoading: isLoadingDmConsent } = useDmConsentQuery({
-    account: currentAccount,
-    topic,
-  });
+    useConversationQuery(currentAccount, topic!);
 
   const composerHeightAV = useSharedValue(0);
 
@@ -87,6 +86,47 @@ export const ConversationContextProvider = (
     };
     checkActive();
   }, [conversation]);
+
+  const reactOnMessage = useCallback(
+    async (args: { messageId: MessageId; emoji: string }) => {
+      const { messageId, emoji } = args;
+      try {
+        if (!conversation) {
+          return;
+        }
+        await conversation.send({
+          reaction: {
+            reference: messageId,
+            content: emoji,
+            schema: "unicode",
+            action: "added",
+          },
+        });
+      } catch (error) {
+        captureErrorWithToast(error);
+      }
+    },
+    [conversation]
+  );
+
+  const removeReactionFromMessage = useCallback(
+    async (args: { messageId: MessageId; emoji: string }) => {
+      const { messageId, emoji } = args;
+      try {
+        await conversation?.send({
+          reaction: {
+            reference: messageId,
+            content: emoji,
+            schema: "unicode",
+            action: "removed",
+          },
+        });
+      } catch (error) {
+        captureErrorWithToast(error);
+      }
+    },
+    [conversation]
+  );
 
   const sendMessage = useCallback(
     async ({ referencedMessageId, content }: ISendMessageParams) => {
@@ -108,8 +148,6 @@ export const ConversationContextProvider = (
           );
           return;
         }
-
-        console.log("payload:", payload);
 
         await conversation?.send(payload);
       };
@@ -147,36 +185,28 @@ export const ConversationContextProvider = (
     [conversation, currentAccount, peerAddress]
   );
 
-  const isGroup = conversation?.version === ConversationVersion.GROUP;
-  const isDm = conversation?.version === ConversationVersion.DM;
-
   const isAllowedConversation = useMemo(() => {
     if (!conversation) {
       return false;
     }
-    if (isGroup) {
-      return groupConsent === "allowed";
-    }
-    if (isDm) {
-      return dmConsent === "allowed";
-    }
-    return false;
-  }, [conversation, dmConsent, groupConsent, isDm, isGroup]);
+    return conversation.state === "allowed";
+  }, [conversation]);
 
   return (
     <ConversationContext.Provider
       value={{
         composerHeightAV,
-        conversationId: conversation?.id,
+        conversationId: conversation?.id || null,
         conversationNotFound: !conversation && !isLoadingConversation,
-        conversationVersion: conversation?.version,
+        conversationVersion: conversation?.version || null,
         isAllowedConversation,
         isBlockedConversation: conversation?.state === "denied", // TODO: implement this
-        isLoadingConversationConsent:
-          isLoadingGroupConsent || isLoadingDmConsent || isLoadingConversation,
+        isLoadingConversationConsent: isLoadingConversation,
         isNewConversation: !topic && !!peerAddress,
-        peerAddress,
+        peerAddress: peerAddress || null,
         sendMessage,
+        reactOnMessage,
+        removeReactionFromMessage,
       }}
     >
       {children}

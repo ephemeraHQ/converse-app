@@ -1,16 +1,25 @@
+import { MessageReactions } from "@/components/Chat/Message/MessageReactions/MessageReactions";
 import { V3MessageSenderAvatar } from "@/components/Chat/Message/MessageSenderAvatar";
 import { MessageContainer } from "@/components/Chat/Message/components/message-container";
 import { MessageContentContainer } from "@/components/Chat/Message/components/message-content-container";
 import { MessageRepliable } from "@/components/Chat/Message/components/message-repliable";
 import { MessageSpaceBetweenMessages } from "@/components/Chat/Message/components/message-space-between-messages";
-import { useMessageContext } from "@/components/Chat/Message/contexts/message-context";
 import { MessageDateChange } from "@/components/Chat/Message/message-date-change";
+import {
+  IMessageGesturesOnLongPressArgs,
+  MessageGestures,
+} from "@/components/Chat/Message/message-gestures";
 import { MessageTimestamp } from "@/components/Chat/Message/message-timestamp";
-import { useMessageContextStoreContext } from "@/components/Chat/Message/stores/message-store";
+import {
+  useMessageContextStore,
+  useMessageContextStoreContext,
+} from "@/components/Chat/Message/stores/message-store";
 import { useSelect } from "@/data/store/storeHelpers";
-import { Pressable } from "@/design-system/Pressable";
 import { VStack } from "@/design-system/VStack";
-import { setCurrentConversationReplyToMessageId } from "@/features/conversation/conversation-service";
+import {
+  setCurrentConversationReplyToMessageId,
+  setMessageContextMenuData,
+} from "@/features/conversation/conversation-service";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ReactNode, useCallback } from "react";
 
@@ -25,15 +34,33 @@ export function MessageLayout({ children }: IMessageLayoutProps) {
     useSelect(["senderAddress", "fromMe", "messageId"])
   );
 
-  const { toggleTime } = useMessageContext();
+  const messageStore = useMessageContextStore();
 
   const handleReply = useCallback(() => {
     setCurrentConversationReplyToMessageId(messageId);
   }, [messageId]);
 
-  const handlePressMessage = useCallback(() => {
-    toggleTime();
-  }, [toggleTime]);
+  const handleTap = useCallback(() => {
+    const isShowingTime = !messageStore.getState().isShowingTime;
+    messageStore.setState({
+      isShowingTime,
+    });
+  }, [messageStore]);
+
+  const handleLongPress = useCallback(
+    (e: IMessageGesturesOnLongPressArgs) => {
+      const messageId = messageStore.getState().messageId;
+      setMessageContextMenuData({
+        messageId,
+        itemRectX: e.pageX,
+        itemRectY: e.pageY,
+        itemRectHeight: e.height,
+        itemRectWidth: e.width,
+        messageComponent: children,
+      });
+    },
+    [messageStore, children]
+  );
 
   return (
     <>
@@ -48,7 +75,17 @@ export function MessageLayout({ children }: IMessageLayoutProps) {
                 <VStack style={{ width: theme.spacing.xxs }} />
               </>
             )}
-            <Pressable onPress={handlePressMessage}>{children}</Pressable>
+            <VStack
+              style={{
+                rowGap: theme.spacing["4xs"],
+                alignItems: fromMe ? "flex-end" : "flex-start",
+              }}
+            >
+              <MessageGestures onTap={handleTap} onLongPress={handleLongPress}>
+                {children}
+              </MessageGestures>
+              <MessageReactions />
+            </VStack>
           </MessageContentContainer>
         </MessageContainer>
       </MessageRepliable>

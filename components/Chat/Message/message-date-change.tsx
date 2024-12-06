@@ -1,15 +1,16 @@
-import { useMessageContext } from "@/components/Chat/Message/contexts/message-context";
-import { useMessageContextStoreContext } from "@/components/Chat/Message/stores/message-store";
+import {
+  useMessageContextStore,
+  useMessageContextStoreContext,
+} from "@/components/Chat/Message/stores/message-store";
 import { AnimatedHStack } from "@design-system/HStack";
 import { AnimatedText, Text } from "@design-system/Text";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
 import { getLocalizedTime, getRelativeDate } from "@utils/date";
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import {
-  interpolate,
   useAnimatedStyle,
-  useDerivedValue,
+  useSharedValue,
   withSpring,
 } from "react-native-reanimated";
 
@@ -21,21 +22,29 @@ export const MessageDateChange = memo(function MessageDateChange() {
     s.showDateChange,
   ]);
 
-  const { showTimeAV } = useMessageContext();
+  const showTimeAV = useSharedValue(0);
 
-  const showTimeProgressAV = useDerivedValue(() => {
-    return withSpring(showTimeAV.value ? 1 : 0, {
-      damping: SICK_DAMPING,
-      stiffness: SICK_STIFFNESS,
-    });
-  });
+  const messageStore = useMessageContextStore();
+
+  useEffect(() => {
+    const unsubscribe = messageStore.subscribe(
+      (state) => state.isShowingTime,
+      (isShowingTime) => {
+        showTimeAV.value = isShowingTime ? 1 : 0;
+      }
+    );
+    return () => unsubscribe();
+  }, [messageStore, showTimeAV]);
 
   const messageTime = sentAt ? getLocalizedTime(sentAt) : "";
 
   const timeInlineAnimatedStyle = useAnimatedStyle(() => {
     return {
       display: showTimeAV.value ? "flex" : "none",
-      opacity: interpolate(showTimeProgressAV.value, [0, 1], [0, 1]),
+      opacity: withSpring(showTimeAV.value ? 1 : 0, {
+        damping: SICK_DAMPING,
+        stiffness: SICK_STIFFNESS,
+      }),
     };
   });
 

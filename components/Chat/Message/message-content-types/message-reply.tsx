@@ -5,13 +5,11 @@ import {
 } from "@/components/Chat/Message/components/message-bubble";
 import { MessageLayout } from "@/components/Chat/Message/components/message-layout";
 import { MessageText } from "@/components/Chat/Message/components/message-text";
-import { useMessageContext } from "@/components/Chat/Message/contexts/message-context";
 import { useMessageContextStoreContext } from "@/components/Chat/Message/stores/message-store";
 import { useSelect } from "@/data/store/storeHelpers";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { HStack } from "@design-system/HStack";
 import { Icon } from "@design-system/Icon/Icon";
-import { Pressable } from "@design-system/Pressable";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
 import { getConversationMessageQueryOptions } from "@queries/useConversationMessage";

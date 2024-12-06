@@ -1,19 +1,19 @@
 import logger from "@utils/logger";
 import {
-  ConversationOrder,
   ConversationOptions,
+  ConversationOrder,
   ConversationTopic,
   ConversationVersion,
 } from "@xmtp/react-native-sdk";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 
+import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
   DmWithCodecsType,
 } from "./client";
 import { getXmtpClient } from "./sync";
-import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 
 export const streamConversations = async (account: string) => {
   await stopStreamingConversations(account);
@@ -130,6 +130,9 @@ export const getConversationByTopic = async ({
   topic,
   includeSync = false,
 }: GetConversationByTopicParams): Promise<ConversationWithCodecsType> => {
+  if (!topic) {
+    throw new Error("Topic is required to get conversation by topic");
+  }
   logger.debug(
     `[XMTPRN Conversations] Getting conversation by topic: ${topic}`
   );

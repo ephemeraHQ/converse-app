@@ -12,3 +12,7 @@ export const executeAfterKeyboardClosed = (methodToExecute: () => void) => {
     methodToExecute();
   }
 };
+
+export const dismissKeyboard = () => {
+  Keyboard.dismiss();
+};

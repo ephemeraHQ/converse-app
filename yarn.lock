@@ -19245,16 +19245,16 @@ react-native-image-viewing@^0.2.1:
   integrity sha512-osWieG+p/d2NPbAyonOMubttajtYEYiRGQaJA54slFxZ69j1V4/dCmcrVQry47ktVKy8/qpFwCpW1eT6MH5T2Q==
 
 react-native-ios-context-menu@^2.5.1:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/react-native-ios-context-menu/-/react-native-ios-context-menu-2.5.1.tgz#795a4722be706f39701f991ae455e105a141e900"
-  integrity sha512-Qt+0qeW/2x2Dc6aNUwsUR6BV0EozT5n2VNYIDKjdEQMF0xrN/o37p2+Oz6xhvWcA+15gAXqCbGq6omjPHLowRw==
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/react-native-ios-context-menu/-/react-native-ios-context-menu-2.5.2.tgz#a54a5a9848619f7a43e673ba4e6d119a76c99459"
+  integrity sha512-DlG/4uTaNqq2Gnz2bN2seLPyvZTptQ6UhftImvcVdsQyNqG9R9Bnmh4cD/JZVAyK732cyFgtFIE/EUXo0AstoQ==
   dependencies:
     "@dominicstop/ts-event-emitter" "^1.1.0"
 
 react-native-ios-utilities@^4.4.5:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/react-native-ios-utilities/-/react-native-ios-utilities-4.5.0.tgz#c7d1b1d1b6b0b7c90ec9adf103c34ec0857f96e9"
-  integrity sha512-SslC5r+GSHijpaCOhp7043d+xzjwPf0qztcQqHv5LL5KftTUQN2HmByUEFJwjycDo1xzeH3SxKgtivtw/2Sj4w==
+  version "4.5.1"
+  resolved "https://registry.yarnpkg.com/react-native-ios-utilities/-/react-native-ios-utilities-4.5.1.tgz#3d43f4fd3add5f0f6a2ff6c53f35c850226e2ead"
+  integrity sha512-A8PMME94PXv1Ui5WrTBcz69zVPAshvvIuYxJUkE09Nl1Ca6/ds6wCxys/A+KkNPtgeVCN7diBR/M5BTVnJbKDQ==
 
 react-native-is-edge-to-edge@^1.1.6:
   version "1.1.6"
