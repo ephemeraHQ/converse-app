@@ -21,6 +21,7 @@ import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
 import { unsubscribeFromNotifications } from "@features/notifications/utils/unsubscribeFromNotifications";
 import { deleteSubscribedTopics } from "@features/notifications/utils/deleteSubscribedTopics";
 import { lastNotifSubscribeByAccount } from "@features/notifications/utils/lastNotifSubscribeByAccount";
+import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 
 type LogoutTasks = {
   [account: string]: {
@@ -158,7 +159,7 @@ export const logoutAccount = async (
       });
     }
   }
-  await dropXmtpClient(await getInboxId(account));
+  await dropXmtpClient((await getInboxId(account)) as InstallationId);
   const isPrivyAccount = !!useAccountsStore.getState().privyAccountId[account];
   if (isPrivyAccount) {
     privyLogout();

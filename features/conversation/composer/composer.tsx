@@ -350,7 +350,7 @@ export const ReplyPreviewEndContent = memo(
     const { theme } = useAppTheme();
 
     if (isReplyMessage(replyMessage)) {
-      const replyTyped = replyMessage as DecodedMessage<[ReplyCodec]>;
+      const replyTyped = replyMessage as DecodedMessage<ReplyCodec>;
 
       const content = replyTyped.content();
 
@@ -376,9 +376,8 @@ export const ReplyPreviewEndContent = memo(
     }
 
     if (isRemoteAttachmentMessage(replyMessage)) {
-      const messageTyped = replyMessage as DecodedMessage<
-        [RemoteAttachmentCodec]
-      >;
+      const messageTyped =
+        replyMessage as DecodedMessage<RemoteAttachmentCodec>;
 
       const content = messageTyped.content();
 
@@ -417,9 +416,8 @@ const ReplyPreviewMessageContent = memo(
     const clearedMessage = messageText?.replace(/(\n)/gm, " ");
 
     if (isStaticAttachmentMessage(replyMessage)) {
-      const messageTyped = replyMessage as DecodedMessage<
-        [StaticAttachmentCodec]
-      >;
+      const messageTyped =
+        replyMessage as DecodedMessage<StaticAttachmentCodec>;
 
       const content = messageTyped.content();
 
@@ -456,7 +454,7 @@ const ReplyPreviewMessageContent = memo(
     }
 
     if (isReplyMessage(replyMessage)) {
-      const messageTyped = replyMessage as DecodedMessage<[ReplyCodec]>;
+      const messageTyped = replyMessage as DecodedMessage<ReplyCodec>;
       const content = messageTyped.content();
 
       if (typeof content === "string") {
