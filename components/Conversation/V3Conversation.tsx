@@ -1,7 +1,7 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationMessages } from "@queries/useConversationMessages";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
-import { memo, useCallback, useEffect } from "react";
+import { memo, useCallback, useEffect, useRef } from "react";
 import { FlatListProps, Platform } from "react-native";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
 import { DmConsentPopup } from "@/components/Chat/ConsentPopup/dm-consent-popup";
@@ -140,27 +140,21 @@ const DmContent = memo(function DmContent() {
 
   const { data: peerInboxId } = useDmPeerInboxId(currentAccount, topic!);
 
-  // Check if conversation is unread
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: messages?.byId[messages?.ids[0]], // Get latest message
     timestamp: messages?.byId[messages?.ids[0]]?.sentNs ?? 0,
   });
-
-  // Add hook to toggle read status
   const toggleReadStatus = useToggleReadStatus({
     topic,
     isUnread,
     currentAccount,
   });
-
-  // Effect to mark as read when entering chat
-  useEffect(() => {
-    if (isUnread && !messagesLoading && messages?.ids.length) {
-      console.log("== Mark as read?");
-      toggleReadStatus();
-    }
-  }, [isUnread, messagesLoading, messages?.ids.length, toggleReadStatus]);
+  useMarkAsReadOnEnter({
+    messagesLoading,
+    isUnread,
+    toggleReadStatus,
+  });
 
   useDmHeader();
 
@@ -212,6 +206,22 @@ const GroupContent = memo(function GroupContent() {
     isRefetching: isRefetchingMessages,
     refetch,
   } = useConversationMessages(currentAccount, topic!);
+
+  const isUnread = useConversationIsUnread({
+    topic,
+    lastMessage: messages?.byId[messages?.ids[0]], // Get latest message
+    timestamp: messages?.byId[messages?.ids[0]]?.sentNs ?? 0,
+  });
+  const toggleReadStatus = useToggleReadStatus({
+    topic,
+    isUnread,
+    currentAccount,
+  });
+  useMarkAsReadOnEnter({
+    messagesLoading,
+    isUnread,
+    toggleReadStatus,
+  });
 
   useGroupHeader();
 
@@ -294,6 +304,26 @@ export const KeyboardFiller = memo(function KeyboardFiller() {
 
   return <AnimatedVStack style={as} />;
 });
+
+const useMarkAsReadOnEnter = ({
+  messagesLoading,
+  isUnread,
+  toggleReadStatus,
+}: {
+  messagesLoading: boolean;
+  isUnread: boolean;
+  toggleReadStatus: () => void;
+}) => {
+  const hasMarkedAsRead = useRef(false);
+
+  useEffect(() => {
+    if (isUnread && !messagesLoading && !hasMarkedAsRead.current) {
+      console.log("Mark as read?");
+      toggleReadStatus();
+      hasMarkedAsRead.current = true;
+    }
+  }, [isUnread, messagesLoading, toggleReadStatus]);
+};
 
 function useNewConversationHeader() {
   const navigation = useRouter();

@@ -21,12 +21,14 @@ export const useToggleReadStatus = ({
     setTopicsData({
       [topic]: {
         status: newStatus,
+        readUntil: isUnread ? timestamp : 0,
         timestamp,
       },
     });
     saveTopicsData(currentAccount, {
       [topic]: {
         status: newStatus,
+        readUntil: isUnread ? timestamp : 0,
         timestamp,
       },
     });

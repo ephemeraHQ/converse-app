@@ -10,7 +10,7 @@ import { saveTopicsData } from "@utils/api";
 import { getMinimalDate } from "@utils/date";
 import { Haptics } from "@utils/haptics";
 import { navigate } from "@utils/navigation";
-import { RefObject, useCallback, useMemo, useRef } from "react";
+import { RefObject, useCallback, useEffect, useMemo, useRef } from "react";
 import { useColorScheme } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
@@ -370,7 +370,9 @@ export function V3GroupConversationListItem({
     handleRestore,
     messageText,
   } = useData({ group });
+
   const ref = useRef<Swipeable>(null);
+
   const {
     onPress,
     onLongPress,
@@ -389,6 +391,7 @@ export function V3GroupConversationListItem({
     handleRestore,
     isBlockedChatView,
   });
+
   const { timeToShow, leftActionIcon } = useDisplayInfo({
     timestamp,
     isUnread,
