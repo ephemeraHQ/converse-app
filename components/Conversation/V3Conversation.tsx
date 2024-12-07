@@ -322,7 +322,6 @@ const useMarkAsReadOnEnter = ({
 
   useEffect(() => {
     if (isUnread && !messagesLoading && !hasMarkedAsRead.current) {
-      console.log("Mark as read?");
       toggleReadStatus();
       hasMarkedAsRead.current = true;
     }
