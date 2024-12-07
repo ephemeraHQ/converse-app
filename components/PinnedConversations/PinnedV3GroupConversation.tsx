@@ -52,7 +52,6 @@ export const PinnedV3GroupConversation = ({
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: group.lastMessage,
-    conversation: group,
     timestamp,
   });
 
