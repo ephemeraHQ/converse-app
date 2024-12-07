@@ -55,7 +55,6 @@ export const PinnedV3DMConversation = ({
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: conversation.lastMessage,
-    conversation: conversation,
     timestamp,
   });
 
