@@ -142,8 +142,12 @@ const DmContent = memo(function DmContent() {
 
   const isUnread = useConversationIsUnread({
     topic,
-    lastMessage: messages?.byId[messages?.ids[0]], // Get latest message
-    timestamp: messages?.byId[messages?.ids[0]]?.sentNs ?? 0,
+    lastMessage: messages?.ids?.length
+      ? messages.byId[messages.ids[0]]
+      : undefined,
+    timestamp: messages?.ids?.length
+      ? (messages.byId[messages.ids[0]]?.sentNs ?? 0)
+      : 0,
   });
   const toggleReadStatus = useToggleReadStatus({
     topic,
