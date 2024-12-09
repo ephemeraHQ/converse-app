@@ -63,7 +63,7 @@ export const consentToAddressesOnProtocol = async ({
       await client.preferences.setConsentState({
         value: address,
         entryType: "address",
-        permissionType: "allowed",
+        state: "allowed",
       });
     }
   } else if (consent === "deny") {
@@ -71,7 +71,7 @@ export const consentToAddressesOnProtocol = async ({
       await client.preferences.setConsentState({
         value: address,
         entryType: "address",
-        permissionType: "denied",
+        state: "denied",
       });
     }
   } else {
@@ -125,7 +125,7 @@ export const consentToInboxIdsOnProtocol = async ({
       await client.preferences.setConsentState({
         value: inboxId,
         entryType: "inbox_id",
-        permissionType: "allowed",
+        state: "allowed",
       });
     }
   } else if (consent === "deny") {
@@ -133,7 +133,7 @@ export const consentToInboxIdsOnProtocol = async ({
       await client.preferences.setConsentState({
         value: inboxId,
         entryType: "inbox_id",
-        permissionType: "denied",
+        state: "denied",
       });
     }
   } else {
@@ -185,7 +185,7 @@ export const consentToGroupsOnProtocol = async ({
       await client.preferences.setConsentState({
         value: groupId,
         entryType: "conversation_id",
-        permissionType: "allowed",
+        state: "allowed",
       });
     }
   } else if (consent === "deny") {
@@ -193,7 +193,7 @@ export const consentToGroupsOnProtocol = async ({
       await client.preferences.setConsentState({
         value: groupId,
         entryType: "conversation_id",
-        permissionType: "denied",
+        state: "denied",
       });
     }
   } else {
