@@ -1,3 +1,4 @@
+import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
@@ -6,10 +7,8 @@ import { conversationWithPeerQueryKey } from "./QueryKeys";
 
 export const useConversationWithPeerQuery = (
   account: string,
-  peer: string | undefined,
-  options?: Partial<
-    UseQueryOptions<ConversationWithCodecsType | null | undefined>
-  >
+  peer: string,
+  options?: Partial<UseQueryOptions<ConversationWithCodecsType | null>>
 ) => {
   return useQuery({
     ...options,
@@ -24,6 +23,12 @@ export const useConversationWithPeerQuery = (
         peer,
         includeSync: true,
       });
+
+      if (!conversation) {
+        return null;
+      }
+
+      setConversationQueryData(account, conversation.topic, conversation);
 
       return conversation;
     },

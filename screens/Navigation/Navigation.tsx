@@ -79,13 +79,9 @@ export type NavigationParamList = {
   NewConversation: NewConversationNavParams;
 
   // WIP
-  DmConversation:
-    | {
-        peerAddress: string;
-      }
-    | {
-        topic: string;
-      };
+  DmConversation: {
+    peerAddress: string;
+  };
 
   NewGroupSummary: undefined;
   ConverseMatchMaker: undefined;

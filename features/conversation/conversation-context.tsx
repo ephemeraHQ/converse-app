@@ -1,9 +1,7 @@
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationQuery } from "@queries/useConversationQuery";
-import { addConversationToConversationListQuery } from "@queries/useV3ConversationListQuery";
 import { navigate } from "@utils/navigation";
-import { createConversationByAccount } from "@utils/xmtpRN/conversations";
 import {
   ConversationId,
   ConversationVersion,
@@ -11,13 +9,8 @@ import {
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
 import React, { useCallback, useEffect, useMemo } from "react";
-import { SharedValue, useSharedValue } from "react-native-reanimated";
 import { createContext, useContextSelector } from "use-context-selector";
-import {
-  updateNewConversation,
-  useConversationCurrentPeerAddress,
-  useConversationCurrentTopic,
-} from "./conversation-service";
+import { useConversationCurrentTopic } from "./conversation-service";
 
 export type ISendMessageParams = {
   content: {
@@ -33,13 +26,8 @@ export type ISendMessageParams = {
 export type IConversationContextType = {
   isAllowedConversation: boolean;
   isBlockedConversation: boolean;
-  isLoadingConversationConsent: boolean;
-  isNewConversation: boolean;
   conversationNotFound: boolean;
-  conversationVersion: ConversationVersion | null;
   conversationId: ConversationId | null;
-  peerAddress: string | null;
-  composerHeightAV: SharedValue<number>;
   sendMessage: (message: ISendMessageParams) => Promise<void>;
   reactOnMessage: (args: {
     messageId: MessageId;
@@ -64,14 +52,11 @@ export const ConversationContextProvider = (
 ) => {
   const { children } = props;
 
-  const topic = useConversationCurrentTopic();
-  const peerAddress = useConversationCurrentPeerAddress();
+  const topic = useConversationCurrentTopic()!;
   const currentAccount = useCurrentAccount()!;
 
   const { data: conversation, isLoading: isLoadingConversation } =
-    useConversationQuery(currentAccount, topic!);
-
-  const composerHeightAV = useSharedValue(0);
+    useConversationQuery(currentAccount, topic);
 
   useEffect(() => {
     const checkActive = async () => {
@@ -130,31 +115,35 @@ export const ConversationContextProvider = (
 
   const sendMessage = useCallback(
     async ({ referencedMessageId, content }: ISendMessageParams) => {
-      const sendCallback = async (payload: any) => {
-        if (!conversation && !peerAddress) {
-          return;
-        }
+      // const sendCallback = async (payload: any) => {
+      //   // if (!conversation && !peerAddress) {
+      //   //   return;
+      //   // }
 
-        if (!conversation && peerAddress) {
-          const newConversation = await createConversationByAccount(
-            currentAccount,
-            peerAddress
-          );
-          updateNewConversation(newConversation.topic);
-          await newConversation.send(payload);
-          addConversationToConversationListQuery(
-            currentAccount,
-            newConversation
-          );
-          return;
-        }
+      //   // if (!conversation && peerAddress) {
+      //   //   const newConversation = await createConversationByAccount(
+      //   //     currentAccount,
+      //   //     peerAddress
+      //   //   );
+      //   //   updateNewConversation(newConversation.topic);
+      //   //   await newConversation.send(payload);
+      //   //   addConversationToConversationListQuery(
+      //   //     currentAccount,
+      //   //     newConversation
+      //   //   );
+      //   //   return;
+      //   // }
 
-        await conversation?.send(payload);
-      };
+      //   // await conversation?.send(payload);
+      // };
+
+      if (!conversation) {
+        return;
+      }
 
       if (referencedMessageId) {
         if (content.remoteAttachment) {
-          await sendCallback({
+          await conversation.send({
             reply: {
               reference: referencedMessageId,
               content: { remoteAttachment: content.remoteAttachment },
@@ -162,7 +151,7 @@ export const ConversationContextProvider = (
           });
         }
         if (content.text) {
-          await sendCallback({
+          await conversation.send({
             reply: {
               reference: referencedMessageId,
               content: { text: content.text },
@@ -173,16 +162,18 @@ export const ConversationContextProvider = (
       }
 
       if (content.remoteAttachment) {
-        await sendCallback({
+        await conversation.send({
           remoteAttachment: content.remoteAttachment,
         });
       }
 
       if (content.text) {
-        await sendCallback(content.text);
+        await conversation?.send({
+          text: content.text,
+        });
       }
     },
-    [conversation, currentAccount, peerAddress]
+    [conversation]
   );
 
   const isAllowedConversation = useMemo(() => {
@@ -195,15 +186,10 @@ export const ConversationContextProvider = (
   return (
     <ConversationContext.Provider
       value={{
-        composerHeightAV,
         conversationId: conversation?.id || null,
         conversationNotFound: !conversation && !isLoadingConversation,
-        conversationVersion: conversation?.version || null,
         isAllowedConversation,
         isBlockedConversation: conversation?.state === "denied", // TODO: implement this
-        isLoadingConversationConsent: isLoadingConversation,
-        isNewConversation: !topic && !!peerAddress,
-        peerAddress: peerAddress || null,
         sendMessage,
         reactOnMessage,
         removeReactionFromMessage,

@@ -10,7 +10,6 @@ import { V3Conversation } from "@components/Conversation/V3Conversation";
 type V3ConversationFromPeerProps = {
   peer: string;
   textPrefill?: string;
-  skipLoading: boolean;
 };
 
 /**
