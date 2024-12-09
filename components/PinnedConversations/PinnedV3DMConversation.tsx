@@ -2,7 +2,6 @@ import { PinnedConversation } from "./PinnedConversation";
 import { useCallback, useMemo } from "react";
 import { navigate } from "@utils/navigation";
 import Avatar from "@components/Avatar";
-import { AvatarSizes } from "@styles/sizes";
 import { DmWithCodecsType } from "@utils/xmtpRN/client";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
 import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
@@ -18,6 +17,10 @@ import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggl
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
 import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
+import { isTextMessage } from "../Chat/Message/message-utils";
+import { VStack } from "@/design-system/VStack";
+import { PinnedMessagePreview } from "./PinnedMessagePreview";
 
 type PinnedV3DMConversationProps = {
   conversation: DmWithCodecsType;
@@ -52,7 +55,6 @@ export const PinnedV3DMConversation = ({
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: conversation.lastMessage,
-    conversation: conversation,
     timestamp,
   });
 
@@ -68,7 +70,9 @@ export const PinnedV3DMConversation = ({
     conversation,
   });
 
-  const contextMenuItems = useMemo(
+  const { theme } = useAppTheme();
+
+  const contextMenuItems: ContextMenuItem[] = useMemo(
     () => [
       {
         title: translate("unpin"),
@@ -77,6 +81,7 @@ export const PinnedV3DMConversation = ({
           closeContextMenu();
         },
         id: "pin",
+        rightView: <ContextMenuIcon icon="pin.slash" />,
       },
       {
         title: isUnread
@@ -87,6 +92,11 @@ export const PinnedV3DMConversation = ({
           closeContextMenu();
         },
         id: "markAsUnread",
+        rightView: (
+          <ContextMenuIcon
+            icon={isUnread ? "checkmark.message" : "message.badge"}
+          />
+        ),
       },
       {
         title: translate("delete"),
@@ -95,9 +105,22 @@ export const PinnedV3DMConversation = ({
           closeContextMenu();
         },
         id: "delete",
+        titleStyle: {
+          color: theme.colors.global.caution,
+        },
+        rightView: (
+          <ContextMenuIcon icon="trash" color={theme.colors.global.caution} />
+        ),
       },
     ],
-    [isUnread, setPinnedConversations, topic, toggleReadStatus, handleDelete]
+    [
+      isUnread,
+      theme.colors.global.caution,
+      setPinnedConversations,
+      topic,
+      toggleReadStatus,
+      handleDelete,
+    ]
   );
 
   const onLongPress = useCallback(() => {
@@ -110,7 +133,8 @@ export const PinnedV3DMConversation = ({
 
   const title = preferredName;
 
-  const { theme } = useAppTheme();
+  const displayMessagePreview =
+    isTextMessage(conversation.lastMessage) && isUnread;
 
   const avatarComponent = useMemo(() => {
     return (
@@ -124,12 +148,17 @@ export const PinnedV3DMConversation = ({
   }, [peerInboxId, preferredAvatar, preferredName, theme.avatarSize.xxl]);
 
   return (
-    <PinnedConversation
-      avatarComponent={avatarComponent}
-      onLongPress={onLongPress}
-      onPress={onPress}
-      showUnread={isUnread}
-      title={title ?? ""}
-    />
+    <VStack>
+      <PinnedConversation
+        avatarComponent={avatarComponent}
+        onLongPress={onLongPress}
+        onPress={onPress}
+        showUnread={isUnread}
+        title={title ?? ""}
+      />
+      {displayMessagePreview && (
+        <PinnedMessagePreview message={conversation.lastMessage!} />
+      )}
+    </VStack>
   );
 };

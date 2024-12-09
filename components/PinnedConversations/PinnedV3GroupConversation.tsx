@@ -2,7 +2,7 @@ import { PinnedConversation } from "./PinnedConversation";
 import { useCallback, useMemo } from "react";
 import { navigate } from "@utils/navigation";
 import Avatar from "@components/Avatar";
-import { useGroupConversationListAvatarInfo } from "../../features/conversation-list/useGroupConversationListAvatarInfo";
+import { useGroupConversationListAvatarInfo } from "@features/conversation-list/useGroupConversationListAvatarInfo";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
@@ -16,6 +16,10 @@ import { useHandleDeleteGroup } from "@/features/conversation-list/hooks/useHand
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
+import { isTextMessage } from "../Chat/Message/message-utils";
+import { VStack } from "@/design-system/VStack";
+import { PinnedMessagePreview } from "./PinnedMessagePreview";
 
 type PinnedV3GroupConversationProps = {
   group: GroupWithCodecsType;
@@ -43,10 +47,11 @@ export const PinnedV3GroupConversation = ({
 
   const timestamp = group?.lastMessage?.sentNs ?? 0;
 
+  const { theme } = useAppTheme();
+
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: group.lastMessage,
-    conversation: group,
     timestamp,
   });
 
@@ -58,7 +63,7 @@ export const PinnedV3GroupConversation = ({
 
   const handleDelete = useHandleDeleteGroup(group);
 
-  const contextMenuItems = useMemo(() => {
+  const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     return [
       {
         title: translate("unpin"),
@@ -67,6 +72,7 @@ export const PinnedV3GroupConversation = ({
           closeContextMenu();
         },
         id: "pin",
+        rightView: <ContextMenuIcon icon="pin.slash" />,
       },
       {
         title: isUnread
@@ -77,6 +83,11 @@ export const PinnedV3GroupConversation = ({
           closeContextMenu();
         },
         id: "markAsUnread",
+        rightView: (
+          <ContextMenuIcon
+            icon={isUnread ? "checkmark.message" : "message.badge"}
+          />
+        ),
       },
       {
         title: translate("delete"),
@@ -85,9 +96,22 @@ export const PinnedV3GroupConversation = ({
           closeContextMenu();
         },
         id: "delete",
+        titleStyle: {
+          color: theme.colors.global.caution,
+        },
+        rightView: (
+          <ContextMenuIcon icon="trash" color={theme.colors.global.caution} />
+        ),
       },
     ];
-  }, [handleDelete, isUnread, setPinnedConversations, toggleReadStatus, topic]);
+  }, [
+    handleDelete,
+    isUnread,
+    setPinnedConversations,
+    theme.colors.global.caution,
+    toggleReadStatus,
+    topic,
+  ]);
 
   const onLongPress = useCallback(() => {
     setConversationListContextMenuConversationData(
@@ -102,7 +126,7 @@ export const PinnedV3GroupConversation = ({
 
   const title = group?.name;
 
-  const { theme } = useAppTheme();
+  const displayMessagePreview = isTextMessage(group.lastMessage) && isUnread;
 
   const avatarComponent = useMemo(() => {
     if (group?.imageUrlSquare) {
@@ -118,12 +142,17 @@ export const PinnedV3GroupConversation = ({
   }, [group?.imageUrlSquare, group?.topic, memberData, theme.avatarSize.xxl]);
 
   return (
-    <PinnedConversation
-      avatarComponent={avatarComponent}
-      onLongPress={onLongPress}
-      onPress={onPress}
-      showUnread={isUnread}
-      title={title ?? ""}
-    />
+    <VStack>
+      <PinnedConversation
+        avatarComponent={avatarComponent}
+        onLongPress={onLongPress}
+        onPress={onPress}
+        showUnread={isUnread}
+        title={title ?? ""}
+      />
+      {displayMessagePreview && (
+        <PinnedMessagePreview message={group.lastMessage!} />
+      )}
+    </VStack>
   );
 };

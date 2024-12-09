@@ -10,7 +10,7 @@ import { saveTopicsData } from "@utils/api";
 import { getMinimalDate } from "@utils/date";
 import { Haptics } from "@utils/haptics";
 import { navigate } from "@utils/navigation";
-import { RefObject, useCallback, useMemo, useRef } from "react";
+import { RefObject, useCallback, useEffect, useMemo, useRef } from "react";
 import { useColorScheme } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
@@ -34,6 +34,8 @@ import {
   resetConversationListContextMenuStore,
   setConversationListContextMenuConversationData,
 } from "@/features/conversation-list/ConversationListContextMenu.store";
+import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
+import { useAppTheme } from "@/theme/useAppTheme";
 
 type V3GroupConversationListItemProps = {
   group: GroupWithCodecsType;
@@ -61,12 +63,12 @@ const useData = ({ group }: UseDataProps) => {
   );
 
   const topic = group?.topic;
+  const { theme } = useAppTheme();
   const timestamp = group?.lastMessage?.sentNs ?? 0;
 
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: group.lastMessage,
-    conversation: group,
     timestamp,
   });
 
@@ -191,7 +193,7 @@ const useData = ({ group }: UseDataProps) => {
     );
   }, [colorScheme, currentAccount, group, setInboxIdPeerStatus]);
 
-  const contextMenuItems = useMemo(
+  const contextMenuItems: ContextMenuItem[] = useMemo(
     () => [
       {
         title: translate("pin"),
@@ -200,6 +202,7 @@ const useData = ({ group }: UseDataProps) => {
           closeContextMenu();
         },
         id: "pin",
+        rightView: <ContextMenuIcon icon="pin" />,
       },
       {
         title: isUnread
@@ -210,6 +213,11 @@ const useData = ({ group }: UseDataProps) => {
           closeContextMenu();
         },
         id: "markAsUnread",
+        rightView: (
+          <ContextMenuIcon
+            icon={isUnread ? "checkmark.message" : "message.badge"}
+          />
+        ),
       },
       {
         title: translate("delete"),
@@ -218,9 +226,22 @@ const useData = ({ group }: UseDataProps) => {
           closeContextMenu();
         },
         id: "delete",
+        titleStyle: {
+          color: theme.colors.global.caution,
+        },
+        rightView: (
+          <ContextMenuIcon icon="trash" color={theme.colors.global.caution} />
+        ),
       },
     ],
-    [topic, setPinnedConversations, handleDelete, isUnread, toggleReadStatus]
+    [
+      isUnread,
+      theme.colors.global.caution,
+      setPinnedConversations,
+      topic,
+      toggleReadStatus,
+      handleDelete,
+    ]
   );
 
   const showContextMenu = useCallback(() => {
@@ -349,7 +370,9 @@ export function V3GroupConversationListItem({
     handleRestore,
     messageText,
   } = useData({ group });
+
   const ref = useRef<Swipeable>(null);
+
   const {
     onPress,
     onLongPress,
@@ -368,6 +391,7 @@ export function V3GroupConversationListItem({
     handleRestore,
     isBlockedChatView,
   });
+
   const { timeToShow, leftActionIcon } = useDisplayInfo({
     timestamp,
     isUnread,

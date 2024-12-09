@@ -1,7 +1,7 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationMessages } from "@queries/useConversationMessages";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
-import { memo, useCallback, useEffect } from "react";
+import { memo, useCallback, useEffect, useRef } from "react";
 import { FlatListProps, Platform } from "react-native";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
 import { DmConsentPopup } from "@/components/Chat/ConsentPopup/dm-consent-popup";
@@ -41,6 +41,8 @@ import {
 import { DmConversationTitle } from "../../features/conversations/components/DmConversationTitle";
 import { GroupConversationTitle } from "../../features/conversations/components/GroupConversationTitle";
 import { NewConversationTitle } from "../../features/conversations/components/NewConversationTitle";
+import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
+import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
 
 const keyExtractor = (item: string) => item;
 
@@ -138,6 +140,26 @@ const DmContent = memo(function DmContent() {
 
   const { data: peerInboxId } = useDmPeerInboxId(currentAccount, topic!);
 
+  const isUnread = useConversationIsUnread({
+    topic,
+    lastMessage: messages?.ids?.length
+      ? messages.byId[messages.ids[0]]
+      : undefined,
+    timestamp: messages?.ids?.length
+      ? (messages.byId[messages.ids[0]]?.sentNs ?? 0)
+      : 0,
+  });
+  const toggleReadStatus = useToggleReadStatus({
+    topic,
+    isUnread,
+    currentAccount,
+  });
+  useMarkAsReadOnEnter({
+    messagesLoading,
+    isUnread,
+    toggleReadStatus,
+  });
+
   useDmHeader();
 
   if (conversationNotFound) {
@@ -188,6 +210,22 @@ const GroupContent = memo(function GroupContent() {
     isRefetching: isRefetchingMessages,
     refetch,
   } = useConversationMessages(currentAccount, topic!);
+
+  const isUnread = useConversationIsUnread({
+    topic,
+    lastMessage: messages?.byId[messages?.ids[0]], // Get latest message
+    timestamp: messages?.byId[messages?.ids[0]]?.sentNs ?? 0,
+  });
+  const toggleReadStatus = useToggleReadStatus({
+    topic,
+    isUnread,
+    currentAccount,
+  });
+  useMarkAsReadOnEnter({
+    messagesLoading,
+    isUnread,
+    toggleReadStatus,
+  });
 
   useGroupHeader();
 
@@ -270,6 +308,25 @@ export const KeyboardFiller = memo(function KeyboardFiller() {
 
   return <AnimatedVStack style={as} />;
 });
+
+const useMarkAsReadOnEnter = ({
+  messagesLoading,
+  isUnread,
+  toggleReadStatus,
+}: {
+  messagesLoading: boolean;
+  isUnread: boolean;
+  toggleReadStatus: () => void;
+}) => {
+  const hasMarkedAsRead = useRef(false);
+
+  useEffect(() => {
+    if (isUnread && !messagesLoading && !hasMarkedAsRead.current) {
+      toggleReadStatus();
+      hasMarkedAsRead.current = true;
+    }
+  }, [isUnread, messagesLoading, toggleReadStatus]);
+};
 
 function useNewConversationHeader() {
   const navigation = useRouter();
