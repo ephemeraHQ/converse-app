@@ -1,11 +1,21 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationMessages } from "@queries/useConversationMessages";
-import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
+import {
+  ConversationTopic,
+  ConversationVersion,
+  MessageId,
+} from "@xmtp/react-native-sdk";
 import { memo, useCallback, useEffect, useRef } from "react";
 import { FlatListProps, Platform } from "react-native";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
 import { DmConsentPopup } from "@/components/Chat/ConsentPopup/dm-consent-popup";
 import { GroupConsentPopup } from "@/components/Chat/ConsentPopup/group-consent-popup";
+import { MessageReactionsDrawer } from "@/components/Chat/Message/MessageReactions/MessageReactionsDrawer/MessageReactionsDrawer";
+import { MessageContextMenu } from "@/components/Chat/Message/message-context-menu/message-context-menu";
+import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
+import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
+import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
+import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { V3Message } from "@components/Chat/Message/V3Message";
 import { Screen } from "@components/Screen/ScreenComp/Screen";
@@ -25,6 +35,13 @@ import {
   ConversationGroupContextProvider,
   useConversationGroupContext,
 } from "@features/conversation/conversation-group-context";
+import {
+  initializeCurrentConversation,
+  useConversationCurrentTopic,
+} from "@features/conversation/conversation-service";
+import { DmConversationTitle } from "@features/conversations/components/DmConversationTitle";
+import { GroupConversationTitle } from "@features/conversations/components/GroupConversationTitle";
+import { NewConversationTitle } from "@features/conversations/components/NewConversationTitle";
 import { translate } from "@i18n/translate";
 import { useRouter } from "@navigation/useNavigation";
 import { useAppTheme } from "@theme/useAppTheme";
@@ -34,15 +51,6 @@ import Animated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  initializeCurrentConversation,
-  useConversationCurrentTopic,
-} from "../../features/conversation/conversation-service";
-import { DmConversationTitle } from "../../features/conversations/components/DmConversationTitle";
-import { GroupConversationTitle } from "../../features/conversations/components/GroupConversationTitle";
-import { NewConversationTitle } from "../../features/conversations/components/NewConversationTitle";
-import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
-import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
 
 const keyExtractor = (item: string) => item;
 
@@ -80,24 +88,29 @@ const Content = memo(function Content() {
   const conversationVersion = useConversationContext("conversationVersion");
 
   return (
-    <AnimatedVStack
-      layout={theme.animation.reanimatedSpringLayoutTransition}
-      style={{
-        flex: 1,
-      }}
-    >
-      {isNewConversation ? (
-        <NewConversationContent />
-      ) : conversationVersion === ConversationVersion.DM ? (
-        <DmContent />
-      ) : (
-        <ConversationGroupContextProvider>
-          <GroupContent />
-        </ConversationGroupContextProvider>
-      )}
-      <ComposerWrapper />
-      <KeyboardFiller />
-    </AnimatedVStack>
+    <ExternalWalletPickerContextProvider>
+      <AnimatedVStack
+        layout={theme.animation.reanimatedSpringLayoutTransition}
+        style={{
+          flex: 1,
+        }}
+      >
+        {isNewConversation ? (
+          <NewConversationContent />
+        ) : conversationVersion === ConversationVersion.DM ? (
+          <DmContent />
+        ) : (
+          <ConversationGroupContextProvider>
+            <GroupContent />
+          </ConversationGroupContextProvider>
+        )}
+        <ComposerWrapper />
+        <KeyboardFiller />
+        <MessageContextMenu />
+        <MessageReactionsDrawer />
+        <ExternalWalletPicker title="Choose a wallet" />
+      </AnimatedVStack>
+    </ExternalWalletPickerContextProvider>
   );
 });
 
@@ -115,7 +128,6 @@ const ComposerWrapper = memo(function ComposerWrapper() {
 });
 
 const NewConversationContent = memo(function NewConversationContent() {
-  const peerAddress = useConversationContext("peerAddress");
   useNewConversationHeader();
 
   return <MessagesList messageIds={[]} />;
@@ -131,6 +143,7 @@ const DmContent = memo(function DmContent() {
   const isLoadingConversationConsent = useConversationContext(
     "isLoadingConversationConsent"
   );
+
   const {
     data: messages,
     isLoading: messagesLoading,
@@ -171,9 +184,6 @@ const DmContent = memo(function DmContent() {
     // TODO: Add DM placeholder
     return null;
   }
-
-  console.log("isAllowedConversation:", isAllowedConversation);
-  console.log("isLoadingConversationConsent:", isLoadingConversationConsent);
 
   return (
     <MessagesList
@@ -237,9 +247,6 @@ const GroupContent = memo(function GroupContent() {
     return <GroupConversationEmpty />;
   }
 
-  console.log("isLoadingConversationConsent:", isLoadingConversationConsent);
-  console.log("isAllowedConversation:", isAllowedConversation);
-
   return (
     <MessagesList
       messageIds={messages?.ids ?? []}
@@ -256,12 +263,10 @@ const GroupContent = memo(function GroupContent() {
 
 export const MessagesList = memo(function MessagesList(
   props: Omit<AnimatedProps<FlatListProps<string>>, "renderItem" | "data"> & {
-    messageIds: string[];
+    messageIds: MessageId[];
   }
 ) {
   const { messageIds, ...rest } = props;
-
-  const { theme } = useAppTheme();
 
   return (
     // @ts-ignore
@@ -273,7 +278,7 @@ export const MessagesList = memo(function MessagesList(
           <V3Message
             nextMessageId={messageIds[index - 1]}
             previousMessageId={messageIds[index + 1]}
-            messageId={item}
+            messageId={item as MessageId}
           />
         );
       }}

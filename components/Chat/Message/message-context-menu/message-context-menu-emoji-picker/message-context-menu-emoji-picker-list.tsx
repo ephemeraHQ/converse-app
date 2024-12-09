@@ -15,8 +15,7 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import { EmojiRow } from "./EmojiRow";
+import { EmojiRow } from "./message-context-menu-emoji-picker-row";
 import { BottomSheetFlashList } from "@design-system/BottomSheet/BottomSheetFlashList";
 import { BottomSheetFlatList } from "@design-system/BottomSheet/BottomSheetFlatList";
 

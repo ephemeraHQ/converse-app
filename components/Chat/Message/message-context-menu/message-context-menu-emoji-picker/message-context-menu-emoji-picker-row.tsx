@@ -15,6 +15,7 @@ export const EmojiRow: FC<EmojiRowProps> = memo(({ item, onPress }) => {
     }
     return sliced;
   }, [item.emojis]);
+
   return (
     <View style={styles.rowContainer}>
       {items.map((emoji, id) => {
