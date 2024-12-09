@@ -30,7 +30,7 @@ import { getCurrentConversationMessages } from "../../../../features/conversatio
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 
 export const MessageReply = memo(function MessageReply(props: {
-  message: DecodedMessage<[ReplyCodec]>;
+  message: DecodedMessage<ReplyCodec>;
 }) {
   const { message } = props;
 
@@ -169,7 +169,7 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
 
 const MessageReplyReferenceContent = memo(
   function ReplyMessageReferenceMessageContent(props: {
-    replyMessage: DecodedMessage<[ReplyCodec]>;
+    replyMessage: DecodedMessage<ReplyCodec>;
   }) {
     const { replyMessage } = props;
 
@@ -219,7 +219,7 @@ const MessageReplyReferenceContent = memo(
   }
 );
 
-function getReplyMessageSafeText(replyMessage: DecodedMessage<[ReplyCodec]>) {
+function getReplyMessageSafeText(replyMessage: DecodedMessage<ReplyCodec>) {
   try {
     const content = replyMessage.content();
     if (typeof content === "string") {
@@ -235,12 +235,12 @@ function getReplyMessageSafeText(replyMessage: DecodedMessage<[ReplyCodec]>) {
 // Needed that in case we need to see the content of a message that is not in the chached list
 function useConversationMessageForReplyMessage(
   messageId: MessageId
-): DecodedMessage<[ReplyCodec]> | undefined {
+): DecodedMessage<ReplyCodec> | undefined {
   const currentAccount = useCurrentAccount()!;
   const messages = getCurrentConversationMessages();
 
   const cachedReplyMessage = messages?.byId[messageId] as
-    | DecodedMessage<[ReplyCodec]>
+    | DecodedMessage<ReplyCodec>
     | undefined;
 
   // Only fetch the message if it's in the list of messages of the conversation
@@ -253,7 +253,7 @@ function useConversationMessageForReplyMessage(
   });
 
   return (
-    (replyMessage as DecodedMessage<[ReplyCodec]> | undefined) ??
+    (replyMessage as DecodedMessage<ReplyCodec> | undefined) ??
     cachedReplyMessage
   );
 }
