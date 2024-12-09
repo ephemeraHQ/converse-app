@@ -1,4 +1,10 @@
 import {
+  getCurrentConversationMessages,
+  getCurrentConversationTopic,
+} from "@/features/conversation/conversation-service";
+import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
+import { useConversationMessages } from "@/queries/useConversationMessages";
+import {
   getCurrentAccount,
   useCurrentAccount,
 } from "@data/store/accountsStore";
@@ -16,11 +22,16 @@ import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-refere
 import {
   DecodedMessage,
   GroupUpdatedCodec,
+  MessageId,
   ReactionCodec,
+  ReactionContent,
   ReadReceiptCodec,
   RemoteAttachmentCodec,
+  RemoteAttachmentContent,
   ReplyCodec,
+  ReplyContent,
   StaticAttachmentCodec,
+  StaticAttachmentContent,
   TextCodec,
 } from "@xmtp/react-native-sdk";
 
@@ -109,4 +120,115 @@ export function getCurrentUserAccountInboxId() {
 }
 export function convertNanosecondsToMilliseconds(nanoseconds: number) {
   return nanoseconds / 1000000;
+}
+
+export function getMessageById(messageId: MessageId) {
+  const conversationMessages = getCurrentConversationMessages();
+  if (!conversationMessages) {
+    return null;
+  }
+  return conversationMessages.byId[messageId];
+}
+
+export function getMessageStringContent(
+  message: DecodedMessageWithCodecsType
+): string | undefined {
+  const content = message.content();
+
+  if (typeof content === "string") {
+    return content;
+  }
+
+  if (isTextMessage(message)) {
+    return message.content() as string;
+  }
+
+  if (isRemoteAttachmentMessage(message)) {
+    const content = message.content() as RemoteAttachmentContent;
+    return content.url;
+  }
+
+  if (isStaticAttachmentMessage(message)) {
+    const content = message.content() as StaticAttachmentContent;
+    return content.filename;
+  }
+
+  if (isTransactionReferenceMessage(message)) {
+    return "Transaction";
+  }
+
+  if (isReactionMessage(message)) {
+    const content = message.content() as ReactionContent;
+    return content.content || "";
+  }
+
+  if (isReplyMessage(message)) {
+    const content = message.content() as ReplyContent;
+    if (content.content.text) {
+      return content.content.text;
+    }
+
+    if (content.content.reply?.content.text) {
+      return content.content.reply.content.text;
+    }
+
+    if (content.content.attachment?.filename) {
+      return content.content.attachment.filename;
+    }
+
+    if (content.content.remoteAttachment?.url) {
+      return content.content.remoteAttachment.url;
+    }
+
+    if (content.content.groupUpdated) {
+      return "Group updated";
+    }
+
+    return "";
+  }
+
+  if (isGroupUpdatedMessage(message)) {
+    return "Group updated";
+  }
+
+  if (isCoinbasePaymentMessage(message)) {
+    return "Coinbase payment";
+  }
+
+  return "";
+}
+
+export function useConversationMessageById(messageId: MessageId) {
+  const currentAccount = useCurrentAccount()!;
+  const messages = getCurrentConversationMessages();
+
+  const cachedMessage = messages?.byId[messageId];
+
+  // Only fetch the message if it's not already in the conversation messages
+  const { data: message, isLoading: isLoadingMessage } = useQuery({
+    ...getConversationMessageQueryOptions({
+      account: currentAccount,
+      messageId,
+    }),
+    enabled: !cachedMessage,
+  });
+
+  return {
+    message: message ?? cachedMessage,
+    isLoading: !cachedMessage && isLoadingMessage,
+  };
+}
+
+export function useConversationMessageReactions(messageId: MessageId) {
+  const currentAccount = useCurrentAccount()!;
+  const topic = getCurrentConversationTopic()!;
+
+  const { data: messages } = useConversationMessages(currentAccount, topic);
+
+  // TODO: Add another fallback query to fetch single message reactions. Coming in the SDK later
+
+  return {
+    bySender: messages?.reactions[messageId]?.bySender,
+    byReactionContent: messages?.reactions[messageId]?.byReactionContent,
+  };
 }

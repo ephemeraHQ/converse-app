@@ -17,15 +17,13 @@ import {
   ReplyCodec,
   StaticAttachmentCodec,
   TextCodec,
-  DecodedMessageUnion,
 } from "@xmtp/react-native-sdk";
 import { useEffect, useRef } from "react";
-
-import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
-import { getXmtpClient } from "./sync";
+import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 import config from "../../config";
 import { getDbDirectory } from "../../data/db";
-import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
+import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
+import { getXmtpClient } from "./sync";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
