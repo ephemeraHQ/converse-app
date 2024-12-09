@@ -9,6 +9,7 @@ import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHead
 import { useRouter } from "../../navigation/useNavigation";
 import { UserProfileScreen } from "../UserProfileScreen";
 import { NativeStack } from "./Navigation";
+import { translate } from "@/i18n";
 
 export default function UserProfileNav() {
   const colorScheme = useColorScheme();
@@ -19,7 +20,7 @@ export default function UserProfileNav() {
       name="UserProfile"
       component={UserProfileScreen}
       options={{
-        headerTitle: "Modify profile",
+        headerTitle: translate("profile.modify_profile"),
         headerTitleStyle: headerTitleStyle(colorScheme),
         headerLeft: () => (
           <ScreenHeaderModalCloseButton
