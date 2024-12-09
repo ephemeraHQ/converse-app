@@ -34,7 +34,7 @@ const fetchProfileSocials = async (peerAddress: string) => {
   return data;
 };
 
-const profileSocialesQueryConfig = (account: string, peerAddress: string) => ({
+const profileSocialsQueryConfig = (account: string, peerAddress: string) => ({
   queryKey: profileSocialsQueryKey(account, peerAddress),
   queryFn: () => fetchProfileSocials(peerAddress),
   enabled: !!account,
@@ -52,7 +52,7 @@ export const useProfileSocialsQuery = (
   account: string,
   peerAddress: string
 ) => {
-  return useQuery(profileSocialesQueryConfig(account, peerAddress));
+  return useQuery(profileSocialsQueryConfig(account, peerAddress));
 };
 
 export const useProfileSocialsQueries = (
@@ -61,7 +61,7 @@ export const useProfileSocialsQueries = (
 ) => {
   return useQueries({
     queries: peerAddresses.map((peerAddress) =>
-      profileSocialesQueryConfig(account, peerAddress)
+      profileSocialsQueryConfig(account, peerAddress)
     ),
   });
 };
@@ -71,7 +71,7 @@ export const fetchProfileSocialsQuery = (
   peerAddress: string
 ) => {
   return queryClient.fetchQuery<ProfileSocialsData>(
-    profileSocialesQueryConfig(account, peerAddress)
+    profileSocialsQueryConfig(account, peerAddress)
   );
 };
 
@@ -95,6 +95,6 @@ export const getProfileSocialsQueryData = (
   peerAddress: string
 ) => {
   return queryClient.getQueryData<ProfileSocialsData>(
-    profileSocialesQueryConfig(account, peerAddress).queryKey
+    profileSocialsQueryConfig(account, peerAddress).queryKey
   );
 };
