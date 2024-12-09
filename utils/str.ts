@@ -6,6 +6,7 @@ import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
 import { ProfilesStoreType } from "../data/store/profilesStore";
 import { getProfile } from "./profile/getProfile";
 import { getPreferredName } from "./profile/getPreferredName";
+import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 
 const { humanize } = require("../vendor/humanhash");
 
@@ -59,11 +60,8 @@ export const getTitleFontScale = (): number => {
 export type TextInputWithValue = TextInput & { currentValue: string };
 
 export const getReadableProfile = (account: string, address: string) => {
-  const socials = getProfile(
-    address,
-    getProfilesStore(account).getState().profiles
-  )?.socials;
-  return getPreferredName(socials, address);
+  const socials = getProfileSocialsQueryData(account, address);
+  return getPreferredName(socials ?? {}, address);
 };
 
 export const useAccountsProfiles = () => {

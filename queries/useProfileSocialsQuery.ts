@@ -9,6 +9,8 @@ import {
 
 import { queryClient } from "./queryClient";
 
+type ProfileSocialsData = ProfileSocials | null | undefined;
+
 const profileSocialsQueryKey = (account: string, peerAddress: string) => [
   "profileSocials",
   account,
@@ -68,7 +70,7 @@ export const fetchProfileSocialsQuery = (
   account: string,
   peerAddress: string
 ) => {
-  return queryClient.fetchQuery(
+  return queryClient.fetchQuery<ProfileSocialsData>(
     profileSocialesQueryConfig(account, peerAddress)
   );
 };
@@ -79,11 +81,20 @@ export const setProfileSocialsQueryData = (
   data: ProfileSocials,
   updatedAt?: number
 ) => {
-  return queryClient.setQueryData(
+  return queryClient.setQueryData<ProfileSocialsData>(
     profileSocialsQueryKey(account, peerAddress),
     data,
     {
       updatedAt,
     }
+  );
+};
+
+export const getProfileSocialsQueryData = (
+  account: string,
+  peerAddress: string
+) => {
+  return queryClient.getQueryData<ProfileSocialsData>(
+    profileSocialesQueryConfig(account, peerAddress).queryKey
   );
 };
