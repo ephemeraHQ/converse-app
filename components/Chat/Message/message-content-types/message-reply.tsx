@@ -19,9 +19,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useAppTheme } from "@theme/useAppTheme";
 import { sentryTrackError } from "@utils/sentry";
 import { getReadableProfile } from "@utils/str";
-import { DecodedMessage, MessageId, ReplyCodec } from "@xmtp/react-native-sdk";
+import {
+  DecodedMessage,
+  InboxId,
+  MessageId,
+  ReplyCodec,
+} from "@xmtp/react-native-sdk";
 import { memo } from "react";
 import { getCurrentConversationMessages } from "../../../../features/conversation/conversation-service";
+import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 
 export const MessageReply = memo(function MessageReply(props: {
   message: DecodedMessage<[ReplyCodec]>;
@@ -116,9 +122,9 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
   const replyMessageReference =
     useConversationMessageForReplyMessage(referenceMessageId);
 
-  const readableProfile = replyMessageReference
-    ? getReadableProfile(currentAccount, replyMessageReference.senderAddress)
-    : null;
+  const inboxName = usePreferredInboxName(
+    replyMessageReference?.senderAddress as InboxId
+  );
 
   return (
     <VStack
@@ -151,7 +157,7 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
           }
         />
         <Text preset="smaller" color="secondary" inverted={fromMe}>
-          {readableProfile}
+          {inboxName}
         </Text>
       </HStack>
       {!!replyMessageReference && (
