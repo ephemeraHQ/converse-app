@@ -5,15 +5,8 @@ import { useColorScheme } from "react-native";
 
 import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import {
-  getSchemedURLFromUniversalURL,
-  navigateToTopic,
-  setTopicToNavigateTo,
-  topicToNavigateTo,
-  // topicToNavigateTo,
-} from "../../utils/navigation";
+import { getSchemedURLFromUniversalURL } from "../../utils/navigation";
 import { hideSplashScreen } from "../../utils/splash/splash";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import logger from "@utils/logger";
 
 const isDevelopmentClientURL = (url: string) => {
