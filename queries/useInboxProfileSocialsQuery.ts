@@ -9,6 +9,7 @@ import {
 
 import { queryClient } from "./queryClient";
 import { InboxId } from "@xmtp/react-native-sdk";
+import { reactQueryPersister } from "@/utils/mmkv";
 
 const profileSocialsQueryKey = (account: string, peerAddress: string) => [
   "inboxProfileSocials",
@@ -48,6 +49,7 @@ const inboxProfileSocialsQueryConfig = (
   // And automatic retries if there was an error fetching
   refetchOnMount: false,
   staleTime: 1000 * 60 * 60 * 24,
+  persister: reactQueryPersister,
 });
 
 export const useInboxProfileSocialsQuery = (
