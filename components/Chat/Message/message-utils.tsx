@@ -1,6 +1,7 @@
 import {
   getCurrentConversationMessages,
   getCurrentConversationTopic,
+  useConversationCurrentTopic,
 } from "@/features/conversation/conversation-service";
 import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
 import { useConversationMessages } from "@/queries/useConversationMessages";
@@ -221,7 +222,7 @@ export function useConversationMessageById(messageId: MessageId) {
 
 export function useConversationMessageReactions(messageId: MessageId) {
   const currentAccount = useCurrentAccount()!;
-  const topic = getCurrentConversationTopic()!;
+  const topic = useConversationCurrentTopic();
 
   const { data: messages } = useConversationMessages(currentAccount, topic);
 
