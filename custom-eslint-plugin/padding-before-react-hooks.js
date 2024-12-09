@@ -53,6 +53,15 @@ module.exports = {
           return;
         }
 
+        // Check if there's a comment immediately before the hook
+        const commentBefore = sourceCode.getCommentsBefore(node);
+        if (commentBefore.length > 0) {
+          const lastComment = commentBefore[commentBefore.length - 1];
+          if (node.loc.start.line - lastComment.loc.end.line === 1) {
+            return;
+          }
+        }
+
         const linesBetween = node.loc.start.line - tokenBefore.loc.end.line - 1;
 
         if (linesBetween === 0) {

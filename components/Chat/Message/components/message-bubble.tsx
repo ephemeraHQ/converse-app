@@ -13,7 +13,6 @@ export const BubbleContainer = ({
     <HStack
       style={{
         // ...debugBorder("red"),
-        flex: 1,
         ...(fromMe
           ? { justifyContent: "flex-end" }
           : { justifyContent: "flex-start" }),
