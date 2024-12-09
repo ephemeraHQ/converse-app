@@ -25,6 +25,7 @@ import { sentryTrackError } from "@utils/sentry";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import {
   DecodedMessage,
+  InboxId,
   MessageId,
   RemoteAttachmentCodec,
   RemoteAttachmentContent,
@@ -64,6 +65,7 @@ import {
 } from "../conversation-service";
 import { AddAttachmentButton } from "./add-attachment-button";
 import { ISendMessageParams } from "@/features/conversation/conversation-context";
+import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 
 export type IComposerSendArgs = ISendMessageParams;
 
@@ -230,15 +232,15 @@ const ReplyPreview = memo(function ReplyPreview() {
     ? getConversationMessages(currentAccount, topic!)?.byId[replyingToMessageId]
     : undefined;
 
-  const readableProfile = replyMessage
-    ? getReadableProfile(currentAccount, replyMessage?.senderAddress)
-    : null;
+  const inboxName = usePreferredInboxName(
+    replyMessage?.senderAddress as InboxId
+  );
 
   const replyingTo = replyMessage
     ? replyMessage.senderAddress === currentAccountInboxId
       ? `Replying to you`
-      : readableProfile
-        ? `Replying to ${readableProfile}`
+      : inboxName
+        ? `Replying to ${inboxName}`
         : "Replying"
     : "";
 
@@ -350,7 +352,7 @@ export const ReplyPreviewEndContent = memo(
     const { theme } = useAppTheme();
 
     if (isReplyMessage(replyMessage)) {
-      const replyTyped = replyMessage as DecodedMessage<[ReplyCodec]>;
+      const replyTyped = replyMessage as DecodedMessage<ReplyCodec>;
 
       const content = replyTyped.content();
 
@@ -376,9 +378,8 @@ export const ReplyPreviewEndContent = memo(
     }
 
     if (isRemoteAttachmentMessage(replyMessage)) {
-      const messageTyped = replyMessage as DecodedMessage<
-        [RemoteAttachmentCodec]
-      >;
+      const messageTyped =
+        replyMessage as DecodedMessage<RemoteAttachmentCodec>;
 
       const content = messageTyped.content();
 
@@ -417,9 +418,8 @@ const ReplyPreviewMessageContent = memo(
     const clearedMessage = messageText?.replace(/(\n)/gm, " ");
 
     if (isStaticAttachmentMessage(replyMessage)) {
-      const messageTyped = replyMessage as DecodedMessage<
-        [StaticAttachmentCodec]
-      >;
+      const messageTyped =
+        replyMessage as DecodedMessage<StaticAttachmentCodec>;
 
       const content = messageTyped.content();
 
@@ -456,7 +456,7 @@ const ReplyPreviewMessageContent = memo(
     }
 
     if (isReplyMessage(replyMessage)) {
-      const messageTyped = replyMessage as DecodedMessage<[ReplyCodec]>;
+      const messageTyped = replyMessage as DecodedMessage<ReplyCodec>;
       const content = messageTyped.content();
 
       if (typeof content === "string") {

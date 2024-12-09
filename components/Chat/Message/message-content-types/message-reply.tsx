@@ -19,12 +19,18 @@ import { useQuery } from "@tanstack/react-query";
 import { useAppTheme } from "@theme/useAppTheme";
 import { sentryTrackError } from "@utils/sentry";
 import { getReadableProfile } from "@utils/str";
-import { DecodedMessage, MessageId, ReplyCodec } from "@xmtp/react-native-sdk";
+import {
+  DecodedMessage,
+  InboxId,
+  MessageId,
+  ReplyCodec,
+} from "@xmtp/react-native-sdk";
 import { memo } from "react";
 import { getCurrentConversationMessages } from "../../../../features/conversation/conversation-service";
+import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 
 export const MessageReply = memo(function MessageReply(props: {
-  message: DecodedMessage<[ReplyCodec]>;
+  message: DecodedMessage<ReplyCodec>;
 }) {
   const { message } = props;
 
@@ -116,9 +122,9 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
   const replyMessageReference =
     useConversationMessageForReplyMessage(referenceMessageId);
 
-  const readableProfile = replyMessageReference
-    ? getReadableProfile(currentAccount, replyMessageReference.senderAddress)
-    : null;
+  const inboxName = usePreferredInboxName(
+    replyMessageReference?.senderAddress as InboxId
+  );
 
   return (
     <VStack
@@ -151,7 +157,7 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
           }
         />
         <Text preset="smaller" color="secondary" inverted={fromMe}>
-          {readableProfile}
+          {inboxName}
         </Text>
       </HStack>
       {!!replyMessageReference && (
@@ -163,7 +169,7 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
 
 const MessageReplyReferenceContent = memo(
   function ReplyMessageReferenceMessageContent(props: {
-    replyMessage: DecodedMessage<[ReplyCodec]>;
+    replyMessage: DecodedMessage<ReplyCodec>;
   }) {
     const { replyMessage } = props;
 
@@ -213,7 +219,7 @@ const MessageReplyReferenceContent = memo(
   }
 );
 
-function getReplyMessageSafeText(replyMessage: DecodedMessage<[ReplyCodec]>) {
+function getReplyMessageSafeText(replyMessage: DecodedMessage<ReplyCodec>) {
   try {
     const content = replyMessage.content();
     if (typeof content === "string") {
@@ -229,12 +235,12 @@ function getReplyMessageSafeText(replyMessage: DecodedMessage<[ReplyCodec]>) {
 // Needed that in case we need to see the content of a message that is not in the chached list
 function useConversationMessageForReplyMessage(
   messageId: MessageId
-): DecodedMessage<[ReplyCodec]> | undefined {
+): DecodedMessage<ReplyCodec> | undefined {
   const currentAccount = useCurrentAccount()!;
   const messages = getCurrentConversationMessages();
 
   const cachedReplyMessage = messages?.byId[messageId] as
-    | DecodedMessage<[ReplyCodec]>
+    | DecodedMessage<ReplyCodec>
     | undefined;
 
   // Only fetch the message if it's in the list of messages of the conversation
@@ -247,7 +253,7 @@ function useConversationMessageForReplyMessage(
   });
 
   return (
-    (replyMessage as DecodedMessage<[ReplyCodec]> | undefined) ??
+    (replyMessage as DecodedMessage<ReplyCodec> | undefined) ??
     cachedReplyMessage
   );
 }

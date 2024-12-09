@@ -52,7 +52,6 @@ export const PinnedV3GroupConversation = ({
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: group.lastMessage,
-    conversation: group,
     timestamp,
   });
 
@@ -127,7 +126,8 @@ export const PinnedV3GroupConversation = ({
 
   const title = group?.name;
 
-  const displayMessagePreview = isTextMessage(group.lastMessage) && isUnread;
+  const displayMessagePreview =
+    group.lastMessage && isTextMessage(group.lastMessage) && isUnread;
 
   const avatarComponent = useMemo(() => {
     if (group?.imageUrlSquare) {

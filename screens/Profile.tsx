@@ -299,7 +299,7 @@ function ProfileScreenImpl() {
   const balanceItems: TableViewItemType[] = [
     {
       id: "balance",
-      title: "Your balance (USDC)",
+      title: translate("your_balance_usdc"),
       rightView: (
         <View style={styles.balanceContainer}>
           <Text style={styles.balance}>
@@ -329,7 +329,7 @@ function ProfileScreenImpl() {
   if (isPrivy) {
     balanceItems.push({
       id: "topUp",
-      title: "Top up your account",
+      title: translate("top_up_your_account"),
       action: () => {
         navigation.push("TopUp");
       },
@@ -520,13 +520,16 @@ function ProfileScreenImpl() {
     if (currentAccountIsSuperAdmin && !peerIsSuperAdmin) {
       items.unshift({
         id: "promoteToSuperAdmin",
-        title: "Promote to super admin",
+        title: translate("promote_to_super_admin"),
         titleColor:
           Platform.OS === "android" ? undefined : primaryColor(colorScheme),
         action: () => {
           showActionSheetWithOptions(
             {
-              options: ["Promote to Super Admin", "Cancel"],
+              options: [
+                translate("promote_to_super_admin"),
+                translate("cancel"),
+              ],
               cancelButtonIndex: 1,
               destructiveButtonIndex: undefined,
               title: translate("are_you_sure"),
@@ -544,13 +547,13 @@ function ProfileScreenImpl() {
     if (currentAccountIsSuperAdmin && peerIsSuperAdmin) {
       items.push({
         id: "revokeSuperAdmin",
-        title: "Revoke super admin",
+        title: translate("revoke_super_admin"),
         titleColor:
           Platform.OS === "android" ? undefined : dangerColor(colorScheme),
         action: () => {
           showActionSheetWithOptions(
             {
-              options: ["Revoke Super Admin", "Cancel"],
+              options: [translate("revoke_super_admin"), translate("cancel")],
               cancelButtonIndex: 1,
               destructiveButtonIndex: 0,
               title: translate("are_you_sure"),
@@ -576,13 +579,13 @@ function ProfileScreenImpl() {
     ) {
       items.push({
         id: "revokeAdmin",
-        title: "Revoke admin",
+        title: translate("revoke_admin"),
         titleColor:
           Platform.OS === "android" ? undefined : dangerColor(colorScheme),
         action: () => {
           showActionSheetWithOptions(
             {
-              options: ["Revoke Admin", "Cancel"],
+              options: [translate("revoke_admin"), translate("cancel")],
               cancelButtonIndex: 1,
               destructiveButtonIndex: 0,
               title: translate("are_you_sure"),
@@ -645,7 +648,7 @@ function ProfileScreenImpl() {
           items={[
             {
               id: "qrCode",
-              title: "Invite more friends",
+              title: translate("invite_more_friends"),
               rightView: (
                 <TableViewPicto
                   symbol="qrcode"
@@ -839,7 +842,7 @@ function ProfileScreenImpl() {
               },
               {
                 id: "delete",
-                title: "Disconnect this account",
+                title: translate("disconnect_this_account"),
                 titleColor:
                   Platform.OS === "android"
                     ? undefined
