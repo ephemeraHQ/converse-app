@@ -1,4 +1,4 @@
-import { GC_TIME } from "@queries/queryClient";
+import { GC_TIME } from "@queries/queryClient.constants";
 import { experimental_createPersister } from "@tanstack/react-query-persist-client";
 import { parse, stringify } from "flatted";
 import { MMKV } from "react-native-mmkv";
