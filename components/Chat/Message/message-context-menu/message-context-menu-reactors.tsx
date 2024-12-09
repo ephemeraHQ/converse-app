@@ -50,7 +50,9 @@ export const MessageContextMenuReactors: FC<
         if (!reactionMap[getReactionContent(reaction)]) {
           reactionMap[getReactionContent(reaction)] = [];
         }
-        reactionMap[getReactionContent(reaction)].push(reactorAddress);
+        reactionMap[getReactionContent(reaction)].push(
+          reactorAddress as InboxId
+        );
       }
     });
     return Object.entries(reactionMap);

@@ -1,16 +1,11 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useConversationMessages } from "@queries/useConversationMessages";
-<<<<<<< HEAD
-import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
-import { memo, useCallback, useEffect, useRef } from "react";
-=======
 import {
   ConversationTopic,
   ConversationVersion,
   MessageId,
 } from "@xmtp/react-native-sdk";
-import { memo, useCallback, useEffect } from "react";
->>>>>>> c9e3a161 (message context menu fix + reactions)
+import { memo, useCallback, useEffect, useRef } from "react";
 import { FlatListProps, Platform } from "react-native";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
 import { DmConsentPopup } from "@/components/Chat/ConsentPopup/dm-consent-popup";
@@ -19,6 +14,8 @@ import { MessageReactionsDrawer } from "@/components/Chat/Message/MessageReactio
 import { MessageContextMenu } from "@/components/Chat/Message/message-context-menu/message-context-menu";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
+import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
+import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { V3Message } from "@components/Chat/Message/V3Message";
 import { Screen } from "@components/Screen/ScreenComp/Screen";
@@ -54,18 +51,6 @@ import Animated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-<<<<<<< HEAD
-import {
-  initializeCurrentConversation,
-  useConversationCurrentTopic,
-} from "../../features/conversation/conversation-service";
-import { DmConversationTitle } from "../../features/conversations/components/DmConversationTitle";
-import { GroupConversationTitle } from "../../features/conversations/components/GroupConversationTitle";
-import { NewConversationTitle } from "../../features/conversations/components/NewConversationTitle";
-import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
-import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
-=======
->>>>>>> c9e3a161 (message context menu fix + reactions)
 
 const keyExtractor = (item: string) => item;
 
