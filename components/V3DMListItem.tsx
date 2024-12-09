@@ -69,7 +69,6 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: conversation.lastMessage,
-    conversation: conversation,
     timestamp,
   });
 
