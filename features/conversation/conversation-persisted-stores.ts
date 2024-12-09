@@ -6,8 +6,7 @@ import {
   persist,
   subscribeWithSelector,
 } from "zustand/middleware";
-import { Nullable } from "../../types/general";
-import { useConversationStore } from "./conversation-store";
+import { Nullable } from "@/types/general";
 
 export type IComposerMediaPreviewStatus =
   | "picked"
@@ -60,15 +59,18 @@ const creatConversationStore = (name: string) =>
     )
   );
 
-const newConversationStore = creatConversationStore("new_conversation");
+// const newConversationStore = creatConversationStore("new_conversation");
 
 // Custom persistence logic
 // Factory function to create a store for each conversation with persistence
-const createConversationPersistedStore = (conversationTopic: string) =>
-  creatConversationStore(`conversation_${conversationTopic}`);
+const createConversationPersistedStore = (
+  conversationTopic: ConversationTopic
+) => creatConversationStore(`conversation_${conversationTopic}`);
 
 // Hook to get or create the store for a conversation
-export const getConversationPersistedStore = (conversationTopic: string) => {
+export const getConversationPersistedStore = (
+  conversationTopic: ConversationTopic
+) => {
   if (!conversationPersistedStores.has(conversationTopic)) {
     conversationPersistedStores.set(
       conversationTopic,
@@ -78,33 +80,23 @@ export const getConversationPersistedStore = (conversationTopic: string) => {
   return conversationPersistedStores.get(conversationTopic)!;
 };
 
-export function useConversationPersistedStore(topic: string) {
-  if (!topic) {
-    return newConversationStore;
-  }
+export function useConversationPersistedStore(topic: ConversationTopic) {
   return getConversationPersistedStore(topic);
 }
 
 export function useConversationPersistedStoreState<T>(
-  conversationTopic: ConversationTopic | null,
+  conversationTopic: ConversationTopic,
   selector: (state: IConversationPersistedStore) => T
 ) {
-  const store = conversationTopic
-    ? getConversationPersistedStore(conversationTopic)
-    : newConversationStore;
+  const store = getConversationPersistedStore(conversationTopic);
   return useStore(store, selector);
 }
 
-// Maybe put somewhere else
 export function getCurrentConversationPersistedStore() {
   const topic = useConversationStore.getState().topic;
-  if (!topic) {
-    return newConversationStore;
-  }
   return getConversationPersistedStore(topic);
 }
 
-// Maybe put somewhere else
 export function useCurrentConversationPersistedStoreState<T>(
   selector: (state: IConversationPersistedStore) => T
 ) {

@@ -23,7 +23,6 @@ const ConversationHoc = ({
       <V3ConversationFromPeer
         peer={route.params.mainConversationWithPeer}
         textPrefill={route.params.text}
-        skipLoading={route.params.skipLoading ?? true}
       />
     );
   }

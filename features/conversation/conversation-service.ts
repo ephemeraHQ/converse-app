@@ -19,7 +19,11 @@ import {
   getCurrentConversationPersistedStore,
   useCurrentConversationPersistedStoreState,
 } from "./conversation-persisted-stores";
-import { IConversationStore, useConversationStore } from "./conversation-store";
+import {
+  IConversationStore,
+  useConversationStore,
+  useConversationStoreContext,
+} from "./conversation-store";
 import logger from "@/utils/logger";
 
 export function initializeCurrentConversation(args: {
@@ -197,16 +201,12 @@ export function getCurrentConversationReplyToMessageId() {
 }
 
 export function useConversationCurrentTopic() {
-  return useConversationStore((state) => state.topic);
+  return useConversationStoreContext((state) => state.topic);
 }
 
-export function useConversationCurrentPeerAddress() {
-  return useConversationStore((state) => state.peerAddress);
-}
-
-export function getCurrentConversationTopic() {
-  return useConversationStore.getState().topic;
-}
+// export function getCurrentConversationTopic() {
+//   return useConversationStore.getState().topic;
+// }
 
 export function useConversationComposerMediaPreview() {
   return useCurrentConversationPersistedStoreState(
