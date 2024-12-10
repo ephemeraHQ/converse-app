@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, TextInput } from "react-native";
 
-import logger from "./logger";
-import { getProfilesStore, useAccountsList } from "../data/store/accountsStore";
-import { ProfilesStoreType } from "../data/store/profilesStore";
-import { getProfile } from "./profile/getProfile";
+import { useAccountsList } from "../data/store/accountsStore";
 import { getPreferredName } from "./profile/getPreferredName";
 import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
+import { usePreferredNames } from "@/hooks/usePreferredNames";
 
 const { humanize } = require("../vendor/humanhash");
 
@@ -66,40 +64,10 @@ export const getReadableProfile = (account: string, address: string) => {
 
 export const useAccountsProfiles = () => {
   const accounts = useAccountsList();
-  const [accountsProfiles, setAccountsProfiles] = useState<{
-    [account: string]: string;
-  }>({});
 
-  const handleAccount = useCallback(
-    (account: string, state: ProfilesStoreType) => {
-      const socials = getProfile(account, state.profiles)?.socials;
-      const readableProfile = getPreferredName(socials, account);
+  const accountNames = usePreferredNames(accounts);
 
-      if (accountsProfiles[account] !== readableProfile) {
-        setAccountsProfiles((s) => ({
-          ...s,
-          [account]: readableProfile,
-        }));
-      }
-    },
-    [accountsProfiles]
-  );
-
-  useEffect(() => {
-    accounts.forEach((account) => {
-      try {
-        const currentState = getProfilesStore(account).getState();
-        handleAccount(account, currentState);
-        getProfilesStore(account).subscribe((state) => {
-          handleAccount(account, state);
-        });
-      } catch (e) {
-        logger.error(e);
-      }
-    });
-  }, [accounts, handleAccount]);
-
-  return accountsProfiles;
+  return accountNames;
 };
 
 export const strByteSize = (str: string) => new Blob([str]).size;
