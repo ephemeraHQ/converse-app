@@ -14,13 +14,15 @@ import {
   DmWithCodecsType,
 } from "./client";
 import { getXmtpClient } from "./sync";
+import { addConversationToConversationListQuery } from "@/queries/useV3ConversationListQuery";
 
 export const streamConversations = async (account: string) => {
   await stopStreamingConversations(account);
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   await client.conversations.stream(async (conversation) => {
     logger.info("[XMTPRN Conversations] GOT A NEW CONVO");
-    // handleNewConversation(client, conversation);
+
+    addConversationToConversationListQuery(account, conversation);
   });
   logger.info("STREAMING CONVOS");
 };
