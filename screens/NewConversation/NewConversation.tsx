@@ -98,7 +98,11 @@ export default function NewConversation({
     navigation.setOptions({
       headerLeft: () =>
         Platform.OS === "ios" ? (
-          <Button variant="text" text="Cancel" onPress={handleBack} />
+          <Button
+            variant="text"
+            text={translate("cancel")}
+            onPress={handleBack}
+          />
         ) : (
           <AndroidBackAction navigation={navigation} />
         ),
@@ -345,7 +349,7 @@ export default function NewConversation({
           <Button
             variant="text"
             picto="person.2"
-            text="New group"
+            text={translate("new_group.title")}
             style={styles.newGroupButton}
             onPress={() => {
               setGroup({ enabled: true, members: [] });
