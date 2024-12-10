@@ -26,7 +26,10 @@ export function isContentType(args: {
   return contentType.startsWith(prefix);
 }
 
-export function getMessageContentType(contentType: string) {
+export function getMessageContentType(contentType: string | undefined) {
+  if (!contentType) {
+    return undefined;
+  }
   return ObjectTyped.keys(contentTypesPrefixes).find((key) =>
     contentType.startsWith(contentTypesPrefixes[key])
   );
