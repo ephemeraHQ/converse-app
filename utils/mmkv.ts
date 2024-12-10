@@ -1,4 +1,3 @@
-import { GC_TIME } from "@queries/queryClient";
 import { experimental_createPersister } from "@tanstack/react-query-persist-client";
 import { parse, stringify } from "flatted";
 import { MMKV } from "react-native-mmkv";
@@ -6,23 +5,24 @@ import { StateStorage } from "zustand/middleware";
 
 import { getAccountEncryptionKey } from "./keychain/helpers";
 import logger from "./logger";
+import { GC_TIME } from "@/queries/queryClient.constants";
 
 const storage = new MMKV();
 
 export default storage;
 
 export const zustandMMKVStorage: StateStorage = {
-  setItem: (name, value) => {
+  setItem(name, value) {
     // Deleting before setting to avoid memory leak
     // https://github.com/mrousavy/react-native-mmkv/issues/440
     storage.delete(name);
     return storage.set(name, value);
   },
-  getItem: (name) => {
+  getItem(name) {
     const value = storage.getString(name);
     return value ?? null;
   },
-  removeItem: (name) => {
+  removeItem(name) {
     return storage.delete(name);
   },
 };

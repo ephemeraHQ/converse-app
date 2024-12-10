@@ -16,12 +16,12 @@ import { deleteAccountEncryptionKey, deleteXmtpKey } from "../keychain/helpers";
 import mmkv, { clearSecureMmkvForAccount, secureMmkvByAccount } from "../mmkv";
 
 import { useDisconnectFromPrivy } from "./privy";
-import { getXmtpApiHeaders } from "../xmtpRN/api";
 import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
 import { unsubscribeFromNotifications } from "@features/notifications/utils/unsubscribeFromNotifications";
 import { deleteSubscribedTopics } from "@features/notifications/utils/deleteSubscribedTopics";
 import { lastNotifSubscribeByAccount } from "@features/notifications/utils/lastNotifSubscribeByAccount";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
+import { getXmtpApiHeaders } from "@utils/api";
 
 type LogoutTasks = {
   [account: string]: {
@@ -106,7 +106,6 @@ export const executeLogoutTasks = async () => {
         `[Logout] Executing logout task for ${account} (${task.topics.length} topics)`
       );
       // await deleteXmtpDatabaseEncryptionKey(account);
-      await clearSecureMmkvForAccount(account);
       await deleteXmtpKey(account);
       await deleteAccountEncryptionKey(account);
       if (task.pkPath) {
@@ -115,7 +114,11 @@ export const executeLogoutTasks = async () => {
       assertNotLogged(account);
       assertNotLogged(account);
       if (task.apiHeaders) {
+        // This seems wrong, if the request fails then the user is still subscribed to pushes
+        // We should probably check if the request failed and then retry
+        // Pick this up with account refactoring
         unsubscribeFromNotifications(task.apiHeaders);
+        await clearSecureMmkvForAccount(account);
       }
       removeLogoutTask(account);
     } catch (e: any) {
