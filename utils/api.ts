@@ -68,12 +68,6 @@ api.interceptors.response.use(
       }
       const secureMmkv = await getSecureMmkvForAccount(account);
       const refreshToken = secureMmkv.getString(CONVERSE_REFRESH_TOKEN_KEY);
-      logger.info(`here111 Checking refresh token for account ${account}`, {
-        status: error.response?.status,
-        refreshToken,
-        retry: req._retry,
-        isReq: !!req,
-      });
       if (
         error.response?.status === 401 &&
         req &&
@@ -83,7 +77,6 @@ api.interceptors.response.use(
         refreshToken
       ) {
         try {
-          logger.info(`here222 Rotating access token for account ${account}`);
           const { accessToken } = await rotateAccessToken(
             account,
             refreshToken
@@ -135,7 +128,7 @@ export async function fetchAccessToken({
   appCheckToken,
 }: AuthParams): Promise<AuthResponse> {
   logger.info("Creating access token");
-  const { data } = await dedupedFetch("/api/authenticate", () =>
+  const { data } = await dedupedFetch("/api/authenticate" + inboxId, () =>
     api.post<AuthResponse>("/api/authenticate", {
       inboxId,
       installationKeySignature,
