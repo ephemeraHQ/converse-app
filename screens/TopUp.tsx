@@ -41,7 +41,7 @@ export default function TopUp({
       headerLeft: () =>
         Platform.OS === "ios" ? (
           <ConverseButton
-            title="Cancel"
+            title={translate("cancel")}
             onPress={() => {
               navigation.goBack();
             }}

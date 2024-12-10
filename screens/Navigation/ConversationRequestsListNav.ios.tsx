@@ -104,7 +104,7 @@ export default function ConversationRequestsListNav() {
               <Text style={styles.headerText}>{translate("clearing")}</Text>
             </View>
           )
-        : "Message requests",
+        : translate("message_requests"),
       headerLeft: undefined,
       headerRight: () =>
         clearingAll ? undefined : (
