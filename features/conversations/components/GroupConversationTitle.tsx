@@ -15,8 +15,9 @@ import { useConversationTitleLongPress } from "../hooks/useConversationTitleLong
 import { useGroupMembersAvatarData } from "../hooks/useGroupMembersAvatarData";
 import { ConversationTitleDumb } from "@components/Conversation/ConversationTitleDumb";
 import { Text } from "@/design-system/Text";
-import { translate } from "@/i18n";
+import { translate } from "@i18n";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
+import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 
 type GroupConversationTitleProps = {
   topic: ConversationTopic;
@@ -63,6 +64,8 @@ export const GroupConversationTitle = memo(
       navigation,
     });
 
+    const requestsCount = useGroupPendingRequests(topic).length;
+
     const displayAvatar = !groupPhotoLoading && !groupNameLoading;
 
     const avatarComponent = useMemo(() => {
@@ -81,6 +84,12 @@ export const GroupConversationTitle = memo(
       );
     }, [groupPhoto, memberData, themed]);
 
+    const memberText =
+      members?.ids.length === 1
+        ? translate("member_count", { count: members?.ids.length })
+        : translate("members_count", { count: members?.ids.length });
+    const displayMemberText = members?.ids.length;
+
     if (!displayAvatar) return null;
 
     return (
@@ -89,9 +98,19 @@ export const GroupConversationTitle = memo(
         onLongPress={onLongPress}
         onPress={onPress}
         subtitle={
-          <Text preset="formLabel">
-            {translate("members_count", { count: members?.ids.length })}
-          </Text>
+          displayMemberText && (
+            <Text preset="formLabel">
+              {memberText}
+              {requestsCount > 0 && (
+                <>
+                  {" • "}
+                  <Text preset="formLabel" color="action">
+                    {translate("pending_count", { count: requestsCount })}
+                  </Text>
+                </>
+              )}
+            </Text>
+          )
         }
         avatarComponent={avatarComponent}
       />

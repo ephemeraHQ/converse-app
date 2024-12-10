@@ -183,8 +183,10 @@ export const fr = {
   converse_match_maker: "Converse Match Maker",
   today: "Aujourd'hui",
   yesterday: "Hier",
+  member_count: "{{count}} membre",
   members_count: "{{count}} membres",
   modify: "Modifier",
+  pending_count: "{{count}} en attente",
 
   // Requests
   requests: "Demandes",

@@ -181,8 +181,10 @@ export const en = {
   converse_match_maker: "Converse Match Maker",
   today: "Today",
   yesterday: "Yesterday",
+  member_count: "{{count}} member",
   members_count: "{{count}} members",
   modify: "Modify",
+  pending_count: "{{count}} pending",
 
   // Requests
   requests: "Requests",
