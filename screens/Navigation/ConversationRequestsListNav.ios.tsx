@@ -33,7 +33,8 @@ export default function ConversationRequestsListNav() {
   const [clearingAll, setClearingAll] = useState(false);
 
   const [selectedSegment, setSelectedSegment] = useState(0);
-  const { likelySpam, likelyNotSpam } = useRequestItems();
+  const { likelySpam, likelyNotSpam, isRefetching, refetch } =
+    useRequestItems();
 
   const styles = useStyles();
 
@@ -171,7 +172,12 @@ export default function ConversationRequestsListNav() {
             {translate("hidden_requests_warn")}
           </Text>
         )}
-        <ConversationFlashList {...navigationProps} items={itemsToShow} />
+        <ConversationFlashList
+          {...navigationProps}
+          isRefetching={isRefetching}
+          refetch={refetch}
+          items={itemsToShow}
+        />
       </>
     );
   };
