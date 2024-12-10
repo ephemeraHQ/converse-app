@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 import { ScreenHeaderButton } from "./ScreenHeaderButton/ScreenHeaderButton";
 import { IScreenHeaderButtonProps } from "./ScreenHeaderButton/ScreenHeaderButton.props";
 import { Optional } from "../../types/general";
+import { translate } from "@/i18n";
 
 export type IScreenHeaderModalCloseButtonProps = Optional<
   IScreenHeaderButtonProps,
@@ -21,8 +22,8 @@ export const ScreenHeaderModalCloseButton = memo(
         title={
           title ??
           Platform.select({
-            android: "Back",
-            default: "Close",
+            android: translate("back"),
+            default: translate("close"),
           })
         }
         {...rest}

@@ -165,6 +165,7 @@ export const en = {
   unblock_and_restore: "Unblock and restore",
   cancel: "Cancel",
   back: "Back",
+  close: "Close",
   view_only: "View only",
   view_and_restore: "View and Restore",
   view_removed_group_chat: "View removed group chat?",
@@ -178,6 +179,12 @@ export const en = {
   add_an_account: "Add an account",
   group_info: "Group info",
   converse_match_maker: "Converse Match Maker",
+  today: "Today",
+  yesterday: "Yesterday",
+  member_count: "{{count}} member",
+  members_count: "{{count}} members",
+  modify: "Modify",
+  pending_count: "{{count}} pending",
 
   // Requests
   requests: "Requests",
@@ -193,6 +200,7 @@ export const en = {
     "You currently have no message requests. We'll make suggestions here as you connect with others.",
   hidden_requests_warn:
     "Requests containing messages that may be offensive or unwanted are moved to this folder.",
+  message_requests: "Message requests",
 
   // Conversation
   accept: "Accept",
@@ -327,6 +335,7 @@ export const en = {
     add_members: "Add members",
     edit_group_info: "Edit group info",
     members_can: "MEMBERS CAN",
+    title: "New group",
   },
 
   new_conversation: {
@@ -504,6 +513,11 @@ export const en = {
   },
 
   file_preview: "File preview",
+
+  share_profile: {
+    link_copied: "Link copied",
+    copy_link: "Copy link",
+  },
 };
 
 export type Translations = typeof en;
