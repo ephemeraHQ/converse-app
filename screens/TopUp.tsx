@@ -25,6 +25,7 @@ import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
 import { NavigationParamList } from "./Navigation/Navigation";
 import { useCurrentAccount } from "../data/store/accountsStore";
+import { translate } from "@/i18n";
 
 export default function TopUp({
   route,
@@ -40,7 +41,7 @@ export default function TopUp({
       headerLeft: () =>
         Platform.OS === "ios" ? (
           <ConverseButton
-            title="Cancel"
+            title={translate("cancel")}
             onPress={() => {
               navigation.goBack();
             }}
@@ -55,7 +56,7 @@ export default function TopUp({
     <View style={styles.topUp}>
       <ConverseButton
         action="primary"
-        title="Bridge from any wallet"
+        title={translate("top_up.title")}
         style={styles.bridgeButton}
         onPress={() => {
           Linking.openURL(
@@ -65,10 +66,11 @@ export default function TopUp({
       />
       <View style={styles.separator} />
       <Text style={styles.p}>
-        Alternatively, if you want to do it by yourself, send{" "}
-        <Text style={styles.bold}>USDC</Text> (native, not USDbC) on the{" "}
-        <Text style={styles.bold}>Base</Text> blockchain to your address (see
-        address below).
+        {translate("top_up.alternatively")}
+        <Text style={styles.bold}>{translate("top_up.usdc")}</Text>{" "}
+        {translate("top_up.native")}
+        <Text style={styles.bold}>{translate("top_up.base")}</Text>
+        {translate("top_up.to_your_address")}
       </Text>
       <TableView
         style={{ width: "100%" }}

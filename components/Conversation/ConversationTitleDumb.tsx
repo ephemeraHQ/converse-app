@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   useColorScheme,
 } from "react-native";
-import { getTitleFontScale } from "../../utils/str";
+import { getTitleFontScale } from "@utils/str";
 import { AnimatedHStack } from "@design-system/HStack";
 import { animation } from "@theme/animations";
+import { VStack } from "@/design-system/VStack";
 
 type ConversationTitleDumbProps = {
   title?: string;
+  subtitle?: React.ReactNode;
   avatarComponent?: React.ReactNode;
   onLongPress?: () => void;
   onPress?: () => void;
@@ -20,6 +22,7 @@ type ConversationTitleDumbProps = {
 export function ConversationTitleDumb({
   avatarComponent,
   title,
+  subtitle,
   onLongPress,
   onPress,
 }: ConversationTitleDumbProps) {
@@ -36,9 +39,12 @@ export function ConversationTitleDumb({
         style={styles.touchableContainer}
       >
         {avatarComponent}
-        <Text style={styles.title} numberOfLines={1} allowFontScaling={false}>
-          {title}
-        </Text>
+        <VStack>
+          <Text style={styles.title} numberOfLines={1} allowFontScaling={false}>
+            {title}
+          </Text>
+          {subtitle}
+        </VStack>
       </TouchableOpacity>
     </AnimatedHStack>
   );

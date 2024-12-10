@@ -8,6 +8,7 @@ import { Platform, useColorScheme } from "react-native";
 import { NativeStack, navigationAnimation } from "./Navigation";
 import GroupScreen from "../Group";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { translate } from "@/i18n";
 
 export type GroupNavParams = {
   topic: ConversationTopic;
@@ -24,7 +25,7 @@ export default function GroupNav() {
       name="Group"
       component={GroupScreen}
       options={({ route }) => ({
-        headerTitle: "Group info",
+        headerTitle: translate("group_info"),
         headerTintColor:
           Platform.OS === "android"
             ? textSecondaryColor(colorScheme)

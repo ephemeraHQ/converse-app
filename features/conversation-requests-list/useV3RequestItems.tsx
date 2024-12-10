@@ -1,3 +1,4 @@
+import logger from "@/utils/logger";
 import { getMessageContentType } from "@/utils/xmtpRN/contentTypes";
 import { getV3SpamScore } from "@data/helpers/conversations/spamScore";
 import { useCurrentAccount } from "@data/store/accountsStore";
@@ -44,17 +45,21 @@ export const useV3RequestItems = () => {
           } catch {
             content = lastMessage?.fallback ?? "";
           }
-
           const contentType = getMessageContentType(
             lastMessage?.contentTypeId!
           );
-
-          const spamScore = contentType
-            ? await getV3SpamScore({
+          let spamScore = 0;
+          try {
+            if (contentType) {
+              spamScore = await getV3SpamScore({
                 message: content,
                 contentType,
-              })
-            : 0; // TODO: Handle this, maybe not 0 if we can't find content type?
+              });
+            }
+          } catch (error) {
+            logger.error("Couldn't get spam score", error);
+          }
+
           if (spamScore > 1) {
             likelySpam.push(conversation);
           } else {

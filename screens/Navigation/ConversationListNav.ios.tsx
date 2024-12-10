@@ -31,6 +31,8 @@ import {
   NavigationParamList,
   navigationAnimation,
 } from "./Navigation";
+import { usePreferredName } from "@/hooks/usePreferredName";
+import { useProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
 
 type HeaderSearchBarProps = {
   searchBarRef: React.RefObject<any>;
@@ -97,7 +99,13 @@ export default function ConversationListNav() {
   const shouldShowConnecting = useShouldShowConnecting();
   const shouldShowError = useShouldShowErrored();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
-  const name = getReadableProfile(currentAccount, currentAccount);
+
+  const { isLoading } = useProfileSocialsQuery(currentAccount, currentAccount);
+
+  const preferredName = usePreferredName(currentAccount);
+
+  // Delays a little flash of the name when loading, as default is a long ugly address
+  const name = isLoading ? "" : preferredName;
 
   return (
     <NativeStack.Screen

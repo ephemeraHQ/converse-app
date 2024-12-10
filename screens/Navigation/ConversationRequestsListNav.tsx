@@ -36,7 +36,8 @@ export default function ConversationRequestsListNav() {
   const [clearingAll, setClearingAll] = useState(false);
 
   const [isSpamToggleEnabled, setIsSpamToggleEnabled] = useState(false);
-  const { likelySpam, likelyNotSpam } = useRequestItems();
+  const { likelySpam, likelyNotSpam, isRefetching, refetch } =
+    useRequestItems();
 
   const styles = useStyles();
 
@@ -96,7 +97,7 @@ export default function ConversationRequestsListNav() {
       navigation: any;
     }) => ({
       animation: navigationAnimation as StackAnimationTypes,
-      headerTitle: clearingAll ? "Clearing..." : "Requests",
+      headerTitle: clearingAll ? translate("clearing") : translate("requests"),
       headerLeft: () => <AndroidBackAction navigation={navigation} />,
       headerRight: () =>
         clearingAll ? undefined : (
@@ -160,7 +161,12 @@ export default function ConversationRequestsListNav() {
           <>
             <GestureHandlerRootView style={styles.root}>
               <View style={styles.container}>
-                <ConversationFlashList {...navigationProps} items={items} />
+                <ConversationFlashList
+                  {...navigationProps}
+                  isRefetching={isRefetching}
+                  refetch={refetch}
+                  items={items}
+                />
               </View>
             </GestureHandlerRootView>
           </>
