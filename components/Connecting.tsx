@@ -1,11 +1,11 @@
 import { sentryTrackMessage } from "@utils/sentry";
 import { useEffect, useRef, useState } from "react";
 
-import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 import { useDebugEnabled } from "./DebugButton";
-import { useChatStore } from "../data/store/accountsStore";
+import { useChatStore, useCurrentAccount } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
+import { useV3ConversationListQuery } from "@/queries/useV3ConversationListQuery";
 
 export const useShouldShowConnecting = () => {
   const isInternetReachable = useAppStore((s) => s.isInternetReachable);
@@ -66,9 +66,9 @@ export const useShouldShowConnecting = () => {
 };
 
 export const useShouldShowConnectingOrSyncing = () => {
-  const { initialLoadDoneOnce } = useChatStore(
-    useSelect(["initialLoadDoneOnce"])
-  );
+  const currentAccount = useCurrentAccount();
+  const { isLoading } = useV3ConversationListQuery(currentAccount!);
+  const initialLoadDoneOnce = !isLoading;
   const shouldShowConnecting = useShouldShowConnecting();
 
   const conditionTrueTime = useRef(0);
@@ -101,7 +101,3 @@ export const useShouldShowConnectingOrSyncing = () => {
 
   return shouldShowConnecting.shouldShow || !initialLoadDoneOnce;
 };
-
-export default function Connecting() {
-  return <ActivityIndicator />;
-}
