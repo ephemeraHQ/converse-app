@@ -1,56 +1,64 @@
-import { MessagesList } from "@/components/Conversation/V3Conversation";
+import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
+import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
+import { MessageDateChange } from "@/features/conversation/conversation-message-date-change";
+import { MessageContextStoreProvider } from "@/features/conversation/conversation-message.store-context";
+import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
 import { useCurrentAccount } from "@/data/store/accountsStore";
-import { AnimatedVStack } from "@/design-system/VStack";
-import { ConversationContextProvider } from "@/features/conversation/conversation-context";
-import {
-  initializeCurrentConversation,
-  useConversationCurrentTopic,
-} from "@/features/conversation/conversation-service";
+import { Center } from "@/design-system/Center";
+import { VStack } from "@/design-system/VStack";
+import { Loader } from "@/design-system/loader";
 import { useConversationPreviewMessages } from "@/queries/useConversationPreviewMessages";
-import { useAppTheme } from "@/theme/useAppTheme";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import React, { memo } from "react";
+import React from "react";
 
 type ConversationReadOnlyProps = {
   topic: ConversationTopic;
 };
 
 export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
-  initializeCurrentConversation({
-    topic,
-    peerAddress: undefined,
-    inputValue: "",
-  });
-
-  return (
-    <ConversationContextProvider>
-      <Content />
-    </ConversationContextProvider>
-  );
-};
-
-const Content = memo(function Content() {
   const currentAccount = useCurrentAccount()!;
-
-  const { theme } = useAppTheme();
-
-  const topic = useConversationCurrentTopic();
 
   const { data: messages, isLoading: isLoadingMessages } =
     useConversationPreviewMessages(currentAccount, topic!);
 
-  if (isLoadingMessages) {
-    return null;
-  }
-
   return (
-    <AnimatedVStack
-      layout={theme.animation.reanimatedSpringLayoutTransition}
+    <VStack
+      // {...debugBorder()}
       style={{
         flex: 1,
       }}
     >
-      <MessagesList messageIds={messages?.ids ?? []} />
-    </AnimatedVStack>
+      {isLoadingMessages ? (
+        <Center
+          style={{
+            flex: 1,
+          }}
+        >
+          <Loader />
+        </Center>
+      ) : (
+        <ConversationMessagesList
+          messageIds={messages?.ids ?? []}
+          renderMessage={({ messageId, index }) => {
+            const message = messages?.byId[messageId]!;
+            const previousMessage = messages?.byId[messages?.ids[index + 1]];
+            const nextMessage = messages?.byId[messages?.ids[index - 1]];
+
+            return (
+              <MessageContextStoreProvider
+                message={message}
+                previousMessage={previousMessage}
+                nextMessage={nextMessage}
+              >
+                <MessageDateChange />
+                <ConversationMessageLayout>
+                  <ConversationMessage message={message} />
+                </ConversationMessageLayout>
+              </MessageContextStoreProvider>
+            );
+          }}
+        />
+      )}
+    </VStack>
   );
-});
+};

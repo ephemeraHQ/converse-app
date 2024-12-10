@@ -1,3 +1,4 @@
+import { isConversationAllowed } from "@/features/conversations/utils/isConversationAllowed";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { useV3ConversationListQuery } from "@queries/useV3ConversationListQuery";
@@ -28,7 +29,7 @@ export const useV3ConversationItems = () => {
     );
 
     return conversations?.filter((conversation) => {
-      const isAllowed = conversation.state === "allowed";
+      const isAllowed = isConversationAllowed(conversation);
       const isNotPinned = !pinnedTopics.has(conversation.topic);
       const isNotDeleted = !deletedTopics.has(conversation.topic);
 

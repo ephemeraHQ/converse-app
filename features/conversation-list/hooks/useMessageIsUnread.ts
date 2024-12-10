@@ -4,12 +4,12 @@ import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { normalizeTimestamp } from "@/utils/date";
-import { getCurrentUserAccountInboxId } from "@/components/Chat/Message/message-utils";
+import { getCurrentUserAccountInboxId } from "@/features/conversation/conversation-message/conversation-message.utils";
 
 type UseConversationIsUnreadProps = {
   topic: string;
   lastMessage: DecodedMessageWithCodecsType | undefined;
-  timestamp: number;
+  timestampNs: number;
 };
 
 const chatStoreSelectKeys: (keyof ChatStoreType)[] = ["topicsData"];
@@ -17,7 +17,7 @@ const chatStoreSelectKeys: (keyof ChatStoreType)[] = ["topicsData"];
 export const useConversationIsUnread = ({
   topic,
   lastMessage,
-  timestamp: timestampNs,
+  timestampNs,
 }: UseConversationIsUnreadProps) => {
   const { topicsData } = useChatStore(useSelect(chatStoreSelectKeys));
   const currentInboxId = getCurrentUserAccountInboxId();

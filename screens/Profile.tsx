@@ -1,4 +1,3 @@
-import Picto from "@components/Picto/Picto";
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { useShouldShowErrored } from "@hooks/useShouldShowErrored";
 import { translate } from "@i18n";
@@ -24,7 +23,7 @@ import {
   getOtherInstallations,
   revokeOtherInstallations,
 } from "@utils/xmtpRN/revoke";
-import { getXmtpClient, useCurrentAccountXmtpClient } from "@utils/xmtpRN/sync";
+import { getXmtpClient } from "@utils/xmtpRN/sync";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
@@ -52,7 +51,6 @@ import {
   TableViewPicto,
 } from "../components/TableView/TableViewImage";
 import config from "../config";
-import { ConversationNavParams } from "./Navigation/ConversationNav";
 import {
   currentAccount,
   useCurrentAccount,
@@ -72,18 +70,20 @@ import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
 } from "../utils/groupUtils/adminUtils";
+import { ConversationNavParams } from "./Navigation/ConversationNav";
 
+import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
 import { consentToAddressesOnProtocolByAccount } from "../utils/xmtpRN/contacts";
-import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
 
-import { requestPushNotificationsPermissions } from "@/features/notifications/utils/requestPushNotificationsPermissions";
-import { NotificationPermissionStatus } from "@/features/notifications/types/Notifications.types";
-import { useProfileSocials } from "@/hooks/useProfileSocials";
-import { usePreferredName } from "@/hooks/usePreferredName";
-import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { Icon } from "@/design-system/Icon/Icon";
+import { NotificationPermissionStatus } from "@/features/notifications/types/Notifications.types";
+import { requestPushNotificationsPermissions } from "@/features/notifications/utils/requestPushNotificationsPermissions";
+import { useCurrentAccountXmtpClient } from "@/hooks/useCurrentAccountXmtpClient";
+import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
+import { usePreferredName } from "@/hooks/usePreferredName";
+import { useProfileSocials } from "@/hooks/useProfileSocials";
 
 export default function ProfileScreen() {
   return (
@@ -98,7 +98,7 @@ const ExternalWalletPickerWrapper = memo(
   function ExternalWalletPickerWrapper() {
     const peerAddress = useRoute<"Profile">().params.address;
     const { data: socials } = useProfileSocials(peerAddress);
-    const { client } = useCurrentAccountXmtpClient();
+    const { data: client } = useCurrentAccountXmtpClient();
 
     return (
       <ExternalWalletPicker
@@ -358,23 +358,21 @@ function ProfileScreenImpl() {
                   return false;
                 }
                 const params = route.params as ConversationNavParams;
-                return (
-                  params?.mainConversationWithPeer === peerAddress.toLowerCase()
-                );
+                return params?.peer === peerAddress.toLowerCase();
               });
             if (isPreviouslyInNavStack) {
               navigation.popToTop();
               navigation.navigate({
                 name: "Conversation",
                 params: {
-                  mainConversationWithPeer: peerAddress,
+                  peer: peerAddress,
                 },
               });
             } else {
               navigation.popToTop();
               navigation.dispatch(
                 StackActions.push("Conversation", {
-                  mainConversationWithPeer: peerAddress,
+                  peer: peerAddress,
                 })
               );
             }
@@ -695,7 +693,7 @@ function ProfileScreenImpl() {
                 // @todo => check if this is the right timing on split screen / web / android
                 setTimeout(() => {
                   navigation.navigate("Conversation", {
-                    mainConversationWithPeer: route.params.address,
+                    peer: route.params.address,
                   });
                 }, 300);
               },

@@ -1,6 +1,6 @@
 import { EntityObject } from "@queries/entify";
 import { getXmtpClientFromAddress } from "@utils/xmtpRN/client";
-import { ConversationId, Group } from "@xmtp/react-native-sdk";
+import { Group } from "@xmtp/react-native-sdk";
 
 export type ConverseXmtpClientType = Awaited<
   ReturnType<typeof getXmtpClientFromAddress>

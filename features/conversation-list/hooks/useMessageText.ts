@@ -1,7 +1,7 @@
 import {
   isReplyMessage,
   isStaticAttachmentMessage,
-} from "@/components/Chat/Message/message-utils";
+} from "@/features/conversation/conversation-message/conversation-message.utils";
 import logger from "@utils/logger";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import { getMessageContentType } from "@utils/xmtpRN/contentTypes";

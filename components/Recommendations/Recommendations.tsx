@@ -80,7 +80,7 @@ export default function Recommendations({
     navigation.popToTop();
     setTimeout(() => {
       navigation.navigate("Conversation", {
-        mainConversationWithPeer: config.contactAddress,
+        peer: config.contactAddress,
       });
     }, 300);
   }, [navigation]);

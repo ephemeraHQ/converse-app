@@ -9,7 +9,7 @@ import { AvatarSizes } from "@styles/sizes";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { ImageStyle, Platform } from "react-native";
 import { useProfileSocials } from "@hooks/useProfileSocials";
-import { ConversationTitleDumb } from "@components/Conversation/ConversationTitleDumb";
+import { ConversationTitle } from "@/features/conversation/conversation-title";
 
 type NewConversationTitleProps = {
   peerAddress: string;
@@ -56,7 +56,7 @@ export const NewConversationTitle = ({
   if (!displayAvatar) return null;
 
   return (
-    <ConversationTitleDumb
+    <ConversationTitle
       title={preferredName}
       onPress={onPress}
       avatarComponent={
