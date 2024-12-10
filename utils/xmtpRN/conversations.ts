@@ -14,6 +14,7 @@ import {
   DmWithCodecsType,
 } from "./client";
 import { getXmtpClient } from "./sync";
+import { streamAllMessages } from "./messages";
 
 export const streamConversations = async (account: string) => {
   await stopStreamingConversations(account);
@@ -310,6 +311,7 @@ export const createConversation = async ({
 }: CreateConversationParams) => {
   logger.info(`[XMTP] Creating a conversation with peer ${peerAddress}`);
   const conversation = await client.conversations.findOrCreateDm(peerAddress);
+  await handleNewConversationCreation(client, conversation);
   return conversation;
 };
 
@@ -341,7 +343,7 @@ export const createGroup = async ({
   groupPhoto,
   groupDescription,
 }: CreateGroupParams) => {
-  return client.conversations.newGroupCustomPermissions(
+  const group = await client.conversations.newGroupCustomPermissions(
     peers,
     permissionPolicySet,
     {
@@ -350,6 +352,12 @@ export const createGroup = async ({
       description: groupDescription,
     }
   );
+
+  logger.info("[XMTPRN Conversations] Created group");
+
+  await handleNewConversationCreation(client, group);
+
+  return group;
 };
 
 type CreateGroupByAccountParams = {
@@ -378,9 +386,10 @@ export const createGroupByAccount = async ({
     groupPhoto,
     groupDescription,
   });
+
   // if (groupName) {
   //   setGroupNameQueryData(account, group.topic, groupName);
-  // }
+  // }s
   // if (groupPhoto) {
   //   setGroupPhotoQueryData(account, group.topic, groupPhoto);
   // }
@@ -530,4 +539,16 @@ export const getPeerAddressFromTopic = async (
     return peerAddress;
   }
   throw new Error("Conversation is not a DM");
+};
+
+// TODO: This is a temporary function to handle new conversation creation
+// This is a temporary workaround related to https://github.com/xmtp/xmtp-react-native/issues/560
+const handleNewConversationCreation = async (
+  client: ConverseXmtpClientType,
+  _conversation: ConversationWithCodecsType
+) => {
+  logger.info(
+    "[XMTPRN Conversations] Restarting message stream to handle new conversation"
+  );
+  await streamAllMessages(client.address);
 };
