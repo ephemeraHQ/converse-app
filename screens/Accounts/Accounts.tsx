@@ -11,21 +11,18 @@ import AccountSettingsButton from "../../components/AccountSettingsButton";
 import TableView from "../../components/TableView/TableView";
 import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import {
-  useAccountsList,
   useAccountsStore,
   useErroredAccountsMap,
 } from "../../data/store/accountsStore";
 import { useRouter } from "../../navigation/useNavigation";
 import { useAccountsProfiles } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";
-import { shortAddress } from "@utils/strings/shortAddress";
 import { translate } from "@/i18n";
 
 export default function Accounts(
   props: NativeStackScreenProps<NavigationParamList, "Accounts">
 ) {
   const styles = useStyles();
-  const accounts = useAccountsList();
   const erroredAccounts = useErroredAccountsMap();
   const accountsProfiles = useAccountsProfiles();
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
@@ -40,9 +37,9 @@ export default function Accounts(
       style={styles.accounts}
     >
       <TableView
-        items={accounts.map((a) => ({
+        items={accountsProfiles.map((a) => ({
           id: a,
-          title: accountsProfiles[a] || shortAddress(a),
+          title: a,
           action: () => {
             setCurrentAccount(a, false);
             router.navigate("Chats");
