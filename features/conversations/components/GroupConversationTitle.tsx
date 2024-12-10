@@ -14,6 +14,9 @@ import { GroupAvatarDumb } from "@components/GroupAvatar";
 import { useConversationTitleLongPress } from "../hooks/useConversationTitleLongPress";
 import { useGroupMembersAvatarData } from "../hooks/useGroupMembersAvatarData";
 import { ConversationTitleDumb } from "@components/Conversation/ConversationTitleDumb";
+import { Text } from "@/design-system/Text";
+import { translate } from "@/i18n";
+import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 
 type GroupConversationTitleProps = {
   topic: ConversationTopic;
@@ -46,6 +49,8 @@ export const GroupConversationTitle = memo(
 
     const { data: groupPhoto, isLoading: groupPhotoLoading } =
       useGroupPhotoQuery(currentAccount, topic!);
+
+    const { data: members } = useGroupMembersQuery(currentAccount, topic!);
 
     const { data: memberData } = useGroupMembersAvatarData({ topic });
 
@@ -83,6 +88,11 @@ export const GroupConversationTitle = memo(
         title={groupName ?? undefined}
         onLongPress={onLongPress}
         onPress={onPress}
+        subtitle={
+          <Text preset="formLabel">
+            {translate("members_count", { count: members?.ids.length })}
+          </Text>
+        }
         avatarComponent={avatarComponent}
       />
     );

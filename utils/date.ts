@@ -1,3 +1,4 @@
+import { translate } from "@i18n";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import format from "date-fns/format";
 // Long term we should only import used locales
@@ -40,9 +41,9 @@ export const getRelativeDate = (date?: number | Date) => {
   const locale = getLocale();
 
   if (days === 0) {
-    relativeDateTime = "Today";
+    relativeDateTime = translate("today");
   } else if (days === 1) {
-    relativeDateTime = "Yesterday";
+    relativeDateTime = translate("yesterday");
   } else if (days < 7) {
     relativeDateTime = format(date, "EEEE", { locale });
   } else {

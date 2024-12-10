@@ -11,6 +11,7 @@ import { navigate } from "../../utils/navigation";
 import ProfileScreen from "../Profile";
 import { NativeStack, navigationAnimation } from "./Navigation";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { translate } from "@/i18n";
 
 export type ProfileNavParams = {
   address: string;
@@ -49,7 +50,7 @@ export default function ProfileNav() {
             if (Platform.OS === "ios") {
               return (
                 <ScreenHeaderButton
-                  title="Modify"
+                  title={translate("modify")}
                   onPress={() => {
                     navigate("UserProfile");
                   }}
