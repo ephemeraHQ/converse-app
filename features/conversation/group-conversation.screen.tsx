@@ -5,7 +5,7 @@ import {
   ConversationVersion,
   MessageId,
 } from "@xmtp/react-native-sdk";
-import { memo, useCallback, useEffect, useRef } from "react";
+import { memo, useCallback, useEffect } from "react";
 import { FlatListProps, Platform } from "react-native";
 // import { DmChatPlaceholder } from "@components/Chat/ChatPlaceholder/ChatPlaceholder";
 import { DmConsentPopup } from "@/components/Chat/ConsentPopup/dm-consent-popup";
@@ -14,8 +14,7 @@ import { MessageReactionsDrawer } from "@/components/Chat/Message/MessageReactio
 import { MessageContextMenu } from "@/components/Chat/Message/message-context-menu/message-context-menu";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
-import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
-import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
+import { ConversationStoreProvider } from "@/features/conversation/conversation-store";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { V3Message } from "@components/Chat/Message/V3Message";
 import { Screen } from "@components/Screen/ScreenComp/Screen";
@@ -35,10 +34,7 @@ import {
   ConversationGroupContextProvider,
   useConversationGroupContext,
 } from "@features/conversation/conversation-group-context";
-import {
-  initializeCurrentConversation,
-  useConversationCurrentTopic,
-} from "@features/conversation/conversation-service";
+import { useConversationCurrentTopic } from "@features/conversation/conversation-service";
 import { DmConversationTitle } from "@features/conversations/components/DmConversationTitle";
 import { GroupConversationTitle } from "@features/conversations/components/GroupConversationTitle";
 import { NewConversationTitle } from "@features/conversations/components/NewConversationTitle";
@@ -51,21 +47,18 @@ import Animated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ConversationStoreProvider } from "@/features/conversation/conversation-store";
 
 const keyExtractor = (item: string) => item;
 
-type V3ConversationProps = {
-  topic: ConversationTopic | undefined;
-  peerAddress?: string;
+type TopicConversationProps = {
+  topic: ConversationTopic;
   textPrefill?: string;
 };
 
-export const V3Conversation = ({
+export const GroupConversation = ({
   topic,
-  peerAddress,
   textPrefill,
-}: V3ConversationProps) => {
+}: TopicConversationProps) => {
   // TODO: Handle when topic is not defined
   const messageToPrefill = textPrefill ?? "";
 
@@ -75,16 +68,19 @@ export const V3Conversation = ({
   //   inputValue: messageToPrefill,
   // });
 
+  if (!topic) {
+    // TODO: Add placeholder
+    return null;
+  }
+
   if (topic) {
     // Existing conversation
   }
 
-  if (peerAddress) {
-    // New conversation
-  }
+  // New conversation
 
   return (
-    <ConversationStoreProvider topic={topic!}>
+    <ConversationStoreProvider topic={topic}>
       <ConversationContextProvider>
         <Screen contentContainerStyle={{ flex: 1 }}>
           <Content />
@@ -165,26 +161,6 @@ const DmContent = memo(function DmContent() {
 
   const { data: peerInboxId } = useDmPeerInboxId(currentAccount, topic!);
 
-  const isUnread = useConversationIsUnread({
-    topic,
-    lastMessage: messages?.ids?.length
-      ? messages.byId[messages.ids[0]]
-      : undefined,
-    timestamp: messages?.ids?.length
-      ? (messages.byId[messages.ids[0]]?.sentNs ?? 0)
-      : 0,
-  });
-  const toggleReadStatus = useToggleReadStatus({
-    topic,
-    isUnread,
-    currentAccount,
-  });
-  useMarkAsReadOnEnter({
-    messagesLoading,
-    isUnread,
-    toggleReadStatus,
-  });
-
   useDmHeader();
 
   if (conversationNotFound) {
@@ -232,22 +208,6 @@ const GroupContent = memo(function GroupContent() {
     isRefetching: isRefetchingMessages,
     refetch,
   } = useConversationMessages(currentAccount, topic!);
-
-  const isUnread = useConversationIsUnread({
-    topic,
-    lastMessage: messages?.byId[messages?.ids[0]], // Get latest message
-    timestamp: messages?.byId[messages?.ids[0]]?.sentNs ?? 0,
-  });
-  const toggleReadStatus = useToggleReadStatus({
-    topic,
-    isUnread,
-    currentAccount,
-  });
-  useMarkAsReadOnEnter({
-    messagesLoading,
-    isUnread,
-    toggleReadStatus,
-  });
 
   useGroupHeader();
 
@@ -325,25 +285,6 @@ export const KeyboardFiller = memo(function KeyboardFiller() {
 
   return <AnimatedVStack style={as} />;
 });
-
-const useMarkAsReadOnEnter = ({
-  messagesLoading,
-  isUnread,
-  toggleReadStatus,
-}: {
-  messagesLoading: boolean;
-  isUnread: boolean;
-  toggleReadStatus: () => void;
-}) => {
-  const hasMarkedAsRead = useRef(false);
-
-  useEffect(() => {
-    if (isUnread && !messagesLoading && !hasMarkedAsRead.current) {
-      toggleReadStatus();
-      hasMarkedAsRead.current = true;
-    }
-  }, [isUnread, messagesLoading, toggleReadStatus]);
-};
 
 function useNewConversationHeader() {
   const navigation = useRouter();
