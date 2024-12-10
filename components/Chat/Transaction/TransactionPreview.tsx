@@ -25,7 +25,7 @@ import Exclamationmark from "../../../assets/exclamationmark.triangle.svg";
 // import { shortAddress } from "@utils/strings/shortAddress";
 // import { useTransactionForMessage } from "../../../utils/transaction";
 // import { showActionSheetWithOptions } from "../../StateHandlers/ActionSheetStateHandler";
-import { MessageToDisplay } from "../Message/Message";
+import { MessageToDisplay } from "../../../features/conversation/Message";
 // import MessageTimestamp from "../Message/MessageTimestamp";
 
 type Props = {

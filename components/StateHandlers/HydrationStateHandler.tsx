@@ -5,6 +5,7 @@ import { useAppStore } from "../../data/store/appStore";
 import { getXmtpClient } from "../../utils/xmtpRN/sync";
 import { getInstalledWallets } from "../Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import { fetchPersistedConversationListQuery } from "@/queries/useV3ConversationListQuery";
+import { prefetchCurrentUserAccountInboxId } from "@/features/conversation/conversation-message/conversation-message.utils";
 
 export default function HydrationStateHandler() {
   // Initial hydration
@@ -42,6 +43,9 @@ export default function HydrationStateHandler() {
       );
 
       logger.debug("[Hydration] Done fetching persisted conversation list");
+
+      // TODO: Move else where once we refactored the accounts logics
+      await prefetchCurrentUserAccountInboxId();
 
       useAppStore.getState().setHydrationDone(true);
       logger.debug(

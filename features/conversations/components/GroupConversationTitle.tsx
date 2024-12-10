@@ -1,23 +1,23 @@
-import React, { memo, useCallback, useMemo } from "react";
-import { useGroupNameQuery } from "@queries/useGroupNameQuery";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { Text } from "@/design-system/Text";
+import { ConversationTitle } from "@/features/conversation/conversation-title";
+import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
+import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
+import Avatar from "@components/Avatar";
+import { GroupAvatarDumb } from "@components/GroupAvatar";
 import { useCurrentAccount } from "@data/store/accountsStore";
+import { translate } from "@i18n";
+import { useRouter } from "@navigation/useNavigation";
+import { useGroupNameQuery } from "@queries/useGroupNameQuery";
+import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { NavigationParamList } from "@screens/Navigation/Navigation";
-import { ImageStyle, Platform } from "react-native";
-import { useRouter } from "@navigation/useNavigation";
-import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
-import Avatar from "@components/Avatar";
 import { AvatarSizes } from "@styles/sizes";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
-import { GroupAvatarDumb } from "@components/GroupAvatar";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import React, { memo, useCallback, useMemo } from "react";
+import { ImageStyle, Platform } from "react-native";
 import { useConversationTitleLongPress } from "../hooks/useConversationTitleLongPress";
 import { useGroupMembersAvatarData } from "../hooks/useGroupMembersAvatarData";
-import { ConversationTitleDumb } from "@components/Conversation/ConversationTitleDumb";
-import { Text } from "@/design-system/Text";
-import { translate } from "@i18n";
-import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
-import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 
 type GroupConversationTitleProps = {
   topic: ConversationTopic;
@@ -93,7 +93,7 @@ export const GroupConversationTitle = memo(
     if (!displayAvatar) return null;
 
     return (
-      <ConversationTitleDumb
+      <ConversationTitle
         title={groupName ?? undefined}
         onLongPress={onLongPress}
         onPress={onPress}

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { isReactionMessage } from "@/components/Chat/Message/message-utils";
+import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import logger from "@utils/logger";
 import {
   ConversationWithCodecsType,
@@ -36,6 +36,7 @@ export const conversationMessagesQueryFn = async (
   }
 
   const messages = await conversation.messages(options);
+
   const ids: MessageId[] = [];
   const byId: Record<MessageId, DecodedMessageWithCodecsType> = {};
   const reactions: Record<
@@ -47,10 +48,9 @@ export const conversationMessagesQueryFn = async (
   > = {};
 
   for (const message of messages) {
-    ids.push(message.id as MessageId);
-    byId[message.id as MessageId] = message;
-
-    if (!message.contentTypeId.includes("reaction:")) {
+    if (!isReactionMessage(message)) {
+      ids.push(message.id as MessageId);
+      byId[message.id as MessageId] = message;
       continue;
     }
 
@@ -83,7 +83,10 @@ export const conversationMessagesQueryFn = async (
         ...(messageReactions.bySender[senderAddress] || []),
         reactionContent,
       ];
-    } else if (reactionContent.action === "removed") {
+      continue;
+    }
+
+    if (reactionContent.action === "removed") {
       // Remove sender from the list of users who used this reaction
       messageReactions.byReactionContent[reactionContent.content] = (
         messageReactions.byReactionContent[reactionContent.content] || []
@@ -93,6 +96,7 @@ export const conversationMessagesQueryFn = async (
       messageReactions.bySender[senderAddress] = (
         messageReactions.bySender[senderAddress] || []
       ).filter((reaction) => reaction.content !== reactionContent.content);
+      continue;
     }
   }
 

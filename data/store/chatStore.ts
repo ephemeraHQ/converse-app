@@ -1,9 +1,8 @@
 import logger from "@utils/logger";
+import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import isDeepEqual from "fast-deep-equal";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-
-import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import { Nullable } from "../../types/general";
 import { zustandMMKVStorage } from "../../utils/mmkv";
 
@@ -102,13 +101,6 @@ export type TopicsData = {
   [topic: string]: TopicData | undefined;
 };
 
-export type MessageAttachmentStatus =
-  | "picked"
-  | "uploading"
-  | "uploaded"
-  | "error"
-  | "sending";
-
 export type MessageAttachmentPreview = {
   mediaURI: string;
   mimeType: Nullable<string>;
@@ -146,7 +138,6 @@ export type ChatStoreType = {
   };
   pinnedConversationTopics: string[];
   openedConversationTopic: string | null;
-  // setOpenedConversationTopic: (topic: string | null) => void;
   lastUpdateAt: number;
   lastSyncedAt: number;
   lastSyncedTopics: string[];
@@ -186,23 +177,11 @@ export type ChatStoreType = {
   //   period: number
   // ) => void;
 
-  messageAttachments: Record<string, MessageAttachmentTodo>;
-
-  setMessageAttachment: (
-    messageId: string,
-    attachment: MessageAttachmentTodo
-  ) => void;
-
   groupInviteLinks: {
     [topic: string]: string;
   };
   setGroupInviteLink: (topic: string, inviteLink: string) => void;
   deleteGroupInviteLink: (topic: string) => void;
-
-  reactingToMessage: { topic: string; messageId: string } | null;
-  setReactingToMessage: (
-    r: { topic: string; messageId: string } | null
-  ) => void;
 };
 
 const now = () => new Date().getTime();
@@ -219,34 +198,6 @@ export const initChatStore = (account: string) => {
           topicsData: {},
           topicsDataFetchedOnce: false,
           openedConversationTopic: "",
-          // setOpenedConversationTopic: (topic) =>
-          //   set((state) => {
-          //     const newState = { ...state, openedConversationTopic: topic };
-          //     if (topic && newState.conversations[topic]) {
-          //       const conversation = newState.conversations[topic];
-          //       const lastMessageId =
-          //         conversation.messagesIds.length > 0
-          //           ? conversation.messagesIds[
-          //               conversation.messagesIds.length - 1
-          //             ]
-          //           : undefined;
-          //       if (lastMessageId) {
-          //         const lastMessage = conversation.messages.get(lastMessageId);
-          //         if (lastMessage) {
-          //           const newData = {
-          //             status: "read",
-          //             readUntil: lastMessage.sent,
-          //             timestamp: now(),
-          //           } as TopicData;
-          //           newState.topicsData[topic] = newData;
-          //           saveTopicsData(account, {
-          //             [topic]: newData,
-          //           });
-          //         }
-          //       }
-          //     }
-          //     return newState;
-          //   }),
           conversationsMapping: {},
           conversationsSortedOnce: false,
           lastUpdateAt: 0,
@@ -369,14 +320,6 @@ export const initChatStore = (account: string) => {
           //     });
           //     return { conversations: newConversations };
           //   }),
-          messageAttachments: {},
-          setMessageAttachment(messageId, attachment) {
-            set((state) => {
-              const newMessageAttachments = { ...state.messageAttachments };
-              newMessageAttachments[messageId] = attachment;
-              return { messageAttachments: newMessageAttachments };
-            });
-          },
           groupInviteLinks: {},
           setGroupInviteLink(topic, inviteLink) {
             set((state) => {
@@ -392,10 +335,6 @@ export const initChatStore = (account: string) => {
               return { groupInviteLinks: newGroupInvites };
             });
           },
-          reactingToMessage: null,
-          setReactingToMessage: (
-            r: { topic: string; messageId: string } | null
-          ) => set(() => ({ reactingToMessage: r })),
         }) as ChatStoreType,
       {
         name: `store-${account}-chat`, // Account-based storage so each account can have its own chat data
