@@ -167,6 +167,7 @@ export const updateConversationDataToConversationListQuery = (
   conversation: Partial<ConversationWithCodecsType>
 ) => {
   const previousConversationsData = getConversationListQueryData(account);
+
   if (!previousConversationsData) return;
   const newConversations: V3ConversationListType =
     previousConversationsData.map((c) => {

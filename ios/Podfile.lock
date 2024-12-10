@@ -2025,12 +2025,12 @@ PODS:
     - React-logger (= 0.75.4)
     - React-perflogger (= 0.75.4)
     - React-utils (= 0.75.4)
-  - ReactNativeIosContextMenu (2.5.1):
+  - ReactNativeIosContextMenu (2.5.2):
     - ContextMenuAuxiliaryPreview (~> 0.3)
     - DGSwiftUtilities
     - ExpoModulesCore
     - ReactNativeIosUtilities
-  - ReactNativeIosUtilities (4.5.0):
+  - ReactNativeIosUtilities (4.5.1):
     - ComputableLayout (~> 0.7)
     - DGSwiftUtilities (~> 0.27)
     - ExpoModulesCore
@@ -2830,8 +2830,8 @@ SPEC CHECKSUMS:
   React-utils: d1bae5ac6a5fb94a772ebfc7a7e1aba3a6706a3a
   ReactCodegen: 99b435b58bd874bb0626b3fb16437d2e8735d370
   ReactCommon: 1007c09a406a451ddbd874e51511aa541d6034f6
-  ReactNativeIosContextMenu: e5f972174bd78ab3a552bd6ee4745762ffaa42b3
-  ReactNativeIosUtilities: 8ea45df073a05d24b9fd75e4ec5fe1de19051466
+  ReactNativeIosContextMenu: 3e0880f9bd20af2905b57ace99b69a36be125d1a
+  ReactNativeIosUtilities: 4980803356bff7906929d5d034da58bfc9bb824a
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNAWSCognito: fe0c870c7cd9970a2efefc075b3f2d75eac913c7
   RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c

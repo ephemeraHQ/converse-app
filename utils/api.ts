@@ -28,6 +28,9 @@ import { authMMKVStorage } from "./mmkv";
 
 export const api = axios.create({
   baseURL: config.apiURI,
+  headers: {
+    ConverseUserAgent: `${analyticsPlatform}/${analyticsAppVersion}`,
+  },
 });
 
 type PatchedAxiosError = Omit<AxiosError, "config"> & {

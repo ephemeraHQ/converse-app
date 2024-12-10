@@ -9,6 +9,8 @@ import {
 
 import { queryClient } from "./queryClient";
 
+type ProfileSocialsData = ProfileSocials | null | undefined;
+
 const profileSocialsQueryKey = (account: string, peerAddress: string) => [
   "profileSocials",
   account,
@@ -32,7 +34,7 @@ const fetchProfileSocials = async (peerAddress: string) => {
   return data;
 };
 
-const profileSocialesQueryConfig = (account: string, peerAddress: string) => ({
+const profileSocialsQueryConfig = (account: string, peerAddress: string) => ({
   queryKey: profileSocialsQueryKey(account, peerAddress),
   queryFn: () => fetchProfileSocials(peerAddress),
   enabled: !!account,
@@ -50,7 +52,7 @@ export const useProfileSocialsQuery = (
   account: string,
   peerAddress: string
 ) => {
-  return useQuery(profileSocialesQueryConfig(account, peerAddress));
+  return useQuery(profileSocialsQueryConfig(account, peerAddress));
 };
 
 export const useProfileSocialsQueries = (
@@ -59,7 +61,7 @@ export const useProfileSocialsQueries = (
 ) => {
   return useQueries({
     queries: peerAddresses.map((peerAddress) =>
-      profileSocialesQueryConfig(account, peerAddress)
+      profileSocialsQueryConfig(account, peerAddress)
     ),
   });
 };
@@ -68,8 +70,8 @@ export const fetchProfileSocialsQuery = (
   account: string,
   peerAddress: string
 ) => {
-  return queryClient.fetchQuery(
-    profileSocialesQueryConfig(account, peerAddress)
+  return queryClient.fetchQuery<ProfileSocialsData>(
+    profileSocialsQueryConfig(account, peerAddress)
   );
 };
 
@@ -79,11 +81,20 @@ export const setProfileSocialsQueryData = (
   data: ProfileSocials,
   updatedAt?: number
 ) => {
-  return queryClient.setQueryData(
+  return queryClient.setQueryData<ProfileSocialsData>(
     profileSocialsQueryKey(account, peerAddress),
     data,
     {
       updatedAt,
     }
+  );
+};
+
+export const getProfileSocialsQueryData = (
+  account: string,
+  peerAddress: string
+) => {
+  return queryClient.getQueryData<ProfileSocialsData>(
+    profileSocialsQueryConfig(account, peerAddress).queryKey
   );
 };
