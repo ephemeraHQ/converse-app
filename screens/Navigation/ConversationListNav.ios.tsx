@@ -15,7 +15,7 @@ import {
 import { SearchBarCommands } from "react-native-screens";
 
 import Button from "../../components/Button/Button";
-import Connecting, {
+import {
   useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
 } from "../../components/Connecting";
@@ -33,6 +33,7 @@ import {
 } from "./Navigation";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { useProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
+import { Loader } from "@/design-system/loader";
 
 type HeaderSearchBarProps = {
   searchBarRef: React.RefObject<any>;
@@ -114,7 +115,7 @@ export default function ConversationListNav() {
         headerTitle: () =>
           shouldShowConnectingOrSyncing ? (
             <View style={styles.connectingContainer}>
-              {shouldShowConnectingOrSyncing && <Connecting />}
+              {shouldShowConnectingOrSyncing && <Loader />}
               {shouldShowConnecting.warnMessage && (
                 <Text
                   style={[
