@@ -47,9 +47,6 @@ export default function ConversationNav(
       title: "",
       headerStyle: {
         backgroundColor: theme.colors.background.surface,
-        height: Platform.OS === "ios" ? 44 : undefined,
-        borderBottomWidth: 0.5,
-        borderBottomColor: theme.colors.border.subtle,
       } as any,
       headerLeft: () => {
         const handleBack = () => {
