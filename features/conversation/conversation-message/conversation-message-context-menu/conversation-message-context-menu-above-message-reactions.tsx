@@ -1,17 +1,20 @@
-import {
-  useConversationMessageById,
-  useCurrentAccountInboxId,
-} from "@/features/conversation/conversation-message/conversation-message.utils";
 import { HStack } from "@/design-system/HStack";
 import { Icon } from "@/design-system/Icon/Icon";
 import { TouchableOpacity } from "@/design-system/TouchableOpacity";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
-import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/messageIsFromCurrentUser";
+import { useConversationMessageById } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/message-is-from-current-user";
+import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getReactionContent } from "@/utils/xmtpRN/reactions";
 import { Text } from "@design-system/Text";
 import { useAppTheme } from "@theme/useAppTheme";
 import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
-import { InboxId, MessageId, ReactionContent } from "@xmtp/react-native-sdk";
+import {
+  ConversationTopic,
+  InboxId,
+  MessageId,
+  ReactionContent,
+} from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useMemo } from "react";
 import {
   EntryAnimationsValues,
@@ -22,6 +25,7 @@ import { MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT } from "./conversat
 
 export const MessageContextMenuAboveMessageReactions = memo(
   function MessageContextMenuAboveMessageReactions({
+    topic,
     messageId,
     onChooseMoreEmojis,
     onSelectReaction,
@@ -29,6 +33,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
     originY,
     reactors,
   }: {
+    topic: ConversationTopic;
     messageId: MessageId;
     onChooseMoreEmojis: () => void;
     onSelectReaction: (emoji: string) => void;
@@ -42,7 +47,10 @@ export const MessageContextMenuAboveMessageReactions = memo(
 
     const { data: currentUserInboxId } = useCurrentAccountInboxId();
 
-    const { message } = useConversationMessageById(messageId);
+    const { message } = useConversationMessageById({
+      messageId,
+      topic,
+    });
 
     const messageFromMe = messageIsFromCurrentUserV3({
       message,

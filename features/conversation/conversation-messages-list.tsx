@@ -3,10 +3,7 @@ import { useAppTheme } from "@/theme/useAppTheme";
 import { MessageId } from "@xmtp/react-native-sdk";
 import { ReactElement, memo } from "react";
 import { FlatListProps, Platform } from "react-native";
-import Animated, {
-  AnimatedProps,
-  LinearTransition,
-} from "react-native-reanimated";
+import Animated, { AnimatedProps } from "react-native-reanimated";
 
 export const ConversationMessagesList = memo(function ConversationMessagesList(
   props: Omit<

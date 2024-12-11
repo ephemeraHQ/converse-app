@@ -139,7 +139,6 @@ const ConversationContextMenuComponent: FC = () => {
                   >
                     <ConversationReadOnly
                       topic={conversationTopic as ConversationTopic}
-                      conversationId={conversationId}
                     />
                   </GestureDetector>
                 </View>

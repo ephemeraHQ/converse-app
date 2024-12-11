@@ -1,5 +1,5 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { getCurrentUserAccountInboxId } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   addConversationMessage,
   refetchConversationMessages,
@@ -34,18 +34,22 @@ export function useRemoveReactionOnMessage(props: {
       const currentUserInboxId = getCurrentUserAccountInboxId()!;
 
       // Add the removal reaction message
-      addConversationMessage(currentAccount, conversation.topic, {
-        id: getRandomId(),
-        client: conversation.client,
-        contentTypeId: contentTypesPrefixes.reaction,
-        sentNs: getTodayNs(),
-        fallback: variables.reaction.content,
-        deliveryStatus: MessageDeliveryStatus.PUBLISHED,
+      addConversationMessage({
+        account: currentAccount,
         topic: conversation.topic,
-        senderAddress: currentUserInboxId,
-        nativeContent: {},
-        content: () => {
-          return variables.reaction;
+        message: {
+          id: getRandomId(),
+          client: conversation.client,
+          contentTypeId: contentTypesPrefixes.reaction,
+          sentNs: getTodayNs(),
+          fallback: variables.reaction.content,
+          deliveryStatus: MessageDeliveryStatus.PUBLISHED,
+          topic: conversation.topic,
+          senderAddress: currentUserInboxId,
+          nativeContent: {},
+          content: () => {
+            return variables.reaction;
+          },
         },
       });
     },

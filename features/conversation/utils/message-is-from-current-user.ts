@@ -1,4 +1,4 @@
-import { getCurrentUserAccountInboxId } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getCurrentAccount } from "@data/store/accountsStore";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 

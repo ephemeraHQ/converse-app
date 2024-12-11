@@ -7,7 +7,7 @@ import {
 } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { KeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
-import { NewConversationTitle } from "@/features/conversation/NewConversationTitle";
+import { NewConversationTitle } from "@/features/conversation/conversation-new-dm-header-title";
 import { useRouter } from "@/navigation/useNavigation";
 import { updateConversationQueryData } from "@/queries/useConversationQuery";
 import { updateConversationWithPeerQueryData } from "@/queries/useConversationWithPeerQuery";

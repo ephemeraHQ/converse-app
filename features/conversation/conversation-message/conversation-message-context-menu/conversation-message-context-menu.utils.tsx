@@ -1,3 +1,8 @@
+import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
+import { TableViewItemType } from "@/components/TableView/TableView";
+import { TableViewPicto } from "@/components/TableView/TableViewImage";
+import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
+import { useMessageContextMenuStore } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
 import {
   getMessageById,
   getMessageStringContent,
@@ -5,10 +10,6 @@ import {
   isStaticAttachmentMessage,
   isTransactionReferenceMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
-import { TableViewItemType } from "@/components/TableView/TableView";
-import { TableViewPicto } from "@/components/TableView/TableViewImage";
-import { useCurrentConversationTopic } from "@/features/conversation/conversation.service";
 import { translate } from "@/i18n";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import Clipboard from "@react-native-clipboard/clipboard";
@@ -20,13 +21,16 @@ const CONTEXT_MENU_ACTIONS = {
   SHARE_FRAME: "Share",
 } as const;
 
-export function getMessageContextMenuItems(args: {
+export function useMessageContextMenuItems(args: {
   messageId: MessageId;
   topic: ConversationTopic;
 }) {
   const { messageId, topic } = args;
 
   const message = getMessageById({ messageId, topic });
+
+  const composerStore = useConversationComposerStore();
+  const messageContextMenuStore = useMessageContextMenuStore();
 
   if (!message) {
     captureErrorWithToast(
@@ -41,8 +45,8 @@ export function getMessageContextMenuItems(args: {
   items.push({
     title: translate("reply"),
     action: () => {
-      setCurrentConversationReplyToMessageId(messageId);
-      resetMessageContextMenuData();
+      composerStore.getState().setReplyToMessageId(messageId);
+      messageContextMenuStore.getState().setMessageContextMenuData(null);
     },
     id: CONTEXT_MENU_ACTIONS.REPLY,
     rightView: <TableViewPicto symbol="arrowshape.turn.up.left" />,
@@ -67,7 +71,7 @@ export function getMessageContextMenuItems(args: {
           });
         }
 
-        resetMessageContextMenuData();
+        messageContextMenuStore.getState().setMessageContextMenuData(null);
       },
     });
   }

@@ -1,4 +1,3 @@
-import { Text } from "@/design-system/Text";
 import { MessageChatGroupUpdate } from "@/features/conversation/conversation-message/conversation-message-content-types/conversation-message-chat-group-update";
 import { MessageRemoteAttachment } from "@/features/conversation/conversation-message/conversation-message-content-types/conversation-message-remote-attachment";
 import { MessageReply } from "@/features/conversation/conversation-message/conversation-message-content-types/conversation-message-reply";

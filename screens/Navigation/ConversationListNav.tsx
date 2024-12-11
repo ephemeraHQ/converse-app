@@ -17,7 +17,6 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { Searchbar as MaterialSearchBar } from "react-native-paper";
-
 import {
   useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
@@ -73,8 +72,8 @@ export default function ConversationListNav() {
   const rightProps = !searchBarFocused
     ? rightNotFocused
     : searchQuery === ""
-    ? rightFocusedEmptyQuery
-    : {};
+      ? rightFocusedEmptyQuery
+      : {};
 
   const onChangeSearch = (query: string) => setSearchQuery(query);
   const searchPlaceholder = (): string => {

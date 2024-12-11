@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-
 import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
 import logger from "@utils/logger";
 import {
   ConversationWithCodecsType,
@@ -25,7 +25,11 @@ export type ConversationMessagesQueryData = Awaited<
   ReturnType<typeof conversationMessagesQueryFn>
 >;
 
-type IReactionSignature = string; // Format: `${senderAddress}-${content}-${action}-${referenceMessageId}`
+const ignoredContentTypesPrefixes = [
+  contentTypesPrefixes.coinbasePayment,
+  contentTypesPrefixes.transactionReference,
+  contentTypesPrefixes.readReceipt,
+];
 
 type IMessageAccumulator = {
   ids: MessageId[];
@@ -35,20 +39,9 @@ type IMessageAccumulator = {
     {
       bySender: Record<InboxId, ReactionContent[]>;
       byReactionContent: Record<string, InboxId[]>;
-      latestReactionActions: Record<IReactionSignature, string>; // Track latest action instead of just signatures
     }
   >;
 };
-
-// function getReactionSignature(args: {
-//   senderAddress: InboxId;
-//   content: string;
-//   action: string;
-//   referenceMessageId: MessageId;
-// }): IReactionSignature {
-//   const { senderAddress, content, action, referenceMessageId } = args;
-//   return `${senderAddress}-${content}-${action}-${referenceMessageId}`;
-// }
 
 function processMessages(args: {
   messages: DecodedMessageWithCodecsType[];
@@ -65,10 +58,35 @@ function processMessages(args: {
         reactions: {},
       };
 
+  // For now, we ignore messages with these content types
+  const validMessages = messages.filter(
+    (message) =>
+      !ignoredContentTypesPrefixes.some((prefix) =>
+        message.contentTypeId.startsWith(prefix)
+      )
+  );
+
   // First process regular messages
-  for (const message of messages) {
+  for (const message of validMessages) {
+    // We handle reactions after
     if (!isReactionMessage(message)) {
       const messageId = message.id as MessageId;
+
+      // WIP
+      // Find matching optimistic message using correlationId from message root
+      // const optimisticMessage = optimisticMessages.find(
+      //   (msg) => msg.messageId === message.id
+      // );
+
+      // if (optimisticMessage) {
+      //   // Remove the optimistic message from tracking and from the result
+      //   removeOptimisticMessage(messageId);
+      //   // Remove from the query data
+      //   result.ids = result.ids.filter((id) => id !== optimisticMessage.tempId);
+      //   delete result.byId[optimisticMessage.tempId as MessageId];
+      // }
+
+      // Add the new message
       result.byId[messageId] = message;
       if (prependNewMessages) {
         result.ids = [messageId, ...result.ids];
@@ -78,25 +96,21 @@ function processMessages(args: {
     }
   }
 
+  const reactionsMessages = validMessages.filter(isReactionMessage);
+
   // Track which reactions we've already processed
   const processedReactions = new Set<string>();
 
-  // Process reactions in reverse order (newest first)
-  for (const message of messages) {
-    if (!isReactionMessage(message)) {
-      continue;
-    }
-
-    const reactionContent = message.content() as ReactionContent;
+  for (const reactionMessage of reactionsMessages) {
+    const reactionContent = reactionMessage.content() as ReactionContent;
     const referenceMessageId = reactionContent?.reference as MessageId;
-    const senderAddress = message.senderAddress as InboxId;
+    const senderAddress = reactionMessage.senderAddress as InboxId;
 
     if (!reactionContent || !referenceMessageId) {
       continue;
     }
 
-    // Create a unique key for this sender + content combination
-    const reactionKey = `${senderAddress}-${reactionContent.content}-${referenceMessageId}`;
+    const reactionKey = `${reactionContent.content}-${referenceMessageId}`;
 
     // Skip if we've already processed a reaction from this sender for this content
     if (processedReactions.has(reactionKey)) {
@@ -110,21 +124,28 @@ function processMessages(args: {
       result.reactions[referenceMessageId] = {
         bySender: {},
         byReactionContent: {},
-        latestReactionActions: {},
       };
     }
 
     const messageReactions = result.reactions[referenceMessageId];
 
     if (reactionContent.action === "added") {
-      messageReactions.byReactionContent[reactionContent.content] = [
-        ...(messageReactions.byReactionContent[reactionContent.content] || []),
-        senderAddress,
-      ];
-      messageReactions.bySender[senderAddress] = [
-        ...(messageReactions.bySender[senderAddress] || []),
-        reactionContent,
-      ];
+      // Check if this sender already has this reaction for this message
+      const hasExistingReaction = messageReactions.bySender[
+        senderAddress
+      ]?.some((reaction) => reaction.content === reactionContent.content);
+
+      if (!hasExistingReaction) {
+        messageReactions.byReactionContent[reactionContent.content] = [
+          ...(messageReactions.byReactionContent[reactionContent.content] ||
+            []),
+          senderAddress,
+        ];
+        messageReactions.bySender[senderAddress] = [
+          ...(messageReactions.bySender[senderAddress] || []),
+          reactionContent,
+        ];
+      }
     } else if (reactionContent.action === "removed") {
       messageReactions.byReactionContent[reactionContent.content] = (
         messageReactions.byReactionContent[reactionContent.content] || []
@@ -201,11 +222,24 @@ export function refetchConversationMessages(
   });
 }
 
-export const addConversationMessage = (
-  account: string,
-  topic: ConversationTopic,
-  message: DecodedMessageWithCodecsType
-) => {
+export const addConversationMessage = (args: {
+  account: string;
+  topic: ConversationTopic;
+  message: DecodedMessageWithCodecsType;
+  // isOptimistic?: boolean;
+}) => {
+  const {
+    account,
+    topic,
+    message,
+    // isOptimistic
+  } = args;
+
+  // WIP
+  // if (isOptimistic) {
+  //   addOptimisticMessage(message.id);
+  // }
+
   queryClient.setQueryData<ConversationMessagesQueryData>(
     conversationMessagesQueryKey(account, topic),
     (previousMessages) => {
@@ -230,3 +264,36 @@ export const prefetchConversationMessages = async (
     },
   });
 };
+
+// WIP
+// type IOptimisticMessage = {
+//   tempId: string;
+//   messageId?: MessageId;
+// };
+
+// // Keep track of optimistic messages
+// let optimisticMessages: IOptimisticMessage[] = [];
+
+// function addOptimisticMessage(tempId: string) {
+//   optimisticMessages.push({
+//     tempId,
+//   });
+// }
+
+// function removeOptimisticMessage(messageId: MessageId) {
+//   optimisticMessages = optimisticMessages.filter(
+//     (msg) => msg.messageId !== messageId
+//   );
+// }
+
+// export function updateConversationMessagesOptimisticMessages(
+//   tempId: string,
+//   messageId: MessageId
+// ) {
+//   const optimisticMessage = optimisticMessages.find(
+//     (msg) => msg.tempId === tempId
+//   );
+//   if (optimisticMessage) {
+//     optimisticMessage.messageId = messageId;
+//   }
+// }

@@ -2,11 +2,11 @@
  * This store/context is to avoid prop drilling in message components.
  */
 
-import { convertNanosecondsToMilliseconds } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { hasNextMessageInSeries } from "@/features/conversation/utils/hasNextMessageInSeries";
-import { hasPreviousMessageInSeries } from "@/features/conversation/utils/hasPreviousMessageInSeries";
-import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/messageIsFromCurrentUser";
-import { messageShouldShowDateChange } from "@/features/conversation/utils/messageShouldShowDateChange";
+import { convertNanosecondsToMilliseconds } from "@/utils/date";
+import { hasNextMessageInSeries } from "@/features/conversation/utils/has-next-message-in-serie";
+import { hasPreviousMessageInSeries } from "@/features/conversation/utils/has-previous-message-in-serie";
+import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/message-is-from-current-user";
+import { messageShouldShowDateChange } from "@/features/conversation/utils/message-should-show-date-change";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { InboxId, MessageId } from "@xmtp/react-native-sdk";
 import { createContext, memo, useContext, useEffect, useRef } from "react";
