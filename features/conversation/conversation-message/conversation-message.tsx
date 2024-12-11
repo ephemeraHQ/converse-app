@@ -18,54 +18,60 @@ import { captureError } from "@/utils/capture-error";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client";
 import { memo } from "react";
 
-export const ConversationMessage = memo(function ConversationMessage(props: {
-  message: DecodedMessageWithCodecsType;
-}) {
-  const { message } = props;
+export const ConversationMessage = memo(
+  function ConversationMessage(props: {
+    message: DecodedMessageWithCodecsType;
+  }) {
+    const { message } = props;
 
-  if (isTextMessage(message)) {
-    return <MessageSimpleText message={message} />;
-  }
+    if (isTextMessage(message)) {
+      return <MessageSimpleText message={message} />;
+    }
 
-  if (isGroupUpdatedMessage(message)) {
-    return <MessageChatGroupUpdate message={message} />;
-  }
+    if (isGroupUpdatedMessage(message)) {
+      return <MessageChatGroupUpdate message={message} />;
+    }
 
-  if (isReplyMessage(message)) {
-    return <MessageReply message={message} />;
-  }
+    if (isReplyMessage(message)) {
+      return <MessageReply message={message} />;
+    }
 
-  if (isRemoteAttachmentMessage(message)) {
-    return <MessageRemoteAttachment message={message} />;
-  }
+    if (isRemoteAttachmentMessage(message)) {
+      return <MessageRemoteAttachment message={message} />;
+    }
 
-  if (isStaticAttachmentMessage(message)) {
-    return <MessageStaticAttachment message={message} />;
-  }
+    if (isStaticAttachmentMessage(message)) {
+      return <MessageStaticAttachment message={message} />;
+    }
 
-  if (isReactionMessage(message)) {
-    // Handle in message
+    if (isReactionMessage(message)) {
+      // Handle in message
+      return null;
+    }
+
+    if (isReadReceiptMessage(message)) {
+      // TODO
+      return null;
+    }
+
+    if (isTransactionReferenceMessage(message)) {
+      // TODO
+      return null;
+    }
+
+    if (isCoinbasePaymentMessage(message)) {
+      // TODO
+      return null;
+    }
+
+    const _ensureNever = message;
+
+    captureError(new Error(`Unknown message type ${message.contentTypeId}`));
+
     return null;
+  },
+  // For now it's okay. For performance. A message shouldn't change
+  (prevProps, nextProps) => {
+    return prevProps.message.id === nextProps.message.id;
   }
-
-  if (isReadReceiptMessage(message)) {
-    // TODO
-    return null;
-  }
-
-  if (isTransactionReferenceMessage(message)) {
-    // TODO
-    return null;
-  }
-
-  if (isCoinbasePaymentMessage(message)) {
-    // TODO
-    return null;
-  }
-
-  const _ensureNever = message;
-
-  captureError(new Error(`Unknown message type ${message.contentTypeId}`));
-
-  return null;
-});
+);
