@@ -1,7 +1,10 @@
+import { AnimatedVStack } from "@/design-system/VStack";
+import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
+import { GroupConversationTitle } from "@/features/conversation/GroupConversationTitle";
 import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
 import {
   ConversationComposerStoreProvider,
@@ -10,12 +13,12 @@ import {
 import { DmConsentPopup } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-dm";
 import { GroupConsentPopup } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-group";
 import { KeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
-import { MessageDateChange } from "@/features/conversation/conversation-message-date-change";
+import { ConversationMessageDateChange } from "@/features/conversation/conversation-message-date-change";
 import {
   IMessageGesturesOnLongPressArgs,
   MessageGestures,
 } from "@/features/conversation/conversation-message-gestures";
-import { MessageTimestamp } from "@/features/conversation/conversation-message-timestamp";
+import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message-timestamp";
 import {
   MessageContextStoreProvider,
   useMessageContextStore,
@@ -29,31 +32,28 @@ import {
 import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import { MessageReactionsDrawer } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer";
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
-import { MessageRepliable } from "@/features/conversation/conversation-message/conversation-message-repliable";
+import { ConversationMessageRepliable } from "@/features/conversation/conversation-message/conversation-message-repliable";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
 import { useCurrentConversationTopic } from "@/features/conversation/conversation.service";
 import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
-import { useMarkAsReadOnEnter } from "@/features/conversation/use-mark-as-read-on-enter";
-import { useSendMessage } from "@/features/conversations/hooks/use-send-message";
-import { isConversationAllowed } from "@/features/conversations/utils/isConversationAllowed";
-import { isConversationDm } from "@/features/conversations/utils/isConversationDm";
-import { isConversationGroup } from "@/features/conversations/utils/isConversationGroup";
+import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
+import { isConversationAllowed } from "@/features/conversation/utils/isConversationAllowed";
+import { isConversationDm } from "@/features/conversation/utils/isConversationDm";
+import { isConversationGroup } from "@/features/conversation/utils/isConversationGroup";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { Screen } from "@components/Screen/ScreenComp/Screen";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { Button } from "@design-system/Button/Button";
 import { Center } from "@design-system/Center";
 import { Text } from "@design-system/Text";
-import { VStack } from "@design-system/VStack";
-import { GroupConversationTitle } from "@features/conversations/components/GroupConversationTitle";
 import { translate } from "@i18n/translate";
 import { useRouter } from "@navigation/useNavigation";
 import { useConversationMessages } from "@queries/useConversationMessages";
 import { useAppTheme } from "@theme/useAppTheme";
 import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
-import React, { memo, useCallback, useEffect } from "react";
+import React, { memo, useCallback, useEffect, useRef } from "react";
+import { LinearTransition } from "react-native-reanimated";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
@@ -65,7 +65,8 @@ export const Conversation = memo(function Conversation(props: {
 
   const navigation = useRouter();
 
-  const { data: conversation } = useConversationQuery(currentAccount, topic);
+  const { data: conversation, isLoading: isLoadingConversation } =
+    useConversationQuery(currentAccount, topic);
 
   useEffect(() => {
     if (!conversation) {
@@ -82,10 +83,10 @@ export const Conversation = memo(function Conversation(props: {
     }
   }, [topic, navigation, conversation]);
 
-  if (!conversation) {
+  if (!conversation && !isLoadingConversation) {
     // TODO: Use EmptyState component
     return (
-      <VStack>
+      <Center style={{ flex: 1 }}>
         <Text
           style={{
             textAlign: "center",
@@ -93,7 +94,19 @@ export const Conversation = memo(function Conversation(props: {
         >
           {translate("group_not_found")}
         </Text>
-      </VStack>
+      </Center>
+    );
+  }
+
+  if (!conversation) {
+    return (
+      <Center
+        style={{
+          flex: 1,
+        }}
+      >
+        <Loader />
+      </Center>
     );
   }
 
@@ -105,14 +118,12 @@ export const Conversation = memo(function Conversation(props: {
             inputValue={textPrefill}
             storeName={topic}
           >
-            <Screen contentContainerStyle={{ flex: 1 }}>
-              <Messages conversation={conversation} />
-              <ComposerWrapper conversation={conversation} />
-              <KeyboardFiller />
-              <MessageContextMenu />
-              <MessageReactionsDrawer />
-              <ExternalWalletPicker title="Choose a wallet" />
-            </Screen>
+            <Messages conversation={conversation} />
+            <ComposerWrapper conversation={conversation} />
+            <KeyboardFiller />
+            <MessageContextMenu />
+            <MessageReactionsDrawer />
+            <ExternalWalletPicker title="Choose a wallet" />
           </ConversationComposerStoreProvider>
         </MessageContextMenuStoreProvider>
       </ConversationStoreProvider>
@@ -157,11 +168,14 @@ const Messages = memo(function Messages(props: {
     currentAccount,
   });
 
-  useMarkAsReadOnEnter({
-    messagesLoading,
-    isUnread,
-    toggleReadStatus,
-  });
+  const hasMarkedAsRead = useRef(false);
+
+  useEffect(() => {
+    if (isUnread && !messagesLoading && !hasMarkedAsRead.current) {
+      toggleReadStatus();
+      hasMarkedAsRead.current = true;
+    }
+  }, [isUnread, messagesLoading, toggleReadStatus]);
 
   const composerStore = useConversationComposerStore();
 
@@ -197,10 +211,10 @@ const Messages = memo(function Messages(props: {
             previousMessage={previousMessage}
             nextMessage={nextMessage}
           >
-            <>
-              <MessageDateChange />
-              <MessageTimestamp />
-              <MessageRepliable
+            <ConversationMessageContainer>
+              <ConversationMessageDateChange />
+              <ConversationMessageTimestamp />
+              <ConversationMessageRepliable
                 onReply={() => {
                   composerStore
                     .getState()
@@ -213,14 +227,32 @@ const Messages = memo(function Messages(props: {
                   </WithGestures>
                   <ConversationMessageReactions />
                 </ConversationMessageLayout>
-              </MessageRepliable>
-            </>
+              </ConversationMessageRepliable>
+            </ConversationMessageContainer>
           </MessageContextStoreProvider>
         );
       }}
     />
   );
 });
+
+const ConversationMessageContainer = memo(
+  function ConversationMessageContainer({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) {
+    const { theme } = useAppTheme();
+    return (
+      <AnimatedVStack
+        // {...debugBorder()}
+        layout={theme.animation.reanimatedLayoutSpringTransition}
+      >
+        {children}
+      </AnimatedVStack>
+    );
+  }
+);
 
 const WithGestures = memo(function WithGestures({
   children,

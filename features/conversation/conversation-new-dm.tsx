@@ -1,4 +1,3 @@
-import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import { VStack } from "@/design-system/VStack";
@@ -8,7 +7,7 @@ import {
 } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { KeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
-import { NewConversationTitle } from "@/features/conversations/components/NewConversationTitle";
+import { NewConversationTitle } from "@/features/conversation/NewConversationTitle";
 import { useRouter } from "@/navigation/useNavigation";
 import { updateConversationQueryData } from "@/queries/useConversationQuery";
 import { updateConversationWithPeerQueryData } from "@/queries/useConversationWithPeerQuery";
@@ -43,16 +42,14 @@ export const ConversationNewDm = memo(function ConversationNewDm(props: {
       storeName={"new-conversation" as ConversationTopic}
       inputValue={textPrefill}
     >
-      <Screen contentContainerStyle={{ flex: 1 }}>
-        {/*  TODO: Add empty state */}
-        <VStack
-          style={{
-            flex: 1,
-          }}
-        />
-        <ComposerWrapper peerAddress={peerAddress} />
-        <KeyboardFiller />
-      </Screen>
+      {/*  TODO: Add empty state */}
+      <VStack
+        style={{
+          flex: 1,
+        }}
+      />
+      <ComposerWrapper peerAddress={peerAddress} />
+      <KeyboardFiller />
     </ConversationComposerStoreProvider>
   );
 });

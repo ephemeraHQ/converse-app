@@ -46,7 +46,7 @@ import { ConversationVersion } from "@xmtp/react-native-sdk";
 import {
   dmMatchesSearchQuery,
   groupMatchesSearchQuery,
-} from "@/features/conversations/utils/search";
+} from "@/features/conversation/utils/search";
 import { translate } from "@/i18n";
 
 type Props = {

@@ -1,5 +1,7 @@
 import { Text } from "@/design-system/Text";
 import { ConversationTitle } from "@/features/conversation/conversation-title";
+import { useConversationTitleLongPress } from "@/features/conversation/hooks/useConversationTitleLongPress";
+import { useGroupMembersAvatarData } from "@/features/conversation/hooks/useGroupMembersAvatarData";
 import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import Avatar from "@components/Avatar";
@@ -16,8 +18,6 @@ import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useMemo } from "react";
 import { ImageStyle, Platform } from "react-native";
-import { useConversationTitleLongPress } from "../hooks/useConversationTitleLongPress";
-import { useGroupMembersAvatarData } from "../hooks/useGroupMembersAvatarData";
 
 type GroupConversationTitleProps = {
   topic: ConversationTopic;

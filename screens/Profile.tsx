@@ -70,7 +70,7 @@ import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
 } from "../utils/groupUtils/adminUtils";
-import { ConversationNavParams } from "./Navigation/ConversationNav";
+import { ConversationNavParams } from "../features/conversation/conversation.nav";
 
 import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
 import { getIPFSAssetURI } from "../utils/thirdweb";

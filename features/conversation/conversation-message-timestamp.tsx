@@ -18,89 +18,91 @@ import {
   withSpring,
 } from "react-native-reanimated";
 
-export const MessageTimestamp = memo(function MessageTimestamp() {
-  const { theme, themed } = useAppTheme();
+export const ConversationMessageTimestamp = memo(
+  function ConversationMessageTimestamp() {
+    const { theme, themed } = useAppTheme();
 
-  const [sentAt, showDateChange] = useMessageContextStoreContext((s) => [
-    s.sentAt,
-    s.showDateChange,
-  ]);
+    const [sentAt, showDateChange] = useMessageContextStoreContext((s) => [
+      s.sentAt,
+      s.showDateChange,
+    ]);
 
-  // const { showTimeAV } = useMessageContext();
+    // const { showTimeAV } = useMessageContext();
 
-  const showTimeAV = useSharedValue(0);
+    const showTimeAV = useSharedValue(0);
 
-  const messageStore = useMessageContextStore();
+    const messageStore = useMessageContextStore();
 
-  useEffect(() => {
-    const unsubscribe = messageStore.subscribe(
-      (state) => state.isShowingTime,
-      (isShowingTime) => {
-        showTimeAV.value = isShowingTime ? 1 : 0;
-      }
-    );
-    return () => unsubscribe();
-  }, [messageStore, showTimeAV]);
+    useEffect(() => {
+      const unsubscribe = messageStore.subscribe(
+        (state) => state.isShowingTime,
+        (isShowingTime) => {
+          showTimeAV.value = isShowingTime ? 1 : 0;
+        }
+      );
+      return () => unsubscribe();
+    }, [messageStore, showTimeAV]);
 
-  const showTimeProgressAV = useDerivedValue(() => {
-    return withSpring(showTimeAV.value ? 1 : 0, {
-      damping: SICK_DAMPING,
-      stiffness: SICK_STIFFNESS,
+    const showTimeProgressAV = useDerivedValue(() => {
+      return withSpring(showTimeAV.value ? 1 : 0, {
+        damping: SICK_DAMPING,
+        stiffness: SICK_STIFFNESS,
+      });
     });
-  });
 
-  const messageTime = sentAt ? getLocalizedTime(sentAt) : "";
+    const messageTime = sentAt ? getLocalizedTime(sentAt) : "";
 
-  const textHeight = flattenStyles(
-    getTextStyle(themed, { preset: "smaller" })
-  ).lineHeight;
+    const textHeight = flattenStyles(
+      getTextStyle(themed, { preset: "smaller" })
+    ).lineHeight;
 
-  const timeAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      height: interpolate(
-        showTimeProgressAV.value,
-        [0, 1],
-        [0, textHeight || 14]
-      ),
-      opacity: interpolate(showTimeProgressAV.value, [0, 1], [0, 1]),
-      marginVertical: interpolate(
-        showTimeProgressAV.value,
-        [0, 1],
-        [0, theme.spacing.sm]
-      ),
-      transform: [
-        { scale: showTimeProgressAV.value },
-        {
-          translateY: interpolate(
-            showTimeProgressAV.value,
-            [0, 1],
-            [theme.spacing.xl, 0]
-          ),
-        },
-      ],
-    };
-  }, [textHeight]);
+    const timeAnimatedStyle = useAnimatedStyle(() => {
+      return {
+        height: interpolate(
+          showTimeProgressAV.value,
+          [0, 1],
+          [0, textHeight || 14]
+        ),
+        opacity: interpolate(showTimeProgressAV.value, [0, 1], [0, 1]),
+        marginVertical: interpolate(
+          showTimeProgressAV.value,
+          [0, 1],
+          [0, theme.spacing.sm]
+        ),
+        transform: [
+          { scale: showTimeProgressAV.value },
+          {
+            translateY: interpolate(
+              showTimeProgressAV.value,
+              [0, 1],
+              [theme.spacing.xl, 0]
+            ),
+          },
+        ],
+      };
+    }, [textHeight]);
 
-  // Because we'll show the time in the MessageDateChange component instead
-  if (showDateChange) {
-    return null;
+    // Because we'll show the time in the MessageDateChange component instead
+    if (showDateChange) {
+      return null;
+    }
+
+    return (
+      <AnimatedVStack
+        style={[
+          {
+            //   ...debugBorder("yellow"),
+            alignItems: "center",
+            overflow: "hidden",
+            width: "100%",
+          },
+          timeAnimatedStyle,
+        ]}
+      >
+        <Text preset="smaller" color="secondary">
+          {messageTime}
+        </Text>
+      </AnimatedVStack>
+    );
   }
-
-  return (
-    <AnimatedVStack
-      style={[
-        {
-          //   ...debugBorder("yellow"),
-          alignItems: "center",
-          overflow: "hidden",
-          width: "100%",
-        },
-        timeAnimatedStyle,
-      ]}
-    >
-      <Text preset="smaller" color="secondary">
-        {messageTime}
-      </Text>
-    </AnimatedVStack>
-  );
-});
+);

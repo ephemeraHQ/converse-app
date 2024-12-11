@@ -1,6 +1,6 @@
+import { ConversationScreen } from "@/features/conversation/conversation.screen";
+import { NativeStack } from "@/screens/Navigation/Navigation";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { ConversationScreen } from "../Conversation";
-import { NativeStack } from "./Navigation";
 
 export type ConversationNavParams = {
   topic?: ConversationTopic;

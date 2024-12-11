@@ -15,68 +15,70 @@ import {
   withSpring,
 } from "react-native-reanimated";
 
-export const MessageDateChange = memo(function MessageDateChange() {
-  const { theme } = useAppTheme();
+export const ConversationMessageDateChange = memo(
+  function ConversationMessageDateChange() {
+    const { theme } = useAppTheme();
 
-  const [sentAt, showDateChange] = useMessageContextStoreContext((s) => [
-    s.sentAt,
-    s.showDateChange,
-  ]);
+    const [sentAt, showDateChange] = useMessageContextStoreContext((s) => [
+      s.sentAt,
+      s.showDateChange,
+    ]);
 
-  const showTimeAV = useSharedValue(0);
+    const showTimeAV = useSharedValue(0);
 
-  const messageStore = useMessageContextStore();
+    const messageStore = useMessageContextStore();
 
-  useEffect(() => {
-    const unsubscribe = messageStore.subscribe(
-      (state) => state.isShowingTime,
-      (isShowingTime) => {
-        showTimeAV.value = isShowingTime ? 1 : 0;
-      }
-    );
-    return () => unsubscribe();
-  }, [messageStore, showTimeAV]);
+    useEffect(() => {
+      const unsubscribe = messageStore.subscribe(
+        (state) => state.isShowingTime,
+        (isShowingTime) => {
+          showTimeAV.value = isShowingTime ? 1 : 0;
+        }
+      );
+      return () => unsubscribe();
+    }, [messageStore, showTimeAV]);
 
-  const messageTime = sentAt ? getLocalizedTime(sentAt) : "";
+    const messageTime = sentAt ? getLocalizedTime(sentAt) : "";
 
-  const timeInlineAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      display: showTimeAV.value ? "flex" : "none",
-      opacity: withSpring(showTimeAV.value ? 1 : 0, {
-        damping: SICK_DAMPING,
-        stiffness: SICK_STIFFNESS,
-      }),
-    };
-  });
+    const timeInlineAnimatedStyle = useAnimatedStyle(() => {
+      return {
+        display: showTimeAV.value ? "flex" : "none",
+        opacity: withSpring(showTimeAV.value ? 1 : 0, {
+          damping: SICK_DAMPING,
+          stiffness: SICK_STIFFNESS,
+        }),
+      };
+    });
 
-  if (!showDateChange) {
-    return null;
-  }
+    if (!showDateChange) {
+      return null;
+    }
 
-  const messageDate = getRelativeDate(sentAt);
+    const messageDate = getRelativeDate(sentAt);
 
-  return (
-    <AnimatedHStack
-      layout={theme.animation.reanimatedSpringLayoutTransition}
-      style={{
-        // ...debugBorder("red"),
-        alignSelf: "center",
-        alignItems: "center",
-        justifyContent: "center",
-        columnGap: theme.spacing["4xs"],
-        marginVertical: theme.spacing.sm,
-      }}
-    >
-      <Text preset="smaller" color="secondary">
-        {messageDate}
-      </Text>
-      <AnimatedText
-        preset="smaller"
-        color="secondary"
-        style={timeInlineAnimatedStyle}
+    return (
+      <AnimatedHStack
+        layout={theme.animation.reanimatedLayoutSpringTransition}
+        style={{
+          // ...debugBorder("red"),
+          alignSelf: "center",
+          alignItems: "center",
+          justifyContent: "center",
+          columnGap: theme.spacing["4xs"],
+          marginVertical: theme.spacing.sm,
+        }}
       >
-        {messageTime}
-      </AnimatedText>
-    </AnimatedHStack>
-  );
-});
+        <Text preset="smaller" color="secondary">
+          {messageDate}
+        </Text>
+        <AnimatedText
+          preset="smaller"
+          color="secondary"
+          style={timeInlineAnimatedStyle}
+        >
+          {messageTime}
+        </AnimatedText>
+      </AnimatedHStack>
+    );
+  }
+);

@@ -22,7 +22,7 @@ import { useAddressBookStateHandler } from "../utils/addressBook";
 import { useAutoConnectExternalWallet } from "../utils/evm/external";
 import { usePrivyAccessToken } from "../utils/evm/privy";
 import { converseNavigations } from "../utils/navigation";
-import { ConversationScreenConfig } from "./Navigation/ConversationNav";
+import { ConversationScreenConfig } from "../features/conversation/conversation.nav";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
 import {
   IdleNavigation,

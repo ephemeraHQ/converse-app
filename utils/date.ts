@@ -98,3 +98,7 @@ export const getLocalizedTime = (date: number | Date): string => {
 
   return format(inputDate, "p", { locale });
 };
+
+export function getTodayNs() {
+  return Date.now() * 1000000;
+}

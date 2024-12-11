@@ -4,7 +4,6 @@ import { V3MessageSenderAvatar } from "@/features/conversation/conversation-mess
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message.store-context";
 import { MessageContainer } from "@/features/conversation/conversation-message/conversation-message-container";
 import { MessageContentContainer } from "@/features/conversation/conversation-message/conversation-message-content-container";
-import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ReactNode, memo } from "react";
 

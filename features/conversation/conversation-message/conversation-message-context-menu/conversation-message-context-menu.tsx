@@ -16,9 +16,9 @@ import {
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { useCurrentConversationTopic } from "@/features/conversation/conversation.service";
-import { useReactOnMessage } from "@/features/conversations/hooks/use-react-on-message";
-import { useRemoveReactionOnMessage } from "@/features/conversations/hooks/use-remove-reaction-on-message";
-import { messageIsFromCurrentUserV3 } from "@/features/conversations/utils/messageIsFromCurrentUser";
+import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
+import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
+import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/messageIsFromCurrentUser";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { calculateMenuHeight } from "@design-system/ContextMenu/ContextMenu.utils";
 import { Portal } from "@gorhom/portal";
@@ -90,9 +90,10 @@ const Content = memo(function Content(props: {
 
   const handleSelectReaction = useCallback(
     (emoji: string) => {
-      const currentUserAlreadyReacted = bySender?.[currentUserInboxId!]?.find(
+      const currentUserAlreadyReacted = bySender?.[currentUserInboxId!]?.some(
         (reaction) => reaction.content === emoji
       );
+
       if (currentUserAlreadyReacted) {
         removeReactionOnMessage({
           messageId: messageId,

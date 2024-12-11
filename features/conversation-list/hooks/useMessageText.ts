@@ -4,7 +4,7 @@ import {
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import logger from "@utils/logger";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
-import { getMessageContentType } from "@utils/xmtpRN/contentTypes";
+import { getMessageContentType } from "@/utils/xmtpRN/content-types/content-types";
 import { DecodedMessage, ReplyCodec } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
 

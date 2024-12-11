@@ -25,6 +25,119 @@ export type ConversationMessagesQueryData = Awaited<
   ReturnType<typeof conversationMessagesQueryFn>
 >;
 
+type IReactionSignature = string; // Format: `${senderAddress}-${content}-${action}-${referenceMessageId}`
+
+type IMessageAccumulator = {
+  ids: MessageId[];
+  byId: Record<MessageId, DecodedMessageWithCodecsType>;
+  reactions: Record<
+    MessageId,
+    {
+      bySender: Record<InboxId, ReactionContent[]>;
+      byReactionContent: Record<string, InboxId[]>;
+      latestReactionActions: Record<IReactionSignature, string>; // Track latest action instead of just signatures
+    }
+  >;
+};
+
+// function getReactionSignature(args: {
+//   senderAddress: InboxId;
+//   content: string;
+//   action: string;
+//   referenceMessageId: MessageId;
+// }): IReactionSignature {
+//   const { senderAddress, content, action, referenceMessageId } = args;
+//   return `${senderAddress}-${content}-${action}-${referenceMessageId}`;
+// }
+
+function processMessages(args: {
+  messages: DecodedMessageWithCodecsType[];
+  existingData?: IMessageAccumulator;
+  prependNewMessages?: boolean;
+}): IMessageAccumulator {
+  const { messages, existingData, prependNewMessages = false } = args;
+
+  const result: IMessageAccumulator = existingData
+    ? { ...existingData }
+    : {
+        ids: [],
+        byId: {},
+        reactions: {},
+      };
+
+  // First process regular messages
+  for (const message of messages) {
+    if (!isReactionMessage(message)) {
+      const messageId = message.id as MessageId;
+      result.byId[messageId] = message;
+      if (prependNewMessages) {
+        result.ids = [messageId, ...result.ids];
+      } else if (!result.ids.includes(messageId)) {
+        result.ids.push(messageId);
+      }
+    }
+  }
+
+  // Track which reactions we've already processed
+  const processedReactions = new Set<string>();
+
+  // Process reactions in reverse order (newest first)
+  for (const message of messages) {
+    if (!isReactionMessage(message)) {
+      continue;
+    }
+
+    const reactionContent = message.content() as ReactionContent;
+    const referenceMessageId = reactionContent?.reference as MessageId;
+    const senderAddress = message.senderAddress as InboxId;
+
+    if (!reactionContent || !referenceMessageId) {
+      continue;
+    }
+
+    // Create a unique key for this sender + content combination
+    const reactionKey = `${senderAddress}-${reactionContent.content}-${referenceMessageId}`;
+
+    // Skip if we've already processed a reaction from this sender for this content
+    if (processedReactions.has(reactionKey)) {
+      continue;
+    }
+
+    // Mark this reaction as processed
+    processedReactions.add(reactionKey);
+
+    if (!result.reactions[referenceMessageId]) {
+      result.reactions[referenceMessageId] = {
+        bySender: {},
+        byReactionContent: {},
+        latestReactionActions: {},
+      };
+    }
+
+    const messageReactions = result.reactions[referenceMessageId];
+
+    if (reactionContent.action === "added") {
+      messageReactions.byReactionContent[reactionContent.content] = [
+        ...(messageReactions.byReactionContent[reactionContent.content] || []),
+        senderAddress,
+      ];
+      messageReactions.bySender[senderAddress] = [
+        ...(messageReactions.bySender[senderAddress] || []),
+        reactionContent,
+      ];
+    } else if (reactionContent.action === "removed") {
+      messageReactions.byReactionContent[reactionContent.content] = (
+        messageReactions.byReactionContent[reactionContent.content] || []
+      ).filter((id) => id !== senderAddress);
+      messageReactions.bySender[senderAddress] = (
+        messageReactions.bySender[senderAddress] || []
+      ).filter((reaction) => reaction.content !== reactionContent.content);
+    }
+  }
+
+  return result;
+}
+
 export const conversationMessagesQueryFn = async (
   conversation: ConversationWithCodecsType,
   options?: MessagesOptions
@@ -36,75 +149,7 @@ export const conversationMessagesQueryFn = async (
   }
 
   const messages = await conversation.messages(options);
-
-  const ids: MessageId[] = [];
-  const byId: Record<MessageId, DecodedMessageWithCodecsType> = {};
-  const reactions: Record<
-    MessageId,
-    {
-      bySender: Record<InboxId, ReactionContent[]>;
-      byReactionContent: Record<string, InboxId[]>;
-    }
-  > = {};
-
-  for (const message of messages) {
-    if (!isReactionMessage(message)) {
-      ids.push(message.id as MessageId);
-      byId[message.id as MessageId] = message;
-      continue;
-    }
-
-    const reactionContent = message.content() as ReactionContent;
-    const referenceMessageId = reactionContent?.reference as MessageId;
-
-    if (!reactionContent || !referenceMessageId) {
-      continue;
-    }
-
-    if (!reactions[referenceMessageId]) {
-      reactions[referenceMessageId] = {
-        bySender: {},
-        byReactionContent: {},
-      };
-    }
-
-    const messageReactions = reactions[referenceMessageId];
-    const senderAddress = message.senderAddress as InboxId;
-
-    if (reactionContent.action === "added") {
-      // Add sender to the list of users who used this reaction
-      messageReactions.byReactionContent[reactionContent.content] = [
-        ...(messageReactions.byReactionContent[reactionContent.content] || []),
-        senderAddress,
-      ];
-
-      // Add reaction to sender's list of reactions
-      messageReactions.bySender[senderAddress] = [
-        ...(messageReactions.bySender[senderAddress] || []),
-        reactionContent,
-      ];
-      continue;
-    }
-
-    if (reactionContent.action === "removed") {
-      // Remove sender from the list of users who used this reaction
-      messageReactions.byReactionContent[reactionContent.content] = (
-        messageReactions.byReactionContent[reactionContent.content] || []
-      ).filter((id) => id !== senderAddress);
-
-      // Remove reaction from sender's list of reactions
-      messageReactions.bySender[senderAddress] = (
-        messageReactions.bySender[senderAddress] || []
-      ).filter((reaction) => reaction.content !== reactionContent.content);
-      continue;
-    }
-  }
-
-  return {
-    ids,
-    byId,
-    reactions,
-  };
+  return processMessages({ messages });
 };
 
 const conversationMessagesByTopicQueryFn = async (
@@ -147,6 +192,15 @@ export const getConversationMessages = (
   );
 };
 
+export function refetchConversationMessages(
+  account: string,
+  topic: ConversationTopic
+) {
+  return queryClient.refetchQueries({
+    queryKey: conversationMessagesQueryKey(account, topic),
+  });
+}
+
 export const addConversationMessage = (
   account: string,
   topic: ConversationTopic,
@@ -155,60 +209,11 @@ export const addConversationMessage = (
   queryClient.setQueryData<ConversationMessagesQueryData>(
     conversationMessagesQueryKey(account, topic),
     (previousMessages) => {
-      if (!previousMessages) {
-        return {
-          ids: [message.id as MessageId],
-          byId: { [message.id]: message },
-          reactions: {},
-        };
-      }
-
-      const newPreviousMessages = {
-        ...previousMessages,
-        byId: {
-          ...previousMessages.byId,
-          [message.id as MessageId]: message,
-        },
-        ids: [message.id as MessageId, ...previousMessages.ids],
-      };
-
-      if (isReactionMessage(message)) {
-        const reactionContent = message.content() as ReactionContent;
-        const reactionContentString = reactionContent.content;
-        const referenceMessageId = reactionContent.reference as MessageId;
-        const senderAddress = message.senderAddress as InboxId;
-
-        const existingReactions = previousMessages.reactions[
-          referenceMessageId
-        ] || {
-          bySender: {},
-          byReactionContent: {},
-        };
-
-        newPreviousMessages.reactions = {
-          ...previousMessages.reactions,
-          [referenceMessageId]: {
-            bySender: {
-              ...existingReactions.bySender,
-              [senderAddress]: [
-                ...(existingReactions.bySender[senderAddress] || []),
-                reactionContent,
-              ],
-            },
-            byReactionContent: {
-              ...existingReactions.byReactionContent,
-              [reactionContentString]: [
-                ...(existingReactions.byReactionContent[
-                  reactionContentString
-                ] || []),
-                senderAddress,
-              ],
-            },
-          },
-        };
-      }
-
-      return newPreviousMessages;
+      return processMessages({
+        messages: [message],
+        existingData: previousMessages,
+        prependNewMessages: true,
+      });
     }
   );
 };

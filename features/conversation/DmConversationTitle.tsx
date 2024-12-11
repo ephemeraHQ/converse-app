@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useConversationTitleLongPress } from "../hooks/useConversationTitleLongPress";
+import { useConversationTitleLongPress } from "./hooks/useConversationTitleLongPress";
 import { useRouter } from "@navigation/useNavigation";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { NavigationParamList } from "@screens/Navigation/Navigation";

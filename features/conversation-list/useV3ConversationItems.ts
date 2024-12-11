@@ -1,4 +1,4 @@
-import { isConversationAllowed } from "@/features/conversations/utils/isConversationAllowed";
+import { isConversationAllowed } from "@/features/conversation/utils/isConversationAllowed";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { useV3ConversationListQuery } from "@queries/useV3ConversationListQuery";
