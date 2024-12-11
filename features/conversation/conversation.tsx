@@ -42,7 +42,10 @@ import { isConversationDm } from "@/features/conversation/utils/is-conversation-
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
+import {
+  ConversationWithCodecsType,
+  DecodedMessageWithCodecsType,
+} from "@/utils/xmtpRN/client.types";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { Button } from "@design-system/Button/Button";
 import { Center } from "@design-system/Center";
@@ -205,35 +208,52 @@ const Messages = memo(function Messages(props: {
         const nextMessage = messages?.byId[messages?.ids[index - 1]];
 
         return (
-          <MessageContextStoreProvider
+          <ConversationMessagesListItem
             message={message}
             previousMessage={previousMessage}
             nextMessage={nextMessage}
-          >
-            <VStack>
-              <ConversationMessageDateChange />
-              <ConversationMessageTimestamp />
-              <ConversationMessageRepliable
-                onReply={() => {
-                  composerStore
-                    .getState()
-                    .setReplyToMessageId(message.id as MessageId);
-                }}
-              >
-                <ConversationMessageLayout>
-                  <WithGestures>
-                    <ConversationMessage message={message} />
-                  </WithGestures>
-                  <ConversationMessageReactions />
-                </ConversationMessageLayout>
-              </ConversationMessageRepliable>
-            </VStack>
-          </MessageContextStoreProvider>
+          />
         );
       }}
     />
   );
 });
+
+const ConversationMessagesListItem = memo(
+  function ConversationMessagesListItem(props: {
+    message: DecodedMessageWithCodecsType;
+    previousMessage: DecodedMessageWithCodecsType | undefined;
+    nextMessage: DecodedMessageWithCodecsType | undefined;
+  }) {
+    const { message, previousMessage, nextMessage } = props;
+    const composerStore = useConversationComposerStore();
+
+    const handleReply = useCallback(() => {
+      composerStore.getState().setReplyToMessageId(message.id as MessageId);
+    }, [composerStore, message]);
+
+    return (
+      <MessageContextStoreProvider
+        message={message}
+        previousMessage={previousMessage}
+        nextMessage={nextMessage}
+      >
+        <VStack>
+          <ConversationMessageDateChange />
+          <ConversationMessageTimestamp />
+          <ConversationMessageRepliable onReply={handleReply}>
+            <ConversationMessageLayout>
+              <WithGestures>
+                <ConversationMessage message={message} />
+              </WithGestures>
+              <ConversationMessageReactions />
+            </ConversationMessageLayout>
+          </ConversationMessageRepliable>
+        </VStack>
+      </MessageContextStoreProvider>
+    );
+  }
+);
 
 const WithGestures = memo(function WithGestures({
   children,
