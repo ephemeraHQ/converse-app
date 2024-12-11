@@ -1,5 +1,4 @@
 import { useScrollToTop } from "@react-navigation/native";
-import { StatusBar } from "expo-status-bar";
 import React, { useRef } from "react";
 import { ScrollView, View, ViewStyle } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
@@ -81,23 +80,18 @@ function ScreenWithScrolling(props: IScreenProps) {
 /**
  * Represents a screen component that provides a consistent layout and behavior for different screen presets.
  * The `Screen` component can be used with different presets such as "fixed", "scroll", or "auto".
- * It handles safe area insets, status bar settings, keyboard avoiding behavior, and scrollability based on the preset.
+ * It handles safe area insets, keyboard avoiding behavior, and scrollability based on the preset.
  * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/app/components/Screen/}
  */
 export function Screen(props: IScreenProps) {
   const { theme } = useAppTheme();
-  const {
-    backgroundColor = theme.colors.background.surface,
-    safeAreaEdges,
-    StatusBarProps,
-    statusBarStyle = "dark",
-  } = props;
+  const { backgroundColor = theme.colors.background.surface, safeAreaEdges } =
+    props;
 
   const $containerInsets = useSafeAreaInsetsStyle(safeAreaEdges);
 
   return (
     <VStack style={[$containerStyle, { backgroundColor }, $containerInsets]}>
-      <StatusBar style={statusBarStyle} {...StatusBarProps} />
       {isNonScrolling(props.preset) ? (
         <ScreenWithoutScrolling {...props} />
       ) : (
