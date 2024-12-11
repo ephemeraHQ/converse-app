@@ -4,7 +4,7 @@ import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client";
 import { useMemo } from "react";
 import { ViewStyle } from "react-native";
-import { isTextMessage } from "../Chat/Message/message-utils";
+import { isTextMessage } from "../../features/conversation/conversation-message/conversation-message.utils";
 
 export type PinnedMessagePreviewProps = {
   message: DecodedMessageWithCodecsType;

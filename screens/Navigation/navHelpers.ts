@@ -121,7 +121,7 @@ const handleConversationLink = ({
   }
   const parameters: { [param: string]: string } = { focus: "true" };
   if (peer) {
-    parameters["mainConversationWithPeer"] = peer;
+    parameters["peer"] = peer;
   } else if (groupId) {
     parameters["topic"] = `/xmtp/mls/1/g-${groupId}/proto`;
   }
@@ -194,9 +194,8 @@ export const screenListeners =
             shouldReplace = true;
           } else if (newRoute.name === "Conversation") {
             const isNewPeer =
-              newRoute.params?.mainConversationWithPeer &&
-              newRoute.params?.mainConversationWithPeer !==
-                currentRoute.params?.mainConversationWithPeer;
+              newRoute.params?.peer &&
+              newRoute.params?.peer !== currentRoute.params?.peer;
             const isNewTopic =
               newRoute.params?.topic &&
               newRoute.params?.topic !== currentRoute.params?.topic;

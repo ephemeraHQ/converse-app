@@ -1,10 +1,11 @@
+import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
+import { fetchPersistedConversationListQuery } from "@/queries/useV3ConversationListQuery";
 import logger from "@utils/logger";
 import { useEffect } from "react";
-import { getAccountsList } from "../../data/store/accountsStore";
-import { useAppStore } from "../../data/store/appStore";
-import { getXmtpClient } from "../../utils/xmtpRN/sync";
+import { getAccountsList } from "@data/store/accountsStore";
+import { useAppStore } from "@data/store/appStore";
+import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { getInstalledWallets } from "../Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
-import { fetchPersistedConversationListQuery } from "@/queries/useV3ConversationListQuery";
 
 export default function HydrationStateHandler() {
   // Initial hydration
@@ -30,8 +31,20 @@ export default function HydrationStateHandler() {
           logger.debug(
             `[Hydration] Fetching persisted conversation list for ${account}`
           );
-          await getXmtpClient(account);
-          await fetchPersistedConversationListQuery(account);
+
+          const results = await Promise.allSettled([
+            getXmtpClient(account),
+            fetchPersistedConversationListQuery(account),
+            prefetchInboxIdQuery({ account }),
+          ]);
+
+          const errors = results.filter(
+            (result) => result.status === "rejected"
+          );
+          if (errors.length > 0) {
+            logger.warn(`[Hydration] error for ${account}:`, errors);
+          }
+
           const accountEndTime = new Date().getTime();
           logger.debug(
             `[Hydration] Done fetching persisted conversation list for ${account} in ${

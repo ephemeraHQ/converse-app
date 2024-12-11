@@ -7,6 +7,7 @@ import {
   Keyframe,
   LinearTransition,
   type WithSpringConfig,
+  withSpring,
 } from "react-native-reanimated";
 
 import { timing } from "./timing";
@@ -72,7 +73,7 @@ export const animation = {
 
   springLayoutTransition: LinearTransition.springify(),
 
-  reanimatedSpringLayoutTransition: LinearTransition.springify()
+  reanimatedLayoutSpringTransition: LinearTransition.springify()
     .damping(SICK_DAMPING)
     .stiffness(SICK_STIFFNESS),
 
@@ -108,16 +109,34 @@ export const animation = {
     },
   }).duration(500),
 
-  reanimatedFadeInScaleIn: new Keyframe({
-    0: {
+  reanimatedFadeInScaleIn: () => {
+    "worklet";
+
+    const animations = {
+      opacity: withSpring(1, {
+        damping: SICK_DAMPING,
+        stiffness: SICK_STIFFNESS,
+      }),
+      transform: [
+        {
+          scale: withSpring(1, {
+            damping: SICK_DAMPING,
+            stiffness: SICK_STIFFNESS,
+          }),
+        },
+      ],
+    };
+
+    const initialValues = {
       opacity: 0,
       transform: [{ scale: 0 }],
-    },
-    100: {
-      opacity: 1,
-      transform: [{ scale: 1 }],
-    },
-  }).duration(500),
+    };
+
+    return {
+      initialValues,
+      animations,
+    };
+  },
 };
 
 export type IAnimation = typeof animation;

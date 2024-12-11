@@ -1,56 +1,87 @@
-import { MessagesList } from "@/components/Conversation/V3Conversation";
 import { useCurrentAccount } from "@/data/store/accountsStore";
-import { AnimatedVStack } from "@/design-system/VStack";
-import { ConversationContextProvider } from "@/features/conversation/conversation-context";
-import {
-  initializeCurrentConversation,
-  useConversationCurrentTopic,
-} from "@/features/conversation/conversation-service";
+import { Center } from "@/design-system/Center";
+import { Text } from "@/design-system/Text";
+import { VStack } from "@/design-system/VStack";
+import { Loader } from "@/design-system/loader";
+import { ConversationMessageDateChange } from "@/features/conversation/conversation-message-date-change";
+import { MessageContextStoreProvider } from "@/features/conversation/conversation-message.store-context";
+import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
+import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
+import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
+import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
+import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
 import { useConversationPreviewMessages } from "@/queries/useConversationPreviewMessages";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useConversationQuery } from "@/queries/useConversationQuery";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import React, { memo } from "react";
+import React from "react";
 
 type ConversationReadOnlyProps = {
   topic: ConversationTopic;
 };
 
 export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
-  initializeCurrentConversation({
-    topic,
-    peerAddress: undefined,
-    inputValue: "",
-  });
-
-  return (
-    <ConversationContextProvider>
-      <Content />
-    </ConversationContextProvider>
-  );
-};
-
-const Content = memo(function Content() {
   const currentAccount = useCurrentAccount()!;
-
-  const { theme } = useAppTheme();
-
-  const topic = useConversationCurrentTopic();
 
   const { data: messages, isLoading: isLoadingMessages } =
     useConversationPreviewMessages(currentAccount, topic!);
 
-  if (isLoadingMessages) {
-    return null;
-  }
+  const { data: conversation, isLoading: isLoadingConversation } =
+    useConversationQuery(currentAccount, topic);
+
+  const isLoading = isLoadingMessages || isLoadingConversation;
 
   return (
-    <AnimatedVStack
-      layout={theme.animation.reanimatedSpringLayoutTransition}
+    <VStack
+      // {...debugBorder()}
       style={{
         flex: 1,
       }}
     >
-      <MessagesList messageIds={messages?.ids ?? []} />
-    </AnimatedVStack>
+      {isLoading ? (
+        <Center
+          style={{
+            flex: 1,
+          }}
+        >
+          <Loader />
+        </Center>
+      ) : !conversation ? (
+        <Center
+          style={{
+            flex: 1,
+          }}
+        >
+          <Text>Conversation not found</Text>
+        </Center>
+      ) : (
+        <ConversationStoreProvider
+          topic={topic}
+          conversationId={conversation.id}
+        >
+          <ConversationMessagesList
+            messageIds={messages?.ids ?? []}
+            renderMessage={({ messageId, index }) => {
+              const message = messages?.byId[messageId]!;
+              const previousMessage = messages?.byId[messages?.ids[index + 1]];
+              const nextMessage = messages?.byId[messages?.ids[index - 1]];
+
+              return (
+                <MessageContextStoreProvider
+                  message={message}
+                  previousMessage={previousMessage}
+                  nextMessage={nextMessage}
+                >
+                  <ConversationMessageDateChange />
+                  <ConversationMessageLayout>
+                    <ConversationMessage message={message} />
+                    <ConversationMessageReactions />
+                  </ConversationMessageLayout>
+                </MessageContextStoreProvider>
+              );
+            }}
+          />
+        </ConversationStoreProvider>
+      )}
+    </VStack>
   );
-});
+};

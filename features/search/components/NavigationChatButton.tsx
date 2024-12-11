@@ -39,7 +39,7 @@ export function NavigationChatButton({
     navigation.popToTop();
 
     navigate("Conversation", {
-      mainConversationWithPeer: address,
+      peer: address,
     });
   }, [address, navigation]);
 

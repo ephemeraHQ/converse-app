@@ -1,5 +1,8 @@
 import { URL_REGEX } from "@utils/regex";
-import { IConvosContentType, isContentType } from "@utils/xmtpRN/contentTypes";
+import {
+  IConvosContentType,
+  isContentType,
+} from "@/utils/xmtpRN/content-types/content-types";
 
 type V3SpameScoreParams = {
   message: string;

@@ -17,7 +17,7 @@ import {
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
-import ChatNullState from "../components/Chat/ChatNullState";
+import ChatNullState from "../components/ConversationList/ChatNullState";
 import ConversationFlashList from "../components/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
 import RequestsButton from "../components/ConversationList/RequestsButton";
@@ -46,7 +46,7 @@ import { ConversationVersion } from "@xmtp/react-native-sdk";
 import {
   dmMatchesSearchQuery,
   groupMatchesSearchQuery,
-} from "@/features/conversations/utils/search";
+} from "@/features/conversation/utils/search";
 import { translate } from "@/i18n";
 
 type Props = {

@@ -69,6 +69,7 @@ export function useConnectViaWalletStoreContext<T>(
 
 export function useConnectViaWalletStore() {
   const store = useContext(ConnectViaWalletStoreContext);
-  if (!store) throw new Error();
+  if (!store)
+    throw new Error(`Missing ConnectViaWalletStore.Provider in the tree`);
   return store;
 }
