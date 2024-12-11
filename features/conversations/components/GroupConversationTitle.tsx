@@ -98,7 +98,7 @@ export const GroupConversationTitle = memo(
         onLongPress={onLongPress}
         onPress={onPress}
         subtitle={
-          displayMemberText && (
+          displayMemberText ? (
             <Text preset="formLabel">
               {memberText}
               {requestsCount > 0 && (
@@ -110,7 +110,7 @@ export const GroupConversationTitle = memo(
                 </>
               )}
             </Text>
-          )
+          ) : null
         }
         avatarComponent={avatarComponent}
       />
