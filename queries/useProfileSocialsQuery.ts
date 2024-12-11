@@ -8,6 +8,7 @@ import {
 } from "@yornaath/batshit";
 
 import { queryClient } from "./queryClient";
+import { reactQueryPersister } from "@/utils/mmkv";
 
 type ProfileSocialsData = ProfileSocials | null | undefined;
 
@@ -46,6 +47,7 @@ const profileSocialsQueryConfig = (account: string, peerAddress: string) => ({
   // And automatic retries if there was an error fetching
   refetchOnMount: false,
   staleTime: 1000 * 60 * 60 * 24,
+  persister: reactQueryPersister,
 });
 
 export const useProfileSocialsQuery = (
