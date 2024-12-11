@@ -3,7 +3,7 @@ import {
   DecodedMessageWithCodecsType,
   GroupWithCodecsType,
 } from "@utils/xmtpRN/client";
-import { isContentType } from "@utils/xmtpRN/contentTypes";
+import { isContentType } from "@/utils/xmtpRN/content-types/content-types";
 import { getSendersSpamScores } from "@/utils/api";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { computeMessageContentSpamScore } from "@/data/helpers/conversations/spamScore";

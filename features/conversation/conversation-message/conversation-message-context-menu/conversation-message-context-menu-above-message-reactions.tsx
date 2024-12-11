@@ -6,7 +6,7 @@ import { HStack } from "@/design-system/HStack";
 import { Icon } from "@/design-system/Icon/Icon";
 import { TouchableOpacity } from "@/design-system/TouchableOpacity";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
-import { messageIsFromCurrentUserV3 } from "@/features/conversations/utils/messageIsFromCurrentUser";
+import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/messageIsFromCurrentUser";
 import { getReactionContent } from "@/utils/xmtpRN/reactions";
 import { Text } from "@design-system/Text";
 import { useAppTheme } from "@theme/useAppTheme";

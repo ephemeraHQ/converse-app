@@ -1,6 +1,7 @@
-import { useMessageContextStoreContext } from "@/features/conversation/conversation-message.store-context";
 import { useSelect } from "@/data/store/storeHelpers";
 import { HStack } from "@/design-system/HStack";
+import { useMessageContextStoreContext } from "@/features/conversation/conversation-message.store-context";
+import { debugBorder } from "@/utils/debug-style";
 import { memo } from "react";
 
 export const MessageContainer = memo(function MessageContainer(props: {
@@ -12,8 +13,8 @@ export const MessageContainer = memo(function MessageContainer(props: {
 
   return (
     <HStack
+      // {...debugBorder()}
       style={{
-        // ...debugBorder("blue"),
         width: "100%",
         alignItems: "flex-end",
         ...(fromMe

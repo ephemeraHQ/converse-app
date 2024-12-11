@@ -27,7 +27,10 @@ import {
   JoinGroupNavigationParams,
 } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
 import ConversationListNav from "./ConversationListNav";
-import { ConversationNavParams, ConversationNav } from "./ConversationNav";
+import {
+  ConversationNavParams,
+  ConversationNav,
+} from "../../features/conversation/conversation.nav";
 import ConversationRequestsListNav from "./ConversationRequestsListNav";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
 import GroupNav, { GroupNavParams } from "./GroupNav";

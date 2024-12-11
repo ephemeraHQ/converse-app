@@ -3,10 +3,10 @@
  */
 
 import { convertNanosecondsToMilliseconds } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { hasNextMessageInSeries } from "@/features/conversations/utils/hasNextMessageInSeries";
-import { hasPreviousMessageInSeries } from "@/features/conversations/utils/hasPreviousMessageInSeries";
-import { messageIsFromCurrentUserV3 } from "@/features/conversations/utils/messageIsFromCurrentUser";
-import { messageShouldShowDateChange } from "@/features/conversations/utils/messageShouldShowDateChange";
+import { hasNextMessageInSeries } from "@/features/conversation/utils/hasNextMessageInSeries";
+import { hasPreviousMessageInSeries } from "@/features/conversation/utils/hasPreviousMessageInSeries";
+import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/messageIsFromCurrentUser";
+import { messageShouldShowDateChange } from "@/features/conversation/utils/messageShouldShowDateChange";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { InboxId, MessageId } from "@xmtp/react-native-sdk";
 import { createContext, memo, useContext, useEffect, useRef } from "react";

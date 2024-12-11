@@ -1,5 +1,5 @@
 import { SendAttachmentPreview } from "@/features/conversation/conversation-composer/conversation-composer-send-attachment-preview";
-import { ISendMessageParams } from "@/features/conversations/hooks/use-send-message";
+import { ISendMessageParams } from "@/features/conversation/hooks/use-send-message";
 import { saveAttachmentLocally } from "@/utils/attachment/attachment.utils";
 import { HStack } from "@design-system/HStack";
 import { IconButton } from "@design-system/IconButton/IconButton";

@@ -22,7 +22,7 @@ import { useEffect, useRef } from "react";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 import config from "../../config";
 import { getDbDirectory } from "../../data/db";
-import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
+import { CoinbaseMessagingPaymentCodec } from "./content-types/coinbasePayment";
 import { getXmtpClient } from "./sync";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";

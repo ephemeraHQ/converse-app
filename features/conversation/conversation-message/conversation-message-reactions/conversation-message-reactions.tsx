@@ -1,5 +1,8 @@
+import { useSelect } from "@/data/store/storeHelpers";
+import { useMessageContextStoreContext } from "@/features/conversation/conversation-message.store-context";
+import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
-import { HStack } from "@design-system/HStack";
+import { AnimatedHStack, HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
@@ -10,14 +13,11 @@ import {
 } from "@utils/profile";
 import { memo, useCallback, useMemo } from "react";
 import { TouchableHighlight, ViewStyle } from "react-native";
-import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useMessageContextStoreContext } from "@/features/conversation/conversation-message.store-context";
-import { useSelect } from "@/data/store/storeHelpers";
+import { openMessageReactionsDrawer } from "./conversation-message-reaction-drawer/conversation-message-reaction-drawer.service.";
 import {
   RolledUpReactions,
   SortedReaction,
 } from "./conversation-message-reactions.types";
-import { openMessageReactionsDrawer } from "./conversation-message-reaction-drawer/conversation-message-reaction-drawer.service.";
 
 const MAX_REACTION_EMOJIS_SHOWN = 3;
 
@@ -38,7 +38,8 @@ export const ConversationMessageReactions = memo(
     }
 
     return (
-      <HStack
+      <AnimatedHStack
+        entering={theme.animation.reanimatedFadeInScaleIn}
         style={[
           {
             flexDirection: "row",
@@ -74,7 +75,7 @@ export const ConversationMessageReactions = memo(
             )}
           </VStack>
         </TouchableHighlight>
-      </HStack>
+      </AnimatedHStack>
     );
   }
 );

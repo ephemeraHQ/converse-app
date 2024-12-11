@@ -4,6 +4,8 @@ import {
   getConversationMessages,
   useConversationMessages,
 } from "@/queries/useConversationMessages";
+import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/content-types/coinbasePayment";
+import { getMessageContentType } from "@/utils/xmtpRN/content-types/content-types";
 import {
   getCurrentAccount,
   useCurrentAccount,
@@ -15,8 +17,6 @@ import {
   DecodedMessageWithCodecsType,
   SupportedCodecsType,
 } from "@utils/xmtpRN/client";
-import { getMessageContentType } from "@utils/xmtpRN/contentTypes";
-import { CoinbaseMessagingPaymentCodec } from "@utils/xmtpRN/contentTypes/coinbasePayment";
 import { getInboxId } from "@utils/xmtpRN/signIn";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
@@ -98,26 +98,38 @@ export function useMessageSenderReadableProfile(
 // TMP until we move this into an account store or something like that
 // Maybe instead worth moving into account store?
 export function useCurrentAccountInboxId() {
-  return useQuery(getCurrentAccountInboxIdQueryOptions());
+  const currentAccount = useCurrentAccount()!;
+  return useQuery(getCurrentAccountInboxIdQueryOptions(currentAccount));
 }
 
-function getCurrentAccountInboxIdQueryOptions() {
-  const currentAccount = getCurrentAccount();
+type IGetCurrentAccountInboxIdQueryData = Awaited<
+  ReturnType<typeof getInboxId>
+>;
+
+function getCurrentAccountInboxIdQueryFn(currentAccount: string) {
+  return getInboxId(currentAccount!);
+}
+
+function getCurrentAccountInboxIdQueryOptions(currentAccount: string) {
   return {
     queryKey: ["inboxId", currentAccount],
-    queryFn: () => getInboxId(currentAccount!),
+    queryFn: () => getCurrentAccountInboxIdQueryFn(currentAccount),
     enabled: !!currentAccount,
   };
 }
 
 export function getCurrentUserAccountInboxId() {
-  return queryClient.getQueryData(
-    getCurrentAccountInboxIdQueryOptions().queryKey
+  const currentAccount = getCurrentAccount()!;
+  return queryClient.getQueryData<IGetCurrentAccountInboxIdQueryData>(
+    getCurrentAccountInboxIdQueryOptions(currentAccount).queryKey
   );
 }
 
 export function prefetchCurrentUserAccountInboxId() {
-  return queryClient.prefetchQuery(getCurrentAccountInboxIdQueryOptions());
+  const currentAccount = getCurrentAccount()!;
+  return queryClient.prefetchQuery(
+    getCurrentAccountInboxIdQueryOptions(currentAccount)
+  );
 }
 
 export function convertNanosecondsToMilliseconds(nanoseconds: number) {
