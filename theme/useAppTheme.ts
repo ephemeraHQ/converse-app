@@ -164,6 +164,8 @@ type UseAppThemeValue = {
   themed: <T>(
     styleOrStyleFn: ThemedStyle<T> | StyleProp<T> | ThemedStyleArray<T>
   ) => T;
+  // Change color scheme to test design system
+  toggleTheme: () => void;
 };
 
 export type IThemed = ReturnType<typeof useAppTheme>["themed"];
@@ -193,16 +195,23 @@ export const useAppTheme = (): UseAppThemeValue => {
     [themeContext]
   );
 
+  const toggleTheme = useCallback(() => {
+    const newTheme = themeContext === "dark" ? "light" : "dark";
+    setThemeContextOverride(newTheme);
+  }, [themeContext, setThemeContextOverride]);
+
   // TODO: Remove after debugging is done
   // Light/dark mode color scheme logging
   useEffect(() => {
-    logger.debug("=== Theme Debug ===", {
-      systemColorScheme: Appearance.getColorScheme(),
-      platformVersion: Platform.Version,
-      themeContext: themeContext,
-      isDarkTheme: themeVariant.isDark,
-      navThemeDark: navTheme.dark,
-    });
+    if (!__DEV__) {
+      logger.debug("=== Theme Debug ===", {
+        systemColorScheme: Appearance.getColorScheme(),
+        platformVersion: Platform.Version,
+        themeContext: themeContext,
+        isDarkTheme: themeVariant.isDark,
+        navThemeDark: navTheme.dark,
+      });
+    }
   }, [themeContext, themeVariant, navTheme]);
 
   const themed = useCallback(
@@ -230,6 +239,7 @@ export const useAppTheme = (): UseAppThemeValue => {
     theme: themeVariant,
     themeContext,
     themed,
+    toggleTheme,
   };
 };
 

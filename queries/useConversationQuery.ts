@@ -1,95 +1,28 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import { isV3Topic } from "@utils/groupUtils/groupId";
-import {
-  ConversationWithCodecsType,
-  ConverseXmtpClientType,
-} from "@utils/xmtpRN/client";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-
-import {
-  conversationQueryKey,
-  conversationWithPeerQueryKey,
-} from "./QueryKeys";
 import { queryClient } from "./queryClient";
-import logger from "@utils/logger";
-import {
-  getConversationByPeerByAccount,
-  getConversationByTopicByAccount,
-} from "@utils/xmtpRN/conversations";
+import { conversationQueryKey } from "./QueryKeys";
+
+export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
+
+function getConversation(account: string, topic: ConversationTopic) {
+  return getConversationByTopicByAccount({
+    account,
+    topic,
+    includeSync: false,
+  });
+}
 
 export const useConversationQuery = (
   account: string,
   topic: ConversationTopic | undefined,
-  options?: Partial<
-    UseQueryOptions<ConversationWithCodecsType | null | undefined>
-  >
+  options?: Partial<UseQueryOptions<ConversationQueryData | null | undefined>>
 ) => {
   return useQuery({
     ...options,
     queryKey: conversationQueryKey(account, topic!),
-    queryFn: async () => {
-      if (!topic) {
-        return null;
-      }
-      return getConversationByTopicByAccount({
-        account,
-        topic,
-        includeSync: false,
-      });
-    },
-    enabled: !!topic,
-  });
-};
-
-export const useConversationWithPeerQuery = (
-  account: string,
-  peer: string | undefined,
-  options?: Partial<
-    UseQueryOptions<ConversationWithCodecsType | null | undefined>
-  >
-) => {
-  return useQuery({
-    ...options,
-    queryKey: conversationWithPeerQueryKey(account, peer!),
-    queryFn: async () => {
-      logger.info("[Crash Debug] queryFn fetching conversation with peer");
-      if (!peer) {
-        return null;
-      }
-      const conversation = await getConversationByPeerByAccount({
-        account,
-        peer,
-        includeSync: true,
-      });
-      return conversation;
-    },
-    enabled: !!peer,
-  });
-};
-
-export const useConversationScreenQuery = (
-  account: string,
-  topic: ConversationTopic | undefined,
-  options?: Partial<
-    UseQueryOptions<ConversationWithCodecsType | null | undefined>
-  >
-) => {
-  return useQuery({
-    ...options,
-    queryKey: conversationQueryKey(account, topic!),
-    queryFn: async () => {
-      logger.info("[Crash Debug] queryFn fetching group");
-      if (!topic) {
-        return null;
-      }
-      const conversation = await getConversationByTopicByAccount({
-        account,
-        topic,
-        includeSync: true,
-      });
-      return conversation;
-    },
+    queryFn: () => getConversation(account, topic!),
     enabled: !!topic,
   });
 };
@@ -106,7 +39,27 @@ export const invalidateConversationQuery = (
 export const setConversationQueryData = (
   account: string,
   topic: ConversationTopic,
-  conversation: ConversationWithCodecsType
+  conversation: ConversationQueryData
 ) => {
-  queryClient.setQueryData(conversationQueryKey(account, topic), conversation);
+  queryClient.setQueryData<ConversationQueryData>(
+    conversationQueryKey(account, topic),
+    conversation
+  );
 };
+
+export function refetchConversationQuery(
+  account: string,
+  topic: ConversationTopic
+) {
+  return queryClient.refetchQueries({
+    queryKey: conversationQueryKey(account, topic),
+  });
+}
+
+export const getConversationQueryData = (
+  account: string,
+  topic: ConversationTopic
+) =>
+  queryClient.getQueryData<ConversationQueryData>(
+    conversationQueryKey(account, topic)
+  );

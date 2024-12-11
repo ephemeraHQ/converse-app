@@ -17,7 +17,6 @@ import {
 } from "react-native";
 
 import Avatar from "./Avatar";
-import { Indicator } from "./Indicator";
 import {
   useProfilesStore,
   useCurrentAccount,
@@ -40,13 +39,12 @@ type GroupAvatarProps = {
   size?: number;
   style?: StyleProp<ViewStyle>;
   uri?: string | undefined;
-  topic?: ConversationTopic | undefined;
+  topic?: ConversationTopic;
   pendingGroupMembers?: { address: string; uri?: string; name?: string }[];
   excludeSelf?: boolean;
   // Converstion List should not make requests across the bridge
   // Use data from the initial sync, and as the query gets updated
   onConversationListScreen?: boolean;
-  showIndicator?: boolean;
 };
 
 type GroupAvatarDumbProps = {
@@ -197,12 +195,11 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
   pendingGroupMembers,
   excludeSelf = true,
   onConversationListScreen = false,
-  showIndicator = false,
 }) => {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { members: groupMembers } = useGroupMembers(
-    topic,
+    topic!,
     onConversationListScreen
       ? {
           refetchOnWindowFocus: false,
@@ -252,7 +249,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
   return (
     <View style={[styles.container, { width: size, height: size }, style]}>
       {uri ? (
-        <Avatar size={size} uri={uri} showIndicator={showIndicator} />
+        <Avatar size={size} uri={uri} />
       ) : (
         <View style={[styles.container, { width: size, height: size }]}>
           <View style={styles.overlay} />
@@ -289,7 +286,6 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
               return null;
             })}
           </View>
-          {showIndicator && <Indicator size={size} />}
         </View>
       )}
     </View>

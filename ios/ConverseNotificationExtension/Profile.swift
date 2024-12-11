@@ -7,21 +7,19 @@
 
 import Foundation
 import Alamofire
-import web3
 
 func getProfile(account: String, address: String) async -> Profile? {
   var profileState = getProfilesStore(account: account)?.state
   let lowercasedAddress = address.lowercased()
-  let formattedAddress = EthereumAddress(lowercasedAddress).toChecksumAddress()
-  if let profile = profileState?.profiles?[address] ?? profileState?.profiles?[formattedAddress] ?? profileState?.profiles?[lowercasedAddress] {
+  if let profile = profileState?.profiles?[address] ?? profileState?.profiles?[lowercasedAddress] ?? profileState?.profiles?[lowercasedAddress] {
     return profile
   }
   
   // If profile is nil, let's refresh it
-  try? await refreshProfileFromBackend(account: account, address: formattedAddress)
+  try? await refreshProfileFromBackend(account: account, address: lowercasedAddress)
   
   profileState = getProfilesStore(account: account)?.state
-  if let profile = profileState?.profiles?[formattedAddress] {
+  if let profile = profileState?.profiles?[lowercasedAddress] {
     return profile
   }
   return nil
@@ -55,3 +53,4 @@ func refreshProfileFromBackend(account: String, address: String) async throws  {
   }
   
 }
+

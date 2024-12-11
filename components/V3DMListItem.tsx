@@ -25,6 +25,8 @@ import {
   setConversationListContextMenuConversationData,
 } from "@/features/conversation-list/ConversationListContextMenu.store";
 import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
+import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
+import { useAppTheme } from "@/theme/useAppTheme";
 
 type V3DMListItemProps = {
   conversation: DmWithCodecsType;
@@ -67,13 +69,14 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: conversation.lastMessage,
-    conversation: conversation,
     timestamp,
   });
 
   const { leftActionIcon } = useDisplayInfo({
     isUnread,
   });
+
+  const { theme } = useAppTheme();
 
   const messageText = useMessageText(conversation.lastMessage);
   const preferredName = usePreferredInboxName(peer);
@@ -95,7 +98,7 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
     resetConversationListContextMenuStore();
   }, []);
 
-  const contextMenuItems = useMemo(
+  const contextMenuItems: ContextMenuItem[] = useMemo(
     () => [
       {
         title: translate("pin"),
@@ -104,6 +107,7 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
           closeContextMenu();
         },
         id: "pin",
+        rightView: <ContextMenuIcon icon="pin" />,
       },
       {
         title: isUnread
@@ -114,6 +118,11 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
           closeContextMenu();
         },
         id: "markAsUnread",
+        rightView: (
+          <ContextMenuIcon
+            icon={isUnread ? "checkmark.message" : "message.badge"}
+          />
+        ),
       },
       {
         title: translate("delete"),
@@ -122,15 +131,22 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
           closeContextMenu();
         },
         id: "delete",
+        titleStyle: {
+          color: theme.colors.global.caution,
+        },
+        rightView: (
+          <ContextMenuIcon icon="trash" color={theme.colors.global.caution} />
+        ),
       },
     ],
     [
-      topic,
-      setPinnedConversations,
-      handleDelete,
-      closeContextMenu,
       isUnread,
+      theme.colors.global.caution,
+      setPinnedConversations,
+      topic,
+      closeContextMenu,
       toggleReadStatus,
+      handleDelete,
     ]
   );
 
@@ -152,8 +168,11 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
   }, [topic]);
 
   const onLeftSwipe = useCallback(() => {
-    toggleReadStatus();
-  }, [toggleReadStatus]);
+    const translation = ref.current?.state.rowTranslation;
+    if (translation && (translation as any)._value > 100) {
+      toggleReadStatus();
+    }
+  }, [toggleReadStatus, ref]);
 
   const triggerHapticFeedback = useCallback(() => {
     return Haptics.mediumImpactAsync();

@@ -10,11 +10,11 @@ import {
   takePictureFromCamera,
 } from "../utils/media";
 
-interface PhotoSelect {
+type PhotoSelect = {
   initialPhoto?: string;
   onPhotoAdd?: (newUrl: string) => void;
   isAvatar?: boolean;
-}
+};
 
 export const usePhotoSelect = (payload?: PhotoSelect) => {
   const { initialPhoto, onPhotoAdd, isAvatar } = payload ?? {};

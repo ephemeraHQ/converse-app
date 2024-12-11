@@ -10,7 +10,7 @@ export type IIconButtonVariant = "outline" | "subtle" | "fill" | "ghost";
 export type IIconButtonSize = "sm" | "md" | "lg";
 export type IIconButtonAction = "primary" | "danger";
 
-export interface IIconButtonProps extends RNPressableProps {
+export type IIconButtonProps = {
   /**
    * The icon component to render.
    * If provided, it will be rendered inside the button.
@@ -65,4 +65,4 @@ export interface IIconButtonProps extends RNPressableProps {
    * Haptic or not
    */
   withHaptics?: boolean;
-}
+} & RNPressableProps;

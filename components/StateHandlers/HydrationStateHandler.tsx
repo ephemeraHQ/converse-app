@@ -1,6 +1,5 @@
 import logger from "@utils/logger";
 import { useEffect } from "react";
-// import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
 import { getAccountsList } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { getXmtpClient } from "../../utils/xmtpRN/sync";
@@ -16,13 +15,10 @@ export default function HydrationStateHandler() {
         // Awaiting before showing onboarding
         await getInstalledWallets(false);
       } else {
+        // note(lustig) I don't think this does anything?
         getInstalledWallets(false);
       }
       accounts.map((a) => getXmtpClient(a));
-
-      // accounts.map((address) => {
-      //   refreshProfileForAddress(address, address);
-      // });
 
       useAppStore.getState().setHydrationDone(true);
       logger.debug(

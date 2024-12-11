@@ -5,7 +5,6 @@ import { createStore, useStore } from "zustand";
 type IConnectViaWalletStoreProps = {
   address: string;
   alreadyV3Db: boolean;
-  onXmtp: boolean;
   signer: Signer;
 };
 
@@ -43,7 +42,6 @@ const createConnectViaWalletStore = (props: IConnectViaWalletStoreProps) =>
   createStore<IConnectViaWalletStoreState>()((set) => ({
     address: props.address,
     signer: props.signer,
-    onXmtp: props.onXmtp,
     alreadyV3Db: props.alreadyV3Db,
     loading: false,
     numberOfSignaturesDone: 0,

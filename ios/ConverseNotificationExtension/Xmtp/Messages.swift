@@ -19,8 +19,8 @@ func handleV3Welcome(xmtpClient: XMTP.Client, apiURI: String?, pushToken: String
     let spamScore = await computeSpamScoreV3Welcome(client: xmtpClient, conversation: conversation, apiURI: apiURI)
     if spamScore < 0 { // Message is going to main inbox
       // Consent list is loaded in computeSpamScoreGroupWelcome
-      let convoAllowed = try await xmtpClient.preferences.consentList.conversationState(conversationId: conversation.id) == .allowed
-      let convoDenied = try await xmtpClient.preferences.consentList.conversationState(conversationId: conversation.id) == .denied
+      let convoAllowed = try await xmtpClient.preferences.conversationState(conversationId: conversation.id) == .allowed
+      let convoDenied = try await xmtpClient.preferences.conversationState(conversationId: conversation.id) == .denied
       // If group is already consented (either way) then don't show a notification for welcome as this will likely be a second+ installation
       if !convoAllowed && !convoDenied {
         
@@ -198,17 +198,17 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_En
   if (isV3MessageTopic(topic: envelope.contentTopic)) {
     if let conversation = try! xmtpClient.findConversationByTopic(topic: envelope.contentTopic) {
       do {
-        sentryTrackMessage(message: "[NotificationExtension] Syncing Group", extras: [:])
+        sentryAddBreadcrumb(message: "[NotificationExtension] Syncing Group")
         try await conversation.sync()
-        sentryTrackMessage(message: "[NotificationExtension] Done Syncing Group", extras: [:])
-        let envelopeBytes = envelope.message
-        let decodedMessage = try await conversation.processMessage(messageBytes: envelopeBytes)
-        print("[NotificationExtension] Group message decoded!")
-        let decoded = try decodedMessage.decode()
-        return decoded
+        sentryAddBreadcrumb(message: "[NotificationExtension] Decoding group message...")
+        let messageBytes = envelope.message
+        let message = try await conversation.processMessage(messageBytes: messageBytes)
+        let decodedMessage = try message.decode()
+        sentryAddBreadcrumb(message:"[NotificationExtension] Group message decoded!")
+        return decodedMessage
       } catch {
         sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
-        print("[NotificationExtension] ERROR WHILE DECODING \(error)")
+        sentryAddBreadcrumb(message: "[NotificationExtension] ERROR WHILE DECODING \(error)")
         return nil
       }
     } else {

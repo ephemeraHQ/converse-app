@@ -8,11 +8,11 @@ import {
   getAddressIsSuperAdmin,
 } from "./adminUtils"; // adjust the import path
 
-interface EntityObjectWithAddress<T, K extends string = string> {
+type EntityObjectWithAddress<T, K extends string = string> = {
   byId: Record<K, T>;
   byAddress: Record<string, K>;
   ids: K[];
-}
+};
 
 const mockMembers: EntityObjectWithAddress<Member, InboxId> = {
   byId: {

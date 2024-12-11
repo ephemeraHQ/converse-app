@@ -6,7 +6,7 @@ const prompts = require("prompts");
 const { handleEnv } = require("./eas");
 const appJson = require("../../app.json");
 
-// eslint-disable-next-line no-undef
+ 
 const PROJECT_ROOT = path.join(__dirname, "..", "..");
 
 const build = async () => {

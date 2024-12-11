@@ -5,6 +5,7 @@ import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
+  GroupWithCodecsType,
 } from "@utils/xmtpRN/client";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 
@@ -12,20 +13,21 @@ import { queryClient } from "./queryClient";
 import { setGroupIsActiveQueryData } from "./useGroupIsActive";
 import { setGroupNameQueryData } from "./useGroupNameQuery";
 import { setGroupPhotoQueryData } from "./useGroupPhotoQuery";
-import { ConversationVersion } from "@xmtp/react-native-sdk";
+import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
+import { useAppStore } from "@/data/store/appStore";
 
 export const conversationListKey = (account: string) => [
   QueryKeys.V3_CONVERSATION_LIST,
-  account,
+  account?.toLowerCase(), // All queries are case sensitive, sometimes we use checksum, but the SDK use lowercase, always use lowercase
 ];
 
-type V3ConversationListType = ConversationWithCodecsType[];
+export type V3ConversationListType = ConversationWithCodecsType[];
 
 const v3ConversationListQueryFn = async (
   account: string,
   context: string,
   includeSync: boolean = true
-) => {
+): Promise<V3ConversationListType> => {
   try {
     logger.debug(
       `[ConversationListQuery] Fetching conversation list from network ${context}`
@@ -129,14 +131,19 @@ export const invalidateGroupsConversationListQuery = (account: string) => {
 const getConversationListQueryData = (
   account: string
 ): V3ConversationListType | undefined => {
-  return queryClient.getQueryData(conversationListKey(account));
+  return queryClient.getQueryData<V3ConversationListType>(
+    conversationListKey(account)
+  );
 };
 
 const setConversationListQueryData = (
   account: string,
   conversations: V3ConversationListType
 ) => {
-  queryClient.setQueryData(conversationListKey(account), conversations);
+  return queryClient.setQueryData<V3ConversationListType>(
+    conversationListKey(account),
+    conversations
+  );
 };
 
 export const addConversationToConversationListQuery = (
@@ -154,23 +161,110 @@ export const addConversationToConversationListQuery = (
   ]);
 };
 
-export const updateMessageToConversationListQuery = (
+export const updateConversationDataToConversationListQuery = (
   account: string,
-  message: DecodedMessageWithCodecsType
+  topic: ConversationTopic,
+  conversation: Partial<ConversationWithCodecsType>
 ) => {
   const previousConversationsData = getConversationListQueryData(account);
+
   if (!previousConversationsData) return;
-  const conversation = previousConversationsData.find(
-    (c) => c.topic === message.topic
-  );
-  if (!conversation) return;
   const newConversations: V3ConversationListType =
     previousConversationsData.map((c) => {
-      if (c.topic === message.topic) {
-        c.lastMessage = message;
-        return c;
+      if (c.topic === topic) {
+        return {
+          ...c,
+          ...conversation,
+        } as ConversationWithCodecsType;
       }
       return c;
     });
   setConversationListQueryData(account, newConversations);
+};
+
+export const updateMessageToConversationListQuery = (
+  account: string,
+  message: DecodedMessageWithCodecsType
+) => {
+  updateConversationDataToConversationListQuery(
+    account,
+    message.topic as ConversationTopic,
+    {
+      lastMessage: message,
+    }
+  );
+};
+
+type UpdateGroupMetadataToConversationListQueryParams = {
+  account: string;
+  topic: ConversationTopic;
+  groupMetadata: Partial<GroupWithCodecsType>;
+};
+
+export const updateGroupMetadataToConversationListQuery = ({
+  account,
+  topic,
+  groupMetadata,
+}: UpdateGroupMetadataToConversationListQueryParams) => {
+  const previousConversationsData = getConversationListQueryData(account);
+  if (!previousConversationsData) return;
+  const newConversations: V3ConversationListType =
+    previousConversationsData.map((c) => {
+      if (c.topic === topic && c.version === ConversationVersion.GROUP) {
+        return {
+          ...c,
+          ...groupMetadata,
+        } as GroupWithCodecsType;
+      }
+      return c;
+    });
+  setConversationListQueryData(account, newConversations);
+};
+
+type UpdateGroupImageToConversationListQueryParams = {
+  account: string;
+  topic: ConversationTopic;
+  image: string;
+};
+
+export const updateGroupImageToConversationListQuery = ({
+  account,
+  topic,
+  image,
+}: UpdateGroupImageToConversationListQueryParams) => {
+  return updateConversationDataToConversationListQuery(account, topic, {
+    imageUrlSquare: image,
+  });
+};
+
+type UpdateGroupNameToConversationListQueryParams = {
+  account: string;
+  topic: ConversationTopic;
+  name: string;
+};
+
+export const updateGroupNameToConversationListQuery = ({
+  account,
+  topic,
+  name,
+}: UpdateGroupNameToConversationListQueryParams) => {
+  return updateConversationDataToConversationListQuery(account, topic, {
+    name,
+  });
+};
+
+type UpdateGroupDescriptionToConversationListQueryParams = {
+  account: string;
+  topic: ConversationTopic;
+  description: string;
+};
+
+export const updateGroupDescriptionToConversationListQuery = ({
+  account,
+  topic,
+  description,
+}: UpdateGroupDescriptionToConversationListQueryParams) => {
+  return updateConversationDataToConversationListQuery(account, topic, {
+    description,
+  });
 };

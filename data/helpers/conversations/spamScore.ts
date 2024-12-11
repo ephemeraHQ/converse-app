@@ -1,8 +1,5 @@
-import { URL_REGEX } from "../../../utils/regex";
-import {
-  IConvosContentType,
-  isContentType,
-} from "../../../utils/xmtpRN/contentTypes";
+import { URL_REGEX } from "@utils/regex";
+import { IConvosContentType, isContentType } from "@utils/xmtpRN/contentTypes";
 
 type V3SpameScoreParams = {
   message: string;
@@ -19,11 +16,11 @@ export const getV3SpamScore = async ({
   // TODO: Check spam score between sender and receiver
 
   // Check contents of last message
-  spamScore += computeSpamScore(message, contentType);
+  spamScore += computeMessageContentSpamScore(message, contentType);
   return spamScore;
 };
 
-const computeSpamScore = (
+export const computeMessageContentSpamScore = (
   message: string,
   contentType: IConvosContentType
 ): number => {
@@ -37,5 +34,6 @@ const computeSpamScore = (
   if (isContentType({ type: "text", contentType }) && message.includes("$")) {
     spamScore += 1;
   }
+
   return spamScore;
 };

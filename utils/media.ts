@@ -292,11 +292,11 @@ const allowedMimeTypes = [
   ...videoMimeTypes,
 ];
 
-interface MediaSelect {
+type MediaSelect = {
   initialMedia?: string;
   onMediaAdd?: (newUrl: string) => void;
   isAvatar?: boolean;
-}
+};
 
 export const useMediaSelect = (payload?: MediaSelect) => {
   const { initialMedia, onMediaAdd, isAvatar } = payload ?? {};

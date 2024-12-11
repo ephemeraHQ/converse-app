@@ -4,7 +4,6 @@ import { Client } from "@xmtp/xmtp-js";
 import { useEffect, useState } from "react";
 import { AppState } from "react-native";
 
-import { xmtpSignatureByAccount } from "./api";
 import {
   ConverseXmtpClientType,
   getXmtpClientFromAddress,
@@ -16,12 +15,13 @@ import {
   streamConversations,
 } from "./conversations";
 import { stopStreamingAllMessage, streamAllMessages } from "./messages";
+import { xmtpSignatureByAccount } from "@utils/api";
 import { getChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import {
   fetchConversationListQuery,
   fetchPersistedConversationListQuery,
 } from "@queries/useV3ConversationListQuery";
-import { subscribeToNotifications } from "../notifications";
+import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
 
 const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;
@@ -30,11 +30,12 @@ const instantiatingClientForAccount: {
 export const getXmtpClient = async (
   account: string
 ): Promise<ConverseXmtpClientType | Client> => {
-  if (account && xmtpClientByAccount[account]) {
-    return xmtpClientByAccount[account];
+  const lowerCaseAccount = account.toLowerCase();
+  if (account && xmtpClientByAccount[lowerCaseAccount]) {
+    return xmtpClientByAccount[lowerCaseAccount];
   }
   // Return the existing instantiating promise to avoid race condition
-  const alreadyInstantiating = instantiatingClientForAccount[account];
+  const alreadyInstantiating = instantiatingClientForAccount[lowerCaseAccount];
   if (alreadyInstantiating) {
     return alreadyInstantiating;
   }
@@ -44,23 +45,23 @@ export const getXmtpClient = async (
     await new Promise((r) => setTimeout(r, 200));
     return getXmtpClient(account);
   }
-  instantiatingClientForAccount[account] = (async () => {
+  instantiatingClientForAccount[lowerCaseAccount] = (async () => {
     try {
       logger.debug("[XmtpRN] Getting client from address");
       const client = await getXmtpClientFromAddress(account);
       logger.info(`[XmtpRN] Instantiated client for ${client.address}`);
       getChatStore(account).getState().setLocalClientConnected(true);
       getChatStore(account).getState().setErrored(false);
-      xmtpClientByAccount[client.address] = client;
+      xmtpClientByAccount[lowerCaseAccount] = client;
       return client;
     } catch (e: any) {
       getChatStore(account).getState().setErrored(true);
       throw e;
     } finally {
-      delete instantiatingClientForAccount[account];
+      delete instantiatingClientForAccount[lowerCaseAccount];
     }
   })();
-  return instantiatingClientForAccount[account] as Promise<
+  return instantiatingClientForAccount[lowerCaseAccount] as Promise<
     ConverseXmtpClientType | Client
   >;
 };
@@ -117,7 +118,7 @@ const syncClientConversationList = async (account: string) => {
     // Load the persisted conversation list
     await fetchPersistedConversationListQuery(account);
     // Streaming conversations
-    retryWithBackoff({
+    await retryWithBackoff({
       fn: () => streamConversations(account),
       retries: 5,
       delay: 1000,
@@ -130,8 +131,8 @@ const syncClientConversationList = async (account: string) => {
         context: `Failed to stream conversations for ${account} no longer retrying`,
       });
     });
-    // Streaming all dm messages (not groups because buggy)
-    retryWithBackoff({
+    // Streaming all messages
+    await retryWithBackoff({
       fn: () => streamAllMessages(account),
       retries: 5,
       delay: 1000,

@@ -15,19 +15,20 @@ export const useToggleReadStatus = ({
   currentAccount,
 }: UseToggleReadStatusProps) => {
   const { setTopicsData } = useChatStore(useSelect(["setTopicsData"]));
-
   return useCallback(() => {
     const newStatus = isUnread ? "read" : "unread";
     const timestamp = new Date().getTime();
     setTopicsData({
       [topic]: {
         status: newStatus,
+        readUntil: isUnread ? timestamp : 0,
         timestamp,
       },
     });
     saveTopicsData(currentAccount, {
       [topic]: {
         status: newStatus,
+        readUntil: isUnread ? timestamp : 0,
         timestamp,
       },
     });

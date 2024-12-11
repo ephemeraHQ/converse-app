@@ -1,4 +1,5 @@
 import { zustandMMKVStorage } from "@utils/mmkv";
+import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
 import { createStore, useStore } from "zustand";
 import {
   createJSONStorage,
@@ -27,7 +28,7 @@ export type IComposerMediaPreview = {
 
 type IConversationPersistedStore = {
   inputValue: string;
-  replyingToMessageId: string | null;
+  replyingToMessageId: MessageId | null;
   composerMediaPreview: IComposerMediaPreview;
 };
 
@@ -85,7 +86,7 @@ export function useConversationPersistedStore(topic: string) {
 }
 
 export function useConversationPersistedStoreState<T>(
-  conversationTopic: string | undefined,
+  conversationTopic: ConversationTopic | null,
   selector: (state: IConversationPersistedStore) => T
 ) {
   const store = conversationTopic

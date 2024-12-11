@@ -32,6 +32,7 @@ export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
   const formattedGroupName = formatGroupName(topic, groupName);
   const currentAccount = useCurrentAccount() as string;
   const { members } = useGroupMembers(topic);
+
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
       currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),

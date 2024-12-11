@@ -41,6 +41,7 @@ import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
 import "./utils/splash/splash";
+import "./features/notifications/utils";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy

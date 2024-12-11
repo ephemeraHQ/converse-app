@@ -1,26 +1,29 @@
 import logger from "@utils/logger";
 import {
-  ConversationOrder,
   ConversationOptions,
+  ConversationOrder,
   ConversationTopic,
   ConversationVersion,
 } from "@xmtp/react-native-sdk";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 
+import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
   DmWithCodecsType,
 } from "./client";
 import { getXmtpClient } from "./sync";
-import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
+import { addConversationToConversationListQuery } from "@/queries/useV3ConversationListQuery";
+import { streamAllMessages } from "./messages";
 
 export const streamConversations = async (account: string) => {
   await stopStreamingConversations(account);
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   await client.conversations.stream(async (conversation) => {
     logger.info("[XMTPRN Conversations] GOT A NEW CONVO");
-    // handleNewConversation(client, conversation);
+
+    addConversationToConversationListQuery(account, conversation);
   });
   logger.info("STREAMING CONVOS");
 };
@@ -130,6 +133,9 @@ export const getConversationByTopic = async ({
   topic,
   includeSync = false,
 }: GetConversationByTopicParams): Promise<ConversationWithCodecsType> => {
+  if (!topic) {
+    throw new Error("Topic is required to get conversation by topic");
+  }
   logger.debug(
     `[XMTPRN Conversations] Getting conversation by topic: ${topic}`
   );
@@ -307,6 +313,7 @@ export const createConversation = async ({
 }: CreateConversationParams) => {
   logger.info(`[XMTP] Creating a conversation with peer ${peerAddress}`);
   const conversation = await client.conversations.findOrCreateDm(peerAddress);
+  await handleNewConversationCreation(client, conversation);
   return conversation;
 };
 
@@ -338,7 +345,7 @@ export const createGroup = async ({
   groupPhoto,
   groupDescription,
 }: CreateGroupParams) => {
-  return client.conversations.newGroupCustomPermissions(
+  const group = await client.conversations.newGroupCustomPermissions(
     peers,
     permissionPolicySet,
     {
@@ -347,6 +354,12 @@ export const createGroup = async ({
       description: groupDescription,
     }
   );
+
+  logger.info("[XMTPRN Conversations] Created group");
+
+  await handleNewConversationCreation(client, group);
+
+  return group;
 };
 
 type CreateGroupByAccountParams = {
@@ -375,6 +388,7 @@ export const createGroupByAccount = async ({
     groupPhoto,
     groupDescription,
   });
+
   // if (groupName) {
   //   setGroupNameQueryData(account, group.topic, groupName);
   // }
@@ -425,7 +439,15 @@ export const getConversationByPeer = async ({
 }: GetConversationByPeerParams) => {
   logger.debug(`[XMTPRN Conversations] Getting conversation by peer: ${peer}`);
   const start = new Date().getTime();
+
+  logger.debug(`[XMTPRN Conversations] Finding DM by address: ${peer}`);
+  const findStart = new Date().getTime();
   let conversation = await client.conversations.findDmByAddress(peer);
+  const findEnd = new Date().getTime();
+  logger.debug(
+    `[XMTPRN Conversations] Find DM took ${(findEnd - findStart) / 1000} sec`
+  );
+
   if (!conversation) {
     logger.debug(
       `[XMTPRN Conversations] Conversation ${peer} not found, syncing conversations`
@@ -438,12 +460,29 @@ export const getConversationByPeer = async ({
         (syncEnd - syncStart) / 1000
       } sec`
     );
+
+    logger.debug(`[XMTPRN Conversations] Retrying find DM by address: ${peer}`);
+    const retryFindStart = new Date().getTime();
     conversation = await client.conversations.findDmByAddress(peer);
+    const retryFindEnd = new Date().getTime();
+    logger.debug(
+      `[XMTPRN Conversations] Retry find DM took ${
+        (retryFindEnd - retryFindStart) / 1000
+      } sec`
+    );
   }
+
   if (!conversation) {
+    logger.error(
+      `[XMTPRN Conversations] Conversation with peer ${peer} not found after sync`
+    );
     throw new Error(`Conversation with peer ${peer} not found`);
   }
+
   if (includeSync) {
+    logger.debug(
+      `[XMTPRN Conversations] Syncing conversation with peer ${peer}`
+    );
     const syncStart = new Date().getTime();
     await conversation.sync();
     const syncEnd = new Date().getTime();
@@ -453,9 +492,10 @@ export const getConversationByPeer = async ({
       } sec`
     );
   }
+
   const end = new Date().getTime();
   logger.debug(
-    `[XMTPRN Conversations] Got conversation by topic in ${
+    `[XMTPRN Conversations] Total time to get conversation by peer: ${
       (end - start) / 1000
     } sec`
   );
@@ -477,7 +517,9 @@ export const getConversationByPeerByAccount = async ({
   return getConversationByPeer({ client, peer, includeSync });
 };
 
-export const getPeerAddressDm = async (dm: DmWithCodecsType) => {
+export const getPeerAddressDm = async (
+  dm: DmWithCodecsType
+): Promise<string | undefined> => {
   const peerInboxId = await dm.peerInboxId();
   const peerAddress = (await dm.members()).find(
     (member) => member.inboxId === peerInboxId
@@ -488,7 +530,7 @@ export const getPeerAddressDm = async (dm: DmWithCodecsType) => {
 export const getPeerAddressFromTopic = async (
   account: string,
   topic: ConversationTopic
-) => {
+): Promise<string | undefined> => {
   const dm = await getConversationByTopicByAccount({
     account,
     topic,
@@ -499,4 +541,16 @@ export const getPeerAddressFromTopic = async (
     return peerAddress;
   }
   throw new Error("Conversation is not a DM");
+};
+
+// TODO: This is a temporary function to handle new conversation creation
+// This is a temporary workaround related to https://github.com/xmtp/xmtp-react-native/issues/560
+const handleNewConversationCreation = async (
+  client: ConverseXmtpClientType,
+  _conversation: ConversationWithCodecsType
+) => {
+  logger.info(
+    "[XMTPRN Conversations] Restarting message stream to handle new conversation"
+  );
+  await streamAllMessages(client.address);
 };

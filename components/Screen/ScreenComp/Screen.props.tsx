@@ -3,7 +3,7 @@ import { ScrollViewProps, StyleProp, ViewStyle } from "react-native";
 
 import { ExtendedEdge } from "./Screen.helpers";
 
-interface BaseScreenProps {
+type BaseScreenProps = {
   /**
    * Children components.
    */
@@ -40,13 +40,13 @@ interface BaseScreenProps {
    * By how much should we offset the keyboard? Defaults to 0.
    */
   keyboardOffset?: number;
-}
+};
 
-export interface FixedScreenProps extends BaseScreenProps {
+export type FixedScreenProps = {
   preset?: "fixed";
-}
+} & BaseScreenProps;
 
-export interface ScrollScreenProps extends BaseScreenProps {
+export type ScrollScreenProps = {
   preset?: "scroll";
   /**
    * Should keyboard persist on screen tap. Defaults to handled.
@@ -57,16 +57,16 @@ export interface ScrollScreenProps extends BaseScreenProps {
    * Pass any additional props directly to the ScrollView component.
    */
   ScrollViewProps?: ScrollViewProps;
-}
+} & BaseScreenProps;
 
-export interface AutoScreenProps extends Omit<ScrollScreenProps, "preset"> {
+export type AutoScreenProps = {
   preset?: "auto";
   /**
    * Threshold to trigger the automatic disabling/enabling of scroll ability.
    * Defaults to `{ percent: 0.92 }`.
    */
   scrollEnabledToggleThreshold?: { percent?: number; point?: number };
-}
+} & Omit<ScrollScreenProps, "preset">;
 
 export type IScreenProps =
   | ScrollScreenProps

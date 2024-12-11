@@ -1,6 +1,7 @@
 import { TransactionData } from "@components/TransactionPreview/TransactionPreview";
 import type { SimulateAssetChangesResponse } from "alchemy-sdk";
-import axios from "axios";
+import { GroupInvite } from "@utils/api.types";
+import axios, { AxiosError } from "axios";
 import * as Contacts from "expo-contacts";
 
 import {
@@ -17,20 +18,33 @@ import type { TopicData } from "../data/store/chatStore";
 import type { ProfileSocials } from "../data/store/profilesStore";
 import type { Frens } from "../data/store/recommendationsStore";
 import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
-import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
 import type { InboxId } from "@xmtp/react-native-sdk";
 import { evmHelpers } from "./evm/helpers";
+import { getXmtpClient } from "./xmtpRN/sync";
+import { ConverseXmtpClientType } from "./xmtpRN/client";
+import { getInboxId } from "./xmtpRN/signIn";
+import { createDedupedFetcher } from "./api.utils";
+import { authMMKVStorage } from "./mmkv";
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: config.apiURI,
+  headers: {
+    ConverseUserAgent: `${analyticsPlatform}/${analyticsAppVersion}`,
+  },
 });
+
+type PatchedAxiosError = Omit<AxiosError, "config"> & {
+  config: AxiosError["config"] & { _retry: boolean };
+};
 
 // Better error handling
 api.interceptors.response.use(
-  function (response) {
+  function axiosSuccessResponse(response) {
     return response;
   },
-  function (error) {
+  async function axiosErrorResponse(error: PatchedAxiosError) {
+    const req = error.config;
+
     if (error.response) {
       logger.warn(
         `[API] HTTP Error ${error.response.status} - ${error.request._url}`,
@@ -40,6 +54,30 @@ api.interceptors.response.use(
           2
         )
       );
+      const refreshToken = authMMKVStorage.get("CONVERSE_REFRESH_TOKEN");
+
+      if (
+        error.response?.status === 401 &&
+        req &&
+        // Prevent multiple simultaneous refresh attempts
+        !req._retry &&
+        // If no refresh token is stored, than token rotation will not be possible
+        refreshToken
+      ) {
+        try {
+          const { accessToken } = await rotateAccessToken(refreshToken);
+          req._retry = true;
+          req.headers = {
+            ...req.headers,
+            authorization: `Bearer ${accessToken}`,
+          };
+
+          return api(req);
+        } catch (refreshError) {
+          // Token rotation failed - this is a legitimate authentication failure
+          return Promise.reject(refreshError);
+        }
+      }
     } else if (error.request) {
       logger.warn(
         `[API] HTTP Error - No response received - ${error.request._url}`,
@@ -52,6 +90,136 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export type AuthResponse = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+type AuthParams = {
+  inboxId: string;
+  installationPublicKey: string;
+  installationKeySignature: string;
+  appCheckToken?: string;
+};
+
+const { fetch: dedupedFetch } = createDedupedFetcher();
+
+export async function createAccessToken({
+  inboxId,
+  installationPublicKey,
+  installationKeySignature,
+  appCheckToken,
+}: AuthParams): Promise<AuthResponse> {
+  const { data } = await dedupedFetch("/api/authenticate", () =>
+    api.post<AuthResponse>("/api/authenticate", {
+      inboxId,
+      installationKeySignature,
+      installationPublicKey,
+      appCheckToken,
+    })
+  );
+
+  if (!data.accessToken) {
+    throw new Error("No access token in auth response");
+  }
+  if (!data.refreshToken) {
+    throw new Error("No refresh token in auth response");
+  }
+  return data;
+}
+
+export async function rotateAccessToken(
+  refreshToken?: string
+): Promise<AuthResponse> {
+  if (!refreshToken) {
+    throw new Error(
+      "Can't request new access token without current token and refresh token"
+    );
+  }
+
+  const { data } = await dedupedFetch("/api/authenticate/token", () =>
+    api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
+  );
+
+  if (!data) {
+    throw new Error("Could not rotate access token");
+  }
+  if (!data.accessToken) {
+    throw new Error("No access token in token rotate response");
+  }
+
+  authMMKVStorage.set("CONVERSE_ACCESS_TOKEN", data.accessToken);
+  return data;
+}
+
+export const xmtpSignatureByAccount: {
+  [account: string]: InstallationSignature;
+} = {};
+
+type InstallationSignature = Pick<
+  AuthParams,
+  "installationPublicKey" | "installationKeySignature"
+>;
+
+async function getInstallationKeySignature(
+  account: string,
+  message: string
+): Promise<InstallationSignature> {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  if (!client) throw new Error("Client not found");
+
+  const raw = await client.signWithInstallationKey(message);
+
+  return {
+    installationPublicKey: client.installationId,
+    installationKeySignature: Buffer.from(raw).toString("hex"),
+  };
+}
+
+type XmtpApiHeaders = {
+  /** TODO: remove this when conversion is complete */
+  ["xmtp-api-address"]: string;
+
+  /** Bearer <jwt access token>*/
+  authorization: `Bearer ${string}`;
+};
+
+export async function getXmtpApiHeaders(
+  account: string
+): Promise<XmtpApiHeaders> {
+  let accessToken = authMMKVStorage.get("CONVERSE_ACCESS_TOKEN");
+
+  if (!accessToken) {
+    const installation =
+      xmtpSignatureByAccount[account] ||
+      (await getInstallationKeySignature(account, "XMTP_IDENTITY"));
+
+    if (!xmtpSignatureByAccount[account]) {
+      xmtpSignatureByAccount[account] = installation;
+    }
+
+    try {
+      const inboxId = await getInboxId(account);
+      const result = await createAccessToken({ inboxId, ...installation });
+
+      if (!result) {
+        throw new Error("Could not create access token");
+      }
+
+      authMMKVStorage.set("CONVERSE_ACCESS_TOKEN", result.accessToken);
+      authMMKVStorage.set("CONVERSE_REFRESH_TOKEN", result.refreshToken);
+      accessToken = result.accessToken;
+    } catch (error) {
+      logger.error("Error while getting access token", error);
+    }
+  }
+
+  return {
+    ["xmtp-api-address"]: account,
+    authorization: `Bearer ${accessToken}`,
+  };
+}
 
 const lastSaveUser: { [address: string]: number } = {};
 
@@ -443,16 +611,6 @@ export const joinGroupFromLink = async (
   return data as JoinGroupLinkResult;
 };
 
-export type GroupInvite = {
-  id: string;
-  inviteLink: string;
-  createdByAddress: string;
-  groupName: string;
-  imageUrl?: string;
-  description?: string;
-  groupId?: string;
-};
-
 export type CreateGroupInviteResult = Pick<GroupInvite, "id" | "inviteLink">;
 
 // Create a group invite. The invite will be associated with the account used.
@@ -517,6 +675,7 @@ export const createGroupJoinRequest = async (
       headers: await getXmtpApiHeaders(account),
     }
   );
+  logger.debug("[API] Group join request created", data);
   return data;
 };
 
@@ -582,6 +741,25 @@ export const simulateTransaction = async (
     }
   );
   return data as SimulateAssetChangesResponse;
+};
+
+export const putGroupInviteRequest = async ({
+  account,
+  status,
+  joinRequestId,
+}: {
+  account: string;
+  status: string;
+  joinRequestId: string;
+}): Promise<void> => {
+  const { data } = await api.put(
+    `/api/groupJoinRequest/${joinRequestId}`,
+    { status },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
+  return data;
 };
 
 export default api;

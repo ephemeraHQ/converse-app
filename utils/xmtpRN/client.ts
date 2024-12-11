@@ -8,12 +8,9 @@ import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-refere
 import {
   Client,
   Conversation,
-  ConversationTopic,
-  DecodedMessage,
   Dm,
   Group,
   GroupUpdatedCodec,
-  InboxId,
   ReactionCodec,
   ReadReceiptCodec,
   RemoteAttachmentCodec,
@@ -22,12 +19,11 @@ import {
   TextCodec,
 } from "@xmtp/react-native-sdk";
 import { useEffect, useRef } from "react";
-
-import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
-import { getXmtpClient } from "./sync";
+import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 import config from "../../config";
 import { getDbDirectory } from "../../data/db";
-import { getCleanAddress } from "../evm/address";
+import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
+import { getXmtpClient } from "./sync";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
@@ -43,7 +39,17 @@ const codecs = [
   new CoinbaseMessagingPaymentCodec(),
 ];
 
-export type SupportedCodecsType = typeof codecs;
+export type SupportedCodecsType = [
+  TextCodec,
+  ReactionCodec,
+  ReadReceiptCodec,
+  GroupUpdatedCodec,
+  ReplyCodec,
+  RemoteAttachmentCodec,
+  StaticAttachmentCodec,
+  TransactionReferenceCodec,
+  CoinbaseMessagingPaymentCodec,
+];
 
 export const getXmtpClientFromAddress = async (address: string) => {
   const dbDirectory = await getDbDirectory();
@@ -65,7 +71,9 @@ export type GroupWithCodecsType = Group<SupportedCodecsType>;
 
 export type DmWithCodecsType = Dm<SupportedCodecsType>;
 
-export type DecodedMessageWithCodecsType = DecodedMessage<SupportedCodecsType>;
+export type DecodedMessageWithCodecsType = Awaited<
+  ReturnType<ConversationWithCodecsType["messages"]>
+>[number];
 
 export type SendMessageWithCodecs = Parameters<
   ConversationWithCodecsType["send"]
@@ -153,7 +161,8 @@ export const useCheckCurrentInstallation = () => {
   }, [account, logout]);
 };
 
-export const dropXmtpClient = (inboxId: InboxId) => Client.dropClient(inboxId);
+export const dropXmtpClient = (installationId: InstallationId) =>
+  Client.dropClient(installationId);
 
 export const requestMessageHistorySync = async (
   client: ConverseXmtpClientType

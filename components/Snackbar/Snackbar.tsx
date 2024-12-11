@@ -3,6 +3,7 @@ import {
   SNACKBAR_BOTTOM_OFFSET,
   SNACKBAR_HEIGHT,
   SNACKBAR_LARGE_TEXT_HEIGHT,
+  SNACKBAR_SPACE_BETWEEN_SNACKBARS,
 } from "@components/Snackbar/Snackbar.constants";
 import {
   getNumberOfSnackbars,
@@ -28,7 +29,6 @@ import {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { SNACKBAR_SPACE_BETWEEN_SNACKBARS } from "./Snackbar.constants";
 
 type SnackbarProps = {
   snackbar: ISnackbar;
