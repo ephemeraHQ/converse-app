@@ -4,6 +4,7 @@ import { getAccountsList } from "../../data/store/accountsStore";
 import { useAppStore } from "../../data/store/appStore";
 import { getXmtpClient } from "../../utils/xmtpRN/sync";
 import { getInstalledWallets } from "../Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
+import { fetchPersistedConversationListQuery } from "@/queries/useV3ConversationListQuery";
 
 export default function HydrationStateHandler() {
   // Initial hydration
@@ -18,7 +19,29 @@ export default function HydrationStateHandler() {
         // note(lustig) I don't think this does anything?
         getInstalledWallets(false);
       }
-      accounts.map((a) => getXmtpClient(a));
+
+      // Fetching persisted conversation lists for all accounts
+      // We may want to fetch only the selected account's conversation list
+      // in the future, but this is simple for now, and want to get feedback to really confirm
+      logger.debug("[Hydration] Fetching persisted conversation list");
+      await Promise.allSettled(
+        accounts.map(async (account) => {
+          const accountStartTime = new Date().getTime();
+          logger.debug(
+            `[Hydration] Fetching persisted conversation list for ${account}`
+          );
+          await getXmtpClient(account);
+          await fetchPersistedConversationListQuery(account);
+          const accountEndTime = new Date().getTime();
+          logger.debug(
+            `[Hydration] Done fetching persisted conversation list for ${account} in ${
+              (accountEndTime - accountStartTime) / 1000
+            } seconds`
+          );
+        })
+      );
+
+      logger.debug("[Hydration] Done fetching persisted conversation list");
 
       useAppStore.getState().setHydrationDone(true);
       logger.debug(
