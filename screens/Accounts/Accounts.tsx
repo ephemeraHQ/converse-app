@@ -16,7 +16,7 @@ import {
   useErroredAccountsMap,
 } from "../../data/store/accountsStore";
 import { useRouter } from "../../navigation/useNavigation";
-import { useAccountsProfiles } from "../../utils/str";
+import { useAccountsProfiles } from "@utils/useAccountsProfiles";
 import { NavigationParamList } from "../Navigation/Navigation";
 import { translate } from "@/i18n";
 
