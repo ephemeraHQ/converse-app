@@ -1,5 +1,5 @@
 import { type ProfileByAddress } from "@data/store/profilesStore";
-import { getCleanAddress } from "@utils/evm/address";
+import { getCleanAddress } from "@utils/evm/getCleanAddress";
 
 export const getProfile = (
   address: string | undefined,

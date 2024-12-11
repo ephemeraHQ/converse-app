@@ -23,8 +23,6 @@ import { useAutoConnectExternalWallet } from "../utils/evm/external";
 import { usePrivyAccessToken } from "../utils/evm/privy";
 import { converseNavigations } from "../utils/navigation";
 import { ConversationScreenConfig } from "./Navigation/ConversationNav";
-import { GroupInviteScreenConfig } from "./Navigation/GroupInviteNav";
-import { GroupLinkScreenConfig } from "./Navigation/GroupLinkNav";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
 import {
   IdleNavigation,
@@ -40,6 +38,7 @@ import {
   getConverseInitialURL,
   getConverseStateFromPath,
 } from "./Navigation/navHelpers";
+import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
 
 const prefix = Linking.createURL("/");
 
@@ -53,8 +52,7 @@ const linking: LinkingOptions<NavigationParamList> = {
       NewConversation: NewConversationScreenConfig,
       Profile: ProfileScreenConfig,
       Group: GroupScreenConfig,
-      GroupLink: GroupLinkScreenConfig,
-      GroupInvite: GroupInviteScreenConfig,
+      GroupInvite: JoinGroupScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
       WebviewPreview: WebviewPreviewScreenConfig,
     },
@@ -111,6 +109,7 @@ const NavigationContent = () => {
     useSelect(["notificationsPermissionStatus", "splashScreenHidden"])
   );
 
+  // Uncomment to test design system components
   // return (
   //   <NativeStack.Navigator>
   //     <NativeStack.Screen name="Examples" component={Examples} />

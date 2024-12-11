@@ -3,7 +3,9 @@ import { awaitableAlert } from "@utils/alert";
 import logger from "@utils/logger";
 import { Client } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
-import { convertEthersSignerToXmtpSigner } from "./signer";
+
+import { ethersSignerToXmtpSigner } from "./signer";
+
 export const getOtherInstallations = async (client: Client<any>) => {
   const inboxState = await client.inboxState(true);
   const installationsIds = inboxState.installations.map((i) => i.id);
@@ -41,9 +43,7 @@ export const revokeOtherInstallations = async (
   logger.debug(
     `[Onboarding] User decided to revoke ${otherInstallationsCount} installation`
   );
-  await client.revokeAllOtherInstallations(
-    convertEthersSignerToXmtpSigner(signer)
-  );
+  await client.revokeAllOtherInstallations(ethersSignerToXmtpSigner(signer));
   logger.debug(`[Onboarding] Installations revoked.`);
   return true;
 };

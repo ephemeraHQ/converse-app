@@ -2,8 +2,7 @@ import { PinnedConversation } from "./PinnedConversation";
 import { useCallback, useMemo } from "react";
 import { navigate } from "@utils/navigation";
 import Avatar from "@components/Avatar";
-import { AvatarSizes } from "@styles/sizes";
-import { useGroupConversationListAvatarInfo } from "../../features/conversation-list/useGroupConversationListAvatarInfo";
+import { useGroupConversationListAvatarInfo } from "@features/conversation-list/useGroupConversationListAvatarInfo";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
@@ -16,6 +15,11 @@ import { useSelect } from "@/data/store/storeHelpers";
 import { useHandleDeleteGroup } from "@/features/conversation-list/hooks/useHandleDeleteGroup";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
+import { useAppTheme } from "@/theme/useAppTheme";
+import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
+import { isTextMessage } from "../Chat/Message/message-utils";
+import { VStack } from "@/design-system/VStack";
+import { PinnedMessagePreview } from "./PinnedMessagePreview";
 
 type PinnedV3GroupConversationProps = {
   group: GroupWithCodecsType;
@@ -43,10 +47,11 @@ export const PinnedV3GroupConversation = ({
 
   const timestamp = group?.lastMessage?.sentNs ?? 0;
 
+  const { theme } = useAppTheme();
+
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: group.lastMessage,
-    conversation: group,
     timestamp,
   });
 
@@ -58,7 +63,7 @@ export const PinnedV3GroupConversation = ({
 
   const handleDelete = useHandleDeleteGroup(group);
 
-  const contextMenuItems = useMemo(() => {
+  const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     return [
       {
         title: translate("unpin"),
@@ -67,6 +72,7 @@ export const PinnedV3GroupConversation = ({
           closeContextMenu();
         },
         id: "pin",
+        rightView: <ContextMenuIcon icon="pin.slash" />,
       },
       {
         title: isUnread
@@ -77,6 +83,11 @@ export const PinnedV3GroupConversation = ({
           closeContextMenu();
         },
         id: "markAsUnread",
+        rightView: (
+          <ContextMenuIcon
+            icon={isUnread ? "checkmark.message" : "message.badge"}
+          />
+        ),
       },
       {
         title: translate("delete"),
@@ -85,9 +96,22 @@ export const PinnedV3GroupConversation = ({
           closeContextMenu();
         },
         id: "delete",
+        titleStyle: {
+          color: theme.colors.global.caution,
+        },
+        rightView: (
+          <ContextMenuIcon icon="trash" color={theme.colors.global.caution} />
+        ),
       },
     ];
-  }, [handleDelete, isUnread, setPinnedConversations, toggleReadStatus, topic]);
+  }, [
+    handleDelete,
+    isUnread,
+    setPinnedConversations,
+    theme.colors.global.caution,
+    toggleReadStatus,
+    topic,
+  ]);
 
   const onLongPress = useCallback(() => {
     setConversationListContextMenuConversationData(
@@ -101,7 +125,9 @@ export const PinnedV3GroupConversation = ({
   }, [group.topic]);
 
   const title = group?.name;
-  const showUnread = false;
+
+  const displayMessagePreview =
+    group.lastMessage && isTextMessage(group.lastMessage) && isUnread;
 
   const avatarComponent = useMemo(() => {
     if (group?.imageUrlSquare) {
@@ -109,26 +135,25 @@ export const PinnedV3GroupConversation = ({
         <Avatar
           key={group?.topic}
           uri={group?.imageUrlSquare}
-          size={AvatarSizes.pinnedConversation}
+          size={theme.avatarSize.xxl}
         />
       );
     }
-    return (
-      <GroupAvatarDumb
-        size={AvatarSizes.pinnedConversation}
-        members={memberData}
-        style={{ marginLeft: 16, alignSelf: "center" }}
-      />
-    );
-  }, [group?.imageUrlSquare, group?.topic, memberData]);
+    return <GroupAvatarDumb size={theme.avatarSize.xxl} members={memberData} />;
+  }, [group?.imageUrlSquare, group?.topic, memberData, theme.avatarSize.xxl]);
 
   return (
-    <PinnedConversation
-      avatarComponent={avatarComponent}
-      onLongPress={onLongPress}
-      onPress={onPress}
-      showUnread={showUnread}
-      title={title ?? ""}
-    />
+    <VStack>
+      <PinnedConversation
+        avatarComponent={avatarComponent}
+        onLongPress={onLongPress}
+        onPress={onPress}
+        showUnread={isUnread}
+        title={title ?? ""}
+      />
+      {displayMessagePreview && (
+        <PinnedMessagePreview message={group.lastMessage!} />
+      )}
+    </VStack>
   );
 };

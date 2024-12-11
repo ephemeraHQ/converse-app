@@ -30,6 +30,7 @@ import { useSelect } from "@data/store/storeHelpers";
 import { useRouter } from "@navigation/useNavigation";
 import { refreshRecommendationsForAccount } from "@utils/recommendations";
 import ActivityIndicator from "@components/ActivityIndicator/ActivityIndicator";
+import { translate } from "@/i18n";
 
 const EXPIRE_AFTER = 86400000; // 1 DAY
 
@@ -80,7 +81,6 @@ export default function Recommendations({
     setTimeout(() => {
       navigation.navigate("Conversation", {
         mainConversationWithPeer: config.contactAddress,
-        focus: true,
       });
     }, 300);
   }, [navigation]);
@@ -131,15 +131,16 @@ export default function Recommendations({
                 <>
                   <Text style={styles.emoji}>👋</Text>
                   <Text style={styles.title}>
-                    Find people who have interests in common with you. Start
-                    talking to them.
+                    {translate("recommendations.title")}
                   </Text>
                 </>
               </View>
             )}
             {visibility === "EMBEDDED" && showTitle && (
               <View style={styles.sectionTitleContainer}>
-                <Text style={styles.sectionTitle}>RECOMMENDED PROFILES</Text>
+                <Text style={styles.sectionTitle}>
+                  {translate("recommendations.section_title")}
+                </Text>
               </View>
             )}
           </>
@@ -189,7 +190,9 @@ export default function Recommendations({
     return (
       <View style={styles.fetching}>
         <ActivityIndicator />
-        <Text style={styles.fetchingText}>Loading your recommendations</Text>
+        <Text style={styles.fetchingText}>
+          {translate("recommendations.loading")}
+        </Text>
       </View>
     );
   }
@@ -199,16 +202,15 @@ export default function Recommendations({
       <>
         <Text style={styles.emoji}>😐</Text>
         <Text style={styles.title}>
-          We did not find people to match you with. We’re still early and we’re
-          not using that many signals. You can{" "}
+          {translate("recommendations.no_recommendations")}
           <Text style={styles.clickableText} onPress={openSignalList}>
-            find the current list here
+            {translate("recommendations.signal_list")}
           </Text>
-          , please feel free to{" "}
+          {translate("recommendations.please_feel_free_to")}
           <Text style={styles.clickableText} onPress={contactPol}>
-            contact our co-founder Pol
+            {translate("recommendations.contact_pol")}
           </Text>{" "}
-          if you want us to add anything.{"\n\n"}Thank you!
+          {translate("recommendations.if_you_want_us_to_add_anything")}
         </Text>
       </>
     );

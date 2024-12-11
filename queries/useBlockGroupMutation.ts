@@ -1,4 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "@queries/queryClient";
+import { useMutation, MutationObserver } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
 import { consentToGroupsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
@@ -9,12 +10,55 @@ import {
   getGroupConsentQueryData,
   setGroupConsentQueryData,
 } from "./useGroupConsentQuery";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import type { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
+import { useConversationQuery } from "./useConversationQuery";
+
+export type BlockGroupMutationProps = {
+  account: string;
+  topic: ConversationTopic;
+  groupId: ConversationId;
+};
+
+const createBlockGroupMutationObserver = ({
+  account,
+  topic,
+  groupId,
+}: BlockGroupMutationProps) => {
+  const blockGroupMutationObserver = new MutationObserver(queryClient, {
+    mutationKey: blockGroupMutationKey(account, topic),
+    mutationFn: async () => {
+      await consentToGroupsOnProtocolByAccount({
+        account,
+        groupIds: [groupId],
+        consent: "deny",
+      });
+      return "denied";
+    },
+    onMutate: async () => {
+      await cancelGroupConsentQuery(account, topic);
+      const previousConsent = getGroupConsentQueryData(account, topic);
+      setGroupConsentQueryData(account, topic, "denied");
+      return { previousConsent };
+    },
+    onError: (error, _variables, context) => {
+      logger.warn("onError useBlockGroupMutation");
+      sentryTrackError(error);
+      if (context?.previousConsent === undefined) {
+        return;
+      }
+      setGroupConsentQueryData(account, topic, context.previousConsent);
+    },
+    onSuccess: () => {
+      logger.debug("onSuccess useBlockGroupMutation");
+    },
+  });
+  return blockGroupMutationObserver;
+};
 
 export const useBlockGroupMutation = (
   account: string,
-  topic: ConversationTopic | undefined
+  topic: ConversationTopic
 ) => {
   return useMutation({
     mutationKey: blockGroupMutationKey(account, topic!),
@@ -22,11 +66,11 @@ export const useBlockGroupMutation = (
       if (!topic || !account) {
         return;
       }
-      await consentToGroupsOnProtocolByAccount(
+      await consentToGroupsOnProtocolByAccount({
         account,
-        [getV3IdFromTopic(topic)],
-        "deny"
-      );
+        groupIds: [getV3IdFromTopic(topic)],
+        consent: "deny",
+      });
       return "denied";
     },
     onMutate: async () => {
@@ -36,7 +80,7 @@ export const useBlockGroupMutation = (
       return { previousConsent };
     },
     onError: (error, _variables, context) => {
-      logger.warn("onError useDenyGroupMutation");
+      logger.warn("onError useBlockGroupMutation");
       sentryTrackError(error);
       if (context?.previousConsent === undefined) {
         return;
@@ -44,7 +88,7 @@ export const useBlockGroupMutation = (
       setGroupConsentQueryData(account, topic!, context.previousConsent);
     },
     onSuccess: () => {
-      logger.debug("onSuccess useDenyGroupMutation");
+      logger.debug("onSuccess useBlockGroupMutation");
     },
   });
 };

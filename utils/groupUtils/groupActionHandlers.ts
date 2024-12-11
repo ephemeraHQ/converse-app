@@ -1,7 +1,7 @@
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { translate } from "@i18n";
-import { Consent } from "@queries/useGroupConsentQuery";
 import { actionSheetColors } from "@styles/colors";
+import { ConsentState } from "@xmtp/react-native-sdk";
 import { ColorSchemeName } from "react-native";
 
 type GroupAction = {
@@ -12,7 +12,7 @@ type GroupAction = {
 type GroupActionHandler = (options: GroupAction) => void;
 
 export const groupRemoveRestoreHandler = (
-  consent: Consent | undefined,
+  consent: ConsentState | undefined,
   colorScheme: ColorSchemeName,
   groupName: string | undefined,
   allowGroup: GroupActionHandler,

@@ -2,19 +2,18 @@ import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
 
+import { useGroupQuery } from "@queries/useGroupQuery";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { setGroupDescriptionMutationKey } from "./MutationKeys";
 import {
   cancelGroupDescriptionQuery,
   getGroupDescriptionQueryData,
-  setGroupDescriptionQueryData,
 } from "./useGroupDescriptionQuery";
-import { useGroupQuery } from "@queries/useGroupQuery";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-// import { refreshGroup } from "../utils/xmtpRN/conversations";
+import { handleGroupDescriptionUpdate } from "@/utils/groupUtils/handleGroupDescriptionUpdate";
 
 export const useGroupDescriptionMutation = (
   account: string,
-  topic: ConversationTopic | undefined
+  topic: ConversationTopic
 ) => {
   const { data: group } = useGroupQuery(account, topic);
   return useMutation({
@@ -35,7 +34,11 @@ export const useGroupDescriptionMutation = (
         account,
         topic
       );
-      setGroupDescriptionQueryData(account, topic, groupDescription);
+      handleGroupDescriptionUpdate({
+        account,
+        topic,
+        description: groupDescription,
+      });
       return { previousGroupDescription };
     },
     onError: (error, _variables, context) => {
@@ -47,11 +50,11 @@ export const useGroupDescriptionMutation = (
       if (!topic) {
         return;
       }
-      setGroupDescriptionQueryData(
+      handleGroupDescriptionUpdate({
         account,
         topic,
-        context.previousGroupDescription
-      );
+        description: context.previousGroupDescription,
+      });
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess useGroupDescriptionMutation");

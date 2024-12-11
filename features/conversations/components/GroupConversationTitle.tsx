@@ -14,6 +14,10 @@ import { GroupAvatarDumb } from "@components/GroupAvatar";
 import { useConversationTitleLongPress } from "../hooks/useConversationTitleLongPress";
 import { useGroupMembersAvatarData } from "../hooks/useGroupMembersAvatarData";
 import { ConversationTitleDumb } from "@components/Conversation/ConversationTitleDumb";
+import { Text } from "@/design-system/Text";
+import { translate } from "@i18n";
+import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
+import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 
 type GroupConversationTitleProps = {
   topic: ConversationTopic;
@@ -47,6 +51,8 @@ export const GroupConversationTitle = memo(
     const { data: groupPhoto, isLoading: groupPhotoLoading } =
       useGroupPhotoQuery(currentAccount, topic!);
 
+    const { data: members } = useGroupMembersQuery(currentAccount, topic!);
+
     const { data: memberData } = useGroupMembersAvatarData({ topic });
 
     const navigation = useRouter();
@@ -57,6 +63,8 @@ export const GroupConversationTitle = memo(
       topic,
       navigation,
     });
+
+    const requestsCount = useGroupPendingRequests(topic).length;
 
     const displayAvatar = !groupPhotoLoading && !groupNameLoading;
 
@@ -76,6 +84,12 @@ export const GroupConversationTitle = memo(
       );
     }, [groupPhoto, memberData, themed]);
 
+    const memberText =
+      members?.ids.length === 1
+        ? translate("member_count", { count: members?.ids.length })
+        : translate("members_count", { count: members?.ids.length });
+    const displayMemberText = members?.ids.length;
+
     if (!displayAvatar) return null;
 
     return (
@@ -83,6 +97,21 @@ export const GroupConversationTitle = memo(
         title={groupName ?? undefined}
         onLongPress={onLongPress}
         onPress={onPress}
+        subtitle={
+          displayMemberText && (
+            <Text preset="formLabel">
+              {memberText}
+              {requestsCount > 0 && (
+                <>
+                  {" • "}
+                  <Text preset="formLabel" color="action">
+                    {translate("pending_count", { count: requestsCount })}
+                  </Text>
+                </>
+              )}
+            </Text>
+          )
+        }
         avatarComponent={avatarComponent}
       />
     );

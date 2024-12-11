@@ -48,8 +48,7 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
 
   const { themed } = useAppTheme();
 
-  const { data: peerAddress, isLoading: peerAddressLoading } =
-    useDmPeerAddressQuery(account, topic);
+  const { data: peerAddress } = useDmPeerAddressQuery(account, topic);
 
   const { onPress, onLongPress } = useUserInteraction({
     peerAddress,
@@ -63,8 +62,7 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
 
   const preferredAvatarUri = usePreferredAvatarUri(peerAddress ?? "");
 
-  const displayAvatar = !peerAddressLoading && !isLoading;
-
+  const displayAvatar = peerAddress && !isLoading;
   if (!displayAvatar) return null;
 
   return (
@@ -78,6 +76,7 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
             uri={preferredAvatarUri ?? undefined}
             size={AvatarSizes.conversationTitle}
             style={themed($avatar)}
+            name={preferredName}
           />
         )
       }

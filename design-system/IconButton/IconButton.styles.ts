@@ -8,13 +8,13 @@ import {
 } from "./IconButton.props";
 import { Theme } from "../../theme/useAppTheme";
 
-interface IconButtonStyleProps {
+type IconButtonStyleProps = {
   variant: IIconButtonVariant;
   size: IIconButtonSize;
   action: IIconButtonAction;
   pressed?: boolean;
   disabled?: boolean;
-}
+};
 
 export const getIconButtonViewStyle =
   ({

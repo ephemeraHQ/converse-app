@@ -1,9 +1,14 @@
 import { invalidateGroupMembersQuery } from "@queries/useGroupMembersQuery";
-import { invalidateGroupNameQuery } from "@queries/useGroupNameQuery";
-import { invalidateGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
+import { setGroupNameQueryData } from "@queries/useGroupNameQuery";
+import { setGroupPhotoQueryData } from "@queries/useGroupPhotoQuery";
+import {
+  updateGroupNameToConversationListQuery,
+  updateGroupImageToConversationListQuery,
+  updateGroupDescriptionToConversationListQuery,
+} from "@queries/useV3ConversationListQuery";
 
 import { handleGroupUpdatedMessage } from "./handleGroupUpdatedMessage";
-import type { DecodedMessageWithCodecsType } from "../../../utils/xmtpRN/client";
+import type { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 jest.mock("@queries/useGroupMembersQuery", () => ({
@@ -31,11 +36,17 @@ jest.mock("../../../utils/xmtpRN/client", () => ({
 }));
 
 jest.mock("@queries/useGroupNameQuery", () => ({
-  invalidateGroupNameQuery: jest.fn(),
+  setGroupNameQueryData: jest.fn(),
 }));
 
 jest.mock("@queries/useGroupPhotoQuery", () => ({
-  invalidateGroupPhotoQuery: jest.fn(),
+  setGroupPhotoQueryData: jest.fn(),
+}));
+
+jest.mock("@queries/useV3ConversationListQuery", () => ({
+  updateGroupNameToConversationListQuery: jest.fn(),
+  updateGroupImageToConversationListQuery: jest.fn(),
+  updateGroupDescriptionToConversationListQuery: jest.fn(),
 }));
 
 describe("handleGroupUpdatedMessage", () => {
@@ -58,8 +69,13 @@ describe("handleGroupUpdatedMessage", () => {
     await handleGroupUpdatedMessage(account, topic, message);
 
     expect(invalidateGroupMembersQuery).not.toHaveBeenCalled();
-    expect(invalidateGroupNameQuery).not.toHaveBeenCalled();
-    expect(invalidateGroupPhotoQuery).not.toHaveBeenCalled();
+    expect(setGroupNameQueryData).not.toHaveBeenCalled();
+    expect(setGroupPhotoQueryData).not.toHaveBeenCalled();
+    expect(updateGroupNameToConversationListQuery).not.toHaveBeenCalled();
+    expect(updateGroupImageToConversationListQuery).not.toHaveBeenCalled();
+    expect(
+      updateGroupDescriptionToConversationListQuery
+    ).not.toHaveBeenCalled();
   });
 
   it("should invalidate group members query if members are added or removed", async () => {
@@ -76,42 +92,65 @@ describe("handleGroupUpdatedMessage", () => {
   });
 
   it("should invalidate group name query if group name is changed", async () => {
+    const newGroupName = "New Group Name";
     const content = {
       membersAdded: [],
       membersRemoved: [],
       metadataFieldsChanged: [
-        { fieldName: "group_name", newValue: "New Group Name" },
+        { fieldName: "group_name", newValue: newGroupName },
       ],
     };
     const message = createMessage("group_updated", content);
 
     await handleGroupUpdatedMessage(account, topic, message);
 
-    expect(invalidateGroupNameQuery).toHaveBeenCalledWith(account, topic);
+    expect(setGroupNameQueryData).toHaveBeenCalledWith(
+      account,
+      topic,
+      newGroupName
+    );
+    expect(updateGroupNameToConversationListQuery).toHaveBeenCalledWith({
+      account,
+      topic,
+      name: newGroupName,
+    });
   });
 
   it("should invalidate group photo query if group photo is changed", async () => {
+    const newGroupPhoto = "New Photo URL";
+
     const content = {
       membersAdded: [],
       membersRemoved: [],
       metadataFieldsChanged: [
-        { fieldName: "group_image_url_square", newValue: "New Photo URL" },
+        { fieldName: "group_image_url_square", newValue: newGroupPhoto },
       ],
     };
     const message = createMessage("group_updated", content);
 
     await handleGroupUpdatedMessage(account, topic, message);
 
-    expect(invalidateGroupPhotoQuery).toHaveBeenCalledWith(account, topic);
+    expect(setGroupPhotoQueryData).toHaveBeenCalledWith(
+      account,
+      topic,
+      newGroupPhoto
+    );
+    expect(updateGroupImageToConversationListQuery).toHaveBeenCalledWith({
+      account,
+      topic,
+      image: newGroupPhoto,
+    });
   });
 
   it("should invalidate all relevant queries if multiple changes occur", async () => {
+    const newGroupName = "New Group Name";
+    const newGroupPhoto = "New Photo URL";
     const content = {
       membersAdded: ["member1"],
       membersRemoved: ["member2"],
       metadataFieldsChanged: [
-        { fieldName: "group_name", newValue: "New Group Name" },
-        { fieldName: "group_image_url_square", newValue: "New Photo URL" },
+        { fieldName: "group_name", newValue: newGroupName },
+        { fieldName: "group_image_url_square", newValue: newGroupPhoto },
       ],
     };
     const message = createMessage("group_updated", content);
@@ -119,8 +158,21 @@ describe("handleGroupUpdatedMessage", () => {
     await handleGroupUpdatedMessage(account, topic, message);
 
     expect(invalidateGroupMembersQuery).toHaveBeenCalledWith(account, topic);
-    expect(invalidateGroupNameQuery).toHaveBeenCalledWith(account, topic);
-    expect(invalidateGroupPhotoQuery).toHaveBeenCalledWith(account, topic);
+    expect(setGroupNameQueryData).toHaveBeenCalledWith(
+      account,
+      topic,
+      newGroupName
+    );
+    expect(setGroupPhotoQueryData).toHaveBeenCalledWith(
+      account,
+      topic,
+      newGroupPhoto
+    );
+    expect(updateGroupNameToConversationListQuery).toHaveBeenCalledWith({
+      account,
+      topic,
+      name: newGroupName,
+    });
   });
 
   it("should handle empty metadataFieldsChanged array", async () => {
@@ -134,7 +186,12 @@ describe("handleGroupUpdatedMessage", () => {
     await handleGroupUpdatedMessage(account, topic, message);
 
     expect(invalidateGroupMembersQuery).toHaveBeenCalled();
-    expect(invalidateGroupNameQuery).not.toHaveBeenCalled();
-    expect(invalidateGroupPhotoQuery).not.toHaveBeenCalled();
+    expect(setGroupNameQueryData).not.toHaveBeenCalled();
+    expect(setGroupPhotoQueryData).not.toHaveBeenCalled();
+    expect(updateGroupNameToConversationListQuery).not.toHaveBeenCalled();
+    expect(updateGroupImageToConversationListQuery).not.toHaveBeenCalled();
+    expect(
+      updateGroupDescriptionToConversationListQuery
+    ).not.toHaveBeenCalled();
   });
 });

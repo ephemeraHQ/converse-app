@@ -40,7 +40,7 @@ describe("Search Query Matchers", () => {
 
       const result = await dmMatchesSearchQuery({
         account,
-        searchQuery,
+        searchQuery: "mockInbox",
         dm: mockDm,
       });
       expect(result).toBe(true);

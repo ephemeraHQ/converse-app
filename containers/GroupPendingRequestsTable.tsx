@@ -27,12 +27,14 @@ export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
   const currentAccount = useCurrentAccount() as string;
   const styles = useStyles();
   const requests = useGroupPendingRequests(topic);
+
   const addresses = useMemo(() => requests.map((a) => a[0]), [requests]);
   const preferredNames = usePreferredNames(addresses);
   const { mutateAsync: addToGroup } = useAddToGroupMutation(
     currentAccount,
     topic
   );
+
   const tableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
     requests.forEach((a, id) => {

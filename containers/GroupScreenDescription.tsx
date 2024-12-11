@@ -30,6 +30,7 @@ export const GroupScreenDescription: FC<GroupScreenDescriptionProps> = ({
 }) => {
   const currentAccount = useCurrentAccount() as string;
   const { members } = useGroupMembers(topic);
+
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
       currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),

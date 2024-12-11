@@ -19,8 +19,6 @@ import {
 import QRCode from "react-native-qrcode-svg";
 
 import { useAppTheme } from "@theme/useAppTheme";
-import { getPreferredAvatar } from "@utils/profile/getPreferredAvatar";
-import { getPreferredName } from "@utils/profile/getPreferredName";
 import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
 import { getProfile } from "@utils/profile/getProfile";
 import { shortAddress } from "@utils/strings/shortAddress";
@@ -36,6 +34,9 @@ import {
   useProfilesStore,
 } from "../data/store/accountsStore";
 import { NavigationParamList } from "./Navigation/Navigation";
+import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
+import { usePreferredName } from "@/hooks/usePreferredName";
+import { translate } from "@/i18n";
 
 const ShareProfileContent = ({
   userAddress,
@@ -61,7 +62,9 @@ const ShareProfileContent = ({
   const shareDict =
     Platform.OS === "ios" ? { url: profileUrl } : { message: profileUrl };
 
-  const shareButtonText = copiedLink ? "Link copied" : "Copy link";
+  const shareButtonText = copiedLink
+    ? translate("share_profile.link_copied")
+    : translate("share_profile.copy_link");
 
   const handleShare = () => {
     Share.share(shareDict);
@@ -151,8 +154,8 @@ export default function ShareProfileScreen({
     (s) => getProfile(userAddress, s.profiles)?.socials
   );
   const username = getPreferredUsername(socials);
-  const displayName = getPreferredName(socials, userAddress);
-  const avatar = getPreferredAvatar(socials);
+  const displayName = usePreferredName(userAddress);
+  const avatar = usePreferredAvatarUri(userAddress);
 
   useEffect(() => {
     navigation.setOptions({

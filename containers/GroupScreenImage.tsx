@@ -26,6 +26,7 @@ export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
   const { groupPhoto, setGroupPhoto } = useGroupPhoto(topic);
   const { permissions } = useGroupPermissions(topic);
   const { members } = useGroupMembers(topic);
+
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
       currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
@@ -66,6 +67,7 @@ export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
           uri={localGroupPhoto}
           style={styles.avatar}
           topic={topic}
+          excludeSelf={false}
         />
         {canEditGroupImage && (
           <Button

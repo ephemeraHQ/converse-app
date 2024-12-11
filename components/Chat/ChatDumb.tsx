@@ -125,6 +125,7 @@ export function ChatDumb<T>({
 
   const { height: keyboardHeight } = useKeyboardAnimation();
   const tertiary = tertiaryBackgroundColor(colorScheme);
+
   const textInputStyle = useAnimatedStyle(
     () => ({
       position: "absolute",

@@ -47,6 +47,7 @@ import {
   dmMatchesSearchQuery,
   groupMatchesSearchQuery,
 } from "@/features/conversations/utils/search";
+import { translate } from "@/i18n";
 
 type Props = {
   searchBarRef:
@@ -199,20 +200,26 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   if (showSearchTitleHeader) {
     ListHeaderComponents.push(
       <View key="search" style={styles.searchTitleContainer}>
-        <Text style={styles.searchTitle}>Messages</Text>
+        <Text style={styles.searchTitle}>
+          {translate("conversation_list.messages")}
+        </Text>
       </View>
     );
   } else if (requestsCount > 0 && !sharingMode) {
     ListHeaderComponents.push(
       <View key="search" style={styles.headerTitleContainer}>
-        <Text style={styles.headerTitle}>Messages</Text>
+        <Text style={styles.headerTitle}>
+          {translate("conversation_list.messages")}
+        </Text>
         <RequestsButton key="requests" requestsCount={requestsCount} />
       </View>
     );
   } else if (!sharingMode) {
     ListHeaderComponents.push(
       <View key="search" style={styles.headerTitleContainer}>
-        <Text style={styles.headerTitle}>Messages</Text>
+        <Text style={styles.headerTitle}>
+          {translate("conversation_list.messages")}
+        </Text>
       </View>
     );
   }

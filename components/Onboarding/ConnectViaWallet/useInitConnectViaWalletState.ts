@@ -10,10 +10,9 @@ import {
 } from "thirdweb/react";
 
 import { useConnectViaWalletContext } from "./ConnectViaWallet.context";
-import { ensureError } from "../../../utils/error";
-import { thirdwebClient } from "../../../utils/thirdweb";
-import { getInboxId } from "../../../utils/xmtpRN/signIn";
-import { canMessageByAccount } from "@utils/xmtpRN/contacts";
+import { ensureError } from "@utils/error";
+import { thirdwebClient } from "@utils/thirdweb";
+import { getInboxId } from "@utils/xmtpRN/signIn";
 
 /**
  * For now let's keep Thirdweb and the hooks because I haven't found a better way to do it.
@@ -26,7 +25,6 @@ export function useInitConnectViaWalletState(args: { address: string }) {
   const { onErrorConnecting } = useConnectViaWalletContext();
 
   const [isInitializing, setIsInitializing] = useState(true);
-  const [onXmtp, setOnXmtp] = useState(false);
   const [alreadyV3Db, setAlreadyV3Db] = useState(false);
   const [signer, setSigner] = useState<Signer | undefined>();
 
@@ -84,22 +82,16 @@ export function useInitConnectViaWalletState(args: { address: string }) {
 
         setIsInitializing(true);
 
-        const [isOnNetwork, inboxId] = await Promise.all([
-          canMessageByAccount({ account: address, peer: address }),
-          getInboxId(address),
-        ]);
+        const inboxId = await getInboxId(address);
 
         const v3Dbs = await getDatabaseFilesForInboxId(inboxId);
         const hasV3 = v3Dbs.filter((n) => n.name.endsWith(".db3")).length > 0;
 
-        setOnXmtp(isOnNetwork);
         setAlreadyV3Db(hasV3);
         setSigner(thirdwebSigner);
 
         logger.debug(
-          `[Connect Wallet] User connected wallet ${thirdwebWallet?.id} (${address}). ${
-            isOnNetwork ? "Already" : "Not yet"
-          } on XMTP. V3 database ${hasV3 ? "already" : "not"} present`
+          `[Connect Wallet] User connected wallet ${thirdwebWallet?.id} (${address}). V3 database ${hasV3 ? "already" : "not"} present`
         );
       } catch (error) {
         logger.error("[Connect Wallet] Error initializing wallet:", error);
@@ -120,5 +112,5 @@ export function useInitConnectViaWalletState(args: { address: string }) {
     onErrorConnecting,
   ]);
 
-  return { isInitializing, onXmtp, alreadyV3Db, signer };
+  return { isInitializing, alreadyV3Db, signer };
 }

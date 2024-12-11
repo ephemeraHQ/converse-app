@@ -23,6 +23,7 @@ import config from "../config";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { useAccountsList } from "../data/store/accountsStore";
 import mmkv from "../utils/mmkv";
+import { translate } from "@/i18n";
 
 export const useDebugEnabled = (address?: string) => {
   const accounts = useAccountsList();
@@ -103,7 +104,7 @@ const DebugButton = forwardRef((props, ref) => {
         ...(debugEnabled ? debugMethods : {}),
         "Share current session logs": async () => {
           Share.open({
-            title: "Converse Log Session",
+            title: translate("debug.converse_log_session"),
             url: `file://${loggingFilePath}`,
             type: "text/plain",
           });
@@ -111,7 +112,7 @@ const DebugButton = forwardRef((props, ref) => {
         "Share native logs": async () => {
           const nativeLogFilePath = await getNativeLogFile();
           Share.open({
-            title: "LibXMTP Logs",
+            title: translate("debug.libxmtp_log_session"),
             url: `file://${nativeLogFilePath}`,
             type: "text/plain",
           });
@@ -122,7 +123,7 @@ const DebugButton = forwardRef((props, ref) => {
             return Alert.alert("No previous session logging file found");
           }
           Share.open({
-            title: "Converse Log Session",
+            title: translate("debug.converse_log_session"),
             url: `file://${previousLoggingFile}`,
             type: "text/plain",
           });
@@ -148,7 +149,10 @@ const DebugButton = forwardRef((props, ref) => {
 
       showActionSheetWithOptions(
         {
-          title: `Converse v${appVersion} (${buildNumber})`,
+          title: translate("debug.converse_version", {
+            version: appVersion,
+            buildNumber,
+          }),
           options,
           cancelButtonIndex: options.indexOf("Cancel"),
         },

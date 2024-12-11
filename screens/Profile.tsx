@@ -57,7 +57,6 @@ import {
   currentAccount,
   useCurrentAccount,
   useLoggedWithPrivy,
-  useProfilesStore,
   useRecommendationsStore,
   useSettingsStore,
   useWalletStore,
@@ -73,21 +72,18 @@ import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
 } from "../utils/groupUtils/adminUtils";
-import { navigate } from "../utils/navigation";
-import {
-  NotificationPermissionStatus,
-  requestPushNotificationsPermissions,
-} from "../utils/notifications";
+
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
-import {
-  consentToAddressesOnProtocolByAccount,
-  consentToGroupsOnProtocol,
-} from "../utils/xmtpRN/contacts";
+import { consentToAddressesOnProtocolByAccount } from "../utils/xmtpRN/contacts";
 import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
-import { getPreferredName } from "@utils/profile/getPreferredName";
-import { getPreferredAvatar } from "@utils/profile/getPreferredAvatar";
-import { getProfile } from "@utils/profile/getProfile";
+
+import { requestPushNotificationsPermissions } from "@/features/notifications/utils/requestPushNotificationsPermissions";
+import { NotificationPermissionStatus } from "@/features/notifications/types/Notifications.types";
+import { useProfileSocials } from "@/hooks/useProfileSocials";
+import { usePreferredName } from "@/hooks/usePreferredName";
+import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
+import { Icon } from "@/design-system/Icon/Icon";
 
 export default function ProfileScreen() {
   return (
@@ -100,18 +96,19 @@ export default function ProfileScreen() {
 
 const ExternalWalletPickerWrapper = memo(
   function ExternalWalletPickerWrapper() {
-    const profiles = useProfilesStore((state) => state.profiles);
     const peerAddress = useRoute<"Profile">().params.address;
-    const socials = getProfile(peerAddress, profiles)?.socials;
+    const { data: socials } = useProfileSocials(peerAddress);
     const { client } = useCurrentAccountXmtpClient();
 
     return (
       <ExternalWalletPicker
         title={translate("revoke_wallet_picker_title")}
         subtitle={translate("revoke_wallet_picker_description", {
-          wallet:
-            getPreferredUsername(socials) ||
-            (client ? shortAddress(client.address) : ""),
+          wallet: socials
+            ? getPreferredUsername(socials)
+            : client
+              ? shortAddress(client.address)
+              : "",
         })}
       />
     );
@@ -133,12 +130,13 @@ function ProfileScreenImpl() {
   const recommendationTags = useRecommendationsStore(
     (s) => s.frens[peerAddress]?.tags
   );
-  const profiles = useProfilesStore((state) => state.profiles);
   const isBlockedPeer = useSettingsStore(
     (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
   );
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
-  const socials = getProfile(peerAddress, profiles)?.socials;
+  const { data: socials } = useProfileSocials(peerAddress);
+  const preferredUserName = usePreferredName(peerAddress);
+  const preferredAvatarUri = usePreferredAvatarUri(peerAddress);
   const groupTopic = route.params.fromGroupTopic;
   const {
     members: groupMembers,
@@ -147,8 +145,8 @@ function ProfileScreenImpl() {
     revokeSuperAdmin,
     promoteToAdmin,
     promoteToSuperAdmin,
-  } = useGroupMembers(groupTopic);
-  const { permissions: groupPermissions } = useGroupPermissions(groupTopic);
+  } = useGroupMembers(groupTopic!);
+  const { permissions: groupPermissions } = useGroupPermissions(groupTopic!);
 
   const { getXmtpSigner } = useXmtpSigner();
   const privySigner = usePrivySigner();
@@ -160,6 +158,7 @@ function ProfileScreenImpl() {
   }, [userAddress]);
 
   const [refreshingBalance, setRefreshingBalance] = useState(false);
+
   const manuallyRefreshBalance = useCallback(async () => {
     setRefreshingBalance(true);
     const now = new Date().getTime();
@@ -300,7 +299,7 @@ function ProfileScreenImpl() {
   const balanceItems: TableViewItemType[] = [
     {
       id: "balance",
-      title: "Your balance (USDC)",
+      title: translate("your_balance_usdc"),
       rightView: (
         <View style={styles.balanceContainer}>
           <Text style={styles.balance}>
@@ -330,7 +329,7 @@ function ProfileScreenImpl() {
   if (isPrivy) {
     balanceItems.push({
       id: "topUp",
-      title: "Top up your account",
+      title: translate("top_up_your_account"),
       action: () => {
         navigation.push("TopUp");
       },
@@ -364,18 +363,18 @@ function ProfileScreenImpl() {
                 );
               });
             if (isPreviouslyInNavStack) {
+              navigation.popToTop();
               navigation.navigate({
                 name: "Conversation",
                 params: {
                   mainConversationWithPeer: peerAddress,
-                  focus: true,
                 },
               });
             } else {
+              navigation.popToTop();
               navigation.dispatch(
                 StackActions.push("Conversation", {
                   mainConversationWithPeer: peerAddress,
-                  focus: true,
                 })
               );
             }
@@ -521,13 +520,16 @@ function ProfileScreenImpl() {
     if (currentAccountIsSuperAdmin && !peerIsSuperAdmin) {
       items.unshift({
         id: "promoteToSuperAdmin",
-        title: "Promote to super admin",
+        title: translate("promote_to_super_admin"),
         titleColor:
           Platform.OS === "android" ? undefined : primaryColor(colorScheme),
         action: () => {
           showActionSheetWithOptions(
             {
-              options: ["Promote to Super Admin", "Cancel"],
+              options: [
+                translate("promote_to_super_admin"),
+                translate("cancel"),
+              ],
               cancelButtonIndex: 1,
               destructiveButtonIndex: undefined,
               title: translate("are_you_sure"),
@@ -545,13 +547,13 @@ function ProfileScreenImpl() {
     if (currentAccountIsSuperAdmin && peerIsSuperAdmin) {
       items.push({
         id: "revokeSuperAdmin",
-        title: "Revoke super admin",
+        title: translate("revoke_super_admin"),
         titleColor:
           Platform.OS === "android" ? undefined : dangerColor(colorScheme),
         action: () => {
           showActionSheetWithOptions(
             {
-              options: ["Revoke Super Admin", "Cancel"],
+              options: [translate("revoke_super_admin"), translate("cancel")],
               cancelButtonIndex: 1,
               destructiveButtonIndex: 0,
               title: translate("are_you_sure"),
@@ -577,13 +579,13 @@ function ProfileScreenImpl() {
     ) {
       items.push({
         id: "revokeAdmin",
-        title: "Revoke admin",
+        title: translate("revoke_admin"),
         titleColor:
           Platform.OS === "android" ? undefined : dangerColor(colorScheme),
         action: () => {
           showActionSheetWithOptions(
             {
-              options: ["Revoke Admin", "Cancel"],
+              options: [translate("revoke_admin"), translate("cancel")],
               cancelButtonIndex: 1,
               destructiveButtonIndex: 0,
               title: translate("are_you_sure"),
@@ -625,15 +627,15 @@ function ProfileScreenImpl() {
       contentContainerStyle={styles.profileContent}
     >
       <Avatar
-        uri={getPreferredAvatar(socials)}
+        uri={preferredAvatarUri ?? undefined}
         style={styles.avatar}
-        name={getPreferredName(socials, peerAddress)}
+        name={preferredUserName}
       />
-      <Text style={styles.title}>{getPreferredName(socials, peerAddress)}</Text>
+      <Text style={styles.title}>{preferredUserName}</Text>
       {isMyProfile && shouldShowError && (
         <View style={styles.errorContainer}>
-          <Picto
-            picto="exclamationmark.triangle"
+          <Icon
+            icon="exclamationmark.triangle"
             color={dangerColor(colorScheme)}
             size={PictoSizes.textButton}
             style={styles.errorIcon}
@@ -646,7 +648,7 @@ function ProfileScreenImpl() {
           items={[
             {
               id: "qrCode",
-              title: "Invite more friends",
+              title: translate("invite_more_friends"),
               rightView: (
                 <TableViewPicto
                   symbol="qrcode"
@@ -686,13 +688,13 @@ function ProfileScreenImpl() {
           items={[
             {
               id: "message",
-              title: "Send a message",
+              title: translate("send_a_message"),
               titleColor: primaryColor(colorScheme),
               action: () => {
                 navigation.pop(3);
                 // @todo => check if this is the right timing on split screen / web / android
                 setTimeout(() => {
-                  navigate("Conversation", {
+                  navigation.navigate("Conversation", {
                     mainConversationWithPeer: route.params.address,
                   });
                 }, 300);
@@ -740,7 +742,7 @@ function ProfileScreenImpl() {
                 title: translate("view_removed_chats"),
                 action: () => {
                   navigation.popToTop();
-                  navigate("Blocked");
+                  navigation.navigate("Blocked");
                 },
                 titleColor:
                   Platform.OS === "android"
@@ -840,7 +842,7 @@ function ProfileScreenImpl() {
               },
               {
                 id: "delete",
-                title: "Disconnect this account",
+                title: translate("disconnect_this_account"),
                 titleColor:
                   Platform.OS === "android"
                     ? undefined

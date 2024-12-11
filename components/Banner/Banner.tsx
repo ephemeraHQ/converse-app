@@ -19,7 +19,7 @@ import {
   Platform,
 } from "react-native";
 
-interface BannerProps {
+type BannerProps = {
   title: string;
   description: string;
   cta?: string;
@@ -29,7 +29,7 @@ interface BannerProps {
   onDismiss: () => void;
   style?: StyleProp<ViewStyle>;
   onLayout?: (event: LayoutChangeEvent) => void;
-}
+};
 
 const Banner: React.FC<BannerProps> = ({
   title,

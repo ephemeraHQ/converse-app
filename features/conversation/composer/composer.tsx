@@ -1,5 +1,4 @@
-import { RemoteImage } from "@components/Chat/Attachment/AttachmentMessagePreview";
-import { SendAttachmentPreview } from "@components/Chat/Attachment/SendAttachmentPreview";
+import { RemoteAttachmentImage } from "@/components/Chat/Attachment/remote-attachment-image";
 import {
   isCoinbasePaymentMessage,
   isGroupUpdatedMessage,
@@ -10,7 +9,8 @@ import {
   isStaticAttachmentMessage,
   isTransactionReferenceMessage,
   useCurrentAccountInboxId,
-} from "@components/Chat/Message/Message.utils";
+} from "@/components/Chat/Message/message-utils";
+import { SendAttachmentPreview } from "@/features/conversation/composer/send-attachment-preview";
 import { HStack } from "@design-system/HStack";
 import { Icon } from "@design-system/Icon/Icon";
 import { IconButton } from "@design-system/IconButton/IconButton";
@@ -25,7 +25,10 @@ import { sentryTrackError } from "@utils/sentry";
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import {
   DecodedMessage,
+  InboxId,
+  MessageId,
   RemoteAttachmentCodec,
+  RemoteAttachmentContent,
   ReplyCodec,
   StaticAttachmentCodec,
 } from "@xmtp/react-native-sdk";
@@ -37,11 +40,9 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AddAttachmentButton } from "../../../components/Chat/Attachment/AddAttachmentButton";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { getReadableProfile } from "../../../utils/str";
 import { useMessageText } from "../../conversation-list/hooks/useMessageText";
-import { useConversationContext } from "../conversation-context";
 import { useCurrentConversationPersistedStoreState } from "../conversation-persisted-stores";
 import {
   getComposerMediaPreview,
@@ -62,11 +63,20 @@ import {
   useReplyToMessageId,
   waitUntilMediaPreviewIsUploaded,
 } from "../conversation-service";
+import { AddAttachmentButton } from "./add-attachment-button";
+import { ISendMessageParams } from "@/features/conversation/conversation-context";
+import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 
-export function ChatInputDumb() {
+export type IComposerSendArgs = ISendMessageParams;
+
+type IComposerProps = {
+  onSend: (args: IComposerSendArgs) => Promise<void>;
+};
+
+export function Composer(props: IComposerProps) {
+  const { onSend } = props;
+
   const { theme } = useAppTheme();
-
-  const sendMessage = useConversationContext("sendMessage");
 
   const send = useCallback(async () => {
     const mediaPreview = getComposerMediaPreview();
@@ -88,8 +98,10 @@ export function ChatInputDumb() {
 
       const uploadedRemoteAttachment = getUploadedRemoteAttachment()!;
 
-      await sendMessage({
-        attachment: uploadedRemoteAttachment,
+      await onSend({
+        content: {
+          remoteAttachment: uploadedRemoteAttachment,
+        },
         ...(replyingToMessageId && {
           referencedMessageId: replyingToMessageId,
         }),
@@ -102,9 +114,10 @@ export function ChatInputDumb() {
     const inputValue = getCurrentConversationInputValue();
 
     if (inputValue.length > 0) {
-      await sendMessage({
-        text: inputValue,
-        // contentType: "xmtp.org/text:1.0",
+      await onSend({
+        content: {
+          text: inputValue,
+        },
         ...(replyingToMessageId && {
           referencedMessageId: replyingToMessageId,
         }),
@@ -119,7 +132,7 @@ export function ChatInputDumb() {
     // converseEventEmitter.emit("scrollChatToMessage", {
     //   index: 0,
     // });
-  }, [sendMessage]);
+  }, [onSend]);
 
   const insets = useSafeAreaInsets();
 
@@ -219,15 +232,15 @@ const ReplyPreview = memo(function ReplyPreview() {
     ? getConversationMessages(currentAccount, topic!)?.byId[replyingToMessageId]
     : undefined;
 
-  const readableProfile = replyMessage
-    ? getReadableProfile(currentAccount, replyMessage?.senderAddress)
-    : null;
+  const inboxName = usePreferredInboxName(
+    replyMessage?.senderAddress as InboxId
+  );
 
   const replyingTo = replyMessage
     ? replyMessage.senderAddress === currentAccountInboxId
       ? `Replying to you`
-      : readableProfile
-        ? `Replying to ${readableProfile}`
+      : inboxName
+        ? `Replying to ${inboxName}`
         : "Replying"
     : "";
 
@@ -339,7 +352,7 @@ export const ReplyPreviewEndContent = memo(
     const { theme } = useAppTheme();
 
     if (isReplyMessage(replyMessage)) {
-      const replyTyped = replyMessage as DecodedMessage<[ReplyCodec]>;
+      const replyTyped = replyMessage as DecodedMessage<ReplyCodec>;
 
       const content = replyTyped.content();
 
@@ -349,13 +362,15 @@ export const ReplyPreviewEndContent = memo(
 
       if (content.content.remoteAttachment) {
         return (
-          <RemoteImage
+          <RemoteAttachmentImage
             messageId={content.reference}
             remoteMessageContent={content.content.remoteAttachment}
-            style={{
-              height: theme.avatarSize.md,
-              width: theme.avatarSize.md,
-              borderRadius: theme.borderRadius.xs,
+            containerProps={{
+              style: {
+                height: theme.avatarSize.md,
+                width: theme.avatarSize.md,
+                borderRadius: theme.borderRadius.xs,
+              },
             }}
           />
         );
@@ -363,9 +378,8 @@ export const ReplyPreviewEndContent = memo(
     }
 
     if (isRemoteAttachmentMessage(replyMessage)) {
-      const messageTyped = replyMessage as DecodedMessage<
-        [RemoteAttachmentCodec]
-      >;
+      const messageTyped =
+        replyMessage as DecodedMessage<RemoteAttachmentCodec>;
 
       const content = messageTyped.content();
 
@@ -374,13 +388,15 @@ export const ReplyPreviewEndContent = memo(
       }
 
       return (
-        <RemoteImage
+        <RemoteAttachmentImage
           messageId={messageTyped.id}
           remoteMessageContent={content}
-          style={{
-            height: theme.avatarSize.md,
-            width: theme.avatarSize.md,
-            borderRadius: theme.borderRadius.xs,
+          containerProps={{
+            style: {
+              height: theme.avatarSize.md,
+              width: theme.avatarSize.md,
+              borderRadius: theme.borderRadius.xs,
+            },
           }}
         />
       );
@@ -402,9 +418,8 @@ const ReplyPreviewMessageContent = memo(
     const clearedMessage = messageText?.replace(/(\n)/gm, " ");
 
     if (isStaticAttachmentMessage(replyMessage)) {
-      const messageTyped = replyMessage as DecodedMessage<
-        [StaticAttachmentCodec]
-      >;
+      const messageTyped =
+        replyMessage as DecodedMessage<StaticAttachmentCodec>;
 
       const content = messageTyped.content();
 
@@ -441,7 +456,7 @@ const ReplyPreviewMessageContent = memo(
     }
 
     if (isReplyMessage(replyMessage)) {
-      const messageTyped = replyMessage as DecodedMessage<[ReplyCodec]>;
+      const messageTyped = replyMessage as DecodedMessage<ReplyCodec>;
       const content = messageTyped.content();
 
       if (typeof content === "string") {

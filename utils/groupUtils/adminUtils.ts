@@ -1,4 +1,4 @@
-import { getCleanAddress } from "@utils/evm/address";
+import { getCleanAddress } from "@utils/evm/getCleanAddress";
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 

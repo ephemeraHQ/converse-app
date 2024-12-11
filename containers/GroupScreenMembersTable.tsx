@@ -7,7 +7,6 @@ import { actionSheetColors, textSecondaryColor } from "@styles/colors";
 import {
   getAccountIsAdmin,
   getAccountIsSuperAdmin,
-  getAddressIsAdmin,
   getAddressIsSuperAdmin,
 } from "@utils/groupUtils/adminUtils";
 import { getGroupMemberActions } from "@utils/groupUtils/getGroupMemberActions";
@@ -16,14 +15,15 @@ import logger from "@utils/logger";
 import { navigate } from "@utils/navigation";
 import { getPreferredName, getProfile } from "@utils/profile";
 import { FC, memo, useMemo } from "react";
-import { Alert, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { StyleSheet, Text, View, useColorScheme } from "react-native";
 
+import { useGroupPermissionPolicyQuery } from "@queries/useGroupPermissionPolicyQuery";
+import type { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import type { GroupWithCodecsType } from "@utils/xmtpRN/client";
-import { useGroupPermissionPolicyQuery } from "@queries/useGroupPermissionPolicyQuery";
+import { captureErrorWithFriendlyToast } from "@/utils/capture-error";
 
 type GroupScreenMembersTableProps = {
   topic: ConversationTopic | undefined;
@@ -31,7 +31,7 @@ type GroupScreenMembersTableProps = {
 };
 
 export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
-  ({ topic }) => {
+  ({ topic, group }) => {
     const colorScheme = useColorScheme();
     const currentAccount = useCurrentAccount() as string;
     const styles = useStyles();
@@ -43,10 +43,10 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
       revokeAdmin,
       revokeSuperAdmin,
       removeMember,
-    } = useGroupMembers(topic);
+    } = useGroupMembers((topic ?? group?.topic)!);
     const { data: groupPermissionPolicy } = useGroupPermissionPolicyQuery(
       currentAccount,
-      topic
+      (topic ?? group?.topic)!
     );
     const profiles = useProfilesStore((s) => s.profiles);
 
@@ -73,7 +73,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
         );
         items.push({
           id: a.inboxId,
-          title: `${preferredName}${isCurrentUser ? " (you)" : ""}`,
+          title: `${preferredName}${isCurrentUser ? translate("you_parentheses") : ""}`,
           action: () => {
             const {
               options,
@@ -113,7 +113,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
                       await promoteToSuperAdmin(a.inboxId);
                     } catch (e) {
                       logger.error(e);
-                      Alert.alert("An error occurred");
+                      captureErrorWithFriendlyToast(e);
                     }
                     break;
                   case revokeSuperAdminIndex:
@@ -122,7 +122,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
                       await revokeSuperAdmin(a.inboxId);
                     } catch (e) {
                       logger.error(e);
-                      Alert.alert("An error occurred");
+                      captureErrorWithFriendlyToast(e);
                     }
                     break;
                   case promoteAdminIndex:
@@ -131,7 +131,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
                       await promoteToAdmin(a.inboxId);
                     } catch (e) {
                       logger.error(e);
-                      Alert.alert("An error occurred");
+                      captureErrorWithFriendlyToast(e);
                     }
                     break;
                   case revokeAdminIndex:
@@ -140,7 +140,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
                       await revokeAdmin(a.inboxId);
                     } catch (e) {
                       logger.error(e);
-                      Alert.alert("An error occurred");
+                      captureErrorWithFriendlyToast(e);
                     }
                     break;
                   case removeIndex:
@@ -149,7 +149,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
                       await removeMember([a.inboxId]);
                     } catch (e) {
                       logger.error(e);
-                      Alert.alert("An error occurred");
+                      captureErrorWithFriendlyToast(e);
                     }
                     break;
                   default:
@@ -160,10 +160,14 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
           rightView: (
             <View style={styles.tableViewRight}>
               {isSuperAdmin && (
-                <Text style={styles.adminText}>Super Admin</Text>
+                <Text style={styles.adminText}>
+                  {translate("group_screen_member_actions.super_admin")}
+                </Text>
               )}
               {isAdmin && !isSuperAdmin && (
-                <Text style={styles.adminText}>Admin</Text>
+                <Text style={styles.adminText}>
+                  {translate("group_screen_member_actions.admin")}
+                </Text>
               )}
               <TableViewPicto
                 symbol="chevron.right"

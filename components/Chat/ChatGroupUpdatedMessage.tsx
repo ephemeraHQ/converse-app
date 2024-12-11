@@ -1,3 +1,4 @@
+import { MessageDateChange } from "./Message/message-date-change";
 import Avatar from "@components/Avatar";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { HStack } from "@design-system/HStack";
@@ -10,7 +11,8 @@ import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { navigate } from "@utils/navigation";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import {
-  GroupUpdatedContent,
+  DecodedMessage,
+  GroupUpdatedCodec,
   GroupUpdatedMetadatEntry,
   InboxId,
 } from "@xmtp/react-native-sdk";
@@ -18,40 +20,54 @@ import { memo } from "react";
 import { ViewStyle } from "react-native";
 
 type IChatGroupUpdatedMessageProps = {
-  content: GroupUpdatedContent;
+  message: DecodedMessage<GroupUpdatedCodec>;
 };
 
 export function ChatGroupUpdatedMessage({
-  content,
+  message,
 }: IChatGroupUpdatedMessageProps) {
-  const { themed } = useAppTheme();
+  const { themed, theme } = useAppTheme();
+
+  const content = message.content();
+
+  if (typeof content === "string") {
+    // TODO
+    return null;
+  }
 
   return (
-    <VStack style={themed($container)}>
-      {/* Member additions */}
-      {content.membersAdded.map((member) => (
-        <ChatGroupMemberJoined
-          key={`joined-${member.inboxId}`}
-          inboxId={member.inboxId as InboxId}
-        />
-      ))}
+    <VStack
+      style={{
+        paddingVertical: theme.spacing.sm,
+      }}
+    >
+      <MessageDateChange />
+      <VStack style={themed($container)}>
+        {/* Member additions */}
+        {content.membersAdded.map((member) => (
+          <ChatGroupMemberJoined
+            key={`joined-${member.inboxId}`}
+            inboxId={member.inboxId as InboxId}
+          />
+        ))}
 
-      {/* Member removals */}
-      {content.membersRemoved.map((member) => (
-        <ChatGroupMemberLeft
-          key={`left-${member.inboxId}`}
-          inboxId={member.inboxId as InboxId}
-        />
-      ))}
+        {/* Member removals */}
+        {content.membersRemoved.map((member) => (
+          <ChatGroupMemberLeft
+            key={`left-${member.inboxId}`}
+            inboxId={member.inboxId as InboxId}
+          />
+        ))}
 
-      {/* Metadata changes */}
-      {content.metadataFieldsChanged.map((entry, index) => (
-        <ChatGroupMetadataUpdate
-          key={`metadata-${index}`}
-          metadataEntry={entry}
-          initiatorInboxId={content.initiatedByInboxId as InboxId}
-        />
-      ))}
+        {/* Metadata changes */}
+        {content.metadataFieldsChanged.map((entry, index) => (
+          <ChatGroupMetadataUpdate
+            key={`metadata-${index}`}
+            metadataEntry={entry}
+            initiatorInboxId={content.initiatedByInboxId as InboxId}
+          />
+        ))}
+      </VStack>
     </VStack>
   );
 }

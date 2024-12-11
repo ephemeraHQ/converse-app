@@ -8,9 +8,9 @@ import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { Client } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
-import { convertEthersSignerToXmtpSigner } from "./signer";
 
 import { isClientInstallationValid } from "./client";
+import { ethersSignerToXmtpSigner } from "./signer";
 import config from "../../config";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
@@ -37,8 +37,8 @@ export const createXmtpClientFromSigner = async (
   await copyDatabasesToTemporaryDirectory(tempDirectory, inboxId);
 
   logger.debug("Instantiating client from signer");
-  const xmtpSigner = convertEthersSignerToXmtpSigner(signer, false);
-  const client = await Client.create(xmtpSigner, {
+
+  const client = await Client.create(ethersSignerToXmtpSigner(signer), {
     ...options,
     preAuthenticateToInboxCallback,
   });

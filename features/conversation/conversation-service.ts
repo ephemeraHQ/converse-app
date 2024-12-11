@@ -9,6 +9,7 @@ import {
 import { moveFileAndReplace } from "@utils/fileSystem";
 import {
   ConversationTopic,
+  MessageId,
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
 import * as ImagePicker from "expo-image-picker";
@@ -18,8 +19,8 @@ import {
   getCurrentConversationPersistedStore,
   useCurrentConversationPersistedStoreState,
 } from "./conversation-persisted-stores";
-import { useConversationStore } from "./conversation-store";
-import { getLocalAttachment } from "@utils/attachment/handleAttachment";
+import { IConversationStore, useConversationStore } from "./conversation-store";
+import logger from "@/utils/logger";
 
 export function initializeCurrentConversation(args: {
   topic: ConversationTopic | undefined;
@@ -108,7 +109,7 @@ export function useReplyToMessageId() {
 }
 
 export function setCurrentConversationReplyToMessageId(
-  replyingToMessageId: string | null
+  replyingToMessageId: MessageId | null
 ) {
   const conversationStore = getCurrentConversationPersistedStore();
   conversationStore.setState((state) => ({
@@ -217,6 +218,7 @@ export function getCurrentConversationMessages() {
   const currentAccount = getCurrentAccount()!;
   const topic = getCurrentConversationTopic();
   if (!topic) {
+    logger.error("No topic in getCurrentConversationMessages");
     return {
       byId: {},
       ids: [],
@@ -224,4 +226,26 @@ export function getCurrentConversationMessages() {
     };
   }
   return getConversationMessages(currentAccount, topic);
+}
+
+export function setMessageContextMenuData(
+  data: IConversationStore["messageContextMenuData"]
+) {
+  useConversationStore.setState({
+    messageContextMenuData: data,
+  });
+}
+
+export function getMessageContextMenuData() {
+  return useConversationStore.getState().messageContextMenuData;
+}
+
+export function resetMessageContextMenuData() {
+  useConversationStore.setState({
+    messageContextMenuData: null,
+  });
+}
+
+export function useMessageContextMenuData() {
+  return useConversationStore((state) => state.messageContextMenuData);
 }

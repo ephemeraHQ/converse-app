@@ -6,9 +6,9 @@ import {
   FadeOut,
   Keyframe,
   LinearTransition,
+  type WithSpringConfig,
 } from "react-native-reanimated";
 
-import { SpringConfig } from "react-native-reanimated/lib/typescript/reanimated2/animation/springUtils";
 import { timing } from "./timing";
 
 export const SICK_EASE_OUT = Easing.out(Easing.cubic);
@@ -17,7 +17,7 @@ export const SICK_DAMPING = 80;
 
 export const SICK_STIFFNESS = 200;
 
-export const SICK_SPRING_CONFIG: SpringConfig = {
+export const SICK_SPRING_CONFIG: WithSpringConfig = {
   damping: SICK_DAMPING,
   stiffness: SICK_STIFFNESS,
 };

@@ -7,7 +7,7 @@ export const colorsDark: IColors = {
     bubbleAccent: darkPalette.accent,
     reply: lightPalette.light96,
     nestedReply: darkPalette.alpha4,
-    nestedReplyFromMe: darkPalette.dark85,
+    nestedReplyFromMe: darkPalette.alpha4,
     received: {
       bubble: lightPalette.light15,
       reply: lightPalette.light15,
@@ -53,11 +53,13 @@ export const colorsDark: IColors = {
     tertiary: lightPalette.light30,
     inactive: lightPalette.light15,
     caution: lightPalette.red,
+    action: darkPalette.deepAccent,
     inverted: {
       primary: darkPalette.dark,
       secondary: darkPalette.dark60,
       tertiary: darkPalette.dark30,
       inactive: darkPalette.dark15,
+      action: darkPalette.deepAccent,
     },
   },
   global: {

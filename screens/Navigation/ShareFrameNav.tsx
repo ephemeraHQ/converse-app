@@ -4,6 +4,7 @@ import { Button, Platform, TextInput } from "react-native";
 import { NativeStack } from "./Navigation";
 import AndroidBackAction from "../../components/AndroidBackAction";
 import ConversationList from "../ConversationList";
+import { translate } from "@/i18n";
 
 export type ShareFrameNavParams = {
   frameURL: string;
@@ -15,7 +16,7 @@ export default function ShareFrameNav() {
     <NativeStack.Screen
       name="ShareFrame"
       options={({ navigation }) => ({
-        headerTitle: "Share Frame",
+        headerTitle: translate("share_frame"),
         presentation: "modal",
         headerLeft: (props) =>
           Platform.OS === "ios" ? (
