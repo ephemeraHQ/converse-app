@@ -1,16 +1,14 @@
 import { NavigationProp } from "@react-navigation/native";
-import { textPrimaryColor } from "@styles/colors";
-import { PictoSizes } from "@styles/sizes";
 import { useCallback } from "react";
 import {
   Platform,
   StyleSheet,
   TouchableOpacity,
-  useColorScheme,
+  ViewStyle,
 } from "react-native";
 import { StackAnimationTypes } from "react-native-screens";
 
-import Picto from "../../components/Picto/Picto";
+import { Icon } from "@design-system/Icon/Icon";
 import Conversation from "../Conversation";
 import {
   NativeStack,
@@ -18,6 +16,7 @@ import {
   navigationAnimation,
 } from "./Navigation";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useAppTheme } from "@theme/useAppTheme";
 
 export type ConversationNavParams = {
   topic?: ConversationTopic;
@@ -39,13 +38,16 @@ export const ConversationScreenConfig = {
 export default function ConversationNav(
   routeParams?: ConversationNavParams | undefined
 ) {
-  const colorScheme = useColorScheme();
+  const { theme, themed } = useAppTheme();
 
   const navigationOptions = useCallback(
     ({ navigation }: { navigation: NavigationProp<NavigationParamList> }) => ({
       headerShadowVisible: false,
       animation: navigationAnimation as StackAnimationTypes,
       title: "",
+      headerStyle: {
+        backgroundColor: theme.colors.background.surface,
+      } as any,
       headerLeft: () => {
         const handleBack = () => {
           navigation.canGoBack() && navigation.goBack();
@@ -53,19 +55,19 @@ export default function ConversationNav(
         return (
           <TouchableOpacity
             onPress={handleBack}
-            style={styles.iconContainer}
+            style={themed($iconContainer)}
             hitSlop={{ top: 20, bottom: 20, left: 20, right: 10 }}
           >
-            <Picto
-              picto="chevron.left"
-              size={PictoSizes.conversationNav}
-              color={textPrimaryColor(colorScheme)}
+            <Icon
+              icon="chevron.left"
+              size={theme.iconSize.md}
+              color={theme.colors.text.primary}
             />
           </TouchableOpacity>
         );
       },
     }),
-    [colorScheme]
+    [theme, themed]
   );
   return (
     <NativeStack.Screen name="Conversation" options={navigationOptions}>
@@ -76,10 +78,8 @@ export default function ConversationNav(
   );
 }
 
-const styles = StyleSheet.create({
-  iconContainer: {
-    height: 40,
-    justifyContent: "center",
-    paddingRight: Platform.OS === "ios" ? 16 : 30,
-  },
-});
+const $iconContainer: ViewStyle = {
+  height: 40,
+  justifyContent: "center",
+  paddingRight: Platform.OS === "ios" ? 16 : 30,
+};

@@ -1,4 +1,3 @@
-import { StatusBarProps } from "expo-status-bar";
 import { ScrollViewProps, StyleProp, ViewStyle } from "react-native";
 
 import { ExtendedEdge } from "./Screen.helpers";
@@ -24,14 +23,6 @@ type BaseScreenProps = {
    * Background color
    */
   backgroundColor?: string;
-  /**
-   * Status bar setting. Defaults to dark.
-   */
-  statusBarStyle?: "light" | "dark";
-  /**
-   * Pass any additional props directly to the StatusBar component.
-   */
-  StatusBarProps?: StatusBarProps;
   /**
    * Pass any additional props directly to the KeyboardAvoidingView component.
    */
