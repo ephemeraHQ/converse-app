@@ -1,36 +1,16 @@
-import { useCallback } from "react";
-import { useRouter } from "@navigation/useNavigation";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { NavigationParamList } from "@screens/Navigation/Navigation";
-import { usePreferredName } from "@hooks/usePreferredName";
+import { ConversationTitle } from "@/features/conversation/conversation-title";
 import Avatar from "@components/Avatar";
 import { usePreferredAvatarUri } from "@hooks/usePreferredAvatarUri";
+import { usePreferredName } from "@hooks/usePreferredName";
+import { useProfileSocials } from "@hooks/useProfileSocials";
+import { useRouter } from "@navigation/useNavigation";
 import { AvatarSizes } from "@styles/sizes";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { useCallback } from "react";
 import { ImageStyle, Platform } from "react-native";
-import { useProfileSocials } from "@hooks/useProfileSocials";
-import { ConversationTitle } from "@/features/conversation/conversation-title";
 
 type NewConversationTitleProps = {
   peerAddress: string;
-};
-
-type UseUserInteractionProps = {
-  peerAddress?: string;
-  navigation: NativeStackNavigationProp<NavigationParamList>;
-};
-
-const useUserInteraction = ({
-  navigation,
-  peerAddress,
-}: UseUserInteractionProps) => {
-  const onPress = useCallback(() => {
-    if (peerAddress) {
-      navigation.push("Profile", { address: peerAddress });
-    }
-  }, [navigation, peerAddress]);
-
-  return { onPress };
 };
 
 export const NewConversationTitle = ({
@@ -40,10 +20,11 @@ export const NewConversationTitle = ({
 
   const { themed } = useAppTheme();
 
-  const { onPress } = useUserInteraction({
-    peerAddress,
-    navigation,
-  });
+  const onPress = useCallback(() => {
+    if (peerAddress) {
+      navigation.push("Profile", { address: peerAddress });
+    }
+  }, [navigation, peerAddress]);
 
   const { isLoading } = useProfileSocials(peerAddress ?? "");
 

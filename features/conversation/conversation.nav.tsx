@@ -20,6 +20,14 @@ export const ConversationScreenConfig = {
 
 export function ConversationNav() {
   return (
-    <NativeStack.Screen name="Conversation" component={ConversationScreen} />
+    <NativeStack.Screen
+      options={{
+        title: "",
+        headerBackTitle: "",
+        headerBackTitleVisible: false,
+      }}
+      name="Conversation"
+      component={ConversationScreen}
+    />
   );
 }

@@ -4,7 +4,7 @@ import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { normalizeTimestamp } from "@/utils/date";
-import { getCurrentUserAccountInboxId } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 
 type UseConversationIsUnreadProps = {
   topic: string;

@@ -32,7 +32,7 @@ export function AddAttachmentButton() {
         store.getState().setComposerMediaPreview({
           mediaURI: asset.uri,
           status: "picked",
-          mimeType: null,
+          mimeType: undefined,
           dimensions: {
             height: asset.height,
             width: asset.width,

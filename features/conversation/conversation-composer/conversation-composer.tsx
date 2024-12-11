@@ -13,11 +13,11 @@ import { Platform, TextInput as RNTextInput } from "react-native";
 import { useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AddAttachmentButton } from "./conversation-composer-add-attachment-button";
+import { ReplyPreview } from "./conversation-composer-reply-preview";
 import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
 } from "./conversation-composer.store-context";
-import { ReplyPreview } from "./conversation-composer-reply-preview";
 
 export type IComposerSendArgs = ISendMessageParams;
 
@@ -80,6 +80,9 @@ export const Composer = memo(function Composer(props: IComposerProps) {
         throw new Error("Something went wrong while uploading attachment");
       }
 
+      store.getState().setComposerMediaPreview(null);
+      store.getState().setComposerUploadedAttachment(null);
+
       await onSend({
         content: {
           remoteAttachment: uploadedRemoteAttachment,
@@ -88,12 +91,11 @@ export const Composer = memo(function Composer(props: IComposerProps) {
           referencedMessageId: replyingToMessageId,
         }),
       });
-
-      store.getState().setComposerMediaPreview(null);
-      store.getState().setComposerUploadedAttachment(null);
     }
 
     const inputValue = store.getState().inputValue;
+
+    store.getState().reset();
 
     if (inputValue.length > 0) {
       await onSend({
@@ -105,8 +107,6 @@ export const Composer = memo(function Composer(props: IComposerProps) {
         }),
       });
     }
-
-    store.getState().reset();
 
     // TODO: Fix with function in context
     // converseEventEmitter.emit("scrollChatToMessage", {

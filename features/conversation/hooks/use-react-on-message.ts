@@ -1,5 +1,5 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { getCurrentUserAccountInboxId } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   addConversationMessage,
   refetchConversationMessages,
@@ -7,6 +7,7 @@ import {
 import { captureError, captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";
+import { Haptics } from "@/utils/haptics";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
 import { useMutation } from "@tanstack/react-query";
@@ -34,18 +35,22 @@ export function useReactOnMessage(props: {
       const currentUserInboxId = getCurrentUserAccountInboxId()!;
 
       // Add the reaction to the message
-      addConversationMessage(currentAccount, conversation.topic, {
-        id: getRandomId(),
-        client: conversation.client,
-        contentTypeId: contentTypesPrefixes.reaction,
-        sentNs: getTodayNs(),
-        fallback: variables.reaction.content,
-        deliveryStatus: MessageDeliveryStatus.PUBLISHED,
+      addConversationMessage({
+        account: currentAccount,
         topic: conversation.topic,
-        senderAddress: currentUserInboxId,
-        nativeContent: {},
-        content: () => {
-          return variables.reaction;
+        message: {
+          id: getRandomId(),
+          client: conversation.client,
+          contentTypeId: contentTypesPrefixes.reaction,
+          sentNs: getTodayNs(),
+          fallback: variables.reaction.content,
+          deliveryStatus: MessageDeliveryStatus.PUBLISHED,
+          topic: conversation.topic,
+          senderAddress: currentUserInboxId,
+          nativeContent: {},
+          content: () => {
+            return variables.reaction;
+          },
         },
       });
     },
@@ -64,6 +69,7 @@ export function useReactOnMessage(props: {
         if (!conversation) {
           throw new Error("Conversation not found when reacting on message");
         }
+        Haptics.softImpactAsync();
         await reactOnMessageMutationAsync({
           reaction: {
             reference: args.messageId,

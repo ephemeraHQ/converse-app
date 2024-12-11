@@ -7,18 +7,18 @@ import {
   IMessageContextMenuStoreState,
   useMessageContextMenuStore,
   useMessageContextMenuStoreContext,
-} from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store";
+} from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
 import {
   getMessageById,
   useConversationMessageReactions,
-  useCurrentAccountInboxId,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { useCurrentConversationTopic } from "@/features/conversation/conversation.service";
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
-import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/messageIsFromCurrentUser";
+import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/message-is-from-current-user";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { calculateMenuHeight } from "@design-system/ContextMenu/ContextMenu.utils";
 import { Portal } from "@gorhom/portal";
@@ -26,7 +26,7 @@ import { memo, useCallback } from "react";
 import { StyleSheet } from "react-native";
 import { MessageContextMenuAboveMessageReactions } from "./conversation-message-context-menu-above-message-reactions";
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container";
-import { getMessageContextMenuItems } from "./conversation-message-context-menu.utils";
+import { useMessageContextMenuItems } from "./conversation-message-context-menu.utils";
 
 export const MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE = 16;
 
@@ -71,7 +71,7 @@ const Content = memo(function Content(props: {
   })!;
 
   const fromMe = messageIsFromCurrentUserV3({ message });
-  const menuItems = getMessageContextMenuItems({
+  const menuItems = useMessageContextMenuItems({
     messageId: messageId,
     topic,
   });
@@ -136,6 +136,7 @@ const Content = memo(function Content(props: {
               hasReactions={hasReactions}
             >
               <MessageContextMenuAboveMessageReactions
+                topic={topic}
                 reactors={bySender ?? {}}
                 messageId={messageId}
                 onChooseMoreEmojis={handleChooseMoreEmojis}

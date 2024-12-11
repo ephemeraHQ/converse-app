@@ -1,44 +1,20 @@
-import { useCallback } from "react";
-import { useConversationTitleLongPress } from "./hooks/useConversationTitleLongPress";
-import { useRouter } from "@navigation/useNavigation";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { NavigationParamList } from "@screens/Navigation/Navigation";
-import { useDmPeerAddressQuery } from "@queries/useDmPeerAddressQuery";
-import { useCurrentAccount } from "@data/store/accountsStore";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { usePreferredName } from "@hooks/usePreferredName";
+import { ConversationTitle } from "@/features/conversation/conversation-title";
+import { copyToClipboard } from "@/utils/clipboard";
 import Avatar from "@components/Avatar";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { usePreferredAvatarUri } from "@hooks/usePreferredAvatarUri";
+import { usePreferredName } from "@hooks/usePreferredName";
+import { useProfileSocials } from "@hooks/useProfileSocials";
+import { useRouter } from "@navigation/useNavigation";
+import { useDmPeerAddressQuery } from "@queries/useDmPeerAddressQuery";
 import { AvatarSizes } from "@styles/sizes";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useCallback } from "react";
 import { ImageStyle, Platform } from "react-native";
-import { useProfileSocials } from "@hooks/useProfileSocials";
-import { ConversationTitle } from "@/features/conversation/conversation-title";
 
 type DmConversationTitleProps = {
   topic: ConversationTopic;
-};
-
-type UseUserInteractionProps = {
-  peerAddress?: string;
-  navigation: NativeStackNavigationProp<NavigationParamList>;
-  topic: ConversationTopic;
-};
-
-const useUserInteraction = ({
-  navigation,
-  peerAddress,
-  topic,
-}: UseUserInteractionProps) => {
-  const onPress = useCallback(() => {
-    if (peerAddress) {
-      navigation.push("Profile", { address: peerAddress });
-    }
-  }, [navigation, peerAddress]);
-
-  const onLongPress = useConversationTitleLongPress(topic);
-
-  return { onPress, onLongPress };
 };
 
 export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
@@ -50,11 +26,15 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
 
   const { data: peerAddress } = useDmPeerAddressQuery(account, topic);
 
-  const { onPress, onLongPress } = useUserInteraction({
-    peerAddress,
-    navigation,
-    topic,
-  });
+  const onPress = useCallback(() => {
+    if (peerAddress) {
+      navigation.push("Profile", { address: peerAddress });
+    }
+  }, [navigation, peerAddress]);
+
+  const onLongPress = useCallback(() => {
+    copyToClipboard(JSON.stringify(topic));
+  }, [topic]);
 
   const { isLoading } = useProfileSocials(peerAddress ?? "");
 

@@ -10,14 +10,12 @@ import {
   getCurrentAccount,
   useCurrentAccount,
 } from "@data/store/accountsStore";
-import { queryClient } from "@queries/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { getReadableProfile } from "@utils/getReadableProfile";
 import {
   DecodedMessageWithCodecsType,
   SupportedCodecsType,
 } from "@utils/xmtpRN/client";
-import { getInboxId } from "@utils/xmtpRN/signIn";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   ConversationTopic,
@@ -93,47 +91,6 @@ export function useMessageSenderReadableProfile(
     return "";
   }
   return getReadableProfile(currentAccountAdress, message.senderAddress);
-}
-
-// TMP until we move this into an account store or something like that
-// Maybe instead worth moving into account store?
-export function useCurrentAccountInboxId() {
-  const currentAccount = useCurrentAccount()!;
-  return useQuery(getCurrentAccountInboxIdQueryOptions(currentAccount));
-}
-
-type IGetCurrentAccountInboxIdQueryData = Awaited<
-  ReturnType<typeof getInboxId>
->;
-
-function getCurrentAccountInboxIdQueryFn(currentAccount: string) {
-  return getInboxId(currentAccount!);
-}
-
-function getCurrentAccountInboxIdQueryOptions(currentAccount: string) {
-  return {
-    queryKey: ["inboxId", currentAccount],
-    queryFn: () => getCurrentAccountInboxIdQueryFn(currentAccount),
-    enabled: !!currentAccount,
-  };
-}
-
-export function getCurrentUserAccountInboxId() {
-  const currentAccount = getCurrentAccount()!;
-  return queryClient.getQueryData<IGetCurrentAccountInboxIdQueryData>(
-    getCurrentAccountInboxIdQueryOptions(currentAccount).queryKey
-  );
-}
-
-export function prefetchCurrentUserAccountInboxId() {
-  const currentAccount = getCurrentAccount()!;
-  return queryClient.prefetchQuery(
-    getCurrentAccountInboxIdQueryOptions(currentAccount)
-  );
-}
-
-export function convertNanosecondsToMilliseconds(nanoseconds: number) {
-  return nanoseconds / 1000000;
 }
 
 export function getMessageById({

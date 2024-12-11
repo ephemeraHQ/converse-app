@@ -1,5 +1,5 @@
 import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
-import { messageIsFromCurrentUser } from "./messageIsFromCurrentUser";
+import { messageIsFromCurrentUser } from "./message-is-from-current-user";
 
 type IsLatestSettledFromCurrentUserPayload = {
   message?: DecodedMessageWithCodecsType;

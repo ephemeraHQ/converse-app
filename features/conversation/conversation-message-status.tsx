@@ -1,113 +1,115 @@
-import { textSecondaryColor } from "@styles/colors";
-import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, useColorScheme, View } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  Easing,
-} from "react-native-reanimated";
+/**
+ * TODO
+ */
+// import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
+// import { textSecondaryColor } from "@styles/colors";
+// import React, { useEffect, useRef, useState } from "react";
+// import { StyleSheet, View, useColorScheme } from "react-native";
+// import Animated, {
+//   Easing,
+//   useAnimatedStyle,
+//   useSharedValue,
+//   withTiming,
+// } from "react-native-reanimated";
 
-import { MessageToDisplay } from "./Message";
+// type Props = {
+//   message: DecodedMessageWithCodecsType;
+// };
 
-type Props = {
-  message: MessageToDisplay;
-};
+// const statusMapping: {
+//   [key: string]: string | undefined;
+// } = {
+//   sent: "Sent",
+//   delivered: "Sent",
+//   error: "Failed",
+//   sending: "Sending",
+//   prepared: "Sending",
+//   seen: "Read",
+// };
 
-const statusMapping: {
-  [key: string]: string | undefined;
-} = {
-  sent: "Sent",
-  delivered: "Sent",
-  error: "Failed",
-  sending: "Sending",
-  prepared: "Sending",
-  seen: "Read",
-};
+// export default function MessageStatus({ message }: Props) {
+//   const styles = useStyles();
+//   const prevStatusRef = useRef(message.status);
+//   const isSentOrDelivered =
+//     message.status === "sent" || message.status === "delivered";
+//   const isLatestSettledFromMe = message.isLatestSettledFromMe;
 
-export default function MessageStatus({ message }: Props) {
-  const styles = useStyles();
-  const prevStatusRef = useRef(message.status);
-  const isSentOrDelivered =
-    message.status === "sent" || message.status === "delivered";
-  const isLatestSettledFromMe = message.isLatestSettledFromMe;
+//   const [renderText, setRenderText] = useState(false);
+//   const opacity = useSharedValue(message.isLatestSettledFromMe ? 1 : 0);
+//   const height = useSharedValue(message.isLatestSettledFromMe ? 22 : 0);
+//   const scale = useSharedValue(message.isLatestSettledFromMe ? 1 : 0);
 
-  const [renderText, setRenderText] = useState(false);
-  const opacity = useSharedValue(message.isLatestSettledFromMe ? 1 : 0);
-  const height = useSharedValue(message.isLatestSettledFromMe ? 22 : 0);
-  const scale = useSharedValue(message.isLatestSettledFromMe ? 1 : 0);
+//   const timingConfig = {
+//     duration: 200,
+//     easing: Easing.inOut(Easing.quad),
+//   };
 
-  const timingConfig = {
-    duration: 200,
-    easing: Easing.inOut(Easing.quad),
-  };
+//   const animatedStyle = useAnimatedStyle(() => ({
+//     opacity: opacity.value,
+//     height: height.value,
+//     transform: [{ scale: scale.value }],
+//   }));
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    height: height.value,
-    transform: [{ scale: scale.value }],
-  }));
+//   useEffect(
+//     () => {
+//       const prevStatus = prevStatusRef.current;
+//       prevStatusRef.current = message.status;
 
-  useEffect(
-    () => {
-      const prevStatus = prevStatusRef.current;
-      prevStatusRef.current = message.status;
+//       setTimeout(() => {
+//         requestAnimationFrame(() => {
+//           if (
+//             isSentOrDelivered &&
+//             (prevStatus === "sending" || prevStatus === "prepared")
+//           ) {
+//             opacity.value = withTiming(1, timingConfig);
+//             height.value = withTiming(22, timingConfig);
+//             scale.value = withTiming(1, timingConfig);
+//             setRenderText(true);
+//           } else if (isSentOrDelivered && !isLatestSettledFromMe) {
+//             opacity.value = withTiming(0, timingConfig);
+//             height.value = withTiming(0, timingConfig);
+//             scale.value = withTiming(0, timingConfig);
+//             setTimeout(() => setRenderText(false), timingConfig.duration);
+//           } else if (isLatestSettledFromMe) {
+//             opacity.value = 1;
+//             height.value = 22;
+//             scale.value = 1;
+//             setRenderText(true);
+//           }
+//         });
+//       }, 100);
+//     },
+//     // eslint-disable-next-line react-hooks/exhaustive-deps
+//     [isLatestSettledFromMe, isSentOrDelivered]
+//   );
 
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          if (
-            isSentOrDelivered &&
-            (prevStatus === "sending" || prevStatus === "prepared")
-          ) {
-            opacity.value = withTiming(1, timingConfig);
-            height.value = withTiming(22, timingConfig);
-            scale.value = withTiming(1, timingConfig);
-            setRenderText(true);
-          } else if (isSentOrDelivered && !isLatestSettledFromMe) {
-            opacity.value = withTiming(0, timingConfig);
-            height.value = withTiming(0, timingConfig);
-            scale.value = withTiming(0, timingConfig);
-            setTimeout(() => setRenderText(false), timingConfig.duration);
-          } else if (isLatestSettledFromMe) {
-            opacity.value = 1;
-            height.value = 22;
-            scale.value = 1;
-            setRenderText(true);
-          }
-        });
-      }, 100);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLatestSettledFromMe, isSentOrDelivered]
-  );
+//   return (
+//     message.fromMe &&
+//     message.status !== "sending" &&
+//     message.status !== "prepared" && (
+//       <Animated.View style={[styles.container, animatedStyle]}>
+//         <View style={styles.contentContainer}>
+//           <Animated.Text style={styles.statusText}>
+//             {renderText && statusMapping[message.status]}
+//           </Animated.Text>
+//         </View>
+//       </Animated.View>
+//     )
+//   );
+// }
 
-  return (
-    message.fromMe &&
-    message.status !== "sending" &&
-    message.status !== "prepared" && (
-      <Animated.View style={[styles.container, animatedStyle]}>
-        <View style={styles.contentContainer}>
-          <Animated.Text style={styles.statusText}>
-            {renderText && statusMapping[message.status]}
-          </Animated.Text>
-        </View>
-      </Animated.View>
-    )
-  );
-}
-
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    container: {
-      overflow: "hidden",
-    },
-    contentContainer: {
-      paddingTop: 5,
-    },
-    statusText: {
-      fontSize: 12,
-      color: textSecondaryColor(colorScheme),
-    },
-  });
-};
+// const useStyles = () => {
+//   const colorScheme = useColorScheme();
+//   return StyleSheet.create({
+//     container: {
+//       overflow: "hidden",
+//     },
+//     contentContainer: {
+//       paddingTop: 5,
+//     },
+//     statusText: {
+//       fontSize: 12,
+//       color: textSecondaryColor(colorScheme),
+//     },
+//   });
+// };
