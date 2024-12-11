@@ -240,6 +240,9 @@ export async function getXmtpApiHeaders(
       logger.error("Error while getting access token", error);
     }
   }
+  if (!accessToken) {
+    throw new Error("No access token");
+  }
 
   return {
     [XMTP_API_ADDRESS_HEADER_KEY]: account,
