@@ -28,8 +28,8 @@ import { getInboxId } from "./xmtpRN/signIn";
 import { createDedupedFetcher } from "./api.utils";
 import { getSecureMmkvForAccount } from "./mmkv";
 import {
-  CONVERSE_ACCESS_TOKEN_KEY,
-  CONVERSE_REFRESH_TOKEN_KEY,
+  CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
+  CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
   XMTP_API_ADDRESS_HEADER_KEY,
   XMTP_IDENTITY_KEY,
 } from "./api.constants";
@@ -67,7 +67,9 @@ api.interceptors.response.use(
         throw new Error("No account in request headers");
       }
       const secureMmkv = await getSecureMmkvForAccount(account);
-      const refreshToken = secureMmkv.getString(CONVERSE_REFRESH_TOKEN_KEY);
+      const refreshToken = secureMmkv.getString(
+        CONVERSE_REFRESH_TOKEN_STORAGE_KEY
+      );
       if (
         error.response?.status === 401 &&
         req &&
@@ -81,7 +83,6 @@ api.interceptors.response.use(
             account,
             refreshToken
           );
-          console.log("here333", accessToken);
           req._retry = true;
           req.headers = {
             ...req.headers,
@@ -117,6 +118,7 @@ type AuthParams = {
   installationPublicKey: string;
   installationKeySignature: string;
   appCheckToken?: string;
+  account: string;
 };
 
 const { fetch: dedupedFetch } = createDedupedFetcher();
@@ -126,15 +128,25 @@ export async function fetchAccessToken({
   installationPublicKey,
   installationKeySignature,
   appCheckToken,
+  // TODO: Remove this once we move to InboxId as the account identifier
+  account,
 }: AuthParams): Promise<AuthResponse> {
   logger.info("Creating access token");
   const { data } = await dedupedFetch("/api/authenticate" + inboxId, () =>
-    api.post<AuthResponse>("/api/authenticate", {
-      inboxId,
-      installationKeySignature,
-      installationPublicKey,
-      appCheckToken,
-    })
+    api.post<AuthResponse>(
+      "/api/authenticate",
+      {
+        inboxId,
+        installationKeySignature,
+        installationPublicKey,
+        appCheckToken,
+      },
+      {
+        headers: {
+          [XMTP_API_ADDRESS_HEADER_KEY]: account,
+        },
+      }
+    )
   );
 
   if (!data.accessToken) {
@@ -161,7 +173,6 @@ export async function rotateAccessToken(
   const { data } = await dedupedFetch("/api/authenticate/token", () =>
     api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
   );
-  console.log("here444", data);
 
   if (!data) {
     throw new Error(`Could not rotate access token for account ${account}`);
@@ -173,8 +184,8 @@ export async function rotateAccessToken(
   }
   logger.info(`Rotated access token for account ${account}`, { data });
   const secureMmkv = await getSecureMmkvForAccount(account);
-  secureMmkv.set(CONVERSE_ACCESS_TOKEN_KEY, data.accessToken);
-  secureMmkv.set(CONVERSE_REFRESH_TOKEN_KEY, data.refreshToken);
+  secureMmkv.set(CONVERSE_ACCESS_TOKEN_STORAGE_KEY, data.accessToken);
+  secureMmkv.set(CONVERSE_REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
   return data;
 }
 
@@ -193,31 +204,35 @@ export async function getXmtpApiHeaders(
   account: string
 ): Promise<XmtpApiHeaders> {
   const secureMmkv = await getSecureMmkvForAccount(account);
-  let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_KEY);
+  let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
 
   if (!accessToken) {
-    const installation =
+    const installationKeySignature =
       xmtpSignatureByAccount[account] ||
       (await getInstallationKeySignature(account, XMTP_IDENTITY_KEY));
 
     if (!xmtpSignatureByAccount[account]) {
-      xmtpSignatureByAccount[account] = installation;
+      xmtpSignatureByAccount[account] = installationKeySignature;
     }
 
     try {
       const inboxId = await getInboxId(account);
       const authTokensResponse = await fetchAccessToken({
         inboxId,
-        ...installation,
+        ...installationKeySignature,
+        account,
       });
 
       if (!authTokensResponse) {
         throw new Error("Could not create access token");
       }
 
-      secureMmkv.set(CONVERSE_ACCESS_TOKEN_KEY, authTokensResponse.accessToken);
       secureMmkv.set(
-        CONVERSE_REFRESH_TOKEN_KEY,
+        CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
+        authTokensResponse.accessToken
+      );
+      secureMmkv.set(
+        CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
         authTokensResponse.refreshToken
       );
       accessToken = authTokensResponse.accessToken;
