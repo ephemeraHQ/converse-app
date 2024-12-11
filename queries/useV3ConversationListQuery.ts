@@ -15,6 +15,7 @@ import { setGroupNameQueryData } from "./useGroupNameQuery";
 import { setGroupPhotoQueryData } from "./useGroupPhotoQuery";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 import { useAppStore } from "@/data/store/appStore";
+import { foo } from "@/utils/appCheck";
 
 export const conversationListKey = (account: string) => [
   QueryKeys.V3_CONVERSATION_LIST,
@@ -29,6 +30,8 @@ const v3ConversationListQueryFn = async (
   includeSync: boolean = true
 ): Promise<V3ConversationListType> => {
   try {
+    logger.debug(foo());
+    logger.debug("v3ConversationListQueryFn---------------------------");
     logger.debug(
       `[ConversationListQuery] Fetching conversation list from network ${context}`
     );
