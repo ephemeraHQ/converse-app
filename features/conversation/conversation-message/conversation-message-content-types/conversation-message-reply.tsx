@@ -6,7 +6,7 @@ import {
   BubbleContentContainer,
 } from "@/features/conversation/conversation-message/conversation-message-bubble";
 import { MessageText } from "@/features/conversation/conversation-message/conversation-message-text";
-import { useCurrentConversationTopic } from "@/features/conversation/conversation.service";
+import { useCurrentConversationTopic } from "@/features/conversation/conversation.store-context";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { getConversationMessages } from "@/queries/useConversationMessages";
 import { useCurrentAccount } from "@data/store/accountsStore";

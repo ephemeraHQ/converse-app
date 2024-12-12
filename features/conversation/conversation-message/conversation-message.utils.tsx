@@ -1,4 +1,4 @@
-import { useCurrentConversationTopic } from "@/features/conversation/conversation.service";
+import { useCurrentConversationTopic } from "../conversation.store-context";
 import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
 import {
   getConversationMessages,

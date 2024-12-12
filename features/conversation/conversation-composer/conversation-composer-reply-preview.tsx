@@ -11,7 +11,7 @@ import {
   useConversationMessageById,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
-import { useCurrentConversationTopic } from "@/features/conversation/conversation.service";
+import { useCurrentConversationTopic } from "../conversation.store-context";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { HStack } from "@design-system/HStack";
 import { Icon } from "@design-system/Icon/Icon";

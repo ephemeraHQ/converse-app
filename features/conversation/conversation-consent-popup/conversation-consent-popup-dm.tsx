@@ -7,7 +7,7 @@ import {
 import {
   useConversationCurrentConversationId,
   useCurrentConversationTopic,
-} from "@/features/conversation/conversation.service";
+} from "../conversation.store-context";
 import { useRouter } from "@/navigation/useNavigation";
 import { refetchConversationQuery } from "@/queries/useConversationQuery";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";

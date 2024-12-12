@@ -5,7 +5,7 @@ import {
   ConsentPopupTitle,
 } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup.design-system";
 import { useCurrentAccount } from "@/data/store/accountsStore";
-import { useCurrentConversationTopic } from "@/features/conversation/conversation.service";
+import { useCurrentConversationTopic } from "../conversation.store-context";
 import { useRouter } from "@/navigation/useNavigation";
 import { getGroupNameQueryData } from "@/queries/useGroupNameQuery";
 import { captureErrorWithToast } from "@/utils/capture-error";

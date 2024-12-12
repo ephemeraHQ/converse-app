@@ -34,8 +34,10 @@ import { MessageReactionsDrawer } from "@/features/conversation/conversation-mes
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { ConversationMessageRepliable } from "@/features/conversation/conversation-message/conversation-message-repliable";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
-import { useCurrentConversationTopic } from "@/features/conversation/conversation.service";
-import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
+import {
+  useCurrentConversationTopic,
+  ConversationStoreProvider,
+} from "./conversation.store-context";
 import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
@@ -55,7 +57,13 @@ import { useRouter } from "@navigation/useNavigation";
 import { useConversationMessages } from "@queries/useConversationMessages";
 import { useAppTheme } from "@theme/useAppTheme";
 import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
-import React, { memo, useCallback, useEffect, useRef } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
@@ -70,7 +78,7 @@ export const Conversation = memo(function Conversation(props: {
   const { data: conversation, isLoading: isLoadingConversation } =
     useConversationQuery(currentAccount, topic);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!conversation) {
       return;
     }
@@ -178,8 +186,6 @@ const Messages = memo(function Messages(props: {
       hasMarkedAsRead.current = true;
     }
   }, [isUnread, messagesLoading, toggleReadStatus]);
-
-  const composerStore = useConversationComposerStore();
 
   return (
     <ConversationMessagesList

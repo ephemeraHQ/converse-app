@@ -1,3 +1,4 @@
+import { useConversationStoreContext } from "@/features/conversation/conversation.store-context";
 import { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
 import { createContext, memo, useContext, useRef } from "react";
 import { createStore, useStore } from "zustand";
@@ -53,4 +54,12 @@ export function useConversationStore() {
   const store = useContext(ConversationStoreContext);
   if (!store) throw new Error(`Missing ConversationStore.Provider in the tree`);
   return store;
+}
+
+export function useCurrentConversationTopic() {
+  return useConversationStoreContext((state) => state.topic);
+}
+
+export function useConversationCurrentConversationId() {
+  return useConversationStoreContext((state) => state.conversationId);
 }

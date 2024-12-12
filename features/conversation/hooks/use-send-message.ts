@@ -27,36 +27,21 @@ export function useSendMessage(props: {
       const { referencedMessageId, content } = variables;
 
       if (referencedMessageId) {
-        if (content.remoteAttachment) {
-          return conversation.send({
-            reply: {
-              reference: referencedMessageId,
-              content: { remoteAttachment: content.remoteAttachment },
-            },
-          });
-        }
-        if (content.text) {
-          return conversation.send({
-            reply: {
-              reference: referencedMessageId,
-              content: { text: content.text },
-            },
-          });
-        }
-        return;
-      }
-
-      if (content.remoteAttachment) {
         return conversation.send({
-          remoteAttachment: content.remoteAttachment,
+          reply: {
+            reference: referencedMessageId,
+            content: content.remoteAttachment
+              ? { remoteAttachment: content.remoteAttachment }
+              : { text: content.text },
+          },
         });
       }
 
-      if (content.text) {
-        return conversation?.send({
-          text: content.text,
-        });
-      }
+      return conversation.send(
+        content.remoteAttachment
+          ? { remoteAttachment: content.remoteAttachment }
+          : { text: content.text! }
+      );
     },
     // WIP
     // onMutate: (variables) => {

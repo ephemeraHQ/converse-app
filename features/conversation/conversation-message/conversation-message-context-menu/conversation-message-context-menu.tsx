@@ -15,7 +15,7 @@ import {
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
-import { useCurrentConversationTopic } from "@/features/conversation/conversation.service";
+import { useCurrentConversationTopic } from "../../conversation.store-context";
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
 import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/message-is-from-current-user";
