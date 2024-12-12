@@ -1,8 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { reactQueryPersister } from "@utils/mmkv";
-
-export const GC_TIME = 1000 * 60 * 60 * 24; // 24 hours
-const STALE_TIME = 1000 * 60 * 60; // 1 hour
+import { GC_TIME, STALE_TIME } from "./queryClient.constants";
 
 export const queryClient = new QueryClient({
   defaultOptions: {

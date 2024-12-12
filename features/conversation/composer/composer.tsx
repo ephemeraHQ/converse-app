@@ -41,7 +41,7 @@ import {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
-import { getReadableProfile } from "../../../utils/str";
+import { getReadableProfile } from "@utils/getReadableProfile";
 import { useMessageText } from "../../conversation-list/hooks/useMessageText";
 import { useCurrentConversationPersistedStoreState } from "../conversation-persisted-stores";
 import {

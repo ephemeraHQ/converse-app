@@ -16,7 +16,7 @@ import { getConversationMessageQueryOptions } from "@queries/useConversationMess
 import { useQuery } from "@tanstack/react-query";
 import { useAppTheme } from "@theme/useAppTheme";
 import { sentryTrackError } from "@utils/sentry";
-import { getReadableProfile } from "@utils/str";
+import { getReadableProfile } from "@utils/getReadableProfile";
 import {
   DecodedMessage,
   InboxId,

@@ -24,7 +24,7 @@ import ProfileSettingsButton from "../../components/ConversationList/ProfileSett
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { navigate } from "../../utils/navigation";
-import { getReadableProfile, shortDisplayName } from "../../utils/str";
+import { shortDisplayName } from "../../utils/str";
 import ConversationList from "../ConversationList";
 import {
   NativeStack,
@@ -34,6 +34,7 @@ import {
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { useProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
 import { Loader } from "@/design-system/loader";
+import { getReadableProfile } from "@/utils/getReadableProfile";
 
 type HeaderSearchBarProps = {
   searchBarRef: React.RefObject<any>;

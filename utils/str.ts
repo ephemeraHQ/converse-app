@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, TextInput } from "react-native";
 
-import { useAccountsList } from "../data/store/accountsStore";
-import { getPreferredName } from "./profile/getPreferredName";
-import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
-import { usePreferredNames } from "@/hooks/usePreferredNames";
-
 const { humanize } = require("../vendor/humanhash");
 
 export const shortDisplayName = (displayName: string | undefined): string => {
@@ -56,19 +51,6 @@ export const getTitleFontScale = (): number => {
 };
 
 export type TextInputWithValue = TextInput & { currentValue: string };
-
-export const getReadableProfile = (account: string, address: string) => {
-  const socials = getProfileSocialsQueryData(account, address);
-  return getPreferredName(socials ?? {}, address);
-};
-
-export const useAccountsProfiles = () => {
-  const accounts = useAccountsList();
-
-  const accountNames = usePreferredNames(accounts);
-
-  return accountNames;
-};
 
 export const strByteSize = (str: string) => new Blob([str]).size;
 
