@@ -36,8 +36,6 @@ async function run() {
   }
 }
 
-run();
-
 export const foo = () => {
   console.log("foo");
   run()
