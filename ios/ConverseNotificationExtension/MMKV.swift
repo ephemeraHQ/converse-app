@@ -56,7 +56,23 @@ func getAccountsState() -> Accounts? {
   }
 }
 
-func getProfilesStore(account: String) -> ProfilesStore? {
+func getProfilesStore(account: String, address: String) -> ProfilesStore? {
+  let mmkv = getMmkv()
+  let key = "tanstack-query-[\"inboxProfileSocials\",\"\(account.lowercased())\",\"\(address.lowercased())\"]"
+  let profilesString = mmkv?.string(forKey: "store-\(account)-profiles")
+  if (profilesString == nil) {
+    return nil
+  }
+  let decoder = JSONDecoder()
+  do {
+    let decoded = try decoder.decode(ProfilesStore.self, from: profilesString!.data(using: .utf8)!)
+    return decoded
+  } catch {
+    return nil
+  }
+}
+
+func getInboxIdProfilesStore(account: String, inboxId: String) -> ProfilesStore? {
   let mmkv = getMmkv()
   let profilesString = mmkv?.string(forKey: "store-\(account)-profiles")
   if (profilesString == nil) {
@@ -72,19 +88,19 @@ func getProfilesStore(account: String) -> ProfilesStore? {
 }
 
 func saveProfileSocials(account: String, address: String, socials: ProfileSocials) {
-  var profilesStore = getProfilesStore(account: account) ?? ProfilesStore(state: Profiles(profiles: [:]), version: 0)
-  if profilesStore.state.profiles == nil {
-    profilesStore.state.profiles = [:]
-  }
-  
-  let updatedAt = Int(Date().timeIntervalSince1970)
-  let newProfile = Profile(updatedAt: updatedAt, socials: socials)
-  profilesStore.state.profiles![address] = newProfile
-  let mmkv = getMmkv()
-  if let jsonData = try? JSONEncoder().encode(profilesStore), let jsonString = String(data: jsonData, encoding: .utf8) {
-    mmkv?.set(jsonString, forKey: "store-\(account)-profiles")
-  }
-  
+//  var profilesStore = getProfilesStore(account: account) ?? ProfilesStore(state: Profiles(profiles: [:]), version: 0)
+//  if profilesStore.state.profiles == nil {
+//    profilesStore.state.profiles = [:]
+//  }
+//  
+//  let updatedAt = Int(Date().timeIntervalSince1970)
+//  let newProfile = Profile(updatedAt: updatedAt, socials: socials)
+//  profilesStore.state.profiles![address] = newProfile
+//  let mmkv = getMmkv()
+//  if let jsonData = try? JSONEncoder().encode(profilesStore), let jsonString = String(data: jsonData, encoding: .utf8) {
+//    mmkv?.set(jsonString, forKey: "store-\(account)-profiles")
+//  }
+//  
 }
 
 func getCurrentAccount() -> String? {

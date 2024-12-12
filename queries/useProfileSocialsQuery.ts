@@ -14,7 +14,7 @@ type ProfileSocialsData = ProfileSocials | null | undefined;
 
 const profileSocialsQueryKey = (account: string, peerAddress: string) => [
   "profileSocials",
-  account,
+  account?.toLowerCase(),
   peerAddress,
 ];
 

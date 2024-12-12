@@ -13,7 +13,7 @@ import { reactQueryPersister } from "@/utils/mmkv";
 
 const profileSocialsQueryKey = (account: string, peerAddress: string) => [
   "inboxProfileSocials",
-  account,
+  account?.toLowerCase(),
   peerAddress,
 ];
 
