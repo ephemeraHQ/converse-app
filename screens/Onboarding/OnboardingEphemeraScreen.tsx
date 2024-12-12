@@ -21,6 +21,7 @@ import { VStack } from "../../design-system/VStack";
 import { useRouter } from "../../navigation/useNavigation";
 import { sentryTrackError } from "../../utils/sentry";
 import { NavigationParamList } from "../Navigation/Navigation";
+import { foo } from "@/utils/appCheck";
 
 export function OnboardingEphemeraScreen(
   props: NativeStackScreenProps<NavigationParamList, "OnboardingEphemeral">
@@ -30,6 +31,8 @@ export function OnboardingEphemeraScreen(
   const [loading, setLoading] = useState(false);
 
   const generateWallet = useCallback(async () => {
+    foo();
+    return;
     setLoading(true);
     try {
       const signer = new Wallet(utils.randomPrivateKey());
