@@ -1,9 +1,13 @@
 import logger from "@utils/logger";
 import { retryWithBackoff } from "@utils/retryWithBackoff";
 import { Client } from "@xmtp/xmtp-js";
-import { useEffect, useState } from "react";
 import { AppState } from "react-native";
-
+import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
+import { getChatStore } from "@data/store/accountsStore";
+import {
+  fetchConversationListQuery,
+  fetchPersistedConversationListQuery,
+} from "@queries/useV3ConversationListQuery";
 import {
   ConverseXmtpClientType,
   getXmtpClientFromAddress,
@@ -15,12 +19,6 @@ import {
   streamConversations,
 } from "./conversations";
 import { stopStreamingAllMessage, streamAllMessages } from "./messages";
-import { getChatStore, useCurrentAccount } from "@data/store/accountsStore";
-import {
-  fetchConversationListQuery,
-  fetchPersistedConversationListQuery,
-} from "@queries/useV3ConversationListQuery";
-import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
 
 const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;
@@ -64,22 +62,6 @@ export const getXmtpClient = async (
     ConverseXmtpClientType | Client
   >;
 };
-
-export function useCurrentAccountXmtpClient() {
-  const address = useCurrentAccount();
-
-  const [client, setClient] = useState<ConverseXmtpClientType | Client>();
-
-  useEffect(() => {
-    if (!address) {
-      setClient(undefined);
-      return;
-    }
-    getXmtpClient(address).then(setClient);
-  }, [address]);
-
-  return { client };
-}
 
 export const onSyncLost = async (account: string, error: any) => {
   // If there is an error let's show it
