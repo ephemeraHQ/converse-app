@@ -9,13 +9,16 @@ import {
 
 import { queryClient } from "./queryClient";
 import { InboxId } from "@xmtp/react-native-sdk";
-import { reactQueryPersister } from "@/utils/mmkv";
+import mmkv from "@/utils/mmkv";
 
 const profileSocialsQueryKey = (account: string, peerAddress: string) => [
   "inboxProfileSocials",
   account?.toLowerCase(),
-  peerAddress,
+  peerAddress?.toLowerCase(),
 ];
+
+const profileSocialsQueryStorageKey = (account: string, inboxId: InboxId) =>
+  profileSocialsQueryKey(account, inboxId).join("-");
 
 const profileSocials = create({
   fetcher: async (inboxIds: InboxId[]) => {
@@ -29,8 +32,17 @@ const profileSocials = create({
   }),
 });
 
-const fetchInboxProfileSocials = async (inboxIds: InboxId) => {
-  const data = await profileSocials.fetch(inboxIds);
+const fetchInboxProfileSocials = async (account: string, inboxId: InboxId) => {
+  const data = await profileSocials.fetch(inboxId);
+
+  const key = profileSocialsQueryStorageKey(account, inboxId);
+
+  mmkv.delete(key);
+
+  if (data) {
+    mmkv.set(key, JSON.stringify(data));
+  }
+
   return data;
 };
 
@@ -39,7 +51,7 @@ const inboxProfileSocialsQueryConfig = (
   inboxId: InboxId | undefined
 ) => ({
   queryKey: profileSocialsQueryKey(account, inboxId!),
-  queryFn: () => fetchInboxProfileSocials(inboxId!),
+  queryFn: () => fetchInboxProfileSocials(account, inboxId!),
   enabled: !!account && !!inboxId,
   // Store for 30 days
   gcTime: 1000 * 60 * 60 * 24 * 30,
@@ -49,7 +61,7 @@ const inboxProfileSocialsQueryConfig = (
   // And automatic retries if there was an error fetching
   refetchOnMount: false,
   staleTime: 1000 * 60 * 60 * 24,
-  persister: reactQueryPersister,
+  // persister: reactQueryPersister,
 });
 
 export const useInboxProfileSocialsQuery = (

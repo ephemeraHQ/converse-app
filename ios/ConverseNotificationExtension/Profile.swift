@@ -8,36 +8,36 @@
 import Foundation
 import Alamofire
 
-func getProfile(account: String, address: String) async -> Profile? {
-  var profileState = getProfilesStore(account: account, address: address )?.state
+func getProfile(account: String, address: String) async -> ProfileSocials? {
+  var profileFromStore = getProfilesStore(account: account, address: address)
   let formattedAddress =  address.lowercased()
-  if let profile = profileState?.profiles?[address] ??  profileState?.profiles?[formattedAddress] {
+  if let profile = profileFromStore {
     return profile
   }
   
   // If profile is nil, let's refresh it
   try? await refreshProfileFromBackend(account: account, address: formattedAddress)
   
-  profileState = getProfilesStore(account: account, address: address)?.state
-  if let profile = profileState?.profiles?[formattedAddress] {
+  profileFromStore = getProfilesStore(account: account, address: address)
+  if let profile = profileFromStore {
     return profile
   }
   return nil
 }
 
-func getInboxIdProfile(account: String, inboxId: String) async -> Profile? {
-  var profileState = getInboxIdProfilesStore(account: account, inboxId: inboxId)
-//  if let profile = profileState. {
-//    return profile
-//  }
+func getInboxIdProfile(account: String, inboxId: String) async -> ProfileSocials? {
+  var profileFromStore = getInboxIdProfilesStore(account: account, inboxId: inboxId)
+  if let profile = profileFromStore {
+    return profile
+  }
   
   // If profile is nil, let's refresh it
   try? await refreshInboxProfileFromBackend(account: account, inboxId: inboxId)
   
-//  profileState = getProfilesStore(account: account)?.state
-//  if let profile = profileState?.profiles?[formattedAddress] {
-//    return profile
-//  }
+  profileFromStore = getInboxIdProfilesStore(account: account, inboxId: inboxId)
+  if let profile = profileFromStore {
+    return profile
+  }
   return nil
 }
 
@@ -91,9 +91,9 @@ func refreshInboxProfileFromBackend(account: String, inboxId: String) async thro
     // Create an instance of JSONDecoder
     let decoder = JSONDecoder()
     
-//    if let socials = try? decoder.decode(ProfileSocials.self, from: response) {
-//      saveProfileSocials(account: account, address: address, socials: socials)
-//    }
+    if let socials = try? decoder.decode(ProfileSocials.self, from: response) {
+      saveInboxIdProfileSocials(account: account, inboxId: inboxId, socials: socials)
+    }
     
   }
   

@@ -8,7 +8,7 @@ import {
 } from "@yornaath/batshit";
 
 import { queryClient } from "./queryClient";
-import { reactQueryPersister } from "@/utils/mmkv";
+import mmkv from "@/utils/mmkv";
 
 type ProfileSocialsData = ProfileSocials | null | undefined;
 
@@ -17,6 +17,9 @@ const profileSocialsQueryKey = (account: string, peerAddress: string) => [
   account?.toLowerCase(),
   peerAddress,
 ];
+
+const profileSocialsQueryStorageKey = (account: string, peerAddress: string) =>
+  profileSocialsQueryKey(account, peerAddress).join("-");
 
 const profileSocials = create({
   fetcher: async (addresses: string[]) => {
@@ -30,14 +33,23 @@ const profileSocials = create({
   }),
 });
 
-const fetchProfileSocials = async (peerAddress: string) => {
+const fetchProfileSocials = async (account: string, peerAddress: string) => {
   const data = await profileSocials.fetch(peerAddress);
+
+  const key = profileSocialsQueryStorageKey(account, peerAddress);
+
+  mmkv.delete(key);
+
+  if (data) {
+    mmkv.set(key, JSON.stringify(data));
+  }
+
   return data;
 };
 
 const profileSocialsQueryConfig = (account: string, peerAddress: string) => ({
   queryKey: profileSocialsQueryKey(account, peerAddress),
-  queryFn: () => fetchProfileSocials(peerAddress),
+  queryFn: () => fetchProfileSocials(account, peerAddress),
   enabled: !!account,
   // Store for 30 days
   gcTime: 1000 * 60 * 60 * 24 * 30,
@@ -47,7 +59,7 @@ const profileSocialsQueryConfig = (account: string, peerAddress: string) => ({
   // And automatic retries if there was an error fetching
   refetchOnMount: false,
   staleTime: 1000 * 60 * 60 * 24,
-  persister: reactQueryPersister,
+  // persister: reactQueryPersister,
 });
 
 export const useProfileSocialsQuery = (
