@@ -115,7 +115,7 @@ export const animation = {
       "worklet";
 
       const {
-        delay = 0,
+        delay,
         damping = SICK_DAMPING,
         stiffness = SICK_STIFFNESS,
       } = args ?? {};
