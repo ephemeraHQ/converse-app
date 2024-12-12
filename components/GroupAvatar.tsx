@@ -42,9 +42,6 @@ type GroupAvatarProps = {
   topic?: ConversationTopic;
   pendingGroupMembers?: { address: string; uri?: string; name?: string }[];
   excludeSelf?: boolean;
-  // Converstion List should not make requests across the bridge
-  // Use data from the initial sync, and as the query gets updated
-  onConversationListScreen?: boolean;
 };
 
 type GroupAvatarDumbProps = {
@@ -194,23 +191,10 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
   topic,
   pendingGroupMembers,
   excludeSelf = true,
-  onConversationListScreen = false,
 }) => {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const { members: groupMembers } = useGroupMembers(
-    topic!,
-    onConversationListScreen
-      ? {
-          refetchOnWindowFocus: false,
-          refetchOnMount: false,
-          refetchOnReconnect: false,
-          refetchInterval: false,
-          staleTime: Infinity,
-          enabled: !!topic && !pendingGroupMembers,
-        }
-      : undefined
-  );
+  const { members: groupMembers } = useGroupMembers(topic!);
   const profiles = useProfilesStore((s) => s.profiles);
   const account = useCurrentAccount();
 

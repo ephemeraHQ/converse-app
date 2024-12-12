@@ -82,3 +82,8 @@ jest.mock("uuid", () => ({
 jest.mock("path", () => ({
   join: jest.fn(() => ""),
 }));
+
+jest.mock("expo-localization", () => ({
+  // TODO: Update later to begin returning more locales and mock within individual tests
+  getLocales: jest.fn(() => [{ languageTag: "en-US" }]),
+}));

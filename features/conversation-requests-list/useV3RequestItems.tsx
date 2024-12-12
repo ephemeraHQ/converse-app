@@ -1,5 +1,5 @@
 import logger from "@/utils/logger";
-import { getMessageContentType } from "@/utils/xmtpRN/contentTypes";
+import { getMessageContentType } from "@/utils/xmtpRN/content-types/content-types";
 import { getV3SpamScore } from "@data/helpers/conversations/spamScore";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useV3ConversationListQuery } from "@queries/useV3ConversationListQuery";

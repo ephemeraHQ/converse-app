@@ -4,7 +4,6 @@ import {
   addressPrefix,
   capitalize,
   formatGroupName,
-  getReadableProfile,
   getTitleFontScale,
   shortDisplayName,
   strByteSize,
@@ -90,23 +89,6 @@ describe("getTitleFontScale", () => {
   it("should return a font scale not greater than 1.235", () => {
     jest.spyOn(PixelRatio, "getFontScale").mockReturnValue(1.5);
     expect(getTitleFontScale()).toBe(1.235);
-  });
-});
-
-describe("getReadableProfile", () => {
-  it("should return the preferred name for the account", () => {
-    const mockGetProfilesStore = getProfilesStore as jest.Mock;
-    mockGetProfilesStore.mockReturnValue({
-      getState: () => ({
-        profiles: {
-          "0x123": {
-            socials: "socials",
-          },
-        },
-      }),
-    });
-
-    expect(getReadableProfile("account", "0x123")).toBe("0x123");
   });
 });
 

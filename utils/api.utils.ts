@@ -1,7 +1,10 @@
+import logger from "./logger";
+
 /**
  * Creates a stateful container to de-duplicate fetches
  */
 export function createDedupedFetcher() {
+  // TODO: Why do we need this?
   const activeRequests = new Map<string, Promise<any>>();
 
   return {
@@ -13,7 +16,10 @@ export function createDedupedFetcher() {
      */
     async fetch<T>(key: string, fetchFn: () => Promise<T>): Promise<T> {
       const existingRequest = activeRequests.get(key);
-      if (existingRequest) return existingRequest;
+      if (existingRequest) {
+        logger.info("Deduped fetch", { key });
+        return existingRequest;
+      }
 
       // Create a new request promise
       const req = fetchFn().finally(() => {

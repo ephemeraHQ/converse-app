@@ -1,8 +1,10 @@
+import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
+import { fetchPersistedConversationListQuery } from "@/queries/useV3ConversationListQuery";
 import logger from "@utils/logger";
 import { useEffect } from "react";
-import { getAccountsList } from "../../data/store/accountsStore";
-import { useAppStore } from "../../data/store/appStore";
-import { getXmtpClient } from "../../utils/xmtpRN/sync";
+import { getAccountsList } from "@data/store/accountsStore";
+import { useAppStore } from "@data/store/appStore";
+import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { getInstalledWallets } from "../Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 
 export default function HydrationStateHandler() {
@@ -18,7 +20,41 @@ export default function HydrationStateHandler() {
         // note(lustig) I don't think this does anything?
         getInstalledWallets(false);
       }
-      accounts.map((a) => getXmtpClient(a));
+
+      // Fetching persisted conversation lists for all accounts
+      // We may want to fetch only the selected account's conversation list
+      // in the future, but this is simple for now, and want to get feedback to really confirm
+      logger.debug("[Hydration] Fetching persisted conversation list");
+      await Promise.allSettled(
+        accounts.map(async (account) => {
+          const accountStartTime = new Date().getTime();
+          logger.debug(
+            `[Hydration] Fetching persisted conversation list for ${account}`
+          );
+
+          const results = await Promise.allSettled([
+            getXmtpClient(account),
+            fetchPersistedConversationListQuery(account),
+            prefetchInboxIdQuery({ account }),
+          ]);
+
+          const errors = results.filter(
+            (result) => result.status === "rejected"
+          );
+          if (errors.length > 0) {
+            logger.warn(`[Hydration] error for ${account}:`, errors);
+          }
+
+          const accountEndTime = new Date().getTime();
+          logger.debug(
+            `[Hydration] Done fetching persisted conversation list for ${account} in ${
+              (accountEndTime - accountStartTime) / 1000
+            } seconds`
+          );
+        })
+      );
+
+      logger.debug("[Hydration] Done fetching persisted conversation list");
 
       useAppStore.getState().setHydrationDone(true);
       logger.debug(

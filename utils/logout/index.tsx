@@ -110,7 +110,6 @@ export const executeLogoutTasks = async () => {
         `[Logout] Executing logout task for ${account} (${task.topics.length} topics)`
       );
       // await deleteXmtpDatabaseEncryptionKey(account);
-      await clearSecureMmkvForAccount(account);
       await deleteXmtpKey(account);
       await deleteAccountEncryptionKey(account);
       if (task.pkPath) {
@@ -119,7 +118,11 @@ export const executeLogoutTasks = async () => {
       assertNotLogged(account);
       assertNotLogged(account);
       if (task.apiHeaders) {
+        // This seems wrong, if the request fails then the user is still subscribed to pushes
+        // We should probably check if the request failed and then retry
+        // Pick this up with account refactoring
         unsubscribeFromNotifications(task.apiHeaders);
+        await clearSecureMmkvForAccount(account);
       }
       removeLogoutTask(account);
     } catch (e: any) {

@@ -69,7 +69,7 @@ const useData = ({ group }: UseDataProps) => {
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: group.lastMessage,
-    timestamp,
+    timestampNs: timestamp,
   });
 
   const { memberData } = useGroupConversationListAvatarInfo(

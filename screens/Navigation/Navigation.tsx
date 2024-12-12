@@ -1,4 +1,3 @@
-import { DmConversationScreen } from "@/features/conversation/dm-conversation.screen";
 import {
   createNativeStackNavigator,
   NativeStackNavigationOptions,
@@ -28,7 +27,10 @@ import {
   JoinGroupNavigationParams,
 } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
 import ConversationListNav from "./ConversationListNav";
-import ConversationNav, { ConversationNavParams } from "./ConversationNav";
+import {
+  ConversationNavParams,
+  ConversationNav,
+} from "../../features/conversation/conversation.nav";
 import ConversationRequestsListNav from "./ConversationRequestsListNav";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
 import GroupNav, { GroupNavParams } from "./GroupNav";
@@ -45,6 +47,7 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import { translate } from "@/i18n";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -77,15 +80,6 @@ export type NavigationParamList = {
   ChatsRequests: undefined;
   Conversation: ConversationNavParams;
   NewConversation: NewConversationNavParams;
-
-  // WIP
-  DmConversation:
-    | {
-        peerAddress: string;
-      }
-    | {
-        topic: string;
-      };
 
   NewGroupSummary: undefined;
   ConverseMatchMaker: undefined;
@@ -153,11 +147,6 @@ export function SignedInNavigation() {
           {GroupNav()}
           {JoinGroupNavigation()}
           {TopUpNav()}
-
-          <NativeStack.Screen
-            name="DmConversation"
-            component={DmConversationScreen}
-          />
         </NativeStack.Group>
 
         {/* Modals */}

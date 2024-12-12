@@ -18,7 +18,7 @@ import { useConversationIsUnread } from "@/features/conversation-list/hooks/useM
 import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
-import { isTextMessage } from "../Chat/Message/message-utils";
+import { isTextMessage } from "../../features/conversation/conversation-message/conversation-message.utils";
 import { VStack } from "@/design-system/VStack";
 import { PinnedMessagePreview } from "./PinnedMessagePreview";
 
@@ -55,7 +55,7 @@ export const PinnedV3DMConversation = ({
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: conversation.lastMessage,
-    timestamp,
+    timestampNs: timestamp,
   });
 
   const toggleReadStatus = useToggleReadStatus({

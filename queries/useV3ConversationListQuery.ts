@@ -83,51 +83,56 @@ const v3ConversationListQueryFn = async (
   }
 };
 
+const v3ConversationListQueryConfig = (
+  account: string,
+  context: string,
+  includeSync: boolean = true
+) => ({
+  queryKey: conversationListKey(account),
+  queryFn: () => v3ConversationListQueryFn(account, context, includeSync),
+  staleTime: 2000,
+  enabled: !!account,
+});
+
 export const useV3ConversationListQuery = (
   account: string,
   queryOptions?: Partial<UseQueryOptions<V3ConversationListType>>,
   context?: string
 ) => {
   return useQuery<V3ConversationListType>({
-    staleTime: 2000,
+    ...v3ConversationListQueryConfig(account, context ?? ""),
     ...queryOptions,
-    queryKey: conversationListKey(account),
-    queryFn: () => v3ConversationListQueryFn(account, context ?? ""),
-    enabled: !!account,
   });
 };
 
 export const fetchPersistedConversationListQuery = (account: string) => {
-  return queryClient.fetchQuery({
-    queryKey: conversationListKey(account),
-    queryFn: () =>
-      v3ConversationListQueryFn(
-        account,
-        "fetchPersistedConversationListQuery",
-        false
-      ),
-  });
+  return queryClient.fetchQuery(
+    v3ConversationListQueryConfig(
+      account,
+      "fetchPersistedConversationListQuery",
+      false
+    )
+  );
 };
 
 export const fetchConversationListQuery = (account: string) => {
-  return queryClient.fetchQuery({
-    queryKey: conversationListKey(account),
-    queryFn: () =>
-      v3ConversationListQueryFn(account, "fetchGroupsConversationListQuery"),
-  });
+  return queryClient.fetchQuery(
+    v3ConversationListQueryConfig(account, "fetchConversationListQuery")
+  );
 };
 
 export const prefetchConversationListQuery = (account: string) => {
-  return queryClient.prefetchQuery({
-    queryKey: conversationListKey(account),
-    queryFn: () =>
-      v3ConversationListQueryFn(account, "prefetchConversationListQuery"),
-  });
+  return queryClient.prefetchQuery(
+    v3ConversationListQueryConfig(account, "prefetchConversationListQuery")
+  );
 };
 
 export const invalidateGroupsConversationListQuery = (account: string) => {
   return queryClient.invalidateQueries({
-    queryKey: conversationListKey(account),
+    queryKey: v3ConversationListQueryConfig(
+      account,
+      "invalidateGroupsConversationListQuery"
+    ).queryKey,
   });
 };
 
@@ -135,7 +140,8 @@ const getConversationListQueryData = (
   account: string
 ): V3ConversationListType | undefined => {
   return queryClient.getQueryData<V3ConversationListType>(
-    conversationListKey(account)
+    v3ConversationListQueryConfig(account, "getConversationListQueryData")
+      .queryKey
   );
 };
 
@@ -144,7 +150,8 @@ const setConversationListQueryData = (
   conversations: V3ConversationListType
 ) => {
   return queryClient.setQueryData<V3ConversationListType>(
-    conversationListKey(account),
+    v3ConversationListQueryConfig(account, "setConversationListQueryData")
+      .queryKey,
     conversations
   );
 };
