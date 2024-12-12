@@ -1,5 +1,6 @@
 import { ConfigContext, ExpoConfig } from "expo/config";
 import warnOnce from "warn-once";
+import { PluginConfigTypeAndroid } from "expo-build-properties/src/pluginConfig";
 
 import appBuildNumbers from "./app.json";
 
@@ -33,6 +34,101 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   version: appBuildNumbers.expo.version,
   assetBundlePatterns: ["**/*"],
+  plugins: [
+    [
+      "expo-build-properties",
+      {
+        android: {
+          compileSdkVersion: 34,
+          targetSdkVersion: 34,
+          buildToolsVersion: "34.0.0",
+          minSdkVersion: 26,
+          manifestQueries: {
+            package: ["org.toshi"],
+            intent: [
+              {
+                action: "VIEW",
+                data: {
+                  scheme: "cbwallet",
+                  host: "*",
+                },
+              },
+              {
+                action: "VIEW",
+                data: {
+                  scheme: "ledgerlive",
+                  host: "*",
+                },
+              },
+              {
+                action: "VIEW",
+                data: {
+                  scheme: "rainbow",
+                  host: "*",
+                },
+              },
+              {
+                action: "VIEW",
+                data: {
+                  scheme: "metamask",
+                  host: "*",
+                },
+              },
+              {
+                action: "VIEW",
+                data: {
+                  scheme: "trust",
+                  host: "*",
+                },
+              },
+              {
+                action: "VIEW",
+                data: {
+                  scheme: "uniswap",
+                  host: "*",
+                },
+              },
+              {
+                action: "VIEW",
+                data: {
+                  scheme: "zerion",
+                  host: "*",
+                },
+              },
+              {
+                action: "VIEW",
+                data: {
+                  scheme: "exodus",
+                  host: "*",
+                },
+              },
+              {
+                action: "VIEW",
+                data: {
+                  scheme: "oneinch",
+                  host: "*",
+                },
+              },
+            ],
+          },
+        } satisfies PluginConfigTypeAndroid,
+        ios: {
+          deploymentTarget: "13.4",
+        },
+      },
+    ],
+    [
+      "@sentry/react-native/expo",
+      {
+        organization: "converse-app",
+        project: "converse-react-native",
+        url: "https://sentry.io/",
+        authToken:
+          "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",
+      },
+    ],
+    ["./scripts/build/androidDependenciesExpoPlugin.js"],
+  ],
   ios: {
     supportsTablet: true,
     buildNumber: appBuildNumbers.expo.ios.buildNumber,
@@ -46,6 +142,73 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#FFFFFF",
     },
     versionCode: appBuildNumbers.expo.android.versionCode,
+    package: "com.converse.dev",
+    googleServicesFile: "./android-google-services.json",
+    permissions: [
+      "INTERNET",
+      "READ_EXTERNAL_STORAGE",
+      "SYSTEM_ALERT_WINDOW",
+      "VIBRATE",
+      "POST_NOTIFICATIONS",
+      "READ_CONTACTS",
+      "RECEIVE_BOOT_COMPLETED",
+      "WRITE_EXTERNAL_STORAGE",
+      "WAKE_LOCK",
+      "USE_FINGERPRINT",
+      "USE_BIOMETRIC",
+    ],
+    intentFilters: [
+      {
+        action: "VIEW",
+        category: ["DEFAULT", "BROWSABLE"],
+        data: [{ scheme: "converse-dev" }, { scheme: "com.converse.dev" }],
+      },
+      {
+        autoVerify: true,
+        action: "VIEW",
+        category: ["DEFAULT", "BROWSABLE"],
+        data: [
+          { scheme: "https", host: "dev.getconverse.app", pathPrefix: "/dm" },
+          { scheme: "https", host: "dev.converse.xyz", pathPrefix: "/dm" },
+          {
+            scheme: "https",
+            host: "dev.getconverse.app",
+            pathPrefix: "/group-invite",
+          },
+          {
+            scheme: "https",
+            host: "dev.converse.xyz",
+            pathPrefix: "/group-invite",
+          },
+          {
+            scheme: "https",
+            host: "dev.getconverse.app",
+            pathPrefix: "/group",
+          },
+          { scheme: "https", host: "dev.converse.xyz", pathPrefix: "/group" },
+          {
+            scheme: "https",
+            host: "dev.getconverse.app",
+            pathPrefix: "/coinbase",
+          },
+          {
+            scheme: "https",
+            host: "dev.converse.xyz",
+            pathPrefix: "/coinbase",
+          },
+          {
+            scheme: "https",
+            host: "dev.getconverse.app",
+            pathPrefix: "/desktopconnect",
+          },
+          {
+            scheme: "https",
+            host: "dev.converse.xyz",
+            pathPrefix: "/desktopconnect",
+          },
+        ],
+      },
+    ],
   },
   web: {
     favicon: "./assets/favicon.png",
