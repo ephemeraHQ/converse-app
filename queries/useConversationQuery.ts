@@ -36,6 +36,17 @@ export const invalidateConversationQuery = (
   });
 };
 
+export function updateConversationQueryData(
+  account: string,
+  topic: ConversationTopic,
+  conversation: ConversationQueryData
+) {
+  queryClient.setQueryData<ConversationQueryData>(
+    conversationQueryKey(account, topic),
+    conversation
+  );
+}
+
 export const setConversationQueryData = (
   account: string,
   topic: ConversationTopic,

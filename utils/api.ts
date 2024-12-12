@@ -20,11 +20,19 @@ import type { Frens } from "../data/store/recommendationsStore";
 import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
 import type { InboxId } from "@xmtp/react-native-sdk";
 import { evmHelpers } from "./evm/helpers";
-import { getXmtpClient } from "./xmtpRN/sync";
-import { ConverseXmtpClientType } from "./xmtpRN/client";
+import {
+  getInstallationKeySignature,
+  InstallationSignature,
+} from "./xmtpRN/client";
 import { getInboxId } from "./xmtpRN/signIn";
 import { createDedupedFetcher } from "./api.utils";
-import { authMMKVStorage } from "./mmkv";
+import { getSecureMmkvForAccount } from "./mmkv";
+import {
+  CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
+  CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
+  XMTP_API_ADDRESS_HEADER_KEY,
+  XMTP_IDENTITY_KEY,
+} from "./api.constants";
 
 export const api = axios.create({
   baseURL: config.apiURI,
@@ -54,8 +62,14 @@ api.interceptors.response.use(
           2
         )
       );
-      const refreshToken = authMMKVStorage.get("CONVERSE_REFRESH_TOKEN");
-
+      const account = req.headers?.[XMTP_API_ADDRESS_HEADER_KEY];
+      if (typeof account !== "string") {
+        throw new Error("No account in request headers");
+      }
+      const secureMmkv = await getSecureMmkvForAccount(account);
+      const refreshToken = secureMmkv.getString(
+        CONVERSE_REFRESH_TOKEN_STORAGE_KEY
+      );
       if (
         error.response?.status === 401 &&
         req &&
@@ -65,7 +79,10 @@ api.interceptors.response.use(
         refreshToken
       ) {
         try {
-          const { accessToken } = await rotateAccessToken(refreshToken);
+          const { accessToken } = await rotateAccessToken(
+            account,
+            refreshToken
+          );
           req._retry = true;
           req.headers = {
             ...req.headers,
@@ -101,23 +118,35 @@ type AuthParams = {
   installationPublicKey: string;
   installationKeySignature: string;
   appCheckToken?: string;
+  account: string;
 };
 
 const { fetch: dedupedFetch } = createDedupedFetcher();
 
-export async function createAccessToken({
+export async function fetchAccessToken({
   inboxId,
   installationPublicKey,
   installationKeySignature,
   appCheckToken,
+  // TODO: Remove this once we move to InboxId as the account identifier
+  account,
 }: AuthParams): Promise<AuthResponse> {
-  const { data } = await dedupedFetch("/api/authenticate", () =>
-    api.post<AuthResponse>("/api/authenticate", {
-      inboxId,
-      installationKeySignature,
-      installationPublicKey,
-      appCheckToken,
-    })
+  logger.info("Creating access token");
+  const { data } = await dedupedFetch("/api/authenticate" + inboxId, () =>
+    api.post<AuthResponse>(
+      "/api/authenticate",
+      {
+        inboxId,
+        installationKeySignature,
+        installationPublicKey,
+        appCheckToken,
+      },
+      {
+        headers: {
+          [XMTP_API_ADDRESS_HEADER_KEY]: account,
+        },
+      }
+    )
   );
 
   if (!data.accessToken) {
@@ -126,12 +155,15 @@ export async function createAccessToken({
   if (!data.refreshToken) {
     throw new Error("No refresh token in auth response");
   }
+  logger.info("Created access token");
   return data;
 }
 
 export async function rotateAccessToken(
-  refreshToken?: string
+  account: string,
+  refreshToken: string | undefined
 ): Promise<AuthResponse> {
+  logger.info(`Rotating access token for account ${account}`);
   if (!refreshToken) {
     throw new Error(
       "Can't request new access token without current token and refresh token"
@@ -143,13 +175,17 @@ export async function rotateAccessToken(
   );
 
   if (!data) {
-    throw new Error("Could not rotate access token");
+    throw new Error(`Could not rotate access token for account ${account}`);
   }
   if (!data.accessToken) {
-    throw new Error("No access token in token rotate response");
+    throw new Error(
+      `No access token in token rotate response for account ${account}`
+    );
   }
-
-  authMMKVStorage.set("CONVERSE_ACCESS_TOKEN", data.accessToken);
+  logger.info(`Rotated access token for account ${account}`, { data });
+  const secureMmkv = await getSecureMmkvForAccount(account);
+  secureMmkv.set(CONVERSE_ACCESS_TOKEN_STORAGE_KEY, data.accessToken);
+  secureMmkv.set(CONVERSE_REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
   return data;
 }
 
@@ -157,29 +193,8 @@ export const xmtpSignatureByAccount: {
   [account: string]: InstallationSignature;
 } = {};
 
-type InstallationSignature = Pick<
-  AuthParams,
-  "installationPublicKey" | "installationKeySignature"
->;
-
-async function getInstallationKeySignature(
-  account: string,
-  message: string
-): Promise<InstallationSignature> {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  if (!client) throw new Error("Client not found");
-
-  const raw = await client.signWithInstallationKey(message);
-
-  return {
-    installationPublicKey: client.installationId,
-    installationKeySignature: Buffer.from(raw).toString("hex"),
-  };
-}
-
 type XmtpApiHeaders = {
-  /** TODO: remove this when conversion is complete */
-  ["xmtp-api-address"]: string;
+  [XMTP_API_ADDRESS_HEADER_KEY]: string;
 
   /** Bearer <jwt access token>*/
   authorization: `Bearer ${string}`;
@@ -188,35 +203,49 @@ type XmtpApiHeaders = {
 export async function getXmtpApiHeaders(
   account: string
 ): Promise<XmtpApiHeaders> {
-  let accessToken = authMMKVStorage.get("CONVERSE_ACCESS_TOKEN");
+  const secureMmkv = await getSecureMmkvForAccount(account);
+  let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
 
   if (!accessToken) {
-    const installation =
+    const installationKeySignature =
       xmtpSignatureByAccount[account] ||
-      (await getInstallationKeySignature(account, "XMTP_IDENTITY"));
+      (await getInstallationKeySignature(account, XMTP_IDENTITY_KEY));
 
     if (!xmtpSignatureByAccount[account]) {
-      xmtpSignatureByAccount[account] = installation;
+      xmtpSignatureByAccount[account] = installationKeySignature;
     }
 
     try {
       const inboxId = await getInboxId(account);
-      const result = await createAccessToken({ inboxId, ...installation });
+      const authTokensResponse = await fetchAccessToken({
+        inboxId,
+        ...installationKeySignature,
+        account,
+      });
 
-      if (!result) {
+      if (!authTokensResponse) {
         throw new Error("Could not create access token");
       }
 
-      authMMKVStorage.set("CONVERSE_ACCESS_TOKEN", result.accessToken);
-      authMMKVStorage.set("CONVERSE_REFRESH_TOKEN", result.refreshToken);
-      accessToken = result.accessToken;
+      secureMmkv.set(
+        CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
+        authTokensResponse.accessToken
+      );
+      secureMmkv.set(
+        CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
+        authTokensResponse.refreshToken
+      );
+      accessToken = authTokensResponse.accessToken;
     } catch (error) {
       logger.error("Error while getting access token", error);
     }
   }
+  if (!accessToken) {
+    throw new Error("No access token");
+  }
 
   return {
-    ["xmtp-api-address"]: account,
+    [XMTP_API_ADDRESS_HEADER_KEY]: account,
     authorization: `Bearer ${accessToken}`,
   };
 }
