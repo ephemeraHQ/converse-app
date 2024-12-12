@@ -1,14 +1,11 @@
 import logger from "@utils/logger";
-
 import { ConverseXmtpClientType } from "./client";
 import { getXmtpClient } from "./sync";
-
 import config from "../../config";
-
+import { updateMessageToConversationListQuery } from "@/queries/useV3ConversationListQuery";
 import { handleGroupUpdatedMessage } from "@data/helpers/messages/handleGroupUpdatedMessage";
 import { addConversationMessage } from "@queries/useConversationMessages";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { updateMessageToConversationListQuery } from "@/queries/useV3ConversationListQuery";
 
 export const streamAllMessages = async (account: string) => {
   await stopStreamingAllMessage(account);
@@ -27,11 +24,11 @@ export const streamAllMessages = async (account: string) => {
         message
       );
     }
-    addConversationMessage(
-      client.address,
-      message.topic as ConversationTopic,
-      message
-    );
+    addConversationMessage({
+      account: client.address,
+      topic: message.topic as ConversationTopic,
+      message,
+    });
     updateMessageToConversationListQuery(client.address, message);
     return;
   });
