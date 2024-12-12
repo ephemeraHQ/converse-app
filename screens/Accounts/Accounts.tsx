@@ -11,11 +11,12 @@ import AccountSettingsButton from "../../components/AccountSettingsButton";
 import TableView from "../../components/TableView/TableView";
 import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import {
+  useAccountsList,
   useAccountsStore,
   useErroredAccountsMap,
 } from "../../data/store/accountsStore";
 import { useRouter } from "../../navigation/useNavigation";
-import { useAccountsProfiles } from "../../utils/str";
+import { useAccountsProfiles } from "@utils/useAccountsProfiles";
 import { NavigationParamList } from "../Navigation/Navigation";
 import { translate } from "@/i18n";
 
@@ -24,6 +25,7 @@ export default function Accounts(
 ) {
   const styles = useStyles();
   const erroredAccounts = useErroredAccountsMap();
+  const accounts = useAccountsList();
   const accountsProfiles = useAccountsProfiles();
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
   const colorScheme = useColorScheme();
@@ -37,9 +39,9 @@ export default function Accounts(
       style={styles.accounts}
     >
       <TableView
-        items={accountsProfiles.map((a) => ({
+        items={accounts.map((a, index) => ({
           id: a,
-          title: a,
+          title: accountsProfiles[index],
           action: () => {
             setCurrentAccount(a, false);
             router.navigate("Chats");

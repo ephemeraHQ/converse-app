@@ -10,7 +10,7 @@ import {
 } from "@data/store/accountsStore";
 import { queryClient } from "@queries/queryClient";
 import { useQuery } from "@tanstack/react-query";
-import { getReadableProfile } from "@utils/str";
+import { getReadableProfile } from "@utils/getReadableProfile";
 import {
   DecodedMessageWithCodecsType,
   SupportedCodecsType,

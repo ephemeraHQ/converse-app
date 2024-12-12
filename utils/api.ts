@@ -1,7 +1,7 @@
 import { TransactionData } from "@components/TransactionPreview/TransactionPreview";
 import type { SimulateAssetChangesResponse } from "alchemy-sdk";
 import { GroupInvite } from "@utils/api.types";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import * as Contacts from "expo-contacts";
 
 import {
@@ -18,9 +18,21 @@ import type { TopicData } from "../data/store/chatStore";
 import type { ProfileSocials } from "../data/store/profilesStore";
 import type { Frens } from "../data/store/recommendationsStore";
 import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
-import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
 import type { InboxId } from "@xmtp/react-native-sdk";
 import { evmHelpers } from "./evm/helpers";
+import {
+  getInstallationKeySignature,
+  InstallationSignature,
+} from "./xmtpRN/client";
+import { getInboxId } from "./xmtpRN/signIn";
+import { createDedupedFetcher } from "./api.utils";
+import { getSecureMmkvForAccount } from "./mmkv";
+import {
+  CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
+  CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
+  XMTP_API_ADDRESS_HEADER_KEY,
+  XMTP_IDENTITY_KEY,
+} from "./api.constants";
 
 export const api = axios.create({
   baseURL: config.apiURI,
@@ -29,12 +41,18 @@ export const api = axios.create({
   },
 });
 
+type PatchedAxiosError = Omit<AxiosError, "config"> & {
+  config: AxiosError["config"] & { _retry: boolean };
+};
+
 // Better error handling
 api.interceptors.response.use(
-  function (response) {
+  function axiosSuccessResponse(response) {
     return response;
   },
-  function (error) {
+  async function axiosErrorResponse(error: PatchedAxiosError) {
+    const req = error.config;
+
     if (error.response) {
       logger.warn(
         `[API] HTTP Error ${error.response.status} - ${error.request._url}`,
@@ -44,6 +62,39 @@ api.interceptors.response.use(
           2
         )
       );
+      const account = req.headers?.[XMTP_API_ADDRESS_HEADER_KEY];
+      if (typeof account !== "string") {
+        throw new Error("No account in request headers");
+      }
+      const secureMmkv = await getSecureMmkvForAccount(account);
+      const refreshToken = secureMmkv.getString(
+        CONVERSE_REFRESH_TOKEN_STORAGE_KEY
+      );
+      if (
+        error.response?.status === 401 &&
+        req &&
+        // Prevent multiple simultaneous refresh attempts
+        !req._retry &&
+        // If no refresh token is stored, than token rotation will not be possible
+        refreshToken
+      ) {
+        try {
+          const { accessToken } = await rotateAccessToken(
+            account,
+            refreshToken
+          );
+          req._retry = true;
+          req.headers = {
+            ...req.headers,
+            authorization: `Bearer ${accessToken}`,
+          };
+
+          return api(req);
+        } catch (refreshError) {
+          // Token rotation failed - this is a legitimate authentication failure
+          return Promise.reject(refreshError);
+        }
+      }
     } else if (error.request) {
       logger.warn(
         `[API] HTTP Error - No response received - ${error.request._url}`,
@@ -56,6 +107,148 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export type AuthResponse = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+type AuthParams = {
+  inboxId: string;
+  installationPublicKey: string;
+  installationKeySignature: string;
+  appCheckToken?: string;
+  account: string;
+};
+
+const { fetch: dedupedFetch } = createDedupedFetcher();
+
+export async function fetchAccessToken({
+  inboxId,
+  installationPublicKey,
+  installationKeySignature,
+  appCheckToken,
+  // TODO: Remove this once we move to InboxId as the account identifier
+  account,
+}: AuthParams): Promise<AuthResponse> {
+  logger.info("Creating access token");
+  const { data } = await dedupedFetch("/api/authenticate" + inboxId, () =>
+    api.post<AuthResponse>(
+      "/api/authenticate",
+      {
+        inboxId,
+        installationKeySignature,
+        installationPublicKey,
+        appCheckToken,
+      },
+      {
+        headers: {
+          [XMTP_API_ADDRESS_HEADER_KEY]: account,
+        },
+      }
+    )
+  );
+
+  if (!data.accessToken) {
+    throw new Error("No access token in auth response");
+  }
+  if (!data.refreshToken) {
+    throw new Error("No refresh token in auth response");
+  }
+  logger.info("Created access token");
+  return data;
+}
+
+export async function rotateAccessToken(
+  account: string,
+  refreshToken: string | undefined
+): Promise<AuthResponse> {
+  logger.info(`Rotating access token for account ${account}`);
+  if (!refreshToken) {
+    throw new Error(
+      "Can't request new access token without current token and refresh token"
+    );
+  }
+
+  const { data } = await dedupedFetch("/api/authenticate/token", () =>
+    api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
+  );
+
+  if (!data) {
+    throw new Error(`Could not rotate access token for account ${account}`);
+  }
+  if (!data.accessToken) {
+    throw new Error(
+      `No access token in token rotate response for account ${account}`
+    );
+  }
+  logger.info(`Rotated access token for account ${account}`, { data });
+  const secureMmkv = await getSecureMmkvForAccount(account);
+  secureMmkv.set(CONVERSE_ACCESS_TOKEN_STORAGE_KEY, data.accessToken);
+  secureMmkv.set(CONVERSE_REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
+  return data;
+}
+
+export const xmtpSignatureByAccount: {
+  [account: string]: InstallationSignature;
+} = {};
+
+type XmtpApiHeaders = {
+  [XMTP_API_ADDRESS_HEADER_KEY]: string;
+
+  /** Bearer <jwt access token>*/
+  authorization: `Bearer ${string}`;
+};
+
+export async function getXmtpApiHeaders(
+  account: string
+): Promise<XmtpApiHeaders> {
+  const secureMmkv = await getSecureMmkvForAccount(account);
+  let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
+
+  if (!accessToken) {
+    const installationKeySignature =
+      xmtpSignatureByAccount[account] ||
+      (await getInstallationKeySignature(account, XMTP_IDENTITY_KEY));
+
+    if (!xmtpSignatureByAccount[account]) {
+      xmtpSignatureByAccount[account] = installationKeySignature;
+    }
+
+    try {
+      const inboxId = await getInboxId(account);
+      const authTokensResponse = await fetchAccessToken({
+        inboxId,
+        ...installationKeySignature,
+        account,
+      });
+
+      if (!authTokensResponse) {
+        throw new Error("Could not create access token");
+      }
+
+      secureMmkv.set(
+        CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
+        authTokensResponse.accessToken
+      );
+      secureMmkv.set(
+        CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
+        authTokensResponse.refreshToken
+      );
+      accessToken = authTokensResponse.accessToken;
+    } catch (error) {
+      logger.error("Error while getting access token", error);
+    }
+  }
+  if (!accessToken) {
+    throw new Error("No access token");
+  }
+
+  return {
+    [XMTP_API_ADDRESS_HEADER_KEY]: account,
+    authorization: `Bearer ${accessToken}`,
+  };
+}
 
 const lastSaveUser: { [address: string]: number } = {};
 

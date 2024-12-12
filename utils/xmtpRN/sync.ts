@@ -4,7 +4,6 @@ import { Client } from "@xmtp/xmtp-js";
 import { useEffect, useState } from "react";
 import { AppState } from "react-native";
 
-import { xmtpSignatureByAccount } from "./api";
 import {
   ConverseXmtpClientType,
   getXmtpClientFromAddress,
@@ -176,7 +175,6 @@ export const deleteXmtpClient = async (account: string) => {
     stopStreamingConversations(account);
   }
   delete xmtpClientByAccount[account];
-  delete xmtpSignatureByAccount[account];
   delete instantiatingClientForAccount[account];
   delete streamingAccounts[account];
 };
