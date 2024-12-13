@@ -2,6 +2,7 @@ import { Center } from "@/design-system/Center";
 import { Text } from "@/design-system/Text";
 import { TouchableWithoutFeedback } from "@/design-system/touchable-without-feedback";
 import { usePreferredName } from "@/hooks/usePreferredName";
+import { translate } from "@/i18n";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { Button } from "@design-system/Button/Button";
 import { Keyboard } from "react-native";
@@ -41,13 +42,14 @@ export function ConversationNewDmNoMessagesPlaceholder(
             textAlign: "center",
           }}
         >
-          This is the beginning of your{"\n"}conversation with{" "}
-          {peerPreferredName}
+          {translate("this_is_the_beginning_of_your_conversation_with", {
+            name: peerPreferredName,
+          })}
         </Text>
         <Button
           variant="fill"
           icon="hand.wave"
-          text="Say hi"
+          tx="say_hi"
           onPress={onSendWelcomeMessage}
         />
       </Center>
