@@ -455,6 +455,11 @@ PODS:
     - fmt (= 9.1.0)
     - glog
     - RCT-Folly/Default (= 2024.01.01.00)
+  - RCT-Folly/Default (2024.01.01.00):
+    - boost
+    - DoubleConversion
+    - fmt (= 9.1.0)
+    - glog
   - RCT-Folly/Fabric (2024.01.01.00):
     - boost
     - DoubleConversion
@@ -2946,7 +2951,7 @@ SPEC CHECKSUMS:
   UMAppLoader: f17a5ee8e85b536ace0fc254b447a37ed198d57e
   XMTP: 3b586fa3703640bb5fec8a64daba9e157d9e5fdc
   XMTPReactNative: f3e1cbf80b7278b817bd42982703a95a9250497d
-  Yoga: a9ef4f5c2cd79ad812110525ef61048be6a582a4
+  Yoga: b05994d1933f507b0a28ceaa4fdb968dc18da178
 
 PODFILE CHECKSUM: 4d82c35393154fdd66fed2438e82b56bea48f396
 
