@@ -54,6 +54,7 @@ jobs:
           echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> $env_file
           echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> $env_file
           echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> $env_file
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $env_file
 
       - name: Update EAS config with env variables
         run: |
@@ -111,6 +112,7 @@ jobs:
           echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> $env_file
           echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> $env_file
           echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> $env_file
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $env_file
 
       - name: Update EAS config with env variables
         run: |
