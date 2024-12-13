@@ -1,4 +1,4 @@
-import { useMessageContextStoreContext } from "@/features/conversation/conversation-message.store-context";
+import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useSelect } from "@/data/store/storeHelpers";
 import { HStack } from "@/design-system/HStack";
 import { useAppTheme } from "@/theme/useAppTheme";

@@ -2,6 +2,7 @@ import { Signer } from "ethers";
 import { Alert } from "react-native";
 
 // import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
+import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
 import {
   getSettingsStore,
   getWalletStore,
@@ -9,7 +10,6 @@ import {
 } from "../../data/store/accountsStore";
 import { translate } from "../../i18n";
 import { awaitableAlert } from "../../utils/alert";
-import { saveXmtpKey } from "../../utils/keychain/helpers";
 import logger from "../../utils/logger";
 import { logoutAccount, waitForLogoutTasksDone } from "../../utils/logout";
 import { sentryTrackMessage } from "../../utils/sentry";
@@ -117,6 +117,8 @@ async function finalizeAccountSetup(args: IConnectWithAddressKeyArgs) {
   if ("pkPath" in args) {
     getWalletStore(address).getState().setPrivateKeyPath(args.pkPath);
   }
+
+  await prefetchInboxIdQuery({ account: address });
 
   getXmtpClient(address);
 

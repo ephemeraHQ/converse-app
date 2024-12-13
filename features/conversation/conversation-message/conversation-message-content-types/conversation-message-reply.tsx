@@ -1,6 +1,6 @@
 import { useSelect } from "@/data/store/storeHelpers";
 import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image";
-import { useMessageContextStoreContext } from "@/features/conversation/conversation-message.store-context";
+import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
   BubbleContainer,
   BubbleContentContainer,

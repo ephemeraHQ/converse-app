@@ -22,6 +22,7 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import { MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT } from "./conversation-message-context-menu-constant";
+import { StaggeredAnimation } from "@/design-system/staggered-animation";
 
 export const MessageContextMenuAboveMessageReactions = memo(
   function MessageContextMenuAboveMessageReactions({
@@ -138,19 +139,18 @@ export const MessageContextMenuAboveMessageReactions = memo(
           ]}
         >
           {favoritedEmojis.getEmojis().map((emoji, index) => (
-            <AnimatedVStack
+            <StaggeredAnimation
               key={emoji}
-              // TODO, build a better animation using staggered animations. Build it in a design system component so it's easier to reuse
-              entering={FadeIn.delay(
-                (favoritedEmojis.getEmojis().length - index) * 60 + 100
-              )}
+              index={index}
+              totalItems={favoritedEmojis.getEmojis().length}
+              isReverse={messageFromMe}
             >
               <Emoji
                 content={emoji}
                 alreadySelected={!!currentUserEmojiSelectedMap.get(emoji)}
                 onSelectReaction={onSelectReaction}
               />
-            </AnimatedVStack>
+            </StaggeredAnimation>
           ))}
           <TouchableOpacity
             hitSlop={{

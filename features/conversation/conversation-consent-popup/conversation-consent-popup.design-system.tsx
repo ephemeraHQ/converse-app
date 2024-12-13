@@ -7,8 +7,7 @@ import React from "react";
 
 export function ConsentPopupButton({ style, ...rest }: IButtonProps) {
   const { theme } = useAppTheme();
-
-  return <Button {...rest} />;
+  return <Button withHapticFeedback={true} {...rest} />;
 }
 
 export function ConsentPopupTitle(props: ITextProps) {

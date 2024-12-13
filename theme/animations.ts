@@ -8,6 +8,7 @@ import {
   LinearTransition,
   type WithSpringConfig,
   withSpring,
+  withDelay,
 } from "react-native-reanimated";
 
 import { timing } from "./timing";
@@ -109,34 +110,43 @@ export const animation = {
     },
   }).duration(500),
 
-  reanimatedFadeInScaleIn: () => {
-    "worklet";
+  reanimatedFadeInScaleIn:
+    (args?: { delay?: number; damping?: number; stiffness?: number }) => () => {
+      "worklet";
 
-    const animations = {
-      opacity: withSpring(1, {
-        damping: SICK_DAMPING,
-        stiffness: SICK_STIFFNESS,
-      }),
-      transform: [
-        {
-          scale: withSpring(1, {
-            damping: SICK_DAMPING,
-            stiffness: SICK_STIFFNESS,
-          }),
-        },
-      ],
-    };
+      const {
+        delay,
+        damping = SICK_DAMPING,
+        stiffness = SICK_STIFFNESS,
+      } = args ?? {};
+      const springConfig = {
+        damping,
+        stiffness,
+      };
 
-    const initialValues = {
-      opacity: 0,
-      transform: [{ scale: 0 }],
-    };
+      const animations = {
+        opacity: delay
+          ? withDelay(delay, withSpring(1, springConfig))
+          : withSpring(1, springConfig),
+        transform: [
+          {
+            scale: delay
+              ? withDelay(delay, withSpring(1, springConfig))
+              : withSpring(1, springConfig),
+          },
+        ],
+      };
 
-    return {
-      initialValues,
-      animations,
-    };
-  },
+      const initialValues = {
+        opacity: 0,
+        transform: [{ scale: 0 }],
+      };
+
+      return {
+        initialValues,
+        animations,
+      };
+    },
 };
 
 export type IAnimation = typeof animation;
