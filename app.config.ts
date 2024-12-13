@@ -40,7 +40,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     buildNumber: appBuildNumbers.expo.ios.buildNumber,
-    googleServicesFile: "./ios/GoogleService-Info.plist",
     bundleIdentifier: "com.converse.dev",
     config: {
       usesNonExemptEncryption: false,

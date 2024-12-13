@@ -49,7 +49,7 @@ import WebviewPreviewNav, {
 import { translate } from "@/i18n";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { Button } from "@/design-system/Button/Button";
-import { testSendToRealtimeDb, tryGetAppCheckToken } from "@/utils/appCheck";
+import { tryGetAppCheckToken } from "@/utils/appCheck";
 import logger from "@/utils/logger";
 
 export type NavigationParamList = {
@@ -210,6 +210,7 @@ const TestAppCheckScreen = () => {
               setToken(token);
             })
             .catch((error) => {
+              logger.error("Error getting token", error);
               setError(JSON.stringify(error));
             });
         }}
@@ -218,19 +219,6 @@ const TestAppCheckScreen = () => {
         {`${token?.substring(0, 10)}...${token?.substring(token.length - 10)}` ??
           "no token"}
       </Text>
-      <Button
-        text="TestSendToRealtimeDb"
-        onPress={() => {
-          testSendToRealtimeDb()
-            .then((key) => {
-              setKey(key ?? undefined);
-            })
-            .catch((error) => {
-              setError(JSON.stringify(error, null, 2));
-            });
-        }}
-      />
-      <Text>Last push key: {key ?? "no key"}</Text>
       <Text>Last Error: {error ?? "no error"}</Text>
     </View>
   );
@@ -251,10 +239,10 @@ export function SignedOutNavigation() {
             ...authScreensSharedScreenOptions,
           }}
         >
-          {/* <NativeStack.Screen
+          <NativeStack.Screen
             name="TestAppCheck"
             component={TestAppCheckScreen}
-          /> */}
+          />
           <NativeStack.Screen
             options={{
               headerShown: false,

@@ -18,7 +18,16 @@
 
   [RNFBAppCheckModule sharedInstance];
 
-  [FIRApp configure];
+//  [FIRApp configure];
+  
+  NSString *firebasePlist = [[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType:@"plist"];
+
+  #if DEBUG
+      firebasePlist = [[NSBundle mainBundle] pathForResource:@"GoogleService-Info-dev" ofType:@"plist"];
+  #endif
+
+  FIROptions *options = [[FIROptions alloc] initWithContentsOfFile:firebasePlist];
+  [FIRApp configureWithOptions:options];
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
