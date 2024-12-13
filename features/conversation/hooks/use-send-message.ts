@@ -7,15 +7,37 @@ import { MessageId, RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 
 export type ISendMessageParams = {
-  content: {
-    text?: string;
-    remoteAttachment?: RemoteAttachmentContent;
-  };
   referencedMessageId?: MessageId;
-} & (
-  | { content: { text: string; remoteAttachment?: RemoteAttachmentContent } }
-  | { content: { text?: string; remoteAttachment: RemoteAttachmentContent } }
-);
+  content:
+    | { text: string; remoteAttachment?: RemoteAttachmentContent }
+    | { text?: string; remoteAttachment: RemoteAttachmentContent };
+};
+
+export function sendMessage(args: {
+  conversation: ConversationWithCodecsType;
+  params: ISendMessageParams;
+}) {
+  const { conversation, params } = args;
+
+  const { referencedMessageId, content } = params;
+
+  if (referencedMessageId) {
+    return conversation.send({
+      reply: {
+        reference: referencedMessageId,
+        content: content.remoteAttachment
+          ? { remoteAttachment: content.remoteAttachment }
+          : { text: content.text },
+      },
+    });
+  }
+
+  return conversation.send(
+    content.remoteAttachment
+      ? { remoteAttachment: content.remoteAttachment }
+      : { text: content.text! }
+  );
+}
 
 export function useSendMessage(props: {
   conversation: ConversationWithCodecsType;
@@ -23,26 +45,8 @@ export function useSendMessage(props: {
   const { conversation } = props;
 
   const { mutateAsync: sendMessageMutationAsync } = useMutation({
-    mutationFn: async (variables: ISendMessageParams) => {
-      const { referencedMessageId, content } = variables;
-
-      if (referencedMessageId) {
-        return conversation.send({
-          reply: {
-            reference: referencedMessageId,
-            content: content.remoteAttachment
-              ? { remoteAttachment: content.remoteAttachment }
-              : { text: content.text },
-          },
-        });
-      }
-
-      return conversation.send(
-        content.remoteAttachment
-          ? { remoteAttachment: content.remoteAttachment }
-          : { text: content.text! }
-      );
-    },
+    mutationFn: (variables: ISendMessageParams) =>
+      sendMessage({ conversation, params: variables }),
     // WIP
     // onMutate: (variables) => {
     //   const currentAccount = getCurrentAccount()!;
@@ -99,7 +103,7 @@ export function useSendMessage(props: {
     },
   });
 
-  const sendMessage = useCallback(
+  return useCallback(
     async (args: ISendMessageParams) => {
       try {
         if (!conversation) {
@@ -112,6 +116,4 @@ export function useSendMessage(props: {
     },
     [sendMessageMutationAsync, conversation]
   );
-
-  return sendMessage;
 }

@@ -7,9 +7,9 @@ import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
 import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
 import { useAppTheme } from "@theme/useAppTheme";
 import { InboxId } from "@xmtp/react-native-sdk";
-import { useCurrentAccount } from "../../data/store/accountsStore";
-import { navigate } from "../../utils/navigation";
-import { getPreferredInboxAvatar } from "../../utils/profile";
+import { useCurrentAccount } from "../../../data/store/accountsStore";
+import { navigate } from "../../../utils/navigation";
+import { getPreferredInboxAvatar } from "../../../utils/profile";
 
 type MessageSenderAvatarDumbProps = {
   // hasNextMessageInSeries: boolean;
