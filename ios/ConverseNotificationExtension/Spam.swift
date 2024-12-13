@@ -89,13 +89,18 @@ func containsRestrictedWords(in searchString: String) -> Bool {
 
 func computeSpamScoreV3Welcome(client: XMTP.Client, conversation: XMTP.Conversation, apiURI: String?) async -> Double {
   do {
-    try await client.preferences.syncConsent()
-    // Probably an unlikely case until consent proofs for groups exist
-    let convoState = try await client.preferences.conversationState(conversationId: conversation.id)
-    let convoAllowed = convoState == .allowed
-    if convoAllowed {
-      return -1
-    }
+//    try await client.preferences.syncConsent()
+//    // Probably an unlikely case until consent proofs for groups exist
+//    do {
+//      let convoState = try await client.preferences.conversationState(conversationId: conversation.id)
+//      let convoAllowed = convoState == .allowed
+//      if convoAllowed {
+//        return -1
+//      }
+//    } catch {
+//      
+//    }
+
     if case .group(let group) = conversation {
       let inviterInboxId = try group.addedByInboxId()
       let inviterState = try await client.preferences.inboxIdState(inboxId: inviterInboxId)
@@ -140,6 +145,7 @@ func computeSpamScoreV3Welcome(client: XMTP.Client, conversation: XMTP.Conversat
       
     }
   } catch {
+    sentryTrackError(error: error, extras: ["message": "Failed to compute Spam Score for V3 Welcome"])
     return 0
   }
 
@@ -147,10 +153,9 @@ func computeSpamScoreV3Welcome(client: XMTP.Client, conversation: XMTP.Conversat
 }
 
 func computeSpamScoreV3Message(client: XMTP.Client, conversation: XMTP.Conversation, decodedMessage: DecodedMessage, apiURI: String?) async -> Double {
-  var senderSpamScore: Double = 0
   do {
     
-    try await client.preferences.syncConsent()
+//    try await client.preferences.syncConsent()
     let groupDenied = try await client.preferences.conversationState(conversationId: conversation.id) == .denied
     if groupDenied {
       // Network consent will override other checks
@@ -202,11 +207,12 @@ func computeSpamScoreV3Message(client: XMTP.Client, conversation: XMTP.Conversat
     }
   } catch {
     //
+    sentryTrackError(error: error, extras: ["message": "Failed to compute Spam Score for V3 Message"])
   }
   let contentType = getContentTypeString(type: decodedMessage.encodedContent.type)
   
   let messageContent = String(data: decodedMessage.encodedContent.content, encoding: .utf8)
   let messageSpamScore = getMessageSpamScore(message: messageContent, contentType: contentType)
   
-  return senderSpamScore + messageSpamScore
+  return messageSpamScore
 }
