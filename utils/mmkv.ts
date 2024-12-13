@@ -59,7 +59,6 @@ const reactQuerySyncStorage = {
     return stringValue || null;
   },
   setItem: (key: string, value: string) => {
-    console.log("setItem111", key, value);
     // Deleting before setting to avoid memory leak
     // https://github.com/mrousavy/react-native-mmkv/issues/440
     reactQueryMMKV.delete(key);
