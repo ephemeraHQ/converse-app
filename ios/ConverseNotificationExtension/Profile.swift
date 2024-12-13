@@ -16,7 +16,7 @@ func getProfile(account: String, address: String) async -> ProfileSocials? {
   }
   
   // If profile is nil, let's refresh it
-  try? await refreshProfileFromBackend(account: account, address: lowercasedAddress)
+  try? await refreshProfileFromBackend(account: account, address: formattedAddress)
   
   profileFromStore = getProfilesStore(account: account, address: address)
   if let profile = profileFromStore {
