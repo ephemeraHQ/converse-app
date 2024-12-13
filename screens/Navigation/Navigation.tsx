@@ -2,8 +2,8 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationOptions,
 } from "@react-navigation/native-stack";
-import { memo } from "react";
-import { Platform, useColorScheme } from "react-native";
+import { memo, useState } from "react";
+import { Platform, useColorScheme, View, Text } from "react-native";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
 import { ConversationBlockedListNav } from "../../features/blocked-chats/ConversationBlockedListNav";
 import { useRouter } from "../../navigation/useNavigation";
@@ -48,6 +48,9 @@ import WebviewPreviewNav, {
 } from "./WebviewPreviewNav";
 import { translate } from "@/i18n";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { Button } from "@/design-system/Button/Button";
+import { testSendToRealtimeDb, tryGetAppCheckToken } from "@/utils/appCheck";
+import logger from "@/utils/logger";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -191,6 +194,48 @@ export function SignedInNavigation() {
   );
 }
 
+// todo: remove once integration complete
+const TestAppCheckScreen = () => {
+  const [token, setToken] = useState<string | undefined>(undefined);
+  const [key, setKey] = useState<string | undefined>(undefined);
+  const [error, setError] = useState<string | undefined>(undefined);
+  return (
+    <View>
+      <Text>TestAppCheckScreen</Text>
+      <Button
+        text="TestAppCheckScreen"
+        onPress={() => {
+          tryGetAppCheckToken()
+            .then((token) => {
+              setToken(token);
+            })
+            .catch((error) => {
+              setError(JSON.stringify(error));
+            });
+        }}
+      />
+      <Text>
+        {`${token?.substring(0, 10)}...${token?.substring(token.length - 10)}` ??
+          "no token"}
+      </Text>
+      <Button
+        text="TestSendToRealtimeDb"
+        onPress={() => {
+          testSendToRealtimeDb()
+            .then((key) => {
+              setKey(key ?? undefined);
+            })
+            .catch((error) => {
+              setError(JSON.stringify(error, null, 2));
+            });
+        }}
+      />
+      <Text>Last push key: {key ?? "no key"}</Text>
+      <Text>Last Error: {error ?? "no error"}</Text>
+    </View>
+  );
+};
+
 export function SignedOutNavigation() {
   const colorScheme = useColorScheme();
 
@@ -206,6 +251,10 @@ export function SignedOutNavigation() {
             ...authScreensSharedScreenOptions,
           }}
         >
+          {/* <NativeStack.Screen
+            name="TestAppCheck"
+            component={TestAppCheckScreen}
+          /> */}
           <NativeStack.Screen
             options={{
               headerShown: false,
