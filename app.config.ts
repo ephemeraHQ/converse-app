@@ -14,6 +14,26 @@ warnOnce(
 
 const isPreview = env.EXPO_ENV === "preview";
 const isProduction = !isDev && !isPreview;
+const scheme = isDev
+  ? "converse-dev"
+  : isPreview
+    ? "converse-preview"
+    : "converse";
+const androidPackage = isDev
+  ? "com.converse.dev"
+  : isPreview
+    ? "com.converse.preview"
+    : "com.converse.prod";
+const appDomainConverse = isDev
+  ? "dev.converse.xyz"
+  : isPreview
+    ? "preview.converse.xyz"
+    : "converse.xyz";
+const appDomainGetConverse = isDev
+  ? "dev.getconverse.app"
+  : isPreview
+    ? "preview.getconverse.app"
+    : "getconverse.app";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -34,6 +54,92 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   version: appBuildNumbers.expo.version,
   assetBundlePatterns: ["**/*"],
+  extra: {
+    eas: {
+      projectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
+    },
+    ENV: isDev ? "dev" : isPreview ? "preview" : "prod",
+  },
+  runtimeVersion: appBuildNumbers.expo.version,
+  owner: "converse",
+  jsEngine: "hermes",
+  ios: {
+    supportsTablet: true,
+    buildNumber: appBuildNumbers.expo.ios.buildNumber,
+    config: {
+      usesNonExemptEncryption: false,
+    },
+  },
+  android: {
+    versionCode: appBuildNumbers.expo.android.versionCode,
+    package: androidPackage,
+    googleServicesFile: "./android-google-services.json",
+    permissions: [
+      "INTERNET",
+      "READ_EXTERNAL_STORAGE",
+      "SYSTEM_ALERT_WINDOW",
+      "VIBRATE",
+      "POST_NOTIFICATIONS",
+      "READ_CONTACTS",
+      "RECEIVE_BOOT_COMPLETED",
+      "WRITE_EXTERNAL_STORAGE",
+      "WAKE_LOCK",
+      "USE_FINGERPRINT",
+      "USE_BIOMETRIC",
+    ],
+    intentFilters: [
+      {
+        action: "VIEW",
+        category: ["DEFAULT", "BROWSABLE"],
+        data: [{ scheme: scheme }, { scheme: androidPackage }],
+      },
+      {
+        autoVerify: true,
+        action: "VIEW",
+        category: ["DEFAULT", "BROWSABLE"],
+        data: [
+          { scheme: "https", host: appDomainGetConverse, pathPrefix: "/dm" },
+          { scheme: "https", host: appDomainConverse, pathPrefix: "/dm" },
+          {
+            scheme: "https",
+            host: appDomainGetConverse,
+            pathPrefix: "/group-invite",
+          },
+          {
+            scheme: "https",
+            host: appDomainConverse,
+            pathPrefix: "/group-invite",
+          },
+          {
+            scheme: "https",
+            host: appDomainGetConverse,
+            pathPrefix: "/group",
+          },
+          { scheme: "https", host: appDomainConverse, pathPrefix: "/group" },
+          {
+            scheme: "https",
+            host: appDomainGetConverse,
+            pathPrefix: "/coinbase",
+          },
+          {
+            scheme: "https",
+            host: appDomainConverse,
+            pathPrefix: "/coinbase",
+          },
+          {
+            scheme: "https",
+            host: appDomainGetConverse,
+            pathPrefix: "/desktopconnect",
+          },
+          {
+            scheme: "https",
+            host: appDomainConverse,
+            pathPrefix: "/desktopconnect",
+          },
+        ],
+      },
+    ],
+  },
   plugins: [
     [
       "expo-build-properties",
@@ -112,9 +218,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             ],
           },
         } satisfies PluginConfigTypeAndroid,
-        ios: {
-          deploymentTarget: "13.4",
-        },
       },
     ],
     [
@@ -123,104 +226,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         organization: "converse-app",
         project: "converse-react-native",
         url: "https://sentry.io/",
-        authToken:
-          "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",
       },
     ],
-    ["./scripts/build/androidDependenciesExpoPlugin.js"],
+    "./scripts/build/android/notifeeExpoPlugin.js", // See https://github.com/invertase/notifee/issues/350
+    "./scripts/build/android/androidDependenciesExpoPlugin.js", // Handle some conflicting dependencies manually
   ],
-  ios: {
-    supportsTablet: true,
-    buildNumber: appBuildNumbers.expo.ios.buildNumber,
-    config: {
-      usesNonExemptEncryption: false,
-    },
-  },
-  android: {
-    adaptiveIcon: {
-      foregroundImage: "./assets/adaptive-icon.png",
-      backgroundColor: "#FFFFFF",
-    },
-    versionCode: appBuildNumbers.expo.android.versionCode,
-    package: "com.converse.dev",
-    googleServicesFile: "./android-google-services.json",
-    permissions: [
-      "INTERNET",
-      "READ_EXTERNAL_STORAGE",
-      "SYSTEM_ALERT_WINDOW",
-      "VIBRATE",
-      "POST_NOTIFICATIONS",
-      "READ_CONTACTS",
-      "RECEIVE_BOOT_COMPLETED",
-      "WRITE_EXTERNAL_STORAGE",
-      "WAKE_LOCK",
-      "USE_FINGERPRINT",
-      "USE_BIOMETRIC",
-    ],
-    intentFilters: [
-      {
-        action: "VIEW",
-        category: ["DEFAULT", "BROWSABLE"],
-        data: [{ scheme: "converse-dev" }, { scheme: "com.converse.dev" }],
-      },
-      {
-        autoVerify: true,
-        action: "VIEW",
-        category: ["DEFAULT", "BROWSABLE"],
-        data: [
-          { scheme: "https", host: "dev.getconverse.app", pathPrefix: "/dm" },
-          { scheme: "https", host: "dev.converse.xyz", pathPrefix: "/dm" },
-          {
-            scheme: "https",
-            host: "dev.getconverse.app",
-            pathPrefix: "/group-invite",
-          },
-          {
-            scheme: "https",
-            host: "dev.converse.xyz",
-            pathPrefix: "/group-invite",
-          },
-          {
-            scheme: "https",
-            host: "dev.getconverse.app",
-            pathPrefix: "/group",
-          },
-          { scheme: "https", host: "dev.converse.xyz", pathPrefix: "/group" },
-          {
-            scheme: "https",
-            host: "dev.getconverse.app",
-            pathPrefix: "/coinbase",
-          },
-          {
-            scheme: "https",
-            host: "dev.converse.xyz",
-            pathPrefix: "/coinbase",
-          },
-          {
-            scheme: "https",
-            host: "dev.getconverse.app",
-            pathPrefix: "/desktopconnect",
-          },
-          {
-            scheme: "https",
-            host: "dev.converse.xyz",
-            pathPrefix: "/desktopconnect",
-          },
-        ],
-      },
-    ],
-  },
   web: {
     favicon: "./assets/favicon.png",
     bundler: "metro",
   },
-  extra: {
-    eas: {
-      projectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
-    },
-    ENV: isDev ? "dev" : isPreview ? "preview" : "prod",
-  },
-  runtimeVersion: appBuildNumbers.expo.version,
-  owner: "converse",
-  jsEngine: "hermes",
 });
