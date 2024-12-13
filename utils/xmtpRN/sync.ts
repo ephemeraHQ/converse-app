@@ -2,12 +2,7 @@ import logger from "@utils/logger";
 import { retryWithBackoff } from "@utils/retryWithBackoff";
 import { Client } from "@xmtp/xmtp-js";
 import { AppState } from "react-native";
-import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
 import { getChatStore } from "@data/store/accountsStore";
-import {
-  fetchConversationListQuery,
-  fetchPersistedConversationListQuery,
-} from "@queries/useV3ConversationListQuery";
 import {
   ConverseXmtpClientType,
   getXmtpClientFromAddress,
@@ -19,6 +14,11 @@ import {
   streamConversations,
 } from "./conversations";
 import { stopStreamingAllMessage, streamAllMessages } from "./messages";
+import {
+  fetchPersistedConversationListQuery,
+  prefetchConversationListQuery,
+} from "@queries/useV3ConversationListQuery";
+import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
 
 const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;
@@ -128,8 +128,8 @@ const syncClientConversationList = async (account: string) => {
     });
     // Prefetch the conversation list so when we land on the conversation list
     // we have it ready, this will include syncing all groups
-    const conversationList = await fetchConversationListQuery(account);
-    subscribeToNotifications({ conversations: conversationList, account });
+    setupAccountTopicSubscription(account);
+    await prefetchConversationListQuery(account);
   } catch (e) {
     logger.error(e, {
       context: `Failed to fetch persisted conversation list for ${account}`,

@@ -1,4 +1,3 @@
-import { useConversationListMembersQuery } from "@/queries/useGroupMembersQuery";
 import { useInboxProfileSocialsQueries } from "@queries/useInboxProfileSocialsQuery";
 import {
   getPreferredInboxAddress,
@@ -6,21 +5,31 @@ import {
   getPreferredInboxName,
 } from "@utils/profile";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
-import type { InboxId } from "@xmtp/react-native-sdk";
-import { useMemo } from "react";
+import type { InboxId, Member } from "@xmtp/react-native-sdk";
+import { useEffect, useMemo, useState } from "react";
 
 export const useGroupConversationListAvatarInfo = (
   currentAccount: string,
   group?: GroupWithCodecsType
 ) => {
-  const { data: membersData } = useConversationListMembersQuery(
-    currentAccount,
-    group
-  );
+  // TODO: Move this to a query to get persistence
+  const [members, setMembers] = useState<Member[]>([]);
+
+  useEffect(() => {
+    if (!group) return;
+    if (group?.imageUrlSquare) {
+      return;
+    }
+    const fetchMembers = async () => {
+      const members = await group.members();
+      setMembers(members || []);
+    };
+    fetchMembers();
+  }, [group]);
 
   const memberInboxIds = useMemo(() => {
-    return membersData?.ids || [];
-  }, [membersData]);
+    return members.map((member) => member.inboxId);
+  }, [members]);
 
   const data = useInboxProfileSocialsQueries(currentAccount, memberInboxIds);
 
