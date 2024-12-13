@@ -1,5 +1,4 @@
 import { QueryClient } from "@tanstack/react-query";
-import { reactQueryPersister } from "@utils/mmkv";
 import { GC_TIME, STALE_TIME } from "./queryClient.constants";
 
 export const queryClient = new QueryClient({
@@ -9,9 +8,10 @@ export const queryClient = new QueryClient({
       gcTime: GC_TIME,
       staleTime: STALE_TIME,
       structuralSharing: false,
-      // Using a query based persister rather than persisting
-      // the whole state on each query change for performance reasons
-      persister: reactQueryPersister,
+      // DON'T USE HERE
+      // Use a query based persister instead of the whole tree.
+      // Using it here seems to break the query client.
+      // persister: reactQueryPersister,
     },
   },
 });
