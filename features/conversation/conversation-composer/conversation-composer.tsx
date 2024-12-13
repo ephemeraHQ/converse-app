@@ -19,10 +19,8 @@ import {
   useConversationComposerStoreContext,
 } from "./conversation-composer.store-context";
 
-export type IComposerSendArgs = ISendMessageParams;
-
 type IComposerProps = {
-  onSend: (args: IComposerSendArgs) => Promise<void>;
+  onSend: (args: ISendMessageParams) => Promise<void>;
 };
 
 export const Composer = memo(function Composer(props: IComposerProps) {

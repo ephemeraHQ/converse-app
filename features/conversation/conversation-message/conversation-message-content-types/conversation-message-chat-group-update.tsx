@@ -17,7 +17,6 @@ import {
 } from "@xmtp/react-native-sdk";
 import { memo } from "react";
 import { ViewStyle } from "react-native";
-import { ConversationMessageDateChange } from "../../conversation-message-date-change";
 
 type IMessageChatGroupUpdateProps = {
   message: DecodedMessage<GroupUpdatedCodec>;
@@ -43,7 +42,6 @@ export function MessageChatGroupUpdate({
         paddingVertical: theme.spacing.sm,
       }}
     >
-      <ConversationMessageDateChange />
       <VStack style={themed($container)}>
         {/* Member additions */}
         {content.membersAdded.map((member) => (

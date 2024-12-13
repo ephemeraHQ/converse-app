@@ -442,6 +442,9 @@ export const en = {
     seen: "Read",
   },
 
+  this_is_the_beginning_of_your_conversation_with:
+    "This is the beginning of your conversation with {{name}}",
+
   group_placeholder: {
     placeholder_text:
       "This is the beginning of your conversation in {{groupName}}",

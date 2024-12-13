@@ -3,8 +3,8 @@ import { Center } from "@/design-system/Center";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
-import { ConversationMessageDateChange } from "@/features/conversation/conversation-message-date-change";
-import { MessageContextStoreProvider } from "@/features/conversation/conversation-message.store-context";
+import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
+import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
@@ -12,6 +12,7 @@ import { ConversationMessagesList } from "@/features/conversation/conversation-m
 import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
 import { useConversationPreviewMessages } from "@/queries/useConversationPreviewMessages";
 import { useConversationQuery } from "@/queries/useConversationQuery";
+import { $globalStyles } from "@/theme/styles";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import React from "react";
 
@@ -33,24 +34,14 @@ export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
   return (
     <VStack
       // {...debugBorder()}
-      style={{
-        flex: 1,
-      }}
+      style={$globalStyles.flex1}
     >
       {isLoading ? (
-        <Center
-          style={{
-            flex: 1,
-          }}
-        >
+        <Center style={$globalStyles.flex1}>
           <Loader />
         </Center>
       ) : !conversation ? (
-        <Center
-          style={{
-            flex: 1,
-          }}
-        >
+        <Center style={$globalStyles.flex1}>
           <Text>Conversation not found</Text>
         </Center>
       ) : (
@@ -71,7 +62,7 @@ export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
                   previousMessage={previousMessage}
                   nextMessage={nextMessage}
                 >
-                  <ConversationMessageDateChange />
+                  <ConversationMessageTimestamp />
                   <ConversationMessageLayout>
                     <ConversationMessage message={message} />
                     <ConversationMessageReactions />

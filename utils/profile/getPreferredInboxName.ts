@@ -1,6 +1,7 @@
 import { type ProfileSocials } from "@data/store/profilesStore";
 import { getPreferredName } from "./getPreferredName";
 import { getPreferredInboxAddress } from "./getPreferredInboxAddress";
+
 /**
  * Get the preferred name for an inbox.
  * TODO: This will need to change when we support multiple accounts on one inbox.

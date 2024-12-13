@@ -3,7 +3,7 @@ import {
   BubbleContentContainer,
 } from "@/features/conversation/conversation-message/conversation-message-bubble";
 import { MessageText } from "@/features/conversation/conversation-message/conversation-message-text";
-import { useMessageContextStoreContext } from "@/features/conversation/conversation-message.store-context";
+import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useSelect } from "@/data/store/storeHelpers";
 import { DecodedMessage, TextCodec } from "@xmtp/react-native-sdk";
 import { memo } from "react";
