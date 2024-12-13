@@ -17,7 +17,6 @@ import { useRouter } from "../../navigation/useNavigation";
 import { sentryTrackError } from "../../utils/sentry";
 import { NavigationParamList } from "../Navigation/Navigation";
 import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
-import { foo } from "@/utils/appCheck";
 
 export function NewAccountEphemeraScreen(
   props: NativeStackScreenProps<NavigationParamList, "NewAccountEphemera">
@@ -27,9 +26,6 @@ export function NewAccountEphemeraScreen(
   const [loading, setLoading] = useState(false);
 
   const generateWallet = useCallback(async () => {
-    setLoading(true);
-    foo();
-    return;
     try {
       const signer = new Wallet(utils.randomPrivateKey());
       await initXmtpClient({

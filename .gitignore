@@ -24,3 +24,5 @@ ios/Converse.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # Reassure output directory
 .reassure
+ios/preview-GoogleService-Info.plist
+ios/GoogleService-Info.plist

@@ -9,7 +9,8 @@
       "distribution": "internal",
       "channel": "development",
       "env": {
-        "EXPO_ENV": "dev"
+        "EXPO_ENV": "dev",
+        "FIREBASE_APP_CHECK_DEBUG_TOKEN": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
       },
       "node": "20.15.1",
       "ios": {

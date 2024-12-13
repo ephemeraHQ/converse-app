@@ -5513,6 +5513,11 @@
     firebase "10.13.2"
     superstruct "^0.6.2"
 
+"@react-native-firebase/database@^21.6.1":
+  version "21.6.1"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/database/-/database-21.6.1.tgz#048a7681d73680cade8b4ad4dc598bda889bff36"
+  integrity sha512-oPh1vzpd+HySm57bLDycmuSUWDZmHOr72Fkkf9jquRzkvbDnjsRJLXIeX6rupSo1UE+9ChfIwYSOs7bRvhOuQQ==
+
 "@react-native-menu/menu@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@react-native-menu/menu/-/menu-1.1.2.tgz#972406d25296a0d01614dc36fae7884c2a08dafd"
