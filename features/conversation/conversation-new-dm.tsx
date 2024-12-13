@@ -1,27 +1,23 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { VStack } from "@/design-system/VStack";
-import {
-  Composer,
-  IComposerSendArgs,
-} from "@/features/conversation/conversation-composer/conversation-composer";
+import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { KeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
 import { NewConversationTitle } from "@/features/conversation/conversation-new-dm-header-title";
+import { ConversationNewDmNoMessagesPlaceholder } from "@/features/conversation/conversation-new-dm-no-messages-placeholder";
+import {
+  ISendMessageParams,
+  sendMessage,
+} from "@/features/conversation/hooks/use-send-message";
 import { useRouter } from "@/navigation/useNavigation";
 import { updateConversationQueryData } from "@/queries/useConversationQuery";
 import { updateConversationWithPeerQueryData } from "@/queries/useConversationWithPeerQuery";
 import { updateConversationDataToConversationListQuery } from "@/queries/useV3ConversationListQuery";
 import { sentryTrackError } from "@/utils/sentry";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client";
 import { createConversationByAccount } from "@/utils/xmtpRN/conversations";
 import { useMutation } from "@tanstack/react-query";
-import {
-  ConversationTopic,
-  MessageId,
-  RemoteAttachmentContent,
-} from "@xmtp/react-native-sdk";
-import { memo, useCallback, useEffect } from "react";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { memo, useCallback, useLayoutEffect } from "react";
 
 export const ConversationNewDm = memo(function ConversationNewDm(props: {
   peerAddress: string;
@@ -31,11 +27,20 @@ export const ConversationNewDm = memo(function ConversationNewDm(props: {
 
   const navigation = useRouter();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: () => <NewConversationTitle peerAddress={peerAddress} />,
     });
   }, [peerAddress, navigation]);
+
+  const sendFirstConversationMessage =
+    useSendFirstConversationMessage(peerAddress);
+
+  const handleSendWelcomeMessage = useCallback(() => {
+    sendFirstConversationMessage({
+      content: { text: "👋" },
+    });
+  }, [sendFirstConversationMessage]);
 
   return (
     <ConversationComposerStoreProvider
@@ -43,22 +48,18 @@ export const ConversationNewDm = memo(function ConversationNewDm(props: {
       inputValue={textPrefill}
     >
       {/*  TODO: Add empty state */}
-      <VStack
-        style={{
-          flex: 1,
-        }}
+      <ConversationNewDmNoMessagesPlaceholder
+        peerAddress={peerAddress}
+        isBlockedPeer={false} // TODO
+        onSendWelcomeMessage={handleSendWelcomeMessage}
       />
-      <ComposerWrapper peerAddress={peerAddress} />
+      <Composer onSend={sendFirstConversationMessage} />
       <KeyboardFiller />
     </ConversationComposerStoreProvider>
   );
 });
 
-const ComposerWrapper = memo(function ComposerWrapper(props: {
-  peerAddress: string;
-}) {
-  const { peerAddress } = props;
-
+function useSendFirstConversationMessage(peerAddress: string) {
   const {
     mutateAsync: createNewConversationAsync,
     status: createNewConversationStatus,
@@ -103,77 +104,32 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
     // },
   });
 
-  const { mutateAsync: sendMessageAsync, status: sendMessageStatus } =
-    useMutation({
-      mutationFn: async (args: {
-        conversation: ConversationWithCodecsType;
-        text?: string;
-        remoteAttachment?: RemoteAttachmentContent;
-        referencedMessageId?: MessageId;
-      }) => {
-        const { conversation, text, remoteAttachment, referencedMessageId } =
-          args;
+  const { mutateAsync: sendMessageAsync } = useMutation({
+    mutationFn: sendMessage,
+    // TODO: Add this for optimistic update and faster UX
+    // onMutate: (args) => {
+    //   try {
+    //     const { conversation } = args;
+    //     const currentAccount = getCurrentAccount()!;
+    //     addConversationMessage(currentAccount, conversation.topic!, {
+    //       id: "RANDOM_MESSAGE_ID",
+    //       content: { text: "RANDOM_MESSAGE_TEXT" },
+    //     });
+    //   } catch (error) {
+    //     console.log("error:", error);
+    //   }
+    // },
+  });
 
-        if (referencedMessageId) {
-          if (remoteAttachment) {
-            await conversation.send({
-              reply: {
-                reference: referencedMessageId,
-                content: { remoteAttachment },
-              },
-            });
-          }
-          if (text) {
-            await conversation.send({
-              reply: {
-                reference: referencedMessageId,
-                content: { text },
-              },
-            });
-          }
-          return;
-        }
-
-        if (remoteAttachment) {
-          await conversation.send({
-            remoteAttachment,
-          });
-        }
-
-        if (text) {
-          await conversation.send(text);
-        }
-      },
-      // TODO: Add this for optimistic update and faster UX
-      // onMutate: (args) => {
-      //   try {
-      //     const { conversation } = args;
-      //     const currentAccount = getCurrentAccount()!;
-      //     addConversationMessage(currentAccount, conversation.topic!, {
-      //       id: "RANDOM_MESSAGE_ID",
-      //       content: { text: "RANDOM_MESSAGE_TEXT" },
-      //     });
-      //   } catch (error) {
-      //     console.log("error:", error);
-      //   }
-      // },
-    });
-
-  const handleSendMessage = useCallback(
-    async (args: IComposerSendArgs) => {
-      const {
-        content: { text, remoteAttachment },
-        referencedMessageId,
-      } = args;
-
+  return useCallback(
+    async (args: ISendMessageParams) => {
       try {
+        // First, create the conversation
         const conversation = await createNewConversationAsync(peerAddress);
-
+        // Then, send the message
         await sendMessageAsync({
           conversation,
-          text,
-          remoteAttachment,
-          referencedMessageId,
+          params: args,
         });
       } catch (error) {
         showSnackbar({ message: "Failed to send message" });
@@ -182,6 +138,4 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
     },
     [createNewConversationAsync, peerAddress, sendMessageAsync]
   );
-
-  return <Composer onSend={handleSendMessage} />;
-});
+}

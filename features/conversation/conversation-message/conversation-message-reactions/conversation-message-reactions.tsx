@@ -1,5 +1,5 @@
 import { useSelect } from "@/data/store/storeHelpers";
-import { useMessageContextStoreContext } from "@/features/conversation/conversation-message.store-context";
+import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
 import { AnimatedHStack, HStack } from "@design-system/HStack";
@@ -29,6 +29,10 @@ export const ConversationMessageReactions = memo(
 
     const rolledUpReactions = useMessageReactionsRolledUp();
 
+    const { hasNextMessageInSeries } = useMessageContextStoreContext(
+      useSelect(["hasNextMessageInSeries"])
+    );
+
     const handlePressContainer = useCallback(() => {
       openMessageReactionsDrawer(rolledUpReactions);
     }, [rolledUpReactions]);
@@ -39,12 +43,14 @@ export const ConversationMessageReactions = memo(
 
     return (
       <AnimatedHStack
-        entering={theme.animation.reanimatedFadeInScaleIn}
+        entering={theme.animation.reanimatedFadeInScaleIn()}
         style={[
           {
             flexDirection: "row",
             flexWrap: "wrap",
-            marginBottom: theme.spacing.xxxs,
+            ...(hasNextMessageInSeries && {
+              marginBottom: theme.spacing.xxxs,
+            }),
           },
           fromMe && { justifyContent: "flex-end" },
         ]}

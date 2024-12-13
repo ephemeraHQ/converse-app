@@ -46,8 +46,6 @@ export const useGroupConsent = (topic: ConversationTopic) => {
         throw new Error("Group is required");
       }
 
-      console.log("group:", group);
-
       await allowGroupMutation({
         group,
         account,

@@ -11,18 +11,18 @@ import {
 } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { DmConsentPopup } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-dm";
 import { GroupConsentPopup } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-group";
+import { DmConversationTitle } from "@/features/conversation/conversation-dm-header-title";
 import { GroupConversationTitle } from "@/features/conversation/conversation-group-header-title";
 import { KeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
-import { ConversationMessageDateChange } from "@/features/conversation/conversation-message-date-change";
 import {
   IMessageGesturesOnLongPressArgs,
   MessageGestures,
-} from "@/features/conversation/conversation-message-gestures";
-import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message-timestamp";
+} from "@/features/conversation/conversation-message/conversation-message-gestures";
+import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
 import {
   MessageContextStoreProvider,
   useMessageContextStore,
-} from "@/features/conversation/conversation-message.store-context";
+} from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { MessageContextMenu } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu";
 import {
@@ -34,10 +34,6 @@ import { MessageReactionsDrawer } from "@/features/conversation/conversation-mes
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { ConversationMessageRepliable } from "@/features/conversation/conversation-message/conversation-message-repliable";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
-import {
-  useCurrentConversationTopic,
-  ConversationStoreProvider,
-} from "./conversation.store-context";
 import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
@@ -64,6 +60,11 @@ import React, {
   useLayoutEffect,
   useRef,
 } from "react";
+import {
+  ConversationStoreProvider,
+  useCurrentConversationTopic,
+} from "./conversation.store-context";
+import { debugBorder } from "@/utils/debug-style";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
@@ -84,7 +85,7 @@ export const Conversation = memo(function Conversation(props: {
     }
     if (isConversationDm(conversation)) {
       navigation.setOptions({
-        headerTitle: () => <GroupConversationTitle topic={topic} />,
+        headerTitle: () => <DmConversationTitle topic={topic} />,
       });
     } else if (isConversationGroup(conversation)) {
       navigation.setOptions({
@@ -202,9 +203,9 @@ const Messages = memo(function Messages(props: {
       ListHeaderComponent={
         !isConversationAllowed(conversation) ? (
           isConversationDm(conversation) ? (
-            <GroupConsentPopup />
-          ) : (
             <DmConsentPopup />
+          ) : (
+            <GroupConsentPopup />
           )
         ) : undefined
       }
@@ -244,8 +245,9 @@ const ConversationMessagesListItem = memo(
         previousMessage={previousMessage}
         nextMessage={nextMessage}
       >
-        <VStack>
-          <ConversationMessageDateChange />
+        <VStack
+        // {...debugBorder()}
+        >
           <ConversationMessageTimestamp />
           <ConversationMessageRepliable onReply={handleReply}>
             <ConversationMessageLayout>
