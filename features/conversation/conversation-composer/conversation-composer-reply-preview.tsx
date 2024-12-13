@@ -11,7 +11,6 @@ import {
   useConversationMessageById,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
-import { useCurrentConversationTopic } from "../conversation.store-context";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { HStack } from "@design-system/HStack";
 import { Icon } from "@design-system/Icon/Icon";
@@ -26,7 +25,6 @@ import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import {
   DecodedMessage,
   InboxId,
-  MessageId,
   RemoteAttachmentCodec,
   ReplyCodec,
   StaticAttachmentCodec,
@@ -37,6 +35,7 @@ import {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { useCurrentConversationTopic } from "../conversation.store-context";
 import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
@@ -47,18 +46,6 @@ export const ReplyPreview = memo(function ReplyPreview() {
     (state) => state.replyingToMessageId
   );
 
-  if (!replyingToMessageId) {
-    return null;
-  }
-
-  return <Content replyingToMessageId={replyingToMessageId} />;
-});
-
-const Content = memo(function Content(props: {
-  replyingToMessageId: MessageId;
-}) {
-  const { replyingToMessageId } = props;
-
   const { theme } = useAppTheme();
 
   const composerStore = useConversationComposerStore();
@@ -67,7 +54,7 @@ const Content = memo(function Content(props: {
   const topic = useCurrentConversationTopic();
 
   const { message: replyMessage } = useConversationMessageById({
-    messageId: replyingToMessageId,
+    messageId: replyingToMessageId!, // ! because we have enabled in the query
     topic,
   });
 
@@ -115,6 +102,8 @@ const Content = memo(function Content(props: {
         },
         containerAS,
       ]}
+      // entering={theme.animation.reanimatedFadeInSpring}
+      // exiting={theme.animation.reanimatedFadeOutSpring}
     >
       {!!replyMessage && (
         <AnimatedVStack

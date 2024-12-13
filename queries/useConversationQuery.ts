@@ -31,7 +31,7 @@ export const invalidateConversationQuery = (
   account: string,
   topic: ConversationTopic
 ) => {
-  queryClient.invalidateQueries({
+  return queryClient.invalidateQueries({
     queryKey: conversationQueryKey(account, topic),
   });
 };
@@ -41,7 +41,7 @@ export function updateConversationQueryData(
   topic: ConversationTopic,
   conversation: ConversationQueryData
 ) {
-  queryClient.setQueryData<ConversationQueryData>(
+  return queryClient.setQueryData<ConversationQueryData>(
     conversationQueryKey(account, topic),
     conversation
   );
@@ -70,7 +70,8 @@ export function refetchConversationQuery(
 export const getConversationQueryData = (
   account: string,
   topic: ConversationTopic
-) =>
-  queryClient.getQueryData<ConversationQueryData>(
+) => {
+  return queryClient.getQueryData<ConversationQueryData>(
     conversationQueryKey(account, topic)
   );
+};

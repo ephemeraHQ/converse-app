@@ -22,3 +22,8 @@ export function prefetchCurrentUserAccountInboxId() {
   const currentAccount = getCurrentAccount()!;
   return prefetchInboxIdQuery({ account: currentAccount });
 }
+
+export function isCurrentUserInboxId(inboxId: InboxId) {
+  const currentUserInboxId = getCurrentUserAccountInboxId();
+  return currentUserInboxId?.toLowerCase() === inboxId.toLowerCase();
+}

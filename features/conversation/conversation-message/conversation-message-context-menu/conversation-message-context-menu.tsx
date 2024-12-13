@@ -22,11 +22,12 @@ import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/messag
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { calculateMenuHeight } from "@design-system/ContextMenu/ContextMenu.utils";
 import { Portal } from "@gorhom/portal";
-import { memo, useCallback } from "react";
-import { StyleSheet } from "react-native";
+import { memo, useCallback, useEffect } from "react";
+import { Keyboard, StyleSheet } from "react-native";
 import { MessageContextMenuAboveMessageReactions } from "./conversation-message-context-menu-above-message-reactions";
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container";
 import { useMessageContextMenuItems } from "./conversation-message-context-menu.utils";
+import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 
 export const MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE = 16;
 
@@ -153,7 +154,7 @@ const Content = memo(function Content(props: {
                 }}
               />
 
-              {messageComponent}
+              <ConversationMessage message={message} />
 
               {/* Put back once we refactor the menu items */}
               {/* <VStack style={{ height: 16 }}></VStack> */}

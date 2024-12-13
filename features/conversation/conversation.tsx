@@ -5,6 +5,8 @@ import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPi
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
 import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
+import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
+import { ReplyPreview } from "@/features/conversation/conversation-composer/conversation-composer-reply-preview";
 import {
   ConversationComposerStoreProvider,
   useConversationComposerStore,
@@ -14,25 +16,27 @@ import { GroupConsentPopup } from "@/features/conversation/conversation-consent-
 import { DmConversationTitle } from "@/features/conversation/conversation-dm-header-title";
 import { GroupConversationTitle } from "@/features/conversation/conversation-group-header-title";
 import { KeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
-import {
-  IMessageGesturesOnLongPressArgs,
-  MessageGestures,
-} from "@/features/conversation/conversation-message/conversation-message-gestures";
-import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
-import {
-  MessageContextStoreProvider,
-  useMessageContextStore,
-} from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { ConversationMessageStatus } from "@/features/conversation/conversation-message-status/conversation-message-status";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { MessageContextMenu } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu";
 import {
   MessageContextMenuStoreProvider,
   useMessageContextMenuStore,
+  useMessageContextMenuStoreContext,
 } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
+import {
+  IMessageGesturesOnLongPressArgs,
+  MessageGestures,
+} from "@/features/conversation/conversation-message/conversation-message-gestures";
 import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import { MessageReactionsDrawer } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer";
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { ConversationMessageRepliable } from "@/features/conversation/conversation-message/conversation-message-repliable";
+import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
+import {
+  MessageContextStoreProvider,
+  useMessageContextStore,
+} from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
 import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
@@ -64,7 +68,7 @@ import {
   ConversationStoreProvider,
   useCurrentConversationTopic,
 } from "./conversation.store-context";
-import { debugBorder } from "@/utils/debug-style";
+import { MessageSimpleText } from "@/features/conversation/conversation-message/conversation-message-content-types/conversation-message-simple-text";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
@@ -131,7 +135,7 @@ export const Conversation = memo(function Conversation(props: {
           >
             <Messages conversation={conversation} />
             <ComposerWrapper conversation={conversation} />
-            <KeyboardFiller />
+            <KeyboardFillerWrapper />
             <MessageContextMenu />
             <MessageReactionsDrawer />
             <ExternalWalletPicker title="Choose a wallet" />
@@ -142,6 +146,13 @@ export const Conversation = memo(function Conversation(props: {
   );
 });
 
+const KeyboardFillerWrapper = memo(function KeyboardFillerWrapper() {
+  const messageContextMenuData = useMessageContextMenuStoreContext(
+    (state) => state.messageContextMenuData
+  );
+  return <KeyboardFiller messageContextMenuIsOpen={!!messageContextMenuData} />;
+});
+
 const ComposerWrapper = memo(function ComposerWrapper(props: {
   conversation: ConversationWithCodecsType;
 }) {
@@ -149,7 +160,13 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
   const sendMessage = useSendMessage({
     conversation,
   });
-  return <Composer onSend={sendMessage} />;
+
+  return (
+    <ConversationComposerContainer>
+      <ReplyPreview />
+      <Composer onSend={sendMessage} />
+    </ConversationComposerContainer>
+  );
 });
 
 const Messages = memo(function Messages(props: {
@@ -245,25 +262,24 @@ const ConversationMessagesListItem = memo(
         previousMessage={previousMessage}
         nextMessage={nextMessage}
       >
-        <VStack
-        // {...debugBorder()}
-        >
+        <VStack>
           <ConversationMessageTimestamp />
           <ConversationMessageRepliable onReply={handleReply}>
             <ConversationMessageLayout>
-              <WithGestures>
-                <ConversationMessage message={message} />
-              </WithGestures>
+              <ConversationMessageGestures>
+                <MessageSimpleText message={message} />
+              </ConversationMessageGestures>
               <ConversationMessageReactions />
             </ConversationMessageLayout>
           </ConversationMessageRepliable>
+          <ConversationMessageStatus message={message} />
         </VStack>
       </MessageContextStoreProvider>
     );
   }
 );
 
-const WithGestures = memo(function WithGestures({
+const ConversationMessageGestures = memo(function ConversationMessageGestures({
   children,
 }: {
   children: React.ReactNode;
@@ -275,9 +291,9 @@ const WithGestures = memo(function WithGestures({
   const handleLongPress = useCallback(
     (e: IMessageGesturesOnLongPressArgs) => {
       const messageId = messageStore.getState().messageId;
-      const message = messageStore.getState().message;
-      const previousMessage = messageStore.getState().previousMessage;
-      const nextMessage = messageStore.getState().nextMessage;
+      // const message = messageStore.getState().message;
+      // const previousMessage = messageStore.getState().previousMessage;
+      // const nextMessage = messageStore.getState().nextMessage;
 
       messageContextMenuStore.getState().setMessageContextMenuData({
         messageId,
@@ -289,18 +305,18 @@ const WithGestures = memo(function WithGestures({
         // Not the cleanest...
         // Might want to find another solution later but works for now.
         // Solution might be to remove the context and just pass props
-        messageComponent: (
-          <MessageContextStoreProvider
-            message={message}
-            previousMessage={previousMessage}
-            nextMessage={nextMessage}
-          >
-            {children}
-          </MessageContextStoreProvider>
-        ),
+        // messageComponent: (
+        //   <MessageContextStoreProvider
+        //     message={message}
+        //     previousMessage={previousMessage}
+        //     nextMessage={nextMessage}
+        //   >
+        //     {children}
+        //   </MessageContextStoreProvider>
+        // ),
       });
     },
-    [messageStore, messageContextMenuStore, children]
+    [messageContextMenuStore, messageStore]
   );
 
   const handleTap = useCallback(() => {

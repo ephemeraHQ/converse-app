@@ -1,6 +1,7 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
+import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
 import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { KeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
 import { NewConversationTitle } from "@/features/conversation/conversation-new-dm-header-title";
@@ -47,14 +48,15 @@ export const ConversationNewDm = memo(function ConversationNewDm(props: {
       storeName={"new-conversation" as ConversationTopic}
       inputValue={textPrefill}
     >
-      {/*  TODO: Add empty state */}
       <ConversationNewDmNoMessagesPlaceholder
         peerAddress={peerAddress}
         isBlockedPeer={false} // TODO
         onSendWelcomeMessage={handleSendWelcomeMessage}
       />
-      <Composer onSend={sendFirstConversationMessage} />
-      <KeyboardFiller />
+      <ConversationComposerContainer>
+        <Composer onSend={sendFirstConversationMessage} />
+      </ConversationComposerContainer>
+      <KeyboardFiller messageContextMenuIsOpen={false} />
     </ConversationComposerStoreProvider>
   );
 });

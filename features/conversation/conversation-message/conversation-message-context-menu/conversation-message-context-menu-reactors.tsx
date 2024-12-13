@@ -1,26 +1,16 @@
-import { MESSAGE_CONTEXT_REACTIONS_HEIGHT } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-constant";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { MESSAGE_CONTEXT_REACTIONS_HEIGHT } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-constant";
+import { useInboxProfileSocialsQueries } from "@/queries/useInboxProfileSocialsQuery";
 import { ObjectTyped } from "@/utils/objectTyped";
+import { getReactionContent } from "@/utils/xmtpRN/reactions";
 import GroupAvatar from "@components/GroupAvatar";
-import { useProfilesStore } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { Text } from "@design-system/Text";
 import { useAppTheme } from "@theme/useAppTheme";
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getProfile,
-} from "@utils/profile";
-import { getReactionContent } from "@/utils/xmtpRN/reactions";
+import { getPreferredInboxAvatar, getPreferredInboxName } from "@utils/profile";
 import { InboxId, ReactionContent } from "@xmtp/react-native-sdk";
-import React, { FC, useEffect, useMemo } from "react";
+import React, { FC, useMemo } from "react";
 import { FlatList } from "react-native-gesture-handler";
-import {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withTiming,
-} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type MessageContextMenuReactorsProps = {
@@ -59,8 +49,9 @@ export const MessageContextMenuReactors: FC<
   }, [reactors]);
 
   return (
-    <VStack
+    <AnimatedVStack
       // {...debugBorder()}
+      entering={theme.animation.reanimatedFadeInScaleIn()}
       style={{
         position: "absolute",
         top: safeAreaInsets.top + theme.spacing.xs,
@@ -87,13 +78,9 @@ export const MessageContextMenuReactors: FC<
           showsHorizontalScrollIndicator={false}
         />
       </VStack>
-    </VStack>
+    </AnimatedVStack>
   );
 };
-
-const INITIAL_DELAY = 0;
-const ITEM_DELAY = 200;
-const ITEM_ANIMATION_DURATION = 500;
 
 type MessageReactionsItemProps = {
   content: string;
@@ -104,45 +91,26 @@ type MessageReactionsItemProps = {
 const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
   const { theme } = useAppTheme();
 
-  const animatedValue = useSharedValue(0);
+  const currentAccount = useCurrentAccount()!;
 
-  const membersSocials = useProfilesStore((s) =>
-    addresses.map((address) => {
-      const socials = getProfile(address, s.profiles)?.socials;
-      return {
-        address,
-        uri: getPreferredAvatar(socials),
-        name: getPreferredName(socials, address),
-      };
-    })
-  );
+  const queriesData = useInboxProfileSocialsQueries(currentAccount, addresses);
 
-  useEffect(() => {
-    animatedValue.value = withDelay(
-      index * ITEM_DELAY + INITIAL_DELAY,
-      withTiming(1, {
-        duration: ITEM_ANIMATION_DURATION,
-        easing: Easing.out(Easing.exp),
-      })
-    );
-  }, [animatedValue, index]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: animatedValue.value,
-    transform: [{ scale: animatedValue.value }],
-  }));
+  const membersSocials = queriesData.map(({ data: socials }) => {
+    return {
+      address: addresses[index],
+      uri: getPreferredInboxAvatar(socials),
+      name: getPreferredInboxName(socials),
+    };
+  });
 
   return (
     <AnimatedVStack
-      style={[
-        {
-          justifyContent: "center",
-          alignItems: "center",
-          width: 76, // From iMessage
-          height: MESSAGE_CONTEXT_REACTIONS_HEIGHT, // From iMessage
-        },
-        animatedStyle,
-      ]}
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+        width: 76, // From iMessage
+        height: MESSAGE_CONTEXT_REACTIONS_HEIGHT, // From iMessage
+      }}
     >
       <VStack
         style={{

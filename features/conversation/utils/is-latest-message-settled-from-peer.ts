@@ -2,14 +2,12 @@ import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
 import { messageIsFromCurrentUser } from "./message-is-from-current-user";
 
 type IsLatestMessageSettledFromPeerPayload = {
-  message?: DecodedMessageWithCodecsType;
-  nextMessage?: DecodedMessageWithCodecsType;
-  currentAccount: string;
+  message: DecodedMessageWithCodecsType;
+  nextMessage: DecodedMessageWithCodecsType | undefined;
 };
 
 export const isLatestMessageSettledFromPeer = ({
   message,
-  currentAccount,
   nextMessage,
 }: IsLatestMessageSettledFromPeerPayload) => {
   if (!message) return false;

@@ -2,11 +2,12 @@
  * This store/context is to avoid prop drilling in message components.
  */
 
-import { convertNanosecondsToMilliseconds } from "@/utils/date";
 import { hasNextMessageInSeries } from "@/features/conversation/utils/has-next-message-in-serie";
 import { hasPreviousMessageInSeries } from "@/features/conversation/utils/has-previous-message-in-serie";
+import { isLatestMessageSettledFromPeer } from "@/features/conversation/utils/is-latest-message-settled-from-peer";
 import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/message-is-from-current-user";
 import { messageShouldShowDateChange } from "@/features/conversation/utils/message-should-show-date-change";
+import { convertNanosecondsToMilliseconds } from "@/utils/date";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { InboxId, MessageId } from "@xmtp/react-native-sdk";
 import { createContext, memo, useContext, useEffect, useRef } from "react";
@@ -21,6 +22,7 @@ type IMessageContextStoreProps = {
 
 type IMessageContextStoreState = IMessageContextStoreProps & {
   messageId: MessageId;
+  isLatestSettledFromMe: boolean;
   hasNextMessageInSeries: boolean;
   hasPreviousMessageInSeries: boolean;
   fromMe: boolean;
@@ -63,6 +65,10 @@ function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
   return {
     ...props,
     messageId: props.message.id as MessageId,
+    isLatestSettledFromMe: isLatestMessageSettledFromPeer({
+      message: props.message,
+      nextMessage: props.nextMessage,
+    }),
     hasNextMessageInSeries: hasNextMessageInSeries({
       currentMessage: props.message,
       nextMessage: props.nextMessage,
