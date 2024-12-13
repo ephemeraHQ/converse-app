@@ -1,5 +1,9 @@
 import { QueryKeys } from "@queries/QueryKeys";
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import {
+  useQuery,
+  UseQueryOptions,
+  QueryObserver,
+} from "@tanstack/react-query";
 import logger from "@utils/logger";
 import {
   ConversationWithCodecsType,
@@ -14,7 +18,6 @@ import { setGroupIsActiveQueryData } from "./useGroupIsActive";
 import { setGroupNameQueryData } from "./useGroupNameQuery";
 import { setGroupPhotoQueryData } from "./useGroupPhotoQuery";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
-import { useAppStore } from "@/data/store/appStore";
 
 export const conversationListKey = (account: string) => [
   QueryKeys.V3_CONVERSATION_LIST,
@@ -90,6 +93,17 @@ const v3ConversationListQueryConfig = (
   staleTime: 2000,
   enabled: !!account,
 });
+
+export const createV3ConversationListQueryObserver = (
+  account: string,
+  context: string,
+  includeSync: boolean = true
+) => {
+  return new QueryObserver(
+    queryClient,
+    v3ConversationListQueryConfig(account, context, includeSync)
+  );
+};
 
 export const useV3ConversationListQuery = (
   account: string,

@@ -38,7 +38,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     if let xmtpClient = await getXmtpClient(account: account), !isIntroTopic(topic: contentTopic) {
       
     if isV3WelcomeTopic(topic: contentTopic) {
-        guard let conversation = await getNewConversation(xmtpClient: xmtpClient, contentTopic: contentTopic)else {
+        guard let conversation = await getNewConversation(xmtpClient: xmtpClient, contentTopic: contentTopic) else {
           contentHandler(UNNotificationContent())
           return
         }
@@ -51,7 +51,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
           welcomeTopic: contentTopic,
           bestAttemptContent: &content
         )
-      } else if isV3MessageTopic(topic: contentTopic) {
+    } else if isV3MessageTopic(topic: contentTopic) {
         let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
         let envelope = XMTP.Xmtp_MessageApi_V1_Envelope .with { envelope in
           envelope.message = encryptedMessageData
@@ -59,18 +59,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
         }
         (shouldShowNotification, messageId, messageIntent) = await handleV3Message(xmtpClient: xmtpClient, envelope: envelope, apiURI: apiURI, bestAttemptContent: &content)
       } else {
-        let encryptedMessageData = Data(base64Encoded: Data(encodedMessage.utf8))!
-        let envelope = XMTP.Xmtp_MessageApi_V1_Envelope.with { envelope in
-          envelope.message = encryptedMessageData
-          envelope.contentTopic = contentTopic
-        }
         sentryAddBreadcrumb(message: "topic \(contentTopic) is not invite topic")
-        (shouldShowNotification, messageId, messageIntent) = await handleOngoingConversationMessage(
-          xmtpClient: xmtpClient,
-          envelope: envelope,
-          bestAttemptContent: &content,
-          body: body
-        )
       }
     }
     
