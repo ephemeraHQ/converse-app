@@ -37,11 +37,13 @@ import {
   MessageContextStoreProvider,
   useMessageContextStore,
 } from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { getConvosMessageStatus } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
 import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 import {
@@ -62,13 +64,13 @@ import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
 } from "react";
 import {
   ConversationStoreProvider,
   useCurrentConversationTopic,
 } from "./conversation.store-context";
-import { MessageSimpleText } from "@/features/conversation/conversation-message/conversation-message-content-types/conversation-message-simple-text";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
@@ -175,6 +177,7 @@ const Messages = memo(function Messages(props: {
   const { conversation } = props;
 
   const currentAccount = useCurrentAccount()!;
+  const { data: currentAccountInboxId } = useCurrentAccountInboxId();
   const topic = useCurrentConversationTopic()!;
 
   const {
@@ -183,6 +186,14 @@ const Messages = memo(function Messages(props: {
     isRefetching: isRefetchingMessages,
     refetch,
   } = useConversationMessages(currentAccount, topic!);
+
+  const latestMessageIdByCurrentUser = useMemo(() => {
+    if (!messages?.ids) return -1;
+    return messages.ids.find(
+      (messageId) =>
+        messages.byId[messageId].senderAddress === currentAccountInboxId
+    );
+  }, [messages?.ids, messages?.byId, currentAccountInboxId]);
 
   const isUnread = useConversationIsUnread({
     topic,
@@ -236,6 +247,9 @@ const Messages = memo(function Messages(props: {
             message={message}
             previousMessage={previousMessage}
             nextMessage={nextMessage}
+            isLatestMessageSentByCurrentUser={
+              latestMessageIdByCurrentUser === messageId
+            }
           />
         );
       }}
@@ -248,8 +262,14 @@ const ConversationMessagesListItem = memo(
     message: DecodedMessageWithCodecsType;
     previousMessage: DecodedMessageWithCodecsType | undefined;
     nextMessage: DecodedMessageWithCodecsType | undefined;
+    isLatestMessageSentByCurrentUser: boolean;
   }) {
-    const { message, previousMessage, nextMessage } = props;
+    const {
+      message,
+      previousMessage,
+      nextMessage,
+      isLatestMessageSentByCurrentUser,
+    } = props;
     const composerStore = useConversationComposerStore();
 
     const handleReply = useCallback(() => {
@@ -267,12 +287,16 @@ const ConversationMessagesListItem = memo(
           <ConversationMessageRepliable onReply={handleReply}>
             <ConversationMessageLayout>
               <ConversationMessageGestures>
-                <MessageSimpleText message={message} />
+                <ConversationMessage message={message} />
               </ConversationMessageGestures>
               <ConversationMessageReactions />
+              {isLatestMessageSentByCurrentUser && (
+                <ConversationMessageStatus
+                  status={getConvosMessageStatus(message)}
+                />
+              )}
             </ConversationMessageLayout>
           </ConversationMessageRepliable>
-          <ConversationMessageStatus message={message} />
         </VStack>
       </MessageContextStoreProvider>
     );

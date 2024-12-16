@@ -3,6 +3,7 @@ import { useSelect } from "@/data/store/storeHelpers";
 import { HStack } from "@/design-system/HStack";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { memo } from "react";
+import { debugBorder } from "@/utils/debug-style";
 
 export const MessageContentContainer = memo(
   function MessageContentContainer(props: { children: React.ReactNode }) {

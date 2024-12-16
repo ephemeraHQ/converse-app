@@ -7,6 +7,7 @@ import {
   prefetchInboxIdQuery,
   useInboxIdQuery,
 } from "../queries/use-inbox-id-query";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 export function useCurrentAccountInboxId() {
   const currentAccount = useCurrentAccount()!;

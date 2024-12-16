@@ -1,3 +1,6 @@
+import { useCurrentAccount } from "@/data/store/accountsStore";
+import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { MessageContextMenuBackdrop } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-backdrop";
 import { MessageContextMenuEmojiPicker } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker";
 import { openMessageContextMenuEmojiPicker } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker-utils";
@@ -8,26 +11,27 @@ import {
   useMessageContextMenuStore,
   useMessageContextMenuStoreContext,
 } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
+import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
   getMessageById,
   useConversationMessageReactions,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
-import { useCurrentAccount } from "@/data/store/accountsStore";
-import { AnimatedVStack, VStack } from "@/design-system/VStack";
-import { useCurrentConversationTopic } from "../../conversation.store-context";
+import {
+  ConversationStoreProvider,
+  useCurrentConversationTopic,
+} from "@/features/conversation/conversation.store-context";
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
 import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/message-is-from-current-user";
+import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { calculateMenuHeight } from "@design-system/ContextMenu/ContextMenu.utils";
 import { Portal } from "@gorhom/portal";
-import { memo, useCallback, useEffect } from "react";
-import { Keyboard, StyleSheet } from "react-native";
+import { memo, useCallback } from "react";
+import { StyleSheet } from "react-native";
 import { MessageContextMenuAboveMessageReactions } from "./conversation-message-context-menu-above-message-reactions";
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container";
 import { useMessageContextMenuItems } from "./conversation-message-context-menu.utils";
-import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 
 export const MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE = 16;
 
@@ -50,14 +54,8 @@ const Content = memo(function Content(props: {
 }) {
   const { messageContextMenuData } = props;
 
-  const {
-    messageId,
-    itemRectX,
-    itemRectY,
-    itemRectHeight,
-    itemRectWidth,
-    messageComponent,
-  } = messageContextMenuData;
+  const { messageId, itemRectX, itemRectY, itemRectHeight, itemRectWidth } =
+    messageContextMenuData;
 
   const account = useCurrentAccount()!;
   const topic = useCurrentConversationTopic();
@@ -124,49 +122,61 @@ const Content = memo(function Content(props: {
   return (
     <>
       <Portal>
-        <MessageContextMenuBackdrop handlePressBackdrop={handlePressBackdrop}>
-          <AnimatedVStack style={StyleSheet.absoluteFill}>
-            {!!bySender && <MessageContextMenuReactors reactors={bySender} />}
-            <MessageContextMenuContainer
-              itemRectY={itemRectY}
-              itemRectX={itemRectX}
-              itemRectHeight={itemRectHeight}
-              itemRectWidth={itemRectWidth}
-              menuHeight={menuHeight}
-              fromMe={fromMe}
-              hasReactions={hasReactions}
-            >
-              <MessageContextMenuAboveMessageReactions
-                topic={topic}
-                reactors={bySender ?? {}}
-                messageId={messageId}
-                onChooseMoreEmojis={handleChooseMoreEmojis}
-                onSelectReaction={handleSelectReaction}
-                originX={fromMe ? itemRectX + itemRectWidth : itemRectX}
-                originY={itemRectHeight}
-              />
+        <ConversationStoreProvider
+          topic={topic}
+          conversationId={conversation!.id}
+        >
+          <MessageContextMenuBackdrop handlePressBackdrop={handlePressBackdrop}>
+            <AnimatedVStack style={StyleSheet.absoluteFill}>
+              {!!bySender && <MessageContextMenuReactors reactors={bySender} />}
+              <MessageContextMenuContainer
+                itemRectY={itemRectY}
+                itemRectX={itemRectX}
+                itemRectHeight={itemRectHeight}
+                itemRectWidth={itemRectWidth}
+                menuHeight={menuHeight}
+                fromMe={fromMe}
+                hasReactions={hasReactions}
+              >
+                <MessageContextMenuAboveMessageReactions
+                  topic={topic}
+                  reactors={bySender ?? {}}
+                  messageId={messageId}
+                  onChooseMoreEmojis={handleChooseMoreEmojis}
+                  onSelectReaction={handleSelectReaction}
+                  originX={fromMe ? itemRectX + itemRectWidth : itemRectX}
+                  originY={itemRectHeight}
+                />
 
-              {/* Replace with rowGap when we refactored menu items */}
-              <VStack
-                style={{
-                  height:
-                    MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE,
-                }}
-              />
+                {/* Replace with rowGap when we refactored menu items and not using rn-paper TableView */}
+                <VStack
+                  style={{
+                    height:
+                      MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE,
+                  }}
+                />
 
-              <ConversationMessage message={message} />
+                <MessageContextStoreProvider
+                  message={message}
+                  nextMessage={undefined}
+                  previousMessage={undefined}
+                >
+                  {/* TODO: maybe make ConversationMessage more dumb to not need any context? */}
+                  <ConversationMessage message={message} />
+                </MessageContextStoreProvider>
 
-              {/* Put back once we refactor the menu items */}
-              {/* <VStack style={{ height: 16 }}></VStack> */}
+                {/* Put back once we refactor the menu items */}
+                {/* <VStack style={{ height: 16 }}></VStack> */}
 
-              <MessageContextMenuItems
-                originX={fromMe ? itemRectX + itemRectWidth : itemRectX}
-                originY={itemRectHeight}
-                menuItems={menuItems}
-              />
-            </MessageContextMenuContainer>
-          </AnimatedVStack>
-        </MessageContextMenuBackdrop>
+                <MessageContextMenuItems
+                  originX={fromMe ? itemRectX + itemRectWidth : itemRectX}
+                  originY={itemRectHeight}
+                  menuItems={menuItems}
+                />
+              </MessageContextMenuContainer>
+            </AnimatedVStack>
+          </MessageContextMenuBackdrop>
+        </ConversationStoreProvider>
       </Portal>
       <MessageContextMenuEmojiPicker onSelectReaction={handleSelectReaction} />
     </>

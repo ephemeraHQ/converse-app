@@ -65,10 +65,7 @@ function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
   return {
     ...props,
     messageId: props.message.id as MessageId,
-    isLatestSettledFromMe: isLatestMessageSettledFromPeer({
-      message: props.message,
-      nextMessage: props.nextMessage,
-    }),
+    isLatestSettledFromMe: true,
     hasNextMessageInSeries: hasNextMessageInSeries({
       currentMessage: props.message,
       nextMessage: props.nextMessage,

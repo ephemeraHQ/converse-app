@@ -80,19 +80,8 @@ export const addConversationMessage = (args: {
   account: string;
   topic: ConversationTopic;
   message: DecodedMessageWithCodecsType;
-  // isOptimistic?: boolean;
 }) => {
-  const {
-    account,
-    topic,
-    message,
-    // isOptimistic
-  } = args;
-
-  // WIP
-  // if (isOptimistic) {
-  //   addOptimisticMessage(message.id);
-  // }
+  const { account, topic, message } = args;
 
   queryClient.setQueryData<ConversationMessagesQueryData>(
     conversationMessagesQueryKey(account, topic),
@@ -177,25 +166,10 @@ function processMessages(args: {
     if (!isReactionMessage(message)) {
       const messageId = message.id as MessageId;
 
-      // WIP
-      // Find matching optimistic message using correlationId from message root
-      // const optimisticMessage = optimisticMessages.find(
-      //   (msg) => msg.messageId === message.id
-      // );
-
-      // if (optimisticMessage) {
-      //   // Remove the optimistic message from tracking and from the result
-      //   removeOptimisticMessage(messageId);
-      //   // Remove from the query data
-      //   result.ids = result.ids.filter((id) => id !== optimisticMessage.tempId);
-      //   delete result.byId[optimisticMessage.tempId as MessageId];
-      // }
-
-      // Add the new message
       result.byId[messageId] = message;
       if (prependNewMessages) {
         result.ids = [messageId, ...result.ids];
-      } else if (!result.ids.includes(messageId)) {
+      } else {
         result.ids.push(messageId);
       }
     }
@@ -265,34 +239,60 @@ function processMessages(args: {
 }
 
 // WIP
-// type IOptimisticMessage = {
-//   tempId: string;
-//   messageId?: MessageId;
-// };
+type IOptimisticMessage = {
+  tempId: string;
+  messageId?: MessageId;
+};
 
-// // Keep track of optimistic messages
-// let optimisticMessages: IOptimisticMessage[] = [];
+export function replaceOptimisticMessageWithReal(args: {
+  tempId: string;
+  topic: ConversationTopic;
+  account: string;
+  message: DecodedMessageWithCodecsType;
+}) {
+  const { tempId, topic, account, message } = args;
+  logger.info(
+    "[linkOptimisticMessageToReal] linking optimistic message to real",
+    {
+      tempId,
+      messageId: message.id,
+    }
+  );
 
-// function addOptimisticMessage(tempId: string) {
-//   optimisticMessages.push({
-//     tempId,
-//   });
-// }
+  queryClient.setQueryData<ConversationMessagesQueryData>(
+    conversationMessagesQueryKey(account, topic),
+    (previousMessages) => {
+      if (!previousMessages) {
+        return {
+          ids: [message.id as MessageId],
+          byId: {
+            [message.id as MessageId]: message,
+          },
+          reactions: {},
+        };
+      }
 
-// function removeOptimisticMessage(messageId: MessageId) {
-//   optimisticMessages = optimisticMessages.filter(
-//     (msg) => msg.messageId !== messageId
-//   );
-// }
+      // Find the index of the temporary message
+      const tempIndex = previousMessages.ids.indexOf(tempId as MessageId);
 
-// export function updateConversationMessagesOptimisticMessages(
-//   tempId: string,
-//   messageId: MessageId
-// ) {
-//   const optimisticMessage = optimisticMessages.find(
-//     (msg) => msg.tempId === tempId
-//   );
-//   if (optimisticMessage) {
-//     optimisticMessage.messageId = messageId;
-//   }
-// }
+      if (tempIndex === -1) {
+        return previousMessages;
+      }
+
+      // Create new ids array with the real message id replacing the temp id
+      const newIds = [...previousMessages.ids];
+      newIds[tempIndex] = message.id as MessageId;
+
+      // Create new byId object without the temp message and with the real message
+      const newById = { ...previousMessages.byId };
+      delete newById[tempId as MessageId];
+      newById[message.id as MessageId] = message;
+
+      return {
+        ...previousMessages,
+        ids: newIds,
+        byId: newById,
+      };
+    }
+  );
+}
