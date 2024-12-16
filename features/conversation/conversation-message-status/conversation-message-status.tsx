@@ -1,4 +1,5 @@
 import { AnimatedHStack } from "@/design-system/HStack";
+import { Icon } from "@/design-system/Icon/Icon";
 import { AnimatedText } from "@/design-system/Text";
 import { usePrevious } from "@/hooks/use-previous-value";
 import { translate } from "@/i18n";
@@ -36,10 +37,19 @@ export const ConversationMessageStatus = memo(
       <AnimatedHStack
         // {...debugBorder()}
         entering={theme.animation.reanimatedFadeInSpring}
+        style={{
+          columnGap: theme.spacing.xxxs,
+          paddingTop: theme.spacing.xxxs,
+        }}
       >
         <AnimatedText color="secondary" size="xxs">
           {statusMapping[status]}
         </AnimatedText>
+        <Icon
+          icon="checkmark"
+          size={theme.iconSize.xs}
+          color={theme.colors.text.secondary}
+        />
       </AnimatedHStack>
     );
   }

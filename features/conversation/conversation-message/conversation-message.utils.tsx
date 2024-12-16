@@ -35,6 +35,12 @@ import {
 } from "@xmtp/react-native-sdk";
 import { useCurrentConversationTopic } from "../conversation.store-context";
 
+export function isAnActualMessage(
+  message: DecodedMessageWithCodecsType
+): message is DecodedMessage<TextCodec> {
+  return !isReadReceiptMessage(message) && !isGroupUpdatedMessage(message);
+}
+
 export function isTextMessage(
   message: DecodedMessageWithCodecsType
 ): message is DecodedMessage<TextCodec> {
@@ -232,6 +238,6 @@ export function getConvosMessageStatus(message: DecodedMessageWithCodecsType) {
     case MessageDeliveryStatus.ALL:
       return "sent";
     default:
-      return message.deliveryStatus satisfies never;
+      throw new Error(`Unhandled delivery status: ${message.deliveryStatus}`);
   }
 }

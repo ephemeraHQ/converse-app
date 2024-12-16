@@ -25,8 +25,6 @@ export const KeyboardFiller = memo(function KeyboardFiller(
   const isKeyboardShown = useKeyboardIsShown();
 
   useEffect(() => {
-    console.log("messageContextMenuIsOpen:", messageContextMenuIsOpen);
-    console.log("keyboardWasOpenRef.current:", keyboardWasOpenRef.current);
     // Context menu was hidden
     if (!messageContextMenuIsOpen) {
       // Reopen keyboard if it was open before context menu was shown

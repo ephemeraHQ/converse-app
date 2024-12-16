@@ -32,7 +32,7 @@ export const MessageContextMenuReactors: FC<
     }
 
     const reactionMap: Record<string, InboxId[]> = {};
-    ObjectTyped.entries(reactors).forEach(([reactorAddress, reactions]) => {
+    ObjectTyped.entries(reactors).forEach(([reactorInboxId, reactions]) => {
       if (!reactions || reactions.length === 0) {
         return;
       }
@@ -41,7 +41,7 @@ export const MessageContextMenuReactors: FC<
           reactionMap[getReactionContent(reaction)] = [];
         }
         reactionMap[getReactionContent(reaction)].push(
-          reactorAddress as InboxId
+          reactorInboxId as InboxId
         );
       }
     });
@@ -71,8 +71,8 @@ export const MessageContextMenuReactors: FC<
         <FlatList
           data={listData}
           horizontal
-          renderItem={({ item: [content, addresses], index }) => (
-            <Item content={content} addresses={addresses} index={index} />
+          renderItem={({ item: [content, inboxIds], index }) => (
+            <Item content={content} inboxIds={inboxIds} />
           )}
           keyExtractor={(item) => item[0]}
           showsHorizontalScrollIndicator={false}
@@ -84,20 +84,19 @@ export const MessageContextMenuReactors: FC<
 
 type MessageReactionsItemProps = {
   content: string;
-  addresses: string[];
-  index: number;
+  inboxIds: InboxId[];
 };
 
-const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
+const Item: FC<MessageReactionsItemProps> = ({ content, inboxIds }) => {
   const { theme } = useAppTheme();
 
   const currentAccount = useCurrentAccount()!;
 
-  const queriesData = useInboxProfileSocialsQueries(currentAccount, addresses);
+  const queriesData = useInboxProfileSocialsQueries(currentAccount, inboxIds);
 
-  const membersSocials = queriesData.map(({ data: socials }) => {
+  const membersSocials = queriesData.map(({ data: socials }, index) => {
     return {
-      address: addresses[index],
+      address: inboxIds[index],
       uri: getPreferredInboxAvatar(socials),
       name: getPreferredInboxName(socials),
     };
@@ -125,7 +124,7 @@ const Item: FC<MessageReactionsItemProps> = ({ content, addresses, index }) => {
         />
       </VStack>
       <Text style={{ marginTop: theme.spacing.md }}>
-        {content} {addresses.length}
+        {content} {inboxIds.length}
       </Text>
     </AnimatedVStack>
   );

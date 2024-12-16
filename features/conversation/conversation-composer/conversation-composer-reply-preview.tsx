@@ -102,8 +102,6 @@ export const ReplyPreview = memo(function ReplyPreview() {
         },
         containerAS,
       ]}
-      // entering={theme.animation.reanimatedFadeInSpring}
-      // exiting={theme.animation.reanimatedFadeOutSpring}
     >
       {!!replyMessage && (
         <AnimatedVStack

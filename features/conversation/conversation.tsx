@@ -37,7 +37,10 @@ import {
   MessageContextStoreProvider,
   useMessageContextStore,
 } from "@/features/conversation/conversation-message/conversation-message.store-context";
-import { getConvosMessageStatus } from "@/features/conversation/conversation-message/conversation-message.utils";
+import {
+  getConvosMessageStatus,
+  isAnActualMessage,
+} from "@/features/conversation/conversation-message/conversation-message.utils";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
 import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
@@ -191,6 +194,7 @@ const Messages = memo(function Messages(props: {
     if (!messages?.ids) return -1;
     return messages.ids.find(
       (messageId) =>
+        isAnActualMessage(messages.byId[messageId]) &&
         messages.byId[messageId].senderAddress === currentAccountInboxId
     );
   }, [messages?.ids, messages?.byId, currentAccountInboxId]);

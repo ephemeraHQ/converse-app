@@ -47,7 +47,12 @@ const conversationMessagesByTopicQueryFn = async (
     account,
     topic,
   });
-  return conversationMessagesQueryFn(conversation!);
+  if (!conversation) {
+    throw new Error(
+      "Conversation not found in conversationMessagesByTopicQueryFn"
+    );
+  }
+  return conversationMessagesQueryFn(conversation);
 };
 
 export const useConversationMessages = (
