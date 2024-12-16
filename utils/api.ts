@@ -237,6 +237,7 @@ our application on a device that has not been tampered with.
         appCheckToken,
         ...installationKeySignature,
       });
+      logger.info("Auth tokens response", authTokensResponse);
 
       if (!authTokensResponse) {
         throw new Error("Could not create access token");

@@ -2,7 +2,7 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationOptions,
 } from "@react-navigation/native-stack";
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { Platform, useColorScheme, View, Text } from "react-native";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
 import { ConversationBlockedListNav } from "../../features/blocked-chats/ConversationBlockedListNav";
@@ -49,7 +49,7 @@ import WebviewPreviewNav, {
 import { translate } from "@/i18n";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { Button } from "@/design-system/Button/Button";
-import { tryGetAppCheckToken } from "@/utils/appCheck";
+import { setupAppAttest, tryGetAppCheckToken } from "@/utils/appCheck";
 import logger from "@/utils/logger";
 
 export type NavigationParamList = {
@@ -199,6 +199,9 @@ const TestAppCheckScreen = () => {
   const [token, setToken] = useState<string | undefined>(undefined);
   const [key, setKey] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    setupAppAttest();
+  }, []);
   return (
     <View>
       <Text>TestAppCheckScreen</Text>

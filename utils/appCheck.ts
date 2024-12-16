@@ -2,6 +2,7 @@
 // dashboards: https://console.firebase.google.com/u/0/project/converse-appcheck/appcheck/products
 import { firebase } from "@react-native-firebase/app-check";
 import logger from "./logger";
+import { getConfig } from "@/config";
 const appCheck = firebase.appCheck();
 
 export const tryGetAppCheckToken = async () => {
@@ -25,12 +26,12 @@ export async function setupAppAttest() {
     android: {
       provider: __DEV__ ? "debug" : "playIntegrity",
       /* TODO: get key and add to env*/
-      debugToken:
-        "some token you have configured for your project firebase web console",
+      debugToken: getConfig().appCheckDebugToken,
     },
     apple: {
       provider: __DEV__ ? "debug" : "appAttestWithDeviceCheckFallback",
-      debugToken: /* todo cycle key*/ "C5A48750-0208-4617-AE12-94AE8F42148A",
+      // Will be intentionally undefined in non-dev environments
+      debugToken: getConfig().appCheckDebugToken,
     },
   });
 

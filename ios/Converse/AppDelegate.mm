@@ -20,6 +20,9 @@
 
 //  [FIRApp configure];
   
+  
+  // todo - check environment variables from expo/react native and
+    // provide appropriate google services info.plist
   NSString *firebasePlist = [[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType:@"plist"];
 
   #if DEBUG
