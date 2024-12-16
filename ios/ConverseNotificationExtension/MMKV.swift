@@ -56,15 +56,32 @@ func getAccountsState() -> Accounts? {
   }
 }
 
-func getProfilesStore(account: String) -> ProfilesStore? {
+func getProfilesStore(account: String, address: String) -> ProfileSocials? {
   let mmkv = getMmkv()
-  let profilesString = mmkv?.string(forKey: "store-\(account)-profiles")
+  let key = "profileSocials-\(account.lowercased())-\(address.lowercased())"
+  let profilesString = mmkv?.string(forKey: key)
   if (profilesString == nil) {
     return nil
   }
   let decoder = JSONDecoder()
   do {
-    let decoded = try decoder.decode(ProfilesStore.self, from: profilesString!.data(using: .utf8)!)
+    let decoded = try decoder.decode(ProfileSocials.self, from: profilesString!.data(using: .utf8)!)
+    return decoded
+  } catch {
+    return nil
+  }
+}
+
+func getInboxIdProfilesStore(account: String, inboxId: String) -> ProfileSocials? {
+  let mmkv = getMmkv()
+  let key = "inboxProfileSocials-\(account.lowercased())-\(inboxId.lowercased())"
+  let profilesString = mmkv?.string(forKey: key)
+  if (profilesString == nil) {
+    return nil
+  }
+  let decoder = JSONDecoder()
+  do {
+    let decoded = try decoder.decode(ProfileSocials.self, from: profilesString!.data(using: .utf8)!)
     return decoded
   } catch {
     return nil
@@ -72,19 +89,21 @@ func getProfilesStore(account: String) -> ProfilesStore? {
 }
 
 func saveProfileSocials(account: String, address: String, socials: ProfileSocials) {
-  var profilesStore = getProfilesStore(account: account) ?? ProfilesStore(state: Profiles(profiles: [:]), version: 0)
-  if profilesStore.state.profiles == nil {
-    profilesStore.state.profiles = [:]
-  }
-  
   let updatedAt = Int(Date().timeIntervalSince1970)
   let newProfile = Profile(updatedAt: updatedAt, socials: socials)
-  profilesStore.state.profiles![address] = newProfile
   let mmkv = getMmkv()
-  if let jsonData = try? JSONEncoder().encode(profilesStore), let jsonString = String(data: jsonData, encoding: .utf8) {
-    mmkv?.set(jsonString, forKey: "store-\(account)-profiles")
+  if let jsonData = try? JSONEncoder().encode(newProfile), let jsonString = String(data: jsonData, encoding: .utf8) {
+    mmkv?.set(jsonString, forKey: "profileSocials-\(account.lowercased())-\(address.lowercased())")
   }
-  
+}
+
+func saveInboxIdProfileSocials(account: String, inboxId: String, socials: ProfileSocials) {
+  let updatedAt = Int(Date().timeIntervalSince1970)
+  let newProfile = Profile(updatedAt: updatedAt, socials: socials)
+  let mmkv = getMmkv()
+  if let jsonData = try? JSONEncoder().encode(newProfile), let jsonString = String(data: jsonData, encoding: .utf8) {
+    mmkv?.set(jsonString, forKey: "inboxProfileSocials-\(account.lowercased())-\(inboxId.lowercased())")
+  }
 }
 
 func getCurrentAccount() -> String? {

@@ -53,11 +53,13 @@ export const colorsDark: IColors = {
     tertiary: lightPalette.light30,
     inactive: lightPalette.light15,
     caution: lightPalette.red,
+    action: darkPalette.deepAccent,
     inverted: {
       primary: darkPalette.dark,
       secondary: darkPalette.dark60,
       tertiary: darkPalette.dark30,
       inactive: darkPalette.dark15,
+      action: darkPalette.deepAccent,
     },
   },
   global: {

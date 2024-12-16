@@ -1,10 +1,11 @@
 import { useChatStore } from "@/data/store/accountsStore";
 import { useSelect } from "@/data/store/storeHelpers";
 import { saveTopicsData } from "@utils/api";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 
 type UseToggleReadStatusProps = {
-  topic: string;
+  topic: ConversationTopic;
   isUnread: boolean;
   currentAccount: string;
 };

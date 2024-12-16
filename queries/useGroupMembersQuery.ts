@@ -1,7 +1,7 @@
 import {
-  QueryObserverOptions,
   SetDataOptions,
   useQuery,
+  UseQueryOptions,
 } from "@tanstack/react-query";
 import { getCleanAddress } from "@utils/evm/getCleanAddress";
 import { ConversationTopic, Member } from "@xmtp/react-native-sdk";
@@ -11,65 +11,69 @@ import { groupMembersQueryKey } from "./QueryKeys";
 import { EntityObjectWithAddress, entifyWithAddress } from "./entify";
 import { queryClient } from "./queryClient";
 import { useGroupQuery } from "./useGroupQuery";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 
 export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
 
+const fetchGroupMembers = async (
+  group: GroupWithCodecsType | undefined | null
+) => {
+  if (!group) {
+    return {
+      byId: {},
+      byAddress: {},
+      ids: [],
+    };
+  }
+  const members = await group.members();
+
+  return entifyWithAddress(
+    members,
+    (member) => member.inboxId,
+    (member) => getCleanAddress(member.addresses[0])
+  );
+};
+
+const groupMembersQueryConfig = (
+  account: string,
+  group: GroupWithCodecsType | undefined | null,
+  enabled: boolean
+): UseQueryOptions<GroupMembersSelectData> => ({
+  queryKey: groupMembersQueryKey(account, group?.topic!),
+  queryFn: () => fetchGroupMembers(group!),
+  enabled,
+});
+
 export const useGroupMembersQuery = (
   account: string,
-  topic: ConversationTopic,
-  queryOptions?: Partial<QueryObserverOptions<GroupMembersSelectData>>
+  topic: ConversationTopic
 ) => {
   const { data: group } = useGroupQuery(account, topic);
-  return useQuery<GroupMembersSelectData>({
-    queryKey: groupMembersQueryKey(account, topic!),
-    queryFn: async () => {
-      if (!group) {
-        return {
-          byId: {},
-          byAddress: {},
-          ids: [],
-        };
-      }
-      const updatedMembers = await group.members();
-      return entifyWithAddress(
-        updatedMembers,
-        (member) => member.inboxId,
-        // TODO: Multiple addresses support
-        (member) => getCleanAddress(member.addresses[0])
-      );
-    },
-    enabled: !!group && !!topic,
-    ...queryOptions,
-  });
+  const enabled = !!group && !!topic;
+  return useQuery<GroupMembersSelectData>(
+    groupMembersQueryConfig(account, group, enabled)
+  );
 };
 
 export const useGroupMembersConversationScreenQuery = (
   account: string,
-  topic: ConversationTopic,
-  queryOptions?: Partial<QueryObserverOptions<GroupMembersSelectData>>
+  topic: ConversationTopic
 ) => {
   const { data: group } = useGroupQuery(account, topic);
-  return useQuery<GroupMembersSelectData>({
-    queryKey: groupMembersQueryKey(account, topic),
-    queryFn: async () => {
-      if (!group) {
-        return {
-          byId: {},
-          byAddress: {},
-          ids: [],
-        };
-      }
-      const members = await group.members();
-      return entifyWithAddress(
-        members,
-        (member) => member.inboxId,
-        // TODO: Multiple addresses support
-        (member) => getCleanAddress(member.addresses[0])
-      );
-    },
-    enabled: !!group,
-    ...queryOptions,
-  });
+  const enabled = !!group && !!topic;
+  return useQuery<GroupMembersSelectData>(
+    groupMembersQueryConfig(account, group, enabled)
+  );
+};
+
+export const useConversationListMembersQuery = (
+  account: string,
+  group: GroupWithCodecsType | undefined | null
+) => {
+  const enabled = !!group && !group.imageUrlSquare;
+  return useQuery<GroupMembersSelectData>(
+    groupMembersQueryConfig(account, group, enabled)
+  );
 };
 
 export const getGroupMembersQueryData = (
@@ -84,7 +88,7 @@ export const setGroupMembersQueryData = (
   members: GroupMembersSelectData,
   options?: SetDataOptions
 ) => {
-  queryClient.setQueryData(
+  queryClient.setQueryData<GroupMembersSelectData>(
     groupMembersQueryKey(account, topic),
     members,
     options

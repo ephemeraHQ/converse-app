@@ -36,6 +36,7 @@ import {
 import { NavigationParamList } from "./Navigation/Navigation";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@/hooks/usePreferredName";
+import { translate } from "@/i18n";
 
 const ShareProfileContent = ({
   userAddress,
@@ -61,7 +62,9 @@ const ShareProfileContent = ({
   const shareDict =
     Platform.OS === "ios" ? { url: profileUrl } : { message: profileUrl };
 
-  const shareButtonText = copiedLink ? "Link copied" : "Copy link";
+  const shareButtonText = copiedLink
+    ? translate("share_profile.link_copied")
+    : translate("share_profile.copy_link");
 
   const handleShare = () => {
     Share.share(shareDict);

@@ -14,7 +14,7 @@ func getNewConversation(xmtpClient: XMTP.Client, contentTopic: String) async -> 
     if (isV3WelcomeTopic(topic: contentTopic)) {
       // Weclome envelopes are too large to send in a push, so a bit of a hack to get the latest group
       try await xmtpClient.conversations.sync()
-      let conversation = try xmtpClient.findConversationByTopic(topic: contentTopic)
+      let conversation = try await xmtpClient.conversations.list().last
           try await conversation?.sync()
         return conversation
     }

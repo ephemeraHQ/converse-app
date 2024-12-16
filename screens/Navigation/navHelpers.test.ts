@@ -43,7 +43,7 @@ describe("getConverseStateFromPath", () => {
     );
     const route = state?.routes[state.routes.length - 1];
     expect(route?.name).toBe("Conversation");
-    expect((route?.params as any).mainConversationWithPeer).toBe("0xno12.eth");
+    expect((route?.params as any).peer).toBe("0xno12.eth");
     expect((route?.params as any).text).toBeUndefined();
   });
 
@@ -54,7 +54,7 @@ describe("getConverseStateFromPath", () => {
     );
     const route = state?.routes[state.routes.length - 1];
     expect(route?.name).toBe("Conversation");
-    expect((route?.params as any).mainConversationWithPeer).toBe("0xno12.eth");
+    expect((route?.params as any).peer).toBe("0xno12.eth");
     expect((route?.params as any).text).toBeUndefined();
   });
 
@@ -91,7 +91,7 @@ describe("getConverseStateFromPath", () => {
     );
     const route = state?.routes[state.routes.length - 1];
     expect(route?.name).toBe("Conversation");
-    expect((route?.params as any).mainConversationWithPeer).toBe("0xno12.eth");
+    expect((route?.params as any).peer).toBe("0xno12.eth");
     expect((route?.params as any).text).toBe("hello");
   });
 
@@ -102,7 +102,7 @@ describe("getConverseStateFromPath", () => {
     );
     const route = state?.routes[state.routes.length - 1];
     expect(route?.name).toBe("Conversation");
-    expect((route?.params as any).mainConversationWithPeer).toBe("0xno12.eth");
+    expect((route?.params as any).peer).toBe("0xno12.eth");
     expect((route?.params as any).text).toBe("hello");
   });
 

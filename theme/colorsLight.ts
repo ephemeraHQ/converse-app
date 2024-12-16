@@ -52,11 +52,13 @@ export const colorsLight = {
     tertiary: darkPalette.dark30,
     inactive: darkPalette.dark15,
     caution: darkPalette.red,
+    action: darkPalette.deepAccent,
     inverted: {
       primary: lightPalette.light,
       secondary: lightPalette.light60,
       tertiary: lightPalette.light30,
       inactive: lightPalette.light15,
+      action: lightPalette.deepAccent,
     },
   },
   global: {

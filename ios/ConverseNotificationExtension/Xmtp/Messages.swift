@@ -83,18 +83,30 @@ func handleV3Message(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_
               }
               // We replaced decodedMessage.senderAddress from inboxId to actual address
               // so it appears well in the app until inboxId is a first class citizen
-              if let senderProfile = await getProfile(account: xmtpClient.address, address: decodedMessage.senderAddress) {
-                bestAttemptContent.subtitle = getPreferredName(address: decodedMessage.senderAddress, socials: senderProfile.socials)
+              if let senderProfileSocials = await getProfile(account: xmtpClient.address, address: decodedMessage.senderAddress) {
+                bestAttemptContent.subtitle = getPreferredName(address: decodedMessage.senderAddress, socials: senderProfileSocials)
               }
 
               if let content = decodedMessageResult.content {
                 bestAttemptContent.body = content
               }
-              
               let groupImage = try? group.groupImageUrlSquare()
               messageIntent = getIncomingGroupMessageIntent(group: group, content: bestAttemptContent.body, senderId: decodedMessage.senderAddress, senderName: bestAttemptContent.subtitle)
             } else if case .dm(let dm) = conversation {
-                print("It's a DM with details: \(dm)")
+              var senderAvatar: String? = nil
+              if let senderProfileSocials = await getProfile(account: xmtpClient.address, address: decodedMessage.senderAddress) {
+                bestAttemptContent.title = getPreferredName(address: decodedMessage.senderAddress, socials: senderProfileSocials)
+                senderAvatar = getPreferredAvatar(socials: senderProfileSocials)
+              }
+              if let content = decodedMessageResult.content {
+                bestAttemptContent.body = content
+              }
+              messageIntent = getIncoming1v1MessageIntent(
+                topic: contentTopic,
+                senderId: decodedMessage.senderAddress,
+                senderName: bestAttemptContent.title,
+                senderAvatar: senderAvatar, content: bestAttemptContent.body
+              )
             }
             
           } else if spamScore == 0 { // Message is Request
@@ -133,9 +145,9 @@ func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Xm
       bestAttemptContent.body = content
       
       var senderAvatar: String? = nil
-      if let senderAddress = decodedMessageResult.senderAddress, let senderProfile = await getProfile(account: xmtpClient.address, address: senderAddress) {
-        conversationTitle = getPreferredName(address: senderAddress, socials: senderProfile.socials)
-        senderAvatar = getPreferredAvatar(socials: senderProfile.socials)
+      if let senderAddress = decodedMessageResult.senderAddress, let senderProfileSocials = await getProfile(account: xmtpClient.address, address: senderAddress) {
+        conversationTitle = getPreferredName(address: senderAddress, socials: senderProfileSocials)
+        senderAvatar = getPreferredAvatar(socials: senderProfileSocials)
       }
       
       if (conversationTitle == nil), let senderAddress = decodedMessageResult.senderAddress {

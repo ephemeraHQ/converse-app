@@ -22,7 +22,7 @@ import { useEffect, useRef } from "react";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 import config from "../../config";
 import { getDbDirectory } from "../../data/db";
-import { CoinbaseMessagingPaymentCodec } from "./contentTypes/coinbasePayment";
+import { CoinbaseMessagingPaymentCodec } from "./content-types/coinbasePayment";
 import { getXmtpClient } from "./sync";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
@@ -175,3 +175,23 @@ export const requestMessageHistorySyncByAccount = async (account: string) => {
   }
   await requestMessageHistorySync(client);
 };
+
+export type InstallationSignature = {
+  installationPublicKey: string;
+  installationKeySignature: string;
+};
+
+export async function getInstallationKeySignature(
+  account: string,
+  message: string
+): Promise<InstallationSignature> {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  if (!client) throw new Error("Client not found");
+
+  const raw = await client.signWithInstallationKey(message);
+
+  return {
+    installationPublicKey: client.installationId,
+    installationKeySignature: Buffer.from(raw).toString("hex"),
+  };
+}

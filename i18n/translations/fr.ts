@@ -181,6 +181,12 @@ export const fr = {
   add_an_account: "Ajouter un compte",
   group_info: "Informations sur le groupe",
   converse_match_maker: "Converse Match Maker",
+  today: "Aujourd'hui",
+  yesterday: "Hier",
+  member_count: "{{count}} membre",
+  members_count: "{{count}} membres",
+  modify: "Modifier",
+  pending_count: "{{count}} en attente",
 
   // Requests
   requests: "Demandes",
@@ -196,7 +202,7 @@ export const fr = {
     "Vous n'avez actuellement aucune demande de message. Nous ferons des suggestions ici à mesure que vous vous connecterez avec d'autres.",
   hidden_requests_warn:
     "Les demandes contenant des messages potentiellement offensants ou indésirables sont déplacées dans ce dossier.",
-
+  message_requests: "Demandes de message",
   // Conversation
   accept: "Accepter",
   block: "Bloquer",
@@ -334,6 +340,7 @@ export const fr = {
     add_members: "Ajouter des membres",
     edit_group_info: "Modifier les informations du groupe",
     members_can: "LES MEMBRES PEUVENT",
+    title: "Nouveau groupe",
   },
 
   new_conversation: {
@@ -515,4 +522,9 @@ export const fr = {
   },
 
   file_preview: "Aperçu du fichier",
+
+  share_profile: {
+    link_copied: "Lien copié",
+    copy_link: "Copier le lien",
+  },
 };

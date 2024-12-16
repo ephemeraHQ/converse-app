@@ -8,7 +8,6 @@ import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { Client } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
-
 import { isClientInstallationValid } from "./client";
 import { ethersSignerToXmtpSigner } from "./signer";
 import config from "../../config";

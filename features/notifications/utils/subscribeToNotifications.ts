@@ -96,7 +96,9 @@ export const subscribeToNotifications = async ({
       status: "PUSH",
     };
 
-    logger.info("[subscribeToNotifications] saving notifications subscribe");
+    logger.info(
+      `[subscribeToNotifications] saving notifications subscribed to ${Object.keys(topicsToUpdateForPeriod).length} topics for account ${account}`
+    );
     await saveNotificationsSubscribe(
       account,
       nativePushToken,

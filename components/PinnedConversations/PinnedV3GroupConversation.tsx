@@ -17,7 +17,7 @@ import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggl
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
-import { isTextMessage } from "../Chat/Message/message-utils";
+import { isTextMessage } from "../../features/conversation/conversation-message/conversation-message.utils";
 import { VStack } from "@/design-system/VStack";
 import { PinnedMessagePreview } from "./PinnedMessagePreview";
 
@@ -52,7 +52,7 @@ export const PinnedV3GroupConversation = ({
   const isUnread = useConversationIsUnread({
     topic,
     lastMessage: group.lastMessage,
-    timestamp,
+    timestampNs: timestamp,
   });
 
   const toggleReadStatus = useToggleReadStatus({

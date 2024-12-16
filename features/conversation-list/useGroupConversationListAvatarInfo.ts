@@ -5,7 +5,7 @@ import {
   getPreferredInboxName,
 } from "@utils/profile";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
-import { InboxId, Member } from "@xmtp/react-native-sdk";
+import type { InboxId, Member } from "@xmtp/react-native-sdk";
 import { useEffect, useMemo, useState } from "react";
 
 export const useGroupConversationListAvatarInfo = (

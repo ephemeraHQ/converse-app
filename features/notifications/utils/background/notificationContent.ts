@@ -6,7 +6,7 @@ import {
 import {
   getMessageContentType,
   isContentType,
-} from "@utils/xmtpRN/contentTypes";
+} from "@/utils/xmtpRN/content-types/content-types";
 import type {
   MessageId,
   ReactionContent,

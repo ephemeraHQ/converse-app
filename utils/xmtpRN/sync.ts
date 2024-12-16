@@ -1,10 +1,8 @@
 import logger from "@utils/logger";
 import { retryWithBackoff } from "@utils/retryWithBackoff";
 import { Client } from "@xmtp/xmtp-js";
-import { useEffect, useState } from "react";
 import { AppState } from "react-native";
-
-import { xmtpSignatureByAccount } from "./api";
+import { getChatStore } from "@data/store/accountsStore";
 import {
   ConverseXmtpClientType,
   getXmtpClientFromAddress,
@@ -16,12 +14,11 @@ import {
   streamConversations,
 } from "./conversations";
 import { stopStreamingAllMessage, streamAllMessages } from "./messages";
-import { getChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import {
-  fetchConversationListQuery,
   fetchPersistedConversationListQuery,
+  prefetchConversationListQuery,
 } from "@queries/useV3ConversationListQuery";
-import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
+import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
 
 const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;
@@ -30,11 +27,12 @@ const instantiatingClientForAccount: {
 export const getXmtpClient = async (
   account: string
 ): Promise<ConverseXmtpClientType | Client> => {
-  if (account && xmtpClientByAccount[account]) {
-    return xmtpClientByAccount[account];
+  const lowerCaseAccount = account.toLowerCase();
+  if (account && xmtpClientByAccount[lowerCaseAccount]) {
+    return xmtpClientByAccount[lowerCaseAccount];
   }
   // Return the existing instantiating promise to avoid race condition
-  const alreadyInstantiating = instantiatingClientForAccount[account];
+  const alreadyInstantiating = instantiatingClientForAccount[lowerCaseAccount];
   if (alreadyInstantiating) {
     return alreadyInstantiating;
   }
@@ -44,42 +42,26 @@ export const getXmtpClient = async (
     await new Promise((r) => setTimeout(r, 200));
     return getXmtpClient(account);
   }
-  instantiatingClientForAccount[account] = (async () => {
+  instantiatingClientForAccount[lowerCaseAccount] = (async () => {
     try {
       logger.debug("[XmtpRN] Getting client from address");
       const client = await getXmtpClientFromAddress(account);
       logger.info(`[XmtpRN] Instantiated client for ${client.address}`);
       getChatStore(account).getState().setLocalClientConnected(true);
       getChatStore(account).getState().setErrored(false);
-      xmtpClientByAccount[client.address] = client;
+      xmtpClientByAccount[lowerCaseAccount] = client;
       return client;
     } catch (e: any) {
       getChatStore(account).getState().setErrored(true);
       throw e;
     } finally {
-      delete instantiatingClientForAccount[account];
+      delete instantiatingClientForAccount[lowerCaseAccount];
     }
   })();
-  return instantiatingClientForAccount[account] as Promise<
+  return instantiatingClientForAccount[lowerCaseAccount] as Promise<
     ConverseXmtpClientType | Client
   >;
 };
-
-export function useCurrentAccountXmtpClient() {
-  const address = useCurrentAccount();
-
-  const [client, setClient] = useState<ConverseXmtpClientType | Client>();
-
-  useEffect(() => {
-    if (!address) {
-      setClient(undefined);
-      return;
-    }
-    getXmtpClient(address).then(setClient);
-  }, [address]);
-
-  return { client };
-}
 
 export const onSyncLost = async (account: string, error: any) => {
   // If there is an error let's show it
@@ -146,8 +128,8 @@ const syncClientConversationList = async (account: string) => {
     });
     // Prefetch the conversation list so when we land on the conversation list
     // we have it ready, this will include syncing all groups
-    const conversationList = await fetchConversationListQuery(account);
-    subscribeToNotifications({ conversations: conversationList, account });
+    setupAccountTopicSubscription(account);
+    await prefetchConversationListQuery(account);
   } catch (e) {
     logger.error(e, {
       context: `Failed to fetch persisted conversation list for ${account}`,
@@ -175,7 +157,6 @@ export const deleteXmtpClient = async (account: string) => {
     stopStreamingConversations(account);
   }
   delete xmtpClientByAccount[account];
-  delete xmtpSignatureByAccount[account];
   delete instantiatingClientForAccount[account];
   delete streamingAccounts[account];
 };
