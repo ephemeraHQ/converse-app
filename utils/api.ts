@@ -218,8 +218,6 @@ our application on a device that has not been tampered with.
 `);
   }
 
-  logger.info("App Check Token", appCheckToken);
-
   if (!accessToken) {
     const installationKeySignature =
       xmtpSignatureByAccount[account] ||

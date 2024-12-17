@@ -19,6 +19,7 @@ const findGoogleServiceFiles = () => {
     });
     return result.split("\n").filter(Boolean);
   } catch (error) {
+    console.warn(`Failed to find GoogleService-Info files: ${error.message}`);
     return [];
   }
 };
