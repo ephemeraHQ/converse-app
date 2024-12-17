@@ -30,9 +30,11 @@ import { getSecureMmkvForAccount } from "./mmkv";
 import {
   CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
   CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
+  FIREBASE_APP_CHECK_HEADER_KEY,
   XMTP_API_ADDRESS_HEADER_KEY,
   XMTP_IDENTITY_KEY,
 } from "./api.constants";
+import { tryGetAppCheckToken } from "./appCheck";
 
 export const api = axios.create({
   baseURL: config.apiURI,
@@ -117,7 +119,7 @@ type AuthParams = {
   inboxId: string;
   installationPublicKey: string;
   installationKeySignature: string;
-  appCheckToken?: string;
+  appCheckToken: string;
   account: string;
 };
 
@@ -144,6 +146,7 @@ export async function fetchAccessToken({
       {
         headers: {
           [XMTP_API_ADDRESS_HEADER_KEY]: account,
+          [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
         },
       }
     )
@@ -195,7 +198,7 @@ export const xmtpSignatureByAccount: {
 
 type XmtpApiHeaders = {
   [XMTP_API_ADDRESS_HEADER_KEY]: string;
-
+  [FIREBASE_APP_CHECK_HEADER_KEY]: string;
   /** Bearer <jwt access token>*/
   authorization: `Bearer ${string}`;
 };
@@ -205,6 +208,15 @@ export async function getXmtpApiHeaders(
 ): Promise<XmtpApiHeaders> {
   const secureMmkv = await getSecureMmkvForAccount(account);
   let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
+
+  const appCheckToken = await tryGetAppCheckToken();
+
+  if (!appCheckToken) {
+    throw new Error(`
+No App Check Token Available. This indicates that we believe the app is not running on an authentic build of
+our application on a device that has not been tampered with. 
+`);
+  }
 
   if (!accessToken) {
     const installationKeySignature =
@@ -219,8 +231,9 @@ export async function getXmtpApiHeaders(
       const inboxId = await getInboxId(account);
       const authTokensResponse = await fetchAccessToken({
         inboxId,
-        ...installationKeySignature,
         account,
+        appCheckToken,
+        ...installationKeySignature,
       });
 
       if (!authTokensResponse) {
@@ -246,6 +259,7 @@ export async function getXmtpApiHeaders(
 
   return {
     [XMTP_API_ADDRESS_HEADER_KEY]: account,
+    [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
     authorization: `Bearer ${accessToken}`,
   };
 }

@@ -26,7 +26,6 @@ export function NewAccountEphemeraScreen(
   const [loading, setLoading] = useState(false);
 
   const generateWallet = useCallback(async () => {
-    setLoading(true);
     try {
       const signer = new Wallet(utils.randomPrivateKey());
       await initXmtpClient({
