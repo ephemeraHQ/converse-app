@@ -230,6 +230,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     "./scripts/build/android/notifeeExpoPlugin.js", // See https://github.com/invertase/notifee/issues/350
     "./scripts/build/android/androidDependenciesExpoPlugin.js", // Handle some conflicting dependencies manually
+    "./scripts/build/android/buildGradleProperties.js", // Increase memory for building android in EAS
   ],
   web: {
     favicon: "./assets/favicon.png",
