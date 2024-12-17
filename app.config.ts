@@ -73,7 +73,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     versionCode: appBuildNumbers.expo.android.versionCode,
     package: androidPackage,
-    googleServicesFile: "./android-google-services.json",
+    googleServicesFile: "./scripts/build/android/google-services.json",
     permissions: [
       "INTERNET",
       "READ_EXTERNAL_STORAGE",
