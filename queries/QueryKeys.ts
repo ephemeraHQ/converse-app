@@ -41,102 +41,102 @@ export enum QueryKeys {
 export const conversationMessageQueryKey = (
   account: string,
   messageId: string
-) => [QueryKeys.CONVERSATION_MESSAGE, account.toLowerCase(), messageId];
+) => [QueryKeys.CONVERSATION_MESSAGE, account?.toLowerCase(), messageId];
 
 export const conversationsQueryKey = (account: string) => [
   QueryKeys.CONVERSATIONS,
-  account.toLowerCase(),
+  account?.toLowerCase(),
 ];
 
 export const conversationQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.CONVERSATION, account.toLowerCase(), topic];
+) => [QueryKeys.CONVERSATION, account?.toLowerCase(), topic];
 
 export const conversationWithPeerQueryKey = (account: string, peer: string) => [
   QueryKeys.CONVERSATION_WITH_PEER,
-  account.toLowerCase(),
+  account?.toLowerCase(),
   peer,
 ];
 
 export const conversationMessagesQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.CONVERSATION_MESSAGES, account.toLowerCase(), topic];
+) => [QueryKeys.CONVERSATION_MESSAGES, account?.toLowerCase(), topic];
 
 export const conversationPreviewMessagesQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.CONVERSATION_MESSAGES, account.toLowerCase(), topic];
+) => [QueryKeys.CONVERSATION_MESSAGES, account?.toLowerCase(), topic];
 
 export const groupMembersQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.GROUP_MEMBERS, account.toLowerCase(), topic];
+) => [QueryKeys.GROUP_MEMBERS, account?.toLowerCase(), topic];
 
 export const groupNameQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.GROUP_NAME, account.toLowerCase(), topic];
+) => [QueryKeys.GROUP_NAME, account?.toLowerCase(), topic];
 
 export const groupDescriptionQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.GROUP_DESCRIPTION, account.toLowerCase(), topic];
+) => [QueryKeys.GROUP_DESCRIPTION, account?.toLowerCase(), topic];
 
 export const groupPhotoQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.GROUP_PHOTO, account.toLowerCase(), topic];
+) => [QueryKeys.GROUP_PHOTO, account?.toLowerCase(), topic];
 
 export const groupPinnedFrameQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.PINNED_FRAME, account.toLowerCase(), topic];
+) => [QueryKeys.PINNED_FRAME, account?.toLowerCase(), topic];
 
 export const groupPermissionsQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.GROUP_PERMISSIONS, account.toLowerCase(), topic];
+) => [QueryKeys.GROUP_PERMISSIONS, account?.toLowerCase(), topic];
 
 export const groupConsentQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.GROUP_CONSENT, account.toLowerCase(), topic];
+) => [QueryKeys.GROUP_CONSENT, account?.toLowerCase(), topic];
 
 export const dmConsentQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.DM_CONSENT, account.toLowerCase(), topic];
+) => [QueryKeys.DM_CONSENT, account?.toLowerCase(), topic];
 
 export const addedByQueryKey = (account: string, topic: ConversationTopic) => [
   QueryKeys.ADDED_BY,
-  account.toLowerCase(),
+  account?.toLowerCase(),
   topic,
 ];
 
 export const groupIsActiveQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.GROUP_ACTIVE, account.toLowerCase(), topic];
+) => [QueryKeys.GROUP_ACTIVE, account?.toLowerCase(), topic];
 
 export const groupInviteQueryKey = (account: string, inviteId: string) => [
   QueryKeys.GROUP_INVITE,
-  account.toLowerCase(),
+  account?.toLowerCase(),
   inviteId,
 ];
 
 export const groupJoinRequestQueryKey = (
   account: string,
   requestId: string
-) => [QueryKeys.GROUP_JOIN_REQUEST, account.toLowerCase(), requestId];
+) => [QueryKeys.GROUP_JOIN_REQUEST, account?.toLowerCase(), requestId];
 
 export const pendingJoinRequestsQueryKey = (account: string) => [
   QueryKeys.PENDING_JOIN_REQUESTS,
-  account.toLowerCase(),
+  account?.toLowerCase(),
 ];
 
 export const groupPermissionPolicyQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.GROUP_PERMISSION_POLICY, account.toLowerCase(), topic];
+) => [QueryKeys.GROUP_PERMISSION_POLICY, account?.toLowerCase(), topic];
