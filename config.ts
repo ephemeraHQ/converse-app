@@ -59,7 +59,6 @@ const ENV = {
     env: "dev",
     xmtpEnv: (process.env.EXPO_PUBLIC_DEV_XMTP_ENV || "dev") as XmtpEnv,
     apiURI: process.env.EXPO_PUBLIC_DEV_API_URI || "",
-    // apiURI: "https://fa7b225de0e1.ngrok.app/",
     debugMenu: true,
     bundleId: "com.converse.dev",
     appleAppGroup: "group.com.converse.dev",

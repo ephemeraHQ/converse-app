@@ -3,15 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		158D0FAC2D0CB65D0088AF1D /* GoogleService-Info-dev.plist in Resources */ = {isa = PBXBuildFile; fileRef = 158D0FAB2D0CB65D0088AF1D /* GoogleService-Info-dev.plist */; };
-		158D0FAD2D0CB65D0088AF1D /* GoogleService-Info-dev.plist in Resources */ = {isa = PBXBuildFile; fileRef = 158D0FAB2D0CB65D0088AF1D /* GoogleService-Info-dev.plist */; };
 		19BACCA5A8C482ED4B85F4AE /* Pods_Converse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E14C537DB575FE9167DE049A /* Pods_Converse.framework */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		4C2440D02A9C8BE8004F31A3 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2440CF2A9C8BE8004F31A3 /* Keychain.swift */; };
@@ -69,7 +67,6 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Converse/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Converse/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Converse/main.m; sourceTree = "<group>"; };
-		158D0FAB2D0CB65D0088AF1D /* GoogleService-Info-dev.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-dev.plist"; sourceTree = "<group>"; };
 		4C2440CF2A9C8BE8004F31A3 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		4C2440D12A9C8C5A004F31A3 /* Datatypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Datatypes.swift; sourceTree = "<group>"; };
 		4C2440D32A9C8CFE004F31A3 /* Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
@@ -100,6 +97,10 @@
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Converse/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		1581A1112D12066900FAFD98 /* Google Services */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Google Services"; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		13B07F8C1A680F5B00A75B9A /* Frameworks */ = {
@@ -189,7 +190,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				158D0FAB2D0CB65D0088AF1D /* GoogleService-Info-dev.plist */,
+				1581A1112D12066900FAFD98 /* Google Services */,
 				13B07FAE1A68108700A75B9A /* Converse */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				4C65044B295C7C1F00C5A40F /* ConverseNotificationExtension */,
@@ -272,6 +273,9 @@
 			dependencies = (
 				4C56DB602BA444B700E84A23 /* PBXTargetDependency */,
 			);
+			fileSystemSynchronizedGroups = (
+				1581A1112D12066900FAFD98 /* Google Services */,
+			);
 			name = Converse;
 			productName = Converse;
 			productReference = 13B07F961A680F5B00A75B9A /* Converse.app */;
@@ -290,6 +294,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				1581A1112D12066900FAFD98 /* Google Services */,
 			);
 			name = ConverseNotificationExtension;
 			packageProductDependencies = (
@@ -345,7 +352,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4CFB3F322BCE878300A47FFE /* PrivacyInfo.xcprivacy in Resources */,
-				158D0FAC2D0CB65D0088AF1D /* GoogleService-Info-dev.plist in Resources */,
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
@@ -357,7 +363,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4CFB3F332BCE878A00A47FFE /* PrivacyInfo.xcprivacy in Resources */,
-				158D0FAD2D0CB65D0088AF1D /* GoogleService-Info-dev.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

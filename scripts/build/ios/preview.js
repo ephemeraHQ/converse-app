@@ -6,7 +6,20 @@
  * It updates bundle IDs, display names, URL schemes and
  * entitlements to use preview-specific values.
  *
+ * The GoogleService-Info.plist file contains Firebase configuration
+ * specific to the preview environment. This file is downloaded from:
+ * https://console.firebase.google.com/project/converse-unshut-labs/
+ * settings/general/ios:com.converse.preview
+ *
+ * The file contains environment-specific Firebase settings including:
+ * - API keys
+ * - Bundle IDs
+ * - Project IDs
+ * - Client IDs
+ * - Database URLs
+ *
  * @sideEffects
+ * - Copies preview-specific GoogleService-Info.plist
  * - Updates Xcode project config
  * - Updates Info.plist files
  * - Updates entitlements files
@@ -14,8 +27,24 @@
 
 const fs = require("fs");
 const plist = require("plist");
+const { copyGoogleServiceInfo } = require("../build.utils.js");
 
+/**
+ * iOS Preview Environment Configuration Script
+ *
+ * This script modifies various iOS configuration files to set up
+ * the preview environment build variant of the Converse app.
+ * It updates bundle IDs, display names, URL schemes and
+ * entitlements to use preview-specific values.
+ *
+ * @sideEffects
+ * - Updates Xcode project config
+ * - Updates Info.plist files
+ * - Updates entitlements files
+ */
 const go = async () => {
+  copyGoogleServiceInfo("preview");
+
   //
   // Update Xcode Project Bundle ID
   // ----------------------------------------

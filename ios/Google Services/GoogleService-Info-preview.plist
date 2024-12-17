@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyABJ4xiJDqhKhu4x0eCE2ub9h0gBSDIRg8</string>
+	<string>AIzaSyD5G_3H8Q1wzUiRTuv9SefDyjlJxigHJh8</string>
 	<key>GCM_SENDER_ID</key>
-	<string>23052121755</string>
+	<string>564961909146</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.converse.dev</string>
+	<string>com.converse.preview</string>
 	<key>PROJECT_ID</key>
-	<string>converse-appcheck</string>
+	<string>converse-unshut-labs</string>
 	<key>STORAGE_BUCKET</key>
-	<string>converse-appcheck.firebasestorage.app</string>
+	<string>converse-unshut-labs.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:23052121755:ios:12430d360ec7260513f83e</string>
+	<string>1:564961909146:ios:5dfa3959b85ed8ccbd0223</string>
 </dict>
 </plist>

@@ -1,5 +1,6 @@
 const fs = require("fs");
 const plist = require("plist");
+const { copyGoogleServiceInfo } = require("../build.utils.js");
 
 /**
  * iOS Production Environment Configuration Script
@@ -15,6 +16,8 @@ const plist = require("plist");
  * - Updates entitlements files
  */
 const go = async () => {
+  copyGoogleServiceInfo("production");
+
   const PROJ_PATH = "ios/Converse.xcodeproj/project.pbxproj";
   const projContent = fs.readFileSync(PROJ_PATH, "utf-8");
 

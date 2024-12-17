@@ -242,10 +242,10 @@ export function SignedOutNavigation() {
             ...authScreensSharedScreenOptions,
           }}
         >
-          <NativeStack.Screen
+          {/* <NativeStack.Screen
             name="TestAppCheck"
             component={TestAppCheckScreen}
-          />
+          /> */}
           <NativeStack.Screen
             options={{
               headerShown: false,

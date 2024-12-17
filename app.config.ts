@@ -35,7 +35,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   assetBundlePatterns: ["**/*"],
   plugins: [
     "@react-native-firebase/app-check",
-    ["expo-build-properties", { ios: { useFrameworks: "static" } }],
+    // https://github.com/invertase/react-native-firebase/issues/6332#issuecomment-1172950523
+    // ["expo-build-properties", { ios: { useFrameworks: "static" } }],
   ],
   ios: {
     supportsTablet: true,
@@ -52,6 +53,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#FFFFFF",
     },
     versionCode: appBuildNumbers.expo.android.versionCode,
+    // TODO(lustig): dynamically set this based on env in Android PR for AppCheck
     googleServicesFile: "./android/google-services.json",
   },
   web: {
