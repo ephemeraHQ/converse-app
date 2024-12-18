@@ -31,7 +31,7 @@ export const getGroupConsentQueryData = (
 export const setGroupConsentQueryData = (
   account: string,
   topic: ConversationTopic,
-  consent: ConsentState
+  consent: ConsentState | undefined
 ) => {
   const currentGroup = getGroupQueryData({ account, topic });
   if (!currentGroup) return;

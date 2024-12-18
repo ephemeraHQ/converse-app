@@ -5,7 +5,6 @@ import {
   ConversationOptions,
   ConversationOrder,
   ConversationTopic,
-  ConversationVersion,
 } from "@xmtp/react-native-sdk";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 import {

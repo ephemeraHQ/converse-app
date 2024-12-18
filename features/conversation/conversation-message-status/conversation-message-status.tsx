@@ -45,11 +45,13 @@ export const ConversationMessageStatus = memo(
         <AnimatedText color="secondary" size="xxs">
           {statusMapping[status]}
         </AnimatedText>
-        <Icon
-          icon="checkmark"
-          size={theme.iconSize.xs}
-          color={theme.colors.text.secondary}
-        />
+        {status === "sent" && (
+          <Icon
+            icon="checkmark"
+            size={theme.iconSize.xs}
+            color={theme.colors.text.secondary}
+          />
+        )}
       </AnimatedHStack>
     );
   }

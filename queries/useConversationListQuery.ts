@@ -127,25 +127,6 @@ export const updateConversationInConversationListQuery = (args: {
   setConversationListQueryData({ account, conversations: newConversations });
 };
 
-export function replaceConversationInConversationListQuery(args: {
-  account: string;
-  topic: ConversationTopic;
-  conversation: ConversationWithCodecsType;
-}) {
-  const { account, topic, conversation } = args;
-  const previousConversationsData = getConversationListQueryData({ account });
-  if (!previousConversationsData) {
-    return;
-  }
-  const newConversations = previousConversationsData.map((c) => {
-    if (c.topic === topic) {
-      return conversation;
-    }
-    return c;
-  });
-  setConversationListQueryData({ account, conversations: newConversations });
-}
-
 export const getConversationListQueryData = (args: { account: string }) => {
   const { account } = args;
   return queryClient.getQueryData<ConversationListQueryData>(

@@ -1,6 +1,7 @@
 import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/message-is-from-current-user";
 import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
+import { updateConversationQueryData } from "@/queries/useConversationQuery";
 import { invalidateGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
 import { addConversationMessage } from "@queries/useConversationMessages";
@@ -59,6 +60,18 @@ export const streamAllMessages = async (account: string) => {
     }
 
     try {
+      updateConversationQueryData({
+        account: client.address,
+        topic: message.topic as ConversationTopic,
+        conversationUpdate: {
+          lastMessage: message,
+        },
+      });
+    } catch (error) {
+      captureError(error);
+    }
+
+    try {
       updateConversationInConversationListQuery({
         account: client.address,
         topic: message.topic as ConversationTopic,
@@ -103,6 +116,13 @@ export const handleGroupUpdatedMessage = async (
       }
     }
     if (!!newGroupName) {
+      updateConversationQueryData({
+        account,
+        topic,
+        conversationUpdate: {
+          name: newGroupName,
+        },
+      });
       updateConversationInConversationListQuery({
         account,
         topic,
@@ -112,6 +132,13 @@ export const handleGroupUpdatedMessage = async (
       });
     }
     if (!!newGroupPhotoUrl) {
+      updateConversationQueryData({
+        account,
+        topic,
+        conversationUpdate: {
+          imageUrlSquare: newGroupPhotoUrl,
+        },
+      });
       updateConversationInConversationListQuery({
         account,
         topic,
@@ -121,6 +148,13 @@ export const handleGroupUpdatedMessage = async (
       });
     }
     if (!!newGroupDescription) {
+      updateConversationQueryData({
+        account,
+        topic,
+        conversationUpdate: {
+          description: newGroupDescription,
+        },
+      });
       updateConversationInConversationListQuery({
         account,
         topic,

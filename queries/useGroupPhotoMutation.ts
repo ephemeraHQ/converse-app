@@ -1,52 +1,61 @@
-import { useMutation } from "@tanstack/react-query";
-
 import { captureError } from "@/utils/capture-error";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import {
   getGroupQueryData,
-  setGroupQueryData,
+  updateGroupQueryData,
   useGroupQuery,
 } from "@queries/useGroupQuery";
+import { useMutation } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { setGroupPhotoMutationKey } from "./MutationKeys";
+import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
 
-export const useGroupPhotoMutation = (args: {
+type IArgs = {
   account: string;
   topic: ConversationTopic;
-}) => {
+};
+
+export function useGroupPhotoMutation(args: IArgs) {
   const { account, topic } = args;
   const { data: group } = useGroupQuery({ account, topic });
+
   return useMutation({
     mutationKey: setGroupPhotoMutationKey(account, topic),
-    mutationFn: async (groupPhoto: string) => {
+    mutationFn: async (imageUrlSquare: string) => {
       if (!group || !account || !topic) {
-        return;
+        throw new Error("Missing required data in useGroupPhotoMutation");
       }
-      await group.updateGroupImageUrlSquare(groupPhoto);
-      return groupPhoto;
+
+      await group.updateGroupImageUrlSquare(imageUrlSquare);
+      return imageUrlSquare;
     },
-    onMutate: async (groupPhoto: string) => {
+    onMutate: async (imageUrlSquare: string) => {
       const previousGroup = getGroupQueryData({ account, topic });
-      setGroupQueryData({
+      const updates = { imageUrlSquare };
+
+      if (previousGroup) {
+        updateGroupQueryData({ account, topic, updates });
+      }
+
+      updateConversationInConversationListQuery({
         account,
         topic,
-        group: {
-          ...group,
-          imageUrlSquare: groupPhoto,
-        } as GroupWithCodecsType,
+        conversationUpdate: updates,
       });
+
       return { previousGroup };
     },
     onError: (error, _variables, context) => {
       captureError(error);
-      if (context?.previousGroup === undefined) {
-        return;
-      }
-      setGroupQueryData({
+
+      const { previousGroup } = context || {};
+
+      const updates = { imageUrlSquare: previousGroup?.imageUrlSquare ?? "" };
+      updateGroupQueryData({ account, topic, updates });
+      updateConversationInConversationListQuery({
         account,
         topic,
-        group: context.previousGroup,
+        conversationUpdate: updates,
       });
     },
   });
-};
+}

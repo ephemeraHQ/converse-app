@@ -46,6 +46,7 @@ const conversationMessagesByTopicQueryFn = async (
   const conversation = await getConversationByTopicByAccount({
     account,
     topic,
+    includeSync: true,
   });
   if (!conversation) {
     throw new Error(
@@ -121,6 +122,7 @@ function getConversationMessagesQueryOptions(
       return conversationMessagesByTopicQueryFn(account, topic);
     },
     enabled: !!conversation,
+    refetchOnMount: true, // Just for now because messages are very important and we want to make sure we have all of them
   };
 }
 

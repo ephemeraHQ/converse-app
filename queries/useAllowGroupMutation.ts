@@ -1,16 +1,17 @@
+import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
+import { captureError } from "@/utils/capture-error";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client";
 import { queryClient } from "@queries/queryClient";
 import {
   MutationObserver,
   MutationOptions,
   useMutation,
 } from "@tanstack/react-query";
+import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import {
   consentToGroupsOnProtocolByAccount,
   consentToInboxIdsOnProtocolByAccount,
 } from "@utils/xmtpRN/contacts";
-import { captureError } from "@/utils/capture-error";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client";
-import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import {
   ConsentState,
   ConversationId,
@@ -89,8 +90,15 @@ export const getAllowGroupMutationOptions = (
       const { account, group } = args;
       const previousConsent = getGroupConsentQueryData(account, group.topic);
       setGroupConsentQueryData(account, group.topic, "allowed");
+      updateConversationInConversationListQuery({
+        account,
+        topic: group.topic,
+        conversationUpdate: {
+          state: "allowed",
+        },
+      });
       return {
-        previousConsent: previousConsent ?? undefined,
+        previousConsent,
       };
     },
     onError: (
@@ -108,9 +116,14 @@ export const getAllowGroupMutationOptions = (
         return;
       }
 
-      if (context.previousConsent) {
-        setGroupConsentQueryData(account, group.topic, context.previousConsent);
-      }
+      setGroupConsentQueryData(account, group.topic, context.previousConsent);
+      updateConversationInConversationListQuery({
+        account,
+        topic: group.topic,
+        conversationUpdate: {
+          state: context.previousConsent,
+        },
+      });
     },
   };
 };

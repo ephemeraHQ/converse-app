@@ -1,5 +1,5 @@
 /**
- * useGroupQuery is derived from useConversationQuery
+ * useGroupQuery is derived from useConversationQuery. Like useDmQuery, maybe worth considering if we should just use useConversationQuery instead.
  */
 import {
   getConversationQueryData,
