@@ -18,7 +18,7 @@ import {
 } from "@utils/profile";
 import { memo, useCallback, useMemo } from "react";
 import { TouchableHighlight, ViewStyle } from "react-native";
-import { openMessageReactionsDrawer } from "./conversation-message-reaction-drawer/conversation-message-reaction-drawer.service.";
+import { openMessageReactionsDrawer } from "./conversation-message-reaction-drawer/conversation-message-reaction-drawer.service";
 import {
   RolledUpReactions,
   SortedReaction,
