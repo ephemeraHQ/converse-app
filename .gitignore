@@ -24,17 +24,3 @@ ios/Converse.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # Reassure output directory
 .reassure
-
-# Firebase Config files
-# Advice from Firebase founding engineer: https://stackoverflow.com/a/44937513/2441420
-# TLDR: safe to commit publicly, but recommended to gitignore
-ios/GoogleService-Info.plist
-ios/GoogleService-Info-preview.plist
-ios/GoogleService-Info-dev.plist
-
-android/google-services.json
-android/google-services-preview.json
-android/google-services-dev.json
-ios/Google Services/GoogleService-Info-prod.plist
-ios/Google Services/GoogleService-Info.plist
-restore.patch
