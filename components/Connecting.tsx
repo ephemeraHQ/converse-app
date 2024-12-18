@@ -5,7 +5,7 @@ import { useDebugEnabled } from "./DebugButton";
 import { useChatStore, useCurrentAccount } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { useV3ConversationListQuery } from "@/queries/useV3ConversationListQuery";
+import { useConversationListQuery } from "@/queries/useConversationListQuery";
 
 export const useShouldShowConnecting = () => {
   const isInternetReachable = useAppStore((s) => s.isInternetReachable);
@@ -67,7 +67,7 @@ export const useShouldShowConnecting = () => {
 
 export const useShouldShowConnectingOrSyncing = () => {
   const currentAccount = useCurrentAccount();
-  const { isLoading } = useV3ConversationListQuery(currentAccount!);
+  const { isLoading } = useConversationListQuery({ account: currentAccount! });
   const initialLoadDoneOnce = !isLoading;
   const shouldShowConnecting = useShouldShowConnecting();
 

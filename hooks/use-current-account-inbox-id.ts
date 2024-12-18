@@ -7,6 +7,7 @@ import {
   prefetchInboxIdQuery,
   useInboxIdQuery,
 } from "../queries/use-inbox-id-query";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 export function useCurrentAccountInboxId() {
   const currentAccount = useCurrentAccount()!;
@@ -21,4 +22,9 @@ export function getCurrentUserAccountInboxId() {
 export function prefetchCurrentUserAccountInboxId() {
   const currentAccount = getCurrentAccount()!;
   return prefetchInboxIdQuery({ account: currentAccount });
+}
+
+export function isCurrentUserInboxId(inboxId: InboxId) {
+  const currentUserInboxId = getCurrentUserAccountInboxId();
+  return currentUserInboxId?.toLowerCase() === inboxId.toLowerCase();
 }

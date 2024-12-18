@@ -1,64 +1,61 @@
+import { captureError } from "@/utils/capture-error";
+import {
+  getGroupQueryData,
+  updateGroupQueryData,
+  useGroupQuery,
+} from "@queries/useGroupQuery";
 import { useMutation } from "@tanstack/react-query";
-import logger from "@utils/logger";
-import { sentryTrackError } from "@utils/sentry";
-
-import { useGroupQuery } from "@queries/useGroupQuery";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { setGroupDescriptionMutationKey } from "./MutationKeys";
-import {
-  cancelGroupDescriptionQuery,
-  getGroupDescriptionQueryData,
-} from "./useGroupDescriptionQuery";
-import { handleGroupDescriptionUpdate } from "@/utils/groupUtils/handleGroupDescriptionUpdate";
+import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
 
-export const useGroupDescriptionMutation = (
-  account: string,
-  topic: ConversationTopic
-) => {
-  const { data: group } = useGroupQuery(account, topic);
+type IArgs = {
+  account: string;
+  topic: ConversationTopic;
+};
+
+export function useGroupDescriptionMutation(args: IArgs) {
+  const { account, topic } = args;
+  const { data: group } = useGroupQuery({ account, topic });
+
   return useMutation({
-    mutationKey: setGroupDescriptionMutationKey(account, topic!),
-    mutationFn: async (groupDescription: string) => {
+    mutationKey: setGroupDescriptionMutationKey(account, topic),
+    mutationFn: async (description: string) => {
       if (!group || !account || !topic) {
-        return;
+        throw new Error("Missing required data in useGroupDescriptionMutation");
       }
-      await group.updateGroupDescription(groupDescription);
-      return groupDescription;
+
+      await group.updateGroupDescription(description);
+      return description;
     },
-    onMutate: async (groupDescription: string) => {
-      if (!topic) {
-        return;
+    onMutate: async (description: string) => {
+      const previousGroup = getGroupQueryData({ account, topic });
+      const updates = { description };
+
+      if (previousGroup) {
+        updateGroupQueryData({ account, topic, updates });
       }
-      await cancelGroupDescriptionQuery(account, topic);
-      const previousGroupDescription = getGroupDescriptionQueryData(
-        account,
-        topic
-      );
-      handleGroupDescriptionUpdate({
+
+      updateConversationInConversationListQuery({
         account,
         topic,
-        description: groupDescription,
+        conversationUpdate: updates,
       });
-      return { previousGroupDescription };
+
+      return { previousGroup };
     },
     onError: (error, _variables, context) => {
-      logger.warn("onError useGroupDescriptionMutation");
-      sentryTrackError(error);
-      if (context?.previousGroupDescription === undefined) {
-        return;
-      }
-      if (!topic) {
-        return;
-      }
-      handleGroupDescriptionUpdate({
+      captureError(error);
+
+      const { previousGroup } = context || {};
+
+      const updates = { description: previousGroup?.description ?? "" };
+      updateGroupQueryData({ account, topic, updates });
+      updateConversationInConversationListQuery({
         account,
         topic,
-        description: context.previousGroupDescription,
+        conversationUpdate: updates,
       });
     },
-    onSuccess: (data, variables, context) => {
-      logger.debug("onSuccess useGroupDescriptionMutation");
-      // refreshGroup(account, topic);
-    },
   });
-};
+}

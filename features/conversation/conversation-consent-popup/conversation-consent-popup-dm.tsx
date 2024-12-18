@@ -1,27 +1,19 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
-import {
-  getCurrentAccount,
-  useCurrentAccount,
-} from "@/data/store/accountsStore";
-import {
-  useConversationCurrentConversationId,
-  useCurrentConversationTopic,
-} from "../conversation.store-context";
+import { useCurrentAccount } from "@/data/store/accountsStore";
 import { useRouter } from "@/navigation/useNavigation";
-import { refetchConversationQuery } from "@/queries/useConversationQuery";
+import { useDmConsentMutation } from "@/queries/useDmConsentMutation";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { actionSheetColors } from "@/styles/colors";
 import { captureError, captureErrorWithToast } from "@/utils/capture-error";
 import { ensureError } from "@/utils/error";
-import {
-  consentToGroupsOnProtocolByAccount,
-  consentToInboxIdsOnProtocolByAccount,
-} from "@/utils/xmtpRN/contacts";
 import { translate } from "@i18n";
-import { useMutation } from "@tanstack/react-query";
 import React, { useCallback } from "react";
 import { useColorScheme } from "react-native";
+import {
+  useConversationCurrentConversationId,
+  useCurrentConversationTopic,
+} from "../conversation.store-context";
 import {
   ConsentPopupButton,
   ConsentPopupButtonsContainer,
@@ -34,7 +26,10 @@ export function DmConsentPopup() {
   const conversationId = useConversationCurrentConversationId();
   const currentAccount = useCurrentAccount()!;
 
-  const { data: peerInboxId } = useDmPeerInboxId(currentAccount, topic);
+  const { data: peerInboxId } = useDmPeerInboxId({
+    account: currentAccount,
+    topic,
+  });
 
   const navigation = useRouter();
 
@@ -43,28 +38,10 @@ export function DmConsentPopup() {
   const {
     mutateAsync: consentToInboxIdsOnProtocolByAccountAsync,
     status: consentToInboxIdsOnProtocolByAccountStatus,
-  } = useMutation({
-    mutationFn: async (args: { consent: "allow" | "deny" }) => {
-      if (!peerInboxId) {
-        throw new Error("Peer inbox id not found");
-      }
-      const currentAccount = getCurrentAccount()!;
-      await Promise.all([
-        consentToGroupsOnProtocolByAccount({
-          account: currentAccount,
-          groupIds: [conversationId],
-          consent: args.consent,
-        }),
-        consentToInboxIdsOnProtocolByAccount({
-          account: currentAccount,
-          inboxIds: [peerInboxId],
-          consent: args.consent,
-        }),
-      ]);
-    },
-    onSuccess: () => {
-      refetchConversationQuery(getCurrentAccount()!, topic);
-    },
+  } = useDmConsentMutation({
+    peerInboxId: peerInboxId!,
+    conversationId: conversationId!,
+    topic: topic!,
   });
 
   const handleBlock = useCallback(async () => {

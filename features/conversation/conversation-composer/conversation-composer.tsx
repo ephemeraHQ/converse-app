@@ -11,9 +11,7 @@ import { sentryTrackError } from "@utils/sentry";
 import React, { memo, useCallback, useEffect, useRef } from "react";
 import { Platform, TextInput as RNTextInput } from "react-native";
 import { useAnimatedStyle, withSpring } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AddAttachmentButton } from "./conversation-composer-add-attachment-button";
-import { ReplyPreview } from "./conversation-composer-reply-preview";
 import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
@@ -112,54 +110,43 @@ export const Composer = memo(function Composer(props: IComposerProps) {
     // });
   }, [onSend, store]);
 
-  const insets = useSafeAreaInsets();
-
   return (
     <VStack
       style={{
-        paddingBottom: insets.bottom,
-        justifyContent: "flex-end",
-        overflow: "hidden",
+        // ...debugBorder("yellow"),
+        margin: 6, // 6 in the Figma
       }}
     >
-      <ReplyPreview />
-      <VStack
+      <HStack
         style={{
-          // ...debugBorder("yellow"),
-          margin: 6, // 6 in the Figma
+          // ...debugBorder("red"),
+          alignItems: "flex-end",
         }}
       >
-        <HStack
+        <AddAttachmentButton />
+        <VStack
           style={{
-            // ...debugBorder("red"),
-            alignItems: "flex-end",
+            flex: 1,
+            margin: theme.spacing.xxxs - theme.borderWidth.sm, // -theme.borderWidth.sm because of the borderWidth is count in react-native and we want exact pixels
+            borderWidth: theme.borderWidth.sm,
+            borderColor: theme.colors.border.subtle,
+            borderRadius: theme.borderRadius.md,
+            overflow: "hidden",
+            justifyContent: "flex-end",
           }}
         >
-          <AddAttachmentButton />
-          <VStack
+          <AttachmentsPreview />
+          <HStack
             style={{
-              flex: 1,
-              margin: theme.spacing.xxxs - theme.borderWidth.sm, // -theme.borderWidth.sm because of the borderWidth is count in react-native and we want exact pixels
-              borderWidth: theme.borderWidth.sm,
-              borderColor: theme.colors.border.subtle,
-              borderRadius: theme.borderRadius.md,
-              overflow: "hidden",
-              justifyContent: "flex-end",
+              // ...debugBorder("blue"),
+              alignItems: "center",
             }}
           >
-            <AttachmentsPreview />
-            <HStack
-              style={{
-                // ...debugBorder("blue"),
-                alignItems: "center",
-              }}
-            >
-              <ComposerTextInput onSubmitEditing={send} />
-              <SendButton onPress={send} />
-            </HStack>
-          </VStack>
-        </HStack>
-      </VStack>
+            <ComposerTextInput onSubmitEditing={send} />
+            <SendButton onPress={send} />
+          </HStack>
+        </VStack>
+      </HStack>
     </VStack>
   );
 });

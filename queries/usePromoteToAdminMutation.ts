@@ -12,12 +12,13 @@ import {
 import { useGroupQuery } from "@queries/useGroupQuery";
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { captureError } from "@/utils/capture-error";
 
 export const usePromoteToAdminMutation = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupQuery({ account, topic });
 
   return useMutation({
     mutationKey: promoteAdminMutationKey(account, topic!),
@@ -53,8 +54,7 @@ export const usePromoteToAdminMutation = (
     },
     // Use onError to revert the cache if the mutation fails
     onError: (error, _variables, context) => {
-      logger.warn("onError usePromoteToAdminMutation");
-      sentryTrackError(error);
+      captureError(error);
       if (context?.previousGroupMembers === undefined) {
         return;
       }

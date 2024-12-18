@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
+import { useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import {
   ConversationWithCodecsType,
@@ -17,13 +17,114 @@ import {
   MessagesOptions,
 } from "@xmtp/react-native-sdk/build/lib/types";
 import { conversationMessagesQueryKey } from "./QueryKeys";
-import { cacheOnlyQueryOptions } from "./cacheOnlyQueryOptions";
 import { queryClient } from "./queryClient";
-import { useConversationQuery } from "./useConversationQuery";
+import { getConversationQueryData } from "./useConversationQuery";
 
 export type ConversationMessagesQueryData = Awaited<
   ReturnType<typeof conversationMessagesQueryFn>
 >;
+
+export const conversationMessagesQueryFn = async (
+  conversation: ConversationWithCodecsType,
+  options?: MessagesOptions
+) => {
+  logger.info("[useConversationMessages] queryFn fetching messages");
+
+  if (!conversation) {
+    throw new Error("Conversation not found in conversationMessagesQueryFn");
+  }
+
+  const messages = await conversation.messages(options);
+  return processMessages({ messages });
+};
+
+const conversationMessagesByTopicQueryFn = async (
+  account: string,
+  topic: ConversationTopic
+) => {
+  logger.info("[useConversationMessages] queryFn fetching messages by topic");
+  const conversation = await getConversationByTopicByAccount({
+    account,
+    topic,
+    includeSync: true,
+  });
+  if (!conversation) {
+    throw new Error(
+      "Conversation not found in conversationMessagesByTopicQueryFn"
+    );
+  }
+  return conversationMessagesQueryFn(conversation);
+};
+
+export const useConversationMessages = (
+  account: string,
+  topic: ConversationTopic
+) => {
+  return useQuery(getConversationMessagesQueryOptions(account, topic));
+};
+
+export const getConversationMessages = (
+  account: string,
+  topic: ConversationTopic
+) => {
+  return queryClient.getQueryData<ConversationMessagesQueryData>(
+    getConversationMessagesQueryOptions(account, topic).queryKey
+  );
+};
+
+export function refetchConversationMessages(
+  account: string,
+  topic: ConversationTopic
+) {
+  logger.info("[refetchConversationMessages] refetching messages");
+  return queryClient.refetchQueries(
+    getConversationMessagesQueryOptions(account, topic)
+  );
+}
+
+export const addConversationMessage = (args: {
+  account: string;
+  topic: ConversationTopic;
+  message: DecodedMessageWithCodecsType;
+}) => {
+  const { account, topic, message } = args;
+
+  queryClient.setQueryData<ConversationMessagesQueryData>(
+    conversationMessagesQueryKey(account, topic),
+    (previousMessages) => {
+      const processedMessages = processMessages({
+        messages: [message],
+        existingData: previousMessages,
+        prependNewMessages: true,
+      });
+      return processedMessages;
+    }
+  );
+};
+
+export const prefetchConversationMessages = async (
+  account: string,
+  topic: ConversationTopic
+) => {
+  return queryClient.prefetchQuery(
+    getConversationMessagesQueryOptions(account, topic)
+  );
+};
+
+function getConversationMessagesQueryOptions(
+  account: string,
+  topic: ConversationTopic
+) {
+  const conversation = getConversationQueryData({ account, topic });
+  return {
+    queryKey: conversationMessagesQueryKey(account, topic),
+    queryFn: () => {
+      return conversationMessagesByTopicQueryFn(account, topic);
+    },
+    enabled: !!conversation,
+    refetchOnMount: true, // Just for now because messages are very important and we want to make sure we have all of them
+  };
+}
 
 const ignoredContentTypesPrefixes = [
   contentTypesPrefixes.coinbasePayment,
@@ -72,25 +173,10 @@ function processMessages(args: {
     if (!isReactionMessage(message)) {
       const messageId = message.id as MessageId;
 
-      // WIP
-      // Find matching optimistic message using correlationId from message root
-      // const optimisticMessage = optimisticMessages.find(
-      //   (msg) => msg.messageId === message.id
-      // );
-
-      // if (optimisticMessage) {
-      //   // Remove the optimistic message from tracking and from the result
-      //   removeOptimisticMessage(messageId);
-      //   // Remove from the query data
-      //   result.ids = result.ids.filter((id) => id !== optimisticMessage.tempId);
-      //   delete result.byId[optimisticMessage.tempId as MessageId];
-      // }
-
-      // Add the new message
       result.byId[messageId] = message;
       if (prependNewMessages) {
         result.ids = [messageId, ...result.ids];
-      } else if (!result.ids.includes(messageId)) {
+      } else {
         result.ids.push(messageId);
       }
     }
@@ -159,141 +245,61 @@ function processMessages(args: {
   return result;
 }
 
-export const conversationMessagesQueryFn = async (
-  conversation: ConversationWithCodecsType,
-  options?: MessagesOptions
-) => {
-  logger.info("[useConversationMessages] queryFn fetching messages");
-
-  if (!conversation) {
-    throw new Error("Conversation not found in conversationMessagesQueryFn");
-  }
-
-  const messages = await conversation.messages(options);
-  return processMessages({ messages });
+// WIP
+type IOptimisticMessage = {
+  tempId: string;
+  messageId?: MessageId;
 };
 
-const conversationMessagesByTopicQueryFn = async (
-  account: string,
-  topic: ConversationTopic
-) => {
-  logger.info("[useConversationMessages] queryFn fetching messages by topic");
-  const conversation = await getConversationByTopicByAccount({
-    account,
-    topic,
-  });
-  return conversationMessagesQueryFn(conversation!);
-};
-
-export const useConversationMessages = (
-  account: string,
-  topic: ConversationTopic
-) => {
-  const { data: conversation } = useConversationQuery(
-    account,
-    topic,
-    cacheOnlyQueryOptions
-  );
-
-  return useQuery({
-    queryKey: conversationMessagesQueryKey(account, topic),
-    queryFn: async () => {
-      return conversationMessagesQueryFn(conversation!);
-    },
-    enabled: !!conversation,
-  });
-};
-
-export const getConversationMessages = (
-  account: string,
-  topic: ConversationTopic
-) => {
-  return queryClient.getQueryData<ConversationMessagesQueryData>(
-    conversationMessagesQueryKey(account, topic)
-  );
-};
-
-export function refetchConversationMessages(
-  account: string,
-  topic: ConversationTopic
-) {
-  return queryClient.refetchQueries({
-    queryKey: conversationMessagesQueryKey(account, topic),
-  });
-}
-
-export const addConversationMessage = (args: {
-  account: string;
+export function replaceOptimisticMessageWithReal(args: {
+  tempId: string;
   topic: ConversationTopic;
+  account: string;
   message: DecodedMessageWithCodecsType;
-  // isOptimistic?: boolean;
-}) => {
-  const {
-    account,
-    topic,
-    message,
-    // isOptimistic
-  } = args;
-
-  // WIP
-  // if (isOptimistic) {
-  //   addOptimisticMessage(message.id);
-  // }
+}) {
+  const { tempId, topic, account, message } = args;
+  logger.info(
+    "[linkOptimisticMessageToReal] linking optimistic message to real",
+    {
+      tempId,
+      messageId: message.id,
+    }
+  );
 
   queryClient.setQueryData<ConversationMessagesQueryData>(
     conversationMessagesQueryKey(account, topic),
     (previousMessages) => {
-      return processMessages({
-        messages: [message],
-        existingData: previousMessages,
-        prependNewMessages: true,
-      });
+      if (!previousMessages) {
+        return {
+          ids: [message.id as MessageId],
+          byId: {
+            [message.id as MessageId]: message,
+          },
+          reactions: {},
+        };
+      }
+
+      // Find the index of the temporary message
+      const tempIndex = previousMessages.ids.indexOf(tempId as MessageId);
+
+      if (tempIndex === -1) {
+        return previousMessages;
+      }
+
+      // Create new ids array with the real message id replacing the temp id
+      const newIds = [...previousMessages.ids];
+      newIds[tempIndex] = message.id as MessageId;
+
+      // Create new byId object without the temp message and with the real message
+      const newById = { ...previousMessages.byId };
+      delete newById[tempId as MessageId];
+      newById[message.id as MessageId] = message;
+
+      return {
+        ...previousMessages,
+        ids: newIds,
+        byId: newById,
+      };
     }
   );
-};
-
-export const prefetchConversationMessages = async (
-  account: string,
-  topic: ConversationTopic
-) => {
-  return queryClient.prefetchQuery({
-    queryKey: conversationMessagesQueryKey(account.toLowerCase(), topic),
-    queryFn: () => {
-      logger.info("[prefetchConversationMessages] prefetching messages");
-      return conversationMessagesByTopicQueryFn(account, topic);
-    },
-  });
-};
-
-// WIP
-// type IOptimisticMessage = {
-//   tempId: string;
-//   messageId?: MessageId;
-// };
-
-// // Keep track of optimistic messages
-// let optimisticMessages: IOptimisticMessage[] = [];
-
-// function addOptimisticMessage(tempId: string) {
-//   optimisticMessages.push({
-//     tempId,
-//   });
-// }
-
-// function removeOptimisticMessage(messageId: MessageId) {
-//   optimisticMessages = optimisticMessages.filter(
-//     (msg) => msg.messageId !== messageId
-//   );
-// }
-
-// export function updateConversationMessagesOptimisticMessages(
-//   tempId: string,
-//   messageId: MessageId
-// ) {
-//   const optimisticMessage = optimisticMessages.find(
-//     (msg) => msg.tempId === tempId
-//   );
-//   if (optimisticMessage) {
-//     optimisticMessage.messageId = messageId;
-//   }
-// }
+}

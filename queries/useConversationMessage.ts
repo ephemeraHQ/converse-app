@@ -45,3 +45,7 @@ export const getConversationMessage = (args: IArgs) => {
     getConversationMessageQueryOptions(args).queryKey
   );
 };
+
+export function fetchMessageByIdQuery(args: IArgs) {
+  return queryClient.fetchQuery(getConversationMessageQueryOptions(args));
+}

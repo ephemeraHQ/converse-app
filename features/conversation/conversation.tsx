@@ -5,6 +5,8 @@ import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPi
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
 import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
+import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
+import { ReplyPreview } from "@/features/conversation/conversation-composer/conversation-composer-reply-preview";
 import {
   ConversationComposerStoreProvider,
   useConversationComposerStore,
@@ -14,57 +16,61 @@ import { GroupConsentPopup } from "@/features/conversation/conversation-consent-
 import { DmConversationTitle } from "@/features/conversation/conversation-dm-header-title";
 import { GroupConversationTitle } from "@/features/conversation/conversation-group-header-title";
 import { KeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
-import {
-  IMessageGesturesOnLongPressArgs,
-  MessageGestures,
-} from "@/features/conversation/conversation-message/conversation-message-gestures";
-import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
-import {
-  MessageContextStoreProvider,
-  useMessageContextStore,
-} from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { ConversationMessageStatus } from "@/features/conversation/conversation-message-status/conversation-message-status";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { MessageContextMenu } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu";
 import {
   MessageContextMenuStoreProvider,
   useMessageContextMenuStore,
+  useMessageContextMenuStoreContext,
 } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
+import {
+  IMessageGesturesOnLongPressArgs,
+  MessageGestures,
+} from "@/features/conversation/conversation-message/conversation-message-gestures";
 import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import { MessageReactionsDrawer } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer";
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { ConversationMessageRepliable } from "@/features/conversation/conversation-message/conversation-message-repliable";
+import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
+import {
+  MessageContextStoreProvider,
+  useMessageContextStore,
+} from "@/features/conversation/conversation-message/conversation-message.store-context";
+import {
+  getConvosMessageStatus,
+  isAnActualMessage,
+} from "@/features/conversation/conversation-message/conversation-message.utils";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
 import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useConversationQuery } from "@/queries/useConversationQuery";
-import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
 } from "@/utils/xmtpRN/client.types";
 import { useCurrentAccount } from "@data/store/accountsStore";
-import { Button } from "@design-system/Button/Button";
 import { Center } from "@design-system/Center";
 import { Text } from "@design-system/Text";
 import { translate } from "@i18n/translate";
 import { useRouter } from "@navigation/useNavigation";
 import { useConversationMessages } from "@queries/useConversationMessages";
-import { useAppTheme } from "@theme/useAppTheme";
 import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
 import React, {
   memo,
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
 } from "react";
 import {
   ConversationStoreProvider,
   useCurrentConversationTopic,
 } from "./conversation.store-context";
-import { debugBorder } from "@/utils/debug-style";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
@@ -77,7 +83,10 @@ export const Conversation = memo(function Conversation(props: {
   const navigation = useRouter();
 
   const { data: conversation, isLoading: isLoadingConversation } =
-    useConversationQuery(currentAccount, topic);
+    useConversationQuery({
+      account: currentAccount,
+      topic,
+    });
 
   useLayoutEffect(() => {
     if (!conversation) {
@@ -131,7 +140,7 @@ export const Conversation = memo(function Conversation(props: {
           >
             <Messages conversation={conversation} />
             <ComposerWrapper conversation={conversation} />
-            <KeyboardFiller />
+            <KeyboardFillerWrapper />
             <MessageContextMenu />
             <MessageReactionsDrawer />
             <ExternalWalletPicker title="Choose a wallet" />
@@ -142,6 +151,13 @@ export const Conversation = memo(function Conversation(props: {
   );
 });
 
+const KeyboardFillerWrapper = memo(function KeyboardFillerWrapper() {
+  const messageContextMenuData = useMessageContextMenuStoreContext(
+    (state) => state.messageContextMenuData
+  );
+  return <KeyboardFiller messageContextMenuIsOpen={!!messageContextMenuData} />;
+});
+
 const ComposerWrapper = memo(function ComposerWrapper(props: {
   conversation: ConversationWithCodecsType;
 }) {
@@ -149,7 +165,13 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
   const sendMessage = useSendMessage({
     conversation,
   });
-  return <Composer onSend={sendMessage} />;
+
+  return (
+    <ConversationComposerContainer>
+      <ReplyPreview />
+      <Composer onSend={sendMessage} />
+    </ConversationComposerContainer>
+  );
 });
 
 const Messages = memo(function Messages(props: {
@@ -158,6 +180,7 @@ const Messages = memo(function Messages(props: {
   const { conversation } = props;
 
   const currentAccount = useCurrentAccount()!;
+  const { data: currentAccountInboxId } = useCurrentAccountInboxId();
   const topic = useCurrentConversationTopic()!;
 
   const {
@@ -166,6 +189,15 @@ const Messages = memo(function Messages(props: {
     isRefetching: isRefetchingMessages,
     refetch,
   } = useConversationMessages(currentAccount, topic!);
+
+  const latestMessageIdByCurrentUser = useMemo(() => {
+    if (!messages?.ids) return -1;
+    return messages.ids.find(
+      (messageId) =>
+        isAnActualMessage(messages.byId[messageId]) &&
+        messages.byId[messageId].senderAddress === currentAccountInboxId
+    );
+  }, [messages?.ids, messages?.byId, currentAccountInboxId]);
 
   const isUnread = useConversationIsUnread({
     topic,
@@ -219,6 +251,9 @@ const Messages = memo(function Messages(props: {
             message={message}
             previousMessage={previousMessage}
             nextMessage={nextMessage}
+            isLatestMessageSentByCurrentUser={
+              latestMessageIdByCurrentUser === messageId
+            }
           />
         );
       }}
@@ -231,8 +266,14 @@ const ConversationMessagesListItem = memo(
     message: DecodedMessageWithCodecsType;
     previousMessage: DecodedMessageWithCodecsType | undefined;
     nextMessage: DecodedMessageWithCodecsType | undefined;
+    isLatestMessageSentByCurrentUser: boolean;
   }) {
-    const { message, previousMessage, nextMessage } = props;
+    const {
+      message,
+      previousMessage,
+      nextMessage,
+      isLatestMessageSentByCurrentUser,
+    } = props;
     const composerStore = useConversationComposerStore();
 
     const handleReply = useCallback(() => {
@@ -245,16 +286,19 @@ const ConversationMessagesListItem = memo(
         previousMessage={previousMessage}
         nextMessage={nextMessage}
       >
-        <VStack
-        // {...debugBorder()}
-        >
+        <VStack>
           <ConversationMessageTimestamp />
           <ConversationMessageRepliable onReply={handleReply}>
             <ConversationMessageLayout>
-              <WithGestures>
+              <ConversationMessageGestures>
                 <ConversationMessage message={message} />
-              </WithGestures>
+              </ConversationMessageGestures>
               <ConversationMessageReactions />
+              {isLatestMessageSentByCurrentUser && (
+                <ConversationMessageStatus
+                  status={getConvosMessageStatus(message)}
+                />
+              )}
             </ConversationMessageLayout>
           </ConversationMessageRepliable>
         </VStack>
@@ -263,7 +307,7 @@ const ConversationMessagesListItem = memo(
   }
 );
 
-const WithGestures = memo(function WithGestures({
+const ConversationMessageGestures = memo(function ConversationMessageGestures({
   children,
 }: {
   children: React.ReactNode;
@@ -275,9 +319,9 @@ const WithGestures = memo(function WithGestures({
   const handleLongPress = useCallback(
     (e: IMessageGesturesOnLongPressArgs) => {
       const messageId = messageStore.getState().messageId;
-      const message = messageStore.getState().message;
-      const previousMessage = messageStore.getState().previousMessage;
-      const nextMessage = messageStore.getState().nextMessage;
+      // const message = messageStore.getState().message;
+      // const previousMessage = messageStore.getState().previousMessage;
+      // const nextMessage = messageStore.getState().nextMessage;
 
       messageContextMenuStore.getState().setMessageContextMenuData({
         messageId,
@@ -289,18 +333,18 @@ const WithGestures = memo(function WithGestures({
         // Not the cleanest...
         // Might want to find another solution later but works for now.
         // Solution might be to remove the context and just pass props
-        messageComponent: (
-          <MessageContextStoreProvider
-            message={message}
-            previousMessage={previousMessage}
-            nextMessage={nextMessage}
-          >
-            {children}
-          </MessageContextStoreProvider>
-        ),
+        // messageComponent: (
+        //   <MessageContextStoreProvider
+        //     message={message}
+        //     previousMessage={previousMessage}
+        //     nextMessage={nextMessage}
+        //   >
+        //     {children}
+        //   </MessageContextStoreProvider>
+        // ),
       });
     },
-    [messageStore, messageContextMenuStore, children]
+    [messageContextMenuStore, messageStore]
   );
 
   const handleTap = useCallback(() => {
@@ -318,58 +362,11 @@ const WithGestures = memo(function WithGestures({
 });
 
 const DmConversationEmpty = memo(function DmConversationEmpty() {
+  // Will never really be empty anyway because to create the DM conversation the user has to send a first message
   return null;
 });
 
 const GroupConversationEmpty = memo(() => {
-  const { theme } = useAppTheme();
-
-  const currentAccount = useCurrentAccount()!;
-  const topic = useCurrentConversationTopic();
-
-  const { data: groupName } = useGroupNameQuery(currentAccount, topic);
-
-  const { data: conversation } = useConversationQuery(currentAccount, topic);
-
-  const sendMessage = useSendMessage({
-    conversation: conversation!,
-  });
-
-  const handleSend = useCallback(() => {
-    sendMessage({
-      content: {
-        text: "👋",
-      },
-    });
-  }, [sendMessage]);
-
-  return (
-    <Center
-      style={{
-        flexGrow: 1,
-        flexDirection: "column",
-      }}
-    >
-      <Text
-        style={{
-          textAlign: "center",
-        }}
-      >
-        {translate("group_placeholder.placeholder_text", {
-          groupName,
-        })}
-      </Text>
-
-      <Button
-        variant="fill"
-        icon="hand.wave"
-        text={translate("say_hi")}
-        onPress={handleSend}
-        style={{
-          alignSelf: "center",
-          marginTop: theme.spacing.md,
-        }}
-      />
-    </Center>
-  );
+  // Will never really be empty anyway becaue we have group updates
+  return null;
 });

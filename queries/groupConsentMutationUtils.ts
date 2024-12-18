@@ -2,17 +2,15 @@ import { MutationObserver, QueryClient } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
 import { consentToGroupsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
-
-import {
-  cancelGroupConsentQuery,
-  getGroupConsentQueryData,
-  setGroupConsentQueryData,
-} from "./useGroupConsentQuery";
 import {
   ConsentState,
   ConversationId,
   ConversationTopic,
 } from "@xmtp/react-native-sdk";
+import {
+  getGroupConsentQueryData,
+  setGroupConsentQueryData,
+} from "./useGroupConsentQuery";
 
 export type GroupConsentAction = "allow" | "deny";
 
@@ -41,7 +39,6 @@ export const createGroupConsentMutationObserver = (
       return consentStatus;
     },
     onMutate: async () => {
-      await cancelGroupConsentQuery(account, topic);
       const previousConsent = getGroupConsentQueryData(account, topic);
       setGroupConsentQueryData(account, topic, consentStatus);
       return { previousConsent };
@@ -89,7 +86,6 @@ export const getGroupConsentMutationOptions = ({
       return consentStatus;
     },
     onMutate: async () => {
-      await cancelGroupConsentQuery(account, topic);
       const previousConsent = getGroupConsentQueryData(account, topic);
       setGroupConsentQueryData(account, topic, consentStatus);
       return { previousConsent };

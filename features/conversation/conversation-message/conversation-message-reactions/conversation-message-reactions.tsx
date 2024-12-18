@@ -1,15 +1,20 @@
 import { useSelect } from "@/data/store/storeHelpers";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
+import {
+  isCurrentUserInboxId,
+  useCurrentAccountInboxId,
+} from "@/hooks/use-current-account-inbox-id";
+import { useInboxProfileSocialsQueries } from "@/queries/useInboxProfileSocialsQuery";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { AnimatedHStack, HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import {
-  getPreferredAvatar,
-  getPreferredName,
-  getProfile,
+  getPreferredInboxAddress,
+  getPreferredInboxAvatar,
+  getPreferredInboxName,
 } from "@utils/profile";
 import { memo, useCallback, useMemo } from "react";
 import { TouchableHighlight, ViewStyle } from "react-native";
@@ -88,27 +93,33 @@ export const ConversationMessageReactions = memo(
 
 function useMessageReactionsRolledUp() {
   const { messageId } = useMessageContextStoreContext(useSelect(["messageId"]));
+  const { bySender: reactionsBySender } =
+    useConversationMessageReactions(messageId);
+  const currentAddress = useCurrentAccount()!;
+  const { data: currentUserInboxId } = useCurrentAccountInboxId();
 
-  const { bySender: reactions } = useConversationMessageReactions(messageId);
-
-  const userAddress = useCurrentAccount();
-
-  // Get social details for all unique addresses
-  const addresses = Array.from(
+  const inboxIds = Array.from(
     new Set(
-      Object.entries(reactions ?? {}).map(([senderAddress]) => senderAddress)
+      Object.entries(reactionsBySender ?? {}).map(
+        ([senderInboxId]) => senderInboxId
+      )
     )
   );
 
-  const membersSocials = useProfilesStore((s) =>
-    addresses.map((address) => {
-      const socials = getProfile(address, s.profiles)?.socials;
+  const inboxProfileSocialsQueries = useInboxProfileSocialsQueries(
+    currentAddress,
+    inboxIds
+  );
+
+  const membersSocials = inboxProfileSocialsQueries.map(
+    ({ data: socials }, index) => {
       return {
-        address,
-        uri: getPreferredAvatar(socials),
-        name: getPreferredName(socials, address),
+        inboxId: inboxIds[index],
+        address: getPreferredInboxAddress(socials),
+        uri: getPreferredInboxAvatar(socials),
+        name: getPreferredInboxName(socials),
       };
-    })
+    }
   );
 
   return useMemo((): RolledUpReactions => {
@@ -117,24 +128,21 @@ function useMessageReactionsRolledUp() {
     let userReacted = false;
 
     // Flatten reactions and track sender addresses
-    const flatReactions = Object.entries(reactions ?? {}).flatMap(
-      ([senderAddress, senderReactions]) =>
-        senderReactions.map((reaction) => ({ senderAddress, ...reaction }))
+    const flatReactions = Object.entries(reactionsBySender ?? {}).flatMap(
+      ([senderInboxId, senderReactions]) =>
+        senderReactions.map((reaction) => ({ senderInboxId, ...reaction }))
     );
     totalCount = flatReactions.length;
-
-    // Create a map to efficiently access social details by address
-    const socialsMap = new Map(
-      membersSocials.map((social) => [social.address, social])
-    );
 
     // Track reaction counts for preview
     const previewCounts = new Map<string, number>();
 
     flatReactions.forEach((reaction) => {
-      const isOwnReaction =
-        reaction.senderAddress.toLowerCase() === userAddress?.toLowerCase();
-      if (isOwnReaction) userReacted = true;
+      const isOwnReaction = isCurrentUserInboxId(reaction.senderInboxId);
+
+      if (isOwnReaction) {
+        userReacted = true;
+      }
 
       // Count reactions for the preview
       previewCounts.set(
@@ -142,13 +150,15 @@ function useMessageReactionsRolledUp() {
         (previewCounts.get(reaction.content) || 0) + 1
       );
 
-      // Add to detailed array
-      const socialDetails = socialsMap.get(reaction.senderAddress);
+      const socialDetails = membersSocials.find(
+        (social) => social.inboxId === reaction.senderInboxId
+      );
+
       detailed.push({
         content: reaction.content,
         isOwnReaction,
         reactor: {
-          address: reaction.senderAddress,
+          address: reaction.senderInboxId,
           userName: socialDetails?.name,
           avatar: socialDetails?.uri,
         },
@@ -170,7 +180,7 @@ function useMessageReactionsRolledUp() {
       preview,
       detailed,
     };
-  }, [reactions, userAddress, membersSocials]);
+  }, [reactionsBySender, membersSocials]);
 }
 
 const $reactionButton: ThemedStyle<ViewStyle> = ({

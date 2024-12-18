@@ -1,20 +1,20 @@
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
+import { useConversationListQuery } from "@/queries/useConversationListQuery";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
-import { useV3ConversationListQuery } from "@queries/useV3ConversationListQuery";
 import { useMemo } from "react";
 
 export const useV3ConversationItems = () => {
   const currentAccount = useCurrentAccount();
 
-  const { data: conversations, ...rest } = useV3ConversationListQuery(
-    currentAccount!,
-    {
+  const { data: conversations, ...rest } = useConversationListQuery({
+    account: currentAccount!,
+    queryOptions: {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
     },
-    "useV3ConversationItems"
-  );
+    context: "useV3ConversationItems",
+  });
 
   const { pinnedConversationTopics, topicsData } = useChatStore(
     useSelect(["pinnedConversationTopics", "topicsData"])
