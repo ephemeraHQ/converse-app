@@ -21,21 +21,12 @@ const profileSocialsQueryKey = (account: string, peerAddress: string) => [
 const profileSocialsQueryStorageKey = (account: string, peerAddress: string) =>
   profileSocialsQueryKey(account, peerAddress).join("-");
 
-const profileSocials = create<
-  { [address: string]: ProfileSocials },
-  { account: string; address: string },
-  ProfileSocials | null
->({
-  fetcher: async (queries) => {
-    const account = queries[0].account;
-    const addresses = queries.map((q) => q.address);
-    const data = await getProfilesForAddresses(account, addresses);
-    return data as { [address: string]: ProfileSocials };
+const profileSocials = create({
+  fetcher: async (addresses: string[]) => {
+    const data = await getProfilesForAddresses(addresses);
+    return data;
   },
-  resolver: indexedResolver<
-    { [address: string]: ProfileSocials },
-    { account: string; address: string }
-  >(),
+  resolver: indexedResolver(),
   scheduler: windowedFiniteBatchScheduler({
     windowMs: 10,
     maxBatchSize: 150,
@@ -43,12 +34,10 @@ const profileSocials = create<
 });
 
 const fetchProfileSocials = async (account: string, peerAddress: string) => {
-  const data = await profileSocials.fetch({
-    account,
-    address: peerAddress,
-  });
+  const data = await profileSocials.fetch(peerAddress);
 
   const key = profileSocialsQueryStorageKey(account, peerAddress);
+
   mmkv.delete(key);
 
   if (data) {
