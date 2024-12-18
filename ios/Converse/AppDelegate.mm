@@ -1,5 +1,8 @@
 #import "AppDelegate.h"
 
+#import "RNFBAppCheckModule.h"
+#import <Firebase.h>
+
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
 
@@ -13,6 +16,12 @@
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
 
+  [RNFBAppCheckModule sharedInstance];
+
+  // Firebase Configuration is provided via Google Services/GoogleServices-Info-<env>.plist and the proper file is copied
+  // during build via the scripts/build/ios/[preview|prod].js files
+  [FIRApp configure];
+  
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 

@@ -2,14 +2,14 @@ import Avatar from "@components/Avatar";
 import { useCallback, useMemo } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
-import { usePreferredInboxAddress } from "@hooks/usePreferredInboxAddress";
-import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
-import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
 import { useAppTheme } from "@theme/useAppTheme";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
 import { navigate } from "../../../utils/navigation";
 import { getPreferredInboxAvatar } from "../../../utils/profile";
+import { usePreferredInboxAddress } from "@/hooks/usePreferredInboxAddress";
+import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
+import { useInboxProfileSocialsQuery } from "@/queries/useInboxProfileSocialsQuery";
 
 type MessageSenderAvatarDumbProps = {
   // hasNextMessageInSeries: boolean;

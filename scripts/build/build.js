@@ -6,10 +6,36 @@ const prompts = require("prompts");
 const { handleEnv } = require("./eas");
 const appJson = require("../../app.json");
 
- 
 const PROJECT_ROOT = path.join(__dirname, "..", "..");
 
 const build = async () => {
+  try {
+    execSync("eas --version", { stdio: "ignore" });
+  } catch (error) {
+    console.error("\nError: EAS CLI is not installed.");
+    const { shouldInstall } = await prompts({
+      type: "confirm",
+      name: "shouldInstall",
+      message: "Would you like to install EAS CLI now?",
+      initial: true,
+    });
+
+    if (shouldInstall) {
+      console.log("\nInstalling EAS CLI...");
+      try {
+        execSync("npm install -g eas-cli", { stdio: "inherit" });
+        console.log("\nEAS CLI installed successfully!\n");
+      } catch (installError) {
+        console.error("\nFailed to install EAS CLI.");
+        console.log("Please install manually with: npm install -g eas-cli\n");
+        process.exit(1);
+      }
+    } else {
+      console.log("\nPlease install EAS CLI with: npm install -g eas-cli\n");
+      process.exit(1);
+    }
+  }
+
   const isAdvanced = process.argv.includes("--advanced");
   const questions = [
     {
@@ -163,8 +189,8 @@ const build = async () => {
       platform === "ios"
         ? "ipa"
         : env === "production" || env === "preview"
-        ? "aab"
-        : "apk";
+          ? "aab"
+          : "apk";
     buildArgs.push(
       "--local",
       "--output",
