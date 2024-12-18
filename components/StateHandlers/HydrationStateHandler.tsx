@@ -1,5 +1,5 @@
 import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
-import { fetchPersistedConversationListQuery } from "@/queries/useV3ConversationListQuery";
+import { fetchPersistedConversationListQuery } from "@/queries/useConversationListQuery";
 import logger from "@utils/logger";
 import { useEffect } from "react";
 import { getAccountsList } from "@data/store/accountsStore";
@@ -34,7 +34,7 @@ export default function HydrationStateHandler() {
 
           const results = await Promise.allSettled([
             getXmtpClient(account),
-            fetchPersistedConversationListQuery(account),
+            fetchPersistedConversationListQuery({ account }),
             prefetchInboxIdQuery({ account }),
           ]);
 

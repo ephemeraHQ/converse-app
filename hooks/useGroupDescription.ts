@@ -5,7 +5,10 @@ import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const useGroupDescription = (topic: ConversationTopic) => {
   const account = currentAccount();
-  const { data, isLoading, isError } = useGroupDescriptionQuery(account, topic);
+  const { data, isLoading, isError } = useGroupDescriptionQuery({
+    account,
+    topic,
+  });
   const { mutateAsync } = useGroupDescriptionMutation(account, topic);
 
   return {

@@ -114,7 +114,7 @@ function getConversationMessagesQueryOptions(
   account: string,
   topic: ConversationTopic
 ) {
-  const conversation = getConversationQueryData(account, topic);
+  const conversation = getConversationQueryData({ account, topic });
   return {
     queryKey: conversationMessagesQueryKey(account, topic),
     queryFn: () => {

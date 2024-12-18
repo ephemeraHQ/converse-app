@@ -1,21 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
-import logger from "@utils/logger";
-import { sentryTrackError } from "@utils/sentry";
 
-import { setGroupPhotoMutationKey } from "./MutationKeys";
+import { captureError } from "@/utils/capture-error";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import {
-  cancelGroupPhotoQuery,
-  getGroupPhotoQueryData,
-} from "./useGroupPhotoQuery";
-import { useGroupQuery } from "@queries/useGroupQuery";
+  getGroupQueryData,
+  setGroupQueryData,
+  useGroupQuery,
+} from "@queries/useGroupQuery";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { handleGroupImageUpdate } from "@/utils/groupUtils/handleGroupImageUpdate";
+import { setGroupPhotoMutationKey } from "./MutationKeys";
 
-export const useGroupPhotoMutation = (
-  account: string,
-  topic: ConversationTopic
-) => {
-  const { data: group } = useGroupQuery(account, topic);
+export const useGroupPhotoMutation = (args: {
+  account: string;
+  topic: ConversationTopic;
+}) => {
+  const { account, topic } = args;
+  const { data: group } = useGroupQuery({ account, topic });
   return useMutation({
     mutationKey: setGroupPhotoMutationKey(account, topic),
     mutationFn: async (groupPhoto: string) => {
@@ -26,26 +26,27 @@ export const useGroupPhotoMutation = (
       return groupPhoto;
     },
     onMutate: async (groupPhoto: string) => {
-      await cancelGroupPhotoQuery(account, topic);
-      const previousGroupPhoto = getGroupPhotoQueryData(account, topic);
-      handleGroupImageUpdate({ account, topic, image: groupPhoto });
-      return { previousGroupPhoto };
-    },
-    onError: (error, _variables, context) => {
-      logger.warn("onError useGroupPhotoMutation");
-      sentryTrackError(error);
-      if (context?.previousGroupPhoto === undefined) {
-        return;
-      }
-      handleGroupImageUpdate({
+      const previousGroup = getGroupQueryData({ account, topic });
+      setGroupQueryData({
         account,
         topic,
-        image: context.previousGroupPhoto,
+        group: {
+          ...group,
+          imageUrlSquare: groupPhoto,
+        } as GroupWithCodecsType,
       });
+      return { previousGroup };
     },
-    onSuccess: (data, variables, context) => {
-      logger.debug("onSuccess useGroupPhotoMutation");
-      // refreshGroup(account, topic);
+    onError: (error, _variables, context) => {
+      captureError(error);
+      if (context?.previousGroup === undefined) {
+        return;
+      }
+      setGroupQueryData({
+        account,
+        topic,
+        group: context.previousGroup,
+      });
     },
   });
 };

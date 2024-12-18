@@ -4,16 +4,15 @@ import {
   getCurrentAccount,
   useCurrentAccount,
 } from "@/data/store/accountsStore";
-import {
-  useConversationCurrentConversationId,
-  useCurrentConversationTopic,
-} from "../conversation.store-context";
 import { useRouter } from "@/navigation/useNavigation";
-import { refetchConversationQuery } from "@/queries/useConversationQuery";
+import { getConversationQueryData } from "@/queries/useConversationQuery";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
+import { getDmQueryData, setDmQueryData } from "@/queries/useDmQuery";
 import { actionSheetColors } from "@/styles/colors";
 import { captureError, captureErrorWithToast } from "@/utils/capture-error";
 import { ensureError } from "@/utils/error";
+import { mutateObjectProperties } from "@/utils/mutate-object-properties";
+import { DmWithCodecsType } from "@/utils/xmtpRN/client";
 import {
   consentToGroupsOnProtocolByAccount,
   consentToInboxIdsOnProtocolByAccount,
@@ -22,6 +21,10 @@ import { translate } from "@i18n";
 import { useMutation } from "@tanstack/react-query";
 import React, { useCallback } from "react";
 import { useColorScheme } from "react-native";
+import {
+  useConversationCurrentConversationId,
+  useCurrentConversationTopic,
+} from "../conversation.store-context";
 import {
   ConsentPopupButton,
   ConsentPopupButtonsContainer,
@@ -34,7 +37,10 @@ export function DmConsentPopup() {
   const conversationId = useConversationCurrentConversationId();
   const currentAccount = useCurrentAccount()!;
 
-  const { data: peerInboxId } = useDmPeerInboxId(currentAccount, topic);
+  const { data: peerInboxId } = useDmPeerInboxId({
+    account: currentAccount,
+    topic,
+  });
 
   const navigation = useRouter();
 
@@ -62,8 +68,42 @@ export function DmConsentPopup() {
         }),
       ]);
     },
-    onSuccess: () => {
-      refetchConversationQuery(getCurrentAccount()!, topic);
+    onMutate: (args) => {
+      const conversation = getConversationQueryData({
+        account: currentAccount,
+        topic,
+      });
+      if (conversation) {
+        const updatedDm = mutateObjectProperties(conversation, {
+          state: args.consent === "allow" ? "allowed" : "denied",
+        });
+        setDmQueryData({
+          account: currentAccount,
+          peer: topic,
+          dm: updatedDm as DmWithCodecsType,
+        });
+        return { previousDmConsent: conversation.state };
+      }
+    },
+    onError: (error, _, context) => {
+      const { previousDmConsent } = context || {};
+      if (previousDmConsent) {
+        const dm = getDmQueryData({
+          account: currentAccount,
+          peer: topic,
+        });
+        if (!dm) {
+          return;
+        }
+        const updatedDm = mutateObjectProperties(dm, {
+          state: previousDmConsent,
+        });
+        setDmQueryData({
+          account: currentAccount,
+          peer: topic,
+          dm: updatedDm,
+        });
+      }
     },
   });
 

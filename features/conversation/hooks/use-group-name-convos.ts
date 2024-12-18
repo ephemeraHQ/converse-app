@@ -14,10 +14,10 @@ export function useGroupNameConvos(args: {
 }) {
   const { topic, account } = args;
 
-  const { data: groupName, isLoading: groupNameLoading } = useGroupNameQuery(
+  const { data: groupName, isLoading: groupNameLoading } = useGroupNameQuery({
     account,
-    topic
-  );
+    topic,
+  });
 
   const { data: members, isLoading: membersLoading } = useGroupMembersQuery(
     account,

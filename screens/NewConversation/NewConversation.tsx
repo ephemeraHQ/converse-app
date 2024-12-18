@@ -19,19 +19,22 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { NewConversationModalParams } from "./NewConversationModal";
+import { translate } from "@/i18n";
+import { getCleanAddress } from "@/utils/evm/getCleanAddress";
+import { useGroupQuery } from "@queries/useGroupQuery";
+import SearchBar from "@search/components/SearchBar";
+import ProfileSearch from "@search/screens/ProfileSearch";
+import { canMessageByAccount } from "@utils/xmtpRN/contacts";
+import { InboxId } from "@xmtp/react-native-sdk";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../../components/AndroidBackAction";
-import SearchBar from "@search/components/SearchBar";
 import Recommendations from "../../components/Recommendations/Recommendations";
-import ProfileSearch from "@search/screens/ProfileSearch";
 import TableView from "../../components/TableView/TableView";
 import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import config from "../../config";
 import {
   currentAccount,
   getProfilesStore,
-  useChatStore,
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
 import { ProfileSocials } from "../../data/store/profilesStore";
@@ -42,11 +45,7 @@ import { getAddressForPeer, isSupportedPeer } from "../../utils/evm/address";
 import { navigate } from "../../utils/navigation";
 import { isEmptyObject } from "../../utils/objects";
 import { getPreferredName } from "../../utils/profile";
-import { canMessageByAccount } from "@utils/xmtpRN/contacts";
-import { useGroupQuery } from "@queries/useGroupQuery";
-import { InboxId } from "@xmtp/react-native-sdk";
-import { getCleanAddress } from "@/utils/evm/getCleanAddress";
-import { translate } from "@/i18n";
+import { NewConversationModalParams } from "./NewConversationModal";
 
 export default function NewConversation({
   route,
@@ -56,10 +55,10 @@ export default function NewConversation({
   "NewConversationScreen"
 >) {
   const colorScheme = useColorScheme();
-  const { data: existingGroup } = useGroupQuery(
-    currentAccount(),
-    route.params?.addingToGroupTopic!
-  );
+  const { data: existingGroup } = useGroupQuery({
+    account: currentAccount(),
+    topic: route.params?.addingToGroupTopic!,
+  });
   const [group, setGroup] = useState({
     enabled: !!route.params?.addingToGroupTopic,
     members: [] as (ProfileSocials & { address: string })[],

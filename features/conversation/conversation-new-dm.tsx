@@ -11,9 +11,9 @@ import {
   sendMessage,
 } from "@/features/conversation/hooks/use-send-message";
 import { useRouter } from "@/navigation/useNavigation";
-import { updateConversationQueryData } from "@/queries/useConversationQuery";
-import { updateConversationWithPeerQueryData } from "@/queries/useConversationWithPeerQuery";
-import { updateConversationDataToConversationListQuery } from "@/queries/useV3ConversationListQuery";
+import { addConversationToConversationListQuery } from "@/queries/useConversationListQuery";
+import { setDmQueryData } from "@/queries/useDmQuery";
+import { captureError } from "@/utils/capture-error";
 import { sentryTrackError } from "@/utils/sentry";
 import { createConversationByAccount } from "@/utils/xmtpRN/conversations";
 import { useMutation } from "@tanstack/react-query";
@@ -72,27 +72,19 @@ function useSendFirstConversationMessage(peerAddress: string) {
     },
     onSuccess: (newConversation) => {
       const currentAccount = getCurrentAccount()!;
-
-      // Update the conversation with peer query
-      updateConversationWithPeerQueryData(
-        currentAccount,
-        peerAddress,
-        newConversation
-      );
-
-      // Update the list of conversations
-      updateConversationDataToConversationListQuery(
-        currentAccount,
-        newConversation.topic,
-        newConversation
-      );
-
-      // Update conversation by topic
-      updateConversationQueryData(
-        currentAccount,
-        newConversation.topic,
-        newConversation
-      );
+      try {
+        addConversationToConversationListQuery({
+          account: currentAccount,
+          conversation: newConversation,
+        });
+        setDmQueryData({
+          account: currentAccount,
+          peer: peerAddress,
+          dm: newConversation,
+        });
+      } catch (error) {
+        captureError(error);
+      }
     },
     // TODO: Add this for optimistic update and faster UX
     // onMutate: (peerAddress) => {
@@ -128,13 +120,18 @@ function useSendFirstConversationMessage(peerAddress: string) {
       try {
         // First, create the conversation
         const conversation = await createNewConversationAsync(peerAddress);
-        // Then, send the message
-        await sendMessageAsync({
-          conversation,
-          params: args,
-        });
+        try {
+          // Then, send the message
+          await sendMessageAsync({
+            conversation,
+            params: args,
+          });
+        } catch (error) {
+          showSnackbar({ message: "Failed to send message" });
+          sentryTrackError(error);
+        }
       } catch (error) {
-        showSnackbar({ message: "Failed to send message" });
+        showSnackbar({ message: "Failed to create conversation" });
         sentryTrackError(error);
       }
     },

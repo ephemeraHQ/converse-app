@@ -17,17 +17,23 @@ import {
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
-import ChatNullState from "../components/ConversationList/ChatNullState";
+import { ConversationContextMenu } from "@/components/ConversationContextMenu";
+import {
+  dmMatchesSearchQuery,
+  groupMatchesSearchQuery,
+} from "@/features/conversation/utils/search";
+import { translate } from "@/i18n";
+import NoResult from "@search/components/NoResult";
+import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
 import ConversationFlashList from "../components/ConversationFlashList";
+import ChatNullState from "../components/ConversationList/ChatNullState";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
 import RequestsButton from "../components/ConversationList/RequestsButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
-import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
-import { NavigationParamList } from "./Navigation/Navigation";
 import { PinnedConversations } from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
-import NoResult from "@search/components/NoResult";
 import {
   useChatStore,
   useCurrentAccount,
@@ -35,19 +41,13 @@ import {
   useSettingsStore,
 } from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
+import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
+import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
+import { useIsSharingMode } from "../features/conversation-list/useIsSharingMode";
 import { ConversationFlatListItem } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
-import { useIsSharingMode } from "../features/conversation-list/useIsSharingMode";
-import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
-import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
-import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
-import { ConversationContextMenu } from "@/components/ConversationContextMenu";
-import { ConversationVersion } from "@xmtp/react-native-sdk";
-import {
-  dmMatchesSearchQuery,
-  groupMatchesSearchQuery,
-} from "@/features/conversation/utils/search";
-import { translate } from "@/i18n";
+import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 type Props = {
   searchBarRef:
@@ -105,7 +105,10 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const requestsCount = useConversationListRequestCount();
 
   const showChatNullState =
-    items?.length === 0 && !searchQuery && !showInitialLoad;
+    items?.length === 0 &&
+    !searchQuery &&
+    !showInitialLoad &&
+    requestsCount === 0;
 
   useEffect(() => {
     if (!initialLoadDoneOnce) {

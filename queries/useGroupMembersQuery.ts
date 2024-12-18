@@ -48,7 +48,7 @@ export const useGroupMembersQuery = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupQuery({ account, topic });
   const enabled = !!group && !!topic;
   return useQuery<GroupMembersSelectData>(
     groupMembersQueryConfig(account, group, enabled)
@@ -59,7 +59,7 @@ export const useGroupMembersConversationScreenQuery = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupQuery({ account, topic });
   const enabled = !!group && !!topic;
   return useQuery<GroupMembersSelectData>(
     groupMembersQueryConfig(account, group, enabled)

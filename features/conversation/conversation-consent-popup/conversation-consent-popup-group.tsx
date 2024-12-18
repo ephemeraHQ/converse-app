@@ -1,32 +1,32 @@
+import { useCurrentAccount } from "@/data/store/accountsStore";
 import {
   ConsentPopupButton,
   ConsentPopupButtonsContainer,
   ConsentPopupContainer,
   ConsentPopupTitle,
 } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup.design-system";
-import { useCurrentAccount } from "@/data/store/accountsStore";
-import { useCurrentConversationTopic } from "../conversation.store-context";
 import { useRouter } from "@/navigation/useNavigation";
-import { getGroupNameQueryData } from "@/queries/useGroupNameQuery";
+import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useGroupConsent } from "@hooks/useGroupConsent";
 import { translate } from "@i18n";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
 import React, { useCallback } from "react";
 import { useColorScheme } from "react-native";
+import { useCurrentConversationTopic } from "../conversation.store-context";
 
 export function GroupConsentPopup() {
   const topic = useCurrentConversationTopic();
 
   const navigation = useRouter();
 
-  const currentAccount = useCurrentAccount()!;
-
   const colorScheme = useColorScheme();
 
   const { blockGroup, allowGroup } = useGroupConsent(topic);
 
-  const groupName = getGroupNameQueryData(currentAccount, topic);
+  const account = useCurrentAccount()!;
+
+  const { data: groupName } = useGroupNameQuery({ account, topic });
 
   const onBlock = useCallback(async () => {
     groupRemoveRestoreHandler(

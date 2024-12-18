@@ -1,4 +1,4 @@
-import { createV3ConversationListQueryObserver } from "@/queries/useV3ConversationListQuery";
+import { createConversationListQueryObserver } from "@/queries/useConversationListQuery";
 import { subscribeToNotifications } from "./subscribeToNotifications";
 import logger from "@/utils/logger";
 
@@ -14,7 +14,10 @@ export const setupAccountTopicSubscription = (account: string) => {
   logger.info(
     `[setupAccountTopicSubscription] subscribing to account ${account}`
   );
-  const observer = createV3ConversationListQueryObserver(account, "sync");
+  const observer = createConversationListQueryObserver({
+    account,
+    context: "sync",
+  });
   let previous: number | undefined;
   const unsubscribe = observer.subscribe((conversationList) => {
     if (conversationList.data && conversationList.dataUpdatedAt !== previous) {

@@ -1,4 +1,3 @@
-import { queryClient } from "@/queries/queryClient";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client";
 import { useGroupQuery } from "@queries/useGroupQuery";
 import { useQuery } from "@tanstack/react-query";
@@ -18,11 +17,11 @@ export const useGroupPermissionsQuery = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupQuery({ account, topic });
   return useQuery(getGroupPermissionsQueryOptions({ account, topic, group }));
 };
 
-export function getGroupPermissionsQueryOptions(args: {
+function getGroupPermissionsQueryOptions(args: {
   account: string;
   topic: ConversationTopic;
   group: GroupWithCodecsType | undefined | null;
@@ -36,15 +35,4 @@ export function getGroupPermissionsQueryOptions(args: {
       }),
     queryKey: groupPermissionsQueryKey(account, topic),
   };
-}
-
-export function getGroupPermissionLevel(args: {
-  account: string;
-  topic: ConversationTopic;
-  group: GroupWithCodecsType | undefined | null;
-}) {
-  const { account, topic, group } = args;
-  return queryClient.getQueryData<IGetGroupPermissionPolicySet>(
-    getGroupPermissionsQueryOptions({ account, topic, group }).queryKey
-  );
 }

@@ -1,64 +1,56 @@
+import { captureError } from "@/utils/capture-error";
+import {
+  getGroupQueryData,
+  updateGroupQueryData,
+  useGroupQuery,
+} from "@queries/useGroupQuery";
 import { useMutation } from "@tanstack/react-query";
-import logger from "@utils/logger";
-import { sentryTrackError } from "@utils/sentry";
-
-import { useGroupQuery } from "@queries/useGroupQuery";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { setGroupDescriptionMutationKey } from "./MutationKeys";
-import {
-  cancelGroupDescriptionQuery,
-  getGroupDescriptionQueryData,
-} from "./useGroupDescriptionQuery";
-import { handleGroupDescriptionUpdate } from "@/utils/groupUtils/handleGroupDescriptionUpdate";
 
 export const useGroupDescriptionMutation = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupQuery({ account, topic });
   return useMutation({
-    mutationKey: setGroupDescriptionMutationKey(account, topic!),
-    mutationFn: async (groupDescription: string) => {
+    mutationKey: setGroupDescriptionMutationKey(account, topic),
+    mutationFn: async (description: string) => {
       if (!group || !account || !topic) {
-        return;
+        throw new Error(
+          "Missing group, account, or topic in useGroupDescriptionMutation"
+        );
       }
-      await group.updateGroupDescription(groupDescription);
-      return groupDescription;
+      group.updateGroupDescription(description);
+      return description;
     },
-    onMutate: async (groupDescription: string) => {
-      if (!topic) {
-        return;
+    onMutate: async (description: string) => {
+      const previousGroup = getGroupQueryData({ account, topic });
+      if (previousGroup) {
+        updateGroupQueryData({
+          account,
+          topic,
+          updates: {
+            description,
+          },
+        });
       }
-      await cancelGroupDescriptionQuery(account, topic);
-      const previousGroupDescription = getGroupDescriptionQueryData(
-        account,
-        topic
-      );
-      handleGroupDescriptionUpdate({
-        account,
-        topic,
-        description: groupDescription,
-      });
-      return { previousGroupDescription };
+
+      return { previousGroupDescription: previousGroup?.description };
     },
     onError: (error, _variables, context) => {
-      logger.warn("onError useGroupDescriptionMutation");
-      sentryTrackError(error);
-      if (context?.previousGroupDescription === undefined) {
-        return;
+      captureError(error);
+      const { previousGroupDescription } = context || {};
+
+      if (previousGroupDescription) {
+        updateGroupQueryData({
+          account,
+          topic,
+          updates: {
+            description: previousGroupDescription,
+          },
+        });
       }
-      if (!topic) {
-        return;
-      }
-      handleGroupDescriptionUpdate({
-        account,
-        topic,
-        description: context.previousGroupDescription,
-      });
-    },
-    onSuccess: (data, variables, context) => {
-      logger.debug("onSuccess useGroupDescriptionMutation");
-      // refreshGroup(account, topic);
     },
   });
 };

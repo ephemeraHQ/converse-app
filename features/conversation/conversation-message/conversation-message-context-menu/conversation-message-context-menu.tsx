@@ -60,7 +60,10 @@ const Content = memo(function Content(props: {
   const account = useCurrentAccount()!;
   const topic = useCurrentConversationTopic();
   const messageContextMenuStore = useMessageContextMenuStore();
-  const { data: conversation } = useConversationQuery(account, topic);
+  const { data: conversation } = useConversationQuery({
+    account,
+    topic,
+  });
   const { data: currentUserInboxId } = useCurrentAccountInboxId();
   const { bySender } = useConversationMessageReactions(messageId!);
 

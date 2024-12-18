@@ -48,19 +48,16 @@ import { isConversationDm } from "@/features/conversation/utils/is-conversation-
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useConversationQuery } from "@/queries/useConversationQuery";
-import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
 } from "@/utils/xmtpRN/client.types";
 import { useCurrentAccount } from "@data/store/accountsStore";
-import { Button } from "@design-system/Button/Button";
 import { Center } from "@design-system/Center";
 import { Text } from "@design-system/Text";
 import { translate } from "@i18n/translate";
 import { useRouter } from "@navigation/useNavigation";
 import { useConversationMessages } from "@queries/useConversationMessages";
-import { useAppTheme } from "@theme/useAppTheme";
 import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
 import React, {
   memo,
@@ -86,7 +83,10 @@ export const Conversation = memo(function Conversation(props: {
   const navigation = useRouter();
 
   const { data: conversation, isLoading: isLoadingConversation } =
-    useConversationQuery(currentAccount, topic);
+    useConversationQuery({
+      account: currentAccount,
+      topic,
+    });
 
   useLayoutEffect(() => {
     if (!conversation) {
@@ -362,58 +362,11 @@ const ConversationMessageGestures = memo(function ConversationMessageGestures({
 });
 
 const DmConversationEmpty = memo(function DmConversationEmpty() {
+  // Will never really be empty anyway because to create the DM conversation the user has to send a first message
   return null;
 });
 
 const GroupConversationEmpty = memo(() => {
-  const { theme } = useAppTheme();
-
-  const currentAccount = useCurrentAccount()!;
-  const topic = useCurrentConversationTopic();
-
-  const { data: groupName } = useGroupNameQuery(currentAccount, topic);
-
-  const { data: conversation } = useConversationQuery(currentAccount, topic);
-
-  const sendMessage = useSendMessage({
-    conversation: conversation!,
-  });
-
-  const handleSend = useCallback(() => {
-    sendMessage({
-      content: {
-        text: "👋",
-      },
-    });
-  }, [sendMessage]);
-
-  return (
-    <Center
-      style={{
-        flexGrow: 1,
-        flexDirection: "column",
-      }}
-    >
-      <Text
-        style={{
-          textAlign: "center",
-        }}
-      >
-        {translate("group_placeholder.placeholder_text", {
-          groupName,
-        })}
-      </Text>
-
-      <Button
-        variant="fill"
-        icon="hand.wave"
-        text={translate("say_hi")}
-        onPress={handleSend}
-        style={{
-          alignSelf: "center",
-          marginTop: theme.spacing.md,
-        }}
-      />
-    </Center>
-  );
+  // Will never really be empty anyway becaue we have group updates
+  return null;
 });
