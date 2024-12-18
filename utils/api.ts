@@ -392,6 +392,11 @@ export const getProfilesForInboxIds = async ({
   logger.info("Fetching profiles for inboxIds", inboxIds);
   const { data } = await api.get("/api/inbox/", {
     params: { ids: inboxIds.join(",") },
+    // todo(lustig) fix this request. it is 401ing after ephemeral account creation.
+    // why I'm delaying - its tied up in a batshit fetcher
+    // thing and I'll have to look into how that ties together with react-query and can't
+    // be bothered right now.
+    // headers: await getXmtpApiHeaders(account),
   });
   return data;
 };
