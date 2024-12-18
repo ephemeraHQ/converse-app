@@ -22,18 +22,6 @@
   // during build via the scripts/build/ios/[preview|prod].js files
   [FIRApp configure];
   
-  
-  // todo - check environment variables from expo/react native and
-    // provide appropriate google services info.plist
-//  NSString *firebasePlist = [[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType:@"plist"];
-//
-//  #if DEBUG
-//      firebasePlist = [[NSBundle mainBundle] pathForResource:@"GoogleService-Info-dev" ofType:@"plist"];
-//  #endif
-//
-//  FIROptions *options = [[FIROptions alloc] initWithContentsOfFile:firebasePlist];
-//  [FIRApp configureWithOptions:options];
-
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
