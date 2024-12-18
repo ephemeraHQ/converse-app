@@ -50,7 +50,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     versionCode: appBuildNumbers.expo.android.versionCode,
     // TODO(lustig): dynamically set this based on env in Android PR for AppCheck
-    googleServicesFile: "./android/google-services.json",
+    // googleServicesFile: "./android/google-services.json",
   },
   web: {
     favicon: "./assets/favicon.png",

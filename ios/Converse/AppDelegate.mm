@@ -8,6 +8,34 @@
 
 @implementation AppDelegate
 
+/**
+ * Initializes Firebase with dev environment configuration.
+ * 
+ * Creates FIROptions instance with values from dev configuration
+ * and initializes Firebase SDK.
+ * 
+ * @returns {void}
+ * @sideEffects
+ * - Configures Firebase with dev environment settings
+ * - May throw if configuration fails
+ * 
+ * @example
+ * // Basic usage in didFinishLaunching
+ * [self initializeFirebase];
+ */
+- (void)initializeFirebase {
+    FIROptions *options = [[FIROptions alloc] 
+        initWithGoogleAppID:@"1:564961909146:ios:779bcea169541560bd0223"
+                GCMSenderID:@"564961909146"];
+    
+    options.APIKey = @"AIzaSyD5G_3H8Q1wzUiRTuv9SefDyjlJxigHJh8";
+    options.bundleID = @"com.converse.dev";
+    options.projectID = @"converse-unshut-labs";
+    options.storageBucket = @"converse-unshut-labs.firebasestorage.app";
+    
+    [FIRApp configureWithOptions:options];
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   self.moduleName = @"main";
@@ -18,21 +46,8 @@
 
   [RNFBAppCheckModule sharedInstance];
 
-  // Firebase Configuration is provided via Google Services/GoogleServices-Info-<env>.plist and the proper file is copied
-  // during build via the scripts/build/ios/[preview|prod].js files
-  [FIRApp configure];
-  
-  
-  // todo - check environment variables from expo/react native and
-    // provide appropriate google services info.plist
-//  NSString *firebasePlist = [[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType:@"plist"];
-//
-//  #if DEBUG
-//      firebasePlist = [[NSBundle mainBundle] pathForResource:@"GoogleService-Info-dev" ofType:@"plist"];
-//  #endif
-//
-//  FIROptions *options = [[FIROptions alloc] initWithContentsOfFile:firebasePlist];
-//  [FIRApp configureWithOptions:options];
+  // Initialize Firebase with custom configuration
+  [self initializeFirebase];
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }

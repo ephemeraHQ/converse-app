@@ -157,16 +157,16 @@ There are certain times where this flow does not work as intended. For example:
 
 ## Firebase Configuration
 
-Firebase config files are not stored in git for security. New team members need to:
+Firebase config files are not stored in this `git` repo for security. New team members need to:
 
 1. Obtain the Firebase config files from the private repository at https://github.com/ephemeraHQ/converse-app-env
 2. Copy them into the correct locations:
 
 iOS:
 
-- ios/Google Services/GoogleService-Info.plist (prod)
-- ios/Google Service-Info-preview.plist (preview)
-- ios/Google Service-Info-prod.plist (dev)
+- ios/Google Services/GoogleService-Info.plist (dev)
+- ios/Google Services/GoogleService-Info-preview.plist (preview)
+- ios/Google Services/GoogleService-Info-prod.plist (prod)
 
 Android:
 

@@ -206,6 +206,9 @@ type XmtpApiHeaders = {
 export async function getXmtpApiHeaders(
   account: string
 ): Promise<XmtpApiHeaders> {
+  if (!account) {
+    throw new Error("[getXmtpApiHeaders] No account provided");
+  }
   const secureMmkv = await getSecureMmkvForAccount(account);
   let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
 
@@ -536,6 +539,7 @@ export const checkUsernameValid = async (
 ): Promise<string> => {
   const { data } = await api.get("/api/profile/username/valid", {
     params: { address, username },
+    headers: await getXmtpApiHeaders(address),
   });
   return data;
 };
