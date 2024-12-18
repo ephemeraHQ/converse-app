@@ -70,6 +70,9 @@ const ENV = {
     ),
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/UDv3aYZONQGc6_XPJY6Ch",
+    appCheckDebugToken: isAndroid
+      ? undefined
+      : process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
   },
   preview: {
     ...defaultConfig,
@@ -88,6 +91,7 @@ const ENV = {
     ].flatMap((domain) => [`https://${domain}`, `http://${domain}`, domain]),
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
+    appCheckDebugToken: undefined,
   },
   prod: {
     ...defaultConfig,
@@ -121,10 +125,11 @@ const ENV = {
     },
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
+    appCheckDebugToken: undefined,
   },
 } as const;
 
-const getConfig = () => {
+export const getConfig = () => {
   if (__DEV__) {
     return ENV.dev;
   } else if (Constants.expoConfig?.extra?.ENV === "preview") {

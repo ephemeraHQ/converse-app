@@ -42,6 +42,7 @@ import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
 import "./utils/splash/splash";
 import "./features/notifications/utils";
+import { setupAppAttest } from "@utils/appCheck";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -64,6 +65,10 @@ xmtpEngine.start();
 const App = () => {
   const styles = useStyles();
   const debugRef = useRef();
+
+  useEffect(() => {
+    setupAppAttest();
+  }, []);
 
   useCoinbaseWalletListener(true, coinbaseUrl);
 

@@ -8,9 +8,6 @@
       "developmentClient": true,
       "distribution": "internal",
       "channel": "development",
-      "env": {
-        "EXPO_ENV": "dev"
-      },
       "node": "20.15.1",
       "ios": {
         "cocoapods": "1.14.3"
