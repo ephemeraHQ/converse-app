@@ -1,6 +1,7 @@
 import { DependencyFlavor, DependencyFlavors } from "./flavors.type";
 
 export function determineDependencyFlavor(): DependencyFlavor {
+  // @ts-ignore
   if (typeof jest !== "undefined" || process.env.JEST_WORKER_ID !== undefined) {
     return DependencyFlavors.jest;
   }
