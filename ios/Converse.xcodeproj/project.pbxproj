@@ -101,10 +101,6 @@
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Converse/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		1581A1112D12066900FAFD98 /* Google Services */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Google Services"; sourceTree = "<group>"; };
-/* End PBXFileSystemSynchronizedRootGroup section */
-
 /* Begin PBXFrameworksBuildPhase section */
 		13B07F8C1A680F5B00A75B9A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -140,6 +136,13 @@
 				68FED7E170C7437EB719C8C6 /* noop-file.swift */,
 			);
 			name = Converse;
+			sourceTree = "<group>";
+		};
+		1581A1112D12066900FAFD98 /* Google Services */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = "Google Services";
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
@@ -277,9 +280,6 @@
 			dependencies = (
 				4C56DB602BA444B700E84A23 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				1581A1112D12066900FAFD98 /* Google Services */,
-			);
 			name = Converse;
 			productName = Converse;
 			productReference = 13B07F961A680F5B00A75B9A /* Converse.app */;
@@ -298,9 +298,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				1581A1112D12066900FAFD98 /* Google Services */,
 			);
 			name = ConverseNotificationExtension;
 			packageProductDependencies = (

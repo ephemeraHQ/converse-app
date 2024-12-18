@@ -69,6 +69,12 @@ target 'Converse' do
         config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
         config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
       end
+
+      if ["expo-dev-menu", "Main", "ReactNativeCompatibles", "SafeAreaView", "Vendored"].include?(target.name)
+        target.build_configurations.each do |config|
+          config.build_settings['DEFINES_MODULE'] = 'YES' # or 'NO', but must be consistent
+        end
+      end
     end
 
     # This is necessary for Xcode 14, because it signs resource bundles by default
