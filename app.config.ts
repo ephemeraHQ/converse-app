@@ -77,7 +77,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       ? "./scripts/build/android/google-services/dev.json"
       : isPreview
         ? "./scripts/build/android/google-services/preview.json"
-        : "./scripts/build/android/google-services/prod.json",
+        : "./scripts/build/android/google-services/production.json",
     permissions: [
       "INTERNET",
       "READ_EXTERNAL_STORAGE",
