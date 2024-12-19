@@ -1,5 +1,8 @@
 source 'https://rubygems.org'
 
+# Specify minimum bundler version for Ruby 3.3.x compatibility
+gem 'bundler', '>= 2.4.0'
+
 gem 'cocoapods'
 gem 'cocoapods-pod-linkage'
 gem 'activesupport', '>= 6.1.7.3', '< 7.1.0'
