@@ -1,6 +1,5 @@
 import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
 import { ProtocolNotification } from "./protocolNotification";
-import { getProfilesStore } from "@data/store/accountsStore";
 import notifee, {
   AndroidStyle,
   AndroidVisibility,
@@ -54,10 +53,11 @@ export const handleGroupMessageNotification = async (
     (m) => m.inboxId === message.senderAddress
   )?.addresses[0];
   if (!senderAddress) return;
-  const senderSocials = getProfile(
-    senderAddress,
-    getProfilesStore(notification.account).getState().profiles
-  )?.socials;
+  const senderSocials = await getProfile(
+    xmtpClient.address,
+    message.senderAddress,
+    senderAddress
+  );
   const senderName = getPreferredName(senderSocials, senderAddress);
 
   const notificationContent = await getNotificationContent(group, message);

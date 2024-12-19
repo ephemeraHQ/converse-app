@@ -1,4 +1,4 @@
-import { ProfileSocials } from "@data/store/profilesStore";
+import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { getProfilesForInboxIds } from "@utils/api";
 import {
@@ -17,8 +17,10 @@ const profileSocialsQueryKey = (account: string, peerAddress: string) => [
   peerAddress?.toLowerCase(),
 ];
 
-const profileSocialsQueryStorageKey = (account: string, inboxId: InboxId) =>
-  profileSocialsQueryKey(account, inboxId).join("-");
+export const inboxProfileSocialsQueryStorageKey = (
+  account: string,
+  inboxId: InboxId
+) => profileSocialsQueryKey(account, inboxId).join("-");
 
 const profileSocials = create({
   fetcher: async (inboxIds: InboxId[]) => {
@@ -35,7 +37,7 @@ const profileSocials = create({
 const fetchInboxProfileSocials = async (account: string, inboxId: InboxId) => {
   const data = await profileSocials.fetch(inboxId);
 
-  const key = profileSocialsQueryStorageKey(account, inboxId);
+  const key = inboxProfileSocialsQueryStorageKey(account, inboxId);
 
   mmkv.delete(key);
 
@@ -94,7 +96,7 @@ export const fetchInboxProfileSocialsQuery = (
 export const setInboxProfileSocialsQueryData = (
   account: string,
   inboxId: InboxId,
-  data: ProfileSocials,
+  data: IProfileSocials,
   updatedAt?: number
 ) => {
   return queryClient.setQueryData(
@@ -109,10 +111,19 @@ export const setInboxProfileSocialsQueryData = (
 export const getInboxProfileSocialsQueryData = (
   account: string,
   inboxId: InboxId
-): ProfileSocials[] | null => {
+): IProfileSocials[] | null => {
   return (
     queryClient.getQueryData(
       inboxProfileSocialsQueryConfig(account, inboxId).queryKey
     ) ?? null
   );
+};
+
+export const invalidateInboxProfileSocialsQuery = (
+  account: string,
+  inboxId: InboxId
+) => {
+  queryClient.invalidateQueries({
+    queryKey: inboxProfileSocialsQueryConfig(account, inboxId).queryKey,
+  });
 };

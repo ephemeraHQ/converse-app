@@ -1,51 +1,61 @@
-import { useMutation } from "@tanstack/react-query";
-import logger from "@utils/logger";
-import { sentryTrackError } from "@utils/sentry";
-
-import { setGroupNameMutationKey } from "./MutationKeys";
+import { captureError } from "@/utils/capture-error";
 import {
-  cancelGroupNameQuery,
-  getGroupNameQueryData,
-} from "./useGroupNameQuery";
-import { useGroupQuery } from "@queries/useGroupQuery";
+  getGroupQueryData,
+  updateGroupQueryData,
+  useGroupQuery,
+} from "@queries/useGroupQuery";
+import { useMutation } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { handleGroupNameUpdate } from "@/utils/groupUtils/handleGroupNameUpdate";
+import { setGroupNameMutationKey } from "./MutationKeys";
+import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
 
-export const useGroupNameMutation = (
-  account: string,
-  topic: ConversationTopic
-) => {
-  const { data: group } = useGroupQuery(account, topic);
+type IArgs = {
+  account: string;
+  topic: ConversationTopic;
+};
+
+export function useGroupNameMutation(args: IArgs) {
+  const { account, topic } = args;
+  const { data: group } = useGroupQuery({ account, topic });
+
   return useMutation({
     mutationKey: setGroupNameMutationKey(account, topic),
-    mutationFn: async (groupName: string) => {
+    mutationFn: async (name: string) => {
       if (!group || !account || !topic) {
-        return;
+        throw new Error("Missing required data in useGroupNameMutation");
       }
-      await group.updateGroupName(groupName);
-      return groupName;
+
+      await group.updateGroupName(name);
+      return name;
     },
-    onMutate: async (groupName: string) => {
-      await cancelGroupNameQuery(account, topic);
-      const previousGroupName = getGroupNameQueryData(account, topic);
-      handleGroupNameUpdate({ account, topic, name: groupName });
-      return { previousGroupName };
-    },
-    onError: (error, _variables, context) => {
-      logger.warn("onError useGroupNameMutation");
-      sentryTrackError(error);
-      if (context?.previousGroupName === undefined) {
-        return;
+    onMutate: async (name: string) => {
+      const previousGroup = getGroupQueryData({ account, topic });
+      const updates = { name };
+
+      if (previousGroup) {
+        updateGroupQueryData({ account, topic, updates });
       }
-      handleGroupNameUpdate({
+
+      updateConversationInConversationListQuery({
         account,
         topic,
-        name: context.previousGroupName,
+        conversationUpdate: updates,
+      });
+
+      return { previousGroup };
+    },
+    onError: (error, _variables, context) => {
+      captureError(error);
+
+      const { previousGroup } = context || {};
+
+      const updates = { name: previousGroup?.name ?? "" };
+      updateGroupQueryData({ account, topic, updates });
+      updateConversationInConversationListQuery({
+        account,
+        topic,
+        conversationUpdate: updates,
       });
     },
-    onSuccess: (data, variables, context) => {
-      logger.debug("onSuccess useGroupNameMutation");
-      // refreshGroup(account, topic);
-    },
   });
-};
+}

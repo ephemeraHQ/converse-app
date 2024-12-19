@@ -4,10 +4,8 @@ import { usePreferredAvatarUri } from "@hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@hooks/usePreferredName";
 import { useProfileSocials } from "@hooks/useProfileSocials";
 import { useRouter } from "@navigation/useNavigation";
-import { AvatarSizes } from "@styles/sizes";
-import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@theme/useAppTheme";
 import { useCallback } from "react";
-import { ImageStyle, Platform } from "react-native";
 
 type NewConversationTitleProps = {
   peerAddress: string;
@@ -18,7 +16,7 @@ export const NewConversationTitle = ({
 }: NewConversationTitleProps) => {
   const navigation = useRouter();
 
-  const { themed } = useAppTheme();
+  const { theme } = useAppTheme();
 
   const onPress = useCallback(() => {
     if (peerAddress) {
@@ -44,16 +42,10 @@ export const NewConversationTitle = ({
         displayAvatar && (
           <Avatar
             uri={preferredAvatarUri ?? undefined}
-            size={AvatarSizes.conversationTitle}
-            style={themed($avatar)}
+            size={theme.avatarSize.md}
           />
         )
       }
     />
   );
 };
-
-const $avatar: ThemedStyle<ImageStyle> = (theme) => ({
-  marginRight: Platform.OS === "android" ? theme.spacing.lg : theme.spacing.xxs,
-  marginLeft: Platform.OS === "ios" ? theme.spacing.zero : -theme.spacing.xxs,
-});

@@ -8,7 +8,7 @@ export const useGroupPinnedFrameQuery = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupQuery({ account, topic });
   return useQuery({
     queryKey: groupPinnedFrameQueryKey(account, topic!),
     queryFn: async () => {

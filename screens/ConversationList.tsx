@@ -17,37 +17,36 @@ import {
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
-import ChatNullState from "../components/ConversationList/ChatNullState";
-import ConversationFlashList from "../components/ConversationFlashList";
-import NewConversationButton from "../components/ConversationList/NewConversationButton";
-import RequestsButton from "../components/ConversationList/RequestsButton";
-import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
-import InitialLoad from "../components/InitialLoad";
-import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
-import { NavigationParamList } from "./Navigation/Navigation";
-import { PinnedConversations } from "../components/PinnedConversations/PinnedConversations";
-import Recommendations from "../components/Recommendations/Recommendations";
-import NoResult from "@search/components/NoResult";
-import {
-  useChatStore,
-  useCurrentAccount,
-  useProfilesStore,
-  useSettingsStore,
-} from "../data/store/accountsStore";
-import { useSelect } from "../data/store/storeHelpers";
-import { ConversationFlatListItem } from "../utils/conversation";
-import { converseEventEmitter } from "../utils/events";
-import { useIsSharingMode } from "../features/conversation-list/useIsSharingMode";
-import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
-import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
-import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
 import { ConversationContextMenu } from "@/components/ConversationContextMenu";
-import { ConversationVersion } from "@xmtp/react-native-sdk";
 import {
   dmMatchesSearchQuery,
   groupMatchesSearchQuery,
 } from "@/features/conversation/utils/search";
 import { translate } from "@/i18n";
+import NoResult from "@search/components/NoResult";
+import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
+import ConversationFlashList from "../components/ConversationFlashList";
+import ChatNullState from "../components/ConversationList/ChatNullState";
+import NewConversationButton from "../components/ConversationList/NewConversationButton";
+import RequestsButton from "../components/ConversationList/RequestsButton";
+import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
+import InitialLoad from "../components/InitialLoad";
+import { PinnedConversations } from "../components/PinnedConversations/PinnedConversations";
+import Recommendations from "../components/Recommendations/Recommendations";
+import {
+  useChatStore,
+  useCurrentAccount,
+  useSettingsStore,
+} from "../data/store/accountsStore";
+import { useSelect } from "../data/store/storeHelpers";
+import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
+import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
+import { useIsSharingMode } from "../features/conversation-list/useIsSharingMode";
+import { ConversationFlatListItem } from "../utils/conversation";
+import { converseEventEmitter } from "../utils/events";
+import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 type Props = {
   searchBarRef:
@@ -66,7 +65,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     searchQuery,
     searchBarFocused,
     setSearchBarFocused,
-    initialLoadDoneOnce,
     openedConversationTopic,
     setSearchQuery,
   } = useChatStore(
@@ -84,7 +82,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const { ephemeralAccount } = useSettingsStore(
     useSelect(["peersStatus", "ephemeralAccount"])
   );
-  const profiles = useProfilesStore((s) => s.profiles);
   const pinnedConversations = useChatStore((s) => s.pinnedConversationTopics);
   const currentAccount = useCurrentAccount();
   const {
@@ -105,14 +102,10 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const requestsCount = useConversationListRequestCount();
 
   const showChatNullState =
-    items?.length === 0 && !searchQuery && !showInitialLoad;
-
-  useEffect(() => {
-    if (!initialLoadDoneOnce) {
-      // First login, let's refresh the profile
-      // refreshProfileForAddress(currentAccount!, currentAccount!);
-    }
-  }, [initialLoadDoneOnce, currentAccount]);
+    items?.length === 0 &&
+    !searchQuery &&
+    !showInitialLoad &&
+    requestsCount === 0;
 
   useEffect(() => {
     const getFilteredItems = async () => {
@@ -147,7 +140,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     } else {
       setFlatListItems({ items: items ?? [], searchQuery });
     }
-  }, [searchQuery, profiles, items, currentAccount]);
+  }, [searchQuery, items, currentAccount]);
 
   // Search bar hook
   useHeaderSearchBar({

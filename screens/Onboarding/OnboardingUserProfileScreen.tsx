@@ -7,7 +7,6 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import logger from "@utils/logger";
-import { getProfile } from "@utils/profile";
 import { ImagePickerAsset } from "expo-image-picker";
 import React, { useCallback, useRef, useState } from "react";
 import {
@@ -21,6 +20,7 @@ import {
 } from "react-native";
 
 import { useAppTheme } from "@theme/useAppTheme";
+import { uploadFile } from "@utils/attachment/uploadFile";
 import Avatar from "../../components/Avatar";
 import Button from "../../components/Button/Button";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
@@ -31,7 +31,6 @@ import config from "../../config";
 import {
   getCurrentAccount,
   useCurrentAccount,
-  useProfilesStore,
   useSettingsStore,
 } from "../../data/store/accountsStore";
 import { setAuthStatus } from "../../data/store/authStore";
@@ -52,7 +51,11 @@ import {
 } from "../../utils/str";
 import { NavigationParamList } from "../Navigation/Navigation";
 import { needToShowNotificationsPermissions } from "./Onboarding.utils";
-import { uploadFile } from "@utils/attachment/uploadFile";
+import { useProfileSocials } from "@/hooks/useProfileSocials";
+import {
+  invalidateProfileSocialsQuery,
+  prefetchProfileSocialsQuery,
+} from "@/queries/useProfileSocialsQuery";
 
 export type ProfileType = {
   avatar?: string;
@@ -185,14 +188,10 @@ export const OnboardingUserProfileScreen = (
 };
 
 export function useProfile() {
-  const address = useCurrentAccount()!; // We assume if someone goes to this screen we have address
+  const currentAccount = useCurrentAccount()!; // We assume if someone goes to this screen we have address
 
-  const profiles = useProfilesStore((state) => state.profiles);
-
-  const currentUserUsername = getProfile(
-    address,
-    profiles
-  )?.socials?.userNames?.find((u) => u.isPrimary);
+  const { data: socials } = useProfileSocials(currentAccount);
+  const currentUserUsername = socials?.userNames?.find((u) => u.isPrimary);
 
   const { ephemeralAccount } = useSettingsStore(
     useSelect(["ephemeralAccount"])
@@ -204,11 +203,11 @@ export function useProfile() {
   );
 
   const defaultEphemeralUsername = formatEphemeralUsername(
-    address,
+    currentAccount,
     usernameWithoutSuffix
   );
   const defaultEphemeralDisplayName = formatEphemeralDisplayName(
-    address,
+    currentAccount,
     currentUserUsername?.displayName
   );
 
@@ -225,6 +224,7 @@ export function useProfile() {
   return { profile, setProfile };
 }
 
+// TODO: Put somewhere else
 export function useAddPfp() {
   const [asset, setAsset] = useState<ImagePickerAsset>();
 
@@ -387,7 +387,7 @@ export function useCreateOrUpdateProfileInfo() {
           account: address,
           profile: { ...profile, avatar: publicAvatar },
         });
-        // await refreshProfileForAddress(address, address);
+        await invalidateProfileSocialsQuery(address, address);
         return { success: true };
       } catch (e: any) {
         logger.error(e, { context: "UserProfile: claiming and refreshing" });

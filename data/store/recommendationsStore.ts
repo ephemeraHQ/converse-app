@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-import { ProfileSocials } from "./profilesStore";
-import { zustandMMKVStorage } from "../../utils/mmkv";
+import { IProfileSocials } from "@/features/profiles/profile-types";
+import { zustandMMKVStorage } from "@/utils/mmkv";
 
 // Recommended profiles for each account
 
@@ -13,7 +13,7 @@ type RecommendationTag = {
 
 export type RecommendationData = {
   tags: RecommendationTag[];
-  profile?: ProfileSocials;
+  profile?: IProfileSocials;
 
   // This is legacy @todo => remove at some point
   ens?: string;

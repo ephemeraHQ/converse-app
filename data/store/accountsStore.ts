@@ -4,7 +4,6 @@ import { create, StoreApi, UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { ChatStoreType, initChatStore } from "./chatStore";
-import { initProfilesStore, ProfilesStoreType } from "./profilesStore";
 import {
   initRecommendationsStore,
   RecommendationsStoreType,
@@ -39,7 +38,6 @@ export const initStores = (account: string) => {
     // If adding a persisted store here, please add
     // the deletion method in deleteStores
     storesByAccount[account] = {
-      profiles: initProfilesStore(account),
       settings: initSettingsStore(account),
       recommendations: initRecommendationsStore(account),
       chat: initChatStore(account),
@@ -222,7 +220,6 @@ export const useAccountsStore = create<AccountsStoreStype>()(
 
 // Add here the type of each store data
 type AccountStoreDataType = {
-  profiles: ProfilesStoreType;
   settings: SettingsStoreType;
   recommendations: RecommendationsStoreType;
   chat: ChatStoreType;
@@ -349,12 +346,6 @@ const accountStoreHook = <T extends keyof AccountStoreDataType>(
 
   return use;
 };
-
-export const useProfilesStore = currentAccountStoreHook("profiles");
-export const useProfilesStoreForAccount = (account: string) =>
-  accountStoreHook("profiles", account);
-export const getProfilesStore = (account: string) =>
-  getAccountStore(account).profiles;
 
 export const useSettingsStore = currentAccountStoreHook("settings");
 export const useSettingsStoreForAccount = (account: string) =>

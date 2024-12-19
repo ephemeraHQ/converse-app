@@ -1,21 +1,21 @@
+import { useConversationListQuery } from "@/queries/useConversationListQuery";
 import logger from "@/utils/logger";
 import { getMessageContentType } from "@/utils/xmtpRN/content-types/content-types";
 import { getV3SpamScore } from "@data/helpers/conversations/spamScore";
 import { useCurrentAccount } from "@data/store/accountsStore";
-import { useV3ConversationListQuery } from "@queries/useV3ConversationListQuery";
 import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
 import { useEffect, useState } from "react";
 
 export const useV3RequestItems = () => {
   const currentAccount = useCurrentAccount();
-  const { data, ...rest } = useV3ConversationListQuery(
-    currentAccount!,
-    {
+  const { data, ...rest } = useConversationListQuery({
+    account: currentAccount!,
+    queryOptions: {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
     },
-    "useV3RequestItems"
-  );
+    context: "useV3RequestItems",
+  });
   const [likelyNotSpam, setLikelyNotSpam] = useState<
     ConversationWithCodecsType[]
   >([]);

@@ -1,9 +1,8 @@
+import { captureError } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
-import { sentryTrackError } from "@utils/sentry";
-import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
-
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 import { promoteSuperAdminMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
@@ -17,7 +16,7 @@ export const usePromoteToSuperAdminMutation = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupQuery({ account, topic });
 
   return useMutation({
     mutationKey: promoteSuperAdminMutationKey(account, topic!),
@@ -48,8 +47,7 @@ export const usePromoteToSuperAdminMutation = (
       return { previousGroupMembers };
     },
     onError: (error, _variables, context) => {
-      logger.warn("onError usePromoteToSuperAdminMutation");
-      sentryTrackError(error);
+      captureError(error);
       if (context?.previousGroupMembers === undefined) {
         return;
       }

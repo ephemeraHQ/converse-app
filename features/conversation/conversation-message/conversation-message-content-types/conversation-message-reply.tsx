@@ -1,11 +1,11 @@
 import { useSelect } from "@/data/store/storeHelpers";
 import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image";
-import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
   BubbleContainer,
   BubbleContentContainer,
 } from "@/features/conversation/conversation-message/conversation-message-bubble";
 import { MessageText } from "@/features/conversation/conversation-message/conversation-message-text";
+import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useCurrentConversationTopic } from "@/features/conversation/conversation.store-context";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { getConversationMessages } from "@/queries/useConversationMessages";
@@ -110,8 +110,6 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
   const { theme } = useAppTheme();
 
   const fromMe = useMessageContextStoreContext((s) => s.fromMe);
-
-  const currentAccount = useCurrentAccount()!;
 
   const replyMessageReference =
     useConversationMessageForReplyMessage(referenceMessageId);

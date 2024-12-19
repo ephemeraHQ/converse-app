@@ -1,5 +1,5 @@
 import { getPreferredUsername } from "../getPreferredUsername";
-import { type ProfileSocials } from "@data/store/profilesStore";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
 
 describe("getPreferredUsername", () => {
   it("should return undefined when no socials provided", () => {
@@ -8,7 +8,7 @@ describe("getPreferredUsername", () => {
   });
 
   it("should return primary username if available", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       userNames: [
         {
           name: "test.cb.id",
@@ -21,7 +21,7 @@ describe("getPreferredUsername", () => {
   });
 
   it("should return primary ENS name if no username", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       ensNames: [
         {
           name: "test.eth",
@@ -34,7 +34,7 @@ describe("getPreferredUsername", () => {
   });
 
   it("should return primary unstoppable domain if no username or ENS", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       unstoppableDomains: [
         {
           domain: "test.crypto",
@@ -47,7 +47,7 @@ describe("getPreferredUsername", () => {
   });
 
   it("should return undefined if no primary identifier found", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       userNames: [
         {
           name: "test.cb.id",

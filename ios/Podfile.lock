@@ -18,7 +18,7 @@ PODS:
     - DGSwiftUtilities (~> 0.29)
   - CryptoSwift (1.8.3)
   - CSecp256k1 (0.2.0)
-  - DGSwiftUtilities (0.29.0)
+  - DGSwiftUtilities (0.36.0)
   - DoubleConversion (1.1.6)
   - EASClient (0.12.0):
     - ExpoModulesCore

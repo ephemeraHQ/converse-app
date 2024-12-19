@@ -16,7 +16,7 @@ import {
   bottomSheetModalRef,
   resetMessageReactionsDrawer,
   useMessageReactionsRolledUpReactions,
-} from "./conversation-message-reaction-drawer.service.";
+} from "./conversation-message-reaction-drawer.service";
 
 export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
   const { theme, themed } = useAppTheme();

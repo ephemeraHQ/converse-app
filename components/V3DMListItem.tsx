@@ -1,32 +1,32 @@
-import { DmWithCodecsType } from "@utils/xmtpRN/client";
-import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
-import { useCallback, useMemo, useRef } from "react";
-import Avatar from "./Avatar";
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
-import { AvatarSizes } from "@styles/sizes";
-import { getMinimalDate } from "@utils/date";
-import { useColorScheme } from "react-native";
-import { IIconName } from "@design-system/Icon/Icon.types";
-import { useDmPeerInboxOnConversationList } from "@queries/useDmPeerInboxOnConversationList";
-import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
-import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
-import { navigate } from "@utils/navigation";
-import { Swipeable } from "react-native-gesture-handler";
-import { useSelect } from "@data/store/storeHelpers";
-import { Haptics } from "@utils/haptics";
-import { runOnJS } from "react-native-reanimated";
-import { translate } from "@i18n/index";
-import { useToggleReadStatus } from "../features/conversation-list/hooks/useToggleReadStatus";
-import { useMessageText } from "../features/conversation-list/hooks/useMessageText";
-import { useRoute } from "@navigation/useNavigation";
-import { useConversationIsUnread } from "../features/conversation-list/hooks/useMessageIsUnread";
 import {
   resetConversationListContextMenuStore,
   setConversationListContextMenuConversationData,
 } from "@/features/conversation-list/ConversationListContextMenu.store";
 import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
-import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
+import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
+import { useSelect } from "@data/store/storeHelpers";
+import { IIconName } from "@design-system/Icon/Icon.types";
+import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
+import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
+import { translate } from "@i18n/index";
+import { useRoute } from "@navigation/useNavigation";
+import { AvatarSizes } from "@styles/sizes";
+import { getMinimalDate } from "@utils/date";
+import { Haptics } from "@utils/haptics";
+import { navigate } from "@utils/navigation";
+import { DmWithCodecsType } from "@utils/xmtpRN/client";
+import { useCallback, useMemo, useRef } from "react";
+import { useColorScheme } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
+import { runOnJS } from "react-native-reanimated";
+import { useConversationIsUnread } from "../features/conversation-list/hooks/useMessageIsUnread";
+import { useMessageText } from "../features/conversation-list/hooks/useMessageText";
+import { useToggleReadStatus } from "../features/conversation-list/hooks/useToggleReadStatus";
+import Avatar from "./Avatar";
+import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
+import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
 
 type V3DMListItemProps = {
   conversation: DmWithCodecsType;
@@ -58,10 +58,10 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
     useSelect(["setPinnedConversations"])
   );
 
-  const { data: peer } = useDmPeerInboxOnConversationList(
-    currentAccount!,
-    conversation
-  );
+  const { data: peerInboxId } = useDmPeerInboxId({
+    account: currentAccount!,
+    topic,
+  });
 
   const timestamp = conversation?.lastMessage?.sentNs ?? 0;
   const timeToShow = getMinimalDate(timestamp);
@@ -79,8 +79,8 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
   const { theme } = useAppTheme();
 
   const messageText = useMessageText(conversation.lastMessage);
-  const preferredName = usePreferredInboxName(peer);
-  const avatarUri = usePreferredInboxAvatar(peer);
+  const preferredName = usePreferredInboxName(peerInboxId);
+  const avatarUri = usePreferredInboxAvatar(peerInboxId);
 
   const toggleReadStatus = useToggleReadStatus({
     topic,

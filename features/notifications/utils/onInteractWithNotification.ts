@@ -7,7 +7,7 @@ import {
 import { getTopicFromV3Id } from "@utils/groupUtils/groupId";
 import { useAccountsStore } from "@data/store/accountsStore";
 import type { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
-import { fetchPersistedConversationListQuery } from "@/queries/useV3ConversationListQuery";
+import { fetchPersistedConversationListQuery } from "@/queries/useConversationListQuery";
 import { resetNotifications } from "./resetNotifications";
 
 export const onInteractWithNotification = async (

@@ -1,5 +1,5 @@
 import { getPrimaryNames } from "../getPrimaryNames";
-import { type ProfileSocials } from "@data/store/profilesStore";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
 
 describe("getPrimaryNames", () => {
   it("should return empty array when no socials provided", () => {
@@ -8,7 +8,7 @@ describe("getPrimaryNames", () => {
   });
 
   it("should return primary usernames", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       userNames: [
         {
           name: "test.cb.id",
@@ -25,7 +25,7 @@ describe("getPrimaryNames", () => {
   });
 
   it("should return primary ENS names", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       ensNames: [
         {
           name: "test.eth",
@@ -42,7 +42,7 @@ describe("getPrimaryNames", () => {
   });
 
   it("should return primary unstoppable domains", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       unstoppableDomains: [
         {
           domain: "test.crypto",
@@ -59,7 +59,7 @@ describe("getPrimaryNames", () => {
   });
 
   it("should return farcaster usernames", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       farcasterUsernames: [
         {
           username: "test",
@@ -71,7 +71,7 @@ describe("getPrimaryNames", () => {
   });
 
   it("should return lens handles", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       lensHandles: [
         {
           handle: "test",
@@ -85,7 +85,7 @@ describe("getPrimaryNames", () => {
   });
 
   it("should return all primary names from multiple sources", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       userNames: [
         {
           name: "test.cb.id",

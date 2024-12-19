@@ -21,7 +21,7 @@ import { AxiosInstance } from "axios";
 
 import {} from "../groupInvites.utils";
 import { JoinGroupResult } from "./joinGroup.types";
-import { V3ConversationListType } from "@queries/useV3ConversationListQuery";
+import { ConversationListQueryData } from "@/queries/useConversationListQuery";
 import { entify } from "@/queries/entify";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client";
 
@@ -92,11 +92,11 @@ export class JoinGroupClient {
       account: string
     ): Promise<ConversationDataEntity> => {
       const { fetchConversationListQuery } = await import(
-        "@queries/useV3ConversationListQuery"
+        "@/queries/useConversationListQuery"
       );
 
-      const conversationList: V3ConversationListType =
-        await fetchConversationListQuery(account);
+      const conversationList: ConversationListQueryData =
+        await fetchConversationListQuery({ account });
 
       const conversationEntity: ConversationDataEntity = entify(
         conversationList,

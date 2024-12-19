@@ -1,6 +1,6 @@
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
-import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { translate } from "@i18n";
 import { actionSheetColors, textSecondaryColor } from "@styles/colors";
@@ -13,17 +13,19 @@ import { getGroupMemberActions } from "@utils/groupUtils/getGroupMemberActions";
 import { sortGroupMembersByAdminStatus } from "@utils/groupUtils/sortGroupMembersByAdminStatus";
 import logger from "@utils/logger";
 import { navigate } from "@utils/navigation";
-import { getPreferredName, getProfile } from "@utils/profile";
+import { getPreferredInboxName } from "@utils/profile";
 import { FC, memo, useMemo } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 
 import { useGroupPermissionPolicyQuery } from "@queries/useGroupPermissionPolicyQuery";
 import type { GroupWithCodecsType } from "@utils/xmtpRN/client";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
 import { captureErrorWithFriendlyToast } from "@/utils/capture-error";
+import { useInboxProfilesSocials } from "@/hooks/useInboxProfilesSocials";
+import { IProfileSocials } from "@/features/profiles/profile-types";
 
 type GroupScreenMembersTableProps = {
   topic: ConversationTopic | undefined;
@@ -48,7 +50,24 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
       currentAccount,
       (topic ?? group?.topic)!
     );
-    const profiles = useProfilesStore((s) => s.profiles);
+
+    const memberInboxIds = useMemo(
+      () => members?.ids.map((m) => m) ?? [],
+      [members]
+    );
+
+    const data = useInboxProfilesSocials(memberInboxIds);
+
+    const mappedData = useMemo(() => {
+      const profileMap: Record<InboxId, IProfileSocials[] | null | undefined> =
+        {};
+      data.forEach(({ data: socials }, index) => {
+        const memberId = members?.ids[index];
+        if (!memberId) return;
+        profileMap[memberId] = socials;
+      });
+      return profileMap;
+    }, [data, members]);
 
     const currentAccountIsSuperAdmin = useMemo(
       () => getAddressIsSuperAdmin(members, currentAccount),
@@ -67,10 +86,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
         const isAdmin = getAccountIsAdmin(members, a.inboxId);
         const isCurrentUser =
           a.address.toLowerCase() === currentAccount.toLowerCase();
-        const preferredName = getPreferredName(
-          getProfile(a.address, profiles)?.socials,
-          a.address
-        );
+        const preferredName = getPreferredInboxName(mappedData[a.inboxId]);
         items.push({
           id: a.inboxId,
           title: `${preferredName}${isCurrentUser ? translate("you_parentheses") : ""}`,
@@ -183,8 +199,8 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
       currentAccount,
       currentAccountIsSuperAdmin,
       groupPermissionPolicy,
+      mappedData,
       members,
-      profiles,
       promoteToAdmin,
       promoteToSuperAdmin,
       removeMember,

@@ -1,5 +1,5 @@
 import { getPreferredInboxName } from "../getPreferredInboxName";
-import { type ProfileSocials } from "@data/store/profilesStore";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
 
 describe("getPreferredInboxName", () => {
   it("should return shortened address when no socials provided", () => {
@@ -14,7 +14,7 @@ describe("getPreferredInboxName", () => {
   });
 
   it("should return primary username if available", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       userNames: [
         {
           name: "test.cb.id",
@@ -28,7 +28,7 @@ describe("getPreferredInboxName", () => {
   });
 
   it("should return primary ENS name if no username", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       ensNames: [
         {
           name: "test.eth",
@@ -42,7 +42,7 @@ describe("getPreferredInboxName", () => {
   });
 
   it("should return primary unstoppable domain if no username or ENS", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       unstoppableDomains: [
         {
           domain: "test.crypto",
@@ -55,7 +55,7 @@ describe("getPreferredInboxName", () => {
   });
 
   it("should return shortened address if no primary names found", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       address: "0x1234567890123456789012345678901234567890",
     };
     const result = getPreferredInboxName([socials]);

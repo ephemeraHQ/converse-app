@@ -15,7 +15,7 @@ import logger from "./logger";
 import type { TransactionDetails } from "./transaction";
 import config from "../config";
 import type { TopicData } from "../data/store/chatStore";
-import type { ProfileSocials } from "../data/store/profilesStore";
+import type { IProfileSocials } from "@/features/profiles/profile-types";
 import type { Frens } from "../data/store/recommendationsStore";
 import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
 import type { InboxId } from "@xmtp/react-native-sdk";
@@ -377,7 +377,7 @@ export const resolveFarcasterUsername = async (
 
 export const getProfilesForAddresses = async (
   addresses: string[]
-): Promise<{ [address: string]: ProfileSocials }> => {
+): Promise<{ [address: string]: IProfileSocials }> => {
   const { data } = await api.post("/api/profile/batch", {
     addresses,
   });
@@ -388,7 +388,7 @@ export const getProfilesForInboxIds = async ({
   inboxIds,
 }: {
   inboxIds: string[];
-}): Promise<{ [inboxId: InboxId]: ProfileSocials[] }> => {
+}): Promise<{ [inboxId: InboxId]: IProfileSocials[] }> => {
   logger.info("Fetching profiles for inboxIds", inboxIds);
   const { data } = await api.get("/api/inbox/", {
     params: { ids: inboxIds.join(",") },
@@ -404,7 +404,7 @@ export const getProfilesForInboxIds = async ({
 export const searchProfiles = async (
   query: string,
   account: string
-): Promise<{ [address: string]: ProfileSocials }> => {
+): Promise<{ [address: string]: IProfileSocials }> => {
   const { data } = await api.get("/api/profile/search", {
     headers: await getXmtpApiHeaders(account),
     params: { query },
