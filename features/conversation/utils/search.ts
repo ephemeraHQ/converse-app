@@ -3,7 +3,7 @@ import { getPreferredInboxName } from "@/utils/profile";
 import type {
   DmWithCodecsType,
   GroupWithCodecsType,
-} from "@/utils/xmtpRN/client";
+} from "@/utils/xmtpRN/client.types";
 import type { InboxId } from "@xmtp/react-native-sdk";
 
 type DmSearchParams = {

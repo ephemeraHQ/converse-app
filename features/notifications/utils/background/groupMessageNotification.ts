@@ -1,28 +1,28 @@
-import {
-  ConverseXmtpClientType,
-  GroupWithCodecsType,
-} from "@utils/xmtpRN/client";
-import { ProtocolNotification } from "./protocolNotification";
+import { normalizeTimestamp } from "@/utils/date";
 import notifee, {
   AndroidPerson,
   AndroidStyle,
   AndroidVisibility,
 } from "@notifee/react-native";
 import {
-  getProfile,
-  getPreferredName,
   getPreferredAvatar,
+  getPreferredName,
+  getProfile,
 } from "@utils/profile";
-import { androidChannel } from "../setupAndroidNotificationChannel";
-import { getNotificationContent } from "./notificationContent";
-import { computeSpamScoreGroupMessage } from "./notificationSpamScore";
-import { notificationAlreadyShown } from "./alreadyShown";
+import {
+  ConverseXmtpClientType,
+  GroupWithCodecsType,
+} from "@utils/xmtpRN/client.types";
 import {
   ConversationVersion,
   Group,
   type ConversationTopic,
 } from "@xmtp/react-native-sdk";
-import { normalizeTimestamp } from "@/utils/date";
+import { androidChannel } from "../setupAndroidNotificationChannel";
+import { notificationAlreadyShown } from "./alreadyShown";
+import { getNotificationContent } from "./notificationContent";
+import { computeSpamScoreGroupMessage } from "./notificationSpamScore";
+import { ProtocolNotification } from "./protocolNotification";
 
 export const isGroupMessageContentTopic = (contentTopic: string) => {
   return contentTopic.startsWith("/xmtp/mls/1/g-");

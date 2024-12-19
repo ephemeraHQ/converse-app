@@ -3,6 +3,10 @@ import {
   getConversationMessages,
   useConversationMessages,
 } from "@/queries/useConversationMessages";
+import {
+  DecodedMessageWithCodecsType,
+  SupportedCodecsType,
+} from "@/utils/xmtpRN/client.types";
 import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/content-types/coinbasePayment";
 import { getMessageContentType } from "@/utils/xmtpRN/content-types/content-types";
 import {
@@ -11,10 +15,6 @@ import {
 } from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
 import { getReadableProfile } from "@utils/getReadableProfile";
-import {
-  DecodedMessageWithCodecsType,
-  SupportedCodecsType,
-} from "@utils/xmtpRN/client";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   ConversationTopic,
@@ -63,9 +63,8 @@ export function isGroupUpdatedMessage(
 }
 export function isReplyMessage(
   message: DecodedMessageWithCodecsType
-): message is DecodedMessage<ReplyCodec, SupportedCodecsType> {
-  const isReply = getMessageContentType(message.contentTypeId) === "reply";
-  return isReply;
+): message is DecodedMessage<ReplyCodec> {
+  return getMessageContentType(message.contentTypeId) === "reply";
 }
 export function isRemoteAttachmentMessage(
   message: DecodedMessageWithCodecsType

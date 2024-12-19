@@ -1,6 +1,6 @@
 import { ConversationVersion } from "@xmtp/react-native-sdk";
 import { TopicData, TopicsData } from "../data/store/chatStore";
-import { ConversationWithCodecsType } from "./xmtpRN/client";
+import { ConversationWithCodecsType } from "./xmtpRN/client.types";
 
 export type ConversationFlatListHiddenRequestItem = {
   topic: "hiddenRequestsButton";

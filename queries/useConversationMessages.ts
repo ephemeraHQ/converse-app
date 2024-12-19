@@ -1,11 +1,12 @@
 import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
-import { useQuery } from "@tanstack/react-query";
+import { UseQueryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
-} from "@utils/xmtpRN/client";
+} from "@/utils/xmtpRN/client.types";
 import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
 import {
   InboxId,
@@ -28,13 +29,14 @@ export const conversationMessagesQueryFn = async (
   conversation: ConversationWithCodecsType,
   options?: MessagesOptions
 ) => {
-  logger.info("[useConversationMessages] queryFn fetching messages");
-
+  logger.info("[useConversationMessages] queryFn fetching messages...");
   if (!conversation) {
     throw new Error("Conversation not found in conversationMessagesQueryFn");
   }
-
   const messages = await conversation.messages(options);
+  logger.info(
+    `[useConversationMessages] queryFn fetched ${messages.length} messages`
+  );
   return processMessages({ messages });
 };
 
@@ -60,7 +62,15 @@ export const useConversationMessages = (
   account: string,
   topic: ConversationTopic
 ) => {
-  return useQuery(getConversationMessagesQueryOptions(account, topic));
+  const query = useQuery(getConversationMessagesQueryOptions(account, topic));
+
+  useAppStateHandlers({
+    onForeground: () => {
+      query.refetch();
+    },
+  });
+
+  return query;
 };
 
 export const getConversationMessages = (
@@ -114,7 +124,7 @@ export const prefetchConversationMessages = async (
 function getConversationMessagesQueryOptions(
   account: string,
   topic: ConversationTopic
-) {
+): UseQueryOptions<ConversationMessagesQueryData> {
   const conversation = getConversationQueryData({ account, topic });
   return {
     queryKey: conversationMessagesQueryKey(account, topic),

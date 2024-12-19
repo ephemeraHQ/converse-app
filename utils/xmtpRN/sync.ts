@@ -4,11 +4,11 @@ import { Client } from "@xmtp/xmtp-js";
 import { AppState } from "react-native";
 import { getChatStore } from "@data/store/accountsStore";
 import {
-  ConverseXmtpClientType,
   getXmtpClientFromAddress,
   reconnectXmtpClientsDbConnections,
   xmtpClientByAccount,
 } from "./client";
+import { ConverseXmtpClientType } from "./client.types";
 import {
   stopStreamingConversations,
   streamConversations,

@@ -5,7 +5,7 @@ import Avatar from "@components/Avatar";
 import { useGroupConversationListAvatarInfo } from "@features/conversation-list/useGroupConversationListAvatarInfo";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
-import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import {
   resetConversationListContextMenuStore,
   setConversationListContextMenuConversationData,

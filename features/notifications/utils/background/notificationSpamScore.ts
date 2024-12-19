@@ -2,7 +2,7 @@ import {
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
   GroupWithCodecsType,
-} from "@utils/xmtpRN/client";
+} from "@/utils/xmtpRN/client.types";
 import { isContentType } from "@/utils/xmtpRN/content-types/content-types";
 import { getSendersSpamScores } from "@/utils/api";
 import { InboxId } from "@xmtp/react-native-sdk";

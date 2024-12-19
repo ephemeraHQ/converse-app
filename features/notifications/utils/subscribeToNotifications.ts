@@ -6,7 +6,7 @@ import logger from "@utils/logger";
 import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
-} from "@utils/xmtpRN/client";
+} from "@/utils/xmtpRN/client.types";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { useAppStore } from "@data/store/appStore";
 import { subscribingByAccount } from "./subscribingByAccount";

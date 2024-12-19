@@ -1,5 +1,5 @@
 import logger from "@/utils/logger";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { getConversationByTopicByAccount } from "@/utils/xmtpRN/conversations";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";

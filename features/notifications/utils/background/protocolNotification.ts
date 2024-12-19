@@ -1,5 +1,5 @@
 import { getAccountsList } from "@data/store/accountsStore";
-import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { z } from "zod";
 import logger from "@utils/logger";

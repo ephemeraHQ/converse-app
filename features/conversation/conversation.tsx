@@ -1,4 +1,3 @@
-import { VStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
@@ -21,22 +20,14 @@ import { ConversationMessage } from "@/features/conversation/conversation-messag
 import { MessageContextMenu } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu";
 import {
   MessageContextMenuStoreProvider,
-  useMessageContextMenuStore,
   useMessageContextMenuStoreContext,
 } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
-import {
-  IMessageGesturesOnLongPressArgs,
-  MessageGestures,
-} from "@/features/conversation/conversation-message/conversation-message-gestures";
 import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import { MessageReactionsDrawer } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer";
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { ConversationMessageRepliable } from "@/features/conversation/conversation-message/conversation-message-repliable";
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
-import {
-  MessageContextStoreProvider,
-  useMessageContextStore,
-} from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
   getConvosMessageStatus,
   isAnActualMessage,
@@ -67,6 +58,8 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+import { ConversationMessageGestures } from "./conversation-message-gestures";
+import { ConversationMessageHighlighted } from "./conversation-message-highlighted";
 import {
   ConversationStoreProvider,
   useCurrentConversationTopic,
@@ -286,80 +279,26 @@ const ConversationMessagesListItem = memo(
         previousMessage={previousMessage}
         nextMessage={nextMessage}
       >
-        <VStack>
-          <ConversationMessageTimestamp />
-          <ConversationMessageRepliable onReply={handleReply}>
-            <ConversationMessageLayout>
-              <ConversationMessageGestures>
+        <ConversationMessageTimestamp />
+        <ConversationMessageRepliable onReply={handleReply}>
+          <ConversationMessageLayout>
+            <ConversationMessageGestures>
+              <ConversationMessageHighlighted>
                 <ConversationMessage message={message} />
-              </ConversationMessageGestures>
-              <ConversationMessageReactions />
-              {isLatestMessageSentByCurrentUser && (
-                <ConversationMessageStatus
-                  status={getConvosMessageStatus(message)}
-                />
-              )}
-            </ConversationMessageLayout>
-          </ConversationMessageRepliable>
-        </VStack>
+              </ConversationMessageHighlighted>
+            </ConversationMessageGestures>
+            <ConversationMessageReactions />
+            {isLatestMessageSentByCurrentUser && (
+              <ConversationMessageStatus
+                status={getConvosMessageStatus(message)}
+              />
+            )}
+          </ConversationMessageLayout>
+        </ConversationMessageRepliable>
       </MessageContextStoreProvider>
     );
   }
 );
-
-const ConversationMessageGestures = memo(function ConversationMessageGestures({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const messageStore = useMessageContextStore();
-
-  const messageContextMenuStore = useMessageContextMenuStore();
-
-  const handleLongPress = useCallback(
-    (e: IMessageGesturesOnLongPressArgs) => {
-      const messageId = messageStore.getState().messageId;
-      // const message = messageStore.getState().message;
-      // const previousMessage = messageStore.getState().previousMessage;
-      // const nextMessage = messageStore.getState().nextMessage;
-
-      messageContextMenuStore.getState().setMessageContextMenuData({
-        messageId,
-        itemRectX: e.pageX,
-        itemRectY: e.pageY,
-        itemRectHeight: e.height,
-        itemRectWidth: e.width,
-        // Need to have MessageContextStoreProvider here.
-        // Not the cleanest...
-        // Might want to find another solution later but works for now.
-        // Solution might be to remove the context and just pass props
-        // messageComponent: (
-        //   <MessageContextStoreProvider
-        //     message={message}
-        //     previousMessage={previousMessage}
-        //     nextMessage={nextMessage}
-        //   >
-        //     {children}
-        //   </MessageContextStoreProvider>
-        // ),
-      });
-    },
-    [messageContextMenuStore, messageStore]
-  );
-
-  const handleTap = useCallback(() => {
-    const isShowingTime = !messageStore.getState().isShowingTime;
-    messageStore.setState({
-      isShowingTime,
-    });
-  }, [messageStore]);
-
-  return (
-    <MessageGestures onLongPress={handleLongPress} onTap={handleTap}>
-      {children}
-    </MessageGestures>
-  );
-});
 
 const DmConversationEmpty = memo(function DmConversationEmpty() {
   // Will never really be empty anyway because to create the DM conversation the user has to send a first message
