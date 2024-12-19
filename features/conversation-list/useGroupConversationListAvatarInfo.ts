@@ -1,10 +1,6 @@
+import { useProfileSocialsQueries } from "@/queries/useProfileSocialsQuery";
 import logger from "@/utils/logger";
-import { useInboxProfileSocialsQueries } from "@queries/useInboxProfileSocialsQuery";
-import {
-  getPreferredInboxAddress,
-  getPreferredInboxAvatar,
-  getPreferredInboxName,
-} from "@utils/profile";
+import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client.types";
 import { Group, type InboxId, type Member } from "@xmtp/react-native-sdk";
 import { useEffect, useMemo, useState } from "react";
@@ -34,11 +30,12 @@ export const useGroupConversationListAvatarInfo = (
     fetchMembers();
   }, [group]);
 
-  const memberInboxIds = useMemo(() => {
-    return members.map((member) => member.inboxId);
-  }, [members]);
+  const memberAddresses = useMemo(
+    () => members?.map((m) => m.addresses[0]) ?? [],
+    [members]
+  );
 
-  const data = useInboxProfileSocialsQueries(currentAccount, memberInboxIds);
+  const data = useProfileSocialsQueries(currentAccount, memberAddresses);
 
   const memberData = useMemo(
     () =>
@@ -46,10 +43,13 @@ export const useGroupConversationListAvatarInfo = (
         .map(
           ({ data: socials }, index) =>
             socials && {
-              inboxId: memberInboxIds[index],
-              address: getPreferredInboxAddress(socials) ?? "",
-              uri: getPreferredInboxAvatar(socials),
-              name: getPreferredInboxName(socials),
+              inboxId: members[index].inboxId,
+              address: members[index].addresses[0] ?? "",
+              uri: getPreferredAvatar(socials),
+              name: getPreferredName(
+                socials,
+                members[index].addresses[0] ?? ""
+              ),
             }
         )
         .filter(Boolean) as {
@@ -58,7 +58,7 @@ export const useGroupConversationListAvatarInfo = (
         uri: string | undefined;
         name: string;
       }[],
-    [data, memberInboxIds]
+    [data, members]
   );
 
   return {

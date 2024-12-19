@@ -13,12 +13,11 @@ import { getGroupMemberActions } from "@utils/groupUtils/getGroupMemberActions";
 import { sortGroupMembersByAdminStatus } from "@utils/groupUtils/sortGroupMembersByAdminStatus";
 import logger from "@utils/logger";
 import { navigate } from "@utils/navigation";
-import { getPreferredInboxName } from "@utils/profile";
+import { getPreferredName } from "@utils/profile";
 import { FC, memo, useMemo } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 
 import { IProfileSocials } from "@/features/profiles/profile-types";
-import { useInboxProfilesSocials } from "@/hooks/useInboxProfilesSocials";
 import { useGroupMembersConversationScreenQuery } from "@/queries/useGroupMembersQuery";
 import { captureErrorWithFriendlyToast } from "@/utils/capture-error";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
@@ -27,6 +26,7 @@ import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
+import { useProfilesSocials } from "@/hooks/useProfilesSocials";
 
 type GroupScreenMembersTableProps = {
   topic: ConversationTopic;
@@ -54,15 +54,15 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
       (topic ?? group?.topic)!
     );
 
-    const memberInboxIds = useMemo(
-      () => members?.ids.map((m) => m) ?? [],
+    const memberAddresses = useMemo(
+      () => members?.ids.map((m) => members?.byId[m].addresses[0]) ?? [],
       [members]
     );
 
-    const data = useInboxProfilesSocials(memberInboxIds);
+    const data = useProfilesSocials(memberAddresses);
 
     const mappedData = useMemo(() => {
-      const profileMap: Record<InboxId, IProfileSocials[] | null | undefined> =
+      const profileMap: Record<InboxId, IProfileSocials | null | undefined> =
         {};
       data.forEach(({ data: socials }, index) => {
         const memberId = members?.ids[index];
@@ -89,7 +89,10 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
         const isAdmin = getAccountIsAdmin(members, a.inboxId);
         const isCurrentUser =
           a.address.toLowerCase() === currentAccount.toLowerCase();
-        const preferredName = getPreferredInboxName(mappedData[a.inboxId]);
+        const preferredName = getPreferredName(
+          mappedData[a.inboxId],
+          a.address
+        );
         items.push({
           id: a.inboxId,
           title: `${preferredName}${isCurrentUser ? translate("you_parentheses") : ""}`,
