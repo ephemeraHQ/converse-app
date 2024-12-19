@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:564961909146:android:93ca1fb8d079f640bd0223",
+        "mobilesdk_app_id": "1:564961909146:android:2faf5c4a2bbcd133bd0223",
         "android_client_info": {
-          "package_name": "com.converse.dev"
+          "package_name": "com.converse.preview"
         }
       },
       "oauth_client": [

@@ -72,7 +72,7 @@ export function useSendMessage(props: {
         const generatedMessageId = getRandomId();
 
         const textMessage: DecodedMessage<TextCodec> = {
-          id: generatedMessageId,
+          id: generatedMessageId as MessageId,
           client: conversation.client,
           contentTypeId: variables.content.text
             ? contentTypesPrefixes.text

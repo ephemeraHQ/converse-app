@@ -59,11 +59,11 @@ export const ReplyPreview = memo(function ReplyPreview() {
   });
 
   const inboxName = usePreferredInboxName(
-    replyMessage?.senderAddress as InboxId
+    replyMessage?.senderInboxId as InboxId
   );
 
   const replyingTo = replyMessage
-    ? replyMessage.senderAddress === currentAccountInboxId
+    ? replyMessage.senderInboxId === currentAccountInboxId
       ? `Replying to you`
       : inboxName
         ? `Replying to ${inboxName}`
