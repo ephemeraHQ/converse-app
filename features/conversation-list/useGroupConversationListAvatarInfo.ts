@@ -1,3 +1,4 @@
+import logger from "@/utils/logger";
 import { useInboxProfileSocialsQueries } from "@queries/useInboxProfileSocialsQuery";
 import {
   getPreferredInboxAddress,
@@ -5,7 +6,7 @@ import {
   getPreferredInboxName,
 } from "@utils/profile";
 import { GroupWithCodecsType } from "@utils/xmtpRN/client";
-import type { InboxId, Member } from "@xmtp/react-native-sdk";
+import { Group, type InboxId, type Member } from "@xmtp/react-native-sdk";
 import { useEffect, useMemo, useState } from "react";
 
 export const useGroupConversationListAvatarInfo = (
@@ -21,6 +22,12 @@ export const useGroupConversationListAvatarInfo = (
       return;
     }
     const fetchMembers = async () => {
+      if (typeof group.members !== "function") {
+        logger.error(
+          `Group members is not a function instance of group is ${group instanceof Group}`
+        );
+        return;
+      }
       const members = await group.members();
       setMembers(members || []);
     };

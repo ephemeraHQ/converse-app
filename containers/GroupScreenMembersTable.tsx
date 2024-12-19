@@ -26,9 +26,10 @@ import TableView, {
 import { captureErrorWithFriendlyToast } from "@/utils/capture-error";
 import { useInboxProfilesSocials } from "@/hooks/useInboxProfilesSocials";
 import { IProfileSocials } from "@/features/profiles/profile-types";
+import { useGroupMembersConversationScreenQuery } from "@/queries/useGroupMembersQuery";
 
 type GroupScreenMembersTableProps = {
-  topic: ConversationTopic | undefined;
+  topic: ConversationTopic;
   group: GroupWithCodecsType | undefined | null;
 };
 
@@ -37,9 +38,11 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
     const colorScheme = useColorScheme();
     const currentAccount = useCurrentAccount() as string;
     const styles = useStyles();
-
+    const { data: members } = useGroupMembersConversationScreenQuery(
+      currentAccount,
+      topic
+    );
     const {
-      members,
       promoteToSuperAdmin,
       promoteToAdmin,
       revokeAdmin,
