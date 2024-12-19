@@ -17,17 +17,14 @@ import {
 } from "react-native";
 
 import Avatar from "./Avatar";
-import {
-  useProfilesStore,
-  useCurrentAccount,
-} from "../data/store/accountsStore";
+import { useCurrentAccount } from "../data/store/accountsStore";
 import { useGroupMembers } from "../hooks/useGroupMembers";
 import {
-  getPreferredAvatar,
-  getPreferredName,
-  getProfile,
+  getPreferredInboxAvatar,
+  getPreferredInboxName,
 } from "../utils/profile";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useGroupMembersSocials } from "@/hooks/useGroupMembersSocials";
 
 const MAIN_CIRCLE_RADIUS = 50;
 const MAX_VISIBLE_MEMBERS = 4;
@@ -195,7 +192,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
   const { members: groupMembers } = useGroupMembers(topic!);
-  const profiles = useProfilesStore((s) => s.profiles);
+  const socialsData = useGroupMembersSocials(groupMembers);
   const account = useCurrentAccount();
 
   const memoizedAndSortedGroupMembers = useMemo(() => {
@@ -204,14 +201,14 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
       (acc: { address: string; uri?: string; name?: string }[], id) => {
         const member = groupMembers.byId[id];
         const address = member.addresses[0].toLowerCase();
-        const senderSocials = getProfile(address, profiles)?.socials;
+        const senderSocials = socialsData[id];
         const shouldExclude =
           excludeSelf && account && address === account.toLowerCase();
         if (shouldExclude) return acc;
         const newMember = {
           address,
-          uri: getPreferredAvatar(senderSocials),
-          name: getPreferredName(senderSocials, address),
+          uri: getPreferredInboxAvatar(senderSocials),
+          name: getPreferredInboxName(senderSocials),
         };
         acc.push(newMember);
         return acc;
@@ -220,7 +217,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
     );
     // Sort the members so that members with avatars are positioned first
     return members.sort((a, b) => (a.uri ? -1 : 1));
-  }, [groupMembers, profiles, account, excludeSelf]);
+  }, [groupMembers, socialsData, excludeSelf, account]);
 
   const membersToDisplay = pendingGroupMembers || memoizedAndSortedGroupMembers;
   const memberCount = membersToDisplay.length;

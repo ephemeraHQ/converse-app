@@ -1,8 +1,8 @@
-import { type ProfileSocials } from "@data/store/profilesStore";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
 import { shortAddress } from "@utils/strings/shortAddress";
 
 export function getPreferredName(
-  socials: ProfileSocials | undefined,
+  socials: IProfileSocials | undefined | null,
   peerAddress: string
 ): string {
   const userName = socials?.userNames?.find((e) => e.isPrimary) || null;

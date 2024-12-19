@@ -12,14 +12,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "@design-system/Text";
 import { translate } from "@i18n";
 import { ProfileSearchItem } from "../components/ProfileSearchItem";
-import { ProfileSocials } from "@data/store/profilesStore";
+import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useAppTheme, ThemedStyle } from "@theme/useAppTheme";
 
 type ProfileSearchProps = {
   navigation: NativeStackNavigationProp<any>;
-  profiles: { [address: string]: ProfileSocials };
+  profiles: { [address: string]: IProfileSocials };
   groupMode?: boolean;
-  addToGroup?: (member: ProfileSocials & { address: string }) => void;
+  addToGroup?: (member: IProfileSocials & { address: string }) => void;
 };
 
 export default function ProfileSearch({

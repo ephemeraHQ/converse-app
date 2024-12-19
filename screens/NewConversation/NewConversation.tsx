@@ -34,10 +34,9 @@ import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import config from "../../config";
 import {
   currentAccount,
-  getProfilesStore,
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
-import { ProfileSocials } from "../../data/store/profilesStore";
+import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useSelect } from "../../data/store/storeHelpers";
 import { useGroupMembers } from "../../hooks/useGroupMembers";
 import { searchProfiles } from "../../utils/api";
@@ -46,6 +45,7 @@ import { navigate } from "../../utils/navigation";
 import { isEmptyObject } from "../../utils/objects";
 import { getPreferredName } from "../../utils/profile";
 import { NewConversationModalParams } from "./NewConversationModal";
+import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 
 export default function NewConversation({
   route,
@@ -61,7 +61,7 @@ export default function NewConversation({
   });
   const [group, setGroup] = useState({
     enabled: !!route.params?.addingToGroupTopic,
-    members: [] as (ProfileSocials & { address: string })[],
+    members: [] as (IProfileSocials & { address: string })[],
   });
 
   const { addMembers, members } = useGroupMembers(
@@ -146,7 +146,7 @@ export default function NewConversation({
     loading: false,
     error: "",
     inviteToConverse: "",
-    profileSearchResults: {} as { [address: string]: ProfileSocials },
+    profileSearchResults: {} as { [address: string]: IProfileSocials },
   });
 
   const {
@@ -226,9 +226,7 @@ export default function NewConversation({
 
                 if (!isEmptyObject(profiles)) {
                   // Let's save the profiles for future use
-                  getProfilesStore(currentAccount())
-                    .getState()
-                    .saveSocials(profiles);
+                  setProfileRecordSocialsQueryData(currentAccount(), profiles);
                   setStatus({
                     loading: false,
                     error: "",
@@ -265,7 +263,7 @@ export default function NewConversation({
 
           if (!isEmptyObject(profiles)) {
             // Let's save the profiles for future use
-            getProfilesStore(currentAccount()).getState().saveSocials(profiles);
+            setProfileRecordSocialsQueryData(currentAccount(), profiles);
             setStatus({
               loading: false,
               error: "",
@@ -297,8 +295,6 @@ export default function NewConversation({
 
   const showRecommendations =
     !status.loading && value.length === 0 && recommendationsFrensCount > 0;
-
-  const profiles = getProfilesStore(currentAccount()).getState().profiles;
 
   const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
 
@@ -422,7 +418,6 @@ export default function NewConversation({
         >
           <Recommendations
             visibility="EMBEDDED"
-            profiles={profiles}
             groupMode={group.enabled}
             groupMembers={group.members}
             addToGroup={async (member) => {

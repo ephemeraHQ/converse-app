@@ -1,7 +1,7 @@
-import { type ProfileSocials } from "@data/store/profilesStore";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
 
 export function getPreferredUsername(
-  socials: ProfileSocials | undefined
+  socials: IProfileSocials | undefined
 ): string | undefined {
   const userName = socials?.userNames?.find((e) => e.isPrimary) || null;
   const ensName = socials?.ensNames?.find((e) => e.isPrimary) || null;

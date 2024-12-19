@@ -1,5 +1,5 @@
 import { getPreferredAvatar } from "../getPreferredAvatar";
-import { type ProfileSocials } from "@data/store/profilesStore";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
 
 describe("getPreferredAvatar", () => {
   it("should return undefined when no socials provided", () => {
@@ -8,7 +8,7 @@ describe("getPreferredAvatar", () => {
   });
 
   it("should return primary username avatar if available", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       userNames: [
         {
           name: "test.cb.id",
@@ -22,7 +22,7 @@ describe("getPreferredAvatar", () => {
   });
 
   it("should return primary ENS avatar if no username avatar", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       ensNames: [
         {
           name: "test.eth",
@@ -36,7 +36,7 @@ describe("getPreferredAvatar", () => {
   });
 
   it("should return undefined if no primary avatar found", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       userNames: [
         {
           name: "test.cb.id",

@@ -8,7 +8,6 @@ import {
   shortDisplayName,
   strByteSize,
 } from "./str";
-import { getProfilesStore } from "../data/store/accountsStore";
 
 jest.mock("react-native", () => ({
   Dimensions: {
