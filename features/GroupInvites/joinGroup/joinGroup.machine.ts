@@ -233,18 +233,27 @@ export const joinGroupMachineLogic = setup({
 
       const invitedConversation: ConversationWithCodecsType | undefined =
         conversation.byId[invitedConversationId];
+
+      if (!invitedConversation) {
+        return false;
+      }
+
       // if this conversation is a DM, we assume the user has membership
       // if this conversation is a Group, we check isGroupActive === true
-      if (invitedConversation.version === ConversationVersion.DM) {
+      if (invitedConversation?.version === ConversationVersion.DM) {
         return true;
       }
 
-      const userHasBeenBlocked =
-        invitedConversation?.version === ConversationVersion.GROUP &&
-        invitedConversation?.isGroupActive === false;
+      // If version is undefined, treat it as not being in the group
+      if (!invitedConversation.version) {
+        return false;
+      }
 
-      const userIsInGroup =
-        !userHasBeenBlocked && invitedConversation !== undefined;
+      const userHasBeenBlocked =
+        invitedConversation.version === ConversationVersion.GROUP &&
+        invitedConversation.isGroupActive === false;
+
+      const userIsInGroup = !userHasBeenBlocked;
       return userIsInGroup;
     },
   },
