@@ -1,5 +1,3 @@
-import { useSelect } from "@/data/store/storeHelpers";
-import { AnimatedVStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
@@ -22,23 +20,14 @@ import { ConversationMessage } from "@/features/conversation/conversation-messag
 import { MessageContextMenu } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu";
 import {
   MessageContextMenuStoreProvider,
-  useMessageContextMenuStore,
   useMessageContextMenuStoreContext,
 } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
-import {
-  IMessageGesturesOnLongPressArgs,
-  MessageGestures,
-} from "@/features/conversation/conversation-message/conversation-message-gestures";
 import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import { MessageReactionsDrawer } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer";
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { ConversationMessageRepliable } from "@/features/conversation/conversation-message/conversation-message-repliable";
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
-import {
-  MessageContextStoreProvider,
-  useMessageContextStore,
-  useMessageContextStoreContext,
-} from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
   getConvosMessageStatus,
   isAnActualMessage,
@@ -50,7 +39,6 @@ import { isConversationDm } from "@/features/conversation/utils/is-conversation-
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useConversationQuery } from "@/queries/useConversationQuery";
-import { useAppTheme } from "@/theme/useAppTheme";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
@@ -70,17 +58,10 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import {
-  cancelAnimation,
-  interpolate,
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import { ConversationMessageGestures } from "./conversation-message-gestures";
+import { ConversationMessageHighlighted } from "./conversation-message-highlighted";
 import {
   ConversationStoreProvider,
-  useConversationStore,
   useCurrentConversationTopic,
 } from "./conversation.store-context";
 
@@ -318,124 +299,6 @@ const ConversationMessagesListItem = memo(
     );
   }
 );
-
-const ConversationMessageHighlighted = memo(
-  function ConversationMessageHighlighted(props: {
-    children: React.ReactNode;
-  }) {
-    const { children } = props;
-
-    const { theme } = useAppTheme();
-
-    const conversationStore = useConversationStore();
-    const isHighlightedAV = useSharedValue(0);
-
-    const { messageId } = useMessageContextStoreContext(
-      useSelect(["messageId"])
-    );
-
-    useEffect(() => {
-      const unsubscribe = conversationStore.subscribe(
-        (state) => state.highlightedMessageId,
-        (highlightedMessageId) => {
-          cancelAnimation(isHighlightedAV);
-
-          if (!highlightedMessageId) {
-            isHighlightedAV.value = withSpring(0, {
-              stiffness: theme.animation.spring.stiffness,
-              damping: theme.animation.spring.damping,
-            });
-            return;
-          }
-
-          if (messageId !== highlightedMessageId) {
-            return;
-          }
-
-          // Animate to highlighted state
-          isHighlightedAV.value = withSpring(
-            1,
-            {
-              stiffness: theme.animation.spring.stiffness,
-              damping: theme.animation.spring.damping,
-            },
-            () => {
-              // Reset highlighted message id after animation
-              runOnJS(conversationStore.setState)({
-                highlightedMessageId: undefined,
-              });
-            }
-          );
-        }
-      );
-      return () => unsubscribe();
-    }, [conversationStore, isHighlightedAV, theme, messageId]);
-
-    const animatedStyle = useAnimatedStyle(() => ({
-      opacity: interpolate(isHighlightedAV.value, [0, 1], [1, 0.5]),
-    }));
-
-    return (
-      <AnimatedVStack style={[{ width: "100%" }, animatedStyle]}>
-        {children}
-      </AnimatedVStack>
-    );
-  }
-);
-
-const ConversationMessageGestures = memo(function ConversationMessageGestures({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const messageStore = useMessageContextStore();
-
-  const messageContextMenuStore = useMessageContextMenuStore();
-
-  const handleLongPress = useCallback(
-    (e: IMessageGesturesOnLongPressArgs) => {
-      const messageId = messageStore.getState().messageId;
-      // const message = messageStore.getState().message;
-      // const previousMessage = messageStore.getState().previousMessage;
-      // const nextMessage = messageStore.getState().nextMessage;
-
-      messageContextMenuStore.getState().setMessageContextMenuData({
-        messageId,
-        itemRectX: e.pageX,
-        itemRectY: e.pageY,
-        itemRectHeight: e.height,
-        itemRectWidth: e.width,
-        // Need to have MessageContextStoreProvider here.
-        // Not the cleanest...
-        // Might want to find another solution later but works for now.
-        // Solution might be to remove the context and just pass props
-        // messageComponent: (
-        //   <MessageContextStoreProvider
-        //     message={message}
-        //     previousMessage={previousMessage}
-        //     nextMessage={nextMessage}
-        //   >
-        //     {children}
-        //   </MessageContextStoreProvider>
-        // ),
-      });
-    },
-    [messageContextMenuStore, messageStore]
-  );
-
-  const handleTap = useCallback(() => {
-    const isShowingTime = !messageStore.getState().isShowingTime;
-    messageStore.setState({
-      isShowingTime,
-    });
-  }, [messageStore]);
-
-  return (
-    <MessageGestures onLongPress={handleLongPress} onTap={handleTap}>
-      {children}
-    </MessageGestures>
-  );
-});
 
 const DmConversationEmpty = memo(function DmConversationEmpty() {
   // Will never really be empty anyway because to create the DM conversation the user has to send a first message
