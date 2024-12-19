@@ -11,6 +11,8 @@ export const onInteractWithNotification = async (
   event: Notifications.NotificationResponse
 ) => {
   logger.debug("[onInteractWithNotification]");
+  // todo(lustig): zod verification of external payloads such as those from
+  // notifications, deep links, etc
   let notificationData = event.notification.request.content.data;
   // Android returns the data in the body as a string
   if (
@@ -54,8 +56,6 @@ export const onInteractWithNotification = async (
 
   if (conversationTopic) {
     await waitForXmtpClientHydration();
-    // todo(lustig): zod verification of external payloads such as those from
-    // notifications, deep links, etc
     const account: string =
       notificationData["account"] || useAccountsStore.getState().currentAccount;
     useAccountsStore.getState().setCurrentAccount(account, false);
