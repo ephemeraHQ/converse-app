@@ -424,7 +424,7 @@ PODS:
   - libwebp/sharpyuv (1.3.2)
   - libwebp/webp (1.3.2):
     - libwebp/sharpyuv
-  - LibXMTP (3.0.10)
+  - LibXMTP (3.0.13)
   - MessagePacker (0.4.7)
   - MMKV (1.3.3):
     - MMKVCore (~> 1.3.3)
@@ -2259,18 +2259,18 @@ PODS:
   - "sqlite3/common (3.45.3+1)"
   - SwiftProtobuf (1.28.2)
   - UMAppLoader (4.6.0)
-  - XMTP (3.0.14):
+  - XMTP (3.0.19):
     - Connect-Swift (= 1.0.0)
     - CryptoSwift (= 1.8.3)
     - CSecp256k1 (~> 0.2)
-    - LibXMTP (= 3.0.10)
+    - LibXMTP (= 3.0.13)
     - SQLCipher (= 4.5.7)
-  - XMTPReactNative (3.1.1):
+  - XMTPReactNative (3.1.4):
     - CSecp256k1 (~> 0.2)
     - ExpoModulesCore
     - MessagePacker
     - SQLCipher (= 4.5.7)
-    - XMTP (= 3.0.14)
+    - XMTP (= 3.0.19)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -2421,7 +2421,7 @@ DEPENDENCIES:
   - Sentry/HybridSDK (= 8.36.0)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 3.0.14)
+  - XMTP (= 3.0.19)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2813,7 +2813,7 @@ SPEC CHECKSUMS:
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
-  LibXMTP: e550ccb4565023eb77f5a2eddd9d5a71cfb9d2b3
+  LibXMTP: 3b4b45c0edd404de164e26c7920af5ea0ebb3e17
   MessagePacker: ab2fe250e86ea7aedd1a9ee47a37083edd41fd02
   MMKV: f902fb6719da13c2ab0965233d8963a59416f911
   MMKVAppExtension: fcf23c6b250cc87db63507bc57be8e6ed378168d

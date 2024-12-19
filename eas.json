@@ -13,7 +13,6 @@
         "cocoapods": "1.16.2"
       },
       "android": {
-        "gradleCommand": ":app:assembleDevDebug",
         "resourceClass": "medium"
       }
     },
@@ -22,7 +21,6 @@
       "channel": "production",
       "android": {
         "buildType": "app-bundle",
-        "gradleCommand": ":app:bundleProdRelease",
         "resourceClass": "large"
       },
       "node": "20.15.1",
@@ -38,9 +36,6 @@
     "preview": {
       "extends": "production",
       "channel": "preview",
-      "android": {
-        "gradleCommand": ":app:bundlePreviewRelease"
-      },
       "env": {
         "EXPO_ENV": "preview"
       },

@@ -161,7 +161,7 @@ func computeSpamScoreV3Message(client: XMTP.Client, conversation: XMTP.Conversat
       // Network consent will override other checks
       return 1
     }
-    let senderInboxId = decodedMessage.senderAddress
+    let senderInboxId = decodedMessage.senderInboxId
     let senderDenied = try await client.preferences.inboxIdState(inboxId: senderInboxId) == .denied
     if senderDenied {
       // Network consent will override other checks

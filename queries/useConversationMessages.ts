@@ -190,7 +190,7 @@ function processMessages(args: {
   for (const reactionMessage of reactionsMessages) {
     const reactionContent = reactionMessage.content() as ReactionContent;
     const referenceMessageId = reactionContent?.reference as MessageId;
-    const senderAddress = reactionMessage.senderAddress as InboxId;
+    const senderAddress = reactionMessage.senderInboxId as InboxId;
 
     if (!reactionContent || !referenceMessageId) {
       continue;
