@@ -1,6 +1,7 @@
 import { Signer as XmtpSigner } from "@xmtp/react-native-sdk";
 import { ethers } from "ethers";
 import { ethereum } from "thirdweb/chains";
+import { LocalAccount } from "viem/accounts";
 
 export const ethersSignerToXmtpSigner = (
   signer: ethers.Signer,
@@ -11,4 +12,14 @@ export const ethersSignerToXmtpSigner = (
   getBlockNumber: () => undefined,
   walletType: () => (isSCW ? "SCW" : "EOA"),
   signMessage: (message: string) => signer.signMessage(message),
+});
+
+export const viemSignerToXmtpSigner = (
+  signer: LocalAccount<any>
+): XmtpSigner => ({
+  getAddress: () => Promise.resolve(signer.address),
+  getChainId: () => ethereum.id, // We don't really care about the chain id because we support https://eips.ethereum.org/EIPS/eip-6492
+  getBlockNumber: () => undefined,
+  walletType: () => "SCW",
+  signMessage: (message: string) => signer.signMessage({ message }),
 });

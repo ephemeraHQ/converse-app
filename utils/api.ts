@@ -35,6 +35,7 @@ import {
   XMTP_IDENTITY_KEY,
 } from "./api.constants";
 import { tryGetAppCheckToken } from "./appCheck";
+import { TurnkeyAuthenticatorParams } from "@turnkey/react-native-passkey-stamper";
 
 export const api = axios.create({
   baseURL: config.apiURI,
@@ -266,6 +267,16 @@ our application on a device that has not been tampered with.
     [XMTP_API_ADDRESS_HEADER_KEY]: account,
     [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
     authorization: `Bearer ${accessToken}`,
+  };
+}
+
+async function getAppCheckTokenHeaders() {
+  const appCheckToken = await tryGetAppCheckToken();
+  if (!appCheckToken) {
+    throw new Error("No App Check Token Available");
+  }
+  return {
+    [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
   };
 }
 
@@ -811,6 +822,25 @@ export const putGroupInviteRequest = async ({
     { status },
     {
       headers: await getXmtpApiHeaders(account),
+    }
+  );
+  return data;
+};
+
+export const createTurnkeySubOrganization = async (
+  authenticatorParams: TurnkeyAuthenticatorParams
+): Promise<{
+  subOrganizationId: string;
+  walletId: string;
+  address: string;
+}> => {
+  const { data } = await api.post(
+    "/api/wallet/create-wallet-turnkey",
+    {
+      authenticatorParams,
+    },
+    {
+      headers: await getAppCheckTokenHeaders(),
     }
   );
   return data;
