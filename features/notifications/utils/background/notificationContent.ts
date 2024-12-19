@@ -64,5 +64,5 @@ const isGroupMessageFromMe = async (
   const message = await client.conversations.findMessage(
     messageId as MessageId
   );
-  return message?.senderAddress === client.inboxId;
+  return message?.senderInboxId === client.inboxId;
 };

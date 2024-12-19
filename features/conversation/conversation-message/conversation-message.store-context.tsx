@@ -82,7 +82,7 @@ function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
       previousMessage: props.previousMessage,
     }),
     sentAt: convertNanosecondsToMilliseconds(props.message.sentNs),
-    senderInboxId: props.message.senderAddress,
+    senderInboxId: props.message.senderInboxId,
     isHighlighted: false,
     isShowingTime: false,
   };

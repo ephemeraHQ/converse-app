@@ -18,5 +18,5 @@ export const isLatestMessageSettledFromPeer = ({
   )
     return false;
   if (!nextMessage) return true;
-  return nextMessage.senderAddress !== message.senderAddress;
+  return nextMessage.senderInboxId !== message.senderInboxId;
 };
