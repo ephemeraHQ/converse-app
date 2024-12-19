@@ -52,6 +52,11 @@ export const en = {
     },
     resendCodeIn: "Resend code in {{seconds}} seconds...",
   },
+  passkey: {
+    title: "Create Passkey",
+    subtitle: "Create a passkey to connect to Converse",
+    createButton: "Create Passkey",
+  },
   createEphemeral: {
     title: "Create an ephemeral account",
     subtitle:

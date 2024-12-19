@@ -6,13 +6,15 @@ import {
 import { ApiKeyStamper } from "@turnkey/api-key-stamper";
 import { TurnkeyClient } from "@turnkey/http";
 import { Buffer } from "buffer";
+import { v4 as uuidv4 } from "uuid";
+import { createAccountWithAddress } from "@turnkey/viem";
 
 const RPID = "dev.converse.xyz";
 const ORG_ID = "ca21dea5-8d5c-485a-93ec-1596d9c30ed2";
 const API_PUBLIC_KEY =
-  "03ac20c5c6e74e5d00ad286ba6d1ed5328ad5220b4ed5de45347868fdaf65c5ea0";
+  "0296d768b0a6e23a20e3ec7de9a5eba9e7559bf4afeeb0e3a33d30cc5764e7233d";
 const API_PRIVATE_KEY =
-  "d7227a8f664744db8e70b7a0ca19daefc69525c47d296f3816230ad954ed09d5";
+  "2b81c8930041480c71e713314316be870a27e1d0c99ebd1ada2c2c237e06b000";
 
 export async function onPasskeyCreate() {
   if (!isSupported()) {
@@ -52,17 +54,34 @@ export async function onPasskeyCreate() {
       },
     });
     console.log("passkey registration succeeded: ", authenticatorParams);
-    const response = await createSubOrganization(authenticatorParams);
-    console.log("created sub-org", response);
-    alert(
-      `Sub-org created! Your ID: ${response.activity.result.createSubOrganizationResultV4?.subOrganizationId}`
+    const {
+      // data: response,
+      client,
+      address,
+    } = await createSubOrganization(authenticatorParams);
+    // console.log("created sub-org", response);
+    // const subOrganizationId =
+    //   response.activity.result.createSubOrganizationResultV7?.subOrganizationId;
+    alert(`Sub-org created! Your address: ${address}`);
+    if (!address) {
+      throw new Error("No address found");
+    }
+    // if (!subOrganizationId) {
+    //   throw new Error("No sub-organization ID found");
+    // }
+    const turnkeyAccount = await createTurnkeyAccount(
+      client,
+      address
+      // subOrganizationId
     );
+    console.log("created turnkey account", turnkeyAccount.address);
+    return turnkeyAccount;
   } catch (e) {
     console.error("error during passkey creation", e);
   }
 }
 
-async function onPasskeySignature() {
+export async function onPasskeySignature() {
   try {
     const stamper = await new PasskeyStamper({
       rpId: RPID,
@@ -78,6 +97,10 @@ async function onPasskeySignature() {
     alert(
       `Successfully logged into sub-organization ${getWhoamiResult.organizationId}`
     );
+    // const address = getWhoamiResult.organization.wallets[0].accounts[0].address;
+    // const turnkeyAccount = await createTurnkeyAccount(client, address);
+    // console.log("created turnkey account", turnkeyAccount.address);
+    // return turnkeyAccount;
   } catch (e) {
     console.error("error during passkey signature", e);
   }
@@ -95,22 +118,69 @@ async function createSubOrganization(
     stamper
   );
 
-  const data = await client.createSubOrganization({
-    type: "ACTIVITY_TYPE_CREATE_SUB_ORGANIZATION_V7",
+  // const data = await client.createSubOrganization({
+  //   type: "ACTIVITY_TYPE_CREATE_SUB_ORGANIZATION_V7",
+  //   timestampMs: String(Date.now()),
+  //   organizationId: ORG_ID,
+  //   parameters: {
+  //     subOrganizationName: `Sub-organization at ${String(Date.now())}`,
+  //     rootQuorumThreshold: 1,
+  //     rootUsers: [
+  //       {
+  //         userName: "Root User",
+  //         apiKeys: [],
+  //         authenticators: [authenticatorParams],
+  //         oauthProviders: [],
+  //       },
+  //     ],
+  //   },
+  // });
+  const walletName = uuidv4();
+  const wallet = await client.createWallet({
+    type: "ACTIVITY_TYPE_CREATE_WALLET",
     timestampMs: String(Date.now()),
     organizationId: ORG_ID,
     parameters: {
-      subOrganizationName: `Sub-organization at ${String(Date.now())}`,
-      rootQuorumThreshold: 1,
-      rootUsers: [
+      walletName,
+      accounts: [
         {
-          userName: "Root User",
-          apiKeys: [],
-          authenticators: [authenticatorParams],
-          oauthProviders: [],
+          curve: "CURVE_SECP256K1",
+          pathFormat: "PATH_FORMAT_BIP32",
+          path: "m/44'/60'/0'/0/0",
+          addressFormat: "ADDRESS_FORMAT_ETHEREUM",
         },
       ],
     },
   });
-  return data;
+  console.log(
+    "embedded wallet",
+    JSON.stringify(wallet.activity.result.createWalletResult, null, 2)
+  );
+  const address = wallet.activity.result.createWalletResult?.addresses[0];
+  if (!address) {
+    throw new Error("No address found");
+  }
+  return {
+    // data,
+    client,
+    address,
+  };
 }
+
+const createTurnkeyAccount = async (
+  turnkeyClient: TurnkeyClient,
+  address: string
+) => {
+  try {
+    const account = await createAccountWithAddress({
+      client: turnkeyClient,
+      organizationId: ORG_ID,
+      signWith: address,
+      ethereumAddress: address,
+    });
+    return account;
+  } catch (e) {
+    console.error("error during turnkey account creation", e);
+    throw e;
+  }
+};

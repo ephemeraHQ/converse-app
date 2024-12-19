@@ -9,7 +9,10 @@ import {
   PasskeyAuthStoreProvider,
   usePasskeyAuthStoreContext,
 } from "@/features/onboarding/passkey/passkeyAuthStore";
-import { onPasskeyCreate } from "@/utils/passkeys/createPasskey";
+import {
+  onPasskeyCreate,
+  onPasskeySignature,
+} from "@/utils/passkeys/createPasskey";
 import { Button } from "@/design-system/Button/Button";
 
 export const OnboardingPasskeyScreen = memo(function Screen() {
@@ -37,12 +40,22 @@ const Content = memo(function Content() {
           size={PictoSizes.onboardingComponent}
         />
         <OnboardingPictoTitleSubtitle.Title>
-          {translate("privyConnect.title.enterPhone")}
+          {translate("passkey.title")}
         </OnboardingPictoTitleSubtitle.Title>
       </OnboardingPictoTitleSubtitle.Container>
       <Button
-        text="Create Passkey"
+        text={translate("passkey.createButton")}
         onPress={handleCreatePasskey}
+        loading={loading}
+      />
+      <Button
+        text={"Login with passkey"}
+        onPress={onPasskeySignature}
+        loading={loading}
+      />
+      <Button
+        text={"Check whoami"}
+        onPress={onPasskeySignature}
         loading={loading}
       />
     </OnboardingScreenComp>
