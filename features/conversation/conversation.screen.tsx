@@ -4,7 +4,8 @@ import { Center } from "@/design-system/Center";
 import { Loader } from "@/design-system/loader";
 import { Conversation } from "@/features/conversation/conversation";
 import { ConversationNewDm } from "@/features/conversation/conversation-new-dm";
-import { useConversationWithPeerQuery } from "@/queries/useConversationWithPeerQuery";
+import { useDmQuery } from "@/queries/useDmQuery";
+import { $globalStyles } from "@/theme/styles";
 import { captureError } from "@/utils/capture-error";
 import { VStack } from "@design-system/VStack";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -51,22 +52,23 @@ const PeerAddressFlow = memo(function PeerAddressFlow(
 ) {
   const { peerAddress, textPrefill } = args;
   const currentAccount = useCurrentAccount()!;
-  const { data: conversation, isLoading } = useConversationWithPeerQuery(
-    currentAccount,
-    peerAddress
-  );
+
+  const { data: dmConversation, isLoading } = useDmQuery({
+    account: currentAccount,
+    peer: peerAddress,
+  });
 
   if (isLoading) {
     return (
-      <Center style={{ flex: 1 }}>
+      <Center style={$globalStyles.flex1}>
         <Loader />
       </Center>
     );
   }
 
-  if (conversation?.topic) {
+  if (dmConversation?.topic) {
     return (
-      <Conversation topic={conversation.topic} textPrefill={textPrefill} />
+      <Conversation topic={dmConversation.topic} textPrefill={textPrefill} />
     );
   }
 

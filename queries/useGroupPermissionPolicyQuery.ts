@@ -7,7 +7,7 @@ export const useGroupPermissionPolicyQuery = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupQuery({ account, topic });
   return useQuery({
     queryKey: groupPermissionPolicyQueryKey(account, topic!),
     queryFn: () => {

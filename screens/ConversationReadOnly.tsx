@@ -27,7 +27,10 @@ export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
     useConversationPreviewMessages(currentAccount, topic!);
 
   const { data: conversation, isLoading: isLoadingConversation } =
-    useConversationQuery(currentAccount, topic);
+    useConversationQuery({
+      account: currentAccount,
+      topic,
+    });
 
   const isLoading = isLoadingMessages || isLoadingConversation;
 

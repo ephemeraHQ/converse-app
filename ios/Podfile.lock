@@ -410,6 +410,11 @@ PODS:
     - fmt (= 9.1.0)
     - glog
     - RCT-Folly/Default (= 2024.01.01.00)
+  - RCT-Folly/Default (2024.01.01.00):
+    - boost
+    - DoubleConversion
+    - fmt (= 9.1.0)
+    - glog
   - RCT-Folly/Fabric (2024.01.01.00):
     - boost
     - DoubleConversion
@@ -2699,7 +2704,7 @@ SPEC CHECKSUMS:
   CryptoSwift: 967f37cea5a3294d9cce358f78861652155be483
   CSecp256k1: 2a59c03e52637ded98896a33be4b2649392cb843
   DGSwiftUtilities: 1f2722e8b2442dc11c17b66818f62b93780e95fd
-  DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
+  DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
   EASClient: 1509a9a6b48b932ec61667644634daf2562983b8
   EXApplication: c08200c34daca7af7fd76ac4b9d606077410e8ad
   EXConstants: 409690fbfd5afea964e5e9d6c4eb2c2b59222c59
@@ -2740,8 +2745,8 @@ SPEC CHECKSUMS:
   EXUpdates: 60b8b9b0d6e8cb7699ebd375a4deada231b9f5ca
   EXUpdatesInterface: 996527fd7d1a5d271eb523258d603f8f92038f24
   FBLazyVector: 430e10366de01d1e3d57374500b1b150fe482e6d
-  fmt: 10c6e61f4be25dc963c36bd73fc7b1705fe975be
-  glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
+  fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
+  glog: fdfdfe5479092de0c4bdbebedd9056951f092c4f
   hermes-engine: ea92f60f37dba025e293cbe4b4a548fd26b610a0
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
@@ -2753,7 +2758,7 @@ SPEC CHECKSUMS:
   MMKVCore: d26e4d3edd5cb8588c2569222cbd8be4231374e9
   op-sqlite: 7720c6cc59e76c983263edc07420e642b45fa288
   OpenSSL-Universal: 6e1ae0555546e604dbc632a2b9a24a9c46c41ef6
-  RCT-Folly: bf5c0376ffe4dd2cf438dcf86db385df9fdce648
+  RCT-Folly: 02617c592a293bd6d418e0a88ff4ee1f88329b47
   RCTDeprecation: 726d24248aeab6d7180dac71a936bbca6a994ed1
   RCTRequired: a94e7febda6db0345d207e854323c37e3a31d93b
   RCTTypeSafety: 28e24a6e44f5cbf912c66dde6ab7e07d1059a205
@@ -2856,7 +2861,7 @@ SPEC CHECKSUMS:
   UMAppLoader: f17a5ee8e85b536ace0fc254b447a37ed198d57e
   XMTP: 3b586fa3703640bb5fec8a64daba9e157d9e5fdc
   XMTPReactNative: f3e1cbf80b7278b817bd42982703a95a9250497d
-  Yoga: a9ef4f5c2cd79ad812110525ef61048be6a582a4
+  Yoga: b05994d1933f507b0a28ceaa4fdb968dc18da178
 
 PODFILE CHECKSUM: 7ed5cefb992e438c67772278d7c473ace4b42753
 

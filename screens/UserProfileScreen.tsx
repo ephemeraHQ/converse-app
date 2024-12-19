@@ -1,15 +1,10 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { memo, useCallback, useEffect, useRef } from "react";
-import { TextInput, useColorScheme, View } from "react-native";
+import { TextInput, View, useColorScheme } from "react-native";
 
 import Avatar from "../components/Avatar";
-import {
-  useAddPfp,
-  useCreateOrUpdateProfileInfo,
-  useProfile,
-  useUserProfileStyles,
-} from "./Onboarding/OnboardingUserProfileScreen";
 import Button from "../components/Button/Button";
+import { Screen } from "../components/Screen/ScreenComp/Screen";
 import { ScreenHeaderButton } from "../components/Screen/ScreenHeaderButton/ScreenHeaderButton";
 import { Pressable } from "../design-system/Pressable";
 import { Text } from "../design-system/Text";
@@ -17,7 +12,12 @@ import { translate } from "../i18n";
 import { textSecondaryColor } from "../styles/colors";
 import { sentryTrackError } from "../utils/sentry";
 import { NavigationParamList } from "./Navigation/Navigation";
-import { Screen } from "../components/Screen/ScreenComp/Screen";
+import {
+  useAddPfp,
+  useCreateOrUpdateProfileInfo,
+  useProfile,
+  useUserProfileStyles,
+} from "./Onboarding/OnboardingUserProfileScreen";
 
 export const UserProfileScreen = memo(function UserProfileScreen(
   props: NativeStackScreenProps<NavigationParamList, "UserProfile">
@@ -63,6 +63,12 @@ export const UserProfileScreen = memo(function UserProfileScreen(
   const usernameRef = useRef<TextInput>();
 
   const { addPFP, asset } = useAddPfp();
+
+  useEffect(() => {
+    if (asset) {
+      setProfile((prevProfile) => ({ ...prevProfile, avatar: asset.uri }));
+    }
+  }, [asset, setProfile]);
 
   return (
     <Screen

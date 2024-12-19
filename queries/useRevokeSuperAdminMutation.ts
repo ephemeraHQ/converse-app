@@ -11,13 +11,14 @@ import {
 } from "./useGroupMembersQuery";
 import { useGroupQuery } from "@queries/useGroupQuery";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { captureError } from "@/utils/capture-error";
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const useRevokeSuperAdminMutation = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupQuery({ account, topic });
 
   return useMutation({
     mutationKey: revokeSuperAdminMutationKey(account, topic!),
@@ -48,8 +49,7 @@ export const useRevokeSuperAdminMutation = (
       return { previousGroupMembers };
     },
     onError: (error, _variables, context) => {
-      logger.warn("onError useRevokeSuperAdminMutation");
-      sentryTrackError(error);
+      captureError(error);
       if (!topic) {
         return;
       }

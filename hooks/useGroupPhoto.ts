@@ -5,8 +5,14 @@ import { useGroupPhotoQuery } from "../queries/useGroupPhotoQuery";
 
 export const useGroupPhoto = (topic: ConversationTopic) => {
   const account = useCurrentAccount();
-  const { data, isLoading, isError } = useGroupPhotoQuery(account ?? "", topic);
-  const { mutateAsync } = useGroupPhotoMutation(account ?? "", topic);
+  const { data, isLoading, isError } = useGroupPhotoQuery({
+    account: account ?? "",
+    topic,
+  });
+  const { mutateAsync } = useGroupPhotoMutation({
+    account: account ?? "",
+    topic,
+  });
 
   return {
     groupPhoto: data,

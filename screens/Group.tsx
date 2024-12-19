@@ -32,7 +32,10 @@ export default function GroupScreen({
   const currentAccount = useCurrentAccount() as string;
   const topic = route.params.topic;
 
-  const { data: group } = useGroupQuery(currentAccount, topic, true);
+  const { data: group } = useGroupQuery({
+    account: currentAccount,
+    topic,
+  });
   const insets = useSafeAreaInsets();
 
   return (

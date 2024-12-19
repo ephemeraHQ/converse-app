@@ -12,12 +12,13 @@ import {
 import { useGroupQuery } from "@queries/useGroupQuery";
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { captureError } from "@/utils/capture-error";
 
 export const useRemoveFromGroupMutation = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupQuery({ account, topic });
 
   return useMutation({
     mutationKey: removeMemberMutationKey(account, topic!),
@@ -51,8 +52,7 @@ export const useRemoveFromGroupMutation = (
       return { previousGroupMembers };
     },
     onError: (error, _variables, context) => {
-      logger.warn("onError useRemoveFromGroupMutation");
-      sentryTrackError(error);
+      captureError(error);
       if (context?.previousGroupMembers === undefined) {
         return;
       }

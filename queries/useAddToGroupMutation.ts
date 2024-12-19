@@ -1,21 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
-import { sentryTrackError } from "@utils/sentry";
 
+import { captureError } from "@/utils/capture-error";
+import { useGroupQuery } from "@queries/useGroupQuery";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { addMemberMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
   invalidateGroupMembersQuery,
 } from "./useGroupMembersQuery";
-import { useGroupQuery } from "@queries/useGroupQuery";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const useAddToGroupMutation = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const { data: group } = useGroupQuery(account, topic);
+  const { data: group } = useGroupQuery({ account, topic });
 
   return useMutation({
     mutationKey: addMemberMutationKey(account, topic!),
@@ -33,8 +33,7 @@ export const useAddToGroupMutation = (
       await cancelGroupMembersQuery(account, topic);
     },
     onError: (error, _variables, _context) => {
-      logger.warn("onError useAddToGroupMutation");
-      sentryTrackError(error);
+      captureError(error);
     },
     onSuccess: (_data, _variables, _context) => {
       logger.debug("onSuccess useAddToGroupMutation");

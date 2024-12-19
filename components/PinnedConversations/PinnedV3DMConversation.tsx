@@ -1,25 +1,25 @@
-import { PinnedConversation } from "./PinnedConversation";
-import { useCallback, useMemo } from "react";
-import { navigate } from "@utils/navigation";
-import Avatar from "@components/Avatar";
-import { DmWithCodecsType } from "@utils/xmtpRN/client";
-import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
-import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
-import { useDmPeerInboxOnConversationList } from "@queries/useDmPeerInboxOnConversationList";
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@/data/store/storeHelpers";
+import { VStack } from "@/design-system/VStack";
 import {
   resetConversationListContextMenuStore,
   setConversationListContextMenuConversationData,
 } from "@/features/conversation-list/ConversationListContextMenu.store";
-import { translate } from "@i18n";
-import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
-import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
 import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
+import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
+import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
+import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
+import Avatar from "@components/Avatar";
+import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
+import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
+import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
+import { translate } from "@i18n";
+import { navigate } from "@utils/navigation";
+import { DmWithCodecsType } from "@utils/xmtpRN/client";
+import { useCallback, useMemo } from "react";
 import { isTextMessage } from "../../features/conversation/conversation-message/conversation-message.utils";
-import { VStack } from "@/design-system/VStack";
+import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
+import { PinnedConversation } from "./PinnedConversation";
 import { PinnedMessagePreview } from "./PinnedMessagePreview";
 
 type PinnedV3DMConversationProps = {
@@ -37,10 +37,10 @@ export const PinnedV3DMConversation = ({
 
   const topic = conversation.topic;
 
-  const { data: peerInboxId } = useDmPeerInboxOnConversationList(
-    currentAccount,
-    conversation
-  );
+  const { data: peerInboxId } = useDmPeerInboxId({
+    account: currentAccount!,
+    topic,
+  });
 
   const preferredName = usePreferredInboxName(peerInboxId);
 

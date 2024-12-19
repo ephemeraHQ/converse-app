@@ -8,7 +8,7 @@ import { useGroupQuery } from "@queries/useGroupQuery";
 import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
-import { useGroupCreator } from "./useGroupCreator";
+import { useGroupCreatorQuery } from "../queries/useGroupCreatorQuery";
 
 export type IGroupConsentOptions = {
   includeCreator?: boolean;
@@ -18,19 +18,19 @@ export type IGroupConsentOptions = {
 export const useGroupConsent = (topic: ConversationTopic) => {
   const account = currentAccount();
 
-  const { data: group, isLoading: isGroupLoading } = useGroupQuery(
+  const { data: group, isLoading: isGroupLoading } = useGroupQuery({
     account,
-    topic
-  );
+    topic,
+  });
 
   const { data: groupCreator, isLoading: isGroupCreatorLoading } =
-    useGroupCreator(topic);
+    useGroupCreatorQuery(topic);
 
   const {
     data: groupConsent,
     isLoading: isGroupConsentLoading,
     isError,
-  } = useGroupConsentQuery(account, topic);
+  } = useGroupConsentQuery({ account, topic });
 
   const { mutateAsync: allowGroupMutation, isPending: isAllowingGroup } =
     useAllowGroupMutation(account, topic);

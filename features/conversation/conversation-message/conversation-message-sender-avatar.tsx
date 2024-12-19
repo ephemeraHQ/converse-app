@@ -1,83 +1,23 @@
+import { useCurrentAccount } from "@/data/store/accountsStore";
+import { navigate } from "@/utils/navigation";
+import { getPreferredInboxAvatar } from "@/utils/profile";
 import Avatar from "@components/Avatar";
-import { useCallback, useMemo } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-
 import { usePreferredInboxAddress } from "@hooks/usePreferredInboxAddress";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
 import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
 import { useAppTheme } from "@theme/useAppTheme";
 import { InboxId } from "@xmtp/react-native-sdk";
-import { useCurrentAccount } from "../../../data/store/accountsStore";
-import { navigate } from "../../../utils/navigation";
-import { getPreferredInboxAvatar } from "../../../utils/profile";
+import { useCallback } from "react";
+import { TouchableOpacity } from "react-native";
 
-type MessageSenderAvatarDumbProps = {
-  // hasNextMessageInSeries: boolean;
-  onPress: () => void;
-  avatarUri: string | undefined;
-  avatarName: string;
-};
-
-export const MessageSenderAvatarDumb = ({
-  // hasNextMessageInSeries,
-  onPress,
-  avatarUri,
-  avatarName,
-}: MessageSenderAvatarDumbProps) => {
-  const styles = useStyles();
-  const { theme } = useAppTheme();
-
-  return (
-    <View style={styles.groupSenderAvatarWrapper}>
-      {/* {!hasNextMessageInSeries ? ( */}
-      <TouchableOpacity onPress={onPress}>
-        <Avatar
-          size={theme.layout.chat.messageSenderAvatar.width}
-          uri={avatarUri}
-          name={avatarName}
-        />
-      </TouchableOpacity>
-      {/* ) : (
-        <View style={styles.avatarPlaceholder} />
-      )} */}
-    </View>
-  );
-};
-
-// type MessageSenderAvatarProps = {
-//   senderAddress: string;
-//   hasNextMessageInSeries: boolean;
-// };
-
-// export const MessageSenderAvatar = ({
-//   senderAddress,
-//   // hasNextMessageInSeries,
-// }: MessageSenderAvatarProps) => {
-//   const senderSocials = useProfilesStore(
-//     (s) => getProfile(senderAddress, s.profiles)?.socials
-//   );
-
-//   const openProfile = useCallback(() => {
-//     navigate("Profile", { address: senderAddress });
-//   }, [senderAddress]);
-
-//   return (
-//     <MessageSenderAvatarDumb
-//       // hasNextMessageInSeries={hasNextMessageInSeries}
-//       onPress={openProfile}
-//       avatarUri={getPreferredAvatar(senderSocials)}
-//       avatarName={getPreferredName(senderSocials, senderAddress)}
-//     />
-//   );
-// };
-
-type V3MessageSenderAvatarProps = {
+type IConversationSenderAvatarProps = {
   inboxId: InboxId;
 };
 
-export const V3MessageSenderAvatar = ({
+export function ConversationSenderAvatar({
   inboxId,
-}: V3MessageSenderAvatarProps) => {
+}: IConversationSenderAvatarProps) {
+  const { theme } = useAppTheme();
   const currentAccount = useCurrentAccount();
   const { data: senderSocials } = useInboxProfileSocialsQuery(
     currentAccount!,
@@ -94,27 +34,12 @@ export const V3MessageSenderAvatar = ({
   }, [address]);
 
   return (
-    <MessageSenderAvatarDumb
-      onPress={openProfile}
-      avatarUri={avatarUri}
-      avatarName={name}
-    />
+    <TouchableOpacity onPress={openProfile}>
+      <Avatar
+        size={theme.layout.chat.messageSenderAvatar.width}
+        uri={avatarUri}
+        name={name}
+      />
+    </TouchableOpacity>
   );
-};
-
-const useStyles = () => {
-  const { theme } = useAppTheme();
-  return useMemo(
-    () =>
-      StyleSheet.create({
-        groupSenderAvatarWrapper: {
-          // marginRight: 6,
-        },
-        avatarPlaceholder: {
-          width: theme.avatarSize.sm,
-          height: theme.avatarSize.sm,
-        },
-      }),
-    [theme]
-  );
-};
+}

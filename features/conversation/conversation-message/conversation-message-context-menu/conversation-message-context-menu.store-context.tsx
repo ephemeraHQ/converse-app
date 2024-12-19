@@ -12,7 +12,6 @@ export type IMessageContextMenuStoreState = IMessageContextMenuStoreProps & {
     itemRectY: number;
     itemRectHeight: number;
     itemRectWidth: number;
-    messageComponent: React.ReactNode;
   } | null;
   setMessageContextMenuData: (
     data: IMessageContextMenuStoreState["messageContextMenuData"]

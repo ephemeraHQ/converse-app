@@ -1,10 +1,10 @@
+import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { Icon } from "@design-system/Icon/Icon";
 import { useExistingGroupInviteLink } from "@hooks/useExistingGroupInviteLink";
 import { useGroupDescription } from "@hooks/useGroupDescription";
 import { useGroupMembers } from "@hooks/useGroupMembers";
-import { useGroupName } from "@hooks/useGroupName";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { useGroupPhoto } from "@hooks/useGroupPhoto";
 import { translate } from "@i18n";
@@ -31,16 +31,16 @@ import {
   Platform,
   StyleSheet,
   TouchableOpacity,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 import { Portal, Snackbar, Text } from "react-native-paper";
 import {
-  saveGroupInviteLink,
-  deleteGroupInviteLink as deleteLinkFromStore,
-  saveInviteIdByGroupId,
   deleteInviteIdByGroupId,
+  deleteGroupInviteLink as deleteLinkFromStore,
   getInviteIdByGroupId,
+  saveGroupInviteLink,
+  saveInviteIdByGroupId,
 } from "../features/GroupInvites/groupInvites.utils";
 
 type GroupScreenAdditionProps = {
@@ -75,7 +75,10 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
     currentAccountIsAdmin,
     currentAccountIsSuperAdmin
   );
-  const { groupName } = useGroupName(topic);
+  const { data: groupName } = useGroupNameQuery({
+    account: currentAccount,
+    topic,
+  });
   const { groupPhoto } = useGroupPhoto(topic);
   const { groupDescription } = useGroupDescription(topic);
 

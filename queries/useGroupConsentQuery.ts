@@ -1,62 +1,43 @@
-import { useGroupQuery } from "@queries/useGroupQuery";
-import { QueryObserverOptions, useQuery } from "@tanstack/react-query";
+import {
+  getGroupQueryData,
+  getGroupQueryOptions,
+  setGroupQueryData,
+} from "@/queries/useGroupQuery";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { useQuery } from "@tanstack/react-query";
 import type { ConsentState, ConversationTopic } from "@xmtp/react-native-sdk";
-import { groupConsentQueryKey } from "./QueryKeys";
-import { queryClient } from "./queryClient";
 
-type GroupConsentQueryData = ConsentState;
+type IGroupConsentQueryArgs = {
+  account: string;
+  topic: ConversationTopic;
+};
 
-export const useGroupConsentQuery = (
-  account: string,
-  topic: ConversationTopic,
-  queryOptions?: Partial<QueryObserverOptions<ConsentState>>
-) => {
-  const { data: group } = useGroupQuery(account, topic);
+export const useGroupConsentQuery = (args: IGroupConsentQueryArgs) => {
+  const { account, topic } = args;
   return useQuery({
-    queryKey: groupConsentQueryKey(account, topic!),
-    queryFn: async () => {
-      const consent = await group!.consentState();
-      return consent;
-    },
-    enabled: !!group && !!topic,
-    initialData: group?.state,
-    ...queryOptions,
+    ...getGroupQueryOptions({ account, topic }),
+    select: (group) => group?.state,
   });
 };
 
 export const getGroupConsentQueryData = (
   account: string,
   topic: ConversationTopic
-) =>
-  queryClient.getQueryData<GroupConsentQueryData>(
-    groupConsentQueryKey(account, topic)
-  );
+) => {
+  const group = getGroupQueryData({ account, topic });
+  return group?.state;
+};
 
 export const setGroupConsentQueryData = (
   account: string,
   topic: ConversationTopic,
-  consent: ConsentState
+  consent: ConsentState | undefined
 ) => {
-  queryClient.setQueryData<GroupConsentQueryData>(
-    groupConsentQueryKey(account, topic),
-    consent
-  );
-};
-
-export const cancelGroupConsentQuery = async (
-  account: string,
-  topic: ConversationTopic
-) => {
-  await queryClient.cancelQueries({
-    queryKey: groupConsentQueryKey(account, topic),
-  });
-};
-
-export const invalidateGroupConsentQuery = async (
-  account: string,
-  topic: ConversationTopic
-) => {
-  return queryClient.invalidateQueries({
-    queryKey: groupConsentQueryKey(account, topic),
+  const currentGroup = getGroupQueryData({ account, topic });
+  if (!currentGroup) return;
+  setGroupQueryData({
+    account,
+    topic,
+    group: { ...currentGroup, state: consent } as GroupWithCodecsType,
   });
 };

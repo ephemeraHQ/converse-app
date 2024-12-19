@@ -1,14 +1,8 @@
-import { headerTitleStyle, textPrimaryColor } from "@styles/colors";
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native";
-import { getTitleFontScale } from "@utils/str";
+import { Pressable } from "@/design-system/Pressable";
 import { VStack } from "@/design-system/VStack";
+import { useAppTheme } from "@/theme/useAppTheme";
 import { HStack } from "@design-system/HStack";
+import { Text } from "react-native";
 
 type ConversationTitleDumbProps = {
   title?: string;
@@ -25,49 +19,36 @@ export function ConversationTitle({
   onLongPress,
   onPress,
 }: ConversationTitleDumbProps) {
-  const styles = useStyles();
+  const { theme } = useAppTheme();
 
   return (
-    <HStack style={styles.container}>
-      <TouchableOpacity
+    <HStack
+      style={{
+        flex: 1,
+      }}
+    >
+      <Pressable
         onLongPress={onLongPress}
         onPress={onPress}
-        style={styles.touchableContainer}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+        }}
       >
-        {avatarComponent}
+        <HStack
+          style={{
+            paddingRight: theme.spacing.xxs,
+          }}
+        >
+          {avatarComponent}
+        </HStack>
         <VStack>
-          <Text style={styles.title} numberOfLines={1} allowFontScaling={false}>
+          <Text numberOfLines={1} allowFontScaling={false}>
             {title}
           </Text>
           {subtitle}
         </VStack>
-      </TouchableOpacity>
+      </Pressable>
     </HStack>
   );
 }
-
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    avatar: {
-      marginRight: Platform.OS === "android" ? 24 : 7,
-      marginLeft: Platform.OS === "ios" ? 0 : -9,
-    },
-    container: { flexDirection: "row", flexGrow: 1 },
-    touchableContainer: {
-      flexDirection: "row",
-      justifyContent: "flex-start",
-      left: Platform.OS === "android" ? -36 : 0,
-      width: "100%",
-      alignItems: "center",
-      paddingRight: 40,
-    },
-    title: {
-      color: textPrimaryColor(colorScheme),
-      fontSize:
-        Platform.OS === "ios"
-          ? 16 * getTitleFontScale()
-          : headerTitleStyle(colorScheme).fontSize,
-    },
-  });
-};

@@ -15,11 +15,9 @@ import { useCurrentAccount } from "@data/store/accountsStore";
 import { translate } from "@i18n";
 import { useRouter } from "@navigation/useNavigation";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
-import { AvatarSizes } from "@styles/sizes";
-import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@theme/useAppTheme";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useMemo } from "react";
-import { ImageStyle, Platform } from "react-native";
 
 type GroupConversationTitleProps = {
   topic: ConversationTopic;
@@ -30,7 +28,10 @@ export const GroupConversationTitle = memo(
     const currentAccount = useCurrentAccount()!;
 
     const { data: groupPhoto, isLoading: groupPhotoLoading } =
-      useGroupPhotoQuery(currentAccount, topic!);
+      useGroupPhotoQuery({
+        account: currentAccount,
+        topic,
+      });
 
     const { data: members } = useGroupMembersQuery(currentAccount, topic!);
 
@@ -43,7 +44,7 @@ export const GroupConversationTitle = memo(
 
     const navigation = useRouter();
 
-    const { themed } = useAppTheme();
+    const { theme } = useAppTheme();
 
     const onPress = useCallback(() => {
       navigation.push("Group", { topic });
@@ -55,31 +56,23 @@ export const GroupConversationTitle = memo(
 
     const requestsCount = useGroupPendingRequests(topic).length;
 
-    const displayAvatar = !groupPhotoLoading && !groupNameLoading;
-
     const avatarComponent = useMemo(() => {
       return groupPhoto ? (
-        <Avatar
-          uri={groupPhoto}
-          size={AvatarSizes.conversationTitle}
-          style={themed($avatar)}
-        />
+        <Avatar uri={groupPhoto} size={theme.avatarSize.md} />
       ) : (
-        <GroupAvatarDumb
-          members={memberData}
-          size={AvatarSizes.conversationTitle}
-          style={themed($avatar)}
-        />
+        <GroupAvatarDumb members={memberData} size={theme.avatarSize.md} />
       );
-    }, [groupPhoto, memberData, themed]);
+    }, [groupPhoto, memberData, theme]);
+
+    if (groupPhotoLoading || groupNameLoading) {
+      return null;
+    }
 
     const memberText =
       members?.ids.length === 1
         ? translate("member_count", { count: members?.ids.length })
         : translate("members_count", { count: members?.ids.length });
     const displayMemberText = members?.ids.length;
-
-    if (!displayAvatar) return null;
 
     return (
       <ConversationTitle
@@ -107,18 +100,14 @@ export const GroupConversationTitle = memo(
   }
 );
 
-const $avatar: ThemedStyle<ImageStyle> = (theme) => ({
-  marginRight: Platform.OS === "android" ? theme.spacing.lg : theme.spacing.xxs,
-  marginLeft: Platform.OS === "ios" ? theme.spacing.zero : -theme.spacing.xxs,
-});
-
-type UseGroupMembersAvatarDataProps = {
-  topic: ConversationTopic;
+type IMemberData = {
+  address: string;
+  uri?: string;
+  name?: string;
 };
 
-const useGroupMembersAvatarData = ({
-  topic,
-}: UseGroupMembersAvatarDataProps) => {
+const useGroupMembersAvatarData = (args: { topic: ConversationTopic }) => {
+  const { topic } = args;
   const currentAccount = useCurrentAccount()!;
   const { data: members, ...query } = useGroupMembersConversationScreenQuery(
     currentAccount,
@@ -126,39 +115,40 @@ const useGroupMembersAvatarData = ({
   );
 
   const memberAddresses = useMemo(() => {
-    const addresses: string[] = [];
-    for (const memberId of members?.ids ?? []) {
-      const member = members?.byId[memberId];
-      if (
-        member?.addresses[0] &&
-        member?.addresses[0].toLowerCase() !== currentAccount?.toLowerCase()
-      ) {
-        addresses.push(member?.addresses[0]);
-      }
+    if (!members?.ids) {
+      return [];
     }
-    return addresses;
+
+    return members.ids.reduce<string[]>((addresses, memberId) => {
+      const memberAddress = members.byId[memberId]?.addresses[0];
+      if (
+        memberAddress &&
+        memberAddress.toLowerCase() !== currentAccount?.toLowerCase()
+      ) {
+        addresses.push(memberAddress);
+      }
+      return addresses;
+    }, []);
   }, [members, currentAccount]);
 
   const data = useProfilesSocials(memberAddresses);
 
-  const memberData: {
-    address: string;
-    uri?: string;
-    name?: string;
-  }[] = useMemo(() => {
-    return data.map(({ data: socials }, index) =>
-      socials
-        ? {
-            address: memberAddresses[index],
-            uri: getPreferredAvatar(socials),
-            name: getPreferredName(socials, memberAddresses[index]),
-          }
-        : {
-            address: memberAddresses[index],
-            uri: undefined,
-            name: memberAddresses[index],
-          }
-    );
+  const memberData = useMemo<IMemberData[]>(() => {
+    return data.map(({ data: socials }, index) => {
+      const address = memberAddresses[index];
+      if (!socials) {
+        return {
+          address,
+          name: address,
+        };
+      }
+
+      return {
+        address,
+        uri: getPreferredAvatar(socials),
+        name: getPreferredName(socials, address),
+      };
+    });
   }, [data, memberAddresses]);
 
   return { data: memberData, ...query };

@@ -1,9 +1,8 @@
 import { View, ViewStyle } from "react-native";
-
-import { PinnedV3Conversation } from "./PinnedV3Conversation";
-import { useV3ConversationListQuery } from "@queries/useV3ConversationListQuery";
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useConversationListQuery } from "@/queries/useConversationListQuery";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { useCurrentAccount } from "@data/store/accountsStore";
+import { PinnedV3Conversation } from "./PinnedV3Conversation";
 
 type Props = {
   topics?: string[];
@@ -14,14 +13,14 @@ export const PinnedConversations = ({ topics }: Props) => {
 
   const { themed } = useAppTheme();
 
-  const { isLoading } = useV3ConversationListQuery(
-    currentAccount!,
-    {
+  const { isLoading } = useConversationListQuery({
+    account: currentAccount!,
+    context: "PinnedConversations",
+    queryOptions: {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
     },
-    "PinnedConversations"
-  );
+  });
 
   if (isLoading) return null;
 

@@ -17,7 +17,7 @@ import { stopStreamingAllMessage, streamAllMessages } from "./messages";
 import {
   fetchPersistedConversationListQuery,
   prefetchConversationListQuery,
-} from "@queries/useV3ConversationListQuery";
+} from "@/queries/useConversationListQuery";
 import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
 
 const instantiatingClientForAccount: {
@@ -97,7 +97,7 @@ const streamingAccounts: { [account: string]: boolean } = {};
 const syncClientConversationList = async (account: string) => {
   try {
     // Load the persisted conversation list
-    await fetchPersistedConversationListQuery(account);
+    await fetchPersistedConversationListQuery({ account });
     // Streaming conversations
     await retryWithBackoff({
       fn: () => streamConversations(account),
@@ -129,7 +129,7 @@ const syncClientConversationList = async (account: string) => {
     // Prefetch the conversation list so when we land on the conversation list
     // we have it ready, this will include syncing all groups
     setupAccountTopicSubscription(account);
-    await prefetchConversationListQuery(account);
+    await prefetchConversationListQuery({ account });
   } catch (e) {
     logger.error(e, {
       context: `Failed to fetch persisted conversation list for ${account}`,

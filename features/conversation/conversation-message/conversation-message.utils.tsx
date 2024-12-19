@@ -1,4 +1,3 @@
-import { useCurrentConversationTopic } from "../conversation.store-context";
 import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
 import {
   getConversationMessages,
@@ -21,6 +20,7 @@ import {
   ConversationTopic,
   DecodedMessage,
   GroupUpdatedCodec,
+  MessageDeliveryStatus,
   MessageId,
   ReactionCodec,
   ReactionContent,
@@ -33,6 +33,13 @@ import {
   StaticAttachmentContent,
   TextCodec,
 } from "@xmtp/react-native-sdk";
+import { useCurrentConversationTopic } from "../conversation.store-context";
+
+export function isAnActualMessage(
+  message: DecodedMessageWithCodecsType
+): message is DecodedMessage<TextCodec> {
+  return !isReadReceiptMessage(message) && !isGroupUpdatedMessage(message);
+}
 
 export function isTextMessage(
   message: DecodedMessageWithCodecsType
@@ -215,4 +222,22 @@ export function useConversationMessageReactions(messageId: MessageId) {
     bySender: messages?.reactions[messageId]?.bySender,
     byReactionContent: messages?.reactions[messageId]?.byReactionContent,
   };
+}
+
+export function getConvosMessageStatus(message: DecodedMessageWithCodecsType) {
+  // @ts-ignore - Custom for optimistic message, we might want to have our custom ConvoMessage
+  if (message.deliveryStatus === "sending") {
+    return "sending";
+  }
+
+  switch (message.deliveryStatus) {
+    case MessageDeliveryStatus.UNPUBLISHED:
+    case MessageDeliveryStatus.FAILED:
+      return "error";
+    case MessageDeliveryStatus.PUBLISHED:
+    case MessageDeliveryStatus.ALL:
+      return "sent";
+    default:
+      throw new Error(`Unhandled delivery status: ${message.deliveryStatus}`);
+  }
 }

@@ -41,6 +41,7 @@ export const BubbleContentContainer = (args: IBubbleContentContainerProps) => {
       borderRadius: theme.borderRadius.sm,
       paddingHorizontal: theme.spacing.xs,
       paddingVertical: theme.spacing.xxs,
+      maxWidth: theme.layout.screen.width * 0.7,
     };
 
     if (!hasNextMessageInSeries) {
