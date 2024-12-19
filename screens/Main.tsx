@@ -21,11 +21,7 @@ import { useThemeProvider } from "../theme/useAppTheme";
 import { useAddressBookStateHandler } from "../utils/addressBook";
 import { useAutoConnectExternalWallet } from "../utils/evm/external";
 import { usePrivyAccessToken } from "../utils/evm/privy";
-import {
-  converseNavigations,
-  converseNavigatorRef,
-  setConverseNavigatorRef,
-} from "../utils/navigation";
+import { setConverseNavigatorRef } from "../utils/navigation";
 import { ConversationScreenConfig } from "../features/conversation/conversation.nav";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
 import {
