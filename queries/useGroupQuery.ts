@@ -9,7 +9,7 @@ import {
 } from "@/queries/useConversationQuery";
 import { mutateObjectProperties } from "@/utils/mutate-object-properties";
 import { UseQueryResult } from "@tanstack/react-query";
-import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export function useGroupQuery(args: {

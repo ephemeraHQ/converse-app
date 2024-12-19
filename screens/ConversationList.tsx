@@ -17,36 +17,36 @@ import {
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
-import { ConversationContextMenu } from "@/components/ConversationContextMenu";
-import {
-  dmMatchesSearchQuery,
-  groupMatchesSearchQuery,
-} from "@/features/conversation/utils/search";
-import { translate } from "@/i18n";
-import NoResult from "@search/components/NoResult";
-import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
-import { ConversationVersion } from "@xmtp/react-native-sdk";
-import ConversationFlashList from "../components/ConversationFlashList";
 import ChatNullState from "../components/ConversationList/ChatNullState";
+import ConversationFlashList from "../components/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
 import RequestsButton from "../components/ConversationList/RequestsButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
+import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
+import { NavigationParamList } from "./Navigation/Navigation";
 import { PinnedConversations } from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
+import NoResult from "@search/components/NoResult";
 import {
   useChatStore,
   useCurrentAccount,
   useSettingsStore,
 } from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
-import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
-import { useIsSharingMode } from "../features/conversation-list/useIsSharingMode";
 import { ConversationFlatListItem } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
-import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
-import { NavigationParamList } from "./Navigation/Navigation";
+import { useIsSharingMode } from "../features/conversation-list/useIsSharingMode";
+import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
+import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { ConversationContextMenu } from "@/components/ConversationContextMenu";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
+import {
+  dmMatchesSearchQuery,
+  groupMatchesSearchQuery,
+} from "@/features/conversation/utils/search";
+import { translate } from "@/i18n";
 
 type Props = {
   searchBarRef:

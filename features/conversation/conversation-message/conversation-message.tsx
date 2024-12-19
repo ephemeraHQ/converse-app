@@ -15,7 +15,7 @@ import {
   isTransactionReferenceMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { captureError } from "@/utils/capture-error";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { memo } from "react";
 
 export const ConversationMessage = memo(

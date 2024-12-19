@@ -1,17 +1,28 @@
-import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
-import { ProtocolNotification } from "./protocolNotification";
+import { normalizeTimestamp } from "@/utils/date";
 import notifee, {
+  AndroidPerson,
   AndroidStyle,
   AndroidVisibility,
 } from "@notifee/react-native";
-import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
-import { getProfile, getPreferredName } from "@utils/profile";
+import {
+  getPreferredAvatar,
+  getPreferredName,
+  getProfile,
+} from "@utils/profile";
+import {
+  ConverseXmtpClientType,
+  GroupWithCodecsType,
+} from "@utils/xmtpRN/client.types";
+import {
+  ConversationVersion,
+  Group,
+  type ConversationTopic,
+} from "@xmtp/react-native-sdk";
 import { androidChannel } from "../setupAndroidNotificationChannel";
+import { notificationAlreadyShown } from "./alreadyShown";
 import { getNotificationContent } from "./notificationContent";
 import { computeSpamScoreGroupMessage } from "./notificationSpamScore";
-import { notificationAlreadyShown } from "./alreadyShown";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { normalizeTimestamp } from "@/utils/date";
+import { ProtocolNotification } from "./protocolNotification";
 
 export const isGroupMessageContentTopic = (contentTopic: string) => {
   return contentTopic.startsWith("/xmtp/mls/1/g-");
@@ -21,77 +32,118 @@ export const handleGroupMessageNotification = async (
   xmtpClient: ConverseXmtpClientType,
   notification: ProtocolNotification
 ) => {
-  const groupId = getV3IdFromTopic(
+  let conversation = await xmtpClient.conversations.findConversationByTopic(
     notification.contentTopic as ConversationTopic
   );
-  let group = await xmtpClient.conversations.findGroup(groupId);
-  if (!group) {
+  if (!conversation) {
     await xmtpClient.conversations.sync();
-    group = await xmtpClient.conversations.findGroup(groupId);
-    if (!group) throw new Error("Group not found");
+    conversation = await xmtpClient.conversations.findConversationByTopic(
+      notification.contentTopic as ConversationTopic
+    );
+    if (!conversation) throw new Error("Conversation not found");
   }
-  await group.sync();
-  const groupName = await group.groupName();
-  const message = await group.processMessage(notification.message);
+  await conversation.sync();
+  const isGroup = conversation.version === ConversationVersion.GROUP;
+
+  const message = await conversation.processMessage(notification.message);
   // Not displaying notifications for ourselves, syncing is enough
-  if (message.senderAddress === xmtpClient.inboxId) return;
+  if (message.senderInboxId === xmtpClient.inboxId) return;
   // Not displaying notifications for already shown messages
   if (notificationAlreadyShown(message.id)) return;
   // Let's compute spam score
   const spamScore = await computeSpamScoreGroupMessage(
     xmtpClient,
-    group,
+    conversation as GroupWithCodecsType,
     message
   );
-  if (spamScore >= 0) {
-    // Not displaying notifications for spam, syncing is enough
-    return;
-  }
+  if (spamScore >= 0) return;
   // For now, use the group member linked address as "senderAddress"
   // @todo => make inboxId a first class citizen
-  const senderAddress = (await group.members()).find(
-    (m) => m.inboxId === message.senderAddress
+  const senderAddress = (await conversation.members()).find(
+    (m) => m.inboxId === message.senderInboxId
   )?.addresses[0];
   if (!senderAddress) return;
   const senderSocials = await getProfile(
     xmtpClient.address,
-    message.senderAddress,
+    message.senderInboxId,
     senderAddress
   );
   const senderName = getPreferredName(senderSocials, senderAddress);
 
-  const notificationContent = await getNotificationContent(group, message);
+  const notificationContent = await getNotificationContent(
+    conversation as GroupWithCodecsType,
+    message
+  );
   if (!notificationContent) return;
 
-  const groupImage = await group.groupImageUrlSquare();
-
-  await notifee.displayNotification({
-    title: groupName,
-    subtitle: senderName,
-    body: notificationContent,
-    data: notification,
-    android: {
-      channelId: androidChannel.id,
-      pressAction: {
-        id: "default",
-      },
-      visibility: AndroidVisibility.PUBLIC,
-      style: {
-        type: AndroidStyle.MESSAGING,
-        person: {
-          name: groupName,
-          icon: groupImage,
+  if (isGroup) {
+    const groupName = await (conversation as Group).groupName();
+    const groupImage = await (conversation as Group).groupImageUrlSquare();
+    const person: AndroidPerson = {
+      name: groupName || "Group",
+    };
+    if (groupImage) {
+      person.icon = groupImage;
+    }
+    await notifee.displayNotification({
+      title: groupName,
+      subtitle: senderName,
+      body: notificationContent,
+      data: notification,
+      android: {
+        channelId: androidChannel.id,
+        pressAction: {
+          id: "default",
         },
-        messages: [
-          {
-            // Notifee doesn't handle more complex messages with a group name & image + a person name & image
-            // so handling it manually by concatenating sender name & message
-            text: `${senderName}: ${notificationContent}`,
-            timestamp: normalizeTimestamp(message.sentNs),
+        visibility: AndroidVisibility.PUBLIC,
+        style: {
+          type: AndroidStyle.MESSAGING,
+          person: {
+            name: groupName,
+            icon: groupImage,
           },
-        ],
-        group: true, // todo => handle 1:1 DM MLS groups
+          messages: [
+            {
+              // Notifee doesn't handle more complex messages with a group name & image + a person name & image
+              // so handling it manually by concatenating sender name & message
+              text: `${senderName}: ${notificationContent}`,
+              timestamp: normalizeTimestamp(message.sentNs),
+            },
+          ],
+          group: true,
+        },
       },
-    },
-  });
+    });
+  } else {
+    const senderImage = getPreferredAvatar(senderSocials);
+    const person: AndroidPerson = {
+      name: senderName,
+    };
+    if (senderImage) {
+      person.icon = senderImage;
+    }
+    await notifee.displayNotification({
+      title: senderName,
+      body: notificationContent,
+      data: notification,
+      android: {
+        channelId: androidChannel.id,
+        pressAction: {
+          id: "default",
+        },
+        visibility: AndroidVisibility.PUBLIC,
+        style: {
+          type: AndroidStyle.MESSAGING,
+          person,
+          messages: [
+            {
+              text: notificationContent,
+              timestamp: normalizeTimestamp(message.sentNs),
+            },
+          ],
+          group: false,
+        },
+      },
+    });
+  }
 };

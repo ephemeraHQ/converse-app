@@ -11,7 +11,7 @@ import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
   DmWithCodecsType,
-} from "./client";
+} from "./client.types";
 import { streamAllMessages } from "./messages";
 import { getXmtpClient } from "./sync";
 

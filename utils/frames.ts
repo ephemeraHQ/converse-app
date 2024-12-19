@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from "uuid";
 import { converseEventEmitter, waitForConverseEvent } from "./events";
 import { useExternalSigner } from "./evm/external";
 import { strByteSize } from "./str";
-import { ConverseXmtpClientType } from "./xmtpRN/client";
+import { ConverseXmtpClientType } from "./xmtpRN/client.types";
 import { getXmtpClient } from "./xmtpRN/sync";
 
 export type FrameWithType = FramesApiResponse & {

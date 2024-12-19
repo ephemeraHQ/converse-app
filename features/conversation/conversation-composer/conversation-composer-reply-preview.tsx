@@ -21,7 +21,7 @@ import { useMessageText } from "@features/conversation-list/hooks/useMessageText
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
 import { Haptics } from "@utils/haptics";
-import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import {
   DecodedMessage,
   InboxId,
@@ -59,11 +59,11 @@ export const ReplyPreview = memo(function ReplyPreview() {
   });
 
   const inboxName = usePreferredInboxName(
-    replyMessage?.senderAddress as InboxId
+    replyMessage?.senderInboxId as InboxId
   );
 
   const replyingTo = replyMessage
-    ? replyMessage.senderAddress === currentAccountInboxId
+    ? replyMessage.senderInboxId === currentAccountInboxId
       ? `Replying to you`
       : inboxName
         ? `Replying to ${inboxName}`

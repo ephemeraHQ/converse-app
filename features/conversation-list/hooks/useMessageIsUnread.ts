@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { ChatStoreType } from "@data/store/chatStore";
-import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { normalizeTimestamp } from "@/utils/date";
@@ -30,7 +30,7 @@ export const useConversationIsUnread = ({
     if (topicsData[topic]?.status === "unread") return true;
 
     // Check if the last message was sent by the current user
-    if (lastMessage.senderAddress === currentInboxId) {
+    if (lastMessage.senderInboxId === currentInboxId) {
       return false;
     }
 

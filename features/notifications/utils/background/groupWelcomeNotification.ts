@@ -1,4 +1,4 @@
-import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 import { ProtocolNotification } from "./protocolNotification";
 import { computeSpamScoreGroupWelcome } from "./notificationSpamScore";
 import notifee, {

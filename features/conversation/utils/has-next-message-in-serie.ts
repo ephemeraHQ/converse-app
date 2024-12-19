@@ -1,4 +1,4 @@
-import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 
 type HasNextMessageInSeriesPayload = {
   currentMessage: DecodedMessageWithCodecsType;
@@ -10,5 +10,5 @@ export const hasNextMessageInSeries = ({
   nextMessage,
 }: HasNextMessageInSeriesPayload) => {
   if (!nextMessage) return false;
-  return nextMessage.senderAddress === currentMessage.senderAddress;
+  return nextMessage.senderInboxId === currentMessage.senderInboxId;
 };

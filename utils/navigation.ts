@@ -78,14 +78,25 @@ const isDMLink = (url: string) => {
 };
 
 const isGroupInviteLink = (url: string) => {
+  // First check if it's a universal link
   for (const prefix of config.universalLinks) {
     if (url.startsWith(prefix)) {
       const path = url.slice(prefix.length);
       if (path.toLowerCase().startsWith("group-invite/")) {
+        logger.debug("[Navigation] Found group invite universal link:", path);
         return true;
       }
     }
   }
+
+  // Then check for deep link format with scheme
+  if (url.includes("group-invite")) {
+    logger.debug("[Navigation] Found group invite deep link:", url);
+    return true;
+  }
+
+  logger.debug("[Navigation] Not a group invite link:", url);
+  return false;
 };
 
 const isGroupLink = (url: string) => {
@@ -97,20 +108,30 @@ const isGroupLink = (url: string) => {
       }
     }
   }
+  return false;
 };
 
 const originalOpenURL = RNLinking.openURL.bind(RNLinking);
 RNLinking.openURL = (url: string) => {
-  // If the URL is a DM link, open it inside the app
-  // as a deeplink, not the browser
-  if (isDMLink(url)) {
-    return originalOpenURL(getSchemedURLFromUniversalURL(url));
+  logger.debug("[Navigation] Processing URL:", url);
+
+  try {
+    if (isDMLink(url)) {
+      logger.debug("[Navigation] Handling DM link");
+      return originalOpenURL(getSchemedURLFromUniversalURL(url));
+    }
+    if (isGroupInviteLink(url)) {
+      logger.debug("[Navigation] Handling group invite link");
+      return originalOpenURL(getSchemedURLFromUniversalURL(url));
+    }
+    if (isGroupLink(url)) {
+      logger.debug("[Navigation] Handling group link");
+      return originalOpenURL(getSchemedURLFromUniversalURL(url));
+    }
+    logger.debug("[Navigation] Handling default link");
+    return originalOpenURL(url);
+  } catch (error) {
+    logger.error("[Navigation] Error processing URL:", error);
+    return Promise.reject(error);
   }
-  if (isGroupInviteLink(url)) {
-    return originalOpenURL(getSchemedURLFromUniversalURL(url));
-  }
-  if (isGroupLink(url)) {
-    return originalOpenURL(getSchemedURLFromUniversalURL(url));
-  }
-  return originalOpenURL(url);
 };

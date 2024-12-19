@@ -28,7 +28,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "20"
 
       - name: Install dependencies
         run: yarn install
@@ -54,6 +54,7 @@ jobs:
           echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> $env_file
           echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> $env_file
           echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> $env_file
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $env_file
 
       - name: Update EAS config with env variables
         run: |
@@ -62,9 +63,6 @@ jobs:
           else
             node scripts/build/eas.js --env preview
           fi
-
-      - name: Update Android Files
-        run: node scripts/build/android/build.js
 
       - name: Build for Android
         run: |
@@ -85,7 +83,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "20"
 
       - name: Install dependencies
         run: yarn install
@@ -111,6 +109,7 @@ jobs:
           echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> $env_file
           echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> $env_file
           echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> $env_file
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $env_file
 
       - name: Update EAS config with env variables
         run: |
@@ -147,7 +146,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "20"
 
       - name: Increment version numbers
         run: node scripts/build/incrementBuildNumbers.js

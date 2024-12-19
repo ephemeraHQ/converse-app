@@ -3,7 +3,7 @@ import logger from "@/utils/logger";
 import { getMessageContentType } from "@/utils/xmtpRN/content-types/content-types";
 import { getV3SpamScore } from "@data/helpers/conversations/spamScore";
 import { useCurrentAccount } from "@data/store/accountsStore";
-import { ConversationWithCodecsType } from "@utils/xmtpRN/client";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useEffect, useState } from "react";
 
 export const useV3RequestItems = () => {

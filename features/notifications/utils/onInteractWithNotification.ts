@@ -1,11 +1,11 @@
-import * as Notifications from "expo-notifications";
-import { navigate, navigateToTopic } from "@utils/navigation";
-import { getTopicFromV3Id } from "@utils/groupUtils/groupId";
+import logger from "@/utils/logger";
 import { useAccountsStore } from "@data/store/accountsStore";
+import { getTopicFromV3Id } from "@utils/groupUtils/groupId";
+import { navigate, navigateToTopic } from "@utils/navigation";
 import type { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
+import * as Notifications from "expo-notifications";
 import { resetNotifications } from "./resetNotifications";
 import { waitForXmtpClientHydration } from "@/data/store/appStore";
-import logger from "@utils/logger";
 
 export const onInteractWithNotification = async (
   event: Notifications.NotificationResponse
