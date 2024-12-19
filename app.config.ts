@@ -1,6 +1,7 @@
 import { ConfigContext, ExpoConfig } from "expo/config";
 import warnOnce from "warn-once";
-import { PluginConfigTypeAndroid } from "expo-build-properties/src/pluginConfig";
+// Removed this import as it was causing a build error
+// import type { PluginConfigTypeAndroid } from "expo-build-properties/src/pluginConfig";
 
 import appBuildNumbers from "./app.json";
 
@@ -221,7 +222,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
               },
             ],
           },
-        } satisfies PluginConfigTypeAndroid,
+        },
       },
     ],
     [
