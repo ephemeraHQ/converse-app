@@ -11,10 +11,12 @@ import { OnboardingNotificationsScreen } from "../screens/Onboarding/OnboardingN
 import { OnboardingPrivateKeyScreen } from "../screens/Onboarding/OnboardingPrivateKeyScreen";
 import { OnboardingPrivyScreen } from "../screens/Onboarding/OnboardingPrivyScreen";
 import { OnboardingUserProfileScreen } from "../screens/Onboarding/OnboardingUserProfileScreen";
+import { OnboardingPasskeyScreen } from "@/screens/Onboarding/OnboardingPasskeyScreen";
 
 type OnboardingParamList = {
   OnboardingGetStarted: undefined;
   OnboardingPrivy: undefined;
+  OnboardingPasskey: undefined;
   OnboardingConnectWallet: {
     address: string;
   };
@@ -47,6 +49,10 @@ export const OnboardingNavigator = memo(function OnboardingNavigator() {
           }}
           name="OnboardingGetStarted"
           component={OnboardingGetStartedScreen}
+        />
+        <OnboardingNativeStack.Screen
+          name="OnboardingPasskey"
+          component={OnboardingPasskeyScreen}
         />
         <OnboardingNativeStack.Screen
           name="OnboardingPrivy"

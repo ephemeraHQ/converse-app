@@ -8,6 +8,7 @@ export const en = {
       title: "CONVERSE ACCOUNTS",
       connectViaPhone: "Connect via Phone",
       createEphemeral: "Create Ephemeral Account",
+      connectViaPasskey: "Connect via Passkey",
     },
     installedApps: {
       title: "INSTALLED APPS",

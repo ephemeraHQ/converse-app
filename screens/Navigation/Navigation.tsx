@@ -48,12 +48,14 @@ import WebviewPreviewNav, {
 } from "./WebviewPreviewNav";
 import { translate } from "@/i18n";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { OnboardingPasskeyScreen } from "../Onboarding/OnboardingPasskeyScreen";
 
 export type NavigationParamList = {
   Idle: undefined;
 
   // Auth / Onboarding
   OnboardingGetStarted: undefined;
+  OnboardingPasskey: undefined;
   OnboardingPrivy: undefined;
   OnboardingConnectWallet: {
     address: string;
@@ -212,6 +214,10 @@ export function SignedOutNavigation() {
             }}
             name="OnboardingGetStarted"
             component={OnboardingGetStartedScreen}
+          />
+          <NativeStack.Screen
+            name="OnboardingPasskey"
+            component={OnboardingPasskeyScreen}
           />
           <NativeStack.Screen
             name="OnboardingPrivy"
