@@ -56,6 +56,28 @@ export const getConverseStateFromPath =
     if (pathForState?.startsWith("/")) {
       pathForState = pathForState.slice(1);
     }
+
+    // Handle group invite links
+    if (pathForState?.startsWith("group-invite")) {
+      const url = new URL(`https://${config.websiteDomain}/${pathForState}`);
+      const params = new URLSearchParams(url.search);
+      const inviteId = params.get("inviteId") || url.pathname.split("/")[1];
+      if (inviteId) {
+        return {
+          routes: [
+            {
+              name: "GroupInvite",
+              params: {
+                groupInviteId: inviteId,
+              },
+            },
+          ],
+        };
+      }
+    }
+
+    // dm method must link to the Conversation Screen as well
+    // but prefilling the parameters
     if (pathForState?.startsWith("dm?peer=")) {
       const params = new URLSearchParams(pathForState.slice(3));
       pathForState = handleConversationLink({
@@ -88,9 +110,6 @@ export const getConverseStateFromPath =
         groupId,
         text: params.get("text"),
       });
-    } else if (pathForState?.startsWith("groupInvite")) {
-      // TODO: Remove this once enough users have updated (September 30, 2024)
-      pathForState = pathForState.replace("groupInvite", "group-invite");
     } else if (pathForState?.startsWith("?text=")) {
       const url = new URL(`https://${config.websiteDomain}/${pathForState}`);
       const params = new URLSearchParams(url.search);
