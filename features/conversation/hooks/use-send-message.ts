@@ -82,7 +82,7 @@ export function useSendMessage(props: {
           // @ts-ignore we're adding our "own" delivery status because we want to display it in the UI
           deliveryStatus: "sending" satisfies IConversationMessageStatus,
           topic: conversation.topic,
-          senderAddress: currentUserInboxId,
+          senderInboxId: currentUserInboxId,
           nativeContent: {},
           content: () => {
             return variables.content.text!;
