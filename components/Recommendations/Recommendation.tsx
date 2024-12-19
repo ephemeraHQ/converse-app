@@ -1,4 +1,4 @@
-import { ProfileSocials } from "@data/store/profilesStore";
+import { IProfileSocials } from "@/features/profiles/profile-types";
 import {
   itemSeparatorColor,
   textPrimaryColor,
@@ -24,6 +24,7 @@ import {
 import { shortAddress } from "@utils/strings/shortAddress";
 import Avatar from "../Avatar";
 import { NavigationChatButton } from "@search/components/NavigationChatButton";
+import { useProfileSocials } from "@/hooks/useProfileSocials";
 
 export function Recommendation({
   address,
@@ -31,7 +32,6 @@ export function Recommendation({
   recommendationData: { ens, farcasterUsernames, lensHandles, tags, profile },
   embedInChat,
   isVisible,
-  socials,
   groupMode,
   addToGroup,
 }: {
@@ -39,9 +39,8 @@ export function Recommendation({
   recommendationData: RecommendationData;
   embedInChat?: boolean;
   isVisible: boolean;
-  socials?: ProfileSocials;
   groupMode?: boolean;
-  addToGroup?: (member: ProfileSocials & { address: string }) => void;
+  addToGroup?: (member: IProfileSocials & { address: string }) => void;
 }) {
   const styles = useStyles();
   let primaryNamesDisplay = [
@@ -59,6 +58,7 @@ export function Recommendation({
     ];
   }
   const textAlign = embedInChat ? "center" : "left";
+  const socials = useProfileSocials(address);
 
   return (
     <View

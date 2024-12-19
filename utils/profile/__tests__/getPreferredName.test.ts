@@ -1,5 +1,5 @@
 import { getPreferredName } from "../getPreferredName";
-import { type ProfileSocials } from "@data/store/profilesStore";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
 
 describe("getPreferredName", () => {
   const testAddress = "0x1234567890123456789012345678901234567890";
@@ -10,7 +10,7 @@ describe("getPreferredName", () => {
   });
 
   it("should return primary username if available", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       userNames: [
         {
           name: "test.cb.id",
@@ -24,7 +24,7 @@ describe("getPreferredName", () => {
   });
 
   it("should return username without displayName if not available", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       userNames: [
         {
           name: "test.cb.id",
@@ -37,7 +37,7 @@ describe("getPreferredName", () => {
   });
 
   it("should return primary ENS name if no username", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       ensNames: [
         {
           name: "test.eth",
@@ -51,7 +51,7 @@ describe("getPreferredName", () => {
   });
 
   it("should return ENS name without displayName if not available", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       ensNames: [
         {
           name: "test.eth",
@@ -64,7 +64,7 @@ describe("getPreferredName", () => {
   });
 
   it("should return primary UNS domain if no username or ENS", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       unstoppableDomains: [
         {
           domain: "test.crypto",
@@ -77,7 +77,7 @@ describe("getPreferredName", () => {
   });
 
   it("should return shortened address if no primary names found", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       userNames: [
         {
           name: "test.cb.id",

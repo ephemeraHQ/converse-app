@@ -30,6 +30,8 @@ import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "./TableView/TableViewImage";
 import { NotificationPermissionStatus } from "../features/notifications/types/Notifications.types";
+import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
+import { invalidateInboxProfileSocialsQuery } from "@/queries/useInboxProfileSocialsQuery";
 
 type Props = {
   account: string;
@@ -63,7 +65,7 @@ export default function AccountSettingsButton({ account }: Props) {
     const methods = {
       [translate("your_profile_page")]: async () => {
         if (account) {
-          // refreshProfileForAddress(account, account);
+          invalidateProfileSocialsQuery(account, account);
           setCurrentAccount(account, false);
           router.navigate("Chats");
           navigate("Profile", {

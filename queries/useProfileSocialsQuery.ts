@@ -1,4 +1,4 @@
-import { ProfileSocials } from "@data/store/profilesStore";
+import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { getProfilesForAddresses } from "@utils/api";
 import {
@@ -10,16 +10,19 @@ import {
 import { queryClient } from "./queryClient";
 import mmkv from "@/utils/mmkv";
 
-type ProfileSocialsData = ProfileSocials | null | undefined;
+type ProfileSocialsData = IProfileSocials | null | undefined;
 
 const profileSocialsQueryKey = (account: string, peerAddress: string) => [
   "profileSocials",
   account?.toLowerCase(),
-  peerAddress,
+  // Typesafe because there's a lot of account! usage
+  peerAddress?.toLowerCase(),
 ];
 
-const profileSocialsQueryStorageKey = (account: string, peerAddress: string) =>
-  profileSocialsQueryKey(account, peerAddress).join("-");
+export const profileSocialsQueryStorageKey = (
+  account: string,
+  peerAddress: string
+) => profileSocialsQueryKey(account, peerAddress).join("-");
 
 const profileSocials = create({
   fetcher: async (addresses: string[]) => {
@@ -80,6 +83,15 @@ export const useProfileSocialsQueries = (
   });
 };
 
+export const prefetchProfileSocialsQuery = (
+  account: string,
+  peerAddress: string
+) => {
+  return queryClient.prefetchQuery(
+    profileSocialsQueryConfig(account, peerAddress)
+  );
+};
+
 export const fetchProfileSocialsQuery = (
   account: string,
   peerAddress: string
@@ -92,7 +104,7 @@ export const fetchProfileSocialsQuery = (
 export const setProfileSocialsQueryData = (
   account: string,
   peerAddress: string,
-  data: ProfileSocials,
+  data: IProfileSocials,
   updatedAt?: number
 ) => {
   return queryClient.setQueryData<ProfileSocialsData>(
@@ -104,6 +116,15 @@ export const setProfileSocialsQueryData = (
   );
 };
 
+export const setProfileRecordSocialsQueryData = (
+  account: string,
+  record: Record<string, IProfileSocials>
+) => {
+  Object.keys(record).forEach((peerAddress) => {
+    setProfileSocialsQueryData(account, peerAddress, record[peerAddress]);
+  });
+};
+
 export const getProfileSocialsQueryData = (
   account: string,
   peerAddress: string
@@ -111,4 +132,13 @@ export const getProfileSocialsQueryData = (
   return queryClient.getQueryData<ProfileSocialsData>(
     profileSocialsQueryConfig(account, peerAddress).queryKey
   );
+};
+
+export const invalidateProfileSocialsQuery = (
+  account: string,
+  address: string
+) => {
+  queryClient.invalidateQueries({
+    queryKey: profileSocialsQueryKey(account, address),
+  });
 };

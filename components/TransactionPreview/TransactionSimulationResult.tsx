@@ -1,10 +1,6 @@
-import { useCurrentAccount, useProfilesStore } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { translate } from "@i18n";
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getProfile,
-} from "@utils/profile";
+import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import { SimulateChangeType, SimulateAssetChangesResponse } from "alchemy-sdk";
 import { useMemo } from "react";
 import { View } from "react-native";
@@ -12,6 +8,7 @@ import { View } from "react-native";
 import TransactionSend from "../../assets/transaction-send.png";
 import TransactionTo from "../../assets/transaction-to.png";
 import { TransactionPreviewRow } from "./TransactionPreviewRow";
+import { useProfilesSocials } from "@/hooks/useProfilesSocials";
 
 type SimulationResultProps = {
   changes: SimulateAssetChangesResponse["changes"] | undefined;
@@ -22,7 +19,6 @@ export const SimulationResult = ({
   changes,
   walletAddress,
 }: SimulationResultProps) => {
-  const profiles = useProfilesStore((s) => s.profiles);
   const accountAddress = useCurrentAccount() as string;
 
   const myChanges = useMemo(() => {
@@ -37,34 +33,35 @@ export const SimulationResult = ({
     );
   }, [accountAddress, changes, walletAddress]);
 
+  const changeToSocials = useProfilesSocials(
+    myChanges?.map((change) => change.to) ?? []
+  );
+
   return (
     <>
-      {myChanges?.map((change, index) => (
-        <View key={`${change.contractAddress}-${index}`}>
-          <TransactionPreviewRow
-            title={
-              change.changeType === SimulateChangeType.APPROVE
-                ? translate("transaction_asset_change_type_approve")
-                : translate("transaction_asset_change_type_transfer")
-            }
-            subtitle={`${change.amount} ${change.symbol}`}
-            imageSrc={change.logo ? { uri: change.logo } : TransactionSend}
-            imagePlaceholder={TransactionSend}
-          />
-          <TransactionPreviewRow
-            title={translate("transaction_asset_change_to")}
-            subtitle={getPreferredName(
-              getProfile(change.to, profiles)?.socials,
-              change.to
-            )}
-            imageSrc={
-              getPreferredAvatar(getProfile(change.to, profiles)?.socials) ||
-              TransactionTo
-            }
-            imagePlaceholder={TransactionTo}
-          />
-        </View>
-      ))}
+      {myChanges?.map((change, index) => {
+        const changeToSocial = changeToSocials[index]?.data;
+        return (
+          <View key={`${change.contractAddress}-${index}`}>
+            <TransactionPreviewRow
+              title={
+                change.changeType === SimulateChangeType.APPROVE
+                  ? translate("transaction_asset_change_type_approve")
+                  : translate("transaction_asset_change_type_transfer")
+              }
+              subtitle={`${change.amount} ${change.symbol}`}
+              imageSrc={change.logo ? { uri: change.logo } : TransactionSend}
+              imagePlaceholder={TransactionSend}
+            />
+            <TransactionPreviewRow
+              title={translate("transaction_asset_change_to")}
+              subtitle={getPreferredName(changeToSocial, change.to)}
+              imageSrc={getPreferredAvatar(changeToSocial) || TransactionTo}
+              imagePlaceholder={TransactionTo}
+            />
+          </View>
+        );
+      })}
     </>
   );
 };

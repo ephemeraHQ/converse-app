@@ -1,9 +1,9 @@
-import { type ProfileSocials } from "@data/store/profilesStore";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
 import { RecommendationData } from "@data/store/recommendationsStore";
 
 export const getProfileData = (
   recommendationData?: RecommendationData,
-  socials?: ProfileSocials
+  socials?: IProfileSocials
 ): RecommendationData | undefined => {
   // We get the data from the recommendations part
   if (recommendationData) return recommendationData;
