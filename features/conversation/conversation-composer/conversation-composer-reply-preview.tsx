@@ -12,6 +12,7 @@ import {
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { HStack } from "@design-system/HStack";
 import { Icon } from "@design-system/Icon/Icon";
 import { IconButton } from "@design-system/IconButton/IconButton";
@@ -21,10 +22,8 @@ import { useMessageText } from "@features/conversation-list/hooks/useMessageText
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
 import { Haptics } from "@utils/haptics";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import {
   DecodedMessage,
-  InboxId,
   RemoteAttachmentCodec,
   ReplyCodec,
   StaticAttachmentCodec,
@@ -58,9 +57,7 @@ export const ReplyPreview = memo(function ReplyPreview() {
     topic,
   });
 
-  const inboxName = usePreferredInboxName(
-    replyMessage?.senderInboxId as InboxId
-  );
+  const inboxName = usePreferredInboxName(replyMessage?.senderInboxId);
 
   const replyingTo = replyMessage
     ? replyMessage.senderInboxId === currentAccountInboxId

@@ -13,6 +13,7 @@ import {
 } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
 import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
+  getCurrentUserAlreadyReactedOnMessage,
   getMessageById,
   useConversationMessageReactions,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
@@ -80,10 +81,10 @@ const Content = memo(function Content(props: {
   const menuHeight = calculateMenuHeight(menuItems.length);
 
   const reactOnMessage = useReactOnMessage({
-    conversation: conversation!,
+    topic,
   });
   const removeReactionOnMessage = useRemoveReactionOnMessage({
-    conversation: conversation!,
+    topic,
   });
 
   const handlePressBackdrop = useCallback(() => {
@@ -92,9 +93,11 @@ const Content = memo(function Content(props: {
 
   const handleSelectReaction = useCallback(
     (emoji: string) => {
-      const currentUserAlreadyReacted = bySender?.[currentUserInboxId!]?.some(
-        (reaction) => reaction.content === emoji
-      );
+      const currentUserAlreadyReacted = getCurrentUserAlreadyReactedOnMessage({
+        messageId,
+        topic,
+        emoji,
+      });
 
       if (currentUserAlreadyReacted) {
         removeReactionOnMessage({
@@ -109,10 +112,9 @@ const Content = memo(function Content(props: {
     [
       reactOnMessage,
       messageId,
-      currentUserInboxId,
-      bySender,
       removeReactionOnMessage,
       messageContextMenuStore,
+      topic,
     ]
   );
 

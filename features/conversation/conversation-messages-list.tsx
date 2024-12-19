@@ -116,10 +116,6 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
       //   autoscrollToTopThreshold: 100,
       // }}
       estimatedItemSize={50} // 50 is very random for now
-      estimatedListSize={{
-        width: theme.layout.screen.width,
-        height: theme.layout.screen.height,
-      }}
       {...rest}
     />
   );

@@ -1,92 +1,8 @@
 import logger from "@utils/logger";
-import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import isDeepEqual from "fast-deep-equal";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { Nullable } from "../../types/general";
 import { zustandMMKVStorage } from "../../utils/mmkv";
-
-// Chat data for each user
-
-type XmtpConversationContext = {
-  conversationId: string;
-  metadata: {
-    [k: string]: string;
-  };
-};
-
-type XmtpConversationShared = {
-  topic: string;
-  createdAt: number;
-  context?: XmtpConversationContext;
-  messages: Map<string, XmtpMessage>;
-  messagesIds: string[];
-  messageDraft?: string;
-  mediaPreview?: MessageAttachment;
-  readUntil: number; // UNUSED
-  hasOneMessageFromMe?: boolean;
-  pending: boolean;
-  version: string;
-  spamScore?: number;
-  lastNotificationsSubscribedPeriod?: number;
-};
-
-export type XmtpDMConversation = XmtpConversationShared & {
-  isGroup: false;
-  peerAddress: string;
-  groupMembers?: undefined;
-  groupAdmins?: undefined;
-  groupPermissionLevel?: undefined;
-  groupCreator?: undefined;
-  groupAddedBy?: undefined;
-};
-
-/**
- * @deprecated - Use the conversation from query instead
- */
-export type XmtpGroupConversation = XmtpConversationShared & {
-  isGroup: true;
-  peerAddress?: undefined;
-  groupMembers: string[];
-  groupPermissionLevel: "all_members" | "admin_only" | "custom_policy";
-  groupName?: string;
-  groupCreator?: string;
-  groupAddedBy?: string;
-  isActive?: boolean;
-};
-
-/**
- * @deprecated - Use the conversation from query instead
- */
-export type XmtpConversation = XmtpDMConversation | XmtpGroupConversation;
-
-/**
- * @deprecated - Use the conversation from query instead
- */
-export type XmtpConversationWithUpdate = XmtpConversation & {
-  lastUpdateAt: number;
-};
-
-type XmtpProtocolMessage = {
-  id: string;
-  senderAddress: string;
-  sent: number;
-  content: string;
-  contentType: string;
-  topic: string;
-};
-
-/**
- * @deprecated - Use DecodedMessageWithCodeca instead
- */
-export type XmtpMessage = XmtpProtocolMessage & {
-  status: "delivered" | "error" | "seen" | "sending" | "sent" | "prepared";
-  reactions?: Map<string, XmtpMessage>;
-  contentFallback?: string;
-  referencedMessageId?: string;
-  lastUpdateAt?: number;
-  localMediaURI?: string;
-};
 
 export type TopicStatus = "deleted" | "unread" | "read";
 
@@ -101,41 +17,10 @@ export type TopicsData = {
   [topic: string]: TopicData | undefined;
 };
 
-export type MessageAttachmentPreview = {
-  mediaURI: string;
-  mimeType: Nullable<string>;
-  dimensions?: {
-    width: number;
-    height: number;
-  };
-};
-
-export type MessageAttachmentUploaded = MessageAttachmentPreview &
-  RemoteAttachmentContent;
-
-export type MessageAttachment =
-  | MessageAttachmentPreview
-  | MessageAttachmentUploaded
-  | null;
-
-export type MessageAttachmentTodo = {
-  loading: boolean;
-  error: boolean;
-  mediaType: "IMAGE" | "UNSUPPORTED" | undefined;
-  mediaURL: string | undefined;
-  filename: string;
-  mimeType: string;
-  contentLength: number;
-  imageSize: { height: number; width: number } | undefined;
-};
-
 export type ChatStoreType = {
   /**
    * @deprecated - Use the conversation from query instead
    */
-  conversations: {
-    [topic: string]: XmtpConversationWithUpdate;
-  };
   pinnedConversationTopics: string[];
   openedConversationTopic: string | null;
   lastUpdateAt: number;
@@ -149,8 +34,6 @@ export type ChatStoreType = {
   errored: boolean;
   topicsData: TopicsData;
   topicsDataFetchedOnce: boolean | undefined;
-
-  conversationsSortedOnce: boolean;
 
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -191,15 +74,12 @@ export const initChatStore = (account: string) => {
     persist(
       (set) =>
         ({
-          conversations: {},
           pinnedConversationTopics: [],
           lastSyncedAt: 0,
           lastSyncedTopics: [],
           topicsData: {},
           topicsDataFetchedOnce: false,
           openedConversationTopic: "",
-          conversationsMapping: {},
-          conversationsSortedOnce: false,
           lastUpdateAt: 0,
           searchQuery: "",
           setSearchQuery: (q) => set(() => ({ searchQuery: q })),
