@@ -35,16 +35,11 @@ const appDomainGetConverse = isDev
   : isPreview
     ? "preview.getconverse.app"
     : "getconverse.app";
-const name = isDev
-  ? "Converse DEV"
-  : isPreview
-    ? "Converse PREVIEW"
-    : "Converse";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name,
-  scheme,
+  name: isDev ? "Converse DEV" : isPreview ? "Converse PREVIEW" : "Converse",
+  scheme: isDev ? "converse-dev" : isPreview ? "converse-preview" : "converse",
   slug: "converse",
   orientation: "portrait",
   icon: isProduction ? "./assets/icon.png" : "./assets/icon-preview.png",
@@ -60,20 +55,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   version: appBuildNumbers.expo.version,
   assetBundlePatterns: ["**/*"],
-
-  // ios: {
-  //   supportsTablet: true,
-  //   buildNumber: appBuildNumbers.expo.ios.buildNumber,
-  //   bundleIdentifier: "com.converse.dev",
-  //   config: {
-  //     usesNonExemptEncryption: false,
-  //   },
-  // },
-
-  web: {
-    favicon: "./assets/favicon.png",
-    bundler: "metro",
-  },
   extra: {
     eas: {
       projectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
@@ -91,10 +72,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
   },
   android: {
-    adaptiveIcon: {
-      foregroundImage: "./assets/adaptive-icon.png",
-      backgroundColor: "#FFFFFF",
-    },
     versionCode: appBuildNumbers.expo.android.versionCode,
     package: androidPackage,
     googleServicesFile: isDev
@@ -169,7 +146,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
   },
   plugins: [
-    ["@react-native-firebase/app-check"],
     [
       "expo-build-properties",
       {
@@ -257,8 +233,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         url: "https://sentry.io/",
       },
     ],
+    ["@react-native-firebase/app-check"],
+
     "./scripts/build/android/notifeeExpoPlugin.js", // See https://github.com/invertase/notifee/issues/350
     "./scripts/build/android/androidDependenciesExpoPlugin.js", // Handle some conflicting dependencies manually
     "./scripts/build/android/buildGradleProperties.js", // Increase memory for building android in EAS
   ],
+  web: {
+    favicon: "./assets/favicon.png",
+    bundler: "metro",
+  },
 });
