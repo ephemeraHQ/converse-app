@@ -1,21 +1,16 @@
 import * as Notifications from "expo-notifications";
-import {
-  navigate,
-  navigateToTopic,
-  setTopicToNavigateTo,
-} from "@utils/navigation";
+import { navigate, navigateToTopic } from "@utils/navigation";
 import { getTopicFromV3Id } from "@utils/groupUtils/groupId";
 import { useAccountsStore } from "@data/store/accountsStore";
 import type { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
-import { fetchPersistedConversationListQuery } from "@/queries/useConversationListQuery";
 import { resetNotifications } from "./resetNotifications";
-import logger from "@/utils/logger";
-import { getXmtpClient } from "@/utils/xmtpRN/sync";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client";
+import { waitForXmtpClientHydration } from "@/data/store/appStore";
+import logger from "@utils/logger";
 
 export const onInteractWithNotification = async (
   event: Notifications.NotificationResponse
 ) => {
+  logger.debug("[onInteractWithNotification]");
   let notificationData = event.notification.request.content.data;
   // Android returns the data in the body as a string
   if (
@@ -58,40 +53,14 @@ export const onInteractWithNotification = async (
     | undefined;
 
   if (conversationTopic) {
+    await waitForXmtpClientHydration();
     // todo(lustig): zod verification of external payloads such as those from
     // notifications, deep links, etc
     const account: string =
       notificationData["account"] || useAccountsStore.getState().currentAccount;
-
-    // Fetch the conversation list to ensure we have the latest conversation list
-    // before navigating to the conversation
-    try {
-      await fetchPersistedConversationListQuery({ account });
-    } catch (e) {
-      logger.error(
-        `[onInteractWithNotification] Error fetching conversation list from network`
-      );
-      if (
-        `${e}`.includes("storage error: Pool needs to  reconnect before use")
-      ) {
-        logger.info(
-          `[onInteractWithNotification] Reconnecting XMTP client for account ${account}`
-        );
-        const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-        await client.reconnectLocalDatabase();
-        logger.info(
-          `[onInteractWithNotification] XMTP client reconnected for account ${account}`
-        );
-        logger.info(
-          `[onInteractWithNotification] Fetching conversation list from network for account ${account}`
-        );
-        await fetchPersistedConversationListQuery({ account });
-      }
-    }
     useAccountsStore.getState().setCurrentAccount(account, false);
 
     navigateToTopic(conversationTopic as ConversationTopic);
-    setTopicToNavigateTo(undefined);
     resetNotifications();
   }
 };

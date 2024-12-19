@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 import { zustandMMKVStorage } from "../../utils/mmkv";
+import logger from "@/utils/logger";
 
 // A app-wide store to store settings that don't depend on
 // an account like if notifications are accepted
@@ -85,3 +86,29 @@ export const useAppStore = create<AppStoreType>()(
     }
   )
 );
+
+/**
+ * Utility function to wait for the app store to be hydrated.
+ * This can be used, for example, to ensure that the xmtp clients have been instantiated and the
+ * conversation list is fetched before navigating to a conversation.
+ *
+ * As of December 19, 2024, when we say Hydration, we mean that the following are true:
+ * 1) XMTP client for all accounts added to device have been instantiated and cached
+ * 2) Conversation list for all accounts added to device have been fetched from the network and cached
+ * 3) Inbox ID for all accounts added to device have been fetched from the network and cached
+ *
+ * You can observe that logic in the HydrationStateHandler, and that will likely be moved once
+ * we refactor accounts to be InboxID based in upcoming refactors.
+ */
+export const waitForXmtpClientHydration = async () => {
+  logger.debug(
+    `[waitForAppStoreHydration] Waiting for app store hydration to complete`
+  );
+  while (!useAppStore.getState().hydrationDone) {
+    logger.debug(
+      `[waitForAppStoreHydration] App store hydration not complete, waiting 100ms...`
+    );
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  logger.debug(`[waitForAppStoreHydration] App store hydration complete`);
+};
