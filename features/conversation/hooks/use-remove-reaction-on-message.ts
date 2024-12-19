@@ -38,14 +38,14 @@ export function useRemoveReactionOnMessage(props: {
         account: currentAccount,
         topic: conversation.topic,
         message: {
-          id: getRandomId(),
+          id: getRandomId() as MessageId,
           client: conversation.client,
           contentTypeId: contentTypesPrefixes.reaction,
           sentNs: getTodayNs(),
           fallback: variables.reaction.content,
           deliveryStatus: MessageDeliveryStatus.PUBLISHED,
           topic: conversation.topic,
-          senderAddress: currentUserInboxId,
+          senderInboxId: currentUserInboxId,
           nativeContent: {},
           content: () => {
             return variables.reaction;
