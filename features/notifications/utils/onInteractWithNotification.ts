@@ -55,12 +55,14 @@ export const onInteractWithNotification = async (
     | undefined;
 
   if (conversationTopic) {
-    const account =
+    // todo(lustig): zod verification of external payloads such as those from
+    // notifications, deep links, etc
+    const account: string =
       notificationData["account"] || useAccountsStore.getState().currentAccount;
 
     // Fetch the conversation list to ensure we have the latest conversation list
     // before navigating to the conversation
-    await fetchPersistedConversationListQuery(account);
+    await fetchPersistedConversationListQuery({ account });
     useAccountsStore.getState().setCurrentAccount(account, false);
 
     navigateToTopic(conversationTopic as ConversationTopic);
