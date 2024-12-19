@@ -1,5 +1,5 @@
-import { getCurrentAccount, getProfilesStore } from "@data/store/accountsStore";
-import { getProfile } from "./getProfile";
+import { getCurrentAccount } from "@data/store/accountsStore";
+import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 
 export function getCurrentAccountPrimaryProfile() {
   const userAddress = getCurrentAccount();
@@ -8,10 +8,7 @@ export function getCurrentAccountPrimaryProfile() {
     return undefined;
   }
 
-  const socials = getProfile(
-    userAddress,
-    getProfilesStore(userAddress).getState().profiles
-  )?.socials;
+  const socials = getProfileSocialsQueryData(userAddress, userAddress);
 
   if (!socials) {
     return undefined;

@@ -37,7 +37,6 @@ import Recommendations from "../components/Recommendations/Recommendations";
 import {
   useChatStore,
   useCurrentAccount,
-  useProfilesStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
@@ -66,7 +65,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     searchQuery,
     searchBarFocused,
     setSearchBarFocused,
-    initialLoadDoneOnce,
     openedConversationTopic,
     setSearchQuery,
   } = useChatStore(
@@ -84,7 +82,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   const { ephemeralAccount } = useSettingsStore(
     useSelect(["peersStatus", "ephemeralAccount"])
   );
-  const profiles = useProfilesStore((s) => s.profiles);
   const pinnedConversations = useChatStore((s) => s.pinnedConversationTopics);
   const currentAccount = useCurrentAccount();
   const {
@@ -109,13 +106,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     !searchQuery &&
     !showInitialLoad &&
     requestsCount === 0;
-
-  useEffect(() => {
-    if (!initialLoadDoneOnce) {
-      // First login, let's refresh the profile
-      // refreshProfileForAddress(currentAccount!, currentAccount!);
-    }
-  }, [initialLoadDoneOnce, currentAccount]);
 
   useEffect(() => {
     const getFilteredItems = async () => {
@@ -150,7 +140,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     } else {
       setFlatListItems({ items: items ?? [], searchQuery });
     }
-  }, [searchQuery, profiles, items, currentAccount]);
+  }, [searchQuery, items, currentAccount]);
 
   // Search bar hook
   useHeaderSearchBar({

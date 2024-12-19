@@ -1,8 +1,8 @@
 import { Pressable } from "@/design-system/Pressable";
 import { VStack } from "@/design-system/VStack";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { HStack } from "@design-system/HStack";
-import { Text } from "react-native";
+import { HStack } from "@/design-system/HStack";
+import { Text } from "@/design-system/Text";
 
 type ConversationTitleDumbProps = {
   title?: string;

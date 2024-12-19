@@ -1,6 +1,8 @@
-import { type ProfileSocials } from "@data/store/profilesStore";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
 
-export function getPrimaryNames(socials: ProfileSocials | undefined): string[] {
+export function getPrimaryNames(
+  socials: IProfileSocials | undefined
+): string[] {
   if (!socials) {
     return [];
   }

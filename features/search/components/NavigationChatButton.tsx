@@ -1,16 +1,15 @@
 import { translate } from "@i18n";
-import { getPreferredName, getProfile } from "@utils/profile";
 import { useCallback, useState } from "react";
 import { Alert, Platform } from "react-native";
-import { useShallow } from "zustand/react/shallow";
 
-import { currentAccount, useProfilesStore } from "@data/store/accountsStore";
+import { currentAccount } from "@data/store/accountsStore";
 import { Button } from "@design-system/Button/Button";
 import { useRouter } from "@navigation/useNavigation";
 import { isCurrentUser } from "@shared/utils/user";
 import { useAppTheme } from "@theme/useAppTheme";
 import { navigate } from "@utils/navigation";
 import { canMessageByAccount } from "@utils/xmtpRN/contacts";
+import { usePreferredName } from "@/hooks/usePreferredName";
 
 type NavigationChatProps = {
   address: string;
@@ -28,10 +27,7 @@ export function NavigationChatButton({
   const navigation = useRouter();
 
   const [loading, setLoading] = useState(false);
-  const profile = useProfilesStore(
-    useShallow((s) => getProfile(address, s.profiles))
-  );
-  const preferredName = getPreferredName(profile?.socials, address);
+  const preferredName = usePreferredName(address);
   const isCurrentUserAddress = isCurrentUser(address);
 
   const openChat = useCallback(() => {

@@ -1,6 +1,6 @@
 import { shortAddress } from "@/utils/strings/shortAddress";
 import Avatar from "@components/Avatar";
-import { ProfileSocials } from "@data/store/profilesStore";
+import { IProfileSocials } from "@/features/profiles/profile-types";
 import { Text } from "@design-system/Text";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
@@ -14,10 +14,10 @@ import { NavigationChatButton } from "./NavigationChatButton";
 
 type ProfileSearchItemProps = {
   address: string;
-  socials: ProfileSocials;
+  socials: IProfileSocials;
   navigation?: NativeStackNavigationProp<any>;
   groupMode?: boolean;
-  addToGroup?: (member: ProfileSocials & { address: string }) => void;
+  addToGroup?: (member: IProfileSocials & { address: string }) => void;
 };
 
 export function ProfileSearchItem({

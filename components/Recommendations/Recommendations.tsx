@@ -1,4 +1,4 @@
-import { ProfileByAddress, ProfileSocials } from "@data/store/profilesStore";
+import { IProfileSocials } from "@/features/profiles/profile-types";
 import {
   backgroundColor,
   itemSeparatorColor,
@@ -6,7 +6,6 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import { getProfile } from "@utils/profile";
 import * as Linking from "expo-linking";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -36,17 +35,15 @@ const EXPIRE_AFTER = 86400000; // 1 DAY
 
 export default function Recommendations({
   visibility,
-  profiles,
   groupMode,
   groupMembers,
   addToGroup,
   showTitle = true,
 }: {
   visibility: "FULL" | "EMBEDDED" | "HIDDEN";
-  profiles?: ProfileByAddress;
   groupMode?: boolean;
-  groupMembers?: (ProfileSocials & { address: string })[];
-  addToGroup?: (member: ProfileSocials & { address: string }) => void;
+  groupMembers?: (IProfileSocials & { address: string })[];
+  addToGroup?: (member: IProfileSocials & { address: string }) => void;
   showTitle?: boolean;
 }) {
   const navigation = useRouter();
@@ -161,7 +158,6 @@ export default function Recommendations({
           address={item}
           recommendationData={frens[item]}
           isVisible={!!viewableItems[item]}
-          socials={getProfile(item, profiles)?.socials}
           groupMode={groupMode}
           addToGroup={addToGroup}
         />
@@ -176,7 +172,6 @@ export default function Recommendations({
       styles.titleContainer,
       viewableItems,
       visibility,
-      profiles,
       groupMembers,
       groupMode,
       addToGroup,

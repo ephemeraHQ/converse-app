@@ -1,4 +1,4 @@
-import { type ProfileSocials } from "@data/store/profilesStore";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
 import { getPreferredAvatar } from "./getPreferredAvatar";
 
 /**
@@ -8,7 +8,7 @@ import { getPreferredAvatar } from "./getPreferredAvatar";
  * @returns The preferred avatar for the inbox.
  */
 export function getPreferredInboxAvatar(
-  socialsArray: ProfileSocials[] | undefined | null
+  socialsArray: IProfileSocials[] | undefined | null
 ): string | undefined {
   const socials = socialsArray?.[0];
   return getPreferredAvatar(socials);

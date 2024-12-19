@@ -1,5 +1,5 @@
 import { getPreferredInboxAvatar } from "../getPreferredInboxAvatar";
-import { type ProfileSocials } from "@data/store/profilesStore";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
 
 describe("getPreferredInboxAvatar", () => {
   it("should return undefined when no socials provided", () => {
@@ -14,7 +14,7 @@ describe("getPreferredInboxAvatar", () => {
   });
 
   it("should return primary username avatar if available", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       userNames: [
         {
           name: "test.cb.id",
@@ -28,7 +28,7 @@ describe("getPreferredInboxAvatar", () => {
   });
 
   it("should return primary ENS avatar if no username avatar", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       ensNames: [
         {
           name: "test.eth",
@@ -42,7 +42,7 @@ describe("getPreferredInboxAvatar", () => {
   });
 
   it("should return undefined if no primary avatar found", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       userNames: [
         {
           name: "test.cb.id",
@@ -63,7 +63,7 @@ describe("getPreferredInboxAvatar", () => {
   });
 
   it("should only use first social profile even if multiple provided", () => {
-    const socials1: ProfileSocials = {
+    const socials1: IProfileSocials = {
       userNames: [
         {
           name: "test1.cb.id",
@@ -72,7 +72,7 @@ describe("getPreferredInboxAvatar", () => {
         },
       ],
     };
-    const socials2: ProfileSocials = {
+    const socials2: IProfileSocials = {
       userNames: [
         {
           name: "test2.cb.id",

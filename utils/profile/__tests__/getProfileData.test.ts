@@ -1,9 +1,9 @@
 import { getProfileData } from "../getProfileData";
-import { type ProfileSocials } from "@data/store/profilesStore";
-import { type RecommendationData } from "@data/store/recommendationsStore";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
+import { type RecommendationData } from "@/data/store/recommendationsStore";
 
 describe("getProfileData", () => {
-  const mockSocials: ProfileSocials = {
+  const mockSocials: IProfileSocials = {
     userNames: [
       {
         name: "test.cb.id",

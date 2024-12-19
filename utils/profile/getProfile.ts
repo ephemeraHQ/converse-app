@@ -1,15 +1,47 @@
-import { type ProfileByAddress } from "@data/store/profilesStore";
-import { getCleanAddress } from "@utils/evm/getCleanAddress";
+import {
+  fetchProfileSocialsQuery,
+  profileSocialsQueryStorageKey,
+} from "@/queries/useProfileSocialsQuery";
+import { InboxId } from "@xmtp/react-native-sdk";
+import mmkv from "@/utils/mmkv";
+import {
+  fetchInboxProfileSocialsQuery,
+  inboxProfileSocialsQueryStorageKey,
+} from "@/queries/useInboxProfileSocialsQuery";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
 
-export const getProfile = (
-  address: string | undefined,
-  profilesByAddress: ProfileByAddress | undefined
-) => {
-  // We might have stored values in lowercase or formatted, let's check both
-  if (!profilesByAddress || !address) return undefined;
-  return (
-    profilesByAddress[address] ||
-    profilesByAddress[getCleanAddress(address)] ||
-    profilesByAddress[address.toLowerCase()]
+export const getProfile = async (
+  currentAccount: string,
+  inboxId: InboxId,
+  address: string | undefined
+): Promise<IProfileSocials | undefined | null> => {
+  if (address) {
+    const addressStorageKey = profileSocialsQueryStorageKey(
+      currentAccount,
+      address
+    );
+    const mmkvString = mmkv.getString(addressStorageKey);
+    if (mmkvString) {
+      return JSON.parse(mmkvString) as IProfileSocials;
+    }
+  }
+
+  const inboxIdStorageKey = inboxProfileSocialsQueryStorageKey(
+    currentAccount,
+    inboxId
   );
+  const mmkvString = mmkv.getString(inboxIdStorageKey);
+  if (mmkvString) {
+    return JSON.parse(mmkvString) as IProfileSocials;
+  }
+
+  // We don't have any profile data, let's fetch it
+  if (address) {
+    return fetchProfileSocialsQuery(currentAccount, address);
+  }
+  const inboxProfileSocials = await fetchInboxProfileSocialsQuery(
+    currentAccount,
+    inboxId
+  );
+  return inboxProfileSocials?.[0];
 };

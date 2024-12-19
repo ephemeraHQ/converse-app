@@ -1,7 +1,6 @@
 import Recommendations from "@components/Recommendations/Recommendations";
 import {
   useSettingsStore,
-  useProfilesStore,
   useRecommendationsStore,
 } from "@data/store/accountsStore";
 import { translate } from "@i18n/index";
@@ -19,13 +18,10 @@ import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import config from "../../config";
 import { ShareProfileContent } from "../../screens/ShareProfile";
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getPreferredUsername,
-  getProfile,
-} from "../../utils/profile";
 import NewConversationButton from "./NewConversationButton";
+import { usePreferredUsername } from "@/hooks/usePreferredUsername";
+import { usePreferredName } from "@/hooks/usePreferredName";
+import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 
 type ChatNullStateProps = {
   currentAccount: string;
@@ -41,15 +37,13 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
-  const socials = useProfilesStore(
-    (s) => getProfile(currentAccount, s.profiles)?.socials
-  );
-  const username = getPreferredUsername(socials);
-  const displayName = getPreferredName(socials, currentAccount);
+  const username = usePreferredUsername(currentAccount);
+  const displayName = usePreferredName(currentAccount);
+  const avatar = usePreferredAvatarUri(currentAccount);
+
   const profileUrl = `https://${config.websiteDomain}/dm/${
     username || currentAccount
   }`;
-  const avatar = getPreferredAvatar(socials);
 
   const frens = useRecommendationsStore((s) => s.frens);
   const hasRecommendations = Object.keys(frens).length > 0;

@@ -1,11 +1,11 @@
 import {
-  EnsName,
-  FarcasterUsername,
-  LensHandle,
-  UnstoppableDomain,
-  ConverseUserName,
+  IEnsName,
+  IFarcasterUsername,
+  ILensHandle,
+  IUnstoppableDomain,
+  IConverseUserName,
   ProfileByAddress,
-} from "@data/store/profilesStore";
+} from "@/features/profiles/profile-types";
 
 export const getMatchedPeerAddresses = (
   profiles: ProfileByAddress,
@@ -22,27 +22,27 @@ export const getMatchedPeerAddresses = (
       return false;
     };
     if (
-      profile?.socials?.userNames?.some((userName: ConverseUserName) =>
+      profile?.socials?.userNames?.some((userName: IConverseUserName) =>
         checkMatch(userName.name)
       )
     ) {
       continue;
     }
     if (
-      profile?.socials?.ensNames?.some((ens: EnsName) => checkMatch(ens.name))
+      profile?.socials?.ensNames?.some((ens: IEnsName) => checkMatch(ens.name))
     ) {
       continue;
     }
     if (
       profile?.socials?.lensHandles?.some(
-        (lens: LensHandle) => checkMatch(lens.name) || checkMatch(lens.handle)
+        (lens: ILensHandle) => checkMatch(lens.name) || checkMatch(lens.handle)
       )
     ) {
       continue;
     }
     if (
       profile?.socials?.farcasterUsernames?.some(
-        (farcaster: FarcasterUsername) =>
+        (farcaster: IFarcasterUsername) =>
           checkMatch(farcaster.name) || checkMatch(farcaster.username)
       )
     ) {
@@ -50,7 +50,7 @@ export const getMatchedPeerAddresses = (
     }
     if (
       profile?.socials?.unstoppableDomains?.some(
-        (unstoppable: UnstoppableDomain) => checkMatch(unstoppable.domain)
+        (unstoppable: IUnstoppableDomain) => checkMatch(unstoppable.domain)
       )
     ) {
       continue;

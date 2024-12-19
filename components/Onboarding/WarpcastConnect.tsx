@@ -6,7 +6,7 @@
 
 // import DeprecatedOnboardingComponent from "./DeprecatedOnboardingComponent";
 // import config from "../../config";
-// import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
+// import { invalidateProfileSocialsQuery } from "../../data/helpers/profiles/profilesUpdate";
 // import {
 //   useCurrentAccount,
 //   useSettingsStore,
@@ -27,7 +27,7 @@
 //     onSuccess: async () => {
 //       try {
 //         await notifyFarcasterLinked();
-//         await refreshProfileForAddress(currentAccount, currentAccount);
+//         await invalidateProfileSocialsQuery(currentAccount, currentAccount);
 //         await refreshRecommendationsForAccount(currentAccount);
 //       } catch (e: any) {
 //         logger.error(e);

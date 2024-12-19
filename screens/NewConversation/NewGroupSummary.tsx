@@ -22,7 +22,6 @@ import {
 import { List } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ensureError } from "@/utils/error";
 import { uploadFile } from "@utils/attachment/uploadFile";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import Button from "../../components/Button/Button";
@@ -31,7 +30,6 @@ import TableView from "../../components/TableView/TableView";
 import {
   currentAccount,
   useCurrentAccount,
-  useProfilesStore,
 } from "../../data/store/accountsStore";
 import { usePhotoSelect } from "../../hooks/usePhotoSelect";
 import { navigate } from "../../utils/navigation";
@@ -42,31 +40,9 @@ import {
 } from "../../utils/profile";
 import { createGroupByAccount } from "../../utils/xmtpRN/conversations";
 import { NewConversationModalParams } from "./NewConversationModal";
-import {
-  captureErrorWithFriendlyToast,
-  captureErrorWithToast,
-} from "@/utils/capture-error";
-
-const getPendingGroupMembers = (
-  members: any[],
-  account: string,
-  currentAccountSocials: any
-) => {
-  const currentUser = {
-    address: account,
-    uri: getPreferredAvatar(currentAccountSocials),
-    name: getPreferredName(currentAccountSocials, account),
-  };
-
-  const memberDetails = members.map((m) => ({
-    address: m.address,
-    uri: getPreferredAvatar(
-      useProfilesStore((s) => getProfile(m.address, s.profiles)?.socials)
-    ),
-    name: getPreferredName(m, m.address),
-  }));
-  return [currentUser, ...memberDetails];
-};
+import { captureErrorWithToast } from "@/utils/capture-error";
+import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
+import { useProfilesSocials } from "@/hooks/useProfilesSocials";
 
 export default function NewGroupSummary({
   route,
@@ -87,9 +63,6 @@ export default function NewGroupSummary({
       updateGroupPinnedFrameUrlPolicy: "allow",
     });
   const account = useCurrentAccount();
-  const currentAccountSocials = useProfilesStore(
-    (s) => getProfile(account, s.profiles)?.socials
-  );
   const { photo: groupPhoto, addPhoto: addGroupPhoto } = usePhotoSelect();
   const [
     { remotePhotoUrl, isLoading: isUploadingGroupPhoto },
@@ -102,6 +75,8 @@ export default function NewGroupSummary({
   const defaultGroupName = useMemo(() => {
     if (!account) return "";
     const members = route.params.members.slice(0, 3);
+    const currentAccountSocials =
+      getProfileSocialsQueryData(account, account) ?? undefined;
     let groupName = getPreferredName(currentAccountSocials, account);
     if (members.length) {
       groupName += ", ";
@@ -114,7 +89,7 @@ export default function NewGroupSummary({
     }
 
     return groupName;
-  }, [route.params.members, account, currentAccountSocials]);
+  }, [route.params.members, account]);
   const colorScheme = useColorScheme();
   const [groupName, setGroupName] = useState(defaultGroupName);
   const [groupDescription, setGroupDescription] = useState("");
@@ -221,6 +196,21 @@ export default function NewGroupSummary({
     ]
   );
 
+  const profileQueries = useProfilesSocials(
+    route.params.members.map((m) => m.address)
+  );
+
+  const pendingGroupMembers = useMemo(() => {
+    return profileQueries.map(({ data: socials }, index) => {
+      const address = route.params.members[index].address;
+      return {
+        address,
+        uri: getPreferredAvatar(socials ?? undefined),
+        name: getPreferredName(socials ?? undefined, account!),
+      };
+    });
+  }, [profileQueries, route.params.members, account]);
+
   return (
     <ScrollView
       style={styles.group}
@@ -231,11 +221,7 @@ export default function NewGroupSummary({
           <GroupAvatar
             uri={groupPhoto}
             style={styles.avatar}
-            pendingGroupMembers={getPendingGroupMembers(
-              route.params.members,
-              account ?? "",
-              currentAccountSocials
-            )}
+            pendingGroupMembers={pendingGroupMembers}
             excludeSelf={false}
           />
           <Button

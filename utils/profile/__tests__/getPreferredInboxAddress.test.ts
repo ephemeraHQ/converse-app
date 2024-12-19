@@ -1,5 +1,5 @@
 import { getPreferredInboxAddress } from "../getPreferredInboxAddress";
-import { type ProfileSocials } from "@data/store/profilesStore";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
 
 describe("getPreferredInboxAddress", () => {
   it("should return undefined when no socials provided", () => {
@@ -14,7 +14,7 @@ describe("getPreferredInboxAddress", () => {
   });
 
   it("should return address from first social profile", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       address: "0x123456789",
       userNames: [
         {
@@ -28,7 +28,7 @@ describe("getPreferredInboxAddress", () => {
   });
 
   it("should return undefined if no address in socials", () => {
-    const socials: ProfileSocials = {
+    const socials: IProfileSocials = {
       userNames: [
         {
           name: "test.cb.id",
@@ -41,10 +41,10 @@ describe("getPreferredInboxAddress", () => {
   });
 
   it("should only use first social profile even if multiple provided", () => {
-    const socials1: ProfileSocials = {
+    const socials1: IProfileSocials = {
       address: "0x111111111",
     };
-    const socials2: ProfileSocials = {
+    const socials2: IProfileSocials = {
       address: "0x222222222",
     };
     const result = getPreferredInboxAddress([socials1, socials2]);

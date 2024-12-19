@@ -19,8 +19,6 @@ import {
 import QRCode from "react-native-qrcode-svg";
 
 import { useAppTheme } from "@theme/useAppTheme";
-import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
-import { getProfile } from "@utils/profile/getProfile";
 import { shortAddress } from "@utils/strings/shortAddress";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Avatar from "../components/Avatar";
@@ -29,14 +27,12 @@ import ActionButton from "../components/Chat/ActionButton";
 import Picto from "../components/Picto/Picto";
 import { Screen } from "../components/Screen/ScreenComp/Screen";
 import config from "../config";
-import {
-  useCurrentAccount,
-  useProfilesStore,
-} from "../data/store/accountsStore";
+import { useCurrentAccount } from "../data/store/accountsStore";
 import { NavigationParamList } from "./Navigation/Navigation";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { translate } from "@/i18n";
+import { usePreferredUsername } from "@/hooks/usePreferredUsername";
 
 const ShareProfileContent = ({
   userAddress,
@@ -150,10 +146,7 @@ export default function ShareProfileScreen({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "ShareProfile">) {
   const userAddress = useCurrentAccount() as string;
-  const socials = useProfilesStore(
-    (s) => getProfile(userAddress, s.profiles)?.socials
-  );
-  const username = getPreferredUsername(socials);
+  const username = usePreferredUsername(userAddress);
   const displayName = usePreferredName(userAddress);
   const avatar = usePreferredAvatarUri(userAddress);
 

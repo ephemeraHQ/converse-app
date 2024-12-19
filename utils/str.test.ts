@@ -8,7 +8,6 @@ import {
   shortDisplayName,
   strByteSize,
 } from "./str";
-import { getProfilesStore } from "../data/store/accountsStore";
 
 jest.mock("react-native", () => ({
   Dimensions: {
@@ -43,10 +42,6 @@ jest.mock("expo-secure-store", () => ({
 
 jest.mock("../data/store/chatStore", () => ({
   XmtpConversation: jest.fn(),
-}));
-
-jest.mock("../data/store/profilesStore", () => ({
-  ProfilesStoreType: jest.fn(),
 }));
 
 describe("shortDisplayName", () => {
