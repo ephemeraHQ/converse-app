@@ -58,6 +58,7 @@ export const onInteractWithNotification = async (
     await waitForXmtpClientHydration();
     const account: string =
       notificationData["account"] || useAccountsStore.getState().currentAccount;
+
     useAccountsStore.getState().setCurrentAccount(account, false);
 
     navigateToTopic(conversationTopic as ConversationTopic);
