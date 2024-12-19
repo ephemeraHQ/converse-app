@@ -21,7 +21,7 @@ import { useThemeProvider } from "../theme/useAppTheme";
 import { useAddressBookStateHandler } from "../utils/addressBook";
 import { useAutoConnectExternalWallet } from "../utils/evm/external";
 import { usePrivyAccessToken } from "../utils/evm/privy";
-import { converseNavigations } from "../utils/navigation";
+import { setConverseNavigatorRef } from "../utils/navigation";
 import { ConversationScreenConfig } from "../features/conversation/conversation.nav";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
 import {
@@ -39,6 +39,7 @@ import {
   getConverseStateFromPath,
 } from "./Navigation/navHelpers";
 import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
+import logger from "@/utils/logger";
 
 const prefix = Linking.createURL("/");
 
@@ -84,9 +85,10 @@ export default function Main() {
           theme={navigationTheme}
           linking={linking}
           ref={(r) => {
-            if (r) {
-              converseNavigations["main"] = r;
-            }
+            logger.info(
+              `[Main] Setting navigation ref to ${r ? "not null" : "null"}`
+            );
+            setConverseNavigatorRef(r);
           }}
           onUnhandledAction={() => {
             // Since we're handling multiple navigators,
@@ -105,9 +107,7 @@ export default function Main() {
 const NavigationContent = () => {
   const authStatus = useAuthStatus();
 
-  const { splashScreenHidden } = useAppStore(
-    useSelect(["notificationsPermissionStatus", "splashScreenHidden"])
-  );
+  const { splashScreenHidden } = useAppStore(useSelect(["splashScreenHidden"]));
 
   // Uncomment to test design system components
   // return (

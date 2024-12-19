@@ -3,32 +3,52 @@ import { Linking as RNLinking } from "react-native";
 
 import logger from "./logger";
 import config from "../config";
-import { currentAccount, getChatStore } from "../data/store/accountsStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import type { ConversationWithCodecsType } from "./xmtpRN/client.types";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { NavigationContainerRef } from "@react-navigation/native";
 
-export const converseNavigations: { [navigationName: string]: any } = {};
+let converseNavigatorRef: NavigationContainerRef<NavigationParamList> | null =
+  null;
+
+export const setConverseNavigatorRef = (
+  ref: NavigationContainerRef<NavigationParamList> | null
+) => {
+  if (converseNavigatorRef) {
+    logger.error("[Navigation] Conversation navigator ref already set");
+    return;
+  }
+  if (!ref) {
+    logger.error("[Navigation] Conversation navigator ref is null");
+    return;
+  }
+  converseNavigatorRef = ref;
+};
 
 export const navigate = async <T extends keyof NavigationParamList>(
   screen: T,
   params?: NavigationParamList[T]
 ) => {
+  if (!converseNavigatorRef) {
+    logger.error("[Navigation] Conversation navigator not found");
+    return;
+  }
+
+  if (!converseNavigatorRef.isReady()) {
+    logger.error(
+      "[Navigation] Conversation navigator is not ready (wait for appStore#hydrated to be true using waitForAppStoreHydration)"
+    );
+    return;
+  }
+
   logger.debug(
     `[Navigation] Navigating to ${screen} ${
       params ? JSON.stringify(params) : ""
     }`
   );
-  // Navigate to a screen in all navigators
-  // like Linking.openURL but without redirect on web
-  Object.values(converseNavigations).forEach((navigation) => {
-    navigation.navigate(screen, params);
-  });
-};
 
-export let topicToNavigateTo: string | undefined = undefined;
-export const setTopicToNavigateTo = (topic: string | undefined) => {
-  topicToNavigateTo = topic;
+  // todo(any): figure out proper typing here
+  // @ts-ignore
+  converseNavigatorRef.navigate(screen, params);
 };
 
 export const navigateToTopic = async (topic: ConversationTopic) => {
