@@ -100,15 +100,19 @@ export const useAppStore = create<AppStoreType>()(
  * You can observe that logic in the HydrationStateHandler, and that will likely be moved once
  * we refactor accounts to be InboxID based in upcoming refactors.
  */
-export const waitForXmtpClientHydration = async () => {
-  logger.debug(
-    `[waitForAppStoreHydration] Waiting for app store hydration to complete`
-  );
-  while (!useAppStore.getState().hydrationDone) {
-    logger.debug(
-      `[waitForAppStoreHydration] App store hydration not complete, waiting 100ms...`
-    );
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  logger.debug(`[waitForAppStoreHydration] App store hydration complete`);
+export const waitForXmtpClientHydration = (): Promise<void> => {
+  return new Promise((resolve) => {
+    const { hydrationDone } = useAppStore.getState();
+    if (hydrationDone) {
+      resolve();
+      return;
+    }
+
+    const unsubscribe = useAppStore.subscribe((state, prevState) => {
+      if (state.hydrationDone && !prevState.hydrationDone) {
+        resolve();
+        unsubscribe();
+      }
+    });
+  });
 };
