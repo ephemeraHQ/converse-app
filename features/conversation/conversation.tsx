@@ -12,27 +12,38 @@ import {
 } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { DmConsentPopup } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-dm";
 import { GroupConsentPopup } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-group";
-import { DmConversationTitle } from "@/features/conversation/conversation-dm-header-title";
-import { GroupConversationTitle } from "@/features/conversation/conversation-group-header-title";
+import { DmConversationTitle } from "@/features/conversation/conversation-header/conversation-dm-header-title";
+import { GroupConversationTitle } from "@/features/conversation/conversation-header/conversation-group-header-title";
 import { KeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
-import { ConversationMessageStatus } from "@/features/conversation/conversation-message-status/conversation-message-status";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { MessageContextMenu } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu";
 import {
   MessageContextMenuStoreProvider,
+  useMessageContextMenuStore,
   useMessageContextMenuStoreContext,
 } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
+import {
+  ConversationMessageGestures,
+  IMessageGesturesOnLongPressArgs,
+} from "@/features/conversation/conversation-message/conversation-message-gestures";
 import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import { MessageReactionsDrawer } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer";
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { ConversationMessageRepliable } from "@/features/conversation/conversation-message/conversation-message-repliable";
+import { ConversationMessageStatus } from "@/features/conversation/conversation-message/conversation-message-status/conversation-message-status";
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
-import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
+import {
+  MessageContextStoreProvider,
+  useMessageContextStore,
+} from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
   getConvosMessageStatus,
+  getCurrentUserAlreadyReactedOnMessage,
   isAnActualMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
+import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
+import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
 import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
@@ -58,8 +69,7 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { ConversationMessageGestures } from "./conversation-message-gestures";
-import { ConversationMessageHighlighted } from "./conversation-message-highlighted";
+import { ConversationMessageHighlighted } from "./conversation-message/conversation-message-highlighted";
 import {
   ConversationStoreProvider,
   useCurrentConversationTopic,
@@ -282,11 +292,11 @@ const ConversationMessagesListItem = memo(
         <ConversationMessageTimestamp />
         <ConversationMessageRepliable onReply={handleReply}>
           <ConversationMessageLayout>
-            <ConversationMessageGestures>
+            <ConversationMessageGesturesWrapper>
               <ConversationMessageHighlighted>
                 <ConversationMessage message={message} />
               </ConversationMessageHighlighted>
-            </ConversationMessageGestures>
+            </ConversationMessageGesturesWrapper>
             <ConversationMessageReactions />
             {isLatestMessageSentByCurrentUser && (
               <ConversationMessageStatus
@@ -296,6 +306,74 @@ const ConversationMessagesListItem = memo(
           </ConversationMessageLayout>
         </ConversationMessageRepliable>
       </MessageContextStoreProvider>
+    );
+  }
+);
+
+const ConversationMessageGesturesWrapper = memo(
+  function ConversationMessageGesturesWrapper(props: {
+    children: React.ReactNode;
+  }) {
+    const messageContextMenuStore = useMessageContextMenuStore();
+    const messageStore = useMessageContextStore();
+    const topic = useCurrentConversationTopic()!;
+
+    const reactOnMessage = useReactOnMessage({
+      topic,
+    });
+    const removeReactionOnMessage = useRemoveReactionOnMessage({
+      topic,
+    });
+
+    const handleLongPress = useCallback(
+      (e: IMessageGesturesOnLongPressArgs) => {
+        const messageId = messageStore.getState().messageId;
+        messageContextMenuStore.getState().setMessageContextMenuData({
+          messageId,
+          itemRectX: e.pageX,
+          itemRectY: e.pageY,
+          itemRectHeight: e.height,
+          itemRectWidth: e.width,
+        });
+      },
+      [messageContextMenuStore, messageStore]
+    );
+
+    const handleTap = useCallback(() => {
+      const isShowingTime = !messageStore.getState().isShowingTime;
+      messageStore.setState({
+        isShowingTime,
+      });
+    }, [messageStore]);
+
+    const handleDoubleTap = useCallback(() => {
+      const messageId = messageStore.getState().messageId;
+      const alreadyReacted = getCurrentUserAlreadyReactedOnMessage({
+        messageId,
+        topic,
+        emoji: "❤️",
+      });
+      if (alreadyReacted) {
+        removeReactionOnMessage({
+          messageId,
+          emoji: "❤️",
+        });
+      } else {
+        reactOnMessage({
+          messageId,
+          emoji: "❤️",
+        });
+      }
+    }, [reactOnMessage, removeReactionOnMessage, messageStore, topic]);
+
+    return (
+      <ConversationMessageGestures
+        onLongPress={handleLongPress}
+        onTap={handleTap}
+        onDoubleTap={handleDoubleTap}
+      >
+        {props.children}
+      </ConversationMessageGestures>
     );
   }
 );

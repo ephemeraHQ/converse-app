@@ -12,7 +12,7 @@ type ConversationTitleDumbProps = {
   onPress?: () => void;
 };
 
-export function ConversationTitle({
+export function ConversationHeaderTitle({
   avatarComponent,
   title,
   subtitle,

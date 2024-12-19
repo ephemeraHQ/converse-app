@@ -88,7 +88,7 @@ export const computeSpamScoreGroupMessage = async (
       return 1;
     }
 
-    const senderInboxId = decodedMessage.senderInboxId as InboxId;
+    const senderInboxId = decodedMessage.senderInboxId;
     const senderConsentState =
       await xmtpClient.preferences.inboxIdConsentState(senderInboxId);
     if (senderConsentState === "denied") {

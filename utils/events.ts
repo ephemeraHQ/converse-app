@@ -1,5 +1,4 @@
 import { TransactionToTrigger } from "@components/TransactionPreview/TransactionPreview";
-import { MessageAttachment } from "@data/store/chatStore";
 import EventEmitter from "eventemitter3";
 import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 import { Account, Wallet } from "thirdweb/wallets";
@@ -16,18 +15,6 @@ type ConverseEvents = {
   showDebugMenu: () => void;
   "conversationList-scroll": () => void;
   "enable-transaction-mode": (enabled: boolean) => void;
-  openingConversation: (payload: { topic: string }) => void;
-  setCurrentConversationMediaPreviewValue: (
-    mediaPreview: MessageAttachment
-  ) => void;
-  highlightMessage: (messageId: string) => void;
-  setCurrentConversationInputValue: (value: string) => void;
-  triggerReplyToMessage: (messageId: string) => void;
-  scrollChatToMessage: (value: {
-    index?: number;
-    messageId?: string;
-    animated?: boolean;
-  }) => void;
   toggleSpamRequests: () => void;
   displayExternalWalletPicker: (title?: string, subtitle?: string) => void;
   externalWalletPicked: (walletPicked: {

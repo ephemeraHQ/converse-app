@@ -1,9 +1,3 @@
-import { ReactionContent } from "@xmtp/react-native-sdk";
-
-export type ConversationMessageReactions = {
-  [senderAddress: string]: ReactionContent[];
-};
-
 /**
  * Aggregated reaction data including top emojis, total count, and detailed breakdown.
  */

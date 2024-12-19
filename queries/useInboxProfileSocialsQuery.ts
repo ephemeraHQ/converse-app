@@ -35,7 +35,9 @@ const profileSocials = create({
 });
 
 const fetchInboxProfileSocials = async (account: string, inboxId: InboxId) => {
+  console.log("caca1");
   const data = await profileSocials.fetch(inboxId);
+  console.log("caca2");
 
   const key = inboxProfileSocialsQueryStorageKey(account, inboxId);
 

@@ -25,20 +25,19 @@ export const KeyboardFiller = memo(function KeyboardFiller(
   const isKeyboardShown = useKeyboardIsShown();
 
   useEffect(() => {
-    // Context menu was hidden
-    if (!messageContextMenuIsOpen) {
-      // Reopen keyboard if it was open before context menu was shown
-      if (keyboardWasOpenRef.current) {
-        textInputRef.current?.focus();
-      }
-    }
-    // Context menu is shown
-    else {
+    if (messageContextMenuIsOpen) {
+      // If the keyboard is open, keep track of where it was because we need to open it again when the context menu is dismissed
       if (isKeyboardShown) {
         Keyboard.dismiss();
         lastKeyboardHeight.value = keyboardHeight.value;
         keyboardWasOpenRef.current = true;
-      } else {
+      }
+    }
+    // Context menu is hidden
+    else {
+      // Reopen keyboard if it was open before context menu was shown
+      if (keyboardWasOpenRef.current) {
+        textInputRef.current?.focus();
         keyboardWasOpenRef.current = false;
       }
     }
@@ -62,7 +61,7 @@ export const KeyboardFiller = memo(function KeyboardFiller(
     lastKeyboardHeight,
   ]);
 
-  const animatedStyle = useAnimatedStyle(() => {
+  const fillerAnimatedStyle = useAnimatedStyle(() => {
     return {
       height: Math.max(
         Math.max(lastKeyboardHeight.value, keyboardHeight.value) -
@@ -74,7 +73,8 @@ export const KeyboardFiller = memo(function KeyboardFiller(
 
   return (
     <>
-      <AnimatedVStack style={animatedStyle} />
+      <AnimatedVStack style={fillerAnimatedStyle} />
+      {/* Need for focus on keyboard */}
       <TextInput
         ref={textInputRef}
         style={{ height: 0, width: 0, opacity: 0, position: "absolute" }}

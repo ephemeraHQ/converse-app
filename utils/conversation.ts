@@ -1,5 +1,5 @@
 import { ConversationVersion } from "@xmtp/react-native-sdk";
-import { TopicData, TopicsData } from "../data/store/chatStore";
+import { TopicsData } from "../data/store/chatStore";
 import { ConversationWithCodecsType } from "./xmtpRN/client.types";
 
 export type ConversationFlatListHiddenRequestItem = {
@@ -101,39 +101,4 @@ export const isConversationBlocked = (
   } else {
     return conversation.state === "denied";
   }
-};
-
-export const markConversationsAsReadIfNecessary = async (account: string) => {
-  // while (!getChatStore(account).getState().topicsDataFetchedOnce) {
-  //   await new Promise((r) => setTimeout(r, 2000));
-  // }
-  // if (Object.keys(getChatStore(account).getState().topicsData).length > 0) {
-  //   return;
-  // }
-  // const topicsUpdates = getTopicsUpdatesAsRead(
-  //   getChatStore(account).getState().conversations
-  // );
-  // getChatStore(account).getState().setTopicsData(topicsUpdates);
-  // saveTopicsData(account, topicsUpdates);
-};
-
-export const getTopicsUpdatesAsRead = (conversations: {
-  [topic: string]: ConversationWithCodecsType;
-}) => {
-  const topicsUpdates: {
-    [topic: string]: TopicData;
-  } = {};
-  const timestamp = new Date().getTime();
-  for (const topic in conversations) {
-    const conversation = conversations[topic];
-    const lastMessage = conversation.lastMessage;
-    if (lastMessage) {
-      topicsUpdates[topic] = {
-        status: "read",
-        readUntil: lastMessage.sentNs,
-        timestamp,
-      };
-    }
-  }
-  return topicsUpdates;
 };

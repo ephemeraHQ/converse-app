@@ -1,24 +1,31 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { getCurrentAccount } from "@/data/store/accountsStore";
+import { Button } from "@/design-system/Button/Button";
+import { Center } from "@/design-system/Center";
+import { Text } from "@/design-system/Text";
+import { TouchableWithoutFeedback } from "@/design-system/touchable-without-feedback";
 import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
 import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
+import { NewConversationTitle } from "@/features/conversation/conversation-header/conversation-new-dm-header-title";
 import { KeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
-import { NewConversationTitle } from "@/features/conversation/conversation-new-dm-header-title";
-import { ConversationNewDmNoMessagesPlaceholder } from "@/features/conversation/conversation-new-dm-no-messages-placeholder";
 import {
   ISendMessageParams,
   sendMessage,
 } from "@/features/conversation/hooks/use-send-message";
+import { usePreferredName } from "@/hooks/usePreferredName";
+import { translate } from "@/i18n";
 import { useRouter } from "@/navigation/useNavigation";
 import { addConversationToConversationListQuery } from "@/queries/useConversationListQuery";
 import { setDmQueryData } from "@/queries/useDmQuery";
+import { useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
 import { sentryTrackError } from "@/utils/sentry";
 import { createConversationByAccount } from "@/utils/xmtpRN/conversations";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo, useCallback, useLayoutEffect } from "react";
+import { Keyboard } from "react-native";
 
 export const ConversationNewDm = memo(function ConversationNewDm(props: {
   peerAddress: string;
@@ -136,5 +143,55 @@ function useSendFirstConversationMessage(peerAddress: string) {
       }
     },
     [createNewConversationAsync, peerAddress, sendMessageAsync]
+  );
+}
+
+type IConversationNewDmNoMessagesPlaceholderProps = {
+  peerAddress: string;
+  onSendWelcomeMessage: () => void;
+  isBlockedPeer: boolean;
+};
+
+function ConversationNewDmNoMessagesPlaceholder(
+  args: IConversationNewDmNoMessagesPlaceholderProps
+) {
+  const { peerAddress, onSendWelcomeMessage, isBlockedPeer } = args;
+
+  const { theme } = useAppTheme();
+
+  const peerPreferredName = usePreferredName(peerAddress);
+
+  if (isBlockedPeer) {
+    // TODO
+    return null;
+  }
+
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <Center
+        style={{
+          flex: 1,
+          flexDirection: "column",
+          paddingHorizontal: theme.spacing.md,
+          rowGap: theme.spacing.sm,
+        }}
+      >
+        <Text
+          style={{
+            textAlign: "center",
+          }}
+        >
+          {translate("this_is_the_beginning_of_your_conversation_with", {
+            name: peerPreferredName,
+          })}
+        </Text>
+        <Button
+          variant="fill"
+          icon="hand.wave"
+          tx="say_hi"
+          onPress={onSendWelcomeMessage}
+        />
+      </Center>
+    </TouchableWithoutFeedback>
   );
 }

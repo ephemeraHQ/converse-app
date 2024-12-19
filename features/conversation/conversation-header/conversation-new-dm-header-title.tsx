@@ -1,4 +1,4 @@
-import { ConversationTitle } from "@/features/conversation/conversation-title";
+import { ConversationHeaderTitle } from "@/features/conversation/conversation-header/conversation-header-title";
 import Avatar from "@components/Avatar";
 import { usePreferredAvatarUri } from "@hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@hooks/usePreferredName";
@@ -35,7 +35,7 @@ export const NewConversationTitle = ({
   if (!displayAvatar) return null;
 
   return (
-    <ConversationTitle
+    <ConversationHeaderTitle
       title={preferredName}
       onPress={onPress}
       avatarComponent={
