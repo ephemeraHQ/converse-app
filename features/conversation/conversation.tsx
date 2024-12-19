@@ -195,7 +195,7 @@ const Messages = memo(function Messages(props: {
     return messages.ids.find(
       (messageId) =>
         isAnActualMessage(messages.byId[messageId]) &&
-        messages.byId[messageId].senderAddress === currentAccountInboxId
+        messages.byId[messageId].senderInboxId === currentAccountInboxId
     );
   }, [messages?.ids, messages?.byId, currentAccountInboxId]);
 
