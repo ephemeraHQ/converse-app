@@ -2,7 +2,7 @@ import {
   ConversationWithCodecsType,
   DmWithCodecsType,
   GroupWithCodecsType,
-} from "@utils/xmtpRN/client";
+} from "../xmtpRN/client.types";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
 
 export const unwrapConversationContainer = (

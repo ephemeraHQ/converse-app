@@ -14,7 +14,10 @@ import { ConversationFlatListHiddenRequestItem } from "../utils/conversation";
 import { FlatListItemType } from "../features/conversation-list/ConversationList.types";
 import { unwrapConversationContainer } from "@utils/groupUtils/conversationContainerHelpers";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
-import { DmWithCodecsType, GroupWithCodecsType } from "@utils/xmtpRN/client";
+import {
+  DmWithCodecsType,
+  GroupWithCodecsType,
+} from "@/utils/xmtpRN/client.types";
 import { V3DMListItem } from "./V3DMListItem";
 
 type Props = {

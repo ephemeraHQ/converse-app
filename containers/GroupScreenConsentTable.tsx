@@ -9,7 +9,7 @@ import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 
 type GroupScreenConsentTableProps = {
   topic: ConversationTopic;

@@ -1,10 +1,17 @@
-import { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
+import {
+  ConversationId,
+  ConversationTopic,
+  MessageId,
+} from "@xmtp/react-native-sdk";
 import { createContext, memo, useContext, useRef } from "react";
 import { createStore, useStore } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
 
 type IConversationStoreProps = {
   topic: ConversationTopic;
   conversationId: ConversationId;
+  highlightedMessageId?: MessageId;
+  scrollToMessageId?: MessageId;
 };
 
 type IConversationStoreState = IConversationStoreProps & {};
@@ -32,11 +39,15 @@ const createConversationStore = (initProps: IConversationStoreProps) => {
   const DEFAULT_PROPS: IConversationStoreProps = {
     topic: null as unknown as ConversationTopic,
     conversationId: null as unknown as ConversationId,
+    highlightedMessageId: undefined,
+    scrollToMessageId: undefined,
   };
-  return createStore<IConversationStoreState>()((set) => ({
-    ...DEFAULT_PROPS,
-    ...initProps,
-  }));
+  return createStore<IConversationStoreState>()(
+    subscribeWithSelector((set) => ({
+      ...DEFAULT_PROPS,
+      ...initProps,
+    }))
+  );
 };
 
 const ConversationStoreContext = createContext<IConversationStore | null>(null);

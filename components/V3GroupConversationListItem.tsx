@@ -20,7 +20,7 @@ import { ConversationListItemDumb } from "./ConversationListItem/ConversationLis
 import { GroupAvatarDumb } from "./GroupAvatar";
 import { useGroupConversationListAvatarInfo } from "../features/conversation-list/useGroupConversationListAvatarInfo";
 import { IIconName } from "@design-system/Icon/Icon.types";
-import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useRoute } from "@navigation/useNavigation";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { actionSheetColors } from "@styles/colors";

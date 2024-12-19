@@ -9,6 +9,7 @@ import {
   ConversationWithCodecsType,
   GroupData,
   GroupsDataEntity,
+  GroupWithCodecsType,
 } from "@utils/xmtpRN/client.types";
 import {
   Conversation,
@@ -23,7 +24,6 @@ import {} from "../groupInvites.utils";
 import { JoinGroupResult } from "./joinGroup.types";
 import { ConversationListQueryData } from "@/queries/useConversationListQuery";
 import { entify } from "@/queries/entify";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client";
 
 const GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS = 10;
 const GROUP_JOIN_REQUEST_POLL_INTERVAL_MS = 1000;

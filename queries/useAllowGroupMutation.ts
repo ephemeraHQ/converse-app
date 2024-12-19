@@ -1,6 +1,6 @@
 import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
 import { captureError } from "@/utils/capture-error";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { queryClient } from "@queries/queryClient";
 import {
   MutationObserver,

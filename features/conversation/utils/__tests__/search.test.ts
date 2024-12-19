@@ -3,7 +3,7 @@ import { getInboxProfileSocialsQueryData } from "@/queries/useInboxProfileSocial
 import type {
   DmWithCodecsType,
   GroupWithCodecsType,
-} from "@/utils/xmtpRN/client";
+} from "@/utils/xmtpRN/client.types";
 
 // Mock getInboxProfileSocialsQueryData
 jest.mock("@/queries/useInboxProfileSocialsQuery", () => ({

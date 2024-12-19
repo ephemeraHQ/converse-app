@@ -11,7 +11,10 @@ import type {
   GroupUpdatedContent,
 } from "@xmtp/react-native-sdk";
 import config from "../../config";
-import { ConverseXmtpClientType, DecodedMessageWithCodecsType } from "./client";
+import {
+  ConverseXmtpClientType,
+  DecodedMessageWithCodecsType,
+} from "./client.types";
 import { getXmtpClient } from "./sync";
 
 export const streamAllMessages = async (account: string) => {

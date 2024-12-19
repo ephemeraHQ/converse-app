@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { ChatStoreType } from "@data/store/chatStore";
-import { DecodedMessageWithCodecsType } from "@utils/xmtpRN/client";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { normalizeTimestamp } from "@/utils/date";

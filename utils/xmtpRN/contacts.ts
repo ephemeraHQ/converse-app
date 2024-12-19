@@ -1,7 +1,7 @@
 import { InboxId } from "@xmtp/react-native-sdk";
 
 import logger from "@utils/logger";
-import { ConverseXmtpClientType, DmWithCodecsType } from "./client";
+import { ConverseXmtpClientType, DmWithCodecsType } from "./client.types";
 import { getXmtpClient } from "./sync";
 
 type ConsentType = "allow" | "deny";

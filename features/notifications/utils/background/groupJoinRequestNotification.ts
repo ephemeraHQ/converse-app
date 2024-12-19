@@ -1,4 +1,4 @@
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 import { z } from "zod";
 import mmkv from "@/utils/mmkv";
 import { sentryTrackError, sentryTrackMessage } from "@/utils/sentry";

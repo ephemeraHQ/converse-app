@@ -6,7 +6,7 @@ import { updateConversationInConversationListQuery } from "@/queries/useConversa
 import { getConversationQueryData } from "@/queries/useConversationQuery";
 import { getDmQueryData, setDmQueryData } from "@/queries/useDmQuery";
 import { mutateObjectProperties } from "@/utils/mutate-object-properties";
-import { DmWithCodecsType } from "@/utils/xmtpRN/client";
+import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
 import {
   consentToGroupsOnProtocolByAccount,
   consentToInboxIdsOnProtocolByAccount,

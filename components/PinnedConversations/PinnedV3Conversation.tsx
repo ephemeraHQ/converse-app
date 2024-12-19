@@ -1,6 +1,9 @@
 import { useConversationListGroupItem } from "@hooks/useConversationListGroupItem";
 import { conversationIsGroup } from "@utils/groupUtils/conversationContainerHelpers";
-import { DmWithCodecsType, GroupWithCodecsType } from "@utils/xmtpRN/client";
+import {
+  DmWithCodecsType,
+  GroupWithCodecsType,
+} from "@/utils/xmtpRN/client.types";
 import React from "react";
 import { PinnedV3GroupConversation } from "./PinnedV3GroupConversation";
 import { PinnedV3DMConversation } from "./PinnedV3DMConversation";

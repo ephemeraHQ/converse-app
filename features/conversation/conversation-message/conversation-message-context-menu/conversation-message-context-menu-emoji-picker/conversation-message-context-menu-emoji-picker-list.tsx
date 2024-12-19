@@ -1,13 +1,15 @@
+import { AnimatedVStack } from "@/design-system/VStack";
+import { BottomSheetFlashList } from "@design-system/BottomSheet/BottomSheetFlashList";
+import { BottomSheetFlatList } from "@design-system/BottomSheet/BottomSheetFlatList";
 import { ListRenderItem as FlashListRenderItem } from "@shopify/flash-list";
-import { ReanimatedView } from "@utils/animations";
 import { CategorizedEmojisRecord } from "@utils/emojis/interfaces";
 import React, { FC, useCallback, useEffect } from "react";
 import {
   ListRenderItem,
   Platform,
   StyleSheet,
-  useWindowDimensions,
   View,
+  useWindowDimensions,
 } from "react-native";
 import {
   useAnimatedStyle,
@@ -16,8 +18,6 @@ import {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EmojiRow } from "./conversation-message-context-menu-emoji-picker-row";
-import { BottomSheetFlashList } from "@design-system/BottomSheet/BottomSheetFlashList";
-import { BottomSheetFlatList } from "@design-system/BottomSheet/BottomSheetFlatList";
 
 type EmojiRowListProps = {
   emojis: CategorizedEmojisRecord[];
@@ -68,7 +68,7 @@ export const EmojiRowList: FC<EmojiRowListProps> = ({
   }, [ListHeader]);
 
   return (
-    <ReanimatedView style={[animatedStyle, styles.container]}>
+    <AnimatedVStack style={[animatedStyle, styles.container]}>
       <ListRenderer
         ListHeaderComponent={ListHeaderComponent}
         showsVerticalScrollIndicator={false}
@@ -80,7 +80,7 @@ export const EmojiRowList: FC<EmojiRowListProps> = ({
         estimatedItemSize={49}
         ListFooterComponent={() => <View style={styles.bottom} />}
       />
-    </ReanimatedView>
+    </AnimatedVStack>
   );
 };
 

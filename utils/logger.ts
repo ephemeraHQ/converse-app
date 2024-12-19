@@ -97,4 +97,8 @@ const logger = _logger as typeof _logger & {
   error: logMethodType;
 };
 
+export function logJson(json: any) {
+  console.log(JSON.stringify(json, null, 2));
+}
+
 export default logger;

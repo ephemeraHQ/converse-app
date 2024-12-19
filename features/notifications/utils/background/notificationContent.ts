@@ -2,7 +2,7 @@ import {
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
   GroupWithCodecsType,
-} from "@utils/xmtpRN/client";
+} from "@/utils/xmtpRN/client.types";
 import {
   getMessageContentType,
   isContentType,

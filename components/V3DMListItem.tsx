@@ -16,7 +16,7 @@ import { AvatarSizes } from "@styles/sizes";
 import { getMinimalDate } from "@utils/date";
 import { Haptics } from "@utils/haptics";
 import { navigate } from "@utils/navigation";
-import { DmWithCodecsType } from "@utils/xmtpRN/client";
+import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useCallback, useMemo, useRef } from "react";
 import { useColorScheme } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";

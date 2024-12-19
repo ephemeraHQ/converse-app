@@ -18,7 +18,7 @@ import { useXmtpSigner } from "@utils/evm/xmtp";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { sentryTrackError } from "@utils/sentry";
 import { shortAddress } from "@utils/strings/shortAddress";
-import { ConverseXmtpClientType } from "@utils/xmtpRN/client";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 import {
   getOtherInstallations,
   revokeOtherInstallations,
