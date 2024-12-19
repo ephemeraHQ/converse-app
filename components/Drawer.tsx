@@ -1,7 +1,6 @@
+import { AnimatedVStack } from "@/design-system/VStack";
 import { AnimatedScrollView } from "@design-system/ScrollView";
 import { backgroundColor } from "@styles/colors";
-import { ReanimatedView } from "@utils/animations";
-import { useKeyboardAnimation } from "@utils/animations/keyboardAnimation";
 import React, {
   forwardRef,
   useCallback,
@@ -13,10 +12,10 @@ import {
   Platform,
   StyleSheet,
   TouchableWithoutFeedback,
-  useColorScheme,
-  useWindowDimensions,
   View,
   ViewStyle,
+  useColorScheme,
+  useWindowDimensions,
 } from "react-native";
 import {
   Gesture,
@@ -25,9 +24,10 @@ import {
 } from "react-native-gesture-handler";
 import { Portal } from "react-native-paper";
 import {
-  interpolateColor,
   LinearTransition,
+  interpolateColor,
   runOnJS,
+  useAnimatedKeyboard,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -153,7 +153,7 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
       ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.5)"]
     ),
   }));
-  const { height: keyboardHeight } = useKeyboardAnimation();
+  const { height: keyboardHeight } = useAnimatedKeyboard();
   const { bottom } = useSafeAreaInsets();
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -171,7 +171,7 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
         {/* A bit of a pain but have to wrap this in a gesture handler */}
         <GestureHandlerRootView style={styles.gestureHandlerContainer}>
           <TouchableWithoutFeedback onPress={handleClose}>
-            <ReanimatedView style={[styles.backdrop, backgroundStyle]} />
+            <AnimatedVStack style={[styles.backdrop, backgroundStyle]} />
           </TouchableWithoutFeedback>
           <GestureDetector gesture={composed}>
             <AnimatedScrollView
