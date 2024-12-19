@@ -391,7 +391,7 @@ PODS:
   - libwebp/sharpyuv (1.3.2)
   - libwebp/webp (1.3.2):
     - libwebp/sharpyuv
-  - LibXMTP (3.0.10)
+  - LibXMTP (3.0.13)
   - MessagePacker (0.4.7)
   - MMKV (1.3.3):
     - MMKVCore (~> 1.3.3)
@@ -2071,10 +2071,10 @@ PODS:
     - Yoga
   - RNLocalize (3.0.2):
     - React-Core
-  - RNNotifee (9.1.2):
+  - RNNotifee (9.1.3):
     - React-Core
-    - RNNotifee/NotifeeCore (= 9.1.2)
-  - RNNotifee/NotifeeCore (9.1.2):
+    - RNNotifee/NotifeeCore (= 9.1.3)
+  - RNNotifee/NotifeeCore (9.1.3):
     - React-Core
   - RNReactNativeSharedGroupPreferences (1.1.23):
     - React
@@ -2218,18 +2218,18 @@ PODS:
   - "sqlite3/common (3.45.3+1)"
   - SwiftProtobuf (1.28.2)
   - UMAppLoader (4.6.0)
-  - XMTP (3.0.14):
+  - XMTP (3.0.19):
     - Connect-Swift (= 1.0.0)
     - CryptoSwift (= 1.8.3)
     - CSecp256k1 (~> 0.2)
-    - LibXMTP (= 3.0.10)
+    - LibXMTP (= 3.0.13)
     - SQLCipher (= 4.5.7)
-  - XMTPReactNative (3.1.1):
+  - XMTPReactNative (3.1.4):
     - CSecp256k1 (~> 0.2)
     - ExpoModulesCore
     - MessagePacker
     - SQLCipher (= 4.5.7)
-    - XMTP (= 3.0.14)
+    - XMTP (= 3.0.19)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -2378,7 +2378,7 @@ DEPENDENCIES:
   - Sentry/HybridSDK (= 8.36.0)
   - SQLite.swift
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 3.0.14)
+  - XMTP (= 3.0.19)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2751,7 +2751,7 @@ SPEC CHECKSUMS:
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
-  LibXMTP: e550ccb4565023eb77f5a2eddd9d5a71cfb9d2b3
+  LibXMTP: 3b4b45c0edd404de164e26c7920af5ea0ebb3e17
   MessagePacker: ab2fe250e86ea7aedd1a9ee47a37083edd41fd02
   MMKV: f902fb6719da13c2ab0965233d8963a59416f911
   MMKVAppExtension: fcf23c6b250cc87db63507bc57be8e6ed378168d
@@ -2841,7 +2841,7 @@ SPEC CHECKSUMS:
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 634189dbe31ecedf6e75c0d8b5ec5ae208850074
   RNLocalize: dbea38dcb344bf80ff18a1757b1becf11f70cae4
-  RNNotifee: bc20a5e3d581f629db988075944fdd944d363dfe
+  RNNotifee: 522276e0be010e98173175fb838514b69f18cbe0
   RNReactNativeSharedGroupPreferences: de0121a4224c267bc7e9fb16c398f3f087c8da81
   RNReanimated: e71d3475e3ef59d343061839b4506a7eaeeeae96
   RNScreens: de55b9d7de8a017d1588dcb70415492d0b0597c2
@@ -2859,10 +2859,10 @@ SPEC CHECKSUMS:
   sqlite3: 02d1f07eaaa01f80a1c16b4b31dfcbb3345ee01a
   SwiftProtobuf: 4dbaffec76a39a8dc5da23b40af1a5dc01a4c02d
   UMAppLoader: f17a5ee8e85b536ace0fc254b447a37ed198d57e
-  XMTP: 3b586fa3703640bb5fec8a64daba9e157d9e5fdc
-  XMTPReactNative: f3e1cbf80b7278b817bd42982703a95a9250497d
+  XMTP: b5311154b2a3cda7c07ce78ae9fa6d111bac979d
+  XMTPReactNative: 19b1bde805593502a14a7337c0b132efa911e5db
   Yoga: a9ef4f5c2cd79ad812110525ef61048be6a582a4
 
-PODFILE CHECKSUM: 7ed5cefb992e438c67772278d7c473ace4b42753
+PODFILE CHECKSUM: c41ba0637d8261aca47e5705727f10078165114f
 
 COCOAPODS: 1.16.2
