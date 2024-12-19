@@ -8,6 +8,7 @@ export const en = {
       title: "CONVERSE ACCOUNTS",
       connectViaPhone: "Connect via Phone",
       createEphemeral: "Create Ephemeral Account",
+      connectViaPasskey: "Connect via Passkey",
     },
     installedApps: {
       title: "INSTALLED APPS",
@@ -50,6 +51,11 @@ export const en = {
       invalidCode: "The code you entered is not valid, please try again",
     },
     resendCodeIn: "Resend code in {{seconds}} seconds...",
+  },
+  passkey: {
+    title: "Create Passkey",
+    subtitle: "Create a passkey to connect to Converse",
+    createButton: "Create Passkey",
   },
   createEphemeral: {
     title: "Create an ephemeral account",

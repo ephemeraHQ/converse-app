@@ -12,6 +12,7 @@ import {
   getConnectViaWalletTableViewEphemeralItem,
   getConnectViaWalletTableViewPhoneItem,
   getConnectViaWalletTableViewPrivateKeyItem,
+  getConnectViaWalletTableViewPasskeyItem,
   InstalledWalletsTableView,
 } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletTableViewItems";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
@@ -58,6 +59,11 @@ export function OnboardingGetStartedScreen() {
         <TableView
           title={translate("walletSelector.converseAccount.title")}
           items={[
+            getConnectViaWalletTableViewPasskeyItem({
+              action: () => {
+                router.navigate("OnboardingPasskey");
+              },
+            }),
             getConnectViaWalletTableViewPhoneItem({
               action: () => {
                 router.navigate("OnboardingPrivy");
