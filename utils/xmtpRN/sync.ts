@@ -26,6 +26,7 @@ const instantiatingClientForAccount: {
 
 export const getXmtpClient = async (
   account: string
+  // todo(any): why is this Union necessary? Why can't we just use ConverseXmtpClientType?
 ): Promise<ConverseXmtpClientType | Client> => {
   const lowerCaseAccount = account.toLowerCase();
   if (account && xmtpClientByAccount[lowerCaseAccount]) {
