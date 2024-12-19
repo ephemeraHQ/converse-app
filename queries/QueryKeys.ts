@@ -30,13 +30,13 @@ export enum QueryKeys {
 // Conversations
 export const conversationsQueryKey = (account: string) => [
   QueryKeys.CONVERSATIONS,
-  account.toLowerCase(),
+  account?.toLowerCase(),
 ];
 
 export const conversationQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.CONVERSATION, account.toLowerCase(), topic];
+) => [QueryKeys.CONVERSATION, account?.toLowerCase(), topic];
 
 export const dmQueryKey = (account: string, peer: string) => [
   QueryKeys.CONVERSATION_DM,
@@ -53,24 +53,24 @@ export const conversationMessageQueryKey = (
 export const conversationMessagesQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.CONVERSATION_MESSAGES, account.toLowerCase(), topic];
+) => [QueryKeys.CONVERSATION_MESSAGES, account?.toLowerCase(), topic];
 
 export const conversationPreviewMessagesQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.CONVERSATION_MESSAGES, account.toLowerCase(), topic];
+) => [QueryKeys.CONVERSATION_MESSAGES, account?.toLowerCase(), topic];
 
 // Members
 export const groupMembersQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.GROUP_MEMBERS, account.toLowerCase(), topic];
+) => [QueryKeys.GROUP_MEMBERS, account?.toLowerCase(), topic];
 
 // Group Mutable Metadata
 export const groupPinnedFrameQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.PINNED_FRAME, account.toLowerCase(), topic];
+) => [QueryKeys.PINNED_FRAME, account?.toLowerCase(), topic];
 
 export const groupPermissionPolicyQueryKey = (
   account: string,
@@ -86,21 +86,21 @@ export const groupCreatorQueryKey = (
 export const groupPermissionsQueryKey = (
   account: string,
   topic: ConversationTopic
-) => [QueryKeys.GROUP_PERMISSIONS, account.toLowerCase(), topic];
+) => [QueryKeys.GROUP_PERMISSIONS, account?.toLowerCase(), topic];
 
 // Group Invites
 export const groupInviteQueryKey = (account: string, inviteId: string) => [
   QueryKeys.GROUP_INVITE,
-  account.toLowerCase(),
+  account?.toLowerCase(),
   inviteId,
 ];
 
 export const groupJoinRequestQueryKey = (
   account: string,
   requestId: string
-) => [QueryKeys.GROUP_JOIN_REQUEST, account.toLowerCase(), requestId];
+) => [QueryKeys.GROUP_JOIN_REQUEST, account?.toLowerCase(), requestId];
 
 export const pendingJoinRequestsQueryKey = (account: string) => [
   QueryKeys.PENDING_JOIN_REQUESTS,
-  account.toLowerCase(),
+  account?.toLowerCase(),
 ];
