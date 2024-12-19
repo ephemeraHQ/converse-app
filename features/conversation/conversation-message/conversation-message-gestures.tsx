@@ -39,83 +39,74 @@ export type IMessageGesturesOnLongPressArgs =
 export type IMessageGesturesProps = {
   children: React.ReactNode;
   onTap?: () => void;
-  //   onDoubleTap?: () => void;
+  onDoubleTap?: () => void;
   onLongPress?: (e: IMessageGesturesOnLongPressArgs) => void;
 };
 
-export const MessageGestures = memo(function MessageGestures(
-  args: IMessageGesturesProps
-) {
-  const {
-    children,
-    onTap,
-    //    onDoubleTap,
-    onLongPress,
-  } = args;
+export const ConversationMessageGestures = memo(
+  function ConversationMessageGestures(args: IMessageGesturesProps) {
+    const { children, onTap, onDoubleTap, onLongPress } = args;
 
-  const containerRef = useAnimatedRef<View>();
+    const containerRef = useAnimatedRef<View>();
 
-  const scaleAV = useSharedValue(1);
+    const scaleAV = useSharedValue(1);
 
-  const tap = Gesture.Tap()
-    .onEnd(() => {
-      if (onTap) {
-        onTap();
-      }
-    })
-    .runOnJS(true);
+    const tap = Gesture.Tap()
+      .onEnd(() => {
+        if (onTap) {
+          onTap();
+        }
+      })
+      .runOnJS(true);
 
-  //   const doubleTap = Gesture.Tap()
-  //     .numberOfTaps(2)
-  //     .onEnd(() => {
-  //       if (onDoubleTap) {
-  //         onDoubleTap();
-  //       }
-  //     })
-  //     .runOnJS(true);
+    const doubleTap = Gesture.Tap()
+      .numberOfTaps(2)
+      .onEnd(() => {
+        if (onDoubleTap) {
+          onDoubleTap();
+        }
+      })
+      .runOnJS(true);
 
-  const longPress = Gesture.LongPress()
-    .onStart((e) => {
-      Haptics.softImpactAsyncAnimated();
-      scaleAV.value = withTiming(MESSAGE_GESTURE_LONG_PRESS_SCALE, {
-        duration: MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION * 2,
-        easing: Easing.bezier(0.31, 0.04, 0.03, 1.04),
-      });
-      const measured = measure(containerRef);
-      if (!measured) return;
-      if (onLongPress) {
-        runOnJS(onLongPress)({ ...e, ...measured });
-      }
-    })
-    .onFinalize(() => {
-      scaleAV.value = withTiming(1, {
-        duration: MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION * 2,
-        easing: Easing.bezier(0.82, 0.06, 0.42, 1.01),
-      });
-    })
-    .minDuration(MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION);
+    const longPress = Gesture.LongPress()
+      .onStart((e) => {
+        Haptics.softImpactAsyncAnimated();
+        scaleAV.value = withTiming(MESSAGE_GESTURE_LONG_PRESS_SCALE, {
+          duration: MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION * 2,
+          easing: Easing.bezier(0.31, 0.04, 0.03, 1.04),
+        });
+        const measured = measure(containerRef);
+        if (!measured) return;
+        if (onLongPress) {
+          runOnJS(onLongPress)({ ...e, ...measured });
+        }
+      })
+      .onFinalize(() => {
+        scaleAV.value = withTiming(1, {
+          duration: MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION * 2,
+          easing: Easing.bezier(0.82, 0.06, 0.42, 1.01),
+        });
+      })
+      .minDuration(MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION);
 
-  const composed = Gesture.Simultaneous(
-    //   doubleTap,
-    tap,
-    longPress
-  );
+    const composed = Gesture.Exclusive(doubleTap, tap, longPress);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scaleAV.value }],
-    };
-  });
+    const animatedStyle = useAnimatedStyle(() => {
+      return {
+        transform: [{ scale: scaleAV.value }],
+      };
+    });
 
-  return (
-    <GestureDetector gesture={composed}>
-      <AnimatedHStack
-        // {...debugBorder("orange")}
-        ref={containerRef}
-        style={animatedStyle}
-      >
-        {children}
-      </AnimatedHStack>
-    </GestureDetector>
-  );
-});
+    return (
+      <GestureDetector gesture={composed}>
+        <AnimatedHStack
+          // {...debugBorder("orange")}
+          ref={containerRef}
+          style={animatedStyle}
+        >
+          {children}
+        </AnimatedHStack>
+      </GestureDetector>
+    );
+  }
+);
