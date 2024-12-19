@@ -2,8 +2,8 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationOptions,
 } from "@react-navigation/native-stack";
-import { memo, useEffect, useState } from "react";
-import { Platform, useColorScheme, View, Text } from "react-native";
+import { memo } from "react";
+import { Platform, useColorScheme } from "react-native";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
 import { ConversationBlockedListNav } from "../../features/blocked-chats/ConversationBlockedListNav";
 import { useRouter } from "../../navigation/useNavigation";
@@ -47,10 +47,6 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import { translate } from "@/i18n";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { Button } from "@/design-system/Button/Button";
-import { setupAppAttest, tryGetAppCheckToken } from "@/utils/appCheck";
-import logger from "@/utils/logger";
 
 export type NavigationParamList = {
   Idle: undefined;
