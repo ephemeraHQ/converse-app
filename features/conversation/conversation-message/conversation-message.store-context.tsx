@@ -26,7 +26,7 @@ type IMessageContextStoreState = IMessageContextStoreProps & {
   fromMe: boolean;
   sentAt: number;
   showDateChange: boolean;
-  senderAddress: InboxId;
+  senderInboxId: InboxId;
   isHighlighted: boolean;
   isShowingTime: boolean;
 };
@@ -79,7 +79,7 @@ function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
       previousMessage: props.previousMessage,
     }),
     sentAt: convertNanosecondsToMilliseconds(props.message.sentNs),
-    senderAddress: props.message.senderAddress,
+    senderInboxId: props.message.senderInboxId,
     isHighlighted: false,
     isShowingTime: false,
   };

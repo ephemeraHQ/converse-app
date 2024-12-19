@@ -30,7 +30,7 @@ export const useConversationIsUnread = ({
     if (topicsData[topic]?.status === "unread") return true;
 
     // Check if the last message was sent by the current user
-    if (lastMessage.senderAddress === currentInboxId) {
+    if (lastMessage.senderInboxId === currentInboxId) {
       return false;
     }
 

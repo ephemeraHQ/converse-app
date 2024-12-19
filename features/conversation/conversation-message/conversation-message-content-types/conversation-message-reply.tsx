@@ -117,7 +117,7 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
     useConversationMessageForReplyMessage(referenceMessageId);
 
   const inboxName = usePreferredInboxName(
-    replyMessageReference?.senderAddress as InboxId
+    replyMessageReference?.senderInboxId as InboxId
   );
 
   return (

@@ -17,9 +17,9 @@ export const ConversationMessageLayout = memo(
   }: IConversationMessageLayoutProps) {
     const { theme } = useAppTheme();
 
-    const { senderAddress, fromMe, hasNextMessageInSeries } =
+    const { senderInboxId, fromMe, hasNextMessageInSeries } =
       useMessageContextStoreContext(
-        useSelect(["senderAddress", "fromMe", "hasNextMessageInSeries"])
+        useSelect(["senderInboxId", "fromMe", "hasNextMessageInSeries"])
       );
 
     return (
@@ -28,7 +28,7 @@ export const ConversationMessageLayout = memo(
           {!fromMe && (
             <>
               {!hasNextMessageInSeries ? (
-                <V3MessageSenderAvatar inboxId={senderAddress} />
+                <V3MessageSenderAvatar inboxId={senderInboxId} />
               ) : (
                 <VStack style={{ width: theme.avatarSize.sm }} />
               )}

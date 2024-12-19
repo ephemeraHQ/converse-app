@@ -12,13 +12,13 @@ export const messageIsFromCurrentUser = ({
   if (!message) return false;
   const currentAccount = getCurrentAccount();
   if (!currentAccount) return false;
-  return message.senderAddress.toLowerCase() === currentAccount.toLowerCase();
+  return message.senderInboxId.toLowerCase() === currentAccount.toLowerCase();
 };
 
 export function messageIsFromCurrentUserV3({
   message,
 }: MessageFromCurrentUserPayload) {
   return (
-    message?.senderAddress.toLowerCase() === getCurrentUserAccountInboxId()
+    message?.senderInboxId.toLowerCase() === getCurrentUserAccountInboxId()
   );
 }
