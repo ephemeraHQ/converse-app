@@ -65,7 +65,7 @@ export const handleGroupMessageNotification = async (
   if (!senderAddress) return;
   const senderSocials = await getProfile(
     xmtpClient.address,
-    message.senderAddress,
+    message.senderInboxId,
     senderAddress
   );
   const senderName = getPreferredName(senderSocials, senderAddress);
