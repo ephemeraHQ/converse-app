@@ -17,16 +17,16 @@ import { getPreferredInboxName } from "@utils/profile";
 import { FC, memo, useMemo } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 
+import { IProfileSocials } from "@/features/profiles/profile-types";
+import { useInboxProfilesSocials } from "@/hooks/useInboxProfilesSocials";
+import { useGroupMembersConversationScreenQuery } from "@/queries/useGroupMembersQuery";
+import { captureErrorWithFriendlyToast } from "@/utils/capture-error";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useGroupPermissionPolicyQuery } from "@queries/useGroupPermissionPolicyQuery";
-import type { GroupWithCodecsType } from "@utils/xmtpRN/client";
 import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
-import { captureErrorWithFriendlyToast } from "@/utils/capture-error";
-import { useInboxProfilesSocials } from "@/hooks/useInboxProfilesSocials";
-import { IProfileSocials } from "@/features/profiles/profile-types";
-import { useGroupMembersConversationScreenQuery } from "@/queries/useGroupMembersQuery";
 
 type GroupScreenMembersTableProps = {
   topic: ConversationTopic;

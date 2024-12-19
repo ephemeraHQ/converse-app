@@ -5,7 +5,7 @@ import {
   getPreferredInboxAvatar,
   getPreferredInboxName,
 } from "@utils/profile";
-import { GroupWithCodecsType } from "@utils/xmtpRN/client";
+import { GroupWithCodecsType } from "@utils/xmtpRN/client.types";
 import { Group, type InboxId, type Member } from "@xmtp/react-native-sdk";
 import { useEffect, useMemo, useState } from "react";
 

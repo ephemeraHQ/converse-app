@@ -1,3 +1,4 @@
+import { Center } from "@/design-system/Center";
 import { AnimatedHStack } from "@/design-system/HStack";
 import { Icon } from "@/design-system/Icon/Icon";
 import { AnimatedText } from "@/design-system/Text";
@@ -12,19 +13,10 @@ type IConversationMessageStatusProps = {
   status: IConversationMessageStatus;
 };
 
-const statusMapping: Record<IConversationMessageStatus, string> = {
-  // sending: translate("message_status.sending"),
-  sending: " ", // For now don't show anything for sending, waiting to see what UX we want
-  sent: translate("message_status.sent"),
-  error: translate("message_status.error"),
-};
-
 export const ConversationMessageStatus = memo(
   function ConversationMessageStatus({
     status,
   }: IConversationMessageStatusProps) {
-    const { theme } = useAppTheme();
-
     const previousStatus = usePrevious(status);
 
     useEffect(() => {
@@ -33,26 +25,89 @@ export const ConversationMessageStatus = memo(
       }
     }, [status, previousStatus]);
 
-    return (
-      <AnimatedHStack
-        // {...debugBorder()}
-        entering={theme.animation.reanimatedFadeInSpring}
-        style={{
-          columnGap: theme.spacing.xxxs,
-          paddingTop: theme.spacing.xxxs,
-        }}
-      >
-        <AnimatedText color="secondary" size="xxs">
-          {statusMapping[status]}
-        </AnimatedText>
-        {status === "sent" && (
-          <Icon
-            icon="checkmark"
-            size={theme.iconSize.xs}
-            color={theme.colors.text.secondary}
-          />
-        )}
-      </AnimatedHStack>
-    );
+    if (status === "sending") {
+      return <SendingStatus />;
+    }
+
+    if (status === "sent") {
+      return <SentStatus />;
+    }
+
+    return null;
   }
 );
+
+const StatusContainer = memo(function StatusContainer({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { theme } = useAppTheme();
+
+  return (
+    <AnimatedHStack
+      entering={theme.animation.reanimatedFadeInSpring}
+      style={{
+        alignItems: "center",
+        columnGap: theme.spacing.xxxs,
+        paddingTop: theme.spacing.xxxs,
+      }}
+    >
+      {children}
+    </AnimatedHStack>
+  );
+});
+
+const StatusText = memo(function StatusText({ text }: { text: string }) {
+  return (
+    <AnimatedText color="secondary" size="xxs">
+      {text}
+    </AnimatedText>
+  );
+});
+
+const StatusIconContainer = memo(function StatusIconContainer({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  const { theme } = useAppTheme();
+
+  return (
+    <Center
+      style={{
+        width: 14,
+        height: 14,
+        padding: 1,
+      }}
+    >
+      {children}
+    </Center>
+  );
+});
+
+const SendingStatus = memo(function SendingStatus() {
+  return (
+    <StatusContainer>
+      <StatusText text=" " />
+      <StatusIconContainer />
+    </StatusContainer>
+  );
+});
+
+const SentStatus = memo(function SentStatus() {
+  const { theme } = useAppTheme();
+
+  return (
+    <StatusContainer>
+      <StatusText text={translate("message_status.sent")} />
+      <StatusIconContainer>
+        <Icon
+          icon="checkmark"
+          size={theme.iconSize.xs}
+          color={theme.colors.text.secondary}
+        />
+      </StatusIconContainer>
+    </StatusContainer>
+  );
+});

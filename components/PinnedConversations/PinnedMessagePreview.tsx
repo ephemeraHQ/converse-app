@@ -1,7 +1,7 @@
 import { HStack } from "@/design-system/HStack";
 import { Text } from "@/design-system/Text";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useMemo } from "react";
 import { ViewStyle } from "react-native";
 import { isTextMessage } from "../../features/conversation/conversation-message/conversation-message.utils";

@@ -5,7 +5,7 @@ import { translate } from "@/i18n";
 import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { saveTopicsData } from "@/utils/api";
-import { DmWithCodecsType } from "@/utils/xmtpRN/client";
+import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { consentToInboxIdsOnProtocolByAccount } from "@/utils/xmtpRN/contacts";
 import { useCallback } from "react";
 

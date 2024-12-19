@@ -4,7 +4,6 @@
 
 import { hasNextMessageInSeries } from "@/features/conversation/utils/has-next-message-in-serie";
 import { hasPreviousMessageInSeries } from "@/features/conversation/utils/has-previous-message-in-serie";
-import { isLatestMessageSettledFromPeer } from "@/features/conversation/utils/is-latest-message-settled-from-peer";
 import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/message-is-from-current-user";
 import { messageShouldShowDateChange } from "@/features/conversation/utils/message-should-show-date-change";
 import { convertNanosecondsToMilliseconds } from "@/utils/date";
@@ -29,7 +28,6 @@ type IMessageContextStoreState = IMessageContextStoreProps & {
   sentAt: number;
   showDateChange: boolean;
   senderInboxId: InboxId;
-  isHighlighted: boolean;
   isShowingTime: boolean;
 };
 
@@ -83,7 +81,6 @@ function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
     }),
     sentAt: convertNanosecondsToMilliseconds(props.message.sentNs),
     senderInboxId: props.message.senderInboxId,
-    isHighlighted: false,
     isShowingTime: false,
   };
 }

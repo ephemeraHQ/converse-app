@@ -5,7 +5,7 @@ import logger from "./logger";
 import config from "../config";
 import { currentAccount, getChatStore } from "../data/store/accountsStore";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
-import type { ConversationWithCodecsType } from "./xmtpRN/client";
+import type { ConversationWithCodecsType } from "./xmtpRN/client.types";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const converseNavigations: { [navigationName: string]: any } = {};

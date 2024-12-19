@@ -7,9 +7,6 @@ import { useLogoutFromConverse } from "@utils/logout";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,
-  Conversation,
-  Dm,
-  Group,
   GroupUpdatedCodec,
   ReactionCodec,
   ReadReceiptCodec,
@@ -24,6 +21,7 @@ import config from "../../config";
 import { getDbDirectory } from "../../data/db";
 import { CoinbaseMessagingPaymentCodec } from "./content-types/coinbasePayment";
 import { getXmtpClient } from "./sync";
+import { ConverseXmtpClientType } from "./client.types";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
@@ -39,18 +37,6 @@ const codecs = [
   new CoinbaseMessagingPaymentCodec(),
 ];
 
-export type SupportedCodecsType = [
-  TextCodec,
-  ReactionCodec,
-  ReadReceiptCodec,
-  GroupUpdatedCodec,
-  ReplyCodec,
-  RemoteAttachmentCodec,
-  StaticAttachmentCodec,
-  TransactionReferenceCodec,
-  CoinbaseMessagingPaymentCodec,
-];
-
 export const getXmtpClientFromAddress = async (address: string) => {
   const dbDirectory = await getDbDirectory();
   const dbEncryptionKey = await getDbEncryptionKey();
@@ -62,22 +48,6 @@ export const getXmtpClientFromAddress = async (address: string) => {
     dbEncryptionKey,
   });
 };
-
-export type ConverseXmtpClientType = Client<SupportedCodecsType>;
-
-export type ConversationWithCodecsType = Conversation<SupportedCodecsType>;
-
-export type GroupWithCodecsType = Group<SupportedCodecsType>;
-
-export type DmWithCodecsType = Dm<SupportedCodecsType>;
-
-export type DecodedMessageWithCodecsType = Awaited<
-  ReturnType<ConversationWithCodecsType["messages"]>
->[number];
-
-export type SendMessageWithCodecs = Parameters<
-  ConversationWithCodecsType["send"]
->;
 
 export const xmtpClientByAccount: {
   [account: string]: ConverseXmtpClientType;

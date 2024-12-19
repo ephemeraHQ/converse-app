@@ -6,25 +6,29 @@ import {
 } from "@/features/conversation/conversation-message/conversation-message-bubble";
 import { MessageText } from "@/features/conversation/conversation-message/conversation-message-text";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
-import { useCurrentConversationTopic } from "@/features/conversation/conversation.store-context";
+import {
+  isCoinbasePaymentMessage,
+  isRemoteAttachmentMessage,
+  isReplyMessage,
+  isTextMessage,
+  isTransactionReferenceMessage,
+  useConversationMessageById,
+} from "@/features/conversation/conversation-message/conversation-message.utils";
+import {
+  useConversationStore,
+  useCurrentConversationTopic,
+} from "@/features/conversation/conversation.store-context";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
-import { getConversationMessages } from "@/queries/useConversationMessages";
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { captureError } from "@/utils/capture-error";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { HStack } from "@design-system/HStack";
 import { Icon } from "@design-system/Icon/Icon";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
-import { getConversationMessageQueryOptions } from "@queries/useConversationMessage";
-import { useQuery } from "@tanstack/react-query";
 import { useAppTheme } from "@theme/useAppTheme";
-import { sentryTrackError } from "@utils/sentry";
-import {
-  DecodedMessage,
-  InboxId,
-  MessageId,
-  ReplyCodec,
-} from "@xmtp/react-native-sdk";
+import { DecodedMessage, MessageId, ReplyCodec } from "@xmtp/react-native-sdk";
 import { memo } from "react";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 export const MessageReply = memo(function MessageReply(props: {
   message: DecodedMessage<ReplyCodec>;
@@ -109,144 +113,174 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
 
   const { theme } = useAppTheme();
 
-  const fromMe = useMessageContextStoreContext((s) => s.fromMe);
+  const { fromMe } = useMessageContextStoreContext(useSelect(["fromMe"]));
 
-  const replyMessageReference =
-    useConversationMessageForReplyMessage(referenceMessageId);
+  const conversationStore = useConversationStore();
 
-  const inboxName = usePreferredInboxName(
-    replyMessageReference?.senderInboxId as InboxId
-  );
+  const topic = useCurrentConversationTopic();
+
+  const { message: referencedMessage } = useConversationMessageById({
+    messageId: referenceMessageId,
+    topic,
+  });
+
+  const inboxName = usePreferredInboxName(referencedMessage?.senderInboxId);
+
+  const tapGesture = Gesture.Tap()
+    .onBegin(() => {
+      conversationStore.setState({
+        highlightedMessageId: referenceMessageId,
+        scrollToMessageId: referenceMessageId,
+      });
+    })
+    .runOnJS(true);
 
   return (
-    <VStack
-      style={{
-        rowGap: theme.spacing.xxxs,
-        flex: 1,
-        backgroundColor: fromMe
-          ? theme.colors.bubbles.nestedReplyFromMe
-          : theme.colors.bubbles.nestedReply,
-        borderRadius:
-          theme.borderRadius.message.bubble -
-          theme.spacing.message.replyMessage.horizontalPadding / 2, // / 2 so the border fits the border radius of BubbleContentContainer
-        paddingHorizontal: theme.spacing.xs,
-        paddingVertical: theme.spacing.xxs,
-      }}
-    >
-      <HStack
+    <GestureDetector gesture={tapGesture}>
+      <VStack
         style={{
-          alignItems: "center",
-          columnGap: theme.spacing.xxxs,
+          rowGap: theme.spacing.xxxs,
+          flex: 1,
+          backgroundColor: fromMe
+            ? theme.colors.bubbles.nestedReplyFromMe
+            : theme.colors.bubbles.nestedReply,
+          borderRadius:
+            theme.borderRadius.message.bubble -
+            theme.spacing.message.replyMessage.horizontalPadding / 2, // / 2 so the border fits the border radius of BubbleContentContainer
+          paddingHorizontal: theme.spacing.xs,
+          paddingVertical: theme.spacing.xxs,
         }}
       >
-        <Icon
-          size={theme.iconSize.xs}
-          icon="arrowshape.turn.up.left.fill"
-          color={
-            fromMe
-              ? theme.colors.text.inverted.secondary
-              : theme.colors.text.secondary
-          }
-        />
-        <Text preset="smaller" color="secondary" inverted={fromMe}>
-          {inboxName}
-        </Text>
-      </HStack>
-      {!!replyMessageReference && (
-        <MessageReplyReferenceContent replyMessage={replyMessageReference} />
-      )}
-    </VStack>
+        <HStack
+          style={{
+            alignItems: "center",
+            columnGap: theme.spacing.xxxs,
+          }}
+        >
+          <Icon
+            size={theme.iconSize.xs}
+            icon="arrowshape.turn.up.left.fill"
+            color={
+              fromMe
+                ? theme.colors.text.inverted.secondary
+                : theme.colors.text.secondary
+            }
+          />
+          <Text preset="smaller" color="secondary" inverted={fromMe}>
+            {inboxName}
+          </Text>
+        </HStack>
+        {!!referencedMessage && (
+          <MessageReplyReferenceContent replyMessage={referencedMessage} />
+        )}
+      </VStack>
+    </GestureDetector>
   );
 });
 
 const MessageReplyReferenceContent = memo(
   function ReplyMessageReferenceMessageContent(props: {
-    replyMessage: DecodedMessage<ReplyCodec>;
+    replyMessage: DecodedMessageWithCodecsType;
   }) {
     const { replyMessage } = props;
-
     const { theme } = useAppTheme();
-
     const fromMe = useMessageContextStoreContext((s) => s.fromMe);
 
-    const content = replyMessage.content();
+    const attachmentStyle = {
+      height: theme.avatarSize.md,
+      width: theme.avatarSize.md,
+      marginBottom: theme.spacing.xxxs,
+      borderRadius:
+        theme.borderRadius.message.attachment -
+        theme.spacing.message.replyMessage.horizontalPadding,
+    };
 
-    if (typeof content === "string") {
-      return (
-        <Text numberOfLines={1} inverted={fromMe}>
-          {content}
-        </Text>
+    function renderMessageContent(message: DecodedMessageWithCodecsType) {
+      if (isRemoteAttachmentMessage(message)) {
+        const content = message.content();
+        return (
+          <AttachmentRemoteImage
+            messageId={message.id}
+            remoteMessageContent={content}
+            containerProps={{ style: attachmentStyle }}
+          />
+        );
+      }
+
+      if (isTextMessage(message)) {
+        return (
+          <Text numberOfLines={1} inverted={fromMe}>
+            {message.content()}
+          </Text>
+        );
+      }
+
+      if (isTransactionReferenceMessage(message)) {
+        return (
+          <Text numberOfLines={1} inverted={fromMe}>
+            Transaction
+          </Text>
+        );
+      }
+
+      if (isCoinbasePaymentMessage(message)) {
+        return (
+          <Text numberOfLines={1} inverted={fromMe}>
+            Coinbase payment
+          </Text>
+        );
+      }
+
+      if (isReplyMessage(message)) {
+        const content = message.content();
+
+        // Handle remote attachment in the reply
+        if (content.content.remoteAttachment) {
+          return (
+            <AttachmentRemoteImage
+              messageId={message.id}
+              remoteMessageContent={content.content.remoteAttachment}
+              containerProps={{ style: attachmentStyle }}
+            />
+          );
+        }
+
+        // Handle text in the reply
+        if (content.content.text) {
+          return (
+            <Text numberOfLines={1} inverted={fromMe}>
+              {content.content.text}
+            </Text>
+          );
+        }
+
+        // Handle static attachment in the reply
+        if (content.content.attachment) {
+          return (
+            <Text numberOfLines={1} inverted={fromMe}>
+              {content.content.attachment.filename}
+            </Text>
+          );
+        }
+
+        // Handle group updates in the reply
+        if (content.content.groupUpdated) {
+          return (
+            <Text numberOfLines={1} inverted={fromMe}>
+              Group updated
+            </Text>
+          );
+        }
+      }
+
+      captureError(
+        new Error(
+          `Reply message reference message content is not handled with message content type id ${message.contentTypeId}`
+        )
       );
+      return null;
     }
 
-    if (content.content.remoteAttachment) {
-      return (
-        <AttachmentRemoteImage
-          messageId={replyMessage.id}
-          remoteMessageContent={content.content.remoteAttachment}
-          containerProps={{
-            style: {
-              height: theme.avatarSize.md,
-              width: theme.avatarSize.md,
-              marginBottom: theme.spacing.xxxs, // Because with text our lineHeight is 20 so we don't need it but with attachment we need to put that missing 4px (16+4)
-              borderRadius:
-                theme.borderRadius.message.attachment -
-                theme.spacing.message.replyMessage.horizontalPadding / 2 -
-                theme.spacing.message.replyMessage.horizontalPadding / 2,
-            },
-          }}
-        />
-      );
-    }
-
-    const replyMessageSafeText = getReplyMessageSafeText(replyMessage);
-    sentryTrackError(
-      `Reply message reference message content is not handled with default text ${replyMessageSafeText}`
-    );
-    return (
-      <Text numberOfLines={1} inverted={fromMe}>
-        {replyMessageSafeText}
-      </Text>
-    );
+    return renderMessageContent(replyMessage);
   }
 );
-
-function getReplyMessageSafeText(replyMessage: DecodedMessage<ReplyCodec>) {
-  try {
-    const content = replyMessage.content();
-    if (typeof content === "string") {
-      return content;
-    }
-    return content.content.text;
-  } catch (error) {
-    sentryTrackError(error);
-    return replyMessage.fallback;
-  }
-}
-
-// Needed that in case we need to see the content of a message that is not in the chached list
-function useConversationMessageForReplyMessage(
-  messageId: MessageId
-): DecodedMessage<ReplyCodec> | undefined {
-  const currentAccount = useCurrentAccount()!;
-  const topic = useCurrentConversationTopic();
-  const messages = getConversationMessages(currentAccount, topic);
-
-  const cachedReplyMessage = messages?.byId[messageId] as
-    | DecodedMessage<ReplyCodec>
-    | undefined;
-
-  // Only fetch the message if it's in the list of messages of the conversation
-  const { data: replyMessage } = useQuery({
-    ...getConversationMessageQueryOptions({
-      account: currentAccount,
-      messageId,
-    }),
-    enabled: !cachedReplyMessage,
-  });
-
-  return (
-    (replyMessage as DecodedMessage<ReplyCodec> | undefined) ??
-    cachedReplyMessage
-  );
-}

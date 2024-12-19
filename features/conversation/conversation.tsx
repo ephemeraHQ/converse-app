@@ -1,4 +1,5 @@
-import { VStack } from "@/design-system/VStack";
+import { useSelect } from "@/data/store/storeHelpers";
+import { AnimatedVStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
@@ -36,6 +37,7 @@ import { ConversationMessageTimestamp } from "@/features/conversation/conversati
 import {
   MessageContextStoreProvider,
   useMessageContextStore,
+  useMessageContextStoreContext,
 } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
   getConvosMessageStatus,
@@ -48,6 +50,7 @@ import { isConversationDm } from "@/features/conversation/utils/is-conversation-
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useConversationQuery } from "@/queries/useConversationQuery";
+import { useAppTheme } from "@/theme/useAppTheme";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
@@ -68,7 +71,16 @@ import React, {
   useRef,
 } from "react";
 import {
+  cancelAnimation,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
+import {
   ConversationStoreProvider,
+  useConversationStore,
   useCurrentConversationTopic,
 } from "./conversation.store-context";
 
@@ -286,23 +298,87 @@ const ConversationMessagesListItem = memo(
         previousMessage={previousMessage}
         nextMessage={nextMessage}
       >
-        <VStack>
-          <ConversationMessageTimestamp />
-          <ConversationMessageRepliable onReply={handleReply}>
-            <ConversationMessageLayout>
-              <ConversationMessageGestures>
+        <ConversationMessageTimestamp />
+        <ConversationMessageRepliable onReply={handleReply}>
+          <ConversationMessageLayout>
+            <ConversationMessageGestures>
+              <ConversationMessageHighlighted>
                 <ConversationMessage message={message} />
-              </ConversationMessageGestures>
-              <ConversationMessageReactions />
-              {isLatestMessageSentByCurrentUser && (
-                <ConversationMessageStatus
-                  status={getConvosMessageStatus(message)}
-                />
-              )}
-            </ConversationMessageLayout>
-          </ConversationMessageRepliable>
-        </VStack>
+              </ConversationMessageHighlighted>
+            </ConversationMessageGestures>
+            <ConversationMessageReactions />
+            {isLatestMessageSentByCurrentUser && (
+              <ConversationMessageStatus
+                status={getConvosMessageStatus(message)}
+              />
+            )}
+          </ConversationMessageLayout>
+        </ConversationMessageRepliable>
       </MessageContextStoreProvider>
+    );
+  }
+);
+
+const ConversationMessageHighlighted = memo(
+  function ConversationMessageHighlighted(props: {
+    children: React.ReactNode;
+  }) {
+    const { children } = props;
+
+    const { theme } = useAppTheme();
+
+    const conversationStore = useConversationStore();
+    const isHighlightedAV = useSharedValue(0);
+
+    const { messageId } = useMessageContextStoreContext(
+      useSelect(["messageId"])
+    );
+
+    useEffect(() => {
+      const unsubscribe = conversationStore.subscribe(
+        (state) => state.highlightedMessageId,
+        (highlightedMessageId) => {
+          cancelAnimation(isHighlightedAV);
+
+          if (!highlightedMessageId) {
+            isHighlightedAV.value = withSpring(0, {
+              stiffness: theme.animation.spring.stiffness,
+              damping: theme.animation.spring.damping,
+            });
+            return;
+          }
+
+          if (messageId !== highlightedMessageId) {
+            return;
+          }
+
+          // Animate to highlighted state
+          isHighlightedAV.value = withSpring(
+            1,
+            {
+              stiffness: theme.animation.spring.stiffness,
+              damping: theme.animation.spring.damping,
+            },
+            () => {
+              // Reset highlighted message id after animation
+              runOnJS(conversationStore.setState)({
+                highlightedMessageId: undefined,
+              });
+            }
+          );
+        }
+      );
+      return () => unsubscribe();
+    }, [conversationStore, isHighlightedAV, theme, messageId]);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+      opacity: interpolate(isHighlightedAV.value, [0, 1], [1, 0.5]),
+    }));
+
+    return (
+      <AnimatedVStack style={[{ width: "100%" }, animatedStyle]}>
+        {children}
+      </AnimatedVStack>
     );
   }
 );

@@ -15,7 +15,7 @@ import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
 import { translate } from "@i18n";
 import { navigate } from "@utils/navigation";
-import { DmWithCodecsType } from "@utils/xmtpRN/client";
+import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useCallback, useMemo } from "react";
 import { isTextMessage } from "../../features/conversation/conversation-message/conversation-message.utils";
 import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
