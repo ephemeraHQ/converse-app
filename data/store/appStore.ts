@@ -92,7 +92,9 @@ export const useAppStore = create<AppStoreType>()(
  * This can be used, for example, to ensure that the xmtp clients have been instantiated and the
  * conversation list is fetched before navigating to a conversation.
  *
- * As of December 19, 2024, when we say Hydration, we mean that the following are true:
+ * @param timeout - The maximum time to wait for hydration in milliseconds. Defaults to 1000ms (1 second).
+ *
+ * As of December 19, 2024, when we say XMTP client hydration, we mean that the following are true:
  * 1) XMTP client for all accounts added to device have been instantiated and cached
  * 2) Conversation list for all accounts added to device have been fetched from the network and cached
  * 3) Inbox ID for all accounts added to device have been fetched from the network and cached
@@ -100,8 +102,10 @@ export const useAppStore = create<AppStoreType>()(
  * You can observe that logic in the HydrationStateHandler, and that will likely be moved once
  * we refactor accounts to be InboxID based in upcoming refactors.
  */
-export const waitForXmtpClientHydration = (): Promise<void> => {
-  return new Promise((resolve) => {
+export const waitForXmtpClientHydration = (
+  timeout: number = 1000
+): Promise<void> => {
+  const hydrationPromise = new Promise<void>((resolve) => {
     const { hydrationDone } = useAppStore.getState();
     if (hydrationDone) {
       resolve();
@@ -115,4 +119,12 @@ export const waitForXmtpClientHydration = (): Promise<void> => {
       }
     });
   });
+
+  const timeoutPromise = new Promise<void>((_, reject) => {
+    setTimeout(() => {
+      reject(new Error("Xmtp client hydration timed out"));
+    }, timeout);
+  });
+
+  return Promise.race([hydrationPromise, timeoutPromise]);
 };
