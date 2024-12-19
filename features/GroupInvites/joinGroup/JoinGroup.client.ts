@@ -28,7 +28,6 @@ import { entify } from "@/queries/entify";
 const GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS = 10;
 const GROUP_JOIN_REQUEST_POLL_INTERVAL_MS = 1000;
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 /**
  * TODOs:
  *
@@ -187,7 +186,7 @@ export class JoinGroupClient {
         logger.debug(
           `[liveAttemptToJoinGroup] Waiting ${GROUP_JOIN_REQUEST_POLL_INTERVAL_MS}ms before next poll`
         );
-        await sleep(GROUP_JOIN_REQUEST_POLL_INTERVAL_MS);
+        await wait(GROUP_JOIN_REQUEST_POLL_INTERVAL_MS);
       }
 
       logger.warn(
@@ -522,7 +521,7 @@ export class JoinGroupClient {
       account: string,
       groupInviteId: string
     ): Promise<JoinGroupResult> => {
-      await sleep(5000);
+      await wait(5000);
       return {
         type: "group-join-request.timed-out",
       } as const;
