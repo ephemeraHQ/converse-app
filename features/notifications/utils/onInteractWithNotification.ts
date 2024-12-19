@@ -9,6 +9,9 @@ import { useAccountsStore } from "@data/store/accountsStore";
 import type { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
 import { fetchPersistedConversationListQuery } from "@/queries/useConversationListQuery";
 import { resetNotifications } from "./resetNotifications";
+import logger from "@/utils/logger";
+import { getXmtpClient } from "@/utils/xmtpRN/sync";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/client";
 
 export const onInteractWithNotification = async (
   event: Notifications.NotificationResponse
@@ -62,7 +65,29 @@ export const onInteractWithNotification = async (
 
     // Fetch the conversation list to ensure we have the latest conversation list
     // before navigating to the conversation
-    await fetchPersistedConversationListQuery({ account });
+    try {
+      await fetchPersistedConversationListQuery({ account });
+    } catch (e) {
+      logger.error(
+        `[onInteractWithNotification] Error fetching conversation list from network`
+      );
+      if (
+        `${e}`.includes("storage error: Pool needs to  reconnect before use")
+      ) {
+        logger.info(
+          `[onInteractWithNotification] Reconnecting XMTP client for account ${account}`
+        );
+        const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+        await client.reconnectLocalDatabase();
+        logger.info(
+          `[onInteractWithNotification] XMTP client reconnected for account ${account}`
+        );
+        logger.info(
+          `[onInteractWithNotification] Fetching conversation list from network for account ${account}`
+        );
+        await fetchPersistedConversationListQuery({ account });
+      }
+    }
     useAccountsStore.getState().setCurrentAccount(account, false);
 
     navigateToTopic(conversationTopic as ConversationTopic);
