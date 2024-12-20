@@ -259,12 +259,16 @@ export function getConvosMessageStatus(message: DecodedMessageWithCodecsType) {
   }
 }
 
+// Compile emoji regex once
+const compiledEmojiRegex = emojiRegex();
+
 export const shouldRenderBigEmoji = (text: string) => {
   const trimmedContent = text.trim();
-  const isEmojiOnly = emojiRegex().test(trimmedContent);
+  const emojis = trimmedContent.match(compiledEmojiRegex) || [];
 
-  const matches = trimmedContent.match(emojiRegex()) || [];
-  const emojisCount = matches.length;
+  const hasEmojis = emojis.length > 0;
+  const hasFewerThanFourEmojis = emojis.length < 4;
+  const containsOnlyEmojis = emojis.join("") === trimmedContent;
 
-  return isEmojiOnly && emojisCount < 4;
+  return hasEmojis && hasFewerThanFourEmojis && containsOnlyEmojis;
 };
