@@ -2,8 +2,9 @@ import { HStack } from "@/design-system/HStack";
 import { Icon } from "@/design-system/Icon/Icon";
 import { TouchableOpacity } from "@/design-system/TouchableOpacity";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { StaggeredAnimation } from "@/design-system/staggered-animation";
 import { useConversationMessageById } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/message-is-from-current-user";
+import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getReactionContent } from "@/utils/xmtpRN/reactions";
 import { Text } from "@design-system/Text";
@@ -16,13 +17,8 @@ import {
   ReactionContent,
 } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useMemo } from "react";
-import {
-  EntryAnimationsValues,
-  FadeIn,
-  withSpring,
-} from "react-native-reanimated";
+import { EntryAnimationsValues, withSpring } from "react-native-reanimated";
 import { MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT } from "./conversation-message-context-menu-constant";
-import { StaggeredAnimation } from "@/design-system/staggered-animation";
 
 export const MessageContextMenuAboveMessageReactions = memo(
   function MessageContextMenuAboveMessageReactions({
@@ -53,7 +49,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
       topic,
     });
 
-    const messageFromMe = messageIsFromCurrentUserV3({
+    const messageFromMe = messageIsFromCurrentAccountInboxId({
       message,
     });
 

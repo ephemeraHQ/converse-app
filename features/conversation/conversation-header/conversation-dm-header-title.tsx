@@ -1,4 +1,4 @@
-import { ConversationTitle } from "@/features/conversation/conversation-title";
+import { ConversationHeaderTitle } from "@/features/conversation/conversation-header/conversation-header-title";
 import { usePreferredInboxAddress } from "@/hooks/usePreferredInboxAddress";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { copyToClipboard } from "@/utils/clipboard";
@@ -47,7 +47,7 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
   if (!displayAvatar) return null;
 
   return (
-    <ConversationTitle
+    <ConversationHeaderTitle
       title={preferredName}
       onLongPress={onLongPress}
       onPress={onPress}

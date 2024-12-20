@@ -4,7 +4,7 @@
 
 import { hasNextMessageInSeries } from "@/features/conversation/utils/has-next-message-in-serie";
 import { hasPreviousMessageInSeries } from "@/features/conversation/utils/has-previous-message-in-serie";
-import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/message-is-from-current-user";
+import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { messageShouldShowDateChange } from "@/features/conversation/utils/message-should-show-date-change";
 import { convertNanosecondsToMilliseconds } from "@/utils/date";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
@@ -21,7 +21,6 @@ type IMessageContextStoreProps = {
 
 type IMessageContextStoreState = IMessageContextStoreProps & {
   messageId: MessageId;
-  isLatestSettledFromMe: boolean;
   hasNextMessageInSeries: boolean;
   hasPreviousMessageInSeries: boolean;
   fromMe: boolean;
@@ -63,7 +62,6 @@ function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
   return {
     ...props,
     messageId: props.message.id as MessageId,
-    isLatestSettledFromMe: true,
     hasNextMessageInSeries: hasNextMessageInSeries({
       currentMessage: props.message,
       nextMessage: props.nextMessage,
@@ -72,7 +70,7 @@ function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
       currentMessage: props.message,
       previousMessage: props.previousMessage,
     }),
-    fromMe: messageIsFromCurrentUserV3({
+    fromMe: messageIsFromCurrentAccountInboxId({
       message: props.message,
     }),
     showDateChange: messageShouldShowDateChange({

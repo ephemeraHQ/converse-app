@@ -1,5 +1,4 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { IConversationMessageStatus } from "@/features/conversation/conversation-message/conversation-message.types";
 import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { fetchMessageByIdQuery } from "@/queries/useConversationMessage";
 import {
@@ -15,6 +14,7 @@ import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types
 import { useMutation } from "@tanstack/react-query";
 import {
   DecodedMessage,
+  MessageDeliveryStatus,
   MessageId,
   RemoteAttachmentContent,
   TextCodec,
@@ -79,10 +79,9 @@ export function useSendMessage(props: {
             : contentTypesPrefixes.remoteAttachment,
           sentNs: getTodayNs(),
           fallback: "new-message",
-          // @ts-ignore we're adding our "own" delivery status because we want to display it in the UI
-          deliveryStatus: "sending" satisfies IConversationMessageStatus,
+          deliveryStatus: "sending" as MessageDeliveryStatus, // NOT GOOD but tmp
           topic: conversation.topic,
-          senderAddress: currentUserInboxId,
+          senderInboxId: currentUserInboxId,
           nativeContent: {},
           content: () => {
             return variables.content.text!;

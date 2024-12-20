@@ -17,10 +17,19 @@ export const ConversationMessageLayout = memo(
   }: IConversationMessageLayoutProps) {
     const { theme } = useAppTheme();
 
-    const { senderInboxId, fromMe, hasNextMessageInSeries } =
-      useMessageContextStoreContext(
-        useSelect(["senderInboxId", "fromMe", "hasNextMessageInSeries"])
-      );
+    const {
+      senderInboxId,
+      fromMe,
+      hasNextMessageInSeries,
+      hasPreviousMessageInSeries,
+    } = useMessageContextStoreContext(
+      useSelect([
+        "senderInboxId",
+        "fromMe",
+        "hasNextMessageInSeries",
+        "hasPreviousMessageInSeries",
+      ])
+    );
 
     return (
       <MessageContainer>
@@ -40,7 +49,7 @@ export const ConversationMessageLayout = memo(
             alignItems: fromMe ? "flex-end" : "flex-start",
           }}
         >
-          {!fromMe && !hasNextMessageInSeries && (
+          {!fromMe && !hasPreviousMessageInSeries && (
             <ConversationMessageSender inboxId={senderInboxId} />
           )}
           {children}

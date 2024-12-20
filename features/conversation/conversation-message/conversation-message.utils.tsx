@@ -1,6 +1,7 @@
+import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
 import {
-  getConversationMessages,
+  getConversationMessagesQueryData,
   useConversationMessages,
 } from "@/queries/useConversationMessages";
 import {
@@ -107,7 +108,7 @@ export function getMessageById({
   topic: ConversationTopic;
 }) {
   const currentAccount = getCurrentAccount()!;
-  const messages = getConversationMessages(currentAccount, topic);
+  const messages = getConversationMessagesQueryData(currentAccount, topic);
   if (!messages) {
     return null;
   }
@@ -221,6 +222,22 @@ export function useConversationMessageReactions(messageId: MessageId) {
     bySender: messages?.reactions[messageId]?.bySender,
     byReactionContent: messages?.reactions[messageId]?.byReactionContent,
   };
+}
+
+export function getCurrentUserAlreadyReactedOnMessage(args: {
+  messageId: MessageId;
+  topic: ConversationTopic;
+  emoji: string | undefined; // Specific emoji or just reacted in general
+}) {
+  const { messageId, topic, emoji } = args;
+  const currentUserInboxId = getCurrentUserAccountInboxId();
+  const currentAccount = getCurrentAccount()!;
+  const messages = getConversationMessagesQueryData(currentAccount, topic);
+  const reactions = messages?.reactions[messageId];
+  const bySender = reactions?.bySender;
+  return bySender?.[currentUserInboxId!]?.some(
+    (reaction) => !emoji || reaction.content === emoji
+  );
 }
 
 export function getConvosMessageStatus(message: DecodedMessageWithCodecsType) {

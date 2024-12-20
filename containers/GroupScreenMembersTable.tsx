@@ -38,10 +38,10 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
     const colorScheme = useColorScheme();
     const currentAccount = useCurrentAccount() as string;
     const styles = useStyles();
-    const { data: members } = useGroupMembersConversationScreenQuery(
-      currentAccount,
-      topic
-    );
+    const { data: members } = useGroupMembersConversationScreenQuery({
+      account: currentAccount,
+      topic,
+    });
     const {
       promoteToSuperAdmin,
       promoteToAdmin,

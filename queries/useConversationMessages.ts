@@ -73,7 +73,7 @@ export const useConversationMessages = (
   return query;
 };
 
-export const getConversationMessages = (
+export const getConversationMessagesQueryData = (
   account: string,
   topic: ConversationTopic
 ) => {
