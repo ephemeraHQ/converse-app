@@ -27,14 +27,14 @@ NEWEST_APK=$(ls -t "$PROJECT_ROOT"/build-*.apk 2>/dev/null | head -n 1)
 if [ -z "$NEWEST_APK" ]; then
   echo "❌ No APK found in project root."
   echo "👉 Please run 'yarn android:build:dev' first or move your built apk to the project root"
-  exit 1
+  exit 0
 fi
 
 # Check if device is connected
 if ! adb devices | grep -q "device$"; then
   echo "❌ No Android device connected"
   echo "👉 Please connect a device and enable USB debugging"
-  exit 1
+  exit 0
 fi
 
 # Push the APK to device
