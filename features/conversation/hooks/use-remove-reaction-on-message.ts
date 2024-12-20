@@ -1,4 +1,5 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
+import { getCurrentAccountConversation } from "@/features/conversation/conversation.utils";
 import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   addConversationMessage,
@@ -7,10 +8,10 @@ import {
 import { captureError, captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
 import { useMutation } from "@tanstack/react-query";
 import {
+  ConversationTopic,
   MessageDeliveryStatus,
   MessageId,
   ReactionContent,
@@ -18,13 +19,17 @@ import {
 import { useCallback } from "react";
 
 export function useRemoveReactionOnMessage(props: {
-  conversation: ConversationWithCodecsType;
+  topic: ConversationTopic;
 }) {
-  const { conversation } = props;
+  const { topic } = props;
 
   const { mutateAsync: removeReactionMutationAsync } = useMutation({
     mutationFn: async (variables: { reaction: ReactionContent }) => {
       const { reaction } = variables;
+      const conversation = getCurrentAccountConversation(topic);
+      if (!conversation) {
+        throw new Error("Conversation not found when removing reaction");
+      }
       await conversation.send({
         reaction,
       });
@@ -32,31 +37,34 @@ export function useRemoveReactionOnMessage(props: {
     onMutate: (variables) => {
       const currentAccount = getCurrentAccount()!;
       const currentUserInboxId = getCurrentUserAccountInboxId()!;
+      const conversation = getCurrentAccountConversation(topic);
 
-      // Add the removal reaction message
-      addConversationMessage({
-        account: currentAccount,
-        topic: conversation.topic,
-        message: {
-          id: getRandomId() as MessageId,
-          client: conversation.client,
-          contentTypeId: contentTypesPrefixes.reaction,
-          sentNs: getTodayNs(),
-          fallback: variables.reaction.content,
-          deliveryStatus: MessageDeliveryStatus.PUBLISHED,
+      if (conversation) {
+        // Add the removal reaction message
+        addConversationMessage({
+          account: currentAccount,
           topic: conversation.topic,
-          senderInboxId: currentUserInboxId,
-          nativeContent: {},
-          content: () => {
-            return variables.reaction;
+          message: {
+            id: getRandomId() as MessageId,
+            client: conversation.client,
+            contentTypeId: contentTypesPrefixes.reaction,
+            sentNs: getTodayNs(),
+            fallback: variables.reaction.content,
+            deliveryStatus: MessageDeliveryStatus.PUBLISHED,
+            topic: conversation.topic,
+            senderInboxId: currentUserInboxId,
+            nativeContent: {},
+            content: () => {
+              return variables.reaction;
+            },
           },
-        },
-      });
+        });
+      }
     },
     onError: (error) => {
       captureError(error);
       const currentAccount = getCurrentAccount()!;
-      refetchConversationMessages(currentAccount, conversation.topic).catch(
+      refetchConversationMessages(currentAccount, topic).catch(
         captureErrorWithToast
       );
     },
@@ -65,11 +73,6 @@ export function useRemoveReactionOnMessage(props: {
   const removeReactionFromMessage = useCallback(
     async (args: { messageId: MessageId; emoji: string }) => {
       try {
-        if (!conversation) {
-          throw new Error(
-            "Conversation not found when removing reaction from message"
-          );
-        }
         await removeReactionMutationAsync({
           reaction: {
             reference: args.messageId,
@@ -82,7 +85,7 @@ export function useRemoveReactionOnMessage(props: {
         captureErrorWithToast(error);
       }
     },
-    [removeReactionMutationAsync, conversation]
+    [removeReactionMutationAsync]
   );
 
   return removeReactionFromMessage;

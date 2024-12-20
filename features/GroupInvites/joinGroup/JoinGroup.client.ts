@@ -1,7 +1,6 @@
 import { IGroupConsentOptions } from "@hooks/useGroupConsent";
 import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
 import { GroupInvite } from "@utils/api.types";
-// import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import { getV3IdFromTopic } from "@/utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import {
@@ -24,7 +23,7 @@ import {} from "../groupInvites.utils";
 import { JoinGroupResult } from "./joinGroup.types";
 import { ConversationListQueryData } from "@/queries/useConversationListQuery";
 import { entify } from "@/queries/entify";
-import { wait } from "@/utils/wait";
+import { wait } from "@/utils/general";
 
 const GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS = 10;
 const GROUP_JOIN_REQUEST_POLL_INTERVAL_MS = 1000;
