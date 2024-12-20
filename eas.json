@@ -43,7 +43,8 @@
         "EXPO_ENV": "preview"
       },
       "ios": {
-        "resourceClass": "medium"
+        "resourceClass": "medium",
+        "image": "macos-sonoma-14.6-xcode-16.1"
       }
     },
     "preview-android": {
