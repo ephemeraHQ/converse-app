@@ -32,7 +32,7 @@ export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
 
   smallerBold: [textBaseStyle, textSizeStyles.xxs, textFontWeightStyles.bold],
 
-  bigBold: [textBaseStyle, textSizeStyles.xs, textFontWeightStyles.bold],
+  bigBold: [textBaseStyle, textFontWeightStyles.bold],
 
   formHelper: [
     textBaseStyle,

@@ -46,11 +46,12 @@ const sliceEmojis = (emojis: Emoji[]) => {
 const filterEmojis = (text: string) => {
   const cleanedSearch = text.toLowerCase().trim();
   if (cleanedSearch.length === 0) {
-    return sliceEmojis(flatEmojis);
+    return defaultEmojis;
   }
   return sliceEmojis(
     matchSorter(flatEmojis, cleanedSearch, {
       keys: ["keywords", "name", "emoji"],
+      threshold: matchSorter.rankings.CONTAINS, // Use a less strict threshold
     })
   );
 };
@@ -86,15 +87,22 @@ export const MessageContextMenuEmojiPicker = memo(
     const debouncedFilter = useMemo(
       () =>
         debounce((value: string) => {
-          setFilteredReactions(filterEmojis(value));
+          const filtered = filterEmojis(value);
+          setFilteredReactions(filtered);
           setHasInput(value.length > 0);
-        }, 150),
+        }, 300),
       []
     );
 
     const onTextInputChange = useCallback(
       (value: string) => {
-        debouncedFilter(value);
+        if (value.trim() === "") {
+          // Reset immediately when input is cleared
+          setFilteredReactions(defaultEmojis);
+          setHasInput(false);
+        } else {
+          debouncedFilter(value);
+        }
       },
       [debouncedFilter]
     );
