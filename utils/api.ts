@@ -173,8 +173,10 @@ export async function rotateAccessToken(
     );
   }
 
-  const { data } = await dedupedFetch("/api/authenticate/token", () =>
-    api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
+  const { data } = await dedupedFetch(
+    `/api/authenticate/token-${account}`,
+    () =>
+      api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
   );
 
   if (!data) {
