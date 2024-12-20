@@ -1,6 +1,6 @@
 import Constants from "expo-constants";
 import logger from "./logger";
-import { getEnv, isProd, Environments } from "./getEnv";
+import { isProd } from "./getEnv";
 
 /**
  * Determines the appropriate API URI for the current environment
@@ -29,41 +29,31 @@ import { getEnv, isProd, Environments } from "./getEnv";
  */
 export const getApiUri = () => {
   // Get configured dev API URI
-  const devApiUri = process.env.EXPO_PUBLIC_DEV_API_URI;
-
-  // Log environment info
-  logger.info("Environment:", {
-    NODE_ENV: process.env.NODE_ENV,
-    devApiUri,
-    hostUri: Constants.expoConfig?.hostUri,
-    inBrowser: typeof document !== "undefined",
-  });
+  const envApiUri = process.env.EXPO_PUBLIC_DEV_API_URI;
 
   // In production, use the configured API
-  if (isProd()) {
-    return devApiUri;
+  if (isProd) {
+    return envApiUri;
   }
 
   // For development, replace localhost with device-accessible IP
-  if (devApiUri?.includes("localhost")) {
+  if (envApiUri?.includes("localhost")) {
     logger.info("Replacing localhost with device-accessible IP");
     // Try Expo host info first
-    const hostIp =
-      Constants.expoConfig?.hostUri?.split(":")[0] ||
-      (Constants.manifest as any)?.debuggerHost?.split(":")[0];
+    const hostIp = Constants.expoConfig?.hostUri?.split(":")[0];
     logger.info("Host IP", { hostIp });
 
     if (hostIp) {
       logger.info("Replacing localhost with device-accessible IP", {
-        devApiUri,
+        envApiUri,
         hostIp,
       });
-      return devApiUri.replace("localhost", hostIp);
+      return envApiUri.replace("localhost", hostIp);
     }
   }
 
   // Fallback to original URI
-  return devApiUri;
+  return envApiUri;
 };
 
 declare const process: {
