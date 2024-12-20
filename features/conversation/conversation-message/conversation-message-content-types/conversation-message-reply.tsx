@@ -13,6 +13,7 @@ import {
   isTextMessage,
   isTransactionReferenceMessage,
   useConversationMessageById,
+  shouldRenderBigEmoji,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import {
   useConversationStore,
@@ -53,6 +54,9 @@ export const MessageReply = memo(function MessageReply(props: {
     console.error("reply message is a string");
     return null;
   }
+
+  const textContent = replyMessageContent.content.text;
+  const isBigEmoji = textContent && shouldRenderBigEmoji(textContent);
 
   return (
     <BubbleContainer fromMe={fromMe}>
@@ -95,9 +99,9 @@ export const MessageReply = memo(function MessageReply(props: {
             </VStack>
           )}
 
-          {!!replyMessageContent.content.text && (
-            <MessageText inverted={fromMe}>
-              {replyMessageContent.content.text}
+          {!!textContent && (
+            <MessageText inverted={fromMe} isBigEmoji={!!isBigEmoji}>
+              {textContent}
             </MessageText>
           )}
         </VStack>

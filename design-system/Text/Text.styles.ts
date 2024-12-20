@@ -4,6 +4,7 @@ import { Theme, ThemedStyle } from "@theme/useAppTheme";
 import { IInvertedTextColors, ITextColors, IWeights } from "./Text.props";
 
 export const textSizeStyles = {
+  xxl: { fontSize: 48, lineHeight: 60 } satisfies TextStyle,
   xl: { fontSize: 32, lineHeight: 36 } satisfies TextStyle, // Made up, need to confirm with Andrew once we have the design
   lg: { fontSize: 24, lineHeight: 28 } satisfies TextStyle, // Made up, need to confirm with Andrew once we have the design
   md: { fontSize: 20, lineHeight: 20 } satisfies TextStyle,
