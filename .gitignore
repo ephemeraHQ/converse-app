@@ -27,3 +27,4 @@ ios/Converse.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # Android
 /android/
+build-*.apk
