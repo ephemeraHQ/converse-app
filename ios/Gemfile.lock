@@ -116,12 +116,12 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport (>= 6.1.7.3, < 7.1.0)
-  bundler (~> 2.6.1)
+  bundler (~> 2.5.16)
   cocoapods
   cocoapods-pod-linkage
 
 RUBY VERSION
-   ruby 3.3.5p100
+   ruby 3.2.5p208
 
 BUNDLED WITH
-   2.6.1
+   2.5.23
