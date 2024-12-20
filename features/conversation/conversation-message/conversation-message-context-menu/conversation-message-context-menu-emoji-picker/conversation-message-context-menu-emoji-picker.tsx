@@ -96,7 +96,13 @@ export const MessageContextMenuEmojiPicker = memo(
 
     const onTextInputChange = useCallback(
       (value: string) => {
-        debouncedFilter(value);
+        if (value.trim() === "") {
+          // Reset immediately when input is cleared
+          setFilteredReactions(defaultEmojis);
+          setHasInput(false);
+        } else {
+          debouncedFilter(value);
+        }
       },
       [debouncedFilter]
     );
