@@ -116,6 +116,7 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport (>= 6.1.7.3, < 7.1.0)
+  bundler (>= 2.4.0)
   cocoapods
   cocoapods-pod-linkage
 

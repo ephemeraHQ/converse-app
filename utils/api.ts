@@ -30,9 +30,11 @@ import { getSecureMmkvForAccount } from "./mmkv";
 import {
   CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
   CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
+  FIREBASE_APP_CHECK_HEADER_KEY,
   XMTP_API_ADDRESS_HEADER_KEY,
   XMTP_IDENTITY_KEY,
 } from "./api.constants";
+import { tryGetAppCheckToken } from "./appCheck";
 
 export const api = axios.create({
   baseURL: config.apiURI,
@@ -117,7 +119,7 @@ type AuthParams = {
   inboxId: string;
   installationPublicKey: string;
   installationKeySignature: string;
-  appCheckToken?: string;
+  appCheckToken: string;
   account: string;
 };
 
@@ -144,6 +146,7 @@ export async function fetchAccessToken({
       {
         headers: {
           [XMTP_API_ADDRESS_HEADER_KEY]: account,
+          [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
         },
       }
     )
@@ -170,8 +173,10 @@ export async function rotateAccessToken(
     );
   }
 
-  const { data } = await dedupedFetch("/api/authenticate/token", () =>
-    api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
+  const { data } = await dedupedFetch(
+    `/api/authenticate/token-${account}`,
+    () =>
+      api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
   );
 
   if (!data) {
@@ -195,7 +200,7 @@ export const xmtpSignatureByAccount: {
 
 type XmtpApiHeaders = {
   [XMTP_API_ADDRESS_HEADER_KEY]: string;
-
+  [FIREBASE_APP_CHECK_HEADER_KEY]: string;
   /** Bearer <jwt access token>*/
   authorization: `Bearer ${string}`;
 };
@@ -203,8 +208,20 @@ type XmtpApiHeaders = {
 export async function getXmtpApiHeaders(
   account: string
 ): Promise<XmtpApiHeaders> {
+  if (!account) {
+    throw new Error("[getXmtpApiHeaders] No account provided");
+  }
   const secureMmkv = await getSecureMmkvForAccount(account);
   let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
+
+  const appCheckToken = await tryGetAppCheckToken();
+
+  if (!appCheckToken) {
+    throw new Error(`
+No App Check Token Available. This indicates that we believe the app is not running on an authentic build of
+our application on a device that has not been tampered with. 
+`);
+  }
 
   if (!accessToken) {
     const installationKeySignature =
@@ -219,8 +236,9 @@ export async function getXmtpApiHeaders(
       const inboxId = await getInboxId(account);
       const authTokensResponse = await fetchAccessToken({
         inboxId,
-        ...installationKeySignature,
         account,
+        appCheckToken,
+        ...installationKeySignature,
       });
 
       if (!authTokensResponse) {
@@ -246,6 +264,7 @@ export async function getXmtpApiHeaders(
 
   return {
     [XMTP_API_ADDRESS_HEADER_KEY]: account,
+    [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
     authorization: `Bearer ${accessToken}`,
   };
 }
@@ -375,6 +394,11 @@ export const getProfilesForInboxIds = async ({
   logger.info("Fetching profiles for inboxIds", inboxIds);
   const { data } = await api.get("/api/inbox/", {
     params: { ids: inboxIds.join(",") },
+    // todo(lustig) fix this request. it is 401ing after ephemeral account creation.
+    // why I'm delaying - its tied up in a batshit fetcher
+    // thing and I'll have to look into how that ties together with react-query and can't
+    // be bothered right now.
+    // headers: await getXmtpApiHeaders(account),
   });
   return data;
 };
@@ -522,6 +546,7 @@ export const checkUsernameValid = async (
 ): Promise<string> => {
   const { data } = await api.get("/api/profile/username/valid", {
     params: { address, username },
+    headers: await getXmtpApiHeaders(address),
   });
   return data;
 };

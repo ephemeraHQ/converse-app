@@ -47,7 +47,6 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import { translate } from "@/i18n";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export type NavigationParamList = {
   Idle: undefined;

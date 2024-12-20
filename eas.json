@@ -13,7 +13,7 @@
       },
       "node": "20.15.1",
       "ios": {
-        "cocoapods": "1.14.3"
+        "cocoapods": "1.16.2"
       },
       "android": {
         "resourceClass": "medium"
@@ -29,7 +29,7 @@
       "node": "20.15.1",
       "ios": {
         "resourceClass": "large",
-        "cocoapods": "1.14.3"
+        "cocoapods": "1.16.2"
       }
     },
     "production-android": {

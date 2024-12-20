@@ -1,10 +1,10 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
-import config from "@/config";
 import logger from "@/utils/logger";
 import { sentryTrackError } from "@/utils/sentry";
+import { isDev } from "@/utils/getEnv";
 
 export function captureError(error: unknown) {
-  if (config.env === "dev") {
+  if (isDev) {
     logger.error(error);
   }
 

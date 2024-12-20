@@ -10,7 +10,7 @@ import type {
   ConversationTopic,
   GroupUpdatedContent,
 } from "@xmtp/react-native-sdk";
-import config from "../../config";
+import { isProd } from "@/utils/getEnv";
 import {
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
@@ -27,7 +27,7 @@ export const streamAllMessages = async (account: string) => {
   await client.conversations.streamAllMessages(async (message) => {
     logger.info(`[XmtpRN] Received a message for ${client.address}`, {
       id: message.id,
-      text: config.env === "prod" ? "Redacted" : message.nativeContent.text,
+      text: isProd ? "Redacted" : message.nativeContent.text,
       topic: message.topic,
     });
 

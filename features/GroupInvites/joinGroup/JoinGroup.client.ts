@@ -1,7 +1,6 @@
 import { IGroupConsentOptions } from "@hooks/useGroupConsent";
 import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
 import { GroupInvite } from "@utils/api.types";
-// import { getGroupIdFromTopic } from "@utils/groupUtils/groupId";
 import { getV3IdFromTopic } from "@/utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import {
