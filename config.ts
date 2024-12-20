@@ -71,7 +71,7 @@ const ENV = {
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/UDv3aYZONQGc6_XPJY6Ch",
     appCheckDebugToken: isAndroid
-      ? undefined
+      ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID
       : process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
   },
   preview: {
