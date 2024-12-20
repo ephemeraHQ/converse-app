@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 
 import appBuildNumbers from "../app.json";
 import config from "../config";
+import { isDev } from "@/utils/getEnv";
 
 const DISABLE_IOS_NATIVE_SENTRY = false;
 
@@ -11,7 +12,7 @@ export const initSentry = () => {
   const sentryOptions: Sentry.ReactNativeOptions = {
     dsn: config.sentryDSN,
     debug: false,
-    enabled: config.env !== "dev",
+    enabled: !isDev,
     environment: config.env,
     beforeSend: (event: ErrorEvent, hint: EventHint) => {
       // Filtering out some errors
