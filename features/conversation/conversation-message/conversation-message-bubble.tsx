@@ -1,18 +1,29 @@
 import { HStack } from "@design-system/HStack";
 import { useAppTheme } from "@theme/useAppTheme";
-import { useMemo } from "react";
+import { memo } from "react";
 
-export const BubbleContainer = ({
-  children,
-  fromMe,
-}: {
+type IBubbleContainerProps = {
   children: React.ReactNode;
   fromMe: boolean;
-}) => {
+  transparent?: boolean;
+};
+
+type IBubbleContentContainerProps = {
+  children: React.ReactNode;
+  fromMe: boolean;
+  hasNextMessageInSeries: boolean;
+  noPadding?: boolean;
+  transparent?: boolean;
+};
+
+export const BubbleContainer = memo(function BubbleContainer(
+  props: IBubbleContainerProps
+) {
+  const { children, fromMe } = props;
+
   return (
     <HStack
       style={{
-        // ...debugBorder("red"),
         ...(fromMe
           ? { justifyContent: "flex-end" }
           : { justifyContent: "flex-start" }),
@@ -21,31 +32,29 @@ export const BubbleContainer = ({
       {children}
     </HStack>
   );
-};
+});
 
-type IBubbleContentContainerProps = {
-  children: React.ReactNode;
-  fromMe: boolean;
-  hasNextMessageInSeries: boolean;
-};
-
-export const BubbleContentContainer = (args: IBubbleContentContainerProps) => {
-  const { children, fromMe, hasNextMessageInSeries } = args;
+export const BubbleContentContainer = memo(function BubbleContentContainer(
+  props: IBubbleContentContainerProps
+) {
+  const { children, fromMe, hasNextMessageInSeries, noPadding, transparent } =
+    props;
   const { theme } = useAppTheme();
 
-  const bubbleStyle = useMemo(() => {
-    const baseStyle = {
-      backgroundColor: fromMe
+  const baseStyle = {
+    backgroundColor: transparent
+      ? "transparent"
+      : fromMe
         ? theme.colors.bubbles.bubble
         : theme.colors.bubbles.received.bubble,
-      borderRadius: theme.borderRadius.sm,
-      paddingHorizontal: theme.spacing.xs,
-      paddingVertical: theme.spacing.xxs,
-      maxWidth: theme.layout.screen.width * 0.7,
-    };
+    borderRadius: theme.borderRadius.sm,
+    paddingHorizontal: noPadding ? 0 : theme.spacing.xs,
+    paddingVertical: noPadding ? 0 : theme.spacing.xxs,
+    maxWidth: theme.layout.screen.width * 0.7,
+  };
 
-    if (!hasNextMessageInSeries) {
-      return {
+  const style = !hasNextMessageInSeries
+    ? {
         ...baseStyle,
         borderBottomLeftRadius: fromMe
           ? theme.borderRadius.sm
@@ -53,11 +62,8 @@ export const BubbleContentContainer = (args: IBubbleContentContainerProps) => {
         borderBottomRightRadius: fromMe
           ? theme.spacing["4xs"]
           : theme.borderRadius.sm,
-      };
-    }
+      }
+    : baseStyle;
 
-    return baseStyle;
-  }, [fromMe, hasNextMessageInSeries, theme]);
-
-  return <HStack style={bubbleStyle}>{children}</HStack>;
-};
+  return <HStack style={style}>{children}</HStack>;
+});
