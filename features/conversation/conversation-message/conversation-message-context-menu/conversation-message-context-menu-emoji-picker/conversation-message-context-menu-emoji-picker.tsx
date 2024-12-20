@@ -3,7 +3,6 @@ import { messageContextMenuEmojiPickerBottomSheetRef } from "@/features/conversa
 import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
 import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
 import { BottomSheetModal } from "@design-system/BottomSheet/BottomSheetModal";
-import { Text } from "@design-system/Text";
 import { TextField } from "@design-system/TextField/TextField";
 import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
@@ -43,17 +42,51 @@ const sliceEmojis = (emojis: Emoji[]) => {
   return slicedEmojis;
 };
 
+// Create an indexed structure for faster lookups
+type IEmojiIndex = {
+  [key: string]: Emoji[];
+};
+
+// Build the index once when the file loads
+const emojiSearchIndex: IEmojiIndex = {};
+flatEmojis.forEach((emoji) => {
+  // Index by first letter of name and keywords
+  const addToIndex = (term: string) => {
+    const key = term.toLowerCase().charAt(0);
+    if (!emojiSearchIndex[key]) {
+      emojiSearchIndex[key] = [];
+    }
+    if (!emojiSearchIndex[key].includes(emoji)) {
+      emojiSearchIndex[key].push(emoji);
+    }
+  };
+
+  addToIndex(emoji.name);
+  emoji.keywords?.forEach(addToIndex);
+});
+
 const filterEmojis = (text: string) => {
   const cleanedSearch = text.toLowerCase().trim();
+
   if (cleanedSearch.length === 0) {
     return defaultEmojis;
   }
-  return sliceEmojis(
-    matchSorter(flatEmojis, cleanedSearch, {
-      keys: ["keywords", "name", "emoji"],
-      threshold: matchSorter.rankings.CONTAINS, // Use a less strict threshold
-    })
-  );
+
+  // Get the first character's emoji list from our index
+  const firstChar = cleanedSearch.charAt(0);
+  const candidateEmojis = emojiSearchIndex[firstChar] || [];
+
+  if (cleanedSearch.length === 1) {
+    return sliceEmojis(candidateEmojis);
+  }
+
+  // Then use matchSorter only on this smaller subset
+  const matches = matchSorter(candidateEmojis, cleanedSearch, {
+    keys: ["keywords", "name", "emoji"],
+    threshold: matchSorter.rankings.STARTS_WITH,
+  });
+
+  return sliceEmojis(matches);
 };
 
 const defaultEmojis = sliceEmojis(flatEmojis);
@@ -70,13 +103,12 @@ export const MessageContextMenuEmojiPicker = memo(
     const { themed } = useAppTheme();
 
     const [filteredReactions, setFilteredReactions] = useState(defaultEmojis);
-    const [hasInput, setHasInput] = useState(false);
 
     const closeMenu = useCallback(() => {
       textInputRef.current?.blur();
     }, []);
 
-    const handleReaction = useCallback(
+    const handleSelectReaction = useCallback(
       (emoji: string) => {
         onSelectReaction(emoji);
         closeMenu();
@@ -89,8 +121,7 @@ export const MessageContextMenuEmojiPicker = memo(
         debounce((value: string) => {
           const filtered = filterEmojis(value);
           setFilteredReactions(filtered);
-          setHasInput(value.length > 0);
-        }, 300),
+        }, 100),
       []
     );
 
@@ -99,7 +130,6 @@ export const MessageContextMenuEmojiPicker = memo(
         if (value.trim() === "") {
           // Reset immediately when input is cleared
           setFilteredReactions(defaultEmojis);
-          setHasInput(false);
         } else {
           debouncedFilter(value);
         }
@@ -112,7 +142,7 @@ export const MessageContextMenuEmojiPicker = memo(
         onClose={closeMenu}
         ref={messageContextMenuEmojiPickerBottomSheetRef}
         topInset={insets.top}
-        snapPoints={["50%", "100%"]}
+        snapPoints={["70%", "100%"]}
       >
         <BottomSheetContentContainer>
           <BottomSheetHeader title={translate("choose_reaction")} hasClose />
@@ -123,23 +153,13 @@ export const MessageContextMenuEmojiPicker = memo(
             clearButtonMode="always"
             containerStyle={themed($inputContainer)}
           />
-        </BottomSheetContentContainer>
-
-        <VStack style={themed($container)}>
-          {hasInput ? (
-            <EmojiRowList emojis={filteredReactions} onPress={handleReaction} />
-          ) : (
+          <VStack style={themed($container)}>
             <EmojiRowList
-              emojis={categorizedEmojis}
-              onPress={handleReaction}
-              ListHeader={
-                <Text preset="smaller" style={themed($headerText)}>
-                  {translate("emoji_picker_all")}
-                </Text>
-              }
+              emojis={filteredReactions}
+              onPress={handleSelectReaction}
             />
-          )}
-        </VStack>
+          </VStack>
+        </BottomSheetContentContainer>
       </BottomSheetModal>
     );
   }
