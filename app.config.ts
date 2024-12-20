@@ -4,15 +4,17 @@ import warnOnce from "warn-once";
 // import type { PluginConfigTypeAndroid } from "expo-build-properties/src/pluginConfig";
 
 import appBuildNumbers from "./app.json";
-import { getEnv, isDev, isPreview, isProd } from "./utils/getEnv";
+
+const env = process.env as any;
+const isDev = env.EXPO_ENV === "dev";
 
 warnOnce(
   isDev && !(process.env as any).EXPO_PUBLIC_DEV_API_URI,
   "\n\n🚧 Running the app without EXPO_PUBLIC_DEV_API_URI setup\n\n"
 );
 
+const isPreview = env.EXPO_ENV === "preview";
 const isProduction = !isDev && !isPreview;
-
 const scheme = isDev
   ? "converse-dev"
   : isPreview
@@ -31,10 +33,8 @@ const appDomainConverse = isDev
 const appDomainGetConverse = isDev
   ? "dev.getconverse.app"
   : isPreview
-    ? "dev.getconverse.app"
-    : isProd
-      ? "getconverse.app"
-      : "preview.getconverse.app";
+    ? "preview.getconverse.app"
+    : "getconverse.app";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -59,7 +59,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     eas: {
       projectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
     },
-    ENV: getEnv(),
+    ENV: isDev ? "dev" : isPreview ? "preview" : "prod",
   },
   runtimeVersion: appBuildNumbers.expo.version,
   owner: "converse",
