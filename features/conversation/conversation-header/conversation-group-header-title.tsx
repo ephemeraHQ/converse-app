@@ -33,7 +33,10 @@ export const GroupConversationTitle = memo(
         topic,
       });
 
-    const { data: members } = useGroupMembersQuery(currentAccount, topic!);
+    const { data: members } = useGroupMembersQuery({
+      account: currentAccount,
+      topic: topic!,
+    });
 
     const { data: memberData } = useGroupMembersAvatarData({ topic });
 
@@ -106,10 +109,10 @@ type IMemberData = {
 const useGroupMembersAvatarData = (args: { topic: ConversationTopic }) => {
   const { topic } = args;
   const currentAccount = useCurrentAccount()!;
-  const { data: members, ...query } = useGroupMembersConversationScreenQuery(
-    currentAccount,
-    topic
-  );
+  const { data: members, ...query } = useGroupMembersConversationScreenQuery({
+    account: currentAccount,
+    topic,
+  });
 
   const memberAddresses = useMemo(() => {
     if (!members?.ids) {

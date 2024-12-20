@@ -166,7 +166,9 @@ const setOpenedConversationText = ({
       currentRoutes.length > 0 &&
       currentRoutes[currentRoutes.length - 1].name === "Conversation"
     ) {
-      converseEventEmitter.emit("setCurrentConversationInputValue", text);
+      // TODO: Fix this so that we prefill the message in the input
+      // Probably need to pass the prefilled text in the nav params instead
+      // converseEventEmitter.emit("setCurrentConversationInputValue", text);
     }
   }
 };
@@ -223,10 +225,11 @@ export const screenListeners =
             } else if (newRoute.params?.message) {
               // If navigating to the same route but with a message param
               // we can set the input value (for instance from a frame)
-              converseEventEmitter.emit(
-                "setCurrentConversationInputValue",
-                newRoute.params.message
-              );
+              // TODO:
+              // converseEventEmitter.emit(
+              //   "setCurrentConversationInputValue",
+              //   newRoute.params.message
+              // );
             }
           }
         }

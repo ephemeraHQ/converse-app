@@ -1,3 +1,4 @@
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { currentAccount } from "../data/store/accountsStore";
 import { useAddToGroupMutation } from "../queries/useAddToGroupMutation";
 import { useGroupMembersQuery } from "../queries/useGroupMembersQuery";
@@ -6,7 +7,6 @@ import { usePromoteToSuperAdminMutation } from "../queries/usePromoteToSuperAdmi
 import { useRemoveFromGroupMutation } from "../queries/useRemoveFromGroupMutation";
 import { useRevokeAdminMutation } from "../queries/useRevokeAdminMutation";
 import { useRevokeSuperAdminMutation } from "../queries/useRevokeSuperAdminMutation";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const useGroupMembers = (topic: ConversationTopic) => {
   const account = currentAccount();
@@ -15,7 +15,10 @@ export const useGroupMembers = (topic: ConversationTopic) => {
     data: members,
     isLoading,
     isError,
-  } = useGroupMembersQuery(account, topic);
+  } = useGroupMembersQuery({
+    account,
+    topic,
+  });
   const { mutateAsync: promoteToAdmin } = usePromoteToAdminMutation(
     account,
     topic

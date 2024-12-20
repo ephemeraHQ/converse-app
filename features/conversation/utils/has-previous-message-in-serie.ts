@@ -10,5 +10,5 @@ export const hasPreviousMessageInSeries = ({
   previousMessage,
 }: HasPreviousMessageInSeriesPayload) => {
   if (!previousMessage || !currentMessage) return false;
-  return previousMessage.senderInboxId !== currentMessage.senderInboxId;
+  return previousMessage.senderInboxId === currentMessage.senderInboxId;
 };

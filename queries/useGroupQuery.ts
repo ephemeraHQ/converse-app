@@ -8,8 +8,8 @@ import {
   useConversationQuery,
 } from "@/queries/useConversationQuery";
 import { mutateObjectProperties } from "@/utils/mutate-object-properties";
-import { UseQueryResult } from "@tanstack/react-query";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { UseQueryResult } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export function useGroupQuery(args: {
@@ -60,13 +60,13 @@ export function updateGroupQueryData(args: {
   updates: Partial<GroupWithCodecsType>;
 }) {
   const { account, topic, updates } = args;
-  const previousGroupData = getGroupQueryData({ account, topic });
-  if (!previousGroupData) {
+  const previousGroup = getGroupQueryData({ account, topic });
+  if (!previousGroup) {
     return;
   }
   setGroupQueryData({
     account,
     topic,
-    group: mutateObjectProperties(previousGroupData, updates),
+    group: mutateObjectProperties(previousGroup, updates),
   });
 }

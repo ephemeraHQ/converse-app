@@ -23,7 +23,7 @@ import {
 } from "@/features/conversation/conversation.store-context";
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
-import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/message-is-from-current-user";
+import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { calculateMenuHeight } from "@design-system/ContextMenu/ContextMenu.utils";
@@ -73,7 +73,7 @@ const Content = memo(function Content(props: {
     topic,
   })!;
 
-  const fromMe = messageIsFromCurrentUserV3({ message });
+  const fromMe = messageIsFromCurrentAccountInboxId({ message });
   const menuItems = useMessageContextMenuItems({
     messageId: messageId,
     topic,

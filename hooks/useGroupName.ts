@@ -17,10 +17,13 @@ export const useGroupName = (topic: ConversationTopic | undefined) => {
     topic: topic!,
   });
 
-  const { data: members, isLoading: membersLoading } = useGroupMembersQuery(
+  const { data: members, isLoading: membersLoading } = useGroupMembersQuery({
     account,
-    topic!
-  );
+    topic: topic!, // ! because we have enabled in the useQuery
+    queryOptions: {
+      enabled: !groupName, // If we have the group name, we don't need to fetch the members
+    },
+  });
 
   const memberAddresses = members?.ids
     .map((id) => members?.byId[id]?.addresses[0])

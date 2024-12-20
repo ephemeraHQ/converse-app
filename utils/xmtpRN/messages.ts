@@ -1,5 +1,5 @@
 import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { messageIsFromCurrentUserV3 } from "@/features/conversation/utils/message-is-from-current-user";
+import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
 import { updateConversationQueryData } from "@/queries/useConversationQuery";
 import { invalidateGroupMembersQuery } from "@/queries/useGroupMembersQuery";
@@ -48,7 +48,9 @@ export const streamAllMessages = async (account: string) => {
     // We only need to handle messages that are either:
     // 1. From other users
     // 2. Non-text messages from current user
-    const isMessageFromOtherUser = !messageIsFromCurrentUserV3({ message });
+    const isMessageFromOtherUser = !messageIsFromCurrentAccountInboxId({
+      message,
+    });
     const isNonTextMessage = !isTextMessage(message);
     if (isMessageFromOtherUser || isNonTextMessage) {
       try {

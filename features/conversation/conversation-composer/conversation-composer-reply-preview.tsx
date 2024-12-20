@@ -10,7 +10,7 @@ import {
   isTransactionReferenceMessage,
   useConversationMessageById,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
+import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { HStack } from "@design-system/HStack";
@@ -49,7 +49,6 @@ export const ReplyPreview = memo(function ReplyPreview() {
 
   const composerStore = useConversationComposerStore();
 
-  const { data: currentAccountInboxId } = useCurrentAccountInboxId();
   const topic = useCurrentConversationTopic();
 
   const { message: replyMessage } = useConversationMessageById({
@@ -60,7 +59,7 @@ export const ReplyPreview = memo(function ReplyPreview() {
   const inboxName = usePreferredInboxName(replyMessage?.senderInboxId);
 
   const replyingTo = replyMessage
-    ? replyMessage.senderInboxId === currentAccountInboxId
+    ? messageIsFromCurrentAccountInboxId({ message: replyMessage })
       ? `Replying to you`
       : inboxName
         ? `Replying to ${inboxName}`
