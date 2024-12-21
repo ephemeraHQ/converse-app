@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 # Specify Ruby version for compatibility
-ruby '~> 3.2.5'
+ruby '~> 3.2.5' # If you are updating this, update the version in the .ruby-version file
 
 # Specify bundler version that works with Ruby 3.3
 gem 'bundler', '~> 2.5.16'
