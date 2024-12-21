@@ -29,7 +29,8 @@
       "node": "20.15.1",
       "ios": {
         "resourceClass": "large",
-        "cocoapods": "1.16.2"
+        "cocoapods": "1.16.2",
+        "image": "macos-sonoma-14.6-xcode-16.1"
       }
     },
     "production-android": {
@@ -43,8 +44,7 @@
         "EXPO_ENV": "preview"
       },
       "ios": {
-        "resourceClass": "medium",
-        "image": "macos-sonoma-14.6-xcode-16.1"
+        "resourceClass": "medium"
       }
     },
     "preview-android": {
