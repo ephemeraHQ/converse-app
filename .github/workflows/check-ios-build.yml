@@ -16,17 +16,17 @@ jobs:
       - name: Setup repo
         uses: actions/checkout@v4
 
-      - name: Setup node
-        uses: actions/setup-node@v4.0.2
-        with:
-          node-version: 20.x
-          cache: "yarn"
-
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2.5" # Not needed with a `.ruby-version` or `.tool-versions`
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+
+      - name: Setup node
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version: 20.x
+          cache: "yarn"
 
       - name: 🏗 Setup EAS
         uses: expo/expo-github-action@v8
