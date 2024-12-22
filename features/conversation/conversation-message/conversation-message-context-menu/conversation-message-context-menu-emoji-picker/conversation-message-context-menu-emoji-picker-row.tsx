@@ -1,15 +1,15 @@
-import { CategorizedEmojisRecord, Emoji } from "@utils/emojis/interfaces";
+import { ICategorizedEmojisRecord, IEmoji } from "@utils/emojis/emoji-types";
 import { FC, memo, useMemo } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 type EmojiRowProps = {
-  item: CategorizedEmojisRecord;
+  item: ICategorizedEmojisRecord;
   onPress: (emoji: string) => void;
 };
 
 export const EmojiRow: FC<EmojiRowProps> = memo(({ item, onPress }) => {
   const items = useMemo(() => {
-    const sliced: (string | Emoji)[] = item.emojis.slice(0, 6);
+    const sliced: (string | IEmoji)[] = item.emojis.slice(0, 6);
     while (sliced.length < 6) {
       sliced.push("");
     }

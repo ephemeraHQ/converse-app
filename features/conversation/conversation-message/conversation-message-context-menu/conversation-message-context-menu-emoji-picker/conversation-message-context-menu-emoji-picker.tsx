@@ -1,5 +1,6 @@
 import { EmojiRowList } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker-list";
 import { messageContextMenuEmojiPickerBottomSheetRef } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker-utils";
+import { emojiTrie } from "@/utils/emojis/emoji-trie";
 import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
 import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
 import { BottomSheetModal } from "@design-system/BottomSheet/BottomSheetModal";
@@ -9,16 +10,14 @@ import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { emojis } from "@utils/emojis/emojis";
-import { CategorizedEmojisRecord, Emoji } from "@utils/emojis/interfaces";
-import { matchSorter } from "match-sorter";
-import { debounce } from "perfect-debounce";
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { ICategorizedEmojisRecord, IEmoji } from "@utils/emojis/emoji-types";
+import { memo, useCallback, useRef, useState } from "react";
 import { TextInput, TextStyle, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const flatEmojis = emojis.flatMap((category) => category.data);
 
-const categorizedEmojis: CategorizedEmojisRecord[] = [];
+const categorizedEmojis: ICategorizedEmojisRecord[] = [];
 emojis.forEach((category, index) => {
   for (let i = 0; i < category.data.length; i += 6) {
     const slicedEmojis = category.data.slice(i, i + 6).map((emoji) => emoji);
@@ -30,8 +29,8 @@ emojis.forEach((category, index) => {
   }
 });
 
-const sliceEmojis = (emojis: Emoji[]) => {
-  const slicedEmojis: CategorizedEmojisRecord[] = [];
+const sliceEmojis = (emojis: IEmoji[]) => {
+  const slicedEmojis: ICategorizedEmojisRecord[] = [];
   for (let i = 0; i < emojis.length; i += 6) {
     const sliced = emojis.slice(i, i + 6).map((emoji) => emoji);
     slicedEmojis.push({
@@ -41,19 +40,6 @@ const sliceEmojis = (emojis: Emoji[]) => {
     });
   }
   return slicedEmojis;
-};
-
-const filterEmojis = (text: string) => {
-  const cleanedSearch = text.toLowerCase().trim();
-  if (cleanedSearch.length === 0) {
-    return defaultEmojis;
-  }
-  return sliceEmojis(
-    matchSorter(flatEmojis, cleanedSearch, {
-      keys: ["keywords", "name", "emoji"],
-      threshold: matchSorter.rankings.CONTAINS, // Use a less strict threshold
-    })
-  );
 };
 
 const defaultEmojis = sliceEmojis(flatEmojis);
@@ -84,28 +70,26 @@ export const MessageContextMenuEmojiPicker = memo(
       [onSelectReaction, closeMenu]
     );
 
-    const debouncedFilter = useMemo(
-      () =>
-        debounce((value: string) => {
-          const filtered = filterEmojis(value);
-          setFilteredReactions(filtered);
-          setHasInput(value.length > 0);
-        }, 300),
-      []
-    );
-
-    const onTextInputChange = useCallback(
-      (value: string) => {
-        if (value.trim() === "") {
-          // Reset immediately when input is cleared
-          setFilteredReactions(defaultEmojis);
-          setHasInput(false);
-        } else {
-          debouncedFilter(value);
-        }
-      },
-      [debouncedFilter]
-    );
+    const onTextInputChange = useCallback((value: string) => {
+      if (value.trim() === "") {
+        // Reset immediately when input is cleared
+        setFilteredReactions(defaultEmojis);
+        setHasInput(false);
+      } else {
+        const emojiSet = new Set();
+        const emojis = emojiTrie.findAllWithPrefix(value);
+        const dedupedEmojis = emojis.filter((emoji) => {
+          if (emojiSet.has(emoji.emoji)) {
+            return false;
+          }
+          emojiSet.add(emoji.emoji);
+          return true;
+        });
+        const sliced = sliceEmojis(dedupedEmojis);
+        setFilteredReactions(sliced);
+        setHasInput(true);
+      }
+    }, []);
 
     return (
       <BottomSheetModal

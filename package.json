@@ -146,7 +146,6 @@
     "i18n-js": "3.9.2",
     "ipfs-car": "^1.0.0",
     "libphonenumber-js": "^1.10.49",
-    "match-sorter": "^6.3.4",
     "mime": "^4.0.4",
     "os-browserify": "^0.3.0",
     "patch-package": "^6.5.1",
