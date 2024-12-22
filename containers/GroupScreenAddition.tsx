@@ -27,7 +27,6 @@ import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import * as Haptics from "expo-haptics";
 import { FC, useCallback, useMemo, useState } from "react";
 import {
-  Alert,
   Platform,
   StyleSheet,
   TouchableOpacity,
@@ -42,6 +41,7 @@ import {
   saveGroupInviteLink,
   saveInviteIdByGroupId,
 } from "../features/GroupInvites/groupInvites.utils";
+import { captureErrorWithToast } from "@/utils/capture-error";
 
 type GroupScreenAdditionProps = {
   topic: ConversationTopic;
@@ -113,8 +113,9 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
         setSnackMessage(translate("group_invite_link_created_copied"));
       })
       .catch((err) => {
-        console.error("Error creating group invite", err);
-        Alert.alert("An error occurred");
+        captureErrorWithToast(err, {
+          message: translate("group_opertation_an_error_occurred"),
+        });
       });
   }, [
     currentAccount,
