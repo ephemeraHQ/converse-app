@@ -9,6 +9,8 @@ import Foundation
 import XMTP
 import Alamofire
 
+extension String: Error {}
+
 func getDbEncryptionKey() throws -> Data {
   if let key = getKeychainValue(forKey: "LIBXMTP_DB_ENCRYPTION_KEY") {
         if let keyData = Data(base64Encoded: key) {

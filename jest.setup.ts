@@ -60,8 +60,6 @@ jest.mock("./utils/evm/privy", () => ({
   getPrivyRequestHeaders: jest.fn(),
 }));
 
-jest.mock("@op-engineering/op-sqlite", () => ({}));
-
 jest.mock("rn-fetch-blob", () => {
   return {
     DocumentDir: () => {},

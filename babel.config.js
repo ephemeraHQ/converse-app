@@ -18,7 +18,6 @@ module.exports = {
         alias: {
           "fast-text-encoding": "text-encoding",
           // crypto: "react-native-quick-crypto",
-          "react-native-sqlite-storage": "@op-engineering/op-sqlite",
           crypto: "crypto-browserify",
           // This entrypoint mapping is done in @xmtp/user-preferences-bindings-wasm's "exports" in package.json
           // but we don't want to enable unstable_enablePackageExports for now in metro.config.js
@@ -27,7 +26,7 @@ module.exports = {
           "react-native-webview": "react-native-webview/src/index.ts",
 
           // Folder aliases
-          '@': './',
+          "@": "./",
           "@components": "./components",
           "@config": "./config",
           "@containers": "./containers",
