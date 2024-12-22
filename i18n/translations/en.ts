@@ -329,6 +329,7 @@ export const en = {
   approve: "Approve",
   deny: "Deny",
   approve_member_to_this_group: "Approve {{name}} to this group",
+  group_opertation_an_error_occurred: "An error occurred",
 
   // New Group
   new_group: {

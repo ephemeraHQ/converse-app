@@ -2,7 +2,7 @@ import { AnimatedVStack } from "@/design-system/VStack";
 import { BottomSheetFlashList } from "@design-system/BottomSheet/BottomSheetFlashList";
 import { BottomSheetFlatList } from "@design-system/BottomSheet/BottomSheetFlatList";
 import { ListRenderItem as FlashListRenderItem } from "@shopify/flash-list";
-import { CategorizedEmojisRecord } from "@utils/emojis/interfaces";
+import { ICategorizedEmojisRecord } from "@utils/emojis/emoji-types";
 import React, { FC, useCallback, useEffect } from "react";
 import {
   ListRenderItem,
@@ -20,7 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EmojiRow } from "./conversation-message-context-menu-emoji-picker-row";
 
 type EmojiRowListProps = {
-  emojis: CategorizedEmojisRecord[];
+  emojis: ICategorizedEmojisRecord[];
   ListHeader?: React.ReactNode;
   onPress: (emoji: string) => void;
 };
@@ -51,8 +51,8 @@ export const EmojiRowList: FC<EmojiRowListProps> = ({
     );
   }, [emojis.length, height, windowHeight]);
 
-  const renderItem: ListRenderItem<CategorizedEmojisRecord> &
-    FlashListRenderItem<CategorizedEmojisRecord> = useCallback(
+  const renderItem: ListRenderItem<ICategorizedEmojisRecord> &
+    FlashListRenderItem<ICategorizedEmojisRecord> = useCallback(
     ({ item }) => <EmojiRow onPress={onPress} item={item} />,
     [onPress]
   );

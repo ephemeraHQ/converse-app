@@ -1,4 +1,6 @@
 import { useGroupName } from "@/hooks/useGroupName";
+import { translate } from "@/i18n";
+import { captureErrorWithToast } from "@/utils/capture-error";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
@@ -8,12 +10,10 @@ import {
   getAddressIsSuperAdmin,
 } from "@utils/groupUtils/adminUtils";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
-import logger from "@utils/logger";
 import { formatGroupName } from "@utils/str";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import React, { FC, useCallback, useMemo, useState } from "react";
 import {
-  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -51,8 +51,9 @@ export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
       setEditing(false);
       await updateGroupName(editedName);
     } catch (e) {
-      logger.error(e);
-      Alert.alert("An error occurred");
+      captureErrorWithToast(e, {
+        message: translate("group_opertation_an_error_occurred"),
+      });
     }
   }, [editedName, updateGroupName]);
   const canEditGroupName = memberCanUpdateGroup(
