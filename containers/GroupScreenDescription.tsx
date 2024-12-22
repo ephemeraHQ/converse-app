@@ -1,3 +1,4 @@
+import { captureErrorWithToast } from "@/utils/capture-error";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupDescription } from "@hooks/useGroupDescription";
 import { useGroupMembers } from "@hooks/useGroupMembers";
@@ -9,11 +10,9 @@ import {
   getAddressIsSuperAdmin,
 } from "@utils/groupUtils/adminUtils";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
-import logger from "@utils/logger";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { FC, useCallback, useMemo, useState } from "react";
 import {
-  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -58,8 +57,9 @@ export const GroupScreenDescription: FC<GroupScreenDescriptionProps> = ({
     try {
       await setGroupDescription(editedDescription);
     } catch (e) {
-      logger.error(e);
-      Alert.alert("An error occurred");
+      captureErrorWithToast(e, {
+        message: translate("group_opertation_an_error_occurred"),
+      });
     }
   }, [editedDescription, setGroupDescription]);
 
