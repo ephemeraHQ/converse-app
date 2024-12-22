@@ -13,10 +13,11 @@
       },
       "node": "20.15.1",
       "ios": {
-        "cocoapods": "1.16.2"
+        "cocoapods": "1.16.2",
+        "image": "macos-sonoma-14.6-xcode-16.1"
       },
       "android": {
-        "resourceClass": "medium"
+        "resourceClass": "large"
       }
     },
     "production": {
@@ -29,7 +30,8 @@
       "node": "20.15.1",
       "ios": {
         "resourceClass": "large",
-        "cocoapods": "1.16.2"
+        "cocoapods": "1.16.2",
+        "image": "macos-sonoma-14.6-xcode-16.1"
       }
     },
     "production-android": {
