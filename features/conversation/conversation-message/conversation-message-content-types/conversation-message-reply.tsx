@@ -54,8 +54,6 @@ export const MessageReply = memo(function MessageReply(props: {
     return null;
   }
 
-  const textContent = replyMessageContent.content.text;
-
   return (
     <BubbleContainer fromMe={fromMe}>
       <BubbleContentContainer
@@ -97,8 +95,10 @@ export const MessageReply = memo(function MessageReply(props: {
             </VStack>
           )}
 
-          {!!textContent && (
-            <MessageText inverted={fromMe}>{textContent}</MessageText>
+          {!!replyMessageContent.content.text && (
+            <MessageText inverted={fromMe}>
+              {replyMessageContent.content.text}
+            </MessageText>
           )}
         </VStack>
       </BubbleContentContainer>
