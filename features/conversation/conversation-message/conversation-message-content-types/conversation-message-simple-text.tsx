@@ -33,16 +33,7 @@ export const MessageSimpleText = memo(function MessageSimpleText(props: {
           alignItems: fromMe ? "flex-end" : "flex-start",
         }}
       >
-        <Text
-          style={{
-            ...textSizeStyles.xxl,
-            color: fromMe
-              ? theme.colors.text.inverted.primary
-              : theme.colors.text.primary,
-          }}
-        >
-          {textContent}
-        </Text>
+        <Text style={textSizeStyles.xxl}>{textContent}</Text>
       </VStack>
     );
   }
