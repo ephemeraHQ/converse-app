@@ -7,13 +7,18 @@ import { useMessageContextStoreContext } from "@/features/conversation/conversat
 import { useSelect } from "@/data/store/storeHelpers";
 import { DecodedMessage, TextCodec } from "@xmtp/react-native-sdk";
 import { memo } from "react";
-import { MessageBigEmoji } from "./conversation-message-big-emoji";
 import { shouldRenderBigEmoji } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { VStack } from "@design-system/VStack";
+import { Text } from "@design-system/Text";
+import { textSizeStyles } from "@design-system/Text/Text.styles";
+import { useAppTheme } from "@theme/useAppTheme";
 
 export const MessageSimpleText = memo(function MessageSimpleText(props: {
   message: DecodedMessage<TextCodec>;
 }) {
   const { message } = props;
+
+  const { theme } = useAppTheme();
 
   const textContent = message.content();
 
@@ -22,7 +27,24 @@ export const MessageSimpleText = memo(function MessageSimpleText(props: {
   );
 
   if (shouldRenderBigEmoji(textContent)) {
-    return <MessageBigEmoji message={message} />;
+    return (
+      <VStack
+        style={{
+          alignItems: fromMe ? "flex-end" : "flex-start",
+        }}
+      >
+        <Text
+          style={{
+            ...textSizeStyles.xxl,
+            color: fromMe
+              ? theme.colors.text.inverted.primary
+              : theme.colors.text.primary,
+          }}
+        >
+          {textContent}
+        </Text>
+      </VStack>
+    );
   }
 
   return (

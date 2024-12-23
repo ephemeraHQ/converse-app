@@ -5,15 +5,12 @@ import { memo } from "react";
 type IBubbleContainerProps = {
   children: React.ReactNode;
   fromMe: boolean;
-  transparent?: boolean;
 };
 
 type IBubbleContentContainerProps = {
   children: React.ReactNode;
   fromMe: boolean;
   hasNextMessageInSeries: boolean;
-  noPadding?: boolean;
-  transparent?: boolean;
 };
 
 export const BubbleContainer = memo(function BubbleContainer(
@@ -37,19 +34,16 @@ export const BubbleContainer = memo(function BubbleContainer(
 export const BubbleContentContainer = memo(function BubbleContentContainer(
   props: IBubbleContentContainerProps
 ) {
-  const { children, fromMe, hasNextMessageInSeries, noPadding, transparent } =
-    props;
+  const { children, fromMe, hasNextMessageInSeries } = props;
   const { theme } = useAppTheme();
 
   const baseStyle = {
-    backgroundColor: transparent
-      ? "transparent"
-      : fromMe
-        ? theme.colors.bubbles.bubble
-        : theme.colors.bubbles.received.bubble,
+    backgroundColor: fromMe
+      ? theme.colors.bubbles.bubble
+      : theme.colors.bubbles.received.bubble,
     borderRadius: theme.borderRadius.sm,
-    paddingHorizontal: noPadding ? 0 : theme.spacing.xs,
-    paddingVertical: noPadding ? 0 : theme.spacing.xxs,
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: theme.spacing.xxs,
     maxWidth: theme.layout.screen.width * 0.7,
   };
 
