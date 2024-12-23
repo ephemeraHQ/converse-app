@@ -35,6 +35,7 @@ import {
   TextCodec,
 } from "@xmtp/react-native-sdk";
 import { useCurrentConversationTopic } from "../conversation.store-context";
+import emojiRegex from "emoji-regex";
 
 export function isAnActualMessage(
   message: DecodedMessageWithCodecsType
@@ -257,3 +258,17 @@ export function getConvosMessageStatus(message: DecodedMessageWithCodecsType) {
       throw new Error(`Unhandled delivery status: ${message.deliveryStatus}`);
   }
 }
+
+// Compile emoji regex once
+const compiledEmojiRegex = emojiRegex();
+
+export const shouldRenderBigEmoji = (text: string) => {
+  const trimmedContent = text.trim();
+  const emojis = trimmedContent.match(compiledEmojiRegex) || [];
+
+  const hasEmojis = emojis.length > 0;
+  const hasFewerThanFourEmojis = emojis.length < 4;
+  const containsOnlyEmojis = emojis.join("") === trimmedContent;
+
+  return hasEmojis && hasFewerThanFourEmojis && containsOnlyEmojis;
+};
