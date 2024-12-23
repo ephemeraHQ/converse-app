@@ -11,7 +11,7 @@
       "env": {
         "EXPO_ENV": "dev"
       },
-      "node": "20.15.1",
+      "node": "20.18.0",
       "ios": {
         "cocoapods": "1.16.2",
         "image": "macos-sonoma-14.6-xcode-16.1"
@@ -27,7 +27,7 @@
         "buildType": "app-bundle",
         "resourceClass": "large"
       },
-      "node": "20.15.1",
+      "node": "20.18.0",
       "ios": {
         "resourceClass": "large",
         "cocoapods": "1.16.2",
