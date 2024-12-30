@@ -1,12 +1,11 @@
+import { IConvosMessage } from "@/features/conversation/conversation-message/conversation-message.types";
 import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
+import { isSupportedMessage } from "@/utils/xmtpRN/messages";
 import { UseQueryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
-import {
-  ConversationWithCodecsType,
-  DecodedMessageWithCodecsType,
-} from "@/utils/xmtpRN/client.types";
 import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
 import {
   InboxId,
@@ -40,7 +39,8 @@ export const conversationMessagesQueryFn = async (
     `[useConversationMessages] queryFn fetched ${messages.length} messages in ${end - start}ms`
   );
   const processingStart = performance.now();
-  const processedMessages = processMessages({ messages });
+  const validMessages = messages.filter(isSupportedMessage);
+  const processedMessages = processMessages({ messages: validMessages });
   const processingEnd = performance.now();
   logger.info(
     `[useConversationMessages] queryFn processed ${messages.length} messages in ${processingEnd - processingStart}ms`
@@ -104,7 +104,7 @@ export function refetchConversationMessages(
 export const addConversationMessage = (args: {
   account: string;
   topic: ConversationTopic;
-  message: DecodedMessageWithCodecsType;
+  message: IConvosMessage;
 }) => {
   const { account, topic, message } = args;
 
@@ -154,7 +154,7 @@ const ignoredContentTypesPrefixes = [
 
 type IMessageAccumulator = {
   ids: MessageId[];
-  byId: Record<MessageId, DecodedMessageWithCodecsType>;
+  byId: Record<MessageId, IConvosMessage>;
   reactions: Record<
     MessageId,
     {
@@ -165,7 +165,7 @@ type IMessageAccumulator = {
 };
 
 function processMessages(args: {
-  messages: DecodedMessageWithCodecsType[];
+  messages: IConvosMessage[];
   existingData?: IMessageAccumulator;
   prependNewMessages?: boolean;
 }): IMessageAccumulator {
@@ -275,7 +275,7 @@ export function replaceOptimisticMessageWithReal(args: {
   tempId: string;
   topic: ConversationTopic;
   account: string;
-  message: DecodedMessageWithCodecsType;
+  message: ConvosMes;
 }) {
   const { tempId, topic, account, message } = args;
   logger.info(

@@ -1,3 +1,4 @@
+import { IConvosMessage } from "@/features/conversation/conversation-message/conversation-message.types";
 import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
 import {
@@ -23,6 +24,7 @@ import {
   GroupUpdatedCodec,
   MessageDeliveryStatus,
   MessageId,
+  NativeMessageContent,
   ReactionCodec,
   ReactionContent,
   ReadReceiptCodec,
@@ -34,8 +36,8 @@ import {
   StaticAttachmentContent,
   TextCodec,
 } from "@xmtp/react-native-sdk";
-import { useCurrentConversationTopic } from "../conversation.store-context";
 import emojiRegex from "emoji-regex";
+import { useCurrentConversationTopic } from "../conversation.store-context";
 
 export function isAnActualMessage(
   message: DecodedMessageWithCodecsType
@@ -241,7 +243,9 @@ export function getCurrentUserAlreadyReactedOnMessage(args: {
   );
 }
 
-export function getConvosMessageStatus(message: DecodedMessageWithCodecsType) {
+export function getConvosMessageStatusForXmtpMessage(
+  message: DecodedMessageWithCodecsType
+) {
   // @ts-ignore - Custom for optimistic message, we might want to have our custom ConvoMessage
   if (message.deliveryStatus === "sending") {
     return "sending";
@@ -272,3 +276,17 @@ export const shouldRenderBigEmoji = (text: string) => {
 
   return hasEmojis && hasFewerThanFourEmojis && containsOnlyEmojis;
 };
+
+export function convertXmtpMessageToConversationMessage(
+  message: DecodedMessageWithCodecsType
+): IConvosMessage {
+  return {
+    convosMessageId: message.id,
+    xmtpMessageId: message.id,
+    status: getConvosMessageStatusForXmtpMessage(message),
+    senderInboxId: message.senderInboxId,
+    sentNs: message.sentNs,
+    type: getMessageContentType(message.contentTypeId),
+    content: message.content() as NativeMessageContent,
+  };
+}

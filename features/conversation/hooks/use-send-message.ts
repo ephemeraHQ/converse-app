@@ -63,64 +63,64 @@ export function useSendMessage(props: {
     mutationFn: (variables: ISendMessageParams) =>
       sendMessage({ conversation, params: variables }),
     // WIP
-    onMutate: (variables) => {
-      const currentAccount = getCurrentAccount()!;
-      const currentUserInboxId = getCurrentUserAccountInboxId()!;
+    // onMutate: (variables) => {
+    //   const currentAccount = getCurrentAccount()!;
+    //   const currentUserInboxId = getCurrentUserAccountInboxId()!;
 
-      // For now only optimistic message for simple text message
-      if (variables.content.text && !variables.referencedMessageId) {
-        const generatedMessageId = getRandomId();
+    //   // For now only optimistic message for simple text message
+    //   if (variables.content.text && !variables.referencedMessageId) {
+    //     const generatedMessageId = getRandomId();
 
-        const textMessage: DecodedMessage<TextCodec> = {
-          id: generatedMessageId as MessageId,
-          client: conversation.client,
-          contentTypeId: variables.content.text
-            ? contentTypesPrefixes.text
-            : contentTypesPrefixes.remoteAttachment,
-          sentNs: getTodayNs(),
-          fallback: "new-message",
-          deliveryStatus: "sending" as MessageDeliveryStatus, // NOT GOOD but tmp
-          topic: conversation.topic,
-          senderInboxId: currentUserInboxId,
-          nativeContent: {},
-          content: () => {
-            return variables.content.text!;
-          },
-        };
+    //     const textMessage: DecodedMessage<TextCodec> = {
+    //       id: generatedMessageId as MessageId,
+    //       client: conversation.client,
+    //       contentTypeId: variables.content.text
+    //         ? contentTypesPrefixes.text
+    //         : contentTypesPrefixes.remoteAttachment,
+    //       sentNs: getTodayNs(),
+    //       fallback: "new-message",
+    //       deliveryStatus: "sending" as MessageDeliveryStatus, // NOT GOOD but tmp
+    //       topic: conversation.topic,
+    //       senderInboxId: currentUserInboxId,
+    //       nativeContent: {},
+    //       content: () => {
+    //         return variables.content.text!;
+    //       },
+    //     };
 
-        addConversationMessage({
-          account: currentAccount,
-          topic: conversation.topic,
-          message: textMessage,
-        });
+    //     addConversationMessage({
+    //       account: currentAccount,
+    //       topic: conversation.topic,
+    //       message: textMessage,
+    //     });
 
-        return {
-          generatedMessageId,
-        };
-      }
-    },
-    onSuccess: async (messageId, _, context) => {
-      if (context && messageId) {
-        // The SDK only returns the messageId
-        const message = await fetchMessageByIdQuery({
-          account: getCurrentAccount()!,
-          messageId,
-        });
+    //     return {
+    //       generatedMessageId,
+    //     };
+    //   }
+    // },
+    // onSuccess: async (messageId, _, context) => {
+    //   if (context && messageId) {
+    //     // The SDK only returns the messageId
+    //     const message = await fetchMessageByIdQuery({
+    //       account: getCurrentAccount()!,
+    //       messageId,
+    //     });
 
-        if (!message) {
-          throw new Error("Message not found");
-        }
+    //     if (!message) {
+    //       throw new Error("Message not found");
+    //     }
 
-        if (message) {
-          replaceOptimisticMessageWithReal({
-            tempId: context.generatedMessageId,
-            topic: conversation.topic,
-            account: getCurrentAccount()!,
-            message,
-          });
-        }
-      }
-    },
+    //     if (message) {
+    //       replaceOptimisticMessageWithReal({
+    //         tempId: context.generatedMessageId,
+    //         topic: conversation.topic,
+    //         account: getCurrentAccount()!,
+    //         message,
+    //       });
+    //     }
+    //   }
+    // },
     onError: (error) => {
       captureError(error);
       const currentAccount = getCurrentAccount()!;
