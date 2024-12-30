@@ -29,15 +29,23 @@ export const conversationMessagesQueryFn = async (
   conversation: ConversationWithCodecsType,
   options?: MessagesOptions
 ) => {
+  const start = performance.now();
   logger.info("[useConversationMessages] queryFn fetching messages...");
   if (!conversation) {
     throw new Error("Conversation not found in conversationMessagesQueryFn");
   }
   const messages = await conversation.messages(options);
+  const end = performance.now();
   logger.info(
-    `[useConversationMessages] queryFn fetched ${messages.length} messages`
+    `[useConversationMessages] queryFn fetched ${messages.length} messages in ${end - start}ms`
   );
-  return processMessages({ messages });
+  const processingStart = performance.now();
+  const processedMessages = processMessages({ messages });
+  const processingEnd = performance.now();
+  logger.info(
+    `[useConversationMessages] queryFn processed ${messages.length} messages in ${processingEnd - processingStart}ms`
+  );
+  return processedMessages;
 };
 
 const conversationMessagesByTopicQueryFn = async (

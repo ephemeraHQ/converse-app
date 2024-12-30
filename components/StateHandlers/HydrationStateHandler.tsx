@@ -33,10 +33,10 @@ export default function HydrationStateHandler() {
           );
 
           const results = await Promise.allSettled([
-            getXmtpClient(account),
+            // This will handle creating the client and setting the conversation list from persistence
             fetchPersistedConversationListQuery({ account }),
-            prefetchInboxIdQuery({ account }),
           ]);
+          prefetchInboxIdQuery({ account });
 
           const errors = results.filter(
             (result) => result.status === "rejected"

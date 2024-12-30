@@ -1,5 +1,5 @@
 import { IProfileSocials } from "@/features/profiles/profile-types";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { QueryKey, useQueries, useQuery } from "@tanstack/react-query";
 import { getProfilesForAddresses } from "@utils/api";
 import {
   create,
@@ -12,7 +12,10 @@ import mmkv from "@/utils/mmkv";
 
 type ProfileSocialsData = IProfileSocials | null | undefined;
 
-const profileSocialsQueryKey = (account: string, peerAddress: string) => [
+const profileSocialsQueryKey = (
+  account: string,
+  peerAddress: string
+): QueryKey => [
   "profileSocials",
   account?.toLowerCase(),
   // Typesafe because there's a lot of account! usage
@@ -62,6 +65,15 @@ const profileSocialsQueryConfig = (account: string, peerAddress: string) => ({
   // And automatic retries if there was an error fetching
   refetchOnMount: false,
   staleTime: 1000 * 60 * 60 * 24,
+  initialData: (): ProfileSocialsData => {
+    if (mmkv.contains(profileSocialsQueryStorageKey(account, peerAddress))) {
+      const data = JSON.parse(
+        mmkv.getString(profileSocialsQueryStorageKey(account, peerAddress))!
+      ) as ProfileSocialsData;
+      return data;
+    }
+  },
+  initialDataUpdatedAt: 0,
   // persister: reactQueryPersister,
 });
 
@@ -96,7 +108,7 @@ export const fetchProfileSocialsQuery = (
   account: string,
   peerAddress: string
 ) => {
-  return queryClient.fetchQuery<ProfileSocialsData>(
+  return queryClient.fetchQuery<IProfileSocials | null>(
     profileSocialsQueryConfig(account, peerAddress)
   );
 };
