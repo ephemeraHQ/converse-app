@@ -37,6 +37,10 @@ export const ConversationMessage = memo(
     }
 
     if (isRemoteAttachmentMessage(message)) {
+      const content = message.content();
+      console.log("content", content);
+      const nativeContent = message.nativeContent;
+      console.log("nativeContent", nativeContent);
       return <MessageRemoteAttachment message={message} />;
     }
 

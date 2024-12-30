@@ -7,7 +7,7 @@ import { translate } from "@/i18n";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { Haptics } from "@/utils/haptics";
 import React, { memo, useEffect } from "react";
-import { IConvosMessageStatus } from "../conversation-message.types";
+import { IConvosMessageStatus } from "../conversation-message/conversation-message.types";
 
 type IConversationMessageStatusProps = {
   status: IConvosMessageStatus;

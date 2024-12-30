@@ -1,3 +1,4 @@
+import { AnimatedVStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
@@ -37,7 +38,7 @@ import {
   useMessageContextStore,
 } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
-  getConvosMessageStatus,
+  getConvosMessageStatusForXmtpMessage,
   getCurrentUserAlreadyReactedOnMessage,
   isAnActualMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
@@ -50,6 +51,7 @@ import { isConversationDm } from "@/features/conversation/utils/is-conversation-
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useConversationQuery } from "@/queries/useConversationQuery";
+import { useAppTheme } from "@/theme/useAppTheme";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
@@ -69,6 +71,7 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+import { FadeInDown } from "react-native-reanimated";
 import { ConversationMessageHighlighted } from "./conversation-message/conversation-message-highlighted";
 import {
   ConversationStoreProvider,
@@ -198,7 +201,7 @@ const Messages = memo(function Messages(props: {
     data: messages,
     isLoading: messagesLoading,
     isRefetching: isRefetchingMessages,
-    refetch,
+    refetch: refetchMessages,
   } = useConversationMessages(currentAccount, topic!);
 
   const latestMessageIdByCurrentUser = useMemo(() => {
@@ -234,13 +237,13 @@ const Messages = memo(function Messages(props: {
   const handleRefresh = useCallback(async () => {
     try {
       refreshingRef.current = true;
-      await refetch();
+      await refetchMessages();
     } catch (e) {
       console.error(e);
     } finally {
       refreshingRef.current = false;
     }
-  }, [refetch]);
+  }, [refetchMessages]);
 
   const onScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -256,7 +259,7 @@ const Messages = memo(function Messages(props: {
     <ConversationMessagesList
       messageIds={messages?.ids ?? []}
       refreshing={isRefetchingMessages}
-      onRefresh={Platform.OS === "android" ? refetch : undefined}
+      onRefresh={Platform.OS === "android" ? refetchMessages : undefined}
       onScroll={onScroll}
       ListEmptyComponent={
         isConversationDm(conversation) ? (
@@ -287,6 +290,7 @@ const Messages = memo(function Messages(props: {
             isLatestMessageSentByCurrentUser={
               latestMessageIdByCurrentUser === messageId
             }
+            isFirstMessage={index === 0}
           />
         );
       }}
@@ -300,13 +304,16 @@ const ConversationMessagesListItem = memo(
     previousMessage: DecodedMessageWithCodecsType | undefined;
     nextMessage: DecodedMessageWithCodecsType | undefined;
     isLatestMessageSentByCurrentUser: boolean;
+    isFirstMessage: boolean;
   }) {
     const {
       message,
       previousMessage,
       nextMessage,
       isLatestMessageSentByCurrentUser,
+      isFirstMessage,
     } = props;
+    const { theme } = useAppTheme();
     const composerStore = useConversationComposerStore();
 
     const handleReply = useCallback(() => {
@@ -319,22 +326,38 @@ const ConversationMessagesListItem = memo(
         previousMessage={previousMessage}
         nextMessage={nextMessage}
       >
-        <ConversationMessageTimestamp />
-        <ConversationMessageRepliable onReply={handleReply}>
-          <ConversationMessageLayout>
-            <ConversationMessageGesturesWrapper>
-              <ConversationMessageHighlighted>
-                <ConversationMessage message={message} />
-              </ConversationMessageHighlighted>
-            </ConversationMessageGesturesWrapper>
-            <ConversationMessageReactions />
-            {isLatestMessageSentByCurrentUser && (
-              <ConversationMessageStatus
-                status={getConvosMessageStatus(message)}
-              />
-            )}
-          </ConversationMessageLayout>
-        </ConversationMessageRepliable>
+        <AnimatedVStack
+          {...(isFirstMessage && {
+            entering: FadeInDown.springify()
+              .damping(theme.animation.spring.damping)
+              .stiffness(theme.animation.spring.stiffness)
+              .withInitialValues({
+                opacity: 0,
+                transform: [
+                  {
+                    translateY: 100,
+                  },
+                ],
+              }),
+          })}
+        >
+          <ConversationMessageTimestamp />
+          <ConversationMessageRepliable onReply={handleReply}>
+            <ConversationMessageLayout>
+              <ConversationMessageGesturesWrapper>
+                <ConversationMessageHighlighted>
+                  <ConversationMessage message={message} />
+                </ConversationMessageHighlighted>
+              </ConversationMessageGesturesWrapper>
+              <ConversationMessageReactions />
+              {isLatestMessageSentByCurrentUser && (
+                <ConversationMessageStatus
+                  status={getConvosMessageStatusForXmtpMessage(message)}
+                />
+              )}
+            </ConversationMessageLayout>
+          </ConversationMessageRepliable>
+        </AnimatedVStack>
       </MessageContextStoreProvider>
     );
   }

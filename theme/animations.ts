@@ -87,6 +87,9 @@ export const animation = {
       .stiffness(SICK_STIFFNESS)
       .damping(SICK_DAMPING),
 
+  fadeInDownSpring: () =>
+    FadeInDown.springify().stiffness(SICK_STIFFNESS).damping(SICK_DAMPING),
+
   reanimatedFadeInSpring: FadeIn.springify()
     .stiffness(SICK_STIFFNESS)
     .damping(SICK_DAMPING),
