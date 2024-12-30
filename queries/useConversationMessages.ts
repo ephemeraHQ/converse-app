@@ -50,13 +50,14 @@ export const conversationMessagesQueryFn = async (
 
 const conversationMessagesByTopicQueryFn = async (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
+  includeSync: boolean = true
 ) => {
   logger.info("[useConversationMessages] queryFn fetching messages by topic");
   const conversation = await getConversationByTopicByAccount({
     account,
     topic,
-    includeSync: true,
+    includeSync,
   });
   if (!conversation) {
     throw new Error(
@@ -125,19 +126,20 @@ export const prefetchConversationMessages = async (
   topic: ConversationTopic
 ) => {
   return queryClient.prefetchQuery(
-    getConversationMessagesQueryOptions(account, topic)
+    getConversationMessagesQueryOptions(account, topic, false)
   );
 };
 
 function getConversationMessagesQueryOptions(
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
+  includeSync: boolean = true
 ): UseQueryOptions<ConversationMessagesQueryData> {
   const conversation = getConversationQueryData({ account, topic });
   return {
     queryKey: conversationMessagesQueryKey(account, topic),
     queryFn: () => {
-      return conversationMessagesByTopicQueryFn(account, topic);
+      return conversationMessagesByTopicQueryFn(account, topic, includeSync);
     },
     enabled: !!conversation,
     refetchOnMount: true, // Just for now because messages are very important and we want to make sure we have all of them
