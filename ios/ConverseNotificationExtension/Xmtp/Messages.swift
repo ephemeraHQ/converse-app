@@ -127,52 +127,6 @@ func handleV3Message(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_
   return (shouldShowNotification, messageId, messageIntent)
 }
 
-
-func handleOngoingConversationMessage(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_Envelope, bestAttemptContent: inout UNMutableNotificationContent, body: [String: Any]) async -> (shouldShowNotification: Bool, messageId: String?, messageIntent: INSendMessageIntent?) {
-  var shouldShowNotification = false
-  let contentTopic = envelope.contentTopic
-  var conversationTitle: String? = nil
-  var messageId: String? = nil
-  var messageIntent: INSendMessageIntent? = nil
-  
-  let decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope)
-  // If couldn't decode the message, not showing
-  if let message = decodedMessage {
-    let decodedMessageResult = handleMessageByContentType(decodedMessage: message, xmtpClient: xmtpClient);
-
-    if decodedMessageResult.senderAddress == xmtpClient.address || decodedMessageResult.forceIgnore {
-      // Message is from me or a reaction removal, let's drop it
-      print("[NotificationExtension] Not showing a notification")
-    } else if let content = decodedMessageResult.content {
-      bestAttemptContent.body = content
-      
-      var senderAvatar: String? = nil
-      if let senderAddress = decodedMessageResult.senderAddress, let senderProfileSocials = await getProfile(account: xmtpClient.address, address: senderAddress) {
-        conversationTitle = getPreferredName(address: senderAddress, socials: senderProfileSocials)
-        senderAvatar = getPreferredAvatar(socials: senderProfileSocials)
-      }
-      
-      if (conversationTitle == nil), let senderAddress = decodedMessageResult.senderAddress {
-        conversationTitle = shortAddress(address: senderAddress)
-      }
-      if let convoTitle = conversationTitle {
-        bestAttemptContent.title = convoTitle
-      }
-      
-      shouldShowNotification = true
-      messageId = decodedMessageResult.id
-      messageIntent = getIncoming1v1MessageIntent(topic: envelope.contentTopic, senderId: decodedMessage?.senderInboxId ?? "", senderName: bestAttemptContent.title, senderAvatar: senderAvatar, content: bestAttemptContent.body)
-    }
-  } else {
-    print("[NotificationExtension] Not showing a notification because could not decode message")
-    sentryTrackMessage(message: "Could not decode envelope", extras: ["envelope": envelope, "account": xmtpClient.address])
-  }
-  if (isDebugAccount(account: xmtpClient.address)) {
-    sentryTrackMessage(message: "DEBUG_NOTIFICATION", extras: ["shouldShowNotification": shouldShowNotification, "messageId": messageId ?? "EMPTY", "bestAttemptContentBody": bestAttemptContent.body, "bestAttemptContentTitle": bestAttemptContent.title])
-  }
-  return (shouldShowNotification, messageId, messageIntent)
-}
-
 func loadSavedMessages() -> [SavedNotificationMessage] {
   let mmkv = getMmkv()
   let savedMessagesString = mmkv?.string(forKey: "saved-notifications-messages")
