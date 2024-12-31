@@ -1,6 +1,6 @@
 import type { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 
-type MemberRole = "admin" | "super_admin" | "member";
+type MemberRole = "admin" | "superAdmin" | "member";
 
 type GetMemberRoleParams = {
   isSuperAdmin: boolean;
@@ -11,7 +11,7 @@ const getMemberRole = ({
   isSuperAdmin,
   isAdmin,
 }: GetMemberRoleParams): MemberRole => {
-  if (isSuperAdmin) return "super_admin";
+  if (isSuperAdmin) return "superAdmin";
   if (isAdmin) return "admin";
   return "member";
 };
@@ -29,7 +29,7 @@ export const userCanDoGroupActions = (
   if (policy === "deny") return false;
   if (
     policy === "admin" &&
-    (memberRole === "admin" || memberRole === "super_admin")
+    (memberRole === "admin" || memberRole === "superAdmin")
   )
     return true;
   if (policy === memberRole) return true;

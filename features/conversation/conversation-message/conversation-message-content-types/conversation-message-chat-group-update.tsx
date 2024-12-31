@@ -112,7 +112,7 @@ export function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
         <ChatGroupUpdateText weight="bold">{readableName} </ChatGroupUpdateText>
       </Pressable>
       <ChatGroupUpdateText>
-        {translate("group_member_joined")}
+        {translate("group_member_left")}
       </ChatGroupUpdateText>
     </HStack>
   );
