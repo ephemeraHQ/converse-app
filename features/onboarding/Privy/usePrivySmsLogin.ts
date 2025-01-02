@@ -11,6 +11,8 @@ import { translate } from "../../../i18n";
 import logger from "../../../utils/logger";
 import { sentryTrackError } from "../../../utils/sentry";
 
+// privy is on the chopping block
+// alex is checking on this
 export function usePrivySmsLogin() {
   const { loginWithCode: loginWithCodePrivy, sendCode: sendCodePrivy } =
     useLoginWithSMSPrivy();
