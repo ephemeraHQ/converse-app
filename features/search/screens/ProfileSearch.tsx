@@ -59,10 +59,10 @@ export default function ProfileSearch({
 
   const renderFooter = useCallback(
     () => (
-      <View style={[themed($footer), { marginBottom: insets.bottom + 55 }]}>
+      <View style={[themed($footer), { marginBottom: insets.bottom }]}>
         <Text
           preset={Platform.OS === "ios" ? "body" : "small"}
-          style={themed($footerText)}
+          style={{ textAlign: Platform.OS === "ios" ? "center" : "left" }}
         >
           {translate("full_address_hint", {
             providers: ".converse.xyz, .eth, .lens, .fc, .x",
@@ -83,6 +83,7 @@ export default function ProfileSearch({
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         onTouchStart={Keyboard.dismiss}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -126,8 +127,4 @@ const $footer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
       marginTop: spacing.lg,
     },
   }),
-});
-
-const $footerText: ThemedStyle<TextStyle> = () => ({
-  textAlign: Platform.OS === "ios" ? "center" : "left",
 });
