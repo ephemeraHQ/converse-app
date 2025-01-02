@@ -513,6 +513,19 @@ export const fr = {
 
   conversation_list: {
     messages: "Messages",
+    attachment: "Pièce jointe",
+    updated_the_group: "{{userName}} a mis à jour le groupe",
+    group_updated: "Groupe mis à jour",
+    name_changed: "{{userName}} a changé le nom du groupe en {{newValue}}",
+    description_changed:
+      "{{userName}} a changé la description du groupe en {{newValue}}",
+    image_changed: "{{userName}} a changé l'image du groupe",
+    member_added: "{{userName}} a ajouté {{memberName}} au groupe",
+    member_added_unknown: "{{userName}} a ajouté un nouveau membre au groupe",
+    members_added: "{{userName}} a ajouté {{count}} membres au groupe",
+    member_removed: "{{userName}} a retiré {{memberName}} du groupe",
+    member_removed_unknown: "{{userName}} a retiré un membre du groupe",
+    members_removed: "{{userName}} a retiré {{count}} membres du groupe",
   },
 
   debug: {

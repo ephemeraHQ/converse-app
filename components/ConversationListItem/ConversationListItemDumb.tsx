@@ -1,34 +1,19 @@
-import {
-  backgroundColor,
-  badgeColor,
-  clickedItemBackgroundColor,
-  dangerColor,
-  inversePrimaryColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "@styles/colors";
-import { PictoSizes } from "@styles/sizes";
-import { Image } from "expo-image";
-import React, { forwardRef, memo, useCallback, useMemo } from "react";
-import {
-  LayoutChangeEvent,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableHighlight,
-  useColorScheme,
-  View,
-} from "react-native";
+// import { Image } from "expo-image";
+import React, { forwardRef, memo, useCallback } from "react";
+import { Platform, TouchableHighlight, ViewStyle } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { TouchableRipple } from "react-native-paper";
-import Animated, {
-  useSharedValue,
-  useAnimatedRef,
-} from "react-native-reanimated";
 
 import { IIconName } from "@design-system/Icon/Icon.types";
 import { Icon } from "@design-system/Icon/Icon";
+import { Text } from "@/design-system/Text";
+import { Center } from "@/design-system/Center";
+import { HStack } from "@/design-system/HStack";
+import { VStack } from "@/design-system/VStack";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ImageStyle } from "expo-image";
+import { clickedItemBackgroundColor } from "@/styles/colors";
 
 export type ConversationListItemDumbProps = {
   title?: string;
@@ -49,156 +34,6 @@ export type ConversationListItemDumbProps = {
   showError: boolean;
   showImagePreview: boolean;
   imagePreviewUrl: string | undefined;
-};
-
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return useMemo(
-    () =>
-      StyleSheet.create({
-        rowSeparator: Platform.select({
-          android: {},
-          default: {
-            height: 80,
-          },
-        }),
-        rowSeparatorMargin: {
-          position: "absolute",
-          width: 84,
-          height: 2,
-          backgroundColor: backgroundColor(colorScheme),
-          bottom: -1.5,
-        },
-        conversationListItem: {
-          flexDirection: "row",
-          height: "100%",
-          paddingRight: 16,
-        },
-        avatarWrapper: {
-          marginLeft: 16,
-          alignSelf: "center",
-        },
-        messagePreviewContainer: {
-          flexGrow: 1,
-          flexShrink: 1,
-          paddingRight: 16,
-          ...Platform.select({
-            default: {
-              height: 84,
-              paddingTop: 12,
-              marginLeft: 12,
-            },
-            android: {
-              height: 72,
-              paddingTop: 16.5,
-              paddingLeft: 16,
-            },
-          }),
-        },
-        conversationName: {
-          color: textPrimaryColor(colorScheme),
-          ...Platform.select({
-            default: {
-              fontSize: 17,
-              fontWeight: "600",
-              marginBottom: 3,
-            },
-            android: {
-              fontSize: 16,
-            },
-          }),
-        },
-        messagePreview: {
-          color: textSecondaryColor(colorScheme),
-          ...Platform.select({
-            default: {
-              fontSize: 15,
-              marginBottom: 8,
-            },
-            android: {
-              fontSize: 14,
-            },
-          }),
-        },
-        timeText: {
-          color: textSecondaryColor(colorScheme),
-          ...Platform.select({
-            default: { fontSize: 15 },
-            web: { marginRight: 14, fontSize: 15 },
-            android: { fontSize: 11 },
-          }),
-        },
-        unreadContainer: {
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          marginLeft: 16,
-        },
-        unread: {
-          width: 14,
-          height: 14,
-          borderRadius: 16,
-          backgroundColor: badgeColor(colorScheme),
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-        },
-        placeholder: {
-          backgroundColor: "transparent",
-        },
-        rightAction: {
-          width: 100,
-          alignItems: "center",
-          backgroundColor: badgeColor(colorScheme),
-          justifyContent: "center",
-        },
-        rightActionRed: {
-          width: 100,
-          alignItems: "center",
-          backgroundColor: dangerColor(colorScheme),
-          justifyContent: "center",
-        },
-        leftAction: {
-          width: 100,
-          alignItems: "center",
-          backgroundColor: badgeColor(colorScheme),
-          justifyContent: "center",
-        },
-        rippleRow: {
-          backgroundColor: backgroundColor(colorScheme),
-        },
-        imagePreviewContainer: {
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          marginLeft: 16,
-        },
-        imagePreview: {
-          height: 56,
-          width: 56,
-          borderRadius: 4,
-          aspectRatio: 1,
-        },
-      }),
-    [colorScheme]
-  );
-};
-
-const useDisplayInfo = () => {
-  const colorScheme = useColorScheme();
-  const displayRowSeparator = Platform.OS === "ios";
-  const themedClickedItemBackgroundColor =
-    clickedItemBackgroundColor(colorScheme);
-  const themedDangerColor = dangerColor(colorScheme);
-  const themedInversePrimaryColor = inversePrimaryColor(colorScheme);
-  const themedBackgroundColor = backgroundColor(colorScheme);
-  return {
-    displayRowSeparator,
-    themedClickedItemBackgroundColor,
-    themedDangerColor,
-    themedInversePrimaryColor,
-    themedBackgroundColor,
-  };
 };
 
 export const ConversationListItemDumb = memo(
@@ -225,38 +60,26 @@ export const ConversationListItemDumb = memo(
       },
       swipeableRef
     ) {
-      const styles = useStyles();
-      const {
-        displayRowSeparator,
-        themedDangerColor,
-        themedInversePrimaryColor,
-        themedClickedItemBackgroundColor,
-        themedBackgroundColor,
-      } = useDisplayInfo();
-
-      const itemRect = useSharedValue({ x: 0, y: 0, width: 0, height: 0 });
-      const containerRef = useAnimatedRef<View>();
-
-      const onLayoutView = useCallback(
-        (event: LayoutChangeEvent) => {
-          const { x, y, width, height } = event.nativeEvent.layout;
-          itemRect.value = { x, y, width, height };
-        },
-        [itemRect]
+      const { themed, theme } = useAppTheme();
+      const { iconSize } = theme;
+      const themedClickedItemBackgroundColor = clickedItemBackgroundColor(
+        theme.isDark ? "dark" : "light"
       );
 
+      const themedInversePrimaryColor = theme.colors.fill.inverted.primary;
+
       const listItemContent = (
-        <View style={styles.conversationListItem}>
-          {avatarComponent}
-          <View style={styles.messagePreviewContainer}>
-            <Text style={styles.conversationName} numberOfLines={1}>
+        <HStack style={themed($conversationListItem)}>
+          <Center style={$avatarWrapper}>{avatarComponent}</Center>
+          <VStack style={themed($messagePreviewContainer)}>
+            <Text preset="bodyBold" weight="medium" numberOfLines={1}>
               {title}
             </Text>
-            <Text style={styles.messagePreview} numberOfLines={2}>
+            <Text preset="small" numberOfLines={2} color="secondary">
               {subtitle}
             </Text>
-          </View>
-          {showImagePreview && (
+          </VStack>
+          {/* {showImagePreview && (
             <View style={styles.imagePreviewContainer}>
               <Image
                 source={{ uri: imagePreviewUrl }}
@@ -264,81 +87,73 @@ export const ConversationListItemDumb = memo(
                 contentFit="cover"
               />
             </View>
-          )}
+          )} */}
           {(isUnread || showError) && (
-            <View style={styles.unreadContainer}>
-              <View
+            <Center style={$unreadContainer}>
+              <Center
                 style={[
-                  styles.unread,
-                  (!isUnread || showError) && styles.placeholder,
+                  themed($unread),
+                  (!isUnread || showError) && themed($placeholder),
                 ]}
-              >
-                {showError && (
-                  <Icon
-                    icon="info.circle"
-                    color={themedDangerColor}
-                    size={PictoSizes.button}
-                  />
-                )}
-              </View>
-            </View>
+              />
+            </Center>
           )}
-        </View>
+        </HStack>
       );
 
       const renderLeftActions = useCallback(() => {
         return (
-          <RectButton style={styles.leftAction}>
+          <RectButton style={themed($leftAction)}>
             <Icon
               icon={leftActionIcon as IIconName}
               color={themedInversePrimaryColor}
-              size={PictoSizes.swipableItem}
+              size={iconSize.lg}
             />
           </RectButton>
         );
-      }, [leftActionIcon, styles.leftAction, themedInversePrimaryColor]);
+      }, [leftActionIcon, themed, themedInversePrimaryColor, iconSize.lg]);
 
       const renderRightActions = useCallback(() => {
         if (rightIsDestructive) {
           return (
-            <RectButton style={styles.rightAction} onPress={onRightActionPress}>
+            <RectButton
+              style={themed($rightAction)}
+              onPress={onRightActionPress}
+            >
               <Icon
                 icon="checkmark"
                 color={themedInversePrimaryColor}
-                size={PictoSizes.swipableItem}
+                size={iconSize.lg}
               />
             </RectButton>
           );
         } else {
           return (
             <RectButton
-              style={styles.rightActionRed}
+              style={themed($rightActionRed)}
               onPress={onRightActionPress}
             >
-              <Icon icon="trash" color="white" size={PictoSizes.swipableItem} />
+              <Icon icon="trash" color="white" size={iconSize.lg} />
             </RectButton>
           );
         }
       }, [
         rightIsDestructive,
-        styles.rightAction,
-        styles.rightActionRed,
+        themed,
         onRightActionPress,
         themedInversePrimaryColor,
+        iconSize.lg,
       ]);
 
       const rowItem = (
-        <Animated.View ref={containerRef} onLayout={onLayoutView}>
+        <>
           {Platform.OS === "ios" ? (
             <TouchableHighlight
               underlayColor={themedClickedItemBackgroundColor}
               delayPressIn={75}
               onLongPress={onLongPress}
               onPress={onPress}
-              style={{
-                backgroundColor: themedBackgroundColor,
-                height: 76,
-              }}
+              style={themed($touchable)}
             >
               {listItemContent}
             </TouchableHighlight>
@@ -347,13 +162,13 @@ export const ConversationListItemDumb = memo(
               unstable_pressDelay={75}
               onPress={onPress}
               onLongPress={onLongPress}
-              style={styles.rippleRow}
+              style={themed($touchable)}
               rippleColor={themedClickedItemBackgroundColor}
             >
               {listItemContent}
             </TouchableRipple>
           )}
-        </Animated.View>
+        </>
       );
 
       const onSwipeableWillClose = useCallback(
@@ -379,23 +194,88 @@ export const ConversationListItemDumb = memo(
       );
 
       return (
-        <View style={styles.rowSeparator}>
-          <Swipeable
-            renderRightActions={renderRightActions}
-            renderLeftActions={renderLeftActions}
-            leftThreshold={10000} // Never trigger opening
-            overshootFriction={4}
-            ref={swipeableRef}
-            onSwipeableWillClose={onSwipeableWillClose}
-            onSwipeableClose={onSwipeableClose}
-            hitSlop={{ left: -6 }}
-          >
-            {rowItem}
-          </Swipeable>
-          {/* Hide part of the border to mimic margin*/}
-          {displayRowSeparator && <View style={styles.rowSeparatorMargin} />}
-        </View>
+        <Swipeable
+          renderRightActions={renderRightActions}
+          renderLeftActions={renderLeftActions}
+          leftThreshold={10000} // Never trigger opening
+          overshootFriction={4}
+          ref={swipeableRef}
+          onSwipeableWillClose={onSwipeableWillClose}
+          onSwipeableClose={onSwipeableClose}
+          hitSlop={{ left: -6 }}
+        >
+          {rowItem}
+        </Swipeable>
       );
     }
   )
 );
+
+const $conversationListItem: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.lg,
+  paddingVertical: spacing.xs,
+});
+
+const $avatarWrapper: ViewStyle = {
+  alignSelf: "center",
+};
+
+const $messagePreviewContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexGrow: 1,
+  flexShrink: 1,
+  marginLeft: spacing.xs,
+});
+
+const $unreadContainer: ViewStyle = {
+  alignItems: "center",
+};
+
+const $unread: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
+  width: spacing.sm,
+  height: spacing.sm,
+  borderRadius: spacing.xs,
+  backgroundColor: colors.fill.primary,
+});
+
+const $touchable: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.background.surface,
+});
+
+const $placeholder: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.global.transparent,
+});
+
+const ACTION_WIDTH = 100;
+
+const $rightAction: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: ACTION_WIDTH,
+  alignItems: "center",
+  backgroundColor: colors.fill.primary,
+  justifyContent: "center",
+});
+
+const $rightActionRed: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: ACTION_WIDTH,
+  alignItems: "center",
+  backgroundColor: colors.fill.caution,
+  justifyContent: "center",
+});
+
+const $leftAction: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: ACTION_WIDTH,
+  alignItems: "center",
+  backgroundColor: colors.fill.primary,
+  justifyContent: "center",
+});
+
+const $imagePreviewContainer: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "flex-end",
+};
+
+const $imagePreview: ThemedStyle<ImageStyle> = ({ spacing }) => ({
+  height: spacing["4xl"],
+  width: spacing["4xl"],
+  borderRadius: spacing.xxxs,
+});
