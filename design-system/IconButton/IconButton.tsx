@@ -3,6 +3,7 @@ import {
   GestureResponderEvent,
   PressableStateCallbackType,
   StyleProp,
+  TextStyle,
   ViewStyle,
 } from "react-native";
 import { useAppTheme } from "../../theme/useAppTheme";
@@ -62,7 +63,7 @@ export function IconButton(props: IIconButtonProps) {
   );
 
   const iconStyle = useCallback(
-    ({ pressed }: PressableStateCallbackType): StyleProp<ViewStyle> =>
+    ({ pressed }: PressableStateCallbackType): StyleProp<TextStyle> =>
       themed(
         getIconStyle({
           variant,
@@ -110,13 +111,13 @@ export function IconButton(props: IIconButtonProps) {
       onPress={handlePress}
       {...rest}
     >
-      {({ pressed }) => {
+      {({ pressed, hovered }) => {
         if (iconName) {
           return (
             <Icon
               picto={iconName}
-              style={iconStyle({ pressed })}
-              {...iconProps({ pressed })}
+              style={iconStyle({ pressed, hovered })}
+              {...iconProps({ pressed, hovered })}
             />
           );
         }

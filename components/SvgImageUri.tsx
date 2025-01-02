@@ -6,6 +6,7 @@ import {
   ImageSourcePropType,
   ImageStyle,
   StyleProp,
+  ViewStyle,
 } from "react-native";
 import { NumberProp, SvgXml } from "react-native-svg";
 
@@ -13,7 +14,7 @@ type Props = {
   width?: NumberProp;
   height?: NumberProp;
   uri: string | null;
-  style?: StyleProp<ImageStyle>;
+  style?: StyleProp<ViewStyle & ImageStyle>;
   defaultSource?: ImageSourcePropType;
 };
 
