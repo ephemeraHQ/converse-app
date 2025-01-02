@@ -27,6 +27,7 @@ import { useToggleReadStatus } from "../features/conversation-list/hooks/useTogg
 import Avatar from "./Avatar";
 import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
 import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
+import { prefetchConversationMessages } from "@/queries/useConversationMessages";
 
 type V3DMListItemProps = {
   conversation: DmWithCodecsType;
@@ -162,10 +163,11 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
   }, [avatarUri, preferredName]);
 
   const onPress = useCallback(() => {
+    prefetchConversationMessages(currentAccount, topic);
     navigate("Conversation", {
       topic: topic,
     });
-  }, [topic]);
+  }, [topic, currentAccount]);
 
   const onLeftSwipe = useCallback(() => {
     const translation = ref.current?.state.rowTranslation;

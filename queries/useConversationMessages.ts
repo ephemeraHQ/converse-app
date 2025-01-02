@@ -29,26 +29,35 @@ export const conversationMessagesQueryFn = async (
   conversation: ConversationWithCodecsType,
   options?: MessagesOptions
 ) => {
+  const start = performance.now();
   logger.info("[useConversationMessages] queryFn fetching messages...");
   if (!conversation) {
     throw new Error("Conversation not found in conversationMessagesQueryFn");
   }
   const messages = await conversation.messages(options);
+  const end = performance.now();
   logger.info(
-    `[useConversationMessages] queryFn fetched ${messages.length} messages`
+    `[useConversationMessages] queryFn fetched ${messages.length} messages in ${end - start}ms`
   );
-  return processMessages({ messages });
+  const processingStart = performance.now();
+  const processedMessages = processMessages({ messages });
+  const processingEnd = performance.now();
+  logger.info(
+    `[useConversationMessages] queryFn processed ${messages.length} messages in ${processingEnd - processingStart}ms`
+  );
+  return processedMessages;
 };
 
 const conversationMessagesByTopicQueryFn = async (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
+  includeSync: boolean = true
 ) => {
   logger.info("[useConversationMessages] queryFn fetching messages by topic");
   const conversation = await getConversationByTopicByAccount({
     account,
     topic,
-    includeSync: true,
+    includeSync,
   });
   if (!conversation) {
     throw new Error(
@@ -117,19 +126,20 @@ export const prefetchConversationMessages = async (
   topic: ConversationTopic
 ) => {
   return queryClient.prefetchQuery(
-    getConversationMessagesQueryOptions(account, topic)
+    getConversationMessagesQueryOptions(account, topic, false)
   );
 };
 
 function getConversationMessagesQueryOptions(
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
+  includeSync: boolean = true
 ): UseQueryOptions<ConversationMessagesQueryData> {
   const conversation = getConversationQueryData({ account, topic });
   return {
     queryKey: conversationMessagesQueryKey(account, topic),
     queryFn: () => {
-      return conversationMessagesByTopicQueryFn(account, topic);
+      return conversationMessagesByTopicQueryFn(account, topic, includeSync);
     },
     enabled: !!conversation,
     refetchOnMount: true, // Just for now because messages are very important and we want to make sure we have all of them
