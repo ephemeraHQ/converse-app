@@ -7,6 +7,7 @@ import { actionSheetColors, textSecondaryColor } from "@styles/colors";
 import {
   getAccountIsAdmin,
   getAccountIsSuperAdmin,
+  getAddressIsAdmin,
   getAddressIsSuperAdmin,
 } from "@utils/groupUtils/adminUtils";
 import { getGroupMemberActions } from "@utils/groupUtils/getGroupMemberActions";
@@ -77,6 +78,11 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
       [currentAccount, members]
     );
 
+    const currentAccountIsAdmin = useMemo(
+      () => getAddressIsAdmin(members, currentAccount),
+      [currentAccount, members]
+    );
+
     const tableViewItems = useMemo(() => {
       const items: TableViewItemType[] = [];
 
@@ -103,13 +109,14 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
               revokeSuperAdminIndex,
               removeIndex,
               destructiveButtonIndex,
-            } = getGroupMemberActions(
-              groupPermissionPolicy,
+            } = getGroupMemberActions({
+              groupPermissionLevel: groupPermissionPolicy,
               isCurrentUser,
               isSuperAdmin,
               isAdmin,
-              currentAccountIsSuperAdmin
-            );
+              currentAccountIsSuperAdmin,
+              currentAccountIsAdmin,
+            });
             showActionSheetWithOptions(
               {
                 options,
@@ -201,6 +208,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
       colorScheme,
       currentAccount,
       currentAccountIsSuperAdmin,
+      currentAccountIsAdmin,
       groupPermissionPolicy,
       mappedData,
       members,

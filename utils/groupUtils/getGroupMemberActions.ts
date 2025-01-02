@@ -2,30 +2,57 @@ import { translate } from "@i18n";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 import { userCanDoGroupActions } from "./userCanDoGroupActions";
 
-export const getGroupMemberActions = (
-  groupPermissionLevel: PermissionPolicySet | undefined,
-  isCurrentUser: boolean,
-  isSuperAdmin: boolean,
-  isAdmin: boolean,
-  currentAccountIsSuperAdmin: boolean
-) => {
+type GetGroupMemberActionsProps = {
+  groupPermissionLevel: PermissionPolicySet | undefined;
+  isCurrentUser: boolean;
+  isSuperAdmin: boolean;
+  isAdmin: boolean;
+  currentAccountIsSuperAdmin: boolean;
+  currentAccountIsAdmin: boolean;
+};
+
+export const getGroupMemberActions = ({
+  groupPermissionLevel,
+  isCurrentUser,
+  isSuperAdmin,
+  isAdmin,
+  currentAccountIsSuperAdmin,
+  currentAccountIsAdmin,
+}: GetGroupMemberActionsProps) => {
   const canRemove =
     !isCurrentUser &&
     userCanDoGroupActions(
       groupPermissionLevel,
       "removeMemberPolicy",
-      isSuperAdmin,
-      isAdmin
+      currentAccountIsSuperAdmin,
+      currentAccountIsAdmin
     );
   const canPromoteToSuperAdmin =
-    currentAccountIsSuperAdmin && !isSuperAdmin && !isCurrentUser;
+    !isSuperAdmin && !isCurrentUser && currentAccountIsSuperAdmin;
   const canPromoteToAdmin =
-    !isCurrentUser && currentAccountIsSuperAdmin && !isAdmin && !isSuperAdmin;
+    !isCurrentUser &&
+    !isAdmin &&
+    !isSuperAdmin &&
+    userCanDoGroupActions(
+      groupPermissionLevel,
+      "addAdminPolicy",
+      currentAccountIsSuperAdmin,
+      currentAccountIsAdmin
+    );
+
   const canRevokeAdmin =
-    !isCurrentUser && currentAccountIsSuperAdmin && isAdmin && !isSuperAdmin;
+    !isCurrentUser &&
+    isAdmin &&
+    !isSuperAdmin &&
+    userCanDoGroupActions(
+      groupPermissionLevel,
+      "removeAdminPolicy",
+      currentAccountIsSuperAdmin,
+      currentAccountIsAdmin
+    );
   const canRevokeSuperAdmin =
     !isCurrentUser && currentAccountIsSuperAdmin && isSuperAdmin;
-  const options = ["Profile page"];
+  const options = [translate("group_screen_member_actions.profile_page")];
   let cancelButtonIndex = 1;
   let promoteAdminIndex: number | undefined = undefined;
   if (canPromoteToAdmin) {
@@ -54,6 +81,7 @@ export const getGroupMemberActions = (
     cancelButtonIndex++;
   }
   let removeIndex: number | undefined = undefined;
+
   if (canRemove) {
     removeIndex = options.length;
     options.push(translate("group_screen_member_actions.remove_member"));
