@@ -5,7 +5,7 @@ import { Platform } from "react-native";
  */
 export enum AvatarSizes {
   default = 121,
-  conversationListItem = Platform.OS === "ios" ? 56 : 47,
+  conversationListItem = 56,
   conversationTitle = 30,
   listItemDisplay = 40,
   messageSender = Platform.OS === "ios" ? 30 : 21,
@@ -18,7 +18,7 @@ export enum AvatarSizes {
 }
 
 /**
- * @deprecated
+ * @deprecated - Use iconSize from theme instead
  */
 export enum PictoSizes {
   default = 48,

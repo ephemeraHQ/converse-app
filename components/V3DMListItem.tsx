@@ -157,7 +157,6 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
         size={AvatarSizes.conversationListItem}
         uri={avatarUri}
         name={preferredName}
-        style={{ marginLeft: 16, alignSelf: "center" }}
       />
     );
   }, [avatarUri, preferredName]);
@@ -197,6 +196,9 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
 
   const onRightSwipe = useCallback(() => {}, []);
 
+  const subtitle =
+    timeToShow && messageText ? `${timeToShow} ⋅ ${messageText}` : "";
+
   return (
     <ConversationListItemDumb
       ref={ref}
@@ -213,7 +215,7 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
       imagePreviewUrl={undefined}
       avatarComponent={avatarComponent}
       title={preferredName}
-      subtitle={`${timeToShow} ⋅ ${messageText}`}
+      subtitle={subtitle}
       isUnread={isUnread}
       rightIsDestructive={isBlockedChatView}
     />

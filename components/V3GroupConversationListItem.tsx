@@ -402,16 +402,17 @@ export function V3GroupConversationListItem({
       <Avatar
         size={AvatarSizes.conversationListItem}
         uri={group?.imageUrlSquare}
-        style={{ marginLeft: 16, alignSelf: "center" }}
       />
     ) : (
       <GroupAvatarDumb
         size={AvatarSizes.conversationListItem}
         members={memberData}
-        style={{ marginLeft: 16, alignSelf: "center" }}
       />
     );
   }, [group?.imageUrlSquare, memberData]);
+
+  const subtitle =
+    timeToShow && messageText ? `${timeToShow} ⋅ ${messageText}` : "";
 
   return (
     <ConversationListItemDumb
@@ -429,7 +430,7 @@ export function V3GroupConversationListItem({
       imagePreviewUrl={undefined}
       avatarComponent={avatarComponent}
       title={group?.name}
-      subtitle={`${timeToShow} ⋅ ${messageText}`}
+      subtitle={subtitle}
       isUnread={isUnread}
       rightIsDestructive={isBlockedChatView}
     />
