@@ -18,7 +18,7 @@ PODS:
     - DGSwiftUtilities (~> 0.29)
   - CryptoSwift (1.8.3)
   - CSecp256k1 (0.2.0)
-  - DGSwiftUtilities (0.36.0)
+  - DGSwiftUtilities (0.46.2)
   - DoubleConversion (1.1.6)
   - EASClient (0.13.1):
     - ExpoModulesCore
@@ -384,9 +384,9 @@ PODS:
   - GoogleUtilities/UserDefaults (8.0.2):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
-  - hermes-engine (0.76.5):
-    - hermes-engine/Pre-built (= 0.76.5)
-  - hermes-engine/Pre-built (0.76.5)
+  - hermes-engine (0.76.3):
+    - hermes-engine/Pre-built (= 0.76.3)
+  - hermes-engine/Pre-built (0.76.3)
   - libavif/core (0.11.1)
   - libavif/libdav1d (0.11.1):
     - libavif/core
@@ -2770,7 +2770,7 @@ SPEC CHECKSUMS:
   ContextMenuAuxiliaryPreview: 20be0be795b783b68f8792732eed4bed9f202c1c
   CryptoSwift: 967f37cea5a3294d9cce358f78861652155be483
   CSecp256k1: 2a59c03e52637ded98896a33be4b2649392cb843
-  DGSwiftUtilities: 3be87518a22cc29d3a93e1b9543576705f501fb5
+  DGSwiftUtilities: 26ab864a9ef7d92facb211aeb133412efd64ce65
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
   EASClient: d15d70e334b019ae5649609011cda761defe4b1a
   EXApplication: 88ebf1a95f85faa5d2df160016d61f2d060e9438
@@ -2821,7 +2821,7 @@ SPEC CHECKSUMS:
   fmt: 10c6e61f4be25dc963c36bd73fc7b1705fe975be
   glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
-  hermes-engine: 06a9c6900587420b90accc394199527c64259db4
+  hermes-engine: 0555a84ea495e8e3b4bde71b597cd87fbb382888
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
