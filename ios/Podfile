@@ -1,20 +1,16 @@
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
-# Resolve react_native_pods.rb with node to allow for hoisting
-require Pod::Executable.execute_command('node', ['-p',
-  'require.resolve(
-    "react-native/scripts/react_native_pods.rb",
-    {paths: [process.argv[1]]},
-  )', __dir__]).strip
-require File.join(File.dirname(`node --print "require.resolve('@react-native-community/cli-platform-ios/package.json')"`), "native_modules")
+require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
 
 require 'json'
 podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
 
-plugin 'cocoapods-pod-linkage'
-platform :ios, podfile_properties['ios.deploymentTarget'] || '14.0'
+ENV['RCT_NEW_ARCH_ENABLED'] = podfile_properties['newArchEnabled'] == 'true' ? '1' : '0'
+ENV['EX_DEV_CLIENT_NETWORK_INSPECTOR'] = podfile_properties['EX_DEV_CLIENT_NETWORK_INSPECTOR']
+
+# plugin 'cocoapods-pod-linkage'
+platform :ios, podfile_properties['ios.deploymentTarget'] || '15.1'
 install! 'cocoapods',
   :deterministic_uuids => false
-
 
 # Version must match version from XMTP Podspec (matching @xmtp/react-native-sdk from package.json)
 # https://github.com/xmtp/xmtp-react-native/blob/v2.6.2/ios/XMTPReactNative.podspec#L29
@@ -23,9 +19,29 @@ $xmtpVersion = '3.0.21'
 # Pinning MMKV to 1.3.3 that has included that fix https://github.com/Tencent/MMKV/pull/1222#issuecomment-1905164314
 $mmkvVersion = '1.3.3'
 
+prepare_react_native_project!
+
 target 'Converse' do
   use_expo_modules!
-  config = use_native_modules!
+  if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
+    config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
+  else
+    config_command = [
+      'node',
+      '--no-warnings',
+      '--eval',
+      'require(require.resolve(\'expo-modules-autolinking\', { paths: [require.resolve(\'expo/package.json\')] }))(process.argv.slice(1))',
+      'react-native-config',
+      '--json',
+      '--platform',
+      'ios'
+    ]
+  end
+
+  config = use_native_modules!(config_command)
+
+  use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
+  use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym if ENV['USE_FRAMEWORKS']
 
   use_frameworks! :linkage => :static
   $RNFirebaseAsStaticFramework = true
@@ -36,7 +52,7 @@ target 'Converse' do
 
   use_react_native!(
     :path => config[:reactNativePath],
-    :hermes_enabled => true,
+    :hermes_enabled => podfile_properties['expo.jsEngine'] == nil || podfile_properties['expo.jsEngine'] == 'hermes',
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/..",
     :privacy_file_aggregation_enabled => podfile_properties['apple.privacyManifestAggregationEnabled'] == 'false',
@@ -55,7 +71,7 @@ target 'Converse' do
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
         config.build_settings['SWIFT_VERSION'] = '5.0'
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
         config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
       end
 
@@ -78,17 +94,11 @@ target 'Converse' do
     end
 
   end
-
-  post_integrate do |installer|
-    begin
-      expo_patch_react_imports!(installer)
-    rescue => e
-      Pod::UI.warn e
-    end
-  end
 end
 
 target 'ConverseNotificationExtension' do
+  use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
+  use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym if ENV['USE_FRAMEWORKS']
   use_frameworks! :linkage => :static
   pod 'MMKVAppExtension', $mmkvVersion, :linkage => :dynamic
   pod 'XMTP', $xmtpVersion, :modular_headers => true
