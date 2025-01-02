@@ -8159,15 +8159,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-clipboard/clipboard@npm:^1.14.1":
-  version: 1.14.1
-  resolution: "@react-native-clipboard/clipboard@npm:1.14.1"
+"@react-native-clipboard/clipboard@npm:^1.15.0":
+  version: 1.16.1
+  resolution: "@react-native-clipboard/clipboard@npm:1.16.1"
   peerDependencies:
-    react: 16.9.0 || 16.11.0 || 16.13.1 || 17.0.1 || 17.0.2 || 18.0.0 || 18.1.0 || 18.2.0
-    react-native: ^0.61.5 || ^0.62.3 || ^0.63.2 || ^0.64.2 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0
-    react-native-macos: ^0.61.0 || ^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0
-    react-native-windows: ^0.61.0 || ^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0
-  checksum: 10c0/581512d46cb23ec14a93244eaf09138ce78f2d0a7003ef4a172f7c83665509a6043348d80be3adb899b34f1a131ce36aa5b17f7ec1f94fbfedad37321f105c90
+    react: ">= 16.9.0"
+    react-native: ">= 0.61.5"
+    react-native-macos: ">= 0.61.0"
+    react-native-windows: ">= 0.61.0"
+  peerDependenciesMeta:
+    react-native-macos:
+      optional: true
+    react-native-windows:
+      optional: true
+  checksum: 10c0/765e1c140c34fbfe30a1e7e0657cc2a325a103a4fcaf757994dff3d8877beb8c4f0b915eac5542ada5910560ce2cfe624cd23081302dd6d6bc76354ff0d98d5e
   languageName: node
   linkType: hard
 
@@ -15130,7 +15135,7 @@ __metadata:
     "@privy-io/expo": "npm:^0.16.2"
     "@privy-io/react-auth": "npm:^1.65.1"
     "@react-native-async-storage/async-storage": "npm:1.23.1"
-    "@react-native-clipboard/clipboard": "npm:^1.14.1"
+    "@react-native-clipboard/clipboard": "npm:^1.15.0"
     "@react-native-community/netinfo": "npm:11.4.1"
     "@react-native-firebase/app": "npm:^21.4.0"
     "@react-native-firebase/app-check": "npm:^21.4.0"
@@ -15272,10 +15277,10 @@ __metadata:
     react-native-keyboard-controller: "npm:^1.13.4"
     react-native-localize: "npm:^3.0.2"
     react-native-logs: "npm:^5.1.0"
-    react-native-mmkv: "npm:^2.12.2"
+    react-native-mmkv: "npm:^3.2.0"
     react-native-otp-entry: "npm:^1.7.3"
     react-native-paper: "npm:^5.10.6"
-    react-native-passkey: "npm:^2.1.1"
+    react-native-passkey: "npm:3.0.0"
     react-native-phone-number-input: "npm:^2.1.0"
     react-native-polyfill-globals: "npm:^3.1.0"
     react-native-qrcode-svg: "npm:^6.2.0"
@@ -15285,7 +15290,7 @@ __metadata:
     react-native-safe-area-context: "npm:4.12.0"
     react-native-screens: "npm:~4.4.0"
     react-native-sfsymbols: "npm:^1.2.1"
-    react-native-share: "npm:^10.2.1"
+    react-native-share: "npm:12.0.3"
     react-native-shared-group-preferences: "npm:^1.1.23"
     react-native-svg: "npm:15.8.0"
     react-native-svg-transformer: "npm:^1.3.0"
@@ -27471,13 +27476,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-mmkv@npm:^2.12.2":
-  version: 2.12.2
-  resolution: "react-native-mmkv@npm:2.12.2"
+"react-native-mmkv@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "react-native-mmkv@npm:3.2.0"
   peerDependencies:
     react: "*"
-    react-native: ">=0.71.0"
-  checksum: 10c0/751b92d60b3526c9bbeac652b840c048b7f1cc4f48179f4e24a45cf14bdcdd08bfc7f3c65fb50c686cae41356ac0d15a21e6da034e2f0907459036dacb67fcbd
+    react-native: "*"
+  checksum: 10c0/41abc5b46d61de7bf0f6af0ed66fab19a391d3fdc30b011cc49ba4dce65ab7c7b1c53eda768bc71f718543e89c7d46848dab2cd537b2af39afd624a8b4f0fec4
   languageName: node
   linkType: hard
 
@@ -27507,13 +27512,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-passkey@npm:^2.1.1":
-  version: 2.1.1
-  resolution: "react-native-passkey@npm:2.1.1"
+"react-native-passkey@npm:3.0.0":
+  version: 3.0.0
+  resolution: "react-native-passkey@npm:3.0.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10c0/276c1c36a54b1f2e653c1baa2d3c3e12309a6ae73447f6e3f5f6facf757ff11b3bfefe87d84a8a7b7d052fed97ff677cfb0ec95c3554896557eabe2970d12e4c
+  checksum: 10c0/0b1ec8a31b1d3d7de059c7218451da405aa60f5c4e69ef89e7c3a136168c658e1b2ad4b0a98a5a62741ee5fbf92075673d4218c8b8e22b87b8ecf79121d5365a
   languageName: node
   linkType: hard
 
@@ -27639,10 +27644,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-share@npm:^10.2.1":
-  version: 10.2.1
-  resolution: "react-native-share@npm:10.2.1"
-  checksum: 10c0/534e6930d337d7e48de5572d8d6afac865bdad027a5d1c7fa843c7adba702d594b82cf2bb8124f82ffb1b4171f78754744c97a88b2fa5e5fda479f486768d42e
+"react-native-share@npm:12.0.3":
+  version: 12.0.3
+  resolution: "react-native-share@npm:12.0.3"
+  checksum: 10c0/38ebf9b9f8c0b7e6d1bc37a86042c283cc985b7034fe3ba91f95d5ca49054c23145b4e90a7a839b6b906f0db32a453297657d9d906909899670934716fab45fc
   languageName: node
   linkType: hard
 

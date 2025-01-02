@@ -92,8 +92,8 @@ export function Icon(props: IIconProps) {
   const iconName = icon
     ? iconRegistry[icon]
     : picto
-    ? iconRegistry[picto]
-    : null;
+      ? iconRegistry[picto]
+      : null;
 
   if (!iconName) {
     logger.warn(`Invalid icon name ${icon || picto}`);

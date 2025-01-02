@@ -4,7 +4,6 @@ import {
   PressableStateCallbackType,
   StyleProp,
   TextStyle,
-  View,
   ViewStyle,
 } from "react-native";
 import { useAppTheme } from "../../theme/useAppTheme";

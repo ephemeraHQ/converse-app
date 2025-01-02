@@ -121,22 +121,6 @@ func handleV3Message(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_
   return (shouldShowNotification, messageId, messageIntent)
 }
 
-func loadSavedMessages() -> [SavedNotificationMessage] {
-  let mmkv = getMmkv()
-  let savedMessagesString = mmkv?.string(forKey: "saved-notifications-messages")
-  if (savedMessagesString == nil) {
-    return []
-  } else {
-    let decoder = JSONDecoder()
-    do {
-      let decoded = try decoder.decode([SavedNotificationMessage].self, from: savedMessagesString!.data(using: .utf8)!)
-      return decoded
-    } catch {
-      return []
-    }
-  }
-}
-
 func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_Envelope) async throws -> Message? {
   // If topic is MLS, the conversation should already be there
   // @todo except if it's new convo => call sync before?

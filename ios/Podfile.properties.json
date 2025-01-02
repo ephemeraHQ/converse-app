@@ -1,4 +1,5 @@
 {
-    "expo.jsEngine": "hermes",
-    "hermesEnabled": true
+  "expo.jsEngine": "hermes",
+  "hermesEnabled": true,
+  "newArchEnabled": true
 }

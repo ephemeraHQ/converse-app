@@ -1,13 +1,16 @@
 import { experimental_createPersister } from "@tanstack/react-query-persist-client";
 import { parse, stringify } from "flatted";
-import { MMKV } from "react-native-mmkv";
+import { MMKV, Mode } from "react-native-mmkv";
 import { StateStorage } from "zustand/middleware";
 
 import { getAccountEncryptionKey } from "./keychain/helpers";
 import logger from "./logger";
 import { DEFAULT_GC_TIME } from "@/queries/queryClient.constants";
 
-const storage = new MMKV();
+const storage = new MMKV({
+  id: "mmkv.default",
+  mode: Mode.MULTI_PROCESS,
+});
 
 export default storage;
 
@@ -37,6 +40,7 @@ export const getSecureMmkvForAccount = async (account: string) => {
   secureMmkvByAccount[account] = new MMKV({
     id: `secure-mmkv-${account}`,
     encryptionKey: mmkvStringEncryptionKey,
+    mode: Mode.MULTI_PROCESS,
   });
   return secureMmkvByAccount[account];
 };
@@ -51,7 +55,10 @@ export const clearSecureMmkvForAccount = async (account: string) => {
   delete secureMmkvByAccount[account];
 };
 
-const reactQueryMMKV = new MMKV({ id: "converse-react-query" });
+const reactQueryMMKV = new MMKV({
+  id: "converse-react-query",
+  mode: Mode.MULTI_PROCESS,
+});
 
 const reactQuerySyncStorage = {
   getItem: (key: string) => {
