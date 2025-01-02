@@ -15,7 +15,7 @@ import {
   NavigationParamList,
 } from "@screens/Navigation/Navigation";
 import AndroidBackAction from "@components/AndroidBackAction";
-import ConversationFlashList from "@components/ConversationFlastList/ConversationFlashList";
+import ConversationFlashList from "@/components/ConversationFlashList/ConversationFlashList";
 import { translate } from "@i18n/index";
 import { useAllBlockedChats } from "./useAllBlockedChats";
 
