@@ -68,44 +68,42 @@ export function useInitXmptClient() {
 
       hasStartedXmtpClientFlowRef.current = true;
 
+      const handleInstallationRevoked = async () => {
+        logger.debug("[Connect Wallet] Installation revoked, disconnecting");
+        try {
+          await awaitableAlert(
+            translate("current_installation_revoked"),
+            translate("current_installation_revoked_description")
+          );
+        } catch (error) {
+          sentryTrackError(error);
+        } finally {
+          onErrorConnecting({
+            error: new Error("Installation revoked"),
+          });
+        }
+      };
+
+      const preAuthenticateToInboxCallback = async () => {
+        logger.debug("[Connect Wallet] Installation revoked, disconnecting");
+        try {
+          await awaitableAlert(
+            translate("current_installation_revoked"),
+            translate("current_installation_revoked_description")
+          );
+        } catch (error) {
+          sentryTrackError(error);
+        } finally {
+          onErrorConnecting({
+            error: new Error("Installation revoked"),
+          });
+        }
+      };
+
       await createXmtpClientFromSigner(
         signer,
-        async () => {
-          logger.debug("[Connect Wallet] Installation revoked, disconnecting");
-          try {
-            await awaitableAlert(
-              translate("current_installation_revoked"),
-              translate("current_installation_revoked_description")
-            );
-          } catch (error) {
-            sentryTrackError(error);
-          } finally {
-            onErrorConnecting({
-              error: new Error("Installation revoked"),
-            });
-          }
-        },
-        async () => {
-          if (connectViewWalletStore.getState().waitingForNextSignature) {
-            const currentSignaturesDone =
-              connectViewWalletStore.getState().numberOfSignaturesDone;
-            connectViewWalletStore
-              .getState()
-              .setNumberOfSignaturesDone(currentSignaturesDone + 1);
-            connectViewWalletStore.getState().setLoading(false);
-            logger.debug(
-              "[Connect Wallet] Waiting until signature click for Authenticate"
-            );
-            await waitForClickSignature();
-            logger.debug(
-              "[Connect Wallet] Click on Sign done for Authenticate"
-            );
-            connectViewWalletStore.getState().setWaitingForNextSignature(false);
-          }
-          logger.debug(
-            "[Connect Wallet] Triggering authenticate to inbox signature"
-          );
-        }
+        handleInstallationRevoked,
+        preAuthenticateToInboxCallback
       );
 
       logger.debug("[Connect Wallet] Got base64 key, now connecting");

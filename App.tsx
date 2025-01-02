@@ -92,8 +92,8 @@ const App = () => {
 
   // For now we use persit with zustand to get the accounts when the app launch so here is okay to see if we're logged in or not
   useEffect(() => {
-    const currentAccount = useAccountsStore.getState().currentAccount;
-    if (currentAccount && currentAccount !== TEMPORARY_ACCOUNT_NAME) {
+    const currentInboxId = useAccountsStore.getState().currentInboxId;
+    if (currentInboxId && currentInboxId !== TEMPORARY_ACCOUNT_NAME) {
       setAuthStatus("signedIn");
     } else {
       setAuthStatus("signedOut");

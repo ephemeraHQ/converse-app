@@ -3,19 +3,18 @@ import RNFetchBlob from "rn-fetch-blob";
 import { getPresignedUriForUpload } from "../api";
 
 export const uploadFile = async ({
-  account,
+  inboxId,
   filePath,
   contentType,
 }: {
-  account?: string | undefined;
+  inboxId?: string | undefined;
   filePath?: string | undefined;
-  blob?: Blob | undefined;
   contentType?: string | undefined;
 }) => {
   if (!filePath) {
     throw new Error("filePath needed to upload file from mobile");
   }
-  const { url } = await getPresignedUriForUpload(account, contentType);
+  const { url } = await getPresignedUriForUpload(inboxId, contentType);
   await RNFetchBlob.fetch(
     "PUT",
     url,

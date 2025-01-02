@@ -11,13 +11,13 @@ import {
 import { type IProfileSocials } from "@/features/profiles/profile-types";
 
 export const getProfile = async (
-  currentAccount: string,
+  currentInboxId: string,
   inboxId: InboxId,
   address: string | undefined
 ): Promise<IProfileSocials | undefined | null> => {
   if (address) {
     const addressStorageKey = profileSocialsQueryStorageKey(
-      currentAccount,
+      currentInboxId,
       address
     );
     const mmkvString = mmkv.getString(addressStorageKey);
@@ -27,7 +27,7 @@ export const getProfile = async (
   }
 
   const inboxIdStorageKey = inboxProfileSocialsQueryStorageKey(
-    currentAccount,
+    currentInboxId,
     inboxId
   );
   const mmkvString = mmkv.getString(inboxIdStorageKey);
@@ -37,10 +37,10 @@ export const getProfile = async (
 
   // We don't have any profile data, let's fetch it
   if (address) {
-    return fetchProfileSocialsQuery(currentAccount, address);
+    return fetchProfileSocialsQuery(currentInboxId, address);
   }
   const inboxProfileSocials = await fetchInboxProfileSocialsQuery(
-    currentAccount,
+    currentInboxId,
     inboxId
   );
   return inboxProfileSocials?.[0];

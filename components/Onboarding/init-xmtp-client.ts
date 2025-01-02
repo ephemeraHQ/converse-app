@@ -30,13 +30,15 @@ export async function initXmtpClient(args: {
   }
 
   try {
-    await createXmtpClientFromSigner(signer, async () => {
+    const onInstallationRevoked = async () => {
       await awaitableAlert(
         translate("current_installation_revoked"),
         translate("current_installation_revoked_description")
       );
       throw new Error("Current installation revoked");
-    });
+    };
+
+    await createXmtpClientFromSigner(signer, onInstallationRevoked);
 
     await connectWithAddress({
       address,
@@ -86,7 +88,10 @@ export async function connectWithAddress(args: IConnectWithAddressKeyArgs) {
   try {
     await performLogoutAndSaveKey(address);
 
-    useAccountsStore.getState().setCurrentAccount(address, true);
+    useAccountsStore.getState().setCurrentInboxId({
+      inboxId,
+      createIfNew: true,
+    });
     await finalizeAccountSetup(args);
     sentryTrackMessage("Connecting done!");
   } catch (e) {
@@ -108,7 +113,10 @@ async function finalizeAccountSetup(args: IConnectWithAddressKeyArgs) {
 
   const { address } = args;
 
-  useAccountsStore.getState().setCurrentAccount(address, false);
+  useAccountsStore.getState().setCurrentInboxId({
+    inboxId,
+    createIfNew: false,
+  });
 
   getSettingsStore(address)
     .getState()

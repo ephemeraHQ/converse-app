@@ -66,7 +66,7 @@ const linking: LinkingOptions<NavigationParamList> = {
 export default function Main() {
   // Makes sure we have a Privy token ready to make API calls
   usePrivyAccessToken();
-  useAddressBookStateHandler();
+  // useAddressBookStateHandler();
   useCheckCurrentInstallation();
   useAutoConnectExternalWallet();
 

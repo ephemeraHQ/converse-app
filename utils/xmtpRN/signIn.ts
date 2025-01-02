@@ -17,11 +17,19 @@ const env = config.xmtpEnv as "dev" | "production" | "local";
 export const getInboxId = (address: string) =>
   Client.getOrCreateInboxId(address, env);
 
+type CreateXmtpClientFromSignerResult =
+  | {
+      inboxId: string;
+    }
+  | {
+      error: Error;
+    };
+
 export const createXmtpClientFromSigner = async (
   signer: Signer,
   onInstallationRevoked: () => Promise<void>,
   preAuthenticateToInboxCallback?: () => Promise<void>
-) => {
+): Promise<CreateXmtpClientFromSignerResult> => {
   const tempDirectory = await createTemporaryDirectory();
   const dbEncryptionKey = await getDbEncryptionKey();
 
@@ -43,6 +51,7 @@ export const createXmtpClientFromSigner = async (
   });
 
   if (client.inboxId !== inboxId) {
+    // how the hell would this happen?
     throw new Error("Inbox ids don't match");
   }
 
@@ -53,7 +62,7 @@ export const createXmtpClientFromSigner = async (
     await client.dropLocalDatabaseConnection();
     await deleteLibXmtpDatabaseForInboxId(inboxId);
     onInstallationRevoked();
-    return;
+    return { error: new Error("Installation revoked") };
   }
 
   logger.debug("Instantiated client from signer");
@@ -65,4 +74,6 @@ export const createXmtpClientFromSigner = async (
     client.inboxId
   );
   logger.debug("Dropped client databases");
+
+  return { inboxId };
 };

@@ -354,7 +354,6 @@ export const createGroup = async (args: {
 };
 
 export const createGroupByAccount = async (args: {
-  account: string;
   peers: string[];
   permissionPolicySet: PermissionPolicySet;
   groupName?: string;
@@ -362,13 +361,13 @@ export const createGroupByAccount = async (args: {
   groupDescription?: string;
 }) => {
   const {
-    account,
     peers,
     permissionPolicySet,
     groupName,
     groupPhoto,
     groupDescription,
   } = args;
+  const account = getCurrentAccount();
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   return createGroup({
     client,

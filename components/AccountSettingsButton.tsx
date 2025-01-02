@@ -17,10 +17,7 @@ import {
   useColorScheme,
 } from "react-native";
 
-import {
-  useAccountsStore,
-  useErroredAccountsMap,
-} from "../data/store/accountsStore";
+import { useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useRouter } from "../navigation/useNavigation";
@@ -31,7 +28,6 @@ import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHand
 import { TableViewPicto } from "./TableView/TableViewImage";
 import { NotificationPermissionStatus } from "../features/notifications/types/Notifications.types";
 import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
-import { invalidateInboxProfileSocialsQuery } from "@/queries/useInboxProfileSocialsQuery";
 
 type Props = {
   account: string;
@@ -52,8 +48,8 @@ export default function AccountSettingsButton({ account }: Props) {
     ])
   );
 
-  const { setCurrentAccount } = useAccountsStore(
-    useSelect(["setCurrentAccount"])
+  const { setCurrentInboxId } = useAccountsStore(
+    useSelect(["setCurrentInboxId"])
   );
   const erroredAccountsMap = useErroredAccountsMap();
   const colorScheme = useColorScheme();
