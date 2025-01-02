@@ -1,5 +1,5 @@
 import { HeaderBackButton } from "@react-navigation/elements";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack/lib/typescript/src/types";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { textSecondaryColor } from "@styles/colors";
 import { useColorScheme } from "react-native";
 

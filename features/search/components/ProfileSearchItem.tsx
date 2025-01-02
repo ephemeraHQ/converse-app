@@ -95,7 +95,7 @@ const $textContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   minWidth: 0,
 });
 
-const $avatar: ThemedStyle<ImageStyle> = ({ spacing }) => ({
+const $avatar: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginRight: spacing.sm,
 });
 

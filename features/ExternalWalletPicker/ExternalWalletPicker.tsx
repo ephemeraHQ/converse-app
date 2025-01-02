@@ -14,7 +14,7 @@ import { ensureError } from "@utils/error";
 import { thirdwebClient } from "@utils/thirdweb";
 import { Image } from "expo-image";
 import { useCallback } from "react";
-import { Alert, ViewStyle } from "react-native";
+import { Alert, TextStyle, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Account, createWallet, Wallet } from "thirdweb/wallets";
 
@@ -105,7 +105,7 @@ export function ExternalWalletPicker(props: IExternalWalletPickerProps) {
               borderRadius: theme.borderRadius.xs,
             }}
           />
-          <Text preset="smaller" style={$globalStyles.flex1}>
+          <Text preset="smaller" style={$globalStyles.flex1 as TextStyle}>
             {installedWallet.name}
           </Text>
         </TouchableOpacity>

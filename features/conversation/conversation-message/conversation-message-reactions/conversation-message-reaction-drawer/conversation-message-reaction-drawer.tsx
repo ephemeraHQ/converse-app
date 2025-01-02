@@ -167,7 +167,7 @@ const $reaction: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.xs,
 });
 
-const $userName: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
+const $userName: ThemedStyle<TextStyle> = ({ spacing, colors }) => ({
   flex: 1,
   display: "flex",
   alignItems: "flex-end",
@@ -176,7 +176,7 @@ const $userName: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   color: colors.text.primary,
 });
 
-const $reactionContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $reactionContent: ThemedStyle<TextStyle> = ({ spacing }) => ({
   padding: spacing.xxxs,
 });
 
