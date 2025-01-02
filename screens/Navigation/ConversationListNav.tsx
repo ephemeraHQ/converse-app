@@ -108,9 +108,6 @@ export default function ConversationListNav() {
                 placeholder={searchPlaceholder()}
                 onChangeText={onChangeSearch}
                 value={searchQuery}
-                icon={({ color }) => (
-                  <Picto picto="menu" size={PictoSizes.navItem} color={color} />
-                )}
                 mode="bar"
                 autoCapitalize="none"
                 autoFocus={false}

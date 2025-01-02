@@ -74,6 +74,12 @@ import {
   ConversationStoreProvider,
   useCurrentConversationTopic,
 } from "./conversation.store-context";
+import { CONVERSATION_LIST_REFRESH_THRESHOLD } from "./conversation-list.contstants";
+import {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Platform,
+} from "react-native";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
@@ -186,6 +192,8 @@ const Messages = memo(function Messages(props: {
   const { data: currentAccountInboxId } = useCurrentAccountInboxId();
   const topic = useCurrentConversationTopic()!;
 
+  const refreshingRef = useRef(false);
+
   const {
     data: messages,
     isLoading: messagesLoading,
@@ -223,11 +231,33 @@ const Messages = memo(function Messages(props: {
     }
   }, [isUnread, messagesLoading, toggleReadStatus]);
 
+  const handleRefresh = useCallback(async () => {
+    try {
+      refreshingRef.current = true;
+      await refetch();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      refreshingRef.current = false;
+    }
+  }, [refetch]);
+
+  const onScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (refreshingRef.current && !isRefetchingMessages) return;
+      if (e.nativeEvent.contentOffset.y < CONVERSATION_LIST_REFRESH_THRESHOLD) {
+        handleRefresh();
+      }
+    },
+    [handleRefresh, isRefetchingMessages]
+  );
+
   return (
     <ConversationMessagesList
       messageIds={messages?.ids ?? []}
       refreshing={isRefetchingMessages}
-      onRefresh={refetch}
+      onRefresh={Platform.OS === "android" ? refetch : undefined}
+      onScroll={onScroll}
       ListEmptyComponent={
         isConversationDm(conversation) ? (
           <DmConversationEmpty />

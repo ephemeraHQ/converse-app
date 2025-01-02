@@ -16,14 +16,14 @@ import {
   navigationAnimation,
   NavigationParamList,
 } from "./Navigation";
-import AndroidBackAction from "../../components/AndroidBackAction";
-import Button from "../../components/Button/Button";
-import ConversationFlashList from "../../components/ConversationFlashList";
-import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
-import { useCurrentAccount } from "../../data/store/accountsStore";
-import { consentToAddressesOnProtocolByAccount } from "../../utils/xmtpRN/contacts";
-import { useRequestItems } from "../../features/conversation-requests-list/useRequestItems";
-import { FlatListItemType } from "../../features/conversation-list/ConversationList.types";
+import AndroidBackAction from "@components/AndroidBackAction";
+import Button from "@components/Button/Button";
+import ConversationFlashList from "@components/ConversationFlastList/ConversationFlashList";
+import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
+import { useCurrentAccount } from "@data/store/accountsStore";
+import { consentToAddressesOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import { useRequestItems } from "@features/conversation-requests-list/useRequestItems";
+import { FlatListItemType } from "@features/conversation-list/ConversationList.types";
 
 // TODO: Remove iOS-specific code due to the existence of a .ios file
 // TODO: Alternatively, implement an Android equivalent for the segmented controller
