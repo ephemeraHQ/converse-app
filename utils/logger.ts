@@ -69,16 +69,30 @@ const converseTransport: transportFunctionType = async (props) => {
   await RNFS.appendFile(loggingFilePath, `${props.msg}\n`, "utf8");
 };
 
+const developerSystemAppearance: "dark" | "light" = "dark" as const;
+const darkSystemColorScheme = {
+  debug: "white",
+  info: "blueBright",
+  warn: "yellowBright",
+  error: "redBright",
+};
+
+const lightSystemColorScheme = {
+  debug: "black",
+  info: "blue",
+  warn: "orange",
+  error: "red",
+};
+
 const _logger = RNLogger.createLogger({
   severity: "debug", // @todo => change minimum severity according to env & user (debug addresses)
   transport: converseTransport,
   transportOptions: {
-    colors: {
-      debug: "white",
-      info: "blueBright",
-      warn: "yellowBright",
-      error: "redBright",
-    },
+    colors:
+      // @ts-ignore
+      developerSystemAppearance === "dark"
+        ? darkSystemColorScheme
+        : lightSystemColorScheme,
   },
   levels: {
     debug: 0,
