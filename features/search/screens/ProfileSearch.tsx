@@ -101,7 +101,7 @@ const $sectionTitleContainer: ThemedStyle<ViewStyle> = ({
   }),
 });
 
-const $sectionTitleSpacing: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $sectionTitleSpacing: ThemedStyle<TextStyle> = ({ spacing }) => ({
   ...Platform.select({
     default: {
       marginBottom: spacing.sm,
