@@ -17,37 +17,34 @@ import {
 } from "react-native";
 
 import Avatar from "./Avatar";
-import { Indicator } from "./Indicator";
-import {
-  useProfilesStore,
-  useCurrentAccount,
-} from "../data/store/accountsStore";
+import { useCurrentAccount } from "../data/store/accountsStore";
 import { useGroupMembers } from "../hooks/useGroupMembers";
 import {
-  getPreferredAvatar,
-  getPreferredName,
-  getProfile,
+  getPreferredInboxAvatar,
+  getPreferredInboxName,
 } from "../utils/profile";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useGroupMembersSocials } from "@/hooks/useGroupMembersSocials";
 
 const MAIN_CIRCLE_RADIUS = 50;
 const MAX_VISIBLE_MEMBERS = 4;
 
-type Member = { uri?: string; name?: string };
 type Position = { x: number; y: number; size: number };
 type ColorSchemeType = "light" | "dark" | null | undefined;
 
 type GroupAvatarProps = {
-  members?: Member[];
   size?: number;
   style?: StyleProp<ViewStyle>;
   uri?: string | undefined;
-  topic?: string | undefined;
+  topic?: ConversationTopic;
   pendingGroupMembers?: { address: string; uri?: string; name?: string }[];
   excludeSelf?: boolean;
-  // Converstion List should not make requests across the bridge
-  // Use data from the initial sync, and as the query gets updated
-  onConversationListScreen?: boolean;
-  showIndicator?: boolean;
+};
+
+type GroupAvatarDumbProps = {
+  size?: number;
+  style?: StyleProp<ViewStyle>;
+  members?: { address: string; uri?: string; name?: string }[];
 };
 
 const calculatePositions = (
@@ -127,6 +124,63 @@ const ExtraMembersIndicator: React.FC<{
   );
 };
 
+export const GroupAvatarDumb: React.FC<GroupAvatarDumbProps> = ({
+  size = AvatarSizes.default,
+  style,
+  members = [],
+}) => {
+  const colorScheme = useColorScheme();
+  const styles = getStyles(colorScheme);
+
+  const memberCount = members?.length || 0;
+
+  const positions = useMemo(
+    () => calculatePositions(memberCount, MAIN_CIRCLE_RADIUS),
+    [memberCount]
+  );
+
+  return (
+    <View style={[styles.container, { width: size, height: size }, style]}>
+      <View style={[styles.container, { width: size, height: size }]}>
+        <View style={styles.overlay} />
+        <View style={styles.content}>
+          {positions.map((pos, index) => {
+            if (index < MAX_VISIBLE_MEMBERS && index < memberCount) {
+              return (
+                <Avatar
+                  key={`avatar-${index}`}
+                  uri={members[index].uri}
+                  name={members[index].name}
+                  size={(pos.size / 100) * size}
+                  style={{
+                    left: (pos.x / 100) * size,
+                    top: (pos.y / 100) * size,
+                    position: "absolute",
+                  }}
+                />
+              );
+            } else if (
+              index === MAX_VISIBLE_MEMBERS &&
+              memberCount > MAX_VISIBLE_MEMBERS
+            ) {
+              return (
+                <ExtraMembersIndicator
+                  key={`extra-${index}`}
+                  pos={pos}
+                  extraMembersCount={memberCount - MAX_VISIBLE_MEMBERS}
+                  colorScheme={colorScheme}
+                  size={size}
+                />
+              );
+            }
+            return null;
+          })}
+        </View>
+      </View>
+    </View>
+  );
+};
+
 const GroupAvatar: React.FC<GroupAvatarProps> = ({
   size = AvatarSizes.default,
   style,
@@ -134,24 +188,11 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
   topic,
   pendingGroupMembers,
   excludeSelf = true,
-  onConversationListScreen = false,
-  showIndicator = false,
 }) => {
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme);
-  const { members: groupMembers } = useGroupMembers(
-    topic || "",
-    onConversationListScreen
-      ? {
-          refetchOnWindowFocus: false,
-          refetchOnMount: false,
-          refetchOnReconnect: false,
-          refetchInterval: false,
-          staleTime: Infinity,
-        }
-      : undefined
-  );
-  const profiles = useProfilesStore((s) => s.profiles);
+  const { members: groupMembers } = useGroupMembers(topic!);
+  const socialsData = useGroupMembersSocials(groupMembers);
   const account = useCurrentAccount();
 
   const memoizedAndSortedGroupMembers = useMemo(() => {
@@ -160,14 +201,14 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
       (acc: { address: string; uri?: string; name?: string }[], id) => {
         const member = groupMembers.byId[id];
         const address = member.addresses[0].toLowerCase();
-        const senderSocials = getProfile(address, profiles)?.socials;
+        const senderSocials = socialsData[id];
         const shouldExclude =
           excludeSelf && account && address === account.toLowerCase();
         if (shouldExclude) return acc;
         const newMember = {
           address,
-          uri: getPreferredAvatar(senderSocials),
-          name: getPreferredName(senderSocials, address),
+          uri: getPreferredInboxAvatar(senderSocials),
+          name: getPreferredInboxName(senderSocials),
         };
         acc.push(newMember);
         return acc;
@@ -176,7 +217,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
     );
     // Sort the members so that members with avatars are positioned first
     return members.sort((a, b) => (a.uri ? -1 : 1));
-  }, [groupMembers, profiles, account, excludeSelf]);
+  }, [groupMembers, socialsData, excludeSelf, account]);
 
   const membersToDisplay = pendingGroupMembers || memoizedAndSortedGroupMembers;
   const memberCount = membersToDisplay.length;
@@ -189,7 +230,7 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
   return (
     <View style={[styles.container, { width: size, height: size }, style]}>
       {uri ? (
-        <Avatar size={size} uri={uri} showIndicator={showIndicator} />
+        <Avatar size={size} uri={uri} />
       ) : (
         <View style={[styles.container, { width: size, height: size }]}>
           <View style={styles.overlay} />
@@ -226,7 +267,6 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({
               return null;
             })}
           </View>
-          {showIndicator && <Indicator size={size} />}
         </View>
       )}
     </View>

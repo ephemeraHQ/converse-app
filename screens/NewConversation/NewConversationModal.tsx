@@ -4,7 +4,6 @@ import {
 } from "@react-navigation/native-stack";
 import {
   headerTitleStyle,
-  listItemSeparatorColor,
   navigationSecondaryBackgroundColor,
   textPrimaryColor,
 } from "@styles/colors";
@@ -13,17 +12,18 @@ import { Platform, useColorScheme } from "react-native";
 import NewConversation from "./NewConversation";
 import NewGroupSummary from "./NewGroupSummary";
 import Button from "../../components/Button/Button";
-import { ProfileSocials } from "../../data/store/profilesStore";
+import { IProfileSocials } from "@/features/profiles/profile-types";
 import {
   NavigationParamList,
   navigationAnimation,
 } from "../Navigation/Navigation";
 import { NewConversationNavParams } from "../Navigation/NewConversationNav";
+import { translate } from "@/i18n";
 
 export type NewConversationModalParams = {
   NewConversationScreen: NewConversationNavParams;
   NewGroupSummary: {
-    members: (ProfileSocials & { address: string })[];
+    members: (IProfileSocials & { address: string })[];
   };
 };
 
@@ -39,10 +39,6 @@ const NewConversationModal = ({
         headerShown: true,
         headerStyle: {
           backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
-          borderBottomColor:
-            Platform.OS === "web"
-              ? listItemSeparatorColor(colorScheme)
-              : undefined,
         } as any,
         headerTitleStyle: Platform.select({
           default: headerTitleStyle(colorScheme),
@@ -55,8 +51,8 @@ const NewConversationModal = ({
         name="NewConversationScreen"
         options={{
           headerTitle: route.params?.addingToGroupTopic
-            ? "Add members"
-            : "New conversation",
+            ? translate("new_group.add_members")
+            : translate("new_conversation.new_conversation"),
           presentation: "modal",
         }}
       >
@@ -74,9 +70,14 @@ const NewConversationModal = ({
         name="NewGroupSummary"
         component={NewGroupSummary}
         options={{
-          headerBackTitle: "Back",
-          headerTitle: "New group",
-          headerRight: () => <Button variant="text" title="Create" />, // Dummy button for style
+          headerBackTitle: translate("new_conversation.back"),
+          headerTitle: translate("new_conversation.create_group"),
+          headerRight: () => (
+            <Button
+              variant="text"
+              title={translate("new_conversation.create")}
+            />
+          ), // Dummy button for style
         }}
       />
     </ModalStack.Navigator>

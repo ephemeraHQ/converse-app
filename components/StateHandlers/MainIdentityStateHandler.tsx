@@ -1,11 +1,12 @@
 import { useEffect } from "react";
 
-import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
+// import { invalidateProfileSocialsQuery } from "../../data/helpers/profiles/profilesUpdate";
 import {
   useAccountsStore,
   useCurrentAccount,
 } from "../../data/store/accountsStore";
 import { saveUser } from "../../utils/api";
+import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
 
 export default function MainIdentityStateHandler() {
   const userAddress = useCurrentAccount();
@@ -14,7 +15,7 @@ export default function MainIdentityStateHandler() {
   useEffect(() => {
     if (userAddress) {
       saveUser(userAddress, privyAccountId[userAddress] as string);
-      refreshProfileForAddress(userAddress, userAddress);
+      invalidateProfileSocialsQuery(userAddress, userAddress);
     }
   }, [privyAccountId, userAddress]);
 

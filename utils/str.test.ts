@@ -1,19 +1,13 @@
 import { PixelRatio } from "react-native";
 
-import * as profileModule from "./profile";
 import {
   addressPrefix,
   capitalize,
-  conversationName,
   formatGroupName,
-  getReadableProfile,
   getTitleFontScale,
   shortDisplayName,
-  shortAddress,
   strByteSize,
 } from "./str";
-import { getProfilesStore } from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
 
 jest.mock("react-native", () => ({
   Dimensions: {
@@ -50,28 +44,6 @@ jest.mock("../data/store/chatStore", () => ({
   XmtpConversation: jest.fn(),
 }));
 
-jest.mock("../data/store/profilesStore", () => ({
-  ProfilesStoreType: jest.fn(),
-}));
-
-jest
-  .spyOn(profileModule, "getPreferredName")
-  .mockImplementation((socials, address) => address);
-
-describe("shortAddress", () => {
-  it("should shorten the address correctly", () => {
-    expect(shortAddress("0x1234567890abcdef")).toBe("0x1234...cdef");
-  });
-
-  it("should return the original address if shorter than 7 characters", () => {
-    expect(shortAddress("0x123")).toBe("0x123");
-  });
-
-  it("should return an empty string if address is empty", () => {
-    expect(shortAddress("")).toBe("");
-  });
-});
-
 describe("shortDisplayName", () => {
   it("should shorten the domain correctly based on screen width", () => {
     expect(shortDisplayName("thisisaverylongdomainname.com")).toBe(
@@ -104,38 +76,6 @@ describe("addressPrefix", () => {
   });
 });
 
-describe("conversationName", () => {
-  it("should return the group name if it is a group conversation", () => {
-    const conversation = {
-      isGroup: true,
-      groupName: "Group Name",
-      topic: "",
-      peerAddress: "",
-    } as unknown as XmtpConversation;
-    expect(conversationName(conversation)).toBe("Group Name");
-  });
-
-  it("should return the humanized topic if group name is not provided", () => {
-    const conversation = {
-      isGroup: true,
-      groupName: "",
-      topic: "/xmtp/mls/1/g-dab181fefd94578cc791bcc42d3b207c/proto",
-      peerAddress: "",
-    } as unknown as XmtpConversation;
-    expect(conversationName(conversation)).toBe("Utah bluebird delta");
-  });
-
-  it("should return the short address if it is not a group conversation", () => {
-    const conversation = {
-      isGroup: false,
-      groupName: "",
-      topic: "",
-      peerAddress: "0x1234567890abcdef",
-    } as unknown as XmtpConversation;
-    expect(conversationName(conversation)).toBe("0x1234...cdef");
-  });
-});
-
 describe("getTitleFontScale", () => {
   it("should return the correct title font scale", () => {
     expect(getTitleFontScale()).toBe(1);
@@ -144,23 +84,6 @@ describe("getTitleFontScale", () => {
   it("should return a font scale not greater than 1.235", () => {
     jest.spyOn(PixelRatio, "getFontScale").mockReturnValue(1.5);
     expect(getTitleFontScale()).toBe(1.235);
-  });
-});
-
-describe("getReadableProfile", () => {
-  it("should return the preferred name for the account", () => {
-    const mockGetProfilesStore = getProfilesStore as jest.Mock;
-    mockGetProfilesStore.mockReturnValue({
-      getState: () => ({
-        profiles: {
-          "0x123": {
-            socials: "socials",
-          },
-        },
-      }),
-    });
-
-    expect(getReadableProfile("account", "0x123")).toBe("0x123");
   });
 });
 

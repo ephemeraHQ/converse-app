@@ -1,18 +1,17 @@
-import "reflect-metadata";
+import "expo-dev-client";
 import "./polyfills";
 
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
+import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PortalProvider } from "@gorhom/portal";
+import { useAppStateHandlers } from "@hooks/useAppStateHandlers";
 import { PrivyProvider } from "@privy-io/expo";
 import { queryClient } from "@queries/queryClient";
-import {
-  backgroundColor,
-  MaterialDarkTheme,
-  MaterialLightTheme,
-} from "@styles/colors";
+import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { useAppTheme, useThemeProvider } from "@theme/useAppTheme";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
@@ -21,27 +20,29 @@ import {
   LogBox,
   Platform,
   StyleSheet,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ThirdwebProvider } from "thirdweb/react";
-import "./utils/splash/splash";
 
-import XmtpEngine from "./components/XmtpEngine";
+import { Snackbars } from "@components/Snackbar/Snackbars";
+import { xmtpEngine } from "./components/XmtpEngine";
 import config from "./config";
-import { useAppStore } from "./data/store/appStore";
-import { useSelect } from "./data/store/storeHelpers";
 import {
-  runAsyncUpdates,
-  updateLastVersionOpen,
-} from "./data/updates/asyncUpdates";
+  TEMPORARY_ACCOUNT_NAME,
+  useAccountsStore,
+} from "./data/store/accountsStore";
+import { setAuthStatus } from "./data/store/authStore";
 import Main from "./screens/Main";
-import { useThemeProvider } from "./theme/useAppTheme";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
+import "./utils/splash/splash";
+import "./features/notifications/utils";
+import { setupAppAttest } from "@utils/appCheck";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -59,9 +60,15 @@ initSentry();
 
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
 
+xmtpEngine.start();
+
 const App = () => {
   const styles = useStyles();
   const debugRef = useRef();
+
+  useEffect(() => {
+    setupAppAttest();
+  }, []);
 
   useCoinbaseWalletListener(true, coinbaseUrl);
 
@@ -83,23 +90,30 @@ const App = () => {
     };
   }, [showDebugMenu]);
 
-  const { isInternetReachable, hydrationDone } = useAppStore(
-    useSelect(["isInternetReachable", "hydrationDone"])
-  );
-
-  useEffect(updateLastVersionOpen, []);
-
+  // For now we use persit with zustand to get the accounts when the app launch so here is okay to see if we're logged in or not
   useEffect(() => {
-    if (isInternetReachable && hydrationDone) {
-      runAsyncUpdates().catch((e) => {
-        logger.error(e);
-      });
+    const currentAccount = useAccountsStore.getState().currentAccount;
+    if (currentAccount && currentAccount !== TEMPORARY_ACCOUNT_NAME) {
+      setAuthStatus("signedIn");
+    } else {
+      setAuthStatus("signedOut");
     }
-  }, [isInternetReachable, hydrationDone]);
+  }, []);
+
+  useAppStateHandlers({
+    onBackground() {
+      logger.debug("App is in background");
+    },
+    onForeground() {
+      logger.debug("App is in foreground");
+    },
+    onInactive() {
+      logger.debug("App is inactive");
+    },
+  });
 
   return (
     <View style={styles.safe}>
-      <XmtpEngine />
       <Main />
       <DebugButton ref={debugRef} />
     </View>
@@ -113,7 +127,7 @@ const AppKeyboardProvider =
 export default function AppWithProviders() {
   const colorScheme = useColorScheme();
 
-  const theme = useMemo(() => {
+  const paperTheme = useMemo(() => {
     return colorScheme === "dark" ? MaterialDarkTheme : MaterialLightTheme;
   }, [colorScheme]);
 
@@ -127,10 +141,15 @@ export default function AppWithProviders() {
           <AppKeyboardProvider>
             <ActionSheetProvider>
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                <PaperProvider theme={theme}>
-                  <PortalProvider>
-                    <App />
-                  </PortalProvider>
+                <PaperProvider theme={paperTheme}>
+                  <GestureHandlerRootView style={{ flex: 1 }}>
+                    <BottomSheetModalProvider>
+                      <PortalProvider>
+                        <App />
+                        <Snackbars />
+                      </PortalProvider>
+                    </BottomSheetModalProvider>
+                  </GestureHandlerRootView>
                 </PaperProvider>
               </ThemeProvider>
             </ActionSheetProvider>
@@ -142,15 +161,16 @@ export default function AppWithProviders() {
 }
 
 const useStyles = () => {
-  const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
+
   return useMemo(
     () =>
       StyleSheet.create({
         safe: {
           flex: 1,
-          backgroundColor: backgroundColor(colorScheme),
+          backgroundColor: theme.colors.background.surface,
         },
       }),
-    [colorScheme]
+    [theme]
   );
 };

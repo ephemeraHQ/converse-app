@@ -1,11 +1,9 @@
-import {
-  listItemSeparatorColor,
-  navigationSecondaryBackgroundColor,
-} from "@styles/colors";
-import { Platform, useColorScheme } from "react-native";
+import { navigationSecondaryBackgroundColor } from "@styles/colors";
+import { useColorScheme } from "react-native";
 
-import { NativeStack, navigationAnimation } from "./Navigation";
 import WebviewPreview from "../WebviewPreview";
+import { NativeStack, navigationAnimation } from "./Navigation";
+import { translate } from "@/i18n";
 
 export type WebviewPreviewNavParams = {
   uri: string;
@@ -28,14 +26,10 @@ export default function WebviewPreviewNav() {
       name="WebviewPreview"
       component={WebviewPreview}
       options={{
-        headerTitle: "File preview",
+        headerTitle: translate("file_preview"),
         presentation: "modal",
         headerStyle: {
           backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
-          borderBottomColor:
-            Platform.OS === "web"
-              ? listItemSeparatorColor(colorScheme)
-              : undefined,
         } as any,
         animation: navigationAnimation,
       }}

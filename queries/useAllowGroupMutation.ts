@@ -1,43 +1,147 @@
-import { useGroupId } from "@hooks/useGroupId";
-import { useMutation } from "@tanstack/react-query";
-import logger from "@utils/logger";
-import { sentryTrackError } from "@utils/sentry";
-import { consentToGroupsOnProtocol } from "@utils/xmtpRN/conversations";
-
-import { allowGroupMutationKey } from "./MutationKeys";
+import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
+import { captureError } from "@/utils/capture-error";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { queryClient } from "@queries/queryClient";
 import {
-  cancelGroupConsentQuery,
+  MutationObserver,
+  MutationOptions,
+  useMutation,
+} from "@tanstack/react-query";
+import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
+import {
+  consentToGroupsOnProtocolByAccount,
+  consentToInboxIdsOnProtocolByAccount,
+} from "@utils/xmtpRN/contacts";
+import {
+  ConsentState,
+  ConversationId,
+  ConversationTopic,
+  InboxId,
+} from "@xmtp/react-native-sdk";
+import { MutationKeys } from "./MutationKeys";
+import {
   getGroupConsentQueryData,
   setGroupConsentQueryData,
 } from "./useGroupConsentQuery";
 
-export const useAllowGroupMutation = (account: string, topic: string) => {
-  const { groupId } = useGroupId(topic);
-  return useMutation({
-    mutationKey: allowGroupMutationKey(account, topic),
-    mutationFn: async () => {
-      if (!groupId || !account) {
-        return;
+export type AllowGroupMutationProps = {
+  account: string;
+  topic: ConversationTopic;
+  groupId: ConversationId;
+};
+
+export type AllowGroupMutationVariables = {
+  includeAddedBy?: boolean;
+  includeCreator?: boolean;
+  group: GroupWithCodecsType;
+  account: string;
+};
+
+export type IUseAllowGroupMutationOptions = MutationOptions<
+  string,
+  unknown,
+  AllowGroupMutationVariables,
+  {
+    previousConsent: ConsentState | undefined;
+  }
+>;
+
+export const getAllowGroupMutationOptions = (
+  account: string,
+  topic: ConversationTopic
+): IUseAllowGroupMutationOptions => {
+  return {
+    mutationKey: [MutationKeys.ALLOW_GROUP, account, topic],
+    mutationFn: async (args: AllowGroupMutationVariables) => {
+      const { includeAddedBy, includeCreator, group, account } = args;
+
+      const groupTopic = group.topic;
+      const groupCreator = await group.creatorInboxId();
+
+      const inboxIdsToAllow: InboxId[] = [];
+      if (includeAddedBy && group?.addedByInboxId) {
+        inboxIdsToAllow.push(group.addedByInboxId);
       }
-      await consentToGroupsOnProtocol(account, [groupId], "allow");
+
+      if (includeCreator && groupCreator) {
+        inboxIdsToAllow.push(groupCreator);
+      }
+
+      await Promise.all([
+        consentToGroupsOnProtocolByAccount({
+          account,
+          groupIds: [getV3IdFromTopic(groupTopic)],
+          consent: "allow",
+        }),
+        ...(inboxIdsToAllow.length > 0
+          ? [
+              consentToInboxIdsOnProtocolByAccount({
+                account,
+                inboxIds: inboxIdsToAllow,
+                consent: "allow",
+              }),
+            ]
+          : []),
+      ]);
+
       return "allowed";
     },
-    onMutate: async () => {
-      await cancelGroupConsentQuery(account, topic);
-      const previousConsent = getGroupConsentQueryData(account, topic);
-      setGroupConsentQueryData(account, topic, "allowed");
-      return { previousConsent };
+    onMutate: (args: AllowGroupMutationVariables) => {
+      const { account, group } = args;
+      const previousConsent = getGroupConsentQueryData(account, group.topic);
+      setGroupConsentQueryData(account, group.topic, "allowed");
+      updateConversationInConversationListQuery({
+        account,
+        topic: group.topic,
+        conversationUpdate: {
+          state: "allowed",
+        },
+      });
+      return {
+        previousConsent,
+      };
     },
-    onError: (error, _variables, context) => {
-      logger.warn("onError useAllowGroupMutation");
-      sentryTrackError(error);
-      if (context?.previousConsent === undefined) {
+    onError: (
+      error: unknown,
+      variables: AllowGroupMutationVariables,
+      context?: {
+        previousConsent: ConsentState | undefined;
+      }
+    ) => {
+      const { account, group } = variables;
+
+      captureError(error);
+
+      if (!context) {
         return;
       }
-      setGroupConsentQueryData(account, topic, context.previousConsent);
+
+      setGroupConsentQueryData(account, group.topic, context.previousConsent);
+      updateConversationInConversationListQuery({
+        account,
+        topic: group.topic,
+        conversationUpdate: {
+          state: context.previousConsent,
+        },
+      });
     },
-    onSuccess: () => {
-      logger.debug("onSuccess useAllowGroupMutation");
-    },
-  });
+  };
+};
+
+export const createAllowGroupMutationObserver = ({
+  account,
+  topic,
+}: AllowGroupMutationProps) => {
+  const allowGroupMutationObserver = new MutationObserver(
+    queryClient,
+    getAllowGroupMutationOptions(account, topic)
+  );
+  return allowGroupMutationObserver;
+};
+
+export const useAllowGroupMutation = (
+  account: string,
+  topic: ConversationTopic
+) => {
+  return useMutation(getAllowGroupMutationOptions(account, topic));
 };

@@ -1,11 +1,11 @@
 import React from "react";
 import Svg, { Path } from "react-native-svg";
 
-interface EncryptedProps {
+type EncryptedProps = {
   width?: number;
   height?: number;
   color?: string;
-}
+};
 
 const Encrypted: React.FC<EncryptedProps> = ({
   width = 40,

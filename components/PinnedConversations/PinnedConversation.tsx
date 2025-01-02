@@ -1,131 +1,69 @@
-import { useSelect } from "@data/store/storeHelpers";
-import { useGroupNameQuery } from "@queries/useGroupNameQuery";
-import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
-import { backgroundColor, textSecondaryColor } from "@styles/colors";
-import { AvatarSizes } from "@styles/sizes";
-import { ConversationWithLastMessagePreview } from "@utils/conversation";
-import { showUnreadOnConversation } from "@utils/conversation/showUnreadOnConversation";
-import { conversationName } from "@utils/str";
-import { FC, useCallback, useMemo } from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native";
+import { Pressable } from "@design-system/Pressable";
+import { Text } from "@design-system/Text";
+import { FC } from "react";
+import { TextStyle, ViewStyle } from "react-native";
+import { HStack } from "@design-system/HStack";
+import { Center } from "@design-system/Center";
+import { VStack } from "@design-system/VStack";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 
-import Avatar from "..//Avatar";
-import {
-  useChatStore,
-  useCurrentAccount,
-  useProfilesStore,
-} from "../../data/store/accountsStore";
-import { navigate } from "../../utils/navigation";
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getProfile,
-} from "../../utils/profile";
-import GroupAvatar from "../GroupAvatar";
+type PinnedConversationProps = {
+  avatarComponent: React.ReactNode;
+  onLongPress: () => void;
+  onPress: () => void;
+  showUnread: boolean;
+  title: string;
+};
 
-interface Props {
-  conversation: ConversationWithLastMessagePreview;
-}
-
-export const PinnedConversation: FC<Props> = ({ conversation }) => {
-  const account = useCurrentAccount() as string;
-  const profiles = useProfilesStore((s) => s.profiles);
-  const { topic, isGroup } = conversation;
-  const { data: groupName } = useGroupNameQuery(account, topic, {
-    refetchOnMount: false,
-    staleTime: Infinity,
-    gcTime: Infinity,
-  });
-  const { data: groupPhoto } = useGroupPhotoQuery(account, topic, {
-    refetchOnMount: false,
-    staleTime: Infinity,
-    gcTime: Infinity,
-  });
-  const title = isGroup ? groupName : conversationName(conversation);
-  const socials = getProfile(conversation.peerAddress, profiles)?.socials;
-  const avatar = isGroup ? groupPhoto : getPreferredAvatar(socials);
-  const setPinnedConversations = useChatStore((s) => s.setPinnedConversations);
-  const styles = useStyles();
-
-  const onPress = useCallback(() => {
-    navigate("Conversation", {
-      topic: conversation.topic,
-    });
-  }, [conversation.topic]);
-
-  const onLongPress = useCallback(() => {
-    setPinnedConversations([conversation.topic]);
-  }, [conversation.topic, setPinnedConversations]);
-  const { initialLoadDoneOnce, topicsData } = useChatStore(
-    useSelect(["initialLoadDoneOnce", "topicsData"])
-  );
-
-  const showUnread = useMemo(
-    () =>
-      showUnreadOnConversation(
-        initialLoadDoneOnce,
-        conversation.lastMessagePreview,
-        topicsData,
-        conversation,
-        account
-      ),
-    [account, conversation, initialLoadDoneOnce, topicsData]
-  );
-
-  const avatarComponent = isGroup ? (
-    <GroupAvatar
-      key={conversation.topic}
-      uri={avatar}
-      size={AvatarSizes.pinnedConversation}
-      style={styles.avatar}
-      topic={conversation.topic}
-      showIndicator={showUnread}
-    />
-  ) : (
-    <Avatar
-      key={conversation.topic}
-      uri={avatar}
-      size={AvatarSizes.pinnedConversation}
-      style={styles.avatar}
-      name={getPreferredName(socials, conversation.peerAddress || "")}
-      showIndicator={showUnread}
-    />
-  );
+export const PinnedConversation: FC<PinnedConversationProps> = ({
+  avatarComponent,
+  onLongPress,
+  onPress,
+  showUnread,
+  title,
+}) => {
+  const { themed } = useAppTheme();
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={onPress}
-      onLongPress={onLongPress}
-    >
-      {avatarComponent}
-      <Text style={styles.text}>{title}</Text>
-    </TouchableOpacity>
+    <Pressable onPress={onPress} onLongPress={onLongPress}>
+      <VStack style={themed($container)}>
+        {avatarComponent}
+        <HStack style={themed($bottomContainer)}>
+          <Text numberOfLines={1} style={themed($text)}>
+            {title}
+          </Text>
+          {showUnread && <Center style={themed($indicator)} />}
+        </HStack>
+      </VStack>
+    </Pressable>
   );
 };
 
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    safe: {
-      flex: 1,
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    container: {
-      margin: 8,
-      padding: 4,
-    },
-    avatar: { margin: 8 },
-    text: {
-      color: textSecondaryColor(colorScheme),
-      textAlign: "center",
-      flexWrap: "wrap",
-      maxWidth: 100,
-    },
-  });
-};
+const $container: ThemedStyle<ViewStyle> = (theme) => ({
+  gap: theme.spacing.xxs,
+  justifyContent: "center",
+  alignItems: "center",
+  width: theme.spacing["6xl"],
+});
+
+const $bottomContainer: ThemedStyle<ViewStyle> = (theme) => ({
+  flex: 1,
+  alignItems: "center",
+  justifyContent: "center",
+  gap: theme.spacing.xxxs,
+  width: theme.spacing["6xl"],
+});
+
+const $indicator: ThemedStyle<ViewStyle> = (theme) => ({
+  width: theme.spacing.xxs,
+  height: theme.spacing.xxs,
+  backgroundColor: theme.colors.text.primary,
+  borderRadius: theme.spacing.xxxs,
+  paddingLeft: theme.spacing.xxxs,
+});
+
+const $text: ThemedStyle<TextStyle> = (theme) => ({
+  color: theme.colors.text.secondary,
+  textAlign: "center",
+  maxWidth: 100,
+});

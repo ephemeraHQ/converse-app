@@ -1,3 +1,4 @@
+import { translate } from "@i18n";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import format from "date-fns/format";
 // Long term we should only import used locales
@@ -40,9 +41,9 @@ export const getRelativeDate = (date?: number | Date) => {
   const locale = getLocale();
 
   if (days === 0) {
-    relativeDateTime = "Today";
+    relativeDateTime = translate("today");
   } else if (days === 1) {
-    relativeDateTime = "Yesterday";
+    relativeDateTime = translate("yesterday");
   } else if (days < 7) {
     relativeDateTime = format(date, "EEEE", { locale });
   } else {
@@ -57,8 +58,17 @@ export const getTime = (date: number | Date) => {
   return format(date, "p", { locale });
 };
 
-export const getMinimalDate = (date: number) => {
-  if (!date) return "";
+export function normalizeTimestamp(timestamp: number) {
+  // If the timestamp has more than 13 digits, assume it's in nanoseconds
+  if (timestamp > 1e13) {
+    return Math.floor(timestamp / 1e6); // Convert nanoseconds to milliseconds
+  }
+  return timestamp; // Already in milliseconds
+}
+
+export const getMinimalDate = (unnormalizedDate: number) => {
+  if (!unnormalizedDate) return "";
+  const date = normalizeTimestamp(unnormalizedDate);
   // To-do: Add supporting locale logic
   // const locale = getLocale();
   const diff = Date.now() - date;
@@ -88,3 +98,11 @@ export const getLocalizedTime = (date: number | Date): string => {
 
   return format(inputDate, "p", { locale });
 };
+
+export function getTodayNs() {
+  return Date.now() * 1000000;
+}
+
+export function convertNanosecondsToMilliseconds(nanoseconds: number) {
+  return nanoseconds / 1000000;
+}

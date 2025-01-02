@@ -5,22 +5,17 @@ import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import React, { useLayoutEffect } from "react";
 import {
   NativeSyntheticEvent,
+  StyleSheet,
   Text,
   TextInputChangeEventData,
+  TouchableOpacity,
   View,
   useColorScheme,
-  TouchableOpacity,
-  StyleSheet,
 } from "react-native";
 import { SearchBarCommands } from "react-native-screens";
 
+import Button from "../../components/Button/Button";
 import {
-  NativeStack,
-  NavigationParamList,
-  navigationAnimation,
-} from "./Navigation";
-import Button from "../../components/Button/Button.ios";
-import Connecting, {
   useShouldShowConnecting,
   useShouldShowConnectingOrSyncing,
 } from "../../components/Connecting";
@@ -28,10 +23,18 @@ import NewConversationButton from "../../components/ConversationList/NewConversa
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
 import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
-import { isDesktop } from "../../utils/device";
 import { navigate } from "../../utils/navigation";
-import { getReadableProfile, shortDisplayName } from "../../utils/str";
+import { shortDisplayName } from "../../utils/str";
 import ConversationList from "../ConversationList";
+import {
+  NativeStack,
+  NavigationParamList,
+  navigationAnimation,
+} from "./Navigation";
+import { usePreferredName } from "@/hooks/usePreferredName";
+import { useProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
+import { Loader } from "@/design-system/loader";
+import { getReadableProfile } from "@/utils/getReadableProfile";
 
 type HeaderSearchBarProps = {
   searchBarRef: React.RefObject<any>;
@@ -64,8 +67,8 @@ export const useHeaderSearchBar = ({
     navigation.setOptions({
       headerSearchBarOptions: {
         ref: searchBarRef as React.RefObject<SearchBarCommands>,
-        hideNavigationBar: autoHide && !isDesktop,
-        hideWhenScrolling: autoHide && !isDesktop,
+        hideNavigationBar: autoHide,
+        hideWhenScrolling: autoHide,
         autoFocus: false,
         placeholder: "Search",
         onChangeText: (
@@ -98,7 +101,13 @@ export default function ConversationListNav() {
   const shouldShowConnecting = useShouldShowConnecting();
   const shouldShowError = useShouldShowErrored();
   const currentAccount = useAccountsStore((s) => s.currentAccount);
-  const name = getReadableProfile(currentAccount, currentAccount);
+
+  const { isLoading } = useProfileSocialsQuery(currentAccount, currentAccount);
+
+  const preferredName = usePreferredName(currentAccount);
+
+  // Delays a little flash of the name when loading, as default is a long ugly address
+  const name = isLoading ? "" : preferredName;
 
   return (
     <NativeStack.Screen
@@ -107,7 +116,7 @@ export default function ConversationListNav() {
         headerTitle: () =>
           shouldShowConnectingOrSyncing ? (
             <View style={styles.connectingContainer}>
-              {shouldShowConnectingOrSyncing && <Connecting />}
+              {shouldShowConnectingOrSyncing && <Loader />}
               {shouldShowConnecting.warnMessage && (
                 <Text
                   style={[
@@ -126,14 +135,13 @@ export default function ConversationListNav() {
         headerRight: () => (
           <View style={styles.headerRightContainer}>
             <Button
-              title=""
               variant="text"
               picto="qrcode"
               onPress={() => navigate("ShareProfile")}
               hitSlop={8}
             />
             <View style={styles.offsetComposeIcon}>
-              <NewConversationButton navigation={navigation} route={route} />
+              <NewConversationButton />
             </View>
           </View>
         ),

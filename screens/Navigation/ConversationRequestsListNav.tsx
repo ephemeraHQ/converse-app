@@ -5,15 +5,8 @@ import {
   backgroundColor,
   textPrimaryColor,
 } from "@styles/colors";
-import { ConversationFlatListItem } from "@utils/conversation";
 import { converseEventEmitter } from "@utils/events";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
@@ -27,35 +20,25 @@ import AndroidBackAction from "../../components/AndroidBackAction";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
-import {
-  useChatStore,
-  useCurrentAccount,
-} from "../../data/store/accountsStore";
-import {
-  consentToPeersOnProtocol,
-  sortRequestsBySpamScore,
-  updateConsentStatus,
-} from "../../utils/xmtpRN/conversations";
+import { useCurrentAccount } from "../../data/store/accountsStore";
+import { consentToAddressesOnProtocolByAccount } from "../../utils/xmtpRN/contacts";
+import { useRequestItems } from "../../features/conversation-requests-list/useRequestItems";
+import { FlatListItemType } from "../../features/conversation-list/ConversationList.types";
 
 // TODO: Remove iOS-specific code due to the existence of a .ios file
 // TODO: Alternatively, implement an Android equivalent for the segmented controller
 // See issue: https://github.com/ephemeraHQ/converse-app/issues/659
 
 export default function ConversationRequestsListNav() {
-  const sortedConversationsWithPreview = useChatStore(
-    (s) => s.sortedConversationsWithPreview
-  );
   const colorScheme = useColorScheme();
   const account = useCurrentAccount() as string;
   const navRef = useRef<any>();
   const [clearingAll, setClearingAll] = useState(false);
 
   const [isSpamToggleEnabled, setIsSpamToggleEnabled] = useState(false);
-  const allRequests = sortedConversationsWithPreview.conversationsRequests;
-  const { likelySpam, likelyNotSpam } = useMemo(
-    () => sortRequestsBySpamScore(allRequests),
-    [allRequests]
-  );
+  const { likelySpam, likelyNotSpam, isRefetching, refetch } =
+    useRequestItems();
+
   const styles = useStyles();
 
   const clearAllSpam = useCallback(() => {
@@ -69,10 +52,17 @@ export default function ConversationRequestsListNav() {
         setClearingAll(true);
         // @todo => handle groups here
         const peers = Array.from(
-          new Set(allRequests.map((c) => c.peerAddress))
+          new Set(
+            likelyNotSpam.map((c) =>
+              "addedByInboxId" in c ? c.addedByInboxId : undefined
+            )
+          )
         ).filter((peer) => !!peer) as string[];
-        await consentToPeersOnProtocol(account, peers, "deny");
-        await updateConsentStatus(account);
+        await consentToAddressesOnProtocolByAccount({
+          account,
+          addresses: peers,
+          consent: "deny",
+        });
         setClearingAll(false);
         navRef.current?.goBack();
       },
@@ -97,7 +87,7 @@ export default function ConversationRequestsListNav() {
         }
       }
     );
-  }, [account, colorScheme, allRequests]);
+  }, [account, colorScheme, likelyNotSpam]);
 
   const navigationOptions = useCallback(
     ({
@@ -107,7 +97,7 @@ export default function ConversationRequestsListNav() {
       navigation: any;
     }) => ({
       animation: navigationAnimation as StackAnimationTypes,
-      headerTitle: clearingAll ? "Clearing..." : "Requests",
+      headerTitle: clearingAll ? translate("clearing") : translate("requests"),
       headerLeft: () => <AndroidBackAction navigation={navigation} />,
       headerRight: () =>
         clearingAll ? undefined : (
@@ -135,18 +125,18 @@ export default function ConversationRequestsListNav() {
   // Navigate back to the main screen when no request to display
   useEffect(() => {
     const unsubscribe = navRef.current?.addListener("focus", () => {
-      if (allRequests.length === 0) {
+      if (likelyNotSpam.length === 0 && likelySpam.length === 0) {
         navRef.current?.goBack();
       }
     });
     return unsubscribe;
-  }, [allRequests]);
+  }, [likelyNotSpam, likelySpam]);
 
   return (
     <NativeStack.Screen name="ChatsRequests" options={navigationOptions}>
       {(navigationProps) => {
         navRef.current = navigationProps.navigation;
-        let items: ConversationFlatListItem[] = likelyNotSpam;
+        let items: FlatListItemType[] = likelyNotSpam;
         if (likelySpam.length > 0) {
           items = isSpamToggleEnabled
             ? [
@@ -171,7 +161,12 @@ export default function ConversationRequestsListNav() {
           <>
             <GestureHandlerRootView style={styles.root}>
               <View style={styles.container}>
-                <ConversationFlashList {...navigationProps} items={items} />
+                <ConversationFlashList
+                  {...navigationProps}
+                  isRefetching={isRefetching}
+                  refetch={refetch}
+                  items={items}
+                />
               </View>
             </GestureHandlerRootView>
           </>

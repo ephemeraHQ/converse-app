@@ -10,7 +10,6 @@ import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
 import {
-  Button,
   Platform,
   StyleSheet,
   Text,
@@ -19,13 +18,14 @@ import {
   View,
 } from "react-native";
 
-import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 import ConverseButton from "../components/Button/Button";
 import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import config from "../config";
+import { NavigationParamList } from "./Navigation/Navigation";
 import { useCurrentAccount } from "../data/store/accountsStore";
+import { translate } from "@/i18n";
 
 export default function TopUp({
   route,
@@ -40,8 +40,8 @@ export default function TopUp({
     navigation.setOptions({
       headerLeft: () =>
         Platform.OS === "ios" ? (
-          <Button
-            title="Cancel"
+          <ConverseButton
+            title={translate("cancel")}
             onPress={() => {
               navigation.goBack();
             }}
@@ -55,8 +55,8 @@ export default function TopUp({
   return (
     <View style={styles.topUp}>
       <ConverseButton
-        variant="primary"
-        title="Bridge from any wallet"
+        action="primary"
+        title={translate("top_up.title")}
         style={styles.bridgeButton}
         onPress={() => {
           Linking.openURL(
@@ -66,10 +66,11 @@ export default function TopUp({
       />
       <View style={styles.separator} />
       <Text style={styles.p}>
-        Alternatively, if you want to do it by yourself, send{" "}
-        <Text style={styles.bold}>USDC</Text> (native, not USDbC) on the{" "}
-        <Text style={styles.bold}>Base</Text> blockchain to your address (see
-        address below).
+        {translate("top_up.alternatively")}
+        <Text style={styles.bold}>{translate("top_up.usdc")}</Text>{" "}
+        {translate("top_up.native")}
+        <Text style={styles.bold}>{translate("top_up.base")}</Text>
+        {translate("top_up.to_your_address")}
       </Text>
       <TableView
         style={{ width: "100%" }}

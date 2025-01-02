@@ -1,24 +1,16 @@
 import { TransactionReference } from "@xmtp/content-type-transaction-reference";
 import { ethers } from "ethers";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { getCoinbaseTransactionDetails, getTransactionDetails } from "./api";
 import { evmHelpers } from "./evm/helpers";
 import logger from "./logger";
-import { sentryTrackError } from "./sentry";
-import { isContentType } from "./xmtpRN/contentTypes";
-import { MessageToDisplay } from "../components/Chat/Message/Message";
-import {
-  useCurrentAccount,
-  useTransactionsStore,
-} from "../data/store/accountsStore";
+// import { MessageToDisplay } from "../components/Chat/Message/Message";
 import { Transaction } from "../data/store/transactionsStore";
 
 export type TransactionContentType =
   | "transactionReference"
   | "coinbaseRegular"
   | "coinbaseSponsored";
-export interface TransactionEvent {
+export type TransactionEvent = {
   amount: number;
   contractAddress: string;
   currency: string;
@@ -26,22 +18,16 @@ export interface TransactionEvent {
   from: string;
   to: string;
   type: string;
-}
+};
 
-export interface TransactionDetails {
+export type TransactionDetails = {
   blockExplorerURL: string;
   chainName: string;
   events: TransactionEvent[];
   sponsored: boolean;
   status: "PENDING" | "FAILURE" | "SUCCESS";
   transactionHash: string;
-}
-
-export const isTransactionMessage = (contentType?: string) =>
-  contentType
-    ? isContentType("transactionReference", contentType) ||
-      isContentType("coinbasePayment", contentType)
-    : false;
+};
 
 export const mergeTransactionRefData = (
   transactionType: TransactionContentType,
@@ -221,222 +207,223 @@ export const formatAmount = (
   }
 };
 
-export const useTransactionForMessage = (
-  message: MessageToDisplay,
-  peerAddress?: string
-) => {
-  const currentAccount = useCurrentAccount() as string;
-  const saveTransactions = useTransactionsStore((s) => s.saveTransactions);
-  const fetchingTransaction = useRef(false);
+// export const useTransactionForMessage = (
+//   messageContent: string,
+//   messageId: string,
+//   peerAddress?: string
+// ) => {
+//   const currentAccount = useCurrentAccount() as string;
+//   const saveTransactions = useTransactionsStore((s) => s.saveTransactions);
+//   const fetchingTransaction = useRef(false);
 
-  // Avoid too many JSON.parse but make sure to
-  // rerender if message.content changes
+//   // Avoid too many JSON.parse but make sure to
+//   // rerender if message.content changes
 
-  const txRef = useMemo(() => {
-    try {
-      const parsed = JSON.parse(message.content);
-      return parsed;
-    } catch (e) {
-      sentryTrackError(e, {
-        error: "Could not parse tx",
-        content: message.content,
-      });
-      return { error: "Could not parse transaction" };
-    }
-  }, [message.content]);
+//   const txRef = useMemo(() => {
+//     try {
+//       const parsed = JSON.parse(messageContent);
+//       return parsed;
+//     } catch (e) {
+//       sentryTrackError(e, {
+//         error: "Could not parse tx",
+//         content: messageContent,
+//       });
+//       return { error: "Could not parse transaction" };
+//     }
+//   }, [messageContent]);
 
-  const txType = getTransactionType(txRef);
-  const txRefId = getTxRefId(txRef, txType);
-  const txLookup = useTransactionsStore((s) => s.transactions[txRefId]);
+//   const txType = getTransactionType(txRef);
+//   const txRefId = getTxRefId(txRef, txType);
+//   const txLookup = useTransactionsStore((s) => s.transactions[txRefId]);
 
-  // Init transaction with values
-  const [transaction, setTransaction] = useState({
-    loading: false,
-    error: txRef.error,
-    ...txLookup,
-  });
+//   // Init transaction with values
+//   const [transaction, setTransaction] = useState({
+//     loading: false,
+//     error: txRef.error,
+//     ...txLookup,
+//   });
 
-  // Components are recycled, let's fix when stuff changes
-  const messageId = useRef(message.id);
-  if (message.id !== messageId.current) {
-    messageId.current = message.id;
-    setTransaction({ loading: false, error: "", ...txLookup });
-  }
+//   // Components are recycled, let's fix when stuff changes
+//   const localMessageId = useRef(messageId);
+//   if (messageId !== localMessageId.current) {
+//     localMessageId.current = messageId;
+//     setTransaction({ loading: false, error: "", ...txLookup });
+//   }
 
-  useEffect(() => {
-    let retryTimeout: NodeJS.Timeout;
+//   useEffect(() => {
+//     let retryTimeout: NodeJS.Timeout;
 
-    const go = async () => {
-      if (fetchingTransaction.current) return;
-      fetchingTransaction.current = true;
-      if (txRef.error) {
-        setTransaction((t) => ({ ...t, loading: false, error: txRef.error }));
-        return;
-      }
-      setTransaction((t) => ({ ...t, loading: true }));
+//     const go = async () => {
+//       if (fetchingTransaction.current) return;
+//       fetchingTransaction.current = true;
+//       if (txRef.error) {
+//         setTransaction((t) => ({ ...t, loading: false, error: txRef.error }));
+//         return;
+//       }
+//       setTransaction((t) => ({ ...t, loading: true }));
 
-      let txDetails: TransactionDetails | undefined;
+//       let txDetails: TransactionDetails | undefined;
 
-      try {
-        switch (txType) {
-          case "transactionReference": {
-            txDetails = await getTransactionDetails(
-              currentAccount,
-              extractChainIdToHex(txRef.networkId),
-              txRef.reference
-            );
-            break;
-          }
-          case "coinbaseRegular": {
-            txDetails = await getTransactionDetails(
-              currentAccount,
-              extractChainIdToHex(txRef.network.rawValue),
-              txRef.transactionHash
-            );
-            break;
-          }
-          case "coinbaseSponsored": {
-            txDetails = await getCoinbaseTransactionDetails(
-              currentAccount,
-              extractChainIdToHex(txRef.network.rawValue),
-              txRef.sponsoredTxId
-            );
-            break;
-          }
-          default: {
-            logger.error("Invalid transaction content type");
-            break;
-          }
-        }
+//       try {
+//         switch (txType) {
+//           case "transactionReference": {
+//             txDetails = await getTransactionDetails(
+//               currentAccount,
+//               extractChainIdToHex(txRef.networkId),
+//               txRef.reference
+//             );
+//             break;
+//           }
+//           case "coinbaseRegular": {
+//             txDetails = await getTransactionDetails(
+//               currentAccount,
+//               extractChainIdToHex(txRef.network.rawValue),
+//               txRef.transactionHash
+//             );
+//             break;
+//           }
+//           case "coinbaseSponsored": {
+//             txDetails = await getCoinbaseTransactionDetails(
+//               currentAccount,
+//               extractChainIdToHex(txRef.network.rawValue),
+//               txRef.sponsoredTxId
+//             );
+//             break;
+//           }
+//           default: {
+//             logger.error("Invalid transaction content type");
+//             break;
+//           }
+//         }
 
-        if (txDetails && txDetails.status === "PENDING") {
-          const uniformTx = createUniformTransaction(txRef, txDetails);
-          setTransaction((t) => ({
-            ...t,
-            error: "",
-            loading: false,
-            ...uniformTx,
-          }));
+//         if (txDetails && txDetails.status === "PENDING") {
+//           const uniformTx = createUniformTransaction(txRef, txDetails);
+//           setTransaction((t) => ({
+//             ...t,
+//             error: "",
+//             loading: false,
+//             ...uniformTx,
+//           }));
 
-          retryTimeout = setTimeout(go, 5000);
-        } else if (txDetails) {
-          const uniformTx = createUniformTransaction(txRef, txDetails);
+//           retryTimeout = setTimeout(go, 5000);
+//         } else if (txDetails) {
+//           const uniformTx = createUniformTransaction(txRef, txDetails);
 
-          // Update zustand transaction store
-          saveTransactions({
-            [uniformTx.id]: uniformTx,
-          });
+//           // Update zustand transaction store
+//           saveTransactions({
+//             [uniformTx.id]: uniformTx,
+//           });
 
-          // Update component state
-          setTransaction((t) => ({
-            ...t,
-            error: "",
-            loading: false,
-            ...uniformTx,
-          }));
-        } else {
-          logger.error("Transaction details could not be fetched");
-        }
-      } catch (error) {
-        logger.error(error, { context: "Error fetching transaction details" });
-        // Let's retry in case of network error
-        retryTimeout = setTimeout(go, 5000);
-      } finally {
-        fetchingTransaction.current = false;
-      }
-    };
+//           // Update component state
+//           setTransaction((t) => ({
+//             ...t,
+//             error: "",
+//             loading: false,
+//             ...uniformTx,
+//           }));
+//         } else {
+//           logger.error("Transaction details could not be fetched");
+//         }
+//       } catch (error) {
+//         logger.error(error, { context: "Error fetching transaction details" });
+//         // Let's retry in case of network error
+//         retryTimeout = setTimeout(go, 5000);
+//       } finally {
+//         fetchingTransaction.current = false;
+//       }
+//     };
 
-    // Fetch tx details
-    if (
-      (!txLookup || txLookup.status === "PENDING") &&
-      !fetchingTransaction.current
-    ) {
-      go();
-    }
+//     // Fetch tx details
+//     if (
+//       (!txLookup || txLookup.status === "PENDING") &&
+//       !fetchingTransaction.current
+//     ) {
+//       go();
+//     }
 
-    // Cleanup on unmount or dependency change
-    return () => {
-      if (retryTimeout) {
-        clearTimeout(retryTimeout);
-      }
-    };
-  }, [
-    currentAccount,
-    saveTransactions,
-    txLookup,
-    txRef,
-    txType,
-    message.content,
-  ]);
+//     // Cleanup on unmount or dependency change
+//     return () => {
+//       if (retryTimeout) {
+//         clearTimeout(retryTimeout);
+//       }
+//     };
+//   }, [
+//     currentAccount,
+//     saveTransactions,
+//     txLookup,
+//     txRef,
+//     txType,
+//     messageContent,
+//   ]);
 
-  useEffect(() => {
-    setTransaction((t) => ({
-      loading: false,
-      error: t.error,
-      ...txLookup,
-    }));
-  }, [txLookup]);
+//   useEffect(() => {
+//     setTransaction((t) => ({
+//       loading: false,
+//       error: t.error,
+//       ...txLookup,
+//     }));
+//   }, [txLookup]);
 
-  const getTransactionInfo = useCallback(
-    (transaction: Transaction) => {
-      let amount, currency, decimals;
+//   const getTransactionInfo = useCallback(
+//     (transaction: Transaction) => {
+//       let amount, currency, decimals;
 
-      const sender = message.senderAddress.toLowerCase();
-      const receiver = message.fromMe
-        ? peerAddress?.toLowerCase()
-        : currentAccount.toLowerCase();
+//       const sender = transaction.from.toLowerCase();
+//       const receiver = transaction.fromMe
+//         ? peerAddress?.toLowerCase()
+//         : currentAccount.toLowerCase();
 
-      // Determine source of transaction details (either from transfer event or metadata)
-      // And verify that tx is between the two peers
-      const transferEvent = transaction.events?.find(
-        (event) =>
-          event.type.toLowerCase() === "transfer" &&
-          event.from.toLowerCase() === sender &&
-          event.to.toLowerCase() === receiver
-      );
-      if (transferEvent) {
-        ({ amount, currency, decimals } = transferEvent);
-      } else if (
-        transaction.sponsored &&
-        transaction.metadata &&
-        transaction.status === "PENDING" &&
-        "amount" in transaction.metadata &&
-        "currency" in transaction.metadata &&
-        "decimals" in transaction.metadata
-      ) {
-        // Display tx details to the sender, while it is creating it on chain
-        ({ amount, currency, decimals } = transaction.metadata);
-      } else {
-        return {};
-      }
+//       // Determine source of transaction details (either from transfer event or metadata)
+//       // And verify that tx is between the two peers
+//       const transferEvent = transaction.events?.find(
+//         (event) =>
+//           event.type.toLowerCase() === "transfer" &&
+//           event.from.toLowerCase() === sender &&
+//           event.to.toLowerCase() === receiver
+//       );
+//       if (transferEvent) {
+//         ({ amount, currency, decimals } = transferEvent);
+//       } else if (
+//         transaction.sponsored &&
+//         transaction.metadata &&
+//         transaction.status === "PENDING" &&
+//         "amount" in transaction.metadata &&
+//         "currency" in transaction.metadata &&
+//         "decimals" in transaction.metadata
+//       ) {
+//         // Display tx details to the sender, while it is creating it on chain
+//         ({ amount, currency, decimals } = transaction.metadata);
+//       } else {
+//         return {};
+//       }
 
-      const isUSDC = (currency as string).toLowerCase() === "usdc";
-      const formattedAmountWithCurrencySymbol = formatAmount(
-        amount as number,
-        currency as string,
-        decimals as number
-      );
-      const formattedAmount = formatAmount(
-        amount as number,
-        currency as string,
-        decimals as number,
-        false
-      );
+//       const isUSDC = (currency as string).toLowerCase() === "usdc";
+//       const formattedAmountWithCurrencySymbol = formatAmount(
+//         amount as number,
+//         currency as string,
+//         decimals as number
+//       );
+//       const formattedAmount = formatAmount(
+//         amount as number,
+//         currency as string,
+//         decimals as number,
+//         false
+//       );
 
-      const transactionDisplay = isUSDC
-        ? `${formattedAmount} –`
-        : `${transaction.chainName || "–"} –`;
+//       const transactionDisplay = isUSDC
+//         ? `${formattedAmount} –`
+//         : `${transaction.chainName || "–"} –`;
 
-      return {
-        transactionDisplay,
-        amountToDisplay: formattedAmountWithCurrencySymbol,
-      };
-    },
-    [currentAccount, message.fromMe, message.senderAddress, peerAddress]
-  );
+//       return {
+//         transactionDisplay,
+//         amountToDisplay: formattedAmountWithCurrencySymbol,
+//       };
+//     },
+//     [currentAccount, message.fromMe, message.senderAddress, peerAddress]
+//   );
 
-  const { transactionDisplay, amountToDisplay } =
-    getTransactionInfo(transaction);
+//   const { transactionDisplay, amountToDisplay } =
+//     getTransactionInfo(transaction);
 
-  return { transaction, transactionDisplay, amountToDisplay };
-};
+//   return { transaction, transactionDisplay, amountToDisplay };
+// };

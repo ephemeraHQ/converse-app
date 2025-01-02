@@ -1,6 +1,6 @@
 import { actionSheetColors } from "@styles/colors";
 import { useCallback, useState } from "react";
-import { Platform, useColorScheme } from "react-native";
+import { useColorScheme } from "react-native";
 
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import { executeAfterKeyboardClosed } from "../utils/keyboard";
@@ -10,11 +10,11 @@ import {
   takePictureFromCamera,
 } from "../utils/media";
 
-interface PhotoSelect {
+type PhotoSelect = {
   initialPhoto?: string;
   onPhotoAdd?: (newUrl: string) => void;
   isAvatar?: boolean;
-}
+};
 
 export const usePhotoSelect = (payload?: PhotoSelect) => {
   const { initialPhoto, onPhotoAdd, isAvatar } = payload ?? {};
@@ -65,11 +65,8 @@ export const usePhotoSelect = (payload?: PhotoSelect) => {
           }
         }
       );
-    if (Platform.OS === "web") {
-      pickMedia();
-    } else {
-      executeAfterKeyboardClosed(showOptions);
-    }
+
+    executeAfterKeyboardClosed(showOptions);
   }, [colorScheme, openCamera, pickMedia]);
 
   return { photo, addPhoto };

@@ -8,7 +8,7 @@ import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
 import { useSettingsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { requestPushNotificationsPermissions } from "../utils/notifications";
+import { requestPushNotificationsPermissions } from "../features/notifications/utils/requestPushNotificationsPermissions";
 
 export default function NotificationsScreen() {
   const setNotificationsSettings = useSettingsStore(
@@ -31,7 +31,7 @@ export default function NotificationsScreen() {
       </Text>
       <Button
         title="Accept notifications"
-        variant="primary"
+        action="primary"
         onPress={async () => {
           // Open popup
           const newStatus = await requestPushNotificationsPermissions();

@@ -1,23 +1,22 @@
 import {
+  backgroundColor,
   tertiaryBackgroundColor,
   textPrimaryColor,
-  BACKGROUND_LIGHT,
-  TEXT_PRIMARY_COLOR_LIGHT,
 } from "@styles/colors";
 import React from "react";
 import {
-  View,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
+  View,
   useColorScheme,
 } from "react-native";
 
-interface SegmentedControllerProps {
+type SegmentedControllerProps = {
   options: string[];
   selectedIndex: number;
   onSelect: (index: number) => void;
-}
+};
 
 const RequestsSegmentedController: React.FC<SegmentedControllerProps> = ({
   options,
@@ -73,7 +72,7 @@ const useStyles = () => {
       justifyContent: "center",
     },
     selectedOption: {
-      backgroundColor: BACKGROUND_LIGHT,
+      backgroundColor: backgroundColor(colorScheme),
       borderRadius: 6,
     },
     firstOption: {
@@ -90,7 +89,7 @@ const useStyles = () => {
     },
     selectedOptionText: {
       fontWeight: "500",
-      color: TEXT_PRIMARY_COLOR_LIGHT,
+      color: textPrimaryColor(colorScheme),
     },
   });
 };

@@ -1,27 +1,23 @@
-import { debugEnabled } from "@components/DebugButton";
+import { translate } from "@i18n";
 import { OpenFramesProxy } from "@open-frames/proxy-client";
 import {
   GetMetadataResponse,
   OpenFrameButtonResult,
 } from "@open-frames/proxy-types";
 import {
+  FrameActionInputs,
   FramesApiResponse,
   FramesClient,
   OPEN_FRAMES_PROXY_URL,
 } from "@xmtp/frames-client";
-import { BigNumber, ethers } from "ethers";
-import { hexValue } from "ethers/lib/utils";
+import { useCallback } from "react";
+import { v4 as uuidv4 } from "uuid";
 
-import logger from "./logger";
-import { URL_REGEX } from "./regex";
+import { converseEventEmitter, waitForConverseEvent } from "./events";
+import { useExternalSigner } from "./evm/external";
 import { strByteSize } from "./str";
-import { extractChainIdToHex } from "./transaction";
-import { isContentType } from "./xmtpRN/contentTypes";
+import { ConverseXmtpClientType } from "./xmtpRN/client.types";
 import { getXmtpClient } from "./xmtpRN/sync";
-import { MessageToDisplay } from "../components/Chat/Message/Message";
-import { ConverseMessageMetadata } from "../data/db/entities/messageEntity";
-import { saveMessageMetadata } from "../data/helpers/messages";
-import { useFramesStore } from "../data/store/framesStore";
 
 export type FrameWithType = FramesApiResponse & {
   type: "FARCASTER_FRAME" | "XMTP_FRAME" | "PREVIEW";
@@ -68,68 +64,63 @@ export const validateFrame = (
   return undefined;
 };
 
-export const fetchFramesForMessage = async (
-  account: string,
-  message: MessageToDisplay
-): Promise<FramesForMessage> => {
-  // OG Preview / Frames are only for text content type
-  if (isContentType("text", message.contentType)) {
-    const urls = (message.content.match(URL_REGEX) || []).filter((u) => {
-      const lower = u.toLowerCase();
-      return lower.startsWith("http://") || lower.startsWith("https://");
-    });
-    const fetchedFrames: FrameWithType[] = [];
-    if (urls.length > 0) {
-      logger.debug(
-        `[FramesMetadata] Fetching Open Graph tags for ${
-          debugEnabled(account) ? urls : "<redacted>"
-        }`
-      );
-      const uniqueUrls = Array.from(new Set(urls));
-      const framesClient = await getFramesClient(account);
-      const urlsMetadata = await Promise.all(
-        uniqueUrls.map((u) =>
-          framesClient.proxy
-            .readMetadata(u)
-            .catch((e) => logger.warn(`[FramesMetadata] ${e}`))
-        )
-      );
+// export const fetchFramesForMessage = async (
+//   account: string,
+//   messageId: string,
+//   messageContentType: string,
+//   messageContent: string
+// ): Promise<FramesForMessage> => {
+//   // OG Preview / Frames are only for text content type
+//   if (isContentType("text", messageContentType)) {
+//     const urls = (messageContent.match(URL_REGEX) || []).filter((u: string) => {
+//       const lower = u.toLowerCase();
+//       return lower.startsWith("http://") || lower.startsWith("https://");
+//     });
+//     const fetchedFrames: FrameWithType[] = [];
+//     if (urls.length > 0) {
+//       logger.debug(
+//         `[FramesMetadata] Fetching Open Graph tags for ${
+//           debugEnabled(account) ? urls : "<redacted>"
+//         }`
+//       );
+//       const uniqueUrls = Array.from(new Set(urls));
+//       const framesClient = await getFramesClient(account);
+//       const urlsMetadata = await Promise.all(
+//         uniqueUrls.map((u) =>
+//           framesClient.proxy
+//             .readMetadata(u)
+//             .catch((e) => logger.warn(`[FramesMetadata] ${e}`))
+//         )
+//       );
 
-      const framesToSave: { [url: string]: FrameWithType } = {};
+//       const framesToSave: { [url: string]: FrameWithType } = {};
 
-      urlsMetadata.forEach((response) => {
-        if (
-          response?.extractedTags &&
-          Object.keys(response.extractedTags).length > 0
-        ) {
-          const validatedFrame = validateFrame(response);
-          if (validatedFrame) {
-            fetchedFrames.push(validatedFrame);
-            // Save lowercased frame url
-            framesToSave[response.url.toLowerCase()] = validatedFrame;
-            // Save lowercase frame url with slash if no slash already
-            const lastCharacter = response.url.charAt(response.url.length - 1);
-            if (lastCharacter === "/") {
-              framesToSave[`${response.url.toLowerCase()}/`] = validatedFrame;
-            }
-          }
-        }
-      });
+//       urlsMetadata.forEach((response) => {
+//         if (
+//           response?.extractedTags &&
+//           Object.keys(response.extractedTags).length > 0
+//         ) {
+//           const validatedFrame = validateFrame(response);
+//           if (validatedFrame) {
+//             fetchedFrames.push(validatedFrame);
+//             // Save lowercased frame url
+//             framesToSave[response.url.toLowerCase()] = validatedFrame;
+//             // Save lowercase frame url with slash if no slash already
+//             const lastCharacter = response.url.charAt(response.url.length - 1);
+//             if (lastCharacter === "/") {
+//               framesToSave[`${response.url.toLowerCase()}/`] = validatedFrame;
+//             }
+//           }
+//         }
+//       });
 
-      // Save frames urls list on message
-      const messageMetadataToSave: ConverseMessageMetadata = {
-        frames: fetchedFrames.map((f) => f.url),
-      };
-      // Save frame to store
-      useFramesStore.getState().setFrames(message.id, framesToSave);
-      // Then update message to reflect change
-      saveMessageMetadata(account, message, messageMetadataToSave);
-
-      return { messageId: message.id, frames: fetchedFrames };
-    }
-  }
-  return { messageId: message.id, frames: [] };
-};
+//       // Save frame to store
+//       useFramesStore.getState().setFrames(messageId, framesToSave);
+//       return { messageId, frames: fetchedFrames };
+//     }
+//   }
+//   return { messageId, frames: [] };
+// };
 
 export type FrameButtonType = OpenFrameButtonResult & {
   index: number;
@@ -173,11 +164,12 @@ export const getFramesClient = async (account: string) => {
   if (frameClientByAccount[account]) return frameClientByAccount[account];
   try {
     creatingFramesClientForAccount[account] = true;
-    const client = await getXmtpClient(account);
-    frameClientByAccount[account] = new FramesClient(
-      client,
-      framesProxy as any
-    );
+    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    // TODO: Fix this when V3 Clients support Frames
+    // frameClientByAccount[account] = new FramesClient(
+    //   client,
+    //   framesProxy as any
+    // );
     delete creatingFramesClientForAccount[account];
     return frameClientByAccount[account];
   } catch (e) {
@@ -197,77 +189,71 @@ export const getFrameImage = (frame: FrameWithType) => {
   }
 };
 
-export const handleTxAction = async (
-  frame: FrameToDisplay,
-  button: FrameButtonType,
-  payload: any,
-  provider: ethers.providers.Web3Provider
-) => {
-  // @todo => proxy should get upgraded to extract post url from button
-  const buttonPostUrl =
-    frame.extractedTags[`fc:frame:button:${button.index}:post_url`];
-  const buttonTarget = button.target;
-  if (!buttonPostUrl || !buttonTarget)
-    throw new Error("Missing postUrl or target");
-  const txData = await framesProxy.postTransaction(buttonTarget, payload);
-  if (txData.method !== "eth_sendTransaction") {
-    throw new Error("method should be eth_sendTransaction");
-  }
-  const hexChainId = extractChainIdToHex(txData.chainId.replace("eip155:", ""));
-  if (
-    ![
-      "0x5d50",
-      "0xaa37dc",
-      "0x12c",
-      "0xe705",
-      "0x14a34",
-      "0x66eee",
-      "0x8274f",
-      "0xaa36a7",
-      "0x134d7c4",
-      "0xa0c71fd",
-      "0x3b9ac9ff",
-      "0x6b6b7274",
-    ].includes(hexChainId)
-  ) {
-    alert("Transaction frames support only Sepolia testnets for now");
-    throw new Error("Transaction frames support only Sepolia testnets for now");
-  }
-  try {
-    await provider.send?.("wallet_switchEthereumChain", [
-      {
-        chainId: hexChainId,
-      },
-    ]);
-  } catch (e: any) {
-    if (e.code !== 4001) {
-      alert(
-        `Could not switch to chain ${txData.chainId}\nPlease check that this chain is configured in your wallet.`
+export const useHandleTxAction = () => {
+  const { getExternalSigner } = useExternalSigner();
+
+  const handleTxAction = useCallback(
+    async ({
+      frame,
+      button,
+      actionInput,
+      framesClient,
+    }: {
+      frame: FrameToDisplay;
+      button: FrameButtonType;
+      actionInput: FrameActionInputs;
+      framesClient: FramesClient;
+    }) => {
+      const externalSigner = await getExternalSigner(
+        translate("transactionalFrameConnectWallet")
       );
-    }
-    throw e;
-  }
+      if (!externalSigner) throw new Error("Could not get an external signer");
 
-  const account = (await provider.listAccounts())[0];
-  const txHash = await provider.send(txData.method, [
-    {
-      from: account,
-      to: txData.params.to,
-      data: txData.params.data ? hexValue(txData.params.data) : undefined,
-      value: hexValue(BigNumber.from(txData.params.value || "0").toHexString()),
+      const buttonPostUrl =
+        frame.extractedTags[`fc:frame:button:${button.index}:post_url`];
+      const buttonTarget = button.target;
+      if (!buttonPostUrl || !buttonTarget)
+        throw new Error("Missing postUrl or target");
+      const address = await externalSigner.getAddress();
+      // Include the address that's doing the transaction inside the payload
+      const postTransactionPayload = await framesClient.signFrameAction({
+        ...actionInput,
+        address,
+      });
+      const txData = await framesProxy.postTransaction(
+        buttonTarget,
+        postTransactionPayload
+      );
+      if (txData.method !== "eth_sendTransaction") {
+        throw new Error("method should be eth_sendTransaction");
+      }
+
+      if (!txData.chainId.startsWith("eip155:")) {
+        throw new Error("Can only handle eip155: chain ids");
+      }
+
+      // Let's display the transaction preview screen
+      const chainId = parseInt(txData.chainId.slice(7), 10);
+      const transactionData = {
+        id: uuidv4(),
+        chainId,
+        to: txData.params.to,
+        value: txData.params.value,
+        data: txData.params.data,
+      };
+      converseEventEmitter.emit("previewTransaction", transactionData);
+      const [transactionId, receipt] =
+        await waitForConverseEvent("transactionResult");
+      const transactionReceipt =
+        transactionId === transactionData.id ? receipt : undefined;
+
+      // Return the fromAddress & transaction receipt to include in
+      // the transaction success frame payload
+      return { buttonPostUrl, transactionReceipt, fromAddress: address };
     },
-  ]);
-
-  const transactionReceipt = await provider.getTransaction(txHash);
-
-  if (
-    transactionReceipt.to?.toLowerCase() !== txData.params.to.toLowerCase() ||
-    transactionReceipt.value.toBigInt() !== BigInt(txData.params.value || 0)
-  ) {
-    // Error handle, shouldn't show frame success screen
-    throw new Error("transaction failed");
-  }
-  return { buttonPostUrl, txHash };
+    [getExternalSigner]
+  );
+  return { handleTxAction };
 };
 
 export const isFrameMessage = (

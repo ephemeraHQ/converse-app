@@ -4,21 +4,22 @@ import { create, StoreApi, UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { ChatStoreType, initChatStore } from "./chatStore";
-import { InboxIdStoreType, initInboxIdStore } from "./inboxIdStore";
-import { initProfilesStore, ProfilesStoreType } from "./profilesStore";
 import {
   initRecommendationsStore,
   RecommendationsStoreType,
 } from "./recommendationsStore";
-import { initSettingsStore, SettingsStoreType } from "./settingsStore";
+import {
+  GroupStatus,
+  initSettingsStore,
+  SettingsStoreType,
+} from "./settingsStore";
 import {
   initTransactionsStore,
   TransactionsStoreType,
 } from "./transactionsStore";
 import { initWalletStore, WalletStoreType } from "./walletStore";
-import { removeLogoutTask } from "../../utils/logout";
+import { removeLogoutTask } from "@utils/logout";
 import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
-import { updateSteps } from "../updates/asyncUpdates";
 
 type AccountStoreType = {
   [K in keyof AccountStoreDataType]: UseBoundStore<
@@ -37,13 +38,11 @@ export const initStores = (account: string) => {
     // If adding a persisted store here, please add
     // the deletion method in deleteStores
     storesByAccount[account] = {
-      profiles: initProfilesStore(account),
       settings: initSettingsStore(account),
       recommendations: initRecommendationsStore(account),
       chat: initChatStore(account),
       wallet: initWalletStore(account),
       transactions: initTransactionsStore(account),
-      inboxId: initInboxIdStore(account),
     };
   }
 };
@@ -77,9 +76,11 @@ export const useErroredAccountsMap = () => {
   return accounts.reduce(
     (acc, a) => {
       const errored = getChatStore(a).getState().errored;
+
       if (errored) {
         acc[a] = errored;
       }
+
       return acc;
     },
     {} as { [account: string]: boolean }
@@ -132,25 +133,30 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           if (state.currentAccount === account) return state;
           const accounts = [...state.accounts];
           const isNew = !accounts.includes(account);
+
           if (isNew && !createIfNew) {
             logger.warn(
               `[AccountsStore] Account ${account} is new but createIfNew is false`
             );
             return state;
           }
+
           logger.debug(`[AccountsStore] Setting current account: ${account}`);
+
           if (!storesByAccount[account]) {
             initStores(account);
           }
+
           const databaseId = { ...state.databaseId };
+
           if (isNew) {
             accounts.push(account);
             databaseId[account] = uuidv4();
             removeLogoutTask(account);
             // Init lastAsyncUpdate so no async migration is run for new accounts
-            getSettingsStore(account)
-              .getState()
-              .setLastAsyncUpdate(updateSteps.length);
+            // getSettingsStore(account)
+            //   .getState()
+            //   .setLastAsyncUpdate(updateSteps.length);
             return {
               // No setting anymore because we want to refresh profile first
               // currentAccount: account,
@@ -158,6 +164,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
               databaseId,
             };
           }
+
           return {
             currentAccount: account,
             accounts,
@@ -169,23 +176,16 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           const newAccounts = [
             ...state.accounts.filter((a) => a !== accountToRemove),
           ];
+
           if (newAccounts.length === 0) {
             newAccounts.push(TEMPORARY_ACCOUNT_NAME);
           }
-          // New current account doesn't change if it's not the one to remove,
-          // else we find the first non temporary one and fallback to temporary (= logout)
-          const newCurrentAccount =
-            state.currentAccount === accountToRemove
-              ? newAccounts.find((a) => a !== TEMPORARY_ACCOUNT_NAME) ||
-                TEMPORARY_ACCOUNT_NAME
-              : state.currentAccount;
 
           const newDatabaseId = { ...state.databaseId };
           delete newDatabaseId[accountToRemove];
           deleteStores(accountToRemove);
           return {
             accounts: newAccounts,
-            currentAccount: newCurrentAccount,
             databaseId: newDatabaseId,
           };
         }),
@@ -199,8 +199,12 @@ export const useAccountsStore = create<AccountsStoreStype>()(
             logger.warn("An error happened during hydration", error);
           } else {
             if (state?.accounts && state.accounts.length > 0) {
+              logger.debug("Accounts found in hydration, initializing stores");
               state.accounts.map(initStores);
             } else if (state) {
+              logger.debug(
+                "No accounts found in hydration, initializing temporary account"
+              );
               state.currentAccount = TEMPORARY_ACCOUNT_NAME;
               state.accounts = [TEMPORARY_ACCOUNT_NAME];
             }
@@ -216,13 +220,11 @@ export const useAccountsStore = create<AccountsStoreStype>()(
 
 // Add here the type of each store data
 type AccountStoreDataType = {
-  profiles: ProfilesStoreType;
   settings: SettingsStoreType;
   recommendations: RecommendationsStoreType;
   chat: ChatStoreType;
   wallet: WalletStoreType;
   transactions: TransactionsStoreType;
-  inboxId: InboxIdStoreType;
 };
 
 const getAccountStore = (account: string) => {
@@ -233,11 +235,46 @@ const getAccountStore = (account: string) => {
   }
 };
 
-export const currentAccount = () => useAccountsStore.getState().currentAccount;
+export const currentAccount = (): string =>
+  (useAccountsStore.getState() as AccountsStoreStype).currentAccount;
+
+//
+/**
+ * TODO: determine if this is the way we want to transition to imperatively
+ * calling our Zustand store.
+ * TODO: move this to a different file
+ *
+ * It isn't very ergonomic and mocking things seems a little difficult.
+ *
+ * We might want to look into creating a subscription to our stores and a
+ * behavior subject by which to observe it across the app.
+ *
+ * Set the group status for the current account
+ * @param groupStatus The group status to set
+ */
+export const setGroupStatus = (groupStatus: GroupStatus) => {
+  const account = currentAccount();
+  if (!account) {
+    logger.warn("[setGroupStatus] No current account");
+    return;
+  }
+  const setGroupStatus = getSettingsStore(account).getState().setGroupStatus;
+  setGroupStatus(groupStatus);
+};
+
+// we'll be able to create a subscription to our stores and a behavior subject
+// by which to observe it across the app
+// We'll seed the behaviorsubject with the getState.value api
+// export const _currentAccount = () => useAccountsStore.subscribe((s) => s.);
 export const useCurrentAccount = () => {
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
 };
+
+export function getCurrentAccount() {
+  const currentAccount = useAccountsStore.getState().currentAccount;
+  return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
+}
 
 export const loggedWithPrivy = () => {
   const account = currentAccount();
@@ -272,18 +309,22 @@ const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
   key: T
 ) => {
   const _useStore = <U>(selector: (state: AccountStoreDataType[T]) => U) => {
+    // TODO: Rename the hook above to useCurrentAccountStore?
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const currentAccount = useAccountsStore((s) => s.currentAccount);
     const accountStore = getAccountStore(currentAccount);
     return accountStore[key](selector);
   };
 
   const use = _useStore as AccountStoreType[T];
+
   use.getState = () => {
     const currentAccountState = useAccountsStore.getState();
     const currentAccount = currentAccountState.currentAccount;
     const accountStore = getAccountStore(currentAccount);
     return accountStore[key].getState();
   };
+
   return use;
 };
 
@@ -297,18 +338,14 @@ const accountStoreHook = <T extends keyof AccountStoreDataType>(
   };
 
   const use = _useStore as AccountStoreType[T];
+
   use.getState = () => {
     const accountStore = getAccountStore(account);
     return accountStore[key].getState();
   };
+
   return use;
 };
-
-export const useProfilesStore = currentAccountStoreHook("profiles");
-export const useProfilesStoreForAccount = (account: string) =>
-  accountStoreHook("profiles", account);
-export const getProfilesStore = (account: string) =>
-  getAccountStore(account).profiles;
 
 export const useSettingsStore = currentAccountStoreHook("settings");
 export const useSettingsStoreForAccount = (account: string) =>
@@ -339,9 +376,3 @@ export const useTransactionsStoreForAccount = (account: string) =>
   accountStoreHook("transactions", account);
 export const getTransactionsStore = (account: string) =>
   getAccountStore(account).transactions;
-
-export const useInboxIdStore = currentAccountStoreHook("inboxId");
-export const useInboxIdStoreForAccount = (account: string) =>
-  accountStoreHook("inboxId", account);
-export const getInboxIdStore = (account: string) =>
-  getAccountStore(account).inboxId;

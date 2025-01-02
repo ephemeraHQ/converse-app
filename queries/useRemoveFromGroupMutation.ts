@@ -9,14 +9,19 @@ import {
   getGroupMembersQueryData,
   setGroupMembersQueryData,
 } from "./useGroupMembersQuery";
-import { useGroupQuery } from "./useGroupQuery";
-import { refreshGroup } from "../utils/xmtpRN/conversations";
+import { useGroupQuery } from "@queries/useGroupQuery";
+// import { refreshGroup } from "../utils/xmtpRN/conversations";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { captureError } from "@/utils/capture-error";
 
-export const useRemoveFromGroupMutation = (account: string, topic: string) => {
-  const { data: group } = useGroupQuery(account, topic);
+export const useRemoveFromGroupMutation = (
+  account: string,
+  topic: ConversationTopic
+) => {
+  const { data: group } = useGroupQuery({ account, topic });
 
   return useMutation({
-    mutationKey: removeMemberMutationKey(account, topic),
+    mutationKey: removeMemberMutationKey(account, topic!),
     mutationFn: async (inboxIds: InboxId[]) => {
       if (!group || !account || !topic) {
         return;
@@ -25,6 +30,9 @@ export const useRemoveFromGroupMutation = (account: string, topic: string) => {
       return inboxIds;
     },
     onMutate: async (inboxIds: InboxId[]) => {
+      if (!topic) {
+        return;
+      }
       await cancelGroupMembersQuery(account, topic);
       const removeSet = new Set(inboxIds);
 
@@ -44,16 +52,18 @@ export const useRemoveFromGroupMutation = (account: string, topic: string) => {
       return { previousGroupMembers };
     },
     onError: (error, _variables, context) => {
-      logger.warn("onError useRemoveFromGroupMutation");
-      sentryTrackError(error);
+      captureError(error);
       if (context?.previousGroupMembers === undefined) {
+        return;
+      }
+      if (!topic) {
         return;
       }
       setGroupMembersQueryData(account, topic, context.previousGroupMembers);
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess useRemoveFromGroupMutation");
-      refreshGroup(account, topic);
+      // refreshGroup(account, topic);
     },
   });
 };

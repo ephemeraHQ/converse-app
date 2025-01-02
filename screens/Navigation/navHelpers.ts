@@ -2,24 +2,82 @@ import { StackActions, getStateFromPath } from "@react-navigation/native";
 import {
   backgroundColor,
   headerTitleStyle,
-  listItemSeparatorColor,
   textPrimaryColor,
 } from "@styles/colors";
 import { converseEventEmitter } from "@utils/events";
-import { ColorSchemeName, Platform, useWindowDimensions } from "react-native";
+import { ColorSchemeName, Platform } from "react-native";
 
 import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
 import config from "../../config";
-import { isDesktop } from "../../utils/device";
 
+/**
+ * Creates a custom state object from a given path for
+ * navigation in a Converse app.
+ *
+ * This higher-order function returns a function that
+ * processes various URL formats and generates appropriate
+ * navigation states. It handles special cases for direct
+ * messages (DM), group chats, and text-only parameters.
+ *
+ * @param {string} navigationName - The name of the
+ *                                  navigation context
+ * @returns {Function} A function that takes a path and
+ *                     options to generate a state object
+ *
+ * @example
+ * // Input:
+ * getConverseStateFromPath('MainNav')('dm?peer=0x123&text=Hello')
+ * // Output:
+ * // State object for navigating to a DM conversation
+ * // with peer '0x123' and prefilled text 'Hello'
+ *
+ * @example
+ * // Input:
+ * getConverseStateFromPath('MainNav')('group/abc123?text=Hi all')
+ * // Output:
+ * // State object for navigating to group 'abc123'
+ * // with prefilled text 'Hi all'
+ *
+ * @example
+ * // Input:
+ * getConverseStateFromPath('MainNav')('?text=Hello world')
+ * // Output:
+ * // null (prevents navigation, but sets conversation text)
+ *
+ * @sideEffects
+ * - May modify the conversation input value via event emission
+ * - Logs errors if URL parsing fails
+ */
 export const getConverseStateFromPath =
   (navigationName: string) => (path: string, options: any) => {
     // dm method must link to the Conversation Screen as well
     // but prefilling the parameters
     let pathForState = path as string | undefined;
-    if (Platform.OS === "web" && pathForState?.startsWith("/")) {
+    if (pathForState?.startsWith("/")) {
       pathForState = pathForState.slice(1);
     }
+
+    // Handle group invite links
+    if (pathForState?.startsWith("group-invite")) {
+      const url = new URL(`https://${config.websiteDomain}/${pathForState}`);
+      const params = new URLSearchParams(url.search);
+      const inviteId = params.get("inviteId") || url.pathname.split("/")[1];
+      if (inviteId) {
+        return {
+          routes: [
+            {
+              name: "GroupInvite",
+              params: {
+                groupInviteId: inviteId,
+              },
+            },
+          ],
+        };
+      }
+    }
+
+    // dm method must link to the Conversation Screen as well
+    // but prefilling the parameters
     if (pathForState?.startsWith("dm?peer=")) {
       const params = new URLSearchParams(pathForState.slice(3));
       pathForState = handleConversationLink({
@@ -52,9 +110,6 @@ export const getConverseStateFromPath =
         groupId,
         text: params.get("text"),
       });
-    } else if (pathForState?.startsWith("groupInvite")) {
-      // TODO: Remove this once enough users have updated (September 30, 2024)
-      pathForState = pathForState.replace("groupInvite", "group-invite");
     } else if (pathForState?.startsWith("?text=")) {
       const url = new URL(`https://${config.websiteDomain}/${pathForState}`);
       const params = new URLSearchParams(url.search);
@@ -85,7 +140,7 @@ const handleConversationLink = ({
   }
   const parameters: { [param: string]: string } = { focus: "true" };
   if (peer) {
-    parameters["mainConversationWithPeer"] = peer;
+    parameters["peer"] = peer;
   } else if (groupId) {
     parameters["topic"] = `/xmtp/mls/1/g-${groupId}/proto`;
   }
@@ -111,7 +166,9 @@ const setOpenedConversationText = ({
       currentRoutes.length > 0 &&
       currentRoutes[currentRoutes.length - 1].name === "Conversation"
     ) {
-      converseEventEmitter.emit("setCurrentConversationInputValue", text);
+      // TODO: Fix this so that we prefill the message in the input
+      // Probably need to pass the prefilled text in the nav params instead
+      // converseEventEmitter.emit("setCurrentConversationInputValue", text);
     }
   }
 };
@@ -123,8 +180,6 @@ export const getConverseInitialURL = () => {
 export const stackGroupScreenOptions = (colorScheme: ColorSchemeName) => ({
   headerStyle: {
     backgroundColor: backgroundColor(colorScheme),
-    borderBottomColor:
-      Platform.OS === "web" ? listItemSeparatorColor(colorScheme) : undefined,
   },
   headerTitleStyle: headerTitleStyle(colorScheme),
   headerTintColor:
@@ -160,9 +215,8 @@ export const screenListeners =
             shouldReplace = true;
           } else if (newRoute.name === "Conversation") {
             const isNewPeer =
-              newRoute.params?.mainConversationWithPeer &&
-              newRoute.params?.mainConversationWithPeer !==
-                currentRoute.params?.mainConversationWithPeer;
+              newRoute.params?.peer &&
+              newRoute.params?.peer !== currentRoute.params?.peer;
             const isNewTopic =
               newRoute.params?.topic &&
               newRoute.params?.topic !== currentRoute.params?.topic;
@@ -171,10 +225,11 @@ export const screenListeners =
             } else if (newRoute.params?.message) {
               // If navigating to the same route but with a message param
               // we can set the input value (for instance from a frame)
-              converseEventEmitter.emit(
-                "setCurrentConversationInputValue",
-                newRoute.params.message
-              );
+              // TODO:
+              // converseEventEmitter.emit(
+              //   "setCurrentConversationInputValue",
+              //   newRoute.params.message
+              // );
             }
           }
         }
@@ -187,9 +242,3 @@ export const screenListeners =
       navigationStates[navigationName] = e.data;
     },
   });
-
-export const useIsSplitScreen = () => {
-  const dimensions = useWindowDimensions();
-
-  return dimensions.width > config.splitScreenThreshold || isDesktop;
-};

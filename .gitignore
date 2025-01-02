@@ -24,3 +24,7 @@ ios/Converse.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # Reassure output directory
 .reassure
+
+# Android
+/android/
+build-*.apk

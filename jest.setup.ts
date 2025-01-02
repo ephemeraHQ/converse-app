@@ -1,5 +1,7 @@
 // @ts-ignore
 import mockRNDeviceInfo from "react-native-device-info/jest/react-native-device-info-mock";
+// todo(lustig): figure out how to use dotenv in jest - this was working before I left
+// require("dotenv").config();
 
 jest.mock("react-native-webview", () => {
   const { View } = require("react-native");
@@ -46,10 +48,10 @@ jest.mock("react-native-fs", () => {
     touch: jest.fn(),
     MainBundlePath: jest.fn(),
     CachesDirectoryPath: jest.fn(),
-    DocumentDirectoryPath: jest.fn(),
+    DocumentDirectoryPath: "",
     ExternalDirectoryPath: jest.fn(),
     ExternalStorageDirectoryPath: jest.fn(),
-    TemporaryDirectoryPath: jest.fn(),
+    TemporaryDirectoryPath: "",
     LibraryDirectoryPath: jest.fn(),
     PicturesDirectoryPath: jest.fn(),
   };
@@ -58,8 +60,6 @@ jest.mock("./utils/evm/privy", () => ({
   getPrivyRequestHeaders: jest.fn(),
 }));
 
-jest.mock("@op-engineering/op-sqlite", () => ({}));
-
 jest.mock("rn-fetch-blob", () => {
   return {
     DocumentDir: () => {},
@@ -67,5 +67,21 @@ jest.mock("rn-fetch-blob", () => {
   };
 });
 
-jest.mock("@sentry/react-native", () => ({}));
+jest.mock("@sentry/react-native", () => ({
+  init: jest.fn(),
+  addBreadcrumb: jest.fn(),
+}));
 jest.mock("expo-constants", () => ({}));
+
+jest.mock("uuid", () => ({
+  v4: jest.fn(() => "uuidv4"),
+}));
+
+jest.mock("path", () => ({
+  join: jest.fn(() => ""),
+}));
+
+jest.mock("expo-localization", () => ({
+  // TODO: Update later to begin returning more locales and mock within individual tests
+  getLocales: jest.fn(() => [{ languageTag: "en-US" }]),
+}));

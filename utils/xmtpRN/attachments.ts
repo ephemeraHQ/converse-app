@@ -1,17 +1,14 @@
-import {
-  DecryptedLocalAttachment,
-  RemoteAttachmentContent,
-} from "@xmtp/react-native-sdk";
+import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import RNFS from "react-native-fs";
-
-import { ConverseXmtpClientType } from "./client";
+import { ConverseXmtpClientType } from "./client.types";
 import { getXmtpClient } from "./sync";
-import { XmtpMessage } from "../../data/store/chatStore";
+
+export const MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE = 10000000; // 10MB
 
 export const encryptRemoteAttachment = async (
   account: string,
   fileUri: string,
-  mimeType?: string
+  mimeType: string | undefined
 ) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   const encryptedAttachment = await client.encryptAttachment({
@@ -21,53 +18,28 @@ export const encryptRemoteAttachment = async (
   return encryptedAttachment;
 };
 
-export const fetchAndDecodeRemoteAttachment = async (
-  account: string,
-  message: XmtpMessage
-): Promise<DecryptedLocalAttachment> => {
-  const remoteAttachment = deserializeRemoteAttachmentMessageContent(
-    message.content
-  );
-  // Let's download the encrypted file
+export const fetchAndDecodeRemoteAttachment = async (args: {
+  account: string;
+  messageId: string;
+  remoteAttachmentContent: RemoteAttachmentContent;
+}) => {
+  const { account, messageId, remoteAttachmentContent } = args;
+
   const separator = RNFS.TemporaryDirectoryPath.endsWith("/") ? "" : "/";
   const encryptedLocalFileUri =
-    `file://${RNFS.TemporaryDirectoryPath}${separator}${message.id}` as `file://${string}`;
+    `file://${RNFS.TemporaryDirectoryPath}${separator}${messageId}` as `file://${string}`;
+
   await RNFS.downloadFile({
-    fromUrl: remoteAttachment.url,
+    fromUrl: remoteAttachmentContent.url,
     toFile: encryptedLocalFileUri,
   }).promise;
+
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+
   const decryptedContent = await client.decryptAttachment({
     encryptedLocalFileUri,
-    metadata: remoteAttachment,
+    metadata: remoteAttachmentContent,
   });
+
   return decryptedContent;
-};
-
-export const serializeRemoteAttachmentMessageContent = (
-  content: RemoteAttachmentContent
-) => {
-  const contentLength = content.contentLength
-    ? parseInt(content.contentLength, 10)
-    : undefined;
-  return JSON.stringify({
-    ...content,
-    contentLength,
-    salt: Buffer.from(content.salt, "hex").toString("base64"),
-    nonce: Buffer.from(content.nonce, "hex").toString("base64"),
-    secret: Buffer.from(content.secret, "hex").toString("base64"),
-  });
-};
-
-export const deserializeRemoteAttachmentMessageContent = (
-  messageContent: string
-) => {
-  const parsedContent = JSON.parse(messageContent);
-  return {
-    ...parsedContent,
-    contentLength: `${parsedContent.contentLength}`,
-    salt: Buffer.from(parsedContent.salt, "base64").toString("hex"),
-    nonce: Buffer.from(parsedContent.nonce, "base64").toString("hex"),
-    secret: Buffer.from(parsedContent.secret, "base64").toString("hex"),
-  } as RemoteAttachmentContent;
 };

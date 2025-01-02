@@ -5,7 +5,7 @@ import {
   listItemSeparatorColor,
   textPrimaryColor,
 } from "@styles/colors";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Platform,
   StyleSheet,
@@ -17,38 +17,36 @@ import {
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
 
-import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
-import { NavigationParamList } from "./Navigation/Navigation";
-import { useIsSplitScreen } from "./Navigation/navHelpers";
-import ChatNullState from "../components/Chat/ChatNullState";
+import ChatNullState from "../components/ConversationList/ChatNullState";
 import ConversationFlashList from "../components/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
 import RequestsButton from "../components/ConversationList/RequestsButton";
 import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
 import InitialLoad from "../components/InitialLoad";
-import PinnedConversations from "../components/PinnedConversations/PinnedConversations";
+import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
+import { NavigationParamList } from "./Navigation/Navigation";
+import { PinnedConversations } from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
-import NoResult from "../components/Search/NoResult";
-import { refreshProfileForAddress } from "../data/helpers/profiles/profilesUpdate";
+import NoResult from "@search/components/NoResult";
 import {
-  currentAccount,
   useChatStore,
-  useProfilesStore,
+  useCurrentAccount,
   useSettingsStore,
 } from "../data/store/accountsStore";
-import { XmtpConversation } from "../data/store/chatStore";
 import { useSelect } from "../data/store/storeHelpers";
-import {
-  ConversationFlatListItem,
-  LastMessagePreview,
-  getFilteredConversationsWithSearch,
-} from "../utils/conversation";
+import { ConversationFlatListItem } from "../utils/conversation";
 import { converseEventEmitter } from "../utils/events";
-import { sortRequestsBySpamScore } from "../utils/xmtpRN/conversations";
-
-type ConversationWithLastMessagePreview = XmtpConversation & {
-  lastMessagePreview?: LastMessagePreview;
-};
+import { useIsSharingMode } from "../features/conversation-list/useIsSharingMode";
+import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
+import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { ConversationContextMenu } from "@/components/ConversationContextMenu";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
+import {
+  dmMatchesSearchQuery,
+  groupMatchesSearchQuery,
+} from "@/features/conversation/utils/search";
+import { translate } from "@/i18n";
 
 type Props = {
   searchBarRef:
@@ -59,14 +57,14 @@ type Props = {
   "Chats" | "ShareFrame" | "Blocked"
 >;
 
+type FlatListItemType = ConversationFlatListItem | ConversationWithCodecsType;
+
 function ConversationList({ navigation, route, searchBarRef }: Props) {
   const styles = useStyles();
   const {
     searchQuery,
     searchBarFocused,
     setSearchBarFocused,
-    initialLoadDoneOnce,
-    sortedConversationsWithPreview,
     openedConversationTopic,
     setSearchQuery,
   } = useChatStore(
@@ -76,63 +74,73 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       "setSearchQuery",
       "searchBarFocused",
       "setSearchBarFocused",
-      "sortedConversationsWithPreview",
       "openedConversationTopic",
     ])
   );
+  const sharingMode = useIsSharingMode();
 
   const { ephemeralAccount } = useSettingsStore(
     useSelect(["peersStatus", "ephemeralAccount"])
   );
-  const profiles = useProfilesStore((s) => s.profiles);
-  const pinnedConversations = useChatStore((s) => s.pinnedConversations);
+  const pinnedConversations = useChatStore((s) => s.pinnedConversationTopics);
+  const currentAccount = useCurrentAccount();
+  const {
+    data: items,
+    isLoading: showInitialLoad,
+    refetch,
+    isRefetching,
+  } = useConversationListItems();
 
   const [flatListItems, setFlatListItems] = useState<{
-    items: ConversationFlatListItem[];
+    items: FlatListItemType[];
     searchQuery: string;
   }>({ items: [], searchQuery: "" });
 
   // Display logic
-  const showInitialLoad =
-    !initialLoadDoneOnce && flatListItems.items.length <= 1;
   const showNoResult = flatListItems.items.length === 0 && !!searchQuery;
 
-  const isSplit = useIsSplitScreen();
-  const sharingMode = !!route.params?.frameURL;
-
-  const requestsCount = useMemo(() => {
-    const { likelyNotSpam } = sortRequestsBySpamScore(
-      sortedConversationsWithPreview.conversationsRequests
-    );
-    return likelyNotSpam.length;
-  }, [sortedConversationsWithPreview.conversationsRequests]);
-
-  const conversationsCount = useChatStore(
-    (s) => Object.keys(s.conversations).length
-  );
+  const requestsCount = useConversationListRequestCount();
 
   const showChatNullState =
-    conversationsCount === 0 && !searchQuery && initialLoadDoneOnce;
+    items?.length === 0 &&
+    !searchQuery &&
+    !showInitialLoad &&
+    requestsCount === 0;
 
   useEffect(() => {
-    if (!initialLoadDoneOnce) {
-      // First login, let's refresh the profile
-      refreshProfileForAddress(currentAccount(), currentAccount());
+    const getFilteredItems = async () => {
+      const filteredItems: FlatListItemType[] = [];
+      for (const item of items ?? []) {
+        if (item.version === ConversationVersion.GROUP) {
+          const groupMatches = await groupMatchesSearchQuery({
+            account: currentAccount!,
+            searchQuery,
+            group: item,
+          });
+          if (groupMatches) {
+            filteredItems.push(item);
+          }
+        } else if (item.version === ConversationVersion.DM) {
+          const dmMatches = await dmMatchesSearchQuery({
+            account: currentAccount!,
+            searchQuery,
+            dm: item,
+          });
+          if (dmMatches) {
+            filteredItems.push(item);
+          }
+        }
+      }
+      return filteredItems ?? [];
+    };
+    if (searchQuery.trim().length > 0) {
+      getFilteredItems().then((filteredItems) => {
+        setFlatListItems({ items: filteredItems, searchQuery });
+      });
+    } else {
+      setFlatListItems({ items: items ?? [], searchQuery });
     }
-  }, [initialLoadDoneOnce]);
-
-  useEffect(() => {
-    const listItems = getFilteredConversationsWithSearch(
-      searchQuery,
-      sortedConversationsWithPreview.conversationsInbox,
-      profiles
-    );
-    setFlatListItems({ items: listItems, searchQuery });
-  }, [
-    searchQuery,
-    sortedConversationsWithPreview.conversationsInbox,
-    profiles,
-  ]);
+  }, [searchQuery, items, currentAccount]);
 
   // Search bar hook
   useHeaderSearchBar({
@@ -164,14 +172,14 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   useEffect(() => {
     // In split screen, when selecting a convo with search active,
     // let's clear the search
-    if (isSplit && openedConversationTopic) {
+    if (openedConversationTopic) {
       clearSearch();
     }
-  }, [clearSearch, isSplit, openedConversationTopic]);
+  }, [clearSearch, openedConversationTopic]);
 
   const ListHeaderComponents: React.ReactElement[] = [
     <PinnedConversations
-      convos={pinnedConversations}
+      topics={pinnedConversations}
       key="pinnedConversations"
     />,
   ];
@@ -185,28 +193,26 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   if (showSearchTitleHeader) {
     ListHeaderComponents.push(
       <View key="search" style={styles.searchTitleContainer}>
-        <Text style={styles.searchTitle}>Messages</Text>
+        <Text style={styles.searchTitle}>
+          {translate("conversation_list.messages")}
+        </Text>
       </View>
     );
-  } else if (
-    sortedConversationsWithPreview.conversationsRequests.length > 0 &&
-    !sharingMode
-  ) {
+  } else if (requestsCount > 0 && !sharingMode) {
     ListHeaderComponents.push(
       <View key="search" style={styles.headerTitleContainer}>
-        <Text style={styles.headerTitle}>Messages</Text>
-        <RequestsButton
-          key="requests"
-          navigation={navigation}
-          route={route}
-          requestsCount={requestsCount}
-        />
+        <Text style={styles.headerTitle}>
+          {translate("conversation_list.messages")}
+        </Text>
+        <RequestsButton key="requests" requestsCount={requestsCount} />
       </View>
     );
   } else if (!sharingMode) {
     ListHeaderComponents.push(
       <View key="search" style={styles.headerTitleContainer}>
-        <Text style={styles.headerTitle}>Messages</Text>
+        <Text style={styles.headerTitle}>
+          {translate("conversation_list.messages")}
+        </Text>
       </View>
     );
   }
@@ -223,13 +229,13 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     ListHeaderComponents.push(<EphemeralAccountBanner key="ephemeral" />);
   }
   if (showNoResult) {
-    ListFooterComponent = <NoResult navigation={navigation} />;
+    ListFooterComponent = <NoResult />;
   }
 
   if (showChatNullState) {
     return (
       <ChatNullState
-        currentAccount={currentAccount()}
+        currentAccount={currentAccount!}
         navigation={navigation}
         route={route}
       />
@@ -253,11 +259,12 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
           ) : undefined
         }
         ListFooterComponent={ListFooterComponent}
+        refetch={refetch}
+        isRefetching={isRefetching}
       />
-      <Recommendations navigation={navigation} visibility="HIDDEN" />
-      {(Platform.OS === "android" || Platform.OS === "web") && !sharingMode && (
-        <NewConversationButton navigation={navigation} route={route} />
-      )}
+      <Recommendations visibility="HIDDEN" />
+      {Platform.OS === "android" && !sharingMode && <NewConversationButton />}
+      <ConversationContextMenu />
     </>
   );
 }

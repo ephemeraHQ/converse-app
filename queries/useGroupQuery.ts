@@ -1,95 +1,72 @@
-import { useQuery } from "@tanstack/react-query";
-import { getCleanAddress } from "@utils/evm/address";
-import { getGroupIdFromTopic, isGroupTopic } from "@utils/groupUtils/groupId";
+/**
+ * useGroupQuery is derived from useConversationQuery. Like useDmQuery, maybe worth considering if we should just use useConversationQuery instead.
+ */
 import {
-  ConverseXmtpClientType,
-  xmtpClientByAccount,
-} from "@utils/xmtpRN/client";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
-import { Group } from "@xmtp/react-native-sdk";
+  getConversationQueryData,
+  getConversationQueryOptions,
+  setConversationQueryData,
+  useConversationQuery,
+} from "@/queries/useConversationQuery";
+import { mutateObjectProperties } from "@/utils/mutate-object-properties";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { UseQueryResult } from "@tanstack/react-query";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
-import { groupQueryKey } from "./QueryKeys";
-import { entifyWithAddress } from "./entify";
-import { queryClient } from "./queryClient";
-import { setGroupMembersQueryData } from "./useGroupMembersQuery";
-import { setGroupNameQueryData } from "./useGroupNameQuery";
-import { setGroupPhotoQueryData } from "./useGroupPhotoQuery";
-import { useGroupsQuery } from "./useGroupsQuery";
+export function useGroupQuery(args: {
+  account: string;
+  topic: ConversationTopic;
+}) {
+  const { account, topic } = args;
+  return useConversationQuery({
+    account,
+    topic,
+  }) as UseQueryResult<GroupWithCodecsType | null>;
+}
 
-export const useGroupQuery = (account: string, topic: string) => {
-  const { data, dataUpdatedAt } = useGroupsQuery(account);
-  return useQuery({
-    queryKey: groupQueryKey(account, topic),
-    queryFn: async () => {
-      if (!topic) {
-        return null;
-      }
-      const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-      if (!client) {
-        return null;
-      }
-      let group = data?.byId[topic];
-      let groupDataUpdatedAt = dataUpdatedAt;
-      if (!group) {
-        group = await client?.conversations.findGroup(
-          getGroupIdFromTopic(topic)
-        );
-        groupDataUpdatedAt = new Date().getTime();
-        if (!group) {
-          return null;
-        }
-      }
-      // We'll pre-cache some queries since we know
-      // how old is our current group instance
-      setGroupNameQueryData(account, topic, group.name, {
-        updatedAt: groupDataUpdatedAt,
-      });
-      setGroupPhotoQueryData(account, topic, group.imageUrlSquare, {
-        updatedAt: groupDataUpdatedAt,
-      });
-      setGroupMembersQueryData(
-        account,
-        topic,
-        entifyWithAddress(
-          group.members,
-          (member) => member.inboxId,
-          // TODO: Multiple addresses support
-          (member) => getCleanAddress(member.addresses[0])
-        ),
-        {
-          updatedAt: groupDataUpdatedAt,
-        }
-      );
-      return group;
-    },
-    enabled: !!data && isGroupTopic(topic),
-    select: (data) => {
-      if (!data) {
-        return null;
-      }
-      if (data instanceof Group) {
-        return data;
-      }
-      const client = xmtpClientByAccount[account];
-      if (!client) {
-        return null;
-      }
-      // Recreate the group object with the client
-      return new Group(client!, data, (data as any)?.members);
-    },
+export function getGroupQueryData(args: {
+  account: string;
+  topic: ConversationTopic;
+}) {
+  const { account, topic } = args;
+  return getConversationQueryData({ account, topic }) as
+    | GroupWithCodecsType
+    | undefined;
+}
+
+export function setGroupQueryData(args: {
+  account: string;
+  topic: ConversationTopic;
+  group: GroupWithCodecsType;
+}) {
+  const { account, topic, group } = args;
+  setConversationQueryData({
+    account,
+    topic,
+    conversation: group,
   });
-};
+}
 
-export const invalidateGroupQuery = (account: string, topic: string) => {
-  queryClient.invalidateQueries({
-    queryKey: groupQueryKey(account, topic),
+export function getGroupQueryOptions(args: {
+  account: string;
+  topic: ConversationTopic;
+}) {
+  const { account, topic } = args;
+  return getConversationQueryOptions({ account, topic });
+}
+
+export function updateGroupQueryData(args: {
+  account: string;
+  topic: ConversationTopic;
+  updates: Partial<GroupWithCodecsType>;
+}) {
+  const { account, topic, updates } = args;
+  const previousGroup = getGroupQueryData({ account, topic });
+  if (!previousGroup) {
+    return;
+  }
+  setGroupQueryData({
+    account,
+    topic,
+    group: mutateObjectProperties(previousGroup, updates),
   });
-};
-
-export const setGroupQueryData = (
-  account: string,
-  topic: string,
-  group: Group
-) => {
-  queryClient.setQueryData(groupQueryKey(account, topic), group);
-};
+}

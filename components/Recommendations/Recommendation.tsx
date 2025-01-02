@@ -1,5 +1,4 @@
-import { ProfileSocials } from "@data/store/profilesStore";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { IProfileSocials } from "@/features/profiles/profile-types";
 import {
   itemSeparatorColor,
   textPrimaryColor,
@@ -15,36 +14,33 @@ import {
   View,
 } from "react-native";
 
-import IconLoading from "../../assets/icon-loading.png";
-import { RecommendationData } from "../../data/store/recommendationsStore";
+import IconLoading from "@assets/icon-loading.png";
+import { RecommendationData } from "@data/store/recommendationsStore";
 import {
   getPreferredAvatar,
   getPreferredName,
   getPrimaryNames,
-} from "../../utils/profile";
-import { shortAddress } from "../../utils/str";
+} from "@utils/profile";
+import { shortAddress } from "@utils/strings/shortAddress";
 import Avatar from "../Avatar";
-import { NavigationChatButton } from "../Search/NavigationChatButton";
+import { NavigationChatButton } from "@search/components/NavigationChatButton";
+import { useProfileSocials } from "@/hooks/useProfileSocials";
 
 export function Recommendation({
   address,
   // @todo => use only profile
   recommendationData: { ens, farcasterUsernames, lensHandles, tags, profile },
-  navigation,
   embedInChat,
   isVisible,
-  socials,
   groupMode,
   addToGroup,
 }: {
   address: string;
   recommendationData: RecommendationData;
-  navigation?: NativeStackNavigationProp<any>;
   embedInChat?: boolean;
   isVisible: boolean;
-  socials?: ProfileSocials;
   groupMode?: boolean;
-  addToGroup?: (member: ProfileSocials & { address: string }) => void;
+  addToGroup?: (member: IProfileSocials & { address: string }) => void;
 }) {
   const styles = useStyles();
   let primaryNamesDisplay = [
@@ -62,6 +58,7 @@ export function Recommendation({
     ];
   }
   const textAlign = embedInChat ? "center" : "left";
+  const socials = useProfileSocials(address);
 
   return (
     <View
@@ -122,10 +119,9 @@ export function Recommendation({
           </View>
         ))}
       </View>
-      {!embedInChat && navigation && (
+      {!embedInChat && (
         <View style={styles.recommendationRight}>
           <NavigationChatButton
-            navigation={navigation}
             address={address}
             groupMode={groupMode}
             addToGroup={

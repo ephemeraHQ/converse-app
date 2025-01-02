@@ -1,44 +1,61 @@
-import { useMutation } from "@tanstack/react-query";
-import logger from "@utils/logger";
-import { sentryTrackError } from "@utils/sentry";
-
-import { setGroupPhotoMutationKey } from "./MutationKeys";
+import { captureError } from "@/utils/capture-error";
 import {
-  cancelGroupPhotoQuery,
-  getGroupPhotoQueryData,
-  setGroupPhotoQueryData,
-} from "./useGroupPhotoQuery";
-import { useGroupQuery } from "./useGroupQuery";
-import { refreshGroup } from "../utils/xmtpRN/conversations";
+  getGroupQueryData,
+  updateGroupQueryData,
+  useGroupQuery,
+} from "@queries/useGroupQuery";
+import { useMutation } from "@tanstack/react-query";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { setGroupPhotoMutationKey } from "./MutationKeys";
+import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
 
-export const useGroupPhotoMutation = (account: string, topic: string) => {
-  const { data: group } = useGroupQuery(account, topic);
+type IArgs = {
+  account: string;
+  topic: ConversationTopic;
+};
+
+export function useGroupPhotoMutation(args: IArgs) {
+  const { account, topic } = args;
+  const { data: group } = useGroupQuery({ account, topic });
+
   return useMutation({
     mutationKey: setGroupPhotoMutationKey(account, topic),
-    mutationFn: async (groupPhoto: string) => {
+    mutationFn: async (imageUrlSquare: string) => {
       if (!group || !account || !topic) {
-        return;
+        throw new Error("Missing required data in useGroupPhotoMutation");
       }
-      await group.updateGroupImageUrlSquare(groupPhoto);
-      return groupPhoto;
+
+      await group.updateGroupImageUrlSquare(imageUrlSquare);
+      return imageUrlSquare;
     },
-    onMutate: async (groupPhoto: string) => {
-      await cancelGroupPhotoQuery(account, topic);
-      const previousGroupPhoto = getGroupPhotoQueryData(account, topic);
-      setGroupPhotoQueryData(account, topic, groupPhoto);
-      return { previousGroupPhoto };
+    onMutate: async (imageUrlSquare: string) => {
+      const previousGroup = getGroupQueryData({ account, topic });
+      const updates = { imageUrlSquare };
+
+      if (previousGroup) {
+        updateGroupQueryData({ account, topic, updates });
+      }
+
+      updateConversationInConversationListQuery({
+        account,
+        topic,
+        conversationUpdate: updates,
+      });
+
+      return { previousGroup };
     },
     onError: (error, _variables, context) => {
-      logger.warn("onError useGroupPhotoMutation");
-      sentryTrackError(error);
-      if (context?.previousGroupPhoto === undefined) {
-        return;
-      }
-      setGroupPhotoQueryData(account, topic, context.previousGroupPhoto);
-    },
-    onSuccess: (data, variables, context) => {
-      logger.debug("onSuccess useGroupPhotoMutation");
-      refreshGroup(account, topic);
+      captureError(error);
+
+      const { previousGroup } = context || {};
+
+      const updates = { imageUrlSquare: previousGroup?.imageUrlSquare ?? "" };
+      updateGroupQueryData({ account, topic, updates });
+      updateConversationInConversationListQuery({
+        account,
+        topic,
+        conversationUpdate: updates,
+      });
     },
   });
-};
+}

@@ -15,21 +15,23 @@ import {
   useAccountsStore,
   useErroredAccountsMap,
 } from "../../data/store/accountsStore";
-import { useOnboardingStore } from "../../data/store/onboardingStore";
-import { shortAddress, useAccountsProfiles } from "../../utils/str";
+import { useRouter } from "../../navigation/useNavigation";
+import { useAccountsProfiles } from "@utils/useAccountsProfiles";
 import { NavigationParamList } from "../Navigation/Navigation";
+import { translate } from "@/i18n";
 
-export default function Accounts({
-  navigation,
-  route,
-}: NativeStackScreenProps<NavigationParamList, "Accounts">) {
+export default function Accounts(
+  props: NativeStackScreenProps<NavigationParamList, "Accounts">
+) {
   const styles = useStyles();
-  const accounts = useAccountsList();
   const erroredAccounts = useErroredAccountsMap();
+  const accounts = useAccountsList();
   const accountsProfiles = useAccountsProfiles();
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
-  const setAddingNewAccount = useOnboardingStore((s) => s.setAddingNewAccount);
   const colorScheme = useColorScheme();
+
+  const router = useRouter();
+
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
@@ -37,12 +39,12 @@ export default function Accounts({
       style={styles.accounts}
     >
       <TableView
-        items={accounts.map((a) => ({
+        items={accounts.map((a, index) => ({
           id: a,
-          title: accountsProfiles[a] || shortAddress(a),
+          title: accountsProfiles[index],
           action: () => {
             setCurrentAccount(a, false);
-            navigation.push("Chats");
+            router.navigate("Chats");
           },
           rightView: (
             <View style={{ flexDirection: "row" }}>
@@ -52,7 +54,7 @@ export default function Accounts({
                   color={dangerColor(colorScheme)}
                 />
               )}
-              <AccountSettingsButton account={a} navigation={navigation} />
+              <AccountSettingsButton account={a} />
               <TableViewPicto
                 symbol="chevron.right"
                 color={textSecondaryColor(colorScheme)}
@@ -65,10 +67,10 @@ export default function Accounts({
         items={[
           {
             id: "add",
-            title: "Add an account",
+            title: translate("add_an_account"),
             titleColor: primaryColor(colorScheme),
             action: () => {
-              setAddingNewAccount(true);
+              router.navigate("NewAccountNavigator");
             },
           },
         ]}

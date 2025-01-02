@@ -1,15 +1,11 @@
+import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
+import { fetchPersistedConversationListQuery } from "@/queries/useConversationListQuery";
 import logger from "@utils/logger";
 import { useEffect } from "react";
-
-import { loadDataToContext } from "../../data";
-import { initDb } from "../../data/db";
-import { cleanupPendingConversations } from "../../data/helpers/conversations/pendingConversations";
-import { refreshProfileForAddress } from "../../data/helpers/profiles/profilesUpdate";
-import { getAccountsList } from "../../data/store/accountsStore";
-import { useAppStore } from "../../data/store/appStore";
-import { loadSavedNotificationMessagesToContext } from "../../utils/notifications";
-import { getXmtpClient } from "../../utils/xmtpRN/sync";
-import { getInstalledWallets } from "../Onboarding/supportedWallets";
+import { getAccountsList } from "@data/store/accountsStore";
+import { useAppStore } from "@data/store/appStore";
+import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { getInstalledWallets } from "../Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 
 export default function HydrationStateHandler() {
   // Initial hydration
@@ -21,18 +17,44 @@ export default function HydrationStateHandler() {
         // Awaiting before showing onboarding
         await getInstalledWallets(false);
       } else {
+        // note(lustig) I don't think this does anything?
         getInstalledWallets(false);
       }
-      await Promise.all(accounts.map((a) => initDb(a)));
-      accounts.map((a) => cleanupPendingConversations(a));
-      accounts.map((a) => getXmtpClient(a));
-      await loadSavedNotificationMessagesToContext();
 
-      await Promise.all(accounts.map((a) => loadDataToContext(a)));
+      // Fetching persisted conversation lists for all accounts
+      // We may want to fetch only the selected account's conversation list
+      // in the future, but this is simple for now, and want to get feedback to really confirm
+      logger.debug("[Hydration] Fetching persisted conversation list");
+      await Promise.allSettled(
+        accounts.map(async (account) => {
+          const accountStartTime = new Date().getTime();
+          logger.debug(
+            `[Hydration] Fetching persisted conversation list for ${account}`
+          );
 
-      accounts.map((address) => {
-        refreshProfileForAddress(address, address);
-      });
+          const results = await Promise.allSettled([
+            // This will handle creating the client and setting the conversation list from persistence
+            fetchPersistedConversationListQuery({ account }),
+          ]);
+          prefetchInboxIdQuery({ account });
+
+          const errors = results.filter(
+            (result) => result.status === "rejected"
+          );
+          if (errors.length > 0) {
+            logger.warn(`[Hydration] error for ${account}:`, errors);
+          }
+
+          const accountEndTime = new Date().getTime();
+          logger.debug(
+            `[Hydration] Done fetching persisted conversation list for ${account} in ${
+              (accountEndTime - accountStartTime) / 1000
+            } seconds`
+          );
+        })
+      );
+
+      logger.debug("[Hydration] Done fetching persisted conversation list");
 
       useAppStore.getState().setHydrationDone(true);
       logger.debug(

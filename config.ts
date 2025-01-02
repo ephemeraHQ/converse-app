@@ -1,6 +1,9 @@
-import Constants from "expo-constants";
+import { DEFAULT_SUPPORTED_CHAINS } from "@utils/evm/wallets";
+import { XmtpEnv } from "@xmtp/xmtp-js";
 import { Platform } from "react-native";
 import { base, baseSepolia } from "wagmi/chains";
+import { getApiUri } from "./utils/apiConfig";
+import { Environments, isDev, isPreview } from "./utils/getEnv";
 
 declare const process: {
   env: {
@@ -27,6 +30,7 @@ const defaultConfig = {
       logoUrl: "https://converse.xyz/icon.png",
       icons: [],
     },
+    optionalChains: DEFAULT_SUPPORTED_CHAINS,
   },
   thirdwebClientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
   expoProjectId: process.env.EXPO_PUBLIC_EXPO_PROJECT_ID,
@@ -50,15 +54,14 @@ const defaultConfig = {
 
 const isAndroid = Platform.OS === "android";
 
+const apiURI = getApiUri();
+
 const ENV = {
   dev: {
     ...defaultConfig,
-    env: "dev",
-    xmtpEnv: process.env.EXPO_PUBLIC_DEV_XMTP_ENV || "dev",
-    apiURI:
-      Platform.OS === "web"
-        ? "http://localhost:9875"
-        : process.env.EXPO_PUBLIC_DEV_API_URI || "",
+    apiURI,
+    env: Environments.dev,
+    xmtpEnv: (process.env.EXPO_PUBLIC_DEV_XMTP_ENV || "dev") as XmtpEnv,
     debugMenu: true,
     bundleId: "com.converse.dev",
     appleAppGroup: "group.com.converse.dev",
@@ -68,13 +71,15 @@ const ENV = {
     universalLinks: ["dev.converse.xyz/", "dev.getconverse.app/"].flatMap(
       (domain) => [`https://${domain}`, `http://${domain}`, domain]
     ),
-    enableTransactionFrames: true,
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/UDv3aYZONQGc6_XPJY6Ch",
+    appCheckDebugToken: isAndroid
+      ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID
+      : process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
   },
   preview: {
     ...defaultConfig,
-    env: "preview",
+    env: Environments.preview,
     xmtpEnv: "dev",
     apiURI: "https://backend-staging.converse.xyz",
     debugMenu: true,
@@ -87,13 +92,13 @@ const ENV = {
       "preview.converse.xyz/",
       "preview.getconverse.app/",
     ].flatMap((domain) => [`https://${domain}`, `http://${domain}`, domain]),
-    enableTransactionFrames: true,
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
+    appCheckDebugToken: undefined,
   },
   prod: {
     ...defaultConfig,
-    env: "prod",
+    env: Environments.prod,
     xmtpEnv: "production",
     apiURI: "https://backend-prod.converse.xyz",
     debugMenu: false,
@@ -121,16 +126,16 @@ const ENV = {
       },
       rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     },
-    enableTransactionFrames: false,
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
+    appCheckDebugToken: undefined,
   },
-};
+} as const;
 
-const getConfig = () => {
-  if (__DEV__) {
+export const getConfig = () => {
+  if (isDev) {
     return ENV.dev;
-  } else if (Constants.expoConfig?.extra?.ENV === "preview") {
+  } else if (isPreview) {
     return ENV.preview;
   } else {
     return ENV.prod;

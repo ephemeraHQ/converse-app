@@ -1,24 +1,25 @@
-import { AnimatedBlurView } from "@components/AnimatedBlurView";
-import TableView, { TableViewItemType } from "@components/TableView/TableView";
-import { ConversationReadOnly } from "@screens/ConversationReadOnly";
-import { useIsSplitScreen } from "@screens/Navigation/navHelpers";
-import { backgroundColor } from "@styles/colors";
 import {
-  SIDE_MARGIN,
-  AUXILIARY_VIEW_MIN_HEIGHT,
-  HOLD_ITEM_TRANSFORM_DURATION,
-  contextMenuStyleGuide,
+  resetConversationListContextMenuStore,
+  useConversationListContextMenuConversationTopic,
+  useConversationListContextMenuIsVisible,
+  useConversationListContextMenuItems,
+} from "@/features/conversation-list/ConversationListContextMenu.store";
+import { ConversationReadOnly } from "@/screens/ConversationReadOnly";
+import { AnimatedBlurView } from "@components/AnimatedBlurView";
+import {
   BACKDROP_DARK_BACKGROUND_COLOR,
   BACKDROP_LIGHT_BACKGROUND_COLOR,
-  ITEM_WIDTH,
-} from "@utils/contextMenu/constants";
+} from "@design-system/ContextMenu/ContextMenu.constants";
+import { animation } from "@theme/animations";
+import { useAppTheme } from "@theme/useAppTheme";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 import React, { FC, memo, useCallback, useEffect } from "react";
 import {
   Platform,
   StyleSheet,
+  View,
   useColorScheme,
   useWindowDimensions,
-  View,
 } from "react-native";
 import {
   Gesture,
@@ -33,35 +34,26 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { ContextMenuItems } from "./ContextMenuItems";
 
-type ConversationContextMenuProps = {
-  isVisible: boolean;
-  onClose: (openConversationOnClose?: boolean) => void;
-  items: TableViewItemType[];
-  conversationTopic: string;
-};
-
-const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
-  isVisible,
-  onClose,
-  items,
-  conversationTopic,
-}) => {
+const ConversationContextMenuComponent: FC = () => {
+  const isVisible = useConversationListContextMenuIsVisible();
+  const conversationTopic = useConversationListContextMenuConversationTopic();
+  const contextMenuItems = useConversationListContextMenuItems();
   const activeValue = useSharedValue(false);
   const opacityValue = useSharedValue(0);
   const intensityValue = useSharedValue(0);
-  const isSplitScreen = useIsSplitScreen();
-  const { height, width } = useWindowDimensions();
+  const { height } = useWindowDimensions();
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
   useEffect(() => {
     activeValue.value = isVisible;
     opacityValue.value = withTiming(isVisible ? 1 : 0, {
-      duration: HOLD_ITEM_TRANSFORM_DURATION,
+      duration: animation.contextMenuHoldDuration,
     });
     intensityValue.value = withTiming(isVisible ? 50 : 0, {
-      duration: HOLD_ITEM_TRANSFORM_DURATION,
+      duration: animation.contextMenuHoldDuration,
     });
   }, [activeValue, isVisible, opacityValue, intensityValue]);
 
@@ -69,7 +61,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
 
   useEffect(() => {
     translateY.value = withTiming(isVisible ? 0 : height, {
-      duration: HOLD_ITEM_TRANSFORM_DURATION,
+      duration: animation.contextMenuHoldDuration,
     });
   }, [isVisible, translateY, height]);
 
@@ -95,12 +87,12 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
   const closeMenu = useCallback(() => {
     translateY.value = withTiming(
       height,
-      { duration: HOLD_ITEM_TRANSFORM_DURATION },
+      { duration: animation.contextMenuHoldDuration },
       () => {
-        runOnJS(onClose)();
+        runOnJS(resetConversationListContextMenuStore)();
       }
     );
-  }, [height, onClose, translateY]);
+  }, [height, translateY]);
 
   const gesture = Gesture.Simultaneous(
     Gesture.Pan()
@@ -112,7 +104,7 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
           runOnJS(closeMenu)();
         } else {
           translateY.value = withTiming(0, {
-            duration: HOLD_ITEM_TRANSFORM_DURATION,
+            duration: animation.contextMenuHoldDuration,
           });
         }
       }),
@@ -139,23 +131,22 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
           >
             <View style={styles.overlay}>
               <Animated.View style={[styles.container, animatedStyle]}>
-                <View style={styles.handle} />
                 <View style={styles.previewContainer}>
                   <GestureDetector
                     gesture={Gesture.Tap().onEnd(() => {
-                      if (isSplitScreen) {
-                        runOnJS(closeMenu)();
-                      } else {
-                        // Navigate to conversation
-                        runOnJS(onClose)(true);
-                      }
+                      runOnJS(resetConversationListContextMenuStore)();
                     })}
                   >
-                    <ConversationReadOnly topic={conversationTopic} />
+                    <ConversationReadOnly
+                      topic={conversationTopic as ConversationTopic}
+                    />
                   </GestureDetector>
                 </View>
                 <View style={styles.menuContainer}>
-                  <TableView style={styles.table} items={items} />
+                  <ContextMenuItems
+                    containerStyle={styles.table}
+                    items={contextMenuItems}
+                  />
                 </View>
               </Animated.View>
             </View>
@@ -167,7 +158,8 @@ const ConversationContextMenuComponent: FC<ConversationContextMenuProps> = ({
 };
 
 const useStyles = () => {
-  const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
+
   return StyleSheet.create({
     overlay: {
       ...StyleSheet.absoluteFillObject,
@@ -177,39 +169,20 @@ const useStyles = () => {
       flex: 1,
       justifyContent: "flex-end",
     },
-    handle: {
-      marginTop: 70,
-      marginBottom: 10,
-      width: 36,
-      height: 5,
-      backgroundColor: contextMenuStyleGuide.palette.secondary,
-      alignSelf: "center",
-      borderRadius: 2.5,
-    },
     previewContainer: {
       flex: 1,
-      margin: SIDE_MARGIN,
-      paddingBottom: contextMenuStyleGuide.spacing,
+      marginHorizontal: theme.spacing.md,
+      marginTop: theme.spacing["5xl"],
+      marginBottom: theme.spacing.zero,
+      paddingBottom: theme.spacing.xxs,
       overflow: "hidden",
       justifyContent: "flex-start",
-      minHeight: AUXILIARY_VIEW_MIN_HEIGHT,
-      backgroundColor: backgroundColor(colorScheme),
-      borderRadius: 16,
-    },
-    conversationName: {
-      ...contextMenuStyleGuide.typography.body,
-      fontWeight: "600",
-      marginBottom: contextMenuStyleGuide.spacing,
-    },
-    lastMessagePreview: {
-      ...contextMenuStyleGuide.typography.callout,
-      color:
-        Platform.OS === "ios"
-          ? contextMenuStyleGuide.palette.secondary
-          : contextMenuStyleGuide.palette.common.black,
+      minHeight: 210,
+      backgroundColor: theme.colors.background.raised,
+      borderRadius: theme.borderRadius.sm,
     },
     menuContainer: {
-      marginHorizontal: SIDE_MARGIN,
+      marginHorizontal: theme.spacing.md,
       minHeight: 300,
       borderRadius: 16,
       overflow: "hidden",
@@ -218,9 +191,9 @@ const useStyles = () => {
       flex: 1,
     },
     table: {
-      width: ITEM_WIDTH,
+      width: 180,
       backgroundColor:
-        Platform.OS === "android" ? backgroundColor(colorScheme) : undefined,
+        Platform.OS === "android" ? theme.colors.background.raised : undefined,
       borderRadius: Platform.OS === "android" ? 10 : undefined,
     },
   });

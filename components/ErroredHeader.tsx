@@ -5,9 +5,9 @@ import { StyleSheet, useColorScheme, View, ViewStyle } from "react-native";
 
 import Picto from "./Picto/Picto";
 
-interface ErroredHeaderProps {
+type ErroredHeaderProps = {
   style?: ViewStyle;
-}
+};
 
 export const ErroredHeader: FC<ErroredHeaderProps> = ({ style }) => {
   const colorScheme = useColorScheme();

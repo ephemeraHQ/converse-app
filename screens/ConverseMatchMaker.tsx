@@ -12,6 +12,7 @@ import {
 import { NavigationParamList } from "./Navigation/Navigation";
 import AndroidBackAction from "../components/AndroidBackAction";
 import Recommendations from "../components/Recommendations/Recommendations";
+import { translate } from "@/i18n";
 
 export default function ConverseMatchMaker({
   route,
@@ -22,7 +23,7 @@ export default function ConverseMatchMaker({
       headerLeft: () =>
         Platform.OS === "ios" ? (
           <Button
-            title="Cancel"
+            title={translate("cancel")}
             onPress={() => {
               navigation.goBack();
             }}
@@ -37,7 +38,7 @@ export default function ConverseMatchMaker({
 
   return (
     <View style={styles.modal}>
-      <Recommendations navigation={navigation} visibility="FULL" />
+      <Recommendations visibility="FULL" />
     </View>
   );
 }

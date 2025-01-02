@@ -18,21 +18,17 @@ module.exports = {
         alias: {
           "fast-text-encoding": "text-encoding",
           // crypto: "react-native-quick-crypto",
-          "react-native-sqlite-storage": "@op-engineering/op-sqlite",
           crypto: "crypto-browserify",
           // This entrypoint mapping is done in @xmtp/user-preferences-bindings-wasm's "exports" in package.json
           // but we don't want to enable unstable_enablePackageExports for now in metro.config.js
           "@xmtp/user-preferences-bindings-wasm/web":
             "@xmtp/user-preferences-bindings-wasm/dist/web/user_preferences_bindings_wasm",
-          // Same for @web3modal/ethers5
-          "@web3modal/ethers5/react":
-            "@web3modal/ethers5/dist/esm/exports/react.js",
-          "@web3modal/scaffold-utils/ethers":
-            "@web3modal/scaffold-utils/dist/esm/exports/ethers.js",
           "react-native-webview": "react-native-webview/src/index.ts",
 
           // Folder aliases
+          "@": "./",
           "@components": "./components",
+          "@config": "./config",
           "@containers": "./containers",
           "@data": "./data",
           "@hooks": "./hooks",
@@ -42,7 +38,12 @@ module.exports = {
           "@styles": "./styles",
           "@utils": "./utils",
           "@theme": "./theme",
+          "@assets": "./assets",
           "@design-system": "./design-system",
+          "@navigation": "./navigation",
+          "@features": "./features",
+          "@shared": "./features/shared",
+          "@search": "./features/search",
         },
       },
     ],

@@ -1,16 +1,20 @@
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import {
   QueryKeys,
-  groupDescriptionQueryKey,
-  groupFirstMessageQueryKey,
+  conversationsQueryKey,
+  conversationQueryKey,
+  dmQueryKey,
+  conversationMessageQueryKey,
+  conversationMessagesQueryKey,
+  conversationPreviewMessagesQueryKey,
   groupMembersQueryKey,
-  groupMessagesQueryKey,
-  groupNameQueryKey,
-  groupPendingMessagesQueryKey,
-  groupPermissionsQueryKey,
-  groupPhotoQueryKey,
   groupPinnedFrameQueryKey,
-  groupQueryKey,
-  groupsQueryKey,
+  groupPermissionPolicyQueryKey,
+  groupCreatorQueryKey,
+  groupPermissionsQueryKey,
+  groupInviteQueryKey,
+  groupJoinRequestQueryKey,
+  pendingJoinRequestsQueryKey,
 } from "./QueryKeys";
 
 describe("QueryKeys", () => {
@@ -20,61 +24,134 @@ describe("QueryKeys", () => {
 });
 
 describe("Query Key Functions", () => {
-  const account = "testAccount";
-  const topic = "testTopic";
+  const account = "TestAccount";
+  const topic = "testTopic" as ConversationTopic;
+  const peer = "testPeer";
+  const messageId = "testMessageId";
+  const inviteId = "testInviteId";
+  const requestId = "testRequestId";
 
-  it("groupsQueryKey should return the correct array", () => {
-    const result = groupsQueryKey(account);
-    expect(result).toEqual([QueryKeys.GROUPS, account]);
+  // Conversations
+  it("conversationsQueryKey should return correct array", () => {
+    expect(conversationsQueryKey(account)).toEqual([
+      QueryKeys.CONVERSATIONS,
+      account.toLowerCase(),
+    ]);
   });
 
-  it("groupQueryKey should return the correct array", () => {
-    const result = groupQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.GROUP, account, topic]);
+  it("conversationQueryKey should return correct array", () => {
+    expect(conversationQueryKey(account, topic)).toEqual([
+      QueryKeys.CONVERSATION,
+      account.toLowerCase(),
+      topic,
+    ]);
   });
 
-  it("groupMessagesQueryKey should return the correct array", () => {
-    const result = groupMessagesQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.GROUP_MESSAGES, account, topic]);
+  it("dmQueryKey should return correct array", () => {
+    expect(dmQueryKey(account, peer)).toEqual([
+      QueryKeys.CONVERSATION_DM,
+      account.toLowerCase(),
+      peer,
+    ]);
   });
 
-  it("groupFirstMessageQueryKey should return the correct array", () => {
-    const result = groupFirstMessageQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.GROUP_FIRST_MESSAGE, account, topic]);
+  // Messages
+  it("conversationMessageQueryKey should return correct array", () => {
+    expect(conversationMessageQueryKey(account, messageId)).toEqual([
+      QueryKeys.CONVERSATION_MESSAGE,
+      account.toLowerCase(),
+      messageId,
+    ]);
   });
 
-  it("groupPendingMessagesQueryKey should return the correct array", () => {
-    const result = groupPendingMessagesQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.GROUP_PENDING_MESSAGES, account, topic]);
+  it("conversationMessagesQueryKey should return correct array", () => {
+    expect(conversationMessagesQueryKey(account, topic)).toEqual([
+      QueryKeys.CONVERSATION_MESSAGES,
+      account.toLowerCase(),
+      topic,
+    ]);
   });
 
-  it("groupMembersQueryKey should return the correct array", () => {
-    const result = groupMembersQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.GROUP_MEMBERS, account, topic]);
+  it("conversationPreviewMessagesQueryKey should return correct array", () => {
+    expect(conversationPreviewMessagesQueryKey(account, topic)).toEqual([
+      QueryKeys.CONVERSATION_MESSAGES,
+      account.toLowerCase(),
+      topic,
+    ]);
   });
 
-  it("groupNameQueryKey should return the correct array", () => {
-    const result = groupNameQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.GROUP_NAME, account, topic]);
+  // Members
+  it("groupMembersQueryKey should return correct array", () => {
+    expect(groupMembersQueryKey(account, topic)).toEqual([
+      QueryKeys.GROUP_MEMBERS,
+      account.toLowerCase(),
+      topic,
+    ]);
   });
 
-  it("groupDescriptionQueryKey should return the correct array", () => {
-    const result = groupDescriptionQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.GROUP_DESCRIPTION, account, topic]);
+  // Group Mutable Metadata
+  it("groupPinnedFrameQueryKey should return correct array", () => {
+    expect(groupPinnedFrameQueryKey(account, topic)).toEqual([
+      QueryKeys.PINNED_FRAME,
+      account.toLowerCase(),
+      topic,
+    ]);
   });
 
-  it("groupPhotoQueryKey should return the correct array", () => {
-    const result = groupPhotoQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.GROUP_PHOTO, account, topic]);
+  it("groupPermissionPolicyQueryKey should return correct array", () => {
+    expect(groupPermissionPolicyQueryKey(account, topic)).toEqual([
+      QueryKeys.GROUP_PERMISSION_POLICY,
+      account.toLowerCase(),
+      topic,
+    ]);
   });
 
-  it("groupPinnedFrameQueryKey should return the correct array", () => {
-    const result = groupPinnedFrameQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.PINNED_FRAME, account, topic]);
+  it("groupCreatorQueryKey should return correct array", () => {
+    expect(groupCreatorQueryKey(account, topic)).toEqual([
+      QueryKeys.GROUP_CREATOR,
+      account.toLowerCase(),
+      topic,
+    ]);
   });
 
-  it("groupPermissionsQueryKey should return the correct array", () => {
-    const result = groupPermissionsQueryKey(account, topic);
-    expect(result).toEqual([QueryKeys.GROUP_PERMISSIONS, account, topic]);
+  // Permissions
+  it("groupPermissionsQueryKey should return correct array", () => {
+    expect(groupPermissionsQueryKey(account, topic)).toEqual([
+      QueryKeys.GROUP_PERMISSIONS,
+      account.toLowerCase(),
+      topic,
+    ]);
+  });
+
+  // Group Invites
+  it("groupInviteQueryKey should return correct array", () => {
+    expect(groupInviteQueryKey(account, inviteId)).toEqual([
+      QueryKeys.GROUP_INVITE,
+      account.toLowerCase(),
+      inviteId,
+    ]);
+  });
+
+  it("groupJoinRequestQueryKey should return correct array", () => {
+    expect(groupJoinRequestQueryKey(account, requestId)).toEqual([
+      QueryKeys.GROUP_JOIN_REQUEST,
+      account.toLowerCase(),
+      requestId,
+    ]);
+  });
+
+  it("pendingJoinRequestsQueryKey should return correct array", () => {
+    expect(pendingJoinRequestsQueryKey(account)).toEqual([
+      QueryKeys.PENDING_JOIN_REQUESTS,
+      account.toLowerCase(),
+    ]);
+  });
+
+  // Case sensitivity tests
+  it("should convert account to lowercase consistently", () => {
+    const mixedCaseAccount = "MiXeDcAsE";
+    expect(conversationsQueryKey(mixedCaseAccount)[1]).toBe(
+      mixedCaseAccount.toLowerCase()
+    );
   });
 });

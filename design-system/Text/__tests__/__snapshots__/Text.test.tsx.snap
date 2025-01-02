@@ -1,0 +1,106 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Text Component applies color style 1`] = `
+<Text
+  style={
+    [
+      {
+        "color": "#000000",
+        "fontFamily": "SFProText-Regular",
+        "fontSize": 16,
+        "fontWeight": 400,
+        "lineHeight": 20,
+      },
+      undefined,
+      undefined,
+      undefined,
+      {
+        "color": "#000000",
+      },
+      undefined,
+    ]
+  }
+  suppressHighlighting={true}
+>
+  Colored Text
+</Text>
+`;
+
+exports[`Text Component applies weight and size styles 1`] = `
+<Text
+  style={
+    [
+      {
+        "color": "#000000",
+        "fontFamily": "SFProText-Regular",
+        "fontSize": 16,
+        "fontWeight": 400,
+        "lineHeight": 20,
+      },
+      undefined,
+      {
+        "fontFamily": "SFProText-Bold",
+        "fontWeight": 700,
+      },
+      {
+        "fontSize": 24,
+        "lineHeight": 28,
+      },
+      undefined,
+      undefined,
+    ]
+  }
+  suppressHighlighting={true}
+>
+  Styled Text
+</Text>
+`;
+
+exports[`Text Component renders correctly with default props 1`] = `
+<Text
+  style={
+    [
+      {
+        "color": "#000000",
+        "fontFamily": "SFProText-Regular",
+        "fontSize": 16,
+        "fontWeight": 400,
+        "lineHeight": 20,
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ]
+  }
+  suppressHighlighting={true}
+>
+  Default Text
+</Text>
+`;
+
+exports[`Text Component renders correctly with translation key 1`] = `
+<Text
+  style={
+    [
+      {
+        "color": "#000000",
+        "fontFamily": "SFProText-Regular",
+        "fontSize": 16,
+        "fontWeight": 400,
+        "lineHeight": 20,
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ]
+  }
+  suppressHighlighting={true}
+>
+  Your messages.
+Your privacy.
+</Text>
+`;

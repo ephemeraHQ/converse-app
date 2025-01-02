@@ -1,4 +1,4 @@
-const en = {
+export const en = {
   // Onboarding
   walletSelector: {
     title: "Your messages.\nYour privacy.",
@@ -63,7 +63,7 @@ const en = {
   privateKeyConnect: {
     title: "Connect via key",
     subtitle:
-      "Enter the private key for the address you are connecting.\n\nYour private key will only be stored locally in {{storage}}.",
+      "Enter the private key for the address you are connecting.\n\nYour private key is not stored.",
     storage: {
       ios: "your iPhone's Secure Enclave",
       android: "the Android Keystore system",
@@ -79,11 +79,6 @@ const en = {
       title: "Get started",
       explanation:
         "The secure inbox you own.\nConverse is built on XMTP, an open-source secure messaging protocol.",
-    },
-    secondSignature: {
-      title: "Allow Converse",
-      explanation:
-        "Converse needs your permission\nto send and receive messages.\nYou can revoke this anytime.",
     },
     valueProps: {
       e2eEncryption: {
@@ -169,12 +164,27 @@ const en = {
   restore_and_unblock_inviter: "Restore and unblock inviter",
   unblock_and_restore: "Unblock and restore",
   cancel: "Cancel",
+  back: "Back",
+  close: "Close",
   view_only: "View only",
   view_and_restore: "View and Restore",
   view_removed_group_chat: "View removed group chat?",
   connecting: "Connecting…",
   syncing: "Syncing…",
   search_chats: "Search chats",
+  no_results:
+    "We could not find any result in your existing conversations. You might want to",
+  no_results_start_convo: "start a new conversation",
+  new_account: "New account",
+  add_an_account: "Add an account",
+  group_info: "Group info",
+  converse_match_maker: "Converse Match Maker",
+  today: "Today",
+  yesterday: "Yesterday",
+  member_count: "{{count}} member",
+  members_count: "{{count}} members",
+  modify: "Modify",
+  pending_count: "{{count}} pending",
 
   // Requests
   requests: "Requests",
@@ -190,6 +200,7 @@ const en = {
     "You currently have no message requests. We'll make suggestions here as you connect with others.",
   hidden_requests_warn:
     "Requests containing messages that may be offensive or unwanted are moved to this folder.",
+  message_requests: "Message requests",
 
   // Conversation
   accept: "Accept",
@@ -218,8 +229,10 @@ const en = {
   identity_not_yet_xmtp:
     "{{identity}} is not yet using XMTP. Tell them to download the app at converse.xyz and log in with their wallet",
 
+  attachment_not_found: "Couldn't find attachment",
   // Conversation Context Menu
   pin: "Pin",
+  unpin: "Unpin",
   mark_as_read: "Mark as read",
   mark_as_unread: "Mark as unread",
 
@@ -246,11 +259,20 @@ const en = {
   xmtp_wrong_signer: "Wrong wallet",
   xmtp_wrong_signer_description:
     "Linked wallet does not own that XMTP identity. We unlinked it, please try again.",
+  promote_to_super_admin: "Promote to super admin",
+  revoke_super_admin: "Revoke super admin",
+  revoke_admin: "Revoke admin",
+  remove_member: "Remove from group",
+  invite_more_friends: "Invite more friends",
+  top_up_your_account: "Top up your account",
+  your_balance_usdc: "Your balance (USDC)",
+  you_parentheses: " (you)",
 
   // Context Menu
   reply: "Reply",
   copy: "Copy",
   share: "Share",
+  share_frame: "Share Frame",
 
   // Attachments
   photo_library: "Photo Library",
@@ -286,6 +308,7 @@ const en = {
     "Your request has been sent. Wait for the admin approve you",
   group_already_joined: "This invite has already been accepted",
   group_invite_default_group_name: "New Group",
+  open_conversation: "Open conversation",
 
   // Group Overview
   change_profile_picture: "Change profile picture",
@@ -306,9 +329,34 @@ const en = {
   approve: "Approve",
   deny: "Deny",
   approve_member_to_this_group: "Approve {{name}} to this group",
+  group_opertation_an_error_occurred: "An error occurred",
+
+  // New Group
+  new_group: {
+    add_members: "Add members",
+    edit_group_info: "Edit group info",
+    members_can: "MEMBERS CAN",
+    title: "New group",
+  },
+
+  new_conversation: {
+    create_group: "Create group",
+    back: "Back",
+    create: "Create",
+    add_members: "Add members",
+    new_conversation: "New conversation",
+    invite_to_converse: "Invite them to Converse",
+  },
 
   // Wallet selector
   no_wallet_detected: "No wallet detected",
+
+  // Profile
+  view_removed_chats: "View removed chats",
+  change_or_add_account: "Change or add account",
+  profile: {
+    modify_profile: "Modify profile",
+  },
 
   // Revocation
   current_installation_revoked: "Logged out",
@@ -325,7 +373,9 @@ const en = {
     "Connect the wallet associated with your XMTP account: {{wallet}}",
 
   // Emoji Picker
+  choose_reaction: "Choose a reaction",
   search_emojis: "Search emojis",
+  emoji_picker_all: "All",
 
   // Chat null state
   connectWithYourNetwork: "Find your frens",
@@ -341,10 +391,137 @@ const en = {
   joinAlphaGroup: "Join Converse VIP Alpha Chat",
   linkCopied: "Link copied",
 
+  // Transactional frames
+  transactionalFrameConnectWallet:
+    "Connect to a wallet app to trigger a transaction",
+  transaction_failure: "Transaction failed",
+  transaction_pending: "Confirm in {{wallet}}",
+  transaction_triggering: "Opening {{wallet}}...",
+  transaction_triggered: "Your transaction is being executed...",
+  transaction_success: "Done!",
+  transaction_switch_chain: "Switch Chain to {{chainName}} in {{wallet}}",
+  transaction_wallet: "Wallet",
+
+  // Transaction Simulation
+  simulation_pending: "Safely Simulating this Transaction",
+  simulation_failure:
+    "We were unable to simulate this transaction. You may still trigger it in your wallet.",
+  simulation_will_revert:
+    "Simulation shows that this transaction will revert. You may still try to trigger it in your wallet.",
+  simulation_caution: "Caution",
+  transaction_asset_change_type_approve: "Approve",
+  transaction_asset_change_type_transfer: "Transfer",
+  transaction_asset_change_to: "To",
+  external_wallet_chain_not_supported:
+    "This chain is not supported by your wallet",
+
   // New Conversation
   cannot_be_added_to_group_yet:
     "{{name}} needs to update Converse to be added to a group",
+  add: "Add",
+  add_loading: "Adding...",
+  chat: "Chat",
+  you: "You",
+  search_results: "RESULTS",
+  full_address_hint:
+    "If you don't see your contact in the list, try typing their full address (with {{providers}} etc…)",
+
+  // Group Updated Message
+  group_name_changed: 'changed the group name to "{{newValue}}".',
+  group_member_joined: "joined the conversation",
+  group_member_left: "left the conversation",
+  group_photo_changed: "changed the group photo.",
+  group_description_changed: 'changed the group description to "{{newValue}}".',
+  group_name_changed_to: 'changed the group name to "{{newValue}}".',
+
+  message_status: {
+    sent: "Sent",
+    delivered: "Sent",
+    error: "Failed",
+    sending: "Sending",
+    prepared: "Sending",
+    seen: "Read",
+  },
+
+  this_is_the_beginning_of_your_conversation_with:
+    "This is the beginning of your conversation with {{name}}",
+
+  group_placeholder: {
+    placeholder_text:
+      "This is the beginning of your conversation in {{groupName}}",
+  },
+
+  removed_chats: {
+    removed_chats: "Removed Chats",
+    eyes: "👀",
+    no_removed_chats:
+      "We could not find any removed group chat in your existing conversations.",
+  },
+
+  group_screen_member_actions: {
+    profile_page: "Profile page",
+    promote_to_admin: "Promote to admin",
+    promote_to_super_admin: "Promote to super admin",
+    revoke_admin: "Revoke admin",
+    revoke_super_admin: "Revoke super admin",
+    remove_member: "Remove from group",
+    cancel: "Cancel",
+    super_admin: "Super Admin",
+    admin: "Admin",
+  },
+
+  ephemeral_account_banner: {
+    title: "This account is ephemeral",
+    subtitle:
+      "Disconnect to permanently remove your device from these conversations and ensure deniability.",
+  },
+
+  initial_load: {
+    title: "Welcome to Converse!",
+    subtitle:
+      "We’re checking if you already own conversations on the XMTP network.",
+  },
+
+  recommendations: {
+    title:
+      "Find people who have interests in common with you. Start talking to them.",
+    section_title: "RECOMMENDED PROFILES",
+    loading: "Loading your recommendations",
+    no_recommendations:
+      "We didn not find people to match you with. We're still early and we're not using that many signals. You can ",
+    signal_list: "find the current list here",
+    please_feel_free_to: ", please feel free to ",
+    contact_pol: "contact our co-founder Pol",
+    if_you_want_us_to_add_anything:
+      "if you want us to add anything. \n\nThank you!",
+  },
+
+  top_up: {
+    header_title: "Top up",
+    title: "Bridge from any wallet",
+    alternatively: "Alternatively, if you want to do it by yourself, send ",
+    usdc: "USDC",
+    base: "Base",
+    native: " (native, not USDbC) on the ",
+    to_your_address: " blockchain to your address (see address below).",
+  },
+
+  conversation_list: {
+    messages: "Messages",
+  },
+
+  debug: {
+    converse_log_session: "Converse Log Session",
+    libxmtp_log_session: "LibXMTP Log Session",
+    converse_version: "Converse v{{version}} ({{buildNumber}})",
+  },
+
+  file_preview: "File preview",
+
+  share_profile: {
+    link_copied: "Link copied",
+    copy_link: "Copy link",
+  },
 };
 
-export default en;
 export type Translations = typeof en;

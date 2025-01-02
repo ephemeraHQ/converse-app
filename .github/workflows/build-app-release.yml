@@ -25,7 +25,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: 20.18.0
 
       - name: Install dependencies
         run: yarn install
@@ -46,16 +46,16 @@ jobs:
           echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> .env.production
           echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> .env.production
           echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> .env.production
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.production
 
       - name: Update EAS config with env variables
-        run: node scripts/build/eas.js --env production
+        run: node scripts/Øbuild/eas.js --env production
 
       - name: Update Android Files
-        # TODO: This should be handled by build configs in the future
-        run: node scripts/build/android/production.js
+        run: node scripts/build/android/build.js
 
       - name: Build for Android
-        run: eas build --profile production-android --platform android --non-interactive --auto-submit --no-wait
+        run: eas build --profile production --platform android --non-interactive --auto-submit --no-wait
 
   build-ios:
     runs-on: ubuntu-latest
@@ -68,7 +68,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: 20.18.0
 
       - name: Install dependencies
         run: yarn install
@@ -89,6 +89,7 @@ jobs:
           echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> .env.production
           echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> .env.production
           echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> .env.production
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.production
 
       - name: Update EAS config with env variables
         run: node scripts/build/eas.js --env production
@@ -98,7 +99,7 @@ jobs:
         run: node scripts/build/ios/production.js
 
       - name: Build for iOS
-        run: eas build --profile production-ios --platform ios --non-interactive --auto-submit --no-wait
+        run: eas build --profile production --platform ios --non-interactive --auto-submit --no-wait
 
   increment-build-numbers:
     runs-on: ubuntu-latest
@@ -110,7 +111,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: 20.18.0
 
       - name: Increment version number
         run: |

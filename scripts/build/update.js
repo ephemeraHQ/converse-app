@@ -3,7 +3,7 @@ const isClean = require("git-is-clean");
 const path = require("path");
 const prompts = require("prompts");
 
-// eslint-disable-next-line no-undef
+ 
 const PROJECT_ROOT = path.join(__dirname, "..", "..");
 
 const update = async () => {
@@ -26,7 +26,6 @@ const update = async () => {
   try {
     await executeCommand("node", ["scripts/build/eas.js", "--env", env]);
     await executeCommand("node", [`scripts/build/ios/${env}.js`]);
-    await executeCommand("node", [`scripts/build/android/${env}.js`]);
     const updateEnv = { ...process.env };
     if (env === "preview") {
       updateEnv.EXPO_ENV = "preview";

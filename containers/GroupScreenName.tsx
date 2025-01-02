@@ -1,6 +1,8 @@
+import { useGroupName } from "@/hooks/useGroupName";
+import { translate } from "@/i18n";
+import { captureErrorWithToast } from "@/utils/capture-error";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupMembers } from "@hooks/useGroupMembers";
-import { useGroupName } from "@hooks/useGroupName";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { textPrimaryColor } from "@styles/colors";
 import {
@@ -8,29 +10,29 @@ import {
   getAddressIsSuperAdmin,
 } from "@utils/groupUtils/adminUtils";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
-import logger from "@utils/logger";
 import { formatGroupName } from "@utils/str";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import React, { FC, useCallback, useMemo, useState } from "react";
 import {
+  Pressable,
   StyleSheet,
+  Text,
   TextInput,
   useColorScheme,
-  Text,
-  Alert,
-  Pressable,
 } from "react-native";
 
-interface GroupScreenNameProps {
-  topic: string;
-}
+type GroupScreenNameProps = {
+  topic: ConversationTopic;
+};
 
 export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
   const styles = useStyles();
   const { permissions } = useGroupPermissions(topic);
-  const { groupName, setGroupName } = useGroupName(topic);
+  const currentAccount = useCurrentAccount()!;
+  const { updateGroupName, groupName } = useGroupName(topic);
   const formattedGroupName = formatGroupName(topic, groupName);
-  const currentAccount = useCurrentAccount() as string;
   const { members } = useGroupMembers(topic);
+
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
       currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
@@ -47,12 +49,13 @@ export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
   const handleNameChange = useCallback(async () => {
     try {
       setEditing(false);
-      await setGroupName(editedName);
+      await updateGroupName(editedName);
     } catch (e) {
-      logger.error(e);
-      Alert.alert("An error occurred");
+      captureErrorWithToast(e, {
+        message: translate("group_opertation_an_error_occurred"),
+      });
     }
-  }, [editedName, setGroupName]);
+  }, [editedName, updateGroupName]);
   const canEditGroupName = memberCanUpdateGroup(
     permissions?.updateGroupNamePolicy,
     currentAccountIsAdmin,

@@ -1,3 +1,4 @@
+import { IPicto } from "@components/Picto/Picto.types";
 import { messageBubbleColor, textSecondaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
 import {
@@ -11,7 +12,7 @@ import {
 import Picto from "../Picto/Picto";
 
 type ChatActionProps = {
-  picto: string;
+  picto: IPicto;
   style?: StyleProp<ViewStyle>;
   pictoStyle?: StyleProp<ViewStyle>;
 };

@@ -1,4 +1,7 @@
-import axios from "axios";
+import { TransactionData } from "@components/TransactionPreview/TransactionPreview";
+import type { SimulateAssetChangesResponse } from "alchemy-sdk";
+import { GroupInvite } from "@utils/api.types";
+import axios, { AxiosError } from "axios";
 import * as Contacts from "expo-contacts";
 
 import {
@@ -10,23 +13,48 @@ import type { TransferAuthorizationMessage } from "./evm/erc20";
 import { getPrivyRequestHeaders } from "./evm/privy";
 import logger from "./logger";
 import type { TransactionDetails } from "./transaction";
-import type { ProfileType } from "../components/Onboarding/UserProfile";
 import config from "../config";
 import type { TopicData } from "../data/store/chatStore";
-import type { ProfileSocials } from "../data/store/profilesStore";
+import type { IProfileSocials } from "@/features/profiles/profile-types";
 import type { Frens } from "../data/store/recommendationsStore";
-import { getXmtpApiHeaders } from "../utils/xmtpRN/api";
+import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
+import type { InboxId } from "@xmtp/react-native-sdk";
+import { evmHelpers } from "./evm/helpers";
+import {
+  getInstallationKeySignature,
+  InstallationSignature,
+} from "./xmtpRN/client";
+import { getInboxId } from "./xmtpRN/signIn";
+import { createDedupedFetcher } from "./api.utils";
+import { getSecureMmkvForAccount } from "./mmkv";
+import {
+  CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
+  CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
+  FIREBASE_APP_CHECK_HEADER_KEY,
+  XMTP_API_ADDRESS_HEADER_KEY,
+  XMTP_IDENTITY_KEY,
+} from "./api.constants";
+import { tryGetAppCheckToken } from "./appCheck";
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: config.apiURI,
+  headers: {
+    ConverseUserAgent: `${analyticsPlatform}/${analyticsAppVersion}`,
+  },
 });
+
+type PatchedAxiosError = Omit<AxiosError, "config"> & {
+  config: AxiosError["config"] & { _retry: boolean };
+};
 
 // Better error handling
 api.interceptors.response.use(
-  function (response) {
+  function axiosSuccessResponse(response) {
     return response;
   },
-  function (error) {
+  async function axiosErrorResponse(error: PatchedAxiosError) {
+    const req = error.config;
+
     if (error.response) {
       logger.warn(
         `[API] HTTP Error ${error.response.status} - ${error.request._url}`,
@@ -36,6 +64,39 @@ api.interceptors.response.use(
           2
         )
       );
+      const account = req.headers?.[XMTP_API_ADDRESS_HEADER_KEY];
+      if (typeof account !== "string") {
+        throw new Error("No account in request headers");
+      }
+      const secureMmkv = await getSecureMmkvForAccount(account);
+      const refreshToken = secureMmkv.getString(
+        CONVERSE_REFRESH_TOKEN_STORAGE_KEY
+      );
+      if (
+        error.response?.status === 401 &&
+        req &&
+        // Prevent multiple simultaneous refresh attempts
+        !req._retry &&
+        // If no refresh token is stored, than token rotation will not be possible
+        refreshToken
+      ) {
+        try {
+          const { accessToken } = await rotateAccessToken(
+            account,
+            refreshToken
+          );
+          req._retry = true;
+          req.headers = {
+            ...req.headers,
+            authorization: `Bearer ${accessToken}`,
+          };
+
+          return api(req);
+        } catch (refreshError) {
+          // Token rotation failed - this is a legitimate authentication failure
+          return Promise.reject(refreshError);
+        }
+      }
     } else if (error.request) {
       logger.warn(
         `[API] HTTP Error - No response received - ${error.request._url}`,
@@ -48,6 +109,165 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export type AuthResponse = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+type AuthParams = {
+  inboxId: string;
+  installationPublicKey: string;
+  installationKeySignature: string;
+  appCheckToken: string;
+  account: string;
+};
+
+const { fetch: dedupedFetch } = createDedupedFetcher();
+
+export async function fetchAccessToken({
+  inboxId,
+  installationPublicKey,
+  installationKeySignature,
+  appCheckToken,
+  // TODO: Remove this once we move to InboxId as the account identifier
+  account,
+}: AuthParams): Promise<AuthResponse> {
+  logger.info("Creating access token");
+  const { data } = await dedupedFetch("/api/authenticate" + inboxId, () =>
+    api.post<AuthResponse>(
+      "/api/authenticate",
+      {
+        inboxId,
+        installationKeySignature,
+        installationPublicKey,
+        appCheckToken,
+      },
+      {
+        headers: {
+          [XMTP_API_ADDRESS_HEADER_KEY]: account,
+          [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
+        },
+      }
+    )
+  );
+
+  if (!data.accessToken) {
+    throw new Error("No access token in auth response");
+  }
+  if (!data.refreshToken) {
+    throw new Error("No refresh token in auth response");
+  }
+  logger.info("Created access token");
+  return data;
+}
+
+export async function rotateAccessToken(
+  account: string,
+  refreshToken: string | undefined
+): Promise<AuthResponse> {
+  logger.info(`Rotating access token for account ${account}`);
+  if (!refreshToken) {
+    throw new Error(
+      "Can't request new access token without current token and refresh token"
+    );
+  }
+
+  const { data } = await dedupedFetch(
+    `/api/authenticate/token-${account}`,
+    () =>
+      api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
+  );
+
+  if (!data) {
+    throw new Error(`Could not rotate access token for account ${account}`);
+  }
+  if (!data.accessToken) {
+    throw new Error(
+      `No access token in token rotate response for account ${account}`
+    );
+  }
+  logger.info(`Rotated access token for account ${account}`, { data });
+  const secureMmkv = await getSecureMmkvForAccount(account);
+  secureMmkv.set(CONVERSE_ACCESS_TOKEN_STORAGE_KEY, data.accessToken);
+  secureMmkv.set(CONVERSE_REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
+  return data;
+}
+
+export const xmtpSignatureByAccount: {
+  [account: string]: InstallationSignature;
+} = {};
+
+type XmtpApiHeaders = {
+  [XMTP_API_ADDRESS_HEADER_KEY]: string;
+  [FIREBASE_APP_CHECK_HEADER_KEY]: string;
+  /** Bearer <jwt access token>*/
+  authorization: `Bearer ${string}`;
+};
+
+export async function getXmtpApiHeaders(
+  account: string
+): Promise<XmtpApiHeaders> {
+  if (!account) {
+    throw new Error("[getXmtpApiHeaders] No account provided");
+  }
+  const secureMmkv = await getSecureMmkvForAccount(account);
+  let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
+
+  const appCheckToken = await tryGetAppCheckToken();
+
+  if (!appCheckToken) {
+    throw new Error(`
+No App Check Token Available. This indicates that we believe the app is not running on an authentic build of
+our application on a device that has not been tampered with. 
+`);
+  }
+
+  if (!accessToken) {
+    const installationKeySignature =
+      xmtpSignatureByAccount[account] ||
+      (await getInstallationKeySignature(account, XMTP_IDENTITY_KEY));
+
+    if (!xmtpSignatureByAccount[account]) {
+      xmtpSignatureByAccount[account] = installationKeySignature;
+    }
+
+    try {
+      const inboxId = await getInboxId(account);
+      const authTokensResponse = await fetchAccessToken({
+        inboxId,
+        account,
+        appCheckToken,
+        ...installationKeySignature,
+      });
+
+      if (!authTokensResponse) {
+        throw new Error("Could not create access token");
+      }
+
+      secureMmkv.set(
+        CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
+        authTokensResponse.accessToken
+      );
+      secureMmkv.set(
+        CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
+        authTokensResponse.refreshToken
+      );
+      accessToken = authTokensResponse.accessToken;
+    } catch (error) {
+      logger.error("Error while getting access token", error);
+    }
+  }
+  if (!accessToken) {
+    throw new Error("No access token");
+  }
+
+  return {
+    [XMTP_API_ADDRESS_HEADER_KEY]: account,
+    [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
+    authorization: `Bearer ${accessToken}`,
+  };
+}
 
 const lastSaveUser: { [address: string]: number } = {};
 
@@ -159,9 +379,26 @@ export const resolveFarcasterUsername = async (
 
 export const getProfilesForAddresses = async (
   addresses: string[]
-): Promise<{ [address: string]: ProfileSocials }> => {
+): Promise<{ [address: string]: IProfileSocials }> => {
   const { data } = await api.post("/api/profile/batch", {
     addresses,
+  });
+  return data;
+};
+
+export const getProfilesForInboxIds = async ({
+  inboxIds,
+}: {
+  inboxIds: string[];
+}): Promise<{ [inboxId: InboxId]: IProfileSocials[] }> => {
+  logger.info("Fetching profiles for inboxIds", inboxIds);
+  const { data } = await api.get("/api/inbox/", {
+    params: { ids: inboxIds.join(",") },
+    // todo(lustig) fix this request. it is 401ing after ephemeral account creation.
+    // why I'm delaying - its tied up in a batshit fetcher
+    // thing and I'll have to look into how that ties together with react-query and can't
+    // be bothered right now.
+    // headers: await getXmtpApiHeaders(account),
   });
   return data;
 };
@@ -169,7 +406,7 @@ export const getProfilesForAddresses = async (
 export const searchProfiles = async (
   query: string,
   account: string
-): Promise<{ [address: string]: ProfileSocials }> => {
+): Promise<{ [address: string]: IProfileSocials }> => {
   const { data } = await api.get("/api/profile/search", {
     headers: await getXmtpApiHeaders(account),
     params: { query },
@@ -180,7 +417,7 @@ export const searchProfiles = async (
 export const findFrens = async (account: string) => {
   const { data } = await api.get("/api/frens/find", {
     headers: await getXmtpApiHeaders(account),
-    params: { address: account },
+    params: { address: evmHelpers.toChecksumAddress(account) },
   });
 
   return data.frens as Frens;
@@ -232,6 +469,23 @@ export const getTopicsData = async (account: string) => {
     headers: await getXmtpApiHeaders(account),
   });
   return data as { [topic: string]: TopicData };
+};
+
+export const pinTopics = async (account: string, topics: string[]) => {
+  await api.post(
+    "/api/topics/pin",
+    { topics },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
+};
+
+export const unpinTopics = async (account: string, topics: string[]) => {
+  await api.delete("/api/topics/pin", {
+    data: { topics },
+    headers: await getXmtpApiHeaders(account),
+  });
 };
 
 export const postUSDCTransferAuthorization = async (
@@ -292,6 +546,7 @@ export const checkUsernameValid = async (
 ): Promise<string> => {
   const { data } = await api.get("/api/profile/username/valid", {
     params: { address, username },
+    headers: await getXmtpApiHeaders(address),
   });
   return data;
 };
@@ -410,16 +665,6 @@ export const joinGroupFromLink = async (
   return data as JoinGroupLinkResult;
 };
 
-export type GroupInvite = {
-  id: string;
-  inviteLink: string;
-  createdByAddress: string;
-  groupName: string;
-  imageUrl?: string;
-  description?: string;
-  groupId?: string;
-};
-
 export type CreateGroupInviteResult = Pick<GroupInvite, "id" | "inviteLink">;
 
 // Create a group invite. The invite will be associated with the account used.
@@ -484,6 +729,7 @@ export const createGroupJoinRequest = async (
       headers: await getXmtpApiHeaders(account),
     }
   );
+  logger.debug("[API] Group join request created", data);
   return data;
 };
 
@@ -524,6 +770,49 @@ export const getPendingGroupJoinRequests = async (
   const { data } = await api.get("/api/groupJoinRequest/pending", {
     headers: await getXmtpApiHeaders(account),
   });
+  return data;
+};
+
+export const simulateTransaction = async (
+  account: string,
+  from: string,
+  chainId: number,
+  transaction: TransactionData
+) => {
+  const { data } = await api.post(
+    "/api/transactions/simulate",
+    {
+      address: from,
+      network: `eip155:${chainId}`,
+      value: transaction.value
+        ? `0x${BigInt(transaction.value).toString(16)}`
+        : undefined,
+      to: transaction.to,
+      data: transaction.data,
+    },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
+  return data as SimulateAssetChangesResponse;
+};
+
+export const putGroupInviteRequest = async ({
+  account,
+  status,
+  joinRequestId,
+}: {
+  account: string;
+  status: string;
+  joinRequestId: string;
+}): Promise<void> => {
+  const { data } = await api.put(
+    `/api/groupJoinRequest/${joinRequestId}`,
+    { status },
+    {
+      headers: await getXmtpApiHeaders(account),
+    }
+  );
   return data;
 };
 

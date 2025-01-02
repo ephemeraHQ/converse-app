@@ -1,10 +1,29 @@
 const fs = require("fs");
 const plist = require("plist");
+const { copyGoogleServiceInfo } = require("../build.utils.js");
 
+/**
+ * iOS Production Environment Configuration Script
+ *
+ * This script modifies various iOS configuration files to set up
+ * the production environment build variant of the Converse app.
+ * It updates bundle IDs, display names, URL schemes and
+ * entitlements to use production-specific values.
+ *
+ * @sideEffects
+ * - Updates Xcode project config
+ * - Updates Info.plist files
+ * - Updates entitlements files
+ */
 const go = async () => {
+  copyGoogleServiceInfo("production");
+
   const PROJ_PATH = "ios/Converse.xcodeproj/project.pbxproj";
   const projContent = fs.readFileSync(PROJ_PATH, "utf-8");
 
+  //
+  // Update Xcode Project Bundle ID
+  // ----------------------------------------
   const newProjContent = projContent
     .replace(
       /PRODUCT_BUNDLE_IDENTIFIER = com\.converse\.dev/g,
@@ -17,6 +36,9 @@ const go = async () => {
 
   fs.writeFileSync(PROJ_PATH, newProjContent);
 
+  //
+  // Update Info.plist Files
+  // ----------------------------------------
   const PLIST_APP_PATH = "ios/Converse/Info.plist";
   const PLIST_EXTENSION_PATH = "ios/ConverseNotificationExtension/Info.plist";
 
@@ -30,6 +52,7 @@ const go = async () => {
   const newAppInfo = plist.build(appInfo);
   fs.writeFileSync(PLIST_APP_PATH, newAppInfo, "utf-8");
 
+  // Update notification extension Info.plist
   const extensionInfo = plist.parse(
     fs.readFileSync(PLIST_EXTENSION_PATH, "utf8")
   );
@@ -38,6 +61,9 @@ const go = async () => {
   const newExtensionInfo = plist.build(extensionInfo);
   fs.writeFileSync(PLIST_EXTENSION_PATH, newExtensionInfo, "utf-8");
 
+  //
+  // Update Entitlements Files
+  // ----------------------------------------
   const ENTITLEMENTS_APP_PATH = "ios/Converse/Converse.entitlements";
   const ENTITLEMENTS_EXTENSION_PATH =
     "ios/ConverseNotificationExtension/ConverseNotificationExtension.entitlements";
@@ -72,7 +98,8 @@ const go = async () => {
       "com.converse.dev",
       "com.converse.native"
     );
-  entitlementsExtension["com.apple.developer.usernotifications.filtering"] = true;
+  entitlementsExtension["com.apple.developer.usernotifications.filtering"] =
+    true;
   const newEntitlementsApp = plist.build(entitlementsApp);
   fs.writeFileSync(ENTITLEMENTS_APP_PATH, newEntitlementsApp, "utf-8");
 

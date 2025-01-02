@@ -14,15 +14,15 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
-  TextInput,
-  useColorScheme,
-  View,
   Text,
+  TextInput,
+  View,
+  useColorScheme,
 } from "react-native";
 import { List } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { NewConversationModalParams } from "./NewConversationModal";
+import { uploadFile } from "@utils/attachment/uploadFile";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import Button from "../../components/Button/Button";
 import GroupAvatar from "../../components/GroupAvatar";
@@ -30,39 +30,19 @@ import TableView from "../../components/TableView/TableView";
 import {
   currentAccount,
   useCurrentAccount,
-  useProfilesStore,
 } from "../../data/store/accountsStore";
 import { usePhotoSelect } from "../../hooks/usePhotoSelect";
-import { uploadFile } from "../../utils/attachment";
 import { navigate } from "../../utils/navigation";
 import {
-  getPreferredName,
   getPreferredAvatar,
+  getPreferredName,
   getProfile,
 } from "../../utils/profile";
-import { createGroup } from "../../utils/xmtpRN/conversations";
-import { useIsSplitScreen } from "../Navigation/navHelpers";
-
-const getPendingGroupMembers = (
-  members: any[],
-  account: string,
-  currentAccountSocials: any
-) => {
-  const currentUser = {
-    address: account,
-    uri: getPreferredAvatar(currentAccountSocials),
-    name: getPreferredName(currentAccountSocials, account),
-  };
-
-  const memberDetails = members.map((m) => ({
-    address: m.address,
-    uri: getPreferredAvatar(
-      useProfilesStore((s) => getProfile(m.address, s.profiles)?.socials)
-    ),
-    name: getPreferredName(m, m.address),
-  }));
-  return [currentUser, ...memberDetails];
-};
+import { createGroupByAccount } from "../../utils/xmtpRN/conversations";
+import { NewConversationModalParams } from "./NewConversationModal";
+import { captureErrorWithToast } from "@/utils/capture-error";
+import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
+import { useProfilesSocials } from "@/hooks/useProfilesSocials";
 
 export default function NewGroupSummary({
   route,
@@ -71,7 +51,6 @@ export default function NewGroupSummary({
   const styles = useStyles();
   const insets = useSafeAreaInsets();
   const [creatingGroup, setCreatingGroup] = useState(false);
-  const isSplitScreen = useIsSplitScreen();
   const [permissionPolicySet, setPermissionPolicySet] =
     useState<PermissionPolicySet>({
       addMemberPolicy: "allow",
@@ -84,9 +63,6 @@ export default function NewGroupSummary({
       updateGroupPinnedFrameUrlPolicy: "allow",
     });
   const account = useCurrentAccount();
-  const currentAccountSocials = useProfilesStore(
-    (s) => getProfile(account, s.profiles)?.socials
-  );
   const { photo: groupPhoto, addPhoto: addGroupPhoto } = usePhotoSelect();
   const [
     { remotePhotoUrl, isLoading: isUploadingGroupPhoto },
@@ -95,9 +71,12 @@ export default function NewGroupSummary({
     remotePhotoUrl: undefined,
     isLoading: false,
   });
+
   const defaultGroupName = useMemo(() => {
     if (!account) return "";
     const members = route.params.members.slice(0, 3);
+    const currentAccountSocials =
+      getProfileSocialsQueryData(account, account) ?? undefined;
     let groupName = getPreferredName(currentAccountSocials, account);
     if (members.length) {
       groupName += ", ";
@@ -110,7 +89,7 @@ export default function NewGroupSummary({
     }
 
     return groupName;
-  }, [route.params.members, account, currentAccountSocials]);
+  }, [route.params.members, account]);
   const colorScheme = useColorScheme();
   const [groupName, setGroupName] = useState(defaultGroupName);
   const [groupDescription, setGroupDescription] = useState("");
@@ -130,7 +109,9 @@ export default function NewGroupSummary({
         });
       })
       .catch((e) => {
-        Alert.alert(translate("upload_group_photo_error"), e.message);
+        captureErrorWithToast(e, {
+          message: translate("upload_group_photo_error"),
+        });
         setRemotePhotUrl({
           remotePhotoUrl: undefined,
           isLoading: false,
@@ -141,26 +122,22 @@ export default function NewGroupSummary({
   const onCreateGroupPress = useCallback(async () => {
     setCreatingGroup(true);
     try {
-      const groupTopic = await createGroup(
-        currentAccount(),
-        route.params.members.map((m) => m.address),
+      const group = await createGroupByAccount({
+        account: currentAccount(),
+        peers: route.params.members.map((m) => m.address),
         permissionPolicySet,
         groupName,
-        remotePhotoUrl,
-        groupDescription
-      );
-      if (Platform.OS !== "web") {
-        navigation.getParent()?.goBack();
-      }
-      setTimeout(
-        () => {
-          navigate("Conversation", {
-            topic: groupTopic,
-            focus: true,
-          });
-        },
-        isSplitScreen ? 0 : 300
-      );
+        groupPhoto: remotePhotoUrl,
+        groupDescription,
+      });
+
+      navigation.getParent()?.goBack();
+
+      setTimeout(() => {
+        navigate("Conversation", {
+          topic: group.topic,
+        });
+      }, 300);
     } catch (e) {
       logger.error(e);
       Alert.alert("An error occurred");
@@ -170,7 +147,6 @@ export default function NewGroupSummary({
     groupDescription,
     groupName,
     permissionPolicySet,
-    isSplitScreen,
     navigation,
     remotePhotoUrl,
     route.params.members,
@@ -220,6 +196,21 @@ export default function NewGroupSummary({
     ]
   );
 
+  const profileQueries = useProfilesSocials(
+    route.params.members.map((m) => m.address)
+  );
+
+  const pendingGroupMembers = useMemo(() => {
+    return profileQueries.map(({ data: socials }, index) => {
+      const address = route.params.members[index].address;
+      return {
+        address,
+        uri: getPreferredAvatar(socials ?? undefined),
+        name: getPreferredName(socials ?? undefined, account!),
+      };
+    });
+  }, [profileQueries, route.params.members, account]);
+
   return (
     <ScrollView
       style={styles.group}
@@ -230,11 +221,7 @@ export default function NewGroupSummary({
           <GroupAvatar
             uri={groupPhoto}
             style={styles.avatar}
-            pendingGroupMembers={getPendingGroupMembers(
-              route.params.members,
-              account ?? "",
-              currentAccountSocials
-            )}
+            pendingGroupMembers={pendingGroupMembers}
             excludeSelf={false}
           />
           <Button
@@ -277,12 +264,12 @@ export default function NewGroupSummary({
           id: a.address,
           title: getPreferredName(a, a.address),
         }))}
-        title="MEMBERS"
+        title={translate("members_title")}
       />
       <TableView
         items={[
           {
-            title: "Add members",
+            title: translate("new_group.add_members"),
             id: "addMembers",
             rightView: (
               <Switch
@@ -292,7 +279,7 @@ export default function NewGroupSummary({
             ),
           },
           {
-            title: "Edit group info",
+            title: translate("new_group.edit_group_info"),
             id: "editGroupInfo",
             rightView: (
               <Switch
@@ -302,7 +289,7 @@ export default function NewGroupSummary({
             ),
           },
         ]}
-        title="MEMBERS CAN"
+        title={translate("new_group.members_can")}
       />
       <Text style={styles.p}>
         {translate("promote_to_admin_to_manage_group")}
@@ -325,8 +312,7 @@ const useStyles = () => {
           backgroundColor: backgroundColor(colorScheme),
         },
         groupContent: {
-          paddingHorizontal:
-            Platform.OS === "ios" || Platform.OS === "web" ? 18 : 0,
+          paddingHorizontal: Platform.OS === "ios" ? 18 : 0,
         },
         sectionTitle: {
           marginBottom: -8,

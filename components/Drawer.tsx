@@ -1,6 +1,6 @@
+import { AnimatedVStack } from "@/design-system/VStack";
+import { AnimatedScrollView } from "@design-system/ScrollView";
 import { backgroundColor } from "@styles/colors";
-import { ReanimatedView } from "@utils/animations";
-import { useKeyboardAnimation } from "@utils/animations/keyboardAnimation";
 import React, {
   forwardRef,
   useCallback,
@@ -12,10 +12,10 @@ import {
   Platform,
   StyleSheet,
   TouchableWithoutFeedback,
-  useColorScheme,
-  useWindowDimensions,
   View,
   ViewStyle,
+  useColorScheme,
+  useWindowDimensions,
 } from "react-native";
 import {
   Gesture,
@@ -24,9 +24,10 @@ import {
 } from "react-native-gesture-handler";
 import { Portal } from "react-native-paper";
 import {
-  interpolateColor,
   LinearTransition,
+  interpolateColor,
   runOnJS,
+  useAnimatedKeyboard,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -37,12 +38,13 @@ const DRAWER_ANIMATION_DURATION = 300;
 const DRAWER_THRESHOLD = 100;
 const TRANSLATION = 1000;
 
-export interface DrawerProps {
+export type DrawerProps = {
   visible: boolean;
   children: React.ReactNode;
   onClose?: () => void;
   style?: ViewStyle;
-}
+  showHandle?: boolean;
+};
 
 export const DrawerContext = React.createContext<{
   closeDrawer: () => void;
@@ -50,16 +52,16 @@ export const DrawerContext = React.createContext<{
   closeDrawer: () => {},
 });
 
-export interface DrawerRef {
+export type DrawerRef = {
   /**
    * Will tell the drawer to close, but still needs
    * @returns
    */
   closeDrawer: (callback: () => void) => void;
-}
+};
 
 export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
-  { children, visible, onClose, style },
+  { children, visible, onClose, style, showHandle },
   ref
 ) {
   const styles = useStyles();
@@ -151,10 +153,10 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
       ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.5)"]
     ),
   }));
-  const { height: keyboardHeight } = useKeyboardAnimation();
+  const { height: keyboardHeight } = useAnimatedKeyboard();
   const { bottom } = useSafeAreaInsets();
 
-  const animtedStyle = useAnimatedStyle(() => ({
+  const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translation.value }],
     paddingBottom: Platform.OS === "ios" ? keyboardHeight.value + bottom : 0,
   }));
@@ -169,16 +171,17 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
         {/* A bit of a pain but have to wrap this in a gesture handler */}
         <GestureHandlerRootView style={styles.gestureHandlerContainer}>
           <TouchableWithoutFeedback onPress={handleClose}>
-            <ReanimatedView style={[styles.backdrop, backgroundStyle]} />
+            <AnimatedVStack style={[styles.backdrop, backgroundStyle]} />
           </TouchableWithoutFeedback>
           <GestureDetector gesture={composed}>
-            <ReanimatedView
-              style={[styles.trayContainer, animtedStyle, style]}
+            <AnimatedScrollView
+              style={[styles.trayContainer, animatedStyle, style]}
               layout={LinearTransition.springify()}
+              alwaysBounceVertical={false}
             >
-              <View style={styles.handle} />
+              {showHandle && <View style={styles.handle} />}
               {children}
-            </ReanimatedView>
+            </AnimatedScrollView>
           </GestureDetector>
         </GestureHandlerRootView>
       </Portal>

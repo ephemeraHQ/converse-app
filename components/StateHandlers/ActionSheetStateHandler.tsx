@@ -15,6 +15,10 @@ export default function ActionSheetStateHandler() {
     options: ActionSheetOptions,
     callback: (i?: number | undefined) => void | Promise<void>
   ) => {
+    if (options.options.length === 1) {
+      callback(0);
+      return;
+    }
     useAppStore.getState().setActionSheetShown(true);
     _showActionSheetWithOptions(options, (i?: number | undefined) => {
       useAppStore.getState().setActionSheetShown(false);

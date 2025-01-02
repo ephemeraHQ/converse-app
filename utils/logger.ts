@@ -10,7 +10,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 
 import { sentryAddBreadcrumb, sentryTrackError } from "./sentry";
-import config from "../config";
+import { isDev } from "./getEnv";
 
 export let loggingFilePath: string;
 
@@ -54,7 +54,7 @@ export const rotateLoggingFile = async () => {
 
 const converseTransport: transportFunctionType = async (props) => {
   // Logs are subperformant, so only in dev
-  if (config.env === "dev") {
+  if (isDev) {
     consoleTransport(props);
   }
   if (props.level.severity >= 3) {
@@ -96,5 +96,9 @@ const logger = _logger as typeof _logger & {
   warn: logMethodType;
   error: logMethodType;
 };
+
+export function logJson(json: any) {
+  console.log(JSON.stringify(json, null, 2));
+}
 
 export default logger;

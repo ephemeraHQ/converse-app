@@ -1,11 +1,11 @@
 import { sentryTrackMessage } from "@utils/sentry";
 import { useEffect, useRef, useState } from "react";
 
-import ActivityIndicator from "./ActivityIndicator/ActivityIndicator";
 import { useDebugEnabled } from "./DebugButton";
-import { useChatStore } from "../data/store/accountsStore";
+import { useChatStore, useCurrentAccount } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
+import { useConversationListQuery } from "@/queries/useConversationListQuery";
 
 export const useShouldShowConnecting = () => {
   const isInternetReachable = useAppStore((s) => s.isInternetReachable);
@@ -66,9 +66,9 @@ export const useShouldShowConnecting = () => {
 };
 
 export const useShouldShowConnectingOrSyncing = () => {
-  const { initialLoadDoneOnce, conversations } = useChatStore(
-    useSelect(["initialLoadDoneOnce", "conversations"])
-  );
+  const currentAccount = useCurrentAccount();
+  const { isLoading } = useConversationListQuery({ account: currentAccount! });
+  const initialLoadDoneOnce = !isLoading;
   const shouldShowConnecting = useShouldShowConnecting();
 
   const conditionTrueTime = useRef(0);
@@ -76,7 +76,7 @@ export const useShouldShowConnectingOrSyncing = () => {
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined = undefined;
 
-    if (!initialLoadDoneOnce && Object.keys(conversations).length > 0) {
+    if (!initialLoadDoneOnce) {
       if (conditionTrueTime.current === 0) {
         conditionTrueTime.current = Date.now();
       }
@@ -97,14 +97,7 @@ export const useShouldShowConnectingOrSyncing = () => {
     }
 
     return () => clearInterval(interval);
-  }, [conversations, initialLoadDoneOnce]);
+  }, [initialLoadDoneOnce]);
 
-  return (
-    shouldShowConnecting.shouldShow ||
-    (!initialLoadDoneOnce && Object.keys(conversations).length > 0)
-  );
+  return shouldShowConnecting.shouldShow || !initialLoadDoneOnce;
 };
-
-export default function Connecting() {
-  return <ActivityIndicator />;
-}

@@ -21,10 +21,9 @@ import { Platform, Alert } from "react-native";
 
 import config from "../config";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
-import { getConverseDbPath } from "../data/db";
-import { currentAccount, useAccountsList } from "../data/store/accountsStore";
-import { getPresignedUriForUpload } from "../utils/api";
+import { useAccountsList } from "../data/store/accountsStore";
 import mmkv from "../utils/mmkv";
+import { translate } from "@/i18n";
 
 export const useDebugEnabled = (address?: string) => {
   const accounts = useAccountsList();
@@ -77,38 +76,6 @@ const DebugButton = forwardRef((props, ref) => {
             alert(error);
           }
         },
-        "Export db file": async () => {
-          const dbPath = await getConverseDbPath(currentAccount());
-          const RNFS = require("react-native-fs");
-          const dbExists = await RNFS.exists(dbPath);
-          if (!dbExists) {
-            alert(`SQlite file does not exist`);
-            return;
-          }
-          const fileContent = await RNFS.readFile(dbPath, "base64");
-          const { url } = await getPresignedUriForUpload(currentAccount());
-          await axios.put(url, Buffer.from(fileContent, "base64"), {
-            headers: {
-              "content-type": "application/octet-stream",
-              "x-amz-acl": "public-read",
-            },
-          });
-          const fileURL = new URL(url);
-          const publicURL = fileURL.origin + fileURL.pathname;
-          const [dbEncryptionKey, dbEncryptionSalt] = await Promise.all([
-            getDbEncryptionKey(),
-            getDbEncryptionSalt(),
-          ]);
-
-          Clipboard.setString(
-            `Database URL: ${publicURL}\n\nPRAGMA key = '${Buffer.from(
-              dbEncryptionKey
-            ).toString(
-              "base64"
-            )}';\nPRAGMA cipher_plaintext_header_size = 32;\nPRAGMA cipher_salt = "x'${dbEncryptionSalt}'";`
-          );
-          alert("Database information copied to clipboard");
-        },
         "Clear logout tasks": () => {
           mmkv.delete("converse-logout-tasks");
         },
@@ -137,7 +104,7 @@ const DebugButton = forwardRef((props, ref) => {
         ...(debugEnabled ? debugMethods : {}),
         "Share current session logs": async () => {
           Share.open({
-            title: "Converse Log Session",
+            title: translate("debug.converse_log_session"),
             url: `file://${loggingFilePath}`,
             type: "text/plain",
           });
@@ -145,7 +112,7 @@ const DebugButton = forwardRef((props, ref) => {
         "Share native logs": async () => {
           const nativeLogFilePath = await getNativeLogFile();
           Share.open({
-            title: "LibXMTP Logs",
+            title: translate("debug.libxmtp_log_session"),
             url: `file://${nativeLogFilePath}`,
             type: "text/plain",
           });
@@ -156,7 +123,7 @@ const DebugButton = forwardRef((props, ref) => {
             return Alert.alert("No previous session logging file found");
           }
           Share.open({
-            title: "Converse Log Session",
+            title: translate("debug.converse_log_session"),
             url: `file://${previousLoggingFile}`,
             type: "text/plain",
           });
@@ -182,7 +149,10 @@ const DebugButton = forwardRef((props, ref) => {
 
       showActionSheetWithOptions(
         {
-          title: `Converse v${appVersion} (${buildNumber})`,
+          title: translate("debug.converse_version", {
+            version: appVersion,
+            buildNumber,
+          }),
           options,
           cancelButtonIndex: options.indexOf("Cancel"),
         },

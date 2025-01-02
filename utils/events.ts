@@ -1,9 +1,9 @@
-import { MessageToDisplay } from "@components/Chat/Message/Message";
-import { MediaPreview } from "@data/store/chatStore";
+import { TransactionToTrigger } from "@components/TransactionPreview/TransactionPreview";
 import EventEmitter from "eventemitter3";
+import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 import { Account, Wallet } from "thirdweb/wallets";
 
-import { GroupWithCodecsType } from "./xmtpRN/client";
+import { GroupWithCodecsType } from "./xmtpRN/client.types";
 
 type ShowActionSheetEvent<T extends string> = `showActionSheetForTxRef-${T}`;
 type OpenAttachmentMessage<T extends string> = `openAttachmentForMessage-${T}`;
@@ -13,25 +13,16 @@ type AttachmentMessageProcessed<T extends string> =
 type ConverseEvents = {
   newGroup: (group: GroupWithCodecsType) => void;
   showDebugMenu: () => void;
-  "toggle-navigation-drawer": (open: boolean) => void;
   "conversationList-scroll": () => void;
   "enable-transaction-mode": (enabled: boolean) => void;
-  openingConversation: (payload: { topic: string }) => void;
-  setCurrentConversationMediaPreviewValue: (mediaPreview: MediaPreview) => void;
-  highlightMessage: (messageId: string) => void;
-  setCurrentConversationInputValue: (value: string) => void;
-  triggerReplyToMessage: (message: MessageToDisplay) => void;
-  scrollChatToMessage: (value: {
-    index?: number;
-    messageId?: string;
-    animated?: boolean;
-  }) => void;
   toggleSpamRequests: () => void;
   displayExternalWalletPicker: (title?: string, subtitle?: string) => void;
   externalWalletPicked: (walletPicked: {
     wallet: Wallet | undefined;
     account: Account | undefined;
   }) => void;
+  previewTransaction: (transactionData: TransactionToTrigger) => void;
+  transactionResult: (id: string, receipt?: TransactionReceipt) => void;
 };
 
 type ShowActionSheetEvents = {

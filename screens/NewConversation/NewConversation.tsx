@@ -1,3 +1,4 @@
+import { Button } from "@design-system/Button/Button";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
@@ -9,7 +10,6 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
-  Button,
   Platform,
   ScrollView,
   StyleSheet,
@@ -19,35 +19,33 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { NewConversationModalParams } from "./NewConversationModal";
+import { translate } from "@/i18n";
+import { getCleanAddress } from "@/utils/evm/getCleanAddress";
+import { useGroupQuery } from "@queries/useGroupQuery";
+import SearchBar from "@search/components/SearchBar";
+import ProfileSearch from "@search/screens/ProfileSearch";
+import { canMessageByAccount } from "@utils/xmtpRN/contacts";
+import { InboxId } from "@xmtp/react-native-sdk";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "../../components/AndroidBackAction";
-import ConverseButton from "../../components/Button/Button";
-import SearchBar from "../../components/NewConversation/SearchBar";
 import Recommendations from "../../components/Recommendations/Recommendations";
-import ProfileSearch from "../../components/Search/ProfileSearch";
 import TableView from "../../components/TableView/TableView";
 import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import config from "../../config";
 import {
   currentAccount,
-  getProfilesStore,
-  useChatStore,
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
-import { ProfileSocials } from "../../data/store/profilesStore";
+import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useSelect } from "../../data/store/storeHelpers";
 import { useGroupMembers } from "../../hooks/useGroupMembers";
 import { searchProfiles } from "../../utils/api";
-import {
-  getAddressForPeer,
-  getCleanAddress,
-  isSupportedPeer,
-} from "../../utils/evm/address";
+import { getAddressForPeer, isSupportedPeer } from "../../utils/evm/address";
 import { navigate } from "../../utils/navigation";
 import { isEmptyObject } from "../../utils/objects";
 import { getPreferredName } from "../../utils/profile";
-import { isOnXmtp } from "../../utils/xmtpRN/client";
+import { NewConversationModalParams } from "./NewConversationModal";
+import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 
 export default function NewConversation({
   route,
@@ -57,26 +55,30 @@ export default function NewConversation({
   "NewConversationScreen"
 >) {
   const colorScheme = useColorScheme();
+  const { data: existingGroup } = useGroupQuery({
+    account: currentAccount(),
+    topic: route.params?.addingToGroupTopic!,
+  });
   const [group, setGroup] = useState({
     enabled: !!route.params?.addingToGroupTopic,
-    members: [] as (ProfileSocials & { address: string })[],
+    members: [] as (IProfileSocials & { address: string })[],
   });
-  const { addMembers } = useGroupMembers(
-    route.params?.addingToGroupTopic ?? ""
+
+  const { addMembers, members } = useGroupMembers(
+    route.params?.addingToGroupTopic!
   );
-  const existingGroup = useChatStore((s) =>
-    route.params?.addingToGroupTopic
-      ? s.conversations[route.params.addingToGroupTopic]
-      : undefined
-  );
+
   const [loading, setLoading] = useState(false);
+
   const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+
   const styles = useStyles();
 
   const handleRightAction = useCallback(async () => {
     if (route.params?.addingToGroupTopic) {
       setLoading(true);
       try {
+        //  TODO: Support multiple addresses
         await addMembers(group.members.map((m) => m.address));
         navigation.goBack();
       } catch (e) {
@@ -96,8 +98,8 @@ export default function NewConversation({
       headerLeft: () =>
         Platform.OS === "ios" ? (
           <Button
-            title="Cancel"
-            color={textPrimaryColor(colorScheme)}
+            variant="text"
+            text={translate("cancel")}
             onPress={handleBack}
           />
         ) : (
@@ -105,18 +107,18 @@ export default function NewConversation({
         ),
       headerTitle: group.enabled
         ? route.params?.addingToGroupTopic
-          ? "Add members"
-          : "New group"
-        : "New conversation",
+          ? translate("new_conversation.add_members")
+          : translate("new_conversation.create_group")
+        : translate("new_conversation.new_conversation"),
       headerRight: () => {
         if (group.enabled && group.members.length > 0) {
           if (loading) {
             return <ActivityIndicator style={styles.activityIndicator} />;
           } else {
             return (
-              <ConverseButton
+              <Button
                 variant="text"
-                title={route.params?.addingToGroupTopic ? "Add" : "Next"}
+                text={route.params?.addingToGroupTopic ? "Add" : "Next"}
                 onPress={handleRightAction}
                 style={{ marginRight: -10, padding: 10 }}
               />
@@ -144,7 +146,7 @@ export default function NewConversation({
     loading: false,
     error: "",
     inviteToConverse: "",
-    profileSearchResults: {} as { [address: string]: ProfileSocials },
+    profileSearchResults: {} as { [address: string]: IProfileSocials },
   });
 
   const {
@@ -210,7 +212,10 @@ export default function NewConversation({
               return;
             }
             const address = getCleanAddress(resolvedAddress);
-            const addressIsOnXmtp = await isOnXmtp(address);
+            const addressIsOnXmtp = await canMessageByAccount({
+              account: currentAccount(),
+              peer: address,
+            });
             if (searchingForValue.current === value) {
               if (addressIsOnXmtp) {
                 // Let's search with the exact address!
@@ -221,9 +226,7 @@ export default function NewConversation({
 
                 if (!isEmptyObject(profiles)) {
                   // Let's save the profiles for future use
-                  getProfilesStore(currentAccount())
-                    .getState()
-                    .saveSocials(profiles);
+                  setProfileRecordSocialsQueryData(currentAccount(), profiles);
                   setStatus({
                     loading: false,
                     error: "",
@@ -260,7 +263,7 @@ export default function NewConversation({
 
           if (!isEmptyObject(profiles)) {
             // Let's save the profiles for future use
-            getProfilesStore(currentAccount()).getState().saveSocials(profiles);
+            setProfileRecordSocialsQueryData(currentAccount(), profiles);
             setStatus({
               loading: false,
               error: "",
@@ -293,19 +296,17 @@ export default function NewConversation({
   const showRecommendations =
     !status.loading && value.length === 0 && recommendationsFrensCount > 0;
 
-  const profiles = getProfilesStore(currentAccount()).getState().profiles;
-
   const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
+
   const onRef = useCallback(
     (r: TextInput | null) => {
       if (!initialFocus.current) {
         initialFocus.current = true;
         if (
-          (!value &&
-            !recommendationsLoading &&
-            recommendationsLoadedOnce &&
-            recommendationsFrensCount === 0) ||
-          Platform.OS === "web" // On web, always focus
+          !value &&
+          !recommendationsLoading &&
+          recommendationsLoadedOnce &&
+          recommendationsFrensCount === 0
         ) {
           setTimeout(() => {
             r?.focus();
@@ -340,12 +341,11 @@ export default function NewConversation({
         ]}
       >
         {!group.enabled && (
-          <ConverseButton
+          <Button
             variant="text"
             picto="person.2"
-            title="New group"
+            text={translate("new_group.title")}
             style={styles.newGroupButton}
-            textStyle={{ fontWeight: "500" }}
             onPress={() => {
               setGroup({ enabled: true, members: [] });
             }}
@@ -358,16 +358,13 @@ export default function NewConversation({
             const preferredName = getPreferredName(m, m.address);
 
             return (
-              <ConverseButton
+              <Button
                 key={m.address}
-                title={preferredName}
-                variant="secondary"
+                text={preferredName}
+                variant="fill"
+                size="md"
                 picto="xmark"
                 style={styles.groupMemberButton}
-                textStyle={{
-                  lineHeight: 17,
-                  top: Platform.OS === "ios" ? undefined : 1,
-                }}
                 onPress={() =>
                   setGroup((g) => {
                     const members = [...g.members];
@@ -394,9 +391,11 @@ export default function NewConversation({
                   delete searchResultsToShow[member.address];
                 });
               }
-              if (existingGroup) {
-                existingGroup.groupMembers?.forEach((a) => {
-                  delete searchResultsToShow[a];
+              if (members) {
+                members?.ids?.forEach((memberId: InboxId) => {
+                  const member = members.byId[memberId];
+                  const address = getCleanAddress(member.addresses[0]);
+                  delete searchResultsToShow[address];
                 });
               }
               return searchResultsToShow;
@@ -419,8 +418,6 @@ export default function NewConversation({
         >
           <Recommendations
             visibility="EMBEDDED"
-            navigation={navigation}
-            profiles={profiles}
             groupMode={group.enabled}
             groupMembers={group.members}
             addToGroup={async (member) => {
@@ -463,7 +460,7 @@ export default function NewConversation({
               {
                 id: "inviteToConverse",
                 leftView: <TableViewPicto symbol="link" />,
-                title: "Invite them to Converse",
+                title: translate("new_conversation.invite_to_converse"),
                 subtitle: "",
                 action: () => {
                   navigation.goBack();
@@ -552,7 +549,7 @@ const useStyles = () => {
       padding: 0,
       marginHorizontal: 0,
       marginRight: 10,
-      height: Platform.OS === "ios" ? 30 : undefined,
+      // height: Platform.OS === "ios" ? 30 : undefined,
       marginTop: 10,
     },
     activityIndicator: {
@@ -561,7 +558,6 @@ const useStyles = () => {
     searchContainer: {
       flex: 1,
       backgroundColor: backgroundColor(colorScheme),
-      paddingHorizontal: Platform.OS === "web" ? 20 : undefined,
     },
     newGroupButton: {
       marginLeft: 7,

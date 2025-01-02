@@ -1,5 +1,4 @@
-import { textSecondaryColor } from "@styles/colors";
-import { PictoSizes } from "@styles/sizes";
+import { IPicto } from "@components/Picto/Picto.types";
 import { Image } from "expo-image";
 import React from "react";
 import {
@@ -10,10 +9,10 @@ import {
   TouchableOpacity,
   View,
   ViewStyle,
-  useColorScheme,
 } from "react-native";
 
-import IconLoading from "../../assets/icon-loading.png";
+import { useAppTheme } from "@theme/useAppTheme";
+import IconLoading from "@assets/icon-loading.png";
 import Picto from "../Picto/Picto";
 import SvgImageUri from "../SvgImageUri";
 
@@ -52,28 +51,15 @@ export const TableViewPicto = ({
   color,
   onPress,
 }: {
-  symbol: string;
+  symbol: IPicto;
   color?: ColorValue;
   onPress?: () => void;
 }) => {
-  const colorScheme = useColorScheme();
+  const { theme } = useAppTheme();
+
   const pictoView = (
     <View style={{ justifyContent: "center" }}>
-      <Picto
-        picto={symbol}
-        size={PictoSizes.tableViewImage}
-        style={Platform.select({
-          default: {
-            width: IMAGE_SIZE,
-            height: IMAGE_SIZE,
-            marginLeft: Platform.OS === "ios" ? 0 : 16,
-          },
-        })}
-        color={
-          color ||
-          (Platform.OS === "ios" ? undefined : textSecondaryColor(colorScheme))
-        }
-      />
+      <Picto picto={symbol} size={theme.iconSize.sm} />
     </View>
   );
   if (!onPress) return pictoView;

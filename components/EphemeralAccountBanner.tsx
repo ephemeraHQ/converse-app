@@ -1,3 +1,4 @@
+import { translate } from "@/i18n";
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import {
   itemSeparatorColor,
@@ -24,10 +25,11 @@ export default function EphemeralAccountBanner() {
       style={styles.tempAccountBanner}
     >
       <View style={styles.tempAccountBannerLeft}>
-        <Text style={styles.tempAccountTitle}>This account is ephemeral</Text>
+        <Text style={styles.tempAccountTitle}>
+          {translate("ephemeral_account_banner.title")}
+        </Text>
         <Text style={styles.tempAccountSubtitle} numberOfLines={4}>
-          Disconnect to permanently remove your device from these conversations
-          and ensure deniability.
+          {translate("ephemeral_account_banner.subtitle")}
         </Text>
       </View>
     </TouchableOpacity>

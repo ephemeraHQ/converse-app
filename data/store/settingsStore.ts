@@ -1,11 +1,9 @@
 import logger from "@utils/logger";
 import { InboxId } from "@xmtp/react-native-sdk";
-import { Platform } from "react-native";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { zustandMMKVStorage } from "../../utils/mmkv";
-import { subscribeToNotifications } from "../../utils/notifications";
 
 // Settings for each account setup in the app
 // not all of them are really settings selected
@@ -36,9 +34,7 @@ export type SettingsStoreType = {
   }) => void;
 
   groupStatus: GroupStatus;
-  setGroupStatus: (groupStatus: {
-    [groupId: string]: "allowed" | "denied";
-  }) => void;
+  setGroupStatus: (groupStatus: GroupStatus) => void;
 
   ephemeralAccount: boolean;
   setEphemeralAccount: (ephemeral: boolean) => void;
@@ -52,12 +48,6 @@ export type SettingsStoreType = {
   skipAddressBook: boolean;
   setSkipAddressBook: (s: boolean) => void;
 
-  // A boolean stating if the user did the app onboarding
-  // before or after we released profiles. Helps to show
-  // an intermediary screen for those who onboarded before
-  onboardedAfterProfilesRelease: boolean;
-  setOnboardedAfterProfilesRelease: (s: boolean) => void;
-
   hasUserDismissedBanner: boolean;
   setHasUserDismissedBanner: (dismissed: boolean) => void;
 };
@@ -67,17 +57,13 @@ export const initSettingsStore = (account: string) => {
     persist(
       (set) => ({
         notifications: {
-          // On web we never show notifications screen
-          showNotificationScreen: Platform.OS !== "web",
+          showNotificationScreen: true,
         },
         peersStatus: {},
         setPeersStatus: (peersStatus: {
           [peerAddress: string]: "blocked" | "consented";
         }) =>
           set((state) => {
-            setImmediate(() => {
-              subscribeToNotifications(account);
-            });
             return {
               peersStatus: {
                 ...state.peersStatus,
@@ -143,9 +129,6 @@ export const initSettingsStore = (account: string) => {
         setSkipFarcaster: (s) => set(() => ({ skipFarcaster: s })),
         skipAddressBook: false,
         setSkipAddressBook: (s) => set(() => ({ skipAddressBook: s })),
-        onboardedAfterProfilesRelease: false,
-        setOnboardedAfterProfilesRelease: (o) =>
-          set(() => ({ onboardedAfterProfilesRelease: o })),
         hasUserDismissedBanner: false,
         setHasUserDismissedBanner: (dismissed) =>
           set({ hasUserDismissedBanner: dismissed }),

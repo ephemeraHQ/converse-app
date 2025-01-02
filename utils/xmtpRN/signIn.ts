@@ -8,20 +8,18 @@ import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { Client } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
-
 import { isClientInstallationValid } from "./client";
+import { ethersSignerToXmtpSigner } from "./signer";
 import config from "../../config";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
 export const getInboxId = (address: string) =>
-  Client.getOrCreateInboxId(address, { env });
+  Client.getOrCreateInboxId(address, env);
 
-export const getXmtpBase64KeyFromSigner = async (
+export const createXmtpClientFromSigner = async (
   signer: Signer,
   onInstallationRevoked: () => Promise<void>,
-  preCreateIdentityCallback?: () => Promise<void>,
-  preEnableIdentityCallback?: () => Promise<void>,
   preAuthenticateToInboxCallback?: () => Promise<void>
 ) => {
   const tempDirectory = await createTemporaryDirectory();
@@ -33,19 +31,14 @@ export const getXmtpBase64KeyFromSigner = async (
     dbDirectory: tempDirectory,
     dbEncryptionKey,
   };
-  const inboxId = await Client.getOrCreateInboxId(
-    await signer.getAddress(),
-    options
-  );
+  const inboxId = await getInboxId(await signer.getAddress());
 
   await copyDatabasesToTemporaryDirectory(tempDirectory, inboxId);
 
   logger.debug("Instantiating client from signer");
 
-  const client = await Client.create(signer, {
+  const client = await Client.create(ethersSignerToXmtpSigner(signer), {
     ...options,
-    preCreateIdentityCallback,
-    preEnableIdentityCallback,
     preAuthenticateToInboxCallback,
   });
 
@@ -63,8 +56,7 @@ export const getXmtpBase64KeyFromSigner = async (
     return;
   }
 
-  logger.debug("Instantiated client from signer, exporting key bundle");
-  const base64Key = await client.exportKeyBundle();
+  logger.debug("Instantiated client from signer");
   // This Client is only be used to extract the key, we can disconnect
   // it to prevent locks happening during Onboarding
   await client.dropLocalDatabaseConnection();
@@ -72,6 +64,5 @@ export const getXmtpBase64KeyFromSigner = async (
     tempDirectory,
     client.inboxId
   );
-  logger.debug("Exported key bundle");
-  return base64Key;
+  logger.debug("Dropped client databases");
 };
