@@ -1,9 +1,9 @@
+import { Center } from "@/design-system/Center";
 import Avatar from "@components/Avatar";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { HStack } from "@design-system/HStack";
 import { Pressable } from "@design-system/Pressable";
 import { ITextProps, Text } from "@design-system/Text";
-import { VStack } from "@design-system/VStack";
 import { TxKeyPath, translate } from "@i18n";
 import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
@@ -25,7 +25,7 @@ type IMessageChatGroupUpdateProps = {
 export function MessageChatGroupUpdate({
   message,
 }: IMessageChatGroupUpdateProps) {
-  const { themed, theme } = useAppTheme();
+  const { theme } = useAppTheme();
 
   const content = message.content();
 
@@ -35,14 +35,15 @@ export function MessageChatGroupUpdate({
   }
 
   return (
-    <VStack
+    <Center
       // {...debugBorder()}
       style={{
         width: "100%",
         paddingVertical: theme.spacing.sm,
+        paddingHorizontal: theme.spacing.sm,
       }}
     >
-      <VStack style={themed($container)}>
+      <Center>
         {/* Member additions */}
         {content.membersAdded.map((member) => (
           <ChatGroupMemberJoined
@@ -67,8 +68,8 @@ export function MessageChatGroupUpdate({
             initiatorInboxId={content.initiatedByInboxId as InboxId}
           />
         ))}
-      </VStack>
-    </VStack>
+      </Center>
+    </Center>
   );
 }
 
@@ -238,13 +239,15 @@ function ChatGroupMetadataUpdate({
 const ChatGroupUpdateText = memo(function ChatGroupUpdateText(
   props: ITextProps
 ) {
-  return <Text color="secondary" preset="smaller" {...props} />;
-});
-
-const $container: ThemedStyle<ViewStyle> = () => ({
-  justifyContent: "center",
-  alignItems: "center",
-  width: "100%",
+  const { style, ...rest } = props;
+  return (
+    <Text
+      style={[{ textAlign: "center" }, style]}
+      color="secondary"
+      preset="smaller"
+      {...rest}
+    />
+  );
 });
 
 const $memberContainer: ThemedStyle<ViewStyle> = () => ({

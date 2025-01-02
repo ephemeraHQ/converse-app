@@ -1,7 +1,8 @@
-import { IConvosMessage } from "@/features/conversation/conversation-message/conversation-message.types";
 import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
+import {
+  ConversationWithCodecsType,
+  DecodedMessageWithCodecsType,
+} from "@/utils/xmtpRN/client.types";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
 import { isSupportedMessage } from "@/utils/xmtpRN/messages";
 import { UseQueryOptions, useQuery } from "@tanstack/react-query";
@@ -71,15 +72,7 @@ export const useConversationMessages = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const query = useQuery(getConversationMessagesQueryOptions(account, topic));
-
-  useAppStateHandlers({
-    onForeground: () => {
-      query.refetch();
-    },
-  });
-
-  return query;
+  return useQuery(getConversationMessagesQueryOptions(account, topic));
 };
 
 export const getConversationMessagesQueryData = (
@@ -104,7 +97,7 @@ export function refetchConversationMessages(
 export const addConversationMessage = (args: {
   account: string;
   topic: ConversationTopic;
-  message: IConvosMessage;
+  message: DecodedMessageWithCodecsType;
 }) => {
   const { account, topic, message } = args;
 
@@ -154,7 +147,7 @@ const ignoredContentTypesPrefixes = [
 
 type IMessageAccumulator = {
   ids: MessageId[];
-  byId: Record<MessageId, IConvosMessage>;
+  byId: Record<MessageId, DecodedMessageWithCodecsType>;
   reactions: Record<
     MessageId,
     {
@@ -165,7 +158,8 @@ type IMessageAccumulator = {
 };
 
 function processMessages(args: {
-  messages: IConvosMessage[];
+  // messages: IConvosMessage[];
+  messages: DecodedMessageWithCodecsType[];
   existingData?: IMessageAccumulator;
   prependNewMessages?: boolean;
 }): IMessageAccumulator {
@@ -275,7 +269,7 @@ export function replaceOptimisticMessageWithReal(args: {
   tempId: string;
   topic: ConversationTopic;
   account: string;
-  message: ConvosMes;
+  message: DecodedMessageWithCodecsType;
 }) {
   const { tempId, topic, account, message } = args;
   logger.info(

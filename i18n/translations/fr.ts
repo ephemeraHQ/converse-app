@@ -378,7 +378,7 @@ export const fr = {
     "Connectez le portefeuille associé à votre compte XMTP : {{wallet}}",
 
   // Emoji Picker
-  choose_reaction: "Choisir une réaction",
+  choose_a_reaction: "Choisir une réaction",
   search_emojis: "Rechercher des émojis",
   emoji_picker_all: "Tout",
 

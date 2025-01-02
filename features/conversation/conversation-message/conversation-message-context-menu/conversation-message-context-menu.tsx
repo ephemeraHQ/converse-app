@@ -24,7 +24,6 @@ import {
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { calculateMenuHeight } from "@design-system/ContextMenu/ContextMenu.utils";
 import { Portal } from "@gorhom/portal";
@@ -65,7 +64,6 @@ const Content = memo(function Content(props: {
     account,
     topic,
   });
-  const { data: currentUserInboxId } = useCurrentAccountInboxId();
   const { bySender } = useConversationMessageReactions(messageId!);
 
   const message = getMessageById({

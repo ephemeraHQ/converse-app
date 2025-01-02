@@ -7,14 +7,14 @@ import { useMessageContextStoreContext } from "@/features/conversation/conversat
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ReactNode, memo } from "react";
 
-type IConversationMessageLayoutProps = {
+type IConversationMessageUserLayoutProps = {
   children: ReactNode;
 };
 
-export const ConversationMessageLayout = memo(
-  function ConversationMessageLayout({
+export const ConversationMessageUserLayout = memo(
+  function ConversationMessageUserLayout({
     children,
-  }: IConversationMessageLayoutProps) {
+  }: IConversationMessageUserLayoutProps) {
     const { theme } = useAppTheme();
 
     const {
