@@ -18,92 +18,56 @@ import {
   TransactionsStoreType,
 } from "./transactionsStore";
 import { initWalletStore, WalletStoreType } from "./walletStore";
-import { removeLogoutTask } from "@utils/logout";
 import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
-import { useLinkWithPasskey } from "@privy-io/expo/dist/passkey";
 
-type AccountStoreType = {
+type AccountStoreByInboxIdType = {
   [K in keyof AccountStoreDataType]: UseBoundStore<
     StoreApi<AccountStoreDataType[K]>
   >;
 };
 
-const storesByAccount: {
-  [account: string]: AccountStoreType;
+const storesByInboxId: {
+  [inboxId: string]: AccountStoreByInboxIdType;
 } = {};
 
 // And here call the init method of each store
-export const initStores = (account: string) => {
-  if (!(account in storesByAccount)) {
-    logger.debug(`[AccountsStore] Initiating account ${account}`);
+export const initStores = ({ inboxId }: { inboxId: string }) => {
+  if (!(inboxId in storesByInboxId)) {
+    logger.debug(`[AccountsStore] Initiating stores for inboxId ${inboxId}`);
     // If adding a persisted store here, please add
     // the deletion method in deleteStores
-    storesByAccount[account] = {
-      settings: initSettingsStore(account),
-      recommendations: initRecommendationsStore(account),
-      chat: initChatStore(account),
-      wallet: initWalletStore(account),
-      transactions: initTransactionsStore(account),
+    storesByInboxId[inboxId] = {
+      settings: initSettingsStore(inboxId),
+      recommendations: initRecommendationsStore(inboxId),
+      chat: initChatStore(inboxId),
+      wallet: initWalletStore(inboxId),
+      transactions: initTransactionsStore(inboxId),
     };
   }
 };
 
-const deleteStores = (account: string) => {
-  logger.debug(`[AccountsStore] Deleting account ${account}`);
-  delete storesByAccount[account];
-  mmkv.delete(`store-${account}-chat`);
-  mmkv.delete(`store-${account}-recommendations`);
-  mmkv.delete(`store-${account}-settings`);
-  mmkv.delete(`store-${account}-wallet`);
-  mmkv.delete(`store-${account}-transactions`);
+const deleteStores = ({ inboxId }: { inboxId: string }) => {
+  logger.debug(`[AccountsStore] Deleting stores for inboxId ${inboxId}`);
+  delete storesByInboxId[inboxId];
+  mmkv.delete(`store-${inboxId}-chat`);
+  mmkv.delete(`store-${inboxId}-recommendations`);
+  mmkv.delete(`store-${inboxId}-settings`);
+  mmkv.delete(`store-${inboxId}-wallet`);
+  mmkv.delete(`store-${inboxId}-transactions`);
 };
 
 export const TEMPORARY_ACCOUNT_NAME = "TEMPORARY_ACCOUNT";
 
-initStores(TEMPORARY_ACCOUNT_NAME);
+initStores({ inboxId: TEMPORARY_ACCOUNT_NAME });
 
 export const getAccountsList = () =>
   useAccountsStore
     .getState()
-    .accounts.filter((a) => a && a !== TEMPORARY_ACCOUNT_NAME);
+    .inboxIds.filter((a: string) => a && a !== TEMPORARY_ACCOUNT_NAME);
 
 export const useAccountsList = () => {
-  const accounts = useAccountsStore((s) => s.accounts);
-  return accounts.filter((a) => a && a !== TEMPORARY_ACCOUNT_NAME);
-};
-
-export const useErroredAccountsMap = () => {
-  const accounts = useAccountsList();
-  return accounts.reduce(
-    (acc, a) => {
-      const errored = getChatStore(a).getState().errored;
-
-      if (errored) {
-        acc[a] = errored;
-      }
-
-      return acc;
-    },
-    {} as { [account: string]: boolean }
-  );
-};
-// This store is global (i.e. not linked to an account)
-// For now we only use a single account so we initialize it
-// and don't add a setter.
-
-type AccountsStoreStype = {
-  currentAccount: string;
-  setCurrentAccount: (account: string, createIfNew: boolean) => void;
-
-  accounts: string[];
-  inboxIdToAccountMap: Record<string, string>;
-
-  removeAccount: (account: string) => void;
-  databaseId: { [account: string]: string };
-  setDatabaseId: (account: string, id: string) => void;
-  resetDatabaseId: (account: string) => void;
-  privyAccountId: { [account: string]: string | undefined };
-  setPrivyAccountId: (account: string, id: string | undefined) => void;
+  const inboxIds = useAccountsStore((s) => s.inboxIds);
+  return inboxIds.filter((a: string) => a && a !== TEMPORARY_ACCOUNT_NAME);
 };
 
 /*
@@ -224,56 +188,82 @@ incognito identity
 
  */
 
-export const useAccountsStore = create<AccountsStoreStype>()(
+type AccountsStoreType = {
+  currentInboxId: string;
+  setCurrentInboxId: ({
+    inboxId,
+    createIfNew,
+  }: {
+    inboxId: string;
+    createIfNew: boolean;
+  }) => void;
+
+  inboxIds: string[];
+  inboxIdToAccountMap: Record<string, string>;
+
+  removeInboxById: ({ inboxId }: { inboxId: string }) => void;
+  databaseIdByInboxId: { [inboxId: string]: string };
+  setDatabaseId: ({ inboxId, id }: { inboxId: string; id: string }) => void;
+  resetDatabaseId: ({ inboxId }: { inboxId: string }) => void;
+
+  // databaseId: { [inboxId: string]: string };
+  // currentAccount: string;
+  // setCurrentAccount: (account: string, createIfNew: boolean) => void;
+  // accounts: string[];
+  // privyAccountId: { [inboxId: string]: string | undefined };
+  // setPrivyAccountId: (inboxId: string, id: string | undefined) => void;
+};
+
+export const useAccountsStore = create<AccountsStoreType>()(
   persist(
     (set) => ({
-      currentAccount: TEMPORARY_ACCOUNT_NAME,
-      accounts: [TEMPORARY_ACCOUNT_NAME],
-      privyAccountId: {},
-      setPrivyAccountId: (account, id) =>
+      currentInboxId: TEMPORARY_ACCOUNT_NAME,
+      inboxIds: [TEMPORARY_ACCOUNT_NAME],
+      inboxIdToAccountMap: {},
+      databaseIdByInboxId: {},
+      setDatabaseId: ({ inboxId, id }) =>
         set((state) => {
-          const privyAccountId = { ...state.privyAccountId };
-          privyAccountId[account] = id;
-          return { privyAccountId };
+          const databaseIdByInboxId = { ...state.databaseIdByInboxId };
+          databaseIdByInboxId[inboxId] = id;
+          return { databaseIdByInboxId };
         }),
-      databaseId: {},
-      setDatabaseId: (account, id) =>
+      // setPrivyAccountId: (account, id) =>
+      //   set((state) => {
+      //     const privyAccountId = { ...state.privyAccountId };
+      //     privyAccountId[account] = id;
+      //     return { privyAccountId };
+      //   }),
+      resetDatabaseId: ({ inboxId }) =>
         set((state) => {
-          const databaseId = { ...state.databaseId };
-          databaseId[account] = id;
-          return { databaseId };
+          const newDatabaseIdByInboxId = { ...state.databaseIdByInboxId };
+          newDatabaseIdByInboxId[inboxId] = uuidv4();
+          return { databaseIdByInboxId: newDatabaseIdByInboxId };
         }),
-      resetDatabaseId: (account) =>
+      setCurrentInboxId: ({ inboxId, createIfNew }) =>
         set((state) => {
-          const databaseId = { ...state.databaseId };
-          databaseId[account] = uuidv4();
-          return { databaseId };
-        }),
-      setCurrentAccount: (account, createIfNew) =>
-        set((state) => {
-          if (state.currentAccount === account) return state;
-          const accounts = [...state.accounts];
-          const isNew = !accounts.includes(account);
+          if (state.currentInboxId === inboxId) return state;
+          const inboxIds = [...state.inboxIds];
+          const isNew = !inboxIds.includes(inboxId);
 
           if (isNew && !createIfNew) {
             logger.warn(
-              `[AccountsStore] Account ${account} is new but createIfNew is false`
+              `[AccountsStore] InboxId ${inboxId} is new but createIfNew is false`
             );
             return state;
           }
 
-          logger.debug(`[AccountsStore] Setting current account: ${account}`);
+          logger.debug(`[AccountsStore] Setting current inboxId: ${inboxId}`);
 
-          if (!storesByAccount[account]) {
-            initStores(account);
+          if (!storesByInboxId[inboxId]) {
+            initStores({ inboxId });
           }
 
-          const databaseId = { ...state.databaseId };
+          const databaseIdByInboxId = { ...state.databaseIdByInboxId };
 
           if (isNew) {
-            accounts.push(account);
-            databaseId[account] = uuidv4();
-            removeLogoutTask(account);
+            inboxIds.push(inboxId);
+            databaseIdByInboxId[inboxId] = uuidv4();
+            // removeLogoutTask(account);
             // Init lastAsyncUpdate so no async migration is run for new accounts
             // getSettingsStore(account)
             //   .getState()
@@ -281,33 +271,31 @@ export const useAccountsStore = create<AccountsStoreStype>()(
             return {
               // No setting anymore because we want to refresh profile first
               // currentAccount: account,
-              accounts,
-              databaseId,
+              inboxIds,
+              databaseIdByInboxId,
             };
           }
 
           return {
-            currentAccount: account,
-            accounts,
-            databaseId,
+            currentInboxId: inboxId,
+            inboxIds,
+            databaseIdByInboxId,
           };
         }),
-      removeAccount: (accountToRemove) =>
+      removeInboxById: ({ inboxId }) =>
         set((state) => {
-          const newAccounts = [
-            ...state.accounts.filter((a) => a !== accountToRemove),
-          ];
+          const newInboxIds = [...state.inboxIds.filter((a) => a !== inboxId)];
 
-          if (newAccounts.length === 0) {
-            newAccounts.push(TEMPORARY_ACCOUNT_NAME);
+          if (newInboxIds.length === 0) {
+            newInboxIds.push(TEMPORARY_ACCOUNT_NAME);
           }
 
-          const newDatabaseId = { ...state.databaseId };
-          delete newDatabaseId[accountToRemove];
-          deleteStores(accountToRemove);
+          const newDatabaseIdByInboxId = { ...state.databaseIdByInboxId };
+          delete newDatabaseIdByInboxId[inboxId];
+          deleteStores({ inboxId });
           return {
-            accounts: newAccounts,
-            databaseId: newDatabaseId,
+            inboxIds: newInboxIds,
+            databaseIdByInboxId: newDatabaseIdByInboxId,
           };
         }),
     }),
@@ -319,15 +307,15 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           if (error) {
             logger.warn("An error happened during hydration", error);
           } else {
-            if (state?.accounts && state.accounts.length > 0) {
+            if (state?.inboxIds && state.inboxIds.length > 0) {
               logger.debug("Accounts found in hydration, initializing stores");
-              state.accounts.map(initStores);
+              state.inboxIds.map((inboxId) => initStores({ inboxId }));
             } else if (state) {
               logger.debug(
                 "No accounts found in hydration, initializing temporary account"
               );
-              state.currentAccount = TEMPORARY_ACCOUNT_NAME;
-              state.accounts = [TEMPORARY_ACCOUNT_NAME];
+              state.currentInboxId = TEMPORARY_ACCOUNT_NAME;
+              state.inboxIds = [TEMPORARY_ACCOUNT_NAME];
             }
           }
         };
@@ -348,16 +336,16 @@ type AccountStoreDataType = {
   transactions: TransactionsStoreType;
 };
 
-const getAccountStore = (account: string) => {
-  if (account in storesByAccount) {
-    return storesByAccount[account];
+const getInboxStoreById = ({ inboxId }: { inboxId: string }) => {
+  if (inboxId in storesByInboxId) {
+    return storesByInboxId[inboxId];
   } else {
-    return storesByAccount[TEMPORARY_ACCOUNT_NAME];
+    return storesByInboxId[TEMPORARY_ACCOUNT_NAME];
   }
 };
 
-export const currentAccount = (): string =>
-  (useAccountsStore.getState() as AccountsStoreStype).currentAccount;
+export const currentInboxId = (): string =>
+  (useAccountsStore.getState() as AccountsStoreType).currentInboxId;
 
 //
 /**
@@ -374,12 +362,12 @@ export const currentAccount = (): string =>
  * @param groupStatus The group status to set
  */
 export const setGroupStatus = (groupStatus: GroupStatus) => {
-  const account = currentAccount();
-  if (!account) {
-    logger.warn("[setGroupStatus] No current account");
+  const inboxId = currentInboxId();
+  if (!inboxId) {
+    logger.warn("[setGroupStatus] No current inboxId");
     return;
   }
-  const setGroupStatus = getSettingsStore(account).getState().setGroupStatus;
+  const setGroupStatus = getSettingsStore(inboxId).getState().setGroupStatus;
   setGroupStatus(groupStatus);
 };
 
@@ -387,62 +375,61 @@ export const setGroupStatus = (groupStatus: GroupStatus) => {
 // by which to observe it across the app
 // We'll seed the behaviorsubject with the getState.value api
 // export const _currentAccount = () => useAccountsStore.subscribe((s) => s.);
-export const useCurrentAccount = () => {
-  const currentAccount = useAccountsStore((s) => s.currentAccount);
-  return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
+export const useCurrentInboxId = () => {
+  const currentInboxId = useAccountsStore((s) => s.currentInboxId);
+  return currentInboxId === TEMPORARY_ACCOUNT_NAME ? undefined : currentInboxId;
 };
 
-export function getCurrentAccount() {
-  const currentAccount = useAccountsStore.getState().currentAccount;
-  return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
+export function getCurrentInboxId() {
+  const currentInboxId = useAccountsStore.getState().currentInboxId;
+  return currentInboxId === TEMPORARY_ACCOUNT_NAME ? undefined : currentInboxId;
 }
 
-export const loggedWithPrivy = () => {
-  const account = currentAccount();
-  return isPrivyAccount(account);
-};
+// export const loggedWithPrivy = () => {
+//   const account = currentAccount();
+//   return isPrivyAccount(account);
+// };
 
-export const isPrivyAccount = (account: string) => {
-  return !!useAccountsStore.getState().privyAccountId[account];
-};
+// export const isPrivyAccount = (account: string) => {
+//   return !!useAccountsStore.getState().privyAccountId[account];
+// };
 
-export const useLoggedWithPrivy = () => {
-  const account = useCurrentAccount();
-  const privyAccountId = useAccountsStore((s) => s.privyAccountId);
-  return account ? !!privyAccountId[account] : false;
-};
+// export const useLoggedWithPrivy = () => {
+//   const account = useCurrentAccount();
+//   const privyAccountId = useAccountsStore((s) => s.privyAccountId);
+//   return account ? !!privyAccountId[account] : false;
+// };
 
-export const useHasOnePrivyAccount = () => {
-  const accountsState = useAccountsStore();
-  let hasOne = undefined as string | undefined;
-  accountsState.accounts.forEach((a) => {
-    if (a !== TEMPORARY_ACCOUNT_NAME && accountsState.privyAccountId[a]) {
-      hasOne = a;
-    }
-  });
-  return hasOne;
-};
+// export const useHasOnePrivyAccount = () => {
+//   const accountsState = useAccountsStore();
+//   let hasOne = undefined as string | undefined;
+//   accountsState.accounts.forEach((a) => {
+//     if (a !== TEMPORARY_ACCOUNT_NAME && accountsState.privyAccountId[a]) {
+//       hasOne = a;
+//     }
+//   });
+//   return hasOne;
+// };
 
 // This enables us to use account-based substores for the current selected user automatically,
 // Just call export useSubStore = accountStoreHook("subStoreName") in the substore definition
 
-const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
+const currentInboxStoreHook = <T extends keyof AccountStoreDataType>(
   key: T
 ) => {
   const _useStore = <U>(selector: (state: AccountStoreDataType[T]) => U) => {
     // TODO: Rename the hook above to useCurrentAccountStore?
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const currentAccount = useAccountsStore((s) => s.currentAccount);
-    const accountStore = getAccountStore(currentAccount);
+    const currentInboxId = useAccountsStore((s) => s.currentInboxId);
+    const accountStore = getInboxStoreById({ inboxId: currentInboxId });
     return accountStore[key](selector);
   };
 
   const use = _useStore as AccountStoreType[T];
 
   use.getState = () => {
-    const currentAccountState = useAccountsStore.getState();
-    const currentAccount = currentAccountState.currentAccount;
-    const accountStore = getAccountStore(currentAccount);
+    const currentInboxId = useAccountsStore.getState().currentInboxId;
+    const accountStore = getInboxStoreById({ inboxId: currentInboxId });
     return accountStore[key].getState();
   };
 
@@ -451,49 +438,49 @@ const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
 
 const accountStoreHook = <T extends keyof AccountStoreDataType>(
   key: T,
-  account: string
+  inboxId: string
 ) => {
   const _useStore = <U>(selector: (state: AccountStoreDataType[T]) => U) => {
-    const accountStore = getAccountStore(account);
+    const accountStore = getInboxStoreById({ inboxId });
     return accountStore[key](selector);
   };
 
   const use = _useStore as AccountStoreType[T];
 
   use.getState = () => {
-    const accountStore = getAccountStore(account);
+    const accountStore = getInboxStoreById({ inboxId });
     return accountStore[key].getState();
   };
 
   return use;
 };
 
-export const useSettingsStore = currentAccountStoreHook("settings");
-export const useSettingsStoreForAccount = (account: string) =>
-  accountStoreHook("settings", account);
-export const getSettingsStore = (account: string) =>
-  getAccountStore(account).settings;
+export const useSettingsStore = currentInboxStoreHook("settings");
+export const useSettingsStoreForAccount = (inboxId: string) =>
+  accountStoreHook("settings", inboxId);
+export const getSettingsStore = (inboxId: string) =>
+  getInboxStoreById({ inboxId }).settings;
 
-export const useRecommendationsStore =
-  currentAccountStoreHook("recommendations");
-export const useRecommendationsStoreForAccount = (account: string) =>
-  accountStoreHook("recommendations", account);
-export const getRecommendationsStore = (account: string) =>
-  getAccountStore(account).recommendations;
+export const useRecommendationsStore = currentInboxStoreHook("recommendations");
+export const useRecommendationsStoreForAccount = (inboxId: string) =>
+  accountStoreHook("recommendations", inboxId);
+export const getRecommendationsStore = (inboxId: string) =>
+  getInboxStoreById({ inboxId }).recommendations;
 
-export const useChatStore = currentAccountStoreHook("chat");
-export const useChatStoreForAccount = (account: string) =>
-  accountStoreHook("chat", account);
-export const getChatStore = (account: string) => getAccountStore(account).chat;
+export const useChatStore = currentInboxStoreHook("chat");
+export const useChatStoreForAccount = (inboxId: string) =>
+  accountStoreHook("chat", inboxId);
+export const getChatStore = (inboxId: string) =>
+  getInboxStoreById({ inboxId }).chat;
 
-export const useWalletStore = currentAccountStoreHook("wallet");
-export const useWalletStoreForAccount = (account: string) =>
-  accountStoreHook("wallet", account);
-export const getWalletStore = (account: string) =>
-  getAccountStore(account).wallet;
+export const useWalletStore = currentInboxStoreHook("wallet");
+export const useWalletStoreForAccount = (inboxId: string) =>
+  accountStoreHook("wallet", inboxId);
+export const getWalletStore = (inboxId: string) =>
+  getInboxStoreById({ inboxId }).wallet;
 
-export const useTransactionsStore = currentAccountStoreHook("transactions");
-export const useTransactionsStoreForAccount = (account: string) =>
-  accountStoreHook("transactions", account);
-export const getTransactionsStore = (account: string) =>
-  getAccountStore(account).transactions;
+export const useTransactionsStore = currentInboxStoreHook("transactions");
+export const useTransactionsStoreForAccount = (inboxId: string) =>
+  accountStoreHook("transactions", inboxId);
+export const getTransactionsStore = (inboxId: string) =>
+  getInboxStoreById({ inboxId }).transactions;

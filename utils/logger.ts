@@ -89,6 +89,7 @@ const _logger = RNLogger.createLogger({
   transport: converseTransport,
   transportOptions: {
     colors:
+      // @ts-ignore
       developerSystemAppearance === "dark"
         ? darkSystemColorScheme
         : lightSystemColorScheme,
