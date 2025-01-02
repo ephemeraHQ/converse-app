@@ -20,7 +20,7 @@ import {
 } from "./Navigation";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import Button from "../../components/Button/Button";
-import ConversationFlashList from "../../components/ConversationFlashList";
+import ConversationFlashList from "@/components/ConversationFlashList/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "../../data/store/accountsStore";
 import { consentToAddressesOnProtocolByAccount } from "../../utils/xmtpRN/contacts";

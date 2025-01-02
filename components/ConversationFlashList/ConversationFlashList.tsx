@@ -3,22 +3,30 @@ import { FlashList } from "@shopify/flash-list";
 import { backgroundColor } from "@styles/colors";
 import { ConversationListContext } from "@utils/conversationList";
 import { useCallback, useEffect, useRef } from "react";
-import { Platform, StyleSheet, View, useColorScheme } from "react-native";
+import {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Platform,
+  StyleSheet,
+  View,
+  useColorScheme,
+} from "react-native";
 
-import HiddenRequestsButton from "./ConversationList/HiddenRequestsButton";
-import { V3GroupConversationListItem } from "./V3GroupConversationListItem";
-import { useChatStore, useCurrentAccount } from "../data/store/accountsStore";
-import { useSelect } from "../data/store/storeHelpers";
-import { NavigationParamList } from "../screens/Navigation/Navigation";
-import { ConversationFlatListHiddenRequestItem } from "../utils/conversation";
-import { FlatListItemType } from "../features/conversation-list/ConversationList.types";
+import HiddenRequestsButton from "../ConversationList/HiddenRequestsButton";
+import { V3GroupConversationListItem } from "../V3GroupConversationListItem";
+import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
+import { useSelect } from "@data/store/storeHelpers";
+import { NavigationParamList } from "@screens/Navigation/Navigation";
+import { ConversationFlatListHiddenRequestItem } from "@utils/conversation";
+import { FlatListItemType } from "@features/conversation-list/ConversationList.types";
 import { unwrapConversationContainer } from "@utils/groupUtils/conversationContainerHelpers";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
 import {
   DmWithCodecsType,
   GroupWithCodecsType,
 } from "@/utils/xmtpRN/client.types";
-import { V3DMListItem } from "./V3DMListItem";
+import { V3DMListItem } from "../V3DMListItem";
+import { CONVERSATION_FLASH_LIST_REFRESH_THRESHOLD } from "./ConversationFlashList.constants";
 
 type Props = {
   onScroll?: () => void;
@@ -26,7 +34,7 @@ type Props = {
   itemsForSearchQuery?: string;
   ListHeaderComponent?: React.ReactElement | null;
   ListFooterComponent?: React.ReactElement | null;
-  refetch?: () => void;
+  refetch?: () => Promise<unknown>;
   isRefetching?: boolean;
 } & NativeStackScreenProps<
   NavigationParamList,
@@ -61,6 +69,7 @@ export default function ConversationFlashList({
   );
   const userAddress = useCurrentAccount() as string;
   const listRef = useRef<FlashList<any> | undefined>();
+  const refreshingRef = useRef(false);
 
   const renderItem = useCallback(({ item }: { item: FlatListItemType }) => {
     if ("lastMessage" in item) {
@@ -87,6 +96,34 @@ export default function ConversationFlashList({
     return null;
   }, []);
 
+  const handleRefresh = useCallback(async () => {
+    if (refreshingRef.current) return;
+    refreshingRef.current = true;
+    try {
+      console.log("refetching from pull");
+      await refetch?.();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      refreshingRef.current = false;
+    }
+  }, [refetch]);
+
+  const onScrollList = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (refreshingRef.current) return;
+      // On Android the list does not bounce, so this will only get hit
+      // on iOS when the user scrolls up
+      if (
+        e.nativeEvent.contentOffset.y <
+        CONVERSATION_FLASH_LIST_REFRESH_THRESHOLD
+      ) {
+        handleRefresh();
+      }
+    },
+    [handleRefresh]
+  );
+
   return (
     <ConversationListContext.Provider
       value={{
@@ -98,11 +135,12 @@ export default function ConversationFlashList({
       <View style={styles.container}>
         <View style={styles.conversationList}>
           <FlashList
-            onRefresh={refetch}
-            refreshing={isRefetching}
+            onRefresh={Platform.OS === "android" ? refetch : undefined}
+            refreshing={Platform.OS === "android" ? isRefetching : undefined}
             keyboardShouldPersistTaps="handled"
             onMomentumScrollBegin={onScroll}
             onScrollBeginDrag={onScroll}
+            onScroll={onScrollList}
             alwaysBounceVertical={items.length > 0}
             contentInsetAdjustmentBehavior="automatic"
             data={items}
