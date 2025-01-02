@@ -6,6 +6,7 @@ import { VStack } from "../VStack";
 import { TextField } from "./TextField";
 import { TextFieldSimple } from "./TextFieldSimple";
 import { useAppTheme } from "@theme/useAppTheme";
+import { ViewStyle } from "react-native";
 
 export const TextFieldExample = memo(function TextFieldExample() {
   const { theme } = useAppTheme();
@@ -23,7 +24,7 @@ export const TextFieldExample = memo(function TextFieldExample() {
         status="error"
         RightAccessory={({ style }) => {
           return (
-            <Center style={style}>
+            <Center style={style as ViewStyle}>
               <IconButton variant="ghost" iconName="phone" />
             </Center>
           );
@@ -35,7 +36,7 @@ export const TextFieldExample = memo(function TextFieldExample() {
         keyboardType="email-address"
         autoCapitalize="none"
         LeftAccessory={({ style }) => (
-          <Center style={style}>
+          <Center style={style as ViewStyle}>
             <IconButton variant="ghost" iconName="link" />
           </Center>
         )}
@@ -46,7 +47,7 @@ export const TextFieldExample = memo(function TextFieldExample() {
         secureTextEntry
         helper="Must be at least 8 characters long"
         RightAccessory={({ style }) => (
-          <Center style={style}>
+          <Center style={style as ViewStyle}>
             <IconButton variant="ghost" iconName="eyes" />
           </Center>
         )}
@@ -63,7 +64,7 @@ export const TextFieldExample = memo(function TextFieldExample() {
         status="disabled"
         RightAccessory={({ style }) => {
           return (
-            <Center style={style}>
+            <Center style={style as ViewStyle}>
               <IconButton disabled variant="ghost" iconName="xmark" />
             </Center>
           );
@@ -78,7 +79,7 @@ export const TextFieldExample = memo(function TextFieldExample() {
       <TextFieldSimple
         placeholder="Search..."
         LeftAccessory={({ style }) => (
-          <Center style={style}>
+          <Center style={style as ViewStyle}>
             <IconButton variant="ghost" iconName="magnifyingglass" />
           </Center>
         )}
@@ -87,7 +88,7 @@ export const TextFieldExample = memo(function TextFieldExample() {
         placeholder="Enter amount"
         keyboardType="numeric"
         RightAccessory={({ style }) => (
-          <Center style={style}>
+          <Center style={style as ViewStyle}>
             <Text>USD</Text>
           </Center>
         )}

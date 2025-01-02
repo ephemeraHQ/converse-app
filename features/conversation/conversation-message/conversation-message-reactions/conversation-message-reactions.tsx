@@ -17,7 +17,7 @@ import {
   getPreferredInboxName,
 } from "@utils/profile";
 import { memo, useCallback, useMemo } from "react";
-import { TouchableHighlight, ViewStyle } from "react-native";
+import { TextStyle, TouchableHighlight, ViewStyle } from "react-native";
 import { openMessageReactionsDrawer } from "./conversation-message-reaction-drawer/conversation-message-reaction-drawer.service";
 import {
   RolledUpReactions,
@@ -209,7 +209,7 @@ const $emojiContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.xxxs,
 });
 
-const $reactorCount: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $reactorCount: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   marginLeft: spacing.xxxs,
   color: colors.text.secondary,
 });

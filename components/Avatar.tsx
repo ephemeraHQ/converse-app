@@ -5,13 +5,13 @@ import { ImageBackground } from "expo-image";
 import React, { useCallback, useState } from "react";
 import {
   ColorSchemeName,
-  ImageStyle,
   Platform,
   StyleProp,
   StyleSheet,
   Text,
   useColorScheme,
   View,
+  ViewStyle,
 } from "react-native";
 
 import Picto from "./Picto/Picto";
@@ -19,7 +19,7 @@ import Picto from "./Picto/Picto";
 export type AvatarProps = {
   uri?: string | undefined;
   size?: number | undefined;
-  style?: StyleProp<ImageStyle>;
+  style?: StyleProp<ViewStyle>;
   color?: boolean;
   name?: string | undefined;
   // Inverts the color of the place holder
