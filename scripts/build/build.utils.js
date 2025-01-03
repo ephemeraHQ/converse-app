@@ -62,7 +62,7 @@ const copyGoogleServiceInfo = (env) => {
   const SOURCE = `ios/Google Services/GoogleService-Info-${
     env === "production" ? "prod" : "preview"
   }.plist`;
-  const DEST = "ios/Converse/GoogleService-Info.plist";
+  const DEST = "ios/GoogleService-Info.plist";
 
   try {
     if (!fs.existsSync(SOURCE)) {
