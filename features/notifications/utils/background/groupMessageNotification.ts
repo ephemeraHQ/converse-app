@@ -97,9 +97,9 @@ export const handleGroupMessageNotification = async (
         : {};
       const displayedNotifications = await notifee.getDisplayedNotifications();
       const previousGroupIdNotification =
-        conversation.topic &&
+        conversation?.topic &&
         displayedNotifications.find(
-          (n) => n.notification.android?.groupId === conversation.topic
+          (n) => n.notification.android?.groupId === conversation?.topic
         );
       const previousMessages =
         previousGroupIdNotification?.notification.android?.style?.type ===
@@ -156,9 +156,9 @@ export const handleGroupMessageNotification = async (
         : {};
       const displayedNotifications = await notifee.getDisplayedNotifications();
       const previousGroupIdNotification =
-        conversation.topic &&
+        conversation?.topic &&
         displayedNotifications.find(
-          (n) => n.notification.android?.groupId === conversation.topic
+          (n) => n.notification.android?.groupId === conversation?.topic
         );
       const previousMessages =
         previousGroupIdNotification?.notification.android?.style?.type ===
