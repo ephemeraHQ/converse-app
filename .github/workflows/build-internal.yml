@@ -17,62 +17,18 @@ on:
           - Production
           - Preview
 
+      platform:
+        description: "Select the platform"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - ios
+          - android
+
 jobs:
-  build-android:
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || 'Production' }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 20.18.0
-
-      - name: Install dependencies
-        run: yarn install
-
-      - name: 🏗 Setup EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Create .env file from secrets
-        run: |
-          if [ "${{ github.event.inputs.environment || 'Production' }}" == "Production" ]; then
-            env_file=".env.production"
-          else
-            env_file=".env"
-          fi
-          echo "EXPO_PUBLIC_CONTACT_ADDRESS=${{ secrets.EXPO_PUBLIC_CONTACT_ADDRESS }}" >> $env_file
-          echo "EXPO_PUBLIC_DEBUG_ADDRESSES=${{ secrets.EXPO_PUBLIC_DEBUG_ADDRESSES }}" >> $env_file
-          echo "EXPO_PUBLIC_SENTRY_DSN=${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}" >> $env_file
-          echo "EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID=${{ secrets.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID }}" >> $env_file
-          echo "EXPO_PUBLIC_THIRDWEB_CLIENT_ID=${{ secrets.EXPO_PUBLIC_THIRDWEB_CLIENT_ID }}" >> $env_file
-          echo "EXPO_PUBLIC_EXPO_PROJECT_ID=${{ secrets.EXPO_PUBLIC_EXPO_PROJECT_ID }}" >> $env_file
-          echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> $env_file
-          echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> $env_file
-          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $env_file
-
-      - name: Update EAS config with env variables
-        run: |
-          if [ "${{ github.event.inputs.environment || 'Production' }}" == "Production" ]; then
-            node scripts/build/eas.js --env production
-          else
-            node scripts/build/eas.js --env preview
-          fi
-
-      - name: Build for Android
-        run: |
-          if [ "${{ github.event.inputs.environment || 'Production' }}" == "Production" ]; then
-            eas build --profile production-android --platform android --non-interactive --auto-submit --no-wait
-          else
-            eas build --profile preview-android --platform android --non-interactive --auto-submit --no-wait
-          fi
-
-  build-ios:
+  build-with-eas:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'Production' }}
 
@@ -130,23 +86,31 @@ jobs:
 
       - name: Build for iOS
         run: |
+          # Check if platform is android, if so return success without building
+          if [ "${{ github.event.inputs.platform || 'all' }}" == "android" ]; then
+            echo "Skipping iOS build for Android"
+            exit 0
+          fi
+
           if [ "${{ github.event.inputs.environment || 'Production' }}" == "Production" ]; then
             eas build --profile production --platform ios --non-interactive --auto-submit --no-wait
           else
             eas build --profile preview --platform ios --non-interactive --auto-submit --no-wait
           fi
 
-  increment-build-numbers:
-    runs-on: ubuntu-latest
+      - name: Build for Android
+        run: |
+          # Check if platform is ios, if so return success without building
+          if [ "${{ github.event.inputs.platform || 'all' }}" == "ios" ]; then
+            echo "Skipping Android build for iOS"
+            exit 0
+          fi
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 20.18.0
+          if [ "${{ github.event.inputs.environment || 'Production' }}" == "Production" ]; then
+            eas build --profile production-android --platform android --non-interactive --auto-submit --no-wait
+          else
+            eas build --profile preview-android --platform android --non-interactive --auto-submit --no-wait
+          fi
 
       - name: Increment version numbers
         run: node scripts/build/incrementBuildNumbers.js
