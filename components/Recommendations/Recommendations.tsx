@@ -24,6 +24,7 @@ import { translate } from "@/i18n";
 import { Text } from "@design-system/Text";
 import { Loader } from "@/design-system/loader";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { textSizeStyles } from "@/design-system/Text/Text.styles";
 
 const EXPIRE_AFTER = 86400000; // 1 DAY
 
@@ -129,7 +130,7 @@ export default function Recommendations({
             )}
             {visibility === "EMBEDDED" && showTitle && (
               <View style={themed($sectionTitleContainer)}>
-                <Text style={themed($sectionTitle)}>
+                <Text preset="formLabel" style={themed($sectionTitleSpacing)}>
                   {translate("recommendations.section_title")}
                 </Text>
               </View>
@@ -220,21 +221,20 @@ export default function Recommendations({
 }
 
 const $emoji: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  ...textSizeStyles.xl,
   textAlign: "center",
   marginTop: spacing.xl,
-  fontSize: 34,
   marginBottom: spacing.sm,
 });
 
 const $title: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  ...textSizeStyles.sm,
   color: colors.text.primary,
   ...Platform.select({
     default: {
-      fontSize: 17,
       paddingHorizontal: spacing.xl,
     },
     android: {
-      fontSize: 14,
       paddingHorizontal: spacing.xxl,
     },
   }),
@@ -254,11 +254,8 @@ const $fetching: ThemedStyle<ViewStyle> = () => ({
 });
 
 const $fetchingText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  ...textSizeStyles.sm,
   color: colors.text.primary,
-  ...Platform.select({
-    default: { fontSize: 17 },
-    android: { fontSize: 16 },
-  }),
   textAlign: "center",
   marginTop: spacing.lg,
 });
@@ -268,15 +265,15 @@ const $clickableText: ThemedStyle<TextStyle> = ({ colors }) => ({
   fontWeight: "500",
 });
 
-const $noMatch: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginTop: spacing.xl,
-});
-
-const $titleContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $titleContainer: ThemedStyle<ViewStyle> = ({
+  colors,
+  spacing,
+  borderWidth,
+}) => ({
   paddingBottom: spacing.xl,
   ...Platform.select({
     default: {
-      borderBottomWidth: 0.5,
+      borderBottomWidth: borderWidth.xs,
       borderBottomColor: colors.border.subtle,
     },
     android: {},
@@ -287,10 +284,11 @@ const $titleContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
 const $sectionTitleContainer: ThemedStyle<ViewStyle> = ({
   colors,
   spacing,
+  borderWidth,
 }) => ({
   ...Platform.select({
     default: {
-      borderBottomWidth: 0.5,
+      borderBottomWidth: borderWidth.xs,
       borderBottomColor: colors.border.subtle,
       paddingLeft: spacing.md,
     },
@@ -299,18 +297,7 @@ const $sectionTitleContainer: ThemedStyle<ViewStyle> = ({
   }),
 });
 
-const $sectionTitle: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  color: colors.text.secondary,
-  ...Platform.select({
-    default: {
-      fontSize: 12,
-      marginBottom: spacing.xs,
-      marginTop: spacing.lg,
-    },
-    android: {
-      fontSize: 11,
-      marginBottom: spacing.sm,
-      marginTop: spacing.md,
-    },
-  }),
+const $sectionTitleSpacing: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  marginBottom: spacing.xs,
+  marginTop: spacing.lg,
 });

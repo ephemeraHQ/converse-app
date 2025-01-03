@@ -40,6 +40,7 @@ import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQue
 import { Text } from "@design-system/Text";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Loader } from "@/design-system/loader";
+import { textSizeStyles } from "@/design-system/Text/Text.styles";
 
 export default function NewConversation({
   route,
@@ -51,10 +52,13 @@ export default function NewConversation({
   const handleBack = useCallback(() => navigation.goBack(), [navigation]);
 
   const { theme, themed } = useAppTheme();
+
+  // TODO: Unused. Should we remove this once we have a proper group query?
   const { data: existingGroup } = useGroupQuery({
     account: currentAccount(),
     topic: route.params?.addingToGroupTopic!,
   });
+
   const [group, setGroup] = useState({
     enabled: !!route.params?.addingToGroupTopic,
     members: [] as (IProfileSocials & { address: string })[],
@@ -488,16 +492,13 @@ const $messageContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 });
 
 const $message: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text.secondary,
+  ...textSizeStyles.sm,
   ...Platform.select({
     default: {
-      fontSize: 17,
       textAlign: "center",
     },
-    android: {
-      fontSize: 14,
-    },
   }),
-  color: colors.text.secondary,
 });
 
 const $error: ThemedStyle<TextStyle> = ({ colors }) => ({

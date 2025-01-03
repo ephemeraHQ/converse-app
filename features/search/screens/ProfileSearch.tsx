@@ -103,16 +103,8 @@ const $sectionTitleContainer: ThemedStyle<ViewStyle> = ({
 });
 
 const $sectionTitleSpacing: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  ...Platform.select({
-    default: {
-      marginBottom: spacing.sm,
-      marginTop: spacing.xl,
-    },
-    android: {
-      marginBottom: spacing.md,
-      marginTop: spacing.lg,
-    },
-  }),
+  marginBottom: spacing.xs,
+  marginTop: spacing.lg,
 });
 
 const $footer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
