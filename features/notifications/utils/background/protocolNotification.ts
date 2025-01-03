@@ -23,26 +23,33 @@ export type ProtocolNotification = z.infer<typeof ProtocolNotificationSchema>;
 export const handleProtocolNotification = async (
   notification: ProtocolNotification
 ) => {
-  logger.debug(
-    `[ProtocolNotification] Received a notification for account ${notification.account}`
-  );
-  const accounts = getAccountsList();
-  if (
-    !accounts.find(
-      (a) => a.toLowerCase() === notification.account.toLowerCase()
-    )
-  ) {
-    logger.error(
-      `[ProtocolNotification] Account ${notification.account} not found, skipping`
+  try {
+    logger.debug(
+      `[ProtocolNotification] Received a notification for account ${notification.account}`
     );
-    return;
-  }
-  const xmtpClient = (await getXmtpClient(
-    notification.account
-  )) as ConverseXmtpClientType;
-  if (isGroupMessageContentTopic(notification.contentTopic)) {
-    handleGroupMessageNotification(xmtpClient, notification);
-  } else if (isGroupWelcomeContentTopic(notification.contentTopic)) {
-    handleGroupWelcomeNotification(xmtpClient, notification);
+    const accounts = getAccountsList();
+    if (
+      !accounts.find(
+        (a) => a.toLowerCase() === notification.account.toLowerCase()
+      )
+    ) {
+      logger.error(
+        `[ProtocolNotification] Account ${notification.account} not found, skipping`
+      );
+      return;
+    }
+    logger.debug(
+      `[ProtocolNotification] found account ${notification.account}`
+    );
+    const xmtpClient = (await getXmtpClient(
+      notification.account
+    )) as ConverseXmtpClientType;
+    if (isGroupMessageContentTopic(notification.contentTopic)) {
+      handleGroupMessageNotification(xmtpClient, notification);
+    } else if (isGroupWelcomeContentTopic(notification.contentTopic)) {
+      handleGroupWelcomeNotification(xmtpClient, notification);
+    }
+  } catch (e) {
+    logger.error("handleProtocolNotification error", e);
   }
 };

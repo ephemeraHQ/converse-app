@@ -17,7 +17,7 @@ func getProfile(account: String, address: String) async -> ProfileSocials? {
   
   // If profile is nil, let's refresh it
   try? await refreshProfileFromBackend(account: account, address: formattedAddress)
-  
+
   profileFromStore = getProfilesStore(account: account, address: address)
   if let profile = profileFromStore {
     return profile
@@ -45,7 +45,7 @@ func refreshProfileFromBackend(account: String, address: String) async throws  {
   let apiURI = getApiURI()
   if (apiURI != nil && !apiURI!.isEmpty) {
     let profileURI = "\(apiURI ?? "")/api/profile"
-    
+
     let response = try await withUnsafeThrowingContinuation { continuation in
       AF.request(profileURI, method: .get, parameters: ["address": address]).validate().responseData { response in
         if let data = response.data {
@@ -58,16 +58,17 @@ func refreshProfileFromBackend(account: String, address: String) async throws  {
         }
       }
     }
-    
+
     // Create an instance of JSONDecoder
     let decoder = JSONDecoder()
     
-    if let socials = try? decoder.decode(ProfileSocials.self, from: response) {
+    if let socials = try? decoder.decode(ProfileSocials.self, from: response) {     
       saveProfileSocials(account: account, address: address, socials: socials)
     }
     
+
   }
-  
+
 }
 
 func refreshInboxProfileFromBackend(account: String, inboxId: String) async throws  {

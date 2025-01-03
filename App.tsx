@@ -42,6 +42,7 @@ import { initSentry } from "./utils/sentry";
 import "./utils/splash/splash";
 import "./features/notifications/utils";
 import { setupAppAttest } from "@utils/appCheck";
+import { saveApiURI } from "./utils/sharedData";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -56,6 +57,8 @@ configureCoinbase({
 });
 
 initSentry();
+
+saveApiURI();
 
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
 
