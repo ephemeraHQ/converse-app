@@ -1,5 +1,6 @@
 import { EmojiRowList } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker-list";
 import { messageContextMenuEmojiPickerBottomSheetRef } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker-utils";
+import { useConversationMessageContextMenuEmojiPickerStore } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker.store";
 import { emojiTrie } from "@/utils/emojis/emoji-trie";
 import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
 import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
@@ -9,8 +10,8 @@ import { TextField } from "@design-system/TextField/TextField";
 import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
-import { emojis } from "@utils/emojis/emojis";
 import { ICategorizedEmojisRecord, IEmoji } from "@utils/emojis/emoji-types";
+import { emojis } from "@utils/emojis/emojis";
 import { memo, useCallback, useRef, useState } from "react";
 import { TextInput, TextStyle, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -91,21 +92,33 @@ export const MessageContextMenuEmojiPicker = memo(
       }
     }, []);
 
+    const handleChange = useCallback((index: number) => {
+      useConversationMessageContextMenuEmojiPickerStore
+        .getState()
+        .setIsEmojiPickerOpen(index >= 0);
+    }, []);
+
+    const handleSearchTextFieldFocus = useCallback(() => {
+      messageContextMenuEmojiPickerBottomSheetRef.current?.expand();
+    }, []);
+
     return (
       <BottomSheetModal
         onClose={closeMenu}
+        onChange={handleChange}
         ref={messageContextMenuEmojiPickerBottomSheetRef}
         topInset={insets.top}
         snapPoints={["50%", "100%"]}
       >
         <BottomSheetContentContainer>
-          <BottomSheetHeader title={translate("choose_reaction")} hasClose />
+          <BottomSheetHeader title={translate("choose_a_reaction")} hasClose />
           <TextField
             ref={textInputRef}
             onChangeText={onTextInputChange}
             placeholder={translate("search_emojis")}
             clearButtonMode="always"
             containerStyle={themed($inputContainer)}
+            onFocus={handleSearchTextFieldFocus}
           />
         </BottomSheetContentContainer>
 

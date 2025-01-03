@@ -16,7 +16,6 @@ import {
 } from "react-native";
 import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 import { SearchBarCommands } from "react-native-screens";
-
 import ChatNullState from "../components/ConversationList/ChatNullState";
 import ConversationFlashList from "../components/ConversationFlashList/ConversationFlashList";
 import NewConversationButton from "../components/ConversationList/NewConversationButton";
@@ -228,6 +227,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   ) {
     ListHeaderComponents.push(<EphemeralAccountBanner key="ephemeral" />);
   }
+
   if (showNoResult) {
     ListFooterComponent = <NoResult />;
   }
@@ -241,6 +241,8 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
       />
     );
   }
+
+  console.log("flatListItems.items:", flatListItems.items);
 
   return (
     <>

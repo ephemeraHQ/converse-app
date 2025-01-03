@@ -6,7 +6,7 @@ import { Loader } from "@/design-system/loader";
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
 import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
-import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
+import { ConversationMessageUserLayout } from "@/features/conversation/conversation-message/conversation-message-user-layout";
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
 import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
@@ -66,10 +66,10 @@ export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
                   nextMessage={nextMessage}
                 >
                   <ConversationMessageTimestamp />
-                  <ConversationMessageLayout>
+                  <ConversationMessageUserLayout>
                     <ConversationMessage message={message} />
                     <ConversationMessageReactions />
-                  </ConversationMessageLayout>
+                  </ConversationMessageUserLayout>
                 </MessageContextStoreProvider>
               );
             }}

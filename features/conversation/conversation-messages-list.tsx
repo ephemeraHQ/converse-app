@@ -2,20 +2,18 @@ import { VStack } from "@/design-system/VStack";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import { useAppTheme } from "@/theme/useAppTheme";
 // import { LegendList } from "@legendapp/list";
-import {
-  AnimatedFlashList,
-  FlashList,
-  FlashListProps,
-} from "@shopify/flash-list";
 import { MessageId } from "@xmtp/react-native-sdk";
 import { ReactElement, memo, useEffect } from "react";
-import { Platform } from "react-native";
-import { useAnimatedRef } from "react-native-reanimated";
+import { FlatList, FlatListProps, Platform } from "react-native";
+import Animated, {
+  AnimatedProps,
+  useAnimatedRef,
+} from "react-native-reanimated";
 
 export const ConversationMessagesList = memo(function ConversationMessagesList(
   props: Omit<
-    // AnimatedProps<FlatListProps<MessageId>>,
-    FlashListProps<MessageId>,
+    AnimatedProps<FlatListProps<MessageId>>,
+    // FlashListProps<MessageId>,
     "renderItem" | "data"
   > & {
     messageIds: MessageId[];
@@ -29,7 +27,7 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
 
   const { theme } = useAppTheme();
 
-  const scrollRef = useAnimatedRef<FlashList<MessageId>>();
+  const scrollRef = useAnimatedRef<FlatList<MessageId>>();
 
   const conversationStore = useConversationStore();
 
@@ -89,7 +87,8 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
   // );
 
   return (
-    <AnimatedFlashList
+    // @ts-expect-error
+    <Animated.FlatList
       inverted={true}
       ref={scrollRef}
       data={messageIds}
@@ -99,10 +98,9 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
           index,
         })
       }
-      // itemLayoutAnimation={theme.animation.reanimatedLayoutSpringTransition}
+      layout={theme.animation.reanimatedLayoutSpringTransition}
+      itemLayoutAnimation={theme.animation.reanimatedLayoutSpringTransition}
       keyboardDismissMode="interactive"
-      // automaticallyAdjustContentInsets={false}
-      // contentInsetAdjustmentBehavior="never"
       keyExtractor={keyExtractor}
       keyboardShouldPersistTaps="handled"
       ItemSeparatorComponent={() => <MessageSeparator />}
@@ -115,7 +113,6 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
       //   minIndexForVisible: 0,
       //   autoscrollToTopThreshold: 100,
       // }}
-      estimatedItemSize={50} // 50 is very random for now
       {...rest}
     />
   );

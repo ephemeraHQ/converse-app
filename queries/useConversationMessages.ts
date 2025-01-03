@@ -1,12 +1,12 @@
 import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
-import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
-import { UseQueryOptions, useQuery } from "@tanstack/react-query";
-import logger from "@utils/logger";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
 } from "@/utils/xmtpRN/client.types";
+import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
+import { isSupportedMessage } from "@/utils/xmtpRN/messages";
+import { UseQueryOptions, useQuery } from "@tanstack/react-query";
+import logger from "@utils/logger";
 import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
 import {
   InboxId,
@@ -40,7 +40,8 @@ export const conversationMessagesQueryFn = async (
     `[useConversationMessages] queryFn fetched ${messages.length} messages in ${end - start}ms`
   );
   const processingStart = performance.now();
-  const processedMessages = processMessages({ messages });
+  const validMessages = messages.filter(isSupportedMessage);
+  const processedMessages = processMessages({ messages: validMessages });
   const processingEnd = performance.now();
   logger.info(
     `[useConversationMessages] queryFn processed ${messages.length} messages in ${processingEnd - processingStart}ms`
@@ -71,15 +72,7 @@ export const useConversationMessages = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const query = useQuery(getConversationMessagesQueryOptions(account, topic));
-
-  useAppStateHandlers({
-    onForeground: () => {
-      query.refetch();
-    },
-  });
-
-  return query;
+  return useQuery(getConversationMessagesQueryOptions(account, topic));
 };
 
 export const getConversationMessagesQueryData = (
@@ -165,6 +158,7 @@ type IMessageAccumulator = {
 };
 
 function processMessages(args: {
+  // messages: IConvosMessage[];
   messages: DecodedMessageWithCodecsType[];
   existingData?: IMessageAccumulator;
   prependNewMessages?: boolean;

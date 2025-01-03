@@ -1,5 +1,5 @@
 import { Center } from "@/design-system/Center";
-import { AnimatedHStack, IAnimatedHStackProps } from "@/design-system/HStack";
+import { AnimatedHStack } from "@/design-system/HStack";
 import { Icon } from "@/design-system/Icon/Icon";
 import { AnimatedText } from "@/design-system/Text";
 import { usePrevious } from "@/hooks/use-previous-value";
@@ -7,7 +7,7 @@ import { translate } from "@/i18n";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { Haptics } from "@/utils/haptics";
 import React, { memo, useEffect } from "react";
-import { IConvosMessageStatus } from "../conversation-message.types";
+import { IConvosMessageStatus } from "../conversation-message/conversation-message.types";
 
 type IConversationMessageStatusProps = {
   status: IConvosMessageStatus;
@@ -20,7 +20,6 @@ export const ConversationMessageStatus = memo(
     const previousStatus = usePrevious(status);
 
     useEffect(() => {
-      // Haptic when message is sent
       if (previousStatus === "sending" && status === "sent") {
         Haptics.softImpactAsync();
       }
@@ -38,25 +37,21 @@ export const ConversationMessageStatus = memo(
   }
 );
 
-const StatusContainer = memo(function StatusContainer(
-  props: IAnimatedHStackProps
-) {
-  const { children, style, ...rest } = props;
-
+const StatusContainer = memo(function StatusContainer({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { theme } = useAppTheme();
 
   return (
     <AnimatedHStack
       entering={theme.animation.reanimatedFadeInSpring}
-      style={[
-        {
-          alignItems: "center",
-          columnGap: theme.spacing.xxxs,
-          paddingTop: theme.spacing.xxxs,
-        },
-        style,
-      ]}
-      {...rest}
+      style={{
+        alignItems: "center",
+        columnGap: theme.spacing.xxxs,
+        paddingTop: theme.spacing.xxxs,
+      }}
     >
       {children}
     </AnimatedHStack>
@@ -76,12 +71,14 @@ const StatusIconContainer = memo(function StatusIconContainer({
 }: {
   children?: React.ReactNode;
 }) {
+  const { theme } = useAppTheme();
+
   return (
     <Center
       style={{
-        width: 14, // Value from Figma
-        height: 14, // Value from Figma
-        padding: 1, // Value from Figma
+        width: 14,
+        height: 14,
+        padding: 1,
       }}
     >
       {children}
@@ -102,10 +99,7 @@ const SentStatus = memo(function SentStatus() {
   const { theme } = useAppTheme();
 
   return (
-    <StatusContainer
-      // 300 delay for better UX so that the message entering animation finishes before showing the sent status
-      entering={theme.animation.reanimatedFadeInSpring.delay(300)}
-    >
+    <StatusContainer>
       <StatusText text={translate("message_status.sent")} />
       <StatusIconContainer>
         <Icon
