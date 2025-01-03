@@ -97,6 +97,7 @@ func handleV3Message(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_
             } else if case .dm(let dm) = conversation {
               var senderAvatar: String? = nil
               if let senderProfileSocials = await getProfile(account: xmtpClient.address, address: decodedMessage.senderInboxId) {
+                let name = getPreferredName(address: decodedMessage.senderInboxId, socials: senderProfileSocials)
                 bestAttemptContent.title = getPreferredName(address: decodedMessage.senderInboxId, socials: senderProfileSocials)
                 senderAvatar = getPreferredAvatar(socials: senderProfileSocials)
               }

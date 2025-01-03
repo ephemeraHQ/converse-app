@@ -11,9 +11,10 @@ import MMKVAppExtension
 let DAILY_REQUEST_NOTIFICAITON_IDENTIFIER = "DailyRequestNotification"
 let DAILY_REQUEST_NOTIFICATION_TIME = 86400
 
-func incrementBadge(for content: UNMutableNotificationContent) {
-  let newBadgeCount = getBadge() + 1
-  setBadge(newBadgeCount)
+func incrementBadge(for content: UNMutableNotificationContent, account: String) {
+  let newAccountBadgeCount = getBadgeByAccount(account: account) + 1
+  setBadgeByAccount(newAccountBadgeCount, account: account)
+  let newBadgeCount = getAllBadgeCounts()
   content.badge = NSNumber(value: newBadgeCount)
 }
 

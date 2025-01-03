@@ -62,6 +62,6 @@ export const onInteractWithNotification = async (
     useAccountsStore.getState().setCurrentAccount(account, false);
 
     navigateToTopic(conversationTopic as ConversationTopic);
-    resetNotifications();
+    resetNotifications(account);
   }
 };

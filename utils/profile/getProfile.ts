@@ -32,16 +32,20 @@ export const getProfile = async (
   );
   const mmkvString = mmkv.getString(inboxIdStorageKey);
   if (mmkvString) {
-    return JSON.parse(mmkvString) as IProfileSocials;
+    const socials = JSON.parse(mmkvString) as IProfileSocials[];
+    return socials[0];
   }
 
   // We don't have any profile data, let's fetch it
   if (address) {
-    return fetchProfileSocialsQuery(currentAccount, address);
+    const profile = await fetchProfileSocialsQuery(currentAccount, address);
+    return profile;
   }
+
   const inboxProfileSocials = await fetchInboxProfileSocialsQuery(
     currentAccount,
     inboxId
   );
+
   return inboxProfileSocials?.[0];
 };

@@ -23,6 +23,7 @@ import { deleteSubscribedTopics } from "@features/notifications/utils/deleteSubs
 import { lastNotifSubscribeByAccount } from "@features/notifications/utils/lastNotifSubscribeByAccount";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 import { getXmtpApiHeaders } from "@utils/api";
+import { resetNotifications } from "@/features/notifications/utils/resetNotifications";
 
 type LogoutTasks = {
   [account: string]: {
@@ -106,13 +107,14 @@ export const executeLogoutTasks = async () => {
       logger.debug(
         `[Logout] Executing logout task for ${account} (${task.topics.length} topics)`
       );
+      resetNotifications(account);
       // await deleteXmtpDatabaseEncryptionKey(account);
       await deleteXmtpKey(account);
       await deleteAccountEncryptionKey(account);
       if (task.pkPath) {
         await deleteSecureItemAsync(task.pkPath);
       }
-      assertNotLogged(account);
+
       assertNotLogged(account);
       if (task.apiHeaders) {
         // This seems wrong, if the request fails then the user is still subscribed to pushes

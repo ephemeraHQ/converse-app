@@ -64,7 +64,7 @@ func handleNotificationAsync(contentHandler: ((UNNotificationContent) -> Void), 
     }
     
     if (shouldShowNotification && !notificationAlreadyShown(for: messageId)) {
-      incrementBadge(for: content)
+      incrementBadge(for: content, account: account)
       guard let intent = messageIntent else {
         contentHandler(content)
         return
@@ -213,7 +213,6 @@ class NotificationService: UNNotificationServiceExtension {
     sentryTrackMessage(message: "NOTIFICATION_TIMEOUT", extras: ["body": bestAttemptContent?.userInfo["body"]])
     if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
       if let body = bestAttemptContent.userInfo["body"] as? [String: Any], let contentTopic = body["contentTopic"] as? String {
-        incrementBadge(for: bestAttemptContent)
       }
       contentHandler(bestAttemptContent)
     }
