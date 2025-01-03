@@ -12,22 +12,17 @@ import {
 
 import { AnimatedVStack } from "@/design-system/VStack";
 import { useAppTheme } from "@/theme/useAppTheme";
-import {
-  DmWithCodecsType,
-  GroupWithCodecsType,
-} from "@/utils/xmtpRN/client.types";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { FlatListItemType } from "@features/conversation-list/ConversationList.types";
 import { NavigationParamList } from "@screens/Navigation/Navigation";
 import { ConversationFlatListHiddenRequestItem } from "@utils/conversation";
-import { unwrapConversationContainer } from "@utils/groupUtils/conversationContainerHelpers";
-import { ConversationVersion } from "@xmtp/react-native-sdk";
 import Animated from "react-native-reanimated";
 import HiddenRequestsButton from "../ConversationList/HiddenRequestsButton";
 import { V3DMListItem } from "../V3DMListItem";
 import { V3GroupConversationListItem } from "../V3GroupConversationListItem";
 import { CONVERSATION_FLASH_LIST_REFRESH_THRESHOLD } from "./ConversationFlashList.constants";
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 
 type Props = {
   onScroll?: () => void;
@@ -75,16 +70,13 @@ export default function ConversationFlashList({
   const renderItem = useCallback(
     ({ item }: { item: FlatListItemType }) => {
       if ("lastMessage" in item) {
-        const conversation = unwrapConversationContainer(item);
-        if (conversation.version === ConversationVersion.GROUP) {
+        if (isConversationGroup(item)) {
           return (
             <AnimatedVStack
               entering={theme.animation.reanimatedFadeInSpring}
               exiting={theme.animation.reanimatedFadeOutSpring}
             >
-              <V3GroupConversationListItem
-                group={conversation as GroupWithCodecsType}
-              />
+              <V3GroupConversationListItem group={item} />
             </AnimatedVStack>
           );
         } else {
@@ -93,7 +85,7 @@ export default function ConversationFlashList({
               entering={theme.animation.reanimatedFadeInSpring}
               exiting={theme.animation.reanimatedFadeOutSpring}
             >
-              <V3DMListItem conversation={conversation as DmWithCodecsType} />
+              <V3DMListItem conversation={item} />
             </AnimatedVStack>
           );
         }
