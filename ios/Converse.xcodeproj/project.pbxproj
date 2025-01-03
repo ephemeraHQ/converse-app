@@ -667,7 +667,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = com.converse.dev;
+				PRODUCT_BUNDLE_IDENTIFIER = com.converse.preview;
 				PRODUCT_NAME = Converse;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -705,7 +705,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = com.converse.dev;
+				PRODUCT_BUNDLE_IDENTIFIER = com.converse.preview;
 				PRODUCT_NAME = Converse;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -749,7 +749,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = com.converse.dev.ConverseNotificationExtension;
+				PRODUCT_BUNDLE_IDENTIFIER = com.converse.preview.ConverseNotificationExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -793,7 +793,7 @@
 				MARKETING_VERSION = 1.0;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = com.converse.dev.ConverseNotificationExtension;
+				PRODUCT_BUNDLE_IDENTIFIER = com.converse.preview.ConverseNotificationExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;

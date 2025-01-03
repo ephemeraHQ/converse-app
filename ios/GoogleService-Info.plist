@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.converse.dev</string>
+	<string>com.converse.preview</string>
 	<key>PROJECT_ID</key>
 	<string>converse-unshut-labs</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:564961909146:ios:779bcea169541560bd0223</string>
+	<string>1:564961909146:ios:5dfa3959b85ed8ccbd0223</string>
 </dict>
 </plist>

@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-	<key>aps-environment</key>
-	<string>development</string>
-	<key>com.apple.developer.associated-domains</key>
-	<array>
-		<string>applinks:dev.converse.xyz</string>
-		<string>applinks:dev.getconverse.app</string>
-	</array>
-	<key>com.apple.developer.devicecheck.appattest-environment</key>
-	<string>production</string>
-	<key>com.apple.developer.usernotifications.communication</key>
-	<true/>
-	<key>com.apple.security.application-groups</key>
-	<array>
-		<string>group.com.converse.dev</string>
-	</array>
-	<key>keychain-access-groups</key>
-	<array>
-		<string>$(AppIdentifierPrefix)com.converse.dev</string>
-	</array>
-</dict>
+  <dict>
+    <key>aps-environment</key>
+    <string>development</string>
+    <key>com.apple.developer.associated-domains</key>
+    <array>
+      <string>applinks:preview.converse.xyz</string>
+      <string>applinks:preview.getconverse.app</string>
+    </array>
+    <key>com.apple.developer.devicecheck.appattest-environment</key>
+    <string>production</string>
+    <key>com.apple.developer.usernotifications.communication</key>
+    <true/>
+    <key>com.apple.security.application-groups</key>
+    <array>
+      <string>group.com.converse.preview</string>
+    </array>
+    <key>keychain-access-groups</key>
+    <array>
+      <string>$(AppIdentifierPrefix)com.converse.preview</string>
+    </array>
+  </dict>
 </plist>
