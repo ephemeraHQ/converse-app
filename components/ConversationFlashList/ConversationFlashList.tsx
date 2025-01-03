@@ -19,14 +19,9 @@ import { useSelect } from "@data/store/storeHelpers";
 import { NavigationParamList } from "@screens/Navigation/Navigation";
 import { ConversationFlatListHiddenRequestItem } from "@utils/conversation";
 import { FlatListItemType } from "@features/conversation-list/ConversationList.types";
-import { unwrapConversationContainer } from "@utils/groupUtils/conversationContainerHelpers";
-import { ConversationVersion } from "@xmtp/react-native-sdk";
-import {
-  DmWithCodecsType,
-  GroupWithCodecsType,
-} from "@/utils/xmtpRN/client.types";
 import { V3DMListItem } from "../V3DMListItem";
 import { CONVERSATION_FLASH_LIST_REFRESH_THRESHOLD } from "./ConversationFlashList.constants";
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 
 type Props = {
   onScroll?: () => void;
@@ -73,15 +68,10 @@ export default function ConversationFlashList({
 
   const renderItem = useCallback(({ item }: { item: FlatListItemType }) => {
     if ("lastMessage" in item) {
-      const conversation = unwrapConversationContainer(item);
-      if (conversation.version === ConversationVersion.GROUP) {
-        return (
-          <V3GroupConversationListItem
-            group={conversation as GroupWithCodecsType}
-          />
-        );
+      if (isConversationGroup(item)) {
+        return <V3GroupConversationListItem group={item} />;
       } else {
-        return <V3DMListItem conversation={conversation as DmWithCodecsType} />;
+        return <V3DMListItem conversation={item} />;
       }
     }
     if (item.topic === "hiddenRequestsButton") {

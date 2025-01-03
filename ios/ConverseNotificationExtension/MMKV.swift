@@ -65,8 +65,8 @@ func getProfilesStore(account: String, address: String) -> ProfileSocials? {
   }
   let decoder = JSONDecoder()
   do {
-    let decoded = try decoder.decode(ProfileSocials.self, from: profilesString!.data(using: .utf8)!)
-    return decoded
+    let decoded = try decoder.decode(Profile.self, from: profilesString!.data(using: .utf8)!)
+    return decoded.socials
   } catch {
     return nil
   }
@@ -81,8 +81,8 @@ func getInboxIdProfilesStore(account: String, inboxId: String) -> ProfileSocials
   }
   let decoder = JSONDecoder()
   do {
-    let decoded = try decoder.decode(ProfileSocials.self, from: profilesString!.data(using: .utf8)!)
-    return decoded
+    let decoded = try decoder.decode([ProfileSocials].self, from: profilesString!.data(using: .utf8)!)
+    return decoded[0]
   } catch {
     return nil
   }
@@ -124,17 +124,33 @@ func getAccounts() -> [String] {
   }))!
 }
 
-func getBadge() -> Int {
+func getBadgeStorageKey(account: String) -> String {
+  return "notifications-badge-\(account.lowercased())"
+}
+
+func getBadgeByAccount(account: String) -> Int {
   let mmkv = getMmkv()
-  if let badge = mmkv?.int32(forKey: "notifications-badge") {
-    return Int(badge)
+  let key = getBadgeStorageKey(account: account)
+  if let accountBadge = mmkv?.double(forKey: key) {
+    return Int(accountBadge)
   }
   return 0
 }
 
-func setBadge(_ badge: Int) {
+func setBadgeByAccount(_ badge: Int, account: String) {
   let mmkv = getMmkv()
-  mmkv?.set(Int32(badge), forKey: "notifications-badge")
+  let key = getBadgeStorageKey(account: account)
+  mmkv?.set(Double(badge), forKey: key)
+}
+
+func getAllBadgeCounts() -> Int {
+  var count = 0
+  let accounts = getAccounts()
+  for account in accounts {
+    let accountCount = getBadgeByAccount(account: account)
+    count += accountCount
+  }
+  return count
 }
 
 func getShownNotificationIds() -> [String] {

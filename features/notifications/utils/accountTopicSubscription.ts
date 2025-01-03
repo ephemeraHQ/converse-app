@@ -1,6 +1,7 @@
 import { createConversationListQueryObserver } from "@/queries/useConversationListQuery";
 import { subscribeToNotifications } from "./subscribeToNotifications";
 import logger from "@/utils/logger";
+import { currentAccount } from "@/data/store/accountsStore";
 import { resetNotifications } from "./resetNotifications";
 
 const accountTopicUnsubscribeMap: Record<string, () => void> = {};
@@ -27,12 +28,9 @@ export const setupAccountTopicSubscription = (account: string) => {
         conversations: conversationList.data,
         account,
       });
-      // For now just reset notifications when we get a new conversation list
-      /*
-        TODO: We can probably do better here
-        - Counter by account (Only clear the counter for the account we are subscribing to so users know they have new messages on other accounts)
-      */
-      resetNotifications();
+      if (account === currentAccount()) {
+        resetNotifications(account);
+      }
     }
   });
   accountTopicUnsubscribeMap[account] = unsubscribe;

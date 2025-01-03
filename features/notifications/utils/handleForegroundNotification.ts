@@ -9,10 +9,14 @@ const handleiOSForegroundNotification = async (
   notification: Notifications.Notification
 ) => {
   logger.debug("[Notifications] Handling iOS foreground notification");
-  resetNotifications();
   // note(lustig): this is not the senderAddress, but the account to which
   // the notification is to be received.
   const recipientAccount = notification.request.content.data?.["account"];
+  if (
+    recipientAccount?.toLowerCase() == currentAccount()?.toLocaleLowerCase()
+  ) {
+    resetNotifications(recipientAccount);
+  }
 
   const senderAccount =
     /* TODO notification.request.content.data?.["sender"]; */ "todo";
@@ -45,7 +49,7 @@ const handleiOSForegroundNotification = async (
 const handleDefaultForegroundNotification = async (
   notification: Notifications.Notification
 ) => {
-  resetNotifications();
+  //
   const account = notification.request.content.data?.["account"];
   if (account && account !== currentAccount()) {
     return {
@@ -54,6 +58,7 @@ const handleDefaultForegroundNotification = async (
       shouldSetBadge: true,
     };
   } else {
+    resetNotifications(account);
     return {
       shouldShowAlert: false,
       shouldPlaySound: false,
@@ -65,7 +70,11 @@ const handleDefaultForegroundNotification = async (
 export const handleForegroundNotification = async (
   notification: Notifications.Notification
 ) => {
-  logger.info("A NOTIFICATION WAS RECEIVED WHILE THE APP WAS FOREGROUNDED");
+  logger.info(
+    "A NOTIFICATION WAS RECEIVED WHILE THE APP WAS FOREGROUNDED",
+    typeof Platform.OS,
+    Platform.OS
+  );
   return Platform.select({
     ios: handleiOSForegroundNotification(notification),
     default: handleDefaultForegroundNotification(notification),
