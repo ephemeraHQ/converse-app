@@ -1,22 +1,14 @@
 import { Button } from "@design-system/Button/Button";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import {
-  backgroundColor,
-  itemSeparatorColor,
-  primaryColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "@styles/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Platform,
   ScrollView,
-  StyleSheet,
-  Text,
   TextInput,
   View,
-  useColorScheme,
+  ViewStyle,
+  TextStyle,
 } from "react-native";
 
 import { translate } from "@/i18n";
@@ -26,26 +18,29 @@ import SearchBar from "@search/components/SearchBar";
 import ProfileSearch from "@search/screens/ProfileSearch";
 import { canMessageByAccount } from "@utils/xmtpRN/contacts";
 import { InboxId } from "@xmtp/react-native-sdk";
-import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
-import AndroidBackAction from "../../components/AndroidBackAction";
-import Recommendations from "../../components/Recommendations/Recommendations";
-import TableView from "../../components/TableView/TableView";
-import { TableViewPicto } from "../../components/TableView/TableViewImage";
-import config from "../../config";
+import AndroidBackAction from "@components/AndroidBackAction";
+import Recommendations from "@components/Recommendations/Recommendations";
+import TableView from "@components/TableView/TableView";
+import { TableViewPicto } from "@components/TableView/TableViewImage";
+import config from "@config";
 import {
   currentAccount,
   useRecommendationsStore,
-} from "../../data/store/accountsStore";
+} from "@data/store/accountsStore";
 import { IProfileSocials } from "@/features/profiles/profile-types";
-import { useSelect } from "../../data/store/storeHelpers";
-import { useGroupMembers } from "../../hooks/useGroupMembers";
-import { searchProfiles } from "../../utils/api";
-import { getAddressForPeer, isSupportedPeer } from "../../utils/evm/address";
-import { navigate } from "../../utils/navigation";
-import { isEmptyObject } from "../../utils/objects";
-import { getPreferredName } from "../../utils/profile";
+import { useSelect } from "@data/store/storeHelpers";
+import { useGroupMembers } from "@hooks/useGroupMembers";
+import { searchProfiles } from "@utils/api";
+import { getAddressForPeer, isSupportedPeer } from "@utils/evm/address";
+import { navigate } from "@utils/navigation";
+import { isEmptyObject } from "@utils/objects";
+import { getPreferredName } from "@utils/profile";
 import { NewConversationModalParams } from "./NewConversationModal";
 import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
+import { Text } from "@design-system/Text";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { Loader } from "@/design-system/loader";
+import { textSizeStyles } from "@/design-system/Text/Text.styles";
 
 export default function NewConversation({
   route,
@@ -54,11 +49,16 @@ export default function NewConversation({
   NewConversationModalParams,
   "NewConversationScreen"
 >) {
-  const colorScheme = useColorScheme();
+  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+
+  const { theme, themed } = useAppTheme();
+
+  // TODO: Unused. Should we remove this once we have a proper group query?
   const { data: existingGroup } = useGroupQuery({
     account: currentAccount(),
     topic: route.params?.addingToGroupTopic!,
   });
+
   const [group, setGroup] = useState({
     enabled: !!route.params?.addingToGroupTopic,
     members: [] as (IProfileSocials & { address: string })[],
@@ -69,10 +69,6 @@ export default function NewConversation({
   );
 
   const [loading, setLoading] = useState(false);
-
-  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
-
-  const styles = useStyles();
 
   const handleRightAction = useCallback(async () => {
     if (route.params?.addingToGroupTopic) {
@@ -113,7 +109,7 @@ export default function NewConversation({
       headerRight: () => {
         if (group.enabled && group.members.length > 0) {
           if (loading) {
-            return <ActivityIndicator style={styles.activityIndicator} />;
+            return <Loader style={{ marginRight: theme.spacing["5xs"] }} />;
           } else {
             return (
               <Button
@@ -136,8 +132,8 @@ export default function NewConversation({
     addMembers,
     handleBack,
     handleRightAction,
-    styles.activityIndicator,
-    colorScheme,
+    themed,
+    theme.spacing,
   ]);
 
   const [value, setValue] = useState(route.params?.peer || "");
@@ -324,7 +320,7 @@ export default function NewConversation({
   );
 
   return (
-    <View style={styles.searchContainer}>
+    <View style={themed($searchContainer)}>
       <SearchBar
         value={value}
         setValue={setValue}
@@ -333,7 +329,7 @@ export default function NewConversation({
       />
       <View
         style={[
-          styles.group,
+          themed($group),
           {
             display:
               group.enabled && group.members.length === 0 ? "none" : "flex",
@@ -345,7 +341,7 @@ export default function NewConversation({
             variant="text"
             picto="person.2"
             text={translate("new_group.title")}
-            style={styles.newGroupButton}
+            style={themed($newGroupButton)}
             onPress={() => {
               setGroup({ enabled: true, members: [] });
             }}
@@ -364,7 +360,7 @@ export default function NewConversation({
                 variant="fill"
                 size="md"
                 picto="xmark"
-                style={styles.groupMemberButton}
+                style={themed($groupMemberButton)}
                 onPress={() =>
                   setGroup((g) => {
                     const members = [...g.members];
@@ -380,8 +376,8 @@ export default function NewConversation({
           })}
       </View>
 
-      {!status.loading && !isEmptyObject(status.profileSearchResults) && (
-        <View>
+      {!status.loading && !isEmptyObject(status.profileSearchResults) ? (
+        <View style={{ flex: 1 }}>
           <ProfileSearch
             navigation={navigation}
             profiles={(() => {
@@ -407,162 +403,140 @@ export default function NewConversation({
             }}
           />
         </View>
-      )}
-
-      {isEmptyObject(status.profileSearchResults) && (
-        <View
-          style={{
-            backgroundColor: backgroundColor(colorScheme),
-            height: showRecommendations ? undefined : 0,
+      ) : (
+        <ScrollView
+          style={[themed($modal), { flex: 1 }]}
+          keyboardShouldPersistTaps="handled"
+          onTouchStart={() => {
+            inputRef.current?.blur();
           }}
         >
-          <Recommendations
-            visibility="EMBEDDED"
-            groupMode={group.enabled}
-            groupMembers={group.members}
-            addToGroup={async (member) => {
-              setGroup((g) => ({ ...g, members: [...g.members, member] }));
-              setValue("");
-            }}
-          />
-        </View>
-      )}
+          {isEmptyObject(status.profileSearchResults) && (
+            <View
+              style={{
+                backgroundColor: theme.colors.background.surface,
+                height: showRecommendations ? undefined : 0,
+              }}
+            >
+              <Recommendations
+                visibility="EMBEDDED"
+                groupMode={group.enabled}
+                groupMembers={group.members}
+                addToGroup={async (member) => {
+                  setGroup((g) => ({ ...g, members: [...g.members, member] }));
+                  setValue("");
+                }}
+              />
+            </View>
+          )}
 
-      <ScrollView
-        style={[styles.modal, { height: showRecommendations ? 0 : undefined }]}
-        keyboardShouldPersistTaps="handled"
-        onTouchStart={() => {
-          inputRef.current?.blur();
-        }}
-      >
-        {!status.loading && isEmptyObject(status.profileSearchResults) && (
-          <View style={styles.messageContainer}>
-            {status.error ? (
-              <Text style={[styles.message, styles.error]}>{status.error}</Text>
-            ) : (
-              <Text style={styles.message}>
-                <Text>
-                  Type the full address/domain of your contact (with
-                  .converse.xyz, .eth, .lens, .fc, .cb.id…)
+          {!status.loading && isEmptyObject(status.profileSearchResults) && (
+            <View style={themed($messageContainer)}>
+              {status.error ? (
+                <Text style={[themed($message), themed($error)]}>
+                  {status.error}
                 </Text>
-              </Text>
-            )}
-          </View>
-        )}
+              ) : (
+                <Text style={themed($message)}>
+                  <Text>
+                    Type the full address/domain of your contact (with
+                    .converse.xyz, .eth, .lens, .fc, .cb.id…)
+                  </Text>
+                </Text>
+              )}
+            </View>
+          )}
 
-        {status.loading && (
-          <ActivityIndicator style={styles.mainActivityIndicator} />
-        )}
+          {status.loading && <Loader style={{ marginTop: theme.spacing.lg }} />}
 
-        {!status.loading && !!status.inviteToConverse && (
-          <TableView
-            items={[
-              {
-                id: "inviteToConverse",
-                leftView: <TableViewPicto symbol="link" />,
-                title: translate("new_conversation.invite_to_converse"),
-                subtitle: "",
-                action: () => {
-                  navigation.goBack();
-                  navigate("ShareProfile");
+          {!status.loading && !!status.inviteToConverse && (
+            <TableView
+              items={[
+                {
+                  id: "inviteToConverse",
+                  leftView: <TableViewPicto symbol="link" />,
+                  title: translate("new_conversation.invite_to_converse"),
+                  subtitle: "",
+                  action: () => {
+                    navigation.goBack();
+                    navigate("ShareProfile");
+                  },
                 },
-              },
-            ]}
-            style={styles.tableView}
-          />
-        )}
-      </ScrollView>
+              ]}
+              style={themed($tableView)}
+            />
+          )}
+        </ScrollView>
+      )}
     </View>
   );
 }
 
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    modal: {
-      flex: 1,
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    messageContainer: {
-      ...Platform.select({
-        default: {
-          marginTop: 23,
-          paddingHorizontal: 16,
-        },
-        android: {
-          marginRight: 16,
-          marginLeft: 16,
-          marginTop: 16,
-        },
-      }),
-    },
-    message: {
-      ...Platform.select({
-        default: {
-          fontSize: 17,
-          textAlign: "center",
-        },
-        android: {
-          fontSize: 14,
-        },
-      }),
+const $modal: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  flex: 1,
+  backgroundColor: colors.background.surface,
+});
 
-      color: textSecondaryColor(colorScheme),
+const $messageContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  ...Platform.select({
+    default: {
+      marginTop: spacing.lg,
+      paddingHorizontal: spacing.md,
     },
-    clickableText: {
-      color: primaryColor(colorScheme),
-      fontWeight: "500",
+    android: {
+      marginRight: spacing.md,
+      marginLeft: spacing.md,
+      marginTop: spacing.md,
     },
-    error: {
-      color:
-        Platform.OS === "android"
-          ? textSecondaryColor(colorScheme)
-          : textPrimaryColor(colorScheme),
+  }),
+});
+
+const $message: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text.secondary,
+  ...textSizeStyles.sm,
+  ...Platform.select({
+    default: {
+      textAlign: "center",
     },
-    mainActivityIndicator: {
-      marginTop: 23,
-    },
-    tableView: {
-      marginHorizontal: Platform.OS === "android" ? 0 : 18,
-    },
-    tableViewActivityIndicator: {
-      width: 32,
-      height: 32,
-      ...Platform.select({
-        default: { marginRight: 8 },
-        android: { marginLeft: 12, marginRight: -4 },
-      }),
-    },
-    group: {
-      minHeight: 50,
-      paddingBottom: Platform.OS === "ios" ? 10 : 0,
-      flexDirection: "row",
-      alignItems: "center",
-      paddingLeft: Platform.OS === "ios" ? 16 : 0,
-      justifyContent: "flex-start",
-      borderBottomWidth: Platform.OS === "android" ? 1 : 0.5,
-      borderBottomColor: itemSeparatorColor(colorScheme),
-      backgroundColor: backgroundColor(colorScheme),
-      flexWrap: "wrap",
-    },
-    groupMemberButton: {
-      padding: 0,
-      marginHorizontal: 0,
-      marginRight: 10,
-      // height: Platform.OS === "ios" ? 30 : undefined,
-      marginTop: 10,
-    },
-    activityIndicator: {
-      marginRight: 5,
-    },
-    searchContainer: {
-      flex: 1,
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    newGroupButton: {
-      marginLeft: 7,
-      paddingTop: Platform.OS === "ios" ? 13 : 10,
-      paddingBottom: Platform.OS === "ios" ? 0 : 10,
-    },
-  });
-};
+  }),
+});
+
+const $error: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color:
+    Platform.OS === "android" ? colors.text.secondary : colors.text.primary,
+});
+
+const $tableView: ThemedStyle<ViewStyle> = () => ({
+  marginHorizontal: Platform.OS === "android" ? 0 : 18,
+});
+
+const $group: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  minHeight: 50,
+  paddingBottom: Platform.OS === "ios" ? spacing.xs : 0,
+  flexDirection: "row",
+  alignItems: "center",
+  paddingLeft: Platform.OS === "ios" ? spacing.md : 0,
+  justifyContent: "flex-start",
+  borderBottomWidth: Platform.OS === "android" ? 1 : 0.5,
+  borderBottomColor: colors.border.subtle,
+  backgroundColor: colors.background.surface,
+  flexWrap: "wrap",
+});
+
+const $groupMemberButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  padding: 0,
+  marginHorizontal: 0,
+  marginRight: spacing.xs,
+  marginTop: spacing.xs,
+});
+
+const $searchContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  flex: 1,
+  backgroundColor: colors.background.surface,
+});
+
+const $newGroupButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginLeft: spacing["6xs"],
+  paddingTop: Platform.OS === "ios" ? spacing.sm : spacing.xs,
+  paddingBottom: Platform.OS === "ios" ? 0 : spacing.xs,
+});

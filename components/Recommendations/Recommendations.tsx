@@ -1,22 +1,14 @@
 import { IProfileSocials } from "@/features/profiles/profile-types";
-import {
-  backgroundColor,
-  itemSeparatorColor,
-  primaryColor,
-  textPrimaryColor,
-  textSecondaryColor,
-} from "@styles/colors";
-import * as Linking from "expo-linking";
 import { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   Keyboard,
   Platform,
-  StyleSheet,
-  Text,
   View,
-  useColorScheme,
+  ViewStyle,
+  TextStyle,
 } from "react-native";
+import * as Linking from "expo-linking";
 
 import { Recommendation } from "./Recommendation";
 import config from "@config";
@@ -28,8 +20,11 @@ import {
 import { useSelect } from "@data/store/storeHelpers";
 import { useRouter } from "@navigation/useNavigation";
 import { refreshRecommendationsForAccount } from "@utils/recommendations";
-import ActivityIndicator from "@components/ActivityIndicator/ActivityIndicator";
 import { translate } from "@/i18n";
+import { Text } from "@design-system/Text";
+import { Loader } from "@/design-system/loader";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { textSizeStyles } from "@/design-system/Text/Text.styles";
 
 const EXPIRE_AFTER = 86400000; // 1 DAY
 
@@ -65,7 +60,7 @@ export default function Recommendations({
       "updatedAt",
     ])
   );
-  const styles = useStyles();
+  const { themed } = useAppTheme();
 
   const openSignalList = useCallback(() => {
     Linking.openURL(
@@ -124,18 +119,18 @@ export default function Recommendations({
         return (
           <>
             {visibility === "FULL" && showTitle && (
-              <View style={styles.titleContainer}>
+              <View style={themed($titleContainer)}>
                 <>
-                  <Text style={styles.emoji}>👋</Text>
-                  <Text style={styles.title}>
+                  <Text style={themed($emoji)}>👋</Text>
+                  <Text style={themed($title)}>
                     {translate("recommendations.title")}
                   </Text>
                 </>
               </View>
             )}
             {visibility === "EMBEDDED" && showTitle && (
-              <View style={styles.sectionTitleContainer}>
-                <Text style={styles.sectionTitle}>
+              <View style={themed($sectionTitleContainer)}>
+                <Text preset="formLabel" style={themed($sectionTitleSpacing)}>
                   {translate("recommendations.section_title")}
                 </Text>
               </View>
@@ -165,11 +160,7 @@ export default function Recommendations({
     },
     [
       frens,
-      styles.emoji,
-      styles.sectionTitle,
-      styles.sectionTitleContainer,
-      styles.title,
-      styles.titleContainer,
+      themed,
       viewableItems,
       visibility,
       groupMembers,
@@ -183,9 +174,9 @@ export default function Recommendations({
 
   if (loading && Object.keys(frens).length === 0 && visibility === "FULL") {
     return (
-      <View style={styles.fetching}>
-        <ActivityIndicator />
-        <Text style={styles.fetchingText}>
+      <View style={themed($fetching)}>
+        <Loader />
+        <Text style={themed($fetchingText)}>
           {translate("recommendations.loading")}
         </Text>
       </View>
@@ -195,14 +186,14 @@ export default function Recommendations({
   if (visibility === "FULL" && frens && Object.keys(frens).length === 0) {
     return (
       <>
-        <Text style={styles.emoji}>😐</Text>
-        <Text style={styles.title}>
+        <Text style={themed($emoji)}>😐</Text>
+        <Text style={themed($title)}>
           {translate("recommendations.no_recommendations")}
-          <Text style={styles.clickableText} onPress={openSignalList}>
+          <Text style={themed($clickableText)} onPress={openSignalList}>
             {translate("recommendations.signal_list")}
           </Text>
           {translate("recommendations.please_feel_free_to")}
-          <Text style={styles.clickableText} onPress={contactPol}>
+          <Text style={themed($clickableText)} onPress={contactPol}>
             {translate("recommendations.contact_pol")}
           </Text>{" "}
           {translate("recommendations.if_you_want_us_to_add_anything")}
@@ -212,7 +203,7 @@ export default function Recommendations({
   }
 
   return (
-    <View style={styles.recommendations}>
+    <View style={themed($recommendations)}>
       <FlatList
         data={["title", ...Object.keys(frens)]}
         keyExtractor={keyExtractor}
@@ -223,98 +214,90 @@ export default function Recommendations({
           minimumViewTime: 0,
         }}
         onTouchStart={Keyboard.dismiss}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
 }
 
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    emoji: {
-      textAlign: "center",
-      marginTop: 30,
-      fontSize: 34,
-      marginBottom: 12,
-    },
-    title: {
-      color: textPrimaryColor(colorScheme),
-      ...Platform.select({
-        default: {
-          fontSize: 17,
-          paddingHorizontal: 32,
-        },
-        android: {
-          fontSize: 14,
-          paddingHorizontal: 39,
-        },
-      }),
+const $emoji: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  ...textSizeStyles.xl,
+  textAlign: "center",
+  marginTop: spacing.xl,
+  marginBottom: spacing.sm,
+});
 
-      textAlign: "center",
+const $title: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  ...textSizeStyles.sm,
+  color: colors.text.primary,
+  ...Platform.select({
+    default: {
+      paddingHorizontal: spacing.xl,
     },
-    recommendations: {
-      marginBottom: 30,
-      backgroundColor: backgroundColor(colorScheme),
-      marginLeft: Platform.OS === "android" ? 16 : 0,
+    android: {
+      paddingHorizontal: spacing.xxl,
     },
-    fetching: {
-      flexGrow: 1,
-      justifyContent: "center",
-      marginBottom: 40,
-    },
-    fetchingText: {
-      color: textPrimaryColor(colorScheme),
-      ...Platform.select({
-        default: { fontSize: 17 },
-        android: { fontSize: 16 },
-      }),
+  }),
+  textAlign: "center",
+});
 
-      textAlign: "center",
-      marginTop: 20,
+const $recommendations: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  marginBottom: spacing.xl,
+  backgroundColor: colors.background.surface,
+  marginLeft: Platform.OS === "android" ? spacing.md : 0,
+});
+
+const $fetching: ThemedStyle<ViewStyle> = () => ({
+  flexGrow: 1,
+  justifyContent: "center",
+  marginBottom: 40,
+});
+
+const $fetchingText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  ...textSizeStyles.sm,
+  color: colors.text.primary,
+  textAlign: "center",
+  marginTop: spacing.lg,
+});
+
+const $clickableText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text.action,
+  fontWeight: "500",
+});
+
+const $titleContainer: ThemedStyle<ViewStyle> = ({
+  colors,
+  spacing,
+  borderWidth,
+}) => ({
+  paddingBottom: spacing.xl,
+  ...Platform.select({
+    default: {
+      borderBottomWidth: borderWidth.xs,
+      borderBottomColor: colors.border.subtle,
     },
-    clickableText: {
-      color: primaryColor(colorScheme),
-      fontWeight: "500",
+    android: {},
+    web: {},
+  }),
+});
+
+const $sectionTitleContainer: ThemedStyle<ViewStyle> = ({
+  colors,
+  spacing,
+  borderWidth,
+}) => ({
+  ...Platform.select({
+    default: {
+      borderBottomWidth: borderWidth.xs,
+      borderBottomColor: colors.border.subtle,
+      paddingLeft: spacing.md,
     },
-    noMatch: {
-      marginTop: 30,
-    },
-    titleContainer: {
-      paddingBottom: 30,
-      ...Platform.select({
-        default: {
-          borderBottomWidth: 0.5,
-          borderBottomColor: itemSeparatorColor(colorScheme),
-        },
-        android: {},
-        web: {},
-      }),
-    },
-    sectionTitleContainer: {
-      ...Platform.select({
-        default: {
-          borderBottomWidth: 0.5,
-          borderBottomColor: itemSeparatorColor(colorScheme),
-          paddingLeft: 16,
-        },
-        android: {},
-        web: {},
-      }),
-    },
-    sectionTitle: {
-      color: textSecondaryColor(colorScheme),
-      ...Platform.select({
-        default: {
-          fontSize: 12,
-          marginBottom: 8,
-          marginTop: 23,
-        },
-        android: {
-          fontSize: 11,
-          marginBottom: 12,
-          marginTop: 16,
-        },
-      }),
-    },
-  });
-};
+    android: {},
+    web: {},
+  }),
+});
+
+const $sectionTitleSpacing: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  marginBottom: spacing.xs,
+  marginTop: spacing.lg,
+});
