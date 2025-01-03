@@ -34,10 +34,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4.0.2
         with:
           node-version: 20.18.0
 
@@ -111,6 +111,18 @@ jobs:
           else
             eas build --profile preview-android --platform android --non-interactive --auto-submit --no-wait
           fi
+
+  increment-build-numbers:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version: 20.18.0
 
       - name: Increment version numbers
         run: node scripts/build/incrementBuildNumbers.js
