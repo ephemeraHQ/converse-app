@@ -11,7 +11,7 @@ import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
 } from "@/utils/xmtpRN/client.types";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { getOrBuildXmtpClient } from "@utils/xmtpRN/sync";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
 
@@ -162,7 +162,9 @@ const getConversationList = async (args: {
       `[ConversationListQuery] Fetching conversation list from network ${context}`
     );
 
-    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    const client = (await getOrBuildXmtpClient(
+      account
+    )) as ConverseXmtpClientType;
 
     const beforeSync = new Date().getTime();
 

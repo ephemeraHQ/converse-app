@@ -13,11 +13,13 @@ import {
   DmWithCodecsType,
 } from "./client.types";
 import { streamAllMessages } from "./messages";
-import { getXmtpClient } from "./sync";
+import { getOrBuildXmtpClient } from "./sync";
 
 export const streamConversations = async (account: string) => {
   await stopStreamingConversations(account);
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   await client.conversations.stream(async (conversation) => {
     logger.info("[XMTPRN Conversations] GOT A NEW CONVO");
     addConversationToConversationListQuery({ account, conversation });
@@ -26,7 +28,9 @@ export const streamConversations = async (account: string) => {
 };
 
 export const stopStreamingConversations = async (account: string) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   return client.conversations.cancelStream();
 };
 
@@ -69,7 +73,9 @@ export const listConversationsByAccount = async (args: {
   const { account, includeSync = false, order, limit, opts } = args;
   logger.debug("[XMTPRN Conversations] Listing conversations by account");
   const start = new Date().getTime();
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   if (!client) {
     throw new Error("Client not found");
   }
@@ -254,7 +260,9 @@ export async function getGroupByTopicByAccount(args: {
   includeSync?: boolean;
 }) {
   const { account, topic, includeSync = false } = args;
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   return getGroupByTopic({
     client,
     topic,
@@ -294,7 +302,9 @@ export const getConversationByTopicByAccount = async (args: {
   includeSync?: boolean;
 }) => {
   const { account, topic, includeSync = false } = args;
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   return getConversationByTopic({ client, topic, includeSync });
 };
 
@@ -313,7 +323,9 @@ export const createConversationByAccount = async (
   account: string,
   peerAddress: string
 ) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   if (!client) {
     throw new Error("Client not found");
   }
@@ -368,7 +380,9 @@ export const createGroupByAccount = async (args: {
     groupDescription,
   } = args;
   const account = getCurrentAccount();
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   return createGroup({
     client,
     peers,
@@ -392,7 +406,9 @@ export const refreshProtocolConversationByAccount = async (args: {
   topic: ConversationTopic;
 }) => {
   const { account, topic } = args;
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   return refreshProtocolConversation({ client, topic });
 };
 
@@ -402,7 +418,9 @@ export const getConversationByPeerByAccount = async (args: {
   includeSync?: boolean;
 }) => {
   const { account, peer, includeSync = false } = args;
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   return getConversationByPeer({ client, peer, includeSync });
 };
 

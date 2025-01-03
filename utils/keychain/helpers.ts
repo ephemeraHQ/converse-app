@@ -1,4 +1,4 @@
-import type { Storage as PrivyStorage } from "@privy-io/js-sdk-core";
+// import type { Storage as PrivyStorage } from "@privy-io/js-sdk-core";
 import logger from "@utils/logger";
 import { createHash } from "crypto";
 import { getRandomBytesAsync } from "expo-crypto";
@@ -17,57 +17,44 @@ export const secureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
 };
 
-export const saveXmtpKey = (account: string, base64Key: string) =>
-  setSecureItemAsync(`XMTP_KEY_${account}`, base64Key);
+export const saveXmtpKey = (
+  { inboxId }: { inboxId: string },
+  base64Key: string
+) => setSecureItemAsync(`XMTP_KEY_${inboxId}`, base64Key);
 
-export const deleteXmtpKey = async (account: string) => {
-  await deleteSecureItemAsync(`XMTP_KEY_${account}`);
-  logger.debug(`[Keychain] Deleted XMTP Key for account ${account}`);
+export const deleteXmtpKey = async ({ inboxId }: { inboxId: string }) => {
+  await deleteSecureItemAsync(`XMTP_KEY_${inboxId}`);
+  logger.debug(`[Keychain] Deleted XMTP Key for inboxId ${inboxId}`);
 };
 
-export const loadXmtpKey = async (account: string): Promise<string | null> =>
-  getSecureItemAsync(`XMTP_KEY_${account}`);
-
-// export const getXmtpDatabaseEncryptionKey = async (
-//   account: string
-// ): Promise<string> => {
-//   const existingKey = await getSecureItemAsync(
-//     `XMTP_DB_ENCRYPTION_KEY_${account}`
-//   );
-//   if (existingKey) {
-//     return existingKey;
-//   }
-//   logger.debug(`[Keychain] Creating db encryption key for account ${account}`);
-//   const newKey = uuidv4();
-//   await setSecureItemAsync(`XMTP_DB_ENCRYPTION_KEY_${account}`, newKey);
-//   return newKey;
-// };
-
-// export const deleteXmtpDatabaseEncryptionKey = (account: string) =>
-//   deleteSecureItemAsync(`XMTP_DB_ENCRYPTION_KEY_${account}`);
+export const loadXmtpKey = async ({
+  inboxId,
+}: {
+  inboxId: string;
+}): Promise<string | null> => getSecureItemAsync(`XMTP_KEY_${inboxId}`);
 
 export const getTopicDataFromKeychain = async (
-  account: string,
+  { inboxId }: { inboxId: string },
   topics: string[]
 ): Promise<string[]> => {
   const keys = topics.map((topic) =>
     createHash("sha256").update(topic).digest("hex")
   );
   const keychainValues = await Promise.all(
-    keys.map((key) => getSecureItemAsync(`XMTP_TOPIC_DATA_${account}_${key}`))
+    keys.map((key) => getSecureItemAsync(`XMTP_TOPIC_DATA_${inboxId}_${key}`))
   );
   const topicData = keychainValues.filter((v) => !!v) as string[];
   return topicData;
 };
 
 export const deleteConversationsFromKeychain = async (
-  account: string,
+  { inboxId }: { inboxId: string },
   topics: string[]
 ) => {
   const promises: Promise<void>[] = [];
   for (const topic of topics) {
     const key = createHash("sha256").update(topic).digest("hex");
-    promises.push(deleteSecureItemAsync(`XMTP_TOPIC_DATA_${account}_${key}`));
+    promises.push(deleteSecureItemAsync(`XMTP_TOPIC_DATA_${inboxId}_${key}`));
     // Delete old version of the data (TODO => remove)
     promises.push(deleteSecureItemAsync(`XMTP_CONVERSATION_${key}`));
   }
@@ -76,13 +63,6 @@ export const deleteConversationsFromKeychain = async (
 
 export const savePushToken = async (pushKey: string) => {
   await setSecureItemAsync("PUSH_TOKEN", pushKey);
-};
-
-export const privySecureStorage: PrivyStorage = {
-  get: (key) => getSecureItemAsync(key.replaceAll(":", "-")),
-  put: (key, val: string) => setSecureItemAsync(key.replaceAll(":", "-"), val),
-  del: async (key) => deleteSecureItemAsync(key.replaceAll(":", "-")),
-  getKeys: async () => [],
 };
 
 export const savePrivateKey = async (
@@ -107,28 +87,33 @@ export const getDeviceId = async () => {
 // Returns a 64 bytes key that can be used for multiple things
 // 32 bytes is used for XMTP db encryption,
 // 16 bytes is used for MMKV secure encryption
-export const getAccountEncryptionKey = async (
-  account: string
-): Promise<Buffer> => {
+export const getEncryptionKeyByInboxId = async ({
+  inboxId,
+}: {
+  inboxId: string;
+}): Promise<Buffer> => {
   const existingKey = await getSecureItemAsync(
-    `CONVERSE_ACCOUNT_ENCRYPTION_KEY_${account}`
+    `CONVERSE_INBOX_ID_ENCRYPTION_KEY_${inboxId}`
   );
   if (existingKey) {
     return Buffer.from(existingKey, "base64");
   }
   logger.debug(
-    `[Keychain] Creating account encryption key for account ${account}`
+    `[Keychain] Creating inboxId encryption key for inboxId ${inboxId}`
   );
   const newKey = Buffer.from(await getRandomBytesAsync(64));
   await setSecureItemAsync(
-    `CONVERSE_ACCOUNT_ENCRYPTION_KEY_${account}`,
+    `CONVERSE_INBOX_ID_ENCRYPTION_KEY_${inboxId}`,
     newKey.toString("base64")
   );
   return newKey;
 };
 
-export const deleteAccountEncryptionKey = (account: string) =>
-  deleteSecureItemAsync(`CONVERSE_ACCOUNT_ENCRYPTION_KEY_${account}`);
+export const removeInboxIdEncryptionKeyFromStorage = ({
+  inboxId,
+}: {
+  inboxId: string;
+}) => deleteSecureItemAsync(`CONVERSE_INBOX_ID_ENCRYPTION_KEY_${inboxId}`);
 
 export const getDbEncryptionKey = async () => {
   const existingKey = await getSecureItemAsync("LIBXMTP_DB_ENCRYPTION_KEY");

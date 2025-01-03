@@ -23,7 +23,7 @@ import {
   getOtherInstallations,
   revokeOtherInstallations,
 } from "@utils/xmtpRN/revoke";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { getOrBuildXmtpClient } from "@utils/xmtpRN/sync";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
@@ -804,7 +804,7 @@ function ProfileScreenImpl() {
                     : primaryColor(colorScheme),
                 action: async () => {
                   try {
-                    const client = (await getXmtpClient(
+                    const client = (await getOrBuildXmtpClient(
                       userAddress
                     )) as ConverseXmtpClientType;
                     const otherInstallations =

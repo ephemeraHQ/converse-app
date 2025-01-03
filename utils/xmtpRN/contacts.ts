@@ -2,7 +2,7 @@ import { InboxId } from "@xmtp/react-native-sdk";
 
 import logger from "@utils/logger";
 import { ConverseXmtpClientType, DmWithCodecsType } from "./client.types";
-import { getXmtpClient } from "./sync";
+import { getOrBuildXmtpClient } from "./sync";
 
 type ConsentType = "allow" | "deny";
 
@@ -32,7 +32,9 @@ export const refreshConsentListByAccount = async ({
 }: RefreshConsentListByAccountParams) => {
   logger.debug("[XMTPRN Contacts] Refreshing consent list");
   const start = new Date().getTime();
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   const consentList = await refreshConsentList({ client });
   const end = new Date().getTime();
   logger.debug(
@@ -96,7 +98,9 @@ export const consentToAddressesOnProtocolByAccount = async ({
   addresses,
   consent,
 }: ConsentToAddressesOnProtocolByAccountParams) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   if (!client) {
     throw new Error("Client not found");
   }
@@ -158,7 +162,9 @@ export const consentToInboxIdsOnProtocolByAccount = async ({
   inboxIds,
   consent,
 }: ConsentToInboxIdsOnProtocolByAccountParams) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   if (!client) {
     throw new Error("Client not found");
   }
@@ -213,7 +219,9 @@ export const consentToGroupsOnProtocolByAccount = async (args: {
   consent: "allow" | "deny";
 }) => {
   const { account, groupIds, consent } = args;
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   if (!client) {
     throw new Error("Client not found");
   }
@@ -247,7 +255,9 @@ export const canMessageByAccount = async ({
   account,
   peer,
 }: CanMessageByAccountParams) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   if (!client) {
     throw new Error("Client not found");
   }

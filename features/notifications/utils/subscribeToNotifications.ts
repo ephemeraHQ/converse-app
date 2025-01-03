@@ -7,7 +7,7 @@ import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
 } from "@/utils/xmtpRN/client.types";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { getOrBuildXmtpClient } from "@utils/xmtpRN/sync";
 import { useAppStore } from "@data/store/appStore";
 import { subscribingByAccount } from "./subscribingByAccount";
 import { saveNotificationsSubscribe } from "@utils/api";
@@ -37,7 +37,9 @@ export const subscribeToNotifications = async ({
     const thirtyDayPeriodsSinceEpoch = Math.floor(
       Date.now() / 1000 / 60 / 60 / 24 / 30
     );
-    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    const client = (await getOrBuildXmtpClient(
+      account
+    )) as ConverseXmtpClientType;
     if (!client) {
       logger.error("[subscribeToNotifications] no client");
       return;

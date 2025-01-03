@@ -15,12 +15,14 @@ import {
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
 } from "./client.types";
-import { getXmtpClient } from "./sync";
+import { getOrBuildXmtpClient } from "./sync";
 
 export const streamAllMessages = async (account: string) => {
   await stopStreamingAllMessage(account);
 
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
 
   logger.info(`[XmtpRN] Streaming messages for ${client.address}`);
 
@@ -91,7 +93,9 @@ export const streamAllMessages = async (account: string) => {
 };
 
 export const stopStreamingAllMessage = async (account: string) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   logger.debug(`[XmtpRN] Stopped streaming messages for ${client.address}`);
   await client.conversations.cancelStreamAllMessages();
 };

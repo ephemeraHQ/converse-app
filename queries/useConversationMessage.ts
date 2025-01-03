@@ -1,6 +1,6 @@
 import { UseQueryOptions, useQuery } from "@tanstack/react-query";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { getOrBuildXmtpClient } from "@utils/xmtpRN/sync";
 import { MessageId, findMessage } from "@xmtp/react-native-sdk";
 import { conversationMessageQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
@@ -15,7 +15,9 @@ type IArgs = {
 async function fetchConversationMessage(args: IArgs) {
   const { account, messageId } = args;
 
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
 
   if (!client) {
     return null;

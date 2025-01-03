@@ -24,14 +24,13 @@ import {
   getInstallationKeySignature,
   InstallationSignature,
 } from "./xmtpRN/client";
-import { getInboxId } from "./xmtpRN/signIn";
 import { createDedupedFetcher } from "./api.utils";
-import { getSecureMmkvForAccount } from "./mmkv";
+import { getSecureMmkvForInboxId } from "./mmkv";
 import {
   CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
   CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
   FIREBASE_APP_CHECK_HEADER_KEY,
-  XMTP_API_ADDRESS_HEADER_KEY,
+  XMTP_API_INBOX_ID_HEADER_KEY,
   XMTP_IDENTITY_KEY,
 } from "./api.constants";
 import { tryGetAppCheckToken } from "./appCheck";
@@ -64,11 +63,11 @@ api.interceptors.response.use(
           2
         )
       );
-      const account = req.headers?.[XMTP_API_ADDRESS_HEADER_KEY];
-      if (typeof account !== "string") {
+      const inboxId = req.headers?.[XMTP_API_INBOX_ID_HEADER_KEY];
+      if (typeof inboxId !== "string") {
         throw new Error("No account in request headers");
       }
-      const secureMmkv = await getSecureMmkvForAccount(account);
+      const secureMmkv = await getSecureMmkvForInboxId({ inboxId });
       const refreshToken = secureMmkv.getString(
         CONVERSE_REFRESH_TOKEN_STORAGE_KEY
       );
@@ -82,7 +81,7 @@ api.interceptors.response.use(
       ) {
         try {
           const { accessToken } = await rotateAccessToken(
-            account,
+            { inboxId },
             refreshToken
           );
           req._retry = true;
@@ -120,7 +119,6 @@ type AuthParams = {
   installationPublicKey: string;
   installationKeySignature: string;
   appCheckToken: string;
-  account: string;
 };
 
 const { fetch: dedupedFetch } = createDedupedFetcher();
@@ -130,8 +128,6 @@ export async function fetchAccessToken({
   installationPublicKey,
   installationKeySignature,
   appCheckToken,
-  // TODO: Remove this once we move to InboxId as the account identifier
-  account,
 }: AuthParams): Promise<AuthResponse> {
   logger.info("Creating access token");
   const { data } = await dedupedFetch("/api/authenticate" + inboxId, () =>
@@ -145,7 +141,8 @@ export async function fetchAccessToken({
       },
       {
         headers: {
-          [XMTP_API_ADDRESS_HEADER_KEY]: account,
+          // used to access secure storage in failures. maybe there's another way to do this?
+          [XMTP_API_INBOX_ID_HEADER_KEY]: inboxId,
           [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
         },
       }
@@ -163,10 +160,10 @@ export async function fetchAccessToken({
 }
 
 export async function rotateAccessToken(
-  account: string,
+  { inboxId }: { inboxId: string },
   refreshToken: string | undefined
 ): Promise<AuthResponse> {
-  logger.info(`Rotating access token for account ${account}`);
+  logger.info(`Rotating access token for inboxId ${inboxId}`);
   if (!refreshToken) {
     throw new Error(
       "Can't request new access token without current token and refresh token"
@@ -174,44 +171,46 @@ export async function rotateAccessToken(
   }
 
   const { data } = await dedupedFetch(
-    `/api/authenticate/token-${account}`,
+    `/api/authenticate/token-${inboxId}`,
     () =>
       api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
   );
 
   if (!data) {
-    throw new Error(`Could not rotate access token for account ${account}`);
+    throw new Error(`Could not rotate access token for inboxId ${inboxId}`);
   }
   if (!data.accessToken) {
     throw new Error(
-      `No access token in token rotate response for account ${account}`
+      `No access token in token rotate response for inboxId ${inboxId}`
     );
   }
-  logger.info(`Rotated access token for account ${account}`, { data });
-  const secureMmkv = await getSecureMmkvForAccount(account);
+  logger.info(`Rotated access token for inboxId ${inboxId}`, { data });
+  const secureMmkv = await getSecureMmkvForInboxId({ inboxId });
   secureMmkv.set(CONVERSE_ACCESS_TOKEN_STORAGE_KEY, data.accessToken);
   secureMmkv.set(CONVERSE_REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
   return data;
 }
 
-export const xmtpSignatureByAccount: {
-  [account: string]: InstallationSignature;
+const xmtpSignatureByInboxId: {
+  [inboxId: string]: InstallationSignature;
 } = {};
 
 type XmtpApiHeaders = {
-  [XMTP_API_ADDRESS_HEADER_KEY]: string;
+  [XMTP_API_INBOX_ID_HEADER_KEY]: string;
   [FIREBASE_APP_CHECK_HEADER_KEY]: string;
   /** Bearer <jwt access token>*/
   authorization: `Bearer ${string}`;
 };
 
-export async function getXmtpApiHeaders(
-  account: string
-): Promise<XmtpApiHeaders> {
-  if (!account) {
-    throw new Error("[getXmtpApiHeaders] No account provided");
+export async function getXmtpApiHeaders({
+  inboxId,
+}: {
+  inboxId: string;
+}): Promise<XmtpApiHeaders> {
+  if (!inboxId) {
+    throw new Error("[getXmtpApiHeaders] No inboxId provided");
   }
-  const secureMmkv = await getSecureMmkvForAccount(account);
+  const secureMmkv = await getSecureMmkvForInboxId({ inboxId });
   let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
 
   const appCheckToken = await tryGetAppCheckToken();
@@ -225,18 +224,16 @@ our application on a device that has not been tampered with.
 
   if (!accessToken) {
     const installationKeySignature =
-      xmtpSignatureByAccount[account] ||
-      (await getInstallationKeySignature(account, XMTP_IDENTITY_KEY));
+      xmtpSignatureByInboxId[inboxId] ||
+      (await getInstallationKeySignature(inboxId, XMTP_IDENTITY_KEY));
 
-    if (!xmtpSignatureByAccount[account]) {
-      xmtpSignatureByAccount[account] = installationKeySignature;
+    if (!xmtpSignatureByInboxId[inboxId]) {
+      xmtpSignatureByInboxId[inboxId] = installationKeySignature;
     }
 
     try {
-      const inboxId = await getInboxId(account);
       const authTokensResponse = await fetchAccessToken({
         inboxId,
-        account,
         appCheckToken,
         ...installationKeySignature,
       });
@@ -263,23 +260,29 @@ our application on a device that has not been tampered with.
   }
 
   return {
-    [XMTP_API_ADDRESS_HEADER_KEY]: account,
+    [XMTP_API_INBOX_ID_HEADER_KEY]: inboxId,
     [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
     authorization: `Bearer ${accessToken}`,
   };
 }
 
-const lastSaveUser: { [address: string]: number } = {};
+const inboxIdToLastSavedUserTimestampMap: { [address: string]: number } = {};
 
-export const saveUser = async (address: string, privyAccountId: string) => {
+export const saveUser = async ({
+  inboxId,
+  privyAccountId,
+}: {
+  inboxId: string;
+  privyAccountId: string;
+}) => {
   const now = new Date().getTime();
-  const last = lastSaveUser[address] || 0;
+  const last = inboxIdToLastSavedUserTimestampMap[inboxId] || 0;
   if (now - last < 3000) {
     // Avoid race condition when changing account at same
     // time than coming back on the app.
     return;
   }
-  lastSaveUser[address] = now;
+  inboxIdToLastSavedUserTimestampMap[address] = now;
 
   await api.post(
     "/api/user",
@@ -719,14 +722,14 @@ export type GroupJoinRequest = {
 // Create a group join request based on an invite ID.
 // This will trigger a push notification for the invite creator
 export const createGroupJoinRequest = async (
-  account: string,
+  { inboxId }: { inboxId: string },
   inviteId: string
 ): Promise<Pick<GroupJoinRequest, "id">> => {
   const { data } = await api.post(
     "/api/groupJoinRequest",
     { inviteId },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   logger.debug("[API] Group join request created", data);
@@ -774,7 +777,7 @@ export const getPendingGroupJoinRequests = async (
 };
 
 export const simulateTransaction = async (
-  account: string,
+  { inboxId }: { inboxId: string },
   from: string,
   chainId: number,
   transaction: TransactionData

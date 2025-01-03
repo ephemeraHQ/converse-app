@@ -17,7 +17,10 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { useAccountsStore } from "../data/store/accountsStore";
+import {
+  useAccountsStore,
+  useErroredAccountsMap
+} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useRouter } from "../navigation/useNavigation";
@@ -30,10 +33,10 @@ import { NotificationPermissionStatus } from "../features/notifications/types/No
 import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
 
 type Props = {
-  account: string;
+  inboxId: string;
 };
 
-export default function AccountSettingsButton({ account }: Props) {
+export default function AccountSettingsButton({ inboxId }: Props) {
   const router = useRouter();
 
   const {
@@ -51,26 +54,28 @@ export default function AccountSettingsButton({ account }: Props) {
   const { setCurrentInboxId } = useAccountsStore(
     useSelect(["setCurrentInboxId"])
   );
-  const erroredAccountsMap = useErroredAccountsMap();
+    const erroredAccountsMap = useErroredAccountsMap();
+
   const colorScheme = useColorScheme();
-  const showDisconnectActionSheet = useDisconnectActionSheet(account);
+  const showDisconnectActionSheet = useDisconnectActionSheet(inboxId);
 
   const onPress = useCallback(() => {
     Keyboard.dismiss();
 
     const methods = {
       [translate("your_profile_page")]: async () => {
-        if (account) {
-          invalidateProfileSocialsQuery(account, account);
-          setCurrentAccount(account, false);
+        if (inboxId) {
+          invalidateProfileSocialsQuery(inboxId, inboxId);
+          setCurrentInboxId({inboxId, createIfNew: false})
+          // setCurrentAccount(inboxId, false);
           router.navigate("Chats");
           navigate("Profile", {
-            address: account,
+            address: inboxId,
           });
         }
       },
       [translate("copy_wallet_address")]: () => {
-        Clipboard.setString(account || "");
+        Clipboard.setString(inboxId || "");
       },
       [translate("turn_on_notifications")]: () => {
         // @todo => move that to a helper because also used in Profile
@@ -106,7 +111,7 @@ export default function AccountSettingsButton({ account }: Props) {
 
     const options = Object.keys(methods);
     const icons = [];
-    if (erroredAccountsMap[account] && isInternetReachable) {
+    if (erroredAccountsMap[inboxId] && isInternetReachable) {
       icons.push(
         <Picto
           style={{
@@ -131,7 +136,7 @@ export default function AccountSettingsButton({ account }: Props) {
           translate("disconnect_this_account")
         ),
         cancelButtonIndex: options.indexOf(translate("cancel")),
-        title: account || undefined,
+        title: inboxId || undefined,
         ...actionSheetColors(colorScheme),
       },
       (selectedIndex?: number) => {
@@ -145,11 +150,11 @@ export default function AccountSettingsButton({ account }: Props) {
   }, [
     router,
     erroredAccountsMap,
-    account,
+    inboxId,
     isInternetReachable,
     notificationsPermissionStatus,
     colorScheme,
-    setCurrentAccount,
+    setCurrentInboxId,
     setNotificationsPermissionStatus,
     showDisconnectActionSheet,
   ]);

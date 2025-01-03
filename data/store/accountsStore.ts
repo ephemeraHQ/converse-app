@@ -60,14 +60,30 @@ export const TEMPORARY_ACCOUNT_NAME = "TEMPORARY_ACCOUNT";
 
 initStores({ inboxId: TEMPORARY_ACCOUNT_NAME });
 
-export const getAccountsList = () =>
-  useAccountsStore
-    .getState()
-    .inboxIds.filter((a: string) => a && a !== TEMPORARY_ACCOUNT_NAME);
+// export const useInboxIdsList = () =>
+//   useAccountsStore
+//     .getState()
+//     .inboxIds.filter((a: string) => a && a !== TEMPORARY_ACCOUNT_NAME);
 
-export const useAccountsList = () => {
+export const useInboxIdsList = () => {
   const inboxIds = useAccountsStore((s) => s.inboxIds);
   return inboxIds.filter((a: string) => a && a !== TEMPORARY_ACCOUNT_NAME);
+};
+
+export const useErroredAccountsMap = () => {
+  const inboxIds = useInboxIdsList();
+  return inboxIds.reduce(
+    (acc, inboxId) => {
+      const errored = getChatStore({ inboxId }).getState().errored;
+
+      if (errored) {
+        acc[inboxId] = errored;
+      }
+
+      return acc;
+    },
+    {} as { [account: string]: boolean }
+  );
 };
 
 type AccountsStoreType = {
@@ -81,7 +97,7 @@ type AccountsStoreType = {
   }) => void;
 
   inboxIds: string[];
-  inboxIdToAccountMap: Record<string, string>;
+  inboxIdToAccountMap: { [inboxId: string]: string };
 
   removeInboxById: ({ inboxId }: { inboxId: string }) => void;
   databaseIdByInboxId: { [inboxId: string]: string };
@@ -94,6 +110,14 @@ type AccountsStoreType = {
   // accounts: string[];
   // privyAccountId: { [inboxId: string]: string | undefined };
   // setPrivyAccountId: (inboxId: string, id: string | undefined) => void;
+  privyAccountIdToInboxIdMap: { [inboxId: string]: string | undefined };
+  setPrivyAccountIdToInboxId: ({
+    inboxId,
+    id,
+  }: {
+    inboxId: string;
+    id: string | undefined;
+  }) => void;
 };
 
 export const useAccountsStore = create<AccountsStoreType>()(
@@ -109,12 +133,15 @@ export const useAccountsStore = create<AccountsStoreType>()(
           databaseIdByInboxId[inboxId] = id;
           return { databaseIdByInboxId };
         }),
-      // setPrivyAccountId: (account, id) =>
-      //   set((state) => {
-      //     const privyAccountId = { ...state.privyAccountId };
-      //     privyAccountId[account] = id;
-      //     return { privyAccountId };
-      //   }),
+      privyAccountIdToInboxIdMap: {},
+      setPrivyAccountIdToInboxId: ({ inboxId, id }) =>
+        set((state) => {
+          const privyAccountIdToInboxIdMap = {
+            ...state.privyAccountIdToInboxIdMap,
+          };
+          privyAccountIdToInboxIdMap[inboxId] = id;
+          return { privyAccountIdToInboxIdMap };
+        }),
       resetDatabaseId: ({ inboxId }) =>
         set((state) => {
           const newDatabaseIdByInboxId = { ...state.databaseIdByInboxId };
@@ -129,7 +156,7 @@ export const useAccountsStore = create<AccountsStoreType>()(
 
           if (isNew && !createIfNew) {
             logger.warn(
-              `[AccountsStore] InboxId ${inboxId} is new but createIfNew is false`
+              `[AccountsStore] InboxId ${inboxId} is new but createIfNew is false; no action taken, returning.`
             );
             return state;
           }
@@ -308,7 +335,7 @@ const currentInboxStoreHook = <T extends keyof AccountStoreDataType>(
     return accountStore[key](selector);
   };
 
-  const use = _useStore as AccountStoreType[T];
+  const use = _useStore as AccountStoreByInboxIdType[T];
 
   use.getState = () => {
     const currentInboxId = useAccountsStore.getState().currentInboxId;
@@ -328,7 +355,7 @@ const accountStoreHook = <T extends keyof AccountStoreDataType>(
     return accountStore[key](selector);
   };
 
-  const use = _useStore as AccountStoreType[T];
+  const use = _useStore as AccountStoreByInboxIdType[T];
 
   use.getState = () => {
     const accountStore = getInboxStoreById({ inboxId });

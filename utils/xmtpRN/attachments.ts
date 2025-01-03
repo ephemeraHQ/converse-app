@@ -1,7 +1,7 @@
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import RNFS from "react-native-fs";
 import { ConverseXmtpClientType } from "./client.types";
-import { getXmtpClient } from "./sync";
+import { getOrBuildXmtpClient } from "./sync";
 
 export const MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE = 10000000; // 10MB
 
@@ -10,7 +10,9 @@ export const encryptRemoteAttachment = async (
   fileUri: string,
   mimeType: string | undefined
 ) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   const encryptedAttachment = await client.encryptAttachment({
     fileUri,
     mimeType,
@@ -34,7 +36,9 @@ export const fetchAndDecodeRemoteAttachment = async (args: {
     toFile: encryptedLocalFileUri,
   }).promise;
 
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
 
   const decryptedContent = await client.decryptAttachment({
     encryptedLocalFileUri,

@@ -14,7 +14,7 @@ import logger from "../../utils/logger";
 import { logoutAccount, waitForLogoutTasksDone } from "../../utils/logout";
 import { sentryTrackMessage } from "../../utils/sentry";
 import { createXmtpClientFromSigner } from "../../utils/xmtpRN/signIn";
-import { getXmtpClient } from "../../utils/xmtpRN/sync";
+import { getOrBuildXmtpClient } from "../../utils/xmtpRN/sync";
 
 export async function initXmtpClient(args: {
   signer: Signer;
@@ -128,7 +128,7 @@ async function finalizeAccountSetup(args: IConnectWithAddressKeyArgs) {
 
   await prefetchInboxIdQuery({ account: address });
 
-  getXmtpClient(address);
+  getOrBuildXmtpClient(address);
 
   logger.debug("Account setup finalized");
 }

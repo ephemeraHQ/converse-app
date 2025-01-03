@@ -7,7 +7,7 @@ import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheet
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PortalProvider } from "@gorhom/portal";
 import { useAppStateHandlers } from "@hooks/useAppStateHandlers";
-import { PrivyProvider } from "@privy-io/expo";
+// import { PrivyProvider } from "@privy-io/expo";
 import { queryClient } from "@queries/queryClient";
 import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -38,7 +38,7 @@ import {
 import { setAuthStatus } from "./data/store/authStore";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
-import { privySecureStorage } from "./utils/keychain/helpers";
+// import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
 import "./utils/splash/splash";
 import "./features/notifications/utils";
@@ -136,26 +136,26 @@ export default function AppWithProviders() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PrivyProvider appId={config.privy.appId} storage={privySecureStorage}>
-        <ThirdwebProvider>
-          <AppKeyboardProvider>
-            <ActionSheetProvider>
-              <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                <PaperProvider theme={paperTheme}>
-                  <GestureHandlerRootView style={{ flex: 1 }}>
-                    <BottomSheetModalProvider>
-                      <PortalProvider>
-                        <App />
-                        <Snackbars />
-                      </PortalProvider>
-                    </BottomSheetModalProvider>
-                  </GestureHandlerRootView>
-                </PaperProvider>
-              </ThemeProvider>
-            </ActionSheetProvider>
-          </AppKeyboardProvider>
-        </ThirdwebProvider>
-      </PrivyProvider>
+      {/* <PrivyProvider appId={config.privy.appId} storage={privySecureStorage}> */}
+      <ThirdwebProvider>
+        <AppKeyboardProvider>
+          <ActionSheetProvider>
+            <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
+              <PaperProvider theme={paperTheme}>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <BottomSheetModalProvider>
+                    <PortalProvider>
+                      <App />
+                      <Snackbars />
+                    </PortalProvider>
+                  </BottomSheetModalProvider>
+                </GestureHandlerRootView>
+              </PaperProvider>
+            </ThemeProvider>
+          </ActionSheetProvider>
+        </AppKeyboardProvider>
+      </ThirdwebProvider>
+      {/* </PrivyProvider> */}
     </QueryClientProvider>
   );
 }

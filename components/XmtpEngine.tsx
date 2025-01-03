@@ -8,7 +8,7 @@ import {
 } from "react-native";
 
 import {
-  getAccountsList,
+  useInboxIdsList,
   getChatStore,
   useAccountsStore,
 } from "../data/store/accountsStore";
@@ -98,19 +98,19 @@ class XmtpEngine {
     logger.debug(
       `[XmtpEngine]  Internet reachability changed: ${isInternetReachable}`
     );
-    this.syncAccounts(getAccountsList());
+    this.syncAccounts(useInboxIdsList());
   }
 
   onHydrationDone(hydrationDone: boolean) {
     logger.debug(`[XmtpEngine] Hydration done changed: ${hydrationDone}`);
-    this.syncAccounts(getAccountsList());
+    this.syncAccounts(useInboxIdsList());
   }
 
   onAppFocus() {
     logger.debug("[XmtpEngine] App is now active, reconnecting db connections");
     if (this.hydrationDone) {
       if (this.isInternetReachable) {
-        this.syncAccounts(getAccountsList());
+        this.syncAccounts(useInboxIdsList());
       }
     }
   }
@@ -119,7 +119,7 @@ class XmtpEngine {
     logger.debug(
       "[XmtpEngine] App is now inactive, stopping xmtp streams and db connections"
     );
-    for (const account of getAccountsList()) {
+    for (const account of useInboxIdsList()) {
       await Promise.all([
         stopStreamingAllMessage(account),
         stopStreamingConversations(account),

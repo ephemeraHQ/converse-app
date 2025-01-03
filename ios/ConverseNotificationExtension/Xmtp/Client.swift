@@ -84,7 +84,7 @@ func putGroupInviteRequest(apiURI: String?, account: String, xmtpClient: Client,
   if let apiURI = apiURI, !apiURI.isEmpty {
     do {
       let joinRequestUri = "\(apiURI)/api/groupJoinRequest/\(joinRequestId)"
-      let secureMmkv = getSecureMmkvForAccount(account: account)
+      let secureMmkv = getSecureMmkvForInboxId(account: account)
       guard let mmkv = secureMmkv else {
           throw NSError(domain: "PutGroupInviteRequest", code: 1, userInfo: [NSLocalizedDescriptionKey: "Secure MMKV not found"])
       }

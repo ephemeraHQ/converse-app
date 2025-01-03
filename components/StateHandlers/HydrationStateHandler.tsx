@@ -2,9 +2,9 @@ import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
 import { fetchPersistedConversationListQuery } from "@/queries/useConversationListQuery";
 import logger from "@utils/logger";
 import { useEffect } from "react";
-import { getAccountsList } from "@data/store/accountsStore";
+import { useInboxIdsList } from "@data/store/accountsStore";
 import { useAppStore } from "@data/store/appStore";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { getOrBuildXmtpClient } from "@utils/xmtpRN/sync";
 import { getInstalledWallets } from "../Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 
 export default function HydrationStateHandler() {
@@ -12,7 +12,7 @@ export default function HydrationStateHandler() {
   useEffect(() => {
     const hydrate = async () => {
       const startTime = new Date().getTime();
-      const accounts = getAccountsList();
+      const accounts = useInboxIdsList();
       if (accounts.length === 0) {
         // Awaiting before showing onboarding
         await getInstalledWallets(false);

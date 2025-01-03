@@ -4,9 +4,10 @@ import { Client } from "@xmtp/xmtp-js";
 import { AppState } from "react-native";
 import { getChatStore } from "@data/store/accountsStore";
 import {
-  getXmtpClientFromAddress,
+  buildXmtpClientFromAddress,
   reconnectXmtpClientsDbConnections,
   xmtpClientByAccount,
+  xmtpClientByInboxId,
 } from "./client";
 import { ConverseXmtpClientType } from "./client.types";
 import {
@@ -24,16 +25,27 @@ const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;
 } = {};
 
-export const getXmtpClient = async (
-  account: string
-  // todo(any): why is this Union necessary? Why can't we just use ConverseXmtpClientType?
-): Promise<ConverseXmtpClientType | Client> => {
-  const lowerCaseAccount = account.toLowerCase();
-  if (account && xmtpClientByAccount[lowerCaseAccount]) {
-    return xmtpClientByAccount[lowerCaseAccount];
+const instantiatingClientForInboxId: {
+  [inboxId: string]: Promise<ConverseXmtpClientType | Client> | undefined;
+} = {};
+
+export const getOrBuildXmtpClient = async ({
+  account,
+  inboxId,
+}: {
+  account: string;
+}): Promise<ConverseXmtpClientType | Client> => {
+  const lowerCaseInboxId = inboxId.toLowerCase();
+  if (inboxId && xmtpClientByInboxId[lowerCaseInboxId]) {
+    return xmtpClientByInboxId[lowerCaseInboxId];
   }
+  // const lowerCaseAccount = account.toLowerCase();
+  // if (account && xmtpClientByAccount[lowerCaseAccount]) {
+  //   return xmtpClientByAccount[lowerCaseAccount];
+  // }
   // Return the existing instantiating promise to avoid race condition
-  const alreadyInstantiating = instantiatingClientForAccount[lowerCaseAccount];
+  // const alreadyInstantiating = instantiatingClientForAccount[lowerCaseAccount];
+  const alreadyInstantiating = instantiatingClientForInboxId[lowerCaseInboxId];
   if (alreadyInstantiating) {
     return alreadyInstantiating;
   }
@@ -41,25 +53,26 @@ export const getXmtpClient = async (
   // blocking the Expo Async Thread
   if (Object.keys(instantiatingClientForAccount).length > 0) {
     await new Promise((r) => setTimeout(r, 200));
-    return getXmtpClient(account);
+    return getOrBuildXmtpClient({ account, inboxId });
   }
-  instantiatingClientForAccount[lowerCaseAccount] = (async () => {
+  // instantiatingClientForAccount[lowerCaseAccount] = (async () => {
+  instantiatingClientForInboxId[lowerCaseInboxId] = (async () => {
     try {
       logger.debug("[XmtpRN] Getting client from address");
-      const client = await getXmtpClientFromAddress(account);
+      const client = await buildXmtpClientFromAddress(account);
       logger.info(`[XmtpRN] Instantiated client for ${client.address}`);
-      getChatStore(account).getState().setLocalClientConnected(true);
-      getChatStore(account).getState().setErrored(false);
-      xmtpClientByAccount[lowerCaseAccount] = client;
+      getChatStore({ inboxId }).getState().setLocalClientConnected(true);
+      getChatStore({ inboxId }).getState().setErrored(false);
+      xmtpClientByInboxId[lowerCaseInboxId] = client;
       return client;
     } catch (e: any) {
-      getChatStore(account).getState().setErrored(true);
+      getChatStore({ inboxId }).getState().setErrored(true);
       throw e;
     } finally {
-      delete instantiatingClientForAccount[lowerCaseAccount];
+      delete instantiatingClientForInboxId[lowerCaseInboxId];
     }
   })();
-  return instantiatingClientForAccount[lowerCaseAccount] as Promise<
+  return instantiatingClientForInboxId[lowerCaseInboxId] as Promise<
     ConverseXmtpClientType | Client
   >;
 };

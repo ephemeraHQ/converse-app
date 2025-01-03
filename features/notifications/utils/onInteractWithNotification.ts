@@ -57,9 +57,12 @@ export const onInteractWithNotification = async (
   if (conversationTopic) {
     await waitForXmtpClientHydration();
     const account: string =
-      notificationData["account"] || useAccountsStore.getState().currentAccount;
+      notificationData["account"] || useAccountsStore.getState().currentInboxId;
 
-    useAccountsStore.getState().setCurrentAccount(account, false);
+    useAccountsStore.getState().setCurrentInboxId({
+      inboxId: account,
+      createIfNew: false,
+    });
 
     navigateToTopic(conversationTopic as ConversationTopic);
     resetNotifications();

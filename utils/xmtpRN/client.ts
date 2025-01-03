@@ -20,7 +20,7 @@ import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 import config from "../../config";
 import { getDbDirectory } from "../../data/db";
 import { CoinbaseMessagingPaymentCodec } from "./content-types/coinbasePayment";
-import { getXmtpClient } from "./sync";
+import { getOrBuildXmtpClient } from "./sync";
 import { ConverseXmtpClientType } from "./client.types";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
@@ -37,7 +37,9 @@ const codecs = [
   new CoinbaseMessagingPaymentCodec(),
 ];
 
-export const getXmtpClientFromAddress = async (address: string) => {
+export const buildXmtpClientFromAddress = async (
+  address: string
+): Promise<Client> => {
   const dbDirectory = await getDbDirectory();
   const dbEncryptionKey = await getDbEncryptionKey();
 
@@ -51,6 +53,9 @@ export const getXmtpClientFromAddress = async (address: string) => {
 
 export const xmtpClientByAccount: {
   [account: string]: ConverseXmtpClientType;
+} = {};
+export const xmtpClientByInboxId: {
+  [inboxId: string]: ConverseXmtpClientType;
 } = {};
 
 // On iOS, it's important to stop writing to SQLite database
@@ -102,7 +107,7 @@ export const useCheckCurrentInstallation = () => {
       if (!account) return;
       if (accountCheck.current === account) return;
       accountCheck.current = account;
-      const client = (await getXmtpClient(account)) as Client;
+      const client = (await getOrBuildXmtpClient(account)) as Client;
       const installationValid = await isClientInstallationValid(client);
 
       if (!installationValid) {
@@ -139,7 +144,9 @@ export const requestMessageHistorySync = async (
 ) => client.requestMessageHistorySync();
 
 export const requestMessageHistorySyncByAccount = async (account: string) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   if (!client) {
     throw new Error("Client not found");
   }
@@ -155,7 +162,9 @@ export async function getInstallationKeySignature(
   account: string,
   message: string
 ): Promise<InstallationSignature> {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = (await getOrBuildXmtpClient(
+    account
+  )) as ConverseXmtpClientType;
   if (!client) throw new Error("Client not found");
 
   const raw = await client.signWithInstallationKey(message);

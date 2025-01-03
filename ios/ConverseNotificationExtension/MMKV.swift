@@ -30,7 +30,7 @@ func getMmkv() -> MMKV? {
   return mmkvInstance;
 }
 
-func getSecureMmkvForAccount(account: String) -> MMKV? {
+func getSecureMmkvForInboxId(account: String) -> MMKV? {
   if (secureMmkvForAccount[account] == nil) {
     initializeMmkv()
     let accountEncryptionKey = getKeychainValue(forKey: "CONVERSE_ACCOUNT_ENCRYPTION_KEY_\(account)")

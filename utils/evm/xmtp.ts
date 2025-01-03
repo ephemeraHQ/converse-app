@@ -1,7 +1,7 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { translate } from "@i18n";
 import { ConverseXmtpClientType } from "../xmtpRN/client.types";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { getOrBuildXmtpClient } from "@utils/xmtpRN/sync";
 import { useCallback } from "react";
 import { Alert } from "react-native";
 
@@ -18,7 +18,9 @@ export const useXmtpSigner = () => {
   const { getExternalSigner, resetExternalSigner } = useExternalSigner();
 
   const getXmtpSigner = useCallback(async () => {
-    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    const client = (await getOrBuildXmtpClient(
+      account
+    )) as ConverseXmtpClientType;
 
     if (privySigner) {
       const privyAddress = await privySigner.getAddress();

@@ -80,7 +80,14 @@ export function OnboardingGetStartedScreen() {
             onAccountExists={(arg) => {
               // TODO: Add a better message
               Alert.alert("Account already connected");
-              useAccountsStore.getState().setCurrentAccount(arg.address, false);
+              // Look up the inbox ID from the already existing account
+              const inboxId =
+                useAccountsStore.getState().inboxIdToAccountMap[arg.address];
+              if (inboxId) {
+                useAccountsStore
+                  .getState()
+                  .setCurrentInboxId({ inboxId, createIfNew: false });
+              }
               useAuthStore.setState({
                 status: "signedIn",
               });

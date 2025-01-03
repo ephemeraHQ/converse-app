@@ -14,7 +14,7 @@ import {
   useInstalledWallets,
 } from "./ConnectViaWalletSupportedWallets";
 import config from "../../../config";
-import { getAccountsList } from "../../../data/store/accountsStore";
+import { useInboxIdsList } from "../../../data/store/accountsStore";
 import { useAppStateHandlers } from "../../../hooks/useAppStateHandlers";
 import { translate } from "../../../i18n";
 import { getEthOSSigner } from "../../../utils/ethos";
@@ -23,6 +23,7 @@ import { thirdwebClient } from "../../../utils/thirdweb";
 import TableView, { TableViewItemType } from "../../TableView/TableView";
 import { TableViewEmoji, TableViewImage } from "../../TableView/TableViewImage";
 import { RightViewChevron } from "../../TableView/TableViewRightChevron";
+import { buildXmtpClientFromAddress } from "@/utils/xmtpRN/client";
 
 export function getConnectViaWalletTableViewPrivateKeyItem(
   args: Partial<TableViewItemType>
@@ -78,7 +79,7 @@ export function getConnectViaWalletInstalledWalletTableViewItem(args: {
 
 export const InstalledWalletsTableView = memo(
   function InstalledWalletsTableView(props: {
-    onAccountExists: (arg: { address: string }) => void;
+    onAccountExists: (arg: { address: string; inboxId: string }) => void;
     onAccountDoesNotExist: (arg: { address: string }) => void;
   }) {
     const { onAccountExists, onAccountDoesNotExist } = props;
@@ -176,8 +177,11 @@ export const InstalledWalletsTableView = memo(
                 walletAddress = account.address;
               }
 
-              if (getAccountsList().includes(walletAddress)) {
-                onAccountExists({ address: walletAddress });
+              if (useInboxIdsList().includes(walletAddress)) {
+                const xmtpClient =
+                  await buildXmtpClientFromAddress(walletAddress);
+                const inboxId = xmtpClient.inboxId;
+                onAccountExists({ address: walletAddress, inboxId });
               } else {
                 onAccountDoesNotExist({ address: walletAddress });
               }

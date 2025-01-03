@@ -1,4 +1,3 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
   dangerColor,
@@ -11,23 +10,20 @@ import AccountSettingsButton from "../../components/AccountSettingsButton";
 import TableView from "../../components/TableView/TableView";
 import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import {
-  useAccountsList,
+  useInboxIdsList,
   useAccountsStore,
   useErroredAccountsMap,
 } from "../../data/store/accountsStore";
 import { useRouter } from "../../navigation/useNavigation";
 import { useAccountsProfiles } from "@utils/useAccountsProfiles";
-import { NavigationParamList } from "../Navigation/Navigation";
 import { translate } from "@/i18n";
 
-export default function Accounts(
-  props: NativeStackScreenProps<NavigationParamList, "Accounts">
-) {
+export default function Accounts() {
   const styles = useStyles();
   const erroredAccounts = useErroredAccountsMap();
-  const accounts = useAccountsList();
+  const inboxIds = useInboxIdsList();
   const accountsProfiles = useAccountsProfiles();
-  const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
+  const setCurrentInboxId = useAccountsStore((s) => s.setCurrentInboxId);
   const colorScheme = useColorScheme();
 
   const router = useRouter();
@@ -39,22 +35,22 @@ export default function Accounts(
       style={styles.accounts}
     >
       <TableView
-        items={accounts.map((a, index) => ({
-          id: a,
+        items={inboxIds.map((inboxId, index) => ({
+          id: inboxId,
           title: accountsProfiles[index],
           action: () => {
-            setCurrentAccount(a, false);
+            setCurrentInboxId({ inboxId, createIfNew: false });
             router.navigate("Chats");
           },
           rightView: (
             <View style={{ flexDirection: "row" }}>
-              {erroredAccounts[a] && (
+              {erroredAccounts[inboxId] && (
                 <TableViewPicto
                   symbol="exclamationmark.triangle"
                   color={dangerColor(colorScheme)}
                 />
               )}
-              <AccountSettingsButton account={a} />
+              <AccountSettingsButton inboxId={inboxId} />
               <TableViewPicto
                 symbol="chevron.right"
                 color={textSecondaryColor(colorScheme)}

@@ -2,7 +2,7 @@ import { getErc20BalanceForAddress } from "./evm/erc20";
 import provider from "./evm/provider";
 import logger from "./logger";
 import config from "../config";
-import { getAccountsList, getWalletStore } from "../data/store/accountsStore";
+import { useInboxIdsList, getWalletStore } from "../data/store/accountsStore";
 
 const lastRefreshByAccount: { [account: string]: number } = {};
 const refreshingBalanceForAccount: { [account: string]: boolean } = {};
@@ -40,7 +40,7 @@ export const refreshBalanceForAccount = async (
 };
 
 export const refreshBalanceForAccounts = async (delayMs = 5000) => {
-  const accounts = getAccountsList();
+  const accounts = useInboxIdsList();
   await Promise.all(
     accounts.map((account) => refreshBalanceForAccount(account, delayMs))
   );

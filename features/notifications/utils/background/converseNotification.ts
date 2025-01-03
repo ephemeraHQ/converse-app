@@ -1,6 +1,6 @@
-import { getAccountsList } from "@data/store/accountsStore";
+import { useInboxIdsList } from "@data/store/accountsStore";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { getOrBuildXmtpClient } from "@utils/xmtpRN/sync";
 import { z } from "zod";
 import logger from "@utils/logger";
 import {
@@ -21,7 +21,7 @@ export const handleConverseNotification = async (
   logger.debug(
     `[ConverseNotification] Received a ${notification.type} notification for account ${notification.account}`
   );
-  const accounts = getAccountsList();
+  const accounts = useInboxIdsList();
   if (
     !accounts.find(
       (a) => a.toLowerCase() === notification.account.toLowerCase()
@@ -32,7 +32,7 @@ export const handleConverseNotification = async (
     );
     return;
   }
-  const xmtpClient = (await getXmtpClient(
+  const xmtpClient = (await getOrBuildXmtpClient(
     notification.account
   )) as ConverseXmtpClientType;
   if (notification.type === "group_join_request") {

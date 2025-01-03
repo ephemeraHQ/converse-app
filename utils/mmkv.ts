@@ -3,7 +3,7 @@ import { parse, stringify } from "flatted";
 import { MMKV } from "react-native-mmkv";
 import { StateStorage } from "zustand/middleware";
 
-import { getAccountEncryptionKey } from "./keychain/helpers";
+import { getEncryptionKeyByInboxId } from "./keychain/helpers";
 import logger from "./logger";
 import { GC_TIME } from "@/queries/queryClient.constants";
 
@@ -27,28 +27,36 @@ export const zustandMMKVStorage: StateStorage = {
   },
 };
 
-export const secureMmkvByAccount: { [account: string]: MMKV } = {};
+export const secureMmkvByInboxId: { [inboxId: string]: MMKV } = {};
 
-export const getSecureMmkvForAccount = async (account: string) => {
-  if (secureMmkvByAccount[account]) return secureMmkvByAccount[account];
-  const encryptionKey = await getAccountEncryptionKey(account);
+export const getSecureMmkvForInboxId = async ({
+  inboxId,
+}: {
+  inboxId: string;
+}) => {
+  if (secureMmkvByInboxId[inboxId]) return secureMmkvByInboxId[inboxId];
+  const encryptionKey = await getEncryptionKeyByInboxId({ inboxId });
   const mmkvStringEncryptionKey = encryptionKey.toString("base64").slice(0, 16);
 
-  secureMmkvByAccount[account] = new MMKV({
-    id: `secure-mmkv-${account}`,
+  secureMmkvByInboxId[inboxId] = new MMKV({
+    id: `secure-mmkv-${inboxId}`,
     encryptionKey: mmkvStringEncryptionKey,
   });
-  return secureMmkvByAccount[account];
+  return secureMmkvByInboxId[inboxId];
 };
 
-export const clearSecureMmkvForAccount = async (account: string) => {
+export const clearSecureMmkvForInboxId = async ({
+  inboxId,
+}: {
+  inboxId: string;
+}) => {
   try {
-    const instance = await getSecureMmkvForAccount(account);
+    const instance = await getSecureMmkvForInboxId({ inboxId });
     instance.clearAll();
   } catch (e) {
     logger.error(e);
   }
-  delete secureMmkvByAccount[account];
+  delete secureMmkvByInboxId[inboxId];
 };
 
 const reactQueryMMKV = new MMKV({ id: "converse-react-query" });

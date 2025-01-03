@@ -59,7 +59,10 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
       {hasInstalledWallets && (
         <InstalledWalletsTableView
           onAccountExists={(arg) => {
-            useAccountsStore.getState().setCurrentAccount(arg.address, false);
+            useAccountsStore.getState().setCurrentInboxId({
+              inboxId: arg.inboxId,
+              createIfNew: false,
+            });
             router.popToTop();
             // TODO: Add a better message
             Alert.alert("Account already connected");
