@@ -1725,8 +1725,27 @@ PODS:
     - React-Core
   - react-native-passkey (2.1.1):
     - React-Core
-  - react-native-quick-base64 (2.0.8):
+  - react-native-quick-base64 (2.1.2):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-quick-crypto (0.7.5):
     - DoubleConversion
     - glog
@@ -2047,7 +2066,7 @@ PODS:
     - DGSwiftUtilities
     - ExpoModulesCore
     - ReactNativeIosUtilities
-  - ReactNativeIosUtilities (4.5.0):
+  - ReactNativeIosUtilities (4.5.2):
     - ComputableLayout (~> 0.7)
     - DGSwiftUtilities (~> 0.27)
     - ExpoModulesCore
@@ -2871,7 +2890,7 @@ SPEC CHECKSUMS:
   react-native-mmkv: aa743b3422e32101a77b22f74bdb6446b46191b7
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
   react-native-passkey: 0ec9f876837f2d37676f8b5df2650905463a6964
-  react-native-quick-base64: daf67f19ee076b77f0755bf4056f3425f164e1d8
+  react-native-quick-base64: d63ae7b77d91c24cb72b46dc66b10c1f3b45ae6e
   react-native-quick-crypto: c51345598218c36181b44117a2acddd641cc9c3d
   react-native-safe-area-context: 8b8404e70b0cbf2a56428a17017c14c1dcc16448
   react-native-sfsymbols: 095f133da14534b26859c6f01065e0fada8993e9
@@ -2904,7 +2923,7 @@ SPEC CHECKSUMS:
   ReactCodegen: 28abe92ea9a1e277edc25d02d7d53ab3acf5cc07
   ReactCommon: 7da12c0f59956995a153de45835b64c89e0a4a57
   ReactNativeIosContextMenu: 23da83d33323a0ef2010a6199df335e51f0df88e
-  ReactNativeIosUtilities: 30ff2cd1d1d7b18d8e745f5ab57aaca821504d4b
+  ReactNativeIosUtilities: 66f47ba72a6caf132da8c8e61090de6e5e364beb
   rn-fetch-blob: 25612b6d6f6e980c6f17ed98ba2f58f5696a51ca
   RNAWSCognito: 7f374b06129b2efd233fe9fa5c60443d90126bc1
   RNCAsyncStorage: aa75595c1aefa18f868452091fa0c411a516ce11
