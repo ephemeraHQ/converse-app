@@ -1,7 +1,6 @@
 import { IPicto } from "@components/Picto/Picto.types";
 import { ReactElement } from "react";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
-
 import {
   ExtendedEdge,
   useSafeAreaInsetsStyle,
@@ -13,6 +12,7 @@ import { ITextProps, Text } from "../Text";
 import { ITouchableOpacityProps } from "../TouchableOpacity";
 import { VStack } from "../VStack";
 import { HeaderAction } from "./HeaderAction";
+import { debugBorder } from "@/utils/debug-style";
 
 export type HeaderProps = {
   titleStyle?: StyleProp<TextStyle>;
@@ -79,6 +79,7 @@ export function Header(props: HeaderProps) {
 
   return (
     <VStack
+      // {...debugBorder()}
       style={[
         $container,
         $containerInsets,
@@ -86,18 +87,26 @@ export function Header(props: HeaderProps) {
         $containerStyleOverride,
       ]}
     >
-      <HStack style={[themed($wrapper), $styleOverride]}>
-        <HStack style={$contentContainer}>
-          <HeaderAction
-            tx={leftTx}
-            text={leftText}
-            icon={leftIcon}
-            iconColor={leftIconColor}
-            onPress={onLeftPress}
-            txOptions={leftTxOptions}
-            backgroundColor={backgroundColor}
-            ActionComponent={LeftActionComponent}
-          />
+      <HStack
+        // {...debugBorder("yellow")}
+        style={[themed($wrapper), $styleOverride]}
+      >
+        <HStack
+          // {...debugBorder("red")}
+          style={$contentContainer}
+        >
+          {(leftTx || leftText || leftIcon || LeftActionComponent) && (
+            <HeaderAction
+              tx={leftTx}
+              text={leftText}
+              icon={leftIcon}
+              iconColor={leftIconColor}
+              onPress={onLeftPress}
+              txOptions={leftTxOptions}
+              backgroundColor={backgroundColor}
+              ActionComponent={LeftActionComponent}
+            />
+          )}
 
           {titleComponent ? (
             titleComponent
@@ -139,7 +148,7 @@ export function Header(props: HeaderProps) {
 const $wrapper: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   height: 72,
   alignItems: "center",
-  paddingHorizontal: spacing.xxs,
+  paddingHorizontal: spacing.sm,
 });
 
 const $container: ViewStyle = {

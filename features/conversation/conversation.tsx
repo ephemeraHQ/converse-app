@@ -33,7 +33,7 @@ import { ConversationMessageReactions } from "@/features/conversation/conversati
 import { ConversationMessageRepliable } from "@/features/conversation/conversation-message/conversation-message-repliable";
 import { ConversationMessageStatus } from "@/features/conversation/conversation-message/conversation-message-status/conversation-message-status";
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
-import { ConversationMessageUserLayout } from "@/features/conversation/conversation-message/conversation-message-user-layout";
+import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import {
   MessageContextStoreProvider,
   useMessageContextStore,
@@ -309,10 +309,7 @@ const Messages = memo(function Messages(props: {
             isLatestMessageSentByCurrentUser={
               latestMessageIdByCurrentUser === messageId
             }
-            animateEntering={
-              index === 0 &&
-              getConvosMessageStatusForXmtpMessage(message) !== "sent"
-            }
+            animateEntering={index === 0}
           />
         );
       }}
@@ -342,10 +339,6 @@ const ConversationMessagesListItem = memo(
       composerStore.getState().setReplyToMessageId(message.id as MessageId);
     }, [composerStore, message]);
 
-    const MessageLayout = isGroupUpdatedMessage(message)
-      ? VStack
-      : ConversationMessageUserLayout;
-
     return (
       <MessageContextStoreProvider
         message={message}
@@ -369,7 +362,7 @@ const ConversationMessagesListItem = memo(
         >
           <ConversationMessageTimestamp />
           <ConversationMessageRepliable onReply={handleReply}>
-            <MessageLayout>
+            <ConversationMessageLayout>
               <ConversationMessageGesturesWrapper>
                 <ConversationMessageHighlighted>
                   <ConversationMessage message={message} />
@@ -381,7 +374,7 @@ const ConversationMessagesListItem = memo(
                   status={getConvosMessageStatusForXmtpMessage(message)}
                 />
               )}
-            </MessageLayout>
+            </ConversationMessageLayout>
           </ConversationMessageRepliable>
         </AnimatedVStack>
       </MessageContextStoreProvider>

@@ -13,7 +13,6 @@ type AttachmentMessageProcessed<T extends string> =
 type ConverseEvents = {
   newGroup: (group: GroupWithCodecsType) => void;
   showDebugMenu: () => void;
-  "conversationList-scroll": () => void;
   "enable-transaction-mode": (enabled: boolean) => void;
   toggleSpamRequests: () => void;
   displayExternalWalletPicker: (title?: string, subtitle?: string) => void;

@@ -26,7 +26,7 @@ import {
   JoinGroupNavigation,
   JoinGroupNavigationParams,
 } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
-import ConversationListNav from "./ConversationListNav";
+import { ConversationListNav } from "./ConversationListNav";
 import {
   ConversationNavParams,
   ConversationNav,
@@ -39,7 +39,6 @@ import NewConversationNav, {
   NewConversationNavParams,
 } from "./NewConversationNav";
 import ProfileNav, { ProfileNavParams } from "./ProfileNav";
-import ShareFrameNav, { ShareFrameNavParams } from "./ShareFrameNav";
 import ShareProfileNav from "./ShareProfileNav";
 import TopUpNav from "./TopUpNav";
 import UserProfileNav from "./UserProfileNav";
@@ -83,7 +82,6 @@ export type NavigationParamList = {
   NewGroupSummary: undefined;
   ConverseMatchMaker: undefined;
   ShareProfile: undefined;
-  ShareFrame: ShareFrameNavParams;
   TopUp: undefined;
   Profile: ProfileNavParams;
   Group: GroupNavParams;
@@ -140,7 +138,6 @@ export function SignedInNavigation() {
           {NewConversationNav()}
           {ConverseMatchMakerNav()}
           {ShareProfileNav()}
-          {ShareFrameNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
           {GroupNav()}

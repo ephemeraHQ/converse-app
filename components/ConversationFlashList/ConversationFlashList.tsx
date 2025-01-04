@@ -1,7 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { FlashList } from "@shopify/flash-list";
 import { backgroundColor } from "@styles/colors";
-import { ConversationListContext } from "@utils/conversationList";
 import { useCallback, useEffect, useRef } from "react";
 import {
   NativeScrollEvent,
@@ -12,20 +10,23 @@ import {
   useColorScheme,
 } from "react-native";
 
-import HiddenRequestsButton from "../ConversationList/HiddenRequestsButton";
-import { V3GroupConversationListItem } from "../V3GroupConversationListItem";
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
-import { useSelect } from "@data/store/storeHelpers";
-import { NavigationParamList } from "@screens/Navigation/Navigation";
-import { ConversationFlatListHiddenRequestItem } from "@utils/conversation";
-import { FlatListItemType } from "@features/conversation-list/ConversationList.types";
-import { unwrapConversationContainer } from "@utils/groupUtils/conversationContainerHelpers";
-import { ConversationVersion } from "@xmtp/react-native-sdk";
+import { AnimatedVStack } from "@/design-system/VStack";
+import { useAppTheme } from "@/theme/useAppTheme";
 import {
   DmWithCodecsType,
   GroupWithCodecsType,
 } from "@/utils/xmtpRN/client.types";
+import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
+import { useSelect } from "@data/store/storeHelpers";
+import { FlatListItemType } from "@features/conversation-list/ConversationList.types";
+import { NavigationParamList } from "@screens/Navigation/Navigation";
+import { ConversationFlatListHiddenRequestItem } from "@utils/conversation";
+import { unwrapConversationContainer } from "@utils/groupUtils/conversationContainerHelpers";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
+import Animated from "react-native-reanimated";
+import HiddenRequestsButton from "../ConversationList/HiddenRequestsButton";
 import { V3DMListItem } from "../V3DMListItem";
+import { V3GroupConversationListItem } from "../V3GroupConversationListItem";
 import { CONVERSATION_FLASH_LIST_REFRESH_THRESHOLD } from "./ConversationFlashList.constants";
 
 type Props = {
@@ -38,7 +39,7 @@ type Props = {
   isRefetching?: boolean;
 } & NativeStackScreenProps<
   NavigationParamList,
-  "Chats" | "ShareFrame" | "ChatsRequests" | "Blocked"
+  "Chats" | "ChatsRequests" | "Blocked"
 >;
 
 const keyExtractor = (item: FlatListItemType) => {
@@ -62,39 +63,54 @@ export default function ConversationFlashList({
   useEffect(() => {
     navigationRef.current = navigation;
   }, [navigation]);
+  const { theme } = useAppTheme();
   const styles = useStyles();
   const colorScheme = useColorScheme();
   const { lastUpdateAt, initialLoadDoneOnce } = useChatStore(
     useSelect(["lastUpdateAt", "initialLoadDoneOnce"])
   );
   const userAddress = useCurrentAccount() as string;
-  const listRef = useRef<FlashList<any> | undefined>();
   const refreshingRef = useRef(false);
 
-  const renderItem = useCallback(({ item }: { item: FlatListItemType }) => {
-    if ("lastMessage" in item) {
-      const conversation = unwrapConversationContainer(item);
-      if (conversation.version === ConversationVersion.GROUP) {
+  const renderItem = useCallback(
+    ({ item }: { item: FlatListItemType }) => {
+      if ("lastMessage" in item) {
+        const conversation = unwrapConversationContainer(item);
+        if (conversation.version === ConversationVersion.GROUP) {
+          return (
+            <AnimatedVStack
+              entering={theme.animation.reanimatedFadeInSpring}
+              exiting={theme.animation.reanimatedFadeOutSpring}
+            >
+              <V3GroupConversationListItem
+                group={conversation as GroupWithCodecsType}
+              />
+            </AnimatedVStack>
+          );
+        } else {
+          return (
+            <AnimatedVStack
+              entering={theme.animation.reanimatedFadeInSpring}
+              exiting={theme.animation.reanimatedFadeOutSpring}
+            >
+              <V3DMListItem conversation={conversation as DmWithCodecsType} />
+            </AnimatedVStack>
+          );
+        }
+      }
+      if (item.topic === "hiddenRequestsButton") {
+        const hiddenRequestItem = item as ConversationFlatListHiddenRequestItem;
         return (
-          <V3GroupConversationListItem
-            group={conversation as GroupWithCodecsType}
+          <HiddenRequestsButton
+            spamCount={hiddenRequestItem.spamCount}
+            toggleActivated={hiddenRequestItem.toggleActivated}
           />
         );
-      } else {
-        return <V3DMListItem conversation={conversation as DmWithCodecsType} />;
       }
-    }
-    if (item.topic === "hiddenRequestsButton") {
-      const hiddenRequestItem = item as ConversationFlatListHiddenRequestItem;
-      return (
-        <HiddenRequestsButton
-          spamCount={hiddenRequestItem.spamCount}
-          toggleActivated={hiddenRequestItem.toggleActivated}
-        />
-      );
-    }
-    return null;
-  }, []);
+      return null;
+    },
+    [theme]
+  );
 
   const handleRefresh = useCallback(async () => {
     if (refreshingRef.current) return;
@@ -125,47 +141,35 @@ export default function ConversationFlashList({
   );
 
   return (
-    <ConversationListContext.Provider
-      value={{
-        navigationRef,
-        routeName: route.name,
-        routeParams: route.params,
-      }}
-    >
-      <View style={styles.container}>
-        <View style={styles.conversationList}>
-          <FlashList
-            onRefresh={Platform.OS === "android" ? refetch : undefined}
-            refreshing={Platform.OS === "android" ? isRefetching : undefined}
-            keyboardShouldPersistTaps="handled"
-            onMomentumScrollBegin={onScroll}
-            onScrollBeginDrag={onScroll}
-            onScroll={onScrollList}
-            alwaysBounceVertical={items.length > 0}
-            contentInsetAdjustmentBehavior="automatic"
-            data={items}
-            extraData={[
-              colorScheme,
-              navigation,
-              route,
-              userAddress,
-              initialLoadDoneOnce,
-              lastUpdateAt,
-            ]}
-            ref={(r) => {
-              if (r) {
-                listRef.current = r;
-              }
-            }}
-            renderItem={renderItem}
-            keyExtractor={keyExtractor}
-            estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
-            ListHeaderComponent={ListHeaderComponent}
-            ListFooterComponent={ListFooterComponent}
-          />
-        </View>
+    <View style={styles.container}>
+      <View style={styles.conversationList}>
+        <Animated.FlatList
+          onRefresh={Platform.OS === "android" ? refetch : undefined}
+          refreshing={Platform.OS === "android" ? isRefetching : undefined}
+          keyboardShouldPersistTaps="handled"
+          onMomentumScrollBegin={onScroll}
+          onScrollBeginDrag={onScroll}
+          onScroll={onScrollList}
+          alwaysBounceVertical={items.length > 0}
+          itemLayoutAnimation={theme.animation.reanimatedLayoutSpringTransition}
+          contentInsetAdjustmentBehavior="automatic"
+          data={items}
+          extraData={[
+            colorScheme,
+            navigation,
+            route,
+            userAddress,
+            initialLoadDoneOnce,
+            lastUpdateAt,
+          ]}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          // estimatedItemSize={Platform.OS === "ios" ? 77 : 88}
+          ListHeaderComponent={ListHeaderComponent}
+          ListFooterComponent={ListFooterComponent}
+        />
       </View>
-    </ConversationListContext.Provider>
+    </View>
   );
 }
 

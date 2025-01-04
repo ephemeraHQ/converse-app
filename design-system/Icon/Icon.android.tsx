@@ -64,6 +64,8 @@ export const iconRegistry: Record<
   star: "star",
   pin: "push-pin",
   "pin.slash": "push-pin", // Doesn't seem like there's a pin.slash icon
+  shield: "shield",
+  "shield.fill": "shield",
 };
 
 export function Icon(props: IIconProps) {

@@ -1,13 +1,13 @@
 import { IPicto } from "@components/Picto/Picto.types";
 import { ReactElement } from "react";
 import { TextStyle, View, ViewStyle } from "react-native";
-
 import { translate } from "../../i18n";
 import { ThemedStyle, useAppTheme } from "../../theme/useAppTheme";
 import { Icon } from "../Icon/Icon";
 import { Pressable } from "../Pressable";
 import { ITextProps, Text } from "../Text";
 import { ITouchableOpacityProps, TouchableOpacity } from "../TouchableOpacity";
+import { debugBorder } from "@/utils/debug-style";
 
 type HeaderActionProps = {
   backgroundColor?: string;
@@ -18,6 +18,7 @@ type HeaderActionProps = {
   txOptions?: ITextProps["txOptions"];
   onPress?: ITouchableOpacityProps["onPress"];
   ActionComponent?: ReactElement;
+  style?: ViewStyle;
 };
 export function HeaderAction(props: HeaderActionProps) {
   const {
@@ -29,6 +30,7 @@ export function HeaderAction(props: HeaderActionProps) {
     onPress,
     ActionComponent,
     iconColor,
+    style,
   } = props;
   const { themed, theme } = useAppTheme();
 
@@ -39,7 +41,7 @@ export function HeaderAction(props: HeaderActionProps) {
   if (content) {
     return (
       <TouchableOpacity
-        style={themed([$actionTextContainer, { backgroundColor }])}
+        style={[themed([$actionTextContainer, { backgroundColor }]), style]}
         onPress={onPress}
         disabled={!onPress}
         activeOpacity={0.8}
@@ -53,14 +55,18 @@ export function HeaderAction(props: HeaderActionProps) {
     return (
       <Pressable
         onPress={onPress}
-        style={themed([$actionIconContainer, { backgroundColor }])}
+        style={[themed([$actionIconContainer, { backgroundColor }]), style]}
       >
-        <Icon size={theme.iconSize.md} picto={icon} color={iconColor} />
+        <Icon size={theme.iconSize.md} icon={icon} color={iconColor} />
       </Pressable>
     );
   }
 
-  return <View style={[themed($actionFillerContainer), { backgroundColor }]} />;
+  return (
+    <View
+      style={[themed($actionFillerContainer), { backgroundColor }, style]}
+    />
+  );
 }
 
 const $actionTextContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -77,6 +83,7 @@ const $actionText: ThemedStyle<TextStyle> = ({ colors }) => ({
 });
 
 const $actionIconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  // ...debugBorder(),
   flexGrow: 0,
   alignItems: "center",
   justifyContent: "center",

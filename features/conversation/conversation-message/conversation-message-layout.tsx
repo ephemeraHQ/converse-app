@@ -7,14 +7,14 @@ import { useMessageContextStoreContext } from "@/features/conversation/conversat
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ReactNode, memo } from "react";
 
-type IConversationMessageUserLayoutProps = {
+type IConversationMessageLayoutProps = {
   children: ReactNode;
 };
 
-export const ConversationMessageUserLayout = memo(
-  function ConversationMessageUserLayout({
+export const ConversationMessageLayout = memo(
+  function ConversationMessageLayout({
     children,
-  }: IConversationMessageUserLayoutProps) {
+  }: IConversationMessageLayoutProps) {
     const { theme } = useAppTheme();
 
     const {
@@ -22,18 +22,20 @@ export const ConversationMessageUserLayout = memo(
       fromMe,
       hasNextMessageInSeries,
       hasPreviousMessageInSeries,
+      isSystemMessage,
     } = useMessageContextStoreContext(
       useSelect([
         "senderInboxId",
         "fromMe",
         "hasNextMessageInSeries",
         "hasPreviousMessageInSeries",
+        "isSystemMessage",
       ])
     );
 
     return (
       <MessageContainer>
-        {!fromMe && (
+        {!fromMe && !isSystemMessage && (
           <>
             {!hasNextMessageInSeries ? (
               <ConversationSenderAvatar inboxId={senderInboxId} />
@@ -49,7 +51,7 @@ export const ConversationMessageUserLayout = memo(
             alignItems: fromMe ? "flex-end" : "flex-start",
           }}
         >
-          {!fromMe && !hasPreviousMessageInSeries && (
+          {!fromMe && !hasPreviousMessageInSeries && !isSystemMessage && (
             <ConversationMessageSender inboxId={senderInboxId} />
           )}
           {children}

@@ -1,0 +1,44 @@
+# Code Style Guide
+
+## Core Principles
+
+- Write concise TypeScript code
+- Use functional programming patterns
+- Prefer clean, readable code over compact code
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
+- Prefer clean and easy to read code over compact code
+
+## TypeScript
+
+- Use types over interfaces, prefixed with 'I' (e.g., IMyItem)
+- Never use 'any'
+- Avoid enums, use maps instead
+- Use functional components with TypeScript types
+- Prefer inferring types if possible over explicit typing
+
+## Function Patterns
+
+- Use function keyword for pure functions
+- Prefer object params: `function(args: { name: string })` over `function(name: string)`
+- Destructure args: `function(args: IArgs) { const { ... } = args }`
+
+## React & Components
+
+- Use named exports
+- Write JSX inline rather than separate render functions
+- Prefer early returns over ternaries
+- Use array syntax for merged styles: `style={[{ color: "red" }, style]}`
+- Minimize useEffect and setState usage
+- Wrap components in memo() for performance
+- When creating a new component outside of the parent component, minimize the number of props and try to reuse hooks
+
+## File Structure
+
+- Use lowercase with dashes for directories (e.g., components/auth-wizard)
+- Import paths from our project should start with @/
+
+## Theming & Styling
+
+- Always use the theme for styling. Import it from @/theme/useAppTheme like `const { theme } = useAppTheme();`
+- Use components from @/design-system
+- Use the theme for colors and spacing

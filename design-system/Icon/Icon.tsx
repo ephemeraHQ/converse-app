@@ -62,6 +62,8 @@ export const iconRegistry: Record<IIconName, string> = {
   star: "star",
   pin: "pin",
   "pin.slash": "pin.slash",
+  shield: "shield",
+  "shield.fill": "shield.fill",
 };
 
 export function Icon(props: IIconProps) {

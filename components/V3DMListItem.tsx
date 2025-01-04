@@ -153,13 +153,9 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
 
   const avatarComponent = useMemo(() => {
     return (
-      <Avatar
-        size={AvatarSizes.conversationListItem}
-        uri={avatarUri}
-        name={preferredName}
-      />
+      <Avatar size={theme.avatarSize.lg} uri={avatarUri} name={preferredName} />
     );
-  }, [avatarUri, preferredName]);
+  }, [avatarUri, preferredName, theme]);
 
   const onPress = useCallback(() => {
     prefetchConversationMessages(currentAccount, topic);

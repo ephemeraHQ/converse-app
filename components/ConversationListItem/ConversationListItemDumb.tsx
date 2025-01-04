@@ -1,19 +1,16 @@
-// import { Image } from "expo-image";
-import React, { forwardRef, memo, useCallback } from "react";
-import { Platform, TouchableHighlight, ViewStyle } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
-import Swipeable from "react-native-gesture-handler/Swipeable";
-import { TouchableRipple } from "react-native-paper";
-
-import { IIconName } from "@design-system/Icon/Icon.types";
-import { Icon } from "@design-system/Icon/Icon";
-import { Text } from "@/design-system/Text";
 import { Center } from "@/design-system/Center";
 import { HStack } from "@/design-system/HStack";
+import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
+import { TouchableHighlight } from "@/design-system/touchable-highlight";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { Icon } from "@design-system/Icon/Icon";
+import { IIconName } from "@design-system/Icon/Icon.types";
 import { ImageStyle } from "expo-image";
-import { clickedItemBackgroundColor } from "@/styles/colors";
+import React, { forwardRef, memo, useCallback } from "react";
+import { ViewStyle } from "react-native";
+import { RectButton } from "react-native-gesture-handler";
+import Swipeable from "react-native-gesture-handler/Swipeable";
 
 export type ConversationListItemDumbProps = {
   title?: string;
@@ -62,50 +59,14 @@ export const ConversationListItemDumb = memo(
     ) {
       const { themed, theme } = useAppTheme();
       const { iconSize } = theme;
-      const themedClickedItemBackgroundColor = clickedItemBackgroundColor(
-        theme.isDark ? "dark" : "light"
-      );
 
       const themedInversePrimaryColor = theme.colors.fill.inverted.primary;
-
-      const listItemContent = (
-        <HStack style={themed($conversationListItem)}>
-          <Center style={$avatarWrapper}>{avatarComponent}</Center>
-          <VStack style={themed($messagePreviewContainer)}>
-            <Text preset="bodyBold" weight="medium" numberOfLines={1}>
-              {title}
-            </Text>
-            <Text preset="small" numberOfLines={2} color="secondary">
-              {subtitle}
-            </Text>
-          </VStack>
-          {/* {showImagePreview && (
-            <View style={styles.imagePreviewContainer}>
-              <Image
-                source={{ uri: imagePreviewUrl }}
-                style={styles.imagePreview}
-                contentFit="cover"
-              />
-            </View>
-          )} */}
-          {(isUnread || showError) && (
-            <Center style={$unreadContainer}>
-              <Center
-                style={[
-                  themed($unread),
-                  (!isUnread || showError) && themed($placeholder),
-                ]}
-              />
-            </Center>
-          )}
-        </HStack>
-      );
 
       const renderLeftActions = useCallback(() => {
         return (
           <RectButton style={themed($leftAction)}>
             <Icon
-              icon={leftActionIcon as IIconName}
+              icon={leftActionIcon}
               color={themedInversePrimaryColor}
               size={iconSize.lg}
             />
@@ -127,16 +88,16 @@ export const ConversationListItemDumb = memo(
               />
             </RectButton>
           );
-        } else {
-          return (
-            <RectButton
-              style={themed($rightActionRed)}
-              onPress={onRightActionPress}
-            >
-              <Icon icon="trash" color="white" size={iconSize.lg} />
-            </RectButton>
-          );
         }
+
+        return (
+          <RectButton
+            style={themed($rightActionRed)}
+            onPress={onRightActionPress}
+          >
+            <Icon icon="trash" color="white" size={iconSize.lg} />
+          </RectButton>
+        );
       }, [
         rightIsDestructive,
         themed,
@@ -144,32 +105,6 @@ export const ConversationListItemDumb = memo(
         themedInversePrimaryColor,
         iconSize.lg,
       ]);
-
-      const rowItem = (
-        <>
-          {Platform.OS === "ios" ? (
-            <TouchableHighlight
-              underlayColor={themedClickedItemBackgroundColor}
-              delayPressIn={75}
-              onLongPress={onLongPress}
-              onPress={onPress}
-              style={themed($touchable)}
-            >
-              {listItemContent}
-            </TouchableHighlight>
-          ) : (
-            <TouchableRipple
-              unstable_pressDelay={75}
-              onPress={onPress}
-              onLongPress={onLongPress}
-              style={themed($touchable)}
-              rippleColor={themedClickedItemBackgroundColor}
-            >
-              {listItemContent}
-            </TouchableRipple>
-          )}
-        </>
-      );
 
       const onSwipeableWillClose = useCallback(
         (direction: "left" | "right") => {
@@ -197,14 +132,40 @@ export const ConversationListItemDumb = memo(
         <Swipeable
           renderRightActions={renderRightActions}
           renderLeftActions={renderLeftActions}
-          leftThreshold={10000} // Never trigger opening
+          leftThreshold={10000}
           overshootFriction={4}
           ref={swipeableRef}
           onSwipeableWillClose={onSwipeableWillClose}
           onSwipeableClose={onSwipeableClose}
           hitSlop={{ left: -6 }}
         >
-          {rowItem}
+          <TouchableHighlight
+            onLongPress={onLongPress}
+            onPress={onPress}
+            style={themed($touchable)}
+          >
+            <HStack style={themed($conversationListItem)}>
+              <Center style={$avatarWrapper}>{avatarComponent}</Center>
+              <VStack style={themed($messagePreviewContainer)}>
+                <Text preset="bodyBold" weight="medium" numberOfLines={1}>
+                  {title}
+                </Text>
+                <Text preset="small" numberOfLines={2} color="secondary">
+                  {subtitle}
+                </Text>
+              </VStack>
+              {(isUnread || showError) && (
+                <Center style={$unreadContainer}>
+                  <Center
+                    style={[
+                      themed($unread),
+                      (!isUnread || showError) && themed($placeholder),
+                    ]}
+                  />
+                </Center>
+              )}
+            </HStack>
+          </TouchableHighlight>
         </Swipeable>
       );
     }

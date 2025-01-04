@@ -2,6 +2,7 @@
  * This store/context is to avoid prop drilling in message components.
  */
 
+import { isGroupUpdatedMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { hasNextMessageInSeries } from "@/features/conversation/utils/has-next-message-in-serie";
 import { hasPreviousMessageInSeries } from "@/features/conversation/utils/has-previous-message-in-serie";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
@@ -28,6 +29,7 @@ type IMessageContextStoreState = IMessageContextStoreProps & {
   showDateChange: boolean;
   senderInboxId: InboxId;
   isShowingTime: boolean;
+  isSystemMessage: boolean;
 };
 
 type IMessageContextStoreProviderProps =
@@ -80,6 +82,7 @@ function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
     sentAt: convertNanosecondsToMilliseconds(props.message.sentNs),
     senderInboxId: props.message.senderInboxId,
     isShowingTime: false,
+    isSystemMessage: isGroupUpdatedMessage(props.message),
   };
 }
 
