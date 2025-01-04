@@ -18992,10 +18992,10 @@ react-native-ios-context-menu@^2.5.1:
   dependencies:
     "@dominicstop/ts-event-emitter" "^1.1.0"
 
-react-native-ios-utilities@^4.4.5:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/react-native-ios-utilities/-/react-native-ios-utilities-4.5.0.tgz#c7d1b1d1b6b0b7c90ec9adf103c34ec0857f96e9"
-  integrity sha512-SslC5r+GSHijpaCOhp7043d+xzjwPf0qztcQqHv5LL5KftTUQN2HmByUEFJwjycDo1xzeH3SxKgtivtw/2Sj4w==
+react-native-ios-utilities@^4.5.2:
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/react-native-ios-utilities/-/react-native-ios-utilities-4.5.2.tgz#97277e6d5d8e480d8109cd426267743c82ebcfdb"
+  integrity sha512-vN0HYbWMaxrFNTMpjQzceB4onjqbWfzj9iJXddTswh7pRQv8+pd3bVY7t+sF23uATGfbmCTBlbo+DYGHLwswLg==
 
 react-native-is-edge-to-edge@^1.1.6:
   version "1.1.6"
@@ -19069,17 +19069,10 @@ react-native-qrcode-svg@^6.2.0:
     prop-types "^15.8.0"
     qrcode "^1.5.1"
 
-react-native-quick-base64@^2.0.5:
+react-native-quick-base64@2.1.2, react-native-quick-base64@^2.0.5:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/react-native-quick-base64/-/react-native-quick-base64-2.1.2.tgz#062b09b165c1530095fe99b94544c948318dbe99"
   integrity sha512-xghaXpWdB0ji8OwYyo0fWezRroNxiNFCNFpGUIyE7+qc4gA/IGWnysIG5L0MbdoORv8FkTKUvfd6yCUN5R2VFA==
-  dependencies:
-    base64-js "^1.5.1"
-
-react-native-quick-base64@^2.0.8:
-  version "2.0.8"
-  resolved "https://registry.yarnpkg.com/react-native-quick-base64/-/react-native-quick-base64-2.0.8.tgz#7a75ea8bd85ca3c5bb38a814c1d63e0688e19531"
-  integrity sha512-2kMlnLSy0qz4NA0KXMGugd3qNB5EAizxZ6ghEVNGIxAOlc9CGvC8miv35wgpFbSKeiaBRfcPfkdTM/5Erb/6SQ==
   dependencies:
     base64-js "^1.5.1"
 

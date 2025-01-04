@@ -161,16 +161,16 @@ export default function AppWithProviders() {
 }
 
 const useStyles = () => {
-  const { theme } = useAppTheme();
+  // const { theme } = useAppTheme();
 
   return useMemo(
     () =>
       StyleSheet.create({
         safe: {
           flex: 1,
-          backgroundColor: theme.colors.background.surface,
+          // backgroundColor: theme.colors.background.surface,
         },
       }),
-    [theme]
+    []
   );
 };
