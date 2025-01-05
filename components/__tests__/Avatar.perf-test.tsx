@@ -4,10 +4,15 @@ import React from "react";
 import { measureRenders } from "reassure";
 
 import Avatar from "../Avatar";
+import { TestThemeProvider } from "@/design-system/test-utils/renderWithThemeProvider";
 
 jest.setTimeout(600_000);
 
-const TestComponent = ({ uri }: { uri?: string }) => <Avatar uri={uri} />;
+const TestComponent = ({ uri }: { uri?: string }) => (
+  <TestThemeProvider>
+    <Avatar uri={uri} />
+  </TestThemeProvider>
+);
 
 test("Empty Avatar 10 runs", async () => {
   const scenario = async () => {
