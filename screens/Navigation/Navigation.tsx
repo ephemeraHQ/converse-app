@@ -97,7 +97,7 @@ export type NavigationParamList = {
 export const authScreensSharedScreenOptions: NativeStackNavigationOptions = {
   headerTitle: "",
   headerBackTitle: translate("back"),
-  headerBackTitleVisible: false,
+  headerBackVisible: false,
   headerShadowVisible: false,
 };
 
