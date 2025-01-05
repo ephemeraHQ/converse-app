@@ -87,23 +87,13 @@ const config: Config = {
    * Won't transform: "lodash", "moment"
    */
   transformIgnorePatterns: [
-    "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|rn-fetch-blob|@xmtp|typeorm|uuid|wagmi))",
+    "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|rn-fetch-blob|@xmtp|uuid|wagmi))",
   ],
 
   /**
    * Enables verbose output, providing detailed information about each test.
    */
   verbose: true,
-
-  /**
-   * Maps module names to file paths or other modules.
-   * Useful for resolving aliases or mocking modules.
-   * @example
-   * Import of 'typeorm' will resolve to the specified file.
-   */
-  moduleNameMapper: {
-    typeorm: "<rootDir>/node_modules/typeorm/index.js",
-  },
 
   /**
    * Specifies setup files to run after the test environment is set up
