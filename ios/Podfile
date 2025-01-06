@@ -45,8 +45,6 @@ target 'Converse' do
   use_frameworks! :linkage => :static
   $RNFirebaseAsStaticFramework = true
 
-  pod 'MMKV', $mmkvVersion, :linkage => :dynamic
-  pod 'MMKVCore', $mmkvVersion, :linkage => :dynamic
   pod 'XMTP', $xmtpVersion, :modular_headers => true
 
   use_react_native!(
@@ -99,7 +97,7 @@ target 'ConverseNotificationExtension' do
   use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
   use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym if ENV['USE_FRAMEWORKS']
   use_frameworks! :linkage => :static
-  pod 'MMKVAppExtension', $mmkvVersion, :linkage => :dynamic
+  pod 'MMKVAppExtension'
   pod 'XMTP', $xmtpVersion, :modular_headers => true
   # Version must match version from RNSentry Podspec (matching @sentry/react-native package from package.json)
   # https://github.com/getsentry/sentry-react-native/blob/5.24.1/RNSentry.podspec#L36

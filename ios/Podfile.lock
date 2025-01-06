@@ -406,11 +406,9 @@ PODS:
     - libwebp/sharpyuv
   - LibXMTP (3.0.13)
   - MessagePacker (0.4.7)
-  - MMKV (1.3.9):
-    - MMKVCore (~> 1.3.9)
-  - MMKVAppExtension (1.3.9):
-    - MMKVCore (~> 1.3.9)
-  - MMKVCore (1.3.9)
+  - MMKVAppExtension (2.0.2):
+    - MMKVCore (~> 2.0.2)
+  - MMKVCore (2.0.2)
   - OpenSSL-Universal (3.3.2000)
   - PromisesObjC (2.4.0)
   - RCT-Folly (2024.01.01.00):
@@ -2440,14 +2438,27 @@ PODS:
     - ReactCommon/turbomodule/core
     - Sentry/HybridSDK (= 8.36.0)
     - Yoga
-  - RNShare (10.2.1):
-    - RCT-Folly
+  - RNShare (12.0.3):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
     - RCTRequired
     - RCTTypeSafety
-    - React-Codegen
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
     - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
+    - Yoga
   - RNSVG (15.8.0):
     - DoubleConversion
     - glog
@@ -2573,9 +2584,7 @@ DEPENDENCIES:
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
-  - MMKV (= 1.3.9)
-  - MMKVAppExtension (= 1.3.9)
-  - MMKVCore (= 1.3.9)
+  - MMKVAppExtension
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
@@ -2695,7 +2704,6 @@ SPEC REPOS:
     - libwebp
     - LibXMTP
     - MessagePacker
-    - MMKV
     - MMKVAppExtension
     - MMKVCore
     - OpenSSL-Universal
@@ -3062,9 +3070,8 @@ SPEC CHECKSUMS:
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
   LibXMTP: 3b4b45c0edd404de164e26c7920af5ea0ebb3e17
   MessagePacker: ab2fe250e86ea7aedd1a9ee47a37083edd41fd02
-  MMKV: 817ba1eea17421547e01e087285606eb270a8dcb
-  MMKVAppExtension: 204fa8b234f7fddbcf24c1b409abf68a9b779d59
-  MMKVCore: af055b00e27d88cd92fad301c5fecd1ff9b26dd9
+  MMKVAppExtension: 76feb1c71005177da3ec9def66666413cef055a5
+  MMKVCore: 508b4d3a8ce031f1b5c8bd235f0517fb3f4c73a9
   OpenSSL-Universal: b60a3702c9fea8b3145549d421fdb018e53ab7b4
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RCT-Folly: 84578c8756030547307e4572ab1947de1685c599
@@ -3157,7 +3164,7 @@ SPEC CHECKSUMS:
   RNReanimated: fb3896d9010787799eb5748e50fd59746a503001
   RNScreens: f5762e2dd74e365dcee2007dc96942a528ac25d4
   RNSentry: 21166488a3af79ec56e7af867d87c00dadbae369
-  RNShare: 268bd40f6f3830299d187b05d3c6f7bbbb3e9d85
+  RNShare: e05ddddd91923125d7005df8ef72b837f6cdb323
   RNSVG: b5087ac7a1b96b793cddb461b0e166e809a114b8
   SDWebImage: 8a6b7b160b4d710e2a22b6900e25301075c34cb3
   SDWebImageAVIFCoder: 00310d246aab3232ce77f1d8f0076f8c4b021d90
@@ -3172,6 +3179,6 @@ SPEC CHECKSUMS:
   XMTPReactNative: 2a8cb6762dd530574888fe1a0ea209baf33b3155
   Yoga: 7548e4449365bf0ef60db4aefe58abff37fcabec
 
-PODFILE CHECKSUM: 06adab8d646b01f3a91cf21460e9d5abcf9cfbef
+PODFILE CHECKSUM: 2150e6a9fe5c9f5061506566f6b612bf3c34a78e
 
 COCOAPODS: 1.16.2
