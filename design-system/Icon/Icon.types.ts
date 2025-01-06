@@ -57,7 +57,9 @@ export type IIconName =
   | "magnifyingglass"
   | "star"
   | "pin"
-  | "pin.slash";
+  | "pin.slash"
+  | "shield"
+  | "shield.fill";
 
 /**
  * Props for the Icon component.

@@ -7,6 +7,7 @@ const paletteShared = {
 export const lightPalette = {
   accent: "#7E00CC",
   deepAccent: "#5A2895",
+  green: "#34C759",
 
   light: "#FFFFFF",
   light98: "#FAFAFA",
@@ -35,6 +36,7 @@ export const lightPalette = {
 export const darkPalette = {
   accent: "#7E00CC",
   deepAccent: "#5A2895",
+  green: "#34C759",
 
   dark: "#000000",
   dark96: "#141414",

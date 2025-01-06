@@ -3,12 +3,23 @@ import logger from "@/utils/logger";
 import { sentryTrackError } from "@/utils/sentry";
 import { isDev } from "@/utils/getEnv";
 
-export function captureError(error: unknown) {
+export function captureError(
+  error: unknown,
+  options?: {
+    message?: string;
+  }
+) {
   if (isDev) {
-    logger.error(error);
+    if (options?.message) {
+      logger.error(`${options.message}:`, error);
+    } else {
+      logger.error(error);
+    }
   }
 
-  sentryTrackError(error);
+  sentryTrackError(error, {
+    message: options?.message,
+  });
 }
 
 export function captureErrorWithToast(

@@ -1,88 +1,90 @@
+import Avatar from "@/components/Avatar";
+import {
+  useShouldShowConnecting,
+  useShouldShowConnectingOrSyncing,
+} from "@/components/Connecting";
+import { ConversationContextMenu } from "@/components/ConversationContextMenu";
+import { ConversationListItemDumb } from "@/components/ConversationListItem/ConversationListItemDumb";
+import { ErroredHeader } from "@/components/ErroredHeader";
+import { Center } from "@/design-system/Center";
+import { HStack } from "@/design-system/HStack";
+import { Header } from "@/design-system/Header/Header";
+import { HeaderAction } from "@/design-system/Header/HeaderAction";
+import { Icon } from "@/design-system/Icon/Icon";
+import { Pressable } from "@/design-system/Pressable";
+import { Text } from "@/design-system/Text";
+import { VStack } from "@/design-system/VStack";
+import {
+  dmMatchesSearchQuery,
+  groupMatchesSearchQuery,
+} from "@/features/conversation/utils/search";
+import { usePreferredName } from "@/hooks/usePreferredName";
+import { useShouldShowErrored } from "@/hooks/useShouldShowErrored";
+import { translate } from "@/i18n";
+import { useAppTheme } from "@/theme/useAppTheme";
+import { Haptics } from "@/utils/haptics";
+import { shortDisplayName } from "@/utils/str";
+import { useAccountsProfiles } from "@/utils/useAccountsProfiles";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
+import { useNavigation } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import NoResult from "@search/components/NoResult";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
+import React, { memo, useEffect, useLayoutEffect, useState } from "react";
 import {
-  backgroundColor,
-  itemSeparatorColor,
-  listItemSeparatorColor,
-  textPrimaryColor,
-} from "@styles/colors";
-import React, { useCallback, useEffect, useState } from "react";
-import {
+  Alert,
   Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+  TouchableOpacity,
   useColorScheme,
 } from "react-native";
-import { gestureHandlerRootHOC } from "react-native-gesture-handler";
-import { SearchBarCommands } from "react-native-screens";
-
-import ChatNullState from "../components/ConversationList/ChatNullState";
+import {
+  ContextMenuButton,
+  MenuActionConfig,
+} from "react-native-ios-context-menu";
 import ConversationFlashList from "../components/ConversationFlashList/ConversationFlashList";
-import NewConversationButton from "../components/ConversationList/NewConversationButton";
-import RequestsButton from "../components/ConversationList/RequestsButton";
-import EphemeralAccountBanner from "../components/EphemeralAccountBanner";
+import ChatNullState from "../components/ConversationList/ChatNullState";
 import InitialLoad from "../components/InitialLoad";
-import { useHeaderSearchBar } from "./Navigation/ConversationListNav";
-import { NavigationParamList } from "./Navigation/Navigation";
 import { PinnedConversations } from "../components/PinnedConversations/PinnedConversations";
 import Recommendations from "../components/Recommendations/Recommendations";
-import NoResult from "@search/components/NoResult";
 import {
+  useAccountsList,
+  useAccountsStore,
   useChatStore,
   useCurrentAccount,
   useSettingsStore,
 } from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { ConversationFlatListItem } from "../utils/conversation";
-import { converseEventEmitter } from "../utils/events";
-import { useIsSharingMode } from "../features/conversation-list/useIsSharingMode";
-import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
 import { useConversationListItems } from "../features/conversation-list/useConversationListItems";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { ConversationContextMenu } from "@/components/ConversationContextMenu";
-import { ConversationVersion } from "@xmtp/react-native-sdk";
-import {
-  dmMatchesSearchQuery,
-  groupMatchesSearchQuery,
-} from "@/features/conversation/utils/search";
-import { translate } from "@/i18n";
-
-type Props = {
-  searchBarRef:
-    | React.MutableRefObject<SearchBarCommands | null>
-    | React.MutableRefObject<TextInput | null>;
-} & NativeStackScreenProps<
-  NavigationParamList,
-  "Chats" | "ShareFrame" | "Blocked"
->;
+import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
+import { ConversationFlatListItem } from "../utils/conversation";
+import { NavigationParamList } from "./Navigation/Navigation";
 
 type FlatListItemType = ConversationFlatListItem | ConversationWithCodecsType;
 
-function ConversationList({ navigation, route, searchBarRef }: Props) {
-  const styles = useStyles();
+type IConversationListProps = NativeStackScreenProps<
+  NavigationParamList,
+  "Chats" | "Blocked"
+>;
+
+export default function ConversationList({
+  navigation,
+  route,
+}: IConversationListProps) {
+  const { theme } = useAppTheme();
   const {
     searchQuery,
-    searchBarFocused,
     setSearchBarFocused,
     openedConversationTopic,
     setSearchQuery,
   } = useChatStore(
     useSelect([
-      "initialLoadDoneOnce",
       "searchQuery",
       "setSearchQuery",
-      "searchBarFocused",
       "setSearchBarFocused",
       "openedConversationTopic",
     ])
   );
-  const sharingMode = useIsSharingMode();
-
-  const { ephemeralAccount } = useSettingsStore(
-    useSelect(["peersStatus", "ephemeralAccount"])
-  );
-  const pinnedConversations = useChatStore((s) => s.pinnedConversationTopics);
   const currentAccount = useCurrentAccount();
   const {
     data: items,
@@ -96,7 +98,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     searchQuery: string;
   }>({ items: [], searchQuery: "" });
 
-  // Display logic
   const showNoResult = flatListItems.items.length === 0 && !!searchQuery;
 
   const requestsCount = useConversationListRequestCount();
@@ -106,6 +107,8 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     !searchQuery &&
     !showInitialLoad &&
     requestsCount === 0;
+
+  useHeader();
 
   useEffect(() => {
     const getFilteredItems = async () => {
@@ -142,96 +145,6 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     }
   }, [searchQuery, items, currentAccount]);
 
-  // Search bar hook
-  useHeaderSearchBar({
-    navigation,
-    route,
-    searchBarRef,
-    autoHide: !sharingMode,
-    showSearchBar: !showChatNullState,
-  });
-
-  const clearSearch = useCallback(() => {
-    setSearchQuery("");
-    (searchBarRef.current as any)?.clearText?.();
-    (searchBarRef.current as any)?.blur?.();
-    setSearchBarFocused(false);
-  }, [searchBarRef, setSearchBarFocused, setSearchQuery]);
-
-  const leavingScreen = useCallback(() => {
-    if (sharingMode) {
-      clearSearch();
-    }
-  }, [clearSearch, sharingMode]);
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", leavingScreen);
-    return unsubscribe;
-  }, [navigation, leavingScreen]);
-
-  useEffect(() => {
-    // In split screen, when selecting a convo with search active,
-    // let's clear the search
-    if (openedConversationTopic) {
-      clearSearch();
-    }
-  }, [clearSearch, openedConversationTopic]);
-
-  const ListHeaderComponents: React.ReactElement[] = [
-    <PinnedConversations
-      topics={pinnedConversations}
-      key="pinnedConversations"
-    />,
-  ];
-
-  const showSearchTitleHeader =
-    ((Platform.OS === "ios" && searchBarFocused && !showNoResult) ||
-      (Platform.OS === "android" && searchBarFocused)) &&
-    !sharingMode &&
-    !showChatNullState;
-
-  if (showSearchTitleHeader) {
-    ListHeaderComponents.push(
-      <View key="search" style={styles.searchTitleContainer}>
-        <Text style={styles.searchTitle}>
-          {translate("conversation_list.messages")}
-        </Text>
-      </View>
-    );
-  } else if (requestsCount > 0 && !sharingMode) {
-    ListHeaderComponents.push(
-      <View key="search" style={styles.headerTitleContainer}>
-        <Text style={styles.headerTitle}>
-          {translate("conversation_list.messages")}
-        </Text>
-        <RequestsButton key="requests" requestsCount={requestsCount} />
-      </View>
-    );
-  } else if (!sharingMode) {
-    ListHeaderComponents.push(
-      <View key="search" style={styles.headerTitleContainer}>
-        <Text style={styles.headerTitle}>
-          {translate("conversation_list.messages")}
-        </Text>
-      </View>
-    );
-  }
-
-  let ListFooterComponent: React.ReactElement | undefined = undefined;
-  if (showInitialLoad) {
-    ListFooterComponent = <InitialLoad />;
-  } else if (
-    ephemeralAccount &&
-    !showNoResult &&
-    !showSearchTitleHeader &&
-    !sharingMode
-  ) {
-    ListHeaderComponents.push(<EphemeralAccountBanner key="ephemeral" />);
-  }
-  if (showNoResult) {
-    ListFooterComponent = <NoResult />;
-  }
-
   if (showChatNullState) {
     return (
       <ChatNullState
@@ -243,97 +156,316 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
   }
 
   return (
-    <>
+    <VStack
+      // {...debugBorder()}
+      style={{
+        flex: 1,
+      }}
+    >
       <ConversationFlashList
         route={route}
         navigation={navigation}
         onScroll={() => {
-          converseEventEmitter.emit("conversationList-scroll");
-          searchBarRef.current?.blur();
+          // searchBarRef.current?.blur();
         }}
         itemsForSearchQuery={flatListItems.searchQuery}
         items={showInitialLoad ? [] : flatListItems.items}
-        ListHeaderComponent={
-          ListHeaderComponents.length > 0 ? (
-            <>{ListHeaderComponents}</>
-          ) : undefined
+        ListHeaderComponent={<ListHeader />}
+        ListFooterComponent={
+          showInitialLoad ? <InitialLoad /> : showNoResult ? <NoResult /> : null
         }
-        ListFooterComponent={ListFooterComponent}
         refetch={refetch}
         isRefetching={isRefetching}
       />
       <Recommendations visibility="HIDDEN" />
-      {Platform.OS === "android" && !sharingMode && <NewConversationButton />}
       <ConversationContextMenu />
-    </>
+    </VStack>
   );
 }
 
-export default gestureHandlerRootHOC(ConversationList);
+const ListHeader = React.memo(function ListHeader() {
+  const pinnedConversations = useChatStore((s) => s.pinnedConversationTopics);
+  const { ephemeralAccount } = useSettingsStore(
+    useSelect(["ephemeralAccount"])
+  );
 
-const useStyles = () => {
+  return (
+    <VStack style={{}}>
+      <States />
+      {ephemeralAccount && <EphemeralAccountBanner />}
+      <PinnedConversations topics={pinnedConversations} />
+      <Requests />
+    </VStack>
+  );
+});
+
+const States = memo(function States() {
+  const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
+  const shouldShowConnecting = useShouldShowConnecting();
+  const shouldShowError = useShouldShowErrored();
+
+  // TODO: Not sure about those
+  if (shouldShowError) {
+    return <ErroredHeader />;
+  }
+
+  // TODO: Not sure about those
+  if (shouldShowConnectingOrSyncing) {
+    return null;
+  }
+
+  // TODO: Not sure about those
+  if (shouldShowConnecting) {
+    return null;
+  }
+
+  return null;
+});
+
+const Requests = memo(function Requests() {
+  const { theme } = useAppTheme();
+  const requestsCount = useConversationListRequestCount();
+  const navigation = useNavigation();
+
+  if (requestsCount === 0) {
+    return null;
+  }
+
+  return (
+    <ConversationListItemDumb
+      title="Requests"
+      onPress={() => {
+        navigation.navigate("ChatsRequests");
+      }}
+      subtitle={`${requestsCount} awaiting your response`}
+      avatarComponent={
+        <Center
+          // {...debugBorder()}
+          style={{
+            width: theme.avatarSize.lg,
+            height: theme.avatarSize.lg,
+            backgroundColor: theme.colors.fill.primary,
+            borderRadius: 999,
+          }}
+        >
+          {/* TODO: Add skia and make it better */}
+          <Icon
+            icon="shield.fill"
+            color={theme.colors.global.green}
+            size={theme.iconSize.md}
+          />
+        </Center>
+      }
+      leftActionIcon="chevron.right"
+      isUnread={false}
+      showError={false}
+      showImagePreview={false}
+      imagePreviewUrl={undefined}
+    />
+  );
+});
+
+function useHeader() {
+  const { theme } = useAppTheme();
+  const navigation = useNavigation();
+  const currentAccount = useCurrentAccount();
+  const preferredName = usePreferredName(currentAccount!);
+  const accounts = useAccountsList();
+  const accountsProfiles = useAccountsProfiles();
+  const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      header: () => (
+        <Header
+          safeAreaEdges={["top"]}
+          RightActionComponent={
+            <HStack
+              style={{
+                alignItems: "center",
+                columnGap: theme.spacing.xxs,
+              }}
+            >
+              <HeaderAction
+                icon="qrcode"
+                onPress={() => {
+                  navigation.navigate("ShareProfile");
+                }}
+              />
+              <HeaderAction
+                style={{
+                  marginBottom: 4, // The square.and.pencil icon is not centered with the qrcode if we don't have this margin
+                }}
+                icon="square.and.pencil"
+                onPress={() => {
+                  navigation.navigate("NewConversation", {});
+                }}
+              />
+            </HStack>
+          }
+          titleComponent={
+            <HStack
+              // {...debugBorder()}
+              style={{
+                alignItems: "center",
+              }}
+            >
+              <Pressable
+                onPress={() => {
+                  navigation.navigate("Profile", {
+                    address: currentAccount!,
+                  });
+                }}
+              >
+                <Center
+                  style={{
+                    padding: theme.spacing.xxs,
+                  }}
+                >
+                  <Avatar size={theme.avatarSize.sm} />
+                </Center>
+              </Pressable>
+              <ContextMenuButton
+                hitSlop={theme.spacing.sm}
+                isMenuPrimaryAction
+                onPressMenuItem={({ nativeEvent }) => {
+                  if (nativeEvent.actionKey === "all-chats") {
+                    Alert.alert("Coming soon");
+                  } else if (nativeEvent.actionKey === "new-account") {
+                    navigation.navigate("NewAccountNavigator");
+                  } else if (nativeEvent.actionKey === "app-settings") {
+                    Alert.alert("Coming soon");
+                  }
+                  // Pressed on an account
+                  else {
+                    Haptics.selectionAsync();
+                    setCurrentAccount(nativeEvent.actionKey, false);
+                  }
+                }}
+                menuConfig={{
+                  menuTitle: "",
+                  menuItems: [
+                    {
+                      actionKey: "all-chats",
+                      actionTitle: "Convos",
+                      actionSubtitle: "All chats",
+                    },
+                    ...accountsProfiles.map((profilePreferedName, index) => {
+                      return {
+                        actionKey: accounts[index],
+                        actionTitle: shortDisplayName(profilePreferedName),
+                        icon: {
+                          iconType: "SYSTEM",
+                          iconValue:
+                            currentAccount === accounts[index]
+                              ? Platform.select({
+                                  default: "checkmark",
+                                  ios: "checkmark",
+                                  android: "checkmark",
+                                })
+                              : "",
+                        },
+                      } as MenuActionConfig;
+                    }),
+                    {
+                      type: "menu",
+                      menuTitle: "",
+                      menuOptions: ["displayInline"],
+                      menuItems: [
+                        {
+                          actionKey: "new-account",
+                          actionTitle: "New Account",
+                          icon: {
+                            iconType: "SYSTEM",
+                            iconValue: Platform.select({
+                              default: "plus",
+                              ios: "plus",
+                              android: "plus",
+                            }),
+                          },
+                        },
+                      ],
+                    },
+                    {
+                      type: "menu",
+                      menuTitle: "",
+                      menuOptions: ["displayInline"],
+                      menuItems: [
+                        {
+                          actionKey: "app-settings",
+                          actionTitle: "App Settings",
+                          icon: {
+                            iconType: "SYSTEM",
+                            iconValue: Platform.select({
+                              default: "gearshape",
+                              ios: "gearshape",
+                              android: "settings",
+                            }),
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                }}
+              >
+                <HStack
+                  style={{
+                    alignItems: "center",
+                    columnGap: theme.spacing.xxxs,
+                  }}
+                >
+                  <Text>{shortDisplayName(preferredName)}</Text>
+                  <Center
+                    style={{
+                      width: theme.spacing.container.small,
+                      height: theme.spacing.container.small,
+                    }}
+                  >
+                    <Icon
+                      color={theme.colors.text.secondary}
+                      icon="chevron.down"
+                      size={theme.iconSize.xs}
+                    />
+                  </Center>
+                </HStack>
+              </ContextMenuButton>
+            </HStack>
+          }
+        />
+      ),
+    });
+  }, [
+    navigation,
+    preferredName,
+    accounts,
+    accountsProfiles,
+    currentAccount,
+    setCurrentAccount,
+    theme,
+  ]);
+}
+
+const EphemeralAccountBanner = React.memo(function EphemeralAccountBanner() {
+  const { theme } = useAppTheme();
   const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    searchTitleContainer: Platform.select({
-      default: {
-        padding: 10,
-        paddingLeft: 16,
-        backgroundColor: backgroundColor(colorScheme),
-        borderBottomColor: itemSeparatorColor(colorScheme),
-        borderBottomWidth: 0.5,
-      },
-      android: {
-        padding: 10,
-        paddingLeft: 16,
-        borderBottomWidth: 0,
-      },
-    }),
-    searchTitle: {
-      ...Platform.select({
-        default: {
-          fontSize: 22,
-          fontWeight: "bold",
-          color: textPrimaryColor(colorScheme),
-        },
-        android: {
-          fontSize: 16,
-        },
-      }),
-    },
-    headerTitleContainer: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      paddingTop: 12,
-      paddingBottom: 8,
-      paddingHorizontal: 16,
-      ...Platform.select({
-        default: {
-          backgroundColor: backgroundColor(colorScheme),
-          borderTopWidth: 0.25,
-          borderTopColor: listItemSeparatorColor(colorScheme),
-        },
-        android: {
-          borderBottomWidth: 0,
-        },
-      }),
-    },
-    headerTitle: {
-      color: textPrimaryColor(colorScheme),
-      ...Platform.select({
-        default: {
-          fontSize: 16,
-          fontWeight: "600",
-          marginBottom: 3,
-          marginRight: 110,
-        },
-        android: {
-          fontSize: 16,
-        },
-      }),
-    },
-    scrollViewWrapper: {
-      backgroundColor: backgroundColor(colorScheme),
-    },
-  });
-};
+  const showDisconnectActionSheet = useDisconnectActionSheet();
+
+  return (
+    <TouchableOpacity
+      onPress={() => showDisconnectActionSheet(colorScheme)}
+      style={{
+        width: "100%",
+        backgroundColor: theme.colors.background.blurred,
+        paddingHorizontal: theme.spacing.lg,
+        paddingVertical: theme.spacing.xs,
+      }}
+    >
+      <VStack>
+        <Text size="xs">
+          {translate("ephemeral_account_banner.title")}.{" "}
+          {translate("ephemeral_account_banner.subtitle")}
+        </Text>
+      </VStack>
+    </TouchableOpacity>
+  );
+});

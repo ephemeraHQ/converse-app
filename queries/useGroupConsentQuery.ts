@@ -31,13 +31,14 @@ export const getGroupConsentQueryData = (
 export const setGroupConsentQueryData = (
   account: string,
   topic: ConversationTopic,
-  consent: ConsentState | undefined
+  consent: ConsentState
 ) => {
   const currentGroup = getGroupQueryData({ account, topic });
   if (!currentGroup) return;
+  currentGroup.state = consent;
   setGroupQueryData({
     account,
     topic,
-    group: { ...currentGroup, state: consent } as GroupWithCodecsType,
+    group: currentGroup,
   });
 };

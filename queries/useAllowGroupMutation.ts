@@ -116,7 +116,11 @@ export const getAllowGroupMutationOptions = (
         return;
       }
 
-      setGroupConsentQueryData(account, group.topic, context.previousConsent);
+      setGroupConsentQueryData(
+        account,
+        group.topic,
+        context.previousConsent || "unknown"
+      );
       updateConversationInConversationListQuery({
         account,
         topic: group.topic,

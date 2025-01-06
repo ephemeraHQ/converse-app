@@ -63,6 +63,7 @@ export const colorsDark: IColors = {
     },
   },
   global: {
+    green: darkPalette.green,
     primary: darkPalette.dark,
     primaryAlpha60: darkPalette.alpha60,
     caution: darkPalette.red,

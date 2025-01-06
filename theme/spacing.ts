@@ -26,6 +26,13 @@ export const spacing = {
       verticalPadding: 8,
     },
   },
+
+  // In his design, Andrew often has container for Icons and Images
+  container: {
+    small: 14,
+    medium: 24,
+    large: 40,
+  },
 } as const;
 
 export type ISpacing = typeof spacing;

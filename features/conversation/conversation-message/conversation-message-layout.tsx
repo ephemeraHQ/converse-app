@@ -22,18 +22,20 @@ export const ConversationMessageLayout = memo(
       fromMe,
       hasNextMessageInSeries,
       hasPreviousMessageInSeries,
+      isSystemMessage,
     } = useMessageContextStoreContext(
       useSelect([
         "senderInboxId",
         "fromMe",
         "hasNextMessageInSeries",
         "hasPreviousMessageInSeries",
+        "isSystemMessage",
       ])
     );
 
     return (
       <MessageContainer>
-        {!fromMe && (
+        {!fromMe && !isSystemMessage && (
           <>
             {!hasNextMessageInSeries ? (
               <ConversationSenderAvatar inboxId={senderInboxId} />
@@ -49,7 +51,7 @@ export const ConversationMessageLayout = memo(
             alignItems: fromMe ? "flex-end" : "flex-start",
           }}
         >
-          {!fromMe && !hasPreviousMessageInSeries && (
+          {!fromMe && !hasPreviousMessageInSeries && !isSystemMessage && (
             <ConversationMessageSender inboxId={senderInboxId} />
           )}
           {children}

@@ -5,7 +5,6 @@ import {
 } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { translate } from "@i18n/index";
-import { AvatarSizes } from "@styles/sizes";
 import { saveTopicsData } from "@utils/api";
 import { getMinimalDate } from "@utils/date";
 import { Haptics } from "@utils/haptics";
@@ -15,27 +14,27 @@ import { useColorScheme } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 
-import Avatar from "./Avatar";
-import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
-import { GroupAvatarDumb } from "./GroupAvatar";
-import { useGroupConversationListAvatarInfo } from "../features/conversation-list/useGroupConversationListAvatarInfo";
-import { IIconName } from "@design-system/Icon/Icon.types";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { useRoute } from "@navigation/useNavigation";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
-import { actionSheetColors } from "@styles/colors";
-import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { prefetchConversationMessages } from "@queries/useConversationMessages";
-import { useToggleReadStatus } from "../features/conversation-list/hooks/useToggleReadStatus";
-import { useMessageText } from "../features/conversation-list/hooks/useMessageText";
-import { useConversationIsUnread } from "../features/conversation-list/hooks/useMessageIsUnread";
 import {
   resetConversationListContextMenuStore,
   setConversationListContextMenuConversationData,
 } from "@/features/conversation-list/ConversationListContextMenu.store";
-import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { IIconName } from "@design-system/Icon/Icon.types";
+import { useRoute } from "@navigation/useNavigation";
+import { prefetchConversationMessages } from "@queries/useConversationMessages";
+import { actionSheetColors } from "@styles/colors";
+import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useConversationIsUnread } from "../features/conversation-list/hooks/useMessageIsUnread";
+import { useMessageText } from "../features/conversation-list/hooks/useMessageText";
+import { useToggleReadStatus } from "../features/conversation-list/hooks/useToggleReadStatus";
+import { useGroupConversationListAvatarInfo } from "../features/conversation-list/useGroupConversationListAvatarInfo";
+import Avatar from "./Avatar";
+import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
+import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
+import { GroupAvatarDumb } from "./GroupAvatar";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 type V3GroupConversationListItemProps = {
   group: GroupWithCodecsType;
@@ -392,6 +391,8 @@ export function V3GroupConversationListItem({
     isBlockedChatView,
   });
 
+  const { theme } = useAppTheme();
+
   const { timeToShow, leftActionIcon } = useDisplayInfo({
     timestamp,
     isUnread,
@@ -399,17 +400,11 @@ export function V3GroupConversationListItem({
 
   const avatarComponent = useMemo(() => {
     return group?.imageUrlSquare ? (
-      <Avatar
-        size={AvatarSizes.conversationListItem}
-        uri={group?.imageUrlSquare}
-      />
+      <Avatar size={theme.avatarSize.lg} uri={group?.imageUrlSquare} />
     ) : (
-      <GroupAvatarDumb
-        size={AvatarSizes.conversationListItem}
-        members={memberData}
-      />
+      <GroupAvatarDumb size={theme.avatarSize.lg} members={memberData} />
     );
-  }, [group?.imageUrlSquare, memberData]);
+  }, [group?.imageUrlSquare, memberData, theme]);
 
   const subtitle =
     timeToShow && messageText ? `${timeToShow} ⋅ ${messageText}` : "";

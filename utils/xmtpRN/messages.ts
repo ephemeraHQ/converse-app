@@ -17,6 +17,10 @@ import {
 } from "./client.types";
 import { getXmtpClient } from "./sync";
 
+export function isSupportedMessage(message: DecodedMessageWithCodecsType) {
+  return true;
+}
+
 export const streamAllMessages = async (account: string) => {
   await stopStreamingAllMessage(account);
 
@@ -48,21 +52,21 @@ export const streamAllMessages = async (account: string) => {
     // We only need to handle messages that are either:
     // 1. From other users
     // 2. Non-text messages from current user
-    const isMessageFromOtherUser = !messageIsFromCurrentAccountInboxId({
-      message,
-    });
-    const isNonTextMessage = !isTextMessage(message);
-    if (isMessageFromOtherUser || isNonTextMessage) {
-      try {
-        addConversationMessage({
-          account: client.address,
-          topic: message.topic as ConversationTopic,
-          message,
-        });
-      } catch (error) {
-        captureError(error);
-      }
+    // const isMessageFromOtherUser = !messageIsFromCurrentAccountInboxId({
+    //   message,
+    // });
+    // const isNonTextMessage = !isTextMessage(message);
+    // if (isMessageFromOtherUser || isNonTextMessage) {
+    try {
+      addConversationMessage({
+        account: client.address,
+        topic: message.topic as ConversationTopic,
+        message,
+      });
+    } catch (error) {
+      captureError(error);
     }
+    // }
 
     try {
       updateConversationQueryData({

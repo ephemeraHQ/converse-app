@@ -47,7 +47,11 @@ export const useBlockGroupMutation = (
         return;
       }
 
-      setGroupConsentQueryData(account, topic!, context.previousConsent);
+      setGroupConsentQueryData(
+        account,
+        topic!,
+        context.previousConsent || "unknown"
+      );
       updateConversationInConversationListQuery({
         account,
         topic: topic!,

@@ -26,11 +26,8 @@ export function isContentType(args: {
   return contentType.startsWith(prefix);
 }
 
-export function getMessageContentType(contentType: string | undefined) {
-  if (!contentType) {
-    return undefined;
-  }
+export function getMessageContentType(contentType: string) {
   return ObjectTyped.keys(contentTypesPrefixes).find((key) =>
     contentType.startsWith(contentTypesPrefixes[key])
-  );
+  )!;
 }

@@ -1,3 +1,4 @@
+import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
@@ -14,9 +15,10 @@ import { DmConsentPopup } from "@/features/conversation/conversation-consent-pop
 import { GroupConsentPopup } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-group";
 import { DmConversationTitle } from "@/features/conversation/conversation-header/conversation-dm-header-title";
 import { GroupConversationTitle } from "@/features/conversation/conversation-header/conversation-group-header-title";
-import { KeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
+import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { MessageContextMenu } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu";
+import { useConversationMessageContextMenuEmojiPickerStore } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker.store";
 import {
   MessageContextMenuStoreProvider,
   useMessageContextMenuStore,
@@ -26,20 +28,21 @@ import {
   ConversationMessageGestures,
   IMessageGesturesOnLongPressArgs,
 } from "@/features/conversation/conversation-message/conversation-message-gestures";
-import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import { MessageReactionsDrawer } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer";
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { ConversationMessageRepliable } from "@/features/conversation/conversation-message/conversation-message-repliable";
 import { ConversationMessageStatus } from "@/features/conversation/conversation-message/conversation-message-status/conversation-message-status";
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
+import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import {
   MessageContextStoreProvider,
   useMessageContextStore,
 } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
-  getConvosMessageStatus,
+  getConvosMessageStatusForXmtpMessage,
   getCurrentUserAlreadyReactedOnMessage,
   isAnActualMessage,
+  isGroupUpdatedMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
@@ -49,7 +52,9 @@ import { isConversationAllowed } from "@/features/conversation/utils/is-conversa
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
+import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
 import { useConversationQuery } from "@/queries/useConversationQuery";
+import { useAppTheme } from "@/theme/useAppTheme";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
@@ -69,17 +74,18 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { ConversationMessageHighlighted } from "./conversation-message/conversation-message-highlighted";
-import {
-  ConversationStoreProvider,
-  useCurrentConversationTopic,
-} from "./conversation.store-context";
-import { CONVERSATION_LIST_REFRESH_THRESHOLD } from "./conversation-list.contstants";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
 } from "react-native";
+import { FadeInDown } from "react-native-reanimated";
+import { CONVERSATION_LIST_REFRESH_THRESHOLD } from "./conversation-list.contstants";
+import { ConversationMessageHighlighted } from "./conversation-message/conversation-message-highlighted";
+import {
+  ConversationStoreProvider,
+  useCurrentConversationTopic,
+} from "./conversation.store-context";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
@@ -164,7 +170,17 @@ const KeyboardFillerWrapper = memo(function KeyboardFillerWrapper() {
   const messageContextMenuData = useMessageContextMenuStoreContext(
     (state) => state.messageContextMenuData
   );
-  return <KeyboardFiller messageContextMenuIsOpen={!!messageContextMenuData} />;
+
+  const isEmojiPickerOpen = useConversationMessageContextMenuEmojiPickerStore(
+    (state) => state.isEmojiPickerOpen
+  );
+
+  return (
+    <ConversationKeyboardFiller
+      messageContextMenuIsOpen={!!messageContextMenuData}
+      enabled={!isEmojiPickerOpen}
+    />
+  );
 });
 
 const ComposerWrapper = memo(function ComposerWrapper(props: {
@@ -198,8 +214,14 @@ const Messages = memo(function Messages(props: {
     data: messages,
     isLoading: messagesLoading,
     isRefetching: isRefetchingMessages,
-    refetch,
+    refetch: refetchMessages,
   } = useConversationMessages(currentAccount, topic!);
+
+  useAppStateHandlers({
+    onForeground: () => {
+      refetchMessages();
+    },
+  });
 
   const latestMessageIdByCurrentUser = useMemo(() => {
     if (!messages?.ids) return -1;
@@ -234,13 +256,13 @@ const Messages = memo(function Messages(props: {
   const handleRefresh = useCallback(async () => {
     try {
       refreshingRef.current = true;
-      await refetch();
+      await refetchMessages();
     } catch (e) {
       console.error(e);
     } finally {
       refreshingRef.current = false;
     }
-  }, [refetch]);
+  }, [refetchMessages]);
 
   const onScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -256,7 +278,7 @@ const Messages = memo(function Messages(props: {
     <ConversationMessagesList
       messageIds={messages?.ids ?? []}
       refreshing={isRefetchingMessages}
-      onRefresh={Platform.OS === "android" ? refetch : undefined}
+      onRefresh={Platform.OS === "android" ? refetchMessages : undefined}
       onScroll={onScroll}
       ListEmptyComponent={
         isConversationDm(conversation) ? (
@@ -287,6 +309,7 @@ const Messages = memo(function Messages(props: {
             isLatestMessageSentByCurrentUser={
               latestMessageIdByCurrentUser === messageId
             }
+            animateEntering={index === 0}
           />
         );
       }}
@@ -300,13 +323,16 @@ const ConversationMessagesListItem = memo(
     previousMessage: DecodedMessageWithCodecsType | undefined;
     nextMessage: DecodedMessageWithCodecsType | undefined;
     isLatestMessageSentByCurrentUser: boolean;
+    animateEntering: boolean;
   }) {
     const {
       message,
       previousMessage,
       nextMessage,
       isLatestMessageSentByCurrentUser,
+      animateEntering,
     } = props;
+    const { theme } = useAppTheme();
     const composerStore = useConversationComposerStore();
 
     const handleReply = useCallback(() => {
@@ -319,28 +345,44 @@ const ConversationMessagesListItem = memo(
         previousMessage={previousMessage}
         nextMessage={nextMessage}
       >
-        <ConversationMessageTimestamp />
-        <ConversationMessageRepliable onReply={handleReply}>
-          <ConversationMessageLayout>
-            <ConversationMessageGesturesWrapper>
-              <ConversationMessageHighlighted>
-                <ConversationMessage message={message} />
-              </ConversationMessageHighlighted>
-            </ConversationMessageGesturesWrapper>
-            <ConversationMessageReactions />
-            {isLatestMessageSentByCurrentUser && (
-              <ConversationMessageStatus
-                status={getConvosMessageStatus(message)}
-              />
-            )}
-          </ConversationMessageLayout>
-        </ConversationMessageRepliable>
+        <AnimatedVStack
+          {...(animateEntering && {
+            entering: FadeInDown.springify()
+              .damping(theme.animation.spring.damping)
+              .stiffness(theme.animation.spring.stiffness)
+              .withInitialValues({
+                opacity: 0,
+                transform: [
+                  {
+                    translateY: 50,
+                  },
+                ],
+              }),
+          })}
+        >
+          <ConversationMessageTimestamp />
+          <ConversationMessageRepliable onReply={handleReply}>
+            <ConversationMessageLayout>
+              <ConversationMessageGesturesWrapper>
+                <ConversationMessageHighlighted>
+                  <ConversationMessage message={message} />
+                </ConversationMessageHighlighted>
+              </ConversationMessageGesturesWrapper>
+              <ConversationMessageReactions />
+              {isLatestMessageSentByCurrentUser && (
+                <ConversationMessageStatus
+                  status={getConvosMessageStatusForXmtpMessage(message)}
+                />
+              )}
+            </ConversationMessageLayout>
+          </ConversationMessageRepliable>
+        </AnimatedVStack>
       </MessageContextStoreProvider>
     );
   }
 );
 
-const ConversationMessageGesturesWrapper = memo(
+export const ConversationMessageGesturesWrapper = memo(
   function ConversationMessageGesturesWrapper(props: {
     children: React.ReactNode;
   }) {

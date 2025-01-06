@@ -8,7 +8,7 @@ import { Composer } from "@/features/conversation/conversation-composer/conversa
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
 import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { NewConversationTitle } from "@/features/conversation/conversation-header/conversation-new-dm-header-title";
-import { KeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
+import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
 import {
   ISendMessageParams,
   sendMessage,
@@ -63,7 +63,10 @@ export const ConversationNewDm = memo(function ConversationNewDm(props: {
       <ConversationComposerContainer>
         <Composer onSend={sendFirstConversationMessage} />
       </ConversationComposerContainer>
-      <KeyboardFiller messageContextMenuIsOpen={false} />
+      <ConversationKeyboardFiller
+        messageContextMenuIsOpen={false}
+        enabled={true}
+      />
     </ConversationComposerStoreProvider>
   );
 });
