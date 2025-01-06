@@ -20,6 +20,7 @@ import {
   prefetchConversationListQuery,
 } from "@/queries/useConversationListQuery";
 import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
+import { getInboxId } from "./signIn";
 
 const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;
@@ -31,14 +32,17 @@ const instantiatingClientForInboxId: {
 
 export const getOrBuildXmtpClient = async ({
   account,
-  inboxId,
 }: {
   account: string;
 }): Promise<ConverseXmtpClientType | Client> => {
-  const lowerCaseInboxId = inboxId.toLowerCase();
-  if (inboxId && xmtpClientByInboxId[lowerCaseInboxId]) {
+  const lowerCaseInboxId = inboxId?.toLowerCase();
+  if (lowerCaseInboxId && xmtpClientByInboxId[lowerCaseInboxId]) {
     return xmtpClientByInboxId[lowerCaseInboxId];
   }
+
+  const address: string = "";
+  const inboxId = await getInboxId(address);
+
   // const lowerCaseAccount = account.toLowerCase();
   // if (account && xmtpClientByAccount[lowerCaseAccount]) {
   //   return xmtpClientByAccount[lowerCaseAccount];
@@ -59,6 +63,9 @@ export const getOrBuildXmtpClient = async ({
   instantiatingClientForInboxId[lowerCaseInboxId] = (async () => {
     try {
       logger.debug("[XmtpRN] Getting client from address");
+      // note(lustig) this function which talks to the sdk requires an ethereum address
+      // at the moment. I'm not sure why we cant build the client from the inboxId, but
+      // we'll have to learn more here.
       const client = await buildXmtpClientFromAddress(account);
       logger.info(`[XmtpRN] Instantiated client for ${client.address}`);
       getChatStore({ inboxId }).getState().setLocalClientConnected(true);

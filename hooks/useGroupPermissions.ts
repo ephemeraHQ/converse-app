@@ -3,7 +3,7 @@ import { currentAccount } from "../data/store/accountsStore";
 import { useGroupPermissionsQuery } from "../queries/useGroupPermissionsQuery";
 
 export const useGroupPermissions = (topic: ConversationTopic | undefined) => {
-  const account = currentAccount();
+  const inboxId = getCurrentInboxId();
   const {
     data: permissions,
     isLoading,

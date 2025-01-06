@@ -296,14 +296,14 @@ export const getConversationByTopic = async (args: {
   });
 };
 
-export const getConversationByTopicByAccount = async (args: {
-  account: string;
+export const getConversationByTopicByInboxId = async (args: {
+  inboxId: string;
   topic: ConversationTopic;
   includeSync?: boolean;
 }) => {
-  const { account, topic, includeSync = false } = args;
+  const { inboxId, topic, includeSync = false } = args;
   const client = (await getOrBuildXmtpClient(
-    account
+    inboxId
   )) as ConverseXmtpClientType;
   return getConversationByTopic({ client, topic, includeSync });
 };

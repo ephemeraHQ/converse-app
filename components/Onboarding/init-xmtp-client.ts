@@ -53,6 +53,7 @@ export async function initXmtpClient(args: {
 
 type IBaseArgs = {
   address: string;
+  inboxId: string;
 };
 
 type IPrivyArgs = IBaseArgs & {
@@ -76,7 +77,7 @@ type IConnectWithAddressKeyArgs =
   | IStandardArgs;
 
 export async function connectWithAddress(args: IConnectWithAddressKeyArgs) {
-  const { address } = args;
+  const { address, inboxId } = args;
 
   logger.debug("In connectWithAddress");
 
@@ -86,7 +87,7 @@ export async function connectWithAddress(args: IConnectWithAddressKeyArgs) {
   }
 
   try {
-    await performLogoutAndSaveKey(address);
+    await performLogoutAndSaveKey();
 
     useAccountsStore.getState().setCurrentInboxId({
       inboxId,
@@ -101,7 +102,7 @@ export async function connectWithAddress(args: IConnectWithAddressKeyArgs) {
   }
 }
 
-async function performLogoutAndSaveKey(address: string) {
+async function performLogoutAndSaveKey() {
   logger.debug("Waiting for logout tasks");
   await waitForLogoutTasksDone(500);
   logger.debug("Logout tasks done, saving xmtp key");
@@ -111,24 +112,24 @@ async function performLogoutAndSaveKey(address: string) {
 async function finalizeAccountSetup(args: IConnectWithAddressKeyArgs) {
   logger.debug("Finalizing account setup");
 
-  const { address } = args;
+  const { address, inboxId } = args;
 
   useAccountsStore.getState().setCurrentInboxId({
     inboxId,
     createIfNew: false,
   });
 
-  getSettingsStore(address)
+  getSettingsStore({ inboxId })
     .getState()
     .setEphemeralAccount("isEphemeral" in args && args.isEphemeral);
 
   if ("pkPath" in args) {
-    getWalletStore(address).getState().setPrivateKeyPath(args.pkPath);
+    getWalletStore({ inboxId }).getState().setPrivateKeyPath(args.pkPath);
   }
 
   await prefetchInboxIdQuery({ account: address });
 
-  getOrBuildXmtpClient(address);
+  getOrBuildXmtpClient({ account: address });
 
   logger.debug("Account setup finalized");
 }

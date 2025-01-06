@@ -1,5 +1,6 @@
 export const CONVERSE_ACCESS_TOKEN_STORAGE_KEY = "CONVERSE_ACCESS_TOKEN";
 export const CONVERSE_REFRESH_TOKEN_STORAGE_KEY = "CONVERSE_REFRESH_TOKEN";
 export const XMTP_IDENTITY_KEY = "XMTP_IDENTITY";
+export const XMTP_API_ADDRESS_HEADER_KEY = "xmtp-api-address";
 export const XMTP_API_INBOX_ID_HEADER_KEY = "xmtp-api-inbox-id";
 export const FIREBASE_APP_CHECK_HEADER_KEY = "X-Firebase-AppCheck";

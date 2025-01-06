@@ -43,7 +43,7 @@ export function NavigationChatButton({
     if (loading) return;
     setLoading(true);
     const allowed = await canMessageByAccount({
-      account: currentAccount(),
+      inboxId: getCurrentInboxId(),
       peer: address,
     });
     setLoading(false);

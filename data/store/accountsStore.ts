@@ -271,7 +271,7 @@ export const currentInboxId = (): string =>
  * @param groupStatus The group status to set
  */
 export const setGroupStatus = (groupStatus: GroupStatus) => {
-  const inboxId = currentInboxId();
+  const inboxId = getCurrentInboxId();
   if (!inboxId) {
     logger.warn("[setGroupStatus] No current inboxId");
     return;
@@ -296,7 +296,7 @@ export function getCurrentInboxId() {
 }
 
 // export const loggedWithPrivy = () => {
-//   const account = currentAccount();
+//   const inboxId = getCurrentInboxId();
 //   return isPrivyAccount(account);
 // };
 

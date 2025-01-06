@@ -13,12 +13,12 @@ import { UseQueryResult } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export function useGroupQuery(args: {
-  account: string;
+  inboxId: string;
   topic: ConversationTopic;
 }) {
-  const { account, topic } = args;
+  const { inboxId, topic } = args;
   return useConversationQuery({
-    account,
+    inboxId,
     topic,
   }) as UseQueryResult<GroupWithCodecsType | null>;
 }

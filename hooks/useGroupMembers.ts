@@ -9,7 +9,7 @@ import { useRevokeAdminMutation } from "../queries/useRevokeAdminMutation";
 import { useRevokeSuperAdminMutation } from "../queries/useRevokeSuperAdminMutation";
 
 export const useGroupMembers = (topic: ConversationTopic) => {
-  const account = currentAccount();
+  const inboxId = getCurrentInboxId();
 
   const {
     data: members,

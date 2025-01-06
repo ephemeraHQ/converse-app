@@ -1,10 +1,7 @@
 import { useEffect } from "react";
 
 // import { invalidateProfileSocialsQuery } from "../../data/helpers/profiles/profilesUpdate";
-import {
-  useAccountsStore,
-  useCurrentAccount,
-} from "../../data/store/accountsStore";
+import { useAccountsStore } from "../../data/store/accountsStore";
 import { saveUser } from "../../utils/api";
 import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
 

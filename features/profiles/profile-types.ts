@@ -32,8 +32,26 @@ export type IConverseUserName = {
   avatar?: string | undefined;
 };
 
+export const Cryptocurrencies = {
+  ETH: "ETH",
+  // to add later!
+  // SOL: "SOL",
+  // BTC: "BTC",
+  // SUI: "SUI",
+} as const;
+
+export type CryptoCurrency =
+  (typeof Cryptocurrencies)[keyof typeof Cryptocurrencies];
+
+export type CryptoCurrencyWalletAddresses = {
+  [key in CryptoCurrency]: Array<string>;
+};
+
 export type IProfileSocials = {
-  address?: string;
+  // address?: string;
+  // note(lustig) this may be overkill for now, but I think preparing for the future
+  // is a good idea.
+  cryptoCurrencyWalletAddresses?: CryptoCurrencyWalletAddresses;
   ensNames?: IEnsName[];
   farcasterUsernames?: IFarcasterUsername[];
   lensHandles?: ILensHandle[];
@@ -41,8 +59,8 @@ export type IProfileSocials = {
   userNames?: IConverseUserName[];
 };
 
-export type ProfileByAddress = {
-  [address: string]:
+export type ProfileByInboxId = {
+  [inboxId: string]:
     | { socials: IProfileSocials; updatedAt: number }
     | undefined;
 };

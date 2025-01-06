@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
 });
 
 export function CurrentAccount(props: ICurrentAccountProps) {
-  const account = currentAccount();
+  const inboxId = getCurrentInboxId();
   const name = usePreferredName(account);
   const avatarUri = usePreferredAvatarUri(account);
 

@@ -33,13 +33,13 @@ import TableView from "../../components/TableView/TableView";
 import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import config from "../../config";
 import {
-  currentAccount,
+  getCurrentInboxId,
   useRecommendationsStore,
 } from "../../data/store/accountsStore";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useSelect } from "../../data/store/storeHelpers";
 import { useGroupMembers } from "../../hooks/useGroupMembers";
-import { searchProfiles } from "../../utils/api";
+import { searchXmtpProfilesByRawString } from "../../utils/api";
 import { getAddressForPeer, isSupportedPeer } from "../../utils/evm/address";
 import { navigate } from "../../utils/navigation";
 import { isEmptyObject } from "../../utils/objects";
@@ -56,7 +56,7 @@ export default function NewConversation({
 >) {
   const colorScheme = useColorScheme();
   const { data: existingGroup } = useGroupQuery({
-    account: currentAccount(),
+    inboxId: getCurrentInboxId(),
     topic: route.params?.addingToGroupTopic!,
   });
   const [group, setGroup] = useState({
@@ -213,20 +213,23 @@ export default function NewConversation({
             }
             const address = getCleanAddress(resolvedAddress);
             const addressIsOnXmtp = await canMessageByAccount({
-              account: currentAccount(),
+              inboxId: getCurrentInboxId(),
               peer: address,
             });
             if (searchingForValue.current === value) {
               if (addressIsOnXmtp) {
                 // Let's search with the exact address!
-                const profiles = await searchProfiles(
+                const profiles = await searchXmtpProfilesByRawString(
                   address,
-                  currentAccount()
+                  getCurrentInboxId()
                 );
 
                 if (!isEmptyObject(profiles)) {
                   // Let's save the profiles for future use
-                  setProfileRecordSocialsQueryData(currentAccount(), profiles);
+                  setProfileRecordSocialsQueryData(
+                    getCurrentInboxId(),
+                    profiles
+                  );
                   setStatus({
                     loading: false,
                     error: "",
@@ -259,11 +262,14 @@ export default function NewConversation({
             profileSearchResults: {},
           });
 
-          const profiles = await searchProfiles(value, currentAccount());
+          const profiles = await searchXmtpProfilesByRawString(
+            value,
+            getCurrentInboxId()
+          );
 
           if (!isEmptyObject(profiles)) {
             // Let's save the profiles for future use
-            setProfileRecordSocialsQueryData(currentAccount(), profiles);
+            setProfileRecordSocialsQueryData(getCurrentInboxId(), profiles);
             setStatus({
               loading: false,
               error: "",

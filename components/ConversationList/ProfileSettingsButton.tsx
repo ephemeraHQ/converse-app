@@ -9,13 +9,13 @@ import { usePreferredName } from "@/hooks/usePreferredName";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 
 export default function ProfileSettingsButton() {
-  const account = currentAccount();
+  const inboxId = getCurrentInboxId();
 
   const displayName = usePreferredName(account);
   const avatarUri = usePreferredAvatarUri(account);
 
   const openProfile = useCallback(() => {
-    navigate("Profile", { address: currentAccount() });
+    navigate("Profile", { address: getCurrentInboxId() });
   }, []);
 
   return (

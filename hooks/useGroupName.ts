@@ -6,7 +6,7 @@ import { useGroupNameQuery } from "../queries/useGroupNameQuery";
 import { usePreferredNames } from "./usePreferredNames";
 
 export const useGroupName = (topic: ConversationTopic | undefined) => {
-  const account = currentAccount();
+  const inboxId = getCurrentInboxId();
 
   const {
     data: groupName,

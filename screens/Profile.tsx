@@ -423,7 +423,7 @@ function ProfileScreenImpl() {
               const newStatus = isBlockedPeer ? "consented" : "blocked";
               const consentOnProtocol = isBlockedPeer ? "allow" : "deny";
               consentToAddressesOnProtocolByAccount({
-                account: currentAccount(),
+                inboxId: getCurrentInboxId(),
                 addresses: [peerAddress],
                 consent: consentOnProtocol,
               });

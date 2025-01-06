@@ -266,7 +266,7 @@ our application on a device that has not been tampered with.
   };
 }
 
-const inboxIdToLastSavedUserTimestampMap: { [address: string]: number } = {};
+const inboxIdToLastSavedUserTimestampMap: { [inboxId: string]: number } = {};
 
 export const saveUser = async ({
   inboxId,
@@ -282,18 +282,18 @@ export const saveUser = async ({
     // time than coming back on the app.
     return;
   }
-  inboxIdToLastSavedUserTimestampMap[address] = now;
+  inboxIdToLastSavedUserTimestampMap[inboxId] = now;
 
   await api.post(
     "/api/user",
     {
-      address,
+      inboxId,
       privyAccountId,
       platform: analyticsPlatform,
       version: analyticsAppVersion,
       build: analyticsBuildNumber,
     },
-    { headers: await getXmtpApiHeaders(address) }
+    { headers: await getXmtpApiHeaders({ inboxId }) }
   );
 };
 
@@ -343,16 +343,16 @@ export const getPrivyAuthenticatedUser = async () => {
 //   );
 // };
 
-export const getPeersStatus = async (account: string) => {
+export const getPeersStatus = async ({ inboxId }: { inboxId: string }) => {
   const { data } = await api.get("/api/consent/peer", {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data as { [peerAddress: string]: "blocked" | "consented" };
 };
 
-export const deletePeersFromDb = async (account: string): Promise<void> => {
+export const deletePeersFromDb = async ({ inboxId }: { inboxId: string }) => {
   const { data } = await api.delete("/api/consent", {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data.message;
 };
@@ -393,7 +393,7 @@ export const getProfilesForInboxIds = async ({
   inboxIds,
 }: {
   inboxIds: string[];
-}): Promise<{ [inboxId: InboxId]: IProfileSocials[] }> => {
+}): Promise<{ [inboxId: string]: IProfileSocials }> => {
   logger.info("Fetching profiles for inboxIds", inboxIds);
   const { data } = await api.get("/api/inbox/", {
     params: { ids: inboxIds.join(",") },
@@ -406,21 +406,30 @@ export const getProfilesForInboxIds = async ({
   return data;
 };
 
-export const searchProfiles = async (
-  query: string,
-  account: string
-): Promise<{ [address: string]: IProfileSocials }> => {
+export const searchXmtpProfilesByRawString = async ({
+  accountInboxId,
+  query,
+}: {
+  accountInboxId: string;
+  query: string;
+}): Promise<{ [inboxId: string]: IProfileSocials }> => {
   const { data } = await api.get("/api/profile/search", {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId: accountInboxId }),
     params: { query },
   });
   return data;
 };
 
-export const findFrens = async (account: string) => {
+export const findFrensByEthereumAddress = async ({
+  accountInboxId,
+  ethereumAddress,
+}: {
+  accountInboxId: string;
+  ethereumAddress: string;
+}) => {
   const { data } = await api.get("/api/frens/find", {
-    headers: await getXmtpApiHeaders(account),
-    params: { address: evmHelpers.toChecksumAddress(account) },
+    headers: await getXmtpApiHeaders({ inboxId: accountInboxId }),
+    params: { address: evmHelpers.toChecksumAddress(ethereumAddress) },
   });
 
   return data.frens as Frens;

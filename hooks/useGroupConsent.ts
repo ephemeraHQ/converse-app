@@ -16,7 +16,7 @@ export type IGroupConsentOptions = {
 };
 
 export const useGroupConsent = (topic: ConversationTopic) => {
-  const account = currentAccount();
+  const inboxId = getCurrentInboxId();
 
   const { data: group, isLoading: isGroupLoading } = useGroupQuery({
     account,

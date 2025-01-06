@@ -7,5 +7,5 @@ import { currentAccount } from "@data/store/accountsStore";
  */
 export function isCurrentUser(address: string): boolean {
   if (!address) return false;
-  return address.toLowerCase() === currentAccount().toLowerCase();
+  return address.toLowerCase() === getCurrentInboxId().toLowerCase();
 }

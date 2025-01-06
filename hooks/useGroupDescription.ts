@@ -4,7 +4,7 @@ import { useGroupDescriptionMutation } from "../queries/useGroupDescriptionMutat
 import { useGroupDescriptionQuery } from "../queries/useGroupDescriptionQuery";
 
 export const useGroupDescription = (topic: ConversationTopic) => {
-  const account = currentAccount();
+  const inboxId = getCurrentInboxId();
   const { data, isLoading, isError } = useGroupDescriptionQuery({
     account,
     topic,

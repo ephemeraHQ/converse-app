@@ -5,7 +5,7 @@ import { currentAccount } from "../data/store/accountsStore";
 import { useGroupQuery } from "./useGroupQuery";
 
 export const useGroupCreatorQuery = (topic: ConversationTopic) => {
-  const account = currentAccount();
+  const inboxId = getCurrentInboxId();
 
   const { data: group } = useGroupQuery({ account, topic });
 

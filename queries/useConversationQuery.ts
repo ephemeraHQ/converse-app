@@ -8,14 +8,14 @@ import { mutateObjectProperties } from "@/utils/mutate-object-properties";
 export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
 
 type IArgs = {
-  account: string;
+  inboxId: string;
   topic: ConversationTopic;
 };
 
 function getConversation(args: IArgs) {
-  const { account, topic } = args;
+  const { inboxId, topic } = args;
   return getConversationByTopicByAccount({
-    account,
+    inboxId,
     topic,
     includeSync: true,
   });

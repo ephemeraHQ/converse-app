@@ -52,10 +52,7 @@ import {
 import { NavigationParamList } from "../Navigation/Navigation";
 import { needToShowNotificationsPermissions } from "./Onboarding.utils";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
-import {
-  invalidateProfileSocialsQuery,
-  prefetchProfileSocialsQuery,
-} from "@/queries/useProfileSocialsQuery";
+import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
 
 export type ProfileType = {
   avatar?: string;
