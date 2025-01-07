@@ -17,10 +17,7 @@ import {
   getMessageById,
   useConversationMessageReactions,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import {
-  ConversationStoreProvider,
-  useCurrentConversationTopic,
-} from "@/features/conversation/conversation.store-context";
+import { useCurrentConversationTopic } from "@/features/conversation/conversation.store-context";
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
@@ -155,6 +152,7 @@ const Content = memo(function Content(props: {
                   originY={itemRectHeight}
                 />
 
+                {/* Replace with rowGap when we refactored menu items and not using rn-paper TableView */}
                 <VStack
                   style={{
                     height:
@@ -167,8 +165,12 @@ const Content = memo(function Content(props: {
                   nextMessage={undefined}
                   previousMessage={undefined}
                 >
+                  {/* TODO: maybe make ConversationMessage more dumb to not need any context? */}
                   <ConversationMessage message={message} />
                 </MessageContextStoreProvider>
+
+                {/* Put back once we refactor the menu items */}
+                {/* <VStack style={{ height: 16 }}></VStack> */}
 
                 <MessageContextMenuItems
                   originX={fromMe ? itemRectX + itemRectWidth : itemRectX}
