@@ -131,7 +131,6 @@ const Content = memo(function Content(props: {
         transparent={true}
         animationType="fade"
         statusBarTranslucent={Platform.OS === "android"}
-        supportedOrientations={["portrait", "landscape"]}
       >
         <Animated.View style={StyleSheet.absoluteFill}>
           <MessageContextMenuBackdrop handlePressBackdrop={handlePressBackdrop}>

@@ -173,7 +173,6 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
       onRequestClose={onClose}
       animationType="fade"
       statusBarTranslucent={Platform.OS === "android"}
-      supportedOrientations={["portrait", "landscape"]}
     >
       <Animated.View style={StyleSheet.absoluteFill}>
         <DrawerContext.Provider value={{ closeDrawer: handleClose }}>

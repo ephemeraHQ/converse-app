@@ -8,15 +8,12 @@ import {
 export function openMessageReactionsDrawer(
   rolledUpReactions: RolledUpReactions
 ) {
-  const store = useMessageReactionsStore.getState() as IMessageReactionsStore;
+  const store = useMessageReactionsStore.getState();
   store.setRolledUpReactions(rolledUpReactions);
-  store.setIsVisible(true);
 }
 
 export function closeMessageReactionsDrawer(arg?: { resetStore?: boolean }) {
   const { resetStore = true } = arg ?? {};
-  const store = useMessageReactionsStore.getState() as IMessageReactionsStore;
-  store.setIsVisible(false);
   if (resetStore) {
     resetMessageReactionsStore();
   }
@@ -28,8 +25,4 @@ export function resetMessageReactionsDrawer() {
 
 export function useMessageReactionsRolledUpReactions() {
   return useMessageReactionsStore((state) => state.rolledUpReactions);
-}
-
-export function useMessageReactionsDrawerVisible() {
-  return useMessageReactionsStore((state) => state.isVisible);
 }

@@ -1,52 +1,51 @@
 import Avatar from "@components/Avatar";
 import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
 import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
-import { CustomBottomSheet } from "@design-system/BottomSheet/BottomSheet";
+import { BottomSheet } from "@design-system/BottomSheet/BottomSheet";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { memo, useCallback, useState, useRef, useEffect } from "react";
-import {
-  TextStyle,
-  TouchableHighlight,
-  ViewStyle,
-  Modal,
-  Platform,
-} from "react-native";
+import { TextStyle, ViewStyle, Modal, Platform } from "react-native";
+import { TouchableHighlight } from "@design-system/touchable-highlight";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 
 import {
   closeMessageReactionsDrawer,
   useMessageReactionsRolledUpReactions,
-  useMessageReactionsDrawerVisible,
 } from "./conversation-message-reaction-drawer.service";
+import { AnimatedVStack } from "@/design-system/VStack";
 
 export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
   const { theme, themed } = useAppTheme();
   const insets = useSafeAreaInsets();
   const rolledUpReactions = useMessageReactionsRolledUpReactions();
-  const isVisible = useMessageReactionsDrawerVisible();
+  const [isVisible, setIsVisible] = useState(false);
   const bottomSheetRef = useRef<BottomSheetMethods>(null);
   const [filterReactions, setFilterReactions] = useState<string | null>(null);
 
+  // Show modal when we have reactions
   useEffect(() => {
-    if (isVisible) {
+    if (rolledUpReactions.totalCount > 0) {
+      setIsVisible(true);
       bottomSheetRef.current?.snapToIndex(0);
       setFilterReactions(null);
     }
-  }, [isVisible]);
+  }, [rolledUpReactions]);
 
+  // Centralized dismiss handler to ensure consistent cleanup
+  // Both the modal and drawer state need to be reset when closing
+  // This prevents any state mismatches that could cause the UI to become unresponsive
   const handleDismiss = useCallback(() => {
-    bottomSheetRef.current?.close();
-    setFilterReactions(null);
+    setIsVisible(false);
+    closeMessageReactionsDrawer();
   }, []);
 
-  if (!isVisible) {
+  if (!rolledUpReactions.totalCount) {
     return null;
   }
 
@@ -54,33 +53,20 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
     <Modal
       visible={isVisible}
       transparent={true}
-      onRequestClose={handleDismiss}
-      animationType="fade"
+      animationType="none"
       statusBarTranslucent={Platform.OS === "android"}
-      supportedOrientations={["portrait", "landscape"]}
     >
-      <Animated.View style={{ flex: 1 }}>
-        <CustomBottomSheet
+      <AnimatedVStack style={{ flex: 1 }}>
+        <BottomSheet
           ref={bottomSheetRef}
           snapPoints={["65%", "90%"]}
           index={0}
           enablePanDownToClose
           enableOverDrag={false}
-          enableContentPanningGesture
-          enableHandlePanningGesture
-          animateOnMount
-          detached={false}
           enableDynamicSizing={false}
           onChange={(index) => {
             if (index === -1) {
               handleDismiss();
-            }
-          }}
-          onAnimate={(fromIndex, toIndex) => {
-            if (toIndex === -1) {
-              setTimeout(() => {
-                closeMessageReactionsDrawer();
-              }, 200);
             }
           }}
           topInset={insets.top}
@@ -105,10 +91,6 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
                   themed($chip),
                   filterReactions === null && themed($chipActive),
                 ]}
-                underlayColor={theme.colors.border.subtle}
-                accessible
-                accessibilityRole="button"
-                accessibilityLabel="Show all reactions"
               >
                 <HStack style={{ alignItems: "center" }}>
                   <Text
@@ -136,10 +118,6 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
                     themed($chip),
                     filterReactions === reaction.content && themed($chipActive),
                   ]}
-                  underlayColor={theme.colors.border.subtle}
-                  accessible
-                  accessibilityRole="button"
-                  accessibilityLabel={`${reaction.count} ${reaction.content} reactions`}
                 >
                   <Text
                     style={themed(
@@ -185,8 +163,8 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
               }
             />
           </BottomSheetScrollView>
-        </CustomBottomSheet>
-      </Animated.View>
+        </BottomSheet>
+      </AnimatedVStack>
     </Modal>
   );
 });
