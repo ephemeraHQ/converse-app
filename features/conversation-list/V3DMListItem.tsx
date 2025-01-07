@@ -21,12 +21,15 @@ import { useCallback, useMemo, useRef } from "react";
 import { useColorScheme } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
-import { useConversationIsUnread } from "../features/conversation-list/hooks/useMessageIsUnread";
-import { useMessageText } from "../features/conversation-list/hooks/useMessageText";
-import { useToggleReadStatus } from "../features/conversation-list/hooks/useToggleReadStatus";
-import Avatar from "./Avatar";
-import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
-import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
+import { useConversationIsUnread } from "./hooks/useMessageIsUnread";
+import { useMessageText } from "./hooks/useMessageText";
+import { useToggleReadStatus } from "./hooks/useToggleReadStatus";
+import Avatar from "../../components/Avatar";
+import {
+  ContextMenuIcon,
+  ContextMenuItem,
+} from "../../components/ContextMenuItems";
+import { ConversationListItemDumb } from "./components/conversation-list-item";
 import { prefetchConversationMessages } from "@/queries/useConversationMessages";
 
 type V3DMListItemProps = {

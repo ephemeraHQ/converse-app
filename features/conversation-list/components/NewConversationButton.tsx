@@ -4,9 +4,9 @@ import React, { useCallback } from "react";
 import { Platform, useColorScheme } from "react-native";
 import { FAB } from "react-native-paper";
 
-import { IconButton } from "../../design-system/IconButton/IconButton";
-import { navigate } from "../../utils/navigation";
-import Picto from "../Picto/Picto";
+import { IconButton } from "../../../design-system/IconButton/IconButton";
+import { navigate } from "../../../utils/navigation";
+import Picto from "../../../components/Picto/Picto";
 
 export default function NewConversationButton() {
   const colorScheme = useColorScheme();

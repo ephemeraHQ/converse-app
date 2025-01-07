@@ -32,7 +32,7 @@ import { useToggleReadStatus } from "../features/conversation-list/hooks/useTogg
 import { useGroupConversationListAvatarInfo } from "../features/conversation-list/useGroupConversationListAvatarInfo";
 import Avatar from "./Avatar";
 import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
-import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
+import { ConversationListItemDumb } from "../features/conversation-list/components/conversation-list-item";
 import { GroupAvatarDumb } from "./GroupAvatar";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 

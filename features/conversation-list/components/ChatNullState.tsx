@@ -16,8 +16,8 @@ import { BorderRadius, Margins, Paddings } from "@styles/sizes";
 import React from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
-import config from "../../config";
-import { ShareProfileContent } from "../../screens/ShareProfile";
+import config from "../../../config";
+import { ShareProfileContent } from "../../../screens/ShareProfile";
 import NewConversationButton from "./NewConversationButton";
 import { usePreferredUsername } from "@/hooks/usePreferredUsername";
 import { usePreferredName } from "@/hooks/usePreferredName";

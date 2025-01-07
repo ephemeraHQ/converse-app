@@ -18,7 +18,7 @@ import {
   View,
 } from "react-native";
 
-import Picto from "../Picto/Picto";
+import Picto from "../../../components/Picto/Picto";
 
 type Props = {
   spamCount: number;

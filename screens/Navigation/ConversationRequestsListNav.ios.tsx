@@ -1,4 +1,5 @@
-import RequestsSegmentedController from "@components/ConversationList/RequestsSegmentedController";
+import RequestsSegmentedController from "@/features/conversation-list/components/RequestsSegmentedController";
+import { ConversationList } from "@/features/conversation-list/components/conversation-list/conversation-list";
 import { translate } from "@i18n";
 import { RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -9,22 +10,20 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { StyleSheet, Text, useColorScheme, View } from "react-native";
+import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StackAnimationTypes } from "react-native-screens";
-
-import {
-  NativeStack,
-  navigationAnimation,
-  NavigationParamList,
-} from "./Navigation";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
 import Button from "../../components/Button/Button";
-import ConversationFlashList from "@/components/ConversationFlashList/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "../../data/store/accountsStore";
-import { consentToAddressesOnProtocolByAccount } from "../../utils/xmtpRN/contacts";
 import { useRequestItems } from "../../features/conversation-requests-list/useRequestItems";
+import { consentToAddressesOnProtocolByAccount } from "../../utils/xmtpRN/contacts";
+import {
+  NativeStack,
+  NavigationParamList,
+  navigationAnimation,
+} from "./Navigation";
 
 export default function ConversationRequestsListNav() {
   const colorScheme = useColorScheme();
@@ -145,10 +144,7 @@ export default function ConversationRequestsListNav() {
     );
   };
 
-  const renderContent = (navigationProps: {
-    route: RouteProp<NavigationParamList, "ChatsRequests">;
-    navigation: NativeStackNavigationProp<NavigationParamList, "ChatsRequests">;
-  }) => {
+  const renderContent = () => {
     const showSuggestionText = selectedSegment === 0 && hasLikelyNotSpam;
     const showNoSuggestionsText = selectedSegment === 0 && !hasLikelyNotSpam;
     const showSpamWarning = selectedSegment === 1;
@@ -172,12 +168,7 @@ export default function ConversationRequestsListNav() {
             {translate("hidden_requests_warn")}
           </Text>
         )}
-        <ConversationFlashList
-          {...navigationProps}
-          isRefetching={isRefetching}
-          refetch={refetch}
-          items={itemsToShow}
-        />
+        <ConversationList conversations={itemsToShow} />
       </>
     );
   };
@@ -189,9 +180,7 @@ export default function ConversationRequestsListNav() {
         return (
           <>
             <GestureHandlerRootView style={styles.root}>
-              <View style={styles.container}>
-                {renderContent(navigationProps)}
-              </View>
+              <View style={styles.container}>{renderContent()}</View>
             </GestureHandlerRootView>
           </>
         );
