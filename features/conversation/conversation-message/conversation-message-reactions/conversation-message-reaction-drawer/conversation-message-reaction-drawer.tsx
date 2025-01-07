@@ -37,6 +37,7 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
   useEffect(() => {
     if (isVisible) {
       bottomSheetRef.current?.snapToIndex(0);
+      setFilterReactions(null);
     }
   }, [isVisible]);
 
