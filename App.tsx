@@ -5,7 +5,6 @@ import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { PortalProvider } from "@gorhom/portal";
 import { useAppStateHandlers } from "@hooks/useAppStateHandlers";
 import { PrivyProvider } from "@privy-io/expo";
 import { queryClient } from "@queries/queryClient";
@@ -138,22 +137,20 @@ export default function AppWithProviders() {
     <QueryClientProvider client={queryClient}>
       <PrivyProvider appId={config.privy.appId} storage={privySecureStorage}>
         <ThirdwebProvider>
-          <AppKeyboardProvider>
-            <ActionSheetProvider>
-              <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
+          <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
+            <AppKeyboardProvider>
+              <ActionSheetProvider>
                 <PaperProvider theme={paperTheme}>
                   <GestureHandlerRootView style={{ flex: 1 }}>
                     <BottomSheetModalProvider>
-                      <PortalProvider>
-                        <App />
-                        <Snackbars />
-                      </PortalProvider>
+                      <App />
+                      <Snackbars />
                     </BottomSheetModalProvider>
                   </GestureHandlerRootView>
                 </PaperProvider>
-              </ThemeProvider>
-            </ActionSheetProvider>
-          </AppKeyboardProvider>
+              </ActionSheetProvider>
+            </AppKeyboardProvider>
+          </ThemeProvider>
         </ThirdwebProvider>
       </PrivyProvider>
     </QueryClientProvider>

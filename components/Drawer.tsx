@@ -16,21 +16,22 @@ import {
   ViewStyle,
   useColorScheme,
   useWindowDimensions,
+  Modal,
 } from "react-native";
 import {
   Gesture,
   GestureDetector,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
-import { Portal } from "react-native-paper";
-import {
-  LinearTransition,
+import Animated, {
   interpolateColor,
   runOnJS,
   useAnimatedKeyboard,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  FadeIn,
+  FadeOut,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -166,26 +167,33 @@ export const Drawer = forwardRef<DrawerRef, DrawerProps>(function Drawer(
   }
 
   return (
-    <DrawerContext.Provider value={{ closeDrawer: handleClose }}>
-      <Portal>
-        {/* A bit of a pain but have to wrap this in a gesture handler */}
-        <GestureHandlerRootView style={styles.gestureHandlerContainer}>
-          <TouchableWithoutFeedback onPress={handleClose}>
-            <AnimatedVStack style={[styles.backdrop, backgroundStyle]} />
-          </TouchableWithoutFeedback>
-          <GestureDetector gesture={composed}>
-            <AnimatedScrollView
-              style={[styles.trayContainer, animatedStyle, style]}
-              layout={LinearTransition.springify()}
-              alwaysBounceVertical={false}
-            >
-              {showHandle && <View style={styles.handle} />}
-              {children}
-            </AnimatedScrollView>
-          </GestureDetector>
-        </GestureHandlerRootView>
-      </Portal>
-    </DrawerContext.Provider>
+    <Modal
+      visible={visible}
+      transparent={true}
+      onRequestClose={onClose}
+      animationType="fade"
+      statusBarTranslucent={Platform.OS === "android"}
+      supportedOrientations={["portrait", "landscape"]}
+    >
+      <Animated.View style={StyleSheet.absoluteFill}>
+        <DrawerContext.Provider value={{ closeDrawer: handleClose }}>
+          <GestureHandlerRootView style={styles.gestureHandlerContainer}>
+            <TouchableWithoutFeedback onPress={handleClose}>
+              <AnimatedVStack style={[styles.backdrop, backgroundStyle]} />
+            </TouchableWithoutFeedback>
+            <GestureDetector gesture={composed}>
+              <AnimatedScrollView
+                style={[styles.trayContainer, animatedStyle, style]}
+                alwaysBounceVertical={false}
+              >
+                {showHandle && <View style={styles.handle} />}
+                {children}
+              </AnimatedScrollView>
+            </GestureDetector>
+          </GestureHandlerRootView>
+        </DrawerContext.Provider>
+      </Animated.View>
+    </Modal>
   );
 });
 

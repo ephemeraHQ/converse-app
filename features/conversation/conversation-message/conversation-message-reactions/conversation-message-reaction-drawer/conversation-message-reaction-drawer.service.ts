@@ -1,36 +1,24 @@
-import { createBottomSheetModalRef } from "@design-system/BottomSheet/BottomSheet.utils";
 import { RolledUpReactions } from "../conversation-message-reactions.types";
 import {
   resetMessageReactionsStore,
   useMessageReactionsStore,
+  IMessageReactionsStore,
 } from "./conversation-message-reaction-drawer.store";
-
-export const bottomSheetModalRef = createBottomSheetModalRef();
 
 export function openMessageReactionsDrawer(
   rolledUpReactions: RolledUpReactions
 ) {
-  try {
-    if (!bottomSheetModalRef.current) {
-      throw new Error(
-        "Bottom sheet modal reference is not initialized. Ensure the component is mounted."
-      );
-    }
-    const setReactions =
-      useMessageReactionsStore.getState().setRolledUpReactions;
-    setReactions(rolledUpReactions);
-    bottomSheetModalRef.current.present();
-  } catch (error) {
-    console.error("Failed to open message reactions drawer:", error);
-    resetMessageReactionsDrawer();
-  }
+  const store = useMessageReactionsStore.getState() as IMessageReactionsStore;
+  store.setRolledUpReactions(rolledUpReactions);
+  store.setIsVisible(true);
 }
 
 export function closeMessageReactionsDrawer(arg?: { resetStore?: boolean }) {
   const { resetStore = true } = arg ?? {};
-  bottomSheetModalRef.current?.dismiss();
+  const store = useMessageReactionsStore.getState() as IMessageReactionsStore;
+  store.setIsVisible(false);
   if (resetStore) {
-    resetMessageReactionsDrawer();
+    resetMessageReactionsStore();
   }
 }
 
@@ -40,4 +28,8 @@ export function resetMessageReactionsDrawer() {
 
 export function useMessageReactionsRolledUpReactions() {
   return useMessageReactionsStore((state) => state.rolledUpReactions);
+}
+
+export function useMessageReactionsDrawerVisible() {
+  return useMessageReactionsStore((state) => state.isVisible);
 }

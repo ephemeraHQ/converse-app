@@ -134,11 +134,7 @@ const Content = memo(function Content(props: {
         statusBarTranslucent={Platform.OS === "android"}
         supportedOrientations={["portrait", "landscape"]}
       >
-        <Animated.View
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(200)}
-          style={StyleSheet.absoluteFill}
-        >
+        <Animated.View style={StyleSheet.absoluteFill}>
           <ConversationStoreProvider
             topic={topic}
             conversationId={conversation!.id}
