@@ -91,6 +91,6 @@ const $input: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   ...textSizeStyles.sm,
 });
 
-const $androidSearchBar: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $androidSearchBar = {
   backgroundColor: "transparent",
-});
+};

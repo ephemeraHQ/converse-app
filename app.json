@@ -1,5 +1,6 @@
 {
   "expo": {
+    "newArchEnabled": false,
     "version": "2.1.0",
     "ios": {
       "buildNumber": "57"

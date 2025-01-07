@@ -1,17 +1,17 @@
 import { actionSecondaryColor, textSecondaryColor } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import { getFirstLetterForAvatar } from "@utils/getFirstLetterForAvatar";
-import { ImageBackground } from "expo-image";
+import { Image } from "expo-image";
 import React, { useCallback, useState } from "react";
 import {
   ColorSchemeName,
-  ImageStyle,
   Platform,
   StyleProp,
   StyleSheet,
   Text,
   useColorScheme,
   View,
+  ViewStyle,
 } from "react-native";
 
 import Picto from "./Picto/Picto";
@@ -19,7 +19,7 @@ import Picto from "./Picto/Picto";
 export type AvatarProps = {
   uri?: string | undefined;
   size?: number | undefined;
-  style?: StyleProp<ImageStyle>;
+  style?: StyleProp<ViewStyle>;
   color?: boolean;
   name?: string | undefined;
   // Inverts the color of the place holder
@@ -47,18 +47,17 @@ function Avatar({
     setDidError(false);
   }, []);
   return uri && !didError ? (
-    <>
-      <ImageBackground
+    <View style={[styles.imageContainer, style]}>
+      <Image
         onLoad={handleImageLoad}
         onError={handleImageError}
         key={`${uri}-${color}-${colorScheme}`}
         source={{ uri }}
-        style={[styles.imageContainer, style]}
-        imageStyle={styles.image}
+        style={styles.image}
         cachePolicy="memory-disk"
         testID="avatar-image"
-      ></ImageBackground>
-    </>
+      />
+    </View>
   ) : (
     <View
       style={StyleSheet.flatten([

@@ -102,7 +102,7 @@ const $sectionTitleContainer: ThemedStyle<ViewStyle> = ({
   }),
 });
 
-const $sectionTitleSpacing: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $sectionTitleSpacing: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.xs,
   marginTop: spacing.lg,
 });

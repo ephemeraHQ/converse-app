@@ -1,7 +1,6 @@
 const { mergeConfig } = require("@react-native/metro-config");
 const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 
- 
 const defaultConfig = getSentryExpoConfig(__dirname, {
   // [Web-only]: Enables CSS support in Metro.
   isCSSEnabled: true,
@@ -31,7 +30,6 @@ const converseMetroConfig = {
     sourceExts: [...defaultConfig.resolver.sourceExts, "svg", "mjs"],
     extraNodeModules: {
       ...require("expo-crypto-polyfills"),
-      // crypto: require.resolve("react-native-quick-crypto"),
       zlib: require.resolve("browserify-zlib"),
     },
     unstable_enablePackageExports: true,
