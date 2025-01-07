@@ -1,4 +1,4 @@
-import { ColorValue, StyleProp, ViewStyle } from "react-native";
+import { ColorValue, StyleProp, TextStyle, ViewStyle } from "react-native";
 import { RequireExactlyOne } from "../../types/general";
 
 export type IIconName =

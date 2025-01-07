@@ -3,6 +3,7 @@ import { useAppTheme } from "@theme/useAppTheme";
 import logger from "@utils/logger";
 
 import { IIconName, IIconProps } from "./Icon.types";
+import { StyleProp, TextStyle } from "react-native";
 
 export const iconRegistry: Record<
   IIconName,
@@ -94,5 +95,13 @@ export function Icon(props: IIconProps) {
     return null;
   }
 
-  return <MaterialIcons name={iconName} size={size} color={color} {...rest} />;
+  return (
+    <MaterialIcons
+      {...rest}
+      style={rest.style as StyleProp<TextStyle>}
+      name={iconName}
+      size={size}
+      color={color}
+    />
+  );
 }

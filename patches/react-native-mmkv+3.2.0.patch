@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-mmkv/react-native-mmkv.podspec b/node_modules/react-native-mmkv/react-native-mmkv.podspec
+index be617c1..0d21dfe 100644
+--- a/node_modules/react-native-mmkv/react-native-mmkv.podspec
++++ b/node_modules/react-native-mmkv/react-native-mmkv.podspec
+@@ -18,6 +18,8 @@ Pod::Spec.new do |s|
+   s.source       = { :git => "https://github.com/mrousavy/react-native-mmkv.git", :tag => "#{s.version}" }
+ 
+   s.pod_target_xcconfig = {
++    # "HEADER_SEARCH_PATHS" => "\"$(PODS_ROOT)/boost\"",
++    # "OTHER_CPLUSPLUSFLAGS" => "-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1",
+     "CLANG_CXX_LANGUAGE_STANDARD" => "c++17",
+     "CLANG_CXX_LIBRARY" => "libc++",
+     "CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF" => "NO",
