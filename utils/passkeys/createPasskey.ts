@@ -40,13 +40,6 @@ export async function onPasskeyCreate(passkeyName: string) {
 }
 
 const createUserPasskey = async (passkeyName: string) => {
-  const now = new Date();
-  const humanReadableDateTime = `${now.getFullYear()}-${now.getMonth()}-${now.getDay()}@${now.getHours()}h${now.getMinutes()}min`;
-  console.log(
-    "creating passkey with the following datetime: ",
-    humanReadableDateTime
-  );
-
   // ID isn't visible by users, but needs to be random enough and valid base64 (for Android)
   const userId = Buffer.from(String(Date.now())).toString("base64");
   const authenticatorParams = await createPasskey({
