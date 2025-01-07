@@ -24,7 +24,7 @@ import {
 export function DmConsentPopup() {
   const topic = useCurrentConversationTopic();
   const conversationId = useConversationCurrentConversationId();
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()()!;
 
   const { data: peerInboxId } = useDmPeerInboxId({
     account: currentAccount,

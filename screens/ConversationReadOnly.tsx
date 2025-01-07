@@ -21,7 +21,7 @@ type ConversationReadOnlyProps = {
 };
 
 export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()()!;
 
   const { data: messages, isLoading: isLoadingMessages } =
     useConversationPreviewMessages(currentAccount, topic!);

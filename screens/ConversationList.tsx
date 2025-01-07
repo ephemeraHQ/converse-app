@@ -83,7 +83,7 @@ function ConversationList({ navigation, route, searchBarRef }: Props) {
     useSelect(["peersStatus", "ephemeralAccount"])
   );
   const pinnedConversations = useChatStore((s) => s.pinnedConversationTopics);
-  const currentAccount = useCurrentAccount();
+  const currentInboxId = useCurrentInboxId()();
   const {
     data: items,
     isLoading: showInitialLoad,

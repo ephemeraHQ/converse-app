@@ -2,13 +2,13 @@ import axios from "axios";
 
 import logger from "@utils/logger";
 import config from "../../../config";
-import { ILensHandle } from "@/features/profiles/profile-types";
+import { ILensData } from "@/features/profiles/profile-types";
 
 const LENS_CONVERSATION_ID_REGEX = /^lens\.dev\/dm\/(.*?)-(.*)$/;
 
 export const getLensHandleFromConversationIdAndPeer = (
   conversationId: string | undefined | null,
-  peerLensHandles?: ILensHandle[]
+  peerLensHandles?: ILensData[]
 ) => {
   if (!conversationId || !peerLensHandles) return null;
   const match = conversationId.match(LENS_CONVERSATION_ID_REGEX);

@@ -6,8 +6,8 @@ import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { translate } from "@i18n";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import {
-  getAddressIsAdmin,
-  getAddressIsSuperAdmin,
+  isUserAdminByInboxId,
+  isUserSuperAdminByInboxId,
 } from "@utils/groupUtils/adminUtils";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -27,13 +27,13 @@ type GroupScreenDescriptionProps = {
 export const GroupScreenDescription: FC<GroupScreenDescriptionProps> = ({
   topic,
 }) => {
-  const currentAccount = useCurrentAccount() as string;
+  const currentInboxId = useCurrentInboxId()() as string;
   const { members } = useGroupMembers(topic);
 
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
-      currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
-      currentAccountIsSuperAdmin: getAddressIsSuperAdmin(
+      currentAccountIsAdmin: isUserAdminByInboxId(members, currentAccount),
+      currentAccountIsSuperAdmin: isUserSuperAdminByInboxId(
         members,
         currentAccount
       ),

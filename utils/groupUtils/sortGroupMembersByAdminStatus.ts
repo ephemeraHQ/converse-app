@@ -6,7 +6,7 @@ import { EntityObjectWithAddress } from "@queries/entify";
 
 export const sortGroupMembersByAdminStatus = (
   members: EntityObjectWithAddress<Member, InboxId> | undefined,
-  currentAccount: string
+  currentInboxId: string | undefined
 ): { inboxId: InboxId; address: string }[] => {
   if (!members) {
     return [];

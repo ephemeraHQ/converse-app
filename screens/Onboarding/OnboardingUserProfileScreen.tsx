@@ -185,7 +185,7 @@ export const OnboardingUserProfileScreen = (
 };
 
 export function useProfile() {
-  const currentAccount = useCurrentAccount()!; // We assume if someone goes to this screen we have address
+  const currentInboxId = useCurrentInboxId()()!; // We assume if someone goes to this screen we have address
 
   const { data: socials } = useProfileSocials(currentAccount);
   const currentUserUsername = socials?.userNames?.find((u) => u.isPrimary);

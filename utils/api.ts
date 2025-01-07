@@ -2,15 +2,9 @@ import { TransactionData } from "@components/TransactionPreview/TransactionPrevi
 import type { SimulateAssetChangesResponse } from "alchemy-sdk";
 import { GroupInvite } from "@utils/api.types";
 import axios, { AxiosError } from "axios";
-import * as Contacts from "expo-contacts";
 
-import {
-  analyticsPlatform,
-  analyticsAppVersion,
-  analyticsBuildNumber,
-} from "./analytics";
+import { analyticsPlatform, analyticsAppVersion } from "./analytics";
 import type { TransferAuthorizationMessage } from "./evm/erc20";
-import { getPrivyRequestHeaders } from "./evm/privy";
 import logger from "./logger";
 import type { TransactionDetails } from "./transaction";
 import config from "../config";
@@ -18,8 +12,6 @@ import type { TopicData } from "../data/store/chatStore";
 import type { IProfileSocials } from "@/features/profiles/profile-types";
 import type { Frens } from "../data/store/recommendationsStore";
 import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
-import type { InboxId } from "@xmtp/react-native-sdk";
-import { evmHelpers } from "./evm/helpers";
 import {
   getInstallationKeySignature,
   InstallationSignature,
@@ -65,7 +57,7 @@ api.interceptors.response.use(
       );
       const inboxId = req.headers?.[XMTP_API_INBOX_ID_HEADER_KEY];
       if (typeof inboxId !== "string") {
-        throw new Error("No account in request headers");
+        throw new Error("No inboxId in request headers");
       }
       const secureMmkv = await getSecureMmkvForInboxId({ inboxId });
       const refreshToken = secureMmkv.getString(
@@ -155,7 +147,7 @@ export async function fetchAccessToken({
   if (!data.refreshToken) {
     throw new Error("No refresh token in auth response");
   }
-  logger.info("Created access token");
+  logger.info(`Created access token for inboxId ${inboxId}`);
   return data;
 }
 
@@ -225,7 +217,10 @@ our application on a device that has not been tampered with.
   if (!accessToken) {
     const installationKeySignature =
       xmtpSignatureByInboxId[inboxId] ||
-      (await getInstallationKeySignature(inboxId, XMTP_IDENTITY_KEY));
+      (await getInstallationKeySignature({
+        inboxId,
+        messageToSign: XMTP_IDENTITY_KEY,
+      }));
 
     if (!xmtpSignatureByInboxId[inboxId]) {
       xmtpSignatureByInboxId[inboxId] = installationKeySignature;
@@ -256,7 +251,7 @@ our application on a device that has not been tampered with.
     }
   }
   if (!accessToken) {
-    throw new Error("No access token");
+    throw new Error(`No access token for inboxId ${inboxId}`);
   }
 
   return {
@@ -265,97 +260,6 @@ our application on a device that has not been tampered with.
     authorization: `Bearer ${accessToken}`,
   };
 }
-
-const inboxIdToLastSavedUserTimestampMap: { [inboxId: string]: number } = {};
-
-export const saveUser = async ({
-  inboxId,
-  privyAccountId,
-}: {
-  inboxId: string;
-  privyAccountId: string;
-}) => {
-  const now = new Date().getTime();
-  const last = inboxIdToLastSavedUserTimestampMap[inboxId] || 0;
-  if (now - last < 3000) {
-    // Avoid race condition when changing account at same
-    // time than coming back on the app.
-    return;
-  }
-  inboxIdToLastSavedUserTimestampMap[inboxId] = now;
-
-  await api.post(
-    "/api/user",
-    {
-      inboxId,
-      privyAccountId,
-      platform: analyticsPlatform,
-      version: analyticsAppVersion,
-      build: analyticsBuildNumber,
-    },
-    { headers: await getXmtpApiHeaders({ inboxId }) }
-  );
-};
-
-export const userExists = async (address: string) => {
-  const { data } = await api.get("/api/user/exists", { params: { address } });
-  return data.userExists;
-};
-
-export const getPrivyAuthenticatedUser = async () => {
-  const { data } = await api.get("/api/user/privyauth", {
-    headers: getPrivyRequestHeaders(),
-  });
-  return data;
-};
-
-// export const getInvite = async (inviteCode: string): Promise<boolean> => {
-//   const { data } = await api.get("/api/user/invite", {
-//     params: { inviteCode },
-//   });
-//   if (data.inviteCode !== inviteCode) {
-//     throw new Error("Invalid invite code");
-//   }
-//   return data;
-// };
-
-// type ReportMessageQuery = {
-//   account: string;
-//   messageId: string;
-//   messageContent: string;
-//   messageSender: string;
-// };
-
-// export const reportMessage = async ({
-//   account,
-//   messageId,
-//   messageContent,
-//   messageSender,
-// }: ReportMessageQuery) => {
-//   await api.post(
-//     "/api/report",
-//     {
-//       messageId,
-//       messageContent,
-//       messageSender,
-//     },
-//     { headers: await getXmtpApiHeaders(account) }
-//   );
-// };
-
-export const getPeersStatus = async ({ inboxId }: { inboxId: string }) => {
-  const { data } = await api.get("/api/consent/peer", {
-    headers: await getXmtpApiHeaders({ inboxId }),
-  });
-  return data as { [peerAddress: string]: "blocked" | "consented" };
-};
-
-export const deletePeersFromDb = async ({ inboxId }: { inboxId: string }) => {
-  const { data } = await api.delete("/api/consent", {
-    headers: await getXmtpApiHeaders({ inboxId }),
-  });
-  return data.message;
-};
 
 export const resolveEnsName = async (
   name: string
@@ -393,7 +297,9 @@ export const getProfilesForInboxIds = async ({
   inboxIds,
 }: {
   inboxIds: string[];
-}): Promise<{ [inboxId: string]: IProfileSocials }> => {
+}): Promise<{
+  [inboxId: string]: /*todo(lustig) confirm this type*/ IProfileSocials;
+}> => {
   logger.info("Fetching profiles for inboxIds", inboxIds);
   const { data } = await api.get("/api/inbox/", {
     params: { ids: inboxIds.join(",") },
@@ -420,88 +326,71 @@ export const searchXmtpProfilesByRawString = async ({
   return data;
 };
 
-export const findFrensByEthereumAddress = async ({
+export const findFrensByInboxId = async ({
   accountInboxId,
-  ethereumAddress,
 }: {
   accountInboxId: string;
-  ethereumAddress: string;
 }) => {
   const { data } = await api.get("/api/frens/find", {
     headers: await getXmtpApiHeaders({ inboxId: accountInboxId }),
-    params: { address: evmHelpers.toChecksumAddress(ethereumAddress) },
+    params: { inboxId: accountInboxId },
   });
 
   return data.frens as Frens;
 };
 
-type DesktopSessionData = {
-  sessionId: string;
-  publicKey: string;
-  otp: string;
-};
-export const openDesktopSession = async ({
-  sessionId,
-  publicKey,
-  otp,
-}: DesktopSessionData) =>
-  api.post("/api/connect", { sessionId, publicKey, otp });
-
-export const fetchDesktopSessionXmtpKey = async ({
-  sessionId,
-  otp,
-}: DesktopSessionData): Promise<string | undefined> => {
-  const { data } = await api.get("/api/connect/session", {
-    params: { sessionId, otp },
-  });
-  return data?.encryptedXmtpKey;
-};
-
-export const markDesktopSessionDone = async ({
-  sessionId,
-  otp,
-}: DesktopSessionData): Promise<string | undefined> =>
-  api.delete("/api/connect/session", {
-    params: { sessionId, otp },
-  });
-
-export const saveTopicsData = async (
-  account: string,
+export const saveTopicsData = async ({
+  inboxId,
+  topicsData,
+}: {
+  inboxId: string;
   topicsData: {
     [topic: string]: TopicData;
-  }
-) => {
+  };
+}) => {
   await api.post("/api/topics", topicsData, {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
 };
 
-export const getTopicsData = async (account: string) => {
+export const getTopicsData = async ({ inboxId }: { inboxId: string }) => {
   const { data } = await api.get("/api/topics", {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data as { [topic: string]: TopicData };
 };
 
-export const pinTopics = async (account: string, topics: string[]) => {
+export const pinTopics = async ({
+  inboxId,
+  topics,
+}: {
+  inboxId: string;
+  topics: string[];
+}) => {
   await api.post(
     "/api/topics/pin",
     { topics },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
 };
 
-export const unpinTopics = async (account: string, topics: string[]) => {
+export const unpinTopics = async ({
+  inboxId,
+  topics,
+}: {
+  inboxId: string;
+  topics: string[];
+}) => {
   await api.delete("/api/topics/pin", {
     data: { topics },
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
 };
 
 export const postUSDCTransferAuthorization = async (
-  account: string,
+  { inboxId }: { inboxId: string },
   message: TransferAuthorizationMessage,
   signature: string
 ): Promise<string> => {
@@ -509,138 +398,137 @@ export const postUSDCTransferAuthorization = async (
     "/api/evm/transferWithAuthorization",
     { message, signature },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   return data.txHash;
 };
 
-export const getTransactionDetails = async (
-  account: string,
-  networkId: string,
-  reference: string
-): Promise<TransactionDetails> => {
+export const getTransactionDetails = async ({
+  inboxId,
+  networkId,
+  reference,
+}: {
+  inboxId: string;
+  networkId: string;
+  reference: string;
+}): Promise<TransactionDetails> => {
   const { data } = await api.get("/api/evm/transactionDetails", {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
     params: { networkId, reference },
   });
   return data;
 };
 
-export const getCoinbaseTransactionDetails = async (
-  account: string,
-  networkId: string,
-  sponsoredTxId: string
-): Promise<TransactionDetails> => {
+export const getCoinbaseTransactionDetails = async ({
+  inboxId,
+  networkId,
+  sponsoredTxId,
+}: {
+  inboxId: string;
+  networkId: string;
+  sponsoredTxId: string;
+}): Promise<TransactionDetails> => {
   const { data } = await api.get("/api/evm/coinbaseTransactionDetails", {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
     params: { networkId, sponsoredTxId },
   });
   return data;
 };
 
 export const claimProfile = async ({
-  account,
+  inboxId,
   profile,
 }: {
-  account: string;
+  inboxId: string;
   profile: ProfileType;
 }): Promise<string> => {
   const { data } = await api.post("/api/profile/username", profile, {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data;
 };
 
-export const checkUsernameValid = async (
-  address: string,
-  username: string
-): Promise<string> => {
+export const checkUsernameValid = async ({
+  inboxId,
+
+  username,
+}: {
+  inboxId: string;
+  username: string;
+}): Promise<string> => {
   const { data } = await api.get("/api/profile/username/valid", {
-    params: { address, username },
-    headers: await getXmtpApiHeaders(address),
+    params: { inboxId, username },
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data;
 };
 
-export const getSendersSpamScores = async (sendersAddresses: string[]) => {
-  if (!sendersAddresses || sendersAddresses.length === 0) return {};
+export const getSendersSpamScores = async (senderInboxIds: string[]) => {
+  if (!senderInboxIds || senderInboxIds.length === 0) return {};
   const { data } = await api.post("/api/spam/senders/batch", {
-    sendersAddresses: sendersAddresses.filter((s) => !!s),
+    sendersAddresses: senderInboxIds.filter((s) => !!s),
   });
   return data as { [senderAddress: string]: number };
 };
 
-export const getPresignedUriForUpload = async (
-  userAddress: string | undefined,
-  contentType?: string | undefined
-) => {
+export const getPresignedUriForUpload = async ({
+  inboxId,
+  contentType,
+}: {
+  inboxId: string;
+  contentType: string;
+}) => {
   const { data } = await api.get("/api/attachment/presigned", {
     params: { contentType },
-    headers: userAddress
-      ? await getXmtpApiHeaders(userAddress)
-      : getPrivyRequestHeaders(),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data as { objectKey: string; url: string };
 };
 
-export const getLastNotificationsSubscribeHash = async (
-  account: string,
-  nativeToken: string
-) => {
+export const getLastNotificationsSubscribeHash = async ({
+  inboxId,
+  nativeToken,
+}: {
+  inboxId: string;
+  nativeToken: string;
+}) => {
   const { data } = await api.post(
     "/api/notifications/subscriptionhash",
     { nativeToken },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   return data?.hash as string | undefined;
 };
 
-export const saveNotificationsSubscribe = async (
-  account: string,
-  nativeToken: string,
-  nativeTokenType: string,
-  notificationChannel: string | null,
+export const saveNotificationsSubscribe = async ({
+  inboxId,
+  nativeToken,
+  nativeTokenType,
+  notificationChannel,
+  topicsWithKeys,
+}: {
+  inboxId: string;
+  nativeToken: string;
+  nativeTokenType: string;
+  notificationChannel: string | null;
   topicsWithKeys: {
     [topic: string]: {
       status: "PUSH" | "MUTED";
       hmacKeys?: any;
     };
-  }
-) => {
+  };
+}) => {
   const { data } = await api.post(
     "/api/subscribe",
     { nativeToken, nativeTokenType, notificationChannel, topicsWithKeys },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   return data.subscribeHash as string;
-};
-
-export const notifyFarcasterLinked = async () => {
-  await api.post(
-    "/api/farcaster/linked",
-    {},
-    {
-      headers: getPrivyRequestHeaders(),
-    }
-  );
-};
-
-export const postAddressBook = async (
-  account: string,
-  data: {
-    deviceId: string;
-    countryCode: string;
-    contacts: Contacts.Contact[];
-  }
-) => {
-  await api.post("/api/addressbook", data, {
-    headers: await getXmtpApiHeaders(account),
-  });
 };
 
 export type GroupLink = { id: string; name: string; description: string };
@@ -663,15 +551,18 @@ export type JoinGroupLinkResult =
     }
   | { status: "ERROR"; reason: undefined; topic: undefined };
 
-export const joinGroupFromLink = async (
-  userAddress: string,
-  groupLinkId: string
-) => {
+export const joinGroupFromLink = async ({
+  inboxId,
+  groupLinkId,
+}: {
+  inboxId: string;
+  groupLinkId: string;
+}) => {
   const { data } = await api.post(
     `/api/groups/join`,
     { groupLinkId },
     {
-      headers: await getXmtpApiHeaders(userAddress),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   return data as JoinGroupLinkResult;
@@ -680,35 +571,47 @@ export const joinGroupFromLink = async (
 export type CreateGroupInviteResult = Pick<GroupInvite, "id" | "inviteLink">;
 
 // Create a group invite. The invite will be associated with the account used.
-export const createGroupInvite = async (
-  account: string,
+export const createGroupInvite = async ({
+  inboxId,
+  inputs,
+}: {
+  inboxId: string;
   inputs: {
     groupName: string;
     description?: string;
     imageUrl?: string;
     groupId: string;
-  }
-): Promise<CreateGroupInviteResult> => {
+  };
+}): Promise<CreateGroupInviteResult> => {
   const { data } = await api.post("/api/groupInvite", inputs, {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data;
 };
 
 // Get a group invite by ID. This method is unauthenticated
-export const getGroupInvite = async (
-  inviteId: string
-): Promise<GroupInvite> => {
-  const { data } = await api.get(`/api/groupInvite/${inviteId}`);
+export const getGroupInvite = async ({
+  inboxId,
+  inviteId,
+}: {
+  inboxId: string;
+  inviteId: string;
+}): Promise<GroupInvite> => {
+  const { data } = await api.get(`/api/groupInvite/${inviteId}`, {
+    headers: await getXmtpApiHeaders({ inboxId }),
+  });
   return data;
 };
 
-export const deleteGroupInvite = async (
-  account: string,
-  inviteId: string
-): Promise<void> => {
+export const deleteGroupInvite = async ({
+  inboxId,
+  inviteId,
+}: {
+  inboxId: string;
+  inviteId: string;
+}): Promise<void> => {
   await api.delete(`/api/groupInvite/${inviteId}`, {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
 };
 
@@ -730,10 +633,13 @@ export type GroupJoinRequest = {
 
 // Create a group join request based on an invite ID.
 // This will trigger a push notification for the invite creator
-export const createGroupJoinRequest = async (
-  { inboxId }: { inboxId: string },
-  inviteId: string
-): Promise<Pick<GroupJoinRequest, "id">> => {
+export const createGroupJoinRequest = async ({
+  inboxId,
+  inviteId,
+}: {
+  inboxId: string;
+  inviteId: string;
+}): Promise<Pick<GroupJoinRequest, "id">> => {
   const { data } = await api.post(
     "/api/groupJoinRequest",
     { inviteId },
@@ -753,16 +659,20 @@ export const getGroupJoinRequest = async (
 };
 
 // Update the status of a group join request. The account must match the creator of the INVITE or the request will error
-export const updateGroupJoinRequestStatus = async (
-  account: string,
-  id: string,
-  status: GroupJoinRequest["status"]
-): Promise<Pick<GroupJoinRequest, "status" | "id">> => {
+export const updateGroupJoinRequestStatus = async ({
+  inboxId,
+  groupJoinRequestId,
+  status,
+}: {
+  inboxId: string;
+  groupJoinRequestId: string;
+  status: GroupJoinRequest["status"];
+}): Promise<Pick<GroupJoinRequest, "status" | "id">> => {
   const { data } = await api.put(
-    `/api/groupJoinRequest/${id}`,
+    `/api/groupJoinRequest/${groupJoinRequestId}`,
     { status },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   return data;
@@ -776,21 +686,28 @@ export type PendingGroupJoinRequest = {
 };
 
 // Get all pending groupJoinRequests for all invites that the account has created
-export const getPendingGroupJoinRequests = async (
-  account: string
-): Promise<{ joinRequests: PendingGroupJoinRequest[] }> => {
+export const getPendingGroupJoinRequests = async ({
+  inboxId,
+}: {
+  inboxId: string;
+}): Promise<{ joinRequests: PendingGroupJoinRequest[] }> => {
   const { data } = await api.get("/api/groupJoinRequest/pending", {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data;
 };
 
-export const simulateTransaction = async (
-  { inboxId }: { inboxId: string },
-  from: string,
-  chainId: number,
-  transaction: TransactionData
-) => {
+export const simulateTransaction = async ({
+  inboxId,
+  from,
+  chainId,
+  transaction,
+}: {
+  inboxId: string;
+  from: string;
+  chainId: number;
+  transaction: TransactionData;
+}) => {
   const { data } = await api.post(
     "/api/transactions/simulate",
     {
@@ -803,18 +720,18 @@ export const simulateTransaction = async (
       data: transaction.data,
     },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   return data as SimulateAssetChangesResponse;
 };
 
 export const putGroupInviteRequest = async ({
-  account,
+  inboxId,
   status,
   joinRequestId,
 }: {
-  account: string;
+  inboxId: string;
   status: string;
   joinRequestId: string;
 }): Promise<void> => {
@@ -822,7 +739,7 @@ export const putGroupInviteRequest = async ({
     `/api/groupJoinRequest/${joinRequestId}`,
     { status },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   return data;

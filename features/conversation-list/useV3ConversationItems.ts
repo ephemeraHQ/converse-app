@@ -5,7 +5,7 @@ import { useSelect } from "@data/store/storeHelpers";
 import { useMemo } from "react";
 
 export const useV3ConversationItems = () => {
-  const currentAccount = useCurrentAccount();
+  const currentInboxId = useCurrentInboxId()();
 
   const { data: conversations, ...rest } = useConversationListQuery({
     account: currentAccount!,

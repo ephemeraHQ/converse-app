@@ -2,7 +2,7 @@ import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
-import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
+import { useToggleReadStatusForCurrentUser } from "@/features/conversation-list/hooks/useToggleReadStatusForCurrentUser";
 import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
 import { ReplyPreview } from "@/features/conversation/conversation-composer/conversation-composer-reply-preview";
@@ -81,7 +81,7 @@ export const Conversation = memo(function Conversation(props: {
 }) {
   const { topic, textPrefill = "" } = props;
 
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()()!;
 
   const navigation = useRouter();
 
@@ -182,7 +182,7 @@ const Messages = memo(function Messages(props: {
 }) {
   const { conversation } = props;
 
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()()!;
   const { data: currentAccountInboxId } = useCurrentAccountInboxId();
   const topic = useCurrentConversationTopic()!;
 
@@ -208,7 +208,7 @@ const Messages = memo(function Messages(props: {
     timestampNs: messages?.byId[messages?.ids[0]]?.sentNs ?? 0,
   });
 
-  const toggleReadStatus = useToggleReadStatus({
+  const toggleReadStatus = useToggleReadStatusForCurrentUser({
     topic,
     isUnread,
     currentAccount,

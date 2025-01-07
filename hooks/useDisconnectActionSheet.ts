@@ -4,27 +4,34 @@ import { useCallback } from "react";
 import { ColorSchemeName } from "react-native";
 
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
-import {
-  useAccountsStore,
-  useSettingsStore,
-} from "../data/store/accountsStore";
+import { useSettingsStore } from "../data/store/accountsStore";
 import { useLogoutFromConverse } from "../utils/logout";
+import logger from "@/utils/logger";
 
-export const useDisconnectActionSheet = (account?: string) => {
-  const currentAccount = useAccountsStore((s) => s.currentAccount);
-  const logout = useLogoutFromConverse(account || currentAccount);
+export const useDisconnectActionSheet = ({
+  inboxId,
+}: {
+  inboxId: string | undefined;
+}) => {
+  const logout = useLogoutFromConverse({ inboxId });
   const { ephemeralAccount } = useSettingsStore((s) => ({
     ephemeralAccount: s.ephemeralAccount,
   }));
 
   return useCallback(
     async (colorScheme: ColorSchemeName) => {
+      if (!inboxId) {
+        logger.debug("[useDisconnectActionSheet] No inboxId provided; noop");
+        return;
+      }
       const methods: Record<string, () => void> = {
-        [translate("disconnect_delete_local_data")]: () => logout(true),
+        [translate("disconnect_delete_local_data")]: () =>
+          logout({ dropLocalDatabase: true }),
         [translate("cancel")]: () => {},
       };
       if (!ephemeralAccount) {
-        methods[translate("disconnect")] = () => logout(false);
+        methods[translate("disconnect")] = () =>
+          logout({ dropLocalDatabase: false });
       }
 
       const options = Object.keys(methods);
@@ -48,6 +55,6 @@ export const useDisconnectActionSheet = (account?: string) => {
         }
       );
     },
-    [logout, ephemeralAccount]
+    [logout, ephemeralAccount, inboxId]
   );
 };

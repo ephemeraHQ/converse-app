@@ -11,6 +11,7 @@ import {
   useInboxIdsList,
   getChatStore,
   useAccountsStore,
+  getInboxIdsList,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { getTopicsData } from "../utils/api";
@@ -119,10 +120,10 @@ class XmtpEngine {
     logger.debug(
       "[XmtpEngine] App is now inactive, stopping xmtp streams and db connections"
     );
-    for (const account of useInboxIdsList()) {
+    for (const inboxId of getInboxIdsList()) {
       await Promise.all([
-        stopStreamingAllMessage(account),
-        stopStreamingConversations(account),
+        stopStreamingAllMessage({ inboxId }),
+        stopStreamingConversations({ inboxId }),
       ]);
     }
   }

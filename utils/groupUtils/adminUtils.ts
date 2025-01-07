@@ -1,8 +1,8 @@
-import { getCleanAddress } from "@utils/evm/getCleanAddress";
-import { Member } from "@xmtp/react-native-sdk";
+import { inboxId, Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
 import { EntityObjectWithAddress } from "../../queries/entify";
+import { PermissionLevel } from "@xmtp/react-native-sdk/build/lib/Member";
 
 export const getAccountIsAdmin = (
   members: EntityObjectWithAddress<Member, InboxId> | undefined,
@@ -21,33 +21,34 @@ export const getAccountIsSuperAdmin = (
   return members?.byId[account]?.permissionLevel === "super_admin";
 };
 
-export const getAddressIsAdmin = (
+const adminLevels: PermissionLevel[] = ["admin", "super_admin"] as const;
+const superAdminLevels: PermissionLevel[] = ["super_admin"] as const;
+
+const doesMemberHavePermissionLevel = (
+  inboxId: string | undefined,
   members: EntityObjectWithAddress<Member, InboxId> | undefined,
-  address: string
+  permissionLevels: PermissionLevel[]
 ) => {
-  const currentId =
-    members?.byAddress[address] ||
-    members?.byAddress[getCleanAddress(address)] ||
-    members?.byAddress[address.toLowerCase()];
-  if (!currentId) {
+  if (!inboxId) {
     return false;
   }
-  return (
-    members?.byId[currentId]?.permissionLevel === "admin" ||
-    members?.byId[currentId]?.permissionLevel === "super_admin"
-  );
+  const member = members?.byId[inboxId];
+  if (!member) {
+    return false;
+  }
+  return permissionLevels.includes(member.permissionLevel);
 };
 
-export const getAddressIsSuperAdmin = (
-  members: EntityObjectWithAddress<Member> | undefined,
-  address: string
+export const isUserAdminByInboxId = (
+  inboxId: string | undefined,
+  members: EntityObjectWithAddress<Member, InboxId> | undefined
 ) => {
-  const currentId =
-    members?.byAddress[address] ||
-    members?.byAddress[getCleanAddress(address)] ||
-    members?.byAddress[address.toLowerCase()];
-  if (!currentId) {
-    return false;
-  }
-  return members?.byId[currentId]?.permissionLevel === "super_admin";
+  return doesMemberHavePermissionLevel(inboxId, members, adminLevels);
+};
+
+export const isUserSuperAdminByInboxId = (
+  inboxId: string | undefined,
+  members: EntityObjectWithAddress<Member, InboxId> | undefined
+) => {
+  return doesMemberHavePermissionLevel(inboxId, members, superAdminLevels);
 };

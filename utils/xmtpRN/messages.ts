@@ -15,16 +15,19 @@ import {
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
 } from "./client.types";
-import { getOrBuildXmtpClient } from "./sync";
+import { getInbox } from "./conversations";
 
-export const streamAllMessages = async (account: string) => {
-  await stopStreamingAllMessage(account);
+export const streamAllMessages = async (inboxId: string | undefined) => {
+  await stopStreamingAllMessage({ inboxId });
 
-  const client = (await getOrBuildXmtpClient(
-    account
-  )) as ConverseXmtpClientType;
+  const client = (await getInbox({
+    inboxId,
+    caller: "streamAllMessages",
+  })) as ConverseXmtpClientType;
 
-  logger.info(`[XmtpRN] Streaming messages for ${client.address}`);
+  logger.info(
+    `[XmtpRN] Streaming messages for address=${client.address} inboxId=${inboxId}`
+  );
 
   await client.conversations.streamAllMessages(async (message) => {
     logger.info(`[XmtpRN] Received a message for ${client.address}`, {
@@ -35,11 +38,11 @@ export const streamAllMessages = async (account: string) => {
 
     if (message.contentTypeId.includes("group_updated")) {
       try {
-        await handleGroupUpdatedMessage(
-          client.address,
-          message.topic as ConversationTopic,
-          message
-        );
+        await handleGroupUpdatedMessage({
+          inboxId: client.inboxId,
+          topic: message.topic as ConversationTopic,
+          message,
+        });
       } catch (error) {
         captureError(error);
       }
@@ -57,7 +60,7 @@ export const streamAllMessages = async (account: string) => {
     if (isMessageFromOtherUser || isNonTextMessage) {
       try {
         addConversationMessage({
-          account: client.address,
+          inboxId: client.inboxId,
           topic: message.topic as ConversationTopic,
           message,
         });
@@ -68,7 +71,7 @@ export const streamAllMessages = async (account: string) => {
 
     try {
       updateConversationQueryData({
-        account: client.address,
+        inboxId: client.inboxId,
         topic: message.topic as ConversationTopic,
         conversationUpdate: {
           lastMessage: message,
@@ -80,7 +83,7 @@ export const streamAllMessages = async (account: string) => {
 
     try {
       updateConversationInConversationListQuery({
-        account: client.address,
+        inboxId: client.inboxId,
         topic: message.topic as ConversationTopic,
         conversationUpdate: {
           lastMessage: message,
@@ -92,24 +95,33 @@ export const streamAllMessages = async (account: string) => {
   });
 };
 
-export const stopStreamingAllMessage = async (account: string) => {
-  const client = (await getOrBuildXmtpClient(
-    account
-  )) as ConverseXmtpClientType;
+export const stopStreamingAllMessage = async ({
+  inboxId,
+}: {
+  inboxId: string | undefined;
+}) => {
+  const client = (await getInbox({
+    inboxId,
+    caller: "stopStreamingAllMessage",
+  })) as ConverseXmtpClientType;
   logger.debug(`[XmtpRN] Stopped streaming messages for ${client.address}`);
   await client.conversations.cancelStreamAllMessages();
 };
 
-export const handleGroupUpdatedMessage = async (
-  account: string,
-  topic: ConversationTopic,
-  message: DecodedMessageWithCodecsType
-) => {
+export const handleGroupUpdatedMessage = async ({
+  inboxId,
+  topic,
+  message,
+}: {
+  inboxId: string | undefined;
+  topic: ConversationTopic;
+  message: DecodedMessageWithCodecsType;
+}) => {
   if (!message.contentTypeId.includes("group_updated")) return;
   const content = message.content() as GroupUpdatedContent;
   if (content.membersAdded.length > 0 || content.membersRemoved.length > 0) {
     // This will refresh members
-    invalidateGroupMembersQuery(account, topic);
+    invalidateGroupMembersQuery({ inboxId, topic });
   }
   if (content.metadataFieldsChanged.length > 0) {
     let newGroupName = "";

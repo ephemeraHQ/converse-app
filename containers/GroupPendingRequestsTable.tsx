@@ -24,7 +24,7 @@ export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
   topic,
 }) => {
   const colorScheme = useColorScheme();
-  const currentAccount = useCurrentAccount() as string;
+  const currentInboxId = useCurrentInboxId()() as string;
   const styles = useStyles();
   const requests = useGroupPendingRequests(topic);
 

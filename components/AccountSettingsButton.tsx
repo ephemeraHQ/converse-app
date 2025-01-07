@@ -19,7 +19,7 @@ import {
 
 import {
   useAccountsStore,
-  useErroredAccountsMap
+  useErroredAccountsMap,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
@@ -54,10 +54,10 @@ export default function AccountSettingsButton({ inboxId }: Props) {
   const { setCurrentInboxId } = useAccountsStore(
     useSelect(["setCurrentInboxId"])
   );
-    const erroredAccountsMap = useErroredAccountsMap();
+  const erroredAccountsMap = useErroredAccountsMap();
 
   const colorScheme = useColorScheme();
-  const showDisconnectActionSheet = useDisconnectActionSheet(inboxId);
+  const showDisconnectActionSheet = useDisconnectActionSheet({ inboxId });
 
   const onPress = useCallback(() => {
     Keyboard.dismiss();
@@ -65,12 +65,12 @@ export default function AccountSettingsButton({ inboxId }: Props) {
     const methods = {
       [translate("your_profile_page")]: async () => {
         if (inboxId) {
-          invalidateProfileSocialsQuery(inboxId, inboxId);
-          setCurrentInboxId({inboxId, createIfNew: false})
+          invalidateProfileSocialsQuery({ profileLookupInboxId: inboxId });
+          setCurrentInboxId({ inboxId, createIfNew: false });
           // setCurrentAccount(inboxId, false);
           router.navigate("Chats");
           navigate("Profile", {
-            address: inboxId,
+            inboxId,
           });
         }
       },

@@ -23,7 +23,7 @@ import { Swipeable } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { useConversationIsUnread } from "../features/conversation-list/hooks/useMessageIsUnread";
 import { useMessageText } from "../features/conversation-list/hooks/useMessageText";
-import { useToggleReadStatus } from "../features/conversation-list/hooks/useToggleReadStatus";
+import { useToggleReadStatusForCurrentUser } from "../features/conversation-list/hooks/useToggleReadStatusForCurrentUser";
 import Avatar from "./Avatar";
 import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
 import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
@@ -45,7 +45,7 @@ const useDisplayInfo = ({ isUnread }: UseDisplayInfoProps) => {
 };
 
 export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()()!;
 
   const { name: routeName } = useRoute();
 
@@ -83,7 +83,7 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
   const preferredName = usePreferredInboxName(peerInboxId);
   const avatarUri = usePreferredInboxAvatar(peerInboxId);
 
-  const toggleReadStatus = useToggleReadStatus({
+  const toggleReadStatus = useToggleReadStatusForCurrentUser({
     topic,
     isUnread,
     currentAccount,

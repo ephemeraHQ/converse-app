@@ -1,4 +1,4 @@
-import { getInboxProfileSocialsQueryData } from "@/queries/useInboxProfileSocialsQuery";
+import { getInboxProfileSocialsQueryData } from "@/queries/useSocialProfileQueryByInboxId";
 import { getPreferredInboxName } from "@/utils/profile";
 import type {
   DmWithCodecsType,

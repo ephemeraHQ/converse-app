@@ -1,5 +1,5 @@
 import { UseQueryOptions, useQuery } from "@tanstack/react-query";
-import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
+import { getConversationByTopicByInboxId } from "@utils/xmtpRN/conversations";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
@@ -8,13 +8,13 @@ import { mutateObjectProperties } from "@/utils/mutate-object-properties";
 export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
 
 type IArgs = {
-  inboxId: string;
+  inboxId: string | undefined;
   topic: ConversationTopic;
 };
 
 function getConversation(args: IArgs) {
   const { inboxId, topic } = args;
-  return getConversationByTopicByAccount({
+  return getConversationByTopicByInboxId({
     inboxId,
     topic,
     includeSync: true,
@@ -26,19 +26,18 @@ export const useConversationQuery = (
     queryOptions?: Partial<UseQueryOptions<ConversationQueryData>>;
   }
 ) => {
-  const { account, topic, queryOptions } = args;
+  const { inboxId, topic, queryOptions } = args;
   return useQuery({
-    ...getConversationQueryOptions({ account, topic }),
+    ...getConversationQueryOptions({ inboxId, topic }),
     ...queryOptions,
   });
 };
 
 export function getConversationQueryOptions(args: IArgs) {
-  const { account, topic } = args;
   return {
-    queryKey: conversationQueryKey(account, topic),
-    queryFn: () => getConversation({ account, topic: topic! }),
-    enabled: !!topic,
+    queryKey: conversationQueryKey(args),
+    queryFn: () => getConversation(args),
+    enabled: !!args.topic,
   };
 }
 
@@ -47,9 +46,9 @@ export const setConversationQueryData = (
     conversation: ConversationQueryData;
   }
 ) => {
-  const { account, topic, conversation } = args;
+  const { inboxId, topic, conversation } = args;
   queryClient.setQueryData<ConversationQueryData>(
-    conversationQueryKey(account, topic),
+    conversationQueryKey({ inboxId, topic }),
     conversation
   );
 };
@@ -57,10 +56,10 @@ export const setConversationQueryData = (
 export function updateConversationQueryData(
   args: IArgs & { conversationUpdate: Partial<ConversationQueryData> }
 ) {
-  const { account, topic, conversationUpdate } = args;
+  const { inboxId, topic, conversationUpdate } = args;
   queryClient.setQueryData<ConversationQueryData>(
-    conversationQueryKey(account, topic),
-    (previousConversation) => {
+    conversationQueryKey({ inboxId, topic }),
+    (previousConversation: ConversationQueryData | undefined) => {
       if (!previousConversation) {
         return undefined;
       }
@@ -70,15 +69,15 @@ export function updateConversationQueryData(
 }
 
 export function refetchConversationQuery(args: IArgs) {
-  const { account, topic } = args;
+  const { inboxId, topic } = args;
   return queryClient.refetchQueries({
-    queryKey: conversationQueryKey(account, topic),
+    queryKey: conversationQueryKey({ inboxId, topic }),
   });
 }
 
 export const getConversationQueryData = (args: IArgs) => {
-  const { account, topic } = args;
+  const { inboxId, topic } = args;
   return queryClient.getQueryData<ConversationQueryData>(
-    conversationQueryKey(account, topic)
+    conversationQueryKey({ inboxId, topic })
   );
 };

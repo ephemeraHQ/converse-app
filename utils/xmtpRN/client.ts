@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentInboxId } from "@data/store/accountsStore";
 import { translate } from "@i18n";
 import { awaitableAlert } from "@utils/alert";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
@@ -20,7 +20,6 @@ import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 import config from "../../config";
 import { getDbDirectory } from "../../data/db";
 import { CoinbaseMessagingPaymentCodec } from "./content-types/coinbasePayment";
-import { getOrBuildXmtpClient } from "./sync";
 import { ConverseXmtpClientType } from "./client.types";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
@@ -70,7 +69,7 @@ export const xmtpClientByInboxId: {
 
 export const dropXmtpClientsDbConnections = async () => {
   await Promise.all(
-    Object.values(xmtpClientByAccount).map((c) =>
+    Object.values(xmtpClientByInboxId).map((c) =>
       c.dropLocalDatabaseConnection()
     )
   );
@@ -78,7 +77,7 @@ export const dropXmtpClientsDbConnections = async () => {
 
 export const reconnectXmtpClientsDbConnections = async () => {
   await Promise.all(
-    Object.values(xmtpClientByAccount).map((c) => c.reconnectLocalDatabase())
+    Object.values(xmtpClientByInboxId).map((c) => c.reconnectLocalDatabase())
   );
 };
 
@@ -98,16 +97,22 @@ export const isClientInstallationValid = async (client: Client) => {
 };
 
 export const useCheckCurrentInstallation = () => {
-  const account = useCurrentAccount() as string;
-  const logout = useLogoutFromConverse(account);
+  // const account = useCurrentAccount() as string;
+  const inboxId = useCurrentInboxId() as string;
+  const logout = useLogoutFromConverse({ inboxId });
   // To make sure we're checking only once
   const accountCheck = useRef<string | undefined>(undefined);
   useEffect(() => {
     const check = async () => {
-      if (!account) return;
-      if (accountCheck.current === account) return;
-      accountCheck.current = account;
-      const client = (await getOrBuildXmtpClient(account)) as Client;
+      if (!inboxId) return;
+      if (accountCheck.current === inboxId) return;
+      accountCheck.current = inboxId;
+      const client = xmtpClientByInboxId[inboxId];
+      if (!client) {
+        logout({ dropLocalDatabase: true });
+        accountCheck.current = undefined;
+        return;
+      }
       const installationValid = await isClientInstallationValid(client);
 
       if (!installationValid) {
@@ -115,7 +120,7 @@ export const useCheckCurrentInstallation = () => {
           translate("current_installation_revoked"),
           translate("current_installation_revoked_description")
         );
-        logout(true);
+        logout({ dropLocalDatabase: true });
         accountCheck.current = undefined;
       }
     };
@@ -125,15 +130,15 @@ export const useCheckCurrentInstallation = () => {
           "No v3 keys found, you must pass a SigningKey in order to enable alpha MLS features"
         )
       ) {
-        logout(true, false);
+        logout({ dropLocalDatabase: true });
         accountCheck.current = undefined;
       }
       accountCheck.current = undefined;
       logger.warn(e, {
-        error: `Could not check inbox state for ${account}`,
+        error: `Could not check inbox state for ${inboxId}`,
       });
     });
-  }, [account, logout]);
+  }, [inboxId, logout]);
 };
 
 export const dropXmtpClient = (installationId: InstallationId) =>
@@ -143,31 +148,23 @@ export const requestMessageHistorySync = async (
   client: ConverseXmtpClientType
 ) => client.requestMessageHistorySync();
 
-export const requestMessageHistorySyncByAccount = async (account: string) => {
-  const client = (await getOrBuildXmtpClient(
-    account
-  )) as ConverseXmtpClientType;
-  if (!client) {
-    throw new Error("Client not found");
-  }
-  await requestMessageHistorySync(client);
-};
-
 export type InstallationSignature = {
   installationPublicKey: string;
   installationKeySignature: string;
 };
 
-export async function getInstallationKeySignature(
-  account: string,
-  message: string
-): Promise<InstallationSignature> {
-  const client = (await getOrBuildXmtpClient(
-    account
-  )) as ConverseXmtpClientType;
-  if (!client) throw new Error("Client not found");
+export async function getInstallationKeySignature({
+  inboxId,
+  messageToSign,
+}: {
+  inboxId: string;
+  messageToSign: string;
+}): Promise<InstallationSignature> {
+  const client = xmtpClientByInboxId[inboxId];
+  if (!client)
+    throw new Error("[client#getInstallationKeySignature] Client not found");
 
-  const raw = await client.signWithInstallationKey(message);
+  const raw = await client.signWithInstallationKey(messageToSign);
 
   return {
     installationPublicKey: client.installationId,

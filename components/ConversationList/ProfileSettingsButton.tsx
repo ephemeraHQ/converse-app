@@ -2,21 +2,21 @@ import { AvatarSizes } from "@styles/sizes";
 import React, { useCallback } from "react";
 import { Platform, TouchableOpacity } from "react-native";
 
-import { currentAccount } from "@data/store/accountsStore";
 import { navigate } from "@utils/navigation";
 import Avatar from "../Avatar";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
+import { useCurrentInboxId } from "@data/store/accountsStore";
 
 export default function ProfileSettingsButton() {
-  const inboxId = getCurrentInboxId();
+  const inboxId = useCurrentInboxId();
 
-  const displayName = usePreferredName(account);
-  const avatarUri = usePreferredAvatarUri(account);
+  const displayName = usePreferredName({ inboxId: inboxId! });
+  const avatarUri = usePreferredAvatarUri({ inboxId: inboxId! });
 
   const openProfile = useCallback(() => {
-    navigate("Profile", { address: getCurrentInboxId() });
-  }, []);
+    navigate("Profile", { inboxId: inboxId! });
+  }, [inboxId]);
 
   return (
     <TouchableOpacity activeOpacity={0.2} onPress={openProfile}>

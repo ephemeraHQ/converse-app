@@ -80,20 +80,24 @@ export function OnboardingGetStartedScreen() {
             onAccountExists={(arg) => {
               // TODO: Add a better message
               Alert.alert("Account already connected");
-              // Look up the inbox ID from the already existing account
-              const inboxId =
-                useAccountsStore.getState().inboxIdToAccountMap[arg.address];
-              if (inboxId) {
+
+              if (arg.inboxId) {
                 useAccountsStore
                   .getState()
-                  .setCurrentInboxId({ inboxId, createIfNew: false });
+                  .setCurrentInboxId({
+                    inboxId: arg.inboxId,
+                    createIfNew: false,
+                  });
               }
               useAuthStore.setState({
                 status: "signedIn",
               });
             }}
-            onAccountDoesNotExist={({ address }) => {
-              router.navigate("OnboardingConnectWallet", { address });
+            onAccountDoesNotExist={({ inboxId, address }) => {
+              router.navigate("OnboardingConnectWallet", {
+                address,
+                inboxId,
+              });
             }}
           />
         </AnimatedVStack>

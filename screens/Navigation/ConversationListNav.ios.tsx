@@ -21,7 +21,11 @@ import {
 } from "../../components/Connecting";
 import NewConversationButton from "../../components/ConversationList/NewConversationButton";
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
-import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
+import {
+  useAccountsStore,
+  useChatStore,
+  useCurrentInboxId,
+} from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { navigate } from "../../utils/navigation";
 import { shortDisplayName } from "../../utils/str";
@@ -100,9 +104,11 @@ export default function ConversationListNav() {
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const shouldShowConnecting = useShouldShowConnecting();
   const shouldShowError = useShouldShowErrored();
-  const currentAccount = useAccountsStore((s) => s.currentAccount);
+  const currentInboxId = useCurrentInboxId();
 
-  const { isLoading } = useProfileSocialsQuery(currentAccount, currentAccount);
+  const { isLoading } = useProfileSocialsQuery({
+    peerInboxId: currentInboxId,
+  });
 
   const preferredName = usePreferredName(currentAccount);
 

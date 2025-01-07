@@ -3,29 +3,29 @@
  */
 import { queryClient } from "@/queries/queryClient";
 import { useQuery } from "@tanstack/react-query";
-import { getConversationByPeerByAccount } from "@utils/xmtpRN/conversations";
+import { getConversationByPeerByInboxId } from "@utils/xmtpRN/conversations";
 import { dmQueryKey } from "./QueryKeys";
 import { setConversationQueryData } from "./useConversationQuery";
 
 type IDmQueryArgs = {
-  account: string;
+  inboxId?: string;
   peer: string;
 };
 
-type IDmQueryData = Awaited<ReturnType<typeof getConversationByPeerByAccount>>;
+type IDmQueryData = Awaited<ReturnType<typeof getConversationByPeerByInboxId>>;
 
 async function getDm(args: IDmQueryArgs) {
-  const { account, peer } = args;
+  const { inboxId, peer } = args;
 
-  const conversation = await getConversationByPeerByAccount({
-    account,
+  const conversation = await getConversationByPeerByInboxId({
+    inboxId,
     peer,
     includeSync: true,
   });
 
   // Update the main conversation query because it's a 1-1
   setConversationQueryData({
-    account,
+    inboxId,
     topic: conversation.topic,
     conversation,
   });
@@ -34,27 +34,27 @@ async function getDm(args: IDmQueryArgs) {
 }
 
 export function useDmQuery(args: IDmQueryArgs) {
-  const { account, peer } = args;
+  const { inboxId, peer } = args;
 
   return useQuery({
-    queryKey: dmQueryKey(account, peer),
+    queryKey: dmQueryKey({ inboxId, peer }),
     queryFn: () => getDm(args),
-    enabled: !!peer,
+    enabled: !!peer && !!inboxId,
   });
 }
 
 export function setDmQueryData(args: IDmQueryArgs & { dm: IDmQueryData }) {
-  const { account, peer, dm } = args;
-  queryClient.setQueryData<IDmQueryData>(dmQueryKey(account, peer), dm);
+  const { inboxId, peer, dm } = args;
+  queryClient.setQueryData<IDmQueryData>(dmQueryKey({ inboxId, peer }), dm);
   // Also set there because it's a 1-1
   setConversationQueryData({
-    account,
+    inboxId,
     topic: dm.topic,
     conversation: dm,
   });
 }
 
 export function getDmQueryData(args: IDmQueryArgs) {
-  const { account, peer } = args;
-  return queryClient.getQueryData<IDmQueryData>(dmQueryKey(account, peer));
+  const { inboxId, peer } = args;
+  return queryClient.getQueryData<IDmQueryData>(dmQueryKey({ inboxId, peer }));
 }

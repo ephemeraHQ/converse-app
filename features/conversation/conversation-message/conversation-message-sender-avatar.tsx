@@ -4,7 +4,7 @@ import { getPreferredInboxAvatar } from "@/utils/profile";
 import Avatar from "@components/Avatar";
 import { usePreferredInboxAddress } from "@hooks/usePreferredInboxAddress";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
-import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
+import { useSocialProfileQueryByInboxId } from "@queries/useSocialProfileQueryByInboxId";
 import { useAppTheme } from "@theme/useAppTheme";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
@@ -18,8 +18,8 @@ export function ConversationSenderAvatar({
   inboxId,
 }: IConversationSenderAvatarProps) {
   const { theme } = useAppTheme();
-  const currentAccount = useCurrentAccount();
-  const { data: senderSocials } = useInboxProfileSocialsQuery(
+  const currentInboxId = useCurrentInboxId()();
+  const { data: senderSocials } = useSocialProfileQueryByInboxId(
     currentAccount!,
     inboxId
   );

@@ -10,7 +10,6 @@ import { Platform, useColorScheme } from "react-native";
 import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
-import MainIdentityStateHandler from "../components/StateHandlers/MainIdentityStateHandler";
 import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler";
 import WalletsStateHandler from "../components/StateHandlers/WalletsStateHandler";
 import config from "../config";
@@ -18,7 +17,6 @@ import { useAppStore } from "../data/store/appStore";
 import { useAuthStatus } from "../data/store/authStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useThemeProvider } from "../theme/useAppTheme";
-import { useAddressBookStateHandler } from "../utils/addressBook";
 import { useAutoConnectExternalWallet } from "../utils/evm/external";
 import { usePrivyAccessToken } from "../utils/evm/privy";
 import { setConverseNavigatorRef } from "../utils/navigation";
@@ -66,7 +64,6 @@ const linking: LinkingOptions<NavigationParamList> = {
 export default function Main() {
   // Makes sure we have a Privy token ready to make API calls
   usePrivyAccessToken();
-  // useAddressBookStateHandler();
   useCheckCurrentInstallation();
   useAutoConnectExternalWallet();
 
@@ -144,7 +141,6 @@ const Initializer = () => {
         <StatusBar backgroundColor={backgroundColor(colorScheme)} />
       )}
       <NetworkStateHandler />
-      <MainIdentityStateHandler />
       <ActionSheetStateHandler />
       <WalletsStateHandler />
     </>

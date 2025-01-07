@@ -1,11 +1,20 @@
-import { subscribedOnceByAccount } from "./subscribedOnceByAccount";
-import { subscribingByAccount } from "./subscribingByAccount";
+import logger from "@/utils/logger";
+import { subscribedOnceByInboxId } from "./subscribedOnceByAccount";
+import { subscribingByInboxId } from "./subscribingByAccount";
 
-export const deleteSubscribedTopics = (account: string) => {
-  if (account in subscribedOnceByAccount) {
-    delete subscribedOnceByAccount[account];
+export const deleteSubscribedTopics = ({
+  inboxId,
+}: {
+  inboxId: string | undefined;
+}) => {
+  if (!inboxId) {
+    logger.error("No inboxId provided to deleteSubscribedTopics");
+    return;
   }
-  if (account in subscribingByAccount) {
-    delete subscribingByAccount[account];
+  if (inboxId in subscribedOnceByInboxId) {
+    delete subscribedOnceByInboxId[inboxId];
+  }
+  if (inboxId in subscribingByInboxId) {
+    delete subscribingByInboxId[inboxId];
   }
 };

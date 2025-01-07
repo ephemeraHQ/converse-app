@@ -30,7 +30,7 @@ import TableView from "../../components/TableView/TableView";
 import { usePhotoSelect } from "../../hooks/usePhotoSelect";
 import { navigate } from "../../utils/navigation";
 import { getPreferredAvatar, getPreferredName } from "../../utils/profile";
-import { createGroupByAccount } from "../../utils/xmtpRN/conversations";
+import { createGroupForCurrentUser } from "../../utils/xmtpRN/conversations";
 import { NewConversationModalParams } from "./NewConversationModal";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
@@ -116,7 +116,7 @@ export default function NewGroupSummary({
   const onCreateGroupPress = useCallback(async () => {
     setCreatingGroup(true);
     try {
-      const group = await createGroupByAccount({
+      const group = await createGroupForCurrentUser({
         peers: route.params.members.map((m) => m.address),
         permissionPolicySet,
         groupName,

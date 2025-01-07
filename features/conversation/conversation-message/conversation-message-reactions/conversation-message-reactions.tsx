@@ -5,7 +5,7 @@ import {
   isCurrentUserInboxId,
   useCurrentAccountInboxId,
 } from "@/hooks/use-current-account-inbox-id";
-import { useInboxProfileSocialsQueries } from "@/queries/useInboxProfileSocialsQuery";
+import { useInboxProfileSocialsQueries } from "@/queries/useSocialProfileQueryByInboxId";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { AnimatedHStack, HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";

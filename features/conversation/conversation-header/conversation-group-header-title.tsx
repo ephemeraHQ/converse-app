@@ -25,7 +25,7 @@ type GroupConversationTitleProps = {
 
 export const GroupConversationTitle = memo(
   ({ topic }: GroupConversationTitleProps) => {
-    const currentAccount = useCurrentAccount()!;
+    const currentInboxId = useCurrentInboxId()()!;
 
     const { data: groupPhoto, isLoading: groupPhotoLoading } =
       useGroupPhotoQuery({
@@ -108,7 +108,7 @@ type IMemberData = {
 
 const useGroupMembersAvatarData = (args: { topic: ConversationTopic }) => {
   const { topic } = args;
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()()!;
   const { data: members, ...query } = useGroupMembersConversationScreenQuery({
     account: currentAccount,
     topic,

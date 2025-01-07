@@ -8,8 +8,8 @@ import { usePhotoSelect } from "@hooks/usePhotoSelect";
 import { translate } from "@i18n";
 import { uploadFile } from "@utils/attachment/uploadFile";
 import {
-  getAddressIsAdmin,
-  getAddressIsSuperAdmin,
+  isUserAdminByInboxId,
+  isUserSuperAdminByInboxId,
 } from "@utils/groupUtils/adminUtils";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -22,15 +22,15 @@ type GroupScreenImageProps = {
 };
 
 export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
-  const currentAccount = useCurrentAccount() as string;
+  const currentInboxId = useCurrentInboxId()() as string;
   const { groupPhoto, setGroupPhoto } = useGroupPhoto(topic);
   const { permissions } = useGroupPermissions(topic);
   const { members } = useGroupMembers(topic);
 
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
-      currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
-      currentAccountIsSuperAdmin: getAddressIsSuperAdmin(
+      currentAccountIsAdmin: isUserAdminByInboxId(members, currentAccount),
+      currentAccountIsSuperAdmin: isUserSuperAdminByInboxId(
         members,
         currentAccount
       ),

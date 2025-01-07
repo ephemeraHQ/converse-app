@@ -1,12 +1,12 @@
 import { dmMatchesSearchQuery, groupMatchesSearchQuery } from "../search";
-import { getInboxProfileSocialsQueryData } from "@/queries/useInboxProfileSocialsQuery";
+import { getInboxProfileSocialsQueryData } from "@/queries/useSocialProfileQueryByInboxId";
 import type {
   DmWithCodecsType,
   GroupWithCodecsType,
 } from "@/utils/xmtpRN/client.types";
 
 // Mock getInboxProfileSocialsQueryData
-jest.mock("@/queries/useInboxProfileSocialsQuery", () => ({
+jest.mock("@/queries/useSocialProfileQueryByInboxId", () => ({
   getInboxProfileSocialsQueryData: jest.fn(),
 }));
 

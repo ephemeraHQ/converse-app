@@ -1,1 +1,1 @@
-export const subscribedOnceByAccount: { [account: string]: boolean } = {};
+export const subscribedOnceByInboxId: { [inboxId: string]: boolean } = {};

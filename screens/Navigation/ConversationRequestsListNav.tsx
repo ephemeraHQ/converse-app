@@ -20,8 +20,7 @@ import AndroidBackAction from "../../components/AndroidBackAction";
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
-import { useCurrentAccount } from "../../data/store/accountsStore";
-import { consentToAddressesOnProtocolByAccount } from "../../utils/xmtpRN/contacts";
+import { consentToInboxIdsOnProtocolForCurrentUser } from "../../utils/xmtpRN/contacts";
 import { useRequestItems } from "../../features/conversation-requests-list/useRequestItems";
 import { FlatListItemType } from "../../features/conversation-list/ConversationList.types";
 
@@ -31,7 +30,6 @@ import { FlatListItemType } from "../../features/conversation-list/ConversationL
 
 export default function ConversationRequestsListNav() {
   const colorScheme = useColorScheme();
-  const account = useCurrentAccount() as string;
   const navRef = useRef<any>();
   const [clearingAll, setClearingAll] = useState(false);
 
@@ -58,9 +56,8 @@ export default function ConversationRequestsListNav() {
             )
           )
         ).filter((peer) => !!peer) as string[];
-        await consentToAddressesOnProtocolByAccount({
-          account,
-          addresses: peers,
+        await consentToInboxIdsOnProtocolForCurrentUser({
+          inboxIds: peers,
           consent: "deny",
         });
         setClearingAll(false);

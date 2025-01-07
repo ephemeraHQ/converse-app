@@ -35,7 +35,7 @@ const fetchGroupMembers = async (
 };
 
 type IGroupMembersQueryConfig = {
-  account: string;
+  inboxId: string | undefined;
   group: GroupWithCodecsType | undefined | null;
   queryOptions?: Partial<UseQueryOptions<GroupMembersSelectData>>;
 };
@@ -43,10 +43,11 @@ type IGroupMembersQueryConfig = {
 const groupMembersQueryConfig = (
   args: IGroupMembersQueryConfig
 ): UseQueryOptions<GroupMembersSelectData> => {
-  const { account, group, queryOptions } = args;
-  const isEnabled = !!group && !!group.topic && (queryOptions?.enabled ?? true);
+  const { inboxId, group, queryOptions } = args;
+  const isEnabled =
+    !!inboxId && !!group && !!group.topic && (queryOptions?.enabled ?? true);
   return {
-    queryKey: groupMembersQueryKey(account, group?.topic!),
+    queryKey: groupMembersQueryKey({ inboxId, topic: group?.topic! }),
     queryFn: () => fetchGroupMembers(group!),
     enabled: isEnabled,
     ...queryOptions,
@@ -54,74 +55,89 @@ const groupMembersQueryConfig = (
 };
 
 export const useGroupMembersQuery = (args: {
-  account: string;
+  inboxId: string | undefined;
   topic: ConversationTopic;
   queryOptions?: Partial<UseQueryOptions<GroupMembersSelectData>>;
 }) => {
-  const { account, topic, queryOptions } = args;
-  const { data: group } = useGroupQuery({ account, topic });
+  const { inboxId, topic, queryOptions } = args;
+  const { data: group } = useGroupQuery({ inboxId, topic });
   return useQuery<GroupMembersSelectData>(
-    groupMembersQueryConfig({ account, group, queryOptions })
+    groupMembersQueryConfig({ inboxId, group, queryOptions })
   );
 };
 
 export const useGroupMembersConversationScreenQuery = (args: {
-  account: string;
+  inboxId: string | undefined;
   topic: ConversationTopic;
 }) => {
-  const { account, topic } = args;
-  const { data: group } = useGroupQuery({ account, topic });
+  const { inboxId, topic } = args;
+  const { data: group } = useGroupQuery({ inboxId, topic });
 
   return useQuery<GroupMembersSelectData>(
-    groupMembersQueryConfig({ account, group })
+    groupMembersQueryConfig({ inboxId, group })
   );
 };
 
 export const useConversationListMembersQuery = (args: {
-  account: string;
+  inboxId: string;
   group: GroupWithCodecsType | undefined | null;
 }) => {
-  const { account, group } = args;
+  const { inboxId, group } = args;
   const queryOptions = { enabled: !!group && !group.imageUrlSquare };
 
   return useQuery<GroupMembersSelectData>(
-    groupMembersQueryConfig({ account, group, queryOptions })
+    groupMembersQueryConfig({ inboxId, group, queryOptions })
   );
 };
 
-export const getGroupMembersQueryData = (
-  account: string,
-  topic: ConversationTopic
-): GroupMembersSelectData | undefined =>
-  queryClient.getQueryData(groupMembersQueryKey(account, topic));
+export const getGroupMembersQueryData = (args: {
+  inboxId: string | undefined;
+  topic: ConversationTopic;
+}): GroupMembersSelectData | undefined => {
+  if (!args.inboxId) {
+    return undefined;
+  }
+  return queryClient.getQueryData(groupMembersQueryKey(args));
+};
 
 export const setGroupMembersQueryData = (
-  account: string,
-  topic: ConversationTopic,
+  args: {
+    inboxId: string | undefined;
+    topic: ConversationTopic;
+  },
   members: GroupMembersSelectData,
   options?: SetDataOptions
 ) => {
+  if (!args.inboxId) {
+    return;
+  }
   queryClient.setQueryData<GroupMembersSelectData>(
-    groupMembersQueryKey(account, topic),
+    groupMembersQueryKey(args),
     members,
     options
   );
 };
 
-export const cancelGroupMembersQuery = async (
-  account: string,
-  topic: ConversationTopic
-) => {
+export const cancelGroupMembersQuery = async (args: {
+  inboxId: string | undefined;
+  topic: ConversationTopic;
+}) => {
+  if (!args.inboxId) {
+    return;
+  }
   return queryClient.cancelQueries({
-    queryKey: groupMembersQueryKey(account, topic),
+    queryKey: groupMembersQueryKey(args),
   });
 };
 
-export const invalidateGroupMembersQuery = (
-  account: string,
-  topic: ConversationTopic
-) => {
+export const invalidateGroupMembersQuery = (args: {
+  inboxId: string | undefined;
+  topic: ConversationTopic;
+}) => {
+  if (!args.inboxId) {
+    return;
+  }
   return queryClient.invalidateQueries({
-    queryKey: groupMembersQueryKey(account, topic),
+    queryKey: groupMembersQueryKey(args),
   });
 };

@@ -1,5 +1,5 @@
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import { useCurrentAccount } from "@/data/store/accountsStore";
+import { useCurrentAccount, useCurrentInboxId } from "@/data/store/accountsStore";
 import { Center } from "@/design-system/Center";
 import { Loader } from "@/design-system/loader";
 import { Conversation } from "@/features/conversation/conversation";
@@ -51,10 +51,10 @@ const PeerAddressFlow = memo(function PeerAddressFlow(
   args: IPeerAddressFlowProps
 ) {
   const { peerAddress, textPrefill } = args;
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId();
 
   const { data: dmConversation, isLoading } = useDmQuery({
-    account: currentAccount,
+    inboxId: currentInboxId,
     peer: peerAddress,
   });
 

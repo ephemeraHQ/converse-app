@@ -10,7 +10,7 @@ import {
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import {
   consentToGroupsOnProtocolByAccount,
-  consentToInboxIdsOnProtocolByAccount,
+  consentToInboxIdsOnProtocolByInboxId,
 } from "@utils/xmtpRN/contacts";
 import {
   ConsentState,
@@ -75,7 +75,7 @@ export const getAllowGroupMutationOptions = (
         }),
         ...(inboxIdsToAllow.length > 0
           ? [
-              consentToInboxIdsOnProtocolByAccount({
+              consentToInboxIdsOnProtocolByInboxId({
                 account,
                 inboxIds: inboxIdsToAllow,
                 consent: "allow",

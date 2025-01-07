@@ -1,7 +1,7 @@
 import { View, ViewStyle } from "react-native";
 import { useConversationListQuery } from "@/queries/useConversationListQuery";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 import { PinnedV3Conversation } from "./PinnedV3Conversation";
 
 type Props = {
@@ -9,12 +9,12 @@ type Props = {
 };
 
 export const PinnedConversations = ({ topics }: Props) => {
-  const currentAccount = useCurrentAccount();
+  const currentInboxId = useCurrentInboxId();
 
   const { themed } = useAppTheme();
 
   const { isLoading } = useConversationListQuery({
-    account: currentAccount!,
+    inboxId: currentInboxId!,
     context: "PinnedConversations",
     queryOptions: {
       refetchOnWindowFocus: false,

@@ -1,14 +1,17 @@
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
-import { useCurrentAccount } from "@data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useCurrentInboxId,
+} from "@data/store/accountsStore";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { translate } from "@i18n";
 import { actionSheetColors, textSecondaryColor } from "@styles/colors";
 import {
   getAccountIsAdmin,
   getAccountIsSuperAdmin,
-  getAddressIsAdmin,
-  getAddressIsSuperAdmin,
+  isUserAdminByInboxId,
+  isUserSuperAdminByInboxId,
 } from "@utils/groupUtils/adminUtils";
 import { getGroupMemberActions } from "@utils/groupUtils/getGroupMemberActions";
 import { sortGroupMembersByAdminStatus } from "@utils/groupUtils/sortGroupMembersByAdminStatus";
@@ -28,6 +31,7 @@ import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
+import { isCurrentUserInboxId } from "@/hooks/use-current-account-inbox-id";
 
 type GroupScreenMembersTableProps = {
   topic: ConversationTopic;
@@ -37,10 +41,10 @@ type GroupScreenMembersTableProps = {
 export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
   ({ topic, group }) => {
     const colorScheme = useColorScheme();
-    const currentAccount = useCurrentAccount() as string;
+    const currentInboxId = useCurrentInboxId();
     const styles = useStyles();
     const { data: members } = useGroupMembersConversationScreenQuery({
-      account: currentAccount,
+      inboxId: currentInboxId,
       topic,
     });
     const {
@@ -49,11 +53,11 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
       revokeAdmin,
       revokeSuperAdmin,
       removeMember,
-    } = useGroupMembers((topic ?? group?.topic)!);
-    const { data: groupPermissionPolicy } = useGroupPermissionPolicyQuery(
-      currentAccount,
-      (topic ?? group?.topic)!
-    );
+    } = useGroupMembers({ topic: topic ?? group?.topic! });
+    const { data: groupPermissionPolicy } = useGroupPermissionPolicyQuery({
+      inboxId: currentInboxId,
+      topic: topic ?? group?.topic!,
+    });
 
     const memberInboxIds = useMemo(
       () => members?.ids.map((m) => m) ?? [],
@@ -68,19 +72,20 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
       data.forEach(({ data: socials }, index) => {
         const memberId = members?.ids[index];
         if (!memberId) return;
+        // todo(lustig) figure out what the hell our issue around profile socials typing is
         profileMap[memberId] = socials;
       });
       return profileMap;
     }, [data, members]);
 
     const currentAccountIsSuperAdmin = useMemo(
-      () => getAddressIsSuperAdmin(members, currentAccount),
-      [currentAccount, members]
+      () => isUserSuperAdminByInboxId(currentInboxId, members),
+      [currentInboxId, members]
     );
 
     const currentAccountIsAdmin = useMemo(
-      () => getAddressIsAdmin(members, currentAccount),
-      [currentAccount, members]
+      () => isUserAdminByInboxId(currentInboxId, members),
+      [currentInboxId, members]
     );
 
     const tableViewItems = useMemo(() => {
@@ -88,16 +93,15 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
 
       const groupMembers = sortGroupMembersByAdminStatus(
         members,
-        currentAccount
+        currentInboxId
       );
-      groupMembers.forEach((a) => {
-        const isSuperAdmin = getAccountIsSuperAdmin(members, a.inboxId);
-        const isAdmin = getAccountIsAdmin(members, a.inboxId);
-        const isCurrentUser =
-          a.address.toLowerCase() === currentAccount.toLowerCase();
-        const preferredName = getPreferredInboxName(mappedData[a.inboxId]);
+      groupMembers.forEach((member) => {
+        const isSuperAdmin = isUserSuperAdminByInboxId(member.inboxId, members);
+        const isAdmin = isUserAdminByInboxId(member.inboxId, members);
+        const isCurrentUser = isCurrentUserInboxId(member.inboxId);
+        const preferredName = getPreferredInboxName(mappedData[member.inboxId]);
         items.push({
-          id: a.inboxId,
+          id: member.inboxId,
           title: `${preferredName}${isCurrentUser ? translate("you_parentheses") : ""}`,
           action: () => {
             const {
@@ -129,14 +133,14 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
                 switch (selectedIndex) {
                   case 0:
                     navigate("Profile", {
-                      address: a.address,
+                      inboxId: member.inboxId,
                       fromGroupTopic: topic,
                     });
                     break;
                   case promoteSuperAdminIndex:
                     logger.debug("Promoting super admin...");
                     try {
-                      await promoteToSuperAdmin(a.inboxId);
+                      await promoteToSuperAdmin(member.inboxId);
                     } catch (e) {
                       logger.error(e);
                       captureErrorWithFriendlyToast(e);
@@ -145,7 +149,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
                   case revokeSuperAdminIndex:
                     logger.debug("Revoking super admin...");
                     try {
-                      await revokeSuperAdmin(a.inboxId);
+                      await revokeSuperAdmin(member.inboxId);
                     } catch (e) {
                       logger.error(e);
                       captureErrorWithFriendlyToast(e);
@@ -154,7 +158,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
                   case promoteAdminIndex:
                     logger.debug("Promoting member...");
                     try {
-                      await promoteToAdmin(a.inboxId);
+                      await promoteToAdmin(member.inboxId);
                     } catch (e) {
                       logger.error(e);
                       captureErrorWithFriendlyToast(e);
@@ -163,7 +167,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
                   case revokeAdminIndex:
                     logger.debug("Revoking admin...");
                     try {
-                      await revokeAdmin(a.inboxId);
+                      await revokeAdmin(member.inboxId);
                     } catch (e) {
                       logger.error(e);
                       captureErrorWithFriendlyToast(e);
@@ -172,7 +176,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
                   case removeIndex:
                     logger.debug("Removing member...");
                     try {
-                      await removeMember([a.inboxId]);
+                      await removeMember([member.inboxId]);
                     } catch (e) {
                       logger.error(e);
                       captureErrorWithFriendlyToast(e);

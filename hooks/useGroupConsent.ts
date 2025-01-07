@@ -5,7 +5,7 @@ import { currentAccount } from "@data/store/accountsStore";
 import { useBlockGroupMutation } from "@queries/useBlockGroupMutation";
 import { useGroupConsentQuery } from "@queries/useGroupConsentQuery";
 import { useGroupQuery } from "@queries/useGroupQuery";
-import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import { consentToInboxIdsOnProtocolByInboxId } from "@utils/xmtpRN/contacts";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 import { useGroupCreatorQuery } from "../queries/useGroupCreatorQuery";
@@ -81,7 +81,7 @@ export const useGroupConsent = (topic: ConversationTopic) => {
       }
 
       if (inboxIdsToDeny.length > 0) {
-        consentToInboxIdsOnProtocolByAccount({
+        consentToInboxIdsOnProtocolByInboxId({
           account,
           inboxIds: inboxIdsToDeny,
           consent: "deny",

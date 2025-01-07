@@ -1,5 +1,9 @@
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
+import {
+  useChatStore,
+  useCurrentAccount,
+  useCurrentInboxId,
+} from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { Icon } from "@design-system/Icon/Icon";
 import { useExistingGroupInviteLink } from "@hooks/useExistingGroupInviteLink";
@@ -17,8 +21,8 @@ import {
 import { PictoSizes } from "@styles/sizes";
 import { createGroupInvite, deleteGroupInvite } from "@utils/api";
 import {
-  getAddressIsAdmin,
-  getAddressIsSuperAdmin,
+  isUserAdminByInboxId,
+  isUserSuperAdminByInboxId,
 } from "@utils/groupUtils/adminUtils";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
@@ -53,13 +57,12 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
   topic,
 }) => {
   const colorScheme = useColorScheme();
-  const currentAccount = useCurrentAccount() as string;
-  const { members } = useGroupMembers(topic);
+  const { members } = useGroupMembers({ topic });
 
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
-      currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
-      currentAccountIsSuperAdmin: getAddressIsSuperAdmin(
+      currentAccountIsAdmin: isUserAdminByInboxId(members, currentAccount),
+      currentAccountIsSuperAdmin: isUserSuperAdminByInboxId(
         members,
         currentAccount
       ),

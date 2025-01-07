@@ -21,48 +21,44 @@ import {
   getPreferredName,
   getPrimaryNames,
 } from "@utils/profile";
-import { shortAddress } from "@utils/strings/shortAddress";
 import Avatar from "../Avatar";
 import { NavigationChatButton } from "@search/components/NavigationChatButton";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
 
 export function Recommendation({
-  address,
+  peerInboxId,
   // @todo => use only profile
-  recommendationData: { ens, farcasterUsernames, lensHandles, tags, profile },
+  recommendationData: { farcasterUsernames, lensHandles, tags, profile },
   embedInChat,
   isVisible,
   groupMode,
   addToGroup,
 }: {
-  address: string;
+  peerInboxId: string;
   recommendationData: RecommendationData;
   embedInChat?: boolean;
   isVisible: boolean;
   groupMode?: boolean;
-  addToGroup?: (member: IProfileSocials & { address: string }) => void;
+  addToGroup?: (member: IProfileSocials & { inboxId: string }) => void;
 }) {
   const styles = useStyles();
   let primaryNamesDisplay = [
     ...(lensHandles || []).map((l) => `${l} on lens`),
     ...(farcasterUsernames || []).map((f) => `${f} on farcaster`),
   ];
-  const preferredName = profile // @todo => use only preferred name
-    ? getPreferredName(profile, address)
-    : ens || shortAddress(address);
+  const preferredName = getPreferredName(profile);
   if (profile) {
     const primaryNames = getPrimaryNames(profile);
     primaryNamesDisplay = [
       ...primaryNames.filter((name) => name !== preferredName),
-      shortAddress(address),
     ];
   }
   const textAlign = embedInChat ? "center" : "left";
-  const socials = useProfileSocials(address);
+  const socials = useProfileSocials({ peerInboxId });
 
   return (
     <View
-      key={address}
+      key={peerInboxId}
       style={[
         styles.recommendation,
         embedInChat
@@ -122,10 +118,12 @@ export function Recommendation({
       {!embedInChat && (
         <View style={styles.recommendationRight}>
           <NavigationChatButton
-            address={address}
+            inboxId={peerInboxId}
             groupMode={groupMode}
             addToGroup={
-              addToGroup ? () => addToGroup({ ...socials, address }) : undefined
+              addToGroup
+                ? () => addToGroup({ ...socials, inboxId: peerInboxId })
+                : undefined
             }
           />
         </View>

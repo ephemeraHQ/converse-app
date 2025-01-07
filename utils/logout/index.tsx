@@ -8,6 +8,7 @@ import {
   getWalletStore,
   TEMPORARY_ACCOUNT_NAME,
   useAccountsStore,
+  useCurrentInboxId,
 } from "../../data/store/accountsStore";
 import { setAuthStatus } from "../../data/store/authStore";
 import { deleteSecureItemAsync } from "../keychain";
@@ -22,6 +23,8 @@ import { unsubscribeFromNotifications } from "@features/notifications/utils/unsu
 import { deleteSubscribedTopics } from "@features/notifications/utils/deleteSubscribedTopics";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 import { getXmtpApiHeaders } from "@utils/api";
+import { getInbox } from "../xmtpRN/conversations";
+import { ConverseXmtpClientType } from "../xmtpRN/client.types";
 
 type InboxIdToLogoutTaskMap = {
   [inboxId: string]: {
@@ -55,17 +58,21 @@ export const removeLogoutTask = ({ inboxId }: { inboxId: string }) => {
 };
 
 export const saveLogoutTask = (
-  { inboxId }: { inboxId: string },
+  { inboxId }: { inboxId: string | undefined },
   apiHeaders: { [key: string]: string } | undefined,
   topics: string[],
   pkPath: string | undefined
 ) => {
   const logoutTasks = getLogoutTasks();
-  logoutTasks[inboxId] = { topics, apiHeaders, pkPath };
-  mmkv.set("converse-logout-tasks", JSON.stringify(logoutTasks));
-  logger.debug(
-    `[Logout] Saved ${topics.length} topics to logout for InboxId ${inboxId}`
-  );
+  if (inboxId) {
+    logoutTasks[inboxId] = { topics, apiHeaders, pkPath };
+    mmkv.set("converse-logout-tasks", JSON.stringify(logoutTasks));
+    logger.debug(
+      `[Logout] Saved ${topics.length} topics to logout for InboxId ${inboxId}`
+    );
+  } else {
+    logger.debug("[Logout] No inboxId provided to saveLogoutTask");
+  }
 };
 
 export const waitForLogoutTasksDone = async (ms: number) => {
@@ -135,36 +142,38 @@ export const executeLogoutTasks = async () => {
   return true;
 };
 
-export const logoutAccount = async (
-  { inboxId }: { inboxId: string },
-  dropLocalDatabase: boolean,
-  isV3Enabled: boolean = true
-) => {
+export const logoutAccount = async ({
+  inboxId,
+  dropLocalDatabase,
+}: {
+  inboxId: string | undefined;
+  dropLocalDatabase: boolean;
+}) => {
   logger.debug(
-    `[Logout] Logging out from ${inboxId} with dropLocalDatabase=${dropLocalDatabase} and isV3Enabled=${isV3Enabled}`
+    `[Logout] Logging out from ${inboxId} with dropLocalDatabase=${dropLocalDatabase}`
   );
-  if (isV3Enabled) {
-    // This clears the libxmtp sqlite database (v3 / groups)
-    try {
-      // if we're attemptinmg to logout, we should be safe to assume
-      // we have a client cached...
-      // const client = (await getOrBuildXmtpClient(
-      //   account
-      // )) as ConverseXmtpClientType;
-      const client = xmtpClientByInboxId[inboxId];
-      await client.dropLocalDatabaseConnection();
-      logger.debug("[Logout] successfully dropped connection to libxmp db");
-      if (dropLocalDatabase) {
-        await client.deleteLocalDatabase();
-        logger.debug("[Logout] successfully deleted libxmp db");
-        // Manual delete database files
-        await deleteLibXmtpDatabaseForInboxId(client.inboxId);
-      }
-    } catch (error) {
-      logger.warn("Could not get XMTP Client while logging out", {
-        error,
-      });
+  // This clears the libxmtp sqlite database (v3 / groups)
+  try {
+    // if we're attemptinmg to logout, we should be safe to assume
+    // we have a client cached...
+    const client = (await getInbox({
+      inboxId,
+      caller: "logoutAccount",
+      ifNotFoundStrategy: "throw",
+    })) as ConverseXmtpClientType;
+
+    await client.dropLocalDatabaseConnection();
+    logger.debug("[Logout] successfully dropped connection to libxmp db");
+    if (dropLocalDatabase) {
+      await client.deleteLocalDatabase();
+      logger.debug("[Logout] successfully deleted libxmp db");
+      // Manual delete database files
+      await deleteLibXmtpDatabaseForInboxId(client.inboxId);
     }
+  } catch (error) {
+    logger.warn("Could not get XMTP Client while logging out", {
+      error,
+    });
   }
   await dropXmtpClient(inboxId as InstallationId);
   const inboxIds = useInboxIdsList();
@@ -207,9 +216,9 @@ export const logoutAccount = async (
     }
   }
 
-  deleteXmtpClient(inboxId);
-  deleteSubscribedTopics(inboxId);
-  delete secureMmkvByInboxId[inboxId];
+  deleteXmtpClient({ inboxId });
+  deleteSubscribedTopics({ inboxId });
+  inboxId && delete secureMmkvByInboxId[inboxId];
 
   // TODO: Set topics to delete
   saveLogoutTask({ inboxId }, apiHeaders, [], pkPath);
@@ -219,10 +228,14 @@ export const logoutAccount = async (
   }, 500);
 };
 
-export const useLogoutFromConverse = ({ inboxId }: { inboxId: string }) => {
+export const useLogoutFromConverse = ({
+  inboxId,
+}: {
+  inboxId: string | undefined;
+}) => {
   const logout = useCallback(
-    async (dropLocalDatabase: boolean, isV3Enabled: boolean = true) => {
-      logoutAccount({ inboxId }, dropLocalDatabase, isV3Enabled);
+    async ({ dropLocalDatabase = false }: { dropLocalDatabase?: boolean }) => {
+      logoutAccount({ inboxId, dropLocalDatabase });
     },
     [inboxId]
   );

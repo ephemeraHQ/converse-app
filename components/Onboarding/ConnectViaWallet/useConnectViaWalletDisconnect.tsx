@@ -9,14 +9,17 @@ export function useConnectViaWalletDisconnect() {
   const thirdwebWallet = useThirdwebActiveWallet();
 
   return useCallback(
-    async (args: { address: string }) => {
-      const { address } = args;
+    async (args: { inboxId: string }) => {
+      const { inboxId } = args;
 
       logger.debug("[Connect Wallet] Disconnecting");
 
-      if (address) {
-        logger.debug(`[Connect Wallet] Logging out address ${address}`);
-        logoutAccount(address, false, true, () => {});
+      if (inboxId) {
+        logger.debug(`[Connect Wallet] Logging out inboxId ${inboxId}`);
+        logoutAccount({
+          inboxId,
+          dropLocalDatabase: false,
+        });
       }
 
       if (thirdwebWallet) {

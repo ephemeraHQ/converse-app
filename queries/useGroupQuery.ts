@@ -13,7 +13,7 @@ import { UseQueryResult } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export function useGroupQuery(args: {
-  inboxId: string;
+  inboxId: string | undefined;
   topic: ConversationTopic;
 }) {
   const { inboxId, topic } = args;
@@ -24,48 +24,48 @@ export function useGroupQuery(args: {
 }
 
 export function getGroupQueryData(args: {
-  account: string;
+  inboxId: string | undefined;
   topic: ConversationTopic;
 }) {
-  const { account, topic } = args;
-  return getConversationQueryData({ account, topic }) as
+  const { inboxId, topic } = args;
+  return getConversationQueryData({ inboxId, topic }) as
     | GroupWithCodecsType
     | undefined;
 }
 
 export function setGroupQueryData(args: {
-  account: string;
+  inboxId: string | undefined;
   topic: ConversationTopic;
   group: GroupWithCodecsType;
 }) {
-  const { account, topic, group } = args;
+  const { inboxId, topic, group } = args;
   setConversationQueryData({
-    account,
+    inboxId,
     topic,
     conversation: group,
   });
 }
 
 export function getGroupQueryOptions(args: {
-  account: string;
+  inboxId: string | undefined;
   topic: ConversationTopic;
 }) {
-  const { account, topic } = args;
-  return getConversationQueryOptions({ account, topic });
+  const { inboxId, topic } = args;
+  return getConversationQueryOptions({ inboxId, topic });
 }
 
 export function updateGroupQueryData(args: {
-  account: string;
+  inboxId: string | undefined;
   topic: ConversationTopic;
   updates: Partial<GroupWithCodecsType>;
 }) {
-  const { account, topic, updates } = args;
-  const previousGroup = getGroupQueryData({ account, topic });
+  const { inboxId, topic, updates } = args;
+  const previousGroup = getGroupQueryData({ inboxId, topic });
   if (!previousGroup) {
     return;
   }
   setGroupQueryData({
-    account,
+    inboxId,
     topic,
     group: mutateObjectProperties(previousGroup, updates),
   });

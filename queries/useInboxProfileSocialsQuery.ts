@@ -10,23 +10,31 @@ import {
 import { queryClient } from "./queryClient";
 import { InboxId } from "@xmtp/react-native-sdk";
 import mmkv from "@/utils/mmkv";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 
-const profileSocialsQueryKey = (
-  account: string,
-  peerAddress: string
-): QueryKey => [
+const profileSocialsQueryKey = ({
+  currentInboxId,
+  profileLookupInboxId,
+}: {
+  currentInboxId: string;
+  profileLookupInboxId: string;
+}): QueryKey => [
   "inboxProfileSocials",
-  account?.toLowerCase(),
-  peerAddress?.toLowerCase(),
+  currentInboxId?.toLowerCase(),
+  profileLookupInboxId?.toLowerCase(),
 ];
 
-export const inboxProfileSocialsQueryStorageKey = (
-  account: string,
-  inboxId: InboxId
-) => profileSocialsQueryKey(account, inboxId).join("-");
+export const inboxProfileSocialsQueryStorageKey = ({
+  currentInboxId,
+  profileLookupInboxId,
+}: {
+  currentInboxId: string;
+  profileLookupInboxId: string;
+}) =>
+  profileSocialsQueryKey({ currentInboxId, profileLookupInboxId }).join("-");
 
 const profileSocials = create({
-  fetcher: async (inboxIds: InboxId[]) => {
+  fetcher: async (inboxIds: string[]) => {
     const data = await getProfilesForInboxIds({ inboxIds });
     return data;
   },
@@ -37,13 +45,19 @@ const profileSocials = create({
   }),
 });
 
-const fetchInboxProfileSocials = async (
-  account: string,
-  inboxId: InboxId
-): Promise<IProfileSocials[] | null> => {
-  const data = await profileSocials.fetch(inboxId);
+const fetchInboxProfileSocials = async ({
+  currentInboxId,
+  profileLookupInboxId,
+}: {
+  currentInboxId: string;
+  profileLookupInboxId: string;
+}): Promise<IProfileSocials | null> => {
+  const data = await profileSocials.fetch(profileLookupInboxId);
 
-  const key = inboxProfileSocialsQueryStorageKey(account, inboxId);
+  const key = inboxProfileSocialsQueryStorageKey({
+    currentInboxId,
+    profileLookupInboxId,
+  });
 
   mmkv.delete(key);
 
@@ -54,13 +68,23 @@ const fetchInboxProfileSocials = async (
   return data;
 };
 
-const inboxProfileSocialsQueryConfig = (
-  account: string,
-  inboxId: InboxId | undefined
-) => ({
-  queryKey: profileSocialsQueryKey(account, inboxId!),
-  queryFn: () => fetchInboxProfileSocials(account, inboxId!),
-  enabled: !!account && !!inboxId,
+const inboxProfileSocialsQueryConfig = ({
+  currentInboxId,
+  profileLookupInboxId,
+}: {
+  currentInboxId: string | undefined;
+  profileLookupInboxId: string;
+}) => ({
+  queryKey: profileSocialsQueryKey({
+    currentInboxId: currentInboxId!,
+    profileLookupInboxId,
+  }),
+  queryFn: () =>
+    fetchInboxProfileSocials({
+      currentInboxId: currentInboxId!,
+      profileLookupInboxId,
+    }),
+  enabled: !!currentInboxId && !!profileLookupInboxId,
   // Store for 30 days
   gcTime: 1000 * 60 * 60 * 24 * 30,
   refetchIntervalInBackground: false,
@@ -70,12 +94,24 @@ const inboxProfileSocialsQueryConfig = (
   refetchOnMount: false,
   staleTime: 1000 * 60 * 60 * 24,
   initialData: (): IProfileSocials[] | null | undefined => {
-    if (!account || !inboxId) {
+    if (!currentInboxId || !profileLookupInboxId) {
       return undefined;
     }
-    if (mmkv.contains(inboxProfileSocialsQueryStorageKey(account, inboxId))) {
+    if (
+      mmkv.contains(
+        inboxProfileSocialsQueryStorageKey({
+          currentInboxId,
+          profileLookupInboxId,
+        })
+      )
+    ) {
       const data = JSON.parse(
-        mmkv.getString(inboxProfileSocialsQueryStorageKey(account, inboxId))!
+        mmkv.getString(
+          inboxProfileSocialsQueryStorageKey({
+            currentInboxId,
+            profileLookupInboxId,
+          })
+        )!
       ) as IProfileSocials[];
       return data;
     }
@@ -83,30 +119,49 @@ const inboxProfileSocialsQueryConfig = (
   initialDataUpdatedAt: 0,
 });
 
-export const useInboxProfileSocialsQuery = (
-  account: string,
-  inboxId: InboxId | undefined
+export const useSocialProfileQueryByInboxId = (
+  profileLookupInboxId: string
 ) => {
-  return useQuery(inboxProfileSocialsQueryConfig(account, inboxId));
+  const currentInboxId = useCurrentInboxId();
+  return useQuery(
+    inboxProfileSocialsQueryConfig({
+      currentInboxId: currentInboxId!,
+      profileLookupInboxId,
+    })
+  );
 };
 
-export const useInboxProfileSocialsQueries = (
-  account: string,
-  inboxIds: InboxId[]
-) => {
+// note(lustig) i want to rename this something like
+// inboxDiscoverability rather than inboxProfileSocials
+export const useInboxProfileSocialsQueries = ({
+  currentInboxId,
+  profileLookupInboxIds,
+}: {
+  currentInboxId: string | undefined;
+  profileLookupInboxIds: string[];
+}) => {
   return useQueries({
-    queries: inboxIds.map((inboxId) =>
-      inboxProfileSocialsQueryConfig(account, inboxId)
+    queries: profileLookupInboxIds.map((profileLookupInboxId) =>
+      inboxProfileSocialsQueryConfig({
+        currentInboxId,
+        profileLookupInboxId,
+      })
     ),
   });
 };
 
-export const fetchInboxProfileSocialsQuery = (
-  account: string,
-  inboxId: InboxId
-) => {
+export const fetchInboxProfileSocialsQuery = ({
+  currentInboxId,
+  profileLookupInboxId,
+}: {
+  currentInboxId: string;
+  profileLookupInboxId: string;
+}) => {
   return queryClient.fetchQuery(
-    inboxProfileSocialsQueryConfig(account, inboxId)
+    inboxProfileSocialsQueryConfig({
+      currentInboxId,
+      profileLookupInboxId,
+    })
   );
 };
 
@@ -117,7 +172,10 @@ export const setInboxProfileSocialsQueryData = (
   updatedAt?: number
 ) => {
   return queryClient.setQueryData(
-    inboxProfileSocialsQueryConfig(account, inboxId).queryKey,
+    inboxProfileSocialsQueryConfig({
+      currentInboxId: account,
+      profileLookupInboxId: inboxId,
+    }).queryKey,
     data,
     {
       updatedAt,
@@ -125,22 +183,34 @@ export const setInboxProfileSocialsQueryData = (
   );
 };
 
-export const getInboxProfileSocialsQueryData = (
-  account: string,
-  inboxId: InboxId
-): IProfileSocials[] | null => {
+export const getInboxProfileSocialsQueryData = ({
+  currentInboxId,
+  profileLookupInboxId,
+}: {
+  currentInboxId: string;
+  profileLookupInboxId: string;
+}): IProfileSocials[] | null => {
   return (
     queryClient.getQueryData(
-      inboxProfileSocialsQueryConfig(account, inboxId).queryKey
+      inboxProfileSocialsQueryConfig({
+        currentInboxId,
+        profileLookupInboxId,
+      }).queryKey
     ) ?? null
   );
 };
 
-export const invalidateInboxProfileSocialsQuery = (
-  account: string,
-  inboxId: InboxId
-) => {
+export const invalidateInboxProfileSocialsQuery = ({
+  currentInboxId,
+  profileLookupInboxId,
+}: {
+  currentInboxId: string;
+  profileLookupInboxId: string;
+}) => {
   queryClient.invalidateQueries({
-    queryKey: inboxProfileSocialsQueryConfig(account, inboxId).queryKey,
+    queryKey: inboxProfileSocialsQueryConfig({
+      currentInboxId,
+      profileLookupInboxId,
+    }).queryKey,
   });
 };

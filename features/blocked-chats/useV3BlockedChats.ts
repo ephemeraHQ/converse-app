@@ -4,7 +4,7 @@ import { useConversationListQuery } from "@/queries/useConversationListQuery";
 import { useMemo } from "react";
 
 export const useV3BlockedChats = () => {
-  const currentAccount = useCurrentAccount();
+  const currentInboxId = useCurrentInboxId()();
   const topicsData = useTopicsData();
   const { data, ...rest } = useConversationListQuery({
     account: currentAccount!,

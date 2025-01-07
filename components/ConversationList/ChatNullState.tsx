@@ -24,22 +24,16 @@ import { usePreferredName } from "@/hooks/usePreferredName";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 
 type ChatNullStateProps = {
-  currentAccount: string;
-  navigation: any;
-  route: any;
+  currentInboxId: string;
 };
 
-const ChatNullState: React.FC<ChatNullStateProps> = ({
-  currentAccount,
-  navigation,
-  route,
-}) => {
+const ChatNullState: React.FC<ChatNullStateProps> = ({ currentInboxId }) => {
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
-  const username = usePreferredUsername(currentAccount);
-  const displayName = usePreferredName(currentAccount);
-  const avatar = usePreferredAvatarUri(currentAccount);
+  const username = usePreferredUsername({ peerInboxId: currentInboxId });
+  const displayName = usePreferredName(currentInboxId);
+  const avatar = usePreferredAvatarUri(currentInboxId);
 
   const profileUrl = `https://${config.websiteDomain}/dm/${
     username || currentAccount

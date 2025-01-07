@@ -3,7 +3,7 @@ import { useConversationListQuery } from "@/queries/useConversationListQuery";
 import { useMemo } from "react";
 
 export const useV3RequestItemCount = () => {
-  const currentAccount = useCurrentAccount();
+  const currentInboxId = useCurrentInboxId()();
   const { data: groups } = useConversationListQuery({
     account: currentAccount!,
     queryOptions: {

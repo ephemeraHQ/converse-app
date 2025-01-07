@@ -21,7 +21,7 @@ export type RecommendationData = {
   farcasterUsernames?: string[];
 };
 
-export type Frens = { [address: string]: RecommendationData };
+export type Frens = { [inboxId: string]: RecommendationData };
 
 export type RecommendationsStoreType = {
   loading: boolean;

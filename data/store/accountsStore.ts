@@ -70,6 +70,11 @@ export const useInboxIdsList = () => {
   return inboxIds.filter((a: string) => a && a !== TEMPORARY_ACCOUNT_NAME);
 };
 
+export const getInboxIdsList = () => {
+  const inboxIds = useAccountsStore.getState().inboxIds;
+  return inboxIds.filter((a: string) => a && a !== TEMPORARY_ACCOUNT_NAME);
+};
+
 export const useErroredAccountsMap = () => {
   const inboxIds = useInboxIdsList();
   return inboxIds.reduce(
@@ -97,7 +102,6 @@ type AccountsStoreType = {
   }) => void;
 
   inboxIds: string[];
-  inboxIdToAccountMap: { [inboxId: string]: string };
 
   removeInboxById: ({ inboxId }: { inboxId: string }) => void;
   databaseIdByInboxId: { [inboxId: string]: string };
@@ -125,7 +129,6 @@ export const useAccountsStore = create<AccountsStoreType>()(
     (set) => ({
       currentInboxId: TEMPORARY_ACCOUNT_NAME,
       inboxIds: [TEMPORARY_ACCOUNT_NAME],
-      inboxIdToAccountMap: {},
       databaseIdByInboxId: {},
       setDatabaseId: ({ inboxId, id }) =>
         set((state) => {

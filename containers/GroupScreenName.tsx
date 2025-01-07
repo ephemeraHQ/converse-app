@@ -1,13 +1,12 @@
 import { useGroupName } from "@/hooks/useGroupName";
 import { translate } from "@/i18n";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { textPrimaryColor } from "@styles/colors";
 import {
-  getAddressIsAdmin,
-  getAddressIsSuperAdmin,
+  isUserAdminByInboxId,
+  isUserSuperAdminByInboxId,
 } from "@utils/groupUtils/adminUtils";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { formatGroupName } from "@utils/str";
@@ -28,15 +27,15 @@ type GroupScreenNameProps = {
 export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
   const styles = useStyles();
   const { permissions } = useGroupPermissions(topic);
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()()!;
   const { updateGroupName, groupName } = useGroupName(topic);
   const formattedGroupName = formatGroupName(topic, groupName);
   const { members } = useGroupMembers(topic);
 
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
-      currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
-      currentAccountIsSuperAdmin: getAddressIsSuperAdmin(
+      currentAccountIsAdmin: isUserAdminByInboxId(members, currentAccount),
+      currentAccountIsSuperAdmin: isUserSuperAdminByInboxId(
         members,
         currentAccount
       ),

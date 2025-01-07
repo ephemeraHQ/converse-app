@@ -6,7 +6,7 @@ import { pendingJoinRequestsQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
 
 export const usePendingRequestsQuery = () => {
-  const currentAccount = useCurrentAccount() as string;
+  const currentInboxId = useCurrentInboxId()() as string;
 
   return useQuery({
     queryKey: pendingJoinRequestsQueryKey(currentAccount),

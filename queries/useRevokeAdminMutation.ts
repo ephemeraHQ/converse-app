@@ -13,16 +13,17 @@ import { useGroupQuery } from "./useGroupQuery";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { captureError } from "@/utils/capture-error";
 
-export const useRevokeAdminMutation = (
-  account: string,
-  topic: ConversationTopic
-) => {
-  const { data: group } = useGroupQuery({ account, topic });
+export const useRevokeAdminMutation = (args: {
+  inboxId: string | undefined;
+  topic: ConversationTopic;
+}) => {
+  const { inboxId, topic } = args;
+  const { data: group } = useGroupQuery({ inboxId, topic });
 
   return useMutation({
-    mutationKey: revokeAdminMutationKey(account, topic!),
+    mutationKey: revokeAdminMutationKey(args),
     mutationFn: async (inboxId: InboxId) => {
-      if (!group || !account || !topic) {
+      if (!group || !inboxId || !topic) {
         return;
       }
       await group.removeAdmin(inboxId);
@@ -32,9 +33,12 @@ export const useRevokeAdminMutation = (
       if (!topic) {
         return;
       }
-      await cancelGroupMembersQuery(account, topic);
+      await cancelGroupMembersQuery({ inboxId, topic });
 
-      const previousGroupMembers = getGroupMembersQueryData(account, topic);
+      const previousGroupMembers = getGroupMembersQueryData({
+        inboxId,
+        topic,
+      });
       if (!previousGroupMembers) {
         return;
       }
@@ -43,7 +47,7 @@ export const useRevokeAdminMutation = (
         return;
       }
       newMembers.byId[inboxId].permissionLevel = "member";
-      setGroupMembersQueryData(account, topic, newMembers);
+      setGroupMembersQueryData({ inboxId, topic }, newMembers);
 
       return { previousGroupMembers };
     },
@@ -55,7 +59,10 @@ export const useRevokeAdminMutation = (
       if (!topic) {
         return;
       }
-      setGroupMembersQueryData(account, topic, context.previousGroupMembers);
+      setGroupMembersQueryData(
+        { inboxId, topic },
+        context.previousGroupMembers
+      );
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess useRevokeAdminMutation");

@@ -7,7 +7,7 @@ import notifee, {
 import {
   getPreferredAvatar,
   getPreferredName,
-  getProfile,
+  getProfileByInboxId,
 } from "@utils/profile";
 import {
   ConverseXmtpClientType,
@@ -59,16 +59,16 @@ export const handleGroupMessageNotification = async (
   if (spamScore >= 0) return;
   // For now, use the group member linked address as "senderAddress"
   // @todo => make inboxId a first class citizen
-  const senderAddress = (await conversation.members()).find(
+  const senderInboxId = (await conversation.members()).find(
     (m) => m.inboxId === message.senderInboxId
   )?.addresses[0];
-  if (!senderAddress) return;
-  const senderSocials = await getProfile(
+  if (!senderInboxId) return;
+  const senderSocials = await getProfileByInboxId(
     xmtpClient.inboxId,
     message.senderInboxId,
-    senderAddress
+    senderInboxId
   );
-  const senderName = getPreferredName(senderSocials, senderAddress);
+  const senderName = getPreferredName(senderSocials, senderInboxId);
 
   const notificationContent = await getNotificationContent(
     conversation as GroupWithCodecsType,

@@ -1,9 +1,14 @@
 import { getPreferredName } from "@utils/profile";
 
 import { useProfileSocials } from "./useProfileSocials";
-import { shortAddress } from "@/utils/strings/shortAddress";
 
-export const usePreferredName = (peerAddress: string) => {
-  const { data } = useProfileSocials(peerAddress);
-  return data ? getPreferredName(data, peerAddress) : shortAddress(peerAddress);
+export const usePreferredName = ({
+  inboxId,
+}: {
+  inboxId: string | undefined;
+}) => {
+  const { data } = useProfileSocials({ peerInboxId: inboxId! });
+  /*todo(lustig) make sure this works*/ return data
+    ? getPreferredName(data)
+    : "name should be invariant on inbox";
 };

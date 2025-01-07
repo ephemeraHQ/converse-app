@@ -1,4 +1,4 @@
-export type ILensHandle = {
+export type ILensData = {
   profileId: string;
   handle: string;
   isDefault: boolean;
@@ -6,26 +6,26 @@ export type ILensHandle = {
   profilePictureURI?: string;
 };
 
-export type IEnsName = {
+export type IEnsData = {
   name: string;
   isPrimary: boolean;
   displayName?: string | undefined;
   avatar?: string | undefined;
 };
 
-export type IFarcasterUsername = {
+export type IFarcasterData = {
   username: string;
   name?: string;
   avatarURI?: string;
   linkedAccount?: boolean;
 };
 
-export type IUnstoppableDomain = {
+export type IUnstoppableDomainData = {
   domain: string;
   isPrimary: boolean;
 };
 
-export type IConverseUserName = {
+export type IConverseUserData = {
   name: string;
   isPrimary: boolean;
   displayName?: string | undefined;
@@ -40,23 +40,23 @@ export const Cryptocurrencies = {
   // SUI: "SUI",
 } as const;
 
-export type CryptoCurrency =
+export type Cryptocurrency =
   (typeof Cryptocurrencies)[keyof typeof Cryptocurrencies];
 
-export type CryptoCurrencyWalletAddresses = {
-  [key in CryptoCurrency]: Array<string>;
+export type CryptocurrencyWalletAddresses = {
+  [key in Cryptocurrency]: Array<string>;
 };
 
 export type IProfileSocials = {
   // address?: string;
   // note(lustig) this may be overkill for now, but I think preparing for the future
   // is a good idea.
-  cryptoCurrencyWalletAddresses?: CryptoCurrencyWalletAddresses;
-  ensNames?: IEnsName[];
-  farcasterUsernames?: IFarcasterUsername[];
-  lensHandles?: ILensHandle[];
-  unstoppableDomains?: IUnstoppableDomain[];
-  userNames?: IConverseUserName[];
+  cryptoCurrencyWalletAddresses?: CryptocurrencyWalletAddresses;
+  ensNames?: IEnsData[];
+  farcasterUsernames?: IFarcasterData[];
+  lensHandles?: ILensData[];
+  unstoppableDomains?: IUnstoppableDomainData[];
+  userNames?: IConverseUserData[];
 };
 
 export type ProfileByInboxId = {

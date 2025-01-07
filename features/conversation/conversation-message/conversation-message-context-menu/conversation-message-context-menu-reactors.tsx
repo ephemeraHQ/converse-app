@@ -1,6 +1,6 @@
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { MESSAGE_CONTEXT_REACTIONS_HEIGHT } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-constant";
-import { useInboxProfileSocialsQueries } from "@/queries/useInboxProfileSocialsQuery";
+import { useInboxProfileSocialsQueries } from "@/queries/useSocialProfileQueryByInboxId";
 import { ObjectTyped } from "@/utils/objectTyped";
 import { getReactionContent } from "@/utils/xmtpRN/reactions";
 import GroupAvatar from "@components/GroupAvatar";
@@ -90,7 +90,7 @@ type MessageReactionsItemProps = {
 const Item: FC<MessageReactionsItemProps> = ({ content, inboxIds }) => {
   const { theme } = useAppTheme();
 
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()()!;
 
   const queriesData = useInboxProfileSocialsQueries(currentAccount, inboxIds);
 

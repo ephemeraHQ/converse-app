@@ -191,7 +191,7 @@ export function useConversationMessageById({
   messageId: MessageId;
   topic: ConversationTopic;
 }) {
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()()!;
   const { data: messages } = useConversationMessages(currentAccount, topic);
 
   const cachedMessage = messages?.byId[messageId];
@@ -212,7 +212,7 @@ export function useConversationMessageById({
 }
 
 export function useConversationMessageReactions(messageId: MessageId) {
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()()!;
   const topic = useCurrentConversationTopic();
 
   const { data: messages } = useConversationMessages(currentAccount, topic);

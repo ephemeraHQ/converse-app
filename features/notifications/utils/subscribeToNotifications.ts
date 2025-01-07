@@ -9,7 +9,7 @@ import {
 } from "@/utils/xmtpRN/client.types";
 import { getOrBuildXmtpClient } from "@utils/xmtpRN/sync";
 import { useAppStore } from "@data/store/appStore";
-import { subscribingByAccount } from "./subscribingByAccount";
+import { subscribingByInboxId } from "./subscribingByInboxId";
 import { saveNotificationsSubscribe } from "@utils/api";
 import { requestPushNotificationsPermissions } from "./requestPushNotificationsPermissions";
 
@@ -88,7 +88,7 @@ export const subscribeToNotifications = async ({
       savePushToken(nativePushToken);
     } else {
       logger.error("[subscribeToNotifications] no native push token");
-      delete subscribingByAccount[account];
+      delete subscribingByInboxId[account];
       return;
     }
     const userGroupInviteTopic = buildUserV3InviteTopic(

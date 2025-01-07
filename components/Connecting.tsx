@@ -66,7 +66,7 @@ export const useShouldShowConnecting = () => {
 };
 
 export const useShouldShowConnectingOrSyncing = () => {
-  const currentAccount = useCurrentAccount();
+  const currentInboxId = useCurrentInboxId()();
   const { isLoading } = useConversationListQuery({ account: currentAccount! });
   const initialLoadDoneOnce = !isLoading;
   const shouldShowConnecting = useShouldShowConnecting();

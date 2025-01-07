@@ -24,6 +24,7 @@ import TableView, { TableViewItemType } from "../../TableView/TableView";
 import { TableViewEmoji, TableViewImage } from "../../TableView/TableViewImage";
 import { RightViewChevron } from "../../TableView/TableViewRightChevron";
 import { buildXmtpClientFromAddress } from "@/utils/xmtpRN/client";
+import { getInboxIdFromCryptocurrencyAddress } from "@/utils/xmtpRN/signIn";
 
 export function getConnectViaWalletTableViewPrivateKeyItem(
   args: Partial<TableViewItemType>
@@ -80,7 +81,7 @@ export function getConnectViaWalletInstalledWalletTableViewItem(args: {
 export const InstalledWalletsTableView = memo(
   function InstalledWalletsTableView(props: {
     onAccountExists: (arg: { address: string; inboxId: string }) => void;
-    onAccountDoesNotExist: (arg: { address: string }) => void;
+    onAccountDoesNotExist: (arg: { address: string; inboxId: string }) => void;
   }) {
     const { onAccountExists, onAccountDoesNotExist } = props;
 
@@ -177,13 +178,21 @@ export const InstalledWalletsTableView = memo(
                 walletAddress = account.address;
               }
 
-              if (useInboxIdsList().includes(walletAddress)) {
-                const xmtpClient =
-                  await buildXmtpClientFromAddress(walletAddress);
-                const inboxId = xmtpClient.inboxId;
-                onAccountExists({ address: walletAddress, inboxId });
+              // const xmtpClient =
+              //   await buildXmtpClientFromAddress(walletAddress);
+              const xmtpInboxId =
+                await getInboxIdFromCryptocurrencyAddress(walletAddress);
+
+              if (useInboxIdsList().includes(xmtpInboxId)) {
+                onAccountExists({
+                  address: walletAddress,
+                  inboxId: xmtpInboxId,
+                });
               } else {
-                onAccountDoesNotExist({ address: walletAddress });
+                onAccountDoesNotExist({
+                  address: walletAddress,
+                  inboxId: xmtpInboxId,
+                });
               }
             } catch (e: any) {
               logger.error("Error connecting to wallet:", e);

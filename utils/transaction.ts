@@ -212,7 +212,7 @@ export const formatAmount = (
 //   messageId: string,
 //   peerAddress?: string
 // ) => {
-//   const currentAccount = useCurrentAccount() as string;
+//   const currentInboxId = useCurrentInboxId()() as string;
 //   const saveTransactions = useTransactionsStore((s) => s.saveTransactions);
 //   const fetchingTransaction = useRef(false);
 

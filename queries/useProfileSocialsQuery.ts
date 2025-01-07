@@ -9,33 +9,35 @@ import {
 
 import { queryClient } from "./queryClient";
 import mmkv from "@/utils/mmkv";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 
 type ProfileSocialsData = IProfileSocials | null | undefined;
 
 const profileSocialsQueryKey = ({
-  accountInboxId,
-  peerAccountInboxId,
+  currentInboxId,
+  profileLookupInboxId,
 }: {
-  accountInboxId: string | undefined;
-  peerAccountInboxId: string | undefined;
+  currentInboxId: string | undefined;
+  profileLookupInboxId: string | undefined;
 }): QueryKey => [
   "profileSocials",
-  accountInboxId?.toLowerCase(),
+  currentInboxId?.toLowerCase(),
   // Typesafe because there's a lot of account! usage
-  peerAccountInboxId?.toLowerCase(),
+  profileLookupInboxId?.toLowerCase(),
 ];
 
 export const profileSocialsQueryStorageKey = ({
-  accountInboxId,
-  peerAccountInboxId,
+  currentInboxId,
+  profileLookupInboxId,
 }: {
-  accountInboxId: string | undefined;
-  peerAccountInboxId: string | undefined;
-}) => profileSocialsQueryKey({ accountInboxId, peerAccountInboxId }).join("-");
+  currentInboxId: string | undefined;
+  profileLookupInboxId: string | undefined;
+}) =>
+  profileSocialsQueryKey({ currentInboxId, profileLookupInboxId }).join("-");
 
 const profileSocials = create({
   fetcher: async (inboxIds: string[]) => {
-    const d = await getProfilesForAddresses([]);
+    // const d = await getProfilesForAddresses([]);
     /*todo: fix this api request*/ const data = await getProfilesForInboxIds({
       inboxIds,
     });
@@ -49,17 +51,17 @@ const profileSocials = create({
 });
 
 const fetchProfileSocials = async ({
-  accountInboxId,
-  peerAccountInboxId,
+  currentInboxId,
+  profileLookupInboxId,
 }: {
-  accountInboxId: string;
-  peerAccountInboxId: string;
+  currentInboxId: string;
+  profileLookupInboxId: string;
 }): Promise<IProfileSocials | null> => {
-  const data = await profileSocials.fetch(peerAccountInboxId);
+  const data = await profileSocials.fetch(profileLookupInboxId);
 
   const key = profileSocialsQueryStorageKey({
-    accountInboxId,
-    peerAccountInboxId,
+    currentInboxId,
+    profileLookupInboxId,
   });
 
   mmkv.delete(key);
@@ -72,21 +74,21 @@ const fetchProfileSocials = async ({
 };
 
 const profileSocialsQueryConfig = ({
-  accountInboxId,
-  peerAccountInboxId,
+  currentInboxId,
+  profileLookupInboxId,
 }: {
-  accountInboxId: string | undefined;
-  peerAccountInboxId: string | undefined;
+  currentInboxId: string | undefined;
+  profileLookupInboxId: string | undefined;
 }) => ({
-  queryKey: profileSocialsQueryKey({ accountInboxId, peerAccountInboxId }),
+  queryKey: profileSocialsQueryKey({ currentInboxId, profileLookupInboxId }),
   queryFn: () =>
     // We know that accountInboxId and peerAccountInboxId are defined
     // because of the enabled: !!accountInboxId below
     fetchProfileSocials({
-      accountInboxId: accountInboxId!,
-      peerAccountInboxId: peerAccountInboxId!,
+      currentInboxId: currentInboxId!,
+      profileLookupInboxId: profileLookupInboxId!,
     }),
-  enabled: !!accountInboxId,
+  enabled: !!currentInboxId,
   // Store for 30 days
   gcTime: 1000 * 60 * 60 * 24 * 30,
   refetchIntervalInBackground: false,
@@ -100,12 +102,15 @@ const profileSocialsQueryConfig = ({
     // we should use the perister and map our data to be persistable
     if (
       mmkv.contains(
-        profileSocialsQueryStorageKey({ accountInboxId, peerAccountInboxId })
+        profileSocialsQueryStorageKey({ currentInboxId, profileLookupInboxId })
       )
     ) {
       const data = JSON.parse(
         mmkv.getString(
-          profileSocialsQueryStorageKey({ accountInboxId, peerAccountInboxId })
+          profileSocialsQueryStorageKey({
+            currentInboxId,
+            profileLookupInboxId,
+          })
         )!
       ) as ProfileSocialsData;
       return data;
@@ -115,72 +120,91 @@ const profileSocialsQueryConfig = ({
   // persister: reactQueryPersister,
 });
 
+/**
+ * Hook to fetch social profile data for a given inbox ID.
+ *
+ * If no profileLookupInboxId is provided but currentInboxId
+ * exists, it will fetch the current user's own profile.
+ * Uses react-query for caching and automatic background
+ * updates.
+ *
+ * @param {string} [currentInboxId] - Current user's inbox ID
+ * @param {string} [profileLookupInboxId] - Target inbox ID
+ *   to lookup
+ * @returns {UseQueryResult} Query result with profile data
+ *
+ * @example
+ * // Fetch another user's profile
+ * const { data } = useProfileSocialsQuery({
+ *   currentInboxId: "user123",
+ *   profileLookupInboxId: "user456"
+ * });
+ *
+ * @example
+ * // Fetch current user's own profile
+ * const { data } = useProfileSocialsQuery({
+ *   currentInboxId: "user123"
+ * });
+ */
 export const useProfileSocialsQuery = ({
-  accountInboxId,
-  peerAccountInboxId,
+  profileLookupInboxId,
 }: {
-  accountInboxId: string | undefined;
-  peerAccountInboxId: string | undefined;
+  profileLookupInboxId: string | undefined;
 }) => {
-  if (!peerAccountInboxId && accountInboxId) {
-    peerAccountInboxId = accountInboxId;
+  const currentInboxId = useCurrentInboxId();
+  if (!profileLookupInboxId && currentInboxId) {
+    profileLookupInboxId = currentInboxId;
   }
   return useQuery(
-    profileSocialsQueryConfig({ accountInboxId, peerAccountInboxId })
+    profileSocialsQueryConfig({ currentInboxId, profileLookupInboxId })
   );
 };
 
 export const useProfileSocialsQueries = ({
-  accountInboxId,
-  peerAccountInboxIds,
+  currentInboxId,
+  peerInboxIds,
 }: {
-  accountInboxId: string;
-  peerAccountInboxIds: string[];
+  currentInboxId: string;
+  peerInboxIds: string[];
 }) => {
   return useQueries({
-    queries: peerAccountInboxIds.map((peerAccountInboxId) =>
+    queries: peerInboxIds.map((peerInboxId) =>
       profileSocialsQueryConfig({
-        accountInboxId,
-        peerAccountInboxId,
+        currentInboxId,
+        profileLookupInboxId: peerInboxId,
       })
     ),
   });
 };
 
-// export const prefetchProfileSocialsQuery = (
-//   accountInboxId: string,
-//   peerAccountInboxIds: string[]
-// ) => {
-//   return queryClient.prefetchQuery(
-//     profileSocialsQueryConfig({ accountInboxId, peerAccountInboxIds })
-//   );
-// };
-
-export const fetchProfileSocialsQuery = (
-  accountInboxId: string,
-  peerAccountInboxId: string
-) => {
+export const fetchProfileSocialsQuery = ({
+  currentInboxId,
+  profileLookupInboxId,
+}: {
+  currentInboxId: string;
+  profileLookupInboxId: string;
+}) => {
   return queryClient.fetchQuery<IProfileSocials | null>(
     profileSocialsQueryConfig({
-      accountInboxId,
-      peerAccountInboxId,
+      currentInboxId,
+      profileLookupInboxId,
     })
   );
 };
 
 export const setProfileSocialsQueryData = ({
-  accountInboxId,
-  peerAccountInboxId,
+  currentInboxId,
+  profileLookupInboxId,
   data,
   updatedAt,
 }: {
-  accountInboxId: string;
-  peerAccountInboxId: string;
+  currentInboxId: string;
+  profileLookupInboxId: string;
   data: IProfileSocials;
   updatedAt?: number;
 }) => {
   return queryClient.setQueryData<ProfileSocialsData>(
-    profileSocialsQueryKey({ accountInboxId, peerAccountInboxId }),
+    profileSocialsQueryKey({ currentInboxId, profileLookupInboxId }),
     data,
     {
       updatedAt,
@@ -189,38 +213,43 @@ export const setProfileSocialsQueryData = ({
 };
 
 export const setProfileRecordSocialsQueryData = ({
-  accountInboxId,
+  currentInboxId,
   record,
 }: {
-  accountInboxId: string;
+  currentInboxId: string;
   record: Record<string, IProfileSocials>;
 }) => {
-  Object.keys(record).forEach((peerAccountInboxId) => {
+  Object.keys(record).forEach((profileLookupInboxId) => {
     setProfileSocialsQueryData({
-      accountInboxId,
-      peerAccountInboxId,
-      data: record[peerAccountInboxId],
+      currentInboxId,
+      profileLookupInboxId,
+      data: record[profileLookupInboxId],
     });
   });
 };
 
 export const getProfileSocialsQueryData = ({
-  accountInboxId,
-  peerAccountInboxId,
+  currentInboxId,
+  profileLookupInboxId,
 }: {
-  accountInboxId: string;
-  peerAccountInboxId: string;
+  currentInboxId: string;
+  profileLookupInboxId: string;
 }) => {
   return queryClient.getQueryData<ProfileSocialsData>(
-    profileSocialsQueryConfig({ accountInboxId, peerAccountInboxId }).queryKey
+    profileSocialsQueryConfig({ currentInboxId, profileLookupInboxId }).queryKey
   );
 };
 
-export const invalidateProfileSocialsQuery = (
-  accountInboxId: string,
-  peerAccountInboxId: string
-) => {
+export const invalidateProfileSocialsQuery = ({
+  profileLookupInboxId,
+}: {
+  profileLookupInboxId: string;
+}) => {
+  const currentInboxId = useCurrentInboxId();
+  if (!currentInboxId) {
+    return;
+  }
   queryClient.invalidateQueries({
-    queryKey: profileSocialsQueryKey({ accountInboxId, peerAccountInboxId }),
+    queryKey: profileSocialsQueryKey({ currentInboxId, profileLookupInboxId }),
   });
 };

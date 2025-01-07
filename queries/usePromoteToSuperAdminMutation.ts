@@ -12,16 +12,17 @@ import {
 import { useGroupQuery } from "./useGroupQuery";
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 
-export const usePromoteToSuperAdminMutation = (
-  account: string,
-  topic: ConversationTopic
-) => {
-  const { data: group } = useGroupQuery({ account, topic });
+export const usePromoteToSuperAdminMutation = (args: {
+  inboxId: string | undefined;
+  topic: ConversationTopic;
+}) => {
+  const { inboxId, topic } = args;
+  const { data: group } = useGroupQuery({ inboxId, topic });
 
   return useMutation({
-    mutationKey: promoteSuperAdminMutationKey(account, topic!),
+    mutationKey: promoteSuperAdminMutationKey(args),
     mutationFn: async (inboxId: InboxId) => {
-      if (!group || !account || !topic) {
+      if (!group || !inboxId || !topic) {
         return;
       }
       await group.addSuperAdmin(inboxId);
@@ -31,9 +32,12 @@ export const usePromoteToSuperAdminMutation = (
       if (!topic) {
         throw new Error("Topic is required");
       }
-      await cancelGroupMembersQuery(account, topic);
+      await cancelGroupMembersQuery({ inboxId, topic });
 
-      const previousGroupMembers = getGroupMembersQueryData(account, topic);
+      const previousGroupMembers = getGroupMembersQueryData({
+        inboxId,
+        topic,
+      });
       if (!previousGroupMembers) {
         return;
       }
@@ -42,7 +46,7 @@ export const usePromoteToSuperAdminMutation = (
         return;
       }
       newMembers.byId[inboxId].permissionLevel = "super_admin";
-      setGroupMembersQueryData(account, topic, newMembers);
+      setGroupMembersQueryData({ inboxId, topic }, newMembers);
 
       return { previousGroupMembers };
     },
@@ -54,7 +58,10 @@ export const usePromoteToSuperAdminMutation = (
       if (!topic) {
         return;
       }
-      setGroupMembersQueryData(account, topic, context.previousGroupMembers);
+      setGroupMembersQueryData(
+        { inboxId, topic },
+        context.previousGroupMembers
+      );
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess usePromoteToSuperAdminMutation");

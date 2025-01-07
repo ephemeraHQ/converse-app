@@ -55,6 +55,7 @@ export type NavigationParamList = {
   OnboardingGetStarted: undefined;
   OnboardingPrivy: undefined;
   OnboardingConnectWallet: {
+    inboxId: string;
     address: string;
   };
   OnboardingPrivateKey: undefined;
@@ -66,6 +67,7 @@ export type NavigationParamList = {
   NewAccountNavigator: undefined;
   NewAccountUserProfile: undefined;
   NewAccountConnectWallet: {
+    inboxId: string;
     address: string;
   };
   NewAccountPrivy: undefined;

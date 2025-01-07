@@ -7,7 +7,7 @@ import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useEffect, useState } from "react";
 
 export const useV3RequestItems = () => {
-  const currentAccount = useCurrentAccount();
+  const currentInboxId = useCurrentInboxId()();
   const { data, ...rest } = useConversationListQuery({
     account: currentAccount!,
     queryOptions: {

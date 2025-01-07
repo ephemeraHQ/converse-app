@@ -24,6 +24,7 @@ import { useInitConnectViaWalletState } from "./useInitConnectViaWalletState";
 
 type IConnectViaWalletProps = {
   address: string;
+  inboxId: string;
   onDoneConnecting: () => void;
   onErrorConnecting: (arg: { error: Error }) => void;
 };
@@ -31,7 +32,7 @@ type IConnectViaWalletProps = {
 export const ConnectViaWallet = memo(function ConnectViaWallet(
   props: IConnectViaWalletProps
 ) {
-  const { address, onErrorConnecting, onDoneConnecting } = props;
+  const { address, inboxId, onErrorConnecting, onDoneConnecting } = props;
 
   const finishedConnectingRef = useRef(false);
 
@@ -41,7 +42,7 @@ export const ConnectViaWallet = memo(function ConnectViaWallet(
     onBeforeRemove: () => {
       // Before we leave, make sure the user completed the flow otherwise disconnect
       if (!finishedConnectingRef.current) {
-        disconnect({ address });
+        disconnect({ inboxId });
       }
     },
     onFocus() {

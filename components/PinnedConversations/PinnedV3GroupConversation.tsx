@@ -13,7 +13,7 @@ import {
 import { translate } from "@/i18n";
 import { useSelect } from "@/data/store/storeHelpers";
 import { useHandleDeleteGroup } from "@/features/conversation-list/hooks/useHandleDeleteGroup";
-import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
+import { useToggleReadStatusForCurrentUser } from "@/features/conversation-list/hooks/useToggleReadStatusForCurrentUser";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
@@ -32,7 +32,7 @@ const closeContextMenu = () => {
 export const PinnedV3GroupConversation = ({
   group,
 }: PinnedV3GroupConversationProps) => {
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()()!;
 
   const topic = group.topic;
 
@@ -55,7 +55,7 @@ export const PinnedV3GroupConversation = ({
     timestampNs: timestamp,
   });
 
-  const toggleReadStatus = useToggleReadStatus({
+  const toggleReadStatus = useToggleReadStatusForCurrentUser({
     topic,
     isUnread,
     currentAccount,

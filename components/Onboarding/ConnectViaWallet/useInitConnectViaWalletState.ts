@@ -12,7 +12,7 @@ import {
 import { useConnectViaWalletContext } from "./ConnectViaWallet.context";
 import { ensureError } from "@utils/error";
 import { thirdwebClient } from "@utils/thirdweb";
-import { getInboxId } from "@utils/xmtpRN/signIn";
+import { getInboxIdFromCryptocurrencyAddress } from "@utils/xmtpRN/signIn";
 
 /**
  * For now let's keep Thirdweb and the hooks because I haven't found a better way to do it.
@@ -82,7 +82,7 @@ export function useInitConnectViaWalletState(args: { address: string }) {
 
         setIsInitializing(true);
 
-        const inboxId = await getInboxId(address);
+        const inboxId = await getInboxIdFromCryptocurrencyAddress(address);
 
         const v3Dbs = await getDatabaseFilesForInboxId(inboxId);
         const hasV3 = v3Dbs.filter((n) => n.name.endsWith(".db3")).length > 0;

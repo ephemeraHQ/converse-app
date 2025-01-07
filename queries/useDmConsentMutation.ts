@@ -9,7 +9,7 @@ import { mutateObjectProperties } from "@/utils/mutate-object-properties";
 import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
 import {
   consentToGroupsOnProtocolByAccount,
-  consentToInboxIdsOnProtocolByAccount,
+  consentToInboxIdsOnProtocolByInboxId,
 } from "@/utils/xmtpRN/contacts";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -25,7 +25,7 @@ export function useDmConsentMutation(args: {
 }) {
   const { peerInboxId, conversationId, topic } = args;
 
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()()!;
 
   return useMutation({
     mutationFn: async (args: { consent: "allow" | "deny" }) => {
@@ -39,7 +39,7 @@ export function useDmConsentMutation(args: {
           groupIds: [conversationId],
           consent: args.consent,
         }),
-        consentToInboxIdsOnProtocolByAccount({
+        consentToInboxIdsOnProtocolByInboxId({
           account: currentAccount,
           inboxIds: [peerInboxId],
           consent: args.consent,

@@ -2,7 +2,7 @@ import { translate } from "@i18n";
 import { useCallback, useState } from "react";
 import { Alert, Platform } from "react-native";
 
-import { currentAccount } from "@data/store/accountsStore";
+import { getCurrentInboxId } from "@data/store/accountsStore";
 import { Button } from "@design-system/Button/Button";
 import { useRouter } from "@navigation/useNavigation";
 import { isCurrentUser } from "@shared/utils/user";
@@ -12,13 +12,13 @@ import { canMessageByAccount } from "@utils/xmtpRN/contacts";
 import { usePreferredName } from "@/hooks/usePreferredName";
 
 type NavigationChatProps = {
-  address: string;
+  inboxId: string;
   groupMode?: boolean;
   addToGroup?: () => void;
 };
 
 export function NavigationChatButton({
-  address,
+  inboxId,
   groupMode,
   addToGroup,
 }: NavigationChatProps) {
@@ -27,24 +27,24 @@ export function NavigationChatButton({
   const navigation = useRouter();
 
   const [loading, setLoading] = useState(false);
-  const preferredName = usePreferredName(address);
-  const isCurrentUserAddress = isCurrentUser(address);
+  const preferredName = usePreferredName({ inboxId });
+  const isCurrentUserInboxId = isCurrentUser(inboxId);
 
   const openChat = useCallback(() => {
     // On Android the accounts are not in the navigation but in a drawer
     navigation.popToTop();
 
     navigate("Conversation", {
-      peer: address,
+      peer: inboxId,
     });
-  }, [address, navigation]);
+  }, [inboxId, navigation]);
 
   const addToGroupIfPossible = useCallback(async () => {
     if (loading) return;
     setLoading(true);
     const allowed = await canMessageByAccount({
       inboxId: getCurrentInboxId(),
-      peer: address,
+      peer: inboxId,
     });
     setLoading(false);
     // canGroupMessage() returns lowercase addresses
@@ -57,10 +57,10 @@ export function NavigationChatButton({
       return;
     }
     addToGroup?.();
-  }, [loading, address, addToGroup, preferredName]);
+  }, [loading, inboxId, addToGroup, preferredName]);
 
   const getButtonText = () => {
-    if (isCurrentUserAddress) return translate("you");
+    if (isCurrentUserInboxId) return translate("you");
     if (groupMode) {
       return loading ? translate("add_loading") : translate("add");
     }
@@ -68,7 +68,7 @@ export function NavigationChatButton({
   };
 
   const getButtonAction = () => {
-    if (isCurrentUserAddress) return undefined;
+    if (isCurrentUserInboxId) return undefined;
     if (groupMode) {
       return loading ? undefined : addToGroupIfPossible;
     }
@@ -78,7 +78,7 @@ export function NavigationChatButton({
   return (
     <Button
       variant={
-        isCurrentUserAddress
+        isCurrentUserInboxId
           ? "fill"
           : Platform.OS === "android"
             ? "link"
@@ -89,7 +89,7 @@ export function NavigationChatButton({
       }}
       text={getButtonText()}
       onPress={getButtonAction()}
-      disabled={isCurrentUserAddress}
+      disabled={isCurrentUserInboxId}
     />
   );
 }

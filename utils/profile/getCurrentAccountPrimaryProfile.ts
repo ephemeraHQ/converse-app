@@ -9,8 +9,8 @@ export function getCurrentAccountPrimaryProfile() {
   }
 
   const socials = getProfileSocialsQueryData({
-    accountInboxId: currentInboxId,
-    peerAccountInboxId: currentInboxId,
+    currentInboxId,
+    profileLookupInboxId: currentInboxId,
   });
 
   if (!socials) {

@@ -20,7 +20,7 @@ import {
   prefetchConversationListQuery,
 } from "@/queries/useConversationListQuery";
 import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
-import { getInboxId } from "./signIn";
+import { getInboxIdFromCryptocurrencyAddress } from "./signIn";
 
 const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;
@@ -35,21 +35,12 @@ export const getOrBuildXmtpClient = async ({
 }: {
   account: string;
 }): Promise<ConverseXmtpClientType | Client> => {
-  const lowerCaseInboxId = inboxId?.toLowerCase();
-  if (lowerCaseInboxId && xmtpClientByInboxId[lowerCaseInboxId]) {
-    return xmtpClientByInboxId[lowerCaseInboxId];
+  const lowerCaseAccount = account?.toLowerCase();
+  if (lowerCaseAccount && xmtpClientByAccount[lowerCaseAccount]) {
+    return xmtpClientByAccount[lowerCaseAccount];
   }
 
-  const address: string = "";
-  const inboxId = await getInboxId(address);
-
-  // const lowerCaseAccount = account.toLowerCase();
-  // if (account && xmtpClientByAccount[lowerCaseAccount]) {
-  //   return xmtpClientByAccount[lowerCaseAccount];
-  // }
-  // Return the existing instantiating promise to avoid race condition
-  // const alreadyInstantiating = instantiatingClientForAccount[lowerCaseAccount];
-  const alreadyInstantiating = instantiatingClientForInboxId[lowerCaseInboxId];
+  const alreadyInstantiating = instantiatingClientForInboxId[lowerCaseAccount];
   if (alreadyInstantiating) {
     return alreadyInstantiating;
   }
@@ -57,10 +48,14 @@ export const getOrBuildXmtpClient = async ({
   // blocking the Expo Async Thread
   if (Object.keys(instantiatingClientForAccount).length > 0) {
     await new Promise((r) => setTimeout(r, 200));
-    return getOrBuildXmtpClient({ account, inboxId });
+    return getOrBuildXmtpClient({ account });
   }
   // instantiatingClientForAccount[lowerCaseAccount] = (async () => {
-  instantiatingClientForInboxId[lowerCaseInboxId] = (async () => {
+  const inboxId = await getInboxIdFromCryptocurrencyAddress({
+    address: account,
+    cryptocurrency: "ETH",
+  });
+  instantiatingClientForInboxId[lowerCaseAccount] = (async () => {
     try {
       logger.debug("[XmtpRN] Getting client from address");
       // note(lustig) this function which talks to the sdk requires an ethereum address
@@ -70,23 +65,29 @@ export const getOrBuildXmtpClient = async ({
       logger.info(`[XmtpRN] Instantiated client for ${client.address}`);
       getChatStore({ inboxId }).getState().setLocalClientConnected(true);
       getChatStore({ inboxId }).getState().setErrored(false);
-      xmtpClientByInboxId[lowerCaseInboxId] = client;
+      xmtpClientByInboxId[inboxId] = client;
       return client;
     } catch (e: any) {
       getChatStore({ inboxId }).getState().setErrored(true);
       throw e;
     } finally {
-      delete instantiatingClientForInboxId[lowerCaseInboxId];
+      delete instantiatingClientForInboxId[inboxId];
     }
   })();
-  return instantiatingClientForInboxId[lowerCaseInboxId] as Promise<
+  return instantiatingClientForInboxId[inboxId] as Promise<
     ConverseXmtpClientType | Client
   >;
 };
 
-export const onSyncLost = async (account: string, error: any) => {
+export const onSyncLost = async ({
+  inboxId,
+  error,
+}: {
+  inboxId: string;
+  error: any;
+}) => {
   // If there is an error let's show it
-  getChatStore(account).getState().setReconnecting(true);
+  getChatStore({ inboxId }).getState().setReconnecting(true);
   // If error is a libxmtp database reconnection issue, let's
   // try to reconnect if we're active
   if (
@@ -103,81 +104,94 @@ export const onSyncLost = async (account: string, error: any) => {
       // as reopening the app will launch a resync
     } else {
       logger.error(error, {
-        context: `An error occured while syncing for ${account}`,
+        context: `An error occured while syncing for ${inboxId}`,
       });
     }
   } else {
     logger.error(error, {
-      context: `An error occured while syncing for ${account}`,
+      context: `An error occured while syncing for ${inboxId}`,
     });
   }
 };
 
 const streamingAccounts: { [account: string]: boolean } = {};
+const streamingInboxIds: { [inboxId: string]: boolean } = {};
 
-const syncClientConversationList = async (account: string) => {
+const syncClientConversationList = async ({ inboxId }: { inboxId: string }) => {
   try {
     // Load the persisted conversation list
-    await fetchPersistedConversationListQuery({ account });
+    await fetchPersistedConversationListQuery({ inboxId });
     // Streaming conversations
     await retryWithBackoff({
-      fn: () => streamConversations(account),
+      fn: () => streamConversations({ inboxId }),
       retries: 5,
       delay: 1000,
       factor: 2,
       maxDelay: 30000,
-      context: `streaming conversations for ${account}`,
+      context: `streaming conversations for ${inboxId}`,
     }).catch((e) => {
       // Streams are good to have, but should not prevent the app from working
       logger.error(e, {
-        context: `Failed to stream conversations for ${account} no longer retrying`,
+        context: `Failed to stream conversations for ${inboxId} no longer retrying`,
       });
     });
     // Streaming all messages
     await retryWithBackoff({
-      fn: () => streamAllMessages(account),
+      fn: () => streamAllMessages({ inboxId }),
       retries: 5,
       delay: 1000,
       factor: 2,
       maxDelay: 30000,
-      context: `streaming all messages for ${account}`,
+      context: `streaming all messages for ${inboxId}`,
     }).catch((e) => {
       // Streams are good to have, but should not prevent the app from working
       logger.error(e, {
-        context: `Failed to stream all messages for ${account} no longer retrying`,
+        context: `Failed to stream all messages for ${inboxId} no longer retrying`,
       });
     });
     // Prefetch the conversation list so when we land on the conversation list
     // we have it ready, this will include syncing all groups
-    setupAccountTopicSubscription(account);
-    await prefetchConversationListQuery({ account });
+    setupAccountTopicSubscription(inboxId);
+    await prefetchConversationListQuery({ inboxId });
   } catch (e) {
     logger.error(e, {
-      context: `Failed to fetch persisted conversation list for ${account}`,
+      context: `Failed to fetch persisted conversation list for ${inboxId}`,
     });
   }
 };
 
-export const syncConversationListXmtpClient = async (account: string) => {
+export const syncConversationListXmtpClient = async ({
+  inboxId,
+}: {
+  inboxId: string;
+}) => {
   return retryWithBackoff({
-    fn: () => syncClientConversationList(account),
+    fn: () => syncClientConversationList({ inboxId }),
     retries: 5,
     delay: 1000,
     factor: 2,
     maxDelay: 30000,
-    context: `syncing ${account}`,
-    onError: async (e) => {
-      await onSyncLost(account, e);
+    context: `syncing ${inboxId}`,
+    onError: async (error) => {
+      await onSyncLost({ inboxId, error });
     },
   });
 };
 
-export const deleteXmtpClient = async (account: string) => {
-  if (account in xmtpClientByAccount) {
-    stopStreamingAllMessage(account);
-    stopStreamingConversations(account);
+export const deleteXmtpClient = async ({
+  inboxId,
+}: {
+  inboxId: string | undefined;
+}) => {
+  if (!inboxId) {
+    logger.error("No inboxId provided to deleteXmtpClient");
+    return;
   }
-  delete xmtpClientByAccount[account];
-  delete instantiatingClientForAccount[account];
-  delete streamingAccounts[account];
+  if (xmtpClientByInboxId[inboxId]) {
+    stopStreamingAllMessage({ inboxId });
+    stopStreamingConversations({ inboxId });
+  }
+  delete xmtpClientByInboxId[inboxId];
+  delete instantiatingClientForInboxId[inboxId];
+  delete streamingInboxIds[inboxId];
 };

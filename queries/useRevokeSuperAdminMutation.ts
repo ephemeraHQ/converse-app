@@ -14,16 +14,17 @@ import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { captureError } from "@/utils/capture-error";
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 
-export const useRevokeSuperAdminMutation = (
-  account: string,
-  topic: ConversationTopic
-) => {
-  const { data: group } = useGroupQuery({ account, topic });
+export const useRevokeSuperAdminMutation = (args: {
+  inboxId: string | undefined;
+  topic: ConversationTopic;
+}) => {
+  const { inboxId, topic } = args;
+  const { data: group } = useGroupQuery({ inboxId, topic });
 
   return useMutation({
-    mutationKey: revokeSuperAdminMutationKey(account, topic!),
+    mutationKey: revokeSuperAdminMutationKey(args),
     mutationFn: async (inboxId: InboxId) => {
-      if (!group || !account || !topic) {
+      if (!group || !inboxId || !topic) {
         return;
       }
       await group.removeSuperAdmin(inboxId);
@@ -33,9 +34,12 @@ export const useRevokeSuperAdminMutation = (
       if (!topic) {
         return;
       }
-      await cancelGroupMembersQuery(account, topic);
+      await cancelGroupMembersQuery({ inboxId, topic });
 
-      const previousGroupMembers = getGroupMembersQueryData(account, topic);
+      const previousGroupMembers = getGroupMembersQueryData({
+        inboxId,
+        topic,
+      });
       if (!previousGroupMembers) {
         return;
       }
@@ -44,7 +48,7 @@ export const useRevokeSuperAdminMutation = (
         return;
       }
       newMembers.byId[inboxId].permissionLevel = "member";
-      setGroupMembersQueryData(account, topic, newMembers);
+      setGroupMembersQueryData({ inboxId, topic }, newMembers);
 
       return { previousGroupMembers };
     },
@@ -56,7 +60,10 @@ export const useRevokeSuperAdminMutation = (
       if (context?.previousGroupMembers === undefined) {
         return;
       }
-      setGroupMembersQueryData(account, topic, context.previousGroupMembers);
+      setGroupMembersQueryData(
+        { inboxId, topic },
+        context.previousGroupMembers
+      );
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess useRevokeSuperAdminMutation");

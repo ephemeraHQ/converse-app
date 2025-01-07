@@ -54,6 +54,7 @@ import config from "../config";
 import {
   currentAccount,
   useCurrentAccount,
+  useCurrentInboxId,
   useLoggedWithPrivy,
   useRecommendationsStore,
   useSettingsStore,
@@ -67,23 +68,24 @@ import { useGroupMembers } from "../hooks/useGroupMembers";
 import { useGroupPermissions } from "../hooks/useGroupPermissions";
 import { evmHelpers } from "../utils/evm/helpers";
 import {
-  getAddressIsAdmin,
-  getAddressIsSuperAdmin,
+  isUserAdminByInboxId,
+  isUserSuperAdminByInboxId,
 } from "../utils/groupUtils/adminUtils";
 import { ConversationNavParams } from "../features/conversation/conversation.nav";
 
-import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
-import { consentToAddressesOnProtocolByAccount } from "../utils/xmtpRN/contacts";
+import { consentToInboxIdsOnProtocolForCurrentUser } from "../utils/xmtpRN/contacts";
 
 import { Icon } from "@/design-system/Icon/Icon";
 import { NotificationPermissionStatus } from "@/features/notifications/types/Notifications.types";
 import { requestPushNotificationsPermissions } from "@/features/notifications/utils/requestPushNotificationsPermissions";
-import { useCurrentAccountXmtpClient } from "@/hooks/useCurrentAccountXmtpClient";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
+import { getPreferredName } from "@/utils/profile";
+import { getInbox } from "@/utils/xmtpRN/conversations";
+import { isCurrentUserInboxId } from "@/hooks/use-current-account-inbox-id";
 
 export default function ProfileScreen() {
   return (
@@ -96,19 +98,14 @@ export default function ProfileScreen() {
 
 const ExternalWalletPickerWrapper = memo(
   function ExternalWalletPickerWrapper() {
-    const peerAddress = useRoute<"Profile">().params.address;
-    const { data: socials } = useProfileSocials(peerAddress);
-    const { data: client } = useCurrentAccountXmtpClient();
+    const peerInboxId = useRoute<"Profile">().params.inboxId;
+    const { data: socials } = useProfileSocials({ peerInboxId });
 
     return (
       <ExternalWalletPicker
         title={translate("revoke_wallet_picker_title")}
         subtitle={translate("revoke_wallet_picker_description", {
-          wallet: socials
-            ? getPreferredUsername(socials)
-            : client
-              ? shortAddress(client.address)
-              : "",
+          wallet: getPreferredName(socials),
         })}
       />
     );
@@ -119,24 +116,24 @@ function ProfileScreenImpl() {
   const navigation = useRouter();
   const route = useRoute<"Profile">();
 
-  const userAddress = useCurrentAccount() as string;
+  const currentInboxId = useCurrentInboxId();
   const USDCBalance = useWalletStore((s) => s.USDCBalance);
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const [copiedAddresses, setCopiedAddresses] = useState<{
     [address: string]: boolean;
   }>({});
-  const peerAddress = route.params.address;
+  const peerInboxId = route.params.inboxId;
   const recommendationTags = useRecommendationsStore(
-    (s) => s.frens[peerAddress]?.tags
+    (s) => s.frens[peerInboxId]?.tags
   );
   const isBlockedPeer = useSettingsStore(
-    (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
+    (s) => s.peersStatus[peerInboxId.toLowerCase()] === "blocked"
   );
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
-  const { data: socials } = useProfileSocials(peerAddress);
-  const preferredUserName = usePreferredName(peerAddress);
-  const preferredAvatarUri = usePreferredAvatarUri(peerAddress);
+  const { data: socials } = useProfileSocials({ peerInboxId });
+  const preferredUserName = usePreferredName({ inboxId: peerInboxId });
+  const preferredAvatarUri = usePreferredAvatarUri({ inboxId: peerInboxId });
   const groupTopic = route.params.fromGroupTopic;
   const {
     members: groupMembers,
@@ -145,30 +142,14 @@ function ProfileScreenImpl() {
     revokeSuperAdmin,
     promoteToAdmin,
     promoteToSuperAdmin,
-  } = useGroupMembers(groupTopic!);
+  } = useGroupMembers({ topic: groupTopic! });
   const { permissions: groupPermissions } = useGroupPermissions(groupTopic!);
 
   const { getXmtpSigner } = useXmtpSigner();
-  const privySigner = usePrivySigner();
 
   const insets = useSafeAreaInsets();
   const shouldShowError = useShouldShowErrored();
-  useEffect(() => {
-    refreshBalanceForAccount(userAddress);
-  }, [userAddress]);
-
   const [refreshingBalance, setRefreshingBalance] = useState(false);
-
-  const manuallyRefreshBalance = useCallback(async () => {
-    setRefreshingBalance(true);
-    const now = new Date().getTime();
-    await refreshBalanceForAccount(userAddress, 0);
-    const after = new Date().getTime();
-    if (after - now < 1000) {
-      await new Promise((r) => setTimeout(r, 1000 - after + now));
-    }
-    setRefreshingBalance(false);
-  }, [userAddress]);
 
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore(
@@ -226,14 +207,16 @@ function ProfileScreenImpl() {
 
   const addressItems = [
     ...getAddressItemsFromArray(
-      [{ title: peerAddress, address: peerAddress }],
+      [{ title: peerInboxId, address: peerInboxId }],
       "title",
       "address"
     ),
   ];
 
   const isPrivy = useLoggedWithPrivy();
-  const showDisconnectActionSheet = useDisconnectActionSheet();
+  const showDisconnectActionSheet = useDisconnectActionSheet({
+    inboxId: currentInboxId,
+  });
 
   const getSocialItemsFromArray = useCallback(
     <T,>(
@@ -290,41 +273,41 @@ function ProfileScreenImpl() {
     ),
   ];
 
-  const isMyProfile = peerAddress.toLowerCase() === userAddress?.toLowerCase();
+  const isMyProfile = isCurrentUserInboxId(peerInboxId);
   const appVersion = Constants.expoConfig?.version;
   const buildNumber =
     Platform.OS === "ios"
       ? Constants.expoConfig?.ios?.buildNumber
       : Constants.expoConfig?.android?.versionCode;
-  const balanceItems: TableViewItemType[] = [
-    {
-      id: "balance",
-      title: translate("your_balance_usdc"),
-      rightView: (
-        <View style={styles.balanceContainer}>
-          <Text style={styles.balance}>
-            ${evmHelpers.fromDecimal(USDCBalance, config.evm.USDC.decimals, 2)}
-          </Text>
-          <View style={{ width: 30 }}>
-            {!refreshingBalance && (
-              <View style={{ left: Platform.OS === "ios" ? 0 : -14 }}>
-                <TableViewPicto
-                  symbol="arrow.clockwise"
-                  color={
-                    Platform.OS === "android"
-                      ? primaryColor(colorScheme)
-                      : undefined
-                  }
-                  onPress={manuallyRefreshBalance}
-                />
-              </View>
-            )}
-            {refreshingBalance && <ActivityIndicator />}
-          </View>
-        </View>
-      ),
-    },
-  ];
+  // const balanceItems: TableViewItemType[] = [
+  //   {
+  //     id: "balance",
+  //     title: translate("your_balance_usdc"),
+  //     rightView: (
+  //       <View style={styles.balanceContainer}>
+  //         <Text style={styles.balance}>
+  //           ${evmHelpers.fromDecimal(USDCBalance, config.evm.USDC.decimals, 2)}
+  //         </Text>
+  //         <View style={{ width: 30 }}>
+  //           {!refreshingBalance && (
+  //             <View style={{ left: Platform.OS === "ios" ? 0 : -14 }}>
+  //               <TableViewPicto
+  //                 symbol="arrow.clockwise"
+  //                 color={
+  //                   Platform.OS === "android"
+  //                     ? primaryColor(colorScheme)
+  //                     : undefined
+  //                 }
+  //                 onPress={manuallyRefreshBalance}
+  //               />
+  //             </View>
+  //           )}
+  //           {refreshingBalance && <ActivityIndicator />}
+  //         </View>
+  //       </View>
+  //     ),
+  //   },
+  // ];
 
   if (isPrivy) {
     balanceItems.push({
@@ -358,21 +341,21 @@ function ProfileScreenImpl() {
                   return false;
                 }
                 const params = route.params as ConversationNavParams;
-                return params?.peer === peerAddress.toLowerCase();
+                return params?.peer === peerInboxId.toLowerCase();
               });
             if (isPreviouslyInNavStack) {
               navigation.popToTop();
               navigation.navigate({
                 name: "Conversation",
                 params: {
-                  peer: peerAddress,
+                  peer: peerInboxId,
                 },
               });
             } else {
               navigation.popToTop();
               navigation.dispatch(
                 StackActions.push("Conversation", {
-                  peer: peerAddress,
+                  peer: peerInboxId,
                 })
               );
             }
@@ -419,15 +402,14 @@ function ProfileScreenImpl() {
             ...actionSheetColors(colorScheme),
           },
           (selectedIndex?: number) => {
-            if (selectedIndex === 0 && peerAddress) {
+            if (selectedIndex === 0 && peerInboxId) {
               const newStatus = isBlockedPeer ? "consented" : "blocked";
               const consentOnProtocol = isBlockedPeer ? "allow" : "deny";
-              consentToAddressesOnProtocolByAccount({
-                inboxId: getCurrentInboxId(),
-                addresses: [peerAddress],
+              consentToInboxIdsOnProtocolForCurrentUser({
+                inboxIds: [peerInboxId],
                 consent: consentOnProtocol,
               });
-              setPeersStatus({ [peerAddress]: newStatus });
+              setPeersStatus({ [peerInboxId]: newStatus });
 
               // Pop to conversation list, antepenultimate screen in stack
               navigation.pop(2);
@@ -440,17 +422,23 @@ function ProfileScreenImpl() {
     if (!groupTopic || !groupMembers) {
       return items;
     }
-    const peerId = groupMembers.byAddress[peerAddress];
-    if (!peerId) {
+    const peer = groupMembers.byId[peerInboxId];
+    if (!peer) {
       return items;
     }
-    const currentAccountIsAdmin = getAddressIsAdmin(groupMembers, userAddress);
-    const currentAccountIsSuperAdmin = getAddressIsSuperAdmin(
-      groupMembers,
-      userAddress
+    const currentAccountIsAdmin = isUserAdminByInboxId(
+      currentInboxId,
+      groupMembers
     );
-    const peerIsAdmin = getAddressIsAdmin(groupMembers, peerAddress);
-    const peerIsSuperAdmin = getAddressIsSuperAdmin(groupMembers, peerAddress);
+    const currentAccountIsSuperAdmin = isUserSuperAdminByInboxId(
+      currentInboxId,
+      groupMembers
+    );
+    const peerIsAdmin = isUserAdminByInboxId(currentInboxId, groupMembers);
+    const peerIsSuperAdmin = isUserSuperAdminByInboxId(
+      currentInboxId,
+      groupMembers
+    );
     if (
       memberCanUpdateGroup(
         groupPermissions?.removeMemberPolicy,
@@ -474,8 +462,8 @@ function ProfileScreenImpl() {
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
-              if (selectedIndex === 0 && peerId) {
-                await removeMember([peerId]);
+              if (selectedIndex === 0 && peerInboxId) {
+                await removeMember([peerInboxId]);
               }
             }
           );
@@ -506,8 +494,8 @@ function ProfileScreenImpl() {
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
-              if (selectedIndex === 0 && peerId) {
-                await promoteToAdmin(peerId);
+              if (selectedIndex === 0 && peerInboxId) {
+                await promoteToAdmin(peerInboxId);
               }
             }
           );
@@ -534,8 +522,8 @@ function ProfileScreenImpl() {
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
-              if (selectedIndex === 0 && peerId) {
-                await promoteToSuperAdmin(peerId);
+              if (selectedIndex === 0 && peerInboxId) {
+                await promoteToSuperAdmin(peerInboxId);
               }
             }
           );
@@ -558,8 +546,8 @@ function ProfileScreenImpl() {
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
-              if (selectedIndex === 0 && peerId) {
-                await revokeSuperAdmin(peerId);
+              if (selectedIndex === 0 && peerInboxId) {
+                await revokeSuperAdmin(peerInboxId);
               }
             }
           );
@@ -590,8 +578,8 @@ function ProfileScreenImpl() {
               ...actionSheetColors(colorScheme),
             },
             async (selectedIndex?: number) => {
-              if (selectedIndex === 0 && peerAddress) {
-                await revokeAdmin(peerId);
+              if (selectedIndex === 0 && peerInboxId) {
+                await revokeAdmin(peerInboxId);
               }
             }
           );
@@ -605,8 +593,6 @@ function ProfileScreenImpl() {
     colorScheme,
     groupTopic,
     groupMembers,
-    peerAddress,
-    userAddress,
     groupPermissions?.removeMemberPolicy,
     groupPermissions?.addAdminPolicy,
     groupPermissions?.removeAdminPolicy,
@@ -693,7 +679,7 @@ function ProfileScreenImpl() {
                 // @todo => check if this is the right timing on split screen / web / android
                 setTimeout(() => {
                   navigation.navigate("Conversation", {
-                    peer: route.params.address,
+                    peer: route.params.inboxId,
                   });
                 }, 300);
               },
@@ -804,9 +790,11 @@ function ProfileScreenImpl() {
                     : primaryColor(colorScheme),
                 action: async () => {
                   try {
-                    const client = (await getOrBuildXmtpClient(
-                      userAddress
-                    )) as ConverseXmtpClientType;
+                    const client = await getInbox({
+                      caller: "revokeOtherInstallations",
+                      ifNotFoundStrategy: "logAndReturnUndefined",
+                    });
+                    if (!client) return;
                     const otherInstallations =
                       await getOtherInstallations(client);
                     if (otherInstallations.length === 0) {

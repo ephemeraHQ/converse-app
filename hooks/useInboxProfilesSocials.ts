@@ -1,8 +1,11 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
-import { useInboxProfileSocialsQueries } from "@queries/useInboxProfileSocialsQuery";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
+import { useInboxProfileSocialsQueries } from "@/queries/useInboxProfileSocialsQuery";
 import { InboxId } from "@xmtp/react-native-sdk";
 
 export const useInboxProfilesSocials = (inboxIds: InboxId[]) => {
-  const currentAccount = useCurrentAccount();
-  return useInboxProfileSocialsQueries(currentAccount!, inboxIds);
+  const currentInboxId = useCurrentInboxId();
+  return useInboxProfileSocialsQueries({
+    currentInboxId: currentInboxId!,
+    profileLookupInboxIds: inboxIds,
+  });
 };

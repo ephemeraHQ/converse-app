@@ -21,13 +21,12 @@ import {
 import { Recommendation } from "./Recommendation";
 import config from "@config";
 import {
-  useAccountsStore,
-  useCurrentAccount,
+  useCurrentInboxId,
   useRecommendationsStore,
 } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { useRouter } from "@navigation/useNavigation";
-import { refreshRecommendationsForAccount } from "@utils/recommendations";
+import { refreshRecommendationsForInboxId } from "@utils/recommendations";
 import ActivityIndicator from "@components/ActivityIndicator/ActivityIndicator";
 import { translate } from "@/i18n";
 
@@ -42,14 +41,15 @@ export default function Recommendations({
 }: {
   visibility: "FULL" | "EMBEDDED" | "HIDDEN";
   groupMode?: boolean;
-  groupMembers?: (IProfileSocials & { address: string })[];
-  addToGroup?: (member: IProfileSocials & { address: string }) => void;
+  groupMembers?: (IProfileSocials & { inboxId: string })[];
+  addToGroup?: (member: IProfileSocials & { inboxId: string }) => void;
   showTitle?: boolean;
 }) {
   const navigation = useRouter();
 
-  const userAddress = useCurrentAccount();
-  const currentAccount = useAccountsStore((s) => s.currentAccount);
+  // const userAddress = useCurrentAccount();
+  // const currentAccount = useAccountsStore((s) => s.currentAccount);
+  const currentInboxId = useCurrentInboxId();
   const {
     frens,
     setLoadingRecommendations,
@@ -101,19 +101,18 @@ export default function Recommendations({
     // On load, let's load frens
     const getRecommendations = async () => {
       setLoadingRecommendations();
-      await refreshRecommendationsForAccount(currentAccount);
+      await refreshRecommendationsForInboxId(currentInboxId);
     };
     const now = new Date().getTime();
-    if (!loading && userAddress && now - updatedAt >= EXPIRE_AFTER) {
+    if (!loading && currentInboxId && now - updatedAt >= EXPIRE_AFTER) {
       getRecommendations();
     }
   }, [
     loading,
     setLoadingRecommendations,
     setRecommendations,
-    userAddress,
+    currentInboxId,
     updatedAt,
-    currentAccount,
   ]);
 
   const keyExtractor = useCallback((address: string) => address, []);
@@ -147,7 +146,7 @@ export default function Recommendations({
       // If address is in groupMembers, remove profile from recommendations
       if (
         groupMembers?.some(
-          (member) => member.address.toLowerCase() === item.toLowerCase()
+          (member) => member.inboxId.toLowerCase() === item.toLowerCase()
         )
       ) {
         return null;
@@ -155,7 +154,7 @@ export default function Recommendations({
 
       return (
         <Recommendation
-          address={item}
+          peerInboxId={item}
           recommendationData={frens[item]}
           isVisible={!!viewableItems[item]}
           groupMode={groupMode}

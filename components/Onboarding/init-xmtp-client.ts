@@ -1,7 +1,6 @@
 import { Signer } from "ethers";
 import { Alert } from "react-native";
 
-// import { invalidateProfileSocialsQuery } from "../../data/helpers/profiles/profilesUpdate";
 import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
 import {
   getSettingsStore,

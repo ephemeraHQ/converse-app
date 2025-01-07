@@ -6,11 +6,11 @@ import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { saveTopicsData } from "@/utils/api";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { consentToInboxIdsOnProtocolByAccount } from "@/utils/xmtpRN/contacts";
+import { consentToInboxIdsOnProtocolByInboxId } from "@/utils/xmtpRN/contacts";
 import { useCallback } from "react";
 
 export const useHandleDeleteGroup = (group: GroupWithCodecsType) => {
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()()!;
   const { theme } = useAppTheme();
   const colorScheme = theme.isDark ? "dark" : "light";
   const { setTopicsData } = useChatStore(useSelect(["setTopicsData"]));
@@ -49,7 +49,7 @@ export const useHandleDeleteGroup = (group: GroupWithCodecsType) => {
           },
         });
         await group.updateConsent("denied");
-        await consentToInboxIdsOnProtocolByAccount({
+        await consentToInboxIdsOnProtocolByInboxId({
           account: currentAccount,
           inboxIds: [group.addedByInboxId],
           consent: "deny",
