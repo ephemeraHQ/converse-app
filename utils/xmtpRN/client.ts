@@ -134,18 +134,6 @@ export const useCheckCurrentInstallation = () => {
 export const dropXmtpClient = (installationId: InstallationId) =>
   Client.dropClient(installationId);
 
-export const requestMessageHistorySync = async (
-  client: ConverseXmtpClientType
-) => client.requestMessageHistorySync();
-
-export const requestMessageHistorySyncByAccount = async (account: string) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  if (!client) {
-    throw new Error("Client not found");
-  }
-  await requestMessageHistorySync(client);
-};
-
 export type InstallationSignature = {
   installationPublicKey: string;
   installationKeySignature: string;
