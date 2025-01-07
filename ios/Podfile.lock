@@ -424,7 +424,7 @@ PODS:
   - libwebp/sharpyuv (1.3.2)
   - libwebp/webp (1.3.2):
     - libwebp/sharpyuv
-  - LibXMTP (3.0.13)
+  - LibXMTP (3.0.15)
   - MessagePacker (0.4.7)
   - MMKV (1.3.3):
     - MMKVCore (~> 1.3.3)
@@ -2247,18 +2247,18 @@ PODS:
   - "sqlite3/common (3.45.3+1)"
   - SwiftProtobuf (1.28.2)
   - UMAppLoader (4.6.0)
-  - XMTP (3.0.19):
+  - XMTP (3.0.21):
     - Connect-Swift (= 1.0.0)
     - CryptoSwift (= 1.8.3)
     - CSecp256k1 (~> 0.2)
-    - LibXMTP (= 3.0.13)
+    - LibXMTP (= 3.0.15)
     - SQLCipher (= 4.5.7)
-  - XMTPReactNative (3.1.4):
+  - XMTPReactNative (3.1.5):
     - CSecp256k1 (~> 0.2)
     - ExpoModulesCore
     - MessagePacker
     - SQLCipher (= 4.5.7)
-    - XMTP (= 3.0.19)
+    - XMTP (= 3.0.21)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -2404,7 +2404,7 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - Sentry/HybridSDK (= 8.36.0)
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 3.0.19)
+  - XMTP (= 3.0.21)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2783,20 +2783,20 @@ SPEC CHECKSUMS:
   FirebaseCore: e0510f1523bc0eb21653cac00792e1e2bd6f1771
   FirebaseCoreInternal: d98ab91e2d80a56d7b246856a8885443b302c0c2
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
-  glog: fdfdfe5479092de0c4bdbebedd9056951f092c4f
+  glog: 69ef571f3de08433d766d614c73a9838a06bf7eb
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
   hermes-engine: ea92f60f37dba025e293cbe4b4a548fd26b610a0
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
-  LibXMTP: 3b4b45c0edd404de164e26c7920af5ea0ebb3e17
+  LibXMTP: ad2c28778d7273c499b12dbf5493978c58d76858
   MessagePacker: ab2fe250e86ea7aedd1a9ee47a37083edd41fd02
   MMKV: f902fb6719da13c2ab0965233d8963a59416f911
   MMKVAppExtension: fcf23c6b250cc87db63507bc57be8e6ed378168d
   MMKVCore: d26e4d3edd5cb8588c2569222cbd8be4231374e9
   OpenSSL-Universal: b60a3702c9fea8b3145549d421fdb018e53ab7b4
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  RCT-Folly: 02617c592a293bd6d418e0a88ff4ee1f88329b47
+  RCT-Folly: 34124ae2e667a0e5f0ea378db071d27548124321
   RCTDeprecation: 726d24248aeab6d7180dac71a936bbca6a994ed1
   RCTRequired: a94e7febda6db0345d207e854323c37e3a31d93b
   RCTTypeSafety: 28e24a6e44f5cbf912c66dde6ab7e07d1059a205
@@ -2896,10 +2896,10 @@ SPEC CHECKSUMS:
   sqlite3: 02d1f07eaaa01f80a1c16b4b31dfcbb3345ee01a
   SwiftProtobuf: 4dbaffec76a39a8dc5da23b40af1a5dc01a4c02d
   UMAppLoader: f17a5ee8e85b536ace0fc254b447a37ed198d57e
-  XMTP: b5311154b2a3cda7c07ce78ae9fa6d111bac979d
-  XMTPReactNative: 2a8cb6762dd530574888fe1a0ea209baf33b3155
+  XMTP: 2c5dd2116778d1b547ac99b5b2396318d02c24d1
+  XMTPReactNative: 6b61a44655d35ddf870b8874fb45a653ec399a24
   Yoga: b05994d1933f507b0a28ceaa4fdb968dc18da178
 
-PODFILE CHECKSUM: e4ee1191ed956b0a582bdfa999017e53a06ef541
+PODFILE CHECKSUM: a7f63952e49b9be6c6e454573c0a6ce8aebddbfb
 
 COCOAPODS: 1.16.2
