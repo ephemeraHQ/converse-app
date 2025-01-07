@@ -24,6 +24,7 @@ Notifications.addNotificationResponseReceivedListener(
 
 // On Android, we handle background notifications in JS
 // while on iOS, we handle them directly in Swift
+
 if (Platform.OS === "android") {
   defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => {
     if (error) {

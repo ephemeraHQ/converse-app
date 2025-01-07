@@ -1,13 +1,9 @@
 import { useConversationListGroupItem } from "@hooks/useConversationListGroupItem";
-import { conversationIsGroup } from "@utils/groupUtils/conversationContainerHelpers";
-import {
-  DmWithCodecsType,
-  GroupWithCodecsType,
-} from "@/utils/xmtpRN/client.types";
 import React from "react";
 import { PinnedV3GroupConversation } from "./PinnedV3GroupConversation";
 import { PinnedV3DMConversation } from "./PinnedV3DMConversation";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 
 type PinnedV3ConversationProps = {
   topic: string;
@@ -18,12 +14,8 @@ export const PinnedV3Conversation = ({ topic }: PinnedV3ConversationProps) => {
   if (!conversation) {
     return null;
   }
-  if (conversationIsGroup(conversation)) {
-    return (
-      <PinnedV3GroupConversation group={conversation as GroupWithCodecsType} />
-    );
+  if (isConversationGroup(conversation)) {
+    return <PinnedV3GroupConversation group={conversation} />;
   }
-  return (
-    <PinnedV3DMConversation conversation={conversation as DmWithCodecsType} />
-  );
+  return <PinnedV3DMConversation conversation={conversation} />;
 };

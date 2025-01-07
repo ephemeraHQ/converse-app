@@ -1,12 +1,13 @@
-import mmkv from "@utils/mmkv";
-import * as Notifications from "expo-notifications";
+import { clearNotificationBadgeForAccount } from "./notifications-badge";
 
 export const resetNotifications = async (
+  account: string,
   timeout: number = 0
 ): Promise<void> => {
   setTimeout(async () => {
-    await Notifications.dismissAllNotificationsAsync();
-    await Notifications.setBadgeCountAsync(0);
-    mmkv.set("notifications-badge", 0);
+    if (!account) {
+      return;
+    }
+    clearNotificationBadgeForAccount(account);
   }, timeout);
 };

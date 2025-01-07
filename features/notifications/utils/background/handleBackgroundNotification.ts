@@ -14,6 +14,7 @@ import { AppState } from "react-native";
 export const handleBackgroundNotification = async (
   rawBody: string | undefined
 ) => {
+  logger.info("handleBackgroundNotification", rawBody);
   let objectBody: unknown = {};
   if (rawBody) {
     try {
