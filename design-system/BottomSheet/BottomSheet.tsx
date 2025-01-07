@@ -1,9 +1,6 @@
-import BottomSheet, {
-  BottomSheetView,
-  BottomSheetProps,
-} from "@gorhom/bottom-sheet";
+import BottomSheetBase, { BottomSheetProps } from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import React, { forwardRef, memo } from "react";
+import React, { forwardRef, memo, useMemo } from "react";
 import { useAppTheme } from "@theme/useAppTheme";
 import { BottomSheetBackdropOpacity } from "./BottomSheetBackdropOpacity";
 
@@ -11,36 +8,64 @@ export type IBottomSheetProps = BottomSheetProps & {
   children: React.ReactNode;
 };
 
-export const CustomBottomSheet = memo(
+export const BottomSheet = memo(
   forwardRef<BottomSheetMethods, IBottomSheetProps>(
-    function CustomBottomSheet(props, ref) {
+    function BottomSheet(props, ref) {
       const {
         children,
         backdropComponent = BottomSheetBackdropOpacity,
+        handleIndicatorStyle,
+        handleStyle,
+        backgroundStyle,
         ...rest
       } = props;
 
       const { theme } = useAppTheme();
 
-      return (
-        <BottomSheet
-          ref={ref}
-          backdropComponent={backdropComponent}
-          handleIndicatorStyle={{
+      const combinedHandleIndicatorStyle = useMemo(
+        () => [
+          {
             backgroundColor: theme.colors.background.raised,
-          }}
-          handleStyle={{
+          },
+          handleIndicatorStyle,
+        ],
+        [theme.colors.background.raised, handleIndicatorStyle]
+      );
+
+      const combinedHandleStyle = useMemo(
+        () => [
+          {
             backgroundColor: theme.colors.background.raised,
             borderTopLeftRadius: theme.borderRadius.sm,
             borderTopRightRadius: theme.borderRadius.sm,
-          }}
-          backgroundStyle={{
+          },
+          handleStyle,
+        ],
+        [theme.colors.background.raised, theme.borderRadius.sm, handleStyle]
+      );
+
+      const combinedBackgroundStyle = useMemo(
+        () => [
+          {
             backgroundColor: theme.colors.background.raised,
-          }}
+          },
+          backgroundStyle,
+        ],
+        [theme.colors.background.raised, backgroundStyle]
+      );
+
+      return (
+        <BottomSheetBase
+          ref={ref}
+          enableDynamicSizing={false}
+          backdropComponent={backdropComponent}
+          handleIndicatorStyle={combinedHandleIndicatorStyle}
+          handleStyle={combinedHandleStyle}
+          backgroundStyle={combinedBackgroundStyle}
           {...rest}
         >
-          <BottomSheetView style={{ flex: 1 }}>{children}</BottomSheetView>
-        </BottomSheet>
+          {children}
+        </BottomSheetBase>
       );
     }
   )

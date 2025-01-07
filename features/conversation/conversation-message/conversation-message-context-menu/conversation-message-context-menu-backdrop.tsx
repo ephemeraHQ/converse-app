@@ -1,7 +1,6 @@
 import { BlurView } from "@/design-system/BlurView";
 import { memo } from "react";
 import { TouchableWithoutFeedback } from "react-native";
-import { useAppTheme } from "@theme/useAppTheme";
 
 export const MessageContextMenuBackdrop = memo(
   function MessageContextMenuBackdrop({
@@ -11,10 +10,8 @@ export const MessageContextMenuBackdrop = memo(
     children: React.ReactNode;
     handlePressBackdrop: () => void;
   }) {
-    const { theme } = useAppTheme();
-
     return (
-      <BlurView isAbsolute tint={theme.isDark ? "dark" : "light"}>
+      <BlurView isAbsolute>
         <TouchableWithoutFeedback onPress={handlePressBackdrop}>
           {children}
         </TouchableWithoutFeedback>

@@ -32,7 +32,7 @@ import { MessageContextMenuAboveMessageReactions } from "./conversation-message-
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container";
 import { useMessageContextMenuItems } from "./conversation-message-context-menu.utils";
 import { useAppTheme } from "@theme/useAppTheme";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 
 export const MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE = 16;
 
@@ -129,66 +129,56 @@ const Content = memo(function Content(props: {
       <Modal
         visible={true}
         transparent={true}
-        onRequestClose={handlePressBackdrop}
         animationType="fade"
         statusBarTranslucent={Platform.OS === "android"}
         supportedOrientations={["portrait", "landscape"]}
       >
         <Animated.View style={StyleSheet.absoluteFill}>
-          <ConversationStoreProvider
-            topic={topic}
-            conversationId={conversation!.id}
-          >
-            <MessageContextMenuBackdrop
-              handlePressBackdrop={handlePressBackdrop}
-            >
-              <AnimatedVStack style={StyleSheet.absoluteFill}>
-                {!!bySender && (
-                  <MessageContextMenuReactors reactors={bySender} />
-                )}
-                <MessageContextMenuContainer
-                  itemRectY={itemRectY}
-                  itemRectX={itemRectX}
-                  itemRectHeight={itemRectHeight}
-                  itemRectWidth={itemRectWidth}
-                  menuHeight={menuHeight}
-                  fromMe={fromMe}
-                  hasReactions={hasReactions}
+          <MessageContextMenuBackdrop handlePressBackdrop={handlePressBackdrop}>
+            <AnimatedVStack style={StyleSheet.absoluteFill}>
+              {!!bySender && <MessageContextMenuReactors reactors={bySender} />}
+              <MessageContextMenuContainer
+                itemRectY={itemRectY}
+                itemRectX={itemRectX}
+                itemRectHeight={itemRectHeight}
+                itemRectWidth={itemRectWidth}
+                menuHeight={menuHeight}
+                fromMe={fromMe}
+                hasReactions={hasReactions}
+              >
+                <MessageContextMenuAboveMessageReactions
+                  topic={topic}
+                  reactors={bySender ?? {}}
+                  messageId={messageId}
+                  onChooseMoreEmojis={handleChooseMoreEmojis}
+                  onSelectReaction={handleSelectReaction}
+                  originX={fromMe ? itemRectX + itemRectWidth : itemRectX}
+                  originY={itemRectHeight}
+                />
+
+                <VStack
+                  style={{
+                    height:
+                      MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE,
+                  }}
+                />
+
+                <MessageContextStoreProvider
+                  message={message}
+                  nextMessage={undefined}
+                  previousMessage={undefined}
                 >
-                  <MessageContextMenuAboveMessageReactions
-                    topic={topic}
-                    reactors={bySender ?? {}}
-                    messageId={messageId}
-                    onChooseMoreEmojis={handleChooseMoreEmojis}
-                    onSelectReaction={handleSelectReaction}
-                    originX={fromMe ? itemRectX + itemRectWidth : itemRectX}
-                    originY={itemRectHeight}
-                  />
+                  <ConversationMessage message={message} />
+                </MessageContextStoreProvider>
 
-                  <VStack
-                    style={{
-                      height:
-                        MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE,
-                    }}
-                  />
-
-                  <MessageContextStoreProvider
-                    message={message}
-                    nextMessage={undefined}
-                    previousMessage={undefined}
-                  >
-                    <ConversationMessage message={message} />
-                  </MessageContextStoreProvider>
-
-                  <MessageContextMenuItems
-                    originX={fromMe ? itemRectX + itemRectWidth : itemRectX}
-                    originY={itemRectHeight}
-                    menuItems={menuItems}
-                  />
-                </MessageContextMenuContainer>
-              </AnimatedVStack>
-            </MessageContextMenuBackdrop>
-          </ConversationStoreProvider>
+                <MessageContextMenuItems
+                  originX={fromMe ? itemRectX + itemRectWidth : itemRectX}
+                  originY={itemRectHeight}
+                  menuItems={menuItems}
+                />
+              </MessageContextMenuContainer>
+            </AnimatedVStack>
+          </MessageContextMenuBackdrop>
         </Animated.View>
       </Modal>
       <MessageContextMenuEmojiPicker onSelectReaction={handleSelectReaction} />
