@@ -18,36 +18,26 @@ import {
   closeMessageReactionsDrawer,
   useMessageReactionsRolledUpReactions,
 } from "./conversation-message-reaction-drawer.service";
-import { AnimatedVStack } from "@/design-system/VStack";
 
 export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
   const { theme, themed } = useAppTheme();
   const insets = useSafeAreaInsets();
   const rolledUpReactions = useMessageReactionsRolledUpReactions();
-  const [isVisible, setIsVisible] = useState(false);
   const bottomSheetRef = useRef<BottomSheetMethods>(null);
   const [filterReactions, setFilterReactions] = useState<string | null>(null);
 
-  // Show modal when we have reactions
-  useEffect(() => {
-    if (rolledUpReactions.totalCount > 0) {
-      setIsVisible(true);
-      bottomSheetRef.current?.snapToIndex(0);
-      setFilterReactions(null);
-    }
-  }, [rolledUpReactions]);
-
-  // Centralized dismiss handler to ensure consistent cleanup
-  // Both the modal and drawer state need to be reset when closing
-  // This prevents any state mismatches that could cause the UI to become unresponsive
+  // Centralized dismiss handler that:
+  // 1. Closes the bottom sheet UI component
+  // 2. Resets the global drawer state
+  // 3. Clears any active reaction filters
+  // This ensures consistent cleanup and prevents UI state mismatches
   const handleDismiss = useCallback(() => {
-    setIsVisible(false);
+    bottomSheetRef.current?.close();
     closeMessageReactionsDrawer();
+    setFilterReactions(null);
   }, []);
 
-  if (!rolledUpReactions.totalCount) {
-    return null;
-  }
+  const isVisible = !!rolledUpReactions.totalCount;
 
   return (
     <Modal
@@ -56,115 +46,113 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
       animationType="none"
       statusBarTranslucent={Platform.OS === "android"}
     >
-      <AnimatedVStack style={{ flex: 1 }}>
-        <BottomSheet
-          ref={bottomSheetRef}
-          snapPoints={["65%", "90%"]}
-          index={0}
-          enablePanDownToClose
-          enableOverDrag={false}
-          enableDynamicSizing={false}
-          onChange={(index) => {
-            if (index === -1) {
-              handleDismiss();
-            }
-          }}
-          topInset={insets.top}
-        >
-          <BottomSheetContentContainer>
-            <BottomSheetHeader title="Reactions" hasClose />
+      <BottomSheet
+        ref={bottomSheetRef}
+        snapPoints={["65%", "90%"]}
+        index={0}
+        enablePanDownToClose
+        enableOverDrag={false}
+        enableDynamicSizing={false}
+        onChange={(index) => {
+          if (index === -1) {
+            handleDismiss();
+          }
+        }}
+        topInset={insets.top}
+      >
+        <BottomSheetContentContainer>
+          <BottomSheetHeader title="Reactions" hasClose />
 
-            {/* Preview of all reactions with counts and filter buttons */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{
-                paddingLeft: theme.spacing.lg,
-                flexDirection: "row",
-              }}
-              scrollEnabled
+          {/* Preview of all reactions with counts and filter buttons */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{
+              paddingLeft: theme.spacing.lg,
+              flexDirection: "row",
+            }}
+            scrollEnabled
+          >
+            {/* "All" button to clear the filter */}
+            <TouchableHighlight
+              onPress={() => setFilterReactions(null)}
+              style={[
+                themed($chip),
+                filterReactions === null && themed($chipActive),
+              ]}
             >
-              {/* "All" button to clear the filter */}
+              <HStack style={{ alignItems: "center" }}>
+                <Text
+                  style={themed(
+                    filterReactions === null ? $chipTextActive : $chipText
+                  )}
+                >
+                  All {rolledUpReactions.totalCount}
+                </Text>
+              </HStack>
+            </TouchableHighlight>
+
+            {/* Buttons for each unique reaction type with counts */}
+            {rolledUpReactions.preview.map((reaction, index) => (
               <TouchableHighlight
-                onPress={() => setFilterReactions(null)}
+                key={index}
+                onPress={() =>
+                  setFilterReactions(
+                    reaction.content === filterReactions
+                      ? null
+                      : reaction.content
+                  )
+                }
                 style={[
                   themed($chip),
-                  filterReactions === null && themed($chipActive),
+                  filterReactions === reaction.content && themed($chipActive),
                 ]}
               >
-                <HStack style={{ alignItems: "center" }}>
-                  <Text
-                    style={themed(
-                      filterReactions === null ? $chipTextActive : $chipText
-                    )}
-                  >
-                    All {rolledUpReactions.totalCount}
-                  </Text>
-                </HStack>
+                <Text
+                  style={themed(
+                    filterReactions === reaction.content
+                      ? $chipTextActive
+                      : $chipText
+                  )}
+                >
+                  {reaction.content} {reaction.count}
+                </Text>
               </TouchableHighlight>
+            ))}
+            <HStack style={{ width: theme.spacing.xxl }} />
+          </ScrollView>
+        </BottomSheetContentContainer>
 
-              {/* Buttons for each unique reaction type with counts */}
-              {rolledUpReactions.preview.map((reaction, index) => (
-                <TouchableHighlight
-                  key={index}
-                  onPress={() =>
-                    setFilterReactions(
-                      reaction.content === filterReactions
-                        ? null
-                        : reaction.content
-                    )
-                  }
-                  style={[
-                    themed($chip),
-                    filterReactions === reaction.content && themed($chipActive),
-                  ]}
-                >
-                  <Text
-                    style={themed(
-                      filterReactions === reaction.content
-                        ? $chipTextActive
-                        : $chipText
-                    )}
-                  >
-                    {reaction.content} {reaction.count}
-                  </Text>
-                </TouchableHighlight>
-              ))}
-              <HStack style={{ width: theme.spacing.xxl }} />
-            </ScrollView>
-          </BottomSheetContentContainer>
-
-          {/* Detailed list of each reaction, sorted and filtered with all own reactions on top */}
-          <BottomSheetScrollView
-            style={{ flex: 1 }}
-            showsVerticalScrollIndicator={false}
-          >
-            <FlashList
-              estimatedItemSize={rolledUpReactions.totalCount}
-              data={rolledUpReactions.detailed.filter(
-                (item) => !filterReactions || item.content === filterReactions
-              )}
-              renderItem={({ item, index }) => (
-                <HStack
-                  key={`${item.content}-${item.reactor.address}-${index}`}
-                  style={themed($reaction)}
-                >
-                  <Avatar
-                    size={theme.avatarSize.md}
-                    uri={item.reactor.avatar}
-                    name={item.reactor.userName}
-                  />
-                  <Text style={themed($userName)}>{item.reactor.userName}</Text>
-                  <Text style={themed($reactionContent)}>{item.content}</Text>
-                </HStack>
-              )}
-              keyExtractor={(item, index) =>
-                `${item.content}-${item.reactor.address}-${index}`
-              }
-            />
-          </BottomSheetScrollView>
-        </BottomSheet>
-      </AnimatedVStack>
+        {/* Detailed list of each reaction, sorted and filtered with all own reactions on top */}
+        <BottomSheetScrollView
+          style={{ flex: 1 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <FlashList
+            estimatedItemSize={rolledUpReactions.totalCount}
+            data={rolledUpReactions.detailed.filter(
+              (item) => !filterReactions || item.content === filterReactions
+            )}
+            renderItem={({ item, index }) => (
+              <HStack
+                key={`${item.content}-${item.reactor.address}-${index}`}
+                style={themed($reaction)}
+              >
+                <Avatar
+                  size={theme.avatarSize.md}
+                  uri={item.reactor.avatar}
+                  name={item.reactor.userName}
+                />
+                <Text style={themed($userName)}>{item.reactor.userName}</Text>
+                <Text style={themed($reactionContent)}>{item.content}</Text>
+              </HStack>
+            )}
+            keyExtractor={(item, index) =>
+              `${item.content}-${item.reactor.address}-${index}`
+            }
+          />
+        </BottomSheetScrollView>
+      </BottomSheet>
     </Modal>
   );
 });
