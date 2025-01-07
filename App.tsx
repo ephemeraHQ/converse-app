@@ -5,7 +5,6 @@ import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { PortalProvider } from "@gorhom/portal";
 import { useAppStateHandlers } from "@hooks/useAppStateHandlers";
 import { PrivyProvider } from "@privy-io/expo";
 import { queryClient } from "@queries/queryClient";
@@ -144,10 +143,8 @@ export default function AppWithProviders() {
                 <PaperProvider theme={paperTheme}>
                   <GestureHandlerRootView style={{ flex: 1 }}>
                     <BottomSheetModalProvider>
-                      <PortalProvider>
-                        <App />
-                        <Snackbars />
-                      </PortalProvider>
+                      <App />
+                      <Snackbars />
                     </BottomSheetModalProvider>
                   </GestureHandlerRootView>
                 </PaperProvider>

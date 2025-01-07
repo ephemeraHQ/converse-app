@@ -1,6 +1,7 @@
 import { BlurViewProps, BlurView as RNBlurView } from "expo-blur";
 import { memo } from "react";
 import Animated, { AnimatedProps, FadeIn } from "react-native-reanimated";
+import { useAppTheme } from "@theme/useAppTheme";
 
 import { IVStackProps } from "./VStack";
 
@@ -13,12 +14,15 @@ export const BlurView = memo(function BlurView({
   children,
   isAbsolute,
   style,
+  tint,
   ...rest
 }: IBlurViewProps) {
+  const { theme } = useAppTheme();
+
   return (
     <AnimatedBlurView
       intensity={80}
-      tint="dark"
+      tint={tint ?? (theme.isDark ? "dark" : "light")}
       style={[
         style,
         isAbsolute && {
