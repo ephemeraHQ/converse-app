@@ -137,9 +137,9 @@ export default function AppWithProviders() {
     <QueryClientProvider client={queryClient}>
       <PrivyProvider appId={config.privy.appId} storage={privySecureStorage}>
         <ThirdwebProvider>
-          <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-            <AppKeyboardProvider>
-              <ActionSheetProvider>
+          <AppKeyboardProvider>
+            <ActionSheetProvider>
+              <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
                 <PaperProvider theme={paperTheme}>
                   <GestureHandlerRootView style={{ flex: 1 }}>
                     <BottomSheetModalProvider>
@@ -148,9 +148,9 @@ export default function AppWithProviders() {
                     </BottomSheetModalProvider>
                   </GestureHandlerRootView>
                 </PaperProvider>
-              </ActionSheetProvider>
-            </AppKeyboardProvider>
-          </ThemeProvider>
+              </ThemeProvider>
+            </ActionSheetProvider>
+          </AppKeyboardProvider>
         </ThirdwebProvider>
       </PrivyProvider>
     </QueryClientProvider>
