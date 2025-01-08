@@ -1,12 +1,24 @@
 import { createContext, memo, useContext, useRef } from "react";
 import { createStore, useStore } from "zustand";
+import { LocalAccount } from "viem/accounts";
+import { TurnkeyStoreInfo } from "@/utils/passkeys/passkeys.interfaces";
 
 type IPasskeyAuthStoreProps = {
-  loading: boolean;
+  loading?: boolean;
+  error?: string;
+  statusString?: string;
+  account?: LocalAccount;
+  turnkeyInfo?: TurnkeyStoreInfo;
+  previousPasskeyName?: string;
 };
 
 type IPasskeyAuthStoreState = IPasskeyAuthStoreProps & {
   setLoading: (loading: boolean) => void;
+  setError: (error: string | undefined) => void;
+  setStatusString: (statusString: string | undefined) => void;
+  setAccount: (account: LocalAccount | undefined) => void;
+  setTurnkeyInfo: (turnkeyInfo: TurnkeyStoreInfo | undefined) => void;
+  setPreviousPasskeyName: (previousPasskeyName: string | undefined) => void;
   reset: () => void;
 };
 
@@ -34,11 +46,23 @@ export const PasskeyAuthStoreProvider = memo(
 const createPasskeyAuthStore = (initProps: IPasskeyAuthStoreProps) => {
   const DEFAULT_PROPS: IPasskeyAuthStoreProps = {
     loading: false,
+    error: undefined,
+    statusString: undefined,
+    account: undefined,
+    turnkeyInfo: undefined,
+    previousPasskeyName: undefined,
   };
   return createStore<IPasskeyAuthStoreState>()((set) => ({
     ...DEFAULT_PROPS,
     ...initProps,
-    setLoading: (loading) => set({ loading }),
+    setLoading: (loading) =>
+      loading ? set({ loading, error: undefined }) : set({ loading: false }),
+    setError: (error) => set({ error, statusString: undefined }),
+    setStatusString: (statusString) => set({ statusString }),
+    setAccount: (account) => set({ account }),
+    setTurnkeyInfo: (turnkeyInfo) => set({ turnkeyInfo }),
+    setPreviousPasskeyName: (previousPasskeyName) =>
+      set({ previousPasskeyName }),
     reset: () => set(DEFAULT_PROPS),
   }));
 };

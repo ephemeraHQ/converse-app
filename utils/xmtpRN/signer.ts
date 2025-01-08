@@ -14,12 +14,12 @@ export const ethersSignerToXmtpSigner = (
   signMessage: (message: string) => signer.signMessage(message),
 });
 
-export const viemSignerToXmtpSigner = (
-  signer: LocalAccount<any>
+export const viemAccountToXmtpSigner = (
+  account: LocalAccount<any>
 ): XmtpSigner => ({
-  getAddress: () => Promise.resolve(signer.address),
+  getAddress: () => Promise.resolve(account.address),
   getChainId: () => ethereum.id, // We don't really care about the chain id because we support https://eips.ethereum.org/EIPS/eip-6492
   getBlockNumber: () => undefined,
   walletType: () => "SCW",
-  signMessage: (message: string) => signer.signMessage({ message }),
+  signMessage: (message: string) => account.signMessage({ message }),
 });
