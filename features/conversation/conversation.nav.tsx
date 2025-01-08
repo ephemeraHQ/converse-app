@@ -24,7 +24,7 @@ export function ConversationNav() {
       options={{
         title: "",
         headerBackTitle: "",
-        headerBackVisible: false,
+        // headerBackVisible: false,
       }}
       name="Conversation"
       component={ConversationScreen}

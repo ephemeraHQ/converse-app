@@ -54,6 +54,7 @@ export const en = {
   },
   passkey: {
     title: "Create Passkey",
+    add_account_title: "Add account by passkey",
     subtitle: "Create a passkey to connect to Converse",
     createButton: "Create Passkey",
   },

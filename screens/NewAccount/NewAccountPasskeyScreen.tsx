@@ -1,27 +1,23 @@
 import React, { memo, useCallback, useRef } from "react";
 
-import { OnboardingPictoTitleSubtitle } from "@components/Onboarding/OnboardingPictoTitleSubtitle";
-import { OnboardingScreenComp } from "@components/Onboarding/OnboardingScreenComp";
-import { translate } from "@i18n";
+import { NewAccountScreenComp } from "@components/NewAccount/NewAccountScreenComp";
+import { NewAccountPictoTitleSubtitle } from "@components/NewAccount/NewAccountTitleSubtitlePicto";
 import {
   PasskeyAuthStoreProvider,
   usePasskeyAuthStoreContext,
-} from "@/features/onboarding/passkey/passkeyAuthStore";
-import { onPasskeyCreate } from "@/utils/passkeys/create-passkey";
-import { Button } from "@/design-system/Button/Button";
-import { Text } from "@/design-system/Text";
-import { TextField } from "@/design-system/TextField/TextField";
-import { initXmtpClientFromViemAccount } from "@/components/Onboarding/init-xmtp-client";
+} from "@features/onboarding/passkey/passkeyAuthStore";
+import { translate } from "@i18n";
+import { useRouter } from "../../navigation/useNavigation";
+import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
 import { addWalletToPasskey } from "@/utils/passkeys/add-wallet-to-passkey";
+import { initXmtpClientFromViemAccount } from "@/components/Onboarding/init-xmtp-client";
+import { Button } from "@/design-system/Button/Button";
+import { TextField } from "@/design-system/TextField/TextField";
+import { Text } from "@/design-system/Text";
+import { onPasskeyCreate } from "@/utils/passkeys/create-passkey";
 import { loadAccountFromPasskey } from "@/utils/passkeys/load-client-from-passkey";
-import {
-  isMissingConverseProfile,
-  needToShowNotificationsPermissions,
-} from "./Onboarding.utils";
-import { useRouter } from "@/navigation/useNavigation";
-import { setAuthStatus } from "@/data/store/authStore";
 
-export const OnboardingPasskeyScreen = memo(function Screen() {
+export const NewAccountPasskeyScreen = memo(function () {
   return (
     <PasskeyAuthStoreProvider>
       <Content />
@@ -106,7 +102,7 @@ const Content = memo(function Content() {
       });
       if (!account) {
         setError("No account loaded from Passkey");
-        throw new Error("No account loaded from Passkey");
+        return;
       }
       setAccount(account);
     } catch (e) {
@@ -155,14 +151,12 @@ const Content = memo(function Content() {
         account,
         address: account.address,
       });
-      if (isMissingConverseProfile()) {
-        router.navigate("OnboardingUserProfile");
-      } else if (needToShowNotificationsPermissions()) {
-        router.navigate("OnboardingNotifications");
-      } else {
-        setAuthStatus("signedIn");
-      }
       setStatusString("Xmtp client created");
+      if (isMissingConverseProfile()) {
+        router.navigate("NewAccountUserProfile");
+      } else {
+        router.navigate("Chats");
+      }
     } catch (err) {
       console.log("error creating Xmtp client", err);
       setStatusString("");
@@ -190,11 +184,9 @@ const Content = memo(function Content() {
         address: account.address,
       });
       if (isMissingConverseProfile()) {
-        router.navigate("OnboardingUserProfile");
-      } else if (needToShowNotificationsPermissions()) {
-        router.navigate("OnboardingNotifications");
+        router.navigate("NewAccountUserProfile");
       } else {
-        setAuthStatus("signedIn");
+        router.navigate("Chats");
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
@@ -210,13 +202,55 @@ const Content = memo(function Content() {
     setError,
   ]);
 
+  const addWalletToExistingPasskey = useCallback(async () => {
+    try {
+      const { turnkeyInfo } = await loadAccountFromPasskey({
+        setStatusString,
+        setPreviousPasskeyName,
+        setTurnkeyInfo,
+      });
+      setStatusString("Got turnkey info");
+
+      if (!turnkeyInfo) {
+        throw new Error("No turnkey info, you must create a passkey first");
+      }
+
+      const { account } = await addWalletToPasskey({
+        subOrgId: turnkeyInfo.subOrganizationId,
+        setStatusString,
+      });
+      setStatusString("Got address and account" + account.address);
+
+      await initXmtpClientFromViemAccount({
+        account,
+        address: account.address,
+      });
+      if (isMissingConverseProfile()) {
+        router.navigate("NewAccountUserProfile");
+      } else {
+        router.navigate("Chats");
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    setStatusString,
+    setPreviousPasskeyName,
+    setTurnkeyInfo,
+    router,
+    setError,
+    setLoading,
+  ]);
+
   return (
-    <OnboardingScreenComp preset="scroll">
-      <OnboardingPictoTitleSubtitle.Container>
-        <OnboardingPictoTitleSubtitle.Title>
-          {translate("passkey.title")}
-        </OnboardingPictoTitleSubtitle.Title>
-      </OnboardingPictoTitleSubtitle.Container>
+    <NewAccountScreenComp>
+      <NewAccountPictoTitleSubtitle.Container>
+        <NewAccountPictoTitleSubtitle.Title>
+          {translate("passkey.add_account_title")}
+        </NewAccountPictoTitleSubtitle.Title>
+      </NewAccountPictoTitleSubtitle.Container>
       {statusString && (
         <Text style={{ marginBottom: 10 }} preset="body">
           {statusString}
@@ -257,6 +291,11 @@ const Content = memo(function Content() {
         loading={loading}
       />
       <Button
+        text={"Add new wallet to existing passkey"}
+        onPress={addWalletToExistingPasskey}
+        loading={loading}
+      />
+      <Button
         text={translate("passkey.createButton")}
         onPress={handleCreatePasskey}
         loading={loading}
@@ -280,6 +319,6 @@ const Content = memo(function Content() {
         loading={loading}
         variant="secondary"
       />
-    </OnboardingScreenComp>
+    </NewAccountScreenComp>
   );
 });
