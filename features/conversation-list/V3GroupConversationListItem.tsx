@@ -1,3 +1,7 @@
+import Avatar from "@/components/Avatar";
+import { GroupAvatarDumb } from "@/components/GroupAvatar";
+import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
+import { useHandleDeleteGroup } from "@/features/conversation-list/hooks/useHandleDeleteGroup";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useCurrentAccount, useSettingsStore } from "@data/store/accountsStore";
@@ -15,10 +19,6 @@ import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { RefObject, useCallback, useMemo, useRef } from "react";
 import { useColorScheme } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
-import Avatar from "../../components/Avatar";
-import { GroupAvatarDumb } from "../../components/GroupAvatar";
-import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import { ConversationListItemDumb } from "./components/conversation-list-item";
 import { useConversationIsUnread } from "./hooks/useMessageIsUnread";
 import { useMessageText } from "./hooks/useMessageText";
@@ -122,24 +122,24 @@ const useData = ({ group }: UseDataProps) => {
 
 type UseUserInteractionsProps = {
   topic: ConversationTopic;
-  ref: RefObject<Swipeable>;
-  showContextMenu: () => void;
+  swipeableRef: RefObject<Swipeable>;
   toggleReadStatus: () => void;
-  handleDelete: () => void;
   handleRestore: () => void;
   isBlockedChatView: boolean;
 };
 
 const useUserInteractions = ({
   topic,
-  ref,
-  showContextMenu,
+  swipeableRef,
   toggleReadStatus,
-  handleDelete,
   handleRestore,
   isBlockedChatView,
 }: UseUserInteractionsProps) => {
   const currentAccount = useCurrentAccount()!;
+
+  const handleDeleteGroup = useHandleDeleteGroup({
+    groupTopic: topic,
+  });
 
   const onPress = useCallback(() => {
     prefetchConversationMessages(currentAccount, topic);
@@ -148,32 +148,23 @@ const useUserInteractions = ({
     });
   }, [topic, currentAccount]);
 
-  const triggerHapticFeedback = useCallback(() => {
-    return Haptics.mediumImpactAsync();
-  }, []);
-
-  const onLongPress = useCallback(() => {
-    runOnJS(triggerHapticFeedback)();
-    runOnJS(showContextMenu)();
-  }, [triggerHapticFeedback, showContextMenu]);
-
   const onLeftPress = useCallback(() => {}, []);
 
   const onRightPress = useCallback(() => {
     if (isBlockedChatView) {
       handleRestore();
     } else {
-      handleDelete();
+      handleDeleteGroup();
     }
-    ref.current?.close();
-  }, [isBlockedChatView, handleRestore, handleDelete, ref]);
+    swipeableRef.current?.close();
+  }, [isBlockedChatView, handleRestore, handleDeleteGroup, swipeableRef]);
 
   const onLeftSwipe = useCallback(() => {
-    const translation = ref.current?.state.rowTranslation;
+    const translation = swipeableRef.current?.state.rowTranslation;
     if (translation && (translation as any)._value > 100) {
       toggleReadStatus();
     }
-  }, [ref, toggleReadStatus]);
+  }, [swipeableRef, toggleReadStatus]);
 
   const onWillLeftSwipe = useCallback(() => {
     Haptics.successNotificationAsync();
@@ -185,7 +176,6 @@ const useUserInteractions = ({
 
   return {
     onPress,
-    onLongPress,
     onLeftPress,
     onRightPress,
     onLeftSwipe,
@@ -225,15 +215,13 @@ export function V3GroupConversationListItem({
 
   const {
     onPress,
-    onLongPress,
-    onLeftPress,
     onRightPress,
     onLeftSwipe,
     onRightSwipe,
     onWillLeftSwipe,
     onWillRightSwipe,
   } = useUserInteractions({
-    ref,
+    swipeableRef: ref,
     topic: group?.topic,
     toggleReadStatus,
     handleRestore,
@@ -263,7 +251,6 @@ export function V3GroupConversationListItem({
       ref={ref}
       onPress={onPress}
       onRightActionPress={onRightPress}
-      onLongPress={onLongPress}
       onRightSwipe={onRightSwipe}
       onLeftSwipe={onLeftSwipe}
       onWillRightSwipe={onWillRightSwipe}

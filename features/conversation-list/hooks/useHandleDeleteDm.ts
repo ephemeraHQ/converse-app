@@ -11,6 +11,7 @@ import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { consentToInboxIdsOnProtocolByAccount } from "@/utils/xmtpRN/contacts";
 import { useCallback } from "react";
 
+// TODO: Refactor to only pass topic or peerInboxId when we finish account refactor
 export const useHandleDeleteDm = (dm: DmWithCodecsType) => {
   const { theme } = useAppTheme();
   const colorScheme = theme.isDark ? "dark" : "light";

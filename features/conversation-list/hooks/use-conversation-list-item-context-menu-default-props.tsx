@@ -160,7 +160,7 @@ function useConversationContextMenuDeleteItem(args: {
   const handleDeleteFn = conversation
     ? isConversationGroup(conversation)
       ? // eslint-disable-next-line react-hooks/rules-of-hooks
-        useHandleDeleteGroup(conversation)
+        useHandleDeleteGroup({ groupTopic: conversationTopic })
       : // eslint-disable-next-line react-hooks/rules-of-hooks
         useHandleDeleteDm(conversation)
     : () => null;
