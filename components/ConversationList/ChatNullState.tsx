@@ -22,6 +22,7 @@ import NewConversationButton from "./NewConversationButton";
 import { usePreferredUsername } from "@/hooks/usePreferredUsername";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
+import { useProfileSocials } from "@/hooks/useProfileSocials";
 
 type ChatNullStateProps = {
   currentInboxId: string;
@@ -31,35 +32,20 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({ currentInboxId }) => {
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
-  const username = usePreferredUsername({ peerInboxId: currentInboxId });
-  const displayName = usePreferredName(currentInboxId);
-  const avatar = usePreferredAvatarUri(currentInboxId);
+  const username = usePreferredUsername({ inboxId: currentInboxId });
+  const displayName = usePreferredName({ inboxId: currentInboxId });
+  const avatar = usePreferredAvatarUri({ inboxId: currentInboxId });
 
-  const profileUrl = `https://${config.websiteDomain}/dm/${
-    username || currentAccount
-  }`;
+  const profileUrl = `https://${config.websiteDomain}/dm/${username}`;
 
   const frens = useRecommendationsStore((s) => s.frens);
   const hasRecommendations = Object.keys(frens).length > 0;
 
-  const hasUserDismissedBanner = useSettingsStore(
-    (s) => s.hasUserDismissedBanner
-  );
+  const { data } = useProfileSocials({ inboxId: currentInboxId });
+  const userAddress = data?.cryptoCurrencyWalletAddresses?.ETH[0];
 
   return (
     <View style={styles.container}>
-      {/* {!hasUserDismissedBanner && (
-        <AnimatedBanner
-          title={translate("alphaTestTitle")}
-          description={translate("alphaTestDescription")}
-          cta={translate("joinAlphaGroup")}
-          style={{ marginBottom: 0 }}
-          onButtonPress={() => {
-            Linking.openURL(config.alphaGroupChatUrl);
-          }}
-        />
-      )} */}
-
       <View style={styles.contentContainer}>
         <View
           style={[
@@ -98,8 +84,8 @@ const ChatNullState: React.FC<ChatNullStateProps> = ({ currentInboxId }) => {
         ) : (
           <View style={styles.qrCodeContainer}>
             <ShareProfileContent
+              userAddress={userAddress}
               compact
-              userAddress={currentAccount}
               username={username}
               displayName={displayName}
               avatar={avatar || ""}

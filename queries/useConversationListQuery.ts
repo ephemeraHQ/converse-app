@@ -14,6 +14,7 @@ import {
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
 import { xmtpClientByInboxId } from "@/utils/xmtpRN/client";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 
 export type ConversationListQueryData = Awaited<
   ReturnType<typeof getConversationList>
@@ -27,14 +28,17 @@ export const createConversationListQueryObserver = (args: {
   return new QueryObserver(queryClient, conversationListQueryConfig(args));
 };
 
-export const useConversationListQuery = (args: {
-  inboxId: string | undefined;
+export const useConversationListForCurrentUserQuery = (args?: {
   queryOptions?: Partial<UseQueryOptions<ConversationListQueryData>>;
   context?: string;
 }) => {
-  const { inboxId, queryOptions, context } = args;
+  const { queryOptions, context } = args ?? {};
+  const currentInboxId = useCurrentInboxId();
   return useQuery<ConversationListQueryData>({
-    ...conversationListQueryConfig({ inboxId, context: context ?? "" }),
+    ...conversationListQueryConfig({
+      inboxId: currentInboxId,
+      context: context ?? "",
+    }),
     ...queryOptions,
   });
 };

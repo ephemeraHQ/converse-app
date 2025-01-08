@@ -1,5 +1,5 @@
 import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
-import { fetchPersistedConversationListQuery } from "@/queries/useConversationListQuery";
+import { fetchPersistedConversationListQuery } from "@/queries/useConversationListForCurrentUserQuery";
 import logger from "@utils/logger";
 import { useEffect } from "react";
 import { useInboxIdsList } from "@data/store/accountsStore";

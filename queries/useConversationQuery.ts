@@ -4,6 +4,7 @@ import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
 import { mutateObjectProperties } from "@/utils/mutate-object-properties";
+import logger from "@/utils/logger";
 
 export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
 
@@ -47,6 +48,10 @@ export const setConversationQueryData = (
   }
 ) => {
   const { inboxId, topic, conversation } = args;
+  if (!inboxId) {
+    logger.error("[setConversationQueryData] Inbox ID is required");
+    return;
+  }
   queryClient.setQueryData<ConversationQueryData>(
     conversationQueryKey({ inboxId, topic }),
     conversation

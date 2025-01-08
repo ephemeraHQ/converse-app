@@ -1,13 +1,10 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { useTopicsData } from "@hooks/useTopicsData";
-import { useConversationListQuery } from "@/queries/useConversationListQuery";
+import { useConversationListForCurrentUserQuery } from "@/queries/useConversationListQuery";
 import { useMemo } from "react";
 
 export const useV3BlockedChats = () => {
-  const currentInboxId = useCurrentInboxId()();
   const topicsData = useTopicsData();
-  const { data, ...rest } = useConversationListQuery({
-    account: currentAccount!,
+  const { data, ...rest } = useConversationListForCurrentUserQuery({
     queryOptions: {
       refetchOnMount: false,
     },

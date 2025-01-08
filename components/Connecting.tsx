@@ -2,10 +2,10 @@ import { sentryTrackMessage } from "@utils/sentry";
 import { useEffect, useRef, useState } from "react";
 
 import { useDebugEnabled } from "./DebugButton";
-import { useChatStore, useCurrentAccount } from "../data/store/accountsStore";
+import { useChatStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { useConversationListQuery } from "@/queries/useConversationListQuery";
+import { useConversationListForCurrentUserQuery } from "@/queries/useConversationListQuery";
 
 export const useShouldShowConnecting = () => {
   const isInternetReachable = useAppStore((s) => s.isInternetReachable);
@@ -66,8 +66,7 @@ export const useShouldShowConnecting = () => {
 };
 
 export const useShouldShowConnectingOrSyncing = () => {
-  const currentInboxId = useCurrentInboxId()();
-  const { isLoading } = useConversationListQuery({ account: currentAccount! });
+  const { isLoading } = useConversationListForCurrentUserQuery();
   const initialLoadDoneOnce = !isLoading;
   const shouldShowConnecting = useShouldShowConnecting();
 

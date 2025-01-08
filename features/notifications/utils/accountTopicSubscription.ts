@@ -1,4 +1,4 @@
-import { createConversationListQueryObserver } from "@/queries/useConversationListQuery";
+import { createConversationListQueryObserver } from "@/queries/useConversationListForCurrentUserQuery";
 import { subscribeToNotifications } from "./subscribeToNotifications";
 import logger from "@/utils/logger";
 import { resetNotifications } from "./resetNotifications";

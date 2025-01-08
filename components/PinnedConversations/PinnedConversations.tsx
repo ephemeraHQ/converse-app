@@ -1,20 +1,16 @@
 import { View, ViewStyle } from "react-native";
-import { useConversationListQuery } from "@/queries/useConversationListQuery";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
-import { useCurrentInboxId } from "@/data/store/accountsStore";
 import { PinnedV3Conversation } from "./PinnedV3Conversation";
+import { useConversationListForCurrentUserQuery } from "@/queries/useConversationListQuery";
 
 type Props = {
   topics?: string[];
 };
 
 export const PinnedConversations = ({ topics }: Props) => {
-  const currentInboxId = useCurrentInboxId();
-
   const { themed } = useAppTheme();
 
-  const { isLoading } = useConversationListQuery({
-    inboxId: currentInboxId!,
+  const { isLoading } = useConversationListForCurrentUserQuery({
     context: "PinnedConversations",
     queryOptions: {
       refetchOnWindowFocus: false,

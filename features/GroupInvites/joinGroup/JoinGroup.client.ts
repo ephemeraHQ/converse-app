@@ -20,7 +20,7 @@ import {
 import { AxiosInstance } from "axios";
 
 import { JoinGroupResult } from "./joinGroup.types";
-import { ConversationListQueryData } from "@/queries/useConversationListQuery";
+import { ConversationListQueryData } from "@/queries/useConversationListForCurrentUserQuery";
 import { entify } from "@/queries/entify";
 import { wait } from "@/utils/general";
 
@@ -90,7 +90,7 @@ export class JoinGroupClient {
       inboxId: string
     ): Promise<ConversationDataEntity | undefined> => {
       const { fetchConversationListQuery } = await import(
-        "@/queries/useConversationListQuery"
+        "@/queries/useConversationListForCurrentUserQuery"
       );
 
       const conversationList: ConversationListQueryData =

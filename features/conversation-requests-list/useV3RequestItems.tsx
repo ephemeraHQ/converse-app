@@ -1,4 +1,4 @@
-import { useConversationListQuery } from "@/queries/useConversationListQuery";
+import { useConversationListForCurrentUserQuery } from "@/queries/useConversationListForCurrentUserQuery";
 import logger from "@/utils/logger";
 import { getMessageContentType } from "@/utils/xmtpRN/content-types/content-types";
 import { getV3SpamScore } from "@data/helpers/conversations/spamScore";
@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 
 export const useV3RequestItems = () => {
   const currentInboxId = useCurrentInboxId()();
-  const { data, ...rest } = useConversationListQuery({
+  const { data, ...rest } = useConversationListForCurrentUserQuery({
     account: currentAccount!,
     queryOptions: {
       refetchOnWindowFocus: false,

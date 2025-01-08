@@ -20,9 +20,9 @@ type IConversationScreenProps = NativeStackScreenProps<
 
 export function ConversationScreen(args: IConversationScreenProps) {
   const { route } = args;
-  const { peerEthereumAddress, topic, text } = route.params || {};
+  const { peerInboxId, topic, text } = route.params || {};
 
-  if (!peerEthereumAddress && !topic) {
+  if (!peerInboxId && !topic) {
     captureError(new Error("No peer or topic found in ConversationScreen"));
     return (
       <Screen contentContainerStyle={{ flex: 1 }}>
@@ -36,29 +36,24 @@ export function ConversationScreen(args: IConversationScreenProps) {
       {topic && isV3Topic(topic) ? (
         <Conversation topic={topic} textPrefill={text} />
       ) : (
-        <PeerAddressFlow
-          peerEthereumAddress={peerEthereumAddress!}
-          textPrefill={text}
-        />
+        <PeerAddressFlow peerInboxId={peerInboxId!} textPrefill={text} />
       )}
     </Screen>
   );
 }
 
 type IPeerAddressFlowProps = {
-  peerEthereumAddress: string;
+  peerInboxId: string;
   textPrefill?: string;
 };
 
 const PeerAddressFlow = memo(function PeerAddressFlow(
   args: IPeerAddressFlowProps
 ) {
-  const { peerEthereumAddress, textPrefill } = args;
-  const currentInboxId = useCurrentInboxId();
+  const { peerInboxId, textPrefill } = args;
 
   const { data: dmConversation, isLoading } = useDmQuery({
-    inboxId: currentInboxId,
-    peerEthereumAddress: peerEthereumAddress,
+    peerInboxId,
   });
 
   if (isLoading) {
@@ -76,10 +71,6 @@ const PeerAddressFlow = memo(function PeerAddressFlow(
   }
 
   return (
-    <ConversationNewDm
-      peerInboxId={peerInboxId}
-      peerEthereumAddress={peerEthereumAddress}
-      textPrefill={textPrefill}
-    />
+    <ConversationNewDm peerInboxId={peerInboxId} textPrefill={textPrefill} />
   );
 });

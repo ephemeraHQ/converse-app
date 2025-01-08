@@ -4,15 +4,14 @@ import { useCallback } from "react";
 import { ColorSchemeName } from "react-native";
 
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
-import { useSettingsStore } from "../data/store/accountsStore";
+import {
+  useCurrentInboxId,
+  useSettingsStore,
+} from "../data/store/accountsStore";
 import { useLogoutFromConverse } from "../utils/logout";
 import logger from "@/utils/logger";
 
-export const useDisconnectActionSheet = ({
-  inboxId,
-}: {
-  inboxId: string | undefined;
-}) => {
+export const useDisconnectActionSheet = ({ inboxId }: { inboxId: string }) => {
   const logout = useLogoutFromConverse({ inboxId });
   const { ephemeralAccount } = useSettingsStore((s) => ({
     ephemeralAccount: s.ephemeralAccount,

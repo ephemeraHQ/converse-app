@@ -16,7 +16,7 @@ import {
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { translate } from "@/i18n";
 import { useRouter } from "@/navigation/useNavigation";
-import { addConversationToConversationListQuery } from "@/queries/useConversationListQuery";
+import { addConversationToConversationListQuery } from "@/queries/useConversationListForCurrentUserQuery";
 import { setDmQueryData } from "@/queries/useDmQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
@@ -32,10 +32,9 @@ import { Keyboard } from "react-native";
 
 export const ConversationNewDm = memo(function ConversationNewDm(props: {
   peerInboxId: string;
-  peerEthereumAddress: string;
   textPrefill?: string;
 }) {
-  const { peerInboxId, textPrefill, peerEthereumAddress } = props;
+  const { peerInboxId, textPrefill } = props;
 
   const navigation = useRouter();
 

@@ -56,7 +56,8 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
         ]}
       />
 
-      {hasInstalledWallets && (
+      {/* todo(lustig/thierry) - new ui and new store */}
+      {/* {hasInstalledWallets && (
         <InstalledWalletsTableView
           onAccountExists={(arg) => {
             useAccountsStore.getState().setCurrentInboxId({
@@ -71,7 +72,7 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
             router.navigate("NewAccountConnectWallet", { inboxId, address });
           }}
         />
-      )}
+      )} */}
 
       <TableView
         title={

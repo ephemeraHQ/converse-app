@@ -1,4 +1,4 @@
-import { addConversationToConversationListQuery } from "@/queries/useConversationListQuery";
+import { addConversationToConversationListQuery } from "@/queries/useConversationListForCurrentUserQuery";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import {
@@ -18,7 +18,7 @@ import { xmtpClientByInboxId } from "./client";
 import { getCurrentInboxId } from "@/data/store/accountsStore";
 import {
   getXmtpClientForCurrentInboxOrThrow,
-  getEthereumAddressesForInboxId,
+  getEthereumRecoveryAddressForInboxId,
   getXmtpClientOrThrow,
   getXmtpClient,
 } from "@/features/Accounts/accounts.utils";
@@ -47,24 +47,27 @@ export const stopStreamingConversations = async ({
 }: {
   inboxId: InboxId;
 }) => {
-  const client = getXmtpClient({
+  const client = getXmtpClientOrThrow({
     inboxId,
     caller: "conversations#stopStreamingConversations",
-    ifNotFoundStrategy: "throw",
   });
   return client.conversations.cancelStream();
 };
 
 async function findGroup(args: {
-  client: ConverseXmtpClientType;
+  inboxId: InboxId;
   topic: ConversationTopic;
   includeSync?: boolean;
 }) {
-  const { client, topic, includeSync = false } = args;
+  const { inboxId, topic, includeSync = false } = args;
   logger.debug(`[XMTPRN Conversations] Getting group by ${topic}`);
   const start = new Date().getTime();
 
   const lookupStart = new Date().getTime();
+  const client = getXmtpClientOrThrow({
+    inboxId,
+    caller: "conversations#findGroup",
+  });
   let group = await client.conversations.findGroup(getV3IdFromTopic(topic));
   const lookupEnd = new Date().getTime();
   logger.debug(
@@ -106,16 +109,19 @@ async function findGroup(args: {
 }
 
 async function findDm(args: {
-  client: ConverseXmtpClientType;
+  inboxId: InboxId;
   peerEthereumAddress: string;
   includeSync?: boolean;
 }) {
-  const { client, peerEthereumAddress, includeSync = false } = args;
+  const { inboxId, peerEthereumAddress, includeSync = false } = args;
   logger.debug(`[XMTPRN Conversations] Getting DM by ${peerEthereumAddress}`);
   const start = new Date().getTime();
 
   const lookupStart = new Date().getTime();
-  // let dm = await client.conversations.findDmByAddress(peerEthereumAddress);
+  const client = getXmtpClientOrThrow({
+    inboxId,
+    caller: "conversations#findDm",
+  });
   let dm = await client.conversations.findDmByInboxId(peerEthereumAddress);
   const lookupEnd = new Date().getTime();
   logger.debug(
@@ -157,15 +163,19 @@ async function findDm(args: {
 }
 
 async function findConversation(args: {
-  client: ConverseXmtpClientType;
+  inboxId: InboxId;
   topic: ConversationTopic;
   includeSync?: boolean;
 }) {
-  const { client, topic, includeSync = false } = args;
+  const { inboxId, topic, includeSync = false } = args;
   logger.debug(`[XMTPRN Conversations] Getting conversation by ${topic}`);
   const start = new Date().getTime();
 
   const lookupStart = new Date().getTime();
+  const client = getXmtpClientOrThrow({
+    inboxId,
+    caller: "conversations#findConversation",
+  });
   let conversation = await client.conversations.findConversationByTopic(topic);
   const lookupEnd = new Date().getTime();
   logger.debug(
@@ -207,27 +217,27 @@ async function findConversation(args: {
 }
 
 export const getGroupByTopic = async (args: {
-  client: ConverseXmtpClientType;
+  inboxId: InboxId;
   topic: ConversationTopic;
   includeSync?: boolean;
 }) => {
-  const { client, topic, includeSync = false } = args;
+  const { inboxId, topic, includeSync = false } = args;
   return findGroup({
-    client,
+    inboxId,
     topic,
     includeSync,
   });
 };
 
-export const getConversationByPeerInboxId = async (args: {
-  client: ConverseXmtpClientType;
-  peerEthereumAddress: string;
+export const findDmByPeerInboxId = async (args: {
+  forInboxId: InboxId;
+  peerInboxId: InboxId;
   includeSync?: boolean;
 }) => {
-  const { client, peerEthereumAddress, includeSync = false } = args;
+  const { forInboxId, peerInboxId, includeSync = false } = args;
   return findDm({
-    client,
-    peerEthereumAddress,
+    forInboxId,
+    peerInboxId,
     includeSync,
   });
 };
@@ -269,7 +279,7 @@ export const createDmForPeerInboxId = async (args: {
     caller: "createDmForPeerInboxId",
   });
   logger.info(`[XMTP] Creating a conversation with peerInboxId ${peerInboxId}`);
-  const peerEthereumAddress = await getEthereumAddressesForInboxId({
+  const peerEthereumAddress = await getEthereumRecoveryAddressForInboxId({
     inboxId: peerInboxId,
   });
   const conversation =

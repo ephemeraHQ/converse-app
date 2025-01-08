@@ -40,8 +40,8 @@ export const conversationQueryKey = (args: {
 
 export const dmQueryKey = (args: {
   inboxId?: string;
-  peerEthereumAddress?: string;
-}) => [QueryKeys.CONVERSATION_DM, args.inboxId, args.peerEthereumAddress];
+  peerInboxId?: string;
+}) => [QueryKeys.CONVERSATION_DM, args.inboxId, args.peerInboxId];
 
 // Messages
 export const conversationMessageQueryKey = (args: {

@@ -1,20 +1,18 @@
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
-import { useConversationListQuery } from "@/queries/useConversationListQuery";
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
+import { useConversationListForCurrentUserQuery } from "@/queries/useConversationListQuery";
+import { useChatStore } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { useMemo } from "react";
 
 export const useV3ConversationItems = () => {
-  const currentInboxId = useCurrentInboxId()();
-
-  const { data: conversations, ...rest } = useConversationListQuery({
-    account: currentAccount!,
-    queryOptions: {
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-    },
-    context: "useV3ConversationItems",
-  });
+  const { data: conversations, ...rest } =
+    useConversationListForCurrentUserQuery({
+      queryOptions: {
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+      },
+      context: "useV3ConversationItems",
+    });
 
   const { pinnedConversationTopics, topicsData } = useChatStore(
     useSelect(["pinnedConversationTopics", "topicsData"])

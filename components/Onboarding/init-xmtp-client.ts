@@ -18,7 +18,6 @@ import { getOrBuildXmtpClient } from "../../utils/xmtpRN/sync";
 export async function initXmtpClient(args: {
   signer: Signer;
   address: string;
-  privyAccountId?: string;
   isEphemeral?: boolean;
   pkPath?: string;
 }) {
@@ -55,10 +54,6 @@ type IBaseArgs = {
   inboxId: string;
 };
 
-type IPrivyArgs = IBaseArgs & {
-  privyAccountId: string;
-};
-
 type IEphemeralArgs = IBaseArgs & {
   isEphemeral: true;
 };
@@ -70,7 +65,6 @@ type IPrivateKeyArgs = IBaseArgs & {
 type IStandardArgs = IBaseArgs;
 
 type IConnectWithAddressKeyArgs =
-  | IPrivyArgs
   | IEphemeralArgs
   | IPrivateKeyArgs
   | IStandardArgs;

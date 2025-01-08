@@ -1,4 +1,4 @@
-import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
+import { updateConversationInConversationListQuery } from "@/queries/useConversationListForCurrentUserQuery";
 import { captureError } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";

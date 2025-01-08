@@ -2,10 +2,9 @@ import { InboxId } from "@xmtp/react-native-sdk";
 
 import logger from "@utils/logger";
 import { ConverseXmtpClientType, DmWithCodecsType } from "./client.types";
-import { xmtpClientByInboxId } from "./client";
 import { getCurrentInboxId } from "@/data/store/accountsStore";
-import { getXmtpClient } from "./conversations";
-
+import { getXmtpClient } from "@/features/Accounts/accounts.utils";
+import { getXmtpClientOrThrow } from "@/features/Accounts/accounts.utils";
 type ConsentType = "allow" | "deny";
 
 type ConsentToAddressesOnProtocolParams = {
@@ -107,10 +106,9 @@ export const consentToInboxIdsOnProtocolForCurrentUser = async ({
   consent,
 }: Omit<ConsentToInboxIdsOnProtocolByInboxIdParams, "inboxId">) => {
   const currentInboxId = getCurrentInboxId();
-  const client = await getXmtpClient({
+  const client = await getXmtpClientOrThrow({
     inboxId: currentInboxId,
     caller: "consentToInboxIdsOnProtocolForCurrentUser",
-    ifNotFoundStrategy: "throw",
   });
   return await consentToInboxIdsOnProtocol({ client, inboxIds, consent });
 };
@@ -129,20 +127,25 @@ export const consentToInboxIdsOnProtocolByInboxId = async ({
 };
 
 type ConsentToGroupsOnProtocolParams = {
-  client: ConverseXmtpClientType;
+  inboxId: string | undefined;
   groupIds: string[];
   consent: "allow" | "deny";
 };
 
-export const consentToGroupsOnProtocol = async ({
-  client,
-  groupIds,
-  consent,
-}: ConsentToGroupsOnProtocolParams) => {
+export const consentToGroupsByGroupIds = async (
+  args: ConsentToGroupsOnProtocolParams
+) => {
+  const { inboxId, groupIds, consent } = args;
   logger.debug(
     `[XMTPRN Contacts] Consenting to groups on protocol: ${groupIds.join(", ")}`
   );
   const start = new Date().getTime();
+  const client = await getXmtpClient({
+    inboxId,
+    caller: "consentToGroupsByGroupIds",
+    ifNotFoundStrategy: "throw",
+  });
+
   if (consent === "allow") {
     for (const groupId of groupIds) {
       await client.preferences.setConsentState({
@@ -168,20 +171,6 @@ export const consentToGroupsOnProtocol = async ({
       (end - start) / 1000
     } sec`
   );
-};
-
-export const consentToGroupsByGroupIds = async (args: {
-  inboxId: string | undefined;
-  groupIds: string[];
-  consent: "allow" | "deny";
-}) => {
-  const { inboxId, groupIds, consent } = args;
-  const client = await getXmtpClient({
-    inboxId,
-    caller: "consentToGroupsByGroupIds",
-    ifNotFoundStrategy: "throw",
-  });
-  return consentToGroupsOnProtocol({ client, groupIds, consent });
 };
 
 type CanMessageParams = {

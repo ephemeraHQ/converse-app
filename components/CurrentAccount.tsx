@@ -1,4 +1,3 @@
-import { currentAccount } from "@data/store/accountsStore";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { AvatarSizes } from "@styles/sizes";
@@ -8,6 +7,7 @@ import { ViewStyle, StyleSheet } from "react-native";
 import Avatar from "./Avatar";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 
 type ICurrentAccountProps = {
   style?: ViewStyle;
@@ -19,9 +19,9 @@ const styles = StyleSheet.create({
 });
 
 export function CurrentAccount(props: ICurrentAccountProps) {
-  const inboxId = getCurrentInboxId();
-  const name = usePreferredName(account);
-  const avatarUri = usePreferredAvatarUri(account);
+  const inboxId = useCurrentInboxId()!;
+  const name = usePreferredName({ inboxId });
+  const avatarUri = usePreferredAvatarUri({ inboxId });
 
   return (
     <HStack style={[styles.container, props.style]}>

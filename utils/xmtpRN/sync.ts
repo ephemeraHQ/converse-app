@@ -18,7 +18,7 @@ import { stopStreamingAllMessage, streamAllMessages } from "./messages";
 import {
   fetchPersistedConversationListQuery,
   prefetchConversationListQuery,
-} from "@/queries/useConversationListQuery";
+} from "@/queries/useConversationListForCurrentUserQuery";
 import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
 import { getInboxIdFromCryptocurrencyAddress } from "./signIn";
 
