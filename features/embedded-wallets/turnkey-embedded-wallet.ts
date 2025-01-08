@@ -1,4 +1,4 @@
-import { onPasskeyCreate } from "@/utils/passkeys/createPasskey";
+import { onPasskeyCreate } from "@/utils/passkeys/create-passkey";
 import { IEmbeddedWallet } from "./embedded-wallet.interface";
 import { Client } from "@xmtp/react-native-sdk";
 import { LocalAccount } from "viem/accounts";

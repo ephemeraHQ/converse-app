@@ -5,7 +5,7 @@ import { useColorScheme } from "react-native";
 import { authScreensSharedScreenOptions } from "../screens/Navigation/Navigation";
 import { stackGroupScreenOptions } from "../screens/Navigation/navHelpers";
 import { OnboardingConnectWalletScreen } from "../screens/Onboarding/OnboardingConnectWalletScreen";
-import { OnboardingEphemeraScreen } from "../screens/Onboarding/OnboardingEphemeraScreen";
+import { OnboardingEphemeralScreen } from "../screens/Onboarding/OnboardingEphemeralScreen";
 import { OnboardingGetStartedScreen } from "../screens/Onboarding/OnboardingGetStartedScreen";
 import { OnboardingNotificationsScreen } from "../screens/Onboarding/OnboardingNotificationsScreen";
 import { OnboardingPrivateKeyScreen } from "../screens/Onboarding/OnboardingPrivateKeyScreen";
@@ -76,7 +76,7 @@ export const OnboardingNavigator = memo(function OnboardingNavigator() {
         />
         <OnboardingNativeStack.Screen
           name="OnboardingEphemeral"
-          component={OnboardingEphemeraScreen}
+          component={OnboardingEphemeralScreen}
         />
       </OnboardingNativeStack.Group>
     </OnboardingNativeStack.Navigator>
