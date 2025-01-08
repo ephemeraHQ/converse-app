@@ -37,7 +37,7 @@ export function NewAccountEphemeraScreen(
       if (isMissingConverseProfile()) {
         router.navigate("NewAccountUserProfile");
       } else {
-        router.navigate("Chats");
+        router.popTo("Chats");
       }
     } catch (error) {
       sentryTrackError(error);

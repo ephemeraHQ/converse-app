@@ -42,12 +42,12 @@ export const NewAccountUserProfileScreen = memo(
       try {
         const { success } = await createOrUpdateProfile({ profile });
         if (success) {
-          navigation.navigate("Chats");
+          navigation.popTo("Chats");
         }
       } catch (error) {
         sentryTrackError(error);
       }
-    }, [createOrUpdateProfile, profile, navigation]);
+    }, [createOrUpdateProfile, navigation, profile]);
 
     const usernameRef = useRef<TextInput>();
 
