@@ -50,6 +50,7 @@ const defaultConfig = {
   },
   splitScreenThreshold: 600,
   framesAllowedSchemes: ["http", "https", "ethereum"],
+  turnkeyOrg: process.env.EXPO_PUBLIC_TURNKEY_ORG,
 };
 
 const isAndroid = Platform.OS === "android";

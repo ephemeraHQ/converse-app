@@ -6,7 +6,6 @@ import { Buffer } from "buffer";
 import { RPID } from "./passkeys.constants";
 import { TurnkeyStoreInfo } from "./passkeys.interfaces";
 import { createTurnkeyAccount } from "./create-turnkey-account";
-import { savePasskeyInfo } from "./persist-passkeys";
 import { createSubOrganization } from "./create-suborganization";
 
 type PasskeyCreateParams = {
@@ -33,13 +32,7 @@ export async function onPasskeyCreate({
 
     const { walletId, subOrganizationId, address } =
       await createSubOrganization(authenticatorParams);
-    savePasskeyInfo({
-      userId,
-      walletId,
-      subOrganizationId,
-      address,
-      passkeyName,
-    });
+
     if (!address) {
       throw new Error("No address found");
     }

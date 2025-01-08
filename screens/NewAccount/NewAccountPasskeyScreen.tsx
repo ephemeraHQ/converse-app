@@ -16,6 +16,7 @@ import { TextField } from "@/design-system/TextField/TextField";
 import { Text } from "@/design-system/Text";
 import { onPasskeyCreate } from "@/utils/passkeys/create-passkey";
 import { loadAccountFromPasskey } from "@/utils/passkeys/load-client-from-passkey";
+import { captureErrorWithToast } from "@/utils/capture-error";
 
 export const NewAccountPasskeyScreen = memo(function () {
   return (
@@ -29,8 +30,6 @@ const Content = memo(function Content() {
   const router = useRouter();
 
   const loading = usePasskeyAuthStoreContext((state) => state.loading);
-
-  const error = usePasskeyAuthStoreContext((state) => state.error);
 
   const statusString = usePasskeyAuthStoreContext(
     (state) => state.statusString
@@ -64,6 +63,14 @@ const Content = memo(function Content() {
 
   const inputTextRef = useRef<string>("");
 
+  const handleError = useCallback(
+    (error: string) => {
+      setError(error);
+      captureErrorWithToast(error);
+    },
+    [setError]
+  );
+
   const handleCreatePasskey = useCallback(async () => {
     try {
       setLoading(true);
@@ -74,18 +81,18 @@ const Content = memo(function Content() {
         setTurnkeyInfo,
       });
       if (!account) {
-        setError("No account created from Passkey");
+        handleError("No account created from Passkey");
         return;
       }
       setAccount(account);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unknown error");
+      handleError(e instanceof Error ? e.message : "Unknown error");
     } finally {
       setLoading(false);
     }
   }, [
     setAccount,
-    setError,
+    handleError,
     setLoading,
     setPreviousPasskeyName,
     setStatusString,
@@ -101,18 +108,18 @@ const Content = memo(function Content() {
         setTurnkeyInfo,
       });
       if (!account) {
-        setError("No account loaded from Passkey");
+        handleError("No account loaded from Passkey");
         return;
       }
       setAccount(account);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unknown error");
+      handleError(e instanceof Error ? e.message : "Unknown error");
     } finally {
       setLoading(false);
     }
   }, [
     setAccount,
-    setError,
+    handleError,
     setLoading,
     setPreviousPasskeyName,
     setStatusString,
@@ -132,13 +139,13 @@ const Content = memo(function Content() {
       });
       setStatusString("Wallet added to passkey");
     } catch (e) {
-      setError(
+      handleError(
         e instanceof Error ? e.message : "Error adding wallet to passkey"
       );
     } finally {
       setLoading(false);
     }
-  }, [turnkeyInfo, setError, setLoading, setStatusString]);
+  }, [turnkeyInfo, handleError, setLoading, setStatusString]);
 
   const createXmtpClientFromAccount = useCallback(async () => {
     try {
@@ -155,12 +162,12 @@ const Content = memo(function Content() {
       if (isMissingConverseProfile()) {
         router.navigate("NewAccountUserProfile");
       } else {
-        router.navigate("Chats");
+        router.popTo("Chats");
       }
     } catch (err) {
       console.log("error creating Xmtp client", err);
       setStatusString("");
-      setError(
+      handleError(
         "Error creating Xmtp client : " +
           (err instanceof Error ? err.message : "") +
           (typeof err === "string" ? err : "")
@@ -168,7 +175,7 @@ const Content = memo(function Content() {
     } finally {
       setLoading(false);
     }
-  }, [account, router, setError, setLoading, setStatusString]);
+  }, [account, router, handleError, setLoading, setStatusString]);
 
   const onboardWithPasskey = useCallback(async () => {
     try {
@@ -186,10 +193,10 @@ const Content = memo(function Content() {
       if (isMissingConverseProfile()) {
         router.navigate("NewAccountUserProfile");
       } else {
-        router.navigate("Chats");
+        router.popTo("Chats");
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unknown error");
+      handleError(e instanceof Error ? e.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -199,7 +206,7 @@ const Content = memo(function Content() {
     setPreviousPasskeyName,
     setTurnkeyInfo,
     router,
-    setError,
+    handleError,
   ]);
 
   const addWalletToExistingPasskey = useCallback(async () => {
@@ -228,10 +235,10 @@ const Content = memo(function Content() {
       if (isMissingConverseProfile()) {
         router.navigate("NewAccountUserProfile");
       } else {
-        router.navigate("Chats");
+        router.popTo("Chats");
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unknown error");
+      handleError(e instanceof Error ? e.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -240,7 +247,7 @@ const Content = memo(function Content() {
     setPreviousPasskeyName,
     setTurnkeyInfo,
     router,
-    setError,
+    handleError,
     setLoading,
   ]);
 
@@ -266,11 +273,6 @@ const Content = memo(function Content() {
         <Text preset="bodyBold">
           Turnkey info:
           <Text preset="body">{JSON.stringify(turnkeyInfo)}</Text>
-        </Text>
-      )}
-      {error && (
-        <Text preset="body" color="caution">
-          {error}
         </Text>
       )}
       {account && (

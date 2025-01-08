@@ -39,7 +39,7 @@ import {
   getConverseStateFromPath,
 } from "./Navigation/navHelpers";
 import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
-import logger from "@/utils/logger";
+import { Snackbars } from "@/components/Snackbar/Snackbars";
 
 const prefix = Linking.createURL("/");
 
@@ -98,6 +98,7 @@ export default function Main() {
           }}
         >
           <NavigationContent />
+          <Snackbars />
         </NavigationContainer>
         <TransactionPreview />
       </ThemeProvider>
