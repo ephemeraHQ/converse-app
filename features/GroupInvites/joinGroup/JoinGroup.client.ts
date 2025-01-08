@@ -19,7 +19,6 @@ import {
 } from "@xmtp/react-native-sdk";
 import { AxiosInstance } from "axios";
 
-import {} from "../groupInvites.utils";
 import { JoinGroupResult } from "./joinGroup.types";
 import { ConversationListQueryData } from "@/queries/useConversationListQuery";
 import { entify } from "@/queries/entify";
@@ -88,14 +87,14 @@ export class JoinGroupClient {
     };
 
     const liveFetchGroupsByAccount = async (
-      account: string
-    ): Promise<ConversationDataEntity> => {
+      inboxId: string
+    ): Promise<ConversationDataEntity | undefined> => {
       const { fetchConversationListQuery } = await import(
         "@/queries/useConversationListQuery"
       );
 
       const conversationList: ConversationListQueryData =
-        await fetchConversationListQuery({ account });
+        await fetchConversationListQuery({ inboxId });
 
       const conversationEntity: ConversationDataEntity = entify(
         conversationList,

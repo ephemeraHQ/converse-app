@@ -176,7 +176,7 @@
 //       try {
 //         // const participantAccountAddresses: string[] = conversation.isGroup
 //         //   ? conversation.groupMembers || []
-//         //   : [account, conversation.peerAddress];
+//         //   : [account, conversation.peerEthereumAddress];
 //         // TODO: Frames when supported by V3
 //         const actionInput: FrameActionInputs = {
 //           frameUrl: actionPostUrl,

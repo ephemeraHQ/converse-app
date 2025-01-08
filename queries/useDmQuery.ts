@@ -1,26 +1,28 @@
 /**
- * TODO: Maybe delete this and just use the conversation query instead and add a "peer" argument?
+ * TODO: Maybe delete this and just use the conversation query instead and add a "" argument?
  */
 import { queryClient } from "@/queries/queryClient";
 import { useQuery } from "@tanstack/react-query";
-import { getConversationByPeerByInboxId } from "@utils/xmtpRN/conversations";
+import { getConversationByPeerInboxId } from "@utils/xmtpRN/conversations";
 import { dmQueryKey } from "./QueryKeys";
 import { setConversationQueryData } from "./useConversationQuery";
+import logger from "@/utils/logger";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 type IDmQueryArgs = {
-  inboxId?: string;
-  peer: string;
+  peerInboxId: InboxId;
 };
 
-type IDmQueryData = Awaited<ReturnType<typeof getConversationByPeerByInboxId>>;
+type IDmQueryData = Awaited<
+  ReturnType<typeof getConversationByPeerInboxId>
+>;
 
 async function getDm(args: IDmQueryArgs) {
-  const { inboxId, peer } = args;
+  const { peerInboxId } = args;
 
-  const conversation = await getConversationByPeerByInboxId({
-    inboxId,
-    peer,
-    includeSync: true,
+  const conversation = await getConversationByPeerInboxId({
+    peerInboxId
+    
   });
 
   // Update the main conversation query because it's a 1-1
@@ -34,18 +36,25 @@ async function getDm(args: IDmQueryArgs) {
 }
 
 export function useDmQuery(args: IDmQueryArgs) {
-  const { inboxId, peer } = args;
+  const { inboxId,  } = args;
 
   return useQuery({
-    queryKey: dmQueryKey({ inboxId, peer }),
+    queryKey: dmQueryKey({ inboxId,  }),
     queryFn: () => getDm(args),
-    enabled: !!peer && !!inboxId,
+    enabled: !! && !!inboxId,
   });
 }
 
 export function setDmQueryData(args: IDmQueryArgs & { dm: IDmQueryData }) {
-  const { inboxId, peer, dm } = args;
-  queryClient.setQueryData<IDmQueryData>(dmQueryKey({ inboxId, peer }), dm);
+  const { inboxId, , dm } = args;
+  if (!inboxId) {
+    logger.error("[setDmQueryData] Inbox ID is required");
+    return;
+  }
+  queryClient.setQueryData<IDmQueryData>(
+    dmQueryKey({ inboxId,  }),
+    dm
+  );
   // Also set there because it's a 1-1
   setConversationQueryData({
     inboxId,
@@ -55,6 +64,8 @@ export function setDmQueryData(args: IDmQueryArgs & { dm: IDmQueryData }) {
 }
 
 export function getDmQueryData(args: IDmQueryArgs) {
-  const { inboxId, peer } = args;
-  return queryClient.getQueryData<IDmQueryData>(dmQueryKey({ inboxId, peer }));
+  const { inboxId,  } = args;
+  return queryClient.getQueryData<IDmQueryData>(
+    dmQueryKey({ inboxId,  })
+  );
 }

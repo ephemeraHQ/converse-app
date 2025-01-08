@@ -35,7 +35,7 @@ export function NavigationChatButton({
     navigation.popToTop();
 
     navigate("Conversation", {
-      peer: inboxId,
+      peerEthereumAddress: inboxId,
     });
   }, [inboxId, navigation]);
 

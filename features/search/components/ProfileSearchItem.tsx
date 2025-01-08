@@ -13,31 +13,32 @@ import { ImageStyle, Platform, View, ViewStyle } from "react-native";
 import { NavigationChatButton } from "./NavigationChatButton";
 
 type ProfileSearchItemProps = {
-  address: string;
+  peerEthereumAddress: string;
+  peerInboxId: string;
   socials: IProfileSocials;
   navigation?: NativeStackNavigationProp<any>;
   groupMode?: boolean;
-  addToGroup?: (member: IProfileSocials & { address: string }) => void;
+  addToGroup?: (member: IProfileSocials & { inboxId: string }) => void;
 };
 
 export function ProfileSearchItem({
-  address,
+  peerEthereumAddress,
   socials,
   navigation,
   groupMode,
   addToGroup,
 }: ProfileSearchItemProps) {
   const { theme, themed } = useAppTheme();
-  const preferredName = getPreferredName(socials, address);
+  const preferredName = getPreferredName(socials);
   const preferredAvatar = getPreferredAvatar(socials);
   const primaryNames = getPrimaryNames(socials);
   const primaryNamesDisplay = [
     ...primaryNames.filter((name) => name !== preferredName),
-    shortAddress(address),
+    shortAddress(peerEthereumAddress),
   ];
 
   return (
-    <View key={address} style={themed($container)}>
+    <View key={peerEthereumAddress} style={themed($container)}>
       <View style={themed($left)}>
         <Avatar
           uri={preferredAvatar}
@@ -59,10 +60,12 @@ export function ProfileSearchItem({
       {navigation && (
         <View style={themed($right)}>
           <NavigationChatButton
-            address={address}
+            inboxId={peerInboxId}
             groupMode={groupMode}
             addToGroup={
-              addToGroup ? () => addToGroup({ ...socials, address }) : undefined
+              addToGroup
+                ? () => addToGroup({ ...socials, inboxId: peerInboxId })
+                : undefined
             }
           />
         </View>

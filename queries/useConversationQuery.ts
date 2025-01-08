@@ -37,7 +37,7 @@ export function getConversationQueryOptions(args: IArgs) {
   return {
     queryKey: conversationQueryKey(args),
     queryFn: () => getConversation(args),
-    enabled: !!args.topic,
+    enabled: !!args.topic && !!args.inboxId,
   };
 }
 

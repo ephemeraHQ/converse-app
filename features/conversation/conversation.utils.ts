@@ -1,11 +1,13 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
+import { getCurrentInboxId } from "@/data/store/accountsStore";
 import { getConversationQueryData } from "@/queries/useConversationQuery";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 
-export function getCurrentAccountConversation(topic: ConversationTopic) {
-  const currentAccount = getCurrentAccount()!;
+export function getConversationForCurrentInboxByTopic(
+  topic: ConversationTopic
+) {
+  const currentInboxId = getCurrentInboxId();
   return getConversationQueryData({
-    account: currentAccount,
+    inboxId: currentInboxId,
     topic: topic,
   });
 }

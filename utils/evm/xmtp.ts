@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { Alert } from "react-native";
 
 import { useExternalSigner } from "./external";
-import { getInbox } from "../xmtpRN/conversations";
+import { getXmtpClient } from "../xmtpRN/conversations";
 import { ConverseXmtpClientType } from "../xmtpRN/client.types";
 
 /**
@@ -14,7 +14,7 @@ export const useXmtpSigner = () => {
   const { getExternalSigner, resetExternalSigner } = useExternalSigner();
 
   const getXmtpSigner = useCallback(async () => {
-    const client = (await getInbox({
+    const client = (await getXmtpClient({
       caller: "getXmtpSigner",
       ifNotFoundStrategy: "throw",
     })) as ConverseXmtpClientType;

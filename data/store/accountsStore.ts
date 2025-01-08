@@ -298,32 +298,6 @@ export function getCurrentInboxId() {
   return currentInboxId === TEMPORARY_ACCOUNT_NAME ? undefined : currentInboxId;
 }
 
-// export const loggedWithPrivy = () => {
-//   const inboxId = getCurrentInboxId();
-//   return isPrivyAccount(account);
-// };
-
-// export const isPrivyAccount = (account: string) => {
-//   return !!useAccountsStore.getState().privyAccountId[account];
-// };
-
-// export const useLoggedWithPrivy = () => {
-//   const account = useCurrentAccount();
-//   const privyAccountId = useAccountsStore((s) => s.privyAccountId);
-//   return account ? !!privyAccountId[account] : false;
-// };
-
-// export const useHasOnePrivyAccount = () => {
-//   const accountsState = useAccountsStore();
-//   let hasOne = undefined as string | undefined;
-//   accountsState.accounts.forEach((a) => {
-//     if (a !== TEMPORARY_ACCOUNT_NAME && accountsState.privyAccountId[a]) {
-//       hasOne = a;
-//     }
-//   });
-//   return hasOne;
-// };
-
 // This enables us to use account-based substores for the current selected user automatically,
 // Just call export useSubStore = accountStoreHook("subStoreName") in the substore definition
 

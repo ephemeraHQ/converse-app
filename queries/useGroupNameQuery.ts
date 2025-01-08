@@ -4,12 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const useGroupNameQuery = (args: {
-  account: string;
+  inboxId: string | undefined;
   topic: ConversationTopic;
 }) => {
-  const { account, topic } = args;
+  const { inboxId, topic } = args;
   return useQuery({
-    ...getGroupQueryOptions({ account, topic }),
+    ...getGroupQueryOptions({ inboxId, topic }),
     select: (group) => (isConversationGroup(group) ? group.name : undefined),
   });
 };

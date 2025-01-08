@@ -25,25 +25,25 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
 
   const { data: peerInboxId } = useDmPeerInboxId({ account, topic });
 
-  const peerAddress = usePreferredInboxAddress(peerInboxId!);
+  const peerEthereumAddress = usePreferredInboxAddress(peerInboxId!);
 
   const onPress = useCallback(() => {
-    if (peerAddress) {
-      navigation.push("Profile", { address: peerAddress });
+    if (peerEthereumAddress) {
+      navigation.push("Profile", { address: peerEthereumAddress });
     }
-  }, [navigation, peerAddress]);
+  }, [navigation, peerEthereumAddress]);
 
   const onLongPress = useCallback(() => {
     copyToClipboard(JSON.stringify(topic));
   }, [topic]);
 
-  const { isLoading } = useProfileSocials(peerAddress ?? "");
+  const { isLoading } = useProfileSocials(peerEthereumAddress ?? "");
 
-  const preferredName = usePreferredName(peerAddress ?? "");
+  const preferredName = usePreferredName(peerEthereumAddress ?? "");
 
-  const preferredAvatarUri = usePreferredAvatarUri(peerAddress ?? "");
+  const preferredAvatarUri = usePreferredAvatarUri(peerEthereumAddress ?? "");
 
-  const displayAvatar = peerAddress && !isLoading;
+  const displayAvatar = peerEthereumAddress && !isLoading;
   if (!displayAvatar) return null;
 
   return (

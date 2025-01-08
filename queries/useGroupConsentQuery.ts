@@ -8,35 +8,35 @@ import { useQuery } from "@tanstack/react-query";
 import type { ConsentState, ConversationTopic } from "@xmtp/react-native-sdk";
 
 type IGroupConsentQueryArgs = {
-  account: string;
+  inboxId: string | undefined;
   topic: ConversationTopic;
 };
 
 export const useGroupConsentQuery = (args: IGroupConsentQueryArgs) => {
-  const { account, topic } = args;
+  const { inboxId, topic } = args;
   return useQuery({
-    ...getGroupQueryOptions({ account, topic }),
+    ...getGroupQueryOptions({ inboxId, topic }),
     select: (group) => group?.state,
   });
 };
 
 export const getGroupConsentQueryData = (
-  account: string,
+  inboxId: string | undefined,
   topic: ConversationTopic
 ) => {
-  const group = getGroupQueryData({ account, topic });
+  const group = getGroupQueryData({ inboxId, topic });
   return group?.state;
 };
 
 export const setGroupConsentQueryData = (
-  account: string,
+  inboxId: string | undefined,
   topic: ConversationTopic,
   consent: ConsentState | undefined
 ) => {
-  const currentGroup = getGroupQueryData({ account, topic });
+  const currentGroup = getGroupQueryData({ inboxId, topic });
   if (!currentGroup) return;
   setGroupQueryData({
-    account,
+    inboxId,
     topic,
     group: { ...currentGroup, state: consent } as GroupWithCodecsType,
   });

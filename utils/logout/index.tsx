@@ -23,7 +23,7 @@ import { unsubscribeFromNotifications } from "@features/notifications/utils/unsu
 import { deleteSubscribedTopics } from "@features/notifications/utils/deleteSubscribedTopics";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 import { getXmtpApiHeaders } from "@utils/api";
-import { getInbox } from "../xmtpRN/conversations";
+import { getXmtpClient } from "../xmtpRN/conversations";
 import { ConverseXmtpClientType } from "../xmtpRN/client.types";
 
 type InboxIdToLogoutTaskMap = {
@@ -156,7 +156,7 @@ export const logoutAccount = async ({
   try {
     // if we're attemptinmg to logout, we should be safe to assume
     // we have a client cached...
-    const client = (await getInbox({
+    const client = (await getXmtpClient({
       inboxId,
       caller: "logoutAccount",
       ifNotFoundStrategy: "throw",

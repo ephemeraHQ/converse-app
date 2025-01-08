@@ -1,20 +1,22 @@
-import {
-  getCurrentAccount,
-  useCurrentAccount,
-} from "@/data/store/accountsStore";
+// import {
+//   getCurrentAccount,
+//   useCurrentAccount,
+// } from "@/data/store/accountsStore";
+import { currentInboxId, getCurrentInboxId } from "@/data/store/accountsStore";
 import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
 import { getConversationQueryData } from "@/queries/useConversationQuery";
 import { getDmQueryData, setDmQueryData } from "@/queries/useDmQuery";
 import { mutateObjectProperties } from "@/utils/mutate-object-properties";
 import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
 import {
-  consentToGroupsOnProtocolByAccount,
+  consentToGroupsByGroupIds,
   consentToInboxIdsOnProtocolByInboxId,
 } from "@/utils/xmtpRN/contacts";
 import { useMutation } from "@tanstack/react-query";
 import {
   ConversationId,
   ConversationTopic,
+  Dm,
   InboxId,
 } from "@xmtp/react-native-sdk";
 
@@ -25,30 +27,31 @@ export function useDmConsentMutation(args: {
 }) {
   const { peerInboxId, conversationId, topic } = args;
 
-  const currentInboxId = useCurrentInboxId()()!;
+  // const currentInboxId = useCurrentInboxId()()!;
 
   return useMutation({
     mutationFn: async (args: { consent: "allow" | "deny" }) => {
       if (!peerInboxId) {
         throw new Error("Peer inbox id not found");
       }
-      const currentAccount = getCurrentAccount()!;
+      const currentInboxId = getCurrentInboxId();
       await Promise.all([
-        consentToGroupsOnProtocolByAccount({
-          account: currentAccount,
+        consentToGroupsByGroupIds({
+          inboxId: currentInboxId,
           groupIds: [conversationId],
           consent: args.consent,
         }),
         consentToInboxIdsOnProtocolByInboxId({
-          account: currentAccount,
+          inboxId: currentInboxId,
           inboxIds: [peerInboxId],
           consent: args.consent,
         }),
       ]);
     },
     onMutate: (args) => {
+      const currentInboxId = getCurrentInboxId();
       const conversation = getConversationQueryData({
-        account: currentAccount,
+        inboxId: currentInboxId,
         topic,
       });
       if (conversation) {
@@ -56,26 +59,27 @@ export function useDmConsentMutation(args: {
           state: args.consent === "allow" ? "allowed" : "denied",
         });
         setDmQueryData({
-          account: currentAccount,
-          peer: topic,
+          inboxId: currentInboxId,
+          peer: updatedDm,
           dm: updatedDm as DmWithCodecsType,
         });
         updateConversationInConversationListQuery({
-          account: currentAccount,
+          inboxId: currentInboxId,
           topic,
           conversationUpdate: {
             state: args.consent === "allow" ? "allowed" : "denied",
           },
         });
-        return { previousDmConsent: conversation.state };
+        return { previousDmConsent: conversation.state, peer: conversation.p };
       }
     },
     onError: (error, _, context) => {
       const { previousDmConsent } = context || {};
       if (previousDmConsent) {
+        const currentInboxId = getCurrentInboxId();
         const dm = getDmQueryData({
-          account: currentAccount,
-          peer: topic,
+          inboxId: currentInboxId,
+          peer: context.,
         });
         if (!dm) {
           return;
@@ -84,12 +88,12 @@ export function useDmConsentMutation(args: {
           state: previousDmConsent,
         });
         setDmQueryData({
-          account: currentAccount,
-          peer: topic,
+          inboxId: currentInboxId,
+          topic,
           dm: updatedDm,
         });
         updateConversationInConversationListQuery({
-          account: currentAccount,
+          inboxId: currentInboxId,
           topic,
           conversationUpdate: {
             state: previousDmConsent,

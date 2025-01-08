@@ -53,7 +53,7 @@ export const conversationShouldBeDisplayed = (
 ) => {
   // const isNotReady =
   //   (conversation.isGroup && !conversation.groupMembers) ||
-  //   (!conversation.isGroup && !conversation.peerAddress);
+  //   (!conversation.isGroup && !conversation.peerEthereumAddress);
   // if (isNotReady) return false;
   // const isPending = !!conversation.pending;
   // const isNotEmpty = conversation.messages.size > 0;

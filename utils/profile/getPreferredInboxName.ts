@@ -1,6 +1,5 @@
 import { type IProfileSocials } from "@/features/profiles/profile-types";
 import { getPreferredName } from "./getPreferredName";
-import { getPreferredInboxAddress } from "./getPreferredInboxAddress";
 
 /**
  * Get the preferred name for an inbox.
@@ -12,8 +11,5 @@ export function getPreferredInboxName(
   socialsArray: IProfileSocials[] | undefined | null
 ): string {
   const socials = socialsArray?.[0];
-  return getPreferredName(
-    socials,
-    getPreferredInboxAddress(socialsArray) ?? ""
-  );
+  return getPreferredName(socials);
 }

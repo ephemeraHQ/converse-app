@@ -26,6 +26,7 @@ import {
   XMTP_IDENTITY_KEY,
 } from "./api.constants";
 import { tryGetAppCheckToken } from "./appCheck";
+import { getCurrentInboxId } from "@/data/store/accountsStore";
 
 export const api = axios.create({
   baseURL: config.apiURI,
@@ -312,15 +313,21 @@ export const getProfilesForInboxIds = async ({
   return data;
 };
 
-export const searchXmtpProfilesByRawString = async ({
-  accountInboxId,
+export const searchXmtpProfilesByRawStringForCurrentAccount = async ({
   query,
 }: {
-  accountInboxId: string;
   query: string;
-}): Promise<{ [inboxId: string]: IProfileSocials }> => {
+}): Promise<{
+  /** @todo(lustig) confirm this type */ [inboxId: string]: IProfileSocials;
+}> => {
+  const currentInboxId = getCurrentInboxId();
+  if (!currentInboxId) {
+    throw new Error(
+      "[searchXmtpProfilesByRawStringForCurrentAccount] No inboxId provided"
+    );
+  }
   const { data } = await api.get("/api/profile/search", {
-    headers: await getXmtpApiHeaders({ inboxId: accountInboxId }),
+    headers: await getXmtpApiHeaders({ inboxId: currentInboxId }),
     params: { query },
   });
   return data;
@@ -343,11 +350,14 @@ export const saveTopicsData = async ({
   inboxId,
   topicsData,
 }: {
-  inboxId: string;
+  inboxId: string | undefined;
   topicsData: {
     [topic: string]: TopicData;
   };
 }) => {
+  if (!inboxId) {
+    throw new Error("[saveTopicsData] No inboxId provided");
+  }
   await api.post("/api/topics", topicsData, {
     headers: await getXmtpApiHeaders({ inboxId }),
   });
@@ -575,7 +585,7 @@ export const createGroupInvite = async ({
   inboxId,
   inputs,
 }: {
-  inboxId: string;
+  inboxId: string | undefined;
   inputs: {
     groupName: string;
     description?: string;
@@ -583,6 +593,9 @@ export const createGroupInvite = async ({
     groupId: string;
   };
 }): Promise<CreateGroupInviteResult> => {
+  if (!inboxId) {
+    throw new Error("[createGroupInvite] Inbox ID is required");
+  }
   const { data } = await api.post("/api/groupInvite", inputs, {
     headers: await getXmtpApiHeaders({ inboxId }),
   });
@@ -607,9 +620,12 @@ export const deleteGroupInvite = async ({
   inboxId,
   inviteId,
 }: {
-  inboxId: string;
+  inboxId: string | undefined;
   inviteId: string;
 }): Promise<void> => {
+  if (!inboxId) {
+    throw new Error("[deleteGroupInvite] Inbox ID is required");
+  }
   await api.delete(`/api/groupInvite/${inviteId}`, {
     headers: await getXmtpApiHeaders({ inboxId }),
   });

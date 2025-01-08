@@ -8,6 +8,7 @@ export function getPreferredName(
   const ensName = socials?.ensNames?.find((e) => e.isPrimary) || null;
   const unsDomain =
     socials?.unstoppableDomains?.find((d) => d.isPrimary) || null;
+  // todo(lustig) more intentional handling of "primary" cryptocurrency walle
   const ethAddress1 = socials?.cryptoCurrencyWalletAddresses?.ETH?.[0];
 
   if (userName) {

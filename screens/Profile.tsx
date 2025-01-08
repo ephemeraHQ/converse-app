@@ -84,7 +84,7 @@ import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
 import { getPreferredName } from "@/utils/profile";
-import { getInbox } from "@/utils/xmtpRN/conversations";
+import { getXmtpClient } from "@/utils/xmtpRN/conversations";
 import { isCurrentUserInboxId } from "@/hooks/use-current-account-inbox-id";
 
 export default function ProfileScreen() {
@@ -790,7 +790,7 @@ function ProfileScreenImpl() {
                     : primaryColor(colorScheme),
                 action: async () => {
                   try {
-                    const client = await getInbox({
+                    const client = await getXmtpClient({
                       caller: "revokeOtherInstallations",
                       ifNotFoundStrategy: "logAndReturnUndefined",
                     });

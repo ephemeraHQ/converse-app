@@ -7,6 +7,9 @@ export const usePreferredName = ({
 }: {
   inboxId: string | undefined;
 }) => {
+  if (!inboxId) {
+    throw new Error("[usePreferredName] Inbox ID is required");
+  }
   const { data } = useProfileSocials({ peerInboxId: inboxId! });
   /*todo(lustig) make sure this works*/ return data
     ? getPreferredName(data)

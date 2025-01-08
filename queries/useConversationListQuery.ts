@@ -83,10 +83,16 @@ export function refetchConversationListQuery(args: { inboxId: string }) {
 }
 
 export const addConversationToConversationListQuery = (args: {
-  inboxId: string;
+  inboxId: string | undefined;
   conversation: ConversationWithCodecsType;
 }) => {
   const { inboxId, conversation } = args;
+  if (!inboxId) {
+    logger.error(
+      "[addConversationToConversationListQuery] Inbox ID is required; noop"
+    );
+    return;
+  }
   const previousConversationsData = getConversationListQueryData({ inboxId });
   if (!previousConversationsData) {
     setConversationListQueryData({ inboxId, conversations: [conversation] });
@@ -108,7 +114,7 @@ export const addConversationToConversationListQuery = (args: {
 };
 
 export const updateConversationInConversationListQuery = (args: {
-  inboxId: string;
+  inboxId: string | undefined;
   topic: ConversationTopic;
   conversationUpdate: Partial<ConversationWithCodecsType>;
 }) => {
@@ -127,7 +133,9 @@ export const updateConversationInConversationListQuery = (args: {
   setConversationListQueryData({ inboxId, conversations: newConversations });
 };
 
-export const getConversationListQueryData = (args: { inboxId: string }) => {
+export const getConversationListQueryData = (args: {
+  inboxId: string | undefined;
+}) => {
   const { inboxId } = args;
   return queryClient.getQueryData<ConversationListQueryData>(
     conversationListQueryConfig({
@@ -138,10 +146,13 @@ export const getConversationListQueryData = (args: { inboxId: string }) => {
 };
 
 export const setConversationListQueryData = (args: {
-  inboxId: string;
+  inboxId: string | undefined;
   conversations: ConversationListQueryData;
 }) => {
   const { inboxId, conversations } = args;
+  if (!inboxId) {
+    return;
+  }
   return queryClient.setQueryData<ConversationListQueryData>(
     conversationListQueryConfig({
       inboxId,

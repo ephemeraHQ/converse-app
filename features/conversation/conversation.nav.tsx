@@ -5,7 +5,7 @@ import type { ConversationTopic } from "@xmtp/react-native-sdk";
 export type ConversationNavParams = {
   topic?: ConversationTopic;
   text?: string;
-  peer?: string;
+  peerEthereumAddress?: string;
 };
 
 export const ConversationScreenConfig = {

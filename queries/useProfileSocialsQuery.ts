@@ -9,7 +9,11 @@ import {
 
 import { queryClient } from "./queryClient";
 import mmkv from "@/utils/mmkv";
-import { useCurrentInboxId } from "@/data/store/accountsStore";
+import {
+  getCurrentInboxId,
+  useCurrentInboxId,
+} from "@/data/store/accountsStore";
+import logger from "@/utils/logger";
 
 type ProfileSocialsData = IProfileSocials | null | undefined;
 
@@ -213,12 +217,17 @@ export const setProfileSocialsQueryData = ({
 };
 
 export const setProfileRecordSocialsQueryData = ({
-  currentInboxId,
   record,
 }: {
-  currentInboxId: string;
   record: Record<string, IProfileSocials>;
 }) => {
+  const currentInboxId = getCurrentInboxId();
+  if (!currentInboxId) {
+    logger.error(
+      "[setProfileRecordSocialsQueryData] No current inboxId provided"
+    );
+    return;
+  }
   Object.keys(record).forEach((profileLookupInboxId) => {
     setProfileSocialsQueryData({
       currentInboxId,

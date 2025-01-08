@@ -68,16 +68,18 @@ export default function NewGroupSummary({
 
   const defaultGroupName = useMemo(() => {
     if (!currentInboxId) return "";
-    const members = route.params.members.slice(0, 3);
-    const currentAccountSocials =
-      getProfileSocialsQueryData(currentInboxId, currentInboxId) ?? undefined;
-    let groupName = getPreferredName(currentAccountSocials, currentInboxId);
-    if (members.length) {
+    const membersSocialProfiles = route.params.members.slice(0, 3);
+    const currentAccountSocials = getProfileSocialsQueryData({
+      currentInboxId,
+      profileLookupInboxId: currentInboxId,
+    });
+    let groupName = getPreferredName(currentAccountSocials);
+    if (membersSocialProfiles.length) {
       groupName += ", ";
     }
-    for (let i = 0; i < members.length; i++) {
-      groupName += getPreferredName(members[i], members[i].address);
-      if (i < members.length - 1) {
+    for (let i = 0; i < membersSocialProfiles.length; i++) {
+      groupName += getPreferredName(membersSocialProfiles[i]);
+      if (i < membersSocialProfiles.length - 1) {
         groupName += ", ";
       }
     }
@@ -117,7 +119,7 @@ export default function NewGroupSummary({
     setCreatingGroup(true);
     try {
       const group = await createGroupForCurrentUser({
-        peers: route.params.members.map((m) => m.address),
+        peers: route.params.members.map((m) => m.peerEthereumAddress),
         permissionPolicySet,
         groupName,
         groupPhoto: remotePhotoUrl,
@@ -189,20 +191,25 @@ export default function NewGroupSummary({
     ]
   );
 
-  const profileQueries = useProfilesSocials(
-    route.params.members.map((m) => m.address)
-  );
+  const profileQueries = useProfilesSocials({
+    peerInboxIds: route.params.members.map((m) => m),
+  });
 
-  const pendingGroupMembers = useMemo(() => {
+  const pendingGroupMembers: {
+    address: string;
+    uri?: string;
+    name?: string;
+  }[] = useMemo(() => {
     return profileQueries.map(({ data: socials }, index) => {
-      const address = route.params.members[index].address;
+      const peerEthereumAddress =
+        route.params.members[index].peerEthereumAddress;
       return {
-        address,
+        address: peerEthereumAddress,
         uri: getPreferredAvatar(socials ?? undefined),
-        name: getPreferredName(socials ?? undefined, account!),
+        name: getPreferredName(socials ?? undefined),
       };
     });
-  }, [profileQueries, route.params.members, account]);
+  }, [profileQueries, route.params.members]);
 
   return (
     <ScrollView
@@ -253,9 +260,9 @@ export default function NewGroupSummary({
         />
       </List.Section>
       <TableView
-        items={route.params.members.map((a) => ({
-          id: a.address,
-          title: getPreferredName(a, a.address),
+        items={route.params.members.map((member) => ({
+          id: member.peerEthereumAddress,
+          title: getPreferredName(member),
         }))}
         title={translate("members_title")}
       />

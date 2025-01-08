@@ -15,12 +15,12 @@ import {
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
 } from "./client.types";
-import { getInbox } from "./conversations";
+import { getXmtpClient } from "./conversations";
 
 export const streamAllMessages = async (inboxId: string | undefined) => {
   await stopStreamingAllMessage({ inboxId });
 
-  const client = (await getInbox({
+  const client = (await getXmtpClient({
     inboxId,
     caller: "streamAllMessages",
   })) as ConverseXmtpClientType;
@@ -100,7 +100,7 @@ export const stopStreamingAllMessage = async ({
 }: {
   inboxId: string | undefined;
 }) => {
-  const client = (await getInbox({
+  const client = (await getXmtpClient({
     inboxId,
     caller: "stopStreamingAllMessage",
   })) as ConverseXmtpClientType;

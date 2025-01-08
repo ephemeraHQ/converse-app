@@ -1,5 +1,5 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
-import { useChatStore, useCurrentAccount } from "@/data/store/accountsStore";
+import { useChatStore, useCurrentInboxId } from "@/data/store/accountsStore";
 import { useSelect } from "@/data/store/storeHelpers";
 import { translate } from "@/i18n";
 import { actionSheetColors } from "@/styles/colors";
@@ -20,7 +20,7 @@ export const useHandleDeleteDm = ({
   preferredName,
   conversation,
 }: UseHandleDeleteDmProps) => {
-  const currentInboxId = useCurrentInboxId()()!;
+  const currentInboxId = useCurrentInboxId();
   const { theme } = useAppTheme();
   const colorScheme = theme.isDark ? "dark" : "light";
   const { setTopicsData } = useChatStore(useSelect(["setTopicsData"]));
@@ -33,22 +33,28 @@ export const useHandleDeleteDm = ({
     const title = `${translate("delete_chat_with")} ${preferredName}?`;
     const actions = [
       () => {
-        saveTopicsData(currentAccount, {
-          [topic]: {
-            status: "deleted",
-            timestamp: new Date().getTime(),
-          },
-        }),
-          setTopicsData({
+        saveTopicsData({
+          inboxId: currentInboxId,
+          topicsData: {
             [topic]: {
               status: "deleted",
               timestamp: new Date().getTime(),
             },
-          });
+          },
+        });
+        setTopicsData({
+          [topic]: {
+            status: "deleted",
+            timestamp: new Date().getTime(),
+          },
+        });
       },
       async () => {
-        saveTopicsData(currentAccount, {
-          [topic]: { status: "deleted" },
+        saveTopicsData({
+          inboxId: currentInboxId,
+          topicsData: {
+            [topic]: { status: "deleted" },
+          },
         });
         setTopicsData({
           [topic]: {
@@ -59,7 +65,7 @@ export const useHandleDeleteDm = ({
         await conversation.updateConsent("denied");
         const peerInboxId = await conversation.peerInboxId();
         await consentToInboxIdsOnProtocolByInboxId({
-          account: currentAccount,
+          inboxId: currentInboxId,
           inboxIds: [peerInboxId],
           consent: "deny",
         });
@@ -83,7 +89,7 @@ export const useHandleDeleteDm = ({
   }, [
     colorScheme,
     conversation,
-    currentAccount,
+    currentInboxId,
     preferredName,
     setTopicsData,
     topic,

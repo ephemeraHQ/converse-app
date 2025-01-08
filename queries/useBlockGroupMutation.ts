@@ -3,7 +3,7 @@ import { captureError } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
-import { consentToGroupsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import { consentToGroupsByGroupIds } from "@utils/xmtpRN/contacts";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { blockGroupMutationKey } from "./MutationKeys";
 import {
@@ -11,29 +11,30 @@ import {
   setGroupConsentQueryData,
 } from "./useGroupConsentQuery";
 
-export const useBlockGroupMutation = (
-  account: string,
-  topic: ConversationTopic
-) => {
+export const useBlockGroupMutation = (args: {
+  inboxId: string | undefined;
+  topic: ConversationTopic;
+}) => {
+  const { inboxId, topic } = args;
   return useMutation({
-    mutationKey: blockGroupMutationKey(account, topic!),
+    mutationKey: blockGroupMutationKey({ inboxId, topic }),
     mutationFn: async () => {
-      if (!topic || !account) {
+      if (!topic || !inboxId) {
         return;
       }
-      await consentToGroupsOnProtocolByAccount({
-        account,
+      await consentToGroupsByGroupIds({
+        inboxId,
         groupIds: [getV3IdFromTopic(topic)],
         consent: "deny",
       });
       return "denied";
     },
     onMutate: async () => {
-      const previousConsent = getGroupConsentQueryData(account, topic!);
-      setGroupConsentQueryData(account, topic!, "denied");
+      const previousConsent = getGroupConsentQueryData(inboxId, topic!);
+      setGroupConsentQueryData(inboxId, topic!, "denied");
       updateConversationInConversationListQuery({
-        account,
-        topic: topic!,
+        inboxId,
+        topic,
         conversationUpdate: {
           state: "denied",
         },
@@ -47,10 +48,10 @@ export const useBlockGroupMutation = (
         return;
       }
 
-      setGroupConsentQueryData(account, topic!, context.previousConsent);
+      setGroupConsentQueryData(inboxId, topic!, context.previousConsent);
       updateConversationInConversationListQuery({
-        account,
-        topic: topic!,
+        inboxId,
+        topic,
         conversationUpdate: {
           state: context.previousConsent,
         },

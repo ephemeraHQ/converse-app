@@ -21,9 +21,8 @@ import {
 
 import { translate } from "@/i18n";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
-import { useGroupQuery } from "@queries/useGroupQuery";
 import SearchBar from "@search/components/SearchBar";
-import ProfileSearch from "@search/screens/ProfileSearch";
+import { ProfileSearch } from "@search/screens/ProfileSearch";
 import { canMessageByAccount } from "@utils/xmtpRN/contacts";
 import { InboxId } from "@xmtp/react-native-sdk";
 import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndicator";
@@ -39,7 +38,7 @@ import {
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useSelect } from "../../data/store/storeHelpers";
 import { useGroupMembers } from "../../hooks/useGroupMembers";
-import { searchXmtpProfilesByRawString } from "../../utils/api";
+import { searchXmtpProfilesByRawStringForCurrentAccount } from "../../utils/api";
 import { getAddressForPeer, isSupportedPeer } from "../../utils/evm/address";
 import { navigate } from "../../utils/navigation";
 import { isEmptyObject } from "../../utils/objects";
@@ -55,18 +54,18 @@ export default function NewConversation({
   "NewConversationScreen"
 >) {
   const colorScheme = useColorScheme();
-  const { data: existingGroup } = useGroupQuery({
-    inboxId: getCurrentInboxId(),
-    topic: route.params?.addingToGroupTopic!,
-  });
+  // const { data: existingGroup } = useGroupQuery({
+  //   inboxId: getCurrentInboxId(),
+  //   topic: route.params?.addingToGroupTopic!,
+  // });
   const [group, setGroup] = useState({
     enabled: !!route.params?.addingToGroupTopic,
-    members: [] as (IProfileSocials & { address: string })[],
+    members: [] as (IProfileSocials & { inboxId: string })[],
   });
 
-  const { addMembers, members } = useGroupMembers(
-    route.params?.addingToGroupTopic!
-  );
+  const { addMembers, members } = useGroupMembers({
+    topic: route.params?.addingToGroupTopic!,
+  });
 
   const [loading, setLoading] = useState(false);
 
@@ -74,12 +73,24 @@ export default function NewConversation({
 
   const styles = useStyles();
 
+  const getFirstEthereumAddress = (member: IProfileSocials) => {
+    const address = member.cryptoCurrencyWalletAddresses?.ETH[0];
+    if (address) {
+      return getCleanAddress(address);
+    }
+    return undefined;
+  };
+
+  const mapMembersToPeerEthereumAddresses = (members: IProfileSocials[]) => {
+    return members.map(getFirstEthereumAddress).filter(Boolean);
+  };
+
   const handleRightAction = useCallback(async () => {
     if (route.params?.addingToGroupTopic) {
       setLoading(true);
       try {
         //  TODO: Support multiple addresses
-        await addMembers(group.members.map((m) => m.address));
+        await addMembers(mapMembersToPeerEthereumAddresses(group.members));
         navigation.goBack();
       } catch (e) {
         setLoading(false);
@@ -140,7 +151,7 @@ export default function NewConversation({
     colorScheme,
   ]);
 
-  const [value, setValue] = useState(route.params?.peer || "");
+  const [value, setValue] = useState(route.params?.peerEthereumAddress || "");
   const searchingForValue = useRef("");
   const [status, setStatus] = useState({
     loading: false,
@@ -219,17 +230,16 @@ export default function NewConversation({
             if (searchingForValue.current === value) {
               if (addressIsOnXmtp) {
                 // Let's search with the exact address!
-                const profiles = await searchXmtpProfilesByRawString(
-                  address,
-                  getCurrentInboxId()
-                );
+                const profiles =
+                  await searchXmtpProfilesByRawStringForCurrentAccount({
+                    query: address,
+                  });
 
                 if (!isEmptyObject(profiles)) {
                   // Let's save the profiles for future use
-                  setProfileRecordSocialsQueryData(
-                    getCurrentInboxId(),
-                    profiles
-                  );
+                  setProfileRecordSocialsQueryData({
+                    record: profiles,
+                  });
                   setStatus({
                     loading: false,
                     error: "",
@@ -262,14 +272,17 @@ export default function NewConversation({
             profileSearchResults: {},
           });
 
-          const profiles = await searchXmtpProfilesByRawString(
-            value,
-            getCurrentInboxId()
+          const profiles = await searchXmtpProfilesByRawStringForCurrentAccount(
+            {
+              query: value,
+            }
           );
 
           if (!isEmptyObject(profiles)) {
             // Let's save the profiles for future use
-            setProfileRecordSocialsQueryData(getCurrentInboxId(), profiles);
+            setProfileRecordSocialsQueryData({
+              record: profiles,
+            });
             setStatus({
               loading: false,
               error: "",
@@ -361,11 +374,11 @@ export default function NewConversation({
         {group.enabled &&
           group.members.length > 0 &&
           group.members.map((m, index) => {
-            const preferredName = getPreferredName(m, m.address);
+            const preferredName = getPreferredName(m);
 
             return (
               <Button
-                key={m.address}
+                key={m.inboxId}
                 text={preferredName}
                 variant="fill"
                 size="md"
@@ -394,21 +407,23 @@ export default function NewConversation({
               const searchResultsToShow = { ...status.profileSearchResults };
               if (group.enabled && group.members) {
                 group.members.forEach((member) => {
-                  delete searchResultsToShow[member.address];
+                  delete searchResultsToShow[member.inboxId];
                 });
               }
               if (members) {
                 members?.ids?.forEach((memberId: InboxId) => {
-                  const member = members.byId[memberId];
-                  const address = getCleanAddress(member.addresses[0]);
-                  delete searchResultsToShow[address];
+                  delete searchResultsToShow[memberId];
                 });
               }
               return searchResultsToShow;
             })()}
             groupMode={group.enabled}
             addToGroup={async (member) => {
-              setGroup((g) => ({ ...g, members: [...g.members, member] }));
+              // setGroup((g) => ({ ...g, members: [...g.members, member] }));
+              setGroup((g) => ({
+                ...g,
+                members: [...g.members, { ...member, inboxId: member.inboxId }],
+              }));
               setValue("");
             }}
           />

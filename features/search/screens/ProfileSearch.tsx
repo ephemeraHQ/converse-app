@@ -19,10 +19,10 @@ type ProfileSearchProps = {
   navigation: NativeStackNavigationProp<any>;
   profiles: { [address: string]: IProfileSocials };
   groupMode?: boolean;
-  addToGroup?: (member: IProfileSocials & { address: string }) => void;
+  addToGroup?: (member: IProfileSocials & { inboxId: string }) => void;
 };
 
-export default function ProfileSearch({
+export function ProfileSearch({
   navigation,
   profiles,
   groupMode,
@@ -34,10 +34,11 @@ export default function ProfileSearch({
   const keyExtractor = useCallback((address: string) => address, []);
 
   const renderItem = useCallback(
-    ({ item }: { item: string }) => (
+    ({ peerEthereumAddress }: { peerEthereumAddress: string }) => (
       <ProfileSearchItem
-        address={item}
-        socials={profiles[item]}
+        peerEthereumAddress={peerEthereumAddress}
+        /*todo*/ peerInboxId={peerInboxId}
+        socials={profiles[peerEthereumAddress]}
         navigation={navigation}
         groupMode={groupMode}
         addToGroup={addToGroup}

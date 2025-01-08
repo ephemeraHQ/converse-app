@@ -42,12 +42,13 @@ export const buildXmtpClientFromAddress = async (
   const dbDirectory = await getDbDirectory();
   const dbEncryptionKey = await getDbEncryptionKey();
 
-  return Client.build(address, {
+  const c = await Client.build(address, {
     env,
     codecs,
     dbDirectory,
     dbEncryptionKey,
   });
+  return c;
 };
 
 export const xmtpClientByAccount: {

@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import {
-  consentToGroupsOnProtocolByAccount,
+  consentToGroupsByGroupIds,
   consentToInboxIdsOnProtocolByInboxId,
 } from "@utils/xmtpRN/contacts";
 import {
@@ -25,7 +25,7 @@ import {
 } from "./useGroupConsentQuery";
 
 export type AllowGroupMutationProps = {
-  account: string;
+  inboxId: string | undefined;
   topic: ConversationTopic;
   groupId: ConversationId;
 };
@@ -34,7 +34,7 @@ export type AllowGroupMutationVariables = {
   includeAddedBy?: boolean;
   includeCreator?: boolean;
   group: GroupWithCodecsType;
-  account: string;
+  inboxId: string | undefined;
 };
 
 export type IUseAllowGroupMutationOptions = MutationOptions<
@@ -47,13 +47,13 @@ export type IUseAllowGroupMutationOptions = MutationOptions<
 >;
 
 export const getAllowGroupMutationOptions = (
-  account: string,
+  inboxId: string | undefined,
   topic: ConversationTopic
 ): IUseAllowGroupMutationOptions => {
   return {
-    mutationKey: [MutationKeys.ALLOW_GROUP, account, topic],
+    mutationKey: [MutationKeys.ALLOW_GROUP, inboxId, topic],
     mutationFn: async (args: AllowGroupMutationVariables) => {
-      const { includeAddedBy, includeCreator, group, account } = args;
+      const { includeAddedBy, includeCreator, group, inboxId } = args;
 
       const groupTopic = group.topic;
       const groupCreator = await group.creatorInboxId();
@@ -68,15 +68,15 @@ export const getAllowGroupMutationOptions = (
       }
 
       await Promise.all([
-        consentToGroupsOnProtocolByAccount({
-          account,
+        consentToGroupsByGroupIds({
+          inboxId,
           groupIds: [getV3IdFromTopic(groupTopic)],
           consent: "allow",
         }),
         ...(inboxIdsToAllow.length > 0
           ? [
               consentToInboxIdsOnProtocolByInboxId({
-                account,
+                inboxId,
                 inboxIds: inboxIdsToAllow,
                 consent: "allow",
               }),
@@ -87,11 +87,11 @@ export const getAllowGroupMutationOptions = (
       return "allowed";
     },
     onMutate: (args: AllowGroupMutationVariables) => {
-      const { account, group } = args;
-      const previousConsent = getGroupConsentQueryData(account, group.topic);
-      setGroupConsentQueryData(account, group.topic, "allowed");
+      const { inboxId, group } = args;
+      const previousConsent = getGroupConsentQueryData(inboxId, group.topic);
+      setGroupConsentQueryData(inboxId, group.topic, "allowed");
       updateConversationInConversationListQuery({
-        account,
+        inboxId,
         topic: group.topic,
         conversationUpdate: {
           state: "allowed",
@@ -108,7 +108,7 @@ export const getAllowGroupMutationOptions = (
         previousConsent: ConsentState | undefined;
       }
     ) => {
-      const { account, group } = variables;
+      const { inboxId, group } = variables;
 
       captureError(error);
 
@@ -116,9 +116,9 @@ export const getAllowGroupMutationOptions = (
         return;
       }
 
-      setGroupConsentQueryData(account, group.topic, context.previousConsent);
+      setGroupConsentQueryData(inboxId, group.topic, context.previousConsent);
       updateConversationInConversationListQuery({
-        account,
+        inboxId,
         topic: group.topic,
         conversationUpdate: {
           state: context.previousConsent,
@@ -129,19 +129,20 @@ export const getAllowGroupMutationOptions = (
 };
 
 export const createAllowGroupMutationObserver = ({
-  account,
+  inboxId,
   topic,
 }: AllowGroupMutationProps) => {
   const allowGroupMutationObserver = new MutationObserver(
     queryClient,
-    getAllowGroupMutationOptions(account, topic)
+    getAllowGroupMutationOptions(inboxId, topic)
   );
   return allowGroupMutationObserver;
 };
 
-export const useAllowGroupMutation = (
-  account: string,
-  topic: ConversationTopic
-) => {
-  return useMutation(getAllowGroupMutationOptions(account, topic));
+export const useAllowGroupMutation = (args: {
+  inboxId: string | undefined;
+  topic: ConversationTopic;
+}) => {
+  const { inboxId, topic } = args;
+  return useMutation(getAllowGroupMutationOptions(inboxId, topic));
 };

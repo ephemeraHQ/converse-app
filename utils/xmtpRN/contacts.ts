@@ -2,49 +2,11 @@ import { InboxId } from "@xmtp/react-native-sdk";
 
 import logger from "@utils/logger";
 import { ConverseXmtpClientType, DmWithCodecsType } from "./client.types";
-import { getOrBuildXmtpClient } from "./sync";
 import { xmtpClientByInboxId } from "./client";
 import { getCurrentInboxId } from "@/data/store/accountsStore";
-import { getInbox } from "./conversations";
+import { getXmtpClient } from "./conversations";
 
 type ConsentType = "allow" | "deny";
-
-// type RefreshConsentListParams = {
-//   client: ConverseXmtpClientType;
-// };
-
-// export const refreshConsentList = async ({
-//   client,
-// }: RefreshConsentListParams) => {
-//   logger.debug("[XMTPRN Contacts] Refreshing consent list");
-//   const start = new Date().getTime();
-//   // const consentList = await client.preferences.;
-//   const end = new Date().getTime();
-//   logger.debug(
-//     `[XMTPRN Contacts] Refreshed consent list in ${(end - start) / 1000} sec`
-//   );
-//   // return consentList;
-// };
-
-// type RefreshConsentListByAccountParams = {
-//   account: string;
-// };
-
-// export const refreshConsentListByAccount = async ({
-//   account,
-// }: RefreshConsentListByAccountParams) => {
-//   logger.debug("[XMTPRN Contacts] Refreshing consent list");
-//   const start = new Date().getTime();
-//   const client = (await getOrBuildXmtpClient(
-//     account
-//   )) as ConverseXmtpClientType;
-//   const consentList = await refreshConsentList({ client });
-//   const end = new Date().getTime();
-//   logger.debug(
-//     `[XMTPRN Contacts] Refreshed consent list in ${(end - start) / 1000} sec`
-//   );
-//   return consentList;
-// };
 
 type ConsentToAddressesOnProtocolParams = {
   client: ConverseXmtpClientType;
@@ -88,26 +50,6 @@ export const consentToAddressesOnProtocol = async ({
       (end - start) / 1000
     } sec`
   );
-};
-
-type ConsentToAddressesOnProtocolByAccountParams = {
-  account: string;
-  addresses: string[];
-  consent: ConsentType;
-};
-
-export const consentToAddressesOnProtocolByAccount = async ({
-  account,
-  addresses,
-  consent,
-}: ConsentToAddressesOnProtocolByAccountParams) => {
-  // const client = (await getOrBuildXmtpClient(
-  //   account
-  // )) as ConverseXmtpClientType;
-  if (!client) {
-    throw new Error("Client not found");
-  }
-  await consentToAddressesOnProtocol({ client, addresses, consent });
 };
 
 type ConsentToInboxIdsOnProtocolParams = {
@@ -155,7 +97,7 @@ export const consentToInboxIdsOnProtocol = async ({
 };
 
 type ConsentToInboxIdsOnProtocolByInboxIdParams = {
-  inboxId: string;
+  inboxId: string | undefined;
   inboxIds: InboxId[];
   consent: ConsentType;
 };
@@ -165,20 +107,12 @@ export const consentToInboxIdsOnProtocolForCurrentUser = async ({
   consent,
 }: Omit<ConsentToInboxIdsOnProtocolByInboxIdParams, "inboxId">) => {
   const currentInboxId = getCurrentInboxId();
-  if (!currentInboxId) {
-    logger.warn(
-      "[consentToInboxIdsOnProtocolForCurrentUser] No current inboxId; noop"
-    );
-    return;
-  }
-  const client = xmtpClientByInboxId[currentInboxId];
-  if (!client) {
-    logger.warn(
-      `[consentToInboxIdsOnProtocolForCurrentUser] No client found for ${currentInboxId}`
-    );
-    return;
-  }
-  return consentToInboxIdsOnProtocol({ client, inboxIds, consent });
+  const client = await getXmtpClient({
+    inboxId: currentInboxId,
+    caller: "consentToInboxIdsOnProtocolForCurrentUser",
+    ifNotFoundStrategy: "throw",
+  });
+  return await consentToInboxIdsOnProtocol({ client, inboxIds, consent });
 };
 
 export const consentToInboxIdsOnProtocolByInboxId = async ({
@@ -186,12 +120,12 @@ export const consentToInboxIdsOnProtocolByInboxId = async ({
   inboxIds,
   consent,
 }: ConsentToInboxIdsOnProtocolByInboxIdParams) => {
-  const client = (await getInbox({
+  const client = await getXmtpClient({
     inboxId,
     caller: "consentToInboxIdsOnProtocolByInboxId",
     ifNotFoundStrategy: "throw",
-  })) as ConverseXmtpClientType;
-  await consentToInboxIdsOnProtocol({ client, inboxIds, consent });
+  });
+  return await consentToInboxIdsOnProtocol({ client, inboxIds, consent });
 };
 
 type ConsentToGroupsOnProtocolParams = {
@@ -236,18 +170,17 @@ export const consentToGroupsOnProtocol = async ({
   );
 };
 
-export const consentToGroupsOnProtocolByAccount = async (args: {
-  account: string;
+export const consentToGroupsByGroupIds = async (args: {
+  inboxId: string | undefined;
   groupIds: string[];
   consent: "allow" | "deny";
 }) => {
-  const { account, groupIds, consent } = args;
-  const client = (await getOrBuildXmtpClient(
-    account
-  )) as ConverseXmtpClientType;
-  if (!client) {
-    throw new Error("Client not found");
-  }
+  const { inboxId, groupIds, consent } = args;
+  const client = await getXmtpClient({
+    inboxId,
+    caller: "consentToGroupsByGroupIds",
+    ifNotFoundStrategy: "throw",
+  });
   return consentToGroupsOnProtocol({ client, groupIds, consent });
 };
 
@@ -269,7 +202,7 @@ export const canMessage = async ({ peer, client }: CanMessageParams) => {
   return canMessage[peer.toLowerCase()];
 };
 
-type CanMessageByAccountParams = {
+type CanMessageByInboxIdParams = {
   inboxId: string | undefined;
   peer: string;
 };
@@ -277,16 +210,21 @@ type CanMessageByAccountParams = {
 export const canMessageByAccount = async ({
   inboxId,
   peer,
-}: CanMessageByAccountParams) => {
-  if (!inboxId) {
-    logger.warn(`[canMessageByAccount] No currentInbox provided`);
-    return false;
-  }
-  const client = xmtpClientByInboxId[inboxId];
-  if (!client) {
-    logger.warn(`[canMessageByAccount] No client found for ${inboxId}`);
-    return false;
-  }
+}: CanMessageByInboxIdParams) => {
+  // if (!inboxId) {
+  //   logger.warn(`[canMessageByAccount] No currentInbox provided`);
+  //   return false;
+  // }
+  // const client = xmtpClientByInboxId[inboxId];
+  // if (!client) {
+  //   logger.warn(`[canMessageByAccount] No client found for ${inboxId}`);
+  //   return false;
+  // }
+  const client = await getXmtpClient({
+    inboxId,
+    caller: "canMessageByAccount",
+    ifNotFoundStrategy: "throw",
+  });
   return canMessage({ client, peer });
 };
 

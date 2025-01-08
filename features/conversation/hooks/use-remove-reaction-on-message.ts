@@ -1,5 +1,5 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { getCurrentAccountConversation } from "@/features/conversation/conversation.utils";
+import { getConversationForCurrentInboxByTopic } from "@/features/conversation/conversation.utils";
 import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   addConversationMessage,
@@ -26,7 +26,7 @@ export function useRemoveReactionOnMessage(props: {
   const { mutateAsync: removeReactionMutationAsync } = useMutation({
     mutationFn: async (variables: { reaction: ReactionContent }) => {
       const { reaction } = variables;
-      const conversation = getCurrentAccountConversation(topic);
+      const conversation = getConversationForCurrentInboxByTopic(topic);
       if (!conversation) {
         throw new Error("Conversation not found when removing reaction");
       }
@@ -37,7 +37,7 @@ export function useRemoveReactionOnMessage(props: {
     onMutate: (variables) => {
       const currentAccount = getCurrentAccount()!;
       const currentUserInboxId = getCurrentUserAccountInboxId()!;
-      const conversation = getCurrentAccountConversation(topic);
+      const conversation = getConversationForCurrentInboxByTopic(topic);
 
       if (conversation) {
         // Add the removal reaction message

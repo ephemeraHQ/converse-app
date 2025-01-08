@@ -5,6 +5,7 @@ import {
   ConversationOptions,
   ConversationOrder,
   ConversationTopic,
+  InboxId,
 } from "@xmtp/react-native-sdk";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 import {
@@ -15,14 +16,24 @@ import {
 import { streamAllMessages } from "./messages";
 import { xmtpClientByInboxId } from "./client";
 import { getCurrentInboxId } from "@/data/store/accountsStore";
+import {
+  getXmtpClientForCurrentInboxOrThrow,
+  getEthereumAddressesForInboxId,
+  getXmtpClientOrThrow,
+  getXmtpClient,
+} from "@/features/Accounts/accounts.utils";
 
-export const streamConversations = async ({ inboxId }: { inboxId: string }) => {
+export const streamConversations = async ({
+  inboxId,
+}: {
+  inboxId: InboxId;
+}) => {
   await stopStreamingConversations({ inboxId });
 
-  const client = (await getInbox({
+  const client = getXmtpClientOrThrow({
+    inboxId,
     caller: "conversations#streamConversations",
-    ifNotFoundStrategy: "throw",
-  })) as ConverseXmtpClientType;
+  });
 
   await client.conversations.stream(async (conversation) => {
     logger.info("[XMTPRN Conversations] GOT A NEW CONVO");
@@ -34,75 +45,15 @@ export const streamConversations = async ({ inboxId }: { inboxId: string }) => {
 export const stopStreamingConversations = async ({
   inboxId,
 }: {
-  inboxId: string;
+  inboxId: InboxId;
 }) => {
-  const client: ConverseXmtpClientType = xmtpClientByInboxId[inboxId];
-  if (!client) {
-    throw new Error(
-      "[XMTPRN Conversations#stopStreamingConversations] Client not found"
-    );
-  }
+  const client = getXmtpClient({
+    inboxId,
+    caller: "conversations#stopStreamingConversations",
+    ifNotFoundStrategy: "throw",
+  });
   return client.conversations.cancelStream();
 };
-
-export const listConversations = async (args: {
-  client: ConverseXmtpClientType;
-  includeSync?: boolean;
-  order?: ConversationOrder;
-  limit?: number;
-  opts?: ConversationOptions;
-}) => {
-  const { client, includeSync = false, order, limit, opts } = args;
-  logger.debug("[XMTPRN Conversations] Listing conversations");
-  const start = new Date().getTime();
-  if (includeSync) {
-    logger.debug("[XMTPRN Conversations] Syncing conversations");
-    const syncStart = new Date().getTime();
-    await client.conversations.sync();
-    const syncEnd = new Date().getTime();
-    logger.debug(
-      `[XMTPRN Conversations] Synced conversations in ${
-        (syncEnd - syncStart) / 1000
-      } sec`
-    );
-  }
-  const conversations = await client.conversations.list(opts, order, limit);
-  const end = new Date().getTime();
-  logger.debug(
-    `[XMTPRN Conversations] Listed conversations in ${(end - start) / 1000} sec`
-  );
-  return conversations;
-};
-
-// export const listConversationsByAccount = async (args: {
-//   account: string;
-//   includeSync?: boolean;
-//   order?: ConversationOrder;
-//   limit?: number;
-//   opts?: ConversationOptions;
-// }) => {
-//   const { account, includeSync = false, order, limit, opts } = args;
-//   logger.debug("[XMTPRN Conversations] Listing conversations by account");
-//   const start = new Date().getTime();
-//   const client = (await getOrBuildXmtpClient(
-//     account
-//   )) as ConverseXmtpClientType;
-//   if (!client) {
-//     throw new Error("Client not found");
-//   }
-//   const conversations = await listConversations({
-//     client,
-//     includeSync,
-//     order,
-//     limit,
-//     opts,
-//   });
-//   const end = new Date().getTime();
-//   logger.debug(
-//     `[XMTPRN Conversations] Listed conversations in ${(end - start) / 1000} sec`
-//   );
-//   return conversations;
-// };
 
 async function findGroup(args: {
   client: ConverseXmtpClientType;
@@ -156,15 +107,16 @@ async function findGroup(args: {
 
 async function findDm(args: {
   client: ConverseXmtpClientType;
-  peer: string;
+  peerEthereumAddress: string;
   includeSync?: boolean;
 }) {
-  const { client, peer, includeSync = false } = args;
-  logger.debug(`[XMTPRN Conversations] Getting DM by ${peer}`);
+  const { client, peerEthereumAddress, includeSync = false } = args;
+  logger.debug(`[XMTPRN Conversations] Getting DM by ${peerEthereumAddress}`);
   const start = new Date().getTime();
 
   const lookupStart = new Date().getTime();
-  let dm = await client.conversations.findDmByAddress(peer);
+  // let dm = await client.conversations.findDmByAddress(peerEthereumAddress);
+  let dm = await client.conversations.findDmByInboxId(peerEthereumAddress);
   const lookupEnd = new Date().getTime();
   logger.debug(
     `[XMTPRN Conversations] Initial lookup took ${(lookupEnd - lookupStart) / 1000} sec`
@@ -179,9 +131,11 @@ async function findDm(args: {
       `[XMTPRN Conversations] Synced conversations in ${(syncEnd - syncStart) / 1000} sec`
     );
 
-    dm = await client.conversations.findDmByAddress(peer);
+    dm = await client.conversations.findDmByAddress(peerEthereumAddress);
     if (!dm) {
-      throw new Error(`DM with peer ${peer} not found`);
+      throw new Error(
+        `DM with peerEthereumAddress ${peerEthereumAddress} not found`
+      );
     }
   }
 
@@ -265,31 +219,15 @@ export const getGroupByTopic = async (args: {
   });
 };
 
-// export async function getGroupByTopicByAccount(args: {
-//   account: string;
-//   topic: ConversationTopic;
-//   includeSync?: boolean;
-// }) {
-//   const { account, topic, includeSync = false } = args;
-//   const client = (await getOrBuildXmtpClient(
-//     account
-//   )) as ConverseXmtpClientType;
-//   return getGroupByTopic({
-//     client,
-//     topic,
-//     includeSync,
-//   });
-// }
-
-export const getConversationByPeer = async (args: {
+export const getConversationByPeerInboxId = async (args: {
   client: ConverseXmtpClientType;
-  peer: string;
+  peerEthereumAddress: string;
   includeSync?: boolean;
 }) => {
-  const { client, peer, includeSync = false } = args;
+  const { client, peerEthereumAddress, includeSync = false } = args;
   return findDm({
     client,
-    peer,
+    peerEthereumAddress,
     includeSync,
   });
 };
@@ -323,34 +261,24 @@ export const getConversationByTopicByInboxId = async (args: {
   return getConversationByTopic({ client, topic, includeSync });
 };
 
-export const createConversation = async (args: {
-  client: ConverseXmtpClientType;
-  peerAddress: string;
+export const createDmForPeerInboxId = async (args: {
+  peerInboxId: InboxId;
 }) => {
-  const { client, peerAddress } = args;
-  logger.info(`[XMTP] Creating a conversation with peer ${peerAddress}`);
-  const conversation = await client.conversations.findOrCreateDm(peerAddress);
+  const { peerInboxId } = args;
+  const client = getXmtpClientForCurrentInboxOrThrow({
+    caller: "createDmForPeerInboxId",
+  });
+  logger.info(`[XMTP] Creating a conversation with peerInboxId ${peerInboxId}`);
+  const peerEthereumAddress = await getEthereumAddressesForInboxId({
+    inboxId: peerInboxId,
+  });
+  const conversation =
+    await client.conversations.findOrCreateDm(peerEthereumAddress);
   await handleNewConversationCreation(client, conversation);
   return conversation;
 };
 
-export const createConversationByAccount = async (args: {
-  inboxId: string | undefined;
-  peerAddress: string;
-}) => {
-  const { inboxId, peerAddress } = args;
-  if (!inboxId) {
-    throw new Error("[createConversationByAccount] Inbox ID is required");
-  }
-  const client: ConverseXmtpClientType = xmtpClientByInboxId[inboxId];
-  if (!client) {
-    throw new Error("[createConversationByAccount] Client not found");
-  }
-  return createConversation({ client, peerAddress });
-};
-
 export const createGroup = async (args: {
-  client: ConverseXmtpClientType;
   peers: string[];
   permissionPolicySet: PermissionPolicySet;
   groupName?: string;
@@ -358,13 +286,15 @@ export const createGroup = async (args: {
   groupDescription?: string;
 }) => {
   const {
-    client,
     peers,
     permissionPolicySet,
     groupName,
     groupPhoto,
     groupDescription,
   } = args;
+  const client = getXmtpClientForCurrentInboxOrThrow({
+    caller: "createGroupForCurrentUser",
+  });
   const group = await client.conversations.newGroupCustomPermissions(
     peers,
     permissionPolicySet,
@@ -382,70 +312,6 @@ export const createGroup = async (args: {
   return group;
 };
 
-/**
- * Gets the XMTP client for the specified user's inbox. Defaults to the current user's inbox.
- *
- * Retrieves the XMTP client instance associated with the given
- * inbox ID or the current inbox. Handles error cases based on
- * the provided strategy.
- *
- * @param {Object} args - The function arguments
- * @param {string} [args.inboxId] - Optional inbox ID to look up; defaults to the current user's inbox
- * @param {string} args.caller - Name of calling function for logs
- * @param {string} [args.ifNotFoundStrategy] - How to handle errors:
- *   - "throw": Throw an error if client not found
- *   - "logAndReturnUndefined": Log error and return undefined
- *
- * @returns {Promise<ConverseXmtpClientType | undefined>} The XMTP client or undefined if not found and using logAndReturnUndefined strategy;
- * throws an error if client not found and using throw strategy
- *
- * @throws {Error} If client not found and using throw strategy
- *
- * @example
- * // Get client and throw if not found
- * const client = await getInbox({
- *   caller: "myFunction",
- *   ifNotFoundStrategy: "throw"
- * });
- *
- * @example
- * // Get client and handle not found case
- * const client = await getInbox({
- *   inboxId: "123",
- *   caller: "myFunction",
- *   ifNotFoundStrategy: "logAndReturnUndefined"
- * });
- */
-export const getInbox = async (args: {
-  inboxId?: string;
-  caller: string;
-  ifNotFoundStrategy?: "throw" | "logAndReturnUndefined";
-}): Promise<ConverseXmtpClientType | undefined> => {
-  const { caller, ifNotFoundStrategy = "logAndReturnUndefined" } = args;
-  const inboxId = args.inboxId || getCurrentInboxId();
-  let message = "";
-  let error: Error | undefined;
-  if (!inboxId) {
-    message = `[${caller}] Inbox ID is required`;
-    error = new Error(message);
-  }
-  const client = xmtpClientByInboxId[inboxId!];
-  if (!client) {
-    message = `[${caller}] Client not found`;
-    error = new Error(message);
-  }
-  if (error) {
-    if (ifNotFoundStrategy === "throw") {
-      throw error;
-    } else if (ifNotFoundStrategy === "logAndReturnUndefined") {
-      logger.error(message);
-      return undefined;
-    }
-  }
-
-  return client;
-};
-
 export const createGroupForCurrentUser = async (args: {
   peers: string[];
   permissionPolicySet: PermissionPolicySet;
@@ -460,12 +326,8 @@ export const createGroupForCurrentUser = async (args: {
     groupPhoto,
     groupDescription,
   } = args;
-  const client = (await getInbox({
-    caller: "createGroupForCurrentUser",
-    ifNotFoundStrategy: "throw",
-  })) as ConverseXmtpClientType;
+
   return createGroup({
-    client,
     peers,
     permissionPolicySet,
     groupName,
@@ -474,49 +336,14 @@ export const createGroupForCurrentUser = async (args: {
   });
 };
 
-export const refreshProtocolConversation = async (args: {
-  client: ConverseXmtpClientType;
-  topic: ConversationTopic;
-}) => {
-  const { client, topic } = args;
-  return getConversationByTopic({ client, topic, includeSync: true });
-};
-
-// export const refreshProtocolConversationByAccount = async (args: {
-//   account: string;
-//   topic: ConversationTopic;
-// }) => {
-//   const { account, topic } = args;
-//   const client = (await getOrBuildXmtpClient(
-//     account
-//   )) as ConverseXmtpClientType;
-//   return refreshProtocolConversation({ client, topic });
-// };
-
-export const getConversationByPeerByInboxId = async (args: {
-  inboxId?: string;
-  peer: string;
-  includeSync?: boolean;
-}) => {
-  const { inboxId, peer, includeSync = false } = args;
-  if (!inboxId) {
-    throw new Error("[getConversationByPeerByInboxId] Inbox ID is required");
-  }
-  const client: ConverseXmtpClientType = xmtpClientByInboxId[inboxId];
-  if (!client) {
-    throw new Error("[getConversationByPeerByInboxId] Client not found");
-  }
-  return getConversationByPeer({ client, peer, includeSync });
-};
-
-export const getPeerAddressDm = async (
+export const getPeerEthereumAddressFromDm = async (
   dm: DmWithCodecsType
 ): Promise<string | undefined> => {
   const peerInboxId = await dm.peerInboxId();
-  const peerAddress = (await dm.members()).find(
+  const peerEthereumAddress = (await dm.members()).find(
     (member) => member.inboxId === peerInboxId
   )?.addresses[0];
-  return peerAddress;
+  return peerEthereumAddress;
 };
 
 // TODO: This is a temporary function to handle new conversation creation

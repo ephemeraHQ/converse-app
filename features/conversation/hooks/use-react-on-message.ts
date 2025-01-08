@@ -1,5 +1,5 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { getCurrentAccountConversation } from "@/features/conversation/conversation.utils";
+import { getConversationForCurrentInboxByTopic } from "@/features/conversation/conversation.utils";
 import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   addConversationMessage,
@@ -25,7 +25,7 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
   const { mutateAsync: reactOnMessageMutationAsync } = useMutation({
     mutationFn: async (variables: { reaction: ReactionContent }) => {
       const { reaction } = variables;
-      const conversation = getCurrentAccountConversation(topic);
+      const conversation = getConversationForCurrentInboxByTopic(topic);
       if (!conversation) {
         throw new Error("Conversation not found when reacting on message");
       }
@@ -36,7 +36,7 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
     onMutate: (variables) => {
       const currentAccount = getCurrentAccount()!;
       const currentUserInboxId = getCurrentUserAccountInboxId()!;
-      const conversation = getCurrentAccountConversation(topic);
+      const conversation = getConversationForCurrentInboxByTopic(topic);
 
       if (conversation) {
         // Add the reaction to the message

@@ -210,7 +210,7 @@ export const formatAmount = (
 // export const useTransactionForMessage = (
 //   messageContent: string,
 //   messageId: string,
-//   peerAddress?: string
+//   peerEthereumAddress?: string
 // ) => {
 //   const currentInboxId = useCurrentInboxId()() as string;
 //   const saveTransactions = useTransactionsStore((s) => s.saveTransactions);
@@ -370,7 +370,7 @@ export const formatAmount = (
 
 //       const sender = transaction.from.toLowerCase();
 //       const receiver = transaction.fromMe
-//         ? peerAddress?.toLowerCase()
+//         ? peerEthereumAddress?.toLowerCase()
 //         : currentAccount.toLowerCase();
 
 //       // Determine source of transaction details (either from transfer event or metadata)
@@ -419,7 +419,7 @@ export const formatAmount = (
 //         amountToDisplay: formattedAmountWithCurrencySymbol,
 //       };
 //     },
-//     [currentAccount, message.fromMe, message.senderAddress, peerAddress]
+//     [currentAccount, message.fromMe, message.senderAddress, peerEthereumAddress]
 //   );
 
 //   const { transactionDisplay, amountToDisplay } =
