@@ -20,7 +20,7 @@ export const NewAccountConnectWalletScreen = memo(
         if (isMissingConverseProfile()) {
           router.navigate("NewAccountUserProfile");
         } else {
-          router.navigate("Chats");
+          router.popTo("Chats");
         }
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps

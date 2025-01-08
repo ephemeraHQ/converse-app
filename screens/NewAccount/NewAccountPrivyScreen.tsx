@@ -33,7 +33,7 @@ const Content = memo(function Content() {
       if (isMissingConverseProfile()) {
         router.navigate("NewAccountUserProfile");
       } else {
-        router.navigate("Chats");
+        router.popTo("Chats");
       }
     },
     onConnectionError: (error) => {
