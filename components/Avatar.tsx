@@ -47,7 +47,7 @@ function Avatar({
     setDidError(false);
   }, []);
   return uri && !didError ? (
-    <View style={[styles.imageContainer, style]}>
+    <View style={style}>
       <Image
         onLoad={handleImageLoad}
         onError={handleImageError}
@@ -88,8 +88,6 @@ const getStyles = (
   StyleSheet.create({
     image: {
       borderRadius: size,
-    },
-    imageContainer: {
       width: size,
       height: size,
     },
