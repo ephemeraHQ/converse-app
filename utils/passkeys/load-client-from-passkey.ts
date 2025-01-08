@@ -1,8 +1,10 @@
-import { Passkey } from "react-native-passkey";
 import { RPID } from "./passkeys.constants";
-import { loadPasskeyInfo } from "./persist-passkeys";
-import { createTurnkeyAccount } from "./create-turnkey-account";
+import { createTurnkeyAccountFromWalletId } from "./create-turnkey-account";
 import { TurnkeyStoreInfo } from "./passkeys.interfaces";
+import { PasskeyStamper } from "@turnkey/react-native-passkey-stamper";
+import { TurnkeyClient } from "@turnkey/http";
+import { setTurnkeyClient } from "./turnkey-clients";
+import config from "@/config";
 
 type LoadAccountFromPasskeyParams = {
   setStatusString: (statusString: string) => void;
@@ -12,35 +14,56 @@ type LoadAccountFromPasskeyParams = {
 
 export const loadAccountFromPasskey = async ({
   setStatusString,
-  setPreviousPasskeyName,
   setTurnkeyInfo,
 }: LoadAccountFromPasskeyParams) => {
   try {
     setStatusString("Loading passkey...");
 
-    const passkey = await Passkey.get({
+    const stamper = await new PasskeyStamper({
       rpId: RPID,
-      challenge: "TODO",
-      userVerification: "preferred",
+    });
+    const client = new TurnkeyClient(
+      { baseUrl: "https://api.turnkey.com" },
+      stamper
+    );
+    setStatusString("Logging in...");
+    const getWhoamiResult = await client.getWhoami({
+      organizationId: config.turnkeyOrg,
     });
 
-    const passkeyInfo = loadPasskeyInfo(passkey.response.userHandle);
-    if (!passkeyInfo) {
-      throw new Error("No passkey info found");
-    }
-    setStatusString("Creating account...");
-    setPreviousPasskeyName(passkeyInfo.passkeyName);
-    setTurnkeyInfo({
-      subOrganizationId: passkeyInfo.subOrganizationId,
-      walletId: passkeyInfo.walletId,
-      address: passkeyInfo.address,
+    setStatusString("Getting wallets...");
+
+    const subOrganizationId = getWhoamiResult.organizationId;
+    setTurnkeyClient(subOrganizationId, client);
+
+    const getWallets = await client.getWallets({
+      organizationId: subOrganizationId,
     });
-    const account = await createTurnkeyAccount(
-      passkeyInfo.address,
-      passkeyInfo.subOrganizationId
+
+    // TODO: Is there a better way to find the embedded wallet?
+    const embeddedWallet = getWallets.wallets.find(
+      (wallet) => wallet.walletName === "Embedded Wallet"
+    );
+    if (!embeddedWallet) {
+      throw new Error("No embedded wallet found");
+    }
+    const walletId = embeddedWallet?.walletId;
+
+    setStatusString("Creating account...");
+    setTurnkeyInfo({
+      subOrganizationId,
+      walletId: embeddedWallet.walletId,
+      address: "",
+    });
+    const account = await createTurnkeyAccountFromWalletId(
+      walletId,
+      subOrganizationId
     );
     setStatusString("Account created");
-    return { account, turnkeyInfo: passkeyInfo };
+    return {
+      account,
+      turnkeyInfo: { subOrganizationId, walletId, address: "" },
+    };
   } catch (e) {
     console.error("error during passkey load", e);
     throw e;

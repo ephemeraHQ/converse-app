@@ -20,6 +20,7 @@ import {
 } from "./Onboarding.utils";
 import { useRouter } from "@/navigation/useNavigation";
 import { setAuthStatus } from "@/data/store/authStore";
+import { captureErrorWithToast } from "@/utils/capture-error";
 
 export const OnboardingPasskeyScreen = memo(function Screen() {
   return (
@@ -33,8 +34,6 @@ const Content = memo(function Content() {
   const router = useRouter();
 
   const loading = usePasskeyAuthStoreContext((state) => state.loading);
-
-  const error = usePasskeyAuthStoreContext((state) => state.error);
 
   const statusString = usePasskeyAuthStoreContext(
     (state) => state.statusString
@@ -68,6 +67,14 @@ const Content = memo(function Content() {
 
   const inputTextRef = useRef<string>("");
 
+  const handleError = useCallback(
+    (error: string) => {
+      setError(error);
+      captureErrorWithToast(error);
+    },
+    [setError]
+  );
+
   const handleCreatePasskey = useCallback(async () => {
     try {
       setLoading(true);
@@ -78,18 +85,18 @@ const Content = memo(function Content() {
         setTurnkeyInfo,
       });
       if (!account) {
-        setError("No account created from Passkey");
+        handleError("No account created from Passkey");
         return;
       }
       setAccount(account);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unknown error");
+      handleError(e instanceof Error ? e.message : "Unknown error");
     } finally {
       setLoading(false);
     }
   }, [
     setAccount,
-    setError,
+    handleError,
     setLoading,
     setPreviousPasskeyName,
     setStatusString,
@@ -105,18 +112,18 @@ const Content = memo(function Content() {
         setTurnkeyInfo,
       });
       if (!account) {
-        setError("No account loaded from Passkey");
+        handleError("No account loaded from Passkey");
         throw new Error("No account loaded from Passkey");
       }
       setAccount(account);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unknown error");
+      handleError(e instanceof Error ? e.message : "Unknown error");
     } finally {
       setLoading(false);
     }
   }, [
     setAccount,
-    setError,
+    handleError,
     setLoading,
     setPreviousPasskeyName,
     setStatusString,
@@ -136,13 +143,13 @@ const Content = memo(function Content() {
       });
       setStatusString("Wallet added to passkey");
     } catch (e) {
-      setError(
+      handleError(
         e instanceof Error ? e.message : "Error adding wallet to passkey"
       );
     } finally {
       setLoading(false);
     }
-  }, [turnkeyInfo, setError, setLoading, setStatusString]);
+  }, [turnkeyInfo, handleError, setLoading, setStatusString]);
 
   const createXmtpClientFromAccount = useCallback(async () => {
     try {
@@ -166,7 +173,7 @@ const Content = memo(function Content() {
     } catch (err) {
       console.log("error creating Xmtp client", err);
       setStatusString("");
-      setError(
+      handleError(
         "Error creating Xmtp client : " +
           (err instanceof Error ? err.message : "") +
           (typeof err === "string" ? err : "")
@@ -174,7 +181,7 @@ const Content = memo(function Content() {
     } finally {
       setLoading(false);
     }
-  }, [account, router, setError, setLoading, setStatusString]);
+  }, [account, router, handleError, setLoading, setStatusString]);
 
   const onboardWithPasskey = useCallback(async () => {
     try {
@@ -197,7 +204,7 @@ const Content = memo(function Content() {
         setAuthStatus("signedIn");
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unknown error");
+      handleError(e instanceof Error ? e.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -207,7 +214,7 @@ const Content = memo(function Content() {
     setPreviousPasskeyName,
     setTurnkeyInfo,
     router,
-    setError,
+    handleError,
   ]);
 
   return (
@@ -232,11 +239,6 @@ const Content = memo(function Content() {
         <Text preset="bodyBold">
           Turnkey info:
           <Text preset="body">{JSON.stringify(turnkeyInfo)}</Text>
-        </Text>
-      )}
-      {error && (
-        <Text preset="body" color="caution">
-          {error}
         </Text>
       )}
       {account && (

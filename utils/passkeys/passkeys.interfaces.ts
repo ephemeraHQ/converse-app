@@ -18,11 +18,3 @@ export type PasskeyState = {
 export type PasskeySetStateCallback = React.Dispatch<
   React.SetStateAction<PasskeyState>
 >;
-
-export type PersistedPasskeyInfo = {
-  userId: string;
-  walletId: string;
-  subOrganizationId: string;
-  address: string;
-  passkeyName: string;
-};
