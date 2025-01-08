@@ -1,40 +1,29 @@
-import {
-  useChatStore,
-  useCurrentAccount,
-  useSettingsStore,
-} from "@data/store/accountsStore";
+import { useAppTheme } from "@/theme/useAppTheme";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { useCurrentAccount, useSettingsStore } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
+import { IIconName } from "@design-system/Icon/Icon.types";
 import { translate } from "@i18n/index";
-import { saveTopicsData } from "@utils/api";
+import { useRoute } from "@navigation/useNavigation";
+import { prefetchConversationMessages } from "@queries/useConversationMessages";
+import { actionSheetColors } from "@styles/colors";
 import { getMinimalDate } from "@utils/date";
 import { Haptics } from "@utils/haptics";
 import { navigate } from "@utils/navigation";
+import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { RefObject, useCallback, useMemo, useRef } from "react";
 import { useColorScheme } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
-
-import {
-  resetConversationListContextMenuStore,
-  setConversationListContextMenuConversationData,
-} from "@/features/conversation-list/ConversationListContextMenu.store";
-import { useAppTheme } from "@/theme/useAppTheme";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { IIconName } from "@design-system/Icon/Icon.types";
-import { useRoute } from "@navigation/useNavigation";
-import { prefetchConversationMessages } from "@queries/useConversationMessages";
-import { actionSheetColors } from "@styles/colors";
-import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useConversationIsUnread } from "../features/conversation-list/hooks/useMessageIsUnread";
-import { useMessageText } from "../features/conversation-list/hooks/useMessageText";
-import { useToggleReadStatus } from "../features/conversation-list/hooks/useToggleReadStatus";
-import { useGroupConversationListAvatarInfo } from "../features/conversation-list/useGroupConversationListAvatarInfo";
-import Avatar from "./Avatar";
-import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
-import { ConversationListItemDumb } from "../features/conversation-list/components/conversation-list-item";
-import { GroupAvatarDumb } from "./GroupAvatar";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
+import Avatar from "../../components/Avatar";
+import { GroupAvatarDumb } from "../../components/GroupAvatar";
+import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
+import { ConversationListItemDumb } from "./components/conversation-list-item";
+import { useConversationIsUnread } from "./hooks/useMessageIsUnread";
+import { useMessageText } from "./hooks/useMessageText";
+import { useToggleReadStatus } from "./hooks/useToggleReadStatus";
+import { useGroupConversationListAvatarInfo } from "./useGroupConversationListAvatarInfo";
 
 type V3GroupConversationListItemProps = {
   group: GroupWithCodecsType;
@@ -42,10 +31,6 @@ type V3GroupConversationListItemProps = {
 
 type UseDataProps = {
   group: GroupWithCodecsType;
-};
-
-const closeContextMenu = () => {
-  resetConversationListContextMenuStore();
 };
 
 const useData = ({ group }: UseDataProps) => {
@@ -57,12 +42,8 @@ const useData = ({ group }: UseDataProps) => {
 
   const currentAccount = useCurrentAccount()!;
 
-  const { setTopicsData, setPinnedConversations } = useChatStore(
-    useSelect(["setTopicsData", "setPinnedConversations"])
-  );
-
   const topic = group?.topic;
-  const { theme } = useAppTheme();
+
   const timestamp = group?.lastMessage?.sentNs ?? 0;
 
   const isUnread = useConversationIsUnread({
@@ -85,73 +66,6 @@ const useData = ({ group }: UseDataProps) => {
   const { setInboxIdPeerStatus } = useSettingsStore(
     useSelect(["setInboxIdPeerStatus"])
   );
-
-  const handleDelete = useCallback(() => {
-    const options = [
-      translate("delete"),
-      translate("delete_and_block"),
-      translate("cancel"),
-    ];
-    const title = `${translate("delete_chat_with")} ${group?.name}?`;
-    const actions = [
-      () => {
-        saveTopicsData(currentAccount, {
-          [topic]: {
-            status: "deleted",
-            timestamp: new Date().getTime(),
-          },
-        }),
-          setTopicsData({
-            [topic]: {
-              status: "deleted",
-              timestamp: new Date().getTime(),
-            },
-          });
-      },
-      async () => {
-        saveTopicsData(currentAccount, {
-          [topic]: { status: "deleted" },
-        });
-        setTopicsData({
-          [topic]: {
-            status: "deleted",
-            timestamp: new Date().getTime(),
-          },
-        });
-        await group.updateConsent("denied");
-        await consentToInboxIdsOnProtocolByAccount({
-          account: currentAccount,
-          inboxIds: [group.addedByInboxId],
-          consent: "deny",
-        });
-        setInboxIdPeerStatus({
-          [group.addedByInboxId]: "denied",
-        });
-      },
-    ];
-    // TODO: Implement
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex: options.length - 1,
-        destructiveButtonIndex: [0, 1],
-        title,
-        ...actionSheetColors(colorScheme),
-      },
-      async (selectedIndex?: number) => {
-        if (selectedIndex !== undefined && selectedIndex < actions.length) {
-          actions[selectedIndex]();
-        }
-      }
-    );
-  }, [
-    colorScheme,
-    currentAccount,
-    group,
-    setInboxIdPeerStatus,
-    setTopicsData,
-    topic,
-  ]);
 
   const handleRestore = useCallback(() => {
     // TODO: Implement
@@ -192,76 +106,15 @@ const useData = ({ group }: UseDataProps) => {
     );
   }, [colorScheme, currentAccount, group, setInboxIdPeerStatus]);
 
-  const contextMenuItems: ContextMenuItem[] = useMemo(
-    () => [
-      {
-        title: translate("pin"),
-        action: () => {
-          setPinnedConversations([topic]);
-          closeContextMenu();
-        },
-        id: "pin",
-        rightView: <ContextMenuIcon icon="pin" />,
-      },
-      {
-        title: isUnread
-          ? translate("mark_as_read")
-          : translate("mark_as_unread"),
-        action: () => {
-          toggleReadStatus();
-          closeContextMenu();
-        },
-        id: "markAsUnread",
-        rightView: (
-          <ContextMenuIcon
-            icon={isUnread ? "checkmark.message" : "message.badge"}
-          />
-        ),
-      },
-      {
-        title: translate("delete"),
-        action: () => {
-          handleDelete();
-          closeContextMenu();
-        },
-        id: "delete",
-        titleStyle: {
-          color: theme.colors.global.caution,
-        },
-        rightView: (
-          <ContextMenuIcon icon="trash" color={theme.colors.global.caution} />
-        ),
-      },
-    ],
-    [
-      isUnread,
-      theme.colors.global.caution,
-      setPinnedConversations,
-      topic,
-      toggleReadStatus,
-      handleDelete,
-    ]
-  );
-
-  const showContextMenu = useCallback(() => {
-    setConversationListContextMenuConversationData(
-      group.topic,
-      contextMenuItems
-    );
-  }, [contextMenuItems, group.topic]);
-
   const messageText = useMessageText(group.lastMessage);
 
   return {
     group,
     memberData,
     timestamp,
-    contextMenuItems,
-    showContextMenu,
     toggleReadStatus,
     isUnread,
     isBlockedChatView,
-    handleDelete,
     handleRestore,
     messageText,
   };
@@ -361,11 +214,9 @@ export function V3GroupConversationListItem({
   const {
     memberData,
     timestamp,
-    showContextMenu,
     isUnread,
     isBlockedChatView,
     toggleReadStatus,
-    handleDelete,
     handleRestore,
     messageText,
   } = useData({ group });
@@ -384,9 +235,7 @@ export function V3GroupConversationListItem({
   } = useUserInteractions({
     ref,
     topic: group?.topic,
-    showContextMenu,
     toggleReadStatus,
-    handleDelete,
     handleRestore,
     isBlockedChatView,
   });

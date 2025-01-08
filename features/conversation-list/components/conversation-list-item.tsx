@@ -140,7 +140,7 @@ export const ConversationListItemDumb = memo(
           hitSlop={{ left: -6 }}
         >
           <TouchableHighlight
-            onLongPress={onLongPress}
+            // onLongPress={onLongPress}
             onPress={onPress}
             style={themed($touchable)}
           >

@@ -1,12 +1,12 @@
-import { IPicto } from "@components/Picto/Picto.types";
+import { IPicto } from "@/components/Picto/Picto.types";
 import { ReactElement } from "react";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import {
   ExtendedEdge,
   useSafeAreaInsetsStyle,
-} from "../../components/Screen/ScreenComp/Screen.helpers";
-import { translate } from "../../i18n";
-import { ThemedStyle, useAppTheme } from "../../theme/useAppTheme";
+} from "@/components/Screen/ScreenComp/Screen.helpers";
+import { translate } from "@/i18n";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { HStack } from "../HStack";
 import { ITextProps, Text } from "../Text";
 import { ITouchableOpacityProps } from "../TouchableOpacity";
@@ -157,7 +157,7 @@ export function Header(props: HeaderProps) {
 const $wrapper: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   height: 72,
   alignItems: "center",
-  paddingHorizontal: spacing.sm,
+  paddingHorizontal: spacing.xs,
 });
 
 const $container: ViewStyle = {

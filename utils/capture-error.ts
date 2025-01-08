@@ -1,7 +1,6 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
-import logger from "@/utils/logger";
-import { sentryTrackError } from "@/utils/sentry";
 import { isDev } from "@/utils/getEnv";
+import logger from "@/utils/logger";
 
 export function captureError(
   error: unknown,
@@ -17,9 +16,10 @@ export function captureError(
     }
   }
 
-  sentryTrackError(error, {
-    message: options?.message,
-  });
+  // Note: (thierry) Our logger is already sending error to Sentry
+  // sentryTrackError(error, {
+  //   message: options?.message,
+  // });
 }
 
 export function captureErrorWithToast(

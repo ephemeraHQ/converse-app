@@ -32,7 +32,6 @@ import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificat
 import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
 import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
 import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
-import ConversationRequestsListNav from "./ConversationRequestsListNav";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
 import GroupNav, { GroupNavParams } from "./GroupNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
@@ -46,6 +45,7 @@ import UserProfileNav from "./UserProfileNav";
 import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
+import ConversationRequestsListNav from "@/screens/Navigation/ConversationRequestsListNav.ios";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -131,6 +131,8 @@ export function SignedInNavigation() {
     >
       <NativeStack.Group>
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
+          <NativeStack.Screen name="Chats" component={ConversationListScreen} />
+          <NativeStack.Screen name="Blocked" component={BlockedChatsScreen} />
           {ConversationRequestsListNav()}
           {ConversationNav()}
           {NewConversationNav()}
@@ -141,9 +143,6 @@ export function SignedInNavigation() {
           {GroupNav()}
           {JoinGroupNavigation()}
           {TopUpNav()}
-
-          <NativeStack.Screen name="Chats" component={ConversationListScreen} />
-          <NativeStack.Screen name="Blocked" component={BlockedChatsScreen} />
         </NativeStack.Group>
 
         {/* Modals */}

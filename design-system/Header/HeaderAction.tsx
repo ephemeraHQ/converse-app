@@ -1,13 +1,12 @@
 import { IPicto } from "@components/Picto/Picto.types";
 import { ReactElement } from "react";
 import { TextStyle, View, ViewStyle } from "react-native";
-import { translate } from "../../i18n";
-import { ThemedStyle, useAppTheme } from "../../theme/useAppTheme";
+import { translate } from "@/i18n";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Icon } from "../Icon/Icon";
 import { Pressable } from "../Pressable";
 import { ITextProps, Text } from "../Text";
 import { ITouchableOpacityProps, TouchableOpacity } from "../TouchableOpacity";
-import { debugBorder } from "@/utils/debug-style";
 
 type HeaderActionProps = {
   backgroundColor?: string;
@@ -45,6 +44,7 @@ export function HeaderAction(props: HeaderActionProps) {
         onPress={onPress}
         disabled={!onPress}
         activeOpacity={0.8}
+        hitSlop={theme.spacing.sm}
       >
         <Text preset="body" text={content} style={themed($actionText)} />
       </TouchableOpacity>
@@ -54,8 +54,10 @@ export function HeaderAction(props: HeaderActionProps) {
   if (icon) {
     return (
       <Pressable
+        // {...debugBorder()}
         onPress={onPress}
         style={[themed([$actionIconContainer, { backgroundColor }]), style]}
+        hitSlop={theme.spacing.sm}
       >
         <Icon size={theme.iconSize.md} icon={icon} color={iconColor} />
       </Pressable>
@@ -83,7 +85,6 @@ const $actionText: ThemedStyle<TextStyle> = ({ colors }) => ({
 });
 
 const $actionIconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  // ...debugBorder(),
   flexGrow: 0,
   alignItems: "center",
   justifyContent: "center",

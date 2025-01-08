@@ -1,7 +1,9 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useChatStore, useCurrentAccount } from "@/data/store/accountsStore";
 import { useSelect } from "@/data/store/storeHelpers";
+import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { translate } from "@/i18n";
+import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { saveTopicsData } from "@/utils/api";
@@ -9,21 +11,21 @@ import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { consentToInboxIdsOnProtocolByAccount } from "@/utils/xmtpRN/contacts";
 import { useCallback } from "react";
 
-type UseHandleDeleteDmProps = {
-  topic: string;
-  preferredName: string;
-  conversation: DmWithCodecsType;
-};
-
-export const useHandleDeleteDm = ({
-  topic,
-  preferredName,
-  conversation,
-}: UseHandleDeleteDmProps) => {
-  const currentAccount = useCurrentAccount()!;
+export const useHandleDeleteDm = (dm: DmWithCodecsType) => {
   const { theme } = useAppTheme();
   const colorScheme = theme.isDark ? "dark" : "light";
+
   const { setTopicsData } = useChatStore(useSelect(["setTopicsData"]));
+
+  const currentAccount = useCurrentAccount()!;
+
+  const { data: peerInboxId } = useDmPeerInboxId({
+    account: currentAccount,
+    topic: dm.topic,
+  });
+
+  const preferredName = usePreferredInboxName(peerInboxId);
+
   return useCallback(() => {
     const options = [
       translate("delete"),
@@ -34,13 +36,13 @@ export const useHandleDeleteDm = ({
     const actions = [
       () => {
         saveTopicsData(currentAccount, {
-          [topic]: {
+          [dm.topic]: {
             status: "deleted",
             timestamp: new Date().getTime(),
           },
         }),
           setTopicsData({
-            [topic]: {
+            [dm.topic]: {
               status: "deleted",
               timestamp: new Date().getTime(),
             },
@@ -48,16 +50,16 @@ export const useHandleDeleteDm = ({
       },
       async () => {
         saveTopicsData(currentAccount, {
-          [topic]: { status: "deleted" },
+          [dm.topic]: { status: "deleted" },
         });
         setTopicsData({
-          [topic]: {
+          [dm.topic]: {
             status: "deleted",
             timestamp: new Date().getTime(),
           },
         });
-        await conversation.updateConsent("denied");
-        const peerInboxId = await conversation.peerInboxId();
+        await dm.updateConsent("denied");
+        const peerInboxId = await dm.peerInboxId();
         await consentToInboxIdsOnProtocolByAccount({
           account: currentAccount,
           inboxIds: [peerInboxId],
@@ -80,12 +82,5 @@ export const useHandleDeleteDm = ({
         }
       }
     );
-  }, [
-    colorScheme,
-    conversation,
-    currentAccount,
-    preferredName,
-    setTopicsData,
-    topic,
-  ]);
+  }, [colorScheme, dm, currentAccount, preferredName, setTopicsData]);
 };

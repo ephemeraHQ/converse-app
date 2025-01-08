@@ -86,6 +86,7 @@ import {
   ConversationStoreProvider,
   useCurrentConversationTopic,
 } from "./conversation.store-context";
+import { useHeader } from "@/navigation/use-header";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
@@ -103,20 +104,17 @@ export const Conversation = memo(function Conversation(props: {
       topic,
     });
 
-  useLayoutEffect(() => {
-    if (!conversation) {
-      return;
-    }
-    if (isConversationDm(conversation)) {
-      navigation.setOptions({
-        headerTitle: () => <DmConversationTitle topic={topic} />,
-      });
-    } else if (isConversationGroup(conversation)) {
-      navigation.setOptions({
-        headerTitle: () => <GroupConversationTitle topic={topic} />,
-      });
-    }
-  }, [topic, navigation, conversation]);
+  useHeader({
+    onBack: () => navigation.goBack(),
+    safeAreaEdges: ["top"],
+    titleComponent: conversation ? (
+      isConversationDm(conversation) ? (
+        <DmConversationTitle topic={topic} />
+      ) : isConversationGroup(conversation) ? (
+        <GroupConversationTitle topic={topic} />
+      ) : undefined
+    ) : undefined,
+  });
 
   if (!conversation && !isLoadingConversation) {
     // TODO: Use EmptyState component

@@ -1,5 +1,6 @@
 import { VStack } from "@/design-system/VStack";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
+import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
 // import { LegendList } from "@legendapp/list";
 import { MessageId } from "@xmtp/react-native-sdk";
@@ -10,18 +11,19 @@ import Animated, {
   useAnimatedRef,
 } from "react-native-reanimated";
 
+type ConversationMessagesListProps = Omit<
+  AnimatedProps<FlatListProps<MessageId>>,
+  "renderItem" | "data"
+> & {
+  messageIds: MessageId[];
+  renderMessage: (args: {
+    messageId: MessageId;
+    index: number;
+  }) => ReactElement;
+};
+
 export const ConversationMessagesList = memo(function ConversationMessagesList(
-  props: Omit<
-    AnimatedProps<FlatListProps<MessageId>>,
-    // FlashListProps<MessageId>,
-    "renderItem" | "data"
-  > & {
-    messageIds: MessageId[];
-    renderMessage: (args: {
-      messageId: MessageId;
-      index: number;
-    }) => ReactElement;
-  }
+  props: ConversationMessagesListProps
 ) {
   const { messageIds, renderMessage, ...rest } = props;
 
@@ -89,6 +91,7 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
   return (
     // @ts-expect-error
     <Animated.FlatList
+      style={$globalStyles.flex1}
       inverted={true}
       ref={scrollRef}
       data={messageIds}

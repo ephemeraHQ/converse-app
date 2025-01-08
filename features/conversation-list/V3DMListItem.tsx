@@ -1,36 +1,23 @@
-import {
-  resetConversationListContextMenuStore,
-  setConversationListContextMenuConversationData,
-} from "@/features/conversation-list/ConversationListContextMenu.store";
-import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
+import { prefetchConversationMessages } from "@/queries/useConversationMessages";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
-import { useSelect } from "@data/store/storeHelpers";
+import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { useCurrentAccount } from "@data/store/accountsStore";
 import { IIconName } from "@design-system/Icon/Icon.types";
 import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
-import { translate } from "@i18n/index";
 import { useRoute } from "@navigation/useNavigation";
-import { AvatarSizes } from "@styles/sizes";
 import { getMinimalDate } from "@utils/date";
 import { Haptics } from "@utils/haptics";
 import { navigate } from "@utils/navigation";
-import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useCallback, useMemo, useRef } from "react";
 import { useColorScheme } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
+import Avatar from "../../components/Avatar";
+import { ConversationListItemDumb } from "./components/conversation-list-item";
 import { useConversationIsUnread } from "./hooks/useMessageIsUnread";
 import { useMessageText } from "./hooks/useMessageText";
 import { useToggleReadStatus } from "./hooks/useToggleReadStatus";
-import Avatar from "../../components/Avatar";
-import {
-  ContextMenuIcon,
-  ContextMenuItem,
-} from "../../components/ContextMenuItems";
-import { ConversationListItemDumb } from "./components/conversation-list-item";
-import { prefetchConversationMessages } from "@/queries/useConversationMessages";
 
 type V3DMListItemProps = {
   conversation: DmWithCodecsType;
@@ -57,10 +44,6 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
   const topic = conversation.topic;
 
   const ref = useRef<Swipeable>(null);
-
-  const { setPinnedConversations } = useChatStore(
-    useSelect(["setPinnedConversations"])
-  );
 
   const { data: peerInboxId } = useDmPeerInboxId({
     account: currentAccount!,
@@ -92,68 +75,6 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
     currentAccount,
   });
 
-  const handleDelete = useHandleDeleteDm({
-    topic,
-    preferredName,
-    conversation,
-  });
-
-  const closeContextMenu = useCallback(() => {
-    resetConversationListContextMenuStore();
-  }, []);
-
-  const contextMenuItems: ContextMenuItem[] = useMemo(
-    () => [
-      {
-        title: translate("pin"),
-        action: () => {
-          setPinnedConversations([topic]);
-          closeContextMenu();
-        },
-        id: "pin",
-        rightView: <ContextMenuIcon icon="pin" />,
-      },
-      {
-        title: isUnread
-          ? translate("mark_as_read")
-          : translate("mark_as_unread"),
-        action: () => {
-          toggleReadStatus();
-          closeContextMenu();
-        },
-        id: "markAsUnread",
-        rightView: (
-          <ContextMenuIcon
-            icon={isUnread ? "checkmark.message" : "message.badge"}
-          />
-        ),
-      },
-      {
-        title: translate("delete"),
-        action: () => {
-          handleDelete();
-          closeContextMenu();
-        },
-        id: "delete",
-        titleStyle: {
-          color: theme.colors.global.caution,
-        },
-        rightView: (
-          <ContextMenuIcon icon="trash" color={theme.colors.global.caution} />
-        ),
-      },
-    ],
-    [
-      isUnread,
-      theme.colors.global.caution,
-      setPinnedConversations,
-      topic,
-      closeContextMenu,
-      toggleReadStatus,
-      handleDelete,
-    ]
-  );
-
   const avatarComponent = useMemo(() => {
     return (
       <Avatar size={theme.avatarSize.lg} uri={avatarUri} name={preferredName} />
@@ -174,19 +95,6 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
     }
   }, [toggleReadStatus, ref]);
 
-  const triggerHapticFeedback = useCallback(() => {
-    return Haptics.mediumImpactAsync();
-  }, []);
-
-  const showContextMenu = useCallback(() => {
-    setConversationListContextMenuConversationData(topic, contextMenuItems);
-  }, [contextMenuItems, topic]);
-
-  const onLongPress = useCallback(() => {
-    runOnJS(triggerHapticFeedback)();
-    runOnJS(showContextMenu)();
-  }, [triggerHapticFeedback, showContextMenu]);
-
   const onWillLeftSwipe = useCallback(() => {
     Haptics.successNotificationAsync();
   }, []);
@@ -203,7 +111,6 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
       ref={ref}
       onPress={onPress}
       // onRightActionPress={onRightPress}
-      onLongPress={onLongPress}
       onRightSwipe={onRightSwipe}
       onLeftSwipe={onLeftSwipe}
       onWillRightSwipe={onWillRightSwipe}

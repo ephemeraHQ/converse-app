@@ -35,11 +35,7 @@ export function ConversationSenderAvatar({
 
   return (
     <TouchableOpacity onPress={openProfile}>
-      <Avatar
-        size={theme.layout.chat.messageSenderAvatar.width}
-        uri={avatarUri}
-        name={name}
-      />
+      <Avatar size={theme.avatarSize.sm} uri={avatarUri} name={name} />
     </TouchableOpacity>
   );
 }

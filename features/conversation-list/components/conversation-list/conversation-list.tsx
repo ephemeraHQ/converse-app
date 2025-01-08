@@ -1,4 +1,4 @@
-import { V3GroupConversationListItem } from "@/components/V3GroupConversationListItem";
+import { V3GroupConversationListItem } from "@/features/conversation-list/V3GroupConversationListItem";
 import { AnimatedVStack } from "@/design-system/VStack";
 import { V3DMListItem } from "@/features/conversation-list/V3DMListItem";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";

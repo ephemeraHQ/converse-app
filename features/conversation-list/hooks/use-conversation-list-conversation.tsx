@@ -1,22 +1,22 @@
 import { useConversationListQuery } from "@/queries/useConversationListQuery";
 import { useCurrentAccount } from "@data/store/accountsStore";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
 
-export const useConversationListGroupItem = (topic: ConversationTopic) => {
+export const useConversationListConversation = (topic: ConversationTopic) => {
   const account = useCurrentAccount();
-  const { data } = useConversationListQuery({
+
+  const { data: conversations } = useConversationListQuery({
     account: account!,
     queryOptions: {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
     },
-
-    context: "useConversationListGroupItem",
+    context: "useConversationListConversation",
   });
 
   return useMemo(
-    () => data?.find((group) => group.topic === topic),
-    [data, topic]
+    () => conversations?.find((c) => c.topic === topic),
+    [conversations, topic]
   );
 };

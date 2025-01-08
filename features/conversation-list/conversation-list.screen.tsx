@@ -1,10 +1,15 @@
 import Avatar from "@/components/Avatar";
-import {
-  useShouldShowConnecting,
-  useShouldShowConnectingOrSyncing,
-} from "@/components/Connecting";
-import { ConversationContextMenu } from "@/components/ConversationContextMenu";
 import { ErroredHeader } from "@/components/ErroredHeader";
+import InitialLoad from "@/components/InitialLoad";
+import { Screen } from "@/components/Screen/ScreenComp/Screen";
+import {
+  useAccountsList,
+  useAccountsStore,
+  useChatStore,
+  useCurrentAccount,
+  useSettingsStore,
+} from "@/data/store/accountsStore";
+import { useSelect } from "@/data/store/storeHelpers";
 import { Center } from "@/design-system/Center";
 import { HStack } from "@/design-system/HStack";
 import { HeaderAction } from "@/design-system/Header/HeaderAction";
@@ -12,22 +17,38 @@ import { Icon } from "@/design-system/Icon/Icon";
 import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
+import { ConversationListPinnedConversations } from "@/features/conversation-list/PinnedConversations/PinnedConversations";
+import { V3DMListItem } from "@/features/conversation-list/V3DMListItem";
+import { V3GroupConversationListItem } from "@/features/conversation-list/V3GroupConversationListItem";
+import { ConversationListAvatarSkeleton } from "@/features/conversation-list/components/conversation-list-avatar-skeleton";
 import { ConversationListItemDumb } from "@/features/conversation-list/components/conversation-list-item";
 import { ConversationList } from "@/features/conversation-list/components/conversation-list/conversation-list";
+import { useConversationContextMenuViewDefaultProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-default-props";
+import { useShouldShowConnecting } from "@/features/conversation-list/hooks/useShouldShowConnecting";
+import { useShouldShowConnectingOrSyncing } from "@/features/conversation-list/hooks/useShouldShowConnectingOrSyncing";
+import { useConversationListStoreForCurrentAccount } from "@/features/conversation-list/stores/conversation-list.store";
+import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { useShouldShowErrored } from "@/hooks/useShouldShowErrored";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
+import { useConversationListQuery } from "@/queries/useConversationListQuery";
+import { NavigationParamList } from "@/screens/Navigation/Navigation";
+import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
 import { shortDisplayName } from "@/utils/str";
 import { useAccountsProfiles } from "@/utils/useAccountsProfiles";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
+import {
+  DmWithCodecsType,
+  GroupWithCodecsType,
+} from "@/utils/xmtpRN/client.types";
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback, useMemo } from "react";
 import {
   Alert,
   Platform,
@@ -36,37 +57,20 @@ import {
 } from "react-native";
 import {
   ContextMenuButton,
+  ContextMenuView,
   MenuActionConfig,
 } from "react-native-ios-context-menu";
-import InitialLoad from "../../components/InitialLoad";
-import { PinnedConversations } from "../../components/PinnedConversations/PinnedConversations";
-import Recommendations from "../../components/Recommendations/Recommendations";
-import {
-  useAccountsList,
-  useAccountsStore,
-  useChatStore,
-  useCurrentAccount,
-  useSettingsStore,
-} from "../../data/store/accountsStore";
-import { useSelect } from "../../data/store/storeHelpers";
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
-import { ConversationFlatListItem } from "../../utils/conversation";
-import ChatNullState from "./components/ChatNullState";
-import { useConversationListItems } from "./useConversationListItems";
 import { useConversationListRequestCount } from "./useConversationListRequestCount";
-
-type FlatListItemType = ConversationFlatListItem | ConversationWithCodecsType;
 
 type IConversationListProps = NativeStackScreenProps<
   NavigationParamList,
-  "Chats" | "Blocked"
+  "Chats"
 >;
 
 export function ConversationListScreen({
   navigation,
   route,
 }: IConversationListProps) {
-  // const { theme } = useAppTheme();
   // const {
   //   searchQuery,
   //   setSearchBarFocused,
@@ -81,12 +85,10 @@ export function ConversationListScreen({
   //   ])
   // );
 
-  const currentAccount = useCurrentAccount();
-
   const {
     data: conversations,
     isLoading: isLoadingConversations,
-    refetch,
+    refetch: refetchConversations,
   } = useConversationListItems();
 
   // const [flatListItems, setFlatListItems] = useState<{
@@ -95,14 +97,6 @@ export function ConversationListScreen({
   // }>({ items: [], searchQuery: "" });
 
   // const showNoResult = flatListItems.items.length === 0 && !!searchQuery;
-
-  const requestsCount = useConversationListRequestCount();
-
-  const showChatNullState =
-    conversations?.length === 0 &&
-    // !searchQuery &&
-    !isLoadingConversations &&
-    requestsCount === 0;
 
   useHeaderWrapper();
 
@@ -143,45 +137,112 @@ export function ConversationListScreen({
 
   const handleRefresh = useCallback(async () => {
     try {
-      await refetch();
+      await refetchConversations();
     } catch (error) {
       captureError(error);
     }
-  }, [refetch]);
-
-  if (showChatNullState) {
-    return (
-      <ChatNullState
-        currentAccount={currentAccount!}
-        navigation={navigation}
-        route={route}
-      />
-    );
-  }
+  }, [refetchConversations]);
 
   return (
-    <VStack
-      // {...debugBorder()}
-      style={{
-        flex: 1,
-      }}
-    >
+    <Screen contentContainerStyle={$globalStyles.flex1}>
       <ConversationList
         conversations={isLoadingConversations ? [] : (conversations ?? [])}
+        scrollEnabled={conversations && conversations?.length > 0}
+        ListEmptyComponent={<ConversationListEmpty />}
         ListHeaderComponent={<ListHeader />}
         ListFooterComponent={
           isLoadingConversations ? <InitialLoad /> : undefined
         }
         onRefetch={handleRefresh}
+        renderConversation={({ item }) => {
+          if (isConversationGroup(item)) {
+            return <ConversationListGroup group={item} />;
+          }
+          return <ConversationListDm dm={item} />;
+        }}
       />
-      <Recommendations visibility="HIDDEN" />
-      <ConversationContextMenu />
-    </VStack>
+      {/* TODO: <Recommendations visibility="HIDDEN" /> */}
+    </Screen>
   );
 }
 
+const ConversationListEmpty = memo(function ConversationListEmpty() {
+  const pinnedConversations = useConversationListStoreForCurrentAccount(
+    (s) => s.pinnedConversationTopics
+  );
+
+  if (pinnedConversations.length > 0) {
+    return null;
+  }
+
+  return <ConversationListSkeletons />;
+});
+
+export const ConversationListSkeletons = memo(
+  function ConversationListSkeletons() {
+    const { theme } = useAppTheme();
+
+    return (
+      <VStack>
+        {/* 8 to fill up the screen */}
+        {new Array(8).fill(null).map((_, index) => (
+          <ConversationListItemDumb
+            key={index}
+            isUnread={false}
+            showError={false}
+            showImagePreview={false}
+            imagePreviewUrl={undefined}
+            leftActionIcon="plus"
+            avatarComponent={
+              <ConversationListAvatarSkeleton
+                color={theme.colors.fill.minimal}
+                size={theme.avatarSize.lg}
+              />
+            }
+          />
+        ))}
+      </VStack>
+    );
+  }
+);
+
+const ConversationListDm = memo(function ConversationListDm(props: {
+  dm: DmWithCodecsType;
+}) {
+  const { dm } = props;
+
+  const { theme } = useAppTheme();
+
+  const contextMenuProps = useConversationContextMenuViewDefaultProps({
+    conversationTopic: dm.topic,
+  });
+
+  return (
+    <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
+      <V3DMListItem conversation={dm} />
+    </ContextMenuView>
+  );
+});
+
+const ConversationListGroup = memo(function ConversationListGroup(props: {
+  group: GroupWithCodecsType;
+}) {
+  const { group } = props;
+
+  const { theme } = useAppTheme();
+
+  const contextMenuProps = useConversationContextMenuViewDefaultProps({
+    conversationTopic: group.topic,
+  });
+
+  return (
+    <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
+      <V3GroupConversationListItem group={group} />
+    </ContextMenuView>
+  );
+});
+
 const ListHeader = React.memo(function ListHeader() {
-  const pinnedConversations = useChatStore((s) => s.pinnedConversationTopics);
   const { ephemeralAccount } = useSettingsStore(
     useSelect(["ephemeralAccount"])
   );
@@ -190,7 +251,7 @@ const ListHeader = React.memo(function ListHeader() {
     <VStack style={{}}>
       <States />
       {ephemeralAccount && <EphemeralAccountBanner />}
-      <PinnedConversations topics={pinnedConversations} />
+      <ConversationListPinnedConversations />
       <Requests />
     </VStack>
   );
@@ -464,3 +525,37 @@ const EphemeralAccountBanner = React.memo(function EphemeralAccountBanner() {
     </TouchableOpacity>
   );
 });
+
+const useConversationListItems = () => {
+  const currentAccount = useCurrentAccount();
+
+  const { data: conversations, ...rest } = useConversationListQuery({
+    account: currentAccount!,
+    context: "conversation-list-screen",
+  });
+
+  const { topicsData } = useChatStore(useSelect(["topicsData"]));
+
+  const pinnedConversationTopics = useConversationListStoreForCurrentAccount(
+    (s) => s.pinnedConversationTopics
+  );
+
+  const conversationsFiltered = useMemo(() => {
+    const pinnedTopics = new Set(pinnedConversationTopics);
+    const deletedTopics = new Set(
+      Object.entries(topicsData)
+        .filter(([_, data]) => data?.status === "deleted")
+        .map(([topic]) => topic)
+    );
+
+    return conversations?.filter((conversation) => {
+      const isAllowed = isConversationAllowed(conversation);
+      const isNotPinned = !pinnedTopics.has(conversation.topic);
+      const isNotDeleted = !deletedTopics.has(conversation.topic);
+
+      return isAllowed && isNotPinned && isNotDeleted;
+    });
+  }, [conversations, pinnedConversationTopics, topicsData]);
+
+  return { data: conversationsFiltered, ...rest };
+};
