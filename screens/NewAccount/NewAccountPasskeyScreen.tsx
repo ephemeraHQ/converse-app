@@ -17,6 +17,7 @@ import { Text } from "@/design-system/Text";
 import { onPasskeyCreate } from "@/utils/passkeys/create-passkey";
 import { loadAccountFromPasskey } from "@/utils/passkeys/load-client-from-passkey";
 import { captureErrorWithToast } from "@/utils/capture-error";
+import logger from "@/utils/logger";
 
 export const NewAccountPasskeyScreen = memo(function () {
   return (
@@ -65,6 +66,7 @@ const Content = memo(function Content() {
 
   const handleError = useCallback(
     (error: string) => {
+      logger.error(error);
       setError(error);
       captureErrorWithToast(error);
     },
