@@ -1,5 +1,5 @@
 import { shortAddress } from "@/utils/strings/shortAddress";
-import Avatar from "@components/Avatar";
+import { Avatar } from "@components/Avatar";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { Text } from "@design-system/Text";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";

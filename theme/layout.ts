@@ -1,19 +1,39 @@
-import { avatarSize } from "@theme/avatar";
-import { spacing } from "./spacing";
 import { Dimensions } from "react-native";
+import { spacing } from "./spacing";
 
-// TODO: Remove and put in spacing?
+const window = {
+  width: Dimensions.get("window").width,
+  height: Dimensions.get("window").height,
+};
+
 export const layout = {
-  onboardingScreenPadding: spacing.lg,
-  chat: {
-    messageSenderAvatar: {
-      width: avatarSize.sm,
-      height: avatarSize.sm,
-    },
-  },
   screen: {
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height,
+    width: window.width,
+    height: window.height,
+  },
+
+  // Common screen patterns
+  screenPadding: {
+    horizontal: spacing.lg,
+    onboarding: spacing.lg,
+  },
+
+  // Grid systems
+  grid: {
+    getColumnWidth: ({
+      totalColumns,
+      horizontalPadding,
+      gap,
+    }: {
+      totalColumns: number;
+      horizontalPadding: number;
+      gap: number;
+    }) => {
+      return (
+        (window.width - horizontalPadding * 2 - gap * (totalColumns - 1)) /
+        totalColumns
+      );
+    },
   },
 };
 

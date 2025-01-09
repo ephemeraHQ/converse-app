@@ -2,7 +2,7 @@ import { ConversationHeaderTitle } from "@/features/conversation/conversation-he
 import { usePreferredInboxAddress } from "@/hooks/usePreferredInboxAddress";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { copyToClipboard } from "@/utils/clipboard";
-import Avatar from "@components/Avatar";
+import { Avatar } from "@components/Avatar";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { usePreferredAvatarUri } from "@hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@hooks/usePreferredName";

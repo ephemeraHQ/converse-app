@@ -7,6 +7,7 @@ export const $globalStyles = {
   flexWrap: { flexWrap: "wrap" } as ViewStyle,
   alignCenter: { alignItems: "center" } as ViewStyle,
   justifyCenter: { justifyContent: "center" } as ViewStyle,
+  justifySpaceBetween: { justifyContent: "space-between" } as ViewStyle,
   center: {
     justifyContent: "center",
     alignItems: "center",

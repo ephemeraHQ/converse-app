@@ -1,10 +1,9 @@
 // __tests__/Avatar.test.tsx
 
-import { render } from "@testing-library/react-native";
 import React from "react";
 
-import Avatar from "../Avatar"; // Adjust the path as needed
 import { renderWithThemeProvider } from "@/design-system/test-utils/renderWithThemeProvider";
+import { Avatar } from "../Avatar"; // Adjust the path as needed
 
 // Mock the useColorScheme hook to always return 'light' for consistency in tests
 jest.mock("react-native/Libraries/Utilities/useColorScheme", () => ({

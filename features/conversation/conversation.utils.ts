@@ -1,6 +1,7 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import { getConversationQueryData } from "@/queries/useConversationQuery";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 
 export function getCurrentAccountConversation(topic: ConversationTopic) {
   const currentAccount = getCurrentAccount()!;
@@ -9,3 +10,15 @@ export function getCurrentAccountConversation(topic: ConversationTopic) {
     topic: topic,
   });
 }
+// Wether a conversation is blocked
+
+export const isConversationBlocked = (
+  conversation: ConversationWithCodecsType
+) => {
+  if (conversation.version === ConversationVersion.GROUP) {
+    // TODO: Check if inboxId is blocked as well
+    return conversation.state === "denied";
+  } else {
+    return conversation.state === "denied";
+  }
+};

@@ -1,3 +1,9 @@
+import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
+import {
+  JoinGroupNavigation,
+  JoinGroupNavigationParams,
+} from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
+import { translate } from "@/i18n";
 import {
   createNativeStackNavigator,
   NativeStackNavigationOptions,
@@ -5,7 +11,11 @@ import {
 import { memo } from "react";
 import { Platform, useColorScheme } from "react-native";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
-import { ConversationBlockedListNav } from "../../features/blocked-chats/ConversationBlockedListNav";
+import { BlockedChatsScreen } from "../../features/blocked-chats/blocked-chats";
+import {
+  ConversationNav,
+  ConversationNavParams,
+} from "../../features/conversation/conversation.nav";
 import { useRouter } from "../../navigation/useNavigation";
 import Accounts from "../Accounts/Accounts";
 import { IdleScreen } from "../IdleScreen";
@@ -22,16 +32,6 @@ import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificat
 import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
 import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
 import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
-import {
-  JoinGroupNavigation,
-  JoinGroupNavigationParams,
-} from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
-import { ConversationListNav } from "./ConversationListNav";
-import {
-  ConversationNavParams,
-  ConversationNav,
-} from "../../features/conversation/conversation.nav";
-import ConversationRequestsListNav from "./ConversationRequestsListNav";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
 import GroupNav, { GroupNavParams } from "./GroupNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
@@ -45,7 +45,7 @@ import UserProfileNav from "./UserProfileNav";
 import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
-import { translate } from "@/i18n";
+import ConversationRequestsListNav from "@/screens/Navigation/ConversationRequestsListNav.ios";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -131,9 +131,9 @@ export function SignedInNavigation() {
     >
       <NativeStack.Group>
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
-          {ConversationListNav()}
+          <NativeStack.Screen name="Chats" component={ConversationListScreen} />
+          <NativeStack.Screen name="Blocked" component={BlockedChatsScreen} />
           {ConversationRequestsListNav()}
-          {ConversationBlockedListNav()}
           {ConversationNav()}
           {NewConversationNav()}
           {ConverseMatchMakerNav()}

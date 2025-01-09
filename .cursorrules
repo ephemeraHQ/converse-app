@@ -2,43 +2,50 @@
 
 ## Core Principles
 
-- Write concise TypeScript code
-- Use functional programming patterns
-- Prefer clean, readable code over compact code
-- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
-- Prefer clean and easy to read code over compact code
+- Write concise TypeScript code.
+- Use functional programming patterns.
+- Prefer clean, readable code over compact code, using empty lines to separate logical blocks and improve readability.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Prefer clean and easy to read code over compact code.
+- Don't create function(s) inside other functions unless it's specified
+- Add clear, concise comments to explain non-obvious logic or unconventional implementation decisions.
+- When refactoring code, preserve existing comments unless explicitly instructed otherwise or the related code is removed. Comments often explain important context or implementation decisions that should be maintained.
 
 ## TypeScript
 
-- Use types over interfaces, prefixed with 'I' (e.g., IMyItem)
-- Never use 'any'
-- Avoid enums, use maps instead
-- Use functional components with TypeScript types
-- Prefer inferring types if possible over explicit typing
+- Use types over interfaces, prefixed with 'I' (e.g., IMyItem).
+- Never use 'any'.
+- Avoid enums, use maps instead.
+- Use functional components with TypeScript types.
+- Prefer inferring types if possible over explicit typing.
+- Prefer type assertions on return objects (`return {...} satisfies IType`) over function return type annotations (`function(): IType`) if we have to put a type because the inferring is not working well.
 
 ## Function Patterns
 
-- Use function keyword for pure functions
-- Prefer object params: `function(args: { name: string })` over `function(name: string)`
-- Destructure args: `function(args: IArgs) { const { ... } = args }`
+- Use function keyword for pure functions.
+- Prefer object params: `function(args: { name: string })` over `function(name: string)`.
+- Destructure args: `function(args: IArgs) { const { ... } = args }`.
 
 ## React & Components
 
-- Use named exports
-- Write JSX inline rather than separate render functions
-- Prefer early returns over ternaries
-- Use array syntax for merged styles: `style={[{ color: "red" }, style]}`
-- Minimize useEffect and setState usage
-- Wrap components in memo() for performance
-- When creating a new component outside of the parent component, minimize the number of props and try to reuse hooks
+- Use named exports.
+- Write JSX inline rather than separate render functions.
+- Prefer early returns over ternaries.
+- Use array syntax for merged styles: `style={[{ color: "red" }, style]}`.
+- Minimize useEffect and setState usage.
+- Wrap components in memo() for performance.
+- When creating a new component or custom hook, aim to minimize the number of props you pass. Instead, try to reuse existing hooks whenever possible. This is especially important if the props or arguments you want to pass are only needed within the new component or hook we wanted to pass are ONLY used in the new component or hook.
+- When asked to extract a component or some code for custom hooks, create those in the same file.
+- Keep related code close together by placing the exported component at the top of the file with related components directly underneath it.
 
 ## File Structure
 
-- Use lowercase with dashes for directories (e.g., components/auth-wizard)
-- Import paths from our project should start with @/
+- Use lowercase with dashes for directories (e.g., components/auth-wizard).
+- Import paths from our project should start with @/.
+- Use the same name for the file and the component.
 
 ## Theming & Styling
 
-- Always use the theme for styling. Import it from @/theme/useAppTheme like `const { theme } = useAppTheme();`
-- Use components from @/design-system
-- Use the theme for colors and spacing
+- Always use the theme for styling. Import it from @/theme/useAppTheme like `const { theme } = useAppTheme();`.
+- Use components from @/design-system.
+- Use the theme for colors and spacing.

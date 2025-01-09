@@ -16,7 +16,7 @@ import {
   View,
 } from "react-native";
 
-import Avatar from "./Avatar";
+import { Avatar } from "./Avatar";
 import { useCurrentAccount } from "../data/store/accountsStore";
 import { useGroupMembers } from "../hooks/useGroupMembers";
 import {

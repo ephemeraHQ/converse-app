@@ -21,7 +21,7 @@ import QRCode from "react-native-qrcode-svg";
 import { useAppTheme } from "@theme/useAppTheme";
 import { shortAddress } from "@utils/strings/shortAddress";
 import AndroidBackAction from "../components/AndroidBackAction";
-import Avatar from "../components/Avatar";
+import { Avatar } from "../components/Avatar";
 import Button from "../components/Button/Button";
 import ActionButton from "../components/Chat/ActionButton";
 import Picto from "../components/Picto/Picto";

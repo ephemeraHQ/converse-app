@@ -21,7 +21,7 @@ import {
 
 import { useAppTheme } from "@theme/useAppTheme";
 import { uploadFile } from "@utils/attachment/uploadFile";
-import Avatar from "../../components/Avatar";
+import { Avatar } from "../../components/Avatar";
 import Button from "../../components/Button/Button";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";

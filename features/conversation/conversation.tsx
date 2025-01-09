@@ -1,4 +1,4 @@
-import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { AnimatedVStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
@@ -28,12 +28,12 @@ import {
   ConversationMessageGestures,
   IMessageGesturesOnLongPressArgs,
 } from "@/features/conversation/conversation-message/conversation-message-gestures";
+import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import { MessageReactionsDrawer } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer";
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { ConversationMessageRepliable } from "@/features/conversation/conversation-message/conversation-message-repliable";
 import { ConversationMessageStatus } from "@/features/conversation/conversation-message/conversation-message-status/conversation-message-status";
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
-import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import {
   MessageContextStoreProvider,
   useMessageContextStore,
@@ -42,7 +42,6 @@ import {
   getConvosMessageStatusForXmtpMessage,
   getCurrentUserAlreadyReactedOnMessage,
   isAnActualMessage,
-  isGroupUpdatedMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
@@ -53,6 +52,7 @@ import { isConversationDm } from "@/features/conversation/utils/is-conversation-
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
+import { useHeader } from "@/navigation/use-header";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import {
@@ -66,14 +66,7 @@ import { translate } from "@i18n/translate";
 import { useRouter } from "@navigation/useNavigation";
 import { useConversationMessages } from "@queries/useConversationMessages";
 import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -103,20 +96,17 @@ export const Conversation = memo(function Conversation(props: {
       topic,
     });
 
-  useLayoutEffect(() => {
-    if (!conversation) {
-      return;
-    }
-    if (isConversationDm(conversation)) {
-      navigation.setOptions({
-        headerTitle: () => <DmConversationTitle topic={topic} />,
-      });
-    } else if (isConversationGroup(conversation)) {
-      navigation.setOptions({
-        headerTitle: () => <GroupConversationTitle topic={topic} />,
-      });
-    }
-  }, [topic, navigation, conversation]);
+  useHeader({
+    onBack: () => navigation.goBack(),
+    safeAreaEdges: ["top"],
+    titleComponent: conversation ? (
+      isConversationDm(conversation) ? (
+        <DmConversationTitle topic={topic} />
+      ) : isConversationGroup(conversation) ? (
+        <GroupConversationTitle topic={topic} />
+      ) : undefined
+    ) : undefined,
+  });
 
   if (!conversation && !isLoadingConversation) {
     // TODO: Use EmptyState component
@@ -240,8 +230,6 @@ const Messages = memo(function Messages(props: {
 
   const toggleReadStatus = useToggleReadStatus({
     topic,
-    isUnread,
-    currentAccount,
   });
 
   const hasMarkedAsRead = useRef(false);

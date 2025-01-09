@@ -2,48 +2,56 @@ import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionShe
 import { useChatStore, useCurrentAccount } from "@/data/store/accountsStore";
 import { useSelect } from "@/data/store/storeHelpers";
 import { translate } from "@/i18n";
+import { getGroupQueryData } from "@/queries/useGroupQuery";
 import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { saveTopicsData } from "@/utils/api";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { consentToInboxIdsOnProtocolByAccount } from "@/utils/xmtpRN/contacts";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 
-export const useHandleDeleteGroup = (group: GroupWithCodecsType) => {
+export const useHandleDeleteGroup = (args: {
+  groupTopic: ConversationTopic;
+}) => {
+  const { groupTopic } = args;
   const currentAccount = useCurrentAccount()!;
   const { theme } = useAppTheme();
   const colorScheme = theme.isDark ? "dark" : "light";
   const { setTopicsData } = useChatStore(useSelect(["setTopicsData"]));
-  const topic = group.topic;
 
   return useCallback(() => {
+    const group = getGroupQueryData({
+      account: currentAccount,
+      topic: groupTopic,
+    });
+
+    if (!group) {
+      throw new Error("Group not found");
+    }
+
     const options = [
       translate("delete"),
       translate("delete_and_block"),
       translate("cancel"),
     ];
-    const title = `${translate("delete_chat_with")} ${group?.name}?`;
+
+    const title = `${translate("delete_chat_with")} ${group.name}?`;
+
     const actions = [
       () => {
         saveTopicsData(currentAccount, {
-          [topic]: {
+          [groupTopic]: {
             status: "deleted",
             timestamp: new Date().getTime(),
           },
-        }),
-          setTopicsData({
-            [topic]: {
-              status: "deleted",
-              timestamp: new Date().getTime(),
-            },
-          });
+        });
       },
       async () => {
         saveTopicsData(currentAccount, {
-          [topic]: { status: "deleted" },
+          [groupTopic]: { status: "deleted" },
         });
         setTopicsData({
-          [topic]: {
+          [groupTopic]: {
             status: "deleted",
             timestamp: new Date().getTime(),
           },
@@ -71,5 +79,5 @@ export const useHandleDeleteGroup = (group: GroupWithCodecsType) => {
         }
       }
     );
-  }, [colorScheme, currentAccount, group, setTopicsData, topic]);
+  }, [colorScheme, currentAccount, setTopicsData, groupTopic]);
 };

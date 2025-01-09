@@ -3,7 +3,7 @@ import { memo, useCallback, useRef } from "react";
 import { TextInput, View, useColorScheme } from "react-native";
 
 import { useAppTheme } from "@theme/useAppTheme";
-import Avatar from "../../components/Avatar";
+import { Avatar } from "../../components/Avatar";
 import Button from "../../components/Button/Button";
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";

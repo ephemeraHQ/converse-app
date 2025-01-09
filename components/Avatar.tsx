@@ -1,42 +1,28 @@
-import { actionSecondaryColor, textSecondaryColor } from "@styles/colors";
-import { AvatarSizes } from "@styles/sizes";
+import { Center } from "@/design-system/Center";
+import { Icon } from "@/design-system/Icon/Icon";
+import { Text } from "@/design-system/Text";
+import { useAppTheme } from "@/theme/useAppTheme";
 import { getFirstLetterForAvatar } from "@utils/getFirstLetterForAvatar";
 import { Image } from "expo-image";
-import React, { useCallback, useState } from "react";
-import {
-  ColorSchemeName,
-  Platform,
-  StyleProp,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-  ViewStyle,
-} from "react-native";
+import React, { memo, useCallback, useState } from "react";
+import { Platform, StyleProp, ViewStyle } from "react-native";
 
-import Picto from "./Picto/Picto";
-
-export type AvatarProps = {
-  uri?: string | undefined;
-  size?: number | undefined;
+export type IAvatarProps = {
+  uri?: string;
+  size?: number;
   style?: StyleProp<ViewStyle>;
-  color?: boolean;
-  name?: string | undefined;
-  // Inverts the color of the place holder
-  invertColor?: boolean;
+  name?: string;
 };
 
-function Avatar({
+export const Avatar = memo(function Avatar({
   uri,
-  size = AvatarSizes.default,
+  size,
   style,
-  color,
   name,
-  invertColor,
-}: AvatarProps) {
-  const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme, size, invertColor || false);
-  const firstLetter = getFirstLetterForAvatar(name || "");
+}: IAvatarProps) {
+  const { theme } = useAppTheme();
+  const avatarSize = size ?? theme.avatarSize.md;
+  const firstLetter = getFirstLetterForAvatar(name ?? "");
   const [didError, setDidError] = useState(false);
 
   const handleImageError = useCallback(() => {
@@ -46,72 +32,58 @@ function Avatar({
   const handleImageLoad = useCallback(() => {
     setDidError(false);
   }, []);
-  return uri && !didError ? (
-    <View style={style}>
-      <Image
-        onLoad={handleImageLoad}
-        onError={handleImageError}
-        key={`${uri}-${color}-${colorScheme}`}
-        source={{ uri }}
-        style={styles.image}
-        cachePolicy="memory-disk"
-        testID="avatar-image"
-      />
-    </View>
-  ) : (
-    <View
-      style={StyleSheet.flatten([
-        styles.placeholder,
+
+  if (uri && !didError) {
+    return (
+      <Center style={style}>
+        <Image
+          onLoad={handleImageLoad}
+          onError={handleImageError}
+          source={{ uri }}
+          style={{
+            borderRadius: 9999,
+            width: avatarSize,
+            height: avatarSize,
+          }}
+          cachePolicy="memory-disk"
+          testID="avatar-image"
+        />
+      </Center>
+    );
+  }
+
+  return (
+    <Center
+      style={[
+        {
+          borderRadius: 9999,
+          width: avatarSize,
+          height: avatarSize,
+          backgroundColor: theme.colors.fill.tertiary,
+        },
         style,
-        { width: size, height: size, borderRadius: size / 2 },
-      ])}
+      ]}
       testID="avatar-placeholder"
     >
       {name ? (
-        <Text style={styles.text}>{firstLetter}</Text>
+        <Text
+          weight="medium"
+          inverted
+          color="primary"
+          style={{
+            fontSize: avatarSize / 2.4, // 2.4 is the ratio in the Figma design
+            lineHeight: avatarSize / 2.4, // 2.4 is the ratio in the Figma design
+          }}
+        >
+          {firstLetter}
+        </Text>
       ) : (
-        <Picto
+        <Icon
           picto="photo"
-          size={Platform.OS === "ios" ? size / 3 : size / 2}
+          size={Platform.OS === "ios" ? avatarSize / 3 : avatarSize / 2}
           color="white"
         />
       )}
-    </View>
+    </Center>
   );
-}
-
-const getStyles = (
-  colorScheme: ColorSchemeName,
-  size: number,
-  invertColor: boolean
-) =>
-  StyleSheet.create({
-    image: {
-      borderRadius: size,
-      width: size,
-      height: size,
-    },
-    placeholder: {
-      width: size,
-      height: size,
-      borderRadius: size / 2,
-      backgroundColor:
-        colorScheme === "dark"
-          ? invertColor
-            ? actionSecondaryColor("light")
-            : textSecondaryColor(colorScheme)
-          : invertColor
-            ? textSecondaryColor("dark")
-            : actionSecondaryColor(colorScheme),
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    text: {
-      fontSize: size / 2,
-      fontWeight: "500",
-      color: "white",
-      textAlign: "center",
-    },
-  });
-
-export default React.memo(Avatar);
+});

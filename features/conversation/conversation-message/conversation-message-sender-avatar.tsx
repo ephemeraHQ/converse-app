@@ -1,7 +1,7 @@
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import { navigate } from "@/utils/navigation";
 import { getPreferredInboxAvatar } from "@/utils/profile";
-import Avatar from "@components/Avatar";
+import { Avatar } from "@components/Avatar";
 import { usePreferredInboxAddress } from "@hooks/usePreferredInboxAddress";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
 import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
@@ -35,11 +35,7 @@ export function ConversationSenderAvatar({
 
   return (
     <TouchableOpacity onPress={openProfile}>
-      <Avatar
-        size={theme.layout.chat.messageSenderAvatar.width}
-        uri={avatarUri}
-        name={name}
-      />
+      <Avatar size={theme.avatarSize.sm} uri={avatarUri} name={name} />
     </TouchableOpacity>
   );
 }

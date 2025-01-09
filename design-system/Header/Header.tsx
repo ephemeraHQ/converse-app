@@ -1,18 +1,17 @@
-import { IPicto } from "@components/Picto/Picto.types";
+import { IPicto } from "@/components/Picto/Picto.types";
 import { ReactElement } from "react";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import {
   ExtendedEdge,
   useSafeAreaInsetsStyle,
-} from "../../components/Screen/ScreenComp/Screen.helpers";
-import { translate } from "../../i18n";
-import { ThemedStyle, useAppTheme } from "../../theme/useAppTheme";
+} from "@/components/Screen/ScreenComp/Screen.helpers";
+import { translate } from "@/i18n";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { HStack } from "../HStack";
 import { ITextProps, Text } from "../Text";
 import { ITouchableOpacityProps } from "../TouchableOpacity";
 import { VStack } from "../VStack";
 import { HeaderAction } from "./HeaderAction";
-import { debugBorder } from "@/utils/debug-style";
 
 export type HeaderProps = {
   titleStyle?: StyleProp<TextStyle>;
@@ -40,6 +39,7 @@ export type HeaderProps = {
   onRightPress?: ITouchableOpacityProps["onPress"];
   safeAreaEdges?: ExtendedEdge[];
   isCollapsible?: boolean;
+  onBack?: () => void;
 };
 
 export function Header(props: HeaderProps) {
@@ -71,6 +71,7 @@ export function Header(props: HeaderProps) {
     titleStyle: $titleStyleOverride,
     containerStyle: $containerStyleOverride,
     isCollapsible,
+    onBack,
   } = props;
 
   const $containerInsets = useSafeAreaInsetsStyle(safeAreaEdges);
@@ -95,17 +96,25 @@ export function Header(props: HeaderProps) {
           // {...debugBorder("red")}
           style={$contentContainer}
         >
-          {(leftTx || leftText || leftIcon || LeftActionComponent) && (
+          {onBack ? (
             <HeaderAction
-              tx={leftTx}
-              text={leftText}
-              icon={leftIcon}
-              iconColor={leftIconColor}
-              onPress={onLeftPress}
-              txOptions={leftTxOptions}
+              icon="chevron.left"
+              onPress={onBack}
               backgroundColor={backgroundColor}
-              ActionComponent={LeftActionComponent}
             />
+          ) : (
+            (leftTx || leftText || leftIcon || LeftActionComponent) && (
+              <HeaderAction
+                tx={leftTx}
+                text={leftText}
+                icon={leftIcon}
+                iconColor={leftIconColor}
+                onPress={onLeftPress}
+                txOptions={leftTxOptions}
+                backgroundColor={backgroundColor}
+                ActionComponent={LeftActionComponent}
+              />
+            )
           )}
 
           {titleComponent ? (
@@ -148,7 +157,7 @@ export function Header(props: HeaderProps) {
 const $wrapper: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   height: 72,
   alignItems: "center",
-  paddingHorizontal: spacing.sm,
+  paddingHorizontal: spacing.xs,
 });
 
 const $container: ViewStyle = {

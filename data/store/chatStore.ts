@@ -1,4 +1,5 @@
 import logger from "@utils/logger";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 import isDeepEqual from "fast-deep-equal";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -18,10 +19,6 @@ export type TopicsData = {
 };
 
 export type ChatStoreType = {
-  /**
-   * @deprecated - Use the conversation from query instead
-   */
-  pinnedConversationTopics: string[];
   openedConversationTopic: string | null;
   lastUpdateAt: number;
   lastSyncedAt: number;
@@ -39,8 +36,6 @@ export type ChatStoreType = {
   setSearchQuery: (query: string) => void;
   searchBarFocused: boolean;
   setSearchBarFocused: (focused: boolean) => void;
-
-  setPinnedConversations: (conversationsTopics: string[]) => void;
 
   setInitialLoadDone: () => void;
 
@@ -74,7 +69,6 @@ export const initChatStore = (account: string) => {
     persist(
       (set) =>
         ({
-          pinnedConversationTopics: [],
           lastSyncedAt: 0,
           lastSyncedTopics: [],
           topicsData: {},
@@ -85,25 +79,6 @@ export const initChatStore = (account: string) => {
           setSearchQuery: (q) => set(() => ({ searchQuery: q })),
           searchBarFocused: false,
           setSearchBarFocused: (f) => set(() => ({ searchBarFocused: f })),
-          setPinnedConversations: (conversationsTopics: string[]) =>
-            set((state) => {
-              const pinnedConversations = [
-                ...(state.pinnedConversationTopics || []),
-              ];
-              conversationsTopics.forEach((topic) => {
-                const alreadyPinnedIndex = pinnedConversations.findIndex(
-                  (item) => item === topic
-                );
-                if (alreadyPinnedIndex !== -1) {
-                  pinnedConversations.splice(alreadyPinnedIndex, 1);
-                } else {
-                  pinnedConversations.push(topic);
-                }
-              });
-              return {
-                pinnedConversationTopics: pinnedConversations,
-              };
-            }),
 
           initialLoadDone: false,
           initialLoadDoneOnce: false,
@@ -228,7 +203,6 @@ export const initChatStore = (account: string) => {
             lastSyncedAt: state.lastSyncedAt,
             lastSyncedTopics: state.lastSyncedTopics,
             topicsData: state.topicsData,
-            pinnedConversationTopics: state.pinnedConversationTopics,
             groupInviteLinks: state.groupInviteLinks,
           };
 
@@ -260,14 +234,7 @@ export const initChatStore = (account: string) => {
             }
             delete persistedState.topicsStatus;
           }
-          if (version < 3) {
-            const fullConversations: unknown[] =
-              persistedState.pinnedConversations;
-            persistedState.pinnedConversationTopics =
-              fullConversations?.map((it) => (it as { topic: string }).topic) ??
-              [];
-            delete persistedState.pinnedConversations;
-          }
+
           return persistedState as ChatStoreType;
         },
       }

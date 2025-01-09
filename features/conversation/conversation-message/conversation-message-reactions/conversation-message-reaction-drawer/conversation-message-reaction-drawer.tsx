@@ -1,4 +1,4 @@
-import Avatar from "@components/Avatar";
+import { Avatar } from "@components/Avatar";
 import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
 import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
 import { BottomSheet } from "@design-system/BottomSheet/BottomSheet";

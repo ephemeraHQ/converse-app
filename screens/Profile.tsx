@@ -40,7 +40,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
-import Avatar from "../components/Avatar";
+import { Avatar } from "../components/Avatar";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import TableView, {
   TableViewItemType,

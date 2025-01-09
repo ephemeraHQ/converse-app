@@ -5,7 +5,7 @@ import { AvatarSizes } from "@styles/sizes";
 import { spacing } from "@theme/spacing";
 import { ViewStyle, StyleSheet } from "react-native";
 
-import Avatar from "./Avatar";
+import { Avatar } from "./Avatar";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 

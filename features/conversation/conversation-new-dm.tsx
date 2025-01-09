@@ -15,6 +15,7 @@ import {
 } from "@/features/conversation/hooks/use-send-message";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { translate } from "@/i18n";
+import { useHeader } from "@/navigation/use-header";
 import { useRouter } from "@/navigation/useNavigation";
 import { addConversationToConversationListQuery } from "@/queries/useConversationListQuery";
 import { setDmQueryData } from "@/queries/useDmQuery";
@@ -24,7 +25,7 @@ import { sentryTrackError } from "@/utils/sentry";
 import { createConversationByAccount } from "@/utils/xmtpRN/conversations";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { memo, useCallback, useLayoutEffect } from "react";
+import { memo, useCallback } from "react";
 import { Keyboard } from "react-native";
 
 export const ConversationNewDm = memo(function ConversationNewDm(props: {
@@ -35,11 +36,11 @@ export const ConversationNewDm = memo(function ConversationNewDm(props: {
 
   const navigation = useRouter();
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: () => <NewConversationTitle peerAddress={peerAddress} />,
-    });
-  }, [peerAddress, navigation]);
+  useHeader({
+    onBack: () => navigation.goBack(),
+    safeAreaEdges: ["top"],
+    titleComponent: <NewConversationTitle peerAddress={peerAddress} />,
+  });
 
   const sendFirstConversationMessage =
     useSendFirstConversationMessage(peerAddress);
