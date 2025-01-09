@@ -24,8 +24,7 @@ export async function onPasskeyCreate({
   try {
     setStatusString("Creating passkey...");
 
-    const { authenticatorParams, userId } =
-      await createUserPasskey(passkeyName);
+    const { authenticatorParams } = await createUserPasskey(passkeyName);
 
     setPreviousPasskeyName(passkeyName);
     setStatusString("Passkey creation successful. Creating sub-org...");
@@ -85,5 +84,5 @@ const createUserPasskey = async (passkeyName: string) => {
       userVerification: "preferred",
     },
   });
-  return { authenticatorParams, userId };
+  return { authenticatorParams };
 };
