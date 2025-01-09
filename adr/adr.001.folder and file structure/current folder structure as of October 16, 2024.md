@@ -231,7 +231,7 @@ technoplato@Michaels-MacBook-Pro converse-app % tree -L 3 -I node_modules
 │   ├── useGroupDescriptionForCurrentInbox.ts
 │   ├── useGroupId.ts
 │   ├── useGroupMembers.ts
-│   ├── useGroupName.ts
+│   ├── useGroupNameForCurrentUser.ts
 │   ├── useGroupPendingRequests.ts
 │   ├── useGroupPermissionspForCurrentUser.ts
 │   ├── useGroupPhotoForCurrentInbox.ts

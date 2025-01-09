@@ -84,7 +84,7 @@ export default function ConversationRequestsListNav() {
         }
       }
     );
-  }, [account, colorScheme, likelyNotSpam]);
+  }, [colorScheme, likelyNotSpam]);
 
   const navigationOptions = useCallback(
     ({

@@ -7,21 +7,22 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { setGroupNameMutationKey } from "./MutationKeys";
-import { updateConversationInConversationListQuery } from "@/queries/useConversationListForCurrentUserQuery";
+import { InboxId } from "@xmtp/react-native-sdk";
+import { updateConversationInConversationListQuery } from "./useConversationListQuery";
 
-type IArgs = {
-  account: string;
+export function useGroupNameMutation({
+  inboxId,
+  topic,
+}: {
+  inboxId: InboxId;
   topic: ConversationTopic;
-};
-
-export function useGroupNameMutation(args: IArgs) {
-  const { account, topic } = args;
-  const { data: group } = useGroupQuery({ account, topic });
+}) {
+  const { data: group } = useGroupQuery({ inboxId, topic });
 
   return useMutation({
-    mutationKey: setGroupNameMutationKey(account, topic),
+    mutationKey: setGroupNameMutationKey({ inboxId, topic }),
     mutationFn: async (name: string) => {
-      if (!group || !account || !topic) {
+      if (!group || !inboxId || !topic) {
         throw new Error("Missing required data in useGroupNameMutation");
       }
 
@@ -29,15 +30,15 @@ export function useGroupNameMutation(args: IArgs) {
       return name;
     },
     onMutate: async (name: string) => {
-      const previousGroup = getGroupQueryData({ account, topic });
+      const previousGroup = getGroupQueryData({ inboxId, topic });
       const updates = { name };
 
       if (previousGroup) {
-        updateGroupQueryData({ account, topic, updates });
+        updateGroupQueryData({ inboxId, topic, updates });
       }
 
       updateConversationInConversationListQuery({
-        account,
+        inboxId,
         topic,
         conversationUpdate: updates,
       });
@@ -50,9 +51,9 @@ export function useGroupNameMutation(args: IArgs) {
       const { previousGroup } = context || {};
 
       const updates = { name: previousGroup?.name ?? "" };
-      updateGroupQueryData({ account, topic, updates });
+      updateGroupQueryData({ inboxId, topic, updates });
       updateConversationInConversationListQuery({
-        account,
+        inboxId,
         topic,
         conversationUpdate: updates,
       });

@@ -51,7 +51,7 @@ export type IProfileSocials = {
   // address?: string;
   // note(lustig) this may be overkill for now, but I think preparing for the future
   // is a good idea.
-  cryptoCurrencyWalletAddresses?: CryptocurrencyWalletAddresses;
+  cryptoCurrencyWalletAddresses: CryptocurrencyWalletAddresses;
   ensNames?: IEnsData[];
   farcasterUsernames?: IFarcasterData[];
   lensHandles?: ILensData[];

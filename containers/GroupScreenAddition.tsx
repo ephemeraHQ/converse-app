@@ -3,7 +3,6 @@ import { useChatStore, useCurrentInboxId } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { Icon } from "@design-system/Icon/Icon";
 import { useExistingGroupInviteLink } from "@hooks/useExistingGroupInviteLink";
-import { useGroupDescriptionForCurrentInbox } from "@hooks/useGroupDescriptionForCurrentInbox";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { translate } from "@i18n";
 import Clipboard from "@react-native-clipboard/clipboard";

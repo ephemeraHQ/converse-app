@@ -1,4 +1,3 @@
-import type { SimulateAssetChangesResponse } from "alchemy-sdk";
 import { GroupInvite } from "@utils/api.types";
 import axios, { AxiosError } from "axios";
 
@@ -461,14 +460,15 @@ export const claimProfile = async ({
 
 export const checkUsernameValid = async ({
   inboxId,
-
+  address,
   username,
 }: {
   inboxId: string;
+  address: string;
   username: string;
 }): Promise<string> => {
   const { data } = await api.get("/api/profile/username/valid", {
-    params: { inboxId, username },
+    params: { username, address },
     headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data;
@@ -713,35 +713,37 @@ export const getPendingGroupJoinRequests = async ({
   return data;
 };
 
-export const simulateTransaction = async ({
-  currentSignerAddress,
-  inboxId,
-  chainId,
-  // transaction,
-}: {
-  inboxId: InboxId;
-  currentSignerAddress: string;
-  chainId: number;
-  // transaction: TransactionData;
-}) => {
+export const simulateTransaction = async (
+  {
+    // currentSignerAddress,
+    // inboxId,
+    // chainId,
+    // transaction,
+  }: {
+    // inboxId: InboxId;
+    // currentSignerAddress: string;
+    // chainId: number;
+    // transaction: TransactionData;
+  }
+) => {
   throw new Error("Not implemented");
-  const { data } = await api.post(
-    "/api/transactions/simulate",
-    {
-      address: currentSignerAddress,
-      to: transaction.to,
-      value: transaction.value
-        ? `0x${BigInt(transaction.value).toString(16)}`
-        : undefined,
+  // const { data } = await api.post(
+  //   "/api/transactions/simulate",
+  //   {
+  //     address: currentSignerAddress,
+  //     to: transaction.to,
+  //     value: transaction.value
+  //       ? `0x${BigInt(transaction.value).toString(16)}`
+  //       : undefined,
 
-      data: transaction.data,
-      network: `eip155:${chainId}`,
-    },
-    {
-      headers: await getXmtpApiHeaders({ inboxId }),
-    }
-  );
-  return data as SimulateAssetChangesResponse;
+  //     data: transaction.data,
+  //     network: `eip155:${chainId}`,
+  //   },
+  //   {
+  //     headers: await getXmtpApiHeaders({ inboxId }),
+  //   }
+  // );
+  // return data as SimulateAssetChangesResponse;
 };
 
 export const putGroupInviteRequest = async ({

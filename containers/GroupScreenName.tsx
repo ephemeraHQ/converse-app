@@ -1,8 +1,9 @@
-import { useGroupName } from "@/hooks/useGroupName";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
+import { useGroupNameForCurrentUser } from "@/hooks/useGroupName";
+import { useGroupPermissionspForCurrentUser } from "@/hooks/useGroupPermissions";
 import { translate } from "@/i18n";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useGroupMembers } from "@hooks/useGroupMembers";
-import { useGroupPermissionspForCurrentUser } from "@hooks/useGroupPermissionspForCurrentUser";
 import { textPrimaryColor } from "@styles/colors";
 import {
   isUserAdminByInboxId,
@@ -26,21 +27,21 @@ type GroupScreenNameProps = {
 
 export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
   const styles = useStyles();
-  const { permissions } = useGroupPermissionspForCurrentUser(topic);
-  const currentInboxId = useCurrentInboxId()()!;
-  const { updateGroupName, groupName } = useGroupName(topic);
+  const { permissions } = useGroupPermissionspForCurrentUser({ topic });
+  const currentInboxId = useCurrentInboxId()!;
+  const { groupName, updateGroupName } = useGroupNameForCurrentUser({ topic });
   const formattedGroupName = formatGroupName(topic, groupName);
-  const { members } = useGroupMembers(topic);
+  const { members } = useGroupMembers({ topic });
 
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
-      currentAccountIsAdmin: isUserAdminByInboxId(members, currentAccount),
+      currentAccountIsAdmin: isUserAdminByInboxId(currentInboxId, members),
       currentAccountIsSuperAdmin: isUserSuperAdminByInboxId(
-        members,
-        currentAccount
+        currentInboxId,
+        members
       ),
     }),
-    [currentAccount, members]
+    [currentInboxId, members]
   );
   const [editing, setEditing] = useState(false);
   const [editedName, setEditedName] = useState(formattedGroupName);

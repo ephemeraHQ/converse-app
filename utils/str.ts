@@ -30,16 +30,29 @@ export const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
 export const addressPrefix = (address: string) =>
   (address && address.length >= 6 ? address.slice(0, 6) : address) || "";
 
-export const formatGroupName = (topic: string, groupName?: string) =>
-  groupName || capitalize(humanize(topic.slice(14, 46), 3, " "));
+export const formatGroupName = ({
+  topic,
+  groupName,
+}: {
+  topic: string;
+  groupName?: string;
+}) => groupName || capitalize(humanize(topic.slice(14, 46), 3, " "));
 
-export const formatEphemeralUsername = (address: string, username?: string) =>
-  username || humanize(address.slice(2, 42), 2, "");
+export const formatEphemeralUsername = ({
+  username,
+  address,
+}: {
+  username?: string;
+  address: string;
+}) => username || humanize(address?.slice(2, 42) || "", 2, "");
 
-export const formatEphemeralDisplayName = (
-  address: string,
-  displayName?: string
-) => displayName || humanize(address.slice(2, 42), 2, "", true);
+export const formatEphemeralDisplayName = ({
+  displayName,
+  address,
+}: {
+  address: string;
+  displayName?: string;
+}) => displayName || humanize(address.slice(2, 42), 2, "", true);
 
 export const getTitleFontScale = (): number => {
   let titleFontScale = 1;

@@ -2,11 +2,12 @@ import { getCurrentInboxId } from "@/data/store/accountsStore";
 import logger from "@/utils/logger";
 import { xmtpClientByInboxId } from "@/utils/xmtpRN/client";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 const inboxIdToAddressesCache = new Map<string, string>();
 
 export async function getEthereumRecoveryAddressForInboxId(args: {
-  inboxId: string;
+  inboxId: InboxId;
 }): Promise<string> {
   if (inboxIdToAddressesCache.has(args.inboxId.toLowerCase())) {
     return inboxIdToAddressesCache.get(args.inboxId.toLowerCase()) as string;

@@ -29,8 +29,8 @@ import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScre
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import config from "../../config";
 import {
-  getCurrentAccount,
-  useCurrentAccount,
+  getCurrentInboxId,
+  useCurrentInboxId,
   useSettingsStore,
 } from "../../data/store/accountsStore";
 import { setAuthStatus } from "../../data/store/authStore";
@@ -53,6 +53,8 @@ import { NavigationParamList } from "../Navigation/Navigation";
 import { needToShowNotificationsPermissions } from "./Onboarding.utils";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
 import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
+import { getXmtpClientOrThrow } from "@/features/Accounts/accounts.utils";
+import { address } from "@xmtp/react-native-sdk";
 
 export type ProfileType = {
   avatar?: string;
@@ -69,7 +71,7 @@ export const OnboardingUserProfileScreen = (
 
   const colorScheme = useColorScheme();
 
-  const { profile, setProfile } = useProfile();
+  const { profile, setProfile } = useProfileForCurrentUser();
 
   const { createOrUpdateProfile, loading, errorMessage } =
     useCreateOrUpdateProfileInfo();
@@ -184,11 +186,12 @@ export const OnboardingUserProfileScreen = (
   );
 };
 
-export function useProfile() {
-  const currentInboxId = useCurrentInboxId()()!; // We assume if someone goes to this screen we have address
+export function useProfileForCurrentUser() {
+  const currentInboxId = useCurrentInboxId()!;
 
-  const { data: socials } = useProfileSocials(currentAccount);
+  const { data: socials } = useProfileSocials({ inboxId: currentInboxId });
   const currentUserUsername = socials?.userNames?.find((u) => u.isPrimary);
+  const currentEthereumAccount = socials?.cryptoCurrencyWalletAddresses.ETH[0];
 
   const { ephemeralAccount } = useSettingsStore(
     useSelect(["ephemeralAccount"])
@@ -199,14 +202,14 @@ export function useProfile() {
     ""
   );
 
-  const defaultEphemeralUsername = formatEphemeralUsername(
-    currentAccount,
-    usernameWithoutSuffix
-  );
-  const defaultEphemeralDisplayName = formatEphemeralDisplayName(
-    currentAccount,
-    currentUserUsername?.displayName
-  );
+  const defaultEphemeralUsername = formatEphemeralUsername({
+    address: currentEthereumAccount || "",
+    username: usernameWithoutSuffix,
+  });
+  const defaultEphemeralDisplayName = formatEphemeralDisplayName({
+    address: currentEthereumAccount || "",
+    displayName: currentUserUsername?.displayName,
+  });
 
   const [profile, setProfile] = useState<ProfileType>({
     username: ephemeralAccount
@@ -291,6 +294,13 @@ type CreateOrUpdateProfileResponse =
   | CreateOrUpdateProfileError
   | CreateOrUpdateProfileSuccess;
 
+export const getCurrentAddress = () => {
+  const currentClient = getXmtpClientOrThrow({
+    caller: "getCurrentAddress",
+  });
+  return currentClient.address;
+};
+
 export function useCreateOrUpdateProfileInfo() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -300,8 +310,6 @@ export function useCreateOrUpdateProfileInfo() {
       profile: ProfileType;
     }): Promise<CreateOrUpdateProfileResponse> => {
       const { profile } = args;
-
-      const address = getCurrentAccount()!;
 
       if (
         profile.displayName &&
@@ -334,7 +342,11 @@ export function useCreateOrUpdateProfileInfo() {
       setLoading(true);
 
       try {
-        await checkUsernameValid(address, profile.username);
+        await checkUsernameValid({
+          address: getCurrentAddress(),
+          inboxId: getCurrentInboxId()!,
+          username: profile.username,
+        });
       } catch (e: any) {
         logger.error(e, { context: "UserProfile: Checking username valid" });
         setLoading(false);
@@ -360,7 +372,7 @@ export function useCreateOrUpdateProfileInfo() {
 
           try {
             publicAvatar = await uploadFile({
-              account: address,
+              inboxId: getCurrentInboxId()!,
               filePath: resizedImage.uri,
               contentType: "image/jpeg",
             });
@@ -381,10 +393,12 @@ export function useCreateOrUpdateProfileInfo() {
 
       try {
         await claimProfile({
-          account: address,
+          inboxId: getCurrentInboxId()!,
           profile: { ...profile, avatar: publicAvatar },
         });
-        await invalidateProfileSocialsQuery(address, address);
+        await invalidateProfileSocialsQuery({
+          profileLookupInboxId: getCurrentInboxId()!,
+        });
         return { success: true };
       } catch (e: any) {
         logger.error(e, { context: "UserProfile: claiming and refreshing" });

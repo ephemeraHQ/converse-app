@@ -8,7 +8,6 @@ import {
   DmWithCodecsType,
 } from "./client.types";
 import { streamAllMessages } from "./messages";
-import { xmtpClientByInboxId } from "./client";
 import {
   getXmtpClientForCurrentInboxOrThrow,
   getEthereumRecoveryAddressForInboxId,
@@ -303,14 +302,14 @@ export const createDmForPeerInboxId = async (args: {
 };
 
 export const createGroupForCurrentUser = async (args: {
-  peers: string[];
+  peerInboxIds: InboxId[];
   permissionPolicySet: PermissionPolicySet;
   groupName?: string;
   groupPhoto?: string;
   groupDescription?: string;
 }) => {
   const {
-    peers,
+    peerInboxIds,
     permissionPolicySet,
     groupName,
     groupPhoto,
@@ -320,8 +319,17 @@ export const createGroupForCurrentUser = async (args: {
   const client = getXmtpClientForCurrentInboxOrThrow({
     caller: "createGroupForCurrentUser",
   });
+
+  const peerEthereumAddresses = await Promise.all(
+    peerInboxIds.map(async (peerInboxId) =>
+      getEthereumRecoveryAddressForInboxId({
+        inboxId: peerInboxId,
+      })
+    )
+  );
+
   const group = await client.conversations.newGroupCustomPermissions(
-    peers,
+    peerEthereumAddresses,
     permissionPolicySet,
     {
       name: groupName,

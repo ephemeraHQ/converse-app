@@ -8,12 +8,6 @@ import { Alert } from "react-native";
 
 import { ConnectViaWalletPopularWalletsTableView } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletPopularWalletsTableView";
 import { useInstalledWallets } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
-import {
-  getConnectViaWalletTableViewEphemeralItem,
-  getConnectViaWalletTableViewPhoneItem,
-  getConnectViaWalletTableViewPrivateKeyItem,
-  InstalledWalletsTableView,
-} from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletTableViewItems";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
 import { useAccountsStore } from "../../data/store/accountsStore";
@@ -52,7 +46,7 @@ export function OnboardingGetStartedScreen() {
         </OnboardingPictoTitleSubtitle.Subtitle>
       </OnboardingPictoTitleSubtitle.Container>
 
-      <AnimatedVStack
+      {/* <AnimatedVStack
         entering={animation.fadeInDownSlow().delay(animationDelays[3])}
       >
         <TableView
@@ -70,9 +64,9 @@ export function OnboardingGetStartedScreen() {
             }),
           ]}
         />
-      </AnimatedVStack>
+      </AnimatedVStack> */}
 
-      {hasInstalledWallets && (
+      {/* {hasInstalledWallets && (
         <AnimatedVStack
           entering={animation.fadeInDownSlow().delay(animationDelays[4])}
         >
@@ -82,12 +76,10 @@ export function OnboardingGetStartedScreen() {
               Alert.alert("Account already connected");
 
               if (arg.inboxId) {
-                useAccountsStore
-                  .getState()
-                  .setCurrentInboxId({
-                    inboxId: arg.inboxId,
-                    createIfNew: false,
-                  });
+                useAccountsStore.getState().setCurrentInboxId({
+                  inboxId: arg.inboxId,
+                  createIfNew: false,
+                });
               }
               useAuthStore.setState({
                 status: "signedIn",
@@ -101,9 +93,9 @@ export function OnboardingGetStartedScreen() {
             }}
           />
         </AnimatedVStack>
-      )}
+      )} */}
 
-      <AnimatedVStack
+      {/* <AnimatedVStack
         entering={animation.fadeInDownSlow().delay(animationDelays[5])}
       >
         <TableView
@@ -120,15 +112,15 @@ export function OnboardingGetStartedScreen() {
             }),
           ]}
         />
-      </AnimatedVStack>
+      </AnimatedVStack> */}
 
-      {!hasInstalledWallets && (
+      {/* {!hasInstalledWallets && (
         <AnimatedVStack
           entering={animation.fadeInDownSlow().delay(animationDelays[5])}
         >
           <ConnectViaWalletPopularWalletsTableView />
         </AnimatedVStack>
-      )}
+      )} */}
     </OnboardingScreenComp>
   );
 }

@@ -210,7 +210,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
       return items;
     }, [
       colorScheme,
-      currentAccount,
+      currentInboxId,
       currentAccountIsSuperAdmin,
       currentAccountIsAdmin,
       groupPermissionPolicy,

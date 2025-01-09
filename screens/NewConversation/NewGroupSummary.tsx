@@ -55,8 +55,7 @@ export default function NewGroupSummary({
       updateGroupImagePolicy: "allow",
       updateGroupPinnedFrameUrlPolicy: "allow",
     });
-  // const account = useCurrentAccount();
-  const currentInboxId = useCurrentInboxId();
+  const currentInboxId = useCurrentInboxId()!;
   const { photo: groupPhoto, addPhoto: addGroupPhoto } = usePhotoSelect();
   const [
     { remotePhotoUrl, isLoading: isUploadingGroupPhoto },
@@ -119,7 +118,7 @@ export default function NewGroupSummary({
     setCreatingGroup(true);
     try {
       const group = await createGroupForCurrentUser({
-        peers: route.params.members.map((m) => m.peerEthereumAddress),
+        peerInboxIds: route.params.members.map((m) => m.inboxId),
         permissionPolicySet,
         groupName,
         groupPhoto: remotePhotoUrl,
@@ -192,7 +191,7 @@ export default function NewGroupSummary({
   );
 
   const profileQueries = useProfilesSocials({
-    peerInboxIds: route.params.members.map((m) => m),
+    peerInboxIds: route.params.members.map((m) => m.inboxId),
   });
 
   const pendingGroupMembers: {
@@ -261,7 +260,7 @@ export default function NewGroupSummary({
       </List.Section>
       <TableView
         items={route.params.members.map((member) => ({
-          id: member.peerEthereumAddress,
+          id: member.inboxId,
           title: getPreferredName(member),
         }))}
         title={translate("members_title")}

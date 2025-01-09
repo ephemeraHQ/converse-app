@@ -1,6 +1,6 @@
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { QueryKey, useQueries, useQuery } from "@tanstack/react-query";
-import { getProfilesForAddresses, getProfilesForInboxIds } from "@utils/api";
+import { getProfilesForInboxIds } from "@utils/api";
 import {
   create,
   windowedFiniteBatchScheduler,

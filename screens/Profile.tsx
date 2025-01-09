@@ -13,20 +13,16 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import { usePrivySigner } from "@utils/evm/privy";
 import { useXmtpSigner } from "@utils/evm/xmtp";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { sentryTrackError } from "@utils/sentry";
-import { shortAddress } from "@utils/strings/shortAddress";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 import {
   getOtherInstallations,
   revokeOtherInstallations,
 } from "@utils/xmtpRN/revoke";
-import { getOrBuildXmtpClient } from "@utils/xmtpRN/sync";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import React, { memo, useCallback, useMemo, useState } from "react";
 import {
   Alert,
   Platform,
@@ -39,7 +35,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import Avatar from "../components/Avatar";
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import TableView, {
@@ -50,23 +45,16 @@ import {
   TableViewImage,
   TableViewPicto,
 } from "../components/TableView/TableViewImage";
-import config from "../config";
 import {
-  currentAccount,
-  useCurrentAccount,
   useCurrentInboxId,
-  useLoggedWithPrivy,
   useRecommendationsStore,
   useSettingsStore,
-  useWalletStore,
 } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { ExternalWalletPicker } from "../features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "../features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { useGroupMembers } from "../hooks/useGroupMembers";
-import { useGroupPermissionspForCurrentUser } from "../hooks/useGroupPermissionspForCurrentUser";
-import { evmHelpers } from "../utils/evm/helpers";
 import {
   isUserAdminByInboxId,
   isUserSuperAdminByInboxId,
@@ -74,7 +62,6 @@ import {
 import { ConversationNavParams } from "../features/conversation/conversation.nav";
 
 import { getIPFSAssetURI } from "../utils/thirdweb";
-import { refreshBalanceForAccount } from "../utils/wallet";
 import { consentToInboxIdsOnProtocolForCurrentUser } from "../utils/xmtpRN/contacts";
 
 import { Icon } from "@/design-system/Icon/Icon";
@@ -84,8 +71,9 @@ import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
 import { getPreferredName } from "@/utils/profile";
-import { getXmtpClient } from "@/utils/xmtpRN/conversations";
 import { isCurrentUserInboxId } from "@/hooks/use-current-account-inbox-id";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { getXmtpClient } from "@/features/Accounts/accounts.utils";
 
 export default function ProfileScreen() {
   return (
@@ -99,7 +87,7 @@ export default function ProfileScreen() {
 const ExternalWalletPickerWrapper = memo(
   function ExternalWalletPickerWrapper() {
     const peerInboxId = useRoute<"Profile">().params.inboxId;
-    const { data: socials } = useProfileSocials({ peerInboxId });
+    const { data: socials } = useProfileSocials({ inboxId: peerInboxId });
 
     return (
       <ExternalWalletPicker
@@ -116,8 +104,7 @@ function ProfileScreenImpl() {
   const navigation = useRouter();
   const route = useRoute<"Profile">();
 
-  const currentInboxId = useCurrentInboxId();
-  const USDCBalance = useWalletStore((s) => s.USDCBalance);
+  const currentInboxId = useCurrentInboxId()!;
   const colorScheme = useColorScheme();
   const styles = useStyles();
   const [copiedAddresses, setCopiedAddresses] = useState<{
@@ -131,7 +118,7 @@ function ProfileScreenImpl() {
     (s) => s.peersStatus[peerInboxId.toLowerCase()] === "blocked"
   );
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
-  const { data: socials } = useProfileSocials({ peerInboxId });
+  const { data: socials } = useProfileSocials({ inboxId: peerInboxId });
   const preferredUserName = usePreferredName({ inboxId: peerInboxId });
   const preferredAvatarUri = usePreferredAvatarUri({ inboxId: peerInboxId });
   const groupTopic = route.params.fromGroupTopic;
@@ -143,7 +130,7 @@ function ProfileScreenImpl() {
     promoteToAdmin,
     promoteToSuperAdmin,
   } = useGroupMembers({ topic: groupTopic! });
-  const { permissions: groupPermissions } = useGroupPermissionspForCurrentUser(
+  const { permissions: groupPermissions } = useGroupPermissionsForCurrentUser(
     groupTopic!
   );
 
@@ -151,7 +138,6 @@ function ProfileScreenImpl() {
 
   const insets = useSafeAreaInsets();
   const shouldShowError = useShouldShowErrored();
-  const [refreshingBalance, setRefreshingBalance] = useState(false);
 
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore(
@@ -215,7 +201,6 @@ function ProfileScreenImpl() {
     ),
   ];
 
-  const isPrivy = useLoggedWithPrivy();
   const showDisconnectActionSheet = useDisconnectActionSheet({
     inboxId: currentInboxId,
   });
@@ -311,22 +296,6 @@ function ProfileScreenImpl() {
   //   },
   // ];
 
-  if (isPrivy) {
-    balanceItems.push({
-      id: "topUp",
-      title: translate("top_up_your_account"),
-      action: () => {
-        navigation.push("TopUp");
-      },
-      rightView: (
-        <TableViewPicto
-          symbol="chevron.right"
-          color={textSecondaryColor(colorScheme)}
-        />
-      ),
-    });
-  }
-
   const actionsTableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
     if (!isBlockedPeer) {
@@ -343,14 +312,14 @@ function ProfileScreenImpl() {
                   return false;
                 }
                 const params = route.params as ConversationNavParams;
-                return params?.peer === peerInboxId.toLowerCase();
+                return params?.peerInboxId === peerInboxId.toLowerCase();
               });
             if (isPreviouslyInNavStack) {
               navigation.popToTop();
               navigation.navigate({
                 name: "Conversation",
                 params: {
-                  peer: peerInboxId,
+                  peerInboxId,
                 },
               });
             } else {
@@ -681,7 +650,7 @@ function ProfileScreenImpl() {
                 // @todo => check if this is the right timing on split screen / web / android
                 setTimeout(() => {
                   navigation.navigate("Conversation", {
-                    peer: route.params.inboxId,
+                    peerInboxId: route.params.inboxId,
                   });
                 }, 300);
               },
@@ -938,3 +907,8 @@ const useStyles = () => {
     },
   });
 };
+function useGroupPermissionsForCurrentUser(arg0: ConversationTopic): {
+  permissions: any;
+} {
+  throw new Error("Function not implemented.");
+}

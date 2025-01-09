@@ -104,13 +104,13 @@ export default function ConversationListNav() {
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const shouldShowConnecting = useShouldShowConnecting();
   const shouldShowError = useShouldShowErrored();
-  const currentInboxId = useCurrentInboxId();
+  const currentInboxId = useCurrentInboxId()!;
 
   const { isLoading } = useProfileSocialsQuery({
-    peerInboxId: currentInboxId,
+    profileLookupInboxId: currentInboxId,
   });
 
-  const preferredName = usePreferredName(currentAccount);
+  const preferredName = usePreferredName({ inboxId: currentInboxId });
 
   // Delays a little flash of the name when loading, as default is a long ugly address
   const name = isLoading ? "" : preferredName;
@@ -137,7 +137,10 @@ export default function ConversationListNav() {
           ) : (
             <View />
           ),
-        headerBackTitle: getReadableProfile(currentAccount, currentAccount),
+        headerBackTitle: getReadableProfile({
+          inboxId: currentInboxId,
+          profileLookupInboxId: currentInboxId,
+        }),
         headerRight: () => (
           <View style={styles.headerRightContainer}>
             <Button
@@ -162,7 +165,7 @@ export default function ConversationListNav() {
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate("Profile", {
-                  address: currentAccount,
+                  inboxId: currentInboxId,
                 });
               }}
             >
