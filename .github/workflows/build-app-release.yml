@@ -48,6 +48,7 @@ jobs:
           echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> .env.production
           echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> .env.production
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.production
+          echo "EXPO_PUBLIC_TURNKEY_ORG=${{ secrets.EXPO_PUBLIC_TURNKEY_ORG }}" >> .env.production
 
       - name: Update EAS config with env variables
         run: node scripts/Øbuild/eas.js --env production
@@ -91,7 +92,7 @@ jobs:
           echo "EXPO_PUBLIC_PRIVY_APP_ID=${{ secrets.EXPO_PUBLIC_PRIVY_APP_ID }}" >> .env.production
           echo "EXPO_PUBLIC_EVM_RPC_ENDPOINT=${{ secrets.EXPO_PUBLIC_EVM_RPC_ENDPOINT }}" >> .env.production
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.production
-
+          echo "EXPO_PUBLIC_TURNKEY_ORG=${{ secrets.EXPO_PUBLIC_TURNKEY_ORG }}" >> .env.production
       - name: Update EAS config with env variables
         run: node scripts/build/eas.js --env production
 
