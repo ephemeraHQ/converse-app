@@ -54,7 +54,7 @@ export function Recommendation({
     ];
   }
   const textAlign = embedInChat ? "center" : "left";
-  const socials = useProfileSocials({ peerInboxId });
+  const { data: socialsData } = useProfileSocials({ inboxId: peerInboxId });
 
   return (
     <View
@@ -122,7 +122,7 @@ export function Recommendation({
             groupMode={groupMode}
             addToGroup={
               addToGroup
-                ? () => addToGroup({ ...socials, inboxId: peerInboxId })
+                ? () => addToGroup({ ...socialsData, inboxId: peerInboxId })
                 : undefined
             }
           />

@@ -15,12 +15,12 @@ type UseHandleDeleteDmProps = {
   conversation: DmWithCodecsType;
 };
 
-export const useHandleDeleteDm = ({
+export const useHandleDeleteDmForCurrentInbox = ({
   topic,
   preferredName,
   conversation,
 }: UseHandleDeleteDmProps) => {
-  const currentInboxId = useCurrentInboxId();
+  const currentInboxId = useCurrentInboxId()!;
   const { theme } = useAppTheme();
   const colorScheme = theme.isDark ? "dark" : "light";
   const { setTopicsData } = useChatStore(useSelect(["setTopicsData"]));

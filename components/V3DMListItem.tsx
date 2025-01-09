@@ -2,10 +2,9 @@ import {
   resetConversationListContextMenuStore,
   setConversationListContextMenuConversationData,
 } from "@/features/conversation-list/ConversationListContextMenu.store";
-import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
-import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
+import { useDmPeerInboxIdForCurrentUser } from "@/queries/useDmPeerInbox";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
+import { getCurrentInboxId, useChatStore } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { IIconName } from "@design-system/Icon/Icon.types";
 import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
@@ -23,11 +22,12 @@ import { Swipeable } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { useConversationIsUnread } from "../features/conversation-list/hooks/useMessageIsUnread";
 import { useMessageText } from "../features/conversation-list/hooks/useMessageText";
-import { useToggleReadStatusForCurrentUser } from "../features/conversation-list/hooks/useToggleReadStatusForCurrentUser";
 import Avatar from "./Avatar";
 import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
 import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
-import { prefetchConversationMessages } from "@/queries/useConversationMessages";
+import { prefetchConversationMessagesForInboxByTopic } from "@/queries/useConversationMessages";
+import { useToggleReadStatusForCurrentUser } from "@/features/conversation-list/hooks/useToggleReadStatus";
+import { useHandleDeleteDmForCurrentInbox } from "@/features/conversation-list/hooks/useHandleDeleteDm";
 
 type V3DMListItemProps = {
   conversation: DmWithCodecsType;
@@ -45,8 +45,6 @@ const useDisplayInfo = ({ isUnread }: UseDisplayInfoProps) => {
 };
 
 export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
-  const currentInboxId = useCurrentInboxId()()!;
-
   const { name: routeName } = useRoute();
 
   const isBlockedChatView = routeName === "Blocked";
@@ -59,8 +57,7 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
     useSelect(["setPinnedConversations"])
   );
 
-  const { data: peerInboxId } = useDmPeerInboxId({
-    account: currentAccount!,
+  const { data: peerInboxId } = useDmPeerInboxIdForCurrentUser({
     topic,
   });
 
@@ -86,10 +83,9 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
   const toggleReadStatus = useToggleReadStatusForCurrentUser({
     topic,
     isUnread,
-    currentAccount,
   });
 
-  const handleDelete = useHandleDeleteDm({
+  const handleDelete = useHandleDeleteDmForCurrentInbox({
     topic,
     preferredName,
     conversation,
@@ -163,11 +159,14 @@ export const V3DMListItem = ({ conversation }: V3DMListItemProps) => {
   }, [avatarUri, preferredName]);
 
   const onPress = useCallback(() => {
-    prefetchConversationMessages(currentAccount, topic);
+    prefetchConversationMessagesForInboxByTopic({
+      inboxId: getCurrentInboxId()!,
+      topic,
+    });
     navigate("Conversation", {
       topic: topic,
     });
-  }, [topic, currentAccount]);
+  }, [topic]);
 
   const onLeftSwipe = useCallback(() => {
     const translation = ref.current?.state.rowTranslation;

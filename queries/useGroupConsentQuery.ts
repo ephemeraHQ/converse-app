@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { ConsentState, ConversationTopic } from "@xmtp/react-native-sdk";
 
 type IGroupConsentQueryArgs = {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 };
 

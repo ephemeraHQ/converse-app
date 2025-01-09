@@ -1,4 +1,3 @@
-import { useCurrentAccount } from "@/data/store/accountsStore";
 import {
   ConsentPopupButton,
   ConsentPopupButtonsContainer,
@@ -14,6 +13,7 @@ import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers
 import React, { useCallback } from "react";
 import { useColorScheme } from "react-native";
 import { useCurrentConversationTopic } from "../conversation.store-context";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 
 export function GroupConsentPopup() {
   const topic = useCurrentConversationTopic();
@@ -24,9 +24,9 @@ export function GroupConsentPopup() {
 
   const { blockGroup, allowGroup } = useGroupConsent(topic);
 
-  const account = useCurrentAccount()!;
+  const inboxId = useCurrentInboxId()!;
 
-  const { data: groupName } = useGroupNameQuery({ account, topic });
+  const { data: groupName } = useGroupNameQuery({ inboxId, topic });
 
   const onBlock = useCallback(async () => {
     groupRemoveRestoreHandler(

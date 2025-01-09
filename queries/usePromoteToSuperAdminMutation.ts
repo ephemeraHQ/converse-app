@@ -13,7 +13,7 @@ import { useGroupQuery } from "./useGroupQuery";
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const usePromoteToSuperAdminMutation = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => {
   const { inboxId, topic } = args;

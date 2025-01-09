@@ -1,9 +1,8 @@
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-header/conversation-header-title";
 import { usePreferredInboxAddress } from "@/hooks/usePreferredInboxAddress";
-import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
+import { useDmPeerInboxIdForCurrentUser } from "@/queries/useDmPeerInbox";
 import { copyToClipboard } from "@/utils/clipboard";
 import Avatar from "@components/Avatar";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { usePreferredAvatarUri } from "@hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@hooks/usePreferredName";
 import { useProfileSocials } from "@hooks/useProfileSocials";
@@ -17,19 +16,19 @@ type DmConversationTitleProps = {
 };
 
 export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
-  const account = useCurrentAccount()!;
-
   const navigation = useRouter();
 
   const { theme } = useAppTheme();
 
-  const { data: peerInboxId } = useDmPeerInboxId({ account, topic });
+  const { data: peerInboxId } = useDmPeerInboxIdForCurrentUser({
+    topic,
+  });
 
   const peerEthereumAddress = usePreferredInboxAddress(peerInboxId!);
 
   const onPress = useCallback(() => {
     if (peerEthereumAddress) {
-      navigation.push("Profile", { address: peerEthereumAddress });
+      navigation.push("Profile", { inboxId: peerInboxId! });
     }
   }, [navigation, peerEthereumAddress]);
 
@@ -37,11 +36,11 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
     copyToClipboard(JSON.stringify(topic));
   }, [topic]);
 
-  const { isLoading } = useProfileSocials(peerEthereumAddress ?? "");
+  const { isLoading } = useProfileSocials({ inboxId: peerInboxId! });
 
-  const preferredName = usePreferredName(peerEthereumAddress ?? "");
+  const preferredName = usePreferredName({ inboxId: peerInboxId! });
 
-  const preferredAvatarUri = usePreferredAvatarUri(peerEthereumAddress ?? "");
+  const preferredAvatarUri = usePreferredAvatarUri({ inboxId: peerInboxId! });
 
   const displayAvatar = peerEthereumAddress && !isLoading;
   if (!displayAvatar) return null;

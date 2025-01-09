@@ -3,16 +3,15 @@ import logger from "@utils/logger";
 
 import { captureError } from "@/utils/capture-error";
 import { useGroupQuery } from "@queries/useGroupQuery";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { addMemberMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
   invalidateGroupMembersQuery,
 } from "./useGroupMembersQuery";
-// import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const useAddToGroupMutation = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => {
   const { inboxId, topic } = args;

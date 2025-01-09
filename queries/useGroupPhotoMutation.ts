@@ -5,23 +5,23 @@ import {
   useGroupQuery,
 } from "@queries/useGroupQuery";
 import { useMutation } from "@tanstack/react-query";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { setGroupPhotoMutationKey } from "./MutationKeys";
-import { updateConversationInConversationListQuery } from "@/queries/useConversationListForCurrentUserQuery";
+import { updateConversationInConversationListQuery } from "./useConversationListQuery";
 
 type IArgs = {
-  account: string;
+  inboxId: InboxId;
   topic: ConversationTopic;
 };
 
 export function useGroupPhotoMutation(args: IArgs) {
-  const { account, topic } = args;
-  const { data: group } = useGroupQuery({ account, topic });
+  const { inboxId, topic } = args;
+  const { data: group } = useGroupQuery({ inboxId, topic });
 
   return useMutation({
-    mutationKey: setGroupPhotoMutationKey(account, topic),
+    mutationKey: setGroupPhotoMutationKey({ inboxId, topic }),
     mutationFn: async (imageUrlSquare: string) => {
-      if (!group || !account || !topic) {
+      if (!group || !inboxId || !topic) {
         throw new Error("Missing required data in useGroupPhotoMutation");
       }
 
@@ -29,15 +29,15 @@ export function useGroupPhotoMutation(args: IArgs) {
       return imageUrlSquare;
     },
     onMutate: async (imageUrlSquare: string) => {
-      const previousGroup = getGroupQueryData({ account, topic });
+      const previousGroup = getGroupQueryData({ inboxId, topic });
       const updates = { imageUrlSquare };
 
       if (previousGroup) {
-        updateGroupQueryData({ account, topic, updates });
+        updateGroupQueryData({ inboxId, topic, updates });
       }
 
       updateConversationInConversationListQuery({
-        account,
+        inboxId,
         topic,
         conversationUpdate: updates,
       });
@@ -50,9 +50,9 @@ export function useGroupPhotoMutation(args: IArgs) {
       const { previousGroup } = context || {};
 
       const updates = { imageUrlSquare: previousGroup?.imageUrlSquare ?? "" };
-      updateGroupQueryData({ account, topic, updates });
+      updateGroupQueryData({ inboxId, topic, updates });
       updateConversationInConversationListQuery({
-        account,
+        inboxId,
         topic,
         conversationUpdate: updates,
       });

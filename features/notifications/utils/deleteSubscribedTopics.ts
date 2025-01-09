@@ -2,11 +2,7 @@ import logger from "@/utils/logger";
 import { subscribedOnceByInboxId } from "./subscribedOnceByAccount";
 import { subscribingByInboxId } from "./subscribingByAccount";
 
-export const deleteSubscribedTopics = ({
-  inboxId,
-}: {
-  inboxId: string | undefined;
-}) => {
+export const deleteSubscribedTopics = ({ inboxId }: { inboxId: InboxId }) => {
   if (!inboxId) {
     logger.error("No inboxId provided to deleteSubscribedTopics");
     return;

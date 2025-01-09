@@ -1,16 +1,19 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useCurrentAccount } from "../data/store/accountsStore";
+import { useCurrentInboxId } from "../data/store/accountsStore";
 import { useGroupPhotoMutation } from "../queries/useGroupPhotoMutation";
 import { useGroupPhotoQuery } from "../queries/useGroupPhotoQuery";
 
-export const useGroupPhoto = (topic: ConversationTopic) => {
-  const account = useCurrentAccount();
+export const useGroupPhotoForCurrentInbox = (args: {
+  topic: ConversationTopic;
+}) => {
+  const { topic } = args;
+  const inboxId = useCurrentInboxId()!;
   const { data, isLoading, isError } = useGroupPhotoQuery({
-    account: account ?? "",
+    inboxId,
     topic,
   });
   const { mutateAsync } = useGroupPhotoMutation({
-    account: account ?? "",
+    inboxId,
     topic,
   });
 

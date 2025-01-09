@@ -9,7 +9,9 @@ export const dmPeerInboxIdQueryKey = (
   topic: ConversationTopic
 ) => ["dmPeerInboxId", currentInboxId, topic];
 
-export const useDmPeerInboxId = (args: { topic: ConversationTopic }) => {
+export const useDmPeerInboxIdForCurrentUser = (args: {
+  topic: ConversationTopic;
+}) => {
   const { topic } = args;
   const currentInboxId = useCurrentInboxId();
   const { data: conversation } = useConversationQuery({

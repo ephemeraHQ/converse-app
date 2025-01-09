@@ -11,38 +11,32 @@ import { InboxId } from "@xmtp/react-native-sdk";
 import { useCurrentInboxId } from "@/data/store/accountsStore";
 
 type IDmQueryArgs = {
-  ourInboxId: InboxId | undefined;
-  peerInboxId: InboxId | undefined;
+  ourInboxId: InboxId;
+  peerInboxId: InboxId;
 };
 
 type IDmQueryData = Awaited<ReturnType<typeof findDmByPeerInboxId>>;
 
 async function getDm(args: IDmQueryArgs) {
   const { ourInboxId, peerInboxId } = args;
-  if (!ourInboxId || !peerInboxId) {
-    logger.error(
-      "[getDm] Inbox IDs required for both peer and our inbox to get DM"
-    );
-    return undefined;
-  }
-  const conversation = await findDmByPeerInboxId({
+  const dm = await findDmByPeerInboxId({
     forInboxId: ourInboxId,
     peerInboxId,
   });
 
-  // Update the main conversation query because it's a 1-1
+  // Update the main dm query because it's a 1-1
   setConversationQueryData({
     inboxId: ourInboxId,
-    topic: conversation.topic,
-    conversation,
+    topic: dm.topic,
+    conversation: dm,
   });
 
-  return conversation;
+  return dm;
 }
 
 export function useDmQuery(args: IDmQueryArgs) {
   const { peerInboxId } = args;
-  const currentInboxId = useCurrentInboxId();
+  const currentInboxId = useCurrentInboxId()!;
 
   return useQuery({
     queryKey: dmQueryKey({ inboxId: currentInboxId, peerInboxId }),

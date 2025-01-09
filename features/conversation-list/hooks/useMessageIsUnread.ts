@@ -1,10 +1,9 @@
 import { useMemo } from "react";
 import { ChatStoreType } from "@data/store/chatStore";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { useChatStore } from "@data/store/accountsStore";
+import { getCurrentInboxId, useChatStore } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { normalizeTimestamp } from "@/utils/date";
-import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 
 type UseConversationIsUnreadProps = {
   topic: string;
@@ -20,7 +19,7 @@ export const useConversationIsUnread = ({
   timestampNs,
 }: UseConversationIsUnreadProps) => {
   const { topicsData } = useChatStore(useSelect(chatStoreSelectKeys));
-  const currentInboxId = getCurrentUserAccountInboxId();
+  const currentInboxId = getCurrentInboxId()!;
 
   return useMemo(() => {
     // No message means no unread status

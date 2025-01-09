@@ -146,7 +146,7 @@ export const logoutAccount = async ({
   inboxId,
   dropLocalDatabase,
 }: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   dropLocalDatabase: boolean;
 }) => {
   logger.debug(
@@ -228,11 +228,7 @@ export const logoutAccount = async ({
   }, 500);
 };
 
-export const useLogoutFromConverse = ({
-  inboxId,
-}: {
-  inboxId: string | undefined;
-}) => {
+export const useLogoutFromConverse = ({ inboxId }: { inboxId: InboxId }) => {
   const logout = useCallback(
     async ({ dropLocalDatabase = false }: { dropLocalDatabase?: boolean }) => {
       logoutAccount({ inboxId, dropLocalDatabase });

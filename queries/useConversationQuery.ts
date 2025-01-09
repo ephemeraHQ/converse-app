@@ -1,6 +1,6 @@
 import { UseQueryOptions, useQuery } from "@tanstack/react-query";
-import { getConversationByTopicByInboxId } from "@utils/xmtpRN/conversations";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { getConversationByTopicForInboxId } from "@utils/xmtpRN/conversations";
+import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
 import { mutateObjectProperties } from "@/utils/mutate-object-properties";
@@ -9,13 +9,13 @@ import logger from "@/utils/logger";
 export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
 
 type IArgs = {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 };
 
 function getConversation(args: IArgs) {
   const { inboxId, topic } = args;
-  return getConversationByTopicByInboxId({
+  return getConversationByTopicForInboxId({
     inboxId,
     topic,
     includeSync: true,

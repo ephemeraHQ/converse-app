@@ -1,16 +1,20 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { currentAccount } from "../data/store/accountsStore";
+import { getCurrentInboxId } from "@/data/store/accountsStore";
 import { useGroupDescriptionMutation } from "../queries/useGroupDescriptionMutation";
 import { useGroupDescriptionQuery } from "../queries/useGroupDescriptionQuery";
 
-export const useGroupDescription = (topic: ConversationTopic) => {
-  const inboxId = getCurrentInboxId();
+export const useGroupDescriptionForCurrentInbox = ({
+  topic,
+}: {
+  topic: ConversationTopic;
+}) => {
+  const inboxId = getCurrentInboxId()!;
   const { data, isLoading, isError } = useGroupDescriptionQuery({
-    account,
+    inboxId,
     topic,
   });
   const { mutateAsync } = useGroupDescriptionMutation({
-    account,
+    inboxId,
     topic,
   });
 

@@ -228,13 +228,13 @@ technoplato@Michaels-MacBook-Pro converse-app % tree -L 3 -I node_modules
 │   ├── useExistingGroupInviteLink.ts
 │   ├── useGroupConsent.ts
 │   ├── useGroupCreator.ts
-│   ├── useGroupDescription.ts
+│   ├── useGroupDescriptionForCurrentInbox.ts
 │   ├── useGroupId.ts
 │   ├── useGroupMembers.ts
 │   ├── useGroupName.ts
 │   ├── useGroupPendingRequests.ts
-│   ├── useGroupPermissions.ts
-│   ├── useGroupPhoto.ts
+│   ├── useGroupPermissionspForCurrentUser.ts
+│   ├── useGroupPhotoForCurrentInbox.ts
 │   ├── usePhotoSelect.ts
 │   └── useShouldShowErrored.ts
 ├── i18n
@@ -630,5 +630,5 @@ technoplato@Michaels-MacBook-Pro converse-app % tree -L 3 -I node_modules
 └── yarn.lock
 
 150 directories, 478 files
-technoplato@Michaels-MacBook-Pro converse-app % 
+technoplato@Michaels-MacBook-Pro converse-app %
 ```

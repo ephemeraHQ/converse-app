@@ -12,7 +12,7 @@ import {
 } from "./useGroupConsentQuery";
 
 export const useBlockGroupMutation = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => {
   const { inboxId, topic } = args;

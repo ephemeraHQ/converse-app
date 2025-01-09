@@ -18,7 +18,6 @@ import { runOnJS } from "react-native-reanimated";
 import Avatar from "./Avatar";
 import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
 import { GroupAvatarDumb } from "./GroupAvatar";
-import { useGroupConversationListAvatarInfo } from "../features/conversation-list/useGroupConversationListAvatarInfo";
 import { IIconName } from "@design-system/Icon/Icon.types";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useRoute } from "@navigation/useNavigation";
@@ -26,7 +25,7 @@ import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHand
 import { actionSheetColors } from "@styles/colors";
 import { consentToInboxIdsOnProtocolForCurrentUser } from "@utils/xmtpRN/contacts";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { prefetchConversationMessages } from "@queries/useConversationMessages";
+import { prefetchConversationMessagesForInboxByTopic } from "@queries/useConversationMessages";
 import { useMessageText } from "../features/conversation-list/hooks/useMessageText";
 import { useConversationIsUnread } from "../features/conversation-list/hooks/useMessageIsUnread";
 import {
@@ -36,6 +35,7 @@ import {
 import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { useToggleReadStatusForCurrentUser } from "@/features/conversation-list/hooks/useToggleReadStatus";
+import { useGroupConversationListAvatarInfoForCurrentUser } from "@/features/conversation-list/useGroupConversationListAvatarInfo";
 
 type V3GroupConversationListItemProps = {
   group: GroupWithCodecsType;
@@ -72,7 +72,8 @@ const useData = ({ group }: UseDataProps) => {
     timestampNs: timestamp,
   });
 
-  const { memberData } = useGroupConversationListAvatarInfo(group);
+  const { memberData } =
+    useGroupConversationListAvatarInfoForCurrentUser(group);
 
   const toggleReadStatus = useToggleReadStatusForCurrentUser({
     topic,
@@ -140,7 +141,7 @@ const useData = ({ group }: UseDataProps) => {
         title,
         ...actionSheetColors(colorScheme),
       },
-      async (selectedIndex?: number) => {
+      (selectedIndex?: number) => {
         if (selectedIndex !== undefined && selectedIndex < actions.length) {
           actions[selectedIndex]();
         }
@@ -283,7 +284,10 @@ const useUserInteractions = ({
   const currentInboxId = useCurrentInboxId()!;
 
   const onPress = useCallback(() => {
-    prefetchConversationMessages({ inboxId: currentInboxId, topic });
+    prefetchConversationMessagesForInboxByTopic({
+      inboxId: currentInboxId,
+      topic,
+    });
     navigate("Conversation", {
       topic,
     });

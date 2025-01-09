@@ -7,9 +7,8 @@ import { sentryTrackError, sentryTrackMessage } from "@utils/sentry";
 import { reloadAsync } from "expo-updates";
 import { useCallback, useEffect, useRef } from "react";
 
-import { wait } from "../../../utils/general";
 import { createXmtpClientFromSigner } from "../../../utils/xmtpRN/signIn";
-import { connectWithAddress } from "../init-xmtp-client";
+import { connectWithInboxId } from "../init-xmtp-client";
 import { useConnectViaWalletContext } from "./ConnectViaWallet.context";
 import { useConnectViaWalletStore } from "./ConnectViaWallet.store";
 
@@ -51,18 +50,6 @@ export function useInitXmptClient() {
 
     try {
       const signer = connectViewWalletStore.getState().signer!; // We can assume that signer is set at this point
-      const address = connectViewWalletStore.getState().address!; // We can assume that address is set at this point
-      const alreadyV3Db = connectViewWalletStore.getState().alreadyV3Db;
-
-      const waitForClickSignature = async () => {
-        while (!connectViewWalletStore.getState().clickedSignature) {
-          if (abortControllerRef.current.signal.aborted) {
-            return;
-          }
-          logger.debug("[Connect Wallet] Waiting for clicked signature");
-          await wait(1000);
-        }
-      };
 
       logger.debug("[Connect Wallet] starting initXmtpClient");
 
@@ -100,16 +87,23 @@ export function useInitXmptClient() {
         }
       };
 
-      await createXmtpClientFromSigner(
+      const xmtpClientCreationResult = await createXmtpClientFromSigner(
         signer,
         handleInstallationRevoked,
         preAuthenticateToInboxCallback
       );
 
-      logger.debug("[Connect Wallet] Got base64 key, now connecting");
+      if ("error" in xmtpClientCreationResult) {
+        onErrorConnecting({
+          error: xmtpClientCreationResult.error,
+        });
+        return;
+      }
 
-      await connectWithAddress({
-        address,
+      const inboxId = xmtpClientCreationResult.inboxId;
+
+      await connectWithInboxId({
+        inboxId,
       });
 
       logger.info("[Connect Wallet] Successfully logged in using a wallet");

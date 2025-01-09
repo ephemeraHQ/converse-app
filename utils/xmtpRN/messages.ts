@@ -1,6 +1,5 @@
 import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { updateConversationInConversationListQuery } from "@/queries/useConversationListForCurrentUserQuery";
 import { updateConversationQueryData } from "@/queries/useConversationQuery";
 import { invalidateGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
@@ -9,21 +8,20 @@ import logger from "@utils/logger";
 import type {
   ConversationTopic,
   GroupUpdatedContent,
+  InboxId,
 } from "@xmtp/react-native-sdk";
 import { isProd } from "@/utils/getEnv";
-import {
-  ConverseXmtpClientType,
-  DecodedMessageWithCodecsType,
-} from "./client.types";
-import { getXmtpClient } from "./conversations";
+import { DecodedMessageWithCodecsType } from "./client.types";
+import { getXmtpClientOrThrow } from "@/features/Accounts/accounts.utils";
+import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
 
-export const streamAllMessages = async (inboxId: string | undefined) => {
+export const streamAllMessages = async ({ inboxId }: { inboxId: InboxId }) => {
   await stopStreamingAllMessage({ inboxId });
 
-  const client = (await getXmtpClient({
+  const client = getXmtpClientOrThrow({
     inboxId,
     caller: "streamAllMessages",
-  })) as ConverseXmtpClientType;
+  });
 
   logger.info(
     `[XmtpRN] Streaming messages for address=${client.address} inboxId=${inboxId}`
@@ -98,14 +96,14 @@ export const streamAllMessages = async (inboxId: string | undefined) => {
 export const stopStreamingAllMessage = async ({
   inboxId,
 }: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
 }) => {
-  const client = (await getXmtpClient({
+  const client = getXmtpClientOrThrow({
     inboxId,
     caller: "stopStreamingAllMessage",
-  })) as ConverseXmtpClientType;
+  });
   logger.debug(`[XmtpRN] Stopped streaming messages for ${client.address}`);
-  await client.conversations.cancelStreamAllMessages();
+  client.conversations.cancelStreamAllMessages();
 };
 
 export const handleGroupUpdatedMessage = async ({
@@ -113,7 +111,7 @@ export const handleGroupUpdatedMessage = async ({
   topic,
   message,
 }: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
   message: DecodedMessageWithCodecsType;
 }) => {
@@ -138,14 +136,14 @@ export const handleGroupUpdatedMessage = async ({
     }
     if (!!newGroupName) {
       updateConversationQueryData({
-        account,
+        inboxId,
         topic,
         conversationUpdate: {
           name: newGroupName,
         },
       });
       updateConversationInConversationListQuery({
-        account,
+        inboxId,
         topic,
         conversationUpdate: {
           name: newGroupName,
@@ -154,14 +152,14 @@ export const handleGroupUpdatedMessage = async ({
     }
     if (!!newGroupPhotoUrl) {
       updateConversationQueryData({
-        account,
+        inboxId,
         topic,
         conversationUpdate: {
           imageUrlSquare: newGroupPhotoUrl,
         },
       });
       updateConversationInConversationListQuery({
-        account,
+        inboxId,
         topic,
         conversationUpdate: {
           imageUrlSquare: newGroupPhotoUrl,
@@ -170,14 +168,14 @@ export const handleGroupUpdatedMessage = async ({
     }
     if (!!newGroupDescription) {
       updateConversationQueryData({
-        account,
+        inboxId,
         topic,
         conversationUpdate: {
           description: newGroupDescription,
         },
       });
       updateConversationInConversationListQuery({
-        account,
+        inboxId,
         topic,
         conversationUpdate: {
           description: newGroupDescription,
@@ -191,6 +189,6 @@ export const handleGroupUpdatedMessage = async ({
     content.membersRemoved.length === 0 &&
     content.metadataFieldsChanged.length === 0
   ) {
-    invalidateGroupMembersQuery(account, topic);
+    invalidateGroupMembersQuery({ inboxId, topic });
   }
 };

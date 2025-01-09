@@ -96,7 +96,7 @@ export const consentToInboxIdsOnProtocol = async ({
 };
 
 type ConsentToInboxIdsOnProtocolByInboxIdParams = {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   inboxIds: InboxId[];
   consent: ConsentType;
 };
@@ -127,7 +127,7 @@ export const consentToInboxIdsOnProtocolByInboxId = async ({
 };
 
 type ConsentToGroupsOnProtocolParams = {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   groupIds: string[];
   consent: "allow" | "deny";
 };
@@ -192,7 +192,7 @@ export const canMessage = async ({ peer, client }: CanMessageParams) => {
 };
 
 type CanMessageByInboxIdParams = {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   peer: string;
 };
 

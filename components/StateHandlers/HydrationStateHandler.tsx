@@ -1,53 +1,51 @@
 import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
-import { fetchPersistedConversationListQuery } from "@/queries/useConversationListForCurrentUserQuery";
 import logger from "@utils/logger";
 import { useEffect } from "react";
 import { useInboxIdsList } from "@data/store/accountsStore";
 import { useAppStore } from "@data/store/appStore";
-import { getOrBuildXmtpClient } from "@utils/xmtpRN/sync";
 import { getInstalledWallets } from "../Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
+import { fetchPersistedConversationListQuery } from "@/queries/useConversationListQuery";
 
 export default function HydrationStateHandler() {
   // Initial hydration
   useEffect(() => {
     const hydrate = async () => {
       const startTime = new Date().getTime();
-      const accounts = useInboxIdsList();
-      if (accounts.length === 0) {
+      const inboxIds = useInboxIdsList();
+      if (inboxIds.length === 0) {
         // Awaiting before showing onboarding
         await getInstalledWallets(false);
       } else {
-        // note(lustig) I don't think this does anything?
         getInstalledWallets(false);
       }
 
-      // Fetching persisted conversation lists for all accounts
+      // Fetching persisted conversation lists for all inboxIds
       // We may want to fetch only the selected account's conversation list
       // in the future, but this is simple for now, and want to get feedback to really confirm
       logger.debug("[Hydration] Fetching persisted conversation list");
       await Promise.allSettled(
-        accounts.map(async (account) => {
+        inboxIds.map(async (inboxId) => {
           const accountStartTime = new Date().getTime();
           logger.debug(
-            `[Hydration] Fetching persisted conversation list for ${account}`
+            `[Hydration] Fetching persisted conversation list for ${inboxId}`
           );
 
           const results = await Promise.allSettled([
             // This will handle creating the client and setting the conversation list from persistence
-            fetchPersistedConversationListQuery({ account }),
+            fetchPersistedConversationListQuery({ inboxId }),
           ]);
-          prefetchInboxIdQuery({ account });
+          prefetchInboxIdQuery({ inboxId });
 
           const errors = results.filter(
             (result) => result.status === "rejected"
           );
           if (errors.length > 0) {
-            logger.warn(`[Hydration] error for ${account}:`, errors);
+            logger.warn(`[Hydration] error for ${inboxId}:`, errors);
           }
 
           const accountEndTime = new Date().getTime();
           logger.debug(
-            `[Hydration] Done fetching persisted conversation list for ${account} in ${
+            `[Hydration] Done fetching persisted conversation list for ${inboxId} in ${
               (accountEndTime - accountStartTime) / 1000
             } seconds`
           );

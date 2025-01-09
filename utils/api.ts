@@ -1,4 +1,3 @@
-import { TransactionData } from "@components/TransactionPreview/TransactionPreview";
 import type { SimulateAssetChangesResponse } from "alchemy-sdk";
 import { GroupInvite } from "@utils/api.types";
 import axios, { AxiosError } from "axios";
@@ -27,6 +26,7 @@ import {
 } from "./api.constants";
 import { tryGetAppCheckToken } from "./appCheck";
 import { getCurrentInboxId } from "@/data/store/accountsStore";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 export const api = axios.create({
   baseURL: config.apiURI,
@@ -350,7 +350,7 @@ export const saveTopicsData = async ({
   inboxId,
   topicsData,
 }: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topicsData: {
     [topic: string]: TopicData;
   };
@@ -486,7 +486,7 @@ export const getPresignedUriForUpload = async ({
   inboxId,
   contentType,
 }: {
-  inboxId: string;
+  inboxId: InboxId;
   contentType: string;
 }) => {
   const { data } = await api.get("/api/attachment/presigned", {
@@ -585,7 +585,7 @@ export const createGroupInvite = async ({
   inboxId,
   inputs,
 }: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   inputs: {
     groupName: string;
     description?: string;
@@ -620,7 +620,7 @@ export const deleteGroupInvite = async ({
   inboxId,
   inviteId,
 }: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   inviteId: string;
 }): Promise<void> => {
   if (!inboxId) {
@@ -714,26 +714,28 @@ export const getPendingGroupJoinRequests = async ({
 };
 
 export const simulateTransaction = async ({
+  currentSignerAddress,
   inboxId,
-  from,
   chainId,
-  transaction,
+  // transaction,
 }: {
-  inboxId: string;
-  from: string;
+  inboxId: InboxId;
+  currentSignerAddress: string;
   chainId: number;
-  transaction: TransactionData;
+  // transaction: TransactionData;
 }) => {
+  throw new Error("Not implemented");
   const { data } = await api.post(
     "/api/transactions/simulate",
     {
-      address: from,
-      network: `eip155:${chainId}`,
+      address: currentSignerAddress,
+      to: transaction.to,
       value: transaction.value
         ? `0x${BigInt(transaction.value).toString(16)}`
         : undefined,
-      to: transaction.to,
+
       data: transaction.data,
+      network: `eip155:${chainId}`,
     },
     {
       headers: await getXmtpApiHeaders({ inboxId }),

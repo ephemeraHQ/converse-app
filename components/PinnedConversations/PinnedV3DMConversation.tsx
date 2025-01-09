@@ -4,9 +4,8 @@ import {
   resetConversationListContextMenuStore,
   setConversationListContextMenuConversationData,
 } from "@/features/conversation-list/ConversationListContextMenu.store";
-import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
-import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
+import { useDmPeerInboxIdForCurrentUser } from "@/queries/useDmPeerInbox";
 import { useAppTheme } from "@/theme/useAppTheme";
 import Avatar from "@components/Avatar";
 import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
@@ -21,6 +20,7 @@ import { PinnedConversation } from "./PinnedConversation";
 import { PinnedMessagePreview } from "./PinnedMessagePreview";
 import { useToggleReadStatusForCurrentUser } from "@/features/conversation-list/hooks/useToggleReadStatus";
 import { useChatStore } from "@/data/store/accountsStore";
+import { useHandleDeleteDmForCurrentInbox } from "@/features/conversation-list/hooks/useHandleDeleteDm";
 
 type PinnedV3DMConversationProps = {
   conversation: DmWithCodecsType;
@@ -35,7 +35,7 @@ export const PinnedV3DMConversation = ({
 }: PinnedV3DMConversationProps) => {
   const topic = conversation.topic;
 
-  const { data: peerInboxId } = useDmPeerInboxId({
+  const { data: peerInboxId } = useDmPeerInboxIdForCurrentUser({
     topic,
   });
 
@@ -60,7 +60,7 @@ export const PinnedV3DMConversation = ({
     isUnread,
   });
 
-  const handleDelete = useHandleDeleteDm({
+  const handleDelete = useHandleDeleteDmForCurrentInbox({
     topic,
     preferredName,
     conversation,

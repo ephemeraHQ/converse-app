@@ -13,7 +13,7 @@ import { UseQueryResult } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export function useGroupQuery(args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) {
   const { inboxId, topic } = args;
@@ -24,7 +24,7 @@ export function useGroupQuery(args: {
 }
 
 export function getGroupQueryData(args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) {
   const { inboxId, topic } = args;
@@ -34,7 +34,7 @@ export function getGroupQueryData(args: {
 }
 
 export function setGroupQueryData(args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
   group: GroupWithCodecsType;
 }) {
@@ -47,7 +47,7 @@ export function setGroupQueryData(args: {
 }
 
 export function getGroupQueryOptions(args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) {
   const { inboxId, topic } = args;
@@ -55,7 +55,7 @@ export function getGroupQueryOptions(args: {
 }
 
 export function updateGroupQueryData(args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
   updates: Partial<GroupWithCodecsType>;
 }) {

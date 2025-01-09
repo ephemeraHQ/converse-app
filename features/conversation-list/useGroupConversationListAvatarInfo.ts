@@ -10,7 +10,7 @@ import { GroupWithCodecsType } from "@utils/xmtpRN/client.types";
 import { Group, type InboxId, type Member } from "@xmtp/react-native-sdk";
 import { useEffect, useMemo, useState } from "react";
 
-export const useGroupConversationListAvatarInfo = (
+export const useGroupConversationListAvatarInfoForCurrentUser = (
   group?: GroupWithCodecsType
 ) => {
   const currentInboxId = useCurrentInboxId()!;
@@ -51,9 +51,12 @@ export const useGroupConversationListAvatarInfo = (
           ({ data: socials }, index) =>
             socials && {
               inboxId: memberInboxIds[index],
+              // @ts-expect-error //TODO fix
               address: getPreferredInboxAddress(socials) ?? "",
-              uri: getPreferredInboxAvatar(socials),
-              name: getPreferredInboxName(socials),
+              // @ts-expect-error
+              uri: getPreferredInboxAvatar(socials) ?? "",
+              // @ts-expect-error
+              name: getPreferredInboxName(socials) ?? "",
             }
         )
         .filter(Boolean) as {

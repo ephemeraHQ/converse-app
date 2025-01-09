@@ -2,7 +2,7 @@ import { useGroupName } from "@/hooks/useGroupName";
 import { translate } from "@/i18n";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useGroupMembers } from "@hooks/useGroupMembers";
-import { useGroupPermissions } from "@hooks/useGroupPermissions";
+import { useGroupPermissionspForCurrentUser } from "@hooks/useGroupPermissionspForCurrentUser";
 import { textPrimaryColor } from "@styles/colors";
 import {
   isUserAdminByInboxId,
@@ -26,7 +26,7 @@ type GroupScreenNameProps = {
 
 export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
   const styles = useStyles();
-  const { permissions } = useGroupPermissions(topic);
+  const { permissions } = useGroupPermissionspForCurrentUser(topic);
   const currentInboxId = useCurrentInboxId()()!;
   const { updateGroupName, groupName } = useGroupName(topic);
   const formattedGroupName = formatGroupName(topic, groupName);

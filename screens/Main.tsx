@@ -11,14 +11,12 @@ import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStat
 import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
 import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler";
-import WalletsStateHandler from "../components/StateHandlers/WalletsStateHandler";
 import config from "../config";
 import { useAppStore } from "../data/store/appStore";
 import { useAuthStatus } from "../data/store/authStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useThemeProvider } from "../theme/useAppTheme";
 import { useAutoConnectExternalWallet } from "../utils/evm/external";
-import { usePrivyAccessToken } from "../utils/evm/privy";
 import { setConverseNavigatorRef } from "../utils/navigation";
 import { ConversationScreenConfig } from "../features/conversation/conversation.nav";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
@@ -142,7 +140,6 @@ const Initializer = () => {
       )}
       <NetworkStateHandler />
       <ActionSheetStateHandler />
-      <WalletsStateHandler />
     </>
   );
 };

@@ -3,10 +3,8 @@ import { useChatStore, useCurrentInboxId } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { Icon } from "@design-system/Icon/Icon";
 import { useExistingGroupInviteLink } from "@hooks/useExistingGroupInviteLink";
-import { useGroupDescription } from "@hooks/useGroupDescription";
+import { useGroupDescriptionForCurrentInbox } from "@hooks/useGroupDescriptionForCurrentInbox";
 import { useGroupMembers } from "@hooks/useGroupMembers";
-import { useGroupPermissions } from "@hooks/useGroupPermissions";
-import { useGroupPhoto } from "@hooks/useGroupPhoto";
 import { translate } from "@i18n";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {
@@ -42,6 +40,9 @@ import {
   saveInviteIdByGroupId,
 } from "../features/GroupInvites/groupInvites.utils";
 import { captureErrorWithToast } from "@/utils/capture-error";
+import { useGroupPermissionspForCurrentUser } from "@/hooks/useGroupPermissions";
+import { useGroupPhotoForCurrentInbox } from "@/hooks/useGroupPhoto";
+import { useGroupDescriptionQuery } from "@/queries/useGroupDescriptionQuery";
 
 type GroupScreenAdditionProps = {
   topic: ConversationTopic;
@@ -54,7 +55,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
 }) => {
   const colorScheme = useColorScheme();
   const { members } = useGroupMembers({ topic });
-  const currentInboxId = useCurrentInboxId();
+  const currentInboxId = useCurrentInboxId()!;
 
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
@@ -69,7 +70,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
 
   const styles = useStyles();
   const [snackMessage, setSnackMessage] = useState<string | null>(null);
-  const { permissions } = useGroupPermissions(topic);
+  const { permissions } = useGroupPermissionspForCurrentUser({ topic });
   const canAddMember = memberCanUpdateGroup(
     permissions?.addMemberPolicy,
     currentAccountIsAdmin,
@@ -79,8 +80,11 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
     inboxId: currentInboxId,
     topic,
   });
-  const { groupPhoto } = useGroupPhoto(topic);
-  const { groupDescription } = useGroupDescription(topic);
+  const { groupPhoto } = useGroupPhotoForCurrentInbox({ topic });
+  const { data: groupDescription } = useGroupDescriptionQuery({
+    inboxId: currentInboxId,
+    topic,
+  });
 
   const groupInviteLink = useExistingGroupInviteLink(topic);
   const { setGroupInviteLink, deleteGroupInviteLink: deleteLinkFromState } =

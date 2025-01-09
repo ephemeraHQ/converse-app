@@ -13,7 +13,7 @@ import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { captureError } from "@/utils/capture-error";
 
 export const usePromoteToAdminMutation = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => {
   const { inboxId, topic } = args;

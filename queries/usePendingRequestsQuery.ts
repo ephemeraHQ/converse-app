@@ -1,26 +1,28 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
 import { getPendingGroupJoinRequests } from "@utils/api";
 
 import { pendingJoinRequestsQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
+import { InboxId } from "@xmtp/react-native-sdk";
 
-export const usePendingRequestsQuery = () => {
-  const currentInboxId = useCurrentInboxId()() as string;
-
+export const usePendingRequestsQuery = ({ inboxId }: { inboxId: InboxId }) => {
   return useQuery({
-    queryKey: pendingJoinRequestsQueryKey(currentAccount),
+    queryKey: pendingJoinRequestsQueryKey({ inboxId }),
     queryFn: () => {
-      return getPendingGroupJoinRequests(currentAccount);
+      return getPendingGroupJoinRequests({ inboxId });
     },
-    enabled: !!currentAccount,
+    enabled: !!inboxId,
     // This just hits the backend api, we don't need to worry too much about information across the bridge
     staleTime: 1000,
   });
 };
 
-export const invalidatePendingJoinRequestsQuery = (account: string) => {
+export const invalidatePendingJoinRequestsQuery = ({
+  inboxId,
+}: {
+  inboxId: InboxId;
+}) => {
   return queryClient.invalidateQueries({
-    queryKey: pendingJoinRequestsQueryKey(account),
+    queryKey: pendingJoinRequestsQueryKey({ inboxId }),
   });
 };

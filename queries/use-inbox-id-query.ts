@@ -1,6 +1,7 @@
 import { queryClient } from "@/queries/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { getInboxIdFromCryptocurrencyAddress } from "@/utils/xmtpRN/signIn";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 export type IGetInboxIdQueryData = Awaited<
   ReturnType<typeof getInboxIdFromCryptocurrencyAddress>
@@ -35,7 +36,7 @@ export function getInboxIdFromQueryData(args: { account: string }) {
   );
 }
 
-export function prefetchInboxIdQuery(args: { account: string }) {
-  const { account } = args;
-  return queryClient.prefetchQuery(getInboxIdQueryOptions({ account }));
+export function prefetchInboxIdQuery(args: { inboxId: InboxId }) {
+  const { inboxId } = args;
+  return queryClient.prefetchQuery(getInboxIdQueryOptions({ inboxId }));
 }

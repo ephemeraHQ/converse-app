@@ -25,7 +25,7 @@ import {
 } from "./useGroupConsentQuery";
 
 export type AllowGroupMutationProps = {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
   groupId: ConversationId;
 };
@@ -34,7 +34,7 @@ export type AllowGroupMutationVariables = {
   includeAddedBy?: boolean;
   includeCreator?: boolean;
   group: GroupWithCodecsType;
-  inboxId: string | undefined;
+  inboxId: InboxId;
 };
 
 export type IUseAllowGroupMutationOptions = MutationOptions<
@@ -140,7 +140,7 @@ export const createAllowGroupMutationObserver = ({
 };
 
 export const useAllowGroupMutation = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => {
   const { inboxId, topic } = args;

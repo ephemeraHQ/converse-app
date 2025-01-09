@@ -12,7 +12,10 @@ import { awaitableAlert } from "../../utils/alert";
 import logger from "../../utils/logger";
 import { logoutAccount, waitForLogoutTasksDone } from "../../utils/logout";
 import { sentryTrackMessage } from "../../utils/sentry";
-import { createXmtpClientFromSigner } from "../../utils/xmtpRN/signIn";
+import {
+  createXmtpClientFromSigner,
+  getInboxIdFromCryptocurrencyAddress,
+} from "../../utils/xmtpRN/signIn";
 import { getOrBuildXmtpClient } from "../../utils/xmtpRN/sync";
 
 export async function initXmtpClient(args: {
@@ -22,6 +25,10 @@ export async function initXmtpClient(args: {
   pkPath?: string;
 }) {
   const { signer, address, ...restArgs } = args;
+  const inboxId = await getInboxIdFromCryptocurrencyAddress({
+    address,
+    cryptocurrency: "ETH",
+  });
 
   if (!signer || !address) {
     throw new Error("No signer or address");
@@ -36,21 +43,28 @@ export async function initXmtpClient(args: {
       throw new Error("Current installation revoked");
     };
 
-    await createXmtpClientFromSigner(signer, onInstallationRevoked);
+    const xmtpClientCreationResult = await createXmtpClientFromSigner(
+      signer,
+      onInstallationRevoked
+    );
 
-    await connectWithAddress({
+    if ("error" in xmtpClientCreationResult) {
+      throw xmtpClientCreationResult.error;
+    }
+
+    await connectWithInboxId({
+      inboxId,
       address,
       ...restArgs,
     });
   } catch (e) {
-    await logoutAccount(address, false, true, () => {});
+    await logoutAccount({ inboxId, dropLocalDatabase: false });
     logger.error(e);
     throw e;
   }
 }
 
 type IBaseArgs = {
-  address: string;
   inboxId: string;
 };
 
@@ -69,13 +83,13 @@ type IConnectWithAddressKeyArgs =
   | IPrivateKeyArgs
   | IStandardArgs;
 
-export async function connectWithAddress(args: IConnectWithAddressKeyArgs) {
-  const { address, inboxId } = args;
+export async function connectWithInboxId(args: IConnectWithAddressKeyArgs) {
+  const { inboxId } = args;
 
-  logger.debug("In connectWithAddress");
+  logger.debug("In connectWithInboxId");
 
-  if (!address) {
-    sentryTrackMessage("Could not connect because no address");
+  if (!inboxId) {
+    sentryTrackMessage("Could not connect because no inboxId");
     return;
   }
 
@@ -89,7 +103,7 @@ export async function connectWithAddress(args: IConnectWithAddressKeyArgs) {
     await finalizeAccountSetup(args);
     sentryTrackMessage("Connecting done!");
   } catch (e) {
-    logger.error(e, { context: "Onboarding - connectWithAddress" });
+    logger.error(e, { context: "Onboarding - connectWithInboxId" });
     Alert.alert(translate("onboarding_error"));
     throw e;
   }
@@ -105,7 +119,7 @@ async function performLogoutAndSaveKey() {
 async function finalizeAccountSetup(args: IConnectWithAddressKeyArgs) {
   logger.debug("Finalizing account setup");
 
-  const { address, inboxId } = args;
+  const { inboxId } = args;
 
   useAccountsStore.getState().setCurrentInboxId({
     inboxId,
@@ -119,8 +133,6 @@ async function finalizeAccountSetup(args: IConnectWithAddressKeyArgs) {
   if ("pkPath" in args) {
     getWalletStore({ inboxId }).getState().setPrivateKeyPath(args.pkPath);
   }
-
-  await prefetchInboxIdQuery({ account: address });
 
   getOrBuildXmtpClient({ account: address });
 

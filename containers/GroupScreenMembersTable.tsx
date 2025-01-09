@@ -1,15 +1,10 @@
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
-import {
-  useCurrentAccount,
-  useCurrentInboxId,
-} from "@data/store/accountsStore";
+import { useCurrentInboxId } from "@data/store/accountsStore";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { translate } from "@i18n";
 import { actionSheetColors, textSecondaryColor } from "@styles/colors";
 import {
-  getAccountIsAdmin,
-  getAccountIsSuperAdmin,
   isUserAdminByInboxId,
   isUserSuperAdminByInboxId,
 } from "@utils/groupUtils/adminUtils";
@@ -41,7 +36,7 @@ type GroupScreenMembersTableProps = {
 export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
   ({ topic, group }) => {
     const colorScheme = useColorScheme();
-    const currentInboxId = useCurrentInboxId();
+    const currentInboxId = useCurrentInboxId()!;
     const styles = useStyles();
     const { data: members } = useGroupMembersConversationScreenQuery({
       inboxId: currentInboxId,
@@ -73,6 +68,11 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
         const memberId = members?.ids[index];
         if (!memberId) return;
         // todo(lustig) figure out what the hell our issue around profile socials typing is
+        /**
+         * Type 'IProfileSocials | IProfileSocials[] | null | undefined' is not assignable to type 'IProfileSocials[] | null | undefined'.
+  Type 'IProfileSocials' is missing the following properties from type 'IProfileSocials[]': length, pop, push, concat, and 35 more.ts(23
+         */
+        // @ts-expect-error
         profileMap[memberId] = socials;
       });
       return profileMap;

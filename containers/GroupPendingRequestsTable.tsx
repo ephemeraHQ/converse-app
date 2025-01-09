@@ -1,6 +1,5 @@
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupPendingRequests } from "@hooks/useGroupPendingRequests";
 import { usePreferredNames } from "@hooks/usePreferredNames";
 import { translate } from "@i18n";
@@ -15,6 +14,7 @@ import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 
 type GroupPendingRequestsTableProps = {
   topic: ConversationTopic;
@@ -24,16 +24,16 @@ export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
   topic,
 }) => {
   const colorScheme = useColorScheme();
-  const currentInboxId = useCurrentInboxId()() as string;
+  const currentInboxId = useCurrentInboxId()!;
   const styles = useStyles();
   const requests = useGroupPendingRequests(topic);
 
   const addresses = useMemo(() => requests.map((a) => a[0]), [requests]);
   const preferredNames = usePreferredNames(addresses);
-  const { mutateAsync: addToGroup } = useAddToGroupMutation(
-    currentAccount,
-    topic
-  );
+  const { mutateAsync: addToGroup } = useAddToGroupMutation({
+    inboxId: currentInboxId,
+    topic,
+  });
 
   const tableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
@@ -66,20 +66,25 @@ export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
                 case 0:
                   // approve
                   await addToGroup([address]);
-                  await updateGroupJoinRequestStatus(
-                    currentAccount,
-                    request.id,
-                    "ACCEPTED"
-                  );
-                  invalidatePendingJoinRequestsQuery(currentAccount);
+                  await updateGroupJoinRequestStatus({
+                    inboxId: currentInboxId,
+                    groupJoinRequestId: request.id,
+                    status: "ACCEPTED",
+                  });
+                  invalidatePendingJoinRequestsQuery({
+                    inboxId: currentInboxId,
+                  });
                   break;
                 case 1:
                   // deny
-                  await updateGroupJoinRequestStatus(
-                    currentAccount,
-                    request.id,
-                    "REJECTED"
-                  );
+                  await updateGroupJoinRequestStatus({
+                    inboxId: currentInboxId,
+                    groupJoinRequestId: request.id,
+                    status: "REJECTED",
+                  });
+                  invalidatePendingJoinRequestsQuery({
+                    inboxId: currentInboxId,
+                  });
                   break;
                 default:
               }
@@ -101,7 +106,7 @@ export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
   }, [
     addToGroup,
     colorScheme,
-    currentAccount,
+    currentInboxId,
     preferredNames,
     requests,
     styles.adminText,

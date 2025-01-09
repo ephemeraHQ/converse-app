@@ -1,9 +1,8 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
-import { useCurrentAccount } from "@/data/store/accountsStore";
 import { useRouter } from "@/navigation/useNavigation";
 import { useDmConsentMutation } from "@/queries/useDmConsentMutation";
-import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
+import { useDmPeerInboxIdForCurrentUser } from "@/queries/useDmPeerInbox";
 import { actionSheetColors } from "@/styles/colors";
 import { captureError, captureErrorWithToast } from "@/utils/capture-error";
 import { ensureError } from "@/utils/error";
@@ -24,10 +23,8 @@ import {
 export function DmConsentPopup() {
   const topic = useCurrentConversationTopic();
   const conversationId = useConversationCurrentConversationId();
-  const currentInboxId = useCurrentInboxId()()!;
 
-  const { data: peerInboxId } = useDmPeerInboxId({
-    account: currentAccount,
+  const { data: peerInboxId } = useDmPeerInboxIdForCurrentUser({
     topic,
   });
 

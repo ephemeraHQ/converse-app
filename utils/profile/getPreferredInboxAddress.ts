@@ -7,7 +7,7 @@ import { type IProfileSocials } from "@/features/profiles/profile-types";
  * @returns The preferred address for the inbox.
  */
 export function getPreferredInboxAddress(
-  socialsArray: IProfileSocials[] | undefined | null
+  socialsArray: IProfileSocials | undefined | null
 ): string | undefined {
   const socials = socialsArray?.[0];
   return socials?.address;

@@ -1,4 +1,4 @@
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 
 export enum QueryKeys {
   // Conversations
@@ -34,71 +34,71 @@ export const conversationsQueryKey = (args: { inboxId?: string }) => [
 ];
 
 export const conversationQueryKey = (args: {
-  inboxId?: string;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => [QueryKeys.CONVERSATION, args.inboxId, args.topic];
 
 export const dmQueryKey = (args: {
-  inboxId?: string;
-  peerInboxId?: string;
+  inboxId: InboxId;
+  peerInboxId: InboxId;
 }) => [QueryKeys.CONVERSATION_DM, args.inboxId, args.peerInboxId];
 
 // Messages
 export const conversationMessageQueryKey = (args: {
-  inboxId?: string;
+  inboxId: InboxId;
   messageId: string;
 }) => [QueryKeys.CONVERSATION_MESSAGE, args.inboxId, args.messageId];
 
 export const conversationMessagesQueryKey = (args: {
-  inboxId?: string;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => [QueryKeys.CONVERSATION_MESSAGES, args.inboxId, args.topic];
 
 export const conversationPreviewMessagesQueryKey = (args: {
-  inboxId?: string;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => [QueryKeys.CONVERSATION_MESSAGES, args.inboxId, args.topic];
 
 // Members
 export const groupMembersQueryKey = (args: {
-  inboxId?: string;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => [QueryKeys.GROUP_MEMBERS, args.inboxId, args.topic];
 
 // Group Mutable Metadata
 export const groupPinnedFrameQueryKey = (args: {
-  inboxId?: string;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => [QueryKeys.PINNED_FRAME, args.inboxId, args.topic];
 
 export const groupPermissionPolicyQueryKey = (args: {
-  inboxId?: string;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => [QueryKeys.GROUP_PERMISSION_POLICY, args.inboxId, args.topic];
 
 export const groupCreatorQueryKey = (args: {
-  inboxId?: string;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => [QueryKeys.GROUP_CREATOR, args.inboxId, args.topic];
 
 // Permissions
 export const groupPermissionsQueryKey = (args: {
-  inboxId?: string;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => [QueryKeys.GROUP_PERMISSIONS, args.inboxId, args.topic];
 
 // Group Invites
 export const groupInviteQueryKey = (args: {
-  inboxId?: string;
+  inboxId: InboxId;
   inviteId: string;
 }) => [QueryKeys.GROUP_INVITE, args.inboxId, args.inviteId];
 
 export const groupJoinRequestQueryKey = (args: {
-  inboxId?: string;
+  inboxId: InboxId;
   requestId: string;
 }) => [QueryKeys.GROUP_JOIN_REQUEST, args.inboxId, args.requestId];
 
-export const pendingJoinRequestsQueryKey = (args: { inboxId?: string }) => [
+export const pendingJoinRequestsQueryKey = (args: { inboxId: InboxId }) => [
   QueryKeys.PENDING_JOIN_REQUESTS,
   args.inboxId,
 ];

@@ -65,7 +65,7 @@ import { useSelect } from "../data/store/storeHelpers";
 import { ExternalWalletPicker } from "../features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "../features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { useGroupMembers } from "../hooks/useGroupMembers";
-import { useGroupPermissions } from "../hooks/useGroupPermissions";
+import { useGroupPermissionspForCurrentUser } from "../hooks/useGroupPermissionspForCurrentUser";
 import { evmHelpers } from "../utils/evm/helpers";
 import {
   isUserAdminByInboxId,
@@ -143,7 +143,9 @@ function ProfileScreenImpl() {
     promoteToAdmin,
     promoteToSuperAdmin,
   } = useGroupMembers({ topic: groupTopic! });
-  const { permissions: groupPermissions } = useGroupPermissions(groupTopic!);
+  const { permissions: groupPermissions } = useGroupPermissionspForCurrentUser(
+    groupTopic!
+  );
 
   const { getXmtpSigner } = useXmtpSigner();
 

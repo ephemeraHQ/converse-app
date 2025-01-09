@@ -80,7 +80,7 @@ export const createXmtpClientFromSigner = async (
 
   if (client.inboxId !== inboxId) {
     // how the hell would this happen?
-    throw new Error("Inbox ids don't match");
+    return { error: new Error("Inbox ids don't match") };
   }
 
   // In case we're logging with an existing libxmtp database, make sure

@@ -87,7 +87,7 @@ export function refetchConversationListQuery(args: { inboxId: string }) {
 }
 
 export const addConversationToConversationListQuery = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   conversation: ConversationWithCodecsType;
 }) => {
   const { inboxId, conversation } = args;
@@ -118,7 +118,7 @@ export const addConversationToConversationListQuery = (args: {
 };
 
 export const updateConversationInConversationListQuery = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
   conversationUpdate: Partial<ConversationWithCodecsType>;
 }) => {
@@ -137,9 +137,7 @@ export const updateConversationInConversationListQuery = (args: {
   setConversationListQueryData({ inboxId, conversations: newConversations });
 };
 
-export const getConversationListQueryData = (args: {
-  inboxId: string | undefined;
-}) => {
+export const getConversationListQueryData = (args: { inboxId: InboxId }) => {
   const { inboxId } = args;
   return queryClient.getQueryData<ConversationListQueryData>(
     conversationListQueryConfig({
@@ -150,7 +148,7 @@ export const getConversationListQueryData = (args: {
 };
 
 export const setConversationListQueryData = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   conversations: ConversationListQueryData;
 }) => {
   const { inboxId, conversations } = args;
@@ -167,7 +165,7 @@ export const setConversationListQueryData = (args: {
 };
 
 const getConversationList = async (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   context: string;
   includeSync?: boolean;
 }) => {
@@ -239,7 +237,7 @@ const getConversationList = async (args: {
 };
 
 export const conversationListQueryConfig = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   context: string;
   includeSync?: boolean;
 }) => {

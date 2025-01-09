@@ -1,20 +1,27 @@
 import RNFetchBlob from "rn-fetch-blob";
 
 import { getPresignedUriForUpload } from "../api";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 export const uploadFile = async ({
   inboxId,
   filePath,
   contentType,
 }: {
-  inboxId?: string | undefined;
-  filePath?: string | undefined;
-  contentType?: string | undefined;
+  inboxId: InboxId;
+  filePath?: string;
+  contentType?: string;
 }) => {
   if (!filePath) {
     throw new Error("filePath needed to upload file from mobile");
   }
-  const { url } = await getPresignedUriForUpload(inboxId, contentType);
+  if (!contentType) {
+    throw new Error("contentType needed to upload file from mobile");
+  }
+  const { url } = await getPresignedUriForUpload({
+    inboxId,
+    contentType,
+  });
   await RNFetchBlob.fetch(
     "PUT",
     url,

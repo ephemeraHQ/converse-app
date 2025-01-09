@@ -15,7 +15,7 @@ import { captureError } from "@/utils/capture-error";
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const useRevokeSuperAdminMutation = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => {
   const { inboxId, topic } = args;

@@ -10,17 +10,14 @@ import {
   xmtpClientByInboxId,
 } from "./client";
 import { ConverseXmtpClientType } from "./client.types";
-import {
-  stopStreamingConversations,
-  streamConversations,
-} from "./conversations";
+import { stopStreamingConversations } from "./conversations";
 import { stopStreamingAllMessage, streamAllMessages } from "./messages";
+import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
+import { getInboxIdFromCryptocurrencyAddress } from "./signIn";
 import {
   fetchPersistedConversationListQuery,
   prefetchConversationListQuery,
-} from "@/queries/useConversationListForCurrentUserQuery";
-import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
-import { getInboxIdFromCryptocurrencyAddress } from "./signIn";
+} from "@/queries/useConversationListQuery";
 
 const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;

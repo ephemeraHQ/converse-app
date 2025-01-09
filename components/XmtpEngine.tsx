@@ -8,7 +8,6 @@ import {
 } from "react-native";
 
 import {
-  useInboxIdsList,
   getChatStore,
   useAccountsStore,
   getInboxIdsList,
@@ -44,15 +43,15 @@ class XmtpEngine {
     this.hydrationDone = hydrationDone;
     this.accountsStoreSubscription = useAccountsStore.subscribe(
       (state, previousState) => {
-        if (!previousState?.accounts || !state?.accounts) return;
-        if (previousState.accounts !== state.accounts) {
-          const previousAccounts = new Set(previousState.accounts);
-          const newAccounts = new Set(state.accounts);
-          const accountsToSync = [...newAccounts].filter(
-            (account) => !previousAccounts.has(account)
+        if (!previousState?.inboxIds || !state?.inboxIds) return;
+        if (previousState.inboxIds !== state.inboxIds) {
+          const inboxIds = new Set(previousState.inboxIds);
+          const newInboxIds = new Set(state.inboxIds);
+          const inboxIdsToSync = [...newInboxIds].filter(
+            (inboxId) => !inboxIds.has(inboxId)
           );
-          if (accountsToSync.length > 0) {
-            this.syncAccounts(accountsToSync);
+          if (inboxIdsToSync.length > 0) {
+            this.syncAccounts({ inboxIdsToSync });
           }
         }
       }
@@ -99,19 +98,19 @@ class XmtpEngine {
     logger.debug(
       `[XmtpEngine]  Internet reachability changed: ${isInternetReachable}`
     );
-    this.syncAccounts(useInboxIdsList());
+    this.syncAccounts({ inboxIdsToSync: getInboxIdsList() });
   }
 
   onHydrationDone(hydrationDone: boolean) {
     logger.debug(`[XmtpEngine] Hydration done changed: ${hydrationDone}`);
-    this.syncAccounts(useInboxIdsList());
+    this.syncAccounts({ inboxIdsToSync: getInboxIdsList() });
   }
 
   onAppFocus() {
     logger.debug("[XmtpEngine] App is now active, reconnecting db connections");
     if (this.hydrationDone) {
       if (this.isInternetReachable) {
-        this.syncAccounts(useInboxIdsList());
+        this.syncAccounts({ inboxIdsToSync: getInboxIdsList() });
       }
     }
   }
@@ -128,21 +127,21 @@ class XmtpEngine {
     }
   }
 
-  async syncAccounts(accountsToSync: string[]) {
-    accountsToSync.forEach((a) => {
-      if (!this.syncingAccounts[a]) {
-        logger.info(`[XmtpEngine] Syncing account ${a}`);
-        getTopicsData(a).then((topicsData) => {
-          getChatStore(a).getState().setTopicsData(topicsData, true);
+  async syncAccounts({ inboxIdsToSync }: { inboxIdsToSync: string[] }) {
+    inboxIdsToSync.forEach((inboxId) => {
+      if (!this.syncingAccounts[inboxId]) {
+        logger.info(`[XmtpEngine] Syncing account ${inboxId}`);
+        getTopicsData({ inboxId }).then((topicsData) => {
+          getChatStore({ inboxId }).getState().setTopicsData(topicsData, true);
         });
-        this.syncedAccounts[a] = true;
-        this.syncingAccounts[a] = true;
-        syncConversationListXmtpClient(a)
+        this.syncedAccounts[inboxId] = true;
+        this.syncingAccounts[inboxId] = true;
+        syncConversationListXmtpClient({ inboxId })
           .then(() => {
-            this.syncingAccounts[a] = false;
+            this.syncingAccounts[inboxId] = false;
           })
           .catch(() => {
-            this.syncingAccounts[a] = false;
+            this.syncingAccounts[inboxId] = false;
           });
       }
     });

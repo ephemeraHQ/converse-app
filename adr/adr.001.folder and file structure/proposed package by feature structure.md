@@ -213,13 +213,13 @@ converse-app/
 │   │   │   ├── useExistingGroupInviteLink.ts
 │   │   │   ├── useGroupConsent.ts
 │   │   │   ├── useGroupCreator.ts
-│   │   │   ├── useGroupDescription.ts
+│   │   │   ├── useGroupDescriptionForCurrentInbox.ts
 │   │   │   ├── useGroupId.ts
 │   │   │   ├── useGroupMembers.ts
 │   │   │   ├── useGroupName.ts
 │   │   │   ├── useGroupPendingRequests.ts
-│   │   │   ├── useGroupPermissions.ts
-│   │   │   ├── useGroupPhoto.ts
+│   │   │   ├── useGroupPermissionspForCurrentUser.ts
+│   │   │   ├── useGroupPhotoForCurrentInbox.ts
 │   │   │   └── useGroupHooks.ts
 │   │   ├── utils/
 │   │   │   ├── groupUtils/

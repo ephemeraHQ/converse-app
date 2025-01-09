@@ -2,8 +2,7 @@ import { PinnedConversation } from "./PinnedConversation";
 import { useCallback, useMemo } from "react";
 import { navigate } from "@utils/navigation";
 import Avatar from "@components/Avatar";
-import { useGroupConversationListAvatarInfo } from "@features/conversation-list/useGroupConversationListAvatarInfo";
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
+import { useChatStore } from "@data/store/accountsStore";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import {
@@ -12,14 +11,15 @@ import {
 } from "@/features/conversation-list/ConversationListContextMenu.store";
 import { translate } from "@/i18n";
 import { useSelect } from "@/data/store/storeHelpers";
-import { useHandleDeleteGroup } from "@/features/conversation-list/hooks/useHandleDeleteGroup";
-import { useToggleReadStatusForCurrentUser } from "@/features/conversation-list/hooks/useToggleReadStatusForCurrentUser";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ContextMenuIcon, ContextMenuItem } from "../ContextMenuItems";
 import { isTextMessage } from "../../features/conversation/conversation-message/conversation-message.utils";
 import { VStack } from "@/design-system/VStack";
 import { PinnedMessagePreview } from "./PinnedMessagePreview";
+import { useToggleReadStatusForCurrentUser } from "@/features/conversation-list/hooks/useToggleReadStatus";
+import { useGroupConversationListAvatarInfoForCurrentUser } from "@/features/conversation-list/useGroupConversationListAvatarInfo";
+import { useHandleDeleteGroupForCurrentInbox } from "@/features/conversation-list/hooks/useHandleDeleteGroup";
 
 type PinnedV3GroupConversationProps = {
   group: GroupWithCodecsType;
@@ -32,14 +32,10 @@ const closeContextMenu = () => {
 export const PinnedV3GroupConversation = ({
   group,
 }: PinnedV3GroupConversationProps) => {
-  const currentInboxId = useCurrentInboxId()()!;
-
   const topic = group.topic;
 
-  const { memberData } = useGroupConversationListAvatarInfo(
-    currentAccount!,
-    group
-  );
+  const { memberData } =
+    useGroupConversationListAvatarInfoForCurrentUser(group);
 
   const { setPinnedConversations } = useChatStore(
     useSelect(["setPinnedConversations"])
@@ -58,10 +54,9 @@ export const PinnedV3GroupConversation = ({
   const toggleReadStatus = useToggleReadStatusForCurrentUser({
     topic,
     isUnread,
-    currentAccount,
   });
 
-  const handleDelete = useHandleDeleteGroup(group);
+  const handleDelete = useHandleDeleteGroupForCurrentInbox(group);
 
   const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     return [

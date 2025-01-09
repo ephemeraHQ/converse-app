@@ -82,7 +82,10 @@ export function useInitConnectViaWalletState(args: { address: string }) {
 
         setIsInitializing(true);
 
-        const inboxId = await getInboxIdFromCryptocurrencyAddress(address);
+        const inboxId = await getInboxIdFromCryptocurrencyAddress({
+          address,
+          cryptocurrency: "ETH",
+        });
 
         const v3Dbs = await getDatabaseFilesForInboxId(inboxId);
         const hasV3 = v3Dbs.filter((n) => n.name.endsWith(".db3")).length > 0;

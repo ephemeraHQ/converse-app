@@ -19,13 +19,11 @@ import {
 } from "react-native";
 
 import { Recommendation } from "./Recommendation";
-import config from "@config";
 import {
   useCurrentInboxId,
   useRecommendationsStore,
 } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
-import { useRouter } from "@navigation/useNavigation";
 import { refreshRecommendationsForInboxId } from "@utils/recommendations";
 import ActivityIndicator from "@components/ActivityIndicator/ActivityIndicator";
 import { translate } from "@/i18n";
@@ -45,10 +43,6 @@ export default function Recommendations({
   addToGroup?: (member: IProfileSocials & { inboxId: string }) => void;
   showTitle?: boolean;
 }) {
-  const navigation = useRouter();
-
-  // const userAddress = useCurrentAccount();
-  // const currentAccount = useAccountsStore((s) => s.currentAccount);
   const currentInboxId = useCurrentInboxId();
   const {
     frens,
@@ -72,15 +66,6 @@ export default function Recommendations({
       "https://converseapp.notion.site/Converse-MM-signals-af014ca135c04ce1aae362e536712461?pvs=4"
     );
   }, []);
-
-  const contactPol = useCallback(() => {
-    navigation.popToTop();
-    setTimeout(() => {
-      navigation.navigate("Conversation", {
-        peer: config.contactAddress,
-      });
-    }, 300);
-  }, [navigation]);
 
   const [viewableItems, setViewableItems] = useState<{ [key: string]: true }>(
     {}
@@ -201,9 +186,6 @@ export default function Recommendations({
             {translate("recommendations.signal_list")}
           </Text>
           {translate("recommendations.please_feel_free_to")}
-          <Text style={styles.clickableText} onPress={contactPol}>
-            {translate("recommendations.contact_pol")}
-          </Text>{" "}
           {translate("recommendations.if_you_want_us_to_add_anything")}
         </Text>
       </>

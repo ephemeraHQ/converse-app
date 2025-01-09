@@ -19,7 +19,7 @@ import {
 import { conversationMessagesQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
 import { getConversationQueryData } from "./useConversationQuery";
-import { getConversationByTopicByInboxId } from "@/utils/xmtpRN/conversations";
+import { getConversationByTopicForInboxId } from "@/utils/xmtpRN/conversations";
 
 export type ConversationMessagesQueryData = Awaited<
   ReturnType<typeof conversationMessagesQueryFn>
@@ -49,13 +49,13 @@ export const conversationMessagesQueryFn = async (
 };
 
 const conversationMessagesByTopicQueryFn = async (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
   includeSync: boolean;
 }) => {
   const { inboxId, topic, includeSync } = args;
   logger.info("[useConversationMessages] queryFn fetching messages by topic");
-  const conversation = await getConversationByTopicByInboxId({
+  const conversation = await getConversationByTopicForInboxId({
     inboxId,
     topic,
     includeSync,
@@ -70,7 +70,7 @@ const conversationMessagesByTopicQueryFn = async (args: {
 
 export const useConversationMessages = (
   args: {
-    inboxId: string | undefined;
+    inboxId: InboxId;
     topic: ConversationTopic;
   } & {
     includeSync: boolean;
@@ -96,7 +96,7 @@ export const useConversationMessages = (
 
 export const getConversationMessagesQueryData = (
   args: {
-    inboxId: string | undefined;
+    inboxId: InboxId;
     topic: ConversationTopic;
   } & {
     includeSync: boolean;
@@ -114,7 +114,7 @@ export const getConversationMessagesQueryData = (
 
 export function refetchConversationMessages(
   args: {
-    inboxId: string | undefined;
+    inboxId: InboxId;
     topic: ConversationTopic;
   } & {
     includeSync: boolean;
@@ -132,7 +132,7 @@ export function refetchConversationMessages(
 }
 
 export const addConversationMessage = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
   message: DecodedMessageWithCodecsType;
 }) => {
@@ -151,8 +151,8 @@ export const addConversationMessage = (args: {
   );
 };
 
-export const prefetchConversationMessages = async (args: {
-  inboxId: string | undefined;
+export const prefetchConversationMessagesForInboxByTopic = async (args: {
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => {
   const { inboxId, topic } = args;
@@ -167,7 +167,7 @@ export const prefetchConversationMessages = async (args: {
 };
 
 function getConversationMessagesQueryOptions(args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
   includeSync: boolean;
 }): UseQueryOptions<ConversationMessagesQueryData> {
@@ -315,7 +315,7 @@ type IOptimisticMessage = {
 export function replaceOptimisticMessageWithReal(args: {
   tempId: string;
   topic: ConversationTopic;
-  inboxId: string | undefined;
+  inboxId: InboxId;
   message: DecodedMessageWithCodecsType;
 }) {
   const { tempId, topic, inboxId, message } = args;

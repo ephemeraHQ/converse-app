@@ -35,7 +35,7 @@ const fetchGroupMembers = async (
 };
 
 type IGroupMembersQueryConfig = {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   group: GroupWithCodecsType | undefined | null;
   queryOptions?: Partial<UseQueryOptions<GroupMembersSelectData>>;
 };
@@ -55,7 +55,7 @@ const groupMembersQueryConfig = (
 };
 
 export const useGroupMembersQuery = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
   queryOptions?: Partial<UseQueryOptions<GroupMembersSelectData>>;
 }) => {
@@ -67,7 +67,7 @@ export const useGroupMembersQuery = (args: {
 };
 
 export const useGroupMembersConversationScreenQuery = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => {
   const { inboxId, topic } = args;
@@ -91,7 +91,7 @@ export const useConversationListMembersQuery = (args: {
 };
 
 export const getGroupMembersQueryData = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }): GroupMembersSelectData | undefined => {
   if (!args.inboxId) {
@@ -102,7 +102,7 @@ export const getGroupMembersQueryData = (args: {
 
 export const setGroupMembersQueryData = (
   args: {
-    inboxId: string | undefined;
+    inboxId: InboxId;
     topic: ConversationTopic;
   },
   members: GroupMembersSelectData,
@@ -119,7 +119,7 @@ export const setGroupMembersQueryData = (
 };
 
 export const cancelGroupMembersQuery = async (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => {
   if (!args.inboxId) {
@@ -131,7 +131,7 @@ export const cancelGroupMembersQuery = async (args: {
 };
 
 export const invalidateGroupMembersQuery = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => {
   if (!args.inboxId) {

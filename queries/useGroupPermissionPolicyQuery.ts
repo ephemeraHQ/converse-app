@@ -4,7 +4,7 @@ import { groupPermissionPolicyQueryKey } from "./QueryKeys";
 import { useGroupQuery } from "./useGroupQuery";
 
 export const useGroupPermissionPolicyQuery = (args: {
-  inboxId: string | undefined;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => {
   const { inboxId, topic } = args;
