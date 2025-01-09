@@ -7,8 +7,9 @@ import { type IProfileSocials } from "@/features/profiles/profile-types";
  * @returns The preferred address for the inbox.
  */
 export function getPreferredInboxAddress(
+  // todo(lustig) more of this socials typing issues
   socialsArray: IProfileSocials | undefined | null
 ): string | undefined {
-  const socials = socialsArray?.[0];
-  return socials?.address;
+  const socials = socialsArray?.cryptoCurrencyWalletAddresses.ETH[0];
+  return socials;
 }

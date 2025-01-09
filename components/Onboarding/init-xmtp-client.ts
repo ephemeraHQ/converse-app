@@ -1,7 +1,6 @@
 import { Signer } from "ethers";
 import { Alert } from "react-native";
 
-import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
 import {
   getSettingsStore,
   getWalletStore,
@@ -54,7 +53,7 @@ export async function initXmtpClient(args: {
 
     await connectWithInboxId({
       inboxId,
-      address,
+      // address,
       ...restArgs,
     });
   } catch (e) {
@@ -133,6 +132,8 @@ async function finalizeAccountSetup(args: IConnectWithAddressKeyArgs) {
   if ("pkPath" in args) {
     getWalletStore({ inboxId }).getState().setPrivateKeyPath(args.pkPath);
   }
+
+  const address = await getAddressFromInboxId(inboxId);
 
   getOrBuildXmtpClient({ account: address });
 

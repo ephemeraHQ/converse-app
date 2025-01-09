@@ -10,7 +10,7 @@ import { useRevokeSuperAdminMutation } from "../queries/useRevokeSuperAdminMutat
 
 export const useGroupMembers = (args: { topic: ConversationTopic }) => {
   const { topic } = args;
-  const inboxId = useCurrentInboxId();
+  const inboxId = useCurrentInboxId()!;
 
   const {
     data: members,

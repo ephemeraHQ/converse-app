@@ -68,14 +68,11 @@ const conversationMessagesByTopicQueryFn = async (args: {
   return conversationMessagesQueryFn(conversation);
 };
 
-export const useConversationMessages = (
-  args: {
-    inboxId: InboxId;
-    topic: ConversationTopic;
-  } & {
-    includeSync: boolean;
-  }
-) => {
+export const useConversationMessages = (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+  includeSync?: boolean;
+}) => {
   const { inboxId, topic, includeSync } = args;
   const query = useQuery(
     getConversationMessagesQueryOptions({
@@ -94,14 +91,11 @@ export const useConversationMessages = (
   return query;
 };
 
-export const getConversationMessagesQueryData = (
-  args: {
-    inboxId: InboxId;
-    topic: ConversationTopic;
-  } & {
-    includeSync: boolean;
-  }
-) => {
+export const getConversationMessagesQueryData = (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+  includeSync: boolean;
+}) => {
   const { inboxId, topic, includeSync } = args;
   return queryClient.getQueryData<ConversationMessagesQueryData>(
     getConversationMessagesQueryOptions({
@@ -112,15 +106,12 @@ export const getConversationMessagesQueryData = (
   );
 };
 
-export function refetchConversationMessages(
-  args: {
-    inboxId: InboxId;
-    topic: ConversationTopic;
-  } & {
-    includeSync: boolean;
-  }
-) {
-  const { inboxId, topic, includeSync } = args;
+export function refetchConversationMessages(args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+  includeSync?: boolean;
+}) {
+  const { inboxId, topic, includeSync = false } = args;
   logger.info("[refetchConversationMessages] refetching messages");
   return queryClient.refetchQueries(
     getConversationMessagesQueryOptions({
@@ -251,7 +242,7 @@ function processMessages(args: {
   for (const reactionMessage of reactionsMessages) {
     const reactionContent = reactionMessage.content() as ReactionContent;
     const referenceMessageId = reactionContent?.reference as MessageId;
-    const senderAddress = reactionMessage.senderInboxId as InboxId;
+    const senderInboxId = reactionMessage.senderInboxId as InboxId;
 
     if (!reactionContent || !referenceMessageId) {
       continue;
@@ -279,26 +270,26 @@ function processMessages(args: {
     if (reactionContent.action === "added") {
       // Check if this sender already has this reaction for this message
       const hasExistingReaction = messageReactions.bySender[
-        senderAddress
+        senderInboxId
       ]?.some((reaction) => reaction.content === reactionContent.content);
 
       if (!hasExistingReaction) {
         messageReactions.byReactionContent[reactionContent.content] = [
           ...(messageReactions.byReactionContent[reactionContent.content] ||
             []),
-          senderAddress,
+          senderInboxId,
         ];
-        messageReactions.bySender[senderAddress] = [
-          ...(messageReactions.bySender[senderAddress] || []),
+        messageReactions.bySender[senderInboxId] = [
+          ...(messageReactions.bySender[senderInboxId] || []),
           reactionContent,
         ];
       }
     } else if (reactionContent.action === "removed") {
       messageReactions.byReactionContent[reactionContent.content] = (
         messageReactions.byReactionContent[reactionContent.content] || []
-      ).filter((id) => id !== senderAddress);
-      messageReactions.bySender[senderAddress] = (
-        messageReactions.bySender[senderAddress] || []
+      ).filter((id) => id !== senderInboxId);
+      messageReactions.bySender[senderInboxId] = (
+        messageReactions.bySender[senderInboxId] || []
       ).filter((reaction) => reaction.content !== reactionContent.content);
     }
   }

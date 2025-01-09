@@ -5,7 +5,7 @@ import { ConversationTopic } from "@xmtp/react-native-sdk";
 export function getConversationForCurrentInboxByTopic(
   topic: ConversationTopic
 ) {
-  const currentInboxId = getCurrentInboxId();
+  const currentInboxId = getCurrentInboxId()!;
   return getConversationQueryData({
     inboxId: currentInboxId,
     topic: topic,

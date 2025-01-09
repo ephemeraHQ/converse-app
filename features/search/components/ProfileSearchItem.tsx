@@ -23,6 +23,7 @@ type ProfileSearchItemProps = {
 
 export function ProfileSearchItem({
   peerEthereumAddress,
+  peerInboxId,
   socials,
   navigation,
   groupMode,

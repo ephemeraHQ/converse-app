@@ -1,12 +1,8 @@
 import { useSelect } from "@/data/store/storeHelpers";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
-import {
-  isCurrentUserInboxId,
-  useCurrentAccountInboxId,
-} from "@/hooks/use-current-account-inbox-id";
-import { useInboxProfileSocialsQueries } from "@/queries/useSocialProfileQueryByInboxId";
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { isCurrentUserInboxId } from "@/hooks/use-current-account-inbox-id";
+import { useInboxProfileSocialsQueries } from "@/queries/useInboxProfileSocialsQuery";
 import { AnimatedHStack, HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
@@ -23,6 +19,7 @@ import {
   RolledUpReactions,
   SortedReaction,
 } from "./conversation-message-reactions.types";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 
 const MAX_REACTION_EMOJIS_SHOWN = 3;
 
@@ -95,8 +92,7 @@ function useMessageReactionsRolledUp() {
   const { messageId } = useMessageContextStoreContext(useSelect(["messageId"]));
   const { bySender: reactionsBySender } =
     useConversationMessageReactions(messageId);
-  const currentAddress = useCurrentAccount()!;
-  const { data: currentUserInboxId } = useCurrentAccountInboxId();
+  const currentInboxId = useCurrentInboxId()!;
 
   const inboxIds = Array.from(
     new Set(
@@ -106,17 +102,23 @@ function useMessageReactionsRolledUp() {
     )
   );
 
-  const inboxProfileSocialsQueries = useInboxProfileSocialsQueries(
-    currentAddress,
-    inboxIds
-  );
+  const inboxProfileSocialsQueries = useInboxProfileSocialsQueries({
+    currentInboxId,
+    profileLookupInboxIds: inboxIds,
+  });
 
   const membersSocials = inboxProfileSocialsQueries.map(
     ({ data: socials }, index) => {
       return {
         inboxId: inboxIds[index],
+        // todo(lustig) more of this socials typing issues
+        // @ts-expect-error
         address: getPreferredInboxAddress(socials),
+        // todo(lustig) more of this socials typing issues
+        // @ts-expect-error
         uri: getPreferredInboxAvatar(socials),
+        // todo(lustig) more of this socials typing issues
+        // @ts-expect-error
         name: getPreferredInboxName(socials),
       };
     }

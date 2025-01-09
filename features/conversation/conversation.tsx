@@ -2,7 +2,6 @@ import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
-import { useToggleReadStatusForCurrentUser } from "@/features/conversation-list/hooks/useToggleReadStatusForCurrentUser";
 import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
 import { ReplyPreview } from "@/features/conversation/conversation-composer/conversation-composer-reply-preview";
@@ -48,13 +47,11 @@ import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
 } from "@/utils/xmtpRN/client.types";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { Center } from "@design-system/Center";
 import { Text } from "@design-system/Text";
 import { translate } from "@i18n/translate";
@@ -74,6 +71,8 @@ import {
   ConversationStoreProvider,
   useCurrentConversationTopic,
 } from "./conversation.store-context";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
+import { useToggleReadStatusForCurrentUser } from "../conversation-list/hooks/useToggleReadStatus";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
@@ -81,13 +80,13 @@ export const Conversation = memo(function Conversation(props: {
 }) {
   const { topic, textPrefill = "" } = props;
 
-  const currentInboxId = useCurrentInboxId()()!;
+  const currentInboxId = useCurrentInboxId()!;
 
   const navigation = useRouter();
 
   const { data: conversation, isLoading: isLoadingConversation } =
     useConversationQuery({
-      account: currentAccount,
+      inboxId: currentInboxId,
       topic,
     });
 
@@ -182,8 +181,7 @@ const Messages = memo(function Messages(props: {
 }) {
   const { conversation } = props;
 
-  const currentInboxId = useCurrentInboxId()()!;
-  const { data: currentAccountInboxId } = useCurrentAccountInboxId();
+  const currentInboxId = useCurrentInboxId()!;
   const topic = useCurrentConversationTopic()!;
 
   const {
@@ -191,16 +189,19 @@ const Messages = memo(function Messages(props: {
     isLoading: messagesLoading,
     isRefetching: isRefetchingMessages,
     refetch,
-  } = useConversationMessages(currentAccount, topic!);
+  } = useConversationMessages({
+    inboxId: currentInboxId,
+    topic,
+  });
 
   const latestMessageIdByCurrentUser = useMemo(() => {
     if (!messages?.ids) return -1;
     return messages.ids.find(
       (messageId) =>
         isAnActualMessage(messages.byId[messageId]) &&
-        messages.byId[messageId].senderInboxId === currentAccountInboxId
+        messages.byId[messageId].senderInboxId === currentInboxId
     );
-  }, [messages?.ids, messages?.byId, currentAccountInboxId]);
+  }, [messages?.ids, messages?.byId, currentInboxId]);
 
   const isUnread = useConversationIsUnread({
     topic,
@@ -211,7 +212,6 @@ const Messages = memo(function Messages(props: {
   const toggleReadStatus = useToggleReadStatusForCurrentUser({
     topic,
     isUnread,
-    currentAccount,
   });
 
   const hasMarkedAsRead = useRef(false);

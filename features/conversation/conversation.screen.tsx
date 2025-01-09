@@ -54,6 +54,7 @@ const PeerAddressFlow = memo(function PeerAddressFlow(
 
   const { data: dmConversation, isLoading } = useDmQuery({
     peerInboxId,
+    ourInboxId: useCurrentInboxId()!,
   });
 
   if (isLoading) {

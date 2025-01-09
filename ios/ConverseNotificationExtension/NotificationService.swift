@@ -159,7 +159,7 @@ func handleConverseNotification(contentHandler: ((UNNotificationContent) -> Void
         do {
           if let group = await getGroup(xmtpClient: xmtpClient, groupId: groupId), let apiURI = apiURI {
             try await group.addMembers(addresses: [address])
-            try await putGroupInviteRequest(apiURI: apiURI, account: account, xmtpClient: xmtpClient, status: "ACCEPTED", joinRequestId: joinRequestId)
+            try await putGroupJoinRequest(apiURI: apiURI, account: account, xmtpClient: xmtpClient, status: "ACCEPTED", joinRequestId: joinRequestId)
             return false // Do not show notification when successfully added
           }
         } catch {

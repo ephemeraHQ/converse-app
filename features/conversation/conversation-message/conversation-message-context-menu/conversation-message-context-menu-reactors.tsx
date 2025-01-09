@@ -1,10 +1,10 @@
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { MESSAGE_CONTEXT_REACTIONS_HEIGHT } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-constant";
-import { useInboxProfileSocialsQueries } from "@/queries/useSocialProfileQueryByInboxId";
+import { useInboxProfileSocialsQueries } from "@/queries/useInboxProfileSocialsQuery";
 import { ObjectTyped } from "@/utils/objectTyped";
 import { getReactionContent } from "@/utils/xmtpRN/reactions";
 import GroupAvatar from "@components/GroupAvatar";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { Text } from "@design-system/Text";
 import { useAppTheme } from "@theme/useAppTheme";
 import { getPreferredInboxAvatar, getPreferredInboxName } from "@utils/profile";
@@ -90,14 +90,20 @@ type MessageReactionsItemProps = {
 const Item: FC<MessageReactionsItemProps> = ({ content, inboxIds }) => {
   const { theme } = useAppTheme();
 
-  const currentInboxId = useCurrentInboxId()()!;
+  const currentInboxId = useCurrentInboxId()!;
 
-  const queriesData = useInboxProfileSocialsQueries(currentAccount, inboxIds);
+  const queriesData = useInboxProfileSocialsQueries({
+    currentInboxId,
+    profileLookupInboxIds: inboxIds,
+  });
 
   const membersSocials = queriesData.map(({ data: socials }, index) => {
     return {
       address: inboxIds[index],
+      // todo(lustig) more of this socials typing issues
+      // @ts-expect-error
       uri: getPreferredInboxAvatar(socials),
+      // @ts-expect-error
       name: getPreferredInboxName(socials),
     };
   });

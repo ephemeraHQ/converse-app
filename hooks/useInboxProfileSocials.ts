@@ -3,6 +3,6 @@ import { useSocialProfileQueryByInboxId } from "@queries/useSocialProfileQueryBy
 import { InboxId } from "@xmtp/react-native-sdk";
 
 export const useInboxProfileSocials = (inboxId: InboxId | undefined) => {
-  const currentInboxId = useCurrentInboxId()();
+  const currentInboxId = useCurrentInboxId();
   return useSocialProfileQueryByInboxId(currentAccount!, inboxId);
 };

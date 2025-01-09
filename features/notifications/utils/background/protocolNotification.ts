@@ -11,6 +11,7 @@ import {
   handleGroupWelcomeNotification,
   isGroupWelcomeContentTopic,
 } from "./groupWelcomeNotification";
+import { getInboxIdFromCryptocurrencyAddress } from "@/utils/xmtpRN/signIn";
 
 export const ProtocolNotificationSchema = z.object({
   account: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
@@ -37,12 +38,9 @@ export const handleProtocolNotification = async (
     );
     return;
   }
-  const xmtpClient = (await getOrBuildXmtpClient(
-    notification.account
-  )) as ConverseXmtpClientType;
   if (isGroupMessageContentTopic(notification.contentTopic)) {
-    handleGroupMessageNotification(xmtpClient, notification);
+    handleGroupMessageNotification(notification);
   } else if (isGroupWelcomeContentTopic(notification.contentTopic)) {
-    handleGroupWelcomeNotification(xmtpClient, notification);
+    handleGroupWelcomeNotification(notification);
   }
 };

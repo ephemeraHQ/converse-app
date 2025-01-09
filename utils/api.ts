@@ -329,6 +329,7 @@ export const searchXmtpProfilesByRawStringForCurrentAccount = async ({
     headers: await getXmtpApiHeaders({ inboxId: currentInboxId }),
     params: { query },
   });
+
   return data;
 };
 
@@ -746,12 +747,12 @@ export const simulateTransaction = async (
   // return data as SimulateAssetChangesResponse;
 };
 
-export const putGroupInviteRequest = async ({
+export const putGroupJoinRequest = async ({
   inboxId,
   status,
   joinRequestId,
 }: {
-  inboxId: string;
+  inboxId: InboxId;
   status: string;
   joinRequestId: string;
 }): Promise<void> => {

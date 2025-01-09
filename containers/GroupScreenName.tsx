@@ -30,7 +30,7 @@ export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
   const { permissions } = useGroupPermissionspForCurrentUser({ topic });
   const currentInboxId = useCurrentInboxId()!;
   const { groupName, updateGroupName } = useGroupNameForCurrentUser({ topic });
-  const formattedGroupName = formatGroupName(topic, groupName);
+  const formattedGroupName = formatGroupName({ topic, groupName });
   const { members } = useGroupMembers({ topic });
 
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(

@@ -29,7 +29,7 @@ export default function GroupScreen({
   route,
 }: NativeStackScreenProps<NavigationParamList, "Group">) {
   const styles = useStyles();
-  const currentInboxId = useCurrentInboxId()() as string;
+  const currentInboxId = useCurrentInboxId() as string;
   const topic = route.params.topic;
 
   const { data: group } = useGroupQuery({

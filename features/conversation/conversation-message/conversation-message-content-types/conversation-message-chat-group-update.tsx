@@ -80,6 +80,8 @@ export function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
   const { data } = useSocialProfileQueryByInboxId(inboxId);
   const { theme } = useAppTheme();
 
+  // todo(lustig) more of this socials typing issues
+  // @ts-expect-error
   const firstSocials = data?.[0];
 
   if (!firstSocials) {
@@ -95,6 +97,8 @@ export function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
         style={themed($pressableContent)}
         onPress={() => {
           navigate("Profile", {
+            // todo(lustig) more of this socials typing issues
+            // @ts-expect-error
             address: firstSocials.address ?? "",
           });
         }}
@@ -122,6 +126,8 @@ function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
   const { data } = useSocialProfileQueryByInboxId(inboxId);
   const { theme } = useAppTheme();
 
+  // todo(lustig) more of this socials typing issues
+  // @ts-expect-error
   const firstSocials = data?.[0];
 
   if (!firstSocials) {
@@ -168,6 +174,8 @@ function ChatGroupMetadataUpdate({
   const { data } = useSocialProfileQueryByInboxId(initiatorInboxId);
   const { theme } = useAppTheme();
 
+  // todo(lustig) more of this socials typing issues
+  // @ts-expect-error
   const firstSocials = data?.[0];
 
   if (!firstSocials) {

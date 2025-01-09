@@ -1,6 +1,5 @@
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
-import { useGroupPendingRequests } from "@hooks/useGroupPendingRequests";
 import { usePreferredNames } from "@hooks/usePreferredNames";
 import { translate } from "@i18n";
 import { useAddToGroupMutation } from "@queries/useAddToGroupMutation";
@@ -15,6 +14,7 @@ import TableView, {
 } from "../components/TableView/TableView";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCurrentInboxId } from "@/data/store/accountsStore";
+import { useGroupPendingRequestsForCurrentUser } from "@/hooks/useGroupPendingRequests";
 
 type GroupPendingRequestsTableProps = {
   topic: ConversationTopic;
@@ -26,10 +26,10 @@ export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
   const colorScheme = useColorScheme();
   const currentInboxId = useCurrentInboxId()!;
   const styles = useStyles();
-  const requests = useGroupPendingRequests(topic);
+  const requests = useGroupPendingRequestsForCurrentUser(topic);
 
   const addresses = useMemo(() => requests.map((a) => a[0]), [requests]);
-  const preferredNames = usePreferredNames(addresses);
+  const preferredNames = usePreferredNames({ peerInboxIds: addresses });
   const { mutateAsync: addToGroup } = useAddToGroupMutation({
     inboxId: currentInboxId,
     topic,

@@ -16,15 +16,12 @@ import {
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { translate } from "@/i18n";
 import { useRouter } from "@/navigation/useNavigation";
-import { addConversationToConversationListQuery } from "@/queries/useConversationListForCurrentUserQuery";
+import { addConversationToConversationListQuery } from "@/queries/useConversationListQuery";
 import { setDmQueryData } from "@/queries/useDmQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
 import { sentryTrackError } from "@/utils/sentry";
-import {
-  createDmForPeerInboxId,
-  getPeerEthereumAddressFromDm,
-} from "@/utils/xmtpRN/conversations";
+import { createDmForPeerInboxId } from "@/utils/xmtpRN/conversations";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo, useCallback, useLayoutEffect } from "react";
@@ -45,7 +42,7 @@ export const ConversationNewDm = memo(function ConversationNewDm(props: {
   }, [peerInboxId, navigation]);
 
   const sendFirstConversationMessage = useSendFirstConversationMessage({
-    peerEthereumAddress,
+    peerInboxId,
   });
 
   const handleSendWelcomeMessage = useCallback(() => {
@@ -72,29 +69,23 @@ export const ConversationNewDm = memo(function ConversationNewDm(props: {
   );
 });
 
-function useSendFirstConversationMessage(args: {
-  peerEthereumAddress: string;
-}) {
+function useSendFirstConversationMessage(args: { peerInboxId: string }) {
   const { mutateAsync: createNewConversationAsync } = useMutation({
     mutationFn: async () => {
-      const currentInboxId = getCurrentInboxId();
       return createDmForPeerInboxId({
-        inboxId: currentInboxId,
-        peerEthereumAddress: args.peerEthereumAddress,
+        peerInboxId: args.peerInboxId,
       });
     },
     onSuccess: async (newConversation) => {
-      const currentInboxId = getCurrentInboxId();
-      const peerEthereumAddress =
-        await getPeerEthereumAddressFromDm(newConversation);
+      const currentInboxId = getCurrentInboxId()!;
       try {
         addConversationToConversationListQuery({
           inboxId: currentInboxId,
           conversation: newConversation,
         });
         setDmQueryData({
-          inboxId: currentInboxId,
-          peerEthereumAddress,
+          ourInboxId: currentInboxId,
+          peerInboxId: args.peerInboxId,
           dm: newConversation,
         });
       } catch (error) {
@@ -134,7 +125,7 @@ function useSendFirstConversationMessage(args: {
     async (args: ISendMessageParams) => {
       try {
         // First, create the conversation
-        const conversation = await createNewConversationAsync(peerInboxId);
+        const conversation = await createNewConversationAsync();
         try {
           // Then, send the message
           await sendMessageAsync({
@@ -150,7 +141,7 @@ function useSendFirstConversationMessage(args: {
         sentryTrackError(error);
       }
     },
-    [createNewConversationAsync, peerInboxId, sendMessageAsync]
+    [createNewConversationAsync, sendMessageAsync]
   );
 }
 

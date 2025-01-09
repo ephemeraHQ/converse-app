@@ -1,8 +1,8 @@
-import { currentAccount } from "@data/store/accountsStore";
 import { resetNotifications } from "./resetNotifications";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import logger from "@utils/logger";
+import { getCurrentInboxId } from "@/data/store/accountsStore";
 
 // note(lustig): these two handlers are the same - do we need both?
 const handleiOSForegroundNotification = async (

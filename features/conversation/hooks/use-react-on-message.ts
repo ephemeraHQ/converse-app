@@ -1,6 +1,5 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
+import { getCurrentInboxId } from "@/data/store/accountsStore";
 import { getConversationForCurrentInboxByTopic } from "@/features/conversation/conversation.utils";
-import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   addConversationMessage,
   refetchConversationMessages,
@@ -34,14 +33,13 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
       });
     },
     onMutate: (variables) => {
-      const currentAccount = getCurrentAccount()!;
-      const currentUserInboxId = getCurrentUserAccountInboxId()!;
+      const currentInboxId = getCurrentInboxId()!;
       const conversation = getConversationForCurrentInboxByTopic(topic);
 
       if (conversation) {
         // Add the reaction to the message
         addConversationMessage({
-          account: currentAccount,
+          inboxId: currentInboxId,
           topic: conversation.topic,
           message: {
             id: getRandomId() as MessageId,
@@ -51,7 +49,7 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
             fallback: variables.reaction.content,
             deliveryStatus: MessageDeliveryStatus.PUBLISHED,
             topic: conversation.topic,
-            senderInboxId: currentUserInboxId,
+            senderInboxId: currentInboxId,
             nativeContent: {},
             content: () => {
               return variables.reaction;
@@ -62,10 +60,11 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
     },
     onError: (error) => {
       captureError(error);
-      const currentAccount = getCurrentAccount()!;
-      refetchConversationMessages(currentAccount, topic).catch(
-        captureErrorWithToast
-      );
+      const currentInboxId = getCurrentInboxId()!;
+      refetchConversationMessages({
+        inboxId: currentInboxId,
+        topic,
+      }).catch(captureErrorWithToast);
     },
   });
 

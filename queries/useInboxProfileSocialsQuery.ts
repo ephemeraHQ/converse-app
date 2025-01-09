@@ -122,10 +122,12 @@ const inboxProfileSocialsQueryConfig = ({
 export const useSocialProfileQueryByInboxId = (
   profileLookupInboxId: string
 ) => {
-  const currentInboxId = useCurrentInboxId();
+  const currentInboxId = useCurrentInboxId()!;
   return useQuery(
+    // todo(lustig) more of this socials typing issues
+    // @ts-expect-error
     inboxProfileSocialsQueryConfig({
-      currentInboxId: currentInboxId!,
+      currentInboxId,
       profileLookupInboxId,
     })
   );

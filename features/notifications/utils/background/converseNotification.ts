@@ -1,12 +1,11 @@
 import { useInboxIdsList } from "@data/store/accountsStore";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
-import { getOrBuildXmtpClient } from "@utils/xmtpRN/sync";
 import { z } from "zod";
 import logger from "@utils/logger";
 import {
   GroupJoinRequestNotificationSchema,
   handleGroupJoinRequestNotification,
 } from "./groupJoinRequestNotification";
+import { getInboxIdFromCryptocurrencyAddress } from "@/utils/xmtpRN/signIn";
 
 // Add other converse notifications here, with different "type" values
 export const ConverseNotificationSchema = z.discriminatedUnion("type", [
@@ -32,10 +31,11 @@ export const handleConverseNotification = async (
     );
     return;
   }
-  const xmtpClient = (await getOrBuildXmtpClient(
-    notification.account
-  )) as ConverseXmtpClientType;
+  const inboxId = await getInboxIdFromCryptocurrencyAddress({
+    address: notification.account,
+    cryptocurrency: "ETH",
+  });
   if (notification.type === "group_join_request") {
-    handleGroupJoinRequestNotification(xmtpClient, notification);
+    handleGroupJoinRequestNotification(inboxId, notification);
   }
 };

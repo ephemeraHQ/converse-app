@@ -1,4 +1,3 @@
-import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
 import {
   getConversationMessagesQueryData,
@@ -10,10 +9,6 @@ import {
 } from "@/utils/xmtpRN/client.types";
 import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/content-types/coinbasePayment";
 import { getMessageContentType } from "@/utils/xmtpRN/content-types/content-types";
-import {
-  getCurrentAccount,
-  useCurrentAccount,
-} from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
 import { getReadableProfile } from "@utils/getReadableProfile";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
@@ -36,6 +31,7 @@ import {
 } from "@xmtp/react-native-sdk";
 import { useCurrentConversationTopic } from "../conversation.store-context";
 import emojiRegex from "emoji-regex";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 
 export function isAnActualMessage(
   message: DecodedMessageWithCodecsType
@@ -94,11 +90,11 @@ export function isCoinbasePaymentMessage(
 export function useMessageSenderReadableProfile(
   message: DecodedMessageWithCodecsType
 ) {
-  const currentAccountAdress = useCurrentAccount();
-  if (!currentAccountAdress) {
-    return "";
-  }
-  return getReadableProfile(currentAccountAdress, message.senderInboxId);
+  const currentInboxId = useCurrentInboxId()!;
+  return getReadableProfile({
+    inboxId: currentInboxId,
+    profileLookupInboxId: message.senderInboxId,
+  });
 }
 
 export function getMessageById({
@@ -108,8 +104,11 @@ export function getMessageById({
   messageId: MessageId;
   topic: ConversationTopic;
 }) {
-  const currentAccount = getCurrentAccount()!;
-  const messages = getConversationMessagesQueryData(currentAccount, topic);
+  const currentInboxId = useCurrentInboxId()!;
+  const messages = getConversationMessagesQueryData({
+    inboxId: currentInboxId,
+    topic,
+  });
   if (!messages) {
     return null;
   }
@@ -191,7 +190,7 @@ export function useConversationMessageById({
   messageId: MessageId;
   topic: ConversationTopic;
 }) {
-  const currentInboxId = useCurrentInboxId()()!;
+  const currentInboxId = useCurrentInboxId()!;
   const { data: messages } = useConversationMessages(currentAccount, topic);
 
   const cachedMessage = messages?.byId[messageId];
@@ -212,7 +211,7 @@ export function useConversationMessageById({
 }
 
 export function useConversationMessageReactions(messageId: MessageId) {
-  const currentInboxId = useCurrentInboxId()()!;
+  const currentInboxId = useCurrentInboxId()!;
   const topic = useCurrentConversationTopic();
 
   const { data: messages } = useConversationMessages(currentAccount, topic);
@@ -231,12 +230,15 @@ export function getCurrentUserAlreadyReactedOnMessage(args: {
   emoji: string | undefined; // Specific emoji or just reacted in general
 }) {
   const { messageId, topic, emoji } = args;
-  const currentUserInboxId = getCurrentUserAccountInboxId();
-  const currentAccount = getCurrentAccount()!;
-  const messages = getConversationMessagesQueryData(currentAccount, topic);
+  const currentInboxId = useCurrentInboxId()!;
+  const messages = getConversationMessagesQueryData({
+    inboxId: currentInboxId,
+    topic,
+    includeSync: true,
+  });
   const reactions = messages?.reactions[messageId];
   const bySender = reactions?.bySender;
-  return bySender?.[currentUserInboxId!]?.some(
+  return bySender?.[currentInboxId!]?.some(
     (reaction) => !emoji || reaction.content === emoji
   );
 }

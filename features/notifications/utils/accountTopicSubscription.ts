@@ -1,22 +1,23 @@
-import { createConversationListQueryObserver } from "@/queries/useConversationListForCurrentUserQuery";
 import { subscribeToNotifications } from "./subscribeToNotifications";
 import logger from "@/utils/logger";
 import { resetNotifications } from "./resetNotifications";
+import { createConversationListQueryObserver } from "@/queries/useConversationListQuery";
+import { InboxId } from "@xmtp/react-native-sdk";
 
-const accountTopicUnsubscribeMap: Record<string, () => void> = {};
+const accountTopicUnsubscribeMap: Record<InboxId, () => void> = {};
 
-export const setupAccountTopicSubscription = (account: string) => {
-  if (accountTopicUnsubscribeMap[account]) {
+export const setupAccountTopicSubscription = (inboxId: InboxId) => {
+  if (accountTopicUnsubscribeMap[inboxId]) {
     logger.info(
-      `[setupAccountTopicSubscription] already subscribed to account ${account}`
+      `[setupAccountTopicSubscription] already subscribed to account ${inboxId}`
     );
-    return accountTopicUnsubscribeMap[account];
+    return accountTopicUnsubscribeMap[inboxId];
   }
   logger.info(
-    `[setupAccountTopicSubscription] subscribing to account ${account}`
+    `[setupAccountTopicSubscription] subscribing to account ${inboxId}`
   );
   const observer = createConversationListQueryObserver({
-    account,
+    inboxId,
     context: "sync",
   });
   let previous: number | undefined;
@@ -25,7 +26,7 @@ export const setupAccountTopicSubscription = (account: string) => {
       previous = conversationList.dataUpdatedAt;
       subscribeToNotifications({
         conversations: conversationList.data,
-        account,
+        inboxId,
       });
       // For now just reset notifications when we get a new conversation list
       /*
@@ -35,7 +36,7 @@ export const setupAccountTopicSubscription = (account: string) => {
       resetNotifications();
     }
   });
-  accountTopicUnsubscribeMap[account] = unsubscribe;
+  accountTopicUnsubscribeMap[inboxId] = unsubscribe;
   return unsubscribe;
 };
 

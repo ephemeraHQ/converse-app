@@ -35,7 +35,7 @@ export function NavigationChatButton({
     navigation.popToTop();
 
     navigate("Conversation", {
-      peerEthereumAddress: inboxId,
+      peerInboxId: inboxId,
     });
   }, [inboxId, navigation]);
 
@@ -43,7 +43,7 @@ export function NavigationChatButton({
     if (loading) return;
     setLoading(true);
     const allowed = await canMessageByAccount({
-      inboxId: getCurrentInboxId(),
+      inboxId: getCurrentInboxId()!,
       peer: inboxId,
     });
     setLoading(false);

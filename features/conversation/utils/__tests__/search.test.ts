@@ -1,5 +1,5 @@
+import { getInboxProfileSocialsQueryData } from "@/queries/useInboxProfileSocialsQuery";
 import { dmMatchesSearchQuery, groupMatchesSearchQuery } from "../search";
-import { getInboxProfileSocialsQueryData } from "@/queries/useSocialProfileQueryByInboxId";
 import type {
   DmWithCodecsType,
   GroupWithCodecsType,

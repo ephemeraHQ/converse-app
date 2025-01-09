@@ -4,11 +4,7 @@ import notifee, {
   AndroidStyle,
   AndroidVisibility,
 } from "@notifee/react-native";
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getProfileByInboxId,
-} from "@utils/profile";
+import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import {
   ConverseXmtpClientType,
   GroupWithCodecsType,
@@ -23,15 +19,25 @@ import { notificationAlreadyShown } from "./alreadyShown";
 import { getNotificationContent } from "./notificationContent";
 import { computeSpamScoreGroupMessage } from "./notificationSpamScore";
 import { ProtocolNotification } from "./protocolNotification";
+import { getProfileByInboxId } from "@/utils/profile/getProfile";
+import { getInboxIdFromCryptocurrencyAddress } from "@/utils/xmtpRN/signIn";
+import { getXmtpClientOrThrow } from "@/features/Accounts/accounts.utils";
 
 export const isGroupMessageContentTopic = (contentTopic: string) => {
   return contentTopic.startsWith("/xmtp/mls/1/g-");
 };
 
 export const handleGroupMessageNotification = async (
-  xmtpClient: ConverseXmtpClientType,
   notification: ProtocolNotification
 ) => {
+  const inboxId = await getInboxIdFromCryptocurrencyAddress({
+    address: notification.account,
+    cryptocurrency: "ETH",
+  });
+  const xmtpClient = getXmtpClientOrThrow({
+    inboxId,
+    caller: "handleGroupMessageNotification",
+  });
   let conversation = await xmtpClient.conversations.findConversationByTopic(
     notification.contentTopic as ConversationTopic
   );
@@ -63,12 +69,8 @@ export const handleGroupMessageNotification = async (
     (m) => m.inboxId === message.senderInboxId
   )?.addresses[0];
   if (!senderInboxId) return;
-  const senderSocials = await getProfileByInboxId(
-    xmtpClient.inboxId,
-    message.senderInboxId,
-    senderInboxId
-  );
-  const senderName = getPreferredName(senderSocials, senderInboxId);
+  const senderSocials = await getProfileByInboxId(message.senderInboxId);
+  const senderName = getPreferredName(senderSocials);
 
   const notificationContent = await getNotificationContent(
     conversation as GroupWithCodecsType,

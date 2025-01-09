@@ -3,15 +3,13 @@ import * as Notifications from "expo-notifications";
 import { savePushToken } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 
-import {
-  ConversationWithCodecsType,
-  ConverseXmtpClientType,
-} from "@/utils/xmtpRN/client.types";
-import { getOrBuildXmtpClient } from "@utils/xmtpRN/sync";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useAppStore } from "@data/store/appStore";
-import { subscribingByInboxId } from "./subscribingByInboxId";
 import { saveNotificationsSubscribe } from "@utils/api";
 import { requestPushNotificationsPermissions } from "./requestPushNotificationsPermissions";
+import { InboxId } from "@xmtp/react-native-sdk";
+import { getXmtpClientOrThrow } from "@/features/Accounts/accounts.utils";
+import { subscribingByInboxId } from "./subscribingByAccount";
 
 let nativePushToken: string | null;
 
@@ -21,29 +19,26 @@ const buildUserV3InviteTopic = (account: string): string => {
 
 type SubscribeToNotificationsParams = {
   conversations: ConversationWithCodecsType[];
-  account: string;
+  inboxId: InboxId;
 };
 
 export const subscribeToNotifications = async ({
   conversations,
-  account,
+  inboxId,
 }: SubscribeToNotificationsParams): Promise<void> => {
   try {
     logger.info(
       "[subscribeToNotifications] start",
-      account,
+      inboxId,
       conversations.length
     );
     const thirtyDayPeriodsSinceEpoch = Math.floor(
       Date.now() / 1000 / 60 / 60 / 24 / 30
     );
-    const client = (await getOrBuildXmtpClient(
-      account
-    )) as ConverseXmtpClientType;
-    if (!client) {
-      logger.error("[subscribeToNotifications] no client");
-      return;
-    }
+    const client = getXmtpClientOrThrow({
+      inboxId,
+      caller: "subscribeToNotifications",
+    });
     logger.info("[subscribeToNotifications] client exists");
     const notificationsPermissionStatus =
       useAppStore.getState().notificationsPermissionStatus;
@@ -88,7 +83,7 @@ export const subscribeToNotifications = async ({
       savePushToken(nativePushToken);
     } else {
       logger.error("[subscribeToNotifications] no native push token");
-      delete subscribingByInboxId[account];
+      delete subscribingByInboxId[inboxId];
       return;
     }
     const userGroupInviteTopic = buildUserV3InviteTopic(
@@ -99,15 +94,16 @@ export const subscribeToNotifications = async ({
     };
 
     logger.info(
-      `[subscribeToNotifications] saving notifications subscribed to ${Object.keys(topicsToUpdateForPeriod).length} topics for account ${account}`
+      `[subscribeToNotifications] saving notifications subscribed to ${Object.keys(topicsToUpdateForPeriod).length} topics for Inbox ID ${inboxId}`
     );
-    await saveNotificationsSubscribe(
-      account,
-      nativePushToken,
-      nativeTokenQuery.type,
-      nativeTokenQuery.type === "android" ? "converse-notifications" : null,
-      topicsToUpdateForPeriod
-    );
+    await saveNotificationsSubscribe({
+      inboxId,
+      nativeToken: nativePushToken,
+      nativeTokenType: nativeTokenQuery.type,
+      notificationChannel:
+        nativeTokenQuery.type === "android" ? "converse-notifications" : null,
+      topicsWithKeys: topicsToUpdateForPeriod,
+    });
   } catch (e) {
     logger.error(e, {
       context:

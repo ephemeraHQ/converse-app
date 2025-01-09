@@ -1,4 +1,3 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { translate } from "@i18n";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation } from "@react-navigation/native";
@@ -22,6 +21,7 @@ import {
   JoinGroupMachineContext,
 } from "./joinGroup.machine";
 import { Button } from "@/design-system/Button/Button";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 
 type UseJoinGroupResult = {
   isGroupInviteLoading: boolean;
@@ -53,7 +53,8 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
    * to avoid transitively importing XMTP is because it litters our tests
    * with unnecessary mocks and distracts from what we're actually testing.
    */
-  const account = useCurrentAccount() ?? "";
+  const inboxId = useCurrentInboxId()!;
+
   const [state, send] = useActor(
     joinGroupMachineLogic.provide({
       actions: {
@@ -64,7 +65,7 @@ function useJoinGroup(groupInviteId: string): UseJoinGroupResult {
       },
     }),
     {
-      input: { groupInviteId, account },
+      input: { groupInviteId, inboxId },
     }
   );
 

@@ -224,7 +224,7 @@ export default function NewConversation({
             }
             const address = getCleanAddress(resolvedAddress);
             const addressIsOnXmtp = await canMessageByAccount({
-              inboxId: getCurrentInboxId(),
+              inboxId: getCurrentInboxId()!,
               peer: address,
             });
             if (searchingForValue.current === value) {

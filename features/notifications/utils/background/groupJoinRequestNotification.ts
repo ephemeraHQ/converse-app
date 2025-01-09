@@ -1,13 +1,12 @@
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 import { z } from "zod";
 import mmkv from "@/utils/mmkv";
 import { sentryTrackError, sentryTrackMessage } from "@/utils/sentry";
 import notifee, { AndroidVisibility } from "@notifee/react-native";
 import { androidChannel } from "../setupAndroidNotificationChannel";
-import { putGroupInviteRequest } from "@/utils/api";
+import { putGroupJoinRequest } from "@/utils/api";
 import { getGroupByTopic } from "@/utils/xmtpRN/conversations";
 import { getTopicFromV3Id } from "@/utils/groupUtils/groupId";
-import { ConversationId } from "@xmtp/react-native-sdk";
+import { ConversationId, InboxId } from "@xmtp/react-native-sdk";
 export const GroupJoinRequestNotificationSchema = z.object({
   type: z.literal("group_join_request"),
   groupId: z.string(),
@@ -22,7 +21,7 @@ export type GroupJoinRequestNotification = z.infer<
 >;
 
 export const handleGroupJoinRequestNotification = async (
-  client: ConverseXmtpClientType,
+  inboxId: InboxId,
   notification: GroupJoinRequestNotification
 ) => {
   const groupId = mmkv.getString(
@@ -36,15 +35,15 @@ export const handleGroupJoinRequestNotification = async (
 
   try {
     const group = await getGroupByTopic({
-      client,
+      inboxId,
       topic: getTopicFromV3Id(groupId as ConversationId),
     });
 
     if (group) {
       await group.addMembers([notification.address]);
       try {
-        await putGroupInviteRequest({
-          account: notification.account,
+        await putGroupJoinRequest({
+          inboxId,
           status: "ACCEPTED",
           joinRequestId: notification.joinRequestId,
         });

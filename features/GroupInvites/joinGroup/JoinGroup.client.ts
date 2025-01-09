@@ -15,6 +15,7 @@ import {
   ConversationId,
   ConversationTopic,
   ConversationVersion,
+  inboxId,
   InboxId,
 } from "@xmtp/react-native-sdk";
 import { AxiosInstance } from "axios";
@@ -46,7 +47,7 @@ const GROUP_JOIN_REQUEST_POLL_INTERVAL_MS = 1000;
  */
 
 export type AllowGroupProps = {
-  account: string;
+  inboxId: InboxId;
   conversation: ConversationWithCodecsType;
   options: IGroupConsentOptions;
 };
@@ -54,22 +55,22 @@ export type AllowGroupProps = {
 export class JoinGroupClient {
   fetchGroupInvite: (groupInviteId: string) => Promise<GroupInvite>;
   attemptToJoinGroup: (
-    account: string,
+    inboxId: InboxId,
     groupInviteId: string
   ) => Promise<JoinGroupResult>;
-  fetchGroupsByAccount: (account: string) => Promise<ConversationDataEntity>;
+  fetchGroupsByAccount: (inboxId: InboxId) => Promise<ConversationDataEntity>;
   allowGroup: (props: AllowGroupProps) => Promise<void>;
-  refreshGroup: (account: string, topic: string) => Promise<void>;
+  refreshGroup: (inboxId: InboxId, topic: string) => Promise<void>;
 
   constructor(
     fetchGroupInvite: (groupInviteId: string) => Promise<GroupInvite>,
     attemptToJoinGroup: (
-      account: string,
+      inboxId: InboxId,
       groupInviteId: string
     ) => Promise<JoinGroupResult>,
-    fetchGroupsByAccount: (account: string) => Promise<ConversationDataEntity>,
+    fetchGroupsByAccount: (inboxId: InboxId) => Promise<ConversationDataEntity>,
     allowGroup: (props: AllowGroupProps) => Promise<void>,
-    refreshGroup: (account: string, topic: string) => Promise<void>
+    refreshGroup: (inboxId: InboxId, topic: string) => Promise<void>
   ) {
     this.fetchGroupInvite = fetchGroupInvite;
     this.attemptToJoinGroup = attemptToJoinGroup;
@@ -87,10 +88,10 @@ export class JoinGroupClient {
     };
 
     const liveFetchGroupsByAccount = async (
-      inboxId: string
-    ): Promise<ConversationDataEntity | undefined> => {
+      inboxId: InboxId
+    ): Promise<ConversationDataEntity> => {
       const { fetchConversationListQuery } = await import(
-        "@/queries/useConversationListForCurrentUserQuery"
+        "@/queries/useConversationListQuery"
       );
 
       const conversationList: ConversationListQueryData =
@@ -132,22 +133,25 @@ export class JoinGroupClient {
      * // Returns: { type: 'group-join-request.rejected' }
      */
     const liveAttemptToJoinGroup = async (
-      account: string,
+      inboxId: InboxId,
       groupInviteId: string,
       groupIdFromInvite?: string
     ): Promise<JoinGroupResult> => {
       logger.debug(
-        `[liveAttemptToJoinGroup] Starting join attempt for account: ${account}, groupInviteId: ${groupInviteId}`
+        `[liveAttemptToJoinGroup] Starting join attempt for account: ${inboxId}, groupInviteId: ${groupInviteId}`
       );
 
       const groupsBeforeJoining = groupIdFromInvite
         ? { ids: [], byId: {} }
-        : await liveFetchGroupsByAccount(account);
+        : await liveFetchGroupsByAccount(inboxId);
       logger.debug(
-        `[liveAttemptToJoinGroup] Before joining, group count = ${groupsBeforeJoining.ids.length}`
+        `[liveAttemptToJoinGroup] Before joining, group count = ${groupsBeforeJoining?.ids.length}`
       );
 
-      const joinRequest = await createGroupJoinRequest(account, groupInviteId);
+      const joinRequest = await createGroupJoinRequest({
+        inboxId,
+        inviteId: groupInviteId,
+      });
       const joinRequestId = joinRequest.id;
 
       let attemptsToRetryJoinGroup = 0;
@@ -195,7 +199,7 @@ export class JoinGroupClient {
     };
 
     const liveAllowGroup = async ({
-      account,
+      inboxId,
       conversation,
       options,
     }: AllowGroupProps) => {
@@ -211,13 +215,13 @@ export class JoinGroupClient {
       const { topic, id: groupId } = conversation;
       logger.debug(`[JoinGroupClient] Allowing group ${topic}`);
       const allowGroupMutationObserver = createAllowGroupMutationObserver({
-        account,
+        inboxId,
         topic,
         groupId,
       });
       await allowGroupMutationObserver.mutate({
         group: conversation as GroupWithCodecsType,
-        account,
+        inboxId,
       });
 
       // Dynamically import setGroupStatus
@@ -333,12 +337,12 @@ export class JoinGroupClient {
     };
 
     const fixtureAllowGroup = async ({
-      account,
+      inboxId,
       options,
       conversation,
     }: AllowGroupProps) => {};
 
-    const fixtureRefreshGroup = async (account: string, topic: string) => {};
+    const fixtureRefreshGroup = async (inboxId: InboxId, topic: string) => {};
 
     return new JoinGroupClient(
       fixtureGetGroupInvite,
@@ -409,7 +413,7 @@ export class JoinGroupClient {
     };
 
     const fixtureAllowGroup = async ({
-      account,
+      inboxId,
       options,
       conversation,
     }: AllowGroupProps) => {};
