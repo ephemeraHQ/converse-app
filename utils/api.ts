@@ -840,7 +840,7 @@ export const createTurnkeySubOrganization = async (
       authenticatorParams,
     },
     {
-      headers: await getAppCheckTokenHeaders(),
+      // headers: await getAppCheckTokenHeaders(),
     }
   );
   return data;

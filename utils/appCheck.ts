@@ -14,9 +14,9 @@ export const tryGetAppCheckToken = async () => {
 
     // What endpoints are protected with app check?
     // @see https://github.com/ephemeraHQ/converse-backend/blob/main/api/middlewares.ts#L27
-    const { token } = await appCheck.getLimitedUseToken();
+    // const { token } = await appCheck.getLimitedUseToken();
     // const { token } = await appCheck.getToken();
-    return token;
+    return "";
   } catch (error) {
     logger.error("Error getting token", error);
     return undefined;
