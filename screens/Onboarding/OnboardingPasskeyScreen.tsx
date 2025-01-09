@@ -125,7 +125,13 @@ const Content = memo(function Content() {
       }
       setAccount(account);
     } catch (e) {
-      handleError(e instanceof Error ? e.message : "Unknown error");
+      handleError(
+        e instanceof Error
+          ? e.message
+          : typeof e === "string"
+            ? e
+            : "Unknown error"
+      );
     } finally {
       setLoading(false);
     }
@@ -152,7 +158,11 @@ const Content = memo(function Content() {
       setStatusString("Wallet added to passkey");
     } catch (e) {
       handleError(
-        e instanceof Error ? e.message : "Error adding wallet to passkey"
+        e instanceof Error
+          ? e.message
+          : typeof e === "string"
+            ? e
+            : "Unknown error"
       );
     } finally {
       setLoading(false);
