@@ -100,7 +100,7 @@ export const ToggleUnreadSwipeableAction = memo(
 
     return (
       <ConversationListItemSwipeableAction
-        icon={isUnread ? "checkmark" : "message.badge"}
+        icon={isUnread ? "checkmark.message" : "message.badge"}
         color={theme.colors.fill.minimal}
         actionProgress={props.progressAnimatedValue}
       />
