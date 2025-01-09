@@ -59,6 +59,8 @@ import { useConversationListItems } from "../features/conversation-list/useConve
 import { useConversationListRequestCount } from "../features/conversation-list/useConversationListRequestCount";
 import { ConversationFlatListItem } from "../utils/conversation";
 import { NavigationParamList } from "./Navigation/Navigation";
+import { useProfileSocials } from "@/hooks/useProfileSocials";
+import { getPreferredAvatar } from "@/utils/profile";
 
 type FlatListItemType = ConversationFlatListItem | ConversationWithCodecsType;
 
@@ -273,6 +275,7 @@ function useHeader() {
   const accounts = useAccountsList();
   const accountsProfiles = useAccountsProfiles();
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
+  const { data: socials } = useProfileSocials(currentAccount!);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -322,7 +325,10 @@ function useHeader() {
                     padding: theme.spacing.xxs,
                   }}
                 >
-                  <Avatar size={theme.avatarSize.sm} />
+                  <Avatar
+                    size={theme.avatarSize.sm}
+                    uri={getPreferredAvatar(socials)}
+                  />
                 </Center>
               </Pressable>
               <ContextMenuButton
@@ -442,6 +448,7 @@ function useHeader() {
     currentAccount,
     setCurrentAccount,
     theme,
+    socials,
   ]);
 }
 
