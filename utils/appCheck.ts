@@ -16,7 +16,7 @@ export const tryGetAppCheckToken = async () => {
     // @see https://github.com/ephemeraHQ/converse-backend/blob/main/api/middlewares.ts#L27
     // const { token } = await appCheck.getLimitedUseToken();
     // const { token } = await appCheck.getToken();
-    return "";
+    return "Placeholder";
   } catch (error) {
     logger.error("Error getting token", error);
     return undefined;

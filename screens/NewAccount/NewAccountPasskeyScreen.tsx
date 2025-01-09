@@ -18,6 +18,7 @@ import { onPasskeyCreate } from "@/utils/passkeys/create-passkey";
 import { loadAccountFromPasskey } from "@/utils/passkeys/load-client-from-passkey";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import logger from "@/utils/logger";
+import { converseEventEmitter } from "@/utils/events";
 
 export const NewAccountPasskeyScreen = memo(function () {
   return (
@@ -63,6 +64,10 @@ const Content = memo(function Content() {
   );
 
   const inputTextRef = useRef<string>("");
+
+  const showDebug = useCallback(() => {
+    converseEventEmitter.emit("showDebugMenu");
+  }, []);
 
   const handleError = useCallback(
     (error: string) => {
@@ -293,6 +298,7 @@ const Content = memo(function Content() {
         text={"Onboard with passkey"}
         onPress={onboardWithPasskey}
         loading={loading}
+        onLongPress={showDebug}
       />
       <Button
         text={"Add new wallet to existing passkey"}
