@@ -21,6 +21,7 @@ import {
 import { useRouter } from "@/navigation/useNavigation";
 import { setAuthStatus } from "@/data/store/authStore";
 import { captureErrorWithToast } from "@/utils/capture-error";
+import logger from "@/utils/logger";
 
 export const OnboardingPasskeyScreen = memo(function Screen() {
   return (
@@ -69,6 +70,7 @@ const Content = memo(function Content() {
 
   const handleError = useCallback(
     (error: string) => {
+      logger.error(error);
       setError(error);
       captureErrorWithToast(error);
     },
