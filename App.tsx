@@ -147,6 +147,7 @@ export default function AppWithProviders() {
                   <GestureHandlerRootView style={{ flex: 1 }}>
                     <BottomSheetModalProvider>
                       <App />
+                      <Snackbars />
                     </BottomSheetModalProvider>
                   </GestureHandlerRootView>
                 </PaperProvider>
