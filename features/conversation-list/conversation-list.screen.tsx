@@ -383,7 +383,7 @@ function useHeaderWrapper() {
             </Center>
           </Pressable>
           <ContextMenuButton
-            hitSlop={theme.spacing.sm}
+            hitSlop={theme.spacing.lg}
             isMenuPrimaryAction
             onPressMenuItem={({ nativeEvent }) => {
               if (nativeEvent.actionKey === "all-chats") {
