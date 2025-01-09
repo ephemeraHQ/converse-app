@@ -22,6 +22,7 @@ import { useRouter } from "@/navigation/useNavigation";
 import { setAuthStatus } from "@/data/store/authStore";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import logger from "@/utils/logger";
+import { converseEventEmitter } from "@/utils/events";
 
 export const OnboardingPasskeyScreen = memo(function Screen() {
   return (
@@ -67,6 +68,10 @@ const Content = memo(function Content() {
   );
 
   const inputTextRef = useRef<string>("");
+
+  const showDebug = useCallback(() => {
+    converseEventEmitter.emit("showDebugMenu");
+  }, []);
 
   const handleError = useCallback(
     (error: string) => {
@@ -275,6 +280,7 @@ const Content = memo(function Content() {
         text={"Onboard with passkey"}
         onPress={onboardWithPasskey}
         loading={loading}
+        onLongPress={showDebug}
       />
       <Button
         text={translate("passkey.createButton")}
