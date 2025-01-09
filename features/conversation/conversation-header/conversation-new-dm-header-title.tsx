@@ -1,5 +1,5 @@
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-header/conversation-header-title";
-import Avatar from "@components/Avatar";
+import { Avatar } from "@components/Avatar";
 import { usePreferredAvatarUri } from "@hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@hooks/usePreferredName";
 import { useProfileSocials } from "@hooks/useProfileSocials";

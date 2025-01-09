@@ -1,6 +1,6 @@
-import { V3GroupConversationListItem } from "@/features/conversation-list/V3GroupConversationListItem";
+import { V3GroupConversationListItem } from "@/features/conversation-list/components/conversation-list-item/V3GroupConversationListItem";
 import { AnimatedVStack } from "@/design-system/VStack";
-import { V3DMListItem } from "@/features/conversation-list/V3DMListItem";
+import { V3DMListItem } from "@/features/conversation-list/components/conversation-list-item/V3DMListItem";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";

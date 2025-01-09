@@ -1,21 +1,19 @@
-import { useChatStore } from "@/data/store/accountsStore";
+import { useChatStore, useCurrentAccount } from "@/data/store/accountsStore";
 import { useSelect } from "@/data/store/storeHelpers";
+import { useConversationIsUnreadByTopic } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { saveTopicsData } from "@utils/api";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 
 type UseToggleReadStatusProps = {
   topic: ConversationTopic;
-  isUnread: boolean;
-  currentAccount: string;
 };
 
-export const useToggleReadStatus = ({
-  topic,
-  isUnread,
-  currentAccount,
-}: UseToggleReadStatusProps) => {
+export const useToggleReadStatus = ({ topic }: UseToggleReadStatusProps) => {
+  const currentAccount = useCurrentAccount()!;
   const { setTopicsData } = useChatStore(useSelect(["setTopicsData"]));
+  const isUnread = useConversationIsUnreadByTopic({ topic });
+
   return useCallback(() => {
     const newStatus = isUnread ? "read" : "unread";
     const timestamp = new Date().getTime();

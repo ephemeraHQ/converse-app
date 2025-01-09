@@ -22,7 +22,7 @@ import {
   getPrimaryNames,
 } from "@utils/profile";
 import { shortAddress } from "@utils/strings/shortAddress";
-import Avatar from "../Avatar";
+import { Avatar } from "../Avatar";
 import { NavigationChatButton } from "@search/components/NavigationChatButton";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
 

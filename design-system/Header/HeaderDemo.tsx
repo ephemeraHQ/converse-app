@@ -1,7 +1,6 @@
 import { memo } from "react";
-
-import Avatar from "../../components/Avatar";
-import { useAppTheme } from "../../theme/useAppTheme";
+import { Avatar } from "@/components/Avatar";
+import { useAppTheme } from "@/theme/useAppTheme";
 import { HStack } from "../HStack";
 import { ScrollView } from "../ScrollView";
 import { Text } from "../Text";

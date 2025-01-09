@@ -1,6 +1,5 @@
-import { useCurrentAccount } from "@/data/store/accountsStore";
 import { VStack } from "@/design-system/VStack";
-import { useConversationListConversation } from "@/features/conversation-list/hooks/use-conversation-list-conversation";
+import { useConversationByTopic } from "@/features/conversation-list/hooks/use-conversation-by-topic";
 import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
 import { useHandleDeleteGroup } from "@/features/conversation-list/hooks/useHandleDeleteGroup";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
@@ -119,7 +118,7 @@ function useConversationContextMenuReadItem(args: {
 }): IUseContextMenuItem {
   const { conversationTopic } = args;
 
-  const conversation = useConversationListConversation(conversationTopic);
+  const conversation = useConversationByTopic(conversationTopic);
 
   const isUnread = useConversationIsUnread({
     topic: conversationTopic,
@@ -127,12 +126,8 @@ function useConversationContextMenuReadItem(args: {
     timestampNs: conversation?.lastMessage?.sentNs ?? 0,
   });
 
-  const currentAccount = useCurrentAccount();
-
   const toggleReadStatus = useToggleReadStatus({
     topic: conversationTopic,
-    isUnread,
-    currentAccount: currentAccount!,
   });
 
   return {
@@ -155,7 +150,7 @@ function useConversationContextMenuDeleteItem(args: {
 
   const { theme } = useAppTheme();
 
-  const conversation = useConversationListConversation(conversationTopic);
+  const conversation = useConversationByTopic(conversationTopic);
 
   const handleDeleteFn = conversation
     ? isConversationGroup(conversation)

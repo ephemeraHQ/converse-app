@@ -3,7 +3,7 @@ import { AnimatedHStack } from "@/design-system/HStack";
 import { PinnedV3DMConversation } from "@/features/conversation-list/PinnedConversations/PinnedV3DMConversation";
 import { PinnedV3GroupConversation } from "@/features/conversation-list/PinnedConversations/PinnedV3GroupConversation";
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/PinnedConversations/conversation-list-pinned-conversations.styles";
-import { ConversationListAvatarSkeleton } from "@/features/conversation-list/components/conversation-list-avatar-skeleton";
+import { ConversationListAvatarSkeleton } from "@/features/conversation-list/components/conversation-list-item/conversation-list-item-avatar-skeleton";
 import { useConversationListStoreForCurrentAccount } from "@/features/conversation-list/stores/conversation-list.store";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useConversationListQuery } from "@/queries/useConversationListQuery";
@@ -14,7 +14,7 @@ import { useCurrentAccount } from "@data/store/accountsStore";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo } from "react";
 import { ViewStyle } from "react-native";
-import { useConversationListConversation } from "../hooks/use-conversation-list-conversation";
+import { useConversationByTopic } from "../hooks/use-conversation-by-topic";
 
 export const ConversationListPinnedConversations = memo(
   function ConversationListPinnedConversations() {
@@ -107,7 +107,7 @@ const PinnedConversationWrapper = memo(
   function PinnedConversationWrapper(props: { topic: ConversationTopic }) {
     const { topic } = props;
 
-    const conversation = useConversationListConversation(topic);
+    const conversation = useConversationByTopic(topic);
 
     if (!conversation) {
       captureError(

@@ -1,4 +1,4 @@
-import Avatar from "@/components/Avatar";
+import { Avatar } from "@/components/Avatar";
 import { ErroredHeader } from "@/components/ErroredHeader";
 import InitialLoad from "@/components/InitialLoad";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
@@ -18,10 +18,10 @@ import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { ConversationListPinnedConversations } from "@/features/conversation-list/PinnedConversations/PinnedConversations";
-import { V3DMListItem } from "@/features/conversation-list/V3DMListItem";
-import { V3GroupConversationListItem } from "@/features/conversation-list/V3GroupConversationListItem";
-import { ConversationListAvatarSkeleton } from "@/features/conversation-list/components/conversation-list-avatar-skeleton";
-import { ConversationListItemDumb } from "@/features/conversation-list/components/conversation-list-item";
+import { V3DMListItem } from "@/features/conversation-list/components/conversation-list-item/V3DMListItem";
+import { V3GroupConversationListItem } from "@/features/conversation-list/components/conversation-list-item/V3GroupConversationListItem";
+import { ConversationListItem } from "@/features/conversation-list/components/conversation-list-item/conversation-list-item";
+import { ConversationListAvatarSkeleton } from "@/features/conversation-list/components/conversation-list-item/conversation-list-item-avatar-skeleton";
 import { ConversationList } from "@/features/conversation-list/components/conversation-list/conversation-list";
 import { useConversationContextMenuViewDefaultProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-default-props";
 import { useShouldShowConnecting } from "@/features/conversation-list/hooks/useShouldShowConnecting";
@@ -186,13 +186,8 @@ export const ConversationListSkeletons = memo(
       <VStack>
         {/* 8 to fill up the screen */}
         {new Array(8).fill(null).map((_, index) => (
-          <ConversationListItemDumb
+          <ConversationListItem
             key={index}
-            isUnread={false}
-            showError={false}
-            showImagePreview={false}
-            imagePreviewUrl={undefined}
-            leftActionIcon="plus"
             avatarComponent={
               <ConversationListAvatarSkeleton
                 color={theme.colors.fill.minimal}
@@ -290,7 +285,7 @@ const Requests = memo(function Requests() {
   }
 
   return (
-    <ConversationListItemDumb
+    <ConversationListItem
       title="Requests"
       onPress={() => {
         navigation.navigate("ChatsRequests");
@@ -314,11 +309,6 @@ const Requests = memo(function Requests() {
           />
         </Center>
       }
-      leftActionIcon="chevron.right"
-      isUnread={false}
-      showError={false}
-      showImagePreview={false}
-      imagePreviewUrl={undefined}
     />
   );
 });
@@ -383,7 +373,11 @@ function useHeaderWrapper() {
             </Center>
           </Pressable>
           <ContextMenuButton
-            hitSlop={theme.spacing.lg}
+            // hitSlop={theme.spacing.sm} // Not working...
+            style={{
+              paddingVertical: theme.spacing.sm, // TMP solution for the hitSlop not working
+              paddingRight: theme.spacing.sm, // TMP solution for the hitSlop not working
+            }}
             isMenuPrimaryAction
             onPressMenuItem={({ nativeEvent }) => {
               if (nativeEvent.actionKey === "all-chats") {
@@ -466,9 +460,11 @@ function useHeaderWrapper() {
             }}
           >
             <HStack
+              // {...debugBorder()}
               style={{
                 alignItems: "center",
                 columnGap: theme.spacing.xxxs,
+                // paddingVertical: theme.spacing.sm,
               }}
             >
               <Text>{shortDisplayName(preferredName)}</Text>

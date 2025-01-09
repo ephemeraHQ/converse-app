@@ -102,16 +102,43 @@ export const animation = {
 
   fadeInDownSlow: () => FadeInDown.duration(timing.slow).easing(SICK_EASE_OUT),
 
-  reanimatedFadeOutScaleOut: new Keyframe({
-    0: {
-      opacity: 1,
-      transform: [{ scale: 1 }],
+  reanimatedFadeOutScaleOut:
+    (args?: { delay?: number; damping?: number; stiffness?: number }) => () => {
+      "worklet";
+
+      const {
+        delay,
+        damping = SICK_DAMPING,
+        stiffness = SICK_STIFFNESS,
+      } = args ?? {};
+      const springConfig = {
+        damping,
+        stiffness,
+      };
+
+      const animations = {
+        opacity: delay
+          ? withDelay(delay, withSpring(0, springConfig))
+          : withSpring(0, springConfig),
+        transform: [
+          {
+            scale: delay
+              ? withDelay(delay, withSpring(0, springConfig))
+              : withSpring(0, springConfig),
+          },
+        ],
+      };
+
+      const initialValues = {
+        opacity: 1,
+        transform: [{ scale: 1 }],
+      };
+
+      return {
+        initialValues,
+        animations,
+      };
     },
-    100: {
-      opacity: 0,
-      transform: [{ scale: 0 }],
-    },
-  }).duration(500),
 
   reanimatedFadeInScaleIn:
     (args?: { delay?: number; damping?: number; stiffness?: number }) => () => {

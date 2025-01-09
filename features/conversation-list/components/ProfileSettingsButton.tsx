@@ -4,7 +4,7 @@ import { Platform, TouchableOpacity } from "react-native";
 
 import { currentAccount } from "@data/store/accountsStore";
 import { navigate } from "@utils/navigation";
-import Avatar from "../../../components/Avatar";
+import { Avatar } from "../../../components/Avatar";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 

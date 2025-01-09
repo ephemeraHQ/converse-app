@@ -3,7 +3,7 @@ import { screen } from "@testing-library/react-native";
 import React from "react";
 import { measureRenders } from "reassure";
 
-import Avatar from "../Avatar";
+import { Avatar } from "../Avatar";
 import { TestThemeProvider } from "@/design-system/test-utils/renderWithThemeProvider";
 
 jest.setTimeout(600_000);
