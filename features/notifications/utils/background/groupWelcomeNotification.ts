@@ -7,6 +7,8 @@ import notifee, {
 } from "@notifee/react-native";
 import { androidChannel } from "../setupAndroidNotificationChannel";
 import { notificationAlreadyShown } from "./alreadyShown";
+import { getInboxIdFromCryptocurrencyAddress } from "@/utils/xmtpRN/signIn";
+import { getXmtpClientOrThrow } from "@/features/Accounts/accounts.utils";
 
 export const isGroupWelcomeContentTopic = (contentTopic: string) => {
   return contentTopic.startsWith("/xmtp/mls/1/w-");
@@ -28,9 +30,16 @@ const getNewGroup = async (xmtpClient: ConverseXmtpClientType) => {
 };
 
 export const handleGroupWelcomeNotification = async (
-  xmtpClient: ConverseXmtpClientType,
   notification: ProtocolNotification
 ) => {
+  const inboxId = await getInboxIdFromCryptocurrencyAddress({
+    address: notification.account,
+    cryptocurrency: "ETH",
+  });
+  const xmtpClient = getXmtpClientOrThrow({
+    inboxId,
+    caller: "handleGroupWelcomeNotification",
+  });
   const group = await getNewGroup(xmtpClient);
   // Not displaying notifications for already shown messages
   if (!group) return;

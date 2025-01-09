@@ -30,6 +30,8 @@ export type SupportedCodecsType = [
 ];
 
 export type ConverseXmtpClientType = Client<SupportedCodecsType>;
+const f: ConverseXmtpClientType = null as any as ConverseXmtpClientType;
+f.inboxState;
 
 export type ConversationWithCodecsType = Conversation<SupportedCodecsType>;
 

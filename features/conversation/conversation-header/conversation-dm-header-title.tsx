@@ -1,9 +1,8 @@
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-header/conversation-header-title";
 import { usePreferredInboxAddress } from "@/hooks/usePreferredInboxAddress";
-import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
+import { useDmPeerInboxIdForCurrentUser } from "@/queries/useDmPeerInbox";
 import { copyToClipboard } from "@/utils/clipboard";
 import Avatar from "@components/Avatar";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { usePreferredAvatarUri } from "@hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@hooks/usePreferredName";
 import { useProfileSocials } from "@hooks/useProfileSocials";
@@ -17,33 +16,33 @@ type DmConversationTitleProps = {
 };
 
 export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
-  const account = useCurrentAccount()!;
-
   const navigation = useRouter();
 
   const { theme } = useAppTheme();
 
-  const { data: peerInboxId } = useDmPeerInboxId({ account, topic });
+  const { data: peerInboxId } = useDmPeerInboxIdForCurrentUser({
+    topic,
+  });
 
-  const peerAddress = usePreferredInboxAddress(peerInboxId!);
+  const peerEthereumAddress = usePreferredInboxAddress(peerInboxId!);
 
   const onPress = useCallback(() => {
-    if (peerAddress) {
-      navigation.push("Profile", { address: peerAddress });
+    if (peerEthereumAddress) {
+      navigation.push("Profile", { inboxId: peerInboxId! });
     }
-  }, [navigation, peerAddress]);
+  }, [navigation, peerEthereumAddress]);
 
   const onLongPress = useCallback(() => {
     copyToClipboard(JSON.stringify(topic));
   }, [topic]);
 
-  const { isLoading } = useProfileSocials(peerAddress ?? "");
+  const { isLoading } = useProfileSocials({ inboxId: peerInboxId! });
 
-  const preferredName = usePreferredName(peerAddress ?? "");
+  const preferredName = usePreferredName({ inboxId: peerInboxId! });
 
-  const preferredAvatarUri = usePreferredAvatarUri(peerAddress ?? "");
+  const preferredAvatarUri = usePreferredAvatarUri({ inboxId: peerInboxId! });
 
-  const displayAvatar = peerAddress && !isLoading;
+  const displayAvatar = peerEthereumAddress && !isLoading;
   if (!displayAvatar) return null;
 
   return (

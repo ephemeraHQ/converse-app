@@ -24,6 +24,7 @@ import { useInitConnectViaWalletState } from "./useInitConnectViaWalletState";
 
 type IConnectViaWalletProps = {
   address: string;
+  inboxId: string;
   onDoneConnecting: () => void;
   onErrorConnecting: (arg: { error: Error }) => void;
 };
@@ -31,7 +32,7 @@ type IConnectViaWalletProps = {
 export const ConnectViaWallet = memo(function ConnectViaWallet(
   props: IConnectViaWalletProps
 ) {
-  const { address, onErrorConnecting, onDoneConnecting } = props;
+  const { address, inboxId, onErrorConnecting, onDoneConnecting } = props;
 
   const finishedConnectingRef = useRef(false);
 
@@ -41,7 +42,7 @@ export const ConnectViaWallet = memo(function ConnectViaWallet(
     onBeforeRemove: () => {
       // Before we leave, make sure the user completed the flow otherwise disconnect
       if (!finishedConnectingRef.current) {
-        disconnect({ address });
+        disconnect({ inboxId });
       }
     },
     onFocus() {
@@ -60,10 +61,10 @@ export const ConnectViaWallet = memo(function ConnectViaWallet(
   const handleErrorConnecting = useCallback(
     (arg: { error: Error }) => {
       // When something went wrong, let's be safe and disconnect
-      disconnect({ address }).catch(sentryTrackError);
+      disconnect({ inboxId }).catch(sentryTrackError);
       onErrorConnecting(arg);
     },
-    [onErrorConnecting, disconnect, address]
+    [onErrorConnecting, disconnect, inboxId]
   );
 
   return (
@@ -103,24 +104,17 @@ const ConnectViaWalletStateWrapper = memo(
   }
 );
 
-const ConnectViaWalletUI = memo(function ConnectViaWalletUI(props: object) {
+const ConnectViaWalletUI = memo(function ConnectViaWalletUI() {
   const { theme } = useAppTheme();
 
-  const {
-    address,
-    loading,
-    waitingForNextSignature,
-    signer,
-    alreadyV3Db,
-    signaturesDone,
-  } = useConnectViaWalletStoreContext((state) => ({
-    address: state.address,
-    loading: state.loading,
-    waitingForNextSignature: state.waitingForNextSignature,
-    signer: state.signer,
-    alreadyV3Db: state.alreadyV3Db,
-    signaturesDone: state.numberOfSignaturesDone,
-  }));
+  const { address, loading, waitingForNextSignature, signer, alreadyV3Db } =
+    useConnectViaWalletStoreContext((state) => ({
+      address: state.address,
+      loading: state.loading,
+      waitingForNextSignature: state.waitingForNextSignature,
+      signer: state.signer,
+      alreadyV3Db: state.alreadyV3Db,
+    }));
 
   const connectViewWalletStore = useConnectViaWalletStore();
 

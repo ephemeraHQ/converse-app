@@ -16,6 +16,7 @@ type OnboardingParamList = {
   OnboardingGetStarted: undefined;
   OnboardingPrivy: undefined;
   OnboardingConnectWallet: {
+    inboxId: string;
     address: string;
   };
   OnboardingNotifications: undefined;

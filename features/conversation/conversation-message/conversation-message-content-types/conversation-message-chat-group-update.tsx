@@ -1,11 +1,10 @@
 import Avatar from "@components/Avatar";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { HStack } from "@design-system/HStack";
 import { Pressable } from "@design-system/Pressable";
 import { ITextProps, Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
 import { TxKeyPath, translate } from "@i18n";
-import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
+import { useSocialProfileQueryByInboxId } from "@queries/useInboxProfileSocialsQuery";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { navigate } from "@utils/navigation";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
@@ -78,20 +77,18 @@ type IChatGroupMemberLeftProps = {
 
 export function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
   const { themed } = useAppTheme();
-  const currentAccount = useCurrentAccount();
-  const { data } = useInboxProfileSocialsQuery(currentAccount!, inboxId);
+  const { data } = useSocialProfileQueryByInboxId(inboxId);
   const { theme } = useAppTheme();
 
+  // todo(lustig) more of this socials typing issues
+  // @ts-expect-error
   const firstSocials = data?.[0];
 
   if (!firstSocials) {
     return null;
   }
 
-  const readableName = getPreferredName(
-    firstSocials,
-    firstSocials.address ?? ""
-  );
+  const readableName = getPreferredName(firstSocials);
   const avatarUri = getPreferredAvatar(firstSocials);
 
   return (
@@ -100,6 +97,8 @@ export function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
         style={themed($pressableContent)}
         onPress={() => {
           navigate("Profile", {
+            // todo(lustig) more of this socials typing issues
+            // @ts-expect-error
             address: firstSocials.address ?? "",
           });
         }}
@@ -124,20 +123,18 @@ type IChatGroupMemberJoinedProps = {
 
 function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
   const { themed } = useAppTheme();
-  const currentAccount = useCurrentAccount();
-  const { data } = useInboxProfileSocialsQuery(currentAccount!, inboxId);
+  const { data } = useSocialProfileQueryByInboxId(inboxId);
   const { theme } = useAppTheme();
 
+  // todo(lustig) more of this socials typing issues
+  // @ts-expect-error
   const firstSocials = data?.[0];
 
   if (!firstSocials) {
     return null;
   }
 
-  const readableName = getPreferredName(
-    firstSocials,
-    firstSocials.address ?? ""
-  );
+  const readableName = getPreferredName(firstSocials);
   const avatarUri = getPreferredAvatar(firstSocials);
 
   return (
@@ -145,7 +142,7 @@ function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
       <Pressable
         onPress={() => {
           navigate("Profile", {
-            address: firstSocials.address ?? "",
+            inboxId,
           });
         }}
         style={themed($pressableContent)}
@@ -174,13 +171,11 @@ function ChatGroupMetadataUpdate({
   initiatorInboxId,
 }: IChatGroupMetadataUpdateProps) {
   const { themed } = useAppTheme();
-  const currentAccount = useCurrentAccount();
-  const { data } = useInboxProfileSocialsQuery(
-    currentAccount!,
-    initiatorInboxId
-  );
+  const { data } = useSocialProfileQueryByInboxId(initiatorInboxId);
   const { theme } = useAppTheme();
 
+  // todo(lustig) more of this socials typing issues
+  // @ts-expect-error
   const firstSocials = data?.[0];
 
   if (!firstSocials) {
@@ -206,10 +201,7 @@ function ChatGroupMetadataUpdate({
       return null;
   }
 
-  const readableName = getPreferredName(
-    firstSocials,
-    firstSocials.address ?? ""
-  );
+  const readableName = getPreferredName(firstSocials);
 
   const avatarUri = getPreferredAvatar(firstSocials);
 
@@ -218,7 +210,7 @@ function ChatGroupMetadataUpdate({
       <Pressable
         onPress={() => {
           navigate("Profile", {
-            address: firstSocials.address ?? "",
+            inboxId: initiatorInboxId,
           });
         }}
         style={themed($pressableContent)}

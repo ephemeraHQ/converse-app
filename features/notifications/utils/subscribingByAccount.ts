@@ -1,1 +1,1 @@
-export const subscribingByAccount: { [account: string]: boolean } = {};
+export const subscribingByInboxId: { [inboxId: string]: boolean } = {};

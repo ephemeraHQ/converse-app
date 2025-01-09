@@ -1,4 +1,4 @@
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 
 export enum QueryKeys {
   // Conversations
@@ -28,79 +28,77 @@ export enum QueryKeys {
 }
 
 // Conversations
-export const conversationsQueryKey = (account: string) => [
+export const conversationsQueryKey = (args: { inboxId?: string }) => [
   QueryKeys.CONVERSATIONS,
-  account?.toLowerCase(),
+  args.inboxId,
 ];
 
-export const conversationQueryKey = (
-  account: string,
-  topic: ConversationTopic
-) => [QueryKeys.CONVERSATION, account?.toLowerCase(), topic];
+export const conversationQueryKey = (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+}) => [QueryKeys.CONVERSATION, args.inboxId, args.topic];
 
-export const dmQueryKey = (account: string, peer: string) => [
-  QueryKeys.CONVERSATION_DM,
-  account.toLowerCase(),
-  peer,
-];
+export const dmQueryKey = (args: {
+  inboxId: InboxId;
+  peerInboxId: InboxId;
+}) => [QueryKeys.CONVERSATION_DM, args.inboxId, args.peerInboxId];
 
 // Messages
-export const conversationMessageQueryKey = (
-  account: string,
-  messageId: string
-) => [QueryKeys.CONVERSATION_MESSAGE, account.toLowerCase(), messageId];
+export const conversationMessageQueryKey = (args: {
+  inboxId: InboxId;
+  messageId: string;
+}) => [QueryKeys.CONVERSATION_MESSAGE, args.inboxId, args.messageId];
 
-export const conversationMessagesQueryKey = (
-  account: string,
-  topic: ConversationTopic
-) => [QueryKeys.CONVERSATION_MESSAGES, account?.toLowerCase(), topic];
+export const conversationMessagesQueryKey = (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+}) => [QueryKeys.CONVERSATION_MESSAGES, args.inboxId, args.topic];
 
-export const conversationPreviewMessagesQueryKey = (
-  account: string,
-  topic: ConversationTopic
-) => [QueryKeys.CONVERSATION_MESSAGES, account?.toLowerCase(), topic];
+export const conversationPreviewMessagesQueryKey = (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+}) => [QueryKeys.CONVERSATION_MESSAGES, args.inboxId, args.topic];
 
 // Members
-export const groupMembersQueryKey = (
-  account: string,
-  topic: ConversationTopic
-) => [QueryKeys.GROUP_MEMBERS, account?.toLowerCase(), topic];
+export const groupMembersQueryKey = (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+}) => [QueryKeys.GROUP_MEMBERS, args.inboxId, args.topic];
 
 // Group Mutable Metadata
-export const groupPinnedFrameQueryKey = (
-  account: string,
-  topic: ConversationTopic
-) => [QueryKeys.PINNED_FRAME, account?.toLowerCase(), topic];
+export const groupPinnedFrameQueryKey = (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+}) => [QueryKeys.PINNED_FRAME, args.inboxId, args.topic];
 
-export const groupPermissionPolicyQueryKey = (
-  account: string,
-  topic: ConversationTopic
-) => [QueryKeys.GROUP_PERMISSION_POLICY, account.toLowerCase(), topic];
+export const groupPermissionPolicyQueryKey = (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+}) => [QueryKeys.GROUP_PERMISSION_POLICY, args.inboxId, args.topic];
 
-export const groupCreatorQueryKey = (
-  account: string,
-  topic: ConversationTopic
-) => [QueryKeys.GROUP_CREATOR, account.toLowerCase(), topic];
+export const groupCreatorQueryKey = (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+}) => [QueryKeys.GROUP_CREATOR, args.inboxId, args.topic];
 
 // Permissions
-export const groupPermissionsQueryKey = (
-  account: string,
-  topic: ConversationTopic
-) => [QueryKeys.GROUP_PERMISSIONS, account?.toLowerCase(), topic];
+export const groupPermissionsQueryKey = (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+}) => [QueryKeys.GROUP_PERMISSIONS, args.inboxId, args.topic];
 
 // Group Invites
-export const groupInviteQueryKey = (account: string, inviteId: string) => [
-  QueryKeys.GROUP_INVITE,
-  account?.toLowerCase(),
-  inviteId,
-];
+export const groupInviteQueryKey = (args: {
+  inboxId: InboxId;
+  inviteId: string;
+}) => [QueryKeys.GROUP_INVITE, args.inboxId, args.inviteId];
 
-export const groupJoinRequestQueryKey = (
-  account: string,
-  requestId: string
-) => [QueryKeys.GROUP_JOIN_REQUEST, account?.toLowerCase(), requestId];
+export const groupJoinRequestQueryKey = (args: {
+  inboxId: InboxId;
+  requestId: string;
+}) => [QueryKeys.GROUP_JOIN_REQUEST, args.inboxId, args.requestId];
 
-export const pendingJoinRequestsQueryKey = (account: string) => [
+export const pendingJoinRequestsQueryKey = (args: { inboxId: InboxId }) => [
   QueryKeys.PENDING_JOIN_REQUESTS,
-  account?.toLowerCase(),
+  args.inboxId,
 ];

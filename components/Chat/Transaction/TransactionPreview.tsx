@@ -123,7 +123,7 @@
 // //   const colorScheme = useColorScheme();
 // //   const styles = useStyles();
 // //   const { transaction, transactionDisplay, amountToDisplay } =
-// //     useTransactionForMessage(message, conversation?.peerAddress);
+// //     useTransactionForMessage(message, conversation?.peerEthereumAddress);
 
 // //   const showTransactionActionSheet = useCallback(() => {
 // //     const methods: { [key: string]: () => void } = {};

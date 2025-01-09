@@ -4,8 +4,8 @@ import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 import {
   getAccountIsAdmin,
   getAccountIsSuperAdmin,
-  getAddressIsAdmin,
-  getAddressIsSuperAdmin,
+  isUserAdminByInboxId,
+  isUserSuperAdminByInboxId,
 } from "./adminUtils"; // adjust the import path
 
 type EntityObjectWithAddress<T, K extends string = string> = {
@@ -86,51 +86,51 @@ describe("Permission Utilities", () => {
     });
   });
 
-  describe("getAddressIsAdmin", () => {
+  describe("isUserAdminByInboxId", () => {
     it("should return true if the address belongs to an admin", () => {
-      const result = getAddressIsAdmin(mockMembers, "address2");
+      const result = isUserAdminByInboxId(mockMembers, "address2");
       expect(result).toBe(true);
     });
 
     it("should return true if the address belongs to a super admin", () => {
-      const result = getAddressIsAdmin(mockMembers, "address3");
+      const result = isUserAdminByInboxId(mockMembers, "address3");
       expect(result).toBe(true);
     });
 
     it("should return false if the address does not belong to an admin or super admin", () => {
-      const result = getAddressIsAdmin(mockMembers, "address1");
+      const result = isUserAdminByInboxId(mockMembers, "address1");
       expect(result).toBe(false);
     });
 
     it("should return false if the members are undefined", () => {
-      const result = getAddressIsAdmin(undefined, "address1");
+      const result = isUserAdminByInboxId(undefined, "address1");
       expect(result).toBe(false);
     });
 
     it("should return false if the address is not found", () => {
-      const result = getAddressIsAdmin(mockMembers, "unknownAddress");
+      const result = isUserAdminByInboxId(mockMembers, "unknownAddress");
       expect(result).toBe(false);
     });
   });
 
-  describe("getAddressIsSuperAdmin", () => {
+  describe("isUserSuperAdminByInboxId", () => {
     it("should return true if the address belongs to a super admin", () => {
-      const result = getAddressIsSuperAdmin(mockMembers, "address3");
+      const result = isUserSuperAdminByInboxId(mockMembers, "address3");
       expect(result).toBe(true);
     });
 
     it("should return false if the address does not belong to a super admin", () => {
-      const result = getAddressIsSuperAdmin(mockMembers, "address2");
+      const result = isUserSuperAdminByInboxId(mockMembers, "address2");
       expect(result).toBe(false);
     });
 
     it("should return false if the members are undefined", () => {
-      const result = getAddressIsSuperAdmin(undefined, "address1");
+      const result = isUserSuperAdminByInboxId(undefined, "address1");
       expect(result).toBe(false);
     });
 
     it("should return false if the address is not found", () => {
-      const result = getAddressIsSuperAdmin(mockMembers, "unknownAddress");
+      const result = isUserSuperAdminByInboxId(mockMembers, "unknownAddress");
       expect(result).toBe(false);
     });
   });

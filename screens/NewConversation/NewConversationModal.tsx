@@ -23,7 +23,7 @@ import { translate } from "@/i18n";
 export type NewConversationModalParams = {
   NewConversationScreen: NewConversationNavParams;
   NewGroupSummary: {
-    members: (IProfileSocials & { address: string })[];
+    members: (IProfileSocials & { inboxId: string })[];
   };
 };
 

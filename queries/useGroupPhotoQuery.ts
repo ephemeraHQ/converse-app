@@ -1,15 +1,15 @@
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { getGroupQueryOptions } from "@/queries/useGroupQuery";
 import { useQuery } from "@tanstack/react-query";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 
 export const useGroupPhotoQuery = (args: {
-  account: string;
+  inboxId: InboxId;
   topic: ConversationTopic;
 }) => {
-  const { account, topic } = args;
+  const { inboxId, topic } = args;
   return useQuery({
-    ...getGroupQueryOptions({ account, topic }),
+    ...getGroupQueryOptions({ inboxId, topic }),
     select: (group) =>
       isConversationGroup(group) ? group.imageUrlSquare : undefined,
   });

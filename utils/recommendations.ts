@@ -1,8 +1,17 @@
-import { findFrens } from "./api";
-import { getRecommendationsStore } from "../data/store/accountsStore";
+import { findFrensByInboxId } from "./api";
+import { getRecommendationsStore } from "@/data/store/accountsStore";
 
-export const refreshRecommendationsForAccount = async (account: string) => {
-  const frens = await findFrens(account);
+export const refreshRecommendationsForInboxId = async (
+  inboxIdToRefresh: string | undefined
+) => {
+  if (!inboxIdToRefresh) {
+    return;
+  }
+  const frens = await findFrensByInboxId({
+    accountInboxId: inboxIdToRefresh,
+  });
   const now = new Date().getTime();
-  getRecommendationsStore(account).getState().setRecommendations(frens, now);
+  getRecommendationsStore({ inboxId: inboxIdToRefresh })
+    .getState()
+    .setRecommendations(frens, now);
 };

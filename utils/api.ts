@@ -1,16 +1,8 @@
-import { TransactionData } from "@components/TransactionPreview/TransactionPreview";
-import type { SimulateAssetChangesResponse } from "alchemy-sdk";
 import { GroupInvite } from "@utils/api.types";
 import axios, { AxiosError } from "axios";
-import * as Contacts from "expo-contacts";
 
-import {
-  analyticsPlatform,
-  analyticsAppVersion,
-  analyticsBuildNumber,
-} from "./analytics";
+import { analyticsPlatform, analyticsAppVersion } from "./analytics";
 import type { TransferAuthorizationMessage } from "./evm/erc20";
-import { getPrivyRequestHeaders } from "./evm/privy";
 import logger from "./logger";
 import type { TransactionDetails } from "./transaction";
 import config from "../config";
@@ -18,23 +10,22 @@ import type { TopicData } from "../data/store/chatStore";
 import type { IProfileSocials } from "@/features/profiles/profile-types";
 import type { Frens } from "../data/store/recommendationsStore";
 import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
-import type { InboxId } from "@xmtp/react-native-sdk";
-import { evmHelpers } from "./evm/helpers";
 import {
   getInstallationKeySignature,
   InstallationSignature,
 } from "./xmtpRN/client";
-import { getInboxId } from "./xmtpRN/signIn";
 import { createDedupedFetcher } from "./api.utils";
-import { getSecureMmkvForAccount } from "./mmkv";
+import { getSecureMmkvForInboxId } from "./mmkv";
 import {
   CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
   CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
   FIREBASE_APP_CHECK_HEADER_KEY,
-  XMTP_API_ADDRESS_HEADER_KEY,
+  XMTP_API_INBOX_ID_HEADER_KEY,
   XMTP_IDENTITY_KEY,
 } from "./api.constants";
 import { tryGetAppCheckToken } from "./appCheck";
+import { getCurrentInboxId } from "@/data/store/accountsStore";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 export const api = axios.create({
   baseURL: config.apiURI,
@@ -64,11 +55,11 @@ api.interceptors.response.use(
           2
         )
       );
-      const account = req.headers?.[XMTP_API_ADDRESS_HEADER_KEY];
-      if (typeof account !== "string") {
-        throw new Error("No account in request headers");
+      const inboxId = req.headers?.[XMTP_API_INBOX_ID_HEADER_KEY];
+      if (typeof inboxId !== "string") {
+        throw new Error("No inboxId in request headers");
       }
-      const secureMmkv = await getSecureMmkvForAccount(account);
+      const secureMmkv = await getSecureMmkvForInboxId({ inboxId });
       const refreshToken = secureMmkv.getString(
         CONVERSE_REFRESH_TOKEN_STORAGE_KEY
       );
@@ -82,7 +73,7 @@ api.interceptors.response.use(
       ) {
         try {
           const { accessToken } = await rotateAccessToken(
-            account,
+            { inboxId },
             refreshToken
           );
           req._retry = true;
@@ -120,7 +111,6 @@ type AuthParams = {
   installationPublicKey: string;
   installationKeySignature: string;
   appCheckToken: string;
-  account: string;
 };
 
 const { fetch: dedupedFetch } = createDedupedFetcher();
@@ -130,8 +120,6 @@ export async function fetchAccessToken({
   installationPublicKey,
   installationKeySignature,
   appCheckToken,
-  // TODO: Remove this once we move to InboxId as the account identifier
-  account,
 }: AuthParams): Promise<AuthResponse> {
   logger.info("Creating access token");
   const { data } = await dedupedFetch("/api/authenticate" + inboxId, () =>
@@ -145,7 +133,8 @@ export async function fetchAccessToken({
       },
       {
         headers: {
-          [XMTP_API_ADDRESS_HEADER_KEY]: account,
+          // used to access secure storage in failures. maybe there's another way to do this?
+          [XMTP_API_INBOX_ID_HEADER_KEY]: inboxId,
           [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
         },
       }
@@ -158,15 +147,15 @@ export async function fetchAccessToken({
   if (!data.refreshToken) {
     throw new Error("No refresh token in auth response");
   }
-  logger.info("Created access token");
+  logger.info(`Created access token for inboxId ${inboxId}`);
   return data;
 }
 
 export async function rotateAccessToken(
-  account: string,
+  { inboxId }: { inboxId: string },
   refreshToken: string | undefined
 ): Promise<AuthResponse> {
-  logger.info(`Rotating access token for account ${account}`);
+  logger.info(`Rotating access token for inboxId ${inboxId}`);
   if (!refreshToken) {
     throw new Error(
       "Can't request new access token without current token and refresh token"
@@ -174,44 +163,46 @@ export async function rotateAccessToken(
   }
 
   const { data } = await dedupedFetch(
-    `/api/authenticate/token-${account}`,
+    `/api/authenticate/token-${inboxId}`,
     () =>
       api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
   );
 
   if (!data) {
-    throw new Error(`Could not rotate access token for account ${account}`);
+    throw new Error(`Could not rotate access token for inboxId ${inboxId}`);
   }
   if (!data.accessToken) {
     throw new Error(
-      `No access token in token rotate response for account ${account}`
+      `No access token in token rotate response for inboxId ${inboxId}`
     );
   }
-  logger.info(`Rotated access token for account ${account}`, { data });
-  const secureMmkv = await getSecureMmkvForAccount(account);
+  logger.info(`Rotated access token for inboxId ${inboxId}`, { data });
+  const secureMmkv = await getSecureMmkvForInboxId({ inboxId });
   secureMmkv.set(CONVERSE_ACCESS_TOKEN_STORAGE_KEY, data.accessToken);
   secureMmkv.set(CONVERSE_REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
   return data;
 }
 
-export const xmtpSignatureByAccount: {
-  [account: string]: InstallationSignature;
+const xmtpSignatureByInboxId: {
+  [inboxId: string]: InstallationSignature;
 } = {};
 
 type XmtpApiHeaders = {
-  [XMTP_API_ADDRESS_HEADER_KEY]: string;
+  [XMTP_API_INBOX_ID_HEADER_KEY]: string;
   [FIREBASE_APP_CHECK_HEADER_KEY]: string;
   /** Bearer <jwt access token>*/
   authorization: `Bearer ${string}`;
 };
 
-export async function getXmtpApiHeaders(
-  account: string
-): Promise<XmtpApiHeaders> {
-  if (!account) {
-    throw new Error("[getXmtpApiHeaders] No account provided");
+export async function getXmtpApiHeaders({
+  inboxId,
+}: {
+  inboxId: string;
+}): Promise<XmtpApiHeaders> {
+  if (!inboxId) {
+    throw new Error("[getXmtpApiHeaders] No inboxId provided");
   }
-  const secureMmkv = await getSecureMmkvForAccount(account);
+  const secureMmkv = await getSecureMmkvForInboxId({ inboxId });
   let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
 
   const appCheckToken = await tryGetAppCheckToken();
@@ -225,18 +216,19 @@ our application on a device that has not been tampered with.
 
   if (!accessToken) {
     const installationKeySignature =
-      xmtpSignatureByAccount[account] ||
-      (await getInstallationKeySignature(account, XMTP_IDENTITY_KEY));
+      xmtpSignatureByInboxId[inboxId] ||
+      (await getInstallationKeySignature({
+        inboxId,
+        messageToSign: XMTP_IDENTITY_KEY,
+      }));
 
-    if (!xmtpSignatureByAccount[account]) {
-      xmtpSignatureByAccount[account] = installationKeySignature;
+    if (!xmtpSignatureByInboxId[inboxId]) {
+      xmtpSignatureByInboxId[inboxId] = installationKeySignature;
     }
 
     try {
-      const inboxId = await getInboxId(account);
       const authTokensResponse = await fetchAccessToken({
         inboxId,
-        account,
         appCheckToken,
         ...installationKeySignature,
       });
@@ -259,100 +251,15 @@ our application on a device that has not been tampered with.
     }
   }
   if (!accessToken) {
-    throw new Error("No access token");
+    throw new Error(`No access token for inboxId ${inboxId}`);
   }
 
   return {
-    [XMTP_API_ADDRESS_HEADER_KEY]: account,
+    [XMTP_API_INBOX_ID_HEADER_KEY]: inboxId,
     [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
     authorization: `Bearer ${accessToken}`,
   };
 }
-
-const lastSaveUser: { [address: string]: number } = {};
-
-export const saveUser = async (address: string, privyAccountId: string) => {
-  const now = new Date().getTime();
-  const last = lastSaveUser[address] || 0;
-  if (now - last < 3000) {
-    // Avoid race condition when changing account at same
-    // time than coming back on the app.
-    return;
-  }
-  lastSaveUser[address] = now;
-
-  await api.post(
-    "/api/user",
-    {
-      address,
-      privyAccountId,
-      platform: analyticsPlatform,
-      version: analyticsAppVersion,
-      build: analyticsBuildNumber,
-    },
-    { headers: await getXmtpApiHeaders(address) }
-  );
-};
-
-export const userExists = async (address: string) => {
-  const { data } = await api.get("/api/user/exists", { params: { address } });
-  return data.userExists;
-};
-
-export const getPrivyAuthenticatedUser = async () => {
-  const { data } = await api.get("/api/user/privyauth", {
-    headers: getPrivyRequestHeaders(),
-  });
-  return data;
-};
-
-// export const getInvite = async (inviteCode: string): Promise<boolean> => {
-//   const { data } = await api.get("/api/user/invite", {
-//     params: { inviteCode },
-//   });
-//   if (data.inviteCode !== inviteCode) {
-//     throw new Error("Invalid invite code");
-//   }
-//   return data;
-// };
-
-// type ReportMessageQuery = {
-//   account: string;
-//   messageId: string;
-//   messageContent: string;
-//   messageSender: string;
-// };
-
-// export const reportMessage = async ({
-//   account,
-//   messageId,
-//   messageContent,
-//   messageSender,
-// }: ReportMessageQuery) => {
-//   await api.post(
-//     "/api/report",
-//     {
-//       messageId,
-//       messageContent,
-//       messageSender,
-//     },
-//     { headers: await getXmtpApiHeaders(account) }
-//   );
-// };
-
-export const getPeersStatus = async (account: string) => {
-  const { data } = await api.get("/api/consent/peer", {
-    headers: await getXmtpApiHeaders(account),
-  });
-  return data as { [peerAddress: string]: "blocked" | "consented" };
-};
-
-export const deletePeersFromDb = async (account: string): Promise<void> => {
-  const { data } = await api.delete("/api/consent", {
-    headers: await getXmtpApiHeaders(account),
-  });
-  return data.message;
-};
 
 export const resolveEnsName = async (
   name: string
@@ -390,7 +297,9 @@ export const getProfilesForInboxIds = async ({
   inboxIds,
 }: {
   inboxIds: string[];
-}): Promise<{ [inboxId: InboxId]: IProfileSocials[] }> => {
+}): Promise<{
+  [inboxId: string]: /*todo(lustig) confirm this type*/ IProfileSocials;
+}> => {
   logger.info("Fetching profiles for inboxIds", inboxIds);
   const { data } = await api.get("/api/inbox/", {
     params: { ids: inboxIds.join(",") },
@@ -403,93 +312,95 @@ export const getProfilesForInboxIds = async ({
   return data;
 };
 
-export const searchProfiles = async (
-  query: string,
-  account: string
-): Promise<{ [address: string]: IProfileSocials }> => {
+export const searchXmtpProfilesByRawStringForCurrentAccount = async ({
+  query,
+}: {
+  query: string;
+}): Promise<{
+  /** @todo(lustig) confirm this type */ [inboxId: string]: IProfileSocials;
+}> => {
+  const currentInboxId = getCurrentInboxId();
+  if (!currentInboxId) {
+    throw new Error(
+      "[searchXmtpProfilesByRawStringForCurrentAccount] No inboxId provided"
+    );
+  }
   const { data } = await api.get("/api/profile/search", {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId: currentInboxId }),
     params: { query },
   });
+
   return data;
 };
 
-export const findFrens = async (account: string) => {
+export const findFrensByInboxId = async ({
+  accountInboxId,
+}: {
+  accountInboxId: string;
+}) => {
   const { data } = await api.get("/api/frens/find", {
-    headers: await getXmtpApiHeaders(account),
-    params: { address: evmHelpers.toChecksumAddress(account) },
+    headers: await getXmtpApiHeaders({ inboxId: accountInboxId }),
+    params: { inboxId: accountInboxId },
   });
 
   return data.frens as Frens;
 };
 
-type DesktopSessionData = {
-  sessionId: string;
-  publicKey: string;
-  otp: string;
-};
-export const openDesktopSession = async ({
-  sessionId,
-  publicKey,
-  otp,
-}: DesktopSessionData) =>
-  api.post("/api/connect", { sessionId, publicKey, otp });
-
-export const fetchDesktopSessionXmtpKey = async ({
-  sessionId,
-  otp,
-}: DesktopSessionData): Promise<string | undefined> => {
-  const { data } = await api.get("/api/connect/session", {
-    params: { sessionId, otp },
-  });
-  return data?.encryptedXmtpKey;
-};
-
-export const markDesktopSessionDone = async ({
-  sessionId,
-  otp,
-}: DesktopSessionData): Promise<string | undefined> =>
-  api.delete("/api/connect/session", {
-    params: { sessionId, otp },
-  });
-
-export const saveTopicsData = async (
-  account: string,
+export const saveTopicsData = async ({
+  inboxId,
+  topicsData,
+}: {
+  inboxId: InboxId;
   topicsData: {
     [topic: string]: TopicData;
+  };
+}) => {
+  if (!inboxId) {
+    throw new Error("[saveTopicsData] No inboxId provided");
   }
-) => {
   await api.post("/api/topics", topicsData, {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
 };
 
-export const getTopicsData = async (account: string) => {
+export const getTopicsData = async ({ inboxId }: { inboxId: string }) => {
   const { data } = await api.get("/api/topics", {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data as { [topic: string]: TopicData };
 };
 
-export const pinTopics = async (account: string, topics: string[]) => {
+export const pinTopics = async ({
+  inboxId,
+  topics,
+}: {
+  inboxId: string;
+  topics: string[];
+}) => {
   await api.post(
     "/api/topics/pin",
     { topics },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
 };
 
-export const unpinTopics = async (account: string, topics: string[]) => {
+export const unpinTopics = async ({
+  inboxId,
+  topics,
+}: {
+  inboxId: string;
+  topics: string[];
+}) => {
   await api.delete("/api/topics/pin", {
     data: { topics },
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
 };
 
 export const postUSDCTransferAuthorization = async (
-  account: string,
+  { inboxId }: { inboxId: string },
   message: TransferAuthorizationMessage,
   signature: string
 ): Promise<string> => {
@@ -497,138 +408,138 @@ export const postUSDCTransferAuthorization = async (
     "/api/evm/transferWithAuthorization",
     { message, signature },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   return data.txHash;
 };
 
-export const getTransactionDetails = async (
-  account: string,
-  networkId: string,
-  reference: string
-): Promise<TransactionDetails> => {
+export const getTransactionDetails = async ({
+  inboxId,
+  networkId,
+  reference,
+}: {
+  inboxId: string;
+  networkId: string;
+  reference: string;
+}): Promise<TransactionDetails> => {
   const { data } = await api.get("/api/evm/transactionDetails", {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
     params: { networkId, reference },
   });
   return data;
 };
 
-export const getCoinbaseTransactionDetails = async (
-  account: string,
-  networkId: string,
-  sponsoredTxId: string
-): Promise<TransactionDetails> => {
+export const getCoinbaseTransactionDetails = async ({
+  inboxId,
+  networkId,
+  sponsoredTxId,
+}: {
+  inboxId: string;
+  networkId: string;
+  sponsoredTxId: string;
+}): Promise<TransactionDetails> => {
   const { data } = await api.get("/api/evm/coinbaseTransactionDetails", {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
     params: { networkId, sponsoredTxId },
   });
   return data;
 };
 
 export const claimProfile = async ({
-  account,
+  inboxId,
   profile,
 }: {
-  account: string;
+  inboxId: string;
   profile: ProfileType;
 }): Promise<string> => {
   const { data } = await api.post("/api/profile/username", profile, {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data;
 };
 
-export const checkUsernameValid = async (
-  address: string,
-  username: string
-): Promise<string> => {
+export const checkUsernameValid = async ({
+  inboxId,
+  address,
+  username,
+}: {
+  inboxId: string;
+  address: string;
+  username: string;
+}): Promise<string> => {
   const { data } = await api.get("/api/profile/username/valid", {
-    params: { address, username },
-    headers: await getXmtpApiHeaders(address),
+    params: { username, address },
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data;
 };
 
-export const getSendersSpamScores = async (sendersAddresses: string[]) => {
-  if (!sendersAddresses || sendersAddresses.length === 0) return {};
+export const getSendersSpamScores = async (senderInboxIds: string[]) => {
+  if (!senderInboxIds || senderInboxIds.length === 0) return {};
   const { data } = await api.post("/api/spam/senders/batch", {
-    sendersAddresses: sendersAddresses.filter((s) => !!s),
+    sendersAddresses: senderInboxIds.filter((s) => !!s),
   });
   return data as { [senderAddress: string]: number };
 };
 
-export const getPresignedUriForUpload = async (
-  userAddress: string | undefined,
-  contentType?: string | undefined
-) => {
+export const getPresignedUriForUpload = async ({
+  inboxId,
+  contentType,
+}: {
+  inboxId: InboxId;
+  contentType: string;
+}) => {
   const { data } = await api.get("/api/attachment/presigned", {
     params: { contentType },
-    headers: userAddress
-      ? await getXmtpApiHeaders(userAddress)
-      : getPrivyRequestHeaders(),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data as { objectKey: string; url: string };
 };
 
-export const getLastNotificationsSubscribeHash = async (
-  account: string,
-  nativeToken: string
-) => {
+export const getLastNotificationsSubscribeHash = async ({
+  inboxId,
+  nativeToken,
+}: {
+  inboxId: string;
+  nativeToken: string;
+}) => {
   const { data } = await api.post(
     "/api/notifications/subscriptionhash",
     { nativeToken },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   return data?.hash as string | undefined;
 };
 
-export const saveNotificationsSubscribe = async (
-  account: string,
-  nativeToken: string,
-  nativeTokenType: string,
-  notificationChannel: string | null,
+export const saveNotificationsSubscribe = async ({
+  inboxId,
+  nativeToken,
+  nativeTokenType,
+  notificationChannel,
+  topicsWithKeys,
+}: {
+  inboxId: string;
+  nativeToken: string;
+  nativeTokenType: string;
+  notificationChannel: string | null;
   topicsWithKeys: {
     [topic: string]: {
       status: "PUSH" | "MUTED";
       hmacKeys?: any;
     };
-  }
-) => {
+  };
+}) => {
   const { data } = await api.post(
     "/api/subscribe",
     { nativeToken, nativeTokenType, notificationChannel, topicsWithKeys },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   return data.subscribeHash as string;
-};
-
-export const notifyFarcasterLinked = async () => {
-  await api.post(
-    "/api/farcaster/linked",
-    {},
-    {
-      headers: getPrivyRequestHeaders(),
-    }
-  );
-};
-
-export const postAddressBook = async (
-  account: string,
-  data: {
-    deviceId: string;
-    countryCode: string;
-    contacts: Contacts.Contact[];
-  }
-) => {
-  await api.post("/api/addressbook", data, {
-    headers: await getXmtpApiHeaders(account),
-  });
 };
 
 export type GroupLink = { id: string; name: string; description: string };
@@ -651,15 +562,18 @@ export type JoinGroupLinkResult =
     }
   | { status: "ERROR"; reason: undefined; topic: undefined };
 
-export const joinGroupFromLink = async (
-  userAddress: string,
-  groupLinkId: string
-) => {
+export const joinGroupFromLink = async ({
+  inboxId,
+  groupLinkId,
+}: {
+  inboxId: string;
+  groupLinkId: string;
+}) => {
   const { data } = await api.post(
     `/api/groups/join`,
     { groupLinkId },
     {
-      headers: await getXmtpApiHeaders(userAddress),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   return data as JoinGroupLinkResult;
@@ -668,35 +582,53 @@ export const joinGroupFromLink = async (
 export type CreateGroupInviteResult = Pick<GroupInvite, "id" | "inviteLink">;
 
 // Create a group invite. The invite will be associated with the account used.
-export const createGroupInvite = async (
-  account: string,
+export const createGroupInvite = async ({
+  inboxId,
+  inputs,
+}: {
+  inboxId: InboxId;
   inputs: {
     groupName: string;
     description?: string;
     imageUrl?: string;
     groupId: string;
+  };
+}): Promise<CreateGroupInviteResult> => {
+  if (!inboxId) {
+    throw new Error("[createGroupInvite] Inbox ID is required");
   }
-): Promise<CreateGroupInviteResult> => {
   const { data } = await api.post("/api/groupInvite", inputs, {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data;
 };
 
 // Get a group invite by ID. This method is unauthenticated
-export const getGroupInvite = async (
-  inviteId: string
-): Promise<GroupInvite> => {
-  const { data } = await api.get(`/api/groupInvite/${inviteId}`);
+export const getGroupInvite = async ({
+  inboxId,
+  inviteId,
+}: {
+  inboxId: string;
+  inviteId: string;
+}): Promise<GroupInvite> => {
+  const { data } = await api.get(`/api/groupInvite/${inviteId}`, {
+    headers: await getXmtpApiHeaders({ inboxId }),
+  });
   return data;
 };
 
-export const deleteGroupInvite = async (
-  account: string,
-  inviteId: string
-): Promise<void> => {
+export const deleteGroupInvite = async ({
+  inboxId,
+  inviteId,
+}: {
+  inboxId: InboxId;
+  inviteId: string;
+}): Promise<void> => {
+  if (!inboxId) {
+    throw new Error("[deleteGroupInvite] Inbox ID is required");
+  }
   await api.delete(`/api/groupInvite/${inviteId}`, {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
 };
 
@@ -718,15 +650,18 @@ export type GroupJoinRequest = {
 
 // Create a group join request based on an invite ID.
 // This will trigger a push notification for the invite creator
-export const createGroupJoinRequest = async (
-  account: string,
-  inviteId: string
-): Promise<Pick<GroupJoinRequest, "id">> => {
+export const createGroupJoinRequest = async ({
+  inboxId,
+  inviteId,
+}: {
+  inboxId: string;
+  inviteId: string;
+}): Promise<Pick<GroupJoinRequest, "id">> => {
   const { data } = await api.post(
     "/api/groupJoinRequest",
     { inviteId },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   logger.debug("[API] Group join request created", data);
@@ -741,16 +676,20 @@ export const getGroupJoinRequest = async (
 };
 
 // Update the status of a group join request. The account must match the creator of the INVITE or the request will error
-export const updateGroupJoinRequestStatus = async (
-  account: string,
-  id: string,
-  status: GroupJoinRequest["status"]
-): Promise<Pick<GroupJoinRequest, "status" | "id">> => {
+export const updateGroupJoinRequestStatus = async ({
+  inboxId,
+  groupJoinRequestId,
+  status,
+}: {
+  inboxId: string;
+  groupJoinRequestId: string;
+  status: GroupJoinRequest["status"];
+}): Promise<Pick<GroupJoinRequest, "status" | "id">> => {
   const { data } = await api.put(
-    `/api/groupJoinRequest/${id}`,
+    `/api/groupJoinRequest/${groupJoinRequestId}`,
     { status },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   return data;
@@ -764,45 +703,56 @@ export type PendingGroupJoinRequest = {
 };
 
 // Get all pending groupJoinRequests for all invites that the account has created
-export const getPendingGroupJoinRequests = async (
-  account: string
-): Promise<{ joinRequests: PendingGroupJoinRequest[] }> => {
+export const getPendingGroupJoinRequests = async ({
+  inboxId,
+}: {
+  inboxId: string;
+}): Promise<{ joinRequests: PendingGroupJoinRequest[] }> => {
   const { data } = await api.get("/api/groupJoinRequest/pending", {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders({ inboxId }),
   });
   return data;
 };
 
 export const simulateTransaction = async (
-  account: string,
-  from: string,
-  chainId: number,
-  transaction: TransactionData
+  {
+    // currentSignerAddress,
+    // inboxId,
+    // chainId,
+    // transaction,
+  }: {
+    // inboxId: InboxId;
+    // currentSignerAddress: string;
+    // chainId: number;
+    // transaction: TransactionData;
+  }
 ) => {
-  const { data } = await api.post(
-    "/api/transactions/simulate",
-    {
-      address: from,
-      network: `eip155:${chainId}`,
-      value: transaction.value
-        ? `0x${BigInt(transaction.value).toString(16)}`
-        : undefined,
-      to: transaction.to,
-      data: transaction.data,
-    },
-    {
-      headers: await getXmtpApiHeaders(account),
-    }
-  );
-  return data as SimulateAssetChangesResponse;
+  throw new Error("Not implemented");
+  // const { data } = await api.post(
+  //   "/api/transactions/simulate",
+  //   {
+  //     address: currentSignerAddress,
+  //     to: transaction.to,
+  //     value: transaction.value
+  //       ? `0x${BigInt(transaction.value).toString(16)}`
+  //       : undefined,
+
+  //     data: transaction.data,
+  //     network: `eip155:${chainId}`,
+  //   },
+  //   {
+  //     headers: await getXmtpApiHeaders({ inboxId }),
+  //   }
+  // );
+  // return data as SimulateAssetChangesResponse;
 };
 
-export const putGroupInviteRequest = async ({
-  account,
+export const putGroupJoinRequest = async ({
+  inboxId,
   status,
   joinRequestId,
 }: {
-  account: string;
+  inboxId: InboxId;
   status: string;
   joinRequestId: string;
 }): Promise<void> => {
@@ -810,7 +760,7 @@ export const putGroupInviteRequest = async ({
     `/api/groupJoinRequest/${joinRequestId}`,
     { status },
     {
-      headers: await getXmtpApiHeaders(account),
+      headers: await getXmtpApiHeaders({ inboxId }),
     }
   );
   return data;

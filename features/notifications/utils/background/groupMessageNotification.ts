@@ -4,11 +4,7 @@ import notifee, {
   AndroidStyle,
   AndroidVisibility,
 } from "@notifee/react-native";
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getProfile,
-} from "@utils/profile";
+import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import {
   ConverseXmtpClientType,
   GroupWithCodecsType,
@@ -23,15 +19,25 @@ import { notificationAlreadyShown } from "./alreadyShown";
 import { getNotificationContent } from "./notificationContent";
 import { computeSpamScoreGroupMessage } from "./notificationSpamScore";
 import { ProtocolNotification } from "./protocolNotification";
+import { getProfileByInboxId } from "@/utils/profile/getProfile";
+import { getInboxIdFromCryptocurrencyAddress } from "@/utils/xmtpRN/signIn";
+import { getXmtpClientOrThrow } from "@/features/Accounts/accounts.utils";
 
 export const isGroupMessageContentTopic = (contentTopic: string) => {
   return contentTopic.startsWith("/xmtp/mls/1/g-");
 };
 
 export const handleGroupMessageNotification = async (
-  xmtpClient: ConverseXmtpClientType,
   notification: ProtocolNotification
 ) => {
+  const inboxId = await getInboxIdFromCryptocurrencyAddress({
+    address: notification.account,
+    cryptocurrency: "ETH",
+  });
+  const xmtpClient = getXmtpClientOrThrow({
+    inboxId,
+    caller: "handleGroupMessageNotification",
+  });
   let conversation = await xmtpClient.conversations.findConversationByTopic(
     notification.contentTopic as ConversationTopic
   );
@@ -59,16 +65,12 @@ export const handleGroupMessageNotification = async (
   if (spamScore >= 0) return;
   // For now, use the group member linked address as "senderAddress"
   // @todo => make inboxId a first class citizen
-  const senderAddress = (await conversation.members()).find(
+  const senderInboxId = (await conversation.members()).find(
     (m) => m.inboxId === message.senderInboxId
   )?.addresses[0];
-  if (!senderAddress) return;
-  const senderSocials = await getProfile(
-    xmtpClient.address,
-    message.senderInboxId,
-    senderAddress
-  );
-  const senderName = getPreferredName(senderSocials, senderAddress);
+  if (!senderInboxId) return;
+  const senderSocials = await getProfileByInboxId(message.senderInboxId);
+  const senderName = getPreferredName(senderSocials);
 
   const notificationContent = await getNotificationContent(
     conversation as GroupWithCodecsType,

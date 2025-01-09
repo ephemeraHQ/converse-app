@@ -1,6 +1,6 @@
 import {
   useChatStore,
-  useCurrentAccount,
+  useCurrentInboxId,
   useSettingsStore,
 } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
@@ -18,16 +18,14 @@ import { runOnJS } from "react-native-reanimated";
 import Avatar from "./Avatar";
 import { ConversationListItemDumb } from "./ConversationListItem/ConversationListItemDumb";
 import { GroupAvatarDumb } from "./GroupAvatar";
-import { useGroupConversationListAvatarInfo } from "../features/conversation-list/useGroupConversationListAvatarInfo";
 import { IIconName } from "@design-system/Icon/Icon.types";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useRoute } from "@navigation/useNavigation";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { actionSheetColors } from "@styles/colors";
-import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import { consentToInboxIdsOnProtocolForCurrentUser } from "@utils/xmtpRN/contacts";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { prefetchConversationMessages } from "@queries/useConversationMessages";
-import { useToggleReadStatus } from "../features/conversation-list/hooks/useToggleReadStatus";
+import { prefetchConversationMessagesForInboxByTopic } from "@queries/useConversationMessages";
 import { useMessageText } from "../features/conversation-list/hooks/useMessageText";
 import { useConversationIsUnread } from "../features/conversation-list/hooks/useMessageIsUnread";
 import {
@@ -36,6 +34,8 @@ import {
 } from "@/features/conversation-list/ConversationListContextMenu.store";
 import { ContextMenuIcon, ContextMenuItem } from "./ContextMenuItems";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { useToggleReadStatusForCurrentUser } from "@/features/conversation-list/hooks/useToggleReadStatus";
+import { useGroupConversationListAvatarInfoForCurrentUser } from "@/features/conversation-list/useGroupConversationListAvatarInfo";
 
 type V3GroupConversationListItemProps = {
   group: GroupWithCodecsType;
@@ -56,7 +56,7 @@ const useData = ({ group }: UseDataProps) => {
 
   const colorScheme = useColorScheme();
 
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()!;
 
   const { setTopicsData, setPinnedConversations } = useChatStore(
     useSelect(["setTopicsData", "setPinnedConversations"])
@@ -72,15 +72,12 @@ const useData = ({ group }: UseDataProps) => {
     timestampNs: timestamp,
   });
 
-  const { memberData } = useGroupConversationListAvatarInfo(
-    currentAccount,
-    group
-  );
+  const { memberData } =
+    useGroupConversationListAvatarInfoForCurrentUser(group);
 
-  const toggleReadStatus = useToggleReadStatus({
+  const toggleReadStatus = useToggleReadStatusForCurrentUser({
     topic,
     isUnread,
-    currentAccount,
   });
 
   const { setInboxIdPeerStatus } = useSettingsStore(
@@ -96,22 +93,28 @@ const useData = ({ group }: UseDataProps) => {
     const title = `${translate("delete_chat_with")} ${group?.name}?`;
     const actions = [
       () => {
-        saveTopicsData(currentAccount, {
-          [topic]: {
-            status: "deleted",
-            timestamp: new Date().getTime(),
-          },
-        }),
-          setTopicsData({
+        saveTopicsData({
+          inboxId: currentInboxId,
+          topicsData: {
             [topic]: {
               status: "deleted",
               timestamp: new Date().getTime(),
             },
-          });
+          },
+        });
+        setTopicsData({
+          [topic]: {
+            status: "deleted",
+            timestamp: new Date().getTime(),
+          },
+        });
       },
       async () => {
-        saveTopicsData(currentAccount, {
-          [topic]: { status: "deleted" },
+        saveTopicsData({
+          inboxId: currentInboxId,
+          topicsData: {
+            [topic]: { status: "deleted" },
+          },
         });
         setTopicsData({
           [topic]: {
@@ -120,8 +123,7 @@ const useData = ({ group }: UseDataProps) => {
           },
         });
         await group.updateConsent("denied");
-        await consentToInboxIdsOnProtocolByAccount({
-          account: currentAccount,
+        await consentToInboxIdsOnProtocolForCurrentUser({
           inboxIds: [group.addedByInboxId],
           consent: "deny",
         });
@@ -139,20 +141,13 @@ const useData = ({ group }: UseDataProps) => {
         title,
         ...actionSheetColors(colorScheme),
       },
-      async (selectedIndex?: number) => {
+      (selectedIndex?: number) => {
         if (selectedIndex !== undefined && selectedIndex < actions.length) {
           actions[selectedIndex]();
         }
       }
     );
-  }, [
-    colorScheme,
-    currentAccount,
-    group,
-    setInboxIdPeerStatus,
-    setTopicsData,
-    topic,
-  ]);
+  }, [colorScheme, group, setInboxIdPeerStatus, setTopicsData, topic]);
 
   const handleRestore = useCallback(() => {
     // TODO: Implement
@@ -168,8 +163,7 @@ const useData = ({ group }: UseDataProps) => {
       },
       async () => {
         await group.updateConsent("allowed");
-        await consentToInboxIdsOnProtocolByAccount({
-          account: currentAccount,
+        await consentToInboxIdsOnProtocolForCurrentUser({
           inboxIds: [group.addedByInboxId],
           consent: "allow",
         });
@@ -191,7 +185,7 @@ const useData = ({ group }: UseDataProps) => {
         }
       }
     );
-  }, [colorScheme, currentAccount, group, setInboxIdPeerStatus]);
+  }, [colorScheme, group, setInboxIdPeerStatus]);
 
   const contextMenuItems: ContextMenuItem[] = useMemo(
     () => [
@@ -287,14 +281,17 @@ const useUserInteractions = ({
   handleRestore,
   isBlockedChatView,
 }: UseUserInteractionsProps) => {
-  const currentAccount = useCurrentAccount()!;
+  const currentInboxId = useCurrentInboxId()!;
 
   const onPress = useCallback(() => {
-    prefetchConversationMessages(currentAccount, topic);
+    prefetchConversationMessagesForInboxByTopic({
+      inboxId: currentInboxId,
+      topic,
+    });
     navigate("Conversation", {
       topic,
     });
-  }, [topic, currentAccount]);
+  }, [topic, currentInboxId]);
 
   const triggerHapticFeedback = useCallback(() => {
     return Haptics.mediumImpactAsync();

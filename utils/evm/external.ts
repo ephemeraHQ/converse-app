@@ -172,7 +172,7 @@ export const useExternalSigner = () => {
     resetExternalSigner,
     switchChain,
     sendTransaction: sendTx,
-    address: activeAccount?.address,
+    currentSignerAddress: activeAccount?.address,
     walletAppId: activeWallet?.id,
     chainId: chain?.id,
   };

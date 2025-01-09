@@ -1,9 +1,4 @@
-import Clipboard from "@react-native-clipboard/clipboard";
 import * as Sentry from "@sentry/react-native";
-import {
-  getDbEncryptionKey,
-  getDbEncryptionSalt,
-} from "@utils/keychain/helpers";
 import {
   getPreviousSessionLoggingFile,
   loggingFilePath,
@@ -21,22 +16,12 @@ import { Platform, Alert } from "react-native";
 
 import config from "../config";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
-import { useAccountsList } from "../data/store/accountsStore";
 import mmkv from "../utils/mmkv";
 import { translate } from "@/i18n";
+import { isDev } from "@/utils/getEnv";
 
-export const useDebugEnabled = (address?: string) => {
-  const accounts = useAccountsList();
-  if (address && debugEnabled(address)) {
-    return true;
-  }
-  for (const account of accounts) {
-    if (debugEnabled(account)) {
-      return true;
-    }
-  }
-
-  return false;
+export const useDebugEnabled = () => {
+  return isDev;
 };
 
 export const debugEnabled = (address?: string) => {
@@ -45,11 +30,6 @@ export const debugEnabled = (address?: string) => {
     (address && config.debugAddresses.includes(address.toLowerCase()))
   );
 };
-
-export async function delayToPropogate(): Promise<void> {
-  // delay 1s to avoid clobbering
-  return new Promise((r) => setTimeout(r, 100));
-}
 
 const DebugButton = forwardRef((props, ref) => {
   const appVersion = Constants.expoConfig?.version;

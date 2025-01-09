@@ -21,7 +21,11 @@ import {
 } from "../../components/Connecting";
 import NewConversationButton from "../../components/ConversationList/NewConversationButton";
 import ProfileSettingsButton from "../../components/ConversationList/ProfileSettingsButton";
-import { useAccountsStore, useChatStore } from "../../data/store/accountsStore";
+import {
+  useAccountsStore,
+  useChatStore,
+  useCurrentInboxId,
+} from "../../data/store/accountsStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { navigate } from "../../utils/navigation";
 import { shortDisplayName } from "../../utils/str";
@@ -100,11 +104,13 @@ export default function ConversationListNav() {
   const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
   const shouldShowConnecting = useShouldShowConnecting();
   const shouldShowError = useShouldShowErrored();
-  const currentAccount = useAccountsStore((s) => s.currentAccount);
+  const currentInboxId = useCurrentInboxId()!;
 
-  const { isLoading } = useProfileSocialsQuery(currentAccount, currentAccount);
+  const { isLoading } = useProfileSocialsQuery({
+    profileLookupInboxId: currentInboxId,
+  });
 
-  const preferredName = usePreferredName(currentAccount);
+  const preferredName = usePreferredName({ inboxId: currentInboxId });
 
   // Delays a little flash of the name when loading, as default is a long ugly address
   const name = isLoading ? "" : preferredName;
@@ -131,7 +137,10 @@ export default function ConversationListNav() {
           ) : (
             <View />
           ),
-        headerBackTitle: getReadableProfile(currentAccount, currentAccount),
+        headerBackTitle: getReadableProfile({
+          inboxId: currentInboxId,
+          profileLookupInboxId: currentInboxId,
+        }),
         headerRight: () => (
           <View style={styles.headerRightContainer}>
             <Button
@@ -156,7 +165,7 @@ export default function ConversationListNav() {
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate("Profile", {
-                  address: currentAccount,
+                  inboxId: currentInboxId,
                 });
               }}
             >

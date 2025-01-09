@@ -1,18 +1,17 @@
 import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
-import { getCurrentAccount } from "@data/store/accountsStore";
+import { uploadRemoteAttachmentForCurrentUser } from "@/utils/attachment/uploadRemoteAttachment";
 import { Icon } from "@design-system/Icon/Icon";
 import { Pressable } from "@design-system/Pressable";
 import { translate } from "@i18n";
 import { MenuView } from "@react-native-menu/menu";
 import { useAppTheme } from "@theme/useAppTheme";
-import { uploadRemoteAttachment } from "@utils/attachment/uploadRemoteAttachment";
 import {
   compressAndResizeImage,
   pickMediaFromLibrary,
   takePictureFromCamera,
 } from "@utils/media";
 import { sentryTrackError, sentryTrackMessage } from "@utils/sentry";
-import { encryptRemoteAttachment } from "@utils/xmtpRN/attachments";
+import { encryptRemoteAttachmentForCurrentUser } from "@utils/xmtpRN/attachments";
 import * as ImagePicker from "expo-image-picker";
 import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
@@ -51,18 +50,18 @@ export function AddAttachmentButton() {
           }
         }
 
-        const currentAccount = getCurrentAccount()!;
-
-        const encryptedAttachment = await encryptRemoteAttachment(
-          currentAccount,
-          resizedImage.uri,
-          mimeType || undefined
+        const encryptedAttachment = await encryptRemoteAttachmentForCurrentUser(
+          {
+            fileUri: resizedImage.uri,
+            mimeType: mimeType || undefined,
+          }
         );
 
         try {
-          const uploadedAttachment = await uploadRemoteAttachment(
-            currentAccount,
-            encryptedAttachment
+          const uploadedAttachment = await uploadRemoteAttachmentForCurrentUser(
+            {
+              attachment: encryptedAttachment,
+            }
           );
 
           store.getState().updateMediaPreviewStatus("uploaded");

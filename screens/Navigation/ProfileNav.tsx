@@ -5,16 +5,16 @@ import { Platform, useColorScheme } from "react-native";
 import { ScreenHeaderButton } from "../../components/Screen/ScreenHeaderButton/ScreenHeaderButton";
 import { ScreenHeaderIconButton } from "../../components/Screen/ScreenHeaderIconButton/ScreenHeaderIconButton";
 import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
-import { useCurrentAccount } from "../../data/store/accountsStore";
 import { useRouter } from "../../navigation/useNavigation";
 import { navigate } from "../../utils/navigation";
 import ProfileScreen from "../Profile";
 import { NativeStack, navigationAnimation } from "./Navigation";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { translate } from "@/i18n";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 
 export type ProfileNavParams = {
-  address: string;
+  inboxId: string;
   fromGroupTopic?: ConversationTopic;
 };
 
@@ -26,7 +26,7 @@ export default function ProfileNav() {
   const router = useRouter();
 
   const colorScheme = useColorScheme();
-  const account = useCurrentAccount();
+  const currentInboxId = useCurrentInboxId();
   const options: NativeStackNavigationOptions = {
     headerTintColor:
       Platform.OS === "android"
@@ -46,7 +46,7 @@ export default function ProfileNav() {
           <ScreenHeaderModalCloseButton onPress={router.goBack} />
         ),
         headerRight: () => {
-          if (route.params.address === account) {
+          if (route.params.inboxId === currentInboxId) {
             if (Platform.OS === "ios") {
               return (
                 <ScreenHeaderButton

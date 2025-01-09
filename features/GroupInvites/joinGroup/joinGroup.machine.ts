@@ -11,7 +11,7 @@ import { assign, fromPromise, log, setup } from "xstate";
 import { AllowGroupProps } from "./JoinGroup.client";
 import { JoinGroupResult, JoinGroupResultType } from "./joinGroup.types";
 import { Controlled } from "../../../dependencies/Environment/Environment";
-import { ConversationVersion } from "@xmtp/react-native-sdk";
+import { ConversationVersion, InboxId } from "@xmtp/react-native-sdk";
 
 type JoinGroupMachineEvents =
   | { type: "user.didTapJoinGroup" }
@@ -26,8 +26,8 @@ type JoinGroupMachineErrorType =
 
 export type JoinGroupMachineContext = {
   // Context
-  /** User's currently active account */
-  account: string;
+  /** User's currently active Inbox ID */
+  inboxId: InboxId;
   /** Group invite metadata, includes info such as group name, group ID, etc */
   groupInviteMetadata?: GroupInvite;
   /** Contains a snapshot of the conversation a user was a member of prior to
@@ -46,7 +46,7 @@ export type JoinGroupMachineContext = {
 
 type JoinGroupMachineInput = {
   groupInviteId: string;
-  account: string;
+  inboxId: InboxId;
 };
 
 type JoinGroupMachineTags = "loading" | "polling" | "error";
@@ -62,7 +62,7 @@ export const joinGroupMachineLogic = setup({
   actors: {
     fetchGroupInviteActorLogic: fromPromise<
       GroupInvite,
-      { account: string; groupInviteId: string }
+      { inboxId: InboxId; groupInviteId: string }
     >(async ({ input }) => {
       const { groupInviteId } = input;
       const groupInvite =
@@ -72,21 +72,21 @@ export const joinGroupMachineLogic = setup({
 
     fetchGroupsByAccountActorLogic: fromPromise<
       ConversationDataEntity,
-      { account: string }
+      { inboxId: InboxId }
     >(async ({ input }) => {
-      const { account } = input;
+      const { inboxId } = input;
       const conversation =
-        await Controlled.joinGroupClient.fetchGroupsByAccount(account);
+        await Controlled.joinGroupClient.fetchGroupsByAccount(inboxId);
       return conversation;
     }),
 
     attemptToJoinGroupActorLogic: fromPromise<
       JoinGroupResult,
-      { account: string; groupInviteId: string }
+      { inboxId: InboxId; groupInviteId: string }
     >(async ({ input }) => {
-      const { account, groupInviteId } = input;
+      const { inboxId, groupInviteId } = input;
       const result = await Controlled.joinGroupClient.attemptToJoinGroup(
-        account,
+        inboxId,
         groupInviteId
       );
       return result;
@@ -94,11 +94,11 @@ export const joinGroupMachineLogic = setup({
 
     provideUserConsentToJoinGroup: fromPromise<
       void,
-      { account: string; conversation: ConversationWithCodecsType }
+      { inboxId: InboxId; conversation: ConversationWithCodecsType }
     >(async ({ input }) => {
-      const { account, conversation } = input;
+      const { inboxId, conversation } = input;
       const allowGroupProps: AllowGroupProps = {
-        account,
+        inboxId,
         options: {
           includeCreator: false,
           includeAddedBy: false,
@@ -108,10 +108,10 @@ export const joinGroupMachineLogic = setup({
       return await Controlled.joinGroupClient.allowGroup(allowGroupProps);
     }),
 
-    refreshGroup: fromPromise<void, { account: string; topic: string }>(
+    refreshGroup: fromPromise<void, { inboxId: InboxId; topic: string }>(
       async ({ input }) => {
-        const { account, topic } = input;
-        return await Controlled.joinGroupClient.refreshGroup(account, topic);
+        const { inboxId, topic } = input;
+        return await Controlled.joinGroupClient.refreshGroup(inboxId, topic);
       }
     ),
   },
@@ -261,7 +261,7 @@ export const joinGroupMachineLogic = setup({
   /** @xstate-layout N4IgpgJg5mDOIC5QCsD2BLAdgcQE6oFcAHAWQEMBjACyzADoAZVMiLKAAj0KPYElMAbugAuYdiTDCWZKQGIIqTPSwDUAa3oAzSdS7F+Q0QEEKw1LiZR0FANoAGALqJQRVLBHpFzkAA9EAVgBmQLoATgAOcNCAJgAWaP9-aIA2OwB2ABoQAE9EaLsARjoEuxSC2ILQwtj-AF9arLQsPVJKGiVGZlZMDha+QRExCSkIGTJZMFx8XDoiABsZTXMAWzptYV18fQHjU3NLa3snJBBXd2FPTG8-BCCQiKi4hKTUzJzECLCCgrTfgv9krFAr96o0MDgtq1qLROiw2P0PGQ5nNsuwAFLgyCcSGweSKZSCdT0OZdNj8RHI7IY2gQFqwI7eM4eLwnG4FfLhOh2ZLBdnhZJVUKBZJZXK3Qp0ZJpAGVUJBcK-NKgkBNCHccjQjpMOE9BEXJEo9GYiDY7i4hQdFREugknVQcn6ynUpS0nE2ArHFxuZlXVmIdl2Tnc3nRfmC4WivISkplCpVcqJZWqloa9r0bXdDgO9AG1HOrF0iZTcyzBbCJa4Va2zPZ3P511mhknJkXFmgNkcrk8wJ8gV2IUi94IcLRLl2QLhbmhNIRaLfaJJ8EptowgDCVDAFDU7AAqrBJqbiEasOwAMpSYQEWDsABCYArYj3B5MrcwsibXvOl2uUcidDSgT+HYsQVIEMQTpGtwTnQNTJMk-jTmkUqlOEi7NJCqZrhuW67vuuCHjwzpnheV63ve5iPnh7Avpc74eoy3qvj+CAcpyAFASBBRgdEEFDoE8RfHKFQKlxsRRGharEJhHTrpu25PvhfREeeMikXeD64c+pi0TY0SeqcjHfn6LGBmxgHAaB4HhJBBR2IkXLCqE4axOBgQScumr0Ap7AAOpkNeRhzLgYAsKiZDiGAywAEYHqgmgEewAAKuCePhZjsKuczWGo8JEQwWBqLIV6THQrAQAAKmQRAAPJEGAmCrooAiTLAMiXB+Blfm2vh5GJ-iSr8oSwfE+SxJBsTAcUcqlKE5SBsCCruRhK4dH5Hi6gAYuYmn4TRihFXhpXoBVVXOi0HUtkZ7Z5JERQuSBLlDaEyQjpB0RpHY-6BIG47JP8f3ckt6orfQa0XJt23eXtb7FTMZWVTVdUNU1LVtYoF2Gd1NxxJOdBJOEXHvbNTmQXK-6RM9PH+D8YHlEDUkg3QRjCKIyxEODHDpURLR4pahIaHQMis+z5WoGdkIvvsqBWLYjgMV1vrXQgwrcsUk7wTOwShtEkHSqExTcu9UTJHE-hifTUJpkzLORez8Jc+CBG8wSqgC0LtvCKL4vcJLFjS4c9HNpjis9crqTJGr3L+JrgTa5BUT-mJ85a7NE4W9J9DM8LHPsA7J48xaLvWu7bOe2LS4S3sfsy7p+mXVjiAqxHoZRzHcdDnORRPCrTmORUC4NCqFfA551vZ-bqDHpgTuF3QVpuzbpde8PxC+wctiBHXwfMU3kca0KsevR3aSjjxgbPTyPJ2IDg-Jsto9Zx7E9TzP+Jz-z9AlyL5foT7VfrzYWIW8FY73DnvaOB925iiBEURIC1EJgTcrfFelsYQABFJCTGWFgeEAA5MAAB3Q09ZX581dloHQVA6RGE0KIXALQDCDBMBQMA7NIAYxAcZWIPIiiRCSLHQEhQpTx1DHQcIiRe5SilIkOoyDf4M1Hhguh2DMB4MIcQ40pCi4C3WJsM0NC6EMJ2GAZhrDRAQHdMAn0zFuE9jEeIniKQJoFGER3QM-5QwmxcmkSIwIALp0ZkorBODdT4KIXmTRPNJjTFLIsFYaxKHUNoZMIxhgTEUBYWwixcsg6cKVrY3hDiBHONcWKACEdqZpCBO9E+gYpQBNHrJLc8JeDxW8gACX8mReqt4SRbixBtfAywnYcOscZRIJ8uRJHKATOCQ0CjxxqGInxwET48knO9BpVsmk5V1K0na7BOnXjvD0m8fSNAmkGagYZPNLHyzGUrCZo47JziTnMiopNhRiLsv2TusQfFBC2VhOSLS2lUSOdRIKIUIARJpCMnJn4HmhyeVM15syBQfLcWxTxcRpy+N+EgsE8jUEyWwrsrMYKDwQsCsFUKU8CyQjolYpi4zo7POmW8jFCy+KAjCHZCc-hxHhAqCbWRRLJIkvoDs0FBzqVQrpSQ25el7ksseWy1FMyXFcvjrNOg-F-g9mFCOJOQKOjJVQEITMBzGqYH3JgYQudJ7c0ZbPee9AiD4EtWABSNq7Vl29sQUZqrQ48M5CkKpk4gRpEqIEca3CxHRHevxPsQpvjJFNfQc1lr4TeV9fVB1edp5ROLDMeYcTKyzE9cdb1eE832uXsSoNV0Q09jDVKMSwFgQxsgvxUc312SVHnC9CcsQM10AAEr3mCrAdovQXVvzdXQYKmhp1UMhE2huCABTAjCFUfkHbZyAXGrHSUSbxyCuvkBAoY7J0rrgLOp20SSxlvLPE5dq7zoIs6kim4260i7rqQekcR6hz-P1oKkcSRE0RBvoPTAqAIBwG8HfEeaYVXNpuAAWkHGKTD-UnIEcI0RwlQ9iUZ1hFavojDRARRGGMdDm74jxyKIBCIPxr6RHCIfMdGYWmqMdBouFdIGMhxuATZ5BNgQ9kTd4t4YoCgJy4-xJyAJpQfQBGOnZBylKOxUpeY55FgoHOhiJ5iLikJhDDFEJyXEuKxqHEECOIF8gJAJS9CIY7vJ+QCvKmF7BwoSGirFeKfRkqpUdRlLKzTdR5QKqZ4yPEXqSinFx8cXFEhjQc5Nbsg1o7ch+KEMdYN4RbXwlDbS3V66ibyFJvlgIKjU3DZl+Tz06Dsj+Ebf4g701yIleRx+pdn7Ou4PFpWPZJrRFmgBYUKy5w2RPROSctl-lwSJiRlDCirZBMrCEjgYTBMugIqN0OlkxHPXKGmiB8FIIQb1SbPd0cATR3Wyg8j0q9mUvwhCk508zmoH6ZcoZR3ck-oCC42IYQqnje+BI-w8cgLFB8QTZ6URjajt6x5bZZKZUdK6TS6FsLDstGOzcam-JJSHxeqGWyPie0mzO+kb4M5cV0wx-fK2Wbjo5qonWgtTrHbE5B8G0nkQIepCThOCNoYe1iWKNwoE30Kg1H4i9sjjNb2rvhILxFwvEBwTsVrWyqR8jXdA4m4oLjZoAi4y41TnnwVdJ+70-7Fz2BXJuZCEnARxFFHAislyU5uVikiJ9eCcF4jCulLZAe4rMcwm8oqz3QuMOIGjdBb4tkza2RmThxABM2sKkmz2CIZtpwx9I319XYAACOBA4B85fn0SdyBNzmK9wgU7xsLu25nKbsUnYT78lxUjvxqvK8P0XnbXUhaErlXQMsLE1UCDCHb5387FQe-PTh3xb6-47J-UppUCDY6ACiJb2C8d1FR4x7fxNckkwBdkw+5P+nyHq5N1TY4B9jqf8-zotdJ464p4d5cT6xd4b77x955ACj-g-BP7fTjgRBj5x4dBn7TAX6khX44jt7mYRwRACjWapx2Y2TjgwQpA8iTYxCUy-7oHbYqJqIELA5AGbrUy8rTgwKFD-AITb5lLRxhATQJAKgOLvQ9ax7s4whoHbSc5Wq5qKB+rt764saxxG6lBRx04hAnwTTciRq-CRA0HbQa73oAEjbJ6bpp6cgZ52QVDVD8g3YSicGXY8hOSTb1D1BAA */
   id: "joinGroupMachine",
   context: ({ input }) => ({
-    account: input.account,
+    inboxId: input.inboxId,
     groupInviteId: input.groupInviteId,
     joinStatus: "PENDING" as const,
   }),
@@ -282,7 +282,7 @@ joiner will see when they land on the deep link page.
         input: ({ context }) => {
           return {
             groupInviteId: context.groupInviteId,
-            account: context.account,
+            inboxId: context.inboxId,
           };
         },
         onDone: {
@@ -319,7 +319,7 @@ joiner will see when they land on the deep link page.
         id: "loadingInitiallyJoinedGroups",
         src: "fetchGroupsByAccountActorLogic",
         input: ({ context }) => ({
-          account: context.account,
+          inboxId: context.inboxId,
         }),
         onDone: [
           {
@@ -501,7 +501,7 @@ to accept the invite.
         input: ({ context }) => {
           return {
             groupInviteId: context.groupInviteId,
-            account: context.account,
+            inboxId: context.inboxId,
           };
         },
         onDone: [
@@ -581,7 +581,7 @@ consent for the new group.
         id: "fetchGroupsAfterGroupInviteAccepted",
         src: "fetchGroupsByAccountActorLogic",
         input: ({ context }) => ({
-          account: context.account,
+          inboxId: context.inboxId,
         }),
         onDone: [
           {
@@ -697,7 +697,7 @@ providing a fallback method to determine the join status.
         id: "provideUserConsentToJoinGroup",
         src: "provideUserConsentToJoinGroup",
         input: ({ context }) => ({
-          account: context.account,
+          inboxId: context.inboxId,
           conversation: context.invitedGroup!,
           options: {
             includeCreator: false,
@@ -727,7 +727,7 @@ providing a fallback method to determine the join status.
         id: "refreshGroup",
         src: "refreshGroup",
         input: ({ context }) => ({
-          account: context.account,
+          inboxId: context.inboxId,
           topic: context.invitedGroup!.topic,
         }),
         onDone: {

@@ -1,4 +1,4 @@
-import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
+import { getCurrentInboxId } from "@/data/store/accountsStore";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 
 type MessageFromCurrentUserPayload = {
@@ -8,7 +8,5 @@ type MessageFromCurrentUserPayload = {
 export function messageIsFromCurrentAccountInboxId({
   message,
 }: MessageFromCurrentUserPayload) {
-  return (
-    message?.senderInboxId.toLowerCase() === getCurrentUserAccountInboxId()
-  );
+  return message?.senderInboxId.toLowerCase() === getCurrentInboxId();
 }

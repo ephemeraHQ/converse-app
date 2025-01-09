@@ -1,8 +1,6 @@
 import { Signer } from "ethers";
 import { Alert } from "react-native";
 
-// import { invalidateProfileSocialsQuery } from "../../data/helpers/profiles/profilesUpdate";
-import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
 import {
   getSettingsStore,
   getWalletStore,
@@ -13,48 +11,60 @@ import { awaitableAlert } from "../../utils/alert";
 import logger from "../../utils/logger";
 import { logoutAccount, waitForLogoutTasksDone } from "../../utils/logout";
 import { sentryTrackMessage } from "../../utils/sentry";
-import { createXmtpClientFromSigner } from "../../utils/xmtpRN/signIn";
-import { getXmtpClient } from "../../utils/xmtpRN/sync";
+import {
+  createXmtpClientFromSigner,
+  getInboxIdFromCryptocurrencyAddress,
+} from "../../utils/xmtpRN/signIn";
+import { getOrBuildXmtpClient } from "../../utils/xmtpRN/sync";
 
 export async function initXmtpClient(args: {
   signer: Signer;
   address: string;
-  privyAccountId?: string;
   isEphemeral?: boolean;
   pkPath?: string;
 }) {
   const { signer, address, ...restArgs } = args;
+  const inboxId = await getInboxIdFromCryptocurrencyAddress({
+    address,
+    cryptocurrency: "ETH",
+  });
 
   if (!signer || !address) {
     throw new Error("No signer or address");
   }
 
   try {
-    await createXmtpClientFromSigner(signer, async () => {
+    const onInstallationRevoked = async () => {
       await awaitableAlert(
         translate("current_installation_revoked"),
         translate("current_installation_revoked_description")
       );
       throw new Error("Current installation revoked");
-    });
+    };
 
-    await connectWithAddress({
-      address,
+    const xmtpClientCreationResult = await createXmtpClientFromSigner(
+      signer,
+      onInstallationRevoked
+    );
+
+    if ("error" in xmtpClientCreationResult) {
+      throw xmtpClientCreationResult.error;
+    }
+
+    await connectWithInboxId({
+      inboxId,
+      // address,
       ...restArgs,
     });
   } catch (e) {
-    await logoutAccount(address, false, true, () => {});
+    await logoutAccount({ inboxId, dropLocalDatabase: false });
     logger.error(e);
     throw e;
   }
 }
 
 type IBaseArgs = {
-  address: string;
-};
-
-type IPrivyArgs = IBaseArgs & {
-  privyAccountId: string;
+  inboxId: string;
 };
 
 type IEphemeralArgs = IBaseArgs & {
@@ -68,35 +78,37 @@ type IPrivateKeyArgs = IBaseArgs & {
 type IStandardArgs = IBaseArgs;
 
 type IConnectWithAddressKeyArgs =
-  | IPrivyArgs
   | IEphemeralArgs
   | IPrivateKeyArgs
   | IStandardArgs;
 
-export async function connectWithAddress(args: IConnectWithAddressKeyArgs) {
-  const { address } = args;
+export async function connectWithInboxId(args: IConnectWithAddressKeyArgs) {
+  const { inboxId } = args;
 
-  logger.debug("In connectWithAddress");
+  logger.debug("In connectWithInboxId");
 
-  if (!address) {
-    sentryTrackMessage("Could not connect because no address");
+  if (!inboxId) {
+    sentryTrackMessage("Could not connect because no inboxId");
     return;
   }
 
   try {
-    await performLogoutAndSaveKey(address);
+    await performLogoutAndSaveKey();
 
-    useAccountsStore.getState().setCurrentAccount(address, true);
+    useAccountsStore.getState().setCurrentInboxId({
+      inboxId,
+      createIfNew: true,
+    });
     await finalizeAccountSetup(args);
     sentryTrackMessage("Connecting done!");
   } catch (e) {
-    logger.error(e, { context: "Onboarding - connectWithAddress" });
+    logger.error(e, { context: "Onboarding - connectWithInboxId" });
     Alert.alert(translate("onboarding_error"));
     throw e;
   }
 }
 
-async function performLogoutAndSaveKey(address: string) {
+async function performLogoutAndSaveKey() {
   logger.debug("Waiting for logout tasks");
   await waitForLogoutTasksDone(500);
   logger.debug("Logout tasks done, saving xmtp key");
@@ -106,21 +118,24 @@ async function performLogoutAndSaveKey(address: string) {
 async function finalizeAccountSetup(args: IConnectWithAddressKeyArgs) {
   logger.debug("Finalizing account setup");
 
-  const { address } = args;
+  const { inboxId } = args;
 
-  useAccountsStore.getState().setCurrentAccount(address, false);
+  useAccountsStore.getState().setCurrentInboxId({
+    inboxId,
+    createIfNew: false,
+  });
 
-  getSettingsStore(address)
+  getSettingsStore({ inboxId })
     .getState()
     .setEphemeralAccount("isEphemeral" in args && args.isEphemeral);
 
   if ("pkPath" in args) {
-    getWalletStore(address).getState().setPrivateKeyPath(args.pkPath);
+    getWalletStore({ inboxId }).getState().setPrivateKeyPath(args.pkPath);
   }
 
-  await prefetchInboxIdQuery({ account: address });
+  const address = await getAddressFromInboxId(inboxId);
 
-  getXmtpClient(address);
+  getOrBuildXmtpClient({ account: address });
 
   logger.debug("Account setup finalized");
 }

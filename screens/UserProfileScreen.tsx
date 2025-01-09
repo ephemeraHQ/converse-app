@@ -15,7 +15,7 @@ import { NavigationParamList } from "./Navigation/Navigation";
 import {
   useAddPfp,
   useCreateOrUpdateProfileInfo,
-  useProfile,
+  useProfileForCurrentUser,
   useUserProfileStyles,
 } from "./Onboarding/OnboardingUserProfileScreen";
 
@@ -26,7 +26,7 @@ export const UserProfileScreen = memo(function UserProfileScreen(
 
   const colorScheme = useColorScheme();
 
-  const { profile, setProfile } = useProfile();
+  const { profile, setProfile } = useProfileForCurrentUser();
 
   // Was called when someone go back, maybe we put this in the GetStarted screen in useEffect ?
   // const logout = useLogoutFromConverse(address);

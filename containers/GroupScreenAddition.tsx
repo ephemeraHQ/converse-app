@@ -1,12 +1,9 @@
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
+import { useChatStore, useCurrentInboxId } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { Icon } from "@design-system/Icon/Icon";
 import { useExistingGroupInviteLink } from "@hooks/useExistingGroupInviteLink";
-import { useGroupDescription } from "@hooks/useGroupDescription";
 import { useGroupMembers } from "@hooks/useGroupMembers";
-import { useGroupPermissions } from "@hooks/useGroupPermissions";
-import { useGroupPhoto } from "@hooks/useGroupPhoto";
 import { translate } from "@i18n";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {
@@ -17,8 +14,8 @@ import {
 import { PictoSizes } from "@styles/sizes";
 import { createGroupInvite, deleteGroupInvite } from "@utils/api";
 import {
-  getAddressIsAdmin,
-  getAddressIsSuperAdmin,
+  isUserAdminByInboxId,
+  isUserSuperAdminByInboxId,
 } from "@utils/groupUtils/adminUtils";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
@@ -42,6 +39,9 @@ import {
   saveInviteIdByGroupId,
 } from "../features/GroupInvites/groupInvites.utils";
 import { captureErrorWithToast } from "@/utils/capture-error";
+import { useGroupPermissionspForCurrentUser } from "@/hooks/useGroupPermissions";
+import { useGroupPhotoForCurrentInbox } from "@/hooks/useGroupPhoto";
+import { useGroupDescriptionQuery } from "@/queries/useGroupDescriptionQuery";
 
 type GroupScreenAdditionProps = {
   topic: ConversationTopic;
@@ -53,34 +53,37 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
   topic,
 }) => {
   const colorScheme = useColorScheme();
-  const currentAccount = useCurrentAccount() as string;
-  const { members } = useGroupMembers(topic);
+  const { members } = useGroupMembers({ topic });
+  const currentInboxId = useCurrentInboxId()!;
 
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
-      currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
-      currentAccountIsSuperAdmin: getAddressIsSuperAdmin(
-        members,
-        currentAccount
+      currentAccountIsAdmin: isUserAdminByInboxId(currentInboxId, members),
+      currentAccountIsSuperAdmin: isUserSuperAdminByInboxId(
+        currentInboxId,
+        members
       ),
     }),
-    [currentAccount, members]
+    [members, currentInboxId]
   );
 
   const styles = useStyles();
   const [snackMessage, setSnackMessage] = useState<string | null>(null);
-  const { permissions } = useGroupPermissions(topic);
+  const { permissions } = useGroupPermissionspForCurrentUser({ topic });
   const canAddMember = memberCanUpdateGroup(
     permissions?.addMemberPolicy,
     currentAccountIsAdmin,
     currentAccountIsSuperAdmin
   );
   const { data: groupName } = useGroupNameQuery({
-    account: currentAccount,
+    inboxId: currentInboxId,
     topic,
   });
-  const { groupPhoto } = useGroupPhoto(topic);
-  const { groupDescription } = useGroupDescription(topic);
+  const { groupPhoto } = useGroupPhotoForCurrentInbox({ topic });
+  const { data: groupDescription } = useGroupDescriptionQuery({
+    inboxId: currentInboxId,
+    topic,
+  });
 
   const groupInviteLink = useExistingGroupInviteLink(topic);
   const { setGroupInviteLink, deleteGroupInviteLink: deleteLinkFromState } =
@@ -99,11 +102,14 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
   }, [groupInviteLink]);
 
   const onCreateInviteLinkPress = useCallback(() => {
-    createGroupInvite(currentAccount, {
-      groupName: groupName ?? translate("group_invite_default_group_name"),
-      imageUrl: groupPhoto,
-      description: groupDescription,
-      groupId: getV3IdFromTopic(topic),
+    createGroupInvite({
+      inboxId: currentInboxId,
+      inputs: {
+        groupName: groupName ?? translate("group_invite_default_group_name"),
+        imageUrl: groupPhoto,
+        description: groupDescription,
+        groupId: getV3IdFromTopic(topic),
+      },
     })
       .then((groupInvite) => {
         saveInviteIdByGroupId(getV3IdFromTopic(topic), groupInvite.id);
@@ -118,7 +124,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
         });
       });
   }, [
-    currentAccount,
+    currentInboxId,
     groupDescription,
     groupName,
     groupPhoto,
@@ -133,13 +139,16 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
     if (!inviteId) {
       return;
     }
-    deleteGroupInvite(currentAccount, inviteId).then(() => {
+    deleteGroupInvite({
+      inboxId: currentInboxId,
+      inviteId,
+    }).then(() => {
       setSnackMessage(translate("group_invite_link_deleted"));
       deleteLinkFromState(topic);
       deleteLinkFromStore(inviteId);
       deleteInviteIdByGroupId(groupId);
     });
-  }, [deleteLinkFromState, topic, currentAccount]);
+  }, [deleteLinkFromState, topic, currentInboxId]);
 
   const dismissSnackBar = useCallback(() => {
     setSnackMessage(null);

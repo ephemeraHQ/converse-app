@@ -17,7 +17,7 @@ import { converseEventEmitter, waitForConverseEvent } from "./events";
 import { useExternalSigner } from "./evm/external";
 import { strByteSize } from "./str";
 import { ConverseXmtpClientType } from "./xmtpRN/client.types";
-import { getXmtpClient } from "./xmtpRN/sync";
+import { getOrBuildXmtpClient } from "./xmtpRN/sync";
 
 export type FrameWithType = FramesApiResponse & {
   type: "FARCASTER_FRAME" | "XMTP_FRAME" | "PREVIEW";
@@ -164,7 +164,9 @@ export const getFramesClient = async (account: string) => {
   if (frameClientByAccount[account]) return frameClientByAccount[account];
   try {
     creatingFramesClientForAccount[account] = true;
-    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    const client = (await getOrBuildXmtpClient(
+      account
+    )) as ConverseXmtpClientType;
     // TODO: Fix this when V3 Clients support Frames
     // frameClientByAccount[account] = new FramesClient(
     //   client,
@@ -241,7 +243,7 @@ export const useHandleTxAction = () => {
         value: txData.params.value,
         data: txData.params.data,
       };
-      converseEventEmitter.emit("previewTransaction", transactionData);
+      // converseEventEmitter.emit("previewTransaction", transactionData);
       const [transactionId, receipt] =
         await waitForConverseEvent("transactionResult");
       const transactionReceipt =

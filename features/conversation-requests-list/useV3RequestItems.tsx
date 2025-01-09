@@ -1,15 +1,12 @@
-import { useConversationListQuery } from "@/queries/useConversationListQuery";
 import logger from "@/utils/logger";
 import { getMessageContentType } from "@/utils/xmtpRN/content-types/content-types";
 import { getV3SpamScore } from "@data/helpers/conversations/spamScore";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useEffect, useState } from "react";
+import { useConversationListForCurrentUserQuery } from "@/queries/useConversationListQuery";
 
 export const useV3RequestItems = () => {
-  const currentAccount = useCurrentAccount();
-  const { data, ...rest } = useConversationListQuery({
-    account: currentAccount!,
+  const { data, ...rest } = useConversationListForCurrentUserQuery({
     queryOptions: {
       refetchOnWindowFocus: false,
       refetchOnMount: false,

@@ -7,7 +7,7 @@ import { getSecureItemAsync } from "../keychain";
 import logger from "@utils/logger";
 
 export const getCurrentAccountSigner = async () => {
-  const account = currentAccount();
+  const inboxId = getCurrentInboxId();
   const pkPath = getWalletStore(account).getState().privateKeyPath;
   if (!pkPath) return;
   try {

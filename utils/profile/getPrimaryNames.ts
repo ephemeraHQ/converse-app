@@ -1,4 +1,5 @@
 import { type IProfileSocials } from "@/features/profiles/profile-types";
+import { shortAddress } from "../strings/shortAddress";
 
 export function getPrimaryNames(
   socials: IProfileSocials | undefined
@@ -8,6 +9,7 @@ export function getPrimaryNames(
   }
 
   const primaryNames: string[] = [];
+  const ethAddress = socials.cryptoCurrencyWalletAddresses?.ETH?.[0];
   if (socials.userNames) {
     primaryNames.push(
       ...socials.userNames.filter((u) => u.isPrimary).map((u) => u.name)
@@ -38,6 +40,9 @@ export function getPrimaryNames(
         .filter((l) => l.handle)
         .map((l) => `${l.handle} on lens`)
     );
+  }
+  if (ethAddress) {
+    primaryNames.push(shortAddress(ethAddress));
   }
 
   return primaryNames;

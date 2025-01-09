@@ -1,11 +1,11 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
-import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
+import { getCurrentInboxId } from "@/data/store/accountsStore";
 import { fetchMessageByIdQuery } from "@/queries/useConversationMessage";
 import {
   addConversationMessage,
   refetchConversationMessages,
   replaceOptimisticMessageWithReal,
 } from "@/queries/useConversationMessages";
+import { getCurrentAddress } from "@/screens/Onboarding/OnboardingUserProfileScreen";
 import { captureError, captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";
@@ -64,8 +64,7 @@ export function useSendMessage(props: {
       sendMessage({ conversation, params: variables }),
     // WIP
     onMutate: (variables) => {
-      const currentAccount = getCurrentAccount()!;
-      const currentUserInboxId = getCurrentUserAccountInboxId()!;
+      const currentInboxId = getCurrentInboxId()!;
 
       // For now only optimistic message for simple text message
       if (variables.content.text && !variables.referencedMessageId) {
@@ -81,7 +80,7 @@ export function useSendMessage(props: {
           fallback: "new-message",
           deliveryStatus: "sending" as MessageDeliveryStatus, // NOT GOOD but tmp
           topic: conversation.topic,
-          senderInboxId: currentUserInboxId,
+          senderInboxId: currentInboxId,
           nativeContent: {},
           content: () => {
             return variables.content.text!;
@@ -89,7 +88,7 @@ export function useSendMessage(props: {
         };
 
         addConversationMessage({
-          account: currentAccount,
+          inboxId: currentInboxId,
           topic: conversation.topic,
           message: textMessage,
         });
@@ -103,7 +102,8 @@ export function useSendMessage(props: {
       if (context && messageId) {
         // The SDK only returns the messageId
         const message = await fetchMessageByIdQuery({
-          account: getCurrentAccount()!,
+          inboxId: getCurrentInboxId()!,
+          account: getCurrentAddress()!,
           messageId,
         });
 
@@ -115,7 +115,7 @@ export function useSendMessage(props: {
           replaceOptimisticMessageWithReal({
             tempId: context.generatedMessageId,
             topic: conversation.topic,
-            account: getCurrentAccount()!,
+            inboxId: getCurrentInboxId()!,
             message,
           });
         }
@@ -123,10 +123,11 @@ export function useSendMessage(props: {
     },
     onError: (error) => {
       captureError(error);
-      const currentAccount = getCurrentAccount()!;
-      refetchConversationMessages(currentAccount, conversation.topic).catch(
-        captureErrorWithToast
-      );
+      const currentInboxId = getCurrentInboxId()!;
+      refetchConversationMessages({
+        inboxId: currentInboxId,
+        topic: conversation.topic,
+      }).catch(captureErrorWithToast);
     },
   });
 

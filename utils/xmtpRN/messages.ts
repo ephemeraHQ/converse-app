@@ -1,6 +1,5 @@
 import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
 import { updateConversationQueryData } from "@/queries/useConversationQuery";
 import { invalidateGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
@@ -9,20 +8,24 @@ import logger from "@utils/logger";
 import type {
   ConversationTopic,
   GroupUpdatedContent,
+  InboxId,
 } from "@xmtp/react-native-sdk";
 import { isProd } from "@/utils/getEnv";
-import {
-  ConverseXmtpClientType,
-  DecodedMessageWithCodecsType,
-} from "./client.types";
-import { getXmtpClient } from "./sync";
+import { DecodedMessageWithCodecsType } from "./client.types";
+import { getXmtpClientOrThrow } from "@/features/Accounts/accounts.utils";
+import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
 
-export const streamAllMessages = async (account: string) => {
-  await stopStreamingAllMessage(account);
+export const streamAllMessages = async ({ inboxId }: { inboxId: InboxId }) => {
+  await stopStreamingAllMessage({ inboxId });
 
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = getXmtpClientOrThrow({
+    inboxId,
+    caller: "streamAllMessages",
+  });
 
-  logger.info(`[XmtpRN] Streaming messages for ${client.address}`);
+  logger.info(
+    `[XmtpRN] Streaming messages for address=${client.address} inboxId=${inboxId}`
+  );
 
   await client.conversations.streamAllMessages(async (message) => {
     logger.info(`[XmtpRN] Received a message for ${client.address}`, {
@@ -33,11 +36,11 @@ export const streamAllMessages = async (account: string) => {
 
     if (message.contentTypeId.includes("group_updated")) {
       try {
-        await handleGroupUpdatedMessage(
-          client.address,
-          message.topic as ConversationTopic,
-          message
-        );
+        await handleGroupUpdatedMessage({
+          inboxId: client.inboxId,
+          topic: message.topic as ConversationTopic,
+          message,
+        });
       } catch (error) {
         captureError(error);
       }
@@ -55,7 +58,7 @@ export const streamAllMessages = async (account: string) => {
     if (isMessageFromOtherUser || isNonTextMessage) {
       try {
         addConversationMessage({
-          account: client.address,
+          inboxId: client.inboxId,
           topic: message.topic as ConversationTopic,
           message,
         });
@@ -66,7 +69,7 @@ export const streamAllMessages = async (account: string) => {
 
     try {
       updateConversationQueryData({
-        account: client.address,
+        inboxId: client.inboxId,
         topic: message.topic as ConversationTopic,
         conversationUpdate: {
           lastMessage: message,
@@ -78,7 +81,7 @@ export const streamAllMessages = async (account: string) => {
 
     try {
       updateConversationInConversationListQuery({
-        account: client.address,
+        inboxId: client.inboxId,
         topic: message.topic as ConversationTopic,
         conversationUpdate: {
           lastMessage: message,
@@ -90,22 +93,33 @@ export const streamAllMessages = async (account: string) => {
   });
 };
 
-export const stopStreamingAllMessage = async (account: string) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+export const stopStreamingAllMessage = async ({
+  inboxId,
+}: {
+  inboxId: InboxId;
+}) => {
+  const client = getXmtpClientOrThrow({
+    inboxId,
+    caller: "stopStreamingAllMessage",
+  });
   logger.debug(`[XmtpRN] Stopped streaming messages for ${client.address}`);
-  await client.conversations.cancelStreamAllMessages();
+  client.conversations.cancelStreamAllMessages();
 };
 
-export const handleGroupUpdatedMessage = async (
-  account: string,
-  topic: ConversationTopic,
-  message: DecodedMessageWithCodecsType
-) => {
+export const handleGroupUpdatedMessage = async ({
+  inboxId,
+  topic,
+  message,
+}: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+  message: DecodedMessageWithCodecsType;
+}) => {
   if (!message.contentTypeId.includes("group_updated")) return;
   const content = message.content() as GroupUpdatedContent;
   if (content.membersAdded.length > 0 || content.membersRemoved.length > 0) {
     // This will refresh members
-    invalidateGroupMembersQuery(account, topic);
+    invalidateGroupMembersQuery({ inboxId, topic });
   }
   if (content.metadataFieldsChanged.length > 0) {
     let newGroupName = "";
@@ -122,14 +136,14 @@ export const handleGroupUpdatedMessage = async (
     }
     if (!!newGroupName) {
       updateConversationQueryData({
-        account,
+        inboxId,
         topic,
         conversationUpdate: {
           name: newGroupName,
         },
       });
       updateConversationInConversationListQuery({
-        account,
+        inboxId,
         topic,
         conversationUpdate: {
           name: newGroupName,
@@ -138,14 +152,14 @@ export const handleGroupUpdatedMessage = async (
     }
     if (!!newGroupPhotoUrl) {
       updateConversationQueryData({
-        account,
+        inboxId,
         topic,
         conversationUpdate: {
           imageUrlSquare: newGroupPhotoUrl,
         },
       });
       updateConversationInConversationListQuery({
-        account,
+        inboxId,
         topic,
         conversationUpdate: {
           imageUrlSquare: newGroupPhotoUrl,
@@ -154,14 +168,14 @@ export const handleGroupUpdatedMessage = async (
     }
     if (!!newGroupDescription) {
       updateConversationQueryData({
-        account,
+        inboxId,
         topic,
         conversationUpdate: {
           description: newGroupDescription,
         },
       });
       updateConversationInConversationListQuery({
-        account,
+        inboxId,
         topic,
         conversationUpdate: {
           description: newGroupDescription,
@@ -175,6 +189,6 @@ export const handleGroupUpdatedMessage = async (
     content.membersRemoved.length === 0 &&
     content.metadataFieldsChanged.length === 0
   ) {
-    invalidateGroupMembersQuery(account, topic);
+    invalidateGroupMembersQuery({ inboxId, topic });
   }
 };

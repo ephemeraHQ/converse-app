@@ -22,13 +22,11 @@ import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndica
 import Button from "../../components/Button/Button";
 import ConversationFlashList from "../../components/ConversationFlashList";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
-import { useCurrentAccount } from "../../data/store/accountsStore";
-import { consentToAddressesOnProtocolByAccount } from "../../utils/xmtpRN/contacts";
+import { consentToInboxIdsOnProtocolForCurrentUser } from "../../utils/xmtpRN/contacts";
 import { useRequestItems } from "../../features/conversation-requests-list/useRequestItems";
 
 export default function ConversationRequestsListNav() {
   const colorScheme = useColorScheme();
-  const account = useCurrentAccount() as string;
   const navRef = useRef<any>();
   const [clearingAll, setClearingAll] = useState(false);
 
@@ -48,16 +46,15 @@ export default function ConversationRequestsListNav() {
       [options.clearAll]: async () => {
         setClearingAll(true);
         // @todo => handle groups here
-        const peers = Array.from(
+        const peerInboxIds = Array.from(
           new Set(
             likelyNotSpam.map((c) =>
               "addedByInboxId" in c ? c.addedByInboxId : undefined
             )
           )
         ).filter((peer) => !!peer) as string[];
-        await consentToAddressesOnProtocolByAccount({
-          account,
-          addresses: peers,
+        await consentToInboxIdsOnProtocolForCurrentUser({
+          inboxIds: peerInboxIds,
           consent: "deny",
         });
         setClearingAll(false);
@@ -84,13 +81,10 @@ export default function ConversationRequestsListNav() {
         }
       }
     );
-  }, [account, colorScheme, likelyNotSpam]);
+  }, [colorScheme, likelyNotSpam]);
 
   const navigationOptions = useCallback(
-    ({
-      route,
-      navigation,
-    }: {
+    ({}: {
       route: RouteProp<NavigationParamList, "ChatsRequests">;
       navigation: NativeStackNavigationProp<
         NavigationParamList,

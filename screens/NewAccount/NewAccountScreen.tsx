@@ -1,18 +1,10 @@
 import { ConnectViaWalletPopularWalletsTableView } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletPopularWalletsTableView";
 import { useInstalledWallets } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import { memo } from "react";
-import { Alert } from "react-native";
 import { useAppTheme } from "@theme/useAppTheme";
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
 import { NewAccountPictoTitleSubtitle } from "../../components/NewAccount/NewAccountTitleSubtitlePicto";
-import {
-  InstalledWalletsTableView,
-  getConnectViaWalletTableViewEphemeralItem,
-  getConnectViaWalletTableViewPhoneItem,
-  getConnectViaWalletTableViewPrivateKeyItem,
-} from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletTableViewItems";
 import TableView from "../../components/TableView/TableView";
-import { useAccountsStore } from "../../data/store/accountsStore";
 import { translate } from "../../i18n";
 import { useRouter } from "../../navigation/useNavigation";
 
@@ -40,7 +32,7 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
         </NewAccountPictoTitleSubtitle.Title>
       </NewAccountPictoTitleSubtitle.Container>
 
-      <TableView
+      {/* <TableView
         title={translate("walletSelector.converseAccount.title")}
         items={[
           getConnectViaWalletTableViewPhoneItem({
@@ -54,23 +46,27 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
             },
           }),
         ]}
-      />
+      /> */}
 
-      {hasInstalledWallets && (
+      {/* todo(lustig/thierry) - new ui and new store */}
+      {/* {hasInstalledWallets && (
         <InstalledWalletsTableView
           onAccountExists={(arg) => {
-            useAccountsStore.getState().setCurrentAccount(arg.address, false);
+            useAccountsStore.getState().setCurrentInboxId({
+              inboxId: arg.inboxId,
+              createIfNew: false,
+            });
             router.popToTop();
             // TODO: Add a better message
             Alert.alert("Account already connected");
           }}
-          onAccountDoesNotExist={({ address }) => {
-            router.navigate("NewAccountConnectWallet", { address });
+          onAccountDoesNotExist={({ inboxId, address }) => {
+            router.navigate("NewAccountConnectWallet", { inboxId, address });
           }}
         />
-      )}
+      )} */}
 
-      <TableView
+      {/* <TableView
         title={
           hasInstalledWallets
             ? translate("walletSelector.connectionOptions.otherOptions")
@@ -83,7 +79,7 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
             },
           }),
         ]}
-      />
+      /> */}
 
       {!hasInstalledWallets && <ConnectViaWalletPopularWalletsTableView />}
     </NewAccountScreenComp>

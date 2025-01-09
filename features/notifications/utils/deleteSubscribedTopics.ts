@@ -1,11 +1,16 @@
-import { subscribedOnceByAccount } from "./subscribedOnceByAccount";
-import { subscribingByAccount } from "./subscribingByAccount";
-
-export const deleteSubscribedTopics = (account: string) => {
-  if (account in subscribedOnceByAccount) {
-    delete subscribedOnceByAccount[account];
+import logger from "@/utils/logger";
+import { subscribedOnceByInboxId } from "./subscribedOnceByAccount";
+import { subscribingByInboxId } from "./subscribingByAccount";
+import { InboxId } from "@xmtp/react-native-sdk";
+export const deleteSubscribedTopics = ({ inboxId }: { inboxId: InboxId }) => {
+  if (!inboxId) {
+    logger.error("No inboxId provided to deleteSubscribedTopics");
+    return;
   }
-  if (account in subscribingByAccount) {
-    delete subscribingByAccount[account];
+  if (inboxId in subscribedOnceByInboxId) {
+    delete subscribedOnceByInboxId[inboxId];
+  }
+  if (inboxId in subscribingByInboxId) {
+    delete subscribingByInboxId[inboxId];
   }
 };

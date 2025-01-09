@@ -1,3 +1,4 @@
+import { getCurrentInboxId } from "@/data/store/accountsStore";
 import { getInboxProfileSocialsQueryData } from "@/queries/useInboxProfileSocialsQuery";
 import { getPreferredInboxName } from "@/utils/profile";
 import type {
@@ -79,14 +80,16 @@ type InboxIdSearchParams = {
 };
 
 const inboxIdMatchesSearchQuery = async ({
-  account,
   searchQuery,
   inboxId,
 }: InboxIdSearchParams): Promise<boolean> => {
   if (inboxId.toLowerCase().includes(searchQuery.toLowerCase())) {
     return true;
   }
-  const profiles = getInboxProfileSocialsQueryData(account, inboxId);
+  const profiles = getInboxProfileSocialsQueryData({
+    currentInboxId: getCurrentInboxId()!,
+    profileLookupInboxId: inboxId,
+  });
   if (!profiles) {
     return false;
   }

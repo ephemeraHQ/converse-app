@@ -1,13 +1,13 @@
+import { getCurrentInboxId } from "@/data/store/accountsStore";
+import { useGroupPermissionspForCurrentUser } from "@/hooks/useGroupPermissions";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { useCurrentAccount } from "@data/store/accountsStore";
-import { useGroupDescription } from "@hooks/useGroupDescription";
+import { useGroupDescriptionForCurrentInbox } from "@hooks/useGroupDescription";
 import { useGroupMembers } from "@hooks/useGroupMembers";
-import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { translate } from "@i18n";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import {
-  getAddressIsAdmin,
-  getAddressIsSuperAdmin,
+  isUserAdminByInboxId,
+  isUserSuperAdminByInboxId,
 } from "@utils/groupUtils/adminUtils";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -27,22 +27,27 @@ type GroupScreenDescriptionProps = {
 export const GroupScreenDescription: FC<GroupScreenDescriptionProps> = ({
   topic,
 }) => {
-  const currentAccount = useCurrentAccount() as string;
-  const { members } = useGroupMembers(topic);
+  const { members } = useGroupMembers({ topic });
 
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
-      currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
-      currentAccountIsSuperAdmin: getAddressIsSuperAdmin(
-        members,
-        currentAccount
+      currentAccountIsAdmin: isUserAdminByInboxId(
+        getCurrentInboxId()!,
+        members
+      ),
+      currentAccountIsSuperAdmin: isUserSuperAdminByInboxId(
+        getCurrentInboxId()!,
+        members
       ),
     }),
-    [currentAccount, members]
+    [members]
   );
   const styles = useStyles();
-  const { permissions } = useGroupPermissions(topic);
-  const { groupDescription, setGroupDescription } = useGroupDescription(topic);
+  const { permissions } = useGroupPermissionspForCurrentUser({ topic });
+  const { groupDescription, setGroupDescription } =
+    useGroupDescriptionForCurrentInbox({
+      topic,
+    });
   const [editing, setEditing] = useState(false);
   const [editedDescription, setEditedDescription] = useState(
     groupDescription ?? ""

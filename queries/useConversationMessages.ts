@@ -7,7 +7,6 @@ import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
 } from "@/utils/xmtpRN/client.types";
-import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
 import {
   InboxId,
   type ConversationTopic,
@@ -20,6 +19,7 @@ import {
 import { conversationMessagesQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
 import { getConversationQueryData } from "./useConversationQuery";
+import { getConversationByTopicForInboxId } from "@/utils/xmtpRN/conversations";
 
 export type ConversationMessagesQueryData = Awaited<
   ReturnType<typeof conversationMessagesQueryFn>
@@ -48,14 +48,15 @@ export const conversationMessagesQueryFn = async (
   return processedMessages;
 };
 
-const conversationMessagesByTopicQueryFn = async (
-  account: string,
-  topic: ConversationTopic,
-  includeSync: boolean = true
-) => {
+const conversationMessagesByTopicQueryFn = async (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+  includeSync: boolean;
+}) => {
+  const { inboxId, topic, includeSync } = args;
   logger.info("[useConversationMessages] queryFn fetching messages by topic");
-  const conversation = await getConversationByTopicByAccount({
-    account,
+  const conversation = await getConversationByTopicForInboxId({
+    inboxId,
     topic,
     includeSync,
   });
@@ -67,11 +68,19 @@ const conversationMessagesByTopicQueryFn = async (
   return conversationMessagesQueryFn(conversation);
 };
 
-export const useConversationMessages = (
-  account: string,
-  topic: ConversationTopic
-) => {
-  const query = useQuery(getConversationMessagesQueryOptions(account, topic));
+export const useConversationMessages = (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+  includeSync?: boolean;
+}) => {
+  const { inboxId, topic, includeSync } = args;
+  const query = useQuery(
+    getConversationMessagesQueryOptions({
+      inboxId,
+      topic,
+      includeSync,
+    })
+  );
 
   useAppStateHandlers({
     onForeground: () => {
@@ -82,34 +91,46 @@ export const useConversationMessages = (
   return query;
 };
 
-export const getConversationMessagesQueryData = (
-  account: string,
-  topic: ConversationTopic
-) => {
+export const getConversationMessagesQueryData = (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+  includeSync: boolean;
+}) => {
+  const { inboxId, topic, includeSync } = args;
   return queryClient.getQueryData<ConversationMessagesQueryData>(
-    getConversationMessagesQueryOptions(account, topic).queryKey
+    getConversationMessagesQueryOptions({
+      inboxId,
+      topic,
+      includeSync,
+    }).queryKey
   );
 };
 
-export function refetchConversationMessages(
-  account: string,
-  topic: ConversationTopic
-) {
+export function refetchConversationMessages(args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+  includeSync?: boolean;
+}) {
+  const { inboxId, topic, includeSync = false } = args;
   logger.info("[refetchConversationMessages] refetching messages");
   return queryClient.refetchQueries(
-    getConversationMessagesQueryOptions(account, topic)
+    getConversationMessagesQueryOptions({
+      inboxId,
+      topic,
+      includeSync,
+    })
   );
 }
 
 export const addConversationMessage = (args: {
-  account: string;
+  inboxId: InboxId;
   topic: ConversationTopic;
   message: DecodedMessageWithCodecsType;
 }) => {
-  const { account, topic, message } = args;
+  const { inboxId, topic, message } = args;
 
   queryClient.setQueryData<ConversationMessagesQueryData>(
-    conversationMessagesQueryKey(account, topic),
+    conversationMessagesQueryKey({ inboxId, topic }),
     (previousMessages) => {
       const processedMessages = processMessages({
         messages: [message],
@@ -121,25 +142,36 @@ export const addConversationMessage = (args: {
   );
 };
 
-export const prefetchConversationMessages = async (
-  account: string,
-  topic: ConversationTopic
-) => {
+export const prefetchConversationMessagesForInboxByTopic = async (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+}) => {
+  const { inboxId, topic } = args;
   return queryClient.prefetchQuery(
-    getConversationMessagesQueryOptions(account, topic, false)
+    getConversationMessagesQueryOptions({
+      inboxId,
+      topic,
+      includeSync:
+        /* if we are prefetching messages, we want the freshest messages */ true,
+    })
   );
 };
 
-function getConversationMessagesQueryOptions(
-  account: string,
-  topic: ConversationTopic,
-  includeSync: boolean = true
-): UseQueryOptions<ConversationMessagesQueryData> {
-  const conversation = getConversationQueryData({ account, topic });
+function getConversationMessagesQueryOptions(args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+  includeSync: boolean;
+}): UseQueryOptions<ConversationMessagesQueryData> {
+  const { inboxId, topic, includeSync } = args;
+  const conversation = getConversationQueryData({ inboxId, topic });
   return {
-    queryKey: conversationMessagesQueryKey(account, topic),
+    queryKey: conversationMessagesQueryKey({ inboxId, topic }),
     queryFn: () => {
-      return conversationMessagesByTopicQueryFn(account, topic, includeSync);
+      return conversationMessagesByTopicQueryFn({
+        inboxId,
+        topic,
+        includeSync,
+      });
     },
     enabled: !!conversation,
     refetchOnMount: true, // Just for now because messages are very important and we want to make sure we have all of them
@@ -210,7 +242,7 @@ function processMessages(args: {
   for (const reactionMessage of reactionsMessages) {
     const reactionContent = reactionMessage.content() as ReactionContent;
     const referenceMessageId = reactionContent?.reference as MessageId;
-    const senderAddress = reactionMessage.senderInboxId as InboxId;
+    const senderInboxId = reactionMessage.senderInboxId as InboxId;
 
     if (!reactionContent || !referenceMessageId) {
       continue;
@@ -238,26 +270,26 @@ function processMessages(args: {
     if (reactionContent.action === "added") {
       // Check if this sender already has this reaction for this message
       const hasExistingReaction = messageReactions.bySender[
-        senderAddress
+        senderInboxId
       ]?.some((reaction) => reaction.content === reactionContent.content);
 
       if (!hasExistingReaction) {
         messageReactions.byReactionContent[reactionContent.content] = [
           ...(messageReactions.byReactionContent[reactionContent.content] ||
             []),
-          senderAddress,
+          senderInboxId,
         ];
-        messageReactions.bySender[senderAddress] = [
-          ...(messageReactions.bySender[senderAddress] || []),
+        messageReactions.bySender[senderInboxId] = [
+          ...(messageReactions.bySender[senderInboxId] || []),
           reactionContent,
         ];
       }
     } else if (reactionContent.action === "removed") {
       messageReactions.byReactionContent[reactionContent.content] = (
         messageReactions.byReactionContent[reactionContent.content] || []
-      ).filter((id) => id !== senderAddress);
-      messageReactions.bySender[senderAddress] = (
-        messageReactions.bySender[senderAddress] || []
+      ).filter((id) => id !== senderInboxId);
+      messageReactions.bySender[senderInboxId] = (
+        messageReactions.bySender[senderInboxId] || []
       ).filter((reaction) => reaction.content !== reactionContent.content);
     }
   }
@@ -274,10 +306,10 @@ type IOptimisticMessage = {
 export function replaceOptimisticMessageWithReal(args: {
   tempId: string;
   topic: ConversationTopic;
-  account: string;
+  inboxId: InboxId;
   message: DecodedMessageWithCodecsType;
 }) {
-  const { tempId, topic, account, message } = args;
+  const { tempId, topic, inboxId, message } = args;
   logger.info(
     "[linkOptimisticMessageToReal] linking optimistic message to real",
     {
@@ -287,7 +319,7 @@ export function replaceOptimisticMessageWithReal(args: {
   );
 
   queryClient.setQueryData<ConversationMessagesQueryData>(
-    conversationMessagesQueryKey(account, topic),
+    conversationMessagesQueryKey({ inboxId, topic }),
     (previousMessages) => {
       if (!previousMessages) {
         return {

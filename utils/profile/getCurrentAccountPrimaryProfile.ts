@@ -1,14 +1,17 @@
-import { getCurrentAccount } from "@data/store/accountsStore";
+import { getCurrentInboxId } from "@data/store/accountsStore";
 import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 
 export function getCurrentAccountPrimaryProfile() {
-  const userAddress = getCurrentAccount();
+  const currentInboxId = getCurrentInboxId();
 
-  if (!userAddress) {
+  if (!currentInboxId) {
     return undefined;
   }
 
-  const socials = getProfileSocialsQueryData(userAddress, userAddress);
+  const socials = getProfileSocialsQueryData({
+    currentInboxId,
+    profileLookupInboxId: currentInboxId,
+  });
 
   if (!socials) {
     return undefined;

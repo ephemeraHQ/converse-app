@@ -1,11 +1,11 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { translate } from "@/i18n";
 import { useAllowGroupMutation } from "@/queries/useAllowGroupMutation";
-import { currentAccount } from "@data/store/accountsStore";
+import { getCurrentInboxId } from "@data/store/accountsStore";
 import { useBlockGroupMutation } from "@queries/useBlockGroupMutation";
 import { useGroupConsentQuery } from "@queries/useGroupConsentQuery";
 import { useGroupQuery } from "@queries/useGroupQuery";
-import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import { consentToInboxIdsOnProtocolByInboxId } from "@utils/xmtpRN/contacts";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 import { useGroupCreatorQuery } from "../queries/useGroupCreatorQuery";
@@ -16,10 +16,10 @@ export type IGroupConsentOptions = {
 };
 
 export const useGroupConsent = (topic: ConversationTopic) => {
-  const account = currentAccount();
+  const inboxId = getCurrentInboxId();
 
   const { data: group, isLoading: isGroupLoading } = useGroupQuery({
-    account,
+    inboxId,
     topic,
   });
 
@@ -30,13 +30,13 @@ export const useGroupConsent = (topic: ConversationTopic) => {
     data: groupConsent,
     isLoading: isGroupConsentLoading,
     isError,
-  } = useGroupConsentQuery({ account, topic });
+  } = useGroupConsentQuery({ inboxId, topic });
 
   const { mutateAsync: allowGroupMutation, isPending: isAllowingGroup } =
-    useAllowGroupMutation(account, topic);
+    useAllowGroupMutation({ inboxId, topic });
 
   const { mutateAsync: blockGroupMutation, isPending: isBlockingGroup } =
-    useBlockGroupMutation(account, topic!);
+    useBlockGroupMutation({ inboxId, topic });
 
   const allowGroup = useCallback(
     async (args: IGroupConsentOptions) => {
@@ -48,12 +48,12 @@ export const useGroupConsent = (topic: ConversationTopic) => {
 
       await allowGroupMutation({
         group,
-        account,
+        inboxId,
         includeAddedBy,
         includeCreator,
       });
     },
-    [allowGroupMutation, group, account]
+    [allowGroupMutation, group, inboxId]
   );
 
   const blockGroup = useCallback(
@@ -81,14 +81,14 @@ export const useGroupConsent = (topic: ConversationTopic) => {
       }
 
       if (inboxIdsToDeny.length > 0) {
-        consentToInboxIdsOnProtocolByAccount({
-          account,
+        consentToInboxIdsOnProtocolByInboxId({
+          inboxId,
           inboxIds: inboxIdsToDeny,
           consent: "deny",
         });
       }
     },
-    [blockGroupMutation, groupCreator, account, group]
+    [blockGroupMutation, groupCreator, inboxId, group]
   );
 
   const isLoading =

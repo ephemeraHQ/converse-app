@@ -27,22 +27,15 @@ import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndica
 import Button from "../../components/Button/Button";
 import GroupAvatar from "../../components/GroupAvatar";
 import TableView from "../../components/TableView/TableView";
-import {
-  currentAccount,
-  useCurrentAccount,
-} from "../../data/store/accountsStore";
 import { usePhotoSelect } from "../../hooks/usePhotoSelect";
 import { navigate } from "../../utils/navigation";
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getProfile,
-} from "../../utils/profile";
-import { createGroupByAccount } from "../../utils/xmtpRN/conversations";
+import { getPreferredAvatar, getPreferredName } from "../../utils/profile";
+import { createGroupForCurrentUser } from "../../utils/xmtpRN/conversations";
 import { NewConversationModalParams } from "./NewConversationModal";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 import { useProfilesSocials } from "@/hooks/useProfilesSocials";
+import { currentInboxId, useCurrentInboxId } from "@/data/store/accountsStore";
 
 export default function NewGroupSummary({
   route,
@@ -62,7 +55,7 @@ export default function NewGroupSummary({
       updateGroupImagePolicy: "allow",
       updateGroupPinnedFrameUrlPolicy: "allow",
     });
-  const account = useCurrentAccount();
+  const currentInboxId = useCurrentInboxId()!;
   const { photo: groupPhoto, addPhoto: addGroupPhoto } = usePhotoSelect();
   const [
     { remotePhotoUrl, isLoading: isUploadingGroupPhoto },
@@ -73,23 +66,25 @@ export default function NewGroupSummary({
   });
 
   const defaultGroupName = useMemo(() => {
-    if (!account) return "";
-    const members = route.params.members.slice(0, 3);
-    const currentAccountSocials =
-      getProfileSocialsQueryData(account, account) ?? undefined;
-    let groupName = getPreferredName(currentAccountSocials, account);
-    if (members.length) {
+    if (!currentInboxId) return "";
+    const membersSocialProfiles = route.params.members.slice(0, 3);
+    const currentAccountSocials = getProfileSocialsQueryData({
+      currentInboxId,
+      profileLookupInboxId: currentInboxId,
+    });
+    let groupName = getPreferredName(currentAccountSocials);
+    if (membersSocialProfiles.length) {
       groupName += ", ";
     }
-    for (let i = 0; i < members.length; i++) {
-      groupName += getPreferredName(members[i], members[i].address);
-      if (i < members.length - 1) {
+    for (let i = 0; i < membersSocialProfiles.length; i++) {
+      groupName += getPreferredName(membersSocialProfiles[i]);
+      if (i < membersSocialProfiles.length - 1) {
         groupName += ", ";
       }
     }
 
     return groupName;
-  }, [route.params.members, account]);
+  }, [route.params.members, currentInboxId]);
   const colorScheme = useColorScheme();
   const [groupName, setGroupName] = useState(defaultGroupName);
   const [groupDescription, setGroupDescription] = useState("");
@@ -98,7 +93,7 @@ export default function NewGroupSummary({
     if (!groupPhoto) return;
     setRemotePhotUrl({ remotePhotoUrl: undefined, isLoading: true });
     uploadFile({
-      account: currentAccount(),
+      inboxId: currentInboxId,
       filePath: groupPhoto,
       contentType: "image/jpeg",
     })
@@ -117,14 +112,13 @@ export default function NewGroupSummary({
           isLoading: false,
         });
       });
-  }, [groupPhoto, setRemotePhotUrl]);
+  }, [groupPhoto, setRemotePhotUrl, currentInboxId]);
 
   const onCreateGroupPress = useCallback(async () => {
     setCreatingGroup(true);
     try {
-      const group = await createGroupByAccount({
-        account: currentAccount(),
-        peers: route.params.members.map((m) => m.address),
+      const group = await createGroupForCurrentUser({
+        peerInboxIds: route.params.members.map((m) => m.inboxId),
         permissionPolicySet,
         groupName,
         groupPhoto: remotePhotoUrl,
@@ -196,20 +190,25 @@ export default function NewGroupSummary({
     ]
   );
 
-  const profileQueries = useProfilesSocials(
-    route.params.members.map((m) => m.address)
-  );
+  const profileQueries = useProfilesSocials({
+    peerInboxIds: route.params.members.map((m) => m.inboxId),
+  });
 
-  const pendingGroupMembers = useMemo(() => {
+  const pendingGroupMembers: {
+    address: string;
+    uri?: string;
+    name?: string;
+  }[] = useMemo(() => {
     return profileQueries.map(({ data: socials }, index) => {
-      const address = route.params.members[index].address;
+      const peerEthereumAddress =
+        route.params.members[index].peerEthereumAddress;
       return {
-        address,
+        address: peerEthereumAddress,
         uri: getPreferredAvatar(socials ?? undefined),
-        name: getPreferredName(socials ?? undefined, account!),
+        name: getPreferredName(socials ?? undefined),
       };
     });
-  }, [profileQueries, route.params.members, account]);
+  }, [profileQueries, route.params.members]);
 
   return (
     <ScrollView
@@ -260,9 +259,9 @@ export default function NewGroupSummary({
         />
       </List.Section>
       <TableView
-        items={route.params.members.map((a) => ({
-          id: a.address,
-          title: getPreferredName(a, a.address),
+        items={route.params.members.map((member) => ({
+          id: member.inboxId,
+          title: getPreferredName(member),
         }))}
         title={translate("members_title")}
       />

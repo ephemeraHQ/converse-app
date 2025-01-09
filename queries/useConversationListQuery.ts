@@ -11,85 +11,95 @@ import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
 } from "@/utils/xmtpRN/client.types";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
+import { xmtpClientByInboxId } from "@/utils/xmtpRN/client";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 
 export type ConversationListQueryData = Awaited<
   ReturnType<typeof getConversationList>
 >;
 
 export const createConversationListQueryObserver = (args: {
-  account: string;
+  inboxId: string;
   context: string;
   includeSync?: boolean;
 }) => {
   return new QueryObserver(queryClient, conversationListQueryConfig(args));
 };
 
-export const useConversationListQuery = (args: {
-  account: string;
+export const useConversationListForCurrentUserQuery = (args?: {
   queryOptions?: Partial<UseQueryOptions<ConversationListQueryData>>;
   context?: string;
 }) => {
-  const { account, queryOptions, context } = args;
+  const { queryOptions, context } = args ?? {};
+  const currentInboxId = useCurrentInboxId();
   return useQuery<ConversationListQueryData>({
-    ...conversationListQueryConfig({ account, context: context ?? "" }),
+    ...conversationListQueryConfig({
+      inboxId: currentInboxId,
+      context: context ?? "",
+    }),
     ...queryOptions,
   });
 };
 
 export const fetchPersistedConversationListQuery = (args: {
-  account: string;
+  inboxId: string;
 }) => {
-  const { account } = args;
+  const { inboxId } = args;
   return queryClient.fetchQuery(
     conversationListQueryConfig({
-      account,
+      inboxId,
       context: "fetchPersistedConversationListQuery",
       includeSync: false,
     })
   );
 };
 
-export const fetchConversationListQuery = (args: { account: string }) => {
-  const { account } = args;
+export const fetchConversationListQuery = (args: { inboxId: string }) => {
+  const { inboxId } = args;
   return queryClient.fetchQuery(
     conversationListQueryConfig({
-      account,
+      inboxId,
       context: "fetchConversationListQuery",
     })
   );
 };
 
-export const prefetchConversationListQuery = (args: { account: string }) => {
-  const { account } = args;
+export const prefetchConversationListQuery = (args: { inboxId: string }) => {
+  const { inboxId } = args;
   return queryClient.prefetchQuery(
     conversationListQueryConfig({
-      account,
+      inboxId,
       context: "prefetchConversationListQuery",
     })
   );
 };
 
-export function refetchConversationListQuery(args: { account: string }) {
-  const { account } = args;
+export function refetchConversationListQuery(args: { inboxId: string }) {
+  const { inboxId } = args;
   return queryClient.refetchQueries({
     queryKey: conversationListQueryConfig({
-      account,
+      inboxId,
       context: "refetchConversationListQuery",
     }).queryKey,
   });
 }
 
 export const addConversationToConversationListQuery = (args: {
-  account: string;
+  inboxId: InboxId;
   conversation: ConversationWithCodecsType;
 }) => {
-  const { account, conversation } = args;
-  const previousConversationsData = getConversationListQueryData({ account });
+  const { inboxId, conversation } = args;
+  if (!inboxId) {
+    logger.error(
+      "[addConversationToConversationListQuery] Inbox ID is required; noop"
+    );
+    return;
+  }
+  const previousConversationsData = getConversationListQueryData({ inboxId });
   if (!previousConversationsData) {
-    setConversationListQueryData({ account, conversations: [conversation] });
+    setConversationListQueryData({ inboxId, conversations: [conversation] });
     return;
   }
 
@@ -102,18 +112,18 @@ export const addConversationToConversationListQuery = (args: {
   }
 
   setConversationListQueryData({
-    account,
+    inboxId,
     conversations: [conversation, ...previousConversationsData],
   });
 };
 
 export const updateConversationInConversationListQuery = (args: {
-  account: string;
+  inboxId: InboxId;
   topic: ConversationTopic;
   conversationUpdate: Partial<ConversationWithCodecsType>;
 }) => {
-  const { account, topic, conversationUpdate } = args;
-  const previousConversationsData = getConversationListQueryData({ account });
+  const { inboxId, topic, conversationUpdate } = args;
+  const previousConversationsData = getConversationListQueryData({ inboxId });
   if (!previousConversationsData) {
     return;
   }
@@ -124,27 +134,30 @@ export const updateConversationInConversationListQuery = (args: {
     }
     return c;
   });
-  setConversationListQueryData({ account, conversations: newConversations });
+  setConversationListQueryData({ inboxId, conversations: newConversations });
 };
 
-export const getConversationListQueryData = (args: { account: string }) => {
-  const { account } = args;
+export const getConversationListQueryData = (args: { inboxId: InboxId }) => {
+  const { inboxId } = args;
   return queryClient.getQueryData<ConversationListQueryData>(
     conversationListQueryConfig({
-      account,
+      inboxId,
       context: "getConversationListQueryData",
     }).queryKey
   );
 };
 
 export const setConversationListQueryData = (args: {
-  account: string;
+  inboxId: InboxId;
   conversations: ConversationListQueryData;
 }) => {
-  const { account, conversations } = args;
+  const { inboxId, conversations } = args;
+  if (!inboxId) {
+    return;
+  }
   return queryClient.setQueryData<ConversationListQueryData>(
     conversationListQueryConfig({
-      account,
+      inboxId,
       context: "setConversationListQueryData",
     }).queryKey,
     conversations
@@ -152,17 +165,30 @@ export const setConversationListQueryData = (args: {
 };
 
 const getConversationList = async (args: {
-  account: string;
+  inboxId: InboxId;
   context: string;
   includeSync?: boolean;
 }) => {
-  const { account, context, includeSync = true } = args;
+  const { inboxId, context, includeSync = true } = args;
   try {
     logger.debug(
       `[ConversationListQuery] Fetching conversation list from network ${context}`
     );
 
-    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    if (!inboxId) {
+      logger.warn(
+        `[ConversationListQuery] No inboxId provided for conversation list query`
+      );
+      return;
+    }
+
+    const client: ConverseXmtpClientType = xmtpClientByInboxId[inboxId];
+    if (!client) {
+      logger.warn(
+        `[ConversationListQuery] No client found for inboxId ${inboxId}`
+      );
+      return;
+    }
 
     const beforeSync = new Date().getTime();
 
@@ -194,7 +220,7 @@ const getConversationList = async (args: {
 
     for (const conversation of conversations) {
       setConversationQueryData({
-        account,
+        inboxId,
         topic: conversation.topic,
         conversation,
       });
@@ -211,18 +237,18 @@ const getConversationList = async (args: {
 };
 
 export const conversationListQueryConfig = (args: {
-  account: string;
+  inboxId: InboxId;
   context: string;
   includeSync?: boolean;
 }) => {
-  const { account, context, includeSync = true } = args;
+  const { inboxId, context, includeSync = true } = args;
   return {
     queryKey: [
       QueryKeys.CONVERSATIONS,
-      account?.toLowerCase(), // All queries are case sensitive, sometimes we use checksum, but the SDK use lowercase, always use lowercase
+      inboxId?.toLowerCase(), // All queries are case sensitive, sometimes we use checksum, but the SDK use lowercase, always use lowercase
     ],
-    queryFn: () => getConversationList({ account, context, includeSync }),
+    queryFn: () => getConversationList({ inboxId, context, includeSync }),
     staleTime: 2000,
-    enabled: !!account,
+    enabled: !!inboxId,
   };
 };

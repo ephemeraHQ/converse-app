@@ -17,7 +17,7 @@ import { NavigationParamList } from "../Navigation/Navigation";
 import {
   useAddPfp,
   useCreateOrUpdateProfileInfo,
-  useProfile,
+  useProfileForCurrentUser,
   useUserProfileStyles,
 } from "../Onboarding/OnboardingUserProfileScreen";
 
@@ -31,7 +31,7 @@ export const NewAccountUserProfileScreen = memo(
 
     const colorScheme = useColorScheme();
 
-    const { profile, setProfile } = useProfile();
+    const { profile, setProfile } = useProfileForCurrentUser();
 
     const { createOrUpdateProfile, loading, errorMessage } =
       useCreateOrUpdateProfileInfo();

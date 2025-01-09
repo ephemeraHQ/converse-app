@@ -8,27 +8,27 @@ import { useAppTheme } from "@theme/useAppTheme";
 import { useCallback } from "react";
 
 type NewConversationTitleProps = {
-  peerAddress: string;
+  peerInboxId: string;
 };
 
 export const NewConversationTitle = ({
-  peerAddress,
+  peerInboxId,
 }: NewConversationTitleProps) => {
   const navigation = useRouter();
 
   const { theme } = useAppTheme();
 
   const onPress = useCallback(() => {
-    if (peerAddress) {
-      navigation.push("Profile", { address: peerAddress });
+    if (peerInboxId) {
+      navigation.push("Profile", { inboxId: peerInboxId });
     }
-  }, [navigation, peerAddress]);
+  }, [navigation, peerInboxId]);
 
-  const { isLoading } = useProfileSocials(peerAddress ?? "");
+  const { isLoading } = useProfileSocials({ peerInboxId });
 
-  const preferredName = usePreferredName(peerAddress ?? "");
+  const preferredName = usePreferredName({ inboxId: peerInboxId });
 
-  const preferredAvatarUri = usePreferredAvatarUri(peerAddress ?? "");
+  const preferredAvatarUri = usePreferredAvatarUri({ inboxId: peerInboxId });
 
   const displayAvatar = !isLoading;
 

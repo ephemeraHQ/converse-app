@@ -2,24 +2,25 @@ import { isConversationDm } from "@/features/conversation/utils/is-conversation-
 import { useQuery } from "@tanstack/react-query";
 import { type ConversationTopic } from "@xmtp/react-native-sdk";
 import { useConversationQuery } from "./useConversationQuery";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 
 export const dmPeerInboxIdQueryKey = (
-  account: string,
+  currentInboxId: string | undefined,
   topic: ConversationTopic
-) => ["dmPeerInboxId", account, topic];
+) => ["dmPeerInboxId", currentInboxId, topic];
 
-export const useDmPeerInboxId = (args: {
-  account: string;
+export const useDmPeerInboxIdForCurrentUser = (args: {
   topic: ConversationTopic;
 }) => {
-  const { account, topic } = args;
+  const { topic } = args;
+  const currentInboxId = useCurrentInboxId();
   const { data: conversation } = useConversationQuery({
-    account,
+    inboxId: currentInboxId,
     topic,
   });
 
   return useQuery({
-    queryKey: dmPeerInboxIdQueryKey(account, topic),
+    queryKey: dmPeerInboxIdQueryKey(currentInboxId, topic),
     queryFn: () => {
       if (!conversation) {
         throw new Error("Conversation not found");
@@ -29,6 +30,7 @@ export const useDmPeerInboxId = (args: {
       }
       return conversation.peerInboxId();
     },
-    enabled: !!conversation && isConversationDm(conversation),
+    enabled:
+      !!currentInboxId && !!conversation && isConversationDm(conversation),
   });
 };

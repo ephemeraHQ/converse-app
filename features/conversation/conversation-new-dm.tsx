@@ -1,5 +1,5 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
-import { getCurrentAccount } from "@/data/store/accountsStore";
+import { getCurrentInboxId } from "@/data/store/accountsStore";
 import { Button } from "@/design-system/Button/Button";
 import { Center } from "@/design-system/Center";
 import { Text } from "@/design-system/Text";
@@ -21,28 +21,29 @@ import { setDmQueryData } from "@/queries/useDmQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
 import { sentryTrackError } from "@/utils/sentry";
-import { createConversationByAccount } from "@/utils/xmtpRN/conversations";
+import { createDmForPeerInboxId } from "@/utils/xmtpRN/conversations";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo, useCallback, useLayoutEffect } from "react";
 import { Keyboard } from "react-native";
 
 export const ConversationNewDm = memo(function ConversationNewDm(props: {
-  peerAddress: string;
+  peerInboxId: string;
   textPrefill?: string;
 }) {
-  const { peerAddress, textPrefill } = props;
+  const { peerInboxId, textPrefill } = props;
 
   const navigation = useRouter();
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: () => <NewConversationTitle peerAddress={peerAddress} />,
+      headerTitle: () => <NewConversationTitle peerInboxId={peerInboxId} />,
     });
-  }, [peerAddress, navigation]);
+  }, [peerInboxId, navigation]);
 
-  const sendFirstConversationMessage =
-    useSendFirstConversationMessage(peerAddress);
+  const sendFirstConversationMessage = useSendFirstConversationMessage({
+    peerInboxId,
+  });
 
   const handleSendWelcomeMessage = useCallback(() => {
     sendFirstConversationMessage({
@@ -56,7 +57,7 @@ export const ConversationNewDm = memo(function ConversationNewDm(props: {
       inputValue={textPrefill}
     >
       <ConversationNewDmNoMessagesPlaceholder
-        peerAddress={peerAddress}
+        peerInboxId={peerInboxId}
         isBlockedPeer={false} // TODO
         onSendWelcomeMessage={handleSendWelcomeMessage}
       />
@@ -68,25 +69,23 @@ export const ConversationNewDm = memo(function ConversationNewDm(props: {
   );
 });
 
-function useSendFirstConversationMessage(peerAddress: string) {
-  const {
-    mutateAsync: createNewConversationAsync,
-    status: createNewConversationStatus,
-  } = useMutation({
-    mutationFn: async (peerAddress: string) => {
-      const currentAccount = getCurrentAccount()!;
-      return createConversationByAccount(currentAccount, peerAddress!);
+function useSendFirstConversationMessage(args: { peerInboxId: string }) {
+  const { mutateAsync: createNewConversationAsync } = useMutation({
+    mutationFn: async () => {
+      return createDmForPeerInboxId({
+        peerInboxId: args.peerInboxId,
+      });
     },
-    onSuccess: (newConversation) => {
-      const currentAccount = getCurrentAccount()!;
+    onSuccess: async (newConversation) => {
+      const currentInboxId = getCurrentInboxId()!;
       try {
         addConversationToConversationListQuery({
-          account: currentAccount,
+          inboxId: currentInboxId,
           conversation: newConversation,
         });
         setDmQueryData({
-          account: currentAccount,
-          peer: peerAddress,
+          ourInboxId: currentInboxId,
+          peerInboxId: args.peerInboxId,
           dm: newConversation,
         });
       } catch (error) {
@@ -94,10 +93,10 @@ function useSendFirstConversationMessage(peerAddress: string) {
       }
     },
     // TODO: Add this for optimistic update and faster UX
-    // onMutate: (peerAddress) => {
+    // onMutate: (peerInboxId) => {
     //   const currentAccount = getCurrentAccount()!;
     //   queryClient.setQueryData<ConversationWithCodecsType>(
-    //     conversationWithPeerQueryKey(currentAccount, peerAddress),
+    //     conversationWithPeerQueryKey(currentAccount, peerInboxId),
     //     () => ({
     //       topic: `RANDOM_TOPIC_${Math.random()}`,
     //     } satisfies DmWithCodecsType)
@@ -126,7 +125,7 @@ function useSendFirstConversationMessage(peerAddress: string) {
     async (args: ISendMessageParams) => {
       try {
         // First, create the conversation
-        const conversation = await createNewConversationAsync(peerAddress);
+        const conversation = await createNewConversationAsync();
         try {
           // Then, send the message
           await sendMessageAsync({
@@ -142,12 +141,12 @@ function useSendFirstConversationMessage(peerAddress: string) {
         sentryTrackError(error);
       }
     },
-    [createNewConversationAsync, peerAddress, sendMessageAsync]
+    [createNewConversationAsync, sendMessageAsync]
   );
 }
 
 type IConversationNewDmNoMessagesPlaceholderProps = {
-  peerAddress: string;
+  peerInboxId: string;
   onSendWelcomeMessage: () => void;
   isBlockedPeer: boolean;
 };
@@ -155,11 +154,11 @@ type IConversationNewDmNoMessagesPlaceholderProps = {
 function ConversationNewDmNoMessagesPlaceholder(
   args: IConversationNewDmNoMessagesPlaceholderProps
 ) {
-  const { peerAddress, onSendWelcomeMessage, isBlockedPeer } = args;
+  const { peerInboxId, onSendWelcomeMessage, isBlockedPeer } = args;
 
   const { theme } = useAppTheme();
 
-  const peerPreferredName = usePreferredName(peerAddress);
+  const peerPreferredName = usePreferredName({ inboxId: peerInboxId });
 
   if (isBlockedPeer) {
     // TODO

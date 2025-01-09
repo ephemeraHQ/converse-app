@@ -37,9 +37,12 @@ export function ClickableText({ children, style }: Props) {
     Linking.openURL(uri);
   }, []);
 
-  const handleNewConversationPress = useCallback((peer: string) => {
-    navigate("NewConversation", { peer });
-  }, []);
+  const handleNewConversationPress = useCallback(
+    (peerEthereumAddress: string) => {
+      navigate("NewConversation", { peerEthereumAddress });
+    },
+    []
+  );
 
   const showCopyActionSheet = useCallback(
     (cta: string) => (content: string) => {

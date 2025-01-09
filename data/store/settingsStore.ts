@@ -13,7 +13,9 @@ type NotificationsSettings = {
   showNotificationScreen: boolean;
 };
 
-export type PeersStatus = { [peerAddress: string]: "blocked" | "consented" };
+export type PeersStatus = {
+  [peerEthereumAddress: string]: "blocked" | "consented";
+};
 export type InboxIdPeerStatus = { [inboxId: InboxId]: "allowed" | "denied" };
 export type GroupStatus = { [groupId: string]: "allowed" | "denied" };
 
@@ -25,7 +27,7 @@ export type SettingsStoreType = {
 
   peersStatus: PeersStatus;
   setPeersStatus: (peersStatus: {
-    [peerAddress: string]: "blocked" | "consented";
+    [peerEthereumAddress: string]: "blocked" | "consented";
   }) => void;
 
   inboxIdPeerStatus: InboxIdPeerStatus;
@@ -61,7 +63,7 @@ export const initSettingsStore = (account: string) => {
         },
         peersStatus: {},
         setPeersStatus: (peersStatus: {
-          [peerAddress: string]: "blocked" | "consented";
+          [peerEthereumAddress: string]: "blocked" | "consented";
         }) =>
           set((state) => {
             return {
@@ -143,8 +145,8 @@ export const initSettingsStore = (account: string) => {
           // Migration from version 0: Convert 'blockedPeers' to 'peersStatus'
           if (version === 0 && persistedState.blockedPeers) {
             persistedState.peersStatus = {};
-            for (const peerAddress in persistedState.blockedPeers) {
-              persistedState.peersStatus[peerAddress] = "blocked";
+            for (const peerEthereumAddress in persistedState.blockedPeers) {
+              persistedState.peersStatus[peerEthereumAddress] = "blocked";
             }
             delete persistedState.blockedPeers;
           }

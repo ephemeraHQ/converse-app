@@ -26,8 +26,8 @@ jest.mock("../data/store/accountsStore", () => ({
   getProfilesStore: jest
     .fn()
     .mockReturnValue({ getState: jest.fn().mockReturnValue({ profiles: {} }) }),
-  useAccountsList: jest.fn().mockReturnValue(["account1", "account2"]),
-  currentAccount: jest.fn().mockReturnValue("currentAccount"),
+  useInboxesList: jest.fn().mockReturnValue(["account1", "account2"]),
+  currentInboxId: jest.fn().mockReturnValue("currentInboxId"),
 }));
 
 jest.mock("expo-crypto", () => ({

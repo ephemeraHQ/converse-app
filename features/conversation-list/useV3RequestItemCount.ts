@@ -1,11 +1,8 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
-import { useConversationListQuery } from "@/queries/useConversationListQuery";
+import { useConversationListForCurrentUserQuery } from "@/queries/useConversationListQuery";
 import { useMemo } from "react";
 
 export const useV3RequestItemCount = () => {
-  const currentAccount = useCurrentAccount();
-  const { data: groups } = useConversationListQuery({
-    account: currentAccount!,
+  const { data: groups } = useConversationListForCurrentUserQuery({
     queryOptions: {
       refetchOnWindowFocus: false,
       refetchOnMount: false,

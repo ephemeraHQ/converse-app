@@ -5,7 +5,6 @@ import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { StaggeredAnimation } from "@/design-system/staggered-animation";
 import { useConversationMessageById } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getReactionContent } from "@/utils/xmtpRN/reactions";
 import { Text } from "@design-system/Text";
 import { useAppTheme } from "@theme/useAppTheme";
@@ -19,6 +18,7 @@ import {
 import React, { memo, useCallback, useMemo } from "react";
 import { EntryAnimationsValues, withSpring } from "react-native-reanimated";
 import { MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT } from "./conversation-message-context-menu-constant";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 
 export const MessageContextMenuAboveMessageReactions = memo(
   function MessageContextMenuAboveMessageReactions({
@@ -42,7 +42,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
   }) {
     const { theme } = useAppTheme();
 
-    const { data: currentUserInboxId } = useCurrentAccountInboxId();
+    const currentUserInboxId = useCurrentInboxId();
 
     const { message } = useConversationMessageById({
       messageId,

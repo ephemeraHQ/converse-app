@@ -3,24 +3,24 @@ import logger from "@utils/logger";
 
 import { captureError } from "@/utils/capture-error";
 import { useGroupQuery } from "@queries/useGroupQuery";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { addMemberMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
   invalidateGroupMembersQuery,
 } from "./useGroupMembersQuery";
-// import { refreshGroup } from "../utils/xmtpRN/conversations";
 
-export const useAddToGroupMutation = (
-  account: string,
-  topic: ConversationTopic
-) => {
-  const { data: group } = useGroupQuery({ account, topic });
+export const useAddToGroupMutation = (args: {
+  inboxId: InboxId;
+  topic: ConversationTopic;
+}) => {
+  const { inboxId, topic } = args;
+  const { data: group } = useGroupQuery({ inboxId, topic });
 
   return useMutation({
-    mutationKey: addMemberMutationKey(account, topic!),
+    mutationKey: addMemberMutationKey(args),
     mutationFn: async (addresses: string[]) => {
-      if (!group || !account || !topic) {
+      if (!group || !inboxId || !topic) {
         return;
       }
       await group.addMembers(addresses);
@@ -30,7 +30,7 @@ export const useAddToGroupMutation = (
       if (!topic) {
         return;
       }
-      await cancelGroupMembersQuery(account, topic);
+      await cancelGroupMembersQuery({ inboxId, topic });
     },
     onError: (error, _variables, _context) => {
       captureError(error);
@@ -40,7 +40,7 @@ export const useAddToGroupMutation = (
       if (!topic) {
         return;
       }
-      invalidateGroupMembersQuery(account, topic);
+      invalidateGroupMembersQuery({ inboxId, topic });
       // refreshGroup(account, topic);
     },
   });

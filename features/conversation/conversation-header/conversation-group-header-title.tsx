@@ -1,7 +1,8 @@
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 import { Text } from "@/design-system/Text";
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-header/conversation-header-title";
-import { useGroupName } from "@/hooks/useGroupName";
-import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
+import { useGroupNameForCurrentUser } from "@/hooks/useGroupName";
+import { useGroupPendingRequestsForCurrentUser } from "@/hooks/useGroupPendingRequests";
 import { useProfilesSocials } from "@/hooks/useProfilesSocials";
 import {
   useGroupMembersConversationScreenQuery,
@@ -11,7 +12,6 @@ import { copyToClipboard } from "@/utils/clipboard";
 import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
 import Avatar from "@components/Avatar";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { translate } from "@i18n";
 import { useRouter } from "@navigation/useNavigation";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
@@ -25,22 +25,22 @@ type GroupConversationTitleProps = {
 
 export const GroupConversationTitle = memo(
   ({ topic }: GroupConversationTitleProps) => {
-    const currentAccount = useCurrentAccount()!;
-
+    const inboxId = useCurrentInboxId()!;
     const { data: groupPhoto, isLoading: groupPhotoLoading } =
       useGroupPhotoQuery({
-        account: currentAccount,
+        inboxId,
         topic,
       });
 
     const { data: members } = useGroupMembersQuery({
-      account: currentAccount,
+      inboxId,
       topic: topic!,
     });
 
     const { data: memberData } = useGroupMembersAvatarData({ topic });
 
-    const { groupName, isLoading: groupNameLoading } = useGroupName(topic);
+    const { groupName, isLoading: groupNameLoading } =
+      useGroupNameForCurrentUser({ topic });
 
     const navigation = useRouter();
 
@@ -54,7 +54,7 @@ export const GroupConversationTitle = memo(
       copyToClipboard(JSON.stringify(topic));
     }, [topic]);
 
-    const requestsCount = useGroupPendingRequests(topic).length;
+    const requestsCount = useGroupPendingRequestsForCurrentUser(topic).length;
 
     const avatarComponent = useMemo(() => {
       return groupPhoto ? (
@@ -108,9 +108,9 @@ type IMemberData = {
 
 const useGroupMembersAvatarData = (args: { topic: ConversationTopic }) => {
   const { topic } = args;
-  const currentAccount = useCurrentAccount()!;
+  const inboxId = useCurrentInboxId()!;
   const { data: members, ...query } = useGroupMembersConversationScreenQuery({
-    account: currentAccount,
+    inboxId,
     topic,
   });
 
@@ -121,17 +121,14 @@ const useGroupMembersAvatarData = (args: { topic: ConversationTopic }) => {
 
     return members.ids.reduce<string[]>((addresses, memberId) => {
       const memberAddress = members.byId[memberId]?.addresses[0];
-      if (
-        memberAddress &&
-        memberAddress.toLowerCase() !== currentAccount?.toLowerCase()
-      ) {
+      if (memberAddress && memberId !== inboxId) {
         addresses.push(memberAddress);
       }
       return addresses;
     }, []);
-  }, [members, currentAccount]);
+  }, [members, inboxId]);
 
-  const data = useProfilesSocials(memberAddresses);
+  const data = useProfilesSocials({ peerInboxIds: memberAddresses });
 
   const memberData = useMemo<IMemberData[]>(() => {
     return data.map(({ data: socials }, index) => {
@@ -146,7 +143,7 @@ const useGroupMembersAvatarData = (args: { topic: ConversationTopic }) => {
       return {
         address,
         uri: getPreferredAvatar(socials),
-        name: getPreferredName(socials, address),
+        name: getPreferredName(socials),
       };
     });
   }, [data, memberAddresses]);

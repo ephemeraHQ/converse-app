@@ -1,8 +1,8 @@
-import { currentAccount } from "@data/store/accountsStore";
 import { resetNotifications } from "./resetNotifications";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import logger from "@utils/logger";
+import { getCurrentInboxId } from "@/data/store/accountsStore";
 
 // note(lustig): these two handlers are the same - do we need both?
 const handleiOSForegroundNotification = async (
@@ -16,12 +16,12 @@ const handleiOSForegroundNotification = async (
 
   const senderAccount =
     /* TODO notification.request.content.data?.["sender"]; */ "todo";
-  const userIsNotSender = senderAccount !== currentAccount();
+  const userIsNotSender = senderAccount !== getCurrentInboxId();
 
   const isViewingNotifiedConversation = /* TODO */ false;
   const hackSoWeDontShowNotificationToSender =
     /* todo(lustig): remove once we get senderAddress */ recipientAccount !==
-    currentAccount();
+    getCurrentInboxId();
   const shouldShowAlert =
     userIsNotSender &&
     !isViewingNotifiedConversation &&
@@ -47,7 +47,7 @@ const handleDefaultForegroundNotification = async (
 ) => {
   resetNotifications();
   const account = notification.request.content.data?.["account"];
-  if (account && account !== currentAccount()) {
+  if (account && account !== getCurrentInboxId()) {
     return {
       shouldShowAlert: true,
       shouldPlaySound: true,

@@ -11,17 +11,17 @@ import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { translate } from "@/i18n";
 
 export type NewConversationNavParams = {
-  peer?: string;
+  peerEthereumAddress?: string;
   addingToGroupTopic?: ConversationTopic;
 };
 
 export const NewConversationScreenConfig = {
   path: "/newConversation",
   parse: {
-    peer: decodeURIComponent,
+    peerEthereumAddress: decodeURIComponent,
   },
   stringify: {
-    peer: encodeURIComponent,
+    peerEthereumAddress: encodeURIComponent,
   },
 };
 

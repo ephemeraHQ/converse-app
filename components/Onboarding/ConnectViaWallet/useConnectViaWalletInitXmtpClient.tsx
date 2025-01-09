@@ -7,9 +7,8 @@ import { sentryTrackError, sentryTrackMessage } from "@utils/sentry";
 import { reloadAsync } from "expo-updates";
 import { useCallback, useEffect, useRef } from "react";
 
-import { wait } from "../../../utils/general";
 import { createXmtpClientFromSigner } from "../../../utils/xmtpRN/signIn";
-import { connectWithAddress } from "../init-xmtp-client";
+import { connectWithInboxId } from "../init-xmtp-client";
 import { useConnectViaWalletContext } from "./ConnectViaWallet.context";
 import { useConnectViaWalletStore } from "./ConnectViaWallet.store";
 
@@ -51,67 +50,60 @@ export function useInitXmptClient() {
 
     try {
       const signer = connectViewWalletStore.getState().signer!; // We can assume that signer is set at this point
-      const address = connectViewWalletStore.getState().address!; // We can assume that address is set at this point
-      const alreadyV3Db = connectViewWalletStore.getState().alreadyV3Db;
-
-      const waitForClickSignature = async () => {
-        while (!connectViewWalletStore.getState().clickedSignature) {
-          if (abortControllerRef.current.signal.aborted) {
-            return;
-          }
-          logger.debug("[Connect Wallet] Waiting for clicked signature");
-          await wait(1000);
-        }
-      };
 
       logger.debug("[Connect Wallet] starting initXmtpClient");
 
       hasStartedXmtpClientFlowRef.current = true;
 
-      await createXmtpClientFromSigner(
-        signer,
-        async () => {
-          logger.debug("[Connect Wallet] Installation revoked, disconnecting");
-          try {
-            await awaitableAlert(
-              translate("current_installation_revoked"),
-              translate("current_installation_revoked_description")
-            );
-          } catch (error) {
-            sentryTrackError(error);
-          } finally {
-            onErrorConnecting({
-              error: new Error("Installation revoked"),
-            });
-          }
-        },
-        async () => {
-          if (connectViewWalletStore.getState().waitingForNextSignature) {
-            const currentSignaturesDone =
-              connectViewWalletStore.getState().numberOfSignaturesDone;
-            connectViewWalletStore
-              .getState()
-              .setNumberOfSignaturesDone(currentSignaturesDone + 1);
-            connectViewWalletStore.getState().setLoading(false);
-            logger.debug(
-              "[Connect Wallet] Waiting until signature click for Authenticate"
-            );
-            await waitForClickSignature();
-            logger.debug(
-              "[Connect Wallet] Click on Sign done for Authenticate"
-            );
-            connectViewWalletStore.getState().setWaitingForNextSignature(false);
-          }
-          logger.debug(
-            "[Connect Wallet] Triggering authenticate to inbox signature"
+      const handleInstallationRevoked = async () => {
+        logger.debug("[Connect Wallet] Installation revoked, disconnecting");
+        try {
+          await awaitableAlert(
+            translate("current_installation_revoked"),
+            translate("current_installation_revoked_description")
           );
+        } catch (error) {
+          sentryTrackError(error);
+        } finally {
+          onErrorConnecting({
+            error: new Error("Installation revoked"),
+          });
         }
+      };
+
+      const preAuthenticateToInboxCallback = async () => {
+        logger.debug("[Connect Wallet] Installation revoked, disconnecting");
+        try {
+          await awaitableAlert(
+            translate("current_installation_revoked"),
+            translate("current_installation_revoked_description")
+          );
+        } catch (error) {
+          sentryTrackError(error);
+        } finally {
+          onErrorConnecting({
+            error: new Error("Installation revoked"),
+          });
+        }
+      };
+
+      const xmtpClientCreationResult = await createXmtpClientFromSigner(
+        signer,
+        handleInstallationRevoked,
+        preAuthenticateToInboxCallback
       );
 
-      logger.debug("[Connect Wallet] Got base64 key, now connecting");
+      if ("error" in xmtpClientCreationResult) {
+        onErrorConnecting({
+          error: xmtpClientCreationResult.error,
+        });
+        return;
+      }
 
-      await connectWithAddress({
-        address,
+      const inboxId = xmtpClientCreationResult.inboxId;
+
+      await connectWithInboxId({
+        inboxId,
       });
 
       logger.info("[Connect Wallet] Successfully logged in using a wallet");

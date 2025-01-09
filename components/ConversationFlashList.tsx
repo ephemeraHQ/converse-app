@@ -7,7 +7,7 @@ import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
 import HiddenRequestsButton from "./ConversationList/HiddenRequestsButton";
 import { V3GroupConversationListItem } from "./V3GroupConversationListItem";
-import { useChatStore, useCurrentAccount } from "../data/store/accountsStore";
+import { useChatStore, useCurrentInboxId } from "../data/store/accountsStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import { ConversationFlatListHiddenRequestItem } from "../utils/conversation";
@@ -59,7 +59,7 @@ export default function ConversationFlashList({
   const { lastUpdateAt, initialLoadDoneOnce } = useChatStore(
     useSelect(["lastUpdateAt", "initialLoadDoneOnce"])
   );
-  const userAddress = useCurrentAccount() as string;
+  const currentInboxId = useCurrentInboxId();
   const listRef = useRef<FlashList<any> | undefined>();
 
   const renderItem = useCallback(({ item }: { item: FlatListItemType }) => {
@@ -110,7 +110,7 @@ export default function ConversationFlashList({
               colorScheme,
               navigation,
               route,
-              userAddress,
+              currentInboxId,
               initialLoadDoneOnce,
               lastUpdateAt,
             ]}

@@ -1,3 +1,4 @@
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 import { translate } from "@/i18n";
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import {
@@ -18,7 +19,10 @@ import React, {
 export default function EphemeralAccountBanner() {
   const styles = useStyles();
   const colorScheme = useColorScheme();
-  const showDisconnectActionSheet = useDisconnectActionSheet();
+  const currentInboxId = useCurrentInboxId()!;
+  const showDisconnectActionSheet = useDisconnectActionSheet({
+    inboxId: currentInboxId,
+  });
   return (
     <TouchableOpacity
       onPress={() => showDisconnectActionSheet(colorScheme)}

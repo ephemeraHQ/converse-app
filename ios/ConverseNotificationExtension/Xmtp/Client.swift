@@ -80,11 +80,11 @@ func subscribeToTopic(apiURI: String?, account: String, pushToken: String?, topi
   }
 }
 
-func putGroupInviteRequest(apiURI: String?, account: String, xmtpClient: Client, status: String, joinRequestId: String) async throws {
+func putGroupJoinRequest(apiURI: String?, account: String, xmtpClient: Client, status: String, joinRequestId: String) async throws {
   if let apiURI = apiURI, !apiURI.isEmpty {
     do {
       let joinRequestUri = "\(apiURI)/api/groupJoinRequest/\(joinRequestId)"
-      let secureMmkv = getSecureMmkvForAccount(account: account)
+      let secureMmkv = getSecureMmkvForInboxId(account: account)
       guard let mmkv = secureMmkv else {
           throw NSError(domain: "PutGroupInviteRequest", code: 1, userInfo: [NSLocalizedDescriptionKey: "Secure MMKV not found"])
       }

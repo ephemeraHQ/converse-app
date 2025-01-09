@@ -1,5 +1,5 @@
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import { useCurrentAccount } from "@/data/store/accountsStore";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
 import { Center } from "@/design-system/Center";
 import { Loader } from "@/design-system/loader";
 import { Conversation } from "@/features/conversation/conversation";
@@ -20,9 +20,9 @@ type IConversationScreenProps = NativeStackScreenProps<
 
 export function ConversationScreen(args: IConversationScreenProps) {
   const { route } = args;
-  const { peer, topic, text } = route.params || {};
+  const { peerInboxId, topic, text } = route.params || {};
 
-  if (!peer && !topic) {
+  if (!peerInboxId && !topic) {
     captureError(new Error("No peer or topic found in ConversationScreen"));
     return (
       <Screen contentContainerStyle={{ flex: 1 }}>
@@ -36,26 +36,25 @@ export function ConversationScreen(args: IConversationScreenProps) {
       {topic && isV3Topic(topic) ? (
         <Conversation topic={topic} textPrefill={text} />
       ) : (
-        <PeerAddressFlow peerAddress={peer!} textPrefill={text} />
+        <PeerAddressFlow peerInboxId={peerInboxId!} textPrefill={text} />
       )}
     </Screen>
   );
 }
 
 type IPeerAddressFlowProps = {
-  peerAddress: string;
+  peerInboxId: string;
   textPrefill?: string;
 };
 
 const PeerAddressFlow = memo(function PeerAddressFlow(
   args: IPeerAddressFlowProps
 ) {
-  const { peerAddress, textPrefill } = args;
-  const currentAccount = useCurrentAccount()!;
+  const { peerInboxId, textPrefill } = args;
 
   const { data: dmConversation, isLoading } = useDmQuery({
-    account: currentAccount,
-    peer: peerAddress,
+    peerInboxId,
+    ourInboxId: useCurrentInboxId()!,
   });
 
   if (isLoading) {
@@ -73,6 +72,6 @@ const PeerAddressFlow = memo(function PeerAddressFlow(
   }
 
   return (
-    <ConversationNewDm peerAddress={peerAddress} textPrefill={textPrefill} />
+    <ConversationNewDm peerInboxId={peerInboxId} textPrefill={textPrefill} />
   );
 });

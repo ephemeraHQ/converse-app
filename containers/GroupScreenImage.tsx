@@ -1,15 +1,15 @@
+import { getCurrentInboxId } from "@/data/store/accountsStore";
+import { useGroupPermissionspForCurrentUser } from "@/hooks/useGroupPermissions";
+import { useGroupPhotoForCurrentInbox } from "@/hooks/useGroupPhoto";
 import Button from "@components/Button/Button";
 import GroupAvatar from "@components/GroupAvatar";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupMembers } from "@hooks/useGroupMembers";
-import { useGroupPermissions } from "@hooks/useGroupPermissions";
-import { useGroupPhoto } from "@hooks/useGroupPhoto";
 import { usePhotoSelect } from "@hooks/usePhotoSelect";
 import { translate } from "@i18n";
 import { uploadFile } from "@utils/attachment/uploadFile";
 import {
-  getAddressIsAdmin,
-  getAddressIsSuperAdmin,
+  isUserAdminByInboxId,
+  isUserSuperAdminByInboxId,
 } from "@utils/groupUtils/adminUtils";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -22,20 +22,24 @@ type GroupScreenImageProps = {
 };
 
 export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
-  const currentAccount = useCurrentAccount() as string;
-  const { groupPhoto, setGroupPhoto } = useGroupPhoto(topic);
-  const { permissions } = useGroupPermissions(topic);
-  const { members } = useGroupMembers(topic);
+  const { groupPhoto, setGroupPhoto } = useGroupPhotoForCurrentInbox({
+    topic,
+  });
+  const { permissions } = useGroupPermissionspForCurrentUser({ topic });
+  const { members } = useGroupMembers({ topic });
 
   const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
     () => ({
-      currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
-      currentAccountIsSuperAdmin: getAddressIsSuperAdmin(
-        members,
-        currentAccount
+      currentAccountIsAdmin: isUserAdminByInboxId(
+        getCurrentInboxId()!,
+        members
+      ),
+      currentAccountIsSuperAdmin: isUserSuperAdminByInboxId(
+        getCurrentInboxId()!,
+        members
       ),
     }),
-    [currentAccount, members]
+    [members]
   );
 
   const canEditGroupImage = memberCanUpdateGroup(
@@ -47,14 +51,14 @@ export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
   const onPhotoChange = useCallback(
     (newImageUrl: string) => {
       uploadFile({
-        account: currentAccount,
+        inboxId: getCurrentInboxId()!,
         filePath: newImageUrl,
         contentType: "image/jpeg",
       }).then((url) => {
         setGroupPhoto(url);
       });
     },
-    [currentAccount, setGroupPhoto]
+    [setGroupPhoto]
   );
   const { addPhoto: addGroupPhoto, photo: localGroupPhoto } = usePhotoSelect({
     initialPhoto: groupPhoto,

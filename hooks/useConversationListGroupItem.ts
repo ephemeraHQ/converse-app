@@ -1,12 +1,8 @@
-import { useConversationListQuery } from "@/queries/useConversationListQuery";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
-
+import { useConversationListForCurrentUserQuery } from "@/queries/useConversationListQuery";
 export const useConversationListGroupItem = (topic: ConversationTopic) => {
-  const account = useCurrentAccount();
-  const { data } = useConversationListQuery({
-    account: account!,
+  const { data } = useConversationListForCurrentUserQuery({
     queryOptions: {
       refetchOnWindowFocus: false,
       refetchOnMount: false,

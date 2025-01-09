@@ -2,46 +2,54 @@ import {
   fetchProfileSocialsQuery,
   profileSocialsQueryStorageKey,
 } from "@/queries/useProfileSocialsQuery";
-import { InboxId } from "@xmtp/react-native-sdk";
 import mmkv from "@/utils/mmkv";
+import { type IProfileSocials } from "@/features/profiles/profile-types";
+import { getCurrentInboxId } from "@/data/store/accountsStore";
 import {
   fetchInboxProfileSocialsQuery,
   inboxProfileSocialsQueryStorageKey,
 } from "@/queries/useInboxProfileSocialsQuery";
-import { type IProfileSocials } from "@/features/profiles/profile-types";
 
-export const getProfile = async (
-  currentAccount: string,
-  inboxId: InboxId,
-  address: string | undefined
+export const getProfileByInboxId = async (
+  inboxId: string
+  // address: string | undefined
 ): Promise<IProfileSocials | undefined | null> => {
-  if (address) {
-    const addressStorageKey = profileSocialsQueryStorageKey(
-      currentAccount,
-      address
-    );
+  const currentInboxId = getCurrentInboxId();
+  if (!currentInboxId) {
+    return undefined;
+  }
+
+  if (inboxId) {
+    const addressStorageKey = profileSocialsQueryStorageKey({
+      currentInboxId,
+      profileLookupInboxId: inboxId,
+    });
     const mmkvString = mmkv.getString(addressStorageKey);
     if (mmkvString) {
       return JSON.parse(mmkvString) as IProfileSocials;
     }
   }
 
-  const inboxIdStorageKey = inboxProfileSocialsQueryStorageKey(
-    currentAccount,
-    inboxId
-  );
+  const inboxIdStorageKey = inboxProfileSocialsQueryStorageKey({
+    currentInboxId,
+    profileLookupInboxId: inboxId,
+  });
   const mmkvString = mmkv.getString(inboxIdStorageKey);
   if (mmkvString) {
     return JSON.parse(mmkvString) as IProfileSocials;
   }
 
   // We don't have any profile data, let's fetch it
-  if (address) {
-    return fetchProfileSocialsQuery(currentAccount, address);
+  if (inboxId) {
+    const profileSocials = await fetchProfileSocialsQuery({
+      currentInboxId,
+      profileLookupInboxId: inboxId,
+    });
+    return profileSocials;
   }
-  const inboxProfileSocials = await fetchInboxProfileSocialsQuery(
-    currentAccount,
-    inboxId
-  );
+  const inboxProfileSocials = await fetchInboxProfileSocialsQuery({
+    currentInboxId,
+    profileLookupInboxId: inboxId,
+  });
   return inboxProfileSocials?.[0];
 };

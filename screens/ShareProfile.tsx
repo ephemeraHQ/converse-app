@@ -27,12 +27,13 @@ import ActionButton from "../components/Chat/ActionButton";
 import Picto from "../components/Picto/Picto";
 import { Screen } from "../components/Screen/ScreenComp/Screen";
 import config from "../config";
-import { useCurrentAccount } from "../data/store/accountsStore";
 import { NavigationParamList } from "./Navigation/Navigation";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { translate } from "@/i18n";
 import { usePreferredUsername } from "@/hooks/usePreferredUsername";
+import { useCurrentInboxId } from "@/data/store/accountsStore";
+import { useProfileSocials } from "@/hooks/useProfileSocials";
 
 const ShareProfileContent = ({
   userAddress,
@@ -42,7 +43,7 @@ const ShareProfileContent = ({
   profileUrl,
   compact = false,
 }: {
-  userAddress: string;
+  userAddress?: string;
   username?: string;
   displayName: string;
   avatar: string;
@@ -81,14 +82,12 @@ const ShareProfileContent = ({
             style={styles.avatar}
           />
           <Text style={[styles.identity, compact && styles.identityCompact]}>
-            {displayName || username || shortAddress(userAddress || "")}
+            {displayName || username}
           </Text>
           {displayName !== username && (
-            <Text style={styles.username}>
-              {username || shortAddress(userAddress || "")}
-            </Text>
+            <Text style={styles.username}>{username}</Text>
           )}
-          {username && (
+          {username && userAddress && (
             <Text style={styles.address}>
               {shortAddress(userAddress || "")}
             </Text>
@@ -142,13 +141,14 @@ const ShareProfileContent = ({
 export { ShareProfileContent };
 
 export default function ShareProfileScreen({
-  route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "ShareProfile">) {
-  const userAddress = useCurrentAccount() as string;
-  const username = usePreferredUsername(userAddress);
-  const displayName = usePreferredName(userAddress);
-  const avatar = usePreferredAvatarUri(userAddress);
+  const currentInboxId = useCurrentInboxId()!;
+  const username = usePreferredUsername({ inboxId: currentInboxId });
+  const displayName = usePreferredName({ inboxId: currentInboxId });
+  const avatar = usePreferredAvatarUri({ inboxId: currentInboxId });
+  const { data } = useProfileSocials({ inboxId: currentInboxId });
+  const userAddress = data?.cryptoCurrencyWalletAddresses?.ETH[0];
 
   useEffect(() => {
     navigation.setOptions({
@@ -170,14 +170,12 @@ export default function ShareProfileScreen({
     });
   }, [navigation]);
 
-  const profileUrl = `https://${config.websiteDomain}/dm/${
-    username || userAddress
-  }`;
+  const profileUrl = `https://${config.websiteDomain}/dm/${username}`;
 
   return (
     <Screen safeAreaEdges={["bottom"]} contentContainerStyle={{ flex: 1 }}>
       <ShareProfileContent
-        userAddress={userAddress}
+        userAddress={userAddress || ""}
         username={username}
         displayName={displayName}
         avatar={avatar || ""}
