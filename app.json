@@ -3,10 +3,10 @@
     "newArchEnabled": false,
     "version": "2.1.0",
     "ios": {
-      "buildNumber": "61"
+      "buildNumber": "62"
     },
     "android": {
-      "versionCode": 261
+      "versionCode": 262
     }
   }
 }
