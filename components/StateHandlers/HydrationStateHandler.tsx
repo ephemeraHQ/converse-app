@@ -6,6 +6,18 @@ import { getAccountsList } from "@data/store/accountsStore";
 import { useAppStore } from "@data/store/appStore";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { getInstalledWallets } from "../Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
+import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
+
+const handleLoadAccount = async (account: string) => {
+  logger.info(`[Hydration] Loading account ${account}`);
+  const conversationList = await fetchPersistedConversationListQuery({
+    account,
+  });
+  subscribeToNotifications({
+    conversations: conversationList,
+    account,
+  });
+};
 
 export default function HydrationStateHandler() {
   // Initial hydration
@@ -33,8 +45,7 @@ export default function HydrationStateHandler() {
           );
 
           const results = await Promise.allSettled([
-            // This will handle creating the client and setting the conversation list from persistence
-            fetchPersistedConversationListQuery({ account }),
+            handleLoadAccount(account),
           ]);
           prefetchInboxIdQuery({ account });
 
