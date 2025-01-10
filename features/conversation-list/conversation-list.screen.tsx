@@ -49,12 +49,7 @@ import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { memo, useCallback, useMemo } from "react";
-import {
-  Alert,
-  Platform,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native";
+import { Alert, TouchableOpacity, useColorScheme } from "react-native";
 import {
   ContextMenuButton,
   ContextMenuView,
@@ -398,26 +393,40 @@ function useHeaderWrapper() {
               menuItems: [
                 {
                   actionKey: "all-chats",
-                  actionTitle: "Convos",
-                  actionSubtitle: "All chats",
+                  actionTitle: "Thierry",
+                  icon: {
+                    iconType: "SYSTEM",
+                    iconValue: "checkmark",
+                  },
                 },
-                ...accountsProfiles.map((profilePreferedName, index) => {
-                  return {
-                    actionKey: accounts[index],
-                    actionTitle: shortDisplayName(profilePreferedName),
-                    icon: {
-                      iconType: "SYSTEM",
-                      iconValue:
-                        currentAccount === accounts[index]
-                          ? Platform.select({
-                              default: "checkmark",
-                              ios: "checkmark",
-                              android: "checkmark",
-                            })
-                          : "",
-                    },
-                  } as MenuActionConfig;
-                }),
+                {
+                  actionKey: "edit-profile",
+                  actionTitle: "Account settings",
+                },
+                {
+                  type: "menu",
+                  menuTitle: "Other accounts",
+                  menuOptions: ["displayInline"],
+                  menuItems: accountsProfiles.map(
+                    (profilePreferedName, index) => {
+                      return {
+                        actionKey: accounts[index],
+                        actionTitle: shortDisplayName(profilePreferedName),
+                        // icon: {
+                        //   iconType: "SYSTEM",
+                        //   iconValue:
+                        //     currentAccount === accounts[index]
+                        //       ? Platform.select({
+                        //           default: "checkmark",
+                        //           ios: "checkmark",
+                        //           android: "checkmark",
+                        //         })
+                        //       : "",
+                        // },
+                      } as MenuActionConfig;
+                    }
+                  ),
+                },
                 {
                   type: "menu",
                   menuTitle: "",
@@ -437,25 +446,21 @@ function useHeaderWrapper() {
                     },
                   ],
                 },
-                {
-                  type: "menu",
-                  menuTitle: "",
-                  menuOptions: ["displayInline"],
-                  menuItems: [
-                    {
-                      actionKey: "app-settings",
-                      actionTitle: "App Settings",
-                      icon: {
-                        iconType: "SYSTEM",
-                        iconValue: Platform.select({
-                          default: "gearshape",
-                          ios: "gearshape",
-                          android: "settings",
-                        }),
-                      },
-                    },
-                  ],
-                },
+                // {
+                //   type: "menu",
+                //   menuTitle: "",
+                //   menuOptions: ["displayInline"],
+                //   menuItems: [
+                //     {
+                //       actionKey: "app-settings",
+                //       actionTitle: translate("App settings"),
+                //       icon: {
+                //         iconType: "SYSTEM",
+                //         iconValue: iconRegistry["settings"],
+                //       },
+                //     },
+                //   ],
+                // },
               ],
             }}
           >
@@ -467,7 +472,7 @@ function useHeaderWrapper() {
                 // paddingVertical: theme.spacing.sm,
               }}
             >
-              <Text>{shortDisplayName(preferredName)}</Text>
+              <Text>Thierry</Text>
               <Center
                 style={{
                   width: theme.spacing.container.small,
