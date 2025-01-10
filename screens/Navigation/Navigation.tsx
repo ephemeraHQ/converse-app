@@ -33,11 +33,13 @@ import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeySc
 import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
 import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
 import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
+import {
+  InviteUsersToExistingGroupNav,
+  InviteUsersToExistingGroupParams,
+} from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
 import GroupNav, { GroupNavParams } from "./GroupNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
-import NewConversationNav, {
-  NewConversationNavParams,
-} from "./NewConversationNav";
+import NewConversationNav, { NewChatNavParams } from "./NewConversationNav";
 import ProfileNav, { ProfileNavParams } from "./ProfileNav";
 import ShareProfileNav from "./ShareProfileNav";
 import TopUpNav from "./TopUpNav";
@@ -46,6 +48,7 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import ConversationRequestsListNav from "@/screens/Navigation/ConversationRequestsListNav.ios";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -61,7 +64,7 @@ export type NavigationParamList = {
   OnboardingEphemeral: undefined;
   OnboardingUserProfile: undefined;
 
-  // Nwe account
+  // New account
   NewAccountNavigator: undefined;
   NewAccountUserProfile: undefined;
   NewAccountConnectWallet: {
@@ -77,7 +80,7 @@ export type NavigationParamList = {
   Chats: undefined;
   ChatsRequests: undefined;
   Conversation: ConversationNavParams;
-  NewConversation: NewConversationNavParams;
+  NewConversation: NewChatNavParams;
 
   NewGroupSummary: undefined;
   ConverseMatchMaker: undefined;
@@ -85,6 +88,7 @@ export type NavigationParamList = {
   TopUp: undefined;
   Profile: ProfileNavParams;
   Group: GroupNavParams;
+  InviteUsersToExistingGroup: InviteUsersToExistingGroupParams;
   GroupInvite: JoinGroupNavigationParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
@@ -131,6 +135,7 @@ export function SignedInNavigation() {
     >
       <NativeStack.Group>
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
+          {/* {NewConversationNav()} */}
           <NativeStack.Screen name="Chats" component={ConversationListScreen} />
           <NativeStack.Screen name="Blocked" component={BlockedChatsScreen} />
           {ConversationRequestsListNav()}
@@ -141,6 +146,7 @@ export function SignedInNavigation() {
           {WebviewPreviewNav()}
           {ProfileNav()}
           {GroupNav()}
+          {InviteUsersToExistingGroupNav()}
           {JoinGroupNavigation()}
           {TopUpNav()}
         </NativeStack.Group>

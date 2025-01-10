@@ -11,17 +11,18 @@ import { Platform, useColorScheme } from "react-native";
 
 import NewConversation from "./NewConversation";
 import NewGroupSummary from "./NewGroupSummary";
-import Button from "../../components/Button/Button";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import {
   NavigationParamList,
   navigationAnimation,
 } from "../Navigation/Navigation";
-import { NewConversationNavParams } from "../Navigation/NewConversationNav";
+import { NewChatNavParams } from "../Navigation/NewConversationNav";
 import { translate } from "@/i18n";
+import logger from "@/utils/logger";
+import { Button } from "@/design-system/Button/Button";
 
 export type NewConversationModalParams = {
-  NewConversationScreen: NewConversationNavParams;
+  NewChatComposerScreen: NewChatNavParams;
   NewGroupSummary: {
     members: (IProfileSocials & { address: string })[];
   };
@@ -33,6 +34,12 @@ const NewConversationModal = ({
   route,
 }: NativeStackScreenProps<NavigationParamList, "NewConversation">) => {
   const colorScheme = useColorScheme();
+
+  logger.debug("[NewConversationModal] Rendering with params:", {
+    addingToGroupTopic: route.params?.addingToGroupTopic,
+    peer: route.params?.peer
+  });
+
   return (
     <ModalStack.Navigator
       screenOptions={{
@@ -42,24 +49,20 @@ const NewConversationModal = ({
         } as any,
         headerTitleStyle: Platform.select({
           default: headerTitleStyle(colorScheme),
-          web: { left: -20, color: textPrimaryColor(colorScheme) } as any,
         }),
         animation: navigationAnimation,
       }}
     >
       <ModalStack.Screen
-        name="NewConversationScreen"
-        options={{
-          headerTitle: route.params?.addingToGroupTopic
-            ? translate("new_group.add_members")
-            : translate("new_conversation.new_conversation"),
-          presentation: "modal",
-        }}
+        name="NewChatComposerScreen"
       >
         {(props) => {
           const newRoute = { ...props.route };
           if (route.params) {
             newRoute.params = route.params;
+            logger.debug("[NewConversationModal] Passing params to NewChatComposerScreen:", {
+              params: route.params
+            });
           }
           return (
             <NewConversation route={newRoute} navigation={props.navigation} />
@@ -70,14 +73,17 @@ const NewConversationModal = ({
         name="NewGroupSummary"
         component={NewGroupSummary}
         options={{
-          headerBackTitle: translate("new_conversation.back"),
-          headerTitle: translate("new_conversation.create_group"),
-          headerRight: () => (
-            <Button
-              variant="text"
-              title={translate("new_conversation.create")}
-            />
-          ), // Dummy button for style
+          headerBackTitle: translate("new_chat.back"),
+          headerTitle: translate("new_chat.create_group"),
+          headerRight: () => {
+            logger.debug("[NewConversationModal] Rendering NewGroupSummary header right button");
+            return (
+              <Button
+                variant="text"
+                text={translate("new_chat.create")}
+              />
+            );
+          },
         }}
       />
     </ModalStack.Navigator>

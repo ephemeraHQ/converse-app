@@ -30,7 +30,7 @@ import {
   SignedInNavigation,
   SignedOutNavigation,
 } from "./Navigation/Navigation";
-import { NewConversationScreenConfig } from "./Navigation/NewConversationNav";
+import { NewChatScreenConfig } from "./Navigation/NewConversationNav";
 import { ProfileScreenConfig } from "./Navigation/ProfileNav";
 import { ShareProfileScreenConfig } from "./Navigation/ShareProfileNav";
 import { WebviewPreviewScreenConfig } from "./Navigation/WebviewPreviewNav";
@@ -50,7 +50,7 @@ const linking: LinkingOptions<NavigationParamList> = {
     screens: {
       Chats: "/",
       Conversation: ConversationScreenConfig,
-      NewConversation: NewConversationScreenConfig,
+      NewConversation: NewChatScreenConfig,
       Profile: ProfileScreenConfig,
       Group: GroupScreenConfig,
       GroupInvite: JoinGroupScreenConfig,

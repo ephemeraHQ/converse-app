@@ -5,17 +5,17 @@ import {
 } from "@styles/colors";
 import { useColorScheme } from "react-native";
 
-import { NativeStack, navigationAnimation } from "./Navigation";
+import { NativeStack } from "./Navigation";
 import NewConversationModal from "../NewConversation/NewConversationModal";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { translate } from "@/i18n";
+import logger from "@/utils/logger";
 
-export type NewConversationNavParams = {
+export type NewChatNavParams = {
   peer?: string;
   addingToGroupTopic?: ConversationTopic;
 };
 
-export const NewConversationScreenConfig = {
+export const NewChatScreenConfig = {
   path: "/newConversation",
   parse: {
     peer: decodeURIComponent,
@@ -27,14 +27,10 @@ export const NewConversationScreenConfig = {
 
 export default function NewConversationNav() {
   const colorScheme = useColorScheme();
-  const options: NativeStackNavigationOptions = {
-    headerTitle: translate("new_conversation.new_conversation"),
-    presentation: "modal",
-    headerStyle: {
-      backgroundColor: navigationSecondaryBackgroundColor(colorScheme),
-    } as any,
-    animation: navigationAnimation,
-  };
+
+  logger.debug("[NewConversationNav] Configuring navigation", {
+    colorScheme,
+  });
 
   return (
     <NativeStack.Screen
@@ -42,7 +38,6 @@ export default function NewConversationNav() {
       component={NewConversationModal}
       options={{
         headerShown: false,
-        presentation: "modal",
         headerTitleStyle: headerTitleStyle(colorScheme),
       }}
     />

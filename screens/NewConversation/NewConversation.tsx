@@ -15,9 +15,12 @@ import { translate } from "@/i18n";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { useGroupQuery } from "@queries/useGroupQuery";
 import SearchBar from "@search/components/SearchBar";
-import ProfileSearch from "@search/screens/ProfileSearch";
 import { canMessageByAccount } from "@utils/xmtpRN/contacts";
-import { InboxId } from "@xmtp/react-native-sdk";
+import {
+  ConversationTopic,
+  ConversationVersion,
+  InboxId,
+} from "@xmtp/react-native-sdk";
 import AndroidBackAction from "@components/AndroidBackAction";
 import Recommendations from "@components/Recommendations/Recommendations";
 import TableView from "@components/TableView/TableView";
@@ -41,23 +44,32 @@ import { Text } from "@design-system/Text";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Loader } from "@/design-system/loader";
 import { textSizeStyles } from "@/design-system/Text/Text.styles";
+import logger from "@/utils/logger";
+import { ProfileSearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
+import { Conversation } from "@/features/conversation/conversation";
+import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
+import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
+import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
+import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
 
 export default function NewConversation({
   route,
   navigation,
 }: NativeStackScreenProps<
   NewConversationModalParams,
-  "NewConversationScreen"
+  "NewChatComposerScreen"
 >) {
-  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+  const handleBack = useCallback(() => {
+    logger.debug("[NewConversation] Navigating back");
+    navigation.goBack();
+  }, [navigation]);
 
   const { theme, themed } = useAppTheme();
 
-  // TODO: Unused. Should we remove this once we have a proper group query?
-  const { data: existingGroup } = useGroupQuery({
-    account: currentAccount(),
-    topic: route.params?.addingToGroupTopic!,
-  });
+  // const { data: existingGroup } = useGroupQuery({
+  //   account: currentAccount(),
+  //   topic: route.params?.addingToGroupTopic!,
+  // });
 
   const [group, setGroup] = useState({
     enabled: !!route.params?.addingToGroupTopic,
@@ -71,58 +83,87 @@ export default function NewConversation({
   const [loading, setLoading] = useState(false);
 
   const handleRightAction = useCallback(async () => {
+    logger.debug("[NewConversation] Handling right action", {
+      isAddingToGroup: !!route.params?.addingToGroupTopic,
+      memberCount: group.members.length,
+    });
+
     if (route.params?.addingToGroupTopic) {
       setLoading(true);
       try {
         //  TODO: Support multiple addresses
         await addMembers(group.members.map((m) => m.address));
+        logger.debug("[NewConversation] Successfully added members to group", {
+          memberAddresses: group.members.map((m) => m.address),
+        });
         navigation.goBack();
       } catch (e) {
         setLoading(false);
-        console.error(e);
+        logger.error("[NewConversation] Failed to add members to group", e);
         Alert.alert("An error occured");
       }
     } else {
+      logger.debug("[NewConversation] Navigating to NewGroupSummary", {
+        memberCount: group.members.length,
+      });
       navigation.push("NewGroupSummary", {
         members: group.members,
       });
     }
   }, [addMembers, group.members, navigation, route.params?.addingToGroupTopic]);
 
+  const conversationCreationMode = ConversationVersion.DM;
+
   useEffect(() => {
+    logger.debug("[NewConversation] Setting navigation options", {
+      groupEnabled: group.enabled,
+      memberCount: group.members.length,
+      loading,
+    });
+
     navigation.setOptions({
       headerLeft: () =>
         Platform.OS === "ios" ? (
-          <Button
-            variant="text"
-            text={translate("cancel")}
-            onPress={handleBack}
-          />
+          <Button icon="chevron.left" variant="text" onPress={handleBack} />
         ) : (
           <AndroidBackAction navigation={navigation} />
         ),
+      headerBackButtonDisplayMode: "default",
       headerTitle: group.enabled
         ? route.params?.addingToGroupTopic
-          ? translate("new_conversation.add_members")
-          : translate("new_conversation.create_group")
-        : translate("new_conversation.new_conversation"),
+          ? translate("new_chat.add_members")
+          : translate("new_chat.create_group")
+        : translate("new_chat.new_chat"),
       headerRight: () => {
-        if (group.enabled && group.members.length > 0) {
-          if (loading) {
-            return <Loader style={{ marginRight: theme.spacing["5xs"] }} />;
-          } else {
-            return (
-              <Button
-                variant="text"
-                text={route.params?.addingToGroupTopic ? "Add" : "Next"}
-                onPress={handleRightAction}
-                style={{ marginRight: -10, padding: 10 }}
-              />
-            );
-          }
-        }
-        return undefined;
+        return (
+          <Button
+            variant="text"
+            text={
+              conversationCreationMode === ConversationVersion.DM
+                ? "New dm"
+                : "New group"
+            }
+            onPress={handleRightAction}
+          />
+        );
       },
+      // headerRight: () => {
+      //   if (group.enabled && group.members.length > 0) {
+      //     if (loading) {
+      //       return <Loader style={{ marginRight: theme.spacing["5xs"] }} />;
+      //     } else {
+      //       return (
+      //         <Button
+      //           variant="text"
+      //           text={route.params?.addingToGroupTopic ? "Add" : "Next"}
+      //           onPress={handleRightAction}
+      //           style={{ marginRight: -10, padding: 10 }}
+      //         />
+      //       );
+      //     }
+      //   }
+      //   return undefined;
+      // },
     });
   }, [
     group,
@@ -157,8 +198,13 @@ export default function NewConversation({
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    // Log initial effect trigger
+    logger.info("[NewConversation] Search effect triggered", { value });
+
     if (value.length < 3) {
-      // If the input is less than 3 characters, do nothing
+      logger.info("[NewConversation] Search value too short, resetting state", {
+        value,
+      });
       setStatus({
         loading: false,
         error: "",
@@ -168,12 +214,17 @@ export default function NewConversation({
       return;
     }
 
+    // Log debounce timer clear
     if (debounceTimer.current !== null) {
+      logger.info("[NewConversation] Clearing existing debounce timer");
       clearTimeout(debounceTimer.current);
     }
 
     debounceTimer.current = setTimeout(async () => {
       const searchForValue = async () => {
+        logger.info("[NewConversation] Starting search after debounce", {
+          value,
+        });
         setStatus(({ loading }) => ({
           loading,
           error: "",
@@ -182,6 +233,9 @@ export default function NewConversation({
         }));
 
         if (isSupportedPeer(value)) {
+          logger.info("[NewConversation] Searching for supported peer", {
+            value,
+          });
           setStatus(({ error }) => ({
             loading: true,
             error,
@@ -195,6 +249,11 @@ export default function NewConversation({
             if (!resolvedAddress) {
               const isLens = value.endsWith(config.lensSuffix);
               const isFarcaster = value.endsWith(".fc");
+              logger.info("[NewConversation] No address resolved for peer", {
+                value,
+                isLens,
+                isFarcaster,
+              });
               setStatus({
                 loading: false,
                 profileSearchResults: {},
@@ -208,12 +267,22 @@ export default function NewConversation({
               return;
             }
             const address = getCleanAddress(resolvedAddress);
+            logger.info("[NewConversation] Checking if address is on XMTP", {
+              address,
+            });
             const addressIsOnXmtp = await canMessageByAccount({
               account: currentAccount(),
               peer: address,
             });
             if (searchingForValue.current === value) {
               if (addressIsOnXmtp) {
+                logger.info(
+                  "[NewConversation] Address found on XMTP, searching profiles",
+                  {
+                    address,
+                    value,
+                  }
+                );
                 // Let's search with the exact address!
                 const profiles = await searchProfiles(
                   address,
@@ -221,6 +290,9 @@ export default function NewConversation({
                 );
 
                 if (!isEmptyObject(profiles)) {
+                  logger.info("[NewConversation] Found and saving profiles", {
+                    profileCount: Object.keys(profiles).length,
+                  });
                   // Let's save the profiles for future use
                   setProfileRecordSocialsQueryData(currentAccount(), profiles);
                   setStatus({
@@ -230,6 +302,9 @@ export default function NewConversation({
                     profileSearchResults: profiles,
                   });
                 } else {
+                  logger.info(
+                    "[NewConversation] No profiles found for XMTP user"
+                  );
                   setStatus({
                     loading: false,
                     error: "",
@@ -238,6 +313,10 @@ export default function NewConversation({
                   });
                 }
               } else {
+                logger.info("[NewConversation] Address not on XMTP", {
+                  value,
+                  address,
+                });
                 setStatus({
                   loading: false,
                   error: `${value} does not use Converse or XMTP yet`,
@@ -248,6 +327,10 @@ export default function NewConversation({
             }
           }
         } else {
+          logger.info(
+            "[NewConversation] Searching profiles for non-peer value",
+            { value }
+          );
           setStatus({
             loading: true,
             error: "",
@@ -258,6 +341,10 @@ export default function NewConversation({
           const profiles = await searchProfiles(value, currentAccount());
 
           if (!isEmptyObject(profiles)) {
+            logger.info("[NewConversation] Found and saving profiles", {
+              value,
+              profileCount: Object.keys(profiles).length,
+            });
             // Let's save the profiles for future use
             setProfileRecordSocialsQueryData(currentAccount(), profiles);
             setStatus({
@@ -267,6 +354,7 @@ export default function NewConversation({
               profileSearchResults: profiles,
             });
           } else {
+            logger.info("[NewConversation] No profiles found", { value });
             setStatus({
               loading: false,
               error: "",
@@ -281,6 +369,7 @@ export default function NewConversation({
 
     return () => {
       if (debounceTimer.current !== null) {
+        logger.info("[NewConversation] Cleanup: clearing debounce timer");
         clearTimeout(debounceTimer.current);
       }
     };
@@ -304,6 +393,7 @@ export default function NewConversation({
           recommendationsLoadedOnce &&
           recommendationsFrensCount === 0
         ) {
+          logger.debug("[NewConversation] Auto-focusing input");
           setTimeout(() => {
             r?.focus();
           }, 100);
@@ -336,7 +426,7 @@ export default function NewConversation({
           },
         ]}
       >
-        {!group.enabled && (
+        {/* {!group.enabled && (
           <Button
             variant="text"
             picto="person.2"
@@ -346,7 +436,7 @@ export default function NewConversation({
               setGroup({ enabled: true, members: [] });
             }}
           />
-        )}
+        )} */}
 
         {group.enabled &&
           group.members.length > 0 &&
@@ -378,7 +468,7 @@ export default function NewConversation({
 
       {!status.loading && !isEmptyObject(status.profileSearchResults) ? (
         <View style={{ flex: 1 }}>
-          <ProfileSearch
+          <ProfileSearchResultsList
             navigation={navigation}
             profiles={(() => {
               const searchResultsToShow = { ...status.profileSearchResults };
@@ -455,7 +545,7 @@ export default function NewConversation({
                 {
                   id: "inviteToConverse",
                   leftView: <TableViewPicto symbol="link" />,
-                  title: translate("new_conversation.invite_to_converse"),
+                  title: translate("new_chat.invite_to_converse"),
                   subtitle: "",
                   action: () => {
                     navigation.goBack();
@@ -468,6 +558,35 @@ export default function NewConversation({
           )}
         </ScrollView>
       )}
+      {/* todo: confirm with thierry we like this pattern  */}
+      <ConversationComposerStoreProvider
+        storeName={"new-conversation" as ConversationTopic}
+        inputValue={"testing"}
+      >
+        <ConversationComposerContainer>
+          <Composer
+            onSend={async (something) => {
+              logger.info(
+                "[NewConversation] Sending message",
+                something.content.text
+              );
+              // todo:
+              // create group/dm
+              // add member to group
+              // send message
+              // createGroupWithFirstMessage({
+              //   account: currentAccount(),
+              //   members: [draftMembersToAdd],
+              //   message: something.content.text,
+              // });
+            }}
+          />
+        </ConversationComposerContainer>
+      </ConversationComposerStoreProvider>
+      <ConversationKeyboardFiller
+        messageContextMenuIsOpen={false}
+        enabled={true}
+      />
     </View>
   );
 }

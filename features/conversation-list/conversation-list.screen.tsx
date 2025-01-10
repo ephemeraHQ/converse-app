@@ -48,7 +48,7 @@ import {
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { memo, useCallback, useMemo } from "react";
+import React, { memo, useCallback, useEffect, useMemo } from "react";
 import {
   Alert,
   Platform,
@@ -84,6 +84,10 @@ export function ConversationListScreen({
   //     "openedConversationTopic",
   //   ])
   // );
+
+  useEffect(() => {
+    navigation.navigate("NewConversation", {});
+  }, []);
 
   const {
     data: conversations,
@@ -501,6 +505,7 @@ const EphemeralAccountBanner = React.memo(function EphemeralAccountBanner() {
   const { theme } = useAppTheme();
   const colorScheme = useColorScheme();
   const showDisconnectActionSheet = useDisconnectActionSheet();
+
 
   return (
     <TouchableOpacity

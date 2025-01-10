@@ -339,12 +339,12 @@ export const en = {
     title: "New group",
   },
 
-  new_conversation: {
+  new_chat: {
     create_group: "Create group",
     back: "Back",
     create: "Create",
     add_members: "Add members",
-    new_conversation: "New conversation",
+    new_chat: "New chat",
     invite_to_converse: "Invite them to Converse",
   },
 

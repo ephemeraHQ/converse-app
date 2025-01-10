@@ -16,6 +16,7 @@ import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
 } from "./conversation-composer.store-context";
+import { debugBorder } from "@/utils/debug-style";
 
 type IComposerProps = {
   onSend: (args: ISendMessageParams) => Promise<void>;
@@ -113,13 +114,13 @@ export const Composer = memo(function Composer(props: IComposerProps) {
   return (
     <VStack
       style={{
-        // ...debugBorder("yellow"),
+        ...debugBorder("yellow"),
         margin: 6, // 6 in the Figma
       }}
     >
       <HStack
         style={{
-          // ...debugBorder("red"),
+          ...debugBorder("red"),
           alignItems: "flex-end",
         }}
       >
