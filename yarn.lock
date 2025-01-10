@@ -18985,17 +18985,17 @@ react-native-helmet-async@2.0.4:
     react-fast-compare "^3.2.2"
     shallowequal "^1.1.0"
 
-react-native-ios-context-menu@^2.5.1:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/react-native-ios-context-menu/-/react-native-ios-context-menu-2.5.1.tgz#795a4722be706f39701f991ae455e105a141e900"
-  integrity sha512-Qt+0qeW/2x2Dc6aNUwsUR6BV0EozT5n2VNYIDKjdEQMF0xrN/o37p2+Oz6xhvWcA+15gAXqCbGq6omjPHLowRw==
+react-native-ios-context-menu@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-ios-context-menu/-/react-native-ios-context-menu-3.0.0.tgz#e796b1a163534890358ed7bd51b74115464ee527"
+  integrity sha512-hhPG2MIhRwO5283YDhtijasoGJzt/P+HpxVN630IjRlsBw64Aue05uzaOgG7yp2bJlz1BwUw816hOWgoaOx2rA==
   dependencies:
     "@dominicstop/ts-event-emitter" "^1.1.0"
 
-react-native-ios-utilities@^4.5.2:
-  version "4.5.2"
-  resolved "https://registry.yarnpkg.com/react-native-ios-utilities/-/react-native-ios-utilities-4.5.2.tgz#97277e6d5d8e480d8109cd426267743c82ebcfdb"
-  integrity sha512-vN0HYbWMaxrFNTMpjQzceB4onjqbWfzj9iJXddTswh7pRQv8+pd3bVY7t+sF23uATGfbmCTBlbo+DYGHLwswLg==
+react-native-ios-utilities@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-ios-utilities/-/react-native-ios-utilities-5.0.0.tgz#1fa6b87ad375666548f7d7e0660847a2e45a9972"
+  integrity sha512-mULGluwqSmLs5RrpwfkX3lt7l4atlJn/UKToxgXysg1Vshw6gGWNEaDafh+kEAlfhyF09gwnVoO8BIgyHoAmNA==
 
 react-native-is-edge-to-edge@^1.1.6:
   version "1.1.6"
