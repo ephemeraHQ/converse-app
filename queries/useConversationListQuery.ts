@@ -179,18 +179,15 @@ const getConversationList = async (args: {
       } sec`
     );
 
-    const conversations = await client.conversations.list(
-      {
-        isActive: true,
-        addedByInboxId: true,
-        name: true,
-        imageUrlSquare: true,
-        consentState: true,
-        lastMessage: true,
-        description: true,
-      },
-      "lastMessage" // Order by last message
-    );
+    const conversations = await client.conversations.list({
+      isActive: true,
+      addedByInboxId: true,
+      name: true,
+      imageUrlSquare: true,
+      consentState: true,
+      lastMessage: true,
+      description: true,
+    });
 
     for (const conversation of conversations) {
       setConversationQueryData({

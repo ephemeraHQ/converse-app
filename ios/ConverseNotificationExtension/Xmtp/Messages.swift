@@ -63,13 +63,6 @@ func handleV3Message(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_
     if let conversation = try await xmtpClient.findConversationByTopic(topic: envelope.contentTopic) {
       try await conversation.sync()
       if var decodedMessage = try? await decodeMessage(xmtpClient: xmtpClient, envelope: envelope) {
-        // For now, use the group member linked address as "senderAddress"
-        // @todo => make inboxId a first class citizen
-        if let senderAddresses = try await conversation.members().first(where: {$0.inboxId == decodedMessage.senderInboxId})?.addresses {
-          // This is a bit yucky since we are doing some gymnastics around inboxId vs address.
-          // Will have a fast follow if we see any issues with push
-          decodedMessage.senderInboxId = senderAddresses[0]
-        }
 
         let decodedMessageResult = handleMessageByContentType(decodedMessage: decodedMessage, xmtpClient: xmtpClient);
         messageId = decodedMessageResult.id
@@ -85,7 +78,7 @@ func handleV3Message(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_
               }
               // We replaced decodedMessage.senderAddress from inboxId to actual address
               // so it appears well in the app until inboxId is a first class citizen
-              if let senderProfileSocials = await getProfile(account: xmtpClient.address, address: decodedMessage.senderInboxId) {
+              if let senderProfileSocials = await getInboxIdProfile(account: xmtpClient.address, inboxId: decodedMessage.senderInboxId) {
                 bestAttemptContent.subtitle = getPreferredName(address: decodedMessage.senderInboxId, socials: senderProfileSocials)
               }
 
@@ -96,7 +89,7 @@ func handleV3Message(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_
               messageIntent = getIncomingGroupMessageIntent(group: group, content: bestAttemptContent.body, senderId: decodedMessage.senderInboxId, senderName: bestAttemptContent.subtitle)
             } else if case .dm(let dm) = conversation {
               var senderAvatar: String? = nil
-              if let senderProfileSocials = await getProfile(account: xmtpClient.address, address: decodedMessage.senderInboxId) {
+              if let senderProfileSocials = await getInboxIdProfile(account: xmtpClient.address, inboxId: decodedMessage.senderInboxId) {
                 let name = getPreferredName(address: decodedMessage.senderInboxId, socials: senderProfileSocials)
                 bestAttemptContent.title = getPreferredName(address: decodedMessage.senderInboxId, socials: senderProfileSocials)
                 senderAvatar = getPreferredAvatar(socials: senderProfileSocials)
@@ -144,7 +137,7 @@ func loadSavedMessages() -> [SavedNotificationMessage] {
   }
 }
 
-func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_Envelope) async throws -> DecodedMessage? {
+func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_Envelope) async throws -> Message? {
   // If topic is MLS, the conversation should already be there
   // @todo except if it's new convo => call sync before?
   if (isV3MessageTopic(topic: envelope.contentTopic)) {
@@ -155,9 +148,8 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_En
         sentryAddBreadcrumb(message: "[NotificationExtension] Decoding group message...")
         let messageBytes = envelope.message
         let message = try await conversation.processMessage(messageBytes: messageBytes)
-        let decodedMessage = try message.decode()
         sentryAddBreadcrumb(message:"[NotificationExtension] Group message decoded!")
-        return decodedMessage
+        return message
       } catch {
         sentryTrackMessage(message: "NOTIFICATION_DECODING_ERROR", extras: ["error": error, "envelope": envelope])
         sentryAddBreadcrumb(message: "[NotificationExtension] ERROR WHILE DECODING \(error)")
@@ -171,20 +163,24 @@ func decodeMessage(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_En
   return nil
 }
 
-func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP.Client) -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
-  var contentType = getContentTypeString(type: decodedMessage.encodedContent.type)
-  var contentToReturn: String?
-  var contentToSave: String?
-  var referencedMessageId: String?
-  var forceIgnore = false
-  
+func handleMessageByContentType(decodedMessage: Message, xmtpClient: XMTP.Client) -> (content: String?, senderAddress: String?, forceIgnore: Bool, id: String?) {
+    
+    guard var contentType = try? decodedMessage.encodedContent.type else {
+        // If decoding fails, just return from the current function
+      return (nil, nil, true, nil)
+    }
+    var contentToReturn: String?
+    var contentToSave: String?
+    var referencedMessageId: String?
+    var forceIgnore = false
+
   var messageContent = try? decodedMessage.content() as Any
   
-  if (contentType.starts(with: "xmtp.org/reply:")) {
+  if (contentType.typeID.starts(with: "reply")) {
     let replyContent = messageContent as? Reply
     if let reply = replyContent {
       referencedMessageId = reply.reference
-      contentType = getContentTypeString(type: reply.contentType)
+      contentType = reply.contentType
       messageContent = reply.content
     }
     
@@ -193,21 +189,21 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
   do {
     switch contentType {
       
-    case let type where type.starts(with: "xmtp.org/text:"):
+    case let type where type.typeID.starts(with: "text"):
       contentToSave = messageContent as? String
       contentToReturn = contentToSave
       
-    case let type where type.starts(with: "xmtp.org/remoteStaticAttachment:"):
+    case let type where type.typeID.starts(with: "remoteStaticAttachment"):
       let remoteAttachment = messageContent as! RemoteAttachment
       contentToSave = getJsonRemoteAttachment(remoteAttachment: remoteAttachment)
       contentToReturn = "📎 Media"
       
-    case let type where type.starts(with: "xmtp.org/transactionReference:") ||
-      type.starts(with: "coinbase.com/coinbase-messaging-payment-activity:"):
+    case let type where type.typeID.starts(with: "transactionReference") ||
+      type.typeID.starts(with: "coinbase-messaging-payment-activity"):
       contentToSave = messageContent as? String
       contentToReturn = "💸 Transaction"
       
-    case let type where type.starts(with: "xmtp.org/reaction:"):
+    case let type where type.typeID.starts(with: "reaction"):
       let reaction = messageContent as? Reaction
       let action = reaction?.action.rawValue
       let schema = reaction?.schema.rawValue
@@ -234,7 +230,7 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
         contentToSave = nil
       }
       
-    case let type where type.starts(with: "xmtp.org/readReceipt:"):
+    case let type where type.typeID.starts(with: "readReceipt"):
       contentToSave = nil
       
     default:
@@ -249,7 +245,7 @@ func handleMessageByContentType(decodedMessage: DecodedMessage, xmtpClient: XMTP
 
     return (contentToReturn, decodedMessage.senderInboxId, forceIgnore, decodedMessage.id)
   } catch {
-    let errorType = contentType.split(separator: "/").last ?? "UNKNOWN"
+    let errorType = contentType.typeID.split(separator: "/").last ?? "UNKNOWN"
     sentryTrackError(error: error, extras: ["message": "NOTIFICATION_\(errorType)_ERROR", "topic": decodedMessage.topic])
     return (nil, nil, false, nil)
   }
@@ -289,7 +285,7 @@ func getJsonReaction(reaction: Reaction) -> String? {
 
 func isGroupMessageFromMe(xmtpClient: Client, messageId: String) throws -> Bool {
   if let message = try xmtpClient.findMessage(messageId: messageId) {
-    return message.decodeOrNull()?.senderInboxId == xmtpClient.inboxID
+    return message.senderInboxId == xmtpClient.inboxID
   } else {
     return false
   }
