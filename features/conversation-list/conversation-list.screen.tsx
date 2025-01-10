@@ -399,11 +399,6 @@ function useHeaderWrapper() {
             menuConfig={{
               menuTitle: "",
               menuItems: [
-                {
-                  actionKey: "all-chats",
-                  actionTitle: translate("conversation_list.messages"),
-                  actionSubtitle: translate("conversation_list.messages"),
-                },
                 ...accountsProfiles.map((profilePreferedName, index) => {
                   return {
                     actionKey: accounts[index],
