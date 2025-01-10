@@ -7,7 +7,7 @@ import {
   PasskeyAuthStoreProvider,
   usePasskeyAuthStoreContext,
 } from "@/features/onboarding/passkey/passkeyAuthStore";
-import { onPasskeyCreate } from "@/utils/passkeys/create-passkey";
+import { createPasskey } from "@/utils/passkeys/create-passkey";
 import { Button } from "@/design-system/Button/Button";
 import { Text } from "@/design-system/Text";
 import { TextField } from "@/design-system/TextField/TextField";
@@ -85,7 +85,7 @@ const Content = memo(function Content() {
   const handleCreatePasskey = useCallback(async () => {
     try {
       setLoading(true);
-      const account = await onPasskeyCreate({
+      const account = await createPasskey({
         passkeyName: inputTextRef.current ?? "",
         setStatusString,
         setPreviousPasskeyName,
@@ -209,7 +209,7 @@ const Content = memo(function Content() {
   const onboardWithPasskey = useCallback(async () => {
     try {
       setLoading(true);
-      const account = await onPasskeyCreate({
+      const account = await createPasskey({
         passkeyName: inputTextRef.current ?? "",
         setStatusString,
         setPreviousPasskeyName,

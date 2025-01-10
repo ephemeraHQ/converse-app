@@ -14,7 +14,7 @@ import { initXmtpClientFromViemAccount } from "@/components/Onboarding/init-xmtp
 import { Button } from "@/design-system/Button/Button";
 import { TextField } from "@/design-system/TextField/TextField";
 import { Text } from "@/design-system/Text";
-import { onPasskeyCreate } from "@/utils/passkeys/create-passkey";
+import { createPasskey } from "@/utils/passkeys/create-passkey";
 import { loadAccountFromPasskey } from "@/utils/passkeys/load-client-from-passkey";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import logger from "@/utils/logger";
@@ -81,7 +81,7 @@ const Content = memo(function Content() {
   const handleCreatePasskey = useCallback(async () => {
     try {
       setLoading(true);
-      const account = await onPasskeyCreate({
+      const account = await createPasskey({
         passkeyName: inputTextRef.current ?? "",
         setStatusString,
         setPreviousPasskeyName,
@@ -187,7 +187,7 @@ const Content = memo(function Content() {
   const onboardWithPasskey = useCallback(async () => {
     try {
       setLoading(true);
-      const account = await onPasskeyCreate({
+      const account = await createPasskey({
         passkeyName: inputTextRef.current ?? "",
         setStatusString,
         setPreviousPasskeyName,

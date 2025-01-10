@@ -1,5 +1,5 @@
 import {
-  createPasskey,
+  createPasskey as turnkeyCreatePasskey,
   isSupported,
 } from "@turnkey/react-native-passkey-stamper";
 import { Buffer } from "buffer";
@@ -15,7 +15,7 @@ type PasskeyCreateParams = {
   setTurnkeyInfo: (turnkeyInfo: TurnkeyStoreInfo) => void;
 };
 
-export async function onPasskeyCreate({
+export async function createPasskey({
   passkeyName,
   setStatusString,
   setPreviousPasskeyName,
@@ -63,7 +63,7 @@ const createUserPasskey = async (passkeyName: string) => {
   const humanReadableDate = new Date().toISOString();
   // ID isn't visible by users, but needs to be random enough and valid base64 (for Android)
   const userId = Buffer.from(String(Date.now())).toString("base64");
-  const authenticatorParams = await createPasskey({
+  const authenticatorParams = await turnkeyCreatePasskey({
     // This doesn't matter much, it will be the name of the authenticator persisted on the Turnkey side.
     // Won't be visible by default.
     authenticatorName: "End-User Passkey",
