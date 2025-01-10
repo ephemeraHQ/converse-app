@@ -1,11 +1,7 @@
 import { addConversationToConversationListQuery } from "@/queries/useConversationListQuery";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
-import {
-  ConversationOptions,
-  ConversationOrder,
-  ConversationTopic,
-} from "@xmtp/react-native-sdk";
+import { ConversationOptions, ConversationTopic } from "@xmtp/react-native-sdk";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 import {
   ConversationWithCodecsType,
@@ -33,11 +29,10 @@ export const stopStreamingConversations = async (account: string) => {
 export const listConversations = async (args: {
   client: ConverseXmtpClientType;
   includeSync?: boolean;
-  order?: ConversationOrder;
   limit?: number;
   opts?: ConversationOptions;
 }) => {
-  const { client, includeSync = false, order, limit, opts } = args;
+  const { client, includeSync = false, limit, opts } = args;
   logger.debug("[XMTPRN Conversations] Listing conversations");
   const start = new Date().getTime();
   if (includeSync) {
@@ -51,7 +46,7 @@ export const listConversations = async (args: {
       } sec`
     );
   }
-  const conversations = await client.conversations.list(opts, order, limit);
+  const conversations = await client.conversations.list(opts, limit);
   const end = new Date().getTime();
   logger.debug(
     `[XMTPRN Conversations] Listed conversations in ${(end - start) / 1000} sec`
@@ -62,11 +57,10 @@ export const listConversations = async (args: {
 export const listConversationsByAccount = async (args: {
   account: string;
   includeSync?: boolean;
-  order?: ConversationOrder;
   limit?: number;
   opts?: ConversationOptions;
 }) => {
-  const { account, includeSync = false, order, limit, opts } = args;
+  const { account, includeSync = false, limit, opts } = args;
   logger.debug("[XMTPRN Conversations] Listing conversations by account");
   const start = new Date().getTime();
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
@@ -76,7 +70,6 @@ export const listConversationsByAccount = async (args: {
   const conversations = await listConversations({
     client,
     includeSync,
-    order,
     limit,
     opts,
   });

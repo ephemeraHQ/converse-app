@@ -404,7 +404,7 @@ PODS:
   - libwebp/sharpyuv (1.3.2)
   - libwebp/webp (1.3.2):
     - libwebp/sharpyuv
-  - LibXMTP (3.0.15)
+  - LibXMTP (3.0.18)
   - MessagePacker (0.4.7)
   - MMKV (1.3.3):
     - MMKVCore (~> 1.3.3)
@@ -2296,18 +2296,18 @@ PODS:
     - SQLCipher/common
   - SwiftProtobuf (1.28.2)
   - UMAppLoader (5.0.0)
-  - XMTP (3.0.21):
+  - XMTP (3.0.22):
     - Connect-Swift (= 1.0.0)
     - CryptoSwift (= 1.8.3)
     - CSecp256k1 (~> 0.2)
-    - LibXMTP (= 3.0.15)
+    - LibXMTP (= 3.0.18)
     - SQLCipher (= 4.5.7)
-  - XMTPReactNative (3.1.5):
+  - XMTPReactNative (3.1.6):
     - CSecp256k1 (~> 0.2)
     - ExpoModulesCore
     - MessagePacker
     - SQLCipher (= 4.5.7)
-    - XMTP (= 3.0.21)
+    - XMTP (= 3.0.22)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -2455,7 +2455,7 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - Sentry/HybridSDK (= 8.36.0)
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 3.0.21)
+  - XMTP (= 3.0.22)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2844,7 +2844,7 @@ SPEC CHECKSUMS:
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
-  LibXMTP: ad2c28778d7273c499b12dbf5493978c58d76858
+  LibXMTP: 09d80c1ef92a6fd195a13b2e0911259bf87005e3
   MessagePacker: ab2fe250e86ea7aedd1a9ee47a37083edd41fd02
   MMKV: f902fb6719da13c2ab0965233d8963a59416f911
   MMKVAppExtension: fcf23c6b250cc87db63507bc57be8e6ed378168d
@@ -2951,10 +2951,10 @@ SPEC CHECKSUMS:
   SQLCipher: 5e6bfb47323635c8b657b1b27d25c5f1baf63bf5
   SwiftProtobuf: 4dbaffec76a39a8dc5da23b40af1a5dc01a4c02d
   UMAppLoader: bda51f73f8599e336a778b23e0956130d1e244d5
-  XMTP: 2c5dd2116778d1b547ac99b5b2396318d02c24d1
-  XMTPReactNative: 6b61a44655d35ddf870b8874fb45a653ec399a24
+  XMTP: c2049f379dd2a799921466cb0720690b786a2958
+  XMTPReactNative: 7574758441a88c709a76fcd99729ca6d7dd60186
   Yoga: 7548e4449365bf0ef60db4aefe58abff37fcabec
 
-PODFILE CHECKSUM: a2b30b9cb41b2ccae9e8890a04fa227f37212463
+PODFILE CHECKSUM: d6352d65ecd51f6cb5c4567e5e3a2e12acd8c4a1
 
 COCOAPODS: 1.16.2

@@ -152,7 +152,7 @@ func computeSpamScoreV3Welcome(client: XMTP.Client, conversation: XMTP.Conversat
   return 0
 }
 
-func computeSpamScoreV3Message(client: XMTP.Client, conversation: XMTP.Conversation, decodedMessage: DecodedMessage, apiURI: String?) async -> Double {
+func computeSpamScoreV3Message(client: XMTP.Client, conversation: XMTP.Conversation, decodedMessage: Message, apiURI: String?) async -> Double {
   do {
     
 //    try await client.preferences.syncConsent()
@@ -209,9 +209,19 @@ func computeSpamScoreV3Message(client: XMTP.Client, conversation: XMTP.Conversat
     //
     sentryTrackError(error: error, extras: ["message": "Failed to compute Spam Score for V3 Message"])
   }
-  let contentType = getContentTypeString(type: decodedMessage.encodedContent.type)
+
+  guard let messageContentType = try? decodedMessage.encodedContent.type else {
+    return 1
+  }
+  let contentType = getContentTypeString(type: messageContentType)
   
-  let messageContent = String(data: decodedMessage.encodedContent.content, encoding: .utf8)
+  
+  guard let content = try? decodedMessage.encodedContent.content else {
+    return 1
+  }
+  
+  let messageContent = String(data:content, encoding: .utf8)
+
   let messageSpamScore = getMessageSpamScore(message: messageContent, contentType: contentType)
   
   return messageSpamScore
