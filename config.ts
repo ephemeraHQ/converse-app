@@ -50,6 +50,7 @@ const defaultConfig = {
   },
   splitScreenThreshold: 600,
   framesAllowedSchemes: ["http", "https", "ethereum"],
+  turnkeyOrg: process.env.EXPO_PUBLIC_TURNKEY_ORG,
 };
 
 const isAndroid = Platform.OS === "android";
@@ -76,6 +77,7 @@ const ENV = {
     appCheckDebugToken: isAndroid
       ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID
       : process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
+    appDomain: "dev.converse.xyz",
   },
   preview: {
     ...defaultConfig,
@@ -95,6 +97,7 @@ const ENV = {
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
     appCheckDebugToken: undefined,
+    appDomain: "preview.converse.xyz",
   },
   prod: {
     ...defaultConfig,
@@ -129,6 +132,7 @@ const ENV = {
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
     appCheckDebugToken: undefined,
+    appDomain: "converse.xyz",
   },
 } as const;
 

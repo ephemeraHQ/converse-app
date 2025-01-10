@@ -1,4 +1,3 @@
-import { Signer } from "ethers";
 import { Alert } from "react-native";
 
 // import { invalidateProfileSocialsQuery } from "../../data/helpers/profiles/profilesUpdate";
@@ -13,8 +12,13 @@ import { awaitableAlert } from "../../utils/alert";
 import logger from "../../utils/logger";
 import { logoutAccount, waitForLogoutTasksDone } from "../../utils/logout";
 import { sentryTrackMessage } from "../../utils/sentry";
-import { createXmtpClientFromSigner } from "../../utils/xmtpRN/signIn";
+import {
+  createXmtpClientFromSigner,
+  createXmtpClientFromViemAccount,
+} from "../../utils/xmtpRN/signIn";
 import { getXmtpClient } from "../../utils/xmtpRN/sync";
+import { Signer } from "ethers";
+import { LocalAccount } from "viem/accounts";
 
 export async function initXmtpClient(args: {
   signer: Signer;
@@ -31,6 +35,39 @@ export async function initXmtpClient(args: {
 
   try {
     await createXmtpClientFromSigner(signer, async () => {
+      await awaitableAlert(
+        translate("current_installation_revoked"),
+        translate("current_installation_revoked_description")
+      );
+      throw new Error("Current installation revoked");
+    });
+
+    await connectWithAddress({
+      address,
+      ...restArgs,
+    });
+  } catch (e) {
+    await logoutAccount(address, false, true, () => {});
+    logger.error(e);
+    throw e;
+  }
+}
+
+export async function initXmtpClientFromViemAccount(args: {
+  account: LocalAccount;
+  address: string;
+  privyAccountId?: string;
+  isEphemeral?: boolean;
+  pkPath?: string;
+}) {
+  const { account, address, ...restArgs } = args;
+
+  if (!account || !address) {
+    throw new Error("No signer or address");
+  }
+
+  try {
+    await createXmtpClientFromViemAccount(account, async () => {
       await awaitableAlert(
         translate("current_installation_revoked"),
         translate("current_installation_revoked_description")

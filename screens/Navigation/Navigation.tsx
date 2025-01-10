@@ -20,13 +20,13 @@ import { useRouter } from "../../navigation/useNavigation";
 import Accounts from "../Accounts/Accounts";
 import { IdleScreen } from "../IdleScreen";
 import { NewAccountConnectWalletScreen } from "../NewAccount/NewAccountConnectWalletScreen";
-import { NewAccountEphemeraScreen } from "../NewAccount/NewAccountEphemeraScreen";
+import { NewAccountEphemeralScreen } from "../NewAccount/NewAccountEphemeralScreen";
 import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeyScreen";
 import { NewAccountPrivyScreen } from "../NewAccount/NewAccountPrivyScreen";
 import { NewAccountScreen } from "../NewAccount/NewAccountScreen";
 import { NewAccountUserProfileScreen } from "../NewAccount/NewAccountUserProfileScreen";
 import { OnboardingConnectWalletScreen } from "../Onboarding/OnboardingConnectWalletScreen";
-import { OnboardingEphemeraScreen } from "../Onboarding/OnboardingEphemeraScreen";
+import { OnboardingEphemeralScreen } from "../Onboarding/OnboardingEphemeralScreen";
 import { OnboardingGetStartedScreen } from "../Onboarding/OnboardingGetStartedScreen";
 import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificationsScreen";
 import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
@@ -46,12 +46,15 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import ConversationRequestsListNav from "@/screens/Navigation/ConversationRequestsListNav.ios";
+import { OnboardingPasskeyScreen } from "../Onboarding/OnboardingPasskeyScreen";
+import { NewAccountPasskeyScreen } from "../NewAccount/NewAccountPasskeyScreen";
 
 export type NavigationParamList = {
   Idle: undefined;
 
   // Auth / Onboarding
   OnboardingGetStarted: undefined;
+  OnboardingPasskey: undefined;
   OnboardingPrivy: undefined;
   OnboardingConnectWallet: {
     address: string;
@@ -70,7 +73,7 @@ export type NavigationParamList = {
   NewAccountPrivy: undefined;
   NewAccountPrivateKey: undefined;
   NewAccountEphemera: undefined;
-
+  NewAccountPasskey: undefined;
   // Main
   Accounts: undefined;
   Blocked: undefined;
@@ -97,7 +100,7 @@ export type NavigationParamList = {
 export const authScreensSharedScreenOptions: NativeStackNavigationOptions = {
   headerTitle: "",
   headerBackTitle: translate("back"),
-  headerBackVisible: false,
+  // headerBackVisible: false,
   headerShadowVisible: false,
 };
 
@@ -210,6 +213,10 @@ export function SignedOutNavigation() {
             component={OnboardingGetStartedScreen}
           />
           <NativeStack.Screen
+            name="OnboardingPasskey"
+            component={OnboardingPasskeyScreen}
+          />
+          <NativeStack.Screen
             name="OnboardingPrivy"
             component={OnboardingPrivyScreen}
           />
@@ -231,7 +238,7 @@ export function SignedOutNavigation() {
           />
           <NativeStack.Screen
             name="OnboardingEphemeral"
-            component={OnboardingEphemeraScreen}
+            component={OnboardingEphemeralScreen}
           />
         </NativeStack.Group>
       </NativeStack.Group>
@@ -285,7 +292,11 @@ const NewAccountNavigator = memo(function NewAccountNavigator() {
         />
         <NewAccountStack.Screen
           name="NewAccountEphemera"
-          component={NewAccountEphemeraScreen}
+          component={NewAccountEphemeralScreen}
+        />
+        <NewAccountStack.Screen
+          name="NewAccountPasskey"
+          component={NewAccountPasskeyScreen}
         />
       </NewAccountStack.Group>
     </NewAccountStack.Navigator>

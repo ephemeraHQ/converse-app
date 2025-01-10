@@ -18,7 +18,7 @@ import { sentryTrackError } from "../../utils/sentry";
 import { NavigationParamList } from "../Navigation/Navigation";
 import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
 
-export function NewAccountEphemeraScreen(
+export function NewAccountEphemeralScreen(
   props: NativeStackScreenProps<NavigationParamList, "NewAccountEphemera">
 ) {
   const router = useRouter();

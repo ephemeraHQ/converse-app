@@ -1723,7 +1723,7 @@ PODS:
     - Yoga
   - react-native-netinfo (11.4.1):
     - React-Core
-  - react-native-passkey (2.1.1):
+  - react-native-passkey (3.0.0):
     - React-Core
   - react-native-quick-base64 (2.1.2):
     - DoubleConversion
@@ -2889,7 +2889,7 @@ SPEC CHECKSUMS:
   react-native-menu: 74230a5879e0ca697e98ee7c3087297dc774bf06
   react-native-mmkv: aa743b3422e32101a77b22f74bdb6446b46191b7
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
-  react-native-passkey: 0ec9f876837f2d37676f8b5df2650905463a6964
+  react-native-passkey: 50ef33b2d7f20c2e5367bfe7ed43cacf46e4af96
   react-native-quick-base64: d63ae7b77d91c24cb72b46dc66b10c1f3b45ae6e
   react-native-quick-crypto: 86115244d0d3c259487f55c958efcbc22adc766f
   react-native-safe-area-context: 8b8404e70b0cbf2a56428a17017c14c1dcc16448

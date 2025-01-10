@@ -39,7 +39,6 @@ import {
   getConverseStateFromPath,
 } from "./Navigation/navHelpers";
 import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
-import logger from "@/utils/logger";
 
 const prefix = Linking.createURL("/");
 
@@ -85,9 +84,10 @@ export default function Main() {
           theme={navigationTheme}
           linking={linking}
           ref={(r) => {
-            logger.info(
-              `[Main] Setting navigation ref to ${r ? "not null" : "null"}`
-            );
+            // logger
+            //   .info
+            //   // `[Main] Setting navigation ref to ${r ? "not null" : "null"}`
+            //   ();
             setConverseNavigatorRef(r);
           }}
           onUnhandledAction={() => {

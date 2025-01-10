@@ -22,7 +22,7 @@ import { useRouter } from "../../navigation/useNavigation";
 import { sentryTrackError } from "../../utils/sentry";
 import { NavigationParamList } from "../Navigation/Navigation";
 
-export function OnboardingEphemeraScreen(
+export function OnboardingEphemeralScreen(
   props: NativeStackScreenProps<NavigationParamList, "OnboardingEphemeral">
 ) {
   const router = useRouter();
