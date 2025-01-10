@@ -4,6 +4,7 @@ import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { ConversationMessageSender } from "@/features/conversation/conversation-message/conversation-message-sender";
 import { ConversationSenderAvatar } from "@/features/conversation/conversation-message/conversation-message-sender-avatar";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ReactNode, memo } from "react";
 
@@ -16,6 +17,8 @@ export const ConversationMessageLayout = memo(
     children,
   }: IConversationMessageLayoutProps) {
     const { theme } = useAppTheme();
+    const { spaceBetweenSenderAvatarAndMessage } =
+      useConversationMessageStyles();
 
     const {
       senderInboxId,
@@ -42,7 +45,7 @@ export const ConversationMessageLayout = memo(
             ) : (
               <VStack style={{ width: theme.avatarSize.sm }} />
             )}
-            <VStack style={{ width: theme.spacing.xxs }} />
+            <VStack style={{ width: spaceBetweenSenderAvatarAndMessage }} />
           </>
         )}
         <AnimatedVStack
