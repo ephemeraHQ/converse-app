@@ -64,6 +64,8 @@ export const iconRegistry: Record<IIconName, string> = {
   "pin.slash": "pin.slash",
   shield: "shield",
   "shield.fill": "shield.fill",
+  "new-account-card": "person.text.rectangle",
+  settings: "gearshape",
 };
 
 export function Icon(props: IIconProps) {

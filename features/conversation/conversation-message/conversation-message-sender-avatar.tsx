@@ -1,11 +1,11 @@
 import { useCurrentAccount } from "@/data/store/accountsStore";
+import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import { navigate } from "@/utils/navigation";
 import { getPreferredInboxAvatar } from "@/utils/profile";
 import { Avatar } from "@components/Avatar";
 import { usePreferredInboxAddress } from "@hooks/usePreferredInboxAddress";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
 import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
-import { useAppTheme } from "@theme/useAppTheme";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 import { TouchableOpacity } from "react-native";
@@ -17,7 +17,7 @@ type IConversationSenderAvatarProps = {
 export function ConversationSenderAvatar({
   inboxId,
 }: IConversationSenderAvatarProps) {
-  const { theme } = useAppTheme();
+  const { senderAvatarSize } = useConversationMessageStyles();
   const currentAccount = useCurrentAccount();
   const { data: senderSocials } = useInboxProfileSocialsQuery(
     currentAccount!,
@@ -35,7 +35,7 @@ export function ConversationSenderAvatar({
 
   return (
     <TouchableOpacity onPress={openProfile}>
-      <Avatar size={theme.avatarSize.sm} uri={avatarUri} name={name} />
+      <Avatar size={senderAvatarSize} uri={avatarUri} name={name} />
     </TouchableOpacity>
   );
 }

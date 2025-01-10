@@ -1,3 +1,4 @@
+import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
@@ -28,6 +29,7 @@ export function ConversationMessageSender(
 
 const useStyles = () => {
   const { theme } = useAppTheme();
+  const { messageContainerSidePadding } = useConversationMessageStyles();
 
   return useMemo(
     () =>
@@ -35,10 +37,10 @@ const useStyles = () => {
         groupSenderContainer: {
           flexDirection: "row",
           flexBasis: "100%",
-          marginLeft: theme.spacing.xs,
+          marginLeft: messageContainerSidePadding,
           marginBottom: theme.spacing.xxxs,
         },
       }),
-    [theme]
+    [theme, messageContainerSidePadding]
   );
 };
