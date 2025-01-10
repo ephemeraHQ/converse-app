@@ -2,8 +2,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useAppTheme } from "@theme/useAppTheme";
 import logger from "@utils/logger";
 
-import { IIconName, IIconProps } from "./Icon.types";
 import { StyleProp, TextStyle } from "react-native";
+import { IIconName, IIconProps } from "./Icon.types";
 
 export const iconRegistry: Record<
   IIconName,
@@ -67,6 +67,8 @@ export const iconRegistry: Record<
   "pin.slash": "push-pin", // Doesn't seem like there's a pin.slash icon
   shield: "shield",
   "shield.fill": "shield",
+  "new-account-card": "person",
+  settings: "settings",
 };
 
 export function Icon(props: IIconProps) {

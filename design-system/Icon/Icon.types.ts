@@ -1,5 +1,6 @@
 import { ColorValue, StyleProp, TextStyle, ViewStyle } from "react-native";
 import { RequireExactlyOne } from "../../types/general";
+import { iconRegistry } from "@/design-system/Icon/Icon";
 
 export type IIconName =
   | "xmark"
@@ -59,7 +60,9 @@ export type IIconName =
   | "pin"
   | "pin.slash"
   | "shield"
-  | "shield.fill";
+  | "shield.fill"
+  | "new-account-card"
+  | "settings";
 
 /**
  * Props for the Icon component.

@@ -1,3 +1,4 @@
+import { iconRegistry } from "@/design-system/Icon/Icon";
 import { VStack } from "@/design-system/VStack";
 import { useConversationByTopic } from "@/features/conversation-list/hooks/use-conversation-by-topic";
 import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
@@ -12,6 +13,7 @@ import { isConversationGroup } from "@/features/conversation/utils/is-conversati
 import { translate } from "@/i18n";
 import { ConversationReadOnly } from "@/screens/ConversationReadOnly";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { Haptics } from "@/utils/haptics";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import {
   ContextMenuViewProps,
@@ -44,7 +46,7 @@ export function useConversationContextMenuViewDefaultProps(args: {
     previewConfig: {
       previewType: "CUSTOM",
       previewSize: "STRETCH",
-      backgroundColor: "white",
+      backgroundColor: theme.colors.background.surface,
     },
     renderPreview: () => {
       return (
@@ -59,6 +61,7 @@ export function useConversationContextMenuViewDefaultProps(args: {
       );
     },
     onPressMenuItem: (event) => {
+      Haptics.selectionAsync();
       const action = menuItems.find(
         (item) => item.actionKey === event.nativeEvent.actionKey
       );
@@ -165,7 +168,7 @@ function useConversationContextMenuDeleteItem(args: {
     actionTitle: translate("delete"),
     icon: {
       iconType: "SYSTEM",
-      iconValue: "trash",
+      iconValue: iconRegistry["trash"],
       iconTint: theme.colors.global.caution,
     },
     menuAttributes: ["destructive"],

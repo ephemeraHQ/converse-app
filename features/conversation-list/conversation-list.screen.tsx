@@ -1,6 +1,5 @@
 import { Avatar } from "@/components/Avatar";
 import { ErroredHeader } from "@/components/ErroredHeader";
-import InitialLoad from "@/components/InitialLoad";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import {
   useAccountsList,
@@ -13,7 +12,7 @@ import { useSelect } from "@/data/store/storeHelpers";
 import { Center } from "@/design-system/Center";
 import { HStack } from "@/design-system/HStack";
 import { HeaderAction } from "@/design-system/Header/HeaderAction";
-import { Icon } from "@/design-system/Icon/Icon";
+import { Icon, iconRegistry } from "@/design-system/Icon/Icon";
 import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
@@ -23,6 +22,7 @@ import { V3GroupConversationListItem } from "@/features/conversation-list/compon
 import { ConversationListItem } from "@/features/conversation-list/components/conversation-list-item/conversation-list-item";
 import { ConversationListAvatarSkeleton } from "@/features/conversation-list/components/conversation-list-item/conversation-list-item-avatar-skeleton";
 import { ConversationList } from "@/features/conversation-list/components/conversation-list/conversation-list";
+import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
 import { useConversationContextMenuViewDefaultProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-default-props";
 import { useShouldShowConnecting } from "@/features/conversation-list/hooks/useShouldShowConnecting";
 import { useShouldShowConnectingOrSyncing } from "@/features/conversation-list/hooks/useShouldShowConnectingOrSyncing";
@@ -60,6 +60,7 @@ import {
   ContextMenuView,
   MenuActionConfig,
 } from "react-native-ios-context-menu";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useConversationListRequestCount } from "./useConversationListRequestCount";
 
 type IConversationListProps = NativeStackScreenProps<
@@ -90,6 +91,8 @@ export function ConversationListScreen({
     isLoading: isLoadingConversations,
     refetch: refetchConversations,
   } = useConversationListItems();
+
+  const insets = useSafeAreaInsets();
 
   // const [flatListItems, setFlatListItems] = useState<{
   //   items: FlatListItemType[];
@@ -150,10 +153,10 @@ export function ConversationListScreen({
         scrollEnabled={conversations && conversations?.length > 0}
         ListEmptyComponent={<ConversationListEmpty />}
         ListHeaderComponent={<ListHeader />}
-        ListFooterComponent={
-          isLoadingConversations ? <InitialLoad /> : undefined
-        }
         onRefetch={handleRefresh}
+        contentContainerStyle={{
+          paddingBottom: insets.bottom,
+        }}
         renderConversation={({ item }) => {
           if (isConversationGroup(item)) {
             return <ConversationListGroup group={item} />;
@@ -380,6 +383,7 @@ function useHeaderWrapper() {
             }}
             isMenuPrimaryAction
             onPressMenuItem={({ nativeEvent }) => {
+              Haptics.selectionAsync();
               if (nativeEvent.actionKey === "all-chats") {
                 Alert.alert("Coming soon");
               } else if (nativeEvent.actionKey === "new-account") {
@@ -389,7 +393,6 @@ function useHeaderWrapper() {
               }
               // Pressed on an account
               else {
-                Haptics.selectionAsync();
                 setCurrentAccount(nativeEvent.actionKey, false);
               }
             }}
@@ -398,8 +401,8 @@ function useHeaderWrapper() {
               menuItems: [
                 {
                   actionKey: "all-chats",
-                  actionTitle: "Convos",
-                  actionSubtitle: "All chats",
+                  actionTitle: translate("conversation_list.messages"),
+                  actionSubtitle: translate("conversation_list.messages"),
                 },
                 ...accountsProfiles.map((profilePreferedName, index) => {
                   return {
@@ -425,14 +428,10 @@ function useHeaderWrapper() {
                   menuItems: [
                     {
                       actionKey: "new-account",
-                      actionTitle: "New Account",
+                      actionTitle: translate("new_account"),
                       icon: {
                         iconType: "SYSTEM",
-                        iconValue: Platform.select({
-                          default: "plus",
-                          ios: "plus",
-                          android: "plus",
-                        }),
+                        iconValue: iconRegistry["new-account-card"],
                       },
                     },
                   ],
@@ -444,14 +443,10 @@ function useHeaderWrapper() {
                   menuItems: [
                     {
                       actionKey: "app-settings",
-                      actionTitle: "App Settings",
+                      actionTitle: translate("App settings"),
                       icon: {
                         iconType: "SYSTEM",
-                        iconValue: Platform.select({
-                          default: "gearshape",
-                          ios: "gearshape",
-                          android: "settings",
-                        }),
+                        iconValue: iconRegistry["settings"],
                       },
                     },
                   ],
@@ -501,6 +496,7 @@ const EphemeralAccountBanner = React.memo(function EphemeralAccountBanner() {
   const { theme } = useAppTheme();
   const colorScheme = useColorScheme();
   const showDisconnectActionSheet = useDisconnectActionSheet();
+  const { screenHorizontalPadding } = useConversationListStyles();
 
   return (
     <TouchableOpacity
@@ -508,7 +504,7 @@ const EphemeralAccountBanner = React.memo(function EphemeralAccountBanner() {
       style={{
         width: "100%",
         backgroundColor: theme.colors.background.blurred,
-        paddingHorizontal: theme.spacing.lg,
+        paddingHorizontal: screenHorizontalPadding,
         paddingVertical: theme.spacing.xs,
       }}
     >
