@@ -606,8 +606,8 @@ function ProfileScreenImpl() {
               });
               setPeersStatus({ [peerAddress]: newStatus });
 
-              // Navigate back to conversation list
-              navigation.popToTop();
+              // Pop to conversation list, antepenultimate screen in stack
+              navigation.pop(2);
             }
           }
         );
