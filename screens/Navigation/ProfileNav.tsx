@@ -18,7 +18,7 @@ export default function ProfileNav() {
       name="Profile"
       component={ProfileScreen}
       options={{
-        headerTitle: "",
+        title: "Profile",
       }}
     />
   );
