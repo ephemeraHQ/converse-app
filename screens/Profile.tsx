@@ -38,6 +38,29 @@ import {
   useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useHeader } from "@/navigation/use-header";
+import { HStack } from "@design-system/HStack";
+import { HeaderAction } from "@/design-system/Header/HeaderAction";
+import {
+  ContextMenuButton,
+  MenuActionConfig,
+} from "react-native-ios-context-menu";
+import { Haptics } from "@/utils/haptics";
+import { iconRegistry, Icon } from "@/design-system/Icon/Icon";
+import {
+  useAccountsList,
+  useAccountsStore,
+  useCurrentAccount,
+  currentAccount,
+  useLoggedWithPrivy,
+  useRecommendationsStore,
+  useSettingsStore,
+  useWalletStore,
+} from "@/data/store/accountsStore";
+import { useAccountsProfiles } from "@/utils/useAccountsProfiles";
+import { shortDisplayName } from "@/utils/str";
+import { useAppTheme } from "@/theme/useAppTheme";
+import { navigate } from "@/utils/navigation";
 
 import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
 import { Avatar } from "../components/Avatar";
@@ -51,14 +74,6 @@ import {
   TableViewPicto,
 } from "../components/TableView/TableViewImage";
 import config from "../config";
-import {
-  currentAccount,
-  useCurrentAccount,
-  useLoggedWithPrivy,
-  useRecommendationsStore,
-  useSettingsStore,
-  useWalletStore,
-} from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { ExternalWalletPicker } from "../features/ExternalWalletPicker/ExternalWalletPicker";
@@ -77,13 +92,64 @@ import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
 import { updateConsentForAddressesForAccount } from "@/features/consent/update-consent-for-addresses-for-account";
 
-import { Icon } from "@/design-system/Icon/Icon";
 import { NotificationPermissionStatus } from "@/features/notifications/types/Notifications.types";
 import { requestPushNotificationsPermissions } from "@/features/notifications/utils/requestPushNotificationsPermissions";
 import { useCurrentAccountXmtpClient } from "@/hooks/useCurrentAccountXmtpClient";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
+
+const useStyles = () => {
+  const colorScheme = useColorScheme();
+  return StyleSheet.create({
+    title: {
+      textAlign: "center",
+      fontSize: 34,
+      fontWeight: "bold",
+      marginVertical: 10,
+      color: textPrimaryColor(colorScheme),
+    },
+    profile: {
+      backgroundColor: backgroundColor(colorScheme),
+    },
+    profileContent: {
+      paddingHorizontal: Platform.OS === "ios" ? 18 : 6,
+    },
+    tableView: {},
+    balanceContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginRight: Platform.OS === "ios" ? 0 : -5,
+    },
+    balance: {
+      color: textPrimaryColor(colorScheme),
+      fontSize: 17,
+      marginRight: 10,
+    },
+    avatar: {
+      marginBottom: 10,
+      marginTop: 23,
+      alignSelf: "center",
+    },
+    emoji: {
+      backgroundColor: "rgba(118, 118, 128, 0.12)",
+      borderRadius: 30,
+    },
+    errorText: {
+      color: dangerColor(colorScheme),
+      textAlign: "center",
+    },
+    errorContainer: {
+      flexDirection: "row",
+      alignSelf: "center",
+    },
+    errorIcon: {
+      width: PictoSizes.textButton,
+      height: PictoSizes.textButton,
+      marginRight: 5,
+    },
+  });
+};
 
 export default function ProfileScreen() {
   return (
@@ -116,26 +182,144 @@ const ExternalWalletPickerWrapper = memo(
 );
 
 function ProfileScreenImpl() {
-  const navigation = useRouter();
+  const { theme } = useAppTheme();
+  const router = useRouter();
+  const account = useCurrentAccount();
+  const accounts = useAccountsList();
+  const accountsProfiles = useAccountsProfiles();
+  const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
   const route = useRoute<"Profile">();
-
-  const userAddress = useCurrentAccount() as string;
-  const USDCBalance = useWalletStore((s) => s.USDCBalance);
+  const peerAddress = route.params.address;
+  const { data: socials } = useProfileSocials(peerAddress);
+  const preferredUserName = usePreferredName(peerAddress);
+  const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const colorScheme = useColorScheme();
   const styles = useStyles();
+
+  useHeader(
+    {
+      safeAreaEdges: ["top"],
+      titleComponent: (
+        <Text
+          style={{
+            fontSize: 17,
+            fontWeight: "600",
+            color: textPrimaryColor(colorScheme),
+          }}
+        >
+          {preferredUserName}
+        </Text>
+      ),
+      LeftActionComponent: (
+        <HeaderAction
+          icon="chevron.left"
+          onPress={() => {
+            router.goBack();
+          }}
+        />
+      ),
+      RightActionComponent: (
+        <HStack
+          style={{
+            alignItems: "center",
+            columnGap: theme.spacing.xxs,
+          }}
+        >
+          <HeaderAction
+            icon="qrcode"
+            onPress={() => {
+              navigate("ShareProfile");
+            }}
+          />
+          <ContextMenuButton
+            style={{
+              paddingVertical: theme.spacing.sm,
+              paddingRight: theme.spacing.sm,
+            }}
+            isMenuPrimaryAction
+            onPressMenuItem={({ nativeEvent }) => {
+              Haptics.selectionAsync();
+              if (nativeEvent.actionKey === "share") {
+                navigate("ShareProfile");
+              } else if (nativeEvent.actionKey === "copy") {
+                Clipboard.setString(peerAddress);
+                //Alert.alert(translate("profile.address_copied"));
+              } else if (nativeEvent.actionKey === "block") {
+                Alert.alert(
+                  "Title", //translate("profile.block.title"),
+                  /*translate("profile.block.message", {
+                  name: preferredUserName,
+                })*/
+                  "Message",
+                  [
+                    {
+                      text: translate("cancel"),
+                      style: "cancel",
+                    },
+                    {
+                      text: translate("block"),
+                      style: "destructive",
+                      onPress: () => {
+                        setPeersStatus({ [peerAddress]: "blocked" });
+                        router.goBack();
+                      },
+                    },
+                  ]
+                );
+              }
+            }}
+            menuConfig={{
+              menuTitle: "",
+              menuItems: [
+                {
+                  actionKey: "share",
+                  actionTitle: translate("share"),
+                  icon: {
+                    iconType: "SYSTEM",
+                    iconValue: "square.and.arrow.up",
+                  },
+                },
+                {
+                  actionKey: "copy",
+                  actionTitle: translate("copy"),
+                  icon: {
+                    iconType: "SYSTEM",
+                    iconValue: "doc.on.doc",
+                  },
+                },
+                {
+                  actionKey: "block",
+                  actionTitle: translate("block"),
+                  icon: {
+                    iconType: "SYSTEM",
+                    iconValue: "person.crop.circle.badge.xmark",
+                  },
+                  menuAttributes: ["destructive"],
+                },
+              ],
+            }}
+          >
+            <HeaderAction icon="more_vert" />
+          </ContextMenuButton>
+        </HStack>
+      ),
+    },
+    [router, theme, peerAddress, preferredUserName, setPeersStatus, colorScheme]
+  );
+
+  const navigation = useRouter();
+  const userAddress = useCurrentAccount() as string;
+  const USDCBalance = useWalletStore((s) => s.USDCBalance);
   const [copiedAddresses, setCopiedAddresses] = useState<{
     [address: string]: boolean;
   }>({});
-  const peerAddress = route.params.address;
   const recommendationTags = useRecommendationsStore(
     (s) => s.frens[peerAddress]?.tags
   );
   const isBlockedPeer = useSettingsStore(
     (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
   );
-  const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
-  const { data: socials } = useProfileSocials(peerAddress);
-  const preferredUserName = usePreferredName(peerAddress);
+  const { data: client } = useCurrentAccountXmtpClient();
   const preferredAvatarUri = usePreferredAvatarUri(peerAddress);
   const groupTopic = route.params.fromGroupTopic;
   const {
@@ -896,55 +1080,3 @@ function ProfileScreenImpl() {
     </ScrollView>
   );
 }
-
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    title: {
-      textAlign: "center",
-      fontSize: 34,
-      fontWeight: "bold",
-      marginVertical: 10,
-      color: textPrimaryColor(colorScheme),
-    },
-    profile: {
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    profileContent: {
-      paddingHorizontal: Platform.OS === "ios" ? 18 : 6,
-    },
-    tableView: {},
-    balanceContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginRight: Platform.OS === "ios" ? 0 : -5,
-    },
-    balance: {
-      color: textPrimaryColor(colorScheme),
-      fontSize: 17,
-      marginRight: 10,
-    },
-    avatar: {
-      marginBottom: 10,
-      marginTop: 23,
-      alignSelf: "center",
-    },
-    emoji: {
-      backgroundColor: "rgba(118, 118, 128, 0.12)",
-      borderRadius: 30,
-    },
-    errorText: {
-      color: dangerColor(colorScheme),
-      textAlign: "center",
-    },
-    errorContainer: {
-      flexDirection: "row",
-      alignSelf: "center",
-    },
-    errorIcon: {
-      width: PictoSizes.textButton,
-      height: PictoSizes.textButton,
-      marginRight: 5,
-    },
-  });
-};
