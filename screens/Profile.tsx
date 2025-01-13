@@ -32,11 +32,11 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
   useColorScheme,
 } from "react-native";
+import { Text } from "@/design-system/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeader } from "@/navigation/use-header";
 import { HStack } from "@design-system/HStack";
@@ -58,34 +58,31 @@ import {
   useWalletStore,
 } from "@/data/store/accountsStore";
 import { useAccountsProfiles } from "@/utils/useAccountsProfiles";
-import { shortDisplayName } from "@/utils/str";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { navigate } from "@/utils/navigation";
 
-import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
-import { Avatar } from "../components/Avatar";
-import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
-import TableView, {
-  TableViewItemType,
-} from "../components/TableView/TableView";
+import ActivityIndicator from "@components/ActivityIndicator/ActivityIndicator";
+import { Avatar } from "@components/Avatar";
+import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
+import TableView, { TableViewItemType } from "@components/TableView/TableView";
 import {
   TableViewEmoji,
   TableViewImage,
   TableViewPicto,
-} from "../components/TableView/TableViewImage";
-import config from "../config";
-import { useAppStore } from "../data/store/appStore";
-import { useSelect } from "../data/store/storeHelpers";
-import { ExternalWalletPicker } from "../features/ExternalWalletPicker/ExternalWalletPicker";
-import { ExternalWalletPickerContextProvider } from "../features/ExternalWalletPicker/ExternalWalletPicker.context";
-import { useGroupMembers } from "../hooks/useGroupMembers";
-import { useGroupPermissions } from "../hooks/useGroupPermissions";
-import { evmHelpers } from "../utils/evm/helpers";
+} from "@components/TableView/TableViewImage";
+import config from "@config";
+import { useAppStore } from "@data/store/appStore";
+import { useSelect } from "@data/store/storeHelpers";
+import { ExternalWalletPicker } from "@features/ExternalWalletPicker/ExternalWalletPicker";
+import { ExternalWalletPickerContextProvider } from "@features/ExternalWalletPicker/ExternalWalletPicker.context";
+import { useGroupMembers } from "@hooks/useGroupMembers";
+import { useGroupPermissions } from "@hooks/useGroupPermissions";
+import { evmHelpers } from "@utils/evm/helpers";
 import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
-} from "../utils/groupUtils/adminUtils";
-import { ConversationNavParams } from "../features/conversation/conversation.nav";
+} from "@utils/groupUtils/adminUtils";
+import { ConversationNavParams } from "@features/conversation/conversation.nav";
 
 import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
 import { getIPFSAssetURI } from "../utils/thirdweb";
@@ -200,14 +197,10 @@ function ProfileScreenImpl() {
     {
       safeAreaEdges: ["top"],
       titleComponent: (
-        <Text
-          style={{
-            fontSize: 17,
-            fontWeight: "600",
-            color: textPrimaryColor(colorScheme),
-          }}
-        >
-          {preferredUserName}
+        <Text preset="body">
+          {router.canGoBack()
+            ? router.getState().routes[router.getState().routes.length - 2].name
+            : ""}
         </Text>
       ),
       LeftActionComponent: (
@@ -234,7 +227,7 @@ function ProfileScreenImpl() {
           <ContextMenuButton
             style={{
               paddingVertical: theme.spacing.sm,
-              paddingRight: theme.spacing.sm,
+              paddingRight: theme.spacing.xxxs,
             }}
             isMenuPrimaryAction
             onPressMenuItem={({ nativeEvent }) => {
