@@ -45,6 +45,10 @@ export type ISwipeableProps = {
   leftActionsBackgroundColor?: string;
   /** Background color for right actions container */
   rightActionsBackgroundColor?: string;
+  /** Hit slop for left actions container. Accepts negative values */
+  leftHitSlop?: number;
+  /** Hit slop for right actions container. Accepts negative values */
+  rightHitSlop?: number;
 
   children: React.ReactNode;
 };
@@ -62,6 +66,8 @@ export function Swipeable({
   overshootLeft,
   overshootRight,
   closeOnOpen,
+  leftHitSlop,
+  rightHitSlop,
   children,
   leftActionsBackgroundColor,
   rightActionsBackgroundColor,
@@ -156,6 +162,10 @@ export function Swipeable({
       /**
        * Configuration
        * */
+      hitSlop={{
+        left: leftHitSlop,
+        right: rightHitSlop,
+      }}
       overshootFriction={overshootFriction}
       overshootRight={overshootRight}
       overshootLeft={overshootLeft}

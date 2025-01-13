@@ -79,6 +79,7 @@ import {
   ConversationStoreProvider,
   useCurrentConversationTopic,
 } from "./conversation.store-context";
+import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
@@ -327,6 +328,10 @@ const ConversationMessagesListItem = memo(
       composerStore.getState().setReplyToMessageId(message.id as MessageId);
     }, [composerStore, message]);
 
+    const isFromCurrentUser = messageIsFromCurrentAccountInboxId({
+      message,
+    });
+
     return (
       <MessageContextStoreProvider
         message={message}
@@ -349,7 +354,10 @@ const ConversationMessagesListItem = memo(
           })}
         >
           <ConversationMessageTimestamp />
-          <ConversationMessageRepliable onReply={handleReply}>
+          <ConversationMessageRepliable
+            onReply={handleReply}
+            messageIsFromCurrentUser={isFromCurrentUser}
+          >
             <ConversationMessageLayout>
               <ConversationMessageGesturesWrapper>
                 <ConversationMessageHighlighted>

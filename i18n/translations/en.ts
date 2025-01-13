@@ -176,6 +176,7 @@ export const en = {
     "We could not find any result in your existing conversations. You might want to",
   no_results_start_convo: "start a new conversation",
   new_account: "New account",
+  "App settings": "App settings",
   add_an_account: "Add an account",
   group_info: "Group info",
   converse_match_maker: "Converse Match Maker",

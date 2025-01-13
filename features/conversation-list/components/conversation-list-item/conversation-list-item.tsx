@@ -3,6 +3,7 @@ import { HStack } from "@/design-system/HStack";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { TouchableHighlight } from "@/design-system/touchable-highlight";
+import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import React, { memo } from "react";
 import { ViewStyle } from "react-native";
@@ -25,10 +26,16 @@ export const ConversationListItem = memo(function ConversationListItem({
   showError,
 }: IConversationListItemProps) {
   const { themed, theme } = useAppTheme();
+  const { screenHorizontalPadding } = useConversationListStyles();
 
   return (
     <TouchableHighlight onPress={onPress} style={themed($touchable)}>
-      <HStack style={themed($conversationListItem)}>
+      <HStack
+        style={[
+          themed($conversationListItem),
+          { paddingHorizontal: screenHorizontalPadding },
+        ]}
+      >
         <Center style={$avatarWrapper}>{avatarComponent}</Center>
         <VStack style={themed($messagePreviewContainer)}>
           <Text preset="bodyBold" weight="medium" numberOfLines={1}>
@@ -55,11 +62,6 @@ export const ConversationListItem = memo(function ConversationListItem({
       </HStack>
     </TouchableHighlight>
   );
-});
-
-const $conversationListItem: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.lg,
-  paddingVertical: spacing.xs,
 });
 
 const $avatarWrapper: ViewStyle = {
@@ -89,4 +91,8 @@ const $touchable: ThemedStyle<ViewStyle> = ({ colors }) => ({
 
 const $placeholder: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.global.transparent,
+});
+
+const $conversationListItem: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingVertical: spacing.xs,
 });

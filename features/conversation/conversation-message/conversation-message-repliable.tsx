@@ -1,5 +1,6 @@
 import { ISwipeableRenderActionsArgs, Swipeable } from "@/components/swipeable";
 import { AnimatedVStack } from "@/design-system/VStack";
+import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import logger from "@/utils/logger";
 import { Icon } from "@design-system/Icon/Icon";
 import { useAppTheme } from "@theme/useAppTheme";
@@ -15,11 +16,19 @@ import {
 type IProps = {
   children: React.ReactNode;
   onReply: () => void;
+  messageIsFromCurrentUser: boolean;
 };
 
 export const ConversationMessageRepliable = memo(
-  function ConversationMessageRepliable({ children, onReply }: IProps) {
+  function ConversationMessageRepliable({
+    children,
+    onReply,
+    messageIsFromCurrentUser,
+  }: IProps) {
     const { theme } = useAppTheme();
+
+    const { messageContainerSidePadding, senderAvatarSize } =
+      useConversationMessageStyles();
 
     const handleLeftSwipe = useCallback(() => {
       logger.debug("[ConversationMessageRepliable] onLeftSwipe");
@@ -35,7 +44,17 @@ export const ConversationMessageRepliable = memo(
     return (
       <Swipeable
         closeOnOpen
-        overshootFriction={10}
+        overshootFriction={10} // 10 feels like the iMessage reply swipe so we like it!
+        // Prevent swipe conflict with back gesture for other users' messages
+        leftHitSlop={
+          !messageIsFromCurrentUser
+            ? -(
+                (messageContainerSidePadding + senderAvatarSize)
+                // Allow swipe to trigger when starting a few pixels left of message. So don't add spaceBetweenSenderAvatarAndMessage
+                // + spaceBetweenSenderAvatarAndMessage
+              )
+            : 0
+        }
         dragOffsetFromLeftEdge={theme.spacing.xs}
         onLeftSwipe={handleLeftSwipe}
         renderLeftActions={renderLeftActions}

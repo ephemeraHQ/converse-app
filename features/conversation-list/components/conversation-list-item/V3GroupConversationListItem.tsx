@@ -1,10 +1,9 @@
 import { Avatar } from "@/components/Avatar";
 import { GroupAvatarDumb } from "@/components/GroupAvatar";
-import { ISwipeableRenderActionsArgs, Swipeable } from "@/components/swipeable";
-import {
-  DeleteSwipeableAction,
-  ToggleUnreadSwipeableAction,
-} from "@/features/conversation-list/components/conversation-list-item/conversation-list-item-swipeable";
+import { ISwipeableRenderActionsArgs } from "@/components/swipeable";
+import { ConversationListItemSwipeable } from "@/features/conversation-list/components/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable";
+import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action";
+import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action";
 import { useHandleDeleteGroup } from "@/features/conversation-list/hooks/useHandleDeleteGroup";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
 import { useMessageText } from "@/features/conversation-list/hooks/useMessageText";
@@ -88,13 +87,9 @@ export function V3GroupConversationListItem({
   });
 
   return (
-    <Swipeable
-      closeOnOpen
+    <ConversationListItemSwipeable
       renderRightActions={renderRightActions}
       renderLeftActions={renderLeftActions}
-      leftThreshold={theme.spacing["5xl"]}
-      leftActionsBackgroundColor={theme.colors.fill.caution}
-      rightActionsBackgroundColor={theme.colors.fill.minimal}
       onLeftSwipe={onDeleteGroup}
       onRightSwipe={toggleReadStatus}
     >
@@ -106,6 +101,6 @@ export function V3GroupConversationListItem({
         subtitle={subtitle}
         isUnread={isUnread}
       />
-    </Swipeable>
+    </ConversationListItemSwipeable>
   );
 }
