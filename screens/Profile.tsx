@@ -429,8 +429,8 @@ function ProfileScreenImpl() {
               });
               setPeersStatus({ [peerAddress]: newStatus });
 
-              // Pop to conversation list, antepenultimate screen in stack
-              navigation.pop(2);
+              // Navigate back to conversation list
+              navigation.popToTop();
             }
           }
         );
@@ -689,13 +689,12 @@ function ProfileScreenImpl() {
               title: translate("send_a_message"),
               titleColor: primaryColor(colorScheme),
               action: () => {
-                navigation.pop(3);
-                // @todo => check if this is the right timing on split screen / web / android
-                setTimeout(() => {
-                  navigation.navigate("Conversation", {
+                navigation.popToTop();
+                navigation.dispatch(
+                  StackActions.push("Conversation", {
                     peer: route.params.address,
-                  });
-                }, 300);
+                  })
+                );
               },
             },
           ]}

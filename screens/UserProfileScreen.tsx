@@ -41,7 +41,7 @@ export const UserProfileScreen = memo(function UserProfileScreen(
     try {
       const { success } = await createOrUpdateProfile({ profile });
       if (success) {
-        navigation.goBack();
+        navigation.popToTop();
       }
     } catch (error) {
       sentryTrackError(error);
