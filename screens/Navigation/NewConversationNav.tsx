@@ -6,9 +6,8 @@ import {
 import { useColorScheme } from "react-native";
 
 import { NativeStack } from "./Navigation";
-import NewConversationModal from "../NewConversation/NewConversationModal";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import logger from "@/utils/logger";
+import NewConversation from "../NewConversation/NewConversation";
 
 export type NewChatNavParams = {
   // peer?: string;
@@ -35,7 +34,7 @@ export default function NewConversationNav() {
   return (
     <NativeStack.Screen
       name="NewConversation"
-      component={NewConversationModal}
+      component={NewConversation}
       options={{
         headerShown: false,
         headerTitleStyle: headerTitleStyle(colorScheme),

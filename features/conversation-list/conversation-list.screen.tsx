@@ -86,10 +86,6 @@ export function ConversationListScreen({
   //   ])
   // );
 
-  useEffect(() => {
-    navigation.navigate("NewConversation", {});
-  }, []);
-
   const {
     data: conversations,
     isLoading: isLoadingConversations,
@@ -496,7 +492,6 @@ const EphemeralAccountBanner = React.memo(function EphemeralAccountBanner() {
   const colorScheme = useColorScheme();
   const showDisconnectActionSheet = useDisconnectActionSheet();
   const { screenHorizontalPadding } = useConversationListStyles();
-
 
   return (
     <TouchableOpacity

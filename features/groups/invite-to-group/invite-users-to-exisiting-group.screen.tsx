@@ -416,7 +416,9 @@ export function InviteUsersToExistingGroupScreen({
               return searchResultsToShow;
             })()}
             groupMode={group.enabled}
-            addToGroup={async (member) => {
+            addToGroup={async (
+              member: IProfileSocials & { address: string }
+            ) => {
               setGroup((g) => ({ ...g, members: [...g.members, member] }));
               setValue("");
             }}

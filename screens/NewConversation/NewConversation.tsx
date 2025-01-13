@@ -1,62 +1,68 @@
-import { Button } from "@design-system/Button/Button";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+/**
+ * BUGS:
+ *
+ * chat is not loaded properly from cold start until chat is visited
+ * solution: proper persistence
+ *
+ * chat flow feels slow on app first launch
+ * solution: proper persistence
+ *
+ * group flow feels slow
+ * solution: requires diagnosing bottleneck
+ *
+ * UI:
+ *
+ * search results list needs updating
+ * create chips for search results
+ *
+ * GITHUB:
+ * https://github.com/ephemeraHQ/converse-app/issues/1498
+ *
+ * FIGMA:
+ * new composer: https://www.figma.com/design/p6mt4tEDltI4mypD3TIgUk/Converse-App?node-id=5026-26989&m=dev
+ * search results list: https://www.figma.com/design/p6mt4tEDltI4mypD3TIgUk/Converse-App?node-id=5191-4200&t=KDRZMuK1xpiNBKG9-4
+ */
+import { Text } from "@/design-system/Text";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  Platform,
-  ScrollView,
-  TextInput,
-  View,
-  ViewStyle,
-  TextStyle,
-} from "react-native";
+import { Platform, ScrollView, TextInput, View } from "react-native";
 
-import { translate } from "@/i18n";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
-import { useGroupQuery } from "@queries/useGroupQuery";
 import { SearchBar } from "@search/components/SearchBar";
 import { canMessageByAccount } from "@utils/xmtpRN/contacts";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 import AndroidBackAction from "@components/AndroidBackAction";
-import TableView from "@components/TableView/TableView";
-import { TableViewPicto } from "@components/TableView/TableViewImage";
 import { currentAccount } from "@data/store/accountsStore";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { searchProfiles } from "@utils/api";
 import { getAddressForPeer, isSupportedPeer } from "@utils/evm/address";
-import { navigate } from "@utils/navigation";
 import { isEmptyObject } from "@utils/objects";
 import { getPreferredName } from "@utils/profile";
-import { NewConversationModalParams } from "./NewConversationModal";
 import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
-import { Text } from "@design-system/Text";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/useAppTheme";
 import { Loader } from "@/design-system/loader";
-import { textSizeStyles } from "@/design-system/Text/Text.styles";
 import logger from "@/utils/logger";
 import { ProfileSearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
-import { Conversation } from "@/features/conversation/conversation";
 import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
 import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
 import { shortAddress } from "@/utils/strings/shortAddress";
 import {
-  createConversation,
   createConversationByAccount,
   createGroupWithDefaultsByAccount,
-  getConversationByPeerByAccount,
   getOptionalConversationByPeerByAccount,
 } from "@/utils/xmtpRN/conversations";
 import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { sendMessage } from "@/features/conversation/hooks/use-send-message";
 import { useNavigation } from "@react-navigation/native";
+import { Button } from "@/design-system/Button/Button";
+import { stylesNewChat } from "./newChat.styles";
 
 /**
  * Screen shown for when user wants to create a new Chat.
  *
- * User can search for peers, create a pendingChatMembers, create a dm, or navigate to an
- * existing dm.
+ * User can search for peers, create a new group, create a dm,
+ * or navigate to an existing dm.
  */
 export default function NewConversation({}) {
   const { theme, themed } = useAppTheme();
@@ -70,7 +76,6 @@ export default function NewConversation({}) {
   }, [navigation]);
 
   const [pendingChatMembers, setPendingGroupMembers] = useState({
-    // enabled: !!route.params?.addingToGroupTopic,
     members: [] as (IProfileSocials & { address: string })[],
   });
 
@@ -83,15 +88,10 @@ export default function NewConversation({}) {
     }
   }, [pendingChatMembers.members.length]);
 
-  // const { addMembers, members } = useGroupMembers(
-  //   route.params?.addingToGroupTopic!
-  // );
-
   const [loading, setLoading] = useState(false);
 
   const handleRightAction = useCallback(async () => {
     logger.debug("[NewConversation] Handling right action", {
-      // isAddingToGroup: !!route.params?.addingToGroupTopic,
       memberCount: pendingChatMembers.members.length,
     });
 
@@ -108,7 +108,6 @@ export default function NewConversation({}) {
 
   useEffect(() => {
     logger.debug("[NewConversation] Setting navigation options", {
-      // groupEnabled: pendingChatMembers.enabled,
       memberCount: pendingChatMembers.members.length,
       conversationCreationMode,
       loading,
@@ -385,7 +384,7 @@ export default function NewConversation({}) {
     status.error && isEmptyObject(status.profileSearchResults);
 
   return (
-    <View style={themed($searchContainer)}>
+    <View style={themed(stylesNewChat.$searchContainer)}>
       <SearchBar
         value={searchQueryState}
         setValue={setSearchQueryState}
@@ -394,7 +393,7 @@ export default function NewConversation({}) {
       />
       <View
         style={[
-          themed($pendingChatMembers),
+          themed(stylesNewChat.$pendingChatMembers),
           {
             display: shouldDisplayPendingMembers ? "flex" : "none",
           },
@@ -411,7 +410,7 @@ export default function NewConversation({}) {
                 variant="fill"
                 size="md"
                 picto="xmark"
-                style={themed($groupMemberButton)}
+                style={themed(stylesNewChat.$groupMemberButton)}
                 onPress={() =>
                   setPendingGroupMembers((g) => {
                     const members = [...g.members];
@@ -458,15 +457,20 @@ export default function NewConversation({}) {
 
       {shouldDisplayErrorMessage && (
         <ScrollView
-          style={[themed($modal), { flex: 1 }]}
+          style={[themed(stylesNewChat.$modal), { flex: 1 }]}
           keyboardShouldPersistTaps="handled"
           onTouchStart={() => {
             inputRef.current?.blur();
           }}
         >
           {status.error && isEmptyObject(status.profileSearchResults) && (
-            <View style={themed($messageContainer)}>
-              <Text style={[themed($message), themed($error)]}>
+            <View style={themed(stylesNewChat.$messageContainer)}>
+              <Text
+                style={[
+                  themed(stylesNewChat.$message),
+                  themed(stylesNewChat.$error),
+                ]}
+              >
                 {status.error}
               </Text>
             </View>
@@ -537,11 +541,8 @@ export default function NewConversation({}) {
                   topic: dm.topic,
                   conversation: dm,
                 });
+                // @ts-expect-error
                 navigation.replace("Conversation", { topic: dm.topic });
-                // await sendMessage({
-                //   conversation: dm,
-                //   message: something.content.text,
-                // });
               } else {
                 const group = await createGroupWithDefaultsByAccount({
                   account: currentAccount(),
@@ -560,17 +561,9 @@ export default function NewConversation({}) {
                   topic: group.topic,
                   conversation: group,
                 });
+                // @ts-expect-error
                 navigation.replace("Conversation", { topic: group.topic });
               }
-              // todo:
-              // create pendingChatMembers/dm
-              // add member to pendingChatMembers
-              // send message
-              // createGroupWithFirstMessage({
-              //   account: currentAccount(),
-              //   members: [draftMembersToAdd],
-              //   message: something.content.text,
-              // });
             }}
           />
         </ConversationComposerContainer>
@@ -582,72 +575,3 @@ export default function NewConversation({}) {
     </View>
   );
 }
-
-const $modal: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  flex: 1,
-  backgroundColor: colors.background.surface,
-});
-
-const $messageContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  ...Platform.select({
-    default: {
-      marginTop: spacing.lg,
-      paddingHorizontal: spacing.md,
-    },
-    android: {
-      marginRight: spacing.md,
-      marginLeft: spacing.md,
-      marginTop: spacing.md,
-    },
-  }),
-});
-
-const $message: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text.secondary,
-  ...textSizeStyles.sm,
-  ...Platform.select({
-    default: {
-      textAlign: "center",
-    },
-  }),
-});
-
-const $error: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color:
-    Platform.OS === "android" ? colors.text.secondary : colors.text.primary,
-});
-
-const $tableView: ThemedStyle<ViewStyle> = () => ({
-  marginHorizontal: Platform.OS === "android" ? 0 : 18,
-});
-
-const $pendingChatMembers: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  minHeight: 50,
-  paddingBottom: Platform.OS === "ios" ? spacing.xs : 0,
-  flexDirection: "row",
-  alignItems: "center",
-  paddingLeft: Platform.OS === "ios" ? spacing.md : 0,
-  justifyContent: "flex-start",
-  borderBottomWidth: Platform.OS === "android" ? 1 : 0.5,
-  borderBottomColor: colors.border.subtle,
-  backgroundColor: colors.background.surface,
-  flexWrap: "wrap",
-});
-
-const $groupMemberButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: 0,
-  marginHorizontal: 0,
-  marginRight: spacing.xs,
-  marginTop: spacing.xs,
-});
-
-const $searchContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  flex: 1,
-  backgroundColor: colors.background.surface,
-});
-
-const $newGroupButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginLeft: spacing["6xs"],
-  paddingTop: Platform.OS === "ios" ? spacing.sm : spacing.xs,
-  paddingBottom: Platform.OS === "ios" ? 0 : spacing.xs,
-});
