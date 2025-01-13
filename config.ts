@@ -1,6 +1,5 @@
 import { DEFAULT_SUPPORTED_CHAINS } from "@utils/evm/wallets";
 import { Platform } from "react-native";
-import { base, baseSepolia } from "wagmi/chains";
 import { getApiUri } from "./utils/apiConfig";
 import { Environments, isDev, isPreview } from "./utils/getEnv";
 
@@ -37,7 +36,7 @@ const defaultConfig = {
   expoProjectId: process.env.EXPO_PUBLIC_EXPO_PROJECT_ID,
   privy: {
     appId: process.env.EXPO_PUBLIC_PRIVY_APP_ID,
-    defaultChain: baseSepolia,
+    clientId: process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID,
   },
   evm: {
     transactionChainId: "0x14a34", // Base Sepolia
@@ -77,6 +76,7 @@ const ENV = {
     appCheckDebugToken: isAndroid
       ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID
       : process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
+    appDomain: "dev.converse.xyz",
   },
   preview: {
     ...defaultConfig,
@@ -96,6 +96,7 @@ const ENV = {
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
     appCheckDebugToken: undefined,
+    appDomain: "preview.converse.xyz",
   },
   prod: {
     ...defaultConfig,
@@ -115,7 +116,7 @@ const ENV = {
     ]),
     privy: {
       appId: process.env.EXPO_PUBLIC_PRIVY_APP_ID,
-      defaultChain: base,
+      clientId: process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID,
     },
     evm: {
       transactionChainId: "0x2105", // Base Mainnet
@@ -130,6 +131,7 @@ const ENV = {
     alphaGroupChatUrl:
       "https://converse.xyz/group-invite/eQAvo-WvwrdBTsHINuSMJ",
     appCheckDebugToken: undefined,
+    appDomain: "converse.xyz",
   },
 } as const;
 

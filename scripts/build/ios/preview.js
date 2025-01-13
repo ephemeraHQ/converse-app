@@ -117,6 +117,11 @@ const go = async () => {
       "applinks:dev.getconverse.app",
       "applinks:preview.getconverse.app"
     );
+  entitlementsApp["com.apple.developer.associated-domains"][2] =
+    entitlementsApp["com.apple.developer.associated-domains"][2].replace(
+      "webcredentials:dev.converse.xyz",
+      "webcredentials:preview.converse.xyz"
+    );
 
   // Update notification extension entitlements
   entitlementsExtension["keychain-access-groups"][0] = entitlementsExtension[

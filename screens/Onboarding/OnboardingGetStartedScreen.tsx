@@ -6,19 +6,20 @@ import { animation } from "@theme/animations";
 import React from "react";
 import { Alert } from "react-native";
 
-import { ConnectViaWalletPopularWalletsTableView } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletPopularWalletsTableView";
-import { useInstalledWallets } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
+import { ConnectViaWalletPopularWalletsTableView } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletPopularWalletsTableView";
+import { useInstalledWallets } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import {
   getConnectViaWalletTableViewEphemeralItem,
+  getConnectViaWalletTableViewPasskeyItem,
   getConnectViaWalletTableViewPhoneItem,
   getConnectViaWalletTableViewPrivateKeyItem,
   InstalledWalletsTableView,
-} from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletTableViewItems";
-import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
-import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
-import { useAccountsStore } from "../../data/store/accountsStore";
-import { useAuthStore } from "../../data/store/authStore";
-import { useRouter } from "../../navigation/useNavigation";
+} from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletTableViewItems";
+import { OnboardingPictoTitleSubtitle } from "@components/Onboarding/OnboardingPictoTitleSubtitle";
+import { OnboardingScreenComp } from "@components/Onboarding/OnboardingScreenComp";
+import { useAccountsStore } from "@data/store/accountsStore";
+import { useAuthStore } from "@data/store/authStore";
+import { useRouter } from "@navigation/useNavigation";
 
 const animationDelays = [525, 550, 575, 800, 825, 850] as const;
 
@@ -58,6 +59,11 @@ export function OnboardingGetStartedScreen() {
         <TableView
           title={translate("walletSelector.converseAccount.title")}
           items={[
+            getConnectViaWalletTableViewPasskeyItem({
+              action: () => {
+                router.navigate("OnboardingPasskey");
+              },
+            }),
             getConnectViaWalletTableViewPhoneItem({
               action: () => {
                 router.navigate("OnboardingPrivy");
