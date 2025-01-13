@@ -24,6 +24,18 @@ import TableView, { TableViewItemType } from "../../TableView/TableView";
 import { TableViewEmoji, TableViewImage } from "../../TableView/TableViewImage";
 import { RightViewChevron } from "../../TableView/TableViewRightChevron";
 
+export function getConnectViaWalletTableViewPasskeyItem(
+  args: Partial<TableViewItemType>
+): TableViewItemType {
+  return {
+    id: "passkey",
+    leftView: <TableViewEmoji emoji="🔑" />,
+    title: translate("passkey.title"),
+    rightView: <RightViewChevron />,
+    ...args,
+  };
+}
+
 export function getConnectViaWalletTableViewPrivateKeyItem(
   args: Partial<TableViewItemType>
 ): TableViewItemType {
