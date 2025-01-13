@@ -4,6 +4,7 @@
   "compilerOptions": {
     "module": "ESNext",
     "strict": true,
+    "moduleResolution": "Bundler",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {

@@ -7,10 +7,11 @@ import { simulateTransaction } from "@utils/api";
 import { converseEventEmitter } from "@utils/events";
 import { useExternalSigner } from "@utils/evm/external";
 import logger from "@utils/logger";
+import type { TransactionReceipt } from "viem";
+
 import { type SimulateAssetChangesResponse } from "alchemy-sdk";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { waitForReceipt } from "thirdweb";
-import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 
 import { Drawer } from "../Drawer";
 import { TransactionActions } from "./TransactionActions";
@@ -162,7 +163,7 @@ export function TransactionPreview() {
       converseEventEmitter.emit(
         "transactionResult",
         transactionToPreview.id,
-        transactionReceipt
+        transactionReceipt as TransactionReceipt
       );
       setTxState({
         status: transactionReceipt.status === "success" ? "success" : "failure",
@@ -170,7 +171,7 @@ export function TransactionPreview() {
 
       if (transactionReceipt.status === "success") {
         setTimeout(() => {
-          closeWithReceipt(transactionReceipt);
+          closeWithReceipt(transactionReceipt as TransactionReceipt);
         }, 1000);
       }
     } catch (e: any) {

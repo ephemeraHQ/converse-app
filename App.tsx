@@ -7,10 +7,11 @@ import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheet
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { useAppStateHandlers } from "@hooks/useAppStateHandlers";
 import { PrivyProvider } from "@privy-io/expo";
+import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { useAppTheme, useThemeProvider } from "@theme/useAppTheme";
+import { useThemeProvider } from "@theme/useAppTheme";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
@@ -138,23 +139,30 @@ export default function AppWithProviders() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PrivyProvider appId={config.privy.appId} storage={privySecureStorage}>
-        <ThirdwebProvider>
-          <AppKeyboardProvider>
-            <ActionSheetProvider>
-              <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                <PaperProvider theme={paperTheme}>
-                  <GestureHandlerRootView style={{ flex: 1 }}>
-                    <BottomSheetModalProvider>
-                      <App />
-                      <Snackbars />
-                    </BottomSheetModalProvider>
-                  </GestureHandlerRootView>
-                </PaperProvider>
-              </ThemeProvider>
-            </ActionSheetProvider>
-          </AppKeyboardProvider>
-        </ThirdwebProvider>
+      <PrivyProvider
+        appId={config.privy.appId}
+        clientId={config.privy.clientId}
+        storage={privySecureStorage}
+        supportedChains={[config.privy.defaultChain]}
+      >
+        <SmartWalletsProvider>
+          <ThirdwebProvider>
+            <AppKeyboardProvider>
+              <ActionSheetProvider>
+                <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
+                  <PaperProvider theme={paperTheme}>
+                    <GestureHandlerRootView style={{ flex: 1 }}>
+                      <BottomSheetModalProvider>
+                        <App />
+                        <Snackbars />
+                      </BottomSheetModalProvider>
+                    </GestureHandlerRootView>
+                  </PaperProvider>
+                </ThemeProvider>
+              </ActionSheetProvider>
+            </AppKeyboardProvider>
+          </ThirdwebProvider>
+        </SmartWalletsProvider>
       </PrivyProvider>
     </QueryClientProvider>
   );
