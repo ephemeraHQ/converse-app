@@ -4,7 +4,6 @@ import { Platform, useColorScheme } from "react-native";
 
 import { ScreenHeaderButton } from "../../components/Screen/ScreenHeaderButton/ScreenHeaderButton";
 import { ScreenHeaderIconButton } from "../../components/Screen/ScreenHeaderIconButton/ScreenHeaderIconButton";
-import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
 import { useCurrentAccount } from "../../data/store/accountsStore";
 import { useRouter } from "../../navigation/useNavigation";
 import { navigate } from "../../utils/navigation";
@@ -24,7 +23,6 @@ export const ProfileScreenConfig = {
 
 export default function ProfileNav() {
   const router = useRouter();
-
   const colorScheme = useColorScheme();
   const account = useCurrentAccount();
   const options: NativeStackNavigationOptions = {
@@ -40,11 +38,7 @@ export default function ProfileNav() {
       name="Profile"
       component={ProfileScreen}
       options={({ route }) => ({
-        presentation: "modal",
         headerTitle: "",
-        headerLeft: () => (
-          <ScreenHeaderModalCloseButton onPress={router.goBack} />
-        ),
         headerRight: () => {
           if (route.params.address === account) {
             if (Platform.OS === "ios") {

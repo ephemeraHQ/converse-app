@@ -156,7 +156,7 @@ export default function ShareProfileScreen({
         Platform.OS === "ios" && (
           <TouchableOpacity
             onPress={() => {
-              navigation.goBack();
+              navigation.popToTop();
             }}
           >
             <ActionButton
