@@ -1,8 +1,13 @@
+import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
+import {
+  fetchPersistedConversationListQuery,
+  prefetchConversationListQuery,
+} from "@/queries/useConversationListQuery";
+import { getChatStore } from "@data/store/accountsStore";
 import logger from "@utils/logger";
 import { retryWithBackoff } from "@utils/retryWithBackoff";
 import { Client } from "@xmtp/xmtp-js";
 import { AppState } from "react-native";
-import { getChatStore } from "@data/store/accountsStore";
 import {
   getXmtpClientFromAddress,
   reconnectXmtpClientsDbConnections,
@@ -14,11 +19,6 @@ import {
   streamConversations,
 } from "./conversations";
 import { stopStreamingAllMessage, streamAllMessages } from "./messages";
-import {
-  fetchPersistedConversationListQuery,
-  prefetchConversationListQuery,
-} from "@/queries/useConversationListQuery";
-import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
 
 const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;
@@ -48,12 +48,9 @@ export const getXmtpClient = async (
       logger.debug("[XmtpRN] Getting client from address");
       const client = await getXmtpClientFromAddress(account);
       logger.info(`[XmtpRN] Instantiated client for ${client.address}`);
-      getChatStore(account).getState().setLocalClientConnected(true);
-      getChatStore(account).getState().setErrored(false);
       xmtpClientByAccount[lowerCaseAccount] = client;
       return client;
-    } catch (e: any) {
-      getChatStore(account).getState().setErrored(true);
+    } catch (e: unknown) {
       throw e;
     } finally {
       delete instantiatingClientForAccount[lowerCaseAccount];

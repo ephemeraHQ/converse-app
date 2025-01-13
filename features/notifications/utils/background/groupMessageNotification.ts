@@ -1,4 +1,4 @@
-import { normalizeTimestamp } from "@/utils/date";
+import { normalizeTimestampToMs } from "@/utils/date";
 import notifee, {
   AndroidPerson,
   AndroidStyle,
@@ -112,7 +112,7 @@ const handleGroupMessageNotification = async ({
     android: {
       channelId: androidChannel.id,
       groupId: conversation.topic,
-      timestamp: normalizeTimestamp(message.sentNs),
+      timestamp: normalizeTimestampToMs(message.sentNs),
       showTimestamp: true,
       pressAction: {
         id: "default",
@@ -126,7 +126,7 @@ const handleGroupMessageNotification = async ({
           ...previousMessages,
           {
             text: notificationContent,
-            timestamp: normalizeTimestamp(message.sentNs),
+            timestamp: normalizeTimestampToMs(message.sentNs),
           },
         ],
         group: true,
@@ -182,7 +182,7 @@ const handleDmMessageNotification = async ({
     android: {
       channelId: androidChannel.id,
       groupId: conversation.topic,
-      timestamp: normalizeTimestamp(message.sentNs),
+      timestamp: normalizeTimestampToMs(message.sentNs),
       showTimestamp: true,
       pressAction: {
         id: "default",
@@ -196,7 +196,7 @@ const handleDmMessageNotification = async ({
           ...previousMessages,
           {
             text: notificationContent,
-            timestamp: normalizeTimestamp(message.sentNs),
+            timestamp: normalizeTimestampToMs(message.sentNs),
           },
         ],
         group: false,

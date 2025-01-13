@@ -1,5 +1,5 @@
-import RequestsSegmentedController from "@/features/conversation-list/components/RequestsSegmentedController";
-import { ConversationList } from "@/features/conversation-list/components/conversation-list/conversation-list";
+import { ConversationList } from "@/features/conversation-list/conversation-list";
+import RequestsSegmentedController from "@/features/conversation-requests/RequestsSegmentedController";
 import { translate } from "@i18n";
 import { RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";

@@ -58,7 +58,7 @@ export const getTime = (date: number | Date) => {
   return format(date, "p", { locale });
 };
 
-export function normalizeTimestamp(timestamp: number) {
+export function normalizeTimestampToMs(timestamp: number) {
   // If the timestamp has more than 13 digits, assume it's in nanoseconds
   if (timestamp > 1e13) {
     return Math.floor(timestamp / 1e6); // Convert nanoseconds to milliseconds
@@ -66,9 +66,9 @@ export function normalizeTimestamp(timestamp: number) {
   return timestamp; // Already in milliseconds
 }
 
-export const getMinimalDate = (unnormalizedDate: number) => {
+export const getCompactRelativeTime = (unnormalizedDate: number) => {
   if (!unnormalizedDate) return "";
-  const date = normalizeTimestamp(unnormalizedDate);
+  const date = normalizeTimestampToMs(unnormalizedDate);
   // To-do: Add supporting locale logic
   // const locale = getLocale();
   const diff = Date.now() - date;
@@ -87,6 +87,7 @@ export const getMinimalDate = (unnormalizedDate: number) => {
   if (days > 0) return `${days}d`;
   if (hours > 0) return `${hours}h`;
   if (minutes > 0) return `${minutes}m`;
+  if (seconds === 0) return "Just now";
   return `${Math.max(seconds, 0)}s`;
 };
 

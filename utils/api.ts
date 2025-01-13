@@ -1,32 +1,18 @@
 import { TransactionData } from "@components/TransactionPreview/TransactionPreview";
-import type { SimulateAssetChangesResponse } from "alchemy-sdk";
 import { GroupInvite } from "@utils/api.types";
+import type { SimulateAssetChangesResponse } from "alchemy-sdk";
 import axios, { AxiosError } from "axios";
 import * as Contacts from "expo-contacts";
-
-import {
-  analyticsPlatform,
-  analyticsAppVersion,
-  analyticsBuildNumber,
-} from "./analytics";
-import type { TransferAuthorizationMessage } from "./evm/erc20";
-import { getPrivyRequestHeaders } from "./evm/privy";
-import logger from "./logger";
-import type { TransactionDetails } from "./transaction";
-import config from "../config";
-import type { TopicData } from "../data/store/chatStore";
 import type { IProfileSocials } from "@/features/profiles/profile-types";
+import type { InboxId } from "@xmtp/react-native-sdk";
+import config from "../config";
 import type { Frens } from "../data/store/recommendationsStore";
 import type { ProfileType } from "../screens/Onboarding/OnboardingUserProfileScreen";
-import type { InboxId } from "@xmtp/react-native-sdk";
-import { evmHelpers } from "./evm/helpers";
 import {
-  getInstallationKeySignature,
-  InstallationSignature,
-} from "./xmtpRN/client";
-import { getInboxId } from "./xmtpRN/signIn";
-import { createDedupedFetcher } from "./api.utils";
-import { getSecureMmkvForAccount } from "./mmkv";
+  analyticsAppVersion,
+  analyticsBuildNumber,
+  analyticsPlatform,
+} from "./analytics";
 import {
   CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
   CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
@@ -34,7 +20,19 @@ import {
   XMTP_API_ADDRESS_HEADER_KEY,
   XMTP_IDENTITY_KEY,
 } from "./api.constants";
+import { createDedupedFetcher } from "./api.utils";
 import { tryGetAppCheckToken } from "./appCheck";
+import type { TransferAuthorizationMessage } from "./evm/erc20";
+import { evmHelpers } from "./evm/helpers";
+import { getPrivyRequestHeaders } from "./evm/privy";
+import logger from "./logger";
+import { getSecureMmkvForAccount } from "./mmkv";
+import type { TransactionDetails } from "./transaction";
+import {
+  InstallationSignature,
+  getInstallationKeySignature,
+} from "./xmtpRN/client";
+import { getInboxId } from "./xmtpRN/signIn";
 
 export const api = axios.create({
   baseURL: config.apiURI,
@@ -421,71 +419,6 @@ export const findFrens = async (account: string) => {
   });
 
   return data.frens as Frens;
-};
-
-type DesktopSessionData = {
-  sessionId: string;
-  publicKey: string;
-  otp: string;
-};
-export const openDesktopSession = async ({
-  sessionId,
-  publicKey,
-  otp,
-}: DesktopSessionData) =>
-  api.post("/api/connect", { sessionId, publicKey, otp });
-
-export const fetchDesktopSessionXmtpKey = async ({
-  sessionId,
-  otp,
-}: DesktopSessionData): Promise<string | undefined> => {
-  const { data } = await api.get("/api/connect/session", {
-    params: { sessionId, otp },
-  });
-  return data?.encryptedXmtpKey;
-};
-
-export const markDesktopSessionDone = async ({
-  sessionId,
-  otp,
-}: DesktopSessionData): Promise<string | undefined> =>
-  api.delete("/api/connect/session", {
-    params: { sessionId, otp },
-  });
-
-export const saveTopicsData = async (
-  account: string,
-  topicsData: {
-    [topic: string]: TopicData;
-  }
-) => {
-  await api.post("/api/topics", topicsData, {
-    headers: await getXmtpApiHeaders(account),
-  });
-};
-
-export const getTopicsData = async (account: string) => {
-  const { data } = await api.get("/api/topics", {
-    headers: await getXmtpApiHeaders(account),
-  });
-  return data as { [topic: string]: TopicData };
-};
-
-export const pinTopics = async (account: string, topics: string[]) => {
-  await api.post(
-    "/api/topics/pin",
-    { topics },
-    {
-      headers: await getXmtpApiHeaders(account),
-    }
-  );
-};
-
-export const unpinTopics = async (account: string, topics: string[]) => {
-  await api.delete("/api/topics/pin", {
-    data: { topics },
-    headers: await getXmtpApiHeaders(account),
-  });
 };
 
 export const postUSDCTransferAuthorization = async (

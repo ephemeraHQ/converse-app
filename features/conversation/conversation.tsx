@@ -2,8 +2,8 @@ import { AnimatedVStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
-import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
-import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
+import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
+import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
 import { ReplyPreview } from "@/features/conversation/conversation-composer/conversation-composer-reply-preview";
@@ -50,6 +50,7 @@ import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
 import { useHeader } from "@/navigation/use-header";
@@ -79,7 +80,6 @@ import {
   ConversationStoreProvider,
   useCurrentConversationTopic,
 } from "./conversation.store-context";
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
@@ -223,24 +223,27 @@ const Messages = memo(function Messages(props: {
     );
   }, [messages?.ids, messages?.byId, currentAccountInboxId]);
 
-  const isUnread = useConversationIsUnread({
-    topic,
-    lastMessage: messages?.byId[messages?.ids[0]], // Get latest message
-    timestampNs: messages?.byId[messages?.ids[0]]?.sentNs ?? 0,
-  });
-
-  const toggleReadStatus = useToggleReadStatus({
+  const { isUnread } = useConversationIsUnread({
     topic,
   });
 
-  const hasMarkedAsRead = useRef(false);
+  const { toggleReadStatusAsync } = useToggleReadStatus({
+    topic,
+  });
+
+  const hasMarkedAsReadRef = useRef(false);
 
   useEffect(() => {
-    if (isUnread && !messagesLoading && !hasMarkedAsRead.current) {
-      toggleReadStatus();
-      hasMarkedAsRead.current = true;
+    if (
+      isUnread &&
+      !messagesLoading &&
+      !hasMarkedAsReadRef.current &&
+      isConversationAllowed(conversation)
+    ) {
+      toggleReadStatusAsync();
+      hasMarkedAsReadRef.current = true;
     }
-  }, [isUnread, messagesLoading, toggleReadStatus]);
+  }, [isUnread, messagesLoading, toggleReadStatusAsync, conversation]);
 
   const handleRefresh = useCallback(async () => {
     try {

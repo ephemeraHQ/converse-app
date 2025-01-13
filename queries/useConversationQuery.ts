@@ -82,3 +82,11 @@ export const getConversationQueryData = (args: IArgs) => {
     conversationQueryKey(account, topic)
   );
 };
+
+export function getOrFetchConversation(args: IArgs) {
+  const conversation = getConversationQueryData(args);
+  if (conversation) {
+    return Promise.resolve(conversation);
+  }
+  return queryClient.fetchQuery(getConversationQueryOptions(args));
+}

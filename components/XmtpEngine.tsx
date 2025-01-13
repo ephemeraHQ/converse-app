@@ -6,14 +6,8 @@ import {
   AppStateStatus,
   NativeEventSubscription,
 } from "react-native";
-
-import {
-  getAccountsList,
-  getChatStore,
-  useAccountsStore,
-} from "../data/store/accountsStore";
+import { getAccountsList, useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { getTopicsData } from "../utils/api";
 import { stopStreamingConversations } from "../utils/xmtpRN/conversations";
 import { syncConversationListXmtpClient } from "../utils/xmtpRN/sync";
 
@@ -131,9 +125,6 @@ class XmtpEngine {
     accountsToSync.forEach((a) => {
       if (!this.syncingAccounts[a]) {
         logger.info(`[XmtpEngine] Syncing account ${a}`);
-        getTopicsData(a).then((topicsData) => {
-          getChatStore(a).getState().setTopicsData(topicsData, true);
-        });
         this.syncedAccounts[a] = true;
         this.syncingAccounts[a] = true;
         syncConversationListXmtpClient(a)

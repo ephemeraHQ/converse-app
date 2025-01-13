@@ -17,21 +17,17 @@ import {
   useColorScheme,
 } from "react-native";
 
-import {
-  useAccountsStore,
-  useErroredAccountsMap,
-} from "../data/store/accountsStore";
+import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
+import { useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
+import { NotificationPermissionStatus } from "../features/notifications/types/Notifications.types";
+import { requestPushNotificationsPermissions } from "../features/notifications/utils/requestPushNotificationsPermissions";
 import { useRouter } from "../navigation/useNavigation";
 import { navigate } from "../utils/navigation";
-import { requestPushNotificationsPermissions } from "../features/notifications/utils/requestPushNotificationsPermissions";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "./TableView/TableViewImage";
-import { NotificationPermissionStatus } from "../features/notifications/types/Notifications.types";
-import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
-import { invalidateInboxProfileSocialsQuery } from "@/queries/useInboxProfileSocialsQuery";
 
 type Props = {
   account: string;
@@ -55,7 +51,6 @@ export default function AccountSettingsButton({ account }: Props) {
   const { setCurrentAccount } = useAccountsStore(
     useSelect(["setCurrentAccount"])
   );
-  const erroredAccountsMap = useErroredAccountsMap();
   const colorScheme = useColorScheme();
   const showDisconnectActionSheet = useDisconnectActionSheet(account);
 
@@ -110,7 +105,7 @@ export default function AccountSettingsButton({ account }: Props) {
 
     const options = Object.keys(methods);
     const icons = [];
-    if (erroredAccountsMap[account] && isInternetReachable) {
+    if (isInternetReachable) {
       icons.push(
         <Picto
           style={{
@@ -148,7 +143,6 @@ export default function AccountSettingsButton({ account }: Props) {
     );
   }, [
     router,
-    erroredAccountsMap,
     account,
     isInternetReachable,
     notificationsPermissionStatus,
