@@ -10,6 +10,9 @@
  * group flow feels slow
  * solution: requires diagnosing bottleneck
  *
+ * messed up old add user to existing group screen
+ * solution: copy existing screen back in
+ *
  * UI:
  *
  * search results list needs updating
@@ -79,36 +82,21 @@ export default function NewConversation({}) {
     members: [] as (IProfileSocials & { address: string })[],
   });
 
+  const pendingChatMembersCount = pendingChatMembers.members.length;
+
   useEffect(() => {
-    console.log("pendingChatMembers", pendingChatMembers.members);
-    if (pendingChatMembers.members.length > 1) {
+    if (pendingChatMembersCount > 1) {
       setConversationCreationMode(ConversationVersion.GROUP);
-    } else if (pendingChatMembers.members.length === 1) {
+    } else if (pendingChatMembersCount === 1) {
       setConversationCreationMode(ConversationVersion.DM);
     }
-  }, [pendingChatMembers.members.length]);
+  }, [pendingChatMembersCount]);
 
   const [loading, setLoading] = useState(false);
 
-  const handleRightAction = useCallback(async () => {
-    logger.debug("[NewConversation] Handling right action", {
-      memberCount: pendingChatMembers.members.length,
-    });
-
-    logger.debug("[NewConversation] Conversation creation mode", {
-      conversationCreationMode,
-    });
-    logger.debug("[NewConversation] Group", {
-      pendingChatMembers: JSON.stringify(pendingChatMembers, null, 2),
-    });
-    logger.debug(
-      "header right action shouldnt be used we should do the creation logic in response to a message being 'sent'"
-    );
-  }, [pendingChatMembers.members, navigation]);
-
   useEffect(() => {
     logger.debug("[NewConversation] Setting navigation options", {
-      memberCount: pendingChatMembers.members.length,
+      memberCount: pendingChatMembersCount,
       conversationCreationMode,
       loading,
     });
@@ -124,25 +112,23 @@ export default function NewConversation({}) {
       headerTitle: "New chat",
       headerRight: () => {
         return (
-          <Button
-            variant="text"
+          <Text
             text={
               conversationCreationMode === ConversationVersion.DM
                 ? "New convo"
                 : "New group"
             }
-            onPress={handleRightAction}
+            // onPress={handleRightAction}
           />
         );
       },
     });
   }, [
-    pendingChatMembers,
+    pendingChatMembersCount,
     conversationCreationMode,
     loading,
     navigation,
     handleBack,
-    handleRightAction,
     themed,
     theme.spacing,
   ]);
@@ -345,7 +331,7 @@ export default function NewConversation({}) {
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [searchQueryState]);
+  }, [searchQueryState, pendingChatMembers.members]);
 
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);

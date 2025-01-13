@@ -25,6 +25,7 @@ import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeySc
 import { NewAccountPrivyScreen } from "../NewAccount/NewAccountPrivyScreen";
 import { NewAccountScreen } from "../NewAccount/NewAccountScreen";
 import { NewAccountUserProfileScreen } from "../NewAccount/NewAccountUserProfileScreen";
+import { NewConversationNav } from "./NewConversationNav";
 import { OnboardingConnectWalletScreen } from "../Onboarding/OnboardingConnectWalletScreen";
 import { OnboardingEphemeraScreen } from "../Onboarding/OnboardingEphemeraScreen";
 import { OnboardingGetStartedScreen } from "../Onboarding/OnboardingGetStartedScreen";
@@ -38,7 +39,7 @@ import {
 } from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
 import GroupNav, { GroupNavParams } from "./GroupNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
-import NewConversationNav, { NewChatNavParams } from "./NewConversationNav";
+
 import ProfileNav, { ProfileNavParams } from "./ProfileNav";
 import ShareProfileNav from "./ShareProfileNav";
 import TopUpNav from "./TopUpNav";
@@ -47,7 +48,6 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import ConversationRequestsListNav from "@/screens/Navigation/ConversationRequestsListNav.ios";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -79,7 +79,7 @@ export type NavigationParamList = {
   Chats: undefined;
   ChatsRequests: undefined;
   Conversation: ConversationNavParams;
-  NewConversation: NewChatNavParams;
+  NewConversation: undefined;
 
   NewGroupSummary: undefined;
   ConverseMatchMaker: undefined;
@@ -138,7 +138,7 @@ export function SignedInNavigation() {
           <NativeStack.Screen name="Blocked" component={BlockedChatsScreen} />
           {ConversationRequestsListNav()}
           {ConversationNav()}
-          {NewConversationNav()}
+          {/* {NewConversationNav()} */}
           {ShareProfileNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}

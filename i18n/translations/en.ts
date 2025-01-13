@@ -349,6 +349,12 @@ export const en = {
     invite_to_converse: "Invite them to Converse",
   },
 
+  invite_to_group: {
+    title: "Invite to group",
+    add_members: "Add members",
+    invite_to_converse: "Invite them to Converse",
+  },
+
   // Wallet selector
   no_wallet_detected: "No wallet detected",
 

@@ -25,47 +25,27 @@ import { useGroupQuery } from "@queries/useGroupQuery";
 import { SearchBar } from "@search/components/SearchBar";
 import { canMessageByAccount } from "@utils/xmtpRN/contacts";
 import { InboxId } from "@xmtp/react-native-sdk";
-import { IProfileSocials } from "@/features/profiles/profile-types";
-import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
-import {
-  currentAccount,
-  useRecommendationsStore,
-} from "@/data/store/accountsStore";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
+import { currentAccount } from "@/data/store/accountsStore";
+import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
-import AndroidBackAction from "@/components/AndroidBackAction";
-import { ActivityIndicator } from "react-native-paper";
-import { useSelect } from "@/data/store/storeHelpers";
-import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
-import config from "@/config";
+import ActivityIndicator from "@/components/ActivityIndicator/ActivityIndicator";
+import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 import { searchProfiles } from "@/utils/api";
 import { isEmptyObject } from "@/utils/objects";
 import { getPreferredName } from "@/utils/profile";
-import { ProfileSearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
+import { OldProfileSearchResultsList } from "@/features/search/components/OldProfileSearchResultsList";
 import TableView from "@/components/TableView/TableView";
 import { TableViewPicto } from "@/components/TableView/TableViewImage";
+import AndroidBackAction from "@/components/AndroidBackAction";
+import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
+import config from "@/config";
 
-/**
- * @deprecated
- * We are redoing our Create new chat flow, and this screen was shared between
- * that and the add members to existing group flow.
- *
- * This screen will need some design work, but is outside of scope of the
- * current work.
- *
- * @see https://github.com/ephemeraHQ/converse-app/issues/1498
- * @see https://www.figma.com/design/p6mt4tEDltI4mypD3TIgUk/Converse-App?node-id=5026-26989&m=dev
- */
 export function InviteUsersToExistingGroupScreen({
   route,
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "InviteUsersToExistingGroup">) {
   const colorScheme = useColorScheme();
-
-  const { data: existingGroup } = useGroupQuery({
-    account: currentAccount(),
-    topic: route.params?.addingToGroupTopic!,
-  });
   const [group, setGroup] = useState({
     enabled: !!route.params?.addingToGroupTopic,
     members: [] as (IProfileSocials & { address: string })[],
@@ -82,7 +62,6 @@ export function InviteUsersToExistingGroupScreen({
   const styles = useStyles();
 
   const handleRightAction = useCallback(async () => {
-    // if (route.params?.addingToGroupTopic) {
     setLoading(true);
     try {
       //  TODO: Support multiple addresses
@@ -93,12 +72,7 @@ export function InviteUsersToExistingGroupScreen({
       console.error(e);
       Alert.alert("An error occured");
     }
-    // } else {
-    //   navigation.push("NewGroupSummary", {
-    //     members: group.members,
-    //   });
-    // }
-  }, [addMembers, group.members, navigation, route.params?.addingToGroupTopic]);
+  }, [addMembers, group.members, navigation]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -112,7 +86,7 @@ export function InviteUsersToExistingGroupScreen({
         ) : (
           <AndroidBackAction navigation={navigation} />
         ),
-      headerTitle: "Add members",
+      headerTitle: translate("invite_to_group.add_members"),
       headerRight: () => {
         if (group.enabled && group.members.length > 0) {
           if (loading) {
@@ -151,14 +125,6 @@ export function InviteUsersToExistingGroupScreen({
     inviteToConverse: "",
     profileSearchResults: {} as { [address: string]: IProfileSocials },
   });
-
-  const {
-    updatedAt: recommendationsUpdatedAt,
-    loading: recommendationsLoading,
-    frens,
-  } = useRecommendationsStore(useSelect(["updatedAt", "loading", "frens"]));
-  const recommendationsLoadedOnce = recommendationsUpdatedAt > 0;
-  const recommendationsFrensCount = Object.keys(frens).length;
 
   const debounceDelay = 500;
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -296,21 +262,13 @@ export function InviteUsersToExistingGroupScreen({
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
 
-  const showRecommendations =
-    !status.loading && value.length === 0 && recommendationsFrensCount > 0;
-
   const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
 
   const onRef = useCallback(
     (r: TextInput | null) => {
       if (!initialFocus.current) {
         initialFocus.current = true;
-        if (
-          !value &&
-          !recommendationsLoading &&
-          recommendationsLoadedOnce &&
-          recommendationsFrensCount === 0
-        ) {
+        if (!value) {
           setTimeout(() => {
             r?.focus();
           }, 100);
@@ -318,29 +276,23 @@ export function InviteUsersToExistingGroupScreen({
       }
       inputRef.current = r;
     },
-    [
-      recommendationsFrensCount,
-      recommendationsLoadedOnce,
-      recommendationsLoading,
-      value,
-    ]
+    [value]
   );
 
   return (
     <View style={styles.searchContainer}>
-      {/* <SearchBar
+      <SearchBar
         value={value}
         setValue={setValue}
         onRef={onRef}
         inputPlaceholder={inputPlaceholder}
-      /> */}
+      />
       <View
         style={[
           styles.group,
           {
             display:
-              // group.enabled && group.members.length === 0 ? "none" : "flex",
-              "flex",
+              group.enabled && group.members.length === 0 ? "none" : "flex",
           },
         ]}
       >
@@ -355,12 +307,11 @@ export function InviteUsersToExistingGroupScreen({
             }}
           />
         )}
-        <Text> at the end of the road</Text>
-        {
-          // group.enabled &&
-          // group.members.length > 0 &&
+
+        {group.enabled &&
+          group.members.length > 0 &&
           group.members.map((m, index) => {
-            const preferredName = "___" + getPreferredName(m, m.address);
+            const preferredName = getPreferredName(m, m.address);
 
             return (
               <Button
@@ -382,22 +333,12 @@ export function InviteUsersToExistingGroupScreen({
                 }
               />
             );
-          })
-        }
-        <Text> at the end of the road</Text>
-        <SearchBar
-          value={value}
-          setValue={setValue}
-          onRef={onRef}
-          inputPlaceholder={inputPlaceholder}
-        />
+          })}
       </View>
-      <Text> at the end of the road</Text>
 
       {!status.loading && !isEmptyObject(status.profileSearchResults) && (
         <View>
-          <ProfileSearchResultsList
-            // todo add back and rename profile search result list item component
+          <OldProfileSearchResultsList
             navigation={navigation}
             profiles={(() => {
               const searchResultsToShow = { ...status.profileSearchResults };
@@ -416,9 +357,7 @@ export function InviteUsersToExistingGroupScreen({
               return searchResultsToShow;
             })()}
             groupMode={group.enabled}
-            addToGroup={async (
-              member: IProfileSocials & { address: string }
-            ) => {
+            addToGroup={async (member) => {
               setGroup((g) => ({ ...g, members: [...g.members, member] }));
               setValue("");
             }}
@@ -427,7 +366,7 @@ export function InviteUsersToExistingGroupScreen({
       )}
 
       <ScrollView
-        style={[styles.modal, { height: showRecommendations ? 0 : undefined }]}
+        style={[styles.modal, { height: undefined }]}
         keyboardShouldPersistTaps="handled"
         onTouchStart={() => {
           inputRef.current?.blur();
@@ -458,7 +397,7 @@ export function InviteUsersToExistingGroupScreen({
               {
                 id: "inviteToConverse",
                 leftView: <TableViewPicto symbol="link" />,
-                title: "Invite to Converse",
+                title: translate("invite_to_group.invite_to_converse"),
                 subtitle: "",
                 action: () => {
                   navigation.goBack();
