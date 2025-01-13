@@ -43,7 +43,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@adraffy/ens-normalize@npm:1.11.0":
+"@adraffy/ens-normalize@npm:1.11.0, @adraffy/ens-normalize@npm:^1.10.1":
   version: 1.11.0
   resolution: "@adraffy/ens-normalize@npm:1.11.0"
   checksum: 10c0/5111d0f1a273468cb5661ed3cf46ee58de8f32f84e2ebc2365652e66c1ead82649df94c736804e2b9cfa831d30ef24e1cc3575d970dbda583416d3a98d8870a6
@@ -5018,6 +5018,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@expo/env@npm:~0.4.1":
+  version: 0.4.1
+  resolution: "@expo/env@npm:0.4.1"
+  dependencies:
+    chalk: "npm:^4.0.0"
+    debug: "npm:^4.3.4"
+    dotenv: "npm:~16.4.5"
+    dotenv-expand: "npm:~11.0.6"
+    getenv: "npm:^1.0.0"
+  checksum: 10c0/9f00bca1a575f078f5d9e3fcf980e3e68479e90db4bdaa38704218f7cda5b6fff3ddaa37662281d7c8545d922f2ab085845d05e8732db24869f54d13aadf8fed
+  languageName: node
+  linkType: hard
+
 "@expo/fingerprint@npm:0.11.6":
   version: 0.11.6
   resolution: "@expo/fingerprint@npm:0.11.6"
@@ -7013,6 +7026,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/curves@npm:1.7.0, @noble/curves@npm:~1.7.0":
+  version: 1.7.0
+  resolution: "@noble/curves@npm:1.7.0"
+  dependencies:
+    "@noble/hashes": "npm:1.6.0"
+  checksum: 10c0/3317ec9b7699d2476707a89ceb3ddce60e69bac287561a31dd533669408633e093860fea5067eb9c54e5a7ced0705da1cba8859b6b1e0c48d3afff55fe2e77d0
+  languageName: node
+  linkType: hard
+
+"@noble/curves@npm:^1.6.0, @noble/curves@npm:~1.8.0":
+  version: 1.8.0
+  resolution: "@noble/curves@npm:1.8.0"
+  dependencies:
+    "@noble/hashes": "npm:1.7.0"
+  checksum: 10c0/3ebb1795f3f7d74c879bc6262a3444061585a2cab90b7b637dc57d931063dd0c95be858a4c2389e932651825dbc461c215dbcf43984a232de3bd6b2d326ba555
+  languageName: node
+  linkType: hard
+
 "@noble/hashes@npm:1.3.1":
   version: 1.3.1
   resolution: "@noble/hashes@npm:1.3.1"
@@ -7034,17 +7065,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/hashes@npm:1.6.0":
+  version: 1.6.0
+  resolution: "@noble/hashes@npm:1.6.0"
+  checksum: 10c0/e7e75898257fb36d933935fcdf1cc67ca7c083eb7b2411aa57fde7eb494c2cea0bec03686462032e25d5b0e1e4ab7357d1afb6718f6a68515db1f392141e9f14
+  languageName: node
+  linkType: hard
+
+"@noble/hashes@npm:1.6.1, @noble/hashes@npm:^1.3.3, @noble/hashes@npm:~1.6.0":
+  version: 1.6.1
+  resolution: "@noble/hashes@npm:1.6.1"
+  checksum: 10c0/27643cd8b551bc933b57cc29aa8c8763d586552fc4c3e06ecf7897f55be3463c0c9dff7f6ebacd88e5ce6d0cdb5415ca4874d0cf4359b5ea4a85be21ada03aab
+  languageName: node
+  linkType: hard
+
+"@noble/hashes@npm:1.7.0, @noble/hashes@npm:^1.5.0, @noble/hashes@npm:~1.7.0":
+  version: 1.7.0
+  resolution: "@noble/hashes@npm:1.7.0"
+  checksum: 10c0/1ef0c985ebdb5a1bd921ea6d959c90ba826af3ae05b40b459a703e2a5e9b259f190c6e92d6220fb3800e2385521e4159e238415ad3f6b79c52f91dd615e491dc
+  languageName: node
+  linkType: hard
+
 "@noble/hashes@npm:^1.3.1, @noble/hashes@npm:~1.3.0, @noble/hashes@npm:~1.3.1, @noble/hashes@npm:~1.3.2":
   version: 1.3.3
   resolution: "@noble/hashes@npm:1.3.3"
   checksum: 10c0/23c020b33da4172c988e44100e33cd9f8f6250b68b43c467d3551f82070ebd9716e0d9d2347427aa3774c85934a35fa9ee6f026fca2117e3fa12db7bedae7668
-  languageName: node
-  linkType: hard
-
-"@noble/hashes@npm:^1.3.3":
-  version: 1.6.1
-  resolution: "@noble/hashes@npm:1.6.1"
-  checksum: 10c0/27643cd8b551bc933b57cc29aa8c8763d586552fc4c3e06ecf7897f55be3463c0c9dff7f6ebacd88e5ce6d0cdb5415ca4874d0cf4359b5ea4a85be21ada03aab
   languageName: node
   linkType: hard
 
@@ -7506,65 +7551,117 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@privy-io/api-base@npm:1.1.0, @privy-io/api-base@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@privy-io/api-base@npm:1.1.0"
+"@privy-io/api-base@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@privy-io/api-base@npm:1.4.1"
   dependencies:
     zod: "npm:^3.21.4"
-  checksum: 10c0/23d4bb871a1cde0538162f5574fac3ab679cb9e08bd6abe8c4422ccd0426c1bcd8df55c688244022d986ccf1f66e48e9c3c62769fd40874abb2ff33e67841210
+  checksum: 10c0/e8297ed24f3b535a096435f6b09cf410b463991b87f6a7f0cc9cfb126e588e306ab648b6a4e95f42638d13cecfe83d3061156828e39ff6926cae2c0a488e5864
   languageName: node
   linkType: hard
 
-"@privy-io/expo@npm:^0.16.2":
-  version: 0.16.2
-  resolution: "@privy-io/expo@npm:0.16.2"
+"@privy-io/api-base@npm:^1.4.1":
+  version: 1.4.2
+  resolution: "@privy-io/api-base@npm:1.4.2"
   dependencies:
-    "@privy-io/js-sdk-core": "npm:0.19.4"
-    react-fast-compare: "npm:^3.2.2"
+    zod: "npm:^3.21.4"
+  checksum: 10c0/20618ba258f8e6ebac568e43e598b95e97d58c11f033962b804f9c35e579fc70bfcaf85b41426c4150bb20eb6a0f377df018563b9a0b3b7dbf0ef35e37ea803f
+  languageName: node
+  linkType: hard
+
+"@privy-io/expo-native-extensions@npm:^0.0.3":
+  version: 0.0.3
+  resolution: "@privy-io/expo-native-extensions@npm:0.0.3"
   peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/0e15cd1c2f6338d2c8a909cfc927e21a5c78891daaa423205610d827d70f051f791efe67bc144fcd0c2f811ae58b6dacd01bb34cd0af42f3ad891af250eb915e
+  languageName: node
+  linkType: hard
+
+"@privy-io/expo@npm:0.36.2":
+  version: 0.36.2
+  resolution: "@privy-io/expo@npm:0.36.2"
+  dependencies:
+    "@privy-io/js-sdk-core": "npm:0.37.2"
+    react-fast-compare: "npm:^3.2.2"
+    zustand: "npm:^4.4.1"
+  peerDependencies:
+    "@expo-google-fonts/inter": "*"
+    "@privy-io/expo-native-extensions": 0.0.3
+    expo-apple-authentication: "*"
     expo-application: "*"
+    expo-clipboard: "*"
     expo-constants: "*"
     expo-crypto: "*"
+    expo-font: "*"
     expo-linking: "*"
     expo-secure-store: "*"
     expo-web-browser: "*"
+    permissionless: ^0.2.10
     react: "*"
     react-native: "*"
-    react-native-passkeys: ^0.2.1
+    react-native-passkeys: ^0.3.0
+    react-native-qrcode-styled: "*"
+    react-native-safe-area-context: "*"
+    react-native-svg: "*"
     react-native-webview: "*"
-  checksum: 10c0/98dbaf982c77a3550b3419b808765df45c39482fdf37bae27aff4b1e9addf3103a4989c4175950d7cb489dce15fa02d8c30112459ec8be2c6a93606c3a92a326
+    viem: ^2.21.36
+  peerDependenciesMeta:
+    "@expo-google-fonts/inter":
+      optional: true
+    expo-font:
+      optional: true
+    permissionless:
+      optional: true
+    viem:
+      optional: true
+  checksum: 10c0/1d4e4d82bcfbae5a60d48fa69d3131f2541e14a60b88e5e1f774085f6c5421334d3752b6a257f6dd1d377bb5681f363b355ea867bd252ada11fd2b1d3531bdb2
   languageName: node
   linkType: hard
 
-"@privy-io/js-sdk-core@npm:0.19.4":
-  version: 0.19.4
-  resolution: "@privy-io/js-sdk-core@npm:0.19.4"
+"@privy-io/js-sdk-core@npm:0.37.2":
+  version: 0.37.2
+  resolution: "@privy-io/js-sdk-core@npm:0.37.2"
   dependencies:
     "@ethersproject/abstract-signer": "npm:^5.7.0"
     "@ethersproject/bignumber": "npm:^5.7.0"
+    "@ethersproject/contracts": "npm:^5.7.0"
     "@ethersproject/providers": "npm:^5.7.2"
+    "@ethersproject/transactions": "npm:^5.7.0"
     "@ethersproject/units": "npm:^5.7.0"
-    "@privy-io/api-base": "npm:^1.1.0"
-    "@privy-io/public-api": "npm:2.3.0"
+    "@privy-io/api-base": "npm:^1.4.1"
+    "@privy-io/public-api": "npm:2.15.11"
     eventemitter3: "npm:^5.0.1"
     fetch-retry: "npm:^5.0.6"
     jose: "npm:^4.15.5"
     js-cookie: "npm:^3.0.5"
+    libphonenumber-js: "npm:^1.10.44"
     set-cookie-parser: "npm:^2.6.0"
     uuid: "npm:>=8 <10"
-  checksum: 10c0/73c697e379568496ad7a50b72123578563a0e732dc7e2fed1dcf5ecc6f301e0260bd3ea92290df20f17684d3160d39f38aa56229d0caa53b21998815e9132ed8
+  peerDependencies:
+    permissionless: ^0.2.10
+    viem: ^2.21.36
+  peerDependenciesMeta:
+    permissionless:
+      optional: true
+    viem:
+      optional: true
+  checksum: 10c0/2c8a8451284ad87e0874758c599bf2ed2fcb3be28aa07f2b5ef945258a4f6a7cd62c8495841c9a98da14e1766ad2de6ae60388df38247022b1fb8e6eea249f6e
   languageName: node
   linkType: hard
 
-"@privy-io/public-api@npm:2.3.0":
-  version: 2.3.0
-  resolution: "@privy-io/public-api@npm:2.3.0"
+"@privy-io/public-api@npm:2.15.11":
+  version: 2.15.11
+  resolution: "@privy-io/public-api@npm:2.15.11"
   dependencies:
-    "@privy-io/api-base": "npm:1.1.0"
+    "@privy-io/api-base": "npm:1.4.1"
+    bs58: "npm:^5.0.0"
     ethers: "npm:^5.7.2"
     libphonenumber-js: "npm:^1.10.31"
     zod: "npm:^3.22.4"
-  checksum: 10c0/e3554706a3940bd4ec05e140e6c3687e66df53560ff7bf34eba8b36754909c0e4c06e6860d6f8278e7ce4039879f4f1ef2254c8f617af1e0373bdb96d753ec20
+  checksum: 10c0/f82128cbaa89885c092ecea265f9d33d59f68a1029ec810ab375a97273256ea5c4939b5838016609f011662cd8c73de9a7e5c23d21949ed5c1acd871e370ce2a
   languageName: node
   linkType: hard
 
@@ -8871,6 +8968,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scure/base@npm:~1.2.1":
+  version: 1.2.1
+  resolution: "@scure/base@npm:1.2.1"
+  checksum: 10c0/e61068854370855b89c50c28fa4092ea6780f1e0db64ea94075ab574ebcc964f719a3120dc708db324991f4b3e652d92ebda03fce2bf6a4900ceeacf9c0ff933
+  languageName: node
+  linkType: hard
+
 "@scure/bip32@npm:1.3.1":
   version: 1.3.1
   resolution: "@scure/bip32@npm:1.3.1"
@@ -8904,6 +9008,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scure/bip32@npm:1.6.0":
+  version: 1.6.0
+  resolution: "@scure/bip32@npm:1.6.0"
+  dependencies:
+    "@noble/curves": "npm:~1.7.0"
+    "@noble/hashes": "npm:~1.6.0"
+    "@scure/base": "npm:~1.2.1"
+  checksum: 10c0/5a5eff8c0bc0b53d70528c5eda6efa7ed6d186a5c9ba0a339edf9c150ee3f331d837ffe29d2c6c6336b1f88ad90aa8b6e596a4950217343f36916d8024f79bdf
+  languageName: node
+  linkType: hard
+
+"@scure/bip32@npm:^1.5.0":
+  version: 1.6.1
+  resolution: "@scure/bip32@npm:1.6.1"
+  dependencies:
+    "@noble/curves": "npm:~1.8.0"
+    "@noble/hashes": "npm:~1.7.0"
+    "@scure/base": "npm:~1.2.1"
+  checksum: 10c0/dbac10404a50a092637372cd4d29a1a447c608fe5ffebad1070c9788ea235f61dca603f1af3a45402b4d4d0a31dc35efdfa002cc938cbb3ddab74e1d14691c58
+  languageName: node
+  linkType: hard
+
 "@scure/bip39@npm:1.2.1":
   version: 1.2.1
   resolution: "@scure/bip39@npm:1.2.1"
@@ -8921,6 +9047,26 @@ __metadata:
     "@noble/hashes": "npm:~1.5.0"
     "@scure/base": "npm:~1.1.8"
   checksum: 10c0/dcdceeac348ed9c0f545c1a7ef8854ef62d6eb4e7b7aaafa4e2ef27f7e1c5744b0cd26292afd04e1ee59ae035b19abdd65174a444b8db8c238ccc662f6b90eac
+  languageName: node
+  linkType: hard
+
+"@scure/bip39@npm:1.5.0":
+  version: 1.5.0
+  resolution: "@scure/bip39@npm:1.5.0"
+  dependencies:
+    "@noble/hashes": "npm:~1.6.0"
+    "@scure/base": "npm:~1.2.1"
+  checksum: 10c0/114ab88fb00269d17a73d5c39a2cade47403e05f6df5a8d6f5da6e7f2b071966fe8f656a740dc3399acd006163f234e82b680544c38004703dbb60f8a29daf73
+  languageName: node
+  linkType: hard
+
+"@scure/bip39@npm:^1.4.0":
+  version: 1.5.1
+  resolution: "@scure/bip39@npm:1.5.1"
+  dependencies:
+    "@noble/hashes": "npm:~1.7.0"
+    "@scure/base": "npm:~1.2.1"
+  checksum: 10c0/e4966f2d6eb7b3ff1c07f27988863f06b05cfa605d73682e3ae09254ca5a535f3d34564917d890fe0f5b0c3e427a05c5d3cf6053e346298a46a3fac39949b7ad
   languageName: node
   linkType: hard
 
@@ -12480,6 +12626,36 @@ __metadata:
   languageName: node
   linkType: hard
 
+"abitype@npm:1.0.7":
+  version: 1.0.7
+  resolution: "abitype@npm:1.0.7"
+  peerDependencies:
+    typescript: ">=5.0.4"
+    zod: ^3 >=3.22.0
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+    zod:
+      optional: true
+  checksum: 10c0/de63055e27bcc8ec14e810c8525c2a61658a1b01dc1e5882af45c96a966ad3911d50dd16d97dfb49c106fb323638a906bcaf1e48f4f1b9c5bf4926dc217a81e1
+  languageName: node
+  linkType: hard
+
+"abitype@npm:^1.0.6":
+  version: 1.0.8
+  resolution: "abitype@npm:1.0.8"
+  peerDependencies:
+    typescript: ">=5.0.4"
+    zod: ^3 >=3.22.0
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+    zod:
+      optional: true
+  checksum: 10c0/d3393f32898c1f0f6da4eed2561da6830dcd0d5129a160fae9517214236ee6a6c8e5a0380b8b960c5bc1b949320bcbd015ec7f38b5d7444f8f2b854a1b5dd754
+  languageName: node
+  linkType: hard
+
 "abort-controller@npm:^3.0.0":
   version: 3.0.0
   resolution: "abort-controller@npm:3.0.0"
@@ -13617,6 +13793,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base-x@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "base-x@npm:4.0.0"
+  checksum: 10c0/0cb47c94535144ab138f70bb5aa7e6e03049ead88615316b62457f110fc204f2c3baff5c64a1c1b33aeb068d79a68092c08a765c7ccfa133eee1e70e4c6eb903
+  languageName: node
+  linkType: hard
+
 "base64-js@npm:0.0.8":
   version: 0.0.8
   resolution: "base64-js@npm:0.0.8"
@@ -14069,6 +14252,15 @@ __metadata:
   dependencies:
     base-x: "npm:^3.0.2"
   checksum: 10c0/613a1b1441e754279a0e3f44d1faeb8c8e838feef81e550efe174ff021dd2e08a4c9ae5805b52dfdde79f97b5c0918c78dd24a0eb726c4a94365f0984a0ffc65
+  languageName: node
+  linkType: hard
+
+"bs58@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "bs58@npm:5.0.0"
+  dependencies:
+    base-x: "npm:^4.0.0"
+  checksum: 10c0/0d1b05630b11db48039421b5975cb2636ae0a42c62f770eec257b2e5c7d94cb5f015f440785f3ec50870a6e9b1132b35bd0a17c7223655b22229f24b2a3491d1
   languageName: node
   linkType: hard
 
@@ -15103,7 +15295,8 @@ __metadata:
     "@notifee/react-native": "npm:^9.1.3"
     "@open-frames/proxy-types": "npm:^0.2.3"
     "@peculiar/webcrypto": "npm:^1.4.1"
-    "@privy-io/expo": "npm:^0.16.2"
+    "@privy-io/expo": "npm:0.36.2"
+    "@privy-io/expo-native-extensions": "npm:^0.0.3"
     "@privy-io/react-auth": "npm:^1.65.1"
     "@react-native-async-storage/async-storage": "npm:1.23.1"
     "@react-native-clipboard/clipboard": "npm:^1.14.1"
@@ -15173,15 +15366,16 @@ __metadata:
     event-target-shim: "npm:^6.0.2"
     eventemitter3: "npm:^5.0.1"
     expo: "npm:^52.0.0"
-    expo-application: "npm:~6.0.1"
+    expo-apple-authentication: "npm:^7.1.3"
+    expo-application: "npm:~6.0.2"
     expo-asset: "npm:~11.0.1"
     expo-background-fetch: "npm:~13.0.3"
     expo-blur: "npm:~14.0.1"
     expo-build-properties: "npm:~0.13.1"
     expo-clipboard: "npm:~7.0.0"
-    expo-constants: "npm:~17.0.3"
+    expo-constants: "npm:~17.0.4"
     expo-contacts: "npm:~14.0.2"
-    expo-crypto: "npm:~14.0.1"
+    expo-crypto: "npm:~14.0.2"
     expo-crypto-polyfills: "npm:^1.1.0"
     expo-dev-client: "npm:~5.0.4"
     expo-device: "npm:~7.0.1"
@@ -15192,19 +15386,19 @@ __metadata:
     expo-image-manipulator: "npm:~13.0.5"
     expo-image-picker: "npm:~16.0.3"
     expo-linear-gradient: "npm:~14.0.1"
-    expo-linking: "npm:~7.0.3"
+    expo-linking: "npm:~7.0.4"
     expo-localization: "npm:~16.0.0"
     expo-module-scripts: "npm:^4.0.3"
     expo-navigation-bar: "npm:~4.0.4"
     expo-notifications: "npm:~0.29.8"
     expo-router: "npm:~4.0.9"
-    expo-secure-store: "npm:~14.0.0"
+    expo-secure-store: "npm:~14.0.1"
     expo-splash-screen: "npm:~0.29.13"
     expo-status-bar: "npm:~2.0.0"
     expo-system-ui: "npm:~4.0.4"
     expo-task-manager: "npm:~12.0.3"
     expo-updates: "npm:~0.26.9"
-    expo-web-browser: "npm:~14.0.1"
+    expo-web-browser: "npm:~14.0.2"
     fast-deep-equal: "npm:^3.1.3"
     flatted: "npm:^3.3.1"
     git-is-clean: "npm:^3.0.1"
@@ -15225,6 +15419,7 @@ __metadata:
     os-browserify: "npm:^0.3.0"
     patch-package: "npm:^6.5.1"
     perfect-debounce: "npm:^1.0.0"
+    permissionless: "npm:^0.2.25"
     plist: "npm:^3.0.6"
     prettier: "npm:^3.3.3"
     pretty-bytes: "npm:^6.1.0"
@@ -15251,8 +15446,10 @@ __metadata:
     react-native-otp-entry: "npm:^1.7.3"
     react-native-paper: "npm:^5.10.6"
     react-native-passkey: "npm:^2.1.1"
+    react-native-passkeys: "npm:^0.3.1"
     react-native-phone-number-input: "npm:^2.1.0"
     react-native-polyfill-globals: "npm:^3.1.0"
+    react-native-qrcode-styled: "npm:^0.3.3"
     react-native-qrcode-svg: "npm:^6.2.0"
     react-native-quick-base64: "npm:2.1.2"
     react-native-quick-crypto: "npm:0.7.11"
@@ -15285,6 +15482,7 @@ __metadata:
     url: "npm:^0.11.0"
     use-context-selector: "npm:^2.0.0"
     uuid: "npm:^9.0.1"
+    viem: "npm:^2.22.7"
     wagmi: "npm:^2.5.11"
     walletsdk-ethos: "npm:0.1.0-no-web3j"
     warn-once: "npm:^0.1.1"
@@ -17983,12 +18181,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-application@npm:~6.0.0, expo-application@npm:~6.0.1":
+"expo-apple-authentication@npm:^7.1.3":
+  version: 7.1.3
+  resolution: "expo-apple-authentication@npm:7.1.3"
+  peerDependencies:
+    expo: "*"
+    react-native: "*"
+  checksum: 10c0/370a9b442eee4db3fc49a4fbc853eed9b7f092cea894ecad2e2144190f6fd3fdeaf2affaf8335fe677e0c6ffff24a835ee60fc18b62a10083b435982ecb44826
+  languageName: node
+  linkType: hard
+
+"expo-application@npm:~6.0.0":
   version: 6.0.1
   resolution: "expo-application@npm:6.0.1"
   peerDependencies:
     expo: "*"
   checksum: 10c0/0af93dcd8b99604696f78c78e4d89c654449fbda2cde5e74bde85bbcdb854cef73c49549d55b50ef2b0c14b18b1b803487298a86034e1dfc466c42ab49353fa8
+  languageName: node
+  linkType: hard
+
+"expo-application@npm:~6.0.2":
+  version: 6.0.2
+  resolution: "expo-application@npm:6.0.2"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/f631846dab4096db4ab191f40ff1839965df38fb48ad71b4392a2fa5b9588601d988b61a27116a4a402b67598872c6ba17e7031c24019ce226c1f17ab6af66c6
   languageName: node
   linkType: hard
 
@@ -18066,6 +18283,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-constants@npm:~17.0.4":
+  version: 17.0.4
+  resolution: "expo-constants@npm:17.0.4"
+  dependencies:
+    "@expo/config": "npm:~10.0.8"
+    "@expo/env": "npm:~0.4.1"
+  peerDependencies:
+    expo: "*"
+    react-native: "*"
+  checksum: 10c0/a6c4944491995fbd732783c6b3baee96d5c013896e1b302652f56e5925b749318329a8f233726aac3c584b5d9ec08f61d6cbd0ab1bc6a13ad555d2a64563d956
+  languageName: node
+  linkType: hard
+
 "expo-contacts@npm:~14.0.2":
   version: 14.0.2
   resolution: "expo-contacts@npm:14.0.2"
@@ -18095,14 +18325,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-crypto@npm:~14.0.1":
-  version: 14.0.1
-  resolution: "expo-crypto@npm:14.0.1"
+"expo-crypto@npm:~14.0.2":
+  version: 14.0.2
+  resolution: "expo-crypto@npm:14.0.2"
   dependencies:
     base64-js: "npm:^1.3.0"
   peerDependencies:
     expo: "*"
-  checksum: 10c0/3a240c83c4e4282d6c23267efdb25276fba73c9848c98eca019e8b48326941662eeb131babab04fec5913cae02a62c7e5b8f161d1657fa2e59048fa429253a5a
+  checksum: 10c0/e8cbfc654fbc6cbbf6a28ac8930fa862262ae586f050c9dcc94f593aefa32b3b6fdf2ab7d1520deeebbbe8ccab2ef549277105e2b08f12de65bb9e38029c7c36
   languageName: node
   linkType: hard
 
@@ -18312,16 +18542,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-linking@npm:~7.0.3":
-  version: 7.0.3
-  resolution: "expo-linking@npm:7.0.3"
+"expo-linking@npm:~7.0.4":
+  version: 7.0.4
+  resolution: "expo-linking@npm:7.0.4"
   dependencies:
-    expo-constants: "npm:~17.0.0"
+    expo-constants: "npm:~17.0.4"
     invariant: "npm:^2.2.4"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10c0/fc1f4e49f8aaf768074aa533891ed11d6cda95c624cfb0962e85127bb1525019cf17ca901c89e4618c48eb8ed0311bb1934d8f6fefca83161ac2b3c8a41c59f9
+  checksum: 10c0/fbd915983e61c45829ed0cb103c81932aee2868eb5a5819decadca1414fd9b685489e28abec259f74a35edeed8a59c78770664ad01d0c21db1063d71e10bd59c
   languageName: node
   linkType: hard
 
@@ -18474,12 +18704,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-secure-store@npm:~14.0.0":
-  version: 14.0.0
-  resolution: "expo-secure-store@npm:14.0.0"
+"expo-secure-store@npm:~14.0.1":
+  version: 14.0.1
+  resolution: "expo-secure-store@npm:14.0.1"
   peerDependencies:
     expo: "*"
-  checksum: 10c0/439c6b3bd242e8a7e4cface3f0739b996395116df5f91374b5a00cff8d23aa8456b422878e4418b1da647f3b23f4b723392bc7ee32fbad11f17a3a4ea20af256
+  checksum: 10c0/c2ad36f7ae8aea5b95ebc117f302974de6ad403f0b98b259f9dfcadc441f5c40c2170472e4e95832ad6cf8bcd37614dfb3757a4de1f7631ea9493c61cb7b2ab3
   languageName: node
   linkType: hard
 
@@ -18576,13 +18806,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-web-browser@npm:~14.0.1":
-  version: 14.0.1
-  resolution: "expo-web-browser@npm:14.0.1"
+"expo-web-browser@npm:~14.0.2":
+  version: 14.0.2
+  resolution: "expo-web-browser@npm:14.0.2"
   peerDependencies:
     expo: "*"
     react-native: "*"
-  checksum: 10c0/cab8390b0b3831d49a4b8ce107c4ff411c15ac8f9cf304119cc37f714086de831f233cc4b319212b95243c06284414f14152ccabfe266049b23f93fa795830dc
+  checksum: 10c0/b02e6d3a59863101e430e8581a621c7c612f35abc6d5bd89b85e458fc9d92836a9306124c8f35bdb0e710e0771272a5724769ef717893e7b49d5e0528252c18c
   languageName: node
   linkType: hard
 
@@ -23105,6 +23335,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"libphonenumber-js@npm:^1.10.44":
+  version: 1.11.17
+  resolution: "libphonenumber-js@npm:1.11.17"
+  checksum: 10c0/102bc66f82b4fb86983f3c68d7b8eafd5e5f82be48bcd87c4c3a723b08e62d2deffa78a5d646698f2ba163f4e0d5722d99661ba9ec36f12b5a108fcdf8731059
+  languageName: node
+  linkType: hard
+
 "lie@npm:3.1.1":
   version: 3.1.1
   resolution: "lie@npm:3.1.1"
@@ -25803,6 +26040,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ox@npm:0.6.0":
+  version: 0.6.0
+  resolution: "ox@npm:0.6.0"
+  dependencies:
+    "@adraffy/ens-normalize": "npm:^1.10.1"
+    "@noble/curves": "npm:^1.6.0"
+    "@noble/hashes": "npm:^1.5.0"
+    "@scure/bip32": "npm:^1.5.0"
+    "@scure/bip39": "npm:^1.4.0"
+    abitype: "npm:^1.0.6"
+    eventemitter3: "npm:5.0.1"
+  peerDependencies:
+    typescript: ">=5.4.0"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/1fe8cfe71df8b69d2240fa8d106ef7b2639534e117ba986243c82d747e98cc9f08b706eeb5e0665d48ddc2dd7935d6a8dd4d214b971169504d6af00a12802f90
+  languageName: node
+  linkType: hard
+
 "p-cancelable@npm:^2.0.0":
   version: 2.1.1
   resolution: "p-cancelable@npm:2.1.1"
@@ -26257,6 +26514,16 @@ __metadata:
   version: 2.1.0
   resolution: "performance-now@npm:2.1.0"
   checksum: 10c0/22c54de06f269e29f640e0e075207af57de5052a3d15e360c09b9a8663f393f6f45902006c1e71aa8a5a1cdfb1a47fe268826f8496d6425c362f00f5bc3e85d9
+  languageName: node
+  linkType: hard
+
+"permissionless@npm:^0.2.25":
+  version: 0.2.26
+  resolution: "permissionless@npm:0.2.26"
+  peerDependencies:
+    viem: ^2.21.54
+    webauthn-p256: 0.0.10
+  checksum: 10c0/0571e1a7582a388eb5f72a14b853192f31fc81f8651b3cc0191837a218a5c09356ce0fc7606222e7ab4739e654431ea026a289790cbd0cb7772d7263fdc09449
   languageName: node
   linkType: hard
 
@@ -26938,6 +27205,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"qrcode@npm:^1.5.4":
+  version: 1.5.4
+  resolution: "qrcode@npm:1.5.4"
+  dependencies:
+    dijkstrajs: "npm:^1.0.1"
+    pngjs: "npm:^5.0.0"
+    yargs: "npm:^15.3.1"
+  bin:
+    qrcode: bin/qrcode
+  checksum: 10c0/ae1d57c9cff6099639a590b432c71b15e3bd3905ce4353e6d00c95dee6bb769a8f773f6a7575ecc1b8ed476bf79c5138a4a65cb380c682de3b926d7205d34d10
+  languageName: node
+  linkType: hard
+
 "qs@npm:6.11.0":
   version: 6.11.0
   resolution: "qs@npm:6.11.0"
@@ -27492,6 +27772,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-passkeys@npm:^0.3.1":
+  version: 0.3.1
+  resolution: "react-native-passkeys@npm:0.3.1"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/71b52d3b497f48618e45ac114c9129c9a3a449c0af8714d0d655e94fd1cad7b61b6712ab5efc60f0d6e1fca7939620ea2a4dd5f7356cde8a762177f974e039d5
+  languageName: node
+  linkType: hard
+
 "react-native-phone-number-input@npm:^2.1.0":
   version: 2.1.0
   resolution: "react-native-phone-number-input@npm:2.1.0"
@@ -27516,6 +27807,20 @@ __metadata:
     text-encoding: "*"
     web-streams-polyfill: "*"
   checksum: 10c0/3bf97f8853a5d1a5a77fe069b9427a49928045ec0741eed232d4c6c41a1d8bf7979fcb7e26eba94eff375cd7907829fe1fbabca30680e29c6d0b4c6c4c7eaa81
+  languageName: node
+  linkType: hard
+
+"react-native-qrcode-styled@npm:^0.3.3":
+  version: 0.3.3
+  resolution: "react-native-qrcode-styled@npm:0.3.3"
+  dependencies:
+    qrcode: "npm:^1.5.4"
+    react-fast-compare: "npm:^3.2.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-svg: "*"
+  checksum: 10c0/d1342af51bb5ae8dd9402c78718088800fbeeab57d7ed3499242ae0db594319c9f967db0a00b33d3c6cebc71b7cfd6ad55da01c54f935a3014815f0f5d0b0d8c
   languageName: node
   linkType: hard
 
@@ -32203,6 +32508,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"viem@npm:^2.22.7":
+  version: 2.22.8
+  resolution: "viem@npm:2.22.8"
+  dependencies:
+    "@noble/curves": "npm:1.7.0"
+    "@noble/hashes": "npm:1.6.1"
+    "@scure/bip32": "npm:1.6.0"
+    "@scure/bip39": "npm:1.5.0"
+    abitype: "npm:1.0.7"
+    isows: "npm:1.0.6"
+    ox: "npm:0.6.0"
+    webauthn-p256: "npm:0.0.10"
+    ws: "npm:8.18.0"
+  peerDependencies:
+    typescript: ">=5.0.4"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/9877565d9b1da302fa2c320cb4f41ca0d18c5f44b6cb76bb19815d0f14d9d2bdbcdc798dda0424c7c707bc1d9c243669e8bbbeb9cf092900605cd9be67fb16b1
+  languageName: node
+  linkType: hard
+
 "vlq@npm:^0.2.1":
   version: 0.2.3
   resolution: "vlq@npm:0.2.3"
@@ -33597,6 +33924,26 @@ __metadata:
     react:
       optional: true
   checksum: 10c0/c119273886e5cdbd7a9f80c9e0fee8a2c736bb6428e283b25c6dfd428789a95e10b6ed6b18553c955ce0d5dd62e2f4a84af3e2a41f31fdb34fd25462d2b19a8c
+  languageName: node
+  linkType: hard
+
+"zustand@npm:^4.4.1":
+  version: 4.5.6
+  resolution: "zustand@npm:4.5.6"
+  dependencies:
+    use-sync-external-store: "npm:^1.2.2"
+  peerDependencies:
+    "@types/react": ">=16.8"
+    immer: ">=9.0.6"
+    react: ">=16.8"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    immer:
+      optional: true
+    react:
+      optional: true
+  checksum: 10c0/5b39aff2ef57e5a8ada647261ec1115697d397be311c51461d9ea81b5b63c6d2c498b960477ad2db72dc21db6aa229a92bdf644f6a8ecf7b1d71df5b4a5e95d3
   languageName: node
   linkType: hard
 
