@@ -38,7 +38,10 @@ import {
   getPreferredName,
   getProfile,
 } from "../../utils/profile";
-import { createGroupByAccount } from "../../utils/xmtpRN/conversations";
+import {
+  createGroupByAccount,
+  defaultPermissionPolicySet,
+} from "../../utils/xmtpRN/conversations";
 import { NewConversationModalParams } from "./NewConversationModal";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
@@ -52,16 +55,7 @@ export default function NewGroupSummary({
   const insets = useSafeAreaInsets();
   const [creatingGroup, setCreatingGroup] = useState(false);
   const [permissionPolicySet, setPermissionPolicySet] =
-    useState<PermissionPolicySet>({
-      addMemberPolicy: "allow",
-      removeMemberPolicy: "admin",
-      addAdminPolicy: "superAdmin",
-      removeAdminPolicy: "superAdmin",
-      updateGroupNamePolicy: "allow",
-      updateGroupDescriptionPolicy: "allow",
-      updateGroupImagePolicy: "allow",
-      updateGroupPinnedFrameUrlPolicy: "allow",
-    });
+    useState<PermissionPolicySet>(defaultPermissionPolicySet);
   const account = useCurrentAccount();
   const { photo: groupPhoto, addPhoto: addGroupPhoto } = usePhotoSelect();
   const [

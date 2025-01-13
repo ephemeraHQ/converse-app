@@ -44,6 +44,7 @@ import { shortAddress } from "@/utils/strings/shortAddress";
 import {
   createConversation,
   createConversationByAccount,
+  createGroupWithDefaultsByAccount,
   getConversationByPeerByAccount,
   getOptionalConversationByPeerByAccount,
 } from "@/utils/xmtpRN/conversations";
@@ -542,6 +543,24 @@ export default function NewConversation({}) {
                 //   message: something.content.text,
                 // });
               } else {
+                const group = await createGroupWithDefaultsByAccount({
+                  account: currentAccount(),
+                  peerEthereumAddresses: pendingChatMembers.members.map(
+                    (m) => m.address
+                  ),
+                });
+                await sendMessage({
+                  conversation: group,
+                  params: {
+                    content: { text: dmCreationMessageText },
+                  },
+                });
+                setConversationQueryData({
+                  account: currentAccount(),
+                  topic: group.topic,
+                  conversation: group,
+                });
+                navigation.replace("Conversation", { topic: group.topic });
               }
               // todo:
               // create pendingChatMembers/dm
