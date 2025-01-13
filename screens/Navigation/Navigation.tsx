@@ -32,7 +32,6 @@ import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificat
 import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
 import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
 import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
-import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
 import {
   InviteUsersToExistingGroupNav,
   InviteUsersToExistingGroupParams,
@@ -135,13 +134,11 @@ export function SignedInNavigation() {
     >
       <NativeStack.Group>
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
-          {/* {NewConversationNav()} */}
           <NativeStack.Screen name="Chats" component={ConversationListScreen} />
           <NativeStack.Screen name="Blocked" component={BlockedChatsScreen} />
           {ConversationRequestsListNav()}
           {ConversationNav()}
           {NewConversationNav()}
-          {ConverseMatchMakerNav()}
           {ShareProfileNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}

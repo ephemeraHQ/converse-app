@@ -22,7 +22,7 @@ import {
 import { translate } from "@/i18n";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { useGroupQuery } from "@queries/useGroupQuery";
-import SearchBar from "@search/components/SearchBar";
+import { SearchBar } from "@search/components/SearchBar";
 import { canMessageByAccount } from "@utils/xmtpRN/contacts";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { IProfileSocials } from "@/features/profiles/profile-types";
@@ -42,7 +42,6 @@ import { searchProfiles } from "@/utils/api";
 import { isEmptyObject } from "@/utils/objects";
 import { getPreferredName } from "@/utils/profile";
 import { ProfileSearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
-import Recommendations from "@/components/Recommendations/Recommendations";
 import TableView from "@/components/TableView/TableView";
 import { TableViewPicto } from "@/components/TableView/TableViewImage";
 
@@ -398,6 +397,7 @@ export function InviteUsersToExistingGroupScreen({
       {!status.loading && !isEmptyObject(status.profileSearchResults) && (
         <View>
           <ProfileSearchResultsList
+            // todo add back and rename profile search result list item component
             navigation={navigation}
             profiles={(() => {
               const searchResultsToShow = { ...status.profileSearchResults };
@@ -416,25 +416,6 @@ export function InviteUsersToExistingGroupScreen({
               return searchResultsToShow;
             })()}
             groupMode={group.enabled}
-            addToGroup={async (member) => {
-              setGroup((g) => ({ ...g, members: [...g.members, member] }));
-              setValue("");
-            }}
-          />
-        </View>
-      )}
-
-      {isEmptyObject(status.profileSearchResults) && (
-        <View
-          style={{
-            backgroundColor: backgroundColor(colorScheme),
-            height: showRecommendations ? undefined : 0,
-          }}
-        >
-          <Recommendations
-            visibility="EMBEDDED"
-            groupMode={group.enabled}
-            groupMembers={group.members}
             addToGroup={async (member) => {
               setGroup((g) => ({ ...g, members: [...g.members, member] }));
               setValue("");

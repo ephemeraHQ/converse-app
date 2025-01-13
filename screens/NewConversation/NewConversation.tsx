@@ -14,25 +14,14 @@ import {
 import { translate } from "@/i18n";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { useGroupQuery } from "@queries/useGroupQuery";
-import SearchBar from "@search/components/SearchBar";
+import { SearchBar } from "@search/components/SearchBar";
 import { canMessageByAccount } from "@utils/xmtpRN/contacts";
-import {
-  ConversationTopic,
-  ConversationVersion,
-  InboxId,
-} from "@xmtp/react-native-sdk";
+import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 import AndroidBackAction from "@components/AndroidBackAction";
-import Recommendations from "@components/Recommendations/Recommendations";
 import TableView from "@components/TableView/TableView";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
-import config from "@config";
-import {
-  currentAccount,
-  useRecommendationsStore,
-} from "@data/store/accountsStore";
+import { currentAccount } from "@data/store/accountsStore";
 import { IProfileSocials } from "@/features/profiles/profile-types";
-import { useSelect } from "@data/store/storeHelpers";
-import { useGroupMembers } from "@hooks/useGroupMembers";
 import { searchProfiles } from "@utils/api";
 import { getAddressForPeer, isSupportedPeer } from "@utils/evm/address";
 import { navigate } from "@utils/navigation";
@@ -51,73 +40,76 @@ import { Composer } from "@/features/conversation/conversation-composer/conversa
 import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
 import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
+import { shortAddress } from "@/utils/strings/shortAddress";
+import {
+  createConversation,
+  createConversationByAccount,
+  getConversationByPeerByAccount,
+  getOptionalConversationByPeerByAccount,
+} from "@/utils/xmtpRN/conversations";
+import { setConversationQueryData } from "@/queries/useConversationQuery";
+import { sendMessage } from "@/features/conversation/hooks/use-send-message";
+import { useNavigation } from "@react-navigation/native";
 
-export default function NewConversation({
-  route,
-  navigation,
-}: NativeStackScreenProps<
-  NewConversationModalParams,
-  "NewChatComposerScreen"
->) {
+/**
+ * Screen shown for when user wants to create a new Chat.
+ *
+ * User can search for peers, create a pendingChatMembers, create a dm, or navigate to an
+ * existing dm.
+ */
+export default function NewConversation({}) {
+  const { theme, themed } = useAppTheme();
+  const [conversationCreationMode, setConversationCreationMode] =
+    useState<ConversationVersion>(ConversationVersion.DM);
+  const navigation = useNavigation();
+
   const handleBack = useCallback(() => {
     logger.debug("[NewConversation] Navigating back");
     navigation.goBack();
   }, [navigation]);
 
-  const { theme, themed } = useAppTheme();
-
-  // const { data: existingGroup } = useGroupQuery({
-  //   account: currentAccount(),
-  //   topic: route.params?.addingToGroupTopic!,
-  // });
-
-  const [group, setGroup] = useState({
-    enabled: !!route.params?.addingToGroupTopic,
+  const [pendingChatMembers, setPendingGroupMembers] = useState({
+    // enabled: !!route.params?.addingToGroupTopic,
     members: [] as (IProfileSocials & { address: string })[],
   });
 
-  const { addMembers, members } = useGroupMembers(
-    route.params?.addingToGroupTopic!
-  );
+  useEffect(() => {
+    console.log("pendingChatMembers", pendingChatMembers.members);
+    if (pendingChatMembers.members.length > 1) {
+      setConversationCreationMode(ConversationVersion.GROUP);
+    } else if (pendingChatMembers.members.length === 1) {
+      setConversationCreationMode(ConversationVersion.DM);
+    }
+  }, [pendingChatMembers.members.length]);
+
+  // const { addMembers, members } = useGroupMembers(
+  //   route.params?.addingToGroupTopic!
+  // );
 
   const [loading, setLoading] = useState(false);
 
   const handleRightAction = useCallback(async () => {
     logger.debug("[NewConversation] Handling right action", {
-      isAddingToGroup: !!route.params?.addingToGroupTopic,
-      memberCount: group.members.length,
+      // isAddingToGroup: !!route.params?.addingToGroupTopic,
+      memberCount: pendingChatMembers.members.length,
     });
 
-    if (route.params?.addingToGroupTopic) {
-      setLoading(true);
-      try {
-        //  TODO: Support multiple addresses
-        await addMembers(group.members.map((m) => m.address));
-        logger.debug("[NewConversation] Successfully added members to group", {
-          memberAddresses: group.members.map((m) => m.address),
-        });
-        navigation.goBack();
-      } catch (e) {
-        setLoading(false);
-        logger.error("[NewConversation] Failed to add members to group", e);
-        Alert.alert("An error occured");
-      }
-    } else {
-      logger.debug("[NewConversation] Navigating to NewGroupSummary", {
-        memberCount: group.members.length,
-      });
-      navigation.push("NewGroupSummary", {
-        members: group.members,
-      });
-    }
-  }, [addMembers, group.members, navigation, route.params?.addingToGroupTopic]);
-
-  const conversationCreationMode = ConversationVersion.DM;
+    logger.debug("[NewConversation] Conversation creation mode", {
+      conversationCreationMode,
+    });
+    logger.debug("[NewConversation] Group", {
+      pendingChatMembers: JSON.stringify(pendingChatMembers, null, 2),
+    });
+    logger.debug(
+      "header right action shouldnt be used we should do the creation logic in response to a message being 'sent'"
+    );
+  }, [pendingChatMembers.members, navigation]);
 
   useEffect(() => {
     logger.debug("[NewConversation] Setting navigation options", {
-      groupEnabled: group.enabled,
-      memberCount: group.members.length,
+      // groupEnabled: pendingChatMembers.enabled,
+      memberCount: pendingChatMembers.members.length,
+      conversationCreationMode,
       loading,
     });
 
@@ -126,59 +118,40 @@ export default function NewConversation({
         Platform.OS === "ios" ? (
           <Button icon="chevron.left" variant="text" onPress={handleBack} />
         ) : (
-          <AndroidBackAction navigation={navigation} />
+          <AndroidBackAction navigation={navigation as any} />
         ),
       headerBackButtonDisplayMode: "default",
-      headerTitle: group.enabled
-        ? route.params?.addingToGroupTopic
-          ? translate("new_chat.add_members")
-          : translate("new_chat.create_group")
-        : translate("new_chat.new_chat"),
+      headerTitle: "New chat",
       headerRight: () => {
         return (
           <Button
             variant="text"
             text={
               conversationCreationMode === ConversationVersion.DM
-                ? "New dm"
+                ? "New convo"
                 : "New group"
             }
             onPress={handleRightAction}
           />
         );
       },
-      // headerRight: () => {
-      //   if (group.enabled && group.members.length > 0) {
-      //     if (loading) {
-      //       return <Loader style={{ marginRight: theme.spacing["5xs"] }} />;
-      //     } else {
-      //       return (
-      //         <Button
-      //           variant="text"
-      //           text={route.params?.addingToGroupTopic ? "Add" : "Next"}
-      //           onPress={handleRightAction}
-      //           style={{ marginRight: -10, padding: 10 }}
-      //         />
-      //       );
-      //     }
-      //   }
-      //   return undefined;
-      // },
     });
   }, [
-    group,
+    pendingChatMembers,
+    conversationCreationMode,
     loading,
     navigation,
-    route.params?.addingToGroupTopic,
-    addMembers,
     handleBack,
     handleRightAction,
     themed,
     theme.spacing,
   ]);
 
-  const [value, setValue] = useState(route.params?.peer || "");
-  const searchingForValue = useRef("");
+  const [
+    searchQueryState,
+    /*weird name becuase I'm not exactly sure what the ref below does so being expliti as state vs ref*/ setSearchQueryState,
+  ] = useState("");
+  const searchQueryRef = useRef("");
   const [status, setStatus] = useState({
     loading: false,
     error: "",
@@ -186,25 +159,25 @@ export default function NewConversation({
     profileSearchResults: {} as { [address: string]: IProfileSocials },
   });
 
-  const {
-    updatedAt: recommendationsUpdatedAt,
-    loading: recommendationsLoading,
-    frens,
-  } = useRecommendationsStore(useSelect(["updatedAt", "loading", "frens"]));
-  const recommendationsLoadedOnce = recommendationsUpdatedAt > 0;
-  const recommendationsFrensCount = Object.keys(frens).length;
-
+  // todo: abstract debounce and provide option for eager vs lazy debounce
+  // ie: lets perform the query but not necessarily rerender until the debounce
+  // this will feel snappier
   const debounceDelay = 500;
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // Log initial effect trigger
-    logger.info("[NewConversation] Search effect triggered", { value });
+    logger.info("[NewConversation] Search effect triggered", {
+      searchQueryState,
+    });
 
-    if (value.length < 3) {
-      logger.info("[NewConversation] Search value too short, resetting state", {
-        value,
-      });
+    if (searchQueryState.length < 3) {
+      logger.info(
+        "[NewConversation] Search searchQueryState too short, resetting state",
+        {
+          searchQueryState,
+        }
+      );
       setStatus({
         loading: false,
         error: "",
@@ -223,7 +196,7 @@ export default function NewConversation({
     debounceTimer.current = setTimeout(async () => {
       const searchForValue = async () => {
         logger.info("[NewConversation] Starting search after debounce", {
-          value,
+          searchQueryState,
         });
         setStatus(({ loading }) => ({
           loading,
@@ -232,9 +205,9 @@ export default function NewConversation({
           profileSearchResults: {},
         }));
 
-        if (isSupportedPeer(value)) {
+        if (isSupportedPeer(searchQueryState)) {
           logger.info("[NewConversation] Searching for supported peer", {
-            value,
+            searchQueryState,
           });
           setStatus(({ error }) => ({
             loading: true,
@@ -242,26 +215,16 @@ export default function NewConversation({
             inviteToConverse: "",
             profileSearchResults: {},
           }));
-          searchingForValue.current = value;
-          const resolvedAddress = await getAddressForPeer(value);
-          if (searchingForValue.current === value) {
+          searchQueryRef.current = searchQueryState;
+          const resolvedAddress = await getAddressForPeer(searchQueryState);
+          if (searchQueryRef.current === searchQueryState) {
             // If we're still searching for this one
             if (!resolvedAddress) {
-              const isLens = value.endsWith(config.lensSuffix);
-              const isFarcaster = value.endsWith(".fc");
-              logger.info("[NewConversation] No address resolved for peer", {
-                value,
-                isLens,
-                isFarcaster,
-              });
               setStatus({
                 loading: false,
                 profileSearchResults: {},
                 inviteToConverse: "",
-                error:
-                  isLens || isFarcaster
-                    ? "This handle does not exist. Please try again."
-                    : "No address has been set for this domain.",
+                error: "No address has been set for this domain.",
               });
 
               return;
@@ -274,13 +237,13 @@ export default function NewConversation({
               account: currentAccount(),
               peer: address,
             });
-            if (searchingForValue.current === value) {
+            if (searchQueryRef.current === searchQueryState) {
               if (addressIsOnXmtp) {
                 logger.info(
                   "[NewConversation] Address found on XMTP, searching profiles",
                   {
                     address,
-                    value,
+                    searchQueryState,
                   }
                 );
                 // Let's search with the exact address!
@@ -295,6 +258,10 @@ export default function NewConversation({
                   });
                   // Let's save the profiles for future use
                   setProfileRecordSocialsQueryData(currentAccount(), profiles);
+                  // delete pending chat memebers from search results
+                  pendingChatMembers.members.forEach((member) => {
+                    delete profiles[member.address];
+                  });
                   setStatus({
                     loading: false,
                     error: "",
@@ -314,13 +281,13 @@ export default function NewConversation({
                 }
               } else {
                 logger.info("[NewConversation] Address not on XMTP", {
-                  value,
+                  searchQueryState,
                   address,
                 });
                 setStatus({
                   loading: false,
-                  error: `${value} does not use Converse or XMTP yet`,
-                  inviteToConverse: value,
+                  error: `${shortAddress(searchQueryState)} is not on the XMTP network yet`,
+                  inviteToConverse: searchQueryState,
                   profileSearchResults: {},
                 });
               }
@@ -328,8 +295,8 @@ export default function NewConversation({
           }
         } else {
           logger.info(
-            "[NewConversation] Searching profiles for non-peer value",
-            { value }
+            "[NewConversation] Searching profiles for non-peer searchQueryState",
+            { searchQueryState }
           );
           setStatus({
             loading: true,
@@ -338,11 +305,14 @@ export default function NewConversation({
             profileSearchResults: {},
           });
 
-          const profiles = await searchProfiles(value, currentAccount());
+          const profiles = await searchProfiles(
+            searchQueryState,
+            currentAccount()
+          );
 
           if (!isEmptyObject(profiles)) {
             logger.info("[NewConversation] Found and saving profiles", {
-              value,
+              searchQueryState,
               profileCount: Object.keys(profiles).length,
             });
             // Let's save the profiles for future use
@@ -354,7 +324,9 @@ export default function NewConversation({
               profileSearchResults: profiles,
             });
           } else {
-            logger.info("[NewConversation] No profiles found", { value });
+            logger.info("[NewConversation] No profiles found", {
+              searchQueryState,
+            });
             setStatus({
               loading: false,
               error: "",
@@ -373,26 +345,18 @@ export default function NewConversation({
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [value]);
+  }, [searchQueryState]);
 
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
 
-  const showRecommendations =
-    !status.loading && value.length === 0 && recommendationsFrensCount > 0;
-
-  const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
+  // const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
 
   const onRef = useCallback(
     (r: TextInput | null) => {
       if (!initialFocus.current) {
         initialFocus.current = true;
-        if (
-          !value &&
-          !recommendationsLoading &&
-          recommendationsLoadedOnce &&
-          recommendationsFrensCount === 0
-        ) {
+        if (!searchQueryState) {
           logger.debug("[NewConversation] Auto-focusing input");
           setTimeout(() => {
             r?.focus();
@@ -401,50 +365,46 @@ export default function NewConversation({
       }
       inputRef.current = r;
     },
-    [
-      recommendationsFrensCount,
-      recommendationsLoadedOnce,
-      recommendationsLoading,
-      value,
-    ]
+    [searchQueryState]
   );
+
+  const shouldDisplaySearchResults =
+    !status.loading &&
+    !status.error &&
+    !isEmptyObject(status.profileSearchResults);
+
+  const shouldDisplayLoading =
+    status.loading &&
+    !status.error &&
+    !isEmptyObject(status.profileSearchResults);
+
+  const shouldDisplayPendingMembers = pendingChatMembers.members.length > 0;
+
+  const shouldDisplayErrorMessage =
+    status.error && isEmptyObject(status.profileSearchResults);
 
   return (
     <View style={themed($searchContainer)}>
       <SearchBar
-        value={value}
-        setValue={setValue}
+        value={searchQueryState}
+        setValue={setSearchQueryState}
         onRef={onRef}
-        inputPlaceholder={inputPlaceholder}
+        inputPlaceholder={".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…"}
       />
       <View
         style={[
-          themed($group),
+          themed($pendingChatMembers),
           {
-            display:
-              group.enabled && group.members.length === 0 ? "none" : "flex",
+            display: shouldDisplayPendingMembers ? "flex" : "none",
           },
         ]}
       >
-        {/* {!group.enabled && (
-          <Button
-            variant="text"
-            picto="person.2"
-            text={translate("new_group.title")}
-            style={themed($newGroupButton)}
-            onPress={() => {
-              setGroup({ enabled: true, members: [] });
-            }}
-          />
-        )} */}
-
-        {group.enabled &&
-          group.members.length > 0 &&
-          group.members.map((m, index) => {
+        {shouldDisplayPendingMembers &&
+          pendingChatMembers.members.map((m, index) => {
             const preferredName = getPreferredName(m, m.address);
 
             return (
-              <Button
+              <Button /** remove member from pendingChatMembers */
                 key={m.address}
                 text={preferredName}
                 variant="fill"
@@ -452,7 +412,7 @@ export default function NewConversation({
                 picto="xmark"
                 style={themed($groupMemberButton)}
                 onPress={() =>
-                  setGroup((g) => {
+                  setPendingGroupMembers((g) => {
                     const members = [...g.members];
                     members.splice(index, 1);
                     return {
@@ -466,34 +426,36 @@ export default function NewConversation({
           })}
       </View>
 
-      {!status.loading && !isEmptyObject(status.profileSearchResults) ? (
+      {shouldDisplaySearchResults && (
         <View style={{ flex: 1 }}>
           <ProfileSearchResultsList
-            navigation={navigation}
             profiles={(() => {
               const searchResultsToShow = { ...status.profileSearchResults };
-              if (group.enabled && group.members) {
-                group.members.forEach((member) => {
+              if (pendingChatMembers.members) {
+                pendingChatMembers.members.forEach((member) => {
                   delete searchResultsToShow[member.address];
-                });
-              }
-              if (members) {
-                members?.ids?.forEach((memberId: InboxId) => {
-                  const member = members.byId[memberId];
-                  const address = getCleanAddress(member.addresses[0]);
-                  delete searchResultsToShow[address];
                 });
               }
               return searchResultsToShow;
             })()}
-            groupMode={group.enabled}
-            addToGroup={async (member) => {
-              setGroup((g) => ({ ...g, members: [...g.members, member] }));
-              setValue("");
+            handleSearchResultItemPress={(args) => {
+              logger.info("[NewConversation] handleSearchResultItemPress", {
+                args,
+              });
+              setPendingGroupMembers((g) => ({
+                ...g,
+                members: [
+                  ...g.members,
+                  { ...args.socials, address: args.address },
+                ],
+              }));
+              setSearchQueryState("");
             }}
           />
         </View>
-      ) : (
+      )}
+
+      {shouldDisplayErrorMessage && (
         <ScrollView
           style={[themed($modal), { flex: 1 }]}
           keyboardShouldPersistTaps="handled"
@@ -501,45 +463,19 @@ export default function NewConversation({
             inputRef.current?.blur();
           }}
         >
-          {isEmptyObject(status.profileSearchResults) && (
-            <View
-              style={{
-                backgroundColor: theme.colors.background.surface,
-                height: showRecommendations ? undefined : 0,
-              }}
-            >
-              <Recommendations
-                visibility="EMBEDDED"
-                groupMode={group.enabled}
-                groupMembers={group.members}
-                addToGroup={async (member) => {
-                  setGroup((g) => ({ ...g, members: [...g.members, member] }));
-                  setValue("");
-                }}
-              />
-            </View>
-          )}
-
-          {!status.loading && isEmptyObject(status.profileSearchResults) && (
+          {status.error && isEmptyObject(status.profileSearchResults) && (
             <View style={themed($messageContainer)}>
-              {status.error ? (
-                <Text style={[themed($message), themed($error)]}>
-                  {status.error}
-                </Text>
-              ) : (
-                <Text style={themed($message)}>
-                  <Text>
-                    Type the full address/domain of your contact (with
-                    .converse.xyz, .eth, .lens, .fc, .cb.id…)
-                  </Text>
-                </Text>
-              )}
+              <Text style={[themed($message), themed($error)]}>
+                {status.error}
+              </Text>
             </View>
           )}
 
-          {status.loading && <Loader style={{ marginTop: theme.spacing.lg }} />}
+          {shouldDisplayLoading && (
+            <Loader style={{ marginTop: theme.spacing.lg }} />
+          )}
 
-          {!status.loading && !!status.inviteToConverse && (
+          {/* {!status.loading && !!status.inviteToConverse && (
             <TableView
               items={[
                 {
@@ -555,10 +491,10 @@ export default function NewConversation({
               ]}
               style={themed($tableView)}
             />
-          )}
+          )} */}
         </ScrollView>
       )}
-      {/* todo: confirm with thierry we like this pattern  */}
+      {/* todo: remove this pattenr with Thierry */}
       <ConversationComposerStoreProvider
         storeName={"new-conversation" as ConversationTopic}
         inputValue={"testing"}
@@ -566,13 +502,50 @@ export default function NewConversation({
         <ConversationComposerContainer>
           <Composer
             onSend={async (something) => {
+              const dmCreationMessageText = something.content.text || "";
+              if (
+                !dmCreationMessageText ||
+                dmCreationMessageText.length === 0
+              ) {
+                return;
+              }
               logger.info(
                 "[NewConversation] Sending message",
                 something.content.text
               );
+
+              if (conversationCreationMode === ConversationVersion.DM) {
+                let dm = await getOptionalConversationByPeerByAccount({
+                  account: currentAccount(),
+                  peer: pendingChatMembers.members[0].address,
+                });
+                if (!dm) {
+                  dm = await createConversationByAccount(
+                    currentAccount(),
+                    pendingChatMembers.members[0].address
+                  );
+                }
+                await sendMessage({
+                  conversation: dm,
+                  params: {
+                    content: { text: dmCreationMessageText },
+                  },
+                });
+                setConversationQueryData({
+                  account: currentAccount(),
+                  topic: dm.topic,
+                  conversation: dm,
+                });
+                navigation.replace("Conversation", { topic: dm.topic });
+                // await sendMessage({
+                //   conversation: dm,
+                //   message: something.content.text,
+                // });
+              } else {
+              }
               // todo:
-              // create group/dm
-              // add member to group
+              // create pendingChatMembers/dm
+              // add member to pendingChatMembers
               // send message
               // createGroupWithFirstMessage({
               //   account: currentAccount(),
@@ -629,7 +602,7 @@ const $tableView: ThemedStyle<ViewStyle> = () => ({
   marginHorizontal: Platform.OS === "android" ? 0 : 18,
 });
 
-const $group: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $pendingChatMembers: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   minHeight: 50,
   paddingBottom: Platform.OS === "ios" ? spacing.xs : 0,
   flexDirection: "row",

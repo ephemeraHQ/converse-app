@@ -2,30 +2,32 @@ import { shortAddress } from "@/utils/strings/shortAddress";
 import { Avatar } from "@components/Avatar";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { Text } from "@design-system/Text";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import {
   getPreferredAvatar,
   getPreferredName,
   getPrimaryNames,
 } from "@utils/profile";
-import { ImageStyle, Platform, View, ViewStyle } from "react-native";
-import { NavigationChatButton } from "./NavigationChatButton";
+import { Platform, View, ViewStyle } from "react-native";
+import { Pressable } from "@/design-system/Pressable";
+import logger from "@/utils/logger";
 
 type ProfileSearchItemProps = {
   address: string;
   socials: IProfileSocials;
-  navigation?: NativeStackNavigationProp<any>;
-  groupMode?: boolean;
-  addToGroup?: (member: IProfileSocials & { address: string }) => void;
+  handleSearchResultItemPress: (args: {
+    address: string;
+    socials: IProfileSocials;
+  }) => void;
 };
 
-export function ProfileSearchItem({
+/**
+ * Figma: https://www.figma.com/design/p6mt4tEDltI4mypD3TIgUk/Converse-App?node-id=5191-4200&t=KDRZMuK1xpiNBKG9-11
+ */
+export function ProfileSearchResultListItem({
   address,
   socials,
-  navigation,
-  groupMode,
-  addToGroup,
+  handleSearchResultItemPress,
 }: ProfileSearchItemProps) {
   const { theme, themed } = useAppTheme();
   const preferredName = getPreferredName(socials, address);
@@ -37,37 +39,39 @@ export function ProfileSearchItem({
   ];
 
   return (
-    <View key={address} style={themed($container)}>
-      <View style={themed($left)}>
-        <Avatar
-          uri={preferredAvatar}
-          size={theme.spacing["3xl"]}
-          style={themed($avatar)}
-          name={preferredName}
-        />
-        <View style={themed($textContainer)}>
-          <Text preset="bodyBold" numberOfLines={1}>
-            {preferredName}
-          </Text>
-          {primaryNamesDisplay.length > 0 && (
-            <Text preset="formLabel" numberOfLines={1}>
-              {primaryNamesDisplay.join(" | ")}
+    <Pressable
+      onPress={() => {
+        logger.info("ProfileSearchResultListItem onPress", {
+          address,
+          socials,
+        });
+        handleSearchResultItemPress({
+          address,
+          /** todo probably just address */ socials,
+        });
+      }}
+    >
+      <View key={address} style={themed($container)}>
+        <View style={themed($left)}>
+          <Avatar
+            uri={preferredAvatar}
+            size={theme.spacing["3xl"]}
+            style={themed($avatar)}
+            name={preferredName}
+          />
+          <View style={themed($textContainer)}>
+            <Text preset="bodyBold" numberOfLines={1}>
+              {preferredName}
             </Text>
-          )}
+            {primaryNamesDisplay.length > 0 && (
+              <Text preset="formLabel" numberOfLines={1}>
+                {primaryNamesDisplay.join(" | ")}
+              </Text>
+            )}
+          </View>
         </View>
       </View>
-      {navigation && (
-        <View style={themed($right)}>
-          <NavigationChatButton
-            address={address}
-            groupMode={groupMode}
-            addToGroup={
-              addToGroup ? () => addToGroup({ ...socials, address }) : undefined
-            }
-          />
-        </View>
-      )}
-    </View>
+    </Pressable>
   );
 }
 

@@ -11,8 +11,8 @@ import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import logger from "@/utils/logger";
 
 export type NewChatNavParams = {
-  peer?: string;
-  addingToGroupTopic?: ConversationTopic;
+  // peer?: string;
+  // addingToGroupTopic?: ConversationTopic;
 };
 
 export const NewChatScreenConfig = {
