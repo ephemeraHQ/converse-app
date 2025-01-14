@@ -1,4 +1,4 @@
-import { format, enUS, fr } from "date-fns";
+import { format, fr, enUS } from "date-fns";
 import { getLocales } from "react-native-localize";
 import {
   getCompactRelativeTime,
