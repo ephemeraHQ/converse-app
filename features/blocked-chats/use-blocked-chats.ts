@@ -1,5 +1,5 @@
-import { getConversationDataQueryOptions } from "@/queries/use-conversation-data-query";
-import { useConversationListQuery } from "@/queries/useConversationListQuery";
+import { getConversationDataQueryOptions } from "@/queries/conversation-data-query";
+import { useConversationsQuery } from "@/queries/conversations-query";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -7,7 +7,7 @@ import { useMemo } from "react";
 export const useBlockedChats = () => {
   const currentAccount = useCurrentAccount();
 
-  const { data } = useConversationListQuery({
+  const { data } = useConversationsQuery({
     account: currentAccount!,
     context: "useBlockedChats",
   });

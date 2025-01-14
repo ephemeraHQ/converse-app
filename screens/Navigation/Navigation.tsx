@@ -45,7 +45,7 @@ import UserProfileNav from "./UserProfileNav";
 import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
-import ConversationRequestsListNav from "@/features/conversation-requests-list/ConversationRequestsListNav.ios";
+import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
 
 export type NavigationParamList = {
   Idle: undefined;

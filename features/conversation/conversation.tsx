@@ -3,7 +3,6 @@ import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
-import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
 import { ReplyPreview } from "@/features/conversation/conversation-composer/conversation-composer-reply-preview";
@@ -44,6 +43,7 @@ import {
   isAnActualMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
+import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read";
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
 import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
@@ -56,6 +56,7 @@ import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
 import { useHeader } from "@/navigation/use-header";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { captureError } from "@/utils/capture-error";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
@@ -228,30 +229,23 @@ const Messages = memo(function Messages(props: {
     topic,
   });
 
-  const { toggleReadStatusAsync } = useToggleReadStatus({
+  const { markAsReadAsync } = useMarkConversationAsRead({
     topic,
   });
 
-  const hasMarkedAsReadRef = useRef(false);
-
+  // TODO: Need improvment but okay for now
   useEffect(() => {
-    if (
-      isUnread &&
-      !messagesLoading &&
-      !hasMarkedAsReadRef.current &&
-      isConversationAllowed(conversation)
-    ) {
-      toggleReadStatusAsync();
-      hasMarkedAsReadRef.current = true;
+    if (isConversationAllowed(conversation) && isUnread && !messagesLoading) {
+      markAsReadAsync().catch(captureError);
     }
-  }, [isUnread, messagesLoading, toggleReadStatusAsync, conversation]);
+  }, [isUnread, messagesLoading, markAsReadAsync, conversation, messages]);
 
   const handleRefresh = useCallback(async () => {
     try {
       refreshingRef.current = true;
       await refetchMessages();
     } catch (e) {
-      console.error(e);
+      captureError(e);
     } finally {
       refreshingRef.current = false;
     }

@@ -2,10 +2,11 @@ import { useCurrentAccount } from "@/data/store/accountsStore";
 import { Center } from "@/design-system/Center";
 import { Image } from "@/design-system/image";
 import { ConversationListItem } from "@/features/conversation-list/conversation-list-item/conversation-list-item";
-import { createConversationListQueryObserver } from "@/queries/useConversationListQuery";
+import { getUnknownConsentConversationsQueryOptions } from "@/queries/unknown-consent-conversations-query";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { useNavigation } from "@react-navigation/native";
-import React, { memo, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import React, { memo } from "react";
 
 export const ConversationListAwaitingRequests = memo(
   function ConversationListAwaitingRequests() {
@@ -56,22 +57,14 @@ export const ConversationListAwaitingRequests = memo(
 const useRequestsCount = () => {
   const account = useCurrentAccount();
 
-  const [count, setCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = createConversationListQueryObserver({
+  const { data: unknownConsentConversations, isLoading } = useQuery(
+    getUnknownConsentConversationsQueryOptions({
       account: account!,
       context: "useRequestsCount",
-    }).subscribe(({ data }) => {
-      setCount(data?.filter((c) => c.state === "unknown").length ?? 0);
-      setIsLoading(false);
-    });
+    })
+  );
 
-    return () => {
-      unsubscribe();
-    };
-  }, [account]);
+  const count = unknownConsentConversations?.length ?? 0;
 
   return { count, isLoading };
 };

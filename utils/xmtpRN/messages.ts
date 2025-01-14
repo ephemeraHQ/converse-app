@@ -1,4 +1,4 @@
-import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
+import { updateConversationInConversationsQuery } from "@/queries/conversations-query";
 import { updateConversationQueryData } from "@/queries/useConversationQuery";
 import { invalidateGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
@@ -80,7 +80,7 @@ export const streamAllMessages = async (account: string) => {
     }
 
     try {
-      updateConversationInConversationListQuery({
+      updateConversationInConversationsQuery({
         account: client.address,
         topic: message.topic as ConversationTopic,
         conversationUpdate: {
@@ -132,7 +132,7 @@ export const handleGroupUpdatedMessage = async (
           name: newGroupName,
         },
       });
-      updateConversationInConversationListQuery({
+      updateConversationInConversationsQuery({
         account,
         topic,
         conversationUpdate: {
@@ -149,7 +149,7 @@ export const handleGroupUpdatedMessage = async (
           imageUrlSquare: newGroupPhotoUrl,
         },
       });
-      updateConversationInConversationListQuery({
+      updateConversationInConversationsQuery({
         account,
         topic,
         conversationUpdate: {
@@ -166,7 +166,7 @@ export const handleGroupUpdatedMessage = async (
           description: newGroupDescription,
         },
       });
-      updateConversationInConversationListQuery({
+      updateConversationInConversationsQuery({
         account,
         topic,
         conversationUpdate: {

@@ -7,7 +7,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { setGroupNameMutationKey } from "./MutationKeys";
-import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
+import { updateConversationInConversationsQuery } from "@/queries/conversations-query";
 
 type IArgs = {
   account: string;
@@ -36,7 +36,7 @@ export function useGroupNameMutation(args: IArgs) {
         updateGroupQueryData({ account, topic, updates });
       }
 
-      updateConversationInConversationListQuery({
+      updateConversationInConversationsQuery({
         account,
         topic,
         conversationUpdate: updates,
@@ -51,7 +51,7 @@ export function useGroupNameMutation(args: IArgs) {
 
       const updates = { name: previousGroup?.name ?? "" };
       updateGroupQueryData({ account, topic, updates });
-      updateConversationInConversationListQuery({
+      updateConversationInConversationsQuery({
         account,
         topic,
         conversationUpdate: updates,

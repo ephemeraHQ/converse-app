@@ -1,6 +1,7 @@
 /**
- * File for Android
- * Keep until we finish refactoring requests
+ *
+ * KEEP UNTIL WE FINALIZE THE REQUESTS LIST DESIGN
+ *
  */
 
 // import { translate } from "@i18n";

@@ -5,7 +5,7 @@ import { translate } from "@/i18n";
 import {
   getConversationDataQueryData,
   setConversationDataQueryData,
-} from "@/queries/use-conversation-data-query";
+} from "@/queries/conversation-data-query";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";

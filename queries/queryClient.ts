@@ -1,7 +1,15 @@
-import { QueryClient } from "@tanstack/react-query";
+import { captureError } from "@/utils/capture-error";
+import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { DEFAULT_GC_TIME, DEFAULT_STALE_TIME } from "./queryClient.constants";
 
 export const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      captureError(error, {
+        message: `Error in query: ${query.queryKey.join(", ")}`,
+      });
+    },
+  }),
   defaultOptions: {
     queries: {
       retry: false, // libXmtp handles retries

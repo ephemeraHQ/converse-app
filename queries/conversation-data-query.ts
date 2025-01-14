@@ -1,7 +1,7 @@
 import { conversationDataQueryKey } from "@/queries/QueryKeys";
 import { getTopics } from "@/utils/api/topics";
 import logger from "@/utils/logger";
-import { UseQueryOptions, useQuery } from "@tanstack/react-query";
+import { UseQueryOptions } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { create, windowScheduler } from "@yornaath/batshit";
 import { queryClient } from "./queryClient";
@@ -14,12 +14,6 @@ type IArgs = {
   account: string;
   topic: ConversationTopic;
   context: string;
-};
-
-export const useConversationDataQuery = (args: IArgs) => {
-  return useQuery({
-    ...getConversationDataQueryOptions(args),
-  });
 };
 
 export function getConversationDataQueryOptions(

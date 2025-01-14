@@ -2,7 +2,7 @@ import { getCurrentAccount } from "@/data/store/accountsStore";
 import {
   getConversationDataQueryData,
   setConversationDataQueryData,
-} from "@/queries/use-conversation-data-query";
+} from "@/queries/conversation-data-query";
 import { pinTopic, unpinTopic } from "@/utils/api/topics";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";

@@ -1,4 +1,4 @@
-import { useConversationListQuery } from "@/queries/useConversationListQuery";
+import { useConversationsQuery } from "@/queries/conversations-query";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
@@ -6,7 +6,7 @@ import { useMemo } from "react";
 export const useConversationByTopic = (topic: ConversationTopic) => {
   const account = useCurrentAccount();
 
-  const { data: conversations } = useConversationListQuery({
+  const { data: conversations } = useConversationsQuery({
     account: account!,
     context: "useConversationListConversation",
   });

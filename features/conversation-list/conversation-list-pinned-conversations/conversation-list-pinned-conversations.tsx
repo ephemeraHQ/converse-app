@@ -19,24 +19,26 @@ export const ConversationListPinnedConversations = memo(
   function ConversationListPinnedConversations() {
     const { themed, theme } = useAppTheme();
 
-    const { pinnedConversations, isLoading } = usePinnedConversations();
+    const { pinnedConversations, isLoading: isLoadingPinnedConversations } =
+      usePinnedConversations();
 
     const {
       count: conversationsCount,
       isLoading: conversationsCountIsLoading,
     } = useConversationsCount();
 
-    if (isLoading || conversationsCountIsLoading) {
+    if (isLoadingPinnedConversations || conversationsCountIsLoading) {
       return null;
     }
 
-    // Show skeleton if we have no conversations yet for better UX
-    if (conversationsCountIsLoading) {
+    if (conversationsCount === 0) {
       return <PinnedConversationsSkeleton />;
     }
 
-    // Don't show anything because user has "onboarded" and don't need placeholders anymore
-    if (conversationsCount > 0 && pinnedConversations?.length === 0) {
+    const hasPinnedConversations =
+      pinnedConversations && pinnedConversations?.length > 0;
+
+    if (!hasPinnedConversations) {
       return null;
     }
 

@@ -17,8 +17,11 @@ import { useShouldShowConnectingOrSyncing } from "@/features/conversation-list/h
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { translate } from "@/i18n";
-import { getConversationDataQueryOptions } from "@/queries/use-conversation-data-query";
-import { useConversationListQuery } from "@/queries/useConversationListQuery";
+import { getConversationDataQueryOptions } from "@/queries/conversation-data-query";
+import {
+  getConversationsQueryOptions,
+  useConversationsQuery,
+} from "@/queries/conversations-query";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
@@ -29,7 +32,7 @@ import {
 } from "@/utils/xmtpRN/client.types";
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import React, { memo, useCallback, useMemo } from "react";
 import { TouchableOpacity, useColorScheme } from "react-native";
 import { ContextMenuView } from "react-native-ios-context-menu";
@@ -181,9 +184,11 @@ const EphemeralAccountBanner = React.memo(function EphemeralAccountBanner() {
 const useConversationListItems = () => {
   const currentAccount = useCurrentAccount();
 
-  const { data: conversations, ...rest } = useConversationListQuery({
-    account: currentAccount!,
-    context: "conversation-list-screen",
+  const { data: conversations, ...rest } = useQuery({
+    ...getConversationsQueryOptions({
+      account: currentAccount!,
+      context: "conversation-list-screen",
+    }),
   });
 
   const conversationsDataQueries = useQueries({

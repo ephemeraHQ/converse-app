@@ -4,7 +4,7 @@ import { translate } from "@/i18n";
 import {
   getConversationDataQueryData,
   setConversationDataQueryData,
-} from "@/queries/use-conversation-data-query";
+} from "@/queries/conversation-data-query";
 import { getGroupQueryData } from "@/queries/useGroupQuery";
 import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";

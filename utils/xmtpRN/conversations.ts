@@ -1,4 +1,4 @@
-import { addConversationToConversationListQuery } from "@/queries/useConversationListQuery";
+import { addConversationToConversationListQuery } from "@/queries/conversations-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import { ConversationOptions, ConversationTopic } from "@xmtp/react-native-sdk";

@@ -1,4 +1,4 @@
-import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
+import { updateConversationInConversationsQuery } from "@/queries/conversations-query";
 import { captureError } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
@@ -31,7 +31,7 @@ export const useBlockGroupMutation = (
     onMutate: async () => {
       const previousConsent = getGroupConsentQueryData(account, topic!);
       setGroupConsentQueryData(account, topic!, "denied");
-      updateConversationInConversationListQuery({
+      updateConversationInConversationsQuery({
         account,
         topic: topic!,
         conversationUpdate: {
@@ -52,7 +52,7 @@ export const useBlockGroupMutation = (
         topic!,
         context.previousConsent || "unknown"
       );
-      updateConversationInConversationListQuery({
+      updateConversationInConversationsQuery({
         account,
         topic: topic!,
         conversationUpdate: {

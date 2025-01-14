@@ -17,7 +17,7 @@ import { usePreferredName } from "@/hooks/usePreferredName";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
 import { useRouter } from "@/navigation/useNavigation";
-import { addConversationToConversationListQuery } from "@/queries/useConversationListQuery";
+import { addConversationToConversationListQuery } from "@/queries/conversations-query";
 import { setDmQueryData } from "@/queries/useDmQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";

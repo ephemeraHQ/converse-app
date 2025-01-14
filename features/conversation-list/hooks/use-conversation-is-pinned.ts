@@ -1,5 +1,5 @@
 import { useCurrentAccount } from "@/data/store/accountsStore";
-import { getConversationDataQueryOptions } from "@/queries/use-conversation-data-query";
+import { getConversationDataQueryOptions } from "@/queries/conversation-data-query";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 

@@ -1,5 +1,5 @@
 import { conversationIsUnreadByTimestamp } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
-import { getConversationDataQueryOptions } from "@/queries/use-conversation-data-query";
+import { getConversationDataQueryOptions } from "@/queries/conversation-data-query";
 import { getConversationQueryOptions } from "@/queries/useConversationQuery";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
