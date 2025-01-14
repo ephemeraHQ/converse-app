@@ -383,7 +383,7 @@ const createGroupName = (peerEthereumAddresses: string[]) => {
   }
   for (let i = 0; i < firstThreeMembers.length; i++) {
     const member = firstThreeMembers[i];
-    const memberSocials = getProfileSocialsQueryData(member, member);
+    const memberSocials = getProfileSocialsQueryData(currentAccount, member);
     groupName += getPreferredName(memberSocials, member);
     if (i < firstThreeMembers.length - 1) {
       groupName += ", ";

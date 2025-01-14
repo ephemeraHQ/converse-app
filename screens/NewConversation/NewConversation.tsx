@@ -11,7 +11,7 @@
  * solution: requires diagnosing bottleneck
  *
  * group name creation not correct: getting first preferred name correct but
- * not using correct preferred name for last two when ephemeral accounts
+ * ✅ not using correct preferred name for last two when ephemeral accounts
  *
  * messed up old add user to existing group screen
  * ✅ solution: copy existing screen back in
@@ -23,7 +23,8 @@
  * ✅ composer disable send button
  * ✅ composer hide plus button
  * ✅ pending members list
- * new group joined the group welcome message needs wrapping
+ *
+ * new group joined the group welcome message needs wrapping (not my problem atm)
  *
  * CODE ORG:
  * change file names to lower-kebab-case
