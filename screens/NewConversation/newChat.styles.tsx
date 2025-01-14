@@ -2,76 +2,48 @@ import { Platform, ViewStyle, TextStyle } from "react-native";
 
 import { ThemedStyle } from "@/theme/useAppTheme";
 import { textSizeStyles } from "@/design-system/Text/Text.styles";
-import { debugBorder } from "@/utils/debug-style";
 
 const $modal: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
   backgroundColor: colors.background.surface,
-  ...debugBorder("orange"),
 });
 
 const $messageContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  ...Platform.select({
-    default: {
-      marginTop: spacing.lg,
-      paddingHorizontal: spacing.md,
-    },
-    android: {
-      marginRight: spacing.md,
-      marginLeft: spacing.md,
-      marginTop: spacing.md,
-    },
-  }),
+  marginTop: spacing.lg,
+  paddingHorizontal: spacing.md,
 });
 
 const $message: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text.secondary,
   ...textSizeStyles.sm,
-  ...Platform.select({
-    default: {
-      textAlign: "center",
-    },
-  }),
+  textAlign: "center",
 });
 
 const $error: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color:
-    Platform.OS === "android" ? colors.text.secondary : colors.text.primary,
+  color: colors.text.primary,
 });
 
 const $pendingChatMembers: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   minHeight: 50,
-  // paddingBottom: Platform.OS === "ios" ? spacing.xs : 0,
   padding: spacing.xs,
   gap: spacing.xs,
   flexDirection: "row",
   alignItems: "center",
-  // paddingLeft: Platform.OS === "ios" ? spacing.md : 0,
   justifyContent: "flex-start",
   borderBottomWidth: 0.5,
-  // borderBottomColor: colors.border.subtle,
   backgroundColor: colors.background.surface,
   flexWrap: "wrap",
-  ...debugBorder("blue"),
 });
-
-// const $groupMemberButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-//   padding: 0,
-//   marginHorizontal: 0,
-//   marginRight: spacing.xs,
-//   marginTop: spacing.xs,
-// });
 
 const $searchContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
   backgroundColor: colors.background.surface,
-  ...debugBorder("green"),
 });
 
 const $newGroupButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginLeft: spacing["6xs"],
-  paddingTop: Platform.OS === "ios" ? spacing.sm : spacing.xs,
-  paddingBottom: Platform.OS === "ios" ? 0 : spacing.xs,
+  paddingTop: spacing.sm,
+  paddingBottom: 0,
 });
 
 export const stylesNewChat = {
@@ -80,7 +52,6 @@ export const stylesNewChat = {
   $message,
   $error,
   $pendingChatMembers,
-  // $groupMemberButton,
   $searchContainer,
   $newGroupButton,
 } as const;

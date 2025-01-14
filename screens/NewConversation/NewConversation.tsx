@@ -14,15 +14,16 @@
  * not using correct preferred name for last two when ephemeral accounts
  *
  * messed up old add user to existing group screen
- * solution: copy existing screen back in
+ * ✅ solution: copy existing screen back in
  *
  * UI:
  *
  * ✅ search results list needs updating
  * ✅ create chips for search results
- *
  * ✅ composer disable send button
  * ✅ composer hide plus button
+ * ✅ pending members list
+ * new group joined the group welcome message needs wrapping
  *
  * CODE ORG:
  * change file names to lower-kebab-case
@@ -96,8 +97,8 @@ export default function NewConversation({}) {
   const [pendingChatMembers, setPendingGroupMembers] = useState({
     members: [] as (IProfileSocials & { address: string })[],
   });
-
   const pendingChatMembersCount = pendingChatMembers.members.length;
+  const composerSendButtonDisabled = pendingChatMembersCount === 0;
 
   useEffect(() => {
     if (pendingChatMembersCount > 1) {
@@ -390,16 +391,17 @@ export default function NewConversation({}) {
         onRef={onRef}
         inputPlaceholder={"Name, address or onchain ID"}
       />
-      <View
-        style={[
-          themed(stylesNewChat.$pendingChatMembers),
-          {
-            display: "flex",
-          },
-        ]}
-      >
-        {shouldDisplayPendingMembers &&
-          pendingChatMembers.members.map((m) => {
+
+      {shouldDisplayPendingMembers && (
+        <View
+          style={[
+            themed(stylesNewChat.$pendingChatMembers),
+            {
+              display: "flex",
+            },
+          ]}
+        >
+          {pendingChatMembers.members.map((m) => {
             const preferredName = getPreferredName(m, m.address);
 
             return (
@@ -418,7 +420,8 @@ export default function NewConversation({}) {
               />
             );
           })}
-      </View>
+        </View>
+      )}
 
       <View style={{ flex: 1 }}>
         {shouldDisplaySearchResults && (
@@ -475,6 +478,7 @@ export default function NewConversation({}) {
           )}
         </ScrollView>
       )}
+
       {/* todo: review this pattern with Thierry */}
       <ConversationComposerStoreProvider
         storeName={"new-conversation" as ConversationTopic}
@@ -483,7 +487,7 @@ export default function NewConversation({}) {
         <ConversationComposerContainer>
           <Composer
             hideAddAttachmentButton
-            disabled={true}
+            disabled={composerSendButtonDisabled}
             onSend={async (something) => {
               const dmCreationMessageText = something.content.text || "";
               if (
