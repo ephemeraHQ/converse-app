@@ -128,10 +128,10 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu (6.0.15):
+  - expo-dev-menu (6.0.14):
     - DoubleConversion
-    - expo-dev-menu/Main (= 6.0.15)
-    - expo-dev-menu/ReactNativeCompatibles (= 6.0.15)
+    - expo-dev-menu/Main (= 6.0.14)
+    - expo-dev-menu/ReactNativeCompatibles (= 6.0.14)
     - glog
     - hermes-engine
     - RCT-Folly (= 2024.01.01.00)
@@ -152,7 +152,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - expo-dev-menu-interface (1.9.2)
-  - expo-dev-menu/Main (6.0.15):
+  - expo-dev-menu/Main (6.0.14):
     - DoubleConversion
     - EXManifests
     - expo-dev-menu-interface
@@ -179,7 +179,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu/ReactNativeCompatibles (6.0.15):
+  - expo-dev-menu/ReactNativeCompatibles (6.0.14):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -200,7 +200,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu/SafeAreaView (6.0.15):
+  - expo-dev-menu/SafeAreaView (6.0.14):
     - DoubleConversion
     - ExpoModulesCore
     - glog
@@ -222,7 +222,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu/Vendored (6.0.15):
+  - expo-dev-menu/Vendored (6.0.14):
     - DoubleConversion
     - expo-dev-menu/SafeAreaView
     - glog
@@ -2801,7 +2801,7 @@ SPEC CHECKSUMS:
   Expo: cac199e7cbd1f9b5ae7047c4294a372d6ff28a88
   expo-dev-client: ae8f6f8c8f90f1505aa6f399987e5e0d5aa39b62
   expo-dev-launcher: 2c71832c9c8de589ccd690bd00b2b795e827cfb3
-  expo-dev-menu: a8abb37c2dd599629f53d93a516bb78ee33691be
+  expo-dev-menu: 50c0a1a19990f16c605db6890087b974651f4713
   expo-dev-menu-interface: 4baf2f8b3b79ce37cf4b900e4b3ba6df3384f0a1
   ExpoAsset: 6f7a8887cbb9fb39fdb0808e7f6f74ba0e1ae9b6
   ExpoBackgroundFetch: a25a06f2c45c943d3efc64db9d737a63a527e7c6
