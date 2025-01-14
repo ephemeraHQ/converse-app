@@ -179,3 +179,7 @@ export const updateConversationInConversationsQuery = (args: {
     newConversations
   );
 };
+
+export function fetchConversationsQuery(args: IArgs) {
+  return queryClient.fetchQuery(getConversationsQueryOptions(args));
+}

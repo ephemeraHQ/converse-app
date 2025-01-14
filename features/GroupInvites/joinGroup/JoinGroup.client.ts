@@ -90,12 +90,12 @@ export class JoinGroupClient {
     const liveFetchGroupsByAccount = async (
       account: string
     ): Promise<ConversationDataEntity> => {
-      const { fetchConversationListQuery } = await import(
+      const { fetchConversationsQuery } = await import(
         "@/queries/conversations-query"
       );
 
       const conversationList: IConversationsQuery =
-        await fetchConversationListQuery({ account });
+        await fetchConversationsQuery({ account });
 
       const conversationEntity: ConversationDataEntity = entify(
         conversationList,
