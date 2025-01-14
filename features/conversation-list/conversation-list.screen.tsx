@@ -62,6 +62,7 @@ import {
 } from "react-native-ios-context-menu";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useConversationListRequestCount } from "./useConversationListRequestCount";
+import logger from "@/utils/logger";
 
 type IConversationListProps = NativeStackScreenProps<
   NavigationParamList,
@@ -347,7 +348,10 @@ function useHeaderWrapper() {
             }}
             icon="square.and.pencil"
             onPress={() => {
-              navigation.navigate("NewConversation", {});
+              logger.debug(
+                "[ConversationListScreen] Navigating to NewConversation"
+              );
+              navigation.navigate("NewConversation");
             }}
           />
         </HStack>

@@ -138,7 +138,7 @@ export function SignedInNavigation() {
           <NativeStack.Screen name="Blocked" component={BlockedChatsScreen} />
           {ConversationRequestsListNav()}
           {ConversationNav()}
-          {/* {NewConversationNav()} */}
+          {NewConversationNav()}
           {ShareProfileNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
