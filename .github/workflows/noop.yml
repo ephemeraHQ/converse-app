@@ -5,6 +5,7 @@ on:
       - main
       - release/*
     paths:
+      - "**"
       - "!**/*.ts"
       - "!**/*.tsx"
       - "!package.json"
