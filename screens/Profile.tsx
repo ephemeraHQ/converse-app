@@ -13,7 +13,6 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import { usePrivySigner } from "@utils/evm/privy";
 import { useXmtpSigner } from "@utils/evm/xmtp";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { sentryTrackError } from "@utils/sentry";
@@ -52,7 +51,6 @@ import {
   useAccountsStore,
   useCurrentAccount,
   currentAccount,
-  useLoggedWithPrivy,
   useRecommendationsStore,
   useSettingsStore,
   useWalletStore,
@@ -85,8 +83,7 @@ import {
 import { ConversationNavParams } from "@features/conversation/conversation.nav";
 
 import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
-import { getIPFSAssetURI } from "../utils/thirdweb";
-import { refreshBalanceForAccount } from "../utils/wallet";
+import { getIPFSAssetURI } from "@utils/thirdweb";
 import { updateConsentForAddressesForAccount } from "@/features/consent/update-consent-for-addresses-for-account";
 
 import { NotificationPermissionStatus } from "@/features/notifications/types/Notifications.types";
@@ -113,16 +110,6 @@ const useStyles = () => {
       paddingHorizontal: Platform.OS === "ios" ? 18 : 6,
     },
     tableView: {},
-    balanceContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginRight: Platform.OS === "ios" ? 0 : -5,
-    },
-    balance: {
-      color: textPrimaryColor(colorScheme),
-      fontSize: 17,
-      marginRight: 10,
-    },
     avatar: {
       marginBottom: 10,
       marginTop: 23,
@@ -302,7 +289,6 @@ function ProfileScreenImpl() {
 
   const navigation = useRouter();
   const userAddress = useCurrentAccount() as string;
-  const USDCBalance = useWalletStore((s) => s.USDCBalance);
   const [copiedAddresses, setCopiedAddresses] = useState<{
     [address: string]: boolean;
   }>({});
@@ -326,26 +312,9 @@ function ProfileScreenImpl() {
   const { permissions: groupPermissions } = useGroupPermissions(groupTopic!);
 
   const { getXmtpSigner } = useXmtpSigner();
-  const privySigner = usePrivySigner();
 
   const insets = useSafeAreaInsets();
   const shouldShowError = useShouldShowErrored();
-  useEffect(() => {
-    refreshBalanceForAccount(userAddress);
-  }, [userAddress]);
-
-  const [refreshingBalance, setRefreshingBalance] = useState(false);
-
-  const manuallyRefreshBalance = useCallback(async () => {
-    setRefreshingBalance(true);
-    const now = new Date().getTime();
-    await refreshBalanceForAccount(userAddress, 0);
-    const after = new Date().getTime();
-    if (after - now < 1000) {
-      await new Promise((r) => setTimeout(r, 1000 - after + now));
-    }
-    setRefreshingBalance(false);
-  }, [userAddress]);
 
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore(
@@ -409,7 +378,6 @@ function ProfileScreenImpl() {
     ),
   ];
 
-  const isPrivy = useLoggedWithPrivy();
   const showDisconnectActionSheet = useDisconnectActionSheet();
 
   const getSocialItemsFromArray = useCallback(
@@ -473,51 +441,6 @@ function ProfileScreenImpl() {
     Platform.OS === "ios"
       ? Constants.expoConfig?.ios?.buildNumber
       : Constants.expoConfig?.android?.versionCode;
-  const balanceItems: TableViewItemType[] = [
-    {
-      id: "balance",
-      title: translate("your_balance_usdc"),
-      rightView: (
-        <View style={styles.balanceContainer}>
-          <Text style={styles.balance}>
-            ${evmHelpers.fromDecimal(USDCBalance, config.evm.USDC.decimals, 2)}
-          </Text>
-          <View style={{ width: 30 }}>
-            {!refreshingBalance && (
-              <View style={{ left: Platform.OS === "ios" ? 0 : -14 }}>
-                <TableViewPicto
-                  symbol="arrow.clockwise"
-                  color={
-                    Platform.OS === "android"
-                      ? primaryColor(colorScheme)
-                      : undefined
-                  }
-                  onPress={manuallyRefreshBalance}
-                />
-              </View>
-            )}
-            {refreshingBalance && <ActivityIndicator />}
-          </View>
-        </View>
-      ),
-    },
-  ];
-
-  if (isPrivy) {
-    balanceItems.push({
-      id: "topUp",
-      title: translate("top_up_your_account"),
-      action: () => {
-        navigation.push("TopUp");
-      },
-      rightView: (
-        <TableViewPicto
-          symbol="chevron.right"
-          color={textSecondaryColor(colorScheme)}
-        />
-      ),
-    });
-  }
 
   const actionsTableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
@@ -1036,26 +959,6 @@ function ProfileScreenImpl() {
             title={translate("actions")}
             style={styles.tableView}
           />
-          {/* Removing until revoking is available */}
-          {/* <TableView
-            items={[
-              {
-                id: "revoke",
-                title: translate("revoke_other_installations"),
-                titleColor:
-                  Platform.OS === "android"
-                    ? undefined
-                    : dangerColor(colorScheme),
-                action: () => {
-                  setTimeout(() => {
-                    showRevokeActionSheet();
-                  }, 300);
-                },
-              },
-            ]}
-            title={translate("security")}
-            style={styles.tableView}
-          /> */}
 
           <TableView
             items={[
