@@ -92,6 +92,14 @@ import { useCurrentAccountXmtpClient } from "@/hooks/useCurrentAccountXmtpClient
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+  useSharedValue,
+} from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { VStack } from "@/design-system/VStack";
+import { Button } from "@/design-system/Button/Button";
 
 const useStyles = () => {
   const colorScheme = useColorScheme();
@@ -102,12 +110,6 @@ const useStyles = () => {
       fontWeight: "bold",
       marginVertical: 10,
       color: textPrimaryColor(colorScheme),
-    },
-    profile: {
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    profileContent: {
-      paddingHorizontal: Platform.OS === "ios" ? 18 : 6,
     },
     tableView: {},
     avatar: {
@@ -164,6 +166,114 @@ const ExternalWalletPickerWrapper = memo(
     );
   }
 );
+
+/**
+ * ContactCard Component
+ *
+ * A card component that displays contact information with a 3D tilt effect.
+ * Includes name, bio, avatar with interactive animations.
+ */
+const ContactCard = memo(function ContactCard({
+  name,
+  bio,
+  avatarUri,
+}: {
+  name: string;
+  bio?: string;
+  avatarUri?: string;
+}) {
+  const { theme } = useAppTheme();
+  const colorScheme = useColorScheme();
+
+  const rotateX = useSharedValue(0);
+  const rotateY = useSharedValue(0);
+  const shadowOffsetX = useSharedValue(0);
+  const shadowOffsetY = useSharedValue(0);
+
+  const baseStyle = {
+    backgroundColor: theme.colors.fill.primary,
+    borderRadius: theme.borderRadius.xs,
+    padding: theme.spacing.xl,
+    marginVertical: theme.spacing.md,
+    shadowColor: theme.colors.fill.primary,
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 5,
+  };
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { perspective: 800 },
+      { rotateX: `${rotateX.value}deg` },
+      { rotateY: `${rotateY.value}deg` },
+    ],
+    shadowOffset: {
+      width: shadowOffsetX.value,
+      height: shadowOffsetY.value,
+    },
+    ...baseStyle,
+  }));
+
+  const panGesture = Gesture.Pan()
+    .onBegin(() => {
+      // Reset values when gesture starts
+      rotateX.value = withSpring(0);
+      rotateY.value = withSpring(0);
+      shadowOffsetX.value = withSpring(0);
+      shadowOffsetY.value = withSpring(0);
+    })
+    .onUpdate((event) => {
+      // Update tilt based on pan gesture
+      rotateX.value = event.translationY / 10;
+      rotateY.value = event.translationX / 10;
+      shadowOffsetX.value = -event.translationX / 20;
+      shadowOffsetY.value = event.translationY / 20;
+    })
+    .onEnd(() => {
+      // Reset to original position when gesture ends
+      rotateX.value = withSpring(0);
+      rotateY.value = withSpring(0);
+      shadowOffsetX.value = withSpring(0);
+      shadowOffsetY.value = withSpring(0);
+    });
+
+  return (
+    <GestureDetector gesture={panGesture}>
+      <Animated.View style={animatedStyle}>
+        <VStack>
+          <Avatar
+            uri={avatarUri}
+            name={name}
+            size={theme.avatarSize.lg}
+            style={{
+              marginBottom: theme.spacing.xxl,
+              alignSelf: "flex-start",
+            }}
+          />
+          <View>
+            <Text
+              preset="bodyBold"
+              style={{
+                color: theme.colors.text.inverted.primary,
+                marginBottom: theme.spacing.xxxs,
+              }}
+            >
+              {name}
+            </Text>
+            {bio && (
+              <Text
+                preset="smaller"
+                style={{ color: theme.colors.text.inverted.secondary }}
+              >
+                {bio}
+              </Text>
+            )}
+          </View>
+        </VStack>
+      </Animated.View>
+    </GestureDetector>
+  );
+});
 
 function ProfileScreenImpl() {
   const { theme } = useAppTheme();
@@ -719,17 +829,61 @@ function ProfileScreenImpl() {
     revokeAdmin,
   ]);
 
+  const handleChatPress = useCallback(() => {
+    const isPreviouslyInNavStack = navigation
+      .getState()
+      .routes.some((route) => {
+        if (route.name !== "Conversation") {
+          return false;
+        }
+        const params = route.params as ConversationNavParams;
+        return params?.peer === peerAddress.toLowerCase();
+      });
+    if (isPreviouslyInNavStack) {
+      navigation.popToTop();
+      navigation.navigate({
+        name: "Conversation",
+        params: {
+          peer: peerAddress,
+        },
+      });
+    } else {
+      navigation.popToTop();
+      navigation.dispatch(
+        StackActions.push("Conversation", {
+          peer: peerAddress,
+        })
+      );
+    }
+  }, [navigation, peerAddress]);
+
   return (
     <ScrollView
-      style={styles.profile}
-      contentContainerStyle={styles.profileContent}
+      style={{
+        backgroundColor: theme.colors.background.surface,
+      }}
+      contentContainerStyle={{
+        paddingHorizontal: theme.spacing.lg,
+      }}
     >
-      <Avatar
-        uri={preferredAvatarUri ?? undefined}
-        style={styles.avatar}
-        name={preferredUserName}
+      {!isMyProfile && !isBlockedPeer && (
+        <ContactCard
+          name={preferredUserName}
+          bio="Soccer dad and physical therapist"
+          avatarUri={preferredAvatarUri}
+        />
+      )}
+
+      <Button
+        onPress={handleChatPress}
+        text="Chat"
+        variant="outline"
+        style={{
+          marginTop: theme.spacing.xxxs,
+          marginBottom: theme.spacing.xl,
+        }}
       />
-      <Text style={styles.title}>{preferredUserName}</Text>
+
       {isMyProfile && shouldShowError && (
         <View style={styles.errorContainer}>
           <Icon
@@ -741,6 +895,7 @@ function ProfileScreenImpl() {
           <Text style={styles.errorText}>{translate("client_error")}</Text>
         </View>
       )}
+
       {isMyProfile && (
         <TableView
           items={[
