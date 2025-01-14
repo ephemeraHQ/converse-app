@@ -26,10 +26,6 @@ export function ClickableText({ children, style }: Props) {
   const colorScheme = useColorScheme();
   const styles = useStyles();
 
-  useEffect(() => {
-    console.log("ClickableText", children);
-  }, [children]);
-
   const handleEmailPress = useCallback((email: string) => {
     try {
       Linking.openURL(`mailto:${email}`);
