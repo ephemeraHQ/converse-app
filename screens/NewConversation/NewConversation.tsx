@@ -10,13 +10,27 @@
  * group flow feels slow
  * solution: requires diagnosing bottleneck
  *
+ * group name creation not correct: getting first preferred name correct but
+ * not using correct preferred name for last two when ephemeral accounts
+ *
  * messed up old add user to existing group screen
  * solution: copy existing screen back in
  *
  * UI:
  *
- * search results list needs updating
+ * ✅ search results list needs updating
  * ✅ create chips for search results
+ *
+ * ✅ composer disable send button
+ * ✅ composer hide plus button
+ *
+ * CODE ORG:
+ * change file names to lower-kebab-case
+ * move files to features/new-conversation
+ * rename files to indicate where they live within new-conversation domain
+ * use proper suffixes
+ *
+ * ---
  *
  * GITHUB:
  * https://github.com/ephemeraHQ/converse-app/issues/1498
@@ -337,8 +351,6 @@ export default function NewConversation({}) {
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
 
-  // const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
-
   const onRef = useCallback(
     (r: TextInput | null) => {
       if (!initialFocus.current) {
@@ -387,7 +399,7 @@ export default function NewConversation({}) {
         ]}
       >
         {shouldDisplayPendingMembers &&
-          pendingChatMembers.members.map((m, index) => {
+          pendingChatMembers.members.map((m) => {
             const preferredName = getPreferredName(m, m.address);
 
             return (
@@ -470,6 +482,8 @@ export default function NewConversation({}) {
       >
         <ConversationComposerContainer>
           <Composer
+            hideAddAttachmentButton
+            disabled={true}
             onSend={async (something) => {
               const dmCreationMessageText = something.content.text || "";
               if (

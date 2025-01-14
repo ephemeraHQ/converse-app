@@ -8,7 +8,7 @@ import {
   getPreferredName,
   getPrimaryNames,
 } from "@utils/profile";
-import { Platform, View, ViewStyle } from "react-native";
+import { Platform, View, ViewStyle, TextStyle } from "react-native";
 import { Pressable } from "@/design-system/Pressable";
 import logger from "@/utils/logger";
 
@@ -47,28 +47,32 @@ export function ProfileSearchResultListItem({
         });
         handleSearchResultItemPress({
           address,
-          /** todo probably just address */ socials,
+          socials,
         });
       }}
     >
       <View key={address} style={themed($container)}>
-        <View style={themed($left)}>
-          <Avatar
-            uri={preferredAvatar}
-            size={theme.spacing["3xl"]}
-            style={themed($avatar)}
-            name={preferredName}
-          />
-          <View style={themed($textContainer)}>
-            <Text preset="bodyBold" numberOfLines={1}>
-              {preferredName}
-            </Text>
-            {primaryNamesDisplay.length > 0 && (
-              <Text preset="formLabel" numberOfLines={1}>
-                {primaryNamesDisplay.join(" | ")}
-              </Text>
-            )}
-          </View>
+        <Avatar
+          uri={preferredAvatar}
+          size={theme.avatarSize.md}
+          style={themed($avatar)}
+          name={preferredName}
+        />
+        <View style={themed($textContainer)}>
+          <Text
+            preset="bodyBold"
+            style={themed($primaryText)}
+            numberOfLines={1}
+          >
+            {preferredName}
+          </Text>
+          <Text
+            preset="formLabel"
+            style={themed($secondaryText)}
+            numberOfLines={1}
+          >
+            {primaryNamesDisplay[0]}
+          </Text>
         </View>
       </View>
     </Pressable>
@@ -83,27 +87,35 @@ const $container: ThemedStyle<ViewStyle> = ({
   borderBottomWidth: borderWidth.sm,
   borderBottomColor: colors.border.subtle,
   paddingVertical: spacing.md,
+  paddingHorizontal: spacing.lg,
   flexDirection: "row",
-  justifyContent: "space-between",
+  justifyContent: "flex-start",
   alignItems: "center",
+  backgroundColor: colors.background.surface,
+  gap: spacing.sm,
 });
 
-const $left: ThemedStyle<ViewStyle> = () => ({
-  flex: 1,
-  flexDirection: "row",
-  alignItems: "center",
-});
-
-const $textContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $textContainer: ThemedStyle<ViewStyle> = () => ({
   flex: 1,
   minWidth: 0,
+  flexDirection: "column",
+  alignItems: "flex-start",
+  justifyContent: "flex-start",
 });
 
-const $avatar: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginRight: spacing.sm,
+const $avatar: ThemedStyle<ViewStyle> = () => ({
+  width: 40,
+  height: 40,
+  borderRadius: 24,
+  overflow: "hidden",
 });
 
-const $right: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  justifyContent: "center",
-  marginLeft: Platform.OS === "ios" ? spacing.md : 0,
+const $primaryText: ThemedStyle<TextStyle> = () => ({
+  lineHeight: 20,
+});
+
+const $secondaryText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  lineHeight: 18,
+  color: colors.text.secondary,
+  fontSize: 14,
 });
