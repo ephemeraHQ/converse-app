@@ -80,6 +80,8 @@ import { useNavigation } from "@react-navigation/native";
 import { Button } from "@/design-system/Button/Button";
 import { stylesNewChat } from "./newChat.styles";
 import { Chip } from "@/design-system/chip";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { NavigationParamList } from "../Navigation/Navigation";
 
 /**
  * Screen shown for when user wants to create a new Chat.
@@ -87,11 +89,20 @@ import { Chip } from "@/design-system/chip";
  * User can search for peers, create a new group, create a dm,
  * or navigate to an existing dm.
  */
-export default function NewConversation({}) {
+type NavigationProps = NativeStackNavigationProp<
+  NavigationParamList,
+  "NewConversation"
+>;
+
+export default function NewConversation({
+  navigation,
+}: {
+  navigation: NavigationProps;
+}) {
   const { theme, themed } = useAppTheme();
   const [conversationCreationMode, setConversationCreationMode] =
     useState<ConversationVersion>(ConversationVersion.DM);
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
 
   const handleBack = useCallback(() => {
     logger.debug("[NewConversation] Navigating back");
@@ -528,7 +539,6 @@ export default function NewConversation({}) {
                   topic: dm.topic,
                   conversation: dm,
                 });
-                // @ts-expect-error
                 navigation.replace("Conversation", { topic: dm.topic });
               } else {
                 const group = await createGroupWithDefaultsByAccount({
@@ -548,7 +558,6 @@ export default function NewConversation({}) {
                   topic: group.topic,
                   conversation: group,
                 });
-                // @ts-expect-error
                 navigation.replace("Conversation", { topic: group.topic });
               }
             }}
