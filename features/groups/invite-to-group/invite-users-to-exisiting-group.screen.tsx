@@ -34,12 +34,13 @@ import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQue
 import { searchProfiles } from "@/utils/api";
 import { isEmptyObject } from "@/utils/objects";
 import { getPreferredName } from "@/utils/profile";
-import { OldProfileSearchResultsList } from "@/features/search/components/OldProfileSearchResultsList";
+// import { OldProfileSearchResultsList } from "@/features/search/components/OldProfileSearchResultsList";
 import TableView from "@/components/TableView/TableView";
 import { TableViewPicto } from "@/components/TableView/TableViewImage";
 import AndroidBackAction from "@/components/AndroidBackAction";
 import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
 import config from "@/config";
+import { OldProfileSearchResultsList } from "@/features/search/components/OldProfileSearchResultsList";
 
 export function InviteUsersToExistingGroupScreen({
   route,

@@ -79,7 +79,7 @@ export function ProfileSearchResultsList({
         renderItem={renderItem}
         // ListHeaderComponent={renderHeader}
         // ListFooterComponent={renderFooter}
-        // onTouchStart={Keyboard.dismiss}
+        onTouchStart={Keyboard.dismiss}
         // showsVerticalScrollIndicator={false}
       />
     </View>

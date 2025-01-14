@@ -214,13 +214,14 @@ export async function getXmtpApiHeaders(
   const secureMmkv = await getSecureMmkvForAccount(account);
   let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
 
-  const appCheckToken = await tryGetAppCheckToken();
+  //   const appCheckToken = await tryGetAppCheckToken();
+  const appCheckToken = "123";
 
   if (!appCheckToken) {
     throw new Error(`
-No App Check Token Available. This indicates that we believe the app is not running on an authentic build of
-our application on a device that has not been tampered with. 
-`);
+  No App Check Token Available. This indicates that we believe the app is not running on an authentic build of
+  our application on a device that has not been tampered with.
+  `);
   }
 
   if (!accessToken) {

@@ -16,7 +16,7 @@
  * UI:
  *
  * search results list needs updating
- * create chips for search results
+ * ✅ create chips for search results
  *
  * GITHUB:
  * https://github.com/ephemeraHQ/converse-app/issues/1498
@@ -39,7 +39,7 @@ import { IProfileSocials } from "@/features/profiles/profile-types";
 import { searchProfiles } from "@utils/api";
 import { getAddressForPeer, isSupportedPeer } from "@utils/evm/address";
 import { isEmptyObject } from "@utils/objects";
-import { getPreferredName } from "@utils/profile";
+import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { Loader } from "@/design-system/loader";
@@ -60,6 +60,7 @@ import { sendMessage } from "@/features/conversation/hooks/use-send-message";
 import { useNavigation } from "@react-navigation/native";
 import { Button } from "@/design-system/Button/Button";
 import { stylesNewChat } from "./newChat.styles";
+import { Chip } from "@/design-system/chip";
 
 /**
  * Screen shown for when user wants to create a new Chat.
@@ -375,13 +376,13 @@ export default function NewConversation({}) {
         value={searchQueryState}
         setValue={setSearchQueryState}
         onRef={onRef}
-        inputPlaceholder={".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…"}
+        inputPlaceholder={"Name, address or onchain ID"}
       />
       <View
         style={[
           themed(stylesNewChat.$pendingChatMembers),
           {
-            display: shouldDisplayPendingMembers ? "flex" : "none",
+            display: "flex",
           },
         ]}
       >
@@ -390,30 +391,25 @@ export default function NewConversation({}) {
             const preferredName = getPreferredName(m, m.address);
 
             return (
-              <Button /** remove member from pendingChatMembers */
+              <Chip
                 key={m.address}
                 text={preferredName}
-                variant="fill"
-                size="md"
-                picto="xmark"
-                style={themed(stylesNewChat.$groupMemberButton)}
-                onPress={() =>
-                  setPendingGroupMembers((g) => {
-                    const members = [...g.members];
-                    members.splice(index, 1);
-                    return {
-                      ...g,
-                      members,
-                    };
-                  })
-                }
+                avatarUrl={getPreferredAvatar(m)}
+                onPress={() => {
+                  setPendingGroupMembers((g) => ({
+                    ...g,
+                    members: g.members.filter(
+                      (member) => member.address !== m.address
+                    ),
+                  }));
+                }}
               />
             );
           })}
       </View>
 
-      {shouldDisplaySearchResults && (
-        <View style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
+        {shouldDisplaySearchResults && (
           <ProfileSearchResultsList
             profiles={(() => {
               const searchResultsToShow = { ...status.profileSearchResults };
@@ -438,8 +434,8 @@ export default function NewConversation({}) {
               setSearchQueryState("");
             }}
           />
-        </View>
-      )}
+        )}
+      </View>
 
       {shouldDisplayErrorMessage && (
         <ScrollView
@@ -465,27 +461,9 @@ export default function NewConversation({}) {
           {shouldDisplayLoading && (
             <Loader style={{ marginTop: theme.spacing.lg }} />
           )}
-
-          {/* {!status.loading && !!status.inviteToConverse && (
-            <TableView
-              items={[
-                {
-                  id: "inviteToConverse",
-                  leftView: <TableViewPicto symbol="link" />,
-                  title: translate("new_chat.invite_to_converse"),
-                  subtitle: "",
-                  action: () => {
-                    navigation.goBack();
-                    navigate("ShareProfile");
-                  },
-                },
-              ]}
-              style={themed($tableView)}
-            />
-          )} */}
         </ScrollView>
       )}
-      {/* todo: remove this pattenr with Thierry */}
+      {/* todo: review this pattern with Thierry */}
       <ConversationComposerStoreProvider
         storeName={"new-conversation" as ConversationTopic}
         inputValue={"testing"}

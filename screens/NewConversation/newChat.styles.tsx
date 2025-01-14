@@ -2,10 +2,12 @@ import { Platform, ViewStyle, TextStyle } from "react-native";
 
 import { ThemedStyle } from "@/theme/useAppTheme";
 import { textSizeStyles } from "@/design-system/Text/Text.styles";
+import { debugBorder } from "@/utils/debug-style";
 
 const $modal: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
   backgroundColor: colors.background.surface,
+  ...debugBorder("orange"),
 });
 
 const $messageContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -39,27 +41,31 @@ const $error: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $pendingChatMembers: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   minHeight: 50,
-  paddingBottom: Platform.OS === "ios" ? spacing.xs : 0,
+  // paddingBottom: Platform.OS === "ios" ? spacing.xs : 0,
+  padding: spacing.xs,
+  gap: spacing.xs,
   flexDirection: "row",
   alignItems: "center",
-  paddingLeft: Platform.OS === "ios" ? spacing.md : 0,
+  // paddingLeft: Platform.OS === "ios" ? spacing.md : 0,
   justifyContent: "flex-start",
-  borderBottomWidth: Platform.OS === "android" ? 1 : 0.5,
-  borderBottomColor: colors.border.subtle,
+  borderBottomWidth: 0.5,
+  // borderBottomColor: colors.border.subtle,
   backgroundColor: colors.background.surface,
   flexWrap: "wrap",
+  ...debugBorder("blue"),
 });
 
-const $groupMemberButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: 0,
-  marginHorizontal: 0,
-  marginRight: spacing.xs,
-  marginTop: spacing.xs,
-});
+// const $groupMemberButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+//   padding: 0,
+//   marginHorizontal: 0,
+//   marginRight: spacing.xs,
+//   marginTop: spacing.xs,
+// });
 
 const $searchContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
   backgroundColor: colors.background.surface,
+  ...debugBorder("green"),
 });
 
 const $newGroupButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -74,7 +80,7 @@ export const stylesNewChat = {
   $message,
   $error,
   $pendingChatMembers,
-  $groupMemberButton,
+  // $groupMemberButton,
   $searchContainer,
   $newGroupButton,
 } as const;
