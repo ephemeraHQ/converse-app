@@ -34,6 +34,7 @@ import {
   TouchableOpacity,
   View,
   useColorScheme,
+  ViewStyle,
 } from "react-native";
 import { Text } from "@/design-system/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -56,7 +57,7 @@ import {
   useWalletStore,
 } from "@/data/store/accountsStore";
 import { useAccountsProfiles } from "@/utils/useAccountsProfiles";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { navigate } from "@/utils/navigation";
 
 import ActivityIndicator from "@components/ActivityIndicator/ActivityIndicator";
@@ -101,41 +102,9 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { VStack } from "@/design-system/VStack";
 import { Button } from "@/design-system/Button/Button";
 
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    title: {
-      textAlign: "center",
-      fontSize: 34,
-      fontWeight: "bold",
-      marginVertical: 10,
-      color: textPrimaryColor(colorScheme),
-    },
-    tableView: {},
-    avatar: {
-      marginBottom: 10,
-      marginTop: 23,
-      alignSelf: "center",
-    },
-    emoji: {
-      backgroundColor: "rgba(118, 118, 128, 0.12)",
-      borderRadius: 30,
-    },
-    errorText: {
-      color: dangerColor(colorScheme),
-      textAlign: "center",
-    },
-    errorContainer: {
-      flexDirection: "row",
-      alignSelf: "center",
-    },
-    errorIcon: {
-      width: PictoSizes.textButton,
-      height: PictoSizes.textButton,
-      marginRight: 5,
-    },
-  });
-};
+const $sectionContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+});
 
 export default function ProfileScreen() {
   return (
@@ -194,10 +163,15 @@ const ContactCard = memo(function ContactCard({
     backgroundColor: theme.colors.fill.primary,
     borderRadius: theme.borderRadius.xs,
     padding: theme.spacing.xl,
-    marginVertical: theme.spacing.md,
+    marginTop: theme.spacing.xs,
+    marginBottom: theme.spacing.lg,
     shadowColor: theme.colors.fill.primary,
     shadowOpacity: 0.25,
-    shadowRadius: 24,
+    shadowRadius: 12,
+    shadowOffset: {
+      width: 0,
+      height: 6, // Positive value pushes shadow down
+    },
     elevation: 5,
   };
 
@@ -276,7 +250,7 @@ const ContactCard = memo(function ContactCard({
 });
 
 function ProfileScreenImpl() {
-  const { theme } = useAppTheme();
+  const { theme, themed } = useAppTheme();
   const router = useRouter();
   const account = useCurrentAccount();
   const accounts = useAccountsList();
@@ -288,7 +262,6 @@ function ProfileScreenImpl() {
   const preferredUserName = usePreferredName(peerAddress);
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const colorScheme = useColorScheme();
-  const styles = useStyles();
 
   useHeader(
     {
@@ -512,7 +485,7 @@ function ProfileScreenImpl() {
           leftView: imageURI ? (
             <TableViewImage imageURI={getIPFSAssetURI(imageURI)} />
           ) : (
-            <TableViewEmoji emoji="👋" style={styles.emoji} />
+            <TableViewEmoji emoji="👋" />
           ),
           rightView: (
             <TableViewPicto
@@ -523,7 +496,7 @@ function ProfileScreenImpl() {
         };
       }) as TableViewItemType[];
     },
-    [colorScheme, styles.emoji]
+    [colorScheme]
   );
 
   const socialItems = [
@@ -869,7 +842,8 @@ function ProfileScreenImpl() {
       {!isMyProfile && !isBlockedPeer && (
         <ContactCard
           name={preferredUserName}
-          bio="Soccer dad and physical therapist"
+          // TODO: implement bio from the profile from Convos backend/local db
+          // bio="Soccer dad and physical therapist"
           avatarUri={preferredAvatarUri}
         />
       )}
@@ -885,14 +859,31 @@ function ProfileScreenImpl() {
       />
 
       {isMyProfile && shouldShowError && (
-        <View style={styles.errorContainer}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: theme.spacing.lg,
+          }}
+        >
           <Icon
             icon="exclamationmark.triangle"
             color={dangerColor(colorScheme)}
             size={PictoSizes.textButton}
-            style={styles.errorIcon}
+            style={{
+              width: theme.iconSize.sm,
+              height: theme.iconSize.sm,
+            }}
           />
-          <Text style={styles.errorText}>{translate("client_error")}</Text>
+          <Text
+            style={{
+              color: dangerColor(colorScheme),
+              marginLeft: theme.spacing.xxs,
+            }}
+          >
+            {translate("client_error")}
+          </Text>
         </View>
       )}
 
@@ -918,7 +909,7 @@ function ProfileScreenImpl() {
             },
           ]}
           title={translate("youre_the_og")}
-          style={styles.tableView}
+          style={themed($sectionContainer)}
         />
       )}
 
@@ -926,14 +917,14 @@ function ProfileScreenImpl() {
         <TableView
           items={usernamesItems}
           title={`USERNAME${usernamesItems.length > 1 ? "S" : ""}`}
-          style={styles.tableView}
+          style={themed($sectionContainer)}
         />
       )}
 
       <TableView
         items={addressItems}
         title={translate("address")}
-        style={styles.tableView}
+        style={themed($sectionContainer)}
       />
 
       {route.params?.fromGroupTopic && !isMyProfile && (
@@ -953,7 +944,7 @@ function ProfileScreenImpl() {
               },
             },
           ]}
-          style={styles.tableView}
+          style={themed($sectionContainer)}
         />
       )}
 
@@ -961,7 +952,7 @@ function ProfileScreenImpl() {
         <TableView
           items={socialItems}
           title={translate("social")}
-          style={styles.tableView}
+          style={themed($sectionContainer)}
         />
       )}
       {!isMyProfile && (
@@ -975,13 +966,13 @@ function ProfileScreenImpl() {
                 leftView: <TableViewImage imageURI={t.image} />,
               }))}
               title={translate("common_activity")}
-              style={styles.tableView}
+              style={themed($sectionContainer)}
             />
           )}
           <TableView
             items={actionsTableViewItems}
             title={translate("actions")}
-            style={styles.tableView}
+            style={themed($sectionContainer)}
           />
         </>
       )}
@@ -1112,7 +1103,7 @@ function ProfileScreenImpl() {
                 !(notificationsPermissionStatus === "granted")
             )}
             title={translate("actions")}
-            style={styles.tableView}
+            style={themed($sectionContainer)}
           />
 
           <TableView
@@ -1123,7 +1114,7 @@ function ProfileScreenImpl() {
               },
             ]}
             title={translate("app_version")}
-            style={styles.tableView}
+            style={themed($sectionContainer)}
           />
         </>
       )}
