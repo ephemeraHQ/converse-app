@@ -17,7 +17,7 @@ on:
 
 jobs:
   build-android:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-8x
     environment: Production
     steps:
       - name: Checkout repository
@@ -63,7 +63,7 @@ jobs:
         run: eas build --profile production --platform android --non-interactive --auto-submit --no-wait
 
   build-ios:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-8x
     environment: Production
 
     steps:
@@ -111,7 +111,7 @@ jobs:
         run: eas build --profile production --platform ios --non-interactive --auto-submit --no-wait
 
   increment-build-numbers:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-8x
 
     steps:
       - name: Checkout repository
@@ -139,7 +139,7 @@ jobs:
           body: "This PR increments the buildNumber for iOS and the versionCode for Android."
 
   create-release-notes:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-8x
 
     steps:
       - name: Checkout repository
