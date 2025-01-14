@@ -8,6 +8,7 @@ export function getCurrentAccountConversation(topic: ConversationTopic) {
   return getConversationQueryData({
     account: currentAccount,
     topic: topic,
+    context: "getCurrentAccountConversation",
   });
 }
 // Wether a conversation is blocked

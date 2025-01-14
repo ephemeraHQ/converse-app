@@ -1,12 +1,16 @@
 import { QueryClient } from "@tanstack/react-query";
-import { GC_TIME, STALE_TIME } from "./queryClient.constants";
+import { DEFAULT_GC_TIME, DEFAULT_STALE_TIME } from "./queryClient.constants";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: false, // libXmtp handles retries
-      gcTime: GC_TIME,
-      staleTime: STALE_TIME,
+      retryOnMount: false, // Prevent infinite refetch loops by manually controlling when queries should retry on component mount
+      gcTime: DEFAULT_GC_TIME,
+      staleTime: DEFAULT_STALE_TIME,
+      refetchOnMount: false, // Prevent infinite refetch loops by manually controlling when queries should refetch when components mount
+      refetchOnWindowFocus: false, // Prevent infinite refetch loops by manually controlling when queries should refetch when window regains focus
+      refetchOnReconnect: false, // Prevent infinite refetch loops by manually controlling when queries should refetch when network reconnects
       structuralSharing: false,
       // DON'T USE HERE
       // Use a query based persister instead of the whole tree.

@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/data/store/accountsStore";
+import { getCurrentAccount } from "@/data/store/accountsStore";
 import {
   getConversationDataQueryData,
   setConversationDataQueryData,
@@ -13,13 +13,13 @@ export function usePinOrUnpinConversation(args: {
 }) {
   const { conversationTopic } = args;
 
-  const currentAccount = useCurrentAccount();
-
   const { mutateAsync: pinOrUnpinConversationAsync } = useMutation({
     mutationFn: () => {
+      const currentAccount = getCurrentAccount()!;
       const isPinned = getConversationDataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
+        context: "usePinOrUnpinConversation",
       })?.isPinned;
 
       if (isPinned) {
@@ -35,14 +35,17 @@ export function usePinOrUnpinConversation(args: {
       }
     },
     onMutate: () => {
+      const currentAccount = getCurrentAccount()!;
       const previousIsPinned = getConversationDataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
+        context: "usePinOrUnpinConversation",
       })?.isPinned;
 
       setConversationDataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
+        context: "usePinOrUnpinConversation",
         data: {
           isPinned: !previousIsPinned,
         },
@@ -50,10 +53,12 @@ export function usePinOrUnpinConversation(args: {
       return { previousIsPinned };
     },
     onError: (error, _, context) => {
+      const currentAccount = getCurrentAccount()!;
       captureErrorWithToast(error);
       setConversationDataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
+        context: "usePinOrUnpinConversation",
         data: {
           isPinned: context?.previousIsPinned,
         },
@@ -62,6 +67,6 @@ export function usePinOrUnpinConversation(args: {
   });
 
   return {
-    pinOrUnpinConversationAsync: pinOrUnpinConversationAsync,
+    pinOrUnpinConversationAsync,
   };
 }

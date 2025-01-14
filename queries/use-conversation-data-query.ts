@@ -1,5 +1,6 @@
 import { conversationDataQueryKey } from "@/queries/QueryKeys";
 import { getTopics } from "@/utils/api/topics";
+import logger from "@/utils/logger";
 import { UseQueryOptions, useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { create, windowScheduler } from "@yornaath/batshit";
@@ -12,37 +13,36 @@ export type IConversationDataQueryData = Awaited<
 type IArgs = {
   account: string;
   topic: ConversationTopic;
+  context: string;
 };
 
-export const useConversationDataQuery = (
-  args: IArgs & {
-    queryOptions?: Partial<UseQueryOptions<IConversationDataQueryData>>;
-  }
-) => {
-  const { account, topic, queryOptions } = args;
+export const useConversationDataQuery = (args: IArgs) => {
   return useQuery({
-    ...getConversationDataQueryOptions({ account, topic }),
-    ...queryOptions,
+    ...getConversationDataQueryOptions(args),
   });
 };
 
-export function getConversationDataQueryOptions(args: IArgs) {
-  const { account, topic } = args;
+export function getConversationDataQueryOptions(
+  args: IArgs
+): UseQueryOptions<IConversationDataQueryData> {
   return {
-    queryKey: conversationDataQueryKey(account, topic),
-    queryFn: () => getConversationData({ account, topic: topic! }),
-    enabled: !!topic,
+    queryKey: conversationDataQueryKey(args.account, args.topic),
+    queryFn: () => getConversationData(args),
+    enabled: !!args.topic && !!args.account,
+    retry: false,
   };
 }
 
 export function prefetchConversationDataQuery(args: IArgs) {
+  logger.debug(
+    `[ConversationDataQuery] prefetchConversationDataQuery for account: ${args.account}, topic: ${args.topic} and context: ${args.context}`
+  );
   return queryClient.prefetchQuery(getConversationDataQueryOptions(args));
 }
 
 export const getConversationDataQueryData = (args: IArgs) => {
-  const { account, topic } = args;
   return queryClient.getQueryData<IConversationDataQueryData>(
-    conversationDataQueryKey(account, topic)
+    getConversationDataQueryOptions(args).queryKey
   );
 };
 
@@ -57,11 +57,11 @@ export function getOrFetchConversationData(args: IArgs) {
 export function setConversationDataQueryData(
   args: IArgs & { data: Partial<IConversationDataQueryData> }
 ) {
-  const { account, topic, data } = args;
+  const { data } = args;
   queryClient.setQueryData<IConversationDataQueryData>(
-    conversationDataQueryKey(account, topic),
+    getConversationDataQueryOptions(args).queryKey,
     (previousData) => {
-      if (!previousData) return undefined;
+      if (!previousData) return data as IConversationDataQueryData;
       return {
         ...previousData,
         ...data,
@@ -71,6 +71,9 @@ export function setConversationDataQueryData(
 }
 
 async function getConversationData(args: IArgs) {
+  logger.debug(
+    `[ConversationDataQuery] getConversationData for account: ${args.account}, topic: ${args.topic} and context: ${args.context}`
+  );
   return batchedGetConversationTopicData.fetch(args);
 }
 

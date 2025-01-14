@@ -3,7 +3,6 @@ import { PinnedConversationAvatar } from "@/features/conversation-list/conversat
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useConversationContextMenuViewDefaultProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-default-props";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
-import { useAppTheme } from "@/theme/useAppTheme";
 import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
@@ -11,16 +10,16 @@ import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
 import { navigate } from "@utils/navigation";
 import { useCallback } from "react";
 import { isTextMessage } from "../../conversation/conversation-message/conversation-message.utils";
-import { PinnedConversation } from "./conversation-list-pinned-conversation";
+import { ConversationListPinnedConversation } from "./conversation-list-pinned-conversation";
 import { PinnedConversationMessagePreview } from "./conversation-list-pinned-conversation-message-preview";
 
-type PinnedV3DMConversationProps = {
+type IConversationListPinnedConversationDmProps = {
   conversation: DmWithCodecsType;
 };
 
-export const PinnedV3DMConversation = ({
+export const ConversationListPinnedConversationDm = ({
   conversation,
-}: PinnedV3DMConversationProps) => {
+}: IConversationListPinnedConversationDmProps) => {
   const currentAccount = useCurrentAccount()!;
 
   const conversationTopic = conversation.topic;
@@ -37,8 +36,6 @@ export const PinnedV3DMConversation = ({
   const { isUnread } = useConversationIsUnread({
     topic: conversationTopic,
   });
-
-  const { theme } = useAppTheme();
 
   const onPress = useCallback(() => {
     navigate("Conversation", { topic: conversation.topic });
@@ -57,7 +54,7 @@ export const PinnedV3DMConversation = ({
 
   return (
     <VStack>
-      <PinnedConversation
+      <ConversationListPinnedConversation
         avatarComponent={
           <PinnedConversationAvatar
             uri={preferredAvatar ?? undefined}

@@ -50,6 +50,7 @@ export function useDmConsentMutation(args: {
       const conversation = getConversationQueryData({
         account: currentAccount,
         topic,
+        context: "useDmConsentMutation",
       });
       if (conversation) {
         const updatedDm = mutateObjectProperties(conversation, {

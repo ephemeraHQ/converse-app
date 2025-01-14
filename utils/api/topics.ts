@@ -1,6 +1,7 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { z } from "zod";
 import { api, getXmtpApiHeaders } from "../api";
+import logger from "@/utils/logger";
 
 // Response schemas
 const MessageResponseSchema = z.object({
@@ -9,19 +10,27 @@ const MessageResponseSchema = z.object({
 
 const TopicSchema = z.object({
   isDeleted: z.boolean(),
-  readUntil: z.number().nullable(),
   isPinned: z.boolean(),
+  markedAsUnread: z.boolean(),
+  readUntil: z.number().optional(),
   timestamp: z.number().optional(),
+  /** @deprecated */
+  status: z.enum(["unread", "read", "deleted"]).optional().nullable(),
 });
 
 export async function getTopics(args: { account: string }) {
+  logger.debug(`[API TOPICS] getTopics for account: ${args.account}`);
   const { account } = args;
 
   const { data } = await api.get(`/api/topics`, {
     headers: await getXmtpApiHeaders(account),
   });
 
-  return z.record(TopicSchema).parse(data);
+  const parseResult = z.record(TopicSchema).safeParse(data);
+  if (!parseResult.success) {
+    logger.error("[API TOPICS] getTopics parse error:", parseResult.error);
+  }
+  return data as Record<string, z.infer<typeof TopicSchema>>;
 }
 
 // API functions
@@ -29,19 +38,22 @@ export async function getTopic(args: {
   account: string;
   topic: ConversationTopic;
 }) {
+  logger.debug(
+    `[API TOPICS] getTopic for account: ${args.account}, topic: ${args.topic}`
+  );
   const { account, topic } = args;
 
   const { data } = await api.post(
     `/api/topics/details`,
-    {
-      topic,
-    },
-    {
-      headers: await getXmtpApiHeaders(account),
-    }
+    { topic },
+    { headers: await getXmtpApiHeaders(account) }
   );
 
-  return TopicSchema.parse(data);
+  const parseResult = TopicSchema.safeParse(data);
+  if (!parseResult.success) {
+    logger.error("[API TOPICS] getTopic parse error:", parseResult.error);
+  }
+  return data as z.infer<typeof TopicSchema>;
 }
 
 export async function markTopicAsRead(args: {
@@ -49,6 +61,9 @@ export async function markTopicAsRead(args: {
   topic: ConversationTopic;
   readUntil: number;
 }) {
+  logger.debug(
+    `[API TOPICS] markTopicAsRead for account: ${args.account}, topic: ${args.topic}, readUntil: ${args.readUntil}`
+  );
   const { account, topic, readUntil } = args;
 
   const { data } = await api.put(
@@ -57,13 +72,23 @@ export async function markTopicAsRead(args: {
     { headers: await getXmtpApiHeaders(account) }
   );
 
-  return MessageResponseSchema.parse(data);
+  const parseResult = MessageResponseSchema.safeParse(data);
+  if (!parseResult.success) {
+    logger.error(
+      "[API TOPICS] markTopicAsRead parse error:",
+      parseResult.error
+    );
+  }
+  return data as z.infer<typeof MessageResponseSchema>;
 }
 
 export async function markTopicAsUnread(args: {
   account: string;
   topic: ConversationTopic;
 }) {
+  logger.debug(
+    `[API TOPICS] markTopicAsUnread for account: ${args.account}, topic: ${args.topic}`
+  );
   const { account, topic } = args;
 
   const { data } = await api.put(
@@ -72,13 +97,23 @@ export async function markTopicAsUnread(args: {
     { headers: await getXmtpApiHeaders(account) }
   );
 
-  return MessageResponseSchema.parse(data);
+  const parseResult = MessageResponseSchema.safeParse(data);
+  if (!parseResult.success) {
+    logger.error(
+      "[API TOPICS] markTopicAsUnread parse error:",
+      parseResult.error
+    );
+  }
+  return data as z.infer<typeof MessageResponseSchema>;
 }
 
 export async function pinTopic(args: {
   account: string;
   topic: ConversationTopic;
 }) {
+  logger.debug(
+    `[API TOPICS] pinTopic for account: ${args.account}, topic: ${args.topic}`
+  );
   const { account, topic } = args;
 
   const { data } = await api.put(
@@ -87,13 +122,20 @@ export async function pinTopic(args: {
     { headers: await getXmtpApiHeaders(account) }
   );
 
-  return MessageResponseSchema.parse(data);
+  const parseResult = MessageResponseSchema.safeParse(data);
+  if (!parseResult.success) {
+    logger.error("[API TOPICS] pinTopic parse error:", parseResult.error);
+  }
+  return data as z.infer<typeof MessageResponseSchema>;
 }
 
 export async function unpinTopic(args: {
   account: string;
   topic: ConversationTopic;
 }) {
+  logger.debug(
+    `[API TOPICS] unpinTopic for account: ${args.account}, topic: ${args.topic}`
+  );
   const { account, topic } = args;
 
   const { data } = await api.put(
@@ -102,13 +144,20 @@ export async function unpinTopic(args: {
     { headers: await getXmtpApiHeaders(account) }
   );
 
-  return MessageResponseSchema.parse(data);
+  const parseResult = MessageResponseSchema.safeParse(data);
+  if (!parseResult.success) {
+    logger.error("[API TOPICS] unpinTopic parse error:", parseResult.error);
+  }
+  return data as z.infer<typeof MessageResponseSchema>;
 }
 
 export async function restoreTopic(args: {
   account: string;
   topic: ConversationTopic;
 }) {
+  logger.debug(
+    `[API TOPICS] restoreTopic for account: ${args.account}, topic: ${args.topic}`
+  );
   const { account, topic } = args;
 
   const { data } = await api.put(
@@ -117,13 +166,20 @@ export async function restoreTopic(args: {
     { headers: await getXmtpApiHeaders(account) }
   );
 
-  return MessageResponseSchema.parse(data);
+  const parseResult = MessageResponseSchema.safeParse(data);
+  if (!parseResult.success) {
+    logger.error("[API TOPICS] restoreTopic parse error:", parseResult.error);
+  }
+  return data as z.infer<typeof MessageResponseSchema>;
 }
 
 export async function deleteTopic(args: {
   account: string;
   topic: ConversationTopic;
 }) {
+  logger.debug(
+    `[API TOPICS] deleteTopic for account: ${args.account}, topic: ${args.topic}`
+  );
   const { account, topic } = args;
 
   const { data } = await api.delete(`/api/topics`, {
@@ -131,5 +187,9 @@ export async function deleteTopic(args: {
     data: { topics: [topic] },
   });
 
-  return MessageResponseSchema.parse(data);
+  const parseResult = MessageResponseSchema.safeParse(data);
+  if (!parseResult.success) {
+    logger.error("[API TOPICS] deleteTopic parse error:", parseResult.error);
+  }
+  return data as z.infer<typeof MessageResponseSchema>;
 }

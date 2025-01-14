@@ -1,22 +1,20 @@
-import { queryClient } from "@/queries/queryClient";
-import { conversationListQueryConfig } from "@/queries/useConversationListQuery";
+import { createConversationListQueryObserver } from "@/queries/useConversationListQuery";
 import { useCurrentAccount } from "@data/store/accountsStore";
-import { QueryObserver } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 export const useConversationsCount = () => {
   const account = useCurrentAccount();
 
   const [count, setCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = new QueryObserver(queryClient, {
-      ...conversationListQueryConfig({
-        account: account!,
-        context: "useConversationsCount",
-      }),
+    const unsubscribe = createConversationListQueryObserver({
+      account: account!,
+      context: "useConversationsCount",
     }).subscribe(({ data }) => {
       setCount(data?.length ?? 0);
+      setIsLoading(false);
     });
 
     return () => {
@@ -24,5 +22,5 @@ export const useConversationsCount = () => {
     };
   }, [account]);
 
-  return count;
+  return { count, isLoading };
 };

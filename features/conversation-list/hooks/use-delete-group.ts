@@ -31,11 +31,13 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
       const previousIsDeleted = getConversationDataQueryData({
         account: currentAccount,
         topic: groupTopic,
+        context: "useDeleteGroup",
       })?.isDeleted;
 
       setConversationDataQueryData({
         account: currentAccount,
         topic: groupTopic,
+        context: "useDeleteGroup",
         data: { isDeleted: true },
       });
 
@@ -45,6 +47,7 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
       setConversationDataQueryData({
         account: currentAccount,
         topic: groupTopic,
+        context: "useDeleteGroup",
         data: { isDeleted: context?.previousIsDeleted },
       });
     },

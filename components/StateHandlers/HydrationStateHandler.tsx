@@ -24,7 +24,9 @@ export default function HydrationStateHandler() {
       // Fetching persisted conversation lists for all accounts
       // We may want to fetch only the selected account's conversation list
       // in the future, but this is simple for now, and want to get feedback to really confirm
-      logger.debug("[Hydration] Fetching persisted conversation list");
+      logger.debug(
+        "[Hydration] Fetching persisted conversation list for all accounts"
+      );
       await Promise.allSettled(
         accounts.map(async (account) => {
           const accountStartTime = new Date().getTime();

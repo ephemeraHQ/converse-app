@@ -95,6 +95,7 @@ export const Conversation = memo(function Conversation(props: {
     useConversationQuery({
       account: currentAccount,
       topic,
+      context: "Conversation",
     });
 
   useHeader({

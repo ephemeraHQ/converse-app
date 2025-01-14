@@ -1,8 +1,8 @@
 import { AnimatedCenter } from "@/design-system/Center";
 import { AnimatedHStack } from "@/design-system/HStack";
 import { ConversationListItemAvatarSkeleton } from "@/features/conversation-list/conversation-list-item/conversation-list-item-avatar-skeleton";
-import { PinnedV3DMConversation } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-dm";
-import { PinnedV3GroupConversation } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-group";
+import { ConversationListPinnedConversationDm } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-dm";
+import { ConversationListPinnedConversationGroup } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-group";
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles";
 import { useConversationsCount } from "@/features/conversation-list/hooks/use-conversations-count";
 import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
@@ -21,14 +21,17 @@ export const ConversationListPinnedConversations = memo(
 
     const { pinnedConversations, isLoading } = usePinnedConversations();
 
-    const conversationsCount = useConversationsCount();
+    const {
+      count: conversationsCount,
+      isLoading: conversationsCountIsLoading,
+    } = useConversationsCount();
 
-    if (isLoading) {
+    if (isLoading || conversationsCountIsLoading) {
       return null;
     }
 
     // Show skeleton if we have no conversations yet for better UX
-    if (conversationsCount === 0) {
+    if (conversationsCountIsLoading) {
       return <PinnedConversationsSkeleton />;
     }
 
@@ -97,10 +100,10 @@ const PinnedConversationWrapper = memo(
     }
 
     if (isConversationGroup(conversation)) {
-      return <PinnedV3GroupConversation group={conversation} />;
+      return <ConversationListPinnedConversationGroup group={conversation} />;
     }
 
-    return <PinnedV3DMConversation conversation={conversation} />;
+    return <ConversationListPinnedConversationDm conversation={conversation} />;
   }
 );
 

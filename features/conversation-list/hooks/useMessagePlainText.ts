@@ -1,20 +1,20 @@
+import { useCurrentAccount } from "@/data/store/accountsStore";
 import {
   isGroupUpdatedMessage,
   isRemoteAttachmentMessage,
   isReplyMessage,
   isStaticAttachmentMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import logger from "@utils/logger";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { DecodedMessage, InboxId, ReplyCodec } from "@xmtp/react-native-sdk";
-import { useMemo } from "react";
 import { translate } from "@/i18n";
 import {
   getInboxProfileSocialsQueryData,
   useInboxProfileSocialsQueries,
 } from "@/queries/useInboxProfileSocialsQuery";
-import { useCurrentAccount } from "@/data/store/accountsStore";
 import { getPreferredInboxName } from "@/utils/profile";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
+import logger from "@utils/logger";
+import { DecodedMessage, InboxId, ReplyCodec } from "@xmtp/react-native-sdk";
+import { useMemo } from "react";
 
 export const useMessagePlainText = (
   message: DecodedMessageWithCodecsType | undefined

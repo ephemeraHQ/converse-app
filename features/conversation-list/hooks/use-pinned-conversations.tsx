@@ -18,6 +18,7 @@ export function usePinnedConversations() {
       getConversationDataQueryOptions({
         account: currentAccount!,
         topic: conversation.topic,
+        context: "usePinnedConversations",
       })
     ),
   });

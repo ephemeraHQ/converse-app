@@ -1,6 +1,6 @@
 import { normalizeTimestampToMs } from "@/utils/date";
 
-export function conversationIsUnread(args: {
+export function conversationIsUnreadByTimestamp(args: {
   lastMessageSent: number;
   readUntil: number;
 }) {
@@ -9,5 +9,5 @@ export function conversationIsUnread(args: {
   const timestamp = normalizeTimestampToMs(lastMessageSent);
 
   // Return true if the last message timestamp is greater than readUntil
-  return (readUntil ?? 0) < (timestamp ?? 0);
+  return readUntil < timestamp;
 }

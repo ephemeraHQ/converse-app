@@ -9,9 +9,6 @@ export const useBlockedChats = () => {
 
   const { data } = useConversationListQuery({
     account: currentAccount!,
-    queryOptions: {
-      refetchOnMount: false,
-    },
     context: "useBlockedChats",
   });
 
@@ -20,6 +17,7 @@ export const useBlockedChats = () => {
       getConversationDataQueryOptions({
         account: currentAccount!,
         topic: conversation.topic,
+        context: "useBlockedChats",
       })
     ),
   });

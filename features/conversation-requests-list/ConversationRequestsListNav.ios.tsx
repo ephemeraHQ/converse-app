@@ -17,13 +17,13 @@ import ActivityIndicator from "../../components/ActivityIndicator/ActivityIndica
 import Button from "../../components/Button/Button";
 import { showActionSheetWithOptions } from "../../components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "../../data/store/accountsStore";
-import { useRequestItems } from "../../features/conversation-requests-list/useRequestItems";
+import { useRequestItems } from "./useRequestItems";
 import { consentToAddressesOnProtocolByAccount } from "../../utils/xmtpRN/contacts";
 import {
   NativeStack,
   NavigationParamList,
   navigationAnimation,
-} from "./Navigation";
+} from "../../screens/Navigation/Navigation";
 
 export default function ConversationRequestsListNav() {
   const colorScheme = useColorScheme();

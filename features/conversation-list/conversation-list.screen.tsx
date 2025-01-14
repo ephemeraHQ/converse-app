@@ -35,7 +35,7 @@ import { TouchableOpacity, useColorScheme } from "react-native";
 import { ContextMenuView } from "react-native-ios-context-menu";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ConversationListEmpty } from "./conversation-list-empty";
-import { ConversationListRequestsListItem } from "./conversation-list-requests-list-item";
+import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-requests";
 import { useHeaderWrapper } from "./conversation-list.screen-header";
 
 type IConversationListProps = NativeStackScreenProps<
@@ -130,7 +130,7 @@ const ListHeader = React.memo(function ListHeader() {
       <States />
       {ephemeralAccount && <EphemeralAccountBanner />}
       <ConversationListPinnedConversations />
-      <ConversationListRequestsListItem />
+      <ConversationListAwaitingRequests />
     </VStack>
   );
 });
@@ -191,6 +191,7 @@ const useConversationListItems = () => {
       getConversationDataQueryOptions({
         account: currentAccount!,
         topic: conversation.topic,
+        context: "conversation-list-screen",
       })
     ),
   });

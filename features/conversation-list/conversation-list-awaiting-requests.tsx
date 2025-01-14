@@ -2,19 +2,18 @@ import { useCurrentAccount } from "@/data/store/accountsStore";
 import { Center } from "@/design-system/Center";
 import { Image } from "@/design-system/image";
 import { ConversationListItem } from "@/features/conversation-list/conversation-list-item/conversation-list-item";
-import { conversationListQueryConfig } from "@/queries/useConversationListQuery";
+import { createConversationListQueryObserver } from "@/queries/useConversationListQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { useNavigation } from "@react-navigation/native";
-import { useQuery } from "@tanstack/react-query";
-import React, { memo } from "react";
+import React, { memo, useEffect, useState } from "react";
 
-export const ConversationListRequestsListItem = memo(
-  function ConversationListRequestsListItem() {
+export const ConversationListAwaitingRequests = memo(
+  function ConversationListAwaitingRequests() {
     const { theme } = useAppTheme();
-    const requestsCount = useRequestsCount();
+    const { count, isLoading } = useRequestsCount();
     const navigation = useNavigation();
 
-    if (requestsCount === 0) {
+    if (count === 0 || isLoading) {
       return null;
     }
 
@@ -24,7 +23,7 @@ export const ConversationListRequestsListItem = memo(
         onPress={() => {
           navigation.navigate("ChatsRequests");
         }}
-        subtitle={`${requestsCount} awaiting your response`}
+        subtitle={`${count} awaiting your response`}
         avatarComponent={
           <Center
             // {...debugBorder()}
@@ -54,16 +53,25 @@ export const ConversationListRequestsListItem = memo(
     );
   }
 );
-
 const useRequestsCount = () => {
-  const currentAccount = useCurrentAccount();
-  const { data: count = 0 } = useQuery({
-    ...conversationListQueryConfig({
-      account: currentAccount!,
+  const account = useCurrentAccount();
+
+  const [count, setCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = createConversationListQueryObserver({
+      account: account!,
       context: "useRequestsCount",
-    }),
-    select: (conversations) =>
-      conversations?.filter((c) => c.state === "unknown").length ?? 0,
-  });
-  return count;
+    }).subscribe(({ data }) => {
+      setCount(data?.filter((c) => c.state === "unknown").length ?? 0);
+      setIsLoading(false);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [account]);
+
+  return { count, isLoading };
 };

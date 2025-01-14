@@ -12,7 +12,7 @@ export const DeleteSwipeableAction = memo(
         icon="trash"
         color={theme.colors.fill.caution}
         actionProgress={props.progressAnimatedValue}
-        iconColor={theme.colors.fill.inverted.primary}
+        iconColor={theme.colors.global.white}
       />
     );
   }

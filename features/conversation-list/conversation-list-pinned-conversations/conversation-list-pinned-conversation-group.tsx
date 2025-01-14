@@ -6,16 +6,16 @@ import { isTextMessage } from "@/features/conversation/conversation-message/conv
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { navigate } from "@utils/navigation";
 import { useCallback } from "react";
-import { PinnedConversation } from "./conversation-list-pinned-conversation";
+import { ConversationListPinnedConversation } from "./conversation-list-pinned-conversation";
 import { PinnedConversationMessagePreview } from "./conversation-list-pinned-conversation-message-preview";
 
-type PinnedV3GroupConversationProps = {
+type IConversationListPinnedConversationGroupProps = {
   group: GroupWithCodecsType;
 };
 
-export const PinnedV3GroupConversation = ({
+export const ConversationListPinnedConversationGroup = ({
   group,
-}: PinnedV3GroupConversationProps) => {
+}: IConversationListPinnedConversationGroupProps) => {
   const groupConversationTopic = group.topic;
 
   const { isUnread } = useConversationIsUnread({
@@ -37,7 +37,7 @@ export const PinnedV3GroupConversation = ({
 
   return (
     <VStack>
-      <PinnedConversation
+      <ConversationListPinnedConversation
         contextMenuProps={contextMenuProps}
         avatarComponent={
           <PinnedConversationAvatar

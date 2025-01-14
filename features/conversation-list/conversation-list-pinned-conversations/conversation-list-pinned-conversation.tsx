@@ -11,7 +11,7 @@ import {
   ContextMenuViewProps,
 } from "react-native-ios-context-menu";
 
-type PinnedConversationProps = {
+type IConversationListPinnedConversationProps = {
   avatarComponent: React.ReactNode;
   onPress: () => void;
   showUnread: boolean;
@@ -19,13 +19,9 @@ type PinnedConversationProps = {
   contextMenuProps: ContextMenuViewProps;
 };
 
-export const PinnedConversation: FC<PinnedConversationProps> = ({
-  avatarComponent,
-  onPress,
-  showUnread,
-  title,
-  contextMenuProps,
-}) => {
+export const ConversationListPinnedConversation: FC<
+  IConversationListPinnedConversationProps
+> = ({ avatarComponent, onPress, showUnread, title, contextMenuProps }) => {
   const { themed, theme } = useAppTheme();
 
   return (

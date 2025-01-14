@@ -1,13 +1,11 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { conversationIsUnread } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
+import { conversationIsUnreadByTimestamp } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
 import {
   getConversationDataQueryData,
-  getOrFetchConversationData,
   setConversationDataQueryData,
 } from "@/queries/use-conversation-data-query";
 import { getConversationQueryData } from "@/queries/useConversationQuery";
 import { markTopicAsRead, markTopicAsUnread } from "@/utils/api/topics";
-import { captureError, captureErrorWithToast } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
@@ -17,76 +15,111 @@ type UseToggleReadStatusProps = {
 };
 
 export const useToggleReadStatus = ({ topic }: UseToggleReadStatusProps) => {
-  const { mutateAsync: markConversationAsReadAsync } = useMutation({
+  const { mutateAsync: markAsReadAsync } = useMutation({
     mutationFn: async () => {
-      const currentAccount = getCurrentAccount();
-      const [conversationData, conversation] = await Promise.all([
-        getOrFetchConversationData({
-          account: currentAccount!,
-          topic,
-        }),
-        getConversationQueryData({
-          account: currentAccount!,
-          topic,
-        }),
-      ]);
-
-      const _conversationIsUnread = conversationIsUnread({
-        lastMessageSent: conversation?.lastMessage?.sentNs ?? 0,
-        readUntil: conversationData?.readUntil ?? 0,
+      const currentAccount = getCurrentAccount()!;
+      await markTopicAsRead({
+        account: currentAccount,
+        topic,
+        readUntil: new Date().getTime(),
       });
-
-      if (_conversationIsUnread) {
-        await markTopicAsRead({
-          account: currentAccount!,
-          topic,
-          readUntil: new Date().getTime(),
-        });
-      } else {
-        await markTopicAsUnread({
-          account: currentAccount!,
-          topic,
-        });
-      }
     },
     onMutate: () => {
-      const currentAccount = getCurrentAccount();
-      const previousReadUntil = getConversationDataQueryData({
-        account: currentAccount!,
+      const currentAccount = getCurrentAccount()!;
+      const previousData = getConversationDataQueryData({
+        account: currentAccount,
         topic,
-      })?.readUntil;
+        context: "useToggleReadStatus",
+      });
 
       setConversationDataQueryData({
-        account: currentAccount!,
+        account: currentAccount,
         topic,
+        context: "useToggleReadStatus",
         data: {
           readUntil: new Date().getTime(),
+          markedAsUnread: false,
         },
       });
 
-      return { previousReadUntil };
+      return { previousData };
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentAccount();
-      captureError(error);
+      const currentAccount = getCurrentAccount()!;
       setConversationDataQueryData({
-        account: currentAccount!,
+        account: currentAccount,
         topic,
+        context: "useToggleReadStatus",
+        data: context?.previousData,
+      });
+    },
+  });
+
+  const { mutateAsync: markAsUnreadAsync } = useMutation({
+    mutationFn: async () => {
+      const currentAccount = getCurrentAccount()!;
+      await markTopicAsUnread({
+        account: currentAccount,
+        topic,
+      });
+    },
+    onMutate: () => {
+      const currentAccount = getCurrentAccount()!;
+      const previousData = getConversationDataQueryData({
+        account: currentAccount,
+        topic,
+        context: "useToggleReadStatus",
+      });
+
+      setConversationDataQueryData({
+        account: currentAccount,
+        topic,
+        context: "useToggleReadStatus",
         data: {
-          readUntil: context?.previousReadUntil,
+          markedAsUnread: true,
         },
       });
-      captureErrorWithToast(error);
+
+      return { previousData };
+    },
+    onError: (error, _, context) => {
+      const currentAccount = getCurrentAccount()!;
+      setConversationDataQueryData({
+        account: currentAccount,
+        topic,
+        context: "useToggleReadStatus",
+        data: context?.previousData,
+      });
     },
   });
 
   const toggleReadStatusAsync = useCallback(async () => {
-    try {
-      await markConversationAsReadAsync();
-    } catch (error) {
-      captureErrorWithToast(error);
+    const currentAccount = getCurrentAccount()!;
+    const conversationData = getConversationDataQueryData({
+      account: currentAccount,
+      topic,
+      context: "useToggleReadStatus",
+    });
+
+    const conversation = getConversationQueryData({
+      account: currentAccount,
+      topic,
+      context: "useToggleReadStatus",
+    });
+    const convoIsUnreadByTimestamp = conversationIsUnreadByTimestamp({
+      lastMessageSent: conversation?.lastMessage?.sentNs ?? 0,
+      readUntil: conversationData?.readUntil ?? 0,
+    });
+
+    const isUnread =
+      conversationData?.markedAsUnread ?? convoIsUnreadByTimestamp;
+
+    if (isUnread) {
+      await markAsReadAsync();
+    } else {
+      await markAsUnreadAsync();
     }
-  }, [markConversationAsReadAsync]);
+  }, [markAsReadAsync, markAsUnreadAsync, topic]);
 
   return { toggleReadStatusAsync };
 };

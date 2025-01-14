@@ -1,16 +1,12 @@
 import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { mutateObjectProperties } from "@/utils/mutate-object-properties";
-import { QueryKeys } from "@queries/QueryKeys";
-import {
-  QueryObserver,
-  UseQueryOptions,
-  useQuery,
-} from "@tanstack/react-query";
-import logger from "@utils/logger";
 import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
 } from "@/utils/xmtpRN/client.types";
+import { QueryKeys } from "@queries/QueryKeys";
+import { QueryObserver, useQuery } from "@tanstack/react-query";
+import logger from "@utils/logger";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
@@ -24,27 +20,31 @@ export const createConversationListQueryObserver = (args: {
   context: string;
   includeSync?: boolean;
 }) => {
-  return new QueryObserver(queryClient, conversationListQueryConfig(args));
+  logger.debug(
+    `[ConversationListQuery] createConversationListQueryObserver for account ${args.account}`
+  );
+  return new QueryObserver(queryClient, getConversationListQueryConfig(args));
 };
 
 export const useConversationListQuery = (args: {
   account: string;
-  queryOptions?: Partial<UseQueryOptions<ConversationListQueryData>>;
   context?: string;
 }) => {
-  const { account, queryOptions, context } = args;
-  return useQuery<ConversationListQueryData>({
-    ...conversationListQueryConfig({ account, context: context ?? "" }),
-    ...queryOptions,
-  });
+  const { account, context } = args;
+  return useQuery<ConversationListQueryData>(
+    getConversationListQueryConfig({ account, context: context ?? "" })
+  );
 };
 
 export const fetchPersistedConversationListQuery = (args: {
   account: string;
 }) => {
   const { account } = args;
+  logger.debug(
+    `[ConversationListQuery] fetchPersistedConversationListQuery for account ${account}`
+  );
   return queryClient.fetchQuery(
-    conversationListQueryConfig({
+    getConversationListQueryConfig({
       account,
       context: "fetchPersistedConversationListQuery",
       includeSync: false,
@@ -54,8 +54,11 @@ export const fetchPersistedConversationListQuery = (args: {
 
 export const fetchConversationListQuery = (args: { account: string }) => {
   const { account } = args;
+  logger.debug(
+    `[ConversationListQuery] fetchConversationListQuery for account ${account}`
+  );
   return queryClient.fetchQuery(
-    conversationListQueryConfig({
+    getConversationListQueryConfig({
       account,
       context: "fetchConversationListQuery",
     })
@@ -65,7 +68,7 @@ export const fetchConversationListQuery = (args: { account: string }) => {
 export const prefetchConversationListQuery = (args: { account: string }) => {
   const { account } = args;
   return queryClient.prefetchQuery(
-    conversationListQueryConfig({
+    getConversationListQueryConfig({
       account,
       context: "prefetchConversationListQuery",
     })
@@ -74,8 +77,11 @@ export const prefetchConversationListQuery = (args: { account: string }) => {
 
 export function refetchConversationListQuery(args: { account: string }) {
   const { account } = args;
+  logger.debug(
+    `[ConversationListQuery] refetchConversationListQuery for account ${account}`
+  );
   return queryClient.refetchQueries({
-    queryKey: conversationListQueryConfig({
+    queryKey: getConversationListQueryConfig({
       account,
       context: "refetchConversationListQuery",
     }).queryKey,
@@ -87,6 +93,9 @@ export const addConversationToConversationListQuery = (args: {
   conversation: ConversationWithCodecsType;
 }) => {
   const { account, conversation } = args;
+  logger.debug(
+    `[ConversationListQuery] addConversationToConversationListQuery for account ${account}`
+  );
   const previousConversationsData = getConversationListQueryData({ account });
   if (!previousConversationsData) {
     setConversationListQueryData({ account, conversations: [conversation] });
@@ -113,6 +122,9 @@ export const updateConversationInConversationListQuery = (args: {
   conversationUpdate: Partial<ConversationWithCodecsType>;
 }) => {
   const { account, topic, conversationUpdate } = args;
+  logger.debug(
+    `[ConversationListQuery] updateConversationInConversationListQuery for account ${account} and topic ${topic}`
+  );
   const previousConversationsData = getConversationListQueryData({ account });
   if (!previousConversationsData) {
     return;
@@ -129,8 +141,11 @@ export const updateConversationInConversationListQuery = (args: {
 
 export const getConversationListQueryData = (args: { account: string }) => {
   const { account } = args;
+  logger.debug(
+    `[ConversationListQuery] getConversationListQueryData for account ${account}`
+  );
   return queryClient.getQueryData<ConversationListQueryData>(
-    conversationListQueryConfig({
+    getConversationListQueryConfig({
       account,
       context: "getConversationListQueryData",
     }).queryKey
@@ -143,7 +158,7 @@ export const setConversationListQueryData = (args: {
 }) => {
   const { account, conversations } = args;
   return queryClient.setQueryData<ConversationListQueryData>(
-    conversationListQueryConfig({
+    getConversationListQueryConfig({
       account,
       context: "setConversationListQueryData",
     }).queryKey,
@@ -194,6 +209,7 @@ const getConversationList = async (args: {
         account,
         topic: conversation.topic,
         conversation,
+        context: "setConversationQueryData",
       });
     }
 
@@ -207,7 +223,7 @@ const getConversationList = async (args: {
   }
 };
 
-export const conversationListQueryConfig = (args: {
+export const getConversationListQueryConfig = (args: {
   account: string;
   context: string;
   includeSync?: boolean;
