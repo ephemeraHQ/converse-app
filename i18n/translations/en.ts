@@ -104,6 +104,11 @@ export const en = {
       message: "This account is already connected to Converse.",
     },
   },
+  passkey: {
+    title: "Connect via passkey",
+    createButton: "Create",
+    add_account_title: "Add an account",
+  },
   userProfile: {
     title: {
       profile: "Profile",

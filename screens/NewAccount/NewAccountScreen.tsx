@@ -8,6 +8,7 @@ import { NewAccountPictoTitleSubtitle } from "../../components/NewAccount/NewAcc
 import {
   InstalledWalletsTableView,
   getConnectViaWalletTableViewEphemeralItem,
+  getConnectViaWalletTableViewPasskeyItem,
   getConnectViaWalletTableViewPhoneItem,
   getConnectViaWalletTableViewPrivateKeyItem,
 } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletTableViewItems";
@@ -43,6 +44,11 @@ export const NewAccountScreen = memo(function NewAccountScreen() {
       <TableView
         title={translate("walletSelector.converseAccount.title")}
         items={[
+          getConnectViaWalletTableViewPasskeyItem({
+            action: () => {
+              router.navigate("NewAccountPasskey");
+            },
+          }),
           getConnectViaWalletTableViewPhoneItem({
             action: () => {
               router.navigate("NewAccountPrivy");

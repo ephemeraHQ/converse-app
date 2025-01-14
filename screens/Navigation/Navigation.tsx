@@ -46,6 +46,8 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import ConversationRequestsListNav from "@/screens/Navigation/ConversationRequestsListNav.ios";
+import { OnboardingPasskeyScreen } from "../Onboarding/onboarding-passkey-screen";
+import { NewAccountPasskeyScreen } from "../NewAccount/new-account-passkey-screen";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -60,6 +62,7 @@ export type NavigationParamList = {
   OnboardingNotifications: undefined;
   OnboardingEphemeral: undefined;
   OnboardingUserProfile: undefined;
+  OnboardingPasskey: undefined;
 
   // Nwe account
   NewAccountNavigator: undefined;
@@ -70,6 +73,7 @@ export type NavigationParamList = {
   NewAccountPrivy: undefined;
   NewAccountPrivateKey: undefined;
   NewAccountEphemera: undefined;
+  NewAccountPasskey: undefined;
 
   // Main
   Accounts: undefined;
@@ -165,6 +169,10 @@ export function SignedInNavigation() {
             }}
           />
           <NativeStack.Screen
+            name="NewAccountPasskey"
+            component={NewAccountPasskeyScreen}
+          />
+          <NativeStack.Screen
             name="NewAccountUserProfile"
             component={NewAccountUserProfileScreen}
             options={{
@@ -208,6 +216,10 @@ export function SignedOutNavigation() {
             }}
             name="OnboardingGetStarted"
             component={OnboardingGetStartedScreen}
+          />
+          <NativeStack.Screen
+            name="OnboardingPasskey"
+            component={OnboardingPasskeyScreen}
           />
           <NativeStack.Screen
             name="OnboardingPrivy"

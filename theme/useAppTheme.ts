@@ -151,7 +151,7 @@ export const useThemeProvider = (initialTheme: ThemeContexts = undefined) => {
 
 type UseAppThemeValue = {
   // The theme object from react-navigation
-  navTheme: typeof DefaultTheme;
+  // navTheme: typeof DefaultTheme;
   // A function to set the theme context override (for switching modes)
   setThemeContextOverride: (newTheme: ThemeContexts) => void;
   // The current theme object
@@ -177,7 +177,7 @@ export type IThemed = ReturnType<typeof useAppTheme>["themed"];
  * @throws {Error} If used outside of a ThemeProvider.
  */
 export const useAppTheme = (): UseAppThemeValue => {
-  const navTheme = useNavTheme();
+  const controlledTheme = useColorScheme();
   const context = useContext(ThemeContext);
   if (!context) {
     throw new Error("useTheme must be used within a ThemeProvider");
@@ -186,8 +186,8 @@ export const useAppTheme = (): UseAppThemeValue => {
   const { themeScheme: overrideTheme, setThemeContextOverride } = context;
 
   const themeContext: ThemeContexts = useMemo(
-    () => overrideTheme || (navTheme.dark ? "dark" : "light"),
-    [overrideTheme, navTheme]
+    () => overrideTheme || (controlledTheme === "dark" ? "dark" : "light"),
+    [overrideTheme, controlledTheme]
   );
 
   const themeVariant: Theme = useMemo(
@@ -209,10 +209,10 @@ export const useAppTheme = (): UseAppThemeValue => {
         platformVersion: Platform.Version,
         themeContext: themeContext,
         isDarkTheme: themeVariant.isDark,
-        navThemeDark: navTheme.dark,
+        navThemeDark: controlledTheme === "dark",
       });
     }
-  }, [themeContext, themeVariant, navTheme]);
+  }, [themeContext, themeVariant, controlledTheme]);
 
   const themed = useCallback(
     <T>(
@@ -234,7 +234,6 @@ export const useAppTheme = (): UseAppThemeValue => {
   );
 
   return {
-    navTheme,
     setThemeContextOverride,
     theme: themeVariant,
     themeContext,

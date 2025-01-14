@@ -90,6 +90,12 @@ const go = async () => {
       "applinks:dev.getconverse.app",
       "applinks:getconverse.app"
     );
+  entitlementsApp["com.apple.developer.associated-domains"][2] =
+    entitlementsApp["com.apple.developer.associated-domains"][2].replace(
+      "webcredentials:dev.converse.xyz",
+      "webcredentials:converse.xyz"
+    );
+
   entitlementsExtension["keychain-access-groups"][0] = entitlementsExtension[
     "keychain-access-groups"
   ][0].replace("com.converse.dev", "com.converse.native");

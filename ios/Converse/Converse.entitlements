@@ -8,6 +8,7 @@
 	<array>
 		<string>applinks:dev.converse.xyz</string>
 		<string>applinks:dev.getconverse.app</string>
+		<string>webcredentials:dev.converse.xyz</string>
 	</array>
 	<key>com.apple.developer.devicecheck.appattest-environment</key>
 	<string>production</string>

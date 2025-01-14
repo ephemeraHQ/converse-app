@@ -1,20 +1,23 @@
 import { Signer } from "ethers";
 import { Alert } from "react-native";
 
-// import { invalidateProfileSocialsQuery } from "../../data/helpers/profiles/profilesUpdate";
 import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
 import {
   getSettingsStore,
   getWalletStore,
   useAccountsStore,
-} from "../../data/store/accountsStore";
-import { translate } from "../../i18n";
-import { awaitableAlert } from "../../utils/alert";
-import logger from "../../utils/logger";
-import { logoutAccount, waitForLogoutTasksDone } from "../../utils/logout";
-import { sentryTrackMessage } from "../../utils/sentry";
-import { createXmtpClientFromSigner } from "../../utils/xmtpRN/signIn";
-import { getXmtpClient } from "../../utils/xmtpRN/sync";
+} from "@data/store/accountsStore";
+import { translate } from "@i18n";
+import { awaitableAlert } from "@utils/alert";
+import logger from "@utils/logger";
+import { logoutAccount, waitForLogoutTasksDone } from "@utils/logout";
+import { sentryTrackMessage } from "@utils/sentry";
+import {
+  createXmtpClientFromSigner,
+  createXmtpClientFromViemAccount,
+} from "@utils/xmtpRN/signIn";
+import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { ViemAccount } from "@/utils/xmtpRN/signer";
 
 export async function initXmtpClient(args: {
   signer: Signer;
@@ -31,6 +34,44 @@ export async function initXmtpClient(args: {
 
   try {
     await createXmtpClientFromSigner(signer, async () => {
+      await awaitableAlert(
+        translate("current_installation_revoked"),
+        translate("current_installation_revoked_description")
+      );
+      throw new Error("Current installation revoked");
+    });
+
+    await connectWithAddress({
+      address,
+      ...restArgs,
+    });
+  } catch (e) {
+    await logoutAccount(address, false, true, () => {});
+    logger.error(e);
+    throw e;
+  }
+}
+
+export async function initXmtpClientFromViemAccount(args: {
+  account: ViemAccount;
+  privyAccountId?: string;
+  isEphemeral?: boolean;
+  pkPath?: string;
+}) {
+  const { account, ...restArgs } = args;
+
+  if (!account) {
+    throw new Error("No signer");
+  }
+
+  const { address } = account;
+
+  if (!address) {
+    throw new Error("No address");
+  }
+
+  try {
+    await createXmtpClientFromViemAccount(account, async () => {
       await awaitableAlert(
         translate("current_installation_revoked"),
         translate("current_installation_revoked_description")

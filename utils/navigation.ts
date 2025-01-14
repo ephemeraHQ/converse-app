@@ -14,7 +14,7 @@ export const setConverseNavigatorRef = (
   ref: NavigationContainerRef<NavigationParamList> | null
 ) => {
   if (converseNavigatorRef) {
-    logger.error("[Navigation] Conversation navigator ref already set");
+    // logger.error("[Navigation] Conversation navigator ref already set");
     return;
   }
   if (!ref) {
