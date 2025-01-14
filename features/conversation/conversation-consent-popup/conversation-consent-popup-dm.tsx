@@ -149,18 +149,18 @@ function useDmConsent(args: {
         throw new Error("Peer inbox id not found");
       }
       const currentAccount = getCurrentAccount()!;
-      // await Promise.all([
-      //   consentToGroupsOnProtocolByAccount({
-      //     account: currentAccount,
-      //     groupIds: [conversationId],
-      //     consent: args.consent,
-      //   }),
-      //   consentToInboxIdsOnProtocolByAccount({
-      //     account: currentAccount,
-      //     inboxIds: [peerInboxId],
-      //     consent: args.consent,
-      //   }),
-      // ]);
+      await Promise.all([
+        consentToGroupsOnProtocolByAccount({
+          account: currentAccount,
+          groupIds: [conversationId],
+          consent: args.consent,
+        }),
+        consentToInboxIdsOnProtocolByAccount({
+          account: currentAccount,
+          inboxIds: [peerInboxId],
+          consent: args.consent,
+        }),
+      ]);
     },
     onMutate: (args) => {
       const conversation = getConversationQueryData({
