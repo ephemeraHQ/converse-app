@@ -497,7 +497,6 @@ export default function NewConversation({
       {/* todo: review this pattern with Thierry */}
       <ConversationComposerStoreProvider
         storeName={"new-conversation" as ConversationTopic}
-        inputValue={"testing"}
       >
         <ConversationComposerContainer>
           <Composer
