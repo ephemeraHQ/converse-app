@@ -10,6 +10,9 @@
  * group flow feels slow
  * solution: requires diagnosing bottleneck
  *
+ * conversation list is not updated with most recent dm when sent from composer
+ * solution: maybe using the hook instead of imperatively doing stuff?
+ *
  * group name creation not correct: getting first preferred name correct but
  * ✅ not using correct preferred name for last two when ephemeral accounts
  *
@@ -506,6 +509,7 @@ export default function NewConversation({}) {
                 let dm = await getOptionalConversationByPeerByAccount({
                   account: currentAccount(),
                   peer: pendingChatMembers.members[0].address,
+                  includeSync: true,
                 });
                 if (!dm) {
                   dm = await createConversationByAccount(

@@ -214,8 +214,7 @@ export async function getXmtpApiHeaders(
   const secureMmkv = await getSecureMmkvForAccount(account);
   let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
 
-  //   const appCheckToken = await tryGetAppCheckToken();
-  const appCheckToken = "123";
+  const appCheckToken = await tryGetAppCheckToken();
 
   if (!appCheckToken) {
     throw new Error(`
