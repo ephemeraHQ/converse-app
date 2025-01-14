@@ -257,7 +257,7 @@
       "prettier --write"
     ]
   },
-  "packageManager": "yarn@1.22.19",
+  "packageManager": "yarn@4.6.0",
   "expo": {
     "install": {
       "exclude": [
@@ -266,6 +266,6 @@
     }
   },
   "engines": {
-    "node": "20.18.0"
+    "node": ">=20"
   }
 }

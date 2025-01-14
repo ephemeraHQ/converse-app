@@ -1,87 +1,90 @@
-# Building the App - iOS
+# Converse
 
-### Install JS/React Native Dependencies
+## Requirements
 
-```
+- Node 20+
+- Ruby 3.2.5+
+- Xcode 15.2+
+- Android Studio 2023.1.1+
+
+#### Node
+
+We recommend using a Node version manager such as [nvm](https://github.com/nvm-sh/nvm) or [nodenv](https://github.com/nodenv/nodenv).
+
+#### Ruby
+
+We recommend using a Ruby version manager such as [rbenv](https://github.com/rbenv/rbenv).
+
+## Setup
+
+### Environment
+
+Copy `.env` from the [converse-app-env](https://github.com/ephemeraHQ/converse-app-env) repository to the root of this repository.
+
+### Install JS/React Native dependencies
+
+```sh
 yarn
 ```
 
-### Install iOS Dependencies
+## Quick start
 
+iOS:
+
+```sh
+yarn ios
 ```
+
+Android:
+
+```sh
+yarn android
+```
+
+## Manual start
+
+### Install iOS dependencies
+
+```sh
 npx pod-install
 ```
 
-### Build the iOS App
+### Build the iOS app
 
-Open ios/Converse.xcworkspace in Xcode and Build
+- Open `ios/Converse.xcworkspace` in Xcode
+- Select the `Converse` target
+- Select target iOS device
+- Click the play/build button to build and install the app
 
-# Building the App - Android
+### Build the Android app
 
-### Install JS/React Native Dependencies
+- Open Android Studio
+- Press the top right gradle icon to sync gradle
+- Click the play/build button to build and install the app
 
-```
-yarn
-```
+#### Forward backend port
 
-### Build the Android App
+If running the backend locally, run `yarn android:reverse`
 
-Open Android Studio
-press the top right gradle icon to sync gradle
-Click the play/build button to build and install the app
+### Running the app
 
-### Forward backend port
+Once the app builds it will open the Expo App and ask what server and port you are targetting. If none are found, you probably need to start the expo server.
 
-if running the backend locally
+### Start Expo server
 
-```
-yarn android:reverse
-```
-
-# Building the App - Web
-
-### Please Note
-
-Currently Groups and V3 Identity is not supported on Web at the SDK layer, but is actively being worked on by the team
-
-Until then Converse web will only show 1 to 1 conversations and the majority of testing and development are native app focused.
-
-Web support is an end goal and the team is happy to fix any issues that are reported
-
-### Install JS/React Native Dependencies
-
-```
-yarn
-```
-
-### Building the Web App
-
-```
+```sh
 yarn start
 ```
 
-Once the expo server starts press W to launch the web app
+## Development
 
-# Running the App
+### Lint
 
-Once the app builds it will open the Expo App
-this will ask what server port you are targetting, if none are found, you probably need to start the expo server
-
-### Start Expo Server
-
-```
-yarn start
-```
-
-# Linting
-
-```
+```sh
 yarn lint
 ```
 
-# Testing
-
-## Running Jest tests
+### Test
 
 Before running the tests make sure that you have a `.env` file setup with the variables variable set
 
@@ -89,37 +92,31 @@ Before running the tests make sure that you have a `.env` file setup with the va
 yarn test
 ```
 
-## Running Performance Tests
+### Performance test
 
-Capture baselines for performance tests
+Capture baselines for performance tests.
 
 ```sh
 yarn test:perf:baseline
 ```
 
-Make changes to the code to see the performance impact
-
-Run the performance tests again to see the changes
+Make changes to the code to see the performance impact. Run the performance tests again to see the changes.
 
 ```sh
 yarn test:perf
 ```
 
-# Frames
+## Release
 
-Frames are expected to follow the Open Frames Standard https://github.com/open-frames/standard
-
-# Release Processes
-
-### Main Branch
+### Main branch
 
 Represents the current production code.
 
-### Release Branches
+### Release branches
 
 Each release branch is based off of `main` or the release branch before it. It is used to prepare and stabilize the code for a specific release version (e.g., `release/2.0.8`).
 
-### Feature Branches
+### Feature branches
 
 Feature branches are longer-lived features or refactors expected to take additional time. They should be based off of the targeted feature release branch.
 
@@ -127,13 +124,11 @@ This structure allows code to flow **from `main` to release branches to feature 
 
 ![Merge Diagram](docs/image.png)
 
----
-
-## Rebasing Branches
+### Branch rebasing
 
 Assuming your branch is `feature/scw`, and your feature is targeted for release `2.1.0`, follow these steps to rebase:
 
-1. First, checkout the feature branch:
+1. Checkout the feature branch:
 
    ```bash
    git fetch origin
@@ -141,7 +136,8 @@ Assuming your branch is `feature/scw`, and your feature is targeted for release 
    git checkout feature/scw origin/feature/scw
    ```
 
-2. Then, rebase onto the targeted release branch:
+2. Rebase onto the targeted release branch:
+
    ```bash
    git pull origin/release/2.1.0 --rebase
    git push origin feature/scw --force-with-lease
@@ -151,6 +147,10 @@ Assuming your branch is `feature/scw`, and your feature is targeted for release 
 
 There are certain times where this flow does not work as intended. For example:
 
-- Build scripts: These may need to be run off of the default main branch instead of feature or release branches.
-- Read me updates: These are not required to be on a branch and can be committed directly to main.
-- Bug fixes that can be OTA updated: These can be committed directly to main to perform an OTA update.
+- Build scripts: These may need to be run off of the default `main` branch instead of feature or release branches.
+- README updates: These are not required to be on a branch and can be committed directly to `main`.
+- Bug fixes that can be OTA updated: These can be committed directly to `main` to perform an OTA update.
+
+## Troubleshoot
+
+If you're having trouble with installation or the build process, try running `yarn clean` to remove the build directories and reinstall dependencies.
