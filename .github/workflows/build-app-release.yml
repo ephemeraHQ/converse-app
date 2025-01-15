@@ -17,16 +17,20 @@ on:
 
 jobs:
   build-android:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-8x
     environment: Production
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4.0.2
+      - name: Setup node
+        uses: actions/setup-node@v4
         with:
-          node-version: 20.18.0
+          node-version-file: .nvmrc
+          cache: "yarn"
+        env:
+          SKIP_YARN_COREPACK_CHECK: "1"
+      - run: corepack enable
 
       - name: Install dependencies
         run: yarn install
@@ -59,17 +63,21 @@ jobs:
         run: eas build --profile production --platform android --non-interactive --auto-submit --no-wait
 
   build-ios:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-8x
     environment: Production
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4.0.2
+      - name: Setup node
+        uses: actions/setup-node@v4
         with:
-          node-version: 20.18.0
+          node-version-file: .nvmrc
+          cache: "yarn"
+        env:
+          SKIP_YARN_COREPACK_CHECK: "1"
+      - run: corepack enable
 
       - name: Install dependencies
         run: yarn install
@@ -103,16 +111,20 @@ jobs:
         run: eas build --profile production --platform ios --non-interactive --auto-submit --no-wait
 
   increment-build-numbers:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-8x
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4.0.2
+      - name: Setup node
+        uses: actions/setup-node@v4
         with:
-          node-version: 20.18.0
+          node-version-file: .nvmrc
+          cache: "yarn"
+        env:
+          SKIP_YARN_COREPACK_CHECK: "1"
+      - run: corepack enable
 
       - name: Increment version number
         run: |
@@ -127,7 +139,7 @@ jobs:
           body: "This PR increments the buildNumber for iOS and the versionCode for Android."
 
   create-release-notes:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-8x
 
     steps:
       - name: Checkout repository
