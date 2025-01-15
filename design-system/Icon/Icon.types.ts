@@ -12,6 +12,7 @@ export type IIconName =
   | "link"
   | "paperplane"
   | "account_circle"
+  | "pencil"
   | "square.and.pencil"
   | "qrcode"
   | "message.circle.fill"

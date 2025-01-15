@@ -49,6 +49,10 @@ import { ConversationRequestsListNav } from "@/features/conversation-requests-li
 import { GroupMetadataScreen } from "@/features/groups/group-metadata/group-metadata.screen";
 import { GroupMetadataNavParams } from "@/features/groups/group-metadata/group-metadata.nav";
 import { IdleScreen } from "../IdleScreen";
+import { EditGroupMetadataParams } from "@/features/groups/group-metadata/edit-group-metadata/edit-group-metadata.nav";
+import { EditGroupMetadataScreen } from "@/features/groups/group-metadata/edit-group-metadata/edit-group-metadata.screen";
+import { InviteUsersToExistingGroupScreen } from "@/features/groups/invite-to-group/invite-users-to-exisiting-group.screen";
+import { ViewAllGroupMembersScreen } from "@/features/groups/group-metadata/view-all-group-members/view-all-group-members.screen";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -87,8 +91,11 @@ export type NavigationParamList = {
   ShareProfile: undefined;
   TopUp: undefined;
   Profile: ProfileNavParams;
+  // todo consolidate group metadata and edit conversation metadata nav
   GroupMetadata: GroupMetadataNavParams;
+  EditConversationMetadata: EditGroupMetadataParams;
   InviteUsersToExistingGroup: InviteUsersToExistingGroupParams;
+  ViewAllGroupMembers: ViewAllGroupMembersParams;
   GroupInvite: JoinGroupNavigationParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
@@ -135,6 +142,24 @@ export function SignedInNavigation() {
     >
       <NativeStack.Group>
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
+          <NativeStack.Screen
+            name="GroupMetadata"
+            component={GroupMetadataScreen}
+          />
+          <NativeStack.Screen
+            name="EditConversationMetadata"
+            component={EditGroupMetadataScreen}
+          />
+          <NativeStack.Screen
+            name="InviteUsersToExistingGroup"
+            component={
+              /* todo adopt the new composer ui for adding members to existing groups */ InviteUsersToExistingGroupScreen
+            }
+          />
+          <NativeStack.Screen
+            name="ViewAllGroupMembers"
+            component={ViewAllGroupMembersScreen}
+          />
           <NativeStack.Screen name="Chats" component={ConversationListScreen} />
           <NativeStack.Screen name="Blocked" component={BlockedChatsScreen} />
           {ConversationRequestsListNav()}
@@ -143,11 +168,7 @@ export function SignedInNavigation() {
           {ShareProfileNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
-          <NativeStack.Screen
-            name="GroupMetadata"
-            component={GroupMetadataScreen}
-          />
-          {InviteUsersToExistingGroupNav()}
+          {/* {InviteUsersToExistingGroupNav()} */}
           {JoinGroupNavigation()}
           {TopUpNav()}
         </NativeStack.Group>

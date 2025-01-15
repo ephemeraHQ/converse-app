@@ -13,13 +13,8 @@ import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { formatGroupName } from "@utils/str";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import React, { FC, useCallback, useMemo, useState } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  useColorScheme,
-} from "react-native";
+import { Pressable, StyleSheet, TextInput, useColorScheme } from "react-native";
+import { Text } from "@/design-system/Text";
 
 type GroupScreenNameProps = {
   topic: ConversationTopic;
@@ -79,9 +74,7 @@ export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
     />
   ) : (
     <Pressable onPress={canEditGroupName ? toggleEditing : undefined}>
-      <Text style={styles.title} ellipsizeMode="tail" numberOfLines={1}>
-        {formattedGroupName}
-      </Text>
+      <Text preset="title">{formattedGroupName}</Text>
     </Pressable>
   );
 };

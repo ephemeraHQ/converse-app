@@ -30,6 +30,8 @@ export const useAddToGroupMutation = (
       if (!topic) {
         return;
       }
+      // todo: do we need to cancel a query?
+      // todo: optimistically update the group query cache with a pending member
       await cancelGroupMembersQuery(account, topic);
     },
     onError: (error, _variables, _context) => {

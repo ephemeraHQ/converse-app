@@ -94,7 +94,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
 
   const onAddMemberPress = useCallback(() => {
     logger.debug("[GroupScreenAddition] Adding new member", { topic });
-    navigate("InviteUsersToExistingGroup", { addingToGroupTopic: topic });
+    navigate("InviteUsersToExistingGroup", { topicToInviteMembersTo: topic });
   }, [topic]);
 
   const onCopyInviteLinkPress = useCallback(() => {

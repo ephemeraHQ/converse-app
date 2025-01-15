@@ -7,6 +7,7 @@ import { usePromoteToSuperAdminMutation } from "../queries/usePromoteToSuperAdmi
 import { useRemoveFromGroupMutation } from "../queries/useRemoveFromGroupMutation";
 import { useRevokeAdminMutation } from "../queries/useRevokeAdminMutation";
 import { useRevokeSuperAdminMutation } from "../queries/useRevokeSuperAdminMutation";
+import { useGroupPermissionPolicyQuery } from "@/queries/useGroupPermissionPolicyQuery";
 
 export const useGroupMembers = (topic: ConversationTopic) => {
   const account = currentAccount();
@@ -19,6 +20,17 @@ export const useGroupMembers = (topic: ConversationTopic) => {
     account,
     topic,
   });
+
+  const { data: groupPermissionPolicy } = useGroupPermissionPolicyQuery(
+    account,
+    topic
+  );
+
+  // const canPromoteToAdmin = members?.byId[account]?.isAdmin;
+  // const canPromoteToSuperAdmin = members?.byId[account]?.isSuperAdmin;
+  // const canRevokeSuperAdmin = members?.byId[account]?.isSuperAdmin;
+  // const canRevokeAdmin = members?.byId[account]?.isAdmin;
+
   const { mutateAsync: promoteToAdmin } = usePromoteToAdminMutation(
     account,
     topic

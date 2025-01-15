@@ -48,12 +48,12 @@ export function InviteUsersToExistingGroupScreen({
 }: NativeStackScreenProps<NavigationParamList, "InviteUsersToExistingGroup">) {
   const colorScheme = useColorScheme();
   const [group, setGroup] = useState({
-    enabled: !!route.params?.addingToGroupTopic,
+    enabled: !!route.params?.topicToInviteMembersTo,
     members: [] as (IProfileSocials & { address: string })[],
   });
 
   const { addMembers, members } = useGroupMembers(
-    route.params?.addingToGroupTopic!
+    route.params?.topicToInviteMembersTo!
   );
 
   const [loading, setLoading] = useState(false);
@@ -96,7 +96,7 @@ export function InviteUsersToExistingGroupScreen({
             return (
               <Button
                 variant="text"
-                text={route.params?.addingToGroupTopic ? "Add" : "Next"}
+                text={route.params?.topicToInviteMembersTo ? "Add" : "Next"}
                 onPress={handleRightAction}
                 style={{ marginRight: -10, padding: 10 }}
               />
@@ -110,7 +110,7 @@ export function InviteUsersToExistingGroupScreen({
     group,
     loading,
     navigation,
-    route.params?.addingToGroupTopic,
+    route.params?.topicToInviteMembersTo,
     addMembers,
     handleBack,
     handleRightAction,

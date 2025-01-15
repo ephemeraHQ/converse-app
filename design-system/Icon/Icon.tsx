@@ -16,6 +16,7 @@ export const iconRegistry: Record<IIconName, string> = {
   paperplane: "paperplane",
   account_circle: "person.circle",
   "square.and.pencil": "square.and.pencil",
+  pencil: "pencil",
   qrcode: "qrcode",
   "message.circle.fill": "message.circle.fill",
   signature: "signature",
@@ -66,6 +67,7 @@ export const iconRegistry: Record<IIconName, string> = {
   "shield.fill": "shield.fill",
   "new-account-card": "person.text.rectangle",
   settings: "gearshape",
+  "your.new.icon": "sf.symbol.name",
 };
 
 export function Icon(props: IIconProps) {

@@ -14,7 +14,7 @@ import {
 } from "@/styles/colors";
 
 export type InviteUsersToExistingGroupParams = {
-  addingToGroupTopic: ConversationTopic;
+  topicToInviteMembersTo: ConversationTopic;
 };
 
 export function InviteUsersToExistingGroupNav() {

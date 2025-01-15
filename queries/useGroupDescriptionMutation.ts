@@ -8,15 +8,58 @@ import { useMutation } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { setGroupDescriptionMutationKey } from "./MutationKeys";
 import { updateConversationInConversationsQuery } from "@/queries/conversations-query";
+import { userCanDoGroupActions } from "@/utils/groupUtils/userCanDoGroupActions";
+import { useGroupPermissionPolicyQuery } from "./useGroupPermissionPolicyQuery";
+import {
+  getAccountIsAdmin,
+  getAccountIsSuperAdmin,
+} from "@/utils/groupUtils/adminUtils";
+import { useGroupMembersQuery } from "./useGroupMembersQuery";
 
 type IArgs = {
   account: string;
   topic: ConversationTopic;
 };
 
+const useGroupMemberPermissions = ({
+  currentAccount,
+  groupTopic,
+}: {
+  currentAccount: string;
+  groupTopic: ConversationTopic;
+}) => {
+  const { data: groupPermissionPolicy } = useGroupPermissionPolicyQuery(
+    currentAccount,
+    groupTopic
+  );
+  const { data: members } = useGroupMembersQuery({
+    account: currentAccount,
+    topic: groupTopic,
+  });
+
+  const isSuperAdmin = getAccountIsSuperAdmin(members, currentAccount);
+  const isAdmin = getAccountIsAdmin(members, currentAccount);
+};
+
 export function useGroupDescriptionMutation(args: IArgs) {
   const { account, topic } = args;
   const { data: group } = useGroupQuery({ account, topic });
+  const { data: groupPermissionPolicy } = useGroupPermissionPolicyQuery(
+    account,
+    topic
+  );
+
+  const {
+    canUpdateGroupName,
+    canUpdateGroupDescription,
+    canUpdateGroupPhoto,
+
+    canUpdateAdminUsers,
+    canUpdateSuperAdminUsers,
+  } = /*todo*/ useGroupMemberPermissions({
+    currentAccount: account,
+    groupTopic: topic,
+  });
 
   return useMutation({
     mutationKey: setGroupDescriptionMutationKey(account, topic),

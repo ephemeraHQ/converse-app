@@ -52,6 +52,7 @@ export const getGroupMemberActions = ({
     );
   const canRevokeSuperAdmin =
     !isCurrentUser && currentAccountIsSuperAdmin && isSuperAdmin;
+
   const options = [translate("group_screen_member_actions.profile_page")];
   let cancelButtonIndex = 1;
   let promoteAdminIndex: number | undefined = undefined;

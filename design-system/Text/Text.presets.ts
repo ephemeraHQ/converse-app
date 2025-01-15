@@ -20,7 +20,7 @@ export type IPresets =
   | "emojiSymbol";
 
 export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
-  title: [textBaseStyle, textSizeStyles.xl, textFontWeightStyles.bold],
+  title: [textBaseStyle, textSizeStyles.md, textFontWeightStyles.bold],
 
   body: [textBaseStyle],
 

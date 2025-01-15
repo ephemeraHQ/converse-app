@@ -36,7 +36,7 @@
 //   const colorScheme = useColorScheme();
 
 //   logger.debug("[NewConversationModal] Rendering with params:", {
-//     addingToGroupTopic: route.params?.addingToGroupTopic,
+//     topicToInviteMembersTo: route.params?.topicToInviteMembersTo,
 //     peer: route.params?.peer
 //   });
 

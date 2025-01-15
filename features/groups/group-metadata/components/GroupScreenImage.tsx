@@ -44,31 +44,33 @@ export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
     currentAccountIsSuperAdmin
   );
 
-  const onPhotoChange = useCallback(
-    (newImageUrl: string) => {
-      uploadFile({
-        account: currentAccount,
-        filePath: newImageUrl,
-        contentType: "image/jpeg",
-      }).then((url) => {
-        setGroupPhoto(url);
-      });
-    },
-    [currentAccount, setGroupPhoto]
-  );
-  const { addPhoto: addGroupPhoto, photo: localGroupPhoto } = usePhotoSelect({
-    initialPhoto: groupPhoto,
-    onPhotoAdd: onPhotoChange,
-  });
+  // const onPhotoChange = useCallback(
+  //   (newImageUrl: string) => {
+  //     uploadFile({
+  //       account: currentAccount,
+  //       filePath: newImageUrl,
+  //       contentType: "image/jpeg",
+  //     }).then((url) => {
+  //       setGroupPhoto(url);
+  //     });
+  //   },
+  //   [currentAccount, setGroupPhoto]
+  // );
+  // const { addPhoto: addGroupPhoto, photo: localGroupPhoto } = usePhotoSelect({
+  //   initialPhoto: groupPhoto,
+  //   onPhotoAdd: onPhotoChange,
+  // });
+
   return (
     <List.Section>
       <View style={styles.container}>
         <GroupAvatar
-          uri={localGroupPhoto}
+          uri={groupPhoto}
           style={styles.avatar}
           topic={topic}
           excludeSelf={false}
         />
+        {/* todo cute little overlapping camera icon
         {canEditGroupImage && (
           <Button
             variant="text"
@@ -80,7 +82,7 @@ export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
             textStyle={styles.buttonText}
             onPress={addGroupPhoto}
           />
-        )}
+        )} */}
       </View>
     </List.Section>
   );
