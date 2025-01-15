@@ -303,7 +303,9 @@ export default function NewConversation({
                 });
                 setStatus({
                   loading: false,
-                  error: `${shortAddress(searchQueryState)} is not on the XMTP network yet`,
+                  error: `${shortAddress(
+                    searchQueryState
+                  )} is not on the XMTP network yet`,
                   inviteToConverse: searchQueryState,
                   profileSearchResults: {},
                 });
@@ -537,6 +539,7 @@ export default function NewConversation({
                   account: currentAccount(),
                   topic: dm.topic,
                   conversation: dm,
+                  context: "NewConversation#sendDm",
                 });
                 navigation.replace("Conversation", { topic: dm.topic });
               } else {
@@ -556,6 +559,7 @@ export default function NewConversation({
                   account: currentAccount(),
                   topic: group.topic,
                   conversation: group,
+                  context: "NewConversation#sendGroupMessage",
                 });
                 navigation.replace("Conversation", { topic: group.topic });
               }

@@ -56,7 +56,7 @@ export function useHeaderWrapper() {
             }}
             icon="square.and.pencil"
             onPress={() => {
-              navigation.navigate("NewConversation", {});
+              navigation.navigate("NewConversation");
             }}
           />
         </HStack>
