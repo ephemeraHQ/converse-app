@@ -3,6 +3,9 @@ import { InboxId } from "@xmtp/react-native-sdk";
 import logger from "@utils/logger";
 import { ConverseXmtpClientType, DmWithCodecsType } from "./client.types";
 import { getXmtpClient } from "./sync";
+import { captureError } from "../capture-error";
+import { fetchPersistedConversationListQuery } from "@/queries/useConversationListQuery";
+import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
 
 type ConsentType = "allow" | "deny";
 
@@ -256,4 +259,54 @@ export const canMessageByAccount = async ({
 
 export const getDmPeerInbox = async (dm: DmWithCodecsType) => {
   return dm.peerInboxId();
+};
+
+export const streamConsent = async (account: string) => {
+  try {
+    logger.info(`[XMTPRN Contacts] Streaming consent for ${account}`);
+    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    await client.preferences.streamConsent(async () => {
+      logger.info(`[XMTPRN Contacts] Consent has been updated`);
+      try {
+        // Consent Has Been Updated, resubscribe to notifications
+        const conversations = await fetchPersistedConversationListQuery({
+          account,
+        });
+        subscribeToNotifications({
+          conversations,
+          account,
+        });
+      } catch (e) {
+        captureError(e);
+      }
+    });
+  } catch (e) {
+    captureError(e);
+  }
+};
+
+export const stopStreamingConsent = async (account: string) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  return client.preferences.cancelStreamConsent();
+};
+
+/**
+ * Not implemented yet
+ * @param account
+ */
+export const streamPreferences = async (account: string) => {
+  try {
+    logger.info(`[XMTPRN Contacts] Streaming preferences for ${account}`);
+    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    await client.preferences.streamPreferenceUpdates(async (preference) => {
+      logger.info(`[XMTPRN Contacts] Preference has been updated`);
+    });
+  } catch (e) {
+    captureError(e);
+  }
+};
+
+export const stopStreamingPreferences = async (account: string) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  return client.preferences.cancelStreamPreferenceUpdates();
 };

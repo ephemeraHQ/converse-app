@@ -1,5 +1,4 @@
 import { createConversationListQueryObserver } from "@/queries/useConversationListQuery";
-import { subscribeToNotifications } from "./subscribeToNotifications";
 import logger from "@/utils/logger";
 import { currentAccount } from "@/data/store/accountsStore";
 import { resetNotifications } from "./resetNotifications";
@@ -23,11 +22,6 @@ export const setupAccountTopicSubscription = (account: string) => {
   let previous: number | undefined;
   const unsubscribe = observer.subscribe((conversationList) => {
     if (conversationList.data && conversationList.dataUpdatedAt !== previous) {
-      previous = conversationList.dataUpdatedAt;
-      subscribeToNotifications({
-        conversations: conversationList.data,
-        account,
-      });
       if (account === currentAccount()) {
         resetNotifications(account);
       }

@@ -16,6 +16,7 @@ import { useAppStore } from "../data/store/appStore";
 import { getTopicsData } from "../utils/api";
 import { stopStreamingConversations } from "../utils/xmtpRN/conversations";
 import { syncConversationListXmtpClient } from "../utils/xmtpRN/sync";
+import { stopStreamingConsent } from "@/utils/xmtpRN/contacts";
 
 class XmtpEngine {
   accountsStoreSubscription: (() => void) | null = null;
@@ -123,6 +124,7 @@ class XmtpEngine {
       await Promise.all([
         stopStreamingAllMessage(account),
         stopStreamingConversations(account),
+        stopStreamingConsent(account),
       ]);
     }
   }
