@@ -33,7 +33,7 @@ export const MessageSimpleText = memo(function MessageSimpleText(props: {
           alignItems: fromMe ? "flex-end" : "flex-start",
         }}
       >
-        <Text style={textSizeStyles.xxl}>{textContent}</Text>
+        <Text style={textSizeStyles["3xl"]}>{textContent}</Text>
       </VStack>
     );
   }

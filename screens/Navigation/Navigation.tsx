@@ -27,7 +27,6 @@ import { NewAccountScreen } from "../NewAccount/NewAccountScreen";
 import { NewAccountUserProfileScreen } from "../NewAccount/NewAccountUserProfileScreen";
 import { OnboardingConnectWalletScreen } from "../Onboarding/OnboardingConnectWalletScreen";
 import { OnboardingEphemeraScreen } from "../Onboarding/OnboardingEphemeraScreen";
-import { OnboardingGetStartedScreen } from "../Onboarding/OnboardingGetStartedScreen";
 import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificationsScreen";
 import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
 import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
@@ -46,6 +45,7 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import ConversationRequestsListNav from "@/screens/Navigation/ConversationRequestsListNav.ios";
+import { OnboardingGetStartedScreen } from "@/features/onboarding/onboarding-get-started.screen";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -195,6 +195,13 @@ export function SignedOutNavigation() {
       screenListeners={screenListeners("fullStackNavigation")}
     >
       <NativeStack.Group>
+        <NativeStack.Group screenOptions={{ headerShown: false }}>
+          <NativeStack.Screen
+            name="OnboardingGetStarted"
+            component={OnboardingGetStartedScreen}
+          />
+        </NativeStack.Group>
+
         {/* Auth / Onboarding */}
         <NativeStack.Group
           screenOptions={{
@@ -202,13 +209,6 @@ export function SignedOutNavigation() {
             ...authScreensSharedScreenOptions,
           }}
         >
-          <NativeStack.Screen
-            options={{
-              headerShown: false,
-            }}
-            name="OnboardingGetStarted"
-            component={OnboardingGetStartedScreen}
-          />
           <NativeStack.Screen
             name="OnboardingPrivy"
             component={OnboardingPrivyScreen}
