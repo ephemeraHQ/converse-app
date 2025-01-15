@@ -15,12 +15,7 @@ type Props = {
   onRef: (r: TextInput | null) => void;
 };
 
-export default function SearchBar({
-  inputPlaceholder,
-  value,
-  setValue,
-  onRef,
-}: Props) {
+export function SearchBar({ inputPlaceholder, value, setValue, onRef }: Props) {
   const { theme, themed } = useAppTheme();
 
   return (

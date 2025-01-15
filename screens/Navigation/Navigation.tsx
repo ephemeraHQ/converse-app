@@ -25,6 +25,7 @@ import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeySc
 import { NewAccountPrivyScreen } from "../NewAccount/NewAccountPrivyScreen";
 import { NewAccountScreen } from "../NewAccount/NewAccountScreen";
 import { NewAccountUserProfileScreen } from "../NewAccount/NewAccountUserProfileScreen";
+import { NewConversationNav } from "./NewConversationNav";
 import { OnboardingConnectWalletScreen } from "../Onboarding/OnboardingConnectWalletScreen";
 import { OnboardingEphemeraScreen } from "../Onboarding/OnboardingEphemeraScreen";
 import { OnboardingGetStartedScreen } from "../Onboarding/OnboardingGetStartedScreen";
@@ -32,12 +33,13 @@ import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificat
 import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
 import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
 import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
-import ConverseMatchMakerNav from "./ConverseMatchMakerNav";
+import {
+  InviteUsersToExistingGroupNav,
+  InviteUsersToExistingGroupParams,
+} from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
 import GroupNav, { GroupNavParams } from "./GroupNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
-import NewConversationNav, {
-  NewConversationNavParams,
-} from "./NewConversationNav";
+
 import ProfileNav, { ProfileNavParams } from "./ProfileNav";
 import ShareProfileNav from "./ShareProfileNav";
 import TopUpNav from "./TopUpNav";
@@ -61,7 +63,7 @@ export type NavigationParamList = {
   OnboardingEphemeral: undefined;
   OnboardingUserProfile: undefined;
 
-  // Nwe account
+  // New account
   NewAccountNavigator: undefined;
   NewAccountUserProfile: undefined;
   NewAccountConnectWallet: {
@@ -77,7 +79,7 @@ export type NavigationParamList = {
   Chats: undefined;
   ChatsRequests: undefined;
   Conversation: ConversationNavParams;
-  NewConversation: NewConversationNavParams;
+  NewConversation: undefined;
 
   NewGroupSummary: undefined;
   ConverseMatchMaker: undefined;
@@ -85,6 +87,7 @@ export type NavigationParamList = {
   TopUp: undefined;
   Profile: ProfileNavParams;
   Group: GroupNavParams;
+  InviteUsersToExistingGroup: InviteUsersToExistingGroupParams;
   GroupInvite: JoinGroupNavigationParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
@@ -136,11 +139,11 @@ export function SignedInNavigation() {
           {ConversationRequestsListNav()}
           {ConversationNav()}
           {NewConversationNav()}
-          {ConverseMatchMakerNav()}
           {ShareProfileNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
           {GroupNav()}
+          {InviteUsersToExistingGroupNav()}
           {JoinGroupNavigation()}
           {TopUpNav()}
         </NativeStack.Group>

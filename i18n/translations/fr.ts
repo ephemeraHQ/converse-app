@@ -343,12 +343,12 @@ export const fr = {
     title: "Nouveau groupe",
   },
 
-  new_conversation: {
+  new_chat: {
     create_group: "Créer un groupe",
     back: "Retour",
     create: "Créer",
     add_members: "Ajouter des membres",
-    new_conversation: "Nouvelle conversation",
+    new_chat: "Nouvelle conversation",
     invite_to_converse: "Invitez-les à Converse",
   },
 

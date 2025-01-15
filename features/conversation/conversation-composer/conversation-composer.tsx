@@ -19,10 +19,12 @@ import {
 
 type IComposerProps = {
   onSend: (args: ISendMessageParams) => Promise<void>;
+  hideAddAttachmentButton?: boolean;
+  disabled?: boolean;
 };
 
 export const Composer = memo(function Composer(props: IComposerProps) {
-  const { onSend } = props;
+  const { onSend, disabled, hideAddAttachmentButton } = props;
 
   const { theme } = useAppTheme();
   const store = useConversationComposerStore();
@@ -113,17 +115,39 @@ export const Composer = memo(function Composer(props: IComposerProps) {
   return (
     <VStack
       style={{
-        // ...debugBorder("yellow"),
         margin: 6, // 6 in the Figma
       }}
     >
       <HStack
         style={{
-          // ...debugBorder("red"),
           alignItems: "flex-end",
         }}
       >
-        <AddAttachmentButton />
+        {/* note(lustig): if we need any more modifications of this component,
+        we should take the time to create a composite component to allow
+        consumers to explicitly construct it the way they need.
+        
+        ie: 
+
+        <Composer.Container>
+          <Composer.SenderSwitcher/>
+          <Composer.TextInput />
+          <Composer.SendButton disabled={whateverArbitraryCondition} />
+        </Composer.Container>
+
+        this api would prevent us from getting into prop hell and we 
+        could still create the "base" component that covers most normal
+        cases from it.
+
+        I foresee this being required once we start building the composer
+        "swap sender" functionality.
+
+        That functionality will be completely useless mid conversation, 
+        but it will be useful when creating a new conversation, for example.
+
+        figma: https://www.figma.com/design/p6mt4tEDltI4mypD3TIgUk/Converse-App?node-id=5026-26997&m=dev
+        */}
+        {!hideAddAttachmentButton && <AddAttachmentButton />}
         <VStack
           style={{
             flex: 1,
@@ -143,7 +167,7 @@ export const Composer = memo(function Composer(props: IComposerProps) {
             }}
           >
             <ComposerTextInput onSubmitEditing={send} />
-            <SendButton onPress={send} />
+            <SendButton onPress={send} disabled={disabled} />
           </HStack>
         </VStack>
       </HStack>
@@ -151,8 +175,11 @@ export const Composer = memo(function Composer(props: IComposerProps) {
   );
 });
 
-const SendButton = memo(function SendButton(props: { onPress: () => void }) {
-  const { onPress } = props;
+const SendButton = memo(function SendButton(props: {
+  onPress: () => void;
+  disabled?: boolean;
+}) {
+  const { onPress, disabled } = props;
 
   const { theme } = useAppTheme();
 
@@ -181,7 +208,7 @@ const SendButton = memo(function SendButton(props: { onPress: () => void }) {
         hitSlop={theme.spacing.xs}
         size="sm"
         onPress={onPress}
-        disabled={!canSend}
+        disabled={disabled || !canSend}
         iconName="arrow.up"
       />
     </VStack>

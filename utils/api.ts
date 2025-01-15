@@ -216,9 +216,9 @@ export async function getXmtpApiHeaders(
 
   if (!appCheckToken) {
     throw new Error(`
-No App Check Token Available. This indicates that we believe the app is not running on an authentic build of
-our application on a device that has not been tampered with. 
-`);
+  No App Check Token Available. This indicates that we believe the app is not running on an authentic build of
+  our application on a device that has not been tampered with.
+  `);
   }
 
   if (!accessToken) {
