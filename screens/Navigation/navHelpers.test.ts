@@ -19,7 +19,7 @@ describe("getConverseStateFromPath", () => {
         path: "/profile",
       },
       Group: {
-        path: "/group",
+        path: "/groupMetadata",
       },
       GroupLink: {
         path: "/groupLink/:groupLinkId",

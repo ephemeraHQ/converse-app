@@ -18,7 +18,6 @@ import {
 } from "../../features/conversation/conversation.nav";
 import { useRouter } from "../../navigation/useNavigation";
 import Accounts from "../Accounts/Accounts";
-import { IdleScreen } from "../IdleScreen";
 import { NewAccountConnectWalletScreen } from "../NewAccount/NewAccountConnectWalletScreen";
 import { NewAccountEphemeraScreen } from "../NewAccount/NewAccountEphemeraScreen";
 import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeyScreen";
@@ -37,7 +36,6 @@ import {
   InviteUsersToExistingGroupNav,
   InviteUsersToExistingGroupParams,
 } from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
-import GroupNav, { GroupNavParams } from "./GroupNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 
 import ProfileNav, { ProfileNavParams } from "./ProfileNav";
@@ -48,6 +46,9 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
+import { GroupMetadataScreen } from "@/features/groups/group-metadata/group-metadata.screen";
+import { GroupMetadataNavParams } from "@/features/groups/group-metadata/group-metadata.nav";
+import { IdleScreen } from "../IdleScreen";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -86,7 +87,7 @@ export type NavigationParamList = {
   ShareProfile: undefined;
   TopUp: undefined;
   Profile: ProfileNavParams;
-  Group: GroupNavParams;
+  GroupMetadata: GroupMetadataNavParams;
   InviteUsersToExistingGroup: InviteUsersToExistingGroupParams;
   GroupInvite: JoinGroupNavigationParams;
   UserProfile: undefined;
@@ -142,7 +143,10 @@ export function SignedInNavigation() {
           {ShareProfileNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
-          {GroupNav()}
+          <NativeStack.Screen
+            name="GroupMetadata"
+            component={GroupMetadataScreen}
+          />
           {InviteUsersToExistingGroupNav()}
           {JoinGroupNavigation()}
           {TopUpNav()}

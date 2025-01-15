@@ -25,7 +25,7 @@ import {
   MenuActionConfig,
 } from "react-native-ios-context-menu";
 
-export function useConversationListScreenHeaderWrapper() {
+export function useGroupMetadataHeader() {
   const { theme } = useAppTheme();
   const navigation = useNavigation();
   const currentAccount = useCurrentAccount();

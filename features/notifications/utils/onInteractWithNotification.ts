@@ -42,7 +42,7 @@ export const onInteractWithNotification = async (
     if (payloadType === "group_join_request") {
       const groupId = payload["groupId"] as string;
       if (typeof groupId === "string") {
-        return navigate("Group", {
+        return navigate("GroupMetadata", {
           topic: getTopicFromV3Id(groupId as ConversationId),
         });
       } else {

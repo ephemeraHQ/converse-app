@@ -36,7 +36,7 @@ import { ContextMenuView } from "react-native-ios-context-menu";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-requests";
 import { ConversationListEmpty } from "./conversation-list-empty";
-import { useHeaderWrapper } from "./conversation-list.screen-header";
+import { useConversationListScreenHeaderWrapper } from "./conversation-list.screen-header";
 
 type IConversationListProps = NativeStackScreenProps<
   NavigationParamList,
@@ -52,7 +52,7 @@ export function ConversationListScreen(props: IConversationListProps) {
 
   const insets = useSafeAreaInsets();
 
-  useHeaderWrapper();
+  useConversationListScreenHeaderWrapper();
 
   const handleRefresh = useCallback(async () => {
     try {
@@ -65,7 +65,7 @@ export function ConversationListScreen(props: IConversationListProps) {
   return (
     <Screen contentContainerStyle={$globalStyles.flex1}>
       <ConversationList
-        conversations={isLoadingConversations ? [] : (conversations ?? [])}
+        conversations={isLoadingConversations ? [] : conversations ?? []}
         scrollEnabled={conversations && conversations?.length > 0}
         ListEmptyComponent={<ConversationListEmpty />}
         ListHeaderComponent={<ListHeader />}

@@ -27,7 +27,7 @@ import { useGroupPermissionPolicyQuery } from "@queries/useGroupPermissionPolicy
 import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import TableView, {
   TableViewItemType,
-} from "../components/TableView/TableView";
+} from "../../../../components/TableView/TableView";
 
 type GroupScreenMembersTableProps = {
   topic: ConversationTopic;
@@ -98,7 +98,9 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
         const preferredName = getPreferredInboxName(mappedData[a.inboxId]);
         items.push({
           id: a.inboxId,
-          title: `${preferredName}${isCurrentUser ? translate("you_parentheses") : ""}`,
+          title: `${preferredName}${
+            isCurrentUser ? translate("you_parentheses") : ""
+          }`,
           action: () => {
             const {
               options,

@@ -2,6 +2,7 @@ import {
   SetDataOptions,
   useQuery,
   UseQueryOptions,
+  queryOptions as reactQueryOptions,
 } from "@tanstack/react-query";
 import { getCleanAddress } from "@utils/evm/getCleanAddress";
 import { ConversationTopic, Member } from "@xmtp/react-native-sdk";
@@ -13,7 +14,7 @@ import { queryClient } from "./queryClient";
 import { groupMembersQueryKey } from "./QueryKeys";
 import { useGroupQuery } from "./useGroupQuery";
 
-export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
+export type GroupMembersMap = EntityObjectWithAddress<Member, InboxId>;
 
 const fetchGroupMembers = async (
   group: GroupWithCodecsType | undefined | null
@@ -25,6 +26,7 @@ const fetchGroupMembers = async (
       ids: [],
     };
   }
+  // note(lustig) this may break after we upgrade to xmtp without client in serializable types?
   const members = await group.members();
 
   return entifyWithAddress(
@@ -37,32 +39,31 @@ const fetchGroupMembers = async (
 type IGroupMembersQueryConfig = {
   account: string;
   group: GroupWithCodecsType | undefined | null;
-  queryOptions?: Partial<UseQueryOptions<GroupMembersSelectData>>;
+  queryOptions?: Partial<UseQueryOptions<GroupMembersMap>>;
 };
 
 const groupMembersQueryConfig = (
   args: IGroupMembersQueryConfig
-): UseQueryOptions<GroupMembersSelectData> => {
+): UseQueryOptions<GroupMembersMap> => {
   const { account, group, queryOptions } = args;
   const isEnabled = !!group && !!group.topic && (queryOptions?.enabled ?? true);
-  return {
+  return reactQueryOptions({
     queryKey: groupMembersQueryKey(account, group?.topic!),
     queryFn: () => fetchGroupMembers(group!),
     enabled: isEnabled,
     ...queryOptions,
-  };
+  });
 };
 
 export const useGroupMembersQuery = (args: {
   account: string;
   topic: ConversationTopic;
-  queryOptions?: Partial<UseQueryOptions<GroupMembersSelectData>>;
+  /** @deprecated this name collides with queryOptions from react-query, needs to be renamed eventually */
+  queryOptions?: Partial<UseQueryOptions<GroupMembersMap>>;
 }) => {
   const { account, topic, queryOptions } = args;
   const { data: group } = useGroupQuery({ account, topic });
-  return useQuery<GroupMembersSelectData>(
-    groupMembersQueryConfig({ account, group, queryOptions })
-  );
+  return useQuery(groupMembersQueryConfig({ account, group, queryOptions }));
 };
 
 export const useGroupMembersConversationScreenQuery = (args: {
@@ -72,9 +73,7 @@ export const useGroupMembersConversationScreenQuery = (args: {
   const { account, topic } = args;
   const { data: group } = useGroupQuery({ account, topic });
 
-  return useQuery<GroupMembersSelectData>(
-    groupMembersQueryConfig({ account, group })
-  );
+  return useQuery<GroupMembersMap>(groupMembersQueryConfig({ account, group }));
 };
 
 export const useConversationListMembersQuery = (args: {
@@ -84,7 +83,7 @@ export const useConversationListMembersQuery = (args: {
   const { account, group } = args;
   const queryOptions = { enabled: !!group && !group.imageUrlSquare };
 
-  return useQuery<GroupMembersSelectData>(
+  return useQuery<GroupMembersMap>(
     groupMembersQueryConfig({ account, group, queryOptions })
   );
 };
@@ -92,16 +91,16 @@ export const useConversationListMembersQuery = (args: {
 export const getGroupMembersQueryData = (
   account: string,
   topic: ConversationTopic
-): GroupMembersSelectData | undefined =>
+): GroupMembersMap | undefined =>
   queryClient.getQueryData(groupMembersQueryKey(account, topic));
 
 export const setGroupMembersQueryData = (
   account: string,
   topic: ConversationTopic,
-  members: GroupMembersSelectData,
+  members: GroupMembersMap,
   options?: SetDataOptions
 ) => {
-  queryClient.setQueryData<GroupMembersSelectData>(
+  queryClient.setQueryData<GroupMembersMap>(
     groupMembersQueryKey(account, topic),
     members,
     options

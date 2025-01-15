@@ -22,7 +22,6 @@ import { useAutoConnectExternalWallet } from "../utils/evm/external";
 import { usePrivyAccessToken } from "../utils/evm/privy";
 import { setConverseNavigatorRef } from "../utils/navigation";
 import { ConversationScreenConfig } from "../features/conversation/conversation.nav";
-import { GroupScreenConfig } from "./Navigation/GroupNav";
 import {
   IdleNavigation,
   NavigationParamList,
@@ -39,6 +38,7 @@ import {
 } from "./Navigation/navHelpers";
 import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
 import logger from "@/utils/logger";
+import { GroupMetadataScreenConfig } from "@/features/groups/group-metadata/group-metadata.nav";
 
 const prefix = Linking.createURL("/");
 
@@ -51,7 +51,7 @@ const linking: LinkingOptions<NavigationParamList> = {
       Conversation: ConversationScreenConfig,
       NewConversation: NewChatScreenConfig,
       Profile: ProfileScreenConfig,
-      Group: GroupScreenConfig,
+      GroupMetadata: GroupMetadataScreenConfig,
       GroupInvite: JoinGroupScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
       WebviewPreview: WebviewPreviewScreenConfig,

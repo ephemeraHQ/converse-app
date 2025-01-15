@@ -1,11 +1,11 @@
-import { GroupMembersSelectData } from "@/queries/useGroupMembersQuery";
+import { GroupMembersMap } from "@/queries/useGroupMembersQuery";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
 import { useInboxProfilesSocials } from "./useInboxProfilesSocials";
 
 export const useGroupMembersSocials = (
-  groupMembers: GroupMembersSelectData | undefined
+  groupMembers: GroupMembersMap | undefined
 ) => {
   const memberInboxIds = useMemo(
     () => groupMembers?.ids.map((m) => m) ?? [],

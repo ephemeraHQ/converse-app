@@ -7,7 +7,7 @@ import { useColorScheme } from "react-native";
 
 import TableView, {
   TableViewItemType,
-} from "../components/TableView/TableView";
+} from "../../../../components/TableView/TableView";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 

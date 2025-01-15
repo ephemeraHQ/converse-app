@@ -73,6 +73,8 @@ const PeerAddressFlow = memo(function PeerAddressFlow(
   }
 
   return (
+    // note(lustig) unsure how new composer will effect this
+    // new composer: https://www.figma.com/design/p6mt4tEDltI4mypD3TIgUk/Converse-App?node-id=5026-26989&m=dev
     <ConversationNewDm peerAddress={peerAddress} textPrefill={textPrefill} />
   );
 });

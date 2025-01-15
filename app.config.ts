@@ -18,23 +18,23 @@ const isProduction = !isDev && !isPreview;
 const scheme = isDev
   ? "converse-dev"
   : isPreview
-    ? "converse-preview"
-    : "converse";
+  ? "converse-preview"
+  : "converse";
 const androidPackage = isDev
   ? "com.converse.dev"
   : isPreview
-    ? "com.converse.preview"
-    : "com.converse.prod";
+  ? "com.converse.preview"
+  : "com.converse.prod";
 const appDomainConverse = isDev
   ? "dev.converse.xyz"
   : isPreview
-    ? "preview.converse.xyz"
-    : "converse.xyz";
+  ? "preview.converse.xyz"
+  : "converse.xyz";
 const appDomainGetConverse = isDev
   ? "dev.getconverse.app"
   : isPreview
-    ? "preview.getconverse.app"
-    : "getconverse.app";
+  ? "preview.getconverse.app"
+  : "getconverse.app";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -77,8 +77,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     googleServicesFile: isDev
       ? "./scripts/build/android/google-services/dev.json"
       : isPreview
-        ? "./scripts/build/android/google-services/preview.json"
-        : "./scripts/build/android/google-services/production.json",
+      ? "./scripts/build/android/google-services/preview.json"
+      : "./scripts/build/android/google-services/production.json",
     permissions: [
       "INTERNET",
       "READ_EXTERNAL_STORAGE",
@@ -118,9 +118,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           {
             scheme: "https",
             host: appDomainGetConverse,
-            pathPrefix: "/group",
+            pathPrefix: "/groupMetadata",
           },
-          { scheme: "https", host: appDomainConverse, pathPrefix: "/group" },
+          {
+            scheme: "https",
+            host: appDomainConverse,
+            pathPrefix: "/groupMetadata",
+          },
           {
             scheme: "https",
             host: appDomainGetConverse,

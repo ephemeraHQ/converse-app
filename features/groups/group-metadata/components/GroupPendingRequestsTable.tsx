@@ -13,7 +13,7 @@ import { StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import TableView, {
   TableViewItemType,
-} from "../components/TableView/TableView";
+} from "../../../../components/TableView/TableView";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 type GroupPendingRequestsTableProps = {

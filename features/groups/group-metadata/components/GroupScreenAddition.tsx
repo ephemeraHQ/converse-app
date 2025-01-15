@@ -40,7 +40,7 @@ import {
   getInviteIdByGroupId,
   saveGroupInviteLink,
   saveInviteIdByGroupId,
-} from "../features/GroupInvites/groupInvites.utils";
+} from "../../../GroupInvites/groupInvites.utils";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import logger from "@/utils/logger";
 

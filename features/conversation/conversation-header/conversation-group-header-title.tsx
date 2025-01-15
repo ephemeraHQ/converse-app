@@ -47,7 +47,7 @@ export const GroupConversationTitle = memo(
     const { theme } = useAppTheme();
 
     const onPress = useCallback(() => {
-      navigation.push("Group", { topic });
+      navigation.push("GroupMetadata", { topic });
     }, [navigation, topic]);
 
     const onLongPress = useCallback(() => {

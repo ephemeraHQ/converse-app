@@ -9,25 +9,18 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  View,
+  Text,
   useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { GroupPendingRequestsTable } from "../containers/GroupPendingRequestsTable";
-import { GroupScreenAddition } from "../containers/GroupScreenAddition";
-import { GroupScreenConsentTable } from "../containers/GroupScreenConsentTable";
-import { GroupScreenDescription } from "../containers/GroupScreenDescription";
-import { GroupScreenImage } from "../containers/GroupScreenImage";
-import { GroupScreenMembersTable } from "../containers/GroupScreenMembersTable";
-import { GroupScreenName } from "../containers/GroupScreenName";
-import { NavigationParamList } from "./Navigation/Navigation";
-import { useCurrentAccount } from "../data/store/accountsStore";
 import { useGroupQuery } from "@queries/useGroupQuery";
+import { useCurrentAccount } from "@data/store/accountsStore";
+import { NavigationParamList } from "@/screens/Navigation/Navigation";
 
-export default function GroupScreen({
+export function GroupMetadataScreen({
   route,
-}: NativeStackScreenProps<NavigationParamList, "Group">) {
+}: NativeStackScreenProps<NavigationParamList, "GroupMetadata">) {
   const styles = useStyles();
   const currentAccount = useCurrentAccount() as string;
   const topic = route.params.topic;
@@ -43,14 +36,15 @@ export default function GroupScreen({
       style={styles.group}
       contentContainerStyle={styles.groupContent}
     >
-      <GroupScreenImage topic={topic} />
+      <Text>Sergeant buttface</Text>
+      {/* <GroupScreenImage topic={topic} />
       <GroupScreenName topic={topic} />
       <GroupScreenDescription topic={topic} />
       <GroupScreenAddition topic={topic} />
       <GroupPendingRequestsTable topic={topic} />
       <GroupScreenMembersTable topic={topic} group={group} />
       <GroupScreenConsentTable topic={topic} group={group} />
-      <View style={{ height: insets.bottom }} />
+      <View style={{ height: insets.bottom }} /> */}
     </ScrollView>
   );
 }
