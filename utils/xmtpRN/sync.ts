@@ -1,8 +1,10 @@
+import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
+
+import { getChatStore } from "@data/store/accountsStore";
 import logger from "@utils/logger";
 import { retryWithBackoff } from "@utils/retryWithBackoff";
 import { Client } from "@xmtp/xmtp-js";
 import { AppState } from "react-native";
-import { getChatStore } from "@data/store/accountsStore";
 import {
   getXmtpClientFromAddress,
   reconnectXmtpClientsDbConnections,
@@ -14,11 +16,6 @@ import {
   streamConversations,
 } from "./conversations";
 import { stopStreamingAllMessage, streamAllMessages } from "./messages";
-import {
-  fetchPersistedConversationListQuery,
-  prefetchConversationListQuery,
-} from "@/queries/useConversationListQuery";
-import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
 
 const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;
@@ -48,12 +45,9 @@ export const getXmtpClient = async (
       logger.debug("[XmtpRN] Getting client from address");
       const client = await getXmtpClientFromAddress(account);
       logger.info(`[XmtpRN] Instantiated client for ${client.address}`);
-      getChatStore(account).getState().setLocalClientConnected(true);
-      getChatStore(account).getState().setErrored(false);
       xmtpClientByAccount[lowerCaseAccount] = client;
       return client;
-    } catch (e: any) {
-      getChatStore(account).getState().setErrored(true);
+    } catch (e: unknown) {
       throw e;
     } finally {
       delete instantiatingClientForAccount[lowerCaseAccount];
@@ -97,8 +91,6 @@ const streamingAccounts: { [account: string]: boolean } = {};
 
 const syncClientConversationList = async (account: string) => {
   try {
-    // Load the persisted conversation list
-    await fetchPersistedConversationListQuery({ account });
     // Streaming conversations
     await retryWithBackoff({
       fn: () => streamConversations(account),
@@ -130,7 +122,6 @@ const syncClientConversationList = async (account: string) => {
     // Prefetch the conversation list so when we land on the conversation list
     // we have it ready, this will include syncing all groups
     setupAccountTopicSubscription(account);
-    await prefetchConversationListQuery({ account });
   } catch (e) {
     logger.error(e, {
       context: `Failed to fetch persisted conversation list for ${account}`,

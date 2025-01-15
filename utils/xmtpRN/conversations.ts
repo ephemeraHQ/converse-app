@@ -1,4 +1,4 @@
-import { addConversationToConversationListQuery } from "@/queries/useConversationListQuery";
+import { addConversationToConversationsQuery } from "@/queries/conversations-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import { ConversationOptions, ConversationTopic } from "@xmtp/react-native-sdk";
@@ -19,7 +19,7 @@ export const streamConversations = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   await client.conversations.stream(async (conversation) => {
     logger.info("[XMTPRN Conversations] GOT A NEW CONVO");
-    addConversationToConversationListQuery({ account, conversation });
+    addConversationToConversationsQuery({ account, conversation });
   });
   logger.info("STREAMING CONVOS");
 };

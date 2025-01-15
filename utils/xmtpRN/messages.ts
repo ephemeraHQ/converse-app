@@ -1,16 +1,14 @@
-import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { updateConversationInConversationListQuery } from "@/queries/useConversationListQuery";
+import { updateConversationInConversationsQuery } from "@/queries/conversations-query";
 import { updateConversationQueryData } from "@/queries/useConversationQuery";
 import { invalidateGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
+import { isProd } from "@/utils/getEnv";
 import { addConversationMessage } from "@queries/useConversationMessages";
 import logger from "@utils/logger";
 import type {
   ConversationTopic,
   GroupUpdatedContent,
 } from "@xmtp/react-native-sdk";
-import { isProd } from "@/utils/getEnv";
 import {
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
@@ -72,6 +70,7 @@ export const streamAllMessages = async (account: string) => {
       updateConversationQueryData({
         account: client.address,
         topic: message.topic as ConversationTopic,
+        context: "streamAllMessages",
         conversationUpdate: {
           lastMessage: message,
         },
@@ -81,7 +80,7 @@ export const streamAllMessages = async (account: string) => {
     }
 
     try {
-      updateConversationInConversationListQuery({
+      updateConversationInConversationsQuery({
         account: client.address,
         topic: message.topic as ConversationTopic,
         conversationUpdate: {
@@ -128,11 +127,12 @@ export const handleGroupUpdatedMessage = async (
       updateConversationQueryData({
         account,
         topic,
+        context: "handleGroupUpdatedMessage",
         conversationUpdate: {
           name: newGroupName,
         },
       });
-      updateConversationInConversationListQuery({
+      updateConversationInConversationsQuery({
         account,
         topic,
         conversationUpdate: {
@@ -144,11 +144,12 @@ export const handleGroupUpdatedMessage = async (
       updateConversationQueryData({
         account,
         topic,
+        context: "handleGroupUpdatedMessage",
         conversationUpdate: {
           imageUrlSquare: newGroupPhotoUrl,
         },
       });
-      updateConversationInConversationListQuery({
+      updateConversationInConversationsQuery({
         account,
         topic,
         conversationUpdate: {
@@ -160,11 +161,12 @@ export const handleGroupUpdatedMessage = async (
       updateConversationQueryData({
         account,
         topic,
+        context: "handleGroupUpdatedMessage",
         conversationUpdate: {
           description: newGroupDescription,
         },
       });
-      updateConversationInConversationListQuery({
+      updateConversationInConversationsQuery({
         account,
         topic,
         conversationUpdate: {

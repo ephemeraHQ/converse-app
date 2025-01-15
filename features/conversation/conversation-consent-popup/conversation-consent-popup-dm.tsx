@@ -2,7 +2,6 @@ import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import { useRouter } from "@/navigation/useNavigation";
-import { useDmConsentMutation } from "@/queries/useDmConsentMutation";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { actionSheetColors } from "@/styles/colors";
 import { captureError, captureErrorWithToast } from "@/utils/capture-error";
@@ -20,6 +19,7 @@ import {
   ConsentPopupContainer,
   ConsentPopupTitle,
 } from "./conversation-consent-popup.design-system";
+import { useDmConsent } from "../hooks/use-dm-consent";
 
 export function DmConsentPopup() {
   const topic = useCurrentConversationTopic();
@@ -38,7 +38,7 @@ export function DmConsentPopup() {
   const {
     mutateAsync: consentToInboxIdsOnProtocolByAccountAsync,
     status: consentToInboxIdsOnProtocolByAccountStatus,
-  } = useDmConsentMutation({
+  } = useDmConsent({
     peerInboxId: peerInboxId!,
     conversationId: conversationId!,
     topic: topic!,

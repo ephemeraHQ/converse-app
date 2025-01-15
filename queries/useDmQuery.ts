@@ -33,6 +33,7 @@ async function getDm(args: IDmQueryArgs) {
     account,
     topic: conversation.topic,
     conversation,
+    context: "useDmQuery",
   });
 
   return conversation;
@@ -60,6 +61,7 @@ export function setDmQueryData(args: IDmQueryArgs & { dm: IDmQueryData }) {
     account,
     topic: dm.topic,
     conversation: dm,
+    context: "setDmQueryData",
   });
 }
 

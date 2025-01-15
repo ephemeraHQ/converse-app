@@ -5,12 +5,12 @@ import {
 } from "@/utils/xmtpRN/content-types/content-types";
 
 type V3SpameScoreParams = {
-  message: string;
+  messageText: string;
   contentType: IConvosContentType;
 };
 
 export const getV3SpamScore = async ({
-  message,
+  messageText,
   contentType,
 }: V3SpameScoreParams): Promise<number> => {
   // TODO: Check if adder has been approved already
@@ -19,7 +19,7 @@ export const getV3SpamScore = async ({
   // TODO: Check spam score between sender and receiver
 
   // Check contents of last message
-  spamScore += computeMessageContentSpamScore(message, contentType);
+  spamScore += computeMessageContentSpamScore(messageText, contentType);
   return spamScore;
 };
 

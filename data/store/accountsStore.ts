@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+import { removeLogoutTask } from "@utils/logout";
+import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
 import { ChatStoreType, initChatStore } from "./chatStore";
 import {
   initRecommendationsStore,
@@ -18,8 +20,6 @@ import {
   TransactionsStoreType,
 } from "./transactionsStore";
 import { initWalletStore, WalletStoreType } from "./walletStore";
-import { removeLogoutTask } from "@utils/logout";
-import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
 
 type AccountStoreType = {
   [K in keyof AccountStoreDataType]: UseBoundStore<
@@ -69,22 +69,6 @@ export const getAccountsList = () =>
 export const useAccountsList = () => {
   const accounts = useAccountsStore((s) => s.accounts);
   return accounts.filter((a) => a && a !== TEMPORARY_ACCOUNT_NAME);
-};
-
-export const useErroredAccountsMap = () => {
-  const accounts = useAccountsList();
-  return accounts.reduce(
-    (acc, a) => {
-      const errored = getChatStore(a).getState().errored;
-
-      if (errored) {
-        acc[a] = errored;
-      }
-
-      return acc;
-    },
-    {} as { [account: string]: boolean }
-  );
 };
 
 // This store is global (i.e. not linked to an account)

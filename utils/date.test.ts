@@ -1,8 +1,13 @@
+// eslint-disable-next-line import/no-duplicates
 import { format } from "date-fns";
-import { getLocales } from "react-native-localize";
-
-import { getMinimalDate, getRelativeDate, getRelativeDateTime } from "./date";
+// eslint-disable-next-line import/no-duplicates
 import { enUS, fr } from "date-fns/locale";
+import { getLocales } from "react-native-localize";
+import {
+  getCompactRelativeTime,
+  getRelativeDate,
+  getRelativeDateTime,
+} from "./date";
 
 jest.mock("react-native-localize", () => ({
   getLocales: jest.fn(),
@@ -151,38 +156,40 @@ describe("getMinimalDate", () => {
   const now = Date.now();
 
   it("should return an empty string for falsy input", () => {
-    expect(getMinimalDate(0)).toBe("");
+    expect(getCompactRelativeTime(0)).toBe("");
   });
 
   it("should return correct minimal timestamp for seconds", () => {
-    expect(getMinimalDate(now - 5000)).toBe("5s");
+    expect(getCompactRelativeTime(now - 5000)).toBe("5s");
   });
 
   it("should return correct minimal timestamp for minutes", () => {
-    expect(getMinimalDate(now - 5 * 60 * 1000)).toBe("5m");
+    expect(getCompactRelativeTime(now - 5 * 60 * 1000)).toBe("5m");
   });
 
   it("should return correct minimal timestamp for hours", () => {
-    expect(getMinimalDate(now - 5 * 60 * 60 * 1000)).toBe("5h");
+    expect(getCompactRelativeTime(now - 5 * 60 * 60 * 1000)).toBe("5h");
   });
 
   it("should return correct minimal timestamp for days", () => {
-    expect(getMinimalDate(now - 5 * 24 * 60 * 60 * 1000)).toBe("5d");
+    expect(getCompactRelativeTime(now - 5 * 24 * 60 * 60 * 1000)).toBe("5d");
   });
 
   it("should return correct minimal timestamp for weeks", () => {
-    expect(getMinimalDate(now - 14 * 24 * 60 * 60 * 1000)).toBe("2w");
+    expect(getCompactRelativeTime(now - 14 * 24 * 60 * 60 * 1000)).toBe("2w");
   });
 
   it("should return correct minimal timestamp for months", () => {
-    expect(getMinimalDate(now - 60 * 24 * 60 * 60 * 1000)).toBe("2mo");
+    expect(getCompactRelativeTime(now - 60 * 24 * 60 * 60 * 1000)).toBe("2mo");
   });
 
   it("should return correct minimal timestamp for years", () => {
-    expect(getMinimalDate(now - 2 * 365 * 24 * 60 * 60 * 1000)).toBe("2y");
+    expect(getCompactRelativeTime(now - 2 * 365 * 24 * 60 * 60 * 1000)).toBe(
+      "2y"
+    );
   });
 
   it("should not show future", () => {
-    expect(getMinimalDate(now + 1)).toBe("0s");
+    expect(getCompactRelativeTime(now + 1)).toBe("0s");
   });
 });

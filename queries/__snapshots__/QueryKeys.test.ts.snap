@@ -4,6 +4,7 @@ exports[`QueryKeys should match the snapshot 1`] = `
 {
   "CONVERSATION": "conversation",
   "CONVERSATIONS": "conversations",
+  "CONVERSATION_DATA": "conversationData",
   "CONVERSATION_DM": "conversationDM",
   "CONVERSATION_MESSAGE": "conversationMessage",
   "CONVERSATION_MESSAGES": "conversationMessages",
