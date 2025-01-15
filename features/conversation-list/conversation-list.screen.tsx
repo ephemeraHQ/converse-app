@@ -18,10 +18,7 @@ import { isConversationAllowed } from "@/features/conversation/utils/is-conversa
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { translate } from "@/i18n";
 import { getConversationDataQueryOptions } from "@/queries/conversation-data-query";
-import {
-  getConversationsQueryOptions,
-  useConversationsQuery,
-} from "@/queries/conversations-query";
+import { getConversationsQueryOptions } from "@/queries/conversations-query";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
@@ -37,8 +34,8 @@ import React, { memo, useCallback, useMemo } from "react";
 import { TouchableOpacity, useColorScheme } from "react-native";
 import { ContextMenuView } from "react-native-ios-context-menu";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ConversationListEmpty } from "./conversation-list-empty";
 import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-requests";
+import { ConversationListEmpty } from "./conversation-list-empty";
 import { useHeaderWrapper } from "./conversation-list.screen-header";
 
 type IConversationListProps = NativeStackScreenProps<
