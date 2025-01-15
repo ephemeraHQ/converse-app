@@ -1,10 +1,11 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "@/data/store/accountsStore";
+import { useDmConsent } from "@/features/conversation/hooks/use-dm-consent";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { translate } from "@/i18n";
 import {
   getConversationDataQueryData,
-  setConversationDataQueryData,
+  updateConversationDataQueryData,
 } from "@/queries/conversation-data-query";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { actionSheetColors } from "@/styles/colors";
@@ -12,7 +13,6 @@ import { useAppTheme } from "@/theme/useAppTheme";
 import { deleteTopic } from "@/utils/api/topics";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { consentToInboxIdsOnProtocolByAccount } from "@/utils/xmtpRN/contacts";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback } from "react";
 
@@ -24,6 +24,12 @@ export const useDeleteDm = (dm: DmWithCodecsType) => {
 
   const { data: peerInboxId } = useDmPeerInboxId({
     account: currentAccount,
+    topic: dm.topic,
+  });
+
+  const { mutateAsync: updateDmConsentAsync } = useDmConsent({
+    peerInboxId: peerInboxId!,
+    conversationId: dm.id,
     topic: dm.topic,
   });
 
@@ -42,21 +48,21 @@ export const useDeleteDm = (dm: DmWithCodecsType) => {
         context: "useDeleteDm",
       })?.isDeleted;
 
-      setConversationDataQueryData({
+      updateConversationDataQueryData({
         account: currentAccount,
         topic: dm.topic,
         context: "useDeleteDm",
-        data: { isDeleted: true },
+        updateData: { isDeleted: true },
       });
 
       return { previousIsDeleted };
     },
     onError: (error, _, context) => {
-      setConversationDataQueryData({
+      updateConversationDataQueryData({
         account: currentAccount,
         topic: dm.topic,
         context: "useDeleteDm",
-        data: { isDeleted: context?.previousIsDeleted },
+        updateData: { isDeleted: context?.previousIsDeleted },
       });
     },
   });
@@ -80,11 +86,7 @@ export const useDeleteDm = (dm: DmWithCodecsType) => {
         action: async () => {
           try {
             await deleteDmAsync();
-            await dm.updateConsent("denied");
-            const peerInboxId = await dm.peerInboxId();
-            await consentToInboxIdsOnProtocolByAccount({
-              account: currentAccount,
-              inboxIds: [peerInboxId],
+            await updateDmConsentAsync({
               consent: "deny",
             });
           } catch (error) {
@@ -112,5 +114,5 @@ export const useDeleteDm = (dm: DmWithCodecsType) => {
         }
       }
     );
-  }, [colorScheme, dm, currentAccount, preferredName, deleteDmAsync]);
+  }, [colorScheme, preferredName, deleteDmAsync, updateDmConsentAsync]);
 };

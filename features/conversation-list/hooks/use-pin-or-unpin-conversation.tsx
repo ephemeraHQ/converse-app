@@ -1,7 +1,7 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import {
   getConversationDataQueryData,
-  setConversationDataQueryData,
+  updateConversationDataQueryData,
 } from "@/queries/conversation-data-query";
 import { pinTopic, unpinTopic } from "@/utils/api/topics";
 import { captureErrorWithToast } from "@/utils/capture-error";
@@ -42,11 +42,11 @@ export function usePinOrUnpinConversation(args: {
         context: "usePinOrUnpinConversation",
       })?.isPinned;
 
-      setConversationDataQueryData({
+      updateConversationDataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
         context: "usePinOrUnpinConversation",
-        data: {
+        updateData: {
           isPinned: !previousIsPinned,
         },
       });
@@ -54,12 +54,11 @@ export function usePinOrUnpinConversation(args: {
     },
     onError: (error, _, context) => {
       const currentAccount = getCurrentAccount()!;
-      captureErrorWithToast(error);
-      setConversationDataQueryData({
+      updateConversationDataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
         context: "usePinOrUnpinConversation",
-        data: {
+        updateData: {
           isPinned: context?.previousIsPinned,
         },
       });

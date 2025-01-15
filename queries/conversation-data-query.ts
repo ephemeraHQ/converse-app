@@ -1,7 +1,7 @@
 import { conversationDataQueryKey } from "@/queries/QueryKeys";
 import { getTopics } from "@/utils/api/topics";
 import logger from "@/utils/logger";
-import { UseQueryOptions } from "@tanstack/react-query";
+import { queryOptions } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { create, windowScheduler } from "@yornaath/batshit";
 import { queryClient } from "./queryClient";
@@ -16,15 +16,13 @@ type IArgs = {
   context: string;
 };
 
-export function getConversationDataQueryOptions(
-  args: IArgs
-): UseQueryOptions<IConversationDataQueryData> {
-  return {
+export function getConversationDataQueryOptions(args: IArgs) {
+  return queryOptions({
     queryKey: conversationDataQueryKey(args.account, args.topic),
     queryFn: () => getConversationData(args),
     enabled: !!args.topic && !!args.account,
     retry: false,
-  };
+  });
 }
 
 export function prefetchConversationDataQuery(args: IArgs) {
@@ -48,17 +46,20 @@ export function getOrFetchConversationData(args: IArgs) {
   return queryClient.fetchQuery(getConversationDataQueryOptions(args));
 }
 
-export function setConversationDataQueryData(
-  args: IArgs & { data: Partial<IConversationDataQueryData> }
+export function updateConversationDataQueryData(
+  args: IArgs & { updateData: Partial<IConversationDataQueryData> }
 ) {
-  const { data } = args;
+  const { updateData } = args;
   queryClient.setQueryData<IConversationDataQueryData>(
     getConversationDataQueryOptions(args).queryKey,
     (previousData) => {
-      if (!previousData) return data as IConversationDataQueryData;
       return {
-        ...previousData,
-        ...data,
+        // By default, if we didn't have any data for this conversation, we put those values
+        isDeleted: false,
+        isPinned: false,
+        markedAsUnread: false,
+        ...(previousData ?? {}),
+        ...updateData,
       };
     }
   );
@@ -76,7 +77,8 @@ const batchedGetConversationTopicData = create({
   resolver: (items, query) => {
     const match = items.find(
       (item) =>
-        `${query.account}-${query.topic}` === `${item.account}-${item.topic}`
+        conversationDataQueryKey(query.account, query.topic).join("-") ===
+        conversationDataQueryKey(item.account, item.topic).join("-")
     );
     if (!match) return undefined;
     // Destructure to remove account and topic from the result

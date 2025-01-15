@@ -6,7 +6,7 @@ import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-
 import { useDeleteGroup } from "@/features/conversation-list/hooks/use-delete-group";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
-import { useCurrentAccountGroupMembersInfo } from "@/hooks/use-current-account-group-members-info";
+import { useGroupMembersInfoForCurrentAccount } from "@/hooks/use-group-members-info-for-current-account";
 import { prefetchConversationMessages } from "@/queries/useConversationMessages";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
@@ -37,8 +37,7 @@ export const ConversationListItemGroup = memo(
       topic,
     });
 
-    const { groupMembersInfo } = useCurrentAccountGroupMembersInfo({
-      currentAccount,
+    const { groupMembersInfo } = useGroupMembersInfoForCurrentAccount({
       groupTopic: topic,
     });
 

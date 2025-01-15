@@ -1,7 +1,7 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import {
   getConversationDataQueryData,
-  setConversationDataQueryData,
+  updateConversationDataQueryData,
 } from "@/queries/conversation-data-query";
 import { markTopicAsRead } from "@/utils/api/topics";
 import { useMutation } from "@tanstack/react-query";
@@ -27,11 +27,11 @@ export function useMarkConversationAsRead(args: { topic: ConversationTopic }) {
         context: "useToggleReadStatus",
       });
 
-      setConversationDataQueryData({
+      updateConversationDataQueryData({
         account: currentAccount,
         topic,
         context: "useToggleReadStatus",
-        data: {
+        updateData: {
           readUntil: new Date().getTime(),
           markedAsUnread: false,
         },
@@ -41,11 +41,11 @@ export function useMarkConversationAsRead(args: { topic: ConversationTopic }) {
     },
     onError: (error, _, context) => {
       const currentAccount = getCurrentAccount()!;
-      setConversationDataQueryData({
+      updateConversationDataQueryData({
         account: currentAccount,
         topic,
         context: "useToggleReadStatus",
-        data: context?.previousData,
+        updateData: context?.previousData,
       });
     },
   });

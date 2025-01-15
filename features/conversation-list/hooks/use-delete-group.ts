@@ -3,7 +3,7 @@ import { useCurrentAccount } from "@/data/store/accountsStore";
 import { translate } from "@/i18n";
 import {
   getConversationDataQueryData,
-  setConversationDataQueryData,
+  updateConversationDataQueryData,
 } from "@/queries/conversation-data-query";
 import { getGroupQueryData } from "@/queries/useGroupQuery";
 import { actionSheetColors } from "@/styles/colors";
@@ -34,21 +34,21 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
         context: "useDeleteGroup",
       })?.isDeleted;
 
-      setConversationDataQueryData({
+      updateConversationDataQueryData({
         account: currentAccount,
         topic: groupTopic,
         context: "useDeleteGroup",
-        data: { isDeleted: true },
+        updateData: { isDeleted: true },
       });
 
       return { previousIsDeleted };
     },
     onError: (error, _, context) => {
-      setConversationDataQueryData({
+      updateConversationDataQueryData({
         account: currentAccount,
         topic: groupTopic,
         context: "useDeleteGroup",
-        data: { isDeleted: context?.previousIsDeleted },
+        updateData: { isDeleted: context?.previousIsDeleted },
       });
     },
   });

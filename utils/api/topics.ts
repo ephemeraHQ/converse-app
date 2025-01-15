@@ -8,6 +8,8 @@ const MessageResponseSchema = z.object({
   message: z.string(),
 });
 
+type IMessageResponse = z.infer<typeof MessageResponseSchema>;
+
 const TopicSchema = z.object({
   isDeleted: z.boolean(),
   isPinned: z.boolean(),
@@ -17,6 +19,8 @@ const TopicSchema = z.object({
   /** @deprecated */
   status: z.enum(["unread", "read", "deleted"]).optional().nullable(),
 });
+
+type ITopic = z.infer<typeof TopicSchema>;
 
 export async function getTopics(args: { account: string }) {
   logger.debug(`[API TOPICS] getTopics for account: ${args.account}`);
@@ -30,7 +34,7 @@ export async function getTopics(args: { account: string }) {
   if (!parseResult.success) {
     logger.error("[API TOPICS] getTopics parse error:", parseResult.error);
   }
-  return data as Record<string, z.infer<typeof TopicSchema>>;
+  return data as Record<string, ITopic>;
 }
 
 // API functions
@@ -53,7 +57,7 @@ export async function getTopic(args: {
   if (!parseResult.success) {
     logger.error("[API TOPICS] getTopic parse error:", parseResult.error);
   }
-  return data as z.infer<typeof TopicSchema>;
+  return data as ITopic;
 }
 
 export async function markTopicAsRead(args: {
@@ -79,7 +83,7 @@ export async function markTopicAsRead(args: {
       parseResult.error
     );
   }
-  return data as z.infer<typeof MessageResponseSchema>;
+  return data as IMessageResponse;
 }
 
 export async function markTopicAsUnread(args: {
@@ -104,7 +108,7 @@ export async function markTopicAsUnread(args: {
       parseResult.error
     );
   }
-  return data as z.infer<typeof MessageResponseSchema>;
+  return data as IMessageResponse;
 }
 
 export async function pinTopic(args: {
@@ -126,7 +130,7 @@ export async function pinTopic(args: {
   if (!parseResult.success) {
     logger.error("[API TOPICS] pinTopic parse error:", parseResult.error);
   }
-  return data as z.infer<typeof MessageResponseSchema>;
+  return data as IMessageResponse;
 }
 
 export async function unpinTopic(args: {
@@ -148,7 +152,7 @@ export async function unpinTopic(args: {
   if (!parseResult.success) {
     logger.error("[API TOPICS] unpinTopic parse error:", parseResult.error);
   }
-  return data as z.infer<typeof MessageResponseSchema>;
+  return data as IMessageResponse;
 }
 
 export async function restoreTopic(args: {
@@ -170,7 +174,7 @@ export async function restoreTopic(args: {
   if (!parseResult.success) {
     logger.error("[API TOPICS] restoreTopic parse error:", parseResult.error);
   }
-  return data as z.infer<typeof MessageResponseSchema>;
+  return data as IMessageResponse;
 }
 
 export async function deleteTopic(args: {
@@ -191,5 +195,5 @@ export async function deleteTopic(args: {
   if (!parseResult.success) {
     logger.error("[API TOPICS] deleteTopic parse error:", parseResult.error);
   }
-  return data as z.infer<typeof MessageResponseSchema>;
+  return data as IMessageResponse;
 }

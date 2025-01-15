@@ -1,3 +1,4 @@
+import { useCurrentAccount } from "@/data/store/accountsStore";
 import { useGroupMembersQuery } from "@queries/useGroupMembersQuery";
 import { useInboxProfileSocialsQueries } from "@queries/useInboxProfileSocialsQuery";
 import {
@@ -15,11 +16,12 @@ type IMemberInfo = {
   name: string;
 };
 
-export function useCurrentAccountGroupMembersInfo(args: {
-  currentAccount: string;
+export function useGroupMembersInfoForCurrentAccount(args: {
   groupTopic: ConversationTopic;
 }) {
-  const { currentAccount, groupTopic } = args;
+  const { groupTopic } = args;
+
+  const currentAccount = useCurrentAccount()!;
 
   const { data: members } = useGroupMembersQuery({
     account: currentAccount,

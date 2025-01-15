@@ -4,7 +4,7 @@ import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-export const useBlockedChats = () => {
+export const useBlockedChatsForCurrentAccount = () => {
   const currentAccount = useCurrentAccount();
 
   const { data } = useConversationsQuery({

@@ -5,7 +5,7 @@ import {
   ConverseXmtpClientType,
 } from "@/utils/xmtpRN/client.types";
 import { conversationsQueryKey } from "@queries/QueryKeys";
-import { QueryObserver, useQuery } from "@tanstack/react-query";
+import { QueryObserver, queryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -142,12 +142,12 @@ const getConversations = async (args: { account: string; context: string }) => {
 
 export const getConversationsQueryOptions = (args: IArgs) => {
   const { account, context } = args;
-  return {
+  return queryOptions({
     queryKey: conversationsQueryKey(account),
     queryFn: () => getConversations({ account, context: context ?? "" }),
     staleTime: 2000, // We want to make sure to always have the latest conversations
     enabled: !!account,
-  };
+  });
 };
 
 export const updateConversationInConversationsQuery = (args: {
