@@ -1,3 +1,5 @@
+import { useAppTheme } from "@/theme/useAppTheme";
+import { hexToRGBA } from "@/utils/colors";
 import { useSnackbars } from "@components/Snackbar/Snackbar.service";
 import { useGradientHeight } from "@components/Snackbar/SnackbarBackdrop/SnackbarBackdrop.utils";
 // import MaskedView from "@react-native-masked-view/masked-view";
@@ -18,6 +20,7 @@ import Animated, {
 
 export const SnackbarBackdrop = memo(() => {
   const snackbars = useSnackbars();
+  const { theme } = useAppTheme();
   const { height: windowHeight } = useWindowDimensions();
   const gradientHeight = useGradientHeight();
 
@@ -38,7 +41,10 @@ export const SnackbarBackdrop = memo(() => {
     >
       <LinearGradient
         locations={[0, 0.55]}
-        colors={["rgba(255, 255,255,0.0)", "rgba(255, 255,255,1)"]}
+        colors={[
+          hexToRGBA(theme.colors.background.surface, 0),
+          hexToRGBA(theme.colors.background.surface, 1),
+        ]}
         style={StyleSheet.absoluteFill}
       />
       {/* TODO: Maybe add back later. For now masked view can be a litte unstable and buggy */}

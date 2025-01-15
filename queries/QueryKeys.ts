@@ -5,6 +5,7 @@ export enum QueryKeys {
   CONVERSATIONS = "conversations",
   CONVERSATION = "conversation",
   CONVERSATION_DM = "conversationDM",
+  CONVERSATION_DATA = "conversationData",
 
   // Messages
   CONVERSATION_MESSAGE = "conversationMessage",
@@ -43,6 +44,10 @@ export const dmQueryKey = (account: string, peer: string) => [
   account.toLowerCase(),
   peer,
 ];
+export const conversationDataQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.CONVERSATION_DATA, account.toLowerCase(), topic];
 
 // Messages
 export const conversationMessageQueryKey = (

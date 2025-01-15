@@ -1,24 +1,23 @@
 import { iconRegistry } from "@/design-system/Icon/Icon";
 import { VStack } from "@/design-system/VStack";
 import { useConversationByTopic } from "@/features/conversation-list/hooks/use-conversation-by-topic";
-import { useHandleDeleteDm } from "@/features/conversation-list/hooks/useHandleDeleteDm";
-import { useHandleDeleteGroup } from "@/features/conversation-list/hooks/useHandleDeleteGroup";
-import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
-import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
-import {
-  useConversationListStoreActions,
-  useConversationListStoreForCurrentAccount,
-} from "@/features/conversation-list/stores/conversation-list.store";
+import { useConversationIsPinned } from "@/features/conversation-list/hooks/use-conversation-is-pinned";
+import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
+import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
+import { useDeleteGroup } from "@/features/conversation-list/hooks/use-delete-group";
+import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { translate } from "@/i18n";
 import { ConversationReadOnly } from "@/screens/ConversationReadOnly";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import {
   ContextMenuViewProps,
   MenuActionConfig,
 } from "react-native-ios-context-menu";
+import { usePinOrUnpinConversation } from "./use-pin-or-unpin-conversation";
 
 export function useConversationContextMenuViewDefaultProps(args: {
   conversationTopic: ConversationTopic;
@@ -84,33 +83,26 @@ function useConversationContextMenuPinItem(args: {
 }): IUseContextMenuItem {
   const { conversationTopic } = args;
 
-  const pinnedConversationTopics = useConversationListStoreForCurrentAccount(
-    (s) => s.pinnedConversationTopics
-  );
+  const { isPinned } = useConversationIsPinned({
+    conversationTopic,
+  });
 
-  const conversationListStoreActions = useConversationListStoreActions();
-
-  const isPinned = pinnedConversationTopics.includes(conversationTopic);
+  const { pinOrUnpinConversationAsync } = usePinOrUnpinConversation({
+    conversationTopic,
+  });
 
   return {
     actionKey: "pin",
     actionTitle: translate(isPinned ? "unpin" : "pin"),
     icon: {
       iconType: "SYSTEM",
-      iconValue: "pin",
+      iconValue: isPinned ? "pin.slash" : "pin",
     },
-    onPress: () => {
-      if (isPinned) {
-        conversationListStoreActions.setPinnedConversationTopics(
-          pinnedConversationTopics.filter(
-            (topic: string) => topic !== conversationTopic
-          )
-        );
-      } else {
-        conversationListStoreActions.setPinnedConversationTopics([
-          ...pinnedConversationTopics,
-          conversationTopic,
-        ]);
+    onPress: async () => {
+      try {
+        await pinOrUnpinConversationAsync();
+      } catch (error) {
+        captureErrorWithToast(error);
       }
     },
   } satisfies IUseContextMenuItem;
@@ -121,15 +113,11 @@ function useConversationContextMenuReadItem(args: {
 }): IUseContextMenuItem {
   const { conversationTopic } = args;
 
-  const conversation = useConversationByTopic(conversationTopic);
-
-  const isUnread = useConversationIsUnread({
+  const { isUnread } = useConversationIsUnread({
     topic: conversationTopic,
-    lastMessage: conversation?.lastMessage,
-    timestampNs: conversation?.lastMessage?.sentNs ?? 0,
   });
 
-  const toggleReadStatus = useToggleReadStatus({
+  const { toggleReadStatusAsync } = useToggleReadStatus({
     topic: conversationTopic,
   });
 
@@ -142,7 +130,7 @@ function useConversationContextMenuReadItem(args: {
       iconType: "SYSTEM",
       iconValue: isUnread ? "checkmark.message" : "message.badge",
     },
-    onPress: toggleReadStatus,
+    onPress: toggleReadStatusAsync,
   } satisfies IUseContextMenuItem;
 }
 
@@ -158,9 +146,9 @@ function useConversationContextMenuDeleteItem(args: {
   const handleDeleteFn = conversation
     ? isConversationGroup(conversation)
       ? // eslint-disable-next-line react-hooks/rules-of-hooks
-        useHandleDeleteGroup({ groupTopic: conversationTopic })
+        useDeleteGroup({ groupTopic: conversationTopic })
       : // eslint-disable-next-line react-hooks/rules-of-hooks
-        useHandleDeleteDm(conversation)
+        useDeleteDm(conversation)
     : () => null;
 
   return {

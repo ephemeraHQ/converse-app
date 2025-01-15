@@ -123,12 +123,16 @@ export const prefetchConversationMessages = async (
   );
 };
 
-function getConversationMessagesQueryOptions(
+export function getConversationMessagesQueryOptions(
   account: string,
   topic: ConversationTopic,
   includeSync: boolean = true
 ): UseQueryOptions<ConversationMessagesQueryData> {
-  const conversation = getConversationQueryData({ account, topic });
+  const conversation = getConversationQueryData({
+    account,
+    topic,
+    context: "getConversationMessagesQueryOptions",
+  });
   return {
     queryKey: conversationMessagesQueryKey(account, topic),
     queryFn: () => {

@@ -18,7 +18,7 @@ import { Icon } from "@design-system/Icon/Icon";
 import { IconButton } from "@design-system/IconButton/IconButton";
 import { Text } from "@design-system/Text";
 import { AnimatedVStack, VStack } from "@design-system/VStack";
-import { useMessageText } from "@features/conversation-list/hooks/useMessageText";
+import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
 import { Haptics } from "@utils/haptics";
@@ -233,7 +233,7 @@ const ReplyPreviewMessageContent = memo(
 
     const { theme } = useAppTheme();
 
-    const messageText = useMessageText(replyMessage);
+    const messageText = useMessagePlainText(replyMessage);
     const clearedMessage = messageText?.replace(/(\n)/gm, " ");
 
     if (isStaticAttachmentMessage(replyMessage)) {

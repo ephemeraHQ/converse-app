@@ -1,15 +1,15 @@
 import { VStack } from "@/design-system/VStack";
 import { EmptyState } from "@/design-system/empty-state";
-import { ConversationList } from "@/features/conversation-list/components/conversation-list/conversation-list";
+import { useBlockedChatsForCurrentAccount } from "@/features/blocked-chats/use-blocked-chats";
+import { ConversationList } from "@/features/conversation-list/conversation-list";
 import { useHeader } from "@/navigation/use-header";
 import { useRouter } from "@/navigation/useNavigation";
 import { $globalStyles } from "@/theme/styles";
 import { translate } from "@i18n/index";
 import React from "react";
-import { useAllBlockedChats } from "./useAllBlockedChats";
 
 export function BlockedChatsScreen() {
-  const { data: allBlockedChats = [] } = useAllBlockedChats();
+  const { data: allBlockedChats = [] } = useBlockedChatsForCurrentAccount();
 
   const router = useRouter();
 

@@ -9,8 +9,8 @@ import { conversationPreviewMessagesQueryKey } from "./QueryKeys";
 import {
   ConversationMessagesQueryData,
   conversationMessagesQueryFn,
+  getConversationMessagesQueryOptions,
 } from "./useConversationMessages";
-import { useConversationQuery } from "./useConversationQuery";
 
 const conversationPreviewMessagesQueryFn = async (
   conversation: ConversationWithCodecsType
@@ -42,10 +42,10 @@ export const useConversationPreviewMessages = (
   topic: ConversationTopic,
   options?: Partial<UseQueryOptions<ConversationMessagesQueryData>>
 ) => {
-  const { data: conversation } = useConversationQuery({
-    account,
-    topic,
-    queryOptions: cacheOnlyQueryOptions,
+  getConversationMessagesQueryOptions;
+  const { data: conversation } = useQuery({
+    ...getConversationMessagesQueryOptions(account, topic, false),
+    ...cacheOnlyQueryOptions,
   });
 
   return useQuery({

@@ -1,4 +1,4 @@
-import { createConversationListQueryObserver } from "@/queries/useConversationListQuery";
+import { createConversationsQueryObserver } from "@/queries/conversations-query";
 import { subscribeToNotifications } from "./subscribeToNotifications";
 import logger from "@/utils/logger";
 import { currentAccount } from "@/data/store/accountsStore";
@@ -16,7 +16,7 @@ export const setupAccountTopicSubscription = (account: string) => {
   logger.info(
     `[setupAccountTopicSubscription] subscribing to account ${account}`
   );
-  const observer = createConversationListQueryObserver({
+  const observer = createConversationsQueryObserver({
     account,
     context: "sync",
   });

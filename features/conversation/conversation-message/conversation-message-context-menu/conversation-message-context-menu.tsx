@@ -1,4 +1,3 @@
-import { useCurrentAccount } from "@/data/store/accountsStore";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { MessageContextMenuBackdrop } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-backdrop";
@@ -21,15 +20,13 @@ import { useCurrentConversationTopic } from "@/features/conversation/conversatio
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { useConversationQuery } from "@/queries/useConversationQuery";
 import { calculateMenuHeight } from "@design-system/ContextMenu/ContextMenu.utils";
 import { memo, useCallback } from "react";
-import { StyleSheet, Modal, View, Platform } from "react-native";
+import { Modal, Platform, StyleSheet } from "react-native";
+import Animated from "react-native-reanimated";
 import { MessageContextMenuAboveMessageReactions } from "./conversation-message-context-menu-above-message-reactions";
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container";
 import { useMessageContextMenuItems } from "./conversation-message-context-menu.utils";
-import { useAppTheme } from "@theme/useAppTheme";
-import Animated from "react-native-reanimated";
 
 export const MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE = 16;
 
@@ -51,18 +48,13 @@ const Content = memo(function Content(props: {
   >;
 }) {
   const { messageContextMenuData } = props;
-  const { theme } = useAppTheme();
 
   const { messageId, itemRectX, itemRectY, itemRectHeight, itemRectWidth } =
     messageContextMenuData;
 
-  const account = useCurrentAccount()!;
   const topic = useCurrentConversationTopic();
   const messageContextMenuStore = useMessageContextMenuStore();
-  const { data: conversation } = useConversationQuery({
-    account,
-    topic,
-  });
+
   const { bySender } = useConversationMessageReactions(messageId!);
 
   const message = getMessageById({

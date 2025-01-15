@@ -2,8 +2,7 @@ import { AnimatedVStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
-import { useConversationIsUnread } from "@/features/conversation-list/hooks/useMessageIsUnread";
-import { useToggleReadStatus } from "@/features/conversation-list/hooks/useToggleReadStatus";
+import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
 import { ReplyPreview } from "@/features/conversation/conversation-composer/conversation-composer-reply-preview";
@@ -44,17 +43,20 @@ import {
   isAnActualMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
+import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read";
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
 import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
 import { useHeader } from "@/navigation/use-header";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { captureError } from "@/utils/capture-error";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
@@ -79,7 +81,6 @@ import {
   ConversationStoreProvider,
   useCurrentConversationTopic,
 } from "./conversation.store-context";
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
@@ -95,6 +96,7 @@ export const Conversation = memo(function Conversation(props: {
     useConversationQuery({
       account: currentAccount,
       topic,
+      context: "Conversation",
     });
 
   useHeader({
@@ -223,31 +225,27 @@ const Messages = memo(function Messages(props: {
     );
   }, [messages?.ids, messages?.byId, currentAccountInboxId]);
 
-  const isUnread = useConversationIsUnread({
-    topic,
-    lastMessage: messages?.byId[messages?.ids[0]], // Get latest message
-    timestampNs: messages?.byId[messages?.ids[0]]?.sentNs ?? 0,
-  });
-
-  const toggleReadStatus = useToggleReadStatus({
+  const { isUnread } = useConversationIsUnread({
     topic,
   });
 
-  const hasMarkedAsRead = useRef(false);
+  const { markAsReadAsync } = useMarkConversationAsRead({
+    topic,
+  });
 
+  // TODO: Need improvment but okay for now
   useEffect(() => {
-    if (isUnread && !messagesLoading && !hasMarkedAsRead.current) {
-      toggleReadStatus();
-      hasMarkedAsRead.current = true;
+    if (isConversationAllowed(conversation) && isUnread && !messagesLoading) {
+      markAsReadAsync().catch(captureError);
     }
-  }, [isUnread, messagesLoading, toggleReadStatus]);
+  }, [isUnread, messagesLoading, markAsReadAsync, conversation, messages]);
 
   const handleRefresh = useCallback(async () => {
     try {
       refreshingRef.current = true;
       await refetchMessages();
     } catch (e) {
-      console.error(e);
+      captureError(e);
     } finally {
       refreshingRef.current = false;
     }

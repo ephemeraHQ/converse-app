@@ -4,11 +4,10 @@ import {
   FadeInDown,
   FadeInUp,
   FadeOut,
-  Keyframe,
   LinearTransition,
-  type WithSpringConfig,
-  withSpring,
   withDelay,
+  withSpring,
+  type WithSpringConfig,
 } from "react-native-reanimated";
 
 import { timing } from "./timing";

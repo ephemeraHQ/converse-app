@@ -12,7 +12,6 @@ export type ISwipeableRenderActionsArgs = {
   progressAnimatedValue: SharedValue<number>;
   dragAnimatedValue: SharedValue<number>;
   swipeable: SwipeableMethods;
-  // caca: number;
 };
 
 export type ISwipeableProps = {

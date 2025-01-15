@@ -20,6 +20,7 @@ export function useGroupQuery(args: {
   return useConversationQuery({
     account,
     topic,
+    context: "useGroupQuery",
   }) as UseQueryResult<GroupWithCodecsType | null>;
 }
 
@@ -28,9 +29,11 @@ export function getGroupQueryData(args: {
   topic: ConversationTopic;
 }) {
   const { account, topic } = args;
-  return getConversationQueryData({ account, topic }) as
-    | GroupWithCodecsType
-    | undefined;
+  return getConversationQueryData({
+    account,
+    topic,
+    context: "getGroupQueryData",
+  }) as GroupWithCodecsType | undefined;
 }
 
 export function setGroupQueryData(args: {
@@ -43,6 +46,7 @@ export function setGroupQueryData(args: {
     account,
     topic,
     conversation: group,
+    context: "setGroupQueryData",
   });
 }
 
@@ -51,7 +55,11 @@ export function getGroupQueryOptions(args: {
   topic: ConversationTopic;
 }) {
   const { account, topic } = args;
-  return getConversationQueryOptions({ account, topic });
+  return getConversationQueryOptions({
+    account,
+    topic,
+    context: "getGroupQueryOptions",
+  });
 }
 
 export function updateGroupQueryData(args: {
@@ -60,7 +68,10 @@ export function updateGroupQueryData(args: {
   updates: Partial<GroupWithCodecsType>;
 }) {
   const { account, topic, updates } = args;
-  const previousGroup = getGroupQueryData({ account, topic });
+  const previousGroup = getGroupQueryData({
+    account,
+    topic,
+  });
   if (!previousGroup) {
     return;
   }

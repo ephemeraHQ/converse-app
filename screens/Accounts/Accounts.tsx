@@ -1,30 +1,26 @@
+import { translate } from "@/i18n";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   backgroundColor,
-  dangerColor,
   primaryColor,
   textSecondaryColor,
 } from "@styles/colors";
+import { useAccountsProfiles } from "@utils/useAccountsProfiles";
 import { ScrollView, StyleSheet, View, useColorScheme } from "react-native";
-
 import AccountSettingsButton from "../../components/AccountSettingsButton";
 import TableView from "../../components/TableView/TableView";
 import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import {
   useAccountsList,
   useAccountsStore,
-  useErroredAccountsMap,
 } from "../../data/store/accountsStore";
 import { useRouter } from "../../navigation/useNavigation";
-import { useAccountsProfiles } from "@utils/useAccountsProfiles";
 import { NavigationParamList } from "../Navigation/Navigation";
-import { translate } from "@/i18n";
 
 export default function Accounts(
   props: NativeStackScreenProps<NavigationParamList, "Accounts">
 ) {
   const styles = useStyles();
-  const erroredAccounts = useErroredAccountsMap();
   const accounts = useAccountsList();
   const accountsProfiles = useAccountsProfiles();
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
@@ -48,12 +44,6 @@ export default function Accounts(
           },
           rightView: (
             <View style={{ flexDirection: "row" }}>
-              {erroredAccounts[a] && (
-                <TableViewPicto
-                  symbol="exclamationmark.triangle"
-                  color={dangerColor(colorScheme)}
-                />
-              )}
               <AccountSettingsButton account={a} />
               <TableViewPicto
                 symbol="chevron.right"

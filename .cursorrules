@@ -5,11 +5,13 @@
 - Write concise TypeScript code.
 - Use functional programming patterns.
 - Prefer clean, readable code over compact code, using empty lines to separate logical blocks and improve readability.
-- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError). Doesn't mater if it's long. For example this is good: "useGroupMembersInfoForCurrentAccount".
 - Prefer clean and easy to read code over compact code.
 - Don't create function(s) inside other functions unless it's specified
 - Add clear, concise comments to explain non-obvious logic or unconventional implementation decisions.
 - When refactoring code, preserve existing comments unless explicitly instructed otherwise or the related code is removed. Comments often explain important context or implementation decisions that should be maintained.
+- Comments should be above the code they are describing.
+-
 
 ## TypeScript
 

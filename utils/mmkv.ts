@@ -5,7 +5,7 @@ import { StateStorage } from "zustand/middleware";
 
 import { getAccountEncryptionKey } from "./keychain/helpers";
 import logger from "./logger";
-import { GC_TIME } from "@/queries/queryClient.constants";
+import { DEFAULT_GC_TIME } from "@/queries/queryClient.constants";
 
 const storage = new MMKV();
 
@@ -71,7 +71,7 @@ const reactQuerySyncStorage = {
 
 export const reactQueryPersister = experimental_createPersister({
   storage: reactQuerySyncStorage,
-  maxAge: GC_TIME,
+  maxAge: DEFAULT_GC_TIME,
   serialize: stringify,
   deserialize: parse,
 });
