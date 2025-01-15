@@ -13,7 +13,6 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import { usePrivySigner } from "@utils/evm/privy";
 import { useXmtpSigner } from "@utils/evm/xmtp";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { sentryTrackError } from "@utils/sentry";
@@ -32,58 +31,80 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
   useColorScheme,
+  ViewStyle,
 } from "react-native";
+import { Text } from "@/design-system/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useHeader } from "@/navigation/use-header";
+import { HStack } from "@design-system/HStack";
+import { HeaderAction } from "@/design-system/Header/HeaderAction";
+import {
+  ContextMenuButton,
+  MenuActionConfig,
+} from "react-native-ios-context-menu";
+import { Haptics } from "@/utils/haptics";
+import { iconRegistry, Icon } from "@/design-system/Icon/Icon";
+import {
+  useAccountsList,
+  useAccountsStore,
+  useCurrentAccount,
+  currentAccount,
+  useRecommendationsStore,
+  useSettingsStore,
+  useWalletStore,
+} from "@/data/store/accountsStore";
+import { useAccountsProfiles } from "@/utils/useAccountsProfiles";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { navigate } from "@/utils/navigation";
 
-import ActivityIndicator from "../components/ActivityIndicator/ActivityIndicator";
-import { Avatar } from "../components/Avatar";
-import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
-import TableView, {
-  TableViewItemType,
-} from "../components/TableView/TableView";
+import ActivityIndicator from "@components/ActivityIndicator/ActivityIndicator";
+import { Avatar } from "@components/Avatar";
+import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
+import TableView, { TableViewItemType } from "@components/TableView/TableView";
 import {
   TableViewEmoji,
   TableViewImage,
   TableViewPicto,
-} from "../components/TableView/TableViewImage";
-import config from "../config";
-import {
-  currentAccount,
-  useCurrentAccount,
-  useLoggedWithPrivy,
-  useRecommendationsStore,
-  useSettingsStore,
-  useWalletStore,
-} from "../data/store/accountsStore";
-import { useAppStore } from "../data/store/appStore";
-import { useSelect } from "../data/store/storeHelpers";
-import { ExternalWalletPicker } from "../features/ExternalWalletPicker/ExternalWalletPicker";
-import { ExternalWalletPickerContextProvider } from "../features/ExternalWalletPicker/ExternalWalletPicker.context";
-import { useGroupMembers } from "../hooks/useGroupMembers";
-import { useGroupPermissions } from "../hooks/useGroupPermissions";
-import { evmHelpers } from "../utils/evm/helpers";
+} from "@components/TableView/TableViewImage";
+import config from "@config";
+import { useAppStore } from "@data/store/appStore";
+import { useSelect } from "@data/store/storeHelpers";
+import { ExternalWalletPicker } from "@features/ExternalWalletPicker/ExternalWalletPicker";
+import { ExternalWalletPickerContextProvider } from "@features/ExternalWalletPicker/ExternalWalletPicker.context";
+import { useGroupMembers } from "@hooks/useGroupMembers";
+import { useGroupPermissions } from "@hooks/useGroupPermissions";
+import { evmHelpers } from "@utils/evm/helpers";
 import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
-} from "../utils/groupUtils/adminUtils";
-import { ConversationNavParams } from "../features/conversation/conversation.nav";
+} from "@utils/groupUtils/adminUtils";
+import { ConversationNavParams } from "@features/conversation/conversation.nav";
 
 import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
-import { getIPFSAssetURI } from "../utils/thirdweb";
-import { refreshBalanceForAccount } from "../utils/wallet";
-import { consentToAddressesOnProtocolByAccount } from "../utils/xmtpRN/contacts";
+import { getIPFSAssetURI } from "@utils/thirdweb";
+import { consentToAddressesOnProtocolByAccount } from "@utils/xmtpRN/contacts";
 
-import { Icon } from "@/design-system/Icon/Icon";
 import { NotificationPermissionStatus } from "@/features/notifications/types/Notifications.types";
 import { requestPushNotificationsPermissions } from "@/features/notifications/utils/requestPushNotificationsPermissions";
 import { useCurrentAccountXmtpClient } from "@/hooks/useCurrentAccountXmtpClient";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+  useSharedValue,
+} from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { VStack } from "@/design-system/VStack";
+import { Button } from "@/design-system/Button/Button";
+
+const $sectionContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+});
 
 export default function ProfileScreen() {
   return (
@@ -115,27 +136,252 @@ const ExternalWalletPickerWrapper = memo(
   }
 );
 
-function ProfileScreenImpl() {
-  const navigation = useRouter();
-  const route = useRoute<"Profile">();
-
-  const userAddress = useCurrentAccount() as string;
-  const USDCBalance = useWalletStore((s) => s.USDCBalance);
+/**
+ * ContactCard Component
+ *
+ * A card component that displays contact information with a 3D tilt effect.
+ * Includes name, bio, avatar with interactive animations.
+ */
+const ContactCard = memo(function ContactCard({
+  name,
+  bio,
+  avatarUri,
+}: {
+  name: string;
+  bio?: string;
+  avatarUri?: string;
+}) {
+  const { theme } = useAppTheme();
   const colorScheme = useColorScheme();
-  const styles = useStyles();
+
+  const rotateX = useSharedValue(0);
+  const rotateY = useSharedValue(0);
+  const shadowOffsetX = useSharedValue(0);
+  const shadowOffsetY = useSharedValue(0);
+
+  const baseStyle = {
+    backgroundColor: theme.colors.fill.primary,
+    borderRadius: theme.borderRadius.xs,
+    padding: theme.spacing.xl,
+    marginTop: theme.spacing.xs,
+    marginBottom: theme.spacing.lg,
+    shadowColor: theme.colors.fill.primary,
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: {
+      width: 0,
+      height: 6, // Positive value pushes shadow down
+    },
+    elevation: 5,
+  };
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { perspective: 800 },
+      { rotateX: `${rotateX.value}deg` },
+      { rotateY: `${rotateY.value}deg` },
+    ],
+    shadowOffset: {
+      width: shadowOffsetX.value,
+      height: shadowOffsetY.value,
+    },
+    ...baseStyle,
+  }));
+
+  const panGesture = Gesture.Pan()
+    .onBegin(() => {
+      // Reset values when gesture starts
+      rotateX.value = withSpring(0);
+      rotateY.value = withSpring(0);
+      shadowOffsetX.value = withSpring(0);
+      shadowOffsetY.value = withSpring(0);
+    })
+    .onUpdate((event) => {
+      // Update tilt based on pan gesture
+      rotateX.value = event.translationY / 10;
+      rotateY.value = event.translationX / 10;
+      shadowOffsetX.value = -event.translationX / 20;
+      shadowOffsetY.value = event.translationY / 20;
+    })
+    .onEnd(() => {
+      // Reset to original position when gesture ends
+      rotateX.value = withSpring(0);
+      rotateY.value = withSpring(0);
+      shadowOffsetX.value = withSpring(0);
+      shadowOffsetY.value = withSpring(0);
+    });
+
+  return (
+    <GestureDetector gesture={panGesture}>
+      <Animated.View style={animatedStyle}>
+        <VStack>
+          <Avatar
+            uri={avatarUri}
+            name={name}
+            size={theme.avatarSize.lg}
+            style={{
+              marginBottom: theme.spacing.xxl,
+              alignSelf: "flex-start",
+            }}
+          />
+          <View>
+            <Text
+              preset="bodyBold"
+              style={{
+                color: theme.colors.text.inverted.primary,
+                marginBottom: theme.spacing.xxxs,
+              }}
+            >
+              {name}
+            </Text>
+            {bio && (
+              <Text
+                preset="smaller"
+                style={{ color: theme.colors.text.inverted.secondary }}
+              >
+                {bio}
+              </Text>
+            )}
+          </View>
+        </VStack>
+      </Animated.View>
+    </GestureDetector>
+  );
+});
+
+function ProfileScreenImpl() {
+  const { theme, themed } = useAppTheme();
+  const router = useRouter();
+  const account = useCurrentAccount();
+  const accounts = useAccountsList();
+  const accountsProfiles = useAccountsProfiles();
+  const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
+  const route = useRoute<"Profile">();
+  const peerAddress = route.params.address;
+  const { data: socials } = useProfileSocials(peerAddress);
+  const preferredUserName = usePreferredName(peerAddress);
+  const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
+  const colorScheme = useColorScheme();
+
+  useHeader(
+    {
+      safeAreaEdges: ["top"],
+      titleComponent: (
+        <Text preset="body">
+          {router.canGoBack()
+            ? router.getState().routes[router.getState().routes.length - 2].name
+            : ""}
+        </Text>
+      ),
+      LeftActionComponent: (
+        <HeaderAction
+          icon="chevron.left"
+          onPress={() => {
+            router.goBack();
+          }}
+        />
+      ),
+      RightActionComponent: (
+        <HStack
+          style={{
+            alignItems: "center",
+            columnGap: theme.spacing.xxs,
+          }}
+        >
+          <HeaderAction
+            icon="qrcode"
+            onPress={() => {
+              navigate("ShareProfile");
+            }}
+          />
+          <ContextMenuButton
+            style={{
+              paddingVertical: theme.spacing.sm,
+              paddingRight: theme.spacing.xxxs,
+            }}
+            isMenuPrimaryAction
+            onPressMenuItem={({ nativeEvent }) => {
+              Haptics.selectionAsync();
+              if (nativeEvent.actionKey === "share") {
+                navigate("ShareProfile");
+              } else if (nativeEvent.actionKey === "copy") {
+                Clipboard.setString(peerAddress);
+                //Alert.alert(translate("profile.address_copied"));
+              } else if (nativeEvent.actionKey === "block") {
+                Alert.alert(
+                  "Title", //translate("profile.block.title"),
+                  /*translate("profile.block.message", {
+                  name: preferredUserName,
+                })*/
+                  "Message",
+                  [
+                    {
+                      text: translate("cancel"),
+                      style: "cancel",
+                    },
+                    {
+                      text: translate("block"),
+                      style: "destructive",
+                      onPress: () => {
+                        setPeersStatus({ [peerAddress]: "blocked" });
+                        router.goBack();
+                      },
+                    },
+                  ]
+                );
+              }
+            }}
+            menuConfig={{
+              menuTitle: "",
+              menuItems: [
+                {
+                  actionKey: "share",
+                  actionTitle: translate("share"),
+                  icon: {
+                    iconType: "SYSTEM",
+                    iconValue: "square.and.arrow.up",
+                  },
+                },
+                {
+                  actionKey: "copy",
+                  actionTitle: translate("copy"),
+                  icon: {
+                    iconType: "SYSTEM",
+                    iconValue: "doc.on.doc",
+                  },
+                },
+                {
+                  actionKey: "block",
+                  actionTitle: translate("block"),
+                  icon: {
+                    iconType: "SYSTEM",
+                    iconValue: "person.crop.circle.badge.xmark",
+                  },
+                  menuAttributes: ["destructive"],
+                },
+              ],
+            }}
+          >
+            <HeaderAction icon="more_vert" />
+          </ContextMenuButton>
+        </HStack>
+      ),
+    },
+    [router, theme, peerAddress, preferredUserName, setPeersStatus, colorScheme]
+  );
+
+  const navigation = useRouter();
+  const userAddress = useCurrentAccount() as string;
   const [copiedAddresses, setCopiedAddresses] = useState<{
     [address: string]: boolean;
   }>({});
-  const peerAddress = route.params.address;
   const recommendationTags = useRecommendationsStore(
     (s) => s.frens[peerAddress]?.tags
   );
   const isBlockedPeer = useSettingsStore(
     (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
   );
-  const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
-  const { data: socials } = useProfileSocials(peerAddress);
-  const preferredUserName = usePreferredName(peerAddress);
+  const { data: client } = useCurrentAccountXmtpClient();
   const preferredAvatarUri = usePreferredAvatarUri(peerAddress);
   const groupTopic = route.params.fromGroupTopic;
   const {
@@ -149,26 +395,9 @@ function ProfileScreenImpl() {
   const { permissions: groupPermissions } = useGroupPermissions(groupTopic!);
 
   const { getXmtpSigner } = useXmtpSigner();
-  const privySigner = usePrivySigner();
 
   const insets = useSafeAreaInsets();
   const shouldShowError = useShouldShowErrored();
-  useEffect(() => {
-    refreshBalanceForAccount(userAddress);
-  }, [userAddress]);
-
-  const [refreshingBalance, setRefreshingBalance] = useState(false);
-
-  const manuallyRefreshBalance = useCallback(async () => {
-    setRefreshingBalance(true);
-    const now = new Date().getTime();
-    await refreshBalanceForAccount(userAddress, 0);
-    const after = new Date().getTime();
-    if (after - now < 1000) {
-      await new Promise((r) => setTimeout(r, 1000 - after + now));
-    }
-    setRefreshingBalance(false);
-  }, [userAddress]);
 
   const { setNotificationsPermissionStatus, notificationsPermissionStatus } =
     useAppStore(
@@ -232,7 +461,6 @@ function ProfileScreenImpl() {
     ),
   ];
 
-  const isPrivy = useLoggedWithPrivy();
   const showDisconnectActionSheet = useDisconnectActionSheet();
 
   const getSocialItemsFromArray = useCallback(
@@ -257,7 +485,7 @@ function ProfileScreenImpl() {
           leftView: imageURI ? (
             <TableViewImage imageURI={getIPFSAssetURI(imageURI)} />
           ) : (
-            <TableViewEmoji emoji="👋" style={styles.emoji} />
+            <TableViewEmoji emoji="👋" />
           ),
           rightView: (
             <TableViewPicto
@@ -268,7 +496,7 @@ function ProfileScreenImpl() {
         };
       }) as TableViewItemType[];
     },
-    [colorScheme, styles.emoji]
+    [colorScheme]
   );
 
   const socialItems = [
@@ -296,51 +524,6 @@ function ProfileScreenImpl() {
     Platform.OS === "ios"
       ? Constants.expoConfig?.ios?.buildNumber
       : Constants.expoConfig?.android?.versionCode;
-  const balanceItems: TableViewItemType[] = [
-    {
-      id: "balance",
-      title: translate("your_balance_usdc"),
-      rightView: (
-        <View style={styles.balanceContainer}>
-          <Text style={styles.balance}>
-            ${evmHelpers.fromDecimal(USDCBalance, config.evm.USDC.decimals, 2)}
-          </Text>
-          <View style={{ width: 30 }}>
-            {!refreshingBalance && (
-              <View style={{ left: Platform.OS === "ios" ? 0 : -14 }}>
-                <TableViewPicto
-                  symbol="arrow.clockwise"
-                  color={
-                    Platform.OS === "android"
-                      ? primaryColor(colorScheme)
-                      : undefined
-                  }
-                  onPress={manuallyRefreshBalance}
-                />
-              </View>
-            )}
-            {refreshingBalance && <ActivityIndicator />}
-          </View>
-        </View>
-      ),
-    },
-  ];
-
-  if (isPrivy) {
-    balanceItems.push({
-      id: "topUp",
-      title: translate("top_up_your_account"),
-      action: () => {
-        navigation.push("TopUp");
-      },
-      rightView: (
-        <TableViewPicto
-          symbol="chevron.right"
-          color={textSecondaryColor(colorScheme)}
-        />
-      ),
-    });
-  }
 
   const actionsTableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];
@@ -619,28 +802,91 @@ function ProfileScreenImpl() {
     revokeAdmin,
   ]);
 
+  const handleChatPress = useCallback(() => {
+    const isPreviouslyInNavStack = navigation
+      .getState()
+      .routes.some((route) => {
+        if (route.name !== "Conversation") {
+          return false;
+        }
+        const params = route.params as ConversationNavParams;
+        return params?.peer === peerAddress.toLowerCase();
+      });
+    if (isPreviouslyInNavStack) {
+      navigation.popToTop();
+      navigation.navigate({
+        name: "Conversation",
+        params: {
+          peer: peerAddress,
+        },
+      });
+    } else {
+      navigation.popToTop();
+      navigation.dispatch(
+        StackActions.push("Conversation", {
+          peer: peerAddress,
+        })
+      );
+    }
+  }, [navigation, peerAddress]);
+
   return (
     <ScrollView
-      style={styles.profile}
-      contentContainerStyle={styles.profileContent}
+      style={{
+        backgroundColor: theme.colors.background.surface,
+      }}
+      contentContainerStyle={{
+        paddingHorizontal: theme.spacing.lg,
+      }}
     >
-      <Avatar
-        uri={preferredAvatarUri ?? undefined}
-        style={styles.avatar}
-        name={preferredUserName}
+      {!isMyProfile && !isBlockedPeer && (
+        <ContactCard
+          name={preferredUserName}
+          // TODO: implement bio from the profile from Convos backend/local db
+          // bio="Soccer dad and physical therapist"
+          avatarUri={preferredAvatarUri}
+        />
+      )}
+
+      <Button
+        onPress={handleChatPress}
+        text="Chat"
+        variant="outline"
+        style={{
+          marginTop: theme.spacing.xxxs,
+          marginBottom: theme.spacing.xl,
+        }}
       />
-      <Text style={styles.title}>{preferredUserName}</Text>
+
       {isMyProfile && shouldShowError && (
-        <View style={styles.errorContainer}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: theme.spacing.lg,
+          }}
+        >
           <Icon
             icon="exclamationmark.triangle"
             color={dangerColor(colorScheme)}
             size={PictoSizes.textButton}
-            style={styles.errorIcon}
+            style={{
+              width: theme.iconSize.sm,
+              height: theme.iconSize.sm,
+            }}
           />
-          <Text style={styles.errorText}>{translate("client_error")}</Text>
+          <Text
+            style={{
+              color: dangerColor(colorScheme),
+              marginLeft: theme.spacing.xxs,
+            }}
+          >
+            {translate("client_error")}
+          </Text>
         </View>
       )}
+
       {isMyProfile && (
         <TableView
           items={[
@@ -663,7 +909,7 @@ function ProfileScreenImpl() {
             },
           ]}
           title={translate("youre_the_og")}
-          style={styles.tableView}
+          style={themed($sectionContainer)}
         />
       )}
 
@@ -671,14 +917,14 @@ function ProfileScreenImpl() {
         <TableView
           items={usernamesItems}
           title={`USERNAME${usernamesItems.length > 1 ? "S" : ""}`}
-          style={styles.tableView}
+          style={themed($sectionContainer)}
         />
       )}
 
       <TableView
         items={addressItems}
         title={translate("address")}
-        style={styles.tableView}
+        style={themed($sectionContainer)}
       />
 
       {route.params?.fromGroupTopic && !isMyProfile && (
@@ -689,17 +935,16 @@ function ProfileScreenImpl() {
               title: translate("send_a_message"),
               titleColor: primaryColor(colorScheme),
               action: () => {
-                navigation.pop(3);
-                // @todo => check if this is the right timing on split screen / web / android
-                setTimeout(() => {
-                  navigation.navigate("Conversation", {
+                navigation.popToTop();
+                navigation.dispatch(
+                  StackActions.push("Conversation", {
                     peer: route.params.address,
-                  });
-                }, 300);
+                  })
+                );
               },
             },
           ]}
-          style={styles.tableView}
+          style={themed($sectionContainer)}
         />
       )}
 
@@ -707,7 +952,7 @@ function ProfileScreenImpl() {
         <TableView
           items={socialItems}
           title={translate("social")}
-          style={styles.tableView}
+          style={themed($sectionContainer)}
         />
       )}
       {!isMyProfile && (
@@ -721,13 +966,13 @@ function ProfileScreenImpl() {
                 leftView: <TableViewImage imageURI={t.image} />,
               }))}
               title={translate("common_activity")}
-              style={styles.tableView}
+              style={themed($sectionContainer)}
             />
           )}
           <TableView
             items={actionsTableViewItems}
             title={translate("actions")}
-            style={styles.tableView}
+            style={themed($sectionContainer)}
           />
         </>
       )}
@@ -857,28 +1102,8 @@ function ProfileScreenImpl() {
                 !(notificationsPermissionStatus === "granted")
             )}
             title={translate("actions")}
-            style={styles.tableView}
+            style={themed($sectionContainer)}
           />
-          {/* Removing until revoking is available */}
-          {/* <TableView
-            items={[
-              {
-                id: "revoke",
-                title: translate("revoke_other_installations"),
-                titleColor:
-                  Platform.OS === "android"
-                    ? undefined
-                    : dangerColor(colorScheme),
-                action: () => {
-                  setTimeout(() => {
-                    showRevokeActionSheet();
-                  }, 300);
-                },
-              },
-            ]}
-            title={translate("security")}
-            style={styles.tableView}
-          /> */}
 
           <TableView
             items={[
@@ -888,7 +1113,7 @@ function ProfileScreenImpl() {
               },
             ]}
             title={translate("app_version")}
-            style={styles.tableView}
+            style={themed($sectionContainer)}
           />
         </>
       )}
@@ -896,55 +1121,3 @@ function ProfileScreenImpl() {
     </ScrollView>
   );
 }
-
-const useStyles = () => {
-  const colorScheme = useColorScheme();
-  return StyleSheet.create({
-    title: {
-      textAlign: "center",
-      fontSize: 34,
-      fontWeight: "bold",
-      marginVertical: 10,
-      color: textPrimaryColor(colorScheme),
-    },
-    profile: {
-      backgroundColor: backgroundColor(colorScheme),
-    },
-    profileContent: {
-      paddingHorizontal: Platform.OS === "ios" ? 18 : 6,
-    },
-    tableView: {},
-    balanceContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginRight: Platform.OS === "ios" ? 0 : -5,
-    },
-    balance: {
-      color: textPrimaryColor(colorScheme),
-      fontSize: 17,
-      marginRight: 10,
-    },
-    avatar: {
-      marginBottom: 10,
-      marginTop: 23,
-      alignSelf: "center",
-    },
-    emoji: {
-      backgroundColor: "rgba(118, 118, 128, 0.12)",
-      borderRadius: 30,
-    },
-    errorText: {
-      color: dangerColor(colorScheme),
-      textAlign: "center",
-    },
-    errorContainer: {
-      flexDirection: "row",
-      alignSelf: "center",
-    },
-    errorIcon: {
-      width: PictoSizes.textButton,
-      height: PictoSizes.textButton,
-      marginRight: 5,
-    },
-  });
-};
