@@ -1,143 +1,174 @@
-import { Button } from "@design-system/Button/Button";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+/**
+ * BUGS:
+ *
+ * chat is not loaded properly from cold start until chat is visited
+ * solution: proper persistence
+ *
+ * chat flow feels slow on app first launch
+ * solution: proper persistence
+ *
+ * group flow feels slow
+ * solution: requires diagnosing bottleneck
+ *
+ * conversation list is not updated with most recent dm when sent from composer
+ * solution: maybe using the hook instead of imperatively doing stuff?
+ *
+ * group name creation not correct: getting first preferred name correct but
+ * ✅ not using correct preferred name for last two when ephemeral accounts
+ *
+ * messed up old add user to existing group screen
+ * ✅ solution: copy existing screen back in
+ *
+ * UI:
+ *
+ * ✅ search results list needs updating
+ * ✅ create chips for search results
+ * ✅ composer disable send button
+ * ✅ composer hide plus button
+ * ✅ pending members list
+ *
+ * new group joined the group welcome message needs wrapping (not my problem atm)
+ *
+ * CODE ORG:
+ * change file names to lower-kebab-case
+ * move files to features/new-conversation
+ * rename files to indicate where they live within new-conversation domain
+ * use proper suffixes
+ *
+ * ---
+ *
+ * GITHUB:
+ * https://github.com/ephemeraHQ/converse-app/issues/1498
+ *
+ * FIGMA:
+ * new composer: https://www.figma.com/design/p6mt4tEDltI4mypD3TIgUk/Converse-App?node-id=5026-26989&m=dev
+ * search results list: https://www.figma.com/design/p6mt4tEDltI4mypD3TIgUk/Converse-App?node-id=5191-4200&t=KDRZMuK1xpiNBKG9-4
+ */
+import { Text } from "@/design-system/Text";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  Platform,
-  ScrollView,
-  TextInput,
-  View,
-  ViewStyle,
-  TextStyle,
-} from "react-native";
+import { Platform, ScrollView, TextInput, View } from "react-native";
 
-import { translate } from "@/i18n";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
-import { useGroupQuery } from "@queries/useGroupQuery";
-import SearchBar from "@search/components/SearchBar";
-import ProfileSearch from "@search/screens/ProfileSearch";
+import { SearchBar } from "@search/components/SearchBar";
 import { canMessageByAccount } from "@utils/xmtpRN/contacts";
-import { InboxId } from "@xmtp/react-native-sdk";
+import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 import AndroidBackAction from "@components/AndroidBackAction";
-import Recommendations from "@components/Recommendations/Recommendations";
-import TableView from "@components/TableView/TableView";
-import { TableViewPicto } from "@components/TableView/TableViewImage";
-import config from "@config";
-import {
-  currentAccount,
-  useRecommendationsStore,
-} from "@data/store/accountsStore";
+import { currentAccount } from "@data/store/accountsStore";
 import { IProfileSocials } from "@/features/profiles/profile-types";
-import { useSelect } from "@data/store/storeHelpers";
-import { useGroupMembers } from "@hooks/useGroupMembers";
 import { searchProfiles } from "@utils/api";
 import { getAddressForPeer, isSupportedPeer } from "@utils/evm/address";
-import { navigate } from "@utils/navigation";
 import { isEmptyObject } from "@utils/objects";
-import { getPreferredName } from "@utils/profile";
-import { NewConversationModalParams } from "./NewConversationModal";
+import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
-import { Text } from "@design-system/Text";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/useAppTheme";
 import { Loader } from "@/design-system/loader";
-import { textSizeStyles } from "@/design-system/Text/Text.styles";
+import logger from "@/utils/logger";
+import { ProfileSearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
+import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
+import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
+import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
+import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
+import { shortAddress } from "@/utils/strings/shortAddress";
+import {
+  createConversationByAccount,
+  createGroupWithDefaultsByAccount,
+  getOptionalConversationByPeerByAccount,
+} from "@/utils/xmtpRN/conversations";
+import { setConversationQueryData } from "@/queries/useConversationQuery";
+import { sendMessage } from "@/features/conversation/hooks/use-send-message";
+import { useNavigation } from "@react-navigation/native";
+import { Button } from "@/design-system/Button/Button";
+import { stylesNewChat } from "./newChat.styles";
+import { Chip } from "@/design-system/chip";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { NavigationParamList } from "../Navigation/Navigation";
+
+/**
+ * Screen shown for when user wants to create a new Chat.
+ *
+ * User can search for peers, create a new group, create a dm,
+ * or navigate to an existing dm.
+ */
+type NavigationProps = NativeStackNavigationProp<
+  NavigationParamList,
+  "NewConversation"
+>;
 
 export default function NewConversation({
-  route,
   navigation,
-}: NativeStackScreenProps<
-  NewConversationModalParams,
-  "NewConversationScreen"
->) {
-  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
-
+}: {
+  navigation: NavigationProps;
+}) {
   const { theme, themed } = useAppTheme();
+  const [conversationCreationMode, setConversationCreationMode] =
+    useState<ConversationVersion>(ConversationVersion.DM);
+  // const navigation = useNavigation();
 
-  // TODO: Unused. Should we remove this once we have a proper group query?
-  const { data: existingGroup } = useGroupQuery({
-    account: currentAccount(),
-    topic: route.params?.addingToGroupTopic!,
-  });
+  const handleBack = useCallback(() => {
+    logger.debug("[NewConversation] Navigating back");
+    navigation.goBack();
+  }, [navigation]);
 
-  const [group, setGroup] = useState({
-    enabled: !!route.params?.addingToGroupTopic,
+  const [pendingChatMembers, setPendingGroupMembers] = useState({
     members: [] as (IProfileSocials & { address: string })[],
   });
+  const pendingChatMembersCount = pendingChatMembers.members.length;
+  const composerSendButtonDisabled = pendingChatMembersCount === 0;
 
-  const { addMembers, members } = useGroupMembers(
-    route.params?.addingToGroupTopic!
-  );
+  useEffect(() => {
+    if (pendingChatMembersCount > 1) {
+      setConversationCreationMode(ConversationVersion.GROUP);
+    } else if (pendingChatMembersCount === 1) {
+      setConversationCreationMode(ConversationVersion.DM);
+    }
+  }, [pendingChatMembersCount]);
 
   const [loading, setLoading] = useState(false);
 
-  const handleRightAction = useCallback(async () => {
-    if (route.params?.addingToGroupTopic) {
-      setLoading(true);
-      try {
-        //  TODO: Support multiple addresses
-        await addMembers(group.members.map((m) => m.address));
-        navigation.goBack();
-      } catch (e) {
-        setLoading(false);
-        console.error(e);
-        Alert.alert("An error occured");
-      }
-    } else {
-      navigation.push("NewGroupSummary", {
-        members: group.members,
-      });
-    }
-  }, [addMembers, group.members, navigation, route.params?.addingToGroupTopic]);
-
   useEffect(() => {
+    logger.debug("[NewConversation] Setting navigation options", {
+      memberCount: pendingChatMembersCount,
+      conversationCreationMode,
+      loading,
+    });
+
     navigation.setOptions({
       headerLeft: () =>
         Platform.OS === "ios" ? (
-          <Button
-            variant="text"
-            text={translate("cancel")}
-            onPress={handleBack}
-          />
+          <Button icon="chevron.left" variant="text" onPress={handleBack} />
         ) : (
-          <AndroidBackAction navigation={navigation} />
+          <AndroidBackAction navigation={navigation as any} />
         ),
-      headerTitle: group.enabled
-        ? route.params?.addingToGroupTopic
-          ? translate("new_conversation.add_members")
-          : translate("new_conversation.create_group")
-        : translate("new_conversation.new_conversation"),
+      headerBackButtonDisplayMode: "default",
+      headerTitle: "New chat",
       headerRight: () => {
-        if (group.enabled && group.members.length > 0) {
-          if (loading) {
-            return <Loader style={{ marginRight: theme.spacing["5xs"] }} />;
-          } else {
-            return (
-              <Button
-                variant="text"
-                text={route.params?.addingToGroupTopic ? "Add" : "Next"}
-                onPress={handleRightAction}
-                style={{ marginRight: -10, padding: 10 }}
-              />
-            );
-          }
-        }
-        return undefined;
+        return (
+          <Text
+            text={
+              conversationCreationMode === ConversationVersion.DM
+                ? "New convo"
+                : "New group"
+            }
+            // onPress={handleRightAction}
+          />
+        );
       },
     });
   }, [
-    group,
+    pendingChatMembersCount,
+    conversationCreationMode,
     loading,
     navigation,
-    route.params?.addingToGroupTopic,
-    addMembers,
     handleBack,
-    handleRightAction,
     themed,
     theme.spacing,
   ]);
 
-  const [value, setValue] = useState(route.params?.peer || "");
-  const searchingForValue = useRef("");
+  const [
+    searchQueryState,
+    /*weird name becuase I'm not exactly sure what the ref below does so being expliti as state vs ref*/ setSearchQueryState,
+  ] = useState("");
+  const searchQueryRef = useRef("");
   const [status, setStatus] = useState({
     loading: false,
     error: "",
@@ -145,20 +176,25 @@ export default function NewConversation({
     profileSearchResults: {} as { [address: string]: IProfileSocials },
   });
 
-  const {
-    updatedAt: recommendationsUpdatedAt,
-    loading: recommendationsLoading,
-    frens,
-  } = useRecommendationsStore(useSelect(["updatedAt", "loading", "frens"]));
-  const recommendationsLoadedOnce = recommendationsUpdatedAt > 0;
-  const recommendationsFrensCount = Object.keys(frens).length;
-
+  // todo: abstract debounce and provide option for eager vs lazy debounce
+  // ie: lets perform the query but not necessarily rerender until the debounce
+  // this will feel snappier
   const debounceDelay = 500;
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (value.length < 3) {
-      // If the input is less than 3 characters, do nothing
+    // Log initial effect trigger
+    logger.info("[NewConversation] Search effect triggered", {
+      searchQueryState,
+    });
+
+    if (searchQueryState.length < 3) {
+      logger.info(
+        "[NewConversation] Search searchQueryState too short, resetting state",
+        {
+          searchQueryState,
+        }
+      );
       setStatus({
         loading: false,
         error: "",
@@ -168,12 +204,17 @@ export default function NewConversation({
       return;
     }
 
+    // Log debounce timer clear
     if (debounceTimer.current !== null) {
+      logger.info("[NewConversation] Clearing existing debounce timer");
       clearTimeout(debounceTimer.current);
     }
 
     debounceTimer.current = setTimeout(async () => {
       const searchForValue = async () => {
+        logger.info("[NewConversation] Starting search after debounce", {
+          searchQueryState,
+        });
         setStatus(({ loading }) => ({
           loading,
           error: "",
@@ -181,39 +222,47 @@ export default function NewConversation({
           profileSearchResults: {},
         }));
 
-        if (isSupportedPeer(value)) {
+        if (isSupportedPeer(searchQueryState)) {
+          logger.info("[NewConversation] Searching for supported peer", {
+            searchQueryState,
+          });
           setStatus(({ error }) => ({
             loading: true,
             error,
             inviteToConverse: "",
             profileSearchResults: {},
           }));
-          searchingForValue.current = value;
-          const resolvedAddress = await getAddressForPeer(value);
-          if (searchingForValue.current === value) {
+          searchQueryRef.current = searchQueryState;
+          const resolvedAddress = await getAddressForPeer(searchQueryState);
+          if (searchQueryRef.current === searchQueryState) {
             // If we're still searching for this one
             if (!resolvedAddress) {
-              const isLens = value.endsWith(config.lensSuffix);
-              const isFarcaster = value.endsWith(".fc");
               setStatus({
                 loading: false,
                 profileSearchResults: {},
                 inviteToConverse: "",
-                error:
-                  isLens || isFarcaster
-                    ? "This handle does not exist. Please try again."
-                    : "No address has been set for this domain.",
+                error: "No address has been set for this domain.",
               });
 
               return;
             }
             const address = getCleanAddress(resolvedAddress);
+            logger.info("[NewConversation] Checking if address is on XMTP", {
+              address,
+            });
             const addressIsOnXmtp = await canMessageByAccount({
               account: currentAccount(),
               peer: address,
             });
-            if (searchingForValue.current === value) {
+            if (searchQueryRef.current === searchQueryState) {
               if (addressIsOnXmtp) {
+                logger.info(
+                  "[NewConversation] Address found on XMTP, searching profiles",
+                  {
+                    address,
+                    searchQueryState,
+                  }
+                );
                 // Let's search with the exact address!
                 const profiles = await searchProfiles(
                   address,
@@ -221,8 +270,15 @@ export default function NewConversation({
                 );
 
                 if (!isEmptyObject(profiles)) {
+                  logger.info("[NewConversation] Found and saving profiles", {
+                    profileCount: Object.keys(profiles).length,
+                  });
                   // Let's save the profiles for future use
                   setProfileRecordSocialsQueryData(currentAccount(), profiles);
+                  // delete pending chat memebers from search results
+                  pendingChatMembers.members.forEach((member) => {
+                    delete profiles[member.address];
+                  });
                   setStatus({
                     loading: false,
                     error: "",
@@ -230,6 +286,9 @@ export default function NewConversation({
                     profileSearchResults: profiles,
                   });
                 } else {
+                  logger.info(
+                    "[NewConversation] No profiles found for XMTP user"
+                  );
                   setStatus({
                     loading: false,
                     error: "",
@@ -238,16 +297,24 @@ export default function NewConversation({
                   });
                 }
               } else {
+                logger.info("[NewConversation] Address not on XMTP", {
+                  searchQueryState,
+                  address,
+                });
                 setStatus({
                   loading: false,
-                  error: `${value} does not use Converse or XMTP yet`,
-                  inviteToConverse: value,
+                  error: `${shortAddress(searchQueryState)} is not on the XMTP network yet`,
+                  inviteToConverse: searchQueryState,
                   profileSearchResults: {},
                 });
               }
             }
           }
         } else {
+          logger.info(
+            "[NewConversation] Searching profiles for non-peer searchQueryState",
+            { searchQueryState }
+          );
           setStatus({
             loading: true,
             error: "",
@@ -255,9 +322,16 @@ export default function NewConversation({
             profileSearchResults: {},
           });
 
-          const profiles = await searchProfiles(value, currentAccount());
+          const profiles = await searchProfiles(
+            searchQueryState,
+            currentAccount()
+          );
 
           if (!isEmptyObject(profiles)) {
+            logger.info("[NewConversation] Found and saving profiles", {
+              searchQueryState,
+              profileCount: Object.keys(profiles).length,
+            });
             // Let's save the profiles for future use
             setProfileRecordSocialsQueryData(currentAccount(), profiles);
             setStatus({
@@ -267,6 +341,9 @@ export default function NewConversation({
               profileSearchResults: profiles,
             });
           } else {
+            logger.info("[NewConversation] No profiles found", {
+              searchQueryState,
+            });
             setStatus({
               loading: false,
               error: "",
@@ -281,29 +358,21 @@ export default function NewConversation({
 
     return () => {
       if (debounceTimer.current !== null) {
+        logger.info("[NewConversation] Cleanup: clearing debounce timer");
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [value]);
+  }, [searchQueryState, pendingChatMembers.members]);
 
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
-
-  const showRecommendations =
-    !status.loading && value.length === 0 && recommendationsFrensCount > 0;
-
-  const inputPlaceholder = ".converse.xyz, 0x, .eth, .lens, .fc, .cb.id, UD…";
 
   const onRef = useCallback(
     (r: TextInput | null) => {
       if (!initialFocus.current) {
         initialFocus.current = true;
-        if (
-          !value &&
-          !recommendationsLoading &&
-          recommendationsLoadedOnce &&
-          recommendationsFrensCount === 0
-        ) {
+        if (!searchQueryState) {
+          logger.debug("[NewConversation] Auto-focusing input");
           setTimeout(() => {
             r?.focus();
           }, 100);
@@ -311,232 +380,193 @@ export default function NewConversation({
       }
       inputRef.current = r;
     },
-    [
-      recommendationsFrensCount,
-      recommendationsLoadedOnce,
-      recommendationsLoading,
-      value,
-    ]
+    [searchQueryState]
   );
 
-  return (
-    <View style={themed($searchContainer)}>
-      <SearchBar
-        value={value}
-        setValue={setValue}
-        onRef={onRef}
-        inputPlaceholder={inputPlaceholder}
-      />
-      <View
-        style={[
-          themed($group),
-          {
-            display:
-              group.enabled && group.members.length === 0 ? "none" : "flex",
-          },
-        ]}
-      >
-        {!group.enabled && (
-          <Button
-            variant="text"
-            picto="person.2"
-            text={translate("new_group.title")}
-            style={themed($newGroupButton)}
-            onPress={() => {
-              setGroup({ enabled: true, members: [] });
-            }}
-          />
-        )}
+  const shouldDisplaySearchResults =
+    !status.loading &&
+    !status.error &&
+    !isEmptyObject(status.profileSearchResults);
 
-        {group.enabled &&
-          group.members.length > 0 &&
-          group.members.map((m, index) => {
+  const shouldDisplayLoading =
+    status.loading &&
+    !status.error &&
+    !isEmptyObject(status.profileSearchResults);
+
+  const shouldDisplayPendingMembers = pendingChatMembers.members.length > 0;
+
+  const shouldDisplayErrorMessage =
+    status.error && isEmptyObject(status.profileSearchResults);
+
+  return (
+    <View style={themed(stylesNewChat.$searchContainer)}>
+      <SearchBar
+        value={searchQueryState}
+        setValue={setSearchQueryState}
+        onRef={onRef}
+        inputPlaceholder={"Name, address or onchain ID"}
+      />
+
+      {shouldDisplayPendingMembers && (
+        <View
+          style={[
+            themed(stylesNewChat.$pendingChatMembers),
+            {
+              display: "flex",
+            },
+          ]}
+        >
+          {pendingChatMembers.members.map((m) => {
             const preferredName = getPreferredName(m, m.address);
 
             return (
-              <Button
+              <Chip
                 key={m.address}
                 text={preferredName}
-                variant="fill"
-                size="md"
-                picto="xmark"
-                style={themed($groupMemberButton)}
-                onPress={() =>
-                  setGroup((g) => {
-                    const members = [...g.members];
-                    members.splice(index, 1);
-                    return {
-                      ...g,
-                      members,
-                    };
-                  })
-                }
+                avatarUrl={getPreferredAvatar(m)}
+                onPress={() => {
+                  setPendingGroupMembers((g) => ({
+                    ...g,
+                    members: g.members.filter(
+                      (member) => member.address !== m.address
+                    ),
+                  }));
+                }}
               />
             );
           })}
-      </View>
+        </View>
+      )}
 
-      {!status.loading && !isEmptyObject(status.profileSearchResults) ? (
-        <View style={{ flex: 1 }}>
-          <ProfileSearch
-            navigation={navigation}
+      <View style={{ flex: 1 }}>
+        {shouldDisplaySearchResults && (
+          <ProfileSearchResultsList
             profiles={(() => {
               const searchResultsToShow = { ...status.profileSearchResults };
-              if (group.enabled && group.members) {
-                group.members.forEach((member) => {
+              if (pendingChatMembers.members) {
+                pendingChatMembers.members.forEach((member) => {
                   delete searchResultsToShow[member.address];
-                });
-              }
-              if (members) {
-                members?.ids?.forEach((memberId: InboxId) => {
-                  const member = members.byId[memberId];
-                  const address = getCleanAddress(member.addresses[0]);
-                  delete searchResultsToShow[address];
                 });
               }
               return searchResultsToShow;
             })()}
-            groupMode={group.enabled}
-            addToGroup={async (member) => {
-              setGroup((g) => ({ ...g, members: [...g.members, member] }));
-              setValue("");
+            handleSearchResultItemPress={(args) => {
+              logger.info("[NewConversation] handleSearchResultItemPress", {
+                args,
+              });
+              setPendingGroupMembers((g) => ({
+                ...g,
+                members: [
+                  ...g.members,
+                  { ...args.socials, address: args.address },
+                ],
+              }));
+              setSearchQueryState("");
             }}
           />
-        </View>
-      ) : (
+        )}
+      </View>
+
+      {shouldDisplayErrorMessage && (
         <ScrollView
-          style={[themed($modal), { flex: 1 }]}
+          style={[themed(stylesNewChat.$modal), { flex: 1 }]}
           keyboardShouldPersistTaps="handled"
           onTouchStart={() => {
             inputRef.current?.blur();
           }}
         >
-          {isEmptyObject(status.profileSearchResults) && (
-            <View
-              style={{
-                backgroundColor: theme.colors.background.surface,
-                height: showRecommendations ? undefined : 0,
-              }}
-            >
-              <Recommendations
-                visibility="EMBEDDED"
-                groupMode={group.enabled}
-                groupMembers={group.members}
-                addToGroup={async (member) => {
-                  setGroup((g) => ({ ...g, members: [...g.members, member] }));
-                  setValue("");
-                }}
-              />
+          {status.error && isEmptyObject(status.profileSearchResults) && (
+            <View style={themed(stylesNewChat.$messageContainer)}>
+              <Text
+                style={[
+                  themed(stylesNewChat.$message),
+                  themed(stylesNewChat.$error),
+                ]}
+              >
+                {status.error}
+              </Text>
             </View>
           )}
 
-          {!status.loading && isEmptyObject(status.profileSearchResults) && (
-            <View style={themed($messageContainer)}>
-              {status.error ? (
-                <Text style={[themed($message), themed($error)]}>
-                  {status.error}
-                </Text>
-              ) : (
-                <Text style={themed($message)}>
-                  <Text>
-                    Type the full address/domain of your contact (with
-                    .converse.xyz, .eth, .lens, .fc, .cb.id…)
-                  </Text>
-                </Text>
-              )}
-            </View>
-          )}
-
-          {status.loading && <Loader style={{ marginTop: theme.spacing.lg }} />}
-
-          {!status.loading && !!status.inviteToConverse && (
-            <TableView
-              items={[
-                {
-                  id: "inviteToConverse",
-                  leftView: <TableViewPicto symbol="link" />,
-                  title: translate("new_conversation.invite_to_converse"),
-                  subtitle: "",
-                  action: () => {
-                    navigation.goBack();
-                    navigate("ShareProfile");
-                  },
-                },
-              ]}
-              style={themed($tableView)}
-            />
+          {shouldDisplayLoading && (
+            <Loader style={{ marginTop: theme.spacing.lg }} />
           )}
         </ScrollView>
       )}
+
+      {/* todo: review this pattern with Thierry */}
+      <ConversationComposerStoreProvider
+        storeName={"new-conversation" as ConversationTopic}
+      >
+        <ConversationComposerContainer>
+          <Composer
+            hideAddAttachmentButton
+            disabled={composerSendButtonDisabled}
+            onSend={async (something) => {
+              const dmCreationMessageText = something.content.text || "";
+              if (
+                !dmCreationMessageText ||
+                dmCreationMessageText.length === 0
+              ) {
+                return;
+              }
+              logger.info(
+                "[NewConversation] Sending message",
+                something.content.text
+              );
+
+              if (conversationCreationMode === ConversationVersion.DM) {
+                let dm = await getOptionalConversationByPeerByAccount({
+                  account: currentAccount(),
+                  peer: pendingChatMembers.members[0].address,
+                  includeSync: true,
+                });
+                if (!dm) {
+                  dm = await createConversationByAccount(
+                    currentAccount(),
+                    pendingChatMembers.members[0].address
+                  );
+                }
+                await sendMessage({
+                  conversation: dm,
+                  params: {
+                    content: { text: dmCreationMessageText },
+                  },
+                });
+                setConversationQueryData({
+                  account: currentAccount(),
+                  topic: dm.topic,
+                  conversation: dm,
+                });
+                navigation.replace("Conversation", { topic: dm.topic });
+              } else {
+                const group = await createGroupWithDefaultsByAccount({
+                  account: currentAccount(),
+                  peerEthereumAddresses: pendingChatMembers.members.map(
+                    (m) => m.address
+                  ),
+                });
+                await sendMessage({
+                  conversation: group,
+                  params: {
+                    content: { text: dmCreationMessageText },
+                  },
+                });
+                setConversationQueryData({
+                  account: currentAccount(),
+                  topic: group.topic,
+                  conversation: group,
+                });
+                navigation.replace("Conversation", { topic: group.topic });
+              }
+            }}
+          />
+        </ConversationComposerContainer>
+      </ConversationComposerStoreProvider>
+      <ConversationKeyboardFiller
+        messageContextMenuIsOpen={false}
+        enabled={true}
+      />
     </View>
   );
 }
-
-const $modal: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  flex: 1,
-  backgroundColor: colors.background.surface,
-});
-
-const $messageContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  ...Platform.select({
-    default: {
-      marginTop: spacing.lg,
-      paddingHorizontal: spacing.md,
-    },
-    android: {
-      marginRight: spacing.md,
-      marginLeft: spacing.md,
-      marginTop: spacing.md,
-    },
-  }),
-});
-
-const $message: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text.secondary,
-  ...textSizeStyles.sm,
-  ...Platform.select({
-    default: {
-      textAlign: "center",
-    },
-  }),
-});
-
-const $error: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color:
-    Platform.OS === "android" ? colors.text.secondary : colors.text.primary,
-});
-
-const $tableView: ThemedStyle<ViewStyle> = () => ({
-  marginHorizontal: Platform.OS === "android" ? 0 : 18,
-});
-
-const $group: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  minHeight: 50,
-  paddingBottom: Platform.OS === "ios" ? spacing.xs : 0,
-  flexDirection: "row",
-  alignItems: "center",
-  paddingLeft: Platform.OS === "ios" ? spacing.md : 0,
-  justifyContent: "flex-start",
-  borderBottomWidth: Platform.OS === "android" ? 1 : 0.5,
-  borderBottomColor: colors.border.subtle,
-  backgroundColor: colors.background.surface,
-  flexWrap: "wrap",
-});
-
-const $groupMemberButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: 0,
-  marginHorizontal: 0,
-  marginRight: spacing.xs,
-  marginTop: spacing.xs,
-});
-
-const $searchContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  flex: 1,
-  backgroundColor: colors.background.surface,
-});
-
-const $newGroupButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginLeft: spacing["6xs"],
-  paddingTop: Platform.OS === "ios" ? spacing.sm : spacing.xs,
-  paddingBottom: Platform.OS === "ios" ? 0 : spacing.xs,
-});

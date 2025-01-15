@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 import {
   FlatList,
   Keyboard,
@@ -11,7 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "@design-system/Text";
 import { translate } from "@i18n";
-import { ProfileSearchItem } from "../components/ProfileSearchItem";
+import { OldProfileSearchResultsListItem } from "./OldProfileSearchResultsListItem";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useAppTheme, ThemedStyle } from "@theme/useAppTheme";
 
@@ -22,7 +22,18 @@ type ProfileSearchProps = {
   addToGroup?: (member: IProfileSocials & { address: string }) => void;
 };
 
-export default function ProfileSearch({
+/**
+ * @deprecated
+ * We are redoing our Create new chat flow, and this screen was shared between
+ * that and the add members to existing group flow.
+ *
+ * This screen will need some design work, but is outside of scope of the
+ * current work.
+ *
+ * @see https://github.com/ephemeraHQ/converse-app/issues/1498
+ * @see https://www.figma.com/design/p6mt4tEDltI4mypD3TIgUk/Converse-App?node-id=5026-26989&m=dev
+ */
+export function OldProfileSearchResultsList({
   navigation,
   profiles,
   groupMode,
@@ -35,7 +46,7 @@ export default function ProfileSearch({
 
   const renderItem = useCallback(
     ({ item }: { item: string }) => (
-      <ProfileSearchItem
+      <OldProfileSearchResultsListItem
         address={item}
         socials={profiles[item]}
         navigation={navigation}
@@ -49,7 +60,10 @@ export default function ProfileSearch({
   const renderHeader = useCallback(
     () => (
       <View style={themed($sectionTitleContainer)}>
-        <Text preset="formLabel" style={themed($sectionTitleSpacing)}>
+        <Text
+          preset="formLabel"
+          style={themed($sectionTitleSpacing) as TextStyle}
+        >
           {translate("search_results")}
         </Text>
       </View>
@@ -59,10 +73,10 @@ export default function ProfileSearch({
 
   const renderFooter = useCallback(
     () => (
-      <View style={[themed($footer), { marginBottom: insets.bottom }]}>
+      <View style={[themed($footer), { marginBottom: insets.bottom + 55 }]}>
         <Text
           preset={Platform.OS === "ios" ? "body" : "small"}
-          style={{ textAlign: Platform.OS === "ios" ? "center" : "left" }}
+          style={themed($footerText)}
         >
           {translate("full_address_hint", {
             providers: ".converse.xyz, .eth, .lens, .fc, .x",
@@ -83,7 +97,6 @@ export default function ProfileSearch({
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         onTouchStart={Keyboard.dismiss}
-        showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -102,9 +115,17 @@ const $sectionTitleContainer: ThemedStyle<ViewStyle> = ({
   }),
 });
 
-const $sectionTitleSpacing: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  marginBottom: spacing.xs,
-  marginTop: spacing.lg,
+const $sectionTitleSpacing: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  ...Platform.select({
+    default: {
+      marginBottom: spacing.sm,
+      marginTop: spacing.xl,
+    },
+    android: {
+      marginBottom: spacing.md,
+      marginTop: spacing.lg,
+    },
+  }),
 });
 
 const $footer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -119,4 +140,8 @@ const $footer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
       marginTop: spacing.lg,
     },
   }),
+});
+
+const $footerText: ThemedStyle<TextStyle> = () => ({
+  textAlign: Platform.OS === "ios" ? "center" : "left",
 });

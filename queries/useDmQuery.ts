@@ -23,6 +23,11 @@ async function getDm(args: IDmQueryArgs) {
     includeSync: true,
   });
 
+  // This will not happen because the above throws if not found
+  if (!conversation) {
+    throw new Error("Conversation not found");
+  }
+
   // Update the main conversation query because it's a 1-1
   setConversationQueryData({
     account,
@@ -45,6 +50,10 @@ export function useDmQuery(args: IDmQueryArgs) {
 
 export function setDmQueryData(args: IDmQueryArgs & { dm: IDmQueryData }) {
   const { account, peer, dm } = args;
+  if (!dm) {
+    // todo: better type handling of undefineds
+    throw new Error("DM not found");
+  }
   queryClient.setQueryData<IDmQueryData>(dmQueryKey(account, peer), dm);
   // Also set there because it's a 1-1
   setConversationQueryData({

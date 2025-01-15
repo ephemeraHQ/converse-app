@@ -42,6 +42,7 @@ import {
   saveInviteIdByGroupId,
 } from "../features/GroupInvites/groupInvites.utils";
 import { captureErrorWithToast } from "@/utils/capture-error";
+import logger from "@/utils/logger";
 
 type GroupScreenAdditionProps = {
   topic: ConversationTopic;
@@ -52,20 +53,25 @@ const noop = () => {};
 export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
   topic,
 }) => {
+  logger.debug("[GroupScreenAddition] Rendering component", { topic });
+
   const colorScheme = useColorScheme();
   const currentAccount = useCurrentAccount() as string;
   const { members } = useGroupMembers(topic);
 
-  const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(
-    () => ({
+  const { currentAccountIsAdmin, currentAccountIsSuperAdmin } = useMemo(() => {
+    logger.debug("[GroupScreenAddition] Calculating admin status", {
+      members,
+      currentAccount,
+    });
+    return {
       currentAccountIsAdmin: getAddressIsAdmin(members, currentAccount),
       currentAccountIsSuperAdmin: getAddressIsSuperAdmin(
         members,
         currentAccount
       ),
-    }),
-    [currentAccount, members]
-  );
+    };
+  }, [currentAccount, members]);
 
   const styles = useStyles();
   const [snackMessage, setSnackMessage] = useState<string | null>(null);
@@ -87,18 +93,25 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
     useChatStore(useSelect(["setGroupInviteLink", "deleteGroupInviteLink"]));
 
   const onAddMemberPress = useCallback(() => {
-    navigate("NewConversation", { addingToGroupTopic: topic });
+    logger.debug("[GroupScreenAddition] Adding new member", { topic });
+    navigate("InviteUsersToExistingGroup", { addingToGroupTopic: topic });
   }, [topic]);
 
   const onCopyInviteLinkPress = useCallback(() => {
     if (!groupInviteLink) {
+      logger.warn("[GroupScreenAddition] No invite link to copy");
       return;
     }
+    logger.debug("[GroupScreenAddition] Copying invite link");
     setSnackMessage(translate("group_invite_link_copied"));
     Clipboard.setString(groupInviteLink);
   }, [groupInviteLink]);
 
   const onCreateInviteLinkPress = useCallback(() => {
+    logger.debug("[GroupScreenAddition] Creating invite link", {
+      groupName,
+      topic,
+    });
     createGroupInvite(currentAccount, {
       groupName: groupName ?? translate("group_invite_default_group_name"),
       imageUrl: groupPhoto,
@@ -106,6 +119,9 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
       groupId: getV3IdFromTopic(topic),
     })
       .then((groupInvite) => {
+        logger.debug("[GroupScreenAddition] Created invite link successfully", {
+          inviteId: groupInvite.id,
+        });
         saveInviteIdByGroupId(getV3IdFromTopic(topic), groupInvite.id);
         saveGroupInviteLink(groupInvite.id, getV3IdFromTopic(topic));
         setGroupInviteLink(topic, groupInvite.inviteLink);
@@ -113,6 +129,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
         setSnackMessage(translate("group_invite_link_created_copied"));
       })
       .catch((err) => {
+        logger.error("[GroupScreenAddition] Failed to create invite link", err);
         captureErrorWithToast(err, {
           message: translate("group_opertation_an_error_occurred"),
         });
@@ -127,13 +144,18 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
   ]);
 
   const onDeleteInviteLink = useCallback(() => {
+    logger.debug("[GroupScreenAddition] Deleting invite link");
     Haptics.impactAsync();
     const groupId = getV3IdFromTopic(topic);
     const inviteId = getInviteIdByGroupId(groupId);
     if (!inviteId) {
+      logger.warn("[GroupScreenAddition] No invite ID found to delete");
       return;
     }
     deleteGroupInvite(currentAccount, inviteId).then(() => {
+      logger.debug("[GroupScreenAddition] Deleted invite link successfully", {
+        inviteId,
+      });
       setSnackMessage(translate("group_invite_link_deleted"));
       deleteLinkFromState(topic);
       deleteLinkFromStore(inviteId);
@@ -142,10 +164,14 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
   }, [deleteLinkFromState, topic, currentAccount]);
 
   const dismissSnackBar = useCallback(() => {
+    logger.debug("[GroupScreenAddition] Dismissing snackbar");
     setSnackMessage(null);
   }, [setSnackMessage]);
 
   if (!canAddMember) {
+    logger.debug(
+      "[GroupScreenAddition] User cannot add members, not rendering"
+    );
     return null;
   }
 

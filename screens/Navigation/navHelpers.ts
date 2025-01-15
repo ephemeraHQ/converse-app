@@ -9,6 +9,7 @@ import { ColorSchemeName, Platform } from "react-native";
 
 import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
 import config from "../../config";
+import logger from "@/utils/logger";
 
 /**
  * Creates a custom state object from a given path for
@@ -212,6 +213,13 @@ export const screenListeners =
             newRoute.params?.peer &&
             currentRoute.params?.peer !== newRoute.params?.peer
           ) {
+            logger.debug("[screenListeners] NewConversation", newRoute.params);
+            // whats happening here
+            logger.debug(
+              "[screenListeners] currentRoute.params",
+              currentRoute.params
+            );
+            logger.debug("setting shouldReplace to true");
             shouldReplace = true;
           } else if (newRoute.name === "Conversation") {
             const isNewPeer =
@@ -234,6 +242,11 @@ export const screenListeners =
           }
         }
         if (shouldReplace) {
+          logger.debug(
+            `[screenListeners] shouldReplace replacing ${newRoute.name} with params ${JSON.stringify(
+              newRoute.params
+            )}`
+          );
           navigation.dispatch(
             StackActions.replace(newRoute.name, newRoute.params)
           );

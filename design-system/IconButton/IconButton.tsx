@@ -4,6 +4,7 @@ import {
   PressableStateCallbackType,
   StyleProp,
   TextStyle,
+  View,
   ViewStyle,
 } from "react-native";
 import { useAppTheme } from "../../theme/useAppTheme";
@@ -94,12 +95,16 @@ export function IconButton(props: IIconButtonProps) {
 
   const handlePress = useCallback(
     (e: GestureResponderEvent) => {
+      if (disabled) {
+        return;
+      }
+
       if (withHaptics) {
         Haptics.softImpactAsync();
       }
       onPress?.(e);
     },
-    [withHaptics, onPress]
+    [withHaptics, onPress, disabled]
   );
 
   return (

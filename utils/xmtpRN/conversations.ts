@@ -10,6 +10,9 @@ import {
 } from "./client.types";
 import { streamAllMessages } from "./messages";
 import { getXmtpClient } from "./sync";
+import { getPreferredName } from "../profile";
+import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
+import { getCurrentAccount } from "@/data/store/accountsStore";
 
 export const streamConversations = async (account: string) => {
   await stopStreamingConversations(account);
@@ -134,8 +137,14 @@ async function findDm(args: {
   client: ConverseXmtpClientType;
   peer: string;
   includeSync?: boolean;
+  throwIfNotFound?: boolean;
 }) {
-  const { client, peer, includeSync = false } = args;
+  const {
+    client,
+    peer,
+    includeSync = false,
+    /** this shouldnt throw, but that was default behavior so maintaining for now */ throwIfNotFound = true,
+  } = args;
   logger.debug(`[XMTPRN Conversations] Getting DM by ${peer}`);
   const start = new Date().getTime();
 
@@ -157,7 +166,11 @@ async function findDm(args: {
 
     dm = await client.conversations.findDmByAddress(peer);
     if (!dm) {
-      throw new Error(`DM with peer ${peer} not found`);
+      if (throwIfNotFound) {
+        throw new Error(`DM with peer ${peer} not found`);
+      } else {
+        return undefined;
+      }
     }
   }
 
@@ -259,12 +272,14 @@ export const getConversationByPeer = async (args: {
   client: ConverseXmtpClientType;
   peer: string;
   includeSync?: boolean;
+  throwIfNotFound?: boolean;
 }) => {
-  const { client, peer, includeSync = false } = args;
+  const { client, peer, includeSync = false, throwIfNotFound = true } = args;
   return findDm({
     client,
     peer,
     includeSync,
+    throwIfNotFound,
   });
 };
 
@@ -346,6 +361,53 @@ export const createGroup = async (args: {
   return group;
 };
 
+export const defaultPermissionPolicySet: PermissionPolicySet = {
+  addMemberPolicy: "allow",
+  removeMemberPolicy: "admin",
+  addAdminPolicy: "superAdmin",
+  removeAdminPolicy: "superAdmin",
+  updateGroupNamePolicy: "allow",
+  updateGroupDescriptionPolicy: "allow",
+  updateGroupImagePolicy: "allow",
+  updateGroupPinnedFrameUrlPolicy: "allow",
+};
+
+const createGroupName = (peerEthereumAddresses: string[]) => {
+  const currentAccount = getCurrentAccount()!;
+  const firstThreeMembers = peerEthereumAddresses.slice(0, 3);
+  const currentAccountSocials =
+    getProfileSocialsQueryData(currentAccount, currentAccount) ?? undefined;
+  let groupName = getPreferredName(currentAccountSocials, currentAccount);
+  if (firstThreeMembers.length) {
+    groupName += ", ";
+  }
+  for (let i = 0; i < firstThreeMembers.length; i++) {
+    const member = firstThreeMembers[i];
+    const memberSocials = getProfileSocialsQueryData(currentAccount, member);
+    groupName += getPreferredName(memberSocials, member);
+    if (i < firstThreeMembers.length - 1) {
+      groupName += ", ";
+    }
+  }
+  return groupName;
+};
+
+export const createGroupWithDefaultsByAccount = async (args: {
+  account: string;
+  peerEthereumAddresses: string[];
+}) => {
+  const { account, peerEthereumAddresses } = args;
+
+  const groupName = createGroupName(peerEthereumAddresses);
+
+  return createGroupByAccount({
+    account,
+    peers: peerEthereumAddresses,
+    permissionPolicySet: defaultPermissionPolicySet,
+    groupName,
+  });
+};
+
 export const createGroupByAccount = async (args: {
   account: string;
   peers: string[];
@@ -397,7 +459,22 @@ export const getConversationByPeerByAccount = async (args: {
 }) => {
   const { account, peer, includeSync = false } = args;
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  return getConversationByPeer({ client, peer, includeSync });
+  return getConversationByPeer({ client, peer, includeSync })!;
+};
+
+export const getOptionalConversationByPeerByAccount = async (args: {
+  account: string;
+  peer: string;
+  includeSync?: boolean;
+}) => {
+  const { account, peer, includeSync = false } = args;
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  return getConversationByPeer({
+    client,
+    peer,
+    includeSync,
+    throwIfNotFound: false,
+  });
 };
 
 export const getPeerAddressDm = async (
