@@ -29,15 +29,23 @@ if (Platform.OS === "android") {
   defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => {
     if (error) {
       logger.error(
-        `${Platform.OS} ${BACKGROUND_NOTIFICATION_TASK}: Error! ${JSON.stringify(
-          error
-        )}`
+        `${
+          Platform.OS
+        } ${BACKGROUND_NOTIFICATION_TASK}: Error! ${JSON.stringify(error)}`
       );
       return;
     }
+
     const notificationBody =
-      ((data as any).notification.data.body as string | undefined) || // Protocol notifications use body (legacy, to support older versions of the app)
-      ((data as any).notification.data.data as string | undefined); // Converse notifications use data (legacy, to support older versions of the app)
+      ((data as any).notification?.data?.body as string | undefined) || // Protocol notifications use body (legacy, to support older versions of the app)
+      ((data as any).notification?.data?.data as string | undefined); // Converse notifications use data (legacy, to support older versions of the app)
+    if (!notificationBody) {
+      logger.error(
+        `${Platform.OS} ${BACKGROUND_NOTIFICATION_TASK}: No notification body found`
+      );
+      return;
+    }
+
     handleBackgroundNotification(notificationBody);
   });
 

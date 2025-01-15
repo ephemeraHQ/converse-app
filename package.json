@@ -229,6 +229,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-native": "^4.1.0",
     "eslint-plugin-unused-imports": "^4.1.4",
+    "expo-module-scripts": "^4.0.3",
     "git-is-clean": "^3.0.1",
     "globals": "^15.12.0",
     "husky": "^8.0.2",

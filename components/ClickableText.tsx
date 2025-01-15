@@ -2,7 +2,7 @@ import { ParsedText } from "@components/ParsedText/ParsedText";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { actionSheetColors } from "@styles/colors";
 import * as Linking from "expo-linking";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { StyleProp, StyleSheet, TextStyle, useColorScheme } from "react-native";
 import { navigate } from "../utils/navigation";
 import {
@@ -38,7 +38,7 @@ export function ClickableText({ children, style }: Props) {
   }, []);
 
   const handleNewConversationPress = useCallback((peer: string) => {
-    navigate("NewConversation", { peer });
+    navigate("Conversation", { peer });
   }, []);
 
   const showCopyActionSheet = useCallback(

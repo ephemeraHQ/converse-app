@@ -47,6 +47,8 @@ export function sendMessage(args: {
     });
   }
 
+  // todo: where do we optimistically handle adding the message
+  // to our query cache?
   return conversation.send(
     content.remoteAttachment
       ? { remoteAttachment: content.remoteAttachment }

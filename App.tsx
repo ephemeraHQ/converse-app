@@ -1,6 +1,9 @@
 import "expo-dev-client";
 import "./polyfills";
-
+import {
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
+} from "react-native-reanimated";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
@@ -48,7 +51,20 @@ LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
   "Error destroying session", // Privy
   'event="noNetwork', // ethers
+  "[Reanimated] Reading from `value` during component render. Please ensure that you do not access the `value` property or use `get` method of a shared value while React is rendering a component.",
+  "Attempted to import the module",
 ]);
+
+// This is the default configuration
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: /*
+ Ignores the following warning: 
+   "[Reanimated] Reading from `value` during component render. Please ensure that you do not access the `value` property or use `get` method of a shared value while React is rendering a component.",
+todo investigate
+
+  */ false,
+});
 
 configureCoinbase({
   callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
