@@ -1,10 +1,10 @@
 import { conversationDataQueryKey } from "@/queries/QueryKeys";
 import { getTopics } from "@/utils/api/topics";
 import logger from "@/utils/logger";
-import { queryOptions } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { create, windowScheduler } from "@yornaath/batshit";
 import { queryClient } from "./queryClient";
+import { queryOptions } from "@tanstack/react-query";
 
 export type IConversationDataQueryData = Awaited<
   ReturnType<typeof getConversationData>
@@ -27,13 +27,17 @@ export function getConversationDataQueryOptions(args: IArgs) {
 
 export function prefetchConversationDataQuery(args: IArgs) {
   logger.debug(
-    `[ConversationDataQuery] prefetchConversationDataQuery for account: ${args.account}, topic: ${args.topic} and context: ${args.context}`
+    `[ConversationDataQuery] prefetchConversationDataQuery for: ${JSON.stringify(
+      args,
+      null,
+      2
+    )}`
   );
   return queryClient.prefetchQuery(getConversationDataQueryOptions(args));
 }
 
 export const getConversationDataQueryData = (args: IArgs) => {
-  return queryClient.getQueryData<IConversationDataQueryData>(
+  return queryClient.getQueryData(
     getConversationDataQueryOptions(args).queryKey
   );
 };
@@ -50,7 +54,7 @@ export function updateConversationDataQueryData(
   args: IArgs & { updateData: Partial<IConversationDataQueryData> }
 ) {
   const { updateData } = args;
-  queryClient.setQueryData<IConversationDataQueryData>(
+  queryClient.setQueryData(
     getConversationDataQueryOptions(args).queryKey,
     (previousData) => {
       return {
@@ -67,7 +71,11 @@ export function updateConversationDataQueryData(
 
 async function getConversationData(args: IArgs) {
   logger.debug(
-    `[ConversationDataQuery] getConversationData for account: ${args.account}, topic: ${args.topic} and context: ${args.context}`
+    `[ConversationDataQuery] getConversationData for: ${JSON.stringify(
+      args,
+      null,
+      2
+    )}`
   );
   return batchedGetConversationTopicData.fetch(args);
 }
@@ -86,14 +94,11 @@ const batchedGetConversationTopicData = create({
     return rest;
   },
   fetcher: async (args: IArgs[]) => {
-    const accountGroups = args.reduce(
-      (groups, arg) => {
-        groups[arg.account] = groups[arg.account] || [];
-        groups[arg.account].push(arg);
-        return groups;
-      },
-      {} as Record<string, IArgs[]>
-    );
+    const accountGroups = args.reduce((groups, arg) => {
+      groups[arg.account] = groups[arg.account] || [];
+      groups[arg.account].push(arg);
+      return groups;
+    }, {} as Record<string, IArgs[]>);
 
     const results = await Promise.all(
       Object.entries(accountGroups).map(async ([account, groupArgs]) => {

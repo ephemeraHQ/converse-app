@@ -4,7 +4,6 @@ import {
   updateConversationDataQueryData,
 } from "@/queries/conversation-data-query";
 import { pinTopic, unpinTopic } from "@/utils/api/topics";
-import { captureErrorWithToast } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 

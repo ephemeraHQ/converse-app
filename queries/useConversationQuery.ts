@@ -1,5 +1,5 @@
 import { mutateObjectProperties } from "@/utils/mutate-object-properties";
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
@@ -23,18 +23,16 @@ function getConversation(args: IArgs) {
 }
 
 export const useConversationQuery = (args: IArgs) => {
-  return useQuery({
-    ...getConversationQueryOptions(args),
-  });
+  return useQuery(getConversationQueryOptions(args));
 };
 
 export function getConversationQueryOptions(args: IArgs) {
   const { account, topic, context } = args;
-  return {
+  return queryOptions({
     queryKey: conversationQueryKey(account, topic),
     queryFn: () => getConversation({ account, topic, context }),
     enabled: !!topic,
-  };
+  });
 }
 
 export const setConversationQueryData = (
@@ -42,10 +40,9 @@ export const setConversationQueryData = (
     conversation: ConversationQueryData;
   }
 ) => {
-  const { account, topic, conversation } = args;
-  queryClient.setQueryData<ConversationQueryData>(
-    conversationQueryKey(account, topic),
-    conversation
+  queryClient.setQueryData(
+    getConversationQueryOptions(args).queryKey,
+    args.conversation
   );
 };
 
@@ -53,7 +50,7 @@ export function updateConversationQueryData(
   args: IArgs & { conversationUpdate: Partial<ConversationQueryData> }
 ) {
   const { conversationUpdate } = args;
-  queryClient.setQueryData<ConversationQueryData>(
+  queryClient.setQueryData(
     getConversationQueryOptions(args).queryKey,
     (previousConversation) => {
       if (!previousConversation) {
@@ -69,9 +66,7 @@ export function refetchConversationQuery(args: IArgs) {
 }
 
 export const getConversationQueryData = (args: IArgs) => {
-  return queryClient.getQueryData<ConversationQueryData>(
-    getConversationQueryOptions(args).queryKey
-  );
+  return queryClient.getQueryData(getConversationQueryOptions(args).queryKey);
 };
 
 export function getOrFetchConversation(args: IArgs) {
