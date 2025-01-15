@@ -1,4 +1,7 @@
-import { format, enUS, fr } from "date-fns";
+// eslint-disable-next-line import/no-duplicates
+import { format } from "date-fns";
+// eslint-disable-next-line import/no-duplicates
+import { enUS, fr } from "date-fns/locale";
 import { getLocales } from "react-native-localize";
 import {
   getCompactRelativeTime,
