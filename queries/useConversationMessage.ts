@@ -1,4 +1,4 @@
-import { UseQueryOptions, useQuery } from "@tanstack/react-query";
+import { UseQueryOptions, useQuery, queryOptions } from "@tanstack/react-query";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { MessageId, findMessage } from "@xmtp/react-native-sdk";
@@ -30,14 +30,15 @@ export const useConversationMessage = (args: IArgs) => {
   return useQuery(getConversationMessageQueryOptions(args));
 };
 
-export function getConversationMessageQueryOptions(
-  args: IArgs
-): UseQueryOptions<ConversationMessage> {
-  return {
-    queryKey: conversationMessageQueryKey(args.account, args.messageId),
-    queryFn: () => fetchConversationMessage(args),
-    enabled: !!args.messageId && !!args.account,
-  };
+export function getConversationMessageQueryOptions({
+  account,
+  messageId,
+}: IArgs) {
+  return queryOptions({
+    queryKey: conversationMessageQueryKey(account, messageId),
+    queryFn: () => fetchConversationMessage({ account, messageId }),
+    enabled: !!messageId && !!account,
+  });
 }
 
 export const getConversationMessage = (args: IArgs) => {

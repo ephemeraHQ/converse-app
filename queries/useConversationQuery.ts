@@ -1,5 +1,5 @@
 import { mutateObjectProperties } from "@/utils/mutate-object-properties";
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
@@ -18,7 +18,7 @@ function getConversation(args: IArgs) {
   return getConversationByTopicByAccount({
     account,
     topic,
-    includeSync: true,
+    // includeSync: true,
   });
 }
 
@@ -30,11 +30,15 @@ export const useConversationQuery = (args: IArgs) => {
 
 export function getConversationQueryOptions(args: IArgs) {
   const { account, topic, context } = args;
-  return {
+  return queryOptions({
+    // note(lustig) we follow a slightly strange pattern of passing the
+    // "context" through to the query for logging purposes.
+    // we can obviously ignore this from our query key
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: conversationQueryKey(account, topic),
     queryFn: () => getConversation({ account, topic, context }),
     enabled: !!topic,
-  };
+  });
 }
 
 export const setConversationQueryData = (

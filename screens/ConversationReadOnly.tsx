@@ -11,7 +11,7 @@ import { ConversationMessageTimestamp } from "@/features/conversation/conversati
 import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
 import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
-import { useConversationPreviewMessages } from "@/queries/useConversationPreviewMessages";
+import { useConversationPreviewMessagesForCurrentAccount } from "@/queries/useConversationPreviewMessages";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { $globalStyles } from "@/theme/styles";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -25,7 +25,7 @@ export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
   const currentAccount = useCurrentAccount()!;
 
   const { data: messages, isLoading: isLoadingMessages } =
-    useConversationPreviewMessages(currentAccount, topic!);
+    useConversationPreviewMessagesForCurrentAccount({ topic });
 
   const { data: conversation, isLoading: isLoadingConversation } =
     useConversationQuery({

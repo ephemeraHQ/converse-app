@@ -16,11 +16,19 @@ type IArgs = {
   context: string;
 };
 
-export function getConversationDataQueryOptions(args: IArgs) {
+export function getConversationDataQueryOptions({
+  account,
+  topic,
+  context,
+}: IArgs) {
   return queryOptions({
-    queryKey: conversationDataQueryKey(args.account, args.topic),
-    queryFn: () => getConversationData(args),
-    enabled: !!args.topic && !!args.account,
+    // note(lustig) we follow a slightly strange pattern of passing the
+    // "context" through to the query for logging purposes.
+    // we can obviously ignore this from our query key
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
+    queryKey: conversationDataQueryKey(account, topic),
+    queryFn: () => getConversationData({ account, topic, context }),
+    enabled: !!topic && !!account,
     retry: false,
   });
 }
@@ -86,14 +94,11 @@ const batchedGetConversationTopicData = create({
     return rest;
   },
   fetcher: async (args: IArgs[]) => {
-    const accountGroups = args.reduce(
-      (groups, arg) => {
-        groups[arg.account] = groups[arg.account] || [];
-        groups[arg.account].push(arg);
-        return groups;
-      },
-      {} as Record<string, IArgs[]>
-    );
+    const accountGroups = args.reduce((groups, arg) => {
+      groups[arg.account] = groups[arg.account] || [];
+      groups[arg.account].push(arg);
+      return groups;
+    }, {} as Record<string, IArgs[]>);
 
     const results = await Promise.all(
       Object.entries(accountGroups).map(async ([account, groupArgs]) => {

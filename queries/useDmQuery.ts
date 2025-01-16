@@ -39,12 +39,10 @@ async function getDm(args: IDmQueryArgs) {
   return conversation;
 }
 
-export function useDmQuery(args: IDmQueryArgs) {
-  const { account, peer } = args;
-
+export function useDmQuery({ account, peer }: IDmQueryArgs) {
   return useQuery({
     queryKey: dmQueryKey(account, peer),
-    queryFn: () => getDm(args),
+    queryFn: () => getDm({ account, peer }),
     enabled: !!peer,
   });
 }

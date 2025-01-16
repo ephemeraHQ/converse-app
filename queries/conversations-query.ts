@@ -143,6 +143,10 @@ const getConversations = async (args: { account: string; context: string }) => {
 export const getConversationsQueryOptions = (args: IArgs) => {
   const { account, context } = args;
   return queryOptions({
+    // note(lustig) we follow a slightly strange pattern of passing the
+    // "context" through to the query for logging purposes.
+    // we can obviously ignore this from our query key
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: conversationsQueryKey(account),
     queryFn: () => getConversations({ account, context: context ?? "" }),
     staleTime: 2000, // We want to make sure to always have the latest conversations

@@ -13,7 +13,6 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import { usePrivySigner } from "@utils/evm/privy";
 import { useXmtpSigner } from "@utils/evm/xmtp";
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import { sentryTrackError } from "@utils/sentry";
@@ -107,8 +106,8 @@ const ExternalWalletPickerWrapper = memo(
           wallet: socials
             ? getPreferredUsername(socials)
             : client
-              ? shortAddress(client.address)
-              : "",
+            ? shortAddress(client.address)
+            : "",
         })}
       />
     );
@@ -149,7 +148,6 @@ function ProfileScreenImpl() {
   const { permissions: groupPermissions } = useGroupPermissions(groupTopic!);
 
   const { getXmtpSigner } = useXmtpSigner();
-  const privySigner = usePrivySigner();
 
   const insets = useSafeAreaInsets();
   const shouldShowError = useShouldShowErrored();
@@ -395,8 +393,8 @@ function ProfileScreenImpl() {
         Platform.OS === "android"
           ? undefined
           : isBlockedPeer
-            ? primaryColor(colorScheme)
-            : dangerColor(colorScheme),
+          ? primaryColor(colorScheme)
+          : dangerColor(colorScheme),
       leftView:
         Platform.OS === "android" ? (
           <TableViewPicto
@@ -807,8 +805,9 @@ function ProfileScreenImpl() {
                     const client = (await getXmtpClient(
                       userAddress
                     )) as ConverseXmtpClientType;
-                    const otherInstallations =
-                      await getOtherInstallations(client);
+                    const otherInstallations = await getOtherInstallations(
+                      client
+                    );
                     if (otherInstallations.length === 0) {
                       Alert.alert(
                         translate("revoke_done_title"),

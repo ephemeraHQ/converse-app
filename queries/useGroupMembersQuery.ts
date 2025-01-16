@@ -7,17 +7,19 @@ import { getCleanAddress } from "@utils/evm/getCleanAddress";
 import { ConversationTopic, Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { entifyWithAddress, EntityObjectWithAddress } from "./entify";
 import { queryClient } from "./queryClient";
 import { groupMembersQueryKey } from "./QueryKeys";
-import { useGroupQuery } from "./useGroupQuery";
+import { getGroupQueryData } from "./useGroupQuery";
 
 export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
 
-const fetchGroupMembers = async (
-  group: GroupWithCodecsType | undefined | null
-) => {
+const fetchGroupMembers = async (args: {
+  account: string;
+  topic: ConversationTopic;
+}): Promise<EntityObjectWithAddress<Member, InboxId>> => {
+  const { account, topic } = args;
+  const group = getGroupQueryData({ account, topic });
   if (!group) {
     return {
       byId: {},
@@ -36,18 +38,18 @@ const fetchGroupMembers = async (
 
 type IGroupMembersQueryConfig = {
   account: string;
-  group: GroupWithCodecsType | undefined | null;
+  topic: ConversationTopic;
   queryOptions?: Partial<UseQueryOptions<GroupMembersSelectData>>;
 };
 
-const groupMembersQueryConfig = (
+const getGroupMemberQueryOptions = (
   args: IGroupMembersQueryConfig
 ): UseQueryOptions<GroupMembersSelectData> => {
-  const { account, group, queryOptions } = args;
-  const isEnabled = !!group && !!group.topic && (queryOptions?.enabled ?? true);
+  const { account, topic, queryOptions } = args;
+  const isEnabled = !!topic && (queryOptions?.enabled ?? true);
   return {
-    queryKey: groupMembersQueryKey(account, group?.topic!),
-    queryFn: () => fetchGroupMembers(group!),
+    queryKey: groupMembersQueryKey(account, topic),
+    queryFn: () => fetchGroupMembers({ account, topic }),
     enabled: isEnabled,
     ...queryOptions,
   };
@@ -59,9 +61,8 @@ export const useGroupMembersQuery = (args: {
   queryOptions?: Partial<UseQueryOptions<GroupMembersSelectData>>;
 }) => {
   const { account, topic, queryOptions } = args;
-  const { data: group } = useGroupQuery({ account, topic });
   return useQuery<GroupMembersSelectData>(
-    groupMembersQueryConfig({ account, group, queryOptions })
+    getGroupMemberQueryOptions({ account, topic, queryOptions })
   );
 };
 
@@ -70,22 +71,21 @@ export const useGroupMembersConversationScreenQuery = (args: {
   topic: ConversationTopic;
 }) => {
   const { account, topic } = args;
-  const { data: group } = useGroupQuery({ account, topic });
 
   return useQuery<GroupMembersSelectData>(
-    groupMembersQueryConfig({ account, group })
+    getGroupMemberQueryOptions({ account, topic })
   );
 };
 
 export const useConversationListMembersQuery = (args: {
   account: string;
-  group: GroupWithCodecsType | undefined | null;
+  topic: ConversationTopic;
 }) => {
-  const { account, group } = args;
-  const queryOptions = { enabled: !!group && !group.imageUrlSquare };
+  const { account, topic } = args;
+  const queryOptions = { enabled: !!topic };
 
   return useQuery<GroupMembersSelectData>(
-    groupMembersQueryConfig({ account, group, queryOptions })
+    getGroupMemberQueryOptions({ account, topic, queryOptions })
   );
 };
 

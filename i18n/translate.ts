@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import i18n from "i18n-js";
 
 import { TxKeyPath } from "./i18n";

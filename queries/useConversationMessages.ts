@@ -5,7 +5,7 @@ import {
 } from "@/utils/xmtpRN/client.types";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
 import { isSupportedMessage } from "@/utils/xmtpRN/messages";
-import { UseQueryOptions, useQuery } from "@tanstack/react-query";
+import { UseQueryOptions, queryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
 import {
@@ -37,28 +37,30 @@ export const conversationMessagesQueryFn = async (
   const messages = await conversation.messages(options);
   const end = performance.now();
   logger.info(
-    `[useConversationMessages] queryFn fetched ${messages.length} messages in ${end - start}ms`
+    `[useConversationMessages] queryFn fetched ${messages.length} messages in ${
+      end - start
+    }ms`
   );
   const processingStart = performance.now();
   const validMessages = messages.filter(isSupportedMessage);
   const processedMessages = processMessages({ messages: validMessages });
   const processingEnd = performance.now();
   logger.info(
-    `[useConversationMessages] queryFn processed ${messages.length} messages in ${processingEnd - processingStart}ms`
+    `[useConversationMessages] queryFn processed ${
+      messages.length
+    } messages in ${processingEnd - processingStart}ms`
   );
   return processedMessages;
 };
 
 const conversationMessagesByTopicQueryFn = async (
   account: string,
-  topic: ConversationTopic,
-  includeSync: boolean = true
+  topic: ConversationTopic
 ) => {
   logger.info("[useConversationMessages] queryFn fetching messages by topic");
   const conversation = await getConversationByTopicByAccount({
     account,
     topic,
-    includeSync,
   });
   if (!conversation) {
     throw new Error(
@@ -72,15 +74,16 @@ export const useConversationMessages = (
   account: string,
   topic: ConversationTopic
 ) => {
-  return useQuery(getConversationMessagesQueryOptions(account, topic));
+  return useQuery(getConversationMessagesQueryOptions({ account, topic }));
 };
 
-export const getConversationMessagesQueryData = (
-  account: string,
-  topic: ConversationTopic
-) => {
+export const getConversationMessagesQueryData = (args: {
+  account: string;
+  topic: ConversationTopic;
+}) => {
+  const { account, topic } = args;
   return queryClient.getQueryData<ConversationMessagesQueryData>(
-    getConversationMessagesQueryOptions(account, topic).queryKey
+    getConversationMessagesQueryOptions({ account, topic }).queryKey
   );
 };
 
@@ -90,7 +93,7 @@ export function refetchConversationMessages(
 ) {
   logger.info("[refetchConversationMessages] refetching messages");
   return queryClient.refetchQueries(
-    getConversationMessagesQueryOptions(account, topic)
+    getConversationMessagesQueryOptions({ account, topic })
   );
 }
 
@@ -119,28 +122,28 @@ export const prefetchConversationMessages = async (
   topic: ConversationTopic
 ) => {
   return queryClient.prefetchQuery(
-    getConversationMessagesQueryOptions(account, topic, false)
+    getConversationMessagesQueryOptions({ account, topic })
   );
 };
 
-export function getConversationMessagesQueryOptions(
-  account: string,
-  topic: ConversationTopic,
-  includeSync: boolean = true
-): UseQueryOptions<ConversationMessagesQueryData> {
+export function getConversationMessagesQueryOptions(args: {
+  account: string;
+  topic: ConversationTopic;
+}): UseQueryOptions<ConversationMessagesQueryData> {
+  const { account, topic } = args;
   const conversation = getConversationQueryData({
     account,
     topic,
     context: "getConversationMessagesQueryOptions",
   });
-  return {
+  return queryOptions({
     queryKey: conversationMessagesQueryKey(account, topic),
     queryFn: () => {
-      return conversationMessagesByTopicQueryFn(account, topic, includeSync);
+      return conversationMessagesByTopicQueryFn(account, topic);
     },
     enabled: !!conversation,
     refetchOnMount: true, // Just for now because messages are very important and we want to make sure we have all of them
-  };
+  });
 }
 
 const ignoredContentTypesPrefixes = [

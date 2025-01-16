@@ -96,7 +96,9 @@ async function findGroup(args: {
   let group = await client.conversations.findGroup(getV3IdFromTopic(topic));
   const lookupEnd = new Date().getTime();
   logger.debug(
-    `[XMTPRN Conversations] Initial lookup took ${(lookupEnd - lookupStart) / 1000} sec`
+    `[XMTPRN Conversations] Initial lookup took ${
+      (lookupEnd - lookupStart) / 1000
+    } sec`
   );
 
   if (!group) {
@@ -107,7 +109,9 @@ async function findGroup(args: {
     await client.conversations.sync();
     const syncEnd = new Date().getTime();
     logger.debug(
-      `[XMTPRN Conversations] Synced conversations in ${(syncEnd - syncStart) / 1000} sec`
+      `[XMTPRN Conversations] Synced conversations in ${
+        (syncEnd - syncStart) / 1000
+      } sec`
     );
 
     group = await client.conversations.findGroup(getV3IdFromTopic(topic));
@@ -121,13 +125,17 @@ async function findGroup(args: {
     await group.sync();
     const syncEnd = new Date().getTime();
     logger.debug(
-      `[XMTPRN Conversations] Synced group in ${(syncEnd - syncStart) / 1000} sec`
+      `[XMTPRN Conversations] Synced group in ${
+        (syncEnd - syncStart) / 1000
+      } sec`
     );
   }
 
   const end = new Date().getTime();
   logger.debug(
-    `[XMTPRN Conversations] Total time to get group: ${(end - start) / 1000} sec`
+    `[XMTPRN Conversations] Total time to get group: ${
+      (end - start) / 1000
+    } sec`
   );
 
   return group;
@@ -152,7 +160,9 @@ async function findDm(args: {
   let dm = await client.conversations.findDmByAddress(peer);
   const lookupEnd = new Date().getTime();
   logger.debug(
-    `[XMTPRN Conversations] Initial lookup took ${(lookupEnd - lookupStart) / 1000} sec`
+    `[XMTPRN Conversations] Initial lookup took ${
+      (lookupEnd - lookupStart) / 1000
+    } sec`
   );
 
   if (!dm) {
@@ -161,7 +171,9 @@ async function findDm(args: {
     await client.conversations.sync();
     const syncEnd = new Date().getTime();
     logger.debug(
-      `[XMTPRN Conversations] Synced conversations in ${(syncEnd - syncStart) / 1000} sec`
+      `[XMTPRN Conversations] Synced conversations in ${
+        (syncEnd - syncStart) / 1000
+      } sec`
     );
 
     dm = await client.conversations.findDmByAddress(peer);
@@ -204,7 +216,9 @@ async function findConversation(args: {
   let conversation = await client.conversations.findConversationByTopic(topic);
   const lookupEnd = new Date().getTime();
   logger.debug(
-    `[XMTPRN Conversations] Initial lookup took ${(lookupEnd - lookupStart) / 1000} sec`
+    `[XMTPRN Conversations] Initial lookup took ${
+      (lookupEnd - lookupStart) / 1000
+    } sec`
   );
 
   if (!conversation) {
@@ -215,7 +229,9 @@ async function findConversation(args: {
     await client.conversations.sync();
     const syncEnd = new Date().getTime();
     logger.debug(
-      `[XMTPRN Conversations] Synced conversations in ${(syncEnd - syncStart) / 1000} sec`
+      `[XMTPRN Conversations] Synced conversations in ${
+        (syncEnd - syncStart) / 1000
+      } sec`
     );
 
     conversation = await client.conversations.findConversationByTopic(topic);
@@ -229,13 +245,17 @@ async function findConversation(args: {
     await conversation.sync();
     const syncEnd = new Date().getTime();
     logger.debug(
-      `[XMTPRN Conversations] Synced conversation in ${(syncEnd - syncStart) / 1000} sec`
+      `[XMTPRN Conversations] Synced conversation in ${
+        (syncEnd - syncStart) / 1000
+      } sec`
     );
   }
 
   const end = new Date().getTime();
   logger.debug(
-    `[XMTPRN Conversations] Total time to get conversation: ${(end - start) / 1000} sec`
+    `[XMTPRN Conversations] Total time to get conversation: ${
+      (end - start) / 1000
+    } sec`
   );
 
   return conversation;
@@ -286,24 +306,21 @@ export const getConversationByPeer = async (args: {
 export const getConversationByTopic = async (args: {
   client: ConverseXmtpClientType;
   topic: ConversationTopic;
-  includeSync?: boolean;
 }) => {
-  const { client, topic, includeSync = false } = args;
+  const { client, topic } = args;
   return findConversation({
     client,
     topic,
-    includeSync,
   });
 };
 
 export const getConversationByTopicByAccount = async (args: {
   account: string;
   topic: ConversationTopic;
-  includeSync?: boolean;
 }) => {
-  const { account, topic, includeSync = false } = args;
+  const { account, topic } = args;
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  return getConversationByTopic({ client, topic, includeSync });
+  return getConversationByTopic({ client, topic });
 };
 
 export const createConversation = async (args: {
@@ -440,7 +457,7 @@ export const refreshProtocolConversation = async (args: {
   topic: ConversationTopic;
 }) => {
   const { client, topic } = args;
-  return getConversationByTopic({ client, topic, includeSync: true });
+  return getConversationByTopic({ client, topic });
 };
 
 export const refreshProtocolConversationByAccount = async (args: {

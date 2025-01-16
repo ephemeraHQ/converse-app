@@ -11,10 +11,20 @@ import {
   conversationMessagesQueryFn,
   getConversationMessagesQueryOptions,
 } from "./useConversationMessages";
+import { useCurrentAccount } from "@/data/store/accountsStore";
+import { getConversationQueryData } from "./useConversationQuery";
 
-const conversationPreviewMessagesQueryFn = async (
-  conversation: ConversationWithCodecsType
-) => {
+const conversationPreviewMessagesQueryFn = async (args: {
+  account: string;
+  topic: ConversationTopic;
+}) => {
+  const { account, topic } = args;
+  const conversation = getConversationQueryData({
+    account,
+    topic,
+    context: "conversationPreviewMessagesQueryFn",
+  });
+
   logger.info(
     "[ConversationPreview Messages]conversationPreviewMessagesQueryFn",
     {
@@ -37,21 +47,24 @@ const conversationPreviewMessagesQueryFn = async (
   return messages;
 };
 
-export const useConversationPreviewMessages = (
-  account: string,
-  topic: ConversationTopic,
-  options?: Partial<UseQueryOptions<ConversationMessagesQueryData>>
-) => {
-  getConversationMessagesQueryOptions;
-  const { data: conversation } = useQuery({
-    ...getConversationMessagesQueryOptions(account, topic, false),
-    ...cacheOnlyQueryOptions,
-  });
+export const useConversationPreviewMessagesForCurrentAccount = ({
+  topic,
+  options,
+}: {
+  topic: ConversationTopic;
+  options?: Partial<UseQueryOptions<ConversationMessagesQueryData>>;
+}) => {
+  const currentAccount = useCurrentAccount()!;
+  // const { data: conversation } = useQuery({
+  //   ...getConversationMessagesQueryOptions(currentAccount, topic),
+  //   ...cacheOnlyQueryOptions,
+  // });
 
   return useQuery({
-    queryKey: conversationPreviewMessagesQueryKey(account, topic),
-    queryFn: () => conversationPreviewMessagesQueryFn(conversation!),
-    enabled: !!conversation,
+    queryKey: conversationPreviewMessagesQueryKey(currentAccount, topic),
+    queryFn: () =>
+      conversationPreviewMessagesQueryFn({ account: currentAccount, topic }),
+    enabled: !!currentAccount && !!topic,
     ...options,
   });
 };
@@ -63,11 +76,7 @@ export const prefetchConversationPreviewMessages = async (
   return queryClient.prefetchQuery({
     queryKey: conversationPreviewMessagesQueryKey(account, topic),
     queryFn: async () => {
-      const conversation = await getConversationByTopicByAccount({
-        account,
-        topic,
-      });
-      return conversationPreviewMessagesQueryFn(conversation);
+      return conversationPreviewMessagesQueryFn({ account, topic });
     },
   });
 };
