@@ -14,16 +14,12 @@ import { usePreferredName } from "@/hooks/usePreferredName";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { Haptics } from "@/utils/haptics";
 import { shortDisplayName } from "@/utils/str";
 import { useAccountsProfiles } from "@/utils/useAccountsProfiles";
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import { Alert, Platform } from "react-native";
-import {
-  ContextMenuButton,
-  MenuActionConfig,
-} from "react-native-ios-context-menu";
+import { Menu } from "@/design-system/Menu/Menu";
 
 export function useHeaderWrapper() {
   const { theme } = useAppTheme();
@@ -84,80 +80,46 @@ export function useHeaderWrapper() {
               <Avatar size={theme.avatarSize.sm} />
             </Center>
           </Pressable>
-          <ContextMenuButton
-            // hitSlop={theme.spacing.sm} // Not working...
+          <Menu
             style={{
               paddingVertical: theme.spacing.sm, // TMP solution for the hitSlop not working
               paddingRight: theme.spacing.sm, // TMP solution for the hitSlop not working
             }}
-            isMenuPrimaryAction
-            onPressMenuItem={({ nativeEvent }) => {
-              Haptics.selectionAsync();
-              if (nativeEvent.actionKey === "all-chats") {
+            onPress={(actionId: string) => {
+              if (actionId === "all-chats") {
                 Alert.alert("Coming soon");
-              } else if (nativeEvent.actionKey === "new-account") {
+              } else if (actionId === "new-account") {
                 navigation.navigate("NewAccountNavigator");
-              } else if (nativeEvent.actionKey === "app-settings") {
+              } else if (actionId === "app-settings") {
                 Alert.alert("Coming soon");
               }
 
               // Pressed on an account
               else {
-                setCurrentAccount(nativeEvent.actionKey, false);
+                setCurrentAccount(actionId, false);
               }
             }}
-            menuConfig={{
-              menuTitle: "",
-              menuItems: [
-                ...accountsProfiles.map((profilePreferedName, index) => {
-                  return {
-                    actionKey: accounts[index],
-                    actionTitle: shortDisplayName(profilePreferedName),
-                    icon: {
-                      iconType: "SYSTEM",
-                      iconValue:
-                        currentAccount === accounts[index]
-                          ? Platform.select({
-                              default: "checkmark",
-                              ios: "checkmark",
-                              android: "checkmark",
-                            })
-                          : "",
-                    },
-                  } as MenuActionConfig;
-                }),
-                {
-                  type: "menu",
-                  menuTitle: "",
-                  menuOptions: ["displayInline"],
-                  menuItems: [
-                    {
-                      actionKey: "new-account",
-                      actionTitle: translate("new_account"),
-                      icon: {
-                        iconType: "SYSTEM",
-                        iconValue: iconRegistry["new-account-card"],
-                      },
-                    },
-                  ],
-                },
-                {
-                  type: "menu",
-                  menuTitle: "",
-                  menuOptions: ["displayInline"],
-                  menuItems: [
-                    {
-                      actionKey: "app-settings",
-                      actionTitle: translate("App settings"),
-                      icon: {
-                        iconType: "SYSTEM",
-                        iconValue: iconRegistry["settings"],
-                      },
-                    },
-                  ],
-                },
-              ],
-            }}
+            actions={[
+              ...accountsProfiles.map((profilePreferedName, index) => {
+                return {
+                  id: accounts[index],
+                  title: shortDisplayName(profilePreferedName),
+                  image: currentAccount === accounts[index] ? "checkmark" : "",
+                };
+              }),
+              {
+                displayInline: true,
+                id: "new-account",
+                title: translate("new_account"),
+                image: iconRegistry["new-account-card"],
+              },
+              {
+                displayInline: true,
+                id: "app-settings",
+                title: translate("App settings"),
+                image: iconRegistry["settings"],
+              },
+            ]}
           >
             <HStack
               // {...debugBorder()}
@@ -181,7 +143,7 @@ export function useHeaderWrapper() {
                 />
               </Center>
             </HStack>
-          </ContextMenuButton>
+          </Menu>
         </HStack>
       ),
     },

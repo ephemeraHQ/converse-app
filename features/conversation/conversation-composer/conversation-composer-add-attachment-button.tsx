@@ -1,9 +1,9 @@
+import { Center } from "@/design-system/Center";
+import { Menu } from "@/design-system/Menu/Menu";
 import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { getCurrentAccount } from "@data/store/accountsStore";
 import { Icon } from "@design-system/Icon/Icon";
-import { Pressable } from "@design-system/Pressable";
 import { translate } from "@i18n";
-import { MenuView } from "@react-native-menu/menu";
 import { useAppTheme } from "@theme/useAppTheme";
 import { uploadRemoteAttachment } from "@utils/attachment/uploadRemoteAttachment";
 import {
@@ -97,13 +97,13 @@ export function AddAttachmentButton() {
   }, [handleAttachmentSelected]);
 
   return (
-    <MenuView
+    <Menu
       style={{
         margin: theme.spacing.xxxs,
         alignSelf: "flex-end",
       }}
-      onPressAction={async ({ nativeEvent }) => {
-        switch (nativeEvent.event) {
+      onPress={(actionId) => {
+        switch (actionId) {
           case "camera":
             openCamera();
             break;
@@ -118,11 +118,6 @@ export function AddAttachmentButton() {
         {
           id: "mediaLibrary",
           title: translate("photo_library"),
-          titleColor: theme.colors.text.primary,
-          imageColor: Platform.select({
-            ios: undefined,
-            android: theme.colors.text.primary,
-          }),
           image: Platform.select({
             ios: "square.and.arrow.up",
             android: "ic_menu_share",
@@ -131,23 +126,15 @@ export function AddAttachmentButton() {
         {
           id: "camera",
           title: translate("camera"),
-          titleColor: theme.colors.text.primary,
-          imageColor: Platform.select({
-            ios: undefined,
-            android: theme.colors.text.primary,
-          }),
           image: Platform.select({
             ios: "camera",
             android: "ic_menu_camera",
           }),
         },
       ]}
-      shouldOpenOnLongPress={false}
     >
-      <Pressable
+      <Center
         style={{
-          alignItems: "center",
-          justifyContent: "center",
           height: 36, // Value from Figma
           width: 36, // Value from Figma
           backgroundColor: theme.colors.fill.minimal,
@@ -159,7 +146,7 @@ export function AddAttachmentButton() {
           icon="plus"
           size={20} // Value from figma
         />
-      </Pressable>
-    </MenuView>
+      </Center>
+    </Menu>
   );
 }
