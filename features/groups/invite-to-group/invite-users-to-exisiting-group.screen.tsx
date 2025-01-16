@@ -196,7 +196,7 @@ export function InviteUsersToExistingGroupScreen({
 
                 if (!isEmptyObject(profiles)) {
                   // Let's save the profiles for future use
-                  setProfileRecordSocialsQueryData(currentAccount(), profiles);
+                  setProfileRecordSocialsQueryData(profiles);
                   setStatus({
                     loading: false,
                     error: "",
@@ -233,7 +233,7 @@ export function InviteUsersToExistingGroupScreen({
 
           if (!isEmptyObject(profiles)) {
             // Let's save the profiles for future use
-            setProfileRecordSocialsQueryData(currentAccount(), profiles);
+            setProfileRecordSocialsQueryData(profiles);
             setStatus({
               loading: false,
               error: "",

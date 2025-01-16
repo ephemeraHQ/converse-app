@@ -7,6 +7,5 @@ import { useProfileSocialsQueries } from "@queries/useProfileSocialsQuery";
  * @returns
  */
 export const useProfilesSocials = (peerAddresses: string[]) => {
-  const currentAccount = useCurrentAccount();
-  return useProfileSocialsQueries(currentAccount!, peerAddresses);
+  return useProfileSocialsQueries(peerAddresses);
 };

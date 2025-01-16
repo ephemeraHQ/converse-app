@@ -13,8 +13,12 @@ export default function HydrationStateHandler() {
       const startTime = new Date().getTime();
       const accounts = getAccountsList();
       if (accounts.length === 0) {
-        // Awaiting before showing onboarding
-        await getInstalledWallets(false);
+        try {
+          // Awaiting before showing onboarding
+          await getInstalledWallets(false);
+        } catch (e) {
+          logger.error("[Hydration] Error getting installed wallets", e);
+        }
       } else {
         // note(lustig) I don't think this does anything?
         getInstalledWallets(false);
@@ -26,26 +30,27 @@ export default function HydrationStateHandler() {
       logger.debug(
         "[Hydration] Fetching persisted conversation list for all accounts"
       );
-      await Promise.allSettled(
-        accounts.map(async (account) => {
-          const accountStartTime = new Date().getTime();
-          logger.debug(
-            `[Hydration] Fetching persisted conversation list for ${account}`
-          );
 
-          prefetchInboxIdQuery({ account });
-          prefetchConversationsQuery({ account });
+      accounts.map((account) => {
+        const accountStartTime = new Date().getTime();
+        logger.debug(
+          `[Hydration] Fetching persisted conversation list for ${account}`
+        );
 
-          const accountEndTime = new Date().getTime();
-          logger.debug(
-            `[Hydration] Done fetching persisted conversation list for ${account} in ${
-              (accountEndTime - accountStartTime) / 1000
-            } seconds`
-          );
-        })
+        prefetchInboxIdQuery({ account });
+        prefetchConversationsQuery({ account });
+
+        const accountEndTime = new Date().getTime();
+        logger.debug(
+          `[Hydration] Done fetching persisted conversation list for ${account} in ${
+            (accountEndTime - accountStartTime) / 1000
+          } seconds`
+        );
+      });
+
+      logger.debug(
+        "[Hydration] Done prefetching all accounts conversation lists"
       );
-
-      logger.debug("[Hydration] Done fetching persisted conversation list");
 
       useAppStore.getState().setHydrationDone(true);
       logger.debug(

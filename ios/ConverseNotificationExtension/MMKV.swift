@@ -56,9 +56,9 @@ func getAccountsState() -> Accounts? {
   }
 }
 
-func getProfilesStore(account: String, address: String) -> ProfileSocials? {
+func getProfilesStore(address: String) -> ProfileSocials? {
   let mmkv = getMmkv()
-  let key = "profileSocials-\(account.lowercased())-\(address.lowercased())"
+  let key = "profileSocials-\(address.lowercased())"
   let profilesString = mmkv?.string(forKey: key)
   if (profilesString == nil) {
     return nil
@@ -72,9 +72,9 @@ func getProfilesStore(account: String, address: String) -> ProfileSocials? {
   }
 }
 
-func getInboxIdProfilesStore(account: String, inboxId: String) -> ProfileSocials? {
+func getInboxIdProfilesStore(inboxId: String) -> ProfileSocials? {
   let mmkv = getMmkv()
-  let key = "inboxProfileSocials-\(account.lowercased())-\(inboxId.lowercased())"
+  let key = "inboxProfileSocials-\(inboxId.lowercased())"
   let profilesString = mmkv?.string(forKey: key)
   if (profilesString == nil) {
     return nil
@@ -88,21 +88,21 @@ func getInboxIdProfilesStore(account: String, inboxId: String) -> ProfileSocials
   }
 }
 
-func saveProfileSocials(account: String, address: String, socials: ProfileSocials) {
+func saveProfileSocials(address: String, socials: ProfileSocials) {
   let updatedAt = Int(Date().timeIntervalSince1970)
   let newProfile = Profile(updatedAt: updatedAt, socials: socials)
   let mmkv = getMmkv()
   if let jsonData = try? JSONEncoder().encode(newProfile), let jsonString = String(data: jsonData, encoding: .utf8) {
-    mmkv?.set(jsonString, forKey: "profileSocials-\(account.lowercased())-\(address.lowercased())")
+    mmkv?.set(jsonString, forKey: "profileSocials-\(address.lowercased())")
   }
 }
 
-func saveInboxIdProfileSocials(account: String, inboxId: String, socials: ProfileSocials) {
+func saveInboxIdProfileSocials(inboxId: String, socials: ProfileSocials) {
   let updatedAt = Int(Date().timeIntervalSince1970)
   let newProfile = Profile(updatedAt: updatedAt, socials: socials)
   let mmkv = getMmkv()
   if let jsonData = try? JSONEncoder().encode(newProfile), let jsonString = String(data: jsonData, encoding: .utf8) {
-    mmkv?.set(jsonString, forKey: "inboxProfileSocials-\(account.lowercased())-\(inboxId.lowercased())")
+    mmkv?.set(jsonString, forKey: "inboxProfileSocials-\(inboxId.lowercased())")
   }
 }
 
