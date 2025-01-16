@@ -12,8 +12,8 @@ describe("getConverseStateFromPath", () => {
       Conversation: {
         path: "/conversation",
       },
-      NewConversation: {
-        path: "/newConversation",
+      CreateConversation: {
+        path: "/createConversation",
       },
       Profile: {
         path: "/profile",

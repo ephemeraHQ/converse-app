@@ -1,4 +1,4 @@
-import { Platform, ViewStyle, TextStyle } from "react-native";
+import { ViewStyle, TextStyle } from "react-native";
 
 import { ThemedStyle } from "@/theme/useAppTheme";
 import { textSizeStyles } from "@/design-system/Text/Text.styles";
@@ -9,6 +9,7 @@ const $modal: ThemedStyle<ViewStyle> = ({ colors }) => ({
 });
 
 const $messageContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flex: 1,
   marginTop: spacing.lg,
   paddingHorizontal: spacing.md,
 });

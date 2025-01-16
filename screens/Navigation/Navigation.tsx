@@ -25,7 +25,6 @@ import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeySc
 import { NewAccountPrivyScreen } from "../NewAccount/NewAccountPrivyScreen";
 import { NewAccountScreen } from "../NewAccount/NewAccountScreen";
 import { NewAccountUserProfileScreen } from "../NewAccount/NewAccountUserProfileScreen";
-import { NewConversationNav } from "./NewConversationNav";
 import { OnboardingConnectWalletScreen } from "../Onboarding/OnboardingConnectWalletScreen";
 import { OnboardingEphemeraScreen } from "../Onboarding/OnboardingEphemeraScreen";
 import { OnboardingGetStartedScreen } from "../Onboarding/OnboardingGetStartedScreen";
@@ -48,7 +47,7 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
-
+import { CreateConversationScreen } from "@/features/create-conversation/create-conversation-screen";
 export type NavigationParamList = {
   Idle: undefined;
 
@@ -79,7 +78,7 @@ export type NavigationParamList = {
   Chats: undefined;
   ChatsRequests: undefined;
   Conversation: ConversationNavParams;
-  NewConversation: undefined;
+  CreateConversation: undefined;
 
   NewGroupSummary: undefined;
   ConverseMatchMaker: undefined;
@@ -136,9 +135,12 @@ export function SignedInNavigation() {
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
           <NativeStack.Screen name="Chats" component={ConversationListScreen} />
           <NativeStack.Screen name="Blocked" component={BlockedChatsScreen} />
+          <NativeStack.Screen
+            name="CreateConversation"
+            component={CreateConversationScreen}
+          />
           {ConversationRequestsListNav()}
           {ConversationNav()}
-          {NewConversationNav()}
           {ShareProfileNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}

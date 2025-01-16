@@ -4,7 +4,6 @@ import {
   headerTitleStyle,
   textPrimaryColor,
 } from "@styles/colors";
-import { converseEventEmitter } from "@utils/events";
 import { ColorSchemeName, Platform } from "react-native";
 
 import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
@@ -209,11 +208,14 @@ export const screenListeners =
         ) {
           // We're talking about the same screen!
           if (
-            newRoute.name === "NewConversation" &&
+            newRoute.name === "CreateConversationScreen" &&
             newRoute.params?.peer &&
             currentRoute.params?.peer !== newRoute.params?.peer
           ) {
-            logger.debug("[screenListeners] NewConversation", newRoute.params);
+            logger.debug(
+              "[screenListeners] CreateConversationScreen",
+              newRoute.params
+            );
             // whats happening here
             logger.debug(
               "[screenListeners] currentRoute.params",
@@ -243,9 +245,9 @@ export const screenListeners =
         }
         if (shouldReplace) {
           logger.debug(
-            `[screenListeners] shouldReplace replacing ${newRoute.name} with params ${JSON.stringify(
-              newRoute.params
-            )}`
+            `[screenListeners] shouldReplace replacing ${
+              newRoute.name
+            } with params ${JSON.stringify(newRoute.params)}`
           );
           navigation.dispatch(
             StackActions.replace(newRoute.name, newRoute.params)
