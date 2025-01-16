@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { ContactCard } from "@/features/profiles/components/contact-card";
-import { Table } from "@/design-system/Table/Table";
+import { SettingsList } from "@/design-system/settings-list/settings-list";
 import { VStack } from "@/design-system/VStack";
 import { Text } from "@/design-system/Text";
 import { useRoute, useRouter } from "@navigation/useNavigation";
@@ -274,7 +274,7 @@ export default function ProfileScreen() {
             <VStack
               style={[themed($section), { paddingVertical: theme.spacing.lg }]}
             >
-              <Table
+              <SettingsList
                 editMode={editMode}
                 rows={[
                   ...(notificationsPermissionStatus !== "granted"

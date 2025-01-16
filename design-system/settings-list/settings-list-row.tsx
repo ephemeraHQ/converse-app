@@ -5,17 +5,17 @@ import { useAppTheme, ThemedStyle } from "@/theme/useAppTheme";
 import { HStack } from "@/design-system/HStack";
 import { VStack } from "@/design-system/VStack";
 import { Icon } from "@/design-system/Icon/Icon";
-import { ITableRow } from "./Table.types";
+import { ISettingsListRow } from "./settings-list.types";
 
-type ITableRowProps = {
-  row: ITableRow;
+type ISettingsListRowProps = {
+  row: ISettingsListRow;
   editMode?: boolean;
 };
 
-export const TableRow = memo(function TableRow({
+export const SettingsListRow = memo(function SettingsListRow({
   row,
   editMode,
-}: ITableRowProps) {
+}: ISettingsListRowProps) {
   const { theme, themed } = useAppTheme();
 
   const content = (

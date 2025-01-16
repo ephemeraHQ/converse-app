@@ -1,9 +1,9 @@
-export type ITableRow = {
+export type ISettingsListRow = {
   label: string;
-  value?: string | number;
-  onValueChange?: (value: boolean) => void;
-  isSwitch?: boolean;
-  isWarning?: boolean;
-  disabled?: boolean;
+  value?: string | boolean;
   onPress?: () => void;
+  onValueChange?: (value: boolean) => void;
+  isWarning?: boolean;
+  isSwitch?: boolean;
+  disabled?: boolean;
 };
