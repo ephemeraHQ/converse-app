@@ -8,40 +8,40 @@
 import Foundation
 import Alamofire
 
-func getProfile(account: String, address: String) async -> ProfileSocials? {
-  var profileFromStore = getProfilesStore(account: account, address: address)
+func getProfile(address: String) async -> ProfileSocials? {
+  var profileFromStore = getProfilesStore(address: address)
   let formattedAddress =  address.lowercased()
   if let profile = profileFromStore {
     return profile
   }
   
   // If profile is nil, let's refresh it
-  try? await refreshProfileFromBackend(account: account, address: formattedAddress)
+  try? await refreshProfileFromBackend(address: formattedAddress)
 
-  profileFromStore = getProfilesStore(account: account, address: address)
+  profileFromStore = getProfilesStore(address: address)
   if let profile = profileFromStore {
     return profile
   }
   return nil
 }
 
-func getInboxIdProfile(account: String, inboxId: String) async -> ProfileSocials? {
-  var profileFromStore = getInboxIdProfilesStore(account: account, inboxId: inboxId)
+func getInboxIdProfile(inboxId: String) async -> ProfileSocials? {
+  var profileFromStore = getInboxIdProfilesStore(inboxId: inboxId)
   if let profile = profileFromStore {
     return profile
   }
   
   // If profile is nil, let's refresh it
-  try? await refreshInboxProfileFromBackend(account: account, inboxId: inboxId)
+  try? await refreshInboxProfileFromBackend(inboxId: inboxId)
   
-  profileFromStore = getInboxIdProfilesStore(account: account, inboxId: inboxId)
+  profileFromStore = getInboxIdProfilesStore(inboxId: inboxId)
   if let profile = profileFromStore {
     return profile
   }
   return nil
 }
 
-func refreshProfileFromBackend(account: String, address: String) async throws  {
+func refreshProfileFromBackend(address: String) async throws  {
   let apiURI = getApiURI()
   if (apiURI != nil && !apiURI!.isEmpty) {
     let profileURI = "\(apiURI ?? "")/api/profile"
@@ -63,7 +63,7 @@ func refreshProfileFromBackend(account: String, address: String) async throws  {
     let decoder = JSONDecoder()
     
     if let socials = try? decoder.decode(ProfileSocials.self, from: response) {     
-      saveProfileSocials(account: account, address: address, socials: socials)
+      saveProfileSocials(address: address, socials: socials)
     }
     
 
@@ -71,7 +71,7 @@ func refreshProfileFromBackend(account: String, address: String) async throws  {
 
 }
 
-func refreshInboxProfileFromBackend(account: String, inboxId: String) async throws  {
+func refreshInboxProfileFromBackend(inboxId: String) async throws  {
   let apiURI = getApiURI()
   if (apiURI != nil && !apiURI!.isEmpty) {
     let profileURI = "\(apiURI ?? "")/api/inbox"
@@ -93,7 +93,7 @@ func refreshInboxProfileFromBackend(account: String, inboxId: String) async thro
     let decoder = JSONDecoder()
     
     if let socials = try? decoder.decode(ProfileSocials.self, from: response) {
-      saveInboxIdProfileSocials(account: account, inboxId: inboxId, socials: socials)
+      saveInboxIdProfileSocials(inboxId: inboxId, socials: socials)
     }
     
   }

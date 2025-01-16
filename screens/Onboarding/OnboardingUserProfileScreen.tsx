@@ -387,7 +387,7 @@ export function useCreateOrUpdateProfileInfo() {
           account: address,
           profile: { ...profile, avatar: publicAvatar },
         });
-        await invalidateProfileSocialsQuery(address, address);
+        await invalidateProfileSocialsQuery(address);
         return { success: true };
       } catch (e: any) {
         logger.error(e, { context: "UserProfile: claiming and refreshing" });

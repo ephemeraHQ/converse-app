@@ -60,7 +60,7 @@ export default function AccountSettingsButton({ account }: Props) {
     const methods = {
       [translate("your_profile_page")]: async () => {
         if (account) {
-          invalidateProfileSocialsQuery(account, account);
+          invalidateProfileSocialsQuery(account);
           setCurrentAccount(account, false);
           router.navigate("Chats");
           navigate("Profile", {

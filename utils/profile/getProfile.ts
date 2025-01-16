@@ -16,10 +16,7 @@ export const getProfile = async (
   address: string | undefined
 ): Promise<IProfileSocials | undefined | null> => {
   if (address) {
-    const addressStorageKey = profileSocialsQueryStorageKey(
-      currentAccount,
-      address
-    );
+    const addressStorageKey = profileSocialsQueryStorageKey(address);
     const mmkvString = mmkv.getString(addressStorageKey);
     if (mmkvString) {
       return JSON.parse(mmkvString) as IProfileSocials;

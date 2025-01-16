@@ -15,7 +15,7 @@ export default function MainIdentityStateHandler() {
   useEffect(() => {
     if (userAddress) {
       saveUser(userAddress, privyAccountId[userAddress] as string);
-      invalidateProfileSocialsQuery(userAddress, userAddress);
+      invalidateProfileSocialsQuery(userAddress);
     }
   }, [privyAccountId, userAddress]);
 

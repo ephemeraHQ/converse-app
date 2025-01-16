@@ -78,7 +78,7 @@ func handleV3Message(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_
               }
               // We replaced decodedMessage.senderAddress from inboxId to actual address
               // so it appears well in the app until inboxId is a first class citizen
-              if let senderProfileSocials = await getInboxIdProfile(account: xmtpClient.address, inboxId: decodedMessage.senderInboxId) {
+              if let senderProfileSocials = await getInboxIdProfile(inboxId: decodedMessage.senderInboxId) {
                 bestAttemptContent.subtitle = getPreferredName(address: decodedMessage.senderInboxId, socials: senderProfileSocials)
               }
 
@@ -89,7 +89,7 @@ func handleV3Message(xmtpClient: XMTP.Client, envelope: XMTP.Xmtp_MessageApi_V1_
               messageIntent = getIncomingGroupMessageIntent(group: group, content: bestAttemptContent.body, senderId: decodedMessage.senderInboxId, senderName: bestAttemptContent.subtitle)
             } else if case .dm(let dm) = conversation {
               var senderAvatar: String? = nil
-              if let senderProfileSocials = await getInboxIdProfile(account: xmtpClient.address, inboxId: decodedMessage.senderInboxId) {
+              if let senderProfileSocials = await getInboxIdProfile(inboxId: decodedMessage.senderInboxId) {
                 let name = getPreferredName(address: decodedMessage.senderInboxId, socials: senderProfileSocials)
                 bestAttemptContent.title = getPreferredName(address: decodedMessage.senderInboxId, socials: senderProfileSocials)
                 senderAvatar = getPreferredAvatar(socials: senderProfileSocials)

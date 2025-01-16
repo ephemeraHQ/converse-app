@@ -12,20 +12,14 @@ import mmkv from "@/utils/mmkv";
 
 type ProfileSocialsData = IProfileSocials | null | undefined;
 
-const profileSocialsQueryKey = (
-  account: string,
-  peerAddress: string
-): QueryKey => [
+const profileSocialsQueryKey = (peerAddress: string): QueryKey => [
   "profileSocials",
-  account?.toLowerCase(),
   // Typesafe because there's a lot of account! usage
   peerAddress?.toLowerCase(),
 ];
 
-export const profileSocialsQueryStorageKey = (
-  account: string,
-  peerAddress: string
-) => profileSocialsQueryKey(account, peerAddress).join("-");
+export const profileSocialsQueryStorageKey = (peerAddress: string) =>
+  profileSocialsQueryKey(peerAddress).join("-");
 
 const profileSocials = create({
   fetcher: async (addresses: string[]) => {
@@ -39,10 +33,10 @@ const profileSocials = create({
   }),
 });
 
-const fetchProfileSocials = async (account: string, peerAddress: string) => {
+const fetchProfileSocials = async (peerAddress: string) => {
   const data = await profileSocials.fetch(peerAddress);
 
-  const key = profileSocialsQueryStorageKey(account, peerAddress);
+  const key = profileSocialsQueryStorageKey(peerAddress);
 
   mmkv.delete(key);
 
@@ -53,10 +47,9 @@ const fetchProfileSocials = async (account: string, peerAddress: string) => {
   return data;
 };
 
-const profileSocialsQueryConfig = (account: string, peerAddress: string) => ({
-  queryKey: profileSocialsQueryKey(account, peerAddress),
-  queryFn: () => fetchProfileSocials(account, peerAddress),
-  enabled: !!account,
+const profileSocialsQueryConfig = (peerAddress: string) => ({
+  queryKey: profileSocialsQueryKey(peerAddress),
+  queryFn: () => fetchProfileSocials(peerAddress),
   // Store for 30 days
   gcTime: 1000 * 60 * 60 * 24 * 30,
   refetchIntervalInBackground: false,
@@ -66,9 +59,9 @@ const profileSocialsQueryConfig = (account: string, peerAddress: string) => ({
   refetchOnMount: false,
   staleTime: 1000 * 60 * 60 * 24,
   initialData: (): ProfileSocialsData => {
-    if (mmkv.contains(profileSocialsQueryStorageKey(account, peerAddress))) {
+    if (mmkv.contains(profileSocialsQueryStorageKey(peerAddress))) {
       const data = JSON.parse(
-        mmkv.getString(profileSocialsQueryStorageKey(account, peerAddress))!
+        mmkv.getString(profileSocialsQueryStorageKey(peerAddress))!
       ) as ProfileSocialsData;
       return data;
     }
@@ -77,20 +70,14 @@ const profileSocialsQueryConfig = (account: string, peerAddress: string) => ({
   // persister: reactQueryPersister,
 });
 
-export const useProfileSocialsQuery = (
-  account: string,
-  peerAddress: string
-) => {
-  return useQuery(profileSocialsQueryConfig(account, peerAddress));
+export const useProfileSocialsQuery = (peerAddress: string) => {
+  return useQuery(profileSocialsQueryConfig(peerAddress));
 };
 
-export const useProfileSocialsQueries = (
-  account: string,
-  peerAddresses: string[]
-) => {
+export const useProfileSocialsQueries = (peerAddresses: string[]) => {
   return useQueries({
     queries: peerAddresses.map((peerAddress) =>
-      profileSocialsQueryConfig(account, peerAddress)
+      profileSocialsQueryConfig(peerAddress)
     ),
   });
 };
@@ -99,9 +86,7 @@ export const prefetchProfileSocialsQuery = (
   account: string,
   peerAddress: string
 ) => {
-  return queryClient.prefetchQuery(
-    profileSocialsQueryConfig(account, peerAddress)
-  );
+  return queryClient.prefetchQuery(profileSocialsQueryConfig(peerAddress));
 };
 
 export const fetchProfileSocialsQuery = (
@@ -109,18 +94,17 @@ export const fetchProfileSocialsQuery = (
   peerAddress: string
 ) => {
   return queryClient.fetchQuery<IProfileSocials | null>(
-    profileSocialsQueryConfig(account, peerAddress)
+    profileSocialsQueryConfig(peerAddress)
   );
 };
 
 export const setProfileSocialsQueryData = (
-  account: string,
   peerAddress: string,
   data: IProfileSocials,
   updatedAt?: number
 ) => {
   return queryClient.setQueryData<ProfileSocialsData>(
-    profileSocialsQueryKey(account, peerAddress),
+    profileSocialsQueryKey(peerAddress),
     data,
     {
       updatedAt,
@@ -129,11 +113,10 @@ export const setProfileSocialsQueryData = (
 };
 
 export const setProfileRecordSocialsQueryData = (
-  account: string,
   record: Record<string, IProfileSocials>
 ) => {
   Object.keys(record).forEach((peerAddress) => {
-    setProfileSocialsQueryData(account, peerAddress, record[peerAddress]);
+    setProfileSocialsQueryData(peerAddress, record[peerAddress]);
   });
 };
 
@@ -142,15 +125,12 @@ export const getProfileSocialsQueryData = (
   peerAddress: string
 ) => {
   return queryClient.getQueryData<ProfileSocialsData>(
-    profileSocialsQueryConfig(account, peerAddress).queryKey
+    profileSocialsQueryConfig(peerAddress).queryKey
   );
 };
 
-export const invalidateProfileSocialsQuery = (
-  account: string,
-  address: string
-) => {
+export const invalidateProfileSocialsQuery = (address: string) => {
   queryClient.invalidateQueries({
-    queryKey: profileSocialsQueryKey(account, address),
+    queryKey: profileSocialsQueryKey(address),
   });
 };

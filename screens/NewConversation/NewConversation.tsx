@@ -274,7 +274,7 @@ export default function NewConversation({
                     profileCount: Object.keys(profiles).length,
                   });
                   // Let's save the profiles for future use
-                  setProfileRecordSocialsQueryData(currentAccount(), profiles);
+                  setProfileRecordSocialsQueryData(profiles);
                   // delete pending chat memebers from search results
                   pendingChatMembers.members.forEach((member) => {
                     delete profiles[member.address];
@@ -335,7 +335,7 @@ export default function NewConversation({
               profileCount: Object.keys(profiles).length,
             });
             // Let's save the profiles for future use
-            setProfileRecordSocialsQueryData(currentAccount(), profiles);
+            setProfileRecordSocialsQueryData(profiles);
             setStatus({
               loading: false,
               error: "",
