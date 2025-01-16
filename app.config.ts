@@ -18,23 +18,23 @@ const isProduction = !isDev && !isPreview;
 const scheme = isDev
   ? "converse-dev"
   : isPreview
-    ? "converse-preview"
-    : "converse";
+  ? "converse-preview"
+  : "converse";
 const androidPackage = isDev
   ? "com.converse.dev"
   : isPreview
-    ? "com.converse.preview"
-    : "com.converse.prod";
+  ? "com.converse.preview"
+  : "com.converse.prod";
 const appDomainConverse = isDev
   ? "dev.converse.xyz"
   : isPreview
-    ? "preview.converse.xyz"
-    : "converse.xyz";
+  ? "preview.converse.xyz"
+  : "converse.xyz";
 const appDomainGetConverse = isDev
   ? "dev.getconverse.app"
   : isPreview
-    ? "preview.getconverse.app"
-    : "getconverse.app";
+  ? "preview.getconverse.app"
+  : "getconverse.app";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -44,11 +44,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: "portrait",
   icon: isProduction ? "./assets/icon.png" : "./assets/icon-preview.png",
   userInterfaceStyle: "automatic",
-  splash: {
-    image: "./assets/splash.png",
-    resizeMode: "contain",
-    backgroundColor: "#ffffff",
-  },
   updates: {
     fallbackToCacheTimeout: 0,
     url: "https://u.expo.dev/49a65fae-3895-4487-8e8a-5bd8bee3a401",
@@ -77,8 +72,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     googleServicesFile: isDev
       ? "./scripts/build/android/google-services/dev.json"
       : isPreview
-        ? "./scripts/build/android/google-services/preview.json"
-        : "./scripts/build/android/google-services/production.json",
+      ? "./scripts/build/android/google-services/preview.json"
+      : "./scripts/build/android/google-services/production.json",
     permissions: [
       "INTERNET",
       "READ_EXTERNAL_STORAGE",
@@ -225,6 +220,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         },
       },
     ],
+    [
+      "expo-splash-screen",
+      {
+        image: "./assets/splash.png",
+        backgroundColor: "#ffffff",
+        dark: {
+          image: "./assets/splash-dark.png",
+          backgroundColor: "#000000",
+        },
+        imageWidth: 300,
+      },
+    ],
+    "expo-secure-store",
     [
       "@sentry/react-native/expo",
       {
