@@ -1,5 +1,5 @@
-import React, { memo, useCallback, useState } from "react";
-import { View, ViewStyle, Alert } from "react-native";
+import React, { useCallback, useState } from "react";
+import { View, ViewStyle, Alert, Share } from "react-native";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { ContactCard } from "@/features/profiles/components/ContactCard";
 import { FullWidthTable } from "@/design-system/table/FullWidthTable";
@@ -7,12 +7,11 @@ import { VStack } from "@/design-system/VStack";
 import { Text } from "@/design-system/Text";
 import { useRoute, useRouter } from "@navigation/useNavigation";
 import { usePreferredName } from "@/hooks/usePreferredName";
+import { usePreferredUsername } from "@/hooks/usePreferredUsername";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
-import { useProfileSocials } from "@/hooks/useProfileSocials";
 import {
   useCurrentAccount,
   useSettingsStore,
-  currentAccount,
 } from "@/data/store/accountsStore";
 import { useAppTheme, ThemedStyle } from "@/theme/useAppTheme";
 import { translate } from "@/i18n";
@@ -28,6 +27,8 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { updateConsentForAddressesForAccount } from "@/features/consent/update-consent-for-addresses-for-account";
 import { StackActions } from "@react-navigation/native";
 import { useDisconnectActionSheet } from "@/hooks/useDisconnectActionSheet";
+import { getConfig } from "@/config";
+import { useProfileSocials } from "@/hooks/useProfileSocials";
 
 export default function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
@@ -40,9 +41,10 @@ export default function ProfileScreen() {
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
 
   const { data: socials } = useProfileSocials(peerAddress);
-  const preferredName = usePreferredName(peerAddress);
-  const userName = socials?.userNames?.find((e) => e.isPrimary)?.name;
-
+  const userName = usePreferredUsername(userAddress);
+  const displayName = usePreferredName(userAddress);
+  const preferredAvatarUri = usePreferredAvatarUri(peerAddress);
+  
   const handleChatPress = useCallback(() => {
     router.dispatch(StackActions.popToTop());
     router.dispatch(
@@ -64,7 +66,7 @@ export default function ProfileScreen() {
       safeAreaEdges: ["top"],
       titleComponent: (
         <Text preset="body">
-          {router.canGoBack()
+          {router.canGoBack() && router.getState().routes.length >= 2
             ? router.getState().routes[router.getState().routes.length - 2].name
             : ""}
         </Text>
@@ -79,89 +81,135 @@ export default function ProfileScreen() {
       ),
       RightActionComponent: (
         <HStack style={themed($headerRight)}>
-          {isMyProfile ? (
-            <HeaderAction
-              icon="qrcode"
+          {editMode ? (
+            <Button
+              text={translate("profile.done")}
+              variant="text"
               onPress={() => {
-                navigate("ShareProfile");
+                handleEditProfile();
+                setEditMode(false);
               }}
             />
           ) : (
-            <HeaderAction
-              style={themed($editIcon)}
-              icon="square.and.pencil"
-              onPress={handleChatPress}
-            />
+            <>
+              {isMyProfile ? (
+                <HeaderAction
+                  icon="qrcode"
+                  onPress={() => {
+                    navigate("ShareProfile");
+                  }}
+                />
+              ) : (
+                <HeaderAction
+                  style={themed($editIcon)}
+                  icon="square.and.pencil"
+                  onPress={handleChatPress}
+                />
+              )}
+              <ContextMenuButton
+                style={themed($contextMenu)}
+                isMenuPrimaryAction
+                menuConfig={{
+                  menuTitle: "",
+                  menuItems: [
+                    ...(isMyProfile
+                      ? [
+                          {
+                            actionKey: "edit",
+                            actionTitle: translate("profile.edit"),
+                            icon: {
+                              iconType: "SYSTEM" as const,
+                              iconValue: "pencil",
+                            },
+                          },
+                          {
+                            actionKey: "share",
+                            actionTitle: translate("share"),
+                            icon: {
+                              iconType: "SYSTEM" as const,
+                              iconValue: "square.and.arrow.up",
+                            },
+                          },
+                        ]
+                      : [
+                          {
+                            actionKey: "share",
+                            actionTitle: translate("share"),
+                            icon: {
+                              iconType: "SYSTEM" as const,
+                              iconValue: "square.and.arrow.up",
+                            },
+                          },
+                          {
+                            actionKey: "block",
+                            actionTitle: translate("block"),
+                            icon: {
+                              iconType: "SYSTEM" as const,
+                              iconValue: "person.crop.circle.badge.xmark",
+                            },
+                            menuAttributes: ["destructive" as const],
+                          },
+                        ]),
+                  ],
+                }}
+                onPressMenuItem={({ nativeEvent }) => {
+                  Haptics.selectionAsync();
+                  if (nativeEvent.actionKey === "share") {
+                    if (isMyProfile) {
+                      navigate("ShareProfile");
+                    } else {
+                      const profileUrl = `https://${
+                        getConfig().websiteDomain
+                      }/dm/${userName}`;
+                      Clipboard.setString(profileUrl);
+                      Share.share({
+                        message: profileUrl,
+                      });
+                    }
+                  } else if (nativeEvent.actionKey === "edit") {
+                    Alert.alert("Available soon");
+                    // TODO - Profile Edit
+                    // handleEditProfile();
+                  } else if (nativeEvent.actionKey === "block") {
+                    Alert.alert(
+                      translate("profile.block.title"),
+                      translate("profile.block.message", {
+                        name: displayName,
+                      }),
+                      [
+                        {
+                          text: translate("cancel"),
+                          style: "cancel",
+                        },
+                        {
+                          text: translate("block"),
+                          style: "destructive",
+                          onPress: () => {
+                            setPeersStatus({ [peerAddress]: "blocked" });
+                            router.goBack();
+                          },
+                        },
+                      ]
+                    );
+                  }
+                }}
+              >
+                <HeaderAction icon="more_vert" />
+              </ContextMenuButton>
+            </>
           )}
-          <ContextMenuButton
-            style={themed($contextMenu)}
-            isMenuPrimaryAction
-            onPressMenuItem={({ nativeEvent }) => {
-              Haptics.selectionAsync();
-              if (nativeEvent.actionKey === "share") {
-                navigate("ShareProfile");
-              } else if (nativeEvent.actionKey === "copy") {
-                Clipboard.setString(peerAddress);
-              } else if (nativeEvent.actionKey === "block") {
-                Alert.alert(
-                  translate("profile.block.title"),
-                  translate("profile.block.message", {
-                    name: preferredName,
-                  }),
-                  [
-                    {
-                      text: translate("cancel"),
-                      style: "cancel",
-                    },
-                    {
-                      text: translate("block"),
-                      style: "destructive",
-                      onPress: () => {
-                        setPeersStatus({ [peerAddress]: "blocked" });
-                        router.goBack();
-                      },
-                    },
-                  ]
-                );
-              }
-            }}
-            menuConfig={{
-              menuTitle: "",
-              menuItems: [
-                {
-                  actionKey: "share",
-                  actionTitle: translate("share"),
-                  icon: {
-                    iconType: "SYSTEM",
-                    iconValue: "square.and.arrow.up",
-                  },
-                },
-                {
-                  actionKey: "copy",
-                  actionTitle: translate("copy"),
-                  icon: {
-                    iconType: "SYSTEM",
-                    iconValue: "doc.on.doc",
-                  },
-                },
-                {
-                  actionKey: "block",
-                  actionTitle: translate("block"),
-                  icon: {
-                    iconType: "SYSTEM",
-                    iconValue: "person.crop.circle.badge.xmark",
-                  },
-                  menuAttributes: ["destructive"],
-                },
-              ],
-            }}
-          >
-            <HeaderAction icon="more_vert" />
-          </ContextMenuButton>
         </HStack>
       ),
     },
-    [router, theme, peerAddress, preferredName, setPeersStatus, handleChatPress]
+    [
+      router,
+      theme,
+      peerAddress,
+      displayName,
+      setPeersStatus,
+      handleChatPress,
+      editMode,
+    ]
   );
 
   return (
@@ -169,7 +217,7 @@ export default function ProfileScreen() {
       <VStack>
         <VStack style={themed($section)}>
           <ContactCard
-            displayName={preferredName}
+            displayName={displayName}
             userName={formatUsername(userName)}
             avatarUri={preferredAvatarUri}
             isMyProfile={isMyProfile}
@@ -271,9 +319,4 @@ const $editIcon: ThemedStyle<ViewStyle> = () => ({
 const $contextMenu: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.sm,
   paddingRight: spacing.xxxs,
-});
-
-const $settingsSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginTop: spacing.xl,
-  borderTopWidth: spacing.xxs, // Add top border to create separation
 });

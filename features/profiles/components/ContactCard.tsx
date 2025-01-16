@@ -107,7 +107,8 @@ export const ContactCard = memo(function ContactCard({
               name={displayName}
               size={theme.avatarSize.lg}
             />
-            {isMyProfile && (
+            {/* TODO: "Names" menu to pick from when SCW will be done */}
+            {/* {isMyProfile && (
               <Button
                 variant="link.bare"
                 size="sm"
@@ -118,7 +119,7 @@ export const ContactCard = memo(function ContactCard({
                 }}
                 onPress={onToggleEdit}
               />
-            )}
+            )} */}
           </VStack>
 
           {/* Name and Username - now positioned at bottom */}

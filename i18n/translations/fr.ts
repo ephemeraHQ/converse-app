@@ -352,7 +352,9 @@ export const fr = {
       message: "Êtes-vous sûr de vouloir bloquer {{name}} ?",
     },
     modify_profile: "Modifier le profil",
+    edit: "Modifier",
     save: "Enregistrer",
+    done: "Valider",
     settings: {
       notifications: "Notifications",
       archive: "Archive",
@@ -371,6 +373,7 @@ export const fr = {
   turn_on_notifications: "Activer les notifications",
   attachment_message_error_download:
     "Impossible de télécharger la pièce jointe",
+  done: "Valider",
 
   // Revocation
   current_installation_revoked: "Déconnecté",

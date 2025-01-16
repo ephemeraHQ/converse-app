@@ -176,7 +176,7 @@ export const en = {
     "We could not find any result in your existing conversations. You might want to",
   no_results_start_convo: "start a new conversation",
   new_account: "New account",
-  "App settings": "App settings",
+  app_settings: "App settings",
   add_an_account: "Add an account",
   group_info: "Group info",
   converse_match_maker: "Converse Match Maker",
@@ -353,11 +353,13 @@ export const en = {
   change_or_add_account: "Change or add account",
   profile: {
     modify_profile: "Modify profile",
+    edit: "Edit",
     block: {
       title: "Block user",
       message: "Are you sure you want to block {{name}}?",
     },
     save: "Save",
+    done: "Done",
     settings: {
       notifications: "Notifications",
       archive: "Archive",

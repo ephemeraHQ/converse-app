@@ -88,11 +88,6 @@ const ShareProfileContent = ({
               {username || shortAddress(userAddress || "")}
             </Text>
           )}
-          {username && (
-            <Text style={styles.address}>
-              {shortAddress(userAddress || "")}
-            </Text>
-          )}
         </View>
         <View style={[styles.qrCode, compact && styles.qrCodeCompact]}>
           <QRCode
