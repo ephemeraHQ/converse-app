@@ -100,11 +100,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { VStack } from "@/design-system/VStack";
-import { Button } from "@/design-system/Button/Button";
-
-const $sectionContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginBottom: spacing.lg,
-});
 
 export default function ProfileScreen() {
   return (
@@ -152,7 +147,6 @@ const ContactCard = memo(function ContactCard({
   avatarUri?: string;
 }) {
   const { theme } = useAppTheme();
-  const colorScheme = useColorScheme();
 
   const rotateX = useSharedValue(0);
   const rotateY = useSharedValue(0);
@@ -245,7 +239,7 @@ const ContactCard = memo(function ContactCard({
   );
 });
 
-function ProfileScreenImpl() {
+const ProfileScreenImpl = () => {
   const { theme, themed } = useAppTheme();
   const router = useRouter();
   const account = useCurrentAccount();
@@ -258,6 +252,19 @@ function ProfileScreenImpl() {
   const preferredUserName = usePreferredName(peerAddress);
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const colorScheme = useColorScheme();
+
+  const userAddress = useCurrentAccount() as string;
+  const isMyProfile = peerAddress.toLowerCase() === userAddress?.toLowerCase();
+  const navigation = useRouter();
+
+  const handleChatPress = useCallback(() => {
+    navigation.dispatch(StackActions.popToTop());
+    navigation.dispatch(
+      StackActions.push("Conversation", {
+        peer: peerAddress,
+      })
+    );
+  }, [navigation, peerAddress]);
 
   useHeader(
     {
@@ -284,12 +291,16 @@ function ProfileScreenImpl() {
             columnGap: theme.spacing.xxs,
           }}
         >
-          <HeaderAction
-            icon="qrcode"
-            onPress={() => {
-              navigate("ShareProfile");
-            }}
-          />
+          {isMyProfile ? (
+            <HeaderAction
+              icon="qrcode"
+              onPress={() => {
+                navigate("ShareProfile");
+              }}
+            />
+          ) : (
+            <HeaderAction icon="square.and.pencil" onPress={handleChatPress} />
+          )}
           <ContextMenuButton
             style={{
               paddingVertical: theme.spacing.sm,
@@ -366,8 +377,6 @@ function ProfileScreenImpl() {
     [router, theme, peerAddress, preferredUserName, setPeersStatus, colorScheme]
   );
 
-  const navigation = useRouter();
-  const userAddress = useCurrentAccount() as string;
   const [copiedAddresses, setCopiedAddresses] = useState<{
     [address: string]: boolean;
   }>({});
@@ -514,7 +523,6 @@ function ProfileScreenImpl() {
     ),
   ];
 
-  const isMyProfile = peerAddress.toLowerCase() === userAddress?.toLowerCase();
   const appVersion = Constants.expoConfig?.version;
   const buildNumber =
     Platform.OS === "ios"
@@ -528,35 +536,7 @@ function ProfileScreenImpl() {
         id: "message",
         title: translate("send_a_message"),
         titleColor: primaryColor(colorScheme),
-        action: () => {
-          setTimeout(() => {
-            const isPreviouslyInNavStack = navigation
-              .getState()
-              .routes.some((route) => {
-                if (route.name !== "Conversation") {
-                  return false;
-                }
-                const params = route.params as ConversationNavParams;
-                return params?.peer === peerAddress.toLowerCase();
-              });
-            if (isPreviouslyInNavStack) {
-              navigation.popToTop();
-              navigation.navigate({
-                name: "Conversation",
-                params: {
-                  peer: peerAddress,
-                },
-              });
-            } else {
-              navigation.popToTop();
-              navigation.dispatch(
-                StackActions.push("Conversation", {
-                  peer: peerAddress,
-                })
-              );
-            }
-          }, 300);
-        },
+        action: handleChatPress,
         leftView:
           Platform.OS === "android" ? (
             <TableViewPicto
@@ -796,35 +776,8 @@ function ProfileScreenImpl() {
     promoteToSuperAdmin,
     revokeSuperAdmin,
     revokeAdmin,
+    handleChatPress,
   ]);
-
-  const handleChatPress = useCallback(() => {
-    const isPreviouslyInNavStack = navigation
-      .getState()
-      .routes.some((route) => {
-        if (route.name !== "Conversation") {
-          return false;
-        }
-        const params = route.params as ConversationNavParams;
-        return params?.peer === peerAddress.toLowerCase();
-      });
-    if (isPreviouslyInNavStack) {
-      navigation.popToTop();
-      navigation.navigate({
-        name: "Conversation",
-        params: {
-          peer: peerAddress,
-        },
-      });
-    } else {
-      navigation.popToTop();
-      navigation.dispatch(
-        StackActions.push("Conversation", {
-          peer: peerAddress,
-        })
-      );
-    }
-  }, [navigation, peerAddress]);
 
   return (
     <ScrollView
@@ -844,25 +797,8 @@ function ProfileScreenImpl() {
         />
       )}
 
-      <Button
-        onPress={handleChatPress}
-        text="Chat"
-        variant="outline"
-        style={{
-          marginTop: theme.spacing.xxxs,
-          marginBottom: theme.spacing.xl,
-        }}
-      />
-
       {isMyProfile && shouldShowError && (
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: theme.spacing.lg,
-          }}
-        >
+        <View style={themed($errorContainer)}>
           <Icon
             icon="exclamationmark.triangle"
             color={dangerColor(colorScheme)}
@@ -930,14 +866,7 @@ function ProfileScreenImpl() {
               id: "message",
               title: translate("send_a_message"),
               titleColor: primaryColor(colorScheme),
-              action: () => {
-                navigation.popToTop();
-                navigation.dispatch(
-                  StackActions.push("Conversation", {
-                    peer: route.params.address,
-                  })
-                );
-              },
+              action: handleChatPress,
             },
           ]}
           style={themed($sectionContainer)}
@@ -1117,4 +1046,15 @@ function ProfileScreenImpl() {
       <View style={{ height: insets.bottom }} />
     </ScrollView>
   );
-}
+};
+
+const $sectionContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+});
+
+const $errorContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: spacing.lg,
+});
