@@ -359,7 +359,18 @@ export const fr = {
   view_removed_chats: "Afficher les conversations supprimées",
   change_or_add_account: "Changer ou ajouter un compte",
   profile: {
+    block: {
+      title: "Bloquer l'utilisateur",
+      message: "Êtes-vous sûr de vouloir bloquer {{name}} ?",
+    },
     modify_profile: "Modifier le profil",
+    save: "Enregistrer",
+    settings: {
+      notifications: "Notifications",
+      archive: "Archive",
+      keep_messages: "Conserver les messages",
+      blocked: "Bloqué",
+    },
   },
 
   // Revocation

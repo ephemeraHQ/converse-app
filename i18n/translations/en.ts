@@ -363,6 +363,17 @@ export const en = {
   change_or_add_account: "Change or add account",
   profile: {
     modify_profile: "Modify profile",
+    block: {
+      title: "Block user",
+      message: "Are you sure you want to block {{name}}?",
+    },
+    save: "Save",
+    settings: {
+      notifications: "Notifications",
+      archive: "Archive",
+      keep_messages: "Keep messages",
+      blocked: "Blocked",
+    },
   },
 
   // Revocation
