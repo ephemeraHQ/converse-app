@@ -29,6 +29,7 @@ import { StackActions } from "@react-navigation/native";
 import { useDisconnectActionSheet } from "@/hooks/useDisconnectActionSheet";
 import { getConfig } from "@/config";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
+import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 
 export default function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
@@ -59,6 +60,10 @@ export default function ProfileScreen() {
   }, [editMode]);
 
   const showDisconnectActionSheet = useDisconnectActionSheet();
+
+  const isBlockedPeer = useSettingsStore(
+    (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
+  );
 
   // Header configuration
   useHeader(
@@ -142,12 +147,18 @@ export default function ProfileScreen() {
                           },
                           {
                             actionKey: "block",
-                            actionTitle: translate("block"),
+                            actionTitle: isBlockedPeer
+                              ? translate("unblock")
+                              : translate("block"),
                             icon: {
                               iconType: "SYSTEM" as const,
-                              iconValue: "person.crop.circle.badge.xmark",
+                              iconValue: isBlockedPeer
+                                ? "person.crop.circle.badge.plus"
+                                : "person.crop.circle.badge.xmark",
                             },
-                            menuAttributes: ["destructive" as const],
+                            menuAttributes: isBlockedPeer
+                              ? undefined
+                              : ["destructive" as const],
                           },
                         ]),
                   ],
@@ -171,25 +182,38 @@ export default function ProfileScreen() {
                     // TODO - Profile Edit
                     // handleEditProfile();
                   } else if (nativeEvent.actionKey === "block") {
-                    Alert.alert(
-                      translate("profile.block.title"),
-                      translate("profile.block.message", {
-                        name: displayName,
-                      }),
-                      [
-                        {
-                          text: translate("cancel"),
-                          style: "cancel",
-                        },
-                        {
-                          text: translate("block"),
-                          style: "destructive",
-                          onPress: () => {
-                            setPeersStatus({ [peerAddress]: "blocked" });
-                            router.goBack();
-                          },
-                        },
-                      ]
+                    showActionSheetWithOptions(
+                      {
+                        options: [
+                          isBlockedPeer
+                            ? translate("unblock")
+                            : translate("block"),
+                          translate("cancel"),
+                        ],
+                        cancelButtonIndex: 1,
+                        destructiveButtonIndex: isBlockedPeer ? undefined : 0,
+                        title: isBlockedPeer
+                          ? translate("if_you_unblock_contact")
+                          : translate("if_you_block_contact"),
+                      },
+                      (selectedIndex?: number) => {
+                        if (selectedIndex === 0 && peerAddress) {
+                          const newStatus = isBlockedPeer
+                            ? "consented"
+                            : "blocked";
+                          const consentOnProtocol = isBlockedPeer
+                            ? "allow"
+                            : "deny";
+                          // TODO - updateConsentForAddressesForAccount
+                          /*consentToAddressesOnProtocolByAccount({
+                            account: userAddress,
+                            addresses: [peerAddress],
+                            consent: consentOnProtocol,
+                          });*/
+                          setPeersStatus({ [peerAddress]: newStatus });
+                          router.goBack();
+                        }
+                      }
                     );
                   }
                 }}
