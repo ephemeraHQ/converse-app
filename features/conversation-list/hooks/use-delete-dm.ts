@@ -45,13 +45,11 @@ export const useDeleteDm = (dm: DmWithCodecsType) => {
       const previousIsDeleted = getConversationMetadataQueryData({
         account: currentAccount,
         topic: dm.topic,
-        context: "useDeleteDm",
       })?.isDeleted;
 
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: dm.topic,
-        context: "useDeleteDm",
         updateData: { isDeleted: true },
       });
 
@@ -61,7 +59,6 @@ export const useDeleteDm = (dm: DmWithCodecsType) => {
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: dm.topic,
-        context: "useDeleteDm",
         updateData: { isDeleted: context?.previousIsDeleted },
       });
     },

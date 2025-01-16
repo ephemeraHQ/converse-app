@@ -1,4 +1,5 @@
 import { conversationIsUnreadByTimestamp } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
+import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
 import { getConversationQueryOptions } from "@/queries/useConversationQuery";
 import { useCurrentAccount } from "@data/store/accountsStore";
@@ -14,60 +15,59 @@ export const useConversationIsUnread = ({
   topic,
 }: UseConversationIsUnreadArgs) => {
   const currentAccount = useCurrentAccount();
-  // const { data: currentUserInboxId } = useCurrentAccountInboxId();
+  const { data: currentUserInboxId } = useCurrentAccountInboxId();
 
-  const { data: conversationData, isLoading: isLoadingConversationData } =
-    useQuery(
-      getConversationMetadataQueryOptions({
-        account: currentAccount!,
-        topic,
-        context: "useConversationIsUnread",
-      })
-    );
+  const {
+    data: conversationMetadata,
+    isLoading: isLoadingConversationMetadata,
+  } = useQuery(
+    getConversationMetadataQueryOptions({
+      account: currentAccount!,
+      topic,
+    })
+  );
 
   const { data: lastMessage, isLoading: isLoadingLastMessage } = useQuery({
     ...getConversationQueryOptions({
       account: currentAccount!,
       topic,
-      context: "useConversationIsUnread",
     }),
     select: (data) => data?.lastMessage,
   });
 
   const isUnread = useMemo(() => {
-    // By default we conside the conversation read if we haven't loaded the conversation metadata
-    if (isLoadingConversationData) {
+    // By default we consider the conversation read if we haven't loaded the conversation metadata
+    if (isLoadingConversationMetadata) {
       return false;
     }
 
     // User intentionally marked as unread
-    if (conversationData?.markedAsUnread) {
+    if (conversationMetadata?.markedAsUnread) {
       return true;
+    }
+
+    // If the last message is from the current user, it's not unread... unless they marked the convo as unread but it's handled above
+    if (lastMessage?.senderInboxId === currentUserInboxId) {
+      return false;
     }
 
     if (!lastMessage) {
       return false;
     }
 
-    // If the last message is from the current user, it's not unread
-    // Not sure... UX Feels weird
-    // if (lastMessage.senderInboxId === currentUserInboxId) {
-    //   return false;
-    // }
-
     return conversationIsUnreadByTimestamp({
       lastMessageSent: lastMessage.sentNs,
-      readUntil: conversationData?.readUntil ?? 0,
+      readUntil: conversationMetadata?.readUntil ?? 0,
     });
   }, [
     lastMessage,
-    conversationData,
-    isLoadingConversationData,
-    // currentUserInboxId,
+    conversationMetadata,
+    isLoadingConversationMetadata,
+    currentUserInboxId,
   ]);
 
   return {
     isUnread,
-    isLoading: isLoadingConversationData || isLoadingLastMessage,
+    isLoading: isLoadingConversationMetadata || isLoadingLastMessage,
   };
 };

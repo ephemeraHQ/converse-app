@@ -14,7 +14,10 @@ import {
   stopStreamingConversations,
   streamConversations,
 } from "./conversations";
-import { stopStreamingAllMessage, streamAllMessages } from "./messages";
+import {
+  stopStreamingAllMessage,
+  streamAllMessages,
+} from "./xmtp-messages/xmtp-messages-stream";
 
 const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType> | undefined;

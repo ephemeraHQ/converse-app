@@ -18,7 +18,6 @@ export function usePinOrUnpinConversation(args: {
       const isPinned = getConversationMetadataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
-        context: "usePinOrUnpinConversation",
       })?.isPinned;
 
       if (isPinned) {
@@ -38,13 +37,11 @@ export function usePinOrUnpinConversation(args: {
       const previousIsPinned = getConversationMetadataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
-        context: "usePinOrUnpinConversation",
       })?.isPinned;
 
       updateConversationMetadataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
-        context: "usePinOrUnpinConversation",
         updateData: {
           isPinned: !previousIsPinned,
         },
@@ -56,7 +53,6 @@ export function usePinOrUnpinConversation(args: {
       updateConversationMetadataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
-        context: "usePinOrUnpinConversation",
         updateData: {
           isPinned: context?.previousIsPinned,
         },

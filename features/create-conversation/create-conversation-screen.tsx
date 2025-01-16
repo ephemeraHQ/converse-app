@@ -529,7 +529,6 @@ export function CreateConversationScreen({
                     account: currentAccount(),
                     topic: dm.topic,
                     conversation: dm,
-                    context: "CreateConversation#sendDm",
                   });
                   navigation.replace("Conversation", { topic: dm.topic });
                 } else {
@@ -549,7 +548,6 @@ export function CreateConversationScreen({
                     account: currentAccount(),
                     topic: group.topic,
                     conversation: group,
-                    context: "CreateConversation#sendGroupMessage",
                   });
                   navigation.replace("Conversation", { topic: group.topic });
                 }

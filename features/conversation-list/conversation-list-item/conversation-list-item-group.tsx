@@ -7,38 +7,41 @@ import { useDeleteGroup } from "@/features/conversation-list/hooks/use-delete-gr
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
 import { useGroupMembersInfoForCurrentAccount } from "@/hooks/use-group-members-info-for-current-account";
-import { prefetchConversationMessages } from "@/queries/useConversationMessages";
+import { prefetchConversationMessages } from "@/queries/use-conversation-messages-query";
+import { useGroupQuery } from "@/queries/useGroupQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useRouter } from "@navigation/useNavigation";
 import { getCompactRelativeTime } from "@utils/date";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo, useCallback, useMemo } from "react";
 import { ConversationListItem } from "./conversation-list-item";
 import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action";
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action";
 
 type IConversationListItemGroupProps = {
-  group: GroupWithCodecsType;
+  conversationTopic: ConversationTopic;
 };
 
 export const ConversationListItemGroup = memo(
   function ConversationListItemGroup({
-    group,
+    conversationTopic,
   }: IConversationListItemGroupProps) {
     const { theme } = useAppTheme();
     const currentAccount = useCurrentAccount()!;
     const router = useRouter();
 
-    const topic = group?.topic;
-    const timestamp = group?.lastMessage?.sentNs ?? 0;
+    const { data: group } = useGroupQuery({
+      account: currentAccount,
+      topic: conversationTopic,
+    });
 
     const { isUnread } = useConversationIsUnread({
-      topic,
+      topic: conversationTopic,
     });
 
     const { groupMembersInfo } = useGroupMembersInfoForCurrentAccount({
-      groupTopic: topic,
+      groupTopic: conversationTopic,
     });
 
     const avatarComponent = useMemo(() => {
@@ -53,23 +56,24 @@ export const ConversationListItemGroup = memo(
     }, [group?.imageUrlSquare, groupMembersInfo, theme]);
 
     const onPress = useCallback(() => {
-      prefetchConversationMessages(currentAccount, topic);
+      prefetchConversationMessages(currentAccount, conversationTopic);
       router.navigate("Conversation", {
-        topic,
+        topic: conversationTopic,
       });
-    }, [topic, currentAccount, router]);
+    }, [conversationTopic, currentAccount, router]);
 
     // Title
     const title = group?.name;
 
     // Subtitle
+    const timestamp = group?.lastMessage?.sentNs ?? 0;
     const timeToShow = getCompactRelativeTime(timestamp);
-    const messageText = useMessagePlainText(group.lastMessage);
+    const messageText = useMessagePlainText(group?.lastMessage);
     const subtitle =
       timeToShow && messageText ? `${timeToShow} ⋅ ${messageText}` : "";
 
     const { toggleReadStatusAsync } = useToggleReadStatus({
-      topic,
+      topic: conversationTopic,
     });
 
     const renderLeftActions = useCallback(
@@ -81,13 +85,15 @@ export const ConversationListItemGroup = memo(
 
     const renderRightActions = useCallback(
       (args: ISwipeableRenderActionsArgs) => {
-        return <ToggleUnreadSwipeableAction {...args} topic={topic} />;
+        return (
+          <ToggleUnreadSwipeableAction {...args} topic={conversationTopic} />
+        );
       },
-      [topic]
+      [conversationTopic]
     );
 
     const onDeleteGroup = useDeleteGroup({
-      groupTopic: topic,
+      groupTopic: conversationTopic,
     });
 
     return (

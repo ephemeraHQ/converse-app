@@ -35,10 +35,10 @@ func getXmtpClient(account: String) async -> XMTP.Client? {
     let groupId = "group.\(try! getInfoPlistValue(key: "AppBundleId", defaultValue: nil))"
     let groupDir = (FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupId)?.path)!
     let client = try await Client.build(address: account, options: .init(api: .init(env: xmtpEnv), dbEncryptionKey: encryptionKey, dbDirectory: groupDir))
-    client.register(codec: AttachmentCodec())
-    client.register(codec: RemoteAttachmentCodec())
-    client.register(codec: ReactionCodec())
-    client.register(codec: ReplyCodec())
+    Client.register(codec: AttachmentCodec())
+    Client.register(codec: RemoteAttachmentCodec())
+    Client.register(codec: ReactionCodec())
+    Client.register(codec: ReplyCodec())
     return client
   } catch {
     sentryTrackError(error: error, extras: ["message": "NOTIFICATION_XMTP_CLIENT_NOT_INSTANTIATED"]);

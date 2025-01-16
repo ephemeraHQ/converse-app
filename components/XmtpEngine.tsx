@@ -1,6 +1,6 @@
 import { appStateIsBlurredState } from "@utils/appState/appStateIsBlurred";
 import logger from "@utils/logger";
-import { stopStreamingAllMessage } from "@utils/xmtpRN/messages";
+import { stopStreamingAllMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
 import {
   AppState,
   AppStateStatus,

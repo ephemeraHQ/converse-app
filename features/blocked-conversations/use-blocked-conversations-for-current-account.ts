@@ -10,7 +10,6 @@ export const useBlockedConversationsForCurrentAccount = () => {
 
   const { data } = useConversationsQuery({
     account: currentAccount!,
-    context: "useBlockedChats",
   });
 
   const conversationsMetadataQueries = useQueries({
@@ -18,7 +17,6 @@ export const useBlockedConversationsForCurrentAccount = () => {
       getConversationMetadataQueryOptions({
         account: currentAccount!,
         topic: conversation.topic,
-        context: "useBlockedChats",
       })
     ),
   });

@@ -24,13 +24,11 @@ export const useToggleReadStatus = ({ topic }: UseToggleReadStatusProps) => {
     const conversationData = getConversationMetadataQueryData({
       account: currentAccount,
       topic,
-      context: "useToggleReadStatus",
     });
 
     const conversation = getConversationQueryData({
       account: currentAccount,
       topic,
-      context: "useToggleReadStatus",
     });
     const convoIsUnreadByTimestamp = conversationIsUnreadByTimestamp({
       lastMessageSent: conversation?.lastMessage?.sentNs ?? 0,

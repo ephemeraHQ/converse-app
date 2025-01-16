@@ -7,7 +7,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { setGroupPhotoMutationKey } from "./MutationKeys";
-import { updateConversationInConversationsQuery } from "@/queries/conversations-query";
+import { updateConversationInConversationsQueryData } from "@/queries/conversations-query";
 
 type IArgs = {
   account: string;
@@ -36,7 +36,7 @@ export function useGroupPhotoMutation(args: IArgs) {
         updateGroupQueryData({ account, topic, updates });
       }
 
-      updateConversationInConversationsQuery({
+      updateConversationInConversationsQueryData({
         account,
         topic,
         conversationUpdate: updates,
@@ -51,7 +51,7 @@ export function useGroupPhotoMutation(args: IArgs) {
 
       const updates = { imageUrlSquare: previousGroup?.imageUrlSquare ?? "" };
       updateGroupQueryData({ account, topic, updates });
-      updateConversationInConversationsQuery({
+      updateConversationInConversationsQueryData({
         account,
         topic,
         conversationUpdate: updates,

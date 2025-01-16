@@ -14,7 +14,6 @@ export function useConversationIsPinned(args: {
     ...getConversationMetadataQueryOptions({
       account: currentAccount!,
       topic: conversationTopic,
-      context: "useConversationIsPinned",
     }),
     select: (data) => data?.isPinned,
   });

@@ -24,13 +24,12 @@ export function useMarkConversationAsRead(args: { topic: ConversationTopic }) {
       const previousData = getConversationMetadataQueryData({
         account: currentAccount,
         topic,
-        context: "useToggleReadStatus",
       });
 
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
-        context: "useToggleReadStatus",
+
         updateData: {
           readUntil: new Date().getTime(),
           markedAsUnread: false,
@@ -44,7 +43,6 @@ export function useMarkConversationAsRead(args: { topic: ConversationTopic }) {
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
-        context: "useToggleReadStatus",
         updateData: context?.previousData,
       });
     },

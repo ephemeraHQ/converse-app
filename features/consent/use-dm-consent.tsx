@@ -2,19 +2,19 @@ import {
   getCurrentAccount,
   useCurrentAccount,
 } from "@/data/store/accountsStore";
-import { updateConversationInConversationsQuery } from "@/queries/conversations-query";
+import { updateConversationInConversationsQueryData } from "@/queries/conversations-query";
 import { getConversationQueryData } from "@/queries/useConversationQuery";
 import { getDmQueryData, setDmQueryData } from "@/queries/useDmQuery";
-import { mutateObjectProperties } from "@/utils/mutate-object-properties";
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
-import { updateGroupsConsentForAccount } from "./update-groups-consent-for-account";
 import { useMutation } from "@tanstack/react-query";
 import {
   ConversationId,
   ConversationTopic,
   InboxId,
 } from "@xmtp/react-native-sdk";
+import { updateGroupsConsentForAccount } from "./update-groups-consent-for-account";
+import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
 
 export function useDmConsent(args: {
   peerInboxId: InboxId;
@@ -48,19 +48,19 @@ export function useDmConsent(args: {
       const conversation = getConversationQueryData({
         account: currentAccount,
         topic,
-        context: "useDmConsentMutation",
       });
       if (conversation) {
-        const updatedDm = mutateObjectProperties(conversation, {
+        const updatedDm = updateObjectAndMethods(conversation, {
           state: args.consent === "allow" ? "allowed" : "denied",
         });
+
         setDmQueryData({
           account: currentAccount,
           peer: topic,
           dm: updatedDm as DmWithCodecsType,
         });
 
-        updateConversationInConversationsQuery({
+        updateConversationInConversationsQueryData({
           account: currentAccount,
           topic,
           conversationUpdate: {
@@ -80,7 +80,7 @@ export function useDmConsent(args: {
         if (!dm) {
           return;
         }
-        const updatedDm = mutateObjectProperties(dm, {
+        const updatedDm = updateObjectAndMethods(dm, {
           state: previousDmConsent,
         });
         setDmQueryData({
@@ -88,7 +88,7 @@ export function useDmConsent(args: {
           peer: topic,
           dm: updatedDm,
         });
-        updateConversationInConversationsQuery({
+        updateConversationInConversationsQueryData({
           account: currentAccount,
           topic,
           conversationUpdate: {

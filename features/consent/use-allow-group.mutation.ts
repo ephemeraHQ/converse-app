@@ -1,4 +1,4 @@
-import { updateConversationInConversationsQuery } from "@/queries/conversations-query";
+import { updateConversationInConversationsQueryData } from "@/queries/conversations-query";
 import { captureError } from "@/utils/capture-error";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { queryClient } from "@queries/queryClient";
@@ -88,7 +88,7 @@ export const getAllowGroupMutationOptions = (
       const { account, group } = args;
       const previousConsent = getGroupConsentQueryData(account, group.topic);
       setGroupConsentQueryData(account, group.topic, "allowed");
-      updateConversationInConversationsQuery({
+      updateConversationInConversationsQueryData({
         account,
         topic: group.topic,
         conversationUpdate: {
@@ -119,7 +119,7 @@ export const getAllowGroupMutationOptions = (
         group.topic,
         context.previousConsent || "unknown"
       );
-      updateConversationInConversationsQuery({
+      updateConversationInConversationsQueryData({
         account,
         topic: group.topic,
         conversationUpdate: {

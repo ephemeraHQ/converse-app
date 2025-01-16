@@ -10,7 +10,6 @@ export function usePinnedConversations() {
   const { isLoading: isLoadingConversations, data: conversations } =
     useConversationsQuery({
       account: currentAccount!,
-      context: "PinnedConversations",
     });
 
   const conversationsDataQueries = useQueries({
@@ -18,7 +17,6 @@ export function usePinnedConversations() {
       getConversationMetadataQueryOptions({
         account: currentAccount!,
         topic: conversation.topic,
-        context: "usePinnedConversations",
       })
     ),
   });

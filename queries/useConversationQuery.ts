@@ -1,5 +1,6 @@
-import { mutateObjectProperties } from "@/utils/mutate-object-properties";
-import { useQuery } from "@tanstack/react-query";
+import logger from "@/utils/logger";
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
@@ -10,11 +11,13 @@ export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
 type IArgs = {
   account: string;
   topic: ConversationTopic;
-  context: string;
 };
 
 function getConversation(args: IArgs) {
   const { account, topic } = args;
+  logger.debug(
+    `[useConversationQuery] Fetching conversation for ${args.topic} with account ${args.account}`
+  );
   return getConversationByTopicByAccount({
     account,
     topic,
@@ -23,18 +26,16 @@ function getConversation(args: IArgs) {
 }
 
 export const useConversationQuery = (args: IArgs) => {
-  return useQuery({
-    ...getConversationQueryOptions(args),
-  });
+  return useQuery(getConversationQueryOptions(args));
 };
 
 export function getConversationQueryOptions(args: IArgs) {
-  const { account, topic, context } = args;
-  return {
+  const { account, topic } = args;
+  return queryOptions({
     queryKey: conversationQueryKey(account, topic),
-    queryFn: () => getConversation({ account, topic, context }),
-    enabled: !!topic,
-  };
+    queryFn: () => getConversation({ account, topic }),
+    enabled: !!topic && !!account,
+  });
 }
 
 export const setConversationQueryData = (
@@ -43,23 +44,25 @@ export const setConversationQueryData = (
   }
 ) => {
   const { account, topic, conversation } = args;
-  queryClient.setQueryData<ConversationQueryData>(
-    conversationQueryKey(account, topic),
-    conversation
-  );
+  queryClient.setQueryData(conversationQueryKey(account, topic), conversation);
 };
 
 export function updateConversationQueryData(
   args: IArgs & { conversationUpdate: Partial<ConversationQueryData> }
 ) {
   const { conversationUpdate } = args;
-  queryClient.setQueryData<ConversationQueryData>(
+  logger.debug(
+    `[updateConversationQueryData] Updating conversation for ${args.topic} with account ${args.account}`
+  );
+  queryClient.setQueryData(
     getConversationQueryOptions(args).queryKey,
     (previousConversation) => {
       if (!previousConversation) {
         return undefined;
       }
-      return mutateObjectProperties(previousConversation, conversationUpdate);
+
+      // Create new object while preserving prototype chain and methods
+      return updateObjectAndMethods(previousConversation, conversationUpdate);
     }
   );
 }
@@ -69,9 +72,7 @@ export function refetchConversationQuery(args: IArgs) {
 }
 
 export const getConversationQueryData = (args: IArgs) => {
-  return queryClient.getQueryData<ConversationQueryData>(
-    getConversationQueryOptions(args).queryKey
-  );
+  return queryClient.getQueryData(getConversationQueryOptions(args).queryKey);
 };
 
 export function getOrFetchConversation(args: IArgs) {

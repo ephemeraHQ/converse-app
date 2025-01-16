@@ -13,7 +13,6 @@ export type IConversationMetadataQueryData = Awaited<
 type IArgs = {
   account: string;
   topic: ConversationTopic;
-  context: string;
 };
 
 export function getConversationMetadataQueryOptions(args: IArgs) {
@@ -27,7 +26,7 @@ export function getConversationMetadataQueryOptions(args: IArgs) {
 
 export function prefetchConversationMetadataQuery(args: IArgs) {
   logger.debug(
-    `[ConversationMetadataQuery] prefetchConversationMetadataQuery for account: ${args.account}, topic: ${args.topic} and context: ${args.context}`
+    `[ConversationMetadataQuery] prefetchConversationMetadataQuery for account: ${args.account}, topic: ${args.topic}`
   );
   return queryClient.prefetchQuery(getConversationMetadataQueryOptions(args));
 }
@@ -59,7 +58,7 @@ export function updateConversationMetadataQueryData(
 
 async function getConversationMetadata(args: IArgs) {
   logger.debug(
-    `[ConversationMetadataQuery] getConversationMetadata for account: ${args.account}, topic: ${args.topic} and context: ${args.context}`
+    `[ConversationMetadataQuery] getConversationMetadata for account: ${args.account}, topic: ${args.topic}`
   );
   return batchedGetConversationMetadata.fetch(args);
 }

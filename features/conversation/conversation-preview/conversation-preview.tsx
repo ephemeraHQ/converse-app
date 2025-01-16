@@ -9,9 +9,9 @@ import { ConversationMessageLayout } from "@/features/conversation/conversation-
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
 import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
-import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
+import { conversationListDefaultProps } from "@/features/conversation/conversation-messages-list";
+import { useConversationPreviewMessages } from "@/features/conversation/conversation-preview/conversation-preview-messages.query";
 import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
-import { useConversationPreviewMessages } from "@/queries/useConversationPreviewMessages";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { $globalStyles } from "@/theme/styles";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -32,7 +32,6 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
     useConversationQuery({
       account: currentAccount,
       topic,
-      context: "conversation-read-only",
     });
 
   const isLoading = isLoadingMessages || isLoadingConversation;
@@ -59,9 +58,10 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
           topic={topic}
           conversationId={conversation.id}
         >
+          {/* Using basic Flatlist instead of the Animated one to try to fix the context menu crashes https://github.com/dominicstop/react-native-ios-context-menu/issues/70 */}
           <FlatList
-            // 15 messages is enough
-            data={messages?.ids.slice(0, 15) ?? []}
+            {...conversationListDefaultProps}
+            data={messages?.ids ?? []}
             renderItem={({ item, index }) => {
               const message = messages?.byId[item]!;
               const previousMessage = messages?.byId[messages?.ids[index + 1]];
@@ -73,11 +73,13 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
                   previousMessage={previousMessage}
                   nextMessage={nextMessage}
                 >
-                  <ConversationMessageTimestamp />
-                  <ConversationMessageLayout>
-                    <ConversationMessage message={message} />
-                    <ConversationMessageReactions />
-                  </ConversationMessageLayout>
+                  <VStack>
+                    <ConversationMessageTimestamp />
+                    <ConversationMessageLayout>
+                      <ConversationMessage message={message} />
+                      <ConversationMessageReactions />
+                    </ConversationMessageLayout>
+                  </VStack>
                 </MessageContextStoreProvider>
               );
             }}

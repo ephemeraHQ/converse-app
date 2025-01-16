@@ -139,16 +139,13 @@ export async function pinTopic(args: {
   );
   const { account, topic } = args;
 
-  console.log("1");
   const headers = await getXmtpApiHeaders(account);
-  console.log("2");
 
   const { data } = await api.put(
     `/api/topics/pin`,
     { topics: [topic] },
     { headers: headers }
   );
-  console.log("3");
 
   const parseResult = MessageResponseSchema.safeParse(data);
   if (!parseResult.success) {
@@ -166,16 +163,13 @@ export async function unpinTopic(args: {
   );
   const { account, topic } = args;
 
-  console.log("1");
   const headers = await getXmtpApiHeaders(account);
-  console.log("2");
 
   const { data } = await api.put(
     `/api/topics/unpin`,
     { topics: [topic] },
     { headers: headers }
   );
-  console.log("3");
 
   const parseResult = MessageResponseSchema.safeParse(data);
   if (!parseResult.success) {

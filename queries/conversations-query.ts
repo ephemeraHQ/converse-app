@@ -1,5 +1,5 @@
 import { setConversationQueryData } from "@/queries/useConversationQuery";
-import { mutateObjectProperties } from "@/utils/mutate-object-properties";
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
@@ -15,7 +15,6 @@ export type IConversationsQuery = Awaited<ReturnType<typeof getConversations>>;
 
 type IArgs = {
   account: string;
-  context?: string;
 };
 
 export const createConversationsQueryObserver = (args: IArgs) => {
@@ -25,15 +24,11 @@ export const createConversationsQueryObserver = (args: IArgs) => {
   return new QueryObserver(queryClient, getConversationsQueryOptions(args));
 };
 
-export const useConversationsQuery = (args: {
-  account: string;
-  context?: string;
-}) => {
-  const { account, context } = args;
+export const useConversationsQuery = (args: { account: string }) => {
+  const { account } = args;
   return useQuery<IConversationsQuery>(
     getConversationsQueryOptions({
       account,
-      context: context ?? "",
     })
   );
 };
@@ -56,10 +51,7 @@ export const addConversationToConversationsQuery = (args: {
 
   if (!previousConversationsData) {
     queryClient.setQueryData<IConversationsQuery>(
-      getConversationsQueryOptions({
-        account,
-        context: "setConversationsQueryData",
-      }).queryKey,
+      getConversationsQueryOptions({ account }).queryKey,
       [conversation]
     );
     return;
@@ -74,33 +66,24 @@ export const addConversationToConversationsQuery = (args: {
   }
 
   queryClient.setQueryData<IConversationsQuery>(
-    getConversationsQueryOptions({
-      account,
-      context: "setConversationsQueryData",
-    }).queryKey,
+    getConversationsQueryOptions({ account }).queryKey,
     [conversation, ...previousConversationsData]
   );
 };
 
 export const getConversationsQueryData = (args: { account: string }) => {
   const { account } = args;
-  logger.debug(
-    `[ConversationsQuery] getConversationsQueryData for account ${account}`
-  );
   return queryClient.getQueryData<IConversationsQuery>(
     getConversationsQueryOptions({
       account,
-      context: "getConversationsQueryData",
     }).queryKey
   );
 };
 
-const getConversations = async (args: { account: string; context: string }) => {
-  const { account, context } = args;
+const getConversations = async (args: { account: string }) => {
+  const { account } = args;
 
-  logger.debug(
-    `[ConversationsQuery] Fetching conversations from network ${context}`
-  );
+  logger.debug("[ConversationsQuery] Fetching conversations from network");
 
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
 
@@ -128,12 +111,12 @@ const getConversations = async (args: { account: string; context: string }) => {
     description: true,
   });
 
+  // For now conversations have all the same properties as one conversation
   for (const conversation of conversations) {
     setConversationQueryData({
       account,
       topic: conversation.topic,
       conversation,
-      context: "setConversationQueryData",
     });
   }
 
@@ -141,21 +124,25 @@ const getConversations = async (args: { account: string; context: string }) => {
 };
 
 export const getConversationsQueryOptions = (args: IArgs) => {
-  const { account, context } = args;
+  const { account } = args;
   return queryOptions({
     queryKey: conversationsQueryKey(account),
-    queryFn: () => getConversations({ account, context: context ?? "" }),
-    staleTime: 2000, // We want to make sure to always have the latest conversations
+    queryFn: () => getConversations({ account }),
     enabled: !!account,
+    refetchOnMount: true, // Just for now because conversations are very important and we want to make sure we have all of them
   });
 };
 
-export const updateConversationInConversationsQuery = (args: {
+export const updateConversationInConversationsQueryData = (args: {
   account: string;
   topic: ConversationTopic;
   conversationUpdate: Partial<ConversationWithCodecsType>;
 }) => {
   const { account, topic, conversationUpdate } = args;
+
+  logger.debug(
+    `[ConversationsQuery] updateConversationInConversationsQueryData for account ${account} and topic ${topic}`
+  );
 
   const previousConversationsData = getConversationsQueryData({
     account,
@@ -165,8 +152,7 @@ export const updateConversationInConversationsQuery = (args: {
   }
   const newConversations = previousConversationsData.map((c) => {
     if (c.topic === topic) {
-      // Need to mutate otherwise some methods on the conversation object change to "undefined"...
-      return mutateObjectProperties(c, conversationUpdate);
+      return updateObjectAndMethods(c, conversationUpdate);
     }
     return c;
   });
@@ -174,7 +160,6 @@ export const updateConversationInConversationsQuery = (args: {
   queryClient.setQueryData<IConversationsQuery>(
     getConversationsQueryOptions({
       account,
-      context: "updateConversationInConversationsQuery",
     }).queryKey,
     newConversations
   );

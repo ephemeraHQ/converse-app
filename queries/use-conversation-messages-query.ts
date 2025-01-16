@@ -1,13 +1,9 @@
 import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
-import {
-  ConversationWithCodecsType,
-  DecodedMessageWithCodecsType,
-} from "@/utils/xmtpRN/client.types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
-import { isSupportedMessage } from "@/utils/xmtpRN/messages";
-import { UseQueryOptions, useQuery } from "@tanstack/react-query";
+import { isSupportedMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
-import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
 import {
   InboxId,
   type ConversationTopic,
@@ -25,47 +21,43 @@ export type ConversationMessagesQueryData = Awaited<
   ReturnType<typeof conversationMessagesQueryFn>
 >;
 
-export const conversationMessagesQueryFn = async (
-  conversation: ConversationWithCodecsType,
-  options?: MessagesOptions
-) => {
-  const start = performance.now();
-  logger.info("[useConversationMessages] queryFn fetching messages...");
+export const conversationMessagesQueryFn = async (args: {
+  account: string;
+  topic: ConversationTopic;
+  options?: MessagesOptions;
+}) => {
+  const { account, topic, options } = args;
+
+  logger.debug(
+    `[useConversationMessages] Fetching messages for ${topic} with options ${JSON.stringify(
+      options
+    )}`
+  );
+
+  // If we are getting the messages it means we have the conversation in the query cache for sure or it's a bug
+  const conversation = getConversationQueryData({
+    account,
+    topic,
+  });
+
   if (!conversation) {
     throw new Error("Conversation not found in conversationMessagesQueryFn");
   }
+
+  const start = performance.now();
+  await conversation.sync();
   const messages = await conversation.messages(options);
   const end = performance.now();
-  logger.info(
-    `[useConversationMessages] queryFn fetched ${messages.length} messages in ${end - start}ms`
-  );
-  const processingStart = performance.now();
-  const validMessages = messages.filter(isSupportedMessage);
-  const processedMessages = processMessages({ messages: validMessages });
-  const processingEnd = performance.now();
-  logger.info(
-    `[useConversationMessages] queryFn processed ${messages.length} messages in ${processingEnd - processingStart}ms`
-  );
-  return processedMessages;
-};
 
-const conversationMessagesByTopicQueryFn = async (
-  account: string,
-  topic: ConversationTopic,
-  includeSync: boolean = true
-) => {
-  logger.info("[useConversationMessages] queryFn fetching messages by topic");
-  const conversation = await getConversationByTopicByAccount({
-    account,
-    topic,
-    includeSync,
-  });
-  if (!conversation) {
-    throw new Error(
-      "Conversation not found in conversationMessagesByTopicQueryFn"
-    );
-  }
-  return conversationMessagesQueryFn(conversation);
+  logger.debug(
+    `[useConversationMessages] Fetched ${messages.length} messages in ${
+      end - start
+    }ms`
+  );
+
+  const validMessages = messages.filter(isSupportedMessage);
+
+  return processMessages({ messages: validMessages });
 };
 
 export const useConversationMessages = (
@@ -79,7 +71,7 @@ export const getConversationMessagesQueryData = (
   account: string,
   topic: ConversationTopic
 ) => {
-  return queryClient.getQueryData<ConversationMessagesQueryData>(
+  return queryClient.getQueryData(
     getConversationMessagesQueryOptions(account, topic).queryKey
   );
 };
@@ -88,21 +80,21 @@ export function refetchConversationMessages(
   account: string,
   topic: ConversationTopic
 ) {
-  logger.info("[refetchConversationMessages] refetching messages");
+  logger.debug("[refetchConversationMessages] refetching messages");
   return queryClient.refetchQueries(
     getConversationMessagesQueryOptions(account, topic)
   );
 }
 
-export const addConversationMessage = (args: {
+export const addConversationMessageQuery = (args: {
   account: string;
   topic: ConversationTopic;
   message: DecodedMessageWithCodecsType;
 }) => {
   const { account, topic, message } = args;
 
-  queryClient.setQueryData<ConversationMessagesQueryData>(
-    conversationMessagesQueryKey(account, topic),
+  queryClient.setQueryData(
+    getConversationMessagesQueryOptions(account, topic).queryKey,
     (previousMessages) => {
       const processedMessages = processMessages({
         messages: [message],
@@ -119,28 +111,26 @@ export const prefetchConversationMessages = async (
   topic: ConversationTopic
 ) => {
   return queryClient.prefetchQuery(
-    getConversationMessagesQueryOptions(account, topic, false)
+    getConversationMessagesQueryOptions(account, topic)
   );
 };
 
 export function getConversationMessagesQueryOptions(
   account: string,
-  topic: ConversationTopic,
-  includeSync: boolean = true
-): UseQueryOptions<ConversationMessagesQueryData> {
+  topic: ConversationTopic
+) {
   const conversation = getConversationQueryData({
     account,
     topic,
-    context: "getConversationMessagesQueryOptions",
   });
-  return {
+  return queryOptions({
     queryKey: conversationMessagesQueryKey(account, topic),
     queryFn: () => {
-      return conversationMessagesByTopicQueryFn(account, topic, includeSync);
+      return conversationMessagesQueryFn({ account, topic });
     },
     enabled: !!conversation,
     refetchOnMount: true, // Just for now because messages are very important and we want to make sure we have all of them
-  };
+  });
 }
 
 const ignoredContentTypesPrefixes = [
@@ -263,12 +253,6 @@ function processMessages(args: {
   return result;
 }
 
-// WIP
-type IOptimisticMessage = {
-  tempId: string;
-  messageId?: MessageId;
-};
-
 export function replaceOptimisticMessageWithReal(args: {
   tempId: string;
   topic: ConversationTopic;
@@ -276,7 +260,7 @@ export function replaceOptimisticMessageWithReal(args: {
   message: DecodedMessageWithCodecsType;
 }) {
   const { tempId, topic, account, message } = args;
-  logger.info(
+  logger.debug(
     "[linkOptimisticMessageToReal] linking optimistic message to real",
     {
       tempId,
@@ -284,8 +268,8 @@ export function replaceOptimisticMessageWithReal(args: {
     }
   );
 
-  queryClient.setQueryData<ConversationMessagesQueryData>(
-    conversationMessagesQueryKey(account, topic),
+  queryClient.setQueryData(
+    getConversationMessagesQueryOptions(account, topic).queryKey,
     (previousMessages) => {
       if (!previousMessages) {
         return {

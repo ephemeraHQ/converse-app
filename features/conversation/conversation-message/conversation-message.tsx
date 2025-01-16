@@ -14,7 +14,6 @@ import {
   isTextMessage,
   isTransactionReferenceMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { captureError } from "@/utils/capture-error";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { memo } from "react";
 
@@ -65,8 +64,6 @@ export const ConversationMessage = memo(
     }
 
     const _ensureNever = message;
-
-    captureError(new Error(`Unknown message type ${message.contentTypeId}`));
 
     return null;
   },

@@ -1,5 +1,6 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "@/data/store/accountsStore";
+import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
 import { translate } from "@/i18n";
 import {
   getConversationMetadataQueryData,
@@ -10,7 +11,6 @@ import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { deleteTopic } from "@/utils/api/topics";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
@@ -31,13 +31,11 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
       const previousIsDeleted = getConversationMetadataQueryData({
         account: currentAccount,
         topic: groupTopic,
-        context: "useDeleteGroup",
       })?.isDeleted;
 
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: groupTopic,
-        context: "useDeleteGroup",
         updateData: { isDeleted: true },
       });
 
@@ -47,7 +45,6 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: groupTopic,
-        context: "useDeleteGroup",
         updateData: { isDeleted: context?.previousIsDeleted },
       });
     },
