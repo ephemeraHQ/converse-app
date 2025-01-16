@@ -3,6 +3,7 @@ import { subscribeToNotifications } from "./subscribeToNotifications";
 import logger from "@/utils/logger";
 import { currentAccount } from "@/data/store/accountsStore";
 import { resetNotifications } from "./resetNotifications";
+import { captureError } from "@/utils/capture-error";
 
 const accountTopicUnsubscribeMap: Record<string, () => void> = {};
 
@@ -27,7 +28,7 @@ export const setupAccountTopicSubscription = (account: string) => {
       subscribeToNotifications({
         conversations: conversationList.data,
         account,
-      });
+      }).catch(captureError);
       if (account === currentAccount()) {
         resetNotifications(account);
       }

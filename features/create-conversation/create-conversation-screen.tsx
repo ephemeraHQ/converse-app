@@ -25,42 +25,40 @@
 import { Text } from "@/design-system/Text";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, TextInput, View } from "react-native";
-
-import { getCleanAddress } from "@/utils/evm/getCleanAddress";
-import { SearchBar } from "@search/components/SearchBar";
-import { canMessageByAccount } from "@utils/xmtpRN/contacts";
-import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
-import AndroidBackAction from "@components/AndroidBackAction";
-import { currentAccount, getCurrentAccount } from "@data/store/accountsStore";
-import { IProfileSocials } from "@/features/profiles/profile-types";
-import { searchProfiles } from "@utils/api";
-import { getAddressForPeer, isSupportedPeer } from "@utils/evm/address";
-import { isEmptyObject } from "@utils/objects";
-import { getPreferredAvatar, getPreferredName } from "@utils/profile";
-import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { Button } from "@/design-system/Button/Button";
+import { Chip } from "@/design-system/chip";
 import { Loader } from "@/design-system/loader";
-import logger from "@/utils/logger";
-import { ProfileSearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
-import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
-import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
+import { accountCanMessagePeer } from "@/features/consent/account-can-message-peer";
+import { ConversationComposer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
+import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
+import { sendMessage } from "@/features/conversation/hooks/use-send-message";
+import { IProfileSocials } from "@/features/profiles/profile-types";
+import { ProfileSearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
+import { setConversationQueryData } from "@/queries/useConversationQuery";
+import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
+import { NavigationParamList } from "@/screens/Navigation/Navigation";
+import { useAppTheme } from "@/theme/useAppTheme";
+import { searchProfiles } from "@/utils/api/profiles";
+import { captureErrorWithToast } from "@/utils/capture-error";
+import { getCleanAddress } from "@/utils/evm/getCleanAddress";
+import logger from "@/utils/logger";
 import { shortAddress } from "@/utils/strings/shortAddress";
 import {
   createConversationByAccount,
   createGroupWithDefaultsByAccount,
   getOptionalConversationByPeerByAccount,
 } from "@/utils/xmtpRN/conversations";
-import { setConversationQueryData } from "@/queries/useConversationQuery";
-import { sendMessage } from "@/features/conversation/hooks/use-send-message";
-import { Button } from "@/design-system/Button/Button";
-import { stylesNewChat } from "./create-conversation.styles";
-import { Chip } from "@/design-system/chip";
+import AndroidBackAction from "@components/AndroidBackAction";
+import { currentAccount, getCurrentAccount } from "@data/store/accountsStore";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { NavigationParamList } from "@/screens/Navigation/Navigation";
-import { captureErrorWithToast } from "@/utils/capture-error";
-import { debugBorder } from "@/utils/debug-style";
+import { SearchBar } from "@search/components/SearchBar";
+import { getAddressForPeer, isSupportedPeer } from "@utils/evm/address";
+import { isEmptyObject } from "@utils/objects";
+import { getPreferredAvatar, getPreferredName } from "@utils/profile";
+import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
+import { stylesNewChat } from "./create-conversation.styles";
 
 /**
  * Screen shown for when user wants to create a new Chat.
@@ -232,7 +230,7 @@ export function CreateConversationScreen({
             logger.info("[CreateConversation] Checking if address is on XMTP", {
               address,
             });
-            const addressIsOnXmtp = await canMessageByAccount({
+            const addressIsOnXmtp = await accountCanMessagePeer({
               account: currentAccount(),
               peer: address,
             });
@@ -491,7 +489,7 @@ export function CreateConversationScreen({
         storeName={"new-conversation" as ConversationTopic}
       >
         <ConversationComposerContainer>
-          <Composer
+          <ConversationComposer
             hideAddAttachmentButton
             disabled={composerSendButtonDisabled || status.loading}
             // todo clean this up/use hooks or query functions properly

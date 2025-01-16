@@ -8,7 +8,7 @@ import { useDeleteGroup } from "@/features/conversation-list/hooks/use-delete-gr
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { translate } from "@/i18n";
-import { ConversationReadOnly } from "@/screens/ConversationReadOnly";
+import { ConversationPreview } from "@/features/conversation/conversation-preview";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
@@ -55,7 +55,7 @@ export function useConversationContextMenuViewDefaultProps(args: {
             paddingBottom: theme.spacing.xs,
           }}
         >
-          <ConversationReadOnly topic={conversationTopic} />
+          <ConversationPreview topic={conversationTopic} />
         </VStack>
       );
     },

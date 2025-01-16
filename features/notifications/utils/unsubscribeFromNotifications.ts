@@ -1,4 +1,4 @@
-import api from "@utils/api";
+import { api } from "@/utils/api/api";
 import * as Notifications from "expo-notifications";
 
 export const unsubscribeFromNotifications = async (apiHeaders: {

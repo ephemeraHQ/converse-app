@@ -1,5 +1,5 @@
 import { conversationIsUnreadByTimestamp } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
-import { getConversationDataQueryOptions } from "@/queries/conversation-data-query";
+import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
 import { getConversationQueryOptions } from "@/queries/useConversationQuery";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
@@ -18,7 +18,7 @@ export const useConversationIsUnread = ({
 
   const { data: conversationData, isLoading: isLoadingConversationData } =
     useQuery(
-      getConversationDataQueryOptions({
+      getConversationMetadataQueryOptions({
         account: currentAccount!,
         topic,
         context: "useConversationIsUnread",
@@ -35,6 +35,11 @@ export const useConversationIsUnread = ({
   });
 
   const isUnread = useMemo(() => {
+    // By default we conside the conversation read if we haven't loaded the conversation metadata
+    if (isLoadingConversationData) {
+      return false;
+    }
+
     // User intentionally marked as unread
     if (conversationData?.markedAsUnread) {
       return true;
@@ -56,8 +61,8 @@ export const useConversationIsUnread = ({
     });
   }, [
     lastMessage,
-    conversationData?.readUntil,
-    conversationData?.markedAsUnread,
+    conversationData,
+    isLoadingConversationData,
     // currentUserInboxId,
   ]);
 

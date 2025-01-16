@@ -10,7 +10,7 @@ import {
   textPrimaryColor,
   textSecondaryColor,
 } from "@styles/colors";
-import { GroupInvite } from "@utils/api.types";
+import { GroupInvite } from "@/utils/api/api-groups/api-group.types";
 import { useActor } from "@xstate/react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { ActivityIndicator } from "react-native-paper";

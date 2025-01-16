@@ -1,4 +1,4 @@
-import logger from "./logger";
+import logger from "../logger";
 
 /**
  * Creates a stateful container to de-duplicate fetches

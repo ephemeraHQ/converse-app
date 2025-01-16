@@ -1,10 +1,9 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import {
-  getConversationDataQueryData,
-  updateConversationDataQueryData,
-} from "@/queries/conversation-data-query";
+  getConversationMetadataQueryData,
+  updateConversationMetadataQueryData,
+} from "@/queries/conversation-metadata-query";
 import { pinTopic, unpinTopic } from "@/utils/api/topics";
-import { captureErrorWithToast } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 
@@ -16,7 +15,7 @@ export function usePinOrUnpinConversation(args: {
   const { mutateAsync: pinOrUnpinConversationAsync } = useMutation({
     mutationFn: () => {
       const currentAccount = getCurrentAccount()!;
-      const isPinned = getConversationDataQueryData({
+      const isPinned = getConversationMetadataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
         context: "usePinOrUnpinConversation",
@@ -36,13 +35,13 @@ export function usePinOrUnpinConversation(args: {
     },
     onMutate: () => {
       const currentAccount = getCurrentAccount()!;
-      const previousIsPinned = getConversationDataQueryData({
+      const previousIsPinned = getConversationMetadataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
         context: "usePinOrUnpinConversation",
       })?.isPinned;
 
-      updateConversationDataQueryData({
+      updateConversationMetadataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
         context: "usePinOrUnpinConversation",
@@ -54,7 +53,7 @@ export function usePinOrUnpinConversation(args: {
     },
     onError: (error, _, context) => {
       const currentAccount = getCurrentAccount()!;
-      updateConversationDataQueryData({
+      updateConversationMetadataQueryData({
         account: currentAccount!,
         topic: conversationTopic,
         context: "usePinOrUnpinConversation",

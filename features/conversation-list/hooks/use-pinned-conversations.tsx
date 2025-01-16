@@ -1,4 +1,4 @@
-import { getConversationDataQueryOptions } from "@/queries/conversation-data-query";
+import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
 import { useConversationsQuery } from "@/queries/conversations-query";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQueries } from "@tanstack/react-query";
@@ -15,7 +15,7 @@ export function usePinnedConversations() {
 
   const conversationsDataQueries = useQueries({
     queries: (conversations ?? []).map((conversation) =>
-      getConversationDataQueryOptions({
+      getConversationMetadataQueryOptions({
         account: currentAccount!,
         topic: conversation.topic,
         context: "usePinnedConversations",

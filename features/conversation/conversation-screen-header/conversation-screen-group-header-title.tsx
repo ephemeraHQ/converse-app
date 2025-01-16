@@ -1,6 +1,6 @@
 import { Text } from "@/design-system/Text";
-import { ConversationHeaderTitle } from "@/features/conversation/conversation-header/conversation-header-title";
-import { useGroupName } from "@/hooks/useGroupName";
+import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
+import { useGroupNameForCurrentAccount } from "@/hooks/useGroupName";
 import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 import { useProfilesSocials } from "@/hooks/useProfilesSocials";
 import {
@@ -40,7 +40,8 @@ export const GroupConversationTitle = memo(
 
     const { data: memberData } = useGroupMembersAvatarData({ topic });
 
-    const { groupName, isLoading: groupNameLoading } = useGroupName(topic);
+    const { groupName, isLoading: groupNameLoading } =
+      useGroupNameForCurrentAccount(topic);
 
     const navigation = useRouter();
 

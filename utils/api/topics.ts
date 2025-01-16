@@ -1,9 +1,9 @@
+import { getXmtpApiHeaders } from "@/utils/api/auth";
+import { api } from "@/utils/api/api";
+import logger from "@/utils/logger";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { z } from "zod";
-import { api, getXmtpApiHeaders } from "../api";
-import logger from "@/utils/logger";
 
-// Response schemas
 const MessageResponseSchema = z.object({
   message: z.string(),
 });
@@ -22,17 +22,36 @@ const TopicSchema = z.object({
 
 type ITopic = z.infer<typeof TopicSchema>;
 
-export async function getTopics(args: { account: string }) {
+export async function getTopics(args: {
+  account: string;
+  topics: ConversationTopic[];
+}) {
   logger.debug(`[API TOPICS] getTopics for account: ${args.account}`);
-  const { account } = args;
+  const { account, topics } = args;
 
   const { data } = await api.get(`/api/topics`, {
     headers: await getXmtpApiHeaders(account),
+    data: { topics },
   });
 
   const parseResult = z.record(TopicSchema).safeParse(data);
   if (!parseResult.success) {
     logger.error("[API TOPICS] getTopics parse error:", parseResult.error);
+  }
+  return data as Record<string, ITopic>;
+}
+
+export async function getAllTopics(args: { account: string }) {
+  logger.debug(`[API TOPICS] getAllTopics for account: ${args.account}`);
+  const { account } = args;
+
+  const { data } = await api.get(`/api/topics/all`, {
+    headers: await getXmtpApiHeaders(account),
+  });
+
+  const parseResult = z.record(TopicSchema).safeParse(data);
+  if (!parseResult.success) {
+    logger.error("[API TOPICS] getAllTopics parse error:", parseResult.error);
   }
   return data as Record<string, ITopic>;
 }
@@ -120,11 +139,16 @@ export async function pinTopic(args: {
   );
   const { account, topic } = args;
 
+  console.log("1");
+  const headers = await getXmtpApiHeaders(account);
+  console.log("2");
+
   const { data } = await api.put(
     `/api/topics/pin`,
     { topics: [topic] },
-    { headers: await getXmtpApiHeaders(account) }
+    { headers: headers }
   );
+  console.log("3");
 
   const parseResult = MessageResponseSchema.safeParse(data);
   if (!parseResult.success) {
@@ -142,11 +166,16 @@ export async function unpinTopic(args: {
   );
   const { account, topic } = args;
 
+  console.log("1");
+  const headers = await getXmtpApiHeaders(account);
+  console.log("2");
+
   const { data } = await api.put(
     `/api/topics/unpin`,
     { topics: [topic] },
-    { headers: await getXmtpApiHeaders(account) }
+    { headers: headers }
   );
+  console.log("3");
 
   const parseResult = MessageResponseSchema.safeParse(data);
   if (!parseResult.success) {

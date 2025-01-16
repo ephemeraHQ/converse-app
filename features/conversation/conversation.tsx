@@ -3,17 +3,17 @@ import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
-import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
+import { ConversationComposer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
 import { ReplyPreview } from "@/features/conversation/conversation-composer/conversation-composer-reply-preview";
 import {
   ConversationComposerStoreProvider,
   useConversationComposerStore,
 } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
-import { DmConsentPopup } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-dm";
-import { GroupConsentPopup } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-group";
-import { DmConversationTitle } from "@/features/conversation/conversation-header/conversation-dm-header-title";
-import { GroupConversationTitle } from "@/features/conversation/conversation-header/conversation-group-header-title";
+import { ConversationConsentPopupDm } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-dm";
+import { ConversationConsentPopupGroup } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-group";
+import { DmConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-dm-header-title";
+import { GroupConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-group-header-title";
 import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { MessageContextMenu } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu";
@@ -187,7 +187,7 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
   return (
     <ConversationComposerContainer>
       <ReplyPreview />
-      <Composer onSend={sendMessage} />
+      <ConversationComposer onSend={sendMessage} />
     </ConversationComposerContainer>
   );
 });
@@ -277,9 +277,9 @@ const Messages = memo(function Messages(props: {
       ListHeaderComponent={
         !isConversationAllowed(conversation) ? (
           isConversationDm(conversation) ? (
-            <DmConsentPopup />
+            <ConversationConsentPopupDm />
           ) : (
-            <GroupConsentPopup />
+            <ConversationConsentPopupGroup />
           )
         ) : undefined
       }

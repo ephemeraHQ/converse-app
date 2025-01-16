@@ -8,21 +8,19 @@ import {
   useMutation,
 } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
-import {
-  consentToGroupsOnProtocolByAccount,
-  consentToInboxIdsOnProtocolByAccount,
-} from "@utils/xmtpRN/contacts";
+import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
+import { updateGroupsConsentForAccount } from "./update-groups-consent-for-account";
 import {
   ConsentState,
   ConversationId,
   ConversationTopic,
   InboxId,
 } from "@xmtp/react-native-sdk";
-import { MutationKeys } from "./MutationKeys";
+import { MutationKeys } from "../../queries/MutationKeys";
 import {
   getGroupConsentQueryData,
   setGroupConsentQueryData,
-} from "./useGroupConsentQuery";
+} from "./use-group-consent.query";
 
 export type AllowGroupMutationProps = {
   account: string;
@@ -68,14 +66,14 @@ export const getAllowGroupMutationOptions = (
       }
 
       await Promise.all([
-        consentToGroupsOnProtocolByAccount({
+        updateGroupsConsentForAccount({
           account,
           groupIds: [getV3IdFromTopic(groupTopic)],
           consent: "allow",
         }),
         ...(inboxIdsToAllow.length > 0
           ? [
-              consentToInboxIdsOnProtocolByAccount({
+              updateInboxIdsConsentForAccount({
                 account,
                 inboxIds: inboxIdsToAllow,
                 consent: "allow",

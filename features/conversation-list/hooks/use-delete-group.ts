@@ -2,15 +2,15 @@ import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionShe
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import { translate } from "@/i18n";
 import {
-  getConversationDataQueryData,
-  updateConversationDataQueryData,
-} from "@/queries/conversation-data-query";
+  getConversationMetadataQueryData,
+  updateConversationMetadataQueryData,
+} from "@/queries/conversation-metadata-query";
 import { getGroupQueryData } from "@/queries/useGroupQuery";
 import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { deleteTopic } from "@/utils/api/topics";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { consentToInboxIdsOnProtocolByAccount } from "@/utils/xmtpRN/contacts";
+import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
@@ -28,13 +28,13 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
         topic: groupTopic,
       }),
     onMutate: () => {
-      const previousIsDeleted = getConversationDataQueryData({
+      const previousIsDeleted = getConversationMetadataQueryData({
         account: currentAccount,
         topic: groupTopic,
         context: "useDeleteGroup",
       })?.isDeleted;
 
-      updateConversationDataQueryData({
+      updateConversationMetadataQueryData({
         account: currentAccount,
         topic: groupTopic,
         context: "useDeleteGroup",
@@ -44,7 +44,7 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
       return { previousIsDeleted };
     },
     onError: (error, _, context) => {
-      updateConversationDataQueryData({
+      updateConversationMetadataQueryData({
         account: currentAccount,
         topic: groupTopic,
         context: "useDeleteGroup",
@@ -82,7 +82,7 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
           try {
             await deleteGroupAsync();
             await group.updateConsent("denied");
-            await consentToInboxIdsOnProtocolByAccount({
+            await updateInboxIdsConsentForAccount({
               account: currentAccount,
               inboxIds: [group.addedByInboxId],
               consent: "deny",

@@ -4,10 +4,10 @@ import { Button } from "@/design-system/Button/Button";
 import { Center } from "@/design-system/Center";
 import { Text } from "@/design-system/Text";
 import { TouchableWithoutFeedback } from "@/design-system/touchable-without-feedback";
-import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
+import { ConversationComposer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
 import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
-import { NewConversationTitle } from "@/features/conversation/conversation-header/conversation-new-dm-header-title";
+import { NewConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-new-dm-header-title";
 import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
 import {
   ISendMessageParams,
@@ -62,7 +62,7 @@ export const ConversationNewDm = memo(function ConversationNewDm(props: {
         onSendWelcomeMessage={handleSendWelcomeMessage}
       />
       <ConversationComposerContainer>
-        <Composer onSend={sendFirstConversationMessage} />
+        <ConversationComposer onSend={sendFirstConversationMessage} />
       </ConversationComposerContainer>
       <ConversationKeyboardFiller
         messageContextMenuIsOpen={false}

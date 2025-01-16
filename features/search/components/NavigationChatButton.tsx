@@ -8,7 +8,7 @@ import { useRouter } from "@navigation/useNavigation";
 import { isCurrentUser } from "@shared/utils/user";
 import { useAppTheme } from "@theme/useAppTheme";
 import { navigate } from "@utils/navigation";
-import { canMessageByAccount } from "@utils/xmtpRN/contacts";
+import { accountCanMessagePeer } from "@/features/consent/account-can-message-peer";
 import { usePreferredName } from "@/hooks/usePreferredName";
 
 type NavigationChatProps = {
@@ -42,7 +42,7 @@ export function NavigationChatButton({
   const addToGroupIfPossible = useCallback(async () => {
     if (loading) return;
     setLoading(true);
-    const allowed = await canMessageByAccount({
+    const allowed = await accountCanMessagePeer({
       account: currentAccount(),
       peer: address,
     });
@@ -81,8 +81,8 @@ export function NavigationChatButton({
         isCurrentUserAddress
           ? "fill"
           : Platform.OS === "android"
-            ? "link"
-            : "outline"
+          ? "link"
+          : "outline"
       }
       style={{
         marginRight: theme.spacing.xs,

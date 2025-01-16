@@ -1,22 +1,28 @@
-import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
+import { ScreenHeaderModalCloseButton } from "@/components/Screen/ScreenHeaderModalCloseButton";
 import {
   JoinGroupNavigation,
   JoinGroupNavigationParams,
 } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
-import { translate } from "@/i18n";
-import {
-  createNativeStackNavigator,
-  NativeStackNavigationOptions,
-} from "@react-navigation/native-stack";
-import { memo } from "react";
-import { Platform, useColorScheme } from "react-native";
-import { ScreenHeaderModalCloseButton } from "../../components/Screen/ScreenHeaderModalCloseButton";
-import { BlockedChatsScreen } from "../../features/blocked-chats/blocked-chats";
+import { BlockedConversations } from "@/features/blocked-conversations/blocked-conversations";
+import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
+import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
 import {
   ConversationNav,
   ConversationNavParams,
-} from "../../features/conversation/conversation.nav";
-import { useRouter } from "../../navigation/useNavigation";
+} from "@/features/conversation/conversation.nav";
+import { CreateConversationScreen } from "@/features/create-conversation/create-conversation-screen";
+import {
+  InviteUsersToExistingGroupNav,
+  InviteUsersToExistingGroupParams,
+} from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
+import { translate } from "@/i18n";
+import { useRouter } from "@/navigation/useNavigation";
+import {
+  NativeStackNavigationOptions,
+  createNativeStackNavigator,
+} from "@react-navigation/native-stack";
+import { memo } from "react";
+import { Platform, useColorScheme } from "react-native";
 import Accounts from "../Accounts/Accounts";
 import { IdleScreen } from "../IdleScreen";
 import { NewAccountConnectWalletScreen } from "../NewAccount/NewAccountConnectWalletScreen";
@@ -32,22 +38,15 @@ import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificat
 import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
 import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
 import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
-import {
-  InviteUsersToExistingGroupNav,
-  InviteUsersToExistingGroupParams,
-} from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
 import GroupNav, { GroupNavParams } from "./GroupNav";
-import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
-
 import ProfileNav, { ProfileNavParams } from "./ProfileNav";
 import ShareProfileNav from "./ShareProfileNav";
 import TopUpNav from "./TopUpNav";
-import UserProfileNav from "./UserProfileNav";
 import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
-import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
-import { CreateConversationScreen } from "@/features/create-conversation/create-conversation-screen";
+import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
+
 export type NavigationParamList = {
   Idle: undefined;
 
@@ -134,11 +133,11 @@ export function SignedInNavigation() {
       <NativeStack.Group>
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
           <NativeStack.Screen name="Chats" component={ConversationListScreen} />
-          <NativeStack.Screen name="Blocked" component={BlockedChatsScreen} />
           <NativeStack.Screen
             name="CreateConversation"
             component={CreateConversationScreen}
           />
+          <NativeStack.Screen name="Blocked" component={BlockedConversations} />
           {ConversationRequestsListNav()}
           {ConversationNav()}
           {ShareProfileNav()}

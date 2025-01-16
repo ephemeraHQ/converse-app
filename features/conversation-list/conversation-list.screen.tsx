@@ -17,7 +17,7 @@ import { useShouldShowConnectingOrSyncing } from "@/features/conversation-list/h
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { translate } from "@/i18n";
-import { getConversationDataQueryOptions } from "@/queries/conversation-data-query";
+import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
 import { getConversationsQueryOptions } from "@/queries/conversations-query";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { $globalStyles } from "@/theme/styles";
@@ -37,6 +37,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-requests";
 import { ConversationListEmpty } from "./conversation-list-empty";
 import { useHeaderWrapper } from "./conversation-list.screen-header";
+import { HStack } from "@/design-system/HStack";
 
 type IConversationListProps = NativeStackScreenProps<
   NavigationParamList,
@@ -65,7 +66,7 @@ export function ConversationListScreen(props: IConversationListProps) {
   return (
     <Screen contentContainerStyle={$globalStyles.flex1}>
       <ConversationList
-        conversations={isLoadingConversations ? [] : (conversations ?? [])}
+        conversations={isLoadingConversations ? [] : conversations ?? []}
         scrollEnabled={conversations && conversations?.length > 0}
         ListEmptyComponent={<ConversationListEmpty />}
         ListHeaderComponent={<ListHeader />}
@@ -75,50 +76,52 @@ export function ConversationListScreen(props: IConversationListProps) {
         }}
         renderConversation={({ item }) => {
           if (isConversationGroup(item)) {
-            return <ConversationListGroup group={item} />;
+            return <ConversationListItemGroupWrapper group={item} />;
           }
-          return <ConversationListDm dm={item} />;
+          return <ConversationListItemDmWrapper dm={item} />;
         }}
       />
     </Screen>
   );
 }
 
-const ConversationListDm = memo(function ConversationListDm(props: {
-  dm: DmWithCodecsType;
-}) {
-  const { dm } = props;
+const ConversationListItemDmWrapper = memo(
+  function ConversationListItemDmWrapper(props: { dm: DmWithCodecsType }) {
+    const { dm } = props;
 
-  const { theme } = useAppTheme();
+    const { theme } = useAppTheme();
 
-  const contextMenuProps = useConversationContextMenuViewDefaultProps({
-    conversationTopic: dm.topic,
-  });
+    const contextMenuProps = useConversationContextMenuViewDefaultProps({
+      conversationTopic: dm.topic,
+    });
 
-  return (
-    <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
-      <ConversationListItemDm conversation={dm} />
-    </ContextMenuView>
-  );
-});
+    return (
+      <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
+        <ConversationListItemDm conversation={dm} />
+      </ContextMenuView>
+    );
+  }
+);
 
-const ConversationListGroup = memo(function ConversationListGroup(props: {
-  group: GroupWithCodecsType;
-}) {
-  const { group } = props;
+const ConversationListItemGroupWrapper = memo(
+  function ConversationListItemGroupWrapper(props: {
+    group: GroupWithCodecsType;
+  }) {
+    const { group } = props;
 
-  const { theme } = useAppTheme();
+    const { theme } = useAppTheme();
 
-  const contextMenuProps = useConversationContextMenuViewDefaultProps({
-    conversationTopic: group.topic,
-  });
+    const contextMenuProps = useConversationContextMenuViewDefaultProps({
+      conversationTopic: group.topic,
+    });
 
-  return (
-    <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
-      <ConversationListItemGroup group={group} />
-    </ContextMenuView>
-  );
-});
+    return (
+      <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
+        <ConversationListItemGroup group={group} />
+      </ContextMenuView>
+    );
+  }
+);
 
 const ListHeader = React.memo(function ListHeader() {
   const { ephemeralAccount } = useSettingsStore(
@@ -181,16 +184,16 @@ const EphemeralAccountBanner = React.memo(function EphemeralAccountBanner() {
 const useConversationListItems = () => {
   const currentAccount = useCurrentAccount();
 
-  const { data: conversations, ...rest } = useQuery({
-    ...getConversationsQueryOptions({
+  const { data: conversations, ...rest } = useQuery(
+    getConversationsQueryOptions({
       account: currentAccount!,
       context: "conversation-list-screen",
-    }),
-  });
+    })
+  );
 
   const conversationsDataQueries = useQueries({
     queries: (conversations ?? []).map((conversation) =>
-      getConversationDataQueryOptions({
+      getConversationMetadataQueryOptions({
         account: currentAccount!,
         topic: conversation.topic,
         context: "conversation-list-screen",

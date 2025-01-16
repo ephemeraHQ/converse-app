@@ -1,12 +1,12 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "@/data/store/accountsStore";
-import { useDmConsent } from "@/features/conversation/hooks/use-dm-consent";
+import { useDmConsent } from "@/features/consent/use-dm-consent";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { translate } from "@/i18n";
 import {
-  getConversationDataQueryData,
-  updateConversationDataQueryData,
-} from "@/queries/conversation-data-query";
+  getConversationMetadataQueryData,
+  updateConversationMetadataQueryData,
+} from "@/queries/conversation-metadata-query";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";
@@ -42,13 +42,13 @@ export const useDeleteDm = (dm: DmWithCodecsType) => {
         topic: dm.topic,
       }),
     onMutate: () => {
-      const previousIsDeleted = getConversationDataQueryData({
+      const previousIsDeleted = getConversationMetadataQueryData({
         account: currentAccount,
         topic: dm.topic,
         context: "useDeleteDm",
       })?.isDeleted;
 
-      updateConversationDataQueryData({
+      updateConversationMetadataQueryData({
         account: currentAccount,
         topic: dm.topic,
         context: "useDeleteDm",
@@ -58,7 +58,7 @@ export const useDeleteDm = (dm: DmWithCodecsType) => {
       return { previousIsDeleted };
     },
     onError: (error, _, context) => {
-      updateConversationDataQueryData({
+      updateConversationMetadataQueryData({
         account: currentAccount,
         topic: dm.topic,
         context: "useDeleteDm",

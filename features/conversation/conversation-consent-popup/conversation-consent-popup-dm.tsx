@@ -14,14 +14,14 @@ import {
   useCurrentConversationTopic,
 } from "../conversation.store-context";
 import {
-  ConsentPopupButton,
+  ConversationConsentPopupButton,
   ConsentPopupButtonsContainer,
-  ConsentPopupContainer,
+  ConversationConsentPopupContainer,
   ConsentPopupTitle,
 } from "./conversation-consent-popup.design-system";
-import { useDmConsent } from "../hooks/use-dm-consent";
+import { useDmConsent } from "@/features/consent/use-dm-consent";
 
-export function DmConsentPopup() {
+export function ConversationConsentPopupDm() {
   const topic = useCurrentConversationTopic();
   const conversationId = useConversationCurrentConversationId();
   const currentAccount = useCurrentAccount()!;
@@ -94,25 +94,25 @@ export function DmConsentPopup() {
   }
 
   return (
-    <ConsentPopupContainer>
+    <ConversationConsentPopupContainer>
       <ConsentPopupTitle>
         {translate("do_you_trust_this_contact")}
       </ConsentPopupTitle>
       <ConsentPopupButtonsContainer>
-        <ConsentPopupButton
+        <ConversationConsentPopupButton
           variant="text"
           action="danger"
           icon="xmark"
           text={translate("block")}
           onPress={handleBlock}
         />
-        <ConsentPopupButton
+        <ConversationConsentPopupButton
           variant="fill"
           icon="checkmark"
           text={translate("accept")}
           onPress={handleAccept}
         />
       </ConsentPopupButtonsContainer>
-    </ConsentPopupContainer>
+    </ConversationConsentPopupContainer>
   );
 }

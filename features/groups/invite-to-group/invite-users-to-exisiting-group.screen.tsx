@@ -19,28 +19,27 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { translate } from "@/i18n";
-import { getCleanAddress } from "@/utils/evm/getCleanAddress";
-import { useGroupQuery } from "@queries/useGroupQuery";
-import { SearchBar } from "@search/components/SearchBar";
-import { canMessageByAccount } from "@utils/xmtpRN/contacts";
-import { InboxId } from "@xmtp/react-native-sdk";
-import { NavigationParamList } from "@/screens/Navigation/Navigation";
+import ActivityIndicator from "@/components/ActivityIndicator/ActivityIndicator";
 import { currentAccount } from "@/data/store/accountsStore";
+import { accountCanMessagePeer } from "@/features/consent/account-can-message-peer";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
-import ActivityIndicator from "@/components/ActivityIndicator/ActivityIndicator";
+import { translate } from "@/i18n";
 import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
-import { searchProfiles } from "@/utils/api";
+import { NavigationParamList } from "@/screens/Navigation/Navigation";
+import { searchProfiles } from "@/utils/api/profiles";
+import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { isEmptyObject } from "@/utils/objects";
 import { getPreferredName } from "@/utils/profile";
+import { SearchBar } from "@search/components/SearchBar";
+import { InboxId } from "@xmtp/react-native-sdk";
 // import { OldProfileSearchResultsList } from "@/features/search/components/OldProfileSearchResultsList";
+import AndroidBackAction from "@/components/AndroidBackAction";
 import TableView from "@/components/TableView/TableView";
 import { TableViewPicto } from "@/components/TableView/TableViewImage";
-import AndroidBackAction from "@/components/AndroidBackAction";
-import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
 import config from "@/config";
 import { OldProfileSearchResultsList } from "@/features/search/components/OldProfileSearchResultsList";
+import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
 
 export function InviteUsersToExistingGroupScreen({
   route,
@@ -182,7 +181,7 @@ export function InviteUsersToExistingGroupScreen({
               return;
             }
             const address = getCleanAddress(resolvedAddress);
-            const addressIsOnXmtp = await canMessageByAccount({
+            const addressIsOnXmtp = await accountCanMessagePeer({
               account: currentAccount(),
               peer: address,
             });

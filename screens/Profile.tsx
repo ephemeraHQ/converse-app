@@ -75,7 +75,7 @@ import { ConversationNavParams } from "../features/conversation/conversation.nav
 import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
-import { consentToAddressesOnProtocolByAccount } from "../utils/xmtpRN/contacts";
+import { updateAddressesConsentForAccount } from "@/features/consent/update-addresses-consent-for-account";
 
 import { Icon } from "@/design-system/Icon/Icon";
 import { NotificationPermissionStatus } from "@/features/notifications/types/Notifications.types";
@@ -107,8 +107,8 @@ const ExternalWalletPickerWrapper = memo(
           wallet: socials
             ? getPreferredUsername(socials)
             : client
-              ? shortAddress(client.address)
-              : "",
+            ? shortAddress(client.address)
+            : "",
         })}
       />
     );
@@ -395,8 +395,8 @@ function ProfileScreenImpl() {
         Platform.OS === "android"
           ? undefined
           : isBlockedPeer
-            ? primaryColor(colorScheme)
-            : dangerColor(colorScheme),
+          ? primaryColor(colorScheme)
+          : dangerColor(colorScheme),
       leftView:
         Platform.OS === "android" ? (
           <TableViewPicto
@@ -422,7 +422,7 @@ function ProfileScreenImpl() {
             if (selectedIndex === 0 && peerAddress) {
               const newStatus = isBlockedPeer ? "consented" : "blocked";
               const consentOnProtocol = isBlockedPeer ? "allow" : "deny";
-              consentToAddressesOnProtocolByAccount({
+              updateAddressesConsentForAccount({
                 account: currentAccount(),
                 addresses: [peerAddress],
                 consent: consentOnProtocol,
@@ -807,8 +807,9 @@ function ProfileScreenImpl() {
                     const client = (await getXmtpClient(
                       userAddress
                     )) as ConverseXmtpClientType;
-                    const otherInstallations =
-                      await getOtherInstallations(client);
+                    const otherInstallations = await getOtherInstallations(
+                      client
+                    );
                     if (otherInstallations.length === 0) {
                       Alert.alert(
                         translate("revoke_done_title"),

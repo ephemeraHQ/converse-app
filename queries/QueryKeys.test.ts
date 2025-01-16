@@ -15,7 +15,7 @@ import {
   groupInviteQueryKey,
   groupJoinRequestQueryKey,
   pendingJoinRequestsQueryKey,
-  conversationDataQueryKey,
+  conversationMetadataQueryKey,
 } from "./QueryKeys";
 
 describe("QueryKeys", () => {
@@ -41,8 +41,8 @@ describe("Query Key Functions", () => {
   });
 
   it("conversationDataQueryKey should return correct array", () => {
-    expect(conversationDataQueryKey(account, topic)).toEqual([
-      QueryKeys.CONVERSATION_DATA,
+    expect(conversationMetadataQueryKey(account, topic)).toEqual([
+      QueryKeys.CONVERSATION_METADATA,
       account.toLowerCase(),
       topic,
     ]);

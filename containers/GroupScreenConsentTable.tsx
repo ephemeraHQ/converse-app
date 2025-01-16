@@ -1,4 +1,4 @@
-import { useGroupConsent } from "@hooks/useGroupConsent";
+import { useGroupConsent } from "@/features/consent/use-group-consent";
 import { translate } from "@i18n";
 import { dangerColor, primaryColor } from "@styles/colors";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";

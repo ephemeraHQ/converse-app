@@ -16,12 +16,13 @@ import { useConversationQuery } from "@/queries/useConversationQuery";
 import { $globalStyles } from "@/theme/styles";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import React from "react";
+import { FlatList } from "react-native";
 
-type ConversationReadOnlyProps = {
+type ConversationPreviewProps = {
   topic: ConversationTopic;
 };
 
-export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
+export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
   const currentAccount = useCurrentAccount()!;
 
   const { data: messages, isLoading: isLoadingMessages } =
@@ -58,11 +59,11 @@ export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
           topic={topic}
           conversationId={conversation.id}
         >
-          <ConversationMessagesList
+          <FlatList
             // 15 messages is enough
-            messageIds={messages?.ids.slice(0, 15) ?? []}
-            renderMessage={({ messageId, index }) => {
-              const message = messages?.byId[messageId]!;
+            data={messages?.ids.slice(0, 15) ?? []}
+            renderItem={({ item, index }) => {
+              const message = messages?.byId[item]!;
               const previousMessage = messages?.byId[messages?.ids[index + 1]];
               const nextMessage = messages?.byId[messages?.ids[index - 1]];
 

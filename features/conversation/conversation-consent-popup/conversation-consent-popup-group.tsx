@@ -1,21 +1,21 @@
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import {
-  ConsentPopupButton,
+  ConversationConsentPopupButton,
   ConsentPopupButtonsContainer,
-  ConsentPopupContainer,
+  ConversationConsentPopupContainer,
   ConsentPopupTitle,
 } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup.design-system";
 import { useRouter } from "@/navigation/useNavigation";
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { useGroupConsent } from "@hooks/useGroupConsent";
+import { useGroupConsent } from "@/features/consent/use-group-consent";
 import { translate } from "@i18n";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
 import React, { useCallback } from "react";
 import { useColorScheme } from "react-native";
 import { useCurrentConversationTopic } from "../conversation.store-context";
 
-export function GroupConsentPopup() {
+export function ConversationConsentPopupGroup() {
   const topic = useCurrentConversationTopic();
 
   const navigation = useRouter();
@@ -55,25 +55,25 @@ export function GroupConsentPopup() {
   }, [allowGroup]);
 
   return (
-    <ConsentPopupContainer>
+    <ConversationConsentPopupContainer>
       <ConsentPopupTitle>
         {translate("do_you_want_to_join_this_group")}
       </ConsentPopupTitle>
       <ConsentPopupButtonsContainer>
-        <ConsentPopupButton
+        <ConversationConsentPopupButton
           variant="text"
           action="danger"
           icon="xmark"
           text={translate("decline")}
           onPress={onBlock}
         />
-        <ConsentPopupButton
+        <ConversationConsentPopupButton
           variant="fill"
           icon="checkmark"
           text={translate("join_this_group")}
           onPress={onAccept}
         />
       </ConsentPopupButtonsContainer>
-    </ConsentPopupContainer>
+    </ConversationConsentPopupContainer>
   );
 }

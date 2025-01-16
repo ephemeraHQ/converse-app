@@ -7,10 +7,8 @@ import { getConversationQueryData } from "@/queries/useConversationQuery";
 import { getDmQueryData, setDmQueryData } from "@/queries/useDmQuery";
 import { mutateObjectProperties } from "@/utils/mutate-object-properties";
 import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
-import {
-  consentToGroupsOnProtocolByAccount,
-  consentToInboxIdsOnProtocolByAccount,
-} from "@/utils/xmtpRN/contacts";
+import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
+import { updateGroupsConsentForAccount } from "./update-groups-consent-for-account";
 import { useMutation } from "@tanstack/react-query";
 import {
   ConversationId,
@@ -34,12 +32,12 @@ export function useDmConsent(args: {
       }
       const currentAccount = getCurrentAccount()!;
       await Promise.all([
-        consentToGroupsOnProtocolByAccount({
+        updateGroupsConsentForAccount({
           account: currentAccount,
           groupIds: [conversationId],
           consent: args.consent,
         }),
-        consentToInboxIdsOnProtocolByAccount({
+        updateInboxIdsConsentForAccount({
           account: currentAccount,
           inboxIds: [peerInboxId],
           consent: args.consent,

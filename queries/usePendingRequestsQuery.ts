@@ -1,6 +1,6 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
-import { getPendingGroupJoinRequests } from "@utils/api";
+import { getPendingGroupJoinRequests } from "@/utils/api/api-groups/api-groups";
 
 import { pendingJoinRequestsQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";

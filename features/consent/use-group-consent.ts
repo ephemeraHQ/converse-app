@@ -1,14 +1,14 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { translate } from "@/i18n";
-import { useAllowGroupMutation } from "@/queries/useAllowGroupMutation";
+import { useAllowGroupMutation } from "@/features/consent/use-allow-group.mutation";
 import { currentAccount } from "@data/store/accountsStore";
 import { useBlockGroupMutation } from "@queries/useBlockGroupMutation";
-import { useGroupConsentQuery } from "@queries/useGroupConsentQuery";
+import { useGroupConsentQuery } from "@/features/consent/use-group-consent.query";
 import { useGroupQuery } from "@queries/useGroupQuery";
-import { consentToInboxIdsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
-import { useGroupCreatorQuery } from "../queries/useGroupCreatorQuery";
+import { useGroupCreatorQuery } from "@/queries/useGroupCreatorQuery";
 
 export type IGroupConsentOptions = {
   includeCreator?: boolean;
@@ -81,7 +81,7 @@ export const useGroupConsent = (topic: ConversationTopic) => {
       }
 
       if (inboxIdsToDeny.length > 0) {
-        consentToInboxIdsOnProtocolByAccount({
+        updateInboxIdsConsentForAccount({
           account,
           inboxIds: inboxIdsToDeny,
           consent: "deny",

@@ -1,6 +1,9 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
-import { getGroupJoinRequest, GroupJoinRequest } from "@utils/api";
+import {
+  getGroupJoinRequest,
+  GroupJoinRequest,
+} from "@/utils/api/api-groups/api-groups";
 
 import { groupJoinRequestQueryKey } from "./QueryKeys";
 

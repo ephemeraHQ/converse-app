@@ -1,12 +1,12 @@
 import { installedWallets } from "@components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 // import { invalidateProfileSocialsQuery } from "@data/helpers/profiles/profilesUpdate";
+import { simulateTransaction } from "@/utils/api/transactions";
+import { converseEventEmitter } from "@/utils/events";
+import { useExternalSigner } from "@/utils/evm/external";
+import logger from "@/utils/logger";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
-import { simulateTransaction } from "@utils/api";
-import { converseEventEmitter } from "@utils/events";
-import { useExternalSigner } from "@utils/evm/external";
-import logger from "@utils/logger";
 import { type SimulateAssetChangesResponse } from "alchemy-sdk";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { waitForReceipt } from "thirdweb";

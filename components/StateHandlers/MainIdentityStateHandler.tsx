@@ -1,12 +1,10 @@
 import { useEffect } from "react";
-
-// import { invalidateProfileSocialsQuery } from "../../data/helpers/profiles/profilesUpdate";
 import {
   useAccountsStore,
   useCurrentAccount,
-} from "../../data/store/accountsStore";
-import { saveUser } from "../../utils/api";
+} from "@/data/store/accountsStore";
 import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
+import { saveUser } from "@/utils/api/users";
 
 export default function MainIdentityStateHandler() {
   const userAddress = useCurrentAccount();
