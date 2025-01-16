@@ -1,5 +1,8 @@
-import { ContentTypeId } from "@xmtp/xmtp-js";
-import type { ContentCodec, EncodedContent } from "@xmtp/xmtp-js";
+import { ContentTypeId } from "@xmtp/content-type-primitives";
+import type {
+  ContentCodec,
+  EncodedContent,
+} from "@xmtp/content-type-primitives";
 
 const ContentTypeCoinbasePayment = new ContentTypeId({
   authorityId: "coinbase.com",
