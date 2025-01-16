@@ -27,6 +27,7 @@ import { Haptics } from "@/utils/haptics";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { updateConsentForAddressesForAccount } from "@/features/consent/update-consent-for-addresses-for-account";
 import { StackActions } from "@react-navigation/native";
+import { useDisconnectActionSheet } from "@/hooks/useDisconnectActionSheet";
 
 export default function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
@@ -54,6 +55,8 @@ export default function ProfileScreen() {
   const handleEditProfile = useCallback(() => {
     setEditMode(!editMode);
   }, [editMode]);
+
+  const showDisconnectActionSheet = useDisconnectActionSheet();
 
   // Header configuration
   useHeader(
@@ -205,6 +208,14 @@ export default function ProfileScreen() {
                     value: "None",
                     onValueChange: () => {},
                   },
+                  {
+                    label: translate("log_out"),
+                    isWarning: true,
+                    onPress: () =>
+                      showDisconnectActionSheet(
+                        theme.isDark ? "dark" : "light"
+                      ),
+                  },
                 ]}
               />
             </VStack>
@@ -223,21 +234,6 @@ export default function ProfileScreen() {
                     value: "On",
                     isSwitch: true,
                     isEnabled: true,
-                    onValueChange: () => {},
-                  },
-                  {
-                    label: translate("profile.settings.archive"),
-                    value: "Forever",
-                    onValueChange: () => {},
-                  },
-                  {
-                    label: translate("profile.settings.keep_messages"),
-                    value: "Forever",
-                    onValueChange: () => {},
-                  },
-                  {
-                    label: translate("profile.settings.blocked"),
-                    value: "None",
                     onValueChange: () => {},
                   },
                 ]}

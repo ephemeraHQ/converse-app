@@ -278,16 +278,6 @@ export const en = {
   // Attachments
   photo_library: "Photo Library",
   camera: "Camera",
-
-  disconnect: "Disconnect",
-  disconnect_delete_local_data: "Disconnect and delete local data",
-  disconnect_this_account: "Disconnect this account",
-  disconnect_account_description:
-    "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
-  your_profile_page: "Your profile page",
-  copy_wallet_address: "Copy wallet address",
-  turn_on_notifications: "Turn on notifications",
-  attachment_message_error_download: "Couldn't download attachment",
   attachment_message_view_in_browser: "View in browser",
   attachment: "Attachment",
 
@@ -375,6 +365,15 @@ export const en = {
       blocked: "Blocked",
     },
   },
+  log_out: "Log out",
+  disconnect_delete_local_data: "Disconnect and delete local data",
+  disconnect_this_account: "Disconnect this account",
+  disconnect_account_description:
+    "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
+  your_profile_page: "Your profile page",
+  copy_wallet_address: "Copy wallet address",
+  turn_on_notifications: "Turn on notifications",
+  attachment_message_error_download: "Couldn't download attachment",
 
   // Revocation
   current_installation_revoked: "Logged out",

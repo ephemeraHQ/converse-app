@@ -95,7 +95,7 @@ export const ContactCard = memo(function ContactCard({
       <Animated.View style={animatedStyle}>
         <VStack style={{ flex: 1, justifyContent: "space-between" }}>
           {/* Top row with Avatar and Edit button */}
-          <View
+          <VStack
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
@@ -119,10 +119,10 @@ export const ContactCard = memo(function ContactCard({
                 onPress={onToggleEdit}
               />
             )}
-          </View>
+          </VStack>
 
           {/* Name and Username - now positioned at bottom */}
-          <View>
+          <VStack>
             <Text
               preset="bodyBold"
               style={{
@@ -140,7 +140,7 @@ export const ContactCard = memo(function ContactCard({
                 {userName}
               </Text>
             )}
-          </View>
+          </VStack>
         </VStack>
       </Animated.View>
     </GestureDetector>
