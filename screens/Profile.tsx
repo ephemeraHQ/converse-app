@@ -35,6 +35,7 @@ import {
   View,
   useColorScheme,
   ViewStyle,
+  Dimensions,
 } from "react-native";
 import { Text } from "@/design-system/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -151,6 +152,7 @@ const ContactCard = memo(function ContactCard({
   isMyProfile?: boolean;
 }) {
   const { theme } = useAppTheme();
+  const { width: screenWidth } = Dimensions.get("window");
 
   const rotateX = useSharedValue(0);
   const rotateY = useSharedValue(0);
@@ -167,7 +169,8 @@ const ContactCard = memo(function ContactCard({
     shadowOpacity: 0.25,
     shadowRadius: 12,
     elevation: 5,
-    height: 220,
+    // Maintains credit card aspect ratio
+    height: (screenWidth - 2 * theme.spacing.lg) * 0.628,
   };
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -206,7 +209,7 @@ const ContactCard = memo(function ContactCard({
   return (
     <GestureDetector gesture={panGesture}>
       <Animated.View style={animatedStyle}>
-        <VStack>
+        <VStack style={{ flex: 1, justifyContent: "space-between" }}>
           {/* Top row with Avatar and Edit button */}
           <View
             style={{
@@ -230,14 +233,14 @@ const ContactCard = memo(function ContactCard({
                   color: theme.colors.text.inverted.secondary,
                 }}
                 onPress={() => {
-                  // Handle edit press
+                  Alert.alert("Coming soon 😊");
                 }}
               />
             )}
           </View>
 
-          {/* Name and Username */}
-          <View style={{ marginTop: theme.spacing.xxl }}>
+          {/* Name and Username - now positioned at bottom */}
+          <View>
             <Text
               preset="bodyBold"
               style={{
