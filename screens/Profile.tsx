@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { View, ViewStyle, Alert, Share } from "react-native";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { ContactCard } from "@/features/profiles/components/ContactCard";
-import { FullWidthTable } from "@/design-system/table/FullWidthTable";
+import { Table } from "@/design-system/Table/Table";
 import { VStack } from "@/design-system/VStack";
 import { Text } from "@/design-system/Text";
 import { useRoute, useRouter } from "@navigation/useNavigation";
@@ -249,7 +249,7 @@ export default function ProfileScreen() {
             <VStack
               style={[themed($section), { paddingVertical: theme.spacing.lg }]}
             >
-              <FullWidthTable
+              <Table
                 editMode={editMode}
                 rows={[
                   {
@@ -261,19 +261,15 @@ export default function ProfileScreen() {
                   },
                   {
                     label: translate("profile.settings.archive"),
-                    value: "Forever",
-                    onValueChange: () => {},
+                    onPress: () => {
+                      router.navigate("Blocked");
+                    },
                   },
-                  {
+                  /*{
                     label: translate("profile.settings.keep_messages"),
                     value: "Forever",
                     onValueChange: () => {},
-                  },
-                  {
-                    label: translate("profile.settings.blocked"),
-                    value: "None",
-                    onValueChange: () => {},
-                  },
+                  },*/
                   {
                     label: translate("log_out"),
                     isWarning: true,
@@ -293,7 +289,7 @@ export default function ProfileScreen() {
             <VStack
               style={[themed($section), { paddingVertical: theme.spacing.lg }]}
             >
-              <FullWidthTable
+              <Table
                 rows={[
                   {
                     label: translate("profile.settings.notifications"),

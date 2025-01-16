@@ -364,7 +364,6 @@ export const en = {
       notifications: "Notifications",
       archive: "Archive",
       keep_messages: "Keep messages",
-      blocked: "Blocked",
     },
   },
   log_out: "Log out",

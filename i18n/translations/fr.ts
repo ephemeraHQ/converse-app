@@ -359,7 +359,6 @@ export const fr = {
       notifications: "Notifications",
       archive: "Archive",
       keep_messages: "Conserver les messages",
-      blocked: "Bloqué",
     },
   },
   log_out: "Se déconnecter",
