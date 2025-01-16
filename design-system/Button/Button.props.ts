@@ -14,6 +14,7 @@ export type IButtonVariant =
   | "outline"
   | "fill"
   | "link"
+  | "link.bare"
   /** @deprecated */
   | "secondary"
   | "secondary-danger"

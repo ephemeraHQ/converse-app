@@ -35,16 +35,21 @@ export const getButtonViewStyle =
     variant,
     size,
     action,
-    pressed = false,
+    pressed,
     disabled = false,
-  }: IButtonStyleProps) =>
-  (theme: Theme): ViewStyle => {
-    const { spacing, colors, borderRadius } = theme;
-
-    const style: ViewStyle = {
+  }: {
+    variant: IButtonVariant;
+    size: IButtonSize;
+    action: IButtonAction;
+    pressed: boolean;
+    disabled?: boolean;
+  }) =>
+  ({ spacing, colors, borderRadius }: Theme): ViewStyle => {
+    const baseStyle: ViewStyle = {
       flexDirection: "row",
-      justifyContent: "center",
       alignItems: "center",
+      justifyContent: "center",
+      gap: spacing.xxs,
       borderRadius: borderRadius.sm,
       overflow: "hidden",
       paddingVertical:
@@ -53,37 +58,47 @@ export const getButtonViewStyle =
         size === "md" || size === "sm" ? spacing.xs : spacing.sm,
     };
 
+    // Special case for bare link text buttons - no padding or other decorations
+    if (variant === "link.bare") {
+      return {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: spacing.xxs,
+      };
+    }
+
     if (action === "primary") {
       switch (variant) {
         case "fill":
-          style.backgroundColor = colors.fill.primary;
+          baseStyle.backgroundColor = colors.fill.primary;
           if (pressed) {
-            style.backgroundColor = colors.fill.secondary;
+            baseStyle.backgroundColor = colors.fill.secondary;
           }
           if (disabled) {
-            style.backgroundColor = colors.fill.tertiary;
+            baseStyle.backgroundColor = colors.fill.tertiary;
           }
           break;
 
         case "outline":
-          style.borderWidth = 1;
-          style.borderColor = colors.border.secondary;
-          style.backgroundColor = "transparent";
+          baseStyle.borderWidth = 1;
+          baseStyle.borderColor = colors.border.secondary;
+          baseStyle.backgroundColor = "transparent";
           if (pressed) {
-            style.backgroundColor = colors.fill.minimal;
+            baseStyle.backgroundColor = colors.fill.minimal;
           }
           break;
 
         case "link":
         case "text":
-          style.backgroundColor = "transparent";
           // Put back when we're done refactoring all the variant="text" button
           // if (pressed) {
           //   style.backgroundColor = colors.fill.minimal;
           // }
           // Temporary opacity change for the variant="text" button
+          baseStyle.backgroundColor = "transparent";
           if (pressed) {
-            style.opacity = 0.8;
+            baseStyle.opacity = 0.8;
           }
           break;
 
@@ -92,7 +107,7 @@ export const getButtonViewStyle =
       }
     }
 
-    return style;
+    return baseStyle;
   };
 
 export const getButtonTextStyle =

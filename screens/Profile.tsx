@@ -100,6 +100,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { VStack } from "@/design-system/VStack";
+import { formatUsername } from "@/features/profiles/utils/formatUsername";
+import { Button } from "@/design-system/Button/Button";
 
 export default function ProfileScreen() {
   return (
@@ -138,20 +140,22 @@ const ExternalWalletPickerWrapper = memo(
  * Includes name, bio, avatar with interactive animations.
  */
 const ContactCard = memo(function ContactCard({
-  name,
-  bio,
+  displayName,
+  userName,
   avatarUri,
+  isMyProfile,
 }: {
-  name: string;
-  bio?: string;
+  displayName: string;
+  userName?: string;
   avatarUri?: string;
+  isMyProfile?: boolean;
 }) {
   const { theme } = useAppTheme();
 
   const rotateX = useSharedValue(0);
   const rotateY = useSharedValue(0);
   const shadowOffsetX = useSharedValue(0);
-  const shadowOffsetY = useSharedValue(6); // Positive value pushes shadow down
+  const shadowOffsetY = useSharedValue(6);
 
   const baseStyle = {
     backgroundColor: theme.colors.fill.primary,
@@ -163,6 +167,7 @@ const ContactCard = memo(function ContactCard({
     shadowOpacity: 0.25,
     shadowRadius: 12,
     elevation: 5,
+    height: 220,
   };
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -180,21 +185,18 @@ const ContactCard = memo(function ContactCard({
 
   const panGesture = Gesture.Pan()
     .onBegin(() => {
-      // Reset values when gesture starts
       rotateX.value = withSpring(0);
       rotateY.value = withSpring(0);
       shadowOffsetX.value = withSpring(0);
       shadowOffsetY.value = withSpring(0);
     })
     .onUpdate((event) => {
-      // Update tilt based on pan gesture
       rotateX.value = event.translationY / 10;
       rotateY.value = event.translationX / 10;
       shadowOffsetX.value = -event.translationX / 20;
       shadowOffsetY.value = event.translationY / 20;
     })
     .onEnd(() => {
-      // Reset to original position when gesture ends
       rotateX.value = withSpring(0);
       rotateY.value = withSpring(0);
       shadowOffsetX.value = withSpring(0);
@@ -205,16 +207,37 @@ const ContactCard = memo(function ContactCard({
     <GestureDetector gesture={panGesture}>
       <Animated.View style={animatedStyle}>
         <VStack>
-          <Avatar
-            uri={avatarUri}
-            name={name}
-            size={theme.avatarSize.lg}
+          {/* Top row with Avatar and Edit button */}
+          <View
             style={{
-              marginBottom: theme.spacing.xxl,
-              alignSelf: "flex-start",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
             }}
-          />
-          <View>
+          >
+            <Avatar
+              uri={avatarUri}
+              name={displayName}
+              size={theme.avatarSize.lg}
+            />
+            {isMyProfile && (
+              <Button
+                variant="link.bare"
+                size="sm"
+                text="Edit"
+                textStyle={{ color: theme.colors.text.inverted.primary }}
+                pressedTextStyle={{
+                  color: theme.colors.text.inverted.secondary,
+                }}
+                onPress={() => {
+                  // Handle edit press
+                }}
+              />
+            )}
+          </View>
+
+          {/* Name and Username */}
+          <View style={{ marginTop: theme.spacing.xxl }}>
             <Text
               preset="bodyBold"
               style={{
@@ -222,14 +245,14 @@ const ContactCard = memo(function ContactCard({
                 marginBottom: theme.spacing.xxxs,
               }}
             >
-              {name}
+              {displayName}
             </Text>
-            {bio && (
+            {userName && (
               <Text
                 preset="smaller"
                 style={{ color: theme.colors.text.inverted.secondary }}
               >
-                {bio}
+                {userName}
               </Text>
             )}
           </View>
@@ -299,7 +322,13 @@ const ProfileScreenImpl = () => {
               }}
             />
           ) : (
-            <HeaderAction icon="square.and.pencil" onPress={handleChatPress} />
+            <HeaderAction
+              style={{
+                marginBottom: 4, // Centers the square.and.pencil icon
+              }}
+              icon="square.and.pencil"
+              onPress={handleChatPress}
+            />
           )}
           <ContextMenuButton
             style={{
@@ -790,12 +819,16 @@ const ProfileScreenImpl = () => {
     >
       {!isBlockedPeer && (
         <ContactCard
-          name={preferredUserName}
-          // TODO: implement bio from the profile from Convos backend/local db
-          // bio="Soccer dad and physical therapist"
+          displayName={preferredUserName}
+          userName={formatUsername(
+            socials?.userNames?.find((e) => e.isPrimary)?.name
+          )}
           avatarUri={preferredAvatarUri}
+          isMyProfile={isMyProfile}
         />
       )}
+
+      {/* TODO: implement bio from the profile from Convos backend/local db */}
 
       {isMyProfile && shouldShowError && (
         <View style={themed($errorContainer)}>

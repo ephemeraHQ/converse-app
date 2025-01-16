@@ -52,48 +52,54 @@ export function Button(props: IButtonProps) {
 
   const variant: IButtonVariant = props.variant ?? "fill";
 
-  const $viewStyle = useCallback(
-    ({ pressed }: PressableStateCallbackType): StyleProp<ViewStyle> => {
-      return [
-        themed(
-          getButtonViewStyle({ variant, size, action: "primary", pressed })
-        ),
-        $viewStyleOverride,
-        pressed && $pressedViewStyleOverride,
-        disabled && $disabledViewStyleOverride,
-      ];
-    },
-    [
-      themed,
-      variant,
-      size,
+  const $viewStyle = useMemo(
+    () => [
+      themed(
+        getButtonViewStyle({ variant, size, action: "primary", pressed: false })
+      ),
       $viewStyleOverride,
-      $pressedViewStyleOverride,
-      $disabledViewStyleOverride,
-      disabled,
-    ]
+    ],
+    [themed, variant, size, $viewStyleOverride]
   );
 
-  const $textStyle = useCallback(
-    ({ pressed }: PressableStateCallbackType): StyleProp<TextStyle> => {
-      return [
-        themed(
-          getButtonTextStyle({ variant, size, action: "primary", pressed })
-        ),
-        $textStyleOverride,
-        pressed && $pressedTextStyleOverride,
-        disabled && $disabledTextStyleOverride,
-      ];
-    },
-    [
-      themed,
-      variant,
-      size,
+  const $pressedViewStyle = useMemo(
+    () => [
+      themed(
+        getButtonViewStyle({ variant, size, action: "primary", pressed: true })
+      ),
+      $pressedViewStyleOverride,
+    ],
+    [themed, variant, size, $pressedViewStyleOverride]
+  );
+
+  const $disabledViewStyle = useMemo(
+    () => [$disabledViewStyleOverride],
+    [$disabledViewStyleOverride]
+  );
+
+  const $combinedTextStyle = useMemo(
+    () => [
+      themed(
+        getButtonTextStyle({ variant, size, action: "primary", pressed: false })
+      ),
       $textStyleOverride,
+    ],
+    [themed, variant, size, $textStyleOverride]
+  );
+
+  const $pressedTextStyle = useMemo(
+    () => [
+      themed(
+        getButtonTextStyle({ variant, size, action: "primary", pressed: true })
+      ),
       $pressedTextStyleOverride,
-      $disabledTextStyleOverride,
-      disabled,
-    ]
+    ],
+    [themed, variant, size, $pressedTextStyleOverride]
+  );
+
+  const $disabledTextStyle = useMemo(
+    () => [$disabledTextStyleOverride],
+    [$disabledTextStyleOverride]
   );
 
   const handlePress = useCallback(
@@ -117,7 +123,10 @@ export function Button(props: IButtonProps) {
 
   return (
     <Pressable
-      style={$viewStyle}
+      style={({ pressed }) => [
+        pressed ? $pressedViewStyle : $viewStyle,
+        disabled && $disabledViewStyle,
+      ]}
       accessibilityRole="button"
       accessibilityState={{ disabled: !!disabled }}
       onPress={handlePress}
@@ -139,7 +148,6 @@ export function Button(props: IButtonProps) {
               />
             )}
 
-            {/* @deprecated stuff */}
             {!!_icon && (
               <Icon
                 icon={_icon}
@@ -157,7 +165,10 @@ export function Button(props: IButtonProps) {
               tx={tx}
               text={title ?? text}
               txOptions={txOptions}
-              style={$textStyle(state)}
+              style={[
+                state.pressed ? $pressedTextStyle : $combinedTextStyle,
+                disabled && $disabledTextStyle,
+              ]}
             >
               {children}
             </Text>
