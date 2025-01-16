@@ -1,5 +1,13 @@
 import React, { useCallback, useState } from "react";
-import { View, ViewStyle, Alert, Share, Platform, Linking } from "react-native";
+import {
+  View,
+  ViewStyle,
+  Alert,
+  Share,
+  Platform,
+  Linking,
+  TextStyle,
+} from "react-native";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { ContactCard } from "@/features/profiles/components/ContactCard";
 import { Table } from "@/design-system/Table/Table";
@@ -9,6 +17,7 @@ import { useRoute, useRouter } from "@navigation/useNavigation";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { usePreferredUsername } from "@/hooks/usePreferredUsername";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
+import { useProfileSocials } from "@/hooks/useProfileSocials";
 import {
   useCurrentAccount,
   useSettingsStore,
@@ -33,6 +42,7 @@ import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { iconRegistry } from "@/design-system/Icon/Icon";
 import { useAppStore } from "@/data/store/appStore";
 import { requestPushNotificationsPermissions } from "@/features/notifications/utils/requestPushNotificationsPermissions";
+import { Chip } from "@/design-system/chip";
 
 export default function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
@@ -43,6 +53,7 @@ export default function ProfileScreen() {
   const userAddress = useCurrentAccount() as string;
   const isMyProfile = peerAddress.toLowerCase() === userAddress?.toLowerCase();
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
+  const { data: socials } = useProfileSocials(peerAddress);
   const { notificationsPermissionStatus, setNotificationsPermissionStatus } =
     useAppStore((s) => ({
       notificationsPermissionStatus: s.notificationsPermissionStatus,
@@ -251,6 +262,55 @@ export default function ProfileScreen() {
           />
         </VStack>
 
+        {/* Names Section */}
+        {((socials?.userNames?.length ?? 0) > 0 ||
+          (socials?.ensNames?.length ?? 0) > 0 ||
+          (socials?.unstoppableDomains?.length ?? 0) > 0) && (
+          <VStack style={[themed($section), { paddingTop: theme.spacing.md }]}>
+            <Text>{translate("profile.names")}</Text>
+            <HStack style={themed($chipContainer)}>
+              {socials?.userNames?.map((username) => (
+                <Chip
+                  isActive
+                  key={username.name}
+                  text={username.name}
+                  style={themed($chip)}
+                  onPress={() => {
+                    Clipboard.setString(username.name);
+                    Alert.alert(translate("profile.username_copied"));
+                  }}
+                />
+              ))}
+              {socials?.ensNames?.map((ens) => (
+                <Chip
+                  isActive
+                  key={ens.name}
+                  text={ens.name}
+                  style={themed($chip)}
+                  onPress={() => {
+                    Clipboard.setString(ens.name);
+                    Alert.alert(translate("profile.ens_copied"));
+                  }}
+                />
+              ))}
+              {socials?.unstoppableDomains
+                ?.filter((d) => !d.domain.toLowerCase().endsWith(".eth"))
+                .map((domain) => (
+                  <Chip
+                    isActive
+                    key={domain.domain}
+                    text={domain.domain}
+                    style={themed($chip)}
+                    onPress={() => {
+                      Clipboard.setString(domain.domain);
+                      Alert.alert(translate("profile.domain_copied"));
+                    }}
+                  />
+                ))}
+            </HStack>
+          </VStack>
+        )}
+
         {isMyProfile && (
           <View>
             <VStack
@@ -327,7 +387,6 @@ const $section: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   backgroundColor: colors.background.surface,
   borderBottomWidth: spacing.xxs,
   borderBottomColor: colors.background.sunken,
-
   paddingHorizontal: spacing.lg,
   paddingVertical: spacing.xs,
 });
@@ -344,4 +403,16 @@ const $editIcon: ThemedStyle<ViewStyle> = () => ({
 const $contextMenu: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.sm,
   paddingRight: spacing.xxxs,
+});
+
+const $chipContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexWrap: "wrap",
+  gap: spacing.xs,
+  paddingVertical: spacing.sm,
+});
+
+const $chip: ThemedStyle<ViewStyle> = ({ colors, borderRadius }) => ({
+  backgroundColor: colors.background.surface,
+  borderColor: colors.border.subtle,
+  borderRadius: borderRadius.xs,
 });

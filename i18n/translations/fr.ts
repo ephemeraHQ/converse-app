@@ -355,6 +355,7 @@ export const fr = {
     edit: "Modifier",
     save: "Enregistrer",
     done: "Valider",
+    names: "Names",
     settings: {
       notifications: "Notifications",
       archive: "Archive",

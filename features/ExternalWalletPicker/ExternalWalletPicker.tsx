@@ -102,7 +102,7 @@ export function ExternalWalletPicker(props: IExternalWalletPickerProps) {
             style={{
               width: theme.avatarSize.md,
               height: theme.avatarSize.md,
-              borderRadius: theme.borderRadius.xs,
+              borderRadius: theme.borderRadius.xxs,
             }}
           />
           <Text preset="smaller" style={$globalStyles.flex1 as TextStyle}>

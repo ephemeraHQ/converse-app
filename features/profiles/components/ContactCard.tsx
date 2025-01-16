@@ -45,7 +45,7 @@ export const ContactCard = memo(function ContactCard({
 
   const baseStyle = {
     backgroundColor: theme.colors.fill.primary,
-    borderRadius: theme.borderRadius.xs,
+    borderRadius: theme.borderRadius.xxs,
     padding: theme.spacing.xl,
     marginTop: theme.spacing.xs,
     marginBottom: theme.spacing.lg,

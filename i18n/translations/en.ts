@@ -360,6 +360,7 @@ export const en = {
     },
     save: "Save",
     done: "Done",
+    names: "Names",
     settings: {
       notifications: "Notifications",
       archive: "Archive",

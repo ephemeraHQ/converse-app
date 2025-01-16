@@ -55,7 +55,10 @@ export function Chip({
         {avatarUrl && (
           <Avatar size={theme.avatarSize.xs} uri={avatarUrl} name={text} />
         )}
-        <Text style={themed(isActive ? $chipTextActive : $chipText)}>
+        <Text
+          preset="smaller"
+          style={themed(isActive ? $chipTextActive : $chipText)}
+        >
           {text}
         </Text>
       </HStack>
@@ -73,9 +76,9 @@ const $chip: ThemedStyle<ViewStyle> = ({
   borderWidth: borderWidth.sm,
   borderColor: colors.border.subtle,
   paddingVertical: spacing.xxs,
-  paddingHorizontal: spacing.xs,
-  minHeight: 36,
-  //   ...debugBorder("orange"),
+  paddingHorizontal: spacing.sm,
+  minHeight: 32,
+  backgroundColor: colors.background.surface,
 });
 
 const $chipActive: ThemedStyle<ViewStyle> = ({ colors }) => ({

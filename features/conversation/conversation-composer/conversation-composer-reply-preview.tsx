@@ -190,7 +190,7 @@ const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
             style: {
               height: theme.avatarSize.md,
               width: theme.avatarSize.md,
-              borderRadius: theme.borderRadius.xs,
+              borderRadius: theme.borderRadius.xxs,
             },
           }}
         />
@@ -215,7 +215,7 @@ const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
           style: {
             height: theme.avatarSize.md,
             width: theme.avatarSize.md,
-            borderRadius: theme.borderRadius.xs,
+            borderRadius: theme.borderRadius.xxs,
           },
         }}
       />
