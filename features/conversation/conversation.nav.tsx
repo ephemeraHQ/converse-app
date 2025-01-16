@@ -30,33 +30,13 @@ export function ConversationNav() {
 
   return (
     <NativeStack.Screen
+      options={{
+        title: "",
+        headerTitle: translate("chat"),
+        // headerBackVisible: false,
+      }}
       name="Conversation"
       component={ConversationScreen}
-      options={{
-        headerTitle: translate("chat"),
-        headerShadowVisible: false,
-        headerRight: () => (
-          <HStack
-            style={{
-              alignItems: "center",
-              columnGap: theme.spacing.xxs,
-            }}
-          >
-            <HeaderAction
-              icon="qrcode"
-              onPress={() => {
-                navigation.navigate("ShareProfile");
-              }}
-            />
-            <HeaderAction
-              icon="more_vert"
-              onPress={() => {
-                // TODO: Open menu
-              }}
-            />
-          </HStack>
-        ),
-      }}
     />
   );
 }

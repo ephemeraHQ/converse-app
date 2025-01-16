@@ -35,7 +35,7 @@ export const getButtonViewStyle =
     variant,
     size,
     action,
-    pressed,
+    pressed = false,
     disabled = false,
   }: {
     variant: IButtonVariant;

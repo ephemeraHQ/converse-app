@@ -1,3 +1,5 @@
+import { getConfig } from "@/config";
+
 /**
  * Formats usernames from Converse domains by extracting the username part and adding @ prefix
  * Returns undefined for non-Converse usernames
@@ -10,14 +12,9 @@ export function formatUsername(
   if (!username) return undefined;
 
   // Check if it's a Converse username (either domain)
-  if (
-    username.endsWith(".conversedev.eth") ||
-    username.endsWith(".converse.xyz")
-  ) {
+  if (username.endsWith(getConfig().usernameSuffix)) {
     // Extract everything before the domain
-    const cleanUsername = username
-      .replace(/\.conversedev\.eth$/, "")
-      .replace(/\.converse\.xyz$/, "");
+    const cleanUsername = username.replace(getConfig().usernameSuffix, "");
     return `@${cleanUsername}`;
   }
 

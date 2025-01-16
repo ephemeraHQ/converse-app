@@ -148,6 +148,7 @@ export function Button(props: IButtonProps) {
               />
             )}
 
+            {/* @deprecated stuff */}
             {!!_icon && (
               <Icon
                 icon={_icon}
