@@ -37,19 +37,14 @@ export const getButtonViewStyle =
     action,
     pressed = false,
     disabled = false,
-  }: {
-    variant: IButtonVariant;
-    size: IButtonSize;
-    action: IButtonAction;
-    pressed: boolean;
-    disabled?: boolean;
-  }) =>
-  ({ spacing, colors, borderRadius }: Theme): ViewStyle => {
-    const baseStyle: ViewStyle = {
+  }: IButtonStyleProps) =>
+  (theme: Theme): ViewStyle => {
+    const { spacing, colors, borderRadius } = theme;
+
+    const style: ViewStyle = {
       flexDirection: "row",
-      alignItems: "center",
       justifyContent: "center",
-      gap: spacing.xxs,
+      alignItems: "center",
       borderRadius: borderRadius.sm,
       overflow: "hidden",
       paddingVertical:
@@ -71,34 +66,34 @@ export const getButtonViewStyle =
     if (action === "primary") {
       switch (variant) {
         case "fill":
-          baseStyle.backgroundColor = colors.fill.primary;
+          style.backgroundColor = colors.fill.primary;
           if (pressed) {
-            baseStyle.backgroundColor = colors.fill.secondary;
+            style.backgroundColor = colors.fill.secondary;
           }
           if (disabled) {
-            baseStyle.backgroundColor = colors.fill.tertiary;
+            style.backgroundColor = colors.fill.tertiary;
           }
           break;
 
         case "outline":
-          baseStyle.borderWidth = 1;
-          baseStyle.borderColor = colors.border.secondary;
-          baseStyle.backgroundColor = "transparent";
+          style.borderWidth = 1;
+          style.borderColor = colors.border.secondary;
+          style.backgroundColor = "transparent";
           if (pressed) {
-            baseStyle.backgroundColor = colors.fill.minimal;
+            style.backgroundColor = colors.fill.minimal;
           }
           break;
 
         case "link":
         case "text":
+          style.backgroundColor = "transparent";
           // Put back when we're done refactoring all the variant="text" button
           // if (pressed) {
           //   style.backgroundColor = colors.fill.minimal;
           // }
           // Temporary opacity change for the variant="text" button
-          baseStyle.backgroundColor = "transparent";
           if (pressed) {
-            baseStyle.opacity = 0.8;
+            style.opacity = 0.8;
           }
           break;
 
@@ -107,7 +102,7 @@ export const getButtonViewStyle =
       }
     }
 
-    return baseStyle;
+    return style;
   };
 
 export const getButtonTextStyle =
