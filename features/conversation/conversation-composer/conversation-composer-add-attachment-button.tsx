@@ -1,5 +1,5 @@
 import { Center } from "@/design-system/Center";
-import { Menu } from "@/design-system/Menu/Menu";
+import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { getCurrentAccount } from "@data/store/accountsStore";
 import { Icon } from "@design-system/Icon/Icon";
@@ -96,24 +96,27 @@ export function AddAttachmentButton() {
     handleAttachmentSelected(asset);
   }, [handleAttachmentSelected]);
 
+  const onDropdownMenuPress = useCallback(
+    (actionId: string) => {
+      switch (actionId) {
+        case "camera":
+          openCamera();
+          break;
+        case "mediaLibrary":
+          pickMedia();
+          break;
+      }
+    },
+    [openCamera, pickMedia]
+  );
+
   return (
-    <Menu
+    <DropdownMenu
       style={{
         margin: theme.spacing.xxxs,
         alignSelf: "flex-end",
       }}
-      onPress={(actionId) => {
-        switch (actionId) {
-          case "camera":
-            openCamera();
-            break;
-          case "mediaLibrary":
-            pickMedia();
-            break;
-          default:
-            break;
-        }
-      }}
+      onPress={onDropdownMenuPress}
       actions={[
         {
           id: "mediaLibrary",
@@ -147,6 +150,6 @@ export function AddAttachmentButton() {
           size={20} // Value from figma
         />
       </Center>
-    </Menu>
+    </DropdownMenu>
   );
 }

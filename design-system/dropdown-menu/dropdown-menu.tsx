@@ -8,20 +8,28 @@ import { Platform, StyleProp, ViewStyle } from "react-native";
 import { Pressable } from "../Pressable";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { Haptics } from "@/utils/haptics";
-import { getInlinedItem } from "./Menu.utils";
+import { getInlinedItem } from "./dropdown-menu.utils";
 
-export type IMenuAction = Omit<RNMenuAction, "titleColor" | "imageColor"> & {
+export type IDropdownMenuAction = Omit<
+  RNMenuAction,
+  "titleColor" | "imageColor"
+> & {
   color?: string;
 };
 
-type MenuProps = {
-  actions: IMenuAction[];
+type IDropdownMenuProps = {
+  actions: IDropdownMenuAction[];
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   onPress?: (actionId: string) => void;
 };
 
-export const Menu = ({ children, actions, style, onPress }: MenuProps) => {
+export const DropdownMenu = ({
+  children,
+  actions,
+  style,
+  onPress,
+}: IDropdownMenuProps) => {
   const { theme } = useAppTheme();
 
   const themedActions: RNMenuAction[] = useMemo(() => {

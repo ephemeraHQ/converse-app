@@ -13,16 +13,48 @@ import { Text } from "@/design-system/Text";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { shortDisplayName } from "@/utils/str";
 import { useAccountsProfiles } from "@/utils/useAccountsProfiles";
 import { useNavigation } from "@react-navigation/native";
-import React from "react";
-import { Alert, Platform } from "react-native";
-import { Menu } from "@/design-system/Menu/Menu";
+import React, { useCallback } from "react";
+import { Alert, ViewStyle } from "react-native";
+import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
+
+const $dropDownMenu: ThemedStyle<ViewStyle> = (theme) => ({
+  paddingVertical: theme.spacing.sm,
+  paddingRight: theme.spacing.sm,
+});
+
+const $iconContainer: ThemedStyle<ViewStyle> = (theme) => ({
+  width: theme.spacing.container.small,
+  height: theme.spacing.container.small,
+});
+
+const $rowContainer: ThemedStyle<ViewStyle> = (theme) => ({
+  alignItems: "center",
+  columnGap: theme.spacing.xxxs,
+});
+
+const $rightContainer: ThemedStyle<ViewStyle> = (theme) => ({
+  alignItems: "center",
+  columnGap: theme.spacing.xxs,
+});
+
+const $newConversationContainer: ViewStyle = {
+  marginBottom: 4, // The square.and.pencil icon is not centered with the qrcode if we don't have this margin
+};
+
+const $titleContainer: ViewStyle = {
+  alignItems: "center",
+};
+
+const $avatarContainer: ThemedStyle<ViewStyle> = (theme) => ({
+  padding: theme.spacing.xxs,
+});
 
 export function useHeaderWrapper() {
-  const { theme } = useAppTheme();
+  const { theme, themed } = useAppTheme();
   const navigation = useNavigation();
   const currentAccount = useCurrentAccount();
   const preferredName = usePreferredName(currentAccount!);
@@ -30,16 +62,29 @@ export function useHeaderWrapper() {
   const accountsProfiles = useAccountsProfiles();
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
 
+  const onDropdownPress = useCallback(
+    (actionId: string) => {
+      if (actionId === "all-chats") {
+        Alert.alert("Coming soon");
+      } else if (actionId === "new-account") {
+        navigation.navigate("NewAccountNavigator");
+      } else if (actionId === "app-settings") {
+        Alert.alert("Coming soon");
+      }
+
+      // Pressed on an account
+      else {
+        setCurrentAccount(actionId, false);
+      }
+    },
+    [navigation, setCurrentAccount]
+  );
+
   useHeader(
     {
       safeAreaEdges: ["top"],
       RightActionComponent: (
-        <HStack
-          style={{
-            alignItems: "center",
-            columnGap: theme.spacing.xxs,
-          }}
-        >
+        <HStack style={themed($rightContainer)}>
           <HeaderAction
             icon="qrcode"
             onPress={() => {
@@ -47,9 +92,7 @@ export function useHeaderWrapper() {
             }}
           />
           <HeaderAction
-            style={{
-              marginBottom: 4, // The square.and.pencil icon is not centered with the qrcode if we don't have this margin
-            }}
+            style={$newConversationContainer}
             icon="square.and.pencil"
             onPress={() => {
               navigation.navigate("NewConversation");
@@ -58,12 +101,7 @@ export function useHeaderWrapper() {
         </HStack>
       ),
       titleComponent: (
-        <HStack
-          // {...debugBorder()}
-          style={{
-            alignItems: "center",
-          }}
-        >
+        <HStack style={$titleContainer}>
           <Pressable
             onPress={() => {
               navigation.navigate("Profile", {
@@ -72,33 +110,13 @@ export function useHeaderWrapper() {
             }}
             hitSlop={theme.spacing.sm}
           >
-            <Center
-              style={{
-                padding: theme.spacing.xxs,
-              }}
-            >
+            <Center style={themed($avatarContainer)}>
               <Avatar size={theme.avatarSize.sm} />
             </Center>
           </Pressable>
-          <Menu
-            style={{
-              paddingVertical: theme.spacing.sm, // TMP solution for the hitSlop not working
-              paddingRight: theme.spacing.sm, // TMP solution for the hitSlop not working
-            }}
-            onPress={(actionId: string) => {
-              if (actionId === "all-chats") {
-                Alert.alert("Coming soon");
-              } else if (actionId === "new-account") {
-                navigation.navigate("NewAccountNavigator");
-              } else if (actionId === "app-settings") {
-                Alert.alert("Coming soon");
-              }
-
-              // Pressed on an account
-              else {
-                setCurrentAccount(actionId, false);
-              }
-            }}
+          <DropdownMenu
+            style={themed($dropDownMenu)}
+            onPress={onDropdownPress}
             actions={[
               ...accountsProfiles.map((profilePreferedName, index) => {
                 return {
@@ -121,21 +139,9 @@ export function useHeaderWrapper() {
               },
             ]}
           >
-            <HStack
-              // {...debugBorder()}
-              style={{
-                alignItems: "center",
-                columnGap: theme.spacing.xxxs,
-                // paddingVertical: theme.spacing.sm,
-              }}
-            >
+            <HStack style={themed($rowContainer)}>
               <Text>{shortDisplayName(preferredName)}</Text>
-              <Center
-                style={{
-                  width: theme.spacing.container.small,
-                  height: theme.spacing.container.small,
-                }}
-              >
+              <Center style={themed($iconContainer)}>
                 <Icon
                   color={theme.colors.text.secondary}
                   icon="chevron.down"
@@ -143,7 +149,7 @@ export function useHeaderWrapper() {
                 />
               </Center>
             </HStack>
-          </Menu>
+          </DropdownMenu>
         </HStack>
       ),
     },
