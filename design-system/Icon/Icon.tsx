@@ -15,6 +15,7 @@ export const iconRegistry: Record<IIconName, string> = {
   link: "link",
   paperplane: "paperplane",
   account_circle: "person.circle",
+  pencil: "pencil",
   "square.and.pencil": "square.and.pencil",
   qrcode: "qrcode",
   "message.circle.fill": "message.circle.fill",
@@ -55,6 +56,7 @@ export const iconRegistry: Record<IIconName, string> = {
   "arrowshape.turn.up.left": "arrowshape.turn.up.left",
   "arrowshape.turn.up.left.fill": "arrowshape.turn.up.left.fill",
   "person.crop.circle.badge.plus": "person.crop.circle.badge.plus",
+  "person.crop.circle.badge.xmark": "person.crop.circle.badge.xmark",
   tray: "tray",
   cloud: "cloud",
   "exclamationmark.triangle": "exclamationmark.triangle",
@@ -98,8 +100,8 @@ export function Icon(props: IIconProps) {
   const iconName = icon
     ? iconRegistry[icon]
     : picto
-      ? iconRegistry[picto]
-      : null;
+    ? iconRegistry[picto]
+    : null;
 
   if (!iconName) {
     logger.warn(

@@ -21,7 +21,6 @@ import { useHeader } from "@/navigation/use-header";
 import { HeaderAction } from "@/design-system/Header/HeaderAction";
 import { HStack } from "@/design-system/HStack";
 import { navigate } from "@/utils/navigation";
-import { ContextMenuButton } from "react-native-ios-context-menu";
 import { Haptics } from "@/utils/haptics";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { updateConsentForAddressesForAccount } from "@/features/consent/update-consent-for-addresses-for-account";
@@ -30,6 +29,8 @@ import { useDisconnectActionSheet } from "@/hooks/useDisconnectActionSheet";
 import { getConfig } from "@/config";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
+import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
+import { iconRegistry } from "@/design-system/Icon/Icon";
 
 export default function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
@@ -63,6 +64,65 @@ export default function ProfileScreen() {
 
   const isBlockedPeer = useSettingsStore(
     (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
+  );
+
+  const handleContextMenuAction = useCallback(
+    (actionId: string) => {
+      Haptics.selectionAsync();
+      if (actionId === "share") {
+        if (isMyProfile) {
+          navigate("ShareProfile");
+        } else {
+          const profileUrl = `https://${
+            getConfig().websiteDomain
+          }/dm/${userName}`;
+          Clipboard.setString(profileUrl);
+          Share.share({
+            message: profileUrl,
+          });
+        }
+      } else if (actionId === "edit") {
+        Alert.alert("Available soon");
+        // TODO - Profile Edit
+        // handleEditProfile();
+      } else if (actionId === "block") {
+        showActionSheetWithOptions(
+          {
+            options: [
+              isBlockedPeer ? translate("unblock") : translate("block"),
+              translate("cancel"),
+            ],
+            cancelButtonIndex: 1,
+            destructiveButtonIndex: isBlockedPeer ? undefined : 0,
+            title: isBlockedPeer
+              ? translate("if_you_unblock_contact")
+              : translate("if_you_block_contact"),
+          },
+          (selectedIndex?: number) => {
+            if (selectedIndex === 0 && peerAddress) {
+              const newStatus = isBlockedPeer ? "consented" : "blocked";
+              const consentOnProtocol = isBlockedPeer ? "allow" : "deny";
+              consentToAddressesOnProtocolByAccount({
+                account: userAddress,
+                addresses: [peerAddress],
+                consent: consentOnProtocol,
+              });
+              setPeersStatus({ [peerAddress]: newStatus });
+              router.goBack();
+            }
+          }
+        );
+      }
+    },
+    [
+      isMyProfile,
+      userName,
+      isBlockedPeer,
+      peerAddress,
+      userAddress,
+      setPeersStatus,
+      router,
+    ]
   );
 
   // Header configuration
@@ -111,115 +171,46 @@ export default function ProfileScreen() {
                   onPress={handleChatPress}
                 />
               )}
-              <ContextMenuButton
+              <DropdownMenu
                 style={themed($contextMenu)}
-                isMenuPrimaryAction
-                menuConfig={{
-                  menuTitle: "",
-                  menuItems: [
-                    ...(isMyProfile
-                      ? [
-                          {
-                            actionKey: "edit",
-                            actionTitle: translate("profile.edit"),
-                            icon: {
-                              iconType: "SYSTEM" as const,
-                              iconValue: "pencil",
-                            },
-                          },
-                          {
-                            actionKey: "share",
-                            actionTitle: translate("share"),
-                            icon: {
-                              iconType: "SYSTEM" as const,
-                              iconValue: "square.and.arrow.up",
-                            },
-                          },
-                        ]
-                      : [
-                          {
-                            actionKey: "share",
-                            actionTitle: translate("share"),
-                            icon: {
-                              iconType: "SYSTEM" as const,
-                              iconValue: "square.and.arrow.up",
-                            },
-                          },
-                          {
-                            actionKey: "block",
-                            actionTitle: isBlockedPeer
-                              ? translate("unblock")
-                              : translate("block"),
-                            icon: {
-                              iconType: "SYSTEM" as const,
-                              iconValue: isBlockedPeer
-                                ? "person.crop.circle.badge.plus"
-                                : "person.crop.circle.badge.xmark",
-                            },
-                            menuAttributes: isBlockedPeer
-                              ? undefined
-                              : ["destructive" as const],
-                          },
-                        ]),
-                  ],
-                }}
-                onPressMenuItem={({ nativeEvent }) => {
-                  Haptics.selectionAsync();
-                  if (nativeEvent.actionKey === "share") {
-                    if (isMyProfile) {
-                      navigate("ShareProfile");
-                    } else {
-                      const profileUrl = `https://${
-                        getConfig().websiteDomain
-                      }/dm/${userName}`;
-                      Clipboard.setString(profileUrl);
-                      Share.share({
-                        message: profileUrl,
-                      });
-                    }
-                  } else if (nativeEvent.actionKey === "edit") {
-                    Alert.alert("Available soon");
-                    // TODO - Profile Edit
-                    // handleEditProfile();
-                  } else if (nativeEvent.actionKey === "block") {
-                    showActionSheetWithOptions(
-                      {
-                        options: [
-                          isBlockedPeer
+                onPress={handleContextMenuAction}
+                actions={[
+                  ...(isMyProfile
+                    ? [
+                        {
+                          id: "edit",
+                          title: translate("profile.edit"),
+                          image: iconRegistry["pencil"],
+                        },
+                        {
+                          id: "share",
+                          title: translate("share"),
+                          image: iconRegistry["square.and.arrow.up"],
+                        },
+                      ]
+                    : [
+                        {
+                          id: "share",
+                          title: translate("share"),
+                          image: iconRegistry["square.and.arrow.up"],
+                        },
+                        {
+                          id: "block",
+                          title: isBlockedPeer
                             ? translate("unblock")
                             : translate("block"),
-                          translate("cancel"),
-                        ],
-                        cancelButtonIndex: 1,
-                        destructiveButtonIndex: isBlockedPeer ? undefined : 0,
-                        title: isBlockedPeer
-                          ? translate("if_you_unblock_contact")
-                          : translate("if_you_block_contact"),
-                      },
-                      (selectedIndex?: number) => {
-                        if (selectedIndex === 0 && peerAddress) {
-                          const newStatus = isBlockedPeer
-                            ? "consented"
-                            : "blocked";
-                          const consentOnProtocol = isBlockedPeer
-                            ? "allow"
-                            : "deny";
-                          // TODO - updateConsentForAddressesForAccount
-                          /*consentToAddressesOnProtocolByAccount({
-                            account: userAddress,
-                            addresses: [peerAddress],
-                            consent: consentOnProtocol,
-                          });*/
-                          setPeersStatus({ [peerAddress]: newStatus });
-                          router.goBack();
-                        }
-                      }
-                    );
-                  }
-                }}
+                          image: isBlockedPeer
+                            ? iconRegistry["person.crop.circle.badge.plus"]
+                            : iconRegistry["person.crop.circle.badge.xmark"],
+                          color: !isBlockedPeer
+                            ? theme.colors.global.caution
+                            : undefined,
+                        },
+                      ]),
+                ]}
               >
                 <HeaderAction icon="more_vert" />
-              </ContextMenuButton>
+              </DropdownMenu>
             </>
           )}
         </HStack>
@@ -233,6 +224,9 @@ export default function ProfileScreen() {
       setPeersStatus,
       handleChatPress,
       editMode,
+      handleContextMenuAction,
+      isMyProfile,
+      isBlockedPeer,
     ]
   );
 
