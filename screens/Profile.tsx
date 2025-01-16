@@ -277,7 +277,7 @@ export default function ProfileScreen() {
                   style={themed($chip)}
                   onPress={() => {
                     Clipboard.setString(username.name);
-                    Alert.alert(translate("profile.username_copied"));
+                    Alert.alert(translate("profile.copied"));
                   }}
                 />
               ))}
@@ -289,7 +289,7 @@ export default function ProfileScreen() {
                   style={themed($chip)}
                   onPress={() => {
                     Clipboard.setString(ens.name);
-                    Alert.alert(translate("profile.ens_copied"));
+                    Alert.alert(translate("profile.copied"));
                   }}
                 />
               ))}
@@ -303,7 +303,7 @@ export default function ProfileScreen() {
                     style={themed($chip)}
                     onPress={() => {
                       Clipboard.setString(domain.domain);
-                      Alert.alert(translate("profile.domain_copied"));
+                      Alert.alert(translate("profile.copied"));
                     }}
                   />
                 ))}

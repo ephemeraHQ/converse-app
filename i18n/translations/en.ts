@@ -361,6 +361,7 @@ export const en = {
     save: "Save",
     done: "Done",
     names: "Names",
+    copied: "Copied",
     settings: {
       notifications: "Notifications",
       archive: "Archive",
