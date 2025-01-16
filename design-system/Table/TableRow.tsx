@@ -34,9 +34,9 @@ export const TableRow = memo(function TableRow({
       <View style={themed($rightContentContainer)}>
         {row.isSwitch ? (
           <Switch
-            value={row.isEnabled}
+            value={!!row.value}
             onValueChange={row.onValueChange}
-            disabled={!editMode}
+            disabled={row.disabled}
           />
         ) : (
           <Icon

@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { View, ViewStyle, Alert, Share } from "react-native";
+import { View, ViewStyle, Alert, Share, Platform, Linking } from "react-native";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { ContactCard } from "@/features/profiles/components/ContactCard";
 import { Table } from "@/design-system/Table/Table";
@@ -31,6 +31,8 @@ import { useProfileSocials } from "@/hooks/useProfileSocials";
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { iconRegistry } from "@/design-system/Icon/Icon";
+import { useAppStore } from "@/data/store/appStore";
+import { requestPushNotificationsPermissions } from "@/features/notifications/utils/requestPushNotificationsPermissions";
 
 export default function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
@@ -41,6 +43,11 @@ export default function ProfileScreen() {
   const userAddress = useCurrentAccount() as string;
   const isMyProfile = peerAddress.toLowerCase() === userAddress?.toLowerCase();
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
+  const { notificationsPermissionStatus, setNotificationsPermissionStatus } =
+    useAppStore((s) => ({
+      notificationsPermissionStatus: s.notificationsPermissionStatus,
+      setNotificationsPermissionStatus: s.setNotificationsPermissionStatus,
+    }));
 
   const { data: socials } = useProfileSocials(peerAddress);
   const userName = usePreferredUsername(userAddress);
@@ -252,13 +259,37 @@ export default function ProfileScreen() {
               <Table
                 editMode={editMode}
                 rows={[
-                  {
-                    label: translate("profile.settings.notifications"),
-                    value: "On",
-                    isSwitch: true,
-                    isEnabled: true,
-                    onValueChange: () => {},
-                  },
+                  ...(notificationsPermissionStatus !== "granted"
+                    ? [
+                        {
+                          label: translate("turn_on_notifications"),
+                          onPress: async () => {
+                            if (notificationsPermissionStatus === "denied") {
+                              if (Platform.OS === "android") {
+                                // Android 13 is always denied first so let's try to show
+                                const newStatus =
+                                  await requestPushNotificationsPermissions();
+                                if (newStatus === "denied") {
+                                  Linking.openSettings();
+                                } else if (newStatus) {
+                                  setNotificationsPermissionStatus(newStatus);
+                                }
+                              } else {
+                                Linking.openSettings();
+                              }
+                            } else if (
+                              notificationsPermissionStatus === "undetermined"
+                            ) {
+                              // Open popup
+                              const newStatus =
+                                await requestPushNotificationsPermissions();
+                              if (!newStatus) return;
+                              setNotificationsPermissionStatus(newStatus);
+                            }
+                          },
+                        },
+                      ]
+                    : []),
                   {
                     label: translate("profile.settings.archive"),
                     onPress: () => {
@@ -282,26 +313,6 @@ export default function ProfileScreen() {
               />
             </VStack>
           </View>
-        )}
-
-        {!isMyProfile && (
-          <>
-            <VStack
-              style={[themed($section), { paddingVertical: theme.spacing.lg }]}
-            >
-              <Table
-                rows={[
-                  {
-                    label: translate("profile.settings.notifications"),
-                    value: "On",
-                    isSwitch: true,
-                    isEnabled: true,
-                    onValueChange: () => {},
-                  },
-                ]}
-              />
-            </VStack>
-          </>
         )}
       </VStack>
     </Screen>

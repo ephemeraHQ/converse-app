@@ -1,9 +1,9 @@
 export type ITableRow = {
   label: string;
-  value?: string;
+  value?: string | number;
   onValueChange?: (value: boolean) => void;
   isSwitch?: boolean;
-  isEnabled?: boolean;
   isWarning?: boolean;
+  disabled?: boolean;
   onPress?: () => void;
 };
