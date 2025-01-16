@@ -77,7 +77,8 @@ const $chip: ThemedStyle<ViewStyle> = ({
   borderColor: colors.border.subtle,
   paddingVertical: spacing.xxs,
   paddingHorizontal: spacing.sm,
-  minHeight: 32,
+  minHeight: 36, // from Figma
+  justifyContent: "center",
   backgroundColor: colors.background.surface,
 });
 

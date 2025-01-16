@@ -134,10 +134,7 @@ export const ContactCard = memo(function ContactCard({
               {displayName}
             </Text>
             {userName && (
-              <Text
-                preset="smaller"
-                style={{ color: theme.colors.text.inverted.secondary }}
-              >
+              <Text inverted color="secondary" preset="smaller">
                 {userName}
               </Text>
             )}

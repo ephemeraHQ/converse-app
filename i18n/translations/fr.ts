@@ -374,7 +374,6 @@ export const fr = {
   turn_on_notifications: "Activer les notifications",
   attachment_message_error_download:
     "Impossible de télécharger la pièce jointe",
-  done: "Valider",
 
   // Revocation
   current_installation_revoked: "Déconnecté",

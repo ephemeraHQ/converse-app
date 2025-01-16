@@ -1,19 +1,15 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { PictoSizes } from "@styles/sizes";
-import * as Linking from "expo-linking";
 import React from "react";
-import { Platform } from "react-native";
 
 import { useAppTheme } from "@theme/useAppTheme";
 import Button from "../../components/Button/Button";
 import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
 import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
 import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
-import { useSettingsStore } from "../../data/store/accountsStore";
-import { useAppStore } from "../../data/store/appStore";
 import { setAuthStatus } from "../../data/store/authStore";
 import { VStack } from "../../design-system/VStack";
-import { requestPushNotificationsPermissions } from "../../features/notifications/utils/requestPushNotificationsPermissions";
+import { useNotificationsPermission } from "@/features/notifications/hooks/use-notifications-permission";
 import { sentryTrackError } from "../../utils/sentry";
 import { NavigationParamList } from "../Navigation/Navigation";
 
@@ -21,13 +17,8 @@ export function OnboardingNotificationsScreen(
   props: NativeStackScreenProps<NavigationParamList, "OnboardingNotifications">
 ) {
   const { theme } = useAppTheme();
-
-  const setNotificationsSettings = useSettingsStore(
-    (s) => s.setNotificationsSettings
-  );
-  const setNotificationsPermissionStatus = useAppStore(
-    (s) => s.setNotificationsPermissionStatus
-  );
+  const { requestPermission, setNotificationsSettings } =
+    useNotificationsPermission();
 
   return (
     <OnboardingScreenComp
@@ -67,17 +58,8 @@ export function OnboardingNotificationsScreen(
           title="Accept notifications"
           onPress={async () => {
             try {
-              // Open popup
-              const newStatus = await requestPushNotificationsPermissions();
-              if (!newStatus) return;
-              if (newStatus === "denied" && Platform.OS === "android") {
-                // Android 13 always show denied first but sometimes
-                // it will still show the popup. If not, go to Settings!
-                Linking.openSettings();
-              } else {
-                setNotificationsSettings({ showNotificationScreen: false });
-              }
-              setNotificationsPermissionStatus(newStatus);
+              await requestPermission();
+              setNotificationsSettings({ showNotificationScreen: false });
             } catch (error) {
               sentryTrackError(error);
             } finally {

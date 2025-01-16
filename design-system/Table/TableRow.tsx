@@ -49,13 +49,15 @@ export const TableRow = memo(function TableRow({
     </HStack>
   );
 
-  return row.onPress ? (
-    <TouchableOpacity style={themed($rowContainer)} onPress={row.onPress}>
-      {content}
-    </TouchableOpacity>
-  ) : (
-    <HStack style={themed($rowContainer)}>{content}</HStack>
-  );
+  if (row.onPress) {
+    return (
+      <TouchableOpacity style={themed($rowContainer)} onPress={row.onPress}>
+        {content}
+      </TouchableOpacity>
+    );
+  }
+
+  return <HStack style={themed($rowContainer)}>{content}</HStack>;
 });
 
 const $rowContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({

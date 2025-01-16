@@ -13,13 +13,5 @@ export const ProfileScreenConfig = {
 };
 
 export default function ProfileNav() {
-  return (
-    <NativeStack.Screen
-      name="Profile"
-      component={ProfileScreen}
-      options={{
-        title: "Profile",
-      }}
-    />
-  );
+  return <NativeStack.Screen name="Profile" component={ProfileScreen} />;
 }

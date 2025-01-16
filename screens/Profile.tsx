@@ -9,7 +9,7 @@ import {
   TextStyle,
 } from "react-native";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import { ContactCard } from "@/features/profiles/components/ContactCard";
+import { ContactCard } from "@/features/profiles/components/contact-card";
 import { Table } from "@/design-system/Table/Table";
 import { VStack } from "@/design-system/VStack";
 import { Text } from "@/design-system/Text";
@@ -24,7 +24,7 @@ import {
 } from "@/data/store/accountsStore";
 import { useAppTheme, ThemedStyle } from "@/theme/useAppTheme";
 import { translate } from "@/i18n";
-import { formatUsername } from "@/features/profiles/utils/formatUsername";
+import { formatConverseUsername } from "@/features/profiles/utils/format-converse-username";
 import { Button } from "@/design-system/Button/Button";
 import { useHeader } from "@/navigation/use-header";
 import { HeaderAction } from "@/design-system/Header/HeaderAction";
@@ -36,13 +36,11 @@ import { updateConsentForAddressesForAccount } from "@/features/consent/update-c
 import { StackActions } from "@react-navigation/native";
 import { useDisconnectActionSheet } from "@/hooks/useDisconnectActionSheet";
 import { getConfig } from "@/config";
-import { useProfileSocials } from "@/hooks/useProfileSocials";
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { iconRegistry } from "@/design-system/Icon/Icon";
-import { useAppStore } from "@/data/store/appStore";
-import { requestPushNotificationsPermissions } from "@/features/notifications/utils/requestPushNotificationsPermissions";
-import { Chip } from "@/design-system/chip";
+import { useNotificationsPermission } from "@/features/notifications/hooks/use-notifications-permission";
+import { SocialNames } from "@/features/profiles/components/social-names";
 
 export default function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
@@ -54,17 +52,16 @@ export default function ProfileScreen() {
   const isMyProfile = peerAddress.toLowerCase() === userAddress?.toLowerCase();
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const { data: socials } = useProfileSocials(peerAddress);
-  const { notificationsPermissionStatus, setNotificationsPermissionStatus } =
-    useAppStore((s) => ({
-      notificationsPermissionStatus: s.notificationsPermissionStatus,
-      setNotificationsPermissionStatus: s.setNotificationsPermissionStatus,
-    }));
+  const {
+    notificationsPermissionStatus,
+    requestPermission,
+    setNotificationsSettings,
+  } = useNotificationsPermission();
 
-  const { data: socials } = useProfileSocials(peerAddress);
-  const userName = usePreferredUsername(userAddress);
-  const displayName = usePreferredName(userAddress);
+  const userName = usePreferredUsername(peerAddress);
+  const displayName = usePreferredName(peerAddress);
   const preferredAvatarUri = usePreferredAvatarUri(peerAddress);
-  
+
   const handleChatPress = useCallback(() => {
     router.dispatch(StackActions.popToTop());
     router.dispatch(
@@ -120,7 +117,7 @@ export default function ProfileScreen() {
             if (selectedIndex === 0 && peerAddress) {
               const newStatus = isBlockedPeer ? "consented" : "blocked";
               const consentOnProtocol = isBlockedPeer ? "allow" : "deny";
-              consentToAddressesOnProtocolByAccount({
+              updateConsentForAddressesForAccount({
                 account: userAddress,
                 addresses: [peerAddress],
                 consent: consentOnProtocol,
@@ -254,7 +251,7 @@ export default function ProfileScreen() {
         <VStack style={themed($section)}>
           <ContactCard
             displayName={displayName}
-            userName={formatUsername(userName)}
+            userName={formatConverseUsername(userName)?.username}
             avatarUri={preferredAvatarUri}
             isMyProfile={isMyProfile}
             editMode={editMode}
@@ -262,54 +259,15 @@ export default function ProfileScreen() {
           />
         </VStack>
 
-        {/* Names Section */}
-        {((socials?.userNames?.length ?? 0) > 0 ||
-          (socials?.ensNames?.length ?? 0) > 0 ||
-          (socials?.unstoppableDomains?.length ?? 0) > 0) && (
-          <VStack style={[themed($section), { paddingTop: theme.spacing.md }]}>
-            <Text>{translate("profile.names")}</Text>
-            <HStack style={themed($chipContainer)}>
-              {socials?.userNames?.map((username) => (
-                <Chip
-                  isActive
-                  key={username.name}
-                  text={username.name}
-                  style={themed($chip)}
-                  onPress={() => {
-                    Clipboard.setString(username.name);
-                    Alert.alert(translate("profile.copied"));
-                  }}
-                />
-              ))}
-              {socials?.ensNames?.map((ens) => (
-                <Chip
-                  isActive
-                  key={ens.name}
-                  text={ens.name}
-                  style={themed($chip)}
-                  onPress={() => {
-                    Clipboard.setString(ens.name);
-                    Alert.alert(translate("profile.copied"));
-                  }}
-                />
-              ))}
-              {socials?.unstoppableDomains
-                ?.filter((d) => !d.domain.toLowerCase().endsWith(".eth"))
-                .map((domain) => (
-                  <Chip
-                    isActive
-                    key={domain.domain}
-                    text={domain.domain}
-                    style={themed($chip)}
-                    onPress={() => {
-                      Clipboard.setString(domain.domain);
-                      Alert.alert(translate("profile.copied"));
-                    }}
-                  />
-                ))}
-            </HStack>
-          </VStack>
-        )}
+        <SocialNames
+          socials={{
+            userNames: socials?.userNames?.map((u) => ({ name: u.name })),
+            ensNames: socials?.ensNames?.map((e) => ({ name: e.name })),
+            unstoppableDomains: socials?.unstoppableDomains?.map((d) => ({
+              name: d.domain,
+            })),
+          }}
+        />
 
         {isMyProfile && (
           <View>
@@ -323,30 +281,7 @@ export default function ProfileScreen() {
                     ? [
                         {
                           label: translate("turn_on_notifications"),
-                          onPress: async () => {
-                            if (notificationsPermissionStatus === "denied") {
-                              if (Platform.OS === "android") {
-                                // Android 13 is always denied first so let's try to show
-                                const newStatus =
-                                  await requestPushNotificationsPermissions();
-                                if (newStatus === "denied") {
-                                  Linking.openSettings();
-                                } else if (newStatus) {
-                                  setNotificationsPermissionStatus(newStatus);
-                                }
-                              } else {
-                                Linking.openSettings();
-                              }
-                            } else if (
-                              notificationsPermissionStatus === "undetermined"
-                            ) {
-                              // Open popup
-                              const newStatus =
-                                await requestPushNotificationsPermissions();
-                              if (!newStatus) return;
-                              setNotificationsPermissionStatus(newStatus);
-                            }
-                          },
+                          onPress: requestPermission,
                         },
                       ]
                     : []),
@@ -403,16 +338,4 @@ const $editIcon: ThemedStyle<ViewStyle> = () => ({
 const $contextMenu: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.sm,
   paddingRight: spacing.xxxs,
-});
-
-const $chipContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  flexWrap: "wrap",
-  gap: spacing.xs,
-  paddingVertical: spacing.sm,
-});
-
-const $chip: ThemedStyle<ViewStyle> = ({ colors, borderRadius }) => ({
-  backgroundColor: colors.background.surface,
-  borderColor: colors.border.subtle,
-  borderRadius: borderRadius.xs,
 });
