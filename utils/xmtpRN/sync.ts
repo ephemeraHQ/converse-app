@@ -3,7 +3,6 @@ import { setupAccountTopicSubscription } from "@/features/notifications/utils/ac
 import { getChatStore } from "@data/store/accountsStore";
 import logger from "@utils/logger";
 import { retryWithBackoff } from "@utils/retryWithBackoff";
-import { Client } from "@xmtp/xmtp-js";
 import { AppState } from "react-native";
 import {
   getXmtpClientFromAddress,
@@ -18,13 +17,12 @@ import {
 import { stopStreamingAllMessage, streamAllMessages } from "./messages";
 
 const instantiatingClientForAccount: {
-  [account: string]: Promise<ConverseXmtpClientType | Client> | undefined;
+  [account: string]: Promise<ConverseXmtpClientType> | undefined;
 } = {};
 
 export const getXmtpClient = async (
   account: string
-  // todo(any): why is this Union necessary? Why can't we just use ConverseXmtpClientType?
-): Promise<ConverseXmtpClientType | Client> => {
+): Promise<ConverseXmtpClientType> => {
   const lowerCaseAccount = account.toLowerCase();
   if (account && xmtpClientByAccount[lowerCaseAccount]) {
     return xmtpClientByAccount[lowerCaseAccount];
@@ -53,9 +51,9 @@ export const getXmtpClient = async (
       delete instantiatingClientForAccount[lowerCaseAccount];
     }
   })();
-  return instantiatingClientForAccount[lowerCaseAccount] as Promise<
-    ConverseXmtpClientType | Client
-  >;
+  return instantiatingClientForAccount[
+    lowerCaseAccount
+  ] as Promise<ConverseXmtpClientType>;
 };
 
 export const onSyncLost = async (account: string, error: any) => {

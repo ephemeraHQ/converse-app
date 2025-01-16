@@ -1,9 +1,10 @@
 import { DEFAULT_SUPPORTED_CHAINS } from "@utils/evm/wallets";
-import { XmtpEnv } from "@xmtp/xmtp-js";
 import { Platform } from "react-native";
 import { base, baseSepolia } from "wagmi/chains";
 import { getApiUri } from "./utils/apiConfig";
 import { Environments, isDev, isPreview } from "./utils/getEnv";
+
+type XmtpEnv = "local" | "dev" | "production";
 
 declare const process: {
   env: {
