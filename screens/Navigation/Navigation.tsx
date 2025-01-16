@@ -17,6 +17,7 @@ import {
 } from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
 import { translate } from "@/i18n";
 import { useRouter } from "@/navigation/useNavigation";
+import UserProfileNav from "@/screens/Navigation/UserProfileNav";
 import {
   NativeStackNavigationOptions,
   createNativeStackNavigator,

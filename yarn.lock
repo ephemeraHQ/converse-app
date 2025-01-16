@@ -12347,6 +12347,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@xmtp/proto@npm:^3.72.0":
+  version: 3.72.4
+  resolution: "@xmtp/proto@npm:3.72.4"
+  dependencies:
+    long: "npm:^5.2.0"
+    protobufjs: "npm:^7.0.0"
+    rxjs: "npm:^7.8.0"
+    undici: "npm:^5.8.1"
+  checksum: 10c0/39b4930de9582fea3d1d907e96c2a9baf51a8d36257a736c1f605fc3cc70bed15b22c498b55d13c0dd1b37c8b8ffd804412dfe1769ef12e42e8479759ceff0e1
+  languageName: node
+  linkType: hard
+
 "@xmtp/react-native-sdk@npm:^3.1.7":
   version: 3.1.7
   resolution: "@xmtp/react-native-sdk@npm:3.1.7"
