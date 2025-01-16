@@ -264,6 +264,7 @@ export function CreateConversationScreen({
                   pendingChatMembers.members.forEach((member) => {
                     delete profiles[member.address];
                   });
+                  delete profiles[getCurrentAccount()!.toLowerCase()];
                   setStatus({
                     loading: false,
                     message: "",
@@ -326,7 +327,8 @@ export function CreateConversationScreen({
             );
             logger.info("[CreateConversation] Saving profiles", profiles);
             setProfileRecordSocialsQueryData(profiles);
-            const currentAccountInProfiles = profiles[getCurrentAccount()!];
+            const currentAccountInProfiles =
+              profiles[getCurrentAccount()!.toLowerCase()];
             logger.info(
               "[CreateConversation] Current account in profiles",
               /** whjy the hell is this undefined if i search for myself in prifiles above? */
@@ -337,7 +339,7 @@ export function CreateConversationScreen({
                 "[CreateConversation] Deleting current account from profiles",
                 getCurrentAccount()
               );
-              delete profiles[getCurrentAccount()!];
+              delete profiles[getCurrentAccount()!.toLowerCase()];
             }
 
             setStatus({
