@@ -29,7 +29,6 @@ import {
   SignedInNavigation,
   SignedOutNavigation,
 } from "./Navigation/Navigation";
-import { NewChatScreenConfig } from "./Navigation/NewConversationNav";
 import { ProfileScreenConfig } from "./Navigation/ProfileNav";
 import { ShareProfileScreenConfig } from "./Navigation/ShareProfileNav";
 import { WebviewPreviewScreenConfig } from "./Navigation/WebviewPreviewNav";
@@ -39,6 +38,7 @@ import {
 } from "./Navigation/navHelpers";
 import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
 import logger from "@/utils/logger";
+import { CreateConversationScreenConfig } from "@/features/create-conversation/create-conversation.nav";
 
 const prefix = Linking.createURL("/");
 
@@ -49,7 +49,7 @@ const linking: LinkingOptions<NavigationParamList> = {
     screens: {
       Chats: "/",
       Conversation: ConversationScreenConfig,
-      NewConversation: NewChatScreenConfig,
+      CreateConversation: CreateConversationScreenConfig,
       Profile: ProfileScreenConfig,
       Group: GroupScreenConfig,
       GroupInvite: JoinGroupScreenConfig,

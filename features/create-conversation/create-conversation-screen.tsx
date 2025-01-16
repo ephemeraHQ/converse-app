@@ -76,12 +76,11 @@ import {
 } from "@/utils/xmtpRN/conversations";
 import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { sendMessage } from "@/features/conversation/hooks/use-send-message";
-import { useNavigation } from "@react-navigation/native";
 import { Button } from "@/design-system/Button/Button";
-import { stylesNewChat } from "./newChat.styles";
+import { stylesNewChat } from "./create-conversation.styles";
 import { Chip } from "@/design-system/chip";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { NavigationParamList } from "../Navigation/Navigation";
+import { NavigationParamList } from "@/screens/Navigation/Navigation";
 
 /**
  * Screen shown for when user wants to create a new Chat.
@@ -91,10 +90,10 @@ import { NavigationParamList } from "../Navigation/Navigation";
  */
 type NavigationProps = NativeStackNavigationProp<
   NavigationParamList,
-  "NewConversation"
+  "CreateConversation"
 >;
 
-export default function NewConversation({
+export function CreateConversationScreen({
   navigation,
 }: {
   navigation: NavigationProps;
@@ -105,7 +104,7 @@ export default function NewConversation({
   // const navigation = useNavigation();
 
   const handleBack = useCallback(() => {
-    logger.debug("[NewConversation] Navigating back");
+    logger.debug("[CreateConver] Navigating back");
     navigation.goBack();
   }, [navigation]);
 
@@ -126,7 +125,7 @@ export default function NewConversation({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    logger.debug("[NewConversation] Setting navigation options", {
+    logger.debug("[CreateConver] Setting navigation options", {
       memberCount: pendingChatMembersCount,
       conversationCreationMode,
       loading,
@@ -184,13 +183,13 @@ export default function NewConversation({
 
   useEffect(() => {
     // Log initial effect trigger
-    logger.info("[NewConversation] Search effect triggered", {
+    logger.info("[CreateConver] Search effect triggered", {
       searchQueryState,
     });
 
     if (searchQueryState.length < 3) {
       logger.info(
-        "[NewConversation] Search searchQueryState too short, resetting state",
+        "[CreateConver] Search searchQueryState too short, resetting state",
         {
           searchQueryState,
         }
@@ -206,13 +205,13 @@ export default function NewConversation({
 
     // Log debounce timer clear
     if (debounceTimer.current !== null) {
-      logger.info("[NewConversation] Clearing existing debounce timer");
+      logger.info("[CreateConver] Clearing existing debounce timer");
       clearTimeout(debounceTimer.current);
     }
 
     debounceTimer.current = setTimeout(async () => {
       const searchForValue = async () => {
-        logger.info("[NewConversation] Starting search after debounce", {
+        logger.info("[CreateConver] Starting search after debounce", {
           searchQueryState,
         });
         setStatus(({ loading }) => ({
@@ -223,7 +222,7 @@ export default function NewConversation({
         }));
 
         if (isSupportedPeer(searchQueryState)) {
-          logger.info("[NewConversation] Searching for supported peer", {
+          logger.info("[CreateConver] Searching for supported peer", {
             searchQueryState,
           });
           setStatus(({ error }) => ({
@@ -247,7 +246,7 @@ export default function NewConversation({
               return;
             }
             const address = getCleanAddress(resolvedAddress);
-            logger.info("[NewConversation] Checking if address is on XMTP", {
+            logger.info("[CreateConver] Checking if address is on XMTP", {
               address,
             });
             const addressIsOnXmtp = await canMessageByAccount({
@@ -257,7 +256,7 @@ export default function NewConversation({
             if (searchQueryRef.current === searchQueryState) {
               if (addressIsOnXmtp) {
                 logger.info(
-                  "[NewConversation] Address found on XMTP, searching profiles",
+                  "[CreateConver] Address found on XMTP, searching profiles",
                   {
                     address,
                     searchQueryState,
@@ -270,7 +269,7 @@ export default function NewConversation({
                 );
 
                 if (!isEmptyObject(profiles)) {
-                  logger.info("[NewConversation] Found and saving profiles", {
+                  logger.info("[CreateConver] Found and saving profiles", {
                     profileCount: Object.keys(profiles).length,
                   });
                   // Let's save the profiles for future use
@@ -286,9 +285,7 @@ export default function NewConversation({
                     profileSearchResults: profiles,
                   });
                 } else {
-                  logger.info(
-                    "[NewConversation] No profiles found for XMTP user"
-                  );
+                  logger.info("[CreateConver] No profiles found for XMTP user");
                   setStatus({
                     loading: false,
                     error: "",
@@ -297,7 +294,7 @@ export default function NewConversation({
                   });
                 }
               } else {
-                logger.info("[NewConversation] Address not on XMTP", {
+                logger.info("[CreateConver] Address not on XMTP", {
                   searchQueryState,
                   address,
                 });
@@ -314,7 +311,7 @@ export default function NewConversation({
           }
         } else {
           logger.info(
-            "[NewConversation] Searching profiles for non-peer searchQueryState",
+            "[CreateConver] Searching profiles for non-peer searchQueryState",
             { searchQueryState }
           );
           setStatus({
@@ -330,7 +327,7 @@ export default function NewConversation({
           );
 
           if (!isEmptyObject(profiles)) {
-            logger.info("[NewConversation] Found and saving profiles", {
+            logger.info("[CreateConver] Found and saving profiles", {
               searchQueryState,
               profileCount: Object.keys(profiles).length,
             });
@@ -343,7 +340,7 @@ export default function NewConversation({
               profileSearchResults: profiles,
             });
           } else {
-            logger.info("[NewConversation] No profiles found", {
+            logger.info("[CreateConver] No profiles found", {
               searchQueryState,
             });
             setStatus({
@@ -360,7 +357,7 @@ export default function NewConversation({
 
     return () => {
       if (debounceTimer.current !== null) {
-        logger.info("[NewConversation] Cleanup: clearing debounce timer");
+        logger.info("[CreateConver] Cleanup: clearing debounce timer");
         clearTimeout(debounceTimer.current);
       }
     };
@@ -374,7 +371,7 @@ export default function NewConversation({
       if (!initialFocus.current) {
         initialFocus.current = true;
         if (!searchQueryState) {
-          logger.debug("[NewConversation] Auto-focusing input");
+          logger.debug("[CreateConver] Auto-focusing input");
           setTimeout(() => {
             r?.focus();
           }, 100);
@@ -453,7 +450,7 @@ export default function NewConversation({
               return searchResultsToShow;
             })()}
             handleSearchResultItemPress={(args) => {
-              logger.info("[NewConversation] handleSearchResultItemPress", {
+              logger.info("[CreateConver] handleSearchResultItemPress", {
                 args,
               });
               setPendingGroupMembers((g) => ({
@@ -513,7 +510,7 @@ export default function NewConversation({
                 return;
               }
               logger.info(
-                "[NewConversation] Sending message",
+                "[CreateConver] Sending message",
                 something.content.text
               );
 
@@ -539,7 +536,7 @@ export default function NewConversation({
                   account: currentAccount(),
                   topic: dm.topic,
                   conversation: dm,
-                  context: "NewConversation#sendDm",
+                  context: "CreateConver#sendDm",
                 });
                 navigation.replace("Conversation", { topic: dm.topic });
               } else {
@@ -559,7 +556,7 @@ export default function NewConversation({
                   account: currentAccount(),
                   topic: group.topic,
                   conversation: group,
-                  context: "NewConversation#sendGroupMessage",
+                  context: "CreateConver#sendGroupMessage",
                 });
                 navigation.replace("Conversation", { topic: group.topic });
               }
