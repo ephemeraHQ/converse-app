@@ -14,7 +14,7 @@
     "ios": "expo run:ios",
     "ios:checkBuildDeps": "./scripts/ios/checkBuildDeps.sh",
     "run:ios": "EXPO_ENV=dev expo run:ios",
-    "postinstall": "patch-package && node scripts/wasm.js && husky install && cross-os postinstall",
+    "postinstall": "patch-package && husky install && cross-os postinstall",
     "start": "EXPO_ENV=dev expo start --scheme converse-dev",
     "start:preview": "EXPO_ENV=preview expo start",
     "test": "echo \"➜ Running tests...\" && jest --testPathIgnorePatterns='.*\\.perf-test\\.tsx$'",
