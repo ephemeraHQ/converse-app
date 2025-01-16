@@ -157,7 +157,7 @@ const ContactCard = memo(function ContactCard({
   const rotateX = useSharedValue(0);
   const rotateY = useSharedValue(0);
   const shadowOffsetX = useSharedValue(0);
-  const shadowOffsetY = useSharedValue(0);
+  const shadowOffsetY = useSharedValue(6); // Positive value pushes shadow down
 
   const baseStyle = {
     backgroundColor: theme.colors.fill.primary,
@@ -168,10 +168,6 @@ const ContactCard = memo(function ContactCard({
     shadowColor: theme.colors.fill.primary,
     shadowOpacity: 0.25,
     shadowRadius: 12,
-    shadowOffset: {
-      width: 0,
-      height: 6, // Positive value pushes shadow down
-    },
     elevation: 5,
   };
 
@@ -839,7 +835,7 @@ function ProfileScreenImpl() {
         paddingHorizontal: theme.spacing.lg,
       }}
     >
-      {!isMyProfile && !isBlockedPeer && (
+      {!isBlockedPeer && (
         <ContactCard
           name={preferredUserName}
           // TODO: implement bio from the profile from Convos backend/local db
