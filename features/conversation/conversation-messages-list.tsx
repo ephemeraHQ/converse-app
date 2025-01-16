@@ -91,31 +91,17 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
   return (
     // @ts-expect-error
     <Animated.FlatList
-      style={$globalStyles.flex1}
-      inverted={true}
+      {...conversationListDefaultProps}
       ref={scrollRef}
       data={messageIds}
+      layout={theme.animation.reanimatedLayoutSpringTransition}
+      itemLayoutAnimation={theme.animation.reanimatedLayoutSpringTransition}
       renderItem={({ item, index }) =>
         renderMessage({
           messageId: item,
           index,
         })
       }
-      layout={theme.animation.reanimatedLayoutSpringTransition}
-      itemLayoutAnimation={theme.animation.reanimatedLayoutSpringTransition}
-      keyboardDismissMode="interactive"
-      keyExtractor={keyExtractor}
-      keyboardShouldPersistTaps="handled"
-      ItemSeparatorComponent={() => <MessageSeparator />}
-      showsVerticalScrollIndicator={Platform.OS === "ios"} // Size glitch on Android
-      // pointerEvents="auto"
-      /**
-       * Causes a glitch on Android, no sure we need it for now
-       */
-      // maintainVisibleContentPosition={{
-      //   minIndexForVisible: 0,
-      //   autoscrollToTopThreshold: 100,
-      // }}
       {...rest}
     />
   );
@@ -127,3 +113,13 @@ const MessageSeparator = memo(function MessageSeparator() {
   const { theme } = useAppTheme();
   return <VStack style={{ height: theme.spacing["4xs"] }} />;
 });
+
+export const conversationListDefaultProps = {
+  style: $globalStyles.flex1,
+  inverted: true,
+  keyboardDismissMode: "interactive" as const,
+  keyboardShouldPersistTaps: "handled" as const,
+  ItemSeparatorComponent: MessageSeparator,
+  showsVerticalScrollIndicator: Platform.OS === "ios", // Size glitch on Android
+  keyExtractor,
+} satisfies Partial<FlatListProps<MessageId>>;

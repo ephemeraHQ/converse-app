@@ -1,12 +1,14 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { currentAccount } from "../data/store/accountsStore";
+import { currentAccount, useCurrentAccount } from "../data/store/accountsStore";
 import { useGroupMembersQuery } from "../queries/useGroupMembersQuery";
 import { useGroupNameMutation } from "../queries/useGroupNameMutation";
 import { useGroupNameQuery } from "../queries/useGroupNameQuery";
 import { usePreferredNames } from "./usePreferredNames";
 
-export const useGroupName = (topic: ConversationTopic | undefined) => {
-  const account = currentAccount();
+export const useGroupNameForCurrentAccount = (
+  topic: ConversationTopic | undefined
+) => {
+  const account = useCurrentAccount()!;
 
   const {
     data: groupName,

@@ -1,8 +1,8 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import {
-  getConversationDataQueryData,
-  updateConversationDataQueryData,
-} from "@/queries/conversation-data-query";
+  getConversationMetadataQueryData,
+  updateConversationMetadataQueryData,
+} from "@/queries/conversation-metadata-query";
 import { markTopicAsUnread } from "@/utils/api/topics";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -22,16 +22,14 @@ export function useMarkConversationAsUnread(args: {
     },
     onMutate: () => {
       const currentAccount = getCurrentAccount()!;
-      const previousData = getConversationDataQueryData({
+      const previousData = getConversationMetadataQueryData({
         account: currentAccount,
         topic,
-        context: "useToggleReadStatus",
       });
 
-      updateConversationDataQueryData({
+      updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
-        context: "useToggleReadStatus",
         updateData: {
           markedAsUnread: true,
         },
@@ -41,11 +39,10 @@ export function useMarkConversationAsUnread(args: {
     },
     onError: (error, _, context) => {
       const currentAccount = getCurrentAccount()!;
-      updateConversationDataQueryData({
+      updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
-        context: "useToggleReadStatus",
-        updateData: context?.previousData,
+        updateData: context?.previousData ?? null,
       });
     },
   });

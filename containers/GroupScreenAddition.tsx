@@ -15,7 +15,10 @@ import {
   tertiaryBackgroundColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import { createGroupInvite, deleteGroupInvite } from "@utils/api";
+import {
+  createGroupInvite,
+  deleteGroupInvite,
+} from "@/utils/api/api-groups/api-groups";
 import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,

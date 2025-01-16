@@ -47,13 +47,9 @@ export const ConversationMessageRepliable = memo(
         overshootFriction={10} // 10 feels like the iMessage reply swipe so we like it!
         // Prevent swipe conflict with back gesture for other users' messages
         leftHitSlop={
-          !messageIsFromCurrentUser
-            ? -(
-                (messageContainerSidePadding + senderAvatarSize)
-                // Allow swipe to trigger when starting a few pixels left of message. So don't add spaceBetweenSenderAvatarAndMessage
-                // + spaceBetweenSenderAvatarAndMessage
-              )
-            : 0
+          -(messageContainerSidePadding + senderAvatarSize)
+          // Allow swipe to trigger when starting a few pixels left of message. So don't add spaceBetweenSenderAvatarAndMessage
+          // + spaceBetweenSenderAvatarAndMessage
         }
         dragOffsetFromLeftEdge={theme.spacing.xs}
         onLeftSwipe={handleLeftSwipe}

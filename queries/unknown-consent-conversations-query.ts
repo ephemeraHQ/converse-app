@@ -5,6 +5,15 @@ import {
 } from "@/queries/conversations-query";
 import { UseQueryOptions } from "@tanstack/react-query";
 
+function selectUnknownConsentConversations(conversations: IConversationsQuery) {
+  return (
+    conversations?.filter((conversation) =>
+      // Only the unknown conversations
+      isConversationConsentUnknown(conversation)
+    ) ?? []
+  );
+}
+
 // For now just reuse the global conversations query
 export const getUnknownConsentConversationsQueryOptions = (args: {
   account: string;
@@ -12,13 +21,6 @@ export const getUnknownConsentConversationsQueryOptions = (args: {
 }): UseQueryOptions<IConversationsQuery> => {
   return {
     ...getConversationsQueryOptions(args),
-    select: (conversations) => {
-      return (
-        conversations?.filter((conversation) =>
-          // Only the unknown conversations
-          isConversationConsentUnknown(conversation)
-        ) ?? []
-      );
-    },
+    select: selectUnknownConsentConversations,
   };
 };

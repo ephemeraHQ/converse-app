@@ -1,51 +1,54 @@
-import { UseQueryOptions, useQuery } from "@tanstack/react-query";
+import logger from "@/utils/logger";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
+import { queryOptions } from "@tanstack/react-query";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
-import { MessageId, findMessage } from "@xmtp/react-native-sdk";
+import { MessageId } from "@xmtp/react-native-sdk";
 import { conversationMessageQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
-
-type ConversationMessage = Awaited<ReturnType<typeof fetchConversationMessage>>;
 
 type IArgs = {
   account: string;
   messageId: MessageId;
 };
 
-async function fetchConversationMessage(args: IArgs) {
+async function getConversationMessage(args: IArgs) {
   const { account, messageId } = args;
 
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-
-  if (!client) {
-    return null;
+  if (!messageId) {
+    throw new Error("Message ID is required");
   }
 
-  const message = await findMessage(client, messageId);
+  logger.debug(
+    `[useConversationMessage] Fetching message ${messageId} for account ${account}`
+  );
+
+  const xmtpClient = (await getXmtpClient(account)) as ConverseXmtpClientType;
+
+  if (!xmtpClient) {
+    throw new Error("XMTP client not found");
+  }
+
+  const message = await xmtpClient.conversations.findMessage(messageId);
 
   return message;
 }
 
-export const useConversationMessage = (args: IArgs) => {
-  return useQuery(getConversationMessageQueryOptions(args));
-};
-
-export function getConversationMessageQueryOptions(
-  args: IArgs
-): UseQueryOptions<ConversationMessage> {
-  return {
+export function getConversationMessageQueryOptions(args: IArgs) {
+  return queryOptions({
     queryKey: conversationMessageQueryKey(args.account, args.messageId),
-    queryFn: () => fetchConversationMessage(args),
+    queryFn: () => getConversationMessage(args),
     enabled: !!args.messageId && !!args.account,
-  };
+  });
 }
 
-export const getConversationMessage = (args: IArgs) => {
-  return queryClient.getQueryData<ConversationMessage>(
-    getConversationMessageQueryOptions(args).queryKey
-  );
-};
-
-export function fetchMessageByIdQuery(args: IArgs) {
+export function fetchConversationMessageQuery(args: IArgs) {
   return queryClient.fetchQuery(getConversationMessageQueryOptions(args));
+}
+
+export function getOrFetchConversationMessageQuery(args: IArgs) {
+  return (
+    queryClient.getQueryData(
+      conversationMessageQueryKey(args.account, args.messageId)
+    ) ?? fetchConversationMessageQuery(args)
+  );
 }

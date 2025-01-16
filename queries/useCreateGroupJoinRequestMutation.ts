@@ -1,6 +1,9 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { MutationOptions, useMutation } from "@tanstack/react-query";
-import { createGroupJoinRequest, GroupJoinRequest } from "@utils/api";
+import {
+  createGroupJoinRequest,
+  GroupJoinRequest,
+} from "@/utils/api/api-groups/api-groups";
 
 export const useCreateGroupJoinRequestMutation = (
   options: MutationOptions<

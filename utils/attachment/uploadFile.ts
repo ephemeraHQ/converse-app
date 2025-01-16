@@ -1,6 +1,5 @@
+import { getPresignedUriForUpload } from "@/utils/api/upload";
 import RNFetchBlob from "rn-fetch-blob";
-
-import { getPresignedUriForUpload } from "../api";
 
 export const uploadFile = async ({
   account,

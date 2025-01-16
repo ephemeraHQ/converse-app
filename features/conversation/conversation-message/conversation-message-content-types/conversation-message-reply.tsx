@@ -12,8 +12,8 @@ import {
   isReplyMessage,
   isTextMessage,
   isTransactionReferenceMessage,
-  useConversationMessageById,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { useConversationMessageById } from "../use-conversation-message";
 import {
   useConversationStore,
   useCurrentConversationTopic,
@@ -121,7 +121,7 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
 
   const { message: referencedMessage } = useConversationMessageById({
     messageId: referenceMessageId,
-    topic,
+    conversationTopic: topic,
   });
 
   const inboxName = usePreferredInboxName(referencedMessage?.senderInboxId);

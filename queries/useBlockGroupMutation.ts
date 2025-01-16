@@ -1,15 +1,15 @@
-import { updateConversationInConversationsQuery } from "@/queries/conversations-query";
+import { updateConversationInConversationsQueryData } from "@/queries/conversations-query";
 import { captureError } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
-import { consentToGroupsOnProtocolByAccount } from "@utils/xmtpRN/contacts";
+import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { blockGroupMutationKey } from "./MutationKeys";
 import {
   getGroupConsentQueryData,
   setGroupConsentQueryData,
-} from "./useGroupConsentQuery";
+} from "../features/consent/use-group-consent.query";
 
 export const useBlockGroupMutation = (
   account: string,
@@ -21,7 +21,7 @@ export const useBlockGroupMutation = (
       if (!topic || !account) {
         return;
       }
-      await consentToGroupsOnProtocolByAccount({
+      await updateConsentForGroupsForAccount({
         account,
         groupIds: [getV3IdFromTopic(topic)],
         consent: "deny",
@@ -31,7 +31,7 @@ export const useBlockGroupMutation = (
     onMutate: async () => {
       const previousConsent = getGroupConsentQueryData(account, topic!);
       setGroupConsentQueryData(account, topic!, "denied");
-      updateConversationInConversationsQuery({
+      updateConversationInConversationsQueryData({
         account,
         topic: topic!,
         conversationUpdate: {
@@ -52,7 +52,7 @@ export const useBlockGroupMutation = (
         topic!,
         context.previousConsent || "unknown"
       );
-      updateConversationInConversationsQuery({
+      updateConversationInConversationsQueryData({
         account,
         topic: topic!,
         conversationUpdate: {

@@ -5,7 +5,7 @@ import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-
 import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
-import { prefetchConversationMessages } from "@/queries/useConversationMessages";
+import { useConversationQuery } from "@/queries/useConversationQuery";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
@@ -14,30 +14,34 @@ import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
 import { getCompactRelativeTime } from "@utils/date";
 import { navigate } from "@utils/navigation";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo, useCallback, useMemo } from "react";
 import { ConversationListItem } from "./conversation-list-item";
 import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action";
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action";
 
 type IConversationListItemDmProps = {
-  conversation: DmWithCodecsType;
+  conversationTopic: ConversationTopic;
 };
 
 export const ConversationListItemDm = memo(function ConversationListItemDm({
-  conversation,
+  conversationTopic,
 }: IConversationListItemDmProps) {
   const currentAccount = useCurrentAccount()!;
 
-  const topic = conversation.topic;
+  const { data: conversation } = useConversationQuery({
+    account: currentAccount!,
+    topic: conversationTopic,
+  });
 
   const { data: peerInboxId } = useDmPeerInboxId({
     account: currentAccount!,
-    topic,
+    topic: conversationTopic,
   });
 
   const { theme } = useAppTheme();
 
-  const messageText = useMessagePlainText(conversation.lastMessage);
+  const messageText = useMessagePlainText(conversation?.lastMessage);
   const preferredName = usePreferredInboxName(peerInboxId);
   const avatarUri = usePreferredInboxAvatar(peerInboxId);
 
@@ -48,11 +52,10 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
   }, [avatarUri, preferredName, theme]);
 
   const onPress = useCallback(() => {
-    prefetchConversationMessages(currentAccount, topic);
     navigate("Conversation", {
-      topic: topic,
+      topic: conversationTopic,
     });
-  }, [topic, currentAccount]);
+  }, [conversationTopic]);
 
   // title
   const title = preferredName;
@@ -64,7 +67,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     timeToShow && messageText ? `${timeToShow} ⋅ ${messageText}` : "";
 
   const { isUnread } = useConversationIsUnread({
-    topic,
+    topic: conversationTopic,
   });
 
   const renderLeftActions = useCallback((args: ISwipeableRenderActionsArgs) => {
@@ -73,15 +76,17 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
 
   const renderRightActions = useCallback(
     (args: ISwipeableRenderActionsArgs) => {
-      return <ToggleUnreadSwipeableAction {...args} topic={topic} />;
+      return (
+        <ToggleUnreadSwipeableAction {...args} topic={conversationTopic} />
+      );
     },
-    [topic]
+    [conversationTopic]
   );
 
-  const deleteDm = useDeleteDm(conversation);
+  const deleteDm = useDeleteDm(conversation as DmWithCodecsType);
 
   const { toggleReadStatusAsync } = useToggleReadStatus({
-    topic,
+    topic: conversationTopic,
   });
 
   return (

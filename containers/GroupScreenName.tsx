@@ -1,4 +1,4 @@
-import { useGroupName } from "@/hooks/useGroupName";
+import { useGroupNameForCurrentAccount } from "@/hooks/useGroupName";
 import { translate } from "@/i18n";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useCurrentAccount } from "@data/store/accountsStore";
@@ -29,7 +29,7 @@ export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
   const styles = useStyles();
   const { permissions } = useGroupPermissions(topic);
   const currentAccount = useCurrentAccount()!;
-  const { updateGroupName, groupName } = useGroupName(topic);
+  const { updateGroupName, groupName } = useGroupNameForCurrentAccount(topic);
   const formattedGroupName = formatGroupName(topic, groupName);
   const { members } = useGroupMembers(topic);
 

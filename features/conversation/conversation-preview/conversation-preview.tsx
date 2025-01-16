@@ -9,19 +9,20 @@ import { ConversationMessageLayout } from "@/features/conversation/conversation-
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
 import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
-import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
+import { conversationListDefaultProps } from "@/features/conversation/conversation-messages-list";
+import { useConversationPreviewMessages } from "@/features/conversation/conversation-preview/conversation-preview-messages.query";
 import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
-import { useConversationPreviewMessages } from "@/queries/useConversationPreviewMessages";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { $globalStyles } from "@/theme/styles";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import React from "react";
+import { FlatList } from "react-native";
 
-type ConversationReadOnlyProps = {
+type ConversationPreviewProps = {
   topic: ConversationTopic;
 };
 
-export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
+export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
   const currentAccount = useCurrentAccount()!;
 
   const { data: messages, isLoading: isLoadingMessages } =
@@ -31,7 +32,6 @@ export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
     useConversationQuery({
       account: currentAccount,
       topic,
-      context: "conversation-read-only",
     });
 
   const isLoading = isLoadingMessages || isLoadingConversation;
@@ -58,11 +58,12 @@ export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
           topic={topic}
           conversationId={conversation.id}
         >
-          <ConversationMessagesList
-            // 15 messages is enough
-            messageIds={messages?.ids.slice(0, 15) ?? []}
-            renderMessage={({ messageId, index }) => {
-              const message = messages?.byId[messageId]!;
+          {/* Using basic Flatlist instead of the Animated one to try to fix the context menu crashes https://github.com/dominicstop/react-native-ios-context-menu/issues/70 */}
+          <FlatList
+            {...conversationListDefaultProps}
+            data={messages?.ids ?? []}
+            renderItem={({ item, index }) => {
+              const message = messages?.byId[item]!;
               const previousMessage = messages?.byId[messages?.ids[index + 1]];
               const nextMessage = messages?.byId[messages?.ids[index - 1]];
 
@@ -72,11 +73,13 @@ export const ConversationReadOnly = ({ topic }: ConversationReadOnlyProps) => {
                   previousMessage={previousMessage}
                   nextMessage={nextMessage}
                 >
-                  <ConversationMessageTimestamp />
-                  <ConversationMessageLayout>
-                    <ConversationMessage message={message} />
-                    <ConversationMessageReactions />
-                  </ConversationMessageLayout>
+                  <VStack>
+                    <ConversationMessageTimestamp />
+                    <ConversationMessageLayout>
+                      <ConversationMessage message={message} />
+                      <ConversationMessageReactions />
+                    </ConversationMessageLayout>
+                  </VStack>
                 </MessageContextStoreProvider>
               );
             }}

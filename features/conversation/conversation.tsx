@@ -3,17 +3,15 @@ import { Loader } from "@/design-system/loader";
 import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
 import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
-import { Composer } from "@/features/conversation/conversation-composer/conversation-composer";
+import { ConversationComposer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
 import { ReplyPreview } from "@/features/conversation/conversation-composer/conversation-composer-reply-preview";
 import {
   ConversationComposerStoreProvider,
   useConversationComposerStore,
 } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
-import { DmConsentPopup } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-dm";
-import { GroupConsentPopup } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-group";
-import { DmConversationTitle } from "@/features/conversation/conversation-header/conversation-dm-header-title";
-import { GroupConversationTitle } from "@/features/conversation/conversation-header/conversation-group-header-title";
+import { ConversationConsentPopupDm } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-dm";
+import { ConversationConsentPopupGroup } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-group";
 import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { MessageContextMenu } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu";
@@ -43,6 +41,8 @@ import {
   isAnActualMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
+import { DmConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-dm-header-title";
+import { GroupConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-group-header-title";
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read";
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
@@ -66,7 +66,7 @@ import { Center } from "@design-system/Center";
 import { Text } from "@design-system/Text";
 import { translate } from "@i18n/translate";
 import { useRouter } from "@navigation/useNavigation";
-import { useConversationMessages } from "@queries/useConversationMessages";
+import { useConversationMessages } from "@/queries/use-conversation-messages-query";
 import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -96,7 +96,6 @@ export const Conversation = memo(function Conversation(props: {
     useConversationQuery({
       account: currentAccount,
       topic,
-      context: "Conversation",
     });
 
   useHeader({
@@ -187,7 +186,7 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
   return (
     <ConversationComposerContainer>
       <ReplyPreview />
-      <Composer onSend={sendMessage} />
+      <ConversationComposer onSend={sendMessage} />
     </ConversationComposerContainer>
   );
 });
@@ -277,9 +276,9 @@ const Messages = memo(function Messages(props: {
       ListHeaderComponent={
         !isConversationAllowed(conversation) ? (
           isConversationDm(conversation) ? (
-            <DmConsentPopup />
+            <ConversationConsentPopupDm />
           ) : (
-            <GroupConsentPopup />
+            <ConversationConsentPopupGroup />
           )
         ) : undefined
       }
@@ -296,7 +295,15 @@ const Messages = memo(function Messages(props: {
             isLatestMessageSentByCurrentUser={
               latestMessageIdByCurrentUser === messageId
             }
-            animateEntering={index === 0}
+            animateEntering={
+              index === 0 &&
+              // Need this because otherwise because our optimistic updates, we first create a dummy message with a random id
+              // and then replace it with the real message. But the replacment triggers a new element in the list because we use messageId as key extractor
+              // Maybe we can have a better solution in the future. Just okay for now until we either have better serialization
+              // or have better ways to handle optimistic updates.
+              // @ts-expect-error until we have better serialization and have our own message type
+              message.deliveryStatus === "sending"
+            }
           />
         );
       }}

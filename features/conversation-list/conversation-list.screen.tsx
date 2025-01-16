@@ -1,8 +1,5 @@
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import {
-  useCurrentAccount,
-  useSettingsStore,
-} from "@/data/store/accountsStore";
+import { useSettingsStore } from "@/data/store/accountsStore";
 import { useSelect } from "@/data/store/storeHelpers";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
@@ -14,11 +11,8 @@ import { useConversationListStyles } from "@/features/conversation-list/conversa
 import { useConversationContextMenuViewDefaultProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-default-props";
 import { useShouldShowConnecting } from "@/features/conversation-list/hooks/useShouldShowConnecting";
 import { useShouldShowConnectingOrSyncing } from "@/features/conversation-list/hooks/useShouldShowConnectingOrSyncing";
-import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { translate } from "@/i18n";
-import { getConversationDataQueryOptions } from "@/queries/conversation-data-query";
-import { getConversationsQueryOptions } from "@/queries/conversations-query";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
@@ -29,14 +23,14 @@ import {
 } from "@/utils/xmtpRN/client.types";
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useQueries, useQuery } from "@tanstack/react-query";
-import React, { memo, useCallback, useMemo } from "react";
+import React, { memo, useCallback } from "react";
 import { TouchableOpacity, useColorScheme } from "react-native";
 import { ContextMenuView } from "react-native-ios-context-menu";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-requests";
 import { ConversationListEmpty } from "./conversation-list-empty";
 import { useHeaderWrapper } from "./conversation-list.screen-header";
+import { useConversationListConversations } from "./use-conversation-list-conversations";
 
 type IConversationListProps = NativeStackScreenProps<
   NavigationParamList,
@@ -48,7 +42,7 @@ export function ConversationListScreen(props: IConversationListProps) {
     data: conversations,
     isLoading: isLoadingConversations,
     refetch: refetchConversations,
-  } = useConversationListItems();
+  } = useConversationListConversations();
 
   const insets = useSafeAreaInsets();
 
@@ -65,7 +59,7 @@ export function ConversationListScreen(props: IConversationListProps) {
   return (
     <Screen contentContainerStyle={$globalStyles.flex1}>
       <ConversationList
-        conversations={isLoadingConversations ? [] : (conversations ?? [])}
+        conversations={isLoadingConversations ? [] : conversations ?? []}
         scrollEnabled={conversations && conversations?.length > 0}
         ListEmptyComponent={<ConversationListEmpty />}
         ListHeaderComponent={<ListHeader />}
@@ -75,50 +69,52 @@ export function ConversationListScreen(props: IConversationListProps) {
         }}
         renderConversation={({ item }) => {
           if (isConversationGroup(item)) {
-            return <ConversationListGroup group={item} />;
+            return <ConversationListItemGroupWrapper group={item} />;
           }
-          return <ConversationListDm dm={item} />;
+          return <ConversationListItemDmWrapper dm={item} />;
         }}
       />
     </Screen>
   );
 }
 
-const ConversationListDm = memo(function ConversationListDm(props: {
-  dm: DmWithCodecsType;
-}) {
-  const { dm } = props;
+const ConversationListItemDmWrapper = memo(
+  function ConversationListItemDmWrapper(props: { dm: DmWithCodecsType }) {
+    const { dm } = props;
 
-  const { theme } = useAppTheme();
+    const { theme } = useAppTheme();
 
-  const contextMenuProps = useConversationContextMenuViewDefaultProps({
-    conversationTopic: dm.topic,
-  });
+    const contextMenuProps = useConversationContextMenuViewDefaultProps({
+      conversationTopic: dm.topic,
+    });
 
-  return (
-    <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
-      <ConversationListItemDm conversation={dm} />
-    </ContextMenuView>
-  );
-});
+    return (
+      <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
+        <ConversationListItemDm conversationTopic={dm.topic} />
+      </ContextMenuView>
+    );
+  }
+);
 
-const ConversationListGroup = memo(function ConversationListGroup(props: {
-  group: GroupWithCodecsType;
-}) {
-  const { group } = props;
+const ConversationListItemGroupWrapper = memo(
+  function ConversationListItemGroupWrapper(props: {
+    group: GroupWithCodecsType;
+  }) {
+    const { group } = props;
 
-  const { theme } = useAppTheme();
+    const { theme } = useAppTheme();
 
-  const contextMenuProps = useConversationContextMenuViewDefaultProps({
-    conversationTopic: group.topic,
-  });
+    const contextMenuProps = useConversationContextMenuViewDefaultProps({
+      conversationTopic: group.topic,
+    });
 
-  return (
-    <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
-      <ConversationListItemGroup group={group} />
-    </ContextMenuView>
-  );
-});
+    return (
+      <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
+        <ConversationListItemGroup conversationTopic={group.topic} />
+      </ContextMenuView>
+    );
+  }
+);
 
 const ListHeader = React.memo(function ListHeader() {
   const { ephemeralAccount } = useSettingsStore(
@@ -177,44 +173,3 @@ const EphemeralAccountBanner = React.memo(function EphemeralAccountBanner() {
     </TouchableOpacity>
   );
 });
-
-const useConversationListItems = () => {
-  const currentAccount = useCurrentAccount();
-
-  const { data: conversations, ...rest } = useQuery({
-    ...getConversationsQueryOptions({
-      account: currentAccount!,
-      context: "conversation-list-screen",
-    }),
-  });
-
-  const conversationsDataQueries = useQueries({
-    queries: (conversations ?? []).map((conversation) =>
-      getConversationDataQueryOptions({
-        account: currentAccount!,
-        topic: conversation.topic,
-        context: "conversation-list-screen",
-      })
-    ),
-  });
-
-  const conversationsFiltered = useMemo(() => {
-    if (!conversations) return [];
-
-    return conversations.filter((conversation, index) => {
-      const query = conversationsDataQueries[index];
-      return (
-        // Check if conversation is allowed based on permissions
-        isConversationAllowed(conversation) &&
-        // Exclude pinned conversations
-        !query?.data?.isPinned &&
-        // Exclude deleted conversations
-        !query?.data?.isDeleted &&
-        // Only include conversations that have finished loading
-        !query?.isLoading
-      );
-    });
-  }, [conversations, conversationsDataQueries]);
-
-  return { data: conversationsFiltered, ...rest };
-};

@@ -37,7 +37,7 @@ import { setAuthStatus } from "../../data/store/authStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { VStack } from "../../design-system/VStack";
 import { translate } from "../../i18n";
-import { checkUsernameValid, claimProfile } from "../../utils/api";
+import { checkUsernameValid, claimProfile } from "@/utils/api/profiles";
 import { executeAfterKeyboardClosed } from "../../utils/keyboard";
 import {
   compressAndResizeImage,

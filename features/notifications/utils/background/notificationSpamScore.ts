@@ -1,12 +1,11 @@
+import { computeMessageContentSpamScore } from "@/data/helpers/conversations/spamScore";
+import { getSendersSpamScores } from "@/utils/api/users";
 import {
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
   GroupWithCodecsType,
 } from "@/utils/xmtpRN/client.types";
 import { isContentType } from "@/utils/xmtpRN/content-types/content-types";
-import { getSendersSpamScores } from "@/utils/api";
-import { InboxId } from "@xmtp/react-native-sdk";
-import { computeMessageContentSpamScore } from "@/data/helpers/conversations/spamScore";
 
 export const computeSpamScoreGroupWelcome = async (
   xmtpClient: ConverseXmtpClientType,
@@ -89,8 +88,9 @@ export const computeSpamScoreGroupMessage = async (
     }
 
     const senderInboxId = decodedMessage.senderInboxId;
-    const senderConsentState =
-      await xmtpClient.preferences.inboxIdConsentState(senderInboxId);
+    const senderConsentState = await xmtpClient.preferences.inboxIdConsentState(
+      senderInboxId
+    );
     if (senderConsentState === "denied") {
       return 1;
     }

@@ -23,7 +23,9 @@ type IComposerProps = {
   disabled?: boolean;
 };
 
-export const Composer = memo(function Composer(props: IComposerProps) {
+export const ConversationComposer = memo(function ConversationComposer(
+  props: IComposerProps
+) {
   const { onSend, disabled, hideAddAttachmentButton } = props;
 
   const { theme } = useAppTheme();
@@ -128,12 +130,12 @@ export const Composer = memo(function Composer(props: IComposerProps) {
         consumers to explicitly construct it the way they need.
         
         ie: 
-
-        <Composer.Container>
-          <Composer.SenderSwitcher/>
-          <Composer.TextInput />
-          <Composer.SendButton disabled={whateverArbitraryCondition} />
-        </Composer.Container>
+          
+        <ConversationComposer.Container>
+          <ConversationComposer.SenderSwitcher/>
+          <ConversationComposer.TextInput />
+          <ConversationComposer.SendButton disabled={whateverArbitraryCondition} />
+        </ConversationComposer.Container>
 
         this api would prevent us from getting into prop hell and we 
         could still create the "base" component that covers most normal

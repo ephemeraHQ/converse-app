@@ -16,7 +16,6 @@ export const useDmPeerInboxId = (args: {
   const { data: conversation } = useConversationQuery({
     account,
     topic,
-    context: "useDmPeerInboxId",
   });
 
   return useQuery({

@@ -2,9 +2,9 @@ import { getCurrentAccount } from "@/data/store/accountsStore";
 import { getCurrentAccountConversation } from "@/features/conversation/conversation.utils";
 import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
-  addConversationMessage,
+  addConversationMessageQuery,
   refetchConversationMessages,
-} from "@/queries/useConversationMessages";
+} from "@/queries/use-conversation-messages-query";
 import { captureError, captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";
@@ -41,12 +41,11 @@ export function useRemoveReactionOnMessage(props: {
 
       if (conversation) {
         // Add the removal reaction message
-        addConversationMessage({
+        addConversationMessageQuery({
           account: currentAccount,
           topic: conversation.topic,
           message: {
             id: getRandomId() as MessageId,
-            client: conversation.client,
             contentTypeId: contentTypesPrefixes.reaction,
             sentNs: getTodayNs(),
             fallback: variables.reaction.content,
