@@ -42,7 +42,7 @@ export function useMarkConversationAsUnread(args: {
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
-        updateData: context?.previousData,
+        updateData: context?.previousData ?? null,
       });
     },
   });

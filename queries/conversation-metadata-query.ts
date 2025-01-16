@@ -71,9 +71,17 @@ const batchedGetConversationMetadata = create({
         conversationMetadataQueryKey(query.account, query.topic).join("-") ===
         conversationMetadataQueryKey(item.account, item.topic).join("-")
     );
-    if (!match) return undefined;
+    if (!match) {
+      return null;
+    }
     // Destructure to remove account and topic from the result
     const { account, topic, ...rest } = match;
+
+    // If we don't have any data for this conversation, we return null
+    if (Object.keys(rest).length === 0) {
+      return null;
+    }
+
     return rest;
   },
   fetcher: async (args: IArgs[]) => {

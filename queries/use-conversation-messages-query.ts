@@ -106,10 +106,11 @@ export const addConversationMessageQuery = (args: {
   );
 };
 
-export const prefetchConversationMessages = async (
-  account: string,
-  topic: ConversationTopic
-) => {
+export const prefetchConversationMessages = async (args: {
+  account: string;
+  topic: ConversationTopic;
+}) => {
+  const { account, topic } = args;
   return queryClient.prefetchQuery(
     getConversationMessagesQueryOptions(account, topic)
   );

@@ -2,17 +2,17 @@ import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 import { getXmtpClient } from "@/utils/xmtpRN/sync";
 import logger from "@utils/logger";
 
-type UpdateAddressesConsentForAccountParams = {
+type UpdateConsentForAddressesForAccountParams = {
   account: string;
   addresses: string[];
   consent: "allow" | "deny";
 };
 
-export const updateAddressesConsentForAccount = async ({
+export const updateConsentForAddressesForAccount = async ({
   account,
   addresses,
   consent,
-}: UpdateAddressesConsentForAccountParams): Promise<void> => {
+}: UpdateConsentForAddressesForAccountParams) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
 
   if (!client) {

@@ -3,7 +3,7 @@ import { captureError } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
-import { updateGroupsConsentForAccount } from "@/features/consent/update-groups-consent-for-account";
+import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { blockGroupMutationKey } from "./MutationKeys";
 import {
@@ -21,7 +21,7 @@ export const useBlockGroupMutation = (
       if (!topic || !account) {
         return;
       }
-      await updateGroupsConsentForAccount({
+      await updateConsentForGroupsForAccount({
         account,
         groupIds: [getV3IdFromTopic(topic)],
         consent: "deny",

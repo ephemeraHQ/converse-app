@@ -7,7 +7,6 @@ import { useDeleteGroup } from "@/features/conversation-list/hooks/use-delete-gr
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
 import { useGroupMembersInfoForCurrentAccount } from "@/hooks/use-group-members-info-for-current-account";
-import { prefetchConversationMessages } from "@/queries/use-conversation-messages-query";
 import { useGroupQuery } from "@/queries/useGroupQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { useCurrentAccount } from "@data/store/accountsStore";
@@ -56,11 +55,10 @@ export const ConversationListItemGroup = memo(
     }, [group?.imageUrlSquare, groupMembersInfo, theme]);
 
     const onPress = useCallback(() => {
-      prefetchConversationMessages(currentAccount, conversationTopic);
       router.navigate("Conversation", {
         topic: conversationTopic,
       });
-    }, [conversationTopic, currentAccount, router]);
+    }, [conversationTopic, router]);
 
     // Title
     const title = group?.name;

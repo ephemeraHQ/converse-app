@@ -13,7 +13,7 @@ import {
   ConversationTopic,
   InboxId,
 } from "@xmtp/react-native-sdk";
-import { updateGroupsConsentForAccount } from "./update-groups-consent-for-account";
+import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account";
 import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
 
 export function useDmConsent(args: {
@@ -32,7 +32,7 @@ export function useDmConsent(args: {
       }
       const currentAccount = getCurrentAccount()!;
       await Promise.all([
-        updateGroupsConsentForAccount({
+        updateConsentForGroupsForAccount({
           account: currentAccount,
           groupIds: [conversationId],
           consent: args.consent,

@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
-import { updateGroupsConsentForAccount } from "./update-groups-consent-for-account";
+import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account";
 import {
   ConsentState,
   ConversationId,
@@ -66,7 +66,7 @@ export const getAllowGroupMutationOptions = (
       }
 
       await Promise.all([
-        updateGroupsConsentForAccount({
+        updateConsentForGroupsForAccount({
           account,
           groupIds: [getV3IdFromTopic(groupTopic)],
           consent: "allow",

@@ -5,7 +5,6 @@ import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-
 import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
-import { prefetchConversationMessages } from "@/queries/use-conversation-messages-query";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { useAppTheme } from "@/theme/useAppTheme";
@@ -53,11 +52,10 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
   }, [avatarUri, preferredName, theme]);
 
   const onPress = useCallback(() => {
-    prefetchConversationMessages(currentAccount, conversationTopic);
     navigate("Conversation", {
       topic: conversationTopic,
     });
-  }, [currentAccount, conversationTopic]);
+  }, [conversationTopic]);
 
   // title
   const title = preferredName;

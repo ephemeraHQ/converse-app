@@ -2,14 +2,14 @@ import logger from "@utils/logger";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 import { getXmtpClient } from "@/utils/xmtpRN/sync";
 
-type UpdateGroupsConsentForAccountArgs = {
+type UpdateConsentForGroupsForAccountArgs = {
   account: string;
   groupIds: string[];
   consent: "allow" | "deny";
 };
 
-export const updateGroupsConsentForAccount = async (
-  args: UpdateGroupsConsentForAccountArgs
+export const updateConsentForGroupsForAccount = async (
+  args: UpdateConsentForGroupsForAccountArgs
 ) => {
   const { account, groupIds, consent } = args;
 

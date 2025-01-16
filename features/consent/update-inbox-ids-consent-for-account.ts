@@ -1,7 +1,7 @@
-import logger from "@utils/logger";
-import { InboxId } from "@xmtp/react-native-sdk";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 import { getXmtpClient } from "@/utils/xmtpRN/sync";
+import logger from "@utils/logger";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 type UpdateInboxIdsConsentForAccountParams = {
   account: string;
@@ -27,24 +27,14 @@ export const updateInboxIdsConsentForAccount = async ({
   );
   const start = new Date().getTime();
 
-  if (consent === "allow") {
-    for (const inboxId of inboxIds) {
-      await client.preferences.setConsentState({
-        value: inboxId,
-        entryType: "inbox_id",
-        state: "allowed",
-      });
-    }
-  } else if (consent === "deny") {
-    for (const inboxId of inboxIds) {
-      await client.preferences.setConsentState({
-        value: inboxId,
-        entryType: "inbox_id",
-        state: "denied",
-      });
-    }
-  } else {
-    throw new Error(`Invalid consent type: ${consent}`);
+  const state = consent === "allow" ? "allowed" : "denied";
+
+  for (const inboxId of inboxIds) {
+    await client.preferences.setConsentState({
+      value: inboxId,
+      entryType: "inbox_id",
+      state,
+    });
   }
 
   const end = new Date().getTime();

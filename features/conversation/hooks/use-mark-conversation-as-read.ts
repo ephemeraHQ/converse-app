@@ -43,7 +43,7 @@ export function useMarkConversationAsRead(args: { topic: ConversationTopic }) {
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
-        updateData: context?.previousData,
+        updateData: context?.previousData ?? null,
       });
     },
   });

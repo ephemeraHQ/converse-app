@@ -12,7 +12,6 @@ import { useConversationContextMenuViewDefaultProps } from "@/features/conversat
 import { useShouldShowConnecting } from "@/features/conversation-list/hooks/useShouldShowConnecting";
 import { useShouldShowConnectingOrSyncing } from "@/features/conversation-list/hooks/useShouldShowConnectingOrSyncing";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
 import { translate } from "@/i18n";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { $globalStyles } from "@/theme/styles";
@@ -48,18 +47,6 @@ export function ConversationListScreen(props: IConversationListProps) {
   const insets = useSafeAreaInsets();
 
   useHeaderWrapper();
-
-  // For now, let's make sure we always are up to date with the conversations
-  // useScreenFocusEffectOnce(() => {
-  //   refetchConversations().catch(captureError);
-  // });
-
-  // For now, let's make sure we always are up to date with the conversations
-  useAppStateHandlers({
-    onForeground: () => {
-      refetchConversations().catch(captureError);
-    },
-  });
 
   const handleRefresh = useCallback(async () => {
     try {

@@ -1,5 +1,5 @@
-import { getXmtpApiHeaders } from "@/utils/api/auth";
 import { api } from "@/utils/api/api";
+import { getXmtpApiHeaders } from "@/utils/api/auth";
 import logger from "@/utils/logger";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { z } from "zod";
@@ -29,15 +29,18 @@ export async function getTopics(args: {
   logger.debug(`[API TOPICS] getTopics for account: ${args.account}`);
   const { account, topics } = args;
 
-  const { data } = await api.get(`/api/topics`, {
-    headers: await getXmtpApiHeaders(account),
-    data: { topics },
-  });
+  // Doing POST because we need to pass in the topics array
+  const { data } = await api.post(
+    `/api/topics`,
+    { topics },
+    { headers: await getXmtpApiHeaders(account) }
+  );
 
   const parseResult = z.record(TopicSchema).safeParse(data);
   if (!parseResult.success) {
     logger.error("[API TOPICS] getTopics parse error:", parseResult.error);
   }
+
   return data as Record<string, ITopic>;
 }
 
@@ -45,7 +48,7 @@ export async function getAllTopics(args: { account: string }) {
   logger.debug(`[API TOPICS] getAllTopics for account: ${args.account}`);
   const { account } = args;
 
-  const { data } = await api.get(`/api/topics/all`, {
+  const { data } = await api.get(`/api/topics`, {
     headers: await getXmtpApiHeaders(account),
   });
 
