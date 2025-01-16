@@ -33,6 +33,7 @@ import {
   getInstallationKeySignature,
 } from "./xmtpRN/client";
 import { getInboxId } from "./xmtpRN/signIn";
+import { getCurrentAccount } from "@/data/store/accountsStore";
 
 export const api = axios.create({
   baseURL: config.apiURI,
@@ -388,7 +389,7 @@ export const getProfilesForInboxIds = async ({
   inboxIds,
 }: {
   inboxIds: string[];
-}): Promise<{ [inboxId: InboxId]: IProfileSocials[] }> => {
+}): Promise<{ [inboxId: string]: IProfileSocials[] }> => {
   logger.info("Fetching profiles for inboxIds", inboxIds);
   const { data } = await api.get("/api/inbox/", {
     params: { ids: inboxIds.join(",") },
@@ -396,7 +397,7 @@ export const getProfilesForInboxIds = async ({
     // why I'm delaying - its tied up in a batshit fetcher
     // thing and I'll have to look into how that ties together with react-query and can't
     // be bothered right now.
-    // headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders(getCurrentAccount()!),
   });
   return data;
 };

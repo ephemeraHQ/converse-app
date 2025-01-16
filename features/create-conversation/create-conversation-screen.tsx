@@ -13,28 +13,6 @@
  * conversation list is not updated with most recent dm when sent from composer
  * solution: maybe using the hook instead of imperatively doing stuff?
  *
- * group name creation not correct: getting first preferred name correct but
- * ✅ not using correct preferred name for last two when ephemeral accounts
- *
- * messed up old add user to existing group screen
- * ✅ solution: copy existing screen back in
- *
- * UI:
- *
- * ✅ search results list needs updating
- * ✅ create chips for search results
- * ✅ composer disable send button
- * ✅ composer hide plus button
- * ✅ pending members list
- *
- * new group joined the group welcome message needs wrapping (not my problem atm)
- *
- * CODE ORG:
- * change file names to lower-kebab-case
- * move files to features/new-conversation
- * rename files to indicate where they live within new-conversation domain
- * use proper suffixes
- *
  * ---
  *
  * GITHUB:
@@ -46,14 +24,14 @@
  */
 import { Text } from "@/design-system/Text";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Platform, ScrollView, TextInput, View } from "react-native";
+import { Platform, TextInput, View } from "react-native";
 
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { SearchBar } from "@search/components/SearchBar";
 import { canMessageByAccount } from "@utils/xmtpRN/contacts";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 import AndroidBackAction from "@components/AndroidBackAction";
-import { currentAccount } from "@data/store/accountsStore";
+import { currentAccount, getCurrentAccount } from "@data/store/accountsStore";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { searchProfiles } from "@utils/api";
 import { getAddressForPeer, isSupportedPeer } from "@utils/evm/address";
@@ -81,6 +59,8 @@ import { stylesNewChat } from "./create-conversation.styles";
 import { Chip } from "@/design-system/chip";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
+import { captureErrorWithToast } from "@/utils/capture-error";
+import { debugBorder } from "@/utils/debug-style";
 
 /**
  * Screen shown for when user wants to create a new Chat.
@@ -101,18 +81,44 @@ export function CreateConversationScreen({
   const { theme, themed } = useAppTheme();
   const [conversationCreationMode, setConversationCreationMode] =
     useState<ConversationVersion>(ConversationVersion.DM);
-  // const navigation = useNavigation();
 
-  const handleBack = useCallback(() => {
-    logger.debug("[CreateConver] Navigating back");
-    navigation.goBack();
-  }, [navigation]);
+  const [
+    searchQueryState,
+    /*weird name becuase I'm not exactly sure what the ref below does so being expliti as state vs ref*/ setSearchQueryState,
+  ] = useState("");
+  const searchQueryRef = useRef("");
+  const [status, setStatus] = useState({
+    loading: false,
+    message: "",
+    inviteToConverse: "",
+    profileSearchResults: {} as { [address: string]: IProfileSocials },
+  });
 
   const [pendingChatMembers, setPendingGroupMembers] = useState({
     members: [] as (IProfileSocials & { address: string })[],
   });
   const pendingChatMembersCount = pendingChatMembers.members.length;
   const composerSendButtonDisabled = pendingChatMembersCount === 0;
+
+  const shouldDisplaySearchResults =
+    !status.loading &&
+    !status.message &&
+    !isEmptyObject(status.profileSearchResults);
+
+  const shouldDisplayLoading =
+    status.loading &&
+    !status.message &&
+    isEmptyObject(status.profileSearchResults);
+
+  const shouldDisplayPendingMembers = pendingChatMembers.members.length > 0;
+
+  const shouldDisplayMessage =
+    !!status.message && isEmptyObject(status.profileSearchResults);
+
+  const handleBack = useCallback(() => {
+    logger.debug("[CreateConversation] Navigating back");
+    navigation.goBack();
+  }, [navigation]);
 
   useEffect(() => {
     if (pendingChatMembersCount > 1) {
@@ -122,13 +128,10 @@ export function CreateConversationScreen({
     }
   }, [pendingChatMembersCount]);
 
-  const [loading, setLoading] = useState(false);
-
   useEffect(() => {
-    logger.debug("[CreateConver] Setting navigation options", {
+    logger.debug("[CreateConversation] Setting navigation options", {
       memberCount: pendingChatMembersCount,
       conversationCreationMode,
-      loading,
     });
 
     navigation.setOptions({
@@ -148,7 +151,6 @@ export function CreateConversationScreen({
                 ? "New convo"
                 : "New group"
             }
-            // onPress={handleRightAction}
           />
         );
       },
@@ -156,47 +158,28 @@ export function CreateConversationScreen({
   }, [
     pendingChatMembersCount,
     conversationCreationMode,
-    loading,
+    status.loading,
     navigation,
     handleBack,
     themed,
     theme.spacing,
   ]);
 
-  const [
-    searchQueryState,
-    /*weird name becuase I'm not exactly sure what the ref below does so being expliti as state vs ref*/ setSearchQueryState,
-  ] = useState("");
-  const searchQueryRef = useRef("");
-  const [status, setStatus] = useState({
-    loading: false,
-    error: "",
-    inviteToConverse: "",
-    profileSearchResults: {} as { [address: string]: IProfileSocials },
-  });
-
   // todo: abstract debounce and provide option for eager vs lazy debounce
   // ie: lets perform the query but not necessarily rerender until the debounce
   // this will feel snappier
-  const debounceDelay = 500;
+  const debounceDelay = 200;
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // Log initial effect trigger
-    logger.info("[CreateConver] Search effect triggered", {
+    logger.info("[CreateConversation] Search effect triggered", {
       searchQueryState,
     });
-
-    if (searchQueryState.length < 3) {
-      logger.info(
-        "[CreateConver] Search searchQueryState too short, resetting state",
-        {
-          searchQueryState,
-        }
-      );
+    if (searchQueryState.length === 0) {
       setStatus({
         loading: false,
-        error: "",
+        message: "",
         inviteToConverse: "",
         profileSearchResults: {},
       });
@@ -205,29 +188,29 @@ export function CreateConversationScreen({
 
     // Log debounce timer clear
     if (debounceTimer.current !== null) {
-      logger.info("[CreateConver] Clearing existing debounce timer");
+      logger.info("[CreateConversation] Clearing existing debounce timer");
       clearTimeout(debounceTimer.current);
     }
 
     debounceTimer.current = setTimeout(async () => {
       const searchForValue = async () => {
-        logger.info("[CreateConver] Starting search after debounce", {
+        logger.info("[CreateConversation] Starting search after debounce", {
           searchQueryState,
         });
         setStatus(({ loading }) => ({
           loading,
-          error: "",
+          message: "",
           inviteToConverse: "",
           profileSearchResults: {},
         }));
 
         if (isSupportedPeer(searchQueryState)) {
-          logger.info("[CreateConver] Searching for supported peer", {
+          logger.info("[CreateConversation] Searching for supported peer", {
             searchQueryState,
           });
-          setStatus(({ error }) => ({
+          setStatus(({ message }) => ({
             loading: true,
-            error,
+            message,
             inviteToConverse: "",
             profileSearchResults: {},
           }));
@@ -240,13 +223,13 @@ export function CreateConversationScreen({
                 loading: false,
                 profileSearchResults: {},
                 inviteToConverse: "",
-                error: "No address has been set for this domain.",
+                message: "No address has been set for this domain.",
               });
 
               return;
             }
             const address = getCleanAddress(resolvedAddress);
-            logger.info("[CreateConver] Checking if address is on XMTP", {
+            logger.info("[CreateConversation] Checking if address is on XMTP", {
               address,
             });
             const addressIsOnXmtp = await canMessageByAccount({
@@ -256,7 +239,7 @@ export function CreateConversationScreen({
             if (searchQueryRef.current === searchQueryState) {
               if (addressIsOnXmtp) {
                 logger.info(
-                  "[CreateConver] Address found on XMTP, searching profiles",
+                  "[CreateConversation] Address found on XMTP, searching profiles",
                   {
                     address,
                     searchQueryState,
@@ -269,9 +252,12 @@ export function CreateConversationScreen({
                 );
 
                 if (!isEmptyObject(profiles)) {
-                  logger.info("[CreateConver] Found and saving profiles", {
-                    profileCount: Object.keys(profiles).length,
-                  });
+                  logger.info(
+                    "[CreateConversation] Found and saving profiles",
+                    {
+                      profileCount: Object.keys(profiles).length,
+                    }
+                  );
                   // Let's save the profiles for future use
                   setProfileRecordSocialsQueryData(profiles);
                   // delete pending chat memebers from search results
@@ -280,27 +266,29 @@ export function CreateConversationScreen({
                   });
                   setStatus({
                     loading: false,
-                    error: "",
+                    message: "",
                     inviteToConverse: "",
                     profileSearchResults: profiles,
                   });
                 } else {
-                  logger.info("[CreateConver] No profiles found for XMTP user");
+                  logger.info(
+                    "[CreateConversation] No profiles found for XMTP user"
+                  );
                   setStatus({
                     loading: false,
-                    error: "",
+                    message: "",
                     inviteToConverse: "",
                     profileSearchResults: {},
                   });
                 }
               } else {
-                logger.info("[CreateConver] Address not on XMTP", {
+                logger.info("[CreateConversation] Address not on XMTP", {
                   searchQueryState,
                   address,
                 });
                 setStatus({
                   loading: false,
-                  error: `${shortAddress(
+                  message: `${shortAddress(
                     searchQueryState
                   )} is not on the XMTP network yet`,
                   inviteToConverse: searchQueryState,
@@ -311,12 +299,12 @@ export function CreateConversationScreen({
           }
         } else {
           logger.info(
-            "[CreateConver] Searching profiles for non-peer searchQueryState",
+            "[CreateConversation] Searching profiles for non-peer searchQueryState",
             { searchQueryState }
           );
           setStatus({
             loading: true,
-            error: "",
+            message: "",
             inviteToConverse: "",
             profileSearchResults: {},
           });
@@ -327,25 +315,44 @@ export function CreateConversationScreen({
           );
 
           if (!isEmptyObject(profiles)) {
-            logger.info("[CreateConver] Found and saving profiles", {
+            logger.info("[CreateConversation] Found and saving profiles", {
               searchQueryState,
               profileCount: Object.keys(profiles).length,
             });
-            // Let's save the profiles for future use
+            // Let's save the profiles for future use[getCurrentAccount()!]
+            logger.info(
+              "[CreateConversation] Current account",
+              getCurrentAccount()
+            );
+            logger.info("[CreateConversation] Saving profiles", profiles);
             setProfileRecordSocialsQueryData(profiles);
+            const currentAccountInProfiles = profiles[getCurrentAccount()!];
+            logger.info(
+              "[CreateConversation] Current account in profiles",
+              /** whjy the hell is this undefined if i search for myself in prifiles above? */
+              currentAccountInProfiles
+            );
+            if (currentAccountInProfiles) {
+              logger.info(
+                "[CreateConversation] Deleting current account from profiles",
+                getCurrentAccount()
+              );
+              delete profiles[getCurrentAccount()!];
+            }
+
             setStatus({
               loading: false,
-              error: "",
+              message: "",
               inviteToConverse: "",
               profileSearchResults: profiles,
             });
           } else {
-            logger.info("[CreateConver] No profiles found", {
+            logger.info("[CreateConversation] No profiles found", {
               searchQueryState,
             });
             setStatus({
               loading: false,
-              error: "",
+              message: `No profiles found for ${searchQueryState}`,
               inviteToConverse: "",
               profileSearchResults: {},
             });
@@ -357,7 +364,7 @@ export function CreateConversationScreen({
 
     return () => {
       if (debounceTimer.current !== null) {
-        logger.info("[CreateConver] Cleanup: clearing debounce timer");
+        logger.info("[CreateConversation] Cleanup: clearing debounce timer");
         clearTimeout(debounceTimer.current);
       }
     };
@@ -371,7 +378,7 @@ export function CreateConversationScreen({
       if (!initialFocus.current) {
         initialFocus.current = true;
         if (!searchQueryState) {
-          logger.debug("[CreateConver] Auto-focusing input");
+          logger.debug("[CreateConversation] Auto-focusing input");
           setTimeout(() => {
             r?.focus();
           }, 100);
@@ -382,21 +389,6 @@ export function CreateConversationScreen({
     [searchQueryState]
   );
 
-  const shouldDisplaySearchResults =
-    !status.loading &&
-    !status.error &&
-    !isEmptyObject(status.profileSearchResults);
-
-  const shouldDisplayLoading =
-    status.loading &&
-    !status.error &&
-    !isEmptyObject(status.profileSearchResults);
-
-  const shouldDisplayPendingMembers = pendingChatMembers.members.length > 0;
-
-  const shouldDisplayErrorMessage =
-    status.error && isEmptyObject(status.profileSearchResults);
-
   return (
     <View style={themed(stylesNewChat.$searchContainer)}>
       <SearchBar
@@ -405,7 +397,6 @@ export function CreateConversationScreen({
         onRef={onRef}
         inputPlaceholder={"Name, address or onchain ID"}
       />
-
       {shouldDisplayPendingMembers && (
         <View
           style={[
@@ -436,21 +427,28 @@ export function CreateConversationScreen({
           })}
         </View>
       )}
-
-      <View style={{ flex: 1 }}>
-        {shouldDisplaySearchResults && (
+      {shouldDisplaySearchResults && (
+        <View style={{ flex: 1 }}>
           <ProfileSearchResultsList
             profiles={(() => {
+              // todo: filter this from search, not here
               const searchResultsToShow = { ...status.profileSearchResults };
               if (pendingChatMembers.members) {
                 pendingChatMembers.members.forEach((member) => {
                   delete searchResultsToShow[member.address];
                 });
               }
+              if (
+                pendingChatMembers.members.find(
+                  (member) => member.address === getCurrentAccount()!
+                )
+              ) {
+                delete searchResultsToShow[getCurrentAccount()!];
+              }
               return searchResultsToShow;
             })()}
             handleSearchResultItemPress={(args) => {
-              logger.info("[CreateConver] handleSearchResultItemPress", {
+              logger.info("[CreateConversation] handleSearchResultItemPress", {
                 args,
               });
               setPendingGroupMembers((g) => ({
@@ -463,35 +461,28 @@ export function CreateConversationScreen({
               setSearchQueryState("");
             }}
           />
-        )}
-      </View>
-
-      {shouldDisplayErrorMessage && (
-        <ScrollView
-          style={[themed(stylesNewChat.$modal), { flex: 1 }]}
-          keyboardShouldPersistTaps="handled"
-          onTouchStart={() => {
-            inputRef.current?.blur();
-          }}
-        >
-          {status.error && isEmptyObject(status.profileSearchResults) && (
-            <View style={themed(stylesNewChat.$messageContainer)}>
-              <Text
-                style={[
-                  themed(stylesNewChat.$message),
-                  themed(stylesNewChat.$error),
-                ]}
-              >
-                {status.error}
-              </Text>
-            </View>
-          )}
-
-          {shouldDisplayLoading && (
-            <Loader style={{ marginTop: theme.spacing.lg }} />
-          )}
-        </ScrollView>
+        </View>
       )}
+      {shouldDisplayMessage && (
+        <View style={themed(stylesNewChat.$messageContainer)}>
+          <Text
+            style={[
+              themed(stylesNewChat.$message),
+              themed(stylesNewChat.$error),
+            ]}
+          >
+            {status.message}
+          </Text>
+        </View>
+      )}
+      {shouldDisplayLoading && (
+        <View style={{ flex: 1 }}>
+          <Loader size="large" style={{ marginTop: theme.spacing.lg }} />
+        </View>
+      )}
+
+      {/* spacer if not doing anything */}
+      <View style={{ flex: 1 }} />
 
       {/* todo: review this pattern with Thierry */}
       <ConversationComposerStoreProvider
@@ -500,65 +491,78 @@ export function CreateConversationScreen({
         <ConversationComposerContainer>
           <Composer
             hideAddAttachmentButton
-            disabled={composerSendButtonDisabled}
+            disabled={composerSendButtonDisabled || status.loading}
+            // todo clean this up/use hooks or query functions properly
             onSend={async (something) => {
-              const dmCreationMessageText = something.content.text || "";
-              if (
-                !dmCreationMessageText ||
-                dmCreationMessageText.length === 0
-              ) {
-                return;
-              }
-              logger.info(
-                "[CreateConver] Sending message",
-                something.content.text
-              );
-
-              if (conversationCreationMode === ConversationVersion.DM) {
-                let dm = await getOptionalConversationByPeerByAccount({
-                  account: currentAccount(),
-                  peer: pendingChatMembers.members[0].address,
-                  includeSync: true,
-                });
-                if (!dm) {
-                  dm = await createConversationByAccount(
-                    currentAccount(),
-                    pendingChatMembers.members[0].address
-                  );
+              try {
+                const dmCreationMessageText = something.content.text || "";
+                if (
+                  !dmCreationMessageText ||
+                  dmCreationMessageText.length === 0
+                ) {
+                  return;
                 }
-                await sendMessage({
-                  conversation: dm,
-                  params: {
-                    content: { text: dmCreationMessageText },
-                  },
+                logger.info(
+                  "[CreateConversation] Sending message",
+                  something.content.text
+                );
+
+                if (conversationCreationMode === ConversationVersion.DM) {
+                  let dm = await getOptionalConversationByPeerByAccount({
+                    account: currentAccount(),
+                    peer: pendingChatMembers.members[0].address,
+                    includeSync: true,
+                  });
+                  if (!dm) {
+                    dm = await createConversationByAccount(
+                      currentAccount(),
+                      pendingChatMembers.members[0].address
+                    );
+                  }
+                  await sendMessage({
+                    conversation: dm,
+                    params: {
+                      content: { text: dmCreationMessageText },
+                    },
+                  });
+                  setConversationQueryData({
+                    account: currentAccount(),
+                    topic: dm.topic,
+                    conversation: dm,
+                    context: "CreateConversation#sendDm",
+                  });
+                  navigation.replace("Conversation", { topic: dm.topic });
+                } else {
+                  const group = await createGroupWithDefaultsByAccount({
+                    account: currentAccount(),
+                    peerEthereumAddresses: pendingChatMembers.members.map(
+                      (m) => m.address
+                    ),
+                  });
+                  await sendMessage({
+                    conversation: group,
+                    params: {
+                      content: { text: dmCreationMessageText },
+                    },
+                  });
+                  setConversationQueryData({
+                    account: currentAccount(),
+                    topic: group.topic,
+                    conversation: group,
+                    context: "CreateConversation#sendGroupMessage",
+                  });
+                  navigation.replace("Conversation", { topic: group.topic });
+                }
+              } catch (e) {
+                const errorString =
+                  (e as Error)?.message || `Something went wrong`;
+                captureErrorWithToast(e);
+                setStatus({
+                  loading: false,
+                  message: errorString,
+                  inviteToConverse: "",
+                  profileSearchResults: {},
                 });
-                setConversationQueryData({
-                  account: currentAccount(),
-                  topic: dm.topic,
-                  conversation: dm,
-                  context: "CreateConver#sendDm",
-                });
-                navigation.replace("Conversation", { topic: dm.topic });
-              } else {
-                const group = await createGroupWithDefaultsByAccount({
-                  account: currentAccount(),
-                  peerEthereumAddresses: pendingChatMembers.members.map(
-                    (m) => m.address
-                  ),
-                });
-                await sendMessage({
-                  conversation: group,
-                  params: {
-                    content: { text: dmCreationMessageText },
-                  },
-                });
-                setConversationQueryData({
-                  account: currentAccount(),
-                  topic: group.topic,
-                  conversation: group,
-                  context: "CreateConver#sendGroupMessage",
-                });
-                navigation.replace("Conversation", { topic: group.topic });
               }
             }}
           />
