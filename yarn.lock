@@ -3830,6 +3830,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dev-plugins/react-query@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@dev-plugins/react-query@npm:0.1.0"
+  dependencies:
+    flatted: "npm:^3.3.1"
+  peerDependencies:
+    "@tanstack/react-query": "*"
+    expo: ^52.0.0
+  checksum: 10c0/97381435528439198c4269c39230d54510f4953a6995d8f61d040c7b8a5d35326cfd1903533dd7249056d97396f7d06cd4ba0cc056a7685ca1966c62fa95c025
+  languageName: node
+  linkType: hard
+
 "@dominicstop/ts-event-emitter@npm:^1.1.0":
   version: 1.1.0
   resolution: "@dominicstop/ts-event-emitter@npm:1.1.0"
@@ -15176,6 +15188,7 @@ __metadata:
     "@babel/runtime": "npm:^7.25.0"
     "@babel/traverse": "npm:^7.25.3"
     "@coinbase/wallet-mobile-sdk": "npm:^1.0.13"
+    "@dev-plugins/react-query": "npm:^0.1.0"
     "@eslint/compat": "npm:^1.2.2"
     "@ethersproject/shims": "npm:^5.7.0"
     "@expo/config-plugins": "npm:~9.0.0"
