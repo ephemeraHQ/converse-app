@@ -7,9 +7,12 @@ import { UseQueryOptions } from "@tanstack/react-query";
 
 function selectUnknownConsentConversations(conversations: IConversationsQuery) {
   return (
-    conversations?.filter((conversation) =>
-      // Only the unknown conversations
-      isConversationConsentUnknown(conversation)
+    conversations?.filter(
+      (conversation) =>
+        // Only the unknown conversations
+        isConversationConsentUnknown(conversation) &&
+        // Only the conversations with last message
+        conversation.lastMessage
     ) ?? []
   );
 }
