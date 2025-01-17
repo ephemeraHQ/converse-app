@@ -1,4 +1,4 @@
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/client/client.types";
 import { getXmtpClient } from "@/utils/xmtpRN/sync";
 import logger from "@utils/logger";
 import { InboxId } from "@xmtp/react-native-sdk";

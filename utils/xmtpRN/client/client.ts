@@ -1,3 +1,6 @@
+import { config } from "@/config";
+import { getDbDirectory } from "@/data/db";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
@@ -11,10 +14,7 @@ import {
   TextCodec,
 } from "@xmtp/react-native-sdk";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
-import { config } from "@/config";
-import { getDbDirectory } from "@/data/db";
 import { CoinbaseMessagingPaymentCodec } from "../content-types/coinbasePayment";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 
 const codecs = [
   new TextCodec(),

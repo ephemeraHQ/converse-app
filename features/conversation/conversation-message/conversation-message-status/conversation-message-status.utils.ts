@@ -1,4 +1,4 @@
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client/client.types";
 import { MessageDeliveryStatus } from "@xmtp/react-native-sdk";
 
 export function messageIsSent(message: DecodedMessageWithCodecsType) {

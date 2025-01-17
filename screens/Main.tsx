@@ -19,7 +19,7 @@ import { useThemeProvider } from "@theme/useAppTheme";
 import { useAutoConnectExternalWallet } from "@utils/evm/external";
 import { usePrivyAccessToken } from "@utils/evm/privy";
 import { converseNavigatorRef } from "@utils/navigation";
-import { useCheckCurrentInstallation } from "@utils/xmtpRN/client";
+import { useCheckCurrentInstallation } from "@utils/xmtpRN/client/client-installations";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import React from "react";

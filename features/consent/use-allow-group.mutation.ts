@@ -13,7 +13,6 @@ import {
   setGroupQueryData,
 } from "@/queries/useGroupQuery";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { queryClient } from "@queries/queryClient";
 import {
   MutationObserver,

@@ -1,55 +1,13 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { translate } from "@i18n";
 import { awaitableAlert } from "@utils/alert";
-import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { useLogoutFromConverse } from "@utils/logout";
-import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
-import {
-  Client,
-  GroupUpdatedCodec,
-  ReactionCodec,
-  ReadReceiptCodec,
-  RemoteAttachmentCodec,
-  ReplyCodec,
-  StaticAttachmentCodec,
-  TextCodec,
-} from "@xmtp/react-native-sdk";
+import { Client } from "@xmtp/react-native-sdk";
 import { useEffect, useRef } from "react";
-import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
-import { config } from "../../config";
-import { getDbDirectory } from "../../data/db";
-import { CoinbaseMessagingPaymentCodec } from "./content-types/coinbasePayment";
-import { getXmtpClient } from "./sync";
-import { ConverseXmtpClientType } from "./client.types";
+import { getXmtpClient } from "../sync";
 
-const codecs = [
-  new TextCodec(),
-  new ReactionCodec(),
-  new ReadReceiptCodec(),
-  new GroupUpdatedCodec(),
-  new ReplyCodec(),
-  new RemoteAttachmentCodec(),
-  new StaticAttachmentCodec(),
-  new TransactionReferenceCodec(),
-  new CoinbaseMessagingPaymentCodec(),
-];
-
-export const getXmtpClientFromAddress = async (address: string) => {
-  const dbDirectory = await getDbDirectory();
-  const dbEncryptionKey = await getDbEncryptionKey();
-
-  return Client.build(address, {
-    env: config.xmtpEnv,
-    codecs,
-    dbDirectory,
-    dbEncryptionKey,
-  });
-};
-
-export const xmtpClientByAccount: {
-  [account: string]: ConverseXmtpClientType;
-} = {};
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/client/client.types";
 
 export const isClientInstallationValid = async (client: Client) => {
   const inboxState = await client.inboxState(true);
@@ -104,10 +62,6 @@ export const useCheckCurrentInstallation = () => {
     });
   }, [account, logout]);
 };
-
-export const dropXmtpClient = (installationId: InstallationId) =>
-  Client.dropClient(installationId);
-
 export type InstallationSignature = {
   installationPublicKey: string;
   installationKeySignature: string;

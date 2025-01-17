@@ -20,7 +20,7 @@ import {
 } from "@/features/conversation/conversation.store-context";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { captureError } from "@/utils/capture-error";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client/client.types";
 import { HStack } from "@design-system/HStack";
 import { Icon } from "@design-system/Icon/Icon";
 import { Text } from "@design-system/Text";

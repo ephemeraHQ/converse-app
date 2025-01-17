@@ -9,7 +9,7 @@ import {
   getOrFetchConversation,
 } from "@/queries/useConversationQuery";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client/client.types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 

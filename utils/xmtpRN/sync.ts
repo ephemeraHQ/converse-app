@@ -1,11 +1,9 @@
 import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
-
-import { getChatStore } from "@data/store/accountsStore";
+import { captureError } from "@/utils/capture-error";
 import logger from "@utils/logger";
 import { retryWithBackoff } from "@utils/retryWithBackoff";
-import { AppState } from "react-native";
-import { getXmtpClientFromAddress, xmtpClientByAccount } from "./client";
-import { ConverseXmtpClientType } from "./client.types";
+import { getXmtpClientFromAddress, xmtpClientByAccount } from "./client/client";
+import { ConverseXmtpClientType } from "./client/client.types";
 import {
   stopStreamingConversations,
   streamConversations,
@@ -58,13 +56,6 @@ export const getXmtpClient = async (
     lowerCaseAccount
   ] as Promise<ConverseXmtpClientType>;
 };
-
-export const onSyncLost = async (account: string) => {
-  // If there is an error let's show it
-  getChatStore(account).getState().setReconnecting(true);
-};
-
-const streamingAccounts: { [account: string]: boolean } = {};
 
 const syncClientConversationList = async (account: string) => {
   try {
@@ -130,7 +121,7 @@ export const syncConversationListXmtpClient = async (account: string) => {
     maxDelay: 30000,
     context: `syncing ${account}`,
     onError: async (e) => {
-      await onSyncLost(account);
+      captureError(e);
     },
   });
 };
@@ -143,5 +134,4 @@ export const deleteXmtpClient = async (account: string) => {
   }
   delete xmtpClientByAccount[account];
   delete instantiatingClientForAccount[account];
-  delete streamingAccounts[account];
 };

@@ -1,11 +1,11 @@
+import { StackActions } from "@react-navigation/native";
 import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
 import logger from "@utils/logger";
-import { dropXmtpClient } from "@utils/xmtpRN/client";
-import { ConverseXmtpClientType } from "@utils/xmtpRN/client.types";
+import { converseNavigatorRef } from "@utils/navigation";
+import { dropXmtpClient } from "@utils/xmtpRN/client/client";
+import { ConverseXmtpClientType } from "@utils/xmtpRN/client/client.types";
 import { getInboxId } from "@utils/xmtpRN/signIn";
 import { useCallback } from "react";
-import { converseNavigatorRef } from "@utils/navigation";
-import { StackActions } from "@react-navigation/native";
 
 import {
   getAccountsList,
@@ -24,14 +24,14 @@ import mmkv, {
   secureMmkvByAccount,
 } from "@utils/mmkv";
 
-import { useDisconnectFromPrivy } from "./privy";
-import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
-import { unsubscribeFromNotifications } from "@features/notifications/utils/unsubscribeFromNotifications";
+import { resetNotifications } from "@/features/notifications/utils/resetNotifications";
+import { getXmtpApiHeaders } from "@/utils/api/auth";
 import { deleteSubscribedTopics } from "@features/notifications/utils/deleteSubscribedTopics";
 import { lastNotifSubscribeByAccount } from "@features/notifications/utils/lastNotifSubscribeByAccount";
+import { unsubscribeFromNotifications } from "@features/notifications/utils/unsubscribeFromNotifications";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
-import { getXmtpApiHeaders } from "@/utils/api/auth";
-import { resetNotifications } from "@/features/notifications/utils/resetNotifications";
+import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
+import { useDisconnectFromPrivy } from "./privy";
 
 type LogoutTasks = {
   [account: string]: {

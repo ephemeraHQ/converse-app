@@ -3,7 +3,7 @@ import { Text } from "@/design-system/Text";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client/client.types";
 import { ViewStyle } from "react-native";
 
 export type IPinnedConversationMessagePreviewProps = {

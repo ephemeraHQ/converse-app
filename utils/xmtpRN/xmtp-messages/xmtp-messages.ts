@@ -3,7 +3,7 @@ import {
   isReadReceiptMessage,
   isTransactionReferenceMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { DecodedMessageWithCodecsType } from "../client.types";
+import { DecodedMessageWithCodecsType } from "../client/client.types";
 
 export function isSupportedMessage(message: DecodedMessageWithCodecsType) {
   if (isReadReceiptMessage(message)) {

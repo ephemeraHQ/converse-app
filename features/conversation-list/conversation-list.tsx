@@ -3,7 +3,7 @@ import { ConversationListItemDm } from "@/features/conversation-list/conversatio
 import { ConversationListItemGroup } from "@/features/conversation-list/conversation-list-item/conversation-list-item-group";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/client/client.types";
 import { useCallback, useRef } from "react";
 import {
   FlatListProps,

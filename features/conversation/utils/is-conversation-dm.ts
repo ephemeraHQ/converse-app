@@ -1,7 +1,7 @@
 import {
   ConversationWithCodecsType,
   DmWithCodecsType,
-} from "@/utils/xmtpRN/client.types";
+} from "@/utils/xmtpRN/client/client.types";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
 
 export function isConversationDm(

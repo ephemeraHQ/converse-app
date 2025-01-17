@@ -1,6 +1,6 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { translate } from "@i18n";
-import { ConverseXmtpClientType } from "../xmtpRN/client.types";
+import { ConverseXmtpClientType } from "../xmtpRN/client/client.types";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { useCallback } from "react";
 import { Alert } from "react-native";

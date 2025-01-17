@@ -5,7 +5,7 @@ import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
-} from "@/utils/xmtpRN/client.types";
+} from "@/utils/xmtpRN/client/client.types";
 import { conversationsQueryKey } from "@queries/QueryKeys";
 import { QueryObserver, queryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";

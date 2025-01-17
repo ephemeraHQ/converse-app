@@ -2,11 +2,10 @@ import { queryOptions, SetDataOptions, useQuery } from "@tanstack/react-query";
 import { getCleanAddress } from "@utils/evm/getCleanAddress";
 import { ConversationTopic, Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
-
 import { entifyWithAddress, EntityObjectWithAddress } from "./entify";
 import { queryClient } from "./queryClient";
 import { groupMembersQueryKey } from "./QueryKeys";
-import { getGroupQueryData, getOrFetchGroupQuery } from "./useGroupQuery";
+import { getOrFetchGroupQuery } from "./useGroupQuery";
 
 export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
 

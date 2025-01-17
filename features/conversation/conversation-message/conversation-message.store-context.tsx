@@ -8,7 +8,7 @@ import { hasPreviousMessageInSeries } from "@/features/conversation/utils/has-pr
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { messageShouldShowDateChange } from "@/features/conversation/utils/message-should-show-date-change";
 import { convertNanosecondsToMilliseconds } from "@/utils/date";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client/client.types";
 import { InboxId, MessageId } from "@xmtp/react-native-sdk";
 import { createContext, memo, useContext, useEffect, useRef } from "react";
 import { createStore, useStore } from "zustand";

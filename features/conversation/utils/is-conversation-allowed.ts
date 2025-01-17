@@ -1,4 +1,4 @@
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/client/client.types";
 
 export function isConversationAllowed(
   conversation: ConversationWithCodecsType

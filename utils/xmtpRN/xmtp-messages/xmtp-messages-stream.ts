@@ -17,7 +17,7 @@ import type {
 import {
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
-} from "../client.types";
+} from "../client/client.types";
 import { getXmtpClient } from "../sync";
 
 export const streamAllMessages = async (account: string) => {

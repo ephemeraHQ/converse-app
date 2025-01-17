@@ -2,7 +2,7 @@ import { VStack } from "@/design-system/VStack";
 import { PinnedConversationAvatar } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-avatar";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
-import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { DmWithCodecsType } from "@/utils/xmtpRN/client/client.types";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";

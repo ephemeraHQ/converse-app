@@ -23,7 +23,7 @@ import { captureError } from "@/utils/capture-error";
 import {
   DmWithCodecsType,
   GroupWithCodecsType,
-} from "@/utils/xmtpRN/client.types";
+} from "@/utils/xmtpRN/client/client.types";
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { memo, useCallback } from "react";

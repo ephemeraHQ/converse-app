@@ -4,7 +4,7 @@ import { getSecureMmkvForAccount } from "../mmkv";
 import {
   InstallationSignature,
   getInstallationKeySignature,
-} from "../xmtpRN/client";
+} from "../xmtpRN/client/client-installations";
 import { getInboxId } from "../xmtpRN/signIn";
 import { api } from "./api";
 import {

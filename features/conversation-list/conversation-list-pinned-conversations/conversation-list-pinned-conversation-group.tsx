@@ -2,7 +2,7 @@ import { VStack } from "@/design-system/VStack";
 import { PinnedConversationAvatar } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-avatar";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client/client.types";
 import { navigate } from "@utils/navigation";
 import { useCallback } from "react";
 import { ConversationListPinnedConversation } from "./conversation-list-pinned-conversation";

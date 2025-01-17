@@ -1,4 +1,4 @@
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client/client.types";
 import { getInboxId } from "@/utils/xmtpRN/signIn";
 
 export async function isConversationMessageFromEthAddress(args: {

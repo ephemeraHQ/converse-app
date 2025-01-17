@@ -12,7 +12,7 @@ import {
 } from "@/queries/useInboxProfileSocialsQuery";
 import { captureError } from "@/utils/capture-error";
 import { getPreferredInboxName } from "@/utils/profile";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client/client.types";
 import logger from "@utils/logger";
 import {
   DecodedMessage,

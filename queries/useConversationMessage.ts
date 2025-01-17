@@ -1,6 +1,6 @@
-import { queryOptions } from "@tanstack/react-query";
 import logger from "@/utils/logger";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
+import { queryOptions } from "@tanstack/react-query";
+import { ConverseXmtpClientType } from "@utils/xmtpRN/client/client.types";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { MessageId } from "@xmtp/react-native-sdk";
 import { conversationMessageQueryKey } from "./QueryKeys";

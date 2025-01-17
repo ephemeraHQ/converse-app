@@ -3,7 +3,7 @@ import {
   getConversationMessagesQueryData,
   useConversationMessagesQuery,
 } from "@/queries/use-conversation-messages-query";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client/client.types";
 import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/content-types/coinbasePayment";
 import { getMessageContentType } from "@/utils/xmtpRN/content-types/content-types";
 import {

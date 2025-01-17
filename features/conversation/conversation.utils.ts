@@ -1,6 +1,6 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import { getConversationQueryData } from "@/queries/useConversationQuery";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/client/client.types";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 
 export function getCurrentAccountConversation(topic: ConversationTopic) {

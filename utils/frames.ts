@@ -12,11 +12,10 @@ import {
 } from "@xmtp/frames-client";
 import { useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
-
-import { converseEventEmitter, waitForConverseEvent } from "./events";
+import { waitForConverseEvent } from "./events";
 import { useExternalSigner } from "./evm/external";
 import { strByteSize } from "./str";
-import { ConverseXmtpClientType } from "./xmtpRN/client.types";
+import { ConverseXmtpClientType } from "./xmtpRN/client/client.types";
 import { getXmtpClient } from "./xmtpRN/sync";
 
 export type FrameWithType = FramesApiResponse & {
@@ -241,9 +240,8 @@ export const useHandleTxAction = () => {
         value: txData.params.value,
         data: txData.params.data,
       };
-      const [transactionId, receipt] = await waitForConverseEvent(
-        "transactionResult"
-      );
+      const [transactionId, receipt] =
+        await waitForConverseEvent("transactionResult");
       const transactionReceipt =
         transactionId === transactionData.id ? receipt : undefined;
 

@@ -9,7 +9,7 @@ import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
   DmWithCodecsType,
-} from "./client.types";
+} from "./client/client.types";
 import { getXmtpClient } from "./sync";
 import { streamAllMessages } from "./xmtp-messages/xmtp-messages-stream";
 

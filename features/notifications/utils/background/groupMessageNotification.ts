@@ -14,7 +14,7 @@ import {
   DecodedMessageWithCodecsType,
   DmWithCodecsType,
   GroupWithCodecsType,
-} from "@utils/xmtpRN/client.types";
+} from "@/utils/xmtpRN/client/client.types";
 import { Conversation, type ConversationTopic } from "@xmtp/react-native-sdk";
 import { androidChannel } from "../setupAndroidNotificationChannel";
 import { notificationAlreadyShown } from "./alreadyShown";

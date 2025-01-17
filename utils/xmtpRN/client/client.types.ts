@@ -14,7 +14,7 @@ import {
 } from "@xmtp/react-native-sdk";
 import {
   CoinbaseMessagingPaymentCodec, // the behavior is driven by the generic codecs but are unused
-} from "./content-types/coinbasePayment";
+} from "../content-types/coinbasePayment";
 
 export type SupportedCodecsType = [
   TextCodec,
