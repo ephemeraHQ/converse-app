@@ -68,6 +68,7 @@ export const iconRegistry: Record<IIconName, string> = {
   "shield.fill": "shield.fill",
   "new-account-card": "person.text.rectangle",
   settings: "gearshape",
+  restore: "archivebox.circle.fill",
 };
 
 export function Icon(props: IIconProps) {

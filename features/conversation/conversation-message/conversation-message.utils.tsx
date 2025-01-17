@@ -1,5 +1,5 @@
 import { IConvosMessage } from "@/features/conversation/conversation-message/conversation-message.types";
-import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
+import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   getConversationMessagesQueryData,
   useConversationMessages,
@@ -201,7 +201,7 @@ export function getCurrentUserAlreadyReactedOnMessage(args: {
   emoji: string | undefined; // Specific emoji or just reacted in general
 }) {
   const { messageId, topic, emoji } = args;
-  const currentUserInboxId = getCurrentUserAccountInboxId();
+  const currentUserInboxId = getCurrentAccountInboxId();
   const currentAccount = getCurrentAccount()!;
   const messages = getConversationMessagesQueryData(currentAccount, topic);
   const reactions = messages?.reactions[messageId];

@@ -13,8 +13,9 @@ export const ConversationListItemSwipeable = memo(
       <Swipeable
         closeOnOpen
         leftThreshold={swipeThreshold}
+        rightThreshold={swipeThreshold}
         leftActionsBackgroundColor={theme.colors.fill.caution}
-        rightActionsBackgroundColor={theme.colors.fill.minimal}
+        rightActionsBackgroundColor={theme.colors.fill.secondary}
         {...props}
       >
         {children}

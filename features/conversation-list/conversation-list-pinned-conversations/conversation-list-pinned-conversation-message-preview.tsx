@@ -1,9 +1,9 @@
-import { HStack } from "@/design-system/HStack";
+import { AnimatedHStack, HStack } from "@/design-system/HStack";
 import { Text } from "@/design-system/Text";
-import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { captureError } from "@/utils/capture-error";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { useMemo } from "react";
 import { ViewStyle } from "react-native";
 
 export type IPinnedConversationMessagePreviewProps = {
@@ -15,36 +15,46 @@ export const PinnedConversationMessagePreview = (
 ) => {
   const { message } = props;
 
-  if (!isTextMessage(message)) {
-    throw new Error(
-      "Pinned message preview can only be used for text messages"
-    );
+  const { themed, theme } = useAppTheme();
+
+  const textContent = useMessagePlainText(message);
+
+  if (!textContent) {
+    captureError;
+    return null;
   }
-
-  const { themed } = useAppTheme();
-
-  const content = useMemo(() => {
-    return message.content() as string;
-  }, [message]);
 
   return (
     <HStack style={themed($containerStyle)}>
-      <Text numberOfLines={2} preset="smaller">
-        {content}
-      </Text>
+      <AnimatedHStack
+        entering={theme.animation.reanimatedFadeInScaleIn()}
+        exiting={theme.animation.reanimatedFadeOutScaleOut()}
+        layout={theme.animation.reanimatedLayoutSpringTransition}
+        style={themed($innerStyle)}
+      >
+        <Text numberOfLines={2} preset="smaller">
+          {textContent}
+        </Text>
+      </AnimatedHStack>
     </HStack>
   );
 };
 
-const $containerStyle: ThemedStyle<ViewStyle> = ({
+const $containerStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  position: "absolute",
+  top: 0,
+  left: -spacing.xs,
+  right: -spacing.xs,
+  justifyContent: "center",
+});
+
+const $innerStyle: ThemedStyle<ViewStyle> = ({
   colors,
   borderRadius,
   borderWidth,
   spacing,
 }) => ({
   backgroundColor: colors.background.raised,
-  position: "absolute",
-  top: 0,
   paddingHorizontal: spacing.xs,
   paddingVertical: spacing.xxs,
   alignSelf: "center",

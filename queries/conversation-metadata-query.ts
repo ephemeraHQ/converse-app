@@ -20,7 +20,6 @@ export function getConversationMetadataQueryOptions(args: IArgs) {
     queryKey: conversationMetadataQueryKey(args.account, args.topic),
     queryFn: () => getConversationMetadata(args),
     enabled: !!args.topic && !!args.account,
-    retry: false,
   });
 }
 
@@ -74,15 +73,15 @@ const batchedGetConversationMetadata = create({
     if (!match) {
       return null;
     }
-    // Destructure to remove account and topic from the result
-    const { account, topic, ...rest } = match;
+
+    const { account, topic, ...backendProperties } = match;
 
     // If we don't have any data for this conversation, we return null
-    if (Object.keys(rest).length === 0) {
+    if (Object.keys(backendProperties).length === 0) {
       return null;
     }
 
-    return rest;
+    return match;
   },
   fetcher: async (args: IArgs[]) => {
     const accountGroups = args.reduce((groups, arg) => {

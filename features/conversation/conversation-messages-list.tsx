@@ -2,6 +2,7 @@ import { VStack } from "@/design-system/VStack";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 // import { LegendList } from "@legendapp/list";
 import { MessageId } from "@xmtp/react-native-sdk";
 import { ReactElement, memo, useEffect } from "react";
@@ -12,12 +13,12 @@ import Animated, {
 } from "react-native-reanimated";
 
 type ConversationMessagesListProps = Omit<
-  AnimatedProps<FlatListProps<MessageId>>,
+  AnimatedProps<FlatListProps<DecodedMessageWithCodecsType>>,
   "renderItem" | "data"
 > & {
-  messageIds: MessageId[];
+  messages: DecodedMessageWithCodecsType[];
   renderMessage: (args: {
-    messageId: MessageId;
+    message: DecodedMessageWithCodecsType;
     index: number;
   }) => ReactElement;
 };
@@ -25,11 +26,11 @@ type ConversationMessagesListProps = Omit<
 export const ConversationMessagesList = memo(function ConversationMessagesList(
   props: ConversationMessagesListProps
 ) {
-  const { messageIds, renderMessage, ...rest } = props;
+  const { messages, renderMessage, ...rest } = props;
 
   const { theme } = useAppTheme();
 
-  const scrollRef = useAnimatedRef<FlatList<MessageId>>();
+  const scrollRef = useAnimatedRef<FlatList<DecodedMessageWithCodecsType>>();
 
   const conversationStore = useConversationStore();
 
@@ -39,7 +40,9 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
       (scrollToMessageId) => {
         if (!scrollToMessageId) return;
         scrollRef.current?.scrollToIndex({
-          index: messageIds.indexOf(scrollToMessageId),
+          index: messages.findIndex(
+            (message) => message.id === scrollToMessageId
+          ),
           animated: true,
           viewOffset: 100, // Random value just so that the message is not directly at the bottom
         });
@@ -52,7 +55,7 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
     return () => {
       unsub();
     };
-  }, [conversationStore, messageIds, scrollRef]);
+  }, [conversationStore, messages, scrollRef]);
 
   // WIP. Lib isn't ready yet
   // return (
@@ -93,12 +96,12 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
     <Animated.FlatList
       {...conversationListDefaultProps}
       ref={scrollRef}
-      data={messageIds}
+      data={messages}
       layout={theme.animation.reanimatedLayoutSpringTransition}
       itemLayoutAnimation={theme.animation.reanimatedLayoutSpringTransition}
       renderItem={({ item, index }) =>
         renderMessage({
-          messageId: item,
+          message: item,
           index,
         })
       }
@@ -107,7 +110,13 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
   );
 });
 
-const keyExtractor = (messageId: MessageId) => messageId;
+const keyExtractor = (message: DecodedMessageWithCodecsType) => {
+  return (
+    // @ts-expect-error
+    message.tempOptimisticId || // Check use-send-message.ts
+    message.id
+  );
+};
 
 const MessageSeparator = memo(function MessageSeparator() {
   const { theme } = useAppTheme();

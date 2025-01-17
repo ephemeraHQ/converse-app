@@ -18,7 +18,7 @@ PODS:
     - DGSwiftUtilities (~> 0.29)
   - CryptoSwift (1.8.3)
   - CSecp256k1 (0.2.0)
-  - DGSwiftUtilities (0.46.2)
+  - DGSwiftUtilities (0.46.3)
   - DoubleConversion (1.1.6)
   - EASClient (0.13.1):
     - ExpoModulesCore
@@ -2061,14 +2061,14 @@ PODS:
     - React-logger (= 0.76.5)
     - React-perflogger (= 0.76.5)
     - React-utils (= 0.76.5)
-  - ReactNativeIosContextMenu (2.5.1):
+  - ReactNativeIosContextMenu (2.5.3):
     - ContextMenuAuxiliaryPreview (~> 0.3)
     - DGSwiftUtilities
     - ExpoModulesCore
     - ReactNativeIosUtilities
-  - ReactNativeIosUtilities (4.5.2):
+  - ReactNativeIosUtilities (4.5.3):
     - ComputableLayout (~> 0.7)
-    - DGSwiftUtilities (~> 0.27)
+    - DGSwiftUtilities (~> 0.46.3)
     - ExpoModulesCore
   - rn-fetch-blob (0.12.0):
     - React-Core
@@ -2789,7 +2789,7 @@ SPEC CHECKSUMS:
   ContextMenuAuxiliaryPreview: 20be0be795b783b68f8792732eed4bed9f202c1c
   CryptoSwift: 967f37cea5a3294d9cce358f78861652155be483
   CSecp256k1: 2a59c03e52637ded98896a33be4b2649392cb843
-  DGSwiftUtilities: 26ab864a9ef7d92facb211aeb133412efd64ce65
+  DGSwiftUtilities: 2f0d35d5ff3d57bd70ccc42f15971460db202c41
   DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
   EASClient: d15d70e334b019ae5649609011cda761defe4b1a
   EXApplication: 88ebf1a95f85faa5d2df160016d61f2d060e9438
@@ -2922,8 +2922,8 @@ SPEC CHECKSUMS:
   React-utils: 89a30618bd38c591900879825de59104ded1e246
   ReactCodegen: 28abe92ea9a1e277edc25d02d7d53ab3acf5cc07
   ReactCommon: 7da12c0f59956995a153de45835b64c89e0a4a57
-  ReactNativeIosContextMenu: 23da83d33323a0ef2010a6199df335e51f0df88e
-  ReactNativeIosUtilities: 66f47ba72a6caf132da8c8e61090de6e5e364beb
+  ReactNativeIosContextMenu: 116a1993b5fd6dc9f8cf703c32f47e8bcc22a618
+  ReactNativeIosUtilities: 780b35bfc6dd1deab9e2bd76c579ad5ebe04be02
   rn-fetch-blob: 25612b6d6f6e980c6f17ed98ba2f58f5696a51ca
   RNAWSCognito: 7f374b06129b2efd233fe9fa5c60443d90126bc1
   RNCAsyncStorage: aa75595c1aefa18f868452091fa0c411a516ce11

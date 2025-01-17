@@ -1,5 +1,5 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
+import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { fetchConversationMessageQuery } from "@/queries/useConversationMessage";
 import {
   addConversationMessageQuery,
@@ -65,7 +65,7 @@ export function useSendMessage(props: {
     },
     onMutate: (variables) => {
       const currentAccount = getCurrentAccount()!;
-      const currentUserInboxId = getCurrentUserAccountInboxId()!;
+      const currentUserInboxId = getCurrentAccountInboxId()!;
 
       // For now, we only do optimistic updates for simple text messages
       // And if we like this, we'll implement the rest of content types
@@ -74,6 +74,8 @@ export function useSendMessage(props: {
 
         const textMessage: DecodedMessage<TextCodec> = {
           id: generatedMessageId as MessageId,
+          // @ts-expect-error helping the list keep a reference to the optimistic message
+          tempOptimisticId: generatedMessageId,
           contentTypeId: variables.content.text
             ? contentTypesPrefixes.text
             : contentTypesPrefixes.remoteAttachment,
@@ -116,7 +118,7 @@ export function useSendMessage(props: {
             tempId: context.generatedMessageId,
             topic: conversation.topic,
             account: getCurrentAccount()!,
-            message,
+            realMessage: message,
           });
         }
       }

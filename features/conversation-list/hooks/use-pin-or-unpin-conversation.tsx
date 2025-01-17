@@ -6,59 +6,92 @@ import {
 import { pinTopic, unpinTopic } from "@/utils/api/topics";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useCallback } from "react";
 
 export function usePinOrUnpinConversation(args: {
   conversationTopic: ConversationTopic;
 }) {
   const { conversationTopic } = args;
 
-  const { mutateAsync: pinOrUnpinConversationAsync } = useMutation({
+  const { mutateAsync: pinConversationAsync } = useMutation({
     mutationFn: () => {
       const currentAccount = getCurrentAccount()!;
-      const isPinned = getConversationMetadataQueryData({
-        account: currentAccount!,
+      return pinTopic({
+        account: currentAccount,
         topic: conversationTopic,
-      })?.isPinned;
-
-      if (isPinned) {
-        return unpinTopic({
-          account: currentAccount!,
-          topic: conversationTopic,
-        });
-      } else {
-        return pinTopic({
-          account: currentAccount!,
-          topic: conversationTopic,
-        });
-      }
+      });
     },
     onMutate: () => {
       const currentAccount = getCurrentAccount()!;
       const previousIsPinned = getConversationMetadataQueryData({
-        account: currentAccount!,
+        account: currentAccount,
         topic: conversationTopic,
       })?.isPinned;
 
       updateConversationMetadataQueryData({
-        account: currentAccount!,
+        account: currentAccount,
         topic: conversationTopic,
-        updateData: {
-          isPinned: !previousIsPinned,
-        },
+        updateData: { isPinned: true },
       });
+
       return { previousIsPinned };
     },
     onError: (error, _, context) => {
       const currentAccount = getCurrentAccount()!;
       updateConversationMetadataQueryData({
-        account: currentAccount!,
+        account: currentAccount,
         topic: conversationTopic,
-        updateData: {
-          isPinned: context?.previousIsPinned,
-        },
+        updateData: { isPinned: context?.previousIsPinned },
       });
     },
   });
+
+  const { mutateAsync: unpinConversationAsync } = useMutation({
+    mutationFn: () => {
+      const currentAccount = getCurrentAccount()!;
+      return unpinTopic({
+        account: currentAccount,
+        topic: conversationTopic,
+      });
+    },
+    onMutate: () => {
+      const currentAccount = getCurrentAccount()!;
+      const previousIsPinned = getConversationMetadataQueryData({
+        account: currentAccount,
+        topic: conversationTopic,
+      })?.isPinned;
+
+      updateConversationMetadataQueryData({
+        account: currentAccount,
+        topic: conversationTopic,
+        updateData: { isPinned: false },
+      });
+
+      return { previousIsPinned };
+    },
+    onError: (error, _, context) => {
+      const currentAccount = getCurrentAccount()!;
+      updateConversationMetadataQueryData({
+        account: currentAccount,
+        topic: conversationTopic,
+        updateData: { isPinned: context?.previousIsPinned },
+      });
+    },
+  });
+
+  const pinOrUnpinConversationAsync = useCallback(async () => {
+    const currentAccount = getCurrentAccount()!;
+    const isPinned = getConversationMetadataQueryData({
+      account: currentAccount,
+      topic: conversationTopic,
+    })?.isPinned;
+
+    if (isPinned) {
+      return unpinConversationAsync();
+    } else {
+      return pinConversationAsync();
+    }
+  }, [conversationTopic, pinConversationAsync, unpinConversationAsync]);
 
   return {
     pinOrUnpinConversationAsync,

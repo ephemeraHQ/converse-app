@@ -1,10 +1,12 @@
+import { Pressable } from "@/design-system/Pressable";
+import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import logger from "@/utils/logger";
 import { Center } from "@design-system/Center";
 import { HStack } from "@design-system/HStack";
-import { Pressable } from "@design-system/Pressable";
 import { Text } from "@design-system/Text";
-import { VStack } from "@design-system/VStack";
-import { FC } from "react";
+import { AnimatedVStack } from "@design-system/VStack";
+import React, { FC, useCallback, useRef } from "react";
 import { TextStyle, ViewStyle } from "react-native";
 import {
   ContextMenuView,
@@ -16,37 +18,79 @@ type IConversationListPinnedConversationProps = {
   onPress: () => void;
   showUnread: boolean;
   title: string;
-  contextMenuProps: ContextMenuViewProps;
+  contextMenuProps: ContextMenuViewProps; // Need this here because we want the context menu animation only to be around the avatar
 };
 
 export const ConversationListPinnedConversation: FC<
   IConversationListPinnedConversationProps
 > = ({ avatarComponent, onPress, showUnread, title, contextMenuProps }) => {
   const { themed, theme } = useAppTheme();
+  const contextMenuRef = useRef<ContextMenuView>(null);
+
+  const menuWillShowRef = useRef(false);
+
+  const { avatarSize } = useConversationListPinnedConversationsStyles();
+
+  const handlePress = useCallback(() => {
+    // Having this delay because right now there seems to be a bug when combining context menu and pressable.
+    // https://github.com/dominicstop/react-native-ios-context-menu/issues/109
+    setTimeout(() => {
+      if (!menuWillShowRef.current) {
+        onPress();
+      } else {
+        logger.debug("[ConversationListPinnedConversation] Saved a crash");
+      }
+    }, 100);
+  }, [onPress]);
 
   return (
-    <Pressable onPress={onPress}>
-      <VStack style={themed($container)}>
-        <ContextMenuView
-          hitSlop={theme.spacing.xs}
-          {...contextMenuProps}
-          style={[
-            {
-              borderRadius: 100,
-            },
-            contextMenuProps.style,
-          ]}
+    <AnimatedVStack
+      style={[
+        themed($container),
+        {
+          maxWidth: avatarSize,
+        },
+      ]}
+    >
+      <ContextMenuView
+        ref={contextMenuRef}
+        hitSlop={theme.spacing.xs}
+        {...contextMenuProps}
+        style={[
+          {
+            borderRadius: 999,
+          },
+          contextMenuProps.style,
+        ]}
+        onMenuWillShow={() => {
+          menuWillShowRef.current = true;
+        }}
+        onMenuWillHide={() => {
+          menuWillShowRef.current = false;
+        }}
+      >
+        <Pressable onPress={handlePress} delayLongPress={100}>
+          <Center
+            style={{
+              borderRadius: 999,
+            }}
+          >
+            {avatarComponent}
+          </Center>
+        </Pressable>
+      </ContextMenuView>
+      <HStack style={themed($bottomContainer)}>
+        <Text
+          preset="smaller"
+          color="secondary"
+          numberOfLines={1}
+          style={themed($text)}
         >
-          {avatarComponent}
-        </ContextMenuView>
-        <HStack style={themed($bottomContainer)}>
-          <Text numberOfLines={1} style={themed($text)}>
-            {title}
-          </Text>
-          {showUnread && <Center style={themed($indicator)} />}
-        </HStack>
-      </VStack>
-    </Pressable>
+          {title} very long
+        </Text>
+        {showUnread && <Center style={themed($indicator)} />}
+      </HStack>
+    </AnimatedVStack>
   );
 };
 
@@ -57,12 +101,10 @@ const $container: ThemedStyle<ViewStyle> = (theme) => ({
 });
 
 const $bottomContainer: ThemedStyle<ViewStyle> = (theme) => ({
-  flex: 1,
   alignItems: "center",
   justifyContent: "center",
   gap: theme.spacing.xxxs,
-  width: theme.spacing["6xl"],
-  paddingHorizontal: theme.spacing.xs,
+  marginHorizontal: -theme.spacing.xxxs, // We allow the text to overflow a bit
 });
 
 const $indicator: ThemedStyle<ViewStyle> = (theme) => ({
@@ -74,7 +116,5 @@ const $indicator: ThemedStyle<ViewStyle> = (theme) => ({
 });
 
 const $text: ThemedStyle<TextStyle> = (theme) => ({
-  color: theme.colors.text.secondary,
   textAlign: "center",
-  maxWidth: theme.spacing["6xl"],
 });

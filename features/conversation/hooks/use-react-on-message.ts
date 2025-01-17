@@ -1,6 +1,6 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import { getCurrentAccountConversation } from "@/features/conversation/conversation.utils";
-import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
+import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   addConversationMessageQuery,
   refetchConversationMessages,
@@ -35,7 +35,7 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
     },
     onMutate: (variables) => {
       const currentAccount = getCurrentAccount()!;
-      const currentUserInboxId = getCurrentUserAccountInboxId()!;
+      const currentUserInboxId = getCurrentAccountInboxId()!;
       const conversation = getCurrentAccountConversation(topic);
 
       if (conversation) {
