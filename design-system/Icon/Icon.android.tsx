@@ -18,6 +18,7 @@ export const iconRegistry: Record<
   link: "link",
   paperplane: "send",
   account_circle: "account-circle",
+  pencil: "edit",
   "square.and.pencil": "edit",
   qrcode: "qr-code",
   "message.circle.fill": "chat",
@@ -58,6 +59,7 @@ export const iconRegistry: Record<
   "arrowshape.turn.up.left": "reply",
   "arrowshape.turn.up.left.fill": "reply",
   "person.crop.circle.badge.plus": "group-add",
+  "person.crop.circle.badge.xmark": "person-remove",
   tray: "inbox",
   cloud: "cloud",
   "exclamationmark.triangle": "warning",
@@ -89,8 +91,8 @@ export function Icon(props: IIconProps) {
   const iconName = icon
     ? iconRegistry[icon]
     : picto
-      ? iconRegistry[picto]
-      : null;
+    ? iconRegistry[picto]
+    : null;
 
   if (!iconName) {
     logger.warn(`Invalid icon name ${icon || picto}`);

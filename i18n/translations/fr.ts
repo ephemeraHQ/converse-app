@@ -280,18 +280,6 @@ export const fr = {
   // Attachments
   photo_library: "Bibliothèque de photos",
   camera: "Caméra",
-
-  disconnect: "Se déconnecter",
-  disconnect_delete_local_data:
-    "Se déconnecter et supprimer les données locales",
-  disconnect_this_account: "Se déconnecter de ce compte",
-  disconnect_account_description:
-    "Vos discussions de groupe seront chiffrées et sauvegardées sur votre appareil jusqu'à ce que vous supprimiez Converse. Vos messages privés seront sauvegardés par le réseau XMTP.",
-  your_profile_page: "Votre page de profil",
-  copy_wallet_address: "Copier l'adresse du portefeuille",
-  turn_on_notifications: "Activer les notifications",
-  attachment_message_error_download:
-    "Impossible de télécharger la pièce jointe",
   attachment_message_view_in_browser: "Voir dans le navigateur",
   attachment: "Pièce jointe",
 
@@ -359,8 +347,33 @@ export const fr = {
   view_removed_chats: "Afficher les conversations supprimées",
   change_or_add_account: "Changer ou ajouter un compte",
   profile: {
+    block: {
+      title: "Bloquer l'utilisateur",
+      message: "Êtes-vous sûr de vouloir bloquer {{name}} ?",
+    },
     modify_profile: "Modifier le profil",
+    edit: "Modifier",
+    save: "Enregistrer",
+    done: "Valider",
+    names: "Names",
+    copied: "Copié",
+    settings: {
+      notifications: "Notifications",
+      archive: "Archive",
+      keep_messages: "Conserver les messages",
+    },
   },
+  log_out: "Se déconnecter",
+  disconnect_delete_local_data:
+    "Se déconnecter et supprimer les données locales",
+  disconnect_this_account: "Se déconnecter de ce compte",
+  disconnect_account_description:
+    "Vos discussions de groupe seront chiffrées et sauvegardées sur votre appareil jusqu'à ce que vous supprimiez Converse. Vos messages privés seront sauvegardés par le réseau XMTP.",
+  your_profile_page: "Votre page de profil",
+  copy_wallet_address: "Copier l'adresse du portefeuille",
+  turn_on_notifications: "Activer les notifications",
+  attachment_message_error_download:
+    "Impossible de télécharger la pièce jointe",
 
   // Revocation
   current_installation_revoked: "Déconnecté",

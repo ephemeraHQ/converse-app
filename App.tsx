@@ -13,6 +13,8 @@ import { PrivyProvider } from "@privy-io/expo";
 import { queryClient } from "@queries/queryClient";
 import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { useReactQueryDevTools } from "@dev-plugins/react-query";
+
 import { useAppTheme, useThemeProvider } from "@theme/useAppTheme";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
@@ -149,6 +151,8 @@ export default function AppWithProviders() {
   const paperTheme = useMemo(() => {
     return colorScheme === "dark" ? MaterialDarkTheme : MaterialLightTheme;
   }, [colorScheme]);
+
+  useReactQueryDevTools(queryClient);
 
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();

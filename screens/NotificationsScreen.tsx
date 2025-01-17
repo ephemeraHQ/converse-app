@@ -1,22 +1,15 @@
 import { textPrimaryColor } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import * as Linking from "expo-linking";
 import React from "react";
 import { Platform, StyleSheet, Text, useColorScheme, View } from "react-native";
 
 import Button from "../components/Button/Button";
 import Picto from "../components/Picto/Picto";
-import { useSettingsStore } from "../data/store/accountsStore";
-import { useAppStore } from "../data/store/appStore";
-import { requestPushNotificationsPermissions } from "../features/notifications/utils/requestPushNotificationsPermissions";
+import { useNotificationsPermission } from "@/features/notifications/hooks/use-notifications-permission";
 
 export default function NotificationsScreen() {
-  const setNotificationsSettings = useSettingsStore(
-    (s) => s.setNotificationsSettings
-  );
-  const setNotificationsPermissionStatus = useAppStore(
-    (s) => s.setNotificationsPermissionStatus
-  );
+  const { requestPermission, setNotificationsSettings } =
+    useNotificationsPermission();
   const styles = useStyles();
   return (
     <View style={styles.notifications}>
@@ -33,17 +26,8 @@ export default function NotificationsScreen() {
         title="Accept notifications"
         action="primary"
         onPress={async () => {
-          // Open popup
-          const newStatus = await requestPushNotificationsPermissions();
-          if (!newStatus) return;
-          if (newStatus === "denied" && Platform.OS === "android") {
-            // Android 13 always show denied first but sometimes
-            // it will still show the popup. If not, go to Settings!
-            Linking.openSettings();
-          } else {
-            setNotificationsSettings({ showNotificationScreen: false });
-          }
-          setNotificationsPermissionStatus(newStatus);
+          await requestPermission();
+          setNotificationsSettings({ showNotificationScreen: false });
         }}
       />
       <Button

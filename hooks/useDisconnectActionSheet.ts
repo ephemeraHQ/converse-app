@@ -24,7 +24,7 @@ export const useDisconnectActionSheet = (account?: string) => {
         [translate("cancel")]: () => {},
       };
       if (!ephemeralAccount) {
-        methods[translate("disconnect")] = () => logout(false);
+        methods[translate("log_out")] = () => logout(false);
       }
 
       const options = Object.keys(methods);
