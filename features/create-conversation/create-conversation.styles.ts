@@ -55,10 +55,8 @@ const $errorText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text.primary,
 });
 
-// Composer section styles
-const $composerSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $composerSection: ThemedStyle<ViewStyle> = () => ({
   marginTop: "auto",
-  paddingBottom: spacing.md,
 });
 
 export const createConversationStyles = {

@@ -76,7 +76,6 @@ export function UserInlineSearch({
             isSelected={selectedChipIndex === index}
             onPress={() => {
               if (selectedChipIndex === index) {
-                onRemoveUser(user.address);
                 setSelectedChipIndex(null);
               } else {
                 setSelectedChipIndex(index);
