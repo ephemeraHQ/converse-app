@@ -3,7 +3,7 @@
     "newArchEnabled": false,
     "version": "2.1.0",
     "ios": {
-      "buildNumber": "79"
+      "buildNumber": "81"
     },
     "android": {
       "versionCode": 280
