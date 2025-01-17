@@ -31,7 +31,18 @@
 
 - Use function keyword for pure functions.
 - Prefer object params: `function(args: { name: string })` over `function(name: string)`.
-- Destructure args: `function(args: IArgs) { const { ... } = args }`.
+- Destructure parameters at the top level.
+  - Makes it clearer which properties are being used and
+  - improves code readability.
+  -
+  - @example
+  - // ❌ Bad: Nested destructuring
+  - function getMetadataOptions(args: IArgs) {
+  - const { account } = args;
+  - }
+  -
+  - // ✅ Good: Top-level destructuring
+  - function getMetadataOptions({ account, topic }: IArgs) {
 
 ## React & Components
 
@@ -44,6 +55,16 @@
 - When creating a new component or custom hook, aim to minimize the number of props you pass. Instead, try to reuse existing hooks whenever possible. This is especially important if the props or arguments you want to pass are only needed within the new component or hook we wanted to pass are ONLY used in the new component or hook.
 - When asked to extract a component or some code for custom hooks, create those in the same file.
 - Keep related code close together by placing the exported component at the top of the file with related components directly underneath it.
+- Avoid default exports to maintain consistent imports and easier refactoring.
+  - Named exports make codebase more maintainable and
+  - refactoring safer.
+  -
+  - @example
+  - // ❌ Bad: Default export
+  - export default function ProfileScreen()
+  -
+  - // ✅ Good: Named export
+  - export function ProfileScreen()
 
 ## File Structure
 
@@ -58,3 +79,28 @@
 - Always use the theme for styling. Import it from @/theme/useAppTheme like `const { theme } = useAppTheme();`.
 - Use components from @/design-system.
 - Use the theme for colors and spacing.
+
+## React Query Principles
+
+- Avoid destructuring rest operators with useQuery.
+
+  - Be explicit about which properties you need from useQuery
+  - to prevent excessive re-rendering and performance issues.
+  -
+  - @example
+  - // ❌ Bad: Causes unnecessary re-renders
+  - const { data: conversations, ...rest } = useQuery()
+  -
+  - // ✅ Good: Explicit property usage
+  - const { data: conversations, isLoading, error } = useQuery()
+
+- Use object parameters for query options.
+  - Pass query options as objects for better maintainability
+  - and clearer intention.
+  -
+  - @example
+  - // ❌ Bad: Positional arguments
+  - useQuery(getConversationMessagesQueryOptions(account, topic))
+  -
+  - // ✅ Good: Object parameters
+  - useQuery(getConversationMessagesQueryOptions({ account, topic }))

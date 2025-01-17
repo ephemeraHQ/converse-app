@@ -54,7 +54,7 @@ jobs:
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.production
 
       - name: Update EAS config with env variables
-        run: node scripts/Øbuild/eas.js --env production
+        run: node scripts/build/eas.js --env production
 
       - name: Update Android Files
         run: node scripts/build/android/build.js
