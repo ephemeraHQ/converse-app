@@ -5,7 +5,7 @@ import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScre
 import { ConnectViaWallet } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWallet";
 import { useRouter } from "../../navigation/useNavigation";
 import { NavigationParamList } from "../Navigation/Navigation";
-import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
+import { isMissingConverseProfile } from "../../features/onboarding/Onboarding.utils";
 
 export const NewAccountConnectWalletScreen = memo(
   function NewAccountConnectWalletScreen({
@@ -18,7 +18,7 @@ export const NewAccountConnectWalletScreen = memo(
     const handleDoneConnecthing = useCallback(
       () => {
         if (isMissingConverseProfile()) {
-          router.navigate("NewAccountUserProfile");
+          router.navigate("NewAccountContactCard");
         } else {
           router.popTo("Chats");
         }

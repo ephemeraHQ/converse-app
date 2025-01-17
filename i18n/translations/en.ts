@@ -1,5 +1,42 @@
 export const en = {
   // Onboarding
+  onboarding: {
+    welcome: {
+      title: "Become unspammable",
+      subtitle: "Welcome to Convos",
+      subtext: "Simple · Secure · Universal",
+      createContactCard: "Create a Contact Card",
+    },
+    contactCard: {
+      title: "Complete your contact card",
+      subtitle: "A secure identity",
+      body: "Add and edit Contact Cards anytime,",
+      bodyPressable: "or go Rando for extra privacy.",
+      randoTitle: "Go Rando",
+      randoSubtitle: "Chat using random contact info",
+      randoBody: "For everyday conversations,",
+      randoPressable: "use your personal Contact Card.",
+      import: "Import",
+      name: "Name",
+      namePlaceholder: "How you'll show up in chat",
+      continue: "Continue",
+    },
+    notifications: {
+      title: "Good vibrations only",
+      subtitle:
+        "Most things aren’t urgent. Protect your attention by minimizing notifications.",
+      essentials: "Essentials",
+      essentialsDescription: "Notify me when approved contacts send messages",
+      mentionsOnly: "Mentions only",
+      mentionsOnlyDescription:
+        "In large groupchats, don’t notify me unless I’m mentioned",
+      cash: "Cash",
+      cashDescription: "Notify me immediately when I receive cash",
+      comingSoon: "Coming soon",
+      enableNotifications: "Enable notifications",
+      later: "Later",
+    },
+  },
   walletSelector: {
     title: "Your messages.\nYour privacy.",
     subtitle:

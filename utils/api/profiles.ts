@@ -1,11 +1,11 @@
 import type { Frens } from "@/data/store/recommendationsStore";
 import type { IProfileSocials } from "@/features/profiles/profile-types";
-import type { ProfileType } from "@/screens/Onboarding/OnboardingUserProfileScreen";
 import { evmHelpers } from "@/utils/evm/helpers";
 import logger from "@/utils/logger";
 import type { InboxId } from "@xmtp/react-native-sdk";
 import { getXmtpApiHeaders } from "./auth";
 import { api } from "./api";
+import type { ProfileType } from "@/features/onboarding/types/onboarding.types";
 
 export const getProfilesForAddresses = async (
   addresses: string[]

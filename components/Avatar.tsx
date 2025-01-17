@@ -2,7 +2,7 @@ import { Center } from "@/design-system/Center";
 import { Icon } from "@/design-system/Icon/Icon";
 import { Text } from "@/design-system/Text";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { getFirstLetterForAvatar } from "@utils/getFirstLetterForAvatar";
+import { getCapitalizedLettersForAvatar } from "@/utils/getCapitalizedLettersForAvatar";
 import { Image } from "expo-image";
 import React, { memo, useCallback, useState } from "react";
 import { Platform, StyleProp, ViewStyle } from "react-native";
@@ -22,7 +22,7 @@ export const Avatar = memo(function Avatar({
 }: IAvatarProps) {
   const { theme } = useAppTheme();
   const avatarSize = size ?? theme.avatarSize.md;
-  const firstLetter = getFirstLetterForAvatar(name ?? "");
+  const firstLetter = getCapitalizedLettersForAvatar(name ?? "");
   const [didError, setDidError] = useState(false);
 
   const handleImageError = useCallback(() => {

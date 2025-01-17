@@ -52,8 +52,6 @@ export const useCreatePasskey = () => {
     } catch (e: any) {
       setError(e?.message ?? "Error creating Passkey account");
       captureErrorWithToast(e);
-    } finally {
-      setLoading(false);
     }
   }, [
     setLoading,
