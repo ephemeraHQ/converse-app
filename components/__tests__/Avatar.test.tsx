@@ -28,7 +28,7 @@ describe("Avatar Component", () => {
     );
 
     // Check if the first letter of the name is rendered
-    const letter = getByText("J");
+    const letter = getByText("JD");
     expect(letter).toBeTruthy();
   });
 
