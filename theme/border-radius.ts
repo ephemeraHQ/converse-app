@@ -3,6 +3,7 @@ export const borderRadius = {
   xs: 12,
   sm: 16,
   md: 24,
+  lg: 32,
 
   message: {
     bubble: 16,

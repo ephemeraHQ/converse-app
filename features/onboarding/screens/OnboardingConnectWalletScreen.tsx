@@ -5,12 +5,12 @@ import { memo, useCallback } from "react";
 import {
   isMissingConverseProfile,
   needToShowNotificationsPermissions,
-} from "./Onboarding.utils";
-import { ConnectViaWallet } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWallet";
-import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
-import { setAuthStatus } from "../../data/store/authStore";
-import { useRouter } from "../../navigation/useNavigation";
-import { NavigationParamList } from "../Navigation/Navigation";
+} from "../Onboarding.utils";
+import { ConnectViaWallet } from "../../../components/Onboarding/ConnectViaWallet/ConnectViaWallet";
+import { OnboardingScreenComp } from "../../../components/Onboarding/OnboardingScreenComp";
+import { setAuthStatus } from "../../../data/store/authStore";
+import { useRouter } from "../../../navigation/useNavigation";
+import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 
 export const OnboardingConnectWalletScreen = memo(
   function OnboardingConnectWalletScreen(
@@ -25,7 +25,7 @@ export const OnboardingConnectWalletScreen = memo(
 
     const handleDoneConnecting = useCallback(() => {
       if (isMissingConverseProfile()) {
-        router.navigate("OnboardingUserProfile");
+        router.navigate("OnboardingContactCard");
       } else if (needToShowNotificationsPermissions()) {
         router.navigate("OnboardingNotifications");
       } else {

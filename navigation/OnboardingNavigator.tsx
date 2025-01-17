@@ -4,26 +4,26 @@ import { useColorScheme } from "react-native";
 
 import { authScreensSharedScreenOptions } from "../screens/Navigation/Navigation";
 import { stackGroupScreenOptions } from "../screens/Navigation/navHelpers";
-import { OnboardingConnectWalletScreen } from "../screens/Onboarding/OnboardingConnectWalletScreen";
-import { OnboardingEphemeraScreen } from "../screens/Onboarding/OnboardingEphemeraScreen";
-import { OnboardingGetStartedScreen } from "../screens/Onboarding/OnboardingGetStartedScreen";
-import { OnboardingNotificationsScreen } from "../screens/Onboarding/OnboardingNotificationsScreen";
-import { OnboardingPrivateKeyScreen } from "../screens/Onboarding/OnboardingPrivateKeyScreen";
-import { OnboardingPrivyScreen } from "../screens/Onboarding/OnboardingPrivyScreen";
-import { OnboardingUserProfileScreen } from "../screens/Onboarding/OnboardingUserProfileScreen";
-import { OnboardingPasskeyScreen } from "@/screens/Onboarding/onboarding-passkey-screen";
+import { OnboardingConnectWalletScreen } from "../features/onboarding/screens/OnboardingConnectWalletScreen";
+import { OnboardingEphemeraScreen } from "../features/onboarding/screens/OnboardingEphemeraScreen";
+import { OnboardingNotificationsScreen } from "../features/onboarding/screens/onboarding-notifications-screen";
+import { OnboardingPrivateKeyScreen } from "../features/onboarding/screens/OnboardingPrivateKeyScreen";
+import { OnboardingPrivyScreen } from "../features/onboarding/screens/OnboardingPrivyScreen";
+import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-weclome-screen";
+import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card-screen";
 
 type OnboardingParamList = {
+  OnboardingWelcome: undefined;
+  OnboardingContactCard: undefined;
+
   OnboardingGetStarted: undefined;
   OnboardingPrivy: undefined;
   OnboardingConnectWallet: {
     address: string;
   };
   OnboardingNotifications: undefined;
-  OnboardingUserProfile: undefined;
   OnboardingPrivateKey: undefined;
   OnboardingEphemeral: undefined;
-  OnboardingPasskey: undefined;
 };
 
 const OnboardingNativeStack = createNativeStackNavigator<OnboardingParamList>();
@@ -47,12 +47,19 @@ export const OnboardingNavigator = memo(function OnboardingNavigator() {
           options={{
             headerShown: false,
           }}
-          name="OnboardingGetStarted"
-          component={OnboardingGetStartedScreen}
+          name="OnboardingWelcome"
+          component={OnboardingWelcomeScreen}
         />
         <OnboardingNativeStack.Screen
-          name="OnboardingPasskey"
-          component={OnboardingPasskeyScreen}
+          options={{
+            headerShown: false,
+          }}
+          name="OnboardingContactCard"
+          component={OnboardingContactCardScreen}
+        />
+        <OnboardingNativeStack.Screen
+          name="OnboardingNotifications"
+          component={OnboardingNotificationsScreen}
         />
         <OnboardingNativeStack.Screen
           name="OnboardingPrivy"
@@ -61,14 +68,6 @@ export const OnboardingNavigator = memo(function OnboardingNavigator() {
         <OnboardingNativeStack.Screen
           name="OnboardingConnectWallet"
           component={OnboardingConnectWalletScreen}
-        />
-        <OnboardingNativeStack.Screen
-          name="OnboardingNotifications"
-          component={OnboardingNotificationsScreen}
-        />
-        <OnboardingNativeStack.Screen
-          name="OnboardingUserProfile"
-          component={OnboardingUserProfileScreen}
         />
         <OnboardingNativeStack.Screen
           name="OnboardingPrivateKey"

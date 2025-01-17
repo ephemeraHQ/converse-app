@@ -13,7 +13,7 @@ import { usePrivyConnection } from "../../features/onboarding/Privy/usePrivyConn
 import { translate } from "../../i18n";
 import { useRouter } from "../../navigation/useNavigation";
 import { PictoSizes } from "../../styles/sizes";
-import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
+import { isMissingConverseProfile } from "../../features/onboarding/Onboarding.utils";
 
 export const NewAccountPrivyScreen = memo(function () {
   return (
@@ -31,7 +31,7 @@ const Content = memo(function Content() {
   usePrivyConnection({
     onConnectionDone: () => {
       if (isMissingConverseProfile()) {
-        router.navigate("NewAccountUserProfile");
+        router.navigate("NewAccountContactCard");
       } else {
         router.popTo("Chats");
       }

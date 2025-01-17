@@ -41,6 +41,9 @@ export const formatEphemeralDisplayName = (
   displayName?: string
 ) => displayName || humanize(address.slice(2, 42), 2, "", true);
 
+export const formatRandoDisplayName = (address: string) =>
+  humanize(address.slice(2, 42), 2, " ", true);
+
 export const getTitleFontScale = (): number => {
   let titleFontScale = 1;
   const fontScale = PixelRatio.getFontScale();
