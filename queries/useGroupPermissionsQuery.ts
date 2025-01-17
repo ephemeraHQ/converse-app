@@ -18,14 +18,14 @@ function getGroupPermissionPolicySet(args: {
 
 export const useGroupPermissionsQuery = (
   account: string,
-  topic: ConversationTopic | undefined
+  topic: ConversationTopic
 ) => {
   return useQuery(getGroupPermissionsQueryOptions({ account, topic }));
 };
 
 function getGroupPermissionsQueryOptions(args: {
   account: string;
-  topic: ConversationTopic | undefined;
+  topic: ConversationTopic;
 }) {
   const { account, topic } = args;
   return queryOptions({
@@ -34,7 +34,7 @@ function getGroupPermissionsQueryOptions(args: {
         account,
         topic: topic!,
       }),
-    queryKey: groupPermissionsQueryKey(account, topic!),
+    queryKey: groupPermissionsQueryKey(account, topic),
     enabled: !!topic && !!account,
   });
 }
