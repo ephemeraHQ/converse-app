@@ -1,6 +1,7 @@
 // IMPORTANT: DO NOT CHANGE THE ORDER OF THESE IMPORTS
 // These imports must be in this specific order for polyfills to work correctly
 import "@walletconnect/react-native-compat";
+import "fast-text-encoding";
 import "react-native-get-random-values";
 import "@ethersproject/shims";
 
