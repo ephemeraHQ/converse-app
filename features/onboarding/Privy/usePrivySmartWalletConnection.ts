@@ -9,6 +9,7 @@ import logger from "@utils/logger";
 import { useSmartWallets } from "@privy-io/expo/smart-wallets";
 import { ViemAccount } from "@/utils/xmtpRN/signer";
 import config from "@/config";
+import { base } from "viem/chains";
 
 export function usePrivySmartWalletConnection(args: {
   onConnectionDone: () => void;
@@ -80,8 +81,7 @@ export function usePrivySmartWalletConnection(args: {
 
         const viemAccount: ViemAccount = {
           address: smartAccount.address,
-          chainId:
-            smartAccount.client.chain?.id ?? config.privy.defaultChain.id,
+          chainId: smartAccount.client.chain?.id ?? base.id,
           signMessage: async ({ message }) => {
             return smartAccount.signMessage({ message });
           },
