@@ -126,14 +126,12 @@ const getConversations = async (args: { account: string }) => {
 export const getConversationsQueryOptions = (args: IArgs) => {
   const { account } = args;
   return queryOptions({
-    // note(lustig) we follow a slightly strange pattern of passing the
-    // "context" through to the query for logging purposes.
-    // we can obviously ignore this from our query key
-
     queryKey: conversationsQueryKey(account),
     queryFn: () => getConversations({ account }),
     enabled: !!account,
-    refetchOnMount: true, // Just for now because conversations are very important and we want to make sure we have all of them
+    // Just for now because conversations are very important and
+    // we want to make sure we have all of them
+    refetchOnMount: true,
   });
 };
 
