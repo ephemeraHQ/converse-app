@@ -6,19 +6,19 @@
 import { ViewStyle, TextStyle } from "react-native";
 import { ThemedStyle } from "@/theme/useAppTheme";
 import { textSizeStyles } from "@/design-system/Text/Text.styles";
-import { debugBorder } from "@/utils/debug-style";
+// import { debugBorder } from "@/utils/debug-style";
 
 // Screen container styles
 const $screenContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
   backgroundColor: colors.background.surface,
-  ...debugBorder("red"),
+  // ...debugBorder("red"),
 });
 
 // Search section styles
 const $searchSection: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.background.surface,
-  ...debugBorder("orange"),
+  // ...debugBorder("orange"),
 });
 
 // Pending members section styles
@@ -35,7 +35,7 @@ const $pendingMembersSection: ThemedStyle<ViewStyle> = ({
   borderBottomWidth: 0.5,
   backgroundColor: colors.background.surface,
   flexWrap: "wrap",
-  ...debugBorder("green"),
+  // ...debugBorder("green"),
 });
 
 // Message section styles

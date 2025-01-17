@@ -77,10 +77,16 @@ export function CreateConversationScreen({
     }
   }, [selectedUsersCount]);
 
+  const { theme } = useAppTheme();
+
   useHeader({
     title: "New chat",
     safeAreaEdges: ["top"],
     onBack: handleBack,
+    style: {
+      borderBottomWidth: theme.borderWidth.sm,
+      borderBottomColor: theme.colors.border.subtle,
+    },
   });
 
   const debounceDelay = 200;

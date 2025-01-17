@@ -23,24 +23,15 @@ type ChipProps = {
 };
 
 export function Chip({ name, avatarUri, isSelected, onPress }: ChipProps) {
-  const { themed } = useAppTheme();
+  const { themed, theme } = useAppTheme();
 
   return (
     <Pressable
       onPress={onPress}
       style={[themed($container), isSelected && themed($selectedContainer)]}
     >
-      <Avatar uri={avatarUri} name={name} size={16} style={themed($avatar)} />
-      <Text
-        preset="formLabel"
-        style={[
-          themed($text) as TextStyle,
-          isSelected && (themed($selectedText) as TextStyle),
-        ]}
-        numberOfLines={1}
-      >
-        {name}
-      </Text>
+      <Avatar uri={avatarUri} name={name} size={theme.avatarSize.xs} />
+      <Text preset="small">{name}</Text>
     </Pressable>
   );
 }
@@ -49,12 +40,12 @@ const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "center",
-  paddingVertical: 4,
-  paddingLeft: 10,
-  paddingRight: 8,
-  gap: 4,
-  minHeight: 36,
-  borderRadius: 12,
+  paddingVertical: spacing.xxxs,
+  paddingLeft: spacing.xs,
+  paddingRight: spacing.xxs,
+  gap: spacing.xxxs,
+  minHeight: spacing.container.large,
+  borderRadius: spacing.xs,
   borderWidth: 1,
   borderColor: colors.border.subtle,
   backgroundColor: colors.background.surface,
@@ -65,17 +56,8 @@ const $selectedContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
   borderColor: colors.border.primary,
 });
 
-const $avatar: ThemedStyle<ViewStyle> = () => ({
-  width: 16,
-  height: 16,
-});
-
 const $text: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text.primary,
   lineHeight: 18,
   fontSize: 14,
-});
-
-const $selectedText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text.primary,
 });

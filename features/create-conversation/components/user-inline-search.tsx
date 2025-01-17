@@ -17,6 +17,7 @@ import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { textSizeStyles } from "@/design-system/Text/Text.styles";
 import { Text } from "@/design-system/Text";
 import { Chip } from "./Chip";
+// import { debugBorder } from "@/utils/debug-style";
 import logger from "@/utils/logger";
 // import { debugBorder } from "@/utils/debug-style";
 
@@ -108,17 +109,15 @@ const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   marginHorizontal: 16,
   marginVertical: 8,
   //   padding: spacing.sm,
-  borderRadius: 12,
-  borderWidth: 1,
   //   borderColor: colors.border.subtle,
-  //   ...debugBorder("blue"),
+  //   ...debugBorder("blue")
 });
 
 const $inputContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   flexWrap: "wrap",
   alignItems: "center",
-  gap: spacing.xs,
+  gap: spacing.xxxs,
   //   ...debugBorder("yellow"),
 });
 
@@ -127,10 +126,12 @@ const $input: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   minWidth: 120,
   height: spacing["3xl"],
   color: colors.text.primary,
-  ...textSizeStyles.sm,
+  paddingStart: spacing.xxs,
+  ...textSizeStyles.xs,
   //   ...debugBorder("purple"),
 });
 
-const $toText: ThemedStyle<TextStyle> = ({ colors }) => ({
+const $toText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   color: colors.text.primary,
+  marginEnd: spacing.xxs,
 });

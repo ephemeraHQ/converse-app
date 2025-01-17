@@ -41,7 +41,7 @@ export const Avatar = memo(function Avatar({
           onError={handleImageError}
           source={{ uri }}
           style={{
-            borderRadius: 9999,
+            borderRadius: avatarSize / 2,
             width: avatarSize,
             height: avatarSize,
           }}
