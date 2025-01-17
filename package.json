@@ -40,6 +40,7 @@
     "@babel/runtime": "^7.25.0",
     "@babel/traverse": "^7.25.3",
     "@coinbase/wallet-mobile-sdk": "^1.0.13",
+    "@dev-plugins/react-query": "^0.1.0",
     "@ethersproject/shims": "^5.7.0",
     "@expo/config-plugins": "~9.0.0",
     "@expo/metro-config": "~0.19.0",
