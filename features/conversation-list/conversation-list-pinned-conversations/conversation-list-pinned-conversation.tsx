@@ -86,7 +86,7 @@ export const ConversationListPinnedConversation: FC<
           numberOfLines={1}
           style={themed($text)}
         >
-          {title} very long
+          {title}
         </Text>
         {showUnread && <Center style={themed($indicator)} />}
       </HStack>

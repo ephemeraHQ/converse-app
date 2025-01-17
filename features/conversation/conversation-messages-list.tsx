@@ -38,10 +38,12 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
       (state) => state.scrollToMessageId,
       (scrollToMessageId) => {
         if (!scrollToMessageId) return;
+        const index = messages.findIndex(
+          (message) => message.id === scrollToMessageId
+        );
+        if (index === -1) return;
         scrollRef.current?.scrollToIndex({
-          index: messages.findIndex(
-            (message) => message.id === scrollToMessageId
-          ),
+          index,
           animated: true,
           viewOffset: 100, // Random value just so that the message is not directly at the bottom
         });
