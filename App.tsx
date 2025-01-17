@@ -56,6 +56,8 @@ LogBox.ignoreLogs([
   "[Reanimated] Reading from `value` during component render. Please ensure that you do not access the `value` property or use `get` method of a shared value while React is rendering a component.",
   "Attempted to import the module",
   "Couldn't find real values for `KeyboardContext`. Please make sure you're inside of `KeyboardProvider` - otherwise functionality of `react-native-keyboard-controller` will not work. [Component Stack]",
+  "sync worker error storage error: Pool needs to  reconnect before use",
+  "[Converse.debug.dylib] sync worker error storage error: Pool needs to  reconnect before use",
 ]);
 
 // This is the default configuration

@@ -30,7 +30,7 @@ export function SearchBar({ inputPlaceholder, value, setValue, onRef }: Props) {
           value={value}
           ref={onRef}
           placeholderTextColor={theme.colors.text.secondary}
-          onChangeText={(text) => setValue(text.trim())}
+          onChangeText={setValue}
           clearButtonMode="always"
         />
       ) : (
