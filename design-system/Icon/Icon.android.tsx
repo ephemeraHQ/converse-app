@@ -71,6 +71,8 @@ export const iconRegistry: Record<
   "shield.fill": "shield",
   "new-account-card": "person",
   settings: "settings",
+  biometric: "fingerprint",
+  camera: "camera",
 };
 
 export function Icon(props: IIconProps) {

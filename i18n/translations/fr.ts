@@ -1,5 +1,46 @@
 export const fr = {
   // Onboarding
+  onboarding: {
+    welcome: {
+      title: "Devenez immunisé(e) au spam",
+      subtitle: "Bienvenue sur Convos",
+      subtext: "Simple · Sécurisé · Universel",
+      createContactCard: "Créer une carte de contact",
+    },
+    contactCard: {
+      title: "Complétez votre carte de contact",
+      subtitle: "Une identité sécurisée",
+      body: "Ajoutez et modifiez vos cartes de contact à tout moment,",
+      bodyPressable:
+        "ou optez pour le mode Rando pour plus de confidentialité.",
+      randoTitle: "Mode Rando",
+      randoSubtitle:
+        "Discutez en utilisant des informations de contact aléatoires",
+      randoBody: "Pour des conversations quotidiennes,",
+      randoPressable: "utilisez votre carte de contact personnelle.",
+      import: "Importer",
+      name: "Nom",
+      namePlaceholder: "Comment vous apparaîtrez dans le chat",
+      continue: "Continuer",
+    },
+    notifications: {
+      title: "Rien que de bonnes vibrations",
+      subtitle:
+        "La plupart des choses ne sont pas urgentes. Protégez votre attention en limitant vos notifications.",
+      essentials: "Essentiels",
+      essentialsDescription:
+        "Me notifier lorsque mes contacts approuvés m’envoient des messages",
+      mentionsOnly: "Mentions uniquement",
+      mentionsOnlyDescription:
+        "Dans les grands groupes, ne me notifier que si je suis mentionné(e)",
+      cash: "Argent",
+      cashDescription:
+        "Me notifier immédiatement lorsque je reçois de l’argent",
+      comingSoon: "Bientôt disponible",
+      enableNotifications: "Activer les notifications",
+      later: "Plus tard",
+    },
+  },
   walletSelector: {
     title: "Vos messages.\nVotre confidentialité.",
     subtitle:

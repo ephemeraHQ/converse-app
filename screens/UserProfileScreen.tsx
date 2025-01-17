@@ -1,6 +1,12 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { memo, useCallback, useEffect, useRef } from "react";
-import { TextInput, View, useColorScheme } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  TextInput,
+  View,
+  useColorScheme,
+} from "react-native";
 
 import { Avatar } from "../components/Avatar";
 import Button from "../components/Button/Button";
@@ -9,15 +15,17 @@ import { ScreenHeaderButton } from "../components/Screen/ScreenHeaderButton/Scre
 import { Pressable } from "../design-system/Pressable";
 import { Text } from "../design-system/Text";
 import { translate } from "../i18n";
-import { textSecondaryColor } from "../styles/colors";
+import {
+  dangerColor,
+  itemSeparatorColor,
+  textPrimaryColor,
+  textSecondaryColor,
+} from "../styles/colors";
 import { sentryTrackError } from "../utils/sentry";
 import { NavigationParamList } from "./Navigation/Navigation";
-import {
-  useAddPfp,
-  useCreateOrUpdateProfileInfo,
-  useProfile,
-  useUserProfileStyles,
-} from "./Onboarding/OnboardingUserProfileScreen";
+import { useProfile } from "@/features/onboarding/hooks/useProfile";
+import { useCreateOrUpdateProfileInfo } from "@/features/onboarding/hooks/useCreateOrUpdateProfileInfo";
+import { useAddPfp } from "@/features/onboarding/hooks/useAddPfp";
 
 export const UserProfileScreen = memo(function UserProfileScreen(
   props: NativeStackScreenProps<NavigationParamList, "UserProfile">
@@ -144,3 +152,84 @@ export const UserProfileScreen = memo(function UserProfileScreen(
     </Screen>
   );
 });
+
+export const useUserProfileStyles = (colorScheme: any, errorMessage: any) => {
+  return StyleSheet.create({
+    avatar: {
+      marginBottom: 10,
+      marginTop: 23,
+    },
+    usernameInputContainer: {
+      width: "100%",
+      marginTop: 23,
+      alignItems: "center",
+      ...Platform.select({
+        default: {
+          borderTopWidth: 1,
+          borderTopColor: itemSeparatorColor(colorScheme),
+          borderBottomWidth: 1,
+          borderBottomColor: itemSeparatorColor(colorScheme),
+        },
+        android: { paddingHorizontal: 32 },
+      }),
+    },
+    profileInput: {
+      alignContent: "flex-start",
+      color: textPrimaryColor(colorScheme),
+
+      paddingTop: 10,
+      paddingBottom: 10,
+      fontSize: 17,
+      width: "100%",
+      ...Platform.select({
+        default: { paddingHorizontal: 16 },
+        android: {
+          paddingHorizontal: 16,
+          borderWidth: 1,
+          borderColor: textSecondaryColor(colorScheme),
+          borderRadius: 4,
+        },
+      }),
+    },
+    displayNameInput: {
+      ...Platform.select({
+        default: {
+          borderTopWidth: 1,
+          borderTopColor: itemSeparatorColor(colorScheme),
+        },
+        android: {
+          marginTop: 21,
+        },
+      }),
+    },
+    usernameSuffixLabel: {
+      position: "absolute",
+      right: Platform.OS === "ios" ? 10 : 46,
+      top: 12,
+      fontSize: 16,
+      color: textSecondaryColor(colorScheme),
+      zIndex: 1,
+    },
+    p: {
+      textAlign: "center",
+      marginTop: 20,
+      marginLeft: 25,
+      marginRight: 25,
+      ...Platform.select({
+        default: {
+          fontSize: 17,
+          color: errorMessage
+            ? dangerColor(colorScheme)
+            : textSecondaryColor(colorScheme),
+        },
+        android: {
+          fontSize: 14,
+          lineHeight: 20,
+          color: errorMessage
+            ? dangerColor(colorScheme)
+            : textSecondaryColor(colorScheme),
+        },
+      }),
+    },
+  });
+};

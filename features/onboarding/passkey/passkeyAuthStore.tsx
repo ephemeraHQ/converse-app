@@ -49,7 +49,8 @@ const createPasskeyAuthStore = (initProps: IPasskeyAuthStoreProps) => {
     ...initProps,
     setLoading: (loading) =>
       loading ? set({ loading, error: undefined }) : set({ loading: false }),
-    setError: (error) => set({ error, statusString: undefined }),
+    setError: (error) =>
+      set({ error, statusString: undefined, loading: false }),
     setStatusString: (statusString) => set({ statusString }),
     setAccount: (account) => set({ account }),
     reset: () => set(DEFAULT_PROPS),
