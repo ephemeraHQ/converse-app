@@ -5,12 +5,6 @@ import { Environments, isDev, isPreview } from "./utils/getEnv";
 
 type XmtpEnv = "local" | "dev" | "production";
 
-declare const process: {
-  env: {
-    [key: string]: string;
-  };
-};
-
 const defaultConfig = {
   loggerColorScheme: process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME,
   debugMenu: false,

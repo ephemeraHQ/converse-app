@@ -21,8 +21,7 @@
     "test:perf:baseline": "echo \"➜ Running tests with performance...\" && echo \"➜ Capture baseline performance tests...\" && yarn reassure --baseline && echo \"➜ Running current performance tests...\"",
     "test:perf": "echo \"➜ Running tests with performance...\" && echo \"➜ Capturing performance tests...\" && yarn reassure && echo \"➜ Running current performance tests...\"",
     "test-deep-linking": "node scripts/test-deep-linking.js",
-    "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit",
-    "update": "node scripts/build/update.js"
+    "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit"
   },
   "cross-os": {
     "postinstall": {
