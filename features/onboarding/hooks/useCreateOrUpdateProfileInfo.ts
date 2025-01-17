@@ -43,7 +43,6 @@ export function useCreateOrUpdateProfileInfo() {
           errorMessage: translate("userProfile.errors.usernameAlphanumeric"),
         };
       }
-      logger.debug("[OnboardingContactCardScreen]1 ");
 
       if (profile.username.length < 3 || profile.username.length > 30) {
         setErrorMessage(translate("userProfile.errors.usernameLength"));
@@ -58,11 +57,9 @@ export function useCreateOrUpdateProfileInfo() {
       }
 
       setLoading(true);
-      logger.debug("[OnboardingContactCardScreen]2 ");
 
       try {
         await checkUsernameValid(address, profile.username);
-        logger.debug("[OnboardingContactCardScreen]3 ");
       } catch (e: any) {
         logger.error(e, { context: "UserProfile: Checking username valid" });
         setLoading(false);
