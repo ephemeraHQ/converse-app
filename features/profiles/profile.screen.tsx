@@ -34,7 +34,7 @@ import { iconRegistry } from "@/design-system/Icon/Icon";
 import { useNotificationsPermission } from "@/features/notifications/hooks/use-notifications-permission";
 import { SocialNames } from "@/features/profiles/components/social-names";
 
-export default function ProfileScreen() {
+export function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
   const { theme, themed } = useAppTheme();
   const router = useRouter();

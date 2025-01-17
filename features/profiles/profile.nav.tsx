@@ -1,7 +1,6 @@
-import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
-import ProfileScreen from "../Profile";
-import { NativeStack } from "./Navigation";
+import { NativeStack } from "@/screens/Navigation/Navigation";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { ProfileScreen } from "./profile.screen";
 
 export type ProfileNavParams = {
   address: string;
@@ -12,6 +11,6 @@ export const ProfileScreenConfig = {
   path: "/profile",
 };
 
-export default function ProfileNav() {
+export function ProfileNav() {
   return <NativeStack.Screen name="Profile" component={ProfileScreen} />;
 }

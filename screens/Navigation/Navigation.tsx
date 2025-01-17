@@ -40,13 +40,13 @@ import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeySc
 import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
 import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
 import GroupNav, { GroupNavParams } from "./GroupNav";
-import ProfileNav, { ProfileNavParams } from "./ProfileNav";
 import ShareProfileNav from "./ShareProfileNav";
 import TopUpNav from "./TopUpNav";
 import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
+import { ProfileNav, ProfileNavParams } from "@/features/profiles/profile.nav";
 
 export type NavigationParamList = {
   Idle: undefined;
