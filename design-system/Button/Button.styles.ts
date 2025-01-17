@@ -53,6 +53,16 @@ export const getButtonViewStyle =
         size === "md" || size === "sm" ? spacing.xs : spacing.sm,
     };
 
+    // Special case for bare link text buttons - no padding or other decorations
+    if (variant === "link.bare") {
+      return {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: spacing.xxs,
+      };
+    }
+
     if (action === "primary") {
       switch (variant) {
         case "fill":

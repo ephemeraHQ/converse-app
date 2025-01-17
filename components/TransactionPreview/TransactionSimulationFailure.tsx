@@ -27,5 +27,5 @@ const $failure: ThemedStyle<ViewStyle> = ({ spacing, borderRadius }) => ({
   marginBottom: spacing.md,
   padding: spacing.sm,
   backgroundColor: "#FFF5F5",
-  borderRadius: borderRadius.xs,
+  borderRadius: borderRadius.xxs,
 });

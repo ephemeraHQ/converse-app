@@ -176,7 +176,7 @@ export const en = {
     "We could not find any result in your existing conversations. You might want to",
   no_results_start_convo: "start a new conversation",
   new_account: "New account",
-  "App settings": "App settings",
+  app_settings: "App settings",
   add_an_account: "Add an account",
   group_info: "Group info",
   converse_match_maker: "Converse Match Maker",
@@ -278,16 +278,6 @@ export const en = {
   // Attachments
   photo_library: "Photo Library",
   camera: "Camera",
-
-  disconnect: "Disconnect",
-  disconnect_delete_local_data: "Disconnect and delete local data",
-  disconnect_this_account: "Disconnect this account",
-  disconnect_account_description:
-    "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
-  your_profile_page: "Your profile page",
-  copy_wallet_address: "Copy wallet address",
-  turn_on_notifications: "Turn on notifications",
-  attachment_message_error_download: "Couldn't download attachment",
   attachment_message_view_in_browser: "View in browser",
   attachment: "Attachment",
 
@@ -363,7 +353,30 @@ export const en = {
   change_or_add_account: "Change or add account",
   profile: {
     modify_profile: "Modify profile",
+    edit: "Edit",
+    block: {
+      title: "Block user",
+      message: "Are you sure you want to block {{name}}?",
+    },
+    save: "Save",
+    done: "Done",
+    names: "Names",
+    copied: "Copied",
+    settings: {
+      notifications: "Notifications",
+      archive: "Archive",
+      keep_messages: "Keep messages",
+    },
   },
+  log_out: "Log out",
+  disconnect_delete_local_data: "Disconnect and delete local data",
+  disconnect_this_account: "Disconnect this account",
+  disconnect_account_description:
+    "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
+  your_profile_page: "Your profile page",
+  copy_wallet_address: "Copy wallet address",
+  turn_on_notifications: "Turn on notifications",
+  attachment_message_error_download: "Couldn't download attachment",
 
   // Revocation
   current_installation_revoked: "Logged out",

@@ -134,7 +134,7 @@ export function useHeaderWrapper() {
               {
                 displayInline: true,
                 id: "app-settings",
-                title: translate("App settings"),
+                title: translate("app_settings"),
                 image: iconRegistry["settings"],
               },
             ]}
