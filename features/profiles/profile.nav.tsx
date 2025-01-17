@@ -1,6 +1,6 @@
 import { NativeStack } from "@/screens/Navigation/Navigation";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { ProfileScreen } from "./profile.screen";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export type ProfileNavParams = {
   address: string;
