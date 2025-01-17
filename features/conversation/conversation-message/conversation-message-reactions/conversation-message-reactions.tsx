@@ -2,7 +2,7 @@ import { useSelect } from "@/data/store/storeHelpers";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
 import {
-  isCurrentUserInboxId,
+  isCurrentAccountInboxId,
   useCurrentAccountInboxId,
 } from "@/hooks/use-current-account-inbox-id";
 import { useInboxProfileSocialsQueries } from "@/queries/useInboxProfileSocialsQuery";
@@ -138,7 +138,7 @@ function useMessageReactionsRolledUp() {
     const previewCounts = new Map<string, number>();
 
     flatReactions.forEach((reaction) => {
-      const isOwnReaction = isCurrentUserInboxId(reaction.senderInboxId);
+      const isOwnReaction = isCurrentAccountInboxId(reaction.senderInboxId);
 
       if (isOwnReaction) {
         userReacted = true;

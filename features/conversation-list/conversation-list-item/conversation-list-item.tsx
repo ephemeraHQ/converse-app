@@ -1,6 +1,5 @@
 import { AnimatedCenter, Center } from "@/design-system/Center";
-import { HStack } from "@/design-system/HStack";
-import { Text } from "@/design-system/Text";
+import { ITextProps, Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { TouchableHighlight } from "@/design-system/touchable-highlight";
 import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
@@ -9,8 +8,8 @@ import React, { memo } from "react";
 import { ViewStyle } from "react-native";
 
 export type IConversationListItemProps = {
-  title?: string;
-  subtitle?: string;
+  title?: string | React.ReactNode;
+  subtitle?: string | React.ReactNode;
   avatarComponent?: React.ReactNode;
   onPress?: () => void;
   isUnread?: boolean;
@@ -29,27 +28,34 @@ export const ConversationListItem = memo(function ConversationListItem({
   const { screenHorizontalPadding } = useConversationListStyles();
 
   return (
-    <TouchableHighlight onPress={onPress} style={themed($touchable)}>
-      <HStack
-        style={[
-          themed($conversationListItem),
-          { paddingHorizontal: screenHorizontalPadding },
-        ]}
-      >
+    <TouchableHighlight
+      onPress={onPress}
+      style={[
+        themed($container),
+        { paddingHorizontal: screenHorizontalPadding },
+      ]}
+    >
+      <>
         <Center style={$avatarWrapper}>{avatarComponent}</Center>
         <VStack style={themed($messagePreviewContainer)}>
-          <Text preset="bodyBold" weight="medium" numberOfLines={1}>
-            {title}
-          </Text>
-          <Text preset="small" numberOfLines={2} color="secondary">
-            {subtitle}
-          </Text>
+          {typeof title === "string" ? (
+            <ConversationListItemTitle>{title}</ConversationListItemTitle>
+          ) : (
+            title
+          )}
+          {typeof subtitle === "string" ? (
+            <ConversationListItemSubtitle>
+              {subtitle}
+            </ConversationListItemSubtitle>
+          ) : (
+            subtitle
+          )}
         </VStack>
         {(isUnread || showError) && (
           <AnimatedCenter
             entering={theme.animation.reanimatedFadeInScaleIn()}
             exiting={theme.animation.reanimatedFadeOutScaleOut()}
-            style={$unreadContainer}
+            style={themed($unreadContainer)}
           >
             <Center
               style={[
@@ -59,10 +65,26 @@ export const ConversationListItem = memo(function ConversationListItem({
             />
           </AnimatedCenter>
         )}
-      </HStack>
+      </>
     </TouchableHighlight>
   );
 });
+
+export const ConversationListItemTitle = memo(
+  function ConversationListItemTitle(props: ITextProps) {
+    return (
+      <Text preset="bodyBold" weight="medium" numberOfLines={1} {...props} />
+    );
+  }
+);
+
+export const ConversationListItemSubtitle = memo(
+  function ConversationListItemSubtitle(props: ITextProps) {
+    return (
+      <Text preset="small" color="secondary" numberOfLines={2} {...props} />
+    );
+  }
+);
 
 const $avatarWrapper: ViewStyle = {
   alignSelf: "center",
@@ -74,9 +96,10 @@ const $messagePreviewContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginLeft: spacing.xs,
 });
 
-const $unreadContainer: ViewStyle = {
+const $unreadContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
-};
+  marginLeft: spacing.xs,
+});
 
 const $unread: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   width: spacing.sm,
@@ -85,14 +108,12 @@ const $unread: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   backgroundColor: colors.fill.primary,
 });
 
-const $touchable: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.background.surface,
-});
-
 const $placeholder: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.global.transparent,
 });
 
-const $conversationListItem: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $container: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   paddingVertical: spacing.xs,
+  backgroundColor: colors.background.surface,
+  flexDirection: "row",
 });

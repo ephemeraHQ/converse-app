@@ -3,7 +3,7 @@ import {
   JoinGroupNavigation,
   JoinGroupNavigationParams,
 } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
-import { BlockedConversations } from "@/features/blocked-conversations/blocked-conversations";
+import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen";
 import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
 import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
 import {
@@ -138,7 +138,10 @@ export function SignedInNavigation() {
             name="CreateConversation"
             component={CreateConversationScreen}
           />
-          <NativeStack.Screen name="Blocked" component={BlockedConversations} />
+          <NativeStack.Screen
+            name="Blocked"
+            component={BlockedConversationsScreen}
+          />
           {ConversationRequestsListNav()}
           {ConversationNav()}
           {ShareProfileNav()}

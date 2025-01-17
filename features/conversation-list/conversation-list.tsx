@@ -43,6 +43,7 @@ export function ConversationList(props: IConversationListProps) {
       onScroll={onScroll}
       keyboardShouldPersistTaps="handled"
       alwaysBounceVertical={conversations?.length > 0}
+      layout={theme.animation.reanimatedLayoutSpringTransition}
       itemLayoutAnimation={theme.animation.reanimatedLayoutSpringTransition}
       data={conversations}
       keyExtractor={keyExtractor}
@@ -62,16 +63,11 @@ export function ConversationList(props: IConversationListProps) {
 const defaultRenderItem: ListRenderItem<ConversationWithCodecsType> = ({
   item,
 }) => {
-  if ("lastMessage" in item) {
-    const conversation = item;
-    if (isConversationGroup(conversation)) {
-      return (
-        <ConversationListItemGroup conversationTopic={conversation.topic} />
-      );
-    }
-    return <ConversationListItemDm conversationTopic={conversation.topic} />;
+  const conversation = item;
+  if (isConversationGroup(conversation)) {
+    return <ConversationListItemGroup conversationTopic={conversation.topic} />;
   }
-  return null;
+  return <ConversationListItemDm conversationTopic={conversation.topic} />;
 };
 
 function keyExtractor(item: ConversationWithCodecsType) {

@@ -1,4 +1,5 @@
 import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
 import { isSupportedMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages";
@@ -57,7 +58,7 @@ export const conversationMessagesQueryFn = async (args: {
 
   const validMessages = messages.filter(isSupportedMessage);
 
-  return processMessages({ messages: validMessages });
+  return processMessages({ newMessages: validMessages });
 };
 
 export const useConversationMessages = (
@@ -97,7 +98,7 @@ export const addConversationMessageQuery = (args: {
     getConversationMessagesQueryOptions(account, topic).queryKey,
     (previousMessages) => {
       const processedMessages = processMessages({
-        messages: [message],
+        newMessages: [message],
         existingData: previousMessages,
         prependNewMessages: true,
       });
@@ -154,11 +155,11 @@ type IMessageAccumulator = {
 
 function processMessages(args: {
   // messages: IConvosMessage[];
-  messages: DecodedMessageWithCodecsType[];
+  newMessages: DecodedMessageWithCodecsType[];
   existingData?: IMessageAccumulator;
   prependNewMessages?: boolean;
 }): IMessageAccumulator {
-  const { messages, existingData, prependNewMessages = false } = args;
+  const { newMessages, existingData, prependNewMessages = false } = args;
 
   const result: IMessageAccumulator = existingData
     ? { ...existingData }
@@ -169,7 +170,7 @@ function processMessages(args: {
       };
 
   // For now, we ignore messages with these content types
-  const validMessages = messages.filter(
+  const validMessages = newMessages.filter(
     (message) =>
       !ignoredContentTypesPrefixes.some((prefix) =>
         message.contentTypeId.startsWith(prefix)
@@ -182,7 +183,11 @@ function processMessages(args: {
     if (!isReactionMessage(message)) {
       const messageId = message.id as MessageId;
 
-      result.byId[messageId] = message;
+      if (prependNewMessages) {
+        result.byId = { [messageId]: message, ...result.byId };
+      } else {
+        result.byId[messageId] = message;
+      }
       if (prependNewMessages) {
         result.ids = [messageId, ...result.ids];
       } else {
@@ -258,14 +263,14 @@ export function replaceOptimisticMessageWithReal(args: {
   tempId: string;
   topic: ConversationTopic;
   account: string;
-  message: DecodedMessageWithCodecsType;
+  realMessage: DecodedMessageWithCodecsType;
 }) {
-  const { tempId, topic, account, message } = args;
+  const { tempId, topic, account, realMessage } = args;
   logger.debug(
     "[linkOptimisticMessageToReal] linking optimistic message to real",
     {
       tempId,
-      messageId: message.id,
+      messageId: realMessage.id,
     }
   );
 
@@ -274,12 +279,12 @@ export function replaceOptimisticMessageWithReal(args: {
     (previousMessages) => {
       if (!previousMessages) {
         return {
-          ids: [message.id as MessageId],
+          ids: [realMessage.id as MessageId],
           byId: {
-            [message.id as MessageId]: message,
+            [realMessage.id as MessageId]: realMessage,
           },
           reactions: {},
-        };
+        } satisfies IMessageAccumulator;
       }
 
       // Find the index of the temporary message
@@ -291,12 +296,18 @@ export function replaceOptimisticMessageWithReal(args: {
 
       // Create new ids array with the real message id replacing the temp id
       const newIds = [...previousMessages.ids];
-      newIds[tempIndex] = message.id as MessageId;
+      newIds[tempIndex] = realMessage.id as MessageId;
 
-      // Create new byId object without the temp message and with the real message
-      const newById = { ...previousMessages.byId };
+      // Add new message first, then spread existing byId
+      const newById: IMessageAccumulator["byId"] = {
+        [realMessage.id]: updateObjectAndMethods(realMessage, {
+          // @ts-expect-error
+          tempOptimisticId: tempId,
+        }),
+        ...previousMessages.byId,
+      };
+      // Remove the temporary message entry
       delete newById[tempId as MessageId];
-      newById[message.id as MessageId] = message;
 
       return {
         ...previousMessages,

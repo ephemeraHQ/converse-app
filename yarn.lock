@@ -27381,27 +27381,27 @@ __metadata:
   linkType: hard
 
 "react-native-ios-context-menu@npm:^2.5.1":
-  version: 2.5.1
-  resolution: "react-native-ios-context-menu@npm:2.5.1"
+  version: 2.5.3
+  resolution: "react-native-ios-context-menu@npm:2.5.3"
   dependencies:
     "@dominicstop/ts-event-emitter": "npm:^1.1.0"
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-    react-native-ios-utilities: 4.4.x
-  checksum: 10c0/39147b0f9c03a2df89dd94a440d3fe3facf3d6a016b5508de53f93a5f50506f81211f8373b99162ba58a0084cb89fede117b677af965ecfb3258ef7ae70cedb2
+    react-native-ios-utilities: ">= 4.4.x <=4.5.x"
+  checksum: 10c0/3ed5fc9dd8f74ce5035396ddf033ec42fe11f4077e7459492ee3b89b0f73ba0daa49b29eb99a4bc22252c1523539277e90cc4dc789037fda84bd2cb080092a4a
   languageName: node
   linkType: hard
 
 "react-native-ios-utilities@npm:^4.5.2":
-  version: 4.5.2
-  resolution: "react-native-ios-utilities@npm:4.5.2"
+  version: 4.5.3
+  resolution: "react-native-ios-utilities@npm:4.5.3"
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 10c0/6a786a58002e144b05c89922255483356d10132489dd7487b54a28f4d3eed72928d8567dd379a1832f8929511ef4bea54e85636f3c5408b61276af61b529756d
+  checksum: 10c0/aeaf5eb03ee20889affba3b1e80c17e196f0d21572b426d377e12536ccccaa72d8bfe5a219a38560b75f5a4c5e129cfa0da69a9cd4da5d956522c1d521d70745
   languageName: node
   linkType: hard
 

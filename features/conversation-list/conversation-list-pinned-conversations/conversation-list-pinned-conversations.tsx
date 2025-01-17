@@ -1,5 +1,6 @@
 import { AnimatedCenter } from "@/design-system/Center";
 import { AnimatedHStack } from "@/design-system/HStack";
+import { AnimatedVStack } from "@/design-system/VStack";
 import { ConversationListItemAvatarSkeleton } from "@/features/conversation-list/conversation-list-item/conversation-list-item-avatar-skeleton";
 import { ConversationListPinnedConversationDm } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-dm";
 import { ConversationListPinnedConversationGroup } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-group";
@@ -10,6 +11,7 @@ import { isConversationGroup } from "@/features/conversation/utils/is-conversati
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
 import { hexToRGBA } from "@/utils/colors";
+import { chunk } from "@/utils/general";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo } from "react";
 import { ViewStyle } from "react-native";
@@ -41,24 +43,37 @@ export const ConversationListPinnedConversations = memo(
     if (!hasPinnedConversations) {
       return null;
     }
-
     return (
-      <AnimatedHStack
+      <AnimatedVStack
         style={themed($container)}
         layout={theme.animation.reanimatedLayoutSpringTransition}
+        exiting={theme.animation.reanimatedFadeOutSpring}
       >
-        {pinnedConversations?.map((conversation) => (
-          <AnimatedCenter
-            key={conversation.topic}
+        {chunk(pinnedConversations, 3).map((row, rowIndex) => (
+          <AnimatedHStack
+            key={`row-${rowIndex}`}
+            style={[
+              themed($pinnedRow),
+              {
+                justifyContent: row.length > 2 ? "space-between" : "center",
+              },
+            ]}
             layout={theme.animation.reanimatedLayoutSpringTransition}
-            entering={theme.animation.reanimatedFadeInScaleIn({
-              delay: 100,
-            })}
           >
-            <PinnedConversationWrapper topic={conversation.topic} />
-          </AnimatedCenter>
+            {row.map((conversation) => (
+              <AnimatedCenter
+                key={conversation.topic}
+                layout={theme.animation.reanimatedLayoutSpringTransition}
+                entering={theme.animation.reanimatedFadeInScaleIn({
+                  delay: 100,
+                })}
+              >
+                <PinnedConversationWrapper topic={conversation.topic} />
+              </AnimatedCenter>
+            ))}
+          </AnimatedHStack>
         ))}
-      </AnimatedHStack>
+      </AnimatedVStack>
     );
   }
 );
@@ -108,12 +123,15 @@ const PinnedConversationWrapper = memo(
     return <ConversationListPinnedConversationDm conversation={conversation} />;
   }
 );
-
 const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  justifyContent: "center",
-  columnGap: spacing.sm,
-  flexWrap: "wrap",
-  rowGap: spacing.lg,
   paddingVertical: spacing.xs,
   paddingHorizontal: spacing.lg,
+  rowGap: spacing.lg,
+});
+
+const $pinnedRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  justifyContent: "space-between",
+  columnGap: spacing.lg, // We want minimum gap between pinned conversations
+  flexWrap: "wrap",
+  rowGap: spacing.lg,
 });

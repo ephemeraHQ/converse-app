@@ -1,5 +1,4 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
-import { isDev } from "@/utils/getEnv";
 import logger from "@/utils/logger";
 
 export function captureError(
@@ -8,12 +7,10 @@ export function captureError(
     message?: string;
   }
 ) {
-  if (isDev) {
-    if (options?.message) {
-      logger.error(`${options.message}:`, error);
-    } else {
-      logger.error(error);
-    }
+  if (options?.message) {
+    logger.error(`${options.message}:`, error);
+  } else {
+    logger.error(error);
   }
 
   // Note: (thierry) Our logger is already sending error to Sentry

@@ -37,7 +37,7 @@ export function setupApiInterceptors(api: AxiosInstance) {
 
       const account = config.headers?.[XMTP_API_ADDRESS_HEADER_KEY];
       if (typeof account !== "string") {
-        throw new Error("No account in request headers");
+        return Promise.reject(error);
       }
 
       // Token refresh logic

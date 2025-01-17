@@ -61,9 +61,9 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
           {/* Using basic Flatlist instead of the Animated one to try to fix the context menu crashes https://github.com/dominicstop/react-native-ios-context-menu/issues/70 */}
           <FlatList
             {...conversationListDefaultProps}
-            data={messages?.ids ?? []}
+            data={Object.values(messages?.byId ?? {})}
             renderItem={({ item, index }) => {
-              const message = messages?.byId[item]!;
+              const message = item;
               const previousMessage = messages?.byId[messages?.ids[index + 1]];
               const nextMessage = messages?.byId[messages?.ids[index - 1]];
 

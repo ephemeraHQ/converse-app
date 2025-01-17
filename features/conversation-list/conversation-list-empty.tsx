@@ -1,10 +1,18 @@
-import { VStack } from "@/design-system/VStack";
+import { AnimatedVStack } from "@/design-system/VStack";
 import { ConversationListItem } from "@/features/conversation-list/conversation-list-item/conversation-list-item";
 import { ConversationListItemAvatarSkeleton } from "@/features/conversation-list/conversation-list-item/conversation-list-item-avatar-skeleton";
+import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
 import { useAppTheme } from "@/theme/useAppTheme";
 import React, { memo } from "react";
 
 export const ConversationListEmpty = memo(function ConversationListEmpty() {
+  const { pinnedConversations = [] } = usePinnedConversations();
+
+  // If there are pinned conversations, don't show the empty state
+  if (pinnedConversations?.length > 0) {
+    return null;
+  }
+
   return <ConversationListSkeletons />;
 });
 
@@ -12,7 +20,7 @@ const ConversationListSkeletons = memo(function ConversationListSkeletons() {
   const { theme } = useAppTheme();
 
   return (
-    <VStack>
+    <AnimatedVStack entering={theme.animation.reanimatedFadeInSpring}>
       {/* 8 to fill up the screen */}
       {new Array(8).fill(null).map((_, index) => (
         <ConversationListItem
@@ -25,6 +33,6 @@ const ConversationListSkeletons = memo(function ConversationListSkeletons() {
           }
         />
       ))}
-    </VStack>
+    </AnimatedVStack>
   );
 });

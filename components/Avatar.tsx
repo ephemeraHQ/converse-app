@@ -8,10 +8,10 @@ import React, { memo, useCallback, useState } from "react";
 import { Platform, StyleProp, ViewStyle } from "react-native";
 
 export type IAvatarProps = {
-  uri?: string;
+  uri: string | undefined;
+  name?: string;
   size?: number;
   style?: StyleProp<ViewStyle>;
-  name?: string;
 };
 
 export const Avatar = memo(function Avatar({
@@ -73,6 +73,7 @@ export const Avatar = memo(function Avatar({
             color: theme.colors.global.white, // white looks better for both dark/light themes
             fontSize: avatarSize / 2.4, // 2.4 is the ratio in the Figma design
             lineHeight: avatarSize / 2.4, // 2.4 is the ratio in the Figma design
+            paddingTop: avatarSize / 15, // 15 is totally random and padding top shouldn't be needed but otherwise the text is not centered
           }}
         >
           {firstLetter}

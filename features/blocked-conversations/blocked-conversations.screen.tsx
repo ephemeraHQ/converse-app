@@ -1,4 +1,4 @@
-import { VStack } from "@/design-system/VStack";
+import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { EmptyState } from "@/design-system/empty-state";
 import { useBlockedConversationsForCurrentAccount } from "@/features/blocked-conversations/use-blocked-conversations-for-current-account";
 import { ConversationList } from "@/features/conversation-list/conversation-list";
@@ -8,7 +8,7 @@ import { $globalStyles } from "@/theme/styles";
 import { translate } from "@i18n/index";
 import React from "react";
 
-export function BlockedConversations() {
+export function BlockedConversationsScreen() {
   const { data: allBlockedChats = [] } =
     useBlockedConversationsForCurrentAccount();
 
@@ -21,7 +21,7 @@ export function BlockedConversations() {
   });
 
   return (
-    <VStack style={$globalStyles.flex1}>
+    <Screen contentContainerStyle={$globalStyles.flex1}>
       {allBlockedChats.length > 0 ? (
         <ConversationList conversations={allBlockedChats} />
       ) : (
@@ -30,6 +30,6 @@ export function BlockedConversations() {
           description={translate("removed_chats.no_removed_chats")}
         />
       )}
-    </VStack>
+    </Screen>
   );
 }
