@@ -1,11 +1,9 @@
 // IMPORTANT: DO NOT CHANGE THE ORDER OF THESE IMPORTS
 // These imports must be in this specific order for polyfills to work correctly
 import "@walletconnect/react-native-compat";
-import "fast-text-encoding";
-import "react-native-get-random-values";
-import "@ethersproject/shims";
+import "react-native-get-random-values"; // Privy requires this
+import "@ethersproject/shims"; // Privy requires this
 
-import "text-encoding";
 import "@azure/core-asynciterator-polyfill";
 import "react-native-polyfill-globals/auto";
 import { Crypto as WebCrypto } from "@peculiar/webcrypto";

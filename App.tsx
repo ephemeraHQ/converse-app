@@ -4,12 +4,15 @@ import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
 } from "react-native-reanimated";
+import * as Privy from "@privy-io/expo";
+// This is a requirement for Privy to work, does not make any sense
+// To test run yarn start --no-dev --minify
+const PrivyProvider = Privy.PrivyProvider;
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { useAppStateHandlers } from "@hooks/useAppStateHandlers";
-import { PrivyProvider } from "@privy-io/expo";
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
