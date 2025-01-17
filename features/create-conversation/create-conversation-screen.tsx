@@ -59,6 +59,7 @@ import { isEmptyObject } from "@utils/objects";
 import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 import { stylesNewChat } from "./create-conversation.styles";
+import { useHeader } from "@/navigation/use-header";
 
 /**
  * Screen shown for when user wants to create a new Chat.
@@ -114,7 +115,6 @@ export function CreateConversationScreen({
     !!status.message && isEmptyObject(status.profileSearchResults);
 
   const handleBack = useCallback(() => {
-    logger.debug("[CreateConversation] Navigating back");
     navigation.goBack();
   }, [navigation]);
 
@@ -126,42 +126,11 @@ export function CreateConversationScreen({
     }
   }, [pendingChatMembersCount]);
 
-  useEffect(() => {
-    logger.debug("[CreateConversation] Setting navigation options", {
-      memberCount: pendingChatMembersCount,
-      conversationCreationMode,
-    });
-
-    navigation.setOptions({
-      headerLeft: () =>
-        Platform.OS === "ios" ? (
-          <Button icon="chevron.left" variant="text" onPress={handleBack} />
-        ) : (
-          <AndroidBackAction navigation={navigation as any} />
-        ),
-      headerBackButtonDisplayMode: "default",
-      headerTitle: "New chat",
-      headerRight: () => {
-        return (
-          <Text
-            text={
-              conversationCreationMode === ConversationVersion.DM
-                ? "New convo"
-                : "New group"
-            }
-          />
-        );
-      },
-    });
-  }, [
-    pendingChatMembersCount,
-    conversationCreationMode,
-    status.loading,
-    navigation,
-    handleBack,
-    themed,
-    theme.spacing,
-  ]);
+  useHeader({
+    title: "New chat",
+    safeAreaEdges: ["top"],
+    onBack: handleBack,
+  });
 
   // todo: abstract debounce and provide option for eager vs lazy debounce
   // ie: lets perform the query but not necessarily rerender until the debounce
