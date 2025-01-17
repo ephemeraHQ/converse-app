@@ -95,6 +95,8 @@ export const useConversationRequestsListItem = () => {
       } catch (error) {
         captureErrorWithToast(error);
       } finally {
+        // Default to putting all conversations in likelySpam if we have an error
+        setLikelySpam(conversations);
         setIsProcessingConversations(false);
       }
     }
