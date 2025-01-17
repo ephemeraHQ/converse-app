@@ -1,6 +1,5 @@
 import { useCallback } from "react";
-import { FlatList, Keyboard } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FlatList } from "react-native";
 import { ProfileSearchResultListItem } from "./ProfileSearchItem";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 
@@ -16,8 +15,6 @@ export function ProfileSearchResultsList({
   profiles,
   handleSearchResultItemPress,
 }: ProfileSearchProps) {
-  const insets = useSafeAreaInsets();
-
   const keyExtractor = useCallback((address: string) => address, []);
 
   const renderItem = useCallback(
@@ -37,7 +34,6 @@ export function ProfileSearchResultsList({
       data={Object.keys(profiles)}
       keyExtractor={keyExtractor}
       renderItem={renderItem}
-      onTouchStart={Keyboard.dismiss}
     />
   );
 }

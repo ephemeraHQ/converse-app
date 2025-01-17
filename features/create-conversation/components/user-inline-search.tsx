@@ -12,12 +12,13 @@
  */
 
 import React, { useRef, useState } from "react";
-import { Platform, TextInput, View, ViewStyle, TextStyle } from "react-native";
+import { TextInput, View, ViewStyle, TextStyle } from "react-native";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
-import { Text } from "@/design-system/Text";
-import { Pressable } from "@/design-system/Pressable";
-import { Icon } from "@/design-system/Icon/Icon";
 import { textSizeStyles } from "@/design-system/Text/Text.styles";
+import { Text } from "@/design-system/Text";
+import { Chip } from "./Chip";
+import logger from "@/utils/logger";
+// import { debugBorder } from "@/utils/debug-style";
 
 type Props = {
   value: string;
@@ -27,6 +28,7 @@ type Props = {
   selectedUsers: Array<{
     address: string;
     name: string;
+    avatarUri: string | undefined;
   }>;
   onRemoveUser: (address: string) => void;
 };
@@ -35,7 +37,7 @@ export function UserInlineSearch({
   value,
   onChangeText,
   onRef,
-  placeholder = "Search users...",
+  placeholder = "Name, address or onchain ID",
   selectedUsers,
   onRemoveUser,
 }: Props) {
@@ -46,25 +48,13 @@ export function UserInlineSearch({
   const inputRef = useRef<TextInput | null>(null);
 
   const handleKeyPress = ({ nativeEvent: { key } }: any) => {
+    logger.debug("key", key);
     if (key === "Backspace" && value === "") {
       if (selectedChipIndex !== null) {
         onRemoveUser(selectedUsers[selectedChipIndex].address);
         setSelectedChipIndex(null);
       } else if (selectedUsers.length > 0) {
         setSelectedChipIndex(selectedUsers.length - 1);
-      }
-    } else if (key === "ArrowLeft" && value === "") {
-      if (selectedChipIndex === null && selectedUsers.length > 0) {
-        setSelectedChipIndex(selectedUsers.length - 1);
-      } else if (selectedChipIndex !== null && selectedChipIndex > 0) {
-        setSelectedChipIndex(selectedChipIndex - 1);
-      }
-    } else if (key === "ArrowRight" && selectedChipIndex !== null) {
-      if (selectedChipIndex < selectedUsers.length - 1) {
-        setSelectedChipIndex(selectedChipIndex + 1);
-      } else {
-        setSelectedChipIndex(null);
-        inputRef.current?.focus();
       }
     } else {
       setSelectedChipIndex(null);
@@ -74,9 +64,15 @@ export function UserInlineSearch({
   return (
     <View style={themed($container)}>
       <View style={themed($inputContainer)}>
+        <Text preset="formLabel" style={themed($toText)}>
+          To
+        </Text>
         {selectedUsers.map((user, index) => (
-          <Pressable
+          <Chip
+            avatarUri={user.avatarUri}
             key={user.address}
+            name={user.name}
+            isSelected={selectedChipIndex === index}
             onPress={() => {
               if (selectedChipIndex === index) {
                 onRemoveUser(user.address);
@@ -85,40 +81,7 @@ export function UserInlineSearch({
                 setSelectedChipIndex(index);
               }
             }}
-            style={[
-              themed($chip),
-              selectedChipIndex === index && themed($selectedChip),
-            ]}
-          >
-            <Text
-              preset="formLabel"
-              style={[
-                themed($chipText) as TextStyle,
-                selectedChipIndex === index &&
-                  (themed($selectedChipText) as TextStyle),
-              ]}
-              numberOfLines={1}
-            >
-              {user.name}
-            </Text>
-            <Pressable
-              onPress={(e) => {
-                e.stopPropagation();
-                onRemoveUser(user.address);
-              }}
-              style={themed($removeButton)}
-            >
-              <Icon
-                icon="xmark"
-                size={theme.iconSize.sm}
-                color={
-                  selectedChipIndex === index
-                    ? theme.colors.text.inverted.primary
-                    : theme.colors.text.secondary
-                }
-              />
-            </Pressable>
-          </Pressable>
+          />
         ))}
 
         <TextInput
@@ -140,18 +103,23 @@ export function UserInlineSearch({
   );
 }
 
-const $container: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  borderBottomWidth: Platform.OS === "android" ? 1 : 0.5,
-  borderBottomColor: colors.border.subtle,
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.background.surface,
+  marginHorizontal: 16,
+  marginVertical: 8,
+  //   padding: spacing.sm,
+  borderRadius: 12,
+  borderWidth: 1,
+  //   borderColor: colors.border.subtle,
+  //   ...debugBorder("blue"),
 });
 
 const $inputContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  minHeight: spacing["3xl"],
-  paddingHorizontal: spacing.sm,
   flexDirection: "row",
   flexWrap: "wrap",
   alignItems: "center",
   gap: spacing.xs,
+  //   ...debugBorder("yellow"),
 });
 
 const $input: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
@@ -160,32 +128,9 @@ const $input: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   height: spacing["3xl"],
   color: colors.text.primary,
   ...textSizeStyles.sm,
+  //   ...debugBorder("purple"),
 });
 
-const $chip: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.background.surface,
-  borderRadius: spacing.xs,
-  flexDirection: "row",
-  alignItems: "center",
-  paddingHorizontal: spacing.xs,
-  paddingVertical: 2,
-  gap: spacing.xxs,
-});
-
-const $selectedChip: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.background.blurred,
-});
-
-const $chipText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text.secondary,
-  maxWidth: 150,
-});
-
-const $selectedChipText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text.inverted.primary,
-});
-
-const $removeButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: spacing.xxs,
-  marginLeft: -spacing.xxs,
+const $toText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text.primary,
 });

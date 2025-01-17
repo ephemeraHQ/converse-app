@@ -32,7 +32,7 @@ import {
   SearchStatus,
 } from "./create-conversation.types";
 import { IProfileSocials } from "../profiles/profile-types";
-import { getPreferredName } from "@/utils/profile";
+import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
 
 /**
  * Screen for creating new conversations
@@ -373,6 +373,7 @@ export function CreateConversationScreen({
         selectedUsers={selectedUsers.map((u) => ({
           address: u.address,
           name: u.name,
+          avatarUri: getPreferredAvatar(u.socials),
         }))}
         onRemoveUser={(address: string) => {
           setSelectedUsers((prev) => prev.filter((u) => u.address !== address));
