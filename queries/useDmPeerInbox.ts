@@ -19,7 +19,6 @@ const getDmPeerInboxIdQueryOptions = (args: {
       const conversation = getConversationQueryData({
         account,
         topic,
-        context: "useDmPeerInboxId",
       });
       if (!conversation) {
         throw new Error("Conversation not found");

@@ -8,7 +8,6 @@ export const useConversationByTopic = (topic: ConversationTopic) => {
 
   const { data: conversations } = useConversationsQuery({
     account: account!,
-    context: "useConversationListConversation",
   });
 
   return useMemo(

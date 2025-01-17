@@ -1,6 +1,9 @@
-import { IGroupConsentOptions } from "@hooks/useGroupConsent";
-import { createGroupJoinRequest, getGroupJoinRequest } from "@utils/api";
-import { GroupInvite } from "@utils/api.types";
+import { IGroupConsentOptions } from "@/features/consent/use-group-consent";
+import {
+  createGroupJoinRequest,
+  getGroupJoinRequest,
+} from "@/utils/api/api-groups/api-groups";
+import { GroupInvite } from "@/utils/api/api-groups/api-group.types";
 import { getV3IdFromTopic } from "@/utils/groupUtils/groupId";
 import logger from "@utils/logger";
 import {
@@ -206,7 +209,7 @@ export class JoinGroupClient {
       // were imported at the top level of this module.
       const { setGroupStatus } = await import("@data/store/accountsStore");
       const { createAllowGroupMutationObserver } = await import(
-        "@queries/useAllowGroupMutation"
+        "@/features/consent/use-allow-group.mutation"
       );
 
       const { topic, id: groupId } = conversation;

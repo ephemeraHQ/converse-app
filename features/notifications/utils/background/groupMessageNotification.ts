@@ -235,10 +235,11 @@ export const handleV3MessageNotification = async (
     );
     if (spamScore >= 0) return;
 
-    const notificationContent = await getNotificationContent(
-      conversation as GroupWithCodecsType,
-      message
-    );
+    const notificationContent = await getNotificationContent({
+      account: xmtpClient.address,
+      message: message as DecodedMessageWithCodecsType,
+    });
+
     if (!notificationContent) return;
     const { senderName, senderImage } = await getSenderProfileInfo(
       xmtpClient,

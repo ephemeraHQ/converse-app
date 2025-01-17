@@ -1,31 +1,22 @@
-import { ConversationHeaderTitle } from "@/features/conversation/conversation-header/conversation-header-title";
-import { usePreferredInboxAddress } from "@/hooks/usePreferredInboxAddress";
-import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
-import { copyToClipboard } from "@/utils/clipboard";
+import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
 import { Avatar } from "@components/Avatar";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { usePreferredAvatarUri } from "@hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@hooks/usePreferredName";
 import { useProfileSocials } from "@hooks/useProfileSocials";
 import { useRouter } from "@navigation/useNavigation";
 import { useAppTheme } from "@theme/useAppTheme";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 
-type DmConversationTitleProps = {
-  topic: ConversationTopic;
+type NewConversationTitleProps = {
+  peerAddress: string;
 };
 
-export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
-  const account = useCurrentAccount()!;
-
+export const NewConversationTitle = ({
+  peerAddress,
+}: NewConversationTitleProps) => {
   const navigation = useRouter();
 
   const { theme } = useAppTheme();
-
-  const { data: peerInboxId } = useDmPeerInboxId({ account, topic });
-
-  const peerAddress = usePreferredInboxAddress(peerInboxId!);
 
   const onPress = useCallback(() => {
     if (peerAddress) {
@@ -33,30 +24,25 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
     }
   }, [navigation, peerAddress]);
 
-  const onLongPress = useCallback(() => {
-    copyToClipboard(JSON.stringify(topic));
-  }, [topic]);
-
   const { isLoading } = useProfileSocials(peerAddress ?? "");
 
   const preferredName = usePreferredName(peerAddress ?? "");
 
   const preferredAvatarUri = usePreferredAvatarUri(peerAddress ?? "");
 
-  const displayAvatar = peerAddress && !isLoading;
+  const displayAvatar = !isLoading;
+
   if (!displayAvatar) return null;
 
   return (
     <ConversationHeaderTitle
       title={preferredName}
-      onLongPress={onLongPress}
       onPress={onPress}
       avatarComponent={
         displayAvatar && (
           <Avatar
             uri={preferredAvatarUri ?? undefined}
             size={theme.avatarSize.md}
-            name={preferredName}
           />
         )
       }

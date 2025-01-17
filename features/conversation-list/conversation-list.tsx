@@ -65,9 +65,11 @@ const defaultRenderItem: ListRenderItem<ConversationWithCodecsType> = ({
   if ("lastMessage" in item) {
     const conversation = item;
     if (isConversationGroup(conversation)) {
-      return <ConversationListItemGroup group={conversation} />;
+      return (
+        <ConversationListItemGroup conversationTopic={conversation.topic} />
+      );
     }
-    return <ConversationListItemDm conversation={conversation} />;
+    return <ConversationListItemDm conversationTopic={conversation.topic} />;
   }
   return null;
 };

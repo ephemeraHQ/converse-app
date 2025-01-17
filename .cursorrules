@@ -11,7 +11,12 @@
 - Add clear, concise comments to explain non-obvious logic or unconventional implementation decisions.
 - When refactoring code, preserve existing comments unless explicitly instructed otherwise or the related code is removed. Comments often explain important context or implementation decisions that should be maintained.
 - Comments should be above the code they are describing.
--
+- Use the suffix 'ForCurrentAccount' when using useCurrentAccount inside components or hooks.
+- Handle errors at the caller level. Unless if we really need to log something but make sure to throw back the error to the caller.
+- Minimize using external hooks inside custom hooks to prevent unnecessary rerenders. Instead, use getter functions to access data, especially in mutations.
+- Use Zod for external API response validation. Define zod schema and infer types from it.
+- Keep files small and focused. Place hooks and components in separate files unless they are small wrapper components. This improves code organization and maintainability.
+- Refactor a component using the composable pattern when you start seeing a lot of optional props.
 
 ## TypeScript
 
@@ -42,9 +47,11 @@
 
 ## File Structure
 
-- Use lowercase with dashes for directories (e.g., components/auth-wizard).
+- Use lower-kebab-case for directories and files (e.g., components/auth-wizard).
 - Import paths from our project should start with @/.
 - Use the same name for the file and the component.
+- Keep features self-contained. Create a new feature folder if accessing features across boundaries.
+- Place queries within their respective feature folders, but maintain queryKeys at the root level for better visibility.
 
 ## Theming & Styling
 

@@ -1,5 +1,5 @@
 import { usePendingRequestsQuery } from "@queries/usePendingRequestsQuery";
-import { PendingGroupJoinRequest } from "@utils/api";
+import { PendingGroupJoinRequest } from "@/utils/api/api-groups/api-groups";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
 import { useExistingGroupInviteLink } from "./useExistingGroupInviteLink";

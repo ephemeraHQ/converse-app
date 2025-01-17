@@ -1,21 +1,16 @@
 import { IConvosMessage } from "@/features/conversation/conversation-message/conversation-message.types";
 import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
-import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
 import {
   getConversationMessagesQueryData,
   useConversationMessages,
-} from "@/queries/useConversationMessages";
-import {
-  DecodedMessageWithCodecsType,
-  SupportedCodecsType,
-} from "@/utils/xmtpRN/client.types";
+} from "@/queries/use-conversation-messages-query";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/content-types/coinbasePayment";
 import { getMessageContentType } from "@/utils/xmtpRN/content-types/content-types";
 import {
   getCurrentAccount,
   useCurrentAccount,
 } from "@data/store/accountsStore";
-import { useQuery } from "@tanstack/react-query";
 import { getReadableProfile } from "@utils/getReadableProfile";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
@@ -82,7 +77,7 @@ export function isStaticAttachmentMessage(
 }
 export function isTransactionReferenceMessage(
   message: DecodedMessageWithCodecsType
-): message is DecodedMessage<TransactionReferenceCodec, SupportedCodecsType> {
+): message is DecodedMessage<TransactionReferenceCodec> {
   return (
     getMessageContentType(message.contentTypeId) === "transactionReference"
   );
@@ -184,33 +179,6 @@ export function getMessageStringContent(
   }
 
   return "";
-}
-
-export function useConversationMessageById({
-  messageId,
-  topic,
-}: {
-  messageId: MessageId;
-  topic: ConversationTopic;
-}) {
-  const currentAccount = useCurrentAccount()!;
-  const { data: messages } = useConversationMessages(currentAccount, topic);
-
-  const cachedMessage = messages?.byId[messageId];
-
-  // Only fetch the message if it's not already in the conversation messages
-  const { data: message, isLoading: isLoadingMessage } = useQuery({
-    ...getConversationMessageQueryOptions({
-      account: currentAccount,
-      messageId,
-    }),
-    enabled: !cachedMessage,
-  });
-
-  return {
-    message: message ?? cachedMessage,
-    isLoading: !cachedMessage && isLoadingMessage,
-  };
 }
 
 export function useConversationMessageReactions(messageId: MessageId) {

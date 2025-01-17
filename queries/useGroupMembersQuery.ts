@@ -125,3 +125,12 @@ export const invalidateGroupMembersQuery = (
     queryKey: groupMembersQueryKey(account, topic),
   });
 };
+
+export function refetchGroupMembersQuery(
+  account: string,
+  topic: ConversationTopic
+) {
+  return queryClient.refetchQueries({
+    queryKey: groupMembersQueryKey(account, topic),
+  });
+}

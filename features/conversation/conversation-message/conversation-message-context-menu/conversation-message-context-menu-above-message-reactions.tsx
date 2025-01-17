@@ -3,7 +3,7 @@ import { Icon } from "@/design-system/Icon/Icon";
 import { TouchableOpacity } from "@/design-system/TouchableOpacity";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { StaggeredAnimation } from "@/design-system/staggered-animation";
-import { useConversationMessageById } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { useConversationMessageById } from "../use-conversation-message";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getReactionContent } from "@/utils/xmtpRN/reactions";
@@ -46,7 +46,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
 
     const { message } = useConversationMessageById({
       messageId,
-      topic,
+      conversationTopic: topic,
     });
 
     const messageFromMe = messageIsFromCurrentAccountInboxId({

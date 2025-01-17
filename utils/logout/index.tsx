@@ -22,7 +22,7 @@ import { unsubscribeFromNotifications } from "@features/notifications/utils/unsu
 import { deleteSubscribedTopics } from "@features/notifications/utils/deleteSubscribedTopics";
 import { lastNotifSubscribeByAccount } from "@features/notifications/utils/lastNotifSubscribeByAccount";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
-import { getXmtpApiHeaders } from "@utils/api";
+import { getXmtpApiHeaders } from "@/utils/api/auth";
 import { resetNotifications } from "@/features/notifications/utils/resetNotifications";
 
 type LogoutTasks = {

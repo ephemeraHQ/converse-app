@@ -8,7 +8,7 @@ export const useGroupPermissions = (topic: ConversationTopic | undefined) => {
     data: permissions,
     isLoading,
     isError,
-  } = useGroupPermissionsQuery(account, topic!);
+  } = useGroupPermissionsQuery(account, topic);
 
   return {
     permissions,

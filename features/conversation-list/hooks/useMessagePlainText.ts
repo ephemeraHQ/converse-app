@@ -7,37 +7,53 @@ import {
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { translate } from "@/i18n";
 import {
+  fetchInboxProfileSocialsQuery,
   getInboxProfileSocialsQueryData,
-  useInboxProfileSocialsQueries,
 } from "@/queries/useInboxProfileSocialsQuery";
+import { captureError } from "@/utils/capture-error";
 import { getPreferredInboxName } from "@/utils/profile";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import logger from "@utils/logger";
-import { DecodedMessage, InboxId, ReplyCodec } from "@xmtp/react-native-sdk";
-import { useMemo } from "react";
+import {
+  DecodedMessage,
+  GroupUpdatedCodec,
+  InboxId,
+  ReplyCodec,
+} from "@xmtp/react-native-sdk";
+import { useEffect, useMemo } from "react";
 
 export const useMessagePlainText = (
   message: DecodedMessageWithCodecsType | undefined
 ) => {
   const account = useCurrentAccount();
 
-  const inboxIds = useMemo(() => {
-    if (!message) return [];
+  // Not sure why we have this. Fixed the typing but need to check why it's needed.
+  // I guess it's to make sure we have the data to display the people's name in group?
+  // But we might have a better solution for that
+  useEffect(() => {
+    if (!message) {
+      return;
+    }
+
     if (isGroupUpdatedMessage(message)) {
-      const idsToFetch: InboxId[] = [];
-      const content = message.content();
-      idsToFetch.push(content.initiatedByInboxId);
+      // TODO: check why we need to cast here. We should not need to do this since we have type guards
+      const messageTyped = message as DecodedMessage<GroupUpdatedCodec>;
+      const inboxIds: InboxId[] = [];
+      const content = messageTyped.content();
+      inboxIds.push(content.initiatedByInboxId);
       content.membersAdded.forEach((member) => {
-        idsToFetch.push(member.inboxId);
+        inboxIds.push(member.inboxId);
       });
       content.membersRemoved.forEach((member) => {
-        idsToFetch.push(member.inboxId);
+        inboxIds.push(member.inboxId);
       });
-      return idsToFetch;
+      if (inboxIds.length > 0) {
+        for (const inboxId of inboxIds) {
+          fetchInboxProfileSocialsQuery(account!, inboxId).catch(captureError);
+        }
+      }
     }
-    return [];
-  }, [message]);
-  useInboxProfileSocialsQueries(account!, inboxIds);
+  }, [message, account]);
 
   return useMemo(() => {
     if (!account) return "";

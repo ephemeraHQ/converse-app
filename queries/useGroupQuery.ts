@@ -1,15 +1,15 @@
 /**
  * useGroupQuery is derived from useConversationQuery. Like useDmQuery, maybe worth considering if we should just use useConversationQuery instead.
  */
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { queryClient } from "@/queries/queryClient";
 import {
-  getConversationQueryData,
+  ConversationQueryData,
   getConversationQueryOptions,
-  setConversationQueryData,
-  useConversationQuery,
 } from "@/queries/useConversationQuery";
-import { mutateObjectProperties } from "@/utils/mutate-object-properties";
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { UseQueryResult } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export function useGroupQuery(args: {
@@ -17,23 +17,27 @@ export function useGroupQuery(args: {
   topic: ConversationTopic;
 }) {
   const { account, topic } = args;
-  return useConversationQuery({
-    account,
-    topic,
-    context: "useGroupQuery",
-  }) as UseQueryResult<GroupWithCodecsType | null>;
+  return useQuery(
+    getGroupQueryOptions({
+      account,
+      topic,
+    })
+  );
 }
 
-export function getGroupQueryData(args: {
-  account: string;
-  topic: ConversationTopic;
-}) {
+export function getGroupQueryData(
+  args: {
+    account: string;
+    topic: ConversationTopic;
+  } // Hate having this return type but for some reason the query is infering a DM or a Group even tho we have a select that filters for GroupWithCodecsType...
+): GroupWithCodecsType | null | undefined {
   const { account, topic } = args;
-  return getConversationQueryData({
-    account,
-    topic,
-    context: "getGroupQueryData",
-  }) as GroupWithCodecsType | undefined;
+  return queryClient.getQueryData(
+    getGroupQueryOptions({
+      account,
+      topic,
+    }).queryKey
+  );
 }
 
 export function setGroupQueryData(args: {
@@ -42,12 +46,13 @@ export function setGroupQueryData(args: {
   group: GroupWithCodecsType;
 }) {
   const { account, topic, group } = args;
-  setConversationQueryData({
-    account,
-    topic,
-    conversation: group,
-    context: "setGroupQueryData",
-  });
+  queryClient.setQueryData(
+    getGroupQueryOptions({
+      account,
+      topic,
+    }).queryKey,
+    group
+  );
 }
 
 export function getGroupQueryOptions(args: {
@@ -55,29 +60,37 @@ export function getGroupQueryOptions(args: {
   topic: ConversationTopic;
 }) {
   const { account, topic } = args;
-  return getConversationQueryOptions({
-    account,
-    topic,
-    context: "getGroupQueryOptions",
+  return queryOptions({
+    ...getConversationQueryOptions({
+      account,
+      topic,
+    }),
+    select: (data) => {
+      if (!data) {
+        return null;
+      }
+      if (!isConversationGroup(data)) {
+        throw new Error(
+          "Expected group conversation but received different type"
+        );
+      }
+      return data;
+    },
   });
 }
 
 export function updateGroupQueryData(args: {
   account: string;
   topic: ConversationTopic;
-  updates: Partial<GroupWithCodecsType>;
+  updates: Partial<ConversationQueryData>;
 }) {
-  const { account, topic, updates } = args;
-  const previousGroup = getGroupQueryData({
-    account,
-    topic,
-  });
-  if (!previousGroup) {
-    return;
-  }
-  setGroupQueryData({
-    account,
-    topic,
-    group: mutateObjectProperties(previousGroup, updates),
-  });
+  queryClient.setQueryData(
+    getGroupQueryOptions(args).queryKey,
+    (previousGroup) => {
+      if (!previousGroup) {
+        return undefined;
+      }
+      return updateObjectAndMethods(previousGroup, args.updates);
+    }
+  );
 }

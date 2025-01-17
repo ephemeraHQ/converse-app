@@ -3,7 +3,6 @@ import {
   getGroupQueryOptions,
   setGroupQueryData,
 } from "@/queries/useGroupQuery";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useQuery } from "@tanstack/react-query";
 import type { ConsentState, ConversationTopic } from "@xmtp/react-native-sdk";
 

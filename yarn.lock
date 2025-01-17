@@ -12370,9 +12370,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xmtp/react-native-sdk@npm:^3.1.6":
-  version: 3.1.6
-  resolution: "@xmtp/react-native-sdk@npm:3.1.6"
+"@xmtp/react-native-sdk@npm:^3.1.7":
+  version: 3.1.7
+  resolution: "@xmtp/react-native-sdk@npm:3.1.7"
   dependencies:
     "@changesets/cli": "npm:^2.27.10"
     "@ethersproject/bytes": "npm:^5.7.0"
@@ -12385,7 +12385,7 @@ __metadata:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 10c0/0b02323f55c8a798e6d68f73150ac3598da5573c3cd5e469e92d9c5ba477df509c3e42ba257f20bf7dc33fa3d9327a1ceffb6dca03fb132f40a13fe46d2fdd64
+  checksum: 10c0/2e07d534b515777fe0c4db0e2d49cdb56db715ff8413e51134398254db66f1c483a6863d971cf824c6c93ba80498604d5cb98e0849154653206d7f320e4e307b
   languageName: node
   linkType: hard
 
@@ -15155,7 +15155,7 @@ __metadata:
     "@xmtp/content-type-transaction-reference": "npm:^2.0.0"
     "@xmtp/frames-client": "npm:^0.5.4"
     "@xmtp/proto": "npm:^3.60.0"
-    "@xmtp/react-native-sdk": "npm:^3.1.6"
+    "@xmtp/react-native-sdk": "npm:^3.1.7"
     "@xstate/react": "npm:^5.0.0"
     "@yornaath/batshit": "npm:^0.10.1"
     alchemy-sdk: "npm:^3.4.4"

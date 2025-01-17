@@ -1,4 +1,4 @@
-import api from "@utils/api";
+import { api } from "@/utils/api/api";
 
 import { JoinGroupClient } from "../../features/GroupInvites/joinGroup/JoinGroup.client";
 

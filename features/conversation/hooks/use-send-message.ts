@@ -1,12 +1,12 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import { getCurrentUserAccountInboxId } from "@/hooks/use-current-account-inbox-id";
-import { fetchMessageByIdQuery } from "@/queries/useConversationMessage";
+import { fetchConversationMessageQuery } from "@/queries/useConversationMessage";
 import {
-  addConversationMessage,
+  addConversationMessageQuery,
   refetchConversationMessages,
   replaceOptimisticMessageWithReal,
-} from "@/queries/useConversationMessages";
-import { captureError, captureErrorWithToast } from "@/utils/capture-error";
+} from "@/queries/use-conversation-messages-query";
+import { captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
@@ -47,8 +47,6 @@ export function sendMessage(args: {
     });
   }
 
-  // todo: where do we optimistically handle adding the message
-  // to our query cache?
   return conversation.send(
     content.remoteAttachment
       ? { remoteAttachment: content.remoteAttachment }
@@ -62,69 +60,68 @@ export function useSendMessage(props: {
   const { conversation } = props;
 
   const { mutateAsync: sendMessageMutationAsync } = useMutation({
-    mutationFn: (variables: ISendMessageParams) =>
-      sendMessage({ conversation, params: variables }),
-    // WIP
-    // onMutate: (variables) => {
-    //   const currentAccount = getCurrentAccount()!;
-    //   const currentUserInboxId = getCurrentUserAccountInboxId()!;
+    mutationFn: (variables: ISendMessageParams) => {
+      return sendMessage({ conversation, params: variables });
+    },
+    onMutate: (variables) => {
+      const currentAccount = getCurrentAccount()!;
+      const currentUserInboxId = getCurrentUserAccountInboxId()!;
 
-    //   // For now only optimistic message for simple text message
-    //   if (variables.content.text && !variables.referencedMessageId) {
-    //     const generatedMessageId = getRandomId();
+      // For now, we only do optimistic updates for simple text messages
+      // And if we like this, we'll implement the rest of content types
+      if (variables.content.text && !variables.referencedMessageId) {
+        const generatedMessageId = getRandomId();
 
-    //     const textMessage: DecodedMessage<TextCodec> = {
-    //       id: generatedMessageId as MessageId,
-    //       client: conversation.client,
-    //       contentTypeId: variables.content.text
-    //         ? contentTypesPrefixes.text
-    //         : contentTypesPrefixes.remoteAttachment,
-    //       sentNs: getTodayNs(),
-    //       fallback: "new-message",
-    //       deliveryStatus: "sending" as MessageDeliveryStatus, // NOT GOOD but tmp
-    //       topic: conversation.topic,
-    //       senderInboxId: currentUserInboxId,
-    //       nativeContent: {},
-    //       content: () => {
-    //         return variables.content.text!;
-    //       },
-    //     };
+        const textMessage: DecodedMessage<TextCodec> = {
+          id: generatedMessageId as MessageId,
+          contentTypeId: variables.content.text
+            ? contentTypesPrefixes.text
+            : contentTypesPrefixes.remoteAttachment,
+          sentNs: getTodayNs(),
+          fallback: "new-message",
+          deliveryStatus: "sending" as MessageDeliveryStatus, // NOT GOOD but tmp
+          topic: conversation.topic,
+          senderInboxId: currentUserInboxId,
+          nativeContent: {},
+          content: () => {
+            return variables.content.text!;
+          },
+        };
 
-    //     addConversationMessage({
-    //       account: currentAccount,
-    //       topic: conversation.topic,
-    //       message: textMessage,
-    //     });
+        addConversationMessageQuery({
+          account: currentAccount,
+          topic: conversation.topic,
+          message: textMessage,
+        });
 
-    //     return {
-    //       generatedMessageId,
-    //     };
-    //   }
-    // },
-    // onSuccess: async (messageId, _, context) => {
-    //   if (context && messageId) {
-    //     // The SDK only returns the messageId
-    //     const message = await fetchMessageByIdQuery({
-    //       account: getCurrentAccount()!,
-    //       messageId,
-    //     });
+        return {
+          generatedMessageId,
+        };
+      }
+    },
+    onSuccess: async (messageId, _, context) => {
+      if (context && messageId) {
+        // The SDK only returns the messageId
+        const message = await fetchConversationMessageQuery({
+          account: getCurrentAccount()!,
+          messageId,
+        });
 
-    //     if (!message) {
-    //       throw new Error("Message not found");
-    //     }
+        if (!message) {
+          throw new Error("Message not found");
+        }
 
-    //     if (message) {
-    //       replaceOptimisticMessageWithReal({
-    //         tempId: context.generatedMessageId,
-    //         topic: conversation.topic,
-    //         account: getCurrentAccount()!,
-    //         message,
-    //       });
-    //     }
-    //   }
-    // },
+        if (message) {
+          replaceOptimisticMessageWithReal({
+            tempId: context.generatedMessageId,
+            topic: conversation.topic,
+            account: getCurrentAccount()!,
+            message,
+          });
+        }
+      }
+    },
     onError: (error) => {
-      captureError(error);
       const currentAccount = getCurrentAccount()!;
       refetchConversationMessages(currentAccount, conversation.topic).catch(
         captureErrorWithToast

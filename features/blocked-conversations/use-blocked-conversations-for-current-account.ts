@@ -1,23 +1,22 @@
-import { getConversationDataQueryOptions } from "@/queries/conversation-data-query";
+import { isConversationDenied } from "@/features/conversation/utils/is-conversation-denied";
+import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
 import { useConversationsQuery } from "@/queries/conversations-query";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-export const useBlockedChatsForCurrentAccount = () => {
+export const useBlockedConversationsForCurrentAccount = () => {
   const currentAccount = useCurrentAccount();
 
   const { data } = useConversationsQuery({
     account: currentAccount!,
-    context: "useBlockedChats",
   });
 
-  const conversationsDataQueries = useQueries({
+  const conversationsMetadataQueries = useQueries({
     queries: (data ?? []).map((conversation) =>
-      getConversationDataQueryOptions({
+      getConversationMetadataQueryOptions({
         account: currentAccount!,
         topic: conversation.topic,
-        context: "useBlockedChats",
       })
     ),
   });
@@ -26,15 +25,15 @@ export const useBlockedChatsForCurrentAccount = () => {
     if (!data) return [];
 
     return data.filter((conversation, index) => {
-      const query = conversationsDataQueries[index];
+      const query = conversationsMetadataQueries[index];
       return (
         // Include deleted conversations
         query?.data?.isDeleted ||
         // Include denied conversations
-        conversation.state === "denied"
+        isConversationDenied(conversation)
       );
     });
-  }, [data, conversationsDataQueries]);
+  }, [data, conversationsMetadataQueries]);
 
   return { data: blockedConversations };
 };

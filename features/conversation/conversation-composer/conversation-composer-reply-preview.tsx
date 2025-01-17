@@ -8,8 +8,8 @@ import {
   isReplyMessage,
   isStaticAttachmentMessage,
   isTransactionReferenceMessage,
-  useConversationMessageById,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { useConversationMessageById } from "../conversation-message/use-conversation-message";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
@@ -53,7 +53,7 @@ export const ReplyPreview = memo(function ReplyPreview() {
 
   const { message: replyMessage } = useConversationMessageById({
     messageId: replyingToMessageId!, // ! because we have enabled in the query
-    topic,
+    conversationTopic: topic,
   });
 
   const inboxName = usePreferredInboxName(replyMessage?.senderInboxId);
@@ -62,8 +62,8 @@ export const ReplyPreview = memo(function ReplyPreview() {
     ? messageIsFromCurrentAccountInboxId({ message: replyMessage })
       ? `Replying to you`
       : inboxName
-        ? `Replying to ${inboxName}`
-        : "Replying"
+      ? `Replying to ${inboxName}`
+      : "Replying"
     : "";
 
   const contentHeightAV = useSharedValue(0);

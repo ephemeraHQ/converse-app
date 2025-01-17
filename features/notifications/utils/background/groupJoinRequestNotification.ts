@@ -1,13 +1,13 @@
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
-import { z } from "zod";
+import { getTopicFromV3Id } from "@/utils/groupUtils/groupId";
 import mmkv from "@/utils/mmkv";
 import { sentryTrackError, sentryTrackMessage } from "@/utils/sentry";
-import notifee, { AndroidVisibility } from "@notifee/react-native";
-import { androidChannel } from "../setupAndroidNotificationChannel";
-import { putGroupInviteRequest } from "@/utils/api";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 import { getGroupByTopic } from "@/utils/xmtpRN/conversations";
-import { getTopicFromV3Id } from "@/utils/groupUtils/groupId";
+import notifee, { AndroidVisibility } from "@notifee/react-native";
 import { ConversationId } from "@xmtp/react-native-sdk";
+import { z } from "zod";
+import { androidChannel } from "../setupAndroidNotificationChannel";
+import { putGroupInviteRequest } from "@/utils/api/api-groups/api-groups";
 export const GroupJoinRequestNotificationSchema = z.object({
   type: z.literal("group_join_request"),
   groupId: z.string(),

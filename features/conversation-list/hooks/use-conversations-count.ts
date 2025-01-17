@@ -8,7 +8,6 @@ export const useConversationsCount = () => {
   const { data: count, isLoading } = useQuery({
     ...getConversationsQueryOptions({
       account: account!,
-      context: "useConversationsCount",
     }),
     select: (data) => data?.length ?? 0,
   });

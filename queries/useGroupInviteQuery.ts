@@ -1,7 +1,7 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
-import { getGroupInvite } from "@utils/api";
-import { GroupInvite } from "@utils/api.types";
+import { getGroupInvite } from "@/utils/api/api-groups/api-groups";
+import { GroupInvite } from "@/utils/api/api-groups/api-group.types";
 
 import { groupInviteQueryKey } from "./QueryKeys";
 

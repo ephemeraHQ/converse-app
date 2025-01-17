@@ -20,13 +20,13 @@ import {
 export type SupportedCodecsType = [
   TextCodec,
   ReactionCodec,
-  ReadReceiptCodec,
+  // ReadReceiptCodec,
   GroupUpdatedCodec,
   ReplyCodec,
   RemoteAttachmentCodec,
   StaticAttachmentCodec,
   TransactionReferenceCodec,
-  CoinbaseMessagingPaymentCodec,
+  CoinbaseMessagingPaymentCodec
 ];
 
 export type ConverseXmtpClientType = Client<SupportedCodecsType>;

@@ -74,7 +74,7 @@ import { ConversationNavParams } from "../features/conversation/conversation.nav
 import { getPreferredUsername } from "@utils/profile/getPreferredUsername";
 import { getIPFSAssetURI } from "../utils/thirdweb";
 import { refreshBalanceForAccount } from "../utils/wallet";
-import { consentToAddressesOnProtocolByAccount } from "../utils/xmtpRN/contacts";
+import { updateConsentForAddressesForAccount } from "@/features/consent/update-consent-for-addresses-for-account";
 
 import { Icon } from "@/design-system/Icon/Icon";
 import { NotificationPermissionStatus } from "@/features/notifications/types/Notifications.types";
@@ -420,7 +420,7 @@ function ProfileScreenImpl() {
             if (selectedIndex === 0 && peerAddress) {
               const newStatus = isBlockedPeer ? "consented" : "blocked";
               const consentOnProtocol = isBlockedPeer ? "allow" : "deny";
-              consentToAddressesOnProtocolByAccount({
+              updateConsentForAddressesForAccount({
                 account: currentAccount(),
                 addresses: [peerAddress],
                 consent: consentOnProtocol,

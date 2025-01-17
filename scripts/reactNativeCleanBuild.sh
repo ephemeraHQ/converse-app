@@ -39,6 +39,6 @@ echo "Running yarn install..."
 yarn install
 
 echo "Running pod install..."
-cd ios && pod install && cd ..
+cd ios && pod install --repo-update && cd ..
 
 echo "Clean and rebuild complete!" 

@@ -7,7 +7,7 @@ import { translate } from "@i18n";
 import { useAddToGroupMutation } from "@queries/useAddToGroupMutation";
 import { invalidatePendingJoinRequestsQuery } from "@queries/usePendingRequestsQuery";
 import { actionSheetColors, textSecondaryColor } from "@styles/colors";
-import { updateGroupJoinRequestStatus } from "@utils/api";
+import { updateGroupJoinRequestStatus } from "@/utils/api/api-groups/api-groups";
 import { FC, useMemo } from "react";
 import { StyleSheet, Text, useColorScheme, View } from "react-native";
 

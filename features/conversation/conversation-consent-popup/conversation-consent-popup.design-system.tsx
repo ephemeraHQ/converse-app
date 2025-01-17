@@ -5,8 +5,10 @@ import { useAppTheme } from "@/theme/useAppTheme";
 import { Button } from "@design-system/Button/Button";
 import React from "react";
 
-export function ConsentPopupButton({ style, ...rest }: IButtonProps) {
-  const { theme } = useAppTheme();
+export function ConversationConsentPopupButton({
+  style,
+  ...rest
+}: IButtonProps) {
   return <Button withHapticFeedback={true} {...rest} />;
 }
 
@@ -38,7 +40,7 @@ export function ConsentPopupButtonsContainer({
   );
 }
 
-export function ConsentPopupContainer({
+export function ConversationConsentPopupContainer({
   children,
   style,
   ...rest

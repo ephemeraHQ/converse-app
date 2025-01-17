@@ -8,7 +8,7 @@ import {
   ConverseXmtpClientType,
   DmWithCodecsType,
 } from "./client.types";
-import { streamAllMessages } from "./messages";
+import { streamAllMessages } from "./xmtp-messages/xmtp-messages-stream";
 import { getXmtpClient } from "./sync";
 import { getPreferredName } from "../profile";
 import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";

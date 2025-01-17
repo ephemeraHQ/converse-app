@@ -2,7 +2,7 @@
  * TODO: Maybe delete this and just use the conversation query instead and add a "peer" argument?
  */
 import { queryClient } from "@/queries/queryClient";
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getConversationByPeerByAccount } from "@utils/xmtpRN/conversations";
 import { dmQueryKey } from "./QueryKeys";
 import { setConversationQueryData } from "./useConversationQuery";
@@ -23,47 +23,44 @@ async function getDm(args: IDmQueryArgs) {
     includeSync: true,
   });
 
-  // This will not happen because the above throws if not found
-  if (!conversation) {
-    throw new Error("Conversation not found");
+  if (conversation) {
+    // Update the main conversation query because it's a 1-1
+    setConversationQueryData({
+      account,
+      topic: conversation.topic,
+      conversation,
+    });
   }
-
-  // Update the main conversation query because it's a 1-1
-  setConversationQueryData({
-    account,
-    topic: conversation.topic,
-    conversation,
-    context: "useDmQuery",
-  });
 
   return conversation;
 }
 
-export function useDmQuery({ account, peer }: IDmQueryArgs) {
-  return useQuery({
+export function getDmQueryOptions(args: IDmQueryArgs) {
+  const { account, peer } = args;
+  return queryOptions({
     queryKey: dmQueryKey(account, peer),
     queryFn: () => getDm({ account, peer }),
     enabled: !!peer,
   });
 }
 
+export function useDmQuery(args: IDmQueryArgs) {
+  return useQuery(getDmQueryOptions(args));
+}
+
 export function setDmQueryData(args: IDmQueryArgs & { dm: IDmQueryData }) {
-  const { account, peer, dm } = args;
-  if (!dm) {
-    // todo: better type handling of undefineds
-    throw new Error("DM not found");
+  const { account, dm } = args;
+  queryClient.setQueryData(getDmQueryOptions(args).queryKey, dm);
+  if (dm) {
+    // Update the main conversation query because it's a 1-1
+    setConversationQueryData({
+      account,
+      topic: dm.topic,
+      conversation: dm,
+    });
   }
-  queryClient.setQueryData<IDmQueryData>(dmQueryKey(account, peer), dm);
-  // Also set there because it's a 1-1
-  setConversationQueryData({
-    account,
-    topic: dm.topic,
-    conversation: dm,
-    context: "setDmQueryData",
-  });
 }
 
 export function getDmQueryData(args: IDmQueryArgs) {
-  const { account, peer } = args;
-  return queryClient.getQueryData<IDmQueryData>(dmQueryKey(account, peer));
+  return queryClient.getQueryData(getDmQueryOptions(args).queryKey);
 }

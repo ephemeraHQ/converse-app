@@ -16,10 +16,10 @@ import { useHeader } from "@/navigation/use-header";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { shortDisplayName } from "@/utils/str";
 import { useAccountsProfiles } from "@/utils/useAccountsProfiles";
-import { useNavigation } from "@react-navigation/native";
 import React, { useCallback } from "react";
 import { Alert, ViewStyle } from "react-native";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
+import { useNavigation } from "@react-navigation/native";
 
 const $dropDownMenu: ThemedStyle<ViewStyle> = (theme) => ({
   paddingVertical: theme.spacing.sm,

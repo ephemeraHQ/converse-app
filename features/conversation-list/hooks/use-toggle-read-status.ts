@@ -2,7 +2,7 @@ import { getCurrentAccount } from "@/data/store/accountsStore";
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read";
 import { useMarkConversationAsUnread } from "@/features/conversation/hooks/use-mark-conversation-as-unread";
 import { conversationIsUnreadByTimestamp } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
-import { getConversationDataQueryData } from "@/queries/conversation-data-query";
+import { getConversationMetadataQueryData } from "@/queries/conversation-metadata-query";
 import { getConversationQueryData } from "@/queries/useConversationQuery";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
@@ -21,16 +21,14 @@ export const useToggleReadStatus = ({ topic }: UseToggleReadStatusProps) => {
 
   const toggleReadStatusAsync = useCallback(async () => {
     const currentAccount = getCurrentAccount()!;
-    const conversationData = getConversationDataQueryData({
+    const conversationData = getConversationMetadataQueryData({
       account: currentAccount,
       topic,
-      context: "useToggleReadStatus",
     });
 
     const conversation = getConversationQueryData({
       account: currentAccount,
       topic,
-      context: "useToggleReadStatus",
     });
     const convoIsUnreadByTimestamp = conversationIsUnreadByTimestamp({
       lastMessageSent: conversation?.lastMessage?.sentNs ?? 0,
