@@ -281,13 +281,10 @@ export function replaceOptimisticMessageWithReal(args: {
         return {
           ids: [realMessage.id as MessageId],
           byId: {
-            [realMessage.id as MessageId]: {
-              ...realMessage,
-              tempOptimisticId: tempId,
-            },
+            [realMessage.id as MessageId]: realMessage,
           },
           reactions: {},
-        };
+        } satisfies IMessageAccumulator;
       }
 
       // Find the index of the temporary message

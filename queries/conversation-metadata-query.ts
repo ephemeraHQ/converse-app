@@ -44,6 +44,8 @@ export function updateConversationMetadataQueryData(
     getConversationMetadataQueryOptions(args).queryKey,
     (previousData) => {
       return {
+        account: args.account,
+        topic: args.topic,
         // By default, if we didn't have any data for this conversation, we put those values
         isDeleted: false,
         isPinned: false,

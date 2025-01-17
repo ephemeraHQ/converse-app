@@ -4,7 +4,6 @@ import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 // import { LegendList } from "@legendapp/list";
-import { MessageId } from "@xmtp/react-native-sdk";
 import { ReactElement, memo, useEffect } from "react";
 import { FlatList, FlatListProps, Platform } from "react-native";
 import Animated, {
@@ -131,4 +130,4 @@ export const conversationListDefaultProps = {
   ItemSeparatorComponent: MessageSeparator,
   showsVerticalScrollIndicator: Platform.OS === "ios", // Size glitch on Android
   keyExtractor,
-} satisfies Partial<FlatListProps<MessageId>>;
+} satisfies Partial<FlatListProps<DecodedMessageWithCodecsType>>;

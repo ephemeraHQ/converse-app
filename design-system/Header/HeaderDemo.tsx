@@ -42,7 +42,7 @@ export const HeaderDemo = memo(function HeaderDemo() {
               columnGap: theme.spacing.xs,
             }}
           >
-            <Avatar size={theme.avatarSize.sm} />
+            <Avatar size={theme.avatarSize.sm} uri={undefined} />
             <Text
               preset="body"
               text="Andrew"
