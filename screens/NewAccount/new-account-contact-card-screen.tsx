@@ -18,7 +18,6 @@ import {
 } from "@/features/onboarding/constants/animationConstants";
 import { useRouter } from "@/navigation/useNavigation";
 import { Pressable } from "@/design-system/Pressable";
-import { setAuthStatus } from "@/data/store/authStore";
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import { formatRandoDisplayName } from "@/utils/str";
 import { OnboardingContactCard } from "@/features/onboarding/components/onboarding-contact-card";
@@ -30,7 +29,6 @@ import { formatRandomUserName } from "@/features/onboarding/utils/formatRandomUs
 import { useAddPfp } from "@/features/onboarding/hooks/useAddPfp";
 import { useCreateOrUpdateProfileInfo } from "@/features/onboarding/hooks/useCreateOrUpdateProfileInfo";
 import { useProfile } from "@/features/onboarding/hooks/useProfile";
-import { needToShowNotificationsPermissions } from "@/features/onboarding/Onboarding.utils";
 import { ProfileType } from "@/features/onboarding/types/onboarding.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { NavigationParamList } from "../Navigation/Navigation";
@@ -74,8 +72,6 @@ export const NewAccountContactCardScreen = memo(
     props: NativeStackScreenProps<NavigationParamList, "NewAccountContactCard">
   ) {
     const { navigation } = props;
-
-    const router = useRouter();
 
     const address = useCurrentAccount()!;
 
@@ -144,16 +140,14 @@ export const NewAccountContactCardScreen = memo(
           profile: newProfile,
         });
         if (success) {
-          if (needToShowNotificationsPermissions()) {
-            router.push("OnboardingNotifications");
-          } else {
-            setAuthStatus("signedIn");
-          }
+          navigation.popTo("Chats");
+        } else {
+          throw new Error("Failed to create or update profile");
         }
       } catch (error) {
         handleError(error as Error);
       }
-    }, [createOrUpdateProfile, profile, router, handleError, asset?.uri]);
+    }, [profile, asset?.uri, createOrUpdateProfile, navigation, handleError]);
 
     const handleContinue = useCallback(() => {
       logger.debug("[NewAccountContactCardScreen] handleContinue", type);
