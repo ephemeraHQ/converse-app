@@ -43,8 +43,8 @@ export const PinnedConversationMessagePreview = (
 const $containerStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   position: "absolute",
   top: 0,
-  left: -spacing.xs,
-  right: -spacing.xs,
+  left: -spacing.xs, // Make the preview message expand to the left
+  right: -spacing.xs, // Make the preview message expand to the right
   justifyContent: "center",
 });
 
