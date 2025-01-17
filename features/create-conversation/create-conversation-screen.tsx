@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { TextInput, View } from "react-native";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { createConversationStyles } from "./create-conversation.styles";
-import { SearchBar } from "@/features/search/components/SearchBar";
 import { useHeader } from "@/navigation/use-header";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
 import { currentAccount, getCurrentAccount } from "@data/store/accountsStore";
@@ -25,14 +24,15 @@ import logger from "@/utils/logger";
 import {
   ComposerSection,
   MessageSection,
-  PendingMembersSection,
-  SearchResultsSection,
+  UserInlineSearch,
 } from "./components";
+import { ProfileSearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
 import {
   CreateConversationScreenProps,
-  PendingChatMembers,
   SearchStatus,
 } from "./create-conversation.types";
+import { IProfileSocials } from "../profiles/profile-types";
+import { getPreferredName } from "@/utils/profile";
 
 /**
  * Screen for creating new conversations
@@ -54,25 +54,28 @@ export function CreateConversationScreen({
     profileSearchResults: {},
   });
 
-  const [pendingChatMembers, setPendingChatMembers] =
-    useState<PendingChatMembers>({
-      members: [],
-    });
+  const [selectedUsers, setSelectedUsers] = useState<
+    Array<{
+      address: string;
+      name: string;
+      socials: IProfileSocials;
+    }>
+  >([]);
 
-  const pendingChatMembersCount = pendingChatMembers.members.length;
-  const composerDisabled = pendingChatMembersCount === 0;
+  const selectedUsersCount = selectedUsers.length;
+  const composerDisabled = selectedUsersCount === 0;
 
   const handleBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
   useEffect(() => {
-    if (pendingChatMembersCount > 1) {
+    if (selectedUsersCount > 1) {
       setConversationMode(ConversationVersion.GROUP);
-    } else if (pendingChatMembersCount === 1) {
+    } else if (selectedUsersCount === 1) {
       setConversationMode(ConversationVersion.DM);
     }
-  }, [pendingChatMembersCount]);
+  }, [selectedUsersCount]);
 
   useHeader({
     title: "New chat",
@@ -165,10 +168,15 @@ export function CreateConversationScreen({
                     }
                   );
                   setProfileRecordSocialsQueryData(profiles);
-                  pendingChatMembers.members.forEach((member) => {
-                    delete profiles[member.address];
+                  const selectedAddresses = selectedUsers.map((u) => u.address);
+                  Object.keys(profiles).forEach((addr) => {
+                    if (
+                      selectedAddresses.includes(addr.toLowerCase()) ||
+                      addr.toLowerCase() === getCurrentAccount()?.toLowerCase()
+                    ) {
+                      delete profiles[addr];
+                    }
                   });
-                  delete profiles[getCurrentAccount()!.toLowerCase()];
                   setStatus({
                     loading: false,
                     message: "",
@@ -179,11 +187,16 @@ export function CreateConversationScreen({
                   logger.info(
                     "[CreateConversation] No profiles found for XMTP user"
                   );
+                  const madeupprofiles: Record<string, IProfileSocials> = {
+                    [address]: {
+                      address: address,
+                    },
+                  };
                   setStatus({
                     loading: false,
                     message: "",
                     inviteToConverse: "",
-                    profileSearchResults: {},
+                    profileSearchResults: madeupprofiles,
                   });
                 }
               } else {
@@ -195,7 +208,7 @@ export function CreateConversationScreen({
                   loading: false,
                   message: `${shortAddress(
                     searchQuery
-                  )} is not on the XMTP network yet`,
+                  )} is not on the XMTP network yet 😏`,
                   inviteToConverse: searchQuery,
                   profileSearchResults: {},
                 });
@@ -217,7 +230,15 @@ export function CreateConversationScreen({
               profileCount: Object.keys(profiles).length,
             });
             setProfileRecordSocialsQueryData(profiles);
-            delete profiles[getCurrentAccount()!.toLowerCase()];
+            const selectedAddresses = selectedUsers.map((u) => u.address);
+            Object.keys(profiles).forEach((addr) => {
+              if (
+                selectedAddresses.includes(addr.toLowerCase()) ||
+                addr.toLowerCase() === getCurrentAccount()?.toLowerCase()
+              ) {
+                delete profiles[addr];
+              }
+            });
             setStatus({
               loading: false,
               message: "",
@@ -246,7 +267,7 @@ export function CreateConversationScreen({
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [searchQuery, pendingChatMembers.members]);
+  }, [searchQuery, selectedUsers]);
 
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
@@ -275,13 +296,13 @@ export function CreateConversationScreen({
       if (conversationMode === ConversationVersion.DM) {
         let dm = await getOptionalConversationByPeerByAccount({
           account: currentAccount(),
-          peer: pendingChatMembers.members[0].address,
+          peer: selectedUsers[0].address,
           includeSync: true,
         });
         if (!dm) {
           dm = await createConversationByAccount(
             currentAccount(),
-            pendingChatMembers.members[0].address
+            selectedUsers[0].address
           );
         }
         await sendMessage({
@@ -299,9 +320,7 @@ export function CreateConversationScreen({
       } else {
         const group = await createGroupWithDefaultsByAccount({
           account: currentAccount(),
-          peerEthereumAddresses: pendingChatMembers.members.map(
-            (m) => m.address
-          ),
+          peerEthereumAddresses: selectedUsers.map((m) => m.address),
         });
         await sendMessage({
           conversation: group,
@@ -328,37 +347,44 @@ export function CreateConversationScreen({
     }
   };
 
+  const handleSearchResultPress = useCallback(
+    ({ address, socials }: { address: string; socials: IProfileSocials }) => {
+      setSelectedUsers((prev) => [
+        ...prev,
+        {
+          address,
+          name: getPreferredName(socials, address),
+          socials,
+        },
+      ]);
+      setSearchQuery("");
+      setStatus((prev) => ({ ...prev, profileSearchResults: {} }));
+    },
+    []
+  );
+
   return (
     <View style={themed(createConversationStyles.$screenContainer)}>
-      <SearchBar
+      <UserInlineSearch
         value={searchQuery}
-        setValue={setSearchQuery}
+        onChangeText={setSearchQuery}
         onRef={onRef}
-        inputPlaceholder="Name, address or onchain ID"
-      />
-
-      <PendingMembersSection
-        members={pendingChatMembers.members}
-        onRemoveMember={(address) => {
-          setPendingChatMembers((prev) => ({
-            ...prev,
-            members: prev.members.filter((m) => m.address !== address),
-          }));
+        placeholder="Name, address or onchain ID"
+        selectedUsers={selectedUsers.map((u) => ({
+          address: u.address,
+          name: u.name,
+        }))}
+        onRemoveUser={(address: string) => {
+          setSelectedUsers((prev) => prev.filter((u) => u.address !== address));
         }}
       />
 
       {!status.loading &&
         !status.message &&
         !isEmptyObject(status.profileSearchResults) && (
-          <SearchResultsSection
+          <ProfileSearchResultsList
             profiles={status.profileSearchResults}
-            onSelectProfile={({ socials, address }) => {
-              setPendingChatMembers((prev) => ({
-                ...prev,
-                members: [...prev.members, { ...socials, address }],
-              }));
-              setSearchQuery("");
-            }}
+            handleSearchResultItemPress={handleSearchResultPress}
           />
         )}
 
