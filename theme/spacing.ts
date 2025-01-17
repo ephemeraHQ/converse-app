@@ -6,6 +6,7 @@ export const spacing = {
   "6xs": 0.5,
   "5xs": 1,
   "4xs": 2,
+  "3xs": 3,
   xxxs: 4,
   xxs: 8,
   xs: 12,

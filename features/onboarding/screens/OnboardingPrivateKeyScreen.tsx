@@ -15,16 +15,16 @@ import { Alert, StyleSheet, TextInput, useColorScheme } from "react-native";
 import {
   isMissingConverseProfile,
   needToShowNotificationsPermissions,
-} from "./Onboarding.utils";
-import { OnboardingPictoTitleSubtitle } from "../../components/Onboarding/OnboardingPictoTitleSubtitle";
-import { OnboardingPrimaryCtaButton } from "../../components/Onboarding/OnboardingPrimaryCtaButton";
-import { OnboardingScreenComp } from "../../components/Onboarding/OnboardingScreenComp";
-import { initXmtpClient } from "../../components/Onboarding/init-xmtp-client";
-import { setAuthStatus } from "../../data/store/authStore";
-import { VStack } from "../../design-system/VStack";
-import { useRouter } from "../../navigation/useNavigation";
-import { sentryTrackError } from "../../utils/sentry";
-import { NavigationParamList } from "../Navigation/Navigation";
+} from "../Onboarding.utils";
+import { OnboardingPictoTitleSubtitle } from "../../../components/Onboarding/OnboardingPictoTitleSubtitle";
+import { OnboardingPrimaryCtaButton } from "../../../components/Onboarding/OnboardingPrimaryCtaButton";
+import { OnboardingScreenComp } from "../../../components/Onboarding/OnboardingScreenComp";
+import { initXmtpClient } from "../../../components/Onboarding/init-xmtp-client";
+import { setAuthStatus } from "../../../data/store/authStore";
+import { VStack } from "../../../design-system/VStack";
+import { useRouter } from "../../../navigation/useNavigation";
+import { sentryTrackError } from "../../../utils/sentry";
+import { NavigationParamList } from "../../../screens/Navigation/Navigation";
 
 export function OnboardingPrivateKeyScreen(
   props: NativeStackScreenProps<NavigationParamList, "OnboardingPrivateKey">
@@ -40,7 +40,7 @@ export function OnboardingPrivateKeyScreen(
       if (!trimmedPrivateKey) return;
       await loginWithPrivateKey(trimmedPrivateKey);
       if (isMissingConverseProfile()) {
-        router.navigate("OnboardingUserProfile");
+        router.navigate("OnboardingContactCard");
       } else if (needToShowNotificationsPermissions()) {
         router.navigate("OnboardingNotifications");
       } else {

@@ -4,7 +4,6 @@ import {
   PressableStateCallbackType,
   StyleProp,
   TextStyle,
-  View,
   ViewStyle,
 } from "react-native";
 import { useAppTheme } from "../../theme/useAppTheme";
@@ -18,7 +17,10 @@ import {
 } from "./IconButton.styles";
 import { Haptics } from "@utils/haptics";
 
-export function IconButton(props: IIconButtonProps) {
+export const IconButton = React.forwardRef(function IconButton(
+  props: IIconButtonProps,
+  ref
+) {
   const {
     icon,
     iconName,
@@ -120,6 +122,7 @@ export function IconButton(props: IIconButtonProps) {
         if (iconName) {
           return (
             <Icon
+              ref={ref}
               picto={iconName}
               style={iconStyle({ pressed, hovered })}
               {...iconProps({ pressed, hovered })}
@@ -131,4 +134,4 @@ export function IconButton(props: IIconButtonProps) {
       }}
     </Pressable>
   );
-}
+});

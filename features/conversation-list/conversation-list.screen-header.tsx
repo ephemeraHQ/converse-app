@@ -10,6 +10,7 @@ import { HeaderAction } from "@/design-system/Header/HeaderAction";
 import { Icon, iconRegistry } from "@/design-system/Icon/Icon";
 import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
+import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
@@ -80,6 +81,7 @@ export function useHeaderWrapper() {
     [navigation, setCurrentAccount]
   );
 
+  const avatarUri = usePreferredAvatarUri(currentAccount!);
   useHeader(
     {
       safeAreaEdges: ["top"],
@@ -111,7 +113,11 @@ export function useHeaderWrapper() {
             hitSlop={theme.spacing.sm}
           >
             <Center style={themed($avatarContainer)}>
-              <Avatar size={theme.avatarSize.sm} />
+              <Avatar
+                name={preferredName}
+                uri={avatarUri}
+                size={theme.avatarSize.sm}
+              />
             </Center>
           </Pressable>
           <DropdownMenu
