@@ -10,13 +10,13 @@ import { ConversationMessageReactions } from "@/features/conversation/conversati
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
 import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { conversationListDefaultProps } from "@/features/conversation/conversation-messages-list";
-import { useConversationPreviewMessages } from "@/features/conversation/conversation-preview/conversation-preview-messages.query";
 import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { $globalStyles } from "@/theme/styles";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import React from "react";
 import { FlatList } from "react-native";
+import { useConversationPreviewMessages } from "./conversation-preview-messages.query";
 
 type ConversationPreviewProps = {
   topic: ConversationTopic;
@@ -26,7 +26,7 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
   const currentAccount = useCurrentAccount()!;
 
   const { data: messages, isLoading: isLoadingMessages } =
-    useConversationPreviewMessages(currentAccount, topic!);
+    useConversationPreviewMessages(currentAccount, topic);
 
   const { data: conversation, isLoading: isLoadingConversation } =
     useConversationQuery({

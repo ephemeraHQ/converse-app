@@ -1,15 +1,18 @@
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { useGroupQuery } from "@queries/useGroupQuery";
-import { useQuery } from "@tanstack/react-query";
+import { getGroupQueryData } from "@queries/useGroupQuery";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { groupPermissionsQueryKey } from "./QueryKeys";
 
-type IGetGroupPermissionPolicySet = Awaited<
-  ReturnType<typeof getGroupPermissionPolicySet>
->;
+// type IGetGroupPermissionPolicySet = Awaited<
+//   ReturnType<typeof getGroupPermissionPolicySet>
+// >;
 
-function getGroupPermissionPolicySet(args: { group: GroupWithCodecsType }) {
-  const { group } = args;
+function getGroupPermissionPolicySet(args: {
+  account: string;
+  topic: ConversationTopic;
+}) {
+  const { account, topic } = args;
+  const group = getGroupQueryData({ account, topic });
   return group?.permissionPolicySet();
 }
 
@@ -17,22 +20,21 @@ export const useGroupPermissionsQuery = (
   account: string,
   topic: ConversationTopic
 ) => {
-  const { data: group } = useGroupQuery({ account, topic });
-  return useQuery(getGroupPermissionsQueryOptions({ account, topic, group }));
+  return useQuery(getGroupPermissionsQueryOptions({ account, topic }));
 };
 
 function getGroupPermissionsQueryOptions(args: {
   account: string;
   topic: ConversationTopic;
-  group: GroupWithCodecsType | undefined | null;
 }) {
-  const { account, topic, group } = args;
-  return {
-    enabled: !!group,
+  const { account, topic } = args;
+  return queryOptions({
     queryFn: () =>
       getGroupPermissionPolicySet({
-        group: group!,
+        account,
+        topic: topic!,
       }),
     queryKey: groupPermissionsQueryKey(account, topic),
-  };
+    enabled: !!topic && !!account,
+  });
 }

@@ -306,24 +306,21 @@ export const getConversationByPeer = async (args: {
 export const getConversationByTopic = async (args: {
   client: ConverseXmtpClientType;
   topic: ConversationTopic;
-  includeSync?: boolean;
 }) => {
-  const { client, topic, includeSync = false } = args;
+  const { client, topic } = args;
   return findConversation({
     client,
     topic,
-    includeSync,
   });
 };
 
 export const getConversationByTopicByAccount = async (args: {
   account: string;
   topic: ConversationTopic;
-  includeSync?: boolean;
 }) => {
-  const { account, topic, includeSync = false } = args;
+  const { account, topic } = args;
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  return getConversationByTopic({ client, topic, includeSync });
+  return getConversationByTopic({ client, topic });
 };
 
 export const createConversation = async (args: {
@@ -460,7 +457,7 @@ export const refreshProtocolConversation = async (args: {
   topic: ConversationTopic;
 }) => {
   const { client, topic } = args;
-  return getConversationByTopic({ client, topic, includeSync: true });
+  return getConversationByTopic({ client, topic });
 };
 
 export const refreshProtocolConversationByAccount = async (args: {

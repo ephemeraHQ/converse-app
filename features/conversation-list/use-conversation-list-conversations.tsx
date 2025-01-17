@@ -12,7 +12,11 @@ import { useEffect, useMemo } from "react";
 export const useConversationListConversations = () => {
   const currentAccount = useCurrentAccount();
 
-  const { data: conversations, ...rest } = useQuery(
+  const {
+    data: conversations,
+    isLoading,
+    refetch,
+  } = useQuery(
     getConversationsQueryOptions({
       account: currentAccount!,
     })
@@ -32,13 +36,13 @@ export const useConversationListConversations = () => {
 
   // For now, let's make sure we always are up to date with the conversations
   useScreenFocusEffectOnce(() => {
-    rest.refetch().catch(captureError);
+    refetch().catch(captureError);
   });
 
   // For now, let's make sure we always are up to date with the conversations
   useAppStateHandlers({
     onForeground: () => {
-      rest.refetch().catch(captureError);
+      refetch().catch(captureError);
     },
   });
 
@@ -49,6 +53,16 @@ export const useConversationListConversations = () => {
         topic: conversation.topic,
       })
     ),
+    // note/todo(lustig): investigate combine to remove need for filteredConvresations (which utilizes conversationsDataQueries)
+    // which is referentially unstable
+    // combine: (queries) => {
+    //   queries.forEach((query) => {
+    //     console.log("query", query);
+    //     if (query) {
+    //       isConversationAllowed(query.data);
+    //     }
+    //   });
+    // },
   });
 
   const filteredAndSortedConversations = useMemo(() => {
@@ -71,7 +85,16 @@ export const useConversationListConversations = () => {
       const timestampB = b.lastMessage?.sentNs ?? 0;
       return timestampB - timestampA;
     });
+    /*
+     * note(lustig): potential fix using existing libraries could be exploring `combine` above
+     * es lint from @tanstack/query/no-unstable-deps
+     *
+     * lint error: The result of useQueries is not referentially stable, so don't pass it
+     * directly into the dependencies array of useMemo. Instead, destructure
+     * the return value of useQueries and pass the destructured values into
+     * the dependency array of useMemo.eslint@tanstack/query/no-unstable-deps
+     */
   }, [conversations, conversationsMetadataQueries]);
 
-  return { data: filteredAndSortedConversations, ...rest };
+  return { data: filteredAndSortedConversations, isLoading, refetch };
 };

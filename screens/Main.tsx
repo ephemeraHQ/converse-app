@@ -29,7 +29,6 @@ import {
   SignedInNavigation,
   SignedOutNavigation,
 } from "./Navigation/Navigation";
-import { ProfileScreenConfig } from "./Navigation/ProfileNav";
 import { ShareProfileScreenConfig } from "./Navigation/ShareProfileNav";
 import { WebviewPreviewScreenConfig } from "./Navigation/WebviewPreviewNav";
 import {
@@ -39,6 +38,7 @@ import {
 import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
 import logger from "@/utils/logger";
 import { CreateConversationScreenConfig } from "@/features/create-conversation/create-conversation.nav";
+import { ProfileScreenConfig } from "@/features/profiles/profile.nav";
 
 const prefix = Linking.createURL("/");
 

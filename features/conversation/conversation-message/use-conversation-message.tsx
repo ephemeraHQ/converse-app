@@ -19,12 +19,12 @@ export function useConversationMessageById({
 
   const cachedMessage = messages?.byId[messageId];
 
-  // Only fetch the message if it's not already in the conversation messages
   const { data: message, isLoading: isLoadingMessage } = useQuery({
     ...getConversationMessageQueryOptions({
       account: currentAccount,
       messageId,
     }),
+    // Only fetch the message if it's not already in the conversation messages
     enabled: !cachedMessage && !!messageId && !!currentAccount,
   });
 

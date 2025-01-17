@@ -1,6 +1,6 @@
+import { queryOptions } from "@tanstack/react-query";
 import logger from "@/utils/logger";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
-import { queryOptions } from "@tanstack/react-query";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
 import { MessageId } from "@xmtp/react-native-sdk";
 import { conversationMessageQueryKey } from "./QueryKeys";
@@ -33,11 +33,14 @@ async function getConversationMessage(args: IArgs) {
   return message;
 }
 
-export function getConversationMessageQueryOptions(args: IArgs) {
+export function getConversationMessageQueryOptions({
+  account,
+  messageId,
+}: IArgs) {
   return queryOptions({
-    queryKey: conversationMessageQueryKey(args.account, args.messageId),
-    queryFn: () => getConversationMessage(args),
-    enabled: !!args.messageId && !!args.account,
+    queryKey: conversationMessageQueryKey(account, messageId),
+    queryFn: () => getConversationMessage({ account, messageId }),
+    enabled: !!messageId && !!account,
   });
 }
 

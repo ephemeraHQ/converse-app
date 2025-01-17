@@ -21,7 +21,6 @@ function getConversation(args: IArgs) {
   return getConversationByTopicByAccount({
     account,
     topic,
-    includeSync: true,
   });
 }
 

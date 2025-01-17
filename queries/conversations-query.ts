@@ -129,7 +129,9 @@ export const getConversationsQueryOptions = (args: IArgs) => {
     queryKey: conversationsQueryKey(account),
     queryFn: () => getConversations({ account }),
     enabled: !!account,
-    refetchOnMount: true, // Just for now because conversations are very important and we want to make sure we have all of them
+    // Just for now because conversations are very important and
+    // we want to make sure we have all of them
+    refetchOnMount: true,
   });
 };
 

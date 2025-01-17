@@ -39,7 +39,7 @@ export function getDmQueryOptions(args: IDmQueryArgs) {
   const { account, peer } = args;
   return queryOptions({
     queryKey: dmQueryKey(account, peer),
-    queryFn: () => getDm(args),
+    queryFn: () => getDm({ account, peer }),
     enabled: !!peer,
   });
 }

@@ -35,7 +35,7 @@ export const GroupConversationTitle = memo(
 
     const { data: members } = useGroupMembersQuery({
       account: currentAccount,
-      topic: topic!,
+      topic,
     });
 
     const { data: memberData } = useGroupMembersAvatarData({ topic });

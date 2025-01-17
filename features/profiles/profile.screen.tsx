@@ -1,13 +1,5 @@
 import React, { useCallback, useState } from "react";
-import {
-  View,
-  ViewStyle,
-  Alert,
-  Share,
-  Platform,
-  Linking,
-  TextStyle,
-} from "react-native";
+import { View, ViewStyle, Alert, Share } from "react-native";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { ContactCard } from "@/features/profiles/components/contact-card";
 import { SettingsList } from "@/design-system/settings-list/settings-list";
@@ -42,7 +34,7 @@ import { iconRegistry } from "@/design-system/Icon/Icon";
 import { useNotificationsPermission } from "@/features/notifications/hooks/use-notifications-permission";
 import { SocialNames } from "@/features/profiles/components/social-names";
 
-export default function ProfileScreen() {
+export function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
   const { theme, themed } = useAppTheme();
   const router = useRouter();
@@ -52,11 +44,8 @@ export default function ProfileScreen() {
   const isMyProfile = peerAddress.toLowerCase() === userAddress?.toLowerCase();
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const { data: socials } = useProfileSocials(peerAddress);
-  const {
-    notificationsPermissionStatus,
-    requestPermission,
-    setNotificationsSettings,
-  } = useNotificationsPermission();
+  const { notificationsPermissionStatus, requestPermission } =
+    useNotificationsPermission();
 
   const userName = usePreferredUsername(peerAddress);
   const displayName = usePreferredName(peerAddress);

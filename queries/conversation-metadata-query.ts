@@ -15,33 +15,39 @@ type IArgs = {
   topic: ConversationTopic;
 };
 
-export function getConversationMetadataQueryOptions(args: IArgs) {
+export function getConversationMetadataQueryOptions({ account, topic }: IArgs) {
   return queryOptions({
-    queryKey: conversationMetadataQueryKey(args.account, args.topic),
-    queryFn: () => getConversationMetadata(args),
-    enabled: !!args.topic && !!args.account,
+    queryKey: conversationMetadataQueryKey(account, topic),
+    queryFn: () => getConversationMetadata({ account, topic }),
+    enabled: !!topic && !!account,
   });
 }
 
-export function prefetchConversationMetadataQuery(args: IArgs) {
+export function prefetchConversationMetadataQuery(
+  account: string,
+  topic: ConversationTopic
+) {
   logger.debug(
-    `[ConversationMetadataQuery] prefetchConversationMetadataQuery for account: ${args.account}, topic: ${args.topic}`
+    `[ConversationMetadataQuery] prefetchConversationMetadataQuery for account: ${account}, topic: ${topic}`
   );
-  return queryClient.prefetchQuery(getConversationMetadataQueryOptions(args));
+  return queryClient.prefetchQuery(
+    getConversationMetadataQueryOptions({ account, topic })
+  );
 }
 
 export const getConversationMetadataQueryData = (args: IArgs) => {
+  const { account, topic } = args;
   return queryClient.getQueryData(
-    getConversationMetadataQueryOptions(args).queryKey
+    getConversationMetadataQueryOptions({ account, topic }).queryKey
   );
 };
 
 export function updateConversationMetadataQueryData(
   args: IArgs & { updateData: Partial<IConversationMetadataQueryData> }
 ) {
-  const { updateData } = args;
+  const { updateData, account, topic } = args;
   queryClient.setQueryData(
-    getConversationMetadataQueryOptions(args).queryKey,
+    getConversationMetadataQueryOptions({ account, topic }).queryKey,
     (previousData) => {
       return {
         account: args.account,
@@ -59,7 +65,11 @@ export function updateConversationMetadataQueryData(
 
 async function getConversationMetadata(args: IArgs) {
   logger.debug(
-    `[ConversationMetadataQuery] getConversationMetadata for account: ${args.account}, topic: ${args.topic}`
+    `[ConversationMetadataQuery] getConversationMetadata for ${JSON.stringify(
+      args,
+      null,
+      2
+    )}`
   );
   return batchedGetConversationMetadata.fetch(args);
 }

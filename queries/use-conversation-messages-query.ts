@@ -2,8 +2,8 @@ import { isReactionMessage } from "@/features/conversation/conversation-message/
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
+import { UseQueryOptions, queryOptions, useQuery } from "@tanstack/react-query";
 import { isSupportedMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages";
-import { queryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import {
   InboxId,
@@ -65,7 +65,7 @@ export const useConversationMessages = (
   account: string,
   topic: ConversationTopic
 ) => {
-  return useQuery(getConversationMessagesQueryOptions(account, topic));
+  return useQuery(getConversationMessagesQueryOptions({ account, topic }));
 };
 
 export const getConversationMessagesQueryData = (
@@ -73,7 +73,7 @@ export const getConversationMessagesQueryData = (
   topic: ConversationTopic
 ) => {
   return queryClient.getQueryData(
-    getConversationMessagesQueryOptions(account, topic).queryKey
+    getConversationMessagesQueryOptions({ account, topic }).queryKey
   );
 };
 
@@ -83,7 +83,7 @@ export function refetchConversationMessages(
 ) {
   logger.debug("[refetchConversationMessages] refetching messages");
   return queryClient.refetchQueries(
-    getConversationMessagesQueryOptions(account, topic)
+    getConversationMessagesQueryOptions({ account, topic })
   );
 }
 
@@ -95,7 +95,7 @@ export const addConversationMessageQuery = (args: {
   const { account, topic, message } = args;
 
   queryClient.setQueryData(
-    getConversationMessagesQueryOptions(account, topic).queryKey,
+    getConversationMessagesQueryOptions({ account, topic }).queryKey,
     (previousMessages) => {
       const processedMessages = processMessages({
         newMessages: [message],
@@ -113,14 +113,15 @@ export const prefetchConversationMessages = async (args: {
 }) => {
   const { account, topic } = args;
   return queryClient.prefetchQuery(
-    getConversationMessagesQueryOptions(account, topic)
+    getConversationMessagesQueryOptions({ account, topic })
   );
 };
 
-export function getConversationMessagesQueryOptions(
-  account: string,
-  topic: ConversationTopic
-) {
+export function getConversationMessagesQueryOptions(args: {
+  account: string;
+  topic: ConversationTopic;
+}) {
+  const { account, topic } = args;
   const conversation = getConversationQueryData({
     account,
     topic,
@@ -275,7 +276,7 @@ export function replaceOptimisticMessageWithReal(args: {
   );
 
   queryClient.setQueryData(
-    getConversationMessagesQueryOptions(account, topic).queryKey,
+    getConversationMessagesQueryOptions({ account, topic }).queryKey,
     (previousMessages) => {
       if (!previousMessages) {
         return {

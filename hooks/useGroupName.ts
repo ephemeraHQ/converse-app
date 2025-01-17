@@ -1,13 +1,11 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { currentAccount, useCurrentAccount } from "../data/store/accountsStore";
+import { useCurrentAccount } from "../data/store/accountsStore";
 import { useGroupMembersQuery } from "../queries/useGroupMembersQuery";
 import { useGroupNameMutation } from "../queries/useGroupNameMutation";
 import { useGroupNameQuery } from "../queries/useGroupNameQuery";
 import { usePreferredNames } from "./usePreferredNames";
 
-export const useGroupNameForCurrentAccount = (
-  topic: ConversationTopic | undefined
-) => {
+export const useGroupNameForCurrentAccount = (topic: ConversationTopic) => {
   const account = useCurrentAccount()!;
 
   const {
@@ -16,12 +14,12 @@ export const useGroupNameForCurrentAccount = (
     isError,
   } = useGroupNameQuery({
     account,
-    topic: topic!,
+    topic,
   });
 
   const { data: members, isLoading: membersLoading } = useGroupMembersQuery({
     account,
-    topic: topic!, // ! because we have enabled in the useQuery
+    topic,
     queryOptions: {
       enabled: !groupName, // If we have the group name, we don't need to fetch the members
     },
