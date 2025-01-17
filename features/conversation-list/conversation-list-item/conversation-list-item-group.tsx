@@ -17,6 +17,7 @@ import { memo, useCallback, useMemo } from "react";
 import { ConversationListItem } from "./conversation-list-item";
 import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action";
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action";
+import { MIDDLE_DOT } from "@/design-system/middle-dot";
 
 type IConversationListItemGroupProps = {
   conversationTopic: ConversationTopic;
@@ -68,7 +69,9 @@ export const ConversationListItemGroup = memo(
     const timeToShow = getCompactRelativeTime(timestamp);
     const messageText = useMessagePlainText(group?.lastMessage);
     const subtitle =
-      timeToShow && messageText ? `${timeToShow} ⋅ ${messageText}` : "";
+      timeToShow && messageText
+        ? `${timeToShow} ${MIDDLE_DOT} ${messageText}`
+        : "";
 
     const { toggleReadStatusAsync } = useToggleReadStatus({
       topic: conversationTopic,

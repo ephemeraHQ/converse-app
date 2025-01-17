@@ -64,7 +64,8 @@ export type IIconName =
   | "shield"
   | "shield.fill"
   | "new-account-card"
-  | "settings";
+  | "settings"
+  | "restore";
 
 /**
  * Props for the Icon component.

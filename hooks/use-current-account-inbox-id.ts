@@ -2,29 +2,29 @@ import {
   getCurrentAccount,
   useCurrentAccount,
 } from "@/data/store/accountsStore";
+import { InboxId } from "@xmtp/react-native-sdk";
 import {
   getInboxIdFromQueryData,
   prefetchInboxIdQuery,
   useInboxIdQuery,
 } from "../queries/use-inbox-id-query";
-import { InboxId } from "@xmtp/react-native-sdk";
 
 export function useCurrentAccountInboxId() {
   const currentAccount = useCurrentAccount()!;
   return useInboxIdQuery({ account: currentAccount });
 }
 
-export function getCurrentUserAccountInboxId() {
+export function getCurrentAccountInboxId() {
   const currentAccount = getCurrentAccount()!;
   return getInboxIdFromQueryData({ account: currentAccount });
 }
 
-export function prefetchCurrentUserAccountInboxId() {
+export function prefetchCurrentAccountInboxId() {
   const currentAccount = getCurrentAccount()!;
   return prefetchInboxIdQuery({ account: currentAccount });
 }
 
-export function isCurrentUserInboxId(inboxId: InboxId) {
-  const currentUserInboxId = getCurrentUserAccountInboxId();
-  return currentUserInboxId?.toLowerCase() === inboxId.toLowerCase();
+export function isCurrentAccountInboxId(inboxId: InboxId) {
+  const currentAccountInboxId = getCurrentAccountInboxId();
+  return currentAccountInboxId?.toLowerCase() === inboxId.toLowerCase();
 }

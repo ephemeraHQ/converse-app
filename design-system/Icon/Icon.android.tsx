@@ -71,6 +71,7 @@ export const iconRegistry: Record<
   "shield.fill": "shield",
   "new-account-card": "person",
   settings: "settings",
+  restore: "restore",
 };
 
 export function Icon(props: IIconProps) {

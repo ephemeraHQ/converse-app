@@ -2,7 +2,7 @@ import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { useSettingsStore } from "@/data/store/accountsStore";
 import { useSelect } from "@/data/store/storeHelpers";
 import { Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
+import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { ConversationList } from "@/features/conversation-list/conversation-list";
 import { ConversationListItemDm } from "@/features/conversation-list/conversation-list-item/conversation-list-item-dm";
 import { ConversationListItemGroup } from "@/features/conversation-list/conversation-list-item/conversation-list-item-group";
@@ -38,11 +38,10 @@ type IConversationListProps = NativeStackScreenProps<
 >;
 
 export function ConversationListScreen(props: IConversationListProps) {
-  const {
-    data: conversations,
-    isLoading: isLoadingConversations,
-    refetch: refetchConversations,
-  } = useConversationListConversations();
+  const { data: conversations, refetch: refetchConversations } =
+    useConversationListConversations();
+
+  const { theme } = useAppTheme();
 
   const insets = useSafeAreaInsets();
 
@@ -58,22 +57,27 @@ export function ConversationListScreen(props: IConversationListProps) {
 
   return (
     <Screen contentContainerStyle={$globalStyles.flex1}>
-      <ConversationList
-        conversations={isLoadingConversations ? [] : conversations ?? []}
-        scrollEnabled={conversations && conversations?.length > 0}
-        ListEmptyComponent={<ConversationListEmpty />}
-        ListHeaderComponent={<ListHeader />}
-        onRefetch={handleRefresh}
-        contentContainerStyle={{
-          paddingBottom: insets.bottom,
-        }}
-        renderConversation={({ item }) => {
-          if (isConversationGroup(item)) {
-            return <ConversationListItemGroupWrapper group={item} />;
-          }
-          return <ConversationListItemDmWrapper dm={item} />;
-        }}
-      />
+      <AnimatedVStack layout={theme.animation.reanimatedLayoutSpringTransition}>
+        <ConversationList
+          conversations={conversations ?? []}
+          scrollEnabled={conversations && conversations?.length > 0}
+          ListEmptyComponent={<ConversationListEmpty />}
+          ListHeaderComponent={<ListHeader />}
+          onRefetch={handleRefresh}
+          onLayout={() => {}}
+          removeClippedSubviews={false}
+          contentContainerStyle={{
+            paddingBottom: insets.bottom,
+          }}
+          renderConversation={({ item }) => {
+            return isConversationGroup(item) ? (
+              <ConversationListItemGroupWrapper group={item} />
+            ) : (
+              <ConversationListItemDmWrapper dm={item} />
+            );
+          }}
+        />
+      </AnimatedVStack>
     </Screen>
   );
 }
@@ -89,7 +93,13 @@ const ConversationListItemDmWrapper = memo(
     });
 
     return (
-      <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
+      <ContextMenuView
+        style={{
+          flex: 1,
+        }}
+        hitSlop={theme.spacing.xs}
+        {...contextMenuProps}
+      >
         <ConversationListItemDm conversationTopic={dm.topic} />
       </ContextMenuView>
     );
@@ -109,7 +119,13 @@ const ConversationListItemGroupWrapper = memo(
     });
 
     return (
-      <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
+      <ContextMenuView
+        style={{
+          flex: 1,
+        }}
+        hitSlop={theme.spacing.xs}
+        {...contextMenuProps}
+      >
         <ConversationListItemGroup conversationTopic={group.topic} />
       </ContextMenuView>
     );
@@ -117,17 +133,18 @@ const ConversationListItemGroupWrapper = memo(
 );
 
 const ListHeader = React.memo(function ListHeader() {
+  const { theme } = useAppTheme();
   const { ephemeralAccount } = useSettingsStore(
     useSelect(["ephemeralAccount"])
   );
 
   return (
-    <VStack style={{}}>
+    <AnimatedVStack layout={theme.animation.reanimatedLayoutSpringTransition}>
       <States />
       {ephemeralAccount && <EphemeralAccountBanner />}
       <ConversationListPinnedConversations />
       <ConversationListAwaitingRequests />
-    </VStack>
+    </AnimatedVStack>
   );
 });
 
@@ -155,21 +172,26 @@ const EphemeralAccountBanner = React.memo(function EphemeralAccountBanner() {
   const { screenHorizontalPadding } = useConversationListStyles();
 
   return (
-    <TouchableOpacity
-      onPress={() => showDisconnectActionSheet(colorScheme)}
-      style={{
-        width: "100%",
-        backgroundColor: theme.colors.background.blurred,
-        paddingHorizontal: screenHorizontalPadding,
-        paddingVertical: theme.spacing.xs,
-      }}
+    <AnimatedVStack
+      layout={theme.animation.reanimatedLayoutSpringTransition}
+      entering={theme.animation.reanimatedFadeInSpring}
     >
-      <VStack>
-        <Text size="xs">
-          {translate("ephemeral_account_banner.title")}.{" "}
-          {translate("ephemeral_account_banner.subtitle")}
-        </Text>
-      </VStack>
-    </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => showDisconnectActionSheet(colorScheme)}
+        style={{
+          width: "100%",
+          backgroundColor: theme.colors.background.blurred,
+          paddingHorizontal: screenHorizontalPadding,
+          paddingVertical: theme.spacing.xs,
+        }}
+      >
+        <VStack>
+          <Text size="xs">
+            {translate("ephemeral_account_banner.title")}.{" "}
+            {translate("ephemeral_account_banner.subtitle")}
+          </Text>
+        </VStack>
+      </TouchableOpacity>
+    </AnimatedVStack>
   );
 });

@@ -1,13 +1,18 @@
 import { Avatar } from "@/components/Avatar";
 import { ISwipeableRenderActionsArgs } from "@/components/swipeable";
+import { MIDDLE_DOT } from "@/design-system/middle-dot";
 import { ConversationListItemSwipeable } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable";
+import { RestoreSwipeableAction } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable-restore-action";
+import { useConversationIsDeleted } from "@/features/conversation-list/hooks/use-conversation-is-deleted";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
+import { useRestoreConversation } from "@/features/conversation-list/hooks/use-restore-conversation";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { captureErrorWithToast } from "@/utils/capture-error";
 import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
@@ -39,6 +44,11 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     topic: conversationTopic,
   });
 
+  const deleteDm = useDeleteDm(conversation as DmWithCodecsType);
+  const { restoreConversationAsync } = useRestoreConversation({
+    topic: conversationTopic,
+  });
+
   const { theme } = useAppTheme();
 
   const messageText = useMessagePlainText(conversation?.lastMessage);
@@ -64,15 +74,27 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
   const timestamp = conversation?.lastMessage?.sentNs ?? 0;
   const timeToShow = getCompactRelativeTime(timestamp);
   const subtitle =
-    timeToShow && messageText ? `${timeToShow} ⋅ ${messageText}` : "";
+    timeToShow && messageText
+      ? `${timeToShow} ${MIDDLE_DOT} ${messageText}`
+      : "";
 
   const { isUnread } = useConversationIsUnread({
     topic: conversationTopic,
   });
 
-  const renderLeftActions = useCallback((args: ISwipeableRenderActionsArgs) => {
-    return <DeleteSwipeableAction {...args} />;
-  }, []);
+  const { isDeleted } = useConversationIsDeleted({
+    conversationTopic,
+  });
+
+  const renderLeftActions = useCallback(
+    (args: ISwipeableRenderActionsArgs) => {
+      if (isDeleted) {
+        return <RestoreSwipeableAction {...args} />;
+      }
+      return <DeleteSwipeableAction {...args} />;
+    },
+    [isDeleted]
+  );
 
   const renderRightActions = useCallback(
     (args: ISwipeableRenderActionsArgs) => {
@@ -83,18 +105,44 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     [conversationTopic]
   );
 
-  const deleteDm = useDeleteDm(conversation as DmWithCodecsType);
+  const onLeftSwipe = useCallback(async () => {
+    try {
+      if (isDeleted) {
+        await restoreConversationAsync();
+      } else {
+        await deleteDm();
+      }
+    } catch (error) {
+      captureErrorWithToast(error);
+    }
+  }, [isDeleted, deleteDm, restoreConversationAsync]);
 
   const { toggleReadStatusAsync } = useToggleReadStatus({
     topic: conversationTopic,
   });
 
+  const onRightSwipe = useCallback(async () => {
+    try {
+      await toggleReadStatusAsync();
+    } catch (error) {
+      captureErrorWithToast(error);
+    }
+  }, [toggleReadStatusAsync]);
+
+  const leftActionsBackgroundColor = useMemo(() => {
+    if (isDeleted) {
+      return theme.colors.fill.tertiary;
+    }
+    return theme.colors.fill.caution;
+  }, [isDeleted, theme]);
+
   return (
     <ConversationListItemSwipeable
       renderRightActions={renderRightActions}
       renderLeftActions={renderLeftActions}
-      onLeftSwipe={deleteDm}
-      onRightSwipe={toggleReadStatusAsync}
+      onLeftSwipe={onLeftSwipe}
+      onRightSwipe={onRightSwipe}
+      leftActionsBackgroundColor={leftActionsBackgroundColor}
     >
       <ConversationListItem
         onPress={onPress}

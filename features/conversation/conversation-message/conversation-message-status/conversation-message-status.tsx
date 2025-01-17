@@ -31,7 +31,7 @@ export const ConversationMessageStatus = memo(
     }
 
     if (status === "sent") {
-      return <SentStatus />;
+      return <SentStatus animateEntering={previousStatus === "sending"} />;
     }
 
     return null;
@@ -98,13 +98,21 @@ const SendingStatus = memo(function SendingStatus() {
   );
 });
 
-const SentStatus = memo(function SentStatus() {
+const SentStatus = memo(function SentStatus({
+  animateEntering,
+}: {
+  animateEntering: boolean;
+}) {
   const { theme } = useAppTheme();
 
   return (
     <StatusContainer
       // 300 delay for better UX so that the message entering animation finishes before showing the sent status
-      entering={theme.animation.reanimatedFadeInSpring.delay(300)}
+      entering={
+        animateEntering
+          ? theme.animation.reanimatedFadeInSpring.delay(300)
+          : undefined
+      }
     >
       <StatusText text={translate("message_status.sent")} />
       <StatusIconContainer>

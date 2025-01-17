@@ -22,9 +22,9 @@ export const useConversationListConversations = () => {
     })
   );
 
+  // Let's prefetch the messages for all the conversations
   useEffect(() => {
     if (conversations) {
-      // Let's prefetch the messages for all the conversations
       for (const conversation of conversations) {
         prefetchConversationMessages({
           account: currentAccount!,
@@ -46,7 +46,7 @@ export const useConversationListConversations = () => {
     },
   });
 
-  const conversationsDataQueries = useQueries({
+  const conversationsMetadataQueries = useQueries({
     queries: (conversations ?? []).map((conversation) =>
       getConversationMetadataQueryOptions({
         account: currentAccount!,
@@ -65,21 +65,25 @@ export const useConversationListConversations = () => {
     // },
   });
 
-  const conversationsFiltered = useMemo(() => {
+  const filteredAndSortedConversations = useMemo(() => {
     if (!conversations) return [];
 
-    return conversations.filter((conversation, index) => {
-      const query = conversationsDataQueries[index];
+    // Filter out conversations that don't meet criteria
+    const filtered = conversations.filter((conversation, index) => {
+      const query = conversationsMetadataQueries[index];
       return (
-        // Check if conversation is allowed based on permissions
         isConversationAllowed(conversation) &&
-        // Exclude pinned conversations
         !query?.data?.isPinned &&
-        // Exclude deleted conversations
         !query?.data?.isDeleted &&
-        // Only include conversations that have finished loading
         !query?.isLoading
       );
+    });
+
+    // Sort by timestamp descending (newest first)
+    return filtered.sort((a, b) => {
+      const timestampA = a.lastMessage?.sentNs ?? 0;
+      const timestampB = b.lastMessage?.sentNs ?? 0;
+      return timestampB - timestampA;
     });
     /*
      * note(lustig): potential fix using existing libraries could be exploring `combine` above
@@ -90,7 +94,7 @@ export const useConversationListConversations = () => {
      * the return value of useQueries and pass the destructured values into
      * the dependency array of useMemo.eslint@tanstack/query/no-unstable-deps
      */
-  }, [conversations, conversationsDataQueries]);
+  }, [conversations, conversationsMetadataQueries]);
 
-  return { data: conversationsFiltered, isLoading, refetch };
+  return { data: filteredAndSortedConversations, isLoading, refetch };
 };

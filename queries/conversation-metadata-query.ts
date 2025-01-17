@@ -20,7 +20,6 @@ export function getConversationMetadataQueryOptions({ account, topic }: IArgs) {
     queryKey: conversationMetadataQueryKey(account, topic),
     queryFn: () => getConversationMetadata({ account, topic }),
     enabled: !!topic && !!account,
-    retry: false,
   });
 }
 
@@ -51,6 +50,8 @@ export function updateConversationMetadataQueryData(
     getConversationMetadataQueryOptions({ account, topic }).queryKey,
     (previousData) => {
       return {
+        account: args.account,
+        topic: args.topic,
         // By default, if we didn't have any data for this conversation, we put those values
         isDeleted: false,
         isPinned: false,
@@ -84,15 +85,15 @@ const batchedGetConversationMetadata = create({
     if (!match) {
       return null;
     }
-    // Destructure to remove account and topic from the result
-    const { account, topic, ...rest } = match;
+
+    const { account, topic, ...backendProperties } = match;
 
     // If we don't have any data for this conversation, we return null
-    if (Object.keys(rest).length === 0) {
+    if (Object.keys(backendProperties).length === 0) {
       return null;
     }
 
-    return rest;
+    return match;
   },
   fetcher: async (args: IArgs[]) => {
     const accountGroups = args.reduce((groups, arg) => {

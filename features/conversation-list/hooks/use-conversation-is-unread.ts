@@ -1,4 +1,4 @@
-import { conversationIsUnreadByTimestamp } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
+import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
 import { getConversationQueryOptions } from "@/queries/useConversationQuery";
@@ -41,22 +41,11 @@ export const useConversationIsUnread = ({
       return false;
     }
 
-    // User intentionally marked as unread
-    if (conversationMetadata?.markedAsUnread) {
-      return true;
-    }
-
-    // If the last message is from the current user, it's not unread... unless they marked the convo as unread but it's handled above
-    if (lastMessage?.senderInboxId === currentUserInboxId) {
-      return false;
-    }
-
-    if (!lastMessage) {
-      return false;
-    }
-
-    return conversationIsUnreadByTimestamp({
-      lastMessageSent: lastMessage.sentNs,
+    return conversationIsUnreadForInboxId({
+      lastMessageSent: lastMessage?.sentNs ?? null,
+      lastMessageSenderInboxId: lastMessage?.senderInboxId ?? null,
+      consumerInboxId: currentUserInboxId!,
+      markedAsUnread: conversationMetadata?.markedAsUnread ?? false,
       readUntil: conversationMetadata?.readUntil ?? 0,
     });
   }, [

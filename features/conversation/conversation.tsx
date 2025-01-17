@@ -52,8 +52,10 @@ import { isConversationDm } from "@/features/conversation/utils/is-conversation-
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
+import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
 import { useHeader } from "@/navigation/use-header";
+import { useConversationMessages } from "@/queries/use-conversation-messages-query";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
@@ -66,7 +68,6 @@ import { Center } from "@design-system/Center";
 import { Text } from "@design-system/Text";
 import { translate } from "@i18n/translate";
 import { useRouter } from "@navigation/useNavigation";
-import { useConversationMessages } from "@/queries/use-conversation-messages-query";
 import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -209,6 +210,14 @@ const Messages = memo(function Messages(props: {
     refetch: refetchMessages,
   } = useConversationMessages(currentAccount, topic!);
 
+  // For now we want to make sure we don't miss any messages.
+  // If we do things correctly we shouldn't really need this but it's a protection for now.
+  useScreenFocusEffectOnce(() => {
+    refetchMessages();
+  });
+
+  // For now we want to make sure we don't miss any messages.
+  // If we do things correctly we shouldn't really need this but it's a protection for now.
   useAppStateHandlers({
     onForeground: () => {
       refetchMessages();
@@ -234,10 +243,10 @@ const Messages = memo(function Messages(props: {
 
   // TODO: Need improvment but okay for now
   useEffect(() => {
-    if (isConversationAllowed(conversation) && isUnread && !messagesLoading) {
+    if (isUnread && !messagesLoading) {
       markAsReadAsync().catch(captureError);
     }
-  }, [isUnread, messagesLoading, markAsReadAsync, conversation, messages]);
+  }, [isUnread, messagesLoading, markAsReadAsync]);
 
   const handleRefresh = useCallback(async () => {
     try {
@@ -260,9 +269,11 @@ const Messages = memo(function Messages(props: {
     [handleRefresh, isRefetchingMessages]
   );
 
+  const allMessages = Object.values(messages?.byId ?? {});
+
   return (
     <ConversationMessagesList
-      messageIds={messages?.ids ?? []}
+      messages={allMessages}
       refreshing={isRefetchingMessages}
       onRefresh={Platform.OS === "android" ? refetchMessages : undefined}
       onScroll={onScroll}
@@ -282,8 +293,7 @@ const Messages = memo(function Messages(props: {
           )
         ) : undefined
       }
-      renderMessage={({ messageId, index }) => {
-        const message = messages?.byId[messageId]!;
+      renderMessage={({ message, index }) => {
         const previousMessage = messages?.byId[messages?.ids[index + 1]];
         const nextMessage = messages?.byId[messages?.ids[index - 1]];
 
@@ -293,7 +303,7 @@ const Messages = memo(function Messages(props: {
             previousMessage={previousMessage}
             nextMessage={nextMessage}
             isLatestMessageSentByCurrentUser={
-              latestMessageIdByCurrentUser === messageId
+              latestMessageIdByCurrentUser === message.id
             }
             animateEntering={
               index === 0 &&
@@ -349,10 +359,9 @@ const ConversationMessagesListItem = memo(
               .damping(theme.animation.spring.damping)
               .stiffness(theme.animation.spring.stiffness)
               .withInitialValues({
-                opacity: 0,
                 transform: [
                   {
-                    translateY: 50,
+                    translateY: 60,
                   },
                 ],
               }),
