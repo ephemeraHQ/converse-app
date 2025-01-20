@@ -40,8 +40,12 @@ export const useConversationRequestsListItem = () => {
         const isSpamResults = await Promise.allSettled(
           conversations.map(async (conversation) => {
             try {
-              // ! since we check for lastMessage in the select, we can safely assume it's not undefined
-              const lastMessage = conversation.lastMessage!;
+              const lastMessage = conversation.lastMessage;
+
+              if (!lastMessage) {
+                return true;
+              }
+
               const messageText = getMessageStringContent(lastMessage);
 
               if (!messageText) {
