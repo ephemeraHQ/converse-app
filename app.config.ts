@@ -8,6 +8,9 @@ import appBuildNumbers from "./app.json";
 const env = process.env as any;
 const isDev = env.EXPO_ENV === "dev";
 
+const mmkvVersion = "1.3.3";
+const xmtpVersion = "3.0.23";
+
 warnOnce(
   isDev && !(process.env as any).EXPO_PUBLIC_DEV_API_URI,
   "\n\n🚧 Running the app without EXPO_PUBLIC_DEV_API_URI setup\n\n"
@@ -65,6 +68,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     config: {
       usesNonExemptEncryption: false,
     },
+    bundleIdentifier: "com.converse.dev",
   },
   android: {
     versionCode: appBuildNumbers.expo.android.versionCode,
@@ -215,6 +219,43 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
                   host: "*",
                 },
               },
+            ],
+          },
+        },
+        ios: {
+          deploymentTarget: "15.1",
+          extraPods: [
+            {
+              name: "MMKV",
+              version: mmkvVersion,
+            },
+            {
+              name: "MMKVCore",
+              version: mmkvVersion,
+            },
+            {
+              name: "XMTP",
+              version: xmtpVersion,
+              modular_headers: true,
+            },
+          ],
+          entitlements: {
+            "com.apple.developer.associated-domains": [
+              `applinks:${appDomainConverse}`,
+              `applinks:${appDomainGetConverse}`,
+            ],
+            "com.apple.developer.devicecheck.appattest-environment":
+              "production",
+            "com.apple.developer.usernotifications.communication": true,
+            "com.apple.security.application-groups": [
+              `group.com.converse.${
+                isDev ? "dev" : isPreview ? "preview" : "prod"
+              }`,
+            ],
+            "keychain-access-groups": [
+              `$(AppIdentifierPrefix)com.converse.${
+                isDev ? "dev" : isPreview ? "preview" : "prod"
+              }`,
             ],
           },
         },
