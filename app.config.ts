@@ -1,79 +1,120 @@
 import { ConfigContext, ExpoConfig } from "expo/config";
-import warnOnce from "warn-once";
-// Removed this import as it was causing a build error
-// import type { PluginConfigTypeAndroid } from "expo-build-properties/src/pluginConfig";
+import appConfig from "./versions.json";
 
-import appBuildNumbers from "./app.json";
+const expoEnv = process.env.EXPO_ENV as Environment;
 
-const env = process.env as any;
-const isDev = env.EXPO_ENV === "dev";
+if (!expoEnv) {
+  throw new Error("EXPO_ENV is not set in env variables");
+}
 
-warnOnce(
-  isDev && !(process.env as any).EXPO_PUBLIC_DEV_API_URI,
-  "\n\n🚧 Running the app without EXPO_PUBLIC_DEV_API_URI setup\n\n"
-);
+type EnvironmentConfig = {
+  scheme: string;
+  androidPackage: string;
+  appDomainConverse: string;
+  appDomainGetConverse: string;
+  appName: string;
+  icon: string;
+  googleServicesFile: string;
+  ios: {
+    bundleIdentifier: string;
+  };
+  android: {
+    package: string;
+    googleServicesFile: string;
+  };
+};
 
-const isPreview = env.EXPO_ENV === "preview";
-const isProduction = !isDev && !isPreview;
-const scheme = isDev
-  ? "converse-dev"
-  : isPreview
-  ? "converse-preview"
-  : "converse";
-const androidPackage = isDev
-  ? "com.converse.dev"
-  : isPreview
-  ? "com.converse.preview"
-  : "com.converse.prod";
-const appDomainConverse = isDev
-  ? "dev.converse.xyz"
-  : isPreview
-  ? "preview.converse.xyz"
-  : "converse.xyz";
-const appDomainGetConverse = isDev
-  ? "dev.getconverse.app"
-  : isPreview
-  ? "preview.getconverse.app"
-  : "getconverse.app";
+type Environment = "dev" | "preview" | "prod";
 
-export default ({ config }: ConfigContext): ExpoConfig => ({
-  ...config,
-  name: isDev ? "Converse DEV" : isPreview ? "Converse PREVIEW" : "Converse",
-  scheme: isDev ? "converse-dev" : isPreview ? "converse-preview" : "converse",
+const settings: Record<Environment, EnvironmentConfig> = {
+  dev: {
+    scheme: "converse-dev",
+    ios: {
+      bundleIdentifier: "com.converse.dev",
+    },
+    android: {
+      package: "com.converse.dev",
+      googleServicesFile: "./scripts/build/android/google-services/dev.json",
+    },
+    androidPackage: "com.converse.dev",
+    appDomainConverse: "dev.converse.xyz",
+    appDomainGetConverse: "dev.getconverse.app",
+    appName: "Converse DEV",
+    icon: "./assets/icon-preview.png",
+    googleServicesFile: "./scripts/build/android/google-services/dev.json",
+  },
+  preview: {
+    scheme: "converse-preview",
+    ios: {
+      bundleIdentifier: "com.converse.preview",
+    },
+    android: {
+      package: "com.converse.preview",
+      googleServicesFile:
+        "./scripts/build/android/google-services/preview.json",
+    },
+    androidPackage: "com.converse.preview",
+    appDomainConverse: "preview.converse.xyz",
+    appDomainGetConverse: "preview.getconverse.app",
+    appName: "Converse PREVIEW",
+    icon: "./assets/icon-preview.png",
+    googleServicesFile: "./scripts/build/android/google-services/preview.json",
+  },
+  prod: {
+    scheme: "converse",
+    ios: {
+      bundleIdentifier: "com.converse.native",
+    },
+    android: {
+      package: "com.converse.prod",
+      googleServicesFile:
+        "./scripts/build/android/google-services/production.json",
+    },
+    androidPackage: "com.converse.prod",
+    appDomainConverse: "converse.xyz",
+    appDomainGetConverse: "getconverse.app",
+    appName: "Converse",
+    icon: "./assets/icon.png",
+    googleServicesFile:
+      "./scripts/build/android/google-services/production.json",
+  },
+};
+
+const config = settings[expoEnv];
+
+export default ({ config: defaultConfig }: ConfigContext): ExpoConfig => ({
+  ...defaultConfig,
+  name: config.appName,
+  scheme: config.scheme,
+  owner: "converse",
   slug: "converse",
   orientation: "portrait",
-  icon: isProduction ? "./assets/icon.png" : "./assets/icon-preview.png",
+  icon: config.icon,
   userInterfaceStyle: "automatic",
+  version: appConfig.version,
+  assetBundlePatterns: ["**/*"],
   updates: {
     fallbackToCacheTimeout: 0,
     url: "https://u.expo.dev/49a65fae-3895-4487-8e8a-5bd8bee3a401",
   },
-  version: appBuildNumbers.expo.version,
-  assetBundlePatterns: ["**/*"],
   extra: {
     eas: {
       projectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
     },
-    ENV: isDev ? "dev" : isPreview ? "preview" : "prod",
   },
-  runtimeVersion: appBuildNumbers.expo.version,
-  owner: "converse",
-  jsEngine: "hermes",
+  runtimeVersion: appConfig.version,
   ios: {
+    // bundleIdentifier: config.ios.bundleIdentifier, // Not needed since we have ios folder already specifying it
     supportsTablet: true,
-    buildNumber: appBuildNumbers.expo.ios.buildNumber,
+    buildNumber: appConfig.ios.buildNumber,
     config: {
       usesNonExemptEncryption: false,
     },
   },
   android: {
-    versionCode: appBuildNumbers.expo.android.versionCode,
-    package: androidPackage,
-    googleServicesFile: isDev
-      ? "./scripts/build/android/google-services/dev.json"
-      : isPreview
-      ? "./scripts/build/android/google-services/preview.json"
-      : "./scripts/build/android/google-services/production.json",
+    versionCode: appConfig.android.versionCode,
+    package: config.android.package,
+    googleServicesFile: config.android.googleServicesFile,
     permissions: [
       "INTERNET",
       "READ_EXTERNAL_STORAGE",
@@ -91,49 +132,61 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         action: "VIEW",
         category: ["DEFAULT", "BROWSABLE"],
-        data: [{ scheme: scheme }, { scheme: androidPackage }],
+        data: [{ scheme: config.scheme }, { scheme: config.androidPackage }],
       },
       {
         autoVerify: true,
         action: "VIEW",
         category: ["DEFAULT", "BROWSABLE"],
         data: [
-          { scheme: "https", host: appDomainGetConverse, pathPrefix: "/dm" },
-          { scheme: "https", host: appDomainConverse, pathPrefix: "/dm" },
           {
             scheme: "https",
-            host: appDomainGetConverse,
+            host: config.appDomainGetConverse,
+            pathPrefix: "/dm",
+          },
+          {
+            scheme: "https",
+            host: config.appDomainConverse,
+            pathPrefix: "/dm",
+          },
+          {
+            scheme: "https",
+            host: config.appDomainGetConverse,
             pathPrefix: "/group-invite",
           },
           {
             scheme: "https",
-            host: appDomainConverse,
+            host: config.appDomainConverse,
             pathPrefix: "/group-invite",
           },
           {
             scheme: "https",
-            host: appDomainGetConverse,
+            host: config.appDomainGetConverse,
             pathPrefix: "/group",
           },
-          { scheme: "https", host: appDomainConverse, pathPrefix: "/group" },
           {
             scheme: "https",
-            host: appDomainGetConverse,
+            host: config.appDomainConverse,
+            pathPrefix: "/group",
+          },
+          {
+            scheme: "https",
+            host: config.appDomainGetConverse,
             pathPrefix: "/coinbase",
           },
           {
             scheme: "https",
-            host: appDomainConverse,
+            host: config.appDomainConverse,
             pathPrefix: "/coinbase",
           },
           {
             scheme: "https",
-            host: appDomainGetConverse,
+            host: config.appDomainGetConverse,
             pathPrefix: "/desktopconnect",
           },
           {
             scheme: "https",
-            host: appDomainConverse,
+            host: config.appDomainConverse,
             pathPrefix: "/desktopconnect",
           },
         ],
@@ -142,6 +195,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     [
+      // Configure Android build properties and SDK versions
       "expo-build-properties",
       {
         android: {
@@ -150,7 +204,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           buildToolsVersion: "34.0.0",
           minSdkVersion: 26,
           manifestQueries: {
+            // Required for Coinbase Wallet integration
             package: ["org.toshi"],
+            // Define supported wallet deep links that our app can open
+            // This allows Android to show our app as an option when users click wallet links
             intent: [
               {
                 action: "VIEW",
@@ -247,8 +304,4 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "./scripts/build/android/androidDependenciesExpoPlugin.js", // Handle some conflicting dependencies manually
     "./scripts/build/android/buildGradleProperties.js", // Increase memory for building android in EAS
   ],
-  web: {
-    favicon: "./assets/favicon.png",
-    bundler: "metro",
-  },
 });

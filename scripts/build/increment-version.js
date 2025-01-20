@@ -1,10 +1,11 @@
 const fs = require("fs");
 const path = require("path");
 
-// Path to app.json
-const filePath = path.join("./app.json");
+// Path to versions.json
+const filePath = path.join("./versions.json");
 
-// Function to increment version number
+// Increments semantic version based on the specified type (patch, minor, or major)
+// Example: 1.2.3 -> 1.2.4 (patch), 1.3.0 (minor), or 2.0.0 (major)
 function incrementVersion(version, incrementType) {
   const parts = version.split(".").map(Number);
 
@@ -31,7 +32,7 @@ function incrementVersion(version, incrementType) {
   return parts.join(".");
 }
 
-// Get the increment type from command-line arguments
+// Parse command line argument for version bump type
 const args = process.argv.slice(2);
 const incrementTypeArg = args.find((arg) => arg.startsWith("--bump="));
 
@@ -44,33 +45,37 @@ if (!incrementTypeArg) {
 
 const incrementType = incrementTypeArg.split("=")[1];
 
-// Read app.json
+// Update version numbers in versions.json
 fs.readFile(filePath, "utf-8", (err, data) => {
   if (err) {
-    console.error("Error reading app.json:", err);
+    console.error("Error reading versions.json:", err);
     process.exit(1);
   }
 
-  const appJson = JSON.parse(data);
+  const versionsJson = JSON.parse(data);
+  const newAppVersion = incrementVersion(
+    versionsJson.expo.version,
+    incrementType
+  );
 
-  // Increment the version for both iOS and Android
-  const newVersion = incrementVersion(appJson.expo.version, incrementType);
+  // Update Expo version and platform-specific version numbers
+  // iOS: Reset build number to 1 for each version update
+  // Android: Increment the version code by 1
+  versionsJson.expo.version = newAppVersion;
+  versionsJson.expo.ios.buildNumber = "1";
+  versionsJson.expo.android.versionCode =
+    versionsJson.expo.android.versionCode + 1;
 
-  appJson.expo.version = newVersion;
-  appJson.expo.ios.buildNumber = "1";
-  appJson.expo.android.versionCode = appJson.expo.android.versionCode + 1;
-
-  // Write the updated app.json back to the file
   fs.writeFile(
     filePath,
-    JSON.stringify(appJson, null, 2) + "\n",
+    JSON.stringify(versionsJson, null, 2) + "\n",
     "utf-8",
     (err) => {
       if (err) {
-        console.error("Error writing app.json:", err);
+        console.error("Error writing versions.json:", err);
         process.exit(1);
       }
-      console.log(`Version updated to ${newVersion} successfully.`);
+      console.log(`Version updated to ${newAppVersion} successfully.`);
     }
   );
 });

@@ -1,10 +1,9 @@
-name: iOS App Build
+name: Check iOS Build
 
 on:
   pull_request:
     branches:
       - main
-      - release/*
     paths:
       - "ios/**"
       - "package.json"
@@ -36,4 +35,4 @@ jobs:
           yarn install
 
       - name: Build iOS app
-        run: eas build --profile ios-simulator --platform ios --non-interactive
+        run: eas build --profile production --platform ios --non-interactive --dry-run

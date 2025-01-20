@@ -1,5 +1,5 @@
 import Constants from "expo-constants";
-import { isProd } from "./getEnv";
+import { isProd } from "../getEnv";
 
 /**
  * Determines the appropriate API URI for the current environment
@@ -30,6 +30,10 @@ export const getApiUri = () => {
   // Get configured dev API URI
   const envApiUri = process.env.EXPO_PUBLIC_DEV_API_URI;
 
+  if (!envApiUri) {
+    throw new Error("EXPO_PUBLIC_DEV_API_URI is not set in env variables");
+  }
+
   // In production, use the configured API
   if (isProd) {
     return envApiUri;
@@ -54,10 +58,4 @@ export const getApiUri = () => {
 
   // Fallback to original URI
   return envApiUri;
-};
-
-declare const process: {
-  env: {
-    [key: string]: string;
-  };
 };

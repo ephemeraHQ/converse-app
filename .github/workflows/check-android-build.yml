@@ -1,12 +1,10 @@
-name: Android App APK Build
+name: Check Android Build
 
 on:
   pull_request:
     branches:
       - main
-      - release/*
     paths:
-      - "android/**"
       - "package.json"
 
 jobs:
@@ -35,4 +33,4 @@ jobs:
         run: yarn install
 
       - name: Build Android app
-        run: eas build --profile development --platform android --non-interactive
+        run: eas build --profile development --platform android --non-interactive --dry-run

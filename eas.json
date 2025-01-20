@@ -5,13 +5,12 @@
   },
   "build": {
     "development": {
+      "autoIncrement": true,
       "developmentClient": true,
       "distribution": "internal",
       "channel": "development",
-      "env": {
-        "EXPO_ENV": "dev"
-      },
       "node": "20.18.0",
+      "environment": "development",
       "ios": {
         "cocoapods": "1.16.2",
         "image": "macos-sonoma-14.6-xcode-16.1"
@@ -23,53 +22,16 @@
     "production": {
       "autoIncrement": true,
       "channel": "production",
+      "node": "20.18.0",
+      "environment": "production",
+      "ios": {
+        "cocoapods": "1.16.2",
+        "image": "macos-sonoma-14.6-xcode-16.1"
+      },
       "android": {
         "buildType": "app-bundle",
         "resourceClass": "large"
-      },
-      "node": "20.18.0",
-      "ios": {
-        "resourceClass": "large",
-        "cocoapods": "1.16.2",
-        "image": "macos-sonoma-14.6-xcode-16.1"
       }
-    },
-    "production-android": {
-      "extends": "production",
-      "autoIncrement": false
-    },
-    "preview": {
-      "extends": "production",
-      "channel": "preview",
-      "env": {
-        "EXPO_ENV": "preview"
-      },
-      "ios": {
-        "resourceClass": "medium"
-      }
-    },
-    "preview-android": {
-      "extends": "preview",
-      "autoIncrement": false
-    },
-    "ios-simulator": {
-      "extends": "development",
-      "developmentClient": true,
-      "distribution": "internal",
-      "env": {
-        "EXPO_ENV": "dev"
-      },
-      "ios": {
-        "simulator": true
-      }
-    },
-    "preview-internal": {
-      "extends": "preview",
-      "distribution": "internal"
-    },
-    "production-internal": {
-      "extends": "production",
-      "distribution": "internal"
     }
   },
   "submit": {
@@ -80,20 +42,6 @@
       "ios": {
         "ascAppId": "1658819514"
       }
-    },
-    "production-android": {
-      "extends": "production"
-    },
-    "preview": {
-      "android": {
-        "track": "internal"
-      },
-      "ios": {
-        "ascAppId": "6478027666"
-      }
-    },
-    "preview-android": {
-      "extends": "preview"
     }
   }
 }

@@ -1,7 +1,8 @@
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      EXPO_PUBLIC_CONTACT_ADDRESS: string;
+      EXPO_ENV: string;
+      EXPO_PUBLIC_WDYR: string;
       EXPO_PUBLIC_DEV_API_URI: string;
       EXPO_PUBLIC_DEV_XMTP_ENV: string;
       EXPO_PUBLIC_DEBUG_ADDRESSES: string;

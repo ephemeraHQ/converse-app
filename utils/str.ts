@@ -1,7 +1,6 @@
+import { humanize } from "@/utils/human-hash";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, TextInput } from "react-native";
-
-const { humanize } = require("../vendor/humanhash");
 
 export const shortDisplayName = (displayName: string | undefined): string => {
   if (!displayName) return "";

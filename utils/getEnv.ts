@@ -8,22 +8,7 @@ export const Environments = {
 
 export type Environment = (typeof Environments)[keyof typeof Environments];
 
-/**
- * Get the current environment
- *
- * @returns {string} The current environment
- *
- * @example
- * // Input:
- * getEnv()
- * /// Output:
- * // - 'dev' when in development
- * // - 'preview' when in preview
- * // - 'prod' when in production
- */
 export const getEnv = (): Environment => {
-  // todo(lustig): type .env variables
-  // @ts-ignore
   const isExpoEnvDev = process.env.EXPO_ENV === "dev";
   if (__DEV__ || isExpoEnvDev) {
     return Environments.dev;

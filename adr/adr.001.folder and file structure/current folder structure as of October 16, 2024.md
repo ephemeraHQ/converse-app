@@ -29,7 +29,7 @@ technoplato@Michaels-MacBook-Pro converse-app % tree -L 3 -I node_modules
 │   ├── sentry.properties
 │   └── settings.gradle
 ├── app.config.ts
-├── app.json
+├── versions.json
 ├── assets
 │   ├── Encrypted.tsx
 │   ├── adaptive-icon.png
@@ -630,5 +630,5 @@ technoplato@Michaels-MacBook-Pro converse-app % tree -L 3 -I node_modules
 └── yarn.lock
 
 150 directories, 478 files
-technoplato@Michaels-MacBook-Pro converse-app % 
+technoplato@Michaels-MacBook-Pro converse-app %
 ```

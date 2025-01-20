@@ -11,11 +11,11 @@
 # - Outputs status messages to console
 # 
 # Example when APK exists:
-# $ ./sendApk.sh
+# $ ./send-apk.sh
 # Output: Successfully pushed newest APK to device
 # 
 # Example when no APK exists:
-# $ ./sendApk.sh
+# $ ./send-apk.sh
 # Output: No APK found. Please run yarn android:build:dev
 
 # Get the project root directory

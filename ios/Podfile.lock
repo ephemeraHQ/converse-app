@@ -2082,6 +2082,8 @@ PODS:
     - React-Core
   - RNAWSCognito (6.3.12):
     - React-Core
+  - RNBootSplash (4.7.5):
+    - React-Core
   - RNCAsyncStorage (1.23.1):
     - React-Core
   - RNCClipboard (1.14.1):
@@ -2302,6 +2304,8 @@ PODS:
     - SQLCipher/common
   - SwiftProtobuf (1.28.2)
   - UMAppLoader (5.0.0)
+  - walletsdk-ethos (0.1.0-no-web3j):
+    - React-Core
   - XMTP (3.0.24):
     - Connect-Swift (= 1.0.0)
     - CryptoSwift (= 1.8.3)
@@ -2447,6 +2451,7 @@ DEPENDENCIES:
   - ReactNativePasskeys (from `../node_modules/react-native-passkeys/ios`)
   - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
   - RNAWSCognito (from `../node_modules/amazon-cognito-identity-js`)
+  - RNBootSplash (from `../node_modules/react-native-bootsplash`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
@@ -2465,6 +2470,7 @@ DEPENDENCIES:
   - Sentry/HybridSDK (= 8.36.0)
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
   - XMTP (= 3.0.24)
+  - walletsdk-ethos (from `../node_modules/walletsdk-ethos`)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2757,6 +2763,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/rn-fetch-blob"
   RNAWSCognito:
     :path: "../node_modules/amazon-cognito-identity-js"
+  RNBootSplash:
+    :path: "../node_modules/react-native-bootsplash"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCClipboard:
@@ -2789,6 +2797,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-svg"
   UMAppLoader:
     :path: "../node_modules/unimodules-app-loader/ios"
+  walletsdk-ethos:
+    :path: "../node_modules/walletsdk-ethos"
   XMTPReactNative:
     :path: "../node_modules/@xmtp/react-native-sdk/ios"
   Yoga:
@@ -2945,6 +2955,7 @@ SPEC CHECKSUMS:
   ReactNativePasskeys: f11a9ff48d8066f3c60e88b38ed10e8f82b77882
   rn-fetch-blob: 25612b6d6f6e980c6f17ed98ba2f58f5696a51ca
   RNAWSCognito: 7f374b06129b2efd233fe9fa5c60443d90126bc1
+  RNBootSplash: 21095c4567847829470786b03b6892c5efed5299
   RNCAsyncStorage: aa75595c1aefa18f868452091fa0c411a516ce11
   RNCClipboard: 4598dae0fe33e2aa130d9d213e2007be78310266
   RNFBApp: 21cbda2e7d2657cd3c92f490c050f5f0905d2ff0
@@ -2969,6 +2980,7 @@ SPEC CHECKSUMS:
   SQLCipher: 5e6bfb47323635c8b657b1b27d25c5f1baf63bf5
   SwiftProtobuf: 4dbaffec76a39a8dc5da23b40af1a5dc01a4c02d
   UMAppLoader: bda51f73f8599e336a778b23e0956130d1e244d5
+  walletsdk-ethos: 826b60d848d8050176c5b043f96726c5819c064d
   XMTP: 3d82fe8598fe043a67ad93276084ab46a30a1fa3
   XMTPReactNative: 31e66f0645c71e86940977590b164e6ffd4efa40
   Yoga: 7548e4449365bf0ef60db4aefe58abff37fcabec
