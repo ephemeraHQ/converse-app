@@ -17,7 +17,9 @@ export function usePrivyConnection(args: {
   const privyAccountId = usePrivyAuthStoreContext(
     (state) => state.privyAccountId
   );
-  const privySigner = usePrivySigner(true);
+  const privySigner = usePrivySigner({
+    isOnboarding: true,
+  });
   const privyAccessToken = usePrivyAccessToken();
   const creatingEmbeddedWallet = useRef(false);
 

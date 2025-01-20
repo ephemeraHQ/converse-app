@@ -51,7 +51,7 @@ const ContainerComponent = memo(function ContainerComponent({
 
 const PictoComponent = memo(function PictoComponent(props: IPictoProps) {
   const { theme } = useAppTheme();
-  const { size = theme.spacing["4xl"], ...rest } = props;
+  const { size = theme.spacing["5xl"], ...rest } = props;
   return <Picto size={size} style={{ height: size }} {...rest} />;
 });
 

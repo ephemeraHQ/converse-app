@@ -4,6 +4,7 @@
   "compilerOptions": {
     "module": "ESNext",
     "strict": true,
+    // https://docs.privy.io/guide/expo/setup/passkey#_1-set-up-your-build-configuration
     "moduleResolution": "Bundler",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

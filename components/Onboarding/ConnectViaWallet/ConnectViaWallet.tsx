@@ -198,7 +198,7 @@ const LoadingState = memo(function LoadingState() {
   const { theme } = useAppTheme();
 
   return (
-    <Center style={{ paddingTop: theme.spacing["6xl"] }}>
+    <Center style={{ paddingTop: theme.spacing["7xl"] }}>
       <ActivityIndicator />
     </Center>
   );

@@ -23,7 +23,9 @@ export function usePrivySmartWalletConnection(args: {
   const privyAccountId = usePrivyAuthStoreContext(
     (state) => state.privyAccountId
   );
-  usePrivySigner(true);
+  usePrivySigner({
+    isOnboarding: true,
+  });
   const privyAccessToken = usePrivyAccessToken();
   const creatingEmbeddedWallet = useRef(false);
   const initializingXmtp = useRef(false);
@@ -51,7 +53,14 @@ export function usePrivySmartWalletConnection(args: {
       embeddedWallet
         .create()
         // TODO: Handle better error
-        .catch(ensureErrorHandler(onConnectionError));
+        .catch((error) => {
+          logger.error(
+            "[Privy connection] Error creating embedded wallet",
+            error
+          );
+          creatingEmbeddedWallet.current = false;
+          ensureErrorHandler(onConnectionError)(error);
+        });
     }
   }, [
     embeddedWallet,
@@ -93,6 +102,7 @@ export function usePrivySmartWalletConnection(args: {
         onStatusChange("Xmtp initialized");
         onConnectionDone();
       } catch (error) {
+        logger.error("[Privy connection] Error initializing Xmtp", error);
         onConnectionError(ensureError(error));
       }
     };

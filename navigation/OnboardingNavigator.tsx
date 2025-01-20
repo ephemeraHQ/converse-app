@@ -9,7 +9,7 @@ import { OnboardingEphemeraScreen } from "../features/onboarding/screens/Onboard
 import { OnboardingNotificationsScreen } from "../features/onboarding/screens/onboarding-notifications-screen";
 import { OnboardingPrivateKeyScreen } from "../features/onboarding/screens/OnboardingPrivateKeyScreen";
 import { OnboardingPrivyScreen } from "../features/onboarding/screens/OnboardingPrivyScreen";
-import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-weclome-screen";
+import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
 import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card-screen";
 
 type OnboardingParamList = {

@@ -44,7 +44,7 @@ import WebviewPreviewNav, {
 } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { ProfileNav, ProfileNavParams } from "@/features/profiles/profile.nav";
-import { OnboardingWelcomeScreen } from "@features/onboarding/screens/onboarding-weclome-screen";
+import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
 import { OnboardingContactCardScreen } from "@features/onboarding/screens/onboarding-contact-card-screen";
 import { NewAccountContactCardScreen } from "../NewAccount/new-account-contact-card-screen";
 

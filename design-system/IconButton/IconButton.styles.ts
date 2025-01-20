@@ -49,8 +49,8 @@ export const getIconButtonViewStyle =
         height: spacing.xxl,
       },
       xl: {
-        width: 56,
-        height: 56,
+        width: spacing["4xl"],
+        height: spacing["4xl"],
       },
     };
 
@@ -181,8 +181,8 @@ export const getIconProps =
   }: IconButtonStyleProps) =>
   (
     theme: Theme // TODO: fix once we fixed IconProps
-  ) => // : Partial<IIconProps>
-  {
+    // : Partial<IIconProps>
+  ) => {
     const { colors, spacing } = theme;
 
     const props: any =
