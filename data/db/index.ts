@@ -1,6 +1,6 @@
 import { Platform } from "react-native";
 import RNFS from "react-native-fs";
-import config from "../../config";
+import { config } from "../../config";
 
 export const getDbDirectory = async () => {
   if (Platform.OS === "ios") {

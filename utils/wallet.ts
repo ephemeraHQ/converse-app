@@ -1,7 +1,7 @@
 import { getErc20BalanceForAddress } from "./evm/erc20";
 import provider from "./evm/provider";
 import logger from "./logger";
-import config from "../config";
+import { config } from "../config";
 import { getAccountsList, getWalletStore } from "../data/store/accountsStore";
 
 const lastRefreshByAccount: { [account: string]: number } = {};

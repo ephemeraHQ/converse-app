@@ -2,8 +2,8 @@ import * as Sentry from "@sentry/react-native";
 import type { EventHint, ErrorEvent } from "@sentry/types";
 import { Platform } from "react-native";
 
-import appBuildNumbers from "../app.json";
-import config from "../config";
+import appBuildNumbers from "../versions.json";
+import { config } from "../config";
 import { isDev } from "@/utils/getEnv";
 
 const DISABLE_IOS_NATIVE_SENTRY = false;

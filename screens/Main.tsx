@@ -1,26 +1,29 @@
-import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
-import { backgroundColor } from "@styles/colors";
-import { useCheckCurrentInstallation } from "@utils/xmtpRN/client";
-import * as Linking from "expo-linking";
-import { StatusBar } from "expo-status-bar";
-import React from "react";
-import { Platform, useColorScheme } from "react-native";
-
+import { config } from "@/config";
+import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
+import { CreateConversationScreenConfig } from "@/features/create-conversation/create-conversation.nav";
+import { ProfileScreenConfig } from "@/features/profiles/profile.nav";
+import logger from "@/utils/logger";
 import ActionSheetStateHandler from "@components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "@components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "@components/StateHandlers/InitialStateHandler";
 import MainIdentityStateHandler from "@components/StateHandlers/MainIdentityStateHandler";
 import NetworkStateHandler from "@components/StateHandlers/NetworkStateHandler";
 import WalletsStateHandler from "@components/StateHandlers/WalletsStateHandler";
-import config from "@config";
 import { useAppStore } from "@data/store/appStore";
 import { useAuthStatus } from "@data/store/authStore";
 import { useSelect } from "@data/store/storeHelpers";
+import { ConversationScreenConfig } from "@features/conversation/conversation.nav";
+import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
+import { backgroundColor } from "@styles/colors";
 import { useThemeProvider } from "@theme/useAppTheme";
 import { useAutoConnectExternalWallet } from "@utils/evm/external";
 import { usePrivyAccessToken } from "@utils/evm/privy";
 import { converseNavigatorRef } from "@utils/navigation";
-import { ConversationScreenConfig } from "@features/conversation/conversation.nav";
+import { useCheckCurrentInstallation } from "@utils/xmtpRN/client";
+import * as Linking from "expo-linking";
+import { StatusBar } from "expo-status-bar";
+import React from "react";
+import { Platform, useColorScheme } from "react-native";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
 import {
   IdleNavigation,
@@ -34,10 +37,6 @@ import {
   getConverseInitialURL,
   getConverseStateFromPath,
 } from "./Navigation/navHelpers";
-import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
-import logger from "@/utils/logger";
-import { CreateConversationScreenConfig } from "@/features/create-conversation/create-conversation.nav";
-import { ProfileScreenConfig } from "@/features/profiles/profile.nav";
 
 const prefix = Linking.createURL("/");
 

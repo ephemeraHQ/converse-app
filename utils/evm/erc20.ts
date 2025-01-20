@@ -4,7 +4,7 @@ import { isAddress } from "ethers/lib/utils";
 import erc20abi from "./abis/erc20.json";
 import { evmHelpers } from "./helpers";
 import provider from "./provider";
-import config from "../../config";
+import { config } from "../../config";
 
 export const TransferWithAuthorizationTypes = {
   TransferWithAuthorization: [

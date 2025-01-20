@@ -17,13 +17,11 @@ import {
 } from "@xmtp/react-native-sdk";
 import { useEffect, useRef } from "react";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
-import config from "../../config";
+import { config } from "../../config";
 import { getDbDirectory } from "../../data/db";
 import { CoinbaseMessagingPaymentCodec } from "./content-types/coinbasePayment";
 import { getXmtpClient } from "./sync";
 import { ConverseXmtpClientType } from "./client.types";
-
-const env = config.xmtpEnv as "dev" | "production" | "local";
 
 const codecs = [
   new TextCodec(),
@@ -42,7 +40,7 @@ export const getXmtpClientFromAddress = async (address: string) => {
   const dbEncryptionKey = await getDbEncryptionKey();
 
   return Client.build(address, {
-    env,
+    env: config.xmtpEnv,
     codecs,
     dbDirectory,
     dbEncryptionKey,

@@ -1,6 +1,6 @@
 import { createThirdwebClient } from "thirdweb";
 
-import config from "../config";
+import { config } from "../config";
 
 const thirdwebGateway = `https://${config.thirdwebClientId}.ipfscdn.io`;
 

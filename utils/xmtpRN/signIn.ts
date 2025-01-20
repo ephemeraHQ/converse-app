@@ -1,3 +1,4 @@
+import { config } from "@/config";
 import {
   copyDatabasesToTemporaryDirectory,
   createTemporaryDirectory,
@@ -10,11 +11,10 @@ import { Client, Signer as XmtpSigner } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
 import { isClientInstallationValid } from "./client";
 import {
-  ethersSignerToXmtpSigner,
   ViemAccount,
+  ethersSignerToXmtpSigner,
   viemAccountToXmtpSigner,
 } from "./signer";
-import config from "@config";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
@@ -30,7 +30,7 @@ const createXmtpClientFromXmtpSigner = async (
   const dbEncryptionKey = await getDbEncryptionKey();
 
   const options = {
-    env,
+    env: config.xmtpEnv,
     enableV3: true,
     dbDirectory: tempDirectory,
     dbEncryptionKey,

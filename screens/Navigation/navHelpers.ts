@@ -7,7 +7,7 @@ import {
 import { ColorSchemeName, Platform } from "react-native";
 
 import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
-import config from "../../config";
+import { config } from "../../config";
 import logger from "@/utils/logger";
 
 /**

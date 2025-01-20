@@ -2,7 +2,7 @@ import NetInfo from "@react-native-community/netinfo";
 import logger from "@utils/logger";
 import { useEffect, useRef } from "react";
 
-import config from "../../config";
+import { config } from "../../config";
 import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
 

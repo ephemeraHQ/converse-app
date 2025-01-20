@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import config from "../../config";
+import { config } from "../../config";
 
 const provider = new ethers.providers.StaticJsonRpcProvider({
   url: config.evm.rpcEndpoint,

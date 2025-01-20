@@ -7,7 +7,6 @@ import {
   Group,
   GroupUpdatedCodec,
   ReactionCodec,
-  ReadReceiptCodec,
   RemoteAttachmentCodec,
   ReplyCodec,
   StaticAttachmentCodec,

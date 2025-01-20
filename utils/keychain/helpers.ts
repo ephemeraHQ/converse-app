@@ -10,7 +10,7 @@ import {
   getSecureItemAsync,
   setSecureItemAsync,
 } from ".";
-import config from "../../config";
+import { config } from "../../config";
 
 export const secureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainService: config.bundleId,

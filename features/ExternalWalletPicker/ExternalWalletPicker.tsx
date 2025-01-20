@@ -23,7 +23,7 @@ import {
   InstalledWallet,
   useInstalledWallets,
 } from "../../components/Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
-import config from "../../config";
+import { config } from "../../config";
 
 type IExternalWalletPickerProps = {
   title?: string;

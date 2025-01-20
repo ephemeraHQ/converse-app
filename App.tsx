@@ -41,7 +41,7 @@ import { Snackbars } from "@components/Snackbar/Snackbars";
 import { setupAppAttest } from "@utils/appCheck";
 import { base } from "viem/chains";
 import { xmtpEngine } from "./components/XmtpEngine";
-import config from "./config";
+import { config } from "./config";
 import {
   TEMPORARY_ACCOUNT_NAME,
   useAccountsStore,

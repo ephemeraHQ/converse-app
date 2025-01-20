@@ -1,7 +1,8 @@
 import { DEFAULT_SUPPORTED_CHAINS } from "@/utils/evm/wallets";
 
 // Base configuration shared across all environments
-export const base = {
+
+export const shared = {
   loggerColorScheme: process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME,
   debugMenu: false,
   debugAddresses:
@@ -27,4 +28,4 @@ export const base = {
     clientId: process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID,
   },
   thirdwebClientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
-} as const;
+};
