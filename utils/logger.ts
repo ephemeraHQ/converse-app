@@ -1,3 +1,4 @@
+import { getConfig } from "@/config";
 import Constants from "expo-constants";
 import path from "path";
 import { Platform } from "react-native";
@@ -8,10 +9,8 @@ import {
   transportFunctionType,
 } from "react-native-logs";
 import { v4 as uuidv4 } from "uuid";
-
-import { sentryAddBreadcrumb, sentryTrackError } from "./sentry";
 import { isDev } from "./getEnv";
-import { getConfig } from "@/config";
+import { sentryAddBreadcrumb, sentryTrackError } from "./sentry";
 
 export let loggingFilePath: string;
 

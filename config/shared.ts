@@ -1,4 +1,4 @@
-import { DEFAULT_SUPPORTED_CHAINS } from "@/utils/evm/wallets";
+import { IConfig } from "@/config/config.types";
 
 // Base configuration shared across all environments
 
@@ -21,11 +21,10 @@ export const shared = {
       logoUrl: "https://converse.xyz/icon.png",
       icons: [],
     },
-    optionalChains: DEFAULT_SUPPORTED_CHAINS,
   },
   privy: {
     appId: process.env.EXPO_PUBLIC_PRIVY_APP_ID,
     clientId: process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID,
   },
   thirdwebClientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
-};
+} satisfies Partial<IConfig>;

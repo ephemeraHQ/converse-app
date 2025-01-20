@@ -19,7 +19,7 @@ import {
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
 export const getInboxId = (address: string) =>
-  Client.getOrCreateInboxId(address, env);
+  Client.getOrCreateInboxId(address, config.xmtpEnv);
 
 const createXmtpClientFromXmtpSigner = async (
   signer: XmtpSigner,

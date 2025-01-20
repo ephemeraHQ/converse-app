@@ -1,76 +1,71 @@
+import { getEnv, isProd } from "@/utils/getEnv";
 import * as Sentry from "@sentry/react-native";
-import type { EventHint, ErrorEvent } from "@sentry/types";
-import { Platform } from "react-native";
-
-import appBuildNumbers from "../versions.json";
+import type { Breadcrumb, ErrorEvent, EventHint } from "@sentry/types";
 import { config } from "../config";
-import { isDev } from "@/utils/getEnv";
 
-const DISABLE_IOS_NATIVE_SENTRY = false;
+// Error patterns that should not be reported to Sentry
+type ErrorFilter = {
+  type: string;
+  value: string;
+};
+
+const errorsToFilterOut: ErrorFilter[] = [
+  { type: "AxiosError", value: "Network Error" },
+];
 
 export const initSentry = () => {
-  const sentryOptions: Sentry.ReactNativeOptions = {
+  Sentry.init({
     dsn: config.sentryDSN,
     debug: false,
-    enabled: !isDev,
-    environment: config.env,
+    enabled: isProd,
+    environment: getEnv(),
     beforeSend: (event: ErrorEvent, hint: EventHint) => {
-      // Filtering out some errors
-      const errorsToFilterOut = [
-        { type: "AxiosError", value: "Network Error" },
-      ];
       if (event.exception?.values?.length === 1) {
-        const exception = event.exception?.values[0];
-        if (
-          errorsToFilterOut.some(
-            (e) => exception.type === e.type && exception.value === e.value
-          )
-        ) {
+        const exception = event.exception.values[0];
+        const shouldFilter = errorsToFilterOut.some(
+          (e) => exception.type === e.type && exception.value === e.value
+        );
+        if (shouldFilter) {
           return null;
         }
       }
-
       return event;
     },
-  };
-  if (Platform.OS === "ios" && DISABLE_IOS_NATIVE_SENTRY) {
-    // According to https://developer.apple.com/forums/thread/113742 third
-    // party crash reporters break Apple's crash reporting and it can be
-    // best to just disable the Native part of Sentry for now on iOS.
-    sentryOptions.enableNative = false;
-    const releaseNumber = `${appBuildNumbers.expo.version}+${appBuildNumbers.expo.ios.buildNumber}`;
-    const release = `${config.bundleId}@${releaseNumber}`;
-    sentryOptions.release = release;
-  }
-  Sentry.init(sentryOptions);
-};
-
-export const sentryAddBreadcrumb = (message: string, forceSafe = false) => {
-  const data = {
-    base64Message: Buffer.from(message).toString("base64"),
-  } as any;
-  if (forceSafe) {
-    data.safeValue = message;
-  }
-  Sentry.addBreadcrumb({
-    category: "converse",
-    message,
-    level: "info",
-    data,
   });
 };
 
-export const sentryTrackMessage = (message: string, extras = {} as any) => {
+export function sentryAddBreadcrumb(message: string) {
+  const breadcrumbData: Record<string, string> = {
+    base64Message: Buffer.from(message).toString("base64"),
+  };
+
+  const breadcrumb: Breadcrumb = {
+    category: "converse",
+    message,
+    level: "info",
+    data: breadcrumbData,
+  };
+
+  Sentry.addBreadcrumb(breadcrumb);
+}
+
+export function sentryTrackMessage(
+  message: string,
+  extras: Record<string, unknown> = {}
+) {
   console.log(`[Sentry] ${message}`, extras);
   Sentry.withScope((scope) => {
     scope.setExtras(extras);
     Sentry.captureMessage(message);
   });
-};
+}
 
-export const sentryTrackError = (error: any, extras = {} as any) => {
+export function sentryTrackError(
+  error: unknown,
+  extras: Record<string, unknown> = {}
+) {
   Sentry.withScope((scope) => {
     scope.setExtras(extras);
     Sentry.captureException(error);
   });
-};
+}

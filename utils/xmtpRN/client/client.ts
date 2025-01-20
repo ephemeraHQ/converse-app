@@ -11,10 +11,10 @@ import {
   TextCodec,
 } from "@xmtp/react-native-sdk";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
-import { config } from "../../../config";
-import { getDbDirectory } from "../../../data/db";
+import { config } from "@/config";
+import { getDbDirectory } from "@/data/db";
 import { CoinbaseMessagingPaymentCodec } from "../content-types/coinbasePayment";
-import { ConverseXmtpClientType } from "./client.types";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
 
 const codecs = [
   new TextCodec(),

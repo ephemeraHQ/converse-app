@@ -1,16 +1,37 @@
+import { IConfig } from "@/config/config.types";
 import { IXmtpEnv } from "@/utils/xmtpRN/xmtp.types";
+import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { baseSepolia } from "wagmi/chains";
-import { getApiUri } from "../utils/api/api.config";
-import { Environments } from "../utils/getEnv";
 import { shared } from "./shared";
-import { IConfig } from "@/config/config.types";
+
+function maybeReplaceLocalhost(uri: string) {
+  try {
+    if (uri?.includes("localhost")) {
+      console.info("Replacing localhost with device-accessible IP");
+      // Try Expo host info first
+      const hostIp = Constants.expoConfig?.hostUri?.split(":")[0];
+      console.info("Host IP", { hostIp });
+
+      if (hostIp) {
+        console.info("Replacing localhost with device-accessible IP", {
+          uri,
+          hostIp,
+        });
+        return uri.replace("localhost", hostIp);
+      }
+    }
+  } catch (error) {
+    console.error("Error replacing localhost with device-accessible IP", error);
+  }
+
+  return uri;
+}
 
 export const devConfig: IConfig = {
   ...shared,
-  env: Environments.dev,
   xmtpEnv: (process.env.EXPO_PUBLIC_DEV_XMTP_ENV || "dev") as IXmtpEnv,
-  apiURI: getApiUri(),
+  apiURI: maybeReplaceLocalhost(process.env.EXPO_PUBLIC_DEV_API_URI),
   debugMenu: true,
   bundleId: "com.converse.dev",
   appleAppGroup: "group.com.converse.dev",
@@ -30,14 +51,12 @@ export const devConfig: IConfig = {
   },
   evm: {
     rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
-    sepolia: {
-      transactionChainId: "0x14a34", // Base Sepolia
-      USDC: {
-        contractAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-        name: "USDC",
-        version: "2",
-        decimals: 6,
-      },
+    transactionChainId: "0x14a34", // Base Sepolia
+    USDC: {
+      contractAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      name: "USDC",
+      version: "2",
+      decimals: 6,
     },
   },
-};
+} as const;
