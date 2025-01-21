@@ -1,9 +1,10 @@
 import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { captureError } from "@/utils/capture-error";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
-import { UseQueryOptions, queryOptions, useQuery } from "@tanstack/react-query";
 import { isSupportedMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import {
   InboxId,
@@ -22,18 +23,20 @@ export type ConversationMessagesQueryData = Awaited<
   ReturnType<typeof conversationMessagesQueryFn>
 >;
 
-export const conversationMessagesQueryFn = async (args: {
+const conversationMessagesQueryFn = async (args: {
   account: string;
   topic: ConversationTopic;
   options?: MessagesOptions;
 }) => {
   const { account, topic, options } = args;
 
-  logger.debug(
-    `[useConversationMessages] Fetching messages for ${topic} with options ${JSON.stringify(
-      options
-    )}`
-  );
+  if (!account) {
+    throw new Error("account is required");
+  }
+
+  if (!topic) {
+    throw new Error("topic is required");
+  }
 
   // If we are getting the messages it means we have the conversation in the query cache for sure or it's a bug
   const conversation = getConversationQueryData({
@@ -42,49 +45,56 @@ export const conversationMessagesQueryFn = async (args: {
   });
 
   if (!conversation) {
-    throw new Error("Conversation not found in conversationMessagesQueryFn");
+    throw new Error("Conversation not found");
   }
+
+  logger.debug(
+    `[useConversationMessages] Fetching messages for ${topic} with options ${JSON.stringify(
+      options
+    )}`
+  );
 
   const start = performance.now();
   await conversation.sync();
   const messages = await conversation.messages(options);
   const end = performance.now();
+  const timeDiff = end - start;
 
-  logger.debug(
-    `[useConversationMessages] Fetched ${messages.length} messages in ${
-      end - start
-    }ms`
-  );
+  if (timeDiff > 3000) {
+    captureError(
+      new Error(
+        `[useConversationMessages] Fetched ${messages.length} messages in ${timeDiff}ms`
+      )
+    );
+  }
 
   const validMessages = messages.filter(isSupportedMessage);
 
   return processMessages({ newMessages: validMessages });
 };
 
-export const useConversationMessages = (
-  account: string,
-  topic: ConversationTopic
-) => {
-  return useQuery(getConversationMessagesQueryOptions({ account, topic }));
+export const useConversationMessagesQuery = (args: {
+  account: string;
+  topic: ConversationTopic;
+}) => {
+  return useQuery(getConversationMessagesQueryOptions(args));
 };
 
-export const getConversationMessagesQueryData = (
-  account: string,
-  topic: ConversationTopic
-) => {
+export const getConversationMessagesQueryData = (args: {
+  account: string;
+  topic: ConversationTopic;
+}) => {
   return queryClient.getQueryData(
-    getConversationMessagesQueryOptions({ account, topic }).queryKey
+    getConversationMessagesQueryOptions(args).queryKey
   );
 };
 
-export function refetchConversationMessages(
-  account: string,
-  topic: ConversationTopic
-) {
+export function refetchConversationMessages(args: {
+  account: string;
+  topic: ConversationTopic;
+}) {
   logger.debug("[refetchConversationMessages] refetching messages");
-  return queryClient.refetchQueries(
-    getConversationMessagesQueryOptions({ account, topic })
-  );
+  return queryClient.refetchQueries(getConversationMessagesQueryOptions(args));
 }
 
 export const addConversationMessageQuery = (args: {

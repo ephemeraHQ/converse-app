@@ -57,16 +57,31 @@ export function useConversationRequestsListItem() {
 
   const isLoading =
     unkownConsentConversationsLoading || spamQueries.some((q) => q.isLoading);
-  const spamResults = spamQueries.map((q, i) => ({
-    conversation: unkownConsentConversations?.[i],
-    isSpam: q.data ?? true,
-  }));
+
+  const spamResults = spamQueries
+    .map((q, i) => ({
+      conversation: unkownConsentConversations?.[i],
+      isSpam: q.data ?? true,
+    }))
+    .filter((r) => !!r.conversation);
 
   return {
     likelyNotSpam:
-      spamResults.filter((r) => !r.isSpam).map((r) => r.conversation) ?? [],
+      spamResults
+        .filter((r) => !r.isSpam)
+        .map(
+          (r) =>
+            // ! because we do .filter above
+            r.conversation!
+        ) ?? [],
     likelySpam:
-      spamResults.filter((r) => r.isSpam).map((r) => r.conversation) ?? [],
+      spamResults
+        .filter((r) => r.isSpam)
+        .map(
+          (r) =>
+            // ! because we do .filter above
+            r.conversation!
+        ) ?? [],
     isLoading,
   };
 }

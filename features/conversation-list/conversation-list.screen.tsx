@@ -55,8 +55,6 @@ export function ConversationListScreen(props: IConversationListProps) {
     }
   }, [refetchConversations]);
 
-  console.log("conversations:", conversations);
-
   return (
     <Screen contentContainerStyle={$globalStyles.flex1}>
       <AnimatedVStack layout={theme.animation.reanimatedLayoutSpringTransition}>

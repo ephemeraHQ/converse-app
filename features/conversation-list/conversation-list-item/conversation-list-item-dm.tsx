@@ -44,7 +44,9 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     topic: conversationTopic,
   });
 
-  const deleteDm = useDeleteDm(conversation as DmWithCodecsType);
+  const deleteDm = useDeleteDm({
+    topic: conversationTopic,
+  });
   const { restoreConversationAsync } = useRestoreConversation({
     topic: conversationTopic,
   });

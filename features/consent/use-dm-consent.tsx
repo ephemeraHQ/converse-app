@@ -16,17 +16,17 @@ import {
 import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account";
 import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
 
-export function useDmConsent(args: {
-  peerInboxId: InboxId;
-  conversationId: ConversationId;
-  topic: ConversationTopic;
-}) {
-  const { peerInboxId, conversationId, topic } = args;
-
+export function useDmConsent() {
   const currentAccount = useCurrentAccount()!;
 
   return useMutation({
-    mutationFn: async (args: { consent: "allow" | "deny" }) => {
+    mutationFn: async (args: {
+      consent: "allow" | "deny";
+      peerInboxId: InboxId;
+      conversationId: ConversationId;
+      topic: ConversationTopic;
+    }) => {
+      const { peerInboxId, conversationId, topic } = args;
       if (!peerInboxId) {
         throw new Error("Peer inbox id not found");
       }
@@ -45,6 +45,7 @@ export function useDmConsent(args: {
       ]);
     },
     onMutate: (args) => {
+      const { peerInboxId, conversationId, topic } = args;
       const conversation = getConversationQueryData({
         account: currentAccount,
         topic,
@@ -70,7 +71,8 @@ export function useDmConsent(args: {
         return { previousDmConsent: conversation.state };
       }
     },
-    onError: (error, _, context) => {
+    onError: (error, variables, context) => {
+      const { topic } = variables;
       const { previousDmConsent } = context || {};
       if (previousDmConsent) {
         const dm = getDmQueryData({

@@ -1,3 +1,4 @@
+import { useCurrentAccount } from "@/data/store/accountsStore";
 import { AnimatedCenter } from "@/design-system/Center";
 import { AnimatedHStack } from "@/design-system/HStack";
 import { AnimatedVStack } from "@/design-system/VStack";
@@ -8,6 +9,7 @@ import { useConversationListPinnedConversationsStyles } from "@/features/convers
 import { useConversationsCount } from "@/features/conversation-list/hooks/use-conversations-count";
 import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { useConversationQuery } from "@/queries/useConversationQuery";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
 import { hexToRGBA } from "@/utils/colors";
@@ -15,7 +17,6 @@ import { chunk } from "@/utils/general";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo } from "react";
 import { ViewStyle } from "react-native";
-import { useConversationByTopic } from "../hooks/use-conversation-by-topic";
 
 export const ConversationListPinnedConversations = memo(
   function ConversationListPinnedConversations() {
@@ -84,7 +85,9 @@ const PinnedConversationsSkeleton = memo(function () {
   const { avatarSize } = useConversationListPinnedConversationsStyles();
 
   return (
-    <AnimatedHStack style={themed($container)}>
+    <AnimatedHStack
+      style={[themed($container), { justifyContent: "space-between" }]}
+    >
       <ConversationListItemAvatarSkeleton
         color={hexToRGBA("#FF8080", 0.15)}
         size={avatarSize}
@@ -105,7 +108,12 @@ const PinnedConversationWrapper = memo(
   function PinnedConversationWrapper(props: { topic: ConversationTopic }) {
     const { topic } = props;
 
-    const conversation = useConversationByTopic(topic);
+    const currentAccount = useCurrentAccount();
+
+    const { data: conversation } = useConversationQuery({
+      topic,
+      account: currentAccount!,
+    });
 
     if (!conversation) {
       captureError(

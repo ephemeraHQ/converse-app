@@ -1,5 +1,5 @@
 import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
-import { useConversationMessages } from "@/queries/use-conversation-messages-query";
+import { useConversationMessagesQuery } from "@/queries/use-conversation-messages-query";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
@@ -12,10 +12,10 @@ export function useConversationMessageById({
   conversationTopic: ConversationTopic;
 }) {
   const currentAccount = useCurrentAccount()!;
-  const { data: messages } = useConversationMessages(
-    currentAccount,
-    conversationTopic
-  );
+  const { data: messages } = useConversationMessagesQuery({
+    account: currentAccount,
+    topic: conversationTopic,
+  });
 
   const cachedMessage = messages?.byId[messageId];
 

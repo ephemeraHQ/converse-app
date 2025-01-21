@@ -55,7 +55,7 @@ import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
 import { useHeader } from "@/navigation/use-header";
-import { useConversationMessages } from "@/queries/use-conversation-messages-query";
+import { useConversationMessagesQuery } from "@/queries/use-conversation-messages-query";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
@@ -208,7 +208,10 @@ const Messages = memo(function Messages(props: {
     isLoading: messagesLoading,
     isRefetching: isRefetchingMessages,
     refetch: refetchMessages,
-  } = useConversationMessages(currentAccount, topic!);
+  } = useConversationMessagesQuery({
+    account: currentAccount,
+    topic,
+  });
 
   // For now we want to make sure we don't miss any messages.
   // If we do things correctly we shouldn't really need this but it's a protection for now.

@@ -26,6 +26,9 @@ export enum QueryKeys {
   GROUP_INVITE = "groupInvite",
   GROUP_JOIN_REQUEST = "groupJoinRequest",
   PENDING_JOIN_REQUESTS = "pendingJoinRequests",
+
+  // DMs
+  DM_PEER_INBOX_ID = "dmPeerInboxId",
 }
 
 // Conversations
@@ -109,3 +112,9 @@ export const pendingJoinRequestsQueryKey = (account: string) => [
   QueryKeys.PENDING_JOIN_REQUESTS,
   account?.toLowerCase(),
 ];
+
+// DMs
+export const dmPeerInboxIdQueryKey = (
+  account: string,
+  topic: ConversationTopic
+) => [QueryKeys.DM_PEER_INBOX_ID, account, topic];

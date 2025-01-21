@@ -1,4 +1,6 @@
 import { setConversationQueryData } from "@/queries/useConversationQuery";
+import { captureError } from "@/utils/capture-error";
+import { reactQueryPersister } from "@/utils/mmkv";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import {
   ConversationWithCodecsType,
@@ -88,28 +90,30 @@ const getConversations = async (args: { account: string }) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
 
   const beforeSync = new Date().getTime();
-
-  // Always include sync for now because we'll have react-query persist anyway to give us the local conversations
   await client.conversations.sync();
-  await client.conversations.syncAllConversations("allowed");
-
   const afterSync = new Date().getTime();
 
-  logger.debug(
-    `[ConversationsQuery] Fetching conversations from network took ${
-      (afterSync - beforeSync) / 1000
-    } sec`
-  );
+  const timeDiff = afterSync - beforeSync;
+  if (timeDiff > 3000) {
+    captureError(
+      new Error(
+        `[ConversationsQuery] Fetching conversations from network took ${timeDiff}ms`
+      )
+    );
+  }
 
-  const conversations = await client.conversations.list({
-    isActive: true,
-    addedByInboxId: true,
-    name: true,
-    imageUrlSquare: true,
-    consentState: true,
-    lastMessage: true,
-    description: true,
-  });
+  const conversations = await client.conversations.list(
+    {
+      isActive: true,
+      addedByInboxId: true,
+      name: true,
+      imageUrlSquare: true,
+      consentState: true,
+      lastMessage: true,
+      description: true,
+    },
+    20 // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
+  );
 
   // For now conversations have all the same properties as one conversation
   for (const conversation of conversations) {
@@ -132,6 +136,7 @@ export const getConversationsQueryOptions = (args: IArgs) => {
     // Just for now because conversations are very important and
     // we want to make sure we have all of them
     refetchOnMount: true,
+    persister: reactQueryPersister,
   });
 };
 

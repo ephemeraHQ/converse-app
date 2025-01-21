@@ -61,11 +61,11 @@ export function useRemoveReactionOnMessage(props: {
       }
     },
     onError: (error) => {
-      captureError(error);
       const currentAccount = getCurrentAccount()!;
-      refetchConversationMessages(currentAccount, topic).catch(
-        captureErrorWithToast
-      );
+      refetchConversationMessages({
+        account: currentAccount,
+        topic,
+      }).catch(captureErrorWithToast);
     },
   });
 

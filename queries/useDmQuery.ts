@@ -20,7 +20,6 @@ async function getDm(args: IDmQueryArgs) {
   const conversation = await getConversationByPeerByAccount({
     account,
     peer,
-    includeSync: true,
   });
 
   if (conversation) {

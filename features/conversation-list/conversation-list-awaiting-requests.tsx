@@ -28,7 +28,7 @@ export const ConversationListAwaitingRequests = memo(
     const conversationsMetadataQueries = useQueries({
       queries: (likelyNotSpam ?? []).map((conversation) =>
         getConversationMetadataQueryOptions({
-          account: currentAccount!,
+          account: currentAccount,
           topic: conversation.topic,
         })
       ),

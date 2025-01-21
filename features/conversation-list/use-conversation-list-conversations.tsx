@@ -92,10 +92,5 @@ export const useConversationListConversations = () => {
      */
   }, [conversations, conversationsMetadataQueries]);
 
-  console.log(
-    "filteredAndSortedConversations:",
-    filteredAndSortedConversations
-  );
-
   return { data: filteredAndSortedConversations, refetch };
 };
