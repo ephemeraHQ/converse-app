@@ -1,4 +1,4 @@
-import { IGroupConsentOptions } from "@/features/consent/use-group-consent";
+import { IGroupConsentOptions } from "@/features/consent/use-group-consent-for-current-account";
 import {
   createGroupJoinRequest,
   getGroupJoinRequest,

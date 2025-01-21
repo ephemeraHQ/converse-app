@@ -1,4 +1,4 @@
-import { useGroupConsent } from "@/features/consent/use-group-consent";
+import { useGroupConsentForCurrentAccount } from "@/features/consent/use-group-consent-for-current-account";
 import { translate } from "@i18n";
 import { dangerColor, primaryColor } from "@styles/colors";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
@@ -21,7 +21,8 @@ export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
   group,
 }) => {
   const colorScheme = useColorScheme();
-  const { consent, allowGroup, blockGroup } = useGroupConsent(topic);
+  const { consent, allowGroup, blockGroup } =
+    useGroupConsentForCurrentAccount(topic);
 
   const consentTableViewItems = useMemo(() => {
     const items: TableViewItemType[] = [];

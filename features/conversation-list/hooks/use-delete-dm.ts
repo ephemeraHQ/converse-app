@@ -1,6 +1,6 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "@/data/store/accountsStore";
-import { useDmConsent } from "@/features/consent/use-dm-consent";
+import { useDmConsentForCurrentAccount } from "@/features/consent/use-dm-consent-for-current-account";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { translate } from "@/i18n";
 import {
@@ -36,7 +36,7 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
     topic,
   });
 
-  const { mutateAsync: updateDmConsentAsync } = useDmConsent();
+  const { mutateAsync: updateDmConsentAsync } = useDmConsentForCurrentAccount();
 
   const preferredName = usePreferredInboxName(peerInboxId);
 

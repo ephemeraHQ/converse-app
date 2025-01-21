@@ -1,6 +1,6 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "@/data/store/accountsStore";
-import { useDmConsent } from "@/features/consent/use-dm-consent";
+import { useDmConsentForCurrentAccount } from "@/features/consent/use-dm-consent-for-current-account";
 import { useRouter } from "@/navigation/useNavigation";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { actionSheetColors } from "@/styles/colors";
@@ -37,7 +37,7 @@ export function ConversationConsentPopupDm() {
   const {
     mutateAsync: consentToInboxIdsOnProtocolByAccountAsync,
     status: consentToInboxIdsOnProtocolByAccountStatus,
-  } = useDmConsent();
+  } = useDmConsentForCurrentAccount();
 
   const handleBlock = useCallback(async () => {
     if (!peerInboxId) {

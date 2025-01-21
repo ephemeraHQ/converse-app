@@ -16,7 +16,7 @@ import {
 import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account";
 import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
 
-export function useDmConsent() {
+export function useDmConsentForCurrentAccount() {
   const currentAccount = useCurrentAccount()!;
 
   return useMutation({
