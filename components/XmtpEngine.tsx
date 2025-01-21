@@ -10,6 +10,7 @@ import { getAccountsList, useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { stopStreamingConversations } from "../utils/xmtpRN/conversations";
 import { syncConversationListXmtpClient } from "../utils/xmtpRN/sync";
+import { stopStreamingConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences-stream";
 
 class XmtpEngine {
   accountsStoreSubscription: (() => void) | null = null;
@@ -117,6 +118,7 @@ class XmtpEngine {
       await Promise.all([
         stopStreamingAllMessage(account),
         stopStreamingConversations(account),
+        stopStreamingConsent(account),
       ]);
     }
   }

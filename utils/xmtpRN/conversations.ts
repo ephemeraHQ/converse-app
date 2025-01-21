@@ -244,6 +244,7 @@ export const defaultPermissionPolicySet: PermissionPolicySet = {
   updateGroupDescriptionPolicy: "allow",
   updateGroupImagePolicy: "allow",
   updateGroupPinnedFrameUrlPolicy: "allow",
+  updateMessageExpirationPolicy: "allow",
 };
 
 const createGroupName = (peerEthereumAddresses: string[]) => {

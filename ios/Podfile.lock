@@ -404,7 +404,7 @@ PODS:
   - libwebp/sharpyuv (1.3.2)
   - libwebp/webp (1.3.2):
     - libwebp/sharpyuv
-  - LibXMTP (3.0.18)
+  - LibXMTP (3.0.20)
   - MessagePacker (0.4.7)
   - MMKV (1.3.3):
     - MMKVCore (~> 1.3.3)
@@ -2296,18 +2296,18 @@ PODS:
     - SQLCipher/common
   - SwiftProtobuf (1.28.2)
   - UMAppLoader (5.0.0)
-  - XMTP (3.0.23):
+  - XMTP (3.0.24):
     - Connect-Swift (= 1.0.0)
     - CryptoSwift (= 1.8.3)
     - CSecp256k1 (~> 0.2)
-    - LibXMTP (= 3.0.18)
+    - LibXMTP (= 3.0.20)
     - SQLCipher (= 4.5.7)
-  - XMTPReactNative (3.1.7):
+  - XMTPReactNative (3.1.8):
     - CSecp256k1 (~> 0.2)
     - ExpoModulesCore
     - MessagePacker
     - SQLCipher (= 4.5.7)
-    - XMTP (= 3.0.23)
+    - XMTP (= 3.0.24)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -2455,7 +2455,7 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - Sentry/HybridSDK (= 8.36.0)
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 3.0.23)
+  - XMTP (= 3.0.24)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2781,7 +2781,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
-  boost: 4cb898d0bf20404aab1850c656dcea009429d6c1
+  boost: 1dca942403ed9342f98334bf4c3621f011aa7946
   CoinbaseWalletSDK: ea1f37512bbc69ebe07416e3b29bf840f5cc3152
   CoinbaseWalletSDKExpo: 7488819c860868cd5fe117f6be43dd42c2e65919
   ComputableLayout: c50faffac4ed9f8f05b0ce5e6f3a60df1f6042c8
@@ -2790,7 +2790,7 @@ SPEC CHECKSUMS:
   CryptoSwift: 967f37cea5a3294d9cce358f78861652155be483
   CSecp256k1: 2a59c03e52637ded98896a33be4b2649392cb843
   DGSwiftUtilities: 2f0d35d5ff3d57bd70ccc42f15971460db202c41
-  DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
+  DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
   EASClient: d15d70e334b019ae5649609011cda761defe4b1a
   EXApplication: 88ebf1a95f85faa5d2df160016d61f2d060e9438
   EXConstants: 277129d9a42ba2cf1fad375e7eaa9939005c60be
@@ -2837,21 +2837,21 @@ SPEC CHECKSUMS:
   FirebaseAppCheckInterop: 347aa09a805219a31249b58fc956888e9fcb314b
   FirebaseCore: e0510f1523bc0eb21653cac00792e1e2bd6f1771
   FirebaseCoreInternal: d98ab91e2d80a56d7b246856a8885443b302c0c2
-  fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
-  glog: 69ef571f3de08433d766d614c73a9838a06bf7eb
+  fmt: 10c6e61f4be25dc963c36bd73fc7b1705fe975be
+  glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
   hermes-engine: 06a9c6900587420b90accc394199527c64259db4
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
-  LibXMTP: 09d80c1ef92a6fd195a13b2e0911259bf87005e3
+  LibXMTP: 5c8a858675af142e4a5336e27bb2d6fa6d633b18
   MessagePacker: ab2fe250e86ea7aedd1a9ee47a37083edd41fd02
   MMKV: f902fb6719da13c2ab0965233d8963a59416f911
   MMKVAppExtension: fcf23c6b250cc87db63507bc57be8e6ed378168d
   MMKVCore: d26e4d3edd5cb8588c2569222cbd8be4231374e9
   OpenSSL-Universal: b60a3702c9fea8b3145549d421fdb018e53ab7b4
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  RCT-Folly: 4464f4d875961fce86008d45f4ecf6cef6de0740
+  RCT-Folly: 84578c8756030547307e4572ab1947de1685c599
   RCTDeprecation: fb7d408617e25d7f537940000d766d60149c5fea
   RCTRequired: 9aaf0ffcc1f41f0c671af863970ef25c422a9920
   RCTTypeSafety: e9a6e7d48184646eb0610295b74c0dd02768cbb2
@@ -2951,10 +2951,10 @@ SPEC CHECKSUMS:
   SQLCipher: 5e6bfb47323635c8b657b1b27d25c5f1baf63bf5
   SwiftProtobuf: 4dbaffec76a39a8dc5da23b40af1a5dc01a4c02d
   UMAppLoader: bda51f73f8599e336a778b23e0956130d1e244d5
-  XMTP: 645cb707d5d779b896d00b5f547227325a7379a7
-  XMTPReactNative: fd5d2ed5a7cbe578beebc5719b129a902466296e
+  XMTP: 3d82fe8598fe043a67ad93276084ab46a30a1fa3
+  XMTPReactNative: b592f083533b7ab8964380889670848ebd32fc9a
   Yoga: 7548e4449365bf0ef60db4aefe58abff37fcabec
 
-PODFILE CHECKSUM: f8ed7e4efb9aec669475d676aed02ac9dfc884d2
+PODFILE CHECKSUM: 40186f68a97e4f0c190af3443ed2361cec3857cb
 
 COCOAPODS: 1.16.2

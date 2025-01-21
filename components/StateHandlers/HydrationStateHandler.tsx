@@ -1,4 +1,4 @@
-import { prefetchConversationsQuery } from "@/queries/use-conversations-query";
+import { fetchConversationsQuery } from "@/queries/use-conversations-query";
 import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
 import { captureError } from "@/utils/capture-error";
 import { getAccountsList } from "@data/store/accountsStore";
@@ -6,6 +6,8 @@ import { useAppStore } from "@data/store/appStore";
 import logger from "@utils/logger";
 import { useEffect } from "react";
 import { getInstalledWallets } from "../Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
+import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
+import { syncConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences";
 
 export default function HydrationStateHandler() {
   useEffect(() => {
@@ -28,9 +30,18 @@ export default function HydrationStateHandler() {
       for (const account of accounts) {
         // Don't await because this is for performance but not critical
         prefetchInboxIdQuery({ account }).catch(captureError);
-        prefetchConversationsQuery({
+        fetchConversationsQuery({
           account,
-        }).catch(captureError);
+          caller: "HydrationStateHandler",
+        })
+          .then((conversations) => {
+            subscribeToNotifications({
+              conversations,
+              account,
+            });
+          })
+          .catch(captureError);
+        syncConsent(account).catch(captureError);
       }
 
       useAppStore.getState().setHydrationDone(true);

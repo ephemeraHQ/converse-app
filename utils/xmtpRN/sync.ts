@@ -18,6 +18,10 @@ import {
   stopStreamingAllMessage,
   streamAllMessages,
 } from "./xmtp-messages/xmtp-messages-stream";
+import {
+  stopStreamingConsent,
+  streamConsent,
+} from "./xmtp-preferences/xmtp-preferences-stream";
 
 const instantiatingClientForAccount: {
   [account: string]: Promise<ConverseXmtpClientType> | undefined;
@@ -120,6 +124,21 @@ const syncClientConversationList = async (account: string) => {
         context: `Failed to stream all messages for ${account} no longer retrying`,
       });
     });
+
+    await retryWithBackoff({
+      fn: () => streamConsent(account),
+      retries: 5,
+      delay: 1000,
+      factor: 2,
+      maxDelay: 30000,
+      context: `streaming consent for ${account}`,
+    }).catch((e) => {
+      // Streams are good to have, but should not prevent the app from working
+      logger.error(e, {
+        context: `Failed to stream consent for ${account} no longer retrying`,
+      });
+    });
+
     // Prefetch the conversation list so when we land on the conversation list
     // we have it ready, this will include syncing all groups
     setupAccountTopicSubscription(account);
@@ -148,6 +167,7 @@ export const deleteXmtpClient = async (account: string) => {
   if (account in xmtpClientByAccount) {
     stopStreamingAllMessage(account);
     stopStreamingConversations(account);
+    stopStreamingConsent(account);
   }
   delete xmtpClientByAccount[account];
   delete instantiatingClientForAccount[account];
