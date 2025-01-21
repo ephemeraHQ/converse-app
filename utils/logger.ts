@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { sentryAddBreadcrumb, sentryTrackError } from "./sentry";
 import { isDev } from "./getEnv";
+import { getConfig } from "@/config";
 
 export let loggingFilePath: string;
 
@@ -69,37 +70,67 @@ const converseTransport: transportFunctionType = async (props) => {
   await RNFS.appendFile(loggingFilePath, `${props.msg}\n`, "utf8");
 };
 
-const developerSystemAppearance: "dark" | "light" = "dark" as const;
-const darkSystemColorScheme = {
-  debug: "white",
-  info: "blueBright",
-  warn: "yellowBright",
-  error: "redBright",
+/**
+ * Available console colors for logging with their ANSI codes
+ * from: https://github.com/mowispace/react-native-logs?tab=readme-ov-file#available-colors
+ */
+export const ReactNativeLogColors = {
+  black: "black",
+  red: "red",
+  green: "green",
+  yellow: "yellow",
+  blue: "blue",
+  magenta: "magenta",
+  cyan: "cyan",
+  white: "white",
+  grey: "grey",
+  redBright: "redBright",
+  greenBright: "greenBright",
+  yellowBright: "yellowBright",
+  blueBright: "blueBright",
+  magentaBright: "magentaBright",
+  cyanBright: "cyanBright",
+  whiteBright: "whiteBright",
+} as const;
+
+type ReactNativeLogColor = keyof typeof ReactNativeLogColors;
+
+const LogLevels = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3,
+} as const;
+type LogLevel = keyof typeof LogLevels;
+
+type ReactNativeLogColorScheme = Record<LogLevel, ReactNativeLogColor>;
+
+const darkSystemColorScheme: ReactNativeLogColorScheme = {
+  debug: ReactNativeLogColors.white,
+  info: ReactNativeLogColors.blueBright,
+  warn: ReactNativeLogColors.yellowBright,
+  error: ReactNativeLogColors.redBright,
 };
 
-const lightSystemColorScheme = {
-  debug: "black",
-  info: "blue",
-  warn: "orange",
-  error: "red",
+const lightSystemColorScheme: ReactNativeLogColorScheme = {
+  debug: ReactNativeLogColors.black,
+  info: ReactNativeLogColors.blue,
+  warn: ReactNativeLogColors.yellow,
+  error: ReactNativeLogColors.red,
 };
+
+const activeColorScheme: ReactNativeLogColorScheme =
+  getConfig().loggerColorScheme === "dark"
+    ? darkSystemColorScheme
+    : lightSystemColorScheme;
 
 const _logger = RNLogger.createLogger({
   severity: "debug", // @todo => change minimum severity according to env & user (debug addresses)
   transport: converseTransport,
   transportOptions: {
-    colors:
-      // @ts-ignore
-      developerSystemAppearance === "dark"
-        ? darkSystemColorScheme
-        : lightSystemColorScheme,
+    colors: activeColorScheme,
   },
-  levels: {
-    debug: 0,
-    info: 1,
-    warn: 2,
-    error: 3,
-  },
+  levels: LogLevels,
 });
 
 type logMethodType = (...args: any[]) => void;
