@@ -2,17 +2,14 @@ import { isConversationConsentUnknown } from "@/features/conversation/utils/is-c
 import {
   IConversationsQuery,
   getConversationsQueryOptions,
-} from "@/queries/conversations-query";
+} from "@/queries/use-conversations-query";
 import { UseQueryOptions } from "@tanstack/react-query";
 
 function selectUnknownConsentConversations(conversations: IConversationsQuery) {
   return (
-    conversations?.filter(
-      (conversation) =>
-        // Only the unknown conversations
-        isConversationConsentUnknown(conversation) &&
-        // Only the conversations with last message
-        conversation.lastMessage
+    conversations?.filter((conversation) =>
+      // Only the unknown conversations
+      isConversationConsentUnknown(conversation)
     ) ?? []
   );
 }
@@ -20,7 +17,7 @@ function selectUnknownConsentConversations(conversations: IConversationsQuery) {
 // For now just reuse the global conversations query
 export const getUnknownConsentConversationsQueryOptions = (args: {
   account: string;
-  context: string;
+  caller: string;
 }): UseQueryOptions<IConversationsQuery> => {
   return {
     ...getConversationsQueryOptions(args),

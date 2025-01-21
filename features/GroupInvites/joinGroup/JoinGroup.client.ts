@@ -24,7 +24,7 @@ import { AxiosInstance } from "axios";
 
 import {} from "../groupInvites.utils";
 import { JoinGroupResult } from "./joinGroup.types";
-import { IConversationsQuery } from "@/queries/conversations-query";
+import { IConversationsQuery } from "@/queries/use-conversations-query";
 import { entify } from "@/queries/entify";
 import { wait } from "@/utils/general";
 
@@ -94,11 +94,14 @@ export class JoinGroupClient {
       account: string
     ): Promise<ConversationDataEntity> => {
       const { fetchConversationsQuery } = await import(
-        "@/queries/conversations-query"
+        "@/queries/use-conversations-query"
       );
 
       const conversationList: IConversationsQuery =
-        await fetchConversationsQuery({ account });
+        await fetchConversationsQuery({
+          account,
+          caller: "liveFetchGroupsByAccount",
+        });
 
       const conversationEntity: ConversationDataEntity = entify(
         conversationList,

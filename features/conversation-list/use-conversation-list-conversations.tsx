@@ -3,7 +3,7 @@ import { isConversationAllowed } from "@/features/conversation/utils/is-conversa
 import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
 import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
-import { getConversationsQueryOptions } from "@/queries/conversations-query";
+import { getConversationsQueryOptions } from "@/queries/use-conversations-query";
 import { prefetchConversationMessages } from "@/queries/use-conversation-messages-query";
 import { captureError } from "@/utils/capture-error";
 import { useQueries, useQuery } from "@tanstack/react-query";

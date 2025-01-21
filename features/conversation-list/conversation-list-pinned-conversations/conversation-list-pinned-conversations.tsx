@@ -44,6 +44,7 @@ export const ConversationListPinnedConversations = memo(
     if (!hasPinnedConversations) {
       return null;
     }
+
     return (
       <AnimatedVStack
         style={themed($container)}
@@ -85,9 +86,7 @@ const PinnedConversationsSkeleton = memo(function () {
   const { avatarSize } = useConversationListPinnedConversationsStyles();
 
   return (
-    <AnimatedHStack
-      style={[themed($container), { justifyContent: "space-between" }]}
-    >
+    <AnimatedHStack style={themed($container)}>
       <ConversationListItemAvatarSkeleton
         color={hexToRGBA("#FF8080", 0.15)}
         size={avatarSize}
@@ -135,6 +134,7 @@ const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.xs,
   paddingHorizontal: spacing.lg,
   rowGap: spacing.lg,
+  justifyContent: "space-between",
 });
 
 const $pinnedRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({

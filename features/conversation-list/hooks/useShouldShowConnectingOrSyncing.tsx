@@ -1,13 +1,14 @@
 import { sentryTrackMessage } from "@utils/sentry";
 import { useEffect, useRef } from "react";
 import { useCurrentAccount } from "../../../data/store/accountsStore";
-import { useConversationsQuery } from "@/queries/conversations-query";
+import { useConversationsQuery } from "@/queries/use-conversations-query";
 import { useShouldShowConnecting } from "./useShouldShowConnecting";
 
 export const useShouldShowConnectingOrSyncing = () => {
   const currentAccount = useCurrentAccount();
   const { isLoading } = useConversationsQuery({
     account: currentAccount!,
+    caller: "useShouldShowConnectingOrSyncing",
   });
   const initialLoadDoneOnce = !isLoading;
   const shouldShowConnecting = useShouldShowConnecting();

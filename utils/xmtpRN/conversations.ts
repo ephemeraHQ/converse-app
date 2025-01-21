@@ -1,5 +1,5 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { addConversationToConversationsQuery } from "@/queries/conversations-query";
+import { addConversationToConversationsQuery } from "@/queries/use-conversations-query";
 import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
@@ -19,7 +19,10 @@ export const streamConversations = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
   await client.conversations.stream(async (conversation) => {
     logger.info("[XMTPRN Conversations] GOT A NEW CONVO");
-    addConversationToConversationsQuery({ account, conversation });
+    addConversationToConversationsQuery({
+      account,
+      conversation,
+    });
   });
   logger.info("STREAMING CONVOS");
 };

@@ -1,5 +1,5 @@
 import { currentAccount } from "@/data/store/accountsStore";
-import { createConversationsQueryObserver } from "@/queries/conversations-query";
+import { createConversationsQueryObserver } from "@/queries/use-conversations-query";
 import { captureError } from "@/utils/capture-error";
 import logger from "@/utils/logger";
 import { resetNotifications } from "./resetNotifications";

@@ -152,15 +152,19 @@ function useConversationContextMenuDeleteItem(args: {
   const deleteDm = useDeleteDm({ topic: conversationTopic });
 
   const handleDelete = useCallback(async () => {
-    if (!conversation) return;
     try {
+      if (!conversation) {
+        throw new Error("Conversation not found");
+      }
       if (isConversationGroup(conversation)) {
         await deleteGroup();
       } else {
         await deleteDm();
       }
     } catch (error) {
-      captureErrorWithToast(error);
+      captureErrorWithToast(error, {
+        message: "Error deleting conversation",
+      });
     }
   }, [conversation, deleteGroup, deleteDm]);
 

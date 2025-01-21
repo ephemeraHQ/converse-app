@@ -1,6 +1,6 @@
 import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { updateConversationInConversationsQueryData } from "@/queries/conversations-query";
+import { updateConversationInConversationsQueryData } from "@/queries/use-conversations-query";
 import { updateConversationQueryData } from "@/queries/useConversationQuery";
 import {
   invalidateGroupMembersQuery,

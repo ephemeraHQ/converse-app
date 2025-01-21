@@ -16,6 +16,7 @@ export const useDmPeerInboxId = (args: {
   });
 
   return useQuery({
+    // since we don't want to add conversation to the deps. We already have topic
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: dmPeerInboxIdQueryKey(account, topic),
     queryFn: () => {

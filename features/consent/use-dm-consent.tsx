@@ -2,7 +2,7 @@ import {
   getCurrentAccount,
   useCurrentAccount,
 } from "@/data/store/accountsStore";
-import { updateConversationInConversationsQueryData } from "@/queries/conversations-query";
+import { updateConversationInConversationsQueryData } from "@/queries/use-conversations-query";
 import { getConversationQueryData } from "@/queries/useConversationQuery";
 import { getDmQueryData, setDmQueryData } from "@/queries/useDmQuery";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";

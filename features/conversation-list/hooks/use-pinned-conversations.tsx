@@ -1,5 +1,5 @@
 import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
-import { useConversationsQuery } from "@/queries/conversations-query";
+import { useConversationsQuery } from "@/queries/use-conversations-query";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -10,6 +10,7 @@ export function usePinnedConversations() {
   const { isLoading: isLoadingConversations, data: conversations } =
     useConversationsQuery({
       account: currentAccount!,
+      caller: "usePinnedConversations",
     });
 
   const conversationsDataQueries = useQueries({
