@@ -1,7 +1,9 @@
+import { captureError } from "@/utils/capture-error";
 import logger from "@/utils/logger";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
+import { getXmtpClient } from "@/utils/xmtpRN/sync";
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { getConversationByTopicByAccount } from "@utils/xmtpRN/conversations";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
@@ -13,15 +15,44 @@ type IArgs = {
   topic: ConversationTopic;
 };
 
-function getConversation(args: IArgs) {
+async function getConversation(args: IArgs) {
   const { account, topic } = args;
+
   logger.debug(
-    `[useConversationQuery] Fetching conversation for ${args.topic} with account ${args.account}`
+    `[useConversationQuery] Getting conversation for ${topic} with account ${account}`
   );
-  return getConversationByTopicByAccount({
-    account,
-    topic,
-  });
+
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+
+  const totalStart = new Date().getTime();
+
+  // Try to find conversation in local DB first
+  let conversation = await client.conversations.findConversationByTopic(topic);
+
+  // If not found locally, sync and try again
+  if (!conversation) {
+    logger.warn(
+      `[useConversationQuery] Conversation not found in local DB, syncing conversations`
+    );
+    await client.conversations.sync();
+    conversation = await client.conversations.findConversationByTopic(topic);
+    if (!conversation) {
+      throw new Error(`Conversation ${topic} not found`);
+    }
+  }
+
+  const totalEnd = new Date().getTime();
+  const totalTimeDiff = totalEnd - totalStart;
+
+  if (totalTimeDiff > 3000) {
+    captureError(
+      new Error(
+        `[useConversationQuery] Fetched conversation for ${topic} in ${totalTimeDiff}ms`
+      )
+    );
+  }
+
+  return conversation;
 }
 
 export const useConversationQuery = (args: IArgs) => {

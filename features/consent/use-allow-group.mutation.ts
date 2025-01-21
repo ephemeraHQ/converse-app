@@ -1,4 +1,4 @@
-import { updateConversationInConversationsQueryData } from "@/queries/conversations-query";
+import { updateConversationInConversationsQueryData } from "@/queries/use-conversations-query";
 import { captureError } from "@/utils/capture-error";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { queryClient } from "@queries/queryClient";
@@ -8,8 +8,6 @@ import {
   useMutation,
 } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
-import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
-import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account";
 import {
   ConsentState,
   ConversationId,
@@ -17,6 +15,8 @@ import {
   InboxId,
 } from "@xmtp/react-native-sdk";
 import { MutationKeys } from "../../queries/MutationKeys";
+import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account";
+import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
 import {
   getGroupConsentQueryData,
   setGroupConsentQueryData,

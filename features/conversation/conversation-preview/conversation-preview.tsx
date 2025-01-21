@@ -11,12 +11,12 @@ import { ConversationMessageTimestamp } from "@/features/conversation/conversati
 import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { conversationListDefaultProps } from "@/features/conversation/conversation-messages-list";
 import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
+import { useConversationMessagesQuery } from "@/queries/use-conversation-messages-query";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { $globalStyles } from "@/theme/styles";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import React from "react";
 import { FlatList } from "react-native";
-import { useConversationPreviewMessages } from "./conversation-preview-messages.query";
 
 type ConversationPreviewProps = {
   topic: ConversationTopic;
@@ -26,7 +26,10 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
   const currentAccount = useCurrentAccount()!;
 
   const { data: messages, isLoading: isLoadingMessages } =
-    useConversationPreviewMessages(currentAccount, topic);
+    useConversationMessagesQuery({
+      account: currentAccount,
+      topic,
+    });
 
   const { data: conversation, isLoading: isLoadingConversation } =
     useConversationQuery({
@@ -61,7 +64,8 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
           {/* Using basic Flatlist instead of the Animated one to try to fix the context menu crashes https://github.com/dominicstop/react-native-ios-context-menu/issues/70 */}
           <FlatList
             {...conversationListDefaultProps}
-            data={Object.values(messages?.byId ?? {})}
+            // 15 is enough
+            data={Object.values(messages?.byId ?? {}).slice(0, 15)}
             renderItem={({ item, index }) => {
               const message = item;
               const previousMessage = messages?.byId[messages?.ids[index + 1]];

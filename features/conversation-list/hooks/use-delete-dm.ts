@@ -1,37 +1,42 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "@/data/store/accountsStore";
-import { useDmConsent } from "@/features/consent/use-dm-consent";
+import { useDmConsentForCurrentAccount } from "@/features/consent/use-dm-consent-for-current-account";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { translate } from "@/i18n";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/queries/conversation-metadata-query";
+import { getConversationQueryOptions } from "@/queries/useConversationQuery";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { deleteTopic } from "@/utils/api/topics";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 
-export const useDeleteDm = (dm: DmWithCodecsType) => {
+export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
   const { theme } = useAppTheme();
   const colorScheme = theme.isDark ? "dark" : "light";
 
   const currentAccount = useCurrentAccount()!;
 
-  const { data: peerInboxId } = useDmPeerInboxId({
-    account: currentAccount,
-    topic: dm.topic,
+  const { data: conversationId } = useQuery({
+    ...getConversationQueryOptions({
+      account: currentAccount,
+      topic,
+    }),
+    select: (conversation) => conversation?.id,
   });
 
-  const { mutateAsync: updateDmConsentAsync } = useDmConsent({
-    peerInboxId: peerInboxId!,
-    conversationId: dm.id,
-    topic: dm.topic,
+  const { data: peerInboxId } = useDmPeerInboxId({
+    account: currentAccount,
+    topic,
   });
+
+  const { mutateAsync: updateDmConsentAsync } = useDmConsentForCurrentAccount();
 
   const preferredName = usePreferredInboxName(peerInboxId);
 
@@ -39,17 +44,17 @@ export const useDeleteDm = (dm: DmWithCodecsType) => {
     mutationFn: () =>
       deleteTopic({
         account: currentAccount,
-        topic: dm.topic,
+        topic,
       }),
     onMutate: () => {
       const previousIsDeleted = getConversationMetadataQueryData({
         account: currentAccount,
-        topic: dm.topic,
+        topic,
       })?.isDeleted;
 
       updateConversationMetadataQueryData({
         account: currentAccount,
-        topic: dm.topic,
+        topic,
         updateData: { isDeleted: true },
       });
 
@@ -58,7 +63,7 @@ export const useDeleteDm = (dm: DmWithCodecsType) => {
     onError: (error, _, context) => {
       updateConversationMetadataQueryData({
         account: currentAccount,
-        topic: dm.topic,
+        topic,
         updateData: { isDeleted: context?.previousIsDeleted },
       });
     },
@@ -66,6 +71,14 @@ export const useDeleteDm = (dm: DmWithCodecsType) => {
 
   return useCallback(() => {
     const title = `${translate("delete_chat_with")} ${preferredName}?`;
+
+    if (!conversationId) {
+      throw new Error("Conversation not found in useDeleteDm");
+    }
+
+    if (!peerInboxId) {
+      throw new Error("Peer inbox id not found in useDeleteDm");
+    }
 
     const actions = [
       {
@@ -85,6 +98,9 @@ export const useDeleteDm = (dm: DmWithCodecsType) => {
             await deleteDmAsync();
             await updateDmConsentAsync({
               consent: "deny",
+              peerInboxId: peerInboxId,
+              conversationId,
+              topic,
             });
           } catch (error) {
             captureErrorWithToast(error);
@@ -111,5 +127,13 @@ export const useDeleteDm = (dm: DmWithCodecsType) => {
         }
       }
     );
-  }, [colorScheme, preferredName, deleteDmAsync, updateDmConsentAsync]);
+  }, [
+    colorScheme,
+    preferredName,
+    deleteDmAsync,
+    updateDmConsentAsync,
+    peerInboxId,
+    conversationId,
+    topic,
+  ]);
 };

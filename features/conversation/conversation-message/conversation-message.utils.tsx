@@ -1,8 +1,7 @@
-import { IConvosMessage } from "@/features/conversation/conversation-message/conversation-message.types";
 import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   getConversationMessagesQueryData,
-  useConversationMessages,
+  useConversationMessagesQuery,
 } from "@/queries/use-conversation-messages-query";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/content-types/coinbasePayment";
@@ -19,7 +18,6 @@ import {
   GroupUpdatedCodec,
   MessageDeliveryStatus,
   MessageId,
-  NativeMessageContent,
   ReactionCodec,
   ReactionContent,
   ReadReceiptCodec,
@@ -106,7 +104,10 @@ export function getMessageById({
   topic: ConversationTopic;
 }) {
   const currentAccount = getCurrentAccount()!;
-  const messages = getConversationMessagesQueryData(currentAccount, topic);
+  const messages = getConversationMessagesQueryData({
+    account: currentAccount,
+    topic,
+  });
   if (!messages) {
     return null;
   }
@@ -185,7 +186,10 @@ export function useConversationMessageReactions(messageId: MessageId) {
   const currentAccount = useCurrentAccount()!;
   const topic = useCurrentConversationTopic();
 
-  const { data: messages } = useConversationMessages(currentAccount, topic);
+  const { data: messages } = useConversationMessagesQuery({
+    account: currentAccount,
+    topic,
+  });
 
   // TODO: Add another fallback query to fetch single message reactions. Coming in the SDK later
 
@@ -203,7 +207,10 @@ export function getCurrentUserAlreadyReactedOnMessage(args: {
   const { messageId, topic, emoji } = args;
   const currentUserInboxId = getCurrentAccountInboxId();
   const currentAccount = getCurrentAccount()!;
-  const messages = getConversationMessagesQueryData(currentAccount, topic);
+  const messages = getConversationMessagesQueryData({
+    account: currentAccount,
+    topic,
+  });
   const reactions = messages?.reactions[messageId];
   const bySender = reactions?.bySender;
   return bySender?.[currentUserInboxId!]?.some(
@@ -245,16 +252,17 @@ export const shouldRenderBigEmoji = (text: string) => {
   return hasEmojis && hasFewerThanFourEmojis && containsOnlyEmojis;
 };
 
-export function convertXmtpMessageToConversationMessage(
-  message: DecodedMessageWithCodecsType
-): IConvosMessage {
-  return {
-    convosMessageId: message.id,
-    xmtpMessageId: message.id,
-    status: getConvosMessageStatusForXmtpMessage(message),
-    senderInboxId: message.senderInboxId,
-    sentNs: message.sentNs,
-    type: getMessageContentType(message.contentTypeId),
-    content: message.content() as NativeMessageContent,
-  };
-}
+// TODO: for when we want to have our own message type
+// export function convertXmtpMessageToConversationMessage(
+//   message: DecodedMessageWithCodecsType
+// ): IConvosMessage {
+//   return {
+//     convosMessageId: message.id,
+//     xmtpMessageId: message.id,
+//     status: getConvosMessageStatusForXmtpMessage(message),
+//     senderInboxId: message.senderInboxId,
+//     sentNs: message.sentNs,
+//     type: getMessageContentType(message.contentTypeId),
+//     content: message.content() as NativeMessageContent,
+//   };
+// }

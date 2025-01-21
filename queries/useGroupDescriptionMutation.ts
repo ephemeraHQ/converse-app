@@ -7,7 +7,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { setGroupDescriptionMutationKey } from "./MutationKeys";
-import { updateConversationInConversationsQueryData } from "@/queries/conversations-query";
+import { updateConversationInConversationsQueryData } from "@/queries/use-conversations-query";
 
 type IArgs = {
   account: string;

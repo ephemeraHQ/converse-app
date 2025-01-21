@@ -1,4 +1,4 @@
-import { prefetchConversationsQuery } from "@/queries/conversations-query";
+import { prefetchConversationsQuery } from "@/queries/use-conversations-query";
 import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
 import { captureError } from "@/utils/capture-error";
 import { getAccountsList } from "@data/store/accountsStore";
@@ -28,7 +28,9 @@ export default function HydrationStateHandler() {
       for (const account of accounts) {
         // Don't await because this is for performance but not critical
         prefetchInboxIdQuery({ account }).catch(captureError);
-        prefetchConversationsQuery({ account }).catch(captureError);
+        prefetchConversationsQuery({
+          account,
+        }).catch(captureError);
       }
 
       useAppStore.getState().setHydrationDone(true);

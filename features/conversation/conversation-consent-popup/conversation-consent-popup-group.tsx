@@ -8,7 +8,7 @@ import {
 import { useRouter } from "@/navigation/useNavigation";
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { useGroupConsent } from "@/features/consent/use-group-consent";
+import { useGroupConsentForCurrentAccount } from "@/features/consent/use-group-consent-for-current-account";
 import { translate } from "@i18n";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
 import React, { useCallback } from "react";
@@ -22,7 +22,7 @@ export function ConversationConsentPopupGroup() {
 
   const colorScheme = useColorScheme();
 
-  const { blockGroup, allowGroup } = useGroupConsent(topic);
+  const { blockGroup, allowGroup } = useGroupConsentForCurrentAccount(topic);
 
   const account = useCurrentAccount()!;
 

@@ -1,10 +1,10 @@
-import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "@/data/store/accountsStore";
+import { useDmConsentForCurrentAccount } from "@/features/consent/use-dm-consent-for-current-account";
 import { useRouter } from "@/navigation/useNavigation";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { actionSheetColors } from "@/styles/colors";
-import { captureError, captureErrorWithToast } from "@/utils/capture-error";
+import { captureErrorWithToast } from "@/utils/capture-error";
 import { ensureError } from "@/utils/error";
 import { translate } from "@i18n";
 import React, { useCallback } from "react";
@@ -14,12 +14,11 @@ import {
   useCurrentConversationTopic,
 } from "../conversation.store-context";
 import {
-  ConversationConsentPopupButton,
   ConsentPopupButtonsContainer,
-  ConversationConsentPopupContainer,
   ConsentPopupTitle,
+  ConversationConsentPopupButton,
+  ConversationConsentPopupContainer,
 } from "./conversation-consent-popup.design-system";
-import { useDmConsent } from "@/features/consent/use-dm-consent";
 
 export function ConversationConsentPopupDm() {
   const topic = useCurrentConversationTopic();
@@ -38,13 +37,13 @@ export function ConversationConsentPopupDm() {
   const {
     mutateAsync: consentToInboxIdsOnProtocolByAccountAsync,
     status: consentToInboxIdsOnProtocolByAccountStatus,
-  } = useDmConsent({
-    peerInboxId: peerInboxId!,
-    conversationId: conversationId!,
-    topic: topic!,
-  });
+  } = useDmConsentForCurrentAccount();
 
   const handleBlock = useCallback(async () => {
+    if (!peerInboxId) {
+      throw new Error("Peer inbox id not found");
+    }
+
     showActionSheetWithOptions(
       {
         options: [translate("block"), translate("cancel")],
@@ -57,32 +56,51 @@ export function ConversationConsentPopupDm() {
         if (selectedIndex === 0) {
           try {
             await consentToInboxIdsOnProtocolByAccountAsync({
+              topic,
               consent: "deny",
+              peerInboxId: peerInboxId,
+              conversationId: conversationId,
             });
             navigation.pop();
           } catch (error) {
-            captureError(error);
-            showSnackbar({
-              type: "error",
+            captureErrorWithToast(ensureError(error), {
               message: `Error consenting`,
             });
           }
         }
       }
     );
-  }, [colorScheme, navigation, consentToInboxIdsOnProtocolByAccountAsync]);
+  }, [
+    colorScheme,
+    navigation,
+    consentToInboxIdsOnProtocolByAccountAsync,
+    peerInboxId,
+    conversationId,
+    topic,
+  ]);
 
   const handleAccept = useCallback(async () => {
     try {
+      if (!peerInboxId) {
+        throw new Error("Peer inbox id not found");
+      }
       await consentToInboxIdsOnProtocolByAccountAsync({
         consent: "allow",
+        peerInboxId,
+        conversationId,
+        topic,
       });
     } catch (error) {
       captureErrorWithToast(ensureError(error), {
         message: `Error consenting`,
       });
     }
-  }, [consentToInboxIdsOnProtocolByAccountAsync]);
+  }, [
+    consentToInboxIdsOnProtocolByAccountAsync,
+    peerInboxId,
+    conversationId,
+    topic,
+  ]);
 
   // UX to show instant feedback to the user. When they click, we remove the popup to show that the action was done instant.
   // If there was an error, the popup will show back and we'll show a snackbar with the error message.

@@ -1,4 +1,4 @@
-import { updateConversationInConversationsQueryData } from "@/queries/conversations-query";
+import { updateConversationInConversationsQueryData } from "@/queries/use-conversations-query";
 import { captureError } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";

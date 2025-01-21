@@ -125,9 +125,10 @@ export function useSendMessage(props: {
     },
     onError: (error) => {
       const currentAccount = getCurrentAccount()!;
-      refetchConversationMessages(currentAccount, conversation.topic).catch(
-        captureErrorWithToast
-      );
+      refetchConversationMessages({
+        account: currentAccount,
+        topic: conversation.topic,
+      }).catch(captureErrorWithToast);
     },
   });
 

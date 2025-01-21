@@ -18,6 +18,7 @@ import { usePreferredName } from "@/hooks/usePreferredName";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { converseEventEmitter } from "@/utils/events";
 import { shortDisplayName } from "@/utils/str";
 import { useAccountsProfiles } from "@/utils/useAccountsProfiles";
 import { useNavigation } from "@react-navigation/native";
@@ -131,6 +132,10 @@ function ProfileAvatar() {
   const preferredName = usePreferredInboxName(currentAccountInboxId);
   const avatarUri = usePreferredInboxAvatar(currentAccountInboxId);
 
+  const showDebugMenu = useCallback(() => {
+    converseEventEmitter.emit("showDebugMenu");
+  }, []);
+
   return (
     <Pressable
       onPress={() => {
@@ -139,6 +144,7 @@ function ProfileAvatar() {
         });
       }}
       hitSlop={theme.spacing.sm}
+      onLongPress={showDebugMenu}
     >
       <Center style={themed($avatarContainer)}>
         <Avatar

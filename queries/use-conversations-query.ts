@@ -1,4 +1,6 @@
 import { setConversationQueryData } from "@/queries/useConversationQuery";
+import { captureError } from "@/utils/capture-error";
+import { reactQueryPersister } from "@/utils/mmkv";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import {
   ConversationWithCodecsType,
@@ -24,23 +26,19 @@ export const createConversationsQueryObserver = (args: IArgs) => {
   return new QueryObserver(queryClient, getConversationsQueryOptions(args));
 };
 
-export const useConversationsQuery = (args: { account: string }) => {
-  const { account } = args;
-  return useQuery<IConversationsQuery>(
-    getConversationsQueryOptions({
-      account,
-    })
-  );
+export const useConversationsQuery = (args: IArgs & { caller: string }) => {
+  return useQuery<IConversationsQuery>(getConversationsQueryOptions(args));
 };
 
 export const prefetchConversationsQuery = (args: IArgs) => {
   return queryClient.prefetchQuery(getConversationsQueryOptions(args));
 };
 
-export const addConversationToConversationsQuery = (args: {
-  account: string;
-  conversation: ConversationWithCodecsType;
-}) => {
+export const addConversationToConversationsQuery = (
+  args: IArgs & {
+    conversation: ConversationWithCodecsType;
+  }
+) => {
   const { account, conversation } = args;
   logger.debug(
     `[ConversationsQuery] addConversationToConversationsQuery for account ${account}`
@@ -71,45 +69,58 @@ export const addConversationToConversationsQuery = (args: {
   );
 };
 
-export const getConversationsQueryData = (args: { account: string }) => {
-  const { account } = args;
+export const getConversationsQueryData = (args: IArgs) => {
   return queryClient.getQueryData<IConversationsQuery>(
-    getConversationsQueryOptions({
-      account,
-    }).queryKey
+    getConversationsQueryOptions(args).queryKey
   );
 };
 
-const getConversations = async (args: { account: string }) => {
-  const { account } = args;
+const getConversations = async (
+  args: IArgs & {
+    // We want to track who's making new calls to the network
+    caller: string;
+  }
+) => {
+  const { account, caller } = args;
 
-  logger.debug("[ConversationsQuery] Fetching conversations from network");
+  if (!caller) {
+    logger.warn(
+      `[ConversationsQuery] getConversations called without caller for account ${account}`
+    );
+  }
+
+  logger.debug(
+    `[ConversationsQuery] Fetching conversations from network for account ${account} with caller "${caller}"`
+  );
 
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
 
   const beforeSync = new Date().getTime();
-
-  // Always include sync for now because we'll have react-query persist anyway to give us the local conversations
   await client.conversations.sync();
-  await client.conversations.syncAllConversations("allowed");
-
+  await client.conversations.syncAllConversations();
   const afterSync = new Date().getTime();
 
-  logger.debug(
-    `[ConversationsQuery] Fetching conversations from network took ${
-      (afterSync - beforeSync) / 1000
-    } sec`
-  );
+  const timeDiff = afterSync - beforeSync;
+  if (timeDiff > 3000) {
+    captureError(
+      new Error(
+        `[ConversationsQuery] Fetching conversations from network took ${timeDiff}ms`
+      )
+    );
+  }
 
-  const conversations = await client.conversations.list({
-    isActive: true,
-    addedByInboxId: true,
-    name: true,
-    imageUrlSquare: true,
-    consentState: true,
-    lastMessage: true,
-    description: true,
-  });
+  const conversations = await client.conversations.list(
+    {
+      isActive: true,
+      addedByInboxId: true,
+      name: true,
+      imageUrlSquare: true,
+      consentState: true,
+      lastMessage: true,
+      description: true,
+    },
+    20 // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
+  );
 
   // For now conversations have all the same properties as one conversation
   for (const conversation of conversations) {
@@ -123,23 +134,37 @@ const getConversations = async (args: { account: string }) => {
   return conversations;
 };
 
-export const getConversationsQueryOptions = (args: IArgs) => {
-  const { account } = args;
+export const getConversationsQueryOptions = (
+  args: IArgs & {
+    // We make it optional here because lots of places we use react-query stuff like "getQueryData" will never call the queryFn.
+    // So we don't want to force them to add a caller argument
+    caller?: string;
+  }
+) => {
+  const { account, caller } = args;
   return queryOptions({
+    // since we don't want to add caller to the deps
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: conversationsQueryKey(account),
-    queryFn: () => getConversations({ account }),
+    queryFn: () =>
+      getConversations({
+        account,
+        caller: caller!, // Let's assume that all places where we need a caller will have it otherwise we have warning logs anyway
+      }),
     enabled: !!account,
     // Just for now because conversations are very important and
     // we want to make sure we have all of them
     refetchOnMount: true,
+    persister: reactQueryPersister,
   });
 };
 
-export const updateConversationInConversationsQueryData = (args: {
-  account: string;
-  topic: ConversationTopic;
-  conversationUpdate: Partial<ConversationWithCodecsType>;
-}) => {
+export const updateConversationInConversationsQueryData = (
+  args: IArgs & {
+    topic: ConversationTopic;
+    conversationUpdate: Partial<ConversationWithCodecsType>;
+  }
+) => {
   const { account, topic, conversationUpdate } = args;
 
   logger.debug(
@@ -167,6 +192,6 @@ export const updateConversationInConversationsQueryData = (args: {
   );
 };
 
-export function fetchConversationsQuery(args: IArgs) {
+export function fetchConversationsQuery(args: IArgs & { caller: string }) {
   return queryClient.fetchQuery(getConversationsQueryOptions(args));
 }

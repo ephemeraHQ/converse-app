@@ -65,11 +65,7 @@ export function updateConversationMetadataQueryData(
 
 async function getConversationMetadata(args: IArgs) {
   logger.debug(
-    `[ConversationMetadataQuery] getConversationMetadata for ${JSON.stringify(
-      args,
-      null,
-      2
-    )}`
+    `[ConversationMetadataQuery] getConversationMetadata for account: ${args.account}, topic: ${args.topic}`
   );
   return batchedGetConversationMetadata.fetch(args);
 }

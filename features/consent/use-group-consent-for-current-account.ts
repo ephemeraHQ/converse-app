@@ -15,7 +15,7 @@ export type IGroupConsentOptions = {
   includeAddedBy?: boolean;
 };
 
-export const useGroupConsent = (topic: ConversationTopic) => {
+export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
   const account = currentAccount();
 
   const { data: group, isLoading: isGroupLoading } = useGroupQuery({
