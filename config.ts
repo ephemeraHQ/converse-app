@@ -13,6 +13,7 @@ declare const process: {
 };
 
 const defaultConfig = {
+  loggerColorScheme: process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME,
   debugMenu: false,
   contactAddress: process.env.EXPO_PUBLIC_CONTACT_ADDRESS,
   debugAddresses:
