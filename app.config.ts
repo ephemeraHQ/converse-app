@@ -39,6 +39,10 @@ const appDomainGetConverse = isDev
   ? "preview.getconverse.app"
   : "getconverse.app";
 
+const iOSGoogleServicesFile = !isPreview
+  ? "./scripts/build/ios/google-services/GoogleService-Info-prod.plist"
+  : "./scripts/build/ios/google-services/GoogleService-Info-preview.plist";
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: isDev ? "Converse DEV" : isPreview ? "Converse PREVIEW" : "Converse",
@@ -69,6 +73,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       usesNonExemptEncryption: false,
     },
     bundleIdentifier: "com.converse.dev",
+    googleServicesFile: iOSGoogleServicesFile,
   },
   android: {
     versionCode: appBuildNumbers.expo.android.versionCode,
@@ -223,6 +228,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           },
         },
         ios: {
+          useFrameworks: "static",
           deploymentTarget: "15.1",
           extraPods: [
             {
@@ -239,11 +245,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
               modular_headers: true,
             },
           ],
+          asassociatedDomains: [
+            `applinks:${appDomainConverse}`,
+            `applinks:${appDomainGetConverse}`,
+          ],
           entitlements: {
-            "com.apple.developer.associated-domains": [
-              `applinks:${appDomainConverse}`,
-              `applinks:${appDomainGetConverse}`,
-            ],
             "com.apple.developer.devicecheck.appattest-environment":
               "production",
             "com.apple.developer.usernotifications.communication": true,
@@ -287,6 +293,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "./scripts/build/android/notifeeExpoPlugin.js", // See https://github.com/invertase/notifee/issues/350
     "./scripts/build/android/androidDependenciesExpoPlugin.js", // Handle some conflicting dependencies manually
     "./scripts/build/android/buildGradleProperties.js", // Increase memory for building android in EAS
+
+    // Converse Notification Extension
+    "./scripts/build/ios/converse-notification-extension-mod.js",
   ],
   web: {
     favicon: "./assets/favicon.png",
