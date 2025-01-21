@@ -1,14 +1,14 @@
 import { useCurrentAccount } from "@/data/store/accountsStore";
+import { useGroupConsentForCurrentAccount } from "@/features/consent/use-group-consent-for-current-account";
 import {
-  ConversationConsentPopupButton,
   ConsentPopupButtonsContainer,
-  ConversationConsentPopupContainer,
   ConsentPopupTitle,
+  ConversationConsentPopupButton,
+  ConversationConsentPopupContainer,
 } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup.design-system";
 import { useRouter } from "@/navigation/useNavigation";
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { useGroupConsentForCurrentAccount } from "@/features/consent/use-group-consent-for-current-account";
 import { translate } from "@i18n";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
 import React, { useCallback } from "react";
@@ -50,7 +50,9 @@ export function ConversationConsentPopupGroup() {
         includeAddedBy: false,
       });
     } catch (error) {
-      captureErrorWithToast(error);
+      captureErrorWithToast(error, {
+        message: `Failed to allow group`,
+      });
     }
   }, [allowGroup]);
 

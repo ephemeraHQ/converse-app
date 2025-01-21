@@ -3,6 +3,7 @@ import type { ConversationTopic } from "@xmtp/react-native-sdk";
 export enum QueryKeys {
   // Conversations
   CONVERSATIONS = "conversations",
+  CONVERSATIONS_UNKNOWN_CONSENT = "conversations-unknown-consent",
   CONVERSATION = "conversation",
   CONVERSATION_DM = "conversationDM",
   CONVERSATION_METADATA = "conversationMetadata",
@@ -34,6 +35,10 @@ export enum QueryKeys {
 // Conversations
 export const conversationsQueryKey = (account: string) => [
   QueryKeys.CONVERSATIONS,
+  account?.toLowerCase(),
+];
+export const unknownConsentConversationsQueryKey = (account: string) => [
+  QueryKeys.CONVERSATIONS_UNKNOWN_CONSENT,
   account?.toLowerCase(),
 ];
 
