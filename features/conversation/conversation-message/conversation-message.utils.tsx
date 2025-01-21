@@ -114,9 +114,7 @@ export function getMessageById({
   return messages.byId[messageId];
 }
 
-export function getMessageStringContent(
-  message: DecodedMessageWithCodecsType
-): string | undefined {
+export function getMessageStringContent(message: DecodedMessageWithCodecsType) {
   const content = message.content();
 
   if (typeof content === "string") {

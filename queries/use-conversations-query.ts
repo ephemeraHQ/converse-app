@@ -96,8 +96,7 @@ const getConversations = async (
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
 
   const beforeSync = new Date().getTime();
-  await client.conversations.sync();
-  await client.conversations.syncAllConversations();
+  await client.conversations.syncAllConversations("allowed");
   const afterSync = new Date().getTime();
 
   const timeDiff = afterSync - beforeSync;
