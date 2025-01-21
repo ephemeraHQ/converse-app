@@ -136,7 +136,7 @@ jobs:
         run: node scripts/build/incrementBuildNumbers.js
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: increment-version
