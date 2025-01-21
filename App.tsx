@@ -1,10 +1,7 @@
-import * as Privy from "@privy-io/expo";
-import "expo-dev-client";
-import {
-  configureReanimatedLogger,
-  ReanimatedLogLevel,
-} from "react-native-reanimated";
+// Keep this at the top
 import "./polyfills";
+import * as Privy from "@privy-io/expo";
+import { PrivyProvider } from "@privy-io/expo";
 
 // This is a requirement for Privy to work, does not make any sense
 // To test run yarn start --no-dev --minify
@@ -16,10 +13,15 @@ import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheet
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { useAppStateHandlers } from "@hooks/useAppStateHandlers";
-import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
 import { QueryClientProvider } from "@tanstack/react-query";
+import "expo-dev-client";
+import {
+  ReanimatedLogLevel,
+  configureReanimatedLogger,
+} from "react-native-reanimated";
+import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { useThemeProvider } from "@theme/useAppTheme";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
@@ -29,8 +31,8 @@ import {
   LogBox,
   Platform,
   StyleSheet,
-  useColorScheme,
   View,
+  useColorScheme,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";

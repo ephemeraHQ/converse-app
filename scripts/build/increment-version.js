@@ -53,18 +53,14 @@ fs.readFile(filePath, "utf-8", (err, data) => {
   }
 
   const versionsJson = JSON.parse(data);
-  const newAppVersion = incrementVersion(
-    versionsJson.expo.version,
-    incrementType
-  );
+  const newAppVersion = incrementVersion(versionsJson.version, incrementType);
 
   // Update Expo version and platform-specific version numbers
   // iOS: Reset build number to 1 for each version update
   // Android: Increment the version code by 1
-  versionsJson.expo.version = newAppVersion;
-  versionsJson.expo.ios.buildNumber = "1";
-  versionsJson.expo.android.versionCode =
-    versionsJson.expo.android.versionCode + 1;
+  versionsJson.version = newAppVersion;
+  versionsJson.ios.buildNumber = "1";
+  versionsJson.android.versionCode = versionsJson.android.versionCode + 1;
 
   fs.writeFile(
     filePath,

@@ -37,7 +37,7 @@ jobs:
       - name: Check for dependency or config changes
         id: check-changes
         run: |
-          if git diff --name-only HEAD^ HEAD | grep -E "package.json|app.config.ts"; then
+          if git diff --name-only HEAD^ HEAD | grep -E "package.json|app.config.ts|ios/"; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
