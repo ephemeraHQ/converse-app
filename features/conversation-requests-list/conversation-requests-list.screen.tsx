@@ -7,7 +7,6 @@ import { memo, useCallback, useState } from "react";
 import { useConversationRequestsListItem } from "./use-conversation-requests-list-items";
 
 export const ConversationRequestsListScreen = memo(function () {
-  console.log("render");
   const [selectedSegment, setSelectedSegment] = useState(0);
 
   useConversationRequestsListScreenHeader();
