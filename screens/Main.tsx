@@ -20,7 +20,7 @@ import { useSelect } from "../data/store/storeHelpers";
 import { useThemeProvider } from "../theme/useAppTheme";
 import { useAutoConnectExternalWallet } from "../utils/evm/external";
 import { usePrivyAccessToken } from "../utils/evm/privy";
-import { setConverseNavigatorRef } from "../utils/navigation";
+import { converseNavigatorRef } from "../utils/navigation";
 import { ConversationScreenConfig } from "../features/conversation/conversation.nav";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
 import {
@@ -79,15 +79,10 @@ export default function Main() {
     <>
       <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
         <Initializer />
-        <NavigationContainer
+        <NavigationContainer<NavigationParamList>
           theme={navigationTheme}
           linking={linking}
-          ref={(r) => {
-            logger.info(
-              `[Main] Setting navigation ref to ${r ? "not null" : "null"}`
-            );
-            setConverseNavigatorRef(r);
-          }}
+          ref={converseNavigatorRef}
           onUnhandledAction={() => {
             // Since we're handling multiple navigators,
             // let's silence errors when the action

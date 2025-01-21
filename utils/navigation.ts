@@ -5,24 +5,10 @@ import logger from "./logger";
 import config from "../config";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { NavigationContainerRef } from "@react-navigation/native";
+import { createNavigationContainerRef } from "@react-navigation/native";
 
-let converseNavigatorRef: NavigationContainerRef<NavigationParamList> | null =
-  null;
-
-export const setConverseNavigatorRef = (
-  ref: NavigationContainerRef<NavigationParamList> | null
-) => {
-  if (converseNavigatorRef) {
-    logger.error("[Navigation] Conversation navigator ref already set");
-    return;
-  }
-  if (!ref) {
-    logger.error("[Navigation] Conversation navigator ref is null");
-    return;
-  }
-  converseNavigatorRef = ref;
-};
+// https://reactnavigation.org/docs/navigating-without-navigation-prop/#usage
+export const converseNavigatorRef = createNavigationContainerRef();
 
 export const navigate = async <T extends keyof NavigationParamList>(
   screen: T,
