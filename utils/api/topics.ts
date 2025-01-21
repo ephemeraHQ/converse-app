@@ -38,7 +38,10 @@ export async function getTopics(args: {
 
   const parseResult = z.record(TopicSchema).safeParse(data);
   if (!parseResult.success) {
-    logger.error("[API TOPICS] getTopics parse error:", parseResult.error);
+    logger.error(
+      "[API TOPICS] getTopics parse error:",
+      JSON.stringify(parseResult.error)
+    );
   }
 
   return data as Record<string, ITopic>;
