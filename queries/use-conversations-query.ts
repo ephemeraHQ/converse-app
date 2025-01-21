@@ -96,14 +96,14 @@ const getConversations = async (
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
 
   const beforeSync = new Date().getTime();
-  await client.conversations.syncAllConversations("allowed");
+  await client.conversations.syncAllConversations(["allowed"]);
   const afterSync = new Date().getTime();
 
   const timeDiff = afterSync - beforeSync;
   if (timeDiff > 3000) {
     captureError(
       new Error(
-        `[ConversationsQuery] Fetching conversations from network took ${timeDiff}ms`
+        `[ConversationsQuery] Fetching conversations from network took ${timeDiff}ms for account ${account} caller ${caller}`
       )
     );
   }

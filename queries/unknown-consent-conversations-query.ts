@@ -16,14 +16,14 @@ async function getUnknownConversations(args: { account: string }) {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
 
   const beforeSync = new Date().getTime();
-  await client.conversations.syncAllConversations("unknown");
+  await client.conversations.syncAllConversations(["unknown"]);
   const afterSync = new Date().getTime();
 
   const timeDiff = afterSync - beforeSync;
   if (timeDiff > 3000) {
     captureError(
       new Error(
-        `[ConversationsQuery] Fetching conversations from network took ${timeDiff}ms`
+        `[ConversationsQuery] Fetching conversations from network took ${timeDiff}ms for unknown consent for account ${account}`
       )
     );
   }
@@ -38,7 +38,8 @@ async function getUnknownConversations(args: { account: string }) {
       lastMessage: true,
       description: true,
     },
-    20 // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
+    20, // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
+    ["unknown"]
   );
 
   // For now conversations have all the same properties as one conversation

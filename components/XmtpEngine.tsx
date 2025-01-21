@@ -10,7 +10,7 @@ import { getAccountsList, useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { stopStreamingConversations } from "../utils/xmtpRN/conversations";
 import { syncConversationListXmtpClient } from "../utils/xmtpRN/sync";
-import { stopStreamingConsent } from "@/utils/xmtpRN/contacts";
+import { stopStreamingConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences-stream";
 
 class XmtpEngine {
   accountsStoreSubscription: (() => void) | null = null;
