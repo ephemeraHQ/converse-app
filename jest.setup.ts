@@ -85,3 +85,24 @@ jest.mock("expo-localization", () => ({
   // TODO: Update later to begin returning more locales and mock within individual tests
   getLocales: jest.fn(() => [{ languageTag: "en-US" }]),
 }));
+
+// Mock config module
+jest.mock("@/config", () => ({
+  __esModule: true,
+  getConfig: () => ({
+    loggerColorScheme: "light",
+    debugMenu: false,
+    env: "test",
+    xmtpEnv: "dev",
+    apiURI: "https://test.api",
+    // Add other config values as needed by tests
+  }),
+  default: {
+    loggerColorScheme: "light",
+    debugMenu: false,
+    env: "test",
+    xmtpEnv: "dev",
+    apiURI: "https://test.api",
+    // Add other config values as needed by tests
+  },
+}));
