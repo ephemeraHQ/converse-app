@@ -23,7 +23,7 @@ import { getXmtpClient } from "../sync";
 export const streamAllMessages = async (account: string) => {
   await stopStreamingAllMessage(account);
 
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient(account);
 
   logger.info(`[XmtpRN] Streaming messages for ${client.address}`);
 

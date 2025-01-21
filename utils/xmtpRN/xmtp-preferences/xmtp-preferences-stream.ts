@@ -32,6 +32,7 @@ export const streamConsent = async (account: string) => {
 
 export const stopStreamingConsent = async (account: string) => {
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  logger.info(`[XMTPRN Contacts] Stopping streaming consent for ${account}`);
   return client.preferences.cancelStreamConsent();
 };
 
