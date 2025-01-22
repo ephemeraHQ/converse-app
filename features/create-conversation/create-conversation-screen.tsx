@@ -1,21 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, TextInput, View } from "react-native";
+import { TextInput, View } from "react-native";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { createConversationStyles } from "./create-conversation.styles";
 import { useHeader } from "@/navigation/use-header";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
 import { currentAccount, getCurrentAccount } from "@data/store/accountsStore";
-import { isEmptyObject } from "@/utils/objects";
 import { setConversationQueryData } from "@/queries/useConversationQuery";
 import {
   createConversationByAccount,
   createGroupWithDefaultsByAccount,
   getOptionalConversationByPeerByAccount,
 } from "@/utils/xmtpRN/conversations";
-import {
-  sendMessage,
-  useSendMessage,
-} from "@/features/conversation/hooks/use-send-message";
+import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import logger from "@/utils/logger";
 import {
@@ -24,16 +20,11 @@ import {
   UserInlineSearch,
 } from "./components";
 import { ProfileSearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
-import {
-  CreateConversationScreenProps,
-  SearchStatus,
-} from "./create-conversation.types";
+import { CreateConversationScreenProps } from "./create-conversation.types";
 import { IProfileSocials } from "../profiles/profile-types";
 import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
-import { useQuery } from "@tanstack/react-query";
-import { getSearchQueryOptions, useSearchQuery } from "@/queries/search-query";
+import { useSearchQuery } from "@/queries/search-query";
 import { Loader } from "@/design-system/loader";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
 
 /**
  * Screen for creating new conversations
