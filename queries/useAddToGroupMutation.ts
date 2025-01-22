@@ -40,7 +40,7 @@ export const useAddToGroupMutation = (
       if (!topic) {
         return;
       }
-      invalidateGroupMembersQuery(account, topic);
+      invalidateGroupMembersQuery({ account, topic });
       // refreshGroup(account, topic);
     },
   });

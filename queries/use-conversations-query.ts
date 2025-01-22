@@ -1,3 +1,4 @@
+import { generateGroupHashFromMemberIds } from "@/features/create-conversation/generate-group-hash-from-member-ids";
 import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { captureError } from "@/utils/capture-error";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
@@ -22,7 +23,7 @@ export const createConversationsQueryObserver = (
 };
 
 export const useConversationsQuery = (args: IArgs & { caller: string }) => {
-  return useQuery<IConversationsQuery>(getConversationsQueryOptions(args));
+  return useQuery(getConversationsQueryOptions(args));
 };
 
 export function addConversationToConversationsQuery(
@@ -39,9 +40,10 @@ export function addConversationToConversationsQuery(
   });
 
   if (!previousConversationsData) {
-    queryClient.setQueryData<IConversationsQuery>(
+    queryClient.setQueryData(
       getConversationsQueryOptions({ account }).queryKey,
       [conversation]
+      // [{...conversation, resolvedMember}]
     );
     return;
   }
@@ -86,9 +88,7 @@ export const removeConversationFromConversationsQuery = (
 };
 
 export const getConversationsQueryData = (args: IArgs) => {
-  return queryClient.getQueryData<IConversationsQuery>(
-    getConversationsQueryOptions(args).queryKey
-  );
+  return queryClient.getQueryData(getConversationsQueryOptions(args).queryKey);
 };
 
 const getConversations = async (args: IArgs) => {
@@ -121,20 +121,40 @@ const getConversations = async (args: IArgs) => {
       lastMessage: true,
       description: true,
     },
-    20, // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
-    ["allowed"]
+    // this is going to be problematic for lookup by group member list
+    // note(lustig) @thierryskoda it'd be unlikely to be able to find a group conversation by member list
+    // if this number is 20. does 200 make this too unperformant?
+    200 // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
+  );
+
+  // Map conversations list to an array of ConversationWithCodecsType by
+  // fetching members for each conversation
+
+  const conversationsWithMembers = await Promise.all(
+    conversations.map(async (c) => {
+      const members = await c.members();
+      // note(lustig) @nplasterer what is the motiviation behind making members an async function instead of
+      // providing them on the conversation as an array[member]
+      return updateObjectAndMethods(c, {
+        // @ts-expect-error can we ignore this? Is it just generic crap?
+        resolvedMembers: members,
+        membersHash: generateGroupHashFromMemberIds(
+          members.map((m) => m.addresses[0])
+        ),
+      });
+    })
   );
 
   // For now conversations have all the same properties as one conversation
-  for (const conversation of conversations) {
+  for (const conversationWithMember of conversationsWithMembers) {
     setConversationQueryData({
       account,
-      topic: conversation.topic,
-      conversation,
+      topic: conversationWithMember.topic,
+      conversation: conversationWithMember,
     });
   }
 
-  return conversations;
+  return conversationsWithMembers;
 };
 
 export const getConversationsQueryOptions = (
@@ -179,6 +199,14 @@ export const updateConversationInConversationsQueryData = (
   if (!previousConversationsData) {
     return;
   }
+
+  // if (!conversationUpdate.membersHash) {
+  //   const members = await conversationUpdate.members();
+  //   conversationUpdate.membersHash = generateGroupHashFromMemberIds(
+  //     members.map((m) => m.inboxId)
+  //   );
+  // }
+
   const newConversations = previousConversationsData.map((c) => {
     if (c.topic === topic) {
       return updateObjectAndMethods(c, conversationUpdate);

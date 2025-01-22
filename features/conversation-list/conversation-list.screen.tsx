@@ -18,6 +18,7 @@ import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
 import { isDev } from "@/utils/getEnv";
+import { logJson } from "@/utils/logger";
 import {
   DmWithCodecsType,
   GroupWithCodecsType,
@@ -84,6 +85,17 @@ export function ConversationListScreen(props: IConversationListProps) {
               conversations && conversations.length > 0 ? insets.bottom : 0,
           }}
           renderConversation={({ item }) => {
+            logJson({
+              // json: item,
+              json: {
+                id: item.topic,
+                hash: item.membersHash,
+                membersIds: item.resolvedMembers
+                  ?.map((m) => m.inboxId)
+                  .join(", "),
+              },
+              msg: "[Rendering Conversation]",
+            });
             return isConversationGroup(item) ? (
               <ConversationListItemGroupWrapper group={item} />
             ) : (

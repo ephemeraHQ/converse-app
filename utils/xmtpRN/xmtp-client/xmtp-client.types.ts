@@ -6,6 +6,7 @@ import {
   Dm,
   Group,
   GroupUpdatedCodec,
+  Member,
   ReactionCodec,
   RemoteAttachmentCodec,
   ReplyCodec,
@@ -19,7 +20,6 @@ import {
 export type SupportedCodecsType = [
   TextCodec,
   ReactionCodec,
-  // ReadReceiptCodec,
   GroupUpdatedCodec,
   ReplyCodec,
   RemoteAttachmentCodec,
@@ -30,7 +30,12 @@ export type SupportedCodecsType = [
 
 export type ConverseXmtpClientType = Client<SupportedCodecsType>;
 
-export type ConversationWithCodecsType = Conversation<SupportedCodecsType>;
+// export type ConversationWithCodecsType = Conversation<SupportedCodecsType>;
+
+export type ConversationWithCodecsType = Conversation<SupportedCodecsType> & {
+  resolvedMembers: Member[];
+  membersHash: string;
+};
 
 export type DmWithCodecsType = Dm<SupportedCodecsType>;
 

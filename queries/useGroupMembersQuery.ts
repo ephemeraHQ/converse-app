@@ -1,4 +1,9 @@
-import { queryOptions, SetDataOptions, useQuery } from "@tanstack/react-query";
+import {
+  queryOptions as reactQueryOptions,
+  SetDataOptions,
+  useQuery,
+  UseQueryOptions,
+} from "@tanstack/react-query";
 import { getCleanAddress } from "@utils/evm/getCleanAddress";
 import { ConversationTopic, Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
@@ -33,19 +38,18 @@ const fetchGroupMembers = async (args: {
   );
 };
 
-type IGroupMembersQueryConfigArgs = {
+const getGroupMemberQueryOptions = (args: {
   account: string;
   topic: ConversationTopic;
-};
-
-export const getGroupMemberQueryOptions = (
-  args: IGroupMembersQueryConfigArgs
-) => {
-  const { account, topic } = args;
-  return queryOptions({
+  queryOptions?: Partial<UseQueryOptions<GroupMembersSelectData>>;
+}): UseQueryOptions<GroupMembersSelectData> => {
+  const { account, topic, queryOptions } = args;
+  const isEnabled = !!topic && (queryOptions?.enabled ?? true);
+  return reactQueryOptions({
     queryKey: groupMembersQueryKey(account, topic),
     queryFn: () => fetchGroupMembers({ account, topic }),
-    enabled: !!topic && !!account,
+    enabled: isEnabled,
+    ...queryOptions,
   });
 };
 
@@ -63,7 +67,9 @@ export const getGroupMembersQueryData = (
   account: string,
   topic: ConversationTopic
 ): GroupMembersSelectData | undefined =>
-  queryClient.getQueryData(groupMembersQueryKey(account, topic));
+  queryClient.getQueryData(
+    getGroupMemberQueryOptions({ account, topic }).queryKey
+  );
 
 export const setGroupMembersQueryData = (
   account: string,
@@ -72,7 +78,7 @@ export const setGroupMembersQueryData = (
   options?: SetDataOptions
 ) => {
   queryClient.setQueryData<GroupMembersSelectData>(
-    groupMembersQueryKey(account, topic),
+    getGroupMemberQueryOptions({ account, topic }).queryKey,
     members,
     options
   );
@@ -83,24 +89,26 @@ export const cancelGroupMembersQuery = async (
   topic: ConversationTopic
 ) => {
   return queryClient.cancelQueries({
-    queryKey: groupMembersQueryKey(account, topic),
+    queryKey: getGroupMemberQueryOptions({ account, topic }).queryKey,
   });
 };
 
-export const invalidateGroupMembersQuery = (
-  account: string,
-  topic: ConversationTopic
-) => {
+export const invalidateGroupMembersQuery = (args: {
+  account: string;
+  topic: ConversationTopic;
+}) => {
+  const { account, topic } = args;
   return queryClient.invalidateQueries({
-    queryKey: groupMembersQueryKey(account, topic),
+    queryKey: getGroupMemberQueryOptions({ account, topic }).queryKey,
   });
 };
 
-export function refetchGroupMembersQuery(
-  account: string,
-  topic: ConversationTopic
-) {
+export function refetchGroupMembersQuery(args: {
+  account: string;
+  topic: ConversationTopic;
+}) {
+  const { account, topic } = args;
   return queryClient.refetchQueries({
-    queryKey: groupMembersQueryKey(account, topic),
+    queryKey: getGroupMemberQueryOptions({ account, topic }).queryKey,
   });
 }

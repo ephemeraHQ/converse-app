@@ -1,27 +1,28 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { TextInput, View } from "react-native";
-import { useAppTheme } from "@/theme/useAppTheme";
-import { createConversationStyles } from "./create-conversation.styles";
+import { Loader } from "@/design-system/loader";
+import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
+import { ProfileSearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
 import { useHeader } from "@/navigation/use-header";
-import { ConversationVersion } from "@xmtp/react-native-sdk";
-import { currentAccount, getCurrentAccount } from "@data/store/accountsStore";
+import { useSearchQuery } from "@/queries/search-query";
 import { setConversationQueryData } from "@/queries/useConversationQuery";
+import { useAppTheme } from "@/theme/useAppTheme";
+import logger, { logJson } from "@/utils/logger";
+import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
 import {
   createConversationByAccount,
   createGroupWithDefaultsByAccount,
   getOptionalConversationByPeerByAccount,
 } from "@/utils/xmtpRN/conversations";
-import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
-import logger from "@/utils/logger";
-import { ProfileSearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
-import { CreateConversationScreenProps } from "./create-conversation.types";
+import { currentAccount, getCurrentAccount } from "@data/store/accountsStore";
+import { ConversationVersion } from "@xmtp/react-native-sdk";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { TextInput, View } from "react-native";
+import { useFindConversationByMembers } from "../conversation-list/hooks/use-conversations-count";
 import { IProfileSocials } from "../profiles/profile-types";
-import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
-import { useSearchQuery } from "@/queries/search-query";
-import { Loader } from "@/design-system/loader";
-import { UserInlineSearch } from "./components/user-inline-search";
-import { MessageSection } from "./components/message-section";
-import { ComposerSection } from "./components/composer-section";
+import { createConversationStyles } from "./create-conversation.styles";
+import { CreateConversationScreenProps } from "./create-conversation.types";
+import { ComposerSection } from "@/features/create-conversation/components/composer-section";
+import { MessageSection } from "@/features/create-conversation/components/message-section";
+import { UserInlineSearch } from "@/features/create-conversation/components/user-inline-search";
 
 /**
  * Screen for creating new conversations
@@ -43,6 +44,11 @@ export function CreateConversationScreen({
       socials: IProfileSocials;
     }>
   >([]);
+  const {
+    conversation: existingConversation,
+    isLoading: isLoadingExistingConversation,
+  } = useFindConversationByMembers(selectedUsers.map((u) => u.address));
+  logJson({ json: existingConversation, msg: "existingConversation" });
 
   const selectedUsersCount = selectedUsers.length;
   const composerDisabled = selectedUsersCount === 0;
@@ -198,6 +204,19 @@ export function CreateConversationScreen({
         </View>
       )}
 
+      {existingConversation && (
+        <MessageSection
+          message={`Conversation already exists with ${existingConversation.topic}`}
+          isError={false}
+        />
+      )}
+
+      {!existingConversation && !isLoadingExistingConversation && (
+        <MessageSection
+          message={"Conversation does not exist with those members"}
+          isError={false}
+        />
+      )}
       <ComposerSection
         disabled={composerDisabled}
         conversationMode={conversationMode}

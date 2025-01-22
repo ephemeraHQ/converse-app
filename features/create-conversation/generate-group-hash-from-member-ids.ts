@@ -18,9 +18,11 @@
  *
  * @throws {Error} If members array is empty
  */
-export function generateGroupHashFromMemberIds(members: string[]): string {
+export function generateGroupHashFromMemberIds(
+  members: string[]
+): string | undefined {
   if (!members.length) {
-    throw new Error("Members array cannot be empty");
+    return undefined;
   }
 
   // 1) Sort members (case-insensitive) and deduplicate
