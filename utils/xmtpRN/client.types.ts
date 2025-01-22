@@ -52,17 +52,18 @@ export type SendMessageWithCodecs = Parameters<
 
 export type GroupData = Pick<
   AnyGroup,
+  | "clientInstallationId"
   | "id"
   | "createdAt"
-  | "members"
+  | "version"
   | "topic"
-  | "creatorInboxId"
   | "name"
   | "isGroupActive"
   | "addedByInboxId"
   | "imageUrlSquare"
   | "description"
   | "state"
+  | "lastMessage"
 >;
 
 // export type ConversationData = Pick<

@@ -11,8 +11,15 @@ import { entifyWithAddress, EntityObjectWithAddress } from "./entify";
 import { queryClient } from "./queryClient";
 import { groupMembersQueryKey } from "./QueryKeys";
 import { getGroupQueryData } from "./useGroupQuery";
+import logger from "@/utils/logger";
+import { createPersister } from "./utils/persistence";
 
 export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
+
+const membersPersister = createPersister<GroupMembersSelectData>({
+  name: "members",
+  deserialize: (test) => test,
+});
 
 const fetchGroupMembers = async (args: {
   account: string;
@@ -20,6 +27,7 @@ const fetchGroupMembers = async (args: {
 }): Promise<EntityObjectWithAddress<Member, InboxId>> => {
   const { account, topic } = args;
   const group = getGroupQueryData({ account, topic });
+  logger.debug("[MEMBERS DEBUGGING 1111] fetchGroupMembers  ", !!group);
   if (!group) {
     return {
       byId: {},
@@ -51,6 +59,7 @@ const getGroupMemberQueryOptions = (
     queryKey: groupMembersQueryKey(account, topic),
     queryFn: () => fetchGroupMembers({ account, topic }),
     enabled: isEnabled,
+    persister: membersPersister,
     ...queryOptions,
   };
 };

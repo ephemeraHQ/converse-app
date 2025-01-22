@@ -16,6 +16,7 @@ type IArgs = {
 };
 
 async function getConversation(args: IArgs) {
+  logger.debug("[MEMBERS DEBUGGING 1111] getConversation  ", args);
   const { account, topic } = args;
 
   logger.debug(

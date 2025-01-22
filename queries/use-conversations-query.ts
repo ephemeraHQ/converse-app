@@ -1,17 +1,71 @@
 import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { captureError } from "@/utils/capture-error";
-import { reactQueryPersister } from "@/utils/mmkv";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
+  GroupData,
 } from "@/utils/xmtpRN/client.types";
 import { conversationsQueryKey } from "@queries/QueryKeys";
 import { QueryObserver, queryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { ConversationTopic, Group } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
+import { createPersister, GenericPersistedQuery } from "./utils/persistence";
+
+const conversationsPersister = createPersister<IConversationsQuery>({
+  name: "conversations",
+  deserialize: (persistedQueryString) => {
+    if (!persistedQueryString) {
+      return null;
+    }
+    const persistedQuery = JSON.parse(
+      persistedQueryString
+    ) as GenericPersistedQuery<GroupData[]>;
+    const { state } = persistedQuery;
+    logger.debug(`[Persistence DEBUGGING 1111] state - ${typeof state}`);
+    if (!state) {
+      return persistedQuery;
+    }
+    const { data } = state;
+    logger.debug(`[Persistence DEBUGGING 1111] data - ${typeof data}`);
+    if (!data) {
+      return persistedQuery;
+    }
+    const conversations = data.map((c) => {
+      return new Group(
+        c.clientInstallationId,
+        {
+          id: c.id,
+          createdAt: c.createdAt,
+          topic: c.topic,
+          name: c.name,
+          isActive: c.isGroupActive,
+          addedByInboxId: c.addedByInboxId,
+          imageUrlSquare: c.imageUrlSquare,
+          description: c.description,
+          consentState: c.state,
+          lastMessage: c.lastMessage,
+        },
+        c.lastMessage
+      );
+    });
+    const deserialized = {
+      ...persistedQuery,
+      state: {
+        ...state,
+        data: conversations,
+      },
+    };
+    logger.debug(
+      `[Persistence DEBUGGING 1111] deserialize`,
+      deserialized.state.data.length
+    );
+
+    return deserialized;
+  },
+});
 
 export type IConversationsQuery = Awaited<ReturnType<typeof getConversations>>;
 
@@ -154,7 +208,7 @@ export const getConversationsQueryOptions = (
     // Just for now because conversations are very important and
     // we want to make sure we have all of them
     refetchOnMount: true,
-    persister: reactQueryPersister,
+    persister: conversationsPersister,
   });
 };
 
