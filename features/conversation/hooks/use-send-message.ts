@@ -9,10 +9,10 @@ import {
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
 import { useMutation } from "@tanstack/react-query";
 import {
+  ConversationTopic,
   DecodedMessage,
   MessageDeliveryStatus,
   MessageId,
@@ -20,21 +20,32 @@ import {
   TextCodec,
 } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
+import { getOrFetchConversation } from "@/queries/useConversationQuery";
 
 export type ISendMessageParams = {
+  topic: ConversationTopic;
   referencedMessageId?: MessageId;
   content:
     | { text: string; remoteAttachment?: RemoteAttachmentContent }
     | { text?: string; remoteAttachment: RemoteAttachmentContent };
 };
 
-export function sendMessage(args: {
-  conversation: ConversationWithCodecsType;
+export async function sendMessage(args: {
+  topic: ConversationTopic;
   params: ISendMessageParams;
 }) {
-  const { conversation, params } = args;
+  const { topic, params } = args;
 
   const { referencedMessageId, content } = params;
+
+  const conversation = await getOrFetchConversation({
+    topic,
+    account: getCurrentAccount()!,
+  });
+
+  if (!conversation) {
+    throw new Error("Conversation not found when sending message");
+  }
 
   if (referencedMessageId) {
     return conversation.send({
@@ -54,14 +65,10 @@ export function sendMessage(args: {
   );
 }
 
-export function useSendMessage(props: {
-  conversation: ConversationWithCodecsType;
-}) {
-  const { conversation } = props;
-
+export function useSendMessage() {
   const { mutateAsync: sendMessageMutationAsync } = useMutation({
     mutationFn: (variables: ISendMessageParams) => {
-      return sendMessage({ conversation, params: variables });
+      return sendMessage({ topic: variables.topic, params: variables });
     },
     onMutate: (variables) => {
       const currentAccount = getCurrentAccount()!;
@@ -82,7 +89,7 @@ export function useSendMessage(props: {
           sentNs: getTodayNs(),
           fallback: "new-message",
           deliveryStatus: "sending" as MessageDeliveryStatus, // NOT GOOD but tmp
-          topic: conversation.topic,
+          topic: variables.topic,
           senderInboxId: currentUserInboxId,
           nativeContent: {},
           content: () => {
@@ -92,7 +99,7 @@ export function useSendMessage(props: {
 
         addConversationMessageQuery({
           account: currentAccount,
-          topic: conversation.topic,
+          topic: variables.topic,
           message: textMessage,
         });
 
@@ -101,7 +108,7 @@ export function useSendMessage(props: {
         };
       }
     },
-    onSuccess: async (messageId, _, context) => {
+    onSuccess: async (messageId, variables, context) => {
       if (context && messageId) {
         // The SDK only returns the messageId
         const message = await fetchConversationMessageQuery({
@@ -116,18 +123,18 @@ export function useSendMessage(props: {
         if (message) {
           replaceOptimisticMessageWithReal({
             tempId: context.generatedMessageId,
-            topic: conversation.topic,
+            topic: variables.topic,
             account: getCurrentAccount()!,
             realMessage: message,
           });
         }
       }
     },
-    onError: (error) => {
+    onError: (error, variables) => {
       const currentAccount = getCurrentAccount()!;
       refetchConversationMessages({
         account: currentAccount,
-        topic: conversation.topic,
+        topic: variables.topic,
       }).catch(captureErrorWithToast);
     },
   });
@@ -135,14 +142,11 @@ export function useSendMessage(props: {
   return useCallback(
     async (args: ISendMessageParams) => {
       try {
-        if (!conversation) {
-          throw new Error("Conversation not found when sending message");
-        }
         await sendMessageMutationAsync(args);
       } catch (error) {
         captureErrorWithToast(error);
       }
     },
-    [sendMessageMutationAsync, conversation]
+    [sendMessageMutationAsync]
   );
 }

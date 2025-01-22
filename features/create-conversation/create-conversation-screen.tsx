@@ -12,7 +12,10 @@ import {
   createGroupWithDefaultsByAccount,
   getOptionalConversationByPeerByAccount,
 } from "@/utils/xmtpRN/conversations";
-import { sendMessage } from "@/features/conversation/hooks/use-send-message";
+import {
+  sendMessage,
+  useSendMessage,
+} from "@/features/conversation/hooks/use-send-message";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import logger from "@/utils/logger";
 import {
@@ -30,6 +33,7 @@ import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
 import { useQuery } from "@tanstack/react-query";
 import { getSearchQueryOptions, useSearchQuery } from "@/queries/search-query";
 import { Loader } from "@/design-system/loader";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
 
 /**
  * Screen for creating new conversations
@@ -92,6 +96,8 @@ export function CreateConversationScreen({
     addressesToOmit: [...selectedAddresses, currentUserAddress],
   });
 
+  const sendMessage = useSendMessage();
+
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
 
@@ -129,10 +135,8 @@ export function CreateConversationScreen({
           );
         }
         await sendMessage({
-          conversation: dm,
-          params: {
-            content: { text: messageText },
-          },
+          topic: dm.topic,
+          content: { text: messageText },
         });
         setConversationQueryData({
           account: currentAccount(),
@@ -141,15 +145,15 @@ export function CreateConversationScreen({
         });
         navigation.replace("Conversation", { topic: dm.topic });
       } else {
+        //todo(lustig) lookup group by list of addresses/inbox ids and optimstically create one if not found
+        // use useFindGroupByPeerIds
         const group = await createGroupWithDefaultsByAccount({
           account: currentAccount(),
           peerEthereumAddresses: selectedUsers.map((m) => m.address),
         });
         await sendMessage({
-          conversation: group,
-          params: {
-            content: { text: messageText },
-          },
+          topic: group.topic,
+          content: { text: messageText },
         });
         setConversationQueryData({
           account: currentAccount(),
