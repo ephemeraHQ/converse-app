@@ -2,7 +2,7 @@ import { Center } from "@/design-system/Center";
 import { Icon } from "@/design-system/Icon/Icon";
 import { Text } from "@/design-system/Text";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { getCapitalizedLettersForAvatar } from "@/utils/getCapitalizedLettersForAvatar";
+import { getCapitalizedLettersForAvatar } from "@/utils/get-capitalized-letters-for-avatar";
 import { Image } from "expo-image";
 import React, { memo, useCallback, useState } from "react";
 import { Platform, StyleProp, ViewStyle } from "react-native";

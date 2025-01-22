@@ -9,13 +9,12 @@ import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { memo, useCallback, useEffect, useState } from "react";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Center } from "@/design-system/Center";
-import { animation } from "@/theme/animations";
 import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer";
 import { TextStyle, ViewStyle } from "react-native";
 import {
   ONBOARDING_ENTERING_DELAY,
   ONBOARDING_ENTERING_DURATION,
-} from "@/features/onboarding/constants/animationConstants";
+} from "@/features/onboarding/constants/animation-constants";
 import { useRouter } from "@/navigation/useNavigation";
 import { Pressable } from "@/design-system/Pressable";
 import { useCurrentAccount } from "@/data/store/accountsStore";
@@ -25,7 +24,7 @@ import { OnboardingContactCardThemeProvider } from "@/features/onboarding/compon
 import logger from "@/utils/logger";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { v4 as uuidv4 } from "uuid";
-import { formatRandomUserName } from "@/features/onboarding/utils/formatRandomUserName";
+import { formatRandomUserName } from "@/features/onboarding/utils/format-random-user-name";
 import { useAddPfp } from "@/features/onboarding/hooks/useAddPfp";
 import { useCreateOrUpdateProfileInfo } from "@/features/onboarding/hooks/useCreateOrUpdateProfileInfo";
 import { useProfile } from "@/features/onboarding/hooks/useProfile";
@@ -57,16 +56,6 @@ const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.sm,
 });
 
-const titleAnimation = animation
-  .fadeInUpSpring()
-  .delay(ONBOARDING_ENTERING_DELAY.FIRST)
-  .duration(ONBOARDING_ENTERING_DURATION);
-
-const subtitleAnimation = animation
-  .fadeInUpSpring()
-  .delay(ONBOARDING_ENTERING_DELAY.SECOND)
-  .duration(ONBOARDING_ENTERING_DURATION);
-
 export const NewAccountContactCardScreen = memo(
   function NewAccountUserProfileScreen(
     props: NativeStackScreenProps<NavigationParamList, "NewAccountContactCard">
@@ -75,7 +64,18 @@ export const NewAccountContactCardScreen = memo(
 
     const address = useCurrentAccount()!;
 
-    const { themed } = useAppTheme();
+    const { themed, theme } = useAppTheme();
+    const { animation } = theme;
+
+    const titleAnimation = animation
+      .fadeInUpSpring()
+      .delay(ONBOARDING_ENTERING_DELAY.FIRST)
+      .duration(ONBOARDING_ENTERING_DURATION);
+
+    const subtitleAnimation = animation
+      .fadeInUpSpring()
+      .delay(ONBOARDING_ENTERING_DELAY.SECOND)
+      .duration(ONBOARDING_ENTERING_DURATION);
 
     const [type, setType] = useState<"real" | "rando">("real");
 
@@ -90,16 +90,11 @@ export const NewAccountContactCardScreen = memo(
 
     const randoDisplayName = formatRandoDisplayName(address);
 
-    const handleError = useCallback((error: Error) => {
-      logger.error(error);
-      captureErrorWithToast(error);
-    }, []);
-
     useEffect(() => {
       if (errorMessage) {
-        handleError(new Error(errorMessage));
+        captureErrorWithToast(new Error(errorMessage));
       }
-    }, [errorMessage, handleError]);
+    }, [errorMessage]);
 
     const { addPFP, asset } = useAddPfp();
 
@@ -124,9 +119,9 @@ export const NewAccountContactCardScreen = memo(
           navigation.popTo("Chats");
         }
       } catch (error) {
-        handleError(error as Error);
+        captureErrorWithToast(error as Error);
       }
-    }, [randoDisplayName, createOrUpdateProfile, navigation, handleError]);
+    }, [randoDisplayName, createOrUpdateProfile, navigation]);
 
     const handleRealContinue = useCallback(async () => {
       try {
@@ -145,9 +140,9 @@ export const NewAccountContactCardScreen = memo(
           throw new Error("Failed to create or update profile");
         }
       } catch (error) {
-        handleError(error as Error);
+        captureErrorWithToast(error as Error);
       }
-    }, [profile, asset?.uri, createOrUpdateProfile, navigation, handleError]);
+    }, [profile, asset?.uri, createOrUpdateProfile, navigation]);
 
     const handleContinue = useCallback(() => {
       logger.debug("[NewAccountContactCardScreen] handleContinue", type);

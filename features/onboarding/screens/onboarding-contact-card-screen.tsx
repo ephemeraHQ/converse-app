@@ -9,13 +9,12 @@ import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { useCallback, useEffect, useState } from "react";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Center } from "@/design-system/Center";
-import { animation } from "@/theme/animations";
 import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer";
 import { TextStyle, ViewStyle } from "react-native";
 import {
   ONBOARDING_ENTERING_DELAY,
   ONBOARDING_ENTERING_DURATION,
-} from "@/features/onboarding/constants/animationConstants";
+} from "@/features/onboarding/constants/animation-constants";
 import { useRouter } from "@/navigation/useNavigation";
 import { Pressable } from "@/design-system/Pressable";
 import { needToShowNotificationsPermissions } from "../Onboarding.utils";
@@ -27,7 +26,7 @@ import { OnboardingContactCardThemeProvider } from "@/features/onboarding/compon
 import logger from "@/utils/logger";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { v4 as uuidv4 } from "uuid";
-import { formatRandomUserName } from "@/features/onboarding/utils/formatRandomUserName";
+import { formatRandomUserName } from "@/features/onboarding/utils/format-random-user-name";
 import { useAddPfp } from "../hooks/useAddPfp";
 import { ProfileType } from "../types/onboarding.types";
 import { useCreateOrUpdateProfileInfo } from "../hooks/useCreateOrUpdateProfileInfo";
@@ -57,23 +56,13 @@ const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.sm,
 });
 
-const titleAnimation = animation
-  .fadeInUpSpring()
-  .delay(ONBOARDING_ENTERING_DELAY.FIRST)
-  .duration(ONBOARDING_ENTERING_DURATION);
-
-const subtitleAnimation = animation
-  .fadeInUpSpring()
-  .delay(ONBOARDING_ENTERING_DELAY.SECOND)
-  .duration(ONBOARDING_ENTERING_DURATION);
-
 export function OnboardingContactCardScreen() {
   const router = useRouter();
 
   const address = useCurrentAccount()!;
 
-  const { themed } = useAppTheme();
-
+  const { themed, theme } = useAppTheme();
+  const { animation } = theme;
   const [type, setType] = useState<"real" | "rando">("real");
 
   const { createOrUpdateProfile, loading, errorMessage } =
@@ -85,20 +74,25 @@ export function OnboardingContactCardScreen() {
     }
   }, [loading]);
 
+  const titleAnimation = animation
+    .fadeInUpSpring()
+    .delay(ONBOARDING_ENTERING_DELAY.FIRST)
+    .duration(ONBOARDING_ENTERING_DURATION);
+
+  const subtitleAnimation = animation
+    .fadeInUpSpring()
+    .delay(ONBOARDING_ENTERING_DELAY.SECOND)
+    .duration(ONBOARDING_ENTERING_DURATION);
+
   const { profile, setProfile } = useProfile();
 
   const randoDisplayName = formatRandoDisplayName(address);
 
-  const handleError = useCallback((error: Error) => {
-    logger.error(error);
-    captureErrorWithToast(error);
-  }, []);
-
   useEffect(() => {
     if (errorMessage) {
-      handleError(new Error(errorMessage));
+      captureErrorWithToast(new Error(errorMessage));
     }
-  }, [errorMessage, handleError]);
+  }, [errorMessage]);
 
   const { addPFP, asset } = useAddPfp();
 
@@ -127,9 +121,9 @@ export function OnboardingContactCardScreen() {
         }
       }
     } catch (error) {
-      handleError(error as Error);
+      captureErrorWithToast(error as Error);
     }
-  }, [randoDisplayName, createOrUpdateProfile, router, handleError]);
+  }, [randoDisplayName, createOrUpdateProfile, router]);
 
   const handleRealContinue = useCallback(async () => {
     try {
@@ -148,9 +142,9 @@ export function OnboardingContactCardScreen() {
         }
       }
     } catch (error) {
-      handleError(error as Error);
+      captureErrorWithToast(error as Error);
     }
-  }, [createOrUpdateProfile, profile, router, handleError, asset?.uri]);
+  }, [createOrUpdateProfile, profile, router, asset?.uri]);
 
   const handleContinue = useCallback(() => {
     logger.debug("[OnboardingContactCardScreen] handleContinue", type);

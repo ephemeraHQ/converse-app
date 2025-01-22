@@ -8,7 +8,6 @@ import { ensureError, ensureErrorHandler } from "@utils/error";
 import logger from "@utils/logger";
 import { useSmartWallets } from "@privy-io/expo/smart-wallets";
 import { ViemAccount } from "@/utils/xmtpRN/signer";
-import config from "@/config";
 import { base } from "viem/chains";
 
 export function usePrivySmartWalletConnection(args: {

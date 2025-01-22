@@ -1,4 +1,3 @@
-import { TransactionToTrigger } from "@components/TransactionPreview/TransactionPreview";
 import EventEmitter from "eventemitter3";
 import { Account, Wallet } from "thirdweb/wallets";
 
@@ -20,7 +19,6 @@ type ConverseEvents = {
     wallet: Wallet | undefined;
     account: Account | undefined;
   }) => void;
-  previewTransaction: (transactionData: TransactionToTrigger) => void;
   transactionResult: (id: string, receipt?: TransactionReceipt) => void;
 };
 

@@ -1,13 +1,12 @@
 import { AnimatedVStack } from "@/design-system/VStack";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { OnboardingIconButton } from "@/features/onboarding/components/onboarding-icon-button";
-import { animation } from "@/theme/animations";
 import { IIconName } from "@/design-system/Icon/Icon.types";
 import { OnboardingFooterText } from "./onboarding-footer-text";
 import {
   ONBOARDING_ENTERING_DELAY,
   ONBOARDING_ENTERING_DURATION,
-} from "../constants/animationConstants";
+} from "../constants/animation-constants";
 import { ViewStyle } from "react-native";
 import { useCallback } from "react";
 import { converseEventEmitter } from "@/utils/events";
@@ -30,7 +29,9 @@ export function OnboardingFooter({
   onPress,
   disabled,
 }: IOnboardingFooterProps) {
-  const { themed } = useAppTheme();
+  const { themed, theme } = useAppTheme();
+  const { animation } = theme;
+
   const keyboard = useAnimatedKeyboard();
 
   // AR - don't anticipate this will be here long

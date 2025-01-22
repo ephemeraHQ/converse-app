@@ -9,13 +9,12 @@ import { VStack } from "@/design-system/VStack";
 import { memo, useCallback } from "react";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Center } from "@/design-system/Center";
-import { animation } from "@/theme/animations";
 import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer";
 import { TextStyle, ViewStyle } from "react-native";
 import {
   ONBOARDING_ENTERING_DELAY,
   ONBOARDING_ENTERING_DURATION,
-} from "@/features/onboarding/constants/animationConstants";
+} from "@/features/onboarding/constants/animation-constants";
 import { useRouter } from "@/navigation/useNavigation";
 import { useCreatePasskey } from "@/features/onboarding/passkey/useCreatePasskey";
 import { usePrivySmartWalletConnection } from "@/features/onboarding/Privy/usePrivySmartWalletConnection";
@@ -52,7 +51,9 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
 
 const OnboardingWelcomeScreenContent = memo(
   function OnboardingWelcomeScreenContent() {
-    const { themed } = useAppTheme();
+    const { themed, theme } = useAppTheme();
+    const { animation } = theme;
+
     const router = useRouter();
 
     const loading = usePasskeyAuthStoreContext((state) => state.loading);
@@ -64,7 +65,6 @@ const OnboardingWelcomeScreenContent = memo(
 
     const handleError = useCallback(
       (error: Error) => {
-        logger.error(error);
         setError(error.message);
         captureErrorWithToast(error);
       },

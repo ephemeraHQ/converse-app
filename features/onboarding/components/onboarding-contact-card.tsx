@@ -2,10 +2,9 @@ import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import {
   ONBOARDING_ENTERING_DELAY,
   ONBOARDING_ENTERING_DURATION,
-} from "../constants/animationConstants";
+} from "../constants/animation-constants";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { memo, useCallback, useState } from "react";
-import { animation } from "@/theme/animations";
 import { Center } from "@/design-system/Center";
 import { TextField } from "@/design-system/TextField/TextField";
 import { ViewStyle } from "react-native";
@@ -31,7 +30,7 @@ export const OnboardingContactCard = memo(function OnboardingContactCard({
   editable = true,
 }: IOnboardingContactCardProps) {
   const { theme } = useAppTheme();
-  const { spacing, borderRadius, borderWidth, colors } = theme;
+  const { spacing, borderRadius, borderWidth, colors, animation } = theme;
 
   const clearName = useCallback(() => {
     setDisplayName("");
