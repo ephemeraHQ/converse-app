@@ -22,9 +22,6 @@ type IArgs = {
 export const createConversationsQueryObserver = (
   args: IArgs & { caller: string }
 ) => {
-  logger.debug(
-    `[ConversationsQuery] createConversationsQueryObserver for account ${args.account}`
-  );
   return new QueryObserver(queryClient, getConversationsQueryOptions(args));
 };
 
