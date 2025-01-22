@@ -39,6 +39,7 @@ async function getConversation(args: IArgs) {
     if (!conversation) {
       throw new Error(`Conversation ${topic} not found`);
     }
+    await conversation.sync();
   }
 
   const totalEnd = new Date().getTime();

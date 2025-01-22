@@ -1,5 +1,8 @@
+import {
+  addConversationToUnknownConsentConversationsQuery,
+  removeConversationFromUnknownConsentConversationsQueryData,
+} from "@/queries/unknown-consent-conversations-query";
 import { updateConversationInConversationsQueryData } from "@/queries/use-conversations-query";
-import { captureError } from "@/utils/capture-error";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { queryClient } from "@queries/queryClient";
 import {
@@ -95,6 +98,10 @@ export const getAllowGroupMutationOptions = (
           state: "allowed",
         },
       });
+      removeConversationFromUnknownConsentConversationsQueryData({
+        account,
+        topic: group.topic,
+      });
       return {
         previousConsent,
       };
@@ -107,8 +114,6 @@ export const getAllowGroupMutationOptions = (
       }
     ) => {
       const { account, group } = variables;
-
-      captureError(error);
 
       if (!context) {
         return;
@@ -125,6 +130,10 @@ export const getAllowGroupMutationOptions = (
         conversationUpdate: {
           state: context.previousConsent,
         },
+      });
+      addConversationToUnknownConsentConversationsQuery({
+        account,
+        conversation: group,
       });
     },
   };

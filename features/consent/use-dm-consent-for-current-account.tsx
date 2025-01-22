@@ -2,8 +2,9 @@ import {
   getCurrentAccount,
   useCurrentAccount,
 } from "@/data/store/accountsStore";
-import { updateConversationInConversationsQueryData } from "@/queries/use-conversations-query";
 import { getConversationQueryData } from "@/queries/useConversationQuery";
+import { updateConversationInUnknownConsentConversationsQueryData } from "@/queries/unknown-consent-conversations-query";
+import { updateConversationInConversationsQueryData } from "@/queries/use-conversations-query";
 import { getDmQueryData, setDmQueryData } from "@/queries/useDmQuery";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
@@ -26,7 +27,7 @@ export function useDmConsentForCurrentAccount() {
       conversationId: ConversationId;
       topic: ConversationTopic;
     }) => {
-      const { peerInboxId, conversationId, topic } = args;
+      const { consent, peerInboxId, conversationId } = args;
       if (!peerInboxId) {
         throw new Error("Peer inbox id not found");
       }
@@ -35,24 +36,23 @@ export function useDmConsentForCurrentAccount() {
         updateConsentForGroupsForAccount({
           account: currentAccount,
           groupIds: [conversationId],
-          consent: args.consent,
+          consent,
         }),
         updateInboxIdsConsentForAccount({
           account: currentAccount,
           inboxIds: [peerInboxId],
-          consent: args.consent,
+          consent,
         }),
       ]);
     },
-    onMutate: (args) => {
-      const { peerInboxId, conversationId, topic } = args;
+    onMutate: ({ consent, topic }) => {
       const conversation = getConversationQueryData({
         account: currentAccount,
         topic,
       });
       if (conversation) {
         const updatedDm = updateObjectAndMethods(conversation, {
-          state: args.consent === "allow" ? "allowed" : "denied",
+          state: consent === "allow" ? "allowed" : "denied",
         });
 
         setDmQueryData({
@@ -65,32 +65,52 @@ export function useDmConsentForCurrentAccount() {
           account: currentAccount,
           topic,
           conversationUpdate: {
-            state: args.consent === "allow" ? "allowed" : "denied",
+            state: consent === "allow" ? "allowed" : "denied",
           },
         });
+
+        updateConversationInUnknownConsentConversationsQueryData({
+          account: currentAccount,
+          topic,
+          conversationUpdate: {
+            state: consent === "allow" ? "allowed" : "denied",
+          },
+        });
+
         return { previousDmConsent: conversation.state };
       }
     },
-    onError: (error, variables, context) => {
-      const { topic } = variables;
+    onError: (error, { topic }, context) => {
       const { previousDmConsent } = context || {};
       if (previousDmConsent) {
         const dm = getDmQueryData({
           account: currentAccount,
           peer: topic,
         });
+
         if (!dm) {
           return;
         }
+
         const updatedDm = updateObjectAndMethods(dm, {
           state: previousDmConsent,
         });
+
         setDmQueryData({
           account: currentAccount,
           peer: topic,
           dm: updatedDm,
         });
+
         updateConversationInConversationsQueryData({
+          account: currentAccount,
+          topic,
+          conversationUpdate: {
+            state: previousDmConsent,
+          },
+        });
+
+        updateConversationInUnknownConsentConversationsQueryData({
           account: currentAccount,
           topic,
           conversationUpdate: {
