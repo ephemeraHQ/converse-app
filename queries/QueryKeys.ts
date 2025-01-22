@@ -30,6 +30,9 @@ export enum QueryKeys {
 
   // DMs
   DM_PEER_INBOX_ID = "dmPeerInboxId",
+
+  // User Search
+  USER_SEARCH = "userSearch",
 }
 
 // Conversations
@@ -123,3 +126,9 @@ export const dmPeerInboxIdQueryKey = (
   account: string,
   topic: ConversationTopic
 ) => [QueryKeys.DM_PEER_INBOX_ID, account, topic];
+
+// Profile Search
+export const userSearchQueryKey = (searchQuery: string) => [
+  QueryKeys.USER_SEARCH,
+  searchQuery,
+];

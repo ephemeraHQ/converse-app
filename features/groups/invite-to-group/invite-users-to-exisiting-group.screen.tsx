@@ -27,7 +27,7 @@ import { useGroupMembers } from "@/hooks/useGroupMembers";
 import { translate } from "@/i18n";
 import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
-import { searchProfiles } from "@/utils/api/profiles";
+import { searchProfilesForCurrentAccount } from "@/utils/api/profiles";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { isEmptyObject } from "@/utils/objects";
 import { getPreferredName } from "@/utils/profile";
@@ -188,10 +188,7 @@ export function InviteUsersToExistingGroupScreen({
             if (searchingForValue.current === value) {
               if (addressIsOnXmtp) {
                 // Let's search with the exact address!
-                const profiles = await searchProfiles(
-                  address,
-                  currentAccount()
-                );
+                const profiles = await searchProfilesForCurrentAccount(address);
 
                 if (!isEmptyObject(profiles)) {
                   // Let's save the profiles for future use
@@ -228,7 +225,7 @@ export function InviteUsersToExistingGroupScreen({
             profileSearchResults: {},
           });
 
-          const profiles = await searchProfiles(value, currentAccount());
+          const profiles = await searchProfilesForCurrentAccount(value);
 
           if (!isEmptyObject(profiles)) {
             // Let's save the profiles for future use

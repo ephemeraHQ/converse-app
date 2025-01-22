@@ -1,7 +1,10 @@
-import { IProfileSocials } from "@/features/profiles/profile-types";
+import { IProfileSocials } from "../profiles/profile-types";
 
 import { ConversationVersion } from "@xmtp/react-native-sdk";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 
 export type CreateConversationNavigationProp = NativeStackNavigationProp<
@@ -9,15 +12,14 @@ export type CreateConversationNavigationProp = NativeStackNavigationProp<
   "CreateConversation"
 >;
 
-export type CreateConversationScreenProps = {
-  navigation: CreateConversationNavigationProp;
-};
+export type CreateConversationScreenProps = NativeStackScreenProps<
+  NavigationParamList,
+  "CreateConversation"
+>;
 
 export type SearchStatus = {
-  loading: boolean;
   message: string;
-  inviteToConverse: string;
-  profileSearchResults: { [address: string]: IProfileSocials };
+  profileSearchResults: Record<string, IProfileSocials>;
 };
 
 export type PendingChatMembers = {

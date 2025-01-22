@@ -1,17 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { TextInput, View } from "react-native";
+import { ActivityIndicator, TextInput, View } from "react-native";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { createConversationStyles } from "./create-conversation.styles";
 import { useHeader } from "@/navigation/use-header";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
 import { currentAccount, getCurrentAccount } from "@data/store/accountsStore";
-import { accountCanMessagePeer } from "@/features/consent/account-can-message-peer";
-import { searchProfiles } from "@/utils/api/profiles";
-import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
-import { getCleanAddress } from "@/utils/evm/getCleanAddress";
-import { shortAddress } from "@/utils/strings/shortAddress";
 import { isEmptyObject } from "@/utils/objects";
-import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 import { setConversationQueryData } from "@/queries/useConversationQuery";
 import {
   createConversationByAccount,
@@ -33,6 +27,9 @@ import {
 } from "./create-conversation.types";
 import { IProfileSocials } from "../profiles/profile-types";
 import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
+import { useQuery } from "@tanstack/react-query";
+import { getSearchQueryOptions, useSearchQuery } from "@/queries/search-query";
+import { Loader } from "@/design-system/loader";
 
 /**
  * Screen for creating new conversations
@@ -46,14 +43,7 @@ export function CreateConversationScreen({
     ConversationVersion.DM
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const searchQueryRef = useRef("");
-  const [status, setStatus] = useState<SearchStatus>({
-    loading: false,
-    message: "",
-    inviteToConverse: "",
-    profileSearchResults: {},
-  });
-
+  const [errorMessage, setErrorMessage] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<
     Array<{
       address: string;
@@ -89,191 +79,18 @@ export function CreateConversationScreen({
     },
   });
 
-  const debounceDelay = 200;
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectedAddresses = selectedUsers.map((u) => u.address);
+  const currentUserAddress = getCurrentAccount() || "";
 
-  useEffect(() => {
-    logger.info("[CreateConversation] Search effect triggered", {
-      searchQuery,
-    });
-
-    if (searchQuery.length === 0) {
-      setStatus({
-        loading: false,
-        message: "",
-        inviteToConverse: "",
-        profileSearchResults: {},
-      });
-      return;
-    }
-
-    if (debounceTimer.current !== null) {
-      logger.info("[CreateConversation] Clearing existing debounce timer");
-      clearTimeout(debounceTimer.current);
-    }
-
-    debounceTimer.current = setTimeout(async () => {
-      const searchForValue = async () => {
-        logger.info("[CreateConversation] Starting search after debounce", {
-          searchQuery,
-        });
-        setStatus((prev) => ({
-          ...prev,
-          message: "",
-          inviteToConverse: "",
-          profileSearchResults: {},
-        }));
-
-        if (isSupportedPeer(searchQuery)) {
-          logger.info("[CreateConversation] Searching for supported peer", {
-            searchQuery,
-          });
-          setStatus((prev) => ({ ...prev, loading: true }));
-          searchQueryRef.current = searchQuery;
-          const resolvedAddress = await getAddressForPeer(searchQuery);
-
-          if (searchQueryRef.current === searchQuery) {
-            if (!resolvedAddress) {
-              setStatus({
-                loading: false,
-                profileSearchResults: {},
-                inviteToConverse: "",
-                message: "No address has been set for this domain.",
-              });
-              return;
-            }
-
-            const address = getCleanAddress(resolvedAddress);
-            logger.info("[CreateConversation] Checking if address is on XMTP", {
-              address,
-            });
-            const addressIsOnXmtp = await accountCanMessagePeer({
-              account: currentAccount(),
-              peer: address,
-            });
-
-            if (searchQueryRef.current === searchQuery) {
-              if (addressIsOnXmtp) {
-                logger.info(
-                  "[CreateConversation] Address found on XMTP, searching profiles",
-                  {
-                    address,
-                    searchQuery,
-                  }
-                );
-                const profiles = await searchProfiles(
-                  address,
-                  currentAccount()
-                );
-
-                if (!isEmptyObject(profiles)) {
-                  logger.info(
-                    "[CreateConversation] Found and saving profiles",
-                    {
-                      profileCount: Object.keys(profiles).length,
-                    }
-                  );
-                  setProfileRecordSocialsQueryData(profiles);
-                  const selectedAddresses = selectedUsers.map((u) => u.address);
-                  Object.keys(profiles).forEach((addr) => {
-                    if (
-                      selectedAddresses.includes(addr.toLowerCase()) ||
-                      addr.toLowerCase() === getCurrentAccount()?.toLowerCase()
-                    ) {
-                      delete profiles[addr];
-                    }
-                  });
-                  setStatus({
-                    loading: false,
-                    message: "",
-                    inviteToConverse: "",
-                    profileSearchResults: profiles,
-                  });
-                } else {
-                  logger.info(
-                    "[CreateConversation] No profiles found for XMTP user"
-                  );
-                  const madeupprofiles: Record<string, IProfileSocials> = {
-                    [address]: {
-                      address: address,
-                    },
-                  };
-                  setStatus({
-                    loading: false,
-                    message: "",
-                    inviteToConverse: "",
-                    profileSearchResults: madeupprofiles,
-                  });
-                }
-              } else {
-                logger.info("[CreateConversation] Address not on XMTP", {
-                  searchQuery,
-                  address,
-                });
-                setStatus({
-                  loading: false,
-                  message: `${shortAddress(
-                    searchQuery
-                  )} is not on the XMTP network yet 😏`,
-                  inviteToConverse: searchQuery,
-                  profileSearchResults: {},
-                });
-              }
-            }
-          }
-        } else {
-          logger.info(
-            "[CreateConversation] Searching profiles for non-peer searchQuery",
-            { searchQuery }
-          );
-          setStatus((prev) => ({ ...prev, loading: true }));
-
-          const profiles = await searchProfiles(searchQuery, currentAccount());
-
-          if (!isEmptyObject(profiles)) {
-            logger.info("[CreateConversation] Found and saving profiles", {
-              searchQuery,
-              profileCount: Object.keys(profiles).length,
-            });
-            setProfileRecordSocialsQueryData(profiles);
-            const selectedAddresses = selectedUsers.map((u) => u.address);
-            Object.keys(profiles).forEach((addr) => {
-              if (
-                selectedAddresses.includes(addr.toLowerCase()) ||
-                addr.toLowerCase() === getCurrentAccount()?.toLowerCase()
-              ) {
-                delete profiles[addr];
-              }
-            });
-            setStatus({
-              loading: false,
-              message: "",
-              inviteToConverse: "",
-              profileSearchResults: profiles,
-            });
-          } else {
-            logger.info("[CreateConversation] No profiles found", {
-              searchQuery,
-            });
-            setStatus({
-              loading: false,
-              message: `No profiles found for ${searchQuery}`,
-              inviteToConverse: "",
-              profileSearchResults: {},
-            });
-          }
-        }
-      };
-      searchForValue();
-    }, debounceDelay);
-
-    return () => {
-      if (debounceTimer.current !== null) {
-        logger.info("[CreateConversation] Cleanup: clearing debounce timer");
-        clearTimeout(debounceTimer.current);
-      }
-    };
-  }, [searchQuery, selectedUsers]);
+  const {
+    profileSearchResults,
+    areSearchResultsLoading,
+    hasSearchResults,
+    message,
+  } = useSearchQuery({
+    searchQuery,
+    addressesToOmit: [...selectedAddresses, currentUserAddress],
+  });
 
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
@@ -344,12 +161,7 @@ export function CreateConversationScreen({
     } catch (e) {
       const errorString = (e as Error)?.message || `Something went wrong`;
       captureErrorWithToast(e);
-      setStatus({
-        loading: false,
-        message: errorString,
-        inviteToConverse: "",
-        profileSearchResults: {},
-      });
+      setErrorMessage(errorString);
     }
   };
 
@@ -364,7 +176,7 @@ export function CreateConversationScreen({
         },
       ]);
       setSearchQuery("");
-      setStatus((prev) => ({ ...prev, profileSearchResults: {} }));
+      setErrorMessage("");
     },
     []
   );
@@ -386,23 +198,20 @@ export function CreateConversationScreen({
         }}
       />
 
-      {!status.loading &&
-        !status.message &&
-        !isEmptyObject(status.profileSearchResults) && (
-          <ProfileSearchResultsList
-            profiles={status.profileSearchResults}
-            handleSearchResultItemPress={handleSearchResultPress}
-          />
-        )}
-
-      {status.message && (
-        <MessageSection
-          message={status.message}
-          isError={!status.inviteToConverse}
+      {!areSearchResultsLoading && !errorMessage && hasSearchResults && (
+        <ProfileSearchResultsList
+          profiles={profileSearchResults!}
+          handleSearchResultItemPress={handleSearchResultPress}
         />
       )}
 
-      {status.loading && <View style={{ flex: 1 }} />}
+      {message && <MessageSection message={message} />}
+
+      {areSearchResultsLoading && (
+        <View style={{ flex: 1 }}>
+          <Loader size="large" />
+        </View>
+      )}
 
       <ComposerSection
         disabled={composerDisabled}
