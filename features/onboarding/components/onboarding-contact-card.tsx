@@ -13,6 +13,7 @@ import { OnboardingEditableAvatar } from "./onboarding-editable-avatar";
 import { translate } from "@/i18n";
 import { IconButton } from "@/design-system/IconButton/IconButton";
 import { Text } from "@/design-system/Text";
+import { ContactCardContainer } from "@/features/profiles/components/contact-card-container";
 
 type IOnboardingContactCardProps = {
   displayName?: string;
@@ -49,66 +50,66 @@ export const OnboardingCreateContactCard = memo(
 
     return (
       <AnimatedVStack
-        style={{
-          marginVertical: spacing.lg,
-          padding: spacing.lg,
-          backgroundColor: theme.colors.fill.inverted.primary,
-          borderRadius: borderRadius.xxs,
-        }}
         entering={animation
           .fadeInDownSlow()
           .delay(ONBOARDING_ENTERING_DELAY.THIRD)
           .duration(ONBOARDING_ENTERING_DURATION)}
       >
-        <Pressable disabled={!editable} onPress={addPFP}>
-          <OnboardingEditableAvatar uri={pfpUri} name={displayName} />
-        </Pressable>
-        {editable ? (
-          <TextField
-            containerStyle={{
-              marginTop: spacing.sm,
-            }}
-            label={translate("onboarding.contactCard.name")}
-            placeholder={translate("onboarding.contactCard.namePlaceholder")}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={displayName}
-            onChangeText={setDisplayName}
-            onFocus={onFocus}
-            onBlur={onBlur}
-            RightAccessory={({ style }) => {
-              if (!displayName || !isTextFieldFocused) {
-                return null;
-              }
-              return (
-                <Center style={style as ViewStyle}>
-                  <IconButton
-                    onPress={clearName}
-                    variant="ghost"
-                    iconName="xmark.circle.fill"
-                  />
-                </Center>
-              );
-            }}
-          />
-        ) : (
-          <VStack
-            style={{
-              marginTop: spacing.sm,
-              paddingLeft: spacing.xs,
-              paddingVertical: spacing.xxs,
-              paddingRight: spacing.xxs,
-              borderRadius: borderRadius.xxs,
-              borderWidth: borderWidth.sm,
-              borderColor: colors.border.subtle,
-            }}
-          >
-            <Text color="secondary" preset="smaller">
-              {translate("onboarding.contactCard.name")}
-            </Text>
-            <Text preset="small">{displayName}</Text>
-          </VStack>
-        )}
+        <ContactCardContainer>
+          <Pressable disabled={!editable} onPress={addPFP}>
+            <OnboardingEditableAvatar uri={pfpUri} name={displayName} />
+          </Pressable>
+          {editable ? (
+            <TextField
+              containerStyle={{
+                marginTop: spacing.sm,
+                marginBottom: spacing.md,
+              }}
+              label={translate("onboarding.contactCard.name")}
+              placeholder={translate("onboarding.contactCard.namePlaceholder")}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={displayName}
+              onChangeText={setDisplayName}
+              onFocus={onFocus}
+              onBlur={onBlur}
+              RightAccessory={({ style }) => {
+                if (!displayName || !isTextFieldFocused) {
+                  return null;
+                }
+                return (
+                  <Center style={style as ViewStyle}>
+                    <IconButton
+                      onPress={clearName}
+                      variant="ghost"
+                      iconName="xmark.circle.fill"
+                    />
+                  </Center>
+                );
+              }}
+            />
+          ) : (
+            <VStack
+              style={{
+                marginTop: spacing.sm,
+                marginBottom: spacing.md,
+                paddingLeft: spacing.xs,
+                paddingVertical: spacing.xxs,
+                paddingRight: spacing.xxs,
+                borderRadius: borderRadius.xxs,
+                borderWidth: borderWidth.sm,
+                borderColor: colors.border.inverted.subtle,
+              }}
+            >
+              <Text color="secondary" preset="smaller">
+                {translate("onboarding.contactCard.name")}
+              </Text>
+              <Text preset="small">{displayName}</Text>
+            </VStack>
+          )}
+        </ContactCardContainer>
+
+        {/* </VStack> */}
       </AnimatedVStack>
     );
   }
