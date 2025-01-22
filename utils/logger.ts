@@ -119,7 +119,8 @@ const lightSystemColorScheme: ReactNativeLogColorScheme = {
 };
 
 const activeColorScheme: ReactNativeLogColorScheme =
-  getConfig().loggerColorScheme === "dark"
+  // @ts-ignore
+  process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME === "dark"
     ? darkSystemColorScheme
     : lightSystemColorScheme;
 
@@ -141,8 +142,20 @@ const logger = _logger as typeof _logger & {
   error: logMethodType;
 };
 
-export function logJson(json: any) {
-  console.log(JSON.stringify(json, null, 2));
+export function logJson({
+  json,
+  msg,
+  logLevel = "info",
+}: {
+  json: unknown;
+  msg?: string;
+  logLevel?: LogLevel;
+}) {
+  logger[logLevel](
+    msg
+      ? `${msg}: ${JSON.stringify(json, null, 2)}`
+      : JSON.stringify(json, null, 2)
+  );
 }
 
 export default logger;
