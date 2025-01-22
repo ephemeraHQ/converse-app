@@ -14,7 +14,7 @@ import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboa
 
 type OnboardingParamList = {
   OnboardingWelcome: undefined;
-  OnboardingContactCard: undefined;
+  OnboardingCreateContactCard: undefined;
 
   OnboardingGetStarted: undefined;
   OnboardingPrivy: undefined;
@@ -54,7 +54,7 @@ export const OnboardingNavigator = memo(function OnboardingNavigator() {
           options={{
             headerShown: false,
           }}
-          name="OnboardingContactCard"
+          name="OnboardingCreateContactCard"
           component={OnboardingContactCardScreen}
         />
         <OnboardingNativeStack.Screen

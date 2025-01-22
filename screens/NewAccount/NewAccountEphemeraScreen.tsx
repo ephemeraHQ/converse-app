@@ -35,7 +35,7 @@ export function NewAccountEphemeraScreen(
         isEphemeral: true,
       });
       if (isMissingConverseProfile()) {
-        router.navigate("NewAccountContactCard");
+        router.navigate("NewAccountCreateContactCard");
       } else {
         router.popTo("Chats");
       }

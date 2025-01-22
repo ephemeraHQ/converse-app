@@ -46,14 +46,14 @@ import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { ProfileNav, ProfileNavParams } from "@/features/profiles/profile.nav";
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
 import { OnboardingContactCardScreen } from "@features/onboarding/screens/onboarding-contact-card-screen";
-import { NewAccountContactCardScreen } from "../NewAccount/new-account-contact-card-screen";
+import { NewAccountCreateContactCardScreen } from "../NewAccount/new-account-create-contact-card-screen";
 
 export type NavigationParamList = {
   Idle: undefined;
 
   // Auth / Onboarding
   OnboardingWelcome: undefined;
-  OnboardingContactCard: undefined;
+  OnboardingCreateContactCard: undefined;
 
   OnboardingGetStarted: undefined;
   OnboardingPrivy: undefined;
@@ -66,7 +66,7 @@ export type NavigationParamList = {
 
   // New account
   NewAccountNavigator: undefined;
-  NewAccountContactCard: undefined;
+  NewAccountCreateContactCard: undefined;
   NewAccountConnectWallet: {
     address: string;
   };
@@ -213,7 +213,7 @@ export function SignedOutNavigation() {
             options={{
               headerShown: false,
             }}
-            name="OnboardingContactCard"
+            name="OnboardingCreateContactCard"
             component={OnboardingContactCardScreen}
           />
 
@@ -278,8 +278,8 @@ const NewAccountNavigator = memo(function NewAccountNavigator() {
           options={{
             headerShown: false,
           }}
-          name="NewAccountContactCard"
-          component={NewAccountContactCardScreen}
+          name="NewAccountCreateContactCard"
+          component={NewAccountCreateContactCardScreen}
         />
         <NewAccountStack.Screen
           name="NewAccountPrivy"

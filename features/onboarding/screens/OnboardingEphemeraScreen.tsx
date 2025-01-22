@@ -39,7 +39,7 @@ export function OnboardingEphemeraScreen(
         isEphemeral: true,
       });
       if (isMissingConverseProfile()) {
-        router.navigate("OnboardingContactCard");
+        router.navigate("OnboardingCreateContactCard");
       } else if (needToShowNotificationsPermissions()) {
         router.navigate("OnboardingNotifications");
       } else {

@@ -19,7 +19,7 @@ import { useRouter } from "@/navigation/useNavigation";
 import { Pressable } from "@/design-system/Pressable";
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import { formatRandoDisplayName } from "@/utils/str";
-import { OnboardingContactCard } from "@/features/onboarding/components/onboarding-contact-card";
+import { OnboardingCreateContactCard } from "@/features/onboarding/components/onboarding-contact-card";
 import { OnboardingContactCardThemeProvider } from "@/features/onboarding/components/onboarding-contact-card-provider";
 import logger from "@/utils/logger";
 import { captureErrorWithToast } from "@/utils/capture-error";
@@ -42,7 +42,11 @@ const $subtextPressableStyle: TextStyle = {
   textDecorationStyle: "dotted",
 };
 
-const $flex1: ViewStyle = {
+const $screenContainer: ViewStyle = {
+  flex: 1,
+};
+
+const $titleContainer: ViewStyle = {
   flex: 1,
 };
 
@@ -56,9 +60,12 @@ const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.sm,
 });
 
-export const NewAccountContactCardScreen = memo(
+export const NewAccountCreateContactCardScreen = memo(
   function NewAccountUserProfileScreen(
-    props: NativeStackScreenProps<NavigationParamList, "NewAccountContactCard">
+    props: NativeStackScreenProps<
+      NavigationParamList,
+      "NewAccountCreateContactCard"
+    >
   ) {
     const { navigation } = props;
 
@@ -102,7 +109,7 @@ export const NewAccountContactCardScreen = memo(
       try {
         const randomUsername = uuidv4().replace(/-/g, "").slice(0, 30);
         logger.debug(
-          "[NewAccountContactCardScreen] handleRandoContinue",
+          "[NewAccountCreateContactCardScreen] handleRandoContinue",
           randoDisplayName
         );
         const { success } = await createOrUpdateProfile({
@@ -112,7 +119,7 @@ export const NewAccountContactCardScreen = memo(
           },
         });
         logger.debug(
-          "[NewAccountContactCardScreen] handleRandoContinue success",
+          "[NewAccountCreateContactCardScreen] handleRandoContinue success",
           success
         );
         if (success) {
@@ -145,7 +152,7 @@ export const NewAccountContactCardScreen = memo(
     }, [profile, asset?.uri, createOrUpdateProfile, navigation]);
 
     const handleContinue = useCallback(() => {
-      logger.debug("[NewAccountContactCardScreen] handleContinue", type);
+      logger.debug("[NewAccountCreateContactCardScreen] handleContinue", type);
       if (type === "real") {
         handleRealContinue();
       } else {
@@ -156,11 +163,11 @@ export const NewAccountContactCardScreen = memo(
     return (
       <Screen
         preset="scroll"
-        contentContainerStyle={$flex1}
+        contentContainerStyle={$screenContainer}
         safeAreaEdges={["bottom"]}
       >
         <Center style={$centerContainerStyle}>
-          <VStack style={$flex1}>
+          <VStack style={$titleContainer}>
             {type === "real" ? (
               <OnboardingTitle entering={titleAnimation} size={"xl"}>
                 {translate("onboarding.contactCard.title")}
@@ -187,7 +194,7 @@ export const NewAccountContactCardScreen = memo(
             )}
             <OnboardingContactCardThemeProvider>
               {type === "real" ? (
-                <OnboardingContactCard
+                <OnboardingCreateContactCard
                   addPFP={addPFP}
                   pfpUri={asset?.uri}
                   displayName={profile.displayName}
@@ -196,7 +203,7 @@ export const NewAccountContactCardScreen = memo(
                   }
                 />
               ) : (
-                <OnboardingContactCard
+                <OnboardingCreateContactCard
                   editable={false}
                   addPFP={() => {}}
                   pfpUri={undefined}

@@ -40,7 +40,7 @@ export function OnboardingPrivateKeyScreen(
       if (!trimmedPrivateKey) return;
       await loginWithPrivateKey(trimmedPrivateKey);
       if (isMissingConverseProfile()) {
-        router.navigate("OnboardingContactCard");
+        router.navigate("OnboardingCreateContactCard");
       } else if (needToShowNotificationsPermissions()) {
         router.navigate("OnboardingNotifications");
       } else {

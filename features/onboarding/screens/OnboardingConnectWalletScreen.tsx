@@ -25,7 +25,7 @@ export const OnboardingConnectWalletScreen = memo(
 
     const handleDoneConnecting = useCallback(() => {
       if (isMissingConverseProfile()) {
-        router.navigate("OnboardingContactCard");
+        router.navigate("OnboardingCreateContactCard");
       } else if (needToShowNotificationsPermissions()) {
         router.navigate("OnboardingNotifications");
       } else {

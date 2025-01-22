@@ -24,7 +24,7 @@ const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginHorizontal: spacing.xxs,
 });
 
-const $flex2: ViewStyle = {
+const $textContainer: ViewStyle = {
   flex: 2,
 };
 
@@ -40,7 +40,7 @@ export const OnboardingNotificationRow = memo(
 
     return (
       <HStack style={themed($container)}>
-        <VStack style={$flex2}>
+        <VStack style={$textContainer}>
           <Text preset="body">{title}</Text>
           <Text preset="small" color={"secondary"}>
             {description}

@@ -31,7 +31,7 @@ const Content = memo(function Content() {
   usePrivyConnection({
     onConnectionDone: () => {
       if (isMissingConverseProfile()) {
-        router.navigate("NewAccountContactCard");
+        router.navigate("NewAccountCreateContactCard");
       } else {
         router.popTo("Chats");
       }

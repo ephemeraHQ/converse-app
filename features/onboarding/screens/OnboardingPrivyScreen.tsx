@@ -34,7 +34,7 @@ const Content = memo(function Content() {
   usePrivyConnection({
     onConnectionDone: () => {
       if (isMissingConverseProfile()) {
-        router.navigate("OnboardingContactCard");
+        router.navigate("OnboardingCreateContactCard");
       } else if (needToShowNotificationsPermissions()) {
         router.navigate("OnboardingNotifications");
       } else {

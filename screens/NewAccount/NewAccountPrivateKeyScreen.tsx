@@ -29,7 +29,7 @@ export const NewAccountPrivateKeyScreen = memo(function () {
       if (!trimmedPrivateKey) return;
       await loginWithPrivateKey(trimmedPrivateKey);
       if (isMissingConverseProfile()) {
-        router.navigate("NewAccountContactCard");
+        router.navigate("NewAccountCreateContactCard");
       } else {
         router.popTo("Chats");
       }

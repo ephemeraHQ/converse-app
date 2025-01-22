@@ -21,7 +21,7 @@ import { needToShowNotificationsPermissions } from "../Onboarding.utils";
 import { setAuthStatus } from "@/data/store/authStore";
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import { formatRandoDisplayName } from "@/utils/str";
-import { OnboardingContactCard } from "@/features/onboarding/components/onboarding-contact-card";
+import { OnboardingCreateContactCard } from "@/features/onboarding/components/onboarding-contact-card";
 import { OnboardingContactCardThemeProvider } from "@/features/onboarding/components/onboarding-contact-card-provider";
 import logger from "@/utils/logger";
 import { captureErrorWithToast } from "@/utils/capture-error";
@@ -42,7 +42,11 @@ const $subtextPressableStyle: TextStyle = {
   textDecorationStyle: "dotted",
 };
 
-const $flex1: ViewStyle = {
+const $screenContainer: ViewStyle = {
+  flex: 1,
+};
+
+const $titleContainer: ViewStyle = {
   flex: 1,
 };
 
@@ -158,11 +162,11 @@ export function OnboardingContactCardScreen() {
   return (
     <Screen
       preset="scroll"
-      contentContainerStyle={$flex1}
+      contentContainerStyle={$screenContainer}
       safeAreaEdges={["bottom"]}
     >
       <Center style={$centerContainerStyle}>
-        <VStack style={$flex1}>
+        <VStack style={$titleContainer}>
           {type === "real" ? (
             <OnboardingTitle entering={titleAnimation} size={"xl"}>
               {translate("onboarding.contactCard.title")}
@@ -189,7 +193,7 @@ export function OnboardingContactCardScreen() {
           )}
           <OnboardingContactCardThemeProvider>
             {type === "real" ? (
-              <OnboardingContactCard
+              <OnboardingCreateContactCard
                 addPFP={addPFP}
                 pfpUri={type === "real" ? asset?.uri : undefined}
                 displayName={profile.displayName}
@@ -198,7 +202,7 @@ export function OnboardingContactCardScreen() {
                 }
               />
             ) : (
-              <OnboardingContactCard
+              <OnboardingCreateContactCard
                 editable={false}
                 addPFP={() => {}}
                 pfpUri={undefined}

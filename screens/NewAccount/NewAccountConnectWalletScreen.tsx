@@ -18,7 +18,7 @@ export const NewAccountConnectWalletScreen = memo(
     const handleDoneConnecthing = useCallback(
       () => {
         if (isMissingConverseProfile()) {
-          router.navigate("NewAccountContactCard");
+          router.navigate("NewAccountCreateContactCard");
         } else {
           router.popTo("Chats");
         }

@@ -30,7 +30,11 @@ const $subtextStyle: TextStyle = {
   textAlign: "center",
 };
 
-const $flex1: ViewStyle = {
+const $screenContainer: ViewStyle = {
+  flex: 1,
+};
+
+const $titleContainer: ViewStyle = {
   flex: 1,
 };
 
@@ -75,7 +79,7 @@ const NewAccountScreenContent = memo(function NewAccountScreenContent() {
 
   const onConnectionDone = useCallback(() => {
     logger.debug("[NewAccountWelcomeScreenContent] onConnectionDone");
-    router.replace("NewAccountContactCard");
+    router.replace("NewAccountCreateContactCard");
   }, [router]);
 
   const onConnectionError = useCallback(
@@ -94,10 +98,10 @@ const NewAccountScreenContent = memo(function NewAccountScreenContent() {
   return (
     <Screen
       safeAreaEdges={["bottom"]}
-      contentContainerStyle={$flex1}
+      contentContainerStyle={$screenContainer}
       preset="scroll"
     >
-      <Center style={$flex1}>
+      <Center style={$titleContainer}>
         <VStack>
           <OnboardingSubtitle
             entering={animation
