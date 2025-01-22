@@ -1,5 +1,4 @@
 import Constants from "expo-constants";
-import logger from "./logger";
 import { isProd } from "./getEnv";
 
 /**
@@ -38,13 +37,14 @@ export const getApiUri = () => {
 
   // For development, replace localhost with device-accessible IP
   if (envApiUri?.includes("localhost")) {
-    logger.info("Replacing localhost with device-accessible IP");
+    // Removed logger to avoid circular dependency
+    console.log("Replacing localhost with device-accessible IP");
     // Try Expo host info first
     const hostIp = Constants.expoConfig?.hostUri?.split(":")[0];
-    logger.info("Host IP", { hostIp });
+    console.log("Host IP", { hostIp });
 
     if (hostIp) {
-      logger.info("Replacing localhost with device-accessible IP", {
+      console.log("Replacing localhost with device-accessible IP", {
         envApiUri,
         hostIp,
       });
