@@ -180,7 +180,7 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
   conversation: ConversationWithCodecsType;
 }) {
   const { conversation } = props;
-  const sendMessage = useSendMessage();
+  const { sendMessage } = useSendMessage();
 
   return (
     <ConversationComposerContainer>

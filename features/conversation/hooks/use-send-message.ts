@@ -66,7 +66,7 @@ export async function sendMessage(args: {
 }
 
 export function useSendMessage() {
-  const { mutateAsync: sendMessageMutationAsync } = useMutation({
+  const { mutateAsync, error, isError } = useMutation({
     mutationFn: (variables: ISendMessageParams) => {
       return sendMessage({ topic: variables.topic, params: variables });
     },
@@ -139,14 +139,20 @@ export function useSendMessage() {
     },
   });
 
-  return useCallback(
+  const sendMessageMutation = useCallback(
     async (args: ISendMessageParams) => {
       try {
-        await sendMessageMutationAsync(args);
+        await mutateAsync(args);
       } catch (error) {
         captureErrorWithToast(error);
       }
     },
-    [sendMessageMutationAsync]
+    [mutateAsync]
   );
+
+  return {
+    sendMessage: sendMessageMutation,
+    error,
+    isError,
+  };
 }

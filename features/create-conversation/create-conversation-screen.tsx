@@ -37,6 +37,7 @@ export function CreateConversationScreen({
   const [conversationMode, setConversationMode] = useState<ConversationVersion>(
     ConversationVersion.DM
   );
+  const { sendMessage, error, isError } = useSendMessage();
   const [searchQuery, setSearchQuery] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<
@@ -87,8 +88,6 @@ export function CreateConversationScreen({
     addressesToOmit: [...selectedAddresses, currentUserAddress],
   });
 
-  const sendMessage = useSendMessage();
-
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
 
@@ -109,54 +108,48 @@ export function CreateConversationScreen({
   );
 
   const handleSendMessage = async (content: { text: string }) => {
-    try {
-      const messageText = content.text;
-      if (!messageText) return;
+    const messageText = content.text;
+    if (!messageText) return;
 
-      if (conversationMode === ConversationVersion.DM) {
-        let dm = await getOptionalConversationByPeerByAccount({
-          account: currentAccount(),
-          peer: selectedUsers[0].address,
-          includeSync: true,
-        });
-        if (!dm) {
-          dm = await createConversationByAccount(
-            currentAccount(),
-            selectedUsers[0].address
-          );
-        }
-        await sendMessage({
-          topic: dm.topic,
-          content: { text: messageText },
-        });
-        setConversationQueryData({
-          account: currentAccount(),
-          topic: dm.topic,
-          conversation: dm,
-        });
-        navigation.replace("Conversation", { topic: dm.topic });
-      } else {
-        //todo(lustig) lookup group by list of addresses/inbox ids and optimstically create one if not found
-        // use useFindGroupByPeerIds
-        const group = await createGroupWithDefaultsByAccount({
-          account: currentAccount(),
-          peerEthereumAddresses: selectedUsers.map((m) => m.address),
-        });
-        await sendMessage({
-          topic: group.topic,
-          content: { text: messageText },
-        });
-        setConversationQueryData({
-          account: currentAccount(),
-          topic: group.topic,
-          conversation: group,
-        });
-        navigation.replace("Conversation", { topic: group.topic });
+    if (conversationMode === ConversationVersion.DM) {
+      let dm = await getOptionalConversationByPeerByAccount({
+        account: currentAccount(),
+        peer: selectedUsers[0].address,
+        includeSync: true,
+      });
+      if (!dm) {
+        dm = await createConversationByAccount(
+          currentAccount(),
+          selectedUsers[0].address
+        );
       }
-    } catch (e) {
-      const errorString = (e as Error)?.message || `Something went wrong`;
-      captureErrorWithToast(e);
-      setErrorMessage(errorString);
+      await sendMessage({
+        topic: dm.topic,
+        content: { text: messageText },
+      });
+      setConversationQueryData({
+        account: currentAccount(),
+        topic: dm.topic,
+        conversation: dm,
+      });
+      navigation.replace("Conversation", { topic: dm.topic });
+    } else {
+      //todo(lustig) lookup group by list of addresses/inbox ids and optimstically create one if not found
+      // use useFindGroupByPeerIds
+      const group = await createGroupWithDefaultsByAccount({
+        account: currentAccount(),
+        peerEthereumAddresses: selectedUsers.map((m) => m.address),
+      });
+      await sendMessage({
+        topic: group.topic,
+        content: { text: messageText },
+      });
+      setConversationQueryData({
+        account: currentAccount(),
+        topic: group.topic,
+        conversation: group,
+      });
+      navigation.replace("Conversation", { topic: group.topic });
     }
   };
 
