@@ -6,19 +6,23 @@ import {
 } from "@utils/fileSystem";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
-import { Client } from "@xmtp/react-native-sdk";
+import { Client, Signer as XmtpSigner } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
 import { isClientInstallationValid } from "./client";
-import { ethersSignerToXmtpSigner } from "./signer";
-import config from "../../config";
+import {
+  ethersSignerToXmtpSigner,
+  ViemAccount,
+  viemAccountToXmtpSigner,
+} from "./signer";
+import config from "@config";
 
 const env = config.xmtpEnv as "dev" | "production" | "local";
 
 export const getInboxId = (address: string) =>
   Client.getOrCreateInboxId(address, env);
 
-export const createXmtpClientFromSigner = async (
-  signer: Signer,
+const createXmtpClientFromXmtpSigner = async (
+  signer: XmtpSigner,
   onInstallationRevoked: () => Promise<void>,
   preAuthenticateToInboxCallback?: () => Promise<void>
 ) => {
@@ -37,7 +41,7 @@ export const createXmtpClientFromSigner = async (
 
   logger.debug("Instantiating client from signer");
 
-  const client = await Client.create(ethersSignerToXmtpSigner(signer), {
+  const client = await Client.create(signer, {
     ...options,
     preAuthenticateToInboxCallback,
   });
@@ -66,3 +70,25 @@ export const createXmtpClientFromSigner = async (
   );
   logger.debug("Dropped client databases");
 };
+
+export const createXmtpClientFromSigner = async (
+  signer: Signer,
+  onInstallationRevoked: () => Promise<void>,
+  preAuthenticateToInboxCallback?: () => Promise<void>
+) =>
+  createXmtpClientFromXmtpSigner(
+    ethersSignerToXmtpSigner(signer),
+    onInstallationRevoked,
+    preAuthenticateToInboxCallback
+  );
+
+export const createXmtpClientFromViemAccount = async (
+  account: ViemAccount,
+  onInstallationRevoked: () => Promise<void>,
+  preAuthenticateToInboxCallback?: () => Promise<void>
+) =>
+  createXmtpClientFromXmtpSigner(
+    viemAccountToXmtpSigner(account),
+    onInstallationRevoked,
+    preAuthenticateToInboxCallback
+  );

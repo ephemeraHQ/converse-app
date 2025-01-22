@@ -72,6 +72,8 @@ export const iconRegistry: Record<
   "new-account-card": "person",
   settings: "settings",
   restore: "restore",
+  biometric: "fingerprint",
+  camera: "camera",
 };
 
 export function Icon(props: IIconProps) {

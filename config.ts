@@ -1,6 +1,5 @@
 import { DEFAULT_SUPPORTED_CHAINS } from "@utils/evm/wallets";
 import { Platform } from "react-native";
-import { base, baseSepolia } from "wagmi/chains";
 import { getApiUri } from "./utils/apiConfig";
 import { Environments, isDev, isPreview } from "./utils/getEnv";
 
@@ -38,7 +37,7 @@ const defaultConfig = {
   expoProjectId: process.env.EXPO_PUBLIC_EXPO_PROJECT_ID,
   privy: {
     appId: process.env.EXPO_PUBLIC_PRIVY_APP_ID,
-    defaultChain: baseSepolia,
+    clientId: process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID,
   },
   evm: {
     transactionChainId: "0x14a34", // Base Sepolia
@@ -116,7 +115,7 @@ const ENV = {
     ]),
     privy: {
       appId: process.env.EXPO_PUBLIC_PRIVY_APP_ID,
-      defaultChain: base,
+      clientId: process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID,
     },
     evm: {
       transactionChainId: "0x2105", // Base Mainnet

@@ -6,6 +6,18 @@ const defaultConfig = getSentryExpoConfig(__dirname, {
   isCSSEnabled: true,
 });
 
+const resolveRequestWithPackageExports = (context, moduleName, platform) => {
+  if (moduleName.startsWith("@privy-io/")) {
+    const ctx = {
+      ...context,
+      unstable_enablePackageExports: true,
+    };
+    return ctx.resolveRequest(ctx, moduleName, platform);
+  }
+
+  return context.resolveRequest(context, moduleName, platform);
+};
+
 const converseMetroConfig = {
   ...defaultConfig,
   transformer: {
@@ -24,6 +36,7 @@ const converseMetroConfig = {
   },
   resolver: {
     ...defaultConfig.resolver,
+    resolveRequest: resolveRequestWithPackageExports,
     assetExts: defaultConfig.resolver.assetExts.filter((ext) => ext !== "svg"),
     // Expo 49 issue: default metro config needs to include "mjs"
     // https://github.com/expo/expo/issues/23180

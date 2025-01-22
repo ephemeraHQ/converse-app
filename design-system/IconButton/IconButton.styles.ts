@@ -48,6 +48,10 @@ export const getIconButtonViewStyle =
         width: spacing.xxl,
         height: spacing.xxl,
       },
+      xl: {
+        width: spacing["4xl"],
+        height: spacing["4xl"],
+      },
     };
 
     Object.assign(style, sizeStyles[size]);
@@ -131,6 +135,9 @@ export const getIconStyle =
       lg: {
         fontSize: spacing.xl,
       },
+      xl: {
+        fontSize: spacing.lg,
+      },
     };
 
     Object.assign(style, sizeStyles[size]);
@@ -172,46 +179,47 @@ export const getIconProps =
     pressed = false,
     disabled = false,
   }: IconButtonStyleProps) =>
-  (theme: Theme) =>
-    // TODO: fix once we fixed IconProps
+  (
+    theme: Theme // TODO: fix once we fixed IconProps
     // : Partial<IIconProps>
-    {
-      const { colors, spacing } = theme;
+  ) => {
+    const { colors, spacing } = theme;
 
-      const props: any =
-        // :Partial<IIconProps>
-        {};
+    const props: any =
+      // :Partial<IIconProps>
+      {};
 
-      // Set icon size
-      const sizeMap = {
-        sm: spacing.xs,
-        md: spacing.sm,
-        lg: spacing.lg,
-      };
-
-      props.size = sizeMap[size];
-
-      if (disabled && variant !== "fill") {
-        props.color = colors.text.tertiary;
-        return props;
-      }
-
-      if (action === "primary") {
-        switch (variant) {
-          case "fill":
-            props.color = colors.text.inverted.primary;
-            break;
-
-          case "outline":
-          case "subtle":
-          case "ghost":
-            props.color = colors.text.primary;
-            break;
-
-          default:
-            break;
-        }
-      }
-
-      return props;
+    // Set icon size
+    const sizeMap = {
+      sm: spacing.xs,
+      md: spacing.sm,
+      lg: spacing.lg,
+      xl: spacing.lg,
     };
+
+    props.size = sizeMap[size];
+
+    if (disabled && variant !== "fill") {
+      props.color = colors.text.tertiary;
+      return props;
+    }
+
+    if (action === "primary") {
+      switch (variant) {
+        case "fill":
+          props.color = colors.text.inverted.primary;
+          break;
+
+        case "outline":
+        case "subtle":
+        case "ghost":
+          props.color = colors.text.primary;
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    return props;
+  };

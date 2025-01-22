@@ -30,15 +30,12 @@ import { NewAccountConnectWalletScreen } from "../NewAccount/NewAccountConnectWa
 import { NewAccountEphemeraScreen } from "../NewAccount/NewAccountEphemeraScreen";
 import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeyScreen";
 import { NewAccountPrivyScreen } from "../NewAccount/NewAccountPrivyScreen";
-import { NewAccountScreen } from "../NewAccount/NewAccountScreen";
-import { NewAccountUserProfileScreen } from "../NewAccount/NewAccountUserProfileScreen";
-import { OnboardingConnectWalletScreen } from "../Onboarding/OnboardingConnectWalletScreen";
-import { OnboardingEphemeraScreen } from "../Onboarding/OnboardingEphemeraScreen";
-import { OnboardingGetStartedScreen } from "../Onboarding/OnboardingGetStartedScreen";
-import { OnboardingNotificationsScreen } from "../Onboarding/OnboardingNotificationsScreen";
-import { OnboardingPrivateKeyScreen } from "../Onboarding/OnboardingPrivateKeyScreen";
-import { OnboardingPrivyScreen } from "../Onboarding/OnboardingPrivyScreen";
-import { OnboardingUserProfileScreen } from "../Onboarding/OnboardingUserProfileScreen";
+import { NewAccountScreen } from "../NewAccount/new-account-screen";
+import { OnboardingConnectWalletScreen } from "@features/onboarding/screens/OnboardingConnectWalletScreen";
+import { OnboardingEphemeraScreen } from "@features/onboarding/screens/OnboardingEphemeraScreen";
+import { OnboardingNotificationsScreen } from "@features/onboarding/screens/onboarding-notifications-screen";
+import { OnboardingPrivateKeyScreen } from "@features/onboarding/screens/OnboardingPrivateKeyScreen";
+import { OnboardingPrivyScreen } from "@features/onboarding/screens/OnboardingPrivyScreen";
 import GroupNav, { GroupNavParams } from "./GroupNav";
 import ShareProfileNav from "./ShareProfileNav";
 import TopUpNav from "./TopUpNav";
@@ -47,11 +44,17 @@ import WebviewPreviewNav, {
 } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { ProfileNav, ProfileNavParams } from "@/features/profiles/profile.nav";
+import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
+import { OnboardingContactCardScreen } from "@features/onboarding/screens/onboarding-contact-card-screen";
+import { NewAccountCreateContactCardScreen } from "../NewAccount/new-account-create-contact-card-screen";
 
 export type NavigationParamList = {
   Idle: undefined;
 
   // Auth / Onboarding
+  OnboardingWelcome: undefined;
+  OnboardingCreateContactCard: undefined;
+
   OnboardingGetStarted: undefined;
   OnboardingPrivy: undefined;
   OnboardingConnectWallet: {
@@ -60,11 +63,10 @@ export type NavigationParamList = {
   OnboardingPrivateKey: undefined;
   OnboardingNotifications: undefined;
   OnboardingEphemeral: undefined;
-  OnboardingUserProfile: undefined;
 
   // New account
   NewAccountNavigator: undefined;
-  NewAccountUserProfile: undefined;
+  NewAccountCreateContactCard: undefined;
   NewAccountConnectWallet: {
     address: string;
   };
@@ -173,16 +175,6 @@ export function SignedInNavigation() {
             }}
           />
           <NativeStack.Screen
-            name="NewAccountUserProfile"
-            component={NewAccountUserProfileScreen}
-            options={{
-              headerLeft: () => (
-                <ScreenHeaderModalCloseButton onPress={router.goBack} />
-              ),
-              headerTitle: translate("profile.modify_profile"),
-            }}
-          />
-          <NativeStack.Screen
             name="NewAccountNavigator"
             component={NewAccountNavigator}
             options={{
@@ -214,9 +206,17 @@ export function SignedOutNavigation() {
             options={{
               headerShown: false,
             }}
-            name="OnboardingGetStarted"
-            component={OnboardingGetStartedScreen}
+            name="OnboardingWelcome"
+            component={OnboardingWelcomeScreen}
           />
+          <NativeStack.Screen
+            options={{
+              headerShown: false,
+            }}
+            name="OnboardingCreateContactCard"
+            component={OnboardingContactCardScreen}
+          />
+
           <NativeStack.Screen
             name="OnboardingPrivy"
             component={OnboardingPrivyScreen}
@@ -226,12 +226,11 @@ export function SignedOutNavigation() {
             component={OnboardingConnectWalletScreen}
           />
           <NativeStack.Screen
+            options={{
+              headerShown: false,
+            }}
             name="OnboardingNotifications"
             component={OnboardingNotificationsScreen}
-          />
-          <NativeStack.Screen
-            name="OnboardingUserProfile"
-            component={OnboardingUserProfileScreen}
           />
           <NativeStack.Screen
             name="OnboardingPrivateKey"
@@ -276,6 +275,13 @@ const NewAccountNavigator = memo(function NewAccountNavigator() {
           }}
         />
         <NewAccountStack.Screen
+          options={{
+            headerShown: false,
+          }}
+          name="NewAccountCreateContactCard"
+          component={NewAccountCreateContactCardScreen}
+        />
+        <NewAccountStack.Screen
           name="NewAccountPrivy"
           component={NewAccountPrivyScreen}
         />
@@ -286,10 +292,6 @@ const NewAccountNavigator = memo(function NewAccountNavigator() {
         <NewAccountStack.Screen
           name="NewAccountPrivateKey"
           component={NewAccountPrivateKeyScreen}
-        />
-        <NewAccountStack.Screen
-          name="NewAccountUserProfile"
-          component={NewAccountUserProfileScreen}
         />
         <NewAccountStack.Screen
           name="NewAccountEphemera"

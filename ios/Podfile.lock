@@ -22,9 +22,9 @@ PODS:
   - DoubleConversion (1.1.6)
   - EASClient (0.13.1):
     - ExpoModulesCore
-  - EXApplication (6.0.1):
+  - EXApplication (6.0.2):
     - ExpoModulesCore
-  - EXConstants (17.0.3):
+  - EXConstants (17.0.4):
     - ExpoModulesCore
   - EXImageLoader (5.0.0):
     - ExpoModulesCore
@@ -244,6 +244,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - ExpoAppleAuthentication (7.1.3):
+    - ExpoModulesCore
   - ExpoAsset (11.0.1):
     - ExpoModulesCore
   - ExpoBackgroundFetch (13.0.3):
@@ -254,7 +256,7 @@ PODS:
     - ExpoModulesCore
   - ExpoContacts (14.0.2):
     - ExpoModulesCore
-  - ExpoCrypto (14.0.1):
+  - ExpoCrypto (14.0.2):
     - ExpoModulesCore
   - ExpoDevice (7.0.1):
     - ExpoModulesCore
@@ -284,7 +286,7 @@ PODS:
     - ExpoModulesCore
   - ExpoLinearGradient (14.0.1):
     - ExpoModulesCore
-  - ExpoLinking (7.0.3):
+  - ExpoLinking (7.0.4):
     - ExpoModulesCore
   - ExpoLocalization (16.0.0):
     - ExpoModulesCore
@@ -311,13 +313,15 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - ExpoSecureStore (14.0.0):
+  - ExpoNativeExtensions (0.0.3):
+    - ExpoModulesCore
+  - ExpoSecureStore (14.0.1):
     - ExpoModulesCore
   - ExpoSplashScreen (0.29.18):
     - ExpoModulesCore
   - ExpoSystemUI (4.0.6):
     - ExpoModulesCore
-  - ExpoWebBrowser (14.0.1):
+  - ExpoWebBrowser (14.0.2):
     - ExpoModulesCore
   - EXStructuredHeaders (4.0.0)
   - EXTaskManager (12.0.3):
@@ -2070,6 +2074,8 @@ PODS:
     - ComputableLayout (~> 0.7)
     - DGSwiftUtilities (~> 0.46.3)
     - ExpoModulesCore
+  - ReactNativePasskeys (0.3.1):
+    - ExpoModulesCore
   - rn-fetch-blob (0.12.0):
     - React-Core
   - RNAWSCognito (6.3.12):
@@ -2326,6 +2332,7 @@ DEPENDENCIES:
   - expo-dev-launcher (from `../node_modules/expo-dev-launcher`)
   - expo-dev-menu (from `../node_modules/expo-dev-menu`)
   - expo-dev-menu-interface (from `../node_modules/expo-dev-menu-interface/ios`)
+  - ExpoAppleAuthentication (from `../node_modules/expo-apple-authentication/ios`)
   - ExpoAsset (from `../node_modules/expo-asset/ios`)
   - ExpoBackgroundFetch (from `../node_modules/expo-background-fetch/ios`)
   - ExpoBlur (from `../node_modules/expo-blur/ios`)
@@ -2346,6 +2353,7 @@ DEPENDENCIES:
   - ExpoLinking (from `../node_modules/expo-linking/ios`)
   - ExpoLocalization (from `../node_modules/expo-localization/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
+  - "ExpoNativeExtensions (from `../node_modules/@privy-io/expo-native-extensions/ios`)"
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
   - ExpoSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
@@ -2435,6 +2443,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - ReactNativeIosContextMenu (from `../node_modules/react-native-ios-context-menu`)
   - ReactNativeIosUtilities (from `../node_modules/react-native-ios-utilities`)
+  - ReactNativePasskeys (from `../node_modules/react-native-passkeys/ios`)
   - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
   - RNAWSCognito (from `../node_modules/amazon-cognito-identity-js`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
@@ -2527,6 +2536,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-dev-menu"
   expo-dev-menu-interface:
     :path: "../node_modules/expo-dev-menu-interface/ios"
+  ExpoAppleAuthentication:
+    :path: "../node_modules/expo-apple-authentication/ios"
   ExpoAsset:
     :path: "../node_modules/expo-asset/ios"
   ExpoBackgroundFetch:
@@ -2567,6 +2578,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-localization/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core"
+  ExpoNativeExtensions:
+    :path: "../node_modules/@privy-io/expo-native-extensions/ios"
   ExpoSecureStore:
     :path: "../node_modules/expo-secure-store/ios"
   ExpoSplashScreen:
@@ -2736,6 +2749,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-ios-context-menu"
   ReactNativeIosUtilities:
     :path: "../node_modules/react-native-ios-utilities"
+  ReactNativePasskeys:
+    :path: "../node_modules/react-native-passkeys/ios"
   rn-fetch-blob:
     :path: "../node_modules/rn-fetch-blob"
   RNAWSCognito:
@@ -2792,8 +2807,8 @@ SPEC CHECKSUMS:
   DGSwiftUtilities: 2f0d35d5ff3d57bd70ccc42f15971460db202c41
   DoubleConversion: f16ae600a246532c4020132d54af21d0ddb2a385
   EASClient: d15d70e334b019ae5649609011cda761defe4b1a
-  EXApplication: 88ebf1a95f85faa5d2df160016d61f2d060e9438
-  EXConstants: 277129d9a42ba2cf1fad375e7eaa9939005c60be
+  EXApplication: 4c72f6017a14a65e338c5e74fca418f35141e819
+  EXConstants: 6b8c5653492349b3c3fe6b905c556bc45b360405
   EXImageLoader: e5da974e25b13585c196b658a440720c075482d5
   EXJSONUtils: 01fc7492b66c234e395dcffdd5f53439c5c29c93
   EXManifests: 8de88191fe548cd5aeafa4228ed92283b483b923
@@ -2803,12 +2818,13 @@ SPEC CHECKSUMS:
   expo-dev-launcher: 2c71832c9c8de589ccd690bd00b2b795e827cfb3
   expo-dev-menu: 50c0a1a19990f16c605db6890087b974651f4713
   expo-dev-menu-interface: 4baf2f8b3b79ce37cf4b900e4b3ba6df3384f0a1
+  ExpoAppleAuthentication: 52631ed9dcb71c65712a447bbb9a5667bb8fcf0c
   ExpoAsset: 6f7a8887cbb9fb39fdb0808e7f6f74ba0e1ae9b6
   ExpoBackgroundFetch: a25a06f2c45c943d3efc64db9d737a63a527e7c6
   ExpoBlur: 2b92367da8158eeaee9bfa940d82512a09c8e0c6
   ExpoClipboard: 8c704e60118cbdc5588a12abf02aec73ea404346
   ExpoContacts: d7fd420dfd4f934435e808213948cadfa9fdc42c
-  ExpoCrypto: 483fc758365923f89ddaab4327c21cae9534841d
+  ExpoCrypto: e97e864c8d7b9ce4a000bca45dddb93544a1b2b4
   ExpoDevice: 449822f2c45660c1ce83283dd51c67fe5404996c
   ExpoDocumentPicker: cb4e43f58f0b5806e15db9baac36c6d99d19ffdf
   ExpoFileSystem: a38e1bb58d77f41717293a7b73ebd4014d8cb8dd
@@ -2820,13 +2836,14 @@ SPEC CHECKSUMS:
   ExpoImagePicker: 4eff722eec3f969b3978a8a3b64efbe52f800905
   ExpoKeepAwake: 22173f45d767c7d37403fdf48292726901d69ce7
   ExpoLinearGradient: 18148bd38f98fa0229c1f9df23393b32ab6d2d32
-  ExpoLinking: 40e30b571ffb77b280a38bed137d89b21f46f2a0
+  ExpoLinking: 4a09f2f0dc1132607c20f5628ba30d94795ea73d
   ExpoLocalization: d81f70d53db94b31e4a0b1e11007424ea1011a1c
   ExpoModulesCore: 39d2589593805e3f5feeb1919a4c7f8af35c32b6
-  ExpoSecureStore: c9fa9d97af1472ddd579bc319762c1eb704afae9
+  ExpoNativeExtensions: ac2ffff99e3480446becd430cb2febe295d72ea4
+  ExpoSecureStore: 9a3665d7161dd1031be386e278bffd623658f316
   ExpoSplashScreen: b7d41a3769736c141e6f49780791e8757bc7ab09
   ExpoSystemUI: 778d700c6f38d3d7b8794460f50c1ca05c4f7462
-  ExpoWebBrowser: b658ba8a9161f1b54afb279591cfce2cb73330fa
+  ExpoWebBrowser: a212e6b480d8857d3e441fba51e0c968333803b3
   EXStructuredHeaders: 09c70347b282e3d2507e25fb4c747b1b885f87f6
   EXTaskManager: 5a684cca9e6c84ab339aa221d4fef5d2e6bbc159
   EXUpdates: da6f0dfa30391fa631d47b5f24e6a2c792dc85c8
@@ -2924,6 +2941,7 @@ SPEC CHECKSUMS:
   ReactCommon: 7da12c0f59956995a153de45835b64c89e0a4a57
   ReactNativeIosContextMenu: 116a1993b5fd6dc9f8cf703c32f47e8bcc22a618
   ReactNativeIosUtilities: 780b35bfc6dd1deab9e2bd76c579ad5ebe04be02
+  ReactNativePasskeys: f11a9ff48d8066f3c60e88b38ed10e8f82b77882
   rn-fetch-blob: 25612b6d6f6e980c6f17ed98ba2f58f5696a51ca
   RNAWSCognito: 7f374b06129b2efd233fe9fa5c60443d90126bc1
   RNCAsyncStorage: aa75595c1aefa18f868452091fa0c411a516ce11

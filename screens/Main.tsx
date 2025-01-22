@@ -1,4 +1,3 @@
-import { TransactionPreview } from "@components/TransactionPreview/TransactionPreview";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { backgroundColor } from "@styles/colors";
 import { useCheckCurrentInstallation } from "@utils/xmtpRN/client";
@@ -91,7 +90,6 @@ export default function Main() {
         >
           <NavigationContent />
         </NavigationContainer>
-        <TransactionPreview />
       </ThemeProvider>
     </>
   );

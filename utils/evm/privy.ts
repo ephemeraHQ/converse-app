@@ -15,7 +15,14 @@ import {
 
 import logger from "@utils/logger";
 
-export const usePrivySigner = (isOnboarding: boolean = false) => {
+type IPrivySignerParams = {
+  isOnboarding: boolean;
+};
+
+export const usePrivySigner = (
+  params: IPrivySignerParams = { isOnboarding: false }
+) => {
+  const { isOnboarding = false } = params;
   const currentAccount = useCurrentAccount();
   const privyAccountId = useAccountsStore((s) => s.privyAccountId);
   const { isReady: privyReady, user: privyUser } = usePrivy();

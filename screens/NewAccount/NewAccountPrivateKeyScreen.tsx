@@ -8,11 +8,11 @@ import { VStack } from "../../design-system/VStack";
 import { translate } from "../../i18n";
 import { useRouter } from "../../navigation/useNavigation";
 import { sentryTrackError } from "../../utils/sentry";
-import { isMissingConverseProfile } from "../Onboarding/Onboarding.utils";
+import { isMissingConverseProfile } from "../../features/onboarding/Onboarding.utils";
 import {
   PrivateKeyInput,
   useLoginWithPrivateKey,
-} from "../Onboarding/OnboardingPrivateKeyScreen";
+} from "../../features/onboarding/screens/OnboardingPrivateKeyScreen";
 import { useAppTheme } from "@theme/useAppTheme";
 
 export const NewAccountPrivateKeyScreen = memo(function () {
@@ -29,7 +29,7 @@ export const NewAccountPrivateKeyScreen = memo(function () {
       if (!trimmedPrivateKey) return;
       await loginWithPrivateKey(trimmedPrivateKey);
       if (isMissingConverseProfile()) {
-        router.navigate("NewAccountUserProfile");
+        router.navigate("NewAccountCreateContactCard");
       } else {
         router.popTo("Chats");
       }

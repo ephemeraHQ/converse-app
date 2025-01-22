@@ -1,9 +1,8 @@
-import { TransactionToTrigger } from "@components/TransactionPreview/TransactionPreview";
 import EventEmitter from "eventemitter3";
-import { TransactionReceipt } from "thirdweb/dist/types/transaction/types";
 import { Account, Wallet } from "thirdweb/wallets";
 
 import { GroupWithCodecsType } from "./xmtpRN/client.types";
+import type { TransactionReceipt } from "viem";
 
 type ShowActionSheetEvent<T extends string> = `showActionSheetForTxRef-${T}`;
 type OpenAttachmentMessage<T extends string> = `openAttachmentForMessage-${T}`;
@@ -20,7 +19,6 @@ type ConverseEvents = {
     wallet: Wallet | undefined;
     account: Account | undefined;
   }) => void;
-  previewTransaction: (transactionData: TransactionToTrigger) => void;
   transactionResult: (id: string, receipt?: TransactionReceipt) => void;
 };
 

@@ -6,6 +6,7 @@ export const spacing = {
   "6xs": 0.5,
   "5xs": 1,
   "4xs": 2,
+  "3xs": 3,
   xxxs: 4,
   xxs: 8,
   xs: 12,
@@ -15,10 +16,11 @@ export const spacing = {
   xl: 32,
   xxl: 40,
   "3xl": 48,
-  "4xl": 64,
-  "5xl": 80,
-  "6xl": 96,
-  "7xl": 128,
+  "4xl": 56,
+  "5xl": 64,
+  "6xl": 80,
+  "7xl": 96,
+  "8xl": 128, // Not Used
 
   message: {
     replyMessage: {

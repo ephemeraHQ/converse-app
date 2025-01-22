@@ -4,18 +4,22 @@ import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
 } from "react-native-reanimated";
+import * as Privy from "@privy-io/expo";
+// This is a requirement for Privy to work, does not make any sense
+// To test run yarn start --no-dev --minify
+const PrivyProvider = Privy.PrivyProvider;
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { useAppStateHandlers } from "@hooks/useAppStateHandlers";
-import { PrivyProvider } from "@privy-io/expo";
+import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 
-import { useAppTheme, useThemeProvider } from "@theme/useAppTheme";
+import { useThemeProvider } from "@theme/useAppTheme";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
@@ -48,6 +52,7 @@ import "./utils/splash/splash";
 import "./features/notifications/utils";
 import { setupAppAttest } from "@utils/appCheck";
 import { saveApiURI } from "./utils/sharedData";
+import { base } from "viem/chains";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -163,23 +168,30 @@ export default function AppWithProviders() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PrivyProvider appId={config.privy.appId} storage={privySecureStorage}>
-        <ThirdwebProvider>
-          <AppKeyboardProvider>
-            <ActionSheetProvider>
-              <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                <PaperProvider theme={paperTheme}>
-                  <GestureHandlerRootView style={{ flex: 1 }}>
-                    <BottomSheetModalProvider>
-                      <App />
-                      <Snackbars />
-                    </BottomSheetModalProvider>
-                  </GestureHandlerRootView>
-                </PaperProvider>
-              </ThemeProvider>
-            </ActionSheetProvider>
-          </AppKeyboardProvider>
-        </ThirdwebProvider>
+      <PrivyProvider
+        appId={config.privy.appId}
+        clientId={config.privy.clientId}
+        storage={privySecureStorage}
+        supportedChains={[base]}
+      >
+        <SmartWalletsProvider>
+          <ThirdwebProvider>
+            <AppKeyboardProvider>
+              <ActionSheetProvider>
+                <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
+                  <PaperProvider theme={paperTheme}>
+                    <GestureHandlerRootView style={{ flex: 1 }}>
+                      <BottomSheetModalProvider>
+                        <App />
+                        <Snackbars />
+                      </BottomSheetModalProvider>
+                    </GestureHandlerRootView>
+                  </PaperProvider>
+                </ThemeProvider>
+              </ActionSheetProvider>
+            </AppKeyboardProvider>
+          </ThirdwebProvider>
+        </SmartWalletsProvider>
       </PrivyProvider>
     </QueryClientProvider>
   );
