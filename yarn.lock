@@ -12945,6 +12945,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"babel-plugin-transform-remove-console@npm:^6.9.4":
+  version: 6.9.4
+  resolution: "babel-plugin-transform-remove-console@npm:6.9.4"
+  checksum: 10c0/8bb152eed6685b92c371d72be3d9107d879f64b507f3e255edd6a1fb4806e9bcf39011d6f32ce1d8d745fb3533d1da4d5c706eefa633fae25151866c986f2e24
+  languageName: node
+  linkType: hard
+
 "babel-preset-current-node-syntax@npm:^1.0.0":
   version: 1.0.1
   resolution: "babel-preset-current-node-syntax@npm:1.0.1"
@@ -14617,6 +14624,7 @@ __metadata:
     amazon-cognito-identity-js: "npm:^6.3.12"
     axios: "npm:^1.2.1"
     babel-plugin-module-resolver: "npm:^5.0.2"
+    babel-plugin-transform-remove-console: "npm:^6.9.4"
     base-64: "npm:^1.0.0"
     big.js: "npm:^6.2.1"
     browserify-zlib: "npm:^0.2.0"

@@ -82,6 +82,7 @@
     "amazon-cognito-identity-js": "^6.3.12",
     "axios": "^1.2.1",
     "babel-plugin-module-resolver": "^5.0.2",
+    "babel-plugin-transform-remove-console": "^6.9.4",
     "base-64": "^1.0.0",
     "big.js": "^6.2.1",
     "browserify-zlib": "^0.2.0",
