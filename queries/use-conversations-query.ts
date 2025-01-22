@@ -19,7 +19,9 @@ type IArgs = {
   account: string;
 };
 
-export const createConversationsQueryObserver = (args: IArgs) => {
+export const createConversationsQueryObserver = (
+  args: IArgs & { caller: string }
+) => {
   logger.debug(
     `[ConversationsQuery] createConversationsQueryObserver for account ${args.account}`
   );
@@ -30,15 +32,11 @@ export const useConversationsQuery = (args: IArgs & { caller: string }) => {
   return useQuery<IConversationsQuery>(getConversationsQueryOptions(args));
 };
 
-export const prefetchConversationsQuery = (args: IArgs) => {
-  return queryClient.prefetchQuery(getConversationsQueryOptions(args));
-};
-
-export const addConversationToConversationsQuery = (
+export function addConversationToConversationsQuery(
   args: IArgs & {
     conversation: ConversationWithCodecsType;
   }
-) => {
+) {
   const { account, conversation } = args;
   logger.debug(
     `[ConversationsQuery] addConversationToConversationsQuery for account ${account}`
@@ -67,6 +65,31 @@ export const addConversationToConversationsQuery = (
     getConversationsQueryOptions({ account }).queryKey,
     [conversation, ...previousConversationsData]
   );
+}
+
+export const removeConversationFromConversationsQuery = (
+  args: IArgs & {
+    topic: ConversationTopic;
+  }
+) => {
+  const { account, topic } = args;
+
+  logger.debug(
+    `[ConversationsQuery] removeConversationFromConversationsQuery for account ${account}`
+  );
+
+  const previousConversationsData = getConversationsQueryData({
+    account,
+  });
+
+  if (!previousConversationsData) {
+    return;
+  }
+
+  queryClient.setQueryData(
+    getConversationsQueryOptions({ account }).queryKey,
+    previousConversationsData.filter((c) => c.topic !== topic)
+  );
 };
 
 export const getConversationsQueryData = (args: IArgs) => {
@@ -75,23 +98,8 @@ export const getConversationsQueryData = (args: IArgs) => {
   );
 };
 
-const getConversations = async (
-  args: IArgs & {
-    // We want to track who's making new calls to the network
-    caller: string;
-  }
-) => {
-  const { account, caller } = args;
-
-  if (!caller) {
-    logger.warn(
-      `[ConversationsQuery] getConversations called without caller for account ${account}`
-    );
-  }
-
-  logger.debug(
-    `[ConversationsQuery] Fetching conversations from network for account ${account} with caller "${caller}"`
-  );
+const getConversations = async (args: IArgs) => {
+  const { account } = args;
 
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
 
@@ -103,7 +111,7 @@ const getConversations = async (
   if (timeDiff > 3000) {
     captureError(
       new Error(
-        `[ConversationsQuery] Fetching conversations from network took ${timeDiff}ms for account ${account} caller ${caller}`
+        `[ConversationsQuery] Fetching conversations from network took ${timeDiff}ms for account ${account}`
       )
     );
   }
@@ -118,7 +126,8 @@ const getConversations = async (
       lastMessage: true,
       description: true,
     },
-    20 // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
+    20, // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
+    ["allowed"]
   );
 
   // For now conversations have all the same properties as one conversation
@@ -135,20 +144,19 @@ const getConversations = async (
 
 export const getConversationsQueryOptions = (
   args: IArgs & {
-    // We make it optional here because lots of places we use react-query stuff like "getQueryData" will never call the queryFn.
-    // So we don't want to force them to add a caller argument
+    // Optional because we don't want functions that just get or set query data to have to pass caller
     caller?: string;
   }
 ) => {
   const { account, caller } = args;
   return queryOptions({
-    // since we don't want to add caller to the deps
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
+    meta: {
+      caller,
+    },
     queryKey: conversationsQueryKey(account),
     queryFn: () =>
       getConversations({
         account,
-        caller: caller!, // Let's assume that all places where we need a caller will have it otherwise we have warning logs anyway
       }),
     enabled: !!account,
     // Just for now because conversations are very important and

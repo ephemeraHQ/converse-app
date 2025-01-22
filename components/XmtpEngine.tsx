@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { getAccountsList, useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { stopStreamingConversations } from "../utils/xmtpRN/conversations";
+import { stopStreamingConversations } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-stream";
 import { syncConversationListXmtpClient } from "../utils/xmtpRN/sync";
 import { stopStreamingConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences-stream";
 

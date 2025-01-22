@@ -15,6 +15,7 @@ export function useConversationMessageById({
   const { data: messages } = useConversationMessagesQuery({
     account: currentAccount,
     topic: conversationTopic,
+    caller: "useConversationMessageById",
   });
 
   const cachedMessage = messages?.byId[messageId];

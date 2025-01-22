@@ -18,6 +18,10 @@ async function getConversationMessage(args: IArgs) {
     throw new Error("Message ID is required");
   }
 
+  if (!account) {
+    throw new Error("Account is required");
+  }
+
   logger.debug(
     `[useConversationMessage] Fetching message ${messageId} for account ${account}`
   );

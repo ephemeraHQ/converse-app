@@ -17,17 +17,16 @@ import {
 import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account";
 import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
 
-export function useDmConsentForCurrentAccount() {
+export function useAllowDmMutation() {
   const currentAccount = useCurrentAccount()!;
 
   return useMutation({
     mutationFn: async (args: {
-      consent: "allow" | "deny";
       peerInboxId: InboxId;
       conversationId: ConversationId;
       topic: ConversationTopic;
     }) => {
-      const { consent, peerInboxId, conversationId } = args;
+      const { peerInboxId, conversationId } = args;
       if (!peerInboxId) {
         throw new Error("Peer inbox id not found");
       }
@@ -36,23 +35,23 @@ export function useDmConsentForCurrentAccount() {
         updateConsentForGroupsForAccount({
           account: currentAccount,
           groupIds: [conversationId],
-          consent,
+          consent: "allow",
         }),
         updateInboxIdsConsentForAccount({
           account: currentAccount,
           inboxIds: [peerInboxId],
-          consent,
+          consent: "allow",
         }),
       ]);
     },
-    onMutate: ({ consent, topic }) => {
+    onMutate: ({ topic }) => {
       const conversation = getConversationQueryData({
         account: currentAccount,
         topic,
       });
       if (conversation) {
         const updatedDm = updateObjectAndMethods(conversation, {
-          state: consent === "allow" ? "allowed" : "denied",
+          state: "allowed",
         });
 
         setDmQueryData({
@@ -65,7 +64,7 @@ export function useDmConsentForCurrentAccount() {
           account: currentAccount,
           topic,
           conversationUpdate: {
-            state: consent === "allow" ? "allowed" : "denied",
+            state: "allowed",
           },
         });
 
@@ -73,7 +72,7 @@ export function useDmConsentForCurrentAccount() {
           account: currentAccount,
           topic,
           conversationUpdate: {
-            state: consent === "allow" ? "allowed" : "denied",
+            state: "allowed",
           },
         });
 

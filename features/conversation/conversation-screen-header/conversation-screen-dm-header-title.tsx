@@ -23,7 +23,11 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
 
   const { theme } = useAppTheme();
 
-  const { data: peerInboxId } = useDmPeerInboxId({ account, topic });
+  const { data: peerInboxId } = useDmPeerInboxId({
+    account,
+    topic,
+    caller: "DmConversationTitle",
+  });
 
   const peerAddress = usePreferredInboxAddress(peerInboxId!);
 

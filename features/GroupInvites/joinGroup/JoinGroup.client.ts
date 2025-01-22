@@ -220,11 +220,10 @@ export class JoinGroupClient {
       const allowGroupMutationObserver = createAllowGroupMutationObserver({
         account,
         topic,
-        groupId,
       });
       await allowGroupMutationObserver.mutate({
-        group: conversation as GroupWithCodecsType,
         account,
+        topic,
       });
 
       // Dynamically import setGroupStatus

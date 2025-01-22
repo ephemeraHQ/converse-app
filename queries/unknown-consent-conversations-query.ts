@@ -2,14 +2,13 @@ import { unknownConsentConversationsQueryKey } from "@/queries/QueryKeys";
 import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { captureError } from "@/utils/capture-error";
 import logger from "@/utils/logger";
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
 } from "@/utils/xmtpRN/client.types";
 import { getXmtpClient } from "@/utils/xmtpRN/sync";
-import { QueryObserver, queryOptions, useQuery } from "@tanstack/react-query";
-import { reactQueryPersister } from "@/utils/mmkv";
-import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
+import { queryOptions } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
 
@@ -49,7 +48,8 @@ async function getUnknownConversations(args: { account: string }) {
       lastMessage: true,
       description: true,
     },
-    20 // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
+    20, // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
+    ["unknown"]
   );
 
   // For now conversations have all the same properties as one conversation
@@ -77,9 +77,11 @@ export const addConversationToUnknownConsentConversationsQuery = (args: {
   conversation: ConversationWithCodecsType;
 }) => {
   const { account, conversation } = args;
+
   logger.debug(
     `[UnknownConversationsQuery] addConversationToUnknownConsentConversationsQuery for account ${account}`
   );
+
   const previousConversationsData = getUnknownConsentConversationsQueryData({
     account,
   });
@@ -178,10 +180,15 @@ export function getUnknownConsentConversationsQueryOptions(args: {
 }) {
   const { account, caller } = args;
   return queryOptions({
-    queryFn: () => getUnknownConversations({ account }),
+    meta: {
+      caller,
+    },
     queryKey: unknownConsentConversationsQueryKey(account),
+    queryFn: () =>
+      getUnknownConversations({
+        account,
+      }),
     enabled: !!account,
-    refetchOnMount: true,
-    persister: reactQueryPersister,
+    refetchOnMount: true, // Just for now to make sure we always have the lastest conversations
   });
 }

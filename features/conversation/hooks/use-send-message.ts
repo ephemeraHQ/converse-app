@@ -128,6 +128,7 @@ export function useSendMessage(props: {
       refetchConversationMessages({
         account: currentAccount,
         topic: conversation.topic,
+        caller: "useSendMessage mutation onError",
       }).catch(captureErrorWithToast);
     },
   });
