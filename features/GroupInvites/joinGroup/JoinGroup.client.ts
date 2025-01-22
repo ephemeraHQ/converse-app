@@ -27,6 +27,7 @@ import { JoinGroupResult } from "./joinGroup.types";
 import { IConversationsQuery } from "@/queries/use-conversations-query";
 import { entify } from "@/queries/entify";
 import { wait } from "@/utils/general";
+import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 
 const GROUP_JOIN_REQUEST_POLL_MAX_ATTEMPTS = 10;
 const GROUP_JOIN_REQUEST_POLL_INTERVAL_MS = 1000;
@@ -297,12 +298,12 @@ export class JoinGroupClient {
       const fixtureGroup: GroupData = {
         id: GroupIdUserAlreadyWasAMemberOf,
         createdAt: new Date().getTime(),
-        members: async () => [],
+        clientInstallationId: "clientInstallationId123" as InstallationId,
+        version: ConversationVersion.GROUP,
         topic: "topic123" as ConversationTopic,
         // has user been blocked?
         isGroupActive: true,
         state: "allowed",
-        creatorInboxId: async () => "0xabc" as InboxId,
         name: "Group Name",
         addedByInboxId: "0x123" as InboxId,
         imageUrlSquare: "https://www.google.com",
@@ -391,11 +392,11 @@ export class JoinGroupClient {
       const fixtureGroup: GroupData = {
         id: GroupIdUserIsAlreadyAMemberOf,
         createdAt: new Date().getTime(),
-        members: async () => [],
+        clientInstallationId: "clientInstallationId123" as InstallationId,
+        version: ConversationVersion.GROUP,
         topic: "topic123" as ConversationTopic,
         isGroupActive: true,
         state: "allowed",
-        creatorInboxId: async () => "0xabc" as InboxId,
         name: "Group Name",
         addedByInboxId: "0x123" as InboxId,
         imageUrlSquare: "https://www.google.com",
@@ -463,17 +464,15 @@ export class JoinGroupClient {
       } as const;
     };
 
-    const fixtureFetchGroupsByAccount = async (
-      account: string
-    ): Promise<GroupsDataEntity> => {
+    const fixtureFetchGroupsByAccount = async (): Promise<GroupsDataEntity> => {
       const fixtureGroup: GroupData = {
+        clientInstallationId: "clientInstallationId123" as InstallationId,
+        version: ConversationVersion.GROUP,
         id: GroupIdUserWasBlockedFrom,
         createdAt: new Date().getTime(),
-        members: async () => [],
         topic: "topic123" as ConversationTopic,
         isGroupActive: UserWasBlockedFromGroupActiveValue,
         state: "allowed",
-        creatorInboxId: async () => "0xabc" as InboxId,
         name: "Group Name",
         addedByInboxId: "0x123" as InboxId,
         imageUrlSquare: "https://www.google.com",

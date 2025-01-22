@@ -50,28 +50,3 @@ export const clearSecureMmkvForAccount = async (account: string) => {
   }
   delete secureMmkvByAccount[account];
 };
-
-const reactQueryMMKV = new MMKV({ id: "converse-react-query" });
-
-const reactQuerySyncStorage = {
-  getItem: (key: string) => {
-    const stringValue = reactQueryMMKV.getString(key);
-    return stringValue || null;
-  },
-  setItem: (key: string, value: string) => {
-    // Deleting before setting to avoid memory leak
-    // https://github.com/mrousavy/react-native-mmkv/issues/440
-    reactQueryMMKV.delete(key);
-    if (value) {
-      reactQueryMMKV.set(key, value);
-    }
-  },
-  removeItem: (key: string) => reactQueryMMKV.delete(key),
-};
-
-export const reactQueryPersister = experimental_createPersister({
-  storage: reactQuerySyncStorage,
-  maxAge: DEFAULT_GC_TIME,
-  serialize: stringify,
-  deserialize: parse,
-});

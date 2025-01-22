@@ -1,4 +1,3 @@
-import { useCurrentAccount } from "@/data/store/accountsStore";
 import {
   isGroupUpdatedMessage,
   isRemoteAttachmentMessage,
@@ -25,8 +24,6 @@ import { useEffect, useMemo } from "react";
 export const useMessagePlainText = (
   message: DecodedMessageWithCodecsType | undefined
 ) => {
-  const account = useCurrentAccount();
-
   // Not sure why we have this. Fixed the typing but need to check why it's needed.
   // I guess it's to make sure we have the data to display the people's name in group?
   // But we might have a better solution for that
@@ -49,14 +46,13 @@ export const useMessagePlainText = (
       });
       if (inboxIds.length > 0) {
         for (const inboxId of inboxIds) {
-          fetchInboxProfileSocialsQuery(account!, inboxId).catch(captureError);
+          fetchInboxProfileSocialsQuery(inboxId).catch(captureError);
         }
       }
     }
-  }, [message, account]);
+  }, [message]);
 
   return useMemo(() => {
-    if (!account) return "";
     if (!message) return "";
 
     try {
@@ -81,7 +77,6 @@ export const useMessagePlainText = (
       if (isGroupUpdatedMessage(message)) {
         const content = message.content();
         const initiatorSocials = getInboxProfileSocialsQueryData(
-          account,
           content.initiatedByInboxId
         );
         const initiatorName = getPreferredInboxName(initiatorSocials);
@@ -118,7 +113,6 @@ export const useMessagePlainText = (
         if (content.membersAdded.length > 0) {
           if (content.membersAdded.length === 1) {
             const memberSocials = getInboxProfileSocialsQueryData(
-              account,
               content.membersAdded[0].inboxId
             );
             const memberName = getPreferredInboxName(memberSocials);
@@ -139,7 +133,6 @@ export const useMessagePlainText = (
         if (content.membersRemoved.length > 0) {
           if (content.membersRemoved.length === 1) {
             const memberSocials = getInboxProfileSocialsQueryData(
-              account,
               content.membersRemoved[0].inboxId
             );
             const memberName = getPreferredInboxName(memberSocials);
@@ -172,5 +165,5 @@ export const useMessagePlainText = (
       });
       return message.fallback;
     }
-  }, [message, account]);
+  }, [message]);
 };

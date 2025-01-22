@@ -9,8 +9,13 @@ import {
 
 import { queryClient } from "./queryClient";
 import mmkv from "@/utils/mmkv";
+import { createPersister } from "./utils/persistence";
 
 type ProfileSocialsData = IProfileSocials | null | undefined;
+
+const profileSocialsPersister = createPersister<ProfileSocialsData>({
+  name: "profileSocials",
+});
 
 const profileSocialsQueryKey = (peerAddress: string): QueryKey => [
   "profileSocials",
@@ -35,15 +40,6 @@ const profileSocials = create({
 
 const fetchProfileSocials = async (peerAddress: string) => {
   const data = await profileSocials.fetch(peerAddress);
-
-  const key = profileSocialsQueryStorageKey(peerAddress);
-
-  mmkv.delete(key);
-
-  if (data) {
-    mmkv.set(key, JSON.stringify(data));
-  }
-
   return data;
 };
 
@@ -67,7 +63,7 @@ const profileSocialsQueryConfig = (peerAddress: string) => ({
     }
   },
   initialDataUpdatedAt: 0,
-  // persister: reactQueryPersister,
+  persister: profileSocialsPersister,
 });
 
 export const useProfileSocialsQuery = (peerAddress: string) => {

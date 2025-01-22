@@ -1,4 +1,3 @@
-import { useCurrentAccount } from "@/data/store/accountsStore";
 import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import { navigate } from "@/utils/navigation";
 import { getPreferredInboxAvatar } from "@/utils/profile";
@@ -18,11 +17,7 @@ export function ConversationSenderAvatar({
   inboxId,
 }: IConversationSenderAvatarProps) {
   const { senderAvatarSize } = useConversationMessageStyles();
-  const currentAccount = useCurrentAccount();
-  const { data: senderSocials } = useInboxProfileSocialsQuery(
-    currentAccount!,
-    inboxId
-  );
+  const { data: senderSocials } = useInboxProfileSocialsQuery(inboxId);
   const address = usePreferredInboxAddress(inboxId);
   const name = usePreferredInboxName(inboxId);
   const avatarUri = getPreferredInboxAvatar(senderSocials);

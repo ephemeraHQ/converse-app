@@ -6,9 +6,14 @@ import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 import { entifyWithAddress, EntityObjectWithAddress } from "./entify";
 import { queryClient } from "./queryClient";
 import { groupMembersQueryKey } from "./QueryKeys";
-import { getGroupQueryData, getOrFetchGroupQuery } from "./useGroupQuery";
+import { getOrFetchGroupQuery } from "./useGroupQuery";
+import { createPersister } from "./utils/persistence";
 
 export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
+
+const membersPersister = createPersister<GroupMembersSelectData>({
+  name: "members",
+});
 
 const fetchGroupMembers = async (args: {
   account: string;
@@ -47,6 +52,7 @@ export const getGroupMemberQueryOptions = (
     queryKey: groupMembersQueryKey(account, topic),
     queryFn: () => fetchGroupMembers({ account, topic }),
     enabled: !!topic && !!account,
+    persister: membersPersister,
   });
 };
 

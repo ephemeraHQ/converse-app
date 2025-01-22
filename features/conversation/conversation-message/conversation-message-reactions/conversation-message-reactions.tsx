@@ -106,10 +106,7 @@ function useMessageReactionsRolledUp() {
     )
   );
 
-  const inboxProfileSocialsQueries = useInboxProfileSocialsQueries(
-    currentAddress,
-    inboxIds
-  );
+  const inboxProfileSocialsQueries = useInboxProfileSocialsQueries(inboxIds);
 
   const membersSocials = inboxProfileSocialsQueries.map(
     ({ data: socials }, index) => {

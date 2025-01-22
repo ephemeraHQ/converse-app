@@ -1,17 +1,92 @@
 import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { captureError } from "@/utils/capture-error";
-import { reactQueryPersister } from "@/utils/mmkv";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
+  DmData,
+  GroupData,
 } from "@/utils/xmtpRN/client.types";
 import { conversationsQueryKey } from "@queries/QueryKeys";
 import { QueryObserver, queryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { getXmtpClient } from "@utils/xmtpRN/sync";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
+import {
+  ConversationTopic,
+  ConversationVersion,
+  DecodedMessage,
+  DecodedMessageUnion,
+  Dm,
+  Group,
+} from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
+import { createPersister, GenericPersistedQuery } from "./utils/persistence";
+import { DefaultContentTypes } from "@xmtp/react-native-sdk/build/lib/types/DefaultContentType";
+
+const conversationsPersister = createPersister<IConversationsQuery>({
+  name: "conversations",
+  deserialize: (persistedQueryString) => {
+    const persistedQuery = JSON.parse(
+      persistedQueryString
+    ) as GenericPersistedQuery<(GroupData | DmData)[]>;
+    const { state } = persistedQuery;
+    if (!state) {
+      return persistedQuery as GenericPersistedQuery<
+        ConversationWithCodecsType[]
+      >;
+    }
+    const { data } = state;
+    if (!data) {
+      return persistedQuery as GenericPersistedQuery<
+        ConversationWithCodecsType[]
+      >;
+    }
+    const conversations: ConversationWithCodecsType[] = data.map((c) => {
+      let lastMessage: DecodedMessageUnion<DefaultContentTypes> | undefined;
+      if (c.lastMessage) {
+        lastMessage = DecodedMessage.fromObject(c.lastMessage);
+      }
+
+      if (c.version === ConversationVersion.GROUP) {
+        return new Group(
+          c.clientInstallationId,
+          {
+            id: c.id,
+            createdAt: c.createdAt,
+            topic: c.topic,
+            name: c.name,
+            isActive: c.isGroupActive,
+            addedByInboxId: c.addedByInboxId,
+            imageUrlSquare: c.imageUrlSquare,
+            description: c.description,
+            consentState: c.state,
+            lastMessage,
+          },
+          lastMessage
+        );
+      }
+      return new Dm(
+        c.clientInstallationId,
+        {
+          id: c.id,
+          createdAt: c.createdAt,
+          topic: c.topic,
+          consentState: c.state,
+          lastMessage: c.lastMessage,
+        },
+        c.lastMessage
+      );
+    });
+    const deserialized: GenericPersistedQuery<ConversationWithCodecsType[]> = {
+      ...persistedQuery,
+      state: {
+        ...state,
+        data: conversations,
+      },
+    };
+    return deserialized;
+  },
+});
 
 export type IConversationsQuery = Awaited<ReturnType<typeof getConversations>>;
 
@@ -159,7 +234,7 @@ export const getConversationsQueryOptions = (
     // Just for now because conversations are very important and
     // we want to make sure we have all of them
     refetchOnMount: true,
-    persister: reactQueryPersister,
+    persister: conversationsPersister,
   });
 };
 

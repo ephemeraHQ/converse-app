@@ -1,6 +1,5 @@
 import { Center } from "@/design-system/Center";
 import { Avatar } from "@components/Avatar";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { HStack } from "@design-system/HStack";
 import { Pressable } from "@design-system/Pressable";
 import { ITextProps, Text } from "@design-system/Text";
@@ -76,8 +75,7 @@ type IChatGroupMemberLeftProps = {
 
 export function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
   const { themed } = useAppTheme();
-  const currentAccount = useCurrentAccount();
-  const { data } = useInboxProfileSocialsQuery(currentAccount!, inboxId);
+  const { data } = useInboxProfileSocialsQuery(inboxId);
   const { theme } = useAppTheme();
 
   const firstSocials = data?.[0];
@@ -122,8 +120,7 @@ type IChatGroupMemberJoinedProps = {
 
 function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
   const { themed } = useAppTheme();
-  const currentAccount = useCurrentAccount();
-  const { data } = useInboxProfileSocialsQuery(currentAccount!, inboxId);
+  const { data } = useInboxProfileSocialsQuery(inboxId);
   const { theme } = useAppTheme();
 
   const firstSocials = data?.[0];
@@ -173,11 +170,7 @@ function ChatGroupMetadataUpdate({
   initiatorInboxId,
 }: IChatGroupMetadataUpdateProps) {
   const { themed } = useAppTheme();
-  const currentAccount = useCurrentAccount();
-  const { data } = useInboxProfileSocialsQuery(
-    currentAccount!,
-    initiatorInboxId
-  );
+  const { data } = useInboxProfileSocialsQuery(initiatorInboxId);
   const { theme } = useAppTheme();
 
   const firstSocials = data?.[0];

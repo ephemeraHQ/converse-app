@@ -23,10 +23,7 @@ export const getProfile = async (
     }
   }
 
-  const inboxIdStorageKey = inboxProfileSocialsQueryStorageKey(
-    currentAccount,
-    inboxId
-  );
+  const inboxIdStorageKey = inboxProfileSocialsQueryStorageKey(inboxId);
   const mmkvString = mmkv.getString(inboxIdStorageKey);
   if (mmkvString) {
     const socials = JSON.parse(mmkvString) as IProfileSocials[];
@@ -39,10 +36,7 @@ export const getProfile = async (
     return profile;
   }
 
-  const inboxProfileSocials = await fetchInboxProfileSocialsQuery(
-    currentAccount,
-    inboxId
-  );
+  const inboxProfileSocials = await fetchInboxProfileSocialsQuery(inboxId);
 
   return inboxProfileSocials?.[0];
 };

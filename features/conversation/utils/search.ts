@@ -18,7 +18,7 @@ export const dmMatchesSearchQuery = async ({
   dm,
 }: DmSearchParams): Promise<boolean> => {
   const inboxId = await dm.peerInboxId();
-  if (await inboxIdMatchesSearchQuery({ account, searchQuery, inboxId })) {
+  if (await inboxIdMatchesSearchQuery({ searchQuery, inboxId })) {
     return true;
   }
   const members = await dm.members();
@@ -53,7 +53,6 @@ export const groupMatchesSearchQuery = async ({
   for (const member of members) {
     if (
       await inboxIdMatchesSearchQuery({
-        account,
         searchQuery,
         inboxId: member.inboxId,
       })
@@ -73,20 +72,18 @@ export const groupMatchesSearchQuery = async ({
 };
 
 type InboxIdSearchParams = {
-  account: string;
   searchQuery: string;
   inboxId: InboxId;
 };
 
 const inboxIdMatchesSearchQuery = async ({
-  account,
   searchQuery,
   inboxId,
 }: InboxIdSearchParams): Promise<boolean> => {
   if (inboxId.toLowerCase().includes(searchQuery.toLowerCase())) {
     return true;
   }
-  const profiles = getInboxProfileSocialsQueryData(account, inboxId);
+  const profiles = getInboxProfileSocialsQueryData(inboxId);
   if (!profiles) {
     return false;
   }

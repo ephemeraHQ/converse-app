@@ -4,7 +4,6 @@ import { useInboxProfileSocialsQueries } from "@/queries/useInboxProfileSocialsQ
 import { ObjectTyped } from "@/utils/objectTyped";
 import { getReactionContent } from "@/utils/xmtpRN/reactions";
 import GroupAvatar from "@components/GroupAvatar";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { Text } from "@design-system/Text";
 import { useAppTheme } from "@theme/useAppTheme";
 import { getPreferredInboxAvatar, getPreferredInboxName } from "@utils/profile";
@@ -90,9 +89,7 @@ type MessageReactionsItemProps = {
 const Item: FC<MessageReactionsItemProps> = ({ content, inboxIds }) => {
   const { theme } = useAppTheme();
 
-  const currentAccount = useCurrentAccount()!;
-
-  const queriesData = useInboxProfileSocialsQueries(currentAccount, inboxIds);
+  const queriesData = useInboxProfileSocialsQueries(inboxIds);
 
   const membersSocials = queriesData.map(({ data: socials }, index) => {
     return {

@@ -30,10 +30,7 @@ export function useGroupMembersInfoForCurrentAccount(args: {
 
   const memberInboxIds = useMemo(() => members?.ids ?? [], [members?.ids]);
 
-  const socialsData = useInboxProfileSocialsQueries(
-    currentAccount,
-    memberInboxIds
-  );
+  const socialsData = useInboxProfileSocialsQueries(memberInboxIds);
 
   const groupMembersInfo = useMemo(
     () =>

@@ -5,6 +5,7 @@ import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 import { useProfilesSocials } from "@/hooks/useProfilesSocials";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { copyToClipboard } from "@/utils/clipboard";
+import logger from "@/utils/logger";
 import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
 import { Avatar } from "@components/Avatar";
 import { GroupAvatarDumb } from "@components/GroupAvatar";
