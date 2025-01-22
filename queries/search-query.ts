@@ -24,8 +24,87 @@ import { accountCanMessagePeer } from "@/features/consent/account-can-message-pe
 import logger from "@/utils/logger";
 
 /**
- * Pure function to search for users by query
+ * Handles searching when searchQuery is a supported domain/ENS
  */
+async function handlePeerSearch(searchQuery: string): Promise<ISearchResult> {
+  logger.info(`[Search] Query ${searchQuery} is a supported peer format`);
+  const resolvedAddress = await getAddressForPeer(searchQuery);
+
+  if (!resolvedAddress) {
+    logger.info(`[Search] No address resolved for ${searchQuery}`);
+    return {
+      profileSearchResults: {},
+      message: "No address has been set for this domain.",
+    };
+  }
+
+  const address = getCleanAddress(resolvedAddress);
+  logger.info(`[Search] Resolved address ${address} for ${searchQuery}`);
+  logger.info(`[Search] Checking if ${address} is on XMTP`);
+
+  const addressIsOnXmtp = await accountCanMessagePeer({
+    account: currentAccount(),
+    peer: address,
+  });
+
+  if (!addressIsOnXmtp) {
+    logger.info(`[Search] ${address} is not on XMTP`);
+    return {
+      message: `${shortAddress(searchQuery)} is not on the XMTP network yet 😏`,
+      profileSearchResults: {},
+    };
+  }
+
+  logger.info(`[Search] ${address} is on XMTP, fetching profiles`);
+  const profiles = await searchProfilesForCurrentAccount(address);
+
+  if (!isEmptyObject(profiles)) {
+    logger.info(`[Search] Found profiles for ${address}, setting profile data`);
+    setProfileRecordSocialsQueryData(profiles);
+    return {
+      message: "",
+      profileSearchResults: profiles,
+    };
+  }
+
+  logger.info(
+    `[Search] No profiles found for ${address}, returning just address`
+  );
+  const justAddress: Record<string, IProfileSocials> = {
+    [address]: { address },
+  };
+  return {
+    message: "address is on xmtp but not on converse yet ;)",
+    profileSearchResults: justAddress,
+  };
+}
+
+/**
+ * Handles searching when searchQuery is a regular string (not a peer)
+ */
+async function handleGeneralSearch(
+  searchQuery: string
+): Promise<ISearchResult> {
+  logger.info(`[Search] Searching profiles for query: ${searchQuery}`);
+  const profiles = await searchProfilesForCurrentAccount(searchQuery);
+
+  if (!isEmptyObject(profiles)) {
+    logger.info(`[Search] Found profiles for query ${searchQuery}`);
+    setProfileRecordSocialsQueryData(profiles);
+    const filteredProfiles = { ...profiles };
+    return {
+      message: "",
+      profileSearchResults: filteredProfiles,
+    };
+  }
+
+  logger.info(`[Search] No profiles found for query ${searchQuery}`);
+  return {
+    message: `No profiles found for ${searchQuery}`,
+    profileSearchResults: {},
+  };
+}
+
 export async function searchUsers({
   searchQuery,
 }: {
@@ -34,7 +113,6 @@ export async function searchUsers({
   logger.info(`[Search] Starting search for query: ${searchQuery}`);
 
   if (searchQuery.length === 0) {
-    logger.info("[Search] Empty search query, returning empty results");
     return {
       message: "",
       profileSearchResults: {},
@@ -42,82 +120,10 @@ export async function searchUsers({
   }
 
   if (isSupportedPeer(searchQuery)) {
-    logger.info(`[Search] Query ${searchQuery} is a supported peer format`);
-    const resolvedAddress = await getAddressForPeer(searchQuery);
-
-    if (!resolvedAddress) {
-      logger.info(`[Search] No address resolved for ${searchQuery}`);
-      return {
-        profileSearchResults: {},
-        message: "No address has been set for this domain.",
-      };
-    }
-
-    logger.info(
-      `[Search] Resolved address ${resolvedAddress} for ${searchQuery}`
-    );
-    const address = getCleanAddress(resolvedAddress);
-    logger.info(`[Search] Checking if ${address} is on XMTP`);
-
-    const addressIsOnXmtp = await accountCanMessagePeer({
-      account: currentAccount(),
-      peer: address,
-    });
-
-    if (addressIsOnXmtp) {
-      logger.info(`[Search] ${address} is on XMTP, fetching profiles`);
-      const profiles = await searchProfilesForCurrentAccount(address);
-
-      if (!isEmptyObject(profiles)) {
-        logger.info(
-          `[Search] Found profiles for ${address}, setting profile data`
-        );
-        setProfileRecordSocialsQueryData(profiles);
-        return {
-          message: "",
-          profileSearchResults: profiles,
-        };
-      } else {
-        logger.info(
-          `[Search] No profiles found for ${address}, returning just address`
-        );
-        const justAddress: Record<string, IProfileSocials> = {
-          [address]: { address },
-        };
-        return {
-          message: "address is on xmtp but not on converse yet ;)",
-          profileSearchResults: justAddress,
-        };
-      }
-    } else {
-      logger.info(`[Search] ${address} is not on XMTP`);
-      return {
-        message: `${shortAddress(
-          searchQuery
-        )} is not on the XMTP network yet 😏`,
-        profileSearchResults: {},
-      };
-    }
-  } else {
-    logger.info(`[Search] Searching profiles for query: ${searchQuery}`);
-    const profiles = await searchProfilesForCurrentAccount(searchQuery);
-
-    if (!isEmptyObject(profiles)) {
-      logger.info(`[Search] Found profiles for query ${searchQuery}`);
-      setProfileRecordSocialsQueryData(profiles);
-      const filteredProfiles = { ...profiles };
-      return {
-        message: "",
-        profileSearchResults: filteredProfiles,
-      };
-    } else {
-      logger.info(`[Search] No profiles found for query ${searchQuery}`);
-      return {
-        message: `No profiles found for ${searchQuery}`,
-        profileSearchResults: {},
-      };
-    }
+    return handlePeerSearch(searchQuery);
   }
+
+  return handleGeneralSearch(searchQuery);
 }
 
 const SearchResultStaleTime = 1000 * 60 * 5; // 5 minutes
