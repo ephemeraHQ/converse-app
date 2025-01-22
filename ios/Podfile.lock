@@ -2084,8 +2084,6 @@ PODS:
     - React-Core
   - RNCClipboard (1.14.1):
     - React-Core
-  - RNDeviceInfo (10.9.0):
-    - React-Core
   - RNFBApp (21.4.0):
     - Firebase/CoreOnly (<= 11.4.0)
     - React-Core
@@ -2448,7 +2446,6 @@ DEPENDENCIES:
   - RNAWSCognito (from `../node_modules/amazon-cognito-identity-js`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
-  - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAppCheck (from `../node_modules/@react-native-firebase/app-check`)"
   - "RNFlashList (from `../node_modules/@shopify/flash-list`)"
@@ -2759,8 +2756,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCClipboard:
     :path: "../node_modules/@react-native-clipboard/clipboard"
-  RNDeviceInfo:
-    :path: "../node_modules/react-native-device-info"
   RNFBApp:
     :path: "../node_modules/@react-native-firebase/app"
   RNFBAppCheck:
@@ -2946,7 +2941,6 @@ SPEC CHECKSUMS:
   RNAWSCognito: 7f374b06129b2efd233fe9fa5c60443d90126bc1
   RNCAsyncStorage: aa75595c1aefa18f868452091fa0c411a516ce11
   RNCClipboard: 4598dae0fe33e2aa130d9d213e2007be78310266
-  RNDeviceInfo: 8af23685571b7867d8dc15fb89e7fb5fa8607e1e
   RNFBApp: 21cbda2e7d2657cd3c92f490c050f5f0905d2ff0
   RNFBAppCheck: b29eba01cd2aaf193e34386e62c32d21cf9d353b
   RNFlashList: e0175aeaa401a4b0b20b2f204d48d457f2254d96
