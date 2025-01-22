@@ -100,7 +100,7 @@ async function handleGeneralSearch(
 
   logger.info(`[Search] No profiles found for query ${searchQuery}`);
   return {
-    message: `No profiles found for ${searchQuery}`,
+    message: `They're not here\nInvite them?`,
     profileSearchResults: {},
   };
 }
@@ -144,11 +144,16 @@ export const useSearchQuery = (args: ISearchArgs) => {
   } = useQuery(getSearchQueryOptions(searchQuery));
   const currentAccount = getCurrentAccount()!;
   const currentAccountAddress = getCleanAddress(currentAccount);
-  const allAddressesToOmit = [...args.addressesToOmit, currentAccountAddress];
+  const allAddressesToOmit = [
+    ...args.addressesToOmit,
+    currentAccountAddress,
+  ].map((address) => address.toLowerCase());
 
-  for (const address of allAddressesToOmit) {
-    if (profileSearchResults && profileSearchResults[address]) {
-      delete profileSearchResults[address];
+  for (const address of Object.keys(profileSearchResults || {})) {
+    if (allAddressesToOmit.includes(address)) {
+      if (profileSearchResults) {
+        delete profileSearchResults[address];
+      }
     }
   }
 

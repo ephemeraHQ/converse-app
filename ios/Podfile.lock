@@ -317,6 +317,8 @@ PODS:
     - ExpoModulesCore
   - ExpoSecureStore (14.0.1):
     - ExpoModulesCore
+  - ExpoSharing (13.0.1):
+    - ExpoModulesCore
   - ExpoSplashScreen (0.29.18):
     - ExpoModulesCore
   - ExpoSystemUI (4.0.6):
@@ -2353,6 +2355,7 @@ DEPENDENCIES:
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - "ExpoNativeExtensions (from `../node_modules/@privy-io/expo-native-extensions/ios`)"
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
+  - ExpoSharing (from `../node_modules/expo-sharing/ios`)
   - ExpoSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
@@ -2579,6 +2582,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@privy-io/expo-native-extensions/ios"
   ExpoSecureStore:
     :path: "../node_modules/expo-secure-store/ios"
+  ExpoSharing:
+    :path: "../node_modules/expo-sharing/ios"
   ExpoSplashScreen:
     :path: "../node_modules/expo-splash-screen/ios"
   ExpoSystemUI:
@@ -2836,6 +2841,7 @@ SPEC CHECKSUMS:
   ExpoModulesCore: 39d2589593805e3f5feeb1919a4c7f8af35c32b6
   ExpoNativeExtensions: ac2ffff99e3480446becd430cb2febe295d72ea4
   ExpoSecureStore: 9a3665d7161dd1031be386e278bffd623658f316
+  ExpoSharing: 849a5ce9985c22598c16ec027e32969be8062e8e
   ExpoSplashScreen: b7d41a3769736c141e6f49780791e8757bc7ab09
   ExpoSystemUI: 778d700c6f38d3d7b8794460f50c1ca05c4f7462
   ExpoWebBrowser: a212e6b480d8857d3e441fba51e0c968333803b3
