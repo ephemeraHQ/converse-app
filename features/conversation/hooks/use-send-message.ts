@@ -37,6 +37,7 @@ export async function sendMessage(args: ISendMessageParams) {
   const conversation = await getOrFetchConversation({
     topic,
     account: getCurrentAccount()!,
+    caller: "use-send-message#sendMessage",
   });
 
   if (!conversation) {
