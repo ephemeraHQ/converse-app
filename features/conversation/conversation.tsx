@@ -97,6 +97,7 @@ export const Conversation = memo(function Conversation(props: {
     useConversationQuery({
       account: currentAccount,
       topic,
+      caller: "Conversation screen",
     });
 
   useHeader({
@@ -217,6 +218,7 @@ const Messages = memo(function Messages(props: {
   } = useConversationMessagesQuery({
     account: currentAccount,
     topic,
+    caller: "Conversation Messages",
   });
 
   // For now we want to make sure we don't miss any messages.

@@ -11,13 +11,13 @@ import {
   type ConversationTopic,
   type ReactionContent,
 } from "@xmtp/react-native-sdk";
-import {
-  MessageId,
-  MessagesOptions,
-} from "@xmtp/react-native-sdk/build/lib/types";
+import { MessageId } from "@xmtp/react-native-sdk/build/lib/types";
 import { conversationMessagesQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
-import { getConversationQueryData } from "./useConversationQuery";
+import {
+  getConversationQueryData,
+  getOrFetchConversation,
+} from "./useConversationQuery";
 
 export type ConversationMessagesQueryData = Awaited<
   ReturnType<typeof conversationMessagesQueryFn>
@@ -26,9 +26,8 @@ export type ConversationMessagesQueryData = Awaited<
 const conversationMessagesQueryFn = async (args: {
   account: string;
   topic: ConversationTopic;
-  options?: MessagesOptions;
 }) => {
-  const { account, topic, options } = args;
+  const { account, topic } = args;
 
   if (!account) {
     throw new Error("account is required");
@@ -39,31 +38,30 @@ const conversationMessagesQueryFn = async (args: {
   }
 
   // If we are getting the messages it means we have the conversation in the query cache for sure or it's a bug
-  const conversation = getConversationQueryData({
+  const conversation = await getOrFetchConversation({
     account,
     topic,
+    caller: "conversationMessagesQueryFn",
   });
 
   if (!conversation) {
     throw new Error("Conversation not found");
   }
 
-  logger.debug(
-    `[useConversationMessages] Fetching messages for ${topic} with options ${JSON.stringify(
-      options
-    )}`
-  );
-
   const start = performance.now();
+
   await conversation.sync();
-  const messages = await conversation.messages(options);
-  const end = performance.now();
-  const timeDiff = end - start;
+
+  const messages = await conversation.messages({
+    limit: 30, // Fetch limited messages for better performance until pagination is implemented
+  });
+
+  const timeDiff = performance.now() - start;
 
   if (timeDiff > 3000) {
     captureError(
       new Error(
-        `[useConversationMessages] Fetched ${messages.length} messages in ${timeDiff}ms`
+        `[useConversationMessages] Fetched ${messages.length} messages in ${timeDiff}ms for conversation ${topic}`
       )
     );
   }
@@ -76,6 +74,7 @@ const conversationMessagesQueryFn = async (args: {
 export const useConversationMessagesQuery = (args: {
   account: string;
   topic: ConversationTopic;
+  caller: string;
 }) => {
   return useQuery(getConversationMessagesQueryOptions(args));
 };
@@ -92,6 +91,7 @@ export const getConversationMessagesQueryData = (args: {
 export function refetchConversationMessages(args: {
   account: string;
   topic: ConversationTopic;
+  caller: string;
 }) {
   logger.debug("[refetchConversationMessages] refetching messages");
   return queryClient.refetchQueries(getConversationMessagesQueryOptions(args));
@@ -120,27 +120,27 @@ export const addConversationMessageQuery = (args: {
 export const prefetchConversationMessages = async (args: {
   account: string;
   topic: ConversationTopic;
+  caller: string;
 }) => {
-  const { account, topic } = args;
-  return queryClient.prefetchQuery(
-    getConversationMessagesQueryOptions({ account, topic })
-  );
+  return queryClient.prefetchQuery(getConversationMessagesQueryOptions(args));
 };
 
 export function getConversationMessagesQueryOptions(args: {
   account: string;
   topic: ConversationTopic;
+  caller?: string; // Optional because we don't want functions that just get or set query data to have to pass caller
 }) {
-  const { account, topic } = args;
+  const { account, topic, caller } = args;
   const conversation = getConversationQueryData({
     account,
     topic,
   });
   return queryOptions({
-    queryKey: conversationMessagesQueryKey(account, topic),
-    queryFn: () => {
-      return conversationMessagesQueryFn({ account, topic });
+    meta: {
+      caller,
     },
+    queryKey: conversationMessagesQueryKey(account, topic),
+    queryFn: () => conversationMessagesQueryFn({ account, topic }),
     enabled: !!conversation,
     refetchOnMount: true, // Just for now because messages are very important and we want to make sure we have all of them
   });

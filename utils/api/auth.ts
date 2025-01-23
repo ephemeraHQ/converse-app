@@ -1,11 +1,3 @@
-import {
-  CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
-  CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
-  FIREBASE_APP_CHECK_HEADER_KEY,
-  XMTP_API_ADDRESS_HEADER_KEY,
-  XMTP_IDENTITY_KEY,
-} from "@/utils/api/api.constants";
-import { createDedupedFetcher } from "@/utils/api/api.utils";
 import { tryGetAppCheckToken } from "../appCheck";
 import logger from "../logger";
 import { getSecureMmkvForAccount } from "../mmkv";
@@ -15,6 +7,14 @@ import {
 } from "../xmtpRN/client";
 import { getInboxId } from "../xmtpRN/signIn";
 import { api } from "./api";
+import {
+  CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
+  CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
+  FIREBASE_APP_CHECK_HEADER_KEY,
+  XMTP_API_ADDRESS_HEADER_KEY,
+  XMTP_IDENTITY_KEY,
+} from "./api.constants";
+import { createDedupedFetcher } from "./api.utils";
 
 export type AuthResponse = {
   accessToken: string;
@@ -81,11 +81,10 @@ export async function rotateAccessToken(
   account: string,
   refreshToken: string | undefined
 ): Promise<AuthResponse> {
-  logger.info(`Rotating access token for account ${account}`);
+  logger.debug(`Rotating access token for account ${account}`);
+
   if (!refreshToken) {
-    throw new Error(
-      "Can't request new access token without current token and refresh token"
-    );
+    throw new Error("Can't request new access token without refresh token");
   }
 
   const { data } = await dedupedFetch(
@@ -94,22 +93,20 @@ export async function rotateAccessToken(
       api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
   );
 
-  if (!data) {
-    throw new Error(`Could not rotate access token for account ${account}`);
+  if (!data?.accessToken) {
+    throw new Error(`Failed to rotate access token for account ${account}`);
   }
-  if (!data.accessToken) {
-    throw new Error(
-      `No access token in token rotate response for account ${account}`
-    );
-  }
-  logger.info(`Rotated access token for account ${account}`, { data });
+
   const secureMmkv = await getSecureMmkvForAccount(account);
   secureMmkv.set(CONVERSE_ACCESS_TOKEN_STORAGE_KEY, data.accessToken);
+
   if (data.refreshToken) {
     secureMmkv.set(CONVERSE_REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
   } else {
     logger.warn("No refresh token in token rotate response");
   }
+
+  logger.debug(`Successfully rotated access token for account ${account}`);
   return data;
 }
 

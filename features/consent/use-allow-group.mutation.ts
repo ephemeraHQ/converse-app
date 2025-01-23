@@ -1,5 +1,18 @@
-import { updateConversationInConversationsQueryData } from "@/queries/use-conversations-query";
-import { captureError } from "@/utils/capture-error";
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import {
+  addConversationToUnknownConsentConversationsQuery,
+  removeConversationFromUnknownConsentConversationsQueryData,
+} from "@/queries/unknown-consent-conversations-query";
+import {
+  addConversationToConversationsQuery,
+  removeConversationFromConversationsQuery,
+} from "@/queries/use-conversations-query";
+import {
+  getGroupQueryData,
+  getOrFetchGroupQuery,
+  setGroupQueryData,
+} from "@/queries/useGroupQuery";
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { queryClient } from "@queries/queryClient";
 import {
@@ -8,135 +21,152 @@ import {
   useMutation,
 } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
-import {
-  ConsentState,
-  ConversationId,
-  ConversationTopic,
-  InboxId,
-} from "@xmtp/react-native-sdk";
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { MutationKeys } from "../../queries/MutationKeys";
 import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account";
 import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
-import {
-  getGroupConsentQueryData,
-  setGroupConsentQueryData,
-} from "./use-group-consent.query";
 
-export type AllowGroupMutationProps = {
+type IAllowGroupMutationOptions = {
   account: string;
   topic: ConversationTopic;
-  groupId: ConversationId;
 };
 
-export type AllowGroupMutationVariables = {
+type IAllowGroupReturnType = Awaited<ReturnType<typeof allowGroup>>;
+
+type IAllowGroupArgs = {
   includeAddedBy?: boolean;
   includeCreator?: boolean;
-  group: GroupWithCodecsType;
   account: string;
+  topic: ConversationTopic;
 };
 
-export type IUseAllowGroupMutationOptions = MutationOptions<
-  string,
-  unknown,
-  AllowGroupMutationVariables,
-  {
-    previousConsent: ConsentState | undefined;
+async function allowGroup({
+  includeAddedBy,
+  includeCreator,
+  account,
+  topic,
+}: IAllowGroupArgs) {
+  const group = await getOrFetchGroupQuery({
+    account,
+    topic,
+    caller: "allowGroup",
+  });
+
+  if (!group) {
+    throw new Error("Group not found");
   }
->;
+
+  if (!isConversationGroup(group)) {
+    throw new Error("Group is not a valid group");
+  }
+
+  const groupTopic = group.topic;
+  const groupCreator = await group.creatorInboxId();
+
+  const inboxIdsToAllow: InboxId[] = [];
+  if (includeAddedBy && group?.addedByInboxId) {
+    inboxIdsToAllow.push(group.addedByInboxId);
+  }
+
+  if (includeCreator && groupCreator) {
+    inboxIdsToAllow.push(groupCreator);
+  }
+
+  await Promise.all([
+    updateConsentForGroupsForAccount({
+      account,
+      groupIds: [getV3IdFromTopic(groupTopic)],
+      consent: "allow",
+    }),
+    ...(inboxIdsToAllow.length > 0
+      ? [
+          updateInboxIdsConsentForAccount({
+            account,
+            inboxIds: inboxIdsToAllow,
+            consent: "allow",
+          }),
+        ]
+      : []),
+  ]);
+
+  return "allowed" as const;
+}
 
 export const getAllowGroupMutationOptions = (
-  account: string,
-  topic: ConversationTopic
-): IUseAllowGroupMutationOptions => {
+  args: IAllowGroupMutationOptions
+): MutationOptions<
+  IAllowGroupReturnType,
+  unknown,
+  IAllowGroupArgs,
+  { previousGroup: GroupWithCodecsType } | undefined
+> => {
+  const { account, topic } = args;
   return {
     mutationKey: [MutationKeys.ALLOW_GROUP, account, topic],
-    mutationFn: async (args: AllowGroupMutationVariables) => {
-      const { includeAddedBy, includeCreator, group, account } = args;
+    mutationFn: allowGroup,
+    onMutate: async (args) => {
+      const { account } = args;
 
-      const groupTopic = group.topic;
-      const groupCreator = await group.creatorInboxId();
+      const previousGroup = getGroupQueryData({ account, topic });
 
-      const inboxIdsToAllow: InboxId[] = [];
-      if (includeAddedBy && group?.addedByInboxId) {
-        inboxIdsToAllow.push(group.addedByInboxId);
+      if (!previousGroup) {
+        throw new Error("Previous group not found");
       }
 
-      if (includeCreator && groupCreator) {
-        inboxIdsToAllow.push(groupCreator);
-      }
-
-      await Promise.all([
-        updateConsentForGroupsForAccount({
-          account,
-          groupIds: [getV3IdFromTopic(groupTopic)],
-          consent: "allow",
-        }),
-        ...(inboxIdsToAllow.length > 0
-          ? [
-              updateInboxIdsConsentForAccount({
-                account,
-                inboxIds: inboxIdsToAllow,
-                consent: "allow",
-              }),
-            ]
-          : []),
-      ]);
-
-      return "allowed";
-    },
-    onMutate: (args: AllowGroupMutationVariables) => {
-      const { account, group } = args;
-      const previousConsent = getGroupConsentQueryData(account, group.topic);
-      setGroupConsentQueryData(account, group.topic, "allowed");
-      updateConversationInConversationsQueryData({
-        account,
-        topic: group.topic,
-        conversationUpdate: {
-          state: "allowed",
-        },
+      const updatedGroup = updateObjectAndMethods(previousGroup, {
+        state: "allowed",
       });
-      return {
-        previousConsent,
-      };
+
+      setGroupQueryData({ account, topic, group: updatedGroup });
+
+      // Remove from requests
+      removeConversationFromUnknownConsentConversationsQueryData({
+        account,
+        topic,
+      });
+
+      // Add to main conversations list
+      addConversationToConversationsQuery({
+        account,
+        conversation: updatedGroup,
+      });
+
+      return { previousGroup };
     },
-    onError: (
-      error: unknown,
-      variables: AllowGroupMutationVariables,
-      context?: {
-        previousConsent: ConsentState | undefined;
-      }
-    ) => {
-      const { account, group } = variables;
-
-      captureError(error);
-
+    onError: (_, variables, context) => {
       if (!context) {
         return;
       }
 
-      setGroupConsentQueryData(
+      const { account, topic } = variables;
+
+      setGroupQueryData({
         account,
-        group.topic,
-        context.previousConsent || "unknown"
-      );
-      updateConversationInConversationsQueryData({
+        topic,
+        group: context.previousGroup,
+      });
+
+      // Add back in requests
+      addConversationToUnknownConsentConversationsQuery({
         account,
-        topic: group.topic,
-        conversationUpdate: {
-          state: context.previousConsent,
-        },
+        conversation: context.previousGroup,
+      });
+
+      // Remove from main conversations list
+      removeConversationFromConversationsQuery({
+        account,
+        topic,
       });
     },
   };
 };
 
-export const createAllowGroupMutationObserver = ({
-  account,
-  topic,
-}: AllowGroupMutationProps) => {
+export const createAllowGroupMutationObserver = (
+  args: IAllowGroupMutationOptions
+) => {
   const allowGroupMutationObserver = new MutationObserver(
     queryClient,
-    getAllowGroupMutationOptions(account, topic)
+    getAllowGroupMutationOptions(args)
   );
   return allowGroupMutationObserver;
 };
@@ -145,5 +175,5 @@ export const useAllowGroupMutation = (
   account: string,
   topic: ConversationTopic
 ) => {
-  return useMutation(getAllowGroupMutationOptions(account, topic));
+  return useMutation(getAllowGroupMutationOptions({ account, topic }));
 };

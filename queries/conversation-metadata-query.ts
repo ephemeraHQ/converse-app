@@ -27,9 +27,6 @@ export function prefetchConversationMetadataQuery(
   account: string,
   topic: ConversationTopic
 ) {
-  logger.debug(
-    `[ConversationMetadataQuery] prefetchConversationMetadataQuery for account: ${account}, topic: ${topic}`
-  );
   return queryClient.prefetchQuery(
     getConversationMetadataQueryOptions({ account, topic })
   );

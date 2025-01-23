@@ -1,10 +1,22 @@
 import { captureError } from "@/utils/capture-error";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { DEFAULT_GC_TIME, DEFAULT_STALE_TIME } from "./queryClient.constants";
+import logger from "@/utils/logger";
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
+    // Used to track which queries execute the queryFn which means will do a network request
+    onSuccess: (_, query) => {
+      if (query.meta?.caller) {
+        logger.debug(
+          `Query ${query.queryKey.join(", ")} success from caller: ${
+            query.meta.caller
+          }`
+        );
+      }
+    },
     onError: (error, query) => {
+      console.log("onError", query.queryKey);
       captureError(error, {
         message: `Error in query: ${query.queryKey.join(", ")}`,
       });

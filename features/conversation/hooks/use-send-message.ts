@@ -131,6 +131,7 @@ export function useSendMessage() {
       refetchConversationMessages({
         account: currentAccount,
         topic: variables.topic,
+        caller: "useSendMessage#onError",
       }).catch(captureErrorWithToast);
     },
   });

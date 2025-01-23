@@ -57,7 +57,10 @@ export async function getAllTopics(args: { account: string }) {
 
   const parseResult = z.record(TopicSchema).safeParse(data);
   if (!parseResult.success) {
-    logger.error("[API TOPICS] getAllTopics parse error:", parseResult.error);
+    logger.error(
+      "[API TOPICS] getAllTopics parse error:",
+      JSON.stringify(parseResult.error)
+    );
   }
   return data as Record<string, ITopic>;
 }
@@ -80,7 +83,10 @@ export async function getTopic(args: {
 
   const parseResult = TopicSchema.safeParse(data);
   if (!parseResult.success) {
-    logger.error("[API TOPICS] getTopic parse error:", parseResult.error);
+    logger.error(
+      "[API TOPICS] getTopic parse error:",
+      JSON.stringify(parseResult.error)
+    );
   }
   return data as ITopic;
 }
@@ -105,7 +111,7 @@ export async function markTopicAsRead(args: {
   if (!parseResult.success) {
     logger.error(
       "[API TOPICS] markTopicAsRead parse error:",
-      parseResult.error
+      JSON.stringify(parseResult.error)
     );
   }
   return data as IMessageResponse;
@@ -130,7 +136,7 @@ export async function markTopicAsUnread(args: {
   if (!parseResult.success) {
     logger.error(
       "[API TOPICS] markTopicAsUnread parse error:",
-      parseResult.error
+      JSON.stringify(parseResult.error)
     );
   }
   return data as IMessageResponse;
@@ -155,7 +161,10 @@ export async function pinTopic(args: {
 
   const parseResult = MessageResponseSchema.safeParse(data);
   if (!parseResult.success) {
-    logger.error("[API TOPICS] pinTopic parse error:", parseResult.error);
+    logger.error(
+      "[API TOPICS] pinTopic parse error:",
+      JSON.stringify(parseResult.error)
+    );
   }
   return data as IMessageResponse;
 }
@@ -179,7 +188,10 @@ export async function unpinTopic(args: {
 
   const parseResult = MessageResponseSchema.safeParse(data);
   if (!parseResult.success) {
-    logger.error("[API TOPICS] unpinTopic parse error:", parseResult.error);
+    logger.error(
+      "[API TOPICS] unpinTopic parse error:",
+      JSON.stringify(parseResult.error)
+    );
   }
   return data as IMessageResponse;
 }
@@ -201,7 +213,10 @@ export async function restoreTopic(args: {
 
   const parseResult = MessageResponseSchema.safeParse(data);
   if (!parseResult.success) {
-    logger.error("[API TOPICS] restoreTopic parse error:", parseResult.error);
+    logger.error(
+      "[API TOPICS] restoreTopic parse error:",
+      JSON.stringify(parseResult.error)
+    );
   }
   return data as IMessageResponse;
 }
@@ -222,7 +237,10 @@ export async function deleteTopic(args: {
 
   const parseResult = MessageResponseSchema.safeParse(data);
   if (!parseResult.success) {
-    logger.error("[API TOPICS] deleteTopic parse error:", parseResult.error);
+    logger.error(
+      "[API TOPICS] deleteTopic parse error:",
+      JSON.stringify(parseResult.error)
+    );
   }
   return data as IMessageResponse;
 }
