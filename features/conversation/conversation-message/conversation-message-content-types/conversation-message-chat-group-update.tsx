@@ -36,39 +36,36 @@ export function MessageChatGroupUpdate({
 
   return (
     <Center
-      // {...debugBorder()}
       style={{
-        width: "100%",
         paddingVertical: theme.spacing.sm,
         paddingHorizontal: theme.spacing.sm,
+        flexWrap: "wrap",
       }}
     >
-      <Center>
-        {/* Member additions */}
-        {content.membersAdded.map((member) => (
-          <ChatGroupMemberJoined
-            key={`joined-${member.inboxId}`}
-            inboxId={member.inboxId as InboxId}
-          />
-        ))}
+      {/* Member additions */}
+      {content.membersAdded.map((member) => (
+        <ChatGroupMemberJoined
+          key={`joined-${member.inboxId}`}
+          inboxId={member.inboxId as InboxId}
+        />
+      ))}
 
-        {/* Member removals */}
-        {content.membersRemoved.map((member) => (
-          <ChatGroupMemberLeft
-            key={`left-${member.inboxId}`}
-            inboxId={member.inboxId as InboxId}
-          />
-        ))}
+      {/* Member removals */}
+      {content.membersRemoved.map((member) => (
+        <ChatGroupMemberLeft
+          key={`left-${member.inboxId}`}
+          inboxId={member.inboxId as InboxId}
+        />
+      ))}
 
-        {/* Metadata changes */}
-        {content.metadataFieldsChanged.map((entry, index) => (
-          <ChatGroupMetadataUpdate
-            key={`metadata-${index}`}
-            metadataEntry={entry}
-            initiatorInboxId={content.initiatedByInboxId as InboxId}
-          />
-        ))}
-      </Center>
+      {/* Metadata changes */}
+      {content.metadataFieldsChanged.map((entry, index) => (
+        <ChatGroupMetadataUpdate
+          key={`metadata-${index}`}
+          metadataEntry={entry}
+          initiatorInboxId={content.initiatedByInboxId as InboxId}
+        />
+      ))}
     </Center>
   );
 }
@@ -139,6 +136,7 @@ function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
     firstSocials,
     firstSocials.address ?? ""
   );
+
   const avatarUri = getPreferredAvatar(firstSocials);
 
   return (

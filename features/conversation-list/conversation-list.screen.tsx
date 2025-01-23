@@ -8,7 +8,10 @@ import { ConversationListItemDm } from "@/features/conversation-list/conversatio
 import { ConversationListItemGroup } from "@/features/conversation-list/conversation-list-item/conversation-list-item-group";
 import { ConversationListPinnedConversations } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations";
 import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
-import { useConversationContextMenuViewDefaultProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-default-props";
+import {
+  useDmConversationContextMenuViewProps,
+  useGroupConversationContextMenuViewProps,
+} from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
 import { useShouldShowConnecting } from "@/features/conversation-list/hooks/useShouldShowConnecting";
 import { useShouldShowConnectingOrSyncing } from "@/features/conversation-list/hooks/useShouldShowConnectingOrSyncing";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
@@ -57,27 +60,26 @@ export function ConversationListScreen(props: IConversationListProps) {
 
   return (
     <Screen contentContainerStyle={$globalStyles.flex1}>
-      <AnimatedVStack layout={theme.animation.reanimatedLayoutSpringTransition}>
-        <ConversationList
-          conversations={conversations ?? []}
-          scrollEnabled={conversations && conversations?.length > 0}
-          ListEmptyComponent={<ConversationListEmpty />}
-          ListHeaderComponent={<ListHeader />}
-          onRefetch={handleRefresh}
-          onLayout={() => {}}
-          removeClippedSubviews={false}
-          contentContainerStyle={{
-            paddingBottom: insets.bottom,
-          }}
-          renderConversation={({ item }) => {
-            return isConversationGroup(item) ? (
-              <ConversationListItemGroupWrapper group={item} />
-            ) : (
-              <ConversationListItemDmWrapper dm={item} />
-            );
-          }}
-        />
-      </AnimatedVStack>
+      <ConversationList
+        conversations={conversations ?? []}
+        scrollEnabled={conversations && conversations?.length > 0}
+        ListEmptyComponent={<ConversationListEmpty />}
+        ListHeaderComponent={<ListHeader />}
+        onRefetch={handleRefresh}
+        onLayout={() => {}}
+        layout={theme.animation.reanimatedLayoutSpringTransition}
+        removeClippedSubviews={false}
+        contentContainerStyle={{
+          paddingBottom: insets.bottom,
+        }}
+        renderConversation={({ item }) => {
+          return isConversationGroup(item) ? (
+            <ConversationListItemGroupWrapper group={item} />
+          ) : (
+            <ConversationListItemDmWrapper dm={item} />
+          );
+        }}
+      />
     </Screen>
   );
 }
@@ -88,8 +90,8 @@ const ConversationListItemDmWrapper = memo(
 
     const { theme } = useAppTheme();
 
-    const contextMenuProps = useConversationContextMenuViewDefaultProps({
-      conversationTopic: dm.topic,
+    const contextMenuProps = useDmConversationContextMenuViewProps({
+      dmConversationTopic: dm.topic,
     });
 
     return (
@@ -114,8 +116,8 @@ const ConversationListItemGroupWrapper = memo(
 
     const { theme } = useAppTheme();
 
-    const contextMenuProps = useConversationContextMenuViewDefaultProps({
-      conversationTopic: group.topic,
+    const contextMenuProps = useGroupConversationContextMenuViewProps({
+      groupConversationTopic: group.topic,
     });
 
     return (

@@ -1,4 +1,4 @@
-import { usePendingRequestsQuery } from "@queries/usePendingRequestsQuery";
+import { useGroupPendingRequestsQuery } from "@/queries/useGroupPendingRequestsQuery";
 import { PendingGroupJoinRequest } from "@/utils/api/api-groups/api-groups";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
@@ -6,7 +6,7 @@ import { useExistingGroupInviteLink } from "./useExistingGroupInviteLink";
 import { useGroupMembers } from "./useGroupMembers";
 
 export const useGroupPendingRequests = (topic: ConversationTopic) => {
-  const { data } = usePendingRequestsQuery();
+  const { data } = useGroupPendingRequestsQuery();
   const { members } = useGroupMembers(topic);
 
   const groupInviteLink = useExistingGroupInviteLink(topic);

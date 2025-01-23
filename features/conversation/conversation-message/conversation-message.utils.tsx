@@ -187,6 +187,7 @@ export function useConversationMessageReactions(messageId: MessageId) {
   const { data: messages } = useConversationMessagesQuery({
     account: currentAccount,
     topic,
+    caller: "useConversationMessageReactions",
   });
 
   // TODO: Add another fallback query to fetch single message reactions. Coming in the SDK later
