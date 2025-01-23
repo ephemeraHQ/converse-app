@@ -16,9 +16,10 @@ import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
 } from "./conversation-composer.store-context";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 type IComposerProps = {
-  onSend: (args: ISendMessageParams) => Promise<void>;
+  onSend: (args: Omit<ISendMessageParams, "topic">) => Promise<void>;
   hideAddAttachmentButton?: boolean;
   disabled?: boolean;
 };

@@ -126,7 +126,7 @@ function useSendFirstConversationMessage(peerAddress: string) {
     // },
   });
 
-  return useCallback(
+  const sendFirstConversationMessage = useCallback(
     async (args: ISendFirstMessageParams) => {
       try {
         // First, create the conversation
@@ -147,6 +147,8 @@ function useSendFirstConversationMessage(peerAddress: string) {
     },
     [createNewConversationAsync, peerAddress, sendMessageAsync]
   );
+
+  return sendFirstConversationMessage;
 }
 
 type IConversationNewDmNoMessagesPlaceholderProps = {
