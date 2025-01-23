@@ -13,7 +13,7 @@ type ISearchResult = {
   profileSearchResults: Record<string, IProfileSocials>;
 };
 
-import { currentAccount, getCurrentAccount } from "@/data/store/accountsStore";
+import { getCurrentAccount } from "@/data/store/accountsStore";
 import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { searchProfilesForCurrentAccount } from "@/utils/api/profiles";
@@ -43,7 +43,7 @@ async function handlePeerSearch(searchQuery: string): Promise<ISearchResult> {
   logger.info(`[Search] Checking if ${address} is on XMTP`);
 
   const addressIsOnXmtp = await accountCanMessagePeer({
-    account: currentAccount(),
+    account: getCurrentAccount()!,
     peer: address,
   });
 
