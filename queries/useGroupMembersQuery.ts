@@ -112,3 +112,16 @@ export function refetchGroupMembersQuery(args: {
     queryKey: getGroupMemberQueryOptions({ account, topic }).queryKey,
   });
 }
+
+export async function ensureGroupMembersQueryData(args: {
+  account: string;
+  topic: ConversationTopic;
+}) {
+  const { account, topic } = args;
+  return queryClient.ensureQueryData({
+    queryKey: getGroupMemberQueryOptions({
+      account,
+      topic,
+    }).queryKey,
+  });
+}

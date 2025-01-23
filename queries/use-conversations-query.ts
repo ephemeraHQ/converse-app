@@ -1,4 +1,3 @@
-import { generateGroupHashFromMemberIds } from "@/features/create-conversation/generate-group-hash-from-member-ids";
 import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { captureError } from "@/utils/capture-error";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
@@ -9,6 +8,7 @@ import { QueryObserver, queryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
+import { ensureGroupMembersQueryData } from "./useGroupMembersQuery";
 
 export type IConversationsQuery = Awaited<ReturnType<typeof getConversations>>;
 
@@ -127,34 +127,21 @@ const getConversations = async (args: IArgs) => {
     200 // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
   );
 
-  // Map conversations list to an array of ConversationWithCodecsType by
-  // fetching members for each conversation
-
-  const conversationsWithMembers = await Promise.all(
-    conversations.map(async (c) => {
-      const members = await c.members();
-      // note(lustig) @nplasterer what is the motiviation behind making members an async function instead of
-      // providing them on the conversation as an array[member]
-      return updateObjectAndMethods(c, {
-        // @ts-expect-error can we ignore this? Is it just generic crap?
-        resolvedMembers: members,
-        membersHash: generateGroupHashFromMemberIds(
-          members.map((m) => m.addresses[0])
-        ),
-      });
-    })
-  );
+  // Fire and forget to fetch and cache each group's members without blocking
+  conversations.map((c) => {
+    ensureGroupMembersQueryData({ account, topic: c.topic });
+  });
 
   // For now conversations have all the same properties as one conversation
-  for (const conversationWithMember of conversationsWithMembers) {
+  for (const conversation of conversations) {
     setConversationQueryData({
       account,
-      topic: conversationWithMember.topic,
-      conversation: conversationWithMember,
+      topic: conversation.topic,
+      conversation,
     });
   }
 
-  return conversationsWithMembers;
+  return conversations;
 };
 
 export const getConversationsQueryOptions = (

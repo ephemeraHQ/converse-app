@@ -6,6 +6,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
+import { ensureGroupMembersQueryData } from "./useGroupMembersQuery";
 
 export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
 
@@ -46,6 +47,8 @@ async function getConversation(args: IGetConversationArgs) {
     }
     await conversation.sync();
   }
+
+  ensureGroupMembersQueryData({ account, topic });
 
   const totalEnd = new Date().getTime();
   const totalTimeDiff = totalEnd - totalStart;
