@@ -22,26 +22,26 @@ export function ConversationConsentPopupGroup() {
 
   const colorScheme = useColorScheme();
 
-  const { denyGroup, allowGroup } = useGroupConsentForCurrentAccount(topic);
+  const { blockGroup, allowGroup } = useGroupConsentForCurrentAccount(topic);
 
   const account = useCurrentAccount()!;
 
   const { data: groupName } = useGroupNameQuery({ account, topic });
 
-  const handleDeclineGroup = useCallback(async () => {
+  const onBlock = useCallback(async () => {
     groupRemoveRestoreHandler(
       "unknown", // To display "Remove & Block inviter"
       colorScheme,
       groupName,
       allowGroup,
-      denyGroup
+      blockGroup
     )((success: boolean) => {
       if (success) {
         navigation.pop();
       }
       // If not successful, do nothing (user canceled)
     });
-  }, [groupName, colorScheme, allowGroup, denyGroup, navigation]);
+  }, [groupName, colorScheme, allowGroup, blockGroup, navigation]);
 
   const onAccept = useCallback(async () => {
     try {
@@ -67,7 +67,7 @@ export function ConversationConsentPopupGroup() {
           action="danger"
           icon="xmark"
           text={translate("decline")}
-          onPress={handleDeclineGroup}
+          onPress={onBlock}
         />
         <ConversationConsentPopupButton
           variant="fill"

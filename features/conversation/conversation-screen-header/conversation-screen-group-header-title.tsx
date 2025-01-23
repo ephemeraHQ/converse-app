@@ -3,7 +3,10 @@ import { ConversationHeaderTitle } from "@/features/conversation/conversation-sc
 import { useGroupNameForCurrentAccount } from "@/hooks/useGroupName";
 import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 import { useProfilesSocials } from "@/hooks/useProfilesSocials";
-import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
+import {
+  useGroupMembersConversationScreenQuery,
+  useGroupMembersQuery,
+} from "@/queries/useGroupMembersQuery";
 import { copyToClipboard } from "@/utils/clipboard";
 import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
 import { Avatar } from "@components/Avatar";
@@ -107,7 +110,7 @@ type IMemberData = {
 const useGroupMembersAvatarData = (args: { topic: ConversationTopic }) => {
   const { topic } = args;
   const currentAccount = useCurrentAccount()!;
-  const { data: members, ...query } = useGroupMembersQuery({
+  const { data: members, ...query } = useGroupMembersConversationScreenQuery({
     account: currentAccount,
     topic,
   });

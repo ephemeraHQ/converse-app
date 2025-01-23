@@ -64,7 +64,6 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
       refetchConversationMessages({
         account: currentAccount,
         topic,
-        caller: "useReactOnMessage mutation onError",
       }).catch(captureErrorWithToast);
     },
   });

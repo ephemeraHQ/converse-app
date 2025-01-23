@@ -13,6 +13,7 @@ import { useConversationQuery } from "@/queries/useConversationQuery";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureErrorWithToast } from "@/utils/capture-error";
+import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
@@ -36,13 +37,11 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
   const { data: conversation } = useConversationQuery({
     account: currentAccount!,
     topic: conversationTopic,
-    caller: "Conversation List Item Dm",
   });
 
   const { data: peerInboxId } = useDmPeerInboxId({
     account: currentAccount!,
     topic: conversationTopic,
-    caller: "ConversationListItemDm",
   });
 
   const deleteDm = useDeleteDm({

@@ -26,7 +26,6 @@ export const useConversationListConversations = () => {
         prefetchConversationMessages({
           account: currentAccount!,
           topic: conversation.topic,
-          caller: "useConversationListConversations",
         }).catch(captureError);
       }
     }
@@ -69,12 +68,12 @@ export const useConversationListConversations = () => {
     // Filter out conversations that don't meet criteria
     const filtered = conversations.filter((conversation, index) => {
       const query = conversationsMetadataQueries[index];
-      const isAllowed = isConversationAllowed(conversation);
-      const isPinned = query?.data?.isPinned;
-      const isDeleted = query?.data?.isDeleted;
-      const isLoading = query?.isLoading;
-
-      return isAllowed && !isPinned && !isDeleted && !isLoading;
+      return (
+        isConversationAllowed(conversation) &&
+        !query?.data?.isPinned &&
+        !query?.data?.isDeleted &&
+        !query?.isLoading
+      );
     });
 
     // Sort by timestamp descending (newest first)
@@ -83,7 +82,6 @@ export const useConversationListConversations = () => {
       const timestampB = b.lastMessage?.sentNs ?? 0;
       return timestampB - timestampA;
     });
-
     /*
      * note(lustig): potential fix using existing libraries could be exploring `combine` above
      * es lint from @tanstack/query/no-unstable-deps

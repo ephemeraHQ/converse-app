@@ -10,21 +10,17 @@ import { queryClient } from "./queryClient";
 
 export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
 
-type IGetConversationArgs = {
+type IArgs = {
   account: string;
   topic: ConversationTopic;
 };
 
-async function getConversation(args: IGetConversationArgs) {
+async function getConversation(args: IArgs) {
   const { account, topic } = args;
 
-  if (!topic) {
-    throw new Error("Topic is required");
-  }
-
-  if (!account) {
-    throw new Error("Account is required");
-  }
+  logger.debug(
+    `[useConversationQuery] Getting conversation for ${topic} with account ${account}`
+  );
 
   const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
 
@@ -43,7 +39,6 @@ async function getConversation(args: IGetConversationArgs) {
     if (!conversation) {
       throw new Error(`Conversation ${topic} not found`);
     }
-    await conversation.sync();
   }
 
   const totalEnd = new Date().getTime();
@@ -60,23 +55,13 @@ async function getConversation(args: IGetConversationArgs) {
   return conversation;
 }
 
-export const useConversationQuery = (
-  args: IGetConversationArgs & { caller: string }
-) => {
+export const useConversationQuery = (args: IArgs) => {
   return useQuery(getConversationQueryOptions(args));
 };
 
-export function getConversationQueryOptions(
-  args: IGetConversationArgs & {
-    // Optional because some react query function will never trigger the queryFn anyway
-    caller?: string;
-  }
-) {
-  const { account, topic, caller } = args;
+export function getConversationQueryOptions(args: IArgs) {
+  const { account, topic } = args;
   return queryOptions({
-    meta: {
-      caller,
-    },
     queryKey: conversationQueryKey(account, topic),
     queryFn: () => getConversation({ account, topic }),
     enabled: !!topic && !!account,
@@ -84,7 +69,7 @@ export function getConversationQueryOptions(
 }
 
 export const setConversationQueryData = (
-  args: IGetConversationArgs & {
+  args: IArgs & {
     conversation: ConversationQueryData;
   }
 ) => {
@@ -93,9 +78,7 @@ export const setConversationQueryData = (
 };
 
 export function updateConversationQueryData(
-  args: IGetConversationArgs & {
-    conversationUpdate: Partial<ConversationQueryData>;
-  }
+  args: IArgs & { conversationUpdate: Partial<ConversationQueryData> }
 ) {
   const { conversationUpdate } = args;
   logger.debug(
@@ -114,19 +97,15 @@ export function updateConversationQueryData(
   );
 }
 
-export function refetchConversationQuery(
-  args: IGetConversationArgs & { caller: string }
-) {
+export function refetchConversationQuery(args: IArgs) {
   return queryClient.refetchQueries(getConversationQueryOptions(args));
 }
 
-export const getConversationQueryData = (args: IGetConversationArgs) => {
+export const getConversationQueryData = (args: IArgs) => {
   return queryClient.getQueryData(getConversationQueryOptions(args).queryKey);
 };
 
-export function getOrFetchConversation(
-  args: IGetConversationArgs & { caller: string }
-) {
+export function getOrFetchConversation(args: IArgs) {
   const conversation = getConversationQueryData(args);
   if (conversation) {
     return Promise.resolve(conversation);

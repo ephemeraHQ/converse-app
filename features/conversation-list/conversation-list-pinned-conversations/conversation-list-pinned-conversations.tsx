@@ -112,7 +112,6 @@ const PinnedConversationWrapper = memo(
     const { data: conversation } = useConversationQuery({
       topic,
       account: currentAccount!,
-      caller: "Conversation List Pinned Conversations",
     });
 
     if (!conversation) {

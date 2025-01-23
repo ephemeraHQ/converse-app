@@ -1,6 +1,6 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "@/data/store/accountsStore";
-import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
+import { useDmConsentForCurrentAccount } from "@/features/consent/use-dm-consent-for-current-account";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { translate } from "@/i18n";
 import {
@@ -34,10 +34,9 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
   const { data: peerInboxId } = useDmPeerInboxId({
     account: currentAccount,
     topic,
-    caller: "useDeleteDm",
   });
 
-  const { mutateAsync: denyDmConsentAsync } = useDenyDmMutation();
+  const { mutateAsync: updateDmConsentAsync } = useDmConsentForCurrentAccount();
 
   const preferredName = usePreferredInboxName(peerInboxId);
 
@@ -97,7 +96,8 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
         action: async () => {
           try {
             await deleteDmAsync();
-            await denyDmConsentAsync({
+            await updateDmConsentAsync({
+              consent: "deny",
               peerInboxId: peerInboxId,
               conversationId,
               topic,
@@ -131,7 +131,7 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
     colorScheme,
     preferredName,
     deleteDmAsync,
-    denyDmConsentAsync,
+    updateDmConsentAsync,
     peerInboxId,
     conversationId,
     topic,

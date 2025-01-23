@@ -13,7 +13,7 @@ import { ConverseXmtpClientType } from "./client.types";
 import {
   stopStreamingConversations,
   streamConversations,
-} from "./xmtp-conversations/xmtp-conversations-stream";
+} from "./conversations";
 import {
   stopStreamingAllMessage,
   streamAllMessages,

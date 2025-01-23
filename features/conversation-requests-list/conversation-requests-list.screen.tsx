@@ -5,7 +5,6 @@ import { useConversationRequestsListScreenHeader } from "@/features/conversation
 import { translate } from "@/i18n";
 import { memo, useCallback, useState } from "react";
 import { useConversationRequestsListItem } from "./use-conversation-requests-list-items";
-import { $globalStyles } from "@/theme/styles";
 
 export const ConversationRequestsListScreen = memo(function () {
   const [selectedSegment, setSelectedSegment] = useState(0);
@@ -17,7 +16,7 @@ export const ConversationRequestsListScreen = memo(function () {
   }, []);
 
   return (
-    <Screen contentContainerStyle={$globalStyles.flex1}>
+    <Screen>
       <ConversationRequestsListSegmentController
         options={[translate("you_might_know"), translate("hidden_requests")]}
         selectedIndex={selectedSegment}

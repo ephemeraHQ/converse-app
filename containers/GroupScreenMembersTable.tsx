@@ -17,8 +17,10 @@ import { navigate } from "@utils/navigation";
 import { getPreferredInboxName } from "@utils/profile";
 import { FC, memo, useMemo } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
+
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useInboxProfilesSocials } from "@/hooks/useInboxProfilesSocials";
+import { useGroupMembersConversationScreenQuery } from "@/queries/useGroupMembersQuery";
 import { captureErrorWithFriendlyToast } from "@/utils/capture-error";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useGroupPermissionPolicyQuery } from "@queries/useGroupPermissionPolicyQuery";
@@ -37,7 +39,10 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
     const colorScheme = useColorScheme();
     const currentAccount = useCurrentAccount() as string;
     const styles = useStyles();
-    const { members } = useGroupMembers(topic);
+    const { data: members } = useGroupMembersConversationScreenQuery({
+      account: currentAccount,
+      topic,
+    });
     const {
       promoteToSuperAdmin,
       promoteToAdmin,
@@ -93,9 +98,7 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
         const preferredName = getPreferredInboxName(mappedData[a.inboxId]);
         items.push({
           id: a.inboxId,
-          title: `${preferredName}${
-            isCurrentUser ? translate("you_parentheses") : ""
-          }`,
+          title: `${preferredName}${isCurrentUser ? translate("you_parentheses") : ""}`,
           action: () => {
             const {
               options,

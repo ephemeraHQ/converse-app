@@ -15,7 +15,6 @@ export function useConversationRequestsListItem() {
   } = useQuery({
     ...getUnknownConsentConversationsQueryOptions({
       account: currentAccount!,
-      caller: "useConversationRequestsListItem",
     }),
   });
 

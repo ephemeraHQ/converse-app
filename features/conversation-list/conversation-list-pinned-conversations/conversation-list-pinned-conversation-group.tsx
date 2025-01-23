@@ -1,13 +1,13 @@
 import { VStack } from "@/design-system/VStack";
 import { PinnedConversationAvatar } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-avatar";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
+import { useConversationContextMenuViewDefaultProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-default-props";
 import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { navigate } from "@utils/navigation";
 import { useCallback } from "react";
 import { ConversationListPinnedConversation } from "./conversation-list-pinned-conversation";
 import { PinnedConversationMessagePreview } from "./conversation-list-pinned-conversation-message-preview";
-import { useGroupConversationContextMenuViewProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
 
 type IConversationListPinnedConversationGroupProps = {
   group: GroupWithCodecsType;
@@ -31,8 +31,8 @@ export const ConversationListPinnedConversationGroup = ({
   const displayMessagePreview =
     group.lastMessage && isTextMessage(group.lastMessage) && isUnread;
 
-  const contextMenuProps = useGroupConversationContextMenuViewProps({
-    groupConversationTopic: groupConversationTopic,
+  const contextMenuProps = useConversationContextMenuViewDefaultProps({
+    conversationTopic: groupConversationTopic,
   });
 
   return (

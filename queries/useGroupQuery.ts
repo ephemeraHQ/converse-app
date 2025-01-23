@@ -6,7 +6,6 @@ import { queryClient } from "@/queries/queryClient";
 import {
   ConversationQueryData,
   getConversationQueryOptions,
-  getOrFetchConversation,
 } from "@/queries/useConversationQuery";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
@@ -94,12 +93,4 @@ export function updateGroupQueryData(args: {
       return updateObjectAndMethods(previousGroup, args.updates);
     }
   );
-}
-
-export function getOrFetchGroupQuery(args: {
-  account: string;
-  topic: ConversationTopic;
-  caller: string;
-}) {
-  return getOrFetchConversation(args);
 }

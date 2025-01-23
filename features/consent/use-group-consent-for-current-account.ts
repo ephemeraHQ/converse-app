@@ -1,14 +1,14 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
-import { useAllowGroupMutation } from "@/features/consent/use-allow-group.mutation";
-import { useDenyGroupMutation } from "@/features/consent/use-deny-group.mutation";
 import { translate } from "@/i18n";
-import { useGroupCreatorQuery } from "@/queries/useGroupCreatorQuery";
+import { useAllowGroupMutation } from "@/features/consent/use-allow-group.mutation";
 import { currentAccount } from "@data/store/accountsStore";
-import { getGroupQueryOptions, useGroupQuery } from "@queries/useGroupQuery";
-import { useQuery } from "@tanstack/react-query";
+import { useBlockGroupMutation } from "@queries/useBlockGroupMutation";
+import { useGroupConsentQuery } from "@/features/consent/use-group-consent.query";
+import { useGroupQuery } from "@queries/useGroupQuery";
+import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
-import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
+import { useGroupCreatorQuery } from "@/queries/useGroupCreatorQuery";
 
 export type IGroupConsentOptions = {
   includeCreator?: boolean;
@@ -30,16 +30,13 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
     data: groupConsent,
     isLoading: isGroupConsentLoading,
     isError,
-  } = useQuery({
-    ...getGroupQueryOptions({ account, topic }),
-    select: (group) => group?.state,
-  });
+  } = useGroupConsentQuery({ account, topic });
 
   const { mutateAsync: allowGroupMutation, isPending: isAllowingGroup } =
     useAllowGroupMutation(account, topic);
 
-  const { mutateAsync: denyGroupMutation, isPending: isDenyingGroup } =
-    useDenyGroupMutation(account, topic!);
+  const { mutateAsync: blockGroupMutation, isPending: isBlockingGroup } =
+    useBlockGroupMutation(account, topic!);
 
   const allowGroup = useCallback(
     async (args: IGroupConsentOptions) => {
@@ -50,16 +47,16 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
       }
 
       await allowGroupMutation({
+        group,
         account,
-        topic,
         includeAddedBy,
         includeCreator,
       });
     },
-    [allowGroupMutation, group, account, topic]
+    [allowGroupMutation, group, account]
   );
 
-  const denyGroup = useCallback(
+  const blockGroup = useCallback(
     async (args: IGroupConsentOptions) => {
       const { includeAddedBy, includeCreator } = args;
 
@@ -71,7 +68,7 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
         return;
       }
 
-      await denyGroupMutation();
+      await blockGroupMutation();
 
       const inboxIdsToDeny: InboxId[] = [];
 
@@ -84,14 +81,14 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
       }
 
       if (inboxIdsToDeny.length > 0) {
-        await updateInboxIdsConsentForAccount({
+        updateInboxIdsConsentForAccount({
           account,
           inboxIds: inboxIdsToDeny,
           consent: "deny",
         });
       }
     },
-    [denyGroupMutation, groupCreator, account, group]
+    [blockGroupMutation, groupCreator, account, group]
   );
 
   const isLoading =
@@ -102,8 +99,8 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
     isLoading,
     isError,
     allowGroup,
-    denyGroup,
+    blockGroup,
     isAllowingGroup,
-    isDenyingGroup,
+    isBlockingGroup,
   };
 };

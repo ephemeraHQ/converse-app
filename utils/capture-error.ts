@@ -5,14 +5,10 @@ export function captureError(
   error: unknown,
   options?: {
     message?: string;
-    caller?: string;
   }
 ) {
-  const { message, caller } = options || {};
-  const prefix = caller ? `[${caller}]` : message ? `${message}:` : "";
-
-  if (prefix) {
-    logger.error(prefix, error);
+  if (options?.message) {
+    logger.error(`${options.message}:`, error);
   } else {
     logger.error(error);
   }

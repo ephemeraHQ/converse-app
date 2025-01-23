@@ -1,6 +1,7 @@
 import { VStack } from "@/design-system/VStack";
 import { PinnedConversationAvatar } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-avatar";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
+import { useConversationContextMenuViewDefaultProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-default-props";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { useCurrentAccount } from "@data/store/accountsStore";
@@ -11,7 +12,6 @@ import { useCallback } from "react";
 import { isTextMessage } from "../../conversation/conversation-message/conversation-message.utils";
 import { ConversationListPinnedConversation } from "./conversation-list-pinned-conversation";
 import { PinnedConversationMessagePreview } from "./conversation-list-pinned-conversation-message-preview";
-import { useDmConversationContextMenuViewProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
 
 type IConversationListPinnedConversationDmProps = {
   conversation: DmWithCodecsType;
@@ -27,7 +27,6 @@ export const ConversationListPinnedConversationDm = ({
   const { data: peerInboxId } = useDmPeerInboxId({
     account: currentAccount!,
     topic: conversationTopic,
-    caller: "ConversationListPinnedConversationDm",
   });
 
   const preferredName = usePreferredInboxName(peerInboxId);
@@ -49,8 +48,8 @@ export const ConversationListPinnedConversationDm = ({
     isTextMessage(conversation.lastMessage) &&
     isUnread;
 
-  const contextMenuProps = useDmConversationContextMenuViewProps({
-    dmConversationTopic: conversationTopic,
+  const contextMenuProps = useConversationContextMenuViewDefaultProps({
+    conversationTopic,
   });
 
   return (

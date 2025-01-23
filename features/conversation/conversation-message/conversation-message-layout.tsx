@@ -5,7 +5,6 @@ import { ConversationMessageSender } from "@/features/conversation/conversation-
 import { ConversationSenderAvatar } from "@/features/conversation/conversation-message/conversation-message-sender-avatar";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
-import { isGroupUpdatedMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ReactNode, memo } from "react";
 
@@ -70,28 +69,25 @@ const MessageContainer = memo(function MessageContainer(props: {
 }) {
   const { children } = props;
   const { theme } = useAppTheme();
-  const { fromMe, nextMessage, hasNextMessageInSeries, message } =
+  const { fromMe, nextMessage, hasNextMessageInSeries } =
     useMessageContextStoreContext(
-      useSelect(["fromMe", "nextMessage", "hasNextMessageInSeries", "message"])
+      useSelect(["fromMe", "nextMessage", "hasNextMessageInSeries"])
     );
-  const isGroupUpdate = isGroupUpdatedMessage(message);
 
   return (
     <HStack
       style={{
         width: "100%",
         alignItems: "flex-end",
-        ...(!isGroupUpdate && {
-          ...(fromMe
-            ? {
-                paddingRight: theme.spacing.sm,
-                justifyContent: "flex-end",
-              }
-            : {
-                paddingLeft: theme.spacing.sm,
-                justifyContent: "flex-start",
-              }),
-        }),
+        ...(fromMe
+          ? {
+              paddingRight: theme.spacing.sm,
+              justifyContent: "flex-end",
+            }
+          : {
+              paddingLeft: theme.spacing.sm,
+              justifyContent: "flex-start",
+            }),
         ...(!hasNextMessageInSeries &&
           nextMessage && {
             marginBottom: theme.spacing.sm,

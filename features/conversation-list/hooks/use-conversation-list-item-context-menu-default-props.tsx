@@ -1,3 +1,4 @@
+import { useCurrentAccount } from "@/data/store/accountsStore";
 import { iconRegistry } from "@/design-system/Icon/Icon";
 import { VStack } from "@/design-system/VStack";
 import { useConversationIsPinned } from "@/features/conversation-list/hooks/use-conversation-is-pinned";
@@ -6,7 +7,9 @@ import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
 import { useDeleteGroup } from "@/features/conversation-list/hooks/use-delete-group";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { ConversationPreview } from "@/features/conversation/conversation-preview/conversation-preview";
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { translate } from "@/i18n";
+import { useConversationQuery } from "@/queries/useConversationQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
@@ -18,42 +21,18 @@ import {
 } from "react-native-ios-context-menu";
 import { usePinOrUnpinConversation } from "./use-pin-or-unpin-conversation";
 
-// Specific hook for DM conversations
-export function useDmConversationContextMenuViewProps(args: {
-  dmConversationTopic: ConversationTopic;
-}) {
-  const { dmConversationTopic: conversationTopic } = args;
-  const deleteMenuItem = useDmDeleteMenuItem({ conversationTopic });
-
-  return useBaseConversationContextMenuViewProps({
-    conversationTopic,
-    deleteMenuItem,
-  });
-}
-
-// Specific hook for Group conversations
-export function useGroupConversationContextMenuViewProps(args: {
-  groupConversationTopic: ConversationTopic;
-}) {
-  const { groupConversationTopic: conversationTopic } = args;
-  const deleteMenuItem = useGroupDeleteMenuItem({ conversationTopic });
-
-  return useBaseConversationContextMenuViewProps({
-    conversationTopic,
-    deleteMenuItem,
-  });
-}
-
-// Base hook with shared functionality
-function useBaseConversationContextMenuViewProps(args: {
+export function useConversationContextMenuViewDefaultProps(args: {
   conversationTopic: ConversationTopic;
-  deleteMenuItem: IUseContextMenuItem;
 }) {
-  const { conversationTopic, deleteMenuItem } = args;
+  const { conversationTopic } = args;
+
   const { theme } = useAppTheme();
 
   const pinMenuItem = useConversationContextMenuPinItem({ conversationTopic });
   const readMenuItem = useConversationContextMenuReadItem({
+    conversationTopic,
+  });
+  const deleteMenuItem = useConversationContextMenuDeleteItem({
     conversationTopic,
   });
 
@@ -157,12 +136,37 @@ function useConversationContextMenuReadItem(args: {
   } satisfies IUseContextMenuItem;
 }
 
-function useBaseDeleteMenuItem({
-  onDelete,
-}: {
-  onDelete: () => Promise<void>;
-}) {
+function useConversationContextMenuDeleteItem(args: {
+  conversationTopic: ConversationTopic;
+}): IUseContextMenuItem {
+  const { conversationTopic } = args;
+  const currentAccount = useCurrentAccount();
   const { theme } = useAppTheme();
+
+  const { data: conversation } = useConversationQuery({
+    account: currentAccount!,
+    topic: conversationTopic,
+  });
+
+  const deleteGroup = useDeleteGroup({ groupTopic: conversationTopic });
+  const deleteDm = useDeleteDm({ topic: conversationTopic });
+
+  const handleDelete = useCallback(async () => {
+    try {
+      if (!conversation) {
+        throw new Error("Conversation not found");
+      }
+      if (isConversationGroup(conversation)) {
+        await deleteGroup();
+      } else {
+        await deleteDm();
+      }
+    } catch (error) {
+      captureErrorWithToast(error, {
+        message: "Error deleting conversation",
+      });
+    }
+  }, [conversation, deleteGroup, deleteDm]);
 
   return {
     actionKey: "delete",
@@ -173,51 +177,6 @@ function useBaseDeleteMenuItem({
       iconTint: theme.colors.global.caution,
     },
     menuAttributes: ["destructive"],
-  } satisfies Omit<IUseContextMenuItem, "onPress">;
-}
-
-function useGroupDeleteMenuItem({
-  conversationTopic,
-}: {
-  conversationTopic: ConversationTopic;
-}) {
-  const deleteGroup = useDeleteGroup({ groupTopic: conversationTopic });
-
-  const handleDelete = useCallback(async () => {
-    try {
-      await deleteGroup();
-    } catch (error) {
-      captureErrorWithToast(error, {
-        message: "Error deleting group",
-      });
-    }
-  }, [deleteGroup]);
-
-  return {
-    ...useBaseDeleteMenuItem({ onDelete: handleDelete }),
-    onPress: handleDelete,
-  } satisfies IUseContextMenuItem;
-}
-
-function useDmDeleteMenuItem({
-  conversationTopic,
-}: {
-  conversationTopic: ConversationTopic;
-}) {
-  const deleteDm = useDeleteDm({ topic: conversationTopic });
-
-  const handleDelete = useCallback(async () => {
-    try {
-      deleteDm();
-    } catch (error) {
-      captureErrorWithToast(error, {
-        message: "Error deleting conversation",
-      });
-    }
-  }, [deleteDm]);
-
-  return {
-    ...useBaseDeleteMenuItem({ onDelete: handleDelete }),
     onPress: handleDelete,
   } satisfies IUseContextMenuItem;
 }

@@ -29,14 +29,12 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
     useConversationMessagesQuery({
       account: currentAccount,
       topic,
-      caller: "Conversation Preview",
     });
 
   const { data: conversation, isLoading: isLoadingConversation } =
     useConversationQuery({
       account: currentAccount,
       topic,
-      caller: "Conversation Preview",
     });
 
   const isLoading = isLoadingMessages || isLoadingConversation;

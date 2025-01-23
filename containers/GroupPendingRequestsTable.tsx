@@ -5,7 +5,7 @@ import { useGroupPendingRequests } from "@hooks/useGroupPendingRequests";
 import { usePreferredNames } from "@hooks/usePreferredNames";
 import { translate } from "@i18n";
 import { useAddToGroupMutation } from "@queries/useAddToGroupMutation";
-import { invalidateGroupPendingJoinRequestsQuery } from "@/queries/useGroupPendingRequestsQuery";
+import { invalidatePendingJoinRequestsQuery } from "@queries/usePendingRequestsQuery";
 import { actionSheetColors, textSecondaryColor } from "@styles/colors";
 import { updateGroupJoinRequestStatus } from "@/utils/api/api-groups/api-groups";
 import { FC, useMemo } from "react";
@@ -71,7 +71,7 @@ export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
                     request.id,
                     "ACCEPTED"
                   );
-                  invalidateGroupPendingJoinRequestsQuery(currentAccount);
+                  invalidatePendingJoinRequestsQuery(currentAccount);
                   break;
                 case 1:
                   // deny

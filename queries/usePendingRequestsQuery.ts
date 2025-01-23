@@ -1,11 +1,11 @@
-import { getPendingGroupJoinRequests } from "@/utils/api/api-groups/api-groups";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
+import { getPendingGroupJoinRequests } from "@/utils/api/api-groups/api-groups";
 
 import { pendingJoinRequestsQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
 
-export const useGroupPendingRequestsQuery = () => {
+export const usePendingRequestsQuery = () => {
   const currentAccount = useCurrentAccount() as string;
 
   return useQuery({
@@ -19,7 +19,7 @@ export const useGroupPendingRequestsQuery = () => {
   });
 };
 
-export const invalidateGroupPendingJoinRequestsQuery = (account: string) => {
+export const invalidatePendingJoinRequestsQuery = (account: string) => {
   return queryClient.invalidateQueries({
     queryKey: pendingJoinRequestsQueryKey(account),
   });

@@ -1,4 +1,8 @@
-import { queryOptions, SetDataOptions, useQuery } from "@tanstack/react-query";
+import {
+  SetDataOptions,
+  useQuery,
+  UseQueryOptions,
+} from "@tanstack/react-query";
 import { getCleanAddress } from "@utils/evm/getCleanAddress";
 import { ConversationTopic, Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
@@ -6,7 +10,7 @@ import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 import { entifyWithAddress, EntityObjectWithAddress } from "./entify";
 import { queryClient } from "./queryClient";
 import { groupMembersQueryKey } from "./QueryKeys";
-import { getGroupQueryData, getOrFetchGroupQuery } from "./useGroupQuery";
+import { getGroupQueryData } from "./useGroupQuery";
 
 export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
 
@@ -15,16 +19,14 @@ const fetchGroupMembers = async (args: {
   topic: ConversationTopic;
 }): Promise<EntityObjectWithAddress<Member, InboxId>> => {
   const { account, topic } = args;
-  const group = await getOrFetchGroupQuery({
-    account,
-    topic,
-    caller: "fetchGroupMembers",
-  });
-
+  const group = getGroupQueryData({ account, topic });
   if (!group) {
-    throw new Error(`Group ${topic} not found in query data cache`);
+    return {
+      byId: {},
+      byAddress: {},
+      ids: [],
+    };
   }
-
   const members = await group.members();
 
   return entifyWithAddress(
@@ -34,29 +36,56 @@ const fetchGroupMembers = async (args: {
   );
 };
 
-type IGroupMembersQueryConfigArgs = {
+type IGroupMembersQueryConfig = {
   account: string;
   topic: ConversationTopic;
+  queryOptions?: Partial<UseQueryOptions<GroupMembersSelectData>>;
 };
 
-export const getGroupMemberQueryOptions = (
-  args: IGroupMembersQueryConfigArgs
-) => {
-  const { account, topic } = args;
-  return queryOptions({
+const getGroupMemberQueryOptions = (
+  args: IGroupMembersQueryConfig
+): UseQueryOptions<GroupMembersSelectData> => {
+  const { account, topic, queryOptions } = args;
+  const isEnabled = !!topic && (queryOptions?.enabled ?? true);
+  return {
     queryKey: groupMembersQueryKey(account, topic),
     queryFn: () => fetchGroupMembers({ account, topic }),
-    enabled: !!topic && !!account,
-  });
+    enabled: isEnabled,
+    ...queryOptions,
+  };
 };
 
 export const useGroupMembersQuery = (args: {
   account: string;
   topic: ConversationTopic;
+  queryOptions?: Partial<UseQueryOptions<GroupMembersSelectData>>;
+}) => {
+  const { account, topic, queryOptions } = args;
+  return useQuery<GroupMembersSelectData>(
+    getGroupMemberQueryOptions({ account, topic, queryOptions })
+  );
+};
+
+export const useGroupMembersConversationScreenQuery = (args: {
+  account: string;
+  topic: ConversationTopic;
 }) => {
   const { account, topic } = args;
+
   return useQuery<GroupMembersSelectData>(
     getGroupMemberQueryOptions({ account, topic })
+  );
+};
+
+export const useConversationListMembersQuery = (args: {
+  account: string;
+  topic: ConversationTopic;
+}) => {
+  const { account, topic } = args;
+  const queryOptions = { enabled: !!topic };
+
+  return useQuery<GroupMembersSelectData>(
+    getGroupMemberQueryOptions({ account, topic, queryOptions })
   );
 };
 

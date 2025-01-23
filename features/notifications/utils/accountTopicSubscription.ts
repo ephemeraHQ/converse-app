@@ -17,7 +17,6 @@ export const setupAccountTopicSubscription = (account: string) => {
   );
   const observer = createConversationsQueryObserver({
     account,
-    caller: "setupAccountTopicSubscription",
   });
   let previous: number | undefined;
   const unsubscribe = observer.subscribe((conversationList) => {

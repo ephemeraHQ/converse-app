@@ -4,11 +4,12 @@ import { dangerColor, primaryColor } from "@styles/colors";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
 import { FC, useMemo } from "react";
 import { useColorScheme } from "react-native";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
 
 type GroupScreenConsentTableProps = {
   topic: ConversationTopic;
@@ -20,7 +21,7 @@ export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
   group,
 }) => {
   const colorScheme = useColorScheme();
-  const { consent, allowGroup, denyGroup } =
+  const { consent, allowGroup, blockGroup } =
     useGroupConsentForCurrentAccount(topic);
 
   const consentTableViewItems = useMemo(() => {
@@ -38,7 +39,7 @@ export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
             colorScheme,
             groupName,
             allowGroup,
-            denyGroup
+            blockGroup
           )((success: boolean) => {
             // If not successful, do nothing (user canceled)
           });
@@ -57,7 +58,7 @@ export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
             colorScheme,
             groupName,
             allowGroup,
-            denyGroup
+            blockGroup
           )((success: boolean) => {
             // If not successful, do nothing (user canceled)
           });
@@ -66,7 +67,7 @@ export const GroupScreenConsentTable: FC<GroupScreenConsentTableProps> = ({
     }
 
     return items;
-  }, [consent, allowGroup, denyGroup, colorScheme, group]);
+  }, [consent, allowGroup, blockGroup, colorScheme, group]);
 
   return (
     <TableView

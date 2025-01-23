@@ -1,7 +1,6 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "@/data/store/accountsStore";
-import { useAllowDmMutation } from "@/features/consent/use-allow-dm.mutation";
-import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
+import { useDmConsentForCurrentAccount } from "@/features/consent/use-dm-consent-for-current-account";
 import { useRouter } from "@/navigation/useNavigation";
 import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
 import { actionSheetColors } from "@/styles/colors";
@@ -29,15 +28,16 @@ export function ConversationConsentPopupDm() {
   const { data: peerInboxId } = useDmPeerInboxId({
     account: currentAccount,
     topic,
-    caller: "ConversationConsentPopupDm",
   });
 
   const navigation = useRouter();
 
   const colorScheme = useColorScheme();
 
-  const { mutateAsync: denyDmConsentAsync } = useDenyDmMutation();
-  const { mutateAsync: allowDmConsentAsync } = useAllowDmMutation();
+  const {
+    mutateAsync: consentToInboxIdsOnProtocolByAccountAsync,
+    status: consentToInboxIdsOnProtocolByAccountStatus,
+  } = useDmConsentForCurrentAccount();
 
   const handleBlock = useCallback(async () => {
     if (!peerInboxId) {
@@ -55,8 +55,9 @@ export function ConversationConsentPopupDm() {
       async (selectedIndex?: number) => {
         if (selectedIndex === 0) {
           try {
-            await denyDmConsentAsync({
+            await consentToInboxIdsOnProtocolByAccountAsync({
               topic,
+              consent: "deny",
               peerInboxId: peerInboxId,
               conversationId: conversationId,
             });
@@ -72,7 +73,7 @@ export function ConversationConsentPopupDm() {
   }, [
     colorScheme,
     navigation,
-    denyDmConsentAsync,
+    consentToInboxIdsOnProtocolByAccountAsync,
     peerInboxId,
     conversationId,
     topic,
@@ -83,7 +84,8 @@ export function ConversationConsentPopupDm() {
       if (!peerInboxId) {
         throw new Error("Peer inbox id not found");
       }
-      await allowDmConsentAsync({
+      await consentToInboxIdsOnProtocolByAccountAsync({
+        consent: "allow",
         peerInboxId,
         conversationId,
         topic,
@@ -93,7 +95,21 @@ export function ConversationConsentPopupDm() {
         message: `Error consenting`,
       });
     }
-  }, [allowDmConsentAsync, peerInboxId, conversationId, topic]);
+  }, [
+    consentToInboxIdsOnProtocolByAccountAsync,
+    peerInboxId,
+    conversationId,
+    topic,
+  ]);
+
+  // UX to show instant feedback to the user. When they click, we remove the popup to show that the action was done instant.
+  // If there was an error, the popup will show back and we'll show a snackbar with the error message.
+  if (
+    consentToInboxIdsOnProtocolByAccountStatus === "success" ||
+    consentToInboxIdsOnProtocolByAccountStatus === "pending"
+  ) {
+    return null;
+  }
 
   return (
     <ConversationConsentPopupContainer>

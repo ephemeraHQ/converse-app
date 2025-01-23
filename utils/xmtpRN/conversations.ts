@@ -1,4 +1,5 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
+import { addConversationToConversationsQuery } from "@/queries/use-conversations-query";
 import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import logger from "@utils/logger";
@@ -12,6 +13,24 @@ import {
 } from "./client.types";
 import { getXmtpClient } from "./sync";
 import { streamAllMessages } from "./xmtp-messages/xmtp-messages-stream";
+
+export const streamConversations = async (account: string) => {
+  await stopStreamingConversations(account);
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  await client.conversations.stream(async (conversation) => {
+    logger.info("[XMTPRN Conversations] GOT A NEW CONVO");
+    addConversationToConversationsQuery({
+      account,
+      conversation,
+    });
+  });
+  logger.info("STREAMING CONVOS");
+};
+
+export const stopStreamingConversations = async (account: string) => {
+  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  return client.conversations.cancelStream();
+};
 
 async function findGroup(args: {
   client: ConverseXmtpClientType;

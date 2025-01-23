@@ -65,7 +65,6 @@ export function useRemoveReactionOnMessage(props: {
       refetchConversationMessages({
         account: currentAccount,
         topic,
-        caller: "useRemoveReactionOnMessage mutation onError",
       }).catch(captureErrorWithToast);
     },
   });

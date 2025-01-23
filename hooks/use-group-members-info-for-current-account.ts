@@ -26,6 +26,9 @@ export function useGroupMembersInfoForCurrentAccount(args: {
   const { data: members } = useGroupMembersQuery({
     account: currentAccount,
     topic: groupTopic,
+    queryOptions: {
+      enabled: Boolean(groupTopic),
+    },
   });
 
   const memberInboxIds = useMemo(() => members?.ids ?? [], [members?.ids]);
