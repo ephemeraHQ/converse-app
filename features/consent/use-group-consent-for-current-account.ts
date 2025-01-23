@@ -38,7 +38,7 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
   const { mutateAsync: allowGroupMutation, isPending: isAllowingGroup } =
     useAllowGroupMutation(account, topic);
 
-  const { mutateAsync: blockGroupMutation, isPending: isBlockingGroup } =
+  const { mutateAsync: denyGroupMutation, isPending: isDenyingGroup } =
     useDenyGroupMutation(account, topic!);
 
   const allowGroup = useCallback(
@@ -59,7 +59,7 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
     [allowGroupMutation, group, account, topic]
   );
 
-  const blockGroup = useCallback(
+  const denyGroup = useCallback(
     async (args: IGroupConsentOptions) => {
       const { includeAddedBy, includeCreator } = args;
 
@@ -71,7 +71,7 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
         return;
       }
 
-      await blockGroupMutation();
+      await denyGroupMutation();
 
       const inboxIdsToDeny: InboxId[] = [];
 
@@ -84,14 +84,14 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
       }
 
       if (inboxIdsToDeny.length > 0) {
-        updateInboxIdsConsentForAccount({
+        await updateInboxIdsConsentForAccount({
           account,
           inboxIds: inboxIdsToDeny,
           consent: "deny",
         });
       }
     },
-    [blockGroupMutation, groupCreator, account, group]
+    [denyGroupMutation, groupCreator, account, group]
   );
 
   const isLoading =
@@ -102,8 +102,8 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
     isLoading,
     isError,
     allowGroup,
-    blockGroup,
+    denyGroup,
     isAllowingGroup,
-    isBlockingGroup,
+    isDenyingGroup,
   };
 };

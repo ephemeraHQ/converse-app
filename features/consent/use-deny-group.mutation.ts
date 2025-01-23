@@ -1,10 +1,13 @@
 import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account";
 import {
+  addConversationToUnknownConsentConversationsQuery,
+  removeConversationFromUnknownConsentConversationsQueryData,
+} from "@/queries/unknown-consent-conversations-query";
+import {
   addConversationToConversationsQuery,
   removeConversationFromConversationsQuery,
 } from "@/queries/use-conversations-query";
 import { getGroupQueryData, setGroupQueryData } from "@/queries/useGroupQuery";
-import { captureError } from "@/utils/capture-error";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { useMutation } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
@@ -42,9 +45,16 @@ export const useDenyGroupMutation = (
 
       setGroupQueryData({ account, topic, group: updatedGroup });
 
+      // Remove from main conversations list
       removeConversationFromConversationsQuery({
         account,
         topic: topic!,
+      });
+
+      // Remove from requests
+      removeConversationFromUnknownConsentConversationsQueryData({
+        account,
+        topic,
       });
 
       return { previousGroup };
@@ -56,7 +66,14 @@ export const useDenyGroupMutation = (
 
       setGroupQueryData({ account, topic, group: context.previousGroup });
 
+      // Add back to main conversations list
       addConversationToConversationsQuery({
+        account,
+        conversation: context.previousGroup,
+      });
+
+      // Add back to requests
+      addConversationToUnknownConsentConversationsQuery({
         account,
         conversation: context.previousGroup,
       });

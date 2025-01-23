@@ -119,11 +119,13 @@ export const getAllowGroupMutationOptions = (
 
       setGroupQueryData({ account, topic, group: updatedGroup });
 
+      // Remove from requests
       removeConversationFromUnknownConsentConversationsQueryData({
         account,
         topic,
       });
 
+      // Add to main conversations list
       addConversationToConversationsQuery({
         account,
         conversation: updatedGroup,
@@ -144,11 +146,13 @@ export const getAllowGroupMutationOptions = (
         group: context.previousGroup,
       });
 
+      // Add back in requests
       addConversationToUnknownConsentConversationsQuery({
         account,
         conversation: context.previousGroup,
       });
 
+      // Remove from main conversations list
       removeConversationFromConversationsQuery({
         account,
         topic,

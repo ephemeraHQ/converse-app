@@ -2306,7 +2306,7 @@ PODS:
     - CSecp256k1 (~> 0.2)
     - LibXMTP (= 3.0.20)
     - SQLCipher (= 4.5.7)
-  - XMTPReactNative (3.1.8):
+  - XMTPReactNative (3.1.9):
     - CSecp256k1 (~> 0.2)
     - ExpoModulesCore
     - MessagePacker
@@ -2964,7 +2964,7 @@ SPEC CHECKSUMS:
   SwiftProtobuf: 4dbaffec76a39a8dc5da23b40af1a5dc01a4c02d
   UMAppLoader: bda51f73f8599e336a778b23e0956130d1e244d5
   XMTP: 3d82fe8598fe043a67ad93276084ab46a30a1fa3
-  XMTPReactNative: b592f083533b7ab8964380889670848ebd32fc9a
+  XMTPReactNative: 31e66f0645c71e86940977590b164e6ffd4efa40
   Yoga: 7548e4449365bf0ef60db4aefe58abff37fcabec
 
 PODFILE CHECKSUM: 40186f68a97e4f0c190af3443ed2361cec3857cb

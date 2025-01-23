@@ -2,12 +2,21 @@ import {
   getCurrentAccount,
   useCurrentAccount,
 } from "@/data/store/accountsStore";
+import {
+  addConversationToUnknownConsentConversationsQuery,
+  removeConversationFromUnknownConsentConversationsQueryData,
+} from "@/queries/unknown-consent-conversations-query";
+import {
+  addConversationToConversationsQuery,
+  removeConversationFromConversationsQuery,
+} from "@/queries/use-conversations-query";
 import { getConversationQueryData } from "@/queries/useConversationQuery";
-import { updateConversationInUnknownConsentConversationsQueryData } from "@/queries/unknown-consent-conversations-query";
-import { updateConversationInConversationsQueryData } from "@/queries/use-conversations-query";
 import { getDmQueryData, setDmQueryData } from "@/queries/useDmQuery";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { DmWithCodecsType } from "@/utils/xmtpRN/client.types";
+import {
+  ConversationWithCodecsType,
+  DmWithCodecsType,
+} from "@/utils/xmtpRN/client.types";
 import { useMutation } from "@tanstack/react-query";
 import {
   ConversationId,
@@ -60,20 +69,16 @@ export function useAllowDmMutation() {
           dm: updatedDm as DmWithCodecsType,
         });
 
-        updateConversationInConversationsQueryData({
+        // Add to main conversations list
+        addConversationToConversationsQuery({
           account: currentAccount,
-          topic,
-          conversationUpdate: {
-            state: "allowed",
-          },
+          conversation: updatedDm as ConversationWithCodecsType,
         });
 
-        updateConversationInUnknownConsentConversationsQueryData({
+        // Remove from requests
+        removeConversationFromUnknownConsentConversationsQueryData({
           account: currentAccount,
           topic,
-          conversationUpdate: {
-            state: "allowed",
-          },
         });
 
         return { previousDmConsent: conversation.state };
@@ -91,30 +96,26 @@ export function useAllowDmMutation() {
           return;
         }
 
-        const updatedDm = updateObjectAndMethods(dm, {
+        const previousDm = updateObjectAndMethods(dm, {
           state: previousDmConsent,
         });
 
         setDmQueryData({
           account: currentAccount,
           peer: topic,
-          dm: updatedDm,
+          dm: previousDm,
         });
 
-        updateConversationInConversationsQueryData({
+        // Add back in requests
+        addConversationToUnknownConsentConversationsQuery({
           account: currentAccount,
-          topic,
-          conversationUpdate: {
-            state: previousDmConsent,
-          },
+          conversation: previousDm as ConversationWithCodecsType,
         });
 
-        updateConversationInUnknownConsentConversationsQueryData({
+        // Remove from main conversations list
+        removeConversationFromConversationsQuery({
           account: currentAccount,
           topic,
-          conversationUpdate: {
-            state: previousDmConsent,
-          },
         });
       }
     },
