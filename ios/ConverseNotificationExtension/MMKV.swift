@@ -58,51 +58,35 @@ func getAccountsState() -> Accounts? {
 
 func getProfilesStore(address: String) -> ProfileSocials? {
   let mmkv = getMmkv()
-  let key = "profileSocials-\(address.lowercased())"
+
+  let key: String = "tanstack-query-[\"profileSocials\",\"\(address.lowercased())\"]"
   let profilesString = mmkv?.string(forKey: key)
   if (profilesString == nil) {
     return nil
   }
   let decoder = JSONDecoder()
   do {
-    let decoded = try decoder.decode(Profile.self, from: profilesString!.data(using: .utf8)!)
-    return decoded.socials
+    let decoded = try decoder.decode(ProfilesQueryCache.self, from: profilesString!.data(using: .utf8)!)
+    return decoded.state.data
   } catch {
     return nil
   }
-}
+}	
 
 func getInboxIdProfilesStore(inboxId: String) -> ProfileSocials? {
   let mmkv = getMmkv()
-  let key = "inboxProfileSocials-\(inboxId.lowercased())"
+  
+  let key: String = "tanstack-query-[\"inboxProfileSocials\",\"\(inboxId.lowercased())\"]"
   let profilesString = mmkv?.string(forKey: key)
   if (profilesString == nil) {
     return nil
   }
   let decoder = JSONDecoder()
   do {
-    let decoded = try decoder.decode([ProfileSocials].self, from: profilesString!.data(using: .utf8)!)
-    return decoded[0]
+    let decoded = try decoder.decode(InboxProfilesQueryCache.self, from: profilesString!.data(using: .utf8)!)
+    return decoded.state.data[0]
   } catch {
     return nil
-  }
-}
-
-func saveProfileSocials(address: String, socials: ProfileSocials) {
-  let updatedAt = Int(Date().timeIntervalSince1970)
-  let newProfile = Profile(updatedAt: updatedAt, socials: socials)
-  let mmkv = getMmkv()
-  if let jsonData = try? JSONEncoder().encode(newProfile), let jsonString = String(data: jsonData, encoding: .utf8) {
-    mmkv?.set(jsonString, forKey: "profileSocials-\(address.lowercased())")
-  }
-}
-
-func saveInboxIdProfileSocials(inboxId: String, socials: ProfileSocials) {
-  let updatedAt = Int(Date().timeIntervalSince1970)
-  let newProfile = Profile(updatedAt: updatedAt, socials: socials)
-  let mmkv = getMmkv()
-  if let jsonData = try? JSONEncoder().encode(newProfile), let jsonString = String(data: jsonData, encoding: .utf8) {
-    mmkv?.set(jsonString, forKey: "inboxProfileSocials-\(inboxId.lowercased())")
   }
 }
 

@@ -22,7 +22,7 @@ const profileSocialsQueryKey = (peerAddress: string): QueryKey => [
 ];
 
 export const inboxProfileSocialsQueryStorageKey = (inboxId: InboxId) =>
-  profileSocialsQueryKey(inboxId).join("-");
+  `tanstack-query-${JSON.stringify(profileSocialsQueryKey(inboxId))}`;
 
 const profileSocials = create({
   fetcher: async (inboxIds: InboxId[]) => {

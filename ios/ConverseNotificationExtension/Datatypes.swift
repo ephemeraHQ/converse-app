@@ -86,3 +86,20 @@ struct ProfilesStore: Codable {
   var state: Profiles;
   var version: Int
 }
+
+struct InboxProfilesQueryCacheState: Codable {
+  var data: [ProfileSocials]
+}
+
+struct InboxProfilesQueryCache: Codable {
+  var state: InboxProfilesQueryCacheState;
+}
+
+
+struct ProfilesQueryCacheState: Codable {
+  var data: ProfileSocials
+}
+
+struct ProfilesQueryCache: Codable {
+  var state: ProfilesQueryCacheState;
+}
