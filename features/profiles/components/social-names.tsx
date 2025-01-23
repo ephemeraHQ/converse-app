@@ -44,10 +44,9 @@ export function SocialNames({ socials }: ISocialNamesProps) {
   ) => {
     return items?.map((item) => (
       <Chip
-        isActive
+        isSelected
         key={getValue(item)}
-        text={getValue(item)}
-        style={themed($chip)}
+        name={getValue(item)}
         onPress={() => handleNamePress(getValue(item))}
       />
     ));

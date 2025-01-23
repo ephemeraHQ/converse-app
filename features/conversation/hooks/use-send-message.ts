@@ -9,10 +9,10 @@ import {
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client.types";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
 import { useMutation } from "@tanstack/react-query";
 import {
+  ConversationTopic,
   DecodedMessage,
   MessageDeliveryStatus,
   MessageId,
@@ -20,21 +20,29 @@ import {
   TextCodec,
 } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
+import { getOrFetchConversation } from "@/queries/useConversationQuery";
 
 export type ISendMessageParams = {
+  topic: ConversationTopic;
   referencedMessageId?: MessageId;
   content:
     | { text: string; remoteAttachment?: RemoteAttachmentContent }
     | { text?: string; remoteAttachment: RemoteAttachmentContent };
 };
 
-export function sendMessage(args: {
-  conversation: ConversationWithCodecsType;
-  params: ISendMessageParams;
-}) {
-  const { conversation, params } = args;
+export type ISendFirstMessageParams = Omit<ISendMessageParams, "topic">;
 
-  const { referencedMessageId, content } = params;
+export async function sendMessage(args: ISendMessageParams) {
+  const { referencedMessageId, content, topic } = args;
+  const conversation = await getOrFetchConversation({
+    topic,
+    account: getCurrentAccount()!,
+    caller: "use-send-message#sendMessage",
+  });
+
+  if (!conversation) {
+    throw new Error("Conversation not found when sending message");
+  }
 
   if (referencedMessageId) {
     return conversation.send({
@@ -54,14 +62,10 @@ export function sendMessage(args: {
   );
 }
 
-export function useSendMessage(props: {
-  conversation: ConversationWithCodecsType;
-}) {
-  const { conversation } = props;
-
-  const { mutateAsync: sendMessageMutationAsync } = useMutation({
+export function useSendMessage() {
+  const { mutateAsync, error, isError } = useMutation({
     mutationFn: (variables: ISendMessageParams) => {
-      return sendMessage({ conversation, params: variables });
+      return sendMessage(variables);
     },
     onMutate: (variables) => {
       const currentAccount = getCurrentAccount()!;
@@ -82,7 +86,7 @@ export function useSendMessage(props: {
           sentNs: getTodayNs(),
           fallback: "new-message",
           deliveryStatus: "sending" as MessageDeliveryStatus, // NOT GOOD but tmp
-          topic: conversation.topic,
+          topic: variables.topic,
           senderInboxId: currentUserInboxId,
           nativeContent: {},
           content: () => {
@@ -92,7 +96,7 @@ export function useSendMessage(props: {
 
         addConversationMessageQuery({
           account: currentAccount,
-          topic: conversation.topic,
+          topic: variables.topic,
           message: textMessage,
         });
 
@@ -101,7 +105,7 @@ export function useSendMessage(props: {
         };
       }
     },
-    onSuccess: async (messageId, _, context) => {
+    onSuccess: async (messageId, variables, context) => {
       if (context && messageId) {
         // The SDK only returns the messageId
         const message = await fetchConversationMessageQuery({
@@ -116,34 +120,37 @@ export function useSendMessage(props: {
         if (message) {
           replaceOptimisticMessageWithReal({
             tempId: context.generatedMessageId,
-            topic: conversation.topic,
+            topic: variables.topic,
             account: getCurrentAccount()!,
             realMessage: message,
           });
         }
       }
     },
-    onError: (error) => {
+    onError: (error, variables) => {
       const currentAccount = getCurrentAccount()!;
       refetchConversationMessages({
         account: currentAccount,
-        topic: conversation.topic,
-        caller: "useSendMessage mutation onError",
+        topic: variables.topic,
+        caller: "useSendMessage#onError",
       }).catch(captureErrorWithToast);
     },
   });
 
-  return useCallback(
+  const sendMessageMutation = useCallback(
     async (args: ISendMessageParams) => {
       try {
-        if (!conversation) {
-          throw new Error("Conversation not found when sending message");
-        }
-        await sendMessageMutationAsync(args);
+        await mutateAsync(args);
       } catch (error) {
         captureErrorWithToast(error);
       }
     },
-    [sendMessageMutationAsync, conversation]
+    [mutateAsync]
   );
+
+  return {
+    sendMessage: sendMessageMutation,
+    error,
+    isError,
+  };
 }

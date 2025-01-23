@@ -16,9 +16,10 @@ import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
 } from "./conversation-composer.store-context";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 type IComposerProps = {
-  onSend: (args: ISendMessageParams) => Promise<void>;
+  onSend: (args: Omit<ISendMessageParams, "topic">) => Promise<void>;
   hideAddAttachmentButton?: boolean;
   disabled?: boolean;
 };
@@ -319,7 +320,6 @@ const ComposerTextInput = memo(function ComposerTextInput(props: {
   return (
     <RNTextInput
       style={{
-        // ...debugBorder("red"),
         ...textSizeStyles.sm,
         color: theme.colors.text.primary,
         flex: 1,

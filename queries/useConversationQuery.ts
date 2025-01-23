@@ -127,9 +127,5 @@ export const getConversationQueryData = (args: IGetConversationArgs) => {
 export function getOrFetchConversation(
   args: IGetConversationArgs & { caller: string }
 ) {
-  const conversation = getConversationQueryData(args);
-  if (conversation) {
-    return Promise.resolve(conversation);
-  }
-  return queryClient.fetchQuery(getConversationQueryOptions(args));
+  return queryClient.ensureQueryData(getConversationQueryOptions(args));
 }

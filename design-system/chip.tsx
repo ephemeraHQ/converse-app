@@ -1,106 +1,56 @@
 /**
- * A Chip component that displays an avatar and text in a pill-shaped
- * container. Used for user selection and filtering.
+ * A chip component that displays an avatar and text
+ * Used for showing selected users in search/selection contexts
  *
- * @see https://www.figma.com/design/p6mt4tEDltI4mypD3TIgUk/Converse-App?node-id=5026-27031
- *
- * @example
- * // Basic usage with avatar
- * <Chip
- *   text="Naomi"
- *   avatarUrl="avatar.png"
- *   onPress={() => {}}
- * />
- *
- * @example
- * // Active state without avatar
- * <Chip
- *   text="All 5"
- *   isActive={true}
- *   onPress={() => {}}
- * />
+ * @param {string} props.name Display name for the chip
+ * @param {string} props.avatarUri Optional avatar image URI
+ * @param {boolean} props.isSelected Whether the chip is in selected state
+ * @param {() => void} props.onPress Called when chip is pressed
  */
 
-import { ViewStyle, TextStyle, ImageStyle } from "react-native";
-import { TouchableOpacity } from "./TouchableOpacity";
-import { HStack } from "./HStack";
-import { Text } from "./Text";
+import React from "react";
+import { Pressable, ViewStyle } from "react-native";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { Text } from "@/design-system/Text";
 import { Avatar } from "@/components/Avatar";
-import { debugBorder } from "@/utils/debug-style";
 
-export type IChipProps = {
-  text: string;
-  avatarUrl?: string;
-  isActive?: boolean;
+type ChipProps = {
+  name: string;
+  avatarUri?: string;
+  isSelected?: boolean;
   onPress?: () => void;
-  style?: ViewStyle;
 };
 
-export function Chip({
-  text,
-  avatarUrl,
-  isActive,
-  onPress,
-  style,
-}: IChipProps) {
+export function Chip({ name, avatarUri, isSelected, onPress }: ChipProps) {
   const { themed, theme } = useAppTheme();
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
-      style={[themed($chip), isActive && themed($chipActive), style]}
+      style={[themed($container), isSelected && themed($selectedContainer)]}
     >
-      <HStack style={themed($chipContainer)}>
-        {avatarUrl && (
-          <Avatar size={theme.avatarSize.xs} uri={avatarUrl} name={text} />
-        )}
-        <Text
-          preset="smaller"
-          style={themed(isActive ? $chipTextActive : $chipText)}
-        >
-          {text}
-        </Text>
-      </HStack>
-    </TouchableOpacity>
+      <Avatar uri={avatarUri} name={name} size={theme.avatarSize.xs} />
+      <Text preset="small">{name}</Text>
+    </Pressable>
   );
 }
 
-const $chip: ThemedStyle<ViewStyle> = ({
-  spacing,
-  borderRadius,
-  borderWidth,
-  colors,
-}) => ({
-  borderRadius: borderRadius.sm,
-  borderWidth: borderWidth.sm,
-  borderColor: colors.border.subtle,
-  paddingVertical: spacing.xxs,
-  paddingHorizontal: spacing.sm,
-  minHeight: 36, // from Figma
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  flexDirection: "row",
+  alignItems: "center",
   justifyContent: "center",
+  paddingVertical: spacing.xxxs,
+  paddingLeft: spacing.xs,
+  paddingRight: spacing.xxs,
+  gap: spacing.xxxs,
+  minHeight: spacing.container.large,
+  borderRadius: spacing.xs,
+  borderWidth: 1,
+  borderColor: colors.border.subtle,
   backgroundColor: colors.background.surface,
 });
 
-const $chipActive: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.border.subtle,
-});
-
-const $chipContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  alignItems: "center",
-  gap: spacing.xxs,
-});
-
-const $avatar: ThemedStyle<ImageStyle> = ({ borderRadius }) => ({
-  width: 16,
-  height: 16,
-  borderRadius: borderRadius.message.bubble,
-});
-
-const $chipText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text.secondary,
-});
-
-const $chipTextActive: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text.primary,
+const $selectedContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.background.blurred,
+  borderColor: colors.border.primary,
 });

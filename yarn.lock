@@ -14673,6 +14673,7 @@ __metadata:
     expo-notifications: "npm:~0.29.8"
     expo-router: "npm:~4.0.9"
     expo-secure-store: "npm:~14.0.1"
+    expo-sharing: "npm:~13.0.1"
     expo-splash-screen: "npm:~0.29.13"
     expo-status-bar: "npm:~2.0.0"
     expo-system-ui: "npm:~4.0.4"
@@ -17924,6 +17925,15 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 10c0/c2ad36f7ae8aea5b95ebc117f302974de6ad403f0b98b259f9dfcadc441f5c40c2170472e4e95832ad6cf8bcd37614dfb3757a4de1f7631ea9493c61cb7b2ab3
+  languageName: node
+  linkType: hard
+
+"expo-sharing@npm:~13.0.1":
+  version: 13.0.1
+  resolution: "expo-sharing@npm:13.0.1"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/ecbd03c51fff90dc88dd06a7c8e8c5d5aeab564fc4c23893cef2734ca65e5525957cb700899a5a723e07e74b53056419ce5496b94442afaad35d7e62e42b4b12
   languageName: node
   linkType: hard
 

@@ -6,6 +6,7 @@ import type { InboxId } from "@xmtp/react-native-sdk";
 import { getXmtpApiHeaders } from "./auth";
 import { api } from "./api";
 import type { ProfileType } from "@/features/onboarding/types/onboarding.types";
+import { getCurrentAccount } from "@/data/store/accountsStore";
 
 export const getProfilesForAddresses = async (
   addresses: string[]
@@ -28,12 +29,12 @@ export const getProfilesForInboxIds = async ({
   return data;
 };
 
-export const searchProfiles = async (
-  query: string,
-  account: string
+export const searchProfilesForCurrentAccount = async (
+  query: string
 ): Promise<{ [address: string]: IProfileSocials }> => {
+  const currentAccount = getCurrentAccount()!;
   const { data } = await api.get("/api/profile/search", {
-    headers: await getXmtpApiHeaders(account),
+    headers: await getXmtpApiHeaders(currentAccount),
     params: { query },
   });
   return data;

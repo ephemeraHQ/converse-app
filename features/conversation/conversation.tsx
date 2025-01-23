@@ -181,14 +181,20 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
   conversation: ConversationWithCodecsType;
 }) {
   const { conversation } = props;
-  const sendMessage = useSendMessage({
-    conversation,
-  });
+  const { sendMessage } = useSendMessage();
 
   return (
     <ConversationComposerContainer>
       <ReplyPreview />
-      <ConversationComposer onSend={sendMessage} />
+      <ConversationComposer
+        onSend={async ({ referencedMessageId, content }) => {
+          return sendMessage({
+            topic: conversation.topic,
+            referencedMessageId,
+            content,
+          });
+        }}
+      />
     </ConversationComposerContainer>
   );
 });

@@ -29,8 +29,8 @@ export function PendingMembersSection({
         return (
           <Chip
             key={member.address}
-            text={preferredName}
-            avatarUrl={getPreferredAvatar(member)}
+            name={preferredName}
+            avatarUri={getPreferredAvatar(member)}
             onPress={() => onRemoveMember(member.address)}
           />
         );

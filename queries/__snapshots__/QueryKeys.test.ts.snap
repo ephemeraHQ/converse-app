@@ -18,5 +18,6 @@ exports[`QueryKeys should match the snapshot 1`] = `
   "GROUP_PERMISSION_POLICY": "groupPermissionPolicy",
   "PENDING_JOIN_REQUESTS": "pendingJoinRequests",
   "PINNED_FRAME": "pinnedFrame",
+  "USER_SEARCH": "userSearch",
 }
 `;
