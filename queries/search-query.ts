@@ -50,7 +50,7 @@ async function handlePeerSearch(searchQuery: string): Promise<ISearchResult> {
   if (!addressIsOnXmtp) {
     logger.info(`[Search] ${address} is not on XMTP`);
     return {
-      message: `${shortAddress(searchQuery)} is not on the XMTP network yet 😏`,
+      message: `${shortAddress(searchQuery)} is not on the XMTP network yet`,
       profileSearchResults: {},
     };
   }
@@ -74,7 +74,7 @@ async function handlePeerSearch(searchQuery: string): Promise<ISearchResult> {
     [address]: { address },
   };
   return {
-    message: "address is on xmtp but not on converse yet ;)",
+    message: "address is on xmtp but not on converse yet",
     profileSearchResults: justAddress,
   };
 }

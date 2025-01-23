@@ -51,6 +51,15 @@ const $messageText: ThemedStyle<TextStyle> = ({ colors }) => ({
   textAlign: "center",
 });
 
+const $inviteThemStyle: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text.secondary,
+  ...textSizeStyles.sm,
+  textAlign: "center",
+  height: 18,
+  textDecorationLine: "underline",
+  textDecorationStyle: "dotted",
+});
+
 const $errorText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text.primary,
 });
@@ -67,4 +76,5 @@ export const createConversationStyles = {
   $messageText,
   $errorText,
   $composerSection,
+  $inviteThemStyle,
 } as const;

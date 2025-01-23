@@ -30,13 +30,10 @@ export type ISendMessageParams = {
     | { text?: string; remoteAttachment: RemoteAttachmentContent };
 };
 
-export async function sendMessage(args: {
-  topic: ConversationTopic;
-  params: ISendMessageParams;
-}) {
-  const { topic, params } = args;
+export type ISendFirstMessageParams = Omit<ISendMessageParams, "topic">;
 
-  const { referencedMessageId, content } = params;
+export async function sendMessage(args: ISendMessageParams) {
+  const { referencedMessageId, content, topic } = args;
 
   const conversation = await getOrFetchConversation({
     topic,
@@ -68,7 +65,7 @@ export async function sendMessage(args: {
 export function useSendMessage() {
   const { mutateAsync, error, isError } = useMutation({
     mutationFn: (variables: ISendMessageParams) => {
-      return sendMessage({ topic: variables.topic, params: variables });
+      return sendMessage(variables);
     },
     onMutate: (variables) => {
       const currentAccount = getCurrentAccount()!;

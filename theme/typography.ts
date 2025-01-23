@@ -48,6 +48,19 @@ export const typography = {
   }),
 };
 
+/**
+ *  
+.inviteThem {
+text-decoration: underline;
+}
+.doYouHaveContainer {
+font-size: 14px;
+line-height: 18px;
+color: #666;
+height: 18px;
+font-family: 'SF Pro';
+}
+ */
 export const text: Record<string, TextStyle> = {
   body: {
     fontSize: 16,
@@ -85,6 +98,6 @@ export const text: Record<string, TextStyle> = {
     letterSpacing: 0,
     fontWeight: 700,
   },
-};
+} as const;
 
 export type ITypography = typeof typography;

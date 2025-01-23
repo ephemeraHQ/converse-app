@@ -16,10 +16,8 @@ import { TextInput, View, ViewStyle, TextStyle } from "react-native";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { textSizeStyles } from "@/design-system/Text/Text.styles";
 import { Text } from "@/design-system/Text";
-import { Chip } from "./Chip";
-// import { debugBorder } from "@/utils/debug-style";
 import logger from "@/utils/logger";
-// import { debugBorder } from "@/utils/debug-style";
+import { Chip } from "@/design-system/chip";
 
 type Props = {
   value: string;

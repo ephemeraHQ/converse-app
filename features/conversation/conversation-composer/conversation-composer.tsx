@@ -319,7 +319,6 @@ const ComposerTextInput = memo(function ComposerTextInput(props: {
   return (
     <RNTextInput
       style={{
-        // ...debugBorder("red"),
         ...textSizeStyles.sm,
         color: theme.colors.text.primary,
         flex: 1,

@@ -12,19 +12,16 @@ import {
   getOptionalConversationByPeerByAccount,
 } from "@/utils/xmtpRN/conversations";
 import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
-import { captureErrorWithToast } from "@/utils/capture-error";
 import logger from "@/utils/logger";
-import {
-  ComposerSection,
-  MessageSection,
-  UserInlineSearch,
-} from "./components";
 import { ProfileSearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
 import { CreateConversationScreenProps } from "./create-conversation.types";
 import { IProfileSocials } from "../profiles/profile-types";
 import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
 import { useSearchQuery } from "@/queries/search-query";
 import { Loader } from "@/design-system/loader";
+import { UserInlineSearch } from "./components/user-inline-search";
+import { MessageSection } from "./components/message-section";
+import { ComposerSection } from "./components/composer-section";
 
 /**
  * Screen for creating new conversations
@@ -37,9 +34,8 @@ export function CreateConversationScreen({
   const [conversationMode, setConversationMode] = useState<ConversationVersion>(
     ConversationVersion.DM
   );
-  const { sendMessage, error, isError } = useSendMessage();
+  const { sendMessage, error } = useSendMessage();
   const [searchQuery, setSearchQuery] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<
     Array<{
       address: string;
@@ -164,7 +160,6 @@ export function CreateConversationScreen({
         },
       ]);
       setSearchQuery("");
-      setErrorMessage("");
     },
     []
   );
@@ -186,7 +181,7 @@ export function CreateConversationScreen({
         }}
       />
 
-      {!areSearchResultsLoading && !errorMessage && hasSearchResults && (
+      {!areSearchResultsLoading && hasSearchResults && (
         <ProfileSearchResultsList
           profiles={profileSearchResults!}
           handleSearchResultItemPress={handleSearchResultPress}
@@ -194,6 +189,8 @@ export function CreateConversationScreen({
       )}
 
       {message && <MessageSection message={message} />}
+
+      {error && <MessageSection message={error.message} />}
 
       {areSearchResultsLoading && (
         <View style={{ flex: 1 }}>

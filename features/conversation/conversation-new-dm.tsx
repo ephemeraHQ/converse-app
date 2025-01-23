@@ -10,7 +10,7 @@ import { ConversationComposerStoreProvider } from "@/features/conversation/conve
 import { NewConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-new-dm-header-title";
 import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
 import {
-  ISendMessageParams,
+  ISendFirstMessageParams,
   sendMessage,
 } from "@/features/conversation/hooks/use-send-message";
 import { usePreferredName } from "@/hooks/usePreferredName";
@@ -127,15 +127,14 @@ function useSendFirstConversationMessage(peerAddress: string) {
   });
 
   return useCallback(
-    async (args: ISendMessageParams) => {
+    async (args: ISendFirstMessageParams) => {
       try {
         // First, create the conversation
         const conversation = await createNewConversationAsync(peerAddress);
         try {
-          // Then, send the message
           await sendMessageAsync({
-            conversation,
-            params: args,
+            content: args.content,
+            topic: conversation.topic,
           });
         } catch (error) {
           showSnackbar({ message: "Failed to send message" });
