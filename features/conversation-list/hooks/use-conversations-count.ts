@@ -1,5 +1,7 @@
 import { generateGroupHashFromMemberIds } from "@/features/create-conversation/generate-group-hash-from-member-ids";
 import { getConversationsQueryOptions } from "@/queries/use-conversations-query";
+import { getGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
+import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import logger from "@/utils/logger";
 import {
   getCurrentAccount,
@@ -22,58 +24,77 @@ export const useAllowedConversationsCount = () => {
   return { count, isLoading };
 };
 
-export const useFindConversationByMembers = (members: InboxId[]) => {
+export const useFindConversationByMembers = (membersToSearch: InboxId[]) => {
   const account = useCurrentAccount();
 
   logger.debug(
     `[useFindConversationByMembers] Finding conversation for members:`,
-    members
+    membersToSearch
   );
 
-  const membersHash = generateGroupHashFromMemberIds([
-    ...members,
-    getCurrentAccount()!,
-  ]);
-
-  logger.debug(
-    `[useFindConversationByMembers] Generated members hash: ${membersHash}`
-  );
-
-  const { data: conversation, isLoading } = useQuery({
+  const { data: conversations, isLoading } = useQuery({
     ...getConversationsQueryOptions({
       account: account!,
       caller: "useConversationByMembers",
     }),
-    select: (data) => {
+    select: (conversations) => {
       logger.debug(
-        `[useFindConversationByMembers] Searching through ${data?.length} conversations`
+        `[useFindConversationByMembers] Searching through ${conversations?.length} conversations`
       );
 
-      const found = data?.find((c) => {
-        const matches = c.membersHash === membersHash;
+      const groupsThatIncludeMembers = conversations?.filter((c) => {
         logger.debug(
-          `[useFindConversationByMembers] Checking conversation ${c.topic}:`,
-          `membersHash=${c.membersHash}`,
-          `matches=${matches}`
+          `[useFindConversationByMembers] Checking conversation ${c.topic}`
         );
-        return matches;
+
+        const groupMembers = getGroupMembersQueryData(account!, c.topic);
+        logger.debug(
+          `[useFindConversationByMembers] Group members for ${c.topic}:`,
+          groupMembers?.ids
+        );
+
+        const membersIdsSet = new Set(
+          groupMembers?.addresses.map((address) => address.toLowerCase()) ?? []
+        );
+        const membersToSearchSet = new Set(
+          membersToSearch.map((member) => member.toLowerCase())
+        );
+
+        logger.debug(
+          `[useFindConversationByMembers] Checking if\n${Array.from(
+            membersToSearchSet
+          )}\n is subset of\n${Array.from(membersIdsSet).join("\n")}`
+        );
+
+        // const areMembersToSearchAllInGroup =
+        //   membersToSearchSet.isSubsetOf(membersIdsSet);
+        // write brute force subset check
+        const areMembersToSearchAllInGroup = membersToSearch.every((member) =>
+          membersIdsSet.has(member.toLowerCase())
+        );
+
+        logger.debug(
+          `[useFindConversationByMembers] Members are ${
+            areMembersToSearchAllInGroup ? "" : "not "
+          }all in group ${c.topic}`
+        );
+
+        return areMembersToSearchAllInGroup;
       });
 
       logger.debug(
-        `[useFindConversationByMembers] Found conversation:`,
-        found ? found.topic : "none"
+        `[useFindConversationByMembers] Found ${groupsThatIncludeMembers?.length} conversations that include members`
       );
 
-      return found;
+      return groupsThatIncludeMembers;
     },
-    enabled: !!membersHash,
+    enabled: !!membersToSearch && membersToSearch.length > 0,
   });
 
   logger.debug(
     `[useFindConversationByMembers] Returning:`,
-    `conversation=${conversation?.topic ?? "nope!"}`,
     `isLoading=${isLoading}`
   );
 
-  return { conversation, isLoading };
+  return { conversations, isLoading };
 };

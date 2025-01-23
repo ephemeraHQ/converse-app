@@ -56,6 +56,7 @@ export type EntityObjectWithAddress<T, KeyType extends string = string> = {
   byId: Record<KeyType, T>;
   byAddress: Record<string, KeyType>;
   ids: KeyType[];
+  addresses: string[];
 };
 
 /**
@@ -99,6 +100,7 @@ export function entifyWithAddress<T, KeyType extends string = string>(
       const id = idFunc(item);
       const address = addressFunc(item);
       acc.ids.push(id);
+      acc.addresses.push(address);
       acc.byId[id] = item;
       acc.byAddress[address] = id;
       return acc;
@@ -107,6 +109,7 @@ export function entifyWithAddress<T, KeyType extends string = string>(
       byId: {} as Record<KeyType, T>,
       byAddress: {},
       ids: [],
+      addresses: [],
     }
   );
 }

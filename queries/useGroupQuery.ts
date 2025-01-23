@@ -70,15 +70,6 @@ export function getGroupQueryOptions(args: {
       if (!data) {
         return null;
       }
-      /**
-       * Type error: Group<SupportedCodecsType> | Dm<SupportedCodecsType> is not
-       * assignable to ConversationWithCodecsType. Group<SupportedCodecsType> is
-       * missing resolvedMembers and membersHash properties.
-       *
-       * note(lustig) I really think we should get away from leaking xmtp types into our codebase.
-       * these generics are starting to be very annoying and counter productive.
-       */
-      // @ts-expect-error TS2345
       if (!isConversationGroup(data)) {
         throw new Error(
           "Expected group conversation but received different type"

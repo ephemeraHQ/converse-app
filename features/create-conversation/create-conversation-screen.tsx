@@ -45,10 +45,10 @@ export function CreateConversationScreen({
     }>
   >([]);
   const {
-    conversation: existingConversation,
+    conversations: existingConversations,
     isLoading: isLoadingExistingConversation,
   } = useFindConversationByMembers(selectedUsers.map((u) => u.address));
-  logJson({ json: existingConversation, msg: "existingConversation" });
+  logJson({ json: existingConversations, msg: "existingConversations" });
 
   const selectedUsersCount = selectedUsers.length;
   const composerDisabled = selectedUsersCount === 0;
@@ -204,14 +204,18 @@ export function CreateConversationScreen({
         </View>
       )}
 
-      {existingConversation && (
+      {existingConversations && (
         <MessageSection
-          message={`Conversation already exists with ${existingConversation.topic}`}
+          message={`${
+            existingConversations.length
+          } conversations already exist with ${selectedUsers
+            .map((u) => u.name)
+            .join(", ")}`}
           isError={false}
         />
       )}
 
-      {!existingConversation && !isLoadingExistingConversation && (
+      {!existingConversations && !isLoadingExistingConversation && (
         <MessageSection
           message={"Conversation does not exist with those members"}
           isError={false}

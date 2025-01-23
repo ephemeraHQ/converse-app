@@ -11,6 +11,7 @@ import { entifyWithAddress, EntityObjectWithAddress } from "./entify";
 import { queryClient } from "./queryClient";
 import { groupMembersQueryKey } from "./QueryKeys";
 import { getOrFetchGroupQuery } from "./useGroupQuery";
+import logger from "@utils/logger";
 
 export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
 
@@ -19,6 +20,11 @@ const fetchGroupMembers = async (args: {
   topic: ConversationTopic;
 }): Promise<EntityObjectWithAddress<Member, InboxId>> => {
   const { account, topic } = args;
+  logger.debug("[fetchGroupMembers] Fetching group members", {
+    account,
+    topic,
+  });
+
   const group = await getOrFetchGroupQuery({
     account,
     topic,
@@ -30,6 +36,11 @@ const fetchGroupMembers = async (args: {
   }
 
   const members = await group.members();
+
+  logger.debug("[fetchGroupMembers] Successfully fetched members", {
+    topic,
+    memberCount: members.length,
+  });
 
   return entifyWithAddress(
     members,
@@ -118,10 +129,10 @@ export async function ensureGroupMembersQueryData(args: {
   topic: ConversationTopic;
 }) {
   const { account, topic } = args;
-  return queryClient.ensureQueryData({
-    queryKey: getGroupMemberQueryOptions({
+  return queryClient.ensureQueryData(
+    getGroupMemberQueryOptions({
       account,
       topic,
-    }).queryKey,
-  });
+    })
+  );
 }

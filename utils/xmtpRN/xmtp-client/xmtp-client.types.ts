@@ -30,12 +30,7 @@ export type SupportedCodecsType = [
 
 export type ConverseXmtpClientType = Client<SupportedCodecsType>;
 
-// export type ConversationWithCodecsType = Conversation<SupportedCodecsType>;
-
-export type ConversationWithCodecsType = Conversation<SupportedCodecsType> & {
-  resolvedMembers: Member[];
-  membersHash: string;
-};
+export type ConversationWithCodecsType = Conversation<SupportedCodecsType>;
 
 export type DmWithCodecsType = Dm<SupportedCodecsType>;
 
