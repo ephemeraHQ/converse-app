@@ -60,27 +60,26 @@ export function ConversationListScreen(props: IConversationListProps) {
 
   return (
     <Screen contentContainerStyle={$globalStyles.flex1}>
-      <AnimatedVStack layout={theme.animation.reanimatedLayoutSpringTransition}>
-        <ConversationList
-          conversations={conversations ?? []}
-          scrollEnabled={conversations && conversations?.length > 0}
-          ListEmptyComponent={<ConversationListEmpty />}
-          ListHeaderComponent={<ListHeader />}
-          onRefetch={handleRefresh}
-          onLayout={() => {}}
-          removeClippedSubviews={false}
-          contentContainerStyle={{
-            paddingBottom: insets.bottom,
-          }}
-          renderConversation={({ item }) => {
-            return isConversationGroup(item) ? (
-              <ConversationListItemGroupWrapper group={item} />
-            ) : (
-              <ConversationListItemDmWrapper dm={item} />
-            );
-          }}
-        />
-      </AnimatedVStack>
+      <ConversationList
+        conversations={conversations ?? []}
+        scrollEnabled={conversations && conversations?.length > 0}
+        ListEmptyComponent={<ConversationListEmpty />}
+        ListHeaderComponent={<ListHeader />}
+        onRefetch={handleRefresh}
+        onLayout={() => {}}
+        layout={theme.animation.reanimatedLayoutSpringTransition}
+        removeClippedSubviews={false}
+        contentContainerStyle={{
+          paddingBottom: insets.bottom,
+        }}
+        renderConversation={({ item }) => {
+          return isConversationGroup(item) ? (
+            <ConversationListItemGroupWrapper group={item} />
+          ) : (
+            <ConversationListItemDmWrapper dm={item} />
+          );
+        }}
+      />
     </Screen>
   );
 }
