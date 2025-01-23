@@ -82,9 +82,7 @@ async function handlePeerSearch(searchQuery: string): Promise<ISearchResult> {
 /**
  * Handles searching when searchQuery is a regular string (not a peer)
  */
-async function handleGeneralSearch(
-  searchQuery: string
-): Promise<ISearchResult> {
+async function handleGeneralSearch(searchQuery: string) {
   logger.info(`[Search] Searching profiles for query: ${searchQuery}`);
   const profiles = await searchProfilesForCurrentAccount(searchQuery);
 
@@ -105,11 +103,7 @@ async function handleGeneralSearch(
   };
 }
 
-export async function searchUsers({
-  searchQuery,
-}: {
-  searchQuery: string;
-}): Promise<ISearchResult> {
+export async function searchUsers({ searchQuery }: { searchQuery: string }) {
   logger.info(`[Search] Starting search for query: ${searchQuery}`);
 
   if (searchQuery.length === 0) {
@@ -138,10 +132,6 @@ export function getSearchQueryOptions(searchQuery: string) {
 
 export const useSearchQuery = (args: ISearchArgs) => {
   const { searchQuery } = args;
-  const {
-    data: { profileSearchResults, message } = {},
-    isLoading: areSearchResultsLoading,
-  } = useQuery(getSearchQueryOptions(searchQuery));
   const currentAccount = getCurrentAccount()!;
   const currentAccountAddress = getCleanAddress(currentAccount);
   const allAddressesToOmit = [
@@ -149,13 +139,23 @@ export const useSearchQuery = (args: ISearchArgs) => {
     currentAccountAddress,
   ].map((address) => address.toLowerCase());
 
-  for (const address of Object.keys(profileSearchResults || {})) {
-    if (allAddressesToOmit.includes(address)) {
-      if (profileSearchResults) {
-        delete profileSearchResults[address];
+  const {
+    data: { profileSearchResults, message } = {},
+    isLoading: areSearchResultsLoading,
+  } = useQuery({
+    ...getSearchQueryOptions(searchQuery),
+    select: (data) => {
+      const filteredResults = { ...data };
+      if (filteredResults.profileSearchResults) {
+        Object.keys(filteredResults.profileSearchResults).forEach((address) => {
+          if (allAddressesToOmit.includes(address.toLowerCase())) {
+            delete filteredResults.profileSearchResults[address];
+          }
+        });
       }
-    }
-  }
+      return filteredResults;
+    },
+  });
 
   return {
     profileSearchResults,
