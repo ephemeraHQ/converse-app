@@ -18,10 +18,10 @@ type EnvironmentConfig = {
   };
 };
 
-type Environment = "dev" | "preview" | "production";
+type Environment = "development" | "preview" | "production";
 
 const settings: Record<Environment, EnvironmentConfig> = {
-  dev: {
+  development: {
     scheme: "converse-dev",
     ios: {
       bundleIdentifier: "com.converse.dev",
@@ -75,8 +75,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
 };
 
 export default (): ExpoConfig => {
-  const environment = (process.env.EXPO_ENV || "dev") as Environment;
-  console.log("environment:", environment);
+  const environment = (process.env.EXPO_ENV || "development") as Environment;
   const config = settings[environment];
 
   return {

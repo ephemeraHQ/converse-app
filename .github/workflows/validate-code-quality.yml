@@ -88,8 +88,3 @@ jobs:
 
           yarn
           yarn reassure --branch
-
-      - name: Run Danger.js
-        run: yarn danger ci
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
