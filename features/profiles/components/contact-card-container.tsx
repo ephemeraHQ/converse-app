@@ -22,7 +22,6 @@ const ContactCardContainerWithoutThemeProvider = memo(
     children,
   }: IContactCardContainerProps) {
     const { theme } = useAppTheme();
-    logger.debug("ContactCardContainerWithoutThemeProvider", theme.isDark);
 
     const { width: screenWidth } = Dimensions.get("window");
 

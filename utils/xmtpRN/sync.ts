@@ -4,11 +4,7 @@ import { getChatStore } from "@data/store/accountsStore";
 import logger from "@utils/logger";
 import { retryWithBackoff } from "@utils/retryWithBackoff";
 import { AppState } from "react-native";
-import {
-  getXmtpClientFromAddress,
-  reconnectXmtpClientsDbConnections,
-  xmtpClientByAccount,
-} from "./client";
+import { getXmtpClientFromAddress, xmtpClientByAccount } from "./client";
 import { ConverseXmtpClientType } from "./client.types";
 import {
   stopStreamingConversations,
@@ -63,33 +59,9 @@ export const getXmtpClient = async (
   ] as Promise<ConverseXmtpClientType>;
 };
 
-export const onSyncLost = async (account: string, error: any) => {
+export const onSyncLost = async (account: string) => {
   // If there is an error let's show it
   getChatStore(account).getState().setReconnecting(true);
-  // If error is a libxmtp database reconnection issue, let's
-  // try to reconnect if we're active
-  if (
-    `${error}`.includes("storage error: Pool needs to  reconnect before use")
-  ) {
-    if (AppState.currentState === "active") {
-      logger.error(
-        "Reconnecting XMTP Pool because it didn't reconnect automatically"
-      );
-      await reconnectXmtpClientsDbConnections();
-      logger.debug("Done reconnecting XMTP Pool");
-    } else if (AppState.currentState === "background") {
-      // This error is normal when backgrounded, fail silently
-      // as reopening the app will launch a resync
-    } else {
-      logger.error(error, {
-        context: `An error occured while syncing for ${account}`,
-      });
-    }
-  } else {
-    logger.error(error, {
-      context: `An error occured while syncing for ${account}`,
-    });
-  }
 };
 
 const streamingAccounts: { [account: string]: boolean } = {};
@@ -158,7 +130,7 @@ export const syncConversationListXmtpClient = async (account: string) => {
     maxDelay: 30000,
     context: `syncing ${account}`,
     onError: async (e) => {
-      await onSyncLost(account, e);
+      await onSyncLost(account);
     },
   });
 };
