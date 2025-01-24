@@ -43,7 +43,7 @@ export const formatEphemeralDisplayName = (
   displayName || humanize(address.slice(2, 42), { numWords: 2, separator: "" });
 
 export const formatRandoDisplayName = (address: string) =>
-  humanize(address.slice(2, 42), 2, " ", true);
+  humanize(address.slice(2, 42), { numWords: 2, separator: " " });
 
 export const getTitleFontScale = (): number => {
   let titleFontScale = 1;

@@ -35,4 +35,4 @@ jobs:
         run: yarn install
 
       - name: Build Android app
-        run: eas build --profile development --platform android --non-interactive --dry-run
+        run: eas build --profile development --platform android --non-interactive

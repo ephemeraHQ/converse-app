@@ -18,7 +18,7 @@ type EnvironmentConfig = {
   };
 };
 
-type Environment = "dev" | "preview" | "prod";
+type Environment = "dev" | "preview" | "production";
 
 const settings: Record<Environment, EnvironmentConfig> = {
   dev: {
@@ -54,7 +54,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     icon: "./assets/icon-preview.png",
     googleServicesFile: "./scripts/build/android/google-services/preview.json",
   },
-  prod: {
+  production: {
     scheme: "converse",
     ios: {
       bundleIdentifier: "com.converse.native",
@@ -76,6 +76,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
 
 export default (): ExpoConfig => {
   const environment = (process.env.EXPO_ENV || "dev") as Environment;
+  console.log("environment:", environment);
   const config = settings[environment];
 
   return {
