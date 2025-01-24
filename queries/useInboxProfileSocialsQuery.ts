@@ -55,17 +55,6 @@ const inboxProfileSocialsQueryConfig = (inboxId: InboxId | undefined) => ({
   // And automatic retries if there was an error fetching
   refetchOnMount: false,
   staleTime: 1000 * 60 * 60 * 24,
-  initialData: (): IProfileSocials[] | null | undefined => {
-    if (!inboxId) {
-      return undefined;
-    }
-    if (mmkv.contains(inboxProfileSocialsQueryStorageKey(inboxId))) {
-      const data = JSON.parse(
-        mmkv.getString(inboxProfileSocialsQueryStorageKey(inboxId))!
-      ) as IProfileSocials[];
-      return data;
-    }
-  },
   initialDataUpdatedAt: 0,
   persister: profileSocialsPersister,
 });

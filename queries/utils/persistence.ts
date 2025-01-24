@@ -8,6 +8,7 @@ import mmkv from "@/utils/mmkv";
 import logger from "@/utils/logger";
 import { QueryState } from "@tanstack/query-core";
 
+// Adds some types, otherwise everything is unknown
 export type GenericPersistedQuery<T, E = Error> = Omit<
   PersistedQuery,
   "state"

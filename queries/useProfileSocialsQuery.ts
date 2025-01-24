@@ -54,14 +54,6 @@ const profileSocialsQueryConfig = (peerAddress: string) => ({
   // And automatic retries if there was an error fetching
   refetchOnMount: false,
   staleTime: 1000 * 60 * 60 * 24,
-  initialData: (): ProfileSocialsData => {
-    if (mmkv.contains(profileSocialsQueryStorageKey(peerAddress))) {
-      const data = JSON.parse(
-        mmkv.getString(profileSocialsQueryStorageKey(peerAddress))!
-      ) as ProfileSocialsData;
-      return data;
-    }
-  },
   initialDataUpdatedAt: 0,
   persister: profileSocialsPersister,
 });
