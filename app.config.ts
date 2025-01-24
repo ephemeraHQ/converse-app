@@ -1,4 +1,4 @@
-import { ConfigContext, ExpoConfig } from "expo/config";
+import { ExpoConfig } from "expo/config";
 import { version } from "./package.json";
 
 type EnvironmentConfig = {
@@ -74,12 +74,11 @@ const settings: Record<Environment, EnvironmentConfig> = {
   },
 };
 
-export default ({ config: defaultConfig }: ConfigContext): ExpoConfig => {
+export default (): ExpoConfig => {
   const environment = (process.env.EXPO_ENV || "dev") as Environment;
   const config = settings[environment];
 
   return {
-    ...defaultConfig,
     name: config.appName,
     scheme: config.scheme,
     owner: "converse",
