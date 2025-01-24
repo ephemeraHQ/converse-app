@@ -53,30 +53,6 @@ export const xmtpClientByAccount: {
   [account: string]: ConverseXmtpClientType;
 } = {};
 
-// On iOS, it's important to stop writing to SQLite database
-// when the app is going from BACKGROUNDED to SUSPENDED
-// (see https://github.com/xmtp/xmtp-ios/issues/336)
-
-// There are currently 2 SQLite databases:
-// 1st one managed by Converse, created to store v2 XMTP data
-// 2nd one managed by LibXMTP, created to store v3 XMTP data
-
-// Let's just stop writing to both of them as soon as the app is BACKGROUNDED
-
-export const dropXmtpClientsDbConnections = async () => {
-  await Promise.all(
-    Object.values(xmtpClientByAccount).map((c) =>
-      c.dropLocalDatabaseConnection()
-    )
-  );
-};
-
-export const reconnectXmtpClientsDbConnections = async () => {
-  await Promise.all(
-    Object.values(xmtpClientByAccount).map((c) => c.reconnectLocalDatabase())
-  );
-};
-
 export const isClientInstallationValid = async (client: Client) => {
   const inboxState = await client.inboxState(true);
   const installationsIds = inboxState.installations.map((i) => i.id);

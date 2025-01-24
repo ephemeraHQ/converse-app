@@ -1,8 +1,6 @@
 import {
-  copyDatabasesToTemporaryDirectory,
   createTemporaryDirectory,
   deleteLibXmtpDatabaseForInboxId,
-  moveTemporaryDatabasesToDatabaseDirecory as moveTemporaryDatabasesToDatabaseDirectory,
 } from "@utils/fileSystem";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
@@ -37,8 +35,6 @@ const createXmtpClientFromXmtpSigner = async (
   };
   const inboxId = await getInboxId(await signer.getAddress());
 
-  await copyDatabasesToTemporaryDirectory(tempDirectory, inboxId);
-
   logger.debug("Instantiating client from signer");
 
   const client = await Client.create(signer, {
@@ -64,10 +60,6 @@ const createXmtpClientFromXmtpSigner = async (
   // This Client is only be used to extract the key, we can disconnect
   // it to prevent locks happening during Onboarding
   await client.dropLocalDatabaseConnection();
-  await moveTemporaryDatabasesToDatabaseDirectory(
-    tempDirectory,
-    client.inboxId
-  );
   logger.debug("Dropped client databases");
 };
 
