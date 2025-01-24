@@ -2469,8 +2469,8 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - Sentry/HybridSDK (= 8.36.0)
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
-  - XMTP (= 3.0.24)
   - walletsdk-ethos (from `../node_modules/walletsdk-ethos`)
+  - XMTP (= 3.0.24)
   - "XMTPReactNative (from `../node_modules/@xmtp/react-native-sdk/ios`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 

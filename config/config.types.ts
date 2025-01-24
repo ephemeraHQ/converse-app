@@ -27,8 +27,10 @@ type IPrivyConfig = {
   clientId: string;
 };
 
+export type ILoggerColorScheme = "light" | "dark";
+
 export type IConfig = {
-  loggerColorScheme: string;
+  loggerColorScheme: ILoggerColorScheme;
   debugMenu: boolean;
   debugAddresses: string[];
   lensApiDomain: string;

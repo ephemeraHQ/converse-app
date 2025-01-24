@@ -1,4 +1,4 @@
-name: Typescript CI (No checks)
+name: Validate Code Quality (No checks)
 on:
   pull_request:
     branches:

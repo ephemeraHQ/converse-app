@@ -2,7 +2,6 @@ import { IConfig } from "@/config/config.types";
 import { IXmtpEnv } from "@/utils/xmtpRN/xmtp.types";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
-import { baseSepolia } from "wagmi/chains";
 import { shared } from "./shared";
 
 function maybeReplaceLocalhost(uri: string) {
@@ -31,7 +30,9 @@ function maybeReplaceLocalhost(uri: string) {
 export const devConfig: IConfig = {
   ...shared,
   xmtpEnv: (process.env.EXPO_PUBLIC_DEV_XMTP_ENV || "dev") as IXmtpEnv,
-  apiURI: maybeReplaceLocalhost(process.env.EXPO_PUBLIC_DEV_API_URI),
+  apiURI: maybeReplaceLocalhost(
+    process.env.EXPO_PUBLIC_DEV_API_URI || "http://localhost:9875"
+  ),
   debugMenu: true,
   bundleId: "com.converse.dev",
   appleAppGroup: "group.com.converse.dev",
@@ -45,10 +46,6 @@ export const devConfig: IConfig = {
     Platform.OS === "android"
       ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID
       : process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
-  privy: {
-    appId: process.env.EXPO_PUBLIC_PRIVY_APP_ID,
-    defaultChain: baseSepolia,
-  },
   evm: {
     rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     transactionChainId: "0x14a34", // Base Sepolia

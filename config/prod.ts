@@ -17,10 +17,6 @@ export const prodConfig: IConfig = {
     `http://${domain}`,
     domain,
   ]),
-  privy: {
-    appId: process.env.EXPO_PUBLIC_PRIVY_APP_ID,
-    defaultChain: shared,
-  },
   evm: {
     rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     transactionChainId: "0x2105", // Base Mainnet

@@ -1,15 +1,17 @@
-import { IConfig } from "@/config/config.types";
+import { IConfig, ILoggerColorScheme } from "@/config/config.types";
 
 // Base configuration shared across all environments
-
 export const shared = {
-  loggerColorScheme: process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME,
+  loggerColorScheme:
+    (process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME as ILoggerColorScheme) ||
+    "light",
   debugMenu: false,
   debugAddresses:
     process.env.EXPO_PUBLIC_DEBUG_ADDRESSES?.toLowerCase().split(",") || [],
   lensApiDomain: "api.lens.dev",
   lensSuffix: ".lens",
-  sentryDSN: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  sentryDSN:
+    "https://fb7c7cbf876644b68a05db08623c8369@o4504757119680512.ingest.sentry.io/4504757120729088",
   framesAllowedSchemes: ["http", "https", "ethereum"],
   walletConnectConfig: {
     projectId: process.env.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID,

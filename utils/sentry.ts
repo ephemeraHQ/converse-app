@@ -1,4 +1,4 @@
-import { getEnv, isProd } from "@/utils/getEnv";
+import { getEnv, isDev } from "@/utils/getEnv";
 import * as Sentry from "@sentry/react-native";
 import type { Breadcrumb, ErrorEvent, EventHint } from "@sentry/types";
 import { config } from "../config";
@@ -17,7 +17,7 @@ export const initSentry = () => {
   Sentry.init({
     dsn: config.sentryDSN,
     debug: false,
-    enabled: isProd,
+    enabled: !isDev,
     environment: getEnv(),
     beforeSend: (event: ErrorEvent, hint: EventHint) => {
       if (event.exception?.values?.length === 1) {

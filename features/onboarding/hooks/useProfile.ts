@@ -1,6 +1,4 @@
 import { useState } from "react";
-
-import config from "@config";
 import { useCurrentAccount, useSettingsStore } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import {
@@ -9,6 +7,7 @@ import {
 } from "@utils/str";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
 import { ProfileType } from "../types/onboarding.types";
+import { config } from "@/config";
 
 export function useProfile() {
   const currentAccount = useCurrentAccount()!; // We assume if someone goes to this screen we have address

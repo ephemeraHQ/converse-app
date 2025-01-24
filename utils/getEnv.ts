@@ -1,14 +1,16 @@
 export const Environments = {
   dev: "dev",
+  preview: "preview",
   prod: "prod",
 } as const;
 
 export type Environment = (typeof Environments)[keyof typeof Environments];
 
 export const getEnv = (): Environment => {
-  const isExpoEnvDev = process.env.EXPO_ENV === "dev";
-  if (__DEV__ || isExpoEnvDev) {
+  if (__DEV__ || process.env.EXPO_ENV === "dev") {
     return Environments.dev;
+  } else if (process.env.EXPO_ENV === "preview") {
+    return Environments.preview;
   } else {
     return Environments.prod;
   }
