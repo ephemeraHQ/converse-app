@@ -138,7 +138,7 @@ export function CreateConversationScreen({
         navigation.replace("Conversation", { topic: existingDm.topic });
         return;
       } else {
-        // optimsitic create dm converlsation and dm message
+        alert("todo: create dm conversation and dm message");
       }
 
       //
@@ -177,6 +177,7 @@ export function CreateConversationScreen({
         navigation.replace("Conversation", { topic: existingGroup.topic });
         return;
       } else {
+        alert("todo: create group conversation and group message");
         // optimsitic create group converlsation and group message
         //todo(lustig) lookup group by list of addresses/inbox ids and optimstically create one if not found
         // use useFindGroupByPeerIds

@@ -30,8 +30,6 @@ export type ISendMessageParams = {
     | { text?: string; remoteAttachment: RemoteAttachmentContent };
 };
 
-export type ISendFirstMessageParams = Omit<ISendMessageParams, "topic">;
-
 export async function sendMessage(args: ISendMessageParams) {
   const { referencedMessageId, content, topic } = args;
   const conversation = await getOrFetchConversation({
