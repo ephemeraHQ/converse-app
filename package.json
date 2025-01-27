@@ -165,7 +165,6 @@
     "react-native-screens": "~4.4.0",
     "react-native-sfsymbols": "^1.2.1",
     "react-native-share": "^10.2.1",
-    "react-native-shared-group-preferences": "^1.1.23",
     "react-native-svg": "15.8.0",
     "react-native-system-navigation-bar": "^2.6.4",
     "react-native-tableview-simple": "^4.4.0",
