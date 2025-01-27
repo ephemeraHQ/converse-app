@@ -2,7 +2,6 @@ import { searchByConversationMembership } from "./search-by-conversation-members
 import { ConversationVersion, ConversationTopic } from "@xmtp/react-native-sdk";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import {
-  ConversationWithCodecsType,
   DmWithCodecsType,
   GroupWithCodecsType,
 } from "@/utils/xmtpRN/client.types";
