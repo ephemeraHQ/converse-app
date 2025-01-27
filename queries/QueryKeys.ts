@@ -127,8 +127,16 @@ export const dmPeerInboxIdQueryKey = (
   topic: ConversationTopic
 ) => [QueryKeys.DM_PEER_INBOX_ID, account, topic];
 
-// Profile Search
+// Convos Users Search
 export const userSearchQueryKey = (searchQuery: string) => [
   QueryKeys.USER_SEARCH,
+  "byName",
+  searchQuery,
+];
+
+// Search based on conversation membership
+export const searchByConversationMembershipQueryKey = (searchQuery: string) => [
+  QueryKeys.USER_SEARCH,
+  "byConversationMembership",
   searchQuery,
 ];

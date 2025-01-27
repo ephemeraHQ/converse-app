@@ -1,39 +1,41 @@
 import { useCallback } from "react";
 import { FlatList } from "react-native";
-import { ProfileSearchResultListItem } from "./ProfileSearchItem";
+import { UserSearchResultListItem } from "./user-search-result-list-item";
 import { IProfileSocials } from "@/features/profiles/profile-types";
+import { IUserSearchResults } from "@/queries/search-users.query";
 
 type ProfileSearchProps = {
-  profiles: { [address: string]: IProfileSocials };
+  searchResults: IUserSearchResults;
   handleSearchResultItemPress: (args: {
     address: string;
     socials: IProfileSocials;
   }) => void;
 };
 
-export function ProfileSearchResultsList({
-  profiles,
+export function SearchResultsList({
+  searchResults,
   handleSearchResultItemPress,
 }: ProfileSearchProps) {
   const keyExtractor = useCallback((address: string) => address, []);
 
-  const renderItem = useCallback(
-    ({ item: searchResultEthereumAddress }: { item: string }) => (
-      <ProfileSearchResultListItem
-        address={searchResultEthereumAddress}
-        socials={profiles[searchResultEthereumAddress]}
-        handleSearchResultItemPress={handleSearchResultItemPress}
-      />
-    ),
-    [profiles, handleSearchResultItemPress]
-  );
+  // const renderItem = useCallback(
+  //   ({ item: searchResultEthereumAddress }: { item: string }) => (
+  //     <UserSearchResultListItem
+  //       address={searchResultEthereumAddress}
+  //       socials={profiles[searchResultEthereumAddress]}
+  //       handleSearchResultItemPress={handleSearchResultItemPress}
+  //     />
+  //   ),
+  //   [profiles, handleSearchResultItemPress]
+  // );
 
-  return (
-    <FlatList
-      keyboardShouldPersistTaps="handled"
-      data={Object.keys(profiles)}
-      keyExtractor={keyExtractor}
-      renderItem={renderItem}
-    />
-  );
+  return null;
+  // return (
+  //   <FlatList
+  //     keyboardShouldPersistTaps="handled"
+  //     data={Object.keys(profiles)}
+  //     keyExtractor={keyExtractor}
+  //     renderItem={renderItem}
+  //   />
+  // );
 }

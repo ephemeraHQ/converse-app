@@ -12,23 +12,24 @@ import { Platform, View, ViewStyle, TextStyle } from "react-native";
 import { Pressable } from "@/design-system/Pressable";
 import logger from "@/utils/logger";
 
-type ProfileSearchItemProps = {
+type UserSearchResultListItemProps = {
   address: string;
   socials: IProfileSocials;
-  handleSearchResultItemPress: (args: {
+  handleUserSearchResultPress: (args: {
     address: string;
     socials: IProfileSocials;
   }) => void;
 };
 
 /**
+ * Search result list item for an individual user (as opposed to a group)
  * Figma: https://www.figma.com/design/p6mt4tEDltI4mypD3TIgUk/Converse-App?node-id=5191-4200&t=KDRZMuK1xpiNBKG9-11
  */
-export function ProfileSearchResultListItem({
+export function UserSearchResultListItem({
   address,
   socials,
-  handleSearchResultItemPress,
-}: ProfileSearchItemProps) {
+  handleUserSearchResultPress,
+}: UserSearchResultListItemProps) {
   const { theme, themed } = useAppTheme();
   const preferredName = getPreferredName(socials, address);
   const preferredAvatar = getPreferredAvatar(socials);
@@ -41,11 +42,11 @@ export function ProfileSearchResultListItem({
   return (
     <Pressable
       onPress={() => {
-        logger.info("ProfileSearchResultListItem onPress", {
+        logger.info("UserSearchResultListItem onPress", {
           address,
           socials,
         });
-        handleSearchResultItemPress({
+        handleUserSearchResultPress({
           address,
           socials,
         });

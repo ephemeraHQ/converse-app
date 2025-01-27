@@ -32,8 +32,7 @@ export const inboxProfileSocialsQueryStorageKey = (
 
 const profileSocials = create({
   fetcher: async (inboxIds: InboxId[]) => {
-    const data = await getProfilesForInboxIds({ inboxIds });
-    return data;
+    return getProfilesForInboxIds({ inboxIds });
   },
   resolver: indexedResolver(),
   scheduler: windowedFiniteBatchScheduler({
@@ -47,7 +46,6 @@ const fetchInboxProfileSocials = async (
   inboxId: InboxId
 ): Promise<IProfileSocials[] | null> => {
   const data = await profileSocials.fetch(inboxId);
-
   const key = inboxProfileSocialsQueryStorageKey(account, inboxId);
 
   // Set in mmkv to use for notifications in Swift
@@ -79,7 +77,6 @@ const inboxProfileSocialsQueryConfig = (
         return data;
       }
     },
-    initialDataUpdatedAt: 0,
     // 30 days because it doens't change often
     gcTime: 1000 * 60 * 60 * 24 * 30,
   });
@@ -148,4 +145,13 @@ export const invalidateInboxProfileSocialsQuery = (
   queryClient.invalidateQueries({
     queryKey: inboxProfileSocialsQueryConfig(account, inboxId).queryKey,
   });
+};
+
+export const ensureInboxProfileSocialsQueryData = (
+  account: string,
+  inboxId: InboxId
+) => {
+  return queryClient.ensureQueryData(
+    inboxProfileSocialsQueryConfig(account, inboxId)
+  );
 };

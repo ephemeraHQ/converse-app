@@ -8,7 +8,7 @@ export function getCurrentAccountPrimaryProfile() {
     return undefined;
   }
 
-  const socials = getProfileSocialsQueryData(userAddress, userAddress);
+  const socials = getProfileSocialsQueryData(userAddress);
 
   if (!socials) {
     return undefined;

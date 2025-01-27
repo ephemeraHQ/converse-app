@@ -229,14 +229,14 @@ const createGroupName = (peerEthereumAddresses: string[]) => {
   const currentAccount = getCurrentAccount()!;
   const firstThreeMembers = peerEthereumAddresses.slice(0, 3);
   const currentAccountSocials =
-    getProfileSocialsQueryData(currentAccount, currentAccount) ?? undefined;
+    getProfileSocialsQueryData(currentAccount) ?? undefined;
   let groupName = getPreferredName(currentAccountSocials, currentAccount);
   if (firstThreeMembers.length) {
     groupName += ", ";
   }
   for (let i = 0; i < firstThreeMembers.length; i++) {
     const member = firstThreeMembers[i];
-    const memberSocials = getProfileSocialsQueryData(currentAccount, member);
+    const memberSocials = getProfileSocialsQueryData(member);
     groupName += getPreferredName(memberSocials, member);
     if (i < firstThreeMembers.length - 1) {
       groupName += ", ";

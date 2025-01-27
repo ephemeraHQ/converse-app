@@ -1,8 +1,11 @@
 import { Loader } from "@/design-system/loader";
 import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
-import { ProfileSearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
+import { ComposerSection } from "@/features/create-conversation/components/composer-section";
+import { MessageSection } from "@/features/create-conversation/components/message-section";
+import { UserInlineSearch } from "@/features/create-conversation/components/user-inline-search";
+import { SearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
 import { useHeader } from "@/navigation/use-header";
-import { useSearchQuery } from "@/queries/search-query";
+import { useSearchUsersQuery } from "@/queries/search-users.query";
 import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import logger, { logJson } from "@/utils/logger";
@@ -20,9 +23,6 @@ import { useFindConversationByMembers } from "../conversation-list/hooks/use-con
 import { IProfileSocials } from "../profiles/profile-types";
 import { createConversationStyles } from "./create-conversation.styles";
 import { CreateConversationScreenProps } from "./create-conversation.types";
-import { ComposerSection } from "@/features/create-conversation/components/composer-section";
-import { MessageSection } from "@/features/create-conversation/components/message-section";
-import { UserInlineSearch } from "@/features/create-conversation/components/user-inline-search";
 
 /**
  * Screen for creating new conversations
@@ -80,15 +80,11 @@ export function CreateConversationScreen({
   const selectedAddresses = selectedUsers.map((u) => u.address);
   const currentUserAddress = getCurrentAccount() || "";
 
-  const {
-    profileSearchResults,
-    areSearchResultsLoading,
-    hasSearchResults,
-    message,
-  } = useSearchQuery({
-    searchQuery,
-    addressesToOmit: [...selectedAddresses, currentUserAddress],
-  });
+  const { searchResults, areSearchResultsLoading, hasSearchResults } =
+    useSearchUsersQuery({
+      searchQuery,
+      addressesToOmit: [...selectedAddresses, currentUserAddress],
+    });
 
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
@@ -188,13 +184,13 @@ export function CreateConversationScreen({
       />
 
       {!areSearchResultsLoading && hasSearchResults && (
-        <ProfileSearchResultsList
-          profiles={profileSearchResults!}
+        <SearchResultsList
+          searchResults={searchResults}
           handleSearchResultItemPress={handleSearchResultPress}
         />
       )}
 
-      {message && <MessageSection message={message} />}
+      {/* {message && <MessageSection message={message} />} */}
 
       {error && <MessageSection message={error.message} />}
 
