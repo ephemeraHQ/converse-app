@@ -1,5 +1,4 @@
 import { IConfig } from "@/config/config.types";
-import { Environments } from "../utils/getEnv";
 import { shared } from "./shared";
 
 export const previewConfig: IConfig = {

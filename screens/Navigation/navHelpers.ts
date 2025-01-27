@@ -5,10 +5,11 @@ import {
   textPrimaryColor,
 } from "@styles/colors";
 import { ColorSchemeName, Platform } from "react-native";
-
 import { initialURL } from "../../components/StateHandlers/InitialStateHandler";
-import { config } from "../../config";
+import { getConfig } from "../../config";
 import logger from "@/utils/logger";
+
+const config = getConfig();
 
 /**
  * Creates a custom state object from a given path for

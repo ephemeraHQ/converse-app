@@ -1,5 +1,4 @@
 import { IConfig } from "@/config/config.types";
-import { IXmtpEnv } from "@/utils/xmtpRN/xmtp.types";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { shared } from "./shared";
@@ -29,7 +28,8 @@ function maybeReplaceLocalhost(uri: string) {
 
 export const devConfig: IConfig = {
   ...shared,
-  xmtpEnv: (process.env.EXPO_PUBLIC_DEV_XMTP_ENV || "dev") as IXmtpEnv,
+  xmtpEnv: (process.env.EXPO_PUBLIC_DEV_XMTP_ENV ||
+    "dev") as IConfig["xmtpEnv"],
   apiURI: maybeReplaceLocalhost(
     process.env.EXPO_PUBLIC_DEV_API_URI || "http://localhost:9875"
   ),

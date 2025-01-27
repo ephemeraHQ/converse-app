@@ -1,11 +1,11 @@
-import { getConfig } from "@/config";
+import { config, getConfig } from "@/config";
 import Constants from "expo-constants";
 import path from "path";
 import { Platform } from "react-native";
 import * as RNFS from "react-native-fs";
 import {
-  consoleTransport,
   logger as RNLogger,
+  consoleTransport,
   transportFunctionType,
 } from "react-native-logs";
 import { v4 as uuidv4 } from "uuid";

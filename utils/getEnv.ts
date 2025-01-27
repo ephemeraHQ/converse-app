@@ -18,3 +18,4 @@ export const getEnv = (): Environment => {
 
 export const isDev = getEnv() === Environments.dev;
 export const isProd = getEnv() === Environments.prod;
+export const isPreview = getEnv() === Environments.preview;
