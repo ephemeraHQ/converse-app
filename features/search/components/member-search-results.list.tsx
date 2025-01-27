@@ -5,9 +5,9 @@ import { IProfileSocials } from "@/features/profiles/profile-types";
 import { IUserSearchResults } from "../search.types";
 import { Text } from "@/design-system/Text";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { searchResultsStyles } from "./search-results.styles";
 import { Pressable } from "@/design-system/Pressable";
 import { Avatar } from "@/components/Avatar";
+import { searchResultsStyles } from "./search-results.styles";
 
 const MAX_INITIAL_RESULTS = 5;
 

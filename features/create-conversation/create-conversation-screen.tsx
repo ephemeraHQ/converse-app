@@ -19,6 +19,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { TextInput, View } from "react-native";
 import { useFindConversationByMembers } from "../conversation-list/hooks/use-conversations-count";
 import { IProfileSocials } from "../profiles/profile-types";
+import { useOptimisticSendFirstMessage } from "../search/use-optimistic-send-first-message.hook";
 import { createConversationStyles } from "./create-conversation.styles";
 import { CreateConversationScreenProps } from "./create-conversation.types";
 
@@ -61,10 +62,12 @@ export function CreateConversationScreen({
   }, [existingDm, existingGroup]);
 
   const { sendMessage, error: messageSendError } = useSendMessage();
+  const selectedAddresses = selectedUsers.map((u) => u.address);
+  const { sendMessage: sendMessageOptimistic, tempTopic } =
+    useOptimisticSendFirstMessage({ members: selectedAddresses });
 
   logJson({ json: existingConversations, msg: "existingConversations" });
 
-  const selectedAddresses = selectedUsers.map((u) => u.address);
   const currentUserAddress = getCurrentAccount() || "";
 
   const { searchResults, areSearchResultsLoading, hasSearchResults } =
@@ -138,36 +141,14 @@ export function CreateConversationScreen({
         navigation.replace("Conversation", { topic: existingDm.topic });
         return;
       } else {
-        alert("todo: create dm conversation and dm message");
+        // alert("todo: create dm conversation and dm message");
+        sendMessageOptimistic({
+          content: { text: messageText },
+        });
+        navigation.replace("Conversation", {
+          topic: tempTopic! as ConversationTopic,
+        });
       }
-
-      //
-
-      //
-
-      // let dm = existingDm;
-      // if (!dm) {
-      //   dm = await getOptionalConversationByPeerByAccount({
-      //     account: currentAccount(),
-      //     peer: selectedUsers[0].address,
-      //     includeSync: true,
-      //   });
-      //   if (!dm) {
-      //     dm = await createConversationByAccount(
-      //       currentAccount(),
-      //       selectedUsers[0].address
-      //     );
-      //   }
-      //   await sendMessage({
-      //     topic: dm.topic,
-      //     content: { text: messageText },
-      //   });
-      //   setConversationQueryData({
-      //     account: currentAccount(),
-      //     topic: dm.topic,
-      //     conversation: dm,
-      //   });
-      //   navigation.replace("Conversation", { topic: dm.topic });
     } else {
       if (existingGroup) {
         sendMessage({
@@ -177,24 +158,12 @@ export function CreateConversationScreen({
         navigation.replace("Conversation", { topic: existingGroup.topic });
         return;
       } else {
-        alert("todo: create group conversation and group message");
-        // optimsitic create group converlsation and group message
-        //todo(lustig) lookup group by list of addresses/inbox ids and optimstically create one if not found
-        // use useFindGroupByPeerIds
-        // const group = await createGroupWithDefaultsByAccount({
-        //   account: currentAccount(),
-        //   peerEthereumAddresses: selectedUsers.map((m) => m.address),
-        // });
-        // await sendMessage({
-        //   topic: group.topic,
-        //   content: { text: messageText },
-        // });
-        // setConversationQueryData({
-        //   account: currentAccount(),
-        //   topic: group.topic,
-        //   conversation: group,
-        // });
-        // navigation.replace("Conversation", { topic: group.topic });
+        sendMessageOptimistic({
+          content: { text: messageText },
+        });
+        navigation.replace("Conversation", {
+          topic: tempTopic! as ConversationTopic,
+        });
       }
     }
   };
