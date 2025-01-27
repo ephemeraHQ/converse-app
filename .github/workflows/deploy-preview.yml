@@ -1,9 +1,23 @@
 name: Preview Deployment
 
 on:
+  workflow_dispatch:
+    inputs:
+      force_native_build:
+        description: "Force native build"
+        type: boolean
+        default: true
+        required: true
   push:
     branches:
       - main
+    paths:
+      - "**.ts"
+      - "**.tsx"
+      - "assets/**"
+      - "package.json"
+      - "app.config.ts"
+      - "ios/**"
 
 # Ensure only one workflow runs at a time
 concurrency:
@@ -37,7 +51,9 @@ jobs:
       - name: Check for native changes
         id: check-changes
         run: |
-          if git diff --name-only HEAD^ HEAD | grep -E "package.json|app.config.ts|ios/|android/"; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force_native_build }}" == "true" ]]; then
+            echo "has_native_changes=true" >> $GITHUB_OUTPUT
+          elif git diff --name-only HEAD^ HEAD | grep -E "package.json|app.config.ts|ios/|android/"; then
             echo "has_native_changes=true" >> $GITHUB_OUTPUT
           else
             echo "has_native_changes=false" >> $GITHUB_OUTPUT
@@ -87,5 +103,5 @@ jobs:
       - name: Run EAS Update
         if: steps.check-changes.outputs.has_native_changes == 'false'
         run: |
-          eas update --auto --profile preview --message "${{ steps.commit_msg.outputs.message }}" --non-interactive
+          eas update --auto --channel=preview --message "${{ steps.commit_msg.outputs.message }}" --non-interactive
           npx sentry-expo-upload-sourcemaps dist
