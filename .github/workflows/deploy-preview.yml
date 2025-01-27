@@ -62,6 +62,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check if PAT_GITHUB is set
+        run: |
+          if [ -z "${{ secrets.PAT_GITHUB }}" ]; then
+            echo "::error::PAT_GITHUB secret is not set. Please add it to repository secrets."
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -70,6 +77,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: "yarn"
+          cache-dependency-path: yarn.lock
         env:
           SKIP_YARN_COREPACK_CHECK: "1"
       - run: corepack enable
@@ -84,23 +92,27 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Increment minor version and build
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB }}
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           CURRENT_COMMIT=$(git rev-parse HEAD)
           npm version minor -m "chore: increment minor version [skip ci]"
-          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main --follow-tags --force
+          git push https://${GH_TOKEN}@github.com/${{ github.repository }}.git HEAD:main --follow-tags --force
           node scripts/build/ios/preview.js
           eas build --platform all --profile preview --non-interactive --auto-submit
           npx sentry-expo-upload-sourcemaps dist
           git reset --hard HEAD~1
-          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+          git push --force https://${GH_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
 
       - name: Rollback on build failure
         if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB }}
         run: |
           git reset --hard HEAD~1
-          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+          git push --force https://${GH_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
 
   ota-update:
     needs: check-changes
@@ -116,6 +128,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: "yarn"
+          cache-dependency-path: yarn.lock
         env:
           SKIP_YARN_COREPACK_CHECK: "1"
       - run: corepack enable
