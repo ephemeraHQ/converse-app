@@ -91,28 +91,38 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Increment minor version and build
-        env:
-          GH_TOKEN: ${{ secrets.PAT_GITHUB }}
+      - name: Configure Git
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          CURRENT_COMMIT=$(git rev-parse HEAD)
+
+      - name: Increment version
+        run: |
           npm version minor -m "chore: increment minor version [skip ci]"
-          git push https://${GH_TOKEN}@github.com/${{ github.repository }}.git HEAD:main --follow-tags --force
-          node scripts/build/ios/preview.js
-          eas build --platform all --profile preview --non-interactive --auto-submit
-          npx sentry-expo-upload-sourcemaps dist
-          git reset --hard HEAD~1
-          git push --force https://${GH_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
+
+      - name: Push version bump
+        run: |
+          git push https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main --follow-tags --force
+
+      - name: Build iOS preview
+        run: node scripts/build/ios/preview.js
+
+      - name: Build and submit to stores
+        run: eas build --platform all --profile preview --non-interactive --auto-submit
+
+      - name: Upload sourcemaps to Sentry
+        run: npx sentry-expo-upload-sourcemaps dist
+
+      - name: Reset iOS preview changes
+        run: |
+          git reset --hard HEAD
+          git push --force https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main
 
       - name: Rollback on build failure
         if: failure()
-        env:
-          GH_TOKEN: ${{ secrets.PAT_GITHUB }}
         run: |
           git reset --hard HEAD~1
-          git push --force https://${GH_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
+          git push --force https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main
 
   ota-update:
     needs: check-changes
@@ -134,7 +144,7 @@ jobs:
       - run: corepack enable
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --immutable
 
       - name: Setup EAS
         uses: expo/expo-github-action@v8
