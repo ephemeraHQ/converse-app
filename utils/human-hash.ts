@@ -1,5 +1,6 @@
-﻿import { capitalize } from "../utils/str";
+import { capitalize } from "./str";
 
+// Word list for human-readable hash generation
 const wordlist = [
   "ack",
   "alabama",
@@ -257,94 +258,115 @@ const wordlist = [
   "yellow",
   "zebra",
   "zulu",
-];
+] as const;
 
-export const humanize = function (digest, numWords, separator, shouldCapitalize) {
-  var chars,
-    i,
-    len,
-    hex,
-    output = [],
-    bytes = [],
-    compressedBytes = [];
+type Separator = string;
+type DigestString = string;
 
-  // defaults
-  numWords = numWords || 4;
-  separator = (separator !== undefined && separator !== null) ? separator : "-";
-  shouldCapitalize = shouldCapitalize || false;
+type HumanizeOptions = {
+  numWords?: number;
+  separator?: Separator;
+  shouldCapitalize?: boolean;
+};
 
+/**
+ * Converts a hexadecimal digest into human-readable words
+ */
+export function humanize(
+  digest: DigestString,
+  {
+    numWords = 4,
+    separator = "-",
+    shouldCapitalize = false,
+  }: HumanizeOptions = {}
+): string {
   if (!/^[a-fA-F0-9]+$/.test(digest)) {
-    throw new Error("`digest` must be hexadecimal characters only.");
+    throw new Error("Digest must be hexadecimal characters only");
   }
 
-  chars = digest.split("");
+  const chars = digest.split("");
+  const bytes: number[] = [];
 
-  // loop through characters, grabbing two at a time and turning them into
-  // a single hex value
-  for (i = 0, len = chars.length; i < len && output.length < numWords; i += 2) {
-    hex = parseInt(chars[i] + (chars[i + 1] || "0"), 16);
+  // Convert hex pairs to bytes
+  for (let i = 0; i < chars.length && bytes.length < numWords; i += 2) {
+    const hex = parseInt(chars[i] + (chars[i + 1] || "0"), 16);
     bytes.push(hex);
   }
 
-  compressedBytes = compress(bytes, numWords);
+  const compressedBytes = compress(bytes, numWords);
 
-  for (var i = 0; i < numWords; i += 1) {
-    output.push(shouldCapitalize ? capitalize(wordlist[compressedBytes[i]]) : wordlist[compressedBytes[i]]);
+  return compressedBytes
+    .map((byte) => {
+      const word = wordlist[byte];
+      return shouldCapitalize ? capitalize(word) : word;
+    })
+    .join(separator);
+}
+
+/**
+ * Compresses a list of byte values to a fixed target length
+ */
+export function compress(bytes: number[], target: number): number[] {
+  const paddedBytes = [...bytes];
+
+  // Zero-pad if needed
+  for (let i = target - bytes.length; i > 0; i--) {
+    paddedBytes.push(0);
   }
 
-  return output.join(separator);
-};
-
-export const compress = function (bytes, target) {
-  // Compress a list of byte values to a fixed target length.
-
-  // A smaller number of bytes will be zero-padded to a larger number as needed
-  for (var i = target - bytes.length; i > 0; i -= 1) {
-    bytes.push(0);
+  if (target === paddedBytes.length) {
+    return paddedBytes;
   }
 
-  if (target === bytes.length) {
-    return bytes;
-  }
+  const bytesLength = paddedBytes.length;
+  const segSize = Math.floor(bytesLength / target);
+  const segments: number[] = [];
 
-  var bytesLength = bytes.length,
-    seg_size = Math.floor(bytesLength / target),
-    segments = [],
-    seg_num = 0;
-
-  // Split `bytes` into `target` segments.
-  // XOR is used for compression.
-  // Left-over bytes are caught in the last segment.
-  for (var i = 0, ii = bytesLength; i < ii; i += 1) {
-    seg_num = Math.min(Math.floor(i / seg_size), target - 1);
-    segments[seg_num] =
-      segments[seg_num] !== undefined ? segments[seg_num] ^ bytes[i] : bytes[i];
+  // Split bytes into target segments using XOR for compression
+  for (let i = 0; i < bytesLength; i++) {
+    const segNum = Math.min(Math.floor(i / segSize), target - 1);
+    segments[segNum] =
+      segments[segNum] !== undefined
+        ? segments[segNum] ^ paddedBytes[i]
+        : paddedBytes[i];
   }
 
   return segments;
+}
+
+type UUIDResult = {
+  humanized: string;
+  digest: string;
 };
 
-export const uuid = function (numWords, separator) {
-  digest = "xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-    var r = (Math.random() * 16) | 0,
-      v = c == "x" ? r : (r & 0x3) | 0x8;
+/**
+ * Generates a UUID and its human-readable representation
+ */
+export function uuid(numWords?: number, separator?: Separator): UUIDResult {
+  const digest = "xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
-  return [humanize(digest, numWords, separator), digest];
-};
 
-export const dehumanize = function (human, separator) {
-  // Reverse a human hash to a digest string.
-  // HumanHasher.dehumanize('beer-earth-princess-five')
-  // '1337b347'
+  return {
+    humanized: humanize(digest, { numWords, separator }),
+    digest,
+  };
+}
 
-  var separator = separator || "-",
-    human = human.split(separator),
-    result = [],
-    found = "";
+/**
+ * Converts a human-readable hash back to its digest form
+ */
+export function dehumanize(
+  human: string,
+  separator: Separator = "-"
+): string | false {
+  const words = human.split(separator);
+  const result: string[] = [];
 
-  for (var i = 0, ii = human.length; i < ii; i += 1) {
-    found = unhash(human[i]);
+  for (const word of words) {
+    const found = unhash(word);
     if (found === false) {
       return false;
     }
@@ -352,32 +374,28 @@ export const dehumanize = function (human, separator) {
   }
 
   return result.join("");
-};
+}
 
-export const unhash = function (human) {
-  // Binary search for the index of the human hash word
-  // HumanHasher.unhash('wisconsin')
-  // 248
-
-  var human = human.toLowerCase(),
-    upper = 255,
-    lower = 0,
-    middle = 0,
-    foundHash = "";
+/**
+ * Binary search for the index of a human hash word
+ */
+export function unhash(human: string): number | false {
+  const searchTerm = human.toLowerCase();
+  let upper = 255;
+  let lower = 0;
 
   while (upper >= lower) {
-    var middle = lower + Math.floor((upper - lower) / 2),
-      foundHash = wordlist[middle].toLowerCase();
-    if (foundHash < human) {
+    const middle = lower + Math.floor((upper - lower) / 2);
+    const foundHash = wordlist[middle].toLowerCase();
+
+    if (foundHash < searchTerm) {
       lower = middle + 1;
-    } else if (foundHash > human) {
+    } else if (foundHash > searchTerm) {
       upper = middle - 1;
     } else {
-      // word found, return index
       return middle;
     }
   }
 
-  // word not found in the wordlist
   return false;
-};
+}

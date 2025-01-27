@@ -9,6 +9,9 @@ ENV['EX_DEV_CLIENT_NETWORK_INSPECTOR'] = podfile_properties['EX_DEV_CLIENT_NETWO
 
 # plugin 'cocoapods-pod-linkage'
 platform :ios, podfile_properties['ios.deploymentTarget'] || '15.1'
+
+project 'Converse.xcodeproj'
+
 install! 'cocoapods',
   :deterministic_uuids => false
 

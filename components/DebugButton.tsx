@@ -1,9 +1,4 @@
-import Clipboard from "@react-native-clipboard/clipboard";
 import * as Sentry from "@sentry/react-native";
-import {
-  getDbEncryptionKey,
-  getDbEncryptionSalt,
-} from "@utils/keychain/helpers";
 import {
   getPreviousSessionLoggingFile,
   loggingFilePath,
@@ -12,18 +7,16 @@ import {
 import { navigate } from "@utils/navigation";
 import Share from "@utils/share";
 import { getNativeLogFile } from "@utils/xmtpRN/logs";
-import axios from "axios";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
-import { Platform, Alert } from "react-native";
-
-import config from "../config";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
+import { Alert, Platform } from "react-native";
+import { translate } from "@/i18n";
+import { config } from "../config";
 import { useAccountsList } from "../data/store/accountsStore";
 import mmkv from "../utils/mmkv";
-import { translate } from "@/i18n";
+import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 
 export const useDebugEnabled = (address?: string) => {
   const accounts = useAccountsList();

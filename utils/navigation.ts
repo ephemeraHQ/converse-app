@@ -2,7 +2,7 @@ import * as Linking from "expo-linking";
 import { Linking as RNLinking } from "react-native";
 
 import logger from "./logger";
-import config from "../config";
+import { config } from "../config";
 import { NavigationParamList } from "../screens/Navigation/Navigation";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { createNavigationContainerRef } from "@react-navigation/native";

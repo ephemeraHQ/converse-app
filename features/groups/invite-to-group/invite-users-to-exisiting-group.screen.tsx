@@ -37,7 +37,7 @@ import { InboxId } from "@xmtp/react-native-sdk";
 import AndroidBackAction from "@/components/AndroidBackAction";
 import TableView from "@/components/TableView/TableView";
 import { TableViewPicto } from "@/components/TableView/TableViewImage";
-import config from "@/config";
+import { config } from "@/config";
 import { OldProfileSearchResultsList } from "@/features/search/components/OldProfileSearchResultsList";
 import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
 

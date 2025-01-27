@@ -1,28 +1,26 @@
-import "expo-dev-client";
+// Keep this at the top
 import "./polyfills";
-import {
-  configureReanimatedLogger,
-  ReanimatedLogLevel,
-} from "react-native-reanimated";
 import * as Privy from "@privy-io/expo";
+
 // This is a requirement for Privy to work, does not make any sense
 // To test run yarn start --no-dev --minify
 const PrivyProvider = Privy.PrivyProvider;
+
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
+import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { useAppStateHandlers } from "@hooks/useAppStateHandlers";
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { useReactQueryDevTools } from "@dev-plugins/react-query";
-
 import { useThemeProvider } from "@theme/useAppTheme";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
+import "expo-dev-client";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   LogBox,
@@ -34,25 +32,28 @@ import {
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
+import {
+  ReanimatedLogLevel,
+  configureReanimatedLogger,
+} from "react-native-reanimated";
 import { ThirdwebProvider } from "thirdweb/react";
-
 import { Snackbars } from "@components/Snackbar/Snackbars";
+import { setupAppAttest } from "@utils/appCheck";
+import { base } from "viem/chains";
 import { xmtpEngine } from "./components/XmtpEngine";
-import config from "./config";
+import { config } from "./config";
 import {
   TEMPORARY_ACCOUNT_NAME,
   useAccountsStore,
 } from "./data/store/accountsStore";
 import { setAuthStatus } from "./data/store/authStore";
+import "./features/notifications/utils";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
-import "./utils/splash/splash";
-import "./features/notifications/utils";
-import { setupAppAttest } from "@utils/appCheck";
 import { saveApiURI } from "./utils/sharedData";
-import { base } from "viem/chains";
+import "./utils/splash/splash";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy

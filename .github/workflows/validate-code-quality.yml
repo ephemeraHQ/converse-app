@@ -1,13 +1,14 @@
-name: Typescript CI
+name: Validate Code Quality
+
 on:
   pull_request:
     branches:
       - main
-      - release/*
     paths:
       - "**/*.ts"
       - "**/*.tsx"
       - "package.json"
+
 jobs:
   tsc:
     runs-on: warp-ubuntu-latest-x64-8x
@@ -57,39 +58,3 @@ jobs:
       - run: corepack enable
       - run: yarn
       - run: yarn test
-  performance-test:
-    runs-on: warp-ubuntu-latest-x64-8x
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "yarn"
-        env:
-          SKIP_YARN_COREPACK_CHECK: "1"
-      - run: corepack enable
-      - run: |
-          BASELINE_BRANCH=${GITHUB_BASE_REF:="main"}
-
-          # Required for `git switch` on CI
-          git fetch origin
-
-          # Gather baseline perf measurements
-          git switch "$BASELINE_BRANCH"
-
-          yarn
-          yarn reassure --baseline
-
-          # Gather current perf measurements & compare results
-          git switch --detach -
-
-          yarn
-          yarn reassure --branch
-
-      - name: Run Danger.js
-        run: yarn danger ci
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

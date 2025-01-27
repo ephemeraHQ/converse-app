@@ -1,75 +1,48 @@
 {
   "cli": {
     "version": ">=12.6.0",
-    "appVersionSource": "local"
+    "appVersionSource": "remote"
   },
   "build": {
+    "_shared": {
+      "autoIncrement": true,
+      "node": "20.18.0",
+      "ios": {
+        "cocoapods": "1.16.2",
+        "image": "macos-sonoma-14.6-xcode-16.1"
+      },
+      "android": {
+        "resourceClass": "large"
+      }
+    },
     "development": {
+      "extends": "_shared",
       "developmentClient": true,
       "distribution": "internal",
       "channel": "development",
+      "environment": "development",
       "env": {
-        "EXPO_ENV": "dev"
-      },
-      "node": "20.18.0",
-      "ios": {
-        "cocoapods": "1.16.2",
-        "image": "macos-sonoma-14.6-xcode-16.1"
-      },
-      "android": {
-        "resourceClass": "large"
+        "EXPO_ENV": "development"
+      }
+    },
+    "preview": {
+      "extends": "_shared",
+      "channel": "preview",
+      "environment": "preview",
+      "env": {
+        "EXPO_ENV": "preview"
       }
     },
     "production": {
-      "autoIncrement": true,
+      "extends": "_shared",
       "channel": "production",
+      "environment": "production",
       "android": {
-        "buildType": "app-bundle",
-        "resourceClass": "large"
+        "buildType": "app-bundle"
       },
-      "node": "20.18.0",
-      "ios": {
-        "resourceClass": "large",
-        "cocoapods": "1.16.2",
-        "image": "macos-sonoma-14.6-xcode-16.1"
-      }
-    },
-    "production-android": {
-      "extends": "production",
-      "autoIncrement": false
-    },
-    "preview": {
-      "extends": "production",
-      "channel": "preview",
       "env": {
-        "EXPO_ENV": "preview"
-      },
-      "ios": {
-        "resourceClass": "medium"
+        "EXPO_ENV": "production"
       }
-    },
-    "preview-android": {
-      "extends": "preview",
-      "autoIncrement": false
-    },
-    "ios-simulator": {
-      "extends": "development",
-      "developmentClient": true,
-      "distribution": "internal",
-      "env": {
-        "EXPO_ENV": "dev"
-      },
-      "ios": {
-        "simulator": true
-      }
-    },
-    "preview-internal": {
-      "extends": "preview",
-      "distribution": "internal"
-    },
-    "production-internal": {
-      "extends": "production",
-      "distribution": "internal"
     }
   },
   "submit": {
@@ -80,20 +53,6 @@
       "ios": {
         "ascAppId": "1658819514"
       }
-    },
-    "production-android": {
-      "extends": "production"
-    },
-    "preview": {
-      "android": {
-        "track": "internal"
-      },
-      "ios": {
-        "ascAppId": "6478027666"
-      }
-    },
-    "preview-android": {
-      "extends": "preview"
     }
   }
 }

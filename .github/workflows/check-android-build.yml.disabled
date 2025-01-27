@@ -1,13 +1,13 @@
-name: iOS App Build
+name: Check Android Build
 
 on:
   pull_request:
     branches:
       - main
-      - release/*
     paths:
-      - "ios/**"
       - "package.json"
+      - "yarn.lock"
+      - "app.config.ts"
 
 jobs:
   build:
@@ -32,8 +32,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install dependencies
-        run: |
-          yarn install
+        run: yarn install
 
-      - name: Build iOS app
-        run: eas build --profile ios-simulator --platform ios --non-interactive
+      - name: Build Android app
+        run: eas build --profile development --platform android --non-interactive

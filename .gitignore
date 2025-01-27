@@ -1,36 +1,5 @@
+# Dependencies
 node_modules/
-.expo/
-dist/
-expo-env.d.ts
-npm-debug.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
-web-build/
-
-# macOS
-.DS_Store
-.vscode
-builds
-.env*
-.vercel
-
-# iOS
-ios/Converse.xcworkspace/xcshareddata/swiftpm/Package.resolved
-
-/.idea
-
-# Reassure output directory
-.reassure
-
-# Android
-/android/
-build-*.apk
-
-# yarn
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -38,3 +7,35 @@ build-*.apk
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Development
+.env*
+.vscode
+/.idea
+npm-debug.*
+.reassure
+
+# Build outputs
+dist/
+builds/
+build-*.apk
+
+# Expo
+.expo/
+expo-env.d.ts
+
+# iOS
+ios/Converse.xcworkspace/xcshareddata/swiftpm/Package.resolved
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Android
+/android/
+
+# System files
+.DS_Store
+*.log

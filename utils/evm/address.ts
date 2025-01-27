@@ -7,7 +7,7 @@ import { getLensOwner } from "@search/utils/lens";
 import { isUNSAddress } from "@utils/uns";
 import { isAddress } from "ethers/lib/utils";
 
-import config from "../../config";
+import { config } from "../../config";
 
 export const isSupportedPeer = (peer: string) => {
   const is0x = isAddress(peer.toLowerCase());

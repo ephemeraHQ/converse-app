@@ -1,4 +1,4 @@
-import config from "../../../config";
+import { config } from "../../../config";
 
 export const AUTHORIZED_URL_PROTOCOLS = new Set([
   `${config.scheme}:`,

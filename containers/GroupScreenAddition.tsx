@@ -1,4 +1,10 @@
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
+import {
+  createGroupInvite,
+  deleteGroupInvite,
+} from "@/utils/api/api-groups/api-groups";
+import { captureErrorWithToast } from "@/utils/capture-error";
+import logger from "@/utils/logger";
 import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
 import { useSelect } from "@data/store/storeHelpers";
 import { Icon } from "@design-system/Icon/Icon";
@@ -15,10 +21,6 @@ import {
   tertiaryBackgroundColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import {
-  createGroupInvite,
-  deleteGroupInvite,
-} from "@/utils/api/api-groups/api-groups";
 import {
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
@@ -44,8 +46,6 @@ import {
   saveGroupInviteLink,
   saveInviteIdByGroupId,
 } from "../features/GroupInvites/groupInvites.utils";
-import { captureErrorWithToast } from "@/utils/capture-error";
-import logger from "@/utils/logger";
 
 type GroupScreenAdditionProps = {
   topic: ConversationTopic;

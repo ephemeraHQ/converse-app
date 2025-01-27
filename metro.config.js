@@ -1,10 +1,7 @@
 const { mergeConfig } = require("@react-native/metro-config");
 const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 
-const defaultConfig = getSentryExpoConfig(__dirname, {
-  // [Web-only]: Enables CSS support in Metro.
-  isCSSEnabled: true,
-});
+const defaultConfig = getSentryExpoConfig(__dirname);
 
 const resolveRequestWithPackageExports = (context, moduleName, platform) => {
   if (moduleName.startsWith("@privy-io/")) {
@@ -22,30 +19,36 @@ const converseMetroConfig = {
   ...defaultConfig,
   transformer: {
     ...defaultConfig.transformer,
-    getTransformOptions: async () => ({
-      transform: {
-        experimentalImportSupport: false,
-        inlineRequires: true,
-      },
-    }),
-    minifierPath: "metro-minify-terser",
-    minifierConfig: {
-      // Terser options...
-    },
+    // getTransformOptions: async () => ({
+    //   transform: {
+    //     // Maybe enable this later https://docs.expo.dev/guides/tree-shaking/
+    //     // experimentalImportSupport: true,
+    //     // inlineRequires: true,
+    //   },
+    // }),
+    // Enable SVG file transformation into React components
     babelTransformerPath: require.resolve("react-native-svg-transformer"),
   },
   resolver: {
     ...defaultConfig.resolver,
     resolveRequest: resolveRequestWithPackageExports,
     assetExts: defaultConfig.resolver.assetExts.filter((ext) => ext !== "svg"),
-    // Expo 49 issue: default metro config needs to include "mjs"
-    // https://github.com/expo/expo/issues/23180
-    sourceExts: [...defaultConfig.resolver.sourceExts, "svg", "mjs"],
+    sourceExts: [
+      ...defaultConfig.resolver.sourceExts,
+      // Handle SVG files as source code
+      "svg",
+      // Support .mjs files (required for Expo 49 compatibility)
+      "mjs",
+    ],
     extraNodeModules: {
+      // Not sure if this is needed
       ...require("expo-crypto-polyfills"),
+      // Not sure if this is needed
       zlib: require.resolve("browserify-zlib"),
     },
+    // Not sure if this is needed
     unstable_enablePackageExports: true,
+    // Not sure if this is needed
     unstable_conditionNames: ["react-native", "browser", "require"],
   },
 };

@@ -1,38 +1,38 @@
-import React, { useCallback, useState } from "react";
-import { View, ViewStyle, Alert, Share } from "react-native";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import { ContactCard } from "@/features/profiles/components/contact-card";
-import { SettingsList } from "@/design-system/settings-list/settings-list";
-import { VStack } from "@/design-system/VStack";
-import { Text } from "@/design-system/Text";
-import { useRoute, useRouter } from "@navigation/useNavigation";
-import { usePreferredName } from "@/hooks/usePreferredName";
-import { usePreferredUsername } from "@/hooks/usePreferredUsername";
-import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
-import { useProfileSocials } from "@/hooks/useProfileSocials";
+import { config } from "@/config";
 import {
   useCurrentAccount,
   useSettingsStore,
 } from "@/data/store/accountsStore";
-import { useAppTheme, ThemedStyle } from "@/theme/useAppTheme";
-import { translate } from "@/i18n";
-import { formatConverseUsername } from "@/features/profiles/utils/format-converse-username";
 import { Button } from "@/design-system/Button/Button";
-import { useHeader } from "@/navigation/use-header";
-import { HeaderAction } from "@/design-system/Header/HeaderAction";
 import { HStack } from "@/design-system/HStack";
-import { navigate } from "@/utils/navigation";
-import { Haptics } from "@/utils/haptics";
-import Clipboard from "@react-native-clipboard/clipboard";
-import { updateConsentForAddressesForAccount } from "@/features/consent/update-consent-for-addresses-for-account";
-import { StackActions } from "@react-navigation/native";
-import { useDisconnectActionSheet } from "@/hooks/useDisconnectActionSheet";
-import { getConfig } from "@/config";
-import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
-import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
+import { HeaderAction } from "@/design-system/Header/HeaderAction";
 import { iconRegistry } from "@/design-system/Icon/Icon";
+import { Text } from "@/design-system/Text";
+import { VStack } from "@/design-system/VStack";
+import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
+import { SettingsList } from "@/design-system/settings-list/settings-list";
+import { updateConsentForAddressesForAccount } from "@/features/consent/update-consent-for-addresses-for-account";
 import { useNotificationsPermission } from "@/features/notifications/hooks/use-notifications-permission";
+import { ContactCard } from "@/features/profiles/components/contact-card";
 import { SocialNames } from "@/features/profiles/components/social-names";
+import { formatConverseUsername } from "@/features/profiles/utils/format-converse-username";
+import { useDisconnectActionSheet } from "@/hooks/useDisconnectActionSheet";
+import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
+import { usePreferredName } from "@/hooks/usePreferredName";
+import { usePreferredUsername } from "@/hooks/usePreferredUsername";
+import { useProfileSocials } from "@/hooks/useProfileSocials";
+import { translate } from "@/i18n";
+import { useHeader } from "@/navigation/use-header";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { Haptics } from "@/utils/haptics";
+import { navigate } from "@/utils/navigation";
+import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
+import { useRoute, useRouter } from "@navigation/useNavigation";
+import Clipboard from "@react-native-clipboard/clipboard";
+import { StackActions } from "@react-navigation/native";
+import React, { useCallback, useState } from "react";
+import { Alert, Share, View, ViewStyle } from "react-native";
 
 export function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
@@ -77,9 +77,7 @@ export function ProfileScreen() {
         if (isMyProfile) {
           navigate("ShareProfile");
         } else {
-          const profileUrl = `https://${
-            getConfig().websiteDomain
-          }/dm/${userName}`;
+          const profileUrl = `https://${config.websiteDomain}/dm/${userName}`;
           Clipboard.setString(profileUrl);
           Share.share({
             message: profileUrl,

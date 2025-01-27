@@ -13,7 +13,7 @@ import {
   InstalledWallet,
   useInstalledWallets,
 } from "./ConnectViaWalletSupportedWallets";
-import config from "../../../config";
+import { config } from "../../../config";
 import { getAccountsList } from "../../../data/store/accountsStore";
 import { useAppStateHandlers } from "../../../hooks/useAppStateHandlers";
 import { translate } from "../../../i18n";

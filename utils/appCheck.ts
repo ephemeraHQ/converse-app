@@ -1,9 +1,9 @@
 // helpful medium article: https://medium.com/@vibhavguria07/level-up-your-app-security-implementing-firebase-app-check-in-react-native-9c7409d56504
 // dashboards: https://console.firebase.google.com/u/0/project/converse-appcheck/appcheck/products
 // setup instructions: https://rnfirebase.io/app-check/usage
+import { config } from "@/config";
 import { firebase } from "@react-native-firebase/app-check";
 import logger from "./logger";
-import { getConfig } from "@/config";
 const appCheck = firebase.appCheck();
 
 export const tryGetAppCheckToken = async () => {
@@ -28,12 +28,12 @@ export async function setupAppAttest() {
   rnfbProvider.configure({
     android: {
       provider: __DEV__ ? "debug" : "playIntegrity",
-      debugToken: getConfig().appCheckDebugToken,
+      debugToken: config.appCheckDebugToken,
     },
     apple: {
       provider: __DEV__ ? "debug" : "appAttestWithDeviceCheckFallback",
       // Will be intentionally undefined in non-dev environments
-      debugToken: getConfig().appCheckDebugToken,
+      debugToken: config.appCheckDebugToken,
     },
   });
 

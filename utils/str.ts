@@ -1,7 +1,6 @@
+import { humanize } from "@/utils/human-hash";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, TextInput } from "react-native";
-
-const { humanize } = require("../vendor/humanhash");
 
 export const shortDisplayName = (displayName: string | undefined): string => {
   if (!displayName) return "";
@@ -31,18 +30,20 @@ export const addressPrefix = (address: string) =>
   (address && address.length >= 6 ? address.slice(0, 6) : address) || "";
 
 export const formatGroupName = (topic: string, groupName?: string) =>
-  groupName || capitalize(humanize(topic.slice(14, 46), 3, " "));
+  groupName ||
+  capitalize(humanize(topic.slice(14, 46), { numWords: 3, separator: " " }));
 
 export const formatEphemeralUsername = (address: string, username?: string) =>
-  username || humanize(address.slice(2, 42), 2, "");
+  username || humanize(address.slice(2, 42), { numWords: 2, separator: "" });
 
 export const formatEphemeralDisplayName = (
   address: string,
   displayName?: string
-) => displayName || humanize(address.slice(2, 42), 2, "", true);
+) =>
+  displayName || humanize(address.slice(2, 42), { numWords: 2, separator: "" });
 
 export const formatRandoDisplayName = (address: string) =>
-  humanize(address.slice(2, 42), 2, " ", true);
+  humanize(address.slice(2, 42), { numWords: 2, separator: " " });
 
 export const getTitleFontScale = (): number => {
   let titleFontScale = 1;

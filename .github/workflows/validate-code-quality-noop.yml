@@ -1,9 +1,9 @@
-name: Typescript CI (No checks)
+name: Validate Code Quality (No checks)
+
 on:
   pull_request:
     branches:
       - main
-      - release/*
     paths:
       - "**"
       - "!**/*.ts"
@@ -25,8 +25,3 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Nothing to test"
-
-  performance-test:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Nothing to performance test"

@@ -1,6 +1,8 @@
 import { getConfig } from "@/config";
 import { formatConverseUsername } from "../format-converse-username";
 
+const config = getConfig();
+
 describe("formatConverseUsername", () => {
   it("should return undefined when no username provided", () => {
     const result = formatConverseUsername(undefined);
@@ -8,9 +10,7 @@ describe("formatConverseUsername", () => {
   });
 
   it("should format .conversedev.eth/.converse.xyz username and mark as Converse username", () => {
-    const result = formatConverseUsername(
-      `louisdev${getConfig().usernameSuffix}`
-    );
+    const result = formatConverseUsername(`louisdev${config.usernameSuffix}`);
     expect(result).toEqual({
       isConverseUsername: true,
       username: "@louisdev",

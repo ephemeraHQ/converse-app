@@ -7,7 +7,7 @@ import { ethers } from "ethers";
 import "@ethersproject/shims";
 import { useEffect, useState } from "react";
 
-import config from "../../config";
+import { config } from "../../config";
 import {
   useAccountsStore,
   useCurrentAccount,

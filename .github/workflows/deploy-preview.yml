@@ -1,0 +1,91 @@
+name: Preview Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+# Ensure only one workflow runs at a time
+concurrency:
+  group: "deployment"
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check for EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "You must provide an EXPO_TOKEN secret"
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Get Commit Message
+        id: commit_msg
+        run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+
+      - name: Check for native changes
+        id: check-changes
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -E "package.json|app.config.ts|ios/|android/"; then
+            echo "has_native_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_native_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+        env:
+          SKIP_YARN_COREPACK_CHECK: "1"
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Update iOS Files
+          # TODO: This should be handled by schemes in the future?
+          run: node scripts/build/ios/preview.js
+
+      # Version increment and build for preview with native changes
+      - name: Increment minor version and build
+        if: steps.check-changes.outputs.has_native_changes == 'true'
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          npm version minor -m "chore: increment minor version [skip ci]"
+          git push https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main --follow-tags
+          eas build --platform all --profile preview --non-interactive
+          npx sentry-expo-upload-sourcemaps dist
+
+      # Add rollback step for build failures
+      - name: Rollback on build failure
+        if: failure() && steps.check-changes.outputs.has_native_changes == 'true'
+        run: |
+          git reset --hard HEAD~1
+          git push --force https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main
+
+      # OTA Update for preview (no native changes)
+      - name: Run EAS Update
+        if: steps.check-changes.outputs.has_native_changes == 'false'
+        run: |
+          eas update --auto --profile preview --message "${{ steps.commit_msg.outputs.message }}" --non-interactive
+          npx sentry-expo-upload-sourcemaps dist

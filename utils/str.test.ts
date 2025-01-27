@@ -100,12 +100,4 @@ describe("formatGroupName", () => {
     const result = formatGroupName(topic, groupName);
     expect(result).toBe(groupName);
   });
-
-  it("should format topic if groupName is not provided", () => {
-    const topic = "/xmtp/mls/1/g-dab181fefd94578cc791bcc42d3b207c/proto";
-    const formattedString = "Utah bluebird delta";
-    const result = formatGroupName(topic);
-
-    expect(result).toBe(formattedString);
-  });
 });

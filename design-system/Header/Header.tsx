@@ -122,12 +122,12 @@ export function Header(props: HeaderProps) {
           ) : titleContent ? (
             <VStack
               style={[themed($titleContainer), $titleContainerStyleOverride]}
-              pointerEvents="none"
             >
               <Text
                 preset="body"
                 text={titleContent}
                 style={$titleStyleOverride}
+                onPress={onBack}
               />
             </VStack>
           ) : null}

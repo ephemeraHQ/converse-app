@@ -1,28 +1,25 @@
 {
   "name": "converse",
-  "version": "1.0.0",
+  "version": "2.1.4",
+  "private": true,
   "scripts": {
-    "android": "EXPO_ENV=dev expo run:android",
+    "start": "expo start",
+    "android": "expo run:android",
     "android:build:dev": "eas build -p android --profile development --local",
     "android:reverse": "adb reverse tcp:8081 tcp:8081 && adb reverse tcp:9875 tcp:9875",
-    "android:sendApk": "./scripts/android/sendApk.sh",
-    "build": "node scripts/build/build.js",
-    "clean": "./scripts/reactNativeCleanBuild.sh",
-    "commit": "git show --format=\"%h\" --no-patch",
+    "android:sendApk": "./scripts/android/send-apk.sh",
+    "ios": "expo run:ios",
+    "ios:checkBuildDeps": "./scripts/ios/check-build-deps.sh",
+    "env:pull:dev": "eas env:pull --environment=development",
+    "clean": "./scripts/react-native-clean-build.sh",
     "lint": "eslint --max-warnings 2500",
     "lint:errors": "eslint --quiet",
-    "ios": "expo run:ios",
-    "ios:checkBuildDeps": "./scripts/ios/checkBuildDeps.sh",
-    "run:ios": "EXPO_ENV=dev expo run:ios",
-    "postinstall": "patch-package && husky install && cross-os postinstall",
-    "start": "EXPO_ENV=dev expo start --scheme converse-dev",
-    "start:preview": "EXPO_ENV=preview expo start",
+    "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit",
     "test": "echo \"➜ Running tests...\" && jest --testPathIgnorePatterns='.*\\.perf-test\\.tsx$'",
     "test:perf:baseline": "echo \"➜ Running tests with performance...\" && echo \"➜ Capture baseline performance tests...\" && yarn reassure --baseline && echo \"➜ Running current performance tests...\"",
     "test:perf": "echo \"➜ Running tests with performance...\" && echo \"➜ Capturing performance tests...\" && yarn reassure && echo \"➜ Running current performance tests...\"",
     "test-deep-linking": "node scripts/test-deep-linking.js",
-    "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit",
-    "update": "node scripts/build/update.js"
+    "postinstall": "patch-package && husky install && cross-os postinstall"
   },
   "cross-os": {
     "postinstall": {
@@ -168,7 +165,6 @@
     "react-native-screens": "~4.4.0",
     "react-native-sfsymbols": "^1.2.1",
     "react-native-share": "^10.2.1",
-    "react-native-shared-group-preferences": "^1.1.23",
     "react-native-svg": "15.8.0",
     "react-native-system-navigation-bar": "^2.6.4",
     "react-native-tableview-simple": "^4.4.0",
@@ -213,7 +209,6 @@
     "@types/uuid": "^9.0.8",
     "@welldone-software/why-did-you-render": "^8.0.3",
     "cross-os": "^1.5.0",
-    "danger": "^12.3.3",
     "eslint": "^9.14.0",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-import": "^2.31.0",
@@ -229,7 +224,7 @@
     "jest-expo": "~52.0.3",
     "knip": "^2.19.1",
     "lint-staged": "^13.1.0",
-    "metro-minify-terser": "^0.80.4",
+    "metro-react-native-babel-preset": "^0.77.0",
     "nanoid": "^3.0.0",
     "patch-package": "^6.5.1",
     "plist": "^3.0.6",
@@ -240,10 +235,8 @@
     "reassure": "^1.2.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.0",
-    "typescript-eslint": "^8.13.0",
-    "warn-once": "^0.1.1"
+    "typescript-eslint": "^8.13.0"
   },
-  "private": true,
   "lint-staged": {
     "*.{tsx,ts}": [
       "eslint --fix",

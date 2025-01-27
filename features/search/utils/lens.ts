@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import logger from "@utils/logger";
-import config from "../../../config";
+import { config } from "../../../config";
 import { ILensHandle } from "@/features/profiles/profile-types";
 
 const LENS_CONVERSATION_ID_REGEX = /^lens\.dev\/dm\/(.*?)-(.*)$/;

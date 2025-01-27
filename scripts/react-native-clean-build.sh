@@ -15,7 +15,7 @@
 #
 # Example:
 #   In terminal from project root:
-#   ./scripts/reactNativeCleanBuild.sh
+#   ./scripts/react-native-clean-build.sh
 #   
 #   Output:
 #   Moving node_modules to trash...

@@ -1,5 +1,7 @@
 import { getConfig } from "@/config";
 
+const config = getConfig();
+
 type IUsernameResult = {
   isConverseUsername: boolean;
   username: string;
@@ -17,9 +19,9 @@ export function formatConverseUsername(
   if (!username) return undefined;
 
   // Check if it's a Converse username (either domain)
-  if (username.endsWith(getConfig().usernameSuffix)) {
+  if (username.endsWith(config.usernameSuffix)) {
     // Extract everything before the domain
-    const cleanUsername = username.replace(getConfig().usernameSuffix, "");
+    const cleanUsername = username.replace(config.usernameSuffix, "");
     return {
       isConverseUsername: true,
       username: `@${cleanUsername}`,

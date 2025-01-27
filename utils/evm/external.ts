@@ -21,7 +21,7 @@ import {
 import { Account, createWallet } from "thirdweb/wallets";
 import { useExternalWalletPickerContext } from "../../features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { DEFAULT_SUPPORTED_CHAINS } from "./wallets";
-import config from "../../config";
+import { config } from "../../config";
 
 let signerSingleton: Signer | undefined = undefined;
 let accountSingleton: Account | undefined = undefined;
