@@ -4,6 +4,8 @@ import { dropXmtpClient } from "@utils/xmtpRN/client";
 import { ConverseXmtpClientType } from "@utils/xmtpRN/client.types";
 import { getInboxId } from "@utils/xmtpRN/signIn";
 import { useCallback } from "react";
+import { converseNavigatorRef } from "@utils/navigation";
+import { StackActions } from "@react-navigation/native";
 
 import {
   getAccountsList,
@@ -150,24 +152,16 @@ export const logoutAccount = async (
   isV3Enabled: boolean = true,
   privyLogout: () => void
 ) => {
-  logger.debug(
-    `[Logout] Starting logout process for ${account} with dropLocalDatabase=${dropLocalDatabase} and isV3Enabled=${isV3Enabled}`
-  );
-
-  // Get initial state for debugging
-  const initialCurrentAccount = useAccountsStore.getState().currentAccount;
-  logger.debug(`[Logout] Initial current account: ${initialCurrentAccount}`);
+  // Reset navigation state first
+  converseNavigatorRef.current?.dispatch(StackActions.popToTop());
 
   if (isV3Enabled) {
     // This clears the libxmtp sqlite database (v3 / groups)
     try {
       const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
       await client.dropLocalDatabaseConnection();
-      logger.debug("[Logout] Successfully dropped connection to libxmp db");
       if (dropLocalDatabase) {
         await client.deleteLocalDatabase();
-        logger.debug("[Logout] Successfully deleted libxmp db");
-        // Manual delete database files
         await deleteLibXmtpDatabaseForInboxId(client.inboxId);
       }
     } catch (error) {
@@ -186,35 +180,19 @@ export const logoutAccount = async (
   delete secureMmkvByAccount[account];
   delete lastNotifSubscribeByAccount[account];
 
-  // Remove account from store
-  logger.debug(`[Logout] Removing account ${account} from store`);
+  // Remove account from store and handle switching
   useAccountsStore.getState().removeAccount(account);
-
-  // Get the updated list of accounts after removal
   const remainingAccounts = getAccountsList();
-  logger.debug(
-    `[Logout] Remaining accounts after removal: ${JSON.stringify(
-      remainingAccounts
-    )}`
-  );
+  const setCurrentAccount = useAccountsStore.getState().setCurrentAccount;
 
-  // Important: Set auth status to signedOut BEFORE changing current account
-  // This ensures navigation state is reset before any account changes
-  if (dropLocalDatabase) {
-    logger.debug(
-      "[Logout] Setting auth status to signedOut due to dropLocalDatabase"
-    );
+  if (remainingAccounts.length > 0) {
+    setCurrentAccount(remainingAccounts[0], false);
+  } else {
+    setCurrentAccount(TEMPORARY_ACCOUNT_NAME, false);
     setAuthStatus("signedOut");
   }
 
-  // Set temporary account
-  const setCurrentAccount = useAccountsStore.getState().setCurrentAccount;
-  setCurrentAccount(TEMPORARY_ACCOUNT_NAME, false);
-  logger.debug(`[Logout] Set temporary account: ${TEMPORARY_ACCOUNT_NAME}`);
-
-  // Execute Privy logout last to prevent any race conditions
   if (isPrivyAccount) {
-    logger.debug("[Logout] Executing Privy logout for account");
     privyLogout();
   }
 
@@ -230,15 +208,7 @@ export const logoutAccount = async (
   }
   saveLogoutTask(account, apiHeaders, [], pkPath);
 
-  // Add a final state check
   setTimeout(() => {
-    const finalState = {
-      currentAccount: useAccountsStore.getState().currentAccount,
-      remainingAccounts: getAccountsList(),
-    };
-    logger.debug(
-      `[Logout] Final state after logout: ${JSON.stringify(finalState)}`
-    );
     executeLogoutTasks();
   }, 500);
 };
