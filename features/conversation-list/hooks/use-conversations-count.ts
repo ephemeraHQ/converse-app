@@ -8,7 +8,7 @@ import {
   useCurrentAccount,
 } from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
-import { InboxId } from "@xmtp/react-native-sdk";
+import { ConversationVersion, InboxId } from "@xmtp/react-native-sdk";
 
 export const useAllowedConversationsCount = () => {
   const account = useCurrentAccount();
@@ -42,48 +42,50 @@ export const useFindConversationByMembers = (membersToSearch: InboxId[]) => {
         `[useFindConversationByMembers] Searching through ${conversations?.length} conversations`
       );
 
-      const groupsThatIncludeMembers = conversations?.filter((c) => {
-        if (membersToSearch.length === 0) {
-          return false;
-        }
-        logger.debug(
-          `[useFindConversationByMembers] Checking conversation ${c.topic}`
-        );
+      const groupsThatIncludeMembers = conversations
+        ?.filter(
+          (conversation) => conversation.version === ConversationVersion.GROUP
+        )
+        .filter((c) => {
+          if (membersToSearch.length === 0) {
+            return false;
+          }
+          logger.debug(
+            `[useFindConversationByMembers] Checking conversation ${c.topic}`
+          );
 
-        const groupMembers = getGroupMembersQueryData(account!, c.topic);
-        logger.debug(
-          `[useFindConversationByMembers] Group members for ${c.topic}:`,
-          groupMembers?.ids
-        );
+          const groupMembers = getGroupMembersQueryData(account!, c.topic);
+          logger.debug(
+            `[useFindConversationByMembers] Group members for ${c.topic}:`,
+            groupMembers?.ids
+          );
 
-        const membersIdsSet = new Set(
-          groupMembers?.addresses.map((address) => address.toLowerCase()) ?? []
-        );
-        const membersToSearchSet = new Set(
-          membersToSearch.map((member) => member.toLowerCase())
-        );
+          const membersIdsSet = new Set(
+            groupMembers?.addresses.map((address) => address.toLowerCase()) ??
+              []
+          );
+          const membersToSearchSet = new Set(
+            membersToSearch.map((member) => member.toLowerCase())
+          );
 
-        logger.debug(
-          `[useFindConversationByMembers] Checking if\n${Array.from(
-            membersToSearchSet
-          )}\n is subset of\n${Array.from(membersIdsSet).join("\n")}`
-        );
+          logger.debug(
+            `[useFindConversationByMembers] Checking if\n${Array.from(
+              membersToSearchSet
+            )}\n is subset of\n${Array.from(membersIdsSet).join("\n")}`
+          );
 
-        // const areMembersToSearchAllInGroup =
-        //   membersToSearchSet.isSubsetOf(membersIdsSet);
-        // write brute force subset check
-        const areMembersToSearchAllInGroup = membersToSearch.every((member) =>
-          membersIdsSet.has(member.toLowerCase())
-        );
+          const areMembersToSearchAllInGroup = membersToSearch.every((member) =>
+            membersIdsSet.has(member.toLowerCase())
+          );
 
-        logger.debug(
-          `[useFindConversationByMembers] Members are ${
-            areMembersToSearchAllInGroup ? "" : "not "
-          }all in group ${c.topic}`
-        );
+          logger.debug(
+            `[useFindConversationByMembers] Members are ${
+              areMembersToSearchAllInGroup ? "" : "not "
+            }all in group ${c.topic}`
+          );
 
-        return areMembersToSearchAllInGroup;
-      });
+          return areMembersToSearchAllInGroup;
+        });
 
       logger.debug(
         `[useFindConversationByMembers] Found ${groupsThatIncludeMembers?.length} conversations that include members`
