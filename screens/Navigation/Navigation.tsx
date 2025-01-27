@@ -3,6 +3,7 @@ import {
   JoinGroupNavigation,
   JoinGroupNavigationParams,
 } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
+import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen";
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen";
 import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
 import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
@@ -15,27 +16,30 @@ import {
   InviteUsersToExistingGroupNav,
   InviteUsersToExistingGroupParams,
 } from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
+import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
+import { ProfileNav, ProfileNavParams } from "@/features/profiles/profile.nav";
 import { translate } from "@/i18n";
 import { useRouter } from "@/navigation/useNavigation";
 import UserProfileNav from "@/screens/Navigation/UserProfileNav";
+import { OnboardingConnectWalletScreen } from "@features/onboarding/screens/OnboardingConnectWalletScreen";
+import { OnboardingEphemeraScreen } from "@features/onboarding/screens/OnboardingEphemeraScreen";
+import { OnboardingPrivateKeyScreen } from "@features/onboarding/screens/OnboardingPrivateKeyScreen";
+import { OnboardingPrivyScreen } from "@features/onboarding/screens/OnboardingPrivyScreen";
+import { OnboardingContactCardScreen } from "@features/onboarding/screens/onboarding-contact-card-screen";
+import { OnboardingNotificationsScreen } from "@features/onboarding/screens/onboarding-notifications-screen";
 import {
   NativeStackNavigationOptions,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
 import { memo } from "react";
 import { Platform, useColorScheme } from "react-native";
-import Accounts from "../Accounts/Accounts";
 import { IdleScreen } from "../IdleScreen";
 import { NewAccountConnectWalletScreen } from "../NewAccount/NewAccountConnectWalletScreen";
 import { NewAccountEphemeraScreen } from "../NewAccount/NewAccountEphemeraScreen";
 import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeyScreen";
 import { NewAccountPrivyScreen } from "../NewAccount/NewAccountPrivyScreen";
+import { NewAccountCreateContactCardScreen } from "../NewAccount/new-account-create-contact-card-screen";
 import { NewAccountScreen } from "../NewAccount/new-account-screen";
-import { OnboardingConnectWalletScreen } from "@features/onboarding/screens/OnboardingConnectWalletScreen";
-import { OnboardingEphemeraScreen } from "@features/onboarding/screens/OnboardingEphemeraScreen";
-import { OnboardingNotificationsScreen } from "@features/onboarding/screens/onboarding-notifications-screen";
-import { OnboardingPrivateKeyScreen } from "@features/onboarding/screens/OnboardingPrivateKeyScreen";
-import { OnboardingPrivyScreen } from "@features/onboarding/screens/OnboardingPrivyScreen";
 import GroupNav, { GroupNavParams } from "./GroupNav";
 import ShareProfileNav from "./ShareProfileNav";
 import TopUpNav from "./TopUpNav";
@@ -43,10 +47,6 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
-import { ProfileNav, ProfileNavParams } from "@/features/profiles/profile.nav";
-import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
-import { OnboardingContactCardScreen } from "@features/onboarding/screens/onboarding-contact-card-screen";
-import { NewAccountCreateContactCardScreen } from "../NewAccount/new-account-create-contact-card-screen";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -96,6 +96,8 @@ export type NavigationParamList = {
 
   // UI Tests
   Examples: undefined;
+
+  AppSettings: undefined;
 };
 
 export const authScreensSharedScreenOptions: NativeStackNavigationOptions = {
@@ -155,24 +157,11 @@ export function SignedInNavigation() {
           {TopUpNav()}
         </NativeStack.Group>
 
-        {/* Modals */}
-        <NativeStack.Group
-          screenOptions={{
-            presentation: "modal",
-            ...stackGroupScreenOptions(colorScheme),
-          }}
-        >
+        <NativeStack.Group>
           {UserProfileNav()}
           <NativeStack.Screen
-            name="Accounts"
-            component={Accounts}
-            options={{
-              headerLargeTitle: true,
-              headerShadowVisible: false,
-              headerLeft: () => (
-                <ScreenHeaderModalCloseButton onPress={router.goBack} />
-              ),
-            }}
+            name="AppSettings"
+            component={AppSettingsScreen}
           />
           <NativeStack.Screen
             name="NewAccountNavigator"

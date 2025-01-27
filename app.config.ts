@@ -74,6 +74,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
   },
 };
 
+// eslint-disable-next-line import/no-default-export
 export default (): ExpoConfig => {
   const environment = (process.env.EXPO_ENV || "development") as Environment;
   const config = settings[environment];

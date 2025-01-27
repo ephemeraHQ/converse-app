@@ -75,7 +75,7 @@ function HeaderTitle() {
       } else if (actionId === "new-account") {
         navigation.navigate("NewAccountNavigator");
       } else if (actionId === "app-settings") {
-        Alert.alert("Coming soon");
+        navigation.navigate("AppSettings");
       } else {
         setCurrentAccount(actionId, false);
       }
