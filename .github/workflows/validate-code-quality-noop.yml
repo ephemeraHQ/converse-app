@@ -1,4 +1,5 @@
 name: Validate Code Quality (No checks)
+
 on:
   pull_request:
     branches:
@@ -24,8 +25,3 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Nothing to test"
-
-  performance-test:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Nothing to performance test"
