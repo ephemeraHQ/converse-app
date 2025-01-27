@@ -19,7 +19,20 @@ We recommend using a Ruby version manager such as [rbenv](https://github.com/rbe
 
 ### Environment
 
-Copy `.env` from the [converse-app-env](https://github.com/ephemeraHQ/converse-app-env) repository to the root of this repository.
+Run one of the following commands to set up your environment variables:
+
+```sh
+# For development environment
+yarn env:pull:dev
+
+# For preview environment
+yarn env:pull:preview
+
+# For production environment
+yarn env:pull:prod
+```
+
+This will create the appropriate `.env.local` file with environment variables configured in expo.dev.
 
 ### Install JS/React Native dependencies
 
@@ -110,46 +123,44 @@ yarn test:perf
 
 ### Main branch
 
+Represents the current preview code.
+
+### Production branch
+
 Represents the current production code.
 
-### Release branches
+## Release Process
 
-Each release branch is based off of `main` or the release branch before it. It is used to prepare and stabilize the code for a specific release version (e.g., `release/2.0.8`).
+### Preview Deployments (Main Branch)
 
-### Feature branches
+The main branch represents the current preview code. When code is merged to main:
 
-Feature branches are longer-lived features or refactors expected to take additional time. They should be based off of the targeted feature release branch.
+1. For TypeScript-only changes:
 
-This structure allows code to flow **from `main` to release branches to feature branches**.
+   - An over-the-air (OTA) update is deployed via EAS Update
+   - No version increment occurs
 
-![Merge Diagram](docs/image.png)
+2. For native changes (iOS/Android/package.json):
+   - A new native build is triggered via EAS Build
+   - Minor version is automatically incremented
+   - App is submitted to TestFlight and Play Store internal testing
+   - Source maps are uploaded to Sentry
 
-### Branch rebasing
+### Production Deployments (Production Branch)
 
-Assuming your branch is `feature/scw`, and your feature is targeted for release `2.1.0`, follow these steps to rebase:
+The production branch represents the current production code. When main is merged to production:
 
-1. Checkout the feature branch:
+1. If versions match between main and production:
 
-   ```bash
-   git fetch origin
-   git branch feature/scw -D
-   git checkout feature/scw origin/feature/scw
-   ```
+   - An over-the-air (OTA) update is deployed via EAS Update
+   - No version increment occurs
 
-2. Rebase onto the targeted release branch:
+2. If versions differ:
+   - A new native build is triggered via EAS Build
+   - App is submitted to App Store and Play Store production
+   - Source maps are uploaded to Sentry
 
-   ```bash
-   git pull origin/release/2.1.0 --rebase
-   git push origin feature/scw --force-with-lease
-   ```
-
-### Exceptions
-
-There are certain times where this flow does not work as intended. For example:
-
-- Build scripts: These may need to be run off of the default `main` branch instead of feature or release branches.
-- README updates: These are not required to be on a branch and can be committed directly to `main`.
-- Bug fixes that can be OTA updated: These can be committed directly to `main` to perform an OTA update.
+Note: Production deployments are carefully managed to ensure version consistency. The system waits for any in-progress preview deployments to complete before proceeding with production deployment.
 
 ## Troubleshoot
 

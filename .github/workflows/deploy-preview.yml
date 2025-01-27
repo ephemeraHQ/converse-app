@@ -40,6 +40,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+          token: ${{ secrets.PAT_GITHUB }}
 
       - name: Get Commit Message
         id: commit_msg
@@ -71,6 +72,8 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -132,6 +135,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
 
       - name: Setup node
         uses: actions/setup-node@v4

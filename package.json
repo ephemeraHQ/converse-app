@@ -11,6 +11,8 @@
     "ios": "expo run:ios",
     "ios:checkBuildDeps": "./scripts/ios/check-build-deps.sh",
     "env:pull:dev": "eas env:pull --environment=development",
+    "env:pull:preview": "eas env:pull --environment=preview",
+    "env:pull:prod": "eas env:pull --environment=production",
     "clean": "./scripts/react-native-clean-build.sh",
     "lint": "eslint --max-warnings 2500",
     "lint:errors": "eslint --quiet",
