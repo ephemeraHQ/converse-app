@@ -43,9 +43,9 @@ export const useFindConversationByMembers = (membersToSearch: InboxId[]) => {
       );
 
       const groupsThatIncludeMembers = conversations
-        ?.filter(
-          (conversation) => conversation.version === ConversationVersion.GROUP
-        )
+        // ?.filter(
+        //   (conversation) => conversation.version === ConversationVersion.GROUP
+        // )
         .filter((c) => {
           if (membersToSearch.length === 0) {
             return false;

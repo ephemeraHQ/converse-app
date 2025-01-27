@@ -6,17 +6,15 @@ import { UserInlineSearch } from "@/features/create-conversation/components/user
 import { SearchResultsList } from "@/features/search/components/member-search-results.list";
 import { useSearchUsersQuery } from "@/features/search/search-convos-users/search-convos-users.query";
 import { useHeader } from "@/navigation/use-header";
-import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import logger, { logJson } from "@/utils/logger";
 import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
+import { getCurrentAccount } from "@data/store/accountsStore";
 import {
-  createConversationByAccount,
-  createGroupWithDefaultsByAccount,
-  getOptionalConversationByPeerByAccount,
-} from "@/utils/xmtpRN/conversations";
-import { currentAccount, getCurrentAccount } from "@data/store/accountsStore";
-import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
+  Conversation,
+  ConversationTopic,
+  ConversationVersion,
+} from "@xmtp/react-native-sdk";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { TextInput, View } from "react-native";
 import { useFindConversationByMembers } from "../conversation-list/hooks/use-conversations-count";
@@ -35,7 +33,6 @@ export function CreateConversationScreen({
   const [conversationMode, setConversationMode] = useState<ConversationVersion>(
     ConversationVersion.DM
   );
-  const { sendMessage, error } = useSendMessage();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<
     Array<{
@@ -48,7 +45,33 @@ export function CreateConversationScreen({
     conversations: existingConversations,
     isLoading: isLoadingExistingConversation,
   } = useFindConversationByMembers(selectedUsers.map((u) => u.address));
+
+  const existingDm = existingConversations?.find(
+    (c) => c.version === ConversationVersion.DM
+  );
+
+  const existingGroup = existingConversations?.find(
+    (c) => c.version === ConversationVersion.GROUP
+  );
+
+  const [existingConversation, setExistingConversation] =
+    useState<Conversation | null>(existingDm || existingGroup || null);
+  useEffect(() => {
+    setExistingConversation(existingDm || existingGroup || null);
+  }, [existingDm, existingGroup]);
+
+  const { sendMessage, error: messageSendError } = useSendMessage();
+
   logJson({ json: existingConversations, msg: "existingConversations" });
+
+  const selectedAddresses = selectedUsers.map((u) => u.address);
+  const currentUserAddress = getCurrentAccount() || "";
+
+  const { searchResults, areSearchResultsLoading, hasSearchResults } =
+    useSearchUsersQuery({
+      searchQuery,
+      addressesToOmit: [...selectedAddresses, currentUserAddress],
+    });
 
   const selectedUsersCount = selectedUsers.length;
   const composerDisabled = selectedUsersCount === 0;
@@ -77,15 +100,6 @@ export function CreateConversationScreen({
     },
   });
 
-  const selectedAddresses = selectedUsers.map((u) => u.address);
-  const currentUserAddress = getCurrentAccount() || "";
-
-  const { searchResults, areSearchResultsLoading, hasSearchResults } =
-    useSearchUsersQuery({
-      searchQuery,
-      addressesToOmit: [...selectedAddresses, currentUserAddress],
-    });
-
   const inputRef = useRef<TextInput | null>(null);
   const initialFocus = useRef(false);
 
@@ -110,44 +124,77 @@ export function CreateConversationScreen({
     if (!messageText) return;
 
     if (conversationMode === ConversationVersion.DM) {
-      let dm = await getOptionalConversationByPeerByAccount({
-        account: currentAccount(),
-        peer: selectedUsers[0].address,
-        includeSync: true,
-      });
-      if (!dm) {
-        dm = await createConversationByAccount(
-          currentAccount(),
-          selectedUsers[0].address
-        );
+      // you should only have one dm with another user
+      // other clients could break this assumption - we should handle then
+      const existingDm = existingConversations?.find(
+        (c) => c.version === ConversationVersion.DM
+      );
+
+      if (existingDm) {
+        sendMessage({
+          topic: existingDm.topic,
+          content: { text: messageText },
+        });
+        navigation.replace("Conversation", { topic: existingDm.topic });
+        return;
+      } else {
+        // optimsitic create dm converlsation and dm message
       }
-      await sendMessage({
-        topic: dm.topic,
-        content: { text: messageText },
-      });
-      setConversationQueryData({
-        account: currentAccount(),
-        topic: dm.topic,
-        conversation: dm,
-      });
-      navigation.replace("Conversation", { topic: dm.topic });
+
+      //
+
+      //
+
+      // let dm = existingDm;
+      // if (!dm) {
+      //   dm = await getOptionalConversationByPeerByAccount({
+      //     account: currentAccount(),
+      //     peer: selectedUsers[0].address,
+      //     includeSync: true,
+      //   });
+      //   if (!dm) {
+      //     dm = await createConversationByAccount(
+      //       currentAccount(),
+      //       selectedUsers[0].address
+      //     );
+      //   }
+      //   await sendMessage({
+      //     topic: dm.topic,
+      //     content: { text: messageText },
+      //   });
+      //   setConversationQueryData({
+      //     account: currentAccount(),
+      //     topic: dm.topic,
+      //     conversation: dm,
+      //   });
+      //   navigation.replace("Conversation", { topic: dm.topic });
     } else {
-      //todo(lustig) lookup group by list of addresses/inbox ids and optimstically create one if not found
-      // use useFindGroupByPeerIds
-      const group = await createGroupWithDefaultsByAccount({
-        account: currentAccount(),
-        peerEthereumAddresses: selectedUsers.map((m) => m.address),
-      });
-      await sendMessage({
-        topic: group.topic,
-        content: { text: messageText },
-      });
-      setConversationQueryData({
-        account: currentAccount(),
-        topic: group.topic,
-        conversation: group,
-      });
-      navigation.replace("Conversation", { topic: group.topic });
+      if (existingGroup) {
+        sendMessage({
+          topic: existingGroup.topic,
+          content: { text: messageText },
+        });
+        navigation.replace("Conversation", { topic: existingGroup.topic });
+        return;
+      } else {
+        // optimsitic create group converlsation and group message
+        //todo(lustig) lookup group by list of addresses/inbox ids and optimstically create one if not found
+        // use useFindGroupByPeerIds
+        // const group = await createGroupWithDefaultsByAccount({
+        //   account: currentAccount(),
+        //   peerEthereumAddresses: selectedUsers.map((m) => m.address),
+        // });
+        // await sendMessage({
+        //   topic: group.topic,
+        //   content: { text: messageText },
+        // });
+        // setConversationQueryData({
+        //   account: currentAccount(),
+        //   topic: group.topic,
+        //   conversation: group,
+        // });
+        // navigation.replace("Conversation", { topic: group.topic });
+      }
     }
   };
 
@@ -198,12 +245,23 @@ export function CreateConversationScreen({
 
       {/* {message && <MessageSection message={message} />} */}
 
-      {error && <MessageSection message={error.message} />}
+      {messageSendError && (
+        <MessageSection message={messageSendError.message} />
+      )}
 
       {areSearchResultsLoading && (
         <View style={{ flex: 1 }}>
           <Loader size="large" />
         </View>
+      )}
+
+      {existingConversation && (
+        <MessageSection
+          message={`${existingConversation.topic} already exists with name ${
+            existingConversation.name || "dm"
+          }`}
+          isError={false}
+        />
       )}
 
       {existingConversations && (
