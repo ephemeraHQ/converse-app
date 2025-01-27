@@ -3,7 +3,7 @@ import { useSendMessage } from "@/features/conversation/hooks/use-send-message";
 import { ComposerSection } from "@/features/create-conversation/components/composer-section";
 import { MessageSection } from "@/features/create-conversation/components/message-section";
 import { UserInlineSearch } from "@/features/create-conversation/components/user-inline-search";
-import { SearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
+import { SearchResultsList } from "@/features/search/components/member-search-results.list";
 import { useSearchUsersQuery } from "@/features/search/search-convos-users/search-convos-users.query";
 import { useHeader } from "@/navigation/use-header";
 import { setConversationQueryData } from "@/queries/useConversationQuery";
@@ -16,7 +16,7 @@ import {
   getOptionalConversationByPeerByAccount,
 } from "@/utils/xmtpRN/conversations";
 import { currentAccount, getCurrentAccount } from "@data/store/accountsStore";
-import { ConversationVersion } from "@xmtp/react-native-sdk";
+import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { TextInput, View } from "react-native";
 import { useFindConversationByMembers } from "../conversation-list/hooks/use-conversations-count";
@@ -166,6 +166,11 @@ export function CreateConversationScreen({
     []
   );
 
+  const handleGroupPress = (topic: string) => {
+    // navigation.replace("Conversation", { topic: topic as ConversationTopic });
+    navigation.navigate("Conversation", { topic: topic as ConversationTopic });
+  };
+
   return (
     <View style={themed(createConversationStyles.$screenContainer)}>
       <UserInlineSearch
@@ -187,6 +192,7 @@ export function CreateConversationScreen({
         <SearchResultsList
           searchResults={searchResults}
           handleSearchResultItemPress={handleSearchResultPress}
+          handleGroupPress={handleGroupPress}
         />
       )}
 
