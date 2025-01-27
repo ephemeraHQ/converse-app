@@ -130,11 +130,9 @@ export const setInboxProfileSocialsQueryData = (
 export const getInboxProfileSocialsQueryData = (
   account: string,
   inboxId: InboxId
-): IProfileSocials[] | null => {
-  return (
-    queryClient.getQueryData(
-      inboxProfileSocialsQueryConfig(account, inboxId).queryKey
-    ) ?? null
+) => {
+  return queryClient.getQueryData(
+    inboxProfileSocialsQueryConfig(account, inboxId).queryKey
   );
 };
 

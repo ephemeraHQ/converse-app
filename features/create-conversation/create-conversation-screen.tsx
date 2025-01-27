@@ -5,7 +5,6 @@ import { MessageSection } from "@/features/create-conversation/components/messag
 import { UserInlineSearch } from "@/features/create-conversation/components/user-inline-search";
 import { SearchResultsList } from "@/features/search/components/ProfileSearchResultsList";
 import { useHeader } from "@/navigation/use-header";
-import { useSearchUsersQuery } from "@/queries/search-users.query";
 import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
 import logger, { logJson } from "@/utils/logger";
@@ -23,6 +22,7 @@ import { useFindConversationByMembers } from "../conversation-list/hooks/use-con
 import { IProfileSocials } from "../profiles/profile-types";
 import { createConversationStyles } from "./create-conversation.styles";
 import { CreateConversationScreenProps } from "./create-conversation.types";
+import { useSearchUsersQuery } from "@/features/search/search-convos-users/search-convos-users.query";
 
 /**
  * Screen for creating new conversations
