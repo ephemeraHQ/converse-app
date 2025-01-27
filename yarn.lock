@@ -14541,7 +14541,6 @@ __metadata:
     react-native-screens: "npm:~4.4.0"
     react-native-sfsymbols: "npm:^1.2.1"
     react-native-share: "npm:^10.2.1"
-    react-native-shared-group-preferences: "npm:^1.1.23"
     react-native-svg: "npm:15.8.0"
     react-native-svg-transformer: "npm:^1.5.0"
     react-native-system-navigation-bar: "npm:^2.6.4"
@@ -26130,15 +26129,6 @@ __metadata:
   version: 10.2.1
   resolution: "react-native-share@npm:10.2.1"
   checksum: 10c0/534e6930d337d7e48de5572d8d6afac865bdad027a5d1c7fa843c7adba702d594b82cf2bb8124f82ffb1b4171f78754744c97a88b2fa5e5fda479f486768d42e
-  languageName: node
-  linkType: hard
-
-"react-native-shared-group-preferences@npm:^1.1.23":
-  version: 1.1.23
-  resolution: "react-native-shared-group-preferences@npm:1.1.23"
-  peerDependencies:
-    react-native: ">=0.41.2"
-  checksum: 10c0/7bbc613c15b953e129ef012740ab92bc33aea5e7b25c5799b3ba271c96ce4c7e98d345bd1043581c14b3163288fcf86a486b1510729acd268c6e7d364f7f3402
   languageName: node
   linkType: hard
 
