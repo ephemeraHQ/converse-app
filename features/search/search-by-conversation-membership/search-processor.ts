@@ -71,7 +71,7 @@ export function processConversationSearch(
       `[Search] Search query matches current user's profile, returning empty results`
     );
     return {
-      existingDmSearchResults: {},
+      existingDmSearchResults: [],
       existingGroupMemberNameSearchResults: [],
       existingGroupNameSearchResults: [],
     };
@@ -163,7 +163,7 @@ export function processConversationSearch(
             logger.info(
               `[Search] Adding DM conversation match for: ${member.address}`
             );
-            acc.existingDmSearchResults[member.address] = member.profile;
+            acc.existingDmSearchResults.push(member.profile);
           }
         }
       });
@@ -171,7 +171,7 @@ export function processConversationSearch(
       return acc;
     },
     {
-      existingDmSearchResults: {},
+      existingDmSearchResults: [],
       existingGroupMemberNameSearchResults: [],
       existingGroupNameSearchResults: [],
     }

@@ -34,12 +34,19 @@ export function useSearchConvosUsersQuery(args: {
     select: (data: IUserSearchResults) => {
       const filteredResults = { ...data };
       if (filteredResults.convosSearchResults) {
-        Object.keys(filteredResults.convosSearchResults).forEach((address) => {
-          if (allAddressesToOmit.includes(address.toLowerCase())) {
-            logger.info(`[Search] Omitting address from results: ${address}`);
-            delete filteredResults.convosSearchResults?.[address];
-          }
-        });
+        filteredResults.convosSearchResults =
+          filteredResults.convosSearchResults.filter((result) => {
+            if (
+              result.address &&
+              allAddressesToOmit.includes(result.address.toLowerCase())
+            ) {
+              logger.info(
+                `[Search] Omitting address from results: ${result.address}`
+              );
+              return false;
+            }
+            return true;
+          });
       }
       return filteredResults;
     },

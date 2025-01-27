@@ -23,7 +23,7 @@ async function handlePeerSearch(
   if (!resolvedAddress) {
     logger.info(`[Search] No address resolved for ${searchQuery}`);
     return {
-      convosSearchResults: {},
+      convosSearchResults: [],
       message: "No address has been set for this domain.",
     };
   }
@@ -41,7 +41,7 @@ async function handlePeerSearch(
     logger.info(`[Search] ${address} is not on XMTP`);
     return {
       message: `${shortAddress(searchQuery)} is not on the XMTP network yet`,
-      convosSearchResults: {},
+      convosSearchResults: [],
     };
   }
 
@@ -54,16 +54,14 @@ async function handlePeerSearch(
     setProfileRecordSocialsQueryData(profiles);
     return {
       message: "",
-      convosSearchResults: profiles,
+      convosSearchResults: Object.values(profiles),
     };
   }
 
   logger.info(
     `[Search] No profiles found for ${address}, returning just address`
   );
-  const justAddress: Record<string, IProfileSocials> = {
-    [address]: { address },
-  };
+  const justAddress: Array<IProfileSocials> = [{ address }];
   return {
     message: "address is on xmtp but not on converse yet",
     convosSearchResults: justAddress,
@@ -82,7 +80,7 @@ async function handleGeneralSearch(searchQuery: string) {
   if (!isEmptyObject(profiles)) {
     logger.info(`[Search] Found profiles for query ${searchQuery}`);
     setProfileRecordSocialsQueryData(profiles);
-    const filteredProfiles = { ...profiles };
+    const filteredProfiles = Object.values(profiles);
     logger.info(
       `[Search] Filtered profiles:`,
       JSON.stringify(filteredProfiles, null, 2)
@@ -96,7 +94,7 @@ async function handleGeneralSearch(searchQuery: string) {
   logger.info(`[Search] No profiles found for query ${searchQuery}`);
   return {
     message: `They're not here\nInvite them?`,
-    convosSearchResults: {},
+    convosSearchResults: [],
   };
 }
 
@@ -116,7 +114,7 @@ export async function searchConvosUsers({
     logger.info(`[Search] Empty search query, returning empty results`);
     return {
       message: "",
-      convosSearchResults: {},
+      convosSearchResults: [],
     };
   }
 

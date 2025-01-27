@@ -160,7 +160,7 @@ describe("searchByConversationMembership", () => {
     });
 
     expect(result).toEqual({
-      existingDmSearchResults: {},
+      existingDmSearchResults: [],
       existingGroupMemberNameSearchResults: [],
       existingGroupNameSearchResults: [],
     });
@@ -189,9 +189,8 @@ describe("searchByConversationMembership", () => {
       searchQuery: "user1.eth",
     });
 
-    expect(result.existingDmSearchResults).toEqual({
-      "0xUserAddress1": mockProfileSocials,
-    });
+    expect(result.existingDmSearchResults).toEqual([mockProfileSocials]);
+
     expect(result.existingGroupMemberNameSearchResults).toEqual([]);
     expect(result.existingGroupNameSearchResults).toEqual([]);
 

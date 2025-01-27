@@ -2,8 +2,7 @@ import { useCallback } from "react";
 import { FlatList } from "react-native";
 import { UserSearchResultListItem } from "./user-search-result-list-item";
 import { IProfileSocials } from "@/features/profiles/profile-types";
-import { IUserSearchResults } from "@/queries/search-users.query";
-
+import type { IUserSearchResults } from "../search.types";
 type ProfileSearchProps = {
   searchResults: IUserSearchResults;
   handleSearchResultItemPress: (args: {

@@ -91,9 +91,7 @@ describe("processConversationSearch", () => {
         currentUserAddress
       );
 
-      expect(result.existingDmSearchResults).toEqual({
-        "0xDmUser": mockDmProfile,
-      });
+      expect(result.existingDmSearchResults).toEqual([mockDmProfile]);
       expect(result.existingGroupMemberNameSearchResults).toEqual([]);
       expect(result.existingGroupNameSearchResults).toEqual([]);
     });
@@ -124,7 +122,7 @@ describe("processConversationSearch", () => {
         currentUserAddress
       );
 
-      expect(result.existingDmSearchResults).toEqual({});
+      expect(result.existingDmSearchResults).toEqual([]);
       expect(result.existingGroupMemberNameSearchResults).toEqual([]);
       expect(result.existingGroupNameSearchResults).toEqual([]);
     });
@@ -138,7 +136,7 @@ describe("processConversationSearch", () => {
         currentUserAddress
       );
 
-      expect(result.existingDmSearchResults).toEqual({});
+      expect(result.existingDmSearchResults).toEqual([]);
       expect(result.existingGroupMemberNameSearchResults).toEqual([]);
       expect(result.existingGroupNameSearchResults).toEqual([
         {
@@ -179,7 +177,7 @@ describe("processConversationSearch", () => {
         currentUserAddress
       );
 
-      expect(result.existingDmSearchResults).toEqual({});
+      expect(result.existingDmSearchResults).toEqual([]);
       expect(result.existingGroupNameSearchResults).toEqual([]);
       expect(result.existingGroupMemberNameSearchResults).toEqual([
         {
@@ -250,7 +248,7 @@ describe("processConversationSearch", () => {
         currentUserAddress
       );
 
-      expect(result.existingDmSearchResults).toEqual({});
+      expect(result.existingDmSearchResults).toEqual([]);
       expect(result.existingGroupMemberNameSearchResults).toEqual([]);
       expect(result.existingGroupNameSearchResults).toEqual([]);
     });

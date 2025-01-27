@@ -29,7 +29,7 @@ export async function searchByConversationMembership({
   if (!conversations) {
     logger.info(`[Search] No conversations found, returning empty results`);
     return {
-      existingDmSearchResults: {},
+      existingDmSearchResults: [],
       existingGroupMemberNameSearchResults: [],
       existingGroupNameSearchResults: [],
     };

@@ -15,7 +15,7 @@ export type MemberProfile = {
 };
 
 export type SearchResults = {
-  existingDmSearchResults: Record<string, IProfileSocials>;
+  existingDmSearchResults: Array<IProfileSocials>;
   existingGroupMemberNameSearchResults: Array<{
     memberNameFromGroup: string;
     groupName: string;

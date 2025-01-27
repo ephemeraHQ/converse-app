@@ -15,12 +15,12 @@ export type IUserSearchResults = IConvosUsersSearchResult &
   IConversationMembershipSearchResult;
 
 export type IConvosUsersSearchResult = {
-  convosSearchResults?: Record<string, IProfileSocials>;
+  convosSearchResults?: Array<IProfileSocials>;
   message?: string;
 };
 
 export type IConversationMembershipSearchResult = {
-  existingDmSearchResults?: Record<string, IProfileSocials>;
-  existingGroupMemberNameSearchResults?: GroupMemberNameSearchResult[];
-  existingGroupNameSearchResults?: GroupNameSearchResult[];
+  existingDmSearchResults?: Array<IProfileSocials>;
+  existingGroupMemberNameSearchResults?: Array<GroupMemberNameSearchResult>;
+  existingGroupNameSearchResults?: Array<GroupNameSearchResult>;
 };
