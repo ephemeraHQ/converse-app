@@ -6,7 +6,7 @@ import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { IConversationMembershipSearchResult } from "@/features/search/search.types";
 import { processConversationSearch } from "./search-processor";
-import type { SearchableConversation } from "./search-types";
+import type { SearchableConversation, MemberProfile } from "./search-types";
 
 export async function searchByConversationMembership({
   searchQuery,
@@ -43,11 +43,14 @@ export async function searchByConversationMembership({
         topic: conversation.topic,
       });
 
-      const memberProfiles = await Promise.all(
-        members.addresses.map(async (address) => ({
-          address,
-          profile: await getProfileSocialsQueryData(address),
-        }))
+      const memberProfiles: MemberProfile[] = await Promise.all(
+        members.addresses.map(async (address) => {
+          const profile = await getProfileSocialsQueryData(address);
+          return {
+            address,
+            profile: profile || null,
+          };
+        })
       );
 
       return {

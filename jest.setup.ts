@@ -137,6 +137,10 @@ jest.mock("@xmtp/react-native-sdk", () => ({
     build: jest.fn(),
     dropClient: jest.fn(),
   },
+  ConversationVersion: {
+    DM: "dm",
+    GROUP: "group",
+  },
   TextCodec: jest.fn().mockImplementation(() => ({
     contentType: "text/plain",
     encode: jest.fn(),

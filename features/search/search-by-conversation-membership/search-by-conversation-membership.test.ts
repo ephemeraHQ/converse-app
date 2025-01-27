@@ -34,7 +34,11 @@ jest.mock("@/queries/useProfileSocialsQuery", () => ({
 }));
 
 jest.mock("@/utils/getReadableProfile", () => ({
-  getReadableProfile: jest.fn().mockReturnValue("User One"),
+  getReadableProfile: (address: string) => {
+    if (address === "0xGroupMember1") return "Group Member";
+    if (address === "0xCurrentUserAddress") return "Current User";
+    return address;
+  },
 }));
 
 // Test fixtures
@@ -233,7 +237,7 @@ describe("searchByConversationMembership", () => {
         groupName: "Test Group",
         groupId: mockGroupTopic,
         groupImageUri: "https://example.com/group.jpg",
-        firstThreeMemberNames: ["User One"],
+        firstThreeMemberNames: ["Current User", "Group Member"],
       },
     ]);
 
@@ -244,11 +248,11 @@ describe("searchByConversationMembership", () => {
 
     expect(result.existingGroupMemberNameSearchResults).toEqual([
       {
-        memberNameFromGroup: "User One",
+        memberNameFromGroup: "Group Member",
         groupName: "Test Group",
         groupId: mockGroupTopic,
         groupImageUri: "https://example.com/group.jpg",
-        firstThreeMemberNames: ["User One"],
+        firstThreeMemberNames: ["Group Member"],
       },
     ]);
 
