@@ -97,6 +97,37 @@ describe("processConversationSearch", () => {
       expect(result.existingGroupMemberNameSearchResults).toEqual([]);
       expect(result.existingGroupNameSearchResults).toEqual([]);
     });
+
+    it("should not match when search query matches current user's profile", () => {
+      const currentUserProfile: IProfileSocials = {
+        address: currentUserAddress,
+        ensNames: [
+          { name: "current.eth", displayName: "Current User", isPrimary: true },
+        ],
+        lensHandles: [],
+        farcasterUsernames: [],
+        unstoppableDomains: [],
+        userNames: [],
+      };
+
+      const conversationWithCurrentUser: SearchableConversation = {
+        ...mockDmConversation,
+        memberProfiles: [
+          { address: currentUserAddress, profile: currentUserProfile },
+          { address: "0xDmUser", profile: mockDmProfile },
+        ],
+      };
+
+      const result = processConversationSearch(
+        [conversationWithCurrentUser],
+        "current.eth", // Search for current user's ENS
+        currentUserAddress
+      );
+
+      expect(result.existingDmSearchResults).toEqual({});
+      expect(result.existingGroupMemberNameSearchResults).toEqual([]);
+      expect(result.existingGroupNameSearchResults).toEqual([]);
+    });
   });
 
   describe("Group name search", () => {
@@ -190,6 +221,38 @@ describe("processConversationSearch", () => {
       expect(
         result.existingGroupMemberNameSearchResults[0].firstThreeMemberNames
       ).toHaveLength(3);
+    });
+
+    it("should not match when search query matches current user's profile in group", () => {
+      const currentUserProfile: IProfileSocials = {
+        address: currentUserAddress,
+        ensNames: [
+          { name: "current.eth", displayName: "Current User", isPrimary: true },
+        ],
+        lensHandles: [],
+        farcasterUsernames: [],
+        unstoppableDomains: [],
+        userNames: [],
+      };
+
+      const groupWithCurrentUser: SearchableConversation = {
+        ...mockGroupConversation,
+        memberProfiles: [
+          { address: currentUserAddress, profile: currentUserProfile },
+          { address: "0xGroupUser1", profile: mockGroupProfile1 },
+          { address: "0xGroupUser2", profile: mockGroupProfile2 },
+        ],
+      };
+
+      const result = processConversationSearch(
+        [groupWithCurrentUser],
+        "current.eth", // Search for current user's ENS
+        currentUserAddress
+      );
+
+      expect(result.existingDmSearchResults).toEqual({});
+      expect(result.existingGroupMemberNameSearchResults).toEqual([]);
+      expect(result.existingGroupNameSearchResults).toEqual([]);
     });
   });
 });

@@ -66,6 +66,10 @@ export async function searchByConversationMembership({
       } satisfies SearchableConversation;
     })
   );
+  logger.info(
+    `[Search] Searchable conversations:`,
+    JSON.stringify(searchableConversations, null, 2)
+  );
 
   return processConversationSearch(
     searchableConversations,

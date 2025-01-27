@@ -5,6 +5,7 @@ import {
 } from "./search-helpers";
 import { getReadableProfile } from "@/utils/getReadableProfile";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
+import logger from "@/utils/logger";
 
 /**
  * Search Processing Rules:
@@ -39,16 +40,47 @@ import { ConversationVersion } from "@xmtp/react-native-sdk";
  * 4. Member Display Rules:
  *    - Member names are converted to readable format using getReadableProfile
  *    - For groups, we limit to 3 visible members maximum
+ *
+ * 5. Current User Exclusion:
+ *    - Exclude matches where the search query matches the current user's profile
+ *    - This prevents showing conversations where the only match is the user themselves
  */
 export function processConversationSearch(
   conversations: SearchableConversation[],
   searchQuery: string,
   currentUserAddress: string
 ): SearchResults {
+  logger.info(
+    `[Search] Processing ${conversations.length} conversations for query: ${searchQuery}`
+  );
   const normalizedQuery = searchQuery.toLowerCase();
+
+  // Find current user's profile to check for self-matches
+  const currentUserProfile = conversations
+    .flatMap((conv) => conv.memberProfiles)
+    .find((member) => member.address === currentUserAddress)?.profile;
+
+  // Check if the search query matches the current user's profile
+  const isCurrentUserMatch =
+    currentUserProfile &&
+    doesMemberProfileMatchQuery(currentUserProfile, normalizedQuery);
+
+  // If the search matches the current user's profile, return empty results
+  if (isCurrentUserMatch) {
+    logger.info(
+      `[Search] Search query matches current user's profile, returning empty results`
+    );
+    return {
+      existingDmSearchResults: {},
+      existingGroupMemberNameSearchResults: [],
+      existingGroupNameSearchResults: [],
+    };
+  }
 
   return conversations.reduce<SearchResults>(
     (acc, conversation) => {
+      logger.info(`[Search] Processing conversation: ${conversation.topic}`);
+
       // Group name matching
       if (
         doesGroupNameMatchQuery(
@@ -57,11 +89,19 @@ export function processConversationSearch(
         ) &&
         !conversation.conversationName?.includes("/proto")
       ) {
+        logger.info(
+          `[Search] Found group name match for: ${conversation.conversationName}`
+        );
+
         // For group name matches, show current user first and up to 2 other members
         const otherMembers = conversation.memberProfiles
           .filter((m) => m.address !== currentUserAddress)
           .slice(0, 2)
           .map((m) => getReadableProfile(m.address));
+
+        logger.info(
+          `[Search] Adding group with ${otherMembers.length} other members to group name results`
+        );
 
         acc.existingGroupNameSearchResults.push({
           groupName: conversation.conversationName || "",
@@ -78,10 +118,21 @@ export function processConversationSearch(
 
       // Member profile matching
       conversation.memberProfiles.forEach((member) => {
-        if (!member.profile) return;
+        if (!member.profile || member.address === currentUserAddress) {
+          logger.info(
+            `[Search] Skipping member ${member.address} - no profile found or is current user`
+          );
+          return;
+        }
 
         if (doesMemberProfileMatchQuery(member.profile, normalizedQuery)) {
+          logger.info(
+            `[Search] Found member profile match for: ${member.address}`
+          );
+
           if (conversation.version === ConversationVersion.GROUP) {
+            logger.info(`[Search] Processing group conversation member match`);
+
             // For member matches, matched member should be first
             const otherMembers = conversation.memberProfiles
               .filter(
@@ -91,6 +142,10 @@ export function processConversationSearch(
               )
               .slice(0, 2)
               .map((m) => getReadableProfile(m.address));
+
+            logger.info(
+              `[Search] Adding group with ${otherMembers.length} other members to member name results`
+            );
 
             acc.existingGroupMemberNameSearchResults.push({
               memberNameFromGroup: getReadableProfile(member.address),
@@ -105,6 +160,9 @@ export function processConversationSearch(
               ],
             });
           } else {
+            logger.info(
+              `[Search] Adding DM conversation match for: ${member.address}`
+            );
             acc.existingDmSearchResults[member.address] = member.profile;
           }
         }
