@@ -160,8 +160,11 @@ export const logoutAccount = async (
     try {
       const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
       await client.dropLocalDatabaseConnection();
+      logger.debug("[Logout] Successfully dropped connection to libxmp db");
       if (dropLocalDatabase) {
         await client.deleteLocalDatabase();
+        logger.debug("[Logout] Successfully deleted libxmp db");
+        // Manual delete database files
         await deleteLibXmtpDatabaseForInboxId(client.inboxId);
       }
     } catch (error) {
@@ -202,6 +205,8 @@ export const logoutAccount = async (
   try {
     apiHeaders = await getXmtpApiHeaders(account);
   } catch (error) {
+    // If we have a broken client we might not be able
+    // to generate the headers
     logger.warn("[Logout] Could not get API headers while logging out", {
       error,
     });
