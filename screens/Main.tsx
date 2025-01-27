@@ -6,21 +6,21 @@ import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { Platform, useColorScheme } from "react-native";
 
-import ActionSheetStateHandler from "../components/StateHandlers/ActionSheetStateHandler";
-import HydrationStateHandler from "../components/StateHandlers/HydrationStateHandler";
-import InitialStateHandler from "../components/StateHandlers/InitialStateHandler";
-import MainIdentityStateHandler from "../components/StateHandlers/MainIdentityStateHandler";
-import NetworkStateHandler from "../components/StateHandlers/NetworkStateHandler";
-import WalletsStateHandler from "../components/StateHandlers/WalletsStateHandler";
-import config from "../config";
-import { useAppStore } from "../data/store/appStore";
-import { useAuthStatus } from "../data/store/authStore";
-import { useSelect } from "../data/store/storeHelpers";
-import { useThemeProvider } from "../theme/useAppTheme";
-import { useAutoConnectExternalWallet } from "../utils/evm/external";
-import { usePrivyAccessToken } from "../utils/evm/privy";
-import { converseNavigatorRef } from "../utils/navigation";
-import { ConversationScreenConfig } from "../features/conversation/conversation.nav";
+import ActionSheetStateHandler from "@components/StateHandlers/ActionSheetStateHandler";
+import HydrationStateHandler from "@components/StateHandlers/HydrationStateHandler";
+import InitialStateHandler from "@components/StateHandlers/InitialStateHandler";
+import MainIdentityStateHandler from "@components/StateHandlers/MainIdentityStateHandler";
+import NetworkStateHandler from "@components/StateHandlers/NetworkStateHandler";
+import WalletsStateHandler from "@components/StateHandlers/WalletsStateHandler";
+import config from "@config";
+import { useAppStore } from "@data/store/appStore";
+import { useAuthStatus } from "@data/store/authStore";
+import { useSelect } from "@data/store/storeHelpers";
+import { useThemeProvider } from "@theme/useAppTheme";
+import { useAutoConnectExternalWallet } from "@utils/evm/external";
+import { usePrivyAccessToken } from "@utils/evm/privy";
+import { converseNavigatorRef } from "@utils/navigation";
+import { ConversationScreenConfig } from "@features/conversation/conversation.nav";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
 import {
   IdleNavigation,
@@ -106,20 +106,33 @@ const NavigationContent = () => {
   //     <NativeStack.Screen name="Examples" component={Examples} />
   //   </NativeStack.Navigator>
   // );
+  logger.debug(
+    `[Navigation] Current auth status: ${authStatus}, splashScreenHidden: ${splashScreenHidden}`
+  );
 
   if (!splashScreenHidden) {
     // TODO: Add a loading screen
+    logger.debug(
+      "[Navigation] Splash screen still visible, showing loading state"
+    );
     return null;
   }
 
   if (authStatus === "idle") {
+    logger.debug("[Navigation] Rendering IdleNavigation");
     return <IdleNavigation />;
   }
 
   if (authStatus === "signedOut") {
+    logger.debug(
+      "[Navigation] Rendering SignedOutNavigation (should show OnboardingWelcomeScreen)"
+    );
     return <SignedOutNavigation />;
   }
 
+  logger.debug(
+    "[Navigation] Rendering SignedInNavigation (should show conversation list)"
+  );
   return <SignedInNavigation />;
 };
 
