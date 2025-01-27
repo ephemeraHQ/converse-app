@@ -29,17 +29,13 @@ permissions:
   id-token: write
 
 jobs:
-  deploy-preview:
+  check-changes:
     runs-on: ubuntu-latest
+    outputs:
+      has_native_changes: ${{ steps.check-changes.outputs.has_native_changes }}
+      commit_message: ${{ steps.commit_msg.outputs.message }}
 
     steps:
-      - name: Check for EXPO_TOKEN
-        run: |
-          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
-            echo "You must provide an EXPO_TOKEN secret"
-            exit 1
-          fi
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -60,6 +56,15 @@ jobs:
             echo "has_native_changes=false" >> $GITHUB_OUTPUT
           fi
 
+  native-build:
+    needs: check-changes
+    if: needs.check-changes.outputs.has_native_changes == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Setup node
         uses: actions/setup-node@v4
         with:
@@ -78,35 +83,53 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      # Version increment and build for preview with native changes
       - name: Increment minor version and build
-        if: steps.check-changes.outputs.has_native_changes == 'true'
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          # Store the current commit hash before version bump
           CURRENT_COMMIT=$(git rev-parse HEAD)
           npm version minor -m "chore: increment minor version [skip ci]"
-          # Push version bump
-          git push https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main --follow-tags
-          # Run preview script and build
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main --follow-tags --force
           node scripts/build/ios/preview.js
           eas build --platform all --profile preview --non-interactive --auto-submit
           npx sentry-expo-upload-sourcemaps dist
-          # Reset to the commit with version bump but without preview script changes
           git reset --hard HEAD~1
-          git push --force https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main
+          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
 
-      # Add rollback step for build failures
       - name: Rollback on build failure
-        if: failure() && steps.check-changes.outputs.has_native_changes == 'true'
+        if: failure()
         run: |
           git reset --hard HEAD~1
-          git push --force-with-lease https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
 
-      # OTA Update for preview (no native changes)
+  ota-update:
+    needs: check-changes
+    if: needs.check-changes.outputs.has_native_changes == 'false'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+        env:
+          SKIP_YARN_COREPACK_CHECK: "1"
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
       - name: Run EAS Update
-        if: steps.check-changes.outputs.has_native_changes == 'false'
         run: |
-          eas update --auto --channel=preview --message "${{ steps.commit_msg.outputs.message }}" --non-interactive
+          eas update --auto --channel=preview --message "${{ needs.check-changes.outputs.commit_message }}" --non-interactive
           npx sentry-expo-upload-sourcemaps dist
