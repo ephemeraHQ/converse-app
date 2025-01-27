@@ -19,6 +19,7 @@ concurrency:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   deploy-production:
@@ -77,10 +78,6 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Update iOS Files
-        # TODO: This should be handled by schemes in the future?
-        run: node scripts/build/ios/production.js
-
       # Create a temporary merge to test deployment safety. If deployment fails,
       # we can cleanly roll back without corrupting production branch history
       - name: Create temporary merge
@@ -112,7 +109,9 @@ jobs:
       # Build new app binary if versions don't match
       - name: Build for production
         if: steps.version-compare.outputs.versions_match == 'false'
-        run: eas build --platform all --profile production --non-interactive
+        run: |
+          node scripts/build/ios/production.js
+          eas build --platform all --profile production --non-interactive --auto-submit
 
       # Upload source maps after build
       - name: Upload source maps after build
@@ -122,7 +121,7 @@ jobs:
       # Deploy OTA update if versions match
       - name: Run EAS Update
         if: steps.version-compare.outputs.versions_match == 'true'
-        run: eas update --auto --profile production --message "${{ steps.commit_msg.outputs.message }}" --non-interactive
+        run: eas update --auto --channel=production --message "${{ steps.commit_msg.outputs.message }}" --non-interactive
 
       # Upload source maps after update
       - name: Upload source maps after update

@@ -26,6 +26,7 @@ concurrency:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   deploy-preview:
@@ -77,27 +78,31 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Update iOS Files
-        # TODO: This should be handled by schemes in the future?
-        run: node scripts/build/ios/preview.js
-
       # Version increment and build for preview with native changes
       - name: Increment minor version and build
         if: steps.check-changes.outputs.has_native_changes == 'true'
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
+          # Store the current commit hash before version bump
+          CURRENT_COMMIT=$(git rev-parse HEAD)
           npm version minor -m "chore: increment minor version [skip ci]"
+          # Push version bump
           git push https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main --follow-tags
-          eas build --platform all --profile preview --non-interactive
+          # Run preview script and build
+          node scripts/build/ios/preview.js
+          eas build --platform all --profile preview --non-interactive --auto-submit
           npx sentry-expo-upload-sourcemaps dist
+          # Reset to the commit with version bump but without preview script changes
+          git reset --hard HEAD~1
+          git push --force https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main
 
       # Add rollback step for build failures
       - name: Rollback on build failure
         if: failure() && steps.check-changes.outputs.has_native_changes == 'true'
         run: |
           git reset --hard HEAD~1
-          git push --force https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main
+          git push --force-with-lease https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
 
       # OTA Update for preview (no native changes)
       - name: Run EAS Update
