@@ -3,9 +3,11 @@
 // require("dotenv").config();
 
 jest.mock("react-native-webview", () => {
-  const { View } = require("react-native");
+  const MockWebView = () => null;
+  MockWebView.defaultProps = {};
   return {
-    WebView: () => View,
+    WebView: MockWebView,
+    default: MockWebView,
   };
 });
 jest.mock("react-native/Libraries/EventEmitter/NativeEventEmitter");
@@ -100,4 +102,92 @@ jest.mock("@/config", () => ({
     apiURI: "https://test.api",
     // Add other config values as needed by tests
   },
+}));
+
+jest.mock("@notifee/react-native", () => ({
+  getInitialNotification: jest.fn(),
+  onBackgroundEvent: jest.fn(),
+  onForegroundEvent: jest.fn(),
+  onNotificationOpenedApp: jest.fn(),
+  onNotification: jest.fn(),
+  onBackgroundNotification: jest.fn(),
+  onForegroundNotification: jest.fn(),
+  onNotificationOpened: jest.fn(),
+}));
+
+jest.mock("@react-native-firebase/app-check", () => {
+  return {
+    firebase: {
+      appCheck: () => ({
+        getLimitedUseToken: jest
+          .fn()
+          .mockResolvedValue({ token: "mock-token" }),
+        getToken: jest.fn().mockResolvedValue({ token: "mock-token" }),
+        newReactNativeFirebaseAppCheckProvider: jest.fn().mockReturnValue({
+          configure: jest.fn(),
+        }),
+        initializeAppCheck: jest.fn(),
+      }),
+    },
+  };
+});
+
+jest.mock("@xmtp/react-native-sdk", () => ({
+  Client: {
+    build: jest.fn(),
+    dropClient: jest.fn(),
+  },
+  TextCodec: jest.fn().mockImplementation(() => ({
+    contentType: "text/plain",
+    encode: jest.fn(),
+    decode: jest.fn(),
+  })),
+  ReactionCodec: jest.fn().mockImplementation(() => ({
+    contentType: "reaction",
+    encode: jest.fn(),
+    decode: jest.fn(),
+  })),
+  ReadReceiptCodec: jest.fn().mockImplementation(() => ({
+    contentType: "receipt",
+    encode: jest.fn(),
+    decode: jest.fn(),
+  })),
+  GroupUpdatedCodec: jest.fn().mockImplementation(() => ({
+    contentType: "group-updated",
+    encode: jest.fn(),
+    decode: jest.fn(),
+  })),
+  ReplyCodec: jest.fn().mockImplementation(() => ({
+    contentType: "reply",
+    encode: jest.fn(),
+    decode: jest.fn(),
+  })),
+  RemoteAttachmentCodec: jest.fn().mockImplementation(() => ({
+    contentType: "remote-attachment",
+    encode: jest.fn(),
+    decode: jest.fn(),
+  })),
+  StaticAttachmentCodec: jest.fn().mockImplementation(() => ({
+    contentType: "static-attachment",
+    encode: jest.fn(),
+    decode: jest.fn(),
+  })),
+}));
+
+jest.mock("@xmtp/content-type-transaction-reference", () => ({
+  TransactionReferenceCodec: jest.fn().mockImplementation(() => ({
+    contentType: "transaction-reference",
+    encode: jest.fn(),
+    decode: jest.fn(),
+  })),
+}));
+
+jest.mock("@privy-io/expo", () => ({
+  usePrivy: jest.fn().mockReturnValue({
+    login: jest.fn(),
+    logout: jest.fn(),
+    authenticated: false,
+    ready: true,
+    user: null,
+  }),
 }));
