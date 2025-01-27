@@ -57,19 +57,44 @@ jobs:
             echo "has_native_changes=false" >> $GITHUB_OUTPUT
           fi
 
-  native-build:
+  bump-version:
     needs: check-changes
     if: needs.check-changes.outputs.has_native_changes == 'true'
     runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.get_version.outputs.new_version }}
 
     steps:
-      - name: Check if PAT_GITHUB is set
-        run: |
-          if [ -z "${{ secrets.PAT_GITHUB }}" ]; then
-            echo "::error::PAT_GITHUB secret is not set. Please add it to repository secrets."
-            exit 1
-          fi
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
 
+      - name: Configure Git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Increment version
+        run: |
+          npm version patch --no-git-tag-version -m "chore: increment patch version [skip ci]"
+
+      - name: Get new version
+        id: get_version
+        run: echo "new_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Push version bump
+        run: |
+          git push https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main --follow-tags
+
+  ios-build:
+    needs: [check-changes, bump-version]
+    if: needs.check-changes.outputs.has_native_changes == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      build_success: ${{ steps.build_status.outputs.success }}
+
+    steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -94,38 +119,91 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Build iOS preview
+        id: build_ios
+        run: node scripts/build/ios/preview.js
+
+      - name: Build and submit to store
+        id: build_status
+        run: |
+          eas build --platform ios --profile preview --non-interactive --auto-submit
+          echo "success=true" >> $GITHUB_OUTPUT
+
+      - name: Upload sourcemaps to Sentry
+        if: steps.build_status.outputs.success == 'true'
+        run: npx sentry-expo-upload-sourcemaps dist
+
+  android-build:
+    needs: [check-changes, bump-version]
+    if: needs.check-changes.outputs.has_native_changes == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      build_success: ${{ steps.build_status.outputs.success }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+        env:
+          SKIP_YARN_COREPACK_CHECK: "1"
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build and submit to store
+        id: build_status
+        run: |
+          eas build --platform android --profile preview --non-interactive --auto-submit
+          echo "success=true" >> $GITHUB_OUTPUT
+
+      - name: Upload sourcemaps to Sentry
+        if: steps.build_status.outputs.success == 'true'
+        run: npx sentry-expo-upload-sourcemaps dist
+
+  handle-build-results:
+    needs: [bump-version, ios-build, android-build]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
+
       - name: Configure Git
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
-      - name: Increment version
+      - name: Handle build results
         run: |
-          npm version minor -m "chore: increment minor version [skip ci]"
-
-      - name: Push version bump
-        run: |
-          git push https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main --follow-tags --force
-
-      - name: Build iOS preview
-        run: node scripts/build/ios/preview.js
-
-      - name: Build and submit to stores
-        run: eas build --platform all --profile preview --non-interactive --auto-submit
-
-      - name: Upload sourcemaps to Sentry
-        run: npx sentry-expo-upload-sourcemaps dist
-
-      - name: Reset iOS preview changes
-        run: |
-          git reset --hard HEAD
-          git push --force https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main
-
-      - name: Rollback on build failure
-        if: failure()
-        run: |
-          git reset --hard HEAD~1
-          git push --force https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main
+          if [[ "${{ needs.ios-build.result }}" == "failure" && "${{ needs.android-build.result }}" == "failure" ]]; then
+            echo "Both builds failed, but keeping version bump for production tracking"
+            echo "Failed platforms: iOS and Android"
+          elif [[ "${{ needs.ios-build.result }}" == "failure" || "${{ needs.android-build.result }}" == "failure" ]]; then
+            echo "One build failed but keeping version bump for production tracking"
+            echo "Failed platform(s):"
+            [[ "${{ needs.ios-build.result }}" == "failure" ]] && echo "- iOS"
+            [[ "${{ needs.android-build.result }}" == "failure" ]] && echo "- Android"
+          else
+            echo "All builds succeeded!"
+          fi
 
   ota-update:
     needs: check-changes

@@ -121,6 +121,8 @@ export default (): ExpoConfig => {
         "WAKE_LOCK",
         "USE_FINGERPRINT",
         "USE_BIOMETRIC",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
       ],
       intentFilters: [
         {
@@ -189,7 +191,6 @@ export default (): ExpoConfig => {
     },
     plugins: [
       [
-        // Configure Android build properties and SDK versions
         "expo-build-properties",
         {
           android: {

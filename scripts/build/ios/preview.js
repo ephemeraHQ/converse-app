@@ -28,6 +28,7 @@
 const fs = require("fs");
 const plist = require("plist");
 const { copyGoogleServiceInfo } = require("../build.utils.js");
+const packageJson = require("../../../package.json");
 
 /**
  * iOS Preview Environment Configuration Script
@@ -73,6 +74,7 @@ const go = async () => {
     "converse-preview",
     "com.converse.preview",
   ];
+  appInfo.CFBundleShortVersionString = packageJson.version;
   const newAppInfo = plist.build(appInfo);
   fs.writeFileSync(PLIST_APP_PATH, newAppInfo, "utf-8");
 
