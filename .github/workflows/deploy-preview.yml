@@ -78,6 +78,9 @@ jobs:
       - name: Increment version
         run: |
           npm version patch --no-git-tag-version -m "chore: increment patch version [skip ci]"
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          git add package.json
+          git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]"
 
       - name: Get new version
         id: get_version
@@ -85,7 +88,7 @@ jobs:
 
       - name: Push version bump
         run: |
-          git push https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main --follow-tags
+          git push https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main
 
   ios-build:
     needs: [check-changes, bump-version]

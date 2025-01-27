@@ -14457,7 +14457,7 @@ __metadata:
     expo-application: "npm:~6.0.2"
     expo-asset: "npm:~11.0.1"
     expo-background-fetch: "npm:~13.0.3"
-    expo-blur: "npm:~14.0.1"
+    expo-blur: "npm:^14.0.3"
     expo-build-properties: "npm:~0.13.1"
     expo-clipboard: "npm:~7.0.0"
     expo-constants: "npm:~17.0.4"
@@ -17169,14 +17169,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-blur@npm:~14.0.1":
-  version: 14.0.1
-  resolution: "expo-blur@npm:14.0.1"
+"expo-blur@npm:^14.0.3":
+  version: 14.0.3
+  resolution: "expo-blur@npm:14.0.3"
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 10c0/c4e72872efbf8c58f1731926690157a9dd64a08eb5e5c10f0bb5dc88be357e9ab1207f89a0d1a837caaa315bd289ad4a6b69b9314851473636833209eeca0922
+  checksum: 10c0/fa511f6a2cf893a6b9fe2baac121e34655f5f10d7fb9fbcee1482acd9c30436bdfcb8ad0587bff65bef5cf7b7dfaf740e4c771cdd0d956e92df0ddf39173631e
   languageName: node
   linkType: hard
 
