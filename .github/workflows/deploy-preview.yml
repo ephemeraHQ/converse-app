@@ -62,8 +62,8 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Update iOS Files
-          # TODO: This should be handled by schemes in the future?
-          run: node scripts/build/ios/preview.js
+        # TODO: This should be handled by schemes in the future?
+        run: node scripts/build/ios/preview.js
 
       # Version increment and build for preview with native changes
       - name: Increment minor version and build
