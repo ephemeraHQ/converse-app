@@ -12,7 +12,6 @@ export const lightPalette = {
   light: "#FFFFFF",
   light98: "#FAFAFA",
   light96: "#F5F5F5",
-  light90: "#EBEBEB",
   light60: "#999999",
   light30: "#4D4D4D",
   light15: "#333333",
@@ -20,6 +19,7 @@ export const lightPalette = {
   light4: "#0A0A0A",
   light2: "#050505",
 
+  alpha90: "rgba(255, 255, 255, 0.90)",
   alpha60: "rgba(255, 255, 255, 0.60)",
   alpha15: "rgba(255, 255, 255, 0.15)",
   alpha8: "rgba(255, 255, 255, 0.08)",
@@ -39,8 +39,7 @@ export const darkPalette = {
   green: "#34C759",
 
   dark: "#000000",
-  dark96: "#141414",
-  dark90: "#1A1A1A",
+  dark92: "#141414",
   dark85: "#262626",
   dark60: "#666666",
   dark30: "#B2B2B2",
@@ -49,6 +48,7 @@ export const darkPalette = {
   dark4: "#F5F5F5",
   dark2: "#FAFAFA",
 
+  alpha90: "rgba(0, 0, 0, 0.90)",
   alpha60: "rgba(0, 0, 0, 0.60)",
   alpha15: "rgba(0, 0, 0, 0.15)",
   alpha8: "rgba(0, 0, 0, 0.08)",
