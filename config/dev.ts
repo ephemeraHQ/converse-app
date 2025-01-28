@@ -1,38 +1,9 @@
 import { IConfig } from "@/config/config.types";
-import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { shared } from "./shared";
 
-function maybeReplaceLocalhost(uri: string) {
-  try {
-    if (uri?.includes("localhost")) {
-      console.info("Replacing localhost with device-accessible IP");
-      // Try Expo host info first
-      const hostIp = Constants.expoConfig?.hostUri?.split(":")[0];
-      console.info("Host IP", { hostIp });
-
-      if (hostIp) {
-        console.info("Replacing localhost with device-accessible IP", {
-          uri,
-          hostIp,
-        });
-        return uri.replace("localhost", hostIp);
-      }
-    }
-  } catch (error) {
-    console.error("Error replacing localhost with device-accessible IP", error);
-  }
-
-  return uri;
-}
-
 export const devConfig: IConfig = {
   ...shared,
-  xmtpEnv: (process.env.EXPO_PUBLIC_DEV_XMTP_ENV ||
-    "dev") as IConfig["xmtpEnv"],
-  apiURI: maybeReplaceLocalhost(
-    process.env.EXPO_PUBLIC_DEV_API_URI || "http://localhost:9875"
-  ),
   debugMenu: true,
   bundleId: "com.converse.dev",
   appleAppGroup: "group.com.converse.dev",

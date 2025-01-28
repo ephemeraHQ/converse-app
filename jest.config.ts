@@ -52,7 +52,7 @@ const config: Config = {
        * the environment variables (for example, in utils/api.ts).
        *
        * Without this, environment variables accessed via normal syntax,
-       * (for example, `process.env.EXPO_PUBLIC_DEV_API_URI`) would be
+       * (for example, `process.env.EXPO_PUBLIC_API_URI`) would be
        * undefined in the test environment.
        *
        * @see https://github.com/expo/expo/issues/26513#issuecomment-1989035903

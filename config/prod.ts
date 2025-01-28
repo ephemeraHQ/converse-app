@@ -4,8 +4,6 @@ import { shared } from "./shared";
 
 export const prodConfig: IConfig = {
   ...shared,
-  xmtpEnv: "production" as const,
-  apiURI: "https://backend-prod.converse.xyz",
   bundleId:
     Platform.OS === "android" ? "com.converse.prod" : "com.converse.native",
   appleAppGroup: "group.com.converse.native",

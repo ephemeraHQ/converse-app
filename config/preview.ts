@@ -3,8 +3,6 @@ import { shared } from "./shared";
 
 export const previewConfig: IConfig = {
   ...shared,
-  xmtpEnv: "dev" as const,
-  apiURI: "https://backend-staging.converse.xyz",
   debugMenu: true,
   bundleId: "com.converse.preview",
   appleAppGroup: "group.com.converse.preview",

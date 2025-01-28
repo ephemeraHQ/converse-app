@@ -1,4 +1,28 @@
 import { IConfig, ILoggerColorScheme } from "@/config/config.types";
+import Constants from "expo-constants";
+
+function maybeReplaceLocalhost(uri: string) {
+  try {
+    if (uri?.includes("localhost")) {
+      console.info("Replacing localhost with device-accessible IP");
+      // Try Expo host info first
+      const hostIp = Constants.expoConfig?.hostUri?.split(":")[0];
+      console.info("Host IP", { hostIp });
+
+      if (hostIp) {
+        console.info("Replacing localhost with device-accessible IP", {
+          uri,
+          hostIp,
+        });
+        return uri.replace("localhost", hostIp);
+      }
+    }
+  } catch (error) {
+    console.error("Error replacing localhost with device-accessible IP", error);
+  }
+
+  return uri;
+}
 
 // Base configuration shared across all environments
 export const shared = {
@@ -6,12 +30,13 @@ export const shared = {
     (process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME as ILoggerColorScheme) ||
     "light",
   debugMenu: false,
+  xmtpEnv: (process.env.EXPO_PUBLIC_XMTP_ENV || "dev") as IConfig["xmtpEnv"],
+  apiURI: maybeReplaceLocalhost(process.env.EXPO_PUBLIC_API_URI),
   debugAddresses:
     process.env.EXPO_PUBLIC_DEBUG_ADDRESSES?.toLowerCase().split(",") || [],
   lensApiDomain: "api.lens.dev",
   lensSuffix: ".lens",
-  sentryDSN:
-    "https://fb7c7cbf876644b68a05db08623c8369@o4504757119680512.ingest.sentry.io/4504757120729088",
+  sentryDSN: process.env.EXPO_PUBLIC_SENTRY_DSN,
   framesAllowedSchemes: ["http", "https", "ethereum"],
   walletConnectConfig: {
     projectId: process.env.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID,

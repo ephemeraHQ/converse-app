@@ -1,21 +1,24 @@
+import Constants from "expo-constants";
+
 export const Environments = {
-  dev: "dev",
+  development: "development",
   preview: "preview",
-  prod: "prod",
+  production: "production",
 } as const;
 
 export type Environment = (typeof Environments)[keyof typeof Environments];
 
 export const getEnv = (): Environment => {
-  if (__DEV__ || process.env.EXPO_ENV === "dev") {
-    return Environments.dev;
-  } else if (process.env.EXPO_ENV === "preview") {
+  const expoEnv = Constants.expoConfig?.extra?.expoEnv as Environment;
+  if (__DEV__ || expoEnv === "development") {
+    return Environments.development;
+  } else if (expoEnv === "preview") {
     return Environments.preview;
   } else {
-    return Environments.prod;
+    return Environments.production;
   }
 };
 
-export const isDev = getEnv() === Environments.dev;
-export const isProd = getEnv() === Environments.prod;
+export const isDev = getEnv() === Environments.development;
+export const isProd = getEnv() === Environments.production;
 export const isPreview = getEnv() === Environments.preview;

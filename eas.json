@@ -20,18 +20,12 @@
       "developmentClient": true,
       "distribution": "internal",
       "channel": "development",
-      "environment": "development",
-      "env": {
-        "EXPO_ENV": "development"
-      }
+      "environment": "development"
     },
     "preview": {
       "extends": "_shared",
       "channel": "preview",
-      "environment": "preview",
-      "env": {
-        "EXPO_ENV": "preview"
-      }
+      "environment": "preview"
     },
     "production": {
       "extends": "_shared",
@@ -39,9 +33,6 @@
       "environment": "production",
       "android": {
         "buildType": "app-bundle"
-      },
-      "env": {
-        "EXPO_ENV": "production"
       }
     }
   },
