@@ -1,4 +1,5 @@
 import { ObjectTyped } from "@utils/objectTyped";
+import logger from "@utils/logger";
 
 export const contentTypesPrefixes = {
   text: "xmtp.org/text:",
@@ -26,8 +27,15 @@ export function isContentType(args: {
   return contentType.startsWith(prefix);
 }
 
-export function getMessageContentType(contentType: string) {
-  return ObjectTyped.keys(contentTypesPrefixes).find((key) =>
+export function getMessageContentType(contentType: string | undefined) {
+  if (!contentType) {
+    logger.info("[getMessageContentType] Content type is undefined");
+    return undefined;
+  }
+
+  const result = ObjectTyped.keys(contentTypesPrefixes).find((key) =>
     contentType.startsWith(contentTypesPrefixes[key])
   )!;
+
+  return result;
 }

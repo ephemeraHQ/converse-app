@@ -31,22 +31,43 @@ import {
 } from "@xmtp/react-native-sdk";
 import emojiRegex from "emoji-regex";
 import { useCurrentConversationTopic } from "../conversation.store-context";
+import logger from "@/utils/logger";
 
 export function isAnActualMessage(
   message: DecodedMessageWithCodecsType
 ): message is DecodedMessage<TextCodec> {
-  return !isReadReceiptMessage(message) && !isGroupUpdatedMessage(message);
+  logger.debug("[isAnActualMessage] Checking if message is actual message", {
+    messageId: message.id,
+    contentTypeId: message.contentTypeId,
+  });
+  const result =
+    !isReadReceiptMessage(message) && !isGroupUpdatedMessage(message);
+  logger.debug("[isAnActualMessage] Result", { result });
+  return result;
 }
 
 export function isTextMessage(
   message: DecodedMessageWithCodecsType
 ): message is DecodedMessage<TextCodec> {
-  return getMessageContentType(message.contentTypeId) === "text";
+  logger.debug("[isTextMessage] Checking if message is text message", {
+    messageId: message.id,
+    contentTypeId: message.contentTypeId,
+  });
+  const result = getMessageContentType(message.contentTypeId) === "text";
+  logger.debug("[isTextMessage] Result", { result });
+  return result;
 }
+
 export function isReactionMessage(
   message: DecodedMessageWithCodecsType
 ): message is DecodedMessage<ReactionCodec> {
-  return getMessageContentType(message.contentTypeId) === "reaction";
+  // logger.debug("[isReactionMessage] Checking if message is reaction message", {
+  //   messageId: message.id,
+  //   contentTypeId: message.contentTypeId,
+  // });
+  const result = getMessageContentType(message.contentTypeId) === "reaction";
+  // logger.debug("[isReactionMessage] Result", { result });
+  return result;
 }
 export function isReadReceiptMessage(
   message: DecodedMessageWithCodecsType

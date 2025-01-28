@@ -45,6 +45,8 @@ import logger from "@/utils/logger";
 import { prefixStringWithV3TopicPrefix } from "@/utils/groupUtils/groupId";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 import { sendMessage } from "../conversation/hooks/use-send-message";
+import { GroupParams } from "@xmtp/react-native-sdk/build/lib/Group";
+import { DmParams } from "@xmtp/react-native-sdk/build/lib/Dm";
 
 export type ISendMessageParams = {
   topic: ConversationTopic;
@@ -211,47 +213,42 @@ export function useOptimisticSendFirstMessage({
         }
       );
 
-      const tempConversation = isGroup
-        ? ({
-            topic: tempTopic as unknown as ConversationTopic,
-            name: "Group",
-            members: async () => [],
-            clientInstallationId: "" as unknown as InstallationId,
-            id: "" as unknown as ConversationId,
-            createdAt: 0,
-            version: 0 as unknown as ConversationVersion,
-            lastMessage: undefined,
-            isGroupActive: true,
-            addedByInboxId: currentAccount,
-            imageUrlSquare: null,
-            description: null,
-            state: "active",
-            memberInboxIds: members,
-            creatorInboxId: currentAccount,
-            groupCreatorId: () => currentAccount,
-            send: async () => "" as MessageId,
-            isReady: true,
-            canMessage: true,
-            canEdit: true,
-            conversationId: "" as ConversationId,
-            context: {},
-            contentTypeCodecs: {} as SupportedCodecsType,
-            keyMaterial: new Uint8Array(),
-            invite: async () => {},
-            leave: async () => {},
-            block: async () => {},
-            unblock: async () => {},
-          } as unknown as Group<SupportedCodecsType>)
-        : ({
-            topic: tempTopic as unknown as ConversationTopic,
-            name: "DM",
-            members: async () => [],
-            clientInstallationId: "" as unknown as InstallationId,
-            id: "" as unknown as ConversationId,
-            createdAt: 0,
-            version: 0 as unknown as ConversationVersion,
-            lastMessage: undefined,
-          } as unknown as Dm<SupportedCodecsType>);
+      const groupParams: GroupParams = {
+        id: "" as unknown as ConversationId,
+        createdAt: 0,
+        topic: tempTopic as unknown as ConversationTopic,
+        name: "Group",
+        isActive: true,
+        addedByInboxId: currentAccount,
+        imageUrlSquare: "imageurl",
+        description: "description",
+        consentState: "allowed",
+      };
+
+      const group = new Group(
+        "" as unknown as InstallationId,
+        groupParams,
+        undefined
+      );
+
+      const dmParams: DmParams = {
+        id: "" as unknown as ConversationId,
+        createdAt: 0,
+        topic: tempTopic as unknown as ConversationTopic,
+        consentState: "allowed",
+      };
+
+      const dm = new Dm("" as unknown as InstallationId, dmParams, undefined);
+
+      const tempConversation = isGroup ? group : dm;
+
+      logger.info(
+        "[send-optimistic][createConversation] Adding temporary conversation to query",
+        {
+          topic: tempConversation.topic,
+          type: isGroup ? "group" : "dm",
+        }
+      );
 
       logger.info(
         "[send-optimistic][createConversation] Adding temporary conversation to query",
@@ -345,19 +342,16 @@ export function useOptimisticSendFirstMessage({
 
       const generatedMessageId = getRandomId();
 
-      const optimisticMessage: DecodedMessage = {
+      const optimisticMessage = DecodedMessage.fromObject({
         id: generatedMessageId as MessageId,
-        // @ts-expect-error we are doing this on purpose for optimstic message
-        tempOptimisticId: generatedMessageId,
+        topic: tempTopic as unknown as ConversationTopic,
         contentTypeId: contentTypesPrefixes.text,
-        sentNs: getTodayNs(),
-        fallback: "new-message",
-        deliveryStatus: "sending" as MessageDeliveryStatus,
-        topic: tempTopic as unknown as ConversationTopic, // Safe cast since this is temporary
         senderInboxId: currentAccount,
-        nativeContent: {},
-        content: () => variables.content.text,
-      };
+        sentNs: getTodayNs(),
+        content: { text: variables.content.text },
+        fallback: variables.content.text,
+        deliveryStatus: "sending" as MessageDeliveryStatus,
+      });
 
       logger.info(
         "[send-optimistic][sendMessageAsync] Created optimistic message",
@@ -391,7 +385,13 @@ export function useOptimisticSendFirstMessage({
           realMessage: {
             id: messageId,
             content: () => variables.content.text,
-            // ... other required message properties
+            contentTypeId: contentTypesPrefixes.text,
+            sentNs: getTodayNs(),
+            fallback: "new-message",
+            deliveryStatus: "sent" as MessageDeliveryStatus,
+            topic: context.tempTopic as unknown as ConversationTopic,
+            senderInboxId: currentAccount,
+            nativeContent: { text: variables.content.text },
           } as DecodedMessage,
         });
       }

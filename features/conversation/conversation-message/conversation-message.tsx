@@ -16,12 +16,20 @@ import {
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { memo } from "react";
+import logger from "@/utils/logger";
 
 export const ConversationMessage = memo(
   function ConversationMessage(props: {
     message: DecodedMessageWithCodecsType;
   }) {
     const { message } = props;
+
+    logger.info("[ConversationMessage] Rendering message", {
+      messageId: message.id,
+      contentTypeId: message.contentTypeId,
+      content: message.content?.(),
+      deliveryStatus: message.deliveryStatus,
+    });
 
     if (isTextMessage(message)) {
       return <MessageSimpleText message={message} />;

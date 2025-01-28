@@ -103,7 +103,7 @@ export const Conversation = memo(function Conversation(props: {
     account: currentAccount,
     topic,
     caller: "Conversation screen",
-    // optimistic,
+    optimistic,
   });
   logger.info("[Conversation] Conversation query", {
     optimistic,
@@ -197,11 +197,27 @@ const ComposerWrapper = memo(function ComposerWrapper(props: {
       <ReplyPreview />
       <ConversationComposer
         onSend={async ({ referencedMessageId, content }) => {
-          return sendMessage({
+          logger.info("[ConversationComposer] Sending message", {
+            referencedMessageId: referencedMessageId ?? "none",
+            hasText: !!content.text,
+            hasAttachment: !!content.remoteAttachment,
             topic: conversation.topic,
-            referencedMessageId,
-            content,
           });
+
+          try {
+            await sendMessage({
+              topic: conversation.topic,
+              referencedMessageId,
+              content,
+            });
+
+            logger.info("[ConversationComposer] Message sent successfully", {});
+          } catch (error) {
+            logger.error("[ConversationComposer] Failed to send message", {
+              error,
+            });
+            throw error;
+          }
         }}
       />
     </ConversationComposerContainer>
@@ -229,6 +245,11 @@ const Messages = memo(function Messages(props: {
     topic,
     caller: "Conversation Messages",
   });
+  logger.info("[Messages] Conversation messages query", {
+    messages: messages?.ids.map((id) =>
+      JSON.parse(JSON.stringify(messages?.byId[id], null, 2))
+    ),
+  });
 
   // For now we want to make sure we don't miss any messages.
   // If we do things correctly we shouldn't really need this but it's a protection for now.
@@ -245,12 +266,31 @@ const Messages = memo(function Messages(props: {
   });
 
   const latestMessageIdByCurrentUser = useMemo(() => {
+    logger.debug("[Messages] Finding latest message by current user", {
+      hasMessages: !!messages?.ids,
+      currentAccountInboxId,
+    });
+
     if (!messages?.ids) return -1;
-    return messages.ids.find(
+
+    const messageId = messages.ids.find(
       (messageId) =>
         isAnActualMessage(messages.byId[messageId]) &&
         messages.byId[messageId].senderInboxId === currentAccountInboxId
     );
+
+    logger.debug("[Messages] Found latest message by current user", {
+      messageId: messageId ?? "none",
+      message:
+        // JSON.stringify(
+
+        messages.byId[messageId ?? ""].nativeContent.text,
+      // null,
+      // 2
+      // ),
+    });
+
+    return messageId;
   }, [messages?.ids, messages?.byId, currentAccountInboxId]);
 
   const { isUnread } = useConversationIsUnread({
@@ -323,7 +363,14 @@ const Messages = memo(function Messages(props: {
             previousMessage={previousMessage}
             nextMessage={nextMessage}
             isLatestMessageSentByCurrentUser={
-              latestMessageIdByCurrentUser === message.id
+              (logger.debug(
+                "[Messages] Checking if latest message is sent by current user",
+                {
+                  latestMessageIdByCurrentUser: latestMessageIdByCurrentUser,
+                  messageId: message.id,
+                }
+              ),
+              latestMessageIdByCurrentUser === message.id)
             }
             animateEntering={
               index === 0 &&
