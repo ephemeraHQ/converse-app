@@ -71,6 +71,10 @@ LogBox.ignoreLogs([
   "Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API.",
 ]);
 
+if (__DEV__) {
+  require("./ReactotronConfig.ts");
+}
+
 // This is the default configuration
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,

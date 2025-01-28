@@ -147,6 +147,7 @@ export function CreateConversationScreen({
         });
         navigation.replace("Conversation", {
           topic: tempTopic! as ConversationTopic,
+          optimistic: true,
         });
       }
     } else {
@@ -163,6 +164,7 @@ export function CreateConversationScreen({
         });
         navigation.replace("Conversation", {
           topic: tempTopic! as ConversationTopic,
+          optimistic: true,
         });
       }
     }

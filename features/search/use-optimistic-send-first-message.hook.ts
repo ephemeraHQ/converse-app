@@ -1,8 +1,6 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import {
   addConversationMessageQuery,
-  getConversationMessagesQueryOptions,
-  refetchConversationMessages,
   replaceOptimisticMessageWithReal,
 } from "@/queries/use-conversation-messages-query";
 import { captureErrorWithToast } from "@/utils/capture-error";
@@ -18,6 +16,8 @@ import {
   MessageId,
   RemoteAttachmentContent,
   Group,
+  ConversationId,
+  ConversationVersion,
 } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 import {
@@ -29,11 +29,7 @@ import {
   createGroupWithDefaultsByAccount,
   createConversationByAccount,
 } from "@/utils/xmtpRN/conversations";
-import {
-  addConversationToConversationsQuery,
-  getConversationsQueryOptions,
-  removeConversationFromConversationsQuery,
-} from "@/queries/use-conversations-query";
+import { addConversationToConversationsQuery } from "@/queries/use-conversations-query";
 import { setDmQueryData } from "@/queries/useDmQuery";
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { sentryTrackError } from "@/utils/sentry";
@@ -46,8 +42,9 @@ import {
   conversationsQueryKey,
 } from "@/queries/QueryKeys";
 import { queryClient } from "@/queries/queryClient";
-import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
 import logger from "@/utils/logger";
+import { prefixStringWithV3TopicPrefix } from "@/utils/groupUtils/groupId";
+import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 
 export type ISendMessageParams = {
   topic: ConversationTopic;
@@ -137,16 +134,21 @@ type SendMessageMutationContext = {
 export function useOptimisticSendFirstMessage({
   members,
 }: IUseOptimisticSendFirstMessageParams) {
+  members = members.map((member) => member.toLowerCase());
   const currentAccount = getCurrentAccount()!;
   const isGroup = members.length > 1;
 
   const tempTopic = generateGroupHashFromMemberIds(members);
+  const v3TempTopic = tempTopic
+    ? prefixStringWithV3TopicPrefix(tempTopic)
+    : undefined;
 
   logger.info("[send-optimistic][useOptimisticSendFirstMessage] Initialized", {
     members: JSON.stringify(members, null, 2),
     isGroup,
     tempTopic,
-    currentAccount,
+    v3TempTopic,
+    currentAccount: JSON.stringify(currentAccount, null, 2),
   });
 
   const {
@@ -205,6 +207,76 @@ export function useOptimisticSendFirstMessage({
 
       return conversation;
     },
+    onMutate: () => {
+      logger.info(
+        "[send-optimistic][createConversation] Preparing optimistic update",
+        {
+          members: JSON.stringify(members, null, 2),
+        }
+      );
+      logger.info(
+        "[send-optimistic][createConversation] Creating temporary conversation",
+        {
+          isGroup,
+          tempTopic,
+          members: JSON.stringify(members, null, 2),
+        }
+      );
+
+      const tempConversation = isGroup
+        ? ({
+            topic: tempTopic! as unknown as ConversationTopic,
+            name: "Group",
+            members: async () => [],
+            clientInstallationId: "" as unknown as InstallationId,
+            id: "" as unknown as ConversationId,
+            createdAt: 0,
+            version: 0 as unknown as ConversationVersion,
+            lastMessage: undefined,
+            isGroupActive: true,
+            addedByInboxId: currentAccount,
+            imageUrlSquare: null,
+            description: null,
+            state: "active",
+            memberInboxIds: members,
+            creatorInboxId: currentAccount,
+            send: async () => "" as MessageId,
+            isReady: true,
+            canMessage: true,
+            canEdit: true,
+            conversationId: "" as ConversationId,
+            context: {},
+            contentTypeCodecs: {} as SupportedCodecsType,
+            keyMaterial: new Uint8Array(),
+            invite: async () => {},
+            leave: async () => {},
+            block: async () => {},
+            unblock: async () => {},
+          } as unknown as Group<SupportedCodecsType>)
+        : ({
+            topic: tempTopic! as unknown as ConversationTopic,
+            name: "DM",
+            members: async () => [],
+            clientInstallationId: "" as unknown as InstallationId,
+            id: "" as unknown as ConversationId,
+            createdAt: 0,
+            version: 0 as unknown as ConversationVersion,
+            lastMessage: undefined,
+          } as unknown as Dm<SupportedCodecsType>);
+
+      logger.info(
+        "[send-optimistic][createConversation] Adding temporary conversation to query",
+        {
+          topic: tempConversation.topic,
+          type: isGroup ? "group" : "dm",
+        }
+      );
+
+      addConversationToConversationsQuery({
+        account: currentAccount,
+        conversation: tempConversation,
+      });
+    },
     onSuccess: (newConversation) => {
       logger.info(
         "[send-optimistic][createConversation] Processing successful creation",
@@ -218,11 +290,11 @@ export function useOptimisticSendFirstMessage({
         conversation: newConversation,
       });
 
-      replaceOptimisticConversationWithReal({
-        account: currentAccount,
-        tempTopic: tempTopic!,
-        realTopic: newConversation.topic,
-      });
+      //   replaceOptimisticConversationWithReal({
+      //     account: currentAccount,
+      //     tempTopic: tempTopic!,
+      //     realTopic: newConversation.topic,
+      //   });
 
       if (!isGroup) {
         logger.info(
@@ -328,7 +400,7 @@ export function useOptimisticSendFirstMessage({
       logger.error(
         "[send-optimistic][sendMessageAsync] Error sending message",
         {
-          error,
+          error: JSON.stringify(error, null, 2),
           context: JSON.stringify(context, null, 2),
         }
       );
@@ -362,7 +434,7 @@ export function useOptimisticSendFirstMessage({
       try {
         await sendMessageAsync({
           content: params.content,
-          conversationTopic: tempTopic,
+          conversationTopic: tempTopic!,
         });
         logger.info(
           "[send-optimistic][sendMessageCallback] Message sent successfully"
@@ -371,7 +443,9 @@ export function useOptimisticSendFirstMessage({
       } catch (error) {
         logger.error(
           "[send-optimistic][sendMessageCallback] Failed to send message",
-          error
+          {
+            error: JSON.stringify(error, null, 2),
+          }
         );
         showSnackbar({
           message: isGroup
@@ -386,7 +460,7 @@ export function useOptimisticSendFirstMessage({
 
   return {
     sendMessage: sendMessageCallback,
-    tempTopic,
+    tempTopic: v3TempTopic,
     isLoading: isPending,
     isError,
   };

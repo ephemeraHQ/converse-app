@@ -13,6 +13,7 @@ export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
 type IGetConversationArgs = {
   account: string;
   topic: ConversationTopic;
+  optimistic?: boolean;
 };
 
 async function getConversation(args: IGetConversationArgs) {
@@ -44,6 +45,12 @@ async function getConversation(args: IGetConversationArgs) {
     conversation = await client.conversations.findConversationByTopic(topic);
     if (!conversation) {
       throw new Error(`Conversation ${topic} not found`);
+      // query data cannot be undefined
+      // logger.warn(`[useConversationQuery] Conversation ${topic} not found`, {
+      //   account,
+      //   topic,
+      // });
+      // return undefined;
     }
     await conversation.sync();
   }
@@ -74,16 +81,17 @@ export function getConversationQueryOptions(
   args: IGetConversationArgs & {
     // Optional because some react query function will never trigger the queryFn anyway
     caller?: string;
+    optimistic?: boolean;
   }
 ) {
-  const { account, topic, caller } = args;
+  const { account, topic, caller, optimistic } = args;
   return queryOptions({
     meta: {
       caller,
     },
     queryKey: conversationQueryKey(account, topic),
     queryFn: () => getConversation({ account, topic }),
-    enabled: !!topic && !!account,
+    enabled: !!topic && !!account && !optimistic,
   });
 }
 

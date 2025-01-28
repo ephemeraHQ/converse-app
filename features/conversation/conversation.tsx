@@ -81,23 +81,36 @@ import {
   ConversationStoreProvider,
   useCurrentConversationTopic,
 } from "./conversation.store-context";
+import logger from "@/utils/logger";
 
 export const Conversation = memo(function Conversation(props: {
   topic: ConversationTopic;
   textPrefill?: string;
+  optimistic?: boolean;
 }) {
-  const { topic, textPrefill = "" } = props;
+  const { topic, optimistic, textPrefill = "" } = props;
 
   const currentAccount = useCurrentAccount()!;
 
   const navigation = useRouter();
 
-  const { data: conversation, isLoading: isLoadingConversation } =
-    useConversationQuery({
-      account: currentAccount,
-      topic,
-      caller: "Conversation screen",
-    });
+  const {
+    data: conversation,
+    isLoading: isLoadingConversation,
+    status,
+    fetchStatus,
+  } = useConversationQuery({
+    account: currentAccount,
+    topic,
+    caller: "Conversation screen",
+    optimistic,
+  });
+  logger.info("[Conversation] Conversation query", {
+    optimistic,
+    status,
+    fetchStatus,
+    conversation: JSON.stringify(conversation, null, 2),
+  });
 
   useHeader({
     onBack: () => navigation.goBack(),

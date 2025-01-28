@@ -12,6 +12,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { isV3Topic } from "@utils/groupUtils/groupId";
 import React, { memo } from "react";
 import { NavigationParamList } from "../../screens/Navigation/Navigation";
+import logger from "@/utils/logger";
 
 type IConversationScreenProps = NativeStackScreenProps<
   NavigationParamList,
@@ -20,10 +21,19 @@ type IConversationScreenProps = NativeStackScreenProps<
 
 export function ConversationScreen(args: IConversationScreenProps) {
   const { route } = args;
-  const { peer, topic, text } = route.params || {};
+  const { peer, topic, text, optimistic } = route.params || {};
+
+  logger.info("[ConversationScreen] Rendering conversation screen", {
+    peer,
+    topic,
+    text,
+    optimistic,
+  });
 
   if (!peer && !topic) {
-    captureError(new Error("No peer or topic found in ConversationScreen"));
+    const error = new Error("No peer or topic found in ConversationScreen");
+    logger.error("[ConversationScreen] Missing required parameters", error);
+    captureError(error);
     return (
       <Screen contentContainerStyle={{ flex: 1 }}>
         <VStack />
@@ -31,10 +41,18 @@ export function ConversationScreen(args: IConversationScreenProps) {
     );
   }
 
+  logger.info("[ConversationScreen] Rendering appropriate conversation view", {
+    isV3Topic: topic ? isV3Topic(topic) : false,
+  });
+
   return (
     <Screen contentContainerStyle={{ flex: 1 }}>
       {topic && isV3Topic(topic) ? (
-        <Conversation topic={topic} textPrefill={text} />
+        <Conversation
+          topic={topic}
+          textPrefill={text}
+          optimistic={optimistic}
+        />
       ) : (
         <PeerAddressFlow peerAddress={peer!} textPrefill={text} />
       )}
@@ -53,18 +71,32 @@ const PeerAddressFlow = memo(function PeerAddressFlow(
   const { peerAddress, textPrefill } = args;
   const currentAccount = useCurrentAccount()!;
 
+  logger.info("[ConversationScreen][PeerAddressFlow] Initializing", {
+    peerAddress,
+    textPrefill,
+    currentAccount,
+  });
+
   const { data: dmConversation, isLoading } = useDmQuery({
     account: currentAccount,
     peer: peerAddress,
   });
 
   if (isLoading) {
+    logger.info(
+      "[ConversationScreen][PeerAddressFlow] Loading DM conversation"
+    );
     return (
       <Center style={$globalStyles.flex1}>
         <Loader />
       </Center>
     );
   }
+
+  logger.info("[ConversationScreen][PeerAddressFlow] DM conversation loaded", {
+    hasTopic: !!dmConversation?.topic,
+    topic: dmConversation?.topic,
+  });
 
   if (dmConversation?.topic) {
     return (
