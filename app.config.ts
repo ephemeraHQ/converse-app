@@ -1,6 +1,8 @@
 import { ExpoConfig } from "expo/config";
 import { version } from "./package.json";
 
+type Environment = "development" | "preview" | "production";
+
 type EnvironmentConfig = {
   scheme: string;
   androidPackage: string;
@@ -17,8 +19,6 @@ type EnvironmentConfig = {
     googleServicesFile: string;
   };
 };
-
-type Environment = "development" | "preview" | "production";
 
 const settings: Record<Environment, EnvironmentConfig> = {
   development: {
@@ -76,8 +76,8 @@ const settings: Record<Environment, EnvironmentConfig> = {
 
 // eslint-disable-next-line import/no-default-export
 export default (): ExpoConfig => {
-  const environment = (process.env.EXPO_ENV || "development") as Environment;
-  const config = settings[environment];
+  const expoEnv = (process.env.EXPO_ENV || "development") as Environment;
+  const config = settings[expoEnv];
 
   return {
     name: config.appName,
@@ -102,6 +102,7 @@ export default (): ExpoConfig => {
       },
     },
     extra: {
+      expoEnv,
       eas: {
         projectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
       },
