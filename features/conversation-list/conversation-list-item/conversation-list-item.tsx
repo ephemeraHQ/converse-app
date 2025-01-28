@@ -114,6 +114,6 @@ const $placeholder: ThemedStyle<ViewStyle> = ({ colors }) => ({
 
 const $container: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   paddingVertical: spacing.xs,
-  backgroundColor: colors.background.surface,
+  backgroundColor: colors.background.surfaceless,
   flexDirection: "row",
 });

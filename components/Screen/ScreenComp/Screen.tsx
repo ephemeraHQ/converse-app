@@ -85,8 +85,10 @@ function ScreenWithScrolling(props: IScreenProps) {
  */
 export function Screen(props: IScreenProps) {
   const { theme } = useAppTheme();
-  const { backgroundColor = theme.colors.background.surface, safeAreaEdges } =
-    props;
+  const {
+    backgroundColor = theme.colors.background.surfaceless,
+    safeAreaEdges,
+  } = props;
 
   const $containerInsets = useSafeAreaInsetsStyle(safeAreaEdges);
 

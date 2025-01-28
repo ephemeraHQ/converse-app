@@ -46,7 +46,7 @@ export function Header(props: HeaderProps) {
   const { theme, themed } = useAppTheme();
 
   const {
-    backgroundColor = theme.colors.background.surface,
+    backgroundColor = theme.colors.background.surfaceless,
     LeftActionComponent,
     leftIcon,
     leftIconColor,

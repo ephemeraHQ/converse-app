@@ -11,13 +11,13 @@ import { textSizeStyles } from "@/design-system/Text/Text.styles";
 // Screen container styles
 const $screenContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
-  backgroundColor: colors.background.surface,
+  backgroundColor: colors.background.surfaceless,
   // ...debugBorder("red"),
 });
 
 // Search section styles
 const $searchSection: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.background.surface,
+  backgroundColor: colors.background.surfaceless,
   // ...debugBorder("orange"),
 });
 
@@ -33,7 +33,7 @@ const $pendingMembersSection: ThemedStyle<ViewStyle> = ({
   alignItems: "center",
   justifyContent: "flex-start",
   borderBottomWidth: 0.5,
-  backgroundColor: colors.background.surface,
+  backgroundColor: colors.background.surfaceless,
   flexWrap: "wrap",
   // ...debugBorder("green"),
 });

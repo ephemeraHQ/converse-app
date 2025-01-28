@@ -20,7 +20,7 @@ export const ConversationComposerContainer = memo(function (
           paddingBottom: insets.bottom,
           justifyContent: "flex-end",
           overflow: "hidden",
-          backgroundColor: theme.colors.background.surface,
+          backgroundColor: theme.colors.background.surfaceless,
         },
         style,
       ]}

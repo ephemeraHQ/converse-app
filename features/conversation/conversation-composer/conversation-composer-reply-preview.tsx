@@ -113,7 +113,7 @@ export const ReplyPreview = memo(function ReplyPreview() {
             paddingRight: theme.spacing.sm,
             paddingTop: theme.spacing.sm,
             paddingBottom: theme.spacing.xxxs,
-            backgroundColor: theme.colors.background.surface,
+            backgroundColor: theme.colors.background.surfaceless,
             minHeight: replyMessage
               ? 56 // Value from Figma. Not the best but we need minHeight for this to work. If the content end up being bigger it will adjust automatically
               : 0,

@@ -117,7 +117,7 @@ const themeContextToTheme = (themeContext: ThemeContexts): Theme =>
   themeContext === "dark" ? darkTheme : lightTheme;
 
 const setImperativeThemeing = (theme: Theme) => {
-  SystemUI.setBackgroundColorAsync(theme.colors.background.surface);
+  SystemUI.setBackgroundColorAsync(theme.colors.background.surfaceless);
 };
 
 export const useThemeProvider = (initialTheme: ThemeContexts = undefined) => {

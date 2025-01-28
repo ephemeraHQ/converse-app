@@ -49,7 +49,7 @@ export function IconExample(args: IExampleProps) {
                 gap: theme.spacing.md,
                 alignItems: "center",
                 padding: theme.spacing.sm,
-                backgroundColor: theme.colors.background.surface,
+                backgroundColor: theme.colors.background.surfaceless,
                 borderRadius: theme.borderRadius.sm,
               }}
             >

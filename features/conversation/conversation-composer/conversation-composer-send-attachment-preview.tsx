@@ -93,7 +93,7 @@ export function SendAttachmentPreview({
           right: theme.spacing.xxs,
           top: theme.spacing.xxs,
           borderWidth: theme.borderWidth.sm,
-          borderColor: theme.colors.background.surface,
+          borderColor: theme.colors.background.surfaceless,
           borderRadius: 100,
         }}
       >
