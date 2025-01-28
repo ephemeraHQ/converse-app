@@ -228,7 +228,7 @@ jobs:
 
       - name: Run EAS Update
         env:
-          SENTRY_AUTH_TOKEN: $(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | cut -d'=' -f2)
+          SENTRY_AUTH_TOKEN: $(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
         run: |
           eas update --auto --channel=preview --message "${{ needs.check-changes.outputs.commit_message }}" --non-interactive
           npx sentry-expo-upload-sourcemaps dist
