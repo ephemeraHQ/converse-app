@@ -288,20 +288,49 @@ export function replaceOptimisticMessageWithReal(args: {
   queryClient.setQueryData(
     getConversationMessagesQueryOptions({ account, topic }).queryKey,
     (previousMessages) => {
+      logger.debug(
+        "[replaceOptimisticMessageWithReal] Processing message update",
+        {
+          previousMessagesExists: !!previousMessages,
+          realMessageId: realMessage.id,
+          tempId,
+        }
+      );
+
       if (!previousMessages) {
-        return {
+        const newState = {
           ids: [realMessage.id as MessageId],
           byId: {
             [realMessage.id as MessageId]: realMessage,
           },
           reactions: {},
         } satisfies IMessageAccumulator;
+
+        logger.debug(
+          "[replaceOptimisticMessageWithReal] No previous messages, creating new state",
+          {
+            newState: JSON.stringify(newState, null, 2),
+          }
+        );
+
+        return newState;
       }
 
       // Find the index of the temporary message
       const tempIndex = previousMessages.ids.indexOf(tempId as MessageId);
 
+      logger.debug(
+        "[replaceOptimisticMessageWithReal] Found temp message index",
+        {
+          tempIndex,
+          messageIds: JSON.stringify(previousMessages.ids, null, 2),
+        }
+      );
+
       if (tempIndex === -1) {
+        logger.debug(
+          "[replaceOptimisticMessageWithReal] Temp message not found, returning previous state"
+        );
         return previousMessages;
       }
 
@@ -320,11 +349,17 @@ export function replaceOptimisticMessageWithReal(args: {
       // Remove the temporary message entry
       delete newById[tempId as MessageId];
 
-      return {
+      const updatedState = {
         ...previousMessages,
         ids: newIds,
         byId: newById,
       };
+
+      logger.debug("[replaceOptimisticMessageWithReal] Updated message state", {
+        updatedState: JSON.stringify(updatedState, null, 2),
+      });
+
+      return updatedState;
     }
   );
 }

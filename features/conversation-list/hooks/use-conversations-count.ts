@@ -27,10 +27,10 @@ export const useAllowedConversationsCount = () => {
 export const useFindConversationByMembers = (membersToSearch: InboxId[]) => {
   const account = useCurrentAccount();
 
-  logger.debug(
-    `[useFindConversationByMembers] Finding conversation for members:`,
-    membersToSearch
-  );
+  // logger.debug(
+  //   `[useFindConversationByMembers] Finding conversation for members:`,
+  //   membersToSearch
+  // );
 
   const { data: conversations, isLoading } = useQuery({
     ...getConversationsQueryOptions({
@@ -38,9 +38,9 @@ export const useFindConversationByMembers = (membersToSearch: InboxId[]) => {
       caller: "useConversationByMembers",
     }),
     select: (conversations) => {
-      logger.debug(
-        `[useFindConversationByMembers] Searching through ${conversations?.length} conversations`
-      );
+      // logger.debug(
+      //   `[useFindConversationByMembers] Searching through ${conversations?.length} conversations`
+      // );
 
       const groupsThatIncludeMembers = conversations
         // ?.filter(
@@ -50,56 +50,53 @@ export const useFindConversationByMembers = (membersToSearch: InboxId[]) => {
           if (membersToSearch.length === 0) {
             return false;
           }
-          logger.debug(
-            `[useFindConversationByMembers] Checking conversation ${c.topic}`
-          );
+          // logger.debug(
+          //   `[useFindConversationByMembers] Checking conversation ${c.topic}`
+          // );
 
           const groupMembers = getGroupMembersQueryData(account!, c.topic);
-          logger.debug(
-            `[useFindConversationByMembers] Group members for ${c.topic}:`,
-            groupMembers?.ids
-          );
+          // logger.debug(
+          //   `[useFindConversationByMembers] Group members for ${c.topic}:`,
+          //   groupMembers?.ids
+          // );
 
           const membersIdsSet = new Set(
             groupMembers?.addresses.map((address) => address.toLowerCase()) ??
               []
           );
-          const membersToSearchSet = new Set(
-            membersToSearch.map((member) => member.toLowerCase())
-          );
 
-          logger.debug(
-            `[useFindConversationByMembers] Checking if\n${Array.from(
-              membersToSearchSet
-            )}\n is subset of\n${Array.from(membersIdsSet).join("\n")}`
-          );
+          // logger.debug(
+          //   `[useFindConversationByMembers] Checking if\n${Array.from(
+          //     membersToSearchSet
+          //   )}\n is subset of\n${Array.from(membersIdsSet).join("\n")}`
+          // );
 
           const areMembersToSearchAllInGroup = membersToSearch.every((member) =>
             membersIdsSet.has(member.toLowerCase())
           );
 
-          logger.debug(
-            `[useFindConversationByMembers] Members are ${
-              areMembersToSearchAllInGroup ? "" : "not "
-            }all in group ${c.topic}`
-          );
+          // logger.debug(
+          //   `[useFindConversationByMembers] Members are ${
+          //     areMembersToSearchAllInGroup ? "" : "not "
+          //   }all in group ${c.topic}`
+          // );
 
           return areMembersToSearchAllInGroup;
         });
 
-      logger.debug(
-        `[useFindConversationByMembers] Found ${groupsThatIncludeMembers?.length} conversations that include members`
-      );
+      // logger.debug(
+      //   `[useFindConversationByMembers] Found ${groupsThatIncludeMembers?.length} conversations that include members`
+      // );
 
       return groupsThatIncludeMembers;
     },
     enabled: !!membersToSearch && membersToSearch.length > 0,
   });
 
-  logger.debug(
-    `[useFindConversationByMembers] Returning:`,
-    `isLoading=${isLoading}`
-  );
+  // logger.debug(
+  //   `[useFindConversationByMembers] Returning:`,
+  //   `isLoading=${isLoading}`
+  // );
 
   return { conversations, isLoading };
 };

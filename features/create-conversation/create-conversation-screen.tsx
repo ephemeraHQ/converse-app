@@ -66,8 +66,6 @@ export function CreateConversationScreen({
   const { sendMessage: sendMessageOptimistic, tempTopic } =
     useOptimisticSendFirstMessage({ members: selectedAddresses });
 
-  logJson({ json: existingConversations, msg: "existingConversations" });
-
   const currentUserAddress = getCurrentAccount() || "";
 
   const { searchResults, areSearchResultsLoading, hasSearchResults } =

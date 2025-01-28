@@ -8,9 +8,8 @@ import {
   getPreferredName,
   getPrimaryNames,
 } from "@utils/profile";
-import { Platform, View, ViewStyle, TextStyle } from "react-native";
+import { View, ViewStyle, TextStyle } from "react-native";
 import { Pressable } from "@/design-system/Pressable";
-import logger from "@/utils/logger";
 
 type UserSearchResultListItemProps = {
   address: string;
@@ -42,10 +41,10 @@ export function UserSearchResultListItem({
   return (
     <Pressable
       onPress={() => {
-        logger.info("UserSearchResultListItem onPress", {
-          address,
-          socials,
-        });
+        // logger.info("UserSearchResultListItem onPress", {
+        //   address,
+        //   socials,
+        // });
         handleUserSearchResultPress({
           address,
           socials,

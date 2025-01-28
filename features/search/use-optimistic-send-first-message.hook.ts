@@ -228,6 +228,7 @@ export function useOptimisticSendFirstMessage({
             state: "active",
             memberInboxIds: members,
             creatorInboxId: currentAccount,
+            groupCreatorId: () => currentAccount,
             send: async () => "" as MessageId,
             isReady: true,
             canMessage: true,

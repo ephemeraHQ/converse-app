@@ -1,0 +1,527 @@
+sending a first hat to sad chikcen from nebraska high
+
+the scvreen appears for a moment and incorrectly asks if we qawnt to consent and the message shows up as having been sent but is not sent by us and then we crash with this startWith of undefined
+
+
+ LOG  9:24:11 PM | DEBUG : key s 
+ LOG  9:24:11 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:11 PM | DEBUG : Getting token 
+ LOG  9:24:11 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:11 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:11 PM | DEBUG : key a 
+ LOG  9:24:11 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:11 PM | DEBUG : Getting token 
+ LOG  9:24:11 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:11 PM | DEBUG : key d 
+ LOG  9:24:11 PM | INFO : Creating access token 
+ LOG  9:24:11 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:11 PM | DEBUG : Getting token 
+ LOG  9:24:11 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:11 PM | INFO : Created access token 
+ LOG  9:24:11 PM | DEBUG : key   
+ LOG  9:24:11 PM | INFO : Creating access token 
+ LOG  9:24:11 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:11 PM | DEBUG : Getting token 
+ LOG  9:24:11 PM | INFO : Created access token 
+ LOG  9:24:11 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:11 PM | DEBUG : key c 
+ LOG  9:24:11 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:11 PM | DEBUG : Getting token 
+ LOG  9:24:11 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:11 PM | INFO : Creating access token 
+ LOG  9:24:11 PM | INFO : Created access token 
+ LOG  9:24:12 PM | DEBUG : key h 
+ LOG  9:24:12 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:12 PM | DEBUG : Getting token 
+ LOG  9:24:12 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:12 PM | INFO : Creating access token 
+ LOG  9:24:12 PM | INFO : Created access token 
+ LOG  9:24:12 PM | DEBUG : key i 
+ LOG  9:24:12 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:12 PM | DEBUG : Getting token 
+ LOG  9:24:12 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:12 PM | INFO : Creating access token 
+ LOG  9:24:12 PM | INFO : Created access token 
+ LOG  9:24:12 PM | INFO : Creating access token 
+ LOG  9:24:12 PM | INFO : Creating access token 
+ LOG  9:24:12 PM | INFO : Deduped fetch 
+{
+  "key": "/api/authenticate40b066c536fcbdab20aa8185b60734db395fe2e42f1eded78dc912de7918301c"
+}
+
+ LOG  9:24:12 PM | INFO : Created access token 
+ LOG  9:24:12 PM | INFO : Created access token 
+ LOG  9:24:12 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[]",
+  "isGroup": false,
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:16 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[\n  \"0x0259a1c25ec1f9f0a7b767132075929112875ecf\"\n]",
+  "isGroup": false,
+  "tempTopic": "/xmtp/mls/1/g-7fe8d9ed214d7a35",
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:16 PM | INFO : [send-optimistic][useOptimisticSendFirstMessage] Initialized 
+{
+  "members": "[\n  \"0x0259a1c25ec1f9f0a7b767132075929112875ecf\"\n]",
+  "isGroup": false,
+  "tempTopic": "/xmtp/mls/1/g-7fe8d9ed214d7a35",
+  "currentAccount": "\"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\""
+}
+
+ LOG  9:24:25 PM | INFO : [send-optimistic][sendMessageCallback] Starting send message flow 
+{
+  "params": "{\n  \"content\": {\n    \"text\": \"Nebraska to sad chicken\"\n  }\n}"
+}
+
+ LOG  9:24:25 PM | INFO : [ConversationScreen] Rendering conversation screen 
+{
+  "topic": "/xmtp/mls/1/g-7fe8d9ed214d7a35",
+  "optimistic": true
+}
+
+ LOG  9:24:25 PM | INFO : [ConversationScreen] Rendering appropriate conversation view 
+{
+  "isV3Topic": true
+}
+
+ LOG  9:24:25 PM | INFO : [Conversation] Conversation query 
+{
+  "optimistic": true,
+  "status": "pending",
+  "fetchStatus": "fetching"
+}
+
+ LOG  9:24:25 PM | INFO : [send-optimistic][sendMessageAsync] Preparing optimistic update 
+{
+  "variables": "{\n  \"content\": {\n    \"text\": \"Nebraska to sad chicken\"\n  },\n  \"conversationTopic\": \"/xmtp/mls/1/g-7fe8d9ed214d7a35\"\n}"
+}
+
+ LOG  9:24:25 PM | INFO : [send-optimistic][sendMessageAsync] Created optimistic message 
+{
+  "message": "{\n  \"id\": \"lkv3dkkpemg\",\n  \"tempOptimisticId\": \"lkv3dkkpemg\",\n  \"contentTypeId\": \"xmtp.org/text:\",\n  \"sentNs\": 1738031065821000000,\n  \"fallback\": \"new-message\",\n  \"deliveryStatus\": \"sending\",\n  \"topic\": \"/xmtp/mls/1/g-7fe8d9ed214d7a35\",\n  \"senderInboxId\": \"0x9d8f8554c1f45d1491b917cca2c55a99d378850c\",\n  \"nativeContent\": {}\n}"
+}
+
+ LOG  9:24:25 PM | INFO : [send-optimistic][createConversation] Preparing optimistic update 
+{
+  "members": "[\n  \"0x0259a1c25ec1f9f0a7b767132075929112875ecf\"\n]",
+  "tempTopic": "/xmtp/mls/1/g-7fe8d9ed214d7a35",
+  "isGroup": false
+}
+
+ LOG  9:24:25 PM | INFO : [send-optimistic][createConversation] Creating temporary conversation 
+{
+  "isGroup": false,
+  "tempTopic": "/xmtp/mls/1/g-7fe8d9ed214d7a35",
+  "members": "[\n  \"0x0259a1c25ec1f9f0a7b767132075929112875ecf\"\n]"
+}
+
+ LOG  9:24:25 PM | INFO : [send-optimistic][createConversation] Adding temporary conversation to query 
+{
+  "topic": "/xmtp/mls/1/g-7fe8d9ed214d7a35",
+  "type": "dm"
+}
+
+ LOG  9:24:25 PM | DEBUG : [ConversationsQuery] addConversationToConversationsQuery for account 0x9d8f8554c1f45d1491b917cca2c55a99d378850c 
+ LOG  9:24:25 PM | INFO : [send-optimistic] Added temp conversation to cache 
+{
+  "topic": "/xmtp/mls/1/g-7fe8d9ed214d7a35",
+  "type": "dm"
+}
+
+ LOG  9:24:25 PM | INFO : [send-optimistic][createConversation] Starting conversation creation 
+ LOG  9:24:25 PM | INFO : [send-optimistic][createConversation] Creating DM conversation 
+ LOG  9:24:25 PM | INFO : [XMTP] Creating a conversation with peer 0x0259a1c25ec1f9f0a7b767132075929112875ecf 
+ LOG  9:24:25 PM | DEBUG : [ConversationMetadataQuery] getConversationMetadata for account: 0x9d8F8554c1F45D1491b917CcA2c55a99D378850C, topic: /xmtp/mls/1/g-7fe8d9ed214d7a35 
+ LOG  9:24:25 PM | INFO : [Conversation] Conversation query 
+{
+  "optimistic": true,
+  "status": "success",
+  "fetchStatus": "fetching",
+  "conversation": "{\n  \"topic\": \"/xmtp/mls/1/g-7fe8d9ed214d7a35\",\n  \"name\": \"DM\",\n  \"clientInstallationId\": \"\",\n  \"id\": \"\",\n  \"createdAt\": 0,\n  \"version\": 0\n}"
+}
+
+ LOG  onError ["groupCreator", "0x9d8f8554c1f45d1491b917cca2c55a99d378850c", "/xmtp/mls/1/g-7fe8d9ed214d7a35"]
+ LOG  9:24:26 PM | ERROR : Error in query: groupCreator, 0x9d8f8554c1f45d1491b917cca2c55a99d378850c, /xmtp/mls/1/g-7fe8d9ed214d7a35: group.creatorInboxId is not a function (it is undefined) 
+ LOG  9:24:26 PM | WARN : [useConversationQuery] Conversation not found in local DB, syncing conversations 
+ LOG  9:24:26 PM | DEBUG : [API TOPICS] getTopics for account: 0x9d8F8554c1F45D1491b917CcA2c55a99D378850C 
+ LOG  9:24:26 PM | INFO : Fetching profiles for inboxIds 
+[
+  "0x9d8f8554c1f45d1491b917cca2c55a99d378850c"
+]
+
+ LOG  9:24:26 PM | DEBUG : Getting token 
+ LOG  9:24:26 PM | INFO : [useConversationQuery] Retrying query 
+{
+  "failureCount": 0,
+  "topic": "/xmtp/mls/1/g-7fe8d9ed214d7a35",
+  "error": "Conversation /xmtp/mls/1/g-7fe8d9ed214d7a35 not found"
+}
+
+ LOG  onError ["conversation", "0x9d8f8554c1f45d1491b917cca2c55a99d378850c", "/xmtp/mls/1/g-7fe8d9ed214d7a35"]
+ LOG  9:24:26 PM | ERROR : Error in query: conversation, 0x9d8f8554c1f45d1491b917cca2c55a99d378850c, /xmtp/mls/1/g-7fe8d9ed214d7a35: Conversation /xmtp/mls/1/g-7fe8d9ed214d7a35 not found 
+ LOG  9:24:26 PM | INFO : [Conversation] Conversation query 
+{
+  "optimistic": true,
+  "status": "error",
+  "fetchStatus": "idle",
+  "conversation": "{\n  \"topic\": \"/xmtp/mls/1/g-7fe8d9ed214d7a35\",\n  \"name\": \"DM\",\n  \"clientInstallationId\": \"\",\n  \"id\": \"\",\n  \"createdAt\": 0,\n  \"version\": 0\n}"
+}
+
+ LOG  onError ["inboxProfileSocials", "0x9d8f8554c1f45d1491b917cca2c55a99d378850c", "0x9d8f8554c1f45d1491b917cca2c55a99d378850c"]
+ LOG  9:24:26 PM | ERROR : Error in query: inboxProfileSocials, 0x9d8f8554c1f45d1491b917cca2c55a99d378850c, 0x9d8f8554c1f45d1491b917cca2c55a99d378850c: [API] HTTP 500 - http://127.0.0.1:9875/api/inbox/?ids=0x9d8f8554c1f45d1491b917cca2c55a99d378850c - {
+  "headers": {
+    "accept": "application/json, text/plain, */*",
+    "converseuseragent": "iOS/2.1.0"
+  },
+  "response": {
+    "error": "Internal server error"
+  }
+} 
+ LOG  9:24:26 PM | INFO : [XMTPRN Conversations] Restarting message stream to handle new conversation 
+ LOG  9:24:26 PM | DEBUG : [XmtpRN] Stopped streaming messages for 0x9d8f8554c1f45d1491b917cca2c55a99d378850c 
+ LOG  9:24:26 PM | INFO : [XmtpRN] Streaming messages for 0x9d8f8554c1f45d1491b917cca2c55a99d378850c 
+ LOG  9:24:26 PM | INFO : [send-optimistic][createConversation] Conversation created successfully 
+{
+  "topic": "/xmtp/mls/1/g-24e8afd45a51b9815fb880b4f8981887/proto",
+  "type": "dm"
+}
+
+ LOG  9:24:26 PM | INFO : [send-optimistic][createConversation] Processing successful creation 
+{
+  "conversationTopic": "/xmtp/mls/1/g-24e8afd45a51b9815fb880b4f8981887/proto"
+}
+
+ LOG  9:24:26 PM | DEBUG : [ConversationsQuery] addConversationToConversationsQuery for account 0x9d8f8554c1f45d1491b917cca2c55a99d378850c 
+ LOG  9:24:26 PM | INFO : [send-optimistic][createConversation] Setting DM query data 
+ LOG  9:24:26 PM | INFO : [XMTPRN Conversations] GOT A NEW CONVO 
+ LOG  9:24:26 PM | DEBUG : [ConversationsQuery] addConversationToConversationsQuery for account 0x9d8F8554c1F45D1491b917CcA2c55a99D378850C 
+ LOG  9:24:26 PM | DEBUG : [ConversationMetadataQuery] getConversationMetadata for account: 0x9d8F8554c1F45D1491b917CcA2c55a99D378850C, topic: /xmtp/mls/1/g-24e8afd45a51b9815fb880b4f8981887/proto 
+ LOG  9:24:26 PM | DEBUG : [API TOPICS] getTopics for account: 0x9d8F8554c1F45D1491b917CcA2c55a99D378850C 
+ LOG  9:24:26 PM | DEBUG : Getting token 
+ LOG  9:24:26 PM | INFO : [XmtpRN] Received a message for 0x9d8f8554c1f45d1491b917cca2c55a99d378850c 
+{
+  "id": "5d320254ab80dfc2ce11ffddbc9ec37d3b2248c5ebaa6e9055b1559b66ae7824",
+  "text": "Nebraska to sad chicken",
+  "topic": "/xmtp/mls/1/g-24e8afd45a51b9815fb880b4f8981887/proto"
+}
+
+ LOG  9:24:26 PM | ERROR : Cannot convert undefined value to object 
+ LOG  9:24:26 PM | DEBUG : [updateConversationQueryData] Updating conversation for /xmtp/mls/1/g-24e8afd45a51b9815fb880b4f8981887/proto with account 0x9d8f8554c1f45d1491b917cca2c55a99d378850c 
+ LOG  9:24:26 PM | DEBUG : [ConversationsQuery] updateConversationInConversationsQueryData for account 0x9d8f8554c1f45d1491b917cca2c55a99d378850c and topic /xmtp/mls/1/g-24e8afd45a51b9815fb880b4f8981887/proto 
+ LOG  9:24:26 PM | INFO : [send-optimistic][sendMessageAsync] Processing successful send 
+{
+  "messageId": "5d320254ab80dfc2ce11ffddbc9ec37d3b2248c5ebaa6e9055b1559b66ae7824",
+  "context": "{\n  \"generatedMessageId\": \"lkv3dkkpemg\",\n  \"tempTopic\": \"/xmtp/mls/1/g-7fe8d9ed214d7a35\"\n}"
+}
+
+ LOG  9:24:26 PM | DEBUG : [linkOptimisticMessageToReal] linking optimistic message to real 
+{
+  "tempId": "lkv3dkkpemg",
+  "messageId": "5d320254ab80dfc2ce11ffddbc9ec37d3b2248c5ebaa6e9055b1559b66ae7824"
+}
+
+ LOG  9:24:26 PM | DEBUG : [replaceOptimisticMessageWithReal] Processing message update 
+{
+  "previousMessagesExists": true,
+  "realMessageId": "5d320254ab80dfc2ce11ffddbc9ec37d3b2248c5ebaa6e9055b1559b66ae7824",
+  "tempId": "lkv3dkkpemg"
+}
+
+ LOG  9:24:26 PM | DEBUG : [replaceOptimisticMessageWithReal] Found temp message index 
+{
+  "tempIndex": 0,
+  "messageIds": "[\n  \"lkv3dkkpemg\"\n]"
+}
+
+ LOG  9:24:26 PM | DEBUG : [replaceOptimisticMessageWithReal] Updated message state 
+{
+  "updatedState": "{\n  \"ids\": [\n    \"5d320254ab80dfc2ce11ffddbc9ec37d3b2248c5ebaa6e9055b1559b66ae7824\"\n  ],\n  \"byId\": {\n    \"5d320254ab80dfc2ce11ffddbc9ec37d3b2248c5ebaa6e9055b1559b66ae7824\": {\n      \"id\": \"5d320254ab80dfc2ce11ffddbc9ec37d3b2248c5ebaa6e9055b1559b66ae7824\",\n      \"tempOptimisticId\": \"lkv3dkkpemg\"\n    }\n  },\n  \"reactions\": {}\n}"
+}
+
+ LOG  9:24:26 PM | INFO : [send-optimistic][sendMessageCallback] Message sent successfully 
+ ERROR  Warning: TypeError: Cannot read property 'startsWith' of undefined
+
+This error is located at:
+    in Messages (created by Conversation)
+    in Unknown (created by Conversation)
+    in Unknown (created by Conversation)
+    in Unknown (created by Conversation)
+    in ExternalWalletPickerContextProvider (created by Conversation)
+    in Conversation (created by ConversationScreen)
+    in RCTView (created by View)
+    in View (created by ScreenWithoutScrolling)
+    in RCTView (created by View)
+    in View (created by ScreenWithoutScrolling)
+    in ScreenWithoutScrolling (created by Screen)
+    in RCTView (created by View)
+    in View
+    in _c
+    in Screen (created by ConversationScreen)
+    in ConversationScreen (created by SceneView)
+    in StaticContainer
+    in EnsureSingleNavigator (created by SceneView)
+    in SceneView (created by NativeStackNavigator)
+    in RNSScreenContentWrapper (created by ScreenContentWrapper)
+    in ScreenContentWrapper (created by DebugContainer)
+    in DebugContainer
+    in RNSScreen (created by Animated(Anonymous))
+    in Animated(Anonymous)
+    in Suspender (created by Freeze)
+    in Suspense (created by Freeze)
+    in Freeze (created by DelayedFreeze)
+    in DelayedFreeze
+    in InnerScreen (created by Screen)
+    in Screen
+    in ScreenStackItem (created by SceneView)
+    in SceneView (created by NativeStackView)
+    in RNSScreenStack (created by ScreenStack)
+    in Unknown (created by ScreenStack)
+    in ScreenStack (created by NativeStackView)
+    in RCTView (created by View)
+    in View (created by SafeAreaProviderCompat)
+    in SafeAreaProviderCompat (created by NativeStackView)
+    in NativeStackView (created by NativeStackNavigator)
+    in PreventRemoveProvider (created by NavigationContent)
+    in NavigationContent
+    in Unknown (created by NativeStackNavigator)
+    in NativeStackNavigator (created by SignedInNavigation)
+    in SignedInNavigation (created by NavigationContent)
+    in NavigationContent (created by Main)
+    in ThemeProvider
+    in EnsureSingleNavigator
+    in BaseNavigationContainer
+    in NavigationContainerInner (created by Main)
+    in Main (created by App)
+    in RCTView (created by View)
+    in View (created by App)
+    in App (created by AppWithProviders)
+    in PortalProviderComponent (created by BottomSheetModalProviderWrapper)
+    in BottomSheetModalProviderWrapper (created by AppWithProviders)
+    in RCTView (created by View)
+    in View (created by GestureHandlerRootView)
+    in GestureHandlerRootView (created by AppWithProviders)
+    in ThemeProvider (created by PaperProvider)
+    in RCTView (created by View)
+    in View (created by Portal.Host)
+    in Portal.Host (created by PaperProvider)
+    in RNCSafeAreaProvider (created by SafeAreaProvider)
+    in SafeAreaProvider (created by SafeAreaInsetsContext)
+    in SafeAreaProviderCompat (created by PaperProvider)
+    in PaperProvider (created by AppWithProviders)
+    in RCTView (created by View)
+    in View (created by ActionSheet)
+    in ActionSheet
+    in ActionSheetProvider (created by AppWithProviders)
+    in KeyboardControllerView (created by Animated(Anonymous))
+    in Animated(Anonymous) (created by AnimatedComponent(Animated(Anonymous)))
+    in AnimatedComponent(Animated(Anonymous))
+    in Unknown (created by KeyboardProvider)
+    in KeyboardProvider (created by AppWithProviders)
+    in QueryClientProvider (created by ThirdwebProviderCore)
+    in ThirdwebProviderCore (created by ThirdwebProvider)
+    in ThirdwebProvider (created by AppWithProviders)
+    in O (created by L)
+    in M (created by L)
+    in J (created by L)
+    in L (created by AppWithProviders)
+    in ai (created by AppWithProviders)
+    in QueryClientProvider (created by AppWithProviders)
+    in AppWithProviders (created by withDevTools(AppWithProviders))
+    in withDevTools(AppWithProviders)
+    in RCTView (created by View)
+    in View (created by AppContainer)
+    in RCTView (created by View)
+    in View (created by AppContainer)
+    in AppContainer
+    in main(RootComponent), js engine: hermes
+ ERROR  Warning: TypeError: Cannot read property 'startsWith' of undefined
+
+This error is located at:
+    in Messages (created by Conversation)
+    in Unknown (created by Conversation)
+    in Unknown (created by Conversation)
+    in Unknown (created by Conversation)
+    in ExternalWalletPickerContextProvider (created by Conversation)
+    in Conversation (created by ConversationScreen)
+    in RCTView (created by View)
+    in View (created by ScreenWithoutScrolling)
+    in RCTView (created by View)
+    in View (created by ScreenWithoutScrolling)
+    in ScreenWithoutScrolling (created by Screen)
+    in RCTView (created by View)
+    in View
+    in _c
+    in Screen (created by ConversationScreen)
+    in ConversationScreen (created by SceneView)
+    in StaticContainer
+    in EnsureSingleNavigator (created by SceneView)
+    in SceneView (created by NativeStackNavigator)
+    in RNSScreenContentWrapper (created by ScreenContentWrapper)
+    in ScreenContentWrapper (created by DebugContainer)
+    in DebugContainer
+    in RNSScreen (created by Animated(Anonymous))
+    in Animated(Anonymous)
+    in Suspender (created by Freeze)
+    in Suspense (created by Freeze)
+    in Freeze (created by DelayedFreeze)
+    in DelayedFreeze
+    in InnerScreen (created by Screen)
+    in Screen
+    in ScreenStackItem (created by SceneView)
+    in SceneView (created by NativeStackView)
+    in RNSScreenStack (created by ScreenStack)
+    in Unknown (created by ScreenStack)
+    in ScreenStack (created by NativeStackView)
+    in RCTView (created by View)
+    in View (created by SafeAreaProviderCompat)
+    in SafeAreaProviderCompat (created by NativeStackView)
+    in NativeStackView (created by NativeStackNavigator)
+    in PreventRemoveProvider (created by NavigationContent)
+    in NavigationContent
+    in Unknown (created by NativeStackNavigator)
+    in NativeStackNavigator (created by SignedInNavigation)
+    in SignedInNavigation (created by NavigationContent)
+    in NavigationContent (created by Main)
+    in ThemeProvider
+    in EnsureSingleNavigator
+    in BaseNavigationContainer
+    in NavigationContainerInner (created by Main)
+    in Main (created by App)
+    in RCTView (created by View)
+    in View (created by App)
+    in App (created by AppWithProviders)
+    in PortalProviderComponent (created by BottomSheetModalProviderWrapper)
+    in BottomSheetModalProviderWrapper (created by AppWithProviders)
+    in RCTView (created by View)
+    in View (created by GestureHandlerRootView)
+    in GestureHandlerRootView (created by AppWithProviders)
+    in ThemeProvider (created by PaperProvider)
+    in RCTView (created by View)
+    in View (created by Portal.Host)
+    in Portal.Host (created by PaperProvider)
+    in RNCSafeAreaProvider (created by SafeAreaProvider)
+    in SafeAreaProvider (created by SafeAreaInsetsContext)
+    in SafeAreaProviderCompat (created by PaperProvider)
+    in PaperProvider (created by AppWithProviders)
+    in RCTView (created by View)
+    in View (created by ActionSheet)
+    in ActionSheet
+    in ActionSheetProvider (created by AppWithProviders)
+    in KeyboardControllerView (created by Animated(Anonymous))
+    in Animated(Anonymous) (created by AnimatedComponent(Animated(Anonymous)))
+    in AnimatedComponent(Animated(Anonymous))
+    in Unknown (created by KeyboardProvider)
+    in KeyboardProvider (created by AppWithProviders)
+    in QueryClientProvider (created by ThirdwebProviderCore)
+    in ThirdwebProviderCore (created by ThirdwebProvider)
+    in ThirdwebProvider (created by AppWithProviders)
+    in O (created by L)
+    in M (created by L)
+    in J (created by L)
+    in L (created by AppWithProviders)
+    in ai (created by AppWithProviders)
+    in QueryClientProvider (created by AppWithProviders)
+    in AppWithProviders (created by withDevTools(AppWithProviders))
+    in withDevTools(AppWithProviders)
+    in RCTView (created by View)
+    in View (created by AppContainer)
+    in RCTView (created by View)
+    in View (created by AppContainer)
+    in AppContainer
+    in main(RootComponent), js engine: hermes
