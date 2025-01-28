@@ -12,22 +12,33 @@ import { startMessageStreaming } from "./stream-messages";
 import { useStreamingStore } from "./stream-store";
 
 export function setupStreamingSubscriptions() {
-  // Start/Stop streaming when hydration is done and internet is reachable
-  useAppStore.subscribe((state, previousState) => {
-    if (state.hydrationDone && !previousState.hydrationDone) {
-      if (state.isInternetReachable && state.hydrationDone) {
-        startStreaming(getAccountsList());
+  // Start streaming when hydration is done
+  useAppStore.subscribe(
+    (state) => state.hydrationDone,
+    (hydrationDone) => {
+      if (hydrationDone) {
+        logger.debug(`[Streaming] Hydration done changed: ${hydrationDone}`);
+        const { isInternetReachable } = useAppStore.getState();
+        if (isInternetReachable) {
+          startStreaming(getAccountsList());
+        }
       }
     }
-    if (state.hydrationDone && !previousState.hydrationDone) {
+  );
+
+  // Start/stop streaming when internet connectivity changes
+  useAppStore.subscribe(
+    (state) => state.isInternetReachable,
+    (isInternetReachable) => {
       logger.debug(
-        `[Streaming] Hydration done changed: ${state.hydrationDone}`
+        `[Streaming] Internet reachability changed: ${isInternetReachable}`
       );
-      if (state.hydrationDone && state.isInternetReachable) {
+      const { hydrationDone } = useAppStore.getState();
+      if (isInternetReachable && hydrationDone) {
         startStreaming(getAccountsList());
       }
     }
-  });
+  );
 
   // Start/Stop streaming when accounts change
   useAccountsStore.subscribe((state, previousState) => {

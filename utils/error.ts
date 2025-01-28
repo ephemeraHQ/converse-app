@@ -21,3 +21,17 @@ export class UserCancelledError extends Error {
     this.name = "UserCancelledError";
   }
 }
+
+class BaseSDKError extends Error {
+  constructor(message: string, cause?: unknown) {
+    super(message);
+    this.name = this.constructor.name;
+    this.cause = cause;
+  }
+}
+
+export class XMTPError extends BaseSDKError {
+  constructor(message: string, cause?: unknown) {
+    super(`[XMTP SDK] ${message}`, cause);
+  }
+}

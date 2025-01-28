@@ -3,6 +3,7 @@ import { isConversationConsentUnknown } from "@/features/conversation/utils/is-c
 import { startMessageStreaming } from "@/features/streams/stream-messages";
 import { addConversationToUnknownConsentConversationsQuery } from "@/queries/unknown-consent-conversations-query";
 import { addConversationToConversationsQuery } from "@/queries/use-conversations-query";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import {
   stopStreamingConversations,
   streamConversations,
@@ -14,7 +15,7 @@ export async function startConversationStreaming(account: string) {
     await streamConversations({
       ethAddress: account,
       onNewConversation: (conversation) =>
-        onNewConversation({ account, conversation }),
+        handleNewConversation({ account, conversation }),
     });
   } catch (error) {
     logger.error(error, {
@@ -26,7 +27,10 @@ export async function startConversationStreaming(account: string) {
 
 export { stopStreamingConversations };
 
-function onNewConversation(args: { account: string; conversation: any }) {
+function handleNewConversation(args: {
+  account: string;
+  conversation: ConversationWithCodecsType;
+}) {
   const { account, conversation } = args;
 
   if (isConversationAllowed(conversation)) {

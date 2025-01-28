@@ -1,4 +1,4 @@
-import { captureError } from "@/utils/capture-error";
+import { XMTPError } from "@/utils/error";
 import { getXmtpClient } from "../xmtp-client/xmtp-client";
 
 export const syncConsent = async (account: string) => {
@@ -6,8 +6,6 @@ export const syncConsent = async (account: string) => {
   try {
     await client.preferences.syncConsent();
   } catch (error) {
-    captureError(error, {
-      caller: "syncConsent",
-    });
+    throw new XMTPError("Failed to sync consent", error);
   }
 };

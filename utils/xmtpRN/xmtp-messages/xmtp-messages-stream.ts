@@ -1,3 +1,4 @@
+import { XMTPError } from "@/utils/error";
 import { isProd } from "@/utils/getEnv";
 import logger from "@utils/logger";
 import { getXmtpClient } from "../xmtp-client/xmtp-client";
@@ -18,17 +19,21 @@ export const streamAllMessages = async (args: {
     `[XMTP - streamAllMessages] Streaming messages for ${client.address}`
   );
 
-  await client.conversations.streamAllMessages(async (message) => {
-    logger.debug(
-      `[XMTP - streamAllMessages] Received a message for ${
-        client.address
-      } with id: ${message.id}, text: ${
-        isProd ? "Redacted" : message.nativeContent.text
-      }, topic: ${message.topic}`
-    );
+  try {
+    await client.conversations.streamAllMessages(async (message) => {
+      logger.debug(
+        `[XMTP - streamAllMessages] Received a message for ${
+          client.address
+        } with id: ${message.id}, text: ${
+          isProd ? "Redacted" : message.nativeContent.text
+        }, topic: ${message.topic}`
+      );
 
-    await onNewMessage(message);
-  });
+      await onNewMessage(message);
+    });
+  } catch (error) {
+    throw new XMTPError("Failed to stream messages", error);
+  }
 };
 
 export const stopStreamingAllMessage = async (args: { ethAddress: string }) => {
@@ -38,9 +43,13 @@ export const stopStreamingAllMessage = async (args: { ethAddress: string }) => {
     address: ethAddress,
   });
 
-  await client.conversations.cancelStreamAllMessages();
+  try {
+    await client.conversations.cancelStreamAllMessages();
 
-  logger.debug(
-    `[XMTP - stopStreamingAllMessage] Stopped streaming messages for ${client.address}`
-  );
+    logger.debug(
+      `[XMTP - stopStreamingAllMessage] Stopped streaming messages for ${client.address}`
+    );
+  } catch (error) {
+    throw new XMTPError("Failed to cancel message streaming", error);
+  }
 };

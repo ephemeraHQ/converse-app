@@ -1,7 +1,7 @@
 import { captureError } from "@/utils/capture-error";
+import logger from "@/utils/logger";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { DEFAULT_GC_TIME, DEFAULT_STALE_TIME } from "./queryClient.constants";
-import logger from "@/utils/logger";
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -16,10 +16,11 @@ export const queryClient = new QueryClient({
       }
     },
     onError: (error, query) => {
-      console.log("onError", query.queryKey);
-      captureError(error, {
-        message: `Error in query: ${query.queryKey.join(", ")}`,
-      });
+      captureError(
+        new Error(`Error in query: ${query.queryKey.join(", ")}`, {
+          cause: error,
+        })
+      );
     },
   }),
   defaultOptions: {

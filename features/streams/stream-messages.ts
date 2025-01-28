@@ -8,42 +8,28 @@ import {
   refetchGroupMembersQuery,
 } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
-import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import {
   stopStreamingAllMessage,
   streamAllMessages,
 } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
-import logger from "@utils/logger";
 import { ConversationTopic, GroupUpdatedContent } from "@xmtp/react-native-sdk";
 
 export async function startMessageStreaming(args: { account: string }) {
   const { account } = args;
-
-  try {
-    await streamAllMessages({
-      account,
-      onNewMessage: (message) => onNewMessage({ account, message }),
-    });
-  } catch (error) {
-    logger.error(error, {
-      context: `Failed to stream all messages for ${account}`,
-    });
-    throw error;
-  }
+  await streamAllMessages({
+    account,
+    onNewMessage: (message) => handleNewMessage({ account, message }),
+  });
 }
 
 export { stopStreamingAllMessage };
 
-async function onNewMessage(args: {
+async function handleNewMessage(args: {
   account: string;
   message: DecodedMessageWithCodecsType;
 }) {
   const { account, message } = args;
-
-  const client = await getXmtpClient({
-    address: account,
-  });
 
   if (message.contentTypeId.includes("group_updated")) {
     try {
@@ -65,7 +51,7 @@ async function onNewMessage(args: {
   if (isMessageFromOtherUser || isNonTextMessage) {
     try {
       addConversationMessageQuery({
-        account: client.address,
+        account,
         topic: message.topic as ConversationTopic,
         message,
       });
@@ -76,7 +62,7 @@ async function onNewMessage(args: {
 
   try {
     updateConversationQueryData({
-      account: client.address,
+      account,
       topic: message.topic as ConversationTopic,
       conversationUpdate: {
         lastMessage: message,
@@ -88,7 +74,7 @@ async function onNewMessage(args: {
 
   try {
     updateConversationInConversationsQueryData({
-      account: client.address,
+      account,
       topic: message.topic as ConversationTopic,
       conversationUpdate: {
         lastMessage: message,
