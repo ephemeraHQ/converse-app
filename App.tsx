@@ -1,6 +1,7 @@
 // Keep this at the top
-import * as Privy from "@privy-io/expo";
 import "./polyfills";
+
+import * as Privy from "@privy-io/expo";
 
 // This is a requirement for Privy to work, does not make any sense
 // To test run yarn start --no-dev --minify
@@ -53,6 +54,8 @@ import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
 import { saveApiURI } from "./utils/sharedData";
 import "./utils/splash/splash";
+import { setupStreamingSubscriptions } from "@/features/streams/streams";
+import { setupTopicNotificationsSubscriptions } from "@/features/notifications/utils/accountTopicSubscription";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -96,6 +99,8 @@ const App = () => {
 
   useEffect(() => {
     setupAppAttest();
+    setupStreamingSubscriptions();
+    setupTopicNotificationsSubscriptions();
   }, []);
 
   useCoinbaseWalletListener(true, coinbaseUrl);

@@ -1,7 +1,7 @@
 import { Signer } from "ethers";
 import { Alert } from "react-native";
 
-import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
+import { prefetchInboxIdQuery } from "@/queries/inbox-id-query";
 import {
   getSettingsStore,
   getWalletStore,
@@ -161,7 +161,7 @@ async function finalizeAccountSetup(args: IConnectWithAddressKeyArgs) {
 
   await prefetchInboxIdQuery({ account: address });
 
-  getXmtpClient(address);
+  getXmtpClient({ address });
 
   logger.debug("Account setup finalized");
 }

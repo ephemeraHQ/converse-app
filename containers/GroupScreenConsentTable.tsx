@@ -1,5 +1,5 @@
 import { useGroupConsentForCurrentAccount } from "@/features/consent/use-group-consent-for-current-account";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { translate } from "@i18n";
 import { dangerColor, primaryColor } from "@styles/colors";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";

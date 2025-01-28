@@ -24,6 +24,7 @@ import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { MutationKeys } from "../../queries/MutationKeys";
 import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account";
 import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 
 type IAllowGroupMutationOptions = {
   account: string;

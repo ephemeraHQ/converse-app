@@ -5,13 +5,11 @@ import logger from "@utils/logger";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 import { getPreferredName } from "../profile";
+import { getXmtpClient } from "./xmtp-client/xmtp-client";
 import {
-  ConversationWithCodecsType,
   ConverseXmtpClientType,
   DmWithCodecsType,
 } from "./xmtp-client/xmtp-client.types";
-import { getXmtpClient } from "./xmtp-client/xmtp-client";
-import { streamAllMessages } from "./xmtp-messages/xmtp-messages-stream";
 
 async function findGroup(args: {
   client: ConverseXmtpClientType;
@@ -168,7 +166,6 @@ export const createConversation = async (args: {
   const { client, peerAddress } = args;
   logger.info(`[XMTP] Creating a conversation with peer ${peerAddress}`);
   const conversation = await client.conversations.findOrCreateDm(peerAddress);
-  await handleNewConversationCreation(client, conversation);
   return conversation;
 };
 
@@ -176,7 +173,9 @@ export const createConversationByAccount = async (
   account: string,
   peerAddress: string
 ) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
   if (!client) {
     throw new Error("Client not found");
   }
@@ -210,8 +209,6 @@ export const createGroup = async (args: {
   );
 
   logger.info("[XMTPRN Conversations] Created group");
-
-  await handleNewConversationCreation(client, group);
 
   return group;
 };
@@ -280,7 +277,9 @@ export const createGroupByAccount = async (args: {
     groupPhoto,
     groupDescription,
   } = args;
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
   return createGroup({
     client,
     peers,
@@ -296,7 +295,9 @@ export const getConversationByPeerByAccount = async (args: {
   peer: string;
 }) => {
   const { account, peer } = args;
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
   return getConversationByPeer({ client, peer });
 };
 
@@ -306,7 +307,9 @@ export const getOptionalConversationByPeerByAccount = async (args: {
   includeSync?: boolean;
 }) => {
   const { account, peer, includeSync = false } = args;
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
   return getConversationByPeer({
     client,
     peer,
@@ -323,16 +326,4 @@ export const getPeerAddressDm = async (
     (member) => member.inboxId === peerInboxId
   )?.addresses[0];
   return peerAddress;
-};
-
-// TODO: This is a temporary function to handle new conversation creation
-// This is a temporary workaround related to https://github.com/xmtp/xmtp-react-native/issues/560
-const handleNewConversationCreation = async (
-  client: ConverseXmtpClientType,
-  _conversation: ConversationWithCodecsType
-) => {
-  logger.info(
-    "[XMTPRN Conversations] Restarting message stream to handle new conversation"
-  );
-  await streamAllMessages(client.address);
 };

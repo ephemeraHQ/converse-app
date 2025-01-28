@@ -10,7 +10,9 @@ export const encryptRemoteAttachment = async (
   fileUri: string,
   mimeType: string | undefined
 ) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
   const encryptedAttachment = await client.encryptAttachment({
     fileUri,
     mimeType,
@@ -34,7 +36,9 @@ export const fetchAndDecodeRemoteAttachment = async (args: {
     toFile: encryptedLocalFileUri,
   }).promise;
 
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
 
   const decryptedContent = await client.decryptAttachment({
     encryptedLocalFileUri,

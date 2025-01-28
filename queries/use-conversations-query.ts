@@ -2,14 +2,11 @@ import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { captureError } from "@/utils/capture-error";
 import { reactQueryPersister } from "@/utils/mmkv";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import {
-  ConversationWithCodecsType,
-  ConverseXmtpClientType,
-} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { conversationsQueryKey } from "@queries/QueryKeys";
 import { QueryObserver, queryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
-import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
 
@@ -98,7 +95,9 @@ export const getConversationsQueryData = (args: IArgs) => {
 const getConversations = async (args: IArgs) => {
   const { account } = args;
 
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
 
   const beforeSync = new Date().getTime();
   await client.conversations.syncAllConversations(["allowed"]);

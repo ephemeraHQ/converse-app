@@ -11,7 +11,9 @@ export const accountCanMessagePeer = async (
   args: AccountCanMessagePeerArgs
 ) => {
   const { peer, account } = args;
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
 
   if (!client) {
     throw new Error("Client not found");

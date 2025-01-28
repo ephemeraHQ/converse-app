@@ -1,6 +1,6 @@
 import { queryClient } from "@/queries/queryClient";
-import { useQuery } from "@tanstack/react-query";
 import { getInboxId } from "@/utils/xmtpRN/signIn";
+import { useQuery } from "@tanstack/react-query";
 
 export type IGetInboxIdQueryData = Awaited<ReturnType<typeof getInboxId>>;
 
@@ -13,27 +13,27 @@ export type IGetInboxIdQueryOptions = {
 export function getInboxIdQueryOptions(args: {
   account: string;
 }): IGetInboxIdQueryOptions {
-  const { account } = args;
   return {
-    queryKey: ["inboxId", account],
-    queryFn: () => getInboxId(account),
-    enabled: !!account,
+    queryKey: ["inboxId", args.account],
+    queryFn: () => getInboxId(args.account),
+    enabled: !!args.account,
   };
 }
 
 export function useInboxIdQuery(args: { account: string }) {
-  const { account } = args;
-  return useQuery(getInboxIdQueryOptions({ account }));
+  return useQuery(getInboxIdQueryOptions(args));
 }
 
 export function getInboxIdFromQueryData(args: { account: string }) {
-  const { account } = args;
   return queryClient.getQueryData<IGetInboxIdQueryData>(
-    getInboxIdQueryOptions({ account }).queryKey
+    getInboxIdQueryOptions(args).queryKey
   );
 }
 
 export function prefetchInboxIdQuery(args: { account: string }) {
-  const { account } = args;
-  return queryClient.prefetchQuery(getInboxIdQueryOptions({ account }));
+  return queryClient.prefetchQuery(getInboxIdQueryOptions(args));
+}
+
+export function ensureInboxId(args: { account: string }) {
+  return queryClient.ensureQueryData(getInboxIdQueryOptions(args));
 }

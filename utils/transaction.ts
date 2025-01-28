@@ -4,7 +4,6 @@ import { ethers } from "ethers";
 import { evmHelpers } from "./evm/helpers";
 import logger from "./logger";
 // import { MessageToDisplay } from "../components/Chat/Message/Message";
-import { Transaction } from "../data/store/transactionsStore";
 
 export type TransactionContentType =
   | "transactionReference"
@@ -34,7 +33,7 @@ export const mergeTransactionRefData = (
   txRef: TransactionReference,
   txRefId: string,
   txDetails?: Partial<TransactionDetails>
-): Transaction => {
+) => {
   return {
     id: txRefId,
     transactionType,
@@ -136,12 +135,12 @@ export const getTxRefId = (
 export function createUniformTransaction(
   input: TransactionReference | any,
   txDetails?: Partial<TransactionDetails>
-): Transaction {
+) {
   const txType = getTransactionType(input);
 
   if (txType) {
     const txRefId = getTxRefId(input, txType);
-    let transaction: Transaction;
+    let transaction;
 
     switch (txType) {
       case "transactionReference": {

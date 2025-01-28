@@ -3,15 +3,12 @@ import * as Notifications from "expo-notifications";
 import { savePushToken } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 
-import {
-  ConversationWithCodecsType,
-  ConverseXmtpClientType,
-} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
-import { useAppStore } from "@data/store/appStore";
-import { subscribingByAccount } from "./subscribingByAccount";
 import { saveNotificationsSubscribe } from "@/utils/api/notifications";
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { useAppStore } from "@data/store/appStore";
 import { requestPushNotificationsPermissions } from "./requestPushNotificationsPermissions";
+import { subscribingByAccount } from "./subscribingByAccount";
 
 let nativePushToken: string | null;
 
@@ -34,7 +31,9 @@ export const subscribeToNotifications = async ({
     conversations.length
   );
 
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
 
   if (!client) {
     logger.error("[subscribeToNotifications] no client");

@@ -2,12 +2,11 @@ import { useCurrentAccount } from "@data/store/accountsStore";
 import { translate } from "@i18n";
 import { awaitableAlert } from "@utils/alert";
 import logger from "@utils/logger";
-import { useLogoutFromConverse } from "@utils/logout";
 import { Client } from "@xmtp/react-native-sdk";
 import { useEffect, useRef } from "react";
 import { getXmtpClient } from "./xmtp-client";
 
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { logoutAccount } from "@/utils/logout";
 
 export const isClientInstallationValid = async (client: Client) => {
   const inboxState = await client.inboxState(true);
@@ -26,7 +25,7 @@ export const isClientInstallationValid = async (client: Client) => {
 
 export const useCheckCurrentInstallation = () => {
   const account = useCurrentAccount() as string;
-  const logout = useLogoutFromConverse(account);
+
   // To make sure we're checking only once
   const accountCheck = useRef<string | undefined>(undefined);
   useEffect(() => {
@@ -34,7 +33,9 @@ export const useCheckCurrentInstallation = () => {
       if (!account) return;
       if (accountCheck.current === account) return;
       accountCheck.current = account;
-      const client = (await getXmtpClient(account)) as Client;
+      const client = (await getXmtpClient({
+        address: account,
+      })) as Client;
       const installationValid = await isClientInstallationValid(client);
 
       if (!installationValid) {
@@ -42,7 +43,7 @@ export const useCheckCurrentInstallation = () => {
           translate("current_installation_revoked"),
           translate("current_installation_revoked_description")
         );
-        logout(true);
+        logoutAccount({ account });
         accountCheck.current = undefined;
       }
     };
@@ -52,7 +53,7 @@ export const useCheckCurrentInstallation = () => {
           "No v3 keys found, you must pass a SigningKey in order to enable alpha MLS features"
         )
       ) {
-        logout(true, false);
+        logoutAccount({ account });
         accountCheck.current = undefined;
       }
       accountCheck.current = undefined;
@@ -60,7 +61,7 @@ export const useCheckCurrentInstallation = () => {
         error: `Could not check inbox state for ${account}`,
       });
     });
-  }, [account, logout]);
+  }, [account]);
 };
 export type InstallationSignature = {
   installationPublicKey: string;
@@ -71,7 +72,10 @@ export async function getInstallationKeySignature(
   account: string,
   message: string
 ): Promise<InstallationSignature> {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
+
   if (!client) throw new Error("Client not found");
 
   const raw = await client.signWithInstallationKey(message);

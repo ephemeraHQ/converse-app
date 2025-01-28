@@ -1,17 +1,13 @@
+import "@ethersproject/shims";
 import {
   useEmbeddedWallet,
   useLinkWithFarcaster,
   usePrivy,
 } from "@privy-io/expo";
 import { ethers } from "ethers";
-import "@ethersproject/shims";
 import { useEffect, useState } from "react";
-
 import { config } from "../../config";
-import {
-  useAccountsStore,
-  useCurrentAccount,
-} from "../../data/store/accountsStore";
+import { useCurrentAccount } from "../../data/store/accountsStore";
 
 import logger from "@utils/logger";
 
@@ -24,11 +20,10 @@ export const usePrivySigner = (
 ) => {
   const { isOnboarding = false } = params;
   const currentAccount = useCurrentAccount();
-  const privyAccountId = useAccountsStore((s) => s.privyAccountId);
   const { isReady: privyReady, user: privyUser } = usePrivy();
   const embeddedWallet = useEmbeddedWallet();
   const [hasSwitchedNetwork, setHasSwitchedNetwork] = useState(false);
-  if (!isOnboarding && (!currentAccount || !privyAccountId[currentAccount])) {
+  if (!isOnboarding && !currentAccount) {
     // Except during onboarding, we need to be
     // logged in a privy account to access a privy signer
     return undefined;

@@ -1,9 +1,8 @@
-export * from "./getPrimaryNames";
-export * from "./getPreferredName";
 export * from "./getPreferredAvatar";
+export * from "./getPreferredName";
 export * from "./getPreferredUsername";
+export * from "./getPrimaryNames";
 export * from "./getProfile";
-export * from "./getProfileData";
 
 // Inbox
 export * from "./getPreferredInboxAddress";

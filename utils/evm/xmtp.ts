@@ -17,7 +17,9 @@ export const useXmtpSigner = () => {
   const { getExternalSigner, resetExternalSigner } = useExternalSigner();
 
   const getXmtpSigner = useCallback(async () => {
-    const client = (await getXmtpClient({ account })) as ConverseXmtpClientType;
+    const client = await getXmtpClient({
+      address: account,
+    });
 
     if (privySigner) {
       const privyAddress = await privySigner.getAddress();

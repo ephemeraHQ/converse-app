@@ -1,14 +1,13 @@
+import { getInboxId } from "@/utils/xmtpRN/signIn";
+import {
+  deleteXmtpClient,
+  dropXmtpClient,
+  getXmtpClient,
+} from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { StackActions } from "@react-navigation/native";
 import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
 import logger from "@utils/logger";
 import { converseNavigatorRef } from "@utils/navigation";
-import {
-  dropXmtpClient,
-  getXmtpClient,
-  deleteXmtpClient,
-} from "@/utils/xmtpRN/xmtp-client/xmtp-client";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { getInboxId } from "@/utils/xmtpRN/signIn";
 
 import {
   getAccountsList,
@@ -156,7 +155,9 @@ export async function logoutAccount({ account }: { account: string }) {
 
   try {
     // Clean up XMTP client and database
-    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    const client = await getXmtpClient({
+      address: account,
+    });
     await client.dropLocalDatabaseConnection();
     logger.debug("[Logout] Successfully dropped connection to libxmp db");
 
@@ -173,7 +174,7 @@ export async function logoutAccount({ account }: { account: string }) {
   await dropXmtpClient((await getInboxId(account)) as InstallationId);
 
   // Clean up all account-related data
-  deleteXmtpClient(account);
+  deleteXmtpClient({ address: account });
   deleteSubscribedTopics(account);
   delete secureMmkvByAccount[account];
   delete lastNotifSubscribeByAccount[account];

@@ -2,10 +2,10 @@ import { config } from "@/config";
 import { getDbDirectory } from "@/data/db";
 import { captureError } from "@/utils/capture-error";
 import { getCleanEthAddress } from "@/utils/evm/address";
-import { stopStreamingAllMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
-import { stopStreamingConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences-stream";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { stopStreamingConversations } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-stream";
+import { stopStreamingAllMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
+import { stopStreamingConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences-stream";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
@@ -49,11 +49,6 @@ export function dropXmtpClient(installationId: InstallationId) {
 
 export async function deleteXmtpClient({ address }: { address: string }) {
   const cleanedEthAddress = getCleanEthAddress(address);
-  if (cleanedEthAddress in xmtpClientByEthAddress) {
-    stopStreamingAllMessage(address);
-    stopStreamingConversations(address);
-    stopStreamingConsent(address);
-  }
   delete xmtpClientByEthAddress[cleanedEthAddress];
 }
 
@@ -62,7 +57,7 @@ export async function getXmtpClient({
   inboxId,
 }: {
   address: string;
-  inboxId: InboxId;
+  inboxId?: InboxId;
 }) {
   const cleanedEthAddress = getCleanEthAddress(address);
 
@@ -93,7 +88,7 @@ async function buildXmtpClient({
   inboxId,
 }: {
   address: string;
-  inboxId: InboxId;
+  inboxId?: InboxId;
 }) {
   const startTime = Date.now();
   try {

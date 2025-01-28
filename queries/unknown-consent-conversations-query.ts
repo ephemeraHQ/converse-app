@@ -3,10 +3,7 @@ import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { captureError } from "@/utils/capture-error";
 import logger from "@/utils/logger";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import {
-  ConversationWithCodecsType,
-  ConverseXmtpClientType,
-} from "@/utils/xmtpRN/client.types";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { queryOptions } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -23,7 +20,9 @@ async function getUnknownConversations(args: { account: string }) {
     `[ConversationsQuery] Fetching conversations from network for account ${account}`
   );
 
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
 
   const beforeSync = new Date().getTime();
   await client.conversations.syncAllConversations(["unknown"]);
