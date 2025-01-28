@@ -19,7 +19,7 @@ export const HeaderDemo = memo(function HeaderDemo() {
       {/* Basic header with title */}
       <Header
         title="Basic Header"
-        backgroundColor={theme.colors.background.surface}
+        backgroundColor={theme.colors.background.surfaceless}
       />
 
       {/* Header with navigation actions */}
@@ -29,7 +29,7 @@ export const HeaderDemo = memo(function HeaderDemo() {
         onLeftPress={() => {}}
         rightIcon="xmark"
         onRightPress={() => {}}
-        backgroundColor={theme.colors.background.surface}
+        backgroundColor={theme.colors.background.surfaceless}
       />
 
       {/* Header with custom title and actions and collapsible indicator */}
@@ -71,7 +71,7 @@ export const HeaderDemo = memo(function HeaderDemo() {
         }
         leftIcon="chevron.left"
         onLeftPress={() => {}}
-        backgroundColor={theme.colors.background.surface}
+        backgroundColor={theme.colors.background.surfaceless}
       />
 
       {/* Settings header with back button */}
@@ -79,7 +79,7 @@ export const HeaderDemo = memo(function HeaderDemo() {
         title="Settings"
         leftIcon="chevron.left"
         onLeftPress={() => {}}
-        backgroundColor={theme.colors.background.surface}
+        backgroundColor={theme.colors.background.surfaceless}
       />
     </ScrollView>
   );

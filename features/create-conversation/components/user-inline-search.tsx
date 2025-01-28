@@ -102,7 +102,7 @@ export function UserInlineSearch({
 }
 
 const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.background.surface,
+  backgroundColor: colors.background.surfaceless,
   marginHorizontal: 16,
   marginVertical: 8,
   //   padding: spacing.sm,

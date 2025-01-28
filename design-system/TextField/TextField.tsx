@@ -180,7 +180,7 @@ const $inputWrapperStyle: ThemedStyle<ViewStyle> = ({
 }) => ({
   borderWidth: borderWidth.sm,
   borderRadius: borderRadius.xxs,
-  backgroundColor: colors.background.surface,
+  backgroundColor: colors.background.surfaceless,
   borderColor: colors.border.subtle,
   overflow: "hidden",
   paddingHorizontal: spacing.xs,

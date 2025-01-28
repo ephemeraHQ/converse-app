@@ -20,12 +20,7 @@ export const BottomSheetBackdropOpacity = memo(function BackdropOpacity(
       appearsOnIndex={0}
       animatedIndex={animatedIndex}
       animatedPosition={animatedPosition}
-      style={[
-        {
-          backgroundColor: theme.colors.background.scrim,
-        },
-        style,
-      ]}
+      style={style}
       {...rest}
     />
   );

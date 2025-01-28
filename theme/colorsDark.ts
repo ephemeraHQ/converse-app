@@ -41,18 +41,18 @@ export const colorsDark: IColors = {
     },
   },
   background: {
-    surface: darkPalette.dark,
-    sunken: darkPalette.dark85,
+    surface: darkPalette.dark92,
+    sunken: darkPalette.dark,
     raised: darkPalette.dark85,
-    scrim: darkPalette.scrim,
-    blurred: darkPalette.dark90,
+    blurred: darkPalette.alpha90,
+    surfaceless: darkPalette.dark,
   },
   text: {
     primary: lightPalette.light,
     secondary: lightPalette.light60,
     tertiary: lightPalette.light30,
     inactive: lightPalette.light15,
-    caution: lightPalette.red,
+    caution: darkPalette.red,
     action: darkPalette.deepAccent,
     inverted: {
       primary: darkPalette.dark,

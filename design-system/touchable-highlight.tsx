@@ -11,8 +11,8 @@ export const TouchableHighlight = memo(function TouchableHighlight(
   const { theme } = useAppTheme();
   return (
     <RNTouchableHighlight
+      underlayColor={theme.colors.background.surface}
       {...props}
-      underlayColor={theme.colors.background.sunken}
     />
   );
 });

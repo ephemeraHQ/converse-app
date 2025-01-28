@@ -30,7 +30,7 @@ export const ConversationListItemAvatarSkeleton = memo(
             width: size,
           }}
           colors={[
-            hexToRGBA(theme.colors.background.surface, 0),
+            hexToRGBA(theme.colors.background.surfaceless, 0),
             theme.colors.background.surface,
           ]}
         />
