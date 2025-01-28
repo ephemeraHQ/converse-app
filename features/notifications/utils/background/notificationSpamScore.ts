@@ -4,8 +4,8 @@ import {
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
   GroupWithCodecsType,
-} from "@/utils/xmtpRN/client/client.types";
-import { isContentType } from "@/utils/xmtpRN/content-types/content-types";
+} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { isContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 
 export const computeSpamScoreGroupWelcome = async (
   xmtpClient: ConverseXmtpClientType,

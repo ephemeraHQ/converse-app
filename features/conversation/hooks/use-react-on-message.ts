@@ -9,7 +9,7 @@ import { captureError, captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";
 import { Haptics } from "@/utils/haptics";
-import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
+import { contentTypesPrefixes } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 import { useMutation } from "@tanstack/react-query";
 import {
   ConversationTopic,

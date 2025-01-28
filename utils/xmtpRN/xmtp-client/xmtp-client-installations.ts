@@ -5,9 +5,9 @@ import logger from "@utils/logger";
 import { useLogoutFromConverse } from "@utils/logout";
 import { Client } from "@xmtp/react-native-sdk";
 import { useEffect, useRef } from "react";
-import { getXmtpClient } from "../sync";
+import { getXmtpClient } from "./xmtp-client";
 
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client/client.types";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 
 export const isClientInstallationValid = async (client: Client) => {
   const inboxState = await client.inboxState(true);

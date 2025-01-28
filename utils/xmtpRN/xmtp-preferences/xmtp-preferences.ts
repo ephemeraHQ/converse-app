@@ -1,5 +1,5 @@
 import logger from "@/utils/logger";
-import { getXmtpClient } from "../sync";
+import { getXmtpClient } from "../xmtp-client/xmtp-client";
 import { captureError } from "@/utils/capture-error";
 
 export const syncConsent = async (account: string) => {

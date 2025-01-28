@@ -12,7 +12,7 @@ import {
 import { useConnectViaWalletContext } from "./ConnectViaWallet.context";
 import { ensureError } from "@utils/error";
 import { thirdwebClient } from "@utils/thirdweb";
-import { getInboxId } from "@utils/xmtpRN/signIn";
+import { getInboxId } from "@/utils/xmtpRN/signIn";
 
 /**
  * For now let's keep Thirdweb and the hooks because I haven't found a better way to do it.
@@ -91,7 +91,9 @@ export function useInitConnectViaWalletState(args: { address: string }) {
         setSigner(thirdwebSigner);
 
         logger.debug(
-          `[Connect Wallet] User connected wallet ${thirdwebWallet?.id} (${address}). V3 database ${hasV3 ? "already" : "not"} present`
+          `[Connect Wallet] User connected wallet ${
+            thirdwebWallet?.id
+          } (${address}). V3 database ${hasV3 ? "already" : "not"} present`
         );
       } catch (error) {
         logger.error("[Connect Wallet] Error initializing wallet:", error);

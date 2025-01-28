@@ -16,7 +16,7 @@ export function useConnectViaWalletDisconnect() {
 
       if (address) {
         logger.debug(`[Connect Wallet] Logging out address ${address}`);
-        logoutAccount(address, false, true, () => {});
+        logoutAccount({ account: address });
       }
 
       if (thirdwebWallet) {

@@ -15,8 +15,8 @@ import { v4 as uuidv4 } from "uuid";
 import { waitForConverseEvent } from "./events";
 import { useExternalSigner } from "./evm/external";
 import { strByteSize } from "./str";
-import { ConverseXmtpClientType } from "./xmtpRN/client/client.types";
-import { getXmtpClient } from "./xmtpRN/sync";
+import { ConverseXmtpClientType } from "./xmtpRN/xmtp-client/xmtp-client.types";
+import { getXmtpClient } from "./xmtpRN/xmtp-client/xmtp-client";
 
 export type FrameWithType = FramesApiResponse & {
   type: "FARCASTER_FRAME" | "XMTP_FRAME" | "PREVIEW";
@@ -240,8 +240,9 @@ export const useHandleTxAction = () => {
         value: txData.params.value,
         data: txData.params.data,
       };
-      const [transactionId, receipt] =
-        await waitForConverseEvent("transactionResult");
+      const [transactionId, receipt] = await waitForConverseEvent(
+        "transactionResult"
+      );
       const transactionReceipt =
         transactionId === transactionData.id ? receipt : undefined;
 

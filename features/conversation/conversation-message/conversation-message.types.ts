@@ -1,4 +1,4 @@
-import { IConvosContentType } from "@/utils/xmtpRN/content-types/content-types";
+import { IConvosContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 import {
   InboxId,
   MessageId,

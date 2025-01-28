@@ -3,9 +3,9 @@ import {
   getConversationMessagesQueryData,
   useConversationMessagesQuery,
 } from "@/queries/use-conversation-messages-query";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client/client.types";
-import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/content-types/coinbasePayment";
-import { getMessageContentType } from "@/utils/xmtpRN/content-types/content-types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/xmtp-content-types/xmtp-coinbase-payment";
+import { getMessageContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 import {
   getCurrentAccount,
   useCurrentAccount,

@@ -2,10 +2,13 @@ import { StackActions } from "@react-navigation/native";
 import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
 import logger from "@utils/logger";
 import { converseNavigatorRef } from "@utils/navigation";
-import { dropXmtpClient } from "@utils/xmtpRN/client/client";
-import { ConverseXmtpClientType } from "@utils/xmtpRN/client/client.types";
-import { getInboxId } from "@utils/xmtpRN/signIn";
-import { useCallback } from "react";
+import {
+  dropXmtpClient,
+  getXmtpClient,
+  deleteXmtpClient,
+} from "@/utils/xmtpRN/xmtp-client/xmtp-client";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { getInboxId } from "@/utils/xmtpRN/signIn";
 
 import {
   getAccountsList,
@@ -30,8 +33,6 @@ import { deleteSubscribedTopics } from "@features/notifications/utils/deleteSubs
 import { lastNotifSubscribeByAccount } from "@features/notifications/utils/lastNotifSubscribeByAccount";
 import { unsubscribeFromNotifications } from "@features/notifications/utils/unsubscribeFromNotifications";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
-import { deleteXmtpClient, getXmtpClient } from "../xmtpRN/sync";
-import { useDisconnectFromPrivy } from "./privy";
 
 type LogoutTasks = {
   [account: string]: {
@@ -132,8 +133,11 @@ export const executeLogoutTasks = async () => {
         await clearSecureMmkvForAccount(account);
       }
       removeLogoutTask(account);
-    } catch (e: any) {
-      if (e.toString().includes("CONVERSE_ACCOUNT_LOGGED_IN")) {
+    } catch (e) {
+      if (
+        e instanceof Error &&
+        e.message.includes("CONVERSE_ACCOUNT_LOGGED_IN")
+      ) {
         removeLogoutTask(account);
       } else {
         logger.error(e, {
@@ -146,44 +150,35 @@ export const executeLogoutTasks = async () => {
   return true;
 };
 
-export const logoutAccount = async (
-  account: string,
-  dropLocalDatabase: boolean,
-  isV3Enabled: boolean = true,
-  privyLogout: () => void
-) => {
-  // Reset navigation state first
+export async function logoutAccount({ account }: { account: string }) {
+  // Reset navigation state before cleanup
   converseNavigatorRef.current?.dispatch(StackActions.popToTop());
 
-  if (isV3Enabled) {
-    // This clears the libxmtp sqlite database (v3 / groups)
-    try {
-      const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-      await client.dropLocalDatabaseConnection();
-      logger.debug("[Logout] Successfully dropped connection to libxmp db");
-      if (dropLocalDatabase) {
-        await client.deleteLocalDatabase();
-        logger.debug("[Logout] Successfully deleted libxmp db");
-        // Manual delete database files
-        await deleteLibXmtpDatabaseForInboxId(client.inboxId);
-      }
-    } catch (error) {
-      logger.warn("[Logout] Could not get XMTP Client while logging out", {
-        error,
-      });
-    }
+  try {
+    // Clean up XMTP client and database
+    const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+    await client.dropLocalDatabaseConnection();
+    logger.debug("[Logout] Successfully dropped connection to libxmp db");
+
+    await client.deleteLocalDatabase();
+    logger.debug("[Logout] Successfully deleted libxmp db");
+    await deleteLibXmtpDatabaseForInboxId(client.inboxId);
+  } catch (error) {
+    logger.warn("[Logout] Could not get XMTP Client while logging out", {
+      error,
+    });
   }
 
+  // Drop XMTP client and clean up account data
   await dropXmtpClient((await getInboxId(account)) as InstallationId);
-  const isPrivyAccount = !!useAccountsStore.getState().privyAccountId[account];
 
-  // Clean up all account-related data first
+  // Clean up all account-related data
   deleteXmtpClient(account);
   deleteSubscribedTopics(account);
   delete secureMmkvByAccount[account];
   delete lastNotifSubscribeByAccount[account];
 
-  // Remove account from store and handle switching
+  // Handle account switching and store cleanup
   useAccountsStore.getState().removeAccount(account);
   const remainingAccounts = getAccountsList();
   const setCurrentAccount = useAccountsStore.getState().setCurrentAccount;
@@ -195,18 +190,12 @@ export const logoutAccount = async (
     setAuthStatus("signedOut");
   }
 
-  if (isPrivyAccount) {
-    privyLogout();
-  }
-
-  // Save logout task
+  // Save logout task for background cleanup
   const pkPath = getWalletStore(account).getState().privateKeyPath;
   let apiHeaders: { [key: string]: string } | undefined;
   try {
     apiHeaders = await getXmtpApiHeaders(account);
   } catch (error) {
-    // If we have a broken client we might not be able
-    // to generate the headers
     logger.warn("[Logout] Could not get API headers while logging out", {
       error,
     });
@@ -216,16 +205,4 @@ export const logoutAccount = async (
   setTimeout(() => {
     executeLogoutTasks();
   }, 500);
-};
-
-export const useLogoutFromConverse = (account: string) => {
-  const privyLogout = useDisconnectFromPrivy();
-
-  const logout = useCallback(
-    async (dropLocalDatabase: boolean, isV3Enabled: boolean = true) => {
-      logoutAccount(account, dropLocalDatabase, isV3Enabled, privyLogout);
-    },
-    [account, privyLogout]
-  );
-  return logout;
-};
+}

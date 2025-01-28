@@ -15,8 +15,8 @@ import { sentryTrackMessage } from "@utils/sentry";
 import {
   createXmtpClientFromSigner,
   createXmtpClientFromViemAccount,
-} from "@utils/xmtpRN/signIn";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
+} from "@/utils/xmtpRN/signIn";
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { ViemAccount } from "@/utils/xmtpRN/signer";
 
 export async function initXmtpClient(args: {
@@ -46,7 +46,7 @@ export async function initXmtpClient(args: {
       ...restArgs,
     });
   } catch (e) {
-    await logoutAccount(address, false, true, () => {});
+    await logoutAccount({ account: address });
     logger.error(e);
     throw e;
   }
@@ -84,7 +84,7 @@ export async function initXmtpClientFromViemAccount(args: {
       ...restArgs,
     });
   } catch (e) {
-    await logoutAccount(address, false, true, () => {});
+    await logoutAccount({ account: address });
     logger.error(e);
     throw e;
   }

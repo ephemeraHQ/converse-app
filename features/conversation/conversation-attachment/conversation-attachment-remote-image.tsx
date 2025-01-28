@@ -12,7 +12,7 @@ import { handleDecryptedLocalAttachment } from "@utils/attachment/handleDecrypte
 import {
   MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE,
   fetchAndDecodeRemoteAttachment,
-} from "@utils/xmtpRN/attachments";
+} from "@/utils/xmtpRN/attachments";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import { Image } from "expo-image";
 import prettyBytes from "pretty-bytes";

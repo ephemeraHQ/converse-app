@@ -6,8 +6,8 @@ import logger from "@utils/logger";
 import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
-} from "@/utils/xmtpRN/client/client.types";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
+} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { useAppStore } from "@data/store/appStore";
 import { subscribingByAccount } from "./subscribingByAccount";
 import { saveNotificationsSubscribe } from "@/utils/api/notifications";

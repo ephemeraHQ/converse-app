@@ -1,7 +1,7 @@
 import EventEmitter from "eventemitter3";
 import { Account, Wallet } from "thirdweb/wallets";
 import type { TransactionReceipt } from "viem";
-import { GroupWithCodecsType } from "./xmtpRN/client/client.types";
+import { GroupWithCodecsType } from "./xmtpRN/xmtp-client/xmtp-client.types";
 
 type ShowActionSheetEvent<T extends string> = `showActionSheetForTxRef-${T}`;
 type OpenAttachmentMessage<T extends string> = `openAttachmentForMessage-${T}`;

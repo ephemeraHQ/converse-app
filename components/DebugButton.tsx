@@ -6,7 +6,7 @@ import {
 } from "@utils/logger";
 import { navigate } from "@utils/navigation";
 import Share from "@utils/share";
-import { getNativeLogFile } from "@utils/xmtpRN/logs";
+import { getNativeLogFile } from "@/utils/xmtpRN/logs";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import * as Updates from "expo-updates";

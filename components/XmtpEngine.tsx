@@ -1,4 +1,7 @@
-import { stopStreamingAllMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
+import {
+  stopStreamingAllMessage,
+  streamAllMessages,
+} from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
 import { appStateIsBlurredState } from "@utils/appState/appStateIsBlurred";
 import logger from "@utils/logger";
 import {
@@ -8,9 +11,16 @@ import {
 } from "react-native";
 import { getAccountsList, useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
-import { stopStreamingConversations } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-stream";
+import {
+  stopStreamingConversations,
+  streamConversations,
+} from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-stream";
 import { syncConversationListXmtpClient } from "../utils/xmtpRN/sync";
-import { stopStreamingConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences-stream";
+import {
+  stopStreamingConsent,
+  streamConsent,
+} from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences-stream";
+import { setupAccountTopicSubscription } from "@/features/notifications/utils/accountTopicSubscription";
 
 class XmtpEngine {
   accountsStoreSubscription: (() => void) | null = null;
@@ -129,13 +139,29 @@ class XmtpEngine {
         logger.info(`[XmtpEngine] Syncing account ${a}`);
         this.syncedAccounts[a] = true;
         this.syncingAccounts[a] = true;
-        syncConversationListXmtpClient(a)
-          .then(() => {
-            this.syncingAccounts[a] = false;
-          })
-          .catch(() => {
-            this.syncingAccounts[a] = false;
-          });
+
+        Promise.all([
+          streamConversations(a).catch((e) => {
+            logger.error(e, {
+              context: `Failed to stream conversations for ${a}`,
+            });
+          }),
+
+          streamAllMessages(a).catch((e) => {
+            logger.error(e, {
+              context: `Failed to stream all messages for ${a}`,
+            });
+          }),
+
+          streamConsent(a).catch((e) => {
+            logger.error(e, {
+              context: `Failed to stream consent for ${a}`,
+            });
+          }),
+        ]);
+
+        // Setup topic subscription after streams are initialized
+        setupAccountTopicSubscription(a);
       }
     });
   }

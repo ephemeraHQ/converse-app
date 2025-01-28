@@ -7,7 +7,7 @@ import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
 } from "@/utils/xmtpRN/client.types";
-import { getXmtpClient } from "@/utils/xmtpRN/sync";
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { queryOptions } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";

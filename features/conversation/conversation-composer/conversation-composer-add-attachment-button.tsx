@@ -12,7 +12,7 @@ import {
   takePictureFromCamera,
 } from "@utils/media";
 import { sentryTrackError, sentryTrackMessage } from "@utils/sentry";
-import { encryptRemoteAttachment } from "@utils/xmtpRN/attachments";
+import { encryptRemoteAttachment } from "@/utils/xmtpRN/attachments";
 import * as ImagePicker from "expo-image-picker";
 import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";

@@ -9,8 +9,8 @@ import {
   ConversationWithCodecsType,
   ConverseXmtpClientType,
   DmWithCodecsType,
-} from "./client/client.types";
-import { getXmtpClient } from "./sync";
+} from "./xmtp-client/xmtp-client.types";
+import { getXmtpClient } from "./xmtp-client/xmtp-client";
 import { streamAllMessages } from "./xmtp-messages/xmtp-messages-stream";
 
 async function findGroup(args: {

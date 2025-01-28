@@ -1,6 +1,6 @@
 import logger from "@utils/logger";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client/client.types";
-import { getXmtpClient } from "@/utils/xmtpRN/sync";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 
 type UpdateConsentForGroupsForAccountArgs = {
   account: string;

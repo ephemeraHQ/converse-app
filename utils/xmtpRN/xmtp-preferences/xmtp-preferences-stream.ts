@@ -1,7 +1,7 @@
 import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
 import { captureError } from "@/utils/capture-error";
 import logger from "@/utils/logger";
-import { getXmtpClient } from "../sync";
+import { getXmtpClient } from "../xmtp-client/xmtp-client";
 import { ConverseXmtpClientType } from "../client.types";
 import { getConversationsQueryData } from "@/queries/use-conversations-query";
 

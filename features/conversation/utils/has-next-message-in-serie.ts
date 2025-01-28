@@ -1,4 +1,4 @@
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client/client.types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 
 type HasNextMessageInSeriesPayload = {
   currentMessage: DecodedMessageWithCodecsType;

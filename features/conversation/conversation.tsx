@@ -62,7 +62,7 @@ import { captureError } from "@/utils/capture-error";
 import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
-} from "@/utils/xmtpRN/client/client.types";
+} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { Center } from "@design-system/Center";
 import { Text } from "@design-system/Text";

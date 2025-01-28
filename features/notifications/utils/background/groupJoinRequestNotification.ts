@@ -1,7 +1,7 @@
 import { getTopicFromV3Id } from "@/utils/groupUtils/groupId";
 import mmkv from "@/utils/mmkv";
 import { sentryTrackError, sentryTrackMessage } from "@/utils/sentry";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client/client.types";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { getGroupByTopic } from "@/utils/xmtpRN/conversations";
 import notifee, { AndroidVisibility } from "@notifee/react-native";
 import { ConversationId } from "@xmtp/react-native-sdk";

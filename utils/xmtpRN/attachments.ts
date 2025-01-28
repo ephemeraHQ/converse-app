@@ -1,7 +1,7 @@
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import RNFS from "react-native-fs";
-import { ConverseXmtpClientType } from "./client/client.types";
-import { getXmtpClient } from "./sync";
+import { ConverseXmtpClientType } from "./xmtp-client/xmtp-client.types";
+import { getXmtpClient } from "./xmtp-client/xmtp-client";
 
 export const MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE = 10000000; // 10MB
 

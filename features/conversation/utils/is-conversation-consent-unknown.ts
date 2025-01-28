@@ -1,4 +1,4 @@
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/client/client.types";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 
 export function isConversationConsentUnknown(
   conversation: ConversationWithCodecsType

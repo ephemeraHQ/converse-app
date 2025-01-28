@@ -3,8 +3,8 @@ import { isConversationConsentUnknown } from "@/features/conversation/utils/is-c
 import { addConversationToUnknownConsentConversationsQuery } from "@/queries/unknown-consent-conversations-query";
 import { addConversationToConversationsQuery } from "@/queries/use-conversations-query";
 import logger from "@utils/logger";
-import { ConverseXmtpClientType } from "../client.types";
-import { getXmtpClient } from "../sync";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { getXmtpClient } from "../xmtp-client/xmtp-client";
 
 export const streamConversations = async (account: string) => {
   await stopStreamingConversations(account);

@@ -2,7 +2,7 @@ import { captureError } from "@/utils/capture-error";
 import logger from "@/utils/logger";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
-import { getXmtpClient } from "@/utils/xmtpRN/sync";
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
