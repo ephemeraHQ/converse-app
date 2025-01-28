@@ -1,55 +1,12 @@
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { translate } from "@i18n";
 import { awaitableAlert } from "@utils/alert";
-import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
-import { useLogoutFromConverse } from "@utils/logout";
-import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
-import {
-  Client,
-  GroupUpdatedCodec,
-  ReactionCodec,
-  ReadReceiptCodec,
-  RemoteAttachmentCodec,
-  ReplyCodec,
-  StaticAttachmentCodec,
-  TextCodec,
-} from "@xmtp/react-native-sdk";
+import { Client } from "@xmtp/react-native-sdk";
 import { useEffect, useRef } from "react";
-import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
-import { config } from "../../config";
-import { getDbDirectory } from "../../data/db";
-import { CoinbaseMessagingPaymentCodec } from "./content-types/coinbasePayment";
-import { getXmtpClient } from "./sync";
-import { ConverseXmtpClientType } from "./client.types";
+import { getXmtpClient } from "./xmtp-client";
 
-const codecs = [
-  new TextCodec(),
-  new ReactionCodec(),
-  new ReadReceiptCodec(),
-  new GroupUpdatedCodec(),
-  new ReplyCodec(),
-  new RemoteAttachmentCodec(),
-  new StaticAttachmentCodec(),
-  new TransactionReferenceCodec(),
-  new CoinbaseMessagingPaymentCodec(),
-];
-
-export const getXmtpClientFromAddress = async (address: string) => {
-  const dbDirectory = await getDbDirectory();
-  const dbEncryptionKey = await getDbEncryptionKey();
-
-  return Client.build(address, {
-    env: config.xmtpEnv,
-    codecs,
-    dbDirectory,
-    dbEncryptionKey,
-  });
-};
-
-export const xmtpClientByAccount: {
-  [account: string]: ConverseXmtpClientType;
-} = {};
+import { logoutAccount } from "@/utils/logout";
 
 export const isClientInstallationValid = async (client: Client) => {
   const inboxState = await client.inboxState(true);
@@ -68,7 +25,7 @@ export const isClientInstallationValid = async (client: Client) => {
 
 export const useCheckCurrentInstallation = () => {
   const account = useCurrentAccount() as string;
-  const logout = useLogoutFromConverse(account);
+
   // To make sure we're checking only once
   const accountCheck = useRef<string | undefined>(undefined);
   useEffect(() => {
@@ -76,7 +33,9 @@ export const useCheckCurrentInstallation = () => {
       if (!account) return;
       if (accountCheck.current === account) return;
       accountCheck.current = account;
-      const client = (await getXmtpClient(account)) as Client;
+      const client = (await getXmtpClient({
+        address: account,
+      })) as Client;
       const installationValid = await isClientInstallationValid(client);
 
       if (!installationValid) {
@@ -84,7 +43,7 @@ export const useCheckCurrentInstallation = () => {
           translate("current_installation_revoked"),
           translate("current_installation_revoked_description")
         );
-        logout(true);
+        logoutAccount({ account });
         accountCheck.current = undefined;
       }
     };
@@ -94,7 +53,7 @@ export const useCheckCurrentInstallation = () => {
           "No v3 keys found, you must pass a SigningKey in order to enable alpha MLS features"
         )
       ) {
-        logout(true, false);
+        logoutAccount({ account });
         accountCheck.current = undefined;
       }
       accountCheck.current = undefined;
@@ -102,12 +61,8 @@ export const useCheckCurrentInstallation = () => {
         error: `Could not check inbox state for ${account}`,
       });
     });
-  }, [account, logout]);
+  }, [account]);
 };
-
-export const dropXmtpClient = (installationId: InstallationId) =>
-  Client.dropClient(installationId);
-
 export type InstallationSignature = {
   installationPublicKey: string;
   installationKeySignature: string;
@@ -117,7 +72,10 @@ export async function getInstallationKeySignature(
   account: string,
   message: string
 ): Promise<InstallationSignature> {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
+
   if (!client) throw new Error("Client not found");
 
   const raw = await client.signWithInstallationKey(message);

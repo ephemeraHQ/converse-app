@@ -1,5 +1,4 @@
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
-import { getXmtpClient } from "@/utils/xmtpRN/sync";
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import logger from "@utils/logger";
 import { InboxId } from "@xmtp/react-native-sdk";
 
@@ -14,7 +13,9 @@ export const updateInboxIdsConsentForAccount = async ({
   inboxIds,
   consent,
 }: UpdateInboxIdsConsentForAccountParams): Promise<void> => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
 
   if (!client) {
     throw new Error("Client not found");

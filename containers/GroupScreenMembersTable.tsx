@@ -20,7 +20,7 @@ import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useInboxProfilesSocials } from "@/hooks/useInboxProfilesSocials";
 import { captureErrorWithFriendlyToast } from "@/utils/capture-error";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { useGroupPermissionPolicyQuery } from "@queries/useGroupPermissionPolicyQuery";
 import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import TableView, {

@@ -1,15 +1,16 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
-import { fetchConversationMessageQuery } from "@/queries/useConversationMessage";
 import {
   addConversationMessageQuery,
   refetchConversationMessages,
   replaceOptimisticMessageWithReal,
 } from "@/queries/use-conversation-messages-query";
+import { fetchConversationMessageQuery } from "@/queries/useConversationMessage";
+import { getOrFetchConversation } from "@/queries/useConversationQuery";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";
-import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
+import { contentTypesPrefixes } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 import { useMutation } from "@tanstack/react-query";
 import {
   ConversationTopic,
@@ -20,7 +21,6 @@ import {
   TextCodec,
 } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
-import { getOrFetchConversation } from "@/queries/useConversationQuery";
 
 export type ISendMessageParams = {
   topic: ConversationTopic;

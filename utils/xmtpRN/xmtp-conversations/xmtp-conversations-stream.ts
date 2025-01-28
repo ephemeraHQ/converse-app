@@ -1,32 +1,38 @@
-import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
-import { isConversationConsentUnknown } from "@/features/conversation/utils/is-conversation-consent-unknown";
-import { addConversationToUnknownConsentConversationsQuery } from "@/queries/unknown-consent-conversations-query";
-import { addConversationToConversationsQuery } from "@/queries/use-conversations-query";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import logger from "@utils/logger";
-import { ConverseXmtpClientType } from "../client.types";
-import { getXmtpClient } from "../sync";
+import { getXmtpClient } from "../xmtp-client/xmtp-client";
 
-export const streamConversations = async (account: string) => {
-  await stopStreamingConversations(account);
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
-  await client.conversations.stream(async (conversation) => {
-    logger.info("[XMTPRN Conversations] GOT A NEW CONVO");
-    if (isConversationAllowed(conversation)) {
-      addConversationToConversationsQuery({
-        account,
-        conversation,
-      });
-    } else if (isConversationConsentUnknown(conversation)) {
-      addConversationToUnknownConsentConversationsQuery({
-        account,
-        conversation,
-      });
-    }
+export async function streamConversations(args: {
+  ethAddress: string;
+  onNewConversation: (
+    conversation: ConversationWithCodecsType
+  ) => void | Promise<void>;
+}) {
+  const { ethAddress, onNewConversation } = args;
+
+  // Stop before restarting just to be sure
+  await stopStreamingConversations({ ethAddress });
+
+  const client = await getXmtpClient({
+    address: ethAddress,
   });
-  logger.info("STREAMING CONVOS");
-};
 
-export const stopStreamingConversations = async (account: string) => {
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  logger.debug(
+    `[XMTP - streamConversations] Started streaming conversations for account: ${ethAddress}`
+  );
+
+  await client.conversations.stream(async (conversation) => {
+    logger.debug(
+      `[XMTP - streamConversations] Received new conversation for account: ${ethAddress}`
+    );
+    onNewConversation(conversation);
+  });
+}
+
+export async function stopStreamingConversations(args: { ethAddress: string }) {
+  const { ethAddress } = args;
+  const client = await getXmtpClient({
+    address: ethAddress,
+  });
   return client.conversations.cancelStream();
-};
+}

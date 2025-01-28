@@ -1,18 +1,16 @@
+import { logoutAccount } from "@/utils/logout";
 import { translate } from "@i18n";
 import { actionSheetColors } from "@styles/colors";
 import { useCallback } from "react";
 import { ColorSchemeName } from "react-native";
-
 import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
 import {
   useAccountsStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
-import { useLogoutFromConverse } from "../utils/logout";
 
 export const useDisconnectActionSheet = (account?: string) => {
   const currentAccount = useAccountsStore((s) => s.currentAccount);
-  const logout = useLogoutFromConverse(account || currentAccount);
   const { ephemeralAccount } = useSettingsStore((s) => ({
     ephemeralAccount: s.ephemeralAccount,
   }));
@@ -20,11 +18,13 @@ export const useDisconnectActionSheet = (account?: string) => {
   return useCallback(
     async (colorScheme: ColorSchemeName) => {
       const methods: Record<string, () => void> = {
-        [translate("disconnect_delete_local_data")]: () => logout(true),
+        [translate("disconnect_delete_local_data")]: () =>
+          logoutAccount({ account: currentAccount }),
         [translate("cancel")]: () => {},
       };
       if (!ephemeralAccount) {
-        methods[translate("log_out")] = () => logout(false);
+        methods[translate("log_out")] = () =>
+          logoutAccount({ account: currentAccount });
       }
 
       const options = Object.keys(methods);
@@ -48,6 +48,6 @@ export const useDisconnectActionSheet = (account?: string) => {
         }
       );
     },
-    [logout, ephemeralAccount]
+    [ephemeralAccount, currentAccount]
   );
 };

@@ -4,7 +4,7 @@ import { GroupInvite } from "@/utils/api/api-groups/api-group.types";
 import {
   ConversationDataEntity,
   ConversationWithCodecsType,
-} from "@utils/xmtpRN/client.types";
+} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { assign, fromPromise, log, setup } from "xstate";
 
 import { AllowGroupProps } from "./JoinGroup.client";

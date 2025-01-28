@@ -1,6 +1,6 @@
 import logger from "@utils/logger";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
-import { getXmtpClient } from "@/utils/xmtpRN/sync";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 
 type AccountCanMessagePeerArgs = {
   account: string;
@@ -11,7 +11,9 @@ export const accountCanMessagePeer = async (
   args: AccountCanMessagePeerArgs
 ) => {
   const { peer, account } = args;
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
 
   if (!client) {
     throw new Error("Client not found");

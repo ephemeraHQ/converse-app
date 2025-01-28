@@ -1,7 +1,6 @@
-import { queryOptions } from "@tanstack/react-query";
 import logger from "@/utils/logger";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
+import { queryOptions } from "@tanstack/react-query";
 import { MessageId } from "@xmtp/react-native-sdk";
 import { conversationMessageQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
@@ -26,7 +25,9 @@ async function getConversationMessage(args: IArgs) {
     `[useConversationMessage] Fetching message ${messageId} for account ${account}`
   );
 
-  const xmtpClient = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const xmtpClient = await getXmtpClient({
+    address: account,
+  });
 
   if (!xmtpClient) {
     throw new Error("XMTP client not found");

@@ -12,7 +12,7 @@ import {
   GroupData,
   GroupsDataEntity,
   GroupWithCodecsType,
-} from "@utils/xmtpRN/client.types";
+} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import {
   Conversation,
   ConversationId,

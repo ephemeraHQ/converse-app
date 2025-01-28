@@ -16,7 +16,7 @@ import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import {
   ConversationWithCodecsType,
   DmWithCodecsType,
-} from "@/utils/xmtpRN/client.types";
+} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { useMutation } from "@tanstack/react-query";
 import {
   ConversationId,

@@ -1,18 +1,9 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import logger from "@/utils/logger";
 
-export function captureError(
-  error: unknown,
-  options?: {
-    message?: string;
-    caller?: string;
-  }
-) {
-  const { message, caller } = options || {};
-  const prefix = caller ? `[${caller}]` : message ? `${message}:` : "";
-
-  if (prefix) {
-    logger.error(prefix, error);
+export function captureError(error: unknown) {
+  if (error instanceof Error && error.cause) {
+    logger.error(error.message, `Caused by:`, error.cause);
   } else {
     logger.error(error);
   }

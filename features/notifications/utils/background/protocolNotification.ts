@@ -1,14 +1,13 @@
+import { isV3Topic } from "@/utils/groupUtils/groupId";
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { getAccountsList } from "@data/store/accountsStore";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
-import { z } from "zod";
 import logger from "@utils/logger";
+import { z } from "zod";
 import { handleV3MessageNotification } from "./groupMessageNotification";
 import {
   handleGroupWelcomeNotification,
   isGroupWelcomeContentTopic,
 } from "./groupWelcomeNotification";
-import { isV3Topic } from "@/utils/groupUtils/groupId";
 
 export const ProtocolNotificationSchema = z.object({
   account: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
@@ -39,9 +38,9 @@ export const handleProtocolNotification = async (
     logger.debug(
       `[ProtocolNotification] found account ${notification.account}`
     );
-    const xmtpClient = (await getXmtpClient(
-      notification.account
-    )) as ConverseXmtpClientType;
+    const xmtpClient = await getXmtpClient({
+      address: notification.account,
+    });
     if (isV3Topic(notification.contentTopic)) {
       handleV3MessageNotification(xmtpClient, notification);
     } else if (isGroupWelcomeContentTopic(notification.contentTopic)) {

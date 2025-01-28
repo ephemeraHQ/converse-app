@@ -1,5 +1,9 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import {
+  persist,
+  createJSONStorage,
+  subscribeWithSelector,
+} from "zustand/middleware";
 
 import { zustandMMKVStorage } from "../../utils/mmkv";
 import logger from "@/utils/logger";
@@ -39,52 +43,55 @@ type AppStoreType = {
 };
 
 export const useAppStore = create<AppStoreType>()(
-  persist(
-    (set) => ({
-      notificationsPermissionStatus: "undetermined",
-      setNotificationsPermissionStatus: (status) =>
-        set(() => ({
-          notificationsPermissionStatus: status,
-        })),
+  subscribeWithSelector(
+    persist(
+      (set) => ({
+        notificationsPermissionStatus: "undetermined",
+        setNotificationsPermissionStatus: (status) =>
+          set(() => ({
+            notificationsPermissionStatus: status,
+          })),
 
-      addressBookPermissionStatus: "undetermined",
-      setAddressBookPermissionStatus: (status) =>
-        set(() => ({
-          addressBookPermissionStatus: status,
-        })),
+        addressBookPermissionStatus: "undetermined",
+        setAddressBookPermissionStatus: (status) =>
+          set(() => ({
+            addressBookPermissionStatus: status,
+          })),
 
-      // On web no splash screen at all
-      splashScreenHidden: false,
-      setSplashScreenHidden: (hidden) =>
-        set(() => ({ splashScreenHidden: hidden })),
+        // On web no splash screen at all
+        splashScreenHidden: false,
+        setSplashScreenHidden: (hidden) =>
+          set(() => ({ splashScreenHidden: hidden })),
 
-      isInternetReachable: false,
-      setIsInternetReachable: (reachable) =>
-        set(() => ({ isInternetReachable: reachable })),
+        isInternetReachable: false,
+        setIsInternetReachable: (reachable) =>
+          set(() => ({ isInternetReachable: reachable })),
 
-      // No hydration on web
-      hydrationDone: false,
-      setHydrationDone: (done) => set(() => ({ hydrationDone: done })),
+        // No hydration on web
+        hydrationDone: false,
+        setHydrationDone: (done) => set(() => ({ hydrationDone: done })),
 
-      lastVersionOpen: "",
-      setLastVersionOpen: (version) =>
-        set(() => ({ lastVersionOpen: version })),
+        lastVersionOpen: "",
+        setLastVersionOpen: (version) =>
+          set(() => ({ lastVersionOpen: version })),
 
-      actionSheetShown: false,
-      setActionSheetShown: (s: boolean) => set(() => ({ actionSheetShown: s })),
+        actionSheetShown: false,
+        setActionSheetShown: (s: boolean) =>
+          set(() => ({ actionSheetShown: s })),
 
-      contextMenuShownId: null,
-      setContextMenuShown: (messageId: string | null) =>
-        set(() => ({ contextMenuShownId: messageId })),
-    }),
-    {
-      name: "store-app",
-      storage: createJSONStorage(() => zustandMMKVStorage),
-      partialize: (state) => ({
-        lastVersionOpen: state.lastVersionOpen,
-        addressBookPermissionStatus: state.addressBookPermissionStatus,
+        contextMenuShownId: null,
+        setContextMenuShown: (messageId: string | null) =>
+          set(() => ({ contextMenuShownId: messageId })),
       }),
-    }
+      {
+        name: "store-app",
+        storage: createJSONStorage(() => zustandMMKVStorage),
+        partialize: (state) => ({
+          lastVersionOpen: state.lastVersionOpen,
+          addressBookPermissionStatus: state.addressBookPermissionStatus,
+        }),
+      }
+    )
   )
 );
 

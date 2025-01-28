@@ -42,7 +42,7 @@ export const initTransactionsStore = (account: string) => {
               transactions: { ...state.transactions, ...newTransactions },
             }));
           },
-        }) as TransactionsStoreType,
+        } as TransactionsStoreType),
       {
         name: `store-${account}-transactions`, // Account-based storage so each account can have its own transactions
         storage: createJSONStorage(() => zustandMMKVStorage),

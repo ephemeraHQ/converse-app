@@ -1,8 +1,8 @@
 import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { captureError } from "@/utils/capture-error";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
-import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { contentTypesPrefixes } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 import { isSupportedMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";

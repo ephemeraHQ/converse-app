@@ -1,6 +1,5 @@
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import logger from "@utils/logger";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
-import { getXmtpClient } from "@/utils/xmtpRN/sync";
 
 type UpdateConsentForGroupsForAccountArgs = {
   account: string;
@@ -13,7 +12,9 @@ export const updateConsentForGroupsForAccount = async (
 ) => {
   const { account, groupIds, consent } = args;
 
-  const client = (await getXmtpClient(account)) as ConverseXmtpClientType;
+  const client = await getXmtpClient({
+    address: account,
+  });
 
   if (!client) {
     throw new Error("Client not found");

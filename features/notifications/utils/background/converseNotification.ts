@@ -1,8 +1,7 @@
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { getAccountsList } from "@data/store/accountsStore";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/client.types";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
-import { z } from "zod";
 import logger from "@utils/logger";
+import { z } from "zod";
 import {
   GroupJoinRequestNotificationSchema,
   handleGroupJoinRequestNotification,
@@ -21,6 +20,7 @@ export const handleConverseNotification = async (
   logger.debug(
     `[ConverseNotification] Received a ${notification.type} notification for account ${notification.account}`
   );
+
   const accounts = getAccountsList();
   if (
     !accounts.find(
@@ -32,9 +32,11 @@ export const handleConverseNotification = async (
     );
     return;
   }
-  const xmtpClient = (await getXmtpClient(
-    notification.account
-  )) as ConverseXmtpClientType;
+
+  const xmtpClient = await getXmtpClient({
+    address: notification.account,
+  });
+
   if (notification.type === "group_join_request") {
     handleGroupJoinRequestNotification(xmtpClient, notification);
   }

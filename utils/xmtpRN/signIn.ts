@@ -7,14 +7,12 @@ import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { Client, Signer as XmtpSigner } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
-import { isClientInstallationValid } from "./client";
+import { isClientInstallationValid } from "./xmtp-client/xmtp-client-installations";
 import {
   ViemAccount,
   ethersSignerToXmtpSigner,
   viemAccountToXmtpSigner,
 } from "./signer";
-
-const env = config.xmtpEnv as "dev" | "production" | "local";
 
 export const getInboxId = (address: string) =>
   Client.getOrCreateInboxId(address, config.xmtpEnv);

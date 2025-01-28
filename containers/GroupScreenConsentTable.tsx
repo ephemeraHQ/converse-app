@@ -1,11 +1,11 @@
 import { useGroupConsentForCurrentAccount } from "@/features/consent/use-group-consent-for-current-account";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { translate } from "@i18n";
 import { dangerColor, primaryColor } from "@styles/colors";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { FC, useMemo } from "react";
 import { useColorScheme } from "react-native";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/client.types";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";

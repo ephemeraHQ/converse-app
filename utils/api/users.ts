@@ -3,12 +3,13 @@ import {
   analyticsBuildNumber,
   analyticsPlatform,
 } from "../analytics";
-import { getXmtpApiHeaders } from "./auth";
 import { api } from "./api";
+import { getXmtpApiHeaders } from "./auth";
 
 const lastSaveUser: { [address: string]: number } = {};
 
-export const saveUser = async (address: string, privyAccountId: string) => {
+export const saveUser = async (args: { address: string }) => {
+  const { address } = args;
   const now = new Date().getTime();
   const last = lastSaveUser[address] || 0;
   if (now - last < 3000) {
@@ -22,7 +23,6 @@ export const saveUser = async (address: string, privyAccountId: string) => {
     "/api/user",
     {
       address,
-      privyAccountId,
       platform: analyticsPlatform,
       version: analyticsAppVersion,
       build: analyticsBuildNumber,

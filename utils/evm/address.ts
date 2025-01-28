@@ -53,3 +53,7 @@ export const getAddressForPeer = async (peer: string) => {
     : peer;
   return resolvedAddress || undefined;
 };
+
+export function getCleanEthAddress(address: string): string {
+  return address.toLowerCase();
+}

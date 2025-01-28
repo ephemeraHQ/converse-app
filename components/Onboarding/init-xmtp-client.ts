@@ -1,7 +1,7 @@
 import { Signer } from "ethers";
 import { Alert } from "react-native";
 
-import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
+import { prefetchInboxIdQuery } from "@/queries/inbox-id-query";
 import {
   getSettingsStore,
   getWalletStore,
@@ -15,8 +15,8 @@ import { sentryTrackMessage } from "@utils/sentry";
 import {
   createXmtpClientFromSigner,
   createXmtpClientFromViemAccount,
-} from "@utils/xmtpRN/signIn";
-import { getXmtpClient } from "@utils/xmtpRN/sync";
+} from "@/utils/xmtpRN/signIn";
+import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { ViemAccount } from "@/utils/xmtpRN/signer";
 
 export async function initXmtpClient(args: {
@@ -46,7 +46,7 @@ export async function initXmtpClient(args: {
       ...restArgs,
     });
   } catch (e) {
-    await logoutAccount(address, false, true, () => {});
+    await logoutAccount({ account: address });
     logger.error(e);
     throw e;
   }
@@ -84,7 +84,7 @@ export async function initXmtpClientFromViemAccount(args: {
       ...restArgs,
     });
   } catch (e) {
-    await logoutAccount(address, false, true, () => {});
+    await logoutAccount({ account: address });
     logger.error(e);
     throw e;
   }
@@ -161,7 +161,7 @@ async function finalizeAccountSetup(args: IConnectWithAddressKeyArgs) {
 
   await prefetchInboxIdQuery({ account: address });
 
-  getXmtpClient(address);
+  getXmtpClient({ address });
 
   logger.debug("Account setup finalized");
 }

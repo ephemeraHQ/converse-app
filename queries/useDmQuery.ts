@@ -3,7 +3,7 @@
  */
 import { queryClient } from "@/queries/queryClient";
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { getConversationByPeerByAccount } from "@utils/xmtpRN/conversations";
+import { getConversationByPeerByAccount } from "@/utils/xmtpRN/conversations";
 import { dmQueryKey } from "./QueryKeys";
 import { setConversationQueryData } from "./useConversationQuery";
 

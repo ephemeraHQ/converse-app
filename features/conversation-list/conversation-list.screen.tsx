@@ -12,8 +12,6 @@ import {
   useDmConversationContextMenuViewProps,
   useGroupConversationContextMenuViewProps,
 } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
-import { useShouldShowConnecting } from "@/features/conversation-list/hooks/useShouldShowConnecting";
-import { useShouldShowConnectingOrSyncing } from "@/features/conversation-list/hooks/useShouldShowConnectingOrSyncing";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { translate } from "@/i18n";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
@@ -23,7 +21,7 @@ import { captureError } from "@/utils/capture-error";
 import {
   DmWithCodecsType,
   GroupWithCodecsType,
-} from "@/utils/xmtpRN/client.types";
+} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { memo, useCallback } from "react";
@@ -142,29 +140,11 @@ const ListHeader = React.memo(function ListHeader() {
 
   return (
     <AnimatedVStack layout={theme.animation.reanimatedLayoutSpringTransition}>
-      <States />
       {ephemeralAccount && <EphemeralAccountBanner />}
       <ConversationListPinnedConversations />
       <ConversationListAwaitingRequests />
     </AnimatedVStack>
   );
-});
-
-const States = memo(function States() {
-  const shouldShowConnectingOrSyncing = useShouldShowConnectingOrSyncing();
-  const shouldShowConnecting = useShouldShowConnecting();
-
-  // TODO: Not sure about those
-  if (shouldShowConnectingOrSyncing) {
-    return null;
-  }
-
-  // TODO: Not sure about those
-  if (shouldShowConnecting) {
-    return null;
-  }
-
-  return null;
 });
 
 const EphemeralAccountBanner = React.memo(function EphemeralAccountBanner() {

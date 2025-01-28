@@ -1,8 +1,8 @@
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import {
   getMessageContentType,
   isContentType,
-} from "@/utils/xmtpRN/content-types/content-types";
+} from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 import type { ReactionContent } from "@xmtp/react-native-sdk";
 
 type GetNotificationContentArgs = {

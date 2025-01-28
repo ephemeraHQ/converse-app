@@ -1,12 +1,10 @@
-import type { Frens } from "@/data/store/recommendationsStore";
+import { getCurrentAccount } from "@/data/store/accountsStore";
+import type { ProfileType } from "@/features/onboarding/types/onboarding.types";
 import type { IProfileSocials } from "@/features/profiles/profile-types";
-import { evmHelpers } from "@/utils/evm/helpers";
 import logger from "@/utils/logger";
 import type { InboxId } from "@xmtp/react-native-sdk";
-import { getXmtpApiHeaders } from "./auth";
 import { api } from "./api";
-import type { ProfileType } from "@/features/onboarding/types/onboarding.types";
-import { getCurrentAccount } from "@/data/store/accountsStore";
+import { getXmtpApiHeaders } from "./auth";
 
 export const getProfilesForAddresses = async (
   addresses: string[]
@@ -38,14 +36,6 @@ export const searchProfilesForCurrentAccount = async (
     params: { query },
   });
   return data;
-};
-
-export const findFrens = async (account: string) => {
-  const { data } = await api.get("/api/frens/find", {
-    headers: await getXmtpApiHeaders(account),
-    params: { address: evmHelpers.toChecksumAddress(account) },
-  });
-  return data.frens as Frens;
 };
 
 export const claimProfile = async ({

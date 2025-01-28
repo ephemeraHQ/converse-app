@@ -1,21 +1,17 @@
-import { useEffect } from "react";
-import {
-  useAccountsStore,
-  useCurrentAccount,
-} from "@/data/store/accountsStore";
+import { useCurrentAccount } from "@/data/store/accountsStore";
 import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
 import { saveUser } from "@/utils/api/users";
+import { useEffect } from "react";
 
 export default function MainIdentityStateHandler() {
   const userAddress = useCurrentAccount();
-  const privyAccountId = useAccountsStore((s) => s.privyAccountId);
 
   useEffect(() => {
     if (userAddress) {
-      saveUser(userAddress, privyAccountId[userAddress] as string);
+      saveUser({ address: userAddress });
       invalidateProfileSocialsQuery(userAddress);
     }
-  }, [privyAccountId, userAddress]);
+  }, [userAddress]);
 
   return null;
 }

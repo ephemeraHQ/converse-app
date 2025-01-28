@@ -17,6 +17,23 @@
 - Use Zod for external API response validation. Define zod schema and infer types from it.
 - Keep files small and focused. Place hooks and components in separate files unless they are small wrapper components. This improves code organization and maintainability.
 - Refactor a component using the composable pattern when you start seeing a lot of optional props.
+- Use logger for all logging operations:
+
+  - Prefer `logger.debug` over `console.log`
+  - Use template literals for inline logging:
+
+    ```typescript
+    // ❌ Bad: Object-based logging
+    logger.debug("[buildXmtpClient] Starting to build XMTP client", {
+      address,
+      inboxId,
+    });
+
+    // ✅ Good: Inline template literal logging
+    logger.debug(
+      `[buildXmtpClient] Starting to build XMTP client with address: ${address} and inboxId: ${inboxId}`
+    );
+    ```
 
 ## TypeScript
 

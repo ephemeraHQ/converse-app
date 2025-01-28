@@ -1,5 +1,5 @@
 import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/client.types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 
 type MessageFromCurrentUserPayload = {
   message: DecodedMessageWithCodecsType | undefined;

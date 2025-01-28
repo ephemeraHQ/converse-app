@@ -1,5 +1,5 @@
 import { fetchConversationsQuery } from "@/queries/use-conversations-query";
-import { prefetchInboxIdQuery } from "@/queries/use-inbox-id-query";
+import { prefetchInboxIdQuery } from "@/queries/inbox-id-query";
 import { captureError } from "@/utils/capture-error";
 import { getAccountsList } from "@data/store/accountsStore";
 import { useAppStore } from "@data/store/appStore";
