@@ -75,23 +75,23 @@ async function handleGeneralSearch(searchQuery: string) {
   logger.info(`[Search] Starting general search for query: ${searchQuery}`);
   logger.info(`[Search] Searching profiles for query: ${searchQuery}`);
   const profiles = await searchProfilesForCurrentAccount(searchQuery);
-  logger.info(`[Search] Profiles found:`, JSON.stringify(profiles, null, 2));
+  // logger.info(`[Search] Profiles found:`, JSON.stringify(profiles, null, 2));
 
   if (!isEmptyObject(profiles)) {
-    logger.info(`[Search] Found profiles for query ${searchQuery}`);
+    // logger.info(`[Search] Found profiles for query ${searchQuery}`);
     setProfileRecordSocialsQueryData(profiles);
     const filteredProfiles = Object.values(profiles);
-    logger.info(
-      `[Search] Filtered profiles:`,
-      JSON.stringify(filteredProfiles, null, 2)
-    );
+    // logger.info(
+    //   `[Search] Filtered profiles:`,
+    //   JSON.stringify(filteredProfiles, null, 2)
+    // );
     return {
       message: "",
       convosSearchResults: filteredProfiles,
     };
   }
 
-  logger.info(`[Search] No profiles found for query ${searchQuery}`);
+  // logger.info(`[Search] No profiles found for query ${searchQuery}`);
   return {
     message: `They're not here\nInvite them?`,
     convosSearchResults: [],
@@ -108,10 +108,10 @@ export async function searchConvosUsers({
 }: {
   searchQuery: string;
 }): Promise<IConvosUsersSearchResult> {
-  logger.info(`[Search] Starting search for query: ${searchQuery}`);
+  // logger.info(`[Search] Starting search for query: ${searchQuery}`);
 
   if (searchQuery.length === 0) {
-    logger.info(`[Search] Empty search query, returning empty results`);
+    // logger.info(`[Search] Empty search query, returning empty results`);
     return {
       message: "",
       convosSearchResults: [],

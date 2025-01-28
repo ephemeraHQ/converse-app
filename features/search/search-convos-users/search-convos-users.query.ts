@@ -1,7 +1,6 @@
 import { useSearchByConversationMembershipQuery } from "../search-by-conversation-membership/use-search-by-conversation-membership.query";
 import { useSearchConvosUsersQuery } from "./use-search-convos-users.query";
 import type { IUserSearchResults } from "../search.types";
-import logger from "@/utils/logger";
 
 export const useSearchUsersQuery = (args: {
   searchQuery: string;
@@ -25,10 +24,10 @@ export const useSearchUsersQuery = (args: {
     convosSearchResults,
     message,
   };
-  logger.info(
-    `[Search] Search results:`,
-    JSON.stringify(searchResults, null, 2)
-  );
+  // logger.info(
+  //   `[Search] Search results:`,
+  //   JSON.stringify(searchResults, null, 2)
+  // );
 
   return {
     searchResults,

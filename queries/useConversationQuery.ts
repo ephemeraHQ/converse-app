@@ -13,7 +13,6 @@ export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
 type IGetConversationArgs = {
   account: string;
   topic: ConversationTopic;
-  optimistic?: boolean;
 };
 
 async function getConversation(args: IGetConversationArgs) {
@@ -79,7 +78,6 @@ export const useConversationQuery = (
 
 export function getConversationQueryOptions(
   args: IGetConversationArgs & {
-    // Optional because some react query function will never trigger the queryFn anyway
     caller?: string;
     optimistic?: boolean;
   }
@@ -92,6 +90,16 @@ export function getConversationQueryOptions(
     queryKey: conversationQueryKey(account, topic),
     queryFn: () => getConversation({ account, topic }),
     enabled: !!topic && !!account && !optimistic,
+    retry: (failureCount, error) => {
+      logger.info("[useConversationQuery] Retrying query", {
+        failureCount,
+        optimistic,
+        topic,
+        error: error.message,
+      });
+      if (optimistic && failureCount < 3) return true;
+      return false;
+    },
   });
 }
 

@@ -1,6 +1,8 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import {
   addConversationMessageQuery,
+  getConversationMessagesQueryData,
+  IMessageAccumulator,
   replaceOptimisticMessageWithReal,
 } from "@/queries/use-conversation-messages-query";
 import { captureErrorWithToast } from "@/utils/capture-error";
@@ -20,10 +22,7 @@ import {
   ConversationVersion,
 } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
-import {
-  getOrFetchConversation,
-  getConversationQueryOptions,
-} from "@/queries/useConversationQuery";
+import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { generateGroupHashFromMemberIds } from "@/features/create-conversation/generate-group-hash-from-member-ids";
 import {
   createGroupWithDefaultsByAccount,
@@ -45,6 +44,7 @@ import { queryClient } from "@/queries/queryClient";
 import logger from "@/utils/logger";
 import { prefixStringWithV3TopicPrefix } from "@/utils/groupUtils/groupId";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
+import { sendMessage } from "../conversation/hooks/use-send-message";
 
 export type ISendMessageParams = {
   topic: ConversationTopic;
@@ -56,56 +56,43 @@ export type ISendMessageParams = {
 
 export type ISendFirstMessageParams = Omit<ISendMessageParams, "topic">;
 
-export async function sendMessage(
-  args: ISendMessageParams
-): Promise<MessageId> {
-  const { referencedMessageId, content, topic } = args;
-  logger.info("[send-optimistic][sendMessage] Starting to send message", {
-    referencedMessageId,
-    content: JSON.stringify(content, null, 2),
-    topic,
-  });
+// export async function sendMessage(
+//   args: ISendMessageParams
+// ): Promise<MessageId> {
+//   const { referencedMessageId, content, topic } = args;
+//   logger.info("[send-optimistic][sendMessage] Starting to send message", {
+//     referencedMessageId,
+//     content: JSON.stringify(content, null, 2),
+//     topic,
+//   });
 
-  const conversation = await getOrFetchConversation({
-    topic,
-    account: getCurrentAccount()!,
-    caller: "use-send-message#sendMessage",
-  });
+//   const conversation = await getOrFetchConversation({
+//     topic,
+//     account: getCurrentAccount()!,
+//     caller: "use-send-message#sendMessage",
+//   });
 
-  if (!conversation) {
-    logger.error("[send-optimistic][sendMessage] Conversation not found");
-    throw new Error("Conversation not found when sending message");
-  }
+//   if (!conversation) {
+//     logger.error("[send-optimistic][sendMessage] Conversation not found");
+//     throw new Error("Conversation not found when sending message");
+//   }
 
-  logger.info("[send-optimistic][sendMessage] Found conversation", {
-    conversationTopic: conversation.topic,
-  });
+//   logger.info("[send-optimistic][sendMessage] Found conversation", {
+//     conversationTopic: conversation.topic,
+//   });
 
-  let messageId: MessageId;
-  if (referencedMessageId) {
-    logger.info("[send-optimistic][sendMessage] Sending reply message");
-    messageId = await conversation.send({
-      reply: {
-        reference: referencedMessageId,
-        content: content.remoteAttachment
-          ? { remoteAttachment: content.remoteAttachment }
-          : { text: content.text },
-      },
-    });
-  } else {
-    logger.info("[send-optimistic][sendMessage] Sending new message");
-    messageId = await conversation.send(
-      content.remoteAttachment
-        ? { remoteAttachment: content.remoteAttachment }
-        : { text: content.text! }
-    );
-  }
+//   logger.info("[send-optimistic][sendMessage] Sending new message");
+//   const messageId = await conversation.send(
+//     content.remoteAttachment
+//       ? { remoteAttachment: content.remoteAttachment }
+//       : { text: content.text! }
+//   );
 
-  logger.info("[send-optimistic][sendMessage] Message sent successfully", {
-    messageId,
-  });
-  return messageId;
-}
+//   logger.info("[send-optimistic][sendMessage] Message sent successfully", {
+//     messageId,
+//   });
+//   return messageId;
+// }
 
 type IUseOptimisticSendFirstMessageParams = {
   members: string[];
@@ -138,16 +125,15 @@ export function useOptimisticSendFirstMessage({
   const currentAccount = getCurrentAccount()!;
   const isGroup = members.length > 1;
 
-  const tempTopic = generateGroupHashFromMemberIds(members);
-  const v3TempTopic = tempTopic
-    ? prefixStringWithV3TopicPrefix(tempTopic)
+  const _tempTopic = generateGroupHashFromMemberIds(members);
+  const tempTopic = _tempTopic
+    ? prefixStringWithV3TopicPrefix(_tempTopic)
     : undefined;
 
   logger.info("[send-optimistic][useOptimisticSendFirstMessage] Initialized", {
     members: JSON.stringify(members, null, 2),
     isGroup,
     tempTopic,
-    v3TempTopic,
     currentAccount: JSON.stringify(currentAccount, null, 2),
   });
 
@@ -212,6 +198,8 @@ export function useOptimisticSendFirstMessage({
         "[send-optimistic][createConversation] Preparing optimistic update",
         {
           members: JSON.stringify(members, null, 2),
+          tempTopic,
+          isGroup,
         }
       );
       logger.info(
@@ -225,7 +213,7 @@ export function useOptimisticSendFirstMessage({
 
       const tempConversation = isGroup
         ? ({
-            topic: tempTopic! as unknown as ConversationTopic,
+            topic: tempTopic as unknown as ConversationTopic,
             name: "Group",
             members: async () => [],
             clientInstallationId: "" as unknown as InstallationId,
@@ -254,7 +242,7 @@ export function useOptimisticSendFirstMessage({
             unblock: async () => {},
           } as unknown as Group<SupportedCodecsType>)
         : ({
-            topic: tempTopic! as unknown as ConversationTopic,
+            topic: tempTopic as unknown as ConversationTopic,
             name: "DM",
             members: async () => [],
             clientInstallationId: "" as unknown as InstallationId,
@@ -276,6 +264,16 @@ export function useOptimisticSendFirstMessage({
         account: currentAccount,
         conversation: tempConversation,
       });
+      setConversationQueryData({
+        account: currentAccount,
+        topic: tempConversation.topic,
+        conversation: tempConversation,
+      });
+
+      logger.info("[send-optimistic] Added temp conversation to cache", {
+        topic: tempConversation.topic,
+        type: isGroup ? "group" : "dm",
+      });
     },
     onSuccess: (newConversation) => {
       logger.info(
@@ -290,11 +288,11 @@ export function useOptimisticSendFirstMessage({
         conversation: newConversation,
       });
 
-      //   replaceOptimisticConversationWithReal({
-      //     account: currentAccount,
-      //     tempTopic: tempTopic!,
-      //     realTopic: newConversation.topic,
-      //   });
+      replaceOptimisticConversationWithReal({
+        account: currentAccount,
+        tempTopic: tempTopic!,
+        realTopic: newConversation.topic,
+      });
 
       if (!isGroup) {
         logger.info(
@@ -318,9 +316,10 @@ export function useOptimisticSendFirstMessage({
     mutationFn: async (args): Promise<MessageId> => {
       const conversation = await createConversationAsync();
 
-      await ensureConversationInCache({
+      setConversationQueryData({
         account: currentAccount,
         topic: conversation.topic,
+        conversation: conversation,
       });
 
       return sendMessage({
@@ -460,7 +459,7 @@ export function useOptimisticSendFirstMessage({
 
   return {
     sendMessage: sendMessageCallback,
-    tempTopic: v3TempTopic,
+    tempTopic,
     isLoading: isPending,
     isError,
   };
@@ -474,80 +473,76 @@ function replaceOptimisticConversationWithReal(args: {
   const { account, tempTopic, realTopic } = args;
 
   try {
-    const messages =
-      queryClient.getQueryData<DecodedMessage[]>(
-        conversationMessagesQueryKey(account, tempTopic as ConversationTopic)
-      ) || []; // Handle undefined case
+    const messages: IMessageAccumulator | undefined =
+      getConversationMessagesQueryData({
+        account,
+        topic: tempTopic as ConversationTopic,
+      });
 
-    if (messages.length > 0) {
+    if (messages?.ids?.length && messages.ids.length > 0) {
       queryClient.setQueryData(
         conversationMessagesQueryKey(account, realTopic),
-        messages.map((msg) => ({
-          ...msg,
-          topic: realTopic,
-          // Preserve existing delivery status
-          deliveryStatus: msg.deliveryStatus || "sent",
-        }))
+        messages.ids.map((messageId) => {
+          const message = messages.byId[messageId];
+          return {
+            ...message,
+            topic: realTopic,
+            // Preserve existing delivery status
+            deliveryStatus: message.deliveryStatus || "sent",
+          };
+        })
       );
     }
 
-    // Add retry logic for cache cleanup
-    const cleanupCache = () => {
-      queryClient.removeQueries({
-        queryKey: conversationMessagesQueryKey(
-          account,
-          tempTopic as ConversationTopic
-        ),
-      });
+    // let the conversation screen handle cleaning up the cache as it'll still be observing
+    // the cache at the time the conversation is created here
+    // queryClient.removeQueries({
+    //   queryKey: conversationMessagesQueryKey(
+    //     account,
+    //     tempTopic as ConversationTopic
+    //   ),
+    // });
 
-      queryClient.setQueryData<ConversationWithCodecsType[]>(
-        conversationsQueryKey(account),
-        (previous) =>
-          (previous ?? []).filter((conv) => conv.topic !== tempTopic)
-      );
-    };
-
-    // First attempt
-    cleanupCache();
-
-    // Schedule secondary cleanup in case of race conditions
-    setTimeout(cleanupCache, 500);
+    // queryClient.setQueryData<ConversationWithCodecsType[]>(
+    //   conversationsQueryKey(account),
+    //   (previous) => (previous ?? []).filter((conv) => conv.topic !== tempTopic)
+    // );
   } catch (error) {
     captureErrorWithToast(error);
   }
 }
 
-async function ensureConversationInCache(args: {
-  account: string;
-  topic: ConversationTopic;
-}) {
-  const MAX_RETRIES = 3;
-  let retries = 0;
+// async function ensureConversationInCache(args: {
+//   account: string;
+//   topic: ConversationTopic;
+// }) {
+//   const MAX_RETRIES = 3;
+//   let retries = 0;
 
-  while (retries < MAX_RETRIES) {
-    const existing = queryClient.getQueryData<ConversationWithCodecsType>(
-      getConversationQueryOptions({
-        account: args.account,
-        topic: args.topic,
-        caller: "ensureConversationInCache",
-      }).queryKey
-    );
+//   while (retries < MAX_RETRIES) {
+//     const existing = queryClient.getQueryData<ConversationWithCodecsType>(
+//       getConversationQueryOptions({
+//         account: args.account,
+//         topic: args.topic,
+//         caller: "ensureConversationInCache",
+//       }).queryKey
+//     );
 
-    if (existing) return;
+//     if (existing) return;
 
-    await queryClient.refetchQueries({
-      queryKey: getConversationQueryOptions({
-        account: args.account,
-        topic: args.topic,
-        caller: "ensureConversationInCache",
-      }).queryKey,
-    });
+//     await queryClient.refetchQueries({
+//       queryKey: getConversationQueryOptions({
+//         account: args.account,
+//         topic: args.topic,
+//         caller: "ensureConversationInCache",
+//       }).queryKey,
+//     });
 
-    retries++;
-    if (retries < MAX_RETRIES) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-    }
-  }
+//     retries++;
+//     if (retries < MAX_RETRIES) {
+//       await new Promise((resolve) => setTimeout(resolve, 300));
+//     }
+//   }
 
-  throw new Error("Failed to validate conversation in cache");
-}
+//   throw new Error("Failed to validate conversation in cache");
+// }

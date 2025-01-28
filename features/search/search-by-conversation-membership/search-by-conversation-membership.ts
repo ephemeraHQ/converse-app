@@ -13,21 +13,21 @@ export async function searchByConversationMembership({
 }: {
   searchQuery: string;
 }): Promise<IConversationMembershipSearchResult> {
-  logger.info(
-    `[Search] Starting conversation membership search for: ${searchQuery}`
-  );
+  // logger.info(
+  //   `[Search] Starting conversation membership search for: ${searchQuery}`
+  // );
 
   const currentAccount = getCurrentAccount()!;
   const conversations = await getConversationsQueryData({
     account: currentAccount,
   });
-  logger.info(
-    `[Search] All conversations:`,
-    JSON.stringify(conversations, null, 2)
-  );
+  // logger.info(
+  //   `[Search] All conversations:`,
+  //   JSON.stringify(conversations, null, 2)
+  // );
 
   if (!conversations) {
-    logger.info(`[Search] No conversations found, returning empty results`);
+    // logger.info(`[Search] No conversations found, returning empty results`);
     return {
       existingDmSearchResults: [],
       existingGroupMemberNameSearchResults: [],
@@ -35,7 +35,7 @@ export async function searchByConversationMembership({
     };
   }
 
-  logger.info(`[Search] Processing ${conversations.length} conversations`);
+  // logger.info(`[Search] Processing ${conversations.length} conversations`);
   const searchableConversations = await Promise.all(
     conversations.map(async (conversation) => {
       const members = await ensureGroupMembersQueryData({
@@ -66,10 +66,10 @@ export async function searchByConversationMembership({
       } satisfies SearchableConversation;
     })
   );
-  logger.info(
-    `[Search] Searchable conversations:`,
-    JSON.stringify(searchableConversations, null, 2)
-  );
+  // logger.info(
+  //   `[Search] Searchable conversations:`,
+  //   JSON.stringify(searchableConversations, null, 2)
+  // );
 
   return processConversationSearch(
     searchableConversations,

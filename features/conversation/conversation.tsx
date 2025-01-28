@@ -103,7 +103,7 @@ export const Conversation = memo(function Conversation(props: {
     account: currentAccount,
     topic,
     caller: "Conversation screen",
-    optimistic,
+    // optimistic,
   });
   logger.info("[Conversation] Conversation query", {
     optimistic,

@@ -230,6 +230,7 @@ export function CreateConversationScreen({
       {existingConversation && (
         <MessageSection
           message={`${existingConversation.topic} already exists with name ${
+            // @ts-ignore
             existingConversation.name || "dm"
           }`}
           isError={false}

@@ -152,7 +152,7 @@ const ignoredContentTypesPrefixes = [
   contentTypesPrefixes.readReceipt,
 ];
 
-type IMessageAccumulator = {
+export type IMessageAccumulator = {
   ids: MessageId[];
   byId: Record<MessageId, DecodedMessageWithCodecsType>;
   reactions: Record<
@@ -326,5 +326,52 @@ export function replaceOptimisticMessageWithReal(args: {
         byId: newById,
       };
     }
+  );
+}
+
+export function replaceOptimisticConversationWithReal(args: {
+  account: string;
+  tempTopic: string;
+  realTopic: ConversationTopic;
+}) {
+  const { account, tempTopic, realTopic } = args;
+  logger.info("[replaceOptimisticConversationWithReal] Starting replacement", {
+    account,
+    tempTopic,
+    realTopic,
+  });
+
+  // Transfer messages from temp topic to real topic
+  const messages = queryClient.getQueryData<IMessageAccumulator>(
+    conversationMessagesQueryKey(account, tempTopic as ConversationTopic)
+  ) || { ids: [], byId: {}, reactions: {} };
+
+  logger.info(
+    "[replaceOptimisticConversationWithReal] Found messages to transfer",
+    {
+      messageCount: messages.ids.length,
+      messageIds: messages.ids,
+    }
+  );
+
+  queryClient.setQueryData(
+    conversationMessagesQueryKey(account, realTopic),
+    messages
+  );
+
+  logger.info(
+    "[replaceOptimisticConversationWithReal] Transferred messages to new topic"
+  );
+
+  // Cleanup temp topic data
+  queryClient.removeQueries({
+    queryKey: conversationMessagesQueryKey(
+      account,
+      tempTopic as ConversationTopic
+    ),
+  });
+
+  logger.info(
+    "[replaceOptimisticConversationWithReal] Cleaned up temp topic data"
   );
 }

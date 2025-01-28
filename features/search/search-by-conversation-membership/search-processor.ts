@@ -50,9 +50,9 @@ export function processConversationSearch(
   searchQuery: string,
   currentUserAddress: string
 ): SearchResults {
-  logger.info(
-    `[Search] Processing ${conversations.length} conversations for query: ${searchQuery}`
-  );
+  // logger.info(
+  //   `[Search] Processing ${conversations.length} conversations for query: ${searchQuery}`
+  // );
   const normalizedQuery = searchQuery.toLowerCase();
 
   // Find current user's profile to check for self-matches
@@ -79,7 +79,7 @@ export function processConversationSearch(
 
   return conversations.reduce<SearchResults>(
     (acc, conversation) => {
-      logger.info(`[Search] Processing conversation: ${conversation.topic}`);
+      // logger.info(`[Search] Processing conversation: ${conversation.topic}`);
 
       // Group name matching
       if (
@@ -89,9 +89,9 @@ export function processConversationSearch(
         ) &&
         !conversation.conversationName?.includes("/proto")
       ) {
-        logger.info(
-          `[Search] Found group name match for: ${conversation.conversationName}`
-        );
+        // logger.info(
+        //   `[Search] Found group name match for: ${conversation.conversationName}`
+        // );
 
         // For group name matches, show current user first and up to 2 other members
         const otherMembers = conversation.memberProfiles
@@ -99,9 +99,9 @@ export function processConversationSearch(
           .slice(0, 2)
           .map((m) => getReadableProfile(m.address));
 
-        logger.info(
-          `[Search] Adding group with ${otherMembers.length} other members to group name results`
-        );
+        // logger.info(
+        //   `[Search] Adding group with ${otherMembers.length} other members to group name results`
+        // );
 
         acc.existingGroupNameSearchResults.push({
           groupName: conversation.conversationName || "",
@@ -119,19 +119,19 @@ export function processConversationSearch(
       // Member profile matching
       conversation.memberProfiles.forEach((member) => {
         if (!member.profile || member.address === currentUserAddress) {
-          logger.info(
-            `[Search] Skipping member ${member.address} - no profile found or is current user`
-          );
+          // logger.info(
+          //   `[Search] Skipping member ${member.address} - no profile found or is current user`
+          // );
           return;
         }
 
         if (doesMemberProfileMatchQuery(member.profile, normalizedQuery)) {
-          logger.info(
-            `[Search] Found member profile match for: ${member.address}`
-          );
+          // logger.info(
+          //   `[Search] Found member profile match for: ${member.address}`
+          // );
 
           if (conversation.version === ConversationVersion.GROUP) {
-            logger.info(`[Search] Processing group conversation member match`);
+            // logger.info(`[Search] Processing group conversation member match`);
 
             // For member matches, matched member should be first
             const otherMembers = conversation.memberProfiles
@@ -143,9 +143,9 @@ export function processConversationSearch(
               .slice(0, 2)
               .map((m) => getReadableProfile(m.address));
 
-            logger.info(
-              `[Search] Adding group with ${otherMembers.length} other members to member name results`
-            );
+            // logger.info(
+            //   `[Search] Adding group with ${otherMembers.length} other members to member name results`
+            // );
 
             acc.existingGroupMemberNameSearchResults.push({
               memberNameFromGroup: getReadableProfile(member.address),
@@ -160,9 +160,9 @@ export function processConversationSearch(
               ],
             });
           } else {
-            logger.info(
-              `[Search] Adding DM conversation match for: ${member.address}`
-            );
+            // logger.info(
+            //   `[Search] Adding DM conversation match for: ${member.address}`
+            // );
             acc.existingDmSearchResults.push(member.profile);
           }
         }

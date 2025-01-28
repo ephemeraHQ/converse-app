@@ -93,7 +93,7 @@ export function useMessageSenderReadableProfile(
   if (!currentAccountAdress) {
     return "";
   }
-  return getReadableProfile(currentAccountAdress, message.senderInboxId);
+  return getReadableProfile(message.senderInboxId);
 }
 
 export function getMessageById({
