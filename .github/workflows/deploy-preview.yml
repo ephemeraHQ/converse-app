@@ -231,17 +231,15 @@ jobs:
           eas update --auto --channel=preview --message "${{ needs.check-changes.outputs.commit_message }}" --non-interactive
 
       - name: Upload Sourcemaps to Sentry
-        env:
-          SENTRY_AUTH_TOKEN: $(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
-          SENTRY_LOG_LEVEL: debug
         run: |
+          # First set the token
+          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
+
           # Debug: Print full token and its length
           echo "Full token: $SENTRY_AUTH_TOKEN"
           echo "Token length: ${#SENTRY_AUTH_TOKEN}"
 
-          # Print the exact command output before processing
-          echo "Raw EAS output:"
-          eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview
-
           # Run the actual Sentry command
           npx sentry-expo-upload-sourcemaps dist
+        env:
+          SENTRY_LOG_LEVEL: debug
