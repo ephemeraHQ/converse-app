@@ -198,9 +198,10 @@ jobs:
         run: eas update --auto --channel=production --message "${{ needs.check-deployment-type.outputs.commit_message }}" --non-interactive
 
       - name: Upload source maps
-        env:
-          SENTRY_AUTH_TOKEN: $(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=production | cut -d'=' -f2)
-        run: npx sentry-expo-upload-sourcemaps dist
+      run: |
+          # Seems to be the only way to get the token
+          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=production | tr -d ' ' | cut -d'=' -f2)
+          npx sentry-expo-upload-sourcemaps dist
 
   finalize-deployment:
     needs: [check-deployment-type, ios-build, android-build, ota-update]
