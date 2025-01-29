@@ -12,7 +12,11 @@ import { useEffect, useMemo } from "react";
 export const useConversationListConversations = () => {
   const currentAccount = useCurrentAccount();
 
-  const { data: conversations, refetch } = useQuery(
+  const {
+    data: conversations,
+    refetch,
+    isLoading: isLoadingConversations,
+  } = useQuery(
     getConversationsQueryOptions({
       account: currentAccount!,
       caller: "useConversationListConversations",
@@ -95,5 +99,12 @@ export const useConversationListConversations = () => {
      */
   }, [conversations, conversationsMetadataQueries]);
 
-  return { data: filteredAndSortedConversations, refetch };
+  const isLoading = useMemo(() => {
+    return (
+      isLoadingConversations ||
+      conversationsMetadataQueries.some((query) => query.isLoading)
+    );
+  }, [isLoadingConversations, conversationsMetadataQueries]);
+
+  return { data: filteredAndSortedConversations, refetch, isLoading };
 };

@@ -38,6 +38,7 @@ export const iconRegistry: Record<IIconName, string> = {
   block: "nosign",
   "chevron.left": "chevron.left",
   "chevron.right": "chevron.right",
+  "chevron.up": "chevron.up",
   "arrow.right.circle.fill": "arrow.right.circle.fill",
   "lock.open.laptopcomputer": "lock.open.laptopcomputer",
   trash: "trash",

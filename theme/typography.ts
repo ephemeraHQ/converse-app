@@ -61,43 +61,5 @@ height: 18px;
 font-family: 'SF Pro';
 }
  */
-export const text: Record<string, TextStyle> = {
-  body: {
-    fontSize: 16,
-    lineHeight: 20,
-    letterSpacing: 0,
-    fontWeight: 400,
-  },
-  bodyBold: {
-    fontSize: 16,
-    lineHeight: 20,
-    letterSpacing: 0,
-    fontWeight: 700,
-  },
-  small: {
-    fontSize: 14,
-    lineHeight: 18,
-    letterSpacing: 0,
-    fontWeight: 400,
-  },
-  smaller: {
-    fontSize: 12,
-    lineHeight: 14,
-    letterSpacing: 0,
-    fontWeight: 400,
-  },
-  smallerBold: {
-    fontSize: 12,
-    lineHeight: 14,
-    letterSpacing: 0,
-    fontWeight: 700,
-  },
-  bigBold: {
-    fontSize: 24,
-    lineHeight: 34,
-    letterSpacing: 0,
-    fontWeight: 700,
-  },
-} as const;
 
 export type ITypography = typeof typography;

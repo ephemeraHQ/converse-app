@@ -1,6 +1,5 @@
 import { setConversationQueryData } from "@/queries/useConversationQuery";
 import { captureError } from "@/utils/capture-error";
-import { reactQueryPersister } from "@/utils/mmkv";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
@@ -158,7 +157,7 @@ export const getConversationsQueryOptions = (
     // Just for now because conversations are very important and
     // we want to make sure we have all of them
     refetchOnMount: true,
-    persister: reactQueryPersister,
+    // persister: reactQueryPersister,
   });
 };
 

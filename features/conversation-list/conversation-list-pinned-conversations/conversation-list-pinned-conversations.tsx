@@ -6,7 +6,7 @@ import { ConversationListItemAvatarSkeleton } from "@/features/conversation-list
 import { ConversationListPinnedConversationDm } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-dm";
 import { ConversationListPinnedConversationGroup } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-group";
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles";
-import { useConversationsCount } from "@/features/conversation-list/hooks/use-conversations-count";
+import { useAllowedConversationsCount } from "@/features/conversation-list/hooks/use-conversations-count";
 import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useConversationQuery } from "@/queries/useConversationQuery";
@@ -26,16 +26,16 @@ export const ConversationListPinnedConversations = memo(
       usePinnedConversations();
 
     const {
-      count: conversationsCount,
-      isLoading: conversationsCountIsLoading,
-    } = useConversationsCount();
+      count: allowedConversationsCount,
+      isLoading: allowedConversationsCountIsLoading,
+    } = useAllowedConversationsCount();
 
-    if (isLoadingPinnedConversations || conversationsCountIsLoading) {
+    if (isLoadingPinnedConversations || allowedConversationsCountIsLoading) {
       return null;
     }
 
-    if (conversationsCount === 0) {
-      return <PinnedConversationsSkeleton />;
+    if (allowedConversationsCount === 0) {
+      return null;
     }
 
     const hasPinnedConversations =
@@ -66,9 +66,7 @@ export const ConversationListPinnedConversations = memo(
               <AnimatedCenter
                 key={conversation.topic}
                 layout={theme.animation.reanimatedLayoutSpringTransition}
-                entering={theme.animation.reanimatedFadeInScaleIn({
-                  delay: 100,
-                })}
+                entering={theme.animation.reanimatedFadeInSpring}
               >
                 <PinnedConversationWrapper topic={conversation.topic} />
               </AnimatedCenter>

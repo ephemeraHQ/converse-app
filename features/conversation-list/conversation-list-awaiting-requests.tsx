@@ -22,7 +22,8 @@ export const ConversationListAwaitingRequests = memo(
     const { theme } = useAppTheme();
     const currentAccount = useCurrentAccount()!;
     const navigation = useNavigation();
-    const { likelyNotSpam, isLoading } = useConversationRequestsListItem();
+    const { likelyNotSpam, isLoading: isLoadingUknownConversations } =
+      useConversationRequestsListItem();
     const { data: currentAccountInboxId } = useCurrentAccountInboxId();
 
     const conversationsMetadataQueries = useQueries({
@@ -56,8 +57,8 @@ export const ConversationListAwaitingRequests = memo(
       [conversationsMetadataQueries, likelyNotSpam, currentAccountInboxId]
     );
 
-    const title = useMemo(
-      () => (
+    const title = useMemo(() => {
+      return (
         <HStack
           style={{
             alignItems: "center",
@@ -66,28 +67,34 @@ export const ConversationListAwaitingRequests = memo(
         >
           <ConversationListItemTitle>Requests</ConversationListItemTitle>
         </HStack>
-      ),
-      [theme]
-    );
+      );
+    }, [theme]);
 
-    const subtitle = useMemo(
-      () =>
-        isLoading ? null : (
-          <AnimatedHStack
-            entering={theme.animation.reanimatedFadeInSpring}
-            exiting={theme.animation.reanimatedFadeOutSpring}
-          >
-            <ConversationListItemSubtitle>
-              {numberOfRequestsLikelyNotSpam === 0
-                ? "All clear"
-                : `${numberOfRequestsLikelyNotSpam} new contact${
-                    numberOfRequestsLikelyNotSpam > 1 ? "s" : ""
-                  }`}
-            </ConversationListItemSubtitle>
-          </AnimatedHStack>
-        ),
-      [theme, isLoading, numberOfRequestsLikelyNotSpam]
-    );
+    const subtitle = useMemo(() => {
+      const getSubtitleText = () => {
+        if (isLoadingUknownConversations) {
+          return "Checking for invites";
+        }
+        if (numberOfRequestsLikelyNotSpam === 0) {
+          return "All clear";
+        }
+        return `${numberOfRequestsLikelyNotSpam} new contact${
+          numberOfRequestsLikelyNotSpam > 1 ? "s" : ""
+        }`;
+      };
+
+      const text = getSubtitleText();
+
+      return (
+        <AnimatedHStack
+          key={text} // Doing this to make sure the animation is triggered
+          entering={theme.animation.reanimatedFadeInSpring}
+          exiting={theme.animation.reanimatedFadeOutSpring}
+        >
+          <ConversationListItemSubtitle>{text}</ConversationListItemSubtitle>
+        </AnimatedHStack>
+      );
+    }, [isLoadingUknownConversations, numberOfRequestsLikelyNotSpam, theme]);
 
     return (
       <AnimatedVStack
@@ -120,7 +127,7 @@ export const ConversationListAwaitingRequests = memo(
                 }
                 style={{
                   width: theme.avatarSize.sm,
-                  aspectRatio: 1,
+                  height: theme.avatarSize.sm,
                 }}
                 contentFit="contain"
               />

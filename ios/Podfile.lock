@@ -1657,6 +1657,27 @@ PODS:
     - Yoga
   - react-native-aes-gcm-crypto (0.2.2):
     - React-Core
+  - react-native-animateable-text (0.14.2):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-compat (2.17.1):
     - DoubleConversion
     - glog
@@ -1779,6 +1800,29 @@ PODS:
     - React-Core
   - react-native-sfsymbols (1.2.1):
     - React
+  - react-native-skia (1.5.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React
+    - React-callinvoker
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-webview (13.12.5):
     - DoubleConversion
     - glog
@@ -2404,6 +2448,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-aes-gcm-crypto (from `../node_modules/react-native-aes-gcm-crypto`)
+  - react-native-animateable-text (from `../node_modules/react-native-animateable-text`)
   - "react-native-compat (from `../node_modules/@walletconnect/react-native-compat`)"
   - "react-native-fast-create-hash (from `../node_modules/@mfellner/react-native-fast-create-hash`)"
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
@@ -2416,6 +2461,7 @@ DEPENDENCIES:
   - react-native-quick-crypto (from `../node_modules/react-native-quick-crypto`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-sfsymbols (from `../node_modules/react-native-sfsymbols`)
+  - "react-native-skia (from `../node_modules/@shopify/react-native-skia`)"
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
@@ -2670,6 +2716,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-aes-gcm-crypto:
     :path: "../node_modules/react-native-aes-gcm-crypto"
+  react-native-animateable-text:
+    :path: "../node_modules/react-native-animateable-text"
   react-native-compat:
     :path: "../node_modules/@walletconnect/react-native-compat"
   react-native-fast-create-hash:
@@ -2694,6 +2742,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-sfsymbols:
     :path: "../node_modules/react-native-sfsymbols"
+  react-native-skia:
+    :path: "../node_modules/@shopify/react-native-skia"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-nativeconfig:
@@ -2905,6 +2955,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: f0c766c9dfb313c91b07457beb4e4ec9b2e02435
   React-microtasksnativemodule: 2b269ab96f8d54e52c4534d1cf8012879663a28c
   react-native-aes-gcm-crypto: d572dd7a69f31c539bb8309b3a829bfa3bfad244
+  react-native-animateable-text: 17f1d10e7bec44e19069021f6924292be7d3574c
   react-native-compat: b02635b29b85ac35b89fb2f98b2922f2c77804b1
   react-native-fast-create-hash: e25af5a905132c4081b4e20dc6336ba8d751e8a0
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
@@ -2917,6 +2968,7 @@ SPEC CHECKSUMS:
   react-native-quick-crypto: 86115244d0d3c259487f55c958efcbc22adc766f
   react-native-safe-area-context: 8b8404e70b0cbf2a56428a17017c14c1dcc16448
   react-native-sfsymbols: 095f133da14534b26859c6f01065e0fada8993e9
+  react-native-skia: 4a92331ee7812f56b11ed27e196a15bc4f3cea17
   react-native-webview: cf76748d6a6012799fdb26ad37f8d3e6f6139519
   React-nativeconfig: 565ebf4340d9ede95b523f0e3640f48286985ef5
   React-NativeModulesApple: 6ec0cac27d99644895c1c22b2b7a33441854a539

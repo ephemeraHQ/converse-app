@@ -25,7 +25,6 @@ export function usePinnedConversations() {
   const pinnedConversations = useMemo(() => {
     return conversations?.filter((conversation, index) => {
       const query = conversationsDataQueries[index];
-
       return query?.data?.isPinned;
     });
   }, [conversations, conversationsDataQueries]);

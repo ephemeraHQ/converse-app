@@ -20,9 +20,9 @@ import { IIconSize, iconSize } from "./icon";
 import { ISpacing, spacing } from "./spacing";
 import { Timing, timing } from "./timing";
 import { ITypography, typography } from "./typography";
-
 import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 import logger from "@utils/logger";
+import { ILoaderSize, loaderSize } from "@/theme/loader";
 
 export type ThemeContexts = "light" | "dark" | undefined;
 
@@ -39,6 +39,7 @@ export type Theme = {
   shadow: IShadow;
   layout: ILayout;
   animation: IAnimation;
+  loaderSize: ILoaderSize;
   isDark: boolean;
 };
 
@@ -55,6 +56,7 @@ export const lightTheme: Theme = {
   shadow,
   layout,
   animation,
+  loaderSize,
   isDark: false,
 };
 export const darkTheme: Theme = {
@@ -69,6 +71,7 @@ export const darkTheme: Theme = {
   shadow,
   layout,
   animation,
+  loaderSize,
   isDark: true,
 };
 

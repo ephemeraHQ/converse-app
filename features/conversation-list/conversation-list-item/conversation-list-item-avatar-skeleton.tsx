@@ -1,7 +1,4 @@
 import { Center } from "@/design-system/Center";
-import { LinearGradient } from "@/design-system/linear-gradient";
-import { useAppTheme } from "@/theme/useAppTheme";
-import { hexToRGBA } from "@/utils/colors";
 import { memo } from "react";
 
 export const ConversationListItemAvatarSkeleton = memo(
@@ -10,7 +7,6 @@ export const ConversationListItemAvatarSkeleton = memo(
     size: number;
   }) {
     const { color, size } = props;
-    const { theme } = useAppTheme();
 
     return (
       <Center
@@ -22,7 +18,8 @@ export const ConversationListItemAvatarSkeleton = memo(
           backgroundColor: color,
         }}
       >
-        <LinearGradient
+        {/* Keep until we're sure of final design */}
+        {/* <LinearGradient
           isAbsoluteFill
           style={{
             borderRadius: 999,
@@ -33,7 +30,7 @@ export const ConversationListItemAvatarSkeleton = memo(
             hexToRGBA(theme.colors.background.surfaceless, 0),
             theme.colors.background.surface,
           ]}
-        />
+        /> */}
       </Center>
     );
   }

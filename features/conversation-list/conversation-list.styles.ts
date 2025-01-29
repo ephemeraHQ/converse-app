@@ -5,5 +5,6 @@ export function useConversationListStyles() {
 
   return {
     screenHorizontalPadding: theme.spacing.lg,
+    listItemPaddingVertical: theme.spacing.xs,
   };
 }
