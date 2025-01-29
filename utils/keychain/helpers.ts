@@ -28,24 +28,6 @@ export const deleteXmtpKey = async (account: string) => {
 export const loadXmtpKey = async (account: string): Promise<string | null> =>
   getSecureItemAsync(`XMTP_KEY_${account}`);
 
-// export const getXmtpDatabaseEncryptionKey = async (
-//   account: string
-// ): Promise<string> => {
-//   const existingKey = await getSecureItemAsync(
-//     `XMTP_DB_ENCRYPTION_KEY_${account}`
-//   );
-//   if (existingKey) {
-//     return existingKey;
-//   }
-//   logger.debug(`[Keychain] Creating db encryption key for account ${account}`);
-//   const newKey = uuidv4();
-//   await setSecureItemAsync(`XMTP_DB_ENCRYPTION_KEY_${account}`, newKey);
-//   return newKey;
-// };
-
-// export const deleteXmtpDatabaseEncryptionKey = (account: string) =>
-//   deleteSecureItemAsync(`XMTP_DB_ENCRYPTION_KEY_${account}`);
-
 export const getTopicDataFromKeychain = async (
   account: string,
   topics: string[]
@@ -141,15 +123,4 @@ export const getDbEncryptionKey = async () => {
     newKey.toString("base64")
   );
   return new Uint8Array(newKey);
-};
-
-export const getDbEncryptionSalt = async () => {
-  const existingSalt = await getSecureItemAsync("CONVERSE_DB_ENCRYPTION_SALT");
-  if (existingSalt) {
-    return existingSalt;
-  }
-  const newKey = Buffer.from(await getRandomBytesAsync(16));
-  const newKeyHex = newKey.toString("hex");
-  await setSecureItemAsync("CONVERSE_DB_ENCRYPTION_SALT", newKeyHex);
-  return newKeyHex;
 };

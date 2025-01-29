@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
   Text,
   TextInput,
@@ -59,6 +59,8 @@ export const UserScreen = () => {
   const wallet = useEmbeddedWallet();
   const account = getUserEmbeddedEthereumWallet(user);
 
+  const isCreatingClient = useRef(false);
+
   const signMessage = useCallback(
     async (provider: PrivyEmbeddedWalletProvider) => {
       try {
@@ -86,20 +88,21 @@ export const UserScreen = () => {
 
   useEffect(() => {
     const buildExistingClient = async () => {
-      if (!account?.address || wallet.status !== "connected" || xmtpClient) {
-        logger.debug(
-          `[UserScreen] Skipping XMTP client build - address: ${
-            account?.address
-          }, wallet status: ${wallet.status}, existing client: ${!!xmtpClient}`
-        );
+      if (
+        !account?.address ||
+        wallet.status !== "connected" ||
+        xmtpClient ||
+        isCreatingClient.current
+      ) {
+        logger.debug(`[UserScreen] Skipping XMTP client build`);
         return;
       }
 
-      logger.debug(
-        `[UserScreen] Building XMTP client for address: ${account.address}`
-      );
+      logger.debug(`[UserScreen] Building XMTP client`);
       setIsLoadingClient(true);
       setXmtpClientError(null);
+      isCreatingClient.current = true;
+
       try {
         const encoder = new TextEncoder();
         const addressBytes = encoder.encode(account.address);
@@ -125,10 +128,14 @@ export const UserScreen = () => {
         setXmtpClientError(errorMsg);
       } finally {
         setIsLoadingClient(false);
+        isCreatingClient.current = false;
       }
     };
 
-    buildExistingClient();
+    // Only run if wallet is connected
+    if (wallet.status === "connected") {
+      buildExistingClient();
+    }
   }, [account?.address, wallet.status, xmtpClient]);
 
   const createXmtpClient = useCallback(async () => {
@@ -208,6 +215,40 @@ export const UserScreen = () => {
     []
   );
 
+  // Add this useEffect for automatic wallet creation
+  useEffect(() => {
+    if (wallet.status === "not-created") {
+      logger.debug("[UserScreen] Automatically creating wallet");
+      wallet.create().catch((error) => {
+        logger.error("[UserScreen] Wallet creation failed:", error);
+      });
+    }
+  }, [wallet.status]);
+
+  // Modify existing useEffect to handle auto-client creation
+  useEffect(() => {
+    const handleAutoClientCreation = async () => {
+      if (
+        wallet.status === "connected" &&
+        !xmtpClient &&
+        !isLoadingClient &&
+        !isCreatingClient.current
+      ) {
+        logger.debug(
+          "[UserScreen] Automatically creating XMTP client after wallet connection"
+        );
+        isCreatingClient.current = true;
+        try {
+          await createXmtpClient();
+        } finally {
+          isCreatingClient.current = false;
+        }
+      }
+    };
+
+    handleAutoClientCreation();
+  }, [wallet.status, xmtpClient, isLoadingClient]);
+
   if (!user) {
     return null;
   }
@@ -244,9 +285,6 @@ export const UserScreen = () => {
             />
           )}
 
-          {!xmtpClient && !isLoadingClient && (
-            <Button title="Create XMTP Client" onPress={createXmtpClient} />
-          )}
           {isLoadingClient && (
             <Text style={{ textAlign: "center", margin: 10 }}>
               Loading XMTP client...
