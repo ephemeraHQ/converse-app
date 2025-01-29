@@ -45,7 +45,11 @@ const xmtpClientByEthAddress: Record<
 
 export function dropXmtpClient(installationId: InstallationId) {
   logger.debug(
-    `[dropXmtpClient] Dropping client with installationId: ${JSON.stringify(installationId, null, 2)}`
+    `[dropXmtpClient] Dropping client with installationId: ${JSON.stringify(
+      installationId,
+      null,
+      2
+    )}`
   );
   return Client.dropClient(installationId);
 }
@@ -67,7 +71,11 @@ export async function getXmtpClient({
 }) {
   const cleanedEthAddress = getCleanEthAddress(address);
   logger.debug(
-    `[getXmtpClient] Getting client with params: ${JSON.stringify({ address: cleanedEthAddress, inboxId }, null, 2)}`
+    `[getXmtpClient] Getting client with params: ${JSON.stringify(
+      { address: cleanedEthAddress, inboxId },
+      null,
+      2
+    )}`
   );
 
   if (cleanedEthAddress in xmtpClientByEthAddress) {
@@ -78,14 +86,24 @@ export async function getXmtpClient({
   }
 
   try {
+    logger.debug(
+      `[getXmtpClient] Building new client for address: ${cleanedEthAddress}`
+    );
     const buildClientPromise = buildXmtpClient({
       address,
       inboxId,
     });
 
+    logger.debug(
+      `[getXmtpClient] Setting new promise for address: ${cleanedEthAddress}`
+    );
     xmtpClientByEthAddress[cleanedEthAddress] = buildClientPromise;
 
+    logger.debug(
+      `[getXmtpClient] Waiting for client to be built for address: ${cleanedEthAddress}`
+    );
     const client = await buildClientPromise;
+
     logger.debug(
       `[getXmtpClient] Built new client for address: ${cleanedEthAddress}`
     );
@@ -111,7 +129,11 @@ async function buildXmtpClient({
   const startTime = Date.now();
   try {
     logger.debug(
-      `[buildXmtpClient] Starting to build XMTP client with params: ${JSON.stringify({ address, inboxId }, null, 2)}`
+      `[buildXmtpClient] Starting to build XMTP client with params: ${JSON.stringify(
+        { address, inboxId },
+        null,
+        2
+      )}`
     );
 
     const [dbDirectory, dbEncryptionKey] = await Promise.all([
@@ -120,7 +142,11 @@ async function buildXmtpClient({
     ]);
 
     logger.debug(
-      `[buildXmtpClient] Got DB info: ${JSON.stringify({ dbDirectory, dbEncryptionKey }, null, 2)}`
+      `[buildXmtpClient] Got DB info: ${JSON.stringify(
+        { dbDirectory, dbEncryptionKey },
+        null,
+        2
+      )}`
     );
 
     const client = await Client.build(

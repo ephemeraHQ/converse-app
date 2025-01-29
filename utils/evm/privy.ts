@@ -1,7 +1,7 @@
 import "@ethersproject/shims";
 import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
 import { ethers } from "ethers";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { config } from "../../config";
 import { useCurrentAccount } from "../../data/store/accountsStore";
 
@@ -18,22 +18,23 @@ export const usePrivySigner = (
   const currentAccount = useCurrentAccount();
   const { isReady: privyReady, user: privyUser } = usePrivy();
   const embeddedWallet = useEmbeddedWallet();
-  const [hasSwitchedNetwork, setHasSwitchedNetwork] = useState(false);
+  const ethersSignerRef = useRef<ethers.Signer | undefined>(undefined);
+  // const [hasSwitchedNetwork, setHasSwitchedNetwork] = useState(false);
 
-  logger.debug(
-    `[usePrivySigner] State: ${JSON.stringify(
-      {
-        isOnboarding,
-        hasCurrentAccount: !!currentAccount,
-        privyReady,
-        privyUserId: privyUser?.id,
-        embeddedWalletStatus: embeddedWallet.status,
-        hasSwitchedNetwork,
-      },
-      null,
-      2
-    )}`
-  );
+  // logger.debug(
+  //   `[usePrivySigner] State: ${JSON.stringify(
+  //     {
+  //       isOnboarding,
+  //       hasCurrentAccount: !!currentAccount,
+  //       privyReady,
+  //       privyUserId: privyUser?.id,
+  //       embeddedWalletStatus: embeddedWallet.status,
+  //       // hasSwitchedNetwork,
+  //     },
+  //     null,
+  //     2
+  //   )}`
+  // );
 
   if (!isOnboarding && !currentAccount) {
     logger.debug(
@@ -42,41 +43,54 @@ export const usePrivySigner = (
     return undefined;
   }
 
-  if (privyReady && privyUser && embeddedWallet.status === "connected") {
+  if (
+    privyReady &&
+    privyUser &&
+    embeddedWallet.status === "connected" &&
+    !ethersSignerRef.current
+  ) {
     logger.debug("[usePrivySigner] Privy and embedded wallet ready");
     const provider = embeddedWallet.provider;
 
-    if (!hasSwitchedNetwork) {
-      logger.debug(
-        `[usePrivySigner] Switching network to chainId: ${config.evm.transactionChainId}`
-      );
+    // if (!hasSwitchedNetwork) {
+    //   logger.debug(
+    //     `[usePrivySigner] Switching network to chainId: ${config.evm.transactionChainId}`
+    //   );
 
-      provider
-        .request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: config.evm.transactionChainId }],
-        })
-        .then(() => {
-          logger.debug("[usePrivySigner] Successfully switched network");
-          setHasSwitchedNetwork(true);
-        })
-        .catch((error) => {
-          logger.error(
-            `[usePrivySigner] Failed to switch network: ${JSON.stringify(
-              error,
-              null,
-              2
-            )}`
-          );
-        });
-    } else {
-      logger.debug("[usePrivySigner] Creating ethers provider and signer");
-      const ethersProvider = new ethers.providers.Web3Provider(provider);
-      const ethersSigner = ethersProvider.getSigner();
-      return ethersSigner;
-    }
+    //   provider
+    //     .request({
+    //       method: "wallet_switchEthereumChain",
+    //       params: [{ chainId: config.evm.transactionChainId }],
+    //     })
+    //     .then(() => {
+    //       logger.debug("[usePrivySigner] Successfully switched network");
+    //       setHasSwitchedNetwork(true);
+    //     })
+    //     .catch((error) => {
+    //       logger.error(
+    //         `[usePrivySigner] Failed to switch network: ${JSON.stringify(
+    //           error,
+    //           null,
+    //           2
+    //         )}`
+    //       );
+    //     });
+    // } else {
+    logger.debug("[usePrivySigner] Creating ethers provider and signer");
+    const ethersProvider = new ethers.providers.Web3Provider(provider);
+    const ethersSigner = ethersProvider.getSigner();
+    logger.debug(
+      `[usePrivySigner] Created ethers signer: ${JSON.stringify(
+        ethersSigner,
+        null,
+        2
+      )}`
+    );
+    ethersSignerRef.current = ethersSigner;
+    // }
   }
 
-  logger.debug("[usePrivySigner] Conditions not met for signer creation");
+  // logger.debug("[usePrivySigner] Conditions not met for signer creation");
+  return ethersSignerRef.current;
   return undefined;
 };
