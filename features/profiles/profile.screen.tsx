@@ -130,6 +130,7 @@ export function ProfileScreen() {
   // Header configuration
   useHeader(
     {
+      backgroundColor: theme.colors.background.surface,
       safeAreaEdges: ["top"],
       titleComponent: (
         <Text preset="body">
@@ -246,21 +247,21 @@ export function ProfileScreen() {
           />
         </VStack>
 
-        <SocialNames
-          socials={{
-            userNames: socials?.userNames?.map((u) => ({ name: u.name })),
-            ensNames: socials?.ensNames?.map((e) => ({ name: e.name })),
-            unstoppableDomains: socials?.unstoppableDomains?.map((d) => ({
-              name: d.domain,
-            })),
-          }}
-        />
+        <VStack style={[themed($section), themed($borderTop)]}>
+          <SocialNames
+            socials={{
+              userNames: socials?.userNames?.map((u) => ({ name: u.name })),
+              ensNames: socials?.ensNames?.map((e) => ({ name: e.name })),
+              unstoppableDomains: socials?.unstoppableDomains?.map((d) => ({
+                name: d.domain,
+              })),
+            }}
+          />
+        </VStack>
 
         {isMyProfile && (
           <View>
-            <VStack
-              style={[themed($section), { paddingVertical: theme.spacing.lg }]}
-            >
+            <VStack style={[themed($section), themed($borderTop)]}>
               <SettingsList
                 editMode={editMode}
                 rows={[
@@ -302,15 +303,19 @@ export function ProfileScreen() {
 }
 
 const $container: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.background.sunken,
+  backgroundColor: colors.background.surface,
 });
 
 const $section: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   backgroundColor: colors.background.surface,
-  borderBottomWidth: spacing.xxs,
-  borderBottomColor: colors.background.sunken,
   paddingHorizontal: spacing.lg,
   paddingVertical: spacing.xs,
+});
+
+const $borderTop: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
+  borderTopWidth: spacing.xxs,
+  borderTopColor: colors.background.sunken,
+  paddingVertical: spacing.lg,
 });
 
 const $headerRight: ThemedStyle<ViewStyle> = ({ spacing }) => ({

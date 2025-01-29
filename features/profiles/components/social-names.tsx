@@ -53,7 +53,7 @@ export function SocialNames({ socials }: ISocialNamesProps) {
   };
 
   return (
-    <VStack style={[themed($section), { paddingTop: theme.spacing.md }]}>
+    <>
       <Text>{translate("profile.names")}</Text>
       <HStack style={themed($chipContainer)}>
         {renderSocialChips(socials.userNames ?? [], (item) => item.name)}
@@ -65,17 +65,9 @@ export function SocialNames({ socials }: ISocialNamesProps) {
           (item) => item.domain!
         )}
       </HStack>
-    </VStack>
+    </>
   );
 }
-
-const $section: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
-  backgroundColor: colors.background.surface,
-  borderBottomWidth: spacing.xxs,
-  borderBottomColor: colors.background.sunken,
-  paddingHorizontal: spacing.lg,
-  paddingVertical: spacing.xs,
-});
 
 const $chipContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexWrap: "wrap",
