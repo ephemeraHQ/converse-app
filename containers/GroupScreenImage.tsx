@@ -22,7 +22,7 @@ type GroupScreenImageProps = {
 };
 
 export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
-  const currentAccount = useCurrentAccount() as string;
+  const currentAccount = useCurrentAccount()!;
   const { groupPhoto, setGroupPhoto } = useGroupPhoto(topic);
   const { permissions } = useGroupPermissions(topic);
   const { members } = useGroupMembers(topic);

@@ -1,5 +1,5 @@
 import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
-import { usePrivyAccessToken, usePrivySigner } from "@utils/evm/privy";
+import { usePrivySigner } from "@utils/evm/privy";
 import { useEffect, useRef } from "react";
 
 import { usePrivyAuthStoreContext } from "./privyAuthStore";
@@ -25,7 +25,6 @@ export function usePrivySmartWalletConnection(args: {
   usePrivySigner({
     isOnboarding: true,
   });
-  const privyAccessToken = usePrivyAccessToken();
   const creatingEmbeddedWallet = useRef(false);
   const initializingXmtp = useRef(false);
 
@@ -49,17 +48,36 @@ export function usePrivySmartWalletConnection(args: {
       creatingEmbeddedWallet.current = true;
       onStatusChange("Creating embedded wallet");
       logger.debug("[Privy connection] Creating embedded wallet");
-      embeddedWallet
-        .create()
-        // TODO: Handle better error
-        .catch((error) => {
-          logger.error(
-            "[Privy connection] Error creating embedded wallet",
-            error
-          );
-          creatingEmbeddedWallet.current = false;
-          ensureErrorHandler(onConnectionError)(error);
-        });
+      if (smartWalletClient?.account) {
+        logger.debug("[Privy connection] Smart wallet already created");
+        return;
+      }
+      const userWallets = privyUser.linked_accounts.filter(
+        (account) => account.type === "wallet"
+      );
+      const smartWallets = privyUser.linked_accounts.filter(
+        (account) => account.type === "smart_wallet"
+      );
+      logger.debug("[Privy connection] User wallets", {
+        userWallets: JSON.stringify(userWallets, null, 2),
+        smartWallets: JSON.stringify(smartWallets, null, 2),
+      });
+      if (smartWallets.length === 0) {
+        logger.debug(
+          "[Privy connection] No smart wallets found, should create one"
+        );
+        embeddedWallet
+          .create()
+          // TODO: Handle better error
+          .catch((error) => {
+            logger.error(
+              "[Privy connection] Error creating embedded wallet",
+              error
+            );
+            creatingEmbeddedWallet.current = false;
+            ensureErrorHandler(onConnectionError)(error);
+          });
+      }
     }
   }, [
     embeddedWallet,
@@ -67,10 +85,11 @@ export function usePrivySmartWalletConnection(args: {
     privyUser,
     onConnectionError,
     onStatusChange,
+    smartWalletClient?.account,
   ]);
 
   useEffect(() => {
-    if (!smartWalletClient || !privyAccessToken || !privyAccountId) {
+    if (!smartWalletClient || !privyAccountId) {
       return;
     }
 
@@ -108,7 +127,6 @@ export function usePrivySmartWalletConnection(args: {
 
     initializeXmtp();
   }, [
-    privyAccessToken,
     privyAccountId,
     onConnectionDone,
     onConnectionError,
@@ -119,7 +137,6 @@ export function usePrivySmartWalletConnection(args: {
   return {
     privyReady: privyIsReady,
     privyUser,
-    privyAccessToken,
     privyAccountId,
   };
 }

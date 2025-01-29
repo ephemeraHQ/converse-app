@@ -44,11 +44,17 @@ const xmtpClientByEthAddress: Record<
 > = {};
 
 export function dropXmtpClient(installationId: InstallationId) {
+  logger.debug(
+    `[dropXmtpClient] Dropping client with installationId: ${JSON.stringify(installationId, null, 2)}`
+  );
   return Client.dropClient(installationId);
 }
 
 export async function deleteXmtpClient({ address }: { address: string }) {
   const cleanedEthAddress = getCleanEthAddress(address);
+  logger.debug(
+    `[deleteXmtpClient] Deleting client for address: ${cleanedEthAddress}`
+  );
   delete xmtpClientByEthAddress[cleanedEthAddress];
 }
 
@@ -60,8 +66,14 @@ export async function getXmtpClient({
   inboxId?: InboxId;
 }) {
   const cleanedEthAddress = getCleanEthAddress(address);
+  logger.debug(
+    `[getXmtpClient] Getting client with params: ${JSON.stringify({ address: cleanedEthAddress, inboxId }, null, 2)}`
+  );
 
   if (cleanedEthAddress in xmtpClientByEthAddress) {
+    logger.debug(
+      `[getXmtpClient] Found existing client for address: ${cleanedEthAddress}`
+    );
     return xmtpClientByEthAddress[cleanedEthAddress];
   }
 
@@ -74,10 +86,16 @@ export async function getXmtpClient({
     xmtpClientByEthAddress[cleanedEthAddress] = buildClientPromise;
 
     const client = await buildClientPromise;
+    logger.debug(
+      `[getXmtpClient] Built new client for address: ${cleanedEthAddress}`
+    );
 
     xmtpClientByEthAddress[cleanedEthAddress] = client;
     return client;
   } catch (error) {
+    logger.debug(
+      `[getXmtpClient] Error building client: ${JSON.stringify(error, null, 2)}`
+    );
     delete xmtpClientByEthAddress[cleanedEthAddress];
     throw error;
   }
@@ -93,13 +111,17 @@ async function buildXmtpClient({
   const startTime = Date.now();
   try {
     logger.debug(
-      `[buildXmtpClient] Starting to build XMTP client with address: ${address} and inboxId: ${inboxId}`
+      `[buildXmtpClient] Starting to build XMTP client with params: ${JSON.stringify({ address, inboxId }, null, 2)}`
     );
 
     const [dbDirectory, dbEncryptionKey] = await Promise.all([
       getDbDirectory(),
       getDbEncryptionKey(),
     ]);
+
+    logger.debug(
+      `[buildXmtpClient] Got DB info: ${JSON.stringify({ dbDirectory, dbEncryptionKey }, null, 2)}`
+    );
 
     const client = await Client.build(
       address,
@@ -114,7 +136,17 @@ async function buildXmtpClient({
 
     const duration = Date.now() - startTime;
     logger.debug(
-      `[buildXmtpClient] Successfully built XMTP client for address: ${address} (took ${duration}ms)`
+      `[buildXmtpClient] Successfully built XMTP client with config: ${JSON.stringify(
+        {
+          address,
+          env: config.xmtpEnv,
+          codecs: codecs.map((c) => c.constructor.name),
+          dbDirectory,
+          duration: `${duration}ms`,
+        },
+        null,
+        2
+      )}`
     );
 
     if (duration > 1000) {
@@ -127,6 +159,7 @@ async function buildXmtpClient({
 
     return client;
   } catch (error) {
+    logger.debug(`[buildXmtpClient] Error: ${JSON.stringify(error, null, 2)}`);
     throw error;
   }
 }

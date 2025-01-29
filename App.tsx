@@ -68,6 +68,7 @@ LogBox.ignoreLogs([
   "sync worker error storage error: Pool needs to  reconnect before use",
   "[Converse.debug.dylib] sync worker error storage error: Pool needs to  reconnect before use",
   "Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API.",
+  /Require cycle/,
 ]);
 
 // This is the default configuration
@@ -169,12 +170,19 @@ export default function AppWithProviders() {
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();
 
+  logger.debug("[privy info]", {
+    appId: config.privy.appId,
+    clientId: config.privy.clientId,
+    storage: privySecureStorage,
+    supportedChains: [base],
+  });
+
   return (
     <QueryClientProvider client={queryClient}>
       <PrivyProvider
         appId={config.privy.appId}
         clientId={config.privy.clientId}
-        storage={privySecureStorage}
+        // storage={privySecureStorage}
         supportedChains={[base]}
       >
         <SmartWalletsProvider>

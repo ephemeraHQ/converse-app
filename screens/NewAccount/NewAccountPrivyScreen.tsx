@@ -3,12 +3,7 @@ import React, { memo } from "react";
 
 import { NewAccountScreenComp } from "../../components/NewAccount/NewAccountScreenComp";
 import { NewAccountPictoTitleSubtitle } from "../../components/NewAccount/NewAccountTitleSubtitlePicto";
-import { PrivyPhoneEntry } from "../../features/onboarding/Privy/PrivyPhoneEntry";
-import { PrivyPhoneVerification } from "../../features/onboarding/Privy/PrivyPhoneVerification";
-import {
-  PrivyAuthStoreProvider,
-  usePrivyAuthStoreContext,
-} from "../../features/onboarding/Privy/privyAuthStore";
+import { PrivyAuthStoreProvider } from "../../features/onboarding/Privy/privyAuthStore";
 import { usePrivyConnection } from "../../features/onboarding/Privy/usePrivyConnection";
 import { translate } from "../../i18n";
 import { useRouter } from "../../navigation/useNavigation";
@@ -24,8 +19,6 @@ export const NewAccountPrivyScreen = memo(function () {
 });
 
 const Content = memo(function Content() {
-  const status = usePrivyAuthStoreContext((state) => state.status);
-
   const router = useRouter();
 
   usePrivyConnection({
@@ -53,11 +46,6 @@ const Content = memo(function Content() {
           {translate("privyConnect.title.enterPhone")}
         </NewAccountPictoTitleSubtitle.Title>
       </NewAccountPictoTitleSubtitle.Container>
-      {status === "enter-phone" ? (
-        <PrivyPhoneEntry />
-      ) : (
-        <PrivyPhoneVerification />
-      )}
     </NewAccountScreenComp>
   );
 });

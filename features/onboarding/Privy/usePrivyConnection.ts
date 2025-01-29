@@ -1,5 +1,5 @@
 import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
-import { usePrivyAccessToken, usePrivySigner } from "@utils/evm/privy";
+import { usePrivySigner } from "@utils/evm/privy";
 import { useEffect, useRef } from "react";
 
 import { usePrivyAuthStoreContext } from "./privyAuthStore";
@@ -20,7 +20,6 @@ export function usePrivyConnection(args: {
   const privySigner = usePrivySigner({
     isOnboarding: true,
   });
-  const privyAccessToken = usePrivyAccessToken();
   const creatingEmbeddedWallet = useRef(false);
 
   // Let's make sure we start with a clean state
@@ -50,7 +49,7 @@ export function usePrivyConnection(args: {
   }, [embeddedWallet, privyIsReady, privyUser, onConnectionError]);
 
   useEffect(() => {
-    if (!privySigner || !privyAccessToken || !privyAccountId) {
+    if (!privySigner || !privyAccountId) {
       return;
     }
 
@@ -69,19 +68,12 @@ export function usePrivyConnection(args: {
     };
 
     initializeXmtp();
-  }, [
-    privyAccessToken,
-    privyAccountId,
-    privySigner,
-    onConnectionDone,
-    onConnectionError,
-  ]);
+  }, [privyAccountId, privySigner, onConnectionDone, onConnectionError]);
 
   return {
     privyReady: privyIsReady,
     privyUser,
     privySigner,
-    privyAccessToken,
     privyAccountId,
   };
 }

@@ -24,7 +24,6 @@ import UserProfileNav from "@/screens/Navigation/UserProfileNav";
 import { OnboardingConnectWalletScreen } from "@features/onboarding/screens/OnboardingConnectWalletScreen";
 import { OnboardingEphemeraScreen } from "@features/onboarding/screens/OnboardingEphemeraScreen";
 import { OnboardingPrivateKeyScreen } from "@features/onboarding/screens/OnboardingPrivateKeyScreen";
-import { OnboardingPrivyScreen } from "@features/onboarding/screens/OnboardingPrivyScreen";
 import { OnboardingContactCardScreen } from "@features/onboarding/screens/onboarding-contact-card-screen";
 import { OnboardingNotificationsScreen } from "@features/onboarding/screens/onboarding-notifications-screen";
 import {
@@ -206,10 +205,6 @@ export function SignedOutNavigation() {
             component={OnboardingContactCardScreen}
           />
 
-          <NativeStack.Screen
-            name="OnboardingPrivy"
-            component={OnboardingPrivyScreen}
-          />
           <NativeStack.Screen
             name="OnboardingConnectWallet"
             component={OnboardingConnectWalletScreen}

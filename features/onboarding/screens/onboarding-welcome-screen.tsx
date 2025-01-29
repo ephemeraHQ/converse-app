@@ -1,5 +1,5 @@
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import { AnimatedText } from "@/design-system/Text";
+import { AnimatedText, Text } from "@/design-system/Text";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 
@@ -25,6 +25,11 @@ import {
 } from "@/features/onboarding/passkey/passkeyAuthStore";
 import logger from "@/utils/logger";
 import { captureErrorWithToast } from "@/utils/capture-error";
+import { Button } from "@/design-system/Button/Button";
+import { getConfig } from "@/config";
+import { RELYING_PARTY } from "../passkey/passkey.constants";
+import { usePrivy } from "@privy-io/expo";
+import { useLoginWithPasskey } from "../passkey/useLoginWithPasskey";
 
 const $subtextStyle: TextStyle = {
   textAlign: "center",
@@ -58,6 +63,7 @@ const OnboardingWelcomeScreenContent = memo(
     const { themed, theme } = useAppTheme();
     const { animation } = theme;
 
+    const { user, logout: logoutPrivy } = usePrivy();
     const router = useRouter();
 
     const loading = usePasskeyAuthStoreContext((state) => state.loading);
@@ -66,6 +72,7 @@ const OnboardingWelcomeScreenContent = memo(
       useCreatePasskey();
 
     const setError = usePasskeyAuthStoreContext((state) => state.setError);
+    const { loginWithPasskey } = useLoginWithPasskey();
 
     const handleError = useCallback(
       (error: Error) => {
@@ -74,6 +81,11 @@ const OnboardingWelcomeScreenContent = memo(
       },
       [setError]
     );
+
+    const handleLoginWithPasskey = useCallback(() => {
+      logger.debug("[OnboardingWelcomeScreenContent] handleLoginWithPasskey");
+      loginWithPasskey();
+    }, [loginWithPasskey]);
 
     const onStatusChange = useCallback((status: string) => {
       logger.debug("[OnboardingWelcomeScreenContent] onStatusChange", status);
@@ -105,6 +117,22 @@ const OnboardingWelcomeScreenContent = memo(
       >
         <Center style={$titleContainer}>
           <VStack>
+            <OnboardingFooter
+              text={translate("onboarding.welcome.createContactCard")}
+              iconName="biometric"
+              onPress={handleCreateAccountWithPasskey}
+              disabled={loading}
+            />
+
+            {/* <Text>{JSON.stringify(user, null, 2)}</Text> */}
+            <Text>{user?.id || "no privy user"}</Text>
+
+            {user?.id && <Button onPress={logoutPrivy}>logout privy</Button>}
+            {!user?.id && (
+              <Button onPress={handleLoginWithPasskey}>login privy</Button>
+            )}
+          </VStack>
+          {/* <VStack>
             <OnboardingSubtitle
               entering={animation
                 .fadeInUpSpring()
@@ -132,14 +160,8 @@ const OnboardingWelcomeScreenContent = memo(
             >
               {translate("onboarding.welcome.subtext")}
             </AnimatedText>
-          </VStack>
+          </VStack> */}
         </Center>
-        <OnboardingFooter
-          text={translate("onboarding.welcome.createContactCard")}
-          iconName="biometric"
-          onPress={handleCreateAccountWithPasskey}
-          disabled={loading}
-        />
       </Screen>
     );
   }

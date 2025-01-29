@@ -5,6 +5,7 @@ import { useLoginWithPasskey as useLoginWithPasskeyPrivy } from "@privy-io/expo/
 import { usePrivyAuthStoreContext } from "../Privy/privyAuthStore";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { RELYING_PARTY } from "./passkey.constants";
+import logger from "@/utils/logger";
 
 /**
  * This hook is used to login with an existing Passkey account and set the account id in the Passkey Auth Store
@@ -36,10 +37,15 @@ export const useLoginWithPasskey = () => {
   const handleLoginWithPasskey = useCallback(async () => {
     try {
       setLoading(true);
+      // we shouldn't get into the state where we're trying to login and have a privy user active,
+      // but we should handle it just in case
       if (privyUser) {
         // We support multiple accounts, so we need to logout of the current before creating a new one
         await logout();
       }
+      logger.debug("[useLoginWithPasskey] loginWithPasskey with params", {
+        relyingParty: RELYING_PARTY,
+      });
       const user = await loginWithPasskey({
         relyingParty: RELYING_PARTY,
       });

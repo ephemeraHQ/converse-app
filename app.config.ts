@@ -100,6 +100,7 @@ export default (): ExpoConfig => {
       config: {
         usesNonExemptEncryption: false,
       },
+      associatedDomains: ["webcredentials:dev.converse.xyz"],
     },
     extra: {
       expoEnv,

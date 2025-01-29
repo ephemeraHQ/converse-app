@@ -1,6 +1,7 @@
 import { humanize } from "@/utils/human-hash";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, PixelRatio, TextInput } from "react-native";
+import logger from "./logger";
 
 export const shortDisplayName = (displayName: string | undefined): string => {
   if (!displayName) return "";
@@ -33,17 +34,40 @@ export const formatGroupName = (topic: string, groupName?: string) =>
   groupName ||
   capitalize(humanize(topic.slice(14, 46), { numWords: 3, separator: " " }));
 
-export const formatEphemeralUsername = (address: string, username?: string) =>
-  username || humanize(address.slice(2, 42), { numWords: 2, separator: "" });
+export const formatEphemeralUsername = (address: string, username?: string) => {
+  logger.info("formatEphemeralUsername", { address, username });
+  if (!username && !address) {
+    return "";
+  }
+
+  return (
+    username || humanize(address.slice(2, 42), { numWords: 2, separator: "" })
+  );
+};
 
 export const formatEphemeralDisplayName = (
   address: string,
   displayName?: string
-) =>
-  displayName || humanize(address.slice(2, 42), { numWords: 2, separator: "" });
+) => {
+  logger.info("formatEphemeralDisplayName", { address, displayName });
+  if (!displayName && !address) {
+    return "";
+  }
 
-export const formatRandoDisplayName = (address: string) =>
-  humanize(address.slice(2, 42), { numWords: 2, separator: " " });
+  return (
+    displayName ||
+    humanize(address.slice(2, 42), { numWords: 2, separator: "" })
+  );
+};
+
+export const formatRandoDisplayName = (address: string) => {
+  logger.info("formatRandoDisplayName", { address });
+  if (!address) {
+    return "";
+  }
+
+  return humanize(address.slice(2, 42), { numWords: 2, separator: " " });
+};
 
 export const getTitleFontScale = (): number => {
   let titleFontScale = 1;

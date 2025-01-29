@@ -8,6 +8,7 @@ import {
 import { useProfileSocials } from "@/hooks/useProfileSocials";
 import { ProfileType } from "../types/onboarding.types";
 import { config } from "@/config";
+import logger from "@/utils/logger";
 
 export function useProfile() {
   const currentAccount = useCurrentAccount()!; // We assume if someone goes to this screen we have address
@@ -23,6 +24,8 @@ export function useProfile() {
     config.usernameSuffix,
     ""
   );
+
+  logger.info("usernameWithoutSuffix", { currentAccount });
 
   const defaultEphemeralUsername = formatEphemeralUsername(
     currentAccount,
