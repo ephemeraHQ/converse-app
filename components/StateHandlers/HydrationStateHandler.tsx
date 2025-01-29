@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { getInstalledWallets } from "../Onboarding/ConnectViaWallet/ConnectViaWalletSupportedWallets";
 import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
 import { syncConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences";
+import { prefetchConversationMetadataQuery } from "@/queries/conversation-metadata-query";
 
 export default function HydrationStateHandler() {
   useEffect(() => {
@@ -35,6 +36,12 @@ export default function HydrationStateHandler() {
           caller: "HydrationStateHandler",
         })
           .then((conversations) => {
+            for (const conversation of conversations) {
+              prefetchConversationMetadataQuery(
+                account,
+                conversation.topic
+              ).catch(captureError);
+            }
             subscribeToNotifications({
               conversations,
               account,

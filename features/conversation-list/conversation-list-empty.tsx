@@ -11,18 +11,14 @@ import React, { memo } from "react";
 export const ConversationListEmpty = memo(function ConversationListEmpty() {
   const { pinnedConversations = [] } = usePinnedConversations();
 
+  const { theme } = useAppTheme();
+
+  const { listItemPaddingVertical } = useConversationListStyles();
+
   // If there are pinned conversations, don't show the empty state
   if (pinnedConversations?.length > 0) {
     return null;
   }
-
-  return <ConversationListSkeletons />;
-});
-
-const ConversationListSkeletons = memo(function ConversationListSkeletons() {
-  const { theme } = useAppTheme();
-
-  const { listItemPaddingVertical } = useConversationListStyles();
 
   return (
     <VStack style={{ flex: 1 }}>

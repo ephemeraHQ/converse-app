@@ -1,49 +1,41 @@
-import { AnimatedCenter, Center } from "@/design-system/Center";
-import { AnimatedText, Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
-import { Loader } from "@/design-system/loader";
+import { useHeaderHeight } from "@/design-system/Header/Header.utils";
+import { Text } from "@/design-system/Text";
+import { AnimatableText } from "@/design-system/Text/AnimatedText";
+import { getTextStyle } from "@/design-system/Text/Text.utils";
+import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { NewLoader } from "@/design-system/new-loader";
 import { ConversationListEmpty } from "@/features/conversation-list/conversation-list-empty";
 import { $globalStyles } from "@/theme/styles";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
-import { debugBorder } from "@/utils/debug-style";
-import { useHeaderHeight } from "@react-navigation/elements";
-import React, { memo } from "react";
-import { StyleSheet, View, ViewStyle } from "react-native";
-import Animated, {
-  useAnimatedStyle,
+import { useAppTheme } from "@/theme/useAppTheme";
+import React, { memo, useEffect } from "react";
+import {
+  Easing,
+  cancelAnimation,
   useDerivedValue,
   useSharedValue,
-  withRepeat,
   withTiming,
-  withSequence,
-  Easing,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const ConversationListLoading = memo(function ConversationListLoading() {
+  const { theme } = useAppTheme();
+
   const headerHeight = useHeaderHeight();
 
   const insets = useSafeAreaInsets();
 
-  const countTextAV = useDerivedValue(() => {
-    // Format time as "00.00.000"
-    const timeInMs = Date.now() % 60000; // Get milliseconds within a minute
-    const seconds = Math.floor(timeInMs / 1000);
-    const milliseconds = timeInMs % 1000;
-
-    return `${String(Math.floor(seconds / 10)).padStart(1, "0")}${
-      seconds % 10
-    }.${String(milliseconds).padStart(3, "0")}`;
-  }, []);
-
   return (
-    <VStack style={$globalStyles.flex1}>
+    <AnimatedVStack
+      style={$globalStyles.flex1}
+      entering={theme.animation.reanimatedFadeInSpring}
+      exiting={theme.animation.reanimatedFadeOutSpring}
+    >
       <ConversationListEmpty />
       <VStack
-        {...debugBorder()}
         style={[
           $globalStyles.absoluteFill,
           {
+            rowGap: theme.spacing.sm,
             alignItems: "center",
             justifyContent: "center",
             // To make sure the loader is centered based on the screen height
@@ -52,58 +44,70 @@ export const ConversationListLoading = memo(function ConversationListLoading() {
         ]}
       >
         {/* <Loader /> */}
-        <ArcLoader />
-        <Text preset="bodyBold">Hello</Text>
-        <Text color="secondary" preset="small">
-          Gathering your messages
-        </Text>
-        {/* <AnimatedText text={countTextAV} /> */}
+        {/* <ArcLoader /> */}
+        <NewLoader size="lg" />
+        <VStack
+          style={{
+            rowGap: theme.spacing.xxxs,
+            alignItems: "center",
+          }}
+        >
+          <Text preset="bodyBold">Hello</Text>
+          <Text color="secondary" preset="small">
+            Gathering your messages
+          </Text>
+        </VStack>
+        <TimeCounter />
       </VStack>
-    </VStack>
+    </AnimatedVStack>
   );
 });
 
-const ArcLoader = () => {
+const TimeCounter = memo(function TimeCounter() {
   const { themed } = useAppTheme();
-  const rotation = useSharedValue(0);
 
-  React.useEffect(() => {
-    const timingConfig = {
-      duration: 1500, // Slower duration for smoother feel
+  const counterAV = useSharedValue(0);
+
+  useEffect(() => {
+    counterAV.value = withTiming(60 * 5, {
+      duration: 60000 * 5, // max of 5 minutes
+      easing: Easing.linear,
+    });
+
+    return () => {
+      cancelAnimation(counterAV);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    rotation.value = withSequence(
-      withTiming(0, timingConfig),
-      withRepeat(
-        withTiming(360, {
-          duration: 1500,
-          // Use bezier curve for smoother animation
-          easing: Easing.bezier(0.35, 0.7, 0.5, 0.7),
-        }),
-        -1, // Infinite loop
-        false // Don't reverse
-      )
-    );
-  }, [rotation]);
+  const countTextAV = useDerivedValue(() => {
+    const count = counterAV.value;
+    const minutes = 0;
+    const seconds = Math.floor(count);
+    const milliseconds = Math.floor((count % 1) * 1000);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
-  }));
+    return `${String(minutes).padStart(2, "0")}.${String(seconds).padStart(
+      2,
+      "0"
+    )}.${String(milliseconds).padStart(3, "0")}`;
+  });
 
-  return <AnimatedCenter style={[themed($arc), animatedStyle]} />;
-};
+  const textStyle = getTextStyle(themed, {
+    preset: "smaller",
+    color: "tertiary",
+  });
 
-const $arc: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  width: 80,
-  height: 80,
-  borderWidth: 8,
-  borderRadius: 40,
-  borderColor: "transparent",
-  borderTopColor: colors.text.primary,
-  borderLeftColor: colors.text.primary,
-  borderBottomColor: colors.text.primary,
-  borderTopLeftRadius: 40,
-  borderTopRightRadius: 40,
-  borderBottomLeftRadius: 40,
-  borderBottomRightRadius: 40,
+  return (
+    <AnimatableText
+      style={[
+        textStyle,
+        {
+          textAlign: "center",
+          alignSelf: "center",
+          fontVariant: ["tabular-nums"], // Uses monospaced numbers where all digits have the same width (e.g., '1' and '8' take up equal space)
+        },
+      ]}
+      text={countTextAV}
+    />
+  );
 });

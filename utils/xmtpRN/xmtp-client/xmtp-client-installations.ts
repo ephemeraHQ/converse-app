@@ -36,9 +36,7 @@ export const useCheckCurrentInstallation = () => {
       const client = (await getXmtpClient({
         address: account,
       })) as Client;
-      console.log("client:", client);
       const installationValid = await isClientInstallationValid(client);
-      console.log("installationValid:", installationValid);
 
       if (!installationValid) {
         await awaitableAlert(
