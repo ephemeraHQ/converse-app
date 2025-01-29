@@ -1,4 +1,5 @@
 import { useAppTheme } from "@/theme/useAppTheme";
+import { TextProps as RNTextProps } from "react-native";
 import AnimateableText from "react-native-animateable-text";
 import Animated, {
   AnimatedProps,
@@ -7,7 +8,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { Text } from "./Text";
 import { ITextProps } from "./Text.props";
-import { TextProps as RNTextProps } from "react-native";
 
 // A wrapper component that makes the base Text component compatible with Reanimated
 // Useful for animating text properties like color, opacity, or transform

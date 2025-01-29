@@ -10,6 +10,8 @@ type ILinearGradientProps = ExpoLinearGradientProps & {
   debug?: boolean;
 };
 
+const DEBUG_COLORS = ["blue", "red"] as const;
+
 export const LinearGradient = memo(function LinearGradient(
   props: ILinearGradientProps
 ) {
@@ -27,12 +29,10 @@ export const LinearGradient = memo(function LinearGradient(
   const end =
     rest.end ?? (orientation === "vertical" ? { x: 0, y: 1 } : { x: 1, y: 0 });
 
-  const debugColors = ["#0000FF", "#FF0000"];
-
   return (
     <ExpoLinearGradient
       {...rest}
-      colors={debug ? debugColors : colors}
+      colors={debug ? DEBUG_COLORS : colors}
       start={start}
       end={end}
       style={[
