@@ -86,6 +86,7 @@ const TimeCounter = memo(function TimeCounter() {
     const seconds = Math.floor(count);
     const milliseconds = Math.floor((count % 1) * 1000);
 
+    // We want format to be 00:00:000
     return `${String(minutes).padStart(2, "0")}.${String(seconds).padStart(
       2,
       "0"

@@ -29,7 +29,6 @@ export const ConversationListStartNewConvoBanner = memo(
 
     useEffect(() => {
       const timingConfig = {
-        // cubic-bezier(.35,.7,.5,.7)
         duration: theme.timing.slow,
       };
       bounceTranslateYAV.value = withSequence(
