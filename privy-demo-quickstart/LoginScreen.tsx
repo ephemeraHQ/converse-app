@@ -50,52 +50,6 @@ export function LoginScreen() {
       <Text style={{ fontSize: 10 }}>
         {Constants.expoConfig?.extra?.privyClientId}
       </Text>
-      <Text>
-        Navigate to your{" "}
-        <Text
-          onPress={() =>
-            Linking.openURL(
-              `https://dashboard.privy.io/apps/${Constants.expoConfig?.extra?.privyAppId}/settings?setting=clients`
-            )
-          }
-        >
-          dashboard
-        </Text>{" "}
-        and ensure the following Expo Application ID is listed as an `Allowed
-        app identifier`:
-      </Text>
-      <Text style={{ fontSize: 10 }}>{Application.applicationId}</Text>
-      <Text>
-        Navigate to your{" "}
-        <Text
-          onPress={() =>
-            Linking.openURL(
-              `https://dashboard.privy.io/apps/${Constants.expoConfig?.extra?.privyAppId}/settings?setting=clients`
-            )
-          }
-        >
-          dashboard
-        </Text>{" "}
-        and ensure the following value is listed as an `Allowed app URL scheme`:
-      </Text>
-      <Text style={{ fontSize: 10 }}>
-        {Application.applicationId === "host.exp.Exponent"
-          ? "exp"
-          : Constants.expoConfig?.scheme}
-      </Text>
-
-      {/* <Button
-        title="Login with Privy UIs"
-        onPress={() => {
-          login({ loginMethods: ["email"] })
-            .then((session) => {
-              console.log(JSON.stringify(session.user, null, 2));
-            })
-            .catch((err) => {
-              setError(JSON.stringify(err.error) as string);
-            });
-        }}
-      /> */}
 
       <Button
         title="Login using Passkey"
@@ -110,7 +64,7 @@ export function LoginScreen() {
         title="Create Passkey"
         onPress={() =>
           signupWithPasskey({
-            relyingParty: Constants.expoConfig?.extra?.passkeyAssociatedDomain,
+            relyingParty: RELYING_PARTY,
           })
             .then(({ user }) => {
               console.log(JSON.stringify(user, null, 2));

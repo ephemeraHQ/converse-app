@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   Text,
   TextInput,
@@ -24,6 +24,7 @@ import { Client, Signer } from "@xmtp/react-native-sdk";
 import { ethers } from "ethers";
 import { ClientOptions } from "@xmtp/react-native-sdk/build/lib/Client";
 import { Center } from "@/design-system/Center";
+import logger from "@/utils/logger";
 
 const toMainIdentifier = (x: PrivyUser["linked_accounts"][number]) => {
   if (x.type === "phone") {
@@ -49,6 +50,8 @@ export const UserScreen = () => {
   const [chainId, setChainId] = useState("1");
   const [signedMessages, setSignedMessages] = useState<string[]>([]);
   const [xmtpClient, setXmtpClient] = useState<Client | null>(null);
+  const [isLoadingClient, setIsLoadingClient] = useState(false);
+  const [xmtpClientError, setXmtpClientError] = useState<string | null>(null);
 
   const { logout, user } = usePrivy();
   const { linkWithPasskey } = useLinkWithPasskey();
@@ -59,37 +62,89 @@ export const UserScreen = () => {
   const signMessage = useCallback(
     async (provider: PrivyEmbeddedWalletProvider) => {
       try {
-        // const plaintext = `0x0${Date.now()}`;
+        logger.debug(
+          `[UserScreen] Signing message for address: ${account?.address}`
+        );
         const constantPlaintext = "foobar";
-        // const message = await provider.request({
-        //   method: "personal_sign",
-        //   params: [plaintext, account?.address],
-        // });
         const signedConstantPlaintext = await provider.request({
           method: "personal_sign",
           params: [constantPlaintext, account?.address],
         });
-        // if (message) {
-        //   const withPlaintext = `${plaintext}\n${message}`;
-        //   setSignedMessages((prev) => prev.concat(withPlaintext));
-        // }
         if (signedConstantPlaintext) {
           const withConstantPlaintext = `${constantPlaintext}\n${signedConstantPlaintext}`;
           setSignedMessages((prev) => prev.concat(withConstantPlaintext));
+          logger.debug(
+            `[UserScreen] Successfully signed message for address: ${account?.address}`
+          );
         }
       } catch (e) {
-        console.error(e);
+        logger.error(`[UserScreen] Error signing message: ${e}`);
       }
     },
     [account?.address]
   );
 
+  useEffect(() => {
+    const buildExistingClient = async () => {
+      if (!account?.address || wallet.status !== "connected" || xmtpClient) {
+        logger.debug(
+          `[UserScreen] Skipping XMTP client build - address: ${
+            account?.address
+          }, wallet status: ${wallet.status}, existing client: ${!!xmtpClient}`
+        );
+        return;
+      }
+
+      logger.debug(
+        `[UserScreen] Building XMTP client for address: ${account.address}`
+      );
+      setIsLoadingClient(true);
+      setXmtpClientError(null);
+      try {
+        const encoder = new TextEncoder();
+        const addressBytes = encoder.encode(account.address);
+        const keyBytes = new Uint8Array(32);
+        for (let i = 0; i < 32; i++) {
+          keyBytes[i] = addressBytes[i % addressBytes.length];
+        }
+
+        const client = await Client.build(account.address, {
+          env: "dev",
+          dbEncryptionKey: keyBytes,
+        });
+
+        setXmtpClient(client);
+        logger.debug(
+          `[UserScreen] Successfully built XMTP client for address: ${account.address}`
+        );
+      } catch (error) {
+        const errorMsg = `Failed to build XMTP client: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`;
+        logger.error(`[UserScreen] ${errorMsg}`, error);
+        setXmtpClientError(errorMsg);
+      } finally {
+        setIsLoadingClient(false);
+      }
+    };
+
+    buildExistingClient();
+  }, [account?.address, wallet.status, xmtpClient]);
+
   const createXmtpClient = useCallback(async () => {
     if (!account?.address || wallet.status !== "connected") {
+      logger.debug(
+        `[UserScreen] Cannot create XMTP client - address: ${account?.address}, wallet status: ${wallet.status}`
+      );
       alert("Wallet not connected");
       return;
     }
 
+    logger.debug(
+      `[UserScreen] Creating new XMTP client for address: ${account.address}`
+    );
+    setIsLoadingClient(true);
+    setXmtpClientError(null);
     try {
       const signer: Signer = {
         getAddress: () => Promise.resolve(account.address),
@@ -105,35 +160,49 @@ export const UserScreen = () => {
         walletType: () => "SCW",
       };
 
-      // Create a proper 32-byte encryption key
-      const encryptionKey = new Uint8Array(32);
-      // Fill with random values
-      crypto.getRandomValues(encryptionKey);
+      const encoder = new TextEncoder();
+      const addressBytes = encoder.encode(account.address);
+      const keyBytes = new Uint8Array(32);
+      for (let i = 0; i < 32; i++) {
+        keyBytes[i] = addressBytes[i % addressBytes.length];
+      }
 
       const options: ClientOptions = {
         env: "dev",
-        dbEncryptionKey: encryptionKey,
+        dbEncryptionKey: keyBytes,
       };
 
       const client = await Client.create(signer, options);
       setXmtpClient(client);
+      setXmtpClientError(null);
+      logger.debug(
+        `[UserScreen] Successfully created XMTP client for address: ${account.address}`
+      );
       alert("XMTP client created successfully!");
     } catch (error) {
-      console.error("Error creating XMTP client:", error);
-      alert("Failed to create XMTP client");
+      const errorMsg = `Failed to create XMTP client: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`;
+      logger.error(`[UserScreen] ${errorMsg}`, error);
+      setXmtpClientError(errorMsg);
+      alert(errorMsg);
+    } finally {
+      setIsLoadingClient(false);
     }
   }, [account, wallet]);
 
   const switchChain = useCallback(
     async (provider: PrivyEmbeddedWalletProvider, id: string) => {
       try {
+        logger.debug(`[UserScreen] Switching chain to ID: ${id}`);
         await provider.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId: id }],
         });
+        logger.debug(`[UserScreen] Successfully switched chain to ID: ${id}`);
         alert(`Chain switched to ${id} successfully`);
       } catch (e) {
-        console.error(JSON.stringify(e, null, 2));
+        logger.error(`[UserScreen] Error switching chain: ${e}`);
       }
     },
     []
@@ -175,7 +244,14 @@ export const UserScreen = () => {
             />
           )}
 
-          <Button title="Create XMTP Client" onPress={createXmtpClient} />
+          {!xmtpClient && !isLoadingClient && (
+            <Button title="Create XMTP Client" onPress={createXmtpClient} />
+          )}
+          {isLoadingClient && (
+            <Text style={{ textAlign: "center", margin: 10 }}>
+              Loading XMTP client...
+            </Text>
+          )}
           {xmtpClient && (
             <View
               style={{ padding: 10, backgroundColor: "#f0f0f0", margin: 10 }}
@@ -183,6 +259,15 @@ export const UserScreen = () => {
               <Text style={{ fontWeight: "bold" }}>XMTP Client Info:</Text>
               <Text>Address: {xmtpClient.address}</Text>
               <Text>Inbox ID: {xmtpClient.inboxId}</Text>
+            </View>
+          )}
+
+          {xmtpClientError && (
+            <View
+              style={{ padding: 10, backgroundColor: "#ffe6e6", margin: 10 }}
+            >
+              <Text style={{ color: "red", fontWeight: "bold" }}>Error:</Text>
+              <Text style={{ color: "red" }}>{xmtpClientError}</Text>
             </View>
           )}
 
