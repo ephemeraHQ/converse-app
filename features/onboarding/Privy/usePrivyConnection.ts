@@ -24,8 +24,7 @@ export function usePrivyConnection(args: {
 
   // Let's make sure we start with a clean state
   useEffect(() => {
-    logout();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // logout();
   }, []);
 
   // To make sure that we have a wallet created

@@ -20,6 +20,23 @@ export type ViemAccount = {
   signMessage: ({ message }: { message: string }) => Promise<string>;
 };
 
+/*
+
+
+// Example SCW
+export function convertSCWToSigner(scwAccount: SCWAccount): Signer {
+  return {
+    getAddress: async () => scwAccount.address,
+    signMessage: async (message: string) => {
+      const byteArray = await scwAccount.signMessage(message);
+      return ethers.utils.hexlify(byteArray); // Convert to hex string
+    },
+    walletType: () => "SCW",
+    getChainId: async () => 8453, // https://chainlist.org/
+    getBlockNumber: async () => undefined, // Optional: will be computed at run
+  };
+}
+*/
 export const viemAccountToXmtpSigner = (account: ViemAccount): XmtpSigner => ({
   getAddress: () => Promise.resolve(account.address),
   getChainId: () => account.chainId,
