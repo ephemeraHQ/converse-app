@@ -64,7 +64,7 @@ export function ConversationListScreen(props: IConversationListProps) {
 
   return (
     <Screen contentContainerStyle={$globalStyles.flex1}>
-      {isLoading ? (
+      {!isLoading ? (
         <ConversationListLoading />
       ) : (
         <ConversationList

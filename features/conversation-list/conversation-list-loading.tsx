@@ -1,3 +1,4 @@
+import { AnimatedTextCarousel } from "@/components/animated-text-carousel";
 import { useHeaderHeight } from "@/design-system/Header/Header.utils";
 import { Text } from "@/design-system/Text";
 import { AnimatableText } from "@/design-system/Text/AnimatedText";
@@ -18,7 +19,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const ConversationListLoading = memo(function ConversationListLoading() {
-  const { theme } = useAppTheme();
+  const { theme, themed } = useAppTheme();
 
   const headerHeight = useHeaderHeight();
 
@@ -52,7 +53,14 @@ export const ConversationListLoading = memo(function ConversationListLoading() {
             alignItems: "center",
           }}
         >
-          <Text preset="bodyBold">Hello</Text>
+          {/* <Text preset="bodyBold">Hello</Text> */}
+          <AnimatedTextCarousel
+            texts={["Hello", "Bonjour", "Ciao", "Hola"]}
+            textStyle={getTextStyle(themed, {
+              preset: "bodyBold",
+            })}
+            msDelayBetweenTextChange={2000}
+          />
           <Text color="secondary" preset="small">
             Gathering your messages
           </Text>
