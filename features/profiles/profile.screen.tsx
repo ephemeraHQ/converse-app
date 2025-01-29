@@ -260,42 +260,38 @@ export function ProfileScreen() {
         </VStack>
 
         {isMyProfile && (
-          <View>
-            <VStack style={[themed($section), themed($borderTop)]}>
-              <SettingsList
-                editMode={editMode}
-                rows={[
-                  ...(notificationsPermissionStatus !== "granted"
-                    ? [
-                        {
-                          label: translate("turn_on_notifications"),
-                          onPress: requestPermission,
-                        },
-                      ]
-                    : []),
-                  {
-                    label: translate("profile.settings.archive"),
-                    onPress: () => {
-                      router.navigate("Blocked");
-                    },
+          <VStack style={[themed($section), themed($borderTop)]}>
+            <SettingsList
+              editMode={editMode}
+              rows={[
+                ...(notificationsPermissionStatus !== "granted"
+                  ? [
+                      {
+                        label: translate("turn_on_notifications"),
+                        onPress: requestPermission,
+                      },
+                    ]
+                  : []),
+                {
+                  label: translate("profile.settings.archive"),
+                  onPress: () => {
+                    router.navigate("Blocked");
                   },
-                  /*{
-                    label: translate("profile.settings.keep_messages"),
-                    value: "Forever",
-                    onValueChange: () => {},
-                  },*/
-                  {
-                    label: translate("log_out"),
-                    isWarning: true,
-                    onPress: () =>
-                      showDisconnectActionSheet(
-                        theme.isDark ? "dark" : "light"
-                      ),
-                  },
-                ]}
-              />
-            </VStack>
-          </View>
+                },
+                /*{
+                  label: translate("profile.settings.keep_messages"),
+                  value: "Forever",
+                  onValueChange: () => {},
+                },*/
+                {
+                  label: translate("log_out"),
+                  isWarning: true,
+                  onPress: () =>
+                    showDisconnectActionSheet(theme.isDark ? "dark" : "light"),
+                },
+              ]}
+            />
+          </VStack>
         )}
       </VStack>
     </Screen>
@@ -315,7 +311,6 @@ const $section: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
 const $borderTop: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   borderTopWidth: spacing.xxs,
   borderTopColor: colors.background.sunken,
-  paddingVertical: spacing.lg,
 });
 
 const $headerRight: ThemedStyle<ViewStyle> = ({ spacing }) => ({

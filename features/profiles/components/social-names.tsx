@@ -44,7 +44,6 @@ export function SocialNames({ socials }: ISocialNamesProps) {
   ) => {
     return items?.map((item) => (
       <Chip
-        isSelected
         key={getValue(item)}
         name={getValue(item)}
         onPress={() => handleNamePress(getValue(item))}
@@ -53,7 +52,7 @@ export function SocialNames({ socials }: ISocialNamesProps) {
   };
 
   return (
-    <>
+    <VStack style={{ paddingVertical: theme.spacing.sm }}>
       <Text>{translate("profile.names")}</Text>
       <HStack style={themed($chipContainer)}>
         {renderSocialChips(socials.userNames ?? [], (item) => item.name)}
@@ -65,18 +64,12 @@ export function SocialNames({ socials }: ISocialNamesProps) {
           (item) => item.domain!
         )}
       </HStack>
-    </>
+    </VStack>
   );
 }
 
 const $chipContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexWrap: "wrap",
   gap: spacing.xs,
-  paddingVertical: spacing.sm,
-});
-
-const $chip: ThemedStyle<ViewStyle> = ({ colors, borderRadius }) => ({
-  backgroundColor: colors.background.surface,
-  borderColor: colors.border.subtle,
-  borderRadius: borderRadius.xs,
+  paddingTop: spacing.sm,
 });
