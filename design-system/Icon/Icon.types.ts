@@ -1,6 +1,5 @@
-import { ColorValue, StyleProp, TextStyle, ViewStyle } from "react-native";
+import { ColorValue, StyleProp, ViewStyle } from "react-native";
 import { RequireExactlyOne } from "../../types/general";
-import { iconRegistry } from "@/design-system/Icon/Icon";
 
 export type IIconName =
   | "xmark"
@@ -35,13 +34,14 @@ export type IIconName =
   | "block"
   | "chevron.left"
   | "chevron.right"
+  | "chevron.up"
+  | "chevron.down"
   | "arrow.right.circle.fill"
   | "lock.open.laptopcomputer"
   | "trash"
   | "menu"
   | "more_vert"
   | "phone"
-  | "chevron.down"
   | "photo"
   | "dollarsign"
   | "gear"

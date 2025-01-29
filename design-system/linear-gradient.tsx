@@ -7,6 +7,7 @@ import { memo } from "react";
 type ILinearGradientProps = ExpoLinearGradientProps & {
   isAbsoluteFill?: boolean;
   orientation?: "vertical" | "horizontal";
+  debug?: boolean;
 };
 
 export const LinearGradient = memo(function LinearGradient(
@@ -15,7 +16,7 @@ export const LinearGradient = memo(function LinearGradient(
   const {
     isAbsoluteFill,
     orientation = "vertical",
-
+    debug = false,
     colors,
     ...rest
   } = props;
@@ -26,10 +27,12 @@ export const LinearGradient = memo(function LinearGradient(
   const end =
     rest.end ?? (orientation === "vertical" ? { x: 0, y: 1 } : { x: 1, y: 0 });
 
+  const debugColors = ["#0000FF", "#FF0000"];
+
   return (
     <ExpoLinearGradient
       {...rest}
-      colors={colors}
+      colors={debug ? debugColors : colors}
       start={start}
       end={end}
       style={[

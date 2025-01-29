@@ -41,6 +41,7 @@ export const iconRegistry: Record<
   block: "block",
   "chevron.left": "chevron-left",
   "chevron.right": "chevron-right",
+  "chevron.up": "expand-less",
   "arrow.right.circle.fill": "arrow-circle-right",
   "lock.open.laptopcomputer": "laptop",
   trash: "delete",

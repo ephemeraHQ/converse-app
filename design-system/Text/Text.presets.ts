@@ -24,7 +24,7 @@ export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
 
   body: [textBaseStyle],
 
-  bodyBold: [textBaseStyle, textFontWeightStyles.bold],
+  bodyBold: [textBaseStyle, textFontWeightStyles.medium],
 
   small: [textBaseStyle, textSizeStyles.xs],
 
@@ -32,7 +32,7 @@ export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
 
   smallerBold: [textBaseStyle, textSizeStyles.xxs, textFontWeightStyles.bold],
 
-  bigBold: [textBaseStyle, textFontWeightStyles.bold],
+  bigBold: [textBaseStyle, textFontWeightStyles.semiBold],
 
   formHelper: [
     textBaseStyle,

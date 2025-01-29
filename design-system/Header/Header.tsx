@@ -12,6 +12,7 @@ import { ITextProps, Text } from "../Text";
 import { ITouchableOpacityProps } from "../TouchableOpacity";
 import { VStack } from "../VStack";
 import { HeaderAction } from "./HeaderAction";
+import { useHeaderHeight } from "@/design-system/Header/Header.utils";
 
 export type HeaderProps = {
   titleStyle?: StyleProp<TextStyle>;
@@ -78,6 +79,8 @@ export function Header(props: HeaderProps) {
 
   const titleContent = titleTx ? translate(titleTx, titleTxOptions) : title;
 
+  const headerHeight = useHeaderHeight();
+
   return (
     <VStack
       // {...debugBorder()}
@@ -90,7 +93,7 @@ export function Header(props: HeaderProps) {
     >
       <HStack
         // {...debugBorder("yellow")}
-        style={[themed($wrapper), $styleOverride]}
+        style={[themed($wrapper), $styleOverride, { height: headerHeight }]}
       >
         <HStack
           // {...debugBorder("red")}
@@ -155,7 +158,6 @@ export function Header(props: HeaderProps) {
 }
 
 const $wrapper: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  height: 72,
   alignItems: "center",
   paddingHorizontal: spacing.xs,
 });
