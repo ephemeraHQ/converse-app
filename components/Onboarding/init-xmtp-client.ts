@@ -54,7 +54,6 @@ export async function initXmtpClient(args: {
 
 export async function initXmtpClientFromViemAccount(args: {
   account: ViemAccount;
-  privyAccountId?: string;
   isEphemeral?: boolean;
   pkPath?: string;
 }) {

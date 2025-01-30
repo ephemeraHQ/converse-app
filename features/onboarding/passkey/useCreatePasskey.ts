@@ -2,7 +2,6 @@ import { useCallback, useEffect } from "react";
 import { usePasskeyAuthStoreContext } from "./passkeyAuthStore";
 import { usePrivy } from "@privy-io/expo";
 import { useSignupWithPasskey } from "@privy-io/expo/passkey";
-import { usePrivyAuthStoreContext } from "../Privy/privyAuthStore";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { RELYING_PARTY } from "./passkey.constants";
 
@@ -26,9 +25,6 @@ export const useCreatePasskey = () => {
   );
 
   // Privy Auth Store Hooks
-  const setPrivyAccountId = usePrivyAuthStoreContext(
-    (state) => state.setPrivyAccountId
-  );
 
   useEffect(() => {
     setStatusString(signupState.status);
@@ -48,19 +44,17 @@ export const useCreatePasskey = () => {
         throw new Error("No account created from Passkey");
       }
       setStatusString("Account created - Waiting for smart wallet");
-      setPrivyAccountId(user.id);
     } catch (e: any) {
       setError(e?.message ?? "Error creating Passkey account");
       captureErrorWithToast(e);
     }
   }, [
-    setLoading,
-    privyUser,
-    signupWithPasskey,
-    setStatusString,
-    setPrivyAccountId,
     logout,
+    signupWithPasskey,
     setError,
+    setStatusString,
+    privyUser,
+    setLoading,
   ]);
 
   return {

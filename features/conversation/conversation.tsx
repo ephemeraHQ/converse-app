@@ -1,7 +1,5 @@
 import { AnimatedVStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
-import { ExternalWalletPicker } from "@/features/ExternalWalletPicker/ExternalWalletPicker";
-import { ExternalWalletPickerContextProvider } from "@/features/ExternalWalletPicker/ExternalWalletPicker.context";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { ConversationComposer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerContainer } from "@/features/conversation/conversation-composer/conversation-composer-container";
@@ -140,23 +138,20 @@ export const Conversation = memo(function Conversation(props: {
   }
 
   return (
-    <ExternalWalletPickerContextProvider>
-      <ConversationStoreProvider conversationId={conversation.id} topic={topic}>
-        <MessageContextMenuStoreProvider>
-          <ConversationComposerStoreProvider
-            inputValue={textPrefill}
-            storeName={topic}
-          >
-            <Messages conversation={conversation} />
-            <ComposerWrapper conversation={conversation} />
-            <KeyboardFillerWrapper />
-            <MessageContextMenu />
-            <MessageReactionsDrawer />
-            <ExternalWalletPicker title="Choose a wallet" />
-          </ConversationComposerStoreProvider>
-        </MessageContextMenuStoreProvider>
-      </ConversationStoreProvider>
-    </ExternalWalletPickerContextProvider>
+    <ConversationStoreProvider conversationId={conversation.id} topic={topic}>
+      <MessageContextMenuStoreProvider>
+        <ConversationComposerStoreProvider
+          inputValue={textPrefill}
+          storeName={topic}
+        >
+          <Messages conversation={conversation} />
+          <ComposerWrapper conversation={conversation} />
+          <KeyboardFillerWrapper />
+          <MessageContextMenu />
+          <MessageReactionsDrawer />
+        </ConversationComposerStoreProvider>
+      </MessageContextMenuStoreProvider>
+    </ConversationStoreProvider>
   );
 });
 
