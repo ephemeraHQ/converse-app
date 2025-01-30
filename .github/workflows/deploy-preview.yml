@@ -103,6 +103,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT_GITHUB }}
+          ref: main
+          fetch-depth: 0
+
+      # To get the incremented version number
+      - name: Pull latest changes
+        run: git pull origin main
 
       - name: Setup node
         uses: actions/setup-node@v4
