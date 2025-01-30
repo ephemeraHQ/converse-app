@@ -4,6 +4,11 @@ import { useLayoutEffect } from "react";
 
 /**
  * A hook that can be used to easily set the Header of a react-navigation screen from within the screen's component.
+ *
+ * Header Background Convention:
+ * - By default, headers use a 'surfaceless' background to match content screens like conversation list and chat
+ * - For settings-like screens (Profile, AppSettings, etc.) that use a 'surface' background,
+ *   explicitly set backgroundColor: theme.colors.background.surface in the header config
  * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/utility/useHeader/}
  * @param {HeaderProps} headerProps - The props for the `Header` component.
  * @param {any[]} deps - The dependencies to watch for changes to update the header.
