@@ -22,13 +22,18 @@ const createXmtpClientFromXmtpSigner = async (
   onInstallationRevoked: () => Promise<void>,
   preAuthenticateToInboxCallback?: () => Promise<void>
 ) => {
-  const tempDirectory = await createTemporaryDirectory();
-  const dbEncryptionKey = await getDbEncryptionKey();
+  const [dbDirectory, dbEncryptionKey] = await Promise.all([
+    getDbDirectory(),
+    getDbEncryptionKey(),
+  ]);
+  logger.debug(
+    "[createXmtpClientFromXmtpSigner] Getting database encryption key"
+  );
 
   const options = {
     env: config.xmtpEnv,
     enableV3: true,
-    dbDirectory: tempDirectory,
+    dbDirectory: dbDirectory,
     dbEncryptionKey,
   };
   const inboxId = await getInboxId(await signer.getAddress());
