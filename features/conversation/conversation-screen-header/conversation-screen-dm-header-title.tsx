@@ -1,6 +1,6 @@
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
 import { usePreferredInboxAddress } from "@/hooks/usePreferredInboxAddress";
-import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
+import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { copyToClipboard } from "@/utils/clipboard";
 import { Avatar } from "@components/Avatar";
 import { useCurrentAccount } from "@data/store/accountsStore";
@@ -23,13 +23,13 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
 
   const { theme } = useAppTheme();
 
-  const { data: peerInboxId } = useDmPeerInboxId({
+  const { data: peerInboxId } = useDmPeerInboxIdQuery({
     account,
     topic,
     caller: "DmConversationTitle",
   });
 
-  const peerAddress = usePreferredInboxAddress(peerInboxId!);
+  const { data: peerAddress } = usePreferredInboxAddress(peerInboxId!);
 
   const onPress = useCallback(() => {
     if (peerAddress) {

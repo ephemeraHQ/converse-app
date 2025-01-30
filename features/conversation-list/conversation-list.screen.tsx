@@ -1,4 +1,5 @@
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
+import { HStack } from "@/design-system/HStack";
 import { AnimatedVStack } from "@/design-system/VStack";
 import { ConversationList } from "@/features/conversation-list/conversation-list";
 import { ConversationListItemDm } from "@/features/conversation-list/conversation-list-item/conversation-list-item-dm";
@@ -9,12 +10,14 @@ import {
   useDmConversationContextMenuViewProps,
   useGroupConversationContextMenuViewProps,
 } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
+import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useMinimumLoadingTime } from "@/hooks/use-minimum-loading-time";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
+import { isDev } from "@/utils/getEnv";
 import {
   DmWithCodecsType,
   GroupWithCodecsType,
@@ -28,7 +31,6 @@ import { ConversationListEmpty } from "./conversation-list-empty";
 import { ConversationListStartNewConvoBanner } from "./conversation-list-start-new-convo-banner";
 import { useHeaderWrapper } from "./conversation-list.screen-header";
 import { useConversationListConversations } from "./use-conversation-list-conversations";
-import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
 
 type IConversationListProps = NativeStackScreenProps<
   NavigationParamList,
@@ -59,7 +61,7 @@ export function ConversationListScreen(props: IConversationListProps) {
   // Better UX to at least show loading for 3 seconds
   const isLoading = useMinimumLoadingTime({
     isLoading: isLoadingConversations,
-    minimumTime: 2500,
+    minimumTime: isDev ? 0 : 2500,
   });
 
   return (
@@ -75,10 +77,11 @@ export function ConversationListScreen(props: IConversationListProps) {
           onRefetch={handleRefresh}
           onLayout={() => {}}
           layout={theme.animation.reanimatedLayoutSpringTransition}
-          removeClippedSubviews={false}
           contentContainerStyle={{
-            paddingBottom: insets.bottom,
             flex: 1,
+            // Little hack because we want ConversationListEmpty to be full screen when we have no conversations
+            paddingBottom:
+              conversations && conversations.length > 0 ? insets.bottom : 0,
           }}
           renderConversation={({ item }) => {
             return isConversationGroup(item) ? (
@@ -97,16 +100,27 @@ const ConversationListItemDmWrapper = memo(
   function ConversationListItemDmWrapper(props: { dm: DmWithCodecsType }) {
     const { dm } = props;
 
-    const { theme } = useAppTheme();
-
     const contextMenuProps = useDmConversationContextMenuViewProps({
       dmConversationTopic: dm.topic,
     });
 
     return (
-      <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
-        <ConversationListItemDm conversationTopic={dm.topic} />
-      </ContextMenuView>
+      // Needed this so we don't see the shadow when long press to open the context menu
+      <HStack
+        style={{
+          width: "100%",
+          overflow: "hidden",
+        }}
+      >
+        <ContextMenuView
+          style={{
+            width: "100%",
+          }}
+          {...contextMenuProps}
+        >
+          <ConversationListItemDm conversationTopic={dm.topic} />
+        </ContextMenuView>
+      </HStack>
     );
   }
 );
@@ -117,16 +131,27 @@ const ConversationListItemGroupWrapper = memo(
   }) {
     const { group } = props;
 
-    const { theme } = useAppTheme();
-
     const contextMenuProps = useGroupConversationContextMenuViewProps({
       groupConversationTopic: group.topic,
     });
 
     return (
-      <ContextMenuView hitSlop={theme.spacing.xs} {...contextMenuProps}>
-        <ConversationListItemGroup conversationTopic={group.topic} />
-      </ContextMenuView>
+      // Needed this so we don't see the shadow when long press to open the context menu
+      <HStack
+        style={{
+          width: "100%",
+          overflow: "hidden",
+        }}
+      >
+        <ContextMenuView
+          style={{
+            width: "100%",
+          }}
+          {...contextMenuProps}
+        >
+          <ConversationListItemGroup conversationTopic={group.topic} />
+        </ContextMenuView>
+      </HStack>
     );
   }
 );

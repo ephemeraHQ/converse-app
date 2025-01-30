@@ -124,7 +124,9 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
     conversationTopic: topic,
   });
 
-  const inboxName = usePreferredInboxName(referencedMessage?.senderInboxId);
+  const { data: inboxName } = usePreferredInboxName({
+    inboxId: referencedMessage?.senderInboxId,
+  });
 
   const tapGesture = Gesture.Tap()
     .onBegin(() => {

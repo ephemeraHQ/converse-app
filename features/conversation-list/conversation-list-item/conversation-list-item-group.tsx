@@ -1,5 +1,5 @@
 import { Avatar } from "@/components/Avatar";
-import { GroupAvatarDumb } from "@/components/GroupAvatar";
+import { GroupAvatarDumb } from "@/components/group-avatar";
 import { ISwipeableRenderActionsArgs } from "@/components/swipeable";
 import { ConversationListItemSwipeable } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";

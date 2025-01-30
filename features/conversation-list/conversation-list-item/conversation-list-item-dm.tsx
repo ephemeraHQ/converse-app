@@ -10,7 +10,7 @@ import { useRestoreConversation } from "@/features/conversation-list/hooks/use-r
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
 import { useConversationQuery } from "@/queries/useConversationQuery";
-import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
+import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useCurrentAccount } from "@data/store/accountsStore";
@@ -39,11 +39,12 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     caller: "Conversation List Item Dm",
   });
 
-  const { data: peerInboxId } = useDmPeerInboxId({
-    account: currentAccount!,
-    topic: conversationTopic,
-    caller: "ConversationListItemDm",
-  });
+  const { data: peerInboxId, isLoading: isLoadingPeerInboxId } =
+    useDmPeerInboxIdQuery({
+      account: currentAccount!,
+      topic: conversationTopic,
+      caller: "ConversationListItemDm",
+    });
 
   const deleteDm = useDeleteDm({
     topic: conversationTopic,
@@ -55,8 +56,11 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
   const { theme } = useAppTheme();
 
   const messageText = useMessagePlainText(conversation?.lastMessage);
-  const preferredName = usePreferredInboxName(peerInboxId);
-  const avatarUri = usePreferredInboxAvatar(peerInboxId);
+  const { data: preferredName, isLoading: isLoadingPreferredName } =
+    usePreferredInboxName({
+      inboxId: peerInboxId,
+    });
+  const { data: avatarUri } = usePreferredInboxAvatar(peerInboxId);
 
   const avatarComponent = useMemo(() => {
     return (
@@ -70,16 +74,30 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     });
   }, [conversationTopic]);
 
-  // title
-  const title = preferredName;
+  const title = useMemo(() => {
+    if (!!preferredName) {
+      return preferredName;
+    }
 
-  // subtitle
-  const timestamp = conversation?.lastMessage?.sentNs ?? 0;
-  const timeToShow = getCompactRelativeTime(timestamp);
-  const subtitle =
-    timeToShow && messageText
-      ? `${timeToShow} ${MIDDLE_DOT} ${messageText}`
-      : "";
+    // Empty string just so we don't see a jump when we finish loading names
+    if (isLoadingPreferredName || isLoadingPeerInboxId) {
+      return " ";
+    }
+
+    // Empty string so UI looks better
+    return " ";
+  }, [preferredName, isLoadingPreferredName, isLoadingPeerInboxId]);
+
+  const subtitle = useMemo(() => {
+    const timestamp = conversation?.lastMessage?.sentNs ?? 0;
+    const timeToShow = getCompactRelativeTime(timestamp);
+
+    if (!timeToShow || !messageText) {
+      return "";
+    }
+
+    return `${timeToShow} ${MIDDLE_DOT} ${messageText}`;
+  }, [conversation?.lastMessage?.sentNs, messageText]);
 
   const { isUnread } = useConversationIsUnread({
     topic: conversationTopic,

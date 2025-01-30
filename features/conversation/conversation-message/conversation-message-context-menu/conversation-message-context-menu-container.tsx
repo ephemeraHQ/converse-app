@@ -11,7 +11,7 @@ import { MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE 
 import {
   MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT,
   MESSAGE_CONTEXT_REACTIONS_HEIGHT,
-} from "./conversation-message-context-menu-constant";
+} from "./conversation-message-context-menu.constants";
 
 export const MessageContextMenuContainer = memo(
   function MessageContextMenuContainer(args: {

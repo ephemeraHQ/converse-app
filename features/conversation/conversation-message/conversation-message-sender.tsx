@@ -16,7 +16,9 @@ export function ConversationMessageSender(
 ) {
   const { inboxId } = args;
   const styles = useStyles();
-  const name = usePreferredInboxName(inboxId);
+  const { data: name } = usePreferredInboxName({
+    inboxId,
+  });
 
   return (
     <VStack style={styles.groupSenderContainer}>

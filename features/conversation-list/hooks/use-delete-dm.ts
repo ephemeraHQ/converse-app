@@ -8,7 +8,7 @@ import {
   updateConversationMetadataQueryData,
 } from "@/queries/conversation-metadata-query";
 import { getConversationQueryOptions } from "@/queries/useConversationQuery";
-import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
+import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { deleteTopic } from "@/utils/api/topics";
@@ -31,7 +31,7 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
     select: (conversation) => conversation?.id,
   });
 
-  const { data: peerInboxId } = useDmPeerInboxId({
+  const { data: peerInboxId } = useDmPeerInboxIdQuery({
     account: currentAccount,
     topic,
     caller: "useDeleteDm",
@@ -39,7 +39,9 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
 
   const { mutateAsync: denyDmConsentAsync } = useDenyDmMutation();
 
-  const preferredName = usePreferredInboxName(peerInboxId);
+  const { data: preferredName } = usePreferredInboxName({
+    inboxId: peerInboxId,
+  });
 
   const { mutateAsync: deleteDmAsync } = useMutation({
     mutationFn: () =>

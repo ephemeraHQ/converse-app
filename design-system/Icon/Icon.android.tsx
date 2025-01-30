@@ -50,6 +50,7 @@ export const iconRegistry: Record<
   phone: "phone",
   "chevron.down": "expand-more",
   photo: "photo",
+  photos: "photo-library",
   dollarsign: "attach-money",
   gear: "settings",
   "arrow.clockwise": "refresh",

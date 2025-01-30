@@ -26,13 +26,18 @@ import React, { useCallback } from "react";
 import { Alert, ViewStyle } from "react-native";
 
 export function useHeaderWrapper() {
+  const { theme } = useAppTheme();
+
   useHeader(
     {
       safeAreaEdges: ["top"],
+      style: {
+        paddingHorizontal: theme.spacing.sm, // In Figma, for the conversation list, the header has bigger horizontal padding
+      },
       RightActionComponent: <HeaderRightActions />,
       titleComponent: <HeaderTitle />,
     },
-    []
+    [theme]
   );
 }
 
@@ -129,8 +134,10 @@ function ProfileAvatar() {
   const navigation = useNavigation();
   const currentAccount = useCurrentAccount();
   const { data: currentAccountInboxId } = useCurrentAccountInboxId();
-  const preferredName = usePreferredInboxName(currentAccountInboxId);
-  const avatarUri = usePreferredInboxAvatar(currentAccountInboxId);
+  const { data: preferredName } = usePreferredInboxName({
+    inboxId: currentAccountInboxId,
+  });
+  const { data: avatarUri } = usePreferredInboxAvatar(currentAccountInboxId);
 
   const showDebugMenu = useCallback(() => {
     converseEventEmitter.emit("showDebugMenu");

@@ -56,7 +56,9 @@ export const ReplyPreview = memo(function ReplyPreview() {
     conversationTopic: topic,
   });
 
-  const inboxName = usePreferredInboxName(replyMessage?.senderInboxId);
+  const { data: inboxName } = usePreferredInboxName({
+    inboxId: replyMessage?.senderInboxId,
+  });
 
   const replyingTo = replyMessage
     ? messageIsFromCurrentAccountInboxId({ message: replyMessage })
