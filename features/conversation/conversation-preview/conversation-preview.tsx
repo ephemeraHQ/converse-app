@@ -9,13 +9,14 @@ import { ConversationMessageLayout } from "@/features/conversation/conversation-
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
 import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { useMessageHasReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { conversationListDefaultProps } from "@/features/conversation/conversation-messages-list";
 import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
 import { useConversationMessagesQuery } from "@/queries/use-conversation-messages-query";
 import { useConversationQuery } from "@/queries/useConversationQuery";
 import { $globalStyles } from "@/theme/styles";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import React from "react";
+import type { ConversationTopic, DecodedMessage } from "@xmtp/react-native-sdk";
+import React, { memo } from "react";
 import { FlatList } from "react-native";
 
 type ConversationPreviewProps = {
@@ -74,19 +75,11 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
               const nextMessage = messages?.byId[messages?.ids[index - 1]];
 
               return (
-                <MessageContextStoreProvider
+                <MessageWrapper
                   message={message}
                   previousMessage={previousMessage}
                   nextMessage={nextMessage}
-                >
-                  <VStack>
-                    <ConversationMessageTimestamp />
-                    <ConversationMessageLayout>
-                      <ConversationMessage message={message} />
-                      <ConversationMessageReactions />
-                    </ConversationMessageLayout>
-                  </VStack>
-                </MessageContextStoreProvider>
+                />
               );
             }}
           />
@@ -95,3 +88,33 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
     </VStack>
   );
 };
+
+const MessageWrapper = memo(function MessageWrapper({
+  message,
+  previousMessage,
+  nextMessage,
+}: {
+  message: DecodedMessage;
+  previousMessage: DecodedMessage | undefined;
+  nextMessage: DecodedMessage | undefined;
+}) {
+  const hasReactions = useMessageHasReactions({
+    messageId: message.id,
+  });
+
+  return (
+    <MessageContextStoreProvider
+      message={message}
+      previousMessage={previousMessage}
+      nextMessage={nextMessage}
+    >
+      <VStack>
+        <ConversationMessageTimestamp />
+        <ConversationMessageLayout
+          message={<ConversationMessage message={message} />}
+          reactions={hasReactions && <ConversationMessageReactions />}
+        />
+      </VStack>
+    </MessageContextStoreProvider>
+  );
+});

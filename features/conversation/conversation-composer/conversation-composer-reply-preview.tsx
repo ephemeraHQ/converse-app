@@ -141,7 +141,7 @@ export const ReplyPreview = memo(function ReplyPreview() {
                 }}
               >
                 <Icon
-                  size={theme.iconSize.xs}
+                  size={theme.iconSize.xxs}
                   icon="arrowshape.turn.up.left.fill"
                   color={theme.colors.text.secondary}
                 />

@@ -138,11 +138,7 @@ export function AddAttachmentButton() {
           borderRadius: 36,
         }}
       >
-        <Icon
-          color={theme.colors.text.secondary}
-          icon="plus"
-          size={20} // Value from figma
-        />
+        <Icon color={theme.colors.text.secondary} icon="plus" size={18} />
       </Center>
     </DropdownMenu>
   );

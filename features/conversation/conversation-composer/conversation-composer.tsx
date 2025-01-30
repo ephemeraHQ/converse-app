@@ -16,7 +16,6 @@ import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
 } from "./conversation-composer.store-context";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 type IComposerProps = {
   onSend: (args: Omit<ISendMessageParams, "topic">) => Promise<void>;
@@ -157,7 +156,10 @@ export const ConversationComposer = memo(function ConversationComposer(
             margin: theme.spacing.xxxs - theme.borderWidth.sm, // -theme.borderWidth.sm because of the borderWidth is count in react-native and we want exact pixels
             borderWidth: theme.borderWidth.sm,
             borderColor: theme.colors.border.subtle,
-            borderRadius: theme.borderRadius.md,
+            borderRadius:
+              theme.borderRadius.md -
+              // 6 is the margin between the send button and the composer border
+              6 / 2,
             overflow: "hidden",
             justifyContent: "flex-end",
           }}
@@ -196,14 +198,13 @@ const SendButton = memo(function SendButton(props: {
   const canSend =
     composerInputValue.length > 0 || mediaPreview?.status === "uploaded";
 
+  const margin = (36 - theme.spacing.lg) / 2 - theme.borderWidth.sm;
+
   return (
     <VStack
       style={{
-        marginHorizontal: 6, // Value from Figma
-        marginVertical:
-          6 -
-          // Because we input container to be exactly 36 pixels and borderWidth add with total height in react-native
-          theme.borderWidth.sm,
+        marginHorizontal: margin,
+        marginVertical: margin,
         alignSelf: "flex-end",
       }}
     >

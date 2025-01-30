@@ -119,17 +119,11 @@ const keyExtractor = (message: DecodedMessageWithCodecsType) => {
   );
 };
 
-const MessageSeparator = memo(function MessageSeparator() {
-  const { theme } = useAppTheme();
-  return <VStack style={{ height: theme.spacing["4xs"] }} />;
-});
-
 export const conversationListDefaultProps = {
   style: $globalStyles.flex1,
   inverted: true,
   keyboardDismissMode: "interactive" as const,
   keyboardShouldPersistTaps: "handled" as const,
-  ItemSeparatorComponent: MessageSeparator,
   showsVerticalScrollIndicator: Platform.OS === "ios", // Size glitch on Android
   keyExtractor,
 } satisfies Partial<FlatListProps<DecodedMessageWithCodecsType>>;

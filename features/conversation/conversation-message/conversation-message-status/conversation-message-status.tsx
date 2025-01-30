@@ -8,6 +8,7 @@ import { useAppTheme } from "@/theme/useAppTheme";
 import { Haptics } from "@/utils/haptics";
 import React, { memo, useEffect } from "react";
 import { IConvosMessageStatus } from "../conversation-message.types";
+import { debugBorder } from "@/utils/debug-style";
 
 type IConversationMessageStatusProps = {
   status: IConvosMessageStatus;
@@ -47,12 +48,14 @@ const StatusContainer = memo(function StatusContainer(
 
   return (
     <AnimatedHStack
+      // {...debugBorder()}
       entering={theme.animation.reanimatedFadeInSpring}
       style={[
         {
           alignItems: "center",
           columnGap: theme.spacing.xxxs,
           paddingTop: theme.spacing.xxxs,
+          paddingBottom: theme.spacing.xxxs,
         },
         style,
       ]}

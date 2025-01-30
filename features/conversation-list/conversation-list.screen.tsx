@@ -58,10 +58,10 @@ export function ConversationListScreen(props: IConversationListProps) {
     }
   }, [refetchConversations]);
 
-  // Better UX to at least show loading for 3 seconds
+  // Better UX to at least show loading for 2 seconds
   const isLoading = useMinimumLoadingTime({
     isLoading: isLoadingConversations,
-    minimumTime: isDev ? 0 : 2500,
+    minimumTime: isDev ? 0 : 2000,
   });
 
   return (
