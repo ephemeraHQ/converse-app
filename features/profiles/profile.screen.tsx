@@ -130,7 +130,7 @@ export function ProfileScreen() {
   // Header configuration
   useHeader(
     {
-      backgroundColor: theme.colors.background.surface,
+      backgroundColor: theme.colors.background.surface, // Use the same background color as the screen
       safeAreaEdges: ["top"],
       titleComponent: (
         <Text preset="body">
