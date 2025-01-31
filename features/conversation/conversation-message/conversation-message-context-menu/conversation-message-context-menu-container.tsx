@@ -1,4 +1,5 @@
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { useConversationMessageContextMenuStyles } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.styles";
 import { useAppTheme } from "@theme/useAppTheme";
 import { memo, useEffect } from "react";
 import {
@@ -7,11 +8,11 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE } from "./conversation-message-context-menu";
 import {
   MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT,
   MESSAGE_CONTEXT_REACTIONS_HEIGHT,
 } from "./conversation-message-context-menu.constants";
+import { debugBorder } from "@/utils/debug-style";
 
 export const MessageContextMenuContainer = memo(
   function MessageContextMenuContainer(args: {
@@ -27,6 +28,8 @@ export const MessageContextMenuContainer = memo(
     const { theme } = useAppTheme();
     const safeAreaInsets = useSafeAreaInsets();
     const translateYAV = useSharedValue(0);
+    const { verticalSpaceBetweenSections } =
+      useConversationMessageContextMenuStyles();
 
     const {
       itemRectY,
@@ -43,7 +46,7 @@ export const MessageContextMenuContainer = memo(
       const screenHeight = theme.layout.screen.height;
       const minTopOffset =
         MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT +
-        MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE +
+        verticalSpaceBetweenSections +
         safeAreaInsets.top +
         (hasReactions
           ? MESSAGE_CONTEXT_REACTIONS_HEIGHT +
@@ -53,7 +56,7 @@ export const MessageContextMenuContainer = memo(
       const containerBottom =
         itemRectY +
         itemRectHeight +
-        MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE +
+        verticalSpaceBetweenSections +
         menuHeight +
         safeAreaInsets.bottom;
 
@@ -80,6 +83,7 @@ export const MessageContextMenuContainer = memo(
       menuHeight,
       safeAreaInsets,
       theme,
+      verticalSpaceBetweenSections,
       translateYAV,
     ]);
 
@@ -90,11 +94,10 @@ export const MessageContextMenuContainer = memo(
     const distanceFromTop =
       itemRectY -
       MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT -
-      MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE;
+      verticalSpaceBetweenSections;
 
     return (
       <AnimatedVStack
-        // {...debugBorder("red")}
         style={[
           {
             position: "absolute",

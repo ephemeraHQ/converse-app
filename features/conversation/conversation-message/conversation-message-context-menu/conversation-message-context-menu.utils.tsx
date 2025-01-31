@@ -1,6 +1,5 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
-import { TableViewItemType } from "@/components/TableView/TableView";
-import { TableViewPicto } from "@/components/TableView/TableViewImage";
+import { IDropdownMenuCustomItemProps } from "@/design-system/dropdown-menu/dropdown-menu-custom";
 import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { useMessageContextMenuStore } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
 import {
@@ -14,12 +13,6 @@ import { translate } from "@/i18n";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
-
-const CONTEXT_MENU_ACTIONS = {
-  REPLY: "Reply",
-  COPY_MESSAGE: "Copy",
-  SHARE_FRAME: "Share",
-} as const;
 
 export function useMessageContextMenuItems(args: {
   messageId: MessageId;
@@ -40,16 +33,15 @@ export function useMessageContextMenuItems(args: {
     return [];
   }
 
-  const items: TableViewItemType[] = [];
+  const items: IDropdownMenuCustomItemProps[] = [];
 
   items.push({
-    title: translate("reply"),
-    action: () => {
+    label: translate("reply"),
+    onPress: () => {
       composerStore.getState().setReplyToMessageId(messageId);
       messageContextMenuStore.getState().setMessageContextMenuData(null);
     },
-    id: CONTEXT_MENU_ACTIONS.REPLY,
-    rightView: <TableViewPicto symbol="arrowshape.turn.up.left" />,
+    iconName: "arrowshape.turn.up.left",
   });
 
   const isAttachment =
@@ -58,10 +50,9 @@ export function useMessageContextMenuItems(args: {
 
   if (!isAttachment && !isTransaction) {
     items.push({
-      title: translate("copy"),
-      rightView: <TableViewPicto symbol="doc.on.doc" />,
-      id: CONTEXT_MENU_ACTIONS.COPY_MESSAGE,
-      action: () => {
+      label: translate("copy"),
+      iconName: "doc.on.doc",
+      onPress: () => {
         const messageStringContent = getMessageStringContent(message);
         if (!!messageStringContent) {
           Clipboard.setString(messageStringContent);

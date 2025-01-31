@@ -11,7 +11,7 @@ export const MessageContextMenuBackdrop = memo(
     handlePressBackdrop: () => void;
   }) {
     return (
-      <BlurView isAbsolute>
+      <BlurView isAbsolute tint="dark">
         <TouchableWithoutFeedback onPress={handlePressBackdrop}>
           {children}
         </TouchableWithoutFeedback>

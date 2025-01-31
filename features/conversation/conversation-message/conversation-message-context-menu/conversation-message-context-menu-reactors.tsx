@@ -1,17 +1,14 @@
 import { GroupAvatarDumb } from "@/components/group-avatar";
-import { AnimatedVStack, VStack } from "@/design-system/VStack";
-import { MESSAGE_CONTEXT_REACTIONS_HEIGHT } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.constants";
+import { AnimatedCenter, Center } from "@/design-system/Center";
+import { HStack } from "@/design-system/HStack";
 import { useCurrentConversationTopic } from "@/features/conversation/conversation.store-context";
 import { useGroupMembersInfoForCurrentAccount } from "@/hooks/use-group-members-info-for-current-account";
-import { useInboxProfileSocialsQueries } from "@/queries/useInboxProfileSocialsQuery";
 import { ObjectTyped } from "@/utils/objectTyped";
 import { getReactionContent } from "@/utils/xmtpRN/reactions";
-import { useCurrentAccount } from "@data/store/accountsStore";
 import { Text } from "@design-system/Text";
 import { useAppTheme } from "@theme/useAppTheme";
-import { getPreferredInboxAvatar, getPreferredInboxName } from "@utils/profile";
 import { InboxId, ReactionContent } from "@xmtp/react-native-sdk";
-import React, { FC, useMemo } from "react";
+import React, { FC, memo, useMemo } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -51,36 +48,32 @@ export const MessageContextMenuReactors: FC<
   }, [reactors]);
 
   return (
-    <AnimatedVStack
-      // {...debugBorder()}
+    <AnimatedCenter
+      vertical
       entering={theme.animation.reanimatedFadeInScaleIn()}
       style={{
         position: "absolute",
         top: safeAreaInsets.top + theme.spacing.xs,
         left: 0,
         right: 0,
-        justifyContent: "center",
-        alignItems: "center",
-        pointerEvents: "box-none",
       }}
     >
-      <VStack
-        style={{
-          borderRadius: theme.spacing.sm,
+      <FlatList
+        data={listData}
+        horizontal
+        contentContainerStyle={{
+          borderRadius: theme.spacing.lg,
           backgroundColor: theme.colors.background.raised,
+          padding: theme.spacing.sm,
+          columnGap: theme.spacing.sm,
         }}
-      >
-        <FlatList
-          data={listData}
-          horizontal
-          renderItem={({ item: [content, inboxIds], index }) => (
-            <Item content={content} inboxIds={inboxIds} />
-          )}
-          keyExtractor={(item) => item[0]}
-          showsHorizontalScrollIndicator={false}
-        />
-      </VStack>
-    </AnimatedVStack>
+        renderItem={({ item: [content, inboxIds], index }) => (
+          <Item content={content} inboxIds={inboxIds} />
+        )}
+        keyExtractor={(item) => item[0]}
+        showsHorizontalScrollIndicator={false}
+      />
+    </AnimatedCenter>
   );
 };
 
@@ -89,51 +82,37 @@ type MessageReactionsItemProps = {
   inboxIds: InboxId[];
 };
 
-const Item: FC<MessageReactionsItemProps> = ({ content, inboxIds }) => {
+const Item = memo(function Item({
+  content,
+  inboxIds,
+}: MessageReactionsItemProps) {
   const { theme } = useAppTheme();
 
-  const currentAccount = useCurrentAccount()!;
-
   const conversationTopic = useCurrentConversationTopic();
-
-  const queriesData = useInboxProfileSocialsQueries(currentAccount, inboxIds);
-
-  const membersSocials = queriesData.map(({ data: socials }, index) => {
-    return {
-      address: inboxIds[index],
-      uri: getPreferredInboxAvatar(socials),
-      name: getPreferredInboxName(socials),
-    };
-  });
 
   const { groupMembersInfo } = useGroupMembersInfoForCurrentAccount({
     groupTopic: conversationTopic,
   });
 
   return (
-    <AnimatedVStack
+    <Center
+      vertical
       style={{
-        justifyContent: "center",
-        alignItems: "center",
-        width: 76, // From iMessage
-        height: MESSAGE_CONTEXT_REACTIONS_HEIGHT, // From iMessage
+        rowGap: theme.spacing.xxs,
       }}
     >
-      <VStack
+      <GroupAvatarDumb size={theme.avatarSize.lg} members={groupMembersInfo} />
+      <HStack
         style={{
-          height: theme.avatarSize.lg,
-          justifyContent: "center",
           alignItems: "center",
+          columnGap: theme.spacing.xxxs,
         }}
       >
-        <GroupAvatarDumb
-          size={theme.avatarSize.lg}
-          members={groupMembersInfo}
-        />
-      </VStack>
-      <Text style={{ marginTop: theme.spacing.md }}>
-        {content} {inboxIds.length}
-      </Text>
-    </AnimatedVStack>
+        <Text>{content}</Text>
+        <Text color="secondary" preset="small">
+          {inboxIds.length}
+        </Text>
+      </HStack>
+    </Center>
   );
-};
+});

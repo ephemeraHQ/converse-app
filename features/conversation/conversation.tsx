@@ -414,7 +414,7 @@ const ConversationMessagesListItem = memo(
   }
 );
 
-export const ConversationMessageGesturesWrapper = memo(
+const ConversationMessageGesturesWrapper = memo(
   function ConversationMessageGesturesWrapper(props: {
     children: React.ReactNode;
   }) {

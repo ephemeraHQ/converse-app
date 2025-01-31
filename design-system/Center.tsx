@@ -3,14 +3,19 @@ import { View } from "react-native";
 import Animated, { AnimatedProps } from "react-native-reanimated";
 
 import { HStack, IHStackProps } from "./HStack";
+import { VStack } from "./VStack";
 
-export type ICenterProps = IHStackProps;
+export type ICenterProps = IHStackProps & {
+  vertical?: boolean;
+};
 
 export const Center = forwardRef(
   (props: ICenterProps, ref: ForwardedRef<View>) => {
-    const { style, ...rest } = props;
+    const { style, vertical = false, ...rest } = props;
+
+    const Stack = vertical ? VStack : HStack;
     return (
-      <HStack
+      <Stack
         ref={ref}
         style={[{ alignItems: "center", justifyContent: "center" }, style]}
         {...rest}

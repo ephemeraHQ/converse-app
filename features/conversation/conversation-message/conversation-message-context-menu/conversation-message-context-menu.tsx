@@ -1,4 +1,5 @@
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { useDropdownMenuCustomStyles } from "@/design-system/dropdown-menu/dropdown-menu-custom";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { MessageContextMenuBackdrop } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-backdrop";
 import { MessageContextMenuEmojiPicker } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker";
@@ -10,6 +11,7 @@ import {
   useMessageContextMenuStore,
   useMessageContextMenuStoreContext,
 } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
+import { useConversationMessageContextMenuStyles } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.styles";
 import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
   getCurrentUserAlreadyReactedOnMessage,
@@ -20,15 +22,12 @@ import { useCurrentConversationTopic } from "@/features/conversation/conversatio
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { calculateMenuHeight } from "@design-system/ContextMenu/ContextMenu.utils";
 import { memo, useCallback } from "react";
 import { Modal, Platform, StyleSheet } from "react-native";
 import Animated from "react-native-reanimated";
 import { MessageContextMenuAboveMessageReactions } from "./conversation-message-context-menu-above-message-reactions";
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container";
 import { useMessageContextMenuItems } from "./conversation-message-context-menu.utils";
-
-export const MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE = 16;
 
 export const MessageContextMenu = memo(function MessageContextMenu() {
   const messageContextMenuData = useMessageContextMenuStoreContext(
@@ -67,7 +66,9 @@ const Content = memo(function Content(props: {
     messageId: messageId,
     topic,
   });
-  const menuHeight = calculateMenuHeight(menuItems.length);
+
+  const { itemHeight } = useDropdownMenuCustomStyles();
+  const menuHeight = itemHeight * menuItems.length;
 
   const reactOnMessage = useReactOnMessage({
     topic,
@@ -113,6 +114,9 @@ const Content = memo(function Content(props: {
 
   const hasReactions = Boolean(bySender && Object.keys(bySender).length > 0);
 
+  const { verticalSpaceBetweenSections } =
+    useConversationMessageContextMenuStyles();
+
   return (
     <>
       <Modal
@@ -147,8 +151,7 @@ const Content = memo(function Content(props: {
                 {/* Replace with rowGap when we refactored menu items and not using rn-paper TableView */}
                 <VStack
                   style={{
-                    height:
-                      MESSAGE_CONTEXT_MENU_SPACE_BETWEEN_ABOVE_MESSAGE_REACTIONS_AND_MESSAGE,
+                    height: verticalSpaceBetweenSections,
                   }}
                 />
 
@@ -160,9 +163,6 @@ const Content = memo(function Content(props: {
                   {/* TODO: maybe make ConversationMessage more dumb to not need any context? */}
                   <ConversationMessage message={message} />
                 </MessageContextStoreProvider>
-
-                {/* Put back once we refactor the menu items */}
-                {/* <VStack style={{ height: 16 }}></VStack> */}
 
                 <MessageContextMenuItems
                   originX={fromMe ? itemRectX + itemRectWidth : itemRectX}

@@ -24,13 +24,13 @@ import {
 } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { memo, useCallback } from "react";
-import { ContextMenuView } from "react-native-ios-context-menu";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-requests";
 import { ConversationListEmpty } from "./conversation-list-empty";
 import { ConversationListStartNewConvoBanner } from "./conversation-list-start-new-convo-banner";
 import { useHeaderWrapper } from "./conversation-list.screen-header";
 import { useConversationListConversations } from "./use-conversation-list-conversations";
+import { ContextMenuView } from "react-native-ios-context-menu";
 
 type IConversationListProps = NativeStackScreenProps<
   NavigationParamList,
@@ -78,7 +78,7 @@ export function ConversationListScreen(props: IConversationListProps) {
           onLayout={() => {}}
           layout={theme.animation.reanimatedLayoutSpringTransition}
           contentContainerStyle={{
-            flex: 1,
+            flexGrow: 1, // For the empty state to be full screen
             // Little hack because we want ConversationListEmpty to be full screen when we have no conversations
             paddingBottom:
               conversations && conversations.length > 0 ? insets.bottom : 0,

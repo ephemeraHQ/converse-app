@@ -1,20 +1,28 @@
-import TableView, { TableViewItemType } from "@/components/TableView/TableView";
 import { AnimatedVStack } from "@/design-system/VStack";
+import {
+  DropdownMenuContainer,
+  DropdownMenuCustomItem,
+  IDropdownMenuCustomItemProps,
+} from "@/design-system/dropdown-menu/dropdown-menu-custom";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { debugBorder } from "@/utils/debug-style";
 import { memo, useCallback } from "react";
 import { EntryAnimationsValues, withSpring } from "react-native-reanimated";
-import { Platform } from "react-native";
 import { MENU_ITEMS_WIDTH } from "./conversation-message-context-menu.constants";
+import { useConversationMessageContextMenuStyles } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.styles";
 
 export const MessageContextMenuItems = memo(
   function MessageContextMenuItems(props: {
-    menuItems: TableViewItemType[];
+    menuItems: IDropdownMenuCustomItemProps[];
     originY: number;
     originX: number;
   }) {
     const { theme } = useAppTheme();
 
     const { menuItems: items, originY, originX } = props;
+
+    const { verticalSpaceBetweenSections } =
+      useConversationMessageContextMenuStyles();
 
     const customEnteringAnimation = useCallback(
       (targetValues: EntryAnimationsValues) => {
@@ -35,6 +43,8 @@ export const MessageContextMenuItems = memo(
           ],
         };
 
+        console.log("originY:", originY);
+
         const initialValues = {
           originX: originX - MENU_ITEMS_WIDTH / 2,
           originY: originY,
@@ -51,8 +61,16 @@ export const MessageContextMenuItems = memo(
     );
 
     return (
-      <AnimatedVStack style={{ zIndex: -1 }} entering={customEnteringAnimation}>
-        <TableView
+      <AnimatedVStack
+        style={{ zIndex: -1, marginTop: verticalSpaceBetweenSections }}
+        entering={customEnteringAnimation}
+      >
+        <DropdownMenuContainer>
+          {items.map((item) => (
+            <DropdownMenuCustomItem key={item.label} {...item} />
+          ))}
+        </DropdownMenuContainer>
+        {/* <TableView
           items={items}
           style={{
             width: MENU_ITEMS_WIDTH,
@@ -62,7 +80,7 @@ export const MessageContextMenuItems = memo(
                 : undefined,
             borderRadius: Platform.OS === "android" ? 10 : undefined,
           }}
-        />
+        /> */}
       </AnimatedVStack>
     );
   }

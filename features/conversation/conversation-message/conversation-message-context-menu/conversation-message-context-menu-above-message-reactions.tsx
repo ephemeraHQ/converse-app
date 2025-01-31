@@ -140,6 +140,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
               index={index}
               totalItems={favoritedEmojis.getEmojis().length}
               isReverse={messageFromMe}
+              delayBetweenItems={20}
             >
               <Emoji
                 content={emoji}
@@ -149,12 +150,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
             </StaggeredAnimation>
           ))}
           <TouchableOpacity
-            hitSlop={{
-              top: 10,
-              bottom: 10,
-              left: 10,
-              right: 10,
-            }}
+            hitSlop={theme.spacing.xs}
             onPress={handlePlusPress}
           >
             <VStack

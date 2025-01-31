@@ -88,16 +88,17 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     return " ";
   }, [preferredName, isLoadingPreferredName, isLoadingPeerInboxId]);
 
-  const subtitle = useMemo(() => {
-    const timestamp = conversation?.lastMessage?.sentNs ?? 0;
-    const timeToShow = getCompactRelativeTime(timestamp);
+  // Need to be out of the useMemo so that the relative time update every time we update conversation or cause a rerender to this component
+  const timestamp = conversation?.lastMessage?.sentNs ?? 0;
+  const timeToShow = getCompactRelativeTime(timestamp);
 
+  const subtitle = useMemo(() => {
     if (!timeToShow || !messageText) {
       return "";
     }
 
     return `${timeToShow} ${MIDDLE_DOT} ${messageText}`;
-  }, [conversation?.lastMessage?.sentNs, messageText]);
+  }, [timeToShow, messageText]);
 
   const { isUnread } = useConversationIsUnread({
     topic: conversationTopic,
