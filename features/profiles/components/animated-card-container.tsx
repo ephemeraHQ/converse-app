@@ -1,5 +1,5 @@
 import React, { memo, PropsWithChildren } from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, ViewStyle } from "react-native";
 import { useAppTheme, useThemeProvider } from "@/theme/useAppTheme";
 import Animated, {
   useAnimatedStyle,
@@ -7,20 +7,22 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import logger from "@/utils/logger";
 
-type IContactCardContainerProps = PropsWithChildren;
+type IAnimatedCardContainerProps = PropsWithChildren & {
+  style?: ViewStyle;
+};
 
 /**
- * ContactCardContainer Component
+ * AnimatedCardContainer Component
  *
- * A component that holds the contact card, wraps the contact card in a gesture detector, and animates the card when swiped
- * ather than passing a bunch of inverted props around, just creating a mini theme provider for it specifically
+ * A component that provides the 3D card animation and theme context.
+ * Wraps any content in a gesture detector and animates it when swiped.
  */
-const ContactCardContainerWithoutThemeProvider = memo(
-  function ContactCardContainerWithoutThemeProvider({
+const AnimatedCardContainerWithoutThemeProvider = memo(
+  function AnimatedCardContainerWithoutThemeProvider({
     children,
-  }: IContactCardContainerProps) {
+    style,
+  }: IAnimatedCardContainerProps) {
     const { theme } = useAppTheme();
 
     const { width: screenWidth } = Dimensions.get("window");
@@ -55,6 +57,7 @@ const ContactCardContainerWithoutThemeProvider = memo(
         height: shadowOffsetY.value,
       },
       ...baseStyle,
+      ...style,
     }));
 
     const panGesture = Gesture.Pan()
@@ -85,9 +88,10 @@ const ContactCardContainerWithoutThemeProvider = memo(
   }
 );
 
-export const ContactCardContainer = memo(function ContactCardContainer({
+export const AnimatedCardContainer = memo(function AnimatedCardContainer({
   children,
-}: IContactCardContainerProps) {
+  style,
+}: IAnimatedCardContainerProps) {
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();
   const invertedTheme = themeScheme === "light" ? "dark" : "light";
@@ -96,9 +100,9 @@ export const ContactCardContainer = memo(function ContactCardContainer({
     <ThemeProvider
       value={{ themeScheme: invertedTheme, setThemeContextOverride }}
     >
-      <ContactCardContainerWithoutThemeProvider>
+      <AnimatedCardContainerWithoutThemeProvider style={style}>
         {children}
-      </ContactCardContainerWithoutThemeProvider>
+      </AnimatedCardContainerWithoutThemeProvider>
     </ThemeProvider>
   );
 });

@@ -14,7 +14,6 @@ import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { SettingsList } from "@/design-system/settings-list/settings-list";
 import { updateConsentForAddressesForAccount } from "@/features/consent/update-consent-for-addresses-for-account";
 import { useNotificationsPermission } from "@/features/notifications/hooks/use-notifications-permission";
-import { ContactCard } from "@/features/profiles/components/contact-card";
 import { SocialNames } from "@/features/profiles/components/social-names";
 import { formatConverseUsername } from "@/features/profiles/utils/format-converse-username";
 import { useDisconnectActionSheet } from "@/hooks/useDisconnectActionSheet";
@@ -33,6 +32,7 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { StackActions } from "@react-navigation/native";
 import React, { useCallback, useState } from "react";
 import { Alert, Share, View, ViewStyle } from "react-native";
+import { ProfileContactCard } from "./components/profile-contact-card";
 
 export function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
@@ -71,49 +71,50 @@ export function ProfileScreen() {
   );
 
   const handleContextMenuAction = useCallback(
-    (actionId: string) => {
+    async (actionId: string) => {
       Haptics.selectionAsync();
-      if (actionId === "share") {
-        if (isMyProfile) {
-          navigate("ShareProfile");
-        } else {
-          const profileUrl = `https://${config.websiteDomain}/dm/${userName}`;
-          Clipboard.setString(profileUrl);
-          Share.share({
-            message: profileUrl,
-          });
-        }
-      } else if (actionId === "edit") {
-        Alert.alert("Available soon");
-        // TODO - Profile Edit
-        // handleEditProfile();
-      } else if (actionId === "block") {
-        showActionSheetWithOptions(
-          {
-            options: [
-              isBlockedPeer ? translate("unblock") : translate("block"),
-              translate("cancel"),
-            ],
-            cancelButtonIndex: 1,
-            destructiveButtonIndex: isBlockedPeer ? undefined : 0,
-            title: isBlockedPeer
-              ? translate("if_you_unblock_contact")
-              : translate("if_you_block_contact"),
-          },
-          (selectedIndex?: number) => {
-            if (selectedIndex === 0 && peerAddress) {
-              const newStatus = isBlockedPeer ? "consented" : "blocked";
-              const consentOnProtocol = isBlockedPeer ? "allow" : "deny";
-              updateConsentForAddressesForAccount({
-                account: userAddress,
-                addresses: [peerAddress],
-                consent: consentOnProtocol,
-              });
-              setPeersStatus({ [peerAddress]: newStatus });
-              router.goBack();
-            }
+      switch (actionId) {
+        case "edit":
+          setEditMode(true);
+          break;
+        case "share":
+          if (isMyProfile) {
+            navigate("ShareProfile");
+          } else {
+            const shareUrl = `${config.webAppUrl}/profile/${peerAddress}`;
+            await Share.share({
+              message: shareUrl,
+            });
           }
-        );
+          break;
+        case "block":
+          Alert.alert(
+            translate(isBlockedPeer ? "unblock_title" : "block_title"),
+            translate(isBlockedPeer ? "unblock_message" : "block_message", {
+              name: userName,
+            }),
+            [
+              {
+                text: translate("cancel"),
+                style: "cancel",
+              },
+              {
+                text: translate(isBlockedPeer ? "unblock" : "block"),
+                style: isBlockedPeer ? "default" : "destructive",
+                onPress: async () => {
+                  const newStatus = isBlockedPeer ? "consented" : "blocked";
+                  await updateConsentForAddressesForAccount({
+                    account: userAddress,
+                    addresses: [peerAddress],
+                    consent: isBlockedPeer ? "allow" : "deny",
+                  });
+                  setPeersStatus({ [peerAddress]: newStatus });
+                  router.goBack();
+                },
+              },
+            ]
+          );
+          break;
       }
     },
     [
@@ -130,11 +131,11 @@ export function ProfileScreen() {
   // Header configuration
   useHeader(
     {
-      backgroundColor: theme.colors.background.surface, // Use the same background color as the screen
+      backgroundColor: theme.colors.background.surface,
       safeAreaEdges: ["top"],
       titleComponent: (
         <Text preset="body">
-          {router.canGoBack() && router.getState().routes.length >= 2
+          {router.canGoBack()
             ? router.getState().routes[router.getState().routes.length - 2].name
             : ""}
         </Text>
@@ -148,15 +149,17 @@ export function ProfileScreen() {
         />
       ),
       RightActionComponent: (
-        <HStack style={themed($headerRight)}>
+        <HStack
+          style={{
+            alignItems: "center",
+            columnGap: theme.spacing.xxs,
+          }}
+        >
           {editMode ? (
             <Button
               text={translate("profile.done")}
               variant="text"
-              onPress={() => {
-                handleEditProfile();
-                setEditMode(false);
-              }}
+              onPress={handleEditProfile}
             />
           ) : (
             <>
@@ -169,13 +172,18 @@ export function ProfileScreen() {
                 />
               ) : (
                 <HeaderAction
-                  style={themed($editIcon)}
+                  style={{
+                    marginBottom: 4,
+                  }}
                   icon="square.and.pencil"
                   onPress={handleChatPress}
                 />
               )}
               <DropdownMenu
-                style={themed($contextMenu)}
+                style={{
+                  paddingVertical: theme.spacing.sm,
+                  paddingRight: theme.spacing.xxxs,
+                }}
                 onPress={handleContextMenuAction}
                 actions={[
                   ...(isMyProfile
@@ -222,14 +230,12 @@ export function ProfileScreen() {
     [
       router,
       theme,
-      peerAddress,
-      displayName,
-      setPeersStatus,
-      handleChatPress,
       editMode,
-      handleContextMenuAction,
       isMyProfile,
+      handleChatPress,
+      handleContextMenuAction,
       isBlockedPeer,
+      handleEditProfile,
     ]
   );
 
@@ -237,7 +243,7 @@ export function ProfileScreen() {
     <Screen preset="fixed" style={themed($container)}>
       <VStack>
         <VStack style={themed($section)}>
-          <ContactCard
+          <ProfileContactCard
             displayName={displayName}
             userName={formatConverseUsername(userName)?.username}
             avatarUri={preferredAvatarUri}
