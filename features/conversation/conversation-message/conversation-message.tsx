@@ -14,7 +14,7 @@ import {
   isTextMessage,
   isTransactionReferenceMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/client.types";
+import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { memo } from "react";
 
 export const ConversationMessage = memo(
