@@ -1,8 +1,5 @@
 import { config } from "@/config";
-import {
-  createTemporaryDirectory,
-  deleteLibXmtpDatabaseForInboxId,
-} from "@utils/fileSystem";
+import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { Client, Signer as XmtpSigner } from "@xmtp/react-native-sdk";
@@ -13,6 +10,7 @@ import {
   ethersSignerToXmtpSigner,
   viemAccountToXmtpSigner,
 } from "./signer";
+import { getDbDirectory } from "@/data/db";
 
 export const getInboxId = (address: string) =>
   Client.getOrCreateInboxId(address, config.xmtpEnv);
@@ -22,43 +20,72 @@ const createXmtpClientFromXmtpSigner = async (
   onInstallationRevoked: () => Promise<void>,
   preAuthenticateToInboxCallback?: () => Promise<void>
 ) => {
-  const tempDirectory = await createTemporaryDirectory();
-  const dbEncryptionKey = await getDbEncryptionKey();
+  const [dbDirectory, dbEncryptionKey] = await Promise.all([
+    getDbDirectory(),
+    getDbEncryptionKey(),
+  ]);
+  logger.debug(
+    "[createXmtpClientFromXmtpSigner] Getting database encryption key"
+  );
 
   const options = {
     env: config.xmtpEnv,
     enableV3: true,
-    dbDirectory: tempDirectory,
+    dbDirectory: dbDirectory,
     dbEncryptionKey,
   };
-  const inboxId = await getInboxId(await signer.getAddress());
+  logger.debug(
+    `[createXmtpClientFromXmtpSigner] Client options configured: ${JSON.stringify(
+      options
+    )}`
+  );
 
-  logger.debug("Instantiating client from signer");
+  logger.debug("[createXmtpClientFromXmtpSigner] Getting signer address");
+  const signerAddress = await signer.getAddress();
+  logger.debug(
+    `[createXmtpClientFromXmtpSigner] Signer address: ${signerAddress}`
+  );
 
+  logger.debug("[createXmtpClientFromXmtpSigner] Getting inbox ID");
+  const inboxId = await getInboxId(signerAddress);
+  logger.debug(`[createXmtpClientFromXmtpSigner] Inbox ID: ${inboxId}`);
+
+  logger.debug("[createXmtpClientFromXmtpSigner] Creating XMTP client");
   const client = await Client.create(signer, {
     ...options,
     preAuthenticateToInboxCallback,
   });
+  logger.debug("[createXmtpClientFromXmtpSigner] XMTP client created");
 
   if (client.inboxId !== inboxId) {
+    logger.error("[createXmtpClientFromXmtpSigner] Inbox ID mismatch", {
+      clientInboxId: client.inboxId,
+      expectedInboxId: inboxId,
+    });
     throw new Error("Inbox ids don't match");
   }
 
   // In case we're logging with an existing libxmtp database, make sure
   // the installation has not already been revoked
+  logger.debug(
+    "[createXmtpClientFromXmtpSigner] Checking if installation is valid"
+  );
   const installationValid = await isClientInstallationValid(client);
+
   if (!installationValid) {
+    logger.warn(
+      "[createXmtpClientFromXmtpSigner] Installation is not valid, cleaning up"
+    );
     await client.dropLocalDatabaseConnection();
     await deleteLibXmtpDatabaseForInboxId(inboxId);
+    logger.debug(
+      "[createXmtpClientFromXmtpSigner] Calling onInstallationRevoked callback"
+    );
     onInstallationRevoked();
     return;
   }
 
-  logger.debug("Instantiated client from signer");
-  // This Client is only be used to extract the key, we can disconnect
-  // it to prevent locks happening during Onboarding
-  await client.dropLocalDatabaseConnection();
-  logger.debug("Dropped client databases");
+  logger.debug("[createXmtpClientFromXmtpSigner] Installation is valid");
 };
 
 export const createXmtpClientFromSigner = async (

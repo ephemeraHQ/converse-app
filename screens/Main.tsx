@@ -105,33 +105,19 @@ const NavigationContent = () => {
   //     <NativeStack.Screen name="Examples" component={Examples} />
   //   </NativeStack.Navigator>
   // );
-  logger.debug(
-    `[Navigation] Current auth status: ${authStatus}, splashScreenHidden: ${splashScreenHidden}`
-  );
-
   if (!splashScreenHidden) {
     // TODO: Add a loading screen
-    logger.debug(
-      "[Navigation] Splash screen still visible, showing loading state"
-    );
     return null;
   }
 
   if (authStatus === "idle") {
-    logger.debug("[Navigation] Rendering IdleNavigation");
     return <IdleNavigation />;
   }
 
   if (authStatus === "signedOut") {
-    logger.debug(
-      "[Navigation] Rendering SignedOutNavigation (should show OnboardingWelcomeScreen)"
-    );
     return <SignedOutNavigation />;
   }
 
-  logger.debug(
-    "[Navigation] Rendering SignedInNavigation (should show conversation list)"
-  );
   return <SignedInNavigation />;
 };
 
