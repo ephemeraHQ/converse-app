@@ -1,11 +1,12 @@
 import { useSelect } from "@/data/store/storeHelpers";
 import { HStack } from "@/design-system/HStack";
-import { VStack } from "@/design-system/VStack";
+import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { ConversationMessageSender } from "@/features/conversation/conversation-message/conversation-message-sender";
 import { ConversationSenderAvatar } from "@/features/conversation/conversation-message/conversation-message-sender-avatar";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import { isGroupUpdatedMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { useAppTheme } from "@/theme/useAppTheme";
 import { ReactNode, memo } from "react";
 
 type IConversationMessageLayoutProps = {
@@ -20,6 +21,8 @@ export const ConversationMessageLayout = memo(
     reactions,
     messageStatus,
   }: IConversationMessageLayoutProps) {
+    const { theme } = useAppTheme();
+
     const {
       messageContainerSidePadding,
       spaceBetweenSenderAvatarAndMessage,
@@ -53,14 +56,31 @@ export const ConversationMessageLayout = memo(
 
     const isGroupUpdate = isGroupUpdatedMessage(messageData);
 
+    function getMessageSpacing() {
+      if (nextMessage && !hasNextMessageInSeries) {
+        return spaceBetweenMessageFromDifferentUserOrType;
+      }
+
+      if (!hasNextMessageInSeries) {
+        return 0;
+      }
+
+      if (reactions) {
+        return spaceBetweenSeriesWithReactions;
+      }
+
+      if (nextMessage && !hasNextMessageInSeries) {
+        return spaceBetweenMessageFromDifferentUserOrType;
+      }
+
+      return spaceBetweenMessagesInSeries;
+    }
+
     return (
-      <VStack
+      <AnimatedVStack
+        layout={theme.animation.reanimatedLayoutSpringTransition}
         style={{
-          ...(!hasNextMessageInSeries && {
-            marginBottom: nextMessage
-              ? spaceBetweenMessageFromDifferentUserOrType
-              : spaceBetweenMessagesInSeries,
-          }),
+          marginBottom: getMessageSpacing(),
         }}
       >
         <HStack
@@ -94,7 +114,7 @@ export const ConversationMessageLayout = memo(
           <VStack
             style={{
               alignItems: fromMe ? "flex-end" : "flex-start",
-              ...((hasNextMessageInSeries || !!reactions) && {
+              ...(Boolean(reactions) && {
                 marginBottom: spaceBetweenMessagesInSeries,
               }),
             }}
@@ -115,13 +135,10 @@ export const ConversationMessageLayout = memo(
           </VStack>
         </HStack>
 
-        {!!reactions && (
+        {Boolean(reactions) && (
           <HStack
-            style={{
-              ...(hasNextMessageInSeries && {
-                marginBottom: spaceBetweenSeriesWithReactions,
-              }),
-              ...(fromMe
+            style={
+              fromMe
                 ? {
                     paddingRight: messageContainerSidePadding,
                     justifyContent: "flex-end",
@@ -132,14 +149,14 @@ export const ConversationMessageLayout = memo(
                       spaceBetweenSenderAvatarAndMessage +
                       senderAvatarSize,
                     justifyContent: "flex-start",
-                  }),
-            }}
+                  }
+            }
           >
             {reactions}
           </HStack>
         )}
 
-        {!!messageStatus && (
+        {Boolean(messageStatus) && (
           <HStack
             style={{
               paddingRight: messageContainerSidePadding,
@@ -149,7 +166,7 @@ export const ConversationMessageLayout = memo(
             {messageStatus}
           </HStack>
         )}
-      </VStack>
+      </AnimatedVStack>
     );
   }
 );

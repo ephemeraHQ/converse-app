@@ -11,8 +11,7 @@ export function useConversationMessageStyles() {
     spaceBetweenMessagesInSeries: theme.spacing["4xs"],
     spaceBetweenMessageAndSender: theme.spacing.xxxs,
     senderNameLeftMargin: theme.spacing.xs,
-    spaceBetweenSeriesWithReactions: `${
-      theme.spacing["3xs"] + theme.spacing["4xs"]
-    }`,
+    spaceBetweenSeriesWithReactions:
+      theme.spacing["3xs"] + theme.spacing["4xs"],
   };
 }
