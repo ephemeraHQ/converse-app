@@ -39,6 +39,7 @@ import {
   getConvosMessageStatusForXmtpMessage,
   getCurrentUserAlreadyReactedOnMessage,
   isAnActualMessage,
+  useMessageHasReactions,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { ConversationMessagesList } from "@/features/conversation/conversation-messages-list";
 import { DmConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-dm-header-title";
@@ -358,6 +359,10 @@ const ConversationMessagesListItem = memo(
       message,
     });
 
+    const messageHasReactions = useMessageHasReactions({
+      messageId: message.id,
+    });
+
     return (
       <MessageContextStoreProvider
         message={message}
@@ -383,19 +388,25 @@ const ConversationMessagesListItem = memo(
             onReply={handleReply}
             messageIsFromCurrentUser={isFromCurrentUser}
           >
-            <ConversationMessageLayout>
-              <ConversationMessageGesturesWrapper>
-                <ConversationMessageHighlighted>
-                  <ConversationMessage message={message} />
-                </ConversationMessageHighlighted>
-              </ConversationMessageGesturesWrapper>
-              <ConversationMessageReactions />
-              {isLatestMessageSentByCurrentUser && (
-                <ConversationMessageStatus
-                  status={getConvosMessageStatusForXmtpMessage(message)}
-                />
-              )}
-            </ConversationMessageLayout>
+            <ConversationMessageLayout
+              message={
+                <ConversationMessageGesturesWrapper>
+                  <ConversationMessageHighlighted>
+                    <ConversationMessage message={message} />
+                  </ConversationMessageHighlighted>
+                </ConversationMessageGesturesWrapper>
+              }
+              reactions={
+                messageHasReactions && <ConversationMessageReactions />
+              }
+              messageStatus={
+                isLatestMessageSentByCurrentUser && (
+                  <ConversationMessageStatus
+                    status={getConvosMessageStatusForXmtpMessage(message)}
+                  />
+                )
+              }
+            />
           </ConversationMessageRepliable>
         </AnimatedVStack>
       </MessageContextStoreProvider>

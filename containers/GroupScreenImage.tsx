@@ -1,5 +1,6 @@
+import { GroupAvatarDumb } from "@/components/group-avatar";
+import { useGroupMembersInfoForCurrentAccount } from "@/hooks/use-group-members-info-for-current-account";
 import Button from "@components/Button/Button";
-import GroupAvatar from "@components/GroupAvatar";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
@@ -14,7 +15,7 @@ import {
 import { memberCanUpdateGroup } from "@utils/groupUtils/memberCanUpdateGroup";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { FC, useCallback, useMemo } from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { List } from "react-native-paper";
 
 type GroupScreenImageProps = {
@@ -56,18 +57,22 @@ export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
     },
     [currentAccount, setGroupPhoto]
   );
-  const { addPhoto: addGroupPhoto, photo: localGroupPhoto } = usePhotoSelect({
+
+  const { addPhoto: addGroupPhoto } = usePhotoSelect({
     initialPhoto: groupPhoto,
     onPhotoAdd: onPhotoChange,
   });
+
+  const { groupMembersInfo } = useGroupMembersInfoForCurrentAccount({
+    groupTopic: topic,
+  });
+
   return (
     <List.Section>
-      <View style={styles.container}>
-        <GroupAvatar
-          uri={localGroupPhoto}
-          style={styles.avatar}
-          topic={topic}
-          excludeSelf={false}
+      <View style={{ alignItems: "center" }}>
+        <GroupAvatarDumb
+          members={groupMembersInfo}
+          style={{ marginBottom: 10, marginTop: 23 }}
         />
         {canEditGroupImage && (
           <Button
@@ -77,7 +82,7 @@ export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
                 ? translate("change_profile_picture")
                 : translate("add_profile_picture")
             }
-            textStyle={styles.buttonText}
+            textStyle={{ fontWeight: "500" }}
             onPress={addGroupPhoto}
           />
         )}
@@ -85,16 +90,3 @@ export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
     </List.Section>
   );
 };
-
-const styles = StyleSheet.create({
-  avatar: {
-    marginBottom: 10,
-    marginTop: 23,
-  },
-  container: {
-    alignItems: "center",
-  },
-  buttonText: {
-    fontWeight: "500",
-  },
-});

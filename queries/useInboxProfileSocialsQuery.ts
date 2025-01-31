@@ -1,15 +1,20 @@
 import { IProfileSocials } from "@/features/profiles/profile-types";
-import { QueryKey, useQueries, useQuery } from "@tanstack/react-query";
 import { getProfilesForInboxIds } from "@/utils/api/profiles";
 import {
+  QueryKey,
+  queryOptions,
+  useQueries,
+  useQuery,
+} from "@tanstack/react-query";
+import {
   create,
-  windowedFiniteBatchScheduler,
   indexedResolver,
+  windowedFiniteBatchScheduler,
 } from "@yornaath/batshit";
 
-import { queryClient } from "./queryClient";
+import mmkv, { reactQueryPersister } from "@/utils/mmkv";
 import { InboxId } from "@xmtp/react-native-sdk";
-import mmkv from "@/utils/mmkv";
+import { queryClient } from "./queryClient";
 
 const profileSocialsQueryKey = (
   account: string,
@@ -45,8 +50,8 @@ const fetchInboxProfileSocials = async (
 
   const key = inboxProfileSocialsQueryStorageKey(account, inboxId);
 
+  // Set in mmkv to use for notifications in Swift
   mmkv.delete(key);
-
   if (data) {
     mmkv.set(key, JSON.stringify(data));
   }
@@ -57,31 +62,27 @@ const fetchInboxProfileSocials = async (
 const inboxProfileSocialsQueryConfig = (
   account: string,
   inboxId: InboxId | undefined
-) => ({
-  queryKey: profileSocialsQueryKey(account, inboxId!),
-  queryFn: () => fetchInboxProfileSocials(account, inboxId!),
-  enabled: !!account && !!inboxId,
-  // Store for 30 days
-  gcTime: 1000 * 60 * 60 * 24 * 30,
-  refetchIntervalInBackground: false,
-  refetchOnWindowFocus: false,
-  // We really just want a 24 hour cache here
-  // And automatic retries if there was an error fetching
-  refetchOnMount: false,
-  staleTime: 1000 * 60 * 60 * 24,
-  initialData: (): IProfileSocials[] | null | undefined => {
-    if (!account || !inboxId) {
-      return undefined;
-    }
-    if (mmkv.contains(inboxProfileSocialsQueryStorageKey(account, inboxId))) {
-      const data = JSON.parse(
-        mmkv.getString(inboxProfileSocialsQueryStorageKey(account, inboxId))!
-      ) as IProfileSocials[];
-      return data;
-    }
-  },
-  initialDataUpdatedAt: 0,
-});
+) =>
+  queryOptions({
+    queryKey: profileSocialsQueryKey(account, inboxId!),
+    queryFn: () => fetchInboxProfileSocials(account, inboxId!),
+    enabled: !!account && !!inboxId,
+    persister: reactQueryPersister,
+    initialData: (): IProfileSocials[] | null | undefined => {
+      if (!account || !inboxId) {
+        return undefined;
+      }
+      if (mmkv.contains(inboxProfileSocialsQueryStorageKey(account, inboxId))) {
+        const data = JSON.parse(
+          mmkv.getString(inboxProfileSocialsQueryStorageKey(account, inboxId))!
+        ) as IProfileSocials[];
+        return data;
+      }
+    },
+    initialDataUpdatedAt: 0,
+    // 30 days because it doens't change often
+    gcTime: 1000 * 60 * 60 * 24 * 30,
+  });
 
 export const useInboxProfileSocialsQuery = (
   account: string,
@@ -118,10 +119,14 @@ export const setInboxProfileSocialsQueryData = (
 ) => {
   return queryClient.setQueryData(
     inboxProfileSocialsQueryConfig(account, inboxId).queryKey,
-    data,
-    {
-      updatedAt,
-    }
+    (oldData) => {
+      if (!oldData) return undefined;
+      return {
+        ...oldData,
+        updatedAt,
+      };
+    },
+    { updatedAt }
   );
 };
 

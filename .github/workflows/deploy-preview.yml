@@ -45,7 +45,14 @@ jobs:
 
       - name: Get Commit Message
         id: commit_msg
-        run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+        run: |
+          # Escape the commit message and store it in a variable
+          MSG=$(git log -1 --pretty=%B)
+          # Properly escape the message for GitHub Actions output
+          MSG="${MSG//'%'/'%25'}"
+          MSG="${MSG//$'\n'/'%0A'}"
+          MSG="${MSG//$'\r'/'%0D'}"
+          echo "message=$MSG" >> $GITHUB_OUTPUT
 
       - name: Check for native changes
         id: check-changes

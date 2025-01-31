@@ -7,7 +7,7 @@ import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { copyToClipboard } from "@/utils/clipboard";
 import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
 import { Avatar } from "@components/Avatar";
-import { GroupAvatarDumb } from "@components/GroupAvatar";
+import { GroupAvatarDumb } from "@/components/group-avatar";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { translate } from "@i18n";
 import { useRouter } from "@navigation/useNavigation";

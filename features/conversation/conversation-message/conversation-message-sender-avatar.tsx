@@ -1,11 +1,9 @@
-import { useCurrentAccount } from "@/data/store/accountsStore";
 import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
+import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
 import { navigate } from "@/utils/navigation";
-import { getPreferredInboxAvatar } from "@/utils/profile";
 import { Avatar } from "@components/Avatar";
 import { usePreferredInboxAddress } from "@hooks/usePreferredInboxAddress";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
-import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 import { TouchableOpacity } from "react-native";
@@ -18,14 +16,12 @@ export function ConversationSenderAvatar({
   inboxId,
 }: IConversationSenderAvatarProps) {
   const { senderAvatarSize } = useConversationMessageStyles();
-  const currentAccount = useCurrentAccount();
-  const { data: senderSocials } = useInboxProfileSocialsQuery(
-    currentAccount!,
-    inboxId
-  );
-  const address = usePreferredInboxAddress(inboxId);
-  const name = usePreferredInboxName(inboxId);
-  const avatarUri = getPreferredInboxAvatar(senderSocials);
+
+  const { data: address } = usePreferredInboxAddress(inboxId);
+  const { data: name } = usePreferredInboxName({
+    inboxId,
+  });
+  const { data: avatarUri } = usePreferredInboxAvatar(inboxId);
 
   const openProfile = useCallback(() => {
     if (address) {

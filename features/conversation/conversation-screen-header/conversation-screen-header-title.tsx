@@ -1,8 +1,8 @@
+import { HStack } from "@/design-system/HStack";
 import { Pressable } from "@/design-system/Pressable";
+import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { HStack } from "@/design-system/HStack";
-import { Text } from "@/design-system/Text";
 
 type ConversationTitleDumbProps = {
   title?: string;
@@ -31,6 +31,7 @@ export function ConversationHeaderTitle({
         onLongPress={onLongPress}
         onPress={onPress}
         style={{
+          flex: 1,
           flexDirection: "row",
           alignItems: "center",
         }}
@@ -42,7 +43,11 @@ export function ConversationHeaderTitle({
         >
           {avatarComponent}
         </HStack>
-        <VStack>
+        <VStack
+          style={{
+            flex: 1,
+          }}
+        >
           <Text numberOfLines={1} allowFontScaling={false}>
             {title}
           </Text>

@@ -4,7 +4,7 @@ import { useAppTheme } from "@/theme/useAppTheme";
 import { memo, useCallback } from "react";
 import { EntryAnimationsValues, withSpring } from "react-native-reanimated";
 import { Platform } from "react-native";
-import { MENU_ITEMS_WIDTH } from "./conversation-message-context-menu-constant";
+import { MENU_ITEMS_WIDTH } from "./conversation-message-context-menu.constants";
 
 export const MessageContextMenuItems = memo(
   function MessageContextMenuItems(props: {

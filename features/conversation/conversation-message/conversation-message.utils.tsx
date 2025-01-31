@@ -180,6 +180,14 @@ export function getMessageStringContent(message: DecodedMessageWithCodecsType) {
   return "";
 }
 
+export function useMessageHasReactions(args: { messageId: MessageId }) {
+  const { messageId } = args;
+  const reactions = useConversationMessageReactions(messageId);
+  return Object.values(reactions.bySender || {}).some(
+    (reactions) => reactions.length > 0
+  );
+}
+
 export function useConversationMessageReactions(messageId: MessageId) {
   const currentAccount = useCurrentAccount()!;
   const topic = useCurrentConversationTopic();

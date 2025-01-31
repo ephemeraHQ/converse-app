@@ -40,6 +40,7 @@ export function MessageChatGroupUpdate({
         paddingVertical: theme.spacing.sm,
         paddingHorizontal: theme.spacing.sm,
         flexWrap: "wrap",
+        rowGap: theme.spacing.sm,
       }}
     >
       {/* Member additions */}

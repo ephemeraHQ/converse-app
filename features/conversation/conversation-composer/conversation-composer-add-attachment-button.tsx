@@ -2,7 +2,7 @@ import { Center } from "@/design-system/Center";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { getCurrentAccount } from "@data/store/accountsStore";
-import { Icon } from "@design-system/Icon/Icon";
+import { Icon, iconRegistry } from "@design-system/Icon/Icon";
 import { translate } from "@i18n";
 import { useAppTheme } from "@theme/useAppTheme";
 import { uploadRemoteAttachment } from "@utils/attachment/uploadRemoteAttachment";
@@ -121,18 +121,12 @@ export function AddAttachmentButton() {
         {
           id: "mediaLibrary",
           title: translate("photo_library"),
-          image: Platform.select({
-            ios: "square.and.arrow.up",
-            android: "ic_menu_share",
-          }),
+          image: iconRegistry["photos"],
         },
         {
           id: "camera",
           title: translate("camera"),
-          image: Platform.select({
-            ios: "camera",
-            android: "ic_menu_camera",
-          }),
+          image: iconRegistry["camera"],
         },
       ]}
     >
@@ -144,11 +138,7 @@ export function AddAttachmentButton() {
           borderRadius: 36,
         }}
       >
-        <Icon
-          color={theme.colors.text.secondary}
-          icon="plus"
-          size={20} // Value from figma
-        />
+        <Icon color={theme.colors.text.secondary} icon="plus" size={18} />
       </Center>
     </DropdownMenu>
   );

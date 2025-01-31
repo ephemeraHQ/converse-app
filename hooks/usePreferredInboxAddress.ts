@@ -1,9 +1,18 @@
 import { getPreferredInboxAddress } from "@utils/profile";
-
-import { useInboxProfileSocials } from "./useInboxProfileSocials";
 import { InboxId } from "@xmtp/react-native-sdk";
+import { useMemo } from "react";
+import { useInboxProfileSocialsForCurrentAccount } from "./useInboxProfileSocials";
 
 export const usePreferredInboxAddress = (inboxId: InboxId) => {
-  const { data } = useInboxProfileSocials(inboxId);
-  return getPreferredInboxAddress(data);
+  const { data, isLoading } = useInboxProfileSocialsForCurrentAccount(inboxId);
+
+  const preferredAddress = useMemo(() => {
+    if (!data) return undefined;
+    return getPreferredInboxAddress(data);
+  }, [data]);
+
+  return {
+    data: preferredAddress,
+    isLoading,
+  };
 };

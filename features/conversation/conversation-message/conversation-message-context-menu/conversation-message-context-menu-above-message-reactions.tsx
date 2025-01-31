@@ -18,7 +18,7 @@ import {
 } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useMemo } from "react";
 import { EntryAnimationsValues, withSpring } from "react-native-reanimated";
-import { MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT } from "./conversation-message-context-menu-constant";
+import { MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT } from "./conversation-message-context-menu.constants";
 
 export const MessageContextMenuAboveMessageReactions = memo(
   function MessageContextMenuAboveMessageReactions({
@@ -126,7 +126,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
               justifyContent: "space-around",
               alignItems: "center",
               borderRadius: theme.spacing.lg,
-              paddingHorizontal: theme.spacing.xxs,
+              paddingHorizontal: theme.spacing.xs,
               backgroundColor: theme.colors.background.raised,
             },
             messageFromMe

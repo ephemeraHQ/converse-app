@@ -1,11 +1,10 @@
 import { experimental_createPersister } from "@tanstack/react-query-persist-client";
-import { parse, stringify } from "flatted";
 import { MMKV } from "react-native-mmkv";
 import { StateStorage } from "zustand/middleware";
 
+import { DEFAULT_GC_TIME } from "@/queries/queryClient.constants";
 import { getAccountEncryptionKey } from "./keychain/helpers";
 import logger from "./logger";
-import { DEFAULT_GC_TIME } from "@/queries/queryClient.constants";
 
 const storage = new MMKV();
 
@@ -53,25 +52,21 @@ export const clearSecureMmkvForAccount = async (account: string) => {
 
 const reactQueryMMKV = new MMKV({ id: "converse-react-query" });
 
-const reactQuerySyncStorage = {
-  getItem: (key: string) => {
-    const stringValue = reactQueryMMKV.getString(key);
-    return stringValue || null;
-  },
-  setItem: (key: string, value: string) => {
-    // Deleting before setting to avoid memory leak
-    // https://github.com/mrousavy/react-native-mmkv/issues/440
-    reactQueryMMKV.delete(key);
-    if (value) {
-      reactQueryMMKV.set(key, value);
-    }
-  },
-  removeItem: (key: string) => reactQueryMMKV.delete(key),
-};
-
 export const reactQueryPersister = experimental_createPersister({
-  storage: reactQuerySyncStorage,
+  storage: {
+    getItem: (key: string) => {
+      const stringValue = reactQueryMMKV.getString(key);
+      return stringValue || null;
+    },
+    setItem: (key: string, value: string) => {
+      // Deleting before setting to avoid memory leak
+      // https://github.com/mrousavy/react-native-mmkv/issues/440
+      reactQueryMMKV.delete(key);
+      if (value) {
+        reactQueryMMKV.set(key, value);
+      }
+    },
+    removeItem: (key: string) => reactQueryMMKV.delete(key),
+  },
   maxAge: DEFAULT_GC_TIME,
-  serialize: stringify,
-  deserialize: parse,
 });

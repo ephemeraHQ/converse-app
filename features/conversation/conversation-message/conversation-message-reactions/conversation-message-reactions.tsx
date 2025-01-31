@@ -1,10 +1,7 @@
 import { useSelect } from "@/data/store/storeHelpers";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
-import {
-  isCurrentAccountInboxId,
-  useCurrentAccountInboxId,
-} from "@/hooks/use-current-account-inbox-id";
+import { isCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useInboxProfileSocialsQueries } from "@/queries/useInboxProfileSocialsQuery";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { AnimatedHStack, HStack } from "@design-system/HStack";
@@ -34,10 +31,6 @@ export const ConversationMessageReactions = memo(
 
     const rolledUpReactions = useMessageReactionsRolledUp();
 
-    const { hasNextMessageInSeries } = useMessageContextStoreContext(
-      useSelect(["hasNextMessageInSeries"])
-    );
-
     const handlePressContainer = useCallback(() => {
       openMessageReactionsDrawer(rolledUpReactions);
     }, [rolledUpReactions]);
@@ -53,9 +46,6 @@ export const ConversationMessageReactions = memo(
           {
             flexDirection: "row",
             flexWrap: "wrap",
-            ...(hasNextMessageInSeries && {
-              marginBottom: theme.spacing.xxxs,
-            }),
           },
           fromMe && { justifyContent: "flex-end" },
         ]}
@@ -96,7 +86,6 @@ function useMessageReactionsRolledUp() {
   const { bySender: reactionsBySender } =
     useConversationMessageReactions(messageId);
   const currentAddress = useCurrentAccount()!;
-  const { data: currentUserInboxId } = useCurrentAccountInboxId();
 
   const inboxIds = Array.from(
     new Set(
@@ -191,8 +180,11 @@ const $reactionButton: ThemedStyle<ViewStyle> = ({
 }) => ({
   flexDirection: "row",
   alignItems: "center",
-  paddingHorizontal: spacing.xs,
-  paddingVertical: spacing.xxs,
+  // -borderWidth.sm because in Figma the padding includes the border
+  paddingHorizontal: spacing.xs - borderWidth.sm,
+  // -borderWidth.sm because in Figma the padding includes the border
+  paddingVertical: spacing.xxs - borderWidth.sm,
+
   borderRadius: borderRadius.sm,
   borderWidth: borderWidth.sm,
   borderColor: colors.border.subtle,
@@ -200,7 +192,6 @@ const $reactionButton: ThemedStyle<ViewStyle> = ({
 
 const $reactionButtonActive: ThemedStyle<ViewStyle> = ({ colors }) => ({
   borderColor: colors.fill.minimal,
-  backgroundColor: colors.fill.minimal,
 });
 
 const $emojiContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({

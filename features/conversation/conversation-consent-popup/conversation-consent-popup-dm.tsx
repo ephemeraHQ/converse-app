@@ -3,7 +3,7 @@ import { useCurrentAccount } from "@/data/store/accountsStore";
 import { useAllowDmMutation } from "@/features/consent/use-allow-dm.mutation";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
 import { useRouter } from "@/navigation/useNavigation";
-import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
+import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { actionSheetColors } from "@/styles/colors";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { ensureError } from "@/utils/error";
@@ -26,7 +26,7 @@ export function ConversationConsentPopupDm() {
   const conversationId = useConversationCurrentConversationId();
   const currentAccount = useCurrentAccount()!;
 
-  const { data: peerInboxId } = useDmPeerInboxId({
+  const { data: peerInboxId } = useDmPeerInboxIdQuery({
     account: currentAccount,
     topic,
     caller: "ConversationConsentPopupDm",

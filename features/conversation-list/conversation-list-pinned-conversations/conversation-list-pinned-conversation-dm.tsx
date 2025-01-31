@@ -1,7 +1,8 @@
 import { VStack } from "@/design-system/VStack";
 import { PinnedConversationAvatar } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-avatar";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
-import { useDmPeerInboxId } from "@/queries/useDmPeerInbox";
+import { useDmConversationContextMenuViewProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
+import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { DmWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
@@ -11,7 +12,6 @@ import { useCallback } from "react";
 import { isTextMessage } from "../../conversation/conversation-message/conversation-message.utils";
 import { ConversationListPinnedConversation } from "./conversation-list-pinned-conversation";
 import { PinnedConversationMessagePreview } from "./conversation-list-pinned-conversation-message-preview";
-import { useDmConversationContextMenuViewProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
 
 type IConversationListPinnedConversationDmProps = {
   conversation: DmWithCodecsType;
@@ -24,15 +24,17 @@ export const ConversationListPinnedConversationDm = ({
 
   const conversationTopic = conversation.topic;
 
-  const { data: peerInboxId } = useDmPeerInboxId({
+  const { data: peerInboxId } = useDmPeerInboxIdQuery({
     account: currentAccount!,
     topic: conversationTopic,
     caller: "ConversationListPinnedConversationDm",
   });
 
-  const preferredName = usePreferredInboxName(peerInboxId);
+  const { data: preferredName } = usePreferredInboxName({
+    inboxId: peerInboxId,
+  });
 
-  const preferredAvatar = usePreferredInboxAvatar(peerInboxId);
+  const { data: preferredAvatar } = usePreferredInboxAvatar(peerInboxId);
 
   const { isUnread } = useConversationIsUnread({
     topic: conversationTopic,

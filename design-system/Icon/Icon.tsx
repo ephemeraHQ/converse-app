@@ -47,6 +47,7 @@ export const iconRegistry: Record<IIconName, string> = {
   phone: "phone",
   "chevron.down": "chevron.down",
   photo: "photo",
+  photos: "photo.on.rectangle.angled.fill",
   dollarsign: "dollarsign",
   gear: "gear",
   "arrow.clockwise": "arrow.clockwise",

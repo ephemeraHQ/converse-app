@@ -1,9 +1,11 @@
+import { GroupAvatarDumb } from "@/components/group-avatar";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
-import { MESSAGE_CONTEXT_REACTIONS_HEIGHT } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-constant";
+import { MESSAGE_CONTEXT_REACTIONS_HEIGHT } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.constants";
+import { useCurrentConversationTopic } from "@/features/conversation/conversation.store-context";
+import { useGroupMembersInfoForCurrentAccount } from "@/hooks/use-group-members-info-for-current-account";
 import { useInboxProfileSocialsQueries } from "@/queries/useInboxProfileSocialsQuery";
 import { ObjectTyped } from "@/utils/objectTyped";
 import { getReactionContent } from "@/utils/xmtpRN/reactions";
-import GroupAvatar from "@components/GroupAvatar";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { Text } from "@design-system/Text";
 import { useAppTheme } from "@theme/useAppTheme";
@@ -92,6 +94,8 @@ const Item: FC<MessageReactionsItemProps> = ({ content, inboxIds }) => {
 
   const currentAccount = useCurrentAccount()!;
 
+  const conversationTopic = useCurrentConversationTopic();
+
   const queriesData = useInboxProfileSocialsQueries(currentAccount, inboxIds);
 
   const membersSocials = queriesData.map(({ data: socials }, index) => {
@@ -100,6 +104,10 @@ const Item: FC<MessageReactionsItemProps> = ({ content, inboxIds }) => {
       uri: getPreferredInboxAvatar(socials),
       name: getPreferredInboxName(socials),
     };
+  });
+
+  const { groupMembersInfo } = useGroupMembersInfoForCurrentAccount({
+    groupTopic: conversationTopic,
   });
 
   return (
@@ -118,9 +126,9 @@ const Item: FC<MessageReactionsItemProps> = ({ content, inboxIds }) => {
           alignItems: "center",
         }}
       >
-        <GroupAvatar
-          pendingGroupMembers={membersSocials}
+        <GroupAvatarDumb
           size={theme.avatarSize.lg}
+          members={groupMembersInfo}
         />
       </VStack>
       <Text style={{ marginTop: theme.spacing.md }}>

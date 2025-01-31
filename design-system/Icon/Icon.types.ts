@@ -42,6 +42,7 @@ export type IIconName =
   | "menu"
   | "more_vert"
   | "phone"
+  | "photos"
   | "photo"
   | "dollarsign"
   | "gear"

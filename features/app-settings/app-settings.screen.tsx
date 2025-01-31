@@ -1,88 +1,20 @@
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { Button } from "@/design-system/Button/Button";
-import { ITextProps, Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
+import { HStack } from "@/design-system/HStack";
+import { Text } from "@/design-system/Text";
+import { SettingsList } from "@/design-system/settings-list/settings-list";
+import { ISettingsListRow } from "@/design-system/settings-list/settings-list.types";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
 import { useRouter } from "@/navigation/useNavigation";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { getEnv } from "@/utils/getEnv";
 import * as Updates from "expo-updates";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 
 export const AppSettingsScreen = memo(function AppSettingsScreen() {
   const { theme } = useAppTheme();
-
   const router = useRouter();
-
-  useHeader({
-    safeAreaEdges: ["top"],
-    title: translate("app_settings"),
-    onBack: () => router.goBack(),
-  });
-
-  return (
-    <Screen
-      contentContainerStyle={{
-        justifyContent: "center",
-        alignItems: "center",
-        padding: theme.spacing.md,
-        rowGap: theme.spacing.xl,
-      }}
-    >
-      <Section title="General">
-        <DebugText>Env: {getEnv()}</DebugText>
-      </Section>
-
-      <Section title="Expo Updates">
-        <ExpoUpdates />
-      </Section>
-    </Screen>
-  );
-});
-
-const Section = memo(function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  const { theme } = useAppTheme();
-
-  return (
-    <VStack>
-      <Text
-        preset="bigBold"
-        style={{
-          textAlign: "center",
-          marginBottom: theme.spacing.xxs,
-        }}
-      >
-        {title}
-      </Text>
-      {children}
-    </VStack>
-  );
-});
-
-const DebugText = memo(function DebugText({
-  children,
-  ...textProps
-}: ITextProps) {
-  return (
-    <Text
-      style={{
-        textAlign: "center",
-      }}
-      {...textProps}
-    >
-      {children}
-    </Text>
-  );
-});
-
-const ExpoUpdates = memo(function ExpoUpdates() {
   const {
     currentlyRunning,
     isUpdateAvailable,
@@ -100,53 +32,79 @@ const ExpoUpdates = memo(function ExpoUpdates() {
     }
   };
 
+  useHeader({
+    safeAreaEdges: ["top"],
+    title: translate("app_settings"),
+    onBack: () => router.goBack(),
+  });
+
+  const allSettings = useMemo((): ISettingsListRow[] => {
+    return [
+      { label: "Environment", value: getEnv() },
+      { label: "Update ID", value: currentlyRunning.updateId || "embedded" },
+      {
+        label: "Created At",
+        value: currentlyRunning.createdAt?.toLocaleString() || "N/A",
+      },
+      {
+        label: "Is Embedded",
+        value: String(currentlyRunning.isEmbeddedLaunch),
+      },
+      { label: "Runtime Version", value: currentlyRunning.runtimeVersion },
+      { label: "Channel", value: currentlyRunning.channel || "N/A" },
+      {
+        label: "Emergency Launch",
+        value: String(currentlyRunning.isEmergencyLaunch),
+      },
+      currentlyRunning.emergencyLaunchReason && {
+        label: "Emergency Reason",
+        value: currentlyRunning.emergencyLaunchReason,
+      },
+      currentlyRunning.launchDuration && {
+        label: "Launch Duration",
+        value: `${currentlyRunning.launchDuration}ms`,
+      },
+      isChecking && { label: "Status", value: "Checking for updates..." },
+      isDownloading && { label: "Status", value: "Downloading update..." },
+
+      // New Update Settings with header (if available)
+      ...(downloadedUpdate
+        ? [
+            { label: "New Update" },
+            { label: "New Update ID", value: downloadedUpdate.updateId },
+            {
+              label: "Created",
+              value: downloadedUpdate.createdAt.toLocaleString(),
+            },
+          ]
+        : []),
+    ].filter(Boolean);
+  }, [currentlyRunning, isChecking, isDownloading, downloadedUpdate]);
+
   return (
-    <VStack>
-      {/* Current Update Info */}
-      <DebugText>
-        Update ID: {currentlyRunning.updateId || "embedded"}
-      </DebugText>
-      <DebugText>
-        Created At: {currentlyRunning.createdAt?.toLocaleString() || "N/A"}
-      </DebugText>
-      <DebugText>
-        Is Embedded: {String(currentlyRunning.isEmbeddedLaunch)}
-      </DebugText>
-      <DebugText>Runtime Version: {currentlyRunning.runtimeVersion}</DebugText>
-      <DebugText>Channel: {currentlyRunning.channel || "N/A"}</DebugText>
-      <DebugText>
-        Emergency Launch: {String(currentlyRunning.isEmergencyLaunch)}
-      </DebugText>
-      {currentlyRunning.emergencyLaunchReason && (
-        <DebugText>
-          Emergency Reason: {currentlyRunning.emergencyLaunchReason}
-        </DebugText>
-      )}
-      {currentlyRunning.launchDuration && (
-        <DebugText>
-          Launch Duration: {currentlyRunning.launchDuration}ms
-        </DebugText>
-      )}
-
-      {/* Update Status */}
-      {isChecking && <DebugText>Checking for updates...</DebugText>}
-      {isDownloading && <DebugText>Downloading update...</DebugText>}
-
-      {/* Downloaded Update Info */}
-      {downloadedUpdate && (
-        <>
-          <DebugText>New Update Available:</DebugText>
-          <DebugText>ID: {downloadedUpdate.updateId}</DebugText>
-          <DebugText>
-            Created: {downloadedUpdate.createdAt.toLocaleString()}
-          </DebugText>
-        </>
-      )}
-
-      {/* Reload Button */}
-      {isUpdateAvailable && downloadedUpdate && (
+    <Screen
+      preset="scroll"
+      contentContainerStyle={{
+        paddingHorizontal: theme.spacing.lg,
+      }}
+    >
+      <HStack
+        style={{
+          padding: theme.spacing.md,
+          backgroundColor: theme.colors.background.sunken,
+          borderRadius: theme.borderRadius.sm,
+          marginBottom: theme.spacing.xxxs,
+        }}
+      >
+        <Text preset="formLabel" color="secondary">
+          These settings are only available for development and debugging
+          purposes
+        </Text>
+      </HStack>
+      <SettingsList rows={allSettings} />
+      {downloadedUpdate && isUpdateAvailable && (
         <Button onPress={handleReload}>Reload App to Apply Update</Button>
       )}
-    </VStack>
+    </Screen>
   );
 });

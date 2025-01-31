@@ -10,16 +10,29 @@ import { useAppTheme } from "@/theme/useAppTheme";
 import { ReactNode, memo } from "react";
 
 type IConversationMessageLayoutProps = {
-  children: ReactNode;
+  reactions?: ReactNode;
+  message?: ReactNode;
+  messageStatus?: ReactNode;
 };
 
 export const ConversationMessageLayout = memo(
   function ConversationMessageLayout({
-    children,
+    message,
+    reactions,
+    messageStatus,
   }: IConversationMessageLayoutProps) {
     const { theme } = useAppTheme();
-    const { spaceBetweenSenderAvatarAndMessage } =
-      useConversationMessageStyles();
+
+    const {
+      messageContainerSidePadding,
+      spaceBetweenSenderAvatarAndMessage,
+      senderAvatarSize,
+      spaceBetweenMessageFromDifferentUserOrType,
+      spaceBetweenMessagesInSeries,
+      spaceBetweenMessageAndSender,
+      senderNameLeftMargin,
+      spaceBetweenSeriesWithReactions,
+    } = useConversationMessageStyles();
 
     const {
       senderInboxId,
@@ -27,6 +40,8 @@ export const ConversationMessageLayout = memo(
       hasNextMessageInSeries,
       hasPreviousMessageInSeries,
       isSystemMessage,
+      nextMessage,
+      message: messageData,
     } = useMessageContextStoreContext(
       useSelect([
         "senderInboxId",
@@ -34,71 +49,124 @@ export const ConversationMessageLayout = memo(
         "hasNextMessageInSeries",
         "hasPreviousMessageInSeries",
         "isSystemMessage",
+        "nextMessage",
+        "message",
       ])
     );
 
+    const isGroupUpdate = isGroupUpdatedMessage(messageData);
+
+    function getMessageSpacing() {
+      if (nextMessage && !hasNextMessageInSeries) {
+        return spaceBetweenMessageFromDifferentUserOrType;
+      }
+
+      if (!hasNextMessageInSeries) {
+        return 0;
+      }
+
+      if (reactions) {
+        return spaceBetweenSeriesWithReactions;
+      }
+
+      if (nextMessage && !hasNextMessageInSeries) {
+        return spaceBetweenMessageFromDifferentUserOrType;
+      }
+
+      return spaceBetweenMessagesInSeries;
+    }
+
     return (
-      <MessageContainer>
-        {!fromMe && !isSystemMessage && (
-          <>
-            {!hasNextMessageInSeries ? (
-              <ConversationSenderAvatar inboxId={senderInboxId} />
-            ) : (
-              <VStack style={{ width: theme.avatarSize.sm }} />
-            )}
-            <VStack style={{ width: spaceBetweenSenderAvatarAndMessage }} />
-          </>
-        )}
-        <AnimatedVStack
+      <AnimatedVStack
+        layout={theme.animation.reanimatedLayoutSpringTransition}
+        style={{
+          marginBottom: getMessageSpacing(),
+        }}
+      >
+        <HStack
           style={{
-            rowGap: theme.spacing["4xs"],
-            alignItems: fromMe ? "flex-end" : "flex-start",
+            width: "100%",
+            alignItems: "flex-end",
+            ...(!isGroupUpdate && {
+              ...(fromMe
+                ? {
+                    paddingRight: messageContainerSidePadding,
+                    justifyContent: "flex-end",
+                  }
+                : {
+                    paddingLeft: messageContainerSidePadding,
+                    justifyContent: "flex-start",
+                  }),
+            }),
           }}
         >
-          {!fromMe && !hasPreviousMessageInSeries && !isSystemMessage && (
-            <ConversationMessageSender inboxId={senderInboxId} />
+          {!fromMe && !isSystemMessage && (
+            <>
+              {!hasNextMessageInSeries ? (
+                <ConversationSenderAvatar inboxId={senderInboxId} />
+              ) : (
+                <VStack style={{ width: senderAvatarSize }} />
+              )}
+              <VStack style={{ width: spaceBetweenSenderAvatarAndMessage }} />
+            </>
           )}
-          {children}
-        </AnimatedVStack>
-      </MessageContainer>
+
+          <VStack
+            style={{
+              alignItems: fromMe ? "flex-end" : "flex-start",
+              ...(Boolean(reactions) && {
+                marginBottom: spaceBetweenMessagesInSeries,
+              }),
+            }}
+          >
+            {!fromMe && !hasPreviousMessageInSeries && !isSystemMessage && (
+              <VStack
+                style={{
+                  flexDirection: "row",
+                  marginLeft: senderNameLeftMargin,
+                  marginBottom: spaceBetweenMessageAndSender,
+                }}
+              >
+                <ConversationMessageSender inboxId={senderInboxId} />
+              </VStack>
+            )}
+
+            {message}
+          </VStack>
+        </HStack>
+
+        {Boolean(reactions) && (
+          <HStack
+            style={
+              fromMe
+                ? {
+                    paddingRight: messageContainerSidePadding,
+                    justifyContent: "flex-end",
+                  }
+                : {
+                    paddingLeft:
+                      messageContainerSidePadding +
+                      spaceBetweenSenderAvatarAndMessage +
+                      senderAvatarSize,
+                    justifyContent: "flex-start",
+                  }
+            }
+          >
+            {reactions}
+          </HStack>
+        )}
+
+        {Boolean(messageStatus) && (
+          <HStack
+            style={{
+              paddingRight: messageContainerSidePadding,
+              justifyContent: "flex-end",
+            }}
+          >
+            {messageStatus}
+          </HStack>
+        )}
+      </AnimatedVStack>
     );
   }
 );
-
-const MessageContainer = memo(function MessageContainer(props: {
-  children: React.ReactNode;
-}) {
-  const { children } = props;
-  const { theme } = useAppTheme();
-  const { fromMe, nextMessage, hasNextMessageInSeries, message } =
-    useMessageContextStoreContext(
-      useSelect(["fromMe", "nextMessage", "hasNextMessageInSeries", "message"])
-    );
-  const isGroupUpdate = isGroupUpdatedMessage(message);
-
-  return (
-    <HStack
-      style={{
-        width: "100%",
-        alignItems: "flex-end",
-        ...(!isGroupUpdate && {
-          ...(fromMe
-            ? {
-                paddingRight: theme.spacing.sm,
-                justifyContent: "flex-end",
-              }
-            : {
-                paddingLeft: theme.spacing.sm,
-                justifyContent: "flex-start",
-              }),
-        }),
-        ...(!hasNextMessageInSeries &&
-          nextMessage && {
-            marginBottom: theme.spacing.sm,
-          }),
-      }}
-    >
-      {children}
-    </HStack>
-  );
-});

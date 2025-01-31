@@ -4,8 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { type ConversationTopic } from "@xmtp/react-native-sdk";
 import { dmPeerInboxIdQueryKey } from "./QueryKeys";
 import { getOrFetchConversation } from "./useConversationQuery";
+import { reactQueryPersister } from "@/utils/mmkv";
 
-export const useDmPeerInboxId = (args: {
+export const useDmPeerInboxIdQuery = (args: {
   account: string;
   topic: ConversationTopic;
   caller: string;
@@ -13,8 +14,6 @@ export const useDmPeerInboxId = (args: {
   const { account, topic, caller } = args;
 
   return useQuery({
-    // since we don't want to add conversation to the deps. We already have topic
-
     queryKey: dmPeerInboxIdQueryKey(account, topic),
     queryFn: async function getPeerInboxId() {
       const conversation = await getOrFetchConversation({
@@ -38,5 +37,6 @@ export const useDmPeerInboxId = (args: {
       return conversation.peerInboxId();
     },
     enabled: !!account && !!topic,
+    persister: reactQueryPersister,
   });
 };
