@@ -24,6 +24,7 @@ type ISocialNamesProps = {
 export function SocialNames({ socials }: ISocialNamesProps) {
   const { theme, themed } = useAppTheme();
 
+  // Early return if no socials data
   if (
     !socials ||
     ((socials.userNames?.length ?? 0) === 0 &&
@@ -58,9 +59,7 @@ export function SocialNames({ socials }: ISocialNamesProps) {
         {renderSocialChips(socials.userNames ?? [], (item) => item.name)}
         {renderSocialChips(socials.ensNames ?? [], (item) => item.name)}
         {renderSocialChips(
-          (socials.unstoppableDomains ?? []).filter(
-            (d) => d.domain && !d.domain.toLowerCase().endsWith(".eth")
-          ),
+          socials.unstoppableDomains ?? [],
           (item) => item.domain!
         )}
       </HStack>

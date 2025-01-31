@@ -247,17 +247,47 @@ export function ProfileScreen() {
           />
         </VStack>
 
-        <VStack style={[themed($section), themed($borderTop)]}>
-          <SocialNames
-            socials={{
-              userNames: socials?.userNames?.map((u) => ({ name: u.name })),
-              ensNames: socials?.ensNames?.map((e) => ({ name: e.name })),
-              unstoppableDomains: socials?.unstoppableDomains?.map((d) => ({
-                name: d.domain,
-              })),
-            }}
-          />
-        </VStack>
+        {socials &&
+          (() => {
+            // Filter out Converse usernames
+            const filteredUserNames = socials.userNames?.filter(
+              (u) => !formatConverseUsername(u.name)?.isConverseUsername
+            );
+
+            // Filter out .eth domains from unstoppable domains to avoid duplicates
+            const filteredUnstoppableDomains =
+              socials.unstoppableDomains?.filter(
+                (d) => d.domain && !d.domain.toLowerCase().endsWith(".eth")
+              );
+
+            // Only render if there are names to display after filtering
+            if (
+              (filteredUserNames?.length ?? 0) > 0 ||
+              (socials.ensNames?.length ?? 0) > 0 ||
+              (filteredUnstoppableDomains?.length ?? 0) > 0
+            ) {
+              return (
+                <VStack style={[themed($section), themed($borderTop)]}>
+                  <SocialNames
+                    socials={{
+                      userNames: filteredUserNames?.map((u) => ({
+                        name: u.name,
+                      })),
+                      ensNames: socials.ensNames?.map((e) => ({
+                        name: e.name,
+                      })),
+                      unstoppableDomains: filteredUnstoppableDomains?.map(
+                        (d) => ({
+                          name: d.domain,
+                        })
+                      ),
+                    }}
+                  />
+                </VStack>
+              );
+            }
+            return null;
+          })()}
 
         {isMyProfile && (
           <VStack style={[themed($section), themed($borderTop)]}>
