@@ -173,7 +173,7 @@ export function ProfileScreen() {
               ) : (
                 <HeaderAction
                   style={{
-                    marginBottom: 4,
+                    marginBottom: 4, // Centers the square.and.pencil icon
                   }}
                   icon="square.and.pencil"
                   onPress={handleChatPress}
@@ -347,18 +347,4 @@ const $section: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
 const $borderTop: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   borderTopWidth: spacing.xxs,
   borderTopColor: colors.background.sunken,
-});
-
-const $headerRight: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  alignItems: "center",
-  columnGap: spacing.xxs,
-});
-
-const $editIcon: ThemedStyle<ViewStyle> = () => ({
-  marginBottom: 4, // Centers the square.and.pencil icon
-});
-
-const $contextMenu: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingVertical: spacing.sm,
-  paddingRight: spacing.xxxs,
 });
