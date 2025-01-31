@@ -102,8 +102,6 @@ jobs:
     needs: [check-changes, bump-version]
     if: needs.check-changes.outputs.has_native_changes == 'true'
     runs-on: ubuntu-latest
-    outputs:
-      build_success: ${{ steps.build_status.outputs.success }}
 
     steps:
       - name: Checkout repository
@@ -141,73 +139,48 @@ jobs:
         run: node scripts/build/ios/preview.js
 
       - name: Build and submit to store
-        id: build_status
         run: |
           eas build --platform ios --profile preview --non-interactive --auto-submit
-          echo "success=true" >> $GITHUB_OUTPUT
 
-  # android-build:
-  #   needs: [check-changes, bump-version]
-  #   if: needs.check-changes.outputs.has_native_changes == 'true'
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     build_success: ${{ steps.build_status.outputs.success }}
-
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         token: ${{ secrets.PAT_GITHUB }}
-
-  #     - name: Setup node
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version-file: .nvmrc
-  #         cache: "yarn"
-  #         cache-dependency-path: yarn.lock
-  #       env:
-  #         SKIP_YARN_COREPACK_CHECK: "1"
-  #     - run: corepack enable
-
-  #     - name: Install dependencies
-  #       run: yarn install
-
-  #     - name: Setup EAS
-  #       uses: expo/expo-github-action@v8
-  #       with:
-  #         eas-version: latest
-  #         token: ${{ secrets.EXPO_TOKEN }}
-
-  #     - name: Build and submit to store
-  #       id: build_status
-  #       run: |
-  #         eas build --platform android --profile preview --non-interactive --auto-submit
-  #         echo "success=true" >> $GITHUB_OUTPUT
-
-  handle-build-results:
-    needs: [bump-version, ios-build] # , android-build
+  android-build:
+    needs: [check-changes, bump-version]
+    if: needs.check-changes.outputs.has_native_changes == 'true'
     runs-on: ubuntu-latest
-    if: always()
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT_GITHUB }}
+          ref: main
+          fetch-depth: 0
 
-      - name: Configure Git
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
+      # To get the incremented version number
+      - name: Pull latest changes
+        run: git pull origin main
 
-      - name: Handle build results
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+        env:
+          SKIP_YARN_COREPACK_CHECK: "1"
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build and submit to store
         run: |
-          if [[ "${{ needs.ios-build.result }}" == "failure" ]]; then
-            echo "iOS build failed, but keeping version bump for production tracking"
-            echo "Failed platform: iOS"
-          else
-            echo "All builds succeeded!"
-          fi
+          eas build --platform android --profile preview --non-interactive --auto-submit
 
   ota-update:
     needs: check-changes
