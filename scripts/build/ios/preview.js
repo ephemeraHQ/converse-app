@@ -88,6 +88,15 @@ const go = async () => {
   fs.writeFileSync(PLIST_EXTENSION_PATH, newExtensionInfo, "utf-8");
 
   //
+  // Update Expo.plist Runtime Version
+  // ----------------------------------------
+  const EXPO_PLIST_PATH = "ios/Converse/Supporting/Expo.plist";
+  const expoPlist = plist.parse(fs.readFileSync(EXPO_PLIST_PATH, "utf8"));
+  expoPlist.EXUpdatesRuntimeVersion = packageJson.version;
+  const newExpoPlist = plist.build(expoPlist);
+  fs.writeFileSync(EXPO_PLIST_PATH, newExpoPlist, "utf-8");
+
+  //
   // Update Entitlements Files
   // ----------------------------------------
   const ENTITLEMENTS_APP_PATH = "ios/Converse/Converse.entitlements";
