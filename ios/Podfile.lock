@@ -288,6 +288,8 @@ PODS:
     - ExpoModulesCore
   - ExpoLinking (7.0.4):
     - ExpoModulesCore
+  - ExpoLocalAuthentication (15.0.2):
+    - ExpoModulesCore
   - ExpoLocalization (16.0.0):
     - ExpoModulesCore
   - ExpoModulesCore (2.1.2):
@@ -2397,6 +2399,7 @@ DEPENDENCIES:
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
   - ExpoLinking (from `../node_modules/expo-linking/ios`)
+  - ExpoLocalAuthentication (from `../node_modules/expo-local-authentication/ios`)
   - ExpoLocalization (from `../node_modules/expo-localization/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - "ExpoNativeExtensions (from `../node_modules/@privy-io/expo-native-extensions/ios`)"
@@ -2623,6 +2626,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-linear-gradient/ios"
   ExpoLinking:
     :path: "../node_modules/expo-linking/ios"
+  ExpoLocalAuthentication:
+    :path: "../node_modules/expo-local-authentication/ios"
   ExpoLocalization:
     :path: "../node_modules/expo-localization/ios"
   ExpoModulesCore:
@@ -2892,6 +2897,7 @@ SPEC CHECKSUMS:
   ExpoKeepAwake: 22173f45d767c7d37403fdf48292726901d69ce7
   ExpoLinearGradient: 18148bd38f98fa0229c1f9df23393b32ab6d2d32
   ExpoLinking: 4a09f2f0dc1132607c20f5628ba30d94795ea73d
+  ExpoLocalAuthentication: eb2be9c7bcdc68e9434d4be4bb5aa5cf7943e816
   ExpoLocalization: d81f70d53db94b31e4a0b1e11007424ea1011a1c
   ExpoModulesCore: 39d2589593805e3f5feeb1919a4c7f8af35c32b6
   ExpoNativeExtensions: ac2ffff99e3480446becd430cb2febe295d72ea4
