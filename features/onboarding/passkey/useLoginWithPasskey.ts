@@ -2,7 +2,6 @@ import { useCallback, useEffect } from "react";
 import { usePasskeyAuthStoreContext } from "./passkeyAuthStore";
 import { usePrivy } from "@privy-io/expo";
 import { useLoginWithPasskey as useLoginWithPasskeyPrivy } from "@privy-io/expo/passkey";
-import { usePrivyAuthStoreContext } from "../Privy/privyAuthStore";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { RELYING_PARTY } from "./passkey.constants";
 
@@ -24,11 +23,6 @@ export const useLoginWithPasskey = () => {
     (state) => state
   );
 
-  // Privy Auth Store Hooks
-  const setPrivyAccountId = usePrivyAuthStoreContext(
-    (state) => state.setPrivyAccountId
-  );
-
   useEffect(() => {
     setStatusString(loginState.status);
   }, [setStatusString, loginState.status]);
@@ -46,7 +40,6 @@ export const useLoginWithPasskey = () => {
       if (!user) {
         throw new Error("No account loaded from Passkey");
       }
-      setPrivyAccountId(user.id);
       setStatusString("Account loaded - Waiting for smart wallet");
     } catch (e: any) {
       setError(e?.message ?? "Error logging in with Passkey");
@@ -55,13 +48,12 @@ export const useLoginWithPasskey = () => {
       setLoading(false);
     }
   }, [
-    setLoading,
-    privyUser,
     loginWithPasskey,
-    setStatusString,
     logout,
-    setPrivyAccountId,
+    privyUser,
     setError,
+    setLoading,
+    setStatusString,
   ]);
 
   return {

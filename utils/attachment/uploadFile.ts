@@ -6,7 +6,7 @@ export const uploadFile = async ({
   filePath,
   contentType,
 }: {
-  account?: string | undefined;
+  account: string;
   filePath?: string | undefined;
   blob?: Blob | undefined;
   contentType?: string | undefined;

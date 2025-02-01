@@ -54,9 +54,6 @@ jest.mock("react-native-fs", () => {
     PicturesDirectoryPath: jest.fn(),
   };
 });
-jest.mock("./utils/evm/privy", () => ({
-  getPrivyRequestHeaders: jest.fn(),
-}));
 
 jest.mock("rn-fetch-blob", () => {
   return {

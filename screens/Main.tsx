@@ -2,7 +2,6 @@ import { config } from "@/config";
 import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
 import { CreateConversationScreenConfig } from "@/features/create-conversation/create-conversation.nav";
 import { ProfileScreenConfig } from "@/features/profiles/profile.nav";
-import logger from "@/utils/logger";
 import ActionSheetStateHandler from "@components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "@components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "@components/StateHandlers/InitialStateHandler";
@@ -16,8 +15,6 @@ import { ConversationScreenConfig } from "@features/conversation/conversation.na
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { backgroundColor } from "@styles/colors";
 import { useThemeProvider } from "@theme/useAppTheme";
-import { useAutoConnectExternalWallet } from "@utils/evm/external";
-import { usePrivyAccessToken } from "@utils/evm/privy";
 import { converseNavigatorRef } from "@utils/navigation";
 import { useCheckCurrentInstallation } from "@/utils/xmtpRN/xmtp-client/xmtp-client-installations";
 import * as Linking from "expo-linking";
@@ -61,10 +58,7 @@ const linking: LinkingOptions<NavigationParamList> = {
 };
 
 export default function Main() {
-  // Makes sure we have a Privy token ready to make API calls
-  usePrivyAccessToken();
   useCheckCurrentInstallation();
-  useAutoConnectExternalWallet();
 
   const {
     themeScheme,

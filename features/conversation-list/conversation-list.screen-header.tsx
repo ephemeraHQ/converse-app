@@ -78,7 +78,10 @@ function HeaderTitle() {
       if (actionId === "all-chats") {
         Alert.alert("Coming soon");
       } else if (actionId === "new-account") {
-        navigation.navigate("NewAccountNavigator");
+        alert(
+          "Under Construction - waiting on Privy for multiple embedded passkey support"
+        );
+        // navigation.navigate("NewAccountNavigator");
       } else if (actionId === "app-settings") {
         navigation.navigate("AppSettings");
       } else {

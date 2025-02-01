@@ -1,8 +1,6 @@
 import { useEmbeddedWallet, usePrivy } from "@privy-io/expo";
-import { usePrivyAccessToken, usePrivySigner } from "@utils/evm/privy";
 import { useEffect, useRef } from "react";
 
-import { usePrivyAuthStoreContext } from "./privyAuthStore";
 import { initXmtpClientFromViemAccount } from "@components/Onboarding/init-xmtp-client";
 import { ensureError, ensureErrorHandler } from "@utils/error";
 import logger from "@utils/logger";
@@ -19,13 +17,6 @@ export function usePrivySmartWalletConnection(args: {
   const { isReady: privyIsReady, user: privyUser, logout } = usePrivy();
   const embeddedWallet = useEmbeddedWallet();
   const { client: smartWalletClient } = useSmartWallets();
-  const privyAccountId = usePrivyAuthStoreContext(
-    (state) => state.privyAccountId
-  );
-  usePrivySigner({
-    isOnboarding: true,
-  });
-  const privyAccessToken = usePrivyAccessToken();
   const creatingEmbeddedWallet = useRef(false);
   const initializingXmtp = useRef(false);
 
@@ -70,7 +61,7 @@ export function usePrivySmartWalletConnection(args: {
   ]);
 
   useEffect(() => {
-    if (!smartWalletClient || !privyAccessToken || !privyAccountId) {
+    if (!smartWalletClient) {
       return;
     }
 
@@ -96,7 +87,6 @@ export function usePrivySmartWalletConnection(args: {
         };
         await initXmtpClientFromViemAccount({
           account: viemAccount,
-          privyAccountId,
         });
         onStatusChange("Xmtp initialized");
         onConnectionDone();
@@ -107,19 +97,10 @@ export function usePrivySmartWalletConnection(args: {
     };
 
     initializeXmtp();
-  }, [
-    privyAccessToken,
-    privyAccountId,
-    onConnectionDone,
-    onConnectionError,
-    smartWalletClient,
-    onStatusChange,
-  ]);
+  }, [onConnectionDone, onConnectionError, smartWalletClient, onStatusChange]);
 
   return {
     privyReady: privyIsReady,
     privyUser,
-    privyAccessToken,
-    privyAccountId,
   };
 }

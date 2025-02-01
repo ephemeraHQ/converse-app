@@ -4,11 +4,7 @@ import { useColorScheme } from "react-native";
 
 import { authScreensSharedScreenOptions } from "../screens/Navigation/Navigation";
 import { stackGroupScreenOptions } from "../screens/Navigation/navHelpers";
-import { OnboardingConnectWalletScreen } from "../features/onboarding/screens/OnboardingConnectWalletScreen";
-import { OnboardingEphemeraScreen } from "../features/onboarding/screens/OnboardingEphemeraScreen";
-import { OnboardingNotificationsScreen } from "../features/onboarding/screens/onboarding-notifications-screen";
-import { OnboardingPrivateKeyScreen } from "../features/onboarding/screens/OnboardingPrivateKeyScreen";
-import { OnboardingPrivyScreen } from "../features/onboarding/screens/OnboardingPrivyScreen";
+import { OnboardingNotificationsScreen } from "@/features/onboarding/screens/onboarding-notifications-screen";
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
 import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card-screen";
 
@@ -17,13 +13,7 @@ type OnboardingParamList = {
   OnboardingCreateContactCard: undefined;
 
   OnboardingGetStarted: undefined;
-  OnboardingPrivy: undefined;
-  OnboardingConnectWallet: {
-    address: string;
-  };
   OnboardingNotifications: undefined;
-  OnboardingPrivateKey: undefined;
-  OnboardingEphemeral: undefined;
 };
 
 const OnboardingNativeStack = createNativeStackNavigator<OnboardingParamList>();
@@ -60,22 +50,6 @@ export const OnboardingNavigator = memo(function OnboardingNavigator() {
         <OnboardingNativeStack.Screen
           name="OnboardingNotifications"
           component={OnboardingNotificationsScreen}
-        />
-        <OnboardingNativeStack.Screen
-          name="OnboardingPrivy"
-          component={OnboardingPrivyScreen}
-        />
-        <OnboardingNativeStack.Screen
-          name="OnboardingConnectWallet"
-          component={OnboardingConnectWalletScreen}
-        />
-        <OnboardingNativeStack.Screen
-          name="OnboardingPrivateKey"
-          component={OnboardingPrivateKeyScreen}
-        />
-        <OnboardingNativeStack.Screen
-          name="OnboardingEphemeral"
-          component={OnboardingEphemeraScreen}
         />
       </OnboardingNativeStack.Group>
     </OnboardingNativeStack.Navigator>

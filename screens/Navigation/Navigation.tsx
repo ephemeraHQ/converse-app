@@ -21,10 +21,6 @@ import { ProfileNav, ProfileNavParams } from "@/features/profiles/profile.nav";
 import { translate } from "@/i18n";
 import { useRouter } from "@/navigation/useNavigation";
 import UserProfileNav from "@/screens/Navigation/UserProfileNav";
-import { OnboardingConnectWalletScreen } from "@features/onboarding/screens/OnboardingConnectWalletScreen";
-import { OnboardingEphemeraScreen } from "@features/onboarding/screens/OnboardingEphemeraScreen";
-import { OnboardingPrivateKeyScreen } from "@features/onboarding/screens/OnboardingPrivateKeyScreen";
-import { OnboardingPrivyScreen } from "@features/onboarding/screens/OnboardingPrivyScreen";
 import { OnboardingContactCardScreen } from "@features/onboarding/screens/onboarding-contact-card-screen";
 import { OnboardingNotificationsScreen } from "@features/onboarding/screens/onboarding-notifications-screen";
 import {
@@ -34,10 +30,6 @@ import {
 import { memo } from "react";
 import { Platform, useColorScheme } from "react-native";
 import { IdleScreen } from "../IdleScreen";
-import { NewAccountConnectWalletScreen } from "../NewAccount/NewAccountConnectWalletScreen";
-import { NewAccountEphemeraScreen } from "../NewAccount/NewAccountEphemeraScreen";
-import { NewAccountPrivateKeyScreen } from "../NewAccount/NewAccountPrivateKeyScreen";
-import { NewAccountPrivyScreen } from "../NewAccount/NewAccountPrivyScreen";
 import { NewAccountCreateContactCardScreen } from "../NewAccount/new-account-create-contact-card-screen";
 import { NewAccountScreen } from "../NewAccount/new-account-screen";
 import GroupNav, { GroupNavParams } from "./GroupNav";
@@ -54,15 +46,8 @@ export type NavigationParamList = {
   // Auth / Onboarding
   OnboardingWelcome: undefined;
   OnboardingCreateContactCard: undefined;
-
-  OnboardingGetStarted: undefined;
-  OnboardingPrivy: undefined;
-  OnboardingConnectWallet: {
-    address: string;
-  };
-  OnboardingPrivateKey: undefined;
   OnboardingNotifications: undefined;
-  OnboardingEphemeral: undefined;
+  OnboardingGetStarted: undefined;
 
   // New account
   NewAccountNavigator: undefined;
@@ -70,9 +55,6 @@ export type NavigationParamList = {
   NewAccountConnectWallet: {
     address: string;
   };
-  NewAccountPrivy: undefined;
-  NewAccountPrivateKey: undefined;
-  NewAccountEphemera: undefined;
 
   // Main
   Accounts: undefined;
@@ -207,27 +189,11 @@ export function SignedOutNavigation() {
           />
 
           <NativeStack.Screen
-            name="OnboardingPrivy"
-            component={OnboardingPrivyScreen}
-          />
-          <NativeStack.Screen
-            name="OnboardingConnectWallet"
-            component={OnboardingConnectWalletScreen}
-          />
-          <NativeStack.Screen
             options={{
               headerShown: false,
             }}
             name="OnboardingNotifications"
             component={OnboardingNotificationsScreen}
-          />
-          <NativeStack.Screen
-            name="OnboardingPrivateKey"
-            component={OnboardingPrivateKeyScreen}
-          />
-          <NativeStack.Screen
-            name="OnboardingEphemeral"
-            component={OnboardingEphemeraScreen}
           />
         </NativeStack.Group>
       </NativeStack.Group>
@@ -269,22 +235,6 @@ const NewAccountNavigator = memo(function NewAccountNavigator() {
           }}
           name="NewAccountCreateContactCard"
           component={NewAccountCreateContactCardScreen}
-        />
-        <NewAccountStack.Screen
-          name="NewAccountPrivy"
-          component={NewAccountPrivyScreen}
-        />
-        <NewAccountStack.Screen
-          name="NewAccountConnectWallet"
-          component={NewAccountConnectWalletScreen}
-        />
-        <NewAccountStack.Screen
-          name="NewAccountPrivateKey"
-          component={NewAccountPrivateKeyScreen}
-        />
-        <NewAccountStack.Screen
-          name="NewAccountEphemera"
-          component={NewAccountEphemeraScreen}
         />
       </NewAccountStack.Group>
     </NewAccountStack.Navigator>

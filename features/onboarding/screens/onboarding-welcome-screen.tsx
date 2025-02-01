@@ -17,14 +17,13 @@ import {
 } from "@/features/onboarding/constants/animation-constants";
 import { useRouter } from "@/navigation/useNavigation";
 import { useCreatePasskey } from "@/features/onboarding/passkey/useCreatePasskey";
-import { usePrivySmartWalletConnection } from "@/features/onboarding/Privy/usePrivySmartWalletConnection";
-import { PrivyAuthStoreProvider } from "@/features/onboarding/Privy/privyAuthStore";
 import {
   PasskeyAuthStoreProvider,
   usePasskeyAuthStoreContext,
 } from "@/features/onboarding/passkey/passkeyAuthStore";
 import logger from "@/utils/logger";
 import { captureErrorWithToast } from "@/utils/capture-error";
+import { usePrivySmartWalletConnection } from "../Privy/usePrivySmartWalletConnection";
 
 const $subtextStyle: TextStyle = {
   textAlign: "center",
@@ -45,11 +44,9 @@ const $titleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 
 export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
   return (
-    <PrivyAuthStoreProvider>
-      <PasskeyAuthStoreProvider>
-        <OnboardingWelcomeScreenContent />
-      </PasskeyAuthStoreProvider>
-    </PrivyAuthStoreProvider>
+    <PasskeyAuthStoreProvider>
+      <OnboardingWelcomeScreenContent />
+    </PasskeyAuthStoreProvider>
   );
 });
 

@@ -2,10 +2,9 @@ import { useCallback, useEffect } from "react";
 import { usePasskeyAuthStoreContext } from "./passkeyAuthStore";
 import { usePrivy } from "@privy-io/expo";
 import { useSignupWithPasskey } from "@privy-io/expo/passkey";
-import { usePrivyAuthStoreContext } from "../Privy/privyAuthStore";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { RELYING_PARTY } from "./passkey.constants";
-
+import * as LocalAuthentication from "expo-local-authentication";
 /**
  * This hook is used to create a new Passkey account and set the account id in the Passkey Auth Store
  * It is expected to be used with usePrivySmartWalletConnection, but does not include that hook as this will likely be used with login with passkey
@@ -26,15 +25,18 @@ export const useCreatePasskey = () => {
   );
 
   // Privy Auth Store Hooks
-  const setPrivyAccountId = usePrivyAuthStoreContext(
-    (state) => state.setPrivyAccountId
-  );
 
   useEffect(() => {
     setStatusString(signupState.status);
   }, [setStatusString, signupState.status]);
 
   const handleCreateAccountWithPasskey = useCallback(async () => {
+    const isEnrolledInBiometrics = await LocalAuthentication.isEnrolledAsync();
+    if (!isEnrolledInBiometrics) {
+      alert("Please activate Face ID or Touch ID to use Passkey");
+      return;
+    }
+
     try {
       setLoading(true);
       if (privyUser) {
@@ -48,19 +50,17 @@ export const useCreatePasskey = () => {
         throw new Error("No account created from Passkey");
       }
       setStatusString("Account created - Waiting for smart wallet");
-      setPrivyAccountId(user.id);
     } catch (e: any) {
       setError(e?.message ?? "Error creating Passkey account");
       captureErrorWithToast(e);
     }
   }, [
-    setLoading,
-    privyUser,
-    signupWithPasskey,
-    setStatusString,
-    setPrivyAccountId,
     logout,
+    signupWithPasskey,
     setError,
+    setStatusString,
+    privyUser,
+    setLoading,
   ]);
 
   return {

@@ -18,7 +18,6 @@ import {
 import { useRouter } from "@/navigation/useNavigation";
 import { useCreatePasskey } from "@/features/onboarding/passkey/useCreatePasskey";
 import { usePrivySmartWalletConnection } from "@/features/onboarding/Privy/usePrivySmartWalletConnection";
-import { PrivyAuthStoreProvider } from "@/features/onboarding/Privy/privyAuthStore";
 import {
   PasskeyAuthStoreProvider,
   usePasskeyAuthStoreContext,
@@ -45,11 +44,9 @@ const $titleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 
 export const NewAccountScreen = memo(function NewAccountWelcomeScreen() {
   return (
-    <PrivyAuthStoreProvider>
-      <PasskeyAuthStoreProvider>
-        <NewAccountScreenContent />
-      </PasskeyAuthStoreProvider>
-    </PrivyAuthStoreProvider>
+    <PasskeyAuthStoreProvider>
+      <NewAccountScreenContent />
+    </PasskeyAuthStoreProvider>
   );
 });
 
