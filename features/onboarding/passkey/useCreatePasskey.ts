@@ -4,7 +4,7 @@ import { usePrivy } from "@privy-io/expo";
 import { useSignupWithPasskey } from "@privy-io/expo/passkey";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { RELYING_PARTY } from "./passkey.constants";
-
+import * as LocalAuthentication from "expo-local-authentication";
 /**
  * This hook is used to create a new Passkey account and set the account id in the Passkey Auth Store
  * It is expected to be used with usePrivySmartWalletConnection, but does not include that hook as this will likely be used with login with passkey
@@ -31,6 +31,12 @@ export const useCreatePasskey = () => {
   }, [setStatusString, signupState.status]);
 
   const handleCreateAccountWithPasskey = useCallback(async () => {
+    const isEnrolledInBiometrics = await LocalAuthentication.isEnrolledAsync();
+    if (!isEnrolledInBiometrics) {
+      alert("Please activate Face ID or Touch ID to use Passkey");
+      return;
+    }
+
     try {
       setLoading(true);
       if (privyUser) {
