@@ -35,7 +35,7 @@ const AnimatedCardContainerWithoutThemeProvider = memo(
     const baseStyle = {
       backgroundColor: theme.colors.fill.inverted.primary,
       borderRadius: theme.borderRadius.xxs,
-      padding: theme.spacing.xl,
+      padding: theme.spacing.lg,
       marginTop: theme.spacing.xs,
       marginBottom: theme.spacing.lg,
       shadowColor: theme.colors.fill.inverted.primary,
@@ -43,7 +43,7 @@ const AnimatedCardContainerWithoutThemeProvider = memo(
       shadowRadius: 12,
       elevation: 5,
       // Maintains credit card aspect ratio
-      height: (screenWidth - 2 * theme.spacing.lg) * 0.628,
+      height: (screenWidth - 2 * theme.spacing.lg) * 0.64,
     };
 
     const animatedStyle = useAnimatedStyle(() => ({

@@ -55,13 +55,13 @@ export const ContactCard = memo(function ContactCard({
                 <Avatar
                   uri={avatarUri}
                   name={displayName}
-                  size={theme.avatarSize.lg}
+                  size={theme.avatarSize.xxl}
                 />
                 <Icon
                   icon="camera"
                   size={theme.iconSize.sm}
                   color={theme.colors.text.inverted.primary}
-                  style={{ position: "absolute", bottom: 0, right: 0 }}
+                  style={{ position: "absolute", bottom: 4, left: 4 }}
                 />
               </VStack>
             </Pressable>
@@ -89,41 +89,49 @@ export const ContactCard = memo(function ContactCard({
         </HStack>
 
         {/* Name and Username */}
-        <VStack>
+        <VStack style={{ marginTop: theme.spacing.lg }}>
           {editMode ? (
-            <TextField
-              value={editableDisplayName}
-              onChangeText={onDisplayNameChange}
-              placeholder={translate(
-                "userProfile.inputs.displayName.placeholder"
-              )}
-              containerStyle={{ backgroundColor: "transparent" }}
-              inputWrapperStyle={{
-                backgroundColor: "transparent",
-                borderWidth: 0,
-                paddingHorizontal: 0,
-              }}
-              style={{
-                color: theme.colors.text.inverted.primary,
-                fontWeight: "bold",
-              }}
-              maxLength={32}
-            />
+            <VStack>
+              <TextField
+                label="Display Name"
+                value={editableDisplayName}
+                onChangeText={onDisplayNameChange}
+                placeholder={translate(
+                  "userProfile.inputs.displayName.placeholder"
+                )}
+                containerStyle={{ backgroundColor: "transparent" }}
+                inputWrapperStyle={{
+                  borderWidth: 1,
+                  borderColor: theme.colors.border.inverted.subtle,
+                  borderRadius: theme.borderRadius.xs,
+                  paddingHorizontal: theme.spacing.sm,
+                  paddingVertical: theme.spacing.xs,
+                }}
+                style={{
+                  color: theme.colors.text.inverted.primary,
+                  fontSize: 20,
+                  fontWeight: "500",
+                }}
+                maxLength={32}
+              />
+            </VStack>
           ) : (
-            <Text
-              preset="bodyBold"
-              style={{
-                color: theme.colors.text.inverted.primary,
-                marginBottom: theme.spacing.xxxs,
-              }}
-            >
-              {displayName}
-            </Text>
-          )}
-          {userName && (
-            <Text inverted color="secondary" preset="smaller">
-              {userName}
-            </Text>
+            <>
+              <Text
+                preset="bodyBold"
+                style={{
+                  color: theme.colors.text.inverted.primary,
+                  marginBottom: theme.spacing.xxxs,
+                }}
+              >
+                {displayName}
+              </Text>
+              {userName && (
+                <Text inverted color="secondary" preset="smaller">
+                  {userName}
+                </Text>
+              )}
+            </>
           )}
         </VStack>
       </VStack>

@@ -81,7 +81,7 @@ export function ProfileScreen() {
           if (isMyProfile) {
             navigate("ShareProfile");
           } else {
-            const shareUrl = `${config.webAppUrl}/profile/${peerAddress}`;
+            const shareUrl = `${config.websiteDomain}/profile/${peerAddress}`;
             await Share.share({
               message: shareUrl,
             });
@@ -89,8 +89,8 @@ export function ProfileScreen() {
           break;
         case "block":
           Alert.alert(
-            translate(isBlockedPeer ? "unblock_title" : "block_title"),
-            translate(isBlockedPeer ? "unblock_message" : "block_message", {
+            translate(isBlockedPeer ? "unblock" : "block"),
+            translate(isBlockedPeer ? "unblock" : "block", {
               name: userName,
             }),
             [
