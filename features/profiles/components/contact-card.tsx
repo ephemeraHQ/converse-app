@@ -9,6 +9,7 @@ import { translate } from "@/i18n";
 import { Pressable } from "@/design-system/Pressable";
 import { HStack } from "@/design-system/HStack";
 import { Icon } from "@/design-system/Icon/Icon";
+import { Center } from "@/design-system/Center";
 
 type IContactCardProps = {
   displayName: string;
@@ -63,12 +64,25 @@ export const ContactCard = memo(function ContactCard({
                   name={displayName}
                   size={theme.avatarSize.xxl}
                 />
-                <Icon
-                  icon="camera"
-                  size={theme.iconSize.sm}
-                  color={theme.colors.text.inverted.primary}
-                  style={{ position: "absolute", bottom: 4, left: 4 }}
-                />
+                <Center
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    width: theme.avatarSize.md,
+                    height: theme.avatarSize.md,
+                    borderRadius: theme.borderRadius.md,
+                    borderWidth: theme.borderWidth.sm,
+                    borderColor: theme.colors.border.inverted.subtle,
+                    backgroundColor: theme.colors.fill.primary,
+                  }}
+                >
+                  <Icon
+                    icon="camera"
+                    size={theme.iconSize.sm}
+                    color={theme.colors.fill.inverted.primary}
+                  />
+                </Center>
               </VStack>
             </Pressable>
           ) : (
