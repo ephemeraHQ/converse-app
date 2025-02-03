@@ -52,7 +52,6 @@ export const ContactCard = memo(function ContactCard({
           style={{
             justifyContent: "space-between",
             alignItems: "flex-start",
-            marginBottom: theme.spacing.lg,
           }}
         >
           {editMode ? (
@@ -98,11 +97,11 @@ export const ContactCard = memo(function ContactCard({
         </HStack>
 
         {/* Name and Username */}
-        <VStack style={{ marginTop: theme.spacing.lg }}>
+        <VStack style={{ marginTop: theme.spacing.md }}>
           {editMode ? (
             <VStack>
               <TextField
-                label="Display Name"
+                label={translate("contactCard.name")}
                 value={editableDisplayName}
                 onChangeText={onDisplayNameChange}
                 placeholder={translate(
