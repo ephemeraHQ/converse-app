@@ -71,7 +71,7 @@ export default function AccountSettingsButton({ account }: Props) {
       [translate("copy_wallet_address")]: () => {
         Clipboard.setString(account || "");
       },
-      [translate("turn_on_notifications")]: () => {
+      [translate("userProfile.settings.notifications")]: () => {
         // @todo => move that to a helper because also used in Profile
         if (notificationsPermissionStatus === "denied") {
           if (Platform.OS === "android") {
@@ -119,7 +119,10 @@ export default function AccountSettingsButton({ account }: Props) {
       );
     }
     if (notificationsPermissionStatus === "granted") {
-      options.splice(options.indexOf(translate("turn_on_notifications")), 1);
+      options.splice(
+        options.indexOf(translate("userProfile.settings.notifications")),
+        1
+      );
     }
 
     showActionSheetWithOptions(
