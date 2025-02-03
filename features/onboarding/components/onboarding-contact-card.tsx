@@ -13,7 +13,6 @@ import { OnboardingEditableAvatar } from "./onboarding-editable-avatar";
 import { translate } from "@/i18n";
 import { IconButton } from "@/design-system/IconButton/IconButton";
 import { Text } from "@/design-system/Text";
-import { ContactCardContainer } from "@/features/profiles/components/contact-card-container";
 import { AnimatedCardContainer } from "@/features/profiles/components/animated-card-container";
 
 type IOnboardingContactCardProps = {

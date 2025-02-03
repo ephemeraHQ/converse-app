@@ -21,6 +21,7 @@ type IContactCardProps = {
   onAvatarPress?: () => void;
   onDisplayNameChange?: (text: string) => void;
   editableDisplayName?: string;
+  isLoading?: boolean;
 };
 
 /**
@@ -39,6 +40,7 @@ export const ContactCard = memo(function ContactCard({
   onAvatarPress,
   onDisplayNameChange,
   editableDisplayName,
+  isLoading,
 }: IContactCardProps) {
   const { theme } = useAppTheme();
 
@@ -47,10 +49,14 @@ export const ContactCard = memo(function ContactCard({
       <VStack style={{ flex: 1, justifyContent: "space-between" }}>
         {/* Top row with Avatar and Edit/Save button */}
         <HStack
-          style={{ justifyContent: "space-between", alignItems: "flex-start" }}
+          style={{
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: theme.spacing.lg,
+          }}
         >
           {editMode ? (
-            <Pressable onPress={onAvatarPress}>
+            <Pressable onPress={onAvatarPress} disabled={isLoading}>
               <VStack>
                 <Avatar
                   uri={avatarUri}
@@ -84,6 +90,7 @@ export const ContactCard = memo(function ContactCard({
                 color: theme.colors.text.inverted.secondary,
               }}
               onPress={onToggleEdit}
+              disabled={isLoading}
             />
           )}
         </HStack>
@@ -113,6 +120,7 @@ export const ContactCard = memo(function ContactCard({
                   fontWeight: "500",
                 }}
                 maxLength={32}
+                editable={!isLoading}
               />
             </VStack>
           ) : (
