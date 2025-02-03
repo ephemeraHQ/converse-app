@@ -30,7 +30,7 @@ import { ConversationListEmpty } from "./conversation-list-empty";
 import { ConversationListStartNewConvoBanner } from "./conversation-list-start-new-convo-banner";
 import { useHeaderWrapper } from "./conversation-list.screen-header";
 import { useConversationListConversations } from "./use-conversation-list-conversations";
-import { ContextMenuView } from "react-native-ios-context-menu";
+import { ContextMenuView } from "@/design-system/context-menu/context-menu";
 
 type IConversationListProps = NativeStackScreenProps<
   NavigationParamList,

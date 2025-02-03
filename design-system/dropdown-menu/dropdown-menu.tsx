@@ -22,6 +22,7 @@ type IDropdownMenuProps = {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   onPress?: (actionId: string) => void;
+  shouldOpenOnLongPress?: boolean;
 };
 
 export const DropdownMenu = ({
@@ -29,6 +30,7 @@ export const DropdownMenu = ({
   actions,
   style,
   onPress,
+  shouldOpenOnLongPress = false,
 }: IDropdownMenuProps) => {
   const { theme } = useAppTheme();
 
@@ -61,7 +63,7 @@ export const DropdownMenu = ({
       onPressAction={handlePress}
       actions={themedActions}
       style={style}
-      shouldOpenOnLongPress={false}
+      shouldOpenOnLongPress={shouldOpenOnLongPress}
     >
       <Pressable style={$pressable}>{children}</Pressable>
     </MenuView>
