@@ -20,6 +20,8 @@ type IContactCardProps = {
   onDisplayNameChange?: (text: string) => void;
   editableDisplayName?: string;
   isLoading?: boolean;
+  error?: string;
+  status?: "error" | "disabled";
 };
 
 /**
@@ -38,6 +40,8 @@ export const ContactCard = memo(function ContactCard({
   onDisplayNameChange,
   editableDisplayName,
   isLoading,
+  error,
+  status,
 }: IContactCardProps) {
   const { theme } = useAppTheme();
 
@@ -90,7 +94,10 @@ export const ContactCard = memo(function ContactCard({
                 containerStyle={{ backgroundColor: "transparent" }}
                 inputWrapperStyle={{
                   borderWidth: 1,
-                  borderColor: theme.colors.border.inverted.subtle,
+                  borderColor:
+                    status === "error"
+                      ? theme.colors.global.caution
+                      : theme.colors.border.inverted.subtle,
                   borderRadius: theme.borderRadius.xs,
                   paddingHorizontal: theme.spacing.sm,
                   paddingVertical: theme.spacing.xs,
@@ -102,6 +109,7 @@ export const ContactCard = memo(function ContactCard({
                 }}
                 maxLength={32}
                 editable={!isLoading}
+                status={status}
               />
             </VStack>
           ) : (

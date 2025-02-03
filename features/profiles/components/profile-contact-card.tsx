@@ -9,6 +9,7 @@ import { ContactCard } from "./contact-card";
 import { useAddPfp } from "@/features/onboarding/hooks/useAddPfp";
 import { useCreateOrUpdateProfileInfo } from "@/features/onboarding/hooks/useCreateOrUpdateProfileInfo";
 import { useProfile } from "@/features/onboarding/hooks/useProfile";
+import { validateProfileName } from "../utils/validate-profile-name";
 
 type IProfileContactCardProps = {
   displayName: string;
@@ -20,7 +21,7 @@ type IProfileContactCardProps = {
 };
 
 export type ProfileContactCardHandle = {
-  handleSave: () => Promise<void>;
+  handleSave: () => Promise<{ success: boolean; error?: string }>;
   hasChanges: boolean;
 };
 
@@ -52,6 +53,7 @@ export const ProfileContactCard = memo(
       const [previousEditMode, setPreviousEditMode] = useState(editMode);
       const [isLoading, setIsLoading] = useState(false);
       const [localAvatarUri, setLocalAvatarUri] = useState(avatarUri);
+      const [validationError, setValidationError] = useState<string>();
 
       // Update local display name when initial changes
       useEffect(() => {
@@ -83,17 +85,25 @@ export const ProfileContactCard = memo(
       }, [asset?.uri, localAvatarUri]);
 
       const handleDisplayNameChange = (text: string) => {
+        const { isValid, error } = validateProfileName(text);
+        setValidationError(error);
         setLocalDisplayName(text);
-        setHasChanges(true);
+        // Set hasChanges if the text is different from initial, regardless of validation
+        setHasChanges(text !== initialDisplayName);
       };
 
       useImperativeHandle(
         ref,
         () => ({
           async handleSave() {
-            // If there are no changes, don't trigger a save
+            // Don't save if there are no changes
             if (!hasChanges) {
-              return;
+              return { success: false };
+            }
+
+            // If there are validation errors, return error result
+            if (validationError) {
+              return { success: false, error: validationError };
             }
 
             setIsLoading(true);
@@ -110,20 +120,24 @@ export const ProfileContactCard = memo(
               if (success) {
                 setProfile(updatedProfile);
                 setHasChanges(false);
+                return { success: true };
               }
+              return { success: false };
             } catch {
               // Error is handled by the mutation
               setLocalDisplayName(initialDisplayName); // Revert on error
               setLocalAvatarUri(avatarUri);
               setHasChanges(false);
+              return { success: false };
             } finally {
               setIsLoading(false);
             }
           },
-          hasChanges,
+          hasChanges, // Now we report all changes, validation is handled in handleSave
         }),
         [
           hasChanges,
+          validationError,
           profile,
           localDisplayName,
           localAvatarUri,
@@ -145,6 +159,8 @@ export const ProfileContactCard = memo(
           onDisplayNameChange={handleDisplayNameChange}
           editableDisplayName={localDisplayName}
           isLoading={isLoading}
+          error={validationError}
+          status={validationError ? "error" : undefined}
         />
       );
     }

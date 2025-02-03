@@ -10,12 +10,12 @@ export const en = {
     notifications: {
       title: "Good vibrations only",
       subtitle:
-        "Most things aren’t urgent. Protect your attention by minimizing notifications.",
+        "Most things aren't urgent. Protect your attention by minimizing notifications.",
       essentials: "Essentials",
       essentialsDescription: "Notify me when approved contacts send messages",
       mentionsOnly: "Mentions only",
       mentionsOnlyDescription:
-        "In large groupchats, don’t notify me unless I’m mentioned",
+        "In large groupchats, don't notify me unless I'm mentioned",
       cash: "Cash",
       cashDescription: "Notify me immediately when I receive cash",
       comingSoon: "Coming soon",
@@ -55,7 +55,10 @@ export const en = {
       },
       usernameSuffix: ".converse.xyz",
       displayName: {
-        placeholder: "Display name (optional)",
+        placeholder: "Enter your name",
+        errors: {
+          noDots: "Display name cannot contain dots",
+        },
       },
     },
     errors: {
@@ -537,7 +540,7 @@ export const en = {
   initial_load: {
     title: "Welcome to Converse!",
     subtitle:
-      "We’re checking if you already own conversations on the XMTP network.",
+      "We're checking if you already own conversations on the XMTP network.",
   },
 
   recommendations: {

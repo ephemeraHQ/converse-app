@@ -13,13 +13,13 @@ export const fr = {
         "La plupart des choses ne sont pas urgentes. Protégez votre attention en limitant vos notifications.",
       essentials: "Essentiels",
       essentialsDescription:
-        "Me notifier lorsque mes contacts approuvés m’envoient des messages",
+        "Me notifier lorsque mes contacts approuvés m'envoient des messages",
       mentionsOnly: "Mentions uniquement",
       mentionsOnlyDescription:
         "Dans les grands groupes, ne me notifier que si je suis mentionné(e)",
       cash: "Argent",
       cashDescription:
-        "Me notifier immédiatement lorsque je reçois de l’argent",
+        "Me notifier immédiatement lorsque je reçois de l'argent",
       comingSoon: "Bientôt disponible",
       enableNotifications: "Activer les notifications",
       later: "Plus tard",
@@ -58,7 +58,10 @@ export const fr = {
       },
       usernameSuffix: ".converse.xyz",
       displayName: {
-        placeholder: "Nom d'affichage (optionnel)",
+        placeholder: "Entrez votre nom",
+        errors: {
+          noDots: "Le nom ne peut pas contenir de points",
+        },
       },
     },
     errors: {
@@ -172,7 +175,7 @@ export const fr = {
     subtitle:
       "Entrez la clé privée de l'adresse à laquelle vous vous connectez.\n\nVotre clé privée n'est pas stockée.",
     storage: {
-      ios: "l’Enclave Sécurisée de votre iPhone",
+      ios: "l'Enclave Sécurisée de votre iPhone",
       android: "le système Android Keystore",
     },
     connectButton: "Se connecter",
@@ -191,12 +194,12 @@ export const fr = {
       e2eEncryption: {
         title: "Chiffré de bout en bout avec MLS",
         subtitle:
-          "Cryptographie conforme aux standards de l’IETF offrant le niveau de sécurité de Signal à chaque conversation.",
+          "Cryptographie conforme aux standards de l'IETF offrant le niveau de sécurité de Signal à chaque conversation.",
       },
       ownCommunications: {
         title: "Possédez vos communications — pour toujours",
         subtitle:
-          "Vos messages vous appartiennent. Vous les contrôlez entièrement, pas l’application.",
+          "Vos messages vous appartiennent. Vous les contrôlez entièrement, pas l'application.",
       },
       chatSecurely: {
         title: "Invitez vos amis",
@@ -221,9 +224,9 @@ export const fr = {
   delete_chat_with: "Supprimer la conversation avec",
   delete_and_block: "Supprimer et bloquer",
   remove: "Retirer",
-  remove_and_block_inviter: "Retirer et bloquer l’invitant",
+  remove_and_block_inviter: "Retirer et bloquer l'invitant",
   restore: "Restaurer",
-  restore_and_unblock_inviter: "Restaurer et débloquer l’invitant",
+  restore_and_unblock_inviter: "Restaurer et débloquer l'invitant",
   unblock_and_restore: "Débloquer et restaurer",
   cancel: "Annuler",
   back: "Retour",
@@ -316,7 +319,7 @@ export const fr = {
   social: "RÉSEAUX SOCIAUX",
   address: "ADRESSE",
   youre_the_og: "VOUS ÊTES LE PREMIER",
-  app_version: "VERSION DE L’APPLICATION",
+  app_version: "VERSION DE L'APPLICATION",
   security: "SÉCURITÉ",
   xmtp_wrong_signer: "Mauvais portefeuille",
   xmtp_wrong_signer_description:
@@ -366,7 +369,7 @@ export const fr = {
   group_join_error: "Une erreur s'est produite",
   group_join_invite_invalid: "Cette invitation n'est plus valable",
   group_finished_polling_unsuccessfully:
-    "Votre demande a été envoyée. Attendez l'approbation par l’administrateur",
+    "Votre demande a été envoyée. Attendez l'approbation par l'administrateur",
   group_already_joined: "Cette invitation a déjà été acceptée",
   group_invite_default_group_name: "Nouveau groupe",
   open_conversation: "Ouvrir la conversation",

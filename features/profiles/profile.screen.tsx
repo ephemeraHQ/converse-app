@@ -34,7 +34,7 @@ import { ProfileContactCard } from "./components/profile-contact-card";
 
 // Add this type at the top level
 type ProfileContactCardHandle = {
-  handleSave: () => Promise<void>;
+  handleSave: () => Promise<{ success: boolean; error?: string }>;
   hasChanges: boolean;
 };
 
@@ -68,9 +68,13 @@ export function ProfileScreen() {
 
   const handleEditProfile = useCallback(async () => {
     if (editMode) {
-      // Only save if there are changes
+      // Try to save if there are changes
       if (profileCardRef.current?.hasChanges) {
-        await profileCardRef.current?.handleSave();
+        const saveResult = await profileCardRef.current?.handleSave();
+        // Only exit edit mode if save was successful (no validation errors)
+        if (saveResult?.success) {
+          setEditMode(false);
+        }
       } else {
         // If no changes, just exit edit mode
         setEditMode(false);
@@ -82,10 +86,7 @@ export function ProfileScreen() {
 
   const handleSaving = useCallback((saving: boolean) => {
     setIsSaving(saving);
-    // When saving is complete, exit edit mode
-    if (!saving) {
-      setEditMode(false);
-    }
+    // Don't exit edit mode here - it's handled in handleEditProfile
   }, []);
 
   const showDisconnectActionSheet = useDisconnectActionSheet();
