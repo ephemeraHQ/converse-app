@@ -36,7 +36,7 @@ export function SocialNames({ socials }: ISocialNamesProps) {
 
   const handleNamePress = (name: string) => {
     Clipboard.setString(name);
-    Alert.alert(translate("profile.copied"));
+    Alert.alert(translate("userProfile.copied"));
   };
 
   const renderSocialChips = (
@@ -54,7 +54,7 @@ export function SocialNames({ socials }: ISocialNamesProps) {
 
   return (
     <VStack style={{ paddingVertical: theme.spacing.sm }}>
-      <Text>{translate("profile.names")}</Text>
+      <Text>{translate("userProfile.names")}</Text>
       <HStack style={themed($chipContainer)}>
         {renderSocialChips(socials.userNames ?? [], (item) => item.name)}
         {renderSocialChips(socials.ensNames ?? [], (item) => item.name)}

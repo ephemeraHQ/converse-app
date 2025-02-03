@@ -169,11 +169,11 @@ export function OnboardingContactCardScreen() {
         <VStack style={$titleContainer}>
           {type === "real" ? (
             <OnboardingTitle entering={titleAnimation} size={"xl"}>
-              {translate("onboarding.contactCard.title")}
+              {translate("contactCard.title")}
             </OnboardingTitle>
           ) : (
             <OnboardingTitle entering={titleAnimation} size={"xl"}>
-              {translate("onboarding.contactCard.randoTitle")}
+              {translate("contactCard.randoTitle")}
             </OnboardingTitle>
           )}
           {type === "real" ? (
@@ -181,14 +181,14 @@ export function OnboardingContactCardScreen() {
               style={themed($subtitleStyle)}
               entering={subtitleAnimation}
             >
-              {translate("onboarding.contactCard.subtitle")}
+              {translate("contactCard.subtitle")}
             </OnboardingSubtitle>
           ) : (
             <OnboardingSubtitle
               style={themed($subtitleStyle)}
               entering={subtitleAnimation}
             >
-              {translate("onboarding.contactCard.randoSubtitle")}
+              {translate("contactCard.randoSubtitle")}
             </OnboardingSubtitle>
           )}
           <OnboardingContactCardThemeProvider>
@@ -219,21 +219,21 @@ export function OnboardingContactCardScreen() {
           >
             <AnimatedText style={$subtextStyle} color={"secondary"}>
               {type === "real"
-                ? translate("onboarding.contactCard.body")
-                : translate("onboarding.contactCard.randoBody")}
+                ? translate("contactCard.body")
+                : translate("contactCard.randoBody")}
             </AnimatedText>
             <Pressable onPress={toggleType}>
               <AnimatedText style={$subtextPressableStyle} color={"secondary"}>
                 {type === "real"
-                  ? translate("onboarding.contactCard.bodyPressable")
-                  : translate("onboarding.contactCard.randoPressable")}
+                  ? translate("contactCard.bodyPressable")
+                  : translate("contactCard.randoPressable")}
               </AnimatedText>
             </Pressable>
           </AnimatedVStack>
         </VStack>
       </Center>
       <OnboardingFooter
-        text={translate("onboarding.contactCard.continue")}
+        text={translate("contactCard.continue")}
         iconName="chevron.right"
         onPress={handleContinue}
         disabled={loading || (type === "real" && !profile.displayName)}

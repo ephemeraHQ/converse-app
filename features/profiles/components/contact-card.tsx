@@ -83,7 +83,9 @@ export const ContactCard = memo(function ContactCard({
               variant="link.bare"
               size="sm"
               text={
-                editMode ? translate("profile.done") : translate("profile.edit")
+                editMode
+                  ? translate("userProfile.done")
+                  : translate("userProfile.edit")
               }
               textStyle={{ color: theme.colors.text.inverted.primary }}
               pressedTextStyle={{

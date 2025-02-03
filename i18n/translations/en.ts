@@ -7,20 +7,6 @@ export const en = {
       subtext: "Simple · Secure · Universal",
       createContactCard: "Create a Contact Card",
     },
-    contactCard: {
-      title: "Complete your contact card",
-      subtitle: "A secure identity",
-      body: "Add and edit Contact Cards anytime,",
-      bodyPressable: "or go Rando for extra privacy.",
-      randoTitle: "Go Rando",
-      randoSubtitle: "Chat using random contact info",
-      randoBody: "For everyday conversations,",
-      randoPressable: "use your personal Contact Card.",
-      import: "Import",
-      name: "Name",
-      namePlaceholder: "How you'll show up in chat",
-      continue: "Continue",
-    },
     notifications: {
       title: "Good vibrations only",
       subtitle:
@@ -35,6 +21,85 @@ export const en = {
       comingSoon: "Coming soon",
       enableNotifications: "Enable notifications",
       later: "Later",
+    },
+  },
+  // Contact Card (used in Onboarding and Profile)
+  contactCard: {
+    title: "Complete your contact card",
+    subtitle: "A secure identity",
+    body: "Add and edit Contact Cards anytime,",
+    bodyPressable: "or go Rando for extra privacy.",
+    randoTitle: "Go Rando",
+    randoSubtitle: "Chat using random contact info",
+    randoBody: "For everyday conversations,",
+    randoPressable: "use your personal Contact Card.",
+    import: "Import",
+    name: "Name",
+    namePlaceholder: "How you'll show up in chat",
+    continue: "Continue",
+  },
+  userProfile: {
+    title: {
+      profile: "Profile",
+    },
+    buttons: {
+      continue: "Continue",
+      logout: "Logout from {{address}}",
+      cancel: "Cancel",
+      addProfilePicture: "Add profile picture",
+      changeProfilePicture: "Change profile picture",
+    },
+    inputs: {
+      username: {
+        placeholder: "Username",
+      },
+      usernameSuffix: ".converse.xyz",
+      displayName: {
+        placeholder: "Display name (optional)",
+      },
+    },
+    errors: {
+      displayNameLength:
+        "Display names must be between 2 and 32 characters and can't include domain name extensions",
+      usernameAlphanumeric:
+        "Your username can only contain letters and numbers",
+      usernameLength: "Your user name must be between 3 and 30 characters long",
+    },
+    converseProfiles:
+      "Claim your identity in the Converse ENS namespace. This name will be publicly discoverable.",
+    instructions:
+      "Claim your identity in the Converse ENS namespace. This name will be publicly discoverable.",
+    loadingSentences: {
+      claimingIdentity: "Claiming your identity",
+      connectingENS: "Connecting to ENS",
+      confirmingAvailability: "Confirming availability",
+      enablingCCIP: "Enabling CCIP",
+      registering: "Registering",
+      configuringResolver: "Configuring offchain resolver",
+      wrappingUp: "Wrapping up",
+    },
+    mediaOptions: {
+      takePhoto: "Take photo",
+      chooseFromLibrary: "Choose from library",
+      cancel: "Cancel",
+    },
+    modify: "Modify profile",
+    edit: "Edit",
+    done: "Done",
+    block: {
+      title: "Block user",
+      message: "Are you sure you want to block {{name}}?",
+    },
+    unblock: {
+      title: "Unblock user",
+      message: "Are you sure you want to unblock {{name}}?",
+    },
+    names: "Names",
+    copied: "Copied",
+    settings: {
+      notifications: "Turn on notifications",
+      archive: "Archive",
+      keep_messages: "Keep messages",
     },
   },
   walletSelector: {
@@ -145,52 +210,6 @@ export const en = {
     title: "Connect via passkey",
     createButton: "Create",
     add_account_title: "Add an account",
-  },
-  userProfile: {
-    title: {
-      profile: "Profile",
-    },
-    buttons: {
-      continue: "Continue",
-      logout: "Logout from {{address}}",
-      cancel: "Cancel",
-      addProfilePicture: "Add profile picture",
-      changeProfilePicture: "Change profile picture",
-    },
-    inputs: {
-      username: {
-        placeholder: "Username",
-      },
-      usernameSuffix: ".converse.xyz",
-      displayName: {
-        placeholder: "Display name (optional)",
-      },
-    },
-    errors: {
-      displayNameLength:
-        "Display names must be between 2 and 32 characters and can't include domain name extensions",
-      usernameAlphanumeric:
-        "Your username can only contain letters and numbers",
-      usernameLength: "Your user name must be between 3 and 30 characters long",
-    },
-    converseProfiles:
-      "Claim your identity in the Converse ENS namespace. This name will be publicly discoverable.",
-    instructions:
-      "Claim your identity in the Converse ENS namespace. This name will be publicly discoverable.",
-    loadingSentences: {
-      claimingIdentity: "Claiming your identity",
-      connectingENS: "Connecting to ENS",
-      confirmingAvailability: "Confirming availability",
-      enablingCCIP: "Enabling CCIP",
-      registering: "Registering",
-      configuringResolver: "Configuring offchain resolver",
-      wrappingUp: "Wrapping up",
-    },
-    mediaOptions: {
-      takePhoto: "Take photo",
-      chooseFromLibrary: "Choose from library",
-      cancel: "Cancel",
-    },
   },
   onboarding_error: "An error occurred while logging you in. Please try again.",
   termsText: "By signing in you agree to our",
@@ -308,8 +327,15 @@ export const en = {
   remove_member: "Remove from group",
   invite_more_friends: "Invite more friends",
   top_up_your_account: "Top up your account",
-  your_balance_usdc: "Your balance (USDC)",
   you_parentheses: " (you)",
+  log_out: "Log out",
+  disconnect_delete_local_data: "Disconnect and delete local data",
+  disconnect_this_account: "Disconnect this account",
+  disconnect_account_description:
+    "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
+  your_profile_page: "Your profile page",
+  copy_wallet_address: "Copy wallet address",
+  attachment_message_error_download: "Couldn't download attachment",
 
   // Context Menu
   reply: "Reply",
@@ -389,36 +415,6 @@ export const en = {
 
   // Wallet selector
   no_wallet_detected: "No wallet detected",
-
-  // Profile
-  view_removed_chats: "View removed chats",
-  change_or_add_account: "Change or add account",
-  profile: {
-    modify_profile: "Modify profile",
-    edit: "Edit",
-    block: {
-      title: "Block user",
-      message: "Are you sure you want to block {{name}}?",
-    },
-    save: "Save",
-    done: "Done",
-    names: "Names",
-    copied: "Copied",
-    settings: {
-      notifications: "Notifications",
-      archive: "Archive",
-      keep_messages: "Keep messages",
-    },
-  },
-  log_out: "Log out",
-  disconnect_delete_local_data: "Disconnect and delete local data",
-  disconnect_this_account: "Disconnect this account",
-  disconnect_account_description:
-    "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
-  your_profile_page: "Your profile page",
-  copy_wallet_address: "Copy wallet address",
-  turn_on_notifications: "Turn on notifications",
-  attachment_message_error_download: "Couldn't download attachment",
 
   // Revocation
   current_installation_revoked: "Logged out",

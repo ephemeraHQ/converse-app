@@ -7,22 +7,6 @@ export const fr = {
       subtext: "Simple · Sécurisé · Universel",
       createContactCard: "Créer une carte de contact",
     },
-    contactCard: {
-      title: "Complétez votre carte de contact",
-      subtitle: "Une identité sécurisée",
-      body: "Ajoutez et modifiez vos cartes de contact à tout moment,",
-      bodyPressable:
-        "ou optez pour le mode Rando pour plus de confidentialité.",
-      randoTitle: "Mode Rando",
-      randoSubtitle:
-        "Discutez en utilisant des informations de contact aléatoires",
-      randoBody: "Pour des conversations quotidiennes,",
-      randoPressable: "utilisez votre carte de contact personnelle.",
-      import: "Importer",
-      name: "Nom",
-      namePlaceholder: "Comment vous apparaîtrez dans le chat",
-      continue: "Continuer",
-    },
     notifications: {
       title: "Rien que de bonnes vibrations",
       subtitle:
@@ -39,6 +23,87 @@ export const fr = {
       comingSoon: "Bientôt disponible",
       enableNotifications: "Activer les notifications",
       later: "Plus tard",
+    },
+  },
+  // Contact Card (used in Onboarding and Profile)
+  contactCard: {
+    title: "Complétez votre carte de contact",
+    subtitle: "Une identité sécurisée",
+    body: "Ajoutez et modifiez vos cartes de contact à tout moment,",
+    bodyPressable: "ou optez pour le mode Rando pour plus de confidentialité.",
+    randoTitle: "Mode Rando",
+    randoSubtitle:
+      "Discutez en utilisant des informations de contact aléatoires",
+    randoBody: "Pour des conversations quotidiennes,",
+    randoPressable: "utilisez votre carte de contact personnelle.",
+    import: "Importer",
+    name: "Nom",
+    namePlaceholder: "Comment vous apparaîtrez dans le chat",
+    continue: "Continuer",
+  },
+  userProfile: {
+    title: {
+      profile: "Profil",
+    },
+    buttons: {
+      continue: "Continuer",
+      logout: "Se déconnecter de {{address}}",
+      cancel: "Annuler",
+      addProfilePicture: "Ajouter une photo de profil",
+      changeProfilePicture: "Changer la photo de profil",
+    },
+    inputs: {
+      username: {
+        placeholder: "Nom d'utilisateur",
+      },
+      usernameSuffix: ".converse.xyz",
+      displayName: {
+        placeholder: "Nom d'affichage (optionnel)",
+      },
+    },
+    errors: {
+      displayNameLength:
+        "Les noms d'affichage doivent comprendre entre 2 et 32 caractères et ne pas inclure d'extensions de nom de domaine",
+      usernameAlphanumeric:
+        "Votre nom d'utilisateur ne peut contenir que des lettres et des chiffres",
+      usernameLength:
+        "Votre nom d'utilisateur doit comporter entre 3 et 30 caractères",
+    },
+    converseProfiles:
+      "Réclamez votre identité dans l'espace de noms ENS de Converse. Ce nom sera publiquement consultable.",
+    instructions:
+      "Réclamez votre identité dans l'espace de noms ENS de Converse. Ce nom sera publiquement consultable.",
+    loadingSentences: {
+      claimingIdentity: "Réclamation de votre identité",
+      connectingENS: "Connexion à ENS",
+      confirmingAvailability: "Confirmation de la disponibilité",
+      enablingCCIP: "Activation de CCIP",
+      registering: "Enregistrement en cours",
+      configuringResolver: "Configuration du résolveur hors chaîne",
+      wrappingUp: "Finalisation",
+    },
+    mediaOptions: {
+      takePhoto: "Prendre une photo",
+      chooseFromLibrary: "Choisir dans la bibliothèque",
+      cancel: "Annuler",
+    },
+    modify: "Modifier le profil",
+    edit: "Modifier",
+    done: "Terminer",
+    block: {
+      title: "Bloquer l'utilisateur",
+      message: "Êtes-vous sûr de vouloir bloquer {{name}} ?",
+    },
+    unblock: {
+      title: "Débloquer l'utilisateur",
+      message: "Êtes-vous sûr de vouloir débloquer {{name}} ?",
+    },
+    names: "Names",
+    copied: "Copié",
+    settings: {
+      notifications: "Activer les notifications",
+      archive: "Archive",
+      keep_messages: "Conserver les messages",
     },
   },
   walletSelector: {
@@ -144,53 +209,6 @@ export const fr = {
     alreadyConnected: {
       title: "Déjà connecté",
       message: "Ce compte est déjà connecté à Converse.",
-    },
-  },
-  userProfile: {
-    title: {
-      profile: "Profil",
-    },
-    buttons: {
-      continue: "Continuer",
-      logout: "Se déconnecter de {{address}}",
-      cancel: "Annuler",
-      addProfilePicture: "Ajouter une photo de profil",
-      changeProfilePicture: "Changer la photo de profil",
-    },
-    inputs: {
-      username: {
-        placeholder: "Nom d'utilisateur",
-      },
-      usernameSuffix: ".converse.xyz",
-      displayName: {
-        placeholder: "Nom d'affichage (optionnel)",
-      },
-    },
-    errors: {
-      displayNameLength:
-        "Les noms d'affichage doivent comprendre entre 2 et 32 caractères et ne pas inclure d'extensions de nom de domaine",
-      usernameAlphanumeric:
-        "Votre nom d'utilisateur ne peut contenir que des lettres et des chiffres",
-      usernameLength:
-        "Votre nom d'utilisateur doit comporter entre 3 et 30 caractères",
-    },
-    converseProfiles:
-      "Réclamez votre identité dans l'espace de noms ENS de Converse. Ce nom sera publiquement consultable.",
-    instructions:
-      "Réclamez votre identité dans l'espace de noms ENS de Converse. Ce nom sera publiquement consultable.",
-    loadingSentences: {
-      claimingIdentity: "Réclamation de votre identité",
-      connectingENS: "Connexion à ENS",
-      confirmingAvailability: "Confirmation de la disponibilité",
-      enablingCCIP: "Activation de CCIP",
-      registering: "Enregistrement en cours",
-      configuringResolver: "Configuration du résolveur hors chaîne",
-      wrappingUp: "Finalisation",
-    },
-    mediaOptions: {
-      takePhoto: "Prendre une photo",
-      chooseFromLibrary: "Choisir dans la bibliothèque",
-      cancel: "Annuler",
     },
   },
   onboarding_error:
@@ -309,8 +327,17 @@ export const fr = {
   remove_member: "Retirer du groupe",
   invite_more_friends: "Inviter plus d'amis",
   top_up_your_account: "Approvisionner votre compte",
-  your_balance_usdc: "Votre solde (USDC)",
   you_parentheses: " (vous)",
+  log_out: "Se déconnecter",
+  disconnect_delete_local_data:
+    "Se déconnecter et supprimer les données locales",
+  disconnect_this_account: "Se déconnecter de ce compte",
+  disconnect_account_description:
+    "Vos discussions de groupe seront chiffrées et sauvegardées sur votre appareil jusqu'à ce que vous supprimiez Converse. Vos messages privés seront sauvegardés par le réseau XMTP.",
+  your_profile_page: "Votre page de profil",
+  copy_wallet_address: "Copier l'adresse du portefeuille",
+  attachment_message_error_download:
+    "Impossible de télécharger la pièce jointe",
 
   // Context Menu
   reply: "Répondre",
@@ -383,38 +410,6 @@ export const fr = {
 
   // Wallet selector
   no_wallet_detected: "Aucun portefeuille détecté",
-
-  // Profile
-  view_removed_chats: "Afficher les conversations supprimées",
-  change_or_add_account: "Changer ou ajouter un compte",
-  profile: {
-    block: {
-      title: "Bloquer l'utilisateur",
-      message: "Êtes-vous sûr de vouloir bloquer {{name}} ?",
-    },
-    modify_profile: "Modifier le profil",
-    edit: "Modifier",
-    save: "Enregistrer",
-    done: "Valider",
-    names: "Names",
-    copied: "Copié",
-    settings: {
-      notifications: "Notifications",
-      archive: "Archive",
-      keep_messages: "Conserver les messages",
-    },
-  },
-  log_out: "Se déconnecter",
-  disconnect_delete_local_data:
-    "Se déconnecter et supprimer les données locales",
-  disconnect_this_account: "Se déconnecter de ce compte",
-  disconnect_account_description:
-    "Vos discussions de groupe seront chiffrées et sauvegardées sur votre appareil jusqu'à ce que vous supprimiez Converse. Vos messages privés seront sauvegardés par le réseau XMTP.",
-  your_profile_page: "Votre page de profil",
-  copy_wallet_address: "Copier l'adresse du portefeuille",
-  turn_on_notifications: "Activer les notifications",
-  attachment_message_error_download:
-    "Impossible de télécharger la pièce jointe",
 
   // Revocation
   current_installation_revoked: "Déconnecté",

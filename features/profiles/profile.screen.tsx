@@ -89,17 +89,30 @@ export function ProfileScreen() {
           break;
         case "block":
           Alert.alert(
-            translate(isBlockedPeer ? "unblock" : "block"),
-            translate(isBlockedPeer ? "unblock" : "block", {
-              name: userName,
-            }),
+            translate(
+              isBlockedPeer
+                ? "userProfile.unblock.title"
+                : "userProfile.block.title"
+            ),
+            translate(
+              isBlockedPeer
+                ? "userProfile.unblock.message"
+                : "userProfile.block.message",
+              {
+                name: userName,
+              }
+            ),
             [
               {
                 text: translate("cancel"),
                 style: "cancel",
               },
               {
-                text: translate(isBlockedPeer ? "unblock" : "block"),
+                text: translate(
+                  isBlockedPeer
+                    ? "userProfile.unblock.title"
+                    : "userProfile.block.title"
+                ),
                 style: isBlockedPeer ? "default" : "destructive",
                 onPress: async () => {
                   const newStatus = isBlockedPeer ? "consented" : "blocked";
@@ -157,7 +170,7 @@ export function ProfileScreen() {
         >
           {editMode ? (
             <Button
-              text={translate("profile.done")}
+              text={translate("userProfile.done")}
               variant="text"
               onPress={handleEditProfile}
             />
@@ -190,7 +203,7 @@ export function ProfileScreen() {
                     ? [
                         {
                           id: "edit",
-                          title: translate("profile.edit"),
+                          title: translate("userProfile.edit"),
                           image: iconRegistry["pencil"],
                         },
                         {
@@ -208,8 +221,8 @@ export function ProfileScreen() {
                         {
                           id: "block",
                           title: isBlockedPeer
-                            ? translate("unblock")
-                            : translate("block"),
+                            ? translate("userProfile.unblock")
+                            : translate("userProfile.block"),
                           image: isBlockedPeer
                             ? iconRegistry["person.crop.circle.badge.plus"]
                             : iconRegistry["person.crop.circle.badge.xmark"],
@@ -303,19 +316,19 @@ export function ProfileScreen() {
                 ...(notificationsPermissionStatus !== "granted"
                   ? [
                       {
-                        label: translate("turn_on_notifications"),
+                        label: translate("userProfile.settings.notifications"),
                         onPress: requestPermission,
                       },
                     ]
                   : []),
                 {
-                  label: translate("profile.settings.archive"),
+                  label: translate("userProfile.settings.archive"),
                   onPress: () => {
                     router.navigate("Blocked");
                   },
                 },
                 /*{
-                  label: translate("profile.settings.keep_messages"),
+                  label: translate("userProfile.settings.keep_messages"),
                   value: "Forever",
                   onValueChange: () => {},
                 },*/

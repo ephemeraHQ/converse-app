@@ -5,8 +5,8 @@ import {
 } from "@styles/colors";
 import { Platform, useColorScheme } from "react-native";
 
-import { useRouter } from "../../navigation/useNavigation";
-import { UserProfileScreen } from "../UserProfileScreen";
+import { useRouter } from "@navigation/useNavigation";
+import { UserProfileScreen } from "@screens/UserProfileScreen";
 import { NativeStack } from "./Navigation";
 import { translate } from "@/i18n";
 
@@ -19,7 +19,7 @@ export default function UserProfileNav() {
       name="UserProfile"
       component={UserProfileScreen}
       options={{
-        headerTitle: translate("profile.modify_profile"),
+        headerTitle: translate("userProfile.modify"),
         headerTitleStyle: headerTitleStyle(colorScheme),
         headerTintColor:
           Platform.OS === "android"

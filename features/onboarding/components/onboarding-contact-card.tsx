@@ -59,8 +59,8 @@ export const OnboardingCreateContactCard = memo(
               marginTop: spacing.sm,
               marginBottom: spacing.md,
             }}
-            label={translate("onboarding.contactCard.name")}
-            placeholder={translate("onboarding.contactCard.namePlaceholder")}
+            label={translate("contactCard.name")}
+            placeholder={translate("contactCard.namePlaceholder")}
             keyboardType="email-address"
             autoCapitalize="none"
             value={displayName}
@@ -96,7 +96,7 @@ export const OnboardingCreateContactCard = memo(
             }}
           >
             <Text color="secondary" preset="smaller">
-              {translate("onboarding.contactCard.name")}
+              {translate("contactCard.name")}
             </Text>
             <Text preset="small">{displayName}</Text>
           </VStack>
