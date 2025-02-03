@@ -189,10 +189,10 @@ describe("searchByConversationMembership", () => {
       searchQuery: "user1.eth",
     });
 
-    expect(result.existingDmSearchResults).toEqual([mockProfileSocials]);
+    expect(result.existingDmTopics).toEqual([mockProfileSocials]);
 
-    expect(result.existingGroupMemberNameSearchResults).toEqual([]);
-    expect(result.existingGroupNameSearchResults).toEqual([]);
+    expect(result.existingGroupTopics).toEqual([]);
+    expect(result.existingGroupsByGroupNameTopics).toEqual([]);
 
     // Verify the mocks were called correctly
     expect(getConversationsQueryData).toHaveBeenCalledWith({
@@ -231,7 +231,7 @@ describe("searchByConversationMembership", () => {
       searchQuery: "Test Group",
     });
 
-    expect(result.existingGroupNameSearchResults).toEqual([
+    expect(result.existingGroupsByGroupNameTopics).toEqual([
       {
         groupName: "Test Group",
         groupId: mockGroupTopic,
@@ -245,7 +245,7 @@ describe("searchByConversationMembership", () => {
       searchQuery: "groupmember.eth",
     });
 
-    expect(result.existingGroupMemberNameSearchResults).toEqual([
+    expect(result.existingGroupTopics).toEqual([
       {
         memberNameFromGroup: "Group Member",
         groupName: "Test Group",

@@ -1,5 +1,5 @@
 import { generateGroupHashFromMemberIds } from "@/features/create-conversation/generate-group-hash-from-member-ids";
-import { getConversationsQueryOptions } from "@/queries/use-conversations-query";
+import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query";
 import { getGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import logger from "@/utils/logger";
@@ -14,7 +14,7 @@ export const useAllowedConversationsCount = () => {
   const account = useCurrentAccount();
 
   const { data: count, isLoading } = useQuery({
-    ...getConversationsQueryOptions({
+    ...getAllowedConsentConversationsQueryOptions({
       account: account!,
       caller: "useConversationsCount",
     }),
@@ -33,7 +33,7 @@ export const useFindConversationByMembers = (membersToSearch: InboxId[]) => {
   // );
 
   const { data: conversations, isLoading } = useQuery({
-    ...getConversationsQueryOptions({
+    ...getAllowedConsentConversationsQueryOptions({
       account: account!,
       caller: "useConversationByMembers",
     }),

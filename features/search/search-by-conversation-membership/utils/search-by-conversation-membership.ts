@@ -1,48 +1,45 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
-import logger from "@/utils/logger";
-import { getConversationsQueryData } from "@/queries/use-conversations-query";
-import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { IConversationMembershipSearchResult } from "@/features/search/search.types";
-import { processConversationSearch } from "./search-processor";
-import type { SearchableConversation, MemberProfile } from "./search-types";
+import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
+import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
+import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
+import { searchByConversationMembershipProcessor } from "./search-by-conversation-membership-processor";
+import type {
+  MemberProfile,
+  SearchResults,
+  SearchableConversation,
+} from "./search-by-conversation-membership.types";
 
 export async function searchByConversationMembership({
   searchQuery,
 }: {
   searchQuery: string;
-}): Promise<IConversationMembershipSearchResult> {
-  // logger.info(
-  //   `[Search] Starting conversation membership search for: ${searchQuery}`
-  // );
-
+}) {
   const currentAccount = getCurrentAccount()!;
-  const conversations = await getConversationsQueryData({
+
+  // Get all allowed consent conversations for current account
+  const conversations = await getAllowedConsentConversationsQueryData({
     account: currentAccount,
   });
-  // logger.info(
-  //   `[Search] All conversations:`,
-  //   JSON.stringify(conversations, null, 2)
-  // );
 
   if (!conversations) {
-    // logger.info(`[Search] No conversations found, returning empty results`);
     return {
-      existingDmSearchResults: [],
-      existingGroupMemberNameSearchResults: [],
-      existingGroupNameSearchResults: [],
-    };
+      existingDmTopics: [],
+      existingGroupsByMemberNameTopics: [],
+      existingGroupsByGroupNameTopics: [],
+    } satisfies SearchResults;
   }
 
-  // logger.info(`[Search] Processing ${conversations.length} conversations`);
+  // Transform conversations into searchable format with member profiles
   const searchableConversations = await Promise.all(
     conversations.map(async (conversation) => {
+      // Get members for each conversation
       const members = await ensureGroupMembersQueryData({
         account: currentAccount,
         topic: conversation.topic,
       });
 
+      // Get profile data for each member
       const memberProfiles: MemberProfile[] = await Promise.all(
         members.addresses.map(async (address) => {
           const profile = await getProfileSocialsQueryData(address);
@@ -53,6 +50,7 @@ export async function searchByConversationMembership({
         })
       );
 
+      // Build searchable conversation object
       return {
         version: conversation.version,
         topic: conversation.topic,
@@ -66,14 +64,10 @@ export async function searchByConversationMembership({
       } satisfies SearchableConversation;
     })
   );
-  // logger.info(
-  //   `[Search] Searchable conversations:`,
-  //   JSON.stringify(searchableConversations, null, 2)
-  // );
 
-  return processConversationSearch(
-    searchableConversations,
+  return searchByConversationMembershipProcessor({
+    conversations: searchableConversations,
     searchQuery,
-    currentAccount
-  );
+    currentUserAddress: currentAccount,
+  });
 }

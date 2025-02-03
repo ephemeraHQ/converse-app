@@ -3,7 +3,7 @@ import logger from "@/utils/logger";
 import { useQuery } from "@tanstack/react-query";
 import { type ConversationTopic } from "@xmtp/react-native-sdk";
 import { dmPeerInboxIdQueryKey } from "./QueryKeys";
-import { getOrFetchConversation } from "./useConversationQuery";
+import { getOrFetchConversation } from "./conversation-query";
 import { reactQueryPersister } from "@/utils/mmkv";
 
 export const useDmPeerInboxIdQuery = (args: {

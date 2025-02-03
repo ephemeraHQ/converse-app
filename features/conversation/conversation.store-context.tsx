@@ -12,6 +12,9 @@ type IConversationStoreProps = {
   conversationId: ConversationId;
   highlightedMessageId?: MessageId;
   scrollToMessageId?: MessageId;
+  searchTextValue: string;
+  searchUserAddresses: string[];
+  searchSelectedUserAddreses: string[];
 };
 
 type IConversationStoreState = IConversationStoreProps & {};
@@ -41,6 +44,9 @@ const createConversationStore = (initProps: IConversationStoreProps) => {
     conversationId: null as unknown as ConversationId,
     highlightedMessageId: undefined,
     scrollToMessageId: undefined,
+    searchTextValue: "",
+    searchUserAddresses: [],
+    searchSelectedUserAddreses: [],
   };
   return createStore<IConversationStoreState>()(
     subscribeWithSelector((set) => ({

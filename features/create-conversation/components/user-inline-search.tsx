@@ -1,96 +1,93 @@
-/**
- * A searchable chip list component for selecting users
- * Supports keyboard navigation and chip management
- *
- * @param {object} props Component props
- * @param {string} props.value Current search input value
- * @param {(value: string) => void} props.onChangeText Called when input changes
- * @param {(ref: TextInput | null) => void} props.onRef Called with input ref
- * @param {string} props.placeholder Placeholder text for empty input
- * @param {Array<{address: string, name: string}>} props.selectedUsers Currently selected users
- * @param {(address: string) => void} props.onRemoveUser Called when removing a user
- */
-
-import React, { useRef, useState } from "react";
-import { TextInput, View, ViewStyle, TextStyle } from "react-native";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
-import { textSizeStyles } from "@/design-system/Text/Text.styles";
 import { Text } from "@/design-system/Text";
-import logger from "@/utils/logger";
+import { textSizeStyles } from "@/design-system/Text/Text.styles";
 import { Chip } from "@/design-system/chip";
+import {
+  useConversationStore,
+  useConversationStoreContext,
+} from "@/features/conversation/conversation.store-context";
+import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
+import { usePreferredName } from "@/hooks/usePreferredName";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { debugBorder } from "@/utils/debug-style";
+import React, { memo, useCallback, useRef, useState } from "react";
+import {
+  NativeSyntheticEvent,
+  TextInput,
+  TextInputKeyPressEventData,
+  TextStyle,
+  View,
+  ViewStyle,
+} from "react-native";
 
-type Props = {
-  value: string;
-  onChangeText: (value: string) => void;
-  onRef: (ref: TextInput | null) => void;
-  placeholder?: string;
-  selectedUsers: Array<{
-    address: string;
-    name: string;
-    avatarUri: string | undefined;
-  }>;
-  onRemoveUser: (address: string) => void;
-};
-
-export function UserInlineSearch({
-  value,
-  onChangeText,
-  onRef,
-  placeholder = "Name, address or onchain ID",
-  selectedUsers,
-  onRemoveUser,
-}: Props) {
+export function UserInlineSearch() {
   const { theme, themed } = useAppTheme();
   const [selectedChipIndex, setSelectedChipIndex] = useState<number | null>(
     null
   );
   const inputRef = useRef<TextInput | null>(null);
 
-  const handleKeyPress = ({ nativeEvent: { key } }: any) => {
-    logger.debug("key", key);
-    if (key === "Backspace" && value === "") {
+  const conversationStore = useConversationStore();
+
+  const searchUserAddresses = useConversationStoreContext(
+    (state) => state.searchUserAddresses
+  );
+
+  const defaultSearchTextValue = conversationStore.getState().searchTextValue;
+
+  const handleKeyPress = (
+    e: NativeSyntheticEvent<TextInputKeyPressEventData>
+  ) => {
+    const { key } = e.nativeEvent;
+    const searchUsersQueryValue = conversationStore.getState().searchTextValue;
+    if (key === "Backspace" && searchUsersQueryValue === "") {
       if (selectedChipIndex !== null) {
-        onRemoveUser(selectedUsers[selectedChipIndex].address);
+        conversationStore.setState({
+          searchUserAddresses: conversationStore
+            .getState()
+            .searchUserAddresses.filter(
+              (user, index) => index !== selectedChipIndex
+            ),
+        });
         setSelectedChipIndex(null);
-      } else if (selectedUsers.length > 0) {
-        setSelectedChipIndex(selectedUsers.length - 1);
+      } else if (conversationStore.getState().searchUserAddresses.length > 0) {
+        setSelectedChipIndex(
+          conversationStore.getState().searchUserAddresses.length - 1
+        );
       }
     } else {
       setSelectedChipIndex(null);
     }
   };
 
+  const handleChangeText = useCallback(
+    (text: string) => {
+      conversationStore.setState({
+        searchTextValue: text,
+      });
+    },
+    [conversationStore]
+  );
+
   return (
-    <View style={themed($container)}>
+    <View style={themed($container)} {...debugBorder()}>
       <View style={themed($inputContainer)}>
         <Text preset="formLabel" style={themed($toText)}>
           To
         </Text>
-        {selectedUsers.map((user, index) => (
-          <Chip
-            avatarUri={user.avatarUri}
-            key={user.address}
-            name={user.name}
-            isSelected={selectedChipIndex === index}
-            onPress={() => {
-              if (selectedChipIndex === index) {
-                setSelectedChipIndex(null);
-              } else {
-                setSelectedChipIndex(index);
-              }
-            }}
-          />
+        {searchUserAddresses.map((user, index) => (
+          <UserChip key={user} address={user} />
         ))}
 
         <TextInput
-          ref={(r) => {
-            inputRef.current = r;
-            onRef(r);
-          }}
+          ref={inputRef}
           style={themed($input) as TextStyle}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={selectedUsers.length === 0 ? placeholder : ""}
+          defaultValue={defaultSearchTextValue}
+          onChangeText={handleChangeText}
+          placeholder={
+            searchUserAddresses.length === 0
+              ? "Name, address or onchain ID"
+              : ""
+          }
           placeholderTextColor={theme.colors.text.secondary}
           onKeyPress={handleKeyPress}
           autoCapitalize="none"
@@ -101,10 +98,53 @@ export function UserInlineSearch({
   );
 }
 
+const UserChip = memo(function UserChip(props: { address: string }) {
+  const { address } = props;
+
+  const avatarUri = usePreferredAvatarUri(address);
+  const name = usePreferredName(address);
+
+  const conversationStore = useConversationStore();
+  const searchSelectedUserAddreses = useConversationStoreContext(
+    (state) => state.searchSelectedUserAddreses
+  );
+
+  const isSelected = searchSelectedUserAddreses.includes(address);
+
+  const handlePress = useCallback(() => {
+    const isSelected = conversationStore
+      .getState()
+      .searchSelectedUserAddreses.includes(address);
+    if (isSelected) {
+      conversationStore.setState({
+        searchSelectedUserAddreses: conversationStore
+          .getState()
+          .searchSelectedUserAddreses.filter((user) => user !== address),
+      });
+    } else {
+      conversationStore.setState({
+        searchSelectedUserAddreses: [
+          ...conversationStore.getState().searchSelectedUserAddreses,
+          address,
+        ],
+      });
+    }
+  }, [address, conversationStore]);
+
+  return (
+    <Chip
+      avatarUri={avatarUri}
+      name={name}
+      isSelected={isSelected}
+      onPress={handlePress}
+    />
+  );
+});
+
 const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.background.surfaceless,
-  marginHorizontal: 16,
-  marginVertical: 8,
+  marginHorizontal: spacing.sm,
+  marginVertical: spacing.xxs,
   //   padding: spacing.sm,
   //   borderColor: colors.border.subtle,
   //   ...debugBorder("blue")

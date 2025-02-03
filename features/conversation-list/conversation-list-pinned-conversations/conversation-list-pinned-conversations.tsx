@@ -9,7 +9,7 @@ import { useConversationListPinnedConversationsStyles } from "@/features/convers
 import { useAllowedConversationsCount } from "@/features/conversation-list/hooks/use-conversations-count";
 import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { useConversationQuery } from "@/queries/useConversationQuery";
+import { useConversationQuery } from "@/queries/conversation-query";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
 import { hexToRGBA } from "@/utils/colors";

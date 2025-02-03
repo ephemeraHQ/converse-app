@@ -7,7 +7,7 @@ import {
   ConversationQueryData,
   getConversationQueryOptions,
   getOrFetchConversation,
-} from "@/queries/useConversationQuery";
+} from "@/queries/conversation-query";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { queryOptions, useQuery } from "@tanstack/react-query";

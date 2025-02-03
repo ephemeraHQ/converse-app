@@ -17,7 +17,7 @@ import { queryClient } from "./queryClient";
 import {
   getConversationQueryData,
   getOrFetchConversation,
-} from "./useConversationQuery";
+} from "./conversation-query";
 
 export type ConversationMessagesQueryData = Awaited<
   ReturnType<typeof conversationMessagesQueryFn>

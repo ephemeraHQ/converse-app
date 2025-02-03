@@ -5,7 +5,7 @@ import { queryClient } from "@/queries/queryClient";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getConversationByPeerByAccount } from "@/utils/xmtpRN/conversations";
 import { dmQueryKey } from "./QueryKeys";
-import { setConversationQueryData } from "./useConversationQuery";
+import { setConversationQueryData } from "./conversation-query";
 
 type IDmQueryArgs = {
   account: string;

@@ -77,8 +77,7 @@ type IChatGroupMemberLeftProps = {
 
 export function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
   const { themed } = useAppTheme();
-  const currentAccount = useCurrentAccount();
-  const { data } = useInboxProfileSocialsQuery(currentAccount!, inboxId);
+  const { data } = useInboxProfileSocialsQuery({ inboxId });
   const { theme } = useAppTheme();
 
   const firstSocials = data?.[0];

@@ -3,15 +3,19 @@ import type { IProfileSocials } from "@/features/profiles/profile-types";
 export function doesGroupNameMatchQuery(
   groupName: string | undefined,
   normalizedQuery: string
-): boolean {
+) {
   return !!groupName?.toLowerCase().includes(normalizedQuery);
 }
 
-export function doesMemberProfileMatchQuery(
-  profile: IProfileSocials | null,
-  normalizedQuery: string
-): boolean {
-  if (!profile) return false;
+export function doesMemberProfileMatchQuery(args: {
+  profile: IProfileSocials | null;
+  normalizedQuery: string;
+}) {
+  const { profile, normalizedQuery } = args;
+
+  if (!profile) {
+    return false;
+  }
 
   return [
     // Check address

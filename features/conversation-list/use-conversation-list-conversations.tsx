@@ -3,8 +3,8 @@ import { isConversationAllowed } from "@/features/conversation/utils/is-conversa
 import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
 import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
-import { prefetchConversationMessages } from "@/queries/use-conversation-messages-query";
-import { getConversationsQueryOptions } from "@/queries/use-conversations-query";
+import { prefetchConversationMessages } from "@/queries/conversation-messages-query";
+import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query";
 import { captureError } from "@/utils/capture-error";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
@@ -17,7 +17,7 @@ export const useConversationListConversations = () => {
     refetch,
     isLoading: isLoadingConversations,
   } = useQuery(
-    getConversationsQueryOptions({
+    getAllowedConsentConversationsQueryOptions({
       account: currentAccount!,
       caller: "useConversationListConversations",
     })

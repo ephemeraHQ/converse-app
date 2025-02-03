@@ -1,5 +1,5 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { getConversationQueryData } from "@/queries/useConversationQuery";
+import { getConversationQueryData } from "@/queries/conversation-query";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 

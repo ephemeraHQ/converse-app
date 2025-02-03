@@ -1,11 +1,4 @@
-import { ViewStyle, TextStyle } from "react-native";
-import { ThemedStyle } from "@/theme/useAppTheme";
-
 export const searchResultsStyles = {
-  $container: () => ({
-    flex: 1,
-  }),
-
   $sectionHeader: ({ colors, spacing }: any) => ({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,

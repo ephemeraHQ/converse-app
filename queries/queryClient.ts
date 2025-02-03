@@ -7,17 +7,15 @@ export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     // Used to track which queries execute the queryFn which means will do a network request
     onSuccess: (_, query) => {
-      if (query.meta?.caller) {
-        logger.debug(
-          `Query ${query.queryKey.join(", ")} success from caller: ${
-            query.meta.caller
-          }`
-        );
-      }
+      logger.debug(
+        `[Query] success fetching ${JSON.stringify(query.queryKey)}${
+          query.meta?.caller ? ` (${query.meta.caller})` : ""
+        }`
+      );
     },
     onError: (error, query) => {
       captureError(
-        new Error(`Error in query: ${query.queryKey.join(", ")}`, {
+        new Error(`Error in query: ${JSON.stringify(query.queryKey)}`, {
           cause: error,
         })
       );

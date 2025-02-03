@@ -4,7 +4,7 @@ import {
   useAccountsStore,
 } from "@/data/store/accountsStore";
 import { useAppStore } from "@/data/store/appStore";
-import { createConversationsQueryObserver } from "@/queries/use-conversations-query";
+import { createAllowedConsentConversationsQueryObserver } from "@/queries/conversations-allowed-consent-query";
 import { captureError } from "@/utils/capture-error";
 import logger from "@/utils/logger";
 import { resetNotifications } from "./resetNotifications";
@@ -52,7 +52,7 @@ const setupAccountTopicSubscription = (account: string) => {
   );
 
   // Create observer to watch for conversation changes
-  const observer = createConversationsQueryObserver({
+  const observer = createAllowedConsentConversationsQueryObserver({
     account,
     caller: `setupAccountTopicSubscription`,
   });

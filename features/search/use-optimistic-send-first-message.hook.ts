@@ -1,52 +1,51 @@
+import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { getCurrentAccount } from "@/data/store/accountsStore";
+import { generateGroupHashFromMemberIds } from "@/features/create-conversation/generate-group-hash-from-member-ids";
 import {
+  conversationMessagesQueryKey,
+  allowedConsentConversationsQueryKey,
+} from "@/queries/QueryKeys";
+import { queryClient } from "@/queries/queryClient";
+import {
+  IMessageAccumulator,
   addConversationMessageQuery,
   getConversationMessagesQueryData,
-  IMessageAccumulator,
   replaceOptimisticMessageWithReal,
-} from "@/queries/use-conversation-messages-query";
+} from "@/queries/conversation-messages-query";
+import { addConversationToAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
+import { setConversationQueryData } from "@/queries/conversation-query";
+import { setDmQueryData } from "@/queries/useDmQuery";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";
-import { contentTypesPrefixes } from "@/utils/xmtpRN/content-types/content-types";
-import { useMutation } from "@tanstack/react-query";
-import {
-  ConversationTopic,
-  DecodedMessage,
-  Dm,
-  MessageDeliveryStatus,
-  MessageId,
-  RemoteAttachmentContent,
-  Group,
-  ConversationId,
-  ConversationVersion,
-} from "@xmtp/react-native-sdk";
-import { useCallback } from "react";
-import { setConversationQueryData } from "@/queries/useConversationQuery";
-import { generateGroupHashFromMemberIds } from "@/features/create-conversation/generate-group-hash-from-member-ids";
-import {
-  createGroupWithDefaultsByAccount,
-  createConversationByAccount,
-} from "@/utils/xmtpRN/conversations";
-import { addConversationToConversationsQuery } from "@/queries/use-conversations-query";
-import { setDmQueryData } from "@/queries/useDmQuery";
-import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
+import { prefixStringWithV3TopicPrefix } from "@/utils/groupUtils/groupId";
+import logger from "@/utils/logger";
 import { sentryTrackError } from "@/utils/sentry";
+import {
+  createConversationByAccount,
+  createGroupWithDefaultsByAccount,
+} from "@/utils/xmtpRN/conversations";
 import {
   ConversationWithCodecsType,
   SupportedCodecsType,
-} from "@/utils/xmtpRN/client.types";
+} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { useMutation } from "@tanstack/react-query";
 import {
-  conversationMessagesQueryKey,
-  conversationsQueryKey,
-} from "@/queries/QueryKeys";
-import { queryClient } from "@/queries/queryClient";
-import logger from "@/utils/logger";
-import { prefixStringWithV3TopicPrefix } from "@/utils/groupUtils/groupId";
+  ConversationId,
+  ConversationTopic,
+  DecodedMessage,
+  Dm,
+  Group,
+  MessageDeliveryStatus,
+  MessageId,
+  RemoteAttachmentContent,
+} from "@xmtp/react-native-sdk";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
-import { sendMessage } from "../conversation/hooks/use-send-message";
-import { GroupParams } from "@xmtp/react-native-sdk/build/lib/Group";
 import { DmParams } from "@xmtp/react-native-sdk/build/lib/Dm";
+import { GroupParams } from "@xmtp/react-native-sdk/build/lib/Group";
+import { useCallback } from "react";
+import { sendMessage } from "../conversation/hooks/use-send-message";
+import { contentTypesPrefixes } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 
 export type ISendMessageParams = {
   topic: ConversationTopic;
@@ -258,7 +257,7 @@ export function useOptimisticSendFirstMessage({
         }
       );
 
-      addConversationToConversationsQuery({
+      addConversationToAllowedConsentConversationsQuery({
         account: currentAccount,
         conversation: tempConversation,
       });
@@ -281,7 +280,7 @@ export function useOptimisticSendFirstMessage({
         }
       );
 
-      addConversationToConversationsQuery({
+      addConversationToAllowedConsentConversationsQuery({
         account: currentAccount,
         conversation: newConversation,
       });
@@ -413,7 +412,7 @@ export function useOptimisticSendFirstMessage({
           ),
         });
         queryClient.setQueryData(
-          conversationsQueryKey(currentAccount),
+          allowedConsentConversationsQueryKey(currentAccount),
           (previous: ConversationWithCodecsType[] = []) =>
             previous.filter((conv) => conv.topic !== context.tempTopic)
         );

@@ -5,12 +5,12 @@ import {
 import {
   addConversationToUnknownConsentConversationsQuery,
   removeConversationFromUnknownConsentConversationsQueryData,
-} from "@/queries/unknown-consent-conversations-query";
+} from "@/queries/conversations-unknown-consent-query";
 import {
-  addConversationToConversationsQuery,
-  removeConversationFromConversationsQuery,
-} from "@/queries/use-conversations-query";
-import { getConversationQueryData } from "@/queries/useConversationQuery";
+  addConversationToAllowedConsentConversationsQuery,
+  removeConversationFromAllowedConsentConversationsQuery,
+} from "@/queries/conversations-allowed-consent-query";
+import { getConversationQueryData } from "@/queries/conversation-query";
 import { getDmQueryData, setDmQueryData } from "@/queries/useDmQuery";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import {
@@ -70,7 +70,7 @@ export function useDenyDmMutation() {
         });
 
         // Remove from main conversations list
-        removeConversationFromConversationsQuery({
+        removeConversationFromAllowedConsentConversationsQuery({
           account: currentAccount,
           topic,
         });
@@ -107,7 +107,7 @@ export function useDenyDmMutation() {
         });
 
         // Add back to main conversations list
-        addConversationToConversationsQuery({
+        addConversationToAllowedConsentConversationsQuery({
           account: currentAccount,
           conversation: previousDm as ConversationWithCodecsType,
         });

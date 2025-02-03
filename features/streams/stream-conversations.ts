@@ -1,8 +1,8 @@
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationConsentUnknown } from "@/features/conversation/utils/is-conversation-consent-unknown";
 import { startMessageStreaming } from "@/features/streams/stream-messages";
-import { addConversationToUnknownConsentConversationsQuery } from "@/queries/unknown-consent-conversations-query";
-import { addConversationToConversationsQuery } from "@/queries/use-conversations-query";
+import { addConversationToUnknownConsentConversationsQuery } from "@/queries/conversations-unknown-consent-query";
+import { addConversationToAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import {
   stopStreamingConversations,
@@ -34,7 +34,7 @@ function handleNewConversation(args: {
   const { account, conversation } = args;
 
   if (isConversationAllowed(conversation)) {
-    addConversationToConversationsQuery({
+    addConversationToAllowedConsentConversationsQuery({
       account,
       conversation,
     });

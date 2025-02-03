@@ -1,32 +1,43 @@
-import { setConversationQueryData } from "@/queries/useConversationQuery";
+import {
+  getConversationQueryData,
+  setConversationQueryData,
+} from "@/queries/conversation-query";
+import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
 import { captureError } from "@/utils/capture-error";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { conversationsQueryKey } from "@queries/QueryKeys";
+import { allowedConsentConversationsQueryKey } from "@queries/QueryKeys";
 import { QueryObserver, queryOptions, useQuery } from "@tanstack/react-query";
 import logger from "@utils/logger";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
 import { ensureGroupMembersQueryData } from "./useGroupMembersQuery";
 
-export type IConversationsQuery = Awaited<ReturnType<typeof getConversations>>;
+export type IAllowedConsentConversationsQuery = Awaited<
+  ReturnType<typeof getAllowedConsentConversations>
+>;
 
 type IArgs = {
   account: string;
 };
 
-export const createConversationsQueryObserver = (
+export const createAllowedConsentConversationsQueryObserver = (
   args: IArgs & { caller: string }
 ) => {
-  return new QueryObserver(queryClient, getConversationsQueryOptions(args));
+  return new QueryObserver(
+    queryClient,
+    getAllowedConsentConversationsQueryOptions(args)
+  );
 };
 
-export const useConversationsQuery = (args: IArgs & { caller: string }) => {
-  return useQuery(getConversationsQueryOptions(args));
+export const useAllowedConsentConversationsQuery = (
+  args: IArgs & { caller: string }
+) => {
+  return useQuery(getAllowedConsentConversationsQueryOptions(args));
 };
 
-export function addConversationToConversationsQuery(
+export function addConversationToAllowedConsentConversationsQuery(
   args: IArgs & {
     conversation: ConversationWithCodecsType;
   }
@@ -35,15 +46,14 @@ export function addConversationToConversationsQuery(
   logger.debug(
     `[ConversationsQuery] addConversationToConversationsQuery for account ${account}`
   );
-  const previousConversationsData = getConversationsQueryData({
+  const previousConversationsData = getAllowedConsentConversationsQueryData({
     account,
   });
 
   if (!previousConversationsData) {
     queryClient.setQueryData(
-      getConversationsQueryOptions({ account }).queryKey,
+      getAllowedConsentConversationsQueryOptions({ account }).queryKey,
       [conversation]
-      // [{...conversation, resolvedMember}]
     );
     return;
   }
@@ -56,13 +66,13 @@ export function addConversationToConversationsQuery(
     return;
   }
 
-  queryClient.setQueryData<IConversationsQuery>(
-    getConversationsQueryOptions({ account }).queryKey,
+  queryClient.setQueryData<IAllowedConsentConversationsQuery>(
+    getAllowedConsentConversationsQueryOptions({ account }).queryKey,
     [conversation, ...previousConversationsData]
   );
 }
 
-export const removeConversationFromConversationsQuery = (
+export const removeConversationFromAllowedConsentConversationsQuery = (
   args: IArgs & {
     topic: ConversationTopic;
   }
@@ -73,7 +83,7 @@ export const removeConversationFromConversationsQuery = (
     `[ConversationsQuery] removeConversationFromConversationsQuery for account ${account}`
   );
 
-  const previousConversationsData = getConversationsQueryData({
+  const previousConversationsData = getAllowedConsentConversationsQueryData({
     account,
   });
 
@@ -82,34 +92,28 @@ export const removeConversationFromConversationsQuery = (
   }
 
   queryClient.setQueryData(
-    getConversationsQueryOptions({ account }).queryKey,
+    getAllowedConsentConversationsQueryOptions({ account }).queryKey,
     previousConversationsData.filter((c) => c.topic !== topic)
   );
 };
 
-export const getConversationsQueryData = (args: IArgs) => {
-  return queryClient.getQueryData(getConversationsQueryOptions(args).queryKey);
+export const getAllowedConsentConversationsQueryData = (args: IArgs) => {
+  return queryClient.getQueryData(
+    getAllowedConsentConversationsQueryOptions(args).queryKey
+  );
 };
 
-const getConversations = async (args: IArgs) => {
+const getAllowedConsentConversations = async (args: IArgs) => {
   const { account } = args;
+
+  await ensureConversationSyncAllQuery({
+    ethAddress: account,
+    consentStates: ["allowed"],
+  });
 
   const client = await getXmtpClient({
     address: account,
   });
-
-  const beforeSync = new Date().getTime();
-  await client.conversations.syncAllConversations(["allowed"]);
-  const afterSync = new Date().getTime();
-
-  const timeDiff = afterSync - beforeSync;
-  if (timeDiff > 3000) {
-    captureError(
-      new Error(
-        `[ConversationsQuery] Fetching conversations from network took ${timeDiff}ms for account ${account}`
-      )
-    );
-  }
 
   const conversations = await client.conversations.list(
     {
@@ -121,30 +125,32 @@ const getConversations = async (args: IArgs) => {
       lastMessage: true,
       description: true,
     },
-    // this is going to be problematic for lookup by group member list
-    // note(lustig) @thierryskoda it'd be unlikely to be able to find a group conversation by member list
-    // if this number is 20. does 200 make this too unperformant?
-    200 // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
+    9999, // All of them
+    ["allowed"]
   );
 
-  // Fire and forget to fetch and cache each group's members without blocking
-  conversations.map((c) => {
-    ensureGroupMembersQueryData({ account, topic: c.topic });
-  });
-
-  // For now conversations have all the same properties as one conversation
   for (const conversation of conversations) {
-    setConversationQueryData({
-      account,
-      topic: conversation.topic,
-      conversation,
-    });
+    // Only set if the conversation is not already in the query cache
+    // Because otherwise we might put a outdated conversation in the query cache.
+    if (!getConversationQueryData({ account, topic: conversation.topic })) {
+      setConversationQueryData({
+        account,
+        topic: conversation.topic,
+        conversation,
+      });
+    }
+
+    // We are often using conversation members info
+    // Call after setting the conversation because we'll need the conversation to get the members
+    ensureGroupMembersQueryData({ account, topic: conversation.topic }).catch(
+      captureError
+    );
   }
 
   return conversations;
 };
 
-export const getConversationsQueryOptions = (
+export const getAllowedConsentConversationsQueryOptions = (
   args: IArgs & {
     // Optional because we don't want functions that just get or set query data to have to pass caller
     caller?: string;
@@ -155,20 +161,16 @@ export const getConversationsQueryOptions = (
     meta: {
       caller,
     },
-    queryKey: conversationsQueryKey(account),
+    queryKey: allowedConsentConversationsQueryKey(account),
     queryFn: () =>
-      getConversations({
+      getAllowedConsentConversations({
         account,
       }),
     enabled: !!account,
-    // Just for now because conversations are very important and
-    // we want to make sure we have all of them
-    refetchOnMount: true,
-    // persister: reactQueryPersister,
   });
 };
 
-export const updateConversationInConversationsQueryData = (
+export const updateConversationInAllowedConsentConversationsQueryData = (
   args: IArgs & {
     topic: ConversationTopic;
     conversationUpdate: Partial<ConversationWithCodecsType>;
@@ -180,7 +182,7 @@ export const updateConversationInConversationsQueryData = (
     `[ConversationsQuery] updateConversationInConversationsQueryData for account ${account} and topic ${topic}`
   );
 
-  const previousConversationsData = getConversationsQueryData({
+  const previousConversationsData = getAllowedConsentConversationsQueryData({
     account,
   });
   if (!previousConversationsData) {
@@ -201,14 +203,18 @@ export const updateConversationInConversationsQueryData = (
     return c;
   });
 
-  queryClient.setQueryData<IConversationsQuery>(
-    getConversationsQueryOptions({
+  queryClient.setQueryData<IAllowedConsentConversationsQuery>(
+    getAllowedConsentConversationsQueryOptions({
       account,
     }).queryKey,
     newConversations
   );
 };
 
-export function fetchConversationsQuery(args: IArgs & { caller: string }) {
-  return queryClient.fetchQuery(getConversationsQueryOptions(args));
+export function fetchAllowedConsentConversationsQuery(
+  args: IArgs & { caller: string }
+) {
+  return queryClient.fetchQuery(
+    getAllowedConsentConversationsQueryOptions(args)
+  );
 }

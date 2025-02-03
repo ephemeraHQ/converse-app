@@ -11,7 +11,6 @@ import { entifyWithAddress, EntityObjectWithAddress } from "./entify";
 import { queryClient } from "./queryClient";
 import { groupMembersQueryKey } from "./QueryKeys";
 import { getOrFetchGroupQuery } from "./useGroupQuery";
-import logger from "@utils/logger";
 
 export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
 
@@ -20,10 +19,6 @@ const fetchGroupMembers = async (args: {
   topic: ConversationTopic;
 }): Promise<EntityObjectWithAddress<Member, InboxId>> => {
   const { account, topic } = args;
-  logger.debug("[fetchGroupMembers] Fetching group members", {
-    account,
-    topic,
-  });
 
   const group = await getOrFetchGroupQuery({
     account,
@@ -37,11 +32,6 @@ const fetchGroupMembers = async (args: {
 
   const members = await group.members();
 
-  logger.debug("[fetchGroupMembers] Successfully fetched members", {
-    topic,
-    memberCount: members.length,
-  });
-
   return entifyWithAddress(
     members,
     (member) => member.inboxId,
@@ -49,7 +39,7 @@ const fetchGroupMembers = async (args: {
   );
 };
 
-const getGroupMemberQueryOptions = (args: {
+export const getGroupMembersQueryOptions = (args: {
   account: string;
   topic: ConversationTopic;
   queryOptions?: Partial<UseQueryOptions<GroupMembersSelectData>>;
@@ -70,7 +60,7 @@ export const useGroupMembersQuery = (args: {
 }) => {
   const { account, topic } = args;
   return useQuery<GroupMembersSelectData>(
-    getGroupMemberQueryOptions({ account, topic })
+    getGroupMembersQueryOptions({ account, topic })
   );
 };
 
@@ -79,7 +69,7 @@ export const getGroupMembersQueryData = (
   topic: ConversationTopic
 ): GroupMembersSelectData | undefined =>
   queryClient.getQueryData(
-    getGroupMemberQueryOptions({ account, topic }).queryKey
+    getGroupMembersQueryOptions({ account, topic }).queryKey
   );
 
 export const setGroupMembersQueryData = (
@@ -89,7 +79,7 @@ export const setGroupMembersQueryData = (
   options?: SetDataOptions
 ) => {
   queryClient.setQueryData<GroupMembersSelectData>(
-    getGroupMemberQueryOptions({ account, topic }).queryKey,
+    getGroupMembersQueryOptions({ account, topic }).queryKey,
     members,
     options
   );
@@ -100,7 +90,7 @@ export const cancelGroupMembersQuery = async (
   topic: ConversationTopic
 ) => {
   return queryClient.cancelQueries({
-    queryKey: getGroupMemberQueryOptions({ account, topic }).queryKey,
+    queryKey: getGroupMembersQueryOptions({ account, topic }).queryKey,
   });
 };
 
@@ -110,7 +100,7 @@ export const invalidateGroupMembersQuery = (args: {
 }) => {
   const { account, topic } = args;
   return queryClient.invalidateQueries({
-    queryKey: getGroupMemberQueryOptions({ account, topic }).queryKey,
+    queryKey: getGroupMembersQueryOptions({ account, topic }).queryKey,
   });
 };
 
@@ -120,7 +110,7 @@ export function refetchGroupMembersQuery(args: {
 }) {
   const { account, topic } = args;
   return queryClient.refetchQueries({
-    queryKey: getGroupMemberQueryOptions({ account, topic }).queryKey,
+    queryKey: getGroupMembersQueryOptions({ account, topic }).queryKey,
   });
 }
 
@@ -130,7 +120,7 @@ export async function ensureGroupMembersQueryData(args: {
 }) {
   const { account, topic } = args;
   return queryClient.ensureQueryData(
-    getGroupMemberQueryOptions({
+    getGroupMembersQueryOptions({
       account,
       topic,
     })

@@ -1,3 +1,4 @@
+import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
 import { captureError } from "@/utils/capture-error";
 import logger from "@/utils/logger";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
@@ -6,7 +7,6 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
-import { ensureGroupMembersQueryData } from "./useGroupMembersQuery";
 
 export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
 
@@ -17,7 +17,6 @@ type IGetConversationArgs = {
 
 async function getConversation(args: IGetConversationArgs) {
   const { account, topic } = args;
-
   if (!topic) {
     throw new Error("Topic is required");
   }
@@ -26,35 +25,72 @@ async function getConversation(args: IGetConversationArgs) {
     throw new Error("Account is required");
   }
 
+  const totalStart = new Date().getTime();
+
+  /**
+   * (START) TMP until we can fetch a single conversation and get ALL the properties for it (lastMessage, etc)
+   */
+  await Promise.all([
+    ensureConversationSyncAllQuery({
+      ethAddress: account,
+      consentStates: ["allowed"],
+    }),
+    ensureConversationSyncAllQuery({
+      ethAddress: account,
+      consentStates: ["unknown"],
+    }),
+    ensureConversationSyncAllQuery({
+      ethAddress: account,
+      consentStates: ["denied"],
+    }),
+  ]);
+
   const client = await getXmtpClient({
     address: account,
   });
 
-  const totalStart = new Date().getTime();
+  const conversation = (
+    await client.conversations.list({
+      isActive: true,
+      addedByInboxId: true,
+      name: true,
+      imageUrlSquare: true,
+      consentState: true,
+      lastMessage: true,
+      description: true,
+    })
+  ).find((c) => c.topic === topic);
+
+  if (!conversation) {
+    throw new Error(`Conversation ${topic} not found`);
+  }
+  /**
+   * (END) TMP until we can fetch a single conversation and get ALL the properties for it (lastMessage, etc)
+   */
 
   // Try to find conversation in local DB first
-  let conversation = await client.conversations.findConversationByTopic(topic);
+  // let conversation = await client.conversations.findConversationByTopic(topic);
 
   // If not found locally, sync and try again
-  if (!conversation) {
-    logger.warn(
-      `[useConversationQuery] Conversation not found in local DB, syncing conversations`
-    );
-    await client.conversations.sync();
-    conversation = await client.conversations.findConversationByTopic(topic);
-    if (!conversation) {
-      throw new Error(`Conversation ${topic} not found`);
-      // query data cannot be undefined
-      // logger.warn(`[useConversationQuery] Conversation ${topic} not found`, {
-      //   account,
-      //   topic,
-      // });
-      // return undefined;
-    }
-    await conversation.sync();
-  }
+  // if (!conversation) {
+  //   logger.warn(
+  //     `[useConversationQuery] Conversation not found in local DB, syncing conversations`
+  //   );
 
-  ensureGroupMembersQueryData({ account, topic });
+  //   await client.conversations.sync();
+  //   conversation = await client.conversations.findConversationByTopic(topic);
+
+  //   if (!conversation) {
+  //     // Throwing here because if we have a topic, we should have a conversation
+  //     throw new Error(`Conversation ${topic} not found`);
+  //   }
+  // }
+
+  // await conversation.sync();
+
+  // if (!conversation.lastMessage) {
+  //   console.log("caca");
+  // }
 
   const totalEnd = new Date().getTime();
   const totalTimeDiff = totalEnd - totalStart;
@@ -79,27 +115,16 @@ export const useConversationQuery = (
 export function getConversationQueryOptions(
   args: IGetConversationArgs & {
     caller?: string;
-    optimistic?: boolean;
   }
 ) {
-  const { account, topic, caller, optimistic } = args;
+  const { account, topic, caller } = args;
   return queryOptions({
     meta: {
       caller,
     },
     queryKey: conversationQueryKey(account, topic),
     queryFn: () => getConversation({ account, topic }),
-    enabled: !!topic && !!account && !optimistic,
-    retry: (failureCount, error) => {
-      logger.info("[useConversationQuery] Retrying query", {
-        failureCount,
-        optimistic,
-        topic,
-        error: error.message,
-      });
-      if (optimistic && failureCount < 3) return true;
-      return false;
-    },
+    enabled: !!topic && !!account,
   });
 }
 
@@ -109,7 +134,13 @@ export const setConversationQueryData = (
   }
 ) => {
   const { account, topic, conversation } = args;
-  queryClient.setQueryData(conversationQueryKey(account, topic), conversation);
+  queryClient.setQueryData(
+    getConversationQueryOptions({
+      account,
+      topic,
+    }).queryKey,
+    conversation
+  );
 };
 
 export function updateConversationQueryData(
@@ -127,17 +158,9 @@ export function updateConversationQueryData(
       if (!previousConversation) {
         return undefined;
       }
-
-      // Create new object while preserving prototype chain and methods
       return updateObjectAndMethods(previousConversation, conversationUpdate);
     }
   );
-}
-
-export function refetchConversationQuery(
-  args: IGetConversationArgs & { caller: string }
-) {
-  return queryClient.refetchQueries(getConversationQueryOptions(args));
 }
 
 export const getConversationQueryData = (args: IGetConversationArgs) => {

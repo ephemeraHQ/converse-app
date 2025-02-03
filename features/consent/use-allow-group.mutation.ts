@@ -2,11 +2,11 @@ import { isConversationGroup } from "@/features/conversation/utils/is-conversati
 import {
   addConversationToUnknownConsentConversationsQuery,
   removeConversationFromUnknownConsentConversationsQueryData,
-} from "@/queries/unknown-consent-conversations-query";
+} from "@/queries/conversations-unknown-consent-query";
 import {
-  addConversationToConversationsQuery,
-  removeConversationFromConversationsQuery,
-} from "@/queries/use-conversations-query";
+  addConversationToAllowedConsentConversationsQuery,
+  removeConversationFromAllowedConsentConversationsQuery,
+} from "@/queries/conversations-allowed-consent-query";
 import {
   getGroupQueryData,
   getOrFetchGroupQuery,
@@ -126,7 +126,7 @@ export const getAllowGroupMutationOptions = (
       });
 
       // Add to main conversations list
-      addConversationToConversationsQuery({
+      addConversationToAllowedConsentConversationsQuery({
         account,
         conversation: updatedGroup,
       });
@@ -153,7 +153,7 @@ export const getAllowGroupMutationOptions = (
       });
 
       // Remove from main conversations list
-      removeConversationFromConversationsQuery({
+      removeConversationFromAllowedConsentConversationsQuery({
         account,
         topic,
       });

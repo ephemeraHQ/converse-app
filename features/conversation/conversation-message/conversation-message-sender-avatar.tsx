@@ -21,7 +21,9 @@ export function ConversationSenderAvatar({
   const { data: name } = usePreferredInboxName({
     inboxId,
   });
-  const { data: avatarUri } = usePreferredInboxAvatar(inboxId);
+  const { data: avatarUri } = usePreferredInboxAvatar({
+    inboxId,
+  });
 
   const openProfile = useCallback(() => {
     if (address) {

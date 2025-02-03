@@ -1,10 +1,10 @@
 import { unknownConsentConversationsQueryKey } from "@/queries/QueryKeys";
-import { setConversationQueryData } from "@/queries/useConversationQuery";
-import { captureError } from "@/utils/capture-error";
+import { setConversationQueryData } from "@/queries/conversation-query";
+import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
 import logger from "@/utils/logger";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
+import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { queryOptions } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
@@ -16,26 +16,22 @@ export type IUnknownConversationsQuery = Awaited<
 async function getUnknownConversations(args: { account: string }) {
   const { account } = args;
 
+  if (!account) {
+    throw new Error("Account is required");
+  }
+
   logger.debug(
     `[ConversationsQuery] Fetching conversations from network for account ${account}`
   );
 
+  await ensureConversationSyncAllQuery({
+    ethAddress: account,
+    consentStates: ["unknown"],
+  });
+
   const client = await getXmtpClient({
     address: account,
   });
-
-  const beforeSync = new Date().getTime();
-  await client.conversations.syncAllConversations(["unknown"]);
-  const afterSync = new Date().getTime();
-
-  const timeDiff = afterSync - beforeSync;
-  if (timeDiff > 3000) {
-    captureError(
-      new Error(
-        `[ConversationsQuery] Fetching conversations from network took ${timeDiff}ms`
-      )
-    );
-  }
 
   const conversations = await client.conversations.list(
     {

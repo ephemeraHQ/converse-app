@@ -1,21 +1,84 @@
-import { IProfileSocials } from "@/features/profiles/profile-types";
-
 import { getCurrentAccount } from "@/data/store/accountsStore";
+import { accountCanMessagePeer } from "@/features/consent/account-can-message-peer";
+import { IProfileSocials } from "@/features/profiles/profile-types";
+import { userSearchQueryKey } from "@/queries/QueryKeys";
+import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
+import { searchProfilesForCurrentAccount } from "@/utils/api/profiles";
 import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
-import { searchProfilesForCurrentAccount } from "@/utils/api/profiles";
-import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 import { isEmptyObject } from "@/utils/objects";
 import { shortAddress } from "@/utils/strings/shortAddress";
-import { accountCanMessagePeer } from "@/features/consent/account-can-message-peer";
-import { IConvosUsersSearchResult } from "../search.types";
-import logger from "@/utils/logger";
+import { queryOptions, useQuery } from "@tanstack/react-query";
+
+export function useSearchConvosUsersQuery(args: {
+  searchQuery: string;
+  addressesToOmit: string[];
+}) {
+  const { searchQuery, addressesToOmit } = args;
+  const currentAccount = getCurrentAccount()!;
+  const currentAccountAddress = getCleanAddress(currentAccount);
+  const allAddressesToOmit = [...addressesToOmit, currentAccountAddress].map(
+    (address) => address.toLowerCase()
+  );
+
+  const { data, isLoading: areSearchResultsLoading } = useQuery({
+    ...getConvosUsersSearchQueryOptions(searchQuery),
+    select: (data) => {
+      // Filter out search results for addresses that should be omitted (e.g. current user and selected users)
+      const filteredResults = {
+        ...data,
+        convosSearchResults: data?.convosSearchResults?.filter(
+          (result) =>
+            !result.address ||
+            !allAddressesToOmit.includes(result.address.toLowerCase())
+        ),
+      };
+
+      return filteredResults;
+    },
+  });
+
+  return {
+    convosSearchResults: data?.convosSearchResults,
+    message: data?.message,
+    areSearchResultsLoading,
+  };
+}
+
+function getConvosUsersSearchQueryOptions(searchQuery: string) {
+  // logger.info(`[Search] Creating query options for search: ${searchQuery}`);
+  return queryOptions({
+    queryKey: userSearchQueryKey(searchQuery),
+    queryFn: () => searchConvosUsers({ searchQuery }),
+    enabled: !!searchQuery,
+    staleTime: 1000 * 10, // We often want to make sure we're looking if there are new users for our search query,
+  });
+}
+
+/**
+ * Users our backend to search for users in the Convo network
+ *
+ * @see we also have methods for searching for users by current conversation cached locally
+ */
+async function searchConvosUsers({ searchQuery }: { searchQuery: string }) {
+  if (searchQuery.length === 0) {
+    return {
+      message: "",
+      convosSearchResults: [],
+    };
+  }
+
+  if (isSupportedPeer(searchQuery)) {
+    return handlePeerSearch(searchQuery);
+  }
+
+  return handleGeneralSearch(searchQuery);
+}
+
 /**
  * Handles searching when searchQuery is a supported domain/ENS
  */
-async function handlePeerSearch(
-  searchQuery: string
-): Promise<IConvosUsersSearchResult> {
+async function handlePeerSearch(searchQuery: string) {
   // logger.info(`[Search] Starting peer search for query: ${searchQuery}`);
   // logger.info(`[Search] Query ${searchQuery} is a supported peer format`);
   const resolvedAddress = await getAddressForPeer(searchQuery);
@@ -31,7 +94,6 @@ async function handlePeerSearch(
   const address = getCleanAddress(resolvedAddress);
   // logger.info(`[Search] Resolved address ${address} for ${searchQuery}`);
   // logger.info(`[Search] Checking if ${address} is on XMTP`);
-
   const addressIsOnXmtp = await accountCanMessagePeer({
     account: getCurrentAccount()!,
     peer: address,
@@ -48,7 +110,6 @@ async function handlePeerSearch(
   // logger.info(`[Search] ${address} is on XMTP, fetching profiles`);
   const profiles = await searchProfilesForCurrentAccount(address);
   // logger.info(`[Search] Profiles fetched:`, JSON.stringify(profiles, null, 2));
-
   if (!isEmptyObject(profiles)) {
     // logger.info(`[Search] Found profiles for ${address}, setting profile data`);
     setProfileRecordSocialsQueryData(profiles);
@@ -76,7 +137,6 @@ async function handleGeneralSearch(searchQuery: string) {
   // logger.info(`[Search] Searching profiles for query: ${searchQuery}`);
   const profiles = await searchProfilesForCurrentAccount(searchQuery);
   // logger.info(`[Search] Profiles found:`, JSON.stringify(profiles, null, 2));
-
   if (!isEmptyObject(profiles)) {
     // logger.info(`[Search] Found profiles for query ${searchQuery}`);
     setProfileRecordSocialsQueryData(profiles);
@@ -96,31 +156,4 @@ async function handleGeneralSearch(searchQuery: string) {
     message: `They're not here\nInvite them?`,
     convosSearchResults: [],
   };
-}
-
-/**
- * Users our backend to search for users in the Convo network
- *
- * @see we also have methods for searching for users by current conversation cached locally
- */
-export async function searchConvosUsers({
-  searchQuery,
-}: {
-  searchQuery: string;
-}): Promise<IConvosUsersSearchResult> {
-  // logger.info(`[Search] Starting search for query: ${searchQuery}`);
-
-  if (searchQuery.length === 0) {
-    // logger.info(`[Search] Empty search query, returning empty results`);
-    return {
-      message: "",
-      convosSearchResults: [],
-    };
-  }
-
-  if (isSupportedPeer(searchQuery)) {
-    return handlePeerSearch(searchQuery);
-  }
-
-  return handleGeneralSearch(searchQuery);
 }

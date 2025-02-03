@@ -9,7 +9,7 @@ import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
 import { useRestoreConversation } from "@/features/conversation-list/hooks/use-restore-conversation";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
-import { useConversationQuery } from "@/queries/useConversationQuery";
+import { useConversationQuery } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureErrorWithToast } from "@/utils/capture-error";
@@ -60,7 +60,9 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     usePreferredInboxName({
       inboxId: peerInboxId,
     });
-  const { data: avatarUri } = usePreferredInboxAvatar(peerInboxId);
+  const { data: avatarUri } = usePreferredInboxAvatar({
+    inboxId: peerInboxId!,
+  });
 
   const avatarComponent = useMemo(() => {
     return (

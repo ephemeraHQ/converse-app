@@ -18,7 +18,7 @@ export const getProfilesForAddresses = async (
 export const getProfilesForInboxIds = async ({
   inboxIds,
 }: {
-  inboxIds: string[];
+  inboxIds: InboxId[];
 }): Promise<{ [inboxId: InboxId]: IProfileSocials[] }> => {
   logger.info("Fetching profiles for inboxIds", inboxIds);
   const { data } = await api.get("/api/inbox/", {

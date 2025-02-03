@@ -4,9 +4,7 @@ import { useMemo } from "react";
 import { useProfilesSocials } from "./useProfilesSocials";
 
 /**
- *
- * @param peerAddress Multiple peer addresses to get their socials
- * @returns array of preferred names or the address if not found
+ * @deprecated
  */
 export const usePreferredNames = (peerAddresses: string[]) => {
   const data = useProfilesSocials(peerAddresses);

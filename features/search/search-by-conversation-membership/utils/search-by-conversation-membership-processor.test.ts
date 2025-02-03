@@ -1,7 +1,7 @@
-import { processConversationSearch } from "./search-processor";
-import type { SearchableConversation } from "./search-types";
+import { searchByConversationMembershipProcessor } from "./search-by-conversation-membership-processor";
+import type { SearchableConversation } from "./search-by-conversation-membership.types";
 import type { IProfileSocials } from "@/features/profiles/profile-types";
-import { ConversationVersion } from "@xmtp/react-native-sdk";
+import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
 
 // Mock XMTP SDK
 jest.mock("@xmtp/react-native-sdk", () => ({
@@ -16,7 +16,7 @@ jest.mock("@/utils/getReadableProfile", () => ({
   getReadableProfile: jest.fn((address: string) => address),
 }));
 
-describe("processConversationSearch", () => {
+describe("searchByConversationMembershipProcessor", () => {
   const currentUserAddress = "0xCurrentUser";
 
   const mockDmProfile: IProfileSocials = {
@@ -63,7 +63,7 @@ describe("processConversationSearch", () => {
 
   const mockDmConversation: SearchableConversation = {
     version: ConversationVersion.DM,
-    topic: "dm-topic",
+    topic: "dm-topic" as ConversationTopic,
     memberProfiles: [
       { address: currentUserAddress, profile: null },
       { address: "0xDmUser", profile: mockDmProfile },
@@ -72,7 +72,7 @@ describe("processConversationSearch", () => {
 
   const mockGroupConversation: SearchableConversation = {
     version: ConversationVersion.GROUP,
-    topic: "group-topic",
+    topic: "group-topic" as ConversationTopic,
     conversationName: "Test Group Chat",
     conversationImageUri: "https://example.com/group.jpg",
     memberProfiles: [
@@ -85,15 +85,15 @@ describe("processConversationSearch", () => {
 
   describe("DM search", () => {
     it("should find DM conversations by ENS name", () => {
-      const result = processConversationSearch(
-        [mockDmConversation],
-        "dm.eth",
-        currentUserAddress
-      );
+      const result = searchByConversationMembershipProcessor({
+        conversations: [mockDmConversation],
+        searchQuery: "dm.eth",
+        currentUserAddress,
+      });
 
-      expect(result.existingDmSearchResults).toEqual([mockDmProfile]);
-      expect(result.existingGroupMemberNameSearchResults).toEqual([]);
-      expect(result.existingGroupNameSearchResults).toEqual([]);
+      expect(result.existingDmTopics).toEqual([mockDmProfile]);
+      expect(result.existingGroupsByMemberNameTopics).toEqual([]);
+      expect(result.existingGroupsByGroupNameTopics).toEqual([]);
     });
 
     it("should not match when search query matches current user's profile", () => {
@@ -116,29 +116,29 @@ describe("processConversationSearch", () => {
         ],
       };
 
-      const result = processConversationSearch(
-        [conversationWithCurrentUser],
-        "current.eth", // Search for current user's ENS
-        currentUserAddress
-      );
+      const result = searchByConversationMembershipProcessor({
+        conversations: [conversationWithCurrentUser],
+        searchQuery: "current.eth", // Search for current user's ENS
+        currentUserAddress,
+      });
 
-      expect(result.existingDmSearchResults).toEqual([]);
-      expect(result.existingGroupMemberNameSearchResults).toEqual([]);
-      expect(result.existingGroupNameSearchResults).toEqual([]);
+      expect(result.existingDmTopics).toEqual([]);
+      expect(result.existingGroupsByMemberNameTopics).toEqual([]);
+      expect(result.existingGroupsByGroupNameTopics).toEqual([]);
     });
   });
 
   describe("Group name search", () => {
     it("should find group by name with current user first in member list", () => {
-      const result = processConversationSearch(
-        [mockGroupConversation],
-        "Test Group",
-        currentUserAddress
-      );
+      const result = searchByConversationMembershipProcessor({
+        conversations: [mockGroupConversation],
+        searchQuery: "Test Group",
+        currentUserAddress,
+      });
 
-      expect(result.existingDmSearchResults).toEqual([]);
-      expect(result.existingGroupMemberNameSearchResults).toEqual([]);
-      expect(result.existingGroupNameSearchResults).toEqual([
+      expect(result.existingDmTopics).toEqual([]);
+      expect(result.existingGroupsByMemberNameTopics).toEqual([]);
+      expect(result.existingGroupsByGroupNameTopics).toEqual([
         {
           groupName: "Test Group Chat",
           groupId: "group-topic",
@@ -159,27 +159,27 @@ describe("processConversationSearch", () => {
         conversationName: "Test Group Chat/proto",
       };
 
-      const result = processConversationSearch(
-        [protoGroup],
-        "Test Group",
-        currentUserAddress
-      );
+      const result = searchByConversationMembershipProcessor({
+        conversations: [protoGroup],
+        searchQuery: "Test Group",
+        currentUserAddress,
+      });
 
-      expect(result.existingGroupNameSearchResults).toEqual([]);
+      expect(result.existingGroupsByGroupNameTopics).toEqual([]);
     });
   });
 
   describe("Group member search", () => {
     it("should find group by member ENS with matched member first in list", () => {
-      const result = processConversationSearch(
-        [mockGroupConversation],
-        "group1.eth",
-        currentUserAddress
-      );
+      const result = searchByConversationMembershipProcessor({
+        conversations: [mockGroupConversation],
+        searchQuery: "group1.eth",
+        currentUserAddress,
+      });
 
-      expect(result.existingDmSearchResults).toEqual([]);
-      expect(result.existingGroupNameSearchResults).toEqual([]);
-      expect(result.existingGroupMemberNameSearchResults).toEqual([
+      expect(result.existingDmTopics).toEqual([]);
+      expect(result.existingGroupsByGroupNameTopics).toEqual([]);
+      expect(result.existingGroupsByMemberNameTopics).toEqual([
         {
           memberNameFromGroup: "0xGroupUser1",
           groupName: "Test Group Chat",
@@ -210,14 +210,14 @@ describe("processConversationSearch", () => {
         ],
       };
 
-      const result = processConversationSearch(
-        [largeGroup],
-        "group1.eth",
-        currentUserAddress
-      );
+      const result = searchByConversationMembershipProcessor({
+        conversations: [largeGroup],
+        searchQuery: "group1.eth",
+        currentUserAddress,
+      });
 
       expect(
-        result.existingGroupMemberNameSearchResults[0].firstThreeMemberNames
+        result.existingGroupsByMemberNameTopics[0].firstThreeMemberNames
       ).toHaveLength(3);
     });
 
@@ -242,15 +242,15 @@ describe("processConversationSearch", () => {
         ],
       };
 
-      const result = processConversationSearch(
-        [groupWithCurrentUser],
-        "current.eth", // Search for current user's ENS
-        currentUserAddress
-      );
+      const result = searchByConversationMembershipProcessor({
+        conversations: [groupWithCurrentUser],
+        searchQuery: "current.eth", // Search for current user's ENS
+        currentUserAddress,
+      });
 
-      expect(result.existingDmSearchResults).toEqual([]);
-      expect(result.existingGroupMemberNameSearchResults).toEqual([]);
-      expect(result.existingGroupNameSearchResults).toEqual([]);
+      expect(result.existingDmTopics).toEqual([]);
+      expect(result.existingGroupsByMemberNameTopics).toEqual([]);
+      expect(result.existingGroupsByGroupNameTopics).toEqual([]);
     });
   });
 });

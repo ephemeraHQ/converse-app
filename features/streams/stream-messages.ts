@@ -1,8 +1,8 @@
 import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { addConversationMessageQuery } from "@/queries/use-conversation-messages-query";
-import { updateConversationInConversationsQueryData } from "@/queries/use-conversations-query";
-import { updateConversationQueryData } from "@/queries/useConversationQuery";
+import { addConversationMessageQuery } from "@/queries/conversation-messages-query";
+import { updateConversationInAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
+import { updateConversationQueryData } from "@/queries/conversation-query";
 import { refetchGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
@@ -70,7 +70,7 @@ async function handleNewMessage(args: {
   }
 
   try {
-    updateConversationInConversationsQueryData({
+    updateConversationInAllowedConsentConversationsQueryData({
       account,
       topic: message.topic as ConversationTopic,
       conversationUpdate: {
@@ -132,7 +132,7 @@ function handleNewGroupUpdatedMessage(args: {
           conversationUpdate: update,
         });
 
-        updateConversationInConversationsQueryData({
+        updateConversationInAllowedConsentConversationsQueryData({
           account,
           topic,
           conversationUpdate: update,

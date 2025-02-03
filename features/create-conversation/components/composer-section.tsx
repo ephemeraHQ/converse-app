@@ -16,7 +16,7 @@ import { ConversationKeyboardFiller } from "@/features/conversation/conversation
  * @param props.conversationMode - The type of conversation being created
  * @param props.onSend - Callback when a message is sent
  */
-export function ComposerSection({
+export function CreateConversationComposerSection({
   disabled,
   conversationMode,
   onSend,

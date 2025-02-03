@@ -1,30 +1,20 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import { searchByConversationMembership } from "./search-by-conversation-membership";
 import { searchByConversationMembershipQueryKey } from "@/queries/QueryKeys";
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { searchByConversationMembership } from "./utils/search-by-conversation-membership";
 
-export function getSearchByConversationMembershipQueryOptions(
-  searchQuery: string
-) {
-  // logger.info(
-  //   `[Search] Creating conversation membership query options for: ${searchQuery}`
-  // );
-  return queryOptions({
-    queryKey: searchByConversationMembershipQueryKey(searchQuery),
-    queryFn: () => searchByConversationMembership({ searchQuery }),
-    enabled: !!searchQuery,
-    staleTime: 0,
-  });
+export function useSearchByConversationMembershipQuery(args: {
+  searchQuery: string;
+}) {
+  return useQuery(getSearchByConversationMembershipQueryOptions(args));
 }
 
-export function useSearchByConversationMembershipQuery(searchQuery: string) {
-  const { data } = useQuery(
-    getSearchByConversationMembershipQueryOptions(searchQuery)
-  );
-
-  return {
-    existingDmSearchResults: data?.existingDmSearchResults,
-    existingGroupMemberNameSearchResults:
-      data?.existingGroupMemberNameSearchResults,
-    existingGroupNameSearchResults: data?.existingGroupNameSearchResults,
-  };
+function getSearchByConversationMembershipQueryOptions(args: {
+  searchQuery: string;
+}) {
+  return queryOptions({
+    queryKey: searchByConversationMembershipQueryKey(args),
+    queryFn: () => searchByConversationMembership(args),
+    enabled: !!args.searchQuery,
+    staleTime: 0,
+  });
 }

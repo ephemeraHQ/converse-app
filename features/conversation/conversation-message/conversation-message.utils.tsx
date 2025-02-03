@@ -2,7 +2,7 @@ import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   getConversationMessagesQueryData,
   useConversationMessagesQuery,
-} from "@/queries/use-conversation-messages-query";
+} from "@/queries/conversation-messages-query";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/xmtp-content-types/xmtp-coinbase-payment";
 import { getMessageContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";

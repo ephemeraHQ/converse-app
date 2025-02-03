@@ -12,8 +12,8 @@ import { MessageContextStoreProvider } from "@/features/conversation/conversatio
 import { useMessageHasReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { conversationListDefaultProps } from "@/features/conversation/conversation-messages-list";
 import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
-import { useConversationMessagesQuery } from "@/queries/use-conversation-messages-query";
-import { useConversationQuery } from "@/queries/useConversationQuery";
+import { useConversationMessagesQuery } from "@/queries/conversation-messages-query";
+import { useConversationQuery } from "@/queries/conversation-query";
 import { $globalStyles } from "@/theme/styles";
 import type { ConversationTopic, DecodedMessage } from "@xmtp/react-native-sdk";
 import React, { memo } from "react";
