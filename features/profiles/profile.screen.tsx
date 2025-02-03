@@ -123,7 +123,7 @@ export function ProfileScreen() {
                 ? "userProfile.unblock.message"
                 : "userProfile.block.message",
               {
-                name: userName,
+                name: displayName,
               }
             ),
             [
@@ -156,7 +156,7 @@ export function ProfileScreen() {
     },
     [
       isMyProfile,
-      userName,
+      displayName,
       isBlockedPeer,
       peerAddress,
       userAddress,
@@ -237,8 +237,8 @@ export function ProfileScreen() {
                         {
                           id: "block",
                           title: isBlockedPeer
-                            ? translate("userProfile.unblock")
-                            : translate("userProfile.block"),
+                            ? translate("userProfile.unblock.title")
+                            : translate("userProfile.block.title"),
                           image: isBlockedPeer
                             ? iconRegistry["person.crop.circle.badge.plus"]
                             : iconRegistry["person.crop.circle.badge.xmark"],
