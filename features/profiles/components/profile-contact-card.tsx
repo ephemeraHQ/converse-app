@@ -1,4 +1,10 @@
-import React, { memo } from "react";
+import React, {
+  memo,
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { ContactCard } from "./contact-card";
 import { useAddPfp } from "@/features/onboarding/hooks/useAddPfp";
 import { useCreateOrUpdateProfileInfo } from "@/features/onboarding/hooks/useCreateOrUpdateProfileInfo";
@@ -10,7 +16,12 @@ type IProfileContactCardProps = {
   avatarUri?: string;
   isMyProfile?: boolean;
   editMode?: boolean;
-  onToggleEdit?: () => void;
+  onSaving?: (isSaving: boolean) => void;
+};
+
+export type ProfileContactCardHandle = {
+  handleSave: () => Promise<void>;
+  hasChanges: boolean;
 };
 
 /**
@@ -19,44 +30,117 @@ type IProfileContactCardProps = {
  * A container component that handles the data layer for the profile contact card.
  * Manages profile updates and avatar changes.
  */
-export const ProfileContactCard = memo(function ProfileContactCard({
-  displayName,
-  userName,
-  avatarUri,
-  isMyProfile,
-  editMode,
-  onToggleEdit,
-}: IProfileContactCardProps) {
-  const { addPFP, asset } = useAddPfp();
-  const { profile, setProfile } = useProfile();
-  const { createOrUpdateProfile } = useCreateOrUpdateProfileInfo();
+export const ProfileContactCard = memo(
+  forwardRef<ProfileContactCardHandle, IProfileContactCardProps>(
+    function ProfileContactCard(
+      {
+        displayName: initialDisplayName,
+        userName,
+        avatarUri,
+        isMyProfile,
+        editMode,
+        onSaving,
+      }: IProfileContactCardProps,
+      ref
+    ) {
+      const { profile, setProfile } = useProfile();
+      const { addPFP, asset } = useAddPfp();
+      const { createOrUpdateProfile } = useCreateOrUpdateProfileInfo();
+      const [hasChanges, setHasChanges] = useState(false);
+      const [localDisplayName, setLocalDisplayName] =
+        useState(initialDisplayName);
+      const [previousEditMode, setPreviousEditMode] = useState(editMode);
+      const [isLoading, setIsLoading] = useState(false);
 
-  const handleSave = async () => {
-    try {
-      const { success } = await createOrUpdateProfile({ profile });
-      if (success && onToggleEdit) {
-        onToggleEdit();
-      }
-    } catch (error) {
-      // Error is handled by the mutation
+      // Update local display name when initial changes
+      useEffect(() => {
+        setLocalDisplayName(initialDisplayName);
+      }, [initialDisplayName]);
+
+      // Handle edit mode changes
+      useEffect(() => {
+        // If we're entering edit mode
+        if (!previousEditMode && editMode) {
+          setLocalDisplayName(initialDisplayName);
+          setHasChanges(false);
+        }
+        setPreviousEditMode(editMode);
+      }, [editMode, previousEditMode, initialDisplayName]);
+
+      // Notify parent of saving state
+      useEffect(() => {
+        onSaving?.(isLoading);
+      }, [isLoading, onSaving]);
+
+      const handleDisplayNameChange = (text: string) => {
+        setLocalDisplayName(text);
+        setHasChanges(true);
+      };
+
+      // Update profile with avatar changes
+      useEffect(() => {
+        if (asset?.uri) {
+          setProfile({ ...profile, avatar: asset.uri });
+          setHasChanges(true);
+        }
+      }, [asset?.uri, profile, setProfile]);
+
+      useImperativeHandle(
+        ref,
+        () => ({
+          async handleSave() {
+            // If there are no changes, don't trigger a save
+            if (!hasChanges) {
+              return;
+            }
+
+            setIsLoading(true);
+            try {
+              const updatedProfile = {
+                ...profile,
+                displayName: localDisplayName,
+              };
+
+              const { success } = await createOrUpdateProfile({
+                profile: updatedProfile,
+              });
+              if (success) {
+                setProfile(updatedProfile);
+                setHasChanges(false);
+              }
+            } catch {
+              // Error is handled by the mutation
+              setLocalDisplayName(initialDisplayName); // Revert on error
+              setHasChanges(false);
+            } finally {
+              setIsLoading(false);
+            }
+          },
+          hasChanges,
+        }),
+        [
+          hasChanges,
+          profile,
+          localDisplayName,
+          initialDisplayName,
+          createOrUpdateProfile,
+          setProfile,
+        ]
+      );
+
+      return (
+        <ContactCard
+          displayName={localDisplayName}
+          userName={userName}
+          avatarUri={asset?.uri || avatarUri}
+          isMyProfile={isMyProfile}
+          editMode={editMode}
+          onAvatarPress={addPFP}
+          onDisplayNameChange={handleDisplayNameChange}
+          editableDisplayName={localDisplayName}
+          isLoading={isLoading}
+        />
+      );
     }
-  };
-
-  const handleDisplayNameChange = (text: string) => {
-    setProfile({ ...profile, displayName: text });
-  };
-
-  return (
-    <ContactCard
-      displayName={displayName}
-      userName={userName}
-      avatarUri={asset?.uri || avatarUri}
-      isMyProfile={isMyProfile}
-      editMode={editMode}
-      onToggleEdit={editMode ? handleSave : onToggleEdit}
-      onAvatarPress={addPFP}
-      onDisplayNameChange={handleDisplayNameChange}
-      editableDisplayName={profile.displayName}
-    />
-  );
-});
+  )
+);

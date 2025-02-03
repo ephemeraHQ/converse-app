@@ -26,16 +26,22 @@ import { useHeader } from "@/navigation/use-header";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Haptics } from "@/utils/haptics";
 import { navigate } from "@/utils/navigation";
-import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { useRoute, useRouter } from "@navigation/useNavigation";
-import Clipboard from "@react-native-clipboard/clipboard";
 import { StackActions } from "@react-navigation/native";
-import React, { useCallback, useState } from "react";
-import { Alert, Share, View, ViewStyle } from "react-native";
+import React, { useCallback, useState, useRef } from "react";
+import { Alert, Share, ViewStyle } from "react-native";
 import { ProfileContactCard } from "./components/profile-contact-card";
+
+// Add this type at the top level
+type ProfileContactCardHandle = {
+  handleSave: () => Promise<void>;
+  hasChanges: boolean;
+};
 
 export function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const profileCardRef = useRef<ProfileContactCardHandle>(null);
   const { theme, themed } = useAppTheme();
   const router = useRouter();
   const route = useRoute<"Profile">();
@@ -60,9 +66,27 @@ export function ProfileScreen() {
     );
   }, [router, peerAddress]);
 
-  const handleEditProfile = useCallback(() => {
+  const handleEditProfile = useCallback(async () => {
+    if (editMode) {
+      // Only save if there are changes
+      if (profileCardRef.current?.hasChanges) {
+        await profileCardRef.current?.handleSave();
+      } else {
+        // If no changes, just exit edit mode
+        setEditMode(false);
+      }
+      return;
+    }
     setEditMode(!editMode);
   }, [editMode]);
+
+  const handleSaving = useCallback((saving: boolean) => {
+    setIsSaving(saving);
+    // When saving is complete, exit edit mode
+    if (!saving) {
+      setEditMode(false);
+    }
+  }, []);
 
   const showDisconnectActionSheet = useDisconnectActionSheet();
 
@@ -162,17 +186,14 @@ export function ProfileScreen() {
         />
       ),
       RightActionComponent: (
-        <HStack
-          style={{
-            alignItems: "center",
-            columnGap: theme.spacing.xxs,
-          }}
-        >
+        <HStack style={themed($headerRightContainer)}>
           {editMode ? (
             <Button
-              text={translate("userProfile.done")}
+              text={isSaving ? "" : translate("userProfile.done")}
               variant="text"
               onPress={handleEditProfile}
+              loading={isSaving}
+              disabled={isSaving}
             />
           ) : (
             <>
@@ -185,18 +206,13 @@ export function ProfileScreen() {
                 />
               ) : (
                 <HeaderAction
-                  style={{
-                    marginBottom: 4, // Centers the square.and.pencil icon
-                  }}
+                  style={themed($chatIcon)}
                   icon="square.and.pencil"
                   onPress={handleChatPress}
                 />
               )}
               <DropdownMenu
-                style={{
-                  paddingVertical: theme.spacing.sm,
-                  paddingRight: theme.spacing.xxxs,
-                }}
+                style={themed($dropdownMenu)}
                 onPress={handleContextMenuAction}
                 actions={[
                   ...(isMyProfile
@@ -249,6 +265,7 @@ export function ProfileScreen() {
       handleContextMenuAction,
       isBlockedPeer,
       handleEditProfile,
+      isSaving,
     ]
   );
 
@@ -257,12 +274,13 @@ export function ProfileScreen() {
       <VStack>
         <VStack style={themed($section)}>
           <ProfileContactCard
+            ref={profileCardRef}
             displayName={displayName}
             userName={formatConverseUsername(userName)?.username}
             avatarUri={preferredAvatarUri}
             isMyProfile={isMyProfile}
             editMode={editMode}
-            onToggleEdit={handleEditProfile}
+            onSaving={handleSaving}
           />
         </VStack>
 
@@ -360,4 +378,18 @@ const $section: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
 const $borderTop: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   borderTopWidth: spacing.xxs,
   borderTopColor: colors.background.sunken,
+});
+
+const $headerRightContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  alignItems: "center",
+  columnGap: spacing.xxs,
+});
+
+const $chatIcon: ThemedStyle<ViewStyle> = () => ({
+  marginBottom: 4, // Centers the square.and.pencil icon
+});
+
+const $dropdownMenu: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingVertical: spacing.sm,
+  paddingRight: spacing.xxxs,
 });

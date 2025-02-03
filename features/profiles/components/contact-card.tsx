@@ -2,7 +2,6 @@ import React, { memo } from "react";
 import { Avatar } from "@/components/Avatar";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
-import { Button } from "@/design-system/Button/Button";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { AnimatedCardContainer } from "./animated-card-container";
 import { TextField } from "@/design-system/TextField/TextField";
@@ -17,7 +16,6 @@ type IContactCardProps = {
   avatarUri?: string;
   isMyProfile?: boolean;
   editMode?: boolean;
-  onToggleEdit?: () => void;
   onAvatarPress?: () => void;
   onDisplayNameChange?: (text: string) => void;
   editableDisplayName?: string;
@@ -36,7 +34,6 @@ export const ContactCard = memo(function ContactCard({
   avatarUri,
   isMyProfile,
   editMode,
-  onToggleEdit,
   onAvatarPress,
   onDisplayNameChange,
   editableDisplayName,
@@ -47,7 +44,7 @@ export const ContactCard = memo(function ContactCard({
   return (
     <AnimatedCardContainer>
       <VStack style={{ flex: 1, justifyContent: "space-between" }}>
-        {/* Top row with Avatar and Edit/Save button */}
+        {/* Top row with Avatar */}
         <HStack
           style={{
             justifyContent: "space-between",
@@ -75,23 +72,6 @@ export const ContactCard = memo(function ContactCard({
               uri={avatarUri}
               name={displayName}
               size={theme.avatarSize.lg}
-            />
-          )}
-          {isMyProfile && (
-            <Button
-              variant="link.bare"
-              size="sm"
-              text={
-                editMode
-                  ? translate("userProfile.done")
-                  : translate("userProfile.edit")
-              }
-              textStyle={{ color: theme.colors.text.inverted.primary }}
-              pressedTextStyle={{
-                color: theme.colors.text.inverted.secondary,
-              }}
-              onPress={onToggleEdit}
-              disabled={isLoading}
             />
           )}
         </HStack>
