@@ -51,6 +51,7 @@ export const ProfileContactCard = memo(
         useState(initialDisplayName);
       const [previousEditMode, setPreviousEditMode] = useState(editMode);
       const [isLoading, setIsLoading] = useState(false);
+      const [localAvatarUri, setLocalAvatarUri] = useState(avatarUri);
 
       // Update local display name when initial changes
       useEffect(() => {
@@ -62,28 +63,29 @@ export const ProfileContactCard = memo(
         // If we're entering edit mode
         if (!previousEditMode && editMode) {
           setLocalDisplayName(initialDisplayName);
+          setLocalAvatarUri(avatarUri);
           setHasChanges(false);
         }
         setPreviousEditMode(editMode);
-      }, [editMode, previousEditMode, initialDisplayName]);
+      }, [editMode, previousEditMode, initialDisplayName, avatarUri]);
 
       // Notify parent of saving state
       useEffect(() => {
         onSaving?.(isLoading);
       }, [isLoading, onSaving]);
 
+      // Handle asset changes from image picker
+      useEffect(() => {
+        if (asset?.uri && asset.uri !== localAvatarUri) {
+          setLocalAvatarUri(asset.uri);
+          setHasChanges(true);
+        }
+      }, [asset?.uri, localAvatarUri]);
+
       const handleDisplayNameChange = (text: string) => {
         setLocalDisplayName(text);
         setHasChanges(true);
       };
-
-      // Update profile with avatar changes
-      useEffect(() => {
-        if (asset?.uri) {
-          setProfile({ ...profile, avatar: asset.uri });
-          setHasChanges(true);
-        }
-      }, [asset?.uri, profile, setProfile]);
 
       useImperativeHandle(
         ref,
@@ -99,6 +101,7 @@ export const ProfileContactCard = memo(
               const updatedProfile = {
                 ...profile,
                 displayName: localDisplayName,
+                avatar: localAvatarUri,
               };
 
               const { success } = await createOrUpdateProfile({
@@ -111,6 +114,7 @@ export const ProfileContactCard = memo(
             } catch {
               // Error is handled by the mutation
               setLocalDisplayName(initialDisplayName); // Revert on error
+              setLocalAvatarUri(avatarUri);
               setHasChanges(false);
             } finally {
               setIsLoading(false);
@@ -122,7 +126,9 @@ export const ProfileContactCard = memo(
           hasChanges,
           profile,
           localDisplayName,
+          localAvatarUri,
           initialDisplayName,
+          avatarUri,
           createOrUpdateProfile,
           setProfile,
         ]
@@ -132,7 +138,7 @@ export const ProfileContactCard = memo(
         <ContactCard
           displayName={localDisplayName}
           userName={userName}
-          avatarUri={asset?.uri || avatarUri}
+          avatarUri={localAvatarUri}
           isMyProfile={isMyProfile}
           editMode={editMode}
           onAvatarPress={addPFP}
