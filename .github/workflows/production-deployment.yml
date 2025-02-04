@@ -1,9 +1,16 @@
 name: Production Deployment
 
 on:
-  push:
-    branches:
-      - production
+  workflow_dispatch:
+    inputs:
+      deployment_type:
+        description: "Deployment type (build/update)"
+        required: true
+        type: choice
+        options:
+          - auto
+          - build
+          - update
 
 # We need to ensure only one workflow runs at a time and wait for any in-progress workflows to complete.
 # This is critical because:
@@ -26,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       versions_match: ${{ steps.version-compare.outputs.versions_match }}
-      commit_message: ${{ steps.commit_msg.outputs.message }}
+      deployment_type: ${{ steps.determine-deployment.outputs.type }}
 
     steps:
       # Verify that the required Expo token is available
@@ -57,19 +64,31 @@ jobs:
             echo "versions_match=true" >> $GITHUB_OUTPUT
           fi
 
-      # Collect all commit messages between main and production for the update message
-      - name: Get Commit Messages
-        id: commit_msg
+      - name: Merge main into production
         run: |
-          COMMITS=$(git log origin/production..origin/main --pretty=format:"- %s")
-          COMMITS="${COMMITS//'%'/'%25'}"
-          COMMITS="${COMMITS//$'\n'/'%0A'}"
-          COMMITS="${COMMITS//$'\r'/'%0D'}"
-          echo "message=$COMMITS" >> $GITHUB_OUTPUT
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git checkout production
+          git pull origin production
+          git merge origin/main -m "feat: Merge main into production for deployment"
+          git push origin production
+
+      - name: Determine deployment type
+        id: determine-deployment
+        run: |
+          if [ "${{ inputs.deployment_type }}" = "auto" ]; then
+            if [ "${{ steps.version-compare.outputs.versions_match }}" = "true" ]; then
+              echo "type=update" >> $GITHUB_OUTPUT
+            else
+              echo "type=build" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "type=${{ inputs.deployment_type }}" >> $GITHUB_OUTPUT
+          fi
 
   ios-build:
     needs: check-deployment-type
-    if: needs.check-deployment-type.outputs.versions_match == 'false'
+    if: needs.check-deployment-type.outputs.deployment_type == 'build'
     runs-on: ubuntu-latest
 
     steps:
@@ -107,7 +126,7 @@ jobs:
 
   android-build:
     needs: check-deployment-type
-    if: needs.check-deployment-type.outputs.versions_match == 'false'
+    if: needs.check-deployment-type.outputs.deployment_type == 'build'
     runs-on: ubuntu-latest
 
     steps:
@@ -144,7 +163,7 @@ jobs:
 
   ota-update:
     needs: check-deployment-type
-    if: needs.check-deployment-type.outputs.versions_match == 'true'
+    if: needs.check-deployment-type.outputs.deployment_type == 'update'
     runs-on: ubuntu-latest
 
     steps:
@@ -177,7 +196,7 @@ jobs:
 
       - name: Run EAS Update
         run: |
-          eas update --auto --channel=production --message "${{ needs.check-deployment-type.outputs.commit_message }}" --non-interactive
+          eas update --auto --channel=production --non-interactive
 
       - name: Upload source maps
         run: |
