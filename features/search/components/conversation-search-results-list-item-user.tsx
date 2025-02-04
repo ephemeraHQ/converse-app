@@ -1,10 +1,12 @@
-import { usePreferredInboxAddress } from "@/hooks/usePreferredInboxAddress";
+import { Pressable } from "@/design-system/Pressable";
+import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { shortAddress } from "@/utils/strings/shortAddress";
 import { Avatar } from "@components/Avatar";
 import { Text } from "@design-system/Text";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { useCallback } from "react";
 import { TextStyle, View, ViewStyle } from "react-native";
 
 type UserSearchResultListItemProps = {
@@ -19,11 +21,8 @@ export function ConversationSearchResultsListItemUser({
   inboxId,
 }: UserSearchResultListItemProps) {
   const { theme, themed } = useAppTheme();
-  const { data: preferredName } = usePreferredInboxName({
-    inboxId,
-  });
 
-  const { data: preferredAddress } = usePreferredInboxAddress({
+  const { data: preferredName } = usePreferredInboxName({
     inboxId,
   });
 
@@ -31,27 +30,45 @@ export function ConversationSearchResultsListItemUser({
     inboxId,
   });
 
+  const conversationStore = useConversationStore();
+
+  const handlePress = useCallback(() => {
+    conversationStore.setState({
+      searchTextValue: "",
+      searchSelectedUserInboxIds: [
+        ...conversationStore.getState().searchSelectedUserInboxIds,
+        inboxId!,
+      ],
+    });
+  }, [conversationStore, inboxId]);
+
   return (
-    <View style={themed($container)}>
-      <Avatar
-        uri={preferredAvatar}
-        size={theme.avatarSize.md}
-        style={themed($avatar)}
-        name={preferredName}
-      />
-      <View style={themed($textContainer)}>
-        <Text preset="bodyBold" style={themed($primaryText)} numberOfLines={1}>
-          {preferredName}
-        </Text>
-        <Text
-          preset="formLabel"
-          style={themed($secondaryText)}
-          numberOfLines={1}
-        >
-          {shortAddress(inboxId)}
-        </Text>
+    <Pressable onPress={handlePress} withHaptics>
+      <View style={themed($container)}>
+        <Avatar
+          uri={preferredAvatar}
+          size={theme.avatarSize.md}
+          style={themed($avatar)}
+          name={preferredName}
+        />
+        <View style={themed($textContainer)}>
+          <Text
+            preset="bodyBold"
+            style={themed($primaryText)}
+            numberOfLines={1}
+          >
+            {preferredName}
+          </Text>
+          <Text
+            preset="formLabel"
+            style={themed($secondaryText)}
+            numberOfLines={1}
+          >
+            {shortAddress(inboxId)}
+          </Text>
+        </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

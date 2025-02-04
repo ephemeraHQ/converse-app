@@ -1,21 +1,13 @@
-import { Avatar } from "@/components/Avatar";
-import { useCurrentAccount } from "@/data/store/accountsStore";
-import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
-import { AnimatedVStack } from "@/design-system/VStack";
+import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { EmptyState } from "@/design-system/empty-state";
 import { Loader } from "@/design-system/loader";
-import {
-  useConversationStore,
-  useConversationStoreContext,
-} from "@/features/conversation/conversation.store-context";
+import { useConversationStoreContext } from "@/features/conversation/conversation.store-context";
 import { useSearchByConversationMembershipQuery } from "@/features/search/search-by-conversation-membership/use-search-by-conversation-membership.query";
 import { useSearchConvosUsersQuery } from "@/features/search/use-search-convos-users-query";
-import { useGroupMembers } from "@/hooks/useGroupMembers";
-import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
-import { useGroupQuery } from "@/queries/useGroupQuery";
+import { useSafeCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { Haptics } from "@/utils/haptics";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { ReactNode, memo, useCallback, useMemo } from "react";
 import { SectionList, View } from "react-native";
@@ -25,9 +17,10 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ConversationSearchResultsListItemGroup } from "./conversation-search-results-list-item-group";
 import { ConversationSearchResultsListItemUser } from "./conversation-search-results-list-item-user";
+import { ConversationSearchResultsListItemDm } from "./conversation-search-results-list-item-user-dm";
 import { searchResultsStyles } from "./search-results.styles";
-import { useSafeCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 
 const MAX_INITIAL_RESULTS = 5;
 
@@ -60,7 +53,7 @@ export function ConversationSearchResultsList() {
 
   const currentUserInboxId = useSafeCurrentAccountInboxId();
 
-  const { convosSearchResults, message, areSearchResultsLoading } =
+  const { data: searchConvosUsersData, isLoading: isSearchingConvosUsers } =
     useSearchConvosUsersQuery({
       searchQuery,
       inboxIdsToOmit: [...selectedSearchUserInboxIds, currentUserInboxId],
@@ -68,7 +61,7 @@ export function ConversationSearchResultsList() {
 
   const {
     data: existingConversationMembershipSearchResults,
-    isLoading: isConversationMembershipLoading,
+    isLoading: isSearchingExistingConversations,
   } = useSearchByConversationMembershipQuery({
     searchQuery,
   });
@@ -76,25 +69,24 @@ export function ConversationSearchResultsList() {
   const sections = useMemo(() => {
     const sections: SearchSection[] = [];
 
-    if (!existingConversationMembershipSearchResults) {
-      return sections;
-    }
-
-    if (!convosSearchResults) {
+    // Wait until we finish loading both existing and searched results
+    if (
+      !existingConversationMembershipSearchResults ||
+      !searchConvosUsersData
+    ) {
       return sections;
     }
 
     // If we have selected users, only show "Other Results" section with profiles
     if (selectedSearchUserInboxIds.length > 0) {
-      if (convosSearchResults.length > 0) {
-        sections.push({
-          title: "Other Results",
-          data: convosSearchResults.map((inboxId) => ({
-            type: "profile",
-            data: inboxId,
-          })),
-        });
-      }
+      sections.push({
+        title: "Other Results",
+        data: searchConvosUsersData?.inboxIds.map((inboxId) => ({
+          type: "profile",
+          data: inboxId,
+        })),
+      });
+
       return sections;
     }
 
@@ -145,6 +137,17 @@ export function ConversationSearchResultsList() {
       });
     }
 
+    // Convos users
+    if (searchConvosUsersData?.inboxIds.length > 0) {
+      sections.push({
+        title: "Convos Users",
+        data: searchConvosUsersData?.inboxIds.map((inboxId) => ({
+          type: "profile",
+          data: inboxId,
+        })),
+      });
+    }
+
     // Remaining DMs
     const remainingDmSearchResults =
       existingDmTopics.slice(MAX_INITIAL_RESULTS);
@@ -187,7 +190,7 @@ export function ConversationSearchResultsList() {
     return sections;
   }, [
     existingConversationMembershipSearchResults,
-    convosSearchResults,
+    searchConvosUsersData,
     selectedSearchUserInboxIds,
   ]);
 
@@ -199,7 +202,7 @@ export function ConversationSearchResultsList() {
   );
 
   const isLoadingSearchResults =
-    isConversationMembershipLoading || areSearchResultsLoading;
+    isSearchingExistingConversations || isSearchingConvosUsers;
 
   return (
     <Container>
@@ -208,19 +211,40 @@ export function ConversationSearchResultsList() {
         stickySectionHeadersEnabled={false}
         keyboardShouldPersistTaps="handled"
         ListEmptyComponent={
-          isLoadingSearchResults ? (
-            <Loader />
-          ) : searchQuery ? (
-            <Text>No results</Text>
-          ) : null
+          <VStack
+            style={{
+              paddingBottom: insets.bottom,
+              flex: 1,
+            }}
+          >
+            {isLoadingSearchResults ? (
+              <Loader style={{ flex: 1 }} />
+            ) : searchQuery ? (
+              <EmptyState
+                title="Oops"
+                description={
+                  searchConvosUsersData?.message ||
+                  `Couldn't find what you are looking for`
+                }
+              />
+            ) : null}
+          </VStack>
         }
         sections={sections}
         renderItem={({ item }) => {
           if (item.type === "dm") {
-            return <DmSearchResult conversationTopic={item.data} />;
+            return (
+              <ConversationSearchResultsListItemDm
+                conversationTopic={item.data}
+              />
+            );
           }
           if (item.type === "group") {
-            return <GroupSearchResult conversationTopic={item.data} />;
+            return (
+              <ConversationSearchResultsListItemGroup
+                conversationTopic={item.data}
+              />
+            );
           }
           if (item.type === "profile") {
             return (
@@ -233,6 +257,7 @@ export function ConversationSearchResultsList() {
         renderSectionHeader={renderSectionHeader}
         contentContainerStyle={{
           paddingBottom: insets.bottom,
+          flexGrow: 1,
         }}
         keyExtractor={(item, index) => `${item.type}-${index}`}
       />
@@ -296,94 +321,3 @@ function SectionHeader({ title }: { title: string }) {
     </View>
   );
 }
-
-const DmSearchResult = memo(function DmSearchResult({
-  conversationTopic,
-}: {
-  conversationTopic: ConversationTopic;
-}) {
-  const currentAccount = useCurrentAccount()!;
-
-  const { data: inboxId } = useDmPeerInboxIdQuery({
-    account: currentAccount,
-    topic: conversationTopic,
-    caller: `DmSearchResult-${conversationTopic}`,
-  });
-
-  const conversationStore = useConversationStore();
-
-  const handlePress = useCallback(() => {
-    Haptics.softImpactAsync();
-    conversationStore.setState({
-      searchTextValue: "",
-      searchSelectedUserInboxIds: [inboxId!],
-    });
-  }, [conversationStore, inboxId]);
-
-  return (
-    <Pressable onPress={handlePress}>
-      <ConversationSearchResultsListItemUser inboxId={inboxId!} />
-    </Pressable>
-  );
-});
-
-const GroupSearchResult = memo(function GroupSearchResult({
-  conversationTopic,
-}: {
-  conversationTopic: ConversationTopic;
-}) {
-  const { theme, themed } = useAppTheme();
-
-  const currentAccount = useCurrentAccount()!;
-
-  const { data: group } = useGroupQuery({
-    account: currentAccount,
-    topic: conversationTopic,
-  });
-
-  const { members } = useGroupMembers(conversationTopic);
-
-  const conversationStore = useConversationStore();
-
-  const handlePress = useCallback(() => {
-    conversationStore.setState({
-      searchTextValue: "",
-      searchSelectedUserInboxIds: [],
-      topic: conversationTopic,
-      isCreatingNewConversation: false,
-    });
-  }, [conversationStore, conversationTopic]);
-
-  return (
-    <Pressable onPress={handlePress}>
-      <View style={themed(searchResultsStyles.$groupContainer)}>
-        <Avatar
-          uri={group?.imageUrlSquare}
-          size={theme.avatarSize.md}
-          style={themed(searchResultsStyles.$avatar)}
-          name={group?.name}
-        />
-        <View style={themed(searchResultsStyles.$groupTextContainer)}>
-          <Text
-            preset="bodyBold"
-            style={themed(searchResultsStyles.$primaryText)}
-            numberOfLines={1}
-          >
-            {group?.name}
-          </Text>
-          <Text
-            preset="formLabel"
-            style={themed(searchResultsStyles.$secondaryText)}
-            numberOfLines={1}
-          >
-            {members?.ids
-              .slice(0, 3)
-              .map((id) => members?.byId[id]?.addresses[0])
-              .filter((address) => address !== currentAccount)
-              .join(", ")}
-          </Text>
-        </View>
-      </View>
-    </Pressable>
-  );
-});

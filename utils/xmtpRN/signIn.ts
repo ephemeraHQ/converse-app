@@ -55,6 +55,7 @@ const createXmtpClientFromXmtpSigner = async (
     ...options,
     preAuthenticateToInboxCallback,
   });
+
   logger.debug("[createXmtpClientFromXmtpSigner] XMTP client created");
 
   if (client.inboxId !== inboxId) {
