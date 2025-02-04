@@ -1,0 +1,35 @@
+name: Merge Main to Production
+
+on:
+  workflow_dispatch:
+
+# Ensure only one workflow runs at a time to be safe with our whole deployment process
+concurrency:
+  group: "deployment"
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  merge-to-production:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT_GITHUB }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Merge main into production
+        run: |
+          git fetch origin main production
+          git checkout production
+          git merge origin/main -m "chore: Merge main into production"
+          git push origin production
