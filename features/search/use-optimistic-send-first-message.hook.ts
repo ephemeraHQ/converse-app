@@ -296,7 +296,7 @@ export function useOptimisticSendFirstMessage({
           "[send-optimistic][createConversation] Setting DM query data"
         );
         setDmQueryData({
-          account: currentAccount,
+          ethAccountAddress: currentAccount,
           peer: members[0],
           dm: newConversation as Dm<SupportedCodecsType>,
         });

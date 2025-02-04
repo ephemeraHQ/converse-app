@@ -1,20 +1,24 @@
+import { getCurrentAccount } from "@/data/store/accountsStore";
+import { getDmQueryData } from "@/queries/useDmQuery";
+import { getGroupQueryData } from "@/queries/useGroupQuery";
 import {
   ConversationId,
   ConversationTopic,
+  InboxId,
   MessageId,
 } from "@xmtp/react-native-sdk";
-import { createContext, memo, useContext, useRef } from "react";
+import { createContext, memo, useContext, useEffect, useRef } from "react";
 import { createStore, useStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
 type IConversationStoreProps = {
-  topic: ConversationTopic;
+  topic: ConversationTopic | null;
   conversationId: ConversationId;
   highlightedMessageId?: MessageId;
   scrollToMessageId?: MessageId;
   searchTextValue: string;
-  searchUserAddresses: string[];
-  searchSelectedUserAddreses: string[];
+  searchSelectedUserInboxIds: InboxId[];
+  isCreatingNewConversation: boolean;
 };
 
 type IConversationStoreState = IConversationStoreProps & {};
@@ -30,6 +34,7 @@ export const ConversationStoreProvider = memo(
     if (!storeRef.current) {
       storeRef.current = createConversationStore(props);
     }
+
     return (
       <ConversationStoreContext.Provider value={storeRef.current}>
         {children}
@@ -45,8 +50,8 @@ const createConversationStore = (initProps: IConversationStoreProps) => {
     highlightedMessageId: undefined,
     scrollToMessageId: undefined,
     searchTextValue: "",
-    searchUserAddresses: [],
-    searchSelectedUserAddreses: [],
+    searchSelectedUserInboxIds: [],
+    isCreatingNewConversation: false,
   };
   return createStore<IConversationStoreState>()(
     subscribeWithSelector((set) => ({

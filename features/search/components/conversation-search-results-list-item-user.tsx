@@ -1,3 +1,4 @@
+import { usePreferredInboxAddress } from "@/hooks/usePreferredInboxAddress";
 import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { shortAddress } from "@/utils/strings/shortAddress";
@@ -21,12 +22,17 @@ export function ConversationSearchResultsListItemUser({
   const { data: preferredName } = usePreferredInboxName({
     inboxId,
   });
+
+  const { data: preferredAddress } = usePreferredInboxAddress({
+    inboxId,
+  });
+
   const { data: preferredAvatar } = usePreferredInboxAvatar({
     inboxId,
   });
 
   return (
-    <View key={inboxId} style={themed($container)}>
+    <View style={themed($container)}>
       <Avatar
         uri={preferredAvatar}
         size={theme.avatarSize.md}

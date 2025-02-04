@@ -64,7 +64,7 @@ export function useDenyDmMutation() {
         });
 
         setDmQueryData({
-          account: currentAccount,
+          ethAccountAddress: currentAccount,
           peer: topic,
           dm: updatedDm as DmWithCodecsType,
         });
@@ -88,7 +88,7 @@ export function useDenyDmMutation() {
       const { previousDmConsent } = context || {};
       if (previousDmConsent) {
         const dm = getDmQueryData({
-          account: currentAccount,
+          ethAccountAddress: currentAccount,
           peer: topic,
         });
 
@@ -101,7 +101,7 @@ export function useDenyDmMutation() {
         });
 
         setDmQueryData({
-          account: currentAccount,
+          ethAccountAddress: currentAccount,
           peer: topic,
           dm: previousDm,
         });

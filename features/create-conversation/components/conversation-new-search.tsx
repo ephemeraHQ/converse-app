@@ -5,11 +5,12 @@ import {
   useConversationStore,
   useConversationStoreContext,
 } from "@/features/conversation/conversation.store-context";
-import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
-import { usePreferredName } from "@/hooks/usePreferredName";
+import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
+import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { debugBorder } from "@/utils/debug-style";
-import React, { memo, useCallback, useRef, useState } from "react";
+import { InboxId } from "@xmtp/react-native-sdk";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   NativeSyntheticEvent,
   TextInput,
@@ -19,7 +20,7 @@ import {
   ViewStyle,
 } from "react-native";
 
-export function UserInlineSearch() {
+export function ConversationNewSearch() {
   const { theme, themed } = useAppTheme();
   const [selectedChipIndex, setSelectedChipIndex] = useState<number | null>(
     null
@@ -28,8 +29,8 @@ export function UserInlineSearch() {
 
   const conversationStore = useConversationStore();
 
-  const searchUserAddresses = useConversationStoreContext(
-    (state) => state.searchUserAddresses
+  const searchSelectedUserInboxIds = useConversationStoreContext(
+    (state) => state.searchSelectedUserInboxIds
   );
 
   const defaultSearchTextValue = conversationStore.getState().searchTextValue;
@@ -38,21 +39,21 @@ export function UserInlineSearch() {
     e: NativeSyntheticEvent<TextInputKeyPressEventData>
   ) => {
     const { key } = e.nativeEvent;
-    const searchUsersQueryValue = conversationStore.getState().searchTextValue;
-    if (key === "Backspace" && searchUsersQueryValue === "") {
+    const { searchTextValue, searchSelectedUserInboxIds } =
+      conversationStore.getState();
+
+    if (key === "Backspace" && !searchTextValue) {
       if (selectedChipIndex !== null) {
+        // Remove selected chip
         conversationStore.setState({
-          searchUserAddresses: conversationStore
-            .getState()
-            .searchUserAddresses.filter(
-              (user, index) => index !== selectedChipIndex
-            ),
+          searchSelectedUserInboxIds: searchSelectedUserInboxIds.filter(
+            (_, index) => index !== selectedChipIndex
+          ),
         });
         setSelectedChipIndex(null);
-      } else if (conversationStore.getState().searchUserAddresses.length > 0) {
-        setSelectedChipIndex(
-          conversationStore.getState().searchUserAddresses.length - 1
-        );
+      } else if (searchSelectedUserInboxIds.length > 0) {
+        // Select last chip for deletion
+        setSelectedChipIndex(searchSelectedUserInboxIds.length - 1);
       }
     } else {
       setSelectedChipIndex(null);
@@ -68,14 +69,25 @@ export function UserInlineSearch() {
     [conversationStore]
   );
 
+  useEffect(() => {
+    conversationStore.subscribe(
+      (state) => state.searchTextValue,
+      (searchTextValue) => {
+        if (searchTextValue === "") {
+          inputRef.current?.clear();
+        }
+      }
+    );
+  }, [conversationStore]);
+
   return (
     <View style={themed($container)} {...debugBorder()}>
       <View style={themed($inputContainer)}>
         <Text preset="formLabel" style={themed($toText)}>
           To
         </Text>
-        {searchUserAddresses.map((user, index) => (
-          <UserChip key={user} address={user} />
+        {searchSelectedUserInboxIds.map((inboxId) => (
+          <UserChip key={inboxId} inboxId={inboxId} />
         ))}
 
         <TextInput
@@ -84,7 +96,7 @@ export function UserInlineSearch() {
           defaultValue={defaultSearchTextValue}
           onChangeText={handleChangeText}
           placeholder={
-            searchUserAddresses.length === 0
+            searchSelectedUserInboxIds.length === 0
               ? "Name, address or onchain ID"
               : ""
           }
@@ -98,38 +110,38 @@ export function UserInlineSearch() {
   );
 }
 
-const UserChip = memo(function UserChip(props: { address: string }) {
-  const { address } = props;
+const UserChip = memo(function UserChip(props: { inboxId: InboxId }) {
+  const { inboxId } = props;
 
-  const avatarUri = usePreferredAvatarUri(address);
-  const name = usePreferredName(address);
+  const { data: avatarUri } = usePreferredInboxAvatar({ inboxId });
+  const { data: name } = usePreferredInboxName({ inboxId });
 
   const conversationStore = useConversationStore();
-  const searchSelectedUserAddreses = useConversationStoreContext(
-    (state) => state.searchSelectedUserAddreses
+  const searchSelectedUserInboxIds = useConversationStoreContext(
+    (state) => state.searchSelectedUserInboxIds
   );
 
-  const isSelected = searchSelectedUserAddreses.includes(address);
+  const isSelected = searchSelectedUserInboxIds.includes(inboxId);
 
   const handlePress = useCallback(() => {
     const isSelected = conversationStore
       .getState()
-      .searchSelectedUserAddreses.includes(address);
+      .searchSelectedUserInboxIds.includes(inboxId);
     if (isSelected) {
       conversationStore.setState({
-        searchSelectedUserAddreses: conversationStore
+        searchSelectedUserInboxIds: conversationStore
           .getState()
-          .searchSelectedUserAddreses.filter((user) => user !== address),
+          .searchSelectedUserInboxIds.filter((user) => user !== inboxId),
       });
     } else {
       conversationStore.setState({
-        searchSelectedUserAddreses: [
-          ...conversationStore.getState().searchSelectedUserAddreses,
-          address,
+        searchSelectedUserInboxIds: [
+          ...conversationStore.getState().searchSelectedUserInboxIds,
+          inboxId,
         ],
       });
     }
-  }, [address, conversationStore]);
+  }, [inboxId, conversationStore]);
 
   return (
     <Chip

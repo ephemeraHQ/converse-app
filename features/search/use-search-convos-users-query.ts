@@ -8,18 +8,16 @@ import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { isEmptyObject } from "@/utils/objects";
 import { shortAddress } from "@/utils/strings/shortAddress";
+import { getInboxId } from "@/utils/xmtpRN/signIn";
+import { isSameInboxId } from "@/utils/xmtpRN/xmtp-inbox-id/xmtp-inbox-id";
 import { queryOptions, useQuery } from "@tanstack/react-query";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 export function useSearchConvosUsersQuery(args: {
   searchQuery: string;
-  addressesToOmit: string[];
+  inboxIdsToOmit: string[];
 }) {
-  const { searchQuery, addressesToOmit } = args;
-  const currentAccount = getCurrentAccount()!;
-  const currentAccountAddress = getCleanAddress(currentAccount);
-  const allAddressesToOmit = [...addressesToOmit, currentAccountAddress].map(
-    (address) => address.toLowerCase()
-  );
+  const { searchQuery, inboxIdsToOmit } = args;
 
   const { data, isLoading: areSearchResultsLoading } = useQuery({
     ...getConvosUsersSearchQueryOptions(searchQuery),
@@ -28,9 +26,11 @@ export function useSearchConvosUsersQuery(args: {
       const filteredResults = {
         ...data,
         convosSearchResults: data?.convosSearchResults?.filter(
-          (result) =>
-            !result.address ||
-            !allAddressesToOmit.includes(result.address.toLowerCase())
+          (inboxId) =>
+            !inboxId ||
+            !inboxIdsToOmit.some((inboxIdToOmit) =>
+              isSameInboxId(inboxId, inboxIdToOmit)
+            )
         ),
       };
 
@@ -60,7 +60,11 @@ function getConvosUsersSearchQueryOptions(searchQuery: string) {
  *
  * @see we also have methods for searching for users by current conversation cached locally
  */
-async function searchConvosUsers({ searchQuery }: { searchQuery: string }) {
+async function searchConvosUsers({
+  searchQuery,
+}: {
+  searchQuery: string;
+}): Promise<{ message: string; convosSearchResults: InboxId[] }> {
   if (searchQuery.length === 0) {
     return {
       message: "",
@@ -68,11 +72,17 @@ async function searchConvosUsers({ searchQuery }: { searchQuery: string }) {
     };
   }
 
-  if (isSupportedPeer(searchQuery)) {
-    return handlePeerSearch(searchQuery);
-  }
+  // TODO: Make backend route to return inboxIds?
+  return {
+    message: "",
+    convosSearchResults: [],
+  };
 
-  return handleGeneralSearch(searchQuery);
+  // if (isSupportedPeer(searchQuery)) {
+  //   return handlePeerSearch(searchQuery);
+  // }
+
+  // return handleGeneralSearch(searchQuery);
 }
 
 /**

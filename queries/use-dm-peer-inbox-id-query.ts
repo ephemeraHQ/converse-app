@@ -1,19 +1,22 @@
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import logger from "@/utils/logger";
-import { useQuery } from "@tanstack/react-query";
+import { reactQueryPersister } from "@/utils/mmkv";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { type ConversationTopic } from "@xmtp/react-native-sdk";
 import { dmPeerInboxIdQueryKey } from "./QueryKeys";
 import { getOrFetchConversation } from "./conversation-query";
-import { reactQueryPersister } from "@/utils/mmkv";
+import { queryClient } from "@/queries/queryClient";
 
-export const useDmPeerInboxIdQuery = (args: {
+type IArgs = {
   account: string;
   topic: ConversationTopic;
   caller: string;
-}) => {
+};
+
+export function getDmPeerInboxIdQueryOptions(args: IArgs) {
   const { account, topic, caller } = args;
 
-  return useQuery({
+  return queryOptions({
     queryKey: dmPeerInboxIdQueryKey(account, topic),
     queryFn: async function getPeerInboxId() {
       const conversation = await getOrFetchConversation({
@@ -39,4 +42,12 @@ export const useDmPeerInboxIdQuery = (args: {
     enabled: !!account && !!topic,
     persister: reactQueryPersister,
   });
+}
+
+export const useDmPeerInboxIdQuery = (args: IArgs) => {
+  return useQuery(getDmPeerInboxIdQueryOptions(args));
+};
+
+export const ensureDmPeerInboxIdQueryData = async (args: IArgs) => {
+  return queryClient.ensureQueryData(getDmPeerInboxIdQueryOptions(args));
 };

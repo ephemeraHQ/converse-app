@@ -3,6 +3,7 @@ import { useCurrentAccount } from "@/data/store/accountsStore";
 import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
 import { AnimatedVStack } from "@/design-system/VStack";
+import { Loader } from "@/design-system/loader";
 import {
   useConversationStore,
   useConversationStoreContext,
@@ -10,11 +11,11 @@ import {
 import { useSearchByConversationMembershipQuery } from "@/features/search/search-by-conversation-membership/use-search-by-conversation-membership.query";
 import { useSearchConvosUsersQuery } from "@/features/search/use-search-convos-users-query";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
-import { useConversationQuery } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { useGroupQuery } from "@/queries/useGroupQuery";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { Haptics } from "@/utils/haptics";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { ReactNode, memo, useCallback, useMemo } from "react";
 import { SectionList, View } from "react-native";
@@ -26,6 +27,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ConversationSearchResultsListItemUser } from "./conversation-search-results-list-item-user";
 import { searchResultsStyles } from "./search-results.styles";
+import { useSafeCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 
 const MAX_INITIAL_RESULTS = 5;
 
@@ -52,13 +54,16 @@ export function ConversationSearchResultsList() {
     (state) => state.searchTextValue
   );
 
-  const selectedAddresses: string[] = [];
-  const currentUserAddress = useCurrentAccount()!;
+  const selectedSearchUserInboxIds = useConversationStoreContext(
+    (state) => state.searchSelectedUserInboxIds
+  );
+
+  const currentUserInboxId = useSafeCurrentAccountInboxId();
 
   const { convosSearchResults, message, areSearchResultsLoading } =
     useSearchConvosUsersQuery({
       searchQuery,
-      addressesToOmit: [...selectedAddresses, currentUserAddress],
+      inboxIdsToOmit: [...selectedSearchUserInboxIds, currentUserInboxId],
     });
 
   const {
@@ -76,6 +81,20 @@ export function ConversationSearchResultsList() {
     }
 
     if (!convosSearchResults) {
+      return sections;
+    }
+
+    // If we have selected users, only show "Other Results" section with profiles
+    if (selectedSearchUserInboxIds.length > 0) {
+      if (convosSearchResults.length > 0) {
+        sections.push({
+          title: "Other Results",
+          data: convosSearchResults.map((inboxId) => ({
+            type: "profile",
+            data: inboxId,
+          })),
+        });
+      }
       return sections;
     }
 
@@ -139,17 +158,6 @@ export function ConversationSearchResultsList() {
       });
     }
 
-    // Other results
-    if (convosSearchResults.length > 0) {
-      sections.push({
-        title: "Other Results",
-        data: convosSearchResults.map((topic) => ({
-          type: "dm",
-          data: topic,
-        })),
-      });
-    }
-
     // Remaining group results with matching members
     const remainingGroupMemberResults =
       existingGroupsByMemberNameTopics.slice(MAX_INITIAL_RESULTS);
@@ -177,7 +185,11 @@ export function ConversationSearchResultsList() {
     }
 
     return sections;
-  }, [existingConversationMembershipSearchResults, convosSearchResults]);
+  }, [
+    existingConversationMembershipSearchResults,
+    convosSearchResults,
+    selectedSearchUserInboxIds,
+  ]);
 
   const renderSectionHeader = useCallback(
     ({ section }: { section: { title: string } }) => (
@@ -186,12 +198,22 @@ export function ConversationSearchResultsList() {
     []
   );
 
+  const isLoadingSearchResults =
+    isConversationMembershipLoading || areSearchResultsLoading;
+
   return (
     <Container>
       <SectionList
         stickyHeaderHiddenOnScroll={false}
         stickySectionHeadersEnabled={false}
         keyboardShouldPersistTaps="handled"
+        ListEmptyComponent={
+          isLoadingSearchResults ? (
+            <Loader />
+          ) : searchQuery ? (
+            <Text>No results</Text>
+          ) : null
+        }
         sections={sections}
         renderItem={({ item }) => {
           if (item.type === "dm") {
@@ -201,7 +223,9 @@ export function ConversationSearchResultsList() {
             return <GroupSearchResult conversationTopic={item.data} />;
           }
           if (item.type === "profile") {
-            return <ProfileSearchResult socials={item.data} />;
+            return (
+              <ConversationSearchResultsListItemUser inboxId={item.data} />
+            );
           }
           const _ensureNever: never = item.type;
           return null;
@@ -273,26 +297,12 @@ function SectionHeader({ title }: { title: string }) {
   );
 }
 
-const ProfileSearchResult = memo(function ProfileSearchResult({
-  inboxId,
-}: {
-  inboxId: InboxId;
-}) {
-  return <ConversationSearchResultsListItemUser inboxId={inboxId} />;
-});
-
 const DmSearchResult = memo(function DmSearchResult({
   conversationTopic,
 }: {
   conversationTopic: ConversationTopic;
 }) {
   const currentAccount = useCurrentAccount()!;
-
-  const { data: conversation } = useConversationQuery({
-    account: currentAccount,
-    topic: conversationTopic,
-    caller: `DmSearchResult-${conversationTopic}`,
-  });
 
   const { data: inboxId } = useDmPeerInboxIdQuery({
     account: currentAccount,
@@ -303,10 +313,12 @@ const DmSearchResult = memo(function DmSearchResult({
   const conversationStore = useConversationStore();
 
   const handlePress = useCallback(() => {
+    Haptics.softImpactAsync();
     conversationStore.setState({
-      topic: conversationTopic,
+      searchTextValue: "",
+      searchSelectedUserInboxIds: [inboxId!],
     });
-  }, [conversationStore, conversationTopic]);
+  }, [conversationStore, inboxId]);
 
   return (
     <Pressable onPress={handlePress}>
@@ -331,9 +343,16 @@ const GroupSearchResult = memo(function GroupSearchResult({
 
   const { members } = useGroupMembers(conversationTopic);
 
+  const conversationStore = useConversationStore();
+
   const handlePress = useCallback(() => {
-    // TODO: Implement group selection logic
-  }, []);
+    conversationStore.setState({
+      searchTextValue: "",
+      searchSelectedUserInboxIds: [],
+      topic: conversationTopic,
+      isCreatingNewConversation: false,
+    });
+  }, [conversationStore, conversationTopic]);
 
   return (
     <Pressable onPress={handlePress}>

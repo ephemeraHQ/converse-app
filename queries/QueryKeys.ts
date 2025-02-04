@@ -75,10 +75,10 @@ export const conversationQueryKey = (
   topic: ConversationTopic
 ) => [QueryKeys.CONVERSATION, account?.toLowerCase(), topic];
 
-export const dmQueryKey = (account: string, peer: string) => [
+export const dmQueryKey = (args: { account: string; inboxId: InboxId }) => [
   QueryKeys.CONVERSATION_DM,
-  account.toLowerCase(),
-  peer,
+  args.account?.toLowerCase(),
+  args.inboxId?.toLowerCase(),
 ];
 export const conversationMetadataQueryKey = (
   account: string,

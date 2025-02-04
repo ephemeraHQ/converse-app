@@ -17,14 +17,14 @@ import {
   useConversationComposerStoreContext,
 } from "./conversation-composer.store-context";
 
-type IComposerProps = {
+export type IConversationComposerProps = {
   onSend: (args: Omit<ISendMessageParams, "topic">) => Promise<void>;
   hideAddAttachmentButton?: boolean;
   disabled?: boolean;
 };
 
 export const ConversationComposer = memo(function ConversationComposer(
-  props: IComposerProps
+  props: IConversationComposerProps
 ) {
   const { onSend, disabled, hideAddAttachmentButton } = props;
 
