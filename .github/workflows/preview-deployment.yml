@@ -133,6 +133,9 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
+          packager: yarn
+          eas-cache: true
+          patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
 
       - name: Build iOS preview
         id: build_ios
@@ -177,6 +180,9 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
+          packager: yarn
+          eas-cache: true
+          patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
 
       - name: Build and submit to store
         run: |
@@ -211,6 +217,9 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
+          packager: yarn
+          eas-cache: true
+          patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
 
       - name: Run EAS Update
         run: |
