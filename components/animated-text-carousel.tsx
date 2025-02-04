@@ -92,13 +92,7 @@ export const AnimatedTextCarousel = memo(function AnimatedTextCarousel({
     <AnimatedCenter>
       <AnimatableText
         text={textAV}
-        style={[
-          textStyle,
-          useAnimatedStyle(() => ({
-            opacity: textAS.opacity,
-            textAlign: "center",
-          })),
-        ]}
+        style={[textStyle, textAS, { textAlign: "center" }]}
       />
     </AnimatedCenter>
   );

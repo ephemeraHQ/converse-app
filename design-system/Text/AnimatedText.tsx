@@ -33,7 +33,8 @@ const AnimatedAnimateableText =
 // default style types and Reanimated's animated style types.
 export type IAnimatableTextProps = Omit<RNTextProps, "style"> & {
   text: SharedValue<string>;
-  style?: StyleProp<TextStyle>;
+  // Required to specify text styling - will be merged with theme's default text color
+  style: StyleProp<TextStyle>;
 };
 
 export function AnimatableText({ style, text, ...rest }: IAnimatableTextProps) {
