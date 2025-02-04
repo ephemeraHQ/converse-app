@@ -27,6 +27,10 @@ const AnimatedAnimateableText =
 // A specialized text component that efficiently updates text content using SharedValue
 // Optimized for frequent text changes without causing re-renders
 // Uses react-native-animateable-text under the hood for better performance
+
+// We omit 'style' from RNTextProps and explicitly redefine it to ensure proper type checking
+// with Reanimated's StyleProp<TextStyle>. This prevents type conflicts between React Native's
+// default style types and Reanimated's animated style types.
 export type IAnimatableTextProps = Omit<RNTextProps, "style"> & {
   text: SharedValue<string>;
   style?: StyleProp<TextStyle>;
@@ -40,6 +44,9 @@ export function AnimatableText({ style, text, ...rest }: IAnimatableTextProps) {
       color: theme.colors.text.primary,
     };
 
+    // Special handling for Android font weight due to a known issue in react-native-animateable-text
+    // where Android requires fontWeight to be a string, while the style type expects a number
+    // This workaround ensures consistent font weight behavior across platforms
     if (
       Platform.OS === "android" &&
       style &&
