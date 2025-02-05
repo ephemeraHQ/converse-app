@@ -28,6 +28,7 @@ export function HydrationStateHandler() {
       results.forEach((result, index) => {
         if (result.status === "rejected") {
           const failedAccount = accounts[index];
+          // note(lustig) Thierry added this but I'm unsure how it'd ever happen
           captureError({
             ...result.reason,
             message: `[Hydration] Failed to get inboxId for account ${failedAccount}, removing account. ${result.reason.message}`,

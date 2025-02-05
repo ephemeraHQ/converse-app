@@ -1,6 +1,7 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { useAllowGroupMutation } from "@/features/consent/use-allow-group.mutation";
 import { useDenyGroupMutation } from "@/features/consent/use-deny-group.mutation";
+import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
 import { translate } from "@/i18n";
 import { useGroupCreatorQuery } from "@/queries/useGroupCreatorQuery";
 import { currentAccount } from "@data/store/accountsStore";
@@ -8,7 +9,6 @@ import { getGroupQueryOptions, useGroupQuery } from "@queries/useGroupQuery";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
-import { updateInboxIdsConsentForAccount } from "../../utils/xmtpRN/xmtp-consent/update-inbox-ids-consent-for-account";
 
 export type IGroupConsentOptions = {
   includeCreator?: boolean;

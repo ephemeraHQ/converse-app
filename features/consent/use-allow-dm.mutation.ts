@@ -23,9 +23,8 @@ import {
   ConversationTopic,
   InboxId,
 } from "@xmtp/react-native-sdk";
-import { updateConsentForGroupsForAccount } from "../../utils/xmtpRN/xmtp-consent/update-consent-for-groups-for-account";
-import { updateInboxIdsConsentForAccount } from "../../utils/xmtpRN/xmtp-consent/update-inbox-ids-consent-for-account";
-
+import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
+import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account";
 export function useAllowDmMutation() {
   const currentAccount = useCurrentAccount()!;
 
