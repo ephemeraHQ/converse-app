@@ -1,12 +1,9 @@
 import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { addConversationMessageQuery } from "@/queries/use-conversation-messages-query";
-import { updateConversationInConversationsQueryData } from "@/queries/use-conversations-query";
-import { updateConversationQueryData } from "@/queries/useConversationQuery";
-import {
-  invalidateGroupMembersQuery,
-  refetchGroupMembersQuery,
-} from "@/queries/useGroupMembersQuery";
+import { addConversationMessageQuery } from "@/queries/conversation-messages-query";
+import { updateConversationInAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
+import { updateConversationQueryData } from "@/queries/conversation-query";
+import { refetchGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import {
@@ -73,7 +70,7 @@ async function handleNewMessage(args: {
   }
 
   try {
-    updateConversationInConversationsQueryData({
+    updateConversationInAllowedConsentConversationsQueryData({
       account,
       topic: message.topic as ConversationTopic,
       conversationUpdate: {
@@ -100,18 +97,22 @@ function handleNewGroupUpdatedMessage(args: {
 }) {
   const { account, topic, message } = args;
 
+  // Early return if not a group update message
   if (!message.contentTypeId.includes("group_updated")) return;
   const content = message.content() as GroupUpdatedContent;
 
+  // Handle member changes by refetching the group members
   if (content.membersAdded.length > 0 || content.membersRemoved.length > 0) {
-    refetchGroupMembersQuery(account, topic).catch(captureError);
+    refetchGroupMembersQuery({ account, topic }).catch(captureError);
     return;
   }
 
+  // Process metadata changes (e.g., group name, image, description)
   if (content.metadataFieldsChanged.length > 0) {
     content.metadataFieldsChanged.forEach((field) => {
       const fieldName = field.fieldName as MetadataField;
 
+      // Validate that the field is supported
       if (!(fieldName in METADATA_FIELD_MAP)) {
         captureError(
           new Error(`Unsupported metadata field name: ${fieldName}`)
@@ -119,17 +120,19 @@ function handleNewGroupUpdatedMessage(args: {
         return;
       }
 
+      // Map the field name to our internal property name and update if there's a new value
       const updateKey = METADATA_FIELD_MAP[fieldName];
       if (updateKey && field.newValue) {
         const update = { [updateKey]: field.newValue };
 
+        // Update both the individual conversation and conversations list queries
         updateConversationQueryData({
           account,
           topic,
           conversationUpdate: update,
         });
 
-        updateConversationInConversationsQueryData({
+        updateConversationInAllowedConsentConversationsQueryData({
           account,
           topic,
           conversationUpdate: update,
@@ -138,6 +141,4 @@ function handleNewGroupUpdatedMessage(args: {
     });
     return;
   }
-
-  invalidateGroupMembersQuery(account, topic);
 }

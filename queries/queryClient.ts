@@ -5,21 +5,23 @@ import { DEFAULT_GC_TIME, DEFAULT_STALE_TIME } from "./queryClient.constants";
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
-    // Used to track which queries execute the queryFn which means will do a network request
+    // Used to track which queries execute the queryFn which means will do a network request.
+    // Carefull, this is also triggered when the query gets its data from the persister.
     onSuccess: (_, query) => {
-      if (query.meta?.caller) {
-        logger.debug(
-          `Query ${query.queryKey.join(", ")} success from caller: ${
-            query.meta.caller
-          }`
-        );
-      }
+      logger.debug(
+        `[Query] success fetching ${JSON.stringify(query.queryKey)}${
+          query.meta?.caller ? ` (caller: ${query.meta.caller})` : ""
+        }`
+      );
     },
     onError: (error, query) => {
       captureError(
-        new Error(`Error in query: ${query.queryKey.join(", ")}`, {
-          cause: error,
-        })
+        new Error(
+          `Error in query: ${JSON.stringify(query.queryKey)}${
+            query.meta?.caller ? ` (caller: ${query.meta.caller})` : ""
+          }`,
+          { cause: error }
+        )
       );
     },
   }),

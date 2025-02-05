@@ -34,7 +34,9 @@ export const ConversationListPinnedConversationDm = ({
     inboxId: peerInboxId,
   });
 
-  const { data: preferredAvatar } = usePreferredInboxAvatar(peerInboxId);
+  const { data: preferredAvatar } = usePreferredInboxAvatar({
+    inboxId: peerInboxId!,
+  });
 
   const { isUnread } = useConversationIsUnread({
     topic: conversationTopic,

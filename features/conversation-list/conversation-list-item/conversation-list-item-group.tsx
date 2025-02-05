@@ -1,23 +1,21 @@
-import { Avatar } from "@/components/Avatar";
-import { GroupAvatarDumb } from "@/components/group-avatar";
+import { GroupAvatar } from "@/components/group-avatar";
 import { ISwipeableRenderActionsArgs } from "@/components/swipeable";
+import { MIDDLE_DOT } from "@/design-system/middle-dot";
 import { ConversationListItemSwipeable } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useDeleteGroup } from "@/features/conversation-list/hooks/use-delete-group";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
-import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
-import { useGroupMembersInfoForCurrentAccount } from "@/hooks/use-group-members-info-for-current-account";
+import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
+import { useGroupNameForCurrentAccount } from "@/hooks/useGroupName";
 import { useGroupQuery } from "@/queries/useGroupQuery";
-import { useAppTheme } from "@/theme/useAppTheme";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useRouter } from "@navigation/useNavigation";
 import { getCompactRelativeTime } from "@utils/date";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback } from "react";
 import { ConversationListItem } from "./conversation-list-item";
 import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action";
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action";
-import { MIDDLE_DOT } from "@/design-system/middle-dot";
 
 type IConversationListItemGroupProps = {
   conversationTopic: ConversationTopic;
@@ -27,7 +25,6 @@ export const ConversationListItemGroup = memo(
   function ConversationListItemGroup({
     conversationTopic,
   }: IConversationListItemGroupProps) {
-    const { theme } = useAppTheme();
     const currentAccount = useCurrentAccount()!;
     const router = useRouter();
 
@@ -40,20 +37,9 @@ export const ConversationListItemGroup = memo(
       topic: conversationTopic,
     });
 
-    const { groupMembersInfo } = useGroupMembersInfoForCurrentAccount({
-      groupTopic: conversationTopic,
+    const { groupName } = useGroupNameForCurrentAccount({
+      conversationTopic,
     });
-
-    const avatarComponent = useMemo(() => {
-      return group?.imageUrlSquare ? (
-        <Avatar size={theme.avatarSize.lg} uri={group?.imageUrlSquare} />
-      ) : (
-        <GroupAvatarDumb
-          size={theme.avatarSize.lg}
-          members={groupMembersInfo}
-        />
-      );
-    }, [group?.imageUrlSquare, groupMembersInfo, theme]);
 
     const onPress = useCallback(() => {
       router.navigate("Conversation", {
@@ -62,7 +48,7 @@ export const ConversationListItemGroup = memo(
     }, [conversationTopic, router]);
 
     // Title
-    const title = group?.name;
+    const title = groupName;
 
     // Subtitle
     const timestamp = group?.lastMessage?.sentNs ?? 0;
@@ -107,7 +93,9 @@ export const ConversationListItemGroup = memo(
         <ConversationListItem
           onPress={onPress}
           showError={false}
-          avatarComponent={avatarComponent}
+          avatarComponent={
+            <GroupAvatar size="lg" groupTopic={conversationTopic} />
+          }
           title={title}
           subtitle={subtitle}
           isUnread={isUnread}

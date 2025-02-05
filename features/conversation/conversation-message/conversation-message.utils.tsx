@@ -2,7 +2,8 @@ import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   getConversationMessagesQueryData,
   useConversationMessagesQuery,
-} from "@/queries/use-conversation-messages-query";
+} from "@/queries/conversation-messages-query";
+import logger from "@/utils/logger";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/xmtp-content-types/xmtp-coinbase-payment";
 import { getMessageContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
@@ -30,7 +31,7 @@ import {
   TextCodec,
 } from "@xmtp/react-native-sdk";
 import emojiRegex from "emoji-regex";
-import { useCurrentConversationTopic } from "../conversation.store-context";
+import { useCurrentConversationTopicSafe } from "../conversation.store-context";
 
 export function isAnActualMessage(
   message: DecodedMessageWithCodecsType
@@ -43,6 +44,7 @@ export function isTextMessage(
 ): message is DecodedMessage<TextCodec> {
   return getMessageContentType(message.contentTypeId) === "text";
 }
+
 export function isReactionMessage(
   message: DecodedMessageWithCodecsType
 ): message is DecodedMessage<ReactionCodec> {
@@ -93,7 +95,7 @@ export function useMessageSenderReadableProfile(
   if (!currentAccountAdress) {
     return "";
   }
-  return getReadableProfile(currentAccountAdress, message.senderInboxId);
+  return getReadableProfile(message.senderInboxId);
 }
 
 export function getMessageById({
@@ -190,7 +192,7 @@ export function useMessageHasReactions(args: { messageId: MessageId }) {
 
 export function useConversationMessageReactions(messageId: MessageId) {
   const currentAccount = useCurrentAccount()!;
-  const topic = useCurrentConversationTopic();
+  const topic = useCurrentConversationTopicSafe();
 
   const { data: messages } = useConversationMessagesQuery({
     account: currentAccount,

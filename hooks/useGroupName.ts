@@ -1,12 +1,16 @@
+import { getGroupMembersQueryOptions } from "@/queries/useGroupMembersQuery";
 import { useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCurrentAccount } from "../data/store/accountsStore";
-import { getGroupMemberQueryOptions } from "../queries/useGroupMembersQuery";
 import { useGroupNameMutation } from "../queries/useGroupNameMutation";
 import { useGroupNameQuery } from "../queries/useGroupNameQuery";
 import { usePreferredNames } from "./usePreferredNames";
 
-export const useGroupNameForCurrentAccount = (topic: ConversationTopic) => {
+export const useGroupNameForCurrentAccount = (args: {
+  conversationTopic: ConversationTopic;
+}) => {
+  const { conversationTopic } = args;
+
   const account = useCurrentAccount()!;
 
   const {
@@ -15,12 +19,12 @@ export const useGroupNameForCurrentAccount = (topic: ConversationTopic) => {
     isError,
   } = useGroupNameQuery({
     account,
-    topic,
+    topic: conversationTopic,
   });
 
   const { data: members, isLoading: membersLoading } = useQuery({
-    ...getGroupMemberQueryOptions({ account, topic }),
-    enabled: !groupName && !!topic && !!account, // If we have the group name, we don't need to fetch the members
+    ...getGroupMembersQueryOptions({ account, topic: conversationTopic }),
+    enabled: !groupName && !!conversationTopic && !!account, // If we have the group name, we don't need to fetch the members
   });
 
   const memberAddresses = members?.ids
@@ -31,7 +35,7 @@ export const useGroupNameForCurrentAccount = (topic: ConversationTopic) => {
 
   const { mutateAsync } = useGroupNameMutation({
     account,
-    topic: topic!,
+    topic: conversationTopic!,
   });
 
   return {

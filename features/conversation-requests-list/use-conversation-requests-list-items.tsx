@@ -1,7 +1,7 @@
 import { getV3SpamScore } from "@/data/helpers/conversations/spamScore";
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import { getMessageStringContent } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { getUnknownConsentConversationsQueryOptions } from "@/queries/unknown-consent-conversations-query";
+import { getUnknownConsentConversationsQueryOptions } from "@/queries/conversations-unknown-consent-query";
 import { captureError } from "@/utils/capture-error";
 import { getMessageContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 import { useQueries, useQuery } from "@tanstack/react-query";

@@ -1,7 +1,7 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { IDropdownMenuCustomItemProps } from "@/design-system/dropdown-menu/dropdown-menu-custom";
 import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
-import { useMessageContextMenuStore } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
+import { useConversationMessageContextMenuStore } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
 import {
   getMessageById,
   getMessageStringContent,
@@ -23,7 +23,7 @@ export function useMessageContextMenuItems(args: {
   const message = getMessageById({ messageId, topic });
 
   const composerStore = useConversationComposerStore();
-  const messageContextMenuStore = useMessageContextMenuStore();
+  const messageContextMenuStore = useConversationMessageContextMenuStore();
 
   if (!message) {
     captureErrorWithToast(

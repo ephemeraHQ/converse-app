@@ -1,9 +1,15 @@
+import { IProfileSocials } from "@/features/profiles/profile-types";
+import { getInboxProfileSocialsQueryConfig } from "@/queries/useInboxProfileSocialsQuery";
+import { captureErrorWithFriendlyToast } from "@/utils/capture-error";
+import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { translate } from "@i18n";
+import { useGroupPermissionPolicyQuery } from "@queries/useGroupPermissionPolicyQuery";
 import { actionSheetColors, textSecondaryColor } from "@styles/colors";
+import { useQueries } from "@tanstack/react-query";
 import {
   getAccountIsAdmin,
   getAccountIsSuperAdmin,
@@ -15,14 +21,9 @@ import { sortGroupMembersByAdminStatus } from "@utils/groupUtils/sortGroupMember
 import logger from "@utils/logger";
 import { navigate } from "@utils/navigation";
 import { getPreferredInboxName } from "@utils/profile";
+import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { FC, memo, useMemo } from "react";
 import { StyleSheet, Text, View, useColorScheme } from "react-native";
-import { IProfileSocials } from "@/features/profiles/profile-types";
-import { useInboxProfilesSocials } from "@/hooks/useInboxProfilesSocials";
-import { captureErrorWithFriendlyToast } from "@/utils/capture-error";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { useGroupPermissionPolicyQuery } from "@queries/useGroupPermissionPolicyQuery";
-import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import TableView, {
   TableViewItemType,
 } from "../components/TableView/TableView";
@@ -55,7 +56,11 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
       [members]
     );
 
-    const data = useInboxProfilesSocials(memberInboxIds);
+    const data = useQueries({
+      queries: memberInboxIds.map((inboxId) =>
+        getInboxProfileSocialsQueryConfig({ inboxId })
+      ),
+    });
 
     const mappedData = useMemo(() => {
       const profileMap: Record<InboxId, IProfileSocials[] | null | undefined> =

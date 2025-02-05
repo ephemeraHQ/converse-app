@@ -12,7 +12,7 @@ import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { SettingsList } from "@/design-system/settings-list/settings-list";
-import { updateConsentForAddressesForAccount } from "@/features/consent/update-consent-for-addresses-for-account";
+import { updateConsentForAddressesForAccount } from "@/utils/xmtpRN/xmtp-consent/update-consent-for-addresses-for-account";
 import { useNotificationsPermission } from "@/features/notifications/hooks/use-notifications-permission";
 import { ContactCard } from "@/features/profiles/components/contact-card";
 import { SocialNames } from "@/features/profiles/components/social-names";

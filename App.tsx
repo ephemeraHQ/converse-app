@@ -65,7 +65,8 @@ LogBox.ignoreLogs([
   "Error destroying session", // Privy
   'event="noNetwork', // ethers
   "[Reanimated] Reading from `value` during component render. Please ensure that you do not access the `value` property or use `get` method of a shared value while React is rendering a component.",
-  "Attempted to import the module",
+  "Attempted to import the module", // General module import warnings
+  'Attempted to import the module "/Users', // More specific module import warnings
   "Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API",
   "Couldn't find real values for `KeyboardContext`. Please make sure you're inside of `KeyboardProvider` - otherwise functionality of `react-native-keyboard-controller` will not work. [Component Stack]",
   "sync worker error storage error: Pool needs to  reconnect before use",
@@ -81,6 +82,10 @@ LogBox.ignoreLogs([
   "Require cycle: data/store/accountsStore.ts -> utils/logout/index.tsx -> data/store/accountsStore.ts",
   "Require cycle: data/store/accountsStore.ts -> utils/logout/index.tsx -> features/notifications/utils/resetNotifications.ts -> features/notifications/utils/notifications-badge.ts -> data/store/accountsStore.ts",
 ]);
+
+if (__DEV__) {
+  require("./ReactotronConfig.ts");
+}
 
 // This is the default configuration
 configureReanimatedLogger({

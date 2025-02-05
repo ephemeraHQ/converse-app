@@ -4,13 +4,12 @@ import { createHash } from "crypto";
 import { getRandomBytesAsync } from "expo-crypto";
 import * as SecureStore from "expo-secure-store";
 import { v4 as uuidv4 } from "uuid";
-
+import { config } from "../../config";
 import {
   deleteSecureItemAsync,
   getSecureItemAsync,
   setSecureItemAsync,
 } from ".";
-import { config } from "../../config";
 
 export const secureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainService: config.bundleId,

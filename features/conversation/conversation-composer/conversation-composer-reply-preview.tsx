@@ -1,3 +1,4 @@
+import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
 import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image";
 import {
   isCoinbasePaymentMessage,
@@ -9,7 +10,6 @@ import {
   isStaticAttachmentMessage,
   isTransactionReferenceMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useConversationMessageById } from "../conversation-message/use-conversation-message";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
@@ -18,11 +18,11 @@ import { Icon } from "@design-system/Icon/Icon";
 import { IconButton } from "@design-system/IconButton/IconButton";
 import { Text } from "@design-system/Text";
 import { AnimatedVStack, VStack } from "@design-system/VStack";
-import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
 import { useAppTheme } from "@theme/useAppTheme";
 import { Haptics } from "@utils/haptics";
 import {
+  ConversationTopic,
   DecodedMessage,
   RemoteAttachmentCodec,
   ReplyCodec,
@@ -34,6 +34,7 @@ import {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { useConversationMessageById } from "../conversation-message/use-conversation-message";
 import { useCurrentConversationTopic } from "../conversation.store-context";
 import {
   useConversationComposerStore,
@@ -41,6 +42,18 @@ import {
 } from "./conversation-composer.store-context";
 
 export const ReplyPreview = memo(function ReplyPreview() {
+  const topic = useCurrentConversationTopic();
+
+  if (!topic) return null;
+
+  return <Content conversationTopic={topic} />;
+});
+
+const Content = memo(function Content(props: {
+  conversationTopic: ConversationTopic;
+}) {
+  const { conversationTopic } = props;
+
   const replyingToMessageId = useConversationComposerStoreContext(
     (state) => state.replyingToMessageId
   );
@@ -49,15 +62,13 @@ export const ReplyPreview = memo(function ReplyPreview() {
 
   const composerStore = useConversationComposerStore();
 
-  const topic = useCurrentConversationTopic();
-
   const { message: replyMessage } = useConversationMessageById({
     messageId: replyingToMessageId!, // ! because we have enabled in the query
-    conversationTopic: topic,
+    conversationTopic,
   });
 
   const { data: inboxName } = usePreferredInboxName({
-    inboxId: replyMessage?.senderInboxId,
+    inboxId: replyMessage?.senderInboxId!, // ! because we have enabled in the query
   });
 
   const replyingTo = replyMessage

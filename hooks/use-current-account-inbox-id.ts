@@ -13,6 +13,11 @@ export function useCurrentAccountInboxId() {
   return useInboxIdQuery({ account: currentAccount });
 }
 
+export function useSafeCurrentAccountInboxId() {
+  const { data } = useCurrentAccountInboxId();
+  return data!;
+}
+
 export function getCurrentAccountInboxId() {
   const currentAccount = getCurrentAccount()!;
   return getInboxIdFromQueryData({ account: currentAccount });

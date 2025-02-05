@@ -1,3 +1,5 @@
+import { translate } from "@/i18n";
+import { getNativeLogFile } from "@/utils/xmtpRN/logs";
 import * as Sentry from "@sentry/react-native";
 import {
   getPreviousSessionLoggingFile,
@@ -6,17 +8,16 @@ import {
 } from "@utils/logger";
 import { navigate } from "@utils/navigation";
 import Share from "@utils/share";
-import { getNativeLogFile } from "@/utils/xmtpRN/logs";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 import { Alert, Platform } from "react-native";
-import { translate } from "@/i18n";
 import { config } from "../config";
-import { useAccountsList } from "../data/store/accountsStore";
+import { useAccountsList, getAccountsList } from "../data/store/accountsStore";
 import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
+import { logoutAccount } from "@/utils/logout";
 
 export const useDebugEnabled = (address?: string) => {
   const accounts = useAccountsList();
@@ -57,6 +58,16 @@ const DebugButton = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     showDebugMenu() {
       const debugMethods = {
+        "Logout all accounts": async () => {
+          const allAccounts = getAccountsList();
+          try {
+            for (const account of allAccounts) {
+              await logoutAccount({ account });
+            }
+          } catch (error) {
+            alert(error);
+          }
+        },
         "Trigger OTA Update": async () => {
           try {
             const update = await Updates.fetchUpdateAsync();

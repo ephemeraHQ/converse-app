@@ -195,19 +195,6 @@ export const useAppTheme = (): UseAppThemeValue => {
     setThemeContextOverride(newTheme);
   }, [themeContext, setThemeContextOverride]);
 
-  // TODO: Remove after debugging is done
-  // Light/dark mode color scheme logging
-  useEffect(() => {
-    if (!__DEV__) {
-      logger.debug("=== Theme Debug ===", {
-        systemColorScheme: Appearance.getColorScheme(),
-        platformVersion: Platform.Version,
-        themeContext: themeContext,
-        isDarkTheme: themeVariant.isDark,
-      });
-    }
-  }, [themeContext, themeVariant]);
-
   const themed = useCallback(
     <T>(
       styleOrStyleFn: ThemedStyle<T> | StyleProp<T> | ThemedStyleArray<T>

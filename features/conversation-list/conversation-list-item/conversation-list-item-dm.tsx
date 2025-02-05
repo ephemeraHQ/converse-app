@@ -8,8 +8,8 @@ import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-
 import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
 import { useRestoreConversation } from "@/features/conversation-list/hooks/use-restore-conversation";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
-import { useMessagePlainText } from "@/features/conversation-list/hooks/useMessagePlainText";
-import { useConversationQuery } from "@/queries/useConversationQuery";
+import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
+import { useConversationQuery } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureErrorWithToast } from "@/utils/capture-error";
@@ -32,116 +32,83 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
   conversationTopic,
 }: IConversationListItemDmProps) {
   const currentAccount = useCurrentAccount()!;
+  const { theme } = useAppTheme();
 
+  // Conversation related hooks
   const { data: conversation } = useConversationQuery({
-    account: currentAccount!,
+    account: currentAccount,
     topic: conversationTopic,
     caller: "Conversation List Item Dm",
   });
 
   const { data: peerInboxId, isLoading: isLoadingPeerInboxId } =
     useDmPeerInboxIdQuery({
-      account: currentAccount!,
+      account: currentAccount,
       topic: conversationTopic,
       caller: "ConversationListItemDm",
     });
 
-  const deleteDm = useDeleteDm({
-    topic: conversationTopic,
-  });
-  const { restoreConversationAsync } = useRestoreConversation({
-    topic: conversationTopic,
-  });
-
-  const { theme } = useAppTheme();
-
-  const messageText = useMessagePlainText(conversation?.lastMessage);
+  // Peer info hooks
   const { data: preferredName, isLoading: isLoadingPreferredName } =
     usePreferredInboxName({
       inboxId: peerInboxId,
     });
-  const { data: avatarUri } = usePreferredInboxAvatar(peerInboxId);
+  const { data: avatarUri } = usePreferredInboxAvatar({
+    inboxId: peerInboxId,
+  });
 
-  const avatarComponent = useMemo(() => {
-    return (
-      <Avatar size={theme.avatarSize.lg} uri={avatarUri} name={preferredName} />
-    );
-  }, [avatarUri, preferredName, theme]);
+  // Status hooks
+  const { isUnread } = useConversationIsUnread({ topic: conversationTopic });
+  const { isDeleted } = useConversationIsDeleted({ conversationTopic });
+  const messageText = useMessagePlainText(conversation?.lastMessage);
 
-  const onPress = useCallback(() => {
-    navigate("Conversation", {
-      topic: conversationTopic,
-    });
-  }, [conversationTopic]);
+  // Action hooks
+  const deleteDm = useDeleteDm({ topic: conversationTopic });
+  const { restoreConversationAsync } = useRestoreConversation({
+    topic: conversationTopic,
+  });
+  const { toggleReadStatusAsync } = useToggleReadStatus({
+    topic: conversationTopic,
+  });
 
+  // Computed values
   const title = useMemo(() => {
-    if (!!preferredName) {
-      return preferredName;
-    }
-
-    // Empty string just so we don't see a jump when we finish loading names
-    if (isLoadingPreferredName || isLoadingPeerInboxId) {
-      return " ";
-    }
-
-    // Empty string so UI looks better
-    return " ";
+    if (preferredName) return preferredName;
+    return isLoadingPreferredName || isLoadingPeerInboxId ? " " : " ";
   }, [preferredName, isLoadingPreferredName, isLoadingPeerInboxId]);
 
-  // Need to be out of the useMemo so that the relative time update every time we update conversation or cause a rerender to this component
   const timestamp = conversation?.lastMessage?.sentNs ?? 0;
   const timeToShow = getCompactRelativeTime(timestamp);
 
   const subtitle = useMemo(() => {
-    if (!timeToShow || !messageText) {
-      return "";
-    }
-
+    if (!timeToShow || !messageText) return "";
     return `${timeToShow} ${MIDDLE_DOT} ${messageText}`;
   }, [timeToShow, messageText]);
 
-  const { isUnread } = useConversationIsUnread({
-    topic: conversationTopic,
-  });
-
-  const { isDeleted } = useConversationIsDeleted({
-    conversationTopic,
-  });
-
-  const renderLeftActions = useCallback(
-    (args: ISwipeableRenderActionsArgs) => {
-      if (isDeleted) {
-        return <RestoreSwipeableAction {...args} />;
-      }
-      return <DeleteSwipeableAction {...args} />;
-    },
-    [isDeleted]
+  const avatarComponent = useMemo(
+    () => (
+      <Avatar size={theme.avatarSize.lg} uri={avatarUri} name={preferredName} />
+    ),
+    [avatarUri, preferredName, theme]
   );
 
-  const renderRightActions = useCallback(
-    (args: ISwipeableRenderActionsArgs) => {
-      return (
-        <ToggleUnreadSwipeableAction {...args} topic={conversationTopic} />
-      );
-    },
-    [conversationTopic]
+  const leftActionsBackgroundColor = useMemo(
+    () => (isDeleted ? theme.colors.fill.tertiary : theme.colors.fill.caution),
+    [isDeleted, theme]
   );
+
+  // Handlers
+  const onPress = useCallback(() => {
+    navigate("Conversation", { topic: conversationTopic });
+  }, [conversationTopic]);
 
   const onLeftSwipe = useCallback(async () => {
     try {
-      if (isDeleted) {
-        await restoreConversationAsync();
-      } else {
-        await deleteDm();
-      }
+      await (isDeleted ? restoreConversationAsync() : deleteDm());
     } catch (error) {
       captureErrorWithToast(error);
     }
   }, [isDeleted, deleteDm, restoreConversationAsync]);
-
-  const { toggleReadStatusAsync } = useToggleReadStatus({
-    topic: conversationTopic,
-  });
 
   const onRightSwipe = useCallback(async () => {
     try {
@@ -151,12 +118,23 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     }
   }, [toggleReadStatusAsync]);
 
-  const leftActionsBackgroundColor = useMemo(() => {
-    if (isDeleted) {
-      return theme.colors.fill.tertiary;
-    }
-    return theme.colors.fill.caution;
-  }, [isDeleted, theme]);
+  // Swipe action renderers
+  const renderLeftActions = useCallback(
+    (args: ISwipeableRenderActionsArgs) =>
+      isDeleted ? (
+        <RestoreSwipeableAction {...args} />
+      ) : (
+        <DeleteSwipeableAction {...args} />
+      ),
+    [isDeleted]
+  );
+
+  const renderRightActions = useCallback(
+    (args: ISwipeableRenderActionsArgs) => (
+      <ToggleUnreadSwipeableAction {...args} topic={conversationTopic} />
+    ),
+    [conversationTopic]
+  );
 
   return (
     <ConversationListItemSwipeable
