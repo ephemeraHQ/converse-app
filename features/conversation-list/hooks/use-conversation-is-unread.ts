@@ -1,7 +1,7 @@
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
-import { getConversationQueryOptions } from "@/queries/useConversationQuery";
+import { getConversationQueryOptions } from "@/queries/conversation-query";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";

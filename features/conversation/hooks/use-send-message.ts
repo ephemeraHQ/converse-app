@@ -4,9 +4,9 @@ import {
   addConversationMessageQuery,
   refetchConversationMessages,
   replaceOptimisticMessageWithReal,
-} from "@/queries/use-conversation-messages-query";
+} from "@/queries/conversation-messages-query";
 import { fetchConversationMessageQuery } from "@/queries/useConversationMessage";
-import { getOrFetchConversation } from "@/queries/useConversationQuery";
+import { getOrFetchConversation } from "@/queries/conversation-query";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";
@@ -29,8 +29,6 @@ export type ISendMessageParams = {
     | { text: string; remoteAttachment?: RemoteAttachmentContent }
     | { text?: string; remoteAttachment: RemoteAttachmentContent };
 };
-
-export type ISendFirstMessageParams = Omit<ISendMessageParams, "topic">;
 
 export async function sendMessage(args: ISendMessageParams) {
   const { referencedMessageId, content, topic } = args;

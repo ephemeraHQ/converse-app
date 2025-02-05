@@ -57,6 +57,7 @@ describe("entify functions", () => {
           address3: "3",
         },
         ids: ["1", "2", "3"],
+        addresses: ["address1", "address2", "address3"],
       });
     });
 
@@ -71,6 +72,7 @@ describe("entify functions", () => {
         byId: {},
         byAddress: {},
         ids: [],
+        addresses: [],
       });
     });
   });

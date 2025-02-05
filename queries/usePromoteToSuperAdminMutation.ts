@@ -10,7 +10,6 @@ import {
   setGroupMembersQueryData,
 } from "./useGroupMembersQuery";
 import { useGroupQuery } from "./useGroupQuery";
-// import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const usePromoteToSuperAdminMutation = (
   account: string,
@@ -31,9 +30,12 @@ export const usePromoteToSuperAdminMutation = (
       if (!topic) {
         throw new Error("Topic is required");
       }
-      await cancelGroupMembersQuery(account, topic);
+      await cancelGroupMembersQuery({ account, topic });
 
-      const previousGroupMembers = getGroupMembersQueryData(account, topic);
+      const previousGroupMembers = getGroupMembersQueryData({
+        account,
+        topic,
+      });
       if (!previousGroupMembers) {
         return;
       }
@@ -42,7 +44,11 @@ export const usePromoteToSuperAdminMutation = (
         return;
       }
       newMembers.byId[inboxId].permissionLevel = "super_admin";
-      setGroupMembersQueryData(account, topic, newMembers);
+      setGroupMembersQueryData({
+        account,
+        topic,
+        members: newMembers,
+      });
 
       return { previousGroupMembers };
     },
@@ -54,7 +60,11 @@ export const usePromoteToSuperAdminMutation = (
       if (!topic) {
         return;
       }
-      setGroupMembersQueryData(account, topic, context.previousGroupMembers);
+      setGroupMembersQueryData({
+        account,
+        topic,
+        members: context.previousGroupMembers,
+      });
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess usePromoteToSuperAdminMutation");

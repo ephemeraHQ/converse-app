@@ -29,7 +29,9 @@ export const GroupScreenName: FC<GroupScreenNameProps> = ({ topic }) => {
   const styles = useStyles();
   const { permissions } = useGroupPermissions(topic);
   const currentAccount = useCurrentAccount()!;
-  const { updateGroupName, groupName } = useGroupNameForCurrentAccount(topic);
+  const { updateGroupName, groupName } = useGroupNameForCurrentAccount({
+    conversationTopic: topic,
+  });
   const formattedGroupName = formatGroupName(topic, groupName);
   const { members } = useGroupMembers(topic);
 

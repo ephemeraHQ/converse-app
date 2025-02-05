@@ -1,7 +1,7 @@
 import { config } from "@/config";
 import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
-import { CreateConversationScreenConfig } from "@/features/create-conversation/create-conversation.nav";
 import { ProfileScreenConfig } from "@/features/profiles/profile.nav";
+import { useCheckCurrentInstallation } from "@/utils/xmtpRN/xmtp-client/xmtp-client-installations";
 import ActionSheetStateHandler from "@components/StateHandlers/ActionSheetStateHandler";
 import HydrationStateHandler from "@components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "@components/StateHandlers/InitialStateHandler";
@@ -16,7 +16,6 @@ import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { backgroundColor } from "@styles/colors";
 import { useThemeProvider } from "@theme/useAppTheme";
 import { converseNavigatorRef } from "@utils/navigation";
-import { useCheckCurrentInstallation } from "@/utils/xmtpRN/xmtp-client/xmtp-client-installations";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
@@ -44,7 +43,6 @@ const linking: LinkingOptions<NavigationParamList> = {
     screens: {
       Chats: "/",
       Conversation: ConversationScreenConfig,
-      CreateConversation: CreateConversationScreenConfig,
       Profile: ProfileScreenConfig,
       Group: GroupScreenConfig,
       GroupInvite: JoinGroupScreenConfig,

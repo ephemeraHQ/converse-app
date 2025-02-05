@@ -8,7 +8,7 @@ import { getGroupQueryOptions, useGroupQuery } from "@queries/useGroupQuery";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
-import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
+import { updateInboxIdsConsentForAccount } from "../../utils/xmtpRN/xmtp-consent/update-inbox-ids-consent-for-account";
 
 export type IGroupConsentOptions = {
   includeCreator?: boolean;

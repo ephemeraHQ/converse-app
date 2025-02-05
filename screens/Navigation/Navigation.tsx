@@ -11,7 +11,6 @@ import {
   ConversationNav,
   ConversationNavParams,
 } from "@/features/conversation/conversation.nav";
-import { CreateConversationScreen } from "@/features/create-conversation/create-conversation-screen";
 import {
   InviteUsersToExistingGroupNav,
   InviteUsersToExistingGroupParams,
@@ -111,7 +110,6 @@ export function IdleNavigation() {
 
 export function SignedInNavigation() {
   const colorScheme = useColorScheme();
-  const router = useRouter();
 
   return (
     <NativeStack.Navigator
@@ -120,10 +118,6 @@ export function SignedInNavigation() {
       <NativeStack.Group>
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
           <NativeStack.Screen name="Chats" component={ConversationListScreen} />
-          <NativeStack.Screen
-            name="CreateConversation"
-            component={CreateConversationScreen}
-          />
           <NativeStack.Screen
             name="Blocked"
             component={BlockedConversationsScreen}

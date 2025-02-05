@@ -1,3 +1,4 @@
+import { Haptics } from "@utils/haptics";
 import React, { useCallback } from "react";
 import {
   GestureResponderEvent,
@@ -15,7 +16,6 @@ import {
   getIconProps,
   getIconStyle,
 } from "./IconButton.styles";
-import { Haptics } from "@utils/haptics";
 
 export const IconButton = React.forwardRef(function IconButton(
   props: IIconButtonProps,
@@ -36,7 +36,7 @@ export const IconButton = React.forwardRef(function IconButton(
     ...rest
   } = props;
 
-  const { themed } = useAppTheme();
+  const { theme, themed } = useAppTheme();
 
   const viewStyle = useCallback(
     ({ pressed }: PressableStateCallbackType): StyleProp<ViewStyle> => [
@@ -116,6 +116,7 @@ export const IconButton = React.forwardRef(function IconButton(
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       onPress={handlePress}
+      hitSlop={theme.spacing.xxs} // By default let's assume we want a small hitSlop
       {...rest}
     >
       {({ pressed, hovered }) => {

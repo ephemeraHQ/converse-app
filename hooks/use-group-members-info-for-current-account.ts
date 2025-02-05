@@ -1,6 +1,7 @@
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import { useGroupMembersQuery } from "@queries/useGroupMembersQuery";
-import { useInboxProfileSocialsQueries } from "@queries/useInboxProfileSocialsQuery";
+import { getInboxProfileSocialsQueryConfig } from "@queries/useInboxProfileSocialsQuery";
+import { useQueries } from "@tanstack/react-query";
 import {
   getPreferredInboxAddress,
   getPreferredInboxAvatar,
@@ -30,10 +31,11 @@ export function useGroupMembersInfoForCurrentAccount(args: {
 
   const memberInboxIds = useMemo(() => members?.ids ?? [], [members?.ids]);
 
-  const socialsData = useInboxProfileSocialsQueries(
-    currentAccount,
-    memberInboxIds
-  );
+  const socialsData = useQueries({
+    queries: memberInboxIds.map((inboxId) =>
+      getInboxProfileSocialsQueryConfig({ inboxId })
+    ),
+  });
 
   const groupMembersInfo = useMemo(
     () =>

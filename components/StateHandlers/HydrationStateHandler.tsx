@@ -1,14 +1,13 @@
-import { fetchConversationsQuery } from "@/queries/use-conversations-query";
-import { prefetchInboxIdQuery } from "@/queries/inbox-id-query";
+import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
+import { prefetchConversationMetadataQuery } from "@/queries/conversation-metadata-query";
+import { fetchAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
+import { ensureInboxId } from "@/queries/inbox-id-query";
 import { captureError } from "@/utils/capture-error";
-import { getAccountsList } from "@data/store/accountsStore";
+import { getAccountsList, useAccountsStore } from "@data/store/accountsStore";
 import { useAppStore } from "@data/store/appStore";
 import logger from "@utils/logger";
-import { useEffect } from "react";
-import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
-import { syncConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences";
-import { prefetchConversationMetadataQuery } from "@/queries/conversation-metadata-query";
 import { Conversation } from "@xmtp/react-native-sdk";
+import { useEffect } from "react";
 
 export default function HydrationStateHandler() {
   useEffect(() => {
@@ -16,10 +15,27 @@ export default function HydrationStateHandler() {
       const startTime = new Date().getTime();
       const accounts = getAccountsList();
 
+      // Critical queries
+      const results = await Promise.allSettled(
+        // We need the inboxId for each account since we use them so much
+        accounts.map((account) => ensureInboxId({ account }))
+      );
+
+      // Remove accounts that failed to get an inboxId
+      results.forEach((result, index) => {
+        if (result.status === "rejected") {
+          const failedAccount = accounts[index];
+          captureError({
+            ...result.reason,
+            message: `[Hydration] Failed to get inboxId for account ${failedAccount}, removing account. ${result.reason.message}`,
+          });
+          useAccountsStore.getState().removeAccount(failedAccount);
+        }
+      });
+
+      // Non critical queries
       for (const account of accounts) {
-        // Don't await because this is for performance but not critical
-        prefetchInboxIdQuery({ account }).catch(captureError);
-        fetchConversationsQuery({
+        fetchAllowedConsentConversationsQuery({
           account,
           caller: "HydrationStateHandler",
         })
@@ -36,7 +52,6 @@ export default function HydrationStateHandler() {
             });
           })
           .catch(captureError);
-        syncConsent(account).catch(captureError);
       }
 
       useAppStore.getState().setHydrationDone(true);

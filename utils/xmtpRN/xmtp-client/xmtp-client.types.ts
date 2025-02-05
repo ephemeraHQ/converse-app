@@ -6,6 +6,7 @@ import {
   Dm,
   Group,
   GroupUpdatedCodec,
+  Member,
   ReactionCodec,
   RemoteAttachmentCodec,
   ReplyCodec,
@@ -19,7 +20,6 @@ import {
 export type SupportedCodecsType = [
   TextCodec,
   ReactionCodec,
-  // ReadReceiptCodec,
   GroupUpdatedCodec,
   ReplyCodec,
   RemoteAttachmentCodec,

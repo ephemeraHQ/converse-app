@@ -19,9 +19,7 @@ import {
 } from "react-native-reanimated";
 
 // Super fast because it's better UX to have a quick response
-// Also, we can't use onBegin to start the scaling as soon as the gesture starts because we also have a tap handler
-// So for example if we had onBegin, and the user just tapped, it would still start the scaling animation which is weird
-const MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION = 400;
+const MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION = 300;
 
 const MESSAGE_GESTURE_LONG_PRESS_SCALE = 1.025;
 
@@ -69,6 +67,8 @@ export const ConversationMessageGestures = memo(
       .runOnJS(true);
 
     const longPress = Gesture.LongPress()
+      // We can't use onBegin to start the scaling as soon as the gesture starts because we also have a tap handler
+      // So for example if we had onBegin, and the user just tapped, it would still start the scaling animation which is weird
       .onStart((e) => {
         Haptics.softImpactAsyncAnimated();
         scaleAV.value = withTiming(MESSAGE_GESTURE_LONG_PRESS_SCALE, {

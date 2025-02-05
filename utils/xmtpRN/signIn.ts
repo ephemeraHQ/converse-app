@@ -1,16 +1,16 @@
 import { config } from "@/config";
+import { getDbDirectory } from "@/data/db";
 import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { Client, Signer as XmtpSigner } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
-import { isClientInstallationValid } from "./xmtp-client/xmtp-client-installations";
 import {
   ViemAccount,
   ethersSignerToXmtpSigner,
   viemAccountToXmtpSigner,
 } from "./signer";
-import { getDbDirectory } from "@/data/db";
+import { isClientInstallationValid } from "./xmtp-client/xmtp-client-installations";
 
 export const getInboxId = (address: string) =>
   Client.getOrCreateInboxId(address, config.xmtpEnv);
@@ -55,6 +55,7 @@ const createXmtpClientFromXmtpSigner = async (
     ...options,
     preAuthenticateToInboxCallback,
   });
+
   logger.debug("[createXmtpClientFromXmtpSigner] XMTP client created");
 
   if (client.inboxId !== inboxId) {

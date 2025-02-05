@@ -38,7 +38,7 @@ export function ClickableText({ children, style }: Props) {
   }, []);
 
   const handleNewConversationPress = useCallback((peer: string) => {
-    navigate("Conversation", { peer });
+    // TODO
   }, []);
 
   const showCopyActionSheet = useCallback(

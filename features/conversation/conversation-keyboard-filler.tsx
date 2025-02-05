@@ -1,3 +1,5 @@
+import { useConversationMessageContextMenuEmojiPickerStore } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker.store";
+import { useConversationMessageContextMenuStoreContext } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
 import { useKeyboardIsShown } from "@/hooks/use-keyboard-is-shown";
 import { AnimatedVStack } from "@design-system/VStack";
 import { memo, useEffect, useRef } from "react";
@@ -9,14 +11,10 @@ import {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-type IConversationKeyboardFillerProps = {
-  messageContextMenuIsOpen: boolean;
-  enabled: boolean; // Controls whether keyboard management is active
-};
+type IConversationKeyboardFillerProps = {};
 
 export const ConversationKeyboardFiller = memo(
   function ConversationKeyboardFiller(props: IConversationKeyboardFillerProps) {
-    const { messageContextMenuIsOpen, enabled } = props;
     const { height: keyboardHeight } = useAnimatedKeyboard();
     const insets = useSafeAreaInsets();
     const lastKeyboardHeight = useSharedValue(0);
@@ -24,12 +22,21 @@ export const ConversationKeyboardFiller = memo(
     const keyboardWasOpenRef = useRef(false);
     const isKeyboardShown = useKeyboardIsShown();
 
+    const messageContextMenuData =
+      useConversationMessageContextMenuStoreContext(
+        (state) => state.messageContextMenuData
+      );
+
+    const isEmojiPickerOpen = useConversationMessageContextMenuEmojiPickerStore(
+      (state) => state.isEmojiPickerOpen
+    );
+
     useEffect(() => {
-      if (!enabled) {
+      if (!isEmojiPickerOpen) {
         return;
       }
 
-      if (messageContextMenuIsOpen) {
+      if (!!messageContextMenuData) {
         // If the keyboard is open, keep track of where it was because we need to open it again when the context menu is dismissed
         if (isKeyboardShown) {
           Keyboard.dismiss();
@@ -46,8 +53,8 @@ export const ConversationKeyboardFiller = memo(
         }
       }
     }, [
-      enabled,
-      messageContextMenuIsOpen,
+      isEmojiPickerOpen,
+      messageContextMenuData,
       isKeyboardShown,
       keyboardHeight,
       lastKeyboardHeight,
@@ -56,11 +63,11 @@ export const ConversationKeyboardFiller = memo(
     // Reset the last height when context menu is dismissed
     // And make sure to wait until the keyboard is open to that the height animates back to what it was before
     useEffect(() => {
-      if (!messageContextMenuIsOpen && isKeyboardShown) {
+      if (!messageContextMenuData && isKeyboardShown) {
         lastKeyboardHeight.value = 0;
       }
     }, [
-      messageContextMenuIsOpen,
+      messageContextMenuData,
       isKeyboardShown,
       keyboardHeight,
       lastKeyboardHeight,
