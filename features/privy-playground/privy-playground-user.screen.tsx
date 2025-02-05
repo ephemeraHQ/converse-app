@@ -34,9 +34,7 @@ import { queryClient } from "@/queries/queryClient";
 import { InboxState } from "@xmtp/react-native-sdk/build/lib/InboxState";
 import { Switch } from "react-native-paper";
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
-const multiInboxClient = MultiInboxClient.live({
-  queryClient: queryClient,
-});
+const multiInboxClient = MultiInboxClient.getInstance();
 
 export const PrivyPlaygroundUserScreen = () => {
   useCoinbaseWalletListener(true, coinbaseUrl);
@@ -54,39 +52,9 @@ export const PrivyPlaygroundUserScreen = () => {
   const smartcontractWallets = user?.linked_accounts.filter(
     (w) => w.type === "smart_wallet"
   );
-
-  // useEffect(() => {
-  //   async function foo() {
-  //     logger.debug("[PrivyPlaygroundUserScreen] Getting provider from wallet");
-  //     const provider = await wallets[0].getProvider();
-
-  //     // type SignMessageRequestArguments = {
-  //     //   method: 'signMessage';
-  //     //   params: {
-  //     //       message: string;
-  //     //   };
-  //     try {
-  //       logger.debug(
-  //         "[PrivyPlaygroundUserScreen] Requesting message signature for 'foo'"
-  //       );
-  //       const signature = await provider.request({
-  //         method: "personal_sign",
-  //         params: ["foo", wallets[0].address],
-  //       });
-  //       logger.debug(
-  //         `[PrivyPlaygroundUserScreen] Received signature: ${signature}`
-  //       );
-  //     } catch (error) {
-  //       logger.error(
-  //         `[PrivyPlaygroundUserScreen] Failed to sign message: ${error}`
-  //       );
-  //       throw error;
-  //     }
-  //   }
-  //   foo();
-  // }, [wallets]);
-
   const { client: smartWalletClient } = useSmartWallets();
+  smartWalletClient;
+
   const account = getUserEmbeddedEthereumWallet(user);
 
   const ethereumSmartWallet = smartWalletClient?.account;
@@ -476,7 +444,9 @@ export const PrivyPlaygroundUserScreen = () => {
             <Button
               title="Logout Privy (this keeps all data on device)"
               onPress={() => {
-                multiInboxClient.logout();
+                multiInboxClient.logoutMessagingClients({
+                  shouldDestroyLocalData: true,
+                });
                 logout();
               }}
             />

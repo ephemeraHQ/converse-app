@@ -10,7 +10,10 @@ import * as Application from "expo-application";
 import { getConfig } from "@/config";
 import { RELYING_PARTY } from "../onboarding/passkey/passkey.constants";
 import logger from "@/utils/logger";
+import { usePrivy } from "@privy-io/expo";
 export function PrivyPlaygroundLoginScreen() {
+  // const { user, logout } = usePrivy();
+  // logout();
   const [error, setError] = useState("");
   const { loginWithPasskey } = useLoginWithPasskey({
     onSuccess: (user, isNewUser) => {

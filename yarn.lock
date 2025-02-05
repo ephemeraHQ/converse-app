@@ -6995,12 +6995,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@privy-io/api-base@npm:1.4.2, @privy-io/api-base@npm:^1.4.2":
-  version: 1.4.2
-  resolution: "@privy-io/api-base@npm:1.4.2"
+"@privy-io/api-base@npm:1.4.3, @privy-io/api-base@npm:^1.4.3":
+  version: 1.4.3
+  resolution: "@privy-io/api-base@npm:1.4.3"
   dependencies:
     zod: "npm:^3.21.4"
-  checksum: 10c0/20618ba258f8e6ebac568e43e598b95e97d58c11f033962b804f9c35e579fc70bfcaf85b41426c4150bb20eb6a0f377df018563b9a0b3b7dbf0ef35e37ea803f
+  checksum: 10c0/56a9e730b2a511cb7271071207a5b7cd0112df8d1d3da51b17042a5e431fbfdea03c20d3a37b56d44125548df0dd4742d28ad4c216a7595500ea81126130f784
   languageName: node
   linkType: hard
 
@@ -7015,11 +7015,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@privy-io/expo@npm:^0.39.0":
-  version: 0.39.0
-  resolution: "@privy-io/expo@npm:0.39.0"
+"@privy-io/expo@npm:0.45.0-beta-20250203223139":
+  version: 0.45.0-beta-20250203223139
+  resolution: "@privy-io/expo@npm:0.45.0-beta-20250203223139"
   dependencies:
-    "@privy-io/js-sdk-core": "npm:0.39.0"
+    "@privy-io/js-sdk-core": "npm:0.42.0-beta-20250203223139"
     react-fast-compare: "npm:^3.2.2"
     zustand: "npm:^4.4.1"
   peerDependencies:
@@ -7052,13 +7052,13 @@ __metadata:
       optional: true
     viem:
       optional: true
-  checksum: 10c0/69a6d0a2fe2816eb6788f6fee6c059051b5caa8cf39ac987b7913102925de380a59b8ad94156c9c529849aa63beb34fe35fe28c2fe953e91ed15b70640a3453b
+  checksum: 10c0/f29204228d4cfda5857fb9e664623db8db11d082dba7b4c4fea314782130ee30d89aa846db592f27bc4f19734f4e078d272683866d6d7fc45875be39b07d053f
   languageName: node
   linkType: hard
 
-"@privy-io/js-sdk-core@npm:0.39.0":
-  version: 0.39.0
-  resolution: "@privy-io/js-sdk-core@npm:0.39.0"
+"@privy-io/js-sdk-core@npm:0.42.0-beta-20250203223139":
+  version: 0.42.0-beta-20250203223139
+  resolution: "@privy-io/js-sdk-core@npm:0.42.0-beta-20250203223139"
   dependencies:
     "@ethersproject/abstract-signer": "npm:^5.7.0"
     "@ethersproject/bignumber": "npm:^5.7.0"
@@ -7066,8 +7066,8 @@ __metadata:
     "@ethersproject/providers": "npm:^5.7.2"
     "@ethersproject/transactions": "npm:^5.7.0"
     "@ethersproject/units": "npm:^5.7.0"
-    "@privy-io/api-base": "npm:^1.4.2"
-    "@privy-io/public-api": "npm:2.17.0"
+    "@privy-io/api-base": "npm:^1.4.3"
+    "@privy-io/public-api": "npm:2.18.5"
     eventemitter3: "npm:^5.0.1"
     fetch-retry: "npm:^5.0.6"
     jose: "npm:^4.15.5"
@@ -7083,20 +7083,20 @@ __metadata:
       optional: true
     viem:
       optional: true
-  checksum: 10c0/ad28e59733368a5093e8190b4dbaefff0cb4329b8008d6a20ce9acf11835fcff5bc5337c2508276d1f5a9d2e58b973633f6ece72f499845f97875befbd04886d
+  checksum: 10c0/09d0ddc37988353469d376f66eb9f60e15ce73dec3b1645f6bf8ec790014e3f1a951ed8cb1e0de336086ecada69043652a8e5ef3e722d0553985cb29f7ed433b
   languageName: node
   linkType: hard
 
-"@privy-io/public-api@npm:2.17.0":
-  version: 2.17.0
-  resolution: "@privy-io/public-api@npm:2.17.0"
+"@privy-io/public-api@npm:2.18.5":
+  version: 2.18.5
+  resolution: "@privy-io/public-api@npm:2.18.5"
   dependencies:
-    "@privy-io/api-base": "npm:1.4.2"
+    "@privy-io/api-base": "npm:1.4.3"
     bs58: "npm:^5.0.0"
     ethers: "npm:^5.7.2"
     libphonenumber-js: "npm:^1.10.31"
     zod: "npm:^3.22.4"
-  checksum: 10c0/952436d2fa2798ed4a3ee40dbda6984592eaaa004ba45c27458e9ced4115da10857bd3ca2e32c87c4dcd1e1299377ccf7ee36881c9a6f294e76ef72f72eaedb5
+  checksum: 10c0/c9b0277178f7452cee083f6a8046b864fc6b83a5d2cade99b607b0345226370cd96428cdaa66ac1ddf946dcdc2bdd233cb3d8aa0f8d5a01e75c1d9d52ab0a522
   languageName: node
   linkType: hard
 
@@ -14420,7 +14420,7 @@ __metadata:
     "@notifee/react-native": "npm:^9.1.3"
     "@open-frames/proxy-types": "npm:^0.2.3"
     "@peculiar/webcrypto": "npm:^1.4.1"
-    "@privy-io/expo": "npm:^0.39.0"
+    "@privy-io/expo": "npm:0.45.0-beta-20250203223139"
     "@privy-io/expo-native-extensions": "npm:^0.0.3"
     "@privy-io/react-auth": "npm:^1.65.1"
     "@react-native-async-storage/async-storage": "npm:1.23.1"
