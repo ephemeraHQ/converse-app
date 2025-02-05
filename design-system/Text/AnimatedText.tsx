@@ -21,12 +21,7 @@ export type IAnimatedTextProps = AnimatedProps<ITextProps>;
 
 export const AnimatedText = Animated.createAnimatedComponent(Text);
 
-const AnimatedAnimateableText =
-  Animated.createAnimatedComponent(AnimateableText);
-
 // A specialized text component that efficiently updates text content using SharedValue
-// Optimized for frequent text changes without causing re-renders
-// Uses react-native-animateable-text under the hood for better performance
 
 // We omit 'style' from RNTextProps and explicitly redefine it to ensure proper type checking
 // with Reanimated's StyleProp<TextStyle>. This prevents type conflicts between React Native's
@@ -70,7 +65,7 @@ export function AnimatableText({ style, text, ...rest }: IAnimatableTextProps) {
   }));
 
   return (
-    <AnimatedAnimateableText
+    <AnimateableText
       animatedProps={animatedProps}
       style={animatedStyle}
       {...rest}
