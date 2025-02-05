@@ -34,7 +34,7 @@ export function getConversationSyncAllQueryOptions(args: IArgs) {
       if (timeDiff > 3000) {
         captureError(
           new Error(
-            `[ConversationsQuery] Fetching conversations from network took ${timeDiff}ms for account ${args.ethAddress}`
+            `[getConversationSyncAllQuery] Syncing conversations from network took ${timeDiff}ms for account ${args.ethAddress}`
           )
         );
       }

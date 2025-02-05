@@ -45,18 +45,15 @@ export function getDmQueryOptions(args: IDmQueryArgs) {
   });
 }
 
-export function useDmQuery(args: IDmQueryArgs) {
-  return useQuery(getDmQueryOptions(args));
-}
-
 export function setDmQueryData(args: IDmQueryArgs & { dm: IDmQueryData }) {
   const { ethAccountAddress, inboxId, dm } = args;
   queryClient.setQueryData(
     getDmQueryOptions({ ethAccountAddress, inboxId }).queryKey,
     dm
   );
+
+  // Update the main conversation query because it's a 1-1
   if (dm) {
-    // Update the main conversation query because it's a 1-1
     setConversationQueryData({
       account: ethAccountAddress,
       topic: dm.topic,

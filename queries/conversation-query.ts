@@ -88,10 +88,6 @@ async function getConversation(args: IGetConversationArgs) {
 
   // await conversation.sync();
 
-  // if (!conversation.lastMessage) {
-  //   console.log("caca");
-  // }
-
   const totalEnd = new Date().getTime();
   const totalTimeDiff = totalEnd - totalStart;
 
@@ -149,9 +145,6 @@ export function updateConversationQueryData(
   }
 ) {
   const { conversationUpdate } = args;
-  logger.debug(
-    `[updateConversationQueryData] Updating conversation for ${args.topic} with account ${args.account}`
-  );
   queryClient.setQueryData(
     getConversationQueryOptions(args).queryKey,
     (previousConversation) => {

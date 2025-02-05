@@ -1,7 +1,6 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query";
 import { queryClient } from "@/queries/queryClient";
 import { ensureDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query";
@@ -15,11 +14,6 @@ export async function findConversationByInboxIds(args: {
   const { inboxIds } = args;
 
   const account = getCurrentAccount();
-  const currentUserInboxId = getCurrentAccountInboxId();
-
-  if (!currentUserInboxId) {
-    throw new Error("No current user inbox id found");
-  }
 
   if (!account) {
     throw new Error("No account found");
@@ -43,7 +37,7 @@ export async function findConversationByInboxIds(args: {
   const groups = conversations.filter(isConversationGroup);
   const dms = conversations.filter(isConversationDm);
 
-  // Fetch all group members data
+  // Make sure we have group members for all groups
   const groupMembersData = await Promise.all(
     groups.map((conversation) =>
       ensureGroupMembersQueryData({
@@ -53,23 +47,22 @@ export async function findConversationByInboxIds(args: {
     )
   );
 
-  // Check groups first
+  // Check if we have a group with all the selected inboxIds
   const matchingGroup = groups.find((group, index) => {
-    const memberIds = groupMembersData[index]?.ids;
-    if (!memberIds) return false;
-    return memberIds.every((memberId) =>
-      inboxIds.some(
-        (inboxId) =>
-          isSameInboxId(memberId, currentUserInboxId) ||
-          isSameInboxId(memberId, inboxId)
-      )
+    const groupMembersInboxIds = groupMembersData[index]?.ids;
+    if (!groupMembersInboxIds) return false;
+
+    // Need only groups with exactly the same number of members as inboxIds
+    if (groupMembersInboxIds.length !== inboxIds.length) return false;
+
+    // Then check that every memberId matches either currentUserInboxId or one of inboxIds
+    return groupMembersInboxIds.every((groupMemberInboxId) =>
+      inboxIds.some((inboxId) => isSameInboxId(groupMemberInboxId, inboxId))
     );
   });
 
-  console.log("matchingGroup:", matchingGroup);
-
-  // If we found a group or if we're looking for multiple members, return the result
-  if (matchingGroup || inboxIds.length > 1) {
+  // If we found a group or if we're looking for a group but didn't find one
+  if (matchingGroup || inboxIds.length > 2) {
     return matchingGroup;
   }
 
@@ -84,8 +77,13 @@ export async function findConversationByInboxIds(args: {
     )
   );
 
-  return dms.find((_, index) => {
+  const matchingDm = dms.find((_, index) => {
     const peerInboxId = dmPeerInboxIds[index];
-    return peerInboxId && isSameInboxId(inboxIds[0], peerInboxId);
+    return (
+      peerInboxId &&
+      inboxIds.some((inboxId) => isSameInboxId(inboxId, peerInboxId))
+    );
   });
+
+  return matchingDm;
 }

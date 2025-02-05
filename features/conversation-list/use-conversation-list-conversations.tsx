@@ -59,7 +59,6 @@ export const useConversationListConversations = () => {
     // which is referentially unstable
     // combine: (queries) => {
     //   queries.forEach((query) => {
-    //     console.log("query", query);
     //     if (query) {
     //       isConversationAllowed(query.data);
     //     }

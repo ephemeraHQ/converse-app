@@ -36,14 +36,7 @@ import { useCurrentConversationTopicSafe } from "../conversation.store-context";
 export function isAnActualMessage(
   message: DecodedMessageWithCodecsType
 ): message is DecodedMessage<TextCodec> {
-  logger.debug("[isAnActualMessage] Checking if message is actual message", {
-    messageId: message.id,
-    contentTypeId: message.contentTypeId,
-  });
-  const result =
-    !isReadReceiptMessage(message) && !isGroupUpdatedMessage(message);
-  logger.debug("[isAnActualMessage] Result", { result });
-  return result;
+  return !isReadReceiptMessage(message) && !isGroupUpdatedMessage(message);
 }
 
 export function isTextMessage(

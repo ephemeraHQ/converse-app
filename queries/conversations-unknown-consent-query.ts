@@ -20,10 +20,6 @@ async function getUnknownConversations(args: { account: string }) {
     throw new Error("Account is required");
   }
 
-  logger.debug(
-    `[ConversationsQuery] Fetching conversations from network for account ${account}`
-  );
-
   await ensureConversationSyncAllQuery({
     ethAddress: account,
     consentStates: ["unknown"],
@@ -72,10 +68,6 @@ export const addConversationToUnknownConsentConversationsQuery = (args: {
   conversation: ConversationWithCodecsType;
 }) => {
   const { account, conversation } = args;
-
-  logger.debug(
-    `[UnknownConversationsQuery] addConversationToUnknownConsentConversationsQuery for account ${account}`
-  );
 
   const previousConversationsData = getUnknownConsentConversationsQueryData({
     account,

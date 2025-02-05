@@ -47,10 +47,7 @@ export const ConversationScreen = memo(function ConversationScreen(
         searchSelectedUserInboxIds={searchSelectedUserInboxIds}
       >
         <ConversationMessageContextMenuStoreProvider>
-          <ConversationComposerStoreProvider
-            inputValue={composerTextPrefill}
-            storeName={topic || "new"}
-          >
+          <ConversationComposerStoreProvider inputValue={composerTextPrefill}>
             <Content />
           </ConversationComposerStoreProvider>
         </ConversationMessageContextMenuStoreProvider>

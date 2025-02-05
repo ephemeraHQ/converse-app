@@ -1,7 +1,9 @@
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import { Center } from "@/design-system/Center";
+import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
+import { useGroupQuery } from "@/queries/useGroupQuery";
 import { getInboxProfileSocialsQueryConfig } from "@/queries/useInboxProfileSocialsQuery";
 import { $globalStyles } from "@/theme/styles";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
@@ -12,9 +14,8 @@ import {
 import { useQueries } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import React, { memo, useMemo } from "react";
-import { StyleProp, Text, TextStyle, ViewStyle } from "react-native";
+import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { Avatar } from "./Avatar";
-import { useGroupQuery } from "@/queries/useGroupQuery";
 
 const MAIN_CIRCLE_RADIUS = 50;
 const MAX_VISIBLE_MEMBERS = 4;
@@ -226,6 +227,7 @@ const ExtraMembersIndicator: React.FC<{
         style={[
           themed($extraMembersText),
           {
+            color: theme.colors.global.white,
             fontSize: ((pos.size / 100) * size) / 2,
           },
         ]}

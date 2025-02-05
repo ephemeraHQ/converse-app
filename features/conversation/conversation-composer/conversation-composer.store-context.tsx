@@ -1,6 +1,12 @@
+import { useCurrentConversationTopic } from "@/features/conversation/conversation.store-context";
+import { usePrevious } from "@/hooks/use-previous-value";
 import { LocalAttachment } from "@/utils/attachment/types";
 import { zustandMMKVStorage } from "@utils/mmkv";
-import { MessageId, RemoteAttachmentContent } from "@xmtp/react-native-sdk";
+import {
+  ConversationTopic,
+  MessageId,
+  RemoteAttachmentContent,
+} from "@xmtp/react-native-sdk";
 import { createContext, memo, useContext, useRef } from "react";
 import { createStore, useStore } from "zustand";
 import {
@@ -24,13 +30,11 @@ export type IComposerMediaPreview =
   | null;
 
 type IConversationComposerStoreProps = {
-  storeName: string;
   inputValue?: string;
 };
 
 type IConversationComposerState = IConversationComposerStoreProps & {
   inputValue: string;
-  storeName: string;
   replyingToMessageId: MessageId | null;
   composerMediaPreview: IComposerMediaPreview;
   composerUploadedAttachment: RemoteAttachmentContent | null;
@@ -60,9 +64,17 @@ type IConversationComposerStore = ReturnType<
 export const ConversationComposerStoreProvider = memo(
   ({ children, ...props }: IConversationComposerStoreProviderProps) => {
     const storeRef = useRef<IConversationComposerStore>();
-    if (!storeRef.current) {
-      storeRef.current = createConversationComposerStore(props);
+    const topic = useCurrentConversationTopic();
+    const previousTopic = usePrevious(topic);
+
+    // Create a new store when topic changes
+    if (!storeRef.current || topic !== previousTopic) {
+      storeRef.current = createConversationComposerStore({
+        ...props,
+        storeName: getStoreName(topic),
+      });
     }
+
     return (
       <ConversationComposerStoreContext.Provider value={storeRef.current}>
         {children}
@@ -72,10 +84,9 @@ export const ConversationComposerStoreProvider = memo(
 );
 
 const createConversationComposerStore = (
-  initProps: IConversationComposerStoreProps
+  initProps: IConversationComposerStoreProps & { storeName: string }
 ) => {
   const DEFAULT_STATE: IConversationComposerState = {
-    storeName: initProps.storeName,
     inputValue: initProps.inputValue ?? "",
     composerMediaPreview: null,
     composerUploadedAttachment: null,
@@ -122,6 +133,10 @@ const createConversationComposerStore = (
     )
   );
 };
+
+function getStoreName(topic: ConversationTopic | null) {
+  return topic ? `composer-${topic}` : "new";
+}
 
 const ConversationComposerStoreContext =
   createContext<IConversationComposerStore | null>(null);

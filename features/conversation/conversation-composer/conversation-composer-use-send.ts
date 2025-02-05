@@ -72,6 +72,9 @@ export function useSend() {
     const { topic } = conversationStore.getState();
     const { inputValue, replyingToMessageId } = composerStore.getState();
 
+    // Reset the composer
+    composerStore.getState().reset();
+
     const uploadedAttachment = await handleMediaPreview();
 
     const messageParamsWithTopic: Omit<ISendMessageParams, "topic"> = {
@@ -93,9 +96,6 @@ export function useSend() {
         await createNewConversation(messageParamsWithTopic);
       }
     }
-
-    // Reset the composer
-    composerStore.getState().reset();
   }, [
     composerStore,
     conversationStore,

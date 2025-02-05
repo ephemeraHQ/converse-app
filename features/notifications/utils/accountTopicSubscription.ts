@@ -71,10 +71,10 @@ const setupAccountTopicSubscription = (account: string) => {
     previousUpdateTime = dataUpdatedAt;
 
     // Set up notifications for conversations
-    subscribeToNotifications({
-      conversations: data,
-      account,
-    }).catch(captureError);
+    // subscribeToNotifications({
+    //   conversations: data,
+    //   account,
+    // }).catch(captureError);
 
     // Reset notifications if this is the current account
     if (account === getCurrentAccount()) {

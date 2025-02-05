@@ -9,7 +9,6 @@ import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { allowedConsentConversationsQueryKey } from "@queries/QueryKeys";
 import { QueryObserver, queryOptions, useQuery } from "@tanstack/react-query";
-import logger from "@utils/logger";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
 import { ensureGroupMembersQueryData } from "./useGroupMembersQuery";
@@ -43,9 +42,7 @@ export function addConversationToAllowedConsentConversationsQuery(
   }
 ) {
   const { account, conversation } = args;
-  logger.debug(
-    `[ConversationsQuery] addConversationToConversationsQuery for account ${account}`
-  );
+
   const previousConversationsData = getAllowedConsentConversationsQueryData({
     account,
   });
@@ -78,10 +75,6 @@ export const removeConversationFromAllowedConsentConversationsQuery = (
   }
 ) => {
   const { account, topic } = args;
-
-  logger.debug(
-    `[ConversationsQuery] removeConversationFromConversationsQuery for account ${account}`
-  );
 
   const previousConversationsData = getAllowedConsentConversationsQueryData({
     account,
@@ -177,10 +170,6 @@ export const updateConversationInAllowedConsentConversationsQueryData = (
   }
 ) => {
   const { account, topic, conversationUpdate } = args;
-
-  logger.debug(
-    `[ConversationsQuery] updateConversationInConversationsQueryData for account ${account} and topic ${topic}`
-  );
 
   const previousConversationsData = getAllowedConsentConversationsQueryData({
     account,

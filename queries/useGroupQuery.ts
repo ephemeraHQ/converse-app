@@ -2,13 +2,14 @@
  * useGroupQuery is derived from useConversationQuery. Like useDmQuery, maybe worth considering if we should just use useConversationQuery instead.
  */
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { queryClient } from "@/queries/queryClient";
 import {
   ConversationQueryData,
+  getConversationQueryData,
   getConversationQueryOptions,
   getOrFetchConversation,
+  setConversationQueryData,
+  updateConversationQueryData,
 } from "@/queries/conversation-query";
-import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -26,19 +27,14 @@ export function useGroupQuery(args: {
   );
 }
 
-export function getGroupQueryData(
-  args: {
-    account: string;
-    topic: ConversationTopic;
-  } // Hate having this return type but for some reason the query is infering a DM or a Group even tho we have a select that filters for GroupWithCodecsType...
-): GroupWithCodecsType | null | undefined {
-  const { account, topic } = args;
-  return queryClient.getQueryData(
-    getGroupQueryOptions({
-      account,
-      topic,
-    }).queryKey
-  );
+export function getGroupQueryData(args: {
+  account: string;
+  topic: ConversationTopic;
+}) {
+  return getConversationQueryData(args) as
+    | GroupWithCodecsType
+    | null
+    | undefined;
 }
 
 export function setGroupQueryData(args: {
@@ -47,13 +43,11 @@ export function setGroupQueryData(args: {
   group: GroupWithCodecsType;
 }) {
   const { account, topic, group } = args;
-  queryClient.setQueryData(
-    getGroupQueryOptions({
-      account,
-      topic,
-    }).queryKey,
-    group
-  );
+  setConversationQueryData({
+    account,
+    topic,
+    conversation: group,
+  });
 }
 
 export function getGroupQueryOptions(args: {
@@ -85,15 +79,11 @@ export function updateGroupQueryData(args: {
   topic: ConversationTopic;
   updates: Partial<ConversationQueryData>;
 }) {
-  queryClient.setQueryData(
-    getGroupQueryOptions(args).queryKey,
-    (previousGroup) => {
-      if (!previousGroup) {
-        return undefined;
-      }
-      return updateObjectAndMethods(previousGroup, args.updates);
-    }
-  );
+  updateConversationQueryData({
+    account: args.account,
+    topic: args.topic,
+    conversationUpdate: args.updates,
+  });
 }
 
 export function getOrFetchGroupQuery(args: {

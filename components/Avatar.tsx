@@ -68,7 +68,6 @@ export const Avatar = memo(function Avatar({
       {name ? (
         <Text
           weight="medium"
-          color="primary"
           style={{
             color: theme.colors.global.white, // white looks better for both dark/light themes
             fontSize: avatarSize / 2.4, // 2.4 is the ratio in the Figma design

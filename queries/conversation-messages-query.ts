@@ -364,49 +364,14 @@ export function replaceOptimisticMessageWithReal(args: {
   );
 }
 
-export function replaceOptimisticConversationWithReal(args: {
+export function setConversationMessagesQueryData(args: {
   account: string;
-  tempTopic: string;
-  realTopic: ConversationTopic;
+  topic: ConversationTopic;
+  data: IMessageAccumulator;
 }) {
-  const { account, tempTopic, realTopic } = args;
-  logger.info("[replaceOptimisticConversationWithReal] Starting replacement", {
-    account,
-    tempTopic,
-    realTopic,
-  });
-
-  // Transfer messages from temp topic to real topic
-  const messages = queryClient.getQueryData<IMessageAccumulator>(
-    conversationMessagesQueryKey(account, tempTopic as ConversationTopic)
-  ) || { ids: [], byId: {}, reactions: {} };
-
-  logger.info(
-    "[replaceOptimisticConversationWithReal] Found messages to transfer",
-    {
-      messageCount: messages.ids.length,
-      messageIds: messages.ids,
-    }
-  );
-
-  queryClient.setQueryData(
-    conversationMessagesQueryKey(account, realTopic),
-    messages
-  );
-
-  logger.info(
-    "[replaceOptimisticConversationWithReal] Transferred messages to new topic"
-  );
-
-  // Cleanup temp topic data
-  queryClient.removeQueries({
-    queryKey: conversationMessagesQueryKey(
-      account,
-      tempTopic as ConversationTopic
-    ),
-  });
-
-  logger.info(
-    "[replaceOptimisticConversationWithReal] Cleaned up temp topic data"
+  const { account, topic, data } = args;
+  return queryClient.setQueryData(
+    getConversationMessagesQueryOptions({ account, topic }).queryKey,
+    data
   );
 }

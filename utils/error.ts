@@ -35,3 +35,9 @@ export class XMTPError extends BaseSDKError {
     super(`[XMTP SDK] ${message}`, cause);
   }
 }
+
+export class StreamError extends BaseSDKError {
+  constructor(message: string, cause?: unknown) {
+    super(`[Stream] ${message}`, cause);
+  }
+}

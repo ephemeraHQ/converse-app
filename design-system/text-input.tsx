@@ -22,7 +22,11 @@ export const TextInput = memo(
         cursorColor={cursorColor}
         selectionHandleColor={cursorColor}
         selectionColor={cursorColor as string} // Not sure why "as string" is required
-        style={[themed(textPresets["body"]), style]}
+        style={[
+          themed(textPresets["body"]),
+          { padding: 0 }, // We want fully control over our TextInput layout
+          style,
+        ]}
         {...rest}
         ref={ref}
       />

@@ -8,7 +8,9 @@ import {
   IMessageAccumulator,
   addConversationMessageQuery,
   getConversationMessagesQueryData,
+  getConversationMessagesQueryOptions,
   replaceOptimisticMessageWithReal,
+  setConversationMessagesQueryData,
 } from "@/queries/conversation-messages-query";
 import {
   addConversationToAllowedConsentConversationsQuery,
@@ -48,6 +50,12 @@ import {
 import { DmParams } from "@xmtp/react-native-sdk/build/lib/Dm";
 import { GroupParams } from "@xmtp/react-native-sdk/build/lib/Group";
 import { sendMessage } from "../hooks/use-send-message";
+import { useConversationStore } from "@/features/conversation/conversation.store-context";
+import logger from "@/utils/logger";
+import {
+  getConversationQueryData,
+  updateConversationQueryData,
+} from "@/queries/conversation-query";
 
 export type ISendMessageParams = {
   topic: ConversationTopic;
@@ -97,12 +105,18 @@ export type ISendFirstMessageParams = Omit<ISendMessageParams, "topic">;
 //   return messageId;
 // }
 
+export const TEMP_CONVERSATION_PREFIX = "tmp-";
+
 function getConversationTempTopic(args: { inboxIds: InboxId[] }) {
   const { inboxIds } = args;
-  return `tmp-${generateGroupHashFromMemberIds(inboxIds)}` as ConversationTopic;
+  return `${TEMP_CONVERSATION_PREFIX}${generateGroupHashFromMemberIds(
+    inboxIds
+  )}` as ConversationTopic;
 }
 
 export function useCreateConversationAndSendFirstMessage() {
+  const conversationStore = useConversationStore();
+
   return useMutation({
     mutationFn: async (args: {
       inboxIds: InboxId[];
@@ -146,14 +160,27 @@ export function useCreateConversationAndSendFirstMessage() {
     //   const currentAccountInboxId = getCurrentAccountInboxId()!;
     //   const currentAccount = getCurrentAccount()!;
 
+    //   logger.debug(
+    //     `[useCreateConversationAndSendFirstMessage] Creating optimistic conversation with currentAccount: ${currentAccount} and currentAccountInboxId: ${currentAccountInboxId}`
+    //   );
+
     //   const isGroup = inboxIds.length > 1;
     //   const tempTopic = getConversationTempTopic({
     //     inboxIds: [currentAccountInboxId, ...inboxIds],
     //   });
 
+    //   logger.debug(
+    //     `[useCreateConversationAndSendFirstMessage] Generated tempTopic: ${tempTopic}, isGroup: ${isGroup}`
+    //   );
+
     //   // Create optimistic conversation
     //   let tempConversation: GroupWithCodecsType | DmWithCodecsType;
+
+    //   // Group
     //   if (isGroup) {
+    //     logger.debug(
+    //       `[useCreateConversationAndSendFirstMessage] Creating optimistic group conversation`
+    //     );
     //     const groupParams: GroupParams = {
     //       id: "" as unknown as ConversationId,
     //       createdAt: 0,
@@ -172,12 +199,20 @@ export function useCreateConversationAndSendFirstMessage() {
     //       undefined
     //     );
 
+    //     logger.debug(
+    //       `[useCreateConversationAndSendFirstMessage] Setting group query data for topic: ${tempTopic}`
+    //     );
     //     setGroupQueryData({
     //       account: currentAccount,
     //       topic: tempTopic,
     //       group: tempConversation as GroupWithCodecsType,
     //     });
-    //   } else {
+    //   }
+    //   // DM
+    //   else {
+    //     logger.debug(
+    //       `[useCreateConversationAndSendFirstMessage] Creating optimistic DM conversation with peer: ${inboxIds[0]}`
+    //     );
     //     const dmParams: DmParams = {
     //       id: "" as unknown as ConversationId,
     //       createdAt: 0,
@@ -191,12 +226,20 @@ export function useCreateConversationAndSendFirstMessage() {
     //       undefined
     //     );
 
+    //     logger.debug(
+    //       `[useCreateConversationAndSendFirstMessage] Setting DM query data for topic: ${tempTopic}`
+    //     );
+
     //     setDmQueryData({
     //       ethAccountAddress: currentAccount,
     //       inboxId: inboxIds[0],
     //       dm: tempConversation as Dm<SupportedCodecsType>,
     //     });
     //   }
+
+    //   conversationStore.setState({
+    //     topic: tempTopic,
+    //   });
 
     //   // addConversationToAllowedConsentConversationsQuery({
     //   //   account: currentAccount,
@@ -298,51 +341,72 @@ export function useCreateConversationAndSendFirstMessage() {
   });
 }
 
-function replaceOptimisticConversationWithReal(args: {
-  account: string;
-  tempTopic: string;
+export function maybeReplaceOptimisticConversationWithReal(args: {
+  ethAccountAddress: string;
+  memberInboxIds: InboxId[];
   realTopic: ConversationTopic;
 }) {
-  const { account, tempTopic, realTopic } = args;
+  const {
+    ethAccountAddress: ethAccountAddress,
+    memberInboxIds,
+    realTopic,
+  } = args;
 
-  try {
-    const messages: IMessageAccumulator | undefined =
-      getConversationMessagesQueryData({
-        account,
-        topic: tempTopic as ConversationTopic,
-      });
+  const tempTopic = getConversationTempTopic({
+    inboxIds: memberInboxIds,
+  });
 
-    if (messages?.ids?.length && messages.ids.length > 0) {
-      queryClient.setQueryData(
-        conversationMessagesQueryKey(account, realTopic),
-        messages.ids.map((messageId) => {
-          const message = messages.byId[messageId];
-          return {
-            ...message,
-            topic: realTopic,
-            // Preserve existing delivery status
-            deliveryStatus: message.deliveryStatus || "sent",
-          };
-        })
-      );
-    }
+  const realConversation = getConversationQueryData({
+    account: ethAccountAddress,
+    topic: realTopic,
+  });
 
-    // let the conversation screen handle cleaning up the cache as it'll still be observing
-    // the cache at the time the conversation is created here
-    // queryClient.removeQueries({
-    //   queryKey: conversationMessagesQueryKey(
-    //     account,
-    //     tempTopic as ConversationTopic
-    //   ),
-    // });
-
-    // queryClient.setQueryData<ConversationWithCodecsType[]>(
-    //   conversationsQueryKey(account),
-    //   (previous) => (previous ?? []).filter((conv) => conv.topic !== tempTopic)
-    // );
-  } catch (error) {
-    captureErrorWithToast(error);
+  if (!realConversation) {
+    throw new Error("Real conversation not found");
   }
+
+  updateConversationQueryData({
+    account: ethAccountAddress,
+    topic: tempTopic,
+    conversationUpdate: realConversation,
+  });
+
+  // Now move the messages from the temp conversation to the real conversation
+  const messages = getConversationMessagesQueryData({
+    account: ethAccountAddress,
+    topic: tempTopic,
+  });
+
+  if (messages) {
+    setConversationMessagesQueryData({
+      account: ethAccountAddress,
+      topic: realTopic,
+      data: messages,
+    });
+  }
+
+  // Get messages for the temporary conversation
+  // const messages: IMessageAccumulator | undefined =
+  //   getConversationMessagesQueryData({
+  //     account,
+  //     topic: tempTopic,
+  //   });
+
+  // // If we found messages for the temp conversation, update them with the real topic
+  // if (messages?.ids?.length && messages.ids.length > 0) {
+  //   queryClient.setQueryData(
+  //     conversationMessagesQueryKey(account, realTopic),
+  //     messages.ids.map((messageId) => {
+  //       const message = messages.byId[messageId];
+  //       return {
+  //         ...message,
+  //         topic: realTopic,
+  //         // Preserve existing delivery status
+  //         deliveryStatus: message.deliveryStatus || "sent",
+  //       };
+  //     })
+  //   );
+  // }
 }
 
 /**

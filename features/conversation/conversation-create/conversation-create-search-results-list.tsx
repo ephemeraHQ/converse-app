@@ -143,7 +143,6 @@ export function ConversationSearchResultsList() {
           const peerInboxId = getDmPeerInboxIdQueryData({
             account: getCurrentAccount()!,
             topic,
-            caller: "ConversationSearchResultsList",
           });
 
           return (

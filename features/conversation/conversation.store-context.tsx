@@ -1,4 +1,5 @@
 import { findConversationByInboxIds } from "@/features/conversation/utils/find-conversations-by-inbox-ids";
+import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { captureError } from "@/utils/capture-error";
 import { ConversationTopic, InboxId, MessageId } from "@xmtp/react-native-sdk";
 import { createContext, memo, useContext, useEffect, useRef } from "react";
@@ -40,8 +41,17 @@ export const ConversationStoreProvider = memo(
             return;
           }
 
+          const currentUserInboxId = getCurrentAccountInboxId();
+
+          if (!currentUserInboxId) {
+            throw new Error("No current user inbox id found");
+          }
+
           const conversation = await findConversationByInboxIds({
-            inboxIds: nextState.searchSelectedUserInboxIds,
+            inboxIds: [
+              currentUserInboxId,
+              ...nextState.searchSelectedUserInboxIds,
+            ],
           });
 
           storeRef.current?.setState({

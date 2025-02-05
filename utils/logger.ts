@@ -142,6 +142,19 @@ const logger = _logger as typeof _logger & {
   error: logMethodType;
 };
 
+// Add stream logger
+export const streamLogger = {
+  ...logger,
+  debug: (...args: Parameters<logMethodType>) =>
+    logger.debug("[STREAM]", ...args),
+  info: (...args: Parameters<logMethodType>) =>
+    logger.info("[STREAM]", ...args),
+  warn: (...args: Parameters<logMethodType>) =>
+    logger.warn("[STREAM]", ...args),
+  error: (...args: Parameters<logMethodType>) =>
+    logger.error("[STREAM]", ...args),
+};
+
 export function logJson({
   json,
   msg,
