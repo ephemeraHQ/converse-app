@@ -1,7 +1,7 @@
 import { GroupAvatar } from "@/components/group-avatar";
 import { useCurrentAccount } from "@/data/store/accountsStore";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
-import { ConversationSearchResultsListItem } from "@/features/conversation/conversation-create/conversation-create-search-result-list-item";
+import { ConversationSearchResultsListItem } from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
 import { useGroupNameForCurrentAccount } from "@/hooks/useGroupName";
 import { ConversationTopic } from "@xmtp/react-native-sdk";

@@ -2,8 +2,8 @@ import { getCurrentAccount } from "@/data/store/accountsStore";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { EmptyState } from "@/design-system/empty-state";
 import { Loader } from "@/design-system/loader";
-import { getSearchByConversationMembershipQueryOptions } from "@/features/conversation/conversation-create/search-by-conversation-membership/use-search-by-conversation-membership.query";
-import { useSearchConvosUsersQuery } from "@/features/conversation/conversation-create/use-search-convos-users.query";
+import { getSearchByConversationMembershipQueryOptions } from "@/features/conversation/conversation-create/utils/search-conversations/search-conversations.query";
+import { useSearchConvosUsers } from "@/features/conversation/conversation-create/hooks/use-search-convos-users";
 import { useConversationStoreContext } from "@/features/conversation/conversation.store-context";
 import { useSafeCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query";
@@ -51,7 +51,7 @@ export function ConversationSearchResultsList() {
   const currentUserInboxId = useSafeCurrentAccountInboxId();
 
   const { data: searchConvosUsersData, isLoading: isSearchingConvosUsers } =
-    useSearchConvosUsersQuery({
+    useSearchConvosUsers({
       searchQuery,
       inboxIdsToOmit: [...selectedSearchUserInboxIds, currentUserInboxId],
     });

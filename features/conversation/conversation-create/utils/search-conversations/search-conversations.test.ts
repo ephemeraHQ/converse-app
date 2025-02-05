@@ -1,4 +1,4 @@
-import { searchByConversationMembership } from "./search-by-conversation-membership";
+import { searchByConversationMembership } from "./search-conversations";
 import { ConversationVersion, ConversationTopic } from "@xmtp/react-native-sdk";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import {

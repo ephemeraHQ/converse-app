@@ -3,14 +3,14 @@ import { ConversationVersion, InboxId } from "@xmtp/react-native-sdk";
 import {
   doesGroupNameMatchQuery,
   doesSocialsMatchQuery,
-} from "./search-by-conversation-membership.helpers";
+} from "./search-conversations.helpers";
 import type {
-  SearchResults,
-  SearchableConversation,
-} from "./search-by-conversation-membership.types";
+  SearchConversationsResults,
+  SearchConversationsSearchableConversation,
+} from "./search-conversations.types";
 
 export function searchByConversationMembershipProcessor(args: {
-  conversations: SearchableConversation[];
+  conversations: SearchConversationsSearchableConversation[];
   searchQuery: string;
   currentUserInboxId: InboxId;
 }) {
@@ -43,7 +43,7 @@ export function searchByConversationMembershipProcessor(args: {
   //   };
   // }
 
-  return conversations.reduce<SearchResults>(
+  return conversations.reduce<SearchConversationsResults>(
     (acc, conversation) => {
       // Group name matching
       if (

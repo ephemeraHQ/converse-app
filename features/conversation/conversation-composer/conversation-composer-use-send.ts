@@ -1,4 +1,4 @@
-import { useCreateConversationAndSendFirstMessage } from "@/features/conversation/conversation-create/use-create-conversation-and-send-first-message";
+import { useCreateConversationAndSendFirstMessage } from "@/features/conversation/conversation-create/hooks/use-create-conversation-and-send-first-message";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import {
   ISendMessageParams,

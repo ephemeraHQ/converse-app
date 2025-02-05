@@ -1,7 +1,7 @@
 import { Avatar } from "@/components/Avatar";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import { useInboxUsername } from "@/features/profiles/utils/inbox-username";
-import { ConversationSearchResultsListItem } from "@/features/conversation/conversation-create/conversation-create-search-result-list-item";
+import { ConversationSearchResultsListItem } from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item";
 import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { useAppTheme } from "@/theme/useAppTheme";

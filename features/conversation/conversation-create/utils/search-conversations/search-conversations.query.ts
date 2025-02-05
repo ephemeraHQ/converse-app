@@ -1,6 +1,6 @@
 import { searchByConversationMembershipQueryKey } from "@/queries/QueryKeys";
 import { queryOptions } from "@tanstack/react-query";
-import { searchByConversationMembership } from "./utils/search-by-conversation-membership";
+import { searchByConversationMembership } from "./search-conversations";
 
 export function getSearchByConversationMembershipQueryOptions(args: {
   searchQuery: string;

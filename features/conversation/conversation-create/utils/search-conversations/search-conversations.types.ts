@@ -5,20 +5,20 @@ import type {
   InboxId,
 } from "@xmtp/react-native-sdk";
 
-export type SearchableConversation = {
+export type SearchConversationsSearchableConversation = {
   version: ConversationVersion;
   topic: ConversationTopic;
   conversationName?: string;
   conversationImageUri?: string;
-  memberProfiles: MemberProfile[];
+  memberProfiles: SearchConversationsMemberProfile[];
 };
 
-export type MemberProfile = {
+export type SearchConversationsMemberProfile = {
   inboxId: InboxId;
   socials: IProfileSocials[] | null;
 };
 
-export type SearchResults = {
+export type SearchConversationsResults = {
   existingDmTopics: ConversationTopic[];
   existingGroupsByMemberNameTopics: ConversationTopic[];
   existingGroupsByGroupNameTopics: ConversationTopic[];

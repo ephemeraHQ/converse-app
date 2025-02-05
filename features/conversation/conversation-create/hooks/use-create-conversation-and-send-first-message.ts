@@ -49,7 +49,7 @@ import {
 } from "@xmtp/react-native-sdk/build/lib/Client";
 import { DmParams } from "@xmtp/react-native-sdk/build/lib/Dm";
 import { GroupParams } from "@xmtp/react-native-sdk/build/lib/Group";
-import { sendMessage } from "../hooks/use-send-message";
+import { sendMessage } from "../../hooks/use-send-message";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import logger from "@/utils/logger";
 import {

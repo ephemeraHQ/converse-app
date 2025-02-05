@@ -4,8 +4,8 @@ import { VStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
 import { ConversationComposer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
-import { ConversationCreateSearch } from "@/features/conversation/conversation-create/conversation-create-search";
-import { ConversationSearchResultsList } from "@/features/conversation/conversation-create/conversation-create-search-results-list";
+import { ConversationCreateSearchInput } from "@/features/conversation/conversation-create/components/conversation-create-search-input";
+import { ConversationSearchResultsList } from "@/features/conversation/conversation-create/components/conversation-create-search-results-list";
 import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
 import { ConversationMessageContextMenu } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu";
 import { ConversationMessageContextMenuStoreProvider } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
@@ -114,7 +114,7 @@ const Content = memo(function Content() {
   return (
     <>
       <VStack style={$globalStyles.flex1}>
-        {isCreatingNewConversation && <ConversationCreateSearch />}
+        {isCreatingNewConversation && <ConversationCreateSearchInput />}
 
         <VStack style={$globalStyles.flex1}>
           {isCreatingNewConversation && <ConversationSearchResultsList />}

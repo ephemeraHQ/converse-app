@@ -1,4 +1,4 @@
-import { maybeReplaceOptimisticConversationWithReal } from "@/features/conversation/conversation-create/use-create-conversation-and-send-first-message";
+import { maybeReplaceOptimisticConversationWithReal } from "@/features/conversation/conversation-create/hooks/use-create-conversation-and-send-first-message";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationConsentUnknown } from "@/features/conversation/utils/is-conversation-consent-unknown";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";

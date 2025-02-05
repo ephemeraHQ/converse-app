@@ -12,7 +12,7 @@ import {
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { InboxId } from "@xmtp/react-native-sdk";
 
-export function useSearchConvosUsersQuery(args: {
+export function useSearchConvosUsers(args: {
   searchQuery: string;
   inboxIdsToOmit: string[];
 }) {

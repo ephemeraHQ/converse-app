@@ -1,7 +1,7 @@
 import type { IProfileSocials } from "@/features/profiles/profile-types";
 import { ConversationTopic, ConversationVersion } from "@xmtp/react-native-sdk";
-import { searchByConversationMembershipProcessor } from "./search-by-conversation-membership-processor";
-import type { SearchableConversation } from "./search-by-conversation-membership.types";
+import { searchByConversationMembershipProcessor } from "./search-conversations-processor";
+import type { SearchConversationsSearchableConversation } from "./search-conversations.types";
 
 // Mock XMTP SDK
 jest.mock("@xmtp/react-native-sdk", () => ({
@@ -61,7 +61,7 @@ describe("searchByConversationMembershipProcessor", () => {
     userNames: [],
   };
 
-  const mockDmConversation: SearchableConversation = {
+  const mockDmConversation: SearchConversationsSearchableConversation = {
     version: ConversationVersion.DM,
     topic: "dm-topic" as ConversationTopic,
     memberProfiles: [
@@ -70,7 +70,7 @@ describe("searchByConversationMembershipProcessor", () => {
     ],
   };
 
-  const mockGroupConversation: SearchableConversation = {
+  const mockGroupConversation: SearchConversationsSearchableConversation = {
     version: ConversationVersion.GROUP,
     topic: "group-topic" as ConversationTopic,
     conversationName: "Test Group Chat",
@@ -99,7 +99,7 @@ describe("searchByConversationMembershipProcessor", () => {
 
   describe("Group name search", () => {
     it("should exclude groups with /proto in name", () => {
-      const protoGroup: SearchableConversation = {
+      const protoGroup: SearchConversationsSearchableConversation = {
         ...mockGroupConversation,
         conversationName: "Test Group Chat/proto",
       };
@@ -131,7 +131,7 @@ describe("searchByConversationMembershipProcessor", () => {
         userNames: [],
       };
 
-      const groupWithCurrentUser: SearchableConversation = {
+      const groupWithCurrentUser: SearchConversationsSearchableConversation = {
         ...mockGroupConversation,
         memberProfiles: [
           { inboxId: currentUserAddress, socials: [currentUserSocials] },

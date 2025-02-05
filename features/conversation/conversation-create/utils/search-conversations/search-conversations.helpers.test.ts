@@ -2,7 +2,7 @@ import type { IProfileSocials } from "@/features/profiles/profile-types";
 import {
   doesGroupNameMatchQuery,
   doesSocialsMatchQuery,
-} from "./search-by-conversation-membership.helpers";
+} from "./search-conversations.helpers";
 
 describe("search-helpers", () => {
   describe("doesGroupNameMatchQuery", () => {

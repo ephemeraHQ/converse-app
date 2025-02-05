@@ -3,12 +3,12 @@ import { isConversationGroup } from "@/features/conversation/utils/is-conversati
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { ensureInboxProfileSocialsQueryData } from "@/queries/useInboxProfileSocialsQuery";
-import { searchByConversationMembershipProcessor } from "./search-by-conversation-membership-processor";
+import { searchByConversationMembershipProcessor } from "./search-conversations-processor";
 import type {
-  MemberProfile,
-  SearchResults,
-  SearchableConversation,
-} from "./search-by-conversation-membership.types";
+  SearchConversationsMemberProfile,
+  SearchConversationsResults,
+  SearchConversationsSearchableConversation,
+} from "./search-conversations.types";
 
 export async function searchByConversationMembership(args: {
   searchQuery: string;
@@ -27,7 +27,7 @@ export async function searchByConversationMembership(args: {
       existingDmTopics: [],
       existingGroupsByMemberNameTopics: [],
       existingGroupsByGroupNameTopics: [],
-    } satisfies SearchResults;
+    } satisfies SearchConversationsResults;
   }
 
   // Transform conversations into searchable format with member profiles
@@ -40,18 +40,19 @@ export async function searchByConversationMembership(args: {
       });
 
       // Get profile data for each member
-      const memberProfiles: MemberProfile[] = await Promise.all(
-        members.ids.map(async (inboxId) => {
-          const socials = await ensureInboxProfileSocialsQueryData({
-            inboxId,
-            caller: "searchByConversationMembership",
-          });
-          return {
-            inboxId,
-            socials,
-          };
-        })
-      );
+      const memberProfiles: SearchConversationsMemberProfile[] =
+        await Promise.all(
+          members.ids.map(async (inboxId) => {
+            const socials = await ensureInboxProfileSocialsQueryData({
+              inboxId,
+              caller: "searchByConversationMembership",
+            });
+            return {
+              inboxId,
+              socials,
+            };
+          })
+        );
 
       // Build searchable conversation object
       return {
@@ -64,7 +65,7 @@ export async function searchByConversationMembership(args: {
           ? conversation.imageUrlSquare
           : undefined,
         memberProfiles,
-      } satisfies SearchableConversation;
+      } satisfies SearchConversationsSearchableConversation;
     })
   );
 
