@@ -1,5 +1,4 @@
-import { QueryClient } from "@tanstack/react-query";
-import { ConnectedEthereumWallet, usePrivy } from "@privy-io/expo";
+import { ConnectedEthereumWallet } from "@privy-io/expo";
 import { useSmartWallets } from "@privy-io/expo/smart-wallets";
 
 import { getDbDirectory } from "@/data/db";
@@ -11,10 +10,14 @@ import {
 } from "@xmtp/react-native-sdk";
 import { base } from "thirdweb/chains";
 import { config } from "@/config";
-type PrivyUser = NonNullable<ReturnType<typeof usePrivy>["user"]>;
 type PrivySmartWalletClient = NonNullable<
   ReturnType<typeof useSmartWallets>["client"]
 >;
+
+export type CurrentSender = {
+  ethereumAddress: string;
+  xmtpInboxId: string;
+};
 
 /**
  * Client for managing multiple XMTP inboxes and their lifecycle.
@@ -34,8 +37,17 @@ type PrivySmartWalletClient = NonNullable<
  * - Error handling and recovery patterns
  */
 export class MultiInboxClient {
-  private isInitialized = false;
-  private isInitializing = false;
+  private _isInitialized = false;
+  private _isInitializing = false;
+
+  get isInitialized() {
+    return this._isInitialized;
+  }
+
+  get isInitializing() {
+    return this._isInitializing;
+  }
+
   private ethereumSmartWalletAddressToXmtpInboxClientMap: {
     [ethereumAddress: string]: XmtpClient;
   } = {};
@@ -43,14 +55,47 @@ export class MultiInboxClient {
   private inboxCreatedObserverCallbacks: InboxCreatedCallback[] = [];
   private clientCreationErrorObserverCallbacks: ClientCreationErrorCallback[] =
     [];
+  private currentInboxChangedObserverCallbacks: CurrentInboxChangedCallback[] =
+    [];
+  private xmtpInitializedObserverCallbacks: XmtpInitializedCallback[] = [];
+  private currentEthereumAddress: string | undefined;
 
-  private static instance: MultiInboxClient | null = null;
-
-  public static getInstance() {
-    if (!MultiInboxClient.instance) {
-      MultiInboxClient.instance = new MultiInboxClient();
+  private static _instance: MultiInboxClient;
+  public static get instance(): MultiInboxClient {
+    if (!this._instance) {
+      this._instance = new MultiInboxClient();
     }
-    return MultiInboxClient.instance;
+    return this._instance;
+  }
+
+  get currentSender(): CurrentSender | undefined {
+    return this.getCurrentSender();
+  }
+
+  get allEthereumAccountAddresses() {
+    return Object.keys(this.ethereumSmartWalletAddressToXmtpInboxClientMap);
+  }
+
+  public getCurrentSender():
+    | {
+        ethereumAddress: string;
+        xmtpInboxId: string;
+      }
+    | undefined {
+    logger.debug(
+      `[getCurrentSender] Getting current sender with ethereum address: ${this.currentEthereumAddress}`
+    );
+    if (!this.currentEthereumAddress) {
+      logger.debug("[getCurrentSender] No current ethereum address found");
+      return undefined;
+    }
+    const xmtpInboxId =
+      this.xmtpClientInboxIdToAddressMap[this.currentEthereumAddress];
+    logger.debug(`[getCurrentSender] Found xmtp inbox ID: ${xmtpInboxId}`);
+    return {
+      ethereumAddress: this.currentEthereumAddress,
+      xmtpInboxId,
+    };
   }
 
   private constructor() {}
@@ -154,9 +199,16 @@ export class MultiInboxClient {
           throw error;
         }
       );
+      this.currentEthereumAddress = client.address;
       logger.debug("[createXmtpClient] XMTP client created successfully");
 
       logger.debug("[createXmtpClient] Client setup completed successfully");
+      // todo(lustig): change this to use cached information about which
+      // account is active at startup
+      this.notifyCurrentInboxChanged({
+        ethereumAddress: client.address,
+        xmtpInboxId: client.inboxId,
+      });
       return client;
     } catch (error) {
       logger.error("[createXmtpClient] Fatal error in client creation", error);
@@ -247,27 +299,48 @@ export class MultiInboxClient {
   }
 
   async initialize({
-    privyUser,
     privySmartWalletClient,
-  }: // wallet,
-  {
-    privyUser: PrivyUser;
-    privySmartWalletClient: PrivySmartWalletClient;
-    // wallet: ConnectedEthereumWallet;
+  }: {
+    privySmartWalletClient: PrivySmartWalletClient | undefined;
   }) {
     if (this.isInitializing) {
-      throw new Error("[MultiInboxClient] Already initializing");
+      logger.debug("[initialize] Already initializing, skipping");
+      return;
     }
 
-    this.isInitializing = true;
+    if (this.isInitialized) {
+      logger.debug("[initialize] Already initialized, skipping");
+      return;
+    }
+
+    this._isInitializing = true;
 
     try {
-      const connectedSmartWalletAddresses = privyUser.linked_accounts
-        .filter((account) => account.type === "smart_wallet")
-        .map((account) => account.address);
+      logger.debug(
+        "[initialize] Starting initialization with privySmartWalletClient",
+        privySmartWalletClient?.account.address
+      );
+
+      if (!privySmartWalletClient) {
+        logger.debug(
+          "[initialize] No smart wallet client found, marking as initialized"
+        );
+        this._isInitialized = true;
+        this.xmtpInitializedObserverCallbacks.forEach((callback) => callback());
+        return;
+      }
+
+      if (!privySmartWalletClient.account.address) {
+        logger.debug(
+          "[initialize] Smart wallet address not available, marking as initialized"
+        );
+        this._isInitialized = true;
+        this.xmtpInitializedObserverCallbacks.forEach((callback) => callback());
+        return;
+      }
 
       const xmtpInboxClients = await Promise.all(
-        connectedSmartWalletAddresses.map(async (address) => {
+        [privySmartWalletClient.account.address].map(async (address) => {
           try {
             logger.debug(
               `[initialize] Checking if client exists for address: ${address}`
@@ -290,6 +363,10 @@ export class MultiInboxClient {
               await this.createXmtpInboxClientFromSmartWalletClient(
                 privySmartWalletClient
               );
+
+            // Set current ethereum address as soon as we have a valid client
+            this.currentEthereumAddress = xmtpInboxClient.address;
+
             // notify inbox created observers
             this.inboxCreatedObserverCallbacks.forEach((callback) => {
               callback({
@@ -301,7 +378,7 @@ export class MultiInboxClient {
             return xmtpInboxClient;
           } catch (error) {
             logger.error(
-              "[initialize] Error creating XMTP inbox client",
+              `[initialize] Error creating XMTP inbox client for address ${address}:`,
               error
             );
             // notify client creation error observers
@@ -329,13 +406,18 @@ export class MultiInboxClient {
           lowercaseClientLinkedEthereumAddress;
       });
 
-      this.isInitialized = true;
+      this._isInitialized = true;
+      logger.debug("[initialize] Successfully initialized XMTP clients");
+      this.xmtpInitializedObserverCallbacks.forEach((callback) => callback());
     } catch (error) {
-      logger.error("[initialize] Error initializing", error);
+      logger.error("[initialize] Error initializing XMTP clients:", error);
+      // Reset initialization state on error
+      this._isInitialized = false;
+      this.clearAllCachedClients();
       throw error;
     } finally {
       logger.debug("[initialize] Initialization completed");
-      this.isInitializing = false;
+      this._isInitializing = false;
     }
   }
 
@@ -357,7 +439,7 @@ export class MultiInboxClient {
    * so we don't have to remove our client usage from the entire
    * codebase at once, but we will be doing so gradually
    */
-  getInboxClientForAddress(ethereumAddress: string) {
+  getInboxClientForAddress({ ethereumAddress }: { ethereumAddress: string }) {
     return this.ethereumSmartWalletAddressToXmtpInboxClientMap[
       ethereumAddress.toLowerCase()
     ];
@@ -371,6 +453,14 @@ export class MultiInboxClient {
     };
   }
 
+  addXmtpInitializedObserver(callback: XmtpInitializedCallback) {
+    this.xmtpInitializedObserverCallbacks.push(callback);
+    return () => {
+      this.xmtpInitializedObserverCallbacks =
+        this.xmtpInitializedObserverCallbacks.filter((cb) => cb !== callback);
+    };
+  }
+
   addClientCreationErrorObserver(callback: ClientCreationErrorCallback) {
     this.clientCreationErrorObserverCallbacks.push(callback);
     return () => {
@@ -379,6 +469,25 @@ export class MultiInboxClient {
           (cb) => cb !== callback
         );
     };
+  }
+
+  addCurrentInboxChangedObserver(callback: CurrentInboxChangedCallback) {
+    this.currentInboxChangedObserverCallbacks.push(callback);
+    return () => {
+      this.currentInboxChangedObserverCallbacks =
+        this.currentInboxChangedObserverCallbacks.filter(
+          (cb) => cb !== callback
+        );
+    };
+  }
+
+  private notifyCurrentInboxChanged(params: {
+    ethereumAddress: string;
+    xmtpInboxId: string;
+  }) {
+    this.currentInboxChangedObserverCallbacks.forEach((callback) => {
+      callback(params);
+    });
   }
 
   private destroyLocalDatabases() {
@@ -418,3 +527,10 @@ type ClientCreationErrorCallback = (error: {
   ethereumAddress: string;
   error: Error;
 }) => void;
+
+type CurrentInboxChangedCallback = (params: {
+  ethereumAddress: string;
+  xmtpInboxId: string;
+}) => void;
+
+type XmtpInitializedCallback = () => void;

@@ -3,7 +3,7 @@ import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery"
 import { saveUser } from "@/utils/api/users";
 import { useEffect } from "react";
 
-export default function MainIdentityStateHandler() {
+export function MainIdentityStateHandler() {
   const userAddress = useCurrentAccount();
 
   useEffect(() => {

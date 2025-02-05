@@ -10,6 +10,11 @@ import {
   SettingsStoreType,
 } from "./settingsStore";
 import { initWalletStore, WalletStoreType } from "./walletStore";
+import {
+  CurrentSender,
+  MultiInboxClient,
+} from "@/features/multi-inbox/multi-inbox.client";
+import { useEffect, useState } from "react";
 
 type AccountStoreDataType = {
   settings: SettingsStoreType;
@@ -160,6 +165,31 @@ export const currentAccount = (): string =>
 export const useCurrentAccount = () => {
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
+};
+
+export const useSafeCurrentSender = (): CurrentSender => {
+  const [currentSender, setCurrentSender] = useState<CurrentSender | undefined>(
+    MultiInboxClient.instance.currentSender
+  );
+
+  if (!currentSender) {
+    throw new Error("No current sender");
+  }
+
+  useEffect(() => {
+    const unsubscribe =
+      MultiInboxClient.instance.addCurrentInboxChangedObserver(
+        ({ ethereumAddress, xmtpInboxId }) => {
+          setCurrentSender({ ethereumAddress, xmtpInboxId });
+        }
+      );
+    return () => unsubscribe();
+  }, []);
+
+  if (!currentSender) {
+    throw new Error("No current sender");
+  }
+  return currentSender;
 };
 
 export function getCurrentAccount() {

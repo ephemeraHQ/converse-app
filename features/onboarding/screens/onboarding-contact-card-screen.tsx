@@ -3,8 +3,6 @@ import { AnimatedText } from "@/design-system/Text";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 
-import { translate } from "@/i18n";
-
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { useCallback, useEffect, useState } from "react";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
@@ -35,6 +33,7 @@ import { ProfileType } from "../types/onboarding.types";
 import { useCreateOrUpdateProfileInfo } from "../hooks/useCreateOrUpdateProfileInfo";
 import { useProfile } from "../hooks/useProfile";
 import { useSelect } from "@/data/store/storeHelpers";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 const $subtextStyle: TextStyle = {
   textAlign: "center",
@@ -67,7 +66,8 @@ const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 export function OnboardingContactCardScreen() {
   const router = useRouter();
 
-  const address = useCurrentAccount()!;
+  // const address = useCurrentAccount()!;
+  const address = MultiInboxClient.instance.currentSender?.ethereumAddress;
 
   const { themed, theme } = useAppTheme();
   const { animation } = theme;
@@ -100,7 +100,7 @@ export function OnboardingContactCardScreen() {
 
   const { profile, setProfile } = useProfile();
 
-  const randoDisplayName = formatRandoDisplayName(address);
+  const randoDisplayName = formatRandoDisplayName(address ?? "");
 
   useEffect(() => {
     if (errorMessage) {
@@ -111,6 +111,8 @@ export function OnboardingContactCardScreen() {
   const { addPFP, asset } = useAddPfp();
 
   const handleRandoContinue = useCallback(async () => {
+    logger.debug("[OnboardingContactCardScreen] handleRandoContinue");
+    logger.debug(MultiInboxClient.instance.currentSender);
     try {
       const randomUsername = uuidv4().replace(/-/g, "").slice(0, 30);
       logger.debug(
@@ -184,11 +186,11 @@ export function OnboardingContactCardScreen() {
         <VStack style={$titleContainer}>
           {isDoxxedAccount ? (
             <OnboardingTitle entering={titleAnimation} size={"xl"}>
-              {translate("onboarding.contactCard.title")}
+              Complete your contact card
             </OnboardingTitle>
           ) : (
             <OnboardingTitle entering={titleAnimation} size={"xl"}>
-              {translate("onboarding.contactCard.randoTitle")}
+              Go Rando
             </OnboardingTitle>
           )}
           {isDoxxedAccount ? (
@@ -196,14 +198,14 @@ export function OnboardingContactCardScreen() {
               style={themed($subtitleStyle)}
               entering={subtitleAnimation}
             >
-              {translate("onboarding.contactCard.subtitle")}
+              Choose how you show up
             </OnboardingSubtitle>
           ) : (
             <OnboardingSubtitle
               style={themed($subtitleStyle)}
               entering={subtitleAnimation}
             >
-              {translate("onboarding.contactCard.randoSubtitle")}
+              Chat using random contact info
             </OnboardingSubtitle>
           )}
           <OnboardingContactCardThemeProvider>
@@ -226,7 +228,8 @@ export function OnboardingContactCardScreen() {
               />
             )}
           </OnboardingContactCardThemeProvider>
-          <AnimatedVStack
+          {/* todo(lustig): bring back when privy supports multiple scws */}
+          {/* <AnimatedVStack
             entering={animation
               .fadeInDownSlow()
               .delay(ONBOARDING_ENTERING_DELAY.THIRD)
@@ -234,21 +237,21 @@ export function OnboardingContactCardScreen() {
           >
             <AnimatedText style={$subtextStyle} color={"secondary"}>
               {isDoxxedAccount
-                ? translate("onboarding.contactCard.body")
-                : translate("onboarding.contactCard.randoBody")}
+                ? "Add and edit Contact Cards anytime,"
+                : "For everyday conversations,"}
             </AnimatedText>
             <Pressable onPress={toggleType}>
               <AnimatedText style={$subtextPressableStyle} color={"secondary"}>
                 {isDoxxedAccount
-                  ? translate("onboarding.contactCard.bodyPressable")
-                  : translate("onboarding.contactCard.randoPressable")}
+                  ? "or go Rando for extra privacy."
+                  : "use your personal Contact Card."}
               </AnimatedText>
             </Pressable>
-          </AnimatedVStack>
+          </AnimatedVStack> */}
         </VStack>
       </Center>
       <OnboardingFooter
-        text={translate("onboarding.contactCard.continue")}
+        text={"Continue"}
         iconName="chevron.right"
         onPress={handleContinue}
         disabled={loading || (!isDoxxedAccount && !profile.displayName)}

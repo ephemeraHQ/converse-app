@@ -51,15 +51,28 @@ export const claimProfile = async ({
   return data;
 };
 
-export const checkUsernameValid = async (
-  address: string,
-  username: string
-): Promise<string> => {
-  const { data } = await api.get("/api/profile/username/valid", {
-    params: { address, username },
-    headers: await getXmtpApiHeaders(address),
-  });
-  return data;
+export const checkUsernameValid = async ({
+  address,
+  username,
+}: {
+  address: string | undefined;
+  username: string;
+}): Promise<string> => {
+  logger.debug(
+    `[checkUsernameValid] Checking username validity for ${username} with address: ${address}`
+  );
+  try {
+    const { data } = await api.get("/api/profile/username/valid", {
+      params: { address, username },
+    });
+    logger.debug(`[checkUsernameValid] Username ${username} is valid`);
+    return data;
+  } catch (error) {
+    logger.error(
+      `[checkUsernameValid] Error checking username validity for ${username}: ${error}`
+    );
+    throw error;
+  }
 };
 
 export const resolveEnsName = async (

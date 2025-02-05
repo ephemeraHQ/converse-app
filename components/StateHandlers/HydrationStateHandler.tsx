@@ -1,7 +1,6 @@
 import { fetchConversationsQuery } from "@/queries/use-conversations-query";
 import { prefetchInboxIdQuery } from "@/queries/inbox-id-query";
 import { captureError } from "@/utils/capture-error";
-import { getAccountsList } from "@data/store/accountsStore";
 import { useAppStore } from "@data/store/appStore";
 import logger from "@utils/logger";
 import { useEffect } from "react";
@@ -9,13 +8,15 @@ import { subscribeToNotifications } from "@/features/notifications/utils/subscri
 import { syncConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences";
 import { prefetchConversationMetadataQuery } from "@/queries/conversation-metadata-query";
 import { Conversation } from "@xmtp/react-native-sdk";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
-export default function HydrationStateHandler() {
+export function HydrationStateHandler() {
   useEffect(() => {
     const hydrate = async () => {
       const startTime = new Date().getTime();
-      const accounts = getAccountsList();
+      const accounts = MultiInboxClient.instance.allEthereumAccountAddresses;
 
+      // todo: create performInitialHydration in MultiInboxClient
       for (const account of accounts) {
         // Don't await because this is for performance but not critical
         prefetchInboxIdQuery({ account }).catch(captureError);

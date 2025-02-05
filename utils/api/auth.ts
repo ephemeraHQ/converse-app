@@ -15,6 +15,7 @@ import {
   XMTP_IDENTITY_KEY,
 } from "./api.constants";
 import { createDedupedFetcher } from "./api.utils";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export type AuthResponse = {
   accessToken: string;
@@ -115,6 +116,13 @@ export async function getXmtpApiHeaders(
 ): Promise<XmtpApiHeaders> {
   if (!account) {
     throw new Error("[getXmtpApiHeaders] No account provided");
+  }
+  const inboxClient = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: account,
+  });
+
+  if (!inboxClient) {
+    throw new Error("[getXmtpApiHeaders] No inbox client found for account");
   }
 
   const secureMmkv = await getSecureMmkvForAccount(account);

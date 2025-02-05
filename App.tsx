@@ -57,6 +57,8 @@ import { saveApiURI } from "./utils/sharedData";
 import "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
 import { setupTopicNotificationsSubscriptions } from "@/features/notifications/utils/accountTopicSubscription";
+import { PrivyPlaygroundLoginScreen } from "./features/privy-playground/privy-playground-login.screen";
+import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -69,6 +71,15 @@ LogBox.ignoreLogs([
   "sync worker error storage error: Pool needs to  reconnect before use",
   "[Converse.debug.dylib] sync worker error storage error: Pool needs to  reconnect before use",
   "Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API.",
+  "Require cycle: utils/keychain/helpers.ts -> utils/keychain/index.ts -> utils/keychain/helpers.ts",
+  "Require cycle: data/store/accountsStore.ts -> utils/logout/index.tsx -> utils/xmtpRN/signIn.ts -> utils/xmtpRN/xmtp-client/xmtp-client-installations.ts -> data/store/accountsStore.ts",
+  "Require cycle: data/store/accountsStore.ts -> utils/logout/index.tsx -> utils/xmtpRN/signIn.ts -> utils/xmtpRN/xmtp-client/xmtp-client-installations.ts -> utils/xmtpRN/xmtp-client/xmtp-client.ts -> utils/evm/address.ts -> utils/api/profiles.ts -> data/store/accountsStore.ts",
+  "Require cycle: utils/xmtpRN/xmtp-client/xmtp-client-installations.ts -> utils/xmtpRN/xmtp-client/xmtp-client.ts -> utils/evm/address.ts -> utils/api/profiles.ts -> utils/api/api.ts -> utils/api/interceptors.ts -> utils/api/auth.ts -> utils/xmtpRN/xmtp-client/xmtp-client-installations.ts",
+  "Require cycle: utils/xmtpRN/signIn.ts -> utils/xmtpRN/xmtp-client/xmtp-client-installations.ts -> utils/xmtpRN/xmtp-client/xmtp-client.ts -> utils/evm/address.ts -> utils/api/profiles.ts -> utils/api/api.ts -> utils/api/interceptors.ts -> utils/api/auth.ts -> utils/xmtpRN/signIn.ts",
+  "Require cycle: utils/api/api.ts -> utils/api/interceptors.ts -> utils/api/auth.ts -> utils/api/api.ts",
+  "Require cycle: utils/logout/index.tsx -> utils/xmtpRN/signIn.ts -> utils/xmtpRN/xmtp-client/xmtp-client-installations.ts -> utils/logout/index.tsx",
+  "Require cycle: data/store/accountsStore.ts -> utils/logout/index.tsx -> data/store/accountsStore.ts",
+  "Require cycle: data/store/accountsStore.ts -> utils/logout/index.tsx -> features/notifications/utils/resetNotifications.ts -> features/notifications/utils/notifications-badge.ts -> data/store/accountsStore.ts",
 ]);
 
 // This is the default configuration
@@ -176,13 +187,14 @@ export default function AppWithProviders() {
       <PrivyProvider
         appId={config.privy.appId}
         clientId={config.privy.clientId}
-        config={{
-          embedded: {
-            ethereum: {
-              createOnLogin: "all-users",
-            },
-          },
-        }}
+        // config={{
+        //   embedded: {
+        //     ethereum: {
+        // note(lustig): not working consistently and forks logic for new vs existing logins
+        //       createOnLogin: "all-users",
+        //     },
+        //   },
+        // }}
       >
         <SmartWalletsProvider>
           <ThirdwebProvider>
@@ -193,6 +205,7 @@ export default function AppWithProviders() {
                     <GestureHandlerRootView style={{ flex: 1 }}>
                       <BottomSheetModalProvider>
                         <App />
+                        {/* <PrivyPlaygroundLandingScreen /> */}
                         <Snackbars />
                       </BottomSheetModalProvider>
                     </GestureHandlerRootView>

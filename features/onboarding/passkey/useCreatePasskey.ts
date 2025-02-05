@@ -5,14 +5,7 @@ import { useSignupWithPasskey } from "@privy-io/expo/passkey";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { RELYING_PARTY } from "./passkey.constants";
 import * as LocalAuthentication from "expo-local-authentication";
-/**
- * This hook is used to create a new Passkey account and set the account id in the Passkey Auth Store
- * It is expected to be used with usePrivySmartWalletConnection, but does not include that hook as this will likely be used with login with passkey
- * And we would run into issues with effects with how Privy is setup
- * @returns {
- *  createPasskey: () => Promise<void>
- * }
- */
+
 export const useCreatePasskey = () => {
   // Privy Hooks
   const { logout, user: privyUser } = usePrivy();

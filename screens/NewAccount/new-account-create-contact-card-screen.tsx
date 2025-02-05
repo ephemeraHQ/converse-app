@@ -3,8 +3,6 @@ import { AnimatedText } from "@/design-system/Text";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 
-import { translate } from "@/i18n";
-
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { memo, useCallback, useEffect, useState } from "react";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
@@ -174,6 +172,27 @@ export const NewAccountCreateContactCardScreen = memo(
 
     const isDoxxedAccount = !isRandoAccount;
 
+    /**
+
+
+        contactCard: {
+      title: "Complete your contact card",
+      subtitle: "A secure identity",
+      body: "Add and edit Contact Cards anytime,",
+      bodyPressable: "or go Rando for extra privacy.",
+      randoTitle: "Go Rando",
+      randoSubtitle: "Chat using random contact info",
+      randoBody: "For everyday conversations,",
+      randoPressable: "use your personal Contact Card.",
+      import: "Import",
+      name: "Name",
+      namePlaceholder: "How you'll show up in chat",
+      continue: "Continue",
+    },
+
+
+         */
+
     return (
       <Screen
         preset="scroll"
@@ -184,11 +203,11 @@ export const NewAccountCreateContactCardScreen = memo(
           <VStack style={$titleContainer}>
             {isDoxxedAccount ? (
               <OnboardingTitle entering={titleAnimation} size={"xl"}>
-                {translate("onboarding.contactCard.title")}
+                Complete your contact card
               </OnboardingTitle>
             ) : (
               <OnboardingTitle entering={titleAnimation} size={"xl"}>
-                {translate("onboarding.contactCard.randoTitle")}
+                Go Rando
               </OnboardingTitle>
             )}
             {isDoxxedAccount ? (
@@ -196,14 +215,14 @@ export const NewAccountCreateContactCardScreen = memo(
                 style={themed($subtitleStyle)}
                 entering={subtitleAnimation}
               >
-                {translate("onboarding.contactCard.subtitle")}
+                A secure identity
               </OnboardingSubtitle>
             ) : (
               <OnboardingSubtitle
                 style={themed($subtitleStyle)}
                 entering={subtitleAnimation}
               >
-                {translate("onboarding.contactCard.randoSubtitle")}
+                Chat using random contact info
               </OnboardingSubtitle>
             )}
             <OnboardingContactCardThemeProvider>
@@ -235,8 +254,8 @@ export const NewAccountCreateContactCardScreen = memo(
             >
               <AnimatedText style={$subtextStyle} color={"secondary"}>
                 {isDoxxedAccount
-                  ? translate("onboarding.contactCard.body")
-                  : translate("onboarding.contactCard.randoBody")}
+                  ? "Add and edit Contact Cards anytime,"
+                  : "For everyday conversations,"}
               </AnimatedText>
               <Pressable onPress={toggleType}>
                 <AnimatedText
@@ -244,15 +263,15 @@ export const NewAccountCreateContactCardScreen = memo(
                   color={"secondary"}
                 >
                   {isDoxxedAccount
-                    ? translate("onboarding.contactCard.bodyPressable")
-                    : translate("onboarding.contactCard.randoPressable")}
+                    ? "or go Rando for extra privacy."
+                    : "use your personal Contact Card."}
                 </AnimatedText>
               </Pressable>
             </AnimatedVStack>
           </VStack>
         </Center>
         <OnboardingFooter
-          text={translate("onboarding.contactCard.continue")}
+          text={"Continue"}
           iconName="chevron.right"
           onPress={handleContinue}
           disabled={loading || (isDoxxedAccount && !profile.displayName)}

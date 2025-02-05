@@ -27,8 +27,8 @@ import {
   NativeStackNavigationOptions,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
-import { memo } from "react";
-import { Platform, useColorScheme } from "react-native";
+import { createContext, memo, useContext } from "react";
+import { Platform, useColorScheme, Text, SafeAreaView } from "react-native";
 import { IdleScreen } from "../IdleScreen";
 import { NewAccountCreateContactCardScreen } from "../NewAccount/new-account-create-contact-card-screen";
 import { NewAccountScreen } from "../NewAccount/new-account-screen";
@@ -39,6 +39,11 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
+import {
+  CurrentSender,
+  useSafeCurrentSender,
+} from "@/data/store/accountsStore";
+import { MainIdentityStateHandler } from "@/components/StateHandlers/MainIdentityStateHandler";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -109,52 +114,90 @@ export function IdleNavigation() {
   );
 }
 
-export function SignedInNavigation() {
-  const colorScheme = useColorScheme();
-  const router = useRouter();
+// provider where we are certain the current user is signed in
+const SignedInUserContext = createContext<CurrentSender | undefined>(undefined);
+function SignedInUserContextProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const currentSender = useSafeCurrentSender();
+  if (!currentSender) {
+    throw new Error("This context should only be used in signed in state");
+  }
 
   return (
-    <NativeStack.Navigator
-      screenListeners={screenListeners("fullStackNavigation")}
-    >
-      <NativeStack.Group>
-        <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
-          <NativeStack.Screen name="Chats" component={ConversationListScreen} />
-          <NativeStack.Screen
-            name="CreateConversation"
-            component={CreateConversationScreen}
-          />
-          <NativeStack.Screen
-            name="Blocked"
-            component={BlockedConversationsScreen}
-          />
-          {ConversationRequestsListNav()}
-          {ConversationNav()}
-          {ShareProfileNav()}
-          {WebviewPreviewNav()}
-          {ProfileNav()}
-          {GroupNav()}
-          {InviteUsersToExistingGroupNav()}
-          {JoinGroupNavigation()}
-          {TopUpNav()}
-        </NativeStack.Group>
+    <SignedInUserContext.Provider value={currentSender}>
+      {children}
+    </SignedInUserContext.Provider>
+  );
+}
+export const useSignedInUser = () => {
+  const currentSender = useContext(SignedInUserContext);
+  // if (!currentSender) {
+  //   throw new Error("This context should only be used in signed in state");
+  // }
+  return currentSender;
+};
 
+export function SignedInNavigation() {
+  const colorScheme = useColorScheme();
+  // return (
+  //   <SafeAreaView>
+  //     <Text>Signed in Navigation</Text>
+  //   </SafeAreaView>
+  // );
+
+  return (
+    <SignedInUserContextProvider>
+      <NativeStack.Navigator
+        screenListeners={screenListeners("fullStackNavigation")}
+      >
         <NativeStack.Group>
-          {UserProfileNav()}
-          <NativeStack.Screen
-            name="AppSettings"
-            component={AppSettingsScreen}
-          />
-          <NativeStack.Screen
-            name="NewAccountNavigator"
-            component={NewAccountNavigator}
-            options={{
-              headerShown: false,
-            }}
-          />
+          <NativeStack.Group
+            screenOptions={stackGroupScreenOptions(colorScheme)}
+          >
+            <NativeStack.Screen
+              name="Chats"
+              component={ConversationListScreen}
+            />
+            <NativeStack.Screen
+              name="CreateConversation"
+              component={CreateConversationScreen}
+            />
+            <NativeStack.Screen
+              name="Blocked"
+              component={BlockedConversationsScreen}
+            />
+            {ConversationRequestsListNav()}
+            {ConversationNav()}
+            {ShareProfileNav()}
+            {WebviewPreviewNav()}
+            {ProfileNav()}
+            {GroupNav()}
+            {InviteUsersToExistingGroupNav()}
+            {JoinGroupNavigation()}
+            {TopUpNav()}
+          </NativeStack.Group>
+
+          <NativeStack.Group>
+            {UserProfileNav()}
+            <NativeStack.Screen
+              name="AppSettings"
+              component={AppSettingsScreen}
+            />
+            <NativeStack.Screen
+              name="NewAccountNavigator"
+              component={NewAccountNavigator}
+              options={{
+                headerShown: false,
+              }}
+            />
+          </NativeStack.Group>
         </NativeStack.Group>
-      </NativeStack.Group>
-    </NativeStack.Navigator>
+      </NativeStack.Navigator>
+      <MainIdentityStateHandler />
+    </SignedInUserContextProvider>
   );
 }
 

@@ -3,9 +3,6 @@ import { getDbDirectory } from "@/data/db";
 import { captureError } from "@/utils/capture-error";
 import { getCleanEthAddress } from "@/utils/evm/address";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { stopStreamingConversations } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-stream";
-import { stopStreamingAllMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
-import { stopStreamingConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences-stream";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
@@ -24,6 +21,7 @@ import {
   InstallationId,
 } from "@xmtp/react-native-sdk/build/lib/Client";
 import { CoinbaseMessagingPaymentCodec } from "../xmtp-content-types/xmtp-coinbase-payment";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 // Supported message codecs for XMTP client
 const codecs = [
@@ -59,6 +57,9 @@ export async function getXmtpClient({
   address: string;
   inboxId?: InboxId;
 }) {
+  return MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: address,
+  });
   const cleanedEthAddress = getCleanEthAddress(address);
 
   if (cleanedEthAddress in xmtpClientByEthAddress) {

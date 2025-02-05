@@ -34,7 +34,7 @@ import { queryClient } from "@/queries/queryClient";
 import { InboxState } from "@xmtp/react-native-sdk/build/lib/InboxState";
 import { Switch } from "react-native-paper";
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
-const multiInboxClient = MultiInboxClient.getInstance();
+const multiInboxClient = MultiInboxClient.instance;
 
 export const PrivyPlaygroundUserScreen = () => {
   useCoinbaseWalletListener(true, coinbaseUrl);
@@ -53,7 +53,6 @@ export const PrivyPlaygroundUserScreen = () => {
     (w) => w.type === "smart_wallet"
   );
   const { client: smartWalletClient } = useSmartWallets();
-  smartWalletClient;
 
   const account = getUserEmbeddedEthereumWallet(user);
 
@@ -172,7 +171,7 @@ export const PrivyPlaygroundUserScreen = () => {
                 await multiInboxClient.initialize({
                   privyUser: user,
                   privySmartWalletClient: smartWalletClient,
-                  wallet: embeddedWallets[0],
+                  // wallet: embeddedWallets[0],
                 });
                 logger.debug(
                   "[initializeMultiInboxClient] Client initialization completed successfully"
