@@ -147,25 +147,24 @@ export const pendingJoinRequestsQueryKey = (account: string) => [
 ];
 
 // DMs
-export const dmPeerInboxIdQueryKey = (
-  account: string,
-  topic: ConversationTopic
-) => [QueryKeys.DM_PEER_INBOX_ID, account, topic];
+export const dmPeerInboxIdQueryKey = (args: {
+  account: string;
+  topic: ConversationTopic;
+}) => [QueryKeys.DM_PEER_INBOX_ID, args.account, args.topic];
 
-// Convos Users Search
+// Search
 export const userSearchQueryKey = (searchQuery: string) => [
   QueryKeys.USER_SEARCH,
   "by-name",
   searchQuery,
 ];
-
-// Search based on conversation membership
 export const searchByConversationMembershipQueryKey = (args: {
   searchQuery: string;
 }) => [QueryKeys.USER_SEARCH, "by-conversation-membership", args.searchQuery];
 
 // Profiles
-export const profileSocialsQueryKey = ({ inboxId }: { inboxId: InboxId }) => [
-  QueryKeys.PROFILE_SOCIALS,
-  inboxId?.toLowerCase(),
-];
+export const getProfileSocialsQueryKey = ({
+  inboxId,
+}: {
+  inboxId: InboxId;
+}) => [QueryKeys.PROFILE_SOCIALS, inboxId?.toLowerCase()];

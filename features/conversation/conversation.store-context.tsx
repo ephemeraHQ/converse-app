@@ -1,27 +1,21 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
-import { getDmQueryData } from "@/queries/useDmQuery";
-import { getGroupQueryData } from "@/queries/useGroupQuery";
-import {
-  ConversationId,
-  ConversationTopic,
-  InboxId,
-  MessageId,
-} from "@xmtp/react-native-sdk";
+import { findConversationByInboxIds } from "@/features/conversation/utils/find-conversations-by-inbox-ids";
+import { captureError } from "@/utils/capture-error";
+import { ConversationTopic, InboxId, MessageId } from "@xmtp/react-native-sdk";
 import { createContext, memo, useContext, useEffect, useRef } from "react";
 import { createStore, useStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
 type IConversationStoreProps = {
-  topic: ConversationTopic | null;
-  conversationId: ConversationId;
-  highlightedMessageId?: MessageId;
-  scrollToMessageId?: MessageId;
-  searchTextValue: string;
-  searchSelectedUserInboxIds: InboxId[];
-  isCreatingNewConversation: boolean;
+  topic?: ConversationTopic | null;
+  highlightedMessageId?: MessageId | null;
+  scrollToMessageId?: MessageId | null;
+  searchSelectedUserInboxIds?: InboxId[];
+  isCreatingNewConversation?: boolean;
 };
 
-type IConversationStoreState = IConversationStoreProps & {};
+type IConversationStoreState = Required<IConversationStoreProps> & {
+  searchTextValue: string;
+};
 
 type IConversationStoreProviderProps =
   React.PropsWithChildren<IConversationStoreProps>;
@@ -35,6 +29,30 @@ export const ConversationStoreProvider = memo(
       storeRef.current = createConversationStore(props);
     }
 
+    useEffect(() => {
+      storeRef.current?.subscribe(async (nextState, previousState) => {
+        try {
+          if (
+            !nextState.searchSelectedUserInboxIds ||
+            nextState.searchSelectedUserInboxIds.length ===
+              previousState.searchSelectedUserInboxIds?.length
+          ) {
+            return;
+          }
+
+          const conversation = await findConversationByInboxIds({
+            inboxIds: nextState.searchSelectedUserInboxIds,
+          });
+
+          storeRef.current?.setState({
+            topic: conversation?.topic ?? null,
+          });
+        } catch (error) {
+          captureError(error);
+        }
+      });
+    }, []);
+
     return (
       <ConversationStoreContext.Provider value={storeRef.current}>
         {children}
@@ -44,18 +62,14 @@ export const ConversationStoreProvider = memo(
 );
 
 const createConversationStore = (initProps: IConversationStoreProps) => {
-  const DEFAULT_PROPS: IConversationStoreProps = {
-    topic: null as unknown as ConversationTopic,
-    conversationId: null as unknown as ConversationId,
-    highlightedMessageId: undefined,
-    scrollToMessageId: undefined,
-    searchTextValue: "",
-    searchSelectedUserInboxIds: [],
-    isCreatingNewConversation: false,
-  };
   return createStore<IConversationStoreState>()(
     subscribeWithSelector((set) => ({
-      ...DEFAULT_PROPS,
+      topic: null,
+      highlightedMessageId: null,
+      scrollToMessageId: null,
+      searchSelectedUserInboxIds: [],
+      isCreatingNewConversation: false,
+      searchTextValue: "",
       ...initProps,
     }))
   );
@@ -81,6 +95,6 @@ export function useCurrentConversationTopic() {
   return useConversationStoreContext((state) => state.topic);
 }
 
-export function useConversationCurrentConversationId() {
-  return useConversationStoreContext((state) => state.conversationId);
+export function useCurrentConversationTopicSafe() {
+  return useCurrentConversationTopic()!; // ! Because at this point we must have a topic to show this
 }

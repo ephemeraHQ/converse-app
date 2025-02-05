@@ -110,7 +110,6 @@ export function IdleNavigation() {
 
 export function SignedInNavigation() {
   const colorScheme = useColorScheme();
-  const router = useRouter();
 
   return (
     <NativeStack.Navigator

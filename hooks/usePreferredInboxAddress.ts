@@ -10,6 +10,7 @@ export const usePreferredInboxAddress = ({
 }) => {
   const { data, isLoading } = useInboxProfileSocialsQuery({
     inboxId: inboxId!,
+    caller: "usePreferredInboxAddress",
   });
 
   const preferredAddress = useMemo(() => {

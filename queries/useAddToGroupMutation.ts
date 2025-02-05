@@ -30,7 +30,7 @@ export const useAddToGroupMutation = (
       if (!topic) {
         return;
       }
-      await cancelGroupMembersQuery(account, topic);
+      await cancelGroupMembersQuery({ account, topic });
     },
     onError: (error, _variables, _context) => {
       captureError(error);

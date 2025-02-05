@@ -3,9 +3,14 @@ import { getPreferredInboxName } from "@utils/profile";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
 
-export function usePreferredInboxName({ inboxId }: { inboxId: InboxId }) {
+export function usePreferredInboxName({
+  inboxId,
+}: {
+  inboxId: InboxId | undefined;
+}) {
   const { data, isLoading } = useInboxProfileSocialsQuery({
-    inboxId,
+    inboxId: inboxId!,
+    caller: "usePreferredInboxName",
   });
 
   const preferredName = useMemo(() => getPreferredInboxName(data), [data]);

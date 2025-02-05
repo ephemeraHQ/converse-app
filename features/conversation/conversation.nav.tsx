@@ -1,13 +1,13 @@
 import { ConversationScreen } from "@/features/conversation/conversation.screen";
 import { NativeStack } from "@/screens/Navigation/Navigation";
 import { translate } from "@/i18n";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 
 export type ConversationNavParams = {
   topic?: ConversationTopic;
-  text?: string;
-  peer?: string;
-  optimistic?: boolean;
+  composerTextPrefill?: string;
+  searchSelectedUserInboxIds?: InboxId[];
+  isNew?: boolean;
 };
 
 export const ConversationScreenConfig = {

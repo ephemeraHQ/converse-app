@@ -1,28 +1,25 @@
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { getInboxProfileSocialsQueryData } from "@/queries/useInboxProfileSocialsQuery";
 import { normalizeTimestampToMs } from "@/utils/date";
-import notifee, {
-  AndroidPerson,
-  AndroidStyle,
-  AndroidVisibility,
-} from "@notifee/react-native";
-import {
-  getPreferredAvatar,
-  getPreferredName,
-  getProfile,
-} from "@utils/profile";
+import logger from "@/utils/logger";
 import {
   ConverseXmtpClientType,
   DecodedMessageWithCodecsType,
   DmWithCodecsType,
   GroupWithCodecsType,
 } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import notifee, {
+  AndroidPerson,
+  AndroidStyle,
+  AndroidVisibility,
+} from "@notifee/react-native";
+import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import { Conversation, type ConversationTopic } from "@xmtp/react-native-sdk";
 import { androidChannel } from "../setupAndroidNotificationChannel";
 import { notificationAlreadyShown } from "./alreadyShown";
 import { getNotificationContent } from "./notificationContent";
 import { computeSpamScoreGroupMessage } from "./notificationSpamScore";
 import { ProtocolNotification } from "./protocolNotification";
-import logger from "@/utils/logger";
-import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 
 const getSenderProfileInfo = async (
   xmtpClient: ConverseXmtpClientType,
@@ -38,12 +35,12 @@ const getSenderProfileInfo = async (
     return {
       senderName: "",
     };
-  const senderSocials = await getProfile(
-    xmtpClient.address,
-    message.senderInboxId,
-    senderAddress
-  );
+  const senderSocials = await getInboxProfileSocialsQueryData({
+    inboxId: message.senderInboxId,
+  });
+  // @ts-ignore
   const senderName = getPreferredName(senderSocials, senderAddress);
+  // @ts-ignore
   const senderImage = getPreferredAvatar(senderSocials);
 
   return {

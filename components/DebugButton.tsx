@@ -14,11 +14,10 @@ import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 import { Alert, Platform } from "react-native";
 import { config } from "../config";
-import { useAccountsList } from "../data/store/accountsStore";
+import { useAccountsList, getAccountsList } from "../data/store/accountsStore";
 import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { logoutAccount } from "@/utils/logout";
-import { getAccountsList } from "../data/store/accountsStore";
 
 export const useDebugEnabled = (address?: string) => {
   const accounts = useAccountsList();
@@ -63,7 +62,7 @@ const DebugButton = forwardRef((props, ref) => {
           const allAccounts = getAccountsList();
           try {
             for (const account of allAccounts) {
-              logoutAccount(account, true, true, () => {});
+              await logoutAccount({ account });
             }
           } catch (error) {
             alert(error);

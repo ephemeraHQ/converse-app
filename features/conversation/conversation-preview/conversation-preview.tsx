@@ -60,10 +60,7 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
           />
         </Center>
       ) : (
-        <ConversationStoreProvider
-          topic={topic}
-          conversationId={conversation.id}
-        >
+        <ConversationStoreProvider topic={topic}>
           {/* Using basic Flatlist instead of the Animated one to try to fix the context menu crashes https://github.com/dominicstop/react-native-ios-context-menu/issues/70 */}
           <FlatList
             {...conversationListDefaultProps}

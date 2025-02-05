@@ -17,7 +17,7 @@ export function ConversationSenderAvatar({
 }: IConversationSenderAvatarProps) {
   const { senderAvatarSize } = useConversationMessageStyles();
 
-  const { data: address } = usePreferredInboxAddress(inboxId);
+  const { data: address } = usePreferredInboxAddress({ inboxId });
   const { data: name } = usePreferredInboxName({
     inboxId,
   });

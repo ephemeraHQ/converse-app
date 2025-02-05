@@ -1,87 +1,147 @@
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import { Conversation } from "@/features/conversation/conversation";
+import { Center } from "@/design-system/Center";
+import { VStack } from "@/design-system/VStack";
+import { Loader } from "@/design-system/loader";
+import { ConversationComposer } from "@/features/conversation/conversation-composer/conversation-composer";
+import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
+import { ConversationCreateSearch } from "@/features/conversation/conversation-create/conversation-create-search";
+import { ConversationSearchResultsList } from "@/features/conversation/conversation-create/conversation-create-search-results-list";
+import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
+import { ConversationMessageContextMenu } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu";
+import { ConversationMessageContextMenuStoreProvider } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
+import { MessageReactionsDrawer } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer";
+import { DmConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-dm-header-title";
+import { GroupConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-group-header-title";
+import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { useHeader } from "@/navigation/use-header";
+import { useConversationQuery } from "@/queries/conversation-query";
+import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { $globalStyles } from "@/theme/styles";
-import { captureError } from "@/utils/capture-error";
-import { VStack } from "@design-system/VStack";
+import { useAppTheme } from "@/theme/useAppTheme";
+import { useCurrentAccount } from "@data/store/accountsStore";
+import { useRouter } from "@navigation/useNavigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import React, { useState } from "react";
-import { NavigationParamList } from "../../screens/Navigation/Navigation";
+import React, { memo } from "react";
+import { ConversationMessages } from "./conversation-messages";
+import {
+  ConversationStoreProvider,
+  useConversationStoreContext,
+} from "./conversation.store-context";
 
-type IConversationScreenProps = NativeStackScreenProps<
-  NavigationParamList,
-  "Conversation"
->;
+export const ConversationScreen = memo(function ConversationScreen(
+  props: NativeStackScreenProps<NavigationParamList, "Conversation">
+) {
+  const {
+    topic,
+    composerTextPrefill = "",
+    searchSelectedUserInboxIds = [],
+    isNew = false,
+  } = props.route.params;
 
-export function ConversationScreen(args: IConversationScreenProps) {
-  const { route } = args;
-  const { topic, text, inboxIds, isNew } = route.params || {};
+  return (
+    <Screen contentContainerStyle={$globalStyles.flex1}>
+      <ConversationStoreProvider
+        topic={topic ?? null}
+        isCreatingNewConversation={isNew}
+        searchSelectedUserInboxIds={searchSelectedUserInboxIds}
+      >
+        <ConversationMessageContextMenuStoreProvider>
+          <ConversationComposerStoreProvider
+            inputValue={composerTextPrefill}
+            storeName={topic || "new"}
+          >
+            <Content />
+          </ConversationComposerStoreProvider>
+        </ConversationMessageContextMenuStoreProvider>
+      </ConversationStoreProvider>
+    </Screen>
+  );
+});
 
-  const [selectedTopic, setSelectedTopic] = useState<
-    ConversationTopic | undefined
-  >(topic);
+const Content = memo(function Content() {
+  const { theme } = useAppTheme();
 
-  if (!topic && !isNew) {
-    captureError(new Error("No topic or isNew found in ConversationScreen"));
+  const currentAccount = useCurrentAccount()!;
+  const navigation = useRouter();
+  const topic = useConversationStoreContext((state) => state.topic);
+  const isCreatingNewConversation = useConversationStoreContext(
+    (state) => state.isCreatingNewConversation
+  );
+
+  const { data: conversation, isLoading: isLoadingConversation } =
+    useConversationQuery({
+      account: currentAccount,
+      topic: topic!, // ! is okay because we have enabled in useQuery
+      caller: "Conversation screen",
+    });
+
+  useHeader(
+    {
+      onBack: () => navigation.goBack(),
+      safeAreaEdges: ["top"],
+      // DM params
+      ...(!isCreatingNewConversation &&
+        conversation &&
+        isConversationDm(conversation) && {
+          titleComponent: <DmConversationTitle topic={conversation.topic} />,
+        }),
+      // Group params
+      ...(!isCreatingNewConversation &&
+        conversation &&
+        isConversationGroup(conversation) && {
+          titleComponent: (
+            <GroupConversationTitle conversationTopic={conversation.topic} />
+          ),
+        }),
+      // New conversation params
+      ...(isCreatingNewConversation && {
+        title: "New chat",
+        style: {
+          borderBottomWidth: theme.borderWidth.sm,
+          borderBottomColor: theme.colors.border.subtle,
+        },
+      }),
+    },
+    [conversation, isCreatingNewConversation]
+  );
+
+  if (isLoadingConversation) {
     return (
-      <Screen contentContainerStyle={$globalStyles.flex1}>
-        <VStack />
-      </Screen>
+      <Center style={$globalStyles.flex1}>
+        <Loader />
+      </Center>
     );
   }
 
   return (
-    <Screen contentContainerStyle={$globalStyles.flex1}>
-      <Conversation topic={selectedTopic} textPrefill={text} />
-    </Screen>
+    <>
+      <VStack style={$globalStyles.flex1}>
+        {isCreatingNewConversation && <ConversationCreateSearch />}
+
+        <VStack style={$globalStyles.flex1}>
+          {isCreatingNewConversation && <ConversationSearchResultsList />}
+          {conversation ? (
+            <ConversationMessages conversation={conversation} />
+          ) : (
+            <VStack style={$globalStyles.flex1} />
+          )}
+          <ConversationComposer />
+          <ConversationKeyboardFiller />
+        </VStack>
+      </VStack>
+      <ConversationMessageContextMenu />
+      <MessageReactionsDrawer />
+    </>
   );
-}
+});
 
-// type IPeerAddressFlowProps = {
-//   peerAddress: string;
-//   textPrefill?: string;
-// };
+export const DmConversationEmpty = memo(function DmConversationEmpty() {
+  // Will never really be empty anyway because to create the DM conversation the user has to send a first message
+  return null;
+});
 
-// const PeerAddressFlow = memo(function PeerAddressFlow(
-//   args: IPeerAddressFlowProps
-// ) {
-//   const { peerAddress, textPrefill } = args;
-//   const currentAccount = useCurrentAccount()!;
-
-//   logger.info("[ConversationScreen][PeerAddressFlow] Initializing", {
-//     peerAddress,
-//     textPrefill,
-//     currentAccount,
-//   });
-
-//   const { data: dmConversation, isLoading } = useDmQuery({
-//     account: currentAccount,
-//     peer: peerAddress,
-//   });
-
-//   if (isLoading) {
-//     logger.info(
-//       "[ConversationScreen][PeerAddressFlow] Loading DM conversation"
-//     );
-//     return (
-//       <Center style={$globalStyles.flex1}>
-//         <Loader />
-//       </Center>
-//     );
-//   }
-
-//   logger.info("[ConversationScreen][PeerAddressFlow] DM conversation loaded", {
-//     hasTopic: !!dmConversation?.topic,
-//     topic: dmConversation?.topic,
-//   });
-
-//   if (dmConversation?.topic) {
-//     return (
-//       <Conversation topic={dmConversation.topic} textPrefill={textPrefill} />
-//     );
-//   }
-
-//   return (
-//     <ConversationNew peerAddress={peerAddress} textPrefill={textPrefill} />
-//   );
-// });
+export const GroupConversationEmpty = memo(() => {
+  // Will never really be empty anyway becaue we have group updates
+  return null;
+});

@@ -17,7 +17,7 @@ export function getDmPeerInboxIdQueryOptions(args: IArgs) {
   const { account, topic, caller } = args;
 
   return queryOptions({
-    queryKey: dmPeerInboxIdQueryKey(account, topic),
+    queryKey: dmPeerInboxIdQueryKey(args),
     queryFn: async function getPeerInboxId() {
       const conversation = await getOrFetchConversation({
         account,
@@ -51,3 +51,7 @@ export const useDmPeerInboxIdQuery = (args: IArgs) => {
 export const ensureDmPeerInboxIdQueryData = async (args: IArgs) => {
   return queryClient.ensureQueryData(getDmPeerInboxIdQueryOptions(args));
 };
+
+export function getDmPeerInboxIdQueryData(args: IArgs) {
+  return queryClient.getQueryData(getDmPeerInboxIdQueryOptions(args).queryKey);
+}

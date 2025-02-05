@@ -1,4 +1,4 @@
-import { ObjectTyped } from "@utils/objectTyped";
+import { ObjectTyped } from "@/utils/object-typed";
 import logger from "@utils/logger";
 
 export const contentTypesPrefixes = {

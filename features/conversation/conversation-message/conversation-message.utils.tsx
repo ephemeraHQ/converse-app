@@ -3,6 +3,7 @@ import {
   getConversationMessagesQueryData,
   useConversationMessagesQuery,
 } from "@/queries/conversation-messages-query";
+import logger from "@/utils/logger";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/xmtp-content-types/xmtp-coinbase-payment";
 import { getMessageContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
@@ -30,8 +31,7 @@ import {
   TextCodec,
 } from "@xmtp/react-native-sdk";
 import emojiRegex from "emoji-regex";
-import { useCurrentConversationTopic } from "../conversation.store-context";
-import logger from "@/utils/logger";
+import { useCurrentConversationTopicSafe } from "../conversation.store-context";
 
 export function isAnActualMessage(
   message: DecodedMessageWithCodecsType
@@ -49,25 +49,13 @@ export function isAnActualMessage(
 export function isTextMessage(
   message: DecodedMessageWithCodecsType
 ): message is DecodedMessage<TextCodec> {
-  logger.debug("[isTextMessage] Checking if message is text message", {
-    messageId: message.id,
-    contentTypeId: message.contentTypeId,
-  });
-  const result = getMessageContentType(message.contentTypeId) === "text";
-  logger.debug("[isTextMessage] Result", { result });
-  return result;
+  return getMessageContentType(message.contentTypeId) === "text";
 }
 
 export function isReactionMessage(
   message: DecodedMessageWithCodecsType
 ): message is DecodedMessage<ReactionCodec> {
-  // logger.debug("[isReactionMessage] Checking if message is reaction message", {
-  //   messageId: message.id,
-  //   contentTypeId: message.contentTypeId,
-  // });
-  const result = getMessageContentType(message.contentTypeId) === "reaction";
-  // logger.debug("[isReactionMessage] Result", { result });
-  return result;
+  return getMessageContentType(message.contentTypeId) === "reaction";
 }
 export function isReadReceiptMessage(
   message: DecodedMessageWithCodecsType
@@ -211,7 +199,7 @@ export function useMessageHasReactions(args: { messageId: MessageId }) {
 
 export function useConversationMessageReactions(messageId: MessageId) {
   const currentAccount = useCurrentAccount()!;
-  const topic = useCurrentConversationTopic();
+  const topic = useCurrentConversationTopicSafe();
 
   const { data: messages } = useConversationMessagesQuery({
     account: currentAccount,

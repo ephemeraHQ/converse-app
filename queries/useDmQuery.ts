@@ -3,7 +3,7 @@
  */
 import { queryClient } from "@/queries/queryClient";
 import { getConversationByPeerByAccount } from "@/utils/xmtpRN/conversations";
-import { getDmByInboxId } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-dm";
+import { getXmtpDmByInboxId } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-dm";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { dmQueryKey } from "./QueryKeys";
@@ -19,7 +19,7 @@ type IDmQueryData = Awaited<ReturnType<typeof getConversationByPeerByAccount>>;
 async function getDm(args: IDmQueryArgs) {
   const { ethAccountAddress: ethAccountAddress, inboxId } = args;
 
-  const conversation = await getDmByInboxId({
+  const conversation = await getXmtpDmByInboxId({
     ethAccountAddress,
     inboxId,
   });

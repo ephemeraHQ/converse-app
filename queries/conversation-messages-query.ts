@@ -323,7 +323,7 @@ export function replaceOptimisticMessageWithReal(args: {
         "[replaceOptimisticMessageWithReal] Found temp message index",
         {
           tempIndex,
-          messageIds: JSON.stringify(previousMessages.ids, null, 2),
+          messageIds: previousMessages.ids,
         }
       );
 

@@ -198,6 +198,7 @@ export const createGroup = async (args: {
     groupPhoto,
     groupDescription,
   } = args;
+
   const group = await client.conversations.newGroupCustomPermissions(
     peers,
     permissionPolicySet,

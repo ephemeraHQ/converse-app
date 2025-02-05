@@ -1,8 +1,6 @@
-import { IProfileSocials } from "@/features/profiles/profile-types";
-import { profileSocialsQueryKey } from "@/queries/QueryKeys";
+import { getProfileSocialsQueryKey } from "@/queries/QueryKeys";
 import { getProfilesForInboxIds } from "@/utils/api/profiles";
-import { reactQueryPersister } from "@/utils/mmkv";
-import { queryOptions, useQueries, useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { InboxId } from "@xmtp/react-native-sdk";
 import {
   create,
@@ -10,9 +8,14 @@ import {
   windowedFiniteBatchScheduler,
 } from "@yornaath/batshit";
 import { queryClient } from "./queryClient";
+import { Optional } from "@/types/general";
 
 type IArgs = {
   inboxId: InboxId;
+};
+
+type IArgsWithCaller = IArgs & {
+  caller: string;
 };
 
 const inboxProfileSocialsBatchFetcher = create({
@@ -26,44 +29,42 @@ const inboxProfileSocialsBatchFetcher = create({
   }),
 });
 
-const fetchInboxProfileSocials = async ({
-  inboxId,
-}: IArgs): Promise<IProfileSocials[] | null> => {
+const fetchInboxProfileSocials = async ({ inboxId }: IArgs) => {
+  if (!inboxId) {
+    throw new Error("Inbox ID is required");
+  }
   return inboxProfileSocialsBatchFetcher.fetch(inboxId);
 };
 
-export const getInboxProfileSocialsQueryConfig = ({ inboxId }: IArgs) =>
+export const getInboxProfileSocialsQueryConfig = ({
+  inboxId,
+  caller,
+}: Optional<IArgsWithCaller, "caller">) =>
   queryOptions({
-    queryKey: profileSocialsQueryKey({ inboxId }),
+    queryKey: getProfileSocialsQueryKey({ inboxId }),
     queryFn: () => fetchInboxProfileSocials({ inboxId }),
     enabled: !!inboxId,
-    persister: reactQueryPersister,
-    initialData: (): IProfileSocials[] | null | undefined => {
-      if (!inboxId) {
-        return undefined;
-      }
+    // persister: reactQueryPersister,
+    gcTime: 1000 * 60 * 60 * 24 * 30, // 30 days because this doesn't often change
+    meta: {
+      caller,
     },
-    gcTime: 1000 * 60 * 60 * 24 * 30,
   });
 
-export const useInboxProfileSocialsQuery = ({ inboxId }: IArgs) => {
-  return useQuery(getInboxProfileSocialsQueryConfig({ inboxId }));
+export const useInboxProfileSocialsQuery = ({
+  inboxId,
+  caller,
+}: IArgsWithCaller) => {
+  return useQuery(getInboxProfileSocialsQueryConfig({ inboxId, caller }));
 };
 
-export const useInboxProfileSocialsQueries = ({
-  inboxIds,
-}: {
-  inboxIds: InboxId[];
-}) => {
-  return useQueries({
-    queries: inboxIds.map((inboxId) =>
-      getInboxProfileSocialsQueryConfig({ inboxId })
-    ),
-  });
-};
-
-export const fetchInboxProfileSocialsQuery = ({ inboxId }: IArgs) => {
-  return queryClient.fetchQuery(getInboxProfileSocialsQueryConfig({ inboxId }));
+export const fetchInboxProfileSocialsQuery = ({
+  inboxId,
+  caller,
+}: IArgsWithCaller) => {
+  return queryClient.fetchQuery(
+    getInboxProfileSocialsQueryConfig({ inboxId, caller })
+  );
 };
 
 export const getInboxProfileSocialsQueryData = ({ inboxId }: IArgs) => {
@@ -78,8 +79,11 @@ export const invalidateInboxProfileSocialsQuery = ({ inboxId }: IArgs) => {
   });
 };
 
-export const ensureInboxProfileSocialsQueryData = ({ inboxId }: IArgs) => {
+export const ensureInboxProfileSocialsQueryData = ({
+  inboxId,
+  caller,
+}: IArgsWithCaller) => {
   return queryClient.ensureQueryData(
-    getInboxProfileSocialsQueryConfig({ inboxId })
+    getInboxProfileSocialsQueryConfig({ inboxId, caller })
   );
 };

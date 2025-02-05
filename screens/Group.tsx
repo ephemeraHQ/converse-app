@@ -13,7 +13,6 @@ import {
   useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 import { GroupPendingRequestsTable } from "../containers/GroupPendingRequestsTable";
 import { GroupScreenAddition } from "../containers/GroupScreenAddition";
 import { GroupScreenConsentTable } from "../containers/GroupScreenConsentTable";

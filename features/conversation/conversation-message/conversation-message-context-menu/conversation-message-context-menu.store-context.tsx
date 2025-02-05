@@ -3,46 +3,52 @@ import { createContext, memo, useContext, useRef } from "react";
 import { createStore, useStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
-type IMessageContextMenuStoreProps = {};
+type IConversationMessageContextMenuStoreProps = {};
 
-export type IMessageContextMenuStoreState = IMessageContextMenuStoreProps & {
-  messageContextMenuData: {
-    messageId: MessageId;
-    itemRectX: number;
-    itemRectY: number;
-    itemRectHeight: number;
-    itemRectWidth: number;
-  } | null;
-  setMessageContextMenuData: (
-    data: IMessageContextMenuStoreState["messageContextMenuData"]
-  ) => void;
-};
+export type IConversationMessageContextMenuStoreState =
+  IConversationMessageContextMenuStoreProps & {
+    messageContextMenuData: {
+      messageId: MessageId;
+      itemRectX: number;
+      itemRectY: number;
+      itemRectHeight: number;
+      itemRectWidth: number;
+    } | null;
+    setMessageContextMenuData: (
+      data: IConversationMessageContextMenuStoreState["messageContextMenuData"]
+    ) => void;
+  };
 
-type IMessageContextMenuStoreProviderProps =
-  React.PropsWithChildren<IMessageContextMenuStoreProps>;
+type IConversationMessageContextMenuStoreProviderProps =
+  React.PropsWithChildren<IConversationMessageContextMenuStoreProps>;
 
-type IMessageContextMenuStore = ReturnType<
-  typeof createMessageContextMenuStore
+type IConversationMessageContextMenuStore = ReturnType<
+  typeof createConversationMessageContextMenuStore
 >;
 
-export const MessageContextMenuStoreProvider = memo(
-  ({ children, ...props }: IMessageContextMenuStoreProviderProps) => {
-    const storeRef = useRef<IMessageContextMenuStore>();
+export const ConversationMessageContextMenuStoreProvider = memo(
+  ({
+    children,
+    ...props
+  }: IConversationMessageContextMenuStoreProviderProps) => {
+    const storeRef = useRef<IConversationMessageContextMenuStore>();
     if (!storeRef.current) {
-      storeRef.current = createMessageContextMenuStore(props);
+      storeRef.current = createConversationMessageContextMenuStore(props);
     }
     return (
-      <MessageContextMenuStoreContext.Provider value={storeRef.current}>
+      <ConversationMessageContextMenuStoreContext.Provider
+        value={storeRef.current}
+      >
         {children}
-      </MessageContextMenuStoreContext.Provider>
+      </ConversationMessageContextMenuStoreContext.Provider>
     );
   }
 );
 
-const createMessageContextMenuStore = (
-  initProps: IMessageContextMenuStoreProps
+const createConversationMessageContextMenuStore = (
+  initProps: IConversationMessageContextMenuStoreProps
 ) => {
-  return createStore<IMessageContextMenuStoreState>()(
+  return createStore<IConversationMessageContextMenuStoreState>()(
     subscribeWithSelector((set) => ({
       messageContextMenuData: null,
       setMessageContextMenuData: (data) =>
@@ -52,21 +58,25 @@ const createMessageContextMenuStore = (
   );
 };
 
-const MessageContextMenuStoreContext =
-  createContext<IMessageContextMenuStore | null>(null);
+const ConversationMessageContextMenuStoreContext =
+  createContext<IConversationMessageContextMenuStore | null>(null);
 
-export function useMessageContextMenuStoreContext<T>(
-  selector: (state: IMessageContextMenuStoreState) => T
+export function useConversationMessageContextMenuStoreContext<T>(
+  selector: (state: IConversationMessageContextMenuStoreState) => T
 ): T {
-  const store = useContext(MessageContextMenuStoreContext);
+  const store = useContext(ConversationMessageContextMenuStoreContext);
   if (!store)
-    throw new Error("Missing MessageContextMenuStore.Provider in the tree");
+    throw new Error(
+      "Missing ConversationMessageContextMenuStore.Provider in the tree"
+    );
   return useStore(store, selector);
 }
 
-export function useMessageContextMenuStore() {
-  const store = useContext(MessageContextMenuStoreContext);
+export function useConversationMessageContextMenuStore() {
+  const store = useContext(ConversationMessageContextMenuStoreContext);
   if (!store)
-    throw new Error(`Missing MessageContextMenuStore.Provider in the tree`);
+    throw new Error(
+      `Missing ConversationMessageContextMenuStore.Provider in the tree`
+    );
   return store;
 }

@@ -77,7 +77,10 @@ type IChatGroupMemberLeftProps = {
 
 export function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
   const { themed } = useAppTheme();
-  const { data } = useInboxProfileSocialsQuery({ inboxId });
+  const { data } = useInboxProfileSocialsQuery({
+    inboxId,
+    caller: "ChatGroupMemberLeft",
+  });
   const { theme } = useAppTheme();
 
   const firstSocials = data?.[0];
@@ -122,11 +125,15 @@ type IChatGroupMemberJoinedProps = {
 
 function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
   const { themed } = useAppTheme();
-  const currentAccount = useCurrentAccount();
-  const { data } = useInboxProfileSocialsQuery(currentAccount!, inboxId);
+
+  const { data: socials } = useInboxProfileSocialsQuery({
+    inboxId,
+    caller: "ChatGroupMemberJoined",
+  });
+
   const { theme } = useAppTheme();
 
-  const firstSocials = data?.[0];
+  const firstSocials = socials?.[0];
 
   if (!firstSocials) {
     return null;
@@ -173,14 +180,15 @@ function ChatGroupMetadataUpdate({
   initiatorInboxId,
 }: IChatGroupMetadataUpdateProps) {
   const { themed } = useAppTheme();
-  const currentAccount = useCurrentAccount();
-  const { data } = useInboxProfileSocialsQuery(
-    currentAccount!,
-    initiatorInboxId
-  );
+
+  const { data: socials } = useInboxProfileSocialsQuery({
+    inboxId: initiatorInboxId,
+    caller: "ChatGroupMetadataUpdate",
+  });
+
   const { theme } = useAppTheme();
 
-  const firstSocials = data?.[0];
+  const firstSocials = socials?.[0];
 
   if (!firstSocials) {
     return null;
