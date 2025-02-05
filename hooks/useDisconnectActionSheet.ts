@@ -8,24 +8,26 @@ import {
   useAccountsStore,
   useSettingsStore,
 } from "../data/store/accountsStore";
+import { usePrivy } from "@privy-io/expo";
 
 export const useDisconnectActionSheet = (account?: string) => {
   const currentAccount = useAccountsStore((s) => s.currentAccount);
   const { ephemeralAccount } = useSettingsStore((s) => ({
     ephemeralAccount: s.ephemeralAccount,
   }));
+  const privy = usePrivy();
 
   return useCallback(
     async (colorScheme: ColorSchemeName) => {
       const methods: Record<string, () => void> = {
-        [translate("disconnect_delete_local_data")]: () =>
-          logoutAccount({ account: currentAccount }),
+        [translate("log_out")]: () => {
+          if (privy.user) {
+            privy.logout();
+          }
+          logoutAccount({ account: currentAccount });
+        },
         [translate("cancel")]: () => {},
       };
-      if (!ephemeralAccount) {
-        methods[translate("log_out")] = () =>
-          logoutAccount({ account: currentAccount });
-      }
 
       const options = Object.keys(methods);
       showActionSheetWithOptions(
@@ -48,6 +50,6 @@ export const useDisconnectActionSheet = (account?: string) => {
         }
       );
     },
-    [ephemeralAccount, currentAccount]
+    [ephemeralAccount, currentAccount, privy]
   );
 };

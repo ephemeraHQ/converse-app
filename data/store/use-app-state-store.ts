@@ -18,9 +18,11 @@ export const useAppState = create<State & { actions: Actions }>((set) => ({
   actions: {
     handleAppStateChange: (nextAppState) =>
       set((state) => {
-        logger.debug(
-          `App state changing from ${state.currentState} to ${nextAppState}`
-        );
+        logger.debug("App state changing", {
+          currentState: state.currentState,
+          previousState: state.previousState,
+          nextAppState,
+        });
         return {
           previousState: state.currentState,
           currentState: nextAppState,

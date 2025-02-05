@@ -14503,7 +14503,7 @@ __metadata:
     expo-crypto: "npm:~14.0.2"
     expo-crypto-polyfills: "npm:^1.1.0"
     expo-dev-client: "npm:~5.0.4"
-    expo-device: "npm:~7.0.1"
+    expo-device: "npm:~7.0.2"
     expo-document-picker: "npm:~13.0.1"
     expo-file-system: "npm:~18.0.4"
     expo-haptics: "npm:~14.0.0"
@@ -17380,14 +17380,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-device@npm:~7.0.1":
-  version: 7.0.1
-  resolution: "expo-device@npm:7.0.1"
+"expo-device@npm:~7.0.2":
+  version: 7.0.2
+  resolution: "expo-device@npm:7.0.2"
   dependencies:
     ua-parser-js: "npm:^0.7.33"
   peerDependencies:
     expo: "*"
-  checksum: 10c0/b9faaad827121f1b5dea5b38b7d418215ab675d416403cfa5d78c71a97ce4f0e1c57dd6b8e4017cd1d87ccfc7e49bc7739f6bba26a287db6598d0add26ccacdd
+  checksum: 10c0/08e19c344710551c3e4726c679048cd44015f654ceed2680158ff0886a9a4173747a210b3ddd896bf4feb18744de43385bfd4c9f643adfe91d82d899d3c8adaf
   languageName: node
   linkType: hard
 

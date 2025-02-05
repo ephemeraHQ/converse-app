@@ -19,7 +19,10 @@ import { useRouter } from "@/navigation/useNavigation";
 import { Pressable } from "@/design-system/Pressable";
 import { needToShowNotificationsPermissions } from "../Onboarding.utils";
 import { setAuthStatus } from "@/data/store/authStore";
-import { useCurrentAccount } from "@/data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useSettingsStore,
+} from "@/data/store/accountsStore";
 import { formatRandoDisplayName } from "@/utils/str";
 import { OnboardingCreateContactCard } from "@/features/onboarding/components/onboarding-contact-card";
 import { OnboardingContactCardThemeProvider } from "@/features/onboarding/components/onboarding-contact-card-provider";
@@ -31,6 +34,7 @@ import { useAddPfp } from "../hooks/useAddPfp";
 import { ProfileType } from "../types/onboarding.types";
 import { useCreateOrUpdateProfileInfo } from "../hooks/useCreateOrUpdateProfileInfo";
 import { useProfile } from "../hooks/useProfile";
+import { useSelect } from "@/data/store/storeHelpers";
 
 const $subtextStyle: TextStyle = {
   textAlign: "center",
@@ -67,16 +71,22 @@ export function OnboardingContactCardScreen() {
 
   const { themed, theme } = useAppTheme();
   const { animation } = theme;
-  const [type, setType] = useState<"real" | "rando">("real");
+
+  logger.debug("OnboardingContactCardScreen", {
+    address,
+  });
+  const { setIsRandoAccount, isRandoAccount } = useSettingsStore(
+    useSelect(["setIsRandoAccount", "isRandoAccount"])
+  );
 
   const { createOrUpdateProfile, loading, errorMessage } =
     useCreateOrUpdateProfileInfo();
 
   const toggleType = useCallback(() => {
     if (!loading) {
-      setType((prev) => (prev === "real" ? "rando" : "real"));
+      setIsRandoAccount(!isRandoAccount);
     }
-  }, [loading]);
+  }, [loading, setIsRandoAccount, isRandoAccount]);
 
   const titleAnimation = animation
     .fadeInUpSpring()
@@ -151,13 +161,18 @@ export function OnboardingContactCardScreen() {
   }, [createOrUpdateProfile, profile, router, asset?.uri]);
 
   const handleContinue = useCallback(() => {
-    logger.debug("[OnboardingContactCardScreen] handleContinue", type);
-    if (type === "real") {
-      handleRealContinue();
-    } else {
+    logger.debug(
+      "[OnboardingContactCardScreen] handleContinue",
+      isRandoAccount
+    );
+    if (isRandoAccount) {
       handleRandoContinue();
+    } else {
+      handleRealContinue();
     }
-  }, [type, handleRealContinue, handleRandoContinue]);
+  }, [isRandoAccount, handleRealContinue, handleRandoContinue]);
+
+  const isDoxxedAccount = !isRandoAccount;
 
   return (
     <Screen
@@ -167,7 +182,7 @@ export function OnboardingContactCardScreen() {
     >
       <Center style={$centerContainerStyle}>
         <VStack style={$titleContainer}>
-          {type === "real" ? (
+          {isDoxxedAccount ? (
             <OnboardingTitle entering={titleAnimation} size={"xl"}>
               {translate("onboarding.contactCard.title")}
             </OnboardingTitle>
@@ -176,7 +191,7 @@ export function OnboardingContactCardScreen() {
               {translate("onboarding.contactCard.randoTitle")}
             </OnboardingTitle>
           )}
-          {type === "real" ? (
+          {isDoxxedAccount ? (
             <OnboardingSubtitle
               style={themed($subtitleStyle)}
               entering={subtitleAnimation}
@@ -192,10 +207,10 @@ export function OnboardingContactCardScreen() {
             </OnboardingSubtitle>
           )}
           <OnboardingContactCardThemeProvider>
-            {type === "real" ? (
+            {isDoxxedAccount ? (
               <OnboardingCreateContactCard
                 addPFP={addPFP}
-                pfpUri={type === "real" ? asset?.uri : undefined}
+                pfpUri={isDoxxedAccount ? asset?.uri : undefined}
                 displayName={profile.displayName}
                 setDisplayName={(displayName) =>
                   setProfile({ ...profile, displayName })
@@ -218,13 +233,13 @@ export function OnboardingContactCardScreen() {
               .duration(ONBOARDING_ENTERING_DURATION)}
           >
             <AnimatedText style={$subtextStyle} color={"secondary"}>
-              {type === "real"
+              {isDoxxedAccount
                 ? translate("onboarding.contactCard.body")
                 : translate("onboarding.contactCard.randoBody")}
             </AnimatedText>
             <Pressable onPress={toggleType}>
               <AnimatedText style={$subtextPressableStyle} color={"secondary"}>
-                {type === "real"
+                {isDoxxedAccount
                   ? translate("onboarding.contactCard.bodyPressable")
                   : translate("onboarding.contactCard.randoPressable")}
               </AnimatedText>
@@ -236,7 +251,7 @@ export function OnboardingContactCardScreen() {
         text={translate("onboarding.contactCard.continue")}
         iconName="chevron.right"
         onPress={handleContinue}
-        disabled={loading || (type === "real" && !profile.displayName)}
+        disabled={loading || (!isDoxxedAccount && !profile.displayName)}
       />
     </Screen>
   );

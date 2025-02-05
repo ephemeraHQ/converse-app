@@ -17,7 +17,10 @@ import {
 } from "@/features/onboarding/constants/animation-constants";
 import { useRouter } from "@/navigation/useNavigation";
 import { Pressable } from "@/design-system/Pressable";
-import { useCurrentAccount } from "@/data/store/accountsStore";
+import {
+  useCurrentAccount,
+  useSettingsStore,
+} from "@/data/store/accountsStore";
 import { formatRandoDisplayName } from "@/utils/str";
 import { OnboardingCreateContactCard } from "@/features/onboarding/components/onboarding-contact-card";
 import { OnboardingContactCardThemeProvider } from "@/features/onboarding/components/onboarding-contact-card-provider";
@@ -31,6 +34,7 @@ import { useProfile } from "@/features/onboarding/hooks/useProfile";
 import { ProfileType } from "@/features/onboarding/types/onboarding.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { NavigationParamList } from "../Navigation/Navigation";
+import { useSelect } from "@/data/store/storeHelpers";
 
 const $subtextStyle: TextStyle = {
   textAlign: "center",
@@ -70,6 +74,9 @@ export const NewAccountCreateContactCardScreen = memo(
     const { navigation } = props;
 
     const address = useCurrentAccount()!;
+    logger.debug("NewAccountCreateContactCardScreen", {
+      address,
+    });
 
     const { themed, theme } = useAppTheme();
     const { animation } = theme;
@@ -84,11 +91,13 @@ export const NewAccountCreateContactCardScreen = memo(
       .delay(ONBOARDING_ENTERING_DELAY.SECOND)
       .duration(ONBOARDING_ENTERING_DURATION);
 
-    const [type, setType] = useState<"real" | "rando">("real");
+    const { isRandoAccount, setIsRandoAccount } = useSettingsStore(
+      useSelect(["isRandoAccount", "setIsRandoAccount"])
+    );
 
     const toggleType = useCallback(() => {
-      setType((prev) => (prev === "real" ? "rando" : "real"));
-    }, []);
+      setIsRandoAccount(!isRandoAccount);
+    }, [isRandoAccount, setIsRandoAccount]);
 
     const { createOrUpdateProfile, loading, errorMessage } =
       useCreateOrUpdateProfileInfo();
@@ -152,13 +161,18 @@ export const NewAccountCreateContactCardScreen = memo(
     }, [profile, asset?.uri, createOrUpdateProfile, navigation]);
 
     const handleContinue = useCallback(() => {
-      logger.debug("[NewAccountCreateContactCardScreen] handleContinue", type);
-      if (type === "real") {
-        handleRealContinue();
-      } else {
+      logger.debug(
+        "[NewAccountCreateContactCardScreen] handleContinue",
+        isRandoAccount
+      );
+      if (isRandoAccount) {
         handleRandoContinue();
+      } else {
+        handleRealContinue();
       }
-    }, [type, handleRealContinue, handleRandoContinue]);
+    }, [isRandoAccount, handleRealContinue, handleRandoContinue]);
+
+    const isDoxxedAccount = !isRandoAccount;
 
     return (
       <Screen
@@ -168,7 +182,7 @@ export const NewAccountCreateContactCardScreen = memo(
       >
         <Center style={$centerContainerStyle}>
           <VStack style={$titleContainer}>
-            {type === "real" ? (
+            {isDoxxedAccount ? (
               <OnboardingTitle entering={titleAnimation} size={"xl"}>
                 {translate("onboarding.contactCard.title")}
               </OnboardingTitle>
@@ -177,7 +191,7 @@ export const NewAccountCreateContactCardScreen = memo(
                 {translate("onboarding.contactCard.randoTitle")}
               </OnboardingTitle>
             )}
-            {type === "real" ? (
+            {isDoxxedAccount ? (
               <OnboardingSubtitle
                 style={themed($subtitleStyle)}
                 entering={subtitleAnimation}
@@ -193,7 +207,7 @@ export const NewAccountCreateContactCardScreen = memo(
               </OnboardingSubtitle>
             )}
             <OnboardingContactCardThemeProvider>
-              {type === "real" ? (
+              {isDoxxedAccount ? (
                 <OnboardingCreateContactCard
                   addPFP={addPFP}
                   pfpUri={asset?.uri}
@@ -220,7 +234,7 @@ export const NewAccountCreateContactCardScreen = memo(
                 .duration(ONBOARDING_ENTERING_DURATION)}
             >
               <AnimatedText style={$subtextStyle} color={"secondary"}>
-                {type === "real"
+                {isDoxxedAccount
                   ? translate("onboarding.contactCard.body")
                   : translate("onboarding.contactCard.randoBody")}
               </AnimatedText>
@@ -229,7 +243,7 @@ export const NewAccountCreateContactCardScreen = memo(
                   style={$subtextPressableStyle}
                   color={"secondary"}
                 >
-                  {type === "real"
+                  {isDoxxedAccount
                     ? translate("onboarding.contactCard.bodyPressable")
                     : translate("onboarding.contactCard.randoPressable")}
                 </AnimatedText>
@@ -241,7 +255,7 @@ export const NewAccountCreateContactCardScreen = memo(
           text={translate("onboarding.contactCard.continue")}
           iconName="chevron.right"
           onPress={handleContinue}
-          disabled={loading || (type === "real" && !profile.displayName)}
+          disabled={loading || (isDoxxedAccount && !profile.displayName)}
         />
       </Screen>
     );

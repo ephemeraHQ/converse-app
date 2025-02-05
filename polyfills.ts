@@ -3,6 +3,7 @@
 import "@walletconnect/react-native-compat";
 import "react-native-get-random-values"; // Privy requires this
 import "@ethersproject/shims"; // Privy requires this
+import "@thirdweb-dev/react-native-adapter";
 
 import "@azure/core-asynciterator-polyfill";
 import "react-native-polyfill-globals/auto";

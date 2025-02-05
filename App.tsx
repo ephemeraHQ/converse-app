@@ -9,6 +9,14 @@ const PrivyProvider = Privy.PrivyProvider;
 
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
+import {
+  Text,
+  LogBox,
+  Platform,
+  StyleSheet,
+  View,
+  useColorScheme,
+} from "react-native";
 import { Snackbars } from "@components/Snackbar/Snackbars";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
@@ -25,13 +33,6 @@ import { converseEventEmitter } from "@utils/events";
 import logger from "@utils/logger";
 import "expo-dev-client";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import {
-  LogBox,
-  Platform,
-  StyleSheet,
-  View,
-  useColorScheme,
-} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -103,6 +104,7 @@ const App = () => {
     setupTopicNotificationsSubscriptions();
   }, []);
 
+  const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
   useCoinbaseWalletListener(true, coinbaseUrl);
 
   useEffect(() => {
@@ -174,8 +176,13 @@ export default function AppWithProviders() {
       <PrivyProvider
         appId={config.privy.appId}
         clientId={config.privy.clientId}
-        storage={privySecureStorage}
-        supportedChains={[base]}
+        config={{
+          embedded: {
+            ethereum: {
+              createOnLogin: "all-users",
+            },
+          },
+        }}
       >
         <SmartWalletsProvider>
           <ThirdwebProvider>

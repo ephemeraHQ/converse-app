@@ -7,7 +7,6 @@ import HydrationStateHandler from "@components/StateHandlers/HydrationStateHandl
 import InitialStateHandler from "@components/StateHandlers/InitialStateHandler";
 import MainIdentityStateHandler from "@components/StateHandlers/MainIdentityStateHandler";
 import NetworkStateHandler from "@components/StateHandlers/NetworkStateHandler";
-import WalletsStateHandler from "@components/StateHandlers/WalletsStateHandler";
 import { useAppStore } from "@data/store/appStore";
 import { useAuthStatus } from "@data/store/authStore";
 import { useSelect } from "@data/store/storeHelpers";
@@ -129,7 +128,6 @@ const Initializer = () => {
       <NetworkStateHandler />
       <MainIdentityStateHandler />
       <ActionSheetStateHandler />
-      <WalletsStateHandler />
     </>
   );
 };

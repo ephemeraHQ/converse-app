@@ -15,9 +15,11 @@ export function useProfile() {
   const { data: socials } = useProfileSocials(currentAccount);
   const currentUserUsername = socials?.userNames?.find((u) => u.isPrimary);
 
-  const { ephemeralAccount } = useSettingsStore(
-    useSelect(["ephemeralAccount"])
+  const { ephemeralAccount, isRandoAccount } = useSettingsStore(
+    useSelect(["ephemeralAccount", "isRandoAccount"])
   );
+
+  const isNotDoxxedAccount = ephemeralAccount || isRandoAccount;
 
   const usernameWithoutSuffix = currentUserUsername?.name?.replace(
     config.usernameSuffix,
@@ -34,11 +36,11 @@ export function useProfile() {
   );
 
   const [profile, setProfile] = useState<ProfileType>({
-    username: ephemeralAccount
+    username: isNotDoxxedAccount
       ? defaultEphemeralUsername
       : usernameWithoutSuffix || "",
     avatar: currentUserUsername?.avatar || "",
-    displayName: ephemeralAccount
+    displayName: isNotDoxxedAccount
       ? defaultEphemeralDisplayName
       : currentUserUsername?.displayName || "",
   });

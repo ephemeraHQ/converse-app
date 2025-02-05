@@ -124,7 +124,7 @@ export async function connectWithAddress(args: IConnectWithAddressKeyArgs) {
   }
 
   try {
-    await performLogoutAndSaveKey(address);
+    await ensurePreviousLogoutTasksAreComplete();
 
     useAccountsStore.getState().setCurrentAccount(address, true);
     await finalizeAccountSetup(args);
@@ -136,11 +136,9 @@ export async function connectWithAddress(args: IConnectWithAddressKeyArgs) {
   }
 }
 
-async function performLogoutAndSaveKey(address: string) {
+async function ensurePreviousLogoutTasksAreComplete() {
   logger.debug("Waiting for logout tasks");
   await waitForLogoutTasksDone(500);
-  logger.debug("Logout tasks done, saving xmtp key");
-  logger.debug("XMTP Key saved");
 }
 
 async function finalizeAccountSetup(args: IConnectWithAddressKeyArgs) {

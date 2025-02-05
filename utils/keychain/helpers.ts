@@ -131,25 +131,17 @@ export const deleteAccountEncryptionKey = (account: string) =>
   deleteSecureItemAsync(`CONVERSE_ACCOUNT_ENCRYPTION_KEY_${account}`);
 
 export const getDbEncryptionKey = async () => {
+  logger.debug("[getDbEncryptionKey] Getting DB encryption key");
   const existingKey = await getSecureItemAsync("LIBXMTP_DB_ENCRYPTION_KEY");
   if (existingKey) {
+    logger.debug("[getDbEncryptionKey] Found existing DB encryption key");
     return new Uint8Array(Buffer.from(existingKey, "base64"));
   }
+  logger.debug("[getDbEncryptionKey] Creating new DB encryption key");
   const newKey = Buffer.from(await getRandomBytesAsync(32));
   await setSecureItemAsync(
     "LIBXMTP_DB_ENCRYPTION_KEY",
     newKey.toString("base64")
   );
   return new Uint8Array(newKey);
-};
-
-export const getDbEncryptionSalt = async () => {
-  const existingSalt = await getSecureItemAsync("CONVERSE_DB_ENCRYPTION_SALT");
-  if (existingSalt) {
-    return existingSalt;
-  }
-  const newKey = Buffer.from(await getRandomBytesAsync(16));
-  const newKeyHex = newKey.toString("hex");
-  await setSecureItemAsync("CONVERSE_DB_ENCRYPTION_SALT", newKeyHex);
-  return newKeyHex;
 };

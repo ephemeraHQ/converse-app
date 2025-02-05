@@ -33,6 +33,8 @@ export enum QueryKeys {
 
   // User Search
   USER_SEARCH = "userSearch",
+
+  PRIVY_CUSTOM_METADATA = "privy-custom-metadata",
 }
 
 // Conversations
@@ -131,4 +133,9 @@ export const dmPeerInboxIdQueryKey = (
 export const userSearchQueryKey = (searchQuery: string) => [
   QueryKeys.USER_SEARCH,
   searchQuery,
+];
+
+export const privyCustomMetadataQueryKey = (userId?: string) => [
+  QueryKeys.PRIVY_CUSTOM_METADATA,
+  userId?.toLowerCase(),
 ];
