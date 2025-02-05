@@ -108,6 +108,7 @@ const OnboardingWelcomeScreenContent = memo(
           privyUser,
           isNewUser
         );
+
         router.replace("OnboardingCreateContactCard");
       },
       onError: (error) => {

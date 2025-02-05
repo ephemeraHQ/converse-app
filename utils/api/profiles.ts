@@ -68,15 +68,8 @@ const deprecatedProfileResponseSchema = z.record(
   z.string(),
   ProfileSocialsSchema
 );
-type IDeprecatedProfileResponse = z.infer<
-  typeof deprecatedProfileResponseSchema
->;
 
-type IProfileResponse = z.infer<typeof inboxIdProfileResponseSchema>;
-
-export const getProfilesForAddresses = async (
-  addresses: string[]
-): Promise<IDeprecatedProfileResponse> => {
+export const getProfilesForAddresses = async (addresses: string[]) => {
   const { data } = await api.post("/api/profile/batch", {
     addresses,
   });
@@ -94,7 +87,7 @@ export const getProfilesForInboxIds = async ({
   inboxIds,
 }: {
   inboxIds: InboxId[];
-}): Promise<IProfileResponse> => {
+}) => {
   const { data } = await api.get("/api/inbox/", {
     params: { ids: inboxIds.join(",") },
   });
@@ -130,7 +123,6 @@ export const searchProfilesForCurrentAccount = async (
 };
 
 const ClaimProfileResponseSchema = z.string();
-type IClaimProfileResponse = z.infer<typeof ClaimProfileResponseSchema>;
 
 export const claimProfile = async ({
   account,
@@ -138,7 +130,7 @@ export const claimProfile = async ({
 }: {
   account: string;
   profile: ProfileType;
-}): Promise<IClaimProfileResponse> => {
+}) => {
   const { data } = await api.post("/api/profile/username", profile, {
     headers: await getXmtpApiHeaders(account),
   });
@@ -153,7 +145,6 @@ export const claimProfile = async ({
 };
 
 const UsernameValidResponseSchema = z.string();
-type IUsernameValidResponse = z.infer<typeof UsernameValidResponseSchema>;
 
 export const checkUsernameValid = async ({
   address,
@@ -163,7 +154,7 @@ export const checkUsernameValid = async ({
     | string
     | /* address is undefined if you want to check only that a username is not taken/available */ undefined;
   username: string;
-}): Promise<IUsernameValidResponse> => {
+}) => {
   const { data } = await api.get("/api/profile/username/valid", {
     params: { address, username },
   });
@@ -201,11 +192,8 @@ export const resolveEnsName = async (
 const UnsResolveResponseSchema = z.object({
   address: z.string().nullable(),
 });
-type IUnsResolveResponse = z.infer<typeof UnsResolveResponseSchema>;
 
-export const resolveUnsDomain = async (
-  domain: string
-): Promise<IUnsResolveResponse> => {
+export const resolveUnsDomain = async (domain: string) => {
   const { data } = await api.get("/api/profile/uns", { params: { domain } });
   const parseResult = UnsResolveResponseSchema.safeParse(data);
   if (!parseResult.success) {
@@ -222,11 +210,8 @@ export const resolveUnsDomain = async (
 const FarcasterResolveResponseSchema = z.object({
   address: z.string().nullable(),
 });
-type IFarcasterResolveResponse = z.infer<typeof FarcasterResolveResponseSchema>;
 
-export const resolveFarcasterUsername = async (
-  username: string
-): Promise<IFarcasterResolveResponse> => {
+export const resolveFarcasterUsername = async (username: string) => {
   const { data } = await api.get("/api/profile/farcaster", {
     params: { username },
   });
