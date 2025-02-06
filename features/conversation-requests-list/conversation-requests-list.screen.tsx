@@ -19,7 +19,7 @@ export const ConversationRequestsListScreen = memo(function () {
   return (
     <Screen contentContainerStyle={$globalStyles.flex1}>
       <ConversationRequestsListSegmentController
-        options={[translate("you_might_know"), translate("hidden_requests")]}
+        options={[translate("You might know"), translate("Hidden requests")]}
         selectedIndex={selectedSegment}
         onSelect={handleSegmentChange}
       />
