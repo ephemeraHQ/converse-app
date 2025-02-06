@@ -192,6 +192,24 @@ export const useSafeCurrentSender = (): CurrentSender => {
   return currentSender;
 };
 
+export const useCurrentSender = () => {
+  const [currentSender, setCurrentSender] = useState<CurrentSender | undefined>(
+    MultiInboxClient.instance.currentSender
+  );
+
+  useEffect(() => {
+    const unsubscribe =
+      MultiInboxClient.instance.addCurrentInboxChangedObserver(
+        ({ ethereumAddress, xmtpInboxId }) => {
+          setCurrentSender({ ethereumAddress, xmtpInboxId });
+        }
+      );
+    return () => unsubscribe();
+  }, []);
+
+  return currentSender;
+};
+
 export function getCurrentAccount() {
   const currentAccount = useAccountsStore.getState().currentAccount;
   return currentAccount === TEMPORARY_ACCOUNT_NAME

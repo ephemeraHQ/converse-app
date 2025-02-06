@@ -4,7 +4,7 @@ import { OnboardingTitle } from "@/features/onboarding/components/onboarding-tit
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 
 import { VStack } from "@/design-system/VStack";
-import { memo } from "react";
+import { memo, useState, useEffect } from "react";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Center } from "@/design-system/Center";
 import { Button, TextStyle, ViewStyle } from "react-native";
@@ -15,6 +15,7 @@ import {
 import { usePrivy } from "@privy-io/expo";
 import { queryClient } from "@/queries/queryClient";
 import { useSignupWithPasskey } from "@/features/onboarding/contexts/signup-with-passkey.context";
+import { useNavigation } from "@react-navigation/native";
 const $subtextStyle: TextStyle = {
   textAlign: "center",
 };
@@ -43,6 +44,7 @@ const OnboardingWelcomeScreenContent = memo(
 
     const { logout: privyLogout } = usePrivy();
     const { signupWithPasskey } = useSignupWithPasskey();
+    const navigation = useNavigation();
 
     return (
       <Screen
@@ -90,7 +92,11 @@ const OnboardingWelcomeScreenContent = memo(
           title="Login with Passkey"
         /> */}
         <Button
-          onPress={() => signupWithPasskey()}
+          onPress={async () => {
+            await signupWithPasskey();
+            // @ts-ignore
+            navigation.replace("OnboardingCreateContactCard");
+          }}
           title="Signup with Passkey"
         />
         <Button

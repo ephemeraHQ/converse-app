@@ -73,7 +73,7 @@ export class MultiInboxClient {
     //   `[getCurrentSender] Getting current sender with ethereum address: ${this.currentEthereumAddress}`
     // );
     if (!this.currentEthereumAddress) {
-      logger.debug("[getCurrentSender] No current ethereum address found");
+      // logger.debug("[getCurrentSender] No current ethereum address found");
       return undefined;
     }
     const xmtpInboxId =

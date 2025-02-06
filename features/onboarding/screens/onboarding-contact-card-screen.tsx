@@ -1,10 +1,10 @@
+import React, { useCallback, useEffect, useState } from "react";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import { AnimatedText } from "@/design-system/Text";
+import { AnimatedText, Text } from "@/design-system/Text";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
-import { useCallback, useEffect, useState } from "react";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Center } from "@/design-system/Center";
 import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer";
@@ -19,6 +19,8 @@ import { needToShowNotificationsPermissions } from "../Onboarding.utils";
 import { setAuthStatus } from "@/data/store/authStore";
 import {
   useCurrentAccount,
+  useCurrentSender,
+  useSafeCurrentSender,
   useSettingsStore,
 } from "@/data/store/accountsStore";
 import { formatRandoDisplayName } from "@/utils/str";
@@ -34,6 +36,14 @@ import { useCreateOrUpdateProfileInfo } from "../hooks/useCreateOrUpdateProfileI
 import { useProfile } from "../hooks/useProfile";
 import { useSelect } from "@/data/store/storeHelpers";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
+import { BottomSheetHeader } from "@/design-system/BottomSheet/BottomSheetHeader";
+import { BottomSheetModal } from "@/design-system/BottomSheet/BottomSheetModal";
+import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import { useBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BottomSheetContentContainer } from "@/design-system/BottomSheet/BottomSheetContentContainer";
+import { Button } from "@/design-system/Button/Button";
+import { debugBorder } from "@/utils/debug-style";
 
 const $subtextStyle: TextStyle = {
   textAlign: "center",
@@ -199,38 +209,48 @@ export function OnboardingContactCardScreen() {
     logger.debug("[OnboardingContactCardScreen] handleContinue");
     handleRandoContinue();
   }, [handleRandoContinue]);
+  const listBottomSheetRef = useBottomSheetModalRef();
+
+  const handleListPress = useCallback(() => {
+    listBottomSheetRef.current?.present();
+  }, [listBottomSheetRef]);
+  const insets = useSafeAreaInsets();
+
+  const currentSender = useCurrentSender();
 
   return (
-    <Screen
-      preset="scroll"
-      contentContainerStyle={$screenContainer}
-      safeAreaEdges={["bottom"]}
-    >
-      <Center style={$centerContainerStyle}>
-        <VStack style={$titleContainer}>
-          <OnboardingTitle entering={titleAnimation} size={"xl"}>
-            Complete your contact card
-          </OnboardingTitle>
-          <OnboardingSubtitle
-            style={themed($subtitleStyle)}
-            entering={subtitleAnimation}
-          >
-            Choose how you show up
-          </OnboardingSubtitle>
+    <>
+      <Screen
+        preset="scroll"
+        contentContainerStyle={$screenContainer}
+        safeAreaEdges={["bottom"]}
+      >
+        <Center style={$centerContainerStyle}>
+          <VStack style={$titleContainer}>
+            <OnboardingTitle entering={titleAnimation} size={"xl"}>
+              Complete your contact card
+            </OnboardingTitle>
+            <OnboardingSubtitle
+              style={themed($subtitleStyle)}
+              entering={subtitleAnimation}
+            >
+              Choose how you show up
+            </OnboardingSubtitle>
 
-          <OnboardingContactCardThemeProvider>
-            <OnboardingCreateContactCard
-              addPFP={addPFP}
-              pfpUri={asset?.uri}
-              displayName={profile.displayName}
-              setDisplayName={(displayName) =>
-                setProfile({ ...profile, displayName })
-              }
-            />
-          </OnboardingContactCardThemeProvider>
+            <OnboardingContactCardThemeProvider>
+              <OnboardingCreateContactCard
+                onImportPress={handleListPress}
+                addPFP={addPFP}
+                pfpUri={asset?.uri}
+                displayName={profile.displayName}
+                setDisplayName={(displayName) =>
+                  setProfile({ ...profile, displayName })
+                }
+              />
+            </OnboardingContactCardThemeProvider>
 
-          {/* todo(lustig): bring back when privy supports multiple scws */}
-          {/* <AnimatedVStack
+            {/* todo(lustig): bring back when privy supports multiple scws */}
+            {/* <AnimatedVStack
             entering={animation
               .fadeInDownSlow()
               .delay(ONBOARDING_ENTERING_DELAY.THIRD)
@@ -249,14 +269,42 @@ export function OnboardingContactCardScreen() {
               </AnimatedText>
             </Pressable>
           </AnimatedVStack> */}
-        </VStack>
-      </Center>
-      <OnboardingFooter
-        text={"Continue"}
-        iconName="chevron.right"
-        onPress={handleContinue}
-        disabled={loading || !profile.displayName}
-      />
-    </Screen>
+          </VStack>
+        </Center>
+        <OnboardingFooter
+          text={"Continue"}
+          iconName="chevron.right"
+          onPress={handleContinue}
+          disabled={loading || !profile.displayName}
+        />
+      </Screen>
+
+      <BottomSheetModal ref={listBottomSheetRef} snapPoints={["50%"]}>
+        <BottomSheetHeader title="Import an identity" />
+        <BottomSheetContentContainer
+          style={{
+            flex: 1,
+          }}
+        >
+          <VStack
+            style={{
+              paddingHorizontal: theme.spacing.md,
+              rowGap: theme.spacing.xs,
+              paddingBottom: insets.bottom,
+            }}
+          >
+            {currentSender ? (
+              <Text>
+                {JSON.stringify(currentSender)}
+                show the installed wallets that we support [coinbase, metamask,
+                rainbow to link]
+              </Text>
+            ) : (
+              <Text>Loading XMTP client...</Text>
+            )}
+          </VStack>
+        </BottomSheetContentContainer>
+      </BottomSheetModal>
+    </>
   );
 }

@@ -172,27 +172,6 @@ export const NewAccountCreateContactCardScreen = memo(
 
     const isDoxxedAccount = !isRandoAccount;
 
-    /**
-
-
-        contactCard: {
-      title: "Complete your contact card",
-      subtitle: "A secure identity",
-      body: "Add and edit Contact Cards anytime,",
-      bodyPressable: "or go Rando for extra privacy.",
-      randoTitle: "Go Rando",
-      randoSubtitle: "Chat using random contact info",
-      randoBody: "For everyday conversations,",
-      randoPressable: "use your personal Contact Card.",
-      import: "Import",
-      name: "Name",
-      namePlaceholder: "How you'll show up in chat",
-      continue: "Continue",
-    },
-
-
-         */
-
     return (
       <Screen
         preset="scroll"

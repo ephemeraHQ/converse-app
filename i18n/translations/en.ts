@@ -8,7 +8,6 @@ export const en = {
       createContactCard: "Create a Contact Card",
     },
     contactCard: {
-      title: "Complete your contact card",
       subtitle: "A secure identity",
       body: "Add and edit Contact Cards anytime,",
       bodyPressable: "or go Rando for extra privacy.",

@@ -1,24 +1,123 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useSignupWithPasskey as usePrivySignupWithPasskey } from "@privy-io/expo/passkey";
-import { useNavigation } from "@react-navigation/native";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { RELYING_PARTY } from "@/features/onboarding/passkey.constants";
 import logger from "@/utils/logger";
+import { skipToken, useQuery, queryOptions } from "@tanstack/react-query";
+import { usePrivy, useEmbeddedEthereumWallet } from "@privy-io/expo";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
+import { useSmartWallets } from "@privy-io/expo/smart-wallets";
 
-type SignupWithPasskeyContextType = {
-  signupWithPasskey: () => Promise<void>;
+const embeddedWalletQueryKey = (args: { embeddedWalletIndex: number }) => [
+  "embeddedWallet",
+  args.embeddedWalletIndex,
+];
+
+export function getEmbeddedWalletQueryOptions(args: {
+  privyUserId: string | undefined;
+  embeddedWalletIndex: number;
+  createEmbeddedWallet: (index: number) => Promise<{
+    embeddedWalletAddress: string;
+  }>;
+}) {
+  const enabled = !!args.privyUserId;
+  return queryOptions({
+    queryKey: embeddedWalletQueryKey({
+      embeddedWalletIndex: args.embeddedWalletIndex,
+    }),
+    queryFn: enabled
+      ? () => args.createEmbeddedWallet(args.embeddedWalletIndex)
+      : skipToken,
+    enabled,
+    staleTime: Infinity,
+  });
+}
+
+const useCreateEmbeddedWallet = (args: { embeddedWalletIndex: number }) => {
+  const { create: createEmbeddedWallet } = useEmbeddedEthereumWallet();
+  const { user } = usePrivy();
+  logger.debug(
+    user?.linked_accounts
+      .filter((account) => account.type === "wallet")
+      .map((account) => {
+        return {
+          address: account.address,
+          first_verified_at: account.first_verified_at,
+        };
+      })
+  );
+  return useQuery(
+    getEmbeddedWalletQueryOptions({
+      privyUserId: user?.id,
+      embeddedWalletIndex: args.embeddedWalletIndex,
+      createEmbeddedWallet: async (index) => {
+        try {
+          logger.debug(
+            `[createEmbeddedWallet] Creating embedded wallet at index: ${index}`
+          );
+          const { user } = await createEmbeddedWallet({
+            createAdditional: true,
+          });
+          logger.debug(
+            `[createEmbeddedWallet] Successfully created embedded wallet for user: ${user.id}`
+          );
+
+          // sort where the oldest wallet is last in the array
+          const embeddedWallets = user.linked_accounts
+            .filter((account) => account.type === "wallet")
+            .sort(
+              (a, b) => (a.first_verified_at ?? 0) - (b.first_verified_at ?? 0)
+            );
+
+          logger.debug(
+            `[createEmbeddedWallet] Found ${embeddedWallets.length} embedded wallets`
+          );
+
+          const walletAtIndex = embeddedWallets[index];
+          if (!walletAtIndex) {
+            logger.error(
+              `[createEmbeddedWallet] No wallet found at index: ${index}`
+            );
+            throw new Error("Wallet not found");
+          }
+          logger.debug(
+            `[createEmbeddedWallet] Successfully retrieved wallet at index ${index} with address: ${walletAtIndex.address}`
+          );
+          return { embeddedWalletAddress: walletAtIndex.address };
+        } catch (error) {
+          logger.error(
+            `[createEmbeddedWallet] Failed to create embedded wallet: ${error}`
+          );
+          throw error;
+        }
+      },
+    })
+  );
 };
 
 const SignupWithPasskeyContext = createContext<
-  SignupWithPasskeyContextType | undefined
+  | {
+      signupWithPasskey: () => Promise<void>;
+    }
+  | undefined
 >(undefined);
-
-export function SignupWithPasskeyProvider({
+export const SignupWithPasskeyProvider = ({
   children,
 }: {
   children: React.ReactNode;
-}) {
-  const navigation = useNavigation();
+}) => {
+  const { user, logout: privyLogout } = usePrivy();
+  const { wallets } = useEmbeddedEthereumWallet();
+  const { client: smartWalletClient } = useSmartWallets();
+
+  // // once user is created, we need to create an embedded wallet
+  // useEffect(() => {
+  //   const shouldThrowIfWalletsExistInSignupContext = wallets.length > 0;
+  //   if (shouldThrowIfWalletsExistInSignupContext) {
+  //     /** todo(lustig) remove logout after code working  */ privyLogout();
+  //     throw new Error("Wallets already exist in signup context");
+  //   }
+  // }, [user, wallets, privyLogout]);
 
   const { signupWithPasskey: privySignupWithPasskey } =
     usePrivySignupWithPasskey({
@@ -28,8 +127,6 @@ export function SignupWithPasskeyProvider({
           privyUser,
           isNewUser
         );
-        // @ts-ignore
-        navigation.replace("OnboardingCreateContactCard");
       },
       onError: (error) => {
         logger.error(
@@ -39,6 +136,88 @@ export function SignupWithPasskeyProvider({
         captureErrorWithToast(error);
       },
     });
+
+  const {
+    data: embeddedWalletAddress,
+    isLoading: isEmbeddedWalletLoading,
+    error: embeddedWalletError,
+    status: embeddedWalletStatus,
+  } = /* wont fire until user is logged in*/ useCreateEmbeddedWallet({
+    embeddedWalletIndex: 0,
+  });
+
+  // logger.debug(
+  //   "[OnboardingWelcomeScreenContent] embeddedWalletAddress",
+  //   embeddedWalletAddress,
+  //   isEmbeddedWalletLoading,
+  //   embeddedWalletError,
+  //   embeddedWalletStatus
+  // );
+
+  const [startTime, setStartTime] = useState<number>();
+
+  useEffect(() => {
+    //  takes on the order of 1-2 seconds
+    /*
+     LOG  11:53:53 AM | DEBUG : [OnboardingWelcomeScreenContent] Smart wallet client creation took 1439ms 
+      LOG  11:57:51 AM | DEBUG : [OnboardingWelcomeScreenContent] Smart wallet client creation took 1590ms 
+    */
+    if (embeddedWalletAddress && !smartWalletClient) {
+      setStartTime(Date.now());
+      logger.debug(
+        "[OnboardingWelcomeScreenContent] Starting smart wallet client creation timer"
+      );
+    }
+  }, [embeddedWalletAddress, smartWalletClient]);
+
+  useEffect(() => {
+    if (smartWalletClient && startTime) {
+      const duration = Date.now() - startTime;
+      logger.debug(
+        `[OnboardingWelcomeScreenContent] Smart wallet client creation took ${duration}ms`
+      );
+    }
+  }, [smartWalletClient, startTime]);
+
+  useEffect(() => {
+    if (embeddedWalletAddress) {
+      logger.debug(
+        "[OnboardingWelcomeScreenContent] Embedded wallet has been created, going to wait for Smart Contract Wallet to be created and then create a new XMTP Inbox"
+      );
+    }
+  }, [embeddedWalletAddress]);
+
+  useEffect(() => {
+    if (!smartWalletClient) {
+      logger.debug(
+        "[OnboardingWelcomeScreenContent] No smart wallet client available yet"
+      );
+      return;
+    }
+
+    logger.debug(
+      "[OnboardingWelcomeScreenContent] Smart wallet client available, going to create a new inbox"
+    );
+
+    // don't love doing async functions use effects, but let's get this working and then refactor
+    async function createNewInbox() {
+      logger.debug(
+        "[OnboardingWelcomeScreenContent] Checking smart wallet client"
+      );
+
+      logger.debug("[signupWithPasskey] creating new inbox");
+      await MultiInboxClient.instance.createNewInboxForPrivySmartContractWallet(
+        {
+          privySmartWalletClient: smartWalletClient,
+        }
+      );
+      logger.debug(
+        "[OnboardingWelcomeScreenContent] MultiInboxClient created a new inbox successfully"
+      );
+    }
+
+    createNewInbox();
+  }, [smartWalletClient]);
 
   const signupWithPasskey = async () => {
     await privySignupWithPasskey({
@@ -51,8 +230,7 @@ export function SignupWithPasskeyProvider({
       {children}
     </SignupWithPasskeyContext.Provider>
   );
-}
-
+};
 export const useSignupWithPasskey = () => {
   const context = useContext(SignupWithPasskeyContext);
   if (!context) {

@@ -1,43 +1,30 @@
 import { ScreenHeaderModalCloseButton } from "@/components/Screen/ScreenHeaderModalCloseButton";
-import {
-  JoinGroupNavigation,
-  JoinGroupNavigationParams,
-} from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
-import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen";
-import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen";
-import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
-import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
-import {
-  ConversationNav,
-  ConversationNavParams,
-} from "@/features/conversation/conversation.nav";
-import {
-  InviteUsersToExistingGroupNav,
-  InviteUsersToExistingGroupParams,
-} from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
+import { JoinGroupNavigationParams } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
+import { ConversationNavParams } from "@/features/conversation/conversation.nav";
+import { InviteUsersToExistingGroupParams } from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
-import { ProfileNav, ProfileNavParams } from "@/features/profiles/profile.nav";
+import { ProfileNavParams } from "@/features/profiles/profile.nav";
 import { translate } from "@/i18n";
 import { useRouter } from "@/navigation/useNavigation";
-import UserProfileNav from "@/screens/Navigation/UserProfileNav";
 import { OnboardingContactCardScreen } from "@features/onboarding/screens/onboarding-contact-card-screen";
 import { OnboardingNotificationsScreen } from "@features/onboarding/screens/onboarding-notifications-screen";
 import {
   NativeStackNavigationOptions,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
-import { memo } from "react";
-import { Platform, useColorScheme } from "react-native";
+import React, { memo } from "react";
+import { Platform, useColorScheme, View, Text, Button } from "react-native";
 import { IdleScreen } from "../IdleScreen";
 import { NewAccountCreateContactCardScreen } from "../NewAccount/new-account-create-contact-card-screen";
 import { NewAccountScreen } from "../NewAccount/new-account-screen";
-import GroupNav, { GroupNavParams } from "./GroupNav";
-import ShareProfileNav from "./ShareProfileNav";
-import TopUpNav from "./TopUpNav";
-import WebviewPreviewNav, {
-  WebviewPreviewNavParams,
-} from "./WebviewPreviewNav";
+import { GroupNavParams } from "./GroupNav";
+import { WebviewPreviewNavParams } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
+import { SignupWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
+import { usePrivy } from "@privy-io/expo";
+import { useSafeCurrentSender } from "@/data/store/accountsStore";
+import { Center } from "@/design-system/Center";
+import { VStack } from "@/design-system/VStack";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -108,6 +95,28 @@ export function IdleNavigation() {
   );
 }
 
+const FakeScreen = () => {
+  const currentSender = useSafeCurrentSender();
+  console.log("currentSender", currentSender);
+  const { logout: privyLogout } = usePrivy();
+
+  return (
+    <Center style={{ flex: 1 }}>
+      <VStack>
+        <Text>Fake Screen</Text>
+        <Text>ETH: {currentSender?.ethereumAddress}</Text>
+        <Text>INBOX: {currentSender?.xmtpInboxId}</Text>
+        <Button
+          title="Logout"
+          onPress={() => {
+            privyLogout();
+          }}
+        />
+      </VStack>
+    </Center>
+  );
+};
+
 export function SignedInNavigation() {
   const colorScheme = useColorScheme();
 
@@ -132,6 +141,13 @@ export function SignedInNavigation() {
           {JoinGroupNavigation()}
           {TopUpNav()}
         </NativeStack.Group> */}
+        <NativeStack.Group>
+          <NativeStack.Screen
+            name="FakeScreen"
+            component={FakeScreen}
+            options={{ headerShown: false }}
+          />
+        </NativeStack.Group>
 
         <NativeStack.Group>
           {/* {UserProfileNav()}
@@ -156,42 +172,46 @@ export function SignedOutNavigation() {
   const colorScheme = useColorScheme();
 
   return (
-    <NativeStack.Navigator
-      screenListeners={screenListeners("fullStackNavigation")}
-    >
-      <NativeStack.Group>
-        {/* Auth / Onboarding */}
-        <NativeStack.Group
-          screenOptions={{
-            ...stackGroupScreenOptions(colorScheme),
-            ...authScreensSharedScreenOptions,
-          }}
-        >
-          <NativeStack.Screen
-            options={{
-              headerShown: false,
+    <SignupWithPasskeyProvider>
+      <NativeStack.Navigator
+        screenListeners={screenListeners("fullStackNavigation")}
+        initialRouteName="OnboardingWelcome"
+      >
+        <NativeStack.Group>
+          {/* Auth / Onboarding */}
+          <NativeStack.Group
+            screenOptions={{
+              ...stackGroupScreenOptions(colorScheme),
+              ...authScreensSharedScreenOptions,
             }}
-            name="OnboardingWelcome"
-            component={OnboardingWelcomeScreen}
-          />
-          <NativeStack.Screen
-            options={{
-              headerShown: false,
-            }}
-            name="OnboardingCreateContactCard"
-            component={OnboardingContactCardScreen}
-          />
+          >
+            <NativeStack.Screen
+              options={{
+                headerShown: false,
+              }}
+              name="OnboardingWelcome"
+              component={OnboardingWelcomeScreen}
+            />
 
-          <NativeStack.Screen
-            options={{
-              headerShown: false,
-            }}
-            name="OnboardingNotifications"
-            component={OnboardingNotificationsScreen}
-          />
+            <NativeStack.Screen
+              options={{
+                headerShown: false,
+              }}
+              name="OnboardingCreateContactCard"
+              component={OnboardingContactCardScreen}
+            />
+
+            <NativeStack.Screen
+              options={{
+                headerShown: false,
+              }}
+              name="OnboardingNotifications"
+              component={OnboardingNotificationsScreen}
+            />
+          </NativeStack.Group>
         </NativeStack.Group>
-      </NativeStack.Group>
-    </NativeStack.Navigator>
+      </NativeStack.Navigator>
+    </SignupWithPasskeyProvider>
   );
 }
 
@@ -199,7 +219,9 @@ const NewAccountStack = createNativeStackNavigator<NavigationParamList>();
 
 const NewAccountNavigator = memo(function NewAccountNavigator() {
   const colorScheme = useColorScheme();
+
   const router = useRouter();
+  const { logout: privyLogout } = usePrivy();
 
   return (
     <NewAccountStack.Navigator>
@@ -218,7 +240,10 @@ const NewAccountNavigator = memo(function NewAccountNavigator() {
             headerLeft: () => (
               <ScreenHeaderModalCloseButton
                 title={translate("cancel")}
-                onPress={router.goBack}
+                onPress={() => {
+                  router.goBack();
+                  privyLogout();
+                }}
               />
             ),
           }}
