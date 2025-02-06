@@ -13,7 +13,6 @@ import {
 } from "@data/store/accountsStore";
 import { setAuthStatus } from "@data/store/authStore";
 import { StackActions } from "@react-navigation/native";
-import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
 import { deleteSecureItemAsync } from "@utils/keychain";
 import {
   deleteAccountEncryptionKey,
@@ -152,7 +151,6 @@ export async function logoutAccount({ account }: { account: string }) {
 
     await client.deleteLocalDatabase();
     logger.debug("[Logout] Successfully deleted libxmp db");
-    await deleteLibXmtpDatabaseForInboxId(client.inboxId);
   } catch (error) {
     logger.warn("[Logout] Could not get XMTP Client while logging out", {
       error,
