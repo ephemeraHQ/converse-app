@@ -3,6 +3,7 @@ import { prefetchConversationMetadataQuery } from "@/queries/conversation-metada
 import { fetchAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
 import { ensureInboxId } from "@/queries/inbox-id-query";
 import { captureError } from "@/utils/capture-error";
+import { HydrationError } from "@/utils/error";
 import { getAccountsList, useAccountsStore } from "@data/store/accountsStore";
 import { useAppStore } from "@data/store/appStore";
 import logger from "@utils/logger";
@@ -16,22 +17,28 @@ export default function HydrationStateHandler() {
       const accounts = getAccountsList();
 
       // Critical queries
-      const results = await Promise.allSettled(
-        // We need the inboxId for each account since we use them so much
-        accounts.map((account) => ensureInboxId({ account }))
-      );
-
-      // Remove accounts that failed to get an inboxId
-      results.forEach((result, index) => {
-        if (result.status === "rejected") {
-          const failedAccount = accounts[index];
-          captureError({
-            ...result.reason,
-            message: `[Hydration] Failed to get inboxId for account ${failedAccount}, removing account. ${result.reason.message}`,
-          });
-          useAccountsStore.getState().removeAccount(failedAccount);
-        }
-      });
+      try {
+        await Promise.all(
+          // We need the inboxId for each account since we use them so much
+          accounts.map(async (account): Promise<void> => {
+            try {
+              await ensureInboxId({ account });
+            } catch (error) {
+              captureError(
+                new HydrationError(
+                  `Failed to get inboxId for account ${account}, removing account`,
+                  error
+                )
+              );
+              useAccountsStore.getState().removeAccount(account);
+            }
+          })
+        );
+      } catch (error) {
+        logger.debug(
+          `[Hydration] Error during inboxId initialization: ${error.message}`
+        );
+      }
 
       // Non critical queries
       for (const account of accounts) {
