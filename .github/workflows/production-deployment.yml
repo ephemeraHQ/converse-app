@@ -120,9 +120,7 @@ jobs:
           patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
 
       - name: Build iOS production
-        run: |
-          node scripts/build/ios/production.js
-          eas build --platform ios --profile production --non-interactive --auto-submit
+        run: eas build --platform ios --profile production --non-interactive --auto-submit
 
   android-build:
     needs: check-deployment-type

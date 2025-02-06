@@ -44,7 +44,6 @@ export type IConfig = {
   xmtpEnv: IXmtpEnv;
   apiURI: string;
   bundleId: string;
-  appleAppGroup: string;
   scheme: string;
   websiteDomain: string;
   usernameSuffix: string;

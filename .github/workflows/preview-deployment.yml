@@ -18,7 +18,11 @@ on:
       - "assets/**"
       - "package.json"
       - "app.config.ts"
-      - "ios/**"
+      - "yarn.lock"
+      - "i18n/**"
+      - "patches/**"
+      - "index.js"
+      - "google-services/**"
 
 # Ensure only one workflow runs at a time
 concurrency:
@@ -59,7 +63,7 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force_native_build }}" == "true" ]]; then
             echo "has_native_changes=true" >> $GITHUB_OUTPUT
-          elif git diff --name-only HEAD^ HEAD | grep -E "package.json|app.config.ts|ios/|android/"; then
+          elif git diff --name-only HEAD^ HEAD | grep -E "package.json|app.config.ts|patches/|google-services/|yarn.lock"; then
             echo "has_native_changes=true" >> $GITHUB_OUTPUT
           else
             echo "has_native_changes=false" >> $GITHUB_OUTPUT
@@ -136,10 +140,6 @@ jobs:
           packager: yarn
           eas-cache: true
           patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
-
-      - name: Build iOS preview
-        id: build_ios
-        run: node scripts/build/ios/preview.js
 
       - name: Build and submit to store
         run: |

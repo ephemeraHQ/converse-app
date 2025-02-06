@@ -1,6 +1,6 @@
 {
   "name": "converse",
-  "version": "2.2.10",
+  "version": "2.2.14",
   "private": true,
   "scripts": {
     "start": "expo start",
@@ -9,7 +9,8 @@
     "android:reverse": "adb reverse tcp:8081 tcp:8081 && adb reverse tcp:9875 tcp:9875",
     "android:sendApk": "./scripts/android/send-apk.sh",
     "ios": "expo run:ios",
-    "ios:checkBuildDeps": "./scripts/ios/check-build-deps.sh",
+    "ios:clean": "yarn ios --no-build-cache",
+    "prebuild:ios:clean": "expo prebuild --platform ios --clean",
     "env:pull:dev": "npx eas-cli env:pull --environment=development",
     "env:pull:preview": "npx eas-cli env:pull --environment=preview",
     "env:pull:prod": "npx eas-cli env:pull --environment=production",
@@ -22,11 +23,6 @@
     "test:perf": "echo \"➜ Running tests with performance...\" && echo \"➜ Capturing performance tests...\" && yarn reassure && echo \"➜ Running current performance tests...\"",
     "test-deep-linking": "node scripts/test-deep-linking.js",
     "postinstall": "patch-package && husky install && cross-os postinstall"
-  },
-  "cross-os": {
-    "postinstall": {
-      "darwin": "bundle install --gemfile=ios/Gemfile"
-    }
   },
   "dependencies": {
     "@azure/core-asynciterator-polyfill": "^1.0.2",
@@ -42,7 +38,6 @@
     "@material-symbols/svg-400": "^0.5.0",
     "@mfellner/react-native-fast-create-hash": "^1.0.0-alpha.2",
     "@noble/secp256k1": "^1.5.2",
-    "@notifee/react-native": "^9.1.3",
     "@open-frames/proxy-types": "^0.2.3",
     "@peculiar/webcrypto": "^1.4.1",
     "@privy-io/expo": "0.45.0-beta-20250203223139",
@@ -159,7 +154,6 @@
     "react-native-paper": "^5.10.6",
     "react-native-passkey": "^2.1.1",
     "react-native-passkeys": "^0.3.1",
-    "react-native-phone-number-input": "^2.1.0",
     "react-native-polyfill-globals": "^3.1.0",
     "react-native-qrcode-styled": "^0.3.3",
     "react-native-qrcode-svg": "^6.2.0",

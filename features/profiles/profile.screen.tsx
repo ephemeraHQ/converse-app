@@ -12,8 +12,6 @@ import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { SettingsList } from "@/design-system/settings-list/settings-list";
-import { updateConsentForAddressesForAccount } from "@/utils/xmtpRN/xmtp-consent/update-consent-for-addresses-for-account";
-import { useNotificationsPermission } from "@/features/notifications/hooks/use-notifications-permission";
 import { ContactCard } from "@/features/profiles/components/contact-card";
 import { SocialNames } from "@/features/profiles/components/social-names";
 import { formatConverseUsername } from "@/features/profiles/utils/format-converse-username";
@@ -27,12 +25,13 @@ import { useHeader } from "@/navigation/use-header";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Haptics } from "@/utils/haptics";
 import { navigate } from "@/utils/navigation";
+import { updateConsentForAddressesForAccount } from "@/utils/xmtpRN/xmtp-consent/update-consent-for-addresses-for-account";
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { useRoute, useRouter } from "@navigation/useNavigation";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { StackActions } from "@react-navigation/native";
 import React, { useCallback, useState } from "react";
-import { Alert, Share, View, ViewStyle } from "react-native";
+import { Alert, Share, ViewStyle } from "react-native";
 
 export function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
@@ -44,8 +43,6 @@ export function ProfileScreen() {
   const isMyProfile = peerAddress.toLowerCase() === userAddress?.toLowerCase();
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const { data: socials } = useProfileSocials(peerAddress);
-  const { notificationsPermissionStatus, requestPermission } =
-    useNotificationsPermission();
 
   const userName = usePreferredUsername(peerAddress);
   const displayName = usePreferredName(peerAddress);
@@ -264,14 +261,6 @@ export function ProfileScreen() {
             <SettingsList
               editMode={editMode}
               rows={[
-                ...(notificationsPermissionStatus !== "granted"
-                  ? [
-                      {
-                        label: translate("turn_on_notifications"),
-                        onPress: requestPermission,
-                      },
-                    ]
-                  : []),
                 {
                   label: translate("profile.settings.archive"),
                   onPress: () => {

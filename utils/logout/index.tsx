@@ -1,36 +1,29 @@
+import { getXmtpApiHeaders } from "@/utils/api/auth";
 import { getInboxId } from "@/utils/xmtpRN/signIn";
 import {
   deleteXmtpClient,
   dropXmtpClient,
   getXmtpClient,
 } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
-import { StackActions } from "@react-navigation/native";
-import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
-import logger from "@utils/logger";
-import { converseNavigatorRef } from "@utils/navigation";
-
 import {
+  TEMPORARY_ACCOUNT_NAME,
   getAccountsList,
   getWalletStore,
-  TEMPORARY_ACCOUNT_NAME,
   useAccountsStore,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { setAuthStatus } from "@data/store/authStore";
+import { StackActions } from "@react-navigation/native";
 import { deleteSecureItemAsync } from "@utils/keychain";
 import {
   deleteAccountEncryptionKey,
   deleteXmtpKey,
 } from "@utils/keychain/helpers";
+import logger from "@utils/logger";
 import mmkv, {
   clearSecureMmkvForAccount,
   secureMmkvByAccount,
 } from "@utils/mmkv";
-
-import { resetNotifications } from "@/features/notifications/utils/resetNotifications";
-import { getXmtpApiHeaders } from "@/utils/api/auth";
-import { deleteSubscribedTopics } from "@features/notifications/utils/deleteSubscribedTopics";
-import { lastNotifSubscribeByAccount } from "@features/notifications/utils/lastNotifSubscribeByAccount";
-import { unsubscribeFromNotifications } from "@features/notifications/utils/unsubscribeFromNotifications";
+import { converseNavigatorRef } from "@utils/navigation";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
 
 type LogoutTasks = {
@@ -115,7 +108,6 @@ export const executeLogoutTasks = async () => {
       logger.debug(
         `[Logout] Executing logout task for ${account} (${task.topics.length} topics)`
       );
-      resetNotifications(account);
       // await deleteXmtpDatabaseEncryptionKey(account);
       await deleteXmtpKey(account);
       await deleteAccountEncryptionKey(account);
@@ -125,10 +117,6 @@ export const executeLogoutTasks = async () => {
 
       assertNotLogged(account);
       if (task.apiHeaders) {
-        // This seems wrong, if the request fails then the user is still subscribed to pushes
-        // We should probably check if the request failed and then retry
-        // Pick this up with account refactoring
-        unsubscribeFromNotifications(task.apiHeaders);
         await clearSecureMmkvForAccount(account);
       }
       removeLogoutTask(account);
@@ -163,7 +151,6 @@ export async function logoutAccount({ account }: { account: string }) {
 
     await client.deleteLocalDatabase();
     logger.debug("[Logout] Successfully deleted libxmp db");
-    await deleteLibXmtpDatabaseForInboxId(client.inboxId);
   } catch (error) {
     logger.warn("[Logout] Could not get XMTP Client while logging out", {
       error,
@@ -175,9 +162,7 @@ export async function logoutAccount({ account }: { account: string }) {
 
   // Clean up all account-related data
   deleteXmtpClient({ address: account });
-  deleteSubscribedTopics(account);
   delete secureMmkvByAccount[account];
-  delete lastNotifSubscribeByAccount[account];
 
   // Handle account switching and store cleanup
   useAccountsStore.getState().removeAccount(account);

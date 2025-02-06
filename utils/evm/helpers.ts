@@ -1,5 +1,4 @@
 import { Wallet, ethers } from "ethers";
-import "@ethersproject/shims";
 
 import {
   currentAccount,

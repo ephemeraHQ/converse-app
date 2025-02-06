@@ -6,7 +6,10 @@ import "@ethersproject/shims"; // Privy requires this
 import "@thirdweb-dev/react-native-adapter";
 
 import "@azure/core-asynciterator-polyfill";
-import "react-native-polyfill-globals/auto";
+
+// For now using all the polyfills. Need to dig which one we'll really need.
+import "react-native-polyfill-globals";
+
 import { Crypto as WebCrypto } from "@peculiar/webcrypto";
 import "@stardazed/streams-polyfill";
 

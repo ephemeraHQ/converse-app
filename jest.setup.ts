@@ -104,17 +104,6 @@ jest.mock("@/config", () => ({
   },
 }));
 
-jest.mock("@notifee/react-native", () => ({
-  getInitialNotification: jest.fn(),
-  onBackgroundEvent: jest.fn(),
-  onForegroundEvent: jest.fn(),
-  onNotificationOpenedApp: jest.fn(),
-  onNotification: jest.fn(),
-  onBackgroundNotification: jest.fn(),
-  onForegroundNotification: jest.fn(),
-  onNotificationOpened: jest.fn(),
-}));
-
 jest.mock("@react-native-firebase/app-check", () => {
   return {
     firebase: {

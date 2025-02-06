@@ -1,30 +1,28 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as Linking from "expo-linking";
 import React, { useCallback, useState } from "react";
-import { Platform, ViewStyle } from "react-native";
+import { ViewStyle } from "react-native";
 
-import { useAppTheme } from "@theme/useAppTheme";
-import {
-  useCurrentAccount,
-  useSettingsStore,
-} from "../../multi-inbox/multi-inbox.store";
-import { useAppStore } from "../../../data/store/appStore";
-import { setAuthStatus } from "../../../data/store/authStore";
-import { requestPushNotificationsPermissions } from "../../notifications/utils/requestPushNotificationsPermissions";
-import { sentryTrackError } from "../../../utils/sentry";
-import { NavigationParamList } from "../../../screens/Navigation/Navigation";
-import { AnimatedHStack } from "@/design-system/HStack";
-import { Text } from "@/design-system/Text";
-import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
-import { usePreferredName } from "@/hooks/usePreferredName";
 import { Avatar } from "@/components/Avatar";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import { Center } from "@/design-system/Center";
-import { translate } from "@/i18n";
 import { Button } from "@/design-system/Button/Button";
-import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
-import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
+import { Center } from "@/design-system/Center";
+import { AnimatedHStack } from "@/design-system/HStack";
+import { Text } from "@/design-system/Text";
 import { OnboardingNotificationRow } from "@/features/onboarding/components/onboarding-notification-row";
+import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
+import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
+import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
+import { usePreferredName } from "@/hooks/usePreferredName";
+import { translate } from "@/i18n";
+import { captureError } from "@/utils/capture-error";
+import { useAppTheme } from "@theme/useAppTheme";
+import {
+  AuthStatuses,
+  useAccountsStore,
+  useCurrentAccount,
+  useSettingsStore,
+} from "@/features/multi-inbox/multi-inbox.store";
+import { NavigationParamList } from "@/screens/Navigation/Navigation";
 
 const $screenContainer: ViewStyle = {
   flex: 1,
@@ -41,33 +39,21 @@ export function OnboardingNotificationsScreen(
   const setNotificationsSettings = useSettingsStore(
     (s) => s.setNotificationsSettings
   );
-  const setNotificationsPermissionStatus = useAppStore(
-    (s) => s.setNotificationsPermissionStatus
-  );
 
   const avatarUri = usePreferredAvatarUri(currentAccount);
 
   const displayName = usePreferredName(currentAccount);
 
-  const handleEnableNotifications = useCallback(async () => {
+  const setAuthStatus = useAccountsStore((s) => s.setAuthStatus);
+  const handleEnableNotifications = () => {
     try {
-      // Open popup
-      const newStatus = await requestPushNotificationsPermissions();
-      if (!newStatus) return;
-      if (newStatus === "denied" && Platform.OS === "android") {
-        // Android 13 always show denied first but sometimes
-        // it will still show the popup. If not, go to Settings!
-        Linking.openSettings();
-      } else {
-        setNotificationsSettings({ showNotificationScreen: false });
-      }
-      setNotificationsPermissionStatus(newStatus);
+      // TODO
     } catch (error) {
-      sentryTrackError(error);
+      captureError(error);
     } finally {
-      setAuthStatus("signedIn");
+      setAuthStatus(AuthStatuses.signedIn);
     }
-  }, [setNotificationsPermissionStatus, setNotificationsSettings]);
+  };
 
   const [isEssentialsEnabled, setIsEssentialsEnabled] = useState(true);
 

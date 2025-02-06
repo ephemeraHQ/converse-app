@@ -1,5 +1,4 @@
 import { config } from "@/config";
-import { getDbDirectory } from "@/data/db";
 import { captureError } from "@/utils/capture-error";
 import { getCleanEthAddress } from "@/utils/evm/address";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
@@ -97,17 +96,13 @@ async function buildXmtpClient({
       `[buildXmtpClient] Starting to build XMTP client with address: ${address} and inboxId: ${inboxId}`
     );
 
-    const [dbDirectory, dbEncryptionKey] = await Promise.all([
-      getDbDirectory(),
-      getDbEncryptionKey(),
-    ]);
+    const dbEncryptionKey = await getDbEncryptionKey();
 
     const client = await Client.build(
       address,
       {
         env: config.xmtpEnv,
         codecs,
-        dbDirectory,
         dbEncryptionKey,
       },
       inboxId

@@ -34,3 +34,13 @@ export function prefetchInboxIdQuery(args: { account: string }) {
 export function ensureInboxId(args: { account: string }) {
   return queryClient.ensureQueryData(getInboxIdQueryOptions(args));
 }
+
+export function setInboxIdQueryData(args: {
+  account: string;
+  inboxId: string;
+}) {
+  return queryClient.setQueryData(
+    getInboxIdQueryOptions(args).queryKey,
+    args.inboxId
+  );
+}

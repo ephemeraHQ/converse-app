@@ -16,6 +16,7 @@ import {
   CurrentSender,
   MultiInboxClientRestorationStates,
 } from "./multi-inbox-client.types";
+import { setInboxIdQueryData } from "@/queries/inbox-id-query";
 
 /**
  * Client for managing multiple XMTP inboxes and their lifecycle.
@@ -69,13 +70,10 @@ export class MultiInboxClient {
   } = {};
 
   private get xmtpClientInboxIdToAddressMap() {
-    return useAccountsStore.getState().senders.reduce(
-      (acc, sender) => {
-        acc[sender.xmtpInboxId] = sender.ethereumAddress;
-        return acc;
-      },
-      {} as { [inboxId: string]: string }
-    );
+    return useAccountsStore.getState().senders.reduce((acc, sender) => {
+      acc[sender.xmtpInboxId] = sender.ethereumAddress;
+      return acc;
+    }, {} as { [inboxId: string]: string });
   }
 
   private static _instance: MultiInboxClient;
@@ -268,6 +266,10 @@ export class MultiInboxClient {
         }
 
         const clientInboxId = xmtpInboxClient.inboxId;
+        setInboxIdQueryData({
+          account: smartWalletEthereumAddress,
+          inboxId: clientInboxId,
+        });
 
         useAccountsStore.getState().addSender({
           ethereumAddress: smartWalletEthereumAddress,
@@ -400,6 +402,11 @@ export class MultiInboxClient {
             );
 
             const clientInboxId = xmtpInboxClient.inboxId;
+            setInboxIdQueryData({
+              account: ethereumAddress,
+              inboxId: clientInboxId,
+            });
+
             useAccountsStore.getState().addSender({
               ethereumAddress,
               xmtpInboxId: clientInboxId,

@@ -1,6 +1,4 @@
 import { config } from "@/config";
-import { getDbDirectory } from "@/data/db";
-import { deleteLibXmtpDatabaseForInboxId } from "@utils/fileSystem";
 import { getDbEncryptionKey } from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import { Client, Signer as XmtpSigner } from "@xmtp/react-native-sdk";
@@ -20,10 +18,8 @@ const createXmtpClientFromXmtpSigner = async (
   onInstallationRevoked: () => Promise<void>,
   preAuthenticateToInboxCallback?: () => Promise<void>
 ) => {
-  const [dbDirectory, dbEncryptionKey] = await Promise.all([
-    getDbDirectory(),
-    getDbEncryptionKey(),
-  ]);
+  const dbEncryptionKey = await getDbEncryptionKey();
+
   logger.debug(
     "[createXmtpClientFromXmtpSigner] Getting database encryption key"
   );
@@ -31,7 +27,6 @@ const createXmtpClientFromXmtpSigner = async (
   const options = {
     env: config.xmtpEnv,
     enableV3: true,
-    dbDirectory: dbDirectory,
     dbEncryptionKey,
   };
   logger.debug(
@@ -74,14 +69,7 @@ const createXmtpClientFromXmtpSigner = async (
   const installationValid = await isClientInstallationValid(client);
 
   if (!installationValid) {
-    logger.warn(
-      "[createXmtpClientFromXmtpSigner] Installation is not valid, cleaning up"
-    );
-    await client.dropLocalDatabaseConnection();
-    await deleteLibXmtpDatabaseForInboxId(inboxId);
-    logger.debug(
-      "[createXmtpClientFromXmtpSigner] Calling onInstallationRevoked callback"
-    );
+    // TODO: Maybe need to clean up local database? Like client.deleteLocalDatabase();?
     onInstallationRevoked();
     return;
   }

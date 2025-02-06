@@ -1,7 +1,6 @@
 import { AnimatedCenter } from "@/design-system/Center";
 import { AnimatableText } from "@/design-system/Text/AnimatedText";
 import { ITextProps } from "@/design-system/Text/Text.props";
-import { debugBorder } from "@/utils/debug-style";
 import React, { memo, useEffect, useRef } from "react";
 import {
   cancelAnimation,
