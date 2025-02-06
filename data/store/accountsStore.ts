@@ -211,10 +211,13 @@ export const useCurrentSender = () => {
 };
 
 export function getCurrentAccount() {
-  const currentAccount = useAccountsStore.getState().currentAccount;
-  return currentAccount === TEMPORARY_ACCOUNT_NAME
-    ? undefined
-    : currentAccount.toLowerCase();
+  const currentAccount =
+    MultiInboxClient.instance.currentSender?.ethereumAddress;
+  return currentAccount;
+  // const currentAccount = useAccountsStore.getState().currentAccount;
+  // return currentAccount === TEMPORARY_ACCOUNT_NAME
+  //   ? undefined
+  //   : currentAccount.toLowerCase();
 }
 
 const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(

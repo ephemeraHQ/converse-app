@@ -122,7 +122,10 @@ export const searchProfilesForCurrentAccount = async (
   return parseResult.data || {};
 };
 
-const ClaimProfileResponseSchema = z.string();
+const ClaimProfileResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+});
 
 export const claimProfile = async ({
   account,
@@ -134,6 +137,7 @@ export const claimProfile = async ({
   const { data } = await api.post("/api/profile/username", profile, {
     headers: await getXmtpApiHeaders(account),
   });
+  logger.debug("[API PROFILES] claimProfile response:", data);
   const parseResult = ClaimProfileResponseSchema.safeParse(data);
   if (!parseResult.success) {
     logger.error(
@@ -141,10 +145,13 @@ export const claimProfile = async ({
       JSON.stringify(parseResult.error)
     );
   }
-  return parseResult.success ? parseResult.data : "";
+  return parseResult.success ? parseResult.data.success : false;
 };
 
-const UsernameValidResponseSchema = z.string();
+const UsernameValidResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+});
 
 export const checkUsernameValid = async ({
   address,
@@ -158,6 +165,7 @@ export const checkUsernameValid = async ({
   const { data } = await api.get("/api/profile/username/valid", {
     params: { address, username },
   });
+  logger.debug("[API PROFILES] checkUsernameValid response:", data);
   const parseResult = UsernameValidResponseSchema.safeParse(data);
   if (!parseResult.success) {
     logger.error(
@@ -165,7 +173,7 @@ export const checkUsernameValid = async ({
       JSON.stringify(parseResult.error)
     );
   }
-  return parseResult.success ? parseResult.data : "";
+  return parseResult.success ? parseResult.data.success : false;
 };
 
 const EnsResolveResponseSchema = z.object({
