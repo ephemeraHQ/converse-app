@@ -20,7 +20,6 @@ import { Snackbars } from "@components/Snackbar/Snackbars";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { useAppStateHandlers } from "@hooks/useAppStateHandlers";
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
@@ -34,6 +33,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
+import { Text } from "react-native";
 import {
   ReanimatedLogLevel,
   configureReanimatedLogger,
@@ -46,6 +46,8 @@ import { initSentry } from "./utils/sentry";
 import { saveApiURI } from "./utils/sharedData";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
+import logger from "./utils/logger";
+import { RELYING_PARTY } from "./features/onboarding/passkey.constants";
 
 preventSplashScreenAutoHide();
 
@@ -154,20 +156,21 @@ export default function AppWithProviders() {
 
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();
-
+  logger.debug(
+    `[AppWithProviders] Rendering: ${JSON.stringify({
+      privy: config.privy,
+    })}`
+  );
   return (
     <QueryClientProvider client={queryClient}>
       <PrivyProvider
         appId={config.privy.appId}
         clientId={config.privy.clientId}
-        // config={{
-        //   embedded: {
-        //     ethereum: {
-        // note(lustig): not working consistently and forks logic for new vs existing logins
-        //       createOnLogin: "all-users",
-        //     },
-        //   },
-        // }}
+        config={{
+          mfa: {
+            relyingParty: RELYING_PARTY,
+          },
+        }}
       >
         <SmartWalletsProvider>
           <ThirdwebProvider>

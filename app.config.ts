@@ -14,6 +14,11 @@ type EnvironmentConfig = {
     bundleIdentifier: string;
     associatedDomains: string[];
     googleServicesFile: string;
+    // infoPlist: {
+    //   NSAppTransportSecurity: {
+    //     NSAllowsArbitraryLoads: boolean;
+    //   };
+    // };
   };
   android: {
     package: string;
@@ -32,6 +37,11 @@ const settings: Record<Environment, EnvironmentConfig> = {
         "webcredentials:dev.converse.xyz",
       ],
       googleServicesFile: "./google-services/ios/development.plist",
+      // infoPlist: {
+      //   NSAppTransportSecurity: {
+      //     NSAllowsArbitraryLoads: true,
+      //   },
+      // },
     },
     android: {
       package: "com.converse.dev",
@@ -53,6 +63,11 @@ const settings: Record<Environment, EnvironmentConfig> = {
         "webcredentials:preview.converse.xyz",
       ],
       googleServicesFile: "./google-services/ios/preview.plist",
+      // infoPlist: {
+      //   NSAppTransportSecurity: {
+      //     NSAllowsArbitraryLoads: false,
+      //   },
+      // },
     },
     android: {
       package: "com.converse.preview",
@@ -74,6 +89,11 @@ const settings: Record<Environment, EnvironmentConfig> = {
         "webcredentials:converse.xyz",
       ],
       googleServicesFile: "./google-services/ios/production.plist",
+      // infoPlist: {
+      //   NSAppTransportSecurity: {
+      //     NSAllowsArbitraryLoads: false,
+      //   },
+      // },
     },
     android: {
       package: "com.converse.prod",
@@ -216,6 +236,7 @@ export default (): ExpoConfig => {
             // you may set `use_modular_headers!` globally in your Podfile,
             // or specify `:modular_headers => true` for particular dependencies"
             useFrameworks: "static",
+            deploymentTarget: "17.5",
           },
           android: {
             compileSdkVersion: 35,

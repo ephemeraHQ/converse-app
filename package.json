@@ -40,7 +40,7 @@
     "@noble/secp256k1": "^1.5.2",
     "@open-frames/proxy-types": "^0.2.3",
     "@peculiar/webcrypto": "^1.4.1",
-    "@privy-io/expo": "0.45.0-beta-20250203223139",
+    "@privy-io/expo": "^0.45.0",
     "@privy-io/expo-native-extensions": "^0.0.3",
     "@privy-io/react-auth": "^1.65.1",
     "@react-native-async-storage/async-storage": "1.23.1",

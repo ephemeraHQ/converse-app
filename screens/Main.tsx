@@ -36,6 +36,7 @@ import {
   useAccountsStore,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { MultiInboxClientRestorationStates } from "@/features/multi-inbox/multi-inbox-client.types";
+import logger from "@/utils/logger";
 const prefix = Linking.createURL("/");
 
 const linking: LinkingOptions<NavigationParamList> = {
@@ -133,13 +134,39 @@ export function useHasMultiInboxClientRestored() {
   };
 }
 
-const NavigationContent = () => {
-  const authStatus = useAccountsStore((state) => state.authStatus);
+export const useAuthStatus = () => {
+  const { user: privyUser, isReady } = usePrivy();
+  logger.debug(
+    `[useAuthStatus] Rendering: ${JSON.stringify({
+      privyUser,
+      isReady,
+    })}`
+  );
+  const { authStatus, setAuthStatus } = useAccountsStore(
+    useSelect(["authStatus", "setAuthStatus"])
+  );
+  useEffect(() => {
+    if (!isReady) {
+      return;
+    }
+    if (!privyUser) {
+      setAuthStatus(AuthStatuses.signedOut);
+    }
+  }, [isReady, privyUser, setAuthStatus]);
+
   const isCheckingAuth = authStatus === AuthStatuses.checking;
   const isSignedIn = authStatus === AuthStatuses.signedIn;
   const isSignedOut = authStatus === AuthStatuses.signedOut;
 
+  return { isCheckingAuth, isSignedIn, isSignedOut };
+};
+
+const NavigationContent = () => {
+  logger.debug("[NavigationContent] Rendering");
+
+  const { isCheckingAuth, isSignedIn, isSignedOut } = useAuthStatus();
   const { splashScreenHidden } = useAppStore(useSelect(["splashScreenHidden"]));
+  logger.debug({ splashScreenHidden, isCheckingAuth, isSignedIn, isSignedOut });
 
   // Uncomment to test design system components
   // return (
