@@ -1,4 +1,7 @@
-import { getAccountsList, useAccountsStore } from "@/data/store/accountsStore";
+import {
+  getAccountsList,
+  useAccountsStore,
+} from "@/features/multi-inbox/multi-inbox.store";
 import { useAppStore } from "@/data/store/appStore";
 import { useAppState } from "@/data/store/use-app-state-store";
 import { captureError } from "@/utils/capture-error";

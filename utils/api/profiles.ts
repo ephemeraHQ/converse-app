@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
+import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import type { ProfileType } from "@/features/onboarding/types/onboarding.types";
 import logger from "@/utils/logger";
 import type { InboxId } from "@xmtp/react-native-sdk";

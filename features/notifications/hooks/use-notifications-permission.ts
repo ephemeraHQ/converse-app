@@ -1,7 +1,7 @@
 import { Platform, Linking } from "react-native";
 import { useAppStore } from "@/data/store/appStore";
 import { requestPushNotificationsPermissions } from "../utils/requestPushNotificationsPermissions";
-import { useSettingsStore } from "@/data/store/accountsStore";
+import { useSettingsStore } from "@/features/multi-inbox/multi-inbox.store";
 
 type UseNotificationsPermissionReturn = {
   notificationsPermissionStatus: "granted" | "undetermined" | "denied";

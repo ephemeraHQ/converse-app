@@ -16,7 +16,7 @@ import {
 import { useRouter } from "@/navigation/useNavigation";
 import { needToShowNotificationsPermissions } from "../Onboarding.utils";
 import { setAuthStatus } from "@/data/store/authStore";
-import { useCurrentSender } from "@/data/store/accountsStore";
+import { useCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingCreateContactCard } from "@/features/onboarding/components/onboarding-contact-card";
 import { OnboardingContactCardThemeProvider } from "@/features/onboarding/components/onboarding-contact-card-provider";
 import logger from "@/utils/logger";
@@ -33,6 +33,7 @@ import { BottomSheetModal } from "@/design-system/BottomSheet/BottomSheetModal";
 import { useBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BottomSheetContentContainer } from "@/design-system/BottomSheet/BottomSheetContentContainer";
+import { usePrivy } from "@privy-io/expo";
 
 const $screenContainer: ViewStyle = {
   flex: 1,
@@ -54,17 +55,18 @@ const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 
 export function OnboardingContactCardScreen() {
   const router = useRouter();
+  const { user: privyUser } = usePrivy();
 
-  const address = MultiInboxClient.instance.currentSender?.ethereumAddress;
+  const currentSender = useCurrentSender();
   logger.debug(
-    `[OnboardingContactCardScreen] Current sender address: ${address}`
+    `[OnboardingContactCardScreen] Current sender address: ${currentSender?.ethereumAddress}`
   );
 
   const { themed, theme } = useAppTheme();
   const { animation } = theme;
 
   logger.debug(
-    `[OnboardingContactCardScreen] Initializing with address: ${address}`
+    `[OnboardingContactCardScreen] Initializing with address: ${currentSender?.ethereumAddress}`
   );
 
   const { profile, setProfile } = useProfile();
@@ -142,8 +144,6 @@ export function OnboardingContactCardScreen() {
     listBottomSheetRef.current?.present();
   }, [listBottomSheetRef]);
   const insets = useSafeAreaInsets();
-
-  const currentSender = useCurrentSender();
 
   return (
     <>

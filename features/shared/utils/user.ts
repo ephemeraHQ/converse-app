@@ -1,4 +1,4 @@
-import { currentAccount } from "@data/store/accountsStore";
+import { currentAccount } from "@/features/multi-inbox/multi-inbox.store";
 
 /**
  * Checks if the provided address belongs to the current user

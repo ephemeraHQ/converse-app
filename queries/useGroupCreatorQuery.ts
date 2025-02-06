@@ -1,7 +1,7 @@
 import { groupCreatorQueryKey } from "@/queries/QueryKeys";
 import { useQuery, queryOptions } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { currentAccount } from "../data/store/accountsStore";
+import { currentAccount } from "../features/multi-inbox/multi-inbox.store";
 import { getGroupQueryData } from "./useGroupQuery";
 
 const getGroupCreatorQueryOptions = (args: {

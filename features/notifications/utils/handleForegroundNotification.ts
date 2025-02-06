@@ -1,4 +1,4 @@
-import { currentAccount } from "@data/store/accountsStore";
+import { currentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { resetNotifications } from "./resetNotifications";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";

@@ -4,7 +4,7 @@ import { useDenyGroupMutation } from "@/features/consent/use-deny-group.mutation
 import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
 import { translate } from "@/i18n";
 import { useGroupCreatorQuery } from "@/queries/useGroupCreatorQuery";
-import { currentAccount } from "@data/store/accountsStore";
+import { currentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { getGroupQueryOptions, useGroupQuery } from "@queries/useGroupQuery";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";

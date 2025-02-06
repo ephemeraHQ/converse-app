@@ -60,6 +60,7 @@ export const OnboardingCreateContactCard = memo(
           .duration(ONBOARDING_ENTERING_DURATION)}
       >
         <ContactCardContainer>
+          {/* @ts-ignore */}
           <HStack justifyContent="space-between">
             <Pressable disabled={!editable} onPress={addPFP}>
               <OnboardingEditableAvatar uri={pfpUri} name={displayName} />

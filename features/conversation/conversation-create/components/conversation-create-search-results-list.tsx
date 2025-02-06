@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
+import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { EmptyState } from "@/design-system/empty-state";
 import { Loader } from "@/design-system/loader";

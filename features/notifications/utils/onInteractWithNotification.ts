@@ -1,5 +1,5 @@
 import logger from "@/utils/logger";
-import { useAccountsStore } from "@data/store/accountsStore";
+import { useAccountsStore } from "@/features/multi-inbox/multi-inbox.store";
 import { getTopicFromV3Id } from "@utils/groupUtils/groupId";
 import { navigate, navigateToTopic } from "@utils/navigation";
 import type { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";

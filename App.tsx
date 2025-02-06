@@ -10,7 +10,6 @@ const PrivyProvider = Privy.PrivyProvider;
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import {
-  Text,
   LogBox,
   Platform,
   StyleSheet,
@@ -30,7 +29,6 @@ import { useThemeProvider } from "@theme/useAppTheme";
 import { setupAppAttest } from "@utils/appCheck";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
-import logger from "@utils/logger";
 import "expo-dev-client";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -41,24 +39,17 @@ import {
   configureReanimatedLogger,
 } from "react-native-reanimated";
 import { ThirdwebProvider } from "thirdweb/react";
-import { base } from "viem/chains";
 import { config } from "./config";
-import {
-  TEMPORARY_ACCOUNT_NAME,
-  useAccountsStore,
-} from "./data/store/accountsStore";
+import { useAccountsStore } from "./features/multi-inbox/multi-inbox.store";
 import { setAuthStatus } from "./data/store/authStore";
 import "./features/notifications/utils";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
-import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
 import { saveApiURI } from "./utils/sharedData";
 import "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
 import { setupTopicNotificationsSubscriptions } from "@/features/notifications/utils/accountTopicSubscription";
-import { PrivyPlaygroundLoginScreen } from "./features/privy-playground/privy-playground-login.screen";
-import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -142,26 +133,6 @@ const App = () => {
   }, [showDebugMenu]);
 
   // For now we use persit with zustand to get the accounts when the app launch so here is okay to see if we're logged in or not
-  useEffect(() => {
-    const currentAccount = useAccountsStore.getState().currentAccount;
-    if (currentAccount && currentAccount !== TEMPORARY_ACCOUNT_NAME) {
-      setAuthStatus("signedIn");
-    } else {
-      setAuthStatus("signedOut");
-    }
-  }, []);
-
-  useAppStateHandlers({
-    onBackground() {
-      logger.debug("App is in background");
-    },
-    onForeground() {
-      logger.debug("App is in foreground");
-    },
-    onInactive() {
-      logger.debug("App is inactive");
-    },
-  });
 
   return (
     <View style={styles.safe}>

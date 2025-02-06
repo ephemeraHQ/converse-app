@@ -2,7 +2,7 @@ import logger from "@utils/logger";
 import { useCallback, useState } from "react";
 
 import { uploadFile } from "@utils/attachment/uploadFile";
-import { getCurrentAccount } from "@data/store/accountsStore";
+import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { compressAndResizeImage } from "@utils/media";
 import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
 import {

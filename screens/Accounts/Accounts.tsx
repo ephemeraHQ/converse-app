@@ -13,7 +13,7 @@ import { TableViewPicto } from "../../components/TableView/TableViewImage";
 import {
   useAccountsList,
   useAccountsStore,
-} from "../../data/store/accountsStore";
+} from "../../features/multi-inbox/multi-inbox.store";
 import { useRouter } from "../../navigation/useNavigation";
 import { NavigationParamList } from "../Navigation/Navigation";
 

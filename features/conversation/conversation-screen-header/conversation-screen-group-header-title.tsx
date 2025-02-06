@@ -8,7 +8,7 @@ import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { copyToClipboard } from "@/utils/clipboard";
 import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
 import { Avatar } from "@components/Avatar";
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { translate } from "@i18n";
 import { useRouter } from "@navigation/useNavigation";
 import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";

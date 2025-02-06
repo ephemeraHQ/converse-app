@@ -13,7 +13,7 @@ import {
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
 import React, { memo } from "react";
-import { Platform, useColorScheme, View, Text, Button } from "react-native";
+import { Platform, useColorScheme, Text, Button } from "react-native";
 import { IdleScreen } from "../IdleScreen";
 import { NewAccountCreateContactCardScreen } from "../NewAccount/new-account-create-contact-card-screen";
 import { NewAccountScreen } from "../NewAccount/new-account-screen";
@@ -22,7 +22,7 @@ import { WebviewPreviewNavParams } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { SignupWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
 import { usePrivy } from "@privy-io/expo";
-import { useSafeCurrentSender } from "@/data/store/accountsStore";
+import { useCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
 
@@ -96,7 +96,7 @@ export function IdleNavigation() {
 }
 
 const FakeScreen = () => {
-  const currentSender = useSafeCurrentSender();
+  const currentSender = useCurrentSender();
   console.log("currentSender", currentSender);
   const { logout: privyLogout } = usePrivy();
 
@@ -118,8 +118,6 @@ const FakeScreen = () => {
 };
 
 export function SignedInNavigation() {
-  const colorScheme = useColorScheme();
-
   return (
     <NativeStack.Navigator
       screenListeners={screenListeners("fullStackNavigation")}

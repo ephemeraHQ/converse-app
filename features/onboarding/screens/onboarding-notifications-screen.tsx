@@ -7,7 +7,7 @@ import { useAppTheme } from "@theme/useAppTheme";
 import {
   useCurrentAccount,
   useSettingsStore,
-} from "../../../data/store/accountsStore";
+} from "../../multi-inbox/multi-inbox.store";
 import { useAppStore } from "../../../data/store/appStore";
 import { setAuthStatus } from "../../../data/store/authStore";
 import { requestPushNotificationsPermissions } from "../../notifications/utils/requestPushNotificationsPermissions";

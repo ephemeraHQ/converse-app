@@ -103,39 +103,39 @@ export const PrivyPlaygroundUserScreen = () => {
                   "[initializeMultiInboxClient] MultiInboxClient instance created"
                 );
 
-                multiInboxClient.addInboxCreatedObserver(
-                  async ({ ethereumAddress, xmtpInbox }) => {
-                    logger.debug(
-                      `[multiInboxClient] Inbox created for address: ${ethereumAddress}`
-                    );
-                    logger.debug(
-                      `[multiInboxClient] Getting inbox state for address: ${ethereumAddress}`
-                    );
+                // multiInboxClient.addInboxCreatedObserver(
+                //   async ({ ethereumAddress, xmtpInbox }) => {
+                //     logger.debug(
+                //       `[multiInboxClient] Inbox created for address: ${ethereumAddress}`
+                //     );
+                //     logger.debug(
+                //       `[multiInboxClient] Getting inbox state for address: ${ethereumAddress}`
+                //     );
 
-                    try {
-                      const inboxState = await xmtpInbox.inboxState(true);
+                //     try {
+                //       const inboxState = await xmtpInbox.inboxState(true);
 
-                      logger.debug(
-                        `[multiInboxClient] Successfully retrieved inbox state for address: ${ethereumAddress}`
-                      );
-                      logger.debug(
-                        `[multiInboxClient] Inbox state: ${JSON.stringify(
-                          inboxState,
-                          null,
-                          2
-                        )}`
-                      );
-                      setXmtpClient(xmtpInbox);
-                      setClientState(inboxState);
-                    } catch (error) {
-                      logger.error(
-                        `[multiInboxClient] Error getting inbox state for address: ${ethereumAddress}`,
-                        error
-                      );
-                      throw error;
-                    }
-                  }
-                );
+                //       logger.debug(
+                //         `[multiInboxClient] Successfully retrieved inbox state for address: ${ethereumAddress}`
+                //       );
+                //       logger.debug(
+                //         `[multiInboxClient] Inbox state: ${JSON.stringify(
+                //           inboxState,
+                //           null,
+                //           2
+                //         )}`
+                //       );
+                //       setXmtpClient(xmtpInbox);
+                //       setClientState(inboxState);
+                //     } catch (error) {
+                //       logger.error(
+                //         `[multiInboxClient] Error getting inbox state for address: ${ethereumAddress}`,
+                //         error
+                //       );
+                //       throw error;
+                //     }
+                //   }
+                // );
 
                 logger.debug(
                   "[initializeMultiInboxClient] Inbox created observer added"
@@ -319,9 +319,8 @@ export const PrivyPlaygroundUserScreen = () => {
                             `[removeFromXmtp] Successfully removed wallet ${m.address} from XMTP client`
                           );
                           const refreshFromNetwork = false;
-                          const clientState = await xmtpClient.inboxState(
-                            refreshFromNetwork
-                          );
+                          const clientState =
+                            await xmtpClient.inboxState(refreshFromNetwork);
                           logger.debug(
                             `[removeFromXmtp] Client state: ${JSON.stringify(
                               clientState,
@@ -364,9 +363,8 @@ export const PrivyPlaygroundUserScreen = () => {
                             `[addToXmtp] Successfully added wallet ${m.address} to XMTP client`
                           );
                           const refreshFromNetwork = false;
-                          const clientState = await xmtpClient.inboxState(
-                            refreshFromNetwork
-                          );
+                          const clientState =
+                            await xmtpClient.inboxState(refreshFromNetwork);
 
                           logger.debug(
                             `[addToXmtp] Client state: ${JSON.stringify(

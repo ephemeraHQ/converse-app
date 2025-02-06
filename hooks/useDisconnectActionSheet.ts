@@ -7,7 +7,7 @@ import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSh
 import {
   useAccountsStore,
   useSettingsStore,
-} from "../data/store/accountsStore";
+} from "../features/multi-inbox/multi-inbox.store";
 import { usePrivy } from "@privy-io/expo";
 
 export const useDisconnectActionSheet = (account?: string) => {

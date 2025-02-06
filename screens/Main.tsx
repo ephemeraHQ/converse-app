@@ -1,7 +1,6 @@
 import { config } from "@/config";
 import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
 import { ProfileScreenConfig } from "@/features/profiles/profile.nav";
-import { useCheckCurrentInstallation } from "@/utils/xmtpRN/xmtp-client/xmtp-client-installations";
 import ActionSheetStateHandler from "@components/StateHandlers/ActionSheetStateHandler";
 import { HydrationStateHandler } from "@components/StateHandlers/HydrationStateHandler";
 import InitialStateHandler from "@components/StateHandlers/InitialStateHandler";
@@ -15,7 +14,7 @@ import { useThemeProvider } from "@theme/useAppTheme";
 import { converseNavigatorRef } from "@utils/navigation";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Platform, useColorScheme } from "react-native";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
 import {
@@ -30,15 +29,13 @@ import {
   getConverseInitialURL,
   getConverseStateFromPath,
 } from "./Navigation/navHelpers";
-import {
-  useEmbeddedEthereumWallet,
-  usePrivy,
-  usePrivyClient,
-} from "@privy-io/expo";
+import { usePrivy } from "@privy-io/expo";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
-import { useSmartWallets } from "@privy-io/expo/smart-wallets";
-import logger from "@/utils/logger";
-import { useActorRef } from "@xstate/react";
+import {
+  AuthStatuses,
+  useAccountsStore,
+} from "@/features/multi-inbox/multi-inbox.store";
+import { MultiInboxClientRestorationStates } from "@/features/multi-inbox/multi-inbox-client.types";
 const prefix = Linking.createURL("/");
 
 const linking: LinkingOptions<NavigationParamList> = {
@@ -61,8 +58,6 @@ const linking: LinkingOptions<NavigationParamList> = {
 };
 
 export default function Main() {
-  useCheckCurrentInstallation();
-
   const {
     themeScheme,
     navigationTheme,
@@ -91,65 +86,35 @@ export default function Main() {
   );
 }
 
-export function useIsXmtpInitialized() {
+export function useHasMultiInboxClientRestored() {
   const { user, isReady } = usePrivy();
-
-  const { client: privySmartWalletClient } = useSmartWallets();
-
-  // logger.debug(
-  //   `[useIsXmtpInitialized] Initial state - user: ${!!user}, privySmartWalletClient: ${!!privySmartWalletClient}, isReady: ${isReady}`
-  // );
-
-  const [isXmtpRestored, setIsXmtpRestored] = useState(
-    MultiInboxClient.instance.isRestored
-  );
-
-  // logger.debug(
-  //   `[useIsXmtpInitialized] Initial isXmtpRestored state: ${isXmtpRestored}`
-  // );
-
-  useEffect(() => {
-    // logger.debug("[useIsXmtpInitialized] Setting up XMTP initialized observer");
-    const unsubscribe = MultiInboxClient.instance.addXmtpInitializedObserver(
-      () => {
-        // logger.debug("[useIsXmtpInitialized] XMTP initialized, updating state");
-        setIsXmtpRestored(true);
-      }
-    );
-    return () => {
-      // logger.debug(
-      //   "[useIsXmtpInitialized] Cleaning up XMTP initialized observer"
-      // );
-      unsubscribe();
-    };
-  }, []);
 
   useEffect(() => {
     async function restoreXmtp() {
       try {
         if (!isReady) {
           // logger.debug(
-          //   "[useIsXmtpInitialized] Privy not ready yet, waiting..."
+          //   "[useHasMultiInboxClientRestored] Privy not ready yet, waiting..."
           // );
           return;
         }
 
         if (!user) {
           // logger.debug(
-          //   "[useIsXmtpInitialized] No user, skipping initialization"
+          //   "[useHasMultiInboxClientRestored] No user, skipping initialization"
           // );
           return;
         }
 
         // logger.debug(
-        //   `[useIsXmtpInitialized] Initializing XMTP with privySmartWalletClient: ${!!privySmartWalletClient}`
+        //   `[useHasMultiInboxClientRestored] Initializing XMTP with privySmartWalletClient: ${!!privySmartWalletClient}`
         // );
 
         await MultiInboxClient.instance.restorePreviouslyCreatedInboxesForDevice();
 
-        // logger.debug("[useIsXmtpInitialized] XMTP initialization completed");
+        // logger.debug("[useHasMultiInboxClientRestored] XMTP initialization completed");
       } catch (error) {
-        // logger.error("[useIsXmtpInitialized] Error initializing XMTP:", error);
+        // logger.error("[useHasMultiInboxClientRestored] Error initializing XMTP:", error);
         // We might want to handle this error more gracefully in the UI
       }
     }
@@ -157,38 +122,22 @@ export function useIsXmtpInitialized() {
     restoreXmtp();
   }, [isReady, user]);
 
+  const hasMultiInboxClientRestored = useAccountsStore(
+    (state) =>
+      state.multiInboxClientRestorationState ===
+      MultiInboxClientRestorationStates.restored
+  );
+
   return {
-    isXmtpRestored,
+    hasMultiInboxClientRestored,
   };
 }
 
 const NavigationContent = () => {
-  const { user, isReady } = usePrivy();
-  const isSignedInPrivy = isReady && user;
-  const { isXmtpRestored } = useIsXmtpInitialized();
-  const currentSender = MultiInboxClient.instance.currentSender;
-
-  // logger.debug(
-  //   `[NavigationContent] State - isReady: ${isReady}, isXmtpRestored: ${isXmtpRestored}, user: ${!!user}, currentSender: ${!!currentSender}`
-  // );
-
-  // User is signed out if they're ready but not signed in to Privy
-  const isSignedOut = (isReady && !isSignedInPrivy) || !currentSender;
-
-  // User is in idle state if they're not ready OR XMTP isn't initialized
-  const isIdle = !isReady;
-
-  // User is fully signed in if:
-  // 1. Privy is ready
-  // 2. User is signed into Privy
-  // 3. XMTP is initialized
-  // 4. We have a current sender
-  const isSignedIn =
-    isReady && isSignedInPrivy && isXmtpRestored && !!currentSender;
-
-  // logger.debug(
-  //   `[NavigationContent] Navigation state - isIdle: ${isIdle}, isSignedOut: ${isSignedOut}, isSignedIn: ${isSignedIn}`
-  // );
+  const authStatus = useAccountsStore((state) => state.authStatus);
+  const isCheckingAuth = authStatus === AuthStatuses.checking;
+  const isSignedIn = authStatus === AuthStatuses.signedIn;
+  const isSignedOut = authStatus === AuthStatuses.signedOut;
 
   const { splashScreenHidden } = useAppStore(useSelect(["splashScreenHidden"]));
 
@@ -203,14 +152,15 @@ const NavigationContent = () => {
     return null;
   }
 
-  if (isIdle) {
+  if (isCheckingAuth) {
     return <IdleNavigation />;
-  }
-  if (isSignedOut) {
+  } else if (isSignedOut) {
     return <SignedOutNavigation />;
+  } else if (isSignedIn) {
+    return <SignedInNavigation />;
+  } else {
+    throw new Error(`Invalid auth status: ${authStatus}`);
   }
-
-  return <SignedInNavigation />;
 };
 
 // Bunch of handlers. Not really react components

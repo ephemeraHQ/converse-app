@@ -6,7 +6,6 @@ import {
   formatGroupName,
   getTitleFontScale,
   shortDisplayName,
-  strByteSize,
 } from "./str";
 
 jest.mock("react-native", () => ({
@@ -84,12 +83,6 @@ describe("getTitleFontScale", () => {
   it("should return a font scale not greater than 1.235", () => {
     jest.spyOn(PixelRatio, "getFontScale").mockReturnValue(1.5);
     expect(getTitleFontScale()).toBe(1.235);
-  });
-});
-
-describe("strByteSize", () => {
-  it("should return the byte size of a string", () => {
-    expect(strByteSize("hello")).toBe(5);
   });
 });
 

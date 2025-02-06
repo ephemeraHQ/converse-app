@@ -18,7 +18,7 @@ import {
 } from "react-native";
 
 import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
-import { useAccountsStore } from "../data/store/accountsStore";
+import { useAccountsStore } from "../features/multi-inbox/multi-inbox.store";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { NotificationPermissionStatus } from "../features/notifications/types/Notifications.types";
@@ -51,6 +51,7 @@ export default function AccountSettingsButton({ account }: Props) {
   const { setCurrentAccount } = useAccountsStore(
     useSelect(["setCurrentAccount"])
   );
+
   const colorScheme = useColorScheme();
   const showDisconnectActionSheet = useDisconnectActionSheet(account);
 
@@ -58,20 +59,21 @@ export default function AccountSettingsButton({ account }: Props) {
     Keyboard.dismiss();
 
     const methods = {
-      [translate("your_profile_page")]: async () => {
+      ["Your profile page"]: async () => {
         if (account) {
           invalidateProfileSocialsQuery(account);
-          setCurrentAccount(account, false);
+          setCurrentAccount({ ethereumAddress: account });
+
           router.navigate("Chats");
           navigate("Profile", {
             address: account,
           });
         }
       },
-      [translate("copy_wallet_address")]: () => {
+      ["Copy wallet address"]: () => {
         Clipboard.setString(account || "");
       },
-      [translate("turn_on_notifications")]: () => {
+      ["Turn on notifications"]: () => {
         // @todo => move that to a helper because also used in Profile
         if (notificationsPermissionStatus === "denied") {
           if (Platform.OS === "android") {

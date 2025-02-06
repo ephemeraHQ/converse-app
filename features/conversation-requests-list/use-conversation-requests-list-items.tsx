@@ -1,5 +1,5 @@
 import { getV3SpamScore } from "@/data/helpers/conversations/spamScore";
-import { useCurrentAccount } from "@/data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { getMessageStringContent } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { getUnknownConsentConversationsQueryOptions } from "@/queries/conversations-unknown-consent-query";
 import { captureError } from "@/utils/capture-error";

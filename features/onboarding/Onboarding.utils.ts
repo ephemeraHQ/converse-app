@@ -1,6 +1,6 @@
 import { Platform } from "react-native";
 
-import { useSettingsStore } from "../../data/store/accountsStore";
+import { useSettingsStore } from "../multi-inbox/multi-inbox.store";
 import { useAppStore } from "../../data/store/appStore";
 import { getCurrentAccountPrimaryProfile } from "@utils/profile/getCurrentAccountPrimaryProfile";
 

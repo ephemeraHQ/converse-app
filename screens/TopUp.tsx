@@ -24,7 +24,7 @@ import TableView from "../components/TableView/TableView";
 import { TableViewPicto } from "../components/TableView/TableViewImage";
 import { config } from "../config";
 import { NavigationParamList } from "./Navigation/Navigation";
-import { useCurrentAccount } from "../data/store/accountsStore";
+import { useCurrentAccount } from "../features/multi-inbox/multi-inbox.store";
 import { translate } from "@/i18n";
 
 export default function TopUp({

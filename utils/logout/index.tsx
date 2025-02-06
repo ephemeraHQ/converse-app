@@ -14,7 +14,7 @@ import {
   getWalletStore,
   TEMPORARY_ACCOUNT_NAME,
   useAccountsStore,
-} from "@data/store/accountsStore";
+} from "@/features/multi-inbox/multi-inbox.store";
 import { setAuthStatus } from "@data/store/authStore";
 import { deleteSecureItemAsync } from "@utils/keychain";
 import {

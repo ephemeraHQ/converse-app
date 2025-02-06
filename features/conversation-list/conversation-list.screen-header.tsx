@@ -3,7 +3,7 @@ import {
   useAccountsList,
   useAccountsStore,
   useCurrentAccount,
-} from "@/data/store/accountsStore";
+} from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { HStack } from "@/design-system/HStack";
 import { HeaderAction } from "@/design-system/Header/HeaderAction";

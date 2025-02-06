@@ -1,5 +1,5 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { currentAccount } from "../data/store/accountsStore";
+import { currentAccount } from "../features/multi-inbox/multi-inbox.store";
 import { useAddToGroupMutation } from "../queries/useAddToGroupMutation";
 import { useGroupMembersQuery } from "../queries/useGroupMembersQuery";
 import { usePromoteToAdminMutation } from "../queries/usePromoteToAdminMutation";

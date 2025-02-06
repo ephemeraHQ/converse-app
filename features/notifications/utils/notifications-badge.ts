@@ -1,7 +1,7 @@
 import mmkv from "@/utils/mmkv";
 import { NOTIFICATION_BADGE_MMKV_KEY_PREFIX } from "../notifications-constants";
 import notifee from "@notifee/react-native";
-import { getAccountsList } from "@/data/store/accountsStore";
+import { getAccountsList } from "@/features/multi-inbox/multi-inbox.store";
 
 export const getNotificationBadge = (account: string): number => {
   const key = NOTIFICATION_BADGE_MMKV_KEY_PREFIX + account.toLowerCase();

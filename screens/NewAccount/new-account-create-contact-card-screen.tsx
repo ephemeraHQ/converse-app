@@ -13,13 +13,11 @@ import {
   ONBOARDING_ENTERING_DELAY,
   ONBOARDING_ENTERING_DURATION,
 } from "@/features/onboarding/constants/animation-constants";
-import { useRouter } from "@/navigation/useNavigation";
 import { Pressable } from "@/design-system/Pressable";
 import {
   useCurrentAccount,
   useSettingsStore,
-} from "@/data/store/accountsStore";
-import { formatRandoDisplayName } from "@/utils/str";
+} from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingCreateContactCard } from "@/features/onboarding/components/onboarding-contact-card";
 import { OnboardingContactCardThemeProvider } from "@/features/onboarding/components/onboarding-contact-card-provider";
 import logger from "@/utils/logger";
@@ -101,8 +99,6 @@ export const NewAccountCreateContactCardScreen = memo(
       useCreateOrUpdateProfileInfo();
 
     const { profile, setProfile } = useProfile();
-
-    const randoDisplayName = formatRandoDisplayName(address);
 
     useEffect(() => {
       if (errorMessage) {

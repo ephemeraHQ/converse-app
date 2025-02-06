@@ -7,7 +7,7 @@ import { VStack } from "@/design-system/VStack";
 import { memo, useState, useEffect } from "react";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Center } from "@/design-system/Center";
-import { Button, TextStyle, ViewStyle } from "react-native";
+import { Button, TextStyle, ViewStyle, Text } from "react-native";
 import {
   ONBOARDING_ENTERING_DELAY,
   ONBOARDING_ENTERING_DURATION,
@@ -42,7 +42,7 @@ const OnboardingWelcomeScreenContent = memo(
     const { themed, theme } = useAppTheme();
     const { animation } = theme;
 
-    const { logout: privyLogout } = usePrivy();
+    const { logout: privyLogout, user: privyUser } = usePrivy();
     const { signupWithPasskey } = useSignupWithPasskey();
     const navigation = useNavigation();
 
@@ -62,6 +62,7 @@ const OnboardingWelcomeScreenContent = memo(
             >
               Welcome to Convos
             </OnboardingSubtitle>
+            <Text>{JSON.stringify(privyUser, null, 2)}</Text>
             <OnboardingTitle
               style={themed($titleStyle)}
               entering={animation

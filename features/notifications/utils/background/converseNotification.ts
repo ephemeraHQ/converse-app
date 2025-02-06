@@ -1,5 +1,5 @@
 import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
-import { getAccountsList } from "@data/store/accountsStore";
+import { getAccountsList } from "@/features/multi-inbox/multi-inbox.store";
 import logger from "@utils/logger";
 import { z } from "zod";
 import {

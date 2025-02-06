@@ -9,7 +9,7 @@ import logger from "@utils/logger";
 import { Conversation } from "@xmtp/react-native-sdk";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { useEffect } from "react";
-import { useAccountsStore } from "@/data/store/accountsStore";
+import { useAccountsStore } from "@/features/multi-inbox/multi-inbox.store";
 
 export function HydrationStateHandler() {
   useEffect(() => {

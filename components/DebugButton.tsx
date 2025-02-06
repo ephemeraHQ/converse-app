@@ -14,31 +14,13 @@ import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 import { Alert, Platform } from "react-native";
 import { config } from "../config";
-import { useAccountsList, getAccountsList } from "../data/store/accountsStore";
+import {
+  useAccountsList,
+  getAccountsList,
+} from "../features/multi-inbox/multi-inbox.store";
 import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { logoutAccount } from "@/utils/logout";
-
-export const useDebugEnabled = (address?: string) => {
-  const accounts = useAccountsList();
-  if (address && debugEnabled(address)) {
-    return true;
-  }
-  for (const account of accounts) {
-    if (debugEnabled(account)) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
-export const debugEnabled = (address?: string) => {
-  return (
-    config.debugMenu ||
-    (address && config.debugAddresses.includes(address.toLowerCase()))
-  );
-};
 
 export async function delayToPropogate(): Promise<void> {
   // delay 1s to avoid clobbering
@@ -47,7 +29,6 @@ export async function delayToPropogate(): Promise<void> {
 
 const DebugButton = forwardRef((props, ref) => {
   const appVersion = Constants.expoConfig?.version;
-  const debugEnabled = useDebugEnabled();
   const buildNumber =
     Platform.OS === "ios"
       ? Constants.expoConfig?.ios?.buildNumber
@@ -105,7 +86,7 @@ const DebugButton = forwardRef((props, ref) => {
         },
       };
       const methods: any = {
-        ...(debugEnabled ? debugMethods : {}),
+        ...debugMethods,
         "Share current session logs": async () => {
           Share.open({
             title: translate("debug.converse_log_session"),

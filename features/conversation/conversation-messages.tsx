@@ -41,7 +41,7 @@ import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
 } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { MessageId } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import {

@@ -3,7 +3,7 @@ import { config } from "@/config";
 import {
   useCurrentAccount,
   useSettingsStore,
-} from "@/data/store/accountsStore";
+} from "@/features/multi-inbox/multi-inbox.store";
 import { Button } from "@/design-system/Button/Button";
 import { HStack } from "@/design-system/HStack";
 import { HeaderAction } from "@/design-system/Header/HeaderAction";

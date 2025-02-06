@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
+import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { userSearchQueryKey } from "@/queries/QueryKeys";
 import { searchProfilesForCurrentAccount } from "@/utils/api/profiles";
 import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";

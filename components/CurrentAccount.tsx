@@ -1,4 +1,4 @@
-import { currentAccount } from "@data/store/accountsStore";
+import { currentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { AvatarSizes } from "@styles/sizes";

@@ -2,7 +2,7 @@ import {
   getAccountsList,
   getCurrentAccount,
   useAccountsStore,
-} from "@/data/store/accountsStore";
+} from "@/features/multi-inbox/multi-inbox.store";
 import { useAppStore } from "@/data/store/appStore";
 import { createAllowedConsentConversationsQueryObserver } from "@/queries/conversations-allowed-consent-query";
 import { captureError } from "@/utils/capture-error";

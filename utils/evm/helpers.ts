@@ -1,7 +1,10 @@
 import { Wallet, ethers } from "ethers";
 import "@ethersproject/shims";
 
-import { currentAccount, getWalletStore } from "../../data/store/accountsStore";
+import {
+  currentAccount,
+  getWalletStore,
+} from "../../features/multi-inbox/multi-inbox.store";
 import { getSecureItemAsync } from "../keychain";
 
 import logger from "@utils/logger";

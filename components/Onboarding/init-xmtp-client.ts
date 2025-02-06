@@ -6,7 +6,7 @@ import {
   getSettingsStore,
   getWalletStore,
   useAccountsStore,
-} from "@data/store/accountsStore";
+} from "@/features/multi-inbox/multi-inbox.store";
 import { translate } from "@i18n";
 import { awaitableAlert } from "@utils/alert";
 import logger from "@utils/logger";

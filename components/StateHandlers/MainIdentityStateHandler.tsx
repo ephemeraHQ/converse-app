@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
 import { saveUser } from "@/utils/api/users";
 import { useEffect } from "react";

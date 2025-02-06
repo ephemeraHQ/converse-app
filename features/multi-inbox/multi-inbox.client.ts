@@ -11,11 +11,11 @@ import { base } from "thirdweb/chains";
 import { config } from "@/config";
 import { PrivySmartWalletClient } from "../embedded-wallets/embedded-wallet.types";
 import { codecs } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
-
-export type CurrentSender = {
-  ethereumAddress: string;
-  xmtpInboxId: string;
-};
+import { useAccountsStore } from "@/features/multi-inbox/multi-inbox.store";
+import {
+  CurrentSender,
+  MultiInboxClientRestorationStates,
+} from "./multi-inbox-client.types";
 
 /**
  * Client for managing multiple XMTP inboxes and their lifecycle.
@@ -35,29 +35,48 @@ export type CurrentSender = {
  * - Error handling and recovery patterns
  */
 export class MultiInboxClient {
-  private _isRestored = false;
-  private _isRestoring = false;
-
   get isRestored() {
-    return this._isRestored;
+    return (
+      useAccountsStore.getState().multiInboxClientRestorationState ===
+      MultiInboxClientRestorationStates.restored
+    );
   }
 
   get isRestoring() {
-    return this._isRestoring;
+    return (
+      useAccountsStore.getState().multiInboxClientRestorationState ===
+      MultiInboxClientRestorationStates.restoring
+    );
+  }
+
+  get isError() {
+    const state = useAccountsStore.getState().multiInboxClientRestorationState;
+    if (typeof state === "string") {
+      return false;
+    }
+    return !!state.error;
+  }
+
+  get isIdle() {
+    return (
+      useAccountsStore.getState().multiInboxClientRestorationState ===
+      MultiInboxClientRestorationStates.idle
+    );
   }
 
   private ethereumSmartWalletAddressToXmtpInboxClientMap: {
     [ethereumAddress: string]: XmtpClient;
   } = {};
-  private xmtpClientInboxIdToAddressMap: { [inboxId: string]: string } = {};
 
-  private inboxCreatedObserverCallbacks: InboxCreatedCallback[] = [];
-  private clientCreationErrorObserverCallbacks: ClientCreationErrorCallback[] =
-    [];
-  private currentInboxChangedObserverCallbacks: CurrentInboxChangedCallback[] =
-    [];
-  private xmtpInitializedObserverCallbacks: XmtpInitializedCallback[] = [];
-  private currentEthereumAddress: string | undefined;
+  private get xmtpClientInboxIdToAddressMap() {
+    return useAccountsStore.getState().senders.reduce(
+      (acc, sender) => {
+        acc[sender.xmtpInboxId] = sender.ethereumAddress;
+        return acc;
+      },
+      {} as { [inboxId: string]: string }
+    );
+  }
 
   private static _instance: MultiInboxClient;
 
@@ -69,24 +88,13 @@ export class MultiInboxClient {
   }
 
   get currentSender(): CurrentSender | undefined {
-    // logger.debug(
-    //   `[getCurrentSender] Getting current sender with ethereum address: ${this.currentEthereumAddress}`
-    // );
-    if (!this.currentEthereumAddress) {
-      // logger.debug("[getCurrentSender] No current ethereum address found");
-      return undefined;
-    }
-    const xmtpInboxId =
-      this.xmtpClientInboxIdToAddressMap[this.currentEthereumAddress];
-    logger.debug(`[getCurrentSender] Found xmtp inbox ID: ${xmtpInboxId}`);
-    return {
-      ethereumAddress: this.currentEthereumAddress,
-      xmtpInboxId,
-    };
+    return useAccountsStore.getState().currentSender;
   }
 
   get allEthereumAccountAddresses() {
-    return Object.keys(this.ethereumSmartWalletAddressToXmtpInboxClientMap);
+    return useAccountsStore
+      .getState()
+      .senders.map((sender) => sender.ethereumAddress);
   }
 
   private constructor() {}
@@ -203,7 +211,13 @@ export class MultiInboxClient {
         logger.debug(
           "[addInbox] No smart wallet client found, skipping inbox creation"
         );
-        this.xmtpInitializedObserverCallbacks.forEach((callback) => callback());
+        useAccountsStore
+          .getState()
+          .setMultiInboxClientRestorationState(
+            MultiInboxClientRestorationStates.error(
+              "[addInbox] No smart wallet client found, skipping inbox creation"
+            )
+          );
         return;
       }
 
@@ -211,7 +225,13 @@ export class MultiInboxClient {
         logger.debug(
           "[addInbox] Smart wallet address not available, skipping inbox creation"
         );
-        this.xmtpInitializedObserverCallbacks.forEach((callback) => callback());
+        useAccountsStore
+          .getState()
+          .setMultiInboxClientRestorationState(
+            MultiInboxClientRestorationStates.error(
+              "[addInbox] Smart wallet address not available, skipping inbox creation"
+            )
+          );
         return;
       }
 
@@ -240,24 +260,20 @@ export class MultiInboxClient {
             privySmartWalletClient
           );
 
-        if (!this.currentEthereumAddress) {
-          this.currentEthereumAddress = smartWalletEthereumAddress;
-          this.notifyCurrentInboxChanged({
+        if (!useAccountsStore.getState().currentSender) {
+          useAccountsStore.getState().setCurrentSender({
             ethereumAddress: smartWalletEthereumAddress,
             xmtpInboxId: xmtpInboxClient.inboxId,
           });
         }
 
-        // notify inbox created observers
-        this.inboxCreatedObserverCallbacks.forEach((callback) => {
-          callback({
-            ethereumAddress: smartWalletEthereumAddress,
-            restoredFromStorage: false,
-            xmtpInbox: xmtpInboxClient,
-          });
+        const clientInboxId = xmtpInboxClient.inboxId;
+
+        useAccountsStore.getState().addSender({
+          ethereumAddress: smartWalletEthereumAddress,
+          xmtpInboxId: clientInboxId,
         });
 
-        const clientInboxId = xmtpInboxClient.inboxId;
         const lowercaseClientLinkedEthereumAddress =
           xmtpInboxClient.address.toLowerCase();
 
@@ -274,13 +290,13 @@ export class MultiInboxClient {
           `[addInbox] Error creating XMTP inbox for address ${smartWalletEthereumAddress}:`,
           error
         );
-        // notify client creation error observers
-        this.clientCreationErrorObserverCallbacks.forEach((callback) => {
-          callback({
-            ethereumAddress: smartWalletEthereumAddress,
-            error: error as Error,
-          });
-        });
+        useAccountsStore
+          .getState()
+          .setMultiInboxClientRestorationState(
+            MultiInboxClientRestorationStates.error(
+              `[addInbox] Error creating XMTP inbox for address ${smartWalletEthereumAddress}:${error}`
+            )
+          );
         throw error;
       }
     } catch (error) {
@@ -331,11 +347,19 @@ export class MultiInboxClient {
       logger.debug(
         "[restorePreviouslyCreatedInboxesForDevice] No previously created inboxes found, skipping"
       );
-      this._isRestored = true;
+      useAccountsStore
+        .getState()
+        .setMultiInboxClientRestorationState(
+          MultiInboxClientRestorationStates.restored
+        );
       return;
     }
 
-    this._isRestoring = true;
+    useAccountsStore
+      .getState()
+      .setMultiInboxClientRestorationState(
+        MultiInboxClientRestorationStates.restoring
+      );
 
     try {
       logger.debug(
@@ -375,13 +399,10 @@ export class MultiInboxClient {
               inboxId
             );
 
-            // notify inbox created observers
-            this.inboxCreatedObserverCallbacks.forEach((callback) => {
-              callback({
-                ethereumAddress,
-                restoredFromStorage: true,
-                xmtpInbox: xmtpInboxClient,
-              });
+            const clientInboxId = xmtpInboxClient.inboxId;
+            useAccountsStore.getState().addSender({
+              ethereumAddress,
+              xmtpInboxId: clientInboxId,
             });
             return xmtpInboxClient;
           } catch (error) {
@@ -389,13 +410,13 @@ export class MultiInboxClient {
               `[restorePreviouslyCreatedInboxesForDevice] Error building XMTP inbox client for address ${ethereumAddress}:`,
               error
             );
-            // notify client creation error observers
-            this.clientCreationErrorObserverCallbacks.forEach((callback) => {
-              callback({
-                ethereumAddress,
-                error: error as Error,
-              });
-            });
+            useAccountsStore
+              .getState()
+              .setMultiInboxClientRestorationState(
+                MultiInboxClientRestorationStates.error(
+                  `[restorePreviouslyCreatedInboxesForDevice] Error building XMTP inbox client for address ${ethereumAddress}:${error}`
+                )
+              );
             throw error;
           }
         })
@@ -414,25 +435,29 @@ export class MultiInboxClient {
           lowercaseClientLinkedEthereumAddress;
       });
 
-      this._isRestored = true;
+      useAccountsStore
+        .getState()
+        .setMultiInboxClientRestorationState(
+          MultiInboxClientRestorationStates.restored
+        );
       logger.debug(
         "[restorePreviouslyCreatedInboxesForDevice] Successfully restored XMTP clients"
       );
-      this.xmtpInitializedObserverCallbacks.forEach((callback) => callback());
     } catch (error) {
       logger.error(
         "[restorePreviouslyCreatedInboxesForDevice] Error restoring XMTP clients: THROWING",
         error
       );
       // Reset initialization state on error
-      this._isRestored = false;
+      useAccountsStore
+        .getState()
+        .setMultiInboxClientRestorationState(
+          MultiInboxClientRestorationStates.error(
+            `[restorePreviouslyCreatedInboxesForDevice] Error restoring XMTP clients:${error}`
+          )
+        );
       this.clearAllCachedClients();
       throw error;
-    } finally {
-      logger.debug(
-        "[restorePreviouslyCreatedInboxesForDevice] Initialization completed"
-      );
-      this._isRestoring = false;
     }
   }
 
@@ -445,51 +470,6 @@ export class MultiInboxClient {
     return this.ethereumSmartWalletAddressToXmtpInboxClientMap[
       ethereumAddress.toLowerCase()
     ];
-  }
-
-  addInboxCreatedObserver(callback: InboxCreatedCallback) {
-    this.inboxCreatedObserverCallbacks.push(callback);
-    return () => {
-      this.inboxCreatedObserverCallbacks =
-        this.inboxCreatedObserverCallbacks.filter((cb) => cb !== callback);
-    };
-  }
-
-  addXmtpInitializedObserver(callback: XmtpInitializedCallback) {
-    this.xmtpInitializedObserverCallbacks.push(callback);
-    return () => {
-      this.xmtpInitializedObserverCallbacks =
-        this.xmtpInitializedObserverCallbacks.filter((cb) => cb !== callback);
-    };
-  }
-
-  addClientCreationErrorObserver(callback: ClientCreationErrorCallback) {
-    this.clientCreationErrorObserverCallbacks.push(callback);
-    return () => {
-      this.clientCreationErrorObserverCallbacks =
-        this.clientCreationErrorObserverCallbacks.filter(
-          (cb) => cb !== callback
-        );
-    };
-  }
-
-  addCurrentInboxChangedObserver(callback: CurrentInboxChangedCallback) {
-    this.currentInboxChangedObserverCallbacks.push(callback);
-    return () => {
-      this.currentInboxChangedObserverCallbacks =
-        this.currentInboxChangedObserverCallbacks.filter(
-          (cb) => cb !== callback
-        );
-    };
-  }
-
-  private notifyCurrentInboxChanged(params: {
-    ethereumAddress: string;
-    xmtpInboxId: string;
-  }) {
-    this.currentInboxChangedObserverCallbacks.forEach((callback) => {
-      callback(params);
-    });
   }
 
   private destroyLocalDatabases() {
@@ -620,23 +600,19 @@ export class MultiInboxClient {
       throw error;
     }
   }
+
+  private async isClientInstallationValid(client: XmtpClient) {
+    const inboxState = await client.inboxState(true);
+    const installationsIds = inboxState.installations.map((i) => i.id);
+    logger.debug(
+      `Current installation id : ${client.installationId} - All installation ids : ${installationsIds}`
+    );
+    if (!installationsIds.includes(client.installationId)) {
+      logger.warn(`Installation ${client.installationId} has been revoked`);
+      return false;
+    } else {
+      logger.debug(`Installation ${client.installationId} is not revoked`);
+      return true;
+    }
+  }
 }
-
-type InboxCreatedCallback = (params: {
-  // @deprecated - use xmtpInbox instead
-  xmtpInbox: XmtpClient;
-  ethereumAddress: string;
-  restoredFromStorage: boolean;
-}) => void;
-
-type ClientCreationErrorCallback = (error: {
-  ethereumAddress: string;
-  error: Error;
-}) => void;
-
-type CurrentInboxChangedCallback = (params: {
-  ethereumAddress: string;
-  xmtpInboxId: string;
-}) => void;
-
-type XmtpInitializedCallback = () => void;

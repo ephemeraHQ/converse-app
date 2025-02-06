@@ -1,7 +1,7 @@
 import {
   getCurrentAccount,
   useCurrentAccount,
-} from "@/data/store/accountsStore";
+} from "@/features/multi-inbox/multi-inbox.store";
 import { getConversationQueryData } from "@/queries/conversation-query";
 import {
   addConversationToAllowedConsentConversationsQuery,
