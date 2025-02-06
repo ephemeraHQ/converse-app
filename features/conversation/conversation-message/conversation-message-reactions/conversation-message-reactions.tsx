@@ -28,13 +28,18 @@ export const ConversationMessageReactions = memo(
   function ConversationMessageReactions() {
     const { themed, theme } = useAppTheme();
 
-    const { fromMe } = useMessageContextStoreContext(useSelect(["fromMe"]));
+    const { fromMe, messageId } = useMessageContextStoreContext(
+      useSelect(["fromMe", "messageId"])
+    );
 
     const rolledUpReactions = useMessageReactionsRolledUp();
 
     const handlePressContainer = useCallback(() => {
-      openMessageReactionsDrawer(rolledUpReactions);
-    }, [rolledUpReactions]);
+      openMessageReactionsDrawer({
+        ...rolledUpReactions,
+        messageId,
+      });
+    }, [rolledUpReactions, messageId]);
 
     if (rolledUpReactions.totalCount === 0) {
       return null;
@@ -169,8 +174,9 @@ function useMessageReactionsRolledUp() {
       userReacted,
       preview,
       detailed,
+      messageId,
     };
-  }, [reactionsBySender, membersSocials]);
+  }, [reactionsBySender, membersSocials, messageId]);
 }
 
 const $reactionButton: ThemedStyle<ViewStyle> = ({

@@ -4,15 +4,17 @@ import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader"
 import { BottomSheet } from "@design-system/BottomSheet/BottomSheet";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
+import { TouchableHighlight } from "@design-system/touchable-highlight";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { memo, useCallback, useState, useRef, useEffect } from "react";
 import { TextStyle, ViewStyle, Modal, Platform } from "react-native";
-import { TouchableHighlight } from "@design-system/touchable-highlight";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
+import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation.store-context";
 
 import {
   closeMessageReactionsDrawer,
@@ -25,6 +27,8 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
   const rolledUpReactions = useMessageReactionsRolledUpReactions();
   const bottomSheetRef = useRef<BottomSheetMethods>(null);
   const [filterReactions, setFilterReactions] = useState<string | null>(null);
+  const topic = useCurrentConversationTopicSafe();
+  const removeReactionOnMessage = useRemoveReactionOnMessage({ topic });
 
   // Centralized dismiss handler that:
   // 1. Closes the bottom sheet UI component
@@ -36,6 +40,19 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
     closeMessageReactionsDrawer();
     setFilterReactions(null);
   }, []);
+
+  const handleRemoveReaction = useCallback(
+    ({ content }: { content: string }) => {
+      // Get the first reaction's messageId - all reactions in the drawer are for the same message
+      const messageId = rolledUpReactions.messageId;
+      removeReactionOnMessage({
+        messageId,
+        emoji: content,
+      });
+      handleDismiss();
+    },
+    [rolledUpReactions.messageId, removeReactionOnMessage, handleDismiss]
+  );
 
   const isVisible = !!rolledUpReactions.totalCount;
 
@@ -133,20 +150,41 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
             data={rolledUpReactions.detailed.filter(
               (item) => !filterReactions || item.content === filterReactions
             )}
-            renderItem={({ item, index }) => (
-              <HStack
-                key={`${item.content}-${item.reactor.address}-${index}`}
-                style={themed($reaction)}
-              >
-                <Avatar
-                  size={theme.avatarSize.md}
-                  uri={item.reactor.avatar}
-                  name={item.reactor.userName}
-                />
-                <Text style={themed($userName)}>{item.reactor.userName}</Text>
-                <Text style={themed($reactionContent)}>{item.content}</Text>
-              </HStack>
-            )}
+            renderItem={({ item, index }) => {
+              const isOwnReaction = item.isOwnReaction;
+              const ReactionContainer = isOwnReaction
+                ? TouchableHighlight
+                : HStack;
+              const containerProps = isOwnReaction
+                ? {
+                    onPress: () =>
+                      handleRemoveReaction({
+                        content: item.content,
+                      }),
+                    underlayColor: "transparent",
+                    activeOpacity: 0.75,
+                  }
+                : {};
+
+              return (
+                <ReactionContainer
+                  {...containerProps}
+                  style={themed($reaction)}
+                >
+                  <HStack style={themed($reactionInner)}>
+                    <Avatar
+                      size={theme.avatarSize.md}
+                      uri={item.reactor.avatar}
+                      name={item.reactor.userName}
+                    />
+                    <Text style={themed($userName)}>
+                      {item.reactor.userName}
+                    </Text>
+                    <Text style={themed($reactionContent)}>{item.content}</Text>
+                  </HStack>
+                </ReactionContainer>
+              );
+            }}
             keyExtractor={(item, index) =>
               `${item.content}-${item.reactor.address}-${index}`
             }
@@ -180,8 +218,12 @@ const $reaction: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   display: "flex",
   paddingVertical: spacing.xs,
   paddingHorizontal: spacing.lg,
+});
+
+const $reactionInner: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
   gap: spacing.xs,
+  flex: 1,
 });
 
 const $userName: ThemedStyle<TextStyle> = ({ spacing, colors }) => ({

@@ -1,25 +1,14 @@
-import { RolledUpReactions } from "../conversation-message-reactions.types";
 import {
   resetMessageReactionsStore,
   useMessageReactionsStore,
-  IMessageReactionsStore,
 } from "./conversation-message-reaction-drawer.store";
+import { RolledUpReactions } from "../conversation-message-reactions.types";
 
-export function openMessageReactionsDrawer(
-  rolledUpReactions: RolledUpReactions
-) {
-  const store = useMessageReactionsStore.getState();
-  store.setRolledUpReactions(rolledUpReactions);
+export function openMessageReactionsDrawer(reactions: RolledUpReactions) {
+  useMessageReactionsStore.getState().setRolledUpReactions(reactions);
 }
 
-export function closeMessageReactionsDrawer(arg?: { resetStore?: boolean }) {
-  const { resetStore = true } = arg ?? {};
-  if (resetStore) {
-    resetMessageReactionsStore();
-  }
-}
-
-export function resetMessageReactionsDrawer() {
+export function closeMessageReactionsDrawer() {
   resetMessageReactionsStore();
 }
 
