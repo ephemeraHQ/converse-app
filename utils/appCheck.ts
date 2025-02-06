@@ -4,6 +4,7 @@
 import { config } from "@/config";
 import { firebase } from "@react-native-firebase/app-check";
 import logger from "./logger";
+
 const appCheck = firebase.appCheck();
 
 export const tryGetAppCheckToken = async () => {
@@ -24,7 +25,16 @@ export const tryGetAppCheckToken = async () => {
 };
 
 export async function setupAppAttest() {
+  // Ensure Firebase is initialized before using it
+  // if (!firebase.apps.length) {
+  //   firebase.initializeApp({
+  //     appId: config.FIREBASE_APP_ID,
+  //     projectId: config.FIREBASE_PROJECT_ID,
+  //   });
+  // }
+
   const rnfbProvider = appCheck.newReactNativeFirebaseAppCheckProvider();
+
   rnfbProvider.configure({
     android: {
       provider: __DEV__ ? "debug" : "playIntegrity",

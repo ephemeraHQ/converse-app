@@ -1,4 +1,3 @@
-import { config, getConfig } from "@/config";
 import Constants from "expo-constants";
 import path from "path";
 import { Platform } from "react-native";
@@ -154,21 +153,5 @@ export const streamLogger = {
   error: (...args: Parameters<logMethodType>) =>
     logger.error("[STREAM]", ...args),
 };
-
-export function logJson({
-  json,
-  msg,
-  logLevel = "info",
-}: {
-  json: unknown;
-  msg?: string;
-  logLevel?: LogLevel;
-}) {
-  logger[logLevel](
-    msg
-      ? `${msg}: ${JSON.stringify(json, null, 2)}`
-      : JSON.stringify(json, null, 2)
-  );
-}
 
 export default logger;

@@ -6719,15 +6719,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@notifee/react-native@npm:^9.1.3":
-  version: 9.1.3
-  resolution: "@notifee/react-native@npm:9.1.3"
-  peerDependencies:
-    react-native: "*"
-  checksum: 10c0/32d0802d43cc49c56eaf39a7465162408ade7707b3a6f171bfd50e68063ac4a27ab45aa249e238cb38aee8660486f8b0edd602e916330b19259ba43591d9994f
-  languageName: node
-  linkType: hard
-
 "@npmcli/agent@npm:^3.0.0":
   version: 3.0.0
   resolution: "@npmcli/agent@npm:3.0.0"
@@ -14417,7 +14408,6 @@ __metadata:
     "@material-symbols/svg-400": "npm:^0.5.0"
     "@mfellner/react-native-fast-create-hash": "npm:^1.0.0-alpha.2"
     "@noble/secp256k1": "npm:^1.5.2"
-    "@notifee/react-native": "npm:^9.1.3"
     "@open-frames/proxy-types": "npm:^0.2.3"
     "@peculiar/webcrypto": "npm:^1.4.1"
     "@privy-io/expo": "npm:^0.39.0"

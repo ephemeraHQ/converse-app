@@ -10,9 +10,10 @@ type EnvironmentConfig = {
   appDomainGetConverse: string;
   appName: string;
   icon: string;
-  googleServicesFile: string;
   ios: {
     bundleIdentifier: string;
+    associatedDomains: string[];
+    googleServicesFile: string;
   };
   android: {
     package: string;
@@ -25,52 +26,64 @@ const settings: Record<Environment, EnvironmentConfig> = {
     scheme: "converse-dev",
     ios: {
       bundleIdentifier: "com.converse.dev",
+      associatedDomains: [
+        "applinks:dev.converse.xyz",
+        "applinks:dev.getconverse.app",
+        "webcredentials:dev.converse.xyz",
+      ],
+      googleServicesFile: "./google-services/ios/development.plist",
     },
     android: {
       package: "com.converse.dev",
-      googleServicesFile: "./scripts/build/android/google-services/dev.json",
+      googleServicesFile: "./google-services/android/development.json",
     },
     androidPackage: "com.converse.dev",
     appDomainConverse: "dev.converse.xyz",
     appDomainGetConverse: "dev.getconverse.app",
     appName: "Converse DEV",
     icon: "./assets/icon-preview.png",
-    googleServicesFile: "./scripts/build/android/google-services/dev.json",
   },
   preview: {
     scheme: "converse-preview",
     ios: {
       bundleIdentifier: "com.converse.preview",
+      associatedDomains: [
+        "applinks:preview.converse.xyz",
+        "applinks:preview.getconverse.app",
+        "webcredentials:preview.converse.xyz",
+      ],
+      googleServicesFile: "./google-services/ios/preview.plist",
     },
     android: {
       package: "com.converse.preview",
-      googleServicesFile:
-        "./scripts/build/android/google-services/preview.json",
+      googleServicesFile: "./google-services/android/preview.json",
     },
     androidPackage: "com.converse.preview",
     appDomainConverse: "preview.converse.xyz",
     appDomainGetConverse: "preview.getconverse.app",
     appName: "Converse PREVIEW",
     icon: "./assets/icon-preview.png",
-    googleServicesFile: "./scripts/build/android/google-services/preview.json",
   },
   production: {
     scheme: "converse",
     ios: {
       bundleIdentifier: "com.converse.native",
+      associatedDomains: [
+        "applinks:converse.xyz",
+        "applinks:getconverse.app",
+        "webcredentials:converse.xyz",
+      ],
+      googleServicesFile: "./google-services/ios/production.plist",
     },
     android: {
       package: "com.converse.prod",
-      googleServicesFile:
-        "./scripts/build/android/google-services/production.json",
+      googleServicesFile: "./google-services/android/production.json",
     },
     androidPackage: "com.converse.prod",
     appDomainConverse: "converse.xyz",
     appDomainGetConverse: "getconverse.app",
     appName: "Converse",
     icon: "./assets/icon.png",
-    googleServicesFile:
-      "./scripts/build/android/google-services/production.json",
   },
 };
 
@@ -89,17 +102,10 @@ export default (): ExpoConfig => {
     userInterfaceStyle: "automatic",
     version: version,
     assetBundlePatterns: ["**/*"],
+    runtimeVersion: version,
     updates: {
       fallbackToCacheTimeout: 0,
       url: "https://u.expo.dev/49a65fae-3895-4487-8e8a-5bd8bee3a401",
-    },
-    runtimeVersion: version,
-    ios: {
-      // bundleIdentifier: config.ios.bundleIdentifier, // Not needed since we have ios folder already specifying it
-      supportsTablet: true,
-      config: {
-        usesNonExemptEncryption: false,
-      },
     },
     extra: {
       expoEnv,
@@ -107,24 +113,31 @@ export default (): ExpoConfig => {
         projectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
       },
     },
+    ios: {
+      bundleIdentifier: config.ios.bundleIdentifier,
+      supportsTablet: true,
+      config: {
+        usesNonExemptEncryption: false,
+      },
+      associatedDomains: config.ios.associatedDomains,
+      googleServicesFile: config.ios.googleServicesFile,
+      infoPlist: {
+        LSApplicationQueriesSchemes: [
+          "cbwallet",
+          "ledgerlive",
+          "rainbow",
+          "metamask",
+          "trust",
+          "uniswap",
+          "zerion",
+          "exodus",
+          "oneinch",
+        ],
+      },
+    },
     android: {
       package: config.android.package,
       googleServicesFile: config.android.googleServicesFile,
-      permissions: [
-        "INTERNET",
-        "READ_EXTERNAL_STORAGE",
-        "SYSTEM_ALERT_WINDOW",
-        "VIBRATE",
-        "POST_NOTIFICATIONS",
-        "READ_CONTACTS",
-        "RECEIVE_BOOT_COMPLETED",
-        "WRITE_EXTERNAL_STORAGE",
-        "WAKE_LOCK",
-        "USE_FINGERPRINT",
-        "USE_BIOMETRIC",
-        "READ_MEDIA_IMAGES",
-        "READ_MEDIA_VIDEO",
-      ],
       intentFilters: [
         {
           action: "VIEW",
@@ -191,9 +204,19 @@ export default (): ExpoConfig => {
       ],
     },
     plugins: [
+      ["expo-notifications"],
+      ["expo-local-authentication"],
       [
         "expo-build-properties",
         {
+          ios: {
+            // To fix error "The Swift pod `FirebaseCoreInternal` depends upon `GoogleUtilities`,
+            // which does not define modules. To opt into those targets generating module maps
+            // (which is necessary to import them from Swift when building as static libraries),
+            // you may set `use_modular_headers!` globally in your Podfile,
+            // or specify `:modular_headers => true` for particular dependencies"
+            useFrameworks: "static",
+          },
           android: {
             compileSdkVersion: 35,
             targetSdkVersion: 34,
@@ -273,6 +296,15 @@ export default (): ExpoConfig => {
           },
         },
       ],
+      [
+        "expo-image-picker",
+        {
+          photosPermission:
+            "We need this so that you can share photos from your library.",
+          cameraPermission:
+            "We need this so that you can take photos to share.",
+        },
+      ],
       "expo-secure-store",
       [
         "expo-splash-screen",
@@ -283,10 +315,8 @@ export default (): ExpoConfig => {
             image: "./assets/splash-dark.png",
             backgroundColor: "#000000",
           },
-          imageWidth: 300,
         },
       ],
-      "expo-secure-store",
       [
         "@sentry/react-native/expo",
         {
@@ -295,10 +325,8 @@ export default (): ExpoConfig => {
           url: "https://sentry.io/",
         },
       ],
+      ["@react-native-firebase/app"],
       ["@react-native-firebase/app-check"],
-      "./scripts/build/android/notifeeExpoPlugin.js", // See https://github.com/invertase/notifee/issues/350
-      "./scripts/build/android/androidDependenciesExpoPlugin.js", // Handle some conflicting dependencies manually
-      "./scripts/build/android/buildGradleProperties.js", // Increase memory for building android in EAS
     ],
   };
 };
