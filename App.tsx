@@ -47,15 +47,15 @@ import {
   useAccountsStore,
 } from "./data/store/accountsStore";
 import { setAuthStatus } from "./data/store/authStore";
-import "./features/notifications/utils";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
 import { saveApiURI } from "./utils/sharedData";
-import "./utils/splash/splash";
+import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
-import { setupTopicNotificationsSubscriptions } from "@/features/notifications/utils/accountTopicSubscription";
+
+preventSplashScreenAutoHide();
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
@@ -105,7 +105,6 @@ const App = () => {
   useEffect(() => {
     setupAppAttest();
     setupStreamingSubscriptions();
-    setupTopicNotificationsSubscriptions();
   }, []);
 
   useCoinbaseWalletListener(true, coinbaseUrl);

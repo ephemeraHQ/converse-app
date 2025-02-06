@@ -85,9 +85,11 @@ export function usePrivySmartWalletConnection(args: {
             return smartAccount.signMessage({ message });
           },
         };
+        console.log("1");
         await initXmtpClientFromViemAccount({
           account: viemAccount,
         });
+        console.log("2");
         onStatusChange("Xmtp initialized");
         onConnectionDone();
       } catch (error) {

@@ -3,6 +3,7 @@ const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 
 const defaultConfig = getSentryExpoConfig(__dirname);
 
+// Privy requires this https://docs.privy.io/guide/expo/setup/passkey#_1-set-up-your-build-configuration
 const resolveRequestWithPackageExports = (context, moduleName, platform) => {
   if (moduleName.startsWith("@privy-io/")) {
     const ctx = {

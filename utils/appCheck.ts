@@ -4,6 +4,7 @@
 import { config } from "@/config";
 import { firebase } from "@react-native-firebase/app-check";
 import logger from "./logger";
+
 const appCheck = firebase.appCheck();
 
 export const tryGetAppCheckToken = async () => {
@@ -25,6 +26,7 @@ export const tryGetAppCheckToken = async () => {
 
 export async function setupAppAttest() {
   const rnfbProvider = appCheck.newReactNativeFirebaseAppCheckProvider();
+
   rnfbProvider.configure({
     android: {
       provider: __DEV__ ? "debug" : "playIntegrity",

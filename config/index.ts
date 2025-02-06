@@ -1,12 +1,12 @@
 import { isDev, isPreview } from "@/utils/getEnv";
-import { devConfig } from "./dev";
-import { prodConfig } from "./prod";
+import { developmentConfig } from "./development";
+import { productionConfig } from "./production";
 import { previewConfig } from "./preview";
 
 export const getConfig = () => {
-  if (isDev) return devConfig;
+  if (isDev) return developmentConfig;
   if (isPreview) return previewConfig;
-  return prodConfig;
+  return productionConfig;
 };
 
 export const config = getConfig();

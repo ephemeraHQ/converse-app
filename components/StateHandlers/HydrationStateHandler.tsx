@@ -1,4 +1,3 @@
-import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
 import { prefetchConversationMetadataQuery } from "@/queries/conversation-metadata-query";
 import { fetchAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
 import { ensureInboxId } from "@/queries/inbox-id-query";
@@ -35,9 +34,7 @@ export default function HydrationStateHandler() {
           })
         );
       } catch (error) {
-        logger.debug(
-          `[Hydration] Error during inboxId initialization: ${error.message}`
-        );
+        captureError(error);
       }
 
       // Non critical queries
@@ -53,10 +50,6 @@ export default function HydrationStateHandler() {
                 conversation.topic
               ).catch(captureError);
             }
-            subscribeToNotifications({
-              conversations,
-              account,
-            });
           })
           .catch(captureError);
       }

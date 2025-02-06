@@ -36,6 +36,9 @@ ios/Converse.xcworkspace/xcshareddata/swiftpm/Package.resolved
 # Android
 /android/
 
+# iOS
+/ios/
+
 # System files
 .DS_Store
 *.log
