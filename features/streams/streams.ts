@@ -51,8 +51,10 @@ export function setupStreamingSubscriptions() {
       return;
     }
 
-    const previousAccounts = previousState?.accounts || [];
-    const currentAccounts = state.accounts || [];
+    const previousAccounts =
+      previousState?.senders?.map((sender) => sender.ethereumAddress) || [];
+    const currentAccounts =
+      state.senders?.map((sender) => sender.ethereumAddress) || [];
 
     // Handle new accounts
     const newAccounts = currentAccounts.filter(

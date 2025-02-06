@@ -6,12 +6,11 @@ import {
   getXmtpClient,
 } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import {
-  TEMPORARY_ACCOUNT_NAME,
+  AuthStatuses,
   getAccountsList,
   getWalletStore,
   useAccountsStore,
 } from "@/features/multi-inbox/multi-inbox.store";
-import { setAuthStatus } from "@data/store/authStore";
 import { StackActions } from "@react-navigation/native";
 import { deleteSecureItemAsync } from "@utils/keychain";
 import {
@@ -164,16 +163,13 @@ export async function logoutAccount({ account }: { account: string }) {
   deleteXmtpClient({ address: account });
   delete secureMmkvByAccount[account];
 
-  // Handle account switching and store cleanup
-  useAccountsStore.getState().removeAccount(account);
   const remainingAccounts = getAccountsList();
-  const setCurrentAccount = useAccountsStore.getState().setCurrentAccount;
+  const { setCurrentAccount, setAuthStatus } = useAccountsStore.getState();
 
   if (remainingAccounts.length > 0) {
-    setCurrentAccount(remainingAccounts[0], false);
+    setCurrentAccount({ ethereumAddress: remainingAccounts[0] });
   } else {
-    setCurrentAccount(TEMPORARY_ACCOUNT_NAME, false);
-    setAuthStatus("signedOut");
+    setAuthStatus(AuthStatuses.signedOut);
   }
 
   // Save logout task for background cleanup

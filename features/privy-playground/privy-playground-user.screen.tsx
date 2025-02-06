@@ -26,13 +26,11 @@ import { Account, createWallet, WalletId } from "thirdweb/wallets";
 import { thirdwebClient } from "@/utils/thirdweb";
 import { useCoinbaseWalletListener } from "@/utils/coinbaseWallet";
 import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
-import { queryClient } from "@/queries/queryClient";
 // import {
 //   IPrivyCustomMetadata,
 //   usePrivyUserCustomMetadataForCurrentAccount,
 // } from "@/queries/use-privy-user-custom-metadata";
 import { InboxState } from "@xmtp/react-native-sdk/build/lib/InboxState";
-import { Switch } from "react-native-paper";
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
 const multiInboxClient = MultiInboxClient.instance;
 
@@ -141,12 +139,6 @@ export const PrivyPlaygroundUserScreen = () => {
                   "[initializeMultiInboxClient] Inbox created observer added"
                 );
 
-                multiInboxClient.addClientCreationErrorObserver(({ error }) => {
-                  logger.error(
-                    `[multiInboxClient] Error creating client`,
-                    error
-                  );
-                });
                 logger.debug(
                   "[initializeMultiInboxClient] Error observer added"
                 );
@@ -168,11 +160,11 @@ export const PrivyPlaygroundUserScreen = () => {
                 logger.debug(
                   "[initializeMultiInboxClient] Starting client initialization"
                 );
-                await multiInboxClient.initialize({
-                  privyUser: user,
-                  privySmartWalletClient: smartWalletClient,
-                  // wallet: embeddedWallets[0],
-                });
+                // await multiInboxClient.initialize({
+                //   privyUser: user,
+                //   privySmartWalletClient: smartWalletClient,
+                //   // wallet: embeddedWallets[0],
+                // });
                 logger.debug(
                   "[initializeMultiInboxClient] Client initialization completed successfully"
                 );
@@ -319,8 +311,9 @@ export const PrivyPlaygroundUserScreen = () => {
                             `[removeFromXmtp] Successfully removed wallet ${m.address} from XMTP client`
                           );
                           const refreshFromNetwork = false;
-                          const clientState =
-                            await xmtpClient.inboxState(refreshFromNetwork);
+                          const clientState = await xmtpClient.inboxState(
+                            refreshFromNetwork
+                          );
                           logger.debug(
                             `[removeFromXmtp] Client state: ${JSON.stringify(
                               clientState,
@@ -363,8 +356,9 @@ export const PrivyPlaygroundUserScreen = () => {
                             `[addToXmtp] Successfully added wallet ${m.address} to XMTP client`
                           );
                           const refreshFromNetwork = false;
-                          const clientState =
-                            await xmtpClient.inboxState(refreshFromNetwork);
+                          const clientState = await xmtpClient.inboxState(
+                            refreshFromNetwork
+                          );
 
                           logger.debug(
                             `[addToXmtp] Client state: ${JSON.stringify(

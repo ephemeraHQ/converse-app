@@ -15,8 +15,11 @@ import {
 } from "@/features/onboarding/constants/animation-constants";
 import { useRouter } from "@/navigation/useNavigation";
 import { needToShowNotificationsPermissions } from "../Onboarding.utils";
-import { setAuthStatus } from "@/data/store/authStore";
-import { useCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import {
+  AuthStatuses,
+  useAccountsStore,
+  useCurrentSender,
+} from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingCreateContactCard } from "@/features/onboarding/components/onboarding-contact-card";
 import { OnboardingContactCardThemeProvider } from "@/features/onboarding/components/onboarding-contact-card-provider";
 import logger from "@/utils/logger";
@@ -56,6 +59,7 @@ const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 export function OnboardingContactCardScreen() {
   const router = useRouter();
   const { user: privyUser } = usePrivy();
+  const setAuthStatus = useAccountsStore((s) => s.setAuthStatus);
 
   const currentSender = useCurrentSender();
   logger.debug(
@@ -126,7 +130,7 @@ export function OnboardingContactCardScreen() {
           logger.debug(
             "[OnboardingContactCardScreen] Setting auth status to signedIn"
           );
-          setAuthStatus("signedIn");
+          setAuthStatus(AuthStatuses.signedIn);
         }
       }
     } catch (error) {
@@ -136,7 +140,7 @@ export function OnboardingContactCardScreen() {
       );
       captureErrorWithToast(error as Error);
     }
-  }, [createOrUpdateProfile, profile, router, asset?.uri]);
+  }, [createOrUpdateProfile, profile, router, asset?.uri, setAuthStatus]);
 
   const listBottomSheetRef = useBottomSheetModalRef();
 

@@ -1,6 +1,5 @@
 import { ConnectedEthereumWallet } from "@privy-io/expo";
 
-import { getDbDirectory } from "@/data/db";
 import { getDbEncryptionKey } from "@/utils/keychain/helpers";
 import logger from "@/utils/logger";
 import {
@@ -114,13 +113,11 @@ export class MultiInboxClient {
       logger.debug(
         "[createXmtpClient] Getting database directory and encryption key"
       );
-      const [dbDirectory, dbEncryptionKey] = await Promise.all([
-        getDbDirectory(),
-        getDbEncryptionKey(),
-      ]).catch((error) => {
+      const dbEncryptionKey = await getDbEncryptionKey().catch((error) => {
         logger.error("[createXmtpClient] Error getting database config", error);
         throw error;
       });
+
       logger.debug("[createXmtpClient] Got database config successfully");
 
       logger.debug("[createXmtpClient] Creating XMTP signer");
@@ -162,7 +159,6 @@ export class MultiInboxClient {
       const options = {
         env: config.xmtpEnv,
         enableV3: true,
-        dbDirectory: dbDirectory,
         dbEncryptionKey,
       };
       logger.debug("[createXmtpClient] Client options configured", options);
@@ -388,7 +384,6 @@ export class MultiInboxClient {
             );
 
             const dbEncryptionKey = await getDbEncryptionKey();
-            const dbDirectory = await getDbDirectory();
 
             const xmtpInboxClient = await XmtpClient.build(
               ethereumAddress,
@@ -396,7 +391,6 @@ export class MultiInboxClient {
                 env: config.xmtpEnv,
                 codecs,
                 dbEncryptionKey,
-                dbDirectory,
               },
               inboxId
             );
@@ -535,10 +529,7 @@ export class MultiInboxClient {
       logger.debug(
         "[createXmtpClient] Getting database directory and encryption key"
       );
-      const [dbDirectory, dbEncryptionKey] = await Promise.all([
-        getDbDirectory(),
-        getDbEncryptionKey(),
-      ]).catch((error) => {
+      const dbEncryptionKey = await getDbEncryptionKey().catch((error) => {
         logger.error("[createXmtpClient] Error getting database config", error);
         throw error;
       });
@@ -586,7 +577,6 @@ export class MultiInboxClient {
       const options = {
         env: config.xmtpEnv,
         enableV3: true,
-        dbDirectory: dbDirectory,
         dbEncryptionKey,
       };
       logger.debug("[createXmtpClient] Client options configured", options);
