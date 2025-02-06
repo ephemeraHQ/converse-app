@@ -100,12 +100,12 @@ export function useIsXmtpInitialized() {
   //   `[useIsXmtpInitialized] Initial state - user: ${!!user}, privySmartWalletClient: ${!!privySmartWalletClient}, isReady: ${isReady}`
   // );
 
-  const [isXmtpInitialized, setIsXmtpInitialized] = useState(
-    MultiInboxClient.instance.isInitialized
+  const [isXmtpRestored, setIsXmtpRestored] = useState(
+    MultiInboxClient.instance.isRestored
   );
 
   // logger.debug(
-  //   `[useIsXmtpInitialized] Initial isXmtpInitialized state: ${isXmtpInitialized}`
+  //   `[useIsXmtpInitialized] Initial isXmtpRestored state: ${isXmtpRestored}`
   // );
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export function useIsXmtpInitialized() {
     const unsubscribe = MultiInboxClient.instance.addXmtpInitializedObserver(
       () => {
         // logger.debug("[useIsXmtpInitialized] XMTP initialized, updating state");
-        setIsXmtpInitialized(true);
+        setIsXmtpRestored(true);
       }
     );
     return () => {
@@ -125,7 +125,7 @@ export function useIsXmtpInitialized() {
   }, []);
 
   useEffect(() => {
-    async function initializeXmtp() {
+    async function restoreXmtp() {
       try {
         if (!isReady) {
           // logger.debug(
@@ -145,9 +145,7 @@ export function useIsXmtpInitialized() {
         //   `[useIsXmtpInitialized] Initializing XMTP with privySmartWalletClient: ${!!privySmartWalletClient}`
         // );
 
-        await MultiInboxClient.instance.initialize({
-          privySmartWalletClient,
-        });
+        await MultiInboxClient.instance.restorePreviouslyCreatedInboxesForDevice();
 
         // logger.debug("[useIsXmtpInitialized] XMTP initialization completed");
       } catch (error) {
@@ -156,22 +154,22 @@ export function useIsXmtpInitialized() {
       }
     }
 
-    initializeXmtp();
-  }, [privySmartWalletClient, isReady, user]);
+    restoreXmtp();
+  }, [isReady, user]);
 
   return {
-    isXmtpInitialized,
+    isXmtpRestored,
   };
 }
 
 const NavigationContent = () => {
   const { user, isReady } = usePrivy();
   const isSignedInPrivy = isReady && user;
-  const { isXmtpInitialized } = useIsXmtpInitialized();
-  const currentSender = MultiInboxClient.instance.getCurrentSender();
+  const { isXmtpRestored } = useIsXmtpInitialized();
+  const currentSender = MultiInboxClient.instance.currentSender;
 
   // logger.debug(
-  //   `[NavigationContent] State - isReady: ${isReady}, isXmtpInitialized: ${isXmtpInitialized}, user: ${!!user}, currentSender: ${!!currentSender}`
+  //   `[NavigationContent] State - isReady: ${isReady}, isXmtpRestored: ${isXmtpRestored}, user: ${!!user}, currentSender: ${!!currentSender}`
   // );
 
   // User is signed out if they're ready but not signed in to Privy
@@ -186,7 +184,7 @@ const NavigationContent = () => {
   // 3. XMTP is initialized
   // 4. We have a current sender
   const isSignedIn =
-    isReady && isSignedInPrivy && isXmtpInitialized && !!currentSender;
+    isReady && isSignedInPrivy && isXmtpRestored && !!currentSender;
 
   // logger.debug(
   //   `[NavigationContent] Navigation state - isIdle: ${isIdle}, isSignedOut: ${isSignedOut}, isSignedIn: ${isSignedIn}`

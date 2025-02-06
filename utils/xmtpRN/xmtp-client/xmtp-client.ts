@@ -24,7 +24,7 @@ import { CoinbaseMessagingPaymentCodec } from "../xmtp-content-types/xmtp-coinba
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 // Supported message codecs for XMTP client
-const codecs = [
+export const codecs = [
   new TextCodec(),
   new ReactionCodec(),
   new ReadReceiptCodec(),

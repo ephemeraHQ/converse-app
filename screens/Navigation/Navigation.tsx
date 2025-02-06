@@ -116,7 +116,7 @@ export function SignedInNavigation() {
       screenListeners={screenListeners("fullStackNavigation")}
     >
       <NativeStack.Group>
-        <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
+        {/* <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
           <NativeStack.Screen name="Chats" component={ConversationListScreen} />
           <NativeStack.Screen
             name="Blocked"
@@ -131,14 +131,14 @@ export function SignedInNavigation() {
           {InviteUsersToExistingGroupNav()}
           {JoinGroupNavigation()}
           {TopUpNav()}
-        </NativeStack.Group>
+        </NativeStack.Group> */}
 
         <NativeStack.Group>
-          {UserProfileNav()}
+          {/* {UserProfileNav()}
           <NativeStack.Screen
             name="AppSettings"
             component={AppSettingsScreen}
-          />
+          /> */}
           <NativeStack.Screen
             name="NewAccountNavigator"
             component={NewAccountNavigator}

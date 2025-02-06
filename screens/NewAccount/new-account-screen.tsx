@@ -16,14 +16,6 @@ import {
   ONBOARDING_ENTERING_DURATION,
 } from "@/features/onboarding/constants/animation-constants";
 import { useRouter } from "@/navigation/useNavigation";
-import { useCreatePasskey } from "@/features/onboarding/passkey/useCreatePasskey";
-import { usePrivySmartWalletConnection } from "@/features/onboarding/Privy/usePrivySmartWalletConnection";
-import {
-  PasskeyAuthStoreProvider,
-  usePasskeyAuthStoreContext,
-} from "@/features/onboarding/passkey/passkeyAuthStore";
-import logger from "@/utils/logger";
-import { captureErrorWithToast } from "@/utils/capture-error";
 
 const $subtextStyle: TextStyle = {
   textAlign: "center",
@@ -43,11 +35,7 @@ const $titleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 });
 
 export const NewAccountScreen = memo(function NewAccountWelcomeScreen() {
-  return (
-    <PasskeyAuthStoreProvider>
-      <NewAccountScreenContent />
-    </PasskeyAuthStoreProvider>
-  );
+  return <NewAccountScreenContent />;
 });
 
 const NewAccountScreenContent = memo(function NewAccountScreenContent() {
@@ -56,41 +44,7 @@ const NewAccountScreenContent = memo(function NewAccountScreenContent() {
 
   const router = useRouter();
 
-  const loading = usePasskeyAuthStoreContext((state) => state.loading);
-
-  const { createPasskey: handleCreateAccountWithPasskey } = useCreatePasskey();
-
-  const setError = usePasskeyAuthStoreContext((state) => state.setError);
-
-  const handleError = useCallback(
-    (error: Error) => {
-      setError(error.message);
-      captureErrorWithToast(error);
-    },
-    [setError]
-  );
-
-  const onStatusChange = useCallback((status: string) => {
-    logger.debug("[NewAccountWelcomeScreenContent] onStatusChange", status);
-  }, []);
-
-  const onConnectionDone = useCallback(() => {
-    logger.debug("[NewAccountWelcomeScreenContent] onConnectionDone");
-    router.replace("NewAccountCreateContactCard");
-  }, [router]);
-
-  const onConnectionError = useCallback(
-    (error: Error) => {
-      handleError(error);
-    },
-    [handleError]
-  );
-
-  usePrivySmartWalletConnection({
-    onConnectionDone,
-    onConnectionError,
-    onStatusChange,
-  });
+  // const { createPasskey: handleCreateAccountWithPasskey } = useCreatePasskey();
 
   return (
     <Screen
@@ -129,12 +83,12 @@ const NewAccountScreenContent = memo(function NewAccountScreenContent() {
           </AnimatedText>
         </VStack>
       </Center>
-      <OnboardingFooter
+      {/* <OnboardingFooter
         text={translate("onboarding.welcome.createContactCard")}
         iconName="biometric"
         onPress={handleCreateAccountWithPasskey}
         disabled={loading}
-      />
+      /> */}
     </Screen>
   );
 });

@@ -66,27 +66,25 @@ const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 export function OnboardingContactCardScreen() {
   const router = useRouter();
 
-  // const address = useCurrentAccount()!;
   const address = MultiInboxClient.instance.currentSender?.ethereumAddress;
+  logger.debug(
+    `[OnboardingContactCardScreen] Current sender address: ${address}`
+  );
 
   const { themed, theme } = useAppTheme();
   const { animation } = theme;
 
-  logger.debug("OnboardingContactCardScreen", {
-    address,
-  });
-  const { setIsRandoAccount, isRandoAccount } = useSettingsStore(
-    useSelect(["setIsRandoAccount", "isRandoAccount"])
+  logger.debug(
+    `[OnboardingContactCardScreen] Initializing with address: ${address}`
   );
 
+  const { profile, setProfile } = useProfile();
+  logger.debug(`[OnboardingContactCardScreen] Current profile:`, profile);
   const { createOrUpdateProfile, loading, errorMessage } =
     useCreateOrUpdateProfileInfo();
-
-  const toggleType = useCallback(() => {
-    if (!loading) {
-      setIsRandoAccount(!isRandoAccount);
-    }
-  }, [loading, setIsRandoAccount, isRandoAccount]);
+  logger.debug(
+    `[OnboardingContactCardScreen] Profile update loading: ${loading}, error: ${errorMessage}`
+  );
 
   const titleAnimation = animation
     .fadeInUpSpring()
@@ -98,26 +96,34 @@ export function OnboardingContactCardScreen() {
     .delay(ONBOARDING_ENTERING_DELAY.SECOND)
     .duration(ONBOARDING_ENTERING_DURATION);
 
-  const { profile, setProfile } = useProfile();
-
-  const randoDisplayName = formatRandoDisplayName(address ?? "");
+  // const randoDisplayName = formatRandoDisplayName(address ?? "");
+  const randoDisplayName = "Rando";
+  logger.debug(
+    `[OnboardingContactCardScreen] Generated rando display name: ${randoDisplayName}`
+  );
 
   useEffect(() => {
     if (errorMessage) {
+      logger.error(
+        `[OnboardingContactCardScreen] Profile update error: ${errorMessage}`
+      );
       captureErrorWithToast(new Error(errorMessage));
     }
   }, [errorMessage]);
 
   const { addPFP, asset } = useAddPfp();
+  logger.debug(`[OnboardingContactCardScreen] Current PFP asset:`, asset);
 
   const handleRandoContinue = useCallback(async () => {
-    logger.debug("[OnboardingContactCardScreen] handleRandoContinue");
-    logger.debug(MultiInboxClient.instance.currentSender);
+    logger.debug("[OnboardingContactCardScreen] Starting rando continue flow");
+    logger.debug(
+      "[OnboardingContactCardScreen] Current sender:",
+      MultiInboxClient.instance.currentSender
+    );
     try {
       const randomUsername = uuidv4().replace(/-/g, "").slice(0, 30);
       logger.debug(
-        "[OnboardingContactCardScreen] handleRandoContinue",
-        randoDisplayName
+        `[OnboardingContactCardScreen] Creating rando profile with displayName: ${randoDisplayName}, username: ${randomUsername}`
       );
       const { success } = await createOrUpdateProfile({
         profile: {
@@ -126,22 +132,32 @@ export function OnboardingContactCardScreen() {
         },
       });
       logger.debug(
-        "[OnboardingContactCardScreen] handleRandoContinue success",
-        success
+        `[OnboardingContactCardScreen] Rando profile creation success: ${success}`
       );
       if (success) {
         if (needToShowNotificationsPermissions()) {
+          logger.debug(
+            "[OnboardingContactCardScreen] Navigating to notifications permissions"
+          );
           router.push("OnboardingNotifications");
         } else {
+          logger.debug(
+            "[OnboardingContactCardScreen] Setting auth status to signedIn"
+          );
           setAuthStatus("signedIn");
         }
       }
     } catch (error) {
+      logger.error(
+        "[OnboardingContactCardScreen] Error in rando continue:",
+        error
+      );
       captureErrorWithToast(error as Error);
     }
   }, [randoDisplayName, createOrUpdateProfile, router]);
 
   const handleRealContinue = useCallback(async () => {
+    logger.debug("[OnboardingContactCardScreen] Starting real continue flow");
     try {
       const profileUserName = formatRandomUserName(profile.displayName ?? "");
       const newProfile: ProfileType = {
@@ -149,32 +165,40 @@ export function OnboardingContactCardScreen() {
         username: profileUserName,
         avatar: asset?.uri,
       };
+      logger.debug(
+        "[OnboardingContactCardScreen] Creating real profile:",
+        newProfile
+      );
       const { success } = await createOrUpdateProfile({ profile: newProfile });
+      logger.debug(
+        `[OnboardingContactCardScreen] Real profile creation success: ${success}`
+      );
       if (success) {
         if (needToShowNotificationsPermissions()) {
+          logger.debug(
+            "[OnboardingContactCardScreen] Navigating to notifications permissions"
+          );
           router.push("OnboardingNotifications");
         } else {
+          logger.debug(
+            "[OnboardingContactCardScreen] Setting auth status to signedIn"
+          );
           setAuthStatus("signedIn");
         }
       }
     } catch (error) {
+      logger.error(
+        "[OnboardingContactCardScreen] Error in real continue:",
+        error
+      );
       captureErrorWithToast(error as Error);
     }
   }, [createOrUpdateProfile, profile, router, asset?.uri]);
 
   const handleContinue = useCallback(() => {
-    logger.debug(
-      "[OnboardingContactCardScreen] handleContinue",
-      isRandoAccount
-    );
-    if (isRandoAccount) {
-      handleRandoContinue();
-    } else {
-      handleRealContinue();
-    }
-  }, [isRandoAccount, handleRealContinue, handleRandoContinue]);
-
-  const isDoxxedAccount = !isRandoAccount;
+    logger.debug("[OnboardingContactCardScreen] handleContinue");
+    handleRandoContinue();
+  }, [handleRandoContinue]);
 
   return (
     <Screen
@@ -184,50 +208,27 @@ export function OnboardingContactCardScreen() {
     >
       <Center style={$centerContainerStyle}>
         <VStack style={$titleContainer}>
-          {isDoxxedAccount ? (
-            <OnboardingTitle entering={titleAnimation} size={"xl"}>
-              Complete your contact card
-            </OnboardingTitle>
-          ) : (
-            <OnboardingTitle entering={titleAnimation} size={"xl"}>
-              Go Rando
-            </OnboardingTitle>
-          )}
-          {isDoxxedAccount ? (
-            <OnboardingSubtitle
-              style={themed($subtitleStyle)}
-              entering={subtitleAnimation}
-            >
-              Choose how you show up
-            </OnboardingSubtitle>
-          ) : (
-            <OnboardingSubtitle
-              style={themed($subtitleStyle)}
-              entering={subtitleAnimation}
-            >
-              Chat using random contact info
-            </OnboardingSubtitle>
-          )}
+          <OnboardingTitle entering={titleAnimation} size={"xl"}>
+            Complete your contact card
+          </OnboardingTitle>
+          <OnboardingSubtitle
+            style={themed($subtitleStyle)}
+            entering={subtitleAnimation}
+          >
+            Choose how you show up
+          </OnboardingSubtitle>
+
           <OnboardingContactCardThemeProvider>
-            {isDoxxedAccount ? (
-              <OnboardingCreateContactCard
-                addPFP={addPFP}
-                pfpUri={isDoxxedAccount ? asset?.uri : undefined}
-                displayName={profile.displayName}
-                setDisplayName={(displayName) =>
-                  setProfile({ ...profile, displayName })
-                }
-              />
-            ) : (
-              <OnboardingCreateContactCard
-                editable={false}
-                addPFP={() => {}}
-                pfpUri={undefined}
-                displayName={randoDisplayName}
-                setDisplayName={() => {}}
-              />
-            )}
+            <OnboardingCreateContactCard
+              addPFP={addPFP}
+              pfpUri={asset?.uri}
+              displayName={profile.displayName}
+              setDisplayName={(displayName) =>
+                setProfile({ ...profile, displayName })
+              }
+            />
           </OnboardingContactCardThemeProvider>
+
           {/* todo(lustig): bring back when privy supports multiple scws */}
           {/* <AnimatedVStack
             entering={animation
@@ -254,7 +255,7 @@ export function OnboardingContactCardScreen() {
         text={"Continue"}
         iconName="chevron.right"
         onPress={handleContinue}
-        disabled={loading || (!isDoxxedAccount && !profile.displayName)}
+        disabled={loading || !profile.displayName}
       />
     </Screen>
   );

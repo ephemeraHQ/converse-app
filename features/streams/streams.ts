@@ -89,6 +89,11 @@ export function setupStreamingSubscriptions() {
 }
 
 async function startStreaming(accountsToStream: string[]) {
+  logger.debug(
+    "[Streaming] TEMP DISABLING Starting streaming for accounts:",
+    accountsToStream
+  );
+  return;
   const store = useStreamingStore.getState();
 
   for (const account of accountsToStream) {

@@ -8,7 +8,7 @@ import Constants from "expo-constants";
 import { useState } from "react";
 import * as Application from "expo-application";
 import { getConfig } from "@/config";
-import { RELYING_PARTY } from "../onboarding/passkey/passkey.constants";
+import { RELYING_PARTY } from "../onboarding/passkey.constants";
 import logger from "@/utils/logger";
 import { usePrivy } from "@privy-io/expo";
 export function PrivyPlaygroundLoginScreen() {
