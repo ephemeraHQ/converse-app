@@ -17,12 +17,16 @@ export function translate(
   const translations = i18n.translations[i18n.locale];
   const enTranslations = i18n.translations.en;
 
-  // Try to get the translation from the current language file
-  let result = key.split(".").reduce((obj, k) => obj?.[k], translations as any);
+  // First try direct lookup, then fallback to path traversal
+  let result =
+    (translations as Record<string, any>)?.[key] ??
+    key.split(".").reduce((obj, k) => obj?.[k], translations as any);
 
   // If no translation found in current locale, try English
   if (result === undefined) {
-    result = key.split(".").reduce((obj, k) => obj?.[k], enTranslations as any);
+    result =
+      (enTranslations as Record<string, any>)?.[key] ??
+      key.split(".").reduce((obj, k) => obj?.[k], enTranslations as any);
   }
 
   // If still no translation found, return the key itself
