@@ -24,11 +24,6 @@
     "test-deep-linking": "node scripts/test-deep-linking.js",
     "postinstall": "patch-package && husky install && cross-os postinstall"
   },
-  "cross-os": {
-    "postinstall": {
-      "darwin": "bundle install --gemfile=ios/Gemfile"
-    }
-  },
   "dependencies": {
     "@azure/core-asynciterator-polyfill": "^1.0.2",
     "@coinbase/wallet-mobile-sdk": "^1.0.13",
