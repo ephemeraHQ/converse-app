@@ -5,29 +5,37 @@ import { TxKeyPath } from "./i18n";
 
 /**
  * Translates text.
- * @param {TxKeyPath} key - The i18n key.
- * @param {i18n.TranslateOptions} options - The i18n options.
+ * @param {TxKeyPath | string} key - The i18n key or plain text.
+ * @param {Record<string, any>} options - The i18n options.
  * @returns {string} - The translated text.
- * @example
- * Translations:
- *
- * ```en.ts
- * {
- *  "hello": "Hello, {{name}}!"
- * }
- * ```
- *
- * Usage:
- * ```ts
- * import { translate } from "i18n-js"
- *
- * translate("common.ok", { name: "world" })
- * // => "Hello world!"
- * ```
  */
 export function translate(
-  key: TxKeyPath,
-  options?: i18n.TranslateOptions
+  key: TxKeyPath | string,
+  options?: Record<string, any>
 ): string {
-  return i18n.t(key, options);
+  // Get the current language's translations
+  const translations = i18n.translations[i18n.locale];
+  const enTranslations = i18n.translations.en;
+
+  // Try to get the translation from the current language file
+  let result = key.split(".").reduce((obj, k) => obj?.[k], translations as any);
+
+  // If no translation found in current locale, try English
+  if (result === undefined) {
+    result = key.split(".").reduce((obj, k) => obj?.[k], enTranslations as any);
+  }
+
+  // If still no translation found, return the key itself
+  if (result === undefined) {
+    result = key;
+  }
+
+  // Handle interpolation if options are provided
+  if (options) {
+    Object.entries(options).forEach(([k, v]) => {
+      result = result.replace(new RegExp(`{{${k}}}`, "g"), String(v));
+    });
+  }
+
+  return result;
 }

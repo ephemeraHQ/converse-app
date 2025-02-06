@@ -6,6 +6,7 @@ import { getTextStyle } from "@/design-system/Text/Text.utils";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { NewLoader } from "@/design-system/new-loader";
 import { ConversationListEmpty } from "@/features/conversation-list/conversation-list-empty";
+import { translate } from "@/i18n";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
 import React, { memo, useEffect } from "react";
@@ -62,7 +63,7 @@ export const ConversationListLoading = memo(function ConversationListLoading() {
             msDelayBetweenTextChange={2000}
           />
           <Text color="secondary" preset="small">
-            Gathering your messages
+            {translate("Gathering your messages")}
           </Text>
         </VStack>
         <TimeCounter />
