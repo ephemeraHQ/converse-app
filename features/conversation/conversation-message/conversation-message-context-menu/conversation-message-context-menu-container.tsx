@@ -2,6 +2,7 @@ import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { useConversationMessageContextMenuStyles } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.styles";
 import { useAppTheme } from "@theme/useAppTheme";
 import { memo, useEffect } from "react";
+import { Platform, StatusBar, useWindowDimensions } from "react-native";
 import {
   useAnimatedStyle,
   useSharedValue,
@@ -12,7 +13,6 @@ import {
   MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT,
   MESSAGE_CONTEXT_REACTIONS_HEIGHT,
 } from "./conversation-message-context-menu.constants";
-import { debugBorder } from "@/utils/debug-style";
 
 export const MessageContextMenuContainer = memo(
   function MessageContextMenuContainer(args: {
@@ -30,6 +30,7 @@ export const MessageContextMenuContainer = memo(
     const translateYAV = useSharedValue(0);
     const { verticalSpaceBetweenSections } =
       useConversationMessageContextMenuStyles();
+    const { height: windowHeight } = useWindowDimensions();
 
     const {
       itemRectY,
@@ -43,7 +44,7 @@ export const MessageContextMenuContainer = memo(
     } = args;
 
     useEffect(() => {
-      const screenHeight = theme.layout.screen.height;
+      const screenHeight = windowHeight;
       const minTopOffset =
         MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT +
         verticalSpaceBetweenSections +
@@ -85,16 +86,22 @@ export const MessageContextMenuContainer = memo(
       theme,
       verticalSpaceBetweenSections,
       translateYAV,
+      windowHeight,
     ]);
 
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [{ translateY: translateYAV.value }],
     }));
 
+    // On Android, we need to account for the status bar height by moving the menu down
+    const statusBarHeight =
+      Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0;
+
     const distanceFromTop =
       itemRectY -
       MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT -
-      verticalSpaceBetweenSections;
+      verticalSpaceBetweenSections +
+      (Platform.OS === "android" ? statusBarHeight : 0);
 
     return (
       <AnimatedVStack
