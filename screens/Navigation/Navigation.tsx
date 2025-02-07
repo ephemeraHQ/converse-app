@@ -22,11 +22,15 @@ import { WebviewPreviewNavParams } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { SignupWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
 import { usePrivy } from "@privy-io/expo";
-import { useCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import {
+  useAccountsStore,
+  useCurrentSender,
+} from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { queryClient } from "@/queries/queryClient";
+import logger from "@/utils/logger";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -174,6 +178,8 @@ export function SignedInNavigation() {
 
 export function SignedOutNavigation() {
   const colorScheme = useColorScheme();
+  const state = useAccountsStore();
+  logger.debug(`[SignedOutNavigation] state`, state);
 
   return (
     <SignupWithPasskeyProvider>

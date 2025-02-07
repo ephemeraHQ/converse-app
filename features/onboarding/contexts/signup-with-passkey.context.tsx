@@ -52,32 +52,11 @@ const useCreateEmbeddedWallet = (args: { embeddedWalletIndex: number }) => {
             `[createEmbeddedWallet] Creating embedded wallet at index: ${index}`
           );
           const userBeforeCreate = await client.user.get();
-          logger.debug(
-            `[createEmbeddedWallet] User before create: ${JSON.stringify(
-              userBeforeCreate,
-              null,
-              2
-            )}`
-          );
 
-          const { user } = await createEmbeddedWallet({
-            createAdditional: true,
-          });
-          logger.debug(
-            `[createEmbeddedWallet] User after create: ${JSON.stringify(
-              user,
-              null,
-              2
-            )}`
-          );
+          const linkedWalletsBefore = userBeforeCreate.user?.linked_accounts
+            .filter((account) => account.type === "wallet")
+            .map((account) => account.address);
 
-          const linkedWalletsBefore =
-            userBeforeCreate.user?.linked_accounts.filter(
-              (account) => account.type === "wallet"
-            );
-          const linkedWalletsAfter = user.linked_accounts.filter(
-            (account) => account.type === "wallet"
-          );
           logger.debug(
             `[createEmbeddedWallet] Linked wallets before create: ${JSON.stringify(
               linkedWalletsBefore,
@@ -85,6 +64,23 @@ const useCreateEmbeddedWallet = (args: { embeddedWalletIndex: number }) => {
               2
             )}`
           );
+
+          if (
+            (linkedWalletsBefore?.length ?? 0) - 1 ===
+            args.embeddedWalletIndex
+          ) {
+            throw new Error(
+              `An attempt to create an embedded wallet with index ${args.embeddedWalletIndex} was made, but the user already has ${linkedWalletsBefore?.length} wallets before creation.`
+            );
+          }
+
+          const { user } = await createEmbeddedWallet({
+            createAdditional: true,
+          });
+          const linkedWalletsAfter = user.linked_accounts
+            .filter((account) => account.type === "wallet")
+            .map((account) => account.address);
+
           logger.debug(
             `[createEmbeddedWallet] Linked wallets after create: ${JSON.stringify(
               linkedWalletsAfter,
