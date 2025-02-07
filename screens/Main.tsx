@@ -14,7 +14,7 @@ import { useThemeProvider } from "@theme/useAppTheme";
 import { converseNavigatorRef } from "@utils/navigation";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Platform, useColorScheme } from "react-native";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
 import {
@@ -136,20 +136,41 @@ export function useHasMultiInboxClientRestored() {
 
 export const useAuthStatus = () => {
   const { user: privyUser } = usePrivy();
+  const [isReady, setIsReady] = useState(false);
 
-  const { authStatus, setAuthStatus } = useAccountsStore(
-    useSelect(["authStatus", "setAuthStatus"])
-  );
+  const { authStatus, setAuthStatus, multiInboxClientRestorationState } =
+    useAccountsStore(
+      useSelect([
+        "authStatus",
+        "setAuthStatus",
+        "multiInboxClientRestorationState",
+      ])
+    );
+
+  const isCheckingAuth = authStatus === AuthStatuses.checking || !isReady;
+  const isSignedIn = authStatus === AuthStatuses.signedIn && isReady;
+  const isSignedOut = authStatus === AuthStatuses.signedOut && isReady;
+
+  const isNotInitialized =
+    multiInboxClientRestorationState !==
+    MultiInboxClientRestorationStates.restored;
+
+  useEffect(() => {
+    async function initialize() {
+      await MultiInboxClient.instance.restorePreviouslyCreatedInboxesForDevice();
+      setIsReady(true);
+    }
+
+    if (isNotInitialized) {
+      initialize();
+    }
+  }, [privyUser, setAuthStatus, isNotInitialized]);
 
   useEffect(() => {
     if (!privyUser) {
       setAuthStatus(AuthStatuses.signedOut);
     }
   }, [privyUser, setAuthStatus]);
-
-  const isCheckingAuth = authStatus === AuthStatuses.checking;
-  const isSignedIn = authStatus === AuthStatuses.signedIn;
-  const isSignedOut = authStatus === AuthStatuses.signedOut;
 
   return { isCheckingAuth, isSignedIn, isSignedOut };
 };

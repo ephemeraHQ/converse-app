@@ -23,7 +23,7 @@ export type MultiInboxClientRestorationState =
 
 export type CurrentSender = {
   ethereumAddress: string;
-  xmtpInboxId: string;
+  inboxId: string;
 };
 
 export type ClientWithInvalidInstallation = undefined;

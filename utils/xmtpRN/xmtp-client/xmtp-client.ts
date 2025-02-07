@@ -56,9 +56,12 @@ export async function getXmtpClient({
   address: string;
   inboxId?: InboxId;
 }) {
-  return MultiInboxClient.instance.getInboxClientForAddress({
+  const client = MultiInboxClient.instance.getInboxClientForAddress({
     ethereumAddress: address,
   });
+  if (!client) {
+    throw new Error("Client undefined");
+  }
   const cleanedEthAddress = getCleanEthAddress(address);
 
   if (cleanedEthAddress in xmtpClientByEthAddress) {

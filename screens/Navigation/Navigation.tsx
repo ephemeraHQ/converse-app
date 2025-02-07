@@ -12,7 +12,7 @@ import {
   NativeStackNavigationOptions,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
-import React, { memo } from "react";
+import React, { memo, useEffect } from "react";
 import { Platform, useColorScheme, Text, Button } from "react-native";
 import { IdleScreen } from "../IdleScreen";
 import { NewAccountCreateContactCardScreen } from "../NewAccount/new-account-create-contact-card-screen";
@@ -86,6 +86,18 @@ export const NativeStack = createNativeStackNavigator<NavigationParamList>();
 export const navigationAnimation = Platform.OS === "ios" ? "default" : "none";
 
 export function IdleNavigation() {
+  // const multiClientRestorationState = useAccountsStore(
+  //   useSelect((state) => state.multiInboxClientRestorationState)
+  // );
+
+  // useEffect(() => {
+  //   if (multiClientRestorationState === MultiInboxClientRestorationStates.RESTORED) {
+  //   logger.debug(
+  //     `[SignedOutNavigation] multiClientRestorationState`,
+  //     multiClientRestorationState
+  //   );
+  // }, [multiClientRestorationState]);
+  // logger.debug(`[SignedOutNavigation] state`, state);
   return (
     <NativeStack.Navigator
       screenListeners={screenListeners("fullStackNavigation")}
@@ -178,8 +190,6 @@ export function SignedInNavigation() {
 
 export function SignedOutNavigation() {
   const colorScheme = useColorScheme();
-  const state = useAccountsStore();
-  logger.debug(`[SignedOutNavigation] state`, state);
 
   return (
     <SignupWithPasskeyProvider>

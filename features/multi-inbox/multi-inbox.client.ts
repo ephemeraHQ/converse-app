@@ -9,7 +9,10 @@ import { base } from "thirdweb/chains";
 import { config } from "@/config";
 import { PrivySmartWalletClient } from "../embedded-wallets/embedded-wallet.types";
 import { codecs } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
-import { useAccountsStore } from "@/features/multi-inbox/multi-inbox.store";
+import {
+  AuthStatuses,
+  useAccountsStore,
+} from "@/features/multi-inbox/multi-inbox.store";
 import {
   ClientWithInvalidInstallation,
   CurrentSender,
@@ -71,7 +74,7 @@ export class MultiInboxClient {
 
   private get xmtpClientInboxIdToAddressMap() {
     return useAccountsStore.getState().senders.reduce((acc, sender) => {
-      acc[sender.xmtpInboxId] = sender.ethereumAddress;
+      acc[sender.inboxId] = sender.ethereumAddress;
       return acc;
     }, {} as { [inboxId: string]: string });
   }
@@ -258,7 +261,7 @@ export class MultiInboxClient {
         if (!useAccountsStore.getState().currentSender) {
           useAccountsStore.getState().setCurrentSender({
             ethereumAddress: smartWalletEthereumAddress,
-            xmtpInboxId: xmtpInboxClient.inboxId,
+            inboxId: xmtpInboxClient.inboxId,
           });
         }
 
@@ -270,7 +273,7 @@ export class MultiInboxClient {
 
         useAccountsStore.getState().addSender({
           ethereumAddress: smartWalletEthereumAddress,
-          xmtpInboxId: clientInboxId,
+          inboxId: clientInboxId,
         });
 
         const lowercaseClientLinkedEthereumAddress =
@@ -324,14 +327,16 @@ export class MultiInboxClient {
     // const previouslyCreatedInboxes = someStore.getState().createdInboxes
     // const previousActiveSender = someStore.getState().activeSender
     // const storeReady = someStore.getState().isReady
-
+    const previouslyCreatedInboxes = useAccountsStore.getState().senders;
     const storeReady = true;
-    const previouslyCreatedInboxes: Array<{
-      ethereumAddress: string;
-      inboxId: string;
-    }> = [
-      // { inboxId: "1", ethereumAddress: "0x123" },
-    ];
+
+    // const storeReady = true;
+    // const previouslyCreatedInboxes: Array<{
+    //   ethereumAddress: string;
+    //   inboxId: string;
+    // }> = [
+    //   // { inboxId: "1", ethereumAddress: "0x123" },
+    // ];
 
     if (!storeReady) {
       logger.debug(
@@ -342,23 +347,32 @@ export class MultiInboxClient {
         "Need to wait for the store to be ready before invoking restore"
       );
     }
-    if (!previouslyCreatedInboxes || previouslyCreatedInboxes.length === 0) {
+
+    const authStatus = useAccountsStore.getState().authStatus;
+    const wasSignedInLastSession = authStatus === AuthStatuses.signedIn;
+    const wasSignedOutLastSession = authStatus === AuthStatuses.signedOut;
+    const hasNoInboxesToRestore = previouslyCreatedInboxes.length === 0;
+    const isInNoInboxButLoggedInErrorState =
+      wasSignedInLastSession && hasNoInboxesToRestore;
+
+    if (isInNoInboxButLoggedInErrorState) {
+      throw new Error(
+        "[restorePreviouslyCreatedInboxesForDevice] The user was signed in but there are no inboxes to restore. This is an invalid state."
+      );
+    }
+
+    if (wasSignedOutLastSession) {
       logger.debug(
-        "[restorePreviouslyCreatedInboxesForDevice] No previously created inboxes found, skipping"
+        "[restorePreviouslyCreatedInboxesForDevice] The user was signed out last session, skipping"
       );
       useAccountsStore
         .getState()
         .setMultiInboxClientRestorationState(
           MultiInboxClientRestorationStates.restored
         );
+      useAccountsStore.getState().setCurrentSender(undefined);
       return;
     }
-
-    useAccountsStore
-      .getState()
-      .setMultiInboxClientRestorationState(
-        MultiInboxClientRestorationStates.restoring
-      );
 
     try {
       logger.debug(
@@ -409,7 +423,7 @@ export class MultiInboxClient {
               alert(
                 `Installation is invalid for address ${ethereumAddress} - whats the UX treatment? Currently just not activating the Inbox.`
               );
-              return;
+              return undefined;
             }
 
             const clientInboxId = xmtpInboxClient.inboxId;
@@ -420,7 +434,7 @@ export class MultiInboxClient {
 
             useAccountsStore.getState().addSender({
               ethereumAddress,
-              xmtpInboxId: clientInboxId,
+              inboxId: clientInboxId,
             });
             return xmtpInboxClient;
           } catch (error) {

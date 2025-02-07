@@ -72,7 +72,7 @@ type AccountsStoreStype = {
 
   setCurrentAccount: ({ ethereumAddress }: { ethereumAddress: string }) => void;
 
-  setCurrentSender: (sender: CurrentSender) => void;
+  setCurrentSender: (sender: CurrentSender | undefined) => void;
   addSender: (sender: CurrentSender) => void;
   // setCurrentAccount: (ethereumAddress: string) => void;
   senders: CurrentSender[];
@@ -98,7 +98,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
         set({ currentSender: sender });
       },
 
-      setCurrentSender: (sender: CurrentSender) =>
+      setCurrentSender: (sender: CurrentSender | undefined) =>
         set({ currentSender: sender }),
       multiInboxClientRestorationState: MultiInboxClientRestorationStates.idle,
       setMultiInboxClientRestorationState: (
@@ -112,7 +112,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           const senderExists = state.senders.some(
             (existingSender) =>
               existingSender.ethereumAddress === sender.ethereumAddress &&
-              existingSender.xmtpInboxId === sender.xmtpInboxId
+              existingSender.inboxId === sender.inboxId
           );
           if (senderExists) return state;
           return { senders: [...state.senders, sender] };
