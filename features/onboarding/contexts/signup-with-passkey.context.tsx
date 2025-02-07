@@ -165,9 +165,19 @@ export const SignupWithPasskeyProvider = ({
   children: React.ReactNode;
 }) => {
   const { client: smartWalletClient } = useSmartWallets();
-  const { logout: privyLogout } = usePrivy();
+  const { logout: privyLogout, user } = usePrivy();
   const { loginWithPasskey: privyLoginWithPasskey } =
     usePrivyLoginWithPasskey();
+  const { create: createEmbeddedWallet } = useEmbeddedEthereumWallet();
+  const privyUserEmbeddedWallets = user?.linked_accounts.filter(
+    (account) => account.type === "wallet"
+  );
+  const embeddedWalletAddress = privyUserEmbeddedWallets?.[0]?.address;
+
+  logger.debug(
+    "[SignupWithPasskeyProvider] privyUserEmbeddedWallets",
+    privyUserEmbeddedWallets
+  );
 
   const { signupWithPasskey: privySignupWithPasskey } =
     usePrivySignupWithPasskey({
@@ -187,16 +197,16 @@ export const SignupWithPasskeyProvider = ({
       },
     });
 
-  const [embeddedWalletIndexToCreate, setEmbeddedWalletIndexToCreate] =
-    useState(-1);
+  // const [embeddedWalletIndexToCreate, setEmbeddedWalletIndexToCreate] =
+  //   useState(-1);
 
-  const {
-    data: embeddedWalletAddress,
-    error: embeddedWalletError,
-    status: embeddedWalletStatus,
-  } = /* wont fire until user is logged in*/ useCreateEmbeddedWallet({
-    embeddedWalletIndex: embeddedWalletIndexToCreate,
-  });
+  // const {
+  //   data: embeddedWalletAddress,
+  //   error: embeddedWalletError,
+  //   status: embeddedWalletStatus,
+  // } = /* wont fire until user is logged in*/ useCreateEmbeddedWallet({
+  //   embeddedWalletIndex: embeddedWalletIndexToCreate,
+  // });
 
   // logger.debug(
   //   "[OnboardingWelcomeScreenContent] embeddedWalletAddress",
@@ -285,17 +295,14 @@ export const SignupWithPasskeyProvider = ({
       privyUserId: privyUser?.id,
     });
     if (privyUser?.id && signingUp) {
-      setEmbeddedWalletIndexToCreate(0);
+      createEmbeddedWallet();
     }
-  }, [privyUser?.id, signingUp]);
+  }, [privyUser?.id, signingUp, createEmbeddedWallet]);
 
   useEffect(() => {
     if (!signingIn || !smartWalletClient) {
       logger.debug(
-        "[passkey onboarding context] waiting for signing in and smart wallet client",
-        {
-          signingIn,
-        }
+        "[passkey onboarding context] waiting for signing in and smart wallet client"
       );
 
       return;

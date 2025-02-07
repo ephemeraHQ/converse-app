@@ -30,7 +30,6 @@ import {
   getConverseInitialURL,
   getConverseStateFromPath,
 } from "./Navigation/navHelpers";
-import { usePrivy } from "@privy-io/expo";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import {
   AuthStatuses,
@@ -38,7 +37,6 @@ import {
 } from "@/features/multi-inbox/multi-inbox.store";
 import { MultiInboxClientRestorationStates } from "@/features/multi-inbox/multi-inbox-client.types";
 import logger from "@/utils/logger";
-import { is } from "date-fns/locale";
 const prefix = Linking.createURL("/");
 
 const linking: LinkingOptions<NavigationParamList> = {
@@ -151,17 +149,6 @@ const NavigationContent = () => {
     });
     SplashScreen.hideAsync();
   }, [isCheckingAuth, isSignedIn, isSignedOut, splashScreenHidden]);
-
-  // Uncomment to test design system components
-  // return (
-  //   <NativeStack.Navigator>
-  //     <NativeStack.Screen name="Examples" component={Examples} />
-  //   </NativeStack.Navigator>
-  // );
-  // if (!splashScreenHidden) {
-  //   // TODO: Add a loading screen
-  //   return null;
-  // }
 
   if (isCheckingAuth) {
     return <IdleNavigation />;

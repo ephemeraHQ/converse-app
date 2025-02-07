@@ -1,5 +1,6 @@
 import { PrivyProvider } from "@privy-io/expo";
-
+import { DevToolsBubble } from "react-native-react-query-devtools";
+import * as Clipboard from "expo-clipboard";
 // This is a requirement for Privy to work, does not make any sense
 // To test run yarn start --no-dev --minify
 
@@ -152,6 +153,18 @@ export default function AppWithProviders() {
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();
 
+  const onCopy = async (text: string) => {
+    try {
+      // For Expo:
+      await Clipboard.setStringAsync(text);
+      // OR for React Native CLI:
+      // await Clipboard.setString(text);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <PrivyProvider
@@ -169,7 +182,7 @@ export default function AppWithProviders() {
                     <GestureHandlerRootView style={{ flex: 1 }}>
                       <BottomSheetModalProvider>
                         <App />
-                        {/* <DevToolsBubble /> */}
+                        <DevToolsBubble onCopy={onCopy} />
                         {/* <PrivyPlaygroundLandingScreen /> */}
                         <Snackbars />
                       </BottomSheetModalProvider>

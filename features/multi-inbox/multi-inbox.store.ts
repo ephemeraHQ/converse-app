@@ -228,11 +228,25 @@ const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
     const currentSender = useAccountsStore((s) => s.currentSender);
     const currentEthereumAddress = currentSender?.ethereumAddress;
     if (!currentEthereumAddress) {
-      throw new Error("No current sender");
+      // throw new Error("No current sender");
+      return {
+        getState: () => {
+          return {
+            [key]: {} as AccountStoreDataType[T],
+          };
+        },
+      };
     }
     const accountStore = getAccountStore(currentEthereumAddress);
     if (!accountStore) {
-      throw new Error("No account store found");
+      // throw new Error("No account store found");
+      return {
+        getState: () => {
+          return {
+            [key]: {} as AccountStoreDataType[T],
+          };
+        },
+      };
     }
     return accountStore[key](selector);
   };

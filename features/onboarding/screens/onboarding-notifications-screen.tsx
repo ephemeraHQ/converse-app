@@ -102,8 +102,7 @@ export function OnboardingNotificationsScreen(
         style={{ flexShrink: 1 }}
       />
       <Text style={$noticeText} preset="body">
-        Note: Notifications will be available by end of week (Friday, April
-        14th) or shortly after.
+        Note: Notifications will be back soon
       </Text>
       <Button
         text="Later"

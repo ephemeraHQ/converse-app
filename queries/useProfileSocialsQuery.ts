@@ -2,6 +2,7 @@ import { IProfileSocials } from "@/features/profiles/profile-types";
 import {
   QueryKey,
   queryOptions,
+  skipToken,
   useQueries,
   useQuery,
 } from "@tanstack/react-query";
@@ -52,10 +53,12 @@ const fetchProfileSocials = async (peerAddress: string) => {
   return data;
 };
 
-const profileSocialsQueryConfig = (peerAddress: string) =>
-  queryOptions({
+const profileSocialsQueryConfig = (peerAddress: string) => {
+  const enabled = !!peerAddress;
+  return queryOptions({
+    enabled,
     queryKey: profileSocialsQueryKey(peerAddress),
-    queryFn: () => fetchProfileSocials(peerAddress),
+    queryFn: enabled ? () => fetchProfileSocials(peerAddress) : skipToken,
     // Store for 30 days
     gcTime: 1000 * 60 * 60 * 24 * 30,
     refetchIntervalInBackground: false,
@@ -75,6 +78,7 @@ const profileSocialsQueryConfig = (peerAddress: string) =>
     initialDataUpdatedAt: 0,
     // persister: reactQueryPersister,
   });
+};
 
 export const useProfileSocialsQuery = (peerAddress: string) => {
   return useQuery(profileSocialsQueryConfig(peerAddress));
