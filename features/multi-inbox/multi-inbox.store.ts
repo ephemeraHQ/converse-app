@@ -56,7 +56,7 @@ const deleteStores = (account: string) => {
 export const AuthStatuses = {
   signedIn: "signedIn",
   signedOut: "signedOut",
-  checking: "checking",
+  undetermined: "undetermined",
 } as const;
 
 type AuthStatus = (typeof AuthStatuses)[keyof typeof AuthStatuses];
@@ -82,7 +82,7 @@ type AccountsStoreStype = {
 export const useAccountsStore = create<AccountsStoreStype>()(
   persist(
     (set, get) => ({
-      authStatus: AuthStatuses.checking,
+      authStatus: AuthStatuses.undetermined,
       setAuthStatus: (status: AuthStatus) => set({ authStatus: status }),
 
       currentSender: undefined,

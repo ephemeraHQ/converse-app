@@ -34,7 +34,7 @@ export function ConnectWalletBottomSheet({
   const insets = useSafeAreaInsets();
   const bottomSheetRef = useBottomSheetModalRef();
   const currentSender = useAccountsStore((state) => state.currentSender);
-  const isInboxClientInitiated = currentSender?.xmtpInboxId;
+  const isInboxClientInitiated = currentSender?.inboxId;
 
   React.useEffect(() => {
     if (isVisible) {

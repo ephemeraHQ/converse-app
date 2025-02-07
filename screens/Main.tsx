@@ -29,7 +29,7 @@ import {
   getConverseInitialURL,
   getConverseStateFromPath,
 } from "./Navigation/navHelpers";
-import { usePrivy, usePrivyClient } from "@privy-io/expo";
+import { usePrivy } from "@privy-io/expo";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import {
   AuthStatuses,
@@ -87,91 +87,50 @@ export default function Main() {
   );
 }
 
-export function useHasMultiInboxClientRestored() {
-  const { user, isReady } = usePrivy();
-
-  useEffect(() => {
-    async function restoreXmtp() {
-      try {
-        if (!isReady) {
-          // logger.debug(
-          //   "[useHasMultiInboxClientRestored] Privy not ready yet, waiting..."
-          // );
-          return;
-        }
-
-        if (!user) {
-          // logger.debug(
-          //   "[useHasMultiInboxClientRestored] No user, skipping initialization"
-          // );
-          return;
-        }
-
-        // logger.debug(
-        //   `[useHasMultiInboxClientRestored] Initializing XMTP with privySmartWalletClient: ${!!privySmartWalletClient}`
-        // );
-
-        await MultiInboxClient.instance.restorePreviouslyCreatedInboxesForDevice();
-
-        // logger.debug("[useHasMultiInboxClientRestored] XMTP initialization completed");
-      } catch (error) {
-        // logger.error("[useHasMultiInboxClientRestored] Error initializing XMTP:", error);
-        // We might want to handle this error more gracefully in the UI
-      }
-    }
-
-    restoreXmtp();
-  }, [isReady, user]);
-
-  const hasMultiInboxClientRestored = useAccountsStore(
-    (state) =>
-      state.multiInboxClientRestorationState ===
-      MultiInboxClientRestorationStates.restored
+export const useAuthStatus = () => {
+  const { authStatus, multiInboxClientRestorationState } = useAccountsStore(
+    useSelect([
+      "authStatus",
+      "setAuthStatus",
+      "multiInboxClientRestorationState",
+    ])
   );
 
-  return {
-    hasMultiInboxClientRestored,
-  };
-}
+  const isRestored =
+    multiInboxClientRestorationState ===
+    MultiInboxClientRestorationStates.restored;
 
-export const useAuthStatus = () => {
-  const { user: privyUser } = usePrivy();
-  const [isReady, setIsReady] = useState(false);
+  const [isReady, setIsReady] = useState(isRestored);
+  logger.debug(
+    `[useAuthStatus] Current auth status: ${authStatus}, isReady: ${isReady}`
+  );
+  logger.debug(
+    `[useAuthStatus] MultiInbox restoration state: ${multiInboxClientRestorationState}`
+  );
 
-  const { authStatus, setAuthStatus, multiInboxClientRestorationState } =
-    useAccountsStore(
-      useSelect([
-        "authStatus",
-        "setAuthStatus",
-        "multiInboxClientRestorationState",
-      ])
-    );
-
-  const isCheckingAuth = authStatus === AuthStatuses.checking || !isReady;
+  const isCheckingAuth = !isReady;
   const isSignedIn = authStatus === AuthStatuses.signedIn && isReady;
   const isSignedOut = authStatus === AuthStatuses.signedOut && isReady;
 
-  const isNotInitialized =
-    multiInboxClientRestorationState !==
-    MultiInboxClientRestorationStates.restored;
-
   useEffect(() => {
     async function initialize() {
+      logger.debug("[useAuthStatus] Starting inbox restoration");
       await MultiInboxClient.instance.restorePreviouslyCreatedInboxesForDevice();
+      logger.debug("[useAuthStatus] Inbox restoration completed");
       setIsReady(true);
     }
 
-    if (isNotInitialized) {
+    if (!isRestored) {
+      logger.debug(
+        "[useAuthStatus] MultiInbox client not initialized, starting initialization"
+      );
       initialize();
     }
-  }, [privyUser, setAuthStatus, isNotInitialized]);
+  }, [isRestored]);
 
-  useEffect(() => {
-    if (!privyUser) {
-      setAuthStatus(AuthStatuses.signedOut);
-    }
-  }, [privyUser, setAuthStatus]);
-
+  logger.debug(
+    `[useAuthStatus] Returning status - isCheckingAuth: ${isCheckingAuth}, isSignedIn: ${isSignedIn}, isSignedOut: ${isSignedOut}`
+  );
   return { isCheckingAuth, isSignedIn, isSignedOut };
 };
 

@@ -12,7 +12,7 @@ import {
   NativeStackNavigationOptions,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
-import React, { memo, useEffect } from "react";
+import React, { memo } from "react";
 import { Platform, useColorScheme, Text, Button } from "react-native";
 import { IdleScreen } from "../IdleScreen";
 import { NewAccountCreateContactCardScreen } from "../NewAccount/new-account-create-contact-card-screen";
@@ -22,15 +22,12 @@ import { WebviewPreviewNavParams } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { SignupWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
 import { usePrivy } from "@privy-io/expo";
-import {
-  useAccountsStore,
-  useCurrentSender,
-} from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { queryClient } from "@/queries/queryClient";
-import logger from "@/utils/logger";
+import { useLogout } from "@/utils/logout";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -86,18 +83,6 @@ export const NativeStack = createNativeStackNavigator<NavigationParamList>();
 export const navigationAnimation = Platform.OS === "ios" ? "default" : "none";
 
 export function IdleNavigation() {
-  // const multiClientRestorationState = useAccountsStore(
-  //   useSelect((state) => state.multiInboxClientRestorationState)
-  // );
-
-  // useEffect(() => {
-  //   if (multiClientRestorationState === MultiInboxClientRestorationStates.RESTORED) {
-  //   logger.debug(
-  //     `[SignedOutNavigation] multiClientRestorationState`,
-  //     multiClientRestorationState
-  //   );
-  // }, [multiClientRestorationState]);
-  // logger.debug(`[SignedOutNavigation] state`, state);
   return (
     <NativeStack.Navigator
       screenListeners={screenListeners("fullStackNavigation")}
@@ -116,22 +101,18 @@ export function IdleNavigation() {
 const FakeScreen = () => {
   const currentSender = useCurrentSender();
   console.log("currentSender", currentSender);
-  const { logout: privyLogout } = usePrivy();
+  const logout = useLogout();
 
   return (
     <Center style={{ flex: 1 }}>
       <VStack>
         <Text>Fake Screen</Text>
         <Text>ETH: {currentSender?.ethereumAddress}</Text>
-        <Text>INBOX: {currentSender?.xmtpInboxId}</Text>
+        <Text>INBOX: {currentSender?.inboxId}</Text>
         <Button
           title="Logout"
           onPress={async () => {
-            queryClient.removeQueries({
-              queryKey: ["embeddedWallet"],
-            });
-            MultiInboxClient.instance.logoutMessagingClients();
-            await privyLogout();
+            logout();
           }}
         />
       </VStack>
