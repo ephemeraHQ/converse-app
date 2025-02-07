@@ -4,14 +4,18 @@ import { captureErrorWithToast } from "@/utils/capture-error";
 import { RELYING_PARTY } from "@/features/onboarding/passkey.constants";
 import logger from "@/utils/logger";
 import { skipToken, useQuery, queryOptions } from "@tanstack/react-query";
-import { usePrivy, useEmbeddedEthereumWallet } from "@privy-io/expo";
+import {
+  usePrivy,
+  useEmbeddedEthereumWallet,
+  usePrivyClient,
+} from "@privy-io/expo";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { useSmartWallets } from "@privy-io/expo/smart-wallets";
 
-const embeddedWalletQueryKey = (args: { embeddedWalletIndex: number }) => [
-  "embeddedWallet",
-  args.embeddedWalletIndex,
-];
+const embeddedWalletQueryKey = (args: {
+  privyUserId: string | undefined;
+  embeddedWalletIndex: number;
+}) => ["embeddedWallet", args.privyUserId, args.embeddedWalletIndex];
 
 export function getEmbeddedWalletQueryOptions(args: {
   privyUserId: string | undefined;
@@ -23,6 +27,7 @@ export function getEmbeddedWalletQueryOptions(args: {
   const enabled = !!args.privyUserId;
   return queryOptions({
     queryKey: embeddedWalletQueryKey({
+      privyUserId: args.privyUserId,
       embeddedWalletIndex: args.embeddedWalletIndex,
     }),
     queryFn: enabled
@@ -36,16 +41,7 @@ export function getEmbeddedWalletQueryOptions(args: {
 const useCreateEmbeddedWallet = (args: { embeddedWalletIndex: number }) => {
   const { create: createEmbeddedWallet } = useEmbeddedEthereumWallet();
   const { user } = usePrivy();
-  logger.debug(
-    user?.linked_accounts
-      .filter((account) => account.type === "wallet")
-      .map((account) => {
-        return {
-          address: account.address,
-          first_verified_at: account.first_verified_at,
-        };
-      })
-  );
+  const client = usePrivyClient();
   return useQuery(
     getEmbeddedWalletQueryOptions({
       privyUserId: user?.id,
@@ -55,11 +51,58 @@ const useCreateEmbeddedWallet = (args: { embeddedWalletIndex: number }) => {
           logger.debug(
             `[createEmbeddedWallet] Creating embedded wallet at index: ${index}`
           );
+          const userBeforeCreate = await client.user.get();
+          logger.debug(
+            `[createEmbeddedWallet] User before create: ${JSON.stringify(
+              userBeforeCreate,
+              null,
+              2
+            )}`
+          );
+
           const { user } = await createEmbeddedWallet({
             createAdditional: true,
           });
           logger.debug(
-            `[createEmbeddedWallet] Successfully created embedded wallet for user: ${user.id}`
+            `[createEmbeddedWallet] User after create: ${JSON.stringify(
+              user,
+              null,
+              2
+            )}`
+          );
+
+          const linkedWalletsBefore =
+            userBeforeCreate.user?.linked_accounts.filter(
+              (account) => account.type === "wallet"
+            );
+          const linkedWalletsAfter = user.linked_accounts.filter(
+            (account) => account.type === "wallet"
+          );
+          logger.debug(
+            `[createEmbeddedWallet] Linked wallets before create: ${JSON.stringify(
+              linkedWalletsBefore,
+              null,
+              2
+            )}`
+          );
+          logger.debug(
+            `[createEmbeddedWallet] Linked wallets after create: ${JSON.stringify(
+              linkedWalletsAfter,
+              null,
+              2
+            )}`
+          );
+
+          const newWallets = linkedWalletsAfter.filter(
+            (walletAfter) => !linkedWalletsBefore?.includes(walletAfter)
+          );
+
+          logger.debug(
+            `[createEmbeddedWallet] New wallets: ${JSON.stringify(
+              newWallets,
+              null,
+              2
+            )}`
           );
 
           // sort where the oldest wallet is last in the array
@@ -106,19 +149,8 @@ export const SignupWithPasskeyProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { user, logout: privyLogout } = usePrivy();
-  const { wallets } = useEmbeddedEthereumWallet();
   const { client: smartWalletClient } = useSmartWallets();
-
-  // // once user is created, we need to create an embedded wallet
-  // useEffect(() => {
-  //   const shouldThrowIfWalletsExistInSignupContext = wallets.length > 0;
-  //   if (shouldThrowIfWalletsExistInSignupContext) {
-  //     /** todo(lustig) remove logout after code working  */ privyLogout();
-  //     throw new Error("Wallets already exist in signup context");
-  //   }
-  // }, [user, wallets, privyLogout]);
-
+  const { logout: privyLogout } = usePrivy();
   const { signupWithPasskey: privySignupWithPasskey } =
     usePrivySignupWithPasskey({
       onSuccess: (privyUser, isNewUser) => {
@@ -139,7 +171,6 @@ export const SignupWithPasskeyProvider = ({
 
   const {
     data: embeddedWalletAddress,
-    isLoading: isEmbeddedWalletLoading,
     error: embeddedWalletError,
     status: embeddedWalletStatus,
   } = /* wont fire until user is logged in*/ useCreateEmbeddedWallet({
@@ -220,6 +251,7 @@ export const SignupWithPasskeyProvider = ({
   }, [smartWalletClient]);
 
   const signupWithPasskey = async () => {
+    await privyLogout();
     await privySignupWithPasskey({
       relyingParty: RELYING_PARTY,
     });

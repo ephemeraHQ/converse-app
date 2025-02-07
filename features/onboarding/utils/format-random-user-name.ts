@@ -5,6 +5,6 @@ export const formatRandomUserName = (displayName: string) => {
   // Remove all whitespace characters from the display name
   const profileUserName = (
     displayName?.replace(/\s+/g, "") + randomUserGuid
-  ).slice(0, 30);
+  ).slice(0, 7);
   return profileUserName;
 };

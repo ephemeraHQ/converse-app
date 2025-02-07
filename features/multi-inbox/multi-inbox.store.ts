@@ -76,6 +76,7 @@ type AccountsStoreStype = {
   addSender: (sender: CurrentSender) => void;
   // setCurrentAccount: (ethereumAddress: string) => void;
   senders: CurrentSender[];
+  logoutAllSenders: () => void;
 };
 // Main accounts store
 export const useAccountsStore = create<AccountsStoreStype>()(
@@ -117,22 +118,46 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           return { senders: [...state.senders, sender] };
         }),
       senders: [],
+      logoutAllSenders: () => {
+        set({ senders: [], currentSender: undefined });
+      },
     }),
     {
       name: "store-accounts",
       storage: createJSONStorage(() => zustandMMKVStorage),
       onRehydrateStorage: () => {
+        logger.debug("[onRehydrateStorage] Starting hydration");
         return (state, error) => {
           if (error) {
-            logger.warn("An error happened during hydration", error);
+            logger.warn(
+              `[onRehydrateStorage] An error happened during hydration: ${error}`
+            );
           } else {
+            logger.debug(
+              `[onRehydrateStorage] State hydrated successfully: ${JSON.stringify(
+                state
+              )}`
+            );
             if (state?.senders && state.senders.length > 0) {
-              logger.debug("Accounts found in hydration, initializing stores");
+              logger.debug(
+                `[onRehydrateStorage] Found ${state.senders.length} accounts in hydration, initializing stores`
+              );
               state.senders.map((sender) => {
                 if (!storesByAccount[sender.ethereumAddress]) {
+                  logger.debug(
+                    `[onRehydrateStorage] Initializing store for account: ${sender.ethereumAddress}`
+                  );
                   initStores(sender.ethereumAddress);
+                } else {
+                  logger.debug(
+                    `[onRehydrateStorage] Store already exists for account: ${sender.ethereumAddress}`
+                  );
                 }
               });
+            } else {
+              logger.debug(
+                "[onRehydrateStorage] No accounts found in hydrated state"
+              );
             }
           }
         };

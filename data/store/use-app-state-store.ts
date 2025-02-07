@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { AppState, AppStateStatus } from "react-native";
-import logger from "@utils/logger";
 
 type State = {
   currentState: AppStateStatus;
@@ -18,11 +17,6 @@ export const useAppState = create<State & { actions: Actions }>((set) => ({
   actions: {
     handleAppStateChange: (nextAppState) =>
       set((state) => {
-        logger.debug("App state changing", {
-          currentState: state.currentState,
-          previousState: state.previousState,
-          nextAppState,
-        });
         return {
           previousState: state.currentState,
           currentState: nextAppState,

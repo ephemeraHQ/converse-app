@@ -25,6 +25,8 @@ import { usePrivy } from "@privy-io/expo";
 import { useCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
+import { queryClient } from "@/queries/queryClient";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -108,8 +110,12 @@ const FakeScreen = () => {
         <Text>INBOX: {currentSender?.xmtpInboxId}</Text>
         <Button
           title="Logout"
-          onPress={() => {
-            privyLogout();
+          onPress={async () => {
+            queryClient.removeQueries({
+              queryKey: ["embeddedWallet"],
+            });
+            MultiInboxClient.instance.logoutMessagingClients();
+            await privyLogout();
           }}
         />
       </VStack>

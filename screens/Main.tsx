@@ -135,9 +135,17 @@ export function useHasMultiInboxClientRestored() {
 }
 
 export const useAuthStatus = () => {
-  const { authStatus } = useAccountsStore(
+  const { user: privyUser } = usePrivy();
+
+  const { authStatus, setAuthStatus } = useAccountsStore(
     useSelect(["authStatus", "setAuthStatus"])
   );
+
+  useEffect(() => {
+    if (!privyUser) {
+      setAuthStatus(AuthStatuses.signedOut);
+    }
+  }, [privyUser, setAuthStatus]);
 
   const isCheckingAuth = authStatus === AuthStatuses.checking;
   const isSignedIn = authStatus === AuthStatuses.signedIn;
@@ -147,11 +155,8 @@ export const useAuthStatus = () => {
 };
 
 const NavigationContent = () => {
-  logger.debug("[NavigationContent] Rendering");
-
   const { isCheckingAuth, isSignedIn, isSignedOut } = useAuthStatus();
   const { splashScreenHidden } = useAppStore(useSelect(["splashScreenHidden"]));
-  logger.debug({ splashScreenHidden, isCheckingAuth, isSignedIn, isSignedOut });
 
   // Uncomment to test design system components
   // return (
@@ -170,8 +175,6 @@ const NavigationContent = () => {
     return <SignedOutNavigation />;
   } else if (isSignedIn) {
     return <SignedInNavigation />;
-  } else {
-    throw new Error(`Invalid auth status: ${authStatus}`);
   }
 };
 

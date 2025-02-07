@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import { Text } from "@/design-system/Text";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 
@@ -24,19 +23,15 @@ import { OnboardingCreateContactCard } from "@/features/onboarding/components/on
 import { OnboardingContactCardThemeProvider } from "@/features/onboarding/components/onboarding-contact-card-provider";
 import logger from "@/utils/logger";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { v4 as uuidv4 } from "uuid";
 import { formatRandomUserName } from "@/features/onboarding/utils/format-random-user-name";
 import { useAddPfp } from "../hooks/useAddPfp";
 import { ProfileType } from "../types/onboarding.types";
 import { useCreateOrUpdateProfileInfo } from "../hooks/useCreateOrUpdateProfileInfo";
 import { useProfile } from "../hooks/useProfile";
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
-import { BottomSheetHeader } from "@/design-system/BottomSheet/BottomSheetHeader";
-import { BottomSheetModal } from "@/design-system/BottomSheet/BottomSheetModal";
 import { useBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BottomSheetContentContainer } from "@/design-system/BottomSheet/BottomSheetContentContainer";
-import { usePrivy } from "@privy-io/expo";
+import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet.bottom-sheet";
+import { useCoinbaseWalletListener } from "@/utils/coinbaseWallet";
+import { config } from "@/config";
 
 const $screenContainer: ViewStyle = {
   flex: 1,
@@ -58,7 +53,6 @@ const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 
 export function OnboardingContactCardScreen() {
   const router = useRouter();
-  const { user: privyUser } = usePrivy();
   const setAuthStatus = useAccountsStore((s) => s.setAuthStatus);
 
   const currentSender = useCurrentSender();
@@ -81,15 +75,8 @@ export function OnboardingContactCardScreen() {
     `[OnboardingContactCardScreen] Profile update loading: ${loading}, error: ${errorMessage}`
   );
 
-  const titleAnimation = animation
-    .fadeInUpSpring()
-    .delay(ONBOARDING_ENTERING_DELAY.FIRST)
-    .duration(ONBOARDING_ENTERING_DURATION);
-
-  const subtitleAnimation = animation
-    .fadeInUpSpring()
-    .delay(ONBOARDING_ENTERING_DELAY.SECOND)
-    .duration(ONBOARDING_ENTERING_DURATION);
+  const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
+  useCoinbaseWalletListener(true, coinbaseUrl);
 
   useEffect(() => {
     if (errorMessage) {
@@ -143,11 +130,14 @@ export function OnboardingContactCardScreen() {
   }, [createOrUpdateProfile, profile, router, asset?.uri, setAuthStatus]);
 
   const listBottomSheetRef = useBottomSheetModalRef();
+  const [
+    isConnectWalletBottomSheetVisible,
+    setIsConnectWalletBottomSheetVisible,
+  ] = useState(false);
 
   const handleImportPress = useCallback(() => {
-    listBottomSheetRef.current?.present();
-  }, [listBottomSheetRef]);
-  const insets = useSafeAreaInsets();
+    setIsConnectWalletBottomSheetVisible(true);
+  }, []);
 
   return (
     <>
@@ -158,12 +148,15 @@ export function OnboardingContactCardScreen() {
       >
         <Center style={$centerContainerStyle}>
           <VStack style={$titleContainer}>
-            <OnboardingTitle entering={titleAnimation} size={"xl"}>
+            <OnboardingTitle
+              // entering={titleAnimation}
+              size={"xl"}
+            >
               Complete your contact card
             </OnboardingTitle>
             <OnboardingSubtitle
               style={themed($subtitleStyle)}
-              entering={subtitleAnimation}
+              // entering={subtitleAnimation}
             >
               Choose how you show up
             </OnboardingSubtitle>
@@ -189,32 +182,22 @@ export function OnboardingContactCardScreen() {
         />
       </Screen>
 
-      <BottomSheetModal ref={listBottomSheetRef} snapPoints={["50%"]}>
-        <BottomSheetHeader title="Import an identity" />
-        <BottomSheetContentContainer
-          style={{
-            flex: 1,
-          }}
-        >
-          <VStack
-            style={{
-              paddingHorizontal: theme.spacing.md,
-              rowGap: theme.spacing.xs,
-              paddingBottom: insets.bottom,
-            }}
-          >
-            {currentSender ? (
-              <Text>
-                {JSON.stringify(currentSender)}
-                show the installed wallets that we support [coinbase, metamask,
-                rainbow to link]
-              </Text>
-            ) : (
-              <Text>Loading XMTP client...</Text>
-            )}
-          </VStack>
-        </BottomSheetContentContainer>
-      </BottomSheetModal>
+      <ConnectWalletBottomSheet
+        isVisible={isConnectWalletBottomSheetVisible}
+        onClose={() => setIsConnectWalletBottomSheetVisible(false)}
+        onWalletConnect={async (connectHandler) => {
+          try {
+            await connectHandler();
+            listBottomSheetRef.current?.dismiss();
+          } catch (error) {
+            logger.error(
+              "[OnboardingContactCardScreen] Wallet connect error:",
+              error
+            );
+            captureErrorWithToast(error as Error);
+          }
+        }}
+      />
     </>
   );
 }

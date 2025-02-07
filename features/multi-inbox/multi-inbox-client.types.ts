@@ -1,3 +1,8 @@
+import {
+  Signer as XmtpSigner,
+  Client as XmtpClient,
+} from "@xmtp/react-native-sdk";
+
 export const MultiInboxClientRestorationStates = {
   idle: "idle",
   restoring: "restoring",
@@ -20,3 +25,11 @@ export type CurrentSender = {
   ethereumAddress: string;
   xmtpInboxId: string;
 };
+
+export type ClientWithInvalidInstallation = undefined;
+
+export type InboxClient =
+  /** we're soon going to abstract xmtp client, for now just alias */ XmtpClient;
+
+export type InboxSigner =
+  /** we're soon going to abstract xmtp client, for now just alias */ XmtpSigner;

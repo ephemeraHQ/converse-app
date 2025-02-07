@@ -150,11 +150,7 @@ export default function AppWithProviders() {
 
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();
-  logger.debug(
-    `[AppWithProviders] Rendering: ${JSON.stringify({
-      privy: config.privy,
-    })}`
-  );
+
   return (
     <QueryClientProvider client={queryClient}>
       <PrivyProvider

@@ -1,6 +1,5 @@
 import { ConnectedEthereumWallet } from "@privy-io/expo";
 
-import { getDbEncryptionKey } from "@/utils/keychain/helpers";
 import logger from "@/utils/logger";
 import {
   Client as XmtpClient,
@@ -12,10 +11,12 @@ import { PrivySmartWalletClient } from "../embedded-wallets/embedded-wallet.type
 import { codecs } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { useAccountsStore } from "@/features/multi-inbox/multi-inbox.store";
 import {
+  ClientWithInvalidInstallation,
   CurrentSender,
   MultiInboxClientRestorationStates,
 } from "./multi-inbox-client.types";
 import { setInboxIdQueryData } from "@/queries/inbox-id-query";
+import { getDbEncryptionKey } from "@/utils/keychain";
 
 /**
  * Client for managing multiple XMTP inboxes and their lifecycle.
@@ -364,7 +365,9 @@ export class MultiInboxClient {
         "[restorePreviouslyCreatedInboxesForDevice] Starting restore"
       );
 
-      const xmtpInboxClients = await Promise.all(
+      const xmtpInboxClients: Array<
+        XmtpClient | ClientWithInvalidInstallation
+      > = await Promise.all(
         previouslyCreatedInboxes.map(async ({ ethereumAddress, inboxId }) => {
           try {
             logger.debug(
@@ -395,6 +398,20 @@ export class MultiInboxClient {
               inboxId
             );
 
+            const isInstallationValid = await this.isClientInstallationValid(
+              xmtpInboxClient
+            );
+
+            if (!isInstallationValid) {
+              logger.warn(
+                `[restorePreviouslyCreatedInboxesForDevice] Installation is invalid for address ${ethereumAddress}`
+              );
+              alert(
+                `Installation is invalid for address ${ethereumAddress} - whats the UX treatment? Currently just not activating the Inbox.`
+              );
+              return;
+            }
+
             const clientInboxId = xmtpInboxClient.inboxId;
             setInboxIdQueryData({
               account: ethereumAddress,
@@ -423,7 +440,11 @@ export class MultiInboxClient {
         })
       );
 
-      xmtpInboxClients.forEach((xmtpClient) => {
+      const validInstallationXmtpInboxClients = xmtpInboxClients.filter(
+        (xmtpClient) => xmtpClient !== undefined
+      );
+
+      validInstallationXmtpInboxClients.forEach((xmtpClient) => {
         const clientInboxId = xmtpClient.inboxId;
         const lowercaseClientLinkedEthereumAddress =
           xmtpClient.address.toLowerCase();
@@ -486,11 +507,15 @@ export class MultiInboxClient {
     );
   }
 
-  async logoutMessagingClients({
-    shouldDestroyLocalData,
-  }: {
-    shouldDestroyLocalData: boolean;
-  }) {
+  async logoutMessagingClients(
+    {
+      shouldDestroyLocalData,
+    }: {
+      shouldDestroyLocalData: boolean;
+    } = {
+      shouldDestroyLocalData: false,
+    }
+  ) {
     if (shouldDestroyLocalData) {
       this.destroyLocalDatabases();
     }
@@ -506,9 +531,10 @@ export class MultiInboxClient {
         ];
       }
     );
-    Object.keys(this.xmtpClientInboxIdToAddressMap).forEach((inboxId) => {
-      delete this.xmtpClientInboxIdToAddressMap[inboxId];
-    });
+    // Object.keys(this.xmtpClientInboxIdToAddressMap).forEach((inboxId) => {
+    //   delete this.xmtpClientInboxIdToAddressMap[inboxId];
+    // });
+    useAccountsStore.getState().logoutAllSenders();
   }
 
   private assertLiveMultiInboxPreconditions() {
