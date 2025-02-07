@@ -1,0 +1,56 @@
+ LOG  10:02:15 AM | DEBUG : [OnboardingContactCardScreen] Current profile: 
+{
+  "username": "",
+  "avatar": "",
+  "displayName": "asdf"
+}
+
+ LOG  10:02:15 AM | DEBUG : [OnboardingContactCardScreen] Profile update loading: true, error: An unknown error occurred 
+ LOG  10:02:15 AM | DEBUG : [OnboardingContactCardScreen] Current PFP asset: Undefined Message
+ LOG  10:02:16 AM | DEBUG : [API PROFILES] checkUsernameValid response: 
+{
+  "success": true,
+  "message": "Could claim username"
+}
+
+ LOG  10:02:16 AM | DEBUG : [Keychain] Creating account encryption key for account 0x4e340B39031b130C306d2aFc4e87768f168B1522 
+ LOG  10:02:16 AM | DEBUG : Getting token 
+ LOG  10:02:16 AM | DEBUG : [Query] success fetching ["profileSocials","0x4e340b39031b130c306d2afc4e87768f168b1522"] 
+ LOG  10:02:16 AM | DEBUG : [OnboardingContactCardScreen] Current sender address: 0x4e340B39031b130C306d2aFc4e87768f168B1522 
+ LOG  10:02:16 AM | DEBUG : [OnboardingContactCardScreen] Initializing with address: 0x4e340B39031b130C306d2aFc4e87768f168B1522 
+ LOG  10:02:16 AM | DEBUG : [OnboardingContactCardScreen] Current profile: 
+{
+  "username": "",
+  "avatar": "",
+  "displayName": "asdf"
+}
+
+ LOG  10:02:16 AM | DEBUG : [OnboardingContactCardScreen] Profile update loading: true, error: An unknown error occurred 
+ LOG  10:02:16 AM | DEBUG : [OnboardingContactCardScreen] Current PFP asset: Undefined Message
+ LOG  10:02:16 AM | INFO : Creating access token 
+ LOG  10:02:16 AM | INFO : Created access token 
+ LOG  10:02:17 AM | DEBUG : [API PROFILES] claimProfile response: 
+{
+  "success": true,
+  "message": "User name set successfully"
+}
+
+ LOG  10:02:17 AM | DEBUG : [OnboardingContactCardScreen] Real profile creation success: true 
+ LOG  10:02:17 AM | DEBUG : [OnboardingContactCardScreen] Navigating to notifications permissions 
+ LOG  10:02:17 AM | DEBUG : [Query] success fetching ["profileSocials","0x4e340b39031b130c306d2afc4e87768f168b1522"] 
+ LOG  10:02:17 AM | DEBUG : [OnboardingContactCardScreen] Current sender address: 0x4e340B39031b130C306d2aFc4e87768f168B1522 
+ LOG  10:02:17 AM | DEBUG : [OnboardingContactCardScreen] Initializing with address: 0x4e340B39031b130C306d2aFc4e87768f168B1522 
+ LOG  10:02:17 AM | DEBUG : [OnboardingContactCardScreen] Current profile: 
+{
+  "username": "",
+  "avatar": "",
+  "displayName": "asdf"
+}
+
+ LOG  10:02:17 AM | DEBUG : [OnboardingContactCardScreen] Profile update loading: true, error: An unknown error occurred 
+ LOG  10:02:17 AM | DEBUG : [OnboardingContactCardScreen] Current PFP asset: Undefined Message
+[BrowserEngineKit] Failed to terminate process: Error Domain=com.apple.extensionKit.errorDomain Code=18 "(null)"
+UserInfo={NSUnderlyingError=0x600000dedfe0 {Error Domain=RBSRequestErrorDomain Code=3 "No such process found"
+UserInfo={NSLocalizedFailureReason=No such process found}}}
+ LOG  10:02:19 AM | DEBUG : [useAuthStatus] Current auth status: signedIn, isReady: true 
+ LOG  10:02:19 AM | DEBUG : [useAuthStatus] MultiInbox restoration state: restored 

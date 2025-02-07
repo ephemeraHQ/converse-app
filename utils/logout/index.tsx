@@ -12,9 +12,9 @@ import { useCallback } from "react";
 // todo what queries should be removed?
 export const useLogout = () => {
   const { setAuthStatus } = useAccountsStore();
-  converseNavigatorRef.current?.dispatch(StackActions.popToTop());
   const privy = usePrivy();
   return useCallback(() => {
+    converseNavigatorRef.current?.dispatch(StackActions.popToTop());
     queryClient.removeQueries({
       queryKey: ["embeddedWallet"],
     });

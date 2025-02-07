@@ -8,7 +8,7 @@ export const ShareProfileScreenConfig = {
   path: "/shareProfile",
 };
 
-export default function ShareProfileNav() {
+export function ShareProfileNav() {
   const colorScheme = useColorScheme();
   return (
     <NativeStack.Screen

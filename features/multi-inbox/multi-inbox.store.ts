@@ -186,6 +186,16 @@ const getAccountStore = (account: string) => {
 export const getAccountsList = () =>
   useAccountsStore.getState().senders.map((sender) => sender.ethereumAddress);
 
+/**
+ * @deprecated We should index by ID instead of ethereum address
+ */
+export const useAccountsList = () => {
+  const senders = useAccountsStore((state) => state.senders);
+  return senders
+    .filter((sender) => Boolean(sender.ethereumAddress))
+    .map((sender) => sender.ethereumAddress);
+};
+
 export const useCurrentAccount = () => {
   const currentSender = useCurrentSender();
   return currentSender?.ethereumAddress;

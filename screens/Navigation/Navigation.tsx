@@ -1,9 +1,18 @@
 import { ScreenHeaderModalCloseButton } from "@/components/Screen/ScreenHeaderModalCloseButton";
-import { JoinGroupNavigationParams } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
-import { ConversationNavParams } from "@/features/conversation/conversation.nav";
-import { InviteUsersToExistingGroupParams } from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
+import {
+  JoinGroupNavigation,
+  JoinGroupNavigationParams,
+} from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
+import {
+  ConversationNav,
+  ConversationNavParams,
+} from "@/features/conversation/conversation.nav";
+import {
+  InviteUsersToExistingGroupNav,
+  InviteUsersToExistingGroupParams,
+} from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
-import { ProfileNavParams } from "@/features/profiles/profile.nav";
+import { ProfileNav, ProfileNavParams } from "@/features/profiles/profile.nav";
 import { translate } from "@/i18n";
 import { useRouter } from "@/navigation/useNavigation";
 import { OnboardingContactCardScreen } from "@features/onboarding/screens/onboarding-contact-card-screen";
@@ -17,18 +26,24 @@ import { Platform, useColorScheme, Text, Button } from "react-native";
 import { IdleScreen } from "../IdleScreen";
 import { NewAccountCreateContactCardScreen } from "../NewAccount/new-account-create-contact-card-screen";
 import { NewAccountScreen } from "../NewAccount/new-account-screen";
-import { GroupNavParams } from "./GroupNav";
-import { WebviewPreviewNavParams } from "./WebviewPreviewNav";
+import GroupNav, { GroupNavParams } from "./GroupNav";
+import WebviewPreviewNav, {
+  WebviewPreviewNavParams,
+} from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { SignupWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
 import { usePrivy } from "@privy-io/expo";
 import { useCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
-import { queryClient } from "@/queries/queryClient";
 import { useLogout } from "@/utils/logout";
 import logger from "@/utils/logger";
+import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen";
+import UserProfileNav from "./UserProfileNav";
+import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
+import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen";
+import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
+import { ShareProfileNav } from "./ShareProfileNav";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -126,12 +141,14 @@ const FakeScreen = memo(function FakeScreen() {
 });
 
 export function SignedInNavigation() {
+  const colorScheme = useColorScheme();
+
   return (
     <NativeStack.Navigator
       screenListeners={screenListeners("fullStackNavigation")}
     >
       <NativeStack.Group>
-        {/* <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
+        <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
           <NativeStack.Screen name="Chats" component={ConversationListScreen} />
           <NativeStack.Screen
             name="Blocked"
@@ -145,8 +162,7 @@ export function SignedInNavigation() {
           {GroupNav()}
           {InviteUsersToExistingGroupNav()}
           {JoinGroupNavigation()}
-          {TopUpNav()}
-        </NativeStack.Group> */}
+        </NativeStack.Group>
         <NativeStack.Group>
           <NativeStack.Screen
             name="FakeScreen"
@@ -156,11 +172,11 @@ export function SignedInNavigation() {
         </NativeStack.Group>
 
         <NativeStack.Group>
-          {/* {UserProfileNav()}
+          {UserProfileNav()}
           <NativeStack.Screen
             name="AppSettings"
             component={AppSettingsScreen}
-          /> */}
+          />
           <NativeStack.Screen
             name="NewAccountNavigator"
             component={NewAccountNavigator}

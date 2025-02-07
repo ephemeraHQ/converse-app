@@ -164,6 +164,7 @@ export class MultiInboxClient {
         env: config.xmtpEnv,
         enableV3: true,
         dbEncryptionKey,
+        codecs,
       };
       logger.debug("[createXmtpClient] Client options configured", options);
 

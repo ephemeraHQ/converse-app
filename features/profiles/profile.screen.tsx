@@ -31,6 +31,7 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { StackActions } from "@react-navigation/native";
 import React, { useCallback, useState } from "react";
 import { Alert, Share, ViewStyle } from "react-native";
+import { useLogout } from "@/utils/logout";
 
 export function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
@@ -63,6 +64,8 @@ export function ProfileScreen() {
   const isBlockedPeer = useSettingsStore(
     (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
   );
+
+  const logout = useLogout();
 
   const handleContextMenuAction = useCallback(
     (actionId: string) => {
@@ -272,8 +275,7 @@ export function ProfileScreen() {
                 {
                   label: "Log out",
                   isWarning: true,
-                  onPress: () =>
-                    showDisconnectActionSheet(theme.isDark ? "dark" : "light"),
+                  onPress: () => logout(),
                 },
               ]}
             />
