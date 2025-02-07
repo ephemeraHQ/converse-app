@@ -3,7 +3,7 @@ import { MMKV } from "react-native-mmkv";
 import { StateStorage } from "zustand/middleware";
 
 import { DEFAULT_GC_TIME } from "@/queries/queryClient.constants";
-import { getAccountEncryptionKey } from "./keychain/helpers";
+import { getAccountEncryptionKey } from "./keychain";
 import logger from "./logger";
 
 const storage = new MMKV();

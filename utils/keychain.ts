@@ -4,12 +4,16 @@ import { createHash } from "crypto";
 import { getRandomBytesAsync } from "expo-crypto";
 import * as SecureStore from "expo-secure-store";
 import { v4 as uuidv4 } from "uuid";
-import { config } from "../../config";
-import {
-  deleteSecureItemAsync,
-  getSecureItemAsync,
-  setSecureItemAsync,
-} from ".";
+import { config } from "../config";
+
+export const setSecureItemAsync = (key: string, value: string) =>
+  SecureStore.setItemAsync(key, value, secureStoreOptions);
+
+export const getSecureItemAsync = (key: string) =>
+  SecureStore.getItemAsync(key, secureStoreOptions);
+
+export const deleteSecureItemAsync = (key: string) =>
+  SecureStore.deleteItemAsync(key, secureStoreOptions);
 
 export const secureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainService: config.bundleId,
@@ -26,7 +30,6 @@ export const deleteXmtpKey = async (account: string) => {
 
 export const loadXmtpKey = async (account: string): Promise<string | null> =>
   getSecureItemAsync(`XMTP_KEY_${account}`);
-
 // export const getXmtpDatabaseEncryptionKey = async (
 //   account: string
 // ): Promise<string> => {
@@ -41,7 +44,6 @@ export const loadXmtpKey = async (account: string): Promise<string | null> =>
 //   await setSecureItemAsync(`XMTP_DB_ENCRYPTION_KEY_${account}`, newKey);
 //   return newKey;
 // };
-
 // export const deleteXmtpDatabaseEncryptionKey = (account: string) =>
 //   deleteSecureItemAsync(`XMTP_DB_ENCRYPTION_KEY_${account}`);
 
@@ -84,17 +86,6 @@ export const privySecureStorage: PrivyStorage = {
   getKeys: async () => [],
 };
 
-export const savePrivateKey = async (
-  privateKeyPath: string,
-  privateKey: string
-) =>
-  SecureStore.setItemAsync(privateKeyPath, privateKey, {
-    keychainService: config.bundleId,
-    keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-    // TODO => add biometric authentication
-    // requireAuthentication: true,
-  });
-
 export const getDeviceId = async () => {
   const deviceId = await SecureStore.getItemAsync("CONVERSE_DEVICE_ID");
   if (deviceId) return deviceId;
@@ -102,10 +93,10 @@ export const getDeviceId = async () => {
   await SecureStore.setItemAsync("CONVERSE_DEVICE_ID", newDeviceId);
   return newDeviceId;
 };
-
 // Returns a 64 bytes key that can be used for multiple things
 // 32 bytes is used for XMTP db encryption,
 // 16 bytes is used for MMKV secure encryption
+
 export const getAccountEncryptionKey = async (
   account: string
 ): Promise<Buffer> => {

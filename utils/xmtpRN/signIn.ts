@@ -1,5 +1,5 @@
 import { config } from "@/config";
-import { getDbEncryptionKey } from "@utils/keychain/helpers";
+import { getDbEncryptionKey } from "../keychain";
 import logger from "@utils/logger";
 import { Client, Signer as XmtpSigner } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";

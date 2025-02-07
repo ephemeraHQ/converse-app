@@ -1,11 +1,7 @@
-// Keep this at the top
-import "./polyfills";
-
-import * as Privy from "@privy-io/expo";
+import { PrivyProvider } from "@privy-io/expo";
 
 // This is a requirement for Privy to work, does not make any sense
 // To test run yarn start --no-dev --minify
-const PrivyProvider = Privy.PrivyProvider;
 
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
@@ -33,7 +29,6 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
-import { Text } from "react-native";
 import {
   ReanimatedLogLevel,
   configureReanimatedLogger,
@@ -47,7 +42,6 @@ import { saveApiURI } from "./utils/sharedData";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
 import logger from "./utils/logger";
-import { RELYING_PARTY } from "./features/onboarding/passkey.constants";
 
 preventSplashScreenAutoHide();
 
@@ -166,11 +160,8 @@ export default function AppWithProviders() {
       <PrivyProvider
         appId={config.privy.appId}
         clientId={config.privy.clientId}
-        config={{
-          mfa: {
-            relyingParty: RELYING_PARTY,
-          },
-        }}
+        // storage={privySecureStorage} // Temporary removed until we see if really needed
+        // supportedChains={[base]} // Temporary removed until we see if really needed
       >
         <SmartWalletsProvider>
           <ThirdwebProvider>
