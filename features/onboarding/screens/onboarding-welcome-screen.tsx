@@ -22,6 +22,7 @@ import { BottomSheetModal } from "@/design-system/BottomSheet/BottomSheetModal";
 import { BottomSheetHeader } from "@/design-system/BottomSheet/BottomSheetHeader";
 import { BottomSheetContentContainer } from "@/design-system/BottomSheet/BottomSheetContentContainer";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
+import { RELYING_PARTY } from "../passkey.constants";
 const $subtextStyle: TextStyle = {
   textAlign: "center",
 };
@@ -45,57 +46,6 @@ type WalletBottomSheetProps = {
   currentSender?: any; // Replace with proper type
 };
 
-function WalletBottomSheet({
-  isVisible,
-  onClose,
-  currentSender,
-}: WalletBottomSheetProps) {
-  const { theme } = useAppTheme();
-  const insets = useSafeAreaInsets();
-  const bottomSheetRef = useBottomSheetModalRef();
-
-  useEffect(() => {
-    if (isVisible) {
-      bottomSheetRef.current?.present();
-    } else {
-      bottomSheetRef.current?.dismiss();
-    }
-  }, [isVisible, bottomSheetRef]);
-
-  return (
-    <BottomSheetModal
-      ref={bottomSheetRef}
-      snapPoints={["50%"]}
-      onDismiss={onClose}
-    >
-      <BottomSheetHeader title="Import an identity" />
-      <BottomSheetContentContainer
-        style={{
-          flex: 1,
-        }}
-      >
-        <VStack
-          style={{
-            paddingHorizontal: theme.spacing.md,
-            rowGap: theme.spacing.xs,
-            paddingBottom: insets.bottom,
-          }}
-        >
-          {currentSender ? (
-            <Text>
-              {JSON.stringify(currentSender)}
-              show the installed wallets that we support [coinbase, metamask,
-              rainbow to link]
-            </Text>
-          ) : (
-            <Text>Loading XMTP client...</Text>
-          )}
-        </VStack>
-      </BottomSheetContentContainer>
-    </BottomSheetModal>
-  );
-}
-
 export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
   return <OnboardingWelcomeScreenContent />;
 });
@@ -106,7 +56,12 @@ const OnboardingWelcomeScreenContent = memo(
     const { animation } = theme;
 
     const { logout: privyLogout, user: privyUser } = usePrivy();
-    const { signupWithPasskey } = useSignupWithPasskey();
+    const { loginWithPasskey: privySigninWithPasskey } =
+      usePrivyLoginWithPasskey();
+    const { signupWithPasskey: privySignupWithPasskey } =
+      usePrivySignupWithPasskey();
+
+    // const { signupWithPasskey } = useSignupWithPasskey();
     const navigation = useNavigation();
 
     const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
@@ -164,12 +119,33 @@ const OnboardingWelcomeScreenContent = memo(
           /> */}
           <Button
             onPress={async () => {
-              await signupWithPasskey();
-              // @ts-ignore
-              navigation.replace("OnboardingCreateContactCard");
+              try {
+                await privySignupWithPasskey({
+                  relyingParty: RELYING_PARTY,
+                });
+                // await signupWithPasskey();
+                // // @ts-ignore
+                // navigation.replace("OnboardingCreateContactCard");
+              } catch (error) {
+                console.log("error", error);
+              }
             }}
             title="Signup with Passkey"
           />
+
+          <Button
+            onPress={async () => {
+              try {
+                await privySigninWithPasskey({
+                  relyingParty: RELYING_PARTY,
+                });
+              } catch (error) {
+                console.log("error", error);
+              }
+            }}
+            title="Sign in with passkey"
+          />
+
           <Button
             onPress={async () => {
               await privyLogout();
