@@ -72,9 +72,6 @@ export function useSend() {
     const { topic } = conversationStore.getState();
     const { inputValue, replyingToMessageId } = composerStore.getState();
 
-    // Reset the composer
-    composerStore.getState().reset();
-
     const uploadedAttachment = await handleMediaPreview();
 
     const messageParamsWithTopic: Omit<ISendMessageParams, "topic"> = {
@@ -85,6 +82,9 @@ export function useSend() {
         referencedMessageId: replyingToMessageId,
       }),
     };
+
+    // Reset the composer before sending just for better UX
+    composerStore.getState().reset();
 
     if (uploadedAttachment || inputValue.length > 0) {
       if (topic) {
@@ -136,7 +136,10 @@ function useMediaPreview() {
 
   async function handleMediaPreview() {
     const mediaPreview = composerStore.getState().composerMediaPreview;
-    if (!mediaPreview) return null;
+
+    if (!mediaPreview) {
+      return null;
+    }
 
     if (mediaPreview.status === "uploading") {
       await waitUntilMediaPreviewIsUploaded();
@@ -145,15 +148,14 @@ function useMediaPreview() {
     composerStore.getState().updateMediaPreviewStatus("sending");
 
     try {
-      if (mediaPreview) {
-        await saveAttachmentLocally(mediaPreview);
-      }
+      await saveAttachmentLocally(mediaPreview);
     } catch (error) {
       sentryTrackError(error);
     }
 
     const uploadedAttachment =
       composerStore.getState().composerUploadedAttachment;
+
     if (!uploadedAttachment) {
       throw new Error("Something went wrong while uploading attachment");
     }

@@ -1,13 +1,14 @@
 import { ReplyPreview } from "@/features/conversation/conversation-composer/conversation-composer-reply-preview";
+import { captureErrorWithToast } from "@/utils/capture-error";
 import { HStack } from "@design-system/HStack";
 import { VStack } from "@design-system/VStack";
 import { useAppTheme } from "@theme/useAppTheme";
-import React, { memo } from "react";
+import React, { memo, useCallback } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ConversationComposerAttachmentPreview } from "./conversation-composer-attachment-preview";
-import { ConversationComposerTextInput } from "./conversation-composer-text-input";
-import { SendButton } from "./conversation-composer-send-button";
 import { AddAttachmentButton } from "./conversation-composer-add-attachment-button";
+import { ConversationComposerAttachmentPreview } from "./conversation-composer-attachment-preview";
+import { SendButton } from "./conversation-composer-send-button";
+import { ConversationComposerTextInput } from "./conversation-composer-text-input";
 import { useSend } from "./conversation-composer-use-send";
 
 export const ConversationComposer = memo(function ConversationComposer() {
@@ -15,6 +16,14 @@ export const ConversationComposer = memo(function ConversationComposer() {
   const insets = useSafeAreaInsets();
 
   const { send } = useSend();
+
+  const handleSend = useCallback(async () => {
+    try {
+      await send();
+    } catch (error) {
+      captureErrorWithToast(error, { message: "Failed to send message" });
+    }
+  }, [send]);
 
   return (
     <VStack
@@ -59,8 +68,8 @@ export const ConversationComposer = memo(function ConversationComposer() {
                 alignItems: "center",
               }}
             >
-              <ConversationComposerTextInput onSubmitEditing={send} />
-              <SendButton onPress={send} />
+              <ConversationComposerTextInput onSubmitEditing={handleSend} />
+              <SendButton onPress={handleSend} />
             </HStack>
           </VStack>
         </HStack>
