@@ -1,3 +1,5 @@
+import { ILoaderSize, loaderSize } from "@/theme/loader";
+import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { IAnimation, animation } from "@theme/animations";
 import { ILayout, layout } from "@theme/layout";
 import { IShadow, shadow } from "@theme/shadow";
@@ -10,7 +12,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { Appearance, Platform, StyleProp, useColorScheme } from "react-native";
+import { StyleProp, useColorScheme } from "react-native";
 import { IAvatarSize, avatarSize } from "./avatar";
 import { IBorderRadius, borderRadius } from "./border-radius";
 import { IBorderWidth, borderWidth } from "./borders";
@@ -20,9 +22,6 @@ import { IIconSize, iconSize } from "./icon";
 import { ISpacing, spacing } from "./spacing";
 import { Timing, timing } from "./timing";
 import { ITypography, typography } from "./typography";
-import { DarkTheme, DefaultTheme } from "@react-navigation/native";
-import logger from "@utils/logger";
-import { ILoaderSize, loaderSize } from "@/theme/loader";
 
 export type ThemeContexts = "light" | "dark" | undefined;
 

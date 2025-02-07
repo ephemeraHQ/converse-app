@@ -30,6 +30,12 @@ class BaseError extends Error {
   }
 }
 
+export class GenericError extends BaseError {
+  constructor(args: { message: string; cause: unknown }) {
+    super(args.message, args.cause);
+  }
+}
+
 export class HydrationError extends BaseError {
   constructor(message: string, cause?: unknown) {
     super(`[Hydration] ${message}`, cause);

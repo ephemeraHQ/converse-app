@@ -19,16 +19,17 @@ export const TextInput = memo(
 
     return (
       <RNTextInput
+        ref={ref}
         cursorColor={cursorColor}
         selectionHandleColor={cursorColor}
         selectionColor={cursorColor as string} // Not sure why "as string" is required
+        hitSlop={theme.spacing.xs} // By default for better UX
         style={[
           themed(textPresets["body"]),
           { padding: 0 }, // We want fully control over our TextInput layout
           style,
         ]}
         {...rest}
-        ref={ref}
       />
     );
   })

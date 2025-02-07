@@ -102,3 +102,7 @@ export const useLoopTxt = (
   }, [active, startInterval, stopInterval]);
   return options[step % options.length];
 };
+
+export function normalizeString(str: string) {
+  return str.toLowerCase().trim();
+}

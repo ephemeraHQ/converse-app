@@ -1,11 +1,8 @@
-import type { IProfileSocials } from "@/features/profiles/profile-types";
+/**
+ * TODO: Maybe move to profile socials utils once we have refactored profile socials
+ */
 
-export function doesGroupNameMatchQuery(
-  groupName: string | undefined,
-  normalizedQuery: string
-) {
-  return !!groupName?.toLowerCase().includes(normalizedQuery);
-}
+import type { IProfileSocials } from "@/features/profiles/profile-types";
 
 export function doesSocialsMatchQuery(args: {
   socials: IProfileSocials[];

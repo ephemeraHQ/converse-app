@@ -23,6 +23,7 @@ type IDropdownMenuProps = {
   style?: StyleProp<ViewStyle>;
   onPress?: (actionId: string) => void;
   shouldOpenOnLongPress?: boolean;
+  disabled?: boolean;
 };
 
 export const DropdownMenu = ({
@@ -31,6 +32,7 @@ export const DropdownMenu = ({
   style,
   onPress,
   shouldOpenOnLongPress = false,
+  disabled = false,
 }: IDropdownMenuProps) => {
   const { theme } = useAppTheme();
 
@@ -57,6 +59,10 @@ export const DropdownMenu = ({
     },
     [onPress]
   );
+
+  if (disabled) {
+    return <Pressable style={[$pressable, style]}>{children}</Pressable>;
+  }
 
   return (
     <MenuView

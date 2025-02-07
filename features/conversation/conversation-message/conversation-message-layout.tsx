@@ -112,11 +112,15 @@ export const ConversationMessageLayout = memo(
           )}
 
           <VStack
+            // {...debugBorder("red")}
             style={{
               alignItems: fromMe ? "flex-end" : "flex-start",
               ...(Boolean(reactions) && {
                 marginBottom: spaceBetweenMessagesInSeries,
               }),
+              // REALLY not sure why... but otherwise the message bubble were cut off?
+              // Maybe because of layout animation on the FlatList? Let's check again when we move to Legend List
+              paddingVertical: 0.5,
             }}
           >
             {!fromMe && !hasPreviousMessageInSeries && !isSystemMessage && (

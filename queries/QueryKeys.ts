@@ -6,12 +6,13 @@ import type {
 
 export enum QueryKeys {
   // Conversations
-  CONVERSATION_SYNC_ALL = "conversation-sync-all",
+  CONVERSATIONS_SYNC_ALL = "conversation-sync-all",
   CONVERSATIONS_ALLOWED_CONSENT = "conversations-allowed-consent",
   CONVERSATIONS_UNKNOWN_CONSENT = "conversations-unknown-consent",
   CONVERSATION = "conversation",
   CONVERSATION_DM = "conversation-dm",
   CONVERSATION_METADATA = "conversation-metadata",
+  CONVERSATIONS_SEARCH = "conversations-search",
 
   // Messages
   CONVERSATION_MESSAGE = "conversation-message",
@@ -36,7 +37,7 @@ export enum QueryKeys {
   // DMs
   DM_PEER_INBOX_ID = "dm-peer-inbox-id",
 
-  // User Search
+  // User search
   USER_SEARCH = "user-search",
 
   // InboxId
@@ -57,7 +58,7 @@ export const conversationSyncAllQueryKey = (args: {
   ethAddress: string;
   consentStates: ConsentState[];
 }) => [
-  QueryKeys.CONVERSATION_SYNC_ALL,
+  QueryKeys.CONVERSATIONS_SYNC_ALL,
   args.ethAddress,
   args.consentStates.join(","),
 ];
@@ -152,15 +153,37 @@ export const dmPeerInboxIdQueryKey = (args: {
   topic: ConversationTopic;
 }) => [QueryKeys.DM_PEER_INBOX_ID, args.account, args.topic];
 
-// Search
+// Conversations Search
 export const userSearchQueryKey = (searchQuery: string) => [
   QueryKeys.USER_SEARCH,
   "by-name",
   searchQuery,
 ];
-export const searchByConversationMembershipQueryKey = (args: {
+
+export const getSearchExistingDmsQueryKey = (args: {
   searchQuery: string;
-}) => [QueryKeys.USER_SEARCH, "by-conversation-membership", args.searchQuery];
+  inboxId: InboxId;
+}) => [QueryKeys.CONVERSATIONS_SEARCH, "dms", args.searchQuery, args.inboxId];
+
+export const getSearchExistingGroupsByGroupNameQueryKey = (args: {
+  searchQuery: string;
+  inboxId: InboxId;
+}) => [
+  QueryKeys.CONVERSATIONS_SEARCH,
+  "groups-by-name",
+  args.searchQuery,
+  args.inboxId,
+];
+
+export const getSearchExistingGroupsByMemberNameQueryKey = (args: {
+  searchQuery: string;
+  inboxId: InboxId;
+}) => [
+  QueryKeys.CONVERSATIONS_SEARCH,
+  "groups-by-member-name",
+  args.searchQuery,
+  args.inboxId,
+];
 
 // Profiles
 export const getProfileSocialsQueryKey = ({

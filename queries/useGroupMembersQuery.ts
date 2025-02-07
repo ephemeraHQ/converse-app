@@ -30,6 +30,16 @@ const fetchGroupMembers = async (args: {
 
   const members = await conversation.members();
 
+  /**
+   * We can't really have an empty group...
+   * And when a group is created on the SDK, the members are added in a separate call
+   * So it can lead that we try to fetch the members before the group is created
+   * So we retry a few times before giving up
+   */
+  if (members.length === 0) {
+    throw new Error("Empty members list");
+  }
+
   return entifyWithAddress(
     members,
     (member) => member.inboxId,
@@ -47,6 +57,16 @@ export const getGroupMembersQueryOptions = (args: {
     queryKey: groupMembersQueryKey(account, topic),
     queryFn: () => fetchGroupMembers({ account, topic }),
     enabled: isEnabled,
+    /**
+     * We can't really have an empty group...
+     * And when a group is created on the SDK, the members are added in a separate call
+     * So it can lead that we try to fetch the members before the group is created
+     * So we retry a few times before giving up
+     */
+    retry: (failureCount) => {
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * (attemptIndex + 1), 3000),
   });
 };
 

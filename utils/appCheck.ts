@@ -2,13 +2,13 @@
 // dashboards: https://console.firebase.google.com/u/0/project/converse-appcheck/appcheck/products
 // setup instructions: https://rnfirebase.io/app-check/usage
 import { config } from "@/config";
+import { captureError } from "@/utils/capture-error";
+import { GenericError } from "@/utils/error";
 import { firebase } from "@react-native-firebase/app-check";
-import logger from "./logger";
 
 const appCheck = firebase.appCheck();
 
 export const tryGetAppCheckToken = async () => {
-  logger.debug("Getting token");
   try {
     // App Check FAQ:
     // Do we need/want to use the limited use token?
@@ -19,7 +19,12 @@ export const tryGetAppCheckToken = async () => {
     // const { token } = await appCheck.getToken();
     return token;
   } catch (error) {
-    logger.error("Error getting token", error);
+    captureError(
+      new GenericError({
+        message: "Error getting App Check token",
+        cause: error,
+      })
+    );
     return undefined;
   }
 };

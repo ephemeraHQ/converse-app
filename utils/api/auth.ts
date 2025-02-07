@@ -1,5 +1,5 @@
 import { tryGetAppCheckToken } from "../appCheck";
-import logger from "../logger";
+import logger, { authLogger } from "../logger";
 import { getSecureMmkvForAccount } from "../mmkv";
 import {
   InstallationSignature,
@@ -48,7 +48,9 @@ export async function fetchAccessToken({
   appCheckToken,
   account,
 }: AuthParams): Promise<AuthResponse> {
-  logger.info("Creating access token");
+  authLogger.debug(
+    `Creating access token for account: ${account} with inboxId: ${inboxId}`
+  );
   const { data } = await dedupedFetch("/api/authenticate" + inboxId, () =>
     api.post<AuthResponse>(
       "/api/authenticate",
@@ -73,7 +75,7 @@ export async function fetchAccessToken({
   if (!data.refreshToken) {
     throw new Error("No refresh token in auth response");
   }
-  logger.info("Created access token");
+  authLogger.debug(`Successfully created access token for account: ${account}`);
   return data;
 }
 

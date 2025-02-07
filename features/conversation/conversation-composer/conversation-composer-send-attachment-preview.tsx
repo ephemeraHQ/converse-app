@@ -1,4 +1,4 @@
-import { Loader } from "@/design-system/loader";
+import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { IconButton } from "@design-system/IconButton/IconButton";
 import { AnimatedVStack, VStack } from "@design-system/VStack";
 import {
@@ -73,7 +73,7 @@ export function SendAttachmentPreview({
               alignItems: "center",
             }}
           >
-            <Loader
+            <ActivityIndicator
               size="small"
               color="#ffffff"
               style={{

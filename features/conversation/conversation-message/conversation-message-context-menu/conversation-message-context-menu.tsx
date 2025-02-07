@@ -62,7 +62,17 @@ const Content = memo(function Content(props: {
   const message = getMessageById({
     messageId,
     topic,
-  })!;
+  })!; // ! Because if we are inside this component it's because we selected a message and it exists for sure
+
+  const nextMessage = getMessageById({
+    messageId: message.id,
+    topic,
+  });
+
+  const previousMessage = getMessageById({
+    messageId: message.id,
+    topic,
+  });
 
   const fromMe = messageIsFromCurrentAccountInboxId({ message });
   const menuItems = useMessageContextMenuItems({
@@ -160,10 +170,11 @@ const Content = memo(function Content(props: {
 
                 <MessageContextStoreProvider
                   message={message}
-                  nextMessage={undefined}
-                  previousMessage={undefined}
+                  nextMessage={nextMessage ?? undefined}
+                  previousMessage={previousMessage ?? undefined}
                 >
                   {/* TODO: maybe make ConversationMessage more dumb to not need any context? */}
+
                   <ConversationMessage message={message} />
                 </MessageContextStoreProvider>
 

@@ -1,8 +1,8 @@
-import { Loader } from "@/design-system/loader";
+import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { useAppTheme } from "@theme/useAppTheme";
 import { memo } from "react";
 
 export const AttachmentLoading = memo(function AttachmentLoading() {
   const { theme } = useAppTheme();
-  return <Loader color={theme.colors.text.inverted.primary} />;
+  return <ActivityIndicator color={theme.colors.text.inverted.primary} />;
 });

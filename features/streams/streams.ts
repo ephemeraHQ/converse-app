@@ -67,25 +67,6 @@ export function setupStreamingSubscriptions() {
       stopStreaming(removedAccounts);
     }
   });
-
-  // Start/Stop streaming when app state changes
-  useAppState.subscribe((state) => {
-    const isGoingActive =
-      state.currentState === "active" && state.previousState !== "active";
-    const isLeavingActive =
-      state.previousState === "active" && state.currentState !== "active";
-
-    if (isGoingActive) {
-      logger.debug("[Streaming] App is now active, reconnecting streams");
-      const { hydrationDone, isInternetReachable } = useAppStore.getState();
-      if (hydrationDone && isInternetReachable) {
-        startStreaming(getAccountsList());
-      }
-    } else if (isLeavingActive) {
-      logger.debug("[Streaming] App is now inactive, stopping xmtp streams");
-      stopStreaming(getAccountsList());
-    }
-  });
 }
 
 async function startStreaming(accountsToStream: string[]) {

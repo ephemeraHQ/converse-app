@@ -1,3 +1,4 @@
+import { useConversationComposerIsEnabled } from "@/features/conversation/conversation-composer/hooks/conversation-composer-is-enabled";
 import { textSizeStyles } from "@design-system/Text/Text.styles";
 import { useAppTheme } from "@theme/useAppTheme";
 import React, { memo, useCallback, useEffect, useRef } from "react";
@@ -15,6 +16,7 @@ export const ConversationComposerTextInput = memo(
     const { theme } = useAppTheme();
 
     const store = useConversationComposerStore();
+    const isEnabled = useConversationComposerIsEnabled();
     const inputDefaultValue = store.getState().inputValue;
 
     const handleChangeText = useCallback(
@@ -72,6 +74,7 @@ export const ConversationComposerTextInput = memo(
             onSubmitEditing();
           }
         }}
+        editable={isEnabled}
         ref={inputRef}
         onSubmitEditing={handleSubmitEditing}
         onChangeText={handleChangeText}
