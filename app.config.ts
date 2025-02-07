@@ -116,15 +116,18 @@ export default (): ExpoConfig => {
     ios: {
       bundleIdentifier: config.ios.bundleIdentifier,
       supportsTablet: true,
+      associatedDomains: config.ios.associatedDomains,
+      googleServicesFile: config.ios.googleServicesFile,
       config: {
         usesNonExemptEncryption: false,
       },
-      associatedDomains: config.ios.associatedDomains,
-      googleServicesFile: config.ios.googleServicesFile,
+      entitlements: {
+        // App check stuff
+        "com.apple.developer.devicecheck.appattest-environment": "production",
+      },
       infoPlist: {
         LSApplicationQueriesSchemes: [
           "cbwallet",
-          "ledgerlive",
           "rainbow",
           "metamask",
           "trust",
@@ -133,6 +136,10 @@ export default (): ExpoConfig => {
           "exodus",
           "oneinch",
         ],
+        NSAppTransportSecurity: {
+          NSAllowsArbitraryLoads: false, // Not sure why
+          NSAllowsLocalNetworking: true, // Not sure why
+        },
       },
     },
     android: {
@@ -205,7 +212,14 @@ export default (): ExpoConfig => {
     },
     plugins: [
       ["expo-notifications"],
-      ["expo-local-authentication"],
+      ["expo-secure-store"],
+      [
+        "expo-local-authentication",
+        {
+          faceIDPermission:
+            "We need this to use biometrics to secure your data.",
+        },
+      ],
       [
         "expo-build-properties",
         {
@@ -216,6 +230,7 @@ export default (): ExpoConfig => {
             // you may set `use_modular_headers!` globally in your Podfile,
             // or specify `:modular_headers => true` for particular dependencies"
             useFrameworks: "static",
+            deploymentTarget: "17.5",
           },
           android: {
             compileSdkVersion: 35,
@@ -305,7 +320,6 @@ export default (): ExpoConfig => {
             "We need this so that you can take photos to share.",
         },
       ],
-      "expo-secure-store",
       [
         "expo-splash-screen",
         {
@@ -327,6 +341,7 @@ export default (): ExpoConfig => {
       ],
       ["@react-native-firebase/app"],
       ["@react-native-firebase/app-check"],
+      "./scripts/android/build/android-deps-expo-plugin.js",
     ],
   };
 };

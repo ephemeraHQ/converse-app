@@ -1,12 +1,9 @@
-// Keep this at the top
-import "./polyfills";
-
-import * as Privy from "@privy-io/expo";
+import { PrivyProvider } from "@privy-io/expo";
 
 // This is a requirement for Privy to work, does not make any sense
 // To test run yarn start --no-dev --minify
-const PrivyProvider = Privy.PrivyProvider;
 
+import { setupStreamingSubscriptions } from "@/features/streams/streams";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import { Snackbars } from "@components/Snackbar/Snackbars";
@@ -40,7 +37,6 @@ import {
   configureReanimatedLogger,
 } from "react-native-reanimated";
 import { ThirdwebProvider } from "thirdweb/react";
-import { base } from "viem/chains";
 import { config } from "./config";
 import {
   TEMPORARY_ACCOUNT_NAME,
@@ -49,11 +45,9 @@ import {
 import { setAuthStatus } from "./data/store/authStore";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
-import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
 import { saveApiURI } from "./utils/sharedData";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
-import { setupStreamingSubscriptions } from "@/features/streams/streams";
 
 preventSplashScreenAutoHide();
 
@@ -176,10 +170,11 @@ export default function AppWithProviders() {
   return (
     <QueryClientProvider client={queryClient}>
       <PrivyProvider
-        appId={config.privy.appId}
-        clientId={config.privy.clientId}
-        storage={privySecureStorage}
-        supportedChains={[base]}
+        appId="cloh5bn1p00q4l50gcg0g1mix"
+        clientId="client-WY2eFe3hjqkyEyrGWiZoJUqsihgrJieWcXjcKN4f3mwXM"
+
+        // storage={privySecureStorage}
+        // supportedChains={[base]}
       >
         <SmartWalletsProvider>
           <ThirdwebProvider>

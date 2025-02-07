@@ -25,7 +25,7 @@ build-*.apk
 expo-env.d.ts
 
 # iOS
-ios/Converse.xcworkspace/xcshareddata/swiftpm/Package.resolved
+/ios/
 *.jks
 *.p8
 *.p12
@@ -35,9 +35,6 @@ ios/Converse.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # Android
 /android/
-
-# iOS
-/ios/
 
 # System files
 .DS_Store

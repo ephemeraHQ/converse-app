@@ -13,11 +13,6 @@ import {
 } from "@data/store/accountsStore";
 import { setAuthStatus } from "@data/store/authStore";
 import { StackActions } from "@react-navigation/native";
-import { deleteSecureItemAsync } from "@utils/keychain";
-import {
-  deleteAccountEncryptionKey,
-  deleteXmtpKey,
-} from "@utils/keychain/helpers";
 import logger from "@utils/logger";
 import mmkv, {
   clearSecureMmkvForAccount,
@@ -25,6 +20,11 @@ import mmkv, {
 } from "@utils/mmkv";
 import { converseNavigatorRef } from "@utils/navigation";
 import { InstallationId } from "@xmtp/react-native-sdk/build/lib/Client";
+import {
+  deleteAccountEncryptionKey,
+  deleteXmtpKey,
+  deleteSecureItemAsync,
+} from "../keychain";
 
 type LogoutTasks = {
   [account: string]: {
