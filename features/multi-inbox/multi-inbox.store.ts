@@ -209,6 +209,13 @@ export const useCurrentAccount = () => {
   return currentSender?.ethereumAddress;
 };
 
+export const getSafeCurrentSender = (): CurrentSender => {
+  const currentSender = useAccountsStore.getState().currentSender;
+  if (!currentSender) {
+    throw new Error("No current sender");
+  }
+  return currentSender;
+};
 export const useSafeCurrentSender = (): CurrentSender => {
   const currentSender = useCurrentSender();
 

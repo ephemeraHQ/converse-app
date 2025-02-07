@@ -3,7 +3,7 @@ import { captureError } from "@/utils/capture-error";
 import logger from "@/utils/logger";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
@@ -114,13 +114,14 @@ export function getConversationQueryOptions(
   args: Optional<IGetConversationArgsWithCaller, "caller">
 ) {
   const { account, topic, caller } = args;
+  const enabled = !!topic && !!account;
   return queryOptions({
     meta: {
       caller,
     },
     queryKey: conversationQueryKey(account, topic),
-    queryFn: () => getConversation({ account, topic }),
-    enabled: !!topic && !!account,
+    queryFn: enabled ? () => getConversation({ account, topic }) : skipToken,
+    enabled,
   });
 }
 

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect } from "react";
 import {
   useLoginWithPasskey as usePrivyLoginWithPasskey,
   useSignupWithPasskey as usePrivySignupWithPasskey,
@@ -6,13 +6,7 @@ import {
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { RELYING_PARTY } from "@/features/onboarding/passkey.constants";
 import logger from "@/utils/logger";
-import { skipToken, useQuery, queryOptions } from "@tanstack/react-query";
-import {
-  usePrivy,
-  useEmbeddedEthereumWallet,
-  usePrivyClient,
-  useCreateGuestAccount,
-} from "@privy-io/expo";
+import { usePrivy, useEmbeddedEthereumWallet } from "@privy-io/expo";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { useSmartWallets } from "@privy-io/expo/smart-wallets";
 import {
@@ -104,13 +98,25 @@ export const SignupWithPasskeyProvider = ({
       return;
     }
 
+    if (!privySmartWalletsMatch) {
+      logger.debug(
+        "[passkey onboarding context] privySmartWalletsMatch is false, so we are not going to initialize the wallet"
+      );
+      return;
+    }
+
     // don't love doing async functions use effects, but let's get this working and then refactor
 
     // don't love doing async functions use effects, but let's get this working and then refactor
     async function createNewInbox() {
       logger.debug(
-        `[passkey onboarding context] Creating new inbox with smart wallet client address: ${smartWalletClient?.account.address}`
+        `[passkey onboarding context] Creating new inbox with smart wallet client address: ${smartWalletClient?.account.address} and privySmartWalletsMatch: ${privySmartWalletsMatch}`
       );
+      logger.debug("privy embedded wallet address", {
+        privyEmbeddedWalletAddress: privyUser?.linked_accounts.find(
+          (account) => account.type === "wallet"
+        )?.address,
+      });
       try {
         await MultiInboxClient.instance.createNewInboxForPrivySmartContractWallet(
           {
@@ -123,12 +129,13 @@ export const SignupWithPasskeyProvider = ({
           error
         );
         useAccountsStore.getState().setAuthStatus(AuthStatuses.signedOut);
+        await privyLogout();
         throw error;
       }
     }
 
     createNewInbox();
-  }, [smartWalletClient, signingUp]);
+  }, [smartWalletClient, signingUp, privySmartWalletsMatch, privyLogout]);
 
   const { user: privyUser } = usePrivy();
 
@@ -159,6 +166,13 @@ export const SignupWithPasskeyProvider = ({
       return;
     }
 
+    if (!privySmartWalletsMatch) {
+      logger.debug(
+        "[passkey onboarding context] privySmartWalletsMatch is false, so we are not going to initialize the wallet"
+      );
+      return;
+    }
+
     async function initializeWalletForLoggingInAccount() {
       logger.debug(
         `[passkey onboarding context] Initializing wallet for logging in with smart wallet client address: ${smartWalletClient?.account.address}`
@@ -172,7 +186,7 @@ export const SignupWithPasskeyProvider = ({
     }
 
     initializeWalletForLoggingInAccount();
-  }, [signingIn, smartWalletClient]);
+  }, [signingIn, smartWalletClient, privySmartWalletsMatch]);
 
   const signupWithPasskey = async () => {
     await privyLogout();

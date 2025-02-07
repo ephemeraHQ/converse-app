@@ -87,7 +87,7 @@ function HeaderTitle() {
       } else if (actionId === "app-settings") {
         navigation.navigate("AppSettings");
       } else {
-        setCurrentAccount(actionId, false);
+        setCurrentAccount({ ethereumAddress: actionId });
       }
     },
     [navigation, setCurrentAccount]

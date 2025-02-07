@@ -24,7 +24,6 @@ import { SearchBar } from "@/components/SearchBar";
 import TableView from "@/components/TableView/TableView";
 import { TableViewPicto } from "@/components/TableView/TableViewImage";
 import { config } from "@/config";
-import { currentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
 import { translate } from "@/i18n";
@@ -37,7 +36,7 @@ import { isEmptyObject } from "@/utils/objects";
 import { getPreferredName } from "@/utils/profile";
 import { accountCanMessagePeer } from "@/utils/xmtpRN/xmtp-consent/account-can-message-peer";
 import { ActivityIndicator } from "@/design-system/activity-indicator";
-
+import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 export function InviteUsersToExistingGroupScreen({
   route,
   navigation,
@@ -179,7 +178,7 @@ export function InviteUsersToExistingGroupScreen({
             }
             const address = getCleanAddress(resolvedAddress);
             const addressIsOnXmtp = await accountCanMessagePeer({
-              account: currentAccount(),
+              account: getSafeCurrentSender().ethereumAddress,
               peer: address,
             });
             if (searchingForValue.current === value) {

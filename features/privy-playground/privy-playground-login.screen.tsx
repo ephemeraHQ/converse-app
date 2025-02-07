@@ -10,7 +10,6 @@ import * as Application from "expo-application";
 import { getConfig } from "@/config";
 import { RELYING_PARTY } from "../onboarding/passkey.constants";
 import logger from "@/utils/logger";
-import { usePrivy } from "@privy-io/expo";
 export function PrivyPlaygroundLoginScreen() {
   // const { user, logout } = usePrivy();
   // logout();
@@ -103,16 +102,17 @@ export function PrivyPlaygroundLoginScreen() {
 
       <Button
         title="Create Passkey"
-        onPress={() =>
-          signupWithPasskey({
-            relyingParty: RELYING_PARTY,
-          })
-            // .then(({ user }) => {
-            //   console.log(JSON.stringify(user, null, 2));
-            // })
-            .catch((err) => {
-              setError(JSON.stringify(err.message));
+        onPress={
+          () =>
+            signupWithPasskey({
+              relyingParty: RELYING_PARTY,
             })
+          // .then(({ user }) => {
+          //   console.log(JSON.stringify(user, null, 2));
+          // })
+          // .catch((err) => {
+          //   setError(JSON.stringify(err.message));
+          // })
         }
       />
 
