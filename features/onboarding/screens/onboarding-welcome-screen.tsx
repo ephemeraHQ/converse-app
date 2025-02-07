@@ -18,8 +18,10 @@ import { RELYING_PARTY } from "../passkey.constants";
 import { useLogout } from "@/utils/logout";
 import {
   AuthStatuses,
+  deleteStores,
   useAccountsStore,
 } from "@/features/multi-inbox/multi-inbox.store";
+import mmkv from "@/utils/mmkv";
 const $subtextStyle: TextStyle = {
   textAlign: "center",
 };
@@ -121,9 +123,19 @@ const OnboardingWelcomeScreenContent = memo(
 
         <Button
           onPress={async () => {
-            logout();
+            const currentAccount = useAccountsStore.getState().currentSender;
+            if (currentAccount) {
+              deleteStores(currentAccount.ethereumAddress);
+            }
+            await logout();
+            // delete all queries
+            // delete all stores
+            // delete all mmkv
+
+            queryClient.clear();
+            mmkv.clearAll();
           }}
-          title="logout privy"
+          title="dleete everything"
         />
         {/* <OnboardingFooter
             text={translate("onboarding.welcome.createContactCard")}

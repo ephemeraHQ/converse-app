@@ -325,29 +325,7 @@ export class MultiInboxClient {
       return;
     }
 
-    // const previouslyCreatedInboxes = someStore.getState().createdInboxes
-    // const previousActiveSender = someStore.getState().activeSender
-    // const storeReady = someStore.getState().isReady
     const previouslyCreatedInboxes = useAccountsStore.getState().senders;
-    const storeReady = true;
-
-    // const storeReady = true;
-    // const previouslyCreatedInboxes: Array<{
-    //   ethereumAddress: string;
-    //   inboxId: string;
-    // }> = [
-    //   // { inboxId: "1", ethereumAddress: "0x123" },
-    // ];
-
-    if (!storeReady) {
-      logger.debug(
-        "[restorePreviouslyCreatedInboxesForDevice] Store not ready, skipping"
-      );
-
-      throw new Error(
-        "Need to wait for the store to be ready before invoking restore"
-      );
-    }
 
     const authStatus = useAccountsStore.getState().authStatus;
     const wasSignedInLastSession = authStatus === AuthStatuses.signedIn;
@@ -560,84 +538,6 @@ export class MultiInboxClient {
       throw new Error(
         "In order to access any methods on the MultiInboxClient, you must first call the `initialize` method."
       );
-    }
-  }
-
-  private async createXmtpInboxClientFromConnectedEthereumWallet(
-    wallet: ConnectedEthereumWallet
-  ): Promise<XmtpClient> {
-    logger.debug("[createXmtpClient] All conditions passed, creating client");
-
-    try {
-      logger.debug(
-        "[createXmtpClient] Getting database directory and encryption key"
-      );
-      const dbEncryptionKey = await getDbEncryptionKey().catch((error) => {
-        logger.error("[createXmtpClient] Error getting database config", error);
-        throw error;
-      });
-      logger.debug("[createXmtpClient] Got database config successfully");
-
-      logger.debug("[createXmtpClient] Creating XMTP signer");
-      const xmtpSigner: XmtpSigner = {
-        getAddress: async () => {
-          try {
-            return wallet.address;
-          } catch (error) {
-            logger.error("[createXmtpClient] Error getting address", error);
-            throw error;
-          }
-        },
-        getChainId: () => {
-          try {
-            return base.id;
-          } catch (error) {
-            logger.error("[createXmtpClient] Error getting chain ID", error);
-            throw error;
-          }
-        },
-        getBlockNumber: () => undefined,
-        walletType: () => "SCW",
-        signMessage: async (message: string) => {
-          try {
-            logger.debug("[createXmtpClient] Signing message");
-            const provider = await wallet.getProvider();
-            const signature = await provider.request({
-              method: "personal_sign",
-              params: [message, wallet.address],
-            });
-            logger.debug("[createXmtpClient] Message signed successfully");
-            logger.debug(`[createXmtpClient] Signature: ${signature}`);
-            return signature;
-          } catch (error) {
-            logger.error("[createXmtpClient] Error signing message", error);
-            throw error;
-          }
-        },
-      };
-      logger.debug("[createXmtpClient] XMTP signer created successfully");
-
-      const options = {
-        env: config.xmtpEnv,
-        enableV3: true,
-        dbEncryptionKey,
-      };
-      logger.debug("[createXmtpClient] Client options configured", options);
-
-      logger.debug("[createXmtpClient] Creating XMTP client");
-      const client = await XmtpClient.create(xmtpSigner, options).catch(
-        (error) => {
-          logger.error("[createXmtpClient] Error creating XMTP client", error);
-          throw error;
-        }
-      );
-      logger.debug("[createXmtpClient] XMTP client created successfully");
-
-      logger.debug("[createXmtpClient] Client setup completed successfully");
-      return client;
-    } catch (error) {
-      logger.error("[createXmtpClient] Fatal error in client creation", error);
-      throw error;
     }
   }
 

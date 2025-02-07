@@ -34,7 +34,7 @@ const storesByAccount: {
 // Store initialization
 export const initStores = (account: string) => {
   if (!(account in storesByAccount)) {
-    logger.debug(`[AccountsStore] Initiating account ${account}`);
+    logger.debug(`[useAuthStatus] Initiating account ${account}`);
     // If adding a persisted store here, please add
     // the deletion method in deleteStores
     storesByAccount[account] = {
@@ -45,7 +45,7 @@ export const initStores = (account: string) => {
   }
 };
 
-const deleteStores = (account: string) => {
+export const deleteStores = (account: string) => {
   logger.debug(`[AccountsStore] Deleting account ${account}`);
   delete storesByAccount[account];
   mmkv.delete(`store-${account}-chat`);
@@ -54,6 +54,9 @@ const deleteStores = (account: string) => {
 };
 
 export const AuthStatuses = {
+  signingUp: "signingUp",
+  signingIn: "signingIn",
+  restoring: "restoring",
   signedIn: "signedIn",
   signedOut: "signedOut",
   undetermined: "undetermined",
@@ -125,44 +128,49 @@ export const useAccountsStore = create<AccountsStoreStype>()(
     {
       name: "store-accounts",
       storage: createJSONStorage(() => zustandMMKVStorage),
-      partialize: (state) => ({
-        ...state,
-        multiInboxClientRestorationState:
-          MultiInboxClientRestorationStates.idle,
-      }),
+      partialize: (state) => {
+        logger.debug("[useAuthStatus] Partializing state for storage", state);
+        const partializedState = {
+          ...state,
+          multiInboxClientRestorationState:
+            MultiInboxClientRestorationStates.idle,
+        };
+        logger.debug("[useAuthStatus] Partialized state", partializedState);
+        return partializedState;
+      },
 
       onRehydrateStorage: () => {
-        logger.debug("[onRehydrateStorage] Starting hydration");
+        logger.debug("[useAuthStatus] Starting hydration");
         return (state, error) => {
           if (error) {
             logger.warn(
-              `[onRehydrateStorage] An error happened during hydration: ${error}`
+              `[useAuthStatus] An error happened during hydration: ${error}`
             );
           } else {
             logger.debug(
-              `[onRehydrateStorage] State hydrated successfully: ${JSON.stringify(
+              `[useAuthStatus] State hydrated successfully: ${JSON.stringify(
                 state
               )}`
             );
             if (state?.senders && state.senders.length > 0) {
               logger.debug(
-                `[onRehydrateStorage] Found ${state.senders.length} accounts in hydration, initializing stores`
+                `[useAuthStatus] Found ${state.senders.length} accounts in hydration, initializing stores`
               );
               state.senders.map((sender) => {
                 if (!storesByAccount[sender.ethereumAddress]) {
                   logger.debug(
-                    `[onRehydrateStorage] Initializing store for account: ${sender.ethereumAddress}`
+                    `[useAuthStatus] Initializing store for account: ${sender.ethereumAddress}`
                   );
                   initStores(sender.ethereumAddress);
                 } else {
                   logger.debug(
-                    `[onRehydrateStorage] Store already exists for account: ${sender.ethereumAddress}`
+                    `[useAuthStatus] Store already exists for account: ${sender.ethereumAddress}`
                   );
                 }
               });
             } else {
               logger.debug(
-                "[onRehydrateStorage] No accounts found in hydrated state"
+                "[useAuthStatus] No accounts found in hydrated state"
               );
             }
           }
