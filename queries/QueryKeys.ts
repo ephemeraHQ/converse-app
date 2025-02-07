@@ -103,10 +103,10 @@ export const conversationPreviewMessagesQueryKey = (
 ) => [QueryKeys.CONVERSATION_MESSAGES, account?.toLowerCase(), topic];
 
 // Members
-export const groupMembersQueryKey = (
-  account: string,
-  topic: ConversationTopic
-) => [QueryKeys.GROUP_MEMBERS, account?.toLowerCase(), topic];
+export const groupMembersQueryKey = (args: {
+  account: string;
+  topic: ConversationTopic;
+}) => [QueryKeys.GROUP_MEMBERS, args.account?.toLowerCase(), args.topic];
 
 // Group Mutable Metadata
 export const groupPinnedFrameQueryKey = (

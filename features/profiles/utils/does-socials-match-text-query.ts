@@ -1,10 +1,6 @@
-/**
- * TODO: Maybe move to profile socials utils once we have refactored profile socials
- */
-
 import type { IProfileSocials } from "@/features/profiles/profile-types";
 
-export function doesSocialsMatchQuery(args: {
+export function doesSocialsMatchTextQuery(args: {
   socials: IProfileSocials[];
   normalizedQuery: string;
 }) {

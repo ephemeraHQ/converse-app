@@ -3,7 +3,7 @@ import { AnimatedVStack } from "@/design-system/VStack";
 import { EmptyState } from "@/design-system/empty-state";
 import { Loader } from "@/design-system/loader";
 import { useSearchConvosUsers } from "@/features/conversation/conversation-create/hooks/use-search-convos-users";
-import { inboxIdIsPartOfConversation } from "@/features/conversation/conversation-create/utils/inbox-id-is-part-of-converastion";
+import { inboxIdIsPartOfConversationUsingCacheData } from "@/features/conversation/utils/inbox-id-is-part-of-converastion";
 import { useConversationStoreContext } from "@/features/conversation/conversation.store-context";
 import { useSafeCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { $globalStyles } from "@/theme/styles";
@@ -152,7 +152,7 @@ export function ConversationSearchResultsList() {
         const addedDms = items.filter(searchResultIsDm);
         // Skip if the profile is already in a DM conversation
         return !addedDms.some(({ conversationTopic }) => {
-          return inboxIdIsPartOfConversation({
+          return inboxIdIsPartOfConversationUsingCacheData({
             inboxId,
             conversationTopic,
           });
@@ -201,26 +201,26 @@ export function ConversationSearchResultsList() {
         }
         data={listData}
         renderItem={({ item }) => {
-          if (item.type === "dm") {
+          if (searchResultIsDm(item)) {
             return (
               <ConversationSearchResultsListItemDm
                 conversationTopic={item.conversationTopic}
               />
             );
           }
-          if (item.type === "group") {
+          if (searchResultIsGroup(item)) {
             return (
               <ConversationSearchResultsListItemGroup
                 conversationTopic={item.conversationTopic}
               />
             );
           }
-          if (item.type === "profile") {
+          if (searchResultIsProfile(item)) {
             return (
               <ConversationSearchResultsListItemUser inboxId={item.inboxId} />
             );
           }
-          const _ensureNever: never = item.type;
+          const _ensureNever: never = item;
           return null;
         }}
         contentContainerStyle={{
@@ -228,16 +228,16 @@ export function ConversationSearchResultsList() {
           flexGrow: 1,
         }}
         keyExtractor={(item, index) => {
-          if (item.type === "dm") {
+          if (searchResultIsDm(item)) {
             return `dm-${item.conversationTopic}`;
           }
-          if (item.type === "group") {
+          if (searchResultIsGroup(item)) {
             return `group-${item.conversationTopic}`;
           }
-          if (item.type === "profile") {
+          if (searchResultIsProfile(item)) {
             return `profile-${item.inboxId}`;
           }
-          const _ensureNever: never = item.type;
+          const _ensureNever: never = item;
           throw new Error("Invalid item type");
         }}
       />

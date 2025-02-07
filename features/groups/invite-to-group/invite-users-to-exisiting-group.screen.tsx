@@ -19,7 +19,6 @@ import {
   useColorScheme,
 } from "react-native";
 
-import ActivityIndicator from "@/components/ActivityIndicator/ActivityIndicator";
 import AndroidBackAction from "@/components/AndroidBackAction";
 import { SearchBar } from "@/components/SearchBar";
 import TableView from "@/components/TableView/TableView";
@@ -37,6 +36,7 @@ import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { isEmptyObject } from "@/utils/objects";
 import { getPreferredName } from "@/utils/profile";
 import { accountCanMessagePeer } from "@/utils/xmtpRN/xmtp-consent/account-can-message-peer";
+import { ActivityIndicator } from "@/design-system/activity-indicator";
 
 export function InviteUsersToExistingGroupScreen({
   route,

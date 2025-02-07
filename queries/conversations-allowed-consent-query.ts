@@ -142,9 +142,11 @@ const getAllowedConsentConversations = async (args: IArgs) => {
 
     // We are often using conversation members info
     // Call after setting the conversation because we'll need the conversation to get the members
-    ensureGroupMembersQueryData({ account, topic: conversation.topic }).catch(
-      captureError
-    );
+    ensureGroupMembersQueryData({
+      caller: "getAllowedConsentConversations",
+      account,
+      topic: conversation.topic,
+    }).catch(captureError);
   }
 
   return conversations;

@@ -1,5 +1,5 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { doesSocialsMatchQuery } from "@/features/conversation/conversation-create/utils/search-conversations.helpers";
+import { doesSocialsMatchTextQuery } from "@/features/profiles/utils/does-socials-match-text-query";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { getSearchExistingGroupsByMemberNameQueryKey } from "@/queries/QueryKeys";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
@@ -32,6 +32,7 @@ export async function searchExistingGroupsByGroupMembers(args: {
     conversations.filter(isConversationGroup).map(async (group) => {
       try {
         const members = await ensureGroupMembersQueryData({
+          caller: "searchExistingGroupsByGroupMembers",
           account: currentAccount,
           topic: group.topic,
         });
@@ -50,7 +51,7 @@ export async function searchExistingGroupsByGroupMembers(args: {
 
             if (!socials) return false;
 
-            return doesSocialsMatchQuery({
+            return doesSocialsMatchTextQuery({
               socials,
               normalizedQuery: searchQuery,
             });

@@ -1,5 +1,5 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { doesSocialsMatchQuery } from "@/features/conversation/conversation-create/utils/search-conversations.helpers";
+import { doesSocialsMatchTextQuery } from "@/features/profiles/utils/does-socials-match-text-query";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { getSearchExistingDmsQueryKey } from "@/queries/QueryKeys";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
@@ -39,6 +39,7 @@ export async function searchExistingDms(args: {
         const [peerInboxId, members] = await Promise.race([
           // Get peer inbox ID from members
           ensureGroupMembersQueryData({
+            caller: "searchExistingDms",
             account: currentAccount,
             topic: conversation.topic,
           }).then((members) => {
@@ -69,7 +70,7 @@ export async function searchExistingDms(args: {
           return null;
         }
 
-        const hasMatch = doesSocialsMatchQuery({
+        const hasMatch = doesSocialsMatchTextQuery({
           socials,
           normalizedQuery: normalizedSearchQuery,
         });

@@ -61,9 +61,10 @@ async function handleNewConversation(args: {
   });
 
   ensureGroupMembersQueryData({
+    caller: "handleNewConversation",
     account,
     topic: conversation.topic,
-  });
+  }).catch(captureError);
 
   /**
    * Maybe replace the optimistic conversation with the real one
