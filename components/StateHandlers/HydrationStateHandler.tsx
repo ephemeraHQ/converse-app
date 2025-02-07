@@ -13,12 +13,12 @@ export function HydrationStateHandler() {
   const multiInboxClientRestorationState = useAccountsStore(
     (state) => state.multiInboxClientRestorationState
   );
-  const isRestored =
+  const haveInboxesBeenRestored =
     multiInboxClientRestorationState ===
     MultiInboxClientRestorationStates.restored;
 
   useEffect(() => {
-    if (!isRestored) {
+    if (!haveInboxesBeenRestored) {
       return;
     }
 
@@ -53,7 +53,7 @@ export function HydrationStateHandler() {
     };
 
     hydrate();
-  }, [isRestored]);
+  }, [haveInboxesBeenRestored]);
 
   return null;
 }

@@ -19,13 +19,15 @@ export function setupStreamingSubscriptions() {
   useAppStore.subscribe(
     (state) => state.hydrationDone,
     (hydrationDone) => {
-      if (hydrationDone) {
-        logger.debug(`[Streaming] Hydration done changed: ${hydrationDone}`);
-        const { isInternetReachable } = useAppStore.getState();
-        if (isInternetReachable) {
-          startStreaming(getAccountsList());
-        }
+      const isInternetReachable = useAppStore.getState().isInternetReachable;
+      logger.debug(
+        `[Streaming] Hydration done changed: ${hydrationDone}, isInternetReachable: ${isInternetReachable}`
+      );
+      if (!isInternetReachable || !hydrationDone) {
+        return;
       }
+
+      startStreaming(getAccountsList());
     }
   );
 
@@ -33,17 +35,23 @@ export function setupStreamingSubscriptions() {
   useAppStore.subscribe(
     (state) => state.isInternetReachable,
     (isInternetReachable) => {
-      logger.debug(
-        `[Streaming] Internet reachability changed: ${isInternetReachable}`
-      );
       const { hydrationDone } = useAppStore.getState();
-      if (isInternetReachable && hydrationDone) {
-        startStreaming(getAccountsList());
+      logger.debug(
+        `[Streaming] Internet reachability changed: ${isInternetReachable}, hydrationDone: ${hydrationDone}`
+      );
+      if (!isInternetReachable || !hydrationDone) {
+        return;
       }
+
+      startStreaming(getAccountsList());
     }
   );
 
   // Start/Stop streaming when accounts change
+  // todo(lustig) I believe this should be handled immediately when
+  // an account is added (removing has not been implemented yet)
+  // I'm not going to play with this right now though, but we should
+  // come back to it and simplify it if possible.
   useAccountsStore.subscribe((state, previousState) => {
     const { hydrationDone, isInternetReachable } = useAppStore.getState();
 
@@ -87,18 +95,13 @@ export function setupStreamingSubscriptions() {
         startStreaming(getAccountsList());
       }
     } else if (isLeavingActive) {
-      // logger.debug("[Streaming] App is now inactive, stopping xmtp streams");
+      logger.debug("[Streaming] App is now inactive, stopping xmtp streams");
       stopStreaming(getAccountsList());
     }
   });
 }
 
 async function startStreaming(accountsToStream: string[]) {
-  // logger.debug(
-  //   "[Streaming] TEMP DISABLING Starting streaming for accounts:",
-  //   accountsToStream
-  // );
-  return;
   const store = useStreamingStore.getState();
 
   for (const account of accountsToStream) {
