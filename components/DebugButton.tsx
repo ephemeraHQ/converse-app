@@ -13,21 +13,10 @@ import { Image } from "expo-image";
 import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 import { Alert, Platform } from "react-native";
-import { config } from "../config";
-import {
-  useAccountsList,
-  getAccountsList,
-} from "../features/multi-inbox/multi-inbox.store";
-import mmkv from "../utils/mmkv";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
-import { logoutAccount } from "@/utils/logout";
+import { logout } from "@/utils/logout";
 
-export async function delayToPropogate(): Promise<void> {
-  // delay 1s to avoid clobbering
-  return new Promise((r) => setTimeout(r, 100));
-}
-
-const DebugButton = forwardRef((props, ref) => {
+export const DebugButton = forwardRef((props, ref) => {
   const appVersion = Constants.expoConfig?.version;
   const buildNumber =
     Platform.OS === "ios"
@@ -39,12 +28,9 @@ const DebugButton = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     showDebugMenu() {
       const debugMethods = {
-        "Logout all accounts": async () => {
-          const allAccounts = getAccountsList();
+        Logout: async () => {
           try {
-            for (const account of allAccounts) {
-              await logoutAccount({ account });
-            }
+            await logout();
           } catch (error) {
             alert(error);
           }
@@ -61,9 +47,7 @@ const DebugButton = forwardRef((props, ref) => {
             alert(error);
           }
         },
-        "Clear logout tasks": () => {
-          mmkv.delete("converse-logout-tasks");
-        },
+
         "Sentry JS error": () => {
           throw new Error("My first Sentry error!");
         },
@@ -134,10 +118,7 @@ const DebugButton = forwardRef((props, ref) => {
 
       showActionSheetWithOptions(
         {
-          title: translate("debug.converse_version", {
-            version: appVersion,
-            buildNumber,
-          }),
+          title: `Converse v${appVersion} (${buildNumber})`,
           options,
           cancelButtonIndex: options.indexOf("Cancel"),
         },
@@ -154,5 +135,3 @@ const DebugButton = forwardRef((props, ref) => {
 
   return null;
 });
-
-export default DebugButton;

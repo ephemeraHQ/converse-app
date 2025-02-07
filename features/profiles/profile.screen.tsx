@@ -15,7 +15,6 @@ import { SettingsList } from "@/design-system/settings-list/settings-list";
 import { ContactCard } from "@/features/profiles/components/contact-card";
 import { SocialNames } from "@/features/profiles/components/social-names";
 import { formatConverseUsername } from "@/features/profiles/utils/format-converse-username";
-import { useDisconnectActionSheet } from "@/hooks/useDisconnectActionSheet";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { usePreferredUsername } from "@/hooks/usePreferredUsername";
@@ -60,8 +59,6 @@ export function ProfileScreen() {
   const handleEditProfile = useCallback(() => {
     setEditMode(!editMode);
   }, [editMode]);
-
-  const showDisconnectActionSheet = useDisconnectActionSheet();
 
   const isBlockedPeer = useSettingsStore(
     (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
@@ -273,7 +270,7 @@ export function ProfileScreen() {
                   onValueChange: () => {},
                 },*/
                 {
-                  label: translate("log_out"),
+                  label: "Log out",
                   isWarning: true,
                   onPress: () =>
                     showDisconnectActionSheet(theme.isDark ? "dark" : "light"),

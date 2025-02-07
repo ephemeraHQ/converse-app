@@ -408,8 +408,6 @@ export const fr = {
   disconnect_delete_local_data:
     "Se déconnecter et supprimer les données locales",
   disconnect_this_account: "Se déconnecter de ce compte",
-  disconnect_account_description:
-    "Vos discussions de groupe seront chiffrées et sauvegardées sur votre appareil jusqu'à ce que vous supprimiez Converse. Vos messages privés seront sauvegardés par le réseau XMTP.",
   your_profile_page: "Votre page de profil",
   copy_wallet_address: "Copier l'adresse du portefeuille",
   turn_on_notifications: "Activer les notifications",

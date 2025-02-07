@@ -545,9 +545,6 @@ export class MultiInboxClient {
         ];
       }
     );
-    // Object.keys(this.xmtpClientInboxIdToAddressMap).forEach((inboxId) => {
-    //   delete this.xmtpClientInboxIdToAddressMap[inboxId];
-    // });
     useAccountsStore.getState().logoutAllSenders();
   }
 

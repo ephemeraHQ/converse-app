@@ -4,7 +4,7 @@ import { PrivyProvider } from "@privy-io/expo";
 // To test run yarn start --no-dev --minify
 
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
-import DebugButton from "@components/DebugButton";
+import { DebugButton } from "@components/DebugButton";
 import {
   LogBox,
   Platform,

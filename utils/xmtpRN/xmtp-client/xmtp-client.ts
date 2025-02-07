@@ -35,20 +35,6 @@ export const codecs = [
   new CoinbaseMessagingPaymentCodec(),
 ];
 
-const xmtpClientByEthAddress: Record<
-  string,
-  ConverseXmtpClientType | Promise<ConverseXmtpClientType>
-> = {};
-
-export function dropXmtpClient(installationId: InstallationId) {
-  return Client.dropClient(installationId);
-}
-
-export async function deleteXmtpClient({ address }: { address: string }) {
-  const cleanedEthAddress = getCleanEthAddress(address);
-  delete xmtpClientByEthAddress[cleanedEthAddress];
-}
-
 export async function getXmtpClient({
   address,
   inboxId,
@@ -62,70 +48,71 @@ export async function getXmtpClient({
   if (!client) {
     throw new Error("Client undefined");
   }
+  return client;
   const cleanedEthAddress = getCleanEthAddress(address);
 
-  if (cleanedEthAddress in xmtpClientByEthAddress) {
-    return xmtpClientByEthAddress[cleanedEthAddress];
-  }
+  // if (cleanedEthAddress in xmtpClientByEthAddress) {
+  //   return xmtpClientByEthAddress[cleanedEthAddress];
+  // }
 
-  try {
-    const buildClientPromise = buildXmtpClient({
-      address,
-      inboxId,
-    });
+  // try {
+  //   const buildClientPromise = buildXmtpClient({
+  //     address,
+  //     inboxId,
+  //   });
 
-    xmtpClientByEthAddress[cleanedEthAddress] = buildClientPromise;
+  //   xmtpClientByEthAddress[cleanedEthAddress] = buildClientPromise;
 
-    const client = await buildClientPromise;
+  //   const client = await buildClientPromise;
 
-    xmtpClientByEthAddress[cleanedEthAddress] = client;
-    return client;
-  } catch (error) {
-    delete xmtpClientByEthAddress[cleanedEthAddress];
-    throw error;
-  }
+  //   xmtpClientByEthAddress[cleanedEthAddress] = client;
+  //   return client;
+  // } catch (error) {
+  //   delete xmtpClientByEthAddress[cleanedEthAddress];
+  //   throw error;
+  // }
 }
 
-async function buildXmtpClient({
-  address,
-  inboxId,
-}: {
-  address: string;
-  inboxId?: InboxId;
-}) {
-  const startTime = Date.now();
-  try {
-    logger.debug(
-      `[buildXmtpClient] Starting to build XMTP client with address: ${address} and inboxId: ${inboxId}`
-    );
+// async function buildXmtpClient({
+//   address,
+//   inboxId,
+// }: {
+//   address: string;
+//   inboxId?: InboxId;
+// }) {
+//   const startTime = Date.now();
+//   try {
+//     logger.debug(
+//       `[buildXmtpClient] Starting to build XMTP client with address: ${address} and inboxId: ${inboxId}`
+//     );
 
-    const dbEncryptionKey = await getDbEncryptionKey();
+//     const dbEncryptionKey = await getDbEncryptionKey();
 
-    const client = await Client.build(
-      address,
-      {
-        env: config.xmtpEnv,
-        codecs,
-        dbEncryptionKey,
-      },
-      inboxId
-    );
+//     const client = await Client.build(
+//       address,
+//       {
+//         env: config.xmtpEnv,
+//         codecs,
+//         dbEncryptionKey,
+//       },
+//       inboxId
+//     );
 
-    const duration = Date.now() - startTime;
-    logger.debug(
-      `[buildXmtpClient] Successfully built XMTP client for address: ${address} (took ${duration}ms)`
-    );
+//     const duration = Date.now() - startTime;
+//     logger.debug(
+//       `[buildXmtpClient] Successfully built XMTP client for address: ${address} (took ${duration}ms)`
+//     );
 
-    if (duration > 1000) {
-      captureError(
-        new Error(
-          `[buildXmtpClient] Building XMTP client took more than 1 second (${duration}ms) for address: ${address}`
-        )
-      );
-    }
+//     if (duration > 1000) {
+//       captureError(
+//         new Error(
+//           `[buildXmtpClient] Building XMTP client took more than 1 second (${duration}ms) for address: ${address}`
+//         )
+//       );
+//     }
 
-    return client;
-  } catch (error) {
-    throw error;
-  }
-}
+//     return client;
+//   } catch (error) {
+//     throw error;
+//   }
+// }

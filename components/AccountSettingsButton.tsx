@@ -1,4 +1,3 @@
-import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { translate } from "@i18n";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {
@@ -25,6 +24,7 @@ import { navigate } from "../utils/navigation";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "./TableView/TableViewImage";
+import { useLogout } from "@/utils/logout";
 
 type Props = {
   account: string;
@@ -33,11 +33,7 @@ type Props = {
 export default function AccountSettingsButton({ account }: Props) {
   const router = useRouter();
 
-  const {
-    setNotificationsPermissionStatus,
-    notificationsPermissionStatus,
-    isInternetReachable,
-  } = useAppStore(
+  const { notificationsPermissionStatus, isInternetReachable } = useAppStore(
     useSelect([
       "setNotificationsPermissionStatus",
       "notificationsPermissionStatus",
@@ -50,7 +46,7 @@ export default function AccountSettingsButton({ account }: Props) {
   );
 
   const colorScheme = useColorScheme();
-  const showDisconnectActionSheet = useDisconnectActionSheet(account);
+  const logout = useLogout();
 
   const onPress = useCallback(() => {
     Keyboard.dismiss();
@@ -73,9 +69,10 @@ export default function AccountSettingsButton({ account }: Props) {
       ["Turn on notifications"]: () => {
         // TODO
       },
-      [translate("disconnect_this_account")]: () =>
-        showDisconnectActionSheet(colorScheme),
-      [translate("cancel")]: () => {},
+      ["Logout"]: () => {
+        logout();
+      },
+      ["Cancel"]: () => {},
     };
 
     const options = Object.keys(methods);
@@ -123,7 +120,7 @@ export default function AccountSettingsButton({ account }: Props) {
     notificationsPermissionStatus,
     colorScheme,
     setCurrentAccount,
-    showDisconnectActionSheet,
+    logout,
   ]);
 
   return Platform.OS === "android" ? (
