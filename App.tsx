@@ -170,11 +170,10 @@ export default function AppWithProviders() {
   return (
     <QueryClientProvider client={queryClient}>
       <PrivyProvider
-        appId="cloh5bn1p00q4l50gcg0g1mix"
-        clientId="client-WY2eFe3hjqkyEyrGWiZoJUqsihgrJieWcXjcKN4f3mwXM"
-
-        // storage={privySecureStorage}
-        // supportedChains={[base]}
+        appId={config.privy.appId}
+        clientId={config.privy.clientId}
+        // storage={privySecureStorage} // Temporary removed until we see if really needed
+        // supportedChains={[base]} // Temporary removed until we see if really needed
       >
         <SmartWalletsProvider>
           <ThirdwebProvider>
