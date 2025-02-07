@@ -138,7 +138,7 @@ const App = () => {
 // On Android we use the default keyboard "animation"
 const AppKeyboardProvider =
   Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
-import { DevToolsBubble } from "react-native-react-query-devtools";
+// import { DevToolsBubble } from "react-native-react-query-devtools";
 
 export default function AppWithProviders() {
   const colorScheme = useColorScheme();
@@ -169,7 +169,7 @@ export default function AppWithProviders() {
                     <GestureHandlerRootView style={{ flex: 1 }}>
                       <BottomSheetModalProvider>
                         <App />
-                        <DevToolsBubble />
+                        {/* <DevToolsBubble /> */}
                         {/* <PrivyPlaygroundLandingScreen /> */}
                         <Snackbars />
                       </BottomSheetModalProvider>
