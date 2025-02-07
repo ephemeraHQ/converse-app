@@ -29,7 +29,7 @@ import {
   getConverseInitialURL,
   getConverseStateFromPath,
 } from "./Navigation/navHelpers";
-import { usePrivy } from "@privy-io/expo";
+import { usePrivy, usePrivyClient } from "@privy-io/expo";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import {
   AuthStatuses,
@@ -135,24 +135,9 @@ export function useHasMultiInboxClientRestored() {
 }
 
 export const useAuthStatus = () => {
-  const { user: privyUser, isReady } = usePrivy();
-  logger.debug(
-    `[useAuthStatus] Rendering: ${JSON.stringify({
-      privyUser,
-      isReady,
-    })}`
-  );
-  const { authStatus, setAuthStatus } = useAccountsStore(
+  const { authStatus } = useAccountsStore(
     useSelect(["authStatus", "setAuthStatus"])
   );
-  useEffect(() => {
-    if (!isReady) {
-      return;
-    }
-    if (!privyUser) {
-      setAuthStatus(AuthStatuses.signedOut);
-    }
-  }, [isReady, privyUser, setAuthStatus]);
 
   const isCheckingAuth = authStatus === AuthStatuses.checking;
   const isSignedIn = authStatus === AuthStatuses.signedIn;
