@@ -3,7 +3,7 @@ import { Center } from "@/design-system/Center";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { EmptyState } from "@/design-system/empty-state";
-import { Loader } from "@/design-system/loader";
+import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
@@ -46,7 +46,7 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
     <VStack style={$globalStyles.flex1}>
       {isLoading ? (
         <Center style={$globalStyles.flex1}>
-          <Loader />
+          <ActivityIndicator />
         </Center>
       ) : !conversation ? (
         <Center style={$globalStyles.flex1}>

@@ -18,6 +18,7 @@ import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
 import { useCallback } from "react";
 import { Platform } from "react-native";
+import { useConversationComposerIsEnabled } from "@/features/conversation/conversation-composer/hooks/conversation-composer-is-enabled";
 
 const DATA_MIMETYPE_REGEX = /data:(.*?);/;
 
@@ -25,6 +26,7 @@ export function AddAttachmentButton() {
   const { theme } = useAppTheme();
 
   const store = useConversationComposerStore();
+  const isEnabled = useConversationComposerIsEnabled();
 
   const handleAttachmentSelected = useCallback(
     async (asset: ImagePicker.ImagePickerAsset) => {
@@ -112,6 +114,7 @@ export function AddAttachmentButton() {
 
   return (
     <DropdownMenu
+      disabled={!isEnabled}
       style={{
         margin: theme.spacing.xxxs,
         alignSelf: "flex-end",

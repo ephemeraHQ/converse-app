@@ -41,6 +41,7 @@ export async function findConversationByInboxIds(args: {
   const groupMembersData = await Promise.all(
     groups.map((conversation) =>
       ensureGroupMembersQueryData({
+        caller: "findConversationByMembers",
         account,
         topic: conversation.topic,
       })

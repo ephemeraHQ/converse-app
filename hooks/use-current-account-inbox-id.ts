@@ -23,6 +23,11 @@ export function getCurrentAccountInboxId() {
   return getInboxIdFromQueryData({ account: currentAccount });
 }
 
+export function getCurrentAccountInboxIdSafe() {
+  const currentAccount = getCurrentAccount()!;
+  return getInboxIdFromQueryData({ account: currentAccount })!;
+}
+
 export function isCurrentAccountInboxId(inboxId: InboxId) {
   const currentAccountInboxId = getCurrentAccountInboxId();
   return currentAccountInboxId?.toLowerCase() === inboxId.toLowerCase();

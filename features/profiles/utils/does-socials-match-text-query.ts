@@ -1,13 +1,6 @@
 import type { IProfileSocials } from "@/features/profiles/profile-types";
 
-export function doesGroupNameMatchQuery(
-  groupName: string | undefined,
-  normalizedQuery: string
-) {
-  return !!groupName?.toLowerCase().includes(normalizedQuery);
-}
-
-export function doesSocialsMatchQuery(args: {
+export function doesSocialsMatchTextQuery(args: {
   socials: IProfileSocials[];
   normalizedQuery: string;
 }) {

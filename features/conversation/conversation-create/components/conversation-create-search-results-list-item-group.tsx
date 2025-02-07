@@ -1,7 +1,7 @@
 import { GroupAvatar } from "@/components/group-avatar";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import { ConversationSearchResultsListItem } from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item";
+import { useConversationStore } from "@/features/conversation/conversation.store-context";
+import { useInboxesUsername } from "@/features/profiles/utils/inbox-username";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
 import { useGroupNameForCurrentAccount } from "@/hooks/useGroupName";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -13,8 +13,6 @@ export const ConversationSearchResultsListItemGroup = memo(
   }: {
     conversationTopic: ConversationTopic;
   }) {
-    const currentAccount = useCurrentAccount()!;
-
     const { members } = useGroupMembers(conversationTopic);
 
     const { groupName } = useGroupNameForCurrentAccount({
@@ -22,6 +20,10 @@ export const ConversationSearchResultsListItemGroup = memo(
     });
 
     const conversationStore = useConversationStore();
+
+    const { data: usernames } = useInboxesUsername({
+      inboxIds: members?.ids?.slice(0, 3) ?? [],
+    });
 
     const handlePress = useCallback(() => {
       conversationStore.setState({
@@ -36,13 +38,7 @@ export const ConversationSearchResultsListItemGroup = memo(
       <ConversationSearchResultsListItem
         avatar={<GroupAvatar groupTopic={conversationTopic} />}
         title={groupName}
-        subtitle={
-          members?.ids
-            .slice(0, 3)
-            .map((id) => members?.byId[id]?.addresses[0])
-            .filter((address) => address !== currentAccount)
-            .join(", ") ?? ""
-        }
+        subtitle={usernames.slice(0, 3).join(", ") ?? ""}
         onPress={handlePress}
       />
     );

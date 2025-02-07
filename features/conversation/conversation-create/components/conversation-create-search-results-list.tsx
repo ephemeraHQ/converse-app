@@ -1,25 +1,26 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { Center } from "@/design-system/Center";
+import { AnimatedVStack } from "@/design-system/VStack";
 import { EmptyState } from "@/design-system/empty-state";
 import { Loader } from "@/design-system/loader";
-import { getSearchByConversationMembershipQueryOptions } from "@/features/conversation/conversation-create/utils/search-conversations/search-conversations.query";
 import { useSearchConvosUsers } from "@/features/conversation/conversation-create/hooks/use-search-convos-users";
+import { inboxIdIsPartOfConversationUsingCacheData } from "@/features/conversation/utils/inbox-id-is-part-of-converastion";
 import { useConversationStoreContext } from "@/features/conversation/conversation.store-context";
 import { useSafeCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
-import { getDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query";
-import { getGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { ReactNode, memo, useMemo } from "react";
 import { FlatList } from "react-native";
 import {
+  useAnimatedKeyboard,
   useAnimatedStyle,
   useDerivedValue,
   withSpring,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSearchExistingDms } from "../queries/search-existing-dms.query";
+import { useSearchExistingGroupsByGroupMembers } from "../queries/search-existing-groups-by-group-members.query";
+import { useSearchExistingGroupsByGroupName } from "../queries/search-existing-groups-by-group-name.query";
 import { ConversationSearchResultsListItemGroup } from "./conversation-create-search-results-list-item-group";
 import { ConversationSearchResultsListItemUser } from "./conversation-create-search-results-list-item-user";
 import { ConversationSearchResultsListItemDm } from "./conversation-create-search-results-list-item-user-dm";
@@ -27,15 +28,41 @@ import { ConversationSearchResultsListItemDm } from "./conversation-create-searc
 // Because we want a mix of DMs, groups, and profiles
 const MAX_INITIAL_RESULTS = 3;
 
+type ISearchResultItemDm = {
+  type: "dm";
+  conversationTopic: ConversationTopic;
+};
+
+type ISearchResultItemGroup = {
+  type: "group";
+  conversationTopic: ConversationTopic;
+};
+
+type ISearchResultItemProfile = {
+  type: "profile";
+  inboxId: InboxId;
+};
+
 type SearchResultItem =
-  | {
-      type: "dm" | "group";
-      conversationTopic: ConversationTopic;
-    }
-  | {
-      type: "profile";
-      inboxId: InboxId;
-    };
+  | ISearchResultItemDm
+  | ISearchResultItemGroup
+  | ISearchResultItemProfile;
+
+function searchResultIsDm(item: SearchResultItem): item is ISearchResultItemDm {
+  return item.type === "dm";
+}
+
+function searchResultIsGroup(
+  item: SearchResultItem
+): item is ISearchResultItemGroup {
+  return item.type === "group";
+}
+
+function searchResultIsProfile(
+  item: SearchResultItem
+): item is ISearchResultItemProfile {
+  return item.type === "profile";
+}
 
 export function ConversationSearchResultsList() {
   const insets = useSafeAreaInsets();
@@ -56,49 +83,44 @@ export function ConversationSearchResultsList() {
       inboxIdsToOmit: [...selectedSearchUserInboxIds, currentUserInboxId],
     });
 
-  const {
-    data: existingConversationMembershipSearchResults,
-    isLoading: isSearchingExistingConversations,
-  } = useQuery(
-    getSearchByConversationMembershipQueryOptions({
+  const { data: existingDmTopics = [], isLoading: isLoadingExistingDmTopics } =
+    useSearchExistingDms({
       searchQuery,
-    })
-  );
+      inboxId: currentUserInboxId,
+    });
+
+  const {
+    data: existingGroupsByGroupNameTopics = [],
+    isLoading: isLoadingExistingGroupsByName,
+  } = useSearchExistingGroupsByGroupName({
+    searchQuery,
+    searcherInboxId: currentUserInboxId,
+  });
+
+  const {
+    data: existingGroupsByMemberNameTopics = [],
+    isLoading: isLoadingExistingGroupsByMembers,
+  } = useSearchExistingGroupsByGroupMembers({
+    searchQuery,
+    searcherInboxId: currentUserInboxId,
+  });
 
   const listData = useMemo(() => {
     const items: SearchResultItem[] = [];
 
-    // Wait until we finish loading both existing and searched results
-    if (
-      !existingConversationMembershipSearchResults ||
-      !searchConvosUsersData
-    ) {
-      return items;
-    }
-
-    // If we have selected users, only show profiles
-    if (selectedSearchUserInboxIds.length > 0) {
-      return searchConvosUsersData?.inboxIds.map((inboxId) => ({
-        type: "profile" as const,
-        inboxId,
-      }));
-    }
-
-    const {
-      existingDmTopics,
-      existingGroupsByMemberNameTopics,
-      existingGroupsByGroupNameTopics,
-    } = existingConversationMembershipSearchResults;
-
     // 1. Add DMs first
-    items.push(
-      ...existingDmTopics
-        .map((conversationTopic) => ({
-          type: "dm" as const,
-          conversationTopic,
-        }))
-        .slice(0, MAX_INITIAL_RESULTS)
-    );
+    // But if we have selected users in the search bar, don't show DMs
+    // Because otherwise the user would have selected the existing DM already...
+    if (selectedSearchUserInboxIds.length === 0) {
+      items.push(
+        ...existingDmTopics
+          .map((conversationTopic) => ({
+            type: "dm" as const,
+            conversationTopic,
+          }))
+          .slice(0, MAX_INITIAL_RESULTS)
+      );
+    }
 
     // 2. Add groups where member names match the search query
     items.push(
@@ -111,15 +133,8 @@ export function ConversationSearchResultsList() {
     );
 
     // 3. Add groups where group names match the search query
-    // Filter out any groups that were already added due to member name matches
-    const uniqueGroupNameMatches = existingGroupsByGroupNameTopics.filter(
-      (topic) =>
-        !existingGroupsByMemberNameTopics.includes(topic) &&
-        !existingDmTopics.includes(topic)
-    );
-
     items.push(
-      ...uniqueGroupNameMatches
+      ...existingGroupsByGroupNameTopics
         .map((conversationTopic) => ({
           type: "group" as const,
           conversationTopic,
@@ -133,22 +148,14 @@ export function ConversationSearchResultsList() {
         type: "profile" as const,
         inboxId,
       }))
-      .filter((item) => {
+      .filter(({ inboxId }) => {
+        const addedDms = items.filter(searchResultIsDm);
         // Skip if the profile is already in a DM conversation
-        return !existingDmTopics.some((topic) => {
-          const members = getGroupMembersQueryData({
-            account: getCurrentAccount()!,
-            topic,
+        return !addedDms.some(({ conversationTopic }) => {
+          return inboxIdIsPartOfConversationUsingCacheData({
+            inboxId,
+            conversationTopic,
           });
-          const peerInboxId = getDmPeerInboxIdQueryData({
-            account: getCurrentAccount()!,
-            topic,
-          });
-
-          return (
-            peerInboxId === item.inboxId ||
-            members?.ids.some((inboxId) => inboxId === item.inboxId)
-          );
         });
       });
 
@@ -156,60 +163,64 @@ export function ConversationSearchResultsList() {
 
     return items;
   }, [
-    existingConversationMembershipSearchResults,
+    existingDmTopics,
+    existingGroupsByMemberNameTopics,
+    existingGroupsByGroupNameTopics,
     searchConvosUsersData,
     selectedSearchUserInboxIds,
   ]);
 
-  const isLoadingSearchResults =
-    isSearchingExistingConversations || isSearchingConvosUsers;
+  const isStillLoadingSearchResults =
+    isLoadingExistingDmTopics ||
+    isLoadingExistingGroupsByName ||
+    isLoadingExistingGroupsByMembers ||
+    isSearchingConvosUsers;
 
   return (
     <Container>
       <FlatList
         keyboardShouldPersistTaps="handled"
         ListEmptyComponent={
-          <VStack
+          <Center
             style={{
               paddingBottom: insets.bottom,
               flex: 1,
             }}
           >
-            {isLoadingSearchResults ? (
-              <Loader style={{ flex: 1 }} />
+            {isStillLoadingSearchResults ? (
+              <Loader size="sm" />
             ) : searchQuery ? (
               <EmptyState
-                title="Oops"
                 description={
                   searchConvosUsersData?.message ||
                   `Couldn't find what you are looking for`
                 }
               />
             ) : null}
-          </VStack>
+          </Center>
         }
         data={listData}
         renderItem={({ item }) => {
-          if (item.type === "dm") {
+          if (searchResultIsDm(item)) {
             return (
               <ConversationSearchResultsListItemDm
                 conversationTopic={item.conversationTopic}
               />
             );
           }
-          if (item.type === "group") {
+          if (searchResultIsGroup(item)) {
             return (
               <ConversationSearchResultsListItemGroup
                 conversationTopic={item.conversationTopic}
               />
             );
           }
-          if (item.type === "profile") {
+          if (searchResultIsProfile(item)) {
             return (
               <ConversationSearchResultsListItemUser inboxId={item.inboxId} />
             );
           }
-          const _ensureNever: never = item.type;
+          const _ensureNever: never = item;
           return null;
         }}
         contentContainerStyle={{
@@ -217,16 +228,16 @@ export function ConversationSearchResultsList() {
           flexGrow: 1,
         }}
         keyExtractor={(item, index) => {
-          if (item.type === "dm") {
+          if (searchResultIsDm(item)) {
             return `dm-${item.conversationTopic}`;
           }
-          if (item.type === "group") {
+          if (searchResultIsGroup(item)) {
             return `group-${item.conversationTopic}`;
           }
-          if (item.type === "profile") {
+          if (searchResultIsProfile(item)) {
             return `profile-${item.inboxId}`;
           }
-          const _ensureNever: never = item.type;
+          const _ensureNever: never = item;
           throw new Error("Invalid item type");
         }}
       />
@@ -238,6 +249,8 @@ const Container = memo(function Container(props: { children: ReactNode }) {
   const { children } = props;
 
   const { theme } = useAppTheme();
+
+  const { height } = useAnimatedKeyboard();
 
   const searchQuery = useConversationStoreContext(
     (state) => state.searchTextValue
@@ -256,6 +269,7 @@ const Container = memo(function Container(props: { children: ReactNode }) {
   }, [searchQuery]);
 
   const containerAS = useAnimatedStyle(() => ({
+    bottom: height.value,
     opacity: containerVisibleAV.value,
     zIndex: !!searchQuery ? 1 : 0,
   }));
@@ -267,7 +281,7 @@ const Container = memo(function Container(props: { children: ReactNode }) {
         $globalStyles.absoluteFill,
         containerAS,
         {
-          backgroundColor: theme.colors.background.surface,
+          backgroundColor: theme.colors.background.surfaceless,
         },
       ]}
     >

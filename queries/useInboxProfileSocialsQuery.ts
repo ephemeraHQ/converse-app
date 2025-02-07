@@ -1,6 +1,11 @@
 import { getProfileSocialsQueryKey } from "@/queries/QueryKeys";
+import { Optional } from "@/types/general";
 import { getProfilesForInboxIds } from "@/utils/api/profiles";
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import {
+  UseQueryOptions,
+  queryOptions as reactQueryOptions,
+  useQuery,
+} from "@tanstack/react-query";
 import { InboxId } from "@xmtp/react-native-sdk";
 import {
   create,
@@ -8,7 +13,6 @@ import {
   windowedFiniteBatchScheduler,
 } from "@yornaath/batshit";
 import { queryClient } from "./queryClient";
-import { Optional } from "@/types/general";
 
 type IArgs = {
   inboxId: InboxId;
@@ -17,6 +21,21 @@ type IArgs = {
 type IArgsWithCaller = IArgs & {
   caller: string;
 };
+
+type IArgsWithCallerAndQueryOptions = IArgsWithCaller & {
+  queryOptions?: Omit<
+    UseQueryOptions<
+      IInboxProfileSocialsQueryData,
+      Error,
+      IInboxProfileSocialsQueryData
+    >,
+    "queryKey" | "queryFn"
+  >;
+};
+
+type IInboxProfileSocialsQueryData = Awaited<
+  ReturnType<(typeof inboxProfileSocialsBatchFetcher)["fetch"]>
+>;
 
 const inboxProfileSocialsBatchFetcher = create({
   fetcher: async (inboxIds: InboxId[]) => {
@@ -39,17 +58,21 @@ const fetchInboxProfileSocials = async ({ inboxId }: IArgs) => {
 export const getInboxProfileSocialsQueryConfig = ({
   inboxId,
   caller,
-}: Optional<IArgsWithCaller, "caller">) =>
-  queryOptions({
+  queryOptions = {},
+}: Optional<IArgsWithCallerAndQueryOptions, "caller">) => {
+  return reactQueryOptions({
     queryKey: getProfileSocialsQueryKey({ inboxId }),
     queryFn: () => fetchInboxProfileSocials({ inboxId }),
-    enabled: !!inboxId,
     // persister: reactQueryPersister,
     gcTime: 1000 * 60 * 60 * 24 * 30, // 30 days because this doesn't often change
+    ...queryOptions,
     meta: {
+      ...queryOptions.meta,
       caller,
     },
+    enabled: !!inboxId && (queryOptions.enabled ?? true),
   });
+};
 
 export const useInboxProfileSocialsQuery = ({
   inboxId,
@@ -82,8 +105,9 @@ export const invalidateInboxProfileSocialsQuery = ({ inboxId }: IArgs) => {
 export const ensureInboxProfileSocialsQueryData = ({
   inboxId,
   caller,
-}: IArgsWithCaller) => {
+  queryOptions,
+}: IArgsWithCallerAndQueryOptions) => {
   return queryClient.ensureQueryData(
-    getInboxProfileSocialsQueryConfig({ inboxId, caller })
+    getInboxProfileSocialsQueryConfig({ inboxId, caller, queryOptions })
   );
 };

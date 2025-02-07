@@ -7,6 +7,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
 import { queryClient } from "./queryClient";
+import { Optional } from "@/types/general";
 
 export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
 
@@ -15,8 +16,11 @@ type IGetConversationArgs = {
   topic: ConversationTopic;
 };
 
+type IGetConversationArgsWithCaller = IGetConversationArgs & { caller: string };
+
 async function getConversation(args: IGetConversationArgs) {
   const { account, topic } = args;
+
   if (!topic) {
     throw new Error("Topic is required");
   }
@@ -102,16 +106,12 @@ async function getConversation(args: IGetConversationArgs) {
   return conversation;
 }
 
-export const useConversationQuery = (
-  args: IGetConversationArgs & { caller: string }
-) => {
+export const useConversationQuery = (args: IGetConversationArgsWithCaller) => {
   return useQuery(getConversationQueryOptions(args));
 };
 
 export function getConversationQueryOptions(
-  args: IGetConversationArgs & {
-    caller?: string;
-  }
+  args: Optional<IGetConversationArgsWithCaller, "caller">
 ) {
   const { account, topic, caller } = args;
   return queryOptions({
@@ -160,8 +160,6 @@ export const getConversationQueryData = (args: IGetConversationArgs) => {
   return queryClient.getQueryData(getConversationQueryOptions(args).queryKey);
 };
 
-export function getOrFetchConversation(
-  args: IGetConversationArgs & { caller: string }
-) {
+export function getOrFetchConversation(args: IGetConversationArgsWithCaller) {
   return queryClient.ensureQueryData(getConversationQueryOptions(args));
 }

@@ -150,4 +150,14 @@ export const streamLogger = {
   error: (...args: Parameters<logMethodType>) => {},
 };
 
+export const authLogger = {
+  ...logger,
+  debug: (...args: Parameters<logMethodType>) =>
+    logger.debug("[AUTH]", ...args),
+  info: (...args: Parameters<logMethodType>) => logger.info("[AUTH]", ...args),
+  warn: (...args: Parameters<logMethodType>) => logger.warn("[AUTH]", ...args),
+  error: (...args: Parameters<logMethodType>) =>
+    logger.error("[AUTH]", ...args),
+};
+
 export default logger;

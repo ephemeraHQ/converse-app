@@ -31,3 +31,7 @@ export const addressPrefix = (address: string) =>
 export const formatGroupName = (topic: string, groupName?: string) =>
   groupName ||
   capitalize(humanize(topic.slice(14, 46), { numWords: 3, separator: " " }));
+
+export function normalizeString(str: string) {
+  return str.toLowerCase().trim();
+}

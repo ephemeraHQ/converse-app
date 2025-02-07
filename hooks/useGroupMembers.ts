@@ -16,6 +16,7 @@ export const useGroupMembers = (topic: ConversationTopic) => {
     isLoading,
     isError,
   } = useGroupMembersQuery({
+    caller: "useGroupMembers",
     account,
     topic,
   });

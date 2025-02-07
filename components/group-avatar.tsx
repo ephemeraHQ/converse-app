@@ -105,6 +105,7 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
   });
 
   const { data: members } = useGroupMembersQuery({
+    caller: "GroupAvatar",
     account: currentAccount,
     topic: groupTopic,
   });

@@ -11,6 +11,7 @@ import {
 import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { Haptics } from "@/utils/haptics";
 import { InboxId } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useRef } from "react";
 import {
@@ -45,6 +46,8 @@ export const ConversationCreateSearchInput = memo(
       const selectedInboxIdChip = useStore.getState().selectedChipInboxId;
 
       if (key === "Backspace" && !searchTextValue) {
+        Haptics.softImpactAsync();
+
         if (selectedInboxIdChip !== null) {
           // Remove selected chip
           conversationStore.setState({
@@ -169,6 +172,7 @@ const UserChip = memo(function UserChip(props: { inboxId: InboxId }) {
   const selectedChipInboxId = useStore((state) => state.selectedChipInboxId);
 
   const handlePress = useCallback(() => {
+    Haptics.softImpactAsync();
     useStore.getState().actions.setSelectedChipInboxId(inboxId);
   }, [inboxId]);
 

@@ -1,24 +1,7 @@
 import type { IProfileSocials } from "@/features/profiles/profile-types";
-import {
-  doesGroupNameMatchQuery,
-  doesSocialsMatchQuery,
-} from "./search-conversations.helpers";
+import { doesSocialsMatchTextQuery } from "./does-socials-match-text-query";
 
 describe("search-helpers", () => {
-  describe("doesGroupNameMatchQuery", () => {
-    it("should match exact group name", () => {
-      expect(doesGroupNameMatchQuery("Test Group", "test group")).toBe(true);
-    });
-
-    it("should match partial group name", () => {
-      expect(doesGroupNameMatchQuery("Awesome Chat", "some")).toBe(true);
-    });
-
-    it("should return false for undefined group name", () => {
-      expect(doesGroupNameMatchQuery(undefined, "test")).toBe(false);
-    });
-  });
-
   describe("doesMemberProfileMatchQuery", () => {
     const mockSocials: IProfileSocials[] = [
       {
@@ -44,7 +27,7 @@ describe("search-helpers", () => {
 
     it("should match ENS name", () => {
       expect(
-        doesSocialsMatchQuery({
+        doesSocialsMatchTextQuery({
           socials: mockSocials,
           normalizedQuery: "user.eth",
         })
@@ -53,7 +36,7 @@ describe("search-helpers", () => {
 
     it("should match Lens handle", () => {
       expect(
-        doesSocialsMatchQuery({
+        doesSocialsMatchTextQuery({
           socials: mockSocials,
           normalizedQuery: "user.lens",
         })
@@ -62,7 +45,7 @@ describe("search-helpers", () => {
 
     it("should match Farcaster username", () => {
       expect(
-        doesSocialsMatchQuery({
+        doesSocialsMatchTextQuery({
           socials: mockSocials,
           normalizedQuery: "user",
         })
@@ -71,7 +54,7 @@ describe("search-helpers", () => {
 
     it("should match Unstoppable Domain", () => {
       expect(
-        doesSocialsMatchQuery({
+        doesSocialsMatchTextQuery({
           socials: mockSocials,
           normalizedQuery: "user.crypto",
         })
@@ -80,7 +63,7 @@ describe("search-helpers", () => {
 
     it("should match display name", () => {
       expect(
-        doesSocialsMatchQuery({
+        doesSocialsMatchTextQuery({
           socials: mockSocials,
           normalizedQuery: "user one",
         })
@@ -89,7 +72,7 @@ describe("search-helpers", () => {
 
     it("should return false for non-matching query", () => {
       expect(
-        doesSocialsMatchQuery({
+        doesSocialsMatchTextQuery({
           socials: mockSocials,
           normalizedQuery: "nomatch",
         })

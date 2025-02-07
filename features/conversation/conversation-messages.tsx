@@ -52,11 +52,11 @@ import {
 import { FadeInDown } from "react-native-reanimated";
 import { CONVERSATION_LIST_REFRESH_THRESHOLD } from "./conversation-list.contstants";
 import { ConversationMessageHighlighted } from "./conversation-message/conversation-message-highlighted";
-import { useCurrentConversationTopic } from "./conversation.store-context";
 import {
   DmConversationEmpty,
   GroupConversationEmpty,
 } from "./conversation.screen";
+import { useCurrentConversationTopic } from "./conversation.store-context";
 
 export const ConversationMessages = memo(function ConversationMessages(props: {
   conversation: ConversationWithCodecsType;

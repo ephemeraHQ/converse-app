@@ -25,6 +25,7 @@ export function useGroupMembersInfoForCurrentAccount(args: {
   const currentAccount = useCurrentAccount()!;
 
   const { data: members } = useGroupMembersQuery({
+    caller: "useGroupMembersInfoForCurrentAccount",
     account: currentAccount,
     topic: groupTopic,
   });
