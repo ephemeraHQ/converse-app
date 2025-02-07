@@ -1,7 +1,7 @@
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
-import { Loader } from "@/design-system/loader";
+import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { ConversationComposer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { ConversationCreateSearchInput } from "@/features/conversation/conversation-create/components/conversation-create-search-input";
@@ -106,7 +106,7 @@ const Content = memo(function Content() {
   if (isLoadingConversation) {
     return (
       <Center style={$globalStyles.flex1}>
-        <Loader />
+        <ActivityIndicator />
       </Center>
     );
   }

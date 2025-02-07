@@ -1,10 +1,9 @@
-import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { addConversationMessageQuery } from "@/queries/conversation-messages-query";
-import { updateConversationInAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
 import { updateConversationQueryData } from "@/queries/conversation-query";
+import { updateConversationInAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
 import { refetchGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
+import { streamLogger } from "@/utils/logger";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import {
   stopStreamingAllMessage,
@@ -28,9 +27,11 @@ async function handleNewMessage(args: {
 }) {
   const { account, message } = args;
 
+  streamLogger.debug(`[handleNewMessage] message: ${JSON.stringify(message)}`);
+
   if (message.contentTypeId.includes("group_updated")) {
     try {
-      await handleNewGroupUpdatedMessage({
+      handleNewGroupUpdatedMessage({
         account,
         topic: message.topic,
         message,
@@ -40,21 +41,14 @@ async function handleNewMessage(args: {
     }
   }
 
-  const isMessageFromOtherUser = !messageIsFromCurrentAccountInboxId({
-    message,
-  });
-  const isNonTextMessage = !isTextMessage(message);
-
-  if (isMessageFromOtherUser || isNonTextMessage) {
-    try {
-      addConversationMessageQuery({
-        account,
-        topic: message.topic as ConversationTopic,
-        message,
-      });
-    } catch (error) {
-      captureError(error);
-    }
+  try {
+    addConversationMessageQuery({
+      account,
+      topic: message.topic as ConversationTopic,
+      message,
+    });
+  } catch (error) {
+    captureError(error);
   }
 
   try {

@@ -59,6 +59,7 @@ export function getGroupQueryOptions(args: {
     ...getConversationQueryOptions({
       account,
       topic,
+      caller: "getGroupQueryOptions",
     }),
     select: (data) => {
       if (!data) {

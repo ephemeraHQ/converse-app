@@ -42,6 +42,5 @@ export function ConversationSearchResultsListItem({
 const $container: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   paddingVertical: spacing.xs,
   paddingHorizontal: spacing.lg,
-  backgroundColor: colors.background.surface,
   columnGap: spacing.xs,
 });

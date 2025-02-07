@@ -3,6 +3,7 @@ import {
   setConversationQueryData,
 } from "@/queries/conversation-query";
 import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
+import { Optional } from "@/types/general";
 import { captureError } from "@/utils/capture-error";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
@@ -20,6 +21,8 @@ export type IAllowedConsentConversationsQuery = Awaited<
 type IArgs = {
   account: string;
 };
+
+type IArgsWithCaller = IArgs & { caller: string };
 
 export const createAllowedConsentConversationsQueryObserver = (
   args: IArgs & { caller: string }
@@ -60,7 +63,11 @@ export function addConversationToAllowedConsentConversationsQuery(
   );
 
   if (conversationExists) {
-    return;
+    return updateConversationInAllowedConsentConversationsQueryData({
+      account,
+      topic: conversation.topic,
+      conversationUpdate: conversation,
+    });
   }
 
   queryClient.setQueryData<IAllowedConsentConversationsQuery>(
@@ -135,19 +142,18 @@ const getAllowedConsentConversations = async (args: IArgs) => {
 
     // We are often using conversation members info
     // Call after setting the conversation because we'll need the conversation to get the members
-    ensureGroupMembersQueryData({ account, topic: conversation.topic }).catch(
-      captureError
-    );
+    ensureGroupMembersQueryData({
+      caller: "getAllowedConsentConversations",
+      account,
+      topic: conversation.topic,
+    }).catch(captureError);
   }
 
   return conversations;
 };
 
 export const getAllowedConsentConversationsQueryOptions = (
-  args: IArgs & {
-    // Optional because we don't want functions that just get or set query data to have to pass caller
-    caller?: string;
-  }
+  args: Optional<IArgsWithCaller, "caller">
 ) => {
   const { account, caller } = args;
   return queryOptions({
@@ -174,16 +180,17 @@ export const updateConversationInAllowedConsentConversationsQueryData = (
   const previousConversationsData = getAllowedConsentConversationsQueryData({
     account,
   });
+
   if (!previousConversationsData) {
+    captureError(
+      new Error(
+        `No previous conversations data found for account: ${account} when updating conversation in allowed consent conversations query data: ${JSON.stringify(
+          conversationUpdate
+        )}`
+      )
+    );
     return;
   }
-
-  // if (!conversationUpdate.membersHash) {
-  //   const members = await conversationUpdate.members();
-  //   conversationUpdate.membersHash = generateGroupHashFromMemberIds(
-  //     members.map((m) => m.inboxId)
-  //   );
-  // }
 
   const newConversations = previousConversationsData.map((c) => {
     if (c.topic === topic) {
@@ -200,9 +207,7 @@ export const updateConversationInAllowedConsentConversationsQueryData = (
   );
 };
 
-export function fetchAllowedConsentConversationsQuery(
-  args: IArgs & { caller: string }
-) {
+export function fetchAllowedConsentConversationsQuery(args: IArgsWithCaller) {
   return queryClient.fetchQuery(
     getAllowedConsentConversationsQueryOptions(args)
   );

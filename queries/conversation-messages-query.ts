@@ -13,11 +13,11 @@ import {
 } from "@xmtp/react-native-sdk";
 import { MessageId } from "@xmtp/react-native-sdk/build/lib/types";
 import { conversationMessagesQueryKey } from "./QueryKeys";
-import { queryClient } from "./queryClient";
 import {
   getConversationQueryData,
   getOrFetchConversation,
 } from "./conversation-query";
+import { queryClient } from "./queryClient";
 
 export type ConversationMessagesQueryData = Awaited<
   ReturnType<typeof conversationMessagesQueryFn>
@@ -107,12 +107,11 @@ export const addConversationMessageQuery = (args: {
   queryClient.setQueryData(
     getConversationMessagesQueryOptions({ account, topic }).queryKey,
     (previousMessages) => {
-      const processedMessages = processMessages({
+      return processMessages({
         newMessages: [message],
         existingData: previousMessages,
         prependNewMessages: true,
       });
-      return processedMessages;
     }
   );
 };
@@ -165,7 +164,6 @@ export type IMessageAccumulator = {
 };
 
 function processMessages(args: {
-  // messages: IConvosMessage[];
   newMessages: DecodedMessageWithCodecsType[];
   existingData?: IMessageAccumulator;
   prependNewMessages?: boolean;
@@ -194,14 +192,17 @@ function processMessages(args: {
     if (!isReactionMessage(message)) {
       const messageId = message.id as MessageId;
 
+      // If message already exists, update it with new data
+      if (result.byId[messageId]) {
+        result.byId[messageId] = message;
+        continue; // Skip adding to ids since it already exists
+      }
+
       if (prependNewMessages) {
         result.byId = { [messageId]: message, ...result.byId };
-      } else {
-        result.byId[messageId] = message;
-      }
-      if (prependNewMessages) {
         result.ids = [messageId, ...result.ids];
       } else {
+        result.byId[messageId] = message;
         result.ids.push(messageId);
       }
     }

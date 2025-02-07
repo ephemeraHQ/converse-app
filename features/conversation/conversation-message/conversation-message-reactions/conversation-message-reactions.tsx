@@ -20,6 +20,7 @@ import {
   RolledUpReactions,
   SortedReaction,
 } from "./conversation-message-reactions.types";
+import { debugBorder } from "@/utils/debug-style";
 
 const MAX_REACTION_EMOJIS_SHOWN = 3;
 
@@ -41,6 +42,7 @@ export const ConversationMessageReactions = memo(
 
     return (
       <AnimatedHStack
+        // {...debugBorder()}
         entering={theme.animation.reanimatedFadeInScaleIn()}
         style={[
           {

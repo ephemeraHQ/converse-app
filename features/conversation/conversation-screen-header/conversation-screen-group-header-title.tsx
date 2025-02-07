@@ -31,6 +31,7 @@ export const GroupConversationTitle = memo(
       });
 
     const { data: members } = useGroupMembersQuery({
+      caller: "GroupConversationTitle",
       account: currentAccount,
       topic: conversationTopic,
     });
@@ -110,6 +111,7 @@ const useGroupMembersAvatarData = (args: { topic: ConversationTopic }) => {
   const { topic } = args;
   const currentAccount = useCurrentAccount()!;
   const { data: members, ...query } = useGroupMembersQuery({
+    caller: "useGroupMembersAvatarData",
     account: currentAccount,
     topic,
   });

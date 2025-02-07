@@ -23,11 +23,7 @@ export const ConversationMessageHighlighted = memo(
     );
     const { animatedStyle } = useHighlightAnimation({ messageId });
 
-    return (
-      <AnimatedVStack style={[{ width: "100%" }, animatedStyle]}>
-        {children}
-      </AnimatedVStack>
-    );
+    return <AnimatedVStack style={animatedStyle}>{children}</AnimatedVStack>;
   }
 );
 

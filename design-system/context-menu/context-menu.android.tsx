@@ -129,20 +129,7 @@ const ContextMenuActionSheet = memo(function ContextMenuActionSheet(
   // Maybe gesture can be improved. Didn't want to spend too much time on it since we might find a better solution for Android later.
   const longPressGesture = Gesture.LongPress()
     .onBegin(() => {
-      scaleAV.value = withSequence(
-        withTiming(0.95, {
-          duration: 500,
-          easing: Easing.bezier(0.25, 0.1, 0.25, 1), // Slow ease-out
-        }),
-        withTiming(1.02, {
-          duration: 300,
-          easing: Easing.bezier(0.33, 0, 0.67, 1), // Quick ease
-        }),
-        withTiming(1, {
-          duration: 300,
-          easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-        })
-      );
+      scaleAV.value = theme.animation.appleContextMenu.start;
     })
     .onStart((e) => {
       Haptics.softImpactAsyncAnimated();
@@ -150,10 +137,7 @@ const ContextMenuActionSheet = memo(function ContextMenuActionSheet(
     })
     .onFinalize(() => {
       // Reset
-      scaleAV.value = withTiming(1, {
-        duration: 100,
-        easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-      });
+      scaleAV.value = theme.animation.appleContextMenu.end;
     })
     .minDuration(500)
     .hitSlop(hitSlop);
