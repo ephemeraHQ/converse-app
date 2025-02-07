@@ -14,9 +14,10 @@ import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 import { Alert, Platform } from "react-native";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
-import { logout } from "@/utils/logout";
+import { useLogout } from "@/utils/logout";
 
 export const DebugButton = forwardRef((props, ref) => {
+  const { logout } = useLogout();
   const appVersion = Constants.expoConfig?.version;
   const buildNumber =
     Platform.OS === "ios"

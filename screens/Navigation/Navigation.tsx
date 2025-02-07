@@ -117,7 +117,7 @@ export function IdleNavigation() {
 
 const FakeScreen = memo(function FakeScreen() {
   const currentSender = useCurrentSender();
-  const logout = useLogout();
+  const { logout } = useLogout();
 
   // Use useEffect for side effects like logging
   useEffect(() => {

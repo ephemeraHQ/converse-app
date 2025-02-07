@@ -17,6 +17,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import { Platform, useColorScheme } from "react-native";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
+import * as SplashScreen from "expo-splash-screen";
 import {
   IdleNavigation,
   NavigationParamList,
@@ -37,6 +38,7 @@ import {
 } from "@/features/multi-inbox/multi-inbox.store";
 import { MultiInboxClientRestorationStates } from "@/features/multi-inbox/multi-inbox-client.types";
 import logger from "@/utils/logger";
+import { is } from "date-fns/locale";
 const prefix = Linking.createURL("/");
 
 const linking: LinkingOptions<NavigationParamList> = {
@@ -89,28 +91,27 @@ export default function Main() {
 
 export const useAuthStatus = () => {
   const { authStatus, multiInboxClientRestorationState } = useAccountsStore(
-    useSelect([
-      "authStatus",
-      "setAuthStatus",
-      "multiInboxClientRestorationState",
-    ])
+    useSelect(["authStatus", "multiInboxClientRestorationState"])
   );
 
   const isRestored =
     multiInboxClientRestorationState ===
     MultiInboxClientRestorationStates.restored;
 
-  const [isReady, setIsReady] = useState(isRestored);
-  logger.debug(
-    `[useAuthStatus] Current auth status: ${authStatus}, isReady: ${isReady}`
-  );
-  logger.debug(
-    `[useAuthStatus] MultiInbox restoration state: ${multiInboxClientRestorationState}`
-  );
+  const isSignedOut = authStatus === AuthStatuses.signedOut;
+  const [isReady, setIsReady] = useState(isRestored || isSignedOut);
+  logger.debug("[useAuthStatus] bundle", { isRestored, isSignedOut, isReady });
+  // logger.debug(
+  //   `[useAuthStatus] Current auth status: ${authStatus}, isReady: ${isReady}`
+  // );
+  // logger.debug(
+  //   `[useAuthStatus] MultiInbox restoration state: ${JSON.stringify(
+  //     multiInboxClientRestorationState
+  //   )}`
+  // );
 
   const isCheckingAuth = !isReady;
   const isSignedIn = authStatus === AuthStatuses.signedIn && isReady;
-  const isSignedOut = authStatus === AuthStatuses.signedOut && isReady;
 
   useEffect(() => {
     async function initialize() {
@@ -120,23 +121,36 @@ export const useAuthStatus = () => {
       setIsReady(true);
     }
 
-    if (!isRestored) {
+    if (isSignedOut) {
+      setIsReady(true);
+    }
+
+    if (!isRestored && isSignedIn) {
       logger.debug(
         "[useAuthStatus] MultiInbox client not initialized, starting initialization"
       );
       initialize();
     }
-  }, [isRestored]);
+  }, [isRestored, isSignedIn, isSignedOut]);
 
-  logger.debug(
-    `[useAuthStatus] Returning status - isCheckingAuth: ${isCheckingAuth}, isSignedIn: ${isSignedIn}, isSignedOut: ${isSignedOut}`
-  );
+  // logger.debug(
+  //   `[useAuthStatus] Returning status - isCheckingAuth: ${isCheckingAuth}, isSignedIn: ${isSignedIn}, isSignedOut: ${isSignedOut}`
+  // );
   return { isCheckingAuth, isSignedIn, isSignedOut };
 };
 
 const NavigationContent = () => {
   const { isCheckingAuth, isSignedIn, isSignedOut } = useAuthStatus();
   const { splashScreenHidden } = useAppStore(useSelect(["splashScreenHidden"]));
+  useEffect(() => {
+    logger.debug("[NavigationContent] bundle", {
+      isCheckingAuth,
+      isSignedIn,
+      isSignedOut,
+      splashScreenHidden,
+    });
+    SplashScreen.hideAsync();
+  }, [isCheckingAuth, isSignedIn, isSignedOut, splashScreenHidden]);
 
   // Uncomment to test design system components
   // return (
@@ -144,10 +158,10 @@ const NavigationContent = () => {
   //     <NativeStack.Screen name="Examples" component={Examples} />
   //   </NativeStack.Navigator>
   // );
-  if (!splashScreenHidden) {
-    // TODO: Add a loading screen
-    return null;
-  }
+  // if (!splashScreenHidden) {
+  //   // TODO: Add a loading screen
+  //   return null;
+  // }
 
   if (isCheckingAuth) {
     return <IdleNavigation />;

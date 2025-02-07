@@ -1,4 +1,3 @@
-import { currentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { AvatarSizes } from "@styles/sizes";
@@ -8,6 +7,7 @@ import { ViewStyle, StyleSheet } from "react-native";
 import { Avatar } from "./Avatar";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
+import { useSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 
 type ICurrentAccountProps = {
   style?: ViewStyle;
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
 });
 
 export function CurrentAccount(props: ICurrentAccountProps) {
-  const account = currentAccount();
+  const account = useSafeCurrentSender().ethereumAddress;
   const name = usePreferredName(account);
   const avatarUri = usePreferredAvatarUri(account);
 

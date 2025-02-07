@@ -44,7 +44,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
 const OnboardingWelcomeScreenContent = memo(
   function OnboardingWelcomeScreenContent() {
     const { themed, theme } = useAppTheme();
-    const logout = useLogout();
+    const { logout } = useLogout();
     const { animation } = theme;
 
     const { signupWithPasskey, loginWithPasskey } = useSignupWithPasskey();
@@ -112,7 +112,6 @@ const OnboardingWelcomeScreenContent = memo(
           onPress={async () => {
             try {
               await loginWithPasskey();
-              useAccountsStore.getState().setAuthStatus(AuthStatuses.signedIn);
             } catch (error) {
               console.log("error", error);
             }

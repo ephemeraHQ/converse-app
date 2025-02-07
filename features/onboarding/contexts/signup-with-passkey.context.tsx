@@ -11,9 +11,14 @@ import {
   usePrivy,
   useEmbeddedEthereumWallet,
   usePrivyClient,
+  useCreateGuestAccount,
 } from "@privy-io/expo";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { useSmartWallets } from "@privy-io/expo/smart-wallets";
+import {
+  AuthStatuses,
+  useAccountsStore,
+} from "@/features/multi-inbox/multi-inbox.store";
 
 const embeddedWalletQueryKey = (args: {
   privyUserId: string | undefined;
@@ -21,16 +26,16 @@ const embeddedWalletQueryKey = (args: {
 }) => ["embeddedWallet", args.privyUserId, args.embeddedWalletIndex];
 
 export function getEmbeddedWalletQueryOptions(args: {
-  privyUserId: string | undefined;
+  privyUserId: string;
   embeddedWalletIndex: number;
   createEmbeddedWallet: (index: number) => Promise<{
     embeddedWalletAddress: string;
   }>;
 }) {
   const enabled = !!args.privyUserId && args.embeddedWalletIndex >= 0;
-  logger.debug(
-    `[getEmbeddedWalletQueryOptions] Enabled: ${enabled}, privyUserId: ${args.privyUserId}, embeddedWalletIndex: ${args.embeddedWalletIndex}`
-  );
+  // logger.debug(
+  //   `[getEmbeddedWalletQueryOptions] Enabled: ${enabled}, privyUserId: ${args.privyUserId}, embeddedWalletIndex: ${args.embeddedWalletIndex}`
+  // );
   return queryOptions({
     queryKey: embeddedWalletQueryKey({
       privyUserId: args.privyUserId,
@@ -234,6 +239,8 @@ export const SignupWithPasskeyProvider = ({
     }
   }, [embeddedWalletAddress]);
 
+  const [signingUp, setSigningUp] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
   useEffect(() => {
     if (!smartWalletClient) {
       logger.debug(
@@ -242,9 +249,14 @@ export const SignupWithPasskeyProvider = ({
       return;
     }
 
-    logger.debug(
-      "[passkey onboarding context] Smart wallet client available, going to create a new inbox"
-    );
+    if (!signingUp) {
+      logger.debug(
+        "[passkey onboarding context] We are creating the inbox from a login differently than signup so returning here"
+      );
+      return;
+    }
+
+    // don't love doing async functions use effects, but let's get this working and then refactor
 
     // don't love doing async functions use effects, but let's get this working and then refactor
     async function createNewInbox() {
@@ -259,24 +271,73 @@ export const SignupWithPasskeyProvider = ({
       logger.debug(
         "[passkey onboarding context] MultiInboxClient created a new inbox successfully"
       );
+      setSigningUp(false);
     }
 
     createNewInbox();
-  }, [smartWalletClient]);
+  }, [smartWalletClient, signingUp]);
+
+  const { user: privyUser } = usePrivy();
+
+  useEffect(() => {
+    logger.debug("[passkey onboarding context] privyUser changing", {
+      signingUp,
+      privyUserId: privyUser?.id,
+    });
+    if (privyUser?.id && signingUp) {
+      setEmbeddedWalletIndexToCreate(0);
+    }
+  }, [privyUser?.id, signingUp]);
+
+  useEffect(() => {
+    if (!signingIn || !smartWalletClient) {
+      logger.debug(
+        "[passkey onboarding context] waiting for signing in and smart wallet client",
+        {
+          signingIn,
+        }
+      );
+
+      return;
+    }
+
+    async function initializeWalletForLoggingInAccount() {
+      await MultiInboxClient.instance.createNewInboxForPrivySmartContractWallet(
+        {
+          privySmartWalletClient: smartWalletClient,
+        }
+      );
+      useAccountsStore.getState().setAuthStatus(AuthStatuses.signedIn);
+      setSigningIn(false);
+    }
+
+    initializeWalletForLoggingInAccount();
+  }, [signingIn, smartWalletClient]);
 
   const signupWithPasskey = async () => {
+    setSigningIn(false);
     await privyLogout();
-    setEmbeddedWalletIndexToCreate(0);
     await privySignupWithPasskey({
       relyingParty: RELYING_PARTY,
     });
+    setSigningUp(true);
   };
 
+  useEffect(() => {
+    if (signingIn) {
+      logger.debug("[passkey onboarding context] signing in", {
+        signingIn,
+      });
+    }
+  }, [signingIn, smartWalletClient]);
+
   const loginWithPasskey = async () => {
+    setSigningUp(false);
     await privyLogout();
     await privyLoginWithPasskey({
       relyingParty: RELYING_PARTY,
     });
+    setSigningIn(true);
   };
 
   return (

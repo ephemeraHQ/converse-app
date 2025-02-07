@@ -13,15 +13,20 @@ import { useCallback } from "react";
 export const useLogout = () => {
   const { setAuthStatus } = useAccountsStore();
   const privy = usePrivy();
-  return useCallback(() => {
+
+  const logout = useCallback(async () => {
+    if (privy.user) {
+      await privy.logout();
+    }
     converseNavigatorRef.current?.dispatch(StackActions.popToTop());
+
     queryClient.removeQueries({
       queryKey: ["embeddedWallet"],
     });
-    if (privy.user) {
-      privy.logout();
-    }
+
     MultiInboxClient.instance.logoutMessagingClients();
     setAuthStatus(AuthStatuses.signedOut);
   }, [privy, setAuthStatus]);
+
+  return { logout };
 };

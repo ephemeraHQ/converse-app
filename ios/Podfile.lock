@@ -254,8 +254,6 @@ PODS:
     - ExpoModulesCore
   - ExpoClipboard (7.0.0):
     - ExpoModulesCore
-  - ExpoContacts (14.0.2):
-    - ExpoModulesCore
   - ExpoCrypto (14.0.2):
     - ExpoModulesCore
   - ExpoDevice (7.0.2):
@@ -2378,7 +2376,6 @@ DEPENDENCIES:
   - ExpoBackgroundFetch (from `../node_modules/expo-background-fetch/ios`)
   - ExpoBlur (from `../node_modules/expo-blur/ios`)
   - ExpoClipboard (from `../node_modules/expo-clipboard/ios`)
-  - ExpoContacts (from `../node_modules/expo-contacts/ios`)
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
   - ExpoDevice (from `../node_modules/expo-device/ios`)
   - ExpoDocumentPicker (from `../node_modules/expo-document-picker/ios`)
@@ -2584,8 +2581,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-blur/ios"
   ExpoClipboard:
     :path: "../node_modules/expo-clipboard/ios"
-  ExpoContacts:
-    :path: "../node_modules/expo-contacts/ios"
   ExpoCrypto:
     :path: "../node_modules/expo-crypto/ios"
   ExpoDevice:
@@ -2867,7 +2862,6 @@ SPEC CHECKSUMS:
   ExpoBackgroundFetch: a25a06f2c45c943d3efc64db9d737a63a527e7c6
   ExpoBlur: 392c1207f71d0ecf22371621c1fbd44ba84d9742
   ExpoClipboard: 8c704e60118cbdc5588a12abf02aec73ea404346
-  ExpoContacts: d7fd420dfd4f934435e808213948cadfa9fdc42c
   ExpoCrypto: e97e864c8d7b9ce4a000bca45dddb93544a1b2b4
   ExpoDevice: 1662ecdf42a8b5b2cf60ef7cecaf5a297639dd63
   ExpoDocumentPicker: cb4e43f58f0b5806e15db9baac36c6d99d19ffdf

@@ -46,7 +46,7 @@ export default function AccountSettingsButton({ account }: Props) {
   );
 
   const colorScheme = useColorScheme();
-  const logout = useLogout();
+  const { logout } = useLogout();
 
   const onPress = useCallback(() => {
     Keyboard.dismiss();

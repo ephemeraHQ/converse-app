@@ -65,7 +65,7 @@ export function ProfileScreen() {
     (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
   );
 
-  const logout = useLogout();
+  const { logout } = useLogout();
 
   const handleContextMenuAction = useCallback(
     (actionId: string) => {

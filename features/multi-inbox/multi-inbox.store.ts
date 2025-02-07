@@ -82,7 +82,7 @@ type AccountsStoreStype = {
 export const useAccountsStore = create<AccountsStoreStype>()(
   persist(
     (set, get) => ({
-      authStatus: AuthStatuses.undetermined,
+      authStatus: AuthStatuses.signedOut,
       setAuthStatus: (status: AuthStatus) => set({ authStatus: status }),
 
       currentSender: undefined,

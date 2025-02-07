@@ -202,7 +202,7 @@ export class MultiInboxClient {
   }) {
     try {
       logger.debug(
-        "[addInbox] Starting to add inbox with privySmartWalletClient",
+        "[addInbox] Starting to add inbox with privySmartWalletClient with address",
         privySmartWalletClient?.account.address
       );
 
@@ -393,9 +393,14 @@ export class MultiInboxClient {
                 ethereumAddress.toLowerCase()
               ];
             if (clientExistsForAddress) {
-              throw new Error(
+              // throw new Error(
+              //   `[restorePreviouslyCreatedInboxesForDevice] Found existing client for address: ${ethereumAddress} during restore. This shouldnt happen...`
+              // );
+
+              logger.debug(
                 `[restorePreviouslyCreatedInboxesForDevice] Found existing client for address: ${ethereumAddress} during restore. This shouldnt happen...`
               );
+              return clientExistsForAddress;
             }
             logger.debug(
               `[restorePreviouslyCreatedInboxesForDevice] No existing client found for address: ${ethereumAddress}, (this is expected during restore) building XMTP client`
