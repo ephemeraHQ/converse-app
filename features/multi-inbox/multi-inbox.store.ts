@@ -125,6 +125,12 @@ export const useAccountsStore = create<AccountsStoreStype>()(
     {
       name: "store-accounts",
       storage: createJSONStorage(() => zustandMMKVStorage),
+      partialize: (state) => ({
+        ...state,
+        multiInboxClientRestorationState:
+          MultiInboxClientRestorationStates.idle,
+      }),
+
       onRehydrateStorage: () => {
         logger.debug("[onRehydrateStorage] Starting hydration");
         return (state, error) => {

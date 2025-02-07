@@ -12,7 +12,7 @@ import {
   NativeStackNavigationOptions,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
-import React, { memo } from "react";
+import React, { memo, useEffect } from "react";
 import { Platform, useColorScheme, Text, Button } from "react-native";
 import { IdleScreen } from "../IdleScreen";
 import { NewAccountCreateContactCardScreen } from "../NewAccount/new-account-create-contact-card-screen";
@@ -28,6 +28,7 @@ import { VStack } from "@/design-system/VStack";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { queryClient } from "@/queries/queryClient";
 import { useLogout } from "@/utils/logout";
+import logger from "@/utils/logger";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -46,6 +47,7 @@ export type NavigationParamList = {
   };
 
   // Main
+  FakeScreen: undefined;
   Accounts: undefined;
   Blocked: undefined;
   Chats: undefined;
@@ -98,10 +100,18 @@ export function IdleNavigation() {
   );
 }
 
-const FakeScreen = () => {
+const FakeScreen = memo(function FakeScreen() {
   const currentSender = useCurrentSender();
-  console.log("currentSender", currentSender);
   const logout = useLogout();
+
+  // Use useEffect for side effects like logging
+  useEffect(() => {
+    if (currentSender) {
+      logger.debug(
+        `[FakeScreen] Current sender info - ETH: ${currentSender.ethereumAddress}, INBOX: ${currentSender.inboxId}`
+      );
+    }
+  }, [currentSender]);
 
   return (
     <Center style={{ flex: 1 }}>
@@ -109,16 +119,11 @@ const FakeScreen = () => {
         <Text>Fake Screen</Text>
         <Text>ETH: {currentSender?.ethereumAddress}</Text>
         <Text>INBOX: {currentSender?.inboxId}</Text>
-        <Button
-          title="Logout"
-          onPress={async () => {
-            logout();
-          }}
-        />
+        <Button title="Logout" onPress={logout} />
       </VStack>
     </Center>
   );
-};
+});
 
 export function SignedInNavigation() {
   return (

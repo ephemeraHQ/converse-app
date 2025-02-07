@@ -6,9 +6,22 @@ import logger from "@utils/logger";
 import { Conversation } from "@xmtp/react-native-sdk";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { useEffect } from "react";
+import { useAccountsStore } from "@/features/multi-inbox/multi-inbox.store";
+import { MultiInboxClientRestorationStates } from "@/features/multi-inbox/multi-inbox-client.types";
 
 export function HydrationStateHandler() {
+  const multiInboxClientRestorationState = useAccountsStore(
+    (state) => state.multiInboxClientRestorationState
+  );
+  const isRestored =
+    multiInboxClientRestorationState ===
+    MultiInboxClientRestorationStates.restored;
+
   useEffect(() => {
+    if (!isRestored) {
+      return;
+    }
+
     const hydrate = async () => {
       const startTime = new Date().getTime();
       const accounts = MultiInboxClient.instance.allEthereumAccountAddresses;
@@ -38,8 +51,9 @@ export function HydrationStateHandler() {
         } seconds total`
       );
     };
+
     hydrate();
-  }, []);
+  }, [isRestored]);
 
   return null;
 }
