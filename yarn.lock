@@ -14043,7 +14043,6 @@ __metadata:
     react-native-qrcode-svg: "npm:^6.2.0"
     react-native-quick-base64: "npm:2.1.2"
     react-native-quick-crypto: "npm:0.7.11"
-    react-native-react-query-devtools: "npm:^1.3.10"
     react-native-reanimated: "npm:~3.16.1"
     react-native-safe-area-context: "npm:4.12.0"
     react-native-screens: "npm:~4.4.0"
@@ -25322,20 +25321,6 @@ __metadata:
     string_decoder: "npm:^1.3.0"
     util: "npm:^0.12.5"
   checksum: 10c0/a27250b32cdac21aa75be970d54f2f35174c30fafd67215398f5c8066299d04258e47d21942f8136b0d20dd7ccb4fa9d20f7aaccdd4d9b204fe1a39051c7011c
-  languageName: node
-  linkType: hard
-
-"react-native-react-query-devtools@npm:^1.3.10":
-  version: 1.3.10
-  resolution: "react-native-react-query-devtools@npm:1.3.10"
-  dependencies:
-    fast-deep-equal: "npm:^3.1.3"
-  peerDependencies:
-    "@tanstack/react-query": ^5.17.19
-    react: ^18.2.0
-    react-native: ">=0.63.0"
-    react-native-svg: ^15
-  checksum: 10c0/72cd830d1940b639f1f818797cc3721c43518e1d1f2f1fa9e237d3a03fb7abe9fe3722e1181be783d83b9cef839acc059f7ab4d9af7659dad66139a4a2376645
   languageName: node
   linkType: hard
 
