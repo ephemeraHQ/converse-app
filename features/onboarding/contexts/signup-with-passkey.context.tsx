@@ -1,5 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useSignupWithPasskey as usePrivySignupWithPasskey } from "@privy-io/expo/passkey";
+import {
+  useLoginWithPasskey as usePrivyLoginWithPasskey,
+  useSignupWithPasskey as usePrivySignupWithPasskey,
+} from "@privy-io/expo/passkey";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { RELYING_PARTY } from "@/features/onboarding/passkey.constants";
 import logger from "@/utils/logger";
@@ -24,7 +27,10 @@ export function getEmbeddedWalletQueryOptions(args: {
     embeddedWalletAddress: string;
   }>;
 }) {
-  const enabled = !!args.privyUserId;
+  const enabled = !!args.privyUserId && args.embeddedWalletIndex >= 0;
+  logger.debug(
+    `[getEmbeddedWalletQueryOptions] Enabled: ${enabled}, privyUserId: ${args.privyUserId}, embeddedWalletIndex: ${args.embeddedWalletIndex}`
+  );
   return queryOptions({
     queryKey: embeddedWalletQueryKey({
       privyUserId: args.privyUserId,
@@ -52,6 +58,13 @@ const useCreateEmbeddedWallet = (args: { embeddedWalletIndex: number }) => {
             `[createEmbeddedWallet] Creating embedded wallet at index: ${index}`
           );
           const userBeforeCreate = await client.user.get();
+          logger.debug(
+            `[createEmbeddedWallet] User before create: ${JSON.stringify(
+              userBeforeCreate,
+              null,
+              2
+            )}`
+          );
 
           const linkedWalletsBefore = userBeforeCreate.user?.linked_accounts
             .filter((account) => account.type === "wallet")
@@ -137,6 +150,7 @@ const useCreateEmbeddedWallet = (args: { embeddedWalletIndex: number }) => {
 const SignupWithPasskeyContext = createContext<
   | {
       signupWithPasskey: () => Promise<void>;
+      loginWithPasskey: () => Promise<void>;
     }
   | undefined
 >(undefined);
@@ -147,6 +161,9 @@ export const SignupWithPasskeyProvider = ({
 }) => {
   const { client: smartWalletClient } = useSmartWallets();
   const { logout: privyLogout } = usePrivy();
+  const { loginWithPasskey: privyLoginWithPasskey } =
+    usePrivyLoginWithPasskey();
+
   const { signupWithPasskey: privySignupWithPasskey } =
     usePrivySignupWithPasskey({
       onSuccess: (privyUser, isNewUser) => {
@@ -165,12 +182,15 @@ export const SignupWithPasskeyProvider = ({
       },
     });
 
+  const [embeddedWalletIndexToCreate, setEmbeddedWalletIndexToCreate] =
+    useState(-1);
+
   const {
     data: embeddedWalletAddress,
     error: embeddedWalletError,
     status: embeddedWalletStatus,
   } = /* wont fire until user is logged in*/ useCreateEmbeddedWallet({
-    embeddedWalletIndex: 0,
+    embeddedWalletIndex: embeddedWalletIndexToCreate,
   });
 
   // logger.debug(
@@ -192,7 +212,7 @@ export const SignupWithPasskeyProvider = ({
     if (embeddedWalletAddress && !smartWalletClient) {
       setStartTime(Date.now());
       logger.debug(
-        "[OnboardingWelcomeScreenContent] Starting smart wallet client creation timer"
+        "[passkey onboarding context] Starting smart wallet client creation timer"
       );
     }
   }, [embeddedWalletAddress, smartWalletClient]);
@@ -201,7 +221,7 @@ export const SignupWithPasskeyProvider = ({
     if (smartWalletClient && startTime) {
       const duration = Date.now() - startTime;
       logger.debug(
-        `[OnboardingWelcomeScreenContent] Smart wallet client creation took ${duration}ms`
+        `[passkey onboarding context] Smart wallet client creation took ${duration}ms`
       );
     }
   }, [smartWalletClient, startTime]);
@@ -209,7 +229,7 @@ export const SignupWithPasskeyProvider = ({
   useEffect(() => {
     if (embeddedWalletAddress) {
       logger.debug(
-        "[OnboardingWelcomeScreenContent] Embedded wallet has been created, going to wait for Smart Contract Wallet to be created and then create a new XMTP Inbox"
+        "[passkey onboarding context] Embedded wallet has been created, going to wait for Smart Contract Wallet to be created and then create a new XMTP Inbox"
       );
     }
   }, [embeddedWalletAddress]);
@@ -217,29 +237,27 @@ export const SignupWithPasskeyProvider = ({
   useEffect(() => {
     if (!smartWalletClient) {
       logger.debug(
-        "[OnboardingWelcomeScreenContent] No smart wallet client available yet"
+        "[passkey onboarding context] No smart wallet client available yet"
       );
       return;
     }
 
     logger.debug(
-      "[OnboardingWelcomeScreenContent] Smart wallet client available, going to create a new inbox"
+      "[passkey onboarding context] Smart wallet client available, going to create a new inbox"
     );
 
     // don't love doing async functions use effects, but let's get this working and then refactor
     async function createNewInbox() {
-      logger.debug(
-        "[OnboardingWelcomeScreenContent] Checking smart wallet client"
-      );
+      logger.debug("[passkey onboarding context] Checking smart wallet client");
 
-      logger.debug("[signupWithPasskey] creating new inbox");
+      logger.debug("[passkey onboarding context] creating new inbox");
       await MultiInboxClient.instance.createNewInboxForPrivySmartContractWallet(
         {
           privySmartWalletClient: smartWalletClient,
         }
       );
       logger.debug(
-        "[OnboardingWelcomeScreenContent] MultiInboxClient created a new inbox successfully"
+        "[passkey onboarding context] MultiInboxClient created a new inbox successfully"
       );
     }
 
@@ -248,13 +266,23 @@ export const SignupWithPasskeyProvider = ({
 
   const signupWithPasskey = async () => {
     await privyLogout();
+    setEmbeddedWalletIndexToCreate(0);
     await privySignupWithPasskey({
       relyingParty: RELYING_PARTY,
     });
   };
 
+  const loginWithPasskey = async () => {
+    await privyLogout();
+    await privyLoginWithPasskey({
+      relyingParty: RELYING_PARTY,
+    });
+  };
+
   return (
-    <SignupWithPasskeyContext.Provider value={{ signupWithPasskey }}>
+    <SignupWithPasskeyContext.Provider
+      value={{ signupWithPasskey, loginWithPasskey }}
+    >
       {children}
     </SignupWithPasskeyContext.Provider>
   );
