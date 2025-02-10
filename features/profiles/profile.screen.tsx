@@ -30,6 +30,7 @@ import { StackActions } from "@react-navigation/native";
 import React, { useCallback, useState, useRef } from "react";
 import { Alert, Share, ViewStyle } from "react-native";
 import { ProfileContactCard } from "./components/profile-contact-card";
+import { useSaveProfileMutation } from "./hooks/use-save-profile-mutation";
 
 // Add this type at the top level
 type ProfileContactCardHandle = {
@@ -39,7 +40,6 @@ type ProfileContactCardHandle = {
 
 export function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const profileCardRef = useRef<ProfileContactCardHandle>(null);
   const { theme, themed } = useAppTheme();
   const router = useRouter();
@@ -49,6 +49,7 @@ export function ProfileScreen() {
   const isMyProfile = peerAddress.toLowerCase() === userAddress?.toLowerCase();
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const { data: socials } = useProfileSocials(peerAddress);
+  const { mutate: saveProfile, isPending: isSaving } = useSaveProfileMutation();
 
   const userName = usePreferredUsername(peerAddress);
   const displayName = usePreferredName(peerAddress);
@@ -67,10 +68,11 @@ export function ProfileScreen() {
     if (editMode) {
       // Try to save if there are changes
       if (profileCardRef.current?.hasChanges) {
+        setEditMode(false); // Optimistically exit edit mode
         const saveResult = await profileCardRef.current?.handleSave();
-        // Only exit edit mode if save was successful (no validation errors)
-        if (saveResult?.success) {
-          setEditMode(false);
+        // If save failed, go back to edit mode
+        if (!saveResult?.success) {
+          setEditMode(true);
         }
       } else {
         // If no changes, just exit edit mode
@@ -80,11 +82,6 @@ export function ProfileScreen() {
     }
     setEditMode(!editMode);
   }, [editMode]);
-
-  const handleSaving = useCallback((saving: boolean) => {
-    setIsSaving(saving);
-    // Don't exit edit mode here - it's handled in handleEditProfile
-  }, []);
 
   const showDisconnectActionSheet = useDisconnectActionSheet();
 
@@ -278,7 +275,6 @@ export function ProfileScreen() {
             avatarUri={preferredAvatarUri}
             isMyProfile={isMyProfile}
             editMode={editMode}
-            onSaving={handleSaving}
           />
         </VStack>
 

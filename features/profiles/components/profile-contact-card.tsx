@@ -7,9 +7,9 @@ import React, {
 } from "react";
 import { ContactCard } from "./contact-card";
 import { useAddPfp } from "@/features/onboarding/hooks/useAddPfp";
-import { useCreateOrUpdateProfileInfo } from "@/features/onboarding/hooks/useCreateOrUpdateProfileInfo";
 import { useProfile } from "@/features/onboarding/hooks/useProfile";
 import { validateProfileName } from "../utils/validate-profile-name";
+import { useSaveProfileMutation } from "../hooks/use-save-profile-mutation";
 
 type IProfileContactCardProps = {
   displayName: string;
@@ -17,7 +17,6 @@ type IProfileContactCardProps = {
   avatarUri?: string;
   isMyProfile?: boolean;
   editMode?: boolean;
-  onSaving?: (isSaving: boolean) => void;
 };
 
 export type ProfileContactCardHandle = {
@@ -40,18 +39,17 @@ export const ProfileContactCard = memo(
         avatarUri,
         isMyProfile,
         editMode,
-        onSaving,
       }: IProfileContactCardProps,
       ref
     ) {
       const { profile, setProfile } = useProfile();
       const { addPFP, asset } = useAddPfp();
-      const { createOrUpdateProfile } = useCreateOrUpdateProfileInfo();
+      const { mutateAsync: saveProfile, isPending: isLoading } =
+        useSaveProfileMutation();
       const [hasChanges, setHasChanges] = useState(false);
       const [localDisplayName, setLocalDisplayName] =
         useState(initialDisplayName);
       const [previousEditMode, setPreviousEditMode] = useState(editMode);
-      const [isLoading, setIsLoading] = useState(false);
       const [localAvatarUri, setLocalAvatarUri] = useState(avatarUri);
       const [validationError, setValidationError] = useState<string>();
 
@@ -70,11 +68,6 @@ export const ProfileContactCard = memo(
         }
         setPreviousEditMode(editMode);
       }, [editMode, previousEditMode, initialDisplayName, avatarUri]);
-
-      // Notify parent of saving state
-      useEffect(() => {
-        onSaving?.(isLoading);
-      }, [isLoading, onSaving]);
 
       // Handle asset changes from image picker
       useEffect(() => {
@@ -106,7 +99,6 @@ export const ProfileContactCard = memo(
               return { success: false, error: validationError };
             }
 
-            setIsLoading(true);
             try {
               const updatedProfile = {
                 ...profile,
@@ -114,23 +106,16 @@ export const ProfileContactCard = memo(
                 avatar: localAvatarUri,
               };
 
-              const { success } = await createOrUpdateProfile({
-                profile: updatedProfile,
-              });
-              if (success) {
-                setProfile(updatedProfile);
-                setHasChanges(false);
-                return { success: true };
-              }
-              return { success: false };
+              await saveProfile({ profile: updatedProfile });
+              setProfile(updatedProfile);
+              setHasChanges(false);
+              return { success: true };
             } catch {
               // Error is handled by the mutation
               setLocalDisplayName(initialDisplayName); // Revert on error
               setLocalAvatarUri(avatarUri);
               setHasChanges(false);
               return { success: false };
-            } finally {
-              setIsLoading(false);
             }
           },
           hasChanges, // Now we report all changes, validation is handled in handleSave
@@ -143,7 +128,7 @@ export const ProfileContactCard = memo(
           localAvatarUri,
           initialDisplayName,
           avatarUri,
-          createOrUpdateProfile,
+          saveProfile,
           setProfile,
         ]
       );
