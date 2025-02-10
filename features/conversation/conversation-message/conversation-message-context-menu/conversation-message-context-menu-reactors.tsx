@@ -1,8 +1,6 @@
-import { GroupAvatarMembers } from "@/components/group-avatar";
+import { GroupAvatarInboxIds } from "@/components/group-avatar";
 import { AnimatedCenter, Center } from "@/design-system/Center";
 import { HStack } from "@/design-system/HStack";
-import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation.store-context";
-import { useGroupMembersInfoForCurrentAccount } from "@/hooks/use-group-members-info-for-current-account";
 import { ObjectTyped } from "@/utils/object-typed";
 import { getReactionContent } from "@/utils/xmtpRN/reactions";
 import { Text } from "@design-system/Text";
@@ -88,12 +86,6 @@ const Item = memo(function Item({
 }: MessageReactionsItemProps) {
   const { theme } = useAppTheme();
 
-  const conversationTopic = useCurrentConversationTopicSafe();
-
-  const { groupMembersInfo } = useGroupMembersInfoForCurrentAccount({
-    groupTopic: conversationTopic,
-  });
-
   return (
     <Center
       vertical
@@ -101,10 +93,7 @@ const Item = memo(function Item({
         rowGap: theme.spacing.xxs,
       }}
     >
-      <GroupAvatarMembers
-        size={theme.avatarSize.lg}
-        members={groupMembersInfo}
-      />
+      <GroupAvatarInboxIds inboxIds={inboxIds} />
       <HStack
         style={{
           alignItems: "center",
