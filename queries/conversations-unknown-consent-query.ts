@@ -185,7 +185,6 @@ export function getUnknownConsentConversationsQueryOptions(args: {
             account,
           })
       : skipToken,
-    enabled: !!account,
     refetchOnMount: true, // Just for now to make sure we always have the lastest conversations
   });
 }

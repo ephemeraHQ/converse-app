@@ -109,6 +109,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
 
 // eslint-disable-next-line import/no-default-export
 export default (): ExpoConfig => {
+  // @ts-expect-error note(lustig) env types aren't working for me OOTB
   const expoEnv = (process.env.EXPO_ENV || "development") as Environment;
   const config = settings[expoEnv];
 

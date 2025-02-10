@@ -1,5 +1,4 @@
-import { currentAccount } from "@/features/multi-inbox/multi-inbox.store";
-
+import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 /**
  * Checks if the provided address belongs to the current user
  * @param address Ethereum address to check
@@ -7,5 +6,8 @@ import { currentAccount } from "@/features/multi-inbox/multi-inbox.store";
  */
 export function isCurrentUser(address: string): boolean {
   if (!address) return false;
-  return address.toLowerCase() === currentAccount().toLowerCase();
+  return (
+    address.toLowerCase() ===
+    getSafeCurrentSender().ethereumAddress.toLowerCase()
+  );
 }

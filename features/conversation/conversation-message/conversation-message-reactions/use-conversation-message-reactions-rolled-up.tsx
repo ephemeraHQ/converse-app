@@ -104,6 +104,7 @@ export function useConversationMessageReactionsRolledUp(args: {
       userReacted,
       preview,
       detailed,
+      messageId,
     };
-  }, [reactionsBySender, membersSocials]);
+  }, [reactionsBySender, membersSocials, messageId]);
 }

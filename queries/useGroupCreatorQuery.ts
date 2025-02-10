@@ -1,7 +1,7 @@
 import { groupCreatorQueryKey } from "@/queries/QueryKeys";
-import { useQuery, queryOptions } from "@tanstack/react-query";
+import { useQuery, queryOptions, skipToken } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { currentAccount } from "../features/multi-inbox/multi-inbox.store";
+import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { getGroupQueryData } from "./useGroupQuery";
 
 const getGroupCreatorQueryOptions = (args: {
@@ -9,21 +9,24 @@ const getGroupCreatorQueryOptions = (args: {
   topic: ConversationTopic;
 }) => {
   const { account, topic } = args;
+  const enabled = !!account && !!topic;
   return queryOptions({
+    enabled,
     queryKey: groupCreatorQueryKey(account, topic),
-    queryFn: () => {
-      const group = getGroupQueryData({ account, topic });
-      if (!group) return null;
-      return group.creatorInboxId();
-    },
-    enabled: !!account && !!topic,
+    queryFn: enabled
+      ? async () => {
+          const group = getGroupQueryData({ account, topic });
+          if (!group) return null;
+          return group.creatorInboxId();
+        }
+      : skipToken,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 };
 
 export const useGroupCreatorQuery = (topic: ConversationTopic) => {
-  const account = currentAccount();
+  const account = getSafeCurrentSender().ethereumAddress;
 
   return useQuery(getGroupCreatorQueryOptions({ account, topic }));
 };

@@ -1,7 +1,7 @@
 import { Wallet, ethers } from "ethers";
 
 import {
-  currentAccount,
+  getSafeCurrentSender,
   getWalletStore,
 } from "../../features/multi-inbox/multi-inbox.store";
 import { getSecureItemAsync } from "../keychain";
@@ -9,7 +9,7 @@ import { getSecureItemAsync } from "../keychain";
 import logger from "@utils/logger";
 
 export const getCurrentAccountSigner = async () => {
-  const account = currentAccount();
+  const account = getSafeCurrentSender().ethereumAddress;
   const pkPath = getWalletStore(account).getState().privateKeyPath;
   if (!pkPath) return;
   try {

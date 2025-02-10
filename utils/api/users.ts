@@ -8,11 +8,7 @@ import { getXmtpApiHeaders } from "./auth";
 
 const lastSaveUser: { [address: string]: number } = {};
 
-export const saveUser = async (args: {
-  address: string;
-  inboxId: string;
-  privyId: string;
-}) => {
+export const saveUser = async (args: { address: string }) => {
   const { address } = args;
   const now = new Date().getTime();
   const last = lastSaveUser[address] || 0;

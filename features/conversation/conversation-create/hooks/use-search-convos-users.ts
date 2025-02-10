@@ -116,6 +116,7 @@ async function handleGeneralSearch(searchQuery: string) {
           captureError(
             new GenericError({
               message: `Failed to get inbox ID for address ${address}`,
+              cause: error,
             })
           );
           return null;

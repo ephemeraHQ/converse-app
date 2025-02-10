@@ -1,4 +1,3 @@
-import { ScreenHeaderModalCloseButton } from "@/components/Screen/ScreenHeaderModalCloseButton";
 import {
   JoinGroupNavigation,
   JoinGroupNavigationParams,
@@ -14,7 +13,6 @@ import {
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
 import { ProfileNav, ProfileNavParams } from "@/features/profiles/profile.nav";
 import { translate } from "@/i18n";
-import { useRouter } from "@/navigation/useNavigation";
 import { OnboardingContactCardScreen } from "@features/onboarding/screens/onboarding-contact-card-screen";
 import { OnboardingNotificationsScreen } from "@features/onboarding/screens/onboarding-notifications-screen";
 import {
@@ -24,15 +22,12 @@ import {
 import React, { memo, useEffect } from "react";
 import { Platform, useColorScheme, Text, Button } from "react-native";
 import { IdleScreen } from "../IdleScreen";
-import { NewAccountCreateContactCardScreen } from "../NewAccount/new-account-create-contact-card-screen";
-import { NewAccountScreen } from "../NewAccount/new-account-screen";
 import GroupNav, { GroupNavParams } from "./GroupNav";
 import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { SignupWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
-import { usePrivy } from "@privy-io/expo";
 import { useCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
@@ -54,16 +49,8 @@ export type NavigationParamList = {
   OnboardingNotifications: undefined;
   OnboardingGetStarted: undefined;
 
-  // New account
-  NewAccountNavigator: undefined;
-  NewAccountCreateContactCard: undefined;
-  NewAccountConnectWallet: {
-    address: string;
-  };
-
   // Main
   FakeScreen: undefined;
-  Accounts: undefined;
   Blocked: undefined;
   Chats: undefined;
   ChatsRequests: undefined;
@@ -80,7 +67,6 @@ export type NavigationParamList = {
   GroupInvite: JoinGroupNavigationParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
-  NewAccount: undefined;
 
   // UI Tests
   Examples: undefined;
@@ -177,13 +163,6 @@ export function SignedInNavigation() {
             name="AppSettings"
             component={AppSettingsScreen}
           />
-          <NativeStack.Screen
-            name="NewAccountNavigator"
-            component={NewAccountNavigator}
-            options={{
-              headerShown: false,
-            }}
-          />
         </NativeStack.Group>
       </NativeStack.Group>
     </NativeStack.Navigator>
@@ -236,48 +215,3 @@ export function SignedOutNavigation() {
     </SignupWithPasskeyProvider>
   );
 }
-
-const NewAccountStack = createNativeStackNavigator<NavigationParamList>();
-
-const NewAccountNavigator = memo(function NewAccountNavigator() {
-  const colorScheme = useColorScheme();
-
-  const router = useRouter();
-  const { logout: privyLogout } = usePrivy();
-
-  return (
-    <NewAccountStack.Navigator>
-      <NewAccountStack.Group
-        screenOptions={{
-          headerTitle: "",
-          headerBackTitle: translate("back"),
-          ...stackGroupScreenOptions(colorScheme),
-        }}
-      >
-        <NativeStack.Screen
-          name="NewAccount"
-          component={NewAccountScreen}
-          options={{
-            headerTitle: translate("new_account"),
-            headerLeft: () => (
-              <ScreenHeaderModalCloseButton
-                title={translate("cancel")}
-                onPress={() => {
-                  router.goBack();
-                  privyLogout();
-                }}
-              />
-            ),
-          }}
-        />
-        <NewAccountStack.Screen
-          options={{
-            headerShown: false,
-          }}
-          name="NewAccountCreateContactCard"
-          component={NewAccountCreateContactCardScreen}
-        />
-      </NewAccountStack.Group>
-    </NewAccountStack.Navigator>
-  );
-});

@@ -1,5 +1,4 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { currentAccount } from "../features/multi-inbox/multi-inbox.store";
 import { useAddToGroupMutation } from "../queries/useAddToGroupMutation";
 import { useGroupMembersQuery } from "../queries/useGroupMembersQuery";
 import { usePromoteToAdminMutation } from "../queries/usePromoteToAdminMutation";
@@ -7,9 +6,10 @@ import { usePromoteToSuperAdminMutation } from "../queries/usePromoteToSuperAdmi
 import { useRemoveFromGroupMutation } from "../queries/useRemoveFromGroupMutation";
 import { useRevokeAdminMutation } from "../queries/useRevokeAdminMutation";
 import { useRevokeSuperAdminMutation } from "../queries/useRevokeSuperAdminMutation";
+import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 
 export const useGroupMembers = (topic: ConversationTopic) => {
-  const account = currentAccount();
+  const account = getSafeCurrentSender().ethereumAddress;
 
   const {
     data: members,
