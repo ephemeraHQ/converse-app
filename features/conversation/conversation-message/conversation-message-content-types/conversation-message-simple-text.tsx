@@ -1,24 +1,21 @@
+import { useSelect } from "@/data/store/storeHelpers";
 import {
   BubbleContainer,
   BubbleContentContainer,
 } from "@/features/conversation/conversation-message/conversation-message-bubble";
 import { MessageText } from "@/features/conversation/conversation-message/conversation-message-text";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
-import { useSelect } from "@/data/store/storeHelpers";
-import { DecodedMessage, TextCodec } from "@xmtp/react-native-sdk";
-import { memo } from "react";
 import { shouldRenderBigEmoji } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { VStack } from "@design-system/VStack";
 import { Text } from "@design-system/Text";
 import { textSizeStyles } from "@design-system/Text/Text.styles";
-import { useAppTheme } from "@theme/useAppTheme";
+import { VStack } from "@design-system/VStack";
+import { DecodedMessage, TextCodec } from "@xmtp/react-native-sdk";
+import { memo } from "react";
 
 export const MessageSimpleText = memo(function MessageSimpleText(props: {
   message: DecodedMessage<TextCodec>;
 }) {
   const { message } = props;
-
-  const { theme } = useAppTheme();
 
   const textContent = message.content();
 
@@ -33,7 +30,7 @@ export const MessageSimpleText = memo(function MessageSimpleText(props: {
           alignItems: fromMe ? "flex-end" : "flex-start",
         }}
       >
-        <Text style={textSizeStyles["3xl"]}>{textContent}</Text>
+        <Text style={textSizeStyles["5xl"]}>{textContent}</Text>
       </VStack>
     );
   }

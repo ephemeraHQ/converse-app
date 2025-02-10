@@ -104,12 +104,13 @@ export function Swipeable({
       progress: SharedValue<number>,
       drag: SharedValue<number>,
       swipeable: SwipeableMethods
-    ) =>
-      renderLeftActions?.({
+    ) => {
+      return renderLeftActions?.({
         progressAnimatedValue: progress,
         dragAnimatedValue: drag,
         swipeable,
-      }),
+      });
+    },
     [renderLeftActions]
   );
 
@@ -118,12 +119,13 @@ export function Swipeable({
       progress: SharedValue<number>,
       drag: SharedValue<number>,
       swipeable: SwipeableMethods
-    ) =>
-      renderRightActions?.({
+    ) => {
+      return renderRightActions?.({
         progressAnimatedValue: progress,
         dragAnimatedValue: drag,
         swipeable,
-      }),
+      });
+    },
     [renderRightActions]
   );
 

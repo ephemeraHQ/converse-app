@@ -1,24 +1,11 @@
 import { getCurrentAccount } from "@/data/store/accountsStore";
-import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
-import {
-  addConversationMessageQuery,
-  refetchConversationMessages,
-  replaceOptimisticMessageWithReal,
-} from "@/queries/conversation-messages-query";
-import { fetchConversationMessageQuery } from "@/queries/useConversationMessage";
 import { getOrFetchConversation } from "@/queries/conversation-query";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { getTodayNs } from "@/utils/date";
-import { getRandomId } from "@/utils/general";
-import { contentTypesPrefixes } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 import { useMutation } from "@tanstack/react-query";
 import {
   ConversationTopic,
-  DecodedMessage,
-  MessageDeliveryStatus,
   MessageId,
   RemoteAttachmentContent,
-  TextCodec,
 } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 
@@ -32,6 +19,14 @@ export type ISendMessageParams = {
 
 export async function sendMessage(args: ISendMessageParams) {
   const { referencedMessageId, content, topic } = args;
+
+  // Need at least a text or remoteAttachment
+  if (!content.remoteAttachment && !content.text) {
+    throw new Error(
+      "Invalid content: Either text or remoteAttachment must be provided"
+    );
+  }
+
   const conversation = await getOrFetchConversation({
     topic,
     account: getCurrentAccount()!,
