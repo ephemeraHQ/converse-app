@@ -83,6 +83,7 @@ export const SignupWithPasskeyProvider = ({
   const signingUp = authStatus === AuthStatuses.signingUp;
   const signingIn = authStatus === AuthStatuses.signingIn;
 
+  const { user: privyUser } = usePrivy();
   useEffect(() => {
     if (!smartWalletClient) {
       logger.debug(
@@ -92,9 +93,6 @@ export const SignupWithPasskeyProvider = ({
     }
 
     if (!signingUp) {
-      logger.debug(
-        "[passkey onboarding context] We are creating the inbox from a login differently than signup so returning here"
-      );
       return;
     }
 
@@ -135,9 +133,13 @@ export const SignupWithPasskeyProvider = ({
     }
 
     createNewInbox();
-  }, [smartWalletClient, signingUp, privySmartWalletsMatch, privyLogout]);
-
-  const { user: privyUser } = usePrivy();
+  }, [
+    smartWalletClient,
+    signingUp,
+    privySmartWalletsMatch,
+    privyLogout,
+    privyUser?.linked_accounts,
+  ]);
 
   useEffect(() => {
     try {
