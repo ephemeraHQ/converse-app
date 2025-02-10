@@ -43,6 +43,7 @@ import { saveApiURI } from "./utils/sharedData";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
 import logger from "./utils/logger";
+import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
 
 preventSplashScreenAutoHide();
 
@@ -181,9 +182,9 @@ export default function AppWithProviders() {
                   <PaperProvider theme={paperTheme}>
                     <GestureHandlerRootView style={{ flex: 1 }}>
                       <BottomSheetModalProvider>
-                        <App />
+                        {/* <App /> */}
+                        <PrivyPlaygroundLandingScreen />
                         <DevToolsBubble onCopy={onCopy} />
-                        {/* <PrivyPlaygroundLandingScreen /> */}
                         <Snackbars />
                       </BottomSheetModalProvider>
                     </GestureHandlerRootView>

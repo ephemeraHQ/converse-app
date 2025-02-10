@@ -135,7 +135,7 @@ const OnboardingWelcomeScreenContent = memo(
             queryClient.clear();
             mmkv.clearAll();
           }}
-          title="dleete everything"
+          title="Delete Everything"
         />
         {/* <OnboardingFooter
             text={translate("onboarding.welcome.createContactCard")}
