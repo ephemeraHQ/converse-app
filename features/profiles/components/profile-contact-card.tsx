@@ -10,6 +10,7 @@ import { useAddPfp } from "@/features/onboarding/hooks/useAddPfp";
 import { useProfile } from "@/features/onboarding/hooks/useProfile";
 import { validateProfileName } from "../utils/validate-profile-name";
 import { useSaveProfileMutation } from "../hooks/use-save-profile-mutation";
+import { ProfileContactCardHandle } from "../profile-types";
 
 type IProfileContactCardProps = {
   displayName: string;
@@ -17,11 +18,6 @@ type IProfileContactCardProps = {
   avatarUri?: string;
   isMyProfile?: boolean;
   editMode?: boolean;
-};
-
-export type ProfileContactCardHandle = {
-  handleSave: () => Promise<{ success: boolean; error?: string }>;
-  hasChanges: boolean;
 };
 
 /**
@@ -44,8 +40,7 @@ export const ProfileContactCard = memo(
     ) {
       const { profile, setProfile } = useProfile();
       const { addPFP, asset } = useAddPfp();
-      const { mutateAsync: saveProfile, isPending: isLoading } =
-        useSaveProfileMutation();
+      const { mutateAsync: saveProfile, isPending } = useSaveProfileMutation();
       const [hasChanges, setHasChanges] = useState(false);
       const [localDisplayName, setLocalDisplayName] =
         useState(initialDisplayName);
@@ -118,7 +113,8 @@ export const ProfileContactCard = memo(
               return { success: false };
             }
           },
-          hasChanges, // Now we report all changes, validation is handled in handleSave
+          hasChanges,
+          isSaving: isPending,
         }),
         [
           hasChanges,
@@ -130,6 +126,7 @@ export const ProfileContactCard = memo(
           avatarUri,
           saveProfile,
           setProfile,
+          isPending,
         ]
       );
 
@@ -139,11 +136,10 @@ export const ProfileContactCard = memo(
           userName={userName}
           avatarUri={localAvatarUri}
           isMyProfile={isMyProfile}
-          editMode={editMode}
+          editMode={editMode && !isPending}
           onAvatarPress={addPFP}
           onDisplayNameChange={handleDisplayNameChange}
           editableDisplayName={localDisplayName}
-          isLoading={isLoading}
           error={validationError}
           status={validationError ? "error" : undefined}
         />

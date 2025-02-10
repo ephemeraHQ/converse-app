@@ -18,3 +18,9 @@ export type IUnstoppableDomain = IUnstoppableDomainZodSchema;
 export type IConverseUserName = IConverseUserNameZodSchema;
 
 export type IProfileSocials = IProfileSocialsZodSchema;
+
+export type ProfileContactCardHandle = {
+  handleSave: () => Promise<{ success: boolean; error?: string }>;
+  hasChanges: boolean;
+  isSaving: boolean;
+};

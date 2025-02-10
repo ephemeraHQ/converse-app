@@ -30,13 +30,7 @@ import { StackActions } from "@react-navigation/native";
 import React, { useCallback, useState, useRef } from "react";
 import { Alert, Share, ViewStyle } from "react-native";
 import { ProfileContactCard } from "./components/profile-contact-card";
-import { useSaveProfileMutation } from "./hooks/use-save-profile-mutation";
-
-// Add this type at the top level
-type ProfileContactCardHandle = {
-  handleSave: () => Promise<{ success: boolean; error?: string }>;
-  hasChanges: boolean;
-};
+import { ProfileContactCardHandle } from "./profile-types";
 
 export function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
@@ -49,7 +43,6 @@ export function ProfileScreen() {
   const isMyProfile = peerAddress.toLowerCase() === userAddress?.toLowerCase();
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const { data: socials } = useProfileSocials(peerAddress);
-  const { mutate: saveProfile, isPending: isSaving } = useSaveProfileMutation();
 
   const userName = usePreferredUsername(peerAddress);
   const displayName = usePreferredName(peerAddress);
@@ -184,11 +177,9 @@ export function ProfileScreen() {
         <HStack style={themed($headerRightContainer)}>
           {editMode ? (
             <Button
-              text={isSaving ? "" : translate("userProfile.done")}
+              text={translate("userProfile.done")}
               variant="text"
               onPress={handleEditProfile}
-              loading={isSaving}
-              disabled={isSaving}
             />
           ) : (
             <>
@@ -260,7 +251,6 @@ export function ProfileScreen() {
       handleContextMenuAction,
       isBlockedPeer,
       handleEditProfile,
-      isSaving,
     ]
   );
 
