@@ -88,87 +88,37 @@ export default function Main() {
 }
 
 export const useAuthStatus = () => {
-  const { authStatus, multiInboxClientRestorationState, currentSender } =
-    useAccountsStore(
-      useSelect([
-        "authStatus",
-        "multiInboxClientRestorationState",
-        "currentSender",
-      ])
-    );
+  const { authStatus, multiInboxClientRestorationState } = useAccountsStore(
+    useSelect(["authStatus", "multiInboxClientRestorationState"])
+  );
 
   const isRestored =
     multiInboxClientRestorationState ===
     MultiInboxClientRestorationStates.restored;
 
-  const hasNotAuthenticated = [
-    AuthStatuses.signedOut,
-    AuthStatuses.signingIn,
-    AuthStatuses.signingUp,
-    AuthStatuses.undetermined,
-  ].includes(authStatus);
+  const isRestoring =
+    multiInboxClientRestorationState ===
+    MultiInboxClientRestorationStates.restoring;
+
+  const hasNotAuthenticated =
+    [
+      AuthStatuses.signedOut,
+      AuthStatuses.signingIn,
+      AuthStatuses.signingUp,
+      AuthStatuses.undetermined,
+    ].includes(authStatus) || isRestoring;
+
   const isSignedOut = hasNotAuthenticated;
+  const isSignedIn = isRestored && authStatus === AuthStatuses.signedIn;
 
-  const isInitiaillyReady =
-    isRestored ||
-    isSignedOut ||
-    (authStatus === AuthStatuses.signedIn && isRestored);
-  logger.debug("[useAuthStatus] isInitiallyReady", isInitiaillyReady);
-
-  const [isReady, setIsReady] = useState(isInitiaillyReady);
-
-  logger.debug("[useAuthStatus]  state", {
-    hasNotAuthenticated,
-    isRestored,
-    isSignedOut,
-    authStatus,
-    isReady,
-  });
-
-  useEffect(() => {
-    async function initialize() {
-      logger.debug("[useAuthStatus] Starting inbox restoration");
-      try {
-        await MultiInboxClient.instance.restorePreviouslyCreatedInboxesForDevice();
-        logger.debug(
-          "[useAuthStatus] Inbox restoration completed successfully"
-        );
-        setIsReady(true);
-      } catch (error) {
-        logger.error("[useAuthStatus] Error during inbox restoration:", error);
-        throw error;
-      }
-    }
-
-    if (!isRestored && authStatus === AuthStatuses.signedIn) {
-      initialize().catch((error) => {
-        logger.error("[useAuthStatus] Initialization failed:", error);
-      });
-    }
-  }, [isRestored, authStatus]);
-
-  const isCheckingAuth = !isReady;
-  const isSignedIn = authStatus === AuthStatuses.signedIn && isReady;
-
-  return { isCheckingAuth, isSignedIn, isSignedOut };
+  return { isRestoring, isSignedIn, isSignedOut };
 };
 
 const NavigationContent = () => {
-  const { isCheckingAuth, isSignedIn, isSignedOut } = useAuthStatus();
-  const { splashScreenHidden } = useAppStore(useSelect(["splashScreenHidden"]));
-
-  useEffect(() => {
-    logger.debug("[useAuthStatus] bundle", {
-      isCheckingAuth,
-      isSignedIn,
-      isSignedOut,
-      splashScreenHidden,
-    });
-    SplashScreen.hideAsync();
-  }, [isCheckingAuth, isSignedIn, isSignedOut, splashScreenHidden]);
+  const { isRestoring, isSignedIn, isSignedOut } = useAuthStatus();
 
   // Show idle navigation during signup/signin/restoration
-  if (isCheckingAuth) {
+  if (isRestoring) {
     return <IdleNavigation />;
   } else if (isSignedOut) {
     return <SignedOutNavigation />;

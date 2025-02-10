@@ -44,10 +44,11 @@ import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
 import logger from "./utils/logger";
 import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
+import { SignupWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
 
 preventSplashScreenAutoHide();
-
 LogBox.ignoreLogs([
+  /Require cycle:.*/, // Ignore all require cycle warnings
   "Privy: Expected status code 200, received 400", // Privy
   "Error destroying session", // Privy
   'event="noNetwork', // ethers
@@ -183,7 +184,9 @@ export default function AppWithProviders() {
                     <GestureHandlerRootView style={{ flex: 1 }}>
                       <BottomSheetModalProvider>
                         {/* <App /> */}
-                        <PrivyPlaygroundLandingScreen />
+                        <SignupWithPasskeyProvider>
+                          <PrivyPlaygroundLandingScreen />
+                        </SignupWithPasskeyProvider>
                         <DevToolsBubble onCopy={onCopy} />
                         <Snackbars />
                       </BottomSheetModalProvider>

@@ -1,47 +1,26 @@
 /* eslint-disable react-native/no-inline-styles */
 import { Button, Linking, Text, View } from "react-native";
-import {
-  useLoginWithPasskey,
-  useSignupWithPasskey,
-} from "@privy-io/expo/passkey";
 import Constants from "expo-constants";
 import { useState } from "react";
 import * as Application from "expo-application";
 import { getConfig } from "@/config";
 import { RELYING_PARTY } from "../onboarding/passkey.constants";
 import logger from "@/utils/logger";
+import { useSignupWithPasskey } from "@/features/onboarding/contexts/signup-with-passkey.context";
+import { useNavigation } from "@react-navigation/native";
+import { queryClient } from "@/queries/queryClient";
+import { useLogout } from "@/utils/logout";
+import {
+  AuthStatuses,
+  deleteStores,
+  useAccountsStore,
+} from "@/features/multi-inbox/multi-inbox.store";
+import mmkv, { zustandMMKVStorage } from "@/utils/mmkv";
+
 export function PrivyPlaygroundLoginScreen() {
-  // const { user, logout } = usePrivy();
-  // logout();
-  const [error, setError] = useState("");
-  const { loginWithPasskey } = useLoginWithPasskey({
-    onSuccess: (user, isNewUser) => {
-      logger.debug(
-        `[PrivyPlaygroundLoginScreen] ${
-          isNewUser ? "New" : "Existing"
-        } user logged in with passkey: ${user.id}`
-      );
-      // if we're a new user, we need to create an embedded wallet
-    },
-    onError: (err) => {
-      console.log(JSON.stringify(err.message, null, 2));
-      setError(JSON.stringify(err.message));
-    },
-  });
-  const { signupWithPasskey } = useSignupWithPasskey({
-    onSuccess: (user, isNewUser) => {
-      logger.debug(
-        `[PrivyPlaygroundLoginScreen] ${
-          isNewUser ? "New" : "Existing"
-        } user signed up with passkey: ${user.id}`
-      );
-      // if we're a new user, we need to create an embedded wallet
-    },
-    onError: (err) => {
-      console.log(JSON.stringify(err.message, null, 2));
-      setError(JSON.stringify(err.message));
-    },
-  });
+  const { signupWithPasskey, loginWithPasskey } = useSignupWithPasskey();
+  // const navigation = useNavigation();
+  const { logout } = useLogout();
 
   return (
     <View
@@ -53,70 +32,46 @@ export function PrivyPlaygroundLoginScreen() {
         marginHorizontal: 10,
       }}
     >
-      <Text>Privy App ID:</Text>
-      <Text style={{ fontSize: 10 }}>{getConfig().privy.appId}</Text>
-      <Text>Privy Client ID:</Text>
-      <Text style={{ fontSize: 10 }}>{getConfig().privy.clientId}</Text>
-      <Text>
-        Navigate to your{" "}
-        <Text
-          onPress={() =>
-            Linking.openURL(
-              `https://dashboard.privy.io/apps/${Constants.expoConfig?.extra?.privyAppId}/settings?setting=clients`
-            )
-          }
-        >
-          dashboard
-        </Text>{" "}
-        and ensure the following Expo Application ID is listed as an `Allowed
-        app identifier`:
-      </Text>
-      <Text style={{ fontSize: 10 }}>{Application.applicationId}</Text>
-      <Text>
-        Navigate to your{" "}
-        <Text
-          onPress={() =>
-            Linking.openURL(
-              `https://dashboard.privy.io/apps/${Constants.expoConfig?.extra?.privyAppId}/settings?setting=clients`
-            )
-          }
-        >
-          dashboard
-        </Text>{" "}
-        and ensure the following value is listed as an `Allowed app URL scheme`:
-      </Text>
-      <Text style={{ fontSize: 10 }}>
-        {Application.applicationId === "host.exp.Exponent"
-          ? "exp"
-          : Constants.expoConfig?.scheme}
-      </Text>
-
       <Button
-        title="Login using Passkey"
-        onPress={() =>
-          loginWithPasskey({
-            relyingParty: RELYING_PARTY,
-          })
-        }
+        title="Sign up with passkey"
+        onPress={async () => {
+          try {
+            await signupWithPasskey();
+            // @ts-ignore
+            // navigation.replace("OnboardingCreateContactCard");
+          } catch (error) {
+            logger.debug(
+              `[PrivyPlaygroundLoginScreen] Error signing up: ${error}`
+            );
+          }
+        }}
       />
 
       <Button
-        title="Create Passkey"
-        onPress={
-          () =>
-            signupWithPasskey({
-              relyingParty: RELYING_PARTY,
-            })
-          // .then(({ user }) => {
-          //   console.log(JSON.stringify(user, null, 2));
-          // })
-          // .catch((err) => {
-          //   setError(JSON.stringify(err.message));
-          // })
-        }
+        title="Sign in with passkey"
+        onPress={async () => {
+          try {
+            await loginWithPasskey();
+          } catch (error) {
+            logger.debug(
+              `[PrivyPlaygroundLoginScreen] Error logging in: ${error}`
+            );
+          }
+        }}
       />
 
-      {error && <Text style={{ color: "red" }}>Error: {error}</Text>}
+      <Button
+        title="Delete Everything"
+        onPress={async () => {
+          const currentAccount = useAccountsStore.getState().currentSender;
+          if (currentAccount) {
+            deleteStores(currentAccount.ethereumAddress);
+          }
+          await logout();
+          queryClient.clear();
+          mmkv.clearAll();
+        }}
+      />
     </View>
   );
 }

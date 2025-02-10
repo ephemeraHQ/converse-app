@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   useLoginWithPasskey as usePrivyLoginWithPasskey,
   useSignupWithPasskey as usePrivySignupWithPasskey,
@@ -13,6 +20,86 @@ import {
   AuthStatuses,
   useAccountsStore,
 } from "@/features/multi-inbox/multi-inbox.store";
+import { base } from "viem/chains";
+import { InboxSigner } from "@/features/multi-inbox/multi-inbox-client.types";
+
+const useXmtpFromPrivySmartWalletClientSigner = ({
+  onSmartClientReady,
+  invokedWhen,
+}: {
+  onSmartClientReady: (signer: InboxSigner) => Promise<void>;
+  invokedWhen: boolean;
+}) => {
+  const { client: smartWalletClient } = useSmartWallets();
+  const { isReady } = usePrivy();
+  const oldSmartWalletClient = useRef(smartWalletClient);
+
+  const smartWalletClientString = useMemo(
+    () => JSON.stringify(smartWalletClient),
+    [smartWalletClient]
+  );
+
+  const oldSmartWalletClientString = useMemo(
+    () => JSON.stringify(oldSmartWalletClient.current),
+    []
+  );
+
+  const hasSmartWalletClientChanged = useMemo(
+    () => smartWalletClientString !== oldSmartWalletClientString,
+    [smartWalletClientString, oldSmartWalletClientString]
+  );
+
+  const newSmartWalletClientExistsAndIsReady = useMemo(
+    () => !!smartWalletClient && isReady,
+    [smartWalletClient, isReady]
+  );
+  const hasInvokedOnSmartClientReady = useRef(false);
+
+  useEffect(() => {
+    if (!newSmartWalletClientExistsAndIsReady) {
+      return;
+    }
+
+    if (!hasSmartWalletClientChanged) {
+      /// note(lustig) Smart Wallet Client from Privy is not referentially stable, so it will trigger
+      /// this effect every render. This check prevents is from invoking the callback
+      /// every render
+      return;
+    }
+
+    if (hasInvokedOnSmartClientReady.current) {
+      return;
+    }
+
+    if (!invokedWhen) {
+      return;
+    }
+
+    hasInvokedOnSmartClientReady.current = true;
+
+    const signer: InboxSigner = {
+      getAddress: async () => {
+        return smartWalletClient!.account.address;
+      },
+      getChainId: () => {
+        return smartWalletClient!.chain?.id;
+      },
+      getBlockNumber: () => undefined,
+      walletType: () => "SCW",
+      signMessage: async (message: string) => {
+        return smartWalletClient!.signMessage({ message });
+      },
+    };
+
+    onSmartClientReady(signer);
+  }, [
+    hasSmartWalletClientChanged,
+    newSmartWalletClientExistsAndIsReady,
+    smartWalletClient,
+    onSmartClientReady,
+    invokedWhen,
+  ]);
+};
 
 const SignupWithPasskeyContext = createContext<
   | {
@@ -26,54 +113,45 @@ export const SignupWithPasskeyProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { client: smartWalletClient } = useSmartWallets();
+  const { senders, currentSender } = useAccountsStore();
+  useEffect(() => {
+    if (senders.length === 0) {
+      return;
+    }
+    logger.debug(
+      "[signup with passkey provider] amount of senders changed: ",
+      senders.length
+    );
+  }, [senders.length]);
+  useEffect(() => {
+    if (
+      currentSender?.ethereumAddress === undefined ||
+      currentSender?.inboxId === undefined
+    ) {
+      return;
+    }
+    logger.debug(
+      "[signup with passkey provider] current sender changed: ",
+      JSON.stringify(currentSender, null, 2)
+    );
+  }, [currentSender]);
 
-  const { logout: privyLogout, user } = usePrivy();
   const { loginWithPasskey: privyLoginWithPasskey } =
     usePrivyLoginWithPasskey();
   const { create: createEmbeddedWallet } = useEmbeddedEthereumWallet();
-  const privySmartWallets = user?.linked_accounts.filter(
-    (account) => account.type === "smart_wallet"
-  );
-  const privySmartWalletAddressFromLinkedAccounts =
-    privySmartWallets?.[0]?.address;
-  const privySmartWalletAddressFromSmartWalletClient =
-    smartWalletClient?.account.address;
-  const privySmartWalletsMatch =
-    privySmartWalletAddressFromLinkedAccounts ===
-    privySmartWalletAddressFromSmartWalletClient;
-
-  useEffect(() => {
-    logger.debug(
-      "[SignupWithPasskeyProvider] privySmartWalletsMatch",
-      JSON.stringify(
-        {
-          privySmartWalletAddressFromLinkedAccounts,
-          privySmartWalletAddressFromSmartWalletClient,
-          privySmartWalletsMatch,
-        },
-        null,
-        2
-      )
-    );
-  }, [
-    privySmartWalletAddressFromLinkedAccounts,
-    privySmartWalletAddressFromSmartWalletClient,
-    privySmartWalletsMatch,
-  ]);
 
   const { signupWithPasskey: privySignupWithPasskey } =
     usePrivySignupWithPasskey({
       onSuccess: (privyUser, isNewUser) => {
         logger.debug(
-          "[OnboardingWelcomeScreenContent] Successfully signed up with passkey, going to create a new embedded wallet (which will in turn automatically create a new Smart Contract Wallet)",
+          "[passkey onboarding context] Successfully signed up with passkey, going to create a new embedded wallet (which will in turn automatically create a new Smart Contract Wallet)",
           privyUser,
           isNewUser
         );
       },
       onError: (error) => {
         logger.error(
-          "[OnboardingWelcomeScreenContent] Error signing up with passkey",
+          "[passkey onboarding context] Error signing up with passkey",
           error
         );
         captureErrorWithToast(error);
@@ -83,70 +161,68 @@ export const SignupWithPasskeyProvider = ({
   const signingUp = authStatus === AuthStatuses.signingUp;
   const signingIn = authStatus === AuthStatuses.signingIn;
 
-  const { user: privyUser } = usePrivy();
+  const { user: privyUser, isReady } = usePrivy();
+
+  useXmtpFromPrivySmartWalletClientSigner({
+    invokedWhen: signingUp && senders.length === 0,
+    onSmartClientReady: async (signer) => {
+      logger.debug(
+        "[passkey onboarding context] Smart wallet client signer is ready"
+      );
+      await MultiInboxClient.instance.createNewInboxForPrivySmartContractWallet(
+        {
+          inboxSigner: signer,
+        }
+      );
+
+      logger.debug(
+        "[passkey onboarding context] signing up and created a new inbox successfully in useXmtpFromPrivySmartWalletClientSigner"
+      );
+      logger.error(
+        "[passkey onboarding context] temp setting login after signup noramlly we'd create profile now"
+      );
+      useAccountsStore.getState().setAuthStatus(AuthStatuses.signedIn);
+    },
+  });
+
+  useXmtpFromPrivySmartWalletClientSigner({
+    invokedWhen: signingIn && senders.length === 0,
+    onSmartClientReady: async (signer) => {
+      logger.debug(
+        "[passkey onboarding context] Smart wallet client signer is ready"
+      );
+      await MultiInboxClient.instance.createNewInboxForPrivySmartContractWallet(
+        {
+          inboxSigner: signer,
+        }
+      );
+
+      logger.debug(
+        "[passkey onboarding context] signing up and created a new inbox successfully in useXmtpFromPrivySmartWalletClientSigner"
+      );
+      useAccountsStore.getState().setAuthStatus(AuthStatuses.signedIn);
+    },
+  });
+
+  const oldPrivyUser = useRef(privyUser);
   useEffect(() => {
-    if (!smartWalletClient) {
-      logger.debug(
-        "[passkey onboarding context] No smart wallet client available yet"
-      );
+    if (oldPrivyUser.current?.id === privyUser?.id) {
       return;
     }
+    logger.debug(
+      "[passkey onboarding context] privyUser has changed\n",
+      JSON.stringify(
+        {
+          oldPrivyUser: oldPrivyUser.current || "undefined",
+          newPrivyUser: privyUser || "undefined",
+        },
+        null,
+        2
+      )
+    );
+    oldPrivyUser.current = privyUser;
 
-    if (!signingUp) {
-      return;
-    }
-
-    if (!privySmartWalletsMatch) {
-      logger.debug(
-        "[passkey onboarding context] privySmartWalletsMatch is false, so we are not going to initialize the wallet"
-      );
-      return;
-    }
-
-    // don't love doing async functions use effects, but let's get this working and then refactor
-
-    // don't love doing async functions use effects, but let's get this working and then refactor
-    async function createNewInbox() {
-      logger.debug(
-        `[passkey onboarding context] Creating new inbox with smart wallet client address: ${smartWalletClient?.account.address} and privySmartWalletsMatch: ${privySmartWalletsMatch}`
-      );
-      logger.debug("privy embedded wallet address", {
-        privyEmbeddedWalletAddress: privyUser?.linked_accounts.find(
-          (account) => account.type === "wallet"
-        )?.address,
-      });
-      try {
-        await MultiInboxClient.instance.createNewInboxForPrivySmartContractWallet(
-          {
-            privySmartWalletClient: smartWalletClient,
-          }
-        );
-      } catch (error) {
-        logger.error(
-          "[passkey onboarding context] Error creating inbox:",
-          error
-        );
-        useAccountsStore.getState().setAuthStatus(AuthStatuses.signedOut);
-        await privyLogout();
-        throw error;
-      }
-    }
-
-    createNewInbox();
-  }, [
-    smartWalletClient,
-    signingUp,
-    privySmartWalletsMatch,
-    privyLogout,
-    privyUser?.linked_accounts,
-  ]);
-
-  useEffect(() => {
     try {
-      logger.debug("[passkey onboarding context] privyUser changing", {
-        signingUp,
-        privyUserId: privyUser?.id,
-      });
       if (privyUser?.id && signingUp) {
         createEmbeddedWallet();
       }
@@ -157,61 +233,20 @@ export const SignupWithPasskeyProvider = ({
       );
       throw error;
     }
-  }, [privyUser?.id, signingUp, createEmbeddedWallet]);
-
-  useEffect(() => {
-    if (!signingIn || !smartWalletClient) {
-      logger.debug(
-        "[passkey onboarding context] waiting for signing in and smart wallet client"
-      );
-
-      return;
-    }
-
-    if (!privySmartWalletsMatch) {
-      logger.debug(
-        "[passkey onboarding context] privySmartWalletsMatch is false, so we are not going to initialize the wallet"
-      );
-      return;
-    }
-
-    async function initializeWalletForLoggingInAccount() {
-      logger.debug(
-        `[passkey onboarding context] Initializing wallet for logging in with smart wallet client address: ${smartWalletClient?.account.address}`
-      );
-      await MultiInboxClient.instance.createNewInboxForPrivySmartContractWallet(
-        {
-          privySmartWalletClient: smartWalletClient,
-        }
-      );
-      useAccountsStore.getState().setAuthStatus(AuthStatuses.signedIn);
-    }
-
-    initializeWalletForLoggingInAccount();
-  }, [signingIn, smartWalletClient, privySmartWalletsMatch]);
+  }, [privyUser?.id, signingUp, createEmbeddedWallet, privyUser]);
 
   const signupWithPasskey = async () => {
-    await privyLogout();
     useAccountsStore.getState().setAuthStatus(AuthStatuses.signingUp);
     await privySignupWithPasskey({
       relyingParty: RELYING_PARTY,
     });
   };
 
-  useEffect(() => {
-    if (signingIn) {
-      logger.debug("[passkey onboarding context] signing in", {
-        signingIn,
-      });
-    }
-  }, [signingIn, smartWalletClient]);
-
   const loginWithPasskey = async () => {
-    await privyLogout();
+    useAccountsStore.getState().setAuthStatus(AuthStatuses.signingIn);
     await privyLoginWithPasskey({
       relyingParty: RELYING_PARTY,
     });
-    useAccountsStore.getState().setAuthStatus(AuthStatuses.signingIn);
   };
 
   return (

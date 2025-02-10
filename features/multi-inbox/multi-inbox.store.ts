@@ -103,7 +103,8 @@ export const useAccountsStore = create<AccountsStoreStype>()(
 
       setCurrentSender: (sender: CurrentSender | undefined) =>
         set({ currentSender: sender }),
-      multiInboxClientRestorationState: MultiInboxClientRestorationStates.idle,
+      multiInboxClientRestorationState:
+        MultiInboxClientRestorationStates.restoring,
       setMultiInboxClientRestorationState: (
         state: MultiInboxClientRestorationState
       ) => set({ multiInboxClientRestorationState: state }),
@@ -129,18 +130,15 @@ export const useAccountsStore = create<AccountsStoreStype>()(
       name: "store-accounts",
       storage: createJSONStorage(() => zustandMMKVStorage),
       partialize: (state) => {
-        logger.debug("[useAuthStatus] Partializing state for storage", state);
         const partializedState = {
           ...state,
           multiInboxClientRestorationState:
-            MultiInboxClientRestorationStates.idle,
+            MultiInboxClientRestorationStates.restoring,
         };
-        logger.debug("[useAuthStatus] Partialized state", partializedState);
         return partializedState;
       },
 
       onRehydrateStorage: () => {
-        logger.debug("[useAuthStatus] Starting hydration");
         return (state, error) => {
           if (error) {
             logger.warn(

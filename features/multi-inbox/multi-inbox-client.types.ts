@@ -4,7 +4,6 @@ import {
 } from "@xmtp/react-native-sdk";
 
 export const MultiInboxClientRestorationStates = {
-  idle: "idle",
   restoring: "restoring",
   restored: "restored",
   error: (msg: string) => ({ error: msg }),

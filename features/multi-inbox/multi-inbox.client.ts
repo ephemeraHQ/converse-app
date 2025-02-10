@@ -16,6 +16,7 @@ import {
 import {
   ClientWithInvalidInstallation,
   CurrentSender,
+  InboxSigner,
   MultiInboxClientRestorationStates,
 } from "./multi-inbox-client.types";
 import { setInboxIdQueryData } from "@/queries/inbox-id-query";
@@ -61,22 +62,18 @@ export class MultiInboxClient {
     return !!state.error;
   }
 
-  get isIdle() {
-    return (
-      useAccountsStore.getState().multiInboxClientRestorationState ===
-      MultiInboxClientRestorationStates.idle
-    );
-  }
-
   private ethereumSmartWalletAddressToXmtpInboxClientMap: {
     [ethereumAddress: string]: XmtpClient;
   } = {};
 
   private get xmtpClientInboxIdToAddressMap() {
-    return useAccountsStore.getState().senders.reduce((acc, sender) => {
-      acc[sender.inboxId] = sender.ethereumAddress;
-      return acc;
-    }, {} as { [inboxId: string]: string });
+    return useAccountsStore.getState().senders.reduce(
+      (acc, sender) => {
+        acc[sender.inboxId] = sender.ethereumAddress;
+        return acc;
+      },
+      {} as { [inboxId: string]: string }
+    );
   }
 
   private static _instance: MultiInboxClient;
@@ -98,21 +95,27 @@ export class MultiInboxClient {
       .senders.map((sender) => sender.ethereumAddress);
   }
 
-  private constructor() {}
+  private async initialize() {
+    const wasSignedInLastSession =
+      useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
+    if (wasSignedInLastSession) {
+      await this.restorePreviouslyCreatedInboxesForDevice();
+    }
+
+    useAccountsStore
+      .getState()
+      .setMultiInboxClientRestorationState(
+        MultiInboxClientRestorationStates.restored
+      );
+  }
+
+  private constructor() {
+    this.initialize();
+  }
 
   private async performXmtpInboxCreationFromPrivySmartWalletClient(
-    smartWalletClient: PrivySmartWalletClient
+    inboxSigner: InboxSigner
   ): Promise<XmtpClient> {
-    if (!smartWalletClient?.account.address) {
-      throw new Error("[createXmtpClient] Smart wallet address not available");
-    }
-
-    if (!smartWalletClient) {
-      throw new Error("[createXmtpClient] Smart wallet client not available");
-    }
-
-    logger.debug("[createXmtpClient] All conditions passed, creating client");
-
     try {
       logger.debug(
         "[createXmtpClient] Getting database directory and encryption key"
@@ -125,39 +128,7 @@ export class MultiInboxClient {
       logger.debug("[createXmtpClient] Got database config successfully");
 
       logger.debug("[createXmtpClient] Creating XMTP signer");
-      const xmtpSigner: XmtpSigner = {
-        getAddress: async () => {
-          try {
-            return smartWalletClient.account.address;
-          } catch (error) {
-            logger.error("[createXmtpClient] Error getting address", error);
-            throw error;
-          }
-        },
-        getChainId: () => {
-          try {
-            return base.id;
-          } catch (error) {
-            logger.error("[createXmtpClient] Error getting chain ID", error);
-            throw error;
-          }
-        },
-        getBlockNumber: () => undefined,
-        walletType: () => "SCW",
-        signMessage: async (message: string) => {
-          try {
-            logger.debug("[createXmtpClient] Signing message");
-            const signature = await smartWalletClient.signMessage({
-              message,
-            });
-            logger.debug("[createXmtpClient] Message signed successfully");
-            return signature;
-          } catch (error) {
-            logger.error("[createXmtpClient] Error signing message", error);
-            throw error;
-          }
-        },
-      };
+
       logger.debug("[createXmtpClient] XMTP signer created successfully");
 
       const options = {
@@ -169,7 +140,7 @@ export class MultiInboxClient {
       logger.debug("[createXmtpClient] Client options configured", options);
 
       logger.debug("[createXmtpClient] Creating XMTP client");
-      const client = await XmtpClient.create(xmtpSigner, options).catch(
+      const client = await XmtpClient.create(inboxSigner, options).catch(
         (error) => {
           logger.error("[createXmtpClient] Error creating XMTP client", error);
           throw error;
@@ -185,6 +156,14 @@ export class MultiInboxClient {
     }
   }
 
+  private setErrorState(error: string) {
+    useAccountsStore
+      .getState()
+      .setMultiInboxClientRestorationState(
+        MultiInboxClientRestorationStates.error(error)
+      );
+  }
+
   /**
    * Creates and links a new XMTP Inbox to a user's Privy Account.
    * Anytime the user logs in with another device using
@@ -196,84 +175,64 @@ export class MultiInboxClient {
    * @returns XMTP Inbox Client
    */
   async createNewInboxForPrivySmartContractWallet({
-    privySmartWalletClient,
+    inboxSigner,
   }: {
-    privySmartWalletClient: PrivySmartWalletClient | undefined;
+    inboxSigner: InboxSigner;
   }) {
+    if (!inboxSigner) {
+      this.setErrorState(
+        "[createNewInboxForPrivySmartContractWallet] No inbox signer provided"
+      );
+      throw new Error(
+        "[createNewInboxForPrivySmartContractWallet] No inbox signer provided"
+      );
+    }
+
     try {
       logger.debug(
-        "[addInbox] Starting to add inbox with privySmartWalletClient with address",
-        privySmartWalletClient?.account.address
+        "[addInbox] Starting to add inbox with inboxSigner with address",
+        await inboxSigner.getAddress()
       );
 
-      if (!privySmartWalletClient) {
-        logger.debug(
-          "[addInbox] No smart wallet client found, skipping inbox creation"
-        );
-        useAccountsStore
-          .getState()
-          .setMultiInboxClientRestorationState(
-            MultiInboxClientRestorationStates.error(
-              "[addInbox] No smart wallet client found, skipping inbox creation"
-            )
-          );
-        return;
-      }
-
-      if (!privySmartWalletClient.account.address) {
-        logger.debug(
-          "[addInbox] Smart wallet address not available, skipping inbox creation"
-        );
-        useAccountsStore
-          .getState()
-          .setMultiInboxClientRestorationState(
-            MultiInboxClientRestorationStates.error(
-              "[addInbox] Smart wallet address not available, skipping inbox creation"
-            )
-          );
-        return;
-      }
-
-      const smartWalletEthereumAddress = privySmartWalletClient.account.address;
+      const signerEthereumAddress = await inboxSigner.getAddress();
 
       try {
         logger.debug(
-          `[addInbox] Checking if inbox exists for address: ${smartWalletEthereumAddress}`
+          `[addInbox] Checking if inbox exists for address: ${signerEthereumAddress}`
         );
         const clientExistsForAddress =
           this.ethereumSmartWalletAddressToXmtpInboxClientMap[
-            smartWalletEthereumAddress.toLowerCase()
+            signerEthereumAddress.toLowerCase()
           ];
         if (clientExistsForAddress) {
-          logger.debug(
-            `[addInbox] Found existing inbox for address: ${smartWalletEthereumAddress}`
+          throw new Error(
+            `[addInbox] Found existing inbox for address: ${signerEthereumAddress}`
           );
-          return clientExistsForAddress;
         }
         logger.debug(
-          `[addInbox] No existing inbox found for address: ${smartWalletEthereumAddress}, creating new one`
+          `[addInbox] No existing inbox found for address: ${signerEthereumAddress}, creating new one`
         );
 
         const xmtpInboxClient =
           await this.performXmtpInboxCreationFromPrivySmartWalletClient(
-            privySmartWalletClient
+            inboxSigner
           );
 
         if (!useAccountsStore.getState().currentSender) {
           useAccountsStore.getState().setCurrentSender({
-            ethereumAddress: smartWalletEthereumAddress,
+            ethereumAddress: signerEthereumAddress,
             inboxId: xmtpInboxClient.inboxId,
           });
         }
 
         const clientInboxId = xmtpInboxClient.inboxId;
         setInboxIdQueryData({
-          account: smartWalletEthereumAddress,
+          account: signerEthereumAddress,
           inboxId: clientInboxId,
         });
 
         useAccountsStore.getState().addSender({
-          ethereumAddress: smartWalletEthereumAddress,
+          ethereumAddress: signerEthereumAddress,
           inboxId: clientInboxId,
         });
 
@@ -290,14 +249,14 @@ export class MultiInboxClient {
         logger.debug("[addInbox] Successfully created new XMTP inbox");
       } catch (error) {
         logger.error(
-          `[addInbox] Error creating XMTP inbox for address ${smartWalletEthereumAddress}:`,
+          `[addInbox] Error creating XMTP inbox for address ${signerEthereumAddress}:`,
           error
         );
         useAccountsStore
           .getState()
           .setMultiInboxClientRestorationState(
             MultiInboxClientRestorationStates.error(
-              `[addInbox] Error creating XMTP inbox for address ${smartWalletEthereumAddress}:${error}`
+              `[addInbox] Error creating XMTP inbox for address ${signerEthereumAddress}:${error}`
             )
           );
         throw error;
@@ -310,7 +269,7 @@ export class MultiInboxClient {
     }
   }
 
-  async restorePreviouslyCreatedInboxesForDevice() {
+  private async restorePreviouslyCreatedInboxesForDevice() {
     if (this.isRestoring) {
       logger.debug(
         "[restorePreviouslyCreatedInboxesForDevice] Already restoring, skipping"
@@ -396,9 +355,8 @@ export class MultiInboxClient {
               inboxId
             );
 
-            const isInstallationValid = await this.isClientInstallationValid(
-              xmtpInboxClient
-            );
+            const isInstallationValid =
+              await this.isClientInstallationValid(xmtpInboxClient);
 
             if (!isInstallationValid) {
               logger.warn(

@@ -31,49 +31,24 @@ import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
 //   usePrivyUserCustomMetadataForCurrentAccount,
 // } from "@/queries/use-privy-user-custom-metadata";
 import { InboxState } from "@xmtp/react-native-sdk/build/lib/InboxState";
+import { SignupWithPasskeyProvider } from "../onboarding/contexts/signup-with-passkey.context";
+import {
+  AuthStatuses,
+  useAccountsStore,
+} from "../multi-inbox/multi-inbox.store";
+import { useLogout } from "@/utils/logout";
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
-const multiInboxClient = MultiInboxClient.instance;
 
 export const PrivyPlaygroundUserScreen = () => {
   useCoinbaseWalletListener(true, coinbaseUrl);
 
-  const { logout, user } = usePrivy();
-  user?.custom_metadata;
+  const { user } = usePrivy();
+  const { logout } = useLogout();
+  const { currentSender, authStatus } = useAccountsStore();
 
-  const { connect: notquiteworkingsmoothlyyetbutwillcomeback } = useConnect();
-  const {
-    create: createEmbeddedWallet,
-    // @ts-ignore
-    error: embeddedWalletError,
-    wallets: embeddedWallets,
-  } = useEmbeddedEthereumWallet();
-  const smartcontractWallets = user?.linked_accounts.filter(
-    (w) => w.type === "smart_wallet"
-  );
   const { client: smartWalletClient } = useSmartWallets();
 
-  const account = getUserEmbeddedEthereumWallet(user);
-
-  const ethereumSmartWallet = smartWalletClient?.account;
-
-  const [randomWallets, setRandomWallets] = useState<Wallet[]>([]);
-  const addWalletToRandomWalletsList = (wallet: Wallet) => {
-    setRandomWallets([...randomWallets, wallet]);
-  };
-
-  const [xmtpClient, setXmtpClient] = useState<Client | null>(null);
-  const [clientState, setClientState] = useState<InboxState | null>(null);
-  // const { customMetadata, updateMetadata } =
-  //   usePrivyUserCustomMetadataForCurrentAccount();
-
-  // useCreateEmbeddedWalletIfNotCreated()
-  // useEffect(() => {
-  //   if (embeddedWalletStatus === "not-created") {
-  //     createEmbeddedWallet();
-  //   }
-  // }, [embeddedWalletStatus, createEmbeddedWallet]);
-
-  if (!user) {
+  if (authStatus !== AuthStatuses.signedIn) {
     return null;
   }
 
@@ -89,101 +64,10 @@ export const PrivyPlaygroundUserScreen = () => {
             gap: 10,
           }}
         >
-          <Button
-            title={"Initialize MultiInboxClient"}
-            onPress={async () => {
-              try {
-                logger.debug(
-                  "[initializeMultiInboxClient] Starting initialization"
-                );
-
-                logger.debug(
-                  "[initializeMultiInboxClient] MultiInboxClient instance created"
-                );
-
-                // multiInboxClient.addInboxCreatedObserver(
-                //   async ({ ethereumAddress, xmtpInbox }) => {
-                //     logger.debug(
-                //       `[multiInboxClient] Inbox created for address: ${ethereumAddress}`
-                //     );
-                //     logger.debug(
-                //       `[multiInboxClient] Getting inbox state for address: ${ethereumAddress}`
-                //     );
-
-                //     try {
-                //       const inboxState = await xmtpInbox.inboxState(true);
-
-                //       logger.debug(
-                //         `[multiInboxClient] Successfully retrieved inbox state for address: ${ethereumAddress}`
-                //       );
-                //       logger.debug(
-                //         `[multiInboxClient] Inbox state: ${JSON.stringify(
-                //           inboxState,
-                //           null,
-                //           2
-                //         )}`
-                //       );
-                //       setXmtpClient(xmtpInbox);
-                //       setClientState(inboxState);
-                //     } catch (error) {
-                //       logger.error(
-                //         `[multiInboxClient] Error getting inbox state for address: ${ethereumAddress}`,
-                //         error
-                //       );
-                //       throw error;
-                //     }
-                //   }
-                // );
-
-                logger.debug(
-                  "[initializeMultiInboxClient] Inbox created observer added"
-                );
-
-                logger.debug(
-                  "[initializeMultiInboxClient] Error observer added"
-                );
-
-                if (!smartWalletClient) {
-                  logger.error(
-                    "[initializeMultiInboxClient] Smart wallet client not available"
-                  );
-                  throw new Error("Smart wallet client not available");
-                }
-
-                if (!user) {
-                  logger.error(
-                    "[initializeMultiInboxClient] User not available"
-                  );
-                  throw new Error("User not available");
-                }
-
-                logger.debug(
-                  "[initializeMultiInboxClient] Starting client initialization"
-                );
-                // await multiInboxClient.initialize({
-                //   privyUser: user,
-                //   privySmartWalletClient: smartWalletClient,
-                //   // wallet: embeddedWallets[0],
-                // });
-                logger.debug(
-                  "[initializeMultiInboxClient] Client initialization completed successfully"
-                );
-              } catch (error) {
-                logger.error(
-                  "[initializeMultiInboxClient] Fatal error during initialization",
-                  error
-                );
-                throw error;
-              }
-            }}
-          />
-          {/* <WalletLinkButtons
-            onPress={notquiteworkingsmoothlyyetbutwillcomeback}
-            xmtpClient={xmtpClient}
-          /> */}
           <View>
             <Text style={{ fontWeight: "bold" }}>Privy User ID</Text>
-            <Text>{user.id}</Text>
+            <Text>ETHEREUM ADDRESS: {currentSender?.ethereumAddress}</Text>
+            <Text>XMTP inbox: {currentSender?.inboxId}</Text>
             <View>
               <Text style={{ fontWeight: "bold" }}>
                 Linked accounts from Privy
@@ -211,125 +95,31 @@ export const PrivyPlaygroundUserScreen = () => {
               ) : null}
             </View>
 
-            <Button
-              title="Create embedded wallet"
-              onPress={async () => {
-                const randomWallet = await createRandomWallet();
-                addWalletToRandomWalletsList(randomWallet);
-              }}
-            />
-
-            {/* <Text>{JSON.stringify(customMetadata, null, 2)}</Text> */}
-            {/* List of all installations in the xmtp client state */}
-            <View
-              style={{
-                borderWidth: 1,
-                borderColor: "rgba(0,0,0,0.1)",
-                padding: 12,
-              }}
-            >
-              {clientState?.installations.map((installation) => (
-                <View key={installation.id}>
-                  <Text style={{ fontWeight: "bold" }}>
-                    installationId: {installation.id}
-                  </Text>
-                  {/* List of all addresses in the installation */}
-                  {clientState?.addresses.map((address) => {
-                    // const isAddressActiveForInstallation =
-                    //   customMetadata?.inboxActiveByInstallation[
-                    //     installation.id
-                    //   ]?.[address];
-                    return (
-                      <>
-                        <Text style={{ paddingLeft: 12 }} key={address}>
-                          address: {address}
-                        </Text>
-                        {/* <Switch
-                          value={isAddressActiveForInstallation}
-                          onValueChange={() => {
-                            const updatedInstallationState: IPrivyCustomMetadata =
-                              {
-                                ...customMetadata,
-                                inboxActiveByInstallation: {
-                                  ...customMetadata?.inboxActiveByInstallation,
-                                  [installation.id]: {
-                                    ...customMetadata
-                                      ?.inboxActiveByInstallation[
-                                      installation.id
-                                    ],
-                                    [address]: !isAddressActiveForInstallation,
-                                  },
-                                },
-                              };
-
-                            updateMetadata(updatedInstallationState);
-                          }}
-                        /> */}
-                      </>
-                    );
-                  })}
-                </View>
-              ))}
-            </View>
-
             <View>
-              {xmtpClient ? (
+              {currentSender?.inboxId ? (
                 <>
                   <Text style={{ fontWeight: "bold" }}>Xmtp Client</Text>
                   <Text style={{ fontWeight: "bold" }}>
                     Xmtp Client Installation ID
                   </Text>
-                  <Text>{xmtpClient.installationId}</Text>
-                  {/* <Text>{JSON.stringify(clientState, null, 2)}</Text> */}
                   <Text style={{ fontWeight: "bold" }}>Address:</Text>
-                  <Text>{xmtpClient.address}</Text>
+                  <Text>{currentSender?.inboxId}</Text>
                   <Text style={{ fontWeight: "bold" }}>Inbox ID:</Text>
-                  <Text>{xmtpClient.inboxId}</Text>
+                  <Text>{currentSender?.ethereumAddress}</Text>
                   <Text style={{ fontWeight: "bold" }}>Addresses:</Text>
-                  {clientState && (
-                    <Text>
-                      {JSON.stringify(clientState.addresses, null, 2)}
-                    </Text>
-                  )}
-                  {clientState && (
-                    <>
-                      <Text style={{ fontWeight: "bold" }}>
-                        Recovery Address:
-                      </Text>
-                      <Text>
-                        {JSON.stringify(clientState.recoveryAddress, null, 2)}
-                      </Text>
-                    </>
-                  )}
                 </>
               ) : (
                 <Text>Client not created</Text>
-              )}
-            </View>
-            <View>
-              {account?.address && (
-                <>
-                  <Text style={{ fontWeight: "bold" }}>Embedded Wallet</Text>
-                  <Text>{account?.address}</Text>
-                </>
-              )}
-
-              {ethereumSmartWallet?.address ? (
-                <>
-                  <Text style={{ fontWeight: "bold" }}>Smart Wallet</Text>
-                  <Text>{ethereumSmartWallet?.address}</Text>
-                </>
-              ) : (
-                <Text>Waiting on smart wallet creation...</Text>
               )}
             </View>
 
             <Button
               title="Logout Privy (this keeps all data on device)"
               onPress={() => {
-                multiInboxClient.logoutMessagingClients({
-                  shouldDestroyLocalData: true,
-                });
+                // multiInboxClient.logoutMessagingClients({
+                //   shouldDestroyLocalData: true,
+                // });
+                // logout();
                 logout();
               }}
             />
