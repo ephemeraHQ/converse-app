@@ -1,5 +1,9 @@
 import { iconRegistry } from "@/design-system/Icon/Icon";
 import { VStack } from "@/design-system/VStack";
+import {
+  IContextMenuViewProps,
+  IMenuActionConfig,
+} from "@/design-system/context-menu/context-menu";
 import { useConversationIsPinned } from "@/features/conversation-list/hooks/use-conversation-is-pinned";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
@@ -12,10 +16,6 @@ import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
-import {
-  ContextMenuViewProps,
-  MenuActionConfig,
-} from "react-native-ios-context-menu";
 import { usePinOrUnpinConversation } from "./use-pin-or-unpin-conversation";
 
 // Specific hook for DM conversations
@@ -47,7 +47,7 @@ export function useGroupConversationContextMenuViewProps(args: {
 // Base hook with shared functionality
 function useBaseConversationContextMenuViewProps(args: {
   conversationTopic: ConversationTopic;
-  deleteMenuItem: IUseContextMenuItem;
+  deleteMenuItem: IUseContextMenuItemArgs;
 }) {
   const { conversationTopic, deleteMenuItem } = args;
   const { theme } = useAppTheme();
@@ -96,14 +96,14 @@ function useBaseConversationContextMenuViewProps(args: {
     onPressMenuPreview: () => {
       // TODO
     },
-  } satisfies ContextMenuViewProps;
+  } satisfies Partial<IContextMenuViewProps>;
 }
 
-type IUseContextMenuItem = MenuActionConfig & { onPress: () => void };
+type IUseContextMenuItemArgs = IMenuActionConfig & { onPress: () => void };
 
 function useConversationContextMenuPinItem(args: {
   conversationTopic: ConversationTopic;
-}): IUseContextMenuItem {
+}): IUseContextMenuItemArgs {
   const { conversationTopic } = args;
 
   const { isPinned } = useConversationIsPinned({
@@ -128,12 +128,12 @@ function useConversationContextMenuPinItem(args: {
         captureErrorWithToast(error);
       }
     },
-  } satisfies IUseContextMenuItem;
+  } satisfies IUseContextMenuItemArgs;
 }
 
 function useConversationContextMenuReadItem(args: {
   conversationTopic: ConversationTopic;
-}): IUseContextMenuItem {
+}): IUseContextMenuItemArgs {
   const { conversationTopic } = args;
 
   const { isUnread } = useConversationIsUnread({
@@ -154,7 +154,7 @@ function useConversationContextMenuReadItem(args: {
       iconValue: isUnread ? "checkmark.message" : "message.badge",
     },
     onPress: toggleReadStatusAsync,
-  } satisfies IUseContextMenuItem;
+  } satisfies IUseContextMenuItemArgs;
 }
 
 function useBaseDeleteMenuItem({
@@ -173,7 +173,7 @@ function useBaseDeleteMenuItem({
       iconTint: theme.colors.global.caution,
     },
     menuAttributes: ["destructive"],
-  } satisfies Omit<IUseContextMenuItem, "onPress">;
+  } satisfies Omit<IUseContextMenuItemArgs, "onPress">;
 }
 
 function useGroupDeleteMenuItem({
@@ -196,7 +196,7 @@ function useGroupDeleteMenuItem({
   return {
     ...useBaseDeleteMenuItem({ onDelete: handleDelete }),
     onPress: handleDelete,
-  } satisfies IUseContextMenuItem;
+  } satisfies IUseContextMenuItemArgs;
 }
 
 function useDmDeleteMenuItem({
@@ -219,5 +219,5 @@ function useDmDeleteMenuItem({
   return {
     ...useBaseDeleteMenuItem({ onDelete: handleDelete }),
     onPress: handleDelete,
-  } satisfies IUseContextMenuItem;
+  } satisfies IUseContextMenuItemArgs;
 }

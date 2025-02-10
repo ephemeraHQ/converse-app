@@ -1,5 +1,4 @@
-import { subscribeToNotifications } from "@/features/notifications/utils/subscribeToNotifications";
-import { getConversationsQueryData } from "@/queries/use-conversations-query";
+import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
 import { captureError } from "@/utils/capture-error";
 import logger from "@/utils/logger";
 import { getXmtpClient } from "../xmtp-client/xmtp-client";
@@ -14,15 +13,13 @@ export const streamConsent = async (account: string) => {
     await client.preferences.streamConsent(async () => {
       logger.info(`[XMTPRN Contacts] Consent has been updated`);
       try {
-        // Consent Has Been Updated, resubscribe to notifications
-        const conversations = getConversationsQueryData({ account });
+        const conversations = getAllowedConsentConversationsQueryData({
+          account,
+        });
+        // TODO: Consent Has Been Updated, resubscribe to notifications
         if (!conversations) {
           return;
         }
-        subscribeToNotifications({
-          conversations: conversations,
-          account,
-        });
       } catch (e) {
         captureError(e);
       }

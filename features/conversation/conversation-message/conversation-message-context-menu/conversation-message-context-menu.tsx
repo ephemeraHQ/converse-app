@@ -7,9 +7,9 @@ import { openMessageContextMenuEmojiPicker } from "@/features/conversation/conve
 import { MessageContextMenuItems } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-items";
 import { MessageContextMenuReactors } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-reactors";
 import {
-  IMessageContextMenuStoreState,
-  useMessageContextMenuStore,
-  useMessageContextMenuStoreContext,
+  IConversationMessageContextMenuStoreState,
+  useConversationMessageContextMenuStore,
+  useConversationMessageContextMenuStoreContext,
 } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
 import { useConversationMessageContextMenuStyles } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.styles";
 import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
@@ -18,7 +18,7 @@ import {
   getMessageById,
   useConversationMessageReactions,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useCurrentConversationTopic } from "@/features/conversation/conversation.store-context";
+import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation.store-context";
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
@@ -29,21 +29,24 @@ import { MessageContextMenuAboveMessageReactions } from "./conversation-message-
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container";
 import { useMessageContextMenuItems } from "./conversation-message-context-menu.utils";
 
-export const MessageContextMenu = memo(function MessageContextMenu() {
-  const messageContextMenuData = useMessageContextMenuStoreContext(
-    (state) => state.messageContextMenuData
-  );
+export const ConversationMessageContextMenu = memo(
+  function ConversationMessageContextMenu() {
+    const messageContextMenuData =
+      useConversationMessageContextMenuStoreContext(
+        (state) => state.messageContextMenuData
+      );
 
-  if (!messageContextMenuData) {
-    return null;
+    if (!messageContextMenuData) {
+      return null;
+    }
+
+    return <Content messageContextMenuData={messageContextMenuData} />;
   }
-
-  return <Content messageContextMenuData={messageContextMenuData} />;
-});
+);
 
 const Content = memo(function Content(props: {
   messageContextMenuData: NonNullable<
-    IMessageContextMenuStoreState["messageContextMenuData"]
+    IConversationMessageContextMenuStoreState["messageContextMenuData"]
   >;
 }) {
   const { messageContextMenuData } = props;
@@ -51,15 +54,25 @@ const Content = memo(function Content(props: {
   const { messageId, itemRectX, itemRectY, itemRectHeight, itemRectWidth } =
     messageContextMenuData;
 
-  const topic = useCurrentConversationTopic();
-  const messageContextMenuStore = useMessageContextMenuStore();
+  const topic = useCurrentConversationTopicSafe();
+  const messageContextMenuStore = useConversationMessageContextMenuStore();
 
   const { bySender } = useConversationMessageReactions(messageId!);
 
   const message = getMessageById({
     messageId,
     topic,
-  })!;
+  })!; // ! Because if we are inside this component it's because we selected a message and it exists for sure
+
+  const nextMessage = getMessageById({
+    messageId: message.id,
+    topic,
+  });
+
+  const previousMessage = getMessageById({
+    messageId: message.id,
+    topic,
+  });
 
   const fromMe = messageIsFromCurrentAccountInboxId({ message });
   const menuItems = useMessageContextMenuItems({
@@ -157,10 +170,11 @@ const Content = memo(function Content(props: {
 
                 <MessageContextStoreProvider
                   message={message}
-                  nextMessage={undefined}
-                  previousMessage={undefined}
+                  nextMessage={nextMessage ?? undefined}
+                  previousMessage={previousMessage ?? undefined}
                 >
                   {/* TODO: maybe make ConversationMessage more dumb to not need any context? */}
+
                   <ConversationMessage message={message} />
                 </MessageContextStoreProvider>
 

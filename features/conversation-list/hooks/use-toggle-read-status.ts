@@ -4,7 +4,7 @@ import { useMarkConversationAsUnread } from "@/features/conversation/hooks/use-m
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
 import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getConversationMetadataQueryData } from "@/queries/conversation-metadata-query";
-import { getConversationQueryData } from "@/queries/useConversationQuery";
+import { getConversationQueryData } from "@/queries/conversation-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 

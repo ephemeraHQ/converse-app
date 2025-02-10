@@ -49,9 +49,11 @@ export const MessageContextMenuAboveMessageReactions = memo(
       conversationTopic: topic,
     });
 
-    const messageFromMe = messageIsFromCurrentAccountInboxId({
-      message,
-    });
+    const messageFromMe =
+      message &&
+      messageIsFromCurrentAccountInboxId({
+        message,
+      });
 
     const currentUserEmojiSelectedMap = useMemo(() => {
       if (!currentUserInboxId || !reactors?.[currentUserInboxId]) {

@@ -91,6 +91,53 @@
 - Keep features self-contained. Create a new feature folder if accessing features across boundaries.
 - Place queries within their respective feature folders, but maintain queryKeys at the root level for better visibility.
 
+## File Naming Convention
+
+Use descriptive suffixes:
+
+```
+[featureName].screen.tsx
+[featureName].nav.tsx
+[featureName].store.ts
+[featureName].queries.ts
+[featureName].utils.ts
+[featureName].client.ts
+[featureName].types.ts
+[featureName].test.ts
+```
+
+// ❌ Bad: Generic or unclear names
+profile.ts
+group-chat.tsx
+utils.ts
+types.ts
+
+// ✅ Good: Clear, descriptive names with proper suffixes
+profile.screen.tsx
+group-chat.nav.tsx
+conversation.store.ts
+messages.queries.ts
+profile.utils.ts
+auth.client.ts
+user.types.ts
+login.test.ts
+
+## Imports
+
+Always import using the @alias as examplified below:
+
+// ✅ Good: Using the @ to simplify imports
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
+import { getReadableProfile } from "@/utils/getReadableProfile";
+import { IConversationMembershipSearchResult } from "@/features/search/search.types";
+
+// ❌ Bad: Using relative paths
+import { isConversationGroup } from "../../../features/conversation/utils/is-conversation-group";
+import { isConversationDm } from "../../../features/conversation/utils/is-conversation-dm";
+import { getReadableProfile } from "../../../../utils/getReadableProfile";
+import { IConversationMembershipSearchResult } from "../../../features/search/search.types";
+
 ## Theming & Styling
 
 - Always use the theme for styling. Import it from @/theme/useAppTheme like `const { theme } = useAppTheme();`.

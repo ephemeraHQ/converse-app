@@ -14,6 +14,7 @@ export const Center = forwardRef(
     const { style, vertical = false, ...rest } = props;
 
     const Stack = vertical ? VStack : HStack;
+
     return (
       <Stack
         ref={ref}

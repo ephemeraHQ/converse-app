@@ -1,10 +1,20 @@
+import { useCurrentAccount } from "@/data/store/accountsStore";
 import { Center } from "@/design-system/Center";
+import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
+import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
+import { useGroupQuery } from "@/queries/useGroupQuery";
+import { getInboxProfileSocialsQueryConfig } from "@/queries/useInboxProfileSocialsQuery";
 import { $globalStyles } from "@/theme/styles";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
-import { AvatarSizes } from "@styles/sizes";
-import React, { useMemo } from "react";
-import { StyleProp, Text, TextStyle, ViewStyle } from "react-native";
+import {
+  getPreferredInboxAvatar,
+  getPreferredInboxName,
+} from "@/utils/profile";
+import { useQueries } from "@tanstack/react-query";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import React, { memo, useMemo } from "react";
+import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { Avatar } from "./Avatar";
 
 const MAIN_CIRCLE_RADIUS = 50;
@@ -12,11 +22,152 @@ const MAX_VISIBLE_MEMBERS = 4;
 
 type Position = { x: number; y: number; size: number };
 
-type GroupAvatarDumbProps = {
+type IGroupAvatarMember = {
+  address: string;
+  uri?: string;
+  name?: string;
+};
+
+type IGroupAvatarDumbProps = {
   size?: number;
   style?: StyleProp<ViewStyle>;
-  members?: { address: string; uri?: string; name?: string }[];
+  members?: IGroupAvatarMember[];
 };
+
+export const GroupAvatarMembers = memo(function GroupAvatarDumb(
+  props: IGroupAvatarDumbProps
+) {
+  const { themed, theme } = useAppTheme();
+
+  const { size = theme.avatarSize.md, style, members = [] } = props;
+
+  const memberCount = members?.length || 0;
+
+  const positions = useMemo(
+    () => calculatePositions(memberCount, MAIN_CIRCLE_RADIUS),
+    [memberCount]
+  );
+
+  return (
+    <Center style={[{ width: size, height: size }, $container, style]}>
+      <Center style={[{ width: size, height: size }, $container]}>
+        <VStack style={themed($background)} />
+        <Center style={$content}>
+          {positions.map((pos, index) => {
+            if (index < MAX_VISIBLE_MEMBERS && index < memberCount) {
+              return (
+                <Avatar
+                  key={`avatar-${index}`}
+                  uri={members[index].uri}
+                  name={members[index].name}
+                  size={(pos.size / 100) * size}
+                  style={{
+                    left: (pos.x / 100) * size,
+                    top: (pos.y / 100) * size,
+                    position: "absolute",
+                  }}
+                />
+              );
+            } else if (
+              index === MAX_VISIBLE_MEMBERS &&
+              memberCount > MAX_VISIBLE_MEMBERS
+            ) {
+              return (
+                <ExtraMembersIndicator
+                  key={`extra-${index}`}
+                  pos={pos}
+                  extraMembersCount={memberCount - MAX_VISIBLE_MEMBERS}
+                  size={size}
+                />
+              );
+            }
+            return null;
+          })}
+        </Center>
+      </Center>
+    </Center>
+  );
+});
+
+export const GroupAvatar = memo(function GroupAvatar(props: {
+  groupTopic: ConversationTopic;
+  size?: "sm" | "md" | "lg";
+}) {
+  const { groupTopic, size = "md" } = props;
+
+  const { theme } = useAppTheme();
+
+  const currentAccount = useCurrentAccount()!;
+
+  const { data: group } = useGroupQuery({
+    account: currentAccount,
+    topic: groupTopic,
+  });
+
+  const { data: members } = useGroupMembersQuery({
+    caller: "GroupAvatar",
+    account: currentAccount,
+    topic: groupTopic,
+  });
+
+  const memberAddresses = useMemo(() => {
+    if (!members?.ids) {
+      return [];
+    }
+
+    return members.ids.reduce<string[]>((addresses, memberId) => {
+      const memberAddress = members.byId[memberId]?.addresses[0];
+      if (
+        memberAddress &&
+        memberAddress.toLowerCase() !== currentAccount?.toLowerCase()
+      ) {
+        addresses.push(memberAddress);
+      }
+      return addresses;
+    }, []);
+  }, [members, currentAccount]);
+
+  const membersSocials = useQueries({
+    queries:
+      members?.ids.map((inboxId) =>
+        getInboxProfileSocialsQueryConfig({ inboxId, caller: "group-avatar" })
+      ) ?? [],
+  });
+
+  const memberData = useMemo<IGroupAvatarMember[]>(() => {
+    return membersSocials.map(({ data: socials }, index) => {
+      const address = memberAddresses[index];
+      if (!socials) {
+        return {
+          address,
+          name: address,
+        };
+      }
+
+      return {
+        address,
+        uri: getPreferredInboxAvatar(socials),
+        name: getPreferredInboxName(socials),
+      };
+    });
+  }, [membersSocials, memberAddresses]);
+
+  const sizeNumber = useMemo(() => {
+    if (size === "sm") {
+      return theme.avatarSize.sm;
+    } else if (size === "md") {
+      return theme.avatarSize.md;
+    } else if (size === "lg") {
+      return theme.avatarSize.lg;
+    }
+  }, [size, theme]);
+
+  if (group?.imageUrlSquare) {
+    return <Avatar uri={group.imageUrlSquare} size={sizeNumber} />;
+  }
+
+  return <GroupAvatarMembers members={memberData} size={sizeNumber} />;
+});
 
 const calculatePositions = (
   memberCount: number,
@@ -77,66 +228,13 @@ const ExtraMembersIndicator: React.FC<{
         style={[
           themed($extraMembersText),
           {
+            color: theme.colors.global.white,
             fontSize: ((pos.size / 100) * size) / 2,
           },
         ]}
       >
         +{extraMembersCount}
       </Text>
-    </Center>
-  );
-};
-
-export const GroupAvatarDumb: React.FC<GroupAvatarDumbProps> = ({
-  size = AvatarSizes.default,
-  style,
-  members = [],
-}) => {
-  const { themed } = useAppTheme();
-  const memberCount = members?.length || 0;
-
-  const positions = useMemo(
-    () => calculatePositions(memberCount, MAIN_CIRCLE_RADIUS),
-    [memberCount]
-  );
-
-  return (
-    <Center style={[{ width: size, height: size }, $container, style]}>
-      <Center style={[{ width: size, height: size }, $container]}>
-        <VStack style={themed($background)} />
-        <Center style={$content}>
-          {positions.map((pos, index) => {
-            if (index < MAX_VISIBLE_MEMBERS && index < memberCount) {
-              return (
-                <Avatar
-                  key={`avatar-${index}`}
-                  uri={members[index].uri}
-                  name={members[index].name}
-                  size={(pos.size / 100) * size}
-                  style={{
-                    left: (pos.x / 100) * size,
-                    top: (pos.y / 100) * size,
-                    position: "absolute",
-                  }}
-                />
-              );
-            } else if (
-              index === MAX_VISIBLE_MEMBERS &&
-              memberCount > MAX_VISIBLE_MEMBERS
-            ) {
-              return (
-                <ExtraMembersIndicator
-                  key={`extra-${index}`}
-                  pos={pos}
-                  extraMembersCount={memberCount - MAX_VISIBLE_MEMBERS}
-                  size={size}
-                />
-              );
-            }
-            return null;
-          })}
-        </Center>
-      </Center>
     </Center>
   );
 };

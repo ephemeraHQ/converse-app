@@ -12,6 +12,6 @@ describe("getReadableProfile", () => {
       socials: "socials",
     });
 
-    expect(getReadableProfile("account", "0x123")).toBe("0x123");
+    expect(getReadableProfile("0x123")).toBe("0x123");
   });
 });

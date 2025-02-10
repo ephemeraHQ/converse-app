@@ -1,43 +1,69 @@
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import type {
+  ConsentState,
+  ConversationTopic,
+  InboxId,
+} from "@xmtp/react-native-sdk";
 
 export enum QueryKeys {
   // Conversations
-  CONVERSATIONS = "conversations",
+  CONVERSATIONS_SYNC_ALL = "conversation-sync-all",
+  CONVERSATIONS_ALLOWED_CONSENT = "conversations-allowed-consent",
   CONVERSATIONS_UNKNOWN_CONSENT = "conversations-unknown-consent",
   CONVERSATION = "conversation",
-  CONVERSATION_DM = "conversationDM",
-  CONVERSATION_METADATA = "conversationMetadata",
+  CONVERSATION_DM = "conversation-dm",
+  CONVERSATION_METADATA = "conversation-metadata",
+  CONVERSATIONS_SEARCH = "conversations-search",
 
   // Messages
-  CONVERSATION_MESSAGE = "conversationMessage",
-  CONVERSATION_MESSAGES = "conversationMessages",
+  CONVERSATION_MESSAGE = "conversation-message",
+  CONVERSATION_MESSAGES = "conversation-messages",
 
   // Members
-  GROUP_MEMBERS = "groupMembersv2",
+  GROUP_MEMBERS = "group-members",
 
   // Group Mutable Metadata
-  PINNED_FRAME = "pinnedFrame",
-  GROUP_PERMISSION_POLICY = "groupPermissionPolicy",
-  GROUP_CREATOR = "groupCreator",
+  PINNED_FRAME = "pinned-frame",
+  GROUP_PERMISSION_POLICY = "group-permission-policy",
+  GROUP_CREATOR = "group-creator",
 
   // Permissions
-  GROUP_PERMISSIONS = "groupPermissions",
+  GROUP_PERMISSIONS = "group-permissions",
 
   // Group Invites
-  GROUP_INVITE = "groupInvite",
-  GROUP_JOIN_REQUEST = "groupJoinRequest",
-  PENDING_JOIN_REQUESTS = "pendingJoinRequests",
+  GROUP_INVITE = "group-invite",
+  GROUP_JOIN_REQUEST = "group-join-request",
+  PENDING_JOIN_REQUESTS = "pending-join-requests",
 
   // DMs
-  DM_PEER_INBOX_ID = "dmPeerInboxId",
+  DM_PEER_INBOX_ID = "dm-peer-inbox-id",
 
-  // User Search
-  USER_SEARCH = "userSearch",
+  // User search
+  USER_SEARCH = "user-search",
+
+  // InboxId
+  INBOX_ID_FOR_ACCOUNT = "inbox-id-for-account",
+
+  // Profile Socials
+  PROFILE_SOCIALS = "profile-socials",
 }
 
+// InboxId
+export const getInboxIdForAccountQueryKey = (account: string) => [
+  QueryKeys.INBOX_ID_FOR_ACCOUNT,
+  account?.toLowerCase(),
+];
+
 // Conversations
-export const conversationsQueryKey = (account: string) => [
-  QueryKeys.CONVERSATIONS,
+export const conversationSyncAllQueryKey = (args: {
+  ethAddress: string;
+  consentStates: ConsentState[];
+}) => [
+  QueryKeys.CONVERSATIONS_SYNC_ALL,
+  args.ethAddress,
+  args.consentStates.join(","),
+];
+export const allowedConsentConversationsQueryKey = (account: string) => [
+  QueryKeys.CONVERSATIONS_ALLOWED_CONSENT,
   account?.toLowerCase(),
 ];
 export const unknownConsentConversationsQueryKey = (account: string) => [
@@ -50,10 +76,10 @@ export const conversationQueryKey = (
   topic: ConversationTopic
 ) => [QueryKeys.CONVERSATION, account?.toLowerCase(), topic];
 
-export const dmQueryKey = (account: string, peer: string) => [
+export const dmQueryKey = (args: { account: string; inboxId: InboxId }) => [
   QueryKeys.CONVERSATION_DM,
-  account.toLowerCase(),
-  peer,
+  args.account?.toLowerCase(),
+  args.inboxId?.toLowerCase(),
 ];
 export const conversationMetadataQueryKey = (
   account: string,
@@ -77,10 +103,10 @@ export const conversationPreviewMessagesQueryKey = (
 ) => [QueryKeys.CONVERSATION_MESSAGES, account?.toLowerCase(), topic];
 
 // Members
-export const groupMembersQueryKey = (
-  account: string,
-  topic: ConversationTopic
-) => [QueryKeys.GROUP_MEMBERS, account?.toLowerCase(), topic];
+export const groupMembersQueryKey = (args: {
+  account: string;
+  topic: ConversationTopic;
+}) => [QueryKeys.GROUP_MEMBERS, args.account?.toLowerCase(), args.topic];
 
 // Group Mutable Metadata
 export const groupPinnedFrameQueryKey = (
@@ -122,13 +148,46 @@ export const pendingJoinRequestsQueryKey = (account: string) => [
 ];
 
 // DMs
-export const dmPeerInboxIdQueryKey = (
-  account: string,
-  topic: ConversationTopic
-) => [QueryKeys.DM_PEER_INBOX_ID, account, topic];
+export const dmPeerInboxIdQueryKey = (args: {
+  account: string;
+  topic: ConversationTopic;
+}) => [QueryKeys.DM_PEER_INBOX_ID, args.account, args.topic];
 
-// Profile Search
+// Conversations Search
 export const userSearchQueryKey = (searchQuery: string) => [
   QueryKeys.USER_SEARCH,
+  "by-name",
   searchQuery,
 ];
+
+export const getSearchExistingDmsQueryKey = (args: {
+  searchQuery: string;
+  inboxId: InboxId;
+}) => [QueryKeys.CONVERSATIONS_SEARCH, "dms", args.searchQuery, args.inboxId];
+
+export const getSearchExistingGroupsByGroupNameQueryKey = (args: {
+  searchQuery: string;
+  inboxId: InboxId;
+}) => [
+  QueryKeys.CONVERSATIONS_SEARCH,
+  "groups-by-name",
+  args.searchQuery,
+  args.inboxId,
+];
+
+export const getSearchExistingGroupsByMemberNameQueryKey = (args: {
+  searchQuery: string;
+  inboxId: InboxId;
+}) => [
+  QueryKeys.CONVERSATIONS_SEARCH,
+  "groups-by-member-name",
+  args.searchQuery,
+  args.inboxId,
+];
+
+// Profiles
+export const getProfileSocialsQueryKey = ({
+  inboxId,
+}: {
+  inboxId: InboxId;
+}) => [QueryKeys.PROFILE_SOCIALS, inboxId?.toLowerCase()];

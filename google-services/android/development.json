@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "564961909146",
+    "project_id": "converse-unshut-labs",
+    "storage_bucket": "converse-unshut-labs.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:564961909146:android:93ca1fb8d079f640bd0223",
+        "android_client_info": {
+          "package_name": "com.converse.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "564961909146-n61c2ccs7s26k7i5gmv2e1cv3r52t4i5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5G_3H8Q1wzUiRTuv9SefDyjlJxigHJh8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "564961909146-n61c2ccs7s26k7i5gmv2e1cv3r52t4i5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

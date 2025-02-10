@@ -1,0 +1,225 @@
+name: Production Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_type:
+        description: "Deployment type (build/update)"
+        required: true
+        type: choice
+        options:
+          - auto
+          - build
+          - update
+
+# We need to ensure only one workflow runs at a time and wait for any in-progress workflows to complete.
+# This is critical because:
+# 1. If we merge multiple PRs to main (preview env), each triggers a preview deployment that may increment versions
+# 2. When we then deploy to production, we must wait for all  deployments to finish
+# 3. Otherwise, we might miss version increments and deploy the wrong build
+# Example: PR1 with native changes merged to main -> PR1's preview deploy starts incrementing version ->
+# If prod deploy starts before PR1's preview deploy finishes, we'll merge main to production with old version ->
+# This causes prod to do EAS update when it should have done EAS build with version increment
+concurrency:
+  group: "deployment"
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  check-deployment-type:
+    runs-on: ubuntu-latest
+    outputs:
+      versions_match: ${{ steps.version-compare.outputs.versions_match }}
+      deployment_type: ${{ steps.determine-deployment.outputs.type }}
+
+    steps:
+      # Verify that the required Expo token is available
+      - name: Check for EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "You must provide an EXPO_TOKEN secret"
+            exit 1
+          fi
+
+      # Get the code from the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT_GITHUB }}
+
+      # Check if the versions in main and production branches match
+      - name: Compare versions with main
+        id: version-compare
+        run: |
+          git fetch origin main
+          MAIN_VERSION=$(git show origin/main:package.json | jq -r .version)
+          PROD_VERSION=$(jq -r .version package.json)
+          if [ "$MAIN_VERSION" != "$PROD_VERSION" ]; then
+            echo "versions_match=false" >> $GITHUB_OUTPUT
+          else
+            echo "versions_match=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Merge main into production
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git checkout production
+          git pull origin production
+          git merge origin/main -m "feat: Merge main into production for deployment"
+          git push origin production
+
+      - name: Determine deployment type
+        id: determine-deployment
+        run: |
+          if [ "${{ inputs.deployment_type }}" = "auto" ]; then
+            if [ "${{ steps.version-compare.outputs.versions_match }}" = "true" ]; then
+              echo "type=update" >> $GITHUB_OUTPUT
+            else
+              echo "type=build" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "type=${{ inputs.deployment_type }}" >> $GITHUB_OUTPUT
+          fi
+
+  ios-build:
+    needs: check-deployment-type
+    if: needs.check-deployment-type.outputs.deployment_type == 'build'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+        env:
+          SKIP_YARN_COREPACK_CHECK: "1"
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          packager: yarn
+          eas-cache: true
+          patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
+
+      - name: Build iOS production
+        run: eas build --platform ios --profile production --non-interactive --auto-submit
+
+  android-build:
+    needs: check-deployment-type
+    if: needs.check-deployment-type.outputs.deployment_type == 'build'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+        env:
+          SKIP_YARN_COREPACK_CHECK: "1"
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          packager: yarn
+          eas-cache: true
+          patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
+
+      - name: Build Android production
+        run: |
+          eas build --platform android --profile production --non-interactive --auto-submit
+
+  ota-update:
+    needs: check-deployment-type
+    if: needs.check-deployment-type.outputs.deployment_type == 'update'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+        env:
+          SKIP_YARN_COREPACK_CHECK: "1"
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          packager: yarn
+          eas-cache: true
+          patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
+
+      - name: Run EAS Update
+        run: |
+          eas update --auto --channel=production --non-interactive
+
+      - name: Upload source maps
+        run: |
+          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=production | tr -d ' ' | cut -d'=' -f2)
+          npx sentry-expo-upload-sourcemaps dist
+
+  finalize-deployment:
+    needs: [check-deployment-type, ios-build, android-build, ota-update]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Finalize merge
+        run: |
+          echo "Deployment successful, finalizing merge..."
+          git fetch origin main
+          git merge origin/main -m "feat: Production deployment"
+          git push origin production

@@ -22,7 +22,7 @@ export class UserCancelledError extends Error {
   }
 }
 
-class BaseSDKError extends Error {
+class BaseError extends Error {
   constructor(message: string, cause?: unknown) {
     super(message);
     this.name = this.constructor.name;
@@ -30,8 +30,26 @@ class BaseSDKError extends Error {
   }
 }
 
-export class XMTPError extends BaseSDKError {
+export class GenericError extends BaseError {
+  constructor(args: { message: string; cause: unknown }) {
+    super(args.message, args.cause);
+  }
+}
+
+export class HydrationError extends BaseError {
+  constructor(message: string, cause?: unknown) {
+    super(`[Hydration] ${message}`, cause);
+  }
+}
+
+export class XMTPError extends BaseError {
   constructor(message: string, cause?: unknown) {
     super(`[XMTP SDK] ${message}`, cause);
+  }
+}
+
+export class StreamError extends BaseError {
+  constructor(message: string, cause?: unknown) {
+    super(`[Stream] ${message}`, cause);
   }
 }

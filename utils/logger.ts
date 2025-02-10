@@ -1,4 +1,3 @@
-import { config, getConfig } from "@/config";
 import Constants from "expo-constants";
 import path from "path";
 import { Platform } from "react-native";
@@ -119,7 +118,8 @@ const lightSystemColorScheme: ReactNativeLogColorScheme = {
 };
 
 const activeColorScheme: ReactNativeLogColorScheme =
-  getConfig().loggerColorScheme === "dark"
+  // @ts-ignore
+  process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME === "dark"
     ? darkSystemColorScheme
     : lightSystemColorScheme;
 
@@ -141,8 +141,27 @@ const logger = _logger as typeof _logger & {
   error: logMethodType;
 };
 
-export function logJson(json: any) {
-  console.log(JSON.stringify(json, null, 2));
-}
+// Add stream logger
+export const streamLogger = {
+  ...logger,
+  debug: (...args: Parameters<logMethodType>) =>
+    logger.debug("[STREAM]", ...args),
+  info: (...args: Parameters<logMethodType>) =>
+    logger.info("[STREAM]", ...args),
+  warn: (...args: Parameters<logMethodType>) =>
+    logger.warn("[STREAM]", ...args),
+  error: (...args: Parameters<logMethodType>) =>
+    logger.error("[STREAM]", ...args),
+};
+
+export const authLogger = {
+  ...logger,
+  debug: (...args: Parameters<logMethodType>) =>
+    logger.debug("[AUTH]", ...args),
+  info: (...args: Parameters<logMethodType>) => logger.info("[AUTH]", ...args),
+  warn: (...args: Parameters<logMethodType>) => logger.warn("[AUTH]", ...args),
+  error: (...args: Parameters<logMethodType>) =>
+    logger.error("[AUTH]", ...args),
+};
 
 export default logger;

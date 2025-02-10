@@ -2,15 +2,15 @@ import {
   getCurrentAccount,
   useCurrentAccount,
 } from "@/data/store/accountsStore";
+import { getConversationQueryData } from "@/queries/conversation-query";
+import {
+  addConversationToAllowedConsentConversationsQuery,
+  removeConversationFromAllowedConsentConversationsQuery,
+} from "@/queries/conversations-allowed-consent-query";
 import {
   addConversationToUnknownConsentConversationsQuery,
   removeConversationFromUnknownConsentConversationsQueryData,
-} from "@/queries/unknown-consent-conversations-query";
-import {
-  addConversationToConversationsQuery,
-  removeConversationFromConversationsQuery,
-} from "@/queries/use-conversations-query";
-import { getConversationQueryData } from "@/queries/useConversationQuery";
+} from "@/queries/conversations-unknown-consent-query";
 import { getDmQueryData, setDmQueryData } from "@/queries/useDmQuery";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import {
@@ -23,8 +23,8 @@ import {
   ConversationTopic,
   InboxId,
 } from "@xmtp/react-native-sdk";
-import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account";
-import { updateInboxIdsConsentForAccount } from "./update-inbox-ids-consent-for-account";
+import { updateConsentForGroupsForAccount } from "../../utils/xmtpRN/xmtp-consent/update-consent-for-groups-for-account";
+import { updateInboxIdsConsentForAccount } from "../../utils/xmtpRN/xmtp-consent/update-inbox-ids-consent-for-account";
 
 export function useDenyDmMutation() {
   const currentAccount = useCurrentAccount()!;
@@ -53,7 +53,7 @@ export function useDenyDmMutation() {
         }),
       ]);
     },
-    onMutate: ({ topic }) => {
+    onMutate: ({ topic, peerInboxId }) => {
       const conversation = getConversationQueryData({
         account: currentAccount,
         topic,
@@ -64,13 +64,13 @@ export function useDenyDmMutation() {
         });
 
         setDmQueryData({
-          account: currentAccount,
-          peer: topic,
+          ethAccountAddress: currentAccount,
+          inboxId: peerInboxId,
           dm: updatedDm as DmWithCodecsType,
         });
 
         // Remove from main conversations list
-        removeConversationFromConversationsQuery({
+        removeConversationFromAllowedConsentConversationsQuery({
           account: currentAccount,
           topic,
         });
@@ -84,12 +84,12 @@ export function useDenyDmMutation() {
         return { previousDmConsent: conversation.state };
       }
     },
-    onError: (error, { topic }, context) => {
+    onError: (error, { topic, peerInboxId }, context) => {
       const { previousDmConsent } = context || {};
       if (previousDmConsent) {
         const dm = getDmQueryData({
-          account: currentAccount,
-          peer: topic,
+          ethAccountAddress: currentAccount,
+          inboxId: peerInboxId,
         });
 
         if (!dm) {
@@ -101,13 +101,13 @@ export function useDenyDmMutation() {
         });
 
         setDmQueryData({
-          account: currentAccount,
-          peer: topic,
+          ethAccountAddress: currentAccount,
+          inboxId: peerInboxId,
           dm: previousDm,
         });
 
         // Add back to main conversations list
-        addConversationToConversationsQuery({
+        addConversationToAllowedConsentConversationsQuery({
           account: currentAccount,
           conversation: previousDm as ConversationWithCodecsType,
         });

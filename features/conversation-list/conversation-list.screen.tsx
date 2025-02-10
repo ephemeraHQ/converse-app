@@ -28,9 +28,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-requests";
 import { ConversationListEmpty } from "./conversation-list-empty";
 import { ConversationListStartNewConvoBanner } from "./conversation-list-start-new-convo-banner";
-import { useHeaderWrapper } from "./conversation-list.screen-header";
+import { useConversationListScreenHeader } from "./conversation-list.screen-header";
 import { useConversationListConversations } from "./use-conversation-list-conversations";
-import { ContextMenuView } from "react-native-ios-context-menu";
+import { ContextMenuView } from "@/design-system/context-menu/context-menu";
 
 type IConversationListProps = NativeStackScreenProps<
   NavigationParamList,
@@ -48,7 +48,7 @@ export function ConversationListScreen(props: IConversationListProps) {
 
   const insets = useSafeAreaInsets();
 
-  useHeaderWrapper();
+  useConversationListScreenHeader();
 
   const handleRefresh = useCallback(async () => {
     try {
@@ -76,6 +76,7 @@ export function ConversationListScreen(props: IConversationListProps) {
           ListHeaderComponent={<ListHeader />}
           onRefetch={handleRefresh}
           onLayout={() => {}}
+          initialNumToRender={10} // 10 should be enough to cover the screen
           layout={theme.animation.reanimatedLayoutSpringTransition}
           contentContainerStyle={{
             flexGrow: 1, // For the empty state to be full screen

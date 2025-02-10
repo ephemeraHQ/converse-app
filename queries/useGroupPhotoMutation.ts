@@ -1,4 +1,4 @@
-import { updateConversationInConversationsQueryData } from "@/queries/use-conversations-query";
+import { updateConversationInAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
 import { captureError } from "@/utils/capture-error";
 import {
   getGroupQueryData,
@@ -36,7 +36,7 @@ export function useGroupPhotoMutation(args: IArgs) {
         updateGroupQueryData({ account, topic, updates });
       }
 
-      updateConversationInConversationsQueryData({
+      updateConversationInAllowedConsentConversationsQueryData({
         account,
         topic,
         conversationUpdate: updates,
@@ -51,7 +51,7 @@ export function useGroupPhotoMutation(args: IArgs) {
 
       const updates = { imageUrlSquare: previousGroup?.imageUrlSquare ?? "" };
       updateGroupQueryData({ account, topic, updates });
-      updateConversationInConversationsQueryData({
+      updateConversationInAllowedConsentConversationsQueryData({
         account,
         topic,
         conversationUpdate: updates,

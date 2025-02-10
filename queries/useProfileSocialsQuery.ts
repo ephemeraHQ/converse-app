@@ -120,10 +120,7 @@ export const setProfileRecordSocialsQueryData = (
   });
 };
 
-export const getProfileSocialsQueryData = (
-  account: string,
-  peerAddress: string
-) => {
+export const getProfileSocialsQueryData = (peerAddress: string) => {
   return queryClient.getQueryData<ProfileSocialsData>(
     profileSocialsQueryConfig(peerAddress).queryKey
   );

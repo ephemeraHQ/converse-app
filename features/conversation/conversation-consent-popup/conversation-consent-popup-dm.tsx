@@ -3,6 +3,7 @@ import { useCurrentAccount } from "@/data/store/accountsStore";
 import { useAllowDmMutation } from "@/features/consent/use-allow-dm.mutation";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
 import { useRouter } from "@/navigation/useNavigation";
+import { getConversationQueryData } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { actionSheetColors } from "@/styles/colors";
 import { captureErrorWithToast } from "@/utils/capture-error";
@@ -10,10 +11,7 @@ import { ensureError } from "@/utils/error";
 import { translate } from "@i18n";
 import React, { useCallback } from "react";
 import { useColorScheme } from "react-native";
-import {
-  useConversationCurrentConversationId,
-  useCurrentConversationTopic,
-} from "../conversation.store-context";
+import { useCurrentConversationTopicSafe } from "../conversation.store-context";
 import {
   ConsentPopupButtonsContainer,
   ConsentPopupTitle,
@@ -22,8 +20,7 @@ import {
 } from "./conversation-consent-popup.design-system";
 
 export function ConversationConsentPopupDm() {
-  const topic = useCurrentConversationTopic();
-  const conversationId = useConversationCurrentConversationId();
+  const topic = useCurrentConversationTopicSafe();
   const currentAccount = useCurrentAccount()!;
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
@@ -44,6 +41,15 @@ export function ConversationConsentPopupDm() {
       throw new Error("Peer inbox id not found");
     }
 
+    const conversation = getConversationQueryData({
+      account: currentAccount,
+      topic,
+    });
+
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
     showActionSheetWithOptions(
       {
         options: [translate("block"), translate("cancel")],
@@ -58,7 +64,7 @@ export function ConversationConsentPopupDm() {
             await denyDmConsentAsync({
               topic,
               peerInboxId: peerInboxId,
-              conversationId: conversationId,
+              conversationId: conversation.id,
             });
             navigation.pop();
           } catch (error) {
@@ -74,8 +80,8 @@ export function ConversationConsentPopupDm() {
     navigation,
     denyDmConsentAsync,
     peerInboxId,
-    conversationId,
     topic,
+    currentAccount,
   ]);
 
   const handleAccept = useCallback(async () => {
@@ -83,9 +89,19 @@ export function ConversationConsentPopupDm() {
       if (!peerInboxId) {
         throw new Error("Peer inbox id not found");
       }
+
+      const conversation = getConversationQueryData({
+        account: currentAccount,
+        topic,
+      });
+
+      if (!conversation) {
+        throw new Error("Conversation not found");
+      }
+
       await allowDmConsentAsync({
         peerInboxId,
-        conversationId,
+        conversationId: conversation.id,
         topic,
       });
     } catch (error) {
@@ -93,7 +109,7 @@ export function ConversationConsentPopupDm() {
         message: `Error consenting`,
       });
     }
-  }, [allowDmConsentAsync, peerInboxId, conversationId, topic]);
+  }, [allowDmConsentAsync, peerInboxId, topic, currentAccount]);
 
   return (
     <ConversationConsentPopupContainer>

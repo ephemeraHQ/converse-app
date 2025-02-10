@@ -13,10 +13,10 @@ import { translate } from "@i18n";
 import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
 import React, { useCallback } from "react";
 import { useColorScheme } from "react-native";
-import { useCurrentConversationTopic } from "../conversation.store-context";
+import { useCurrentConversationTopicSafe } from "../conversation.store-context";
 
 export function ConversationConsentPopupGroup() {
-  const topic = useCurrentConversationTopic();
+  const topic = useCurrentConversationTopicSafe();
 
   const navigation = useRouter();
 

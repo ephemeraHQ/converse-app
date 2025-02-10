@@ -1,12 +1,11 @@
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
 import { usePreferredInboxAddress } from "@/hooks/usePreferredInboxAddress";
+import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
+import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { copyToClipboard } from "@/utils/clipboard";
 import { Avatar } from "@components/Avatar";
 import { useCurrentAccount } from "@data/store/accountsStore";
-import { usePreferredAvatarUri } from "@hooks/usePreferredAvatarUri";
-import { usePreferredName } from "@hooks/usePreferredName";
-import { useProfileSocials } from "@hooks/useProfileSocials";
 import { useRouter } from "@navigation/useNavigation";
 import { useAppTheme } from "@theme/useAppTheme";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -29,7 +28,9 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
     caller: "DmConversationTitle",
   });
 
-  const { data: peerAddress } = usePreferredInboxAddress(peerInboxId!);
+  const { data: peerAddress } = usePreferredInboxAddress({
+    inboxId: peerInboxId!,
+  });
 
   const onPress = useCallback(() => {
     if (peerAddress) {
@@ -41,28 +42,31 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
     copyToClipboard(JSON.stringify(topic));
   }, [topic]);
 
-  const { isLoading } = useProfileSocials(peerAddress ?? "");
+  const { data: preferredInboxName, isLoading: isLoadingPreferredInboxName } =
+    usePreferredInboxName({
+      inboxId: peerInboxId!,
+    });
 
-  const preferredName = usePreferredName(peerAddress ?? "");
+  const { data: preferredAvatarUri, isLoading: isLoadingPreferredAvatarUri } =
+    usePreferredInboxAvatar({
+      inboxId: peerInboxId!,
+    });
 
-  const preferredAvatarUri = usePreferredAvatarUri(peerAddress ?? "");
-
-  const displayAvatar = peerAddress && !isLoading;
-  if (!displayAvatar) return null;
+  if (isLoadingPreferredInboxName || isLoadingPreferredAvatarUri) {
+    return null;
+  }
 
   return (
     <ConversationHeaderTitle
-      title={preferredName}
+      title={preferredInboxName}
       onLongPress={onLongPress}
       onPress={onPress}
       avatarComponent={
-        displayAvatar && (
-          <Avatar
-            uri={preferredAvatarUri ?? undefined}
-            size={theme.avatarSize.md}
-            name={preferredName}
-          />
-        )
+        <Avatar
+          uri={preferredAvatarUri ?? undefined}
+          size={theme.avatarSize.md}
+          name={preferredInboxName}
+        />
       }
     />
   );

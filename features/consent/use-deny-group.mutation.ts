@@ -1,12 +1,12 @@
-import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account";
+import { updateConsentForGroupsForAccount } from "@/utils/xmtpRN/xmtp-consent/update-consent-for-groups-for-account";
 import {
   addConversationToUnknownConsentConversationsQuery,
   removeConversationFromUnknownConsentConversationsQueryData,
-} from "@/queries/unknown-consent-conversations-query";
+} from "@/queries/conversations-unknown-consent-query";
 import {
-  addConversationToConversationsQuery,
-  removeConversationFromConversationsQuery,
-} from "@/queries/use-conversations-query";
+  addConversationToAllowedConsentConversationsQuery,
+  removeConversationFromAllowedConsentConversationsQuery,
+} from "@/queries/conversations-allowed-consent-query";
 import { getGroupQueryData, setGroupQueryData } from "@/queries/useGroupQuery";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { useMutation } from "@tanstack/react-query";
@@ -46,7 +46,7 @@ export const useDenyGroupMutation = (
       setGroupQueryData({ account, topic, group: updatedGroup });
 
       // Remove from main conversations list
-      removeConversationFromConversationsQuery({
+      removeConversationFromAllowedConsentConversationsQuery({
         account,
         topic: topic!,
       });
@@ -67,7 +67,7 @@ export const useDenyGroupMutation = (
       setGroupQueryData({ account, topic, group: context.previousGroup });
 
       // Add back to main conversations list
-      addConversationToConversationsQuery({
+      addConversationToAllowedConsentConversationsQuery({
         account,
         conversation: context.previousGroup,
       });

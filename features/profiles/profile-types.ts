@@ -1,48 +1,20 @@
-export type ILensHandle = {
-  profileId: string;
-  handle: string;
-  isDefault: boolean;
-  name?: string;
-  profilePictureURI?: string;
-};
+import {
+  IConverseUserNameZodSchema,
+  IEnsNameZodSchema,
+  IFarcasterUsernameZodSchema,
+  ILensHandleZodSchema,
+  IProfileSocialsZodSchema,
+  IUnstoppableDomainZodSchema,
+} from "@/utils/api/profiles";
 
-export type IEnsName = {
-  name: string;
-  isPrimary: boolean;
-  displayName?: string | undefined;
-  avatar?: string | undefined;
-};
+export type ILensHandle = ILensHandleZodSchema;
 
-export type IFarcasterUsername = {
-  username: string;
-  name?: string;
-  avatarURI?: string;
-  linkedAccount?: boolean;
-};
+export type IEnsName = IEnsNameZodSchema;
 
-export type IUnstoppableDomain = {
-  domain: string;
-  isPrimary: boolean;
-};
+export type IFarcasterUsername = IFarcasterUsernameZodSchema;
 
-export type IConverseUserName = {
-  name: string;
-  isPrimary: boolean;
-  displayName?: string | undefined;
-  avatar?: string | undefined;
-};
+export type IUnstoppableDomain = IUnstoppableDomainZodSchema;
 
-export type IProfileSocials = {
-  address?: string;
-  ensNames?: IEnsName[];
-  farcasterUsernames?: IFarcasterUsername[];
-  lensHandles?: ILensHandle[];
-  unstoppableDomains?: IUnstoppableDomain[];
-  userNames?: IConverseUserName[];
-};
+export type IConverseUserName = IConverseUserNameZodSchema;
 
-export type ProfileByAddress = {
-  [address: string]:
-    | { socials: IProfileSocials; updatedAt: number }
-    | undefined;
-};
+export type IProfileSocials = IProfileSocialsZodSchema;

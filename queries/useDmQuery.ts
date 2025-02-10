@@ -2,30 +2,32 @@
  * TODO: Maybe delete this and just use the conversation query instead and add a "peer" argument?
  */
 import { queryClient } from "@/queries/queryClient";
-import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getConversationByPeerByAccount } from "@/utils/xmtpRN/conversations";
+import { getXmtpDmByInboxId } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-dm";
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { InboxId } from "@xmtp/react-native-sdk";
 import { dmQueryKey } from "./QueryKeys";
-import { setConversationQueryData } from "./useConversationQuery";
+import { setConversationQueryData } from "./conversation-query";
 
 type IDmQueryArgs = {
-  account: string;
-  peer: string;
+  ethAccountAddress: string;
+  inboxId: InboxId;
 };
 
 type IDmQueryData = Awaited<ReturnType<typeof getConversationByPeerByAccount>>;
 
 async function getDm(args: IDmQueryArgs) {
-  const { account, peer } = args;
+  const { ethAccountAddress: ethAccountAddress, inboxId } = args;
 
-  const conversation = await getConversationByPeerByAccount({
-    account,
-    peer,
+  const conversation = await getXmtpDmByInboxId({
+    ethAccountAddress,
+    inboxId,
   });
 
   if (conversation) {
     // Update the main conversation query because it's a 1-1
     setConversationQueryData({
-      account,
+      account: ethAccountAddress,
       topic: conversation.topic,
       conversation,
     });
@@ -35,25 +37,25 @@ async function getDm(args: IDmQueryArgs) {
 }
 
 export function getDmQueryOptions(args: IDmQueryArgs) {
-  const { account, peer } = args;
+  const { ethAccountAddress, inboxId } = args;
   return queryOptions({
-    queryKey: dmQueryKey(account, peer),
-    queryFn: () => getDm({ account, peer }),
-    enabled: !!peer,
+    queryKey: dmQueryKey({ account: ethAccountAddress, inboxId }),
+    queryFn: () => getDm({ ethAccountAddress: ethAccountAddress, inboxId }),
+    enabled: !!inboxId,
   });
 }
 
-export function useDmQuery(args: IDmQueryArgs) {
-  return useQuery(getDmQueryOptions(args));
-}
-
 export function setDmQueryData(args: IDmQueryArgs & { dm: IDmQueryData }) {
-  const { account, dm } = args;
-  queryClient.setQueryData(getDmQueryOptions(args).queryKey, dm);
+  const { ethAccountAddress, inboxId, dm } = args;
+  queryClient.setQueryData(
+    getDmQueryOptions({ ethAccountAddress, inboxId }).queryKey,
+    dm
+  );
+
+  // Update the main conversation query because it's a 1-1
   if (dm) {
-    // Update the main conversation query because it's a 1-1
     setConversationQueryData({
-      account,
+      account: ethAccountAddress,
       topic: dm.topic,
       conversation: dm,
     });

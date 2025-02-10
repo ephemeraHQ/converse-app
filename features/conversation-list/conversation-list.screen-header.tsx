@@ -11,7 +11,7 @@ import { Icon, iconRegistry } from "@/design-system/Icon/Icon";
 import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
-import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
+import { useSafeCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { usePreferredName } from "@/hooks/usePreferredName";
@@ -25,7 +25,7 @@ import { useNavigation } from "@react-navigation/native";
 import React, { useCallback } from "react";
 import { Alert, ViewStyle } from "react-native";
 
-export function useHeaderWrapper() {
+export function useConversationListScreenHeader() {
   const { theme } = useAppTheme();
 
   useHeader(
@@ -57,7 +57,9 @@ function HeaderRightActions() {
         style={$newConversationContainer}
         icon="square.and.pencil"
         onPress={() => {
-          navigation.navigate("CreateConversation");
+          navigation.navigate("Conversation", {
+            isNew: true,
+          });
         }}
       />
     </HStack>
@@ -136,11 +138,13 @@ function ProfileAvatar() {
   const { theme, themed } = useAppTheme();
   const navigation = useNavigation();
   const currentAccount = useCurrentAccount();
-  const { data: currentAccountInboxId } = useCurrentAccountInboxId();
+  const currentAccountInboxId = useSafeCurrentAccountInboxId();
   const { data: preferredName } = usePreferredInboxName({
     inboxId: currentAccountInboxId,
   });
-  const { data: avatarUri } = usePreferredInboxAvatar(currentAccountInboxId);
+  const { data: avatarUri } = usePreferredInboxAvatar({
+    inboxId: currentAccountInboxId!,
+  });
 
   const showDebugMenu = useCallback(() => {
     converseEventEmitter.emit("showDebugMenu");

@@ -5,7 +5,6 @@ export const previewConfig: IConfig = {
   ...shared,
   debugMenu: true,
   bundleId: "com.converse.preview",
-  appleAppGroup: "group.com.converse.preview",
   scheme: "converse-preview",
   websiteDomain: "preview.converse.xyz",
   usernameSuffix: ".conversedev.eth",

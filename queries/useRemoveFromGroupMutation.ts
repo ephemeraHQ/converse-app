@@ -1,18 +1,17 @@
 import { useMutation } from "@tanstack/react-query";
 import logger from "@utils/logger";
-import { sentryTrackError } from "@utils/sentry";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
+import { useGroupQuery } from "@queries/useGroupQuery";
 import { removeMemberMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
   getGroupMembersQueryData,
   setGroupMembersQueryData,
 } from "./useGroupMembersQuery";
-import { useGroupQuery } from "@queries/useGroupQuery";
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { captureError } from "@/utils/capture-error";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const useRemoveFromGroupMutation = (
   account: string,
@@ -33,10 +32,13 @@ export const useRemoveFromGroupMutation = (
       if (!topic) {
         return;
       }
-      await cancelGroupMembersQuery(account, topic);
+      await cancelGroupMembersQuery({ account, topic });
       const removeSet = new Set(inboxIds);
 
-      const previousGroupMembers = getGroupMembersQueryData(account, topic);
+      const previousGroupMembers = getGroupMembersQueryData({
+        account,
+        topic,
+      });
       if (!previousGroupMembers) {
         return;
       }
@@ -47,7 +49,11 @@ export const useRemoveFromGroupMutation = (
           (member) => !removeSet.has(member)
         ),
       };
-      setGroupMembersQueryData(account, topic, newGroupMembers);
+      setGroupMembersQueryData({
+        account,
+        topic,
+        members: newGroupMembers,
+      });
 
       return { previousGroupMembers };
     },
@@ -59,7 +65,11 @@ export const useRemoveFromGroupMutation = (
       if (!topic) {
         return;
       }
-      setGroupMembersQueryData(account, topic, context.previousGroupMembers);
+      setGroupMembersQueryData({
+        account,
+        topic,
+        members: context.previousGroupMembers,
+      });
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess useRemoveFromGroupMutation");

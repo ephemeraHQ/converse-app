@@ -2,11 +2,11 @@ import { useSelect } from "@/data/store/storeHelpers";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { isCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
-import { useInboxProfileSocialsQueries } from "@/queries/useInboxProfileSocialsQuery";
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { getInboxProfileSocialsQueryConfig } from "@/queries/useInboxProfileSocialsQuery";
 import { AnimatedHStack, HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
+import { useQueries } from "@tanstack/react-query";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import {
   getPreferredInboxAddress,
@@ -20,6 +20,7 @@ import {
   RolledUpReactions,
   SortedReaction,
 } from "./conversation-message-reactions.types";
+import { debugBorder } from "@/utils/debug-style";
 
 const MAX_REACTION_EMOJIS_SHOWN = 3;
 
@@ -41,6 +42,7 @@ export const ConversationMessageReactions = memo(
 
     return (
       <AnimatedHStack
+        // {...debugBorder()}
         entering={theme.animation.reanimatedFadeInScaleIn()}
         style={[
           {
@@ -85,8 +87,6 @@ function useMessageReactionsRolledUp() {
   const { messageId } = useMessageContextStoreContext(useSelect(["messageId"]));
   const { bySender: reactionsBySender } =
     useConversationMessageReactions(messageId);
-  const currentAddress = useCurrentAccount()!;
-
   const inboxIds = Array.from(
     new Set(
       Object.entries(reactionsBySender ?? {}).map(
@@ -95,10 +95,11 @@ function useMessageReactionsRolledUp() {
     )
   );
 
-  const inboxProfileSocialsQueries = useInboxProfileSocialsQueries(
-    currentAddress,
-    inboxIds
-  );
+  const inboxProfileSocialsQueries = useQueries({
+    queries: inboxIds.map((inboxId) =>
+      getInboxProfileSocialsQueryConfig({ inboxId })
+    ),
+  });
 
   const membersSocials = inboxProfileSocialsQueries.map(
     ({ data: socials }, index) => {

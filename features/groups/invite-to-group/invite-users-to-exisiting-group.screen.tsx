@@ -19,27 +19,24 @@ import {
   useColorScheme,
 } from "react-native";
 
-import ActivityIndicator from "@/components/ActivityIndicator/ActivityIndicator";
+import AndroidBackAction from "@/components/AndroidBackAction";
+import { SearchBar } from "@/components/SearchBar";
+import TableView from "@/components/TableView/TableView";
+import { TableViewPicto } from "@/components/TableView/TableViewImage";
+import { config } from "@/config";
 import { currentAccount } from "@/data/store/accountsStore";
-import { accountCanMessagePeer } from "@/features/consent/account-can-message-peer";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
 import { translate } from "@/i18n";
 import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { searchProfilesForCurrentAccount } from "@/utils/api/profiles";
+import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { isEmptyObject } from "@/utils/objects";
 import { getPreferredName } from "@/utils/profile";
-import { SearchBar } from "@search/components/SearchBar";
-import { InboxId } from "@xmtp/react-native-sdk";
-// import { OldProfileSearchResultsList } from "@/features/search/components/OldProfileSearchResultsList";
-import AndroidBackAction from "@/components/AndroidBackAction";
-import TableView from "@/components/TableView/TableView";
-import { TableViewPicto } from "@/components/TableView/TableViewImage";
-import { config } from "@/config";
-import { OldProfileSearchResultsList } from "@/features/search/components/OldProfileSearchResultsList";
-import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
+import { accountCanMessagePeer } from "@/utils/xmtpRN/xmtp-consent/account-can-message-peer";
+import { ActivityIndicator } from "@/design-system/activity-indicator";
 
 export function InviteUsersToExistingGroupScreen({
   route,
@@ -334,32 +331,8 @@ export function InviteUsersToExistingGroupScreen({
       </View>
 
       {!status.loading && !isEmptyObject(status.profileSearchResults) && (
-        <View>
-          <OldProfileSearchResultsList
-            navigation={navigation}
-            profiles={(() => {
-              const searchResultsToShow = { ...status.profileSearchResults };
-              if (group.enabled && group.members) {
-                group.members.forEach((member) => {
-                  delete searchResultsToShow[member.address];
-                });
-              }
-              if (members) {
-                members?.ids?.forEach((memberId: InboxId) => {
-                  const member = members.byId[memberId];
-                  const address = getCleanAddress(member.addresses[0]);
-                  delete searchResultsToShow[address];
-                });
-              }
-              return searchResultsToShow;
-            })()}
-            groupMode={group.enabled}
-            addToGroup={async (member) => {
-              setGroup((g) => ({ ...g, members: [...g.members, member] }));
-              setValue("");
-            }}
-          />
-        </View>
+        // TODO
+        <View />
       )}
 
       <ScrollView

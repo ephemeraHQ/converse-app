@@ -8,7 +8,6 @@ import {
   textSecondaryColor,
 } from "@styles/colors";
 import { PictoSizes } from "@styles/sizes";
-import * as Linking from "expo-linking";
 import React, { useCallback } from "react";
 import {
   Keyboard,
@@ -21,8 +20,6 @@ import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery"
 import { useAccountsStore } from "../data/store/accountsStore";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
-import { NotificationPermissionStatus } from "../features/notifications/types/Notifications.types";
-import { requestPushNotificationsPermissions } from "../features/notifications/utils/requestPushNotificationsPermissions";
 import { useRouter } from "../navigation/useNavigation";
 import { navigate } from "../utils/navigation";
 import Picto from "./Picto/Picto";
@@ -71,32 +68,8 @@ export default function AccountSettingsButton({ account }: Props) {
       [translate("copy_wallet_address")]: () => {
         Clipboard.setString(account || "");
       },
-      [translate("userProfile.settings.notifications")]: () => {
-        // @todo => move that to a helper because also used in Profile
-        if (notificationsPermissionStatus === "denied") {
-          if (Platform.OS === "android") {
-            // Android 13 is always denied first so let's try to show
-            requestPushNotificationsPermissions().then(
-              (newStatus: NotificationPermissionStatus | undefined) => {
-                if (newStatus === "denied") {
-                  Linking.openSettings();
-                } else if (newStatus) {
-                  setNotificationsPermissionStatus(newStatus);
-                }
-              }
-            );
-          } else {
-            Linking.openSettings();
-          }
-        } else if (notificationsPermissionStatus === "undetermined") {
-          // Open popup
-          requestPushNotificationsPermissions().then(
-            (newStatus: NotificationPermissionStatus | undefined) => {
-              if (!newStatus) return;
-              setNotificationsPermissionStatus(newStatus);
-            }
-          );
-        }
+      [translate("turn_on_notifications")]: () => {
+        // TODO
       },
       [translate("disconnect_this_account")]: () =>
         showDisconnectActionSheet(colorScheme),
@@ -151,7 +124,6 @@ export default function AccountSettingsButton({ account }: Props) {
     notificationsPermissionStatus,
     colorScheme,
     setCurrentAccount,
-    setNotificationsPermissionStatus,
     showDisconnectActionSheet,
   ]);
 

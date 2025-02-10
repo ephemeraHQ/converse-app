@@ -4,9 +4,9 @@ import {
   addConversationMessageQuery,
   refetchConversationMessages,
   replaceOptimisticMessageWithReal,
-} from "@/queries/use-conversation-messages-query";
+} from "@/queries/conversation-messages-query";
 import { fetchConversationMessageQuery } from "@/queries/useConversationMessage";
-import { getOrFetchConversation } from "@/queries/useConversationQuery";
+import { getOrFetchConversation } from "@/queries/conversation-query";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";
@@ -29,8 +29,6 @@ export type ISendMessageParams = {
     | { text: string; remoteAttachment?: RemoteAttachmentContent }
     | { text?: string; remoteAttachment: RemoteAttachmentContent };
 };
-
-export type ISendFirstMessageParams = Omit<ISendMessageParams, "topic">;
 
 export async function sendMessage(args: ISendMessageParams) {
   const { referencedMessageId, content, topic } = args;
@@ -67,74 +65,74 @@ export function useSendMessage() {
     mutationFn: (variables: ISendMessageParams) => {
       return sendMessage(variables);
     },
-    onMutate: (variables) => {
-      const currentAccount = getCurrentAccount()!;
-      const currentUserInboxId = getCurrentAccountInboxId()!;
+    // onMutate: (variables) => {
+    //   const currentAccount = getCurrentAccount()!;
+    //   const currentUserInboxId = getCurrentAccountInboxId()!;
 
-      // For now, we only do optimistic updates for simple text messages
-      // And if we like this, we'll implement the rest of content types
-      if (variables.content.text && !variables.referencedMessageId) {
-        const generatedMessageId = getRandomId();
+    //   // For now, we only do optimistic updates for simple text messages
+    //   // And if we like this, we'll implement the rest of content types
+    //   if (variables.content.text && !variables.referencedMessageId) {
+    //     const generatedMessageId = getRandomId();
 
-        const textMessage: DecodedMessage<TextCodec> = {
-          id: generatedMessageId as MessageId,
-          // @ts-expect-error helping the list keep a reference to the optimistic message
-          tempOptimisticId: generatedMessageId,
-          contentTypeId: variables.content.text
-            ? contentTypesPrefixes.text
-            : contentTypesPrefixes.remoteAttachment,
-          sentNs: getTodayNs(),
-          fallback: "new-message",
-          deliveryStatus: "sending" as MessageDeliveryStatus, // NOT GOOD but tmp
-          topic: variables.topic,
-          senderInboxId: currentUserInboxId,
-          nativeContent: {},
-          content: () => {
-            return variables.content.text!;
-          },
-        };
+    //     const textMessage: DecodedMessage<TextCodec> = {
+    //       id: generatedMessageId as MessageId,
+    //       // @ts-expect-error helping the list keep a reference to the optimistic message
+    //       tempOptimisticId: generatedMessageId,
+    //       contentTypeId: variables.content.text
+    //         ? contentTypesPrefixes.text
+    //         : contentTypesPrefixes.remoteAttachment,
+    //       sentNs: getTodayNs(),
+    //       fallback: "new-message",
+    //       deliveryStatus: "sending" as MessageDeliveryStatus, // NOT GOOD but tmp
+    //       topic: variables.topic,
+    //       senderInboxId: currentUserInboxId,
+    //       nativeContent: {},
+    //       content: () => {
+    //         return variables.content.text!;
+    //       },
+    //     };
 
-        addConversationMessageQuery({
-          account: currentAccount,
-          topic: variables.topic,
-          message: textMessage,
-        });
+    //     addConversationMessageQuery({
+    //       account: currentAccount,
+    //       topic: variables.topic,
+    //       message: textMessage,
+    //     });
 
-        return {
-          generatedMessageId,
-        };
-      }
-    },
-    onSuccess: async (messageId, variables, context) => {
-      if (context && messageId) {
-        // The SDK only returns the messageId
-        const message = await fetchConversationMessageQuery({
-          account: getCurrentAccount()!,
-          messageId,
-        });
+    //     return {
+    //       generatedMessageId,
+    //     };
+    //   }
+    // },
+    // onSuccess: async (messageId, variables, context) => {
+    //   if (context && messageId) {
+    //     // The SDK only returns the messageId
+    //     const message = await fetchConversationMessageQuery({
+    //       account: getCurrentAccount()!,
+    //       messageId,
+    //     });
 
-        if (!message) {
-          throw new Error("Message not found");
-        }
+    //     if (!message) {
+    //       throw new Error("Message not found");
+    //     }
 
-        if (message) {
-          replaceOptimisticMessageWithReal({
-            tempId: context.generatedMessageId,
-            topic: variables.topic,
-            account: getCurrentAccount()!,
-            realMessage: message,
-          });
-        }
-      }
-    },
-    onError: (error, variables) => {
-      const currentAccount = getCurrentAccount()!;
-      refetchConversationMessages({
-        account: currentAccount,
-        topic: variables.topic,
-        caller: "useSendMessage#onError",
-      }).catch(captureErrorWithToast);
-    },
+    //     if (message) {
+    //       replaceOptimisticMessageWithReal({
+    //         tempId: context.generatedMessageId,
+    //         topic: variables.topic,
+    //         account: getCurrentAccount()!,
+    //         realMessage: message,
+    //       });
+    //     }
+    //   }
+    // },
+    // onError: (error, variables) => {
+    //   const currentAccount = getCurrentAccount()!;
+    //   refetchConversationMessages({
+    //     account: currentAccount,
+    //     topic: variables.topic,
+    //     caller: "useSendMessage#onError",
+    //   }).catch(captureErrorWithToast);
+    // },
   });
 
   const sendMessageMutation = useCallback(

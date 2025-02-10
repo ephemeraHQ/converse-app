@@ -1,30 +1,51 @@
-import { queryOptions, SetDataOptions, useQuery } from "@tanstack/react-query";
+import { getOrFetchConversation } from "@/queries/conversation-query";
+import {
+  queryOptions as reactQueryOptions,
+  useQuery,
+} from "@tanstack/react-query";
 import { getCleanAddress } from "@utils/evm/getCleanAddress";
 import { ConversationTopic, Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
-import { entifyWithAddress, EntityObjectWithAddress } from "./entify";
-import { queryClient } from "./queryClient";
 import { groupMembersQueryKey } from "./QueryKeys";
-import { getOrFetchGroupQuery } from "./useGroupQuery";
+import { EntityObjectWithAddress, entifyWithAddress } from "./entify";
+import { queryClient } from "./queryClient";
+import { Optional } from "@/types/general";
 
 export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
 
-const fetchGroupMembers = async (args: {
+type IGroupMembersArgs = {
   account: string;
   topic: ConversationTopic;
-}): Promise<EntityObjectWithAddress<Member, InboxId>> => {
-  const { account, topic } = args;
-  const group = await getOrFetchGroupQuery({
+};
+
+type IGroupMembersArgsWithCaller = IGroupMembersArgs & { caller: string };
+
+const fetchGroupMembers = async (
+  args: IGroupMembersArgsWithCaller
+): Promise<EntityObjectWithAddress<Member, InboxId>> => {
+  const { account, topic, caller } = args;
+
+  const conversation = await getOrFetchConversation({
     account,
     topic,
-    caller: "fetchGroupMembers",
+    caller,
   });
 
-  if (!group) {
+  if (!conversation) {
     throw new Error(`Group ${topic} not found in query data cache`);
   }
 
-  const members = await group.members();
+  const members = await conversation.members();
+
+  /**
+   * We can't really have an empty group...
+   * And when a group is created on the SDK, the members are added in a separate call
+   * So it can lead that we try to fetch the members before the group is created
+   * So we retry a few times before giving up
+   */
+  if (members.length === 0) {
+    throw new Error("Empty members list");
+  }
 
   return entifyWithAddress(
     members,
@@ -33,74 +54,88 @@ const fetchGroupMembers = async (args: {
   );
 };
 
-type IGroupMembersQueryConfigArgs = {
-  account: string;
-  topic: ConversationTopic;
-};
-
-export const getGroupMemberQueryOptions = (
-  args: IGroupMembersQueryConfigArgs
+export const getGroupMembersQueryOptions = (
+  args: Optional<IGroupMembersArgsWithCaller, "caller">
 ) => {
-  const { account, topic } = args;
-  return queryOptions({
-    queryKey: groupMembersQueryKey(account, topic),
-    queryFn: () => fetchGroupMembers({ account, topic }),
-    enabled: !!topic && !!account,
+  const { account, topic, caller } = args;
+  const isEnabled = !!topic;
+  return reactQueryOptions({
+    meta: {
+      caller,
+    },
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
+    queryKey: groupMembersQueryKey({ account, topic }),
+    queryFn: () =>
+      fetchGroupMembers({ account, topic, caller: caller ?? "unknown" }),
+    enabled: isEnabled,
+    /**
+     * We can't really have an empty group...
+     * And when a group is created on the SDK, the members are added in a separate call
+     * So it can lead that we try to fetch the members before the group is created
+     * So we retry a few times before giving up
+     */
+    retry: (failureCount) => {
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * (attemptIndex + 1), 3000),
   });
 };
 
-export const useGroupMembersQuery = (args: {
-  account: string;
-  topic: ConversationTopic;
-}) => {
-  const { account, topic } = args;
-  return useQuery<GroupMembersSelectData>(
-    getGroupMemberQueryOptions({ account, topic })
-  );
+export const useGroupMembersQuery = (args: IGroupMembersArgsWithCaller) => {
+  return useQuery(getGroupMembersQueryOptions(args));
 };
 
 export const getGroupMembersQueryData = (
-  account: string,
-  topic: ConversationTopic
-): GroupMembersSelectData | undefined =>
-  queryClient.getQueryData(groupMembersQueryKey(account, topic));
-
-export const setGroupMembersQueryData = (
-  account: string,
-  topic: ConversationTopic,
-  members: GroupMembersSelectData,
-  options?: SetDataOptions
-) => {
-  queryClient.setQueryData<GroupMembersSelectData>(
-    groupMembersQueryKey(account, topic),
-    members,
-    options
+  args: IGroupMembersArgs
+): GroupMembersSelectData | undefined => {
+  const { account, topic } = args;
+  return queryClient.getQueryData(
+    getGroupMembersQueryOptions({ account, topic }).queryKey
   );
 };
 
-export const cancelGroupMembersQuery = async (
-  account: string,
-  topic: ConversationTopic
+export const setGroupMembersQueryData = (
+  args: IGroupMembersArgs & {
+    members: GroupMembersSelectData;
+  }
 ) => {
+  const { account, topic, members } = args;
+  queryClient.setQueryData(
+    getGroupMembersQueryOptions({ account, topic }).queryKey,
+    members
+  );
+};
+
+export const cancelGroupMembersQuery = async (args: IGroupMembersArgs) => {
+  const { account, topic } = args;
   return queryClient.cancelQueries({
-    queryKey: groupMembersQueryKey(account, topic),
+    queryKey: getGroupMembersQueryOptions({ account, topic }).queryKey,
   });
 };
 
-export const invalidateGroupMembersQuery = (
-  account: string,
-  topic: ConversationTopic
-) => {
+export const invalidateGroupMembersQuery = (args: IGroupMembersArgs) => {
+  const { account, topic } = args;
   return queryClient.invalidateQueries({
-    queryKey: groupMembersQueryKey(account, topic),
+    queryKey: getGroupMembersQueryOptions({ account, topic }).queryKey,
   });
 };
 
-export function refetchGroupMembersQuery(
-  account: string,
-  topic: ConversationTopic
-) {
+export function refetchGroupMembersQuery(args: IGroupMembersArgs) {
+  const { account, topic } = args;
   return queryClient.refetchQueries({
-    queryKey: groupMembersQueryKey(account, topic),
+    queryKey: getGroupMembersQueryOptions({ account, topic }).queryKey,
   });
+}
+
+export async function ensureGroupMembersQueryData(
+  args: IGroupMembersArgsWithCaller
+) {
+  const { account, topic, caller } = args;
+  return queryClient.ensureQueryData(
+    getGroupMembersQueryOptions({
+      account,
+      topic,
+      caller,
+    })
+  );
 }

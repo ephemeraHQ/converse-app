@@ -1,4 +1,4 @@
-import { getConversationsQueryOptions } from "@/queries/use-conversations-query";
+import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
 
@@ -6,7 +6,7 @@ export const useAllowedConversationsCount = () => {
   const account = useCurrentAccount();
 
   const { data: count, isLoading } = useQuery({
-    ...getConversationsQueryOptions({
+    ...getAllowedConsentConversationsQueryOptions({
       account: account!,
       caller: "useConversationsCount",
     }),

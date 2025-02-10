@@ -32,9 +32,12 @@ export const useRevokeAdminMutation = (
       if (!topic) {
         return;
       }
-      await cancelGroupMembersQuery(account, topic);
+      await cancelGroupMembersQuery({ account, topic });
 
-      const previousGroupMembers = getGroupMembersQueryData(account, topic);
+      const previousGroupMembers = getGroupMembersQueryData({
+        account,
+        topic,
+      });
       if (!previousGroupMembers) {
         return;
       }
@@ -43,7 +46,7 @@ export const useRevokeAdminMutation = (
         return;
       }
       newMembers.byId[inboxId].permissionLevel = "member";
-      setGroupMembersQueryData(account, topic, newMembers);
+      setGroupMembersQueryData({ account, topic, members: newMembers });
 
       return { previousGroupMembers };
     },
@@ -55,7 +58,11 @@ export const useRevokeAdminMutation = (
       if (!topic) {
         return;
       }
-      setGroupMembersQueryData(account, topic, context.previousGroupMembers);
+      setGroupMembersQueryData({
+        account,
+        topic,
+        members: context.previousGroupMembers,
+      });
     },
     onSuccess: (data, variables, context) => {
       logger.debug("onSuccess useRevokeAdminMutation");

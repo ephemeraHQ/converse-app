@@ -1,6 +1,6 @@
 import { isConversationDenied } from "@/features/conversation/utils/is-conversation-denied";
 import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
-import { useConversationsQuery } from "@/queries/use-conversations-query";
+import { useAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -8,7 +8,7 @@ import { useMemo } from "react";
 export const useBlockedConversationsForCurrentAccount = () => {
   const currentAccount = useCurrentAccount();
 
-  const { data } = useConversationsQuery({
+  const { data } = useAllowedConsentConversationsQuery({
     account: currentAccount!,
     caller: "useBlockedConversationsForCurrentAccount",
   });

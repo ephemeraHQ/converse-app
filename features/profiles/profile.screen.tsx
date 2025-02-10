@@ -12,8 +12,6 @@ import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { SettingsList } from "@/design-system/settings-list/settings-list";
-import { updateConsentForAddressesForAccount } from "@/features/consent/update-consent-for-addresses-for-account";
-import { useNotificationsPermission } from "@/features/notifications/hooks/use-notifications-permission";
 import { SocialNames } from "@/features/profiles/components/social-names";
 import { formatConverseUsername } from "@/features/profiles/utils/format-converse-username";
 import { useDisconnectActionSheet } from "@/hooks/useDisconnectActionSheet";
@@ -26,6 +24,7 @@ import { useHeader } from "@/navigation/use-header";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Haptics } from "@/utils/haptics";
 import { navigate } from "@/utils/navigation";
+import { updateConsentForAddressesForAccount } from "@/utils/xmtpRN/xmtp-consent/update-consent-for-addresses-for-account";
 import { useRoute, useRouter } from "@navigation/useNavigation";
 import { StackActions } from "@react-navigation/native";
 import React, { useCallback, useState, useRef } from "react";
@@ -50,8 +49,6 @@ export function ProfileScreen() {
   const isMyProfile = peerAddress.toLowerCase() === userAddress?.toLowerCase();
   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
   const { data: socials } = useProfileSocials(peerAddress);
-  const { notificationsPermissionStatus, requestPermission } =
-    useNotificationsPermission();
 
   const userName = usePreferredUsername(peerAddress);
   const displayName = usePreferredName(peerAddress);
@@ -332,14 +329,6 @@ export function ProfileScreen() {
             <SettingsList
               editMode={editMode}
               rows={[
-                ...(notificationsPermissionStatus !== "granted"
-                  ? [
-                      {
-                        label: translate("userProfile.settings.notifications"),
-                        onPress: requestPermission,
-                      },
-                    ]
-                  : []),
                 {
                   label: translate("userProfile.settings.archive"),
                   onPress: () => {

@@ -1,6 +1,8 @@
 import { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
 
 const V3_TOPIC_PREFIX = "/xmtp/mls/1/g-";
+export const prefixStringWithV3TopicPrefix = (str: string) =>
+  `${V3_TOPIC_PREFIX}${str}`;
 
 export const getV3IdFromTopic = (topic: ConversationTopic): ConversationId => {
   return topic

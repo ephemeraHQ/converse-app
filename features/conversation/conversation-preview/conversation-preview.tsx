@@ -3,7 +3,7 @@ import { Center } from "@/design-system/Center";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { EmptyState } from "@/design-system/empty-state";
-import { Loader } from "@/design-system/loader";
+import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
@@ -12,8 +12,8 @@ import { MessageContextStoreProvider } from "@/features/conversation/conversatio
 import { useMessageHasReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { conversationListDefaultProps } from "@/features/conversation/conversation-messages-list";
 import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
-import { useConversationMessagesQuery } from "@/queries/use-conversation-messages-query";
-import { useConversationQuery } from "@/queries/useConversationQuery";
+import { useConversationMessagesQuery } from "@/queries/conversation-messages-query";
+import { useConversationQuery } from "@/queries/conversation-query";
 import { $globalStyles } from "@/theme/styles";
 import type { ConversationTopic, DecodedMessage } from "@xmtp/react-native-sdk";
 import React, { memo } from "react";
@@ -46,7 +46,7 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
     <VStack style={$globalStyles.flex1}>
       {isLoading ? (
         <Center style={$globalStyles.flex1}>
-          <Loader />
+          <ActivityIndicator />
         </Center>
       ) : !conversation ? (
         <Center style={$globalStyles.flex1}>
@@ -60,10 +60,7 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
           />
         </Center>
       ) : (
-        <ConversationStoreProvider
-          topic={topic}
-          conversationId={conversation.id}
-        >
+        <ConversationStoreProvider topic={topic}>
           {/* Using basic Flatlist instead of the Animated one to try to fix the context menu crashes https://github.com/dominicstop/react-native-ios-context-menu/issues/70 */}
           <FlatList
             {...conversationListDefaultProps}

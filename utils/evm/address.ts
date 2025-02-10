@@ -1,12 +1,12 @@
 import {
   resolveEnsName,
-  resolveUnsDomain,
   resolveFarcasterUsername,
+  resolveUnsDomain,
 } from "@/utils/api/profiles";
-import { getLensOwner } from "@search/utils/lens";
+import { captureError } from "@/utils/capture-error";
 import { isUNSAddress } from "@utils/uns";
+import axios from "axios";
 import { isAddress } from "ethers/lib/utils";
-
 import { config } from "../../config";
 
 export const isSupportedPeer = (peer: string) => {
@@ -56,4 +56,21 @@ export const getAddressForPeer = async (peer: string) => {
 
 export function getCleanEthAddress(address: string): string {
   return address.toLowerCase();
+}
+
+async function getLensOwner(handle: string) {
+  try {
+    const { data } = await axios.post(`https://${config.lensApiDomain}/`, {
+      operationName: "Profile",
+      query:
+        "query Profile($handle: Handle) {\n  profile(request: {handle: $handle}) {\n    ownedBy\n  }\n}\n",
+      variables: {
+        handle,
+      },
+    });
+    return data.data?.profile?.ownedBy || null;
+  } catch (e) {
+    captureError(e);
+  }
+  return null;
 }

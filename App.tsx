@@ -1,12 +1,9 @@
-// Keep this at the top
-import "./polyfills";
-
-import * as Privy from "@privy-io/expo";
+import { PrivyProvider } from "@privy-io/expo";
 
 // This is a requirement for Privy to work, does not make any sense
 // To test run yarn start --no-dev --minify
-const PrivyProvider = Privy.PrivyProvider;
 
+import { setupStreamingSubscriptions } from "@/features/streams/streams";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import DebugButton from "@components/DebugButton";
 import { Snackbars } from "@components/Snackbar/Snackbars";
@@ -40,35 +37,37 @@ import {
   configureReanimatedLogger,
 } from "react-native-reanimated";
 import { ThirdwebProvider } from "thirdweb/react";
-import { base } from "viem/chains";
 import { config } from "./config";
 import {
   TEMPORARY_ACCOUNT_NAME,
   useAccountsStore,
 } from "./data/store/accountsStore";
 import { setAuthStatus } from "./data/store/authStore";
-import "./features/notifications/utils";
 import Main from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
-import { privySecureStorage } from "./utils/keychain/helpers";
 import { initSentry } from "./utils/sentry";
 import { saveApiURI } from "./utils/sharedData";
-import "./utils/splash/splash";
-import { setupStreamingSubscriptions } from "@/features/streams/streams";
-import { setupTopicNotificationsSubscriptions } from "@/features/notifications/utils/accountTopicSubscription";
+import { preventSplashScreenAutoHide } from "./utils/splash/splash";
+
+preventSplashScreenAutoHide();
 
 LogBox.ignoreLogs([
   "Privy: Expected status code 200, received 400", // Privy
   "Error destroying session", // Privy
   'event="noNetwork', // ethers
   "[Reanimated] Reading from `value` during component render. Please ensure that you do not access the `value` property or use `get` method of a shared value while React is rendering a component.",
-  "Attempted to import the module",
+  "Attempted to import the module", // General module import warnings
+  'Attempted to import the module "/Users', // More specific module import warnings
   "Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API",
   "Couldn't find real values for `KeyboardContext`. Please make sure you're inside of `KeyboardProvider` - otherwise functionality of `react-native-keyboard-controller` will not work. [Component Stack]",
   "sync worker error storage error: Pool needs to  reconnect before use",
   "[Converse.debug.dylib] sync worker error storage error: Pool needs to  reconnect before use",
   "Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API.",
 ]);
+
+if (__DEV__) {
+  require("./ReactotronConfig.ts");
+}
 
 // This is the default configuration
 configureReanimatedLogger({
@@ -100,7 +99,6 @@ const App = () => {
   useEffect(() => {
     setupAppAttest();
     setupStreamingSubscriptions();
-    setupTopicNotificationsSubscriptions();
   }, []);
 
   useCoinbaseWalletListener(true, coinbaseUrl);
@@ -174,8 +172,8 @@ export default function AppWithProviders() {
       <PrivyProvider
         appId={config.privy.appId}
         clientId={config.privy.clientId}
-        storage={privySecureStorage}
-        supportedChains={[base]}
+        // storage={privySecureStorage} // Temporary removed until we see if really needed
+        // supportedChains={[base]} // Temporary removed until we see if really needed
       >
         <SmartWalletsProvider>
           <ThirdwebProvider>

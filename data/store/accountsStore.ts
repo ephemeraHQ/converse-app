@@ -164,7 +164,9 @@ export const useCurrentAccount = () => {
 
 export function getCurrentAccount() {
   const currentAccount = useAccountsStore.getState().currentAccount;
-  return currentAccount === TEMPORARY_ACCOUNT_NAME ? undefined : currentAccount;
+  return currentAccount === TEMPORARY_ACCOUNT_NAME
+    ? undefined
+    : currentAccount.toLowerCase();
 }
 
 const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(

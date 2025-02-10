@@ -3,7 +3,7 @@ index b3a5614..4c7c9b3 100644
 --- a/node_modules/react-native-fetch-api/src/Fetch.js
 +++ b/node_modules/react-native-fetch-api/src/Fetch.js
 @@ -31,7 +31,7 @@ function createStream(cancel) {
- 
+
  class Fetch {
      _nativeNetworkSubscriptions = new Set();
 -    _nativeResponseType = "blob";

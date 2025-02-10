@@ -1,4 +1,8 @@
 import { Pressable } from "@/design-system/Pressable";
+import {
+  ContextMenuView,
+  IContextMenuViewProps,
+} from "@/design-system/context-menu/context-menu";
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import logger from "@/utils/logger";
@@ -8,24 +12,19 @@ import { Text } from "@design-system/Text";
 import { AnimatedVStack } from "@design-system/VStack";
 import React, { FC, useCallback, useRef } from "react";
 import { TextStyle, ViewStyle } from "react-native";
-import {
-  ContextMenuView,
-  ContextMenuViewProps,
-} from "react-native-ios-context-menu";
 
 type IConversationListPinnedConversationProps = {
   avatarComponent: React.ReactNode;
   onPress: () => void;
   showUnread: boolean;
   title: string;
-  contextMenuProps: ContextMenuViewProps; // Need this here because we want the context menu animation only to be around the avatar
+  contextMenuProps: Omit<IContextMenuViewProps, "children">; // Need this here because we want the context menu animation only to be around the avatar
 };
 
 export const ConversationListPinnedConversation: FC<
   IConversationListPinnedConversationProps
 > = ({ avatarComponent, onPress, showUnread, title, contextMenuProps }) => {
   const { themed, theme } = useAppTheme();
-  const contextMenuRef = useRef<ContextMenuView>(null);
 
   const menuWillShowRef = useRef(false);
 
@@ -53,7 +52,6 @@ export const ConversationListPinnedConversation: FC<
       ]}
     >
       <ContextMenuView
-        ref={contextMenuRef}
         hitSlop={theme.spacing.xs}
         {...contextMenuProps}
         style={[

@@ -1,4 +1,6 @@
 import { AnimatedHStack } from "@/design-system/HStack";
+import { useAppTheme } from "@/theme/useAppTheme";
+import { debugBorder } from "@/utils/debug-style";
 import { Haptics } from "@/utils/haptics";
 import { memo } from "react";
 import { View } from "react-native";
@@ -19,9 +21,7 @@ import {
 } from "react-native-reanimated";
 
 // Super fast because it's better UX to have a quick response
-// Also, we can't use onBegin to start the scaling as soon as the gesture starts because we also have a tap handler
-// So for example if we had onBegin, and the user just tapped, it would still start the scaling animation which is weird
-const MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION = 400;
+const MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION = 150;
 
 const MESSAGE_GESTURE_LONG_PRESS_SCALE = 1.025;
 
@@ -47,6 +47,8 @@ export const ConversationMessageGestures = memo(
   function ConversationMessageGestures(args: IMessageGesturesProps) {
     const { children, onTap, onDoubleTap, onLongPress } = args;
 
+    const { theme } = useAppTheme();
+
     const containerRef = useAnimatedRef<View>();
 
     const scaleAV = useSharedValue(1);
@@ -54,27 +56,28 @@ export const ConversationMessageGestures = memo(
     const tap = Gesture.Tap()
       .onEnd(() => {
         if (onTap) {
-          onTap();
+          runOnJS(onTap)();
         }
       })
-      .runOnJS(true);
+      .hitSlop(theme.spacing.xs);
 
     const doubleTap = Gesture.Tap()
       .numberOfTaps(2)
       .onEnd(() => {
         if (onDoubleTap) {
-          onDoubleTap();
+          runOnJS(onDoubleTap)();
         }
       })
-      .runOnJS(true);
+      .hitSlop(theme.spacing.xs);
 
     const longPress = Gesture.LongPress()
+      // We can't use onBegin to start the scaling as soon as the gesture starts because we also have a tap handler
+      // So for example if we had onBegin, and the user just tapped, it would still start the scaling animation which is weird
       .onStart((e) => {
         Haptics.softImpactAsyncAnimated();
-        scaleAV.value = withTiming(MESSAGE_GESTURE_LONG_PRESS_SCALE, {
-          duration: MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION * 2,
-          easing: Easing.bezier(0.31, 0.04, 0.03, 1.04),
-        });
+
+        scaleAV.value = theme.animation.appleContextMenu.start;
+
         const measured = measure(containerRef);
         if (!measured) return;
         if (onLongPress) {
@@ -82,14 +85,13 @@ export const ConversationMessageGestures = memo(
         }
       })
       .onFinalize(() => {
-        scaleAV.value = withTiming(1, {
-          duration: MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION * 2,
-          easing: Easing.bezier(0.82, 0.06, 0.42, 1.01),
-        });
+        scaleAV.value = theme.animation.appleContextMenu.end;
       })
-      .minDuration(MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION);
+      .minDuration(MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION)
+      .hitSlop(theme.spacing.xs);
 
-    const composed = Gesture.Exclusive(doubleTap, tap, longPress);
+    const tapGestures = Gesture.Exclusive(doubleTap, tap);
+    const composed = Gesture.Race(tapGestures, longPress);
 
     const animatedStyle = useAnimatedStyle(() => {
       return {

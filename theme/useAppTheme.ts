@@ -1,3 +1,5 @@
+import { ILoaderSize, loaderSize } from "@/theme/loader";
+import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { IAnimation, animation } from "@theme/animations";
 import { ILayout, layout } from "@theme/layout";
 import { IShadow, shadow } from "@theme/shadow";
@@ -10,7 +12,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { Appearance, Platform, StyleProp, useColorScheme } from "react-native";
+import { StyleProp, useColorScheme } from "react-native";
 import { IAvatarSize, avatarSize } from "./avatar";
 import { IBorderRadius, borderRadius } from "./border-radius";
 import { IBorderWidth, borderWidth } from "./borders";
@@ -20,9 +22,6 @@ import { IIconSize, iconSize } from "./icon";
 import { ISpacing, spacing } from "./spacing";
 import { Timing, timing } from "./timing";
 import { ITypography, typography } from "./typography";
-import { DarkTheme, DefaultTheme } from "@react-navigation/native";
-import logger from "@utils/logger";
-import { ILoaderSize, loaderSize } from "@/theme/loader";
 
 export type ThemeContexts = "light" | "dark" | undefined;
 
@@ -194,19 +193,6 @@ export const useAppTheme = (): UseAppThemeValue => {
     const newTheme = themeContext === "dark" ? "light" : "dark";
     setThemeContextOverride(newTheme);
   }, [themeContext, setThemeContextOverride]);
-
-  // TODO: Remove after debugging is done
-  // Light/dark mode color scheme logging
-  useEffect(() => {
-    if (!__DEV__) {
-      logger.debug("=== Theme Debug ===", {
-        systemColorScheme: Appearance.getColorScheme(),
-        platformVersion: Platform.Version,
-        themeContext: themeContext,
-        isDarkTheme: themeVariant.isDark,
-      });
-    }
-  }, [themeContext, themeVariant]);
 
   const themed = useCallback(
     <T>(

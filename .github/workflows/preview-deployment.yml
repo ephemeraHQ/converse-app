@@ -1,0 +1,232 @@
+name: Preview Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_native_build:
+        description: "Force native build"
+        type: boolean
+        default: true
+        required: true
+
+  push:
+    branches:
+      - main
+    paths:
+      - "**.ts"
+      - "**.tsx"
+      - "assets/**"
+      - "package.json"
+      - "app.config.ts"
+      - "yarn.lock"
+      - "i18n/**"
+      - "patches/**"
+      - "index.js"
+      - "google-services/**"
+
+# Ensure only one workflow runs at a time
+concurrency:
+  group: "deployment"
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      has_native_changes: ${{ steps.check-changes.outputs.has_native_changes }}
+      commit_message: ${{ steps.commit_msg.outputs.message }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          token: ${{ secrets.PAT_GITHUB }}
+
+      - name: Get Commit Message
+        id: commit_msg
+        run: |
+          # Escape the commit message and store it in a variable
+          MSG=$(git log -1 --pretty=%B)
+          # Properly escape the message for GitHub Actions output
+          MSG="${MSG//'%'/'%25'}"
+          MSG="${MSG//$'\n'/'%0A'}"
+          MSG="${MSG//$'\r'/'%0D'}"
+          echo "message=$MSG" >> $GITHUB_OUTPUT
+
+      - name: Check for native changes
+        id: check-changes
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force_native_build }}" == "true" ]]; then
+            echo "has_native_changes=true" >> $GITHUB_OUTPUT
+          elif git diff --name-only HEAD^ HEAD | grep -E "package.json|app.config.ts|patches/|google-services/|yarn.lock"; then
+            echo "has_native_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_native_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+  bump-version:
+    needs: check-changes
+    if: needs.check-changes.outputs.has_native_changes == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.get_version.outputs.new_version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Increment version
+        run: |
+          npm version patch --no-git-tag-version -m "chore: increment patch version [skip ci]"
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          git add package.json
+          git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]"
+
+      - name: Get new version
+        id: get_version
+        run: echo "new_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Push version bump
+        run: |
+          git push https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main
+
+  ios-build:
+    needs: [check-changes, bump-version]
+    if: needs.check-changes.outputs.has_native_changes == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
+          ref: main
+          fetch-depth: 0
+
+      # To get the incremented version number
+      - name: Pull latest changes
+        run: git pull origin main
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+        env:
+          SKIP_YARN_COREPACK_CHECK: "1"
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          packager: yarn
+          eas-cache: true
+          patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
+
+      - name: Build and submit to store
+        run: |
+          eas build --platform ios --profile preview --non-interactive --auto-submit
+
+  android-build:
+    needs: [check-changes, bump-version]
+    if: needs.check-changes.outputs.has_native_changes == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
+          ref: main
+          fetch-depth: 0
+
+      # To get the incremented version number
+      - name: Pull latest changes
+        run: git pull origin main
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+        env:
+          SKIP_YARN_COREPACK_CHECK: "1"
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          packager: yarn
+          eas-cache: true
+          patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
+
+      - name: Build and submit to store
+        run: |
+          eas build --platform android --profile preview --non-interactive --auto-submit
+
+  ota-update:
+    needs: check-changes
+    if: needs.check-changes.outputs.has_native_changes == 'false'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+        env:
+          SKIP_YARN_COREPACK_CHECK: "1"
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          packager: yarn
+          eas-cache: true
+          patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
+
+      - name: Run EAS Update
+        run: |
+          eas update --auto --channel=preview --message "${{ needs.check-changes.outputs.commit_message }}" --non-interactive
+
+      - name: Upload Sourcemaps to Sentry
+        run: |
+          # Seems to be the only way to get the token
+          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
+          npx sentry-expo-upload-sourcemaps dist

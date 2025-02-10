@@ -1,39 +1,45 @@
-import { IProfileSocials } from "@/features/profiles/profile-types";
+import { getProfileSocialsQueryKey } from "@/queries/QueryKeys";
+import { Optional } from "@/types/general";
 import { getProfilesForInboxIds } from "@/utils/api/profiles";
 import {
-  QueryKey,
-  queryOptions,
-  useQueries,
+  UseQueryOptions,
+  queryOptions as reactQueryOptions,
   useQuery,
 } from "@tanstack/react-query";
+import { InboxId } from "@xmtp/react-native-sdk";
 import {
   create,
   indexedResolver,
   windowedFiniteBatchScheduler,
 } from "@yornaath/batshit";
-
-import mmkv, { reactQueryPersister } from "@/utils/mmkv";
-import { InboxId } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
 
-const profileSocialsQueryKey = (
-  account: string,
-  peerAddress: string
-): QueryKey => [
-  "inboxProfileSocials",
-  account?.toLowerCase(),
-  peerAddress?.toLowerCase(),
-];
+type IArgs = {
+  inboxId: InboxId;
+};
 
-export const inboxProfileSocialsQueryStorageKey = (
-  account: string,
-  inboxId: InboxId
-) => profileSocialsQueryKey(account, inboxId).join("-");
+type IArgsWithCaller = IArgs & {
+  caller: string;
+};
 
-const profileSocials = create({
+type IArgsWithCallerAndQueryOptions = IArgsWithCaller & {
+  queryOptions?: Omit<
+    UseQueryOptions<
+      IInboxProfileSocialsQueryData,
+      Error,
+      IInboxProfileSocialsQueryData
+    >,
+    "queryKey" | "queryFn"
+  >;
+};
+
+type IInboxProfileSocialsQueryData = Awaited<
+  ReturnType<(typeof inboxProfileSocialsBatchFetcher)["fetch"]>
+>;
+
+const inboxProfileSocialsBatchFetcher = create({
   fetcher: async (inboxIds: InboxId[]) => {
-    const data = await getProfilesForInboxIds({ inboxIds });
-    return data;
+    return getProfilesForInboxIds({ inboxIds });
   },
   resolver: indexedResolver(),
   scheduler: windowedFiniteBatchScheduler({
@@ -42,110 +48,66 @@ const profileSocials = create({
   }),
 });
 
-const fetchInboxProfileSocials = async (
-  account: string,
-  inboxId: InboxId
-): Promise<IProfileSocials[] | null> => {
-  const data = await profileSocials.fetch(inboxId);
-
-  const key = inboxProfileSocialsQueryStorageKey(account, inboxId);
-
-  // Set in mmkv to use for notifications in Swift
-  mmkv.delete(key);
-  if (data) {
-    mmkv.set(key, JSON.stringify(data));
+const fetchInboxProfileSocials = async ({ inboxId }: IArgs) => {
+  if (!inboxId) {
+    throw new Error("Inbox ID is required");
   }
-
-  return data;
+  return inboxProfileSocialsBatchFetcher.fetch(inboxId);
 };
 
-const inboxProfileSocialsQueryConfig = (
-  account: string,
-  inboxId: InboxId | undefined
-) =>
-  queryOptions({
-    queryKey: profileSocialsQueryKey(account, inboxId!),
-    queryFn: () => fetchInboxProfileSocials(account, inboxId!),
-    enabled: !!account && !!inboxId,
-    persister: reactQueryPersister,
-    initialData: (): IProfileSocials[] | null | undefined => {
-      if (!account || !inboxId) {
-        return undefined;
-      }
-      if (mmkv.contains(inboxProfileSocialsQueryStorageKey(account, inboxId))) {
-        const data = JSON.parse(
-          mmkv.getString(inboxProfileSocialsQueryStorageKey(account, inboxId))!
-        ) as IProfileSocials[];
-        return data;
-      }
+export const getInboxProfileSocialsQueryConfig = ({
+  inboxId,
+  caller,
+  queryOptions = {},
+}: Optional<IArgsWithCallerAndQueryOptions, "caller">) => {
+  return reactQueryOptions({
+    queryKey: getProfileSocialsQueryKey({ inboxId }),
+    queryFn: () => fetchInboxProfileSocials({ inboxId }),
+    // persister: reactQueryPersister,
+    gcTime: 1000 * 60 * 60 * 24 * 30, // 30 days because this doesn't often change
+    ...queryOptions,
+    meta: {
+      ...queryOptions.meta,
+      caller,
     },
-    initialDataUpdatedAt: 0,
-    // 30 days because it doens't change often
-    gcTime: 1000 * 60 * 60 * 24 * 30,
-  });
-
-export const useInboxProfileSocialsQuery = (
-  account: string,
-  inboxId: InboxId | undefined
-) => {
-  return useQuery(inboxProfileSocialsQueryConfig(account, inboxId));
-};
-
-export const useInboxProfileSocialsQueries = (
-  account: string,
-  inboxIds: InboxId[]
-) => {
-  return useQueries({
-    queries: inboxIds.map((inboxId) =>
-      inboxProfileSocialsQueryConfig(account, inboxId)
-    ),
+    enabled: !!inboxId && (queryOptions.enabled ?? true),
   });
 };
 
-export const fetchInboxProfileSocialsQuery = (
-  account: string,
-  inboxId: InboxId
-) => {
+export const useInboxProfileSocialsQuery = ({
+  inboxId,
+  caller,
+}: IArgsWithCaller) => {
+  return useQuery(getInboxProfileSocialsQueryConfig({ inboxId, caller }));
+};
+
+export const fetchInboxProfileSocialsQuery = ({
+  inboxId,
+  caller,
+}: IArgsWithCaller) => {
   return queryClient.fetchQuery(
-    inboxProfileSocialsQueryConfig(account, inboxId)
+    getInboxProfileSocialsQueryConfig({ inboxId, caller })
   );
 };
 
-export const setInboxProfileSocialsQueryData = (
-  account: string,
-  inboxId: InboxId,
-  data: IProfileSocials,
-  updatedAt?: number
-) => {
-  return queryClient.setQueryData(
-    inboxProfileSocialsQueryConfig(account, inboxId).queryKey,
-    (oldData) => {
-      if (!oldData) return undefined;
-      return {
-        ...oldData,
-        updatedAt,
-      };
-    },
-    { updatedAt }
+export const getInboxProfileSocialsQueryData = ({ inboxId }: IArgs) => {
+  return queryClient.getQueryData(
+    getInboxProfileSocialsQueryConfig({ inboxId }).queryKey
   );
 };
 
-export const getInboxProfileSocialsQueryData = (
-  account: string,
-  inboxId: InboxId
-): IProfileSocials[] | null => {
-  return (
-    queryClient.getQueryData(
-      inboxProfileSocialsQueryConfig(account, inboxId).queryKey
-    ) ?? null
-  );
-};
-
-export const invalidateInboxProfileSocialsQuery = (
-  account: string,
-  inboxId: InboxId
-) => {
+export const invalidateInboxProfileSocialsQuery = ({ inboxId }: IArgs) => {
   queryClient.invalidateQueries({
-    queryKey: inboxProfileSocialsQueryConfig(account, inboxId).queryKey,
+    queryKey: getInboxProfileSocialsQueryConfig({ inboxId }).queryKey,
   });
+};
+
+export const ensureInboxProfileSocialsQueryData = ({
+  inboxId,
+  caller,
+  queryOptions,
+}: IArgsWithCallerAndQueryOptions) => {
+  return queryClient.ensureQueryData(
+    getInboxProfileSocialsQueryConfig({ inboxId, caller, queryOptions })
+  );
 };

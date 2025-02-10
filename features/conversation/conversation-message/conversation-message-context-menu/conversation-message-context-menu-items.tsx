@@ -43,8 +43,6 @@ export const MessageContextMenuItems = memo(
           ],
         };
 
-        console.log("originY:", originY);
-
         const initialValues = {
           originX: originX - MENU_ITEMS_WIDTH / 2,
           originY: originY,

@@ -1,17 +1,17 @@
 import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
-import { useConversationMessagesQuery } from "@/queries/use-conversation-messages-query";
+import { useConversationMessagesQuery } from "@/queries/conversation-messages-query";
 import { useCurrentAccount } from "@data/store/accountsStore";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
 
-export function useConversationMessageById({
-  messageId,
-  conversationTopic,
-}: {
+export function useConversationMessageById(args: {
   messageId: MessageId;
   conversationTopic: ConversationTopic;
 }) {
+  const { messageId, conversationTopic } = args;
+
   const currentAccount = useCurrentAccount()!;
+
   const { data: messages } = useConversationMessagesQuery({
     account: currentAccount,
     topic: conversationTopic,

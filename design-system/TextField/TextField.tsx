@@ -5,8 +5,7 @@ import React, {
   useImperativeHandle,
   useRef,
 } from "react";
-import { TextInput, TextStyle, ViewStyle } from "react-native";
-
+import { TextInput as RNTextInput, TextStyle, ViewStyle } from "react-native";
 import { translate } from "@i18n";
 import { $globalStyles } from "@theme/styles";
 import { ThemedStyle, ThemedStyleArray, useAppTheme } from "@theme/useAppTheme";
@@ -16,10 +15,11 @@ import { textPresets } from "../Text/Text.presets";
 import { TouchableOpacity } from "../TouchableOpacity";
 import { VStack } from "../VStack";
 import { TextFieldProps } from "./TextField.props";
+import { TextInput } from "@/design-system/text-input";
 
 export const TextField = forwardRef(function TextField(
   props: TextFieldProps,
-  ref: Ref<TextInput>
+  ref: Ref<RNTextInput>
 ) {
   const {
     labelTx,
@@ -41,7 +41,7 @@ export const TextField = forwardRef(function TextField(
     inputWrapperStyle: $inputWrapperStyleOverride,
     ...TextInputProps
   } = props;
-  const input = useRef<TextInput>(null);
+  const input = useRef<RNTextInput>(null);
 
   const { themed, theme } = useAppTheme();
 
@@ -73,7 +73,6 @@ export const TextField = forwardRef(function TextField(
     disabled && { color: theme.colors.text.tertiary },
     TextInputProps.multiline && { height: "auto" },
     $inputStyleOverride,
-    themed(textPresets["body"]),
   ];
 
   const $helperStyles = [
@@ -92,7 +91,7 @@ export const TextField = forwardRef(function TextField(
     input.current?.focus();
   }, [disabled]);
 
-  useImperativeHandle(ref, () => input.current as TextInput);
+  useImperativeHandle(ref, () => input.current as RNTextInput);
 
   return (
     <TouchableOpacity
