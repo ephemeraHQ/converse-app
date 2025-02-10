@@ -1,4 +1,5 @@
-import { GroupAvatarMembers } from "@/components/group-avatar";
+import { GroupAvatar } from "@/components/group-avatar";
+import { Center } from "@/design-system/Center";
 import { useGroupMembersInfoForCurrentAccount } from "@/hooks/use-group-members-info-for-current-account";
 import Button from "@components/Button/Button";
 import { useCurrentAccount } from "@data/store/accountsStore";
@@ -70,10 +71,9 @@ export const GroupScreenImage: FC<GroupScreenImageProps> = ({ topic }) => {
   return (
     <List.Section>
       <View style={{ alignItems: "center" }}>
-        <GroupAvatarMembers
-          members={groupMembersInfo}
-          style={{ marginBottom: 10, marginTop: 23 }}
-        />
+        <Center style={{ marginBottom: 10, marginTop: 23 }}>
+          <GroupAvatar groupTopic={topic} size="md" />
+        </Center>
         {canEditGroupImage && (
           <Button
             variant="text"

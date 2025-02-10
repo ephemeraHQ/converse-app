@@ -12,8 +12,7 @@ const defaultPermissionPolicySet: PermissionPolicySet = {
   updateGroupNamePolicy: "allow",
   updateGroupDescriptionPolicy: "allow",
   updateGroupImagePolicy: "allow",
-  updateGroupPinnedFrameUrlPolicy: "allow",
-  updateMessageExpirationPolicy: "allow",
+  updateMessageDisappearingPolicy: "allow",
 };
 
 export async function createXmtpGroup(args: {

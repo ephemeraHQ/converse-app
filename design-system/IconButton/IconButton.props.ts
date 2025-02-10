@@ -1,5 +1,5 @@
 // IconButton.props.ts
-import { IIconName } from "@design-system/Icon/Icon.types";
+import { IIconName, IIconProps } from "@design-system/Icon/Icon.types";
 import {
   PressableProps as RNPressableProps,
   StyleProp,
@@ -22,6 +22,11 @@ export type IIconButtonProps = {
    * This is useful if you're using a predefined set of icons.
    */
   iconName?: IIconName;
+
+  /**
+   * The weight of the icon.
+   */
+  iconWeight?: IIconProps["weight"];
 
   /**
    * The variant of the button.

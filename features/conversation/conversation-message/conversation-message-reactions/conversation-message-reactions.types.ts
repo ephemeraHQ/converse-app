@@ -1,3 +1,5 @@
+import { MessageId } from "@xmtp/react-native-sdk";
+
 /**
  * Aggregated reaction data including top emojis, total count, and detailed breakdown.
  */
@@ -6,6 +8,7 @@ export type RolledUpReactions = {
   userReacted: boolean;
   preview: ReactionPreview[];
   detailed: SortedReaction[];
+  messageId: MessageId;
 };
 
 /**

@@ -251,13 +251,14 @@ export const fr = {
   pending_count: "{{count}} en attente",
 
   // Requests
-  requests: "Demandes",
+  Requests: "Demandes",
+  "You might know": "Vous pourriez connaître",
+  "Hidden requests": "Demandes masquées",
+  // Requests (to migrate from keys to plain english keys)
   clear_all: "Tout effacer",
   clear_confirm:
     "Confirmez-vous ? Cela bloquera tous les comptes actuellement marqués comme demandes.",
   clearing: "Nettoyage",
-  you_might_know: "Vous pourriez connaître",
-  hidden_requests: "Demandes masquées",
   suggestion_text:
     "Sur la base de votre historique on-chain, nous vous proposons quelques suggestions de personnes que vous pourriez connaître.",
   no_suggestions_text:

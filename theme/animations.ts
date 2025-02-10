@@ -111,6 +111,11 @@ export const animation = {
     .stiffness(SICK_STIFFNESS)
     .damping(SICK_DAMPING),
 
+  reanimatedFadeInSpringSlow: FadeIn.springify()
+    .stiffness(SICK_STIFFNESS)
+    .damping(SICK_DAMPING)
+    .duration(timing.slow),
+
   reanimatedFadeOutSpring: FadeOut.springify()
     .stiffness(SICK_STIFFNESS)
     .damping(SICK_DAMPING),

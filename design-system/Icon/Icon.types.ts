@@ -92,11 +92,16 @@ export type IIconProps = RequireExactlyOne<{
    * @default 24
    */
   size?: number;
-
   /**
-   * @deprecated
-   * Weight property is no longer supported and will be removed in the next major version.
-   * @see Use different icon names for different weights instead.
+   * Weight of the icon
    */
-  weight?: string;
+  weight?:
+    | "ultralight"
+    | "light"
+    | "thin"
+    | "regular"
+    | "medium"
+    | "semibold"
+    | "bold"
+    | "heavy";
 };
