@@ -12,7 +12,7 @@ import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { SettingsList } from "@/design-system/settings-list/settings-list";
-import { SocialNames } from "@/features/profiles/components/social-names";
+import { FilteredSocialNames } from "@/features/profiles/components/filtered-social-names";
 import { formatConverseUsername } from "@/features/profiles/utils/format-converse-username";
 import { useDisconnectActionSheet } from "@/hooks/useDisconnectActionSheet";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
@@ -268,47 +268,7 @@ export function ProfileScreen() {
           />
         </VStack>
 
-        {socials &&
-          (() => {
-            // Filter out Converse usernames
-            const filteredUserNames = socials.userNames?.filter(
-              (u) => !formatConverseUsername(u.name)?.isConverseUsername
-            );
-
-            // Filter out .eth domains from unstoppable domains to avoid duplicates
-            const filteredUnstoppableDomains =
-              socials.unstoppableDomains?.filter(
-                (d) => d.domain && !d.domain.toLowerCase().endsWith(".eth")
-              );
-
-            // Only render if there are names to display after filtering
-            if (
-              (filteredUserNames?.length ?? 0) > 0 ||
-              (socials.ensNames?.length ?? 0) > 0 ||
-              (filteredUnstoppableDomains?.length ?? 0) > 0
-            ) {
-              return (
-                <VStack style={[themed($section), themed($borderTop)]}>
-                  <SocialNames
-                    socials={{
-                      userNames: filteredUserNames?.map((u) => ({
-                        name: u.name,
-                      })),
-                      ensNames: socials.ensNames?.map((e) => ({
-                        name: e.name,
-                      })),
-                      unstoppableDomains: filteredUnstoppableDomains?.map(
-                        (d) => ({
-                          name: d.domain,
-                        })
-                      ),
-                    }}
-                  />
-                </VStack>
-              );
-            }
-            return null;
-          })()}
+        {socials && <FilteredSocialNames socials={socials} />}
 
         {isMyProfile && (
           <VStack style={[themed($section), themed($borderTop)]}>

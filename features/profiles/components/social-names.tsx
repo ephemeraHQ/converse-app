@@ -21,6 +21,11 @@ type ISocialNamesProps = {
   };
 };
 
+/**
+ * Generic presentation component for displaying social names.
+ * Handles the rendering and interaction (copy to clipboard) of social names.
+ * Kept separate from filtering logic to maintain reusability in different contexts.
+ */
 export function SocialNames({ socials }: ISocialNamesProps) {
   const { theme, themed } = useAppTheme();
 
@@ -35,6 +40,7 @@ export function SocialNames({ socials }: ISocialNamesProps) {
   }
 
   const handleNamePress = (name: string) => {
+    // Copy name to clipboard
     Clipboard.setString(name);
     Alert.alert(translate("userProfile.copied"));
   };
