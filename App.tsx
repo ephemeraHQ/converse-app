@@ -7,6 +7,7 @@ import * as Clipboard from "expo-clipboard";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { DebugButton } from "@components/DebugButton";
 import {
+  AppState,
   LogBox,
   Platform,
   StyleSheet,
@@ -20,7 +21,7 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { focusManager, QueryClientProvider } from "@tanstack/react-query";
 import { useThemeProvider } from "@theme/useAppTheme";
 import { setupAppAttest } from "@utils/appCheck";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
@@ -42,6 +43,9 @@ import { saveApiURI } from "./utils/sharedData";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
 import { useInitializeMultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
+import { useAppStateHandlers } from "./hooks/useAppStateHandlers";
+import { useInstalledWallets } from "@/features/wallets/use-installed-wallets.hook";
+import logger from "./utils/logger";
 
 preventSplashScreenAutoHide();
 LogBox.ignoreLogs([
@@ -120,6 +124,14 @@ const App = () => {
       converseEventEmitter.off("showDebugMenu", showDebugMenu);
     };
   }, [showDebugMenu]);
+  useEffect(() => {
+    AppState.addEventListener("change", (state) => {
+      logger.debug("[App] AppState changed to", state);
+      focusManager.setFocused(state === "active");
+    });
+  }, []);
+
+  // useInstalledWallets();
 
   // For now we use persit with zustand to get the accounts when the app launch so here is okay to see if we're logged in or not
 

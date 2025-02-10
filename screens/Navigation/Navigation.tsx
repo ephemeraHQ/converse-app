@@ -28,7 +28,11 @@ import WebviewPreviewNav, {
 } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { SignupWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
-import { useCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import {
+  getSafeCurrentSender,
+  useAccountsStore,
+  useCurrentSender,
+} from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
 import { useLogout } from "@/utils/logout";
@@ -39,6 +43,7 @@ import { ConversationListScreen } from "@/features/conversation-list/conversatio
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen";
 import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
 import { ShareProfileNav } from "./ShareProfileNav";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -128,6 +133,21 @@ const FakeScreen = memo(function FakeScreen() {
 
 export function SignedInNavigation() {
   const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    async function stuff() {
+      const inboxClient = MultiInboxClient.instance.getInboxClientForAddress({
+        ethereumAddress: getSafeCurrentSender().ethereumAddress,
+      });
+
+      const state = await inboxClient.inboxState(true);
+      logger.debug(
+        `[SignedInNavigation] Inbox state: ${JSON.stringify(state, null, 2)}`
+      );
+    }
+
+    stuff();
+  }, []);
 
   return (
     <NativeStack.Navigator

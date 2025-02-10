@@ -6,7 +6,7 @@ import { VStack } from "@/design-system/VStack";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { useBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button } from "react-native";
+import { Button, Linking } from "react-native";
 import { base } from "viem/chains";
 import { Account, createWallet, WalletId } from "thirdweb/wallets";
 import { thirdwebClient } from "@/utils/thirdweb";
@@ -62,30 +62,44 @@ export function ConnectWalletBottomSheet({
             } when attempting to connect wallet ${walletType}`
           );
         }
-        const inboxClient = MultiInboxClient.instance.getInboxClientForAddress({
-          ethereumAddress: currentSender!.ethereumAddress,
-        })!;
+        const currentInboxClient =
+          MultiInboxClient.instance.getInboxClientForAddress({
+            ethereumAddress: currentSender!.ethereumAddress,
+          })!;
         const w = createWallet(walletType, options);
         const account = await w.connect({ client: thirdwebClient });
 
-        const signer: InboxSigner = {
-          getAddress: async () => account.address,
-          getChainId: () => base.id,
-          getBlockNumber: () => undefined,
-          walletType: () => "EOA",
-          signMessage: async (message: string) => {
-            const signature = await account.signMessage({ message });
-            return signature;
-          },
-        };
+        // check if is on xmtp already and branch
 
-        await inboxClient?.addAccount(signer);
+        const isOnXmtp = await currentInboxClient.canMessage([account.address]);
 
-        const socialData = ensureProfileSocialsQueryData(account.address);
-        logger.debug(
-          `[ConnectWalletBottomSheet] Social data for address ${account.address}:`,
-          JSON.stringify(socialData, null, 2)
-        );
+        if (isOnXmtp) {
+          alert(
+            `You are already on XMTP with address ${account.address}. We're going to handle this carefully according to https://xmtp-labs.slack.com/archives/C07NSHXK693/p1739215446331469?thread_ts=1739212558.484059&cid=C07NSHXK693.`
+          );
+          Linking.openURL(
+            "https://xmtp-labs.slack.com/archives/C07NSHXK693/p1739215446331469?thread_ts=1739212558.484059&cid=C07NSHXK693"
+          );
+        } else {
+          const signer: InboxSigner = {
+            getAddress: async () => account.address,
+            getChainId: () => base.id,
+            getBlockNumber: () => undefined,
+            walletType: () => "EOA",
+            signMessage: async (message: string) => {
+              const signature = await account.signMessage({ message });
+              return signature;
+            },
+          };
+
+          await currentInboxClient?.addAccount(signer);
+
+          const socialData = ensureProfileSocialsQueryData(account.address);
+          logger.debug(
+            `[ConnectWalletBottomSheet] Social data for address ${account.address}:`,
+            JSON.stringify(socialData, null, 2)
+          );
+        }
 
         return account;
       });

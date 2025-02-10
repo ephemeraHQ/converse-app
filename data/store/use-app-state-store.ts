@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { AppState, AppStateStatus } from "react-native";
+import { focusManager } from "@tanstack/react-query";
 
 type State = {
   currentState: AppStateStatus;
@@ -27,5 +28,6 @@ export const useAppState = create<State & { actions: Actions }>((set) => ({
 
 // Set up app state listener
 AppState.addEventListener("change", (nextAppState) => {
+  focusManager.setFocused(nextAppState === "active");
   useAppState.getState().actions.handleAppStateChange(nextAppState);
 });
