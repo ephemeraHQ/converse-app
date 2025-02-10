@@ -10,15 +10,10 @@ import { useAddPfp } from "@/features/onboarding/hooks/useAddPfp";
 import { useProfile } from "@/features/onboarding/hooks/useProfile";
 import { validateProfileName } from "../utils/validate-profile-name";
 import { useSaveProfileMutation } from "../hooks/use-save-profile-mutation";
-import { ProfileContactCardHandle } from "../profile-types";
-
-type IProfileContactCardProps = {
-  displayName: string;
-  userName?: string;
-  avatarUri?: string;
-  isMyProfile?: boolean;
-  editMode?: boolean;
-};
+import {
+  ProfileContactCardHandle,
+  IProfileContactCardProps,
+} from "../profile-types";
 
 /**
  * ProfileContactCard Container
@@ -33,8 +28,8 @@ export const ProfileContactCard = memo(
         displayName: initialDisplayName,
         userName,
         avatarUri,
-        isMyProfile,
-        editMode,
+        isMyProfile = false,
+        editMode = false,
       }: IProfileContactCardProps,
       ref
     ) {
@@ -142,6 +137,7 @@ export const ProfileContactCard = memo(
           editableDisplayName={localDisplayName}
           error={validationError}
           status={validationError ? "error" : undefined}
+          isLoading={isPending}
         />
       );
     }
