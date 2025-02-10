@@ -37,7 +37,6 @@ import {
 import { ThirdwebProvider } from "thirdweb/react";
 import { config } from "./config";
 import { Main } from "./screens/Main";
-import { registerBackgroundFetchTask } from "./utils/background";
 import { initSentry } from "./utils/sentry";
 import { saveApiURI } from "./utils/sharedData";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
@@ -107,10 +106,6 @@ const App = () => {
 
   const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
   useCoinbaseWalletListener(true, coinbaseUrl);
-
-  useEffect(() => {
-    registerBackgroundFetchTask();
-  }, []);
 
   const showDebugMenu = useCallback(() => {
     if (!debugRef.current || !(debugRef.current as any).showDebugMenu) {

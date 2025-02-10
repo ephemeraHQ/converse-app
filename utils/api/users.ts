@@ -30,11 +30,3 @@ export const saveUser = async (args: { address: string }) => {
     { headers: await getXmtpApiHeaders(address) }
   );
 };
-
-export const getSendersSpamScores = async (sendersAddresses: string[]) => {
-  if (!sendersAddresses || sendersAddresses.length === 0) return {};
-  const { data } = await api.post("/api/spam/senders/batch", {
-    sendersAddresses: sendersAddresses.filter((s) => !!s),
-  });
-  return data as { [senderAddress: string]: number };
-};
