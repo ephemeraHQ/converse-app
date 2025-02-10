@@ -1,4 +1,4 @@
-import { IProfileSocials } from "@/features/profiles/profile-types";
+import { IProfileSocials } from "@/features/profiles/profile.types";
 import { QueryKey, useQueries, useQuery } from "@tanstack/react-query";
 import { getProfilesForAddresses } from "@/utils/api/profiles";
 import {
@@ -70,10 +70,16 @@ const profileSocialsQueryConfig = (peerAddress: string) => ({
   // persister: reactQueryPersister,
 });
 
+/**
+ * @deprecated Use the one from inbox instead
+ */
 export const useProfileSocialsQuery = (peerAddress: string) => {
   return useQuery(profileSocialsQueryConfig(peerAddress));
 };
 
+/**
+ * @deprecated Use the one from inbox instead
+ */
 export const useProfileSocialsQueries = (peerAddresses: string[]) => {
   return useQueries({
     queries: peerAddresses.map((peerAddress) =>
@@ -82,6 +88,9 @@ export const useProfileSocialsQueries = (peerAddresses: string[]) => {
   });
 };
 
+/**
+ * @deprecated Use the one from inbox instead
+ */
 export const prefetchProfileSocialsQuery = (
   account: string,
   peerAddress: string
@@ -89,6 +98,9 @@ export const prefetchProfileSocialsQuery = (
   return queryClient.prefetchQuery(profileSocialsQueryConfig(peerAddress));
 };
 
+/**
+ * @deprecated Use the one from inbox instead
+ */
 export const fetchProfileSocialsQuery = (
   account: string,
   peerAddress: string
@@ -98,6 +110,9 @@ export const fetchProfileSocialsQuery = (
   );
 };
 
+/**
+ * @deprecated Use the one from inbox instead
+ */
 export const setProfileSocialsQueryData = (
   peerAddress: string,
   data: IProfileSocials,
@@ -112,6 +127,9 @@ export const setProfileSocialsQueryData = (
   );
 };
 
+/**
+ * @deprecated Use the one from inbox instead
+ */
 export const setProfileRecordSocialsQueryData = (
   record: Record<string, IProfileSocials>
 ) => {
@@ -120,12 +138,18 @@ export const setProfileRecordSocialsQueryData = (
   });
 };
 
+/**
+ * @deprecated Use the one from inbox instead
+ */
 export const getProfileSocialsQueryData = (peerAddress: string) => {
   return queryClient.getQueryData<ProfileSocialsData>(
     profileSocialsQueryConfig(peerAddress).queryKey
   );
 };
 
+/**
+ * @deprecated Use the one from inbox instead
+ */
 export const invalidateProfileSocialsQuery = (address: string) => {
   queryClient.invalidateQueries({
     queryKey: profileSocialsQueryKey(address),

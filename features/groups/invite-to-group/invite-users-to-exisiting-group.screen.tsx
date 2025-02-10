@@ -25,7 +25,7 @@ import TableView from "@/components/TableView/TableView";
 import { TableViewPicto } from "@/components/TableView/TableViewImage";
 import { config } from "@/config";
 import { currentAccount } from "@/data/store/accountsStore";
-import { IProfileSocials } from "@/features/profiles/profile-types";
+import { IProfileSocials } from "@/features/profiles/profile.types";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
 import { translate } from "@/i18n";
 import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";

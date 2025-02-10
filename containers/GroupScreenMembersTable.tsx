@@ -1,4 +1,4 @@
-import { IProfileSocials } from "@/features/profiles/profile-types";
+import { IProfileSocials } from "@/features/profiles/profile.types";
 import { getInboxProfileSocialsQueryConfig } from "@/queries/useInboxProfileSocialsQuery";
 import { captureErrorWithFriendlyToast } from "@/utils/capture-error";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
@@ -130,10 +130,11 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
               async (selectedIndex?: number) => {
                 switch (selectedIndex) {
                   case 0:
-                    navigate("Profile", {
-                      address: a.address,
-                      fromGroupTopic: topic,
-                    });
+                    // TODO
+                    // navigate("Profile", {
+                    //   address: a.address,
+                    //   fromGroupTopic: topic,
+                    // });
                     break;
                   case promoteSuperAdminIndex:
                     logger.debug("Promoting super admin...");
@@ -221,7 +222,6 @@ export const GroupScreenMembersTable: FC<GroupScreenMembersTableProps> = memo(
       revokeSuperAdmin,
       styles.adminText,
       styles.tableViewRight,
-      topic,
     ]);
 
     return (

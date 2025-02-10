@@ -6,6 +6,7 @@ import {
   IProfileSocialsZodSchema,
   IUnstoppableDomainZodSchema,
 } from "@/utils/api/profiles";
+import { InboxId } from "@xmtp/react-native-sdk";
 import { ReactNode } from "react";
 
 export type ILensHandle = ILensHandleZodSchema;
@@ -28,7 +29,8 @@ export type ProfileContactCardHandle = {
 
 export type ICardLayoutProps = {
   avatar: ReactNode;
-  content: ReactNode;
+  name: ReactNode;
+  additionalOptions?: ReactNode;
 };
 
 export type IEditableContactCardProps = {
@@ -64,9 +66,5 @@ export type IContactCardProps = {
 };
 
 export type IProfileContactCardProps = {
-  displayName: string;
-  userName: string | undefined;
-  avatarUri: string | undefined;
-  isMyProfile: boolean;
-  editMode: boolean;
+  inboxId: InboxId;
 };

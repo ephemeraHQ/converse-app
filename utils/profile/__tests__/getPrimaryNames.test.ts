@@ -1,5 +1,5 @@
 import { getPrimaryNames } from "../getPrimaryNames";
-import { type IProfileSocials } from "@/features/profiles/profile-types";
+import { type IProfileSocials } from "@/features/profiles/profile.types";
 
 describe("getPrimaryNames", () => {
   it("should return empty array when no socials provided", () => {

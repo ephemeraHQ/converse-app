@@ -13,7 +13,7 @@ import { OnboardingEditableAvatar } from "./onboarding-editable-avatar";
 import { translate } from "@/i18n";
 import { IconButton } from "@/design-system/IconButton/IconButton";
 import { Text } from "@/design-system/Text";
-import { AnimatedCardContainer } from "@/features/profiles/components/animated-card-container";
+import { ProfileContactCardContainer } from "@/features/profiles/components/profile-contact-card/profile-contact-card-container";
 
 type IOnboardingContactCardProps = {
   displayName?: string;
@@ -49,7 +49,7 @@ export const OnboardingCreateContactCard = memo(
     }, []);
 
     return (
-      <AnimatedCardContainer>
+      <ProfileContactCardContainer>
         <Pressable disabled={!editable} onPress={addPFP}>
           <OnboardingEditableAvatar uri={pfpUri} name={displayName} />
         </Pressable>
@@ -101,7 +101,7 @@ export const OnboardingCreateContactCard = memo(
             <Text preset="small">{displayName}</Text>
           </VStack>
         )}
-      </AnimatedCardContainer>
+      </ProfileContactCardContainer>
     );
   }
 );

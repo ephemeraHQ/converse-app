@@ -1,5 +1,4 @@
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
-import { usePreferredInboxAddress } from "@/hooks/usePreferredInboxAddress";
 import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
@@ -28,15 +27,11 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
     caller: "DmConversationTitle",
   });
 
-  const { data: peerAddress } = usePreferredInboxAddress({
-    inboxId: peerInboxId!,
-  });
-
   const onPress = useCallback(() => {
-    if (peerAddress) {
-      navigation.push("Profile", { address: peerAddress });
+    if (peerInboxId) {
+      navigation.push("Profile", { inboxId: peerInboxId });
     }
-  }, [navigation, peerAddress]);
+  }, [navigation, peerInboxId]);
 
   const onLongPress = useCallback(() => {
     copyToClipboard(JSON.stringify(topic));

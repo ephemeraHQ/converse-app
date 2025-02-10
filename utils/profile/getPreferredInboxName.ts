@@ -1,4 +1,4 @@
-import { type IProfileSocials } from "@/features/profiles/profile-types";
+import { type IProfileSocials } from "@/features/profiles/profile.types";
 import { getPreferredName } from "./getPreferredName";
 import { getPreferredInboxAddress } from "./getPreferredInboxAddress";
 

@@ -9,12 +9,10 @@ import { ISettingsListRow } from "./settings-list.types";
 
 type ISettingsListRowProps = {
   row: ISettingsListRow;
-  editMode?: boolean;
 };
 
 export const SettingsListRow = memo(function SettingsListRow({
   row,
-  editMode,
 }: ISettingsListRowProps) {
   const { theme, themed } = useAppTheme();
 

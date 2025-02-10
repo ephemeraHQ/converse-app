@@ -102,6 +102,12 @@ export const invalidateInboxProfileSocialsQuery = ({ inboxId }: IArgs) => {
   });
 };
 
+export function refetchInboxProfileSocialsQuery({ inboxId }: IArgs) {
+  queryClient.invalidateQueries({
+    queryKey: getInboxProfileSocialsQueryConfig({ inboxId }).queryKey,
+  });
+}
+
 export const ensureInboxProfileSocialsQueryData = ({
   inboxId,
   caller,
