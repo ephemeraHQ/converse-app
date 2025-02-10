@@ -1,12 +1,30 @@
+import { Platform } from "react-native";
 import {
   analyticsAppVersion,
   analyticsBuildNumber,
   analyticsPlatform,
 } from "../analytics";
-import { oldApi } from "./api";
+import { api, oldApi } from "./api";
 import { getXmtpApiHeaders } from "./auth";
+import * as Device from "expo-device";
 
 const lastSaveUser: { [address: string]: number } = {};
+
+export const createUser = async (args: {
+  privyUserId: string;
+  smartContractWalletAddress: string;
+  inboxId: string;
+}) => {
+  const { privyUserId, smartContractWalletAddress, inboxId } = args;
+  const { data } = await api.post("/api/v1/users", {
+    privyUserId,
+    privyAddress: smartContractWalletAddress,
+    inboxId,
+    deviceOS: Platform.OS.toLowerCase(),
+    deviceName: Device.modelName,
+  });
+  return data;
+};
 
 export const saveUser = async (args: { address: string }) => {
   const { address } = args;
