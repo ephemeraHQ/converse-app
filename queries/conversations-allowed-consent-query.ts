@@ -18,6 +18,10 @@ import {
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
 import { ensureGroupMembersQueryData } from "./useGroupMembersQuery";
+import {
+  AuthStatuses,
+  useAccountsStore,
+} from "@/features/multi-inbox/multi-inbox.store";
 
 export type IAllowedConsentConversationsQuery = Awaited<
   ReturnType<typeof getAllowedConsentConversations>
@@ -160,8 +164,10 @@ const getAllowedConsentConversations = async (args: IArgs) => {
 export const getAllowedConsentConversationsQueryOptions = (
   args: Optional<IArgsWithCaller, "caller">
 ) => {
+  const isSignedIn =
+    useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
   const { account, caller } = args;
-  const enabled = !!account;
+  const enabled = !!account && isSignedIn;
   return queryOptions({
     meta: {
       caller,

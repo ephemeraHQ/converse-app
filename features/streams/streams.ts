@@ -1,9 +1,9 @@
 import {
   getAccountsList,
   useAccountsStore,
+  AuthStatuses,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { useAppStore } from "@/data/store/appStore";
-import { useAppState } from "@/data/store/use-app-state-store";
 import { captureError } from "@/utils/capture-error";
 import { stopStreamingConversations } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-stream";
 import { stopStreamingAllMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
@@ -84,6 +84,12 @@ export function setupStreamingSubscriptions() {
 
 async function startStreaming(accountsToStream: string[]) {
   const store = useStreamingStore.getState();
+  const isSignedIn =
+    useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
+  if (!isSignedIn) {
+    logger.info("[Streaming] Not signed in, skipping startStreaming");
+    return;
+  }
 
   for (const account of accountsToStream) {
     const streamingState = store.accountStreamingStates[account];

@@ -16,6 +16,7 @@ import {
 import {
   ClientWithInvalidInstallation,
   CurrentSender,
+  InboxClient,
   InboxSigner,
   MultiInboxClientRestorationStates,
 } from "./multi-inbox-client.types";
@@ -95,31 +96,31 @@ export class MultiInboxClient {
       .senders.map((sender) => sender.ethereumAddress);
   }
 
-  private async initialize() {
-    const wasSignedInLastSession =
-      useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
-    if (wasSignedInLastSession) {
-      await this.restorePreviouslyCreatedInboxesForDevice();
-    }
+  async initialize() {
+    if (!this.isRestored) {
+      const wasSignedInLastSession =
+        useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
+      if (wasSignedInLastSession) {
+        await this.restorePreviouslyCreatedInboxesForDevice();
+      }
 
-    useAccountsStore
-      .getState()
-      .setMultiInboxClientRestorationState(
-        MultiInboxClientRestorationStates.restored
-      );
+      useAccountsStore
+        .getState()
+        .setMultiInboxClientRestorationState(
+          MultiInboxClientRestorationStates.restored
+        );
+    }
   }
 
   private constructor() {
     this.initialize();
   }
 
-  private async performXmtpInboxCreationFromPrivySmartWalletClient(
+  private async performInboxCreationFromInboxSigner(
     inboxSigner: InboxSigner
-  ): Promise<XmtpClient> {
+  ): Promise<InboxClient> {
     try {
-      logger.debug(
-        "[createXmtpClient] Getting database directory and encryption key"
-      );
+      logger.debug("[createXmtpClient] Getting database encryption key");
       const dbEncryptionKey = await getDbEncryptionKey().catch((error) => {
         logger.error("[createXmtpClient] Error getting database config", error);
         throw error;
@@ -127,17 +128,12 @@ export class MultiInboxClient {
 
       logger.debug("[createXmtpClient] Got database config successfully");
 
-      logger.debug("[createXmtpClient] Creating XMTP signer");
-
-      logger.debug("[createXmtpClient] XMTP signer created successfully");
-
       const options = {
         env: config.xmtpEnv,
         enableV3: true,
         dbEncryptionKey,
         codecs,
       };
-      logger.debug("[createXmtpClient] Client options configured", options);
 
       logger.debug("[createXmtpClient] Creating XMTP client");
       const client = await XmtpClient.create(inboxSigner, options).catch(
@@ -148,7 +144,6 @@ export class MultiInboxClient {
       );
       logger.debug("[createXmtpClient] XMTP client created successfully");
 
-      logger.debug("[createXmtpClient] Client setup completed successfully");
       return client;
     } catch (error) {
       logger.error("[createXmtpClient] Fatal error in client creation", error);
@@ -214,9 +209,7 @@ export class MultiInboxClient {
         );
 
         const xmtpInboxClient =
-          await this.performXmtpInboxCreationFromPrivySmartWalletClient(
-            inboxSigner
-          );
+          await this.performInboxCreationFromInboxSigner(inboxSigner);
 
         if (!useAccountsStore.getState().currentSender) {
           useAccountsStore.getState().setCurrentSender({
@@ -514,3 +507,5 @@ export class MultiInboxClient {
     }
   }
 }
+
+MultiInboxClient.instance.initialize();

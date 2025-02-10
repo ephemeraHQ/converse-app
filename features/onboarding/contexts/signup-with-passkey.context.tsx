@@ -178,10 +178,10 @@ export const SignupWithPasskeyProvider = ({
       logger.debug(
         "[passkey onboarding context] signing up and created a new inbox successfully in useXmtpFromPrivySmartWalletClientSigner"
       );
-      logger.error(
-        "[passkey onboarding context] temp setting login after signup noramlly we'd create profile now"
-      );
-      useAccountsStore.getState().setAuthStatus(AuthStatuses.signedIn);
+      // logger.error(
+      //   "[passkey onboarding context] temp setting login after signup noramlly we'd create profile now"
+      // );
+      // useAccountsStore.getState().setAuthStatus(AuthStatuses.signedIn);
     },
   });
 
@@ -204,24 +204,7 @@ export const SignupWithPasskeyProvider = ({
     },
   });
 
-  const oldPrivyUser = useRef(privyUser);
   useEffect(() => {
-    if (oldPrivyUser.current?.id === privyUser?.id) {
-      return;
-    }
-    logger.debug(
-      "[passkey onboarding context] privyUser has changed\n",
-      JSON.stringify(
-        {
-          oldPrivyUser: oldPrivyUser.current || "undefined",
-          newPrivyUser: privyUser || "undefined",
-        },
-        null,
-        2
-      )
-    );
-    oldPrivyUser.current = privyUser;
-
     try {
       if (privyUser?.id && signingUp) {
         createEmbeddedWallet();

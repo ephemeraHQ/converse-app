@@ -4,24 +4,12 @@ import { OnboardingTitle } from "@/features/onboarding/components/onboarding-tit
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 
 import { VStack } from "@/design-system/VStack";
-import { memo, useState, useEffect, useCallback } from "react";
+import { memo } from "react";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Center } from "@/design-system/Center";
-import { Button, TextStyle, ViewStyle, Text } from "react-native";
-import { usePrivy } from "@privy-io/expo";
-import { queryClient } from "@/queries/queryClient";
+import { Button, TextStyle, ViewStyle } from "react-native";
 import { useSignupWithPasskey } from "@/features/onboarding/contexts/signup-with-passkey.context";
-import { useLoginWithPasskey as usePrivyLoginWithPasskey } from "@privy-io/expo/passkey";
 import { useNavigation } from "@react-navigation/native";
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
-import { RELYING_PARTY } from "../passkey.constants";
-import { useLogout } from "@/utils/logout";
-import {
-  AuthStatuses,
-  deleteStores,
-  useAccountsStore,
-} from "@/features/multi-inbox/multi-inbox.store";
-import mmkv from "@/utils/mmkv";
 const $subtextStyle: TextStyle = {
   textAlign: "center",
 };
@@ -45,9 +33,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
 
 const OnboardingWelcomeScreenContent = memo(
   function OnboardingWelcomeScreenContent() {
-    const { themed, theme } = useAppTheme();
-    const { logout } = useLogout();
-    const { animation } = theme;
+    const { themed } = useAppTheme();
 
     const { signupWithPasskey, loginWithPasskey } = useSignupWithPasskey();
     const navigation = useNavigation();
@@ -60,43 +46,16 @@ const OnboardingWelcomeScreenContent = memo(
       >
         <Center style={$titleContainer}>
           <VStack>
-            <OnboardingSubtitle
-            // entering={animation
-            //   .fadeInUpSpring()
-            //   .delay(ONBOARDING_ENTERING_DELAY.FIRST)
-            //   .duration(ONBOARDING_ENTERING_DURATION)}
-            >
-              Welcome to Convos
-            </OnboardingSubtitle>
-            <OnboardingTitle
-              style={themed($titleStyle)}
-              // entering={animation
-              //   .fadeInUpSpring()
-              //   .delay(ONBOARDING_ENTERING_DELAY.SECOND)
-              //   .duration(ONBOARDING_ENTERING_DURATION)}
-            >
+            <OnboardingSubtitle>Welcome to Convos</OnboardingSubtitle>
+            <OnboardingTitle style={themed($titleStyle)}>
               Not another chat app
             </OnboardingTitle>
-            <AnimatedText
-              style={$subtextStyle}
-              color={"secondary"}
-              // entering={animation
-              //   .fadeInDownSlow()
-              //   .delay(ONBOARDING_ENTERING_DELAY.THIRD)
-              //   .duration(ONBOARDING_ENTERING_DURATION)}
-            >
+            <AnimatedText style={$subtextStyle} color={"secondary"}>
               Super secure · Decentralized · Universal
             </AnimatedText>
           </VStack>
         </Center>
-        {/* <Button
-            onPress={() => {
-              loginWithPasskey({
-                relyingParty: RELYING_PARTY,
-              });
-            }}
-            title="Login with Passkey"
-          /> */}
+
         <Button
           onPress={async () => {
             try {
@@ -120,33 +79,6 @@ const OnboardingWelcomeScreenContent = memo(
           }}
           title="Sign in with passkey"
         />
-
-        <Button
-          onPress={async () => {
-            const currentAccount = useAccountsStore.getState().currentSender;
-            if (currentAccount) {
-              deleteStores(currentAccount.ethereumAddress);
-            }
-            await logout();
-            // delete all queries
-            // delete all stores
-            // delete all mmkv
-
-            queryClient.clear();
-            mmkv.clearAll();
-          }}
-          title="Delete Everything"
-        />
-        {/* <OnboardingFooter
-            text={translate("onboarding.welcome.createContactCard")}
-            iconName="biometric"
-            onPress={() =>
-              loginWithPasskey({
-                relyingParty: RELYING_PARTY,
-              })
-            }
-            disabled={loading}
-          /> */}
       </Screen>
     );
   }

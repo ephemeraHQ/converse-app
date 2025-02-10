@@ -5,9 +5,13 @@ import logger from "@/utils/logger";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, skipToken } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
+import {
+  useAccountsStore,
+  AuthStatuses,
+} from "@/features/multi-inbox/multi-inbox.store";
 
 export type IUnknownConversationsQuery = Awaited<
   ReturnType<typeof getUnknownConversations>
@@ -166,15 +170,21 @@ export function getUnknownConsentConversationsQueryOptions(args: {
   caller?: string;
 }) {
   const { account, caller } = args;
+  const isSignedIn =
+    useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
+  const enabled = !!account && isSignedIn;
   return queryOptions({
+    enabled,
     meta: {
       caller,
     },
     queryKey: unknownConsentConversationsQueryKey(account),
-    queryFn: () =>
-      getUnknownConversations({
-        account,
-      }),
+    queryFn: enabled
+      ? async () =>
+          getUnknownConversations({
+            account,
+          })
+      : skipToken,
     enabled: !!account,
     refetchOnMount: true, // Just for now to make sure we always have the lastest conversations
   });

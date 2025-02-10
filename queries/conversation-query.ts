@@ -1,6 +1,5 @@
 import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
 import { captureError } from "@/utils/capture-error";
-import logger from "@/utils/logger";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";

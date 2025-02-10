@@ -36,7 +36,7 @@ import {
 } from "react-native-reanimated";
 import { ThirdwebProvider } from "thirdweb/react";
 import { config } from "./config";
-import Main from "./screens/Main";
+import { Main } from "./screens/Main";
 import { registerBackgroundFetchTask } from "./utils/background";
 import { initSentry } from "./utils/sentry";
 import { saveApiURI } from "./utils/sharedData";
@@ -183,10 +183,10 @@ export default function AppWithProviders() {
                   <PaperProvider theme={paperTheme}>
                     <GestureHandlerRootView style={{ flex: 1 }}>
                       <BottomSheetModalProvider>
-                        {/* <App /> */}
-                        <SignupWithPasskeyProvider>
+                        <App />
+                        {/* <SignupWithPasskeyProvider>
                           <PrivyPlaygroundLandingScreen />
-                        </SignupWithPasskeyProvider>
+                        </SignupWithPasskeyProvider> */}
                         <DevToolsBubble onCopy={onCopy} />
                         <Snackbars />
                       </BottomSheetModalProvider>

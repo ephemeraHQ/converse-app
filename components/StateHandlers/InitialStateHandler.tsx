@@ -8,6 +8,7 @@ import { useSelect } from "../../data/store/storeHelpers";
 import { getSchemedURLFromUniversalURL } from "../../utils/navigation";
 import { hideSplashScreen } from "../../utils/splash/splash";
 import logger from "@utils/logger";
+import { useAuthStatus } from "@/features/authentication/useAuthStatus.hook";
 
 const isDevelopmentClientURL = (url: string) => {
   return url.includes("expo-development-client");
@@ -15,12 +16,16 @@ const isDevelopmentClientURL = (url: string) => {
 
 export let initialURL = "";
 
-export default function InitialStateHandler() {
+export function InitialStateHandler() {
   const colorScheme = useColorScheme();
 
   const { setSplashScreenHidden, hydrationDone } = useAppStore(
     useSelect(["setSplashScreenHidden", "hydrationDone"])
   );
+
+  const { isRestoring } = useAuthStatus();
+
+  const splashScreenHidden = useRef(false);
 
   useEffect(() => {
     setAndroidColors(colorScheme);
@@ -37,11 +42,9 @@ export default function InitialStateHandler() {
     handleInitialDeeplink();
   }, []);
 
-  const splashScreenHidden = useRef(false);
-
   useEffect(() => {
     const hideSplashScreenIfReady = async () => {
-      if (!splashScreenHidden.current && hydrationDone) {
+      if (!splashScreenHidden.current && hydrationDone && !isRestoring) {
         splashScreenHidden.current = true;
         setSplashScreenHidden(true);
         await hideSplashScreen();
@@ -56,7 +59,7 @@ export default function InitialStateHandler() {
       }
     };
     hideSplashScreenIfReady();
-  }, [hydrationDone, setSplashScreenHidden]);
+  }, [hydrationDone, setSplashScreenHidden, isRestoring]);
 
   return null;
 }
