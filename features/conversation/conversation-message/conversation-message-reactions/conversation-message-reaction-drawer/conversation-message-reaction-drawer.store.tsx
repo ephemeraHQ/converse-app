@@ -1,12 +1,14 @@
 import { create } from "zustand";
 
 import { RolledUpReactions } from "../conversation-message-reactions.types";
+import { MessageId } from "@xmtp/react-native-sdk";
 
 const initialMessageReactionsState: RolledUpReactions = {
   totalCount: 0,
   userReacted: false,
   preview: [],
   detailed: [],
+  messageId: "" as MessageId,
 };
 
 export type IMessageReactionsStore = {
