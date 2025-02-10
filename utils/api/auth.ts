@@ -6,7 +6,7 @@ import {
   getInstallationKeySignature,
 } from "../xmtpRN/xmtp-client/xmtp-client-installations";
 import { getInboxId } from "../xmtpRN/signIn";
-import { api } from "./api";
+import { oldApi } from "./api";
 import {
   CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
   CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
@@ -53,7 +53,7 @@ export async function fetchAccessToken({
     `Creating access token for account: ${account} with inboxId: ${inboxId}`
   );
   const { data } = await dedupedFetch("/api/authenticate" + inboxId, () =>
-    api.post<AuthResponse>(
+    oldApi.post<AuthResponse>(
       "/api/authenticate",
       {
         inboxId,
@@ -93,7 +93,9 @@ export async function rotateAccessToken(
   const { data } = await dedupedFetch(
     `/api/authenticate/token-${account}`,
     () =>
-      api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
+      oldApi.post<AuthResponse>("/api/authenticate/token", {
+        token: refreshToken,
+      })
   );
 
   if (!data?.accessToken) {

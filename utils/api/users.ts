@@ -3,7 +3,7 @@ import {
   analyticsBuildNumber,
   analyticsPlatform,
 } from "../analytics";
-import { api } from "./api";
+import { oldApi } from "./api";
 import { getXmtpApiHeaders } from "./auth";
 
 const lastSaveUser: { [address: string]: number } = {};
@@ -19,7 +19,7 @@ export const saveUser = async (args: { address: string }) => {
   }
   lastSaveUser[address] = now;
 
-  await api.post(
+  await oldApi.post(
     "/api/user",
     {
       address,

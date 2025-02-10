@@ -3,7 +3,7 @@ import type { ProfileType } from "@/features/onboarding/types/onboarding.types";
 import logger from "@/utils/logger";
 import type { InboxId } from "@xmtp/react-native-sdk";
 import { z } from "zod";
-import { api } from "./api";
+import { oldApi } from "./api";
 import { getXmtpApiHeaders } from "./auth";
 
 const LensHandleSchema = z.object({
@@ -70,7 +70,7 @@ const deprecatedProfileResponseSchema = z.record(
 );
 
 export const getProfilesForAddresses = async (addresses: string[]) => {
-  const { data } = await api.post("/api/profile/batch", {
+  const { data } = await oldApi.post("/api/profile/batch", {
     addresses,
   });
   const parseResult = deprecatedProfileResponseSchema.safeParse(data);
@@ -88,7 +88,7 @@ export const getProfilesForInboxIds = async ({
 }: {
   inboxIds: InboxId[];
 }) => {
-  const { data } = await api.get("/api/inbox/", {
+  const { data } = await oldApi.get("/api/inbox/", {
     params: { ids: inboxIds.join(",") },
   });
   const parseResult = inboxIdProfileResponseSchema.safeParse(data);
@@ -108,7 +108,7 @@ export const searchProfilesForCurrentAccount = async (
   query: string
 ): Promise<IProfileSearchResponse> => {
   const currentAccount = getCurrentAccount()!;
-  const { data } = await api.get("/api/profile/search", {
+  const { data } = await oldApi.get("/api/profile/search", {
     headers: await getXmtpApiHeaders(currentAccount),
     params: { query },
   });
@@ -134,7 +134,7 @@ export const claimProfile = async ({
   account: string;
   profile: ProfileType;
 }) => {
-  const { data } = await api.post("/api/profile/username", profile, {
+  const { data } = await oldApi.post("/api/profile/username", profile, {
     headers: await getXmtpApiHeaders(account),
   });
   logger.debug("[API PROFILES] claimProfile response:", data);
@@ -162,7 +162,7 @@ export const checkUsernameValid = async ({
     | /* address is undefined if you want to check only that a username is not taken/available */ undefined;
   username: string;
 }) => {
-  const { data } = await api.get("/api/profile/username/valid", {
+  const { data } = await oldApi.get("/api/profile/username/valid", {
     params: { address, username },
   });
   logger.debug("[API PROFILES] checkUsernameValid response:", data);
@@ -184,7 +184,7 @@ type IEnsResolveResponse = z.infer<typeof EnsResolveResponseSchema>;
 export const resolveEnsName = async (
   name: string
 ): Promise<IEnsResolveResponse> => {
-  const { data } = await api.get("/api/profile/ens", { params: { name } });
+  const { data } = await oldApi.get("/api/profile/ens", { params: { name } });
   const parseResult = EnsResolveResponseSchema.safeParse(data);
   if (!parseResult.success) {
     logger.error(
@@ -202,7 +202,7 @@ const UnsResolveResponseSchema = z.object({
 });
 
 export const resolveUnsDomain = async (domain: string) => {
-  const { data } = await api.get("/api/profile/uns", { params: { domain } });
+  const { data } = await oldApi.get("/api/profile/uns", { params: { domain } });
   const parseResult = UnsResolveResponseSchema.safeParse(data);
   if (!parseResult.success) {
     logger.error(
@@ -220,7 +220,7 @@ const FarcasterResolveResponseSchema = z.object({
 });
 
 export const resolveFarcasterUsername = async (username: string) => {
-  const { data } = await api.get("/api/profile/farcaster", {
+  const { data } = await oldApi.get("/api/profile/farcaster", {
     params: { username },
   });
   const parseResult = FarcasterResolveResponseSchema.safeParse(data);

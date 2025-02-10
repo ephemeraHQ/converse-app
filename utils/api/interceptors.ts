@@ -10,8 +10,19 @@ type PatchedAxiosError = Omit<AxiosError, "config"> & {
   config: AxiosError["config"] & { _retry: boolean };
 };
 
-export function setupApiInterceptors(api: AxiosInstance) {
-  api.interceptors.response.use(
+/**
+ * @deprecated Use whatever new methodology for token exchnage @rygine dictates.
+ *
+ * @todo: Ry figure it out!
+ *
+ * @rygine is refactoring the backend to https://github.com/ephemeraHQ/convos-backend
+ * and it's going to be awesome.
+ *
+ * We're doing the migration manually, so use oldApi only until the new Backend support
+ * all of the app's required endpoints.
+ */
+export function oldsSetupApiInterceptors(oldApi: AxiosInstance) {
+  oldApi.interceptors.response.use(
     function axiosSuccessResponse(response) {
       return response;
     },

@@ -1,4 +1,4 @@
-import { api } from "@/utils/api/api";
+import { oldApi } from "@/utils/api/api";
 import { getXmtpApiHeaders } from "@/utils/api/auth";
 import logger from "@/utils/logger";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -30,7 +30,7 @@ export async function getTopics(args: {
   const { account, topics } = args;
 
   // Doing POST because we need to pass in the topics array
-  const { data } = await api.post(
+  const { data } = await oldApi.post(
     `/api/topics`,
     { topics },
     { headers: await getXmtpApiHeaders(account) }
@@ -51,7 +51,7 @@ export async function getAllTopics(args: { account: string }) {
   logger.debug(`[API TOPICS] getAllTopics for account: ${args.account}`);
   const { account } = args;
 
-  const { data } = await api.get(`/api/topics`, {
+  const { data } = await oldApi.get(`/api/topics`, {
     headers: await getXmtpApiHeaders(account),
   });
 
@@ -75,7 +75,7 @@ export async function getTopic(args: {
   );
   const { account, topic } = args;
 
-  const { data } = await api.post(
+  const { data } = await oldApi.post(
     `/api/topics/details`,
     { topic },
     { headers: await getXmtpApiHeaders(account) }
@@ -101,7 +101,7 @@ export async function markTopicAsRead(args: {
   );
   const { account, topic, readUntil } = args;
 
-  const { data } = await api.put(
+  const { data } = await oldApi.put(
     `/api/topics/read`,
     { topics: [topic], readUntil },
     { headers: await getXmtpApiHeaders(account) }
@@ -126,7 +126,7 @@ export async function markTopicAsUnread(args: {
   );
   const { account, topic } = args;
 
-  const { data } = await api.put(
+  const { data } = await oldApi.put(
     `/api/topics/unread`,
     { topics: [topic] },
     { headers: await getXmtpApiHeaders(account) }
@@ -153,7 +153,7 @@ export async function pinTopic(args: {
 
   const headers = await getXmtpApiHeaders(account);
 
-  const { data } = await api.put(
+  const { data } = await oldApi.put(
     `/api/topics/pin`,
     { topics: [topic] },
     { headers: headers }
@@ -180,7 +180,7 @@ export async function unpinTopic(args: {
 
   const headers = await getXmtpApiHeaders(account);
 
-  const { data } = await api.put(
+  const { data } = await oldApi.put(
     `/api/topics/unpin`,
     { topics: [topic] },
     { headers: headers }
@@ -205,7 +205,7 @@ export async function restoreTopic(args: {
   );
   const { account, topic } = args;
 
-  const { data } = await api.put(
+  const { data } = await oldApi.put(
     `/api/topics/restore`,
     { topics: [topic] },
     { headers: await getXmtpApiHeaders(account) }
@@ -230,7 +230,7 @@ export async function deleteTopic(args: {
   );
   const { account, topic } = args;
 
-  const { data } = await api.delete(`/api/topics`, {
+  const { data } = await oldApi.delete(`/api/topics`, {
     headers: await getXmtpApiHeaders(account),
     data: { topics: [topic] },
   });
