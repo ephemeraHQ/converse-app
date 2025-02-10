@@ -1,13 +1,6 @@
-import { ConnectedEthereumWallet } from "@privy-io/expo";
-
 import logger from "@/utils/logger";
-import {
-  Client as XmtpClient,
-  Signer as XmtpSigner,
-} from "@xmtp/react-native-sdk";
-import { base } from "thirdweb/chains";
+import { Client as XmtpClient } from "@xmtp/react-native-sdk";
 import { config } from "@/config";
-import { PrivySmartWalletClient } from "../embedded-wallets/embedded-wallet.types";
 import { codecs } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import {
   AuthStatuses,
@@ -22,6 +15,7 @@ import {
 } from "./multi-inbox-client.types";
 import { setInboxIdQueryData } from "@/queries/inbox-id-query";
 import { getDbEncryptionKey } from "@/utils/keychain";
+import { useEffect } from "react";
 
 /**
  * Client for managing multiple XMTP inboxes and their lifecycle.
@@ -68,13 +62,10 @@ export class MultiInboxClient {
   } = {};
 
   private get xmtpClientInboxIdToAddressMap() {
-    return useAccountsStore.getState().senders.reduce(
-      (acc, sender) => {
-        acc[sender.inboxId] = sender.ethereumAddress;
-        return acc;
-      },
-      {} as { [inboxId: string]: string }
-    );
+    return useAccountsStore.getState().senders.reduce((acc, sender) => {
+      acc[sender.inboxId] = sender.ethereumAddress;
+      return acc;
+    }, {} as { [inboxId: string]: string });
   }
 
   private static _instance: MultiInboxClient;
@@ -97,23 +88,53 @@ export class MultiInboxClient {
   }
 
   async initialize() {
-    if (!this.isRestored) {
-      const wasSignedInLastSession =
-        useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
-      if (wasSignedInLastSession) {
-        await this.restorePreviouslyCreatedInboxesForDevice();
-      }
+    if (this.isRestoring) {
+      logger.debug("[initialize] Already restoring, skipping");
+      return;
+    }
 
+    if (this.isRestored) {
+      logger.debug("[initialize] Already restored, skipping");
+      return;
+    }
+
+    const wasSignedInLastSession =
+      useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
+
+    logger.debug(
+      `[initialize] Was signed in last session: ${wasSignedInLastSession}`
+    );
+
+    if (wasSignedInLastSession) {
       useAccountsStore
         .getState()
         .setMultiInboxClientRestorationState(
-          MultiInboxClientRestorationStates.restored
+          MultiInboxClientRestorationStates.restoring
         );
+      logger.debug(
+        "[initialize] Restoring previously created inboxes for device"
+      );
+      await this.restorePreviouslyCreatedInboxesForDevice();
+      logger.debug(
+        "[initialize] Successfully restored previously created inboxes"
+      );
     }
+
+    logger.debug(
+      "[initialize] Setting multi-inbox client restoration state to restored"
+    );
+    useAccountsStore
+      .getState()
+      .setMultiInboxClientRestorationState(
+        MultiInboxClientRestorationStates.restored
+      );
+    logger.debug("[initialize] Initialization complete");
   }
 
   private constructor() {
+    logger.debug("[constructor] Initializing MultiInboxClient");
     this.initialize();
+    logger.debug("[constructor] MultiInboxClient initialization started");
   }
 
   private async performInboxCreationFromInboxSigner(
@@ -208,8 +229,9 @@ export class MultiInboxClient {
           `[addInbox] No existing inbox found for address: ${signerEthereumAddress}, creating new one`
         );
 
-        const xmtpInboxClient =
-          await this.performInboxCreationFromInboxSigner(inboxSigner);
+        const xmtpInboxClient = await this.performInboxCreationFromInboxSigner(
+          inboxSigner
+        );
 
         if (!useAccountsStore.getState().currentSender) {
           useAccountsStore.getState().setCurrentSender({
@@ -263,25 +285,10 @@ export class MultiInboxClient {
   }
 
   private async restorePreviouslyCreatedInboxesForDevice() {
-    if (this.isRestoring) {
-      logger.debug(
-        "[restorePreviouslyCreatedInboxesForDevice] Already restoring, skipping"
-      );
-      return;
-    }
-
-    if (this.isRestored) {
-      logger.debug(
-        "[restorePreviouslyCreatedInboxesForDevice] Already restored, skipping"
-      );
-      return;
-    }
-
     const previouslyCreatedInboxes = useAccountsStore.getState().senders;
 
     const authStatus = useAccountsStore.getState().authStatus;
     const wasSignedInLastSession = authStatus === AuthStatuses.signedIn;
-    const wasSignedOutLastSession = authStatus === AuthStatuses.signedOut;
     const hasNoInboxesToRestore = previouslyCreatedInboxes.length === 0;
     const isInNoInboxButLoggedInErrorState =
       wasSignedInLastSession && hasNoInboxesToRestore;
@@ -290,19 +297,6 @@ export class MultiInboxClient {
       throw new Error(
         "[restorePreviouslyCreatedInboxesForDevice] The user was signed in but there are no inboxes to restore. This is an invalid state."
       );
-    }
-
-    if (wasSignedOutLastSession) {
-      logger.debug(
-        "[restorePreviouslyCreatedInboxesForDevice] The user was signed out last session, skipping"
-      );
-      useAccountsStore
-        .getState()
-        .setMultiInboxClientRestorationState(
-          MultiInboxClientRestorationStates.restored
-        );
-      useAccountsStore.getState().setCurrentSender(undefined);
-      return;
     }
 
     try {
@@ -314,6 +308,9 @@ export class MultiInboxClient {
         XmtpClient | ClientWithInvalidInstallation
       > = await Promise.all(
         previouslyCreatedInboxes.map(async ({ ethereumAddress, inboxId }) => {
+          logger.debug(
+            `[restorePreviouslyCreatedInboxesForDevice] Restoring inbox for address: ${ethereumAddress}`
+          );
           try {
             logger.debug(
               `[restorePreviouslyCreatedInboxesForDevice] Checking if client exists for address: ${ethereumAddress}`
@@ -348,8 +345,9 @@ export class MultiInboxClient {
               inboxId
             );
 
-            const isInstallationValid =
-              await this.isClientInstallationValid(xmtpInboxClient);
+            const isInstallationValid = await this.isClientInstallationValid(
+              xmtpInboxClient
+            );
 
             if (!isInstallationValid) {
               logger.warn(
@@ -483,15 +481,6 @@ export class MultiInboxClient {
     useAccountsStore.getState().logoutAllSenders();
   }
 
-  private assertLiveMultiInboxPreconditions() {
-    if (!this.isRestored) {
-      logger.error("[MultiInboxClient] MultiInboxClient is not initialized");
-      throw new Error(
-        "In order to access any methods on the MultiInboxClient, you must first call the `initialize` method."
-      );
-    }
-  }
-
   private async isClientInstallationValid(client: XmtpClient) {
     const inboxState = await client.inboxState(true);
     const installationsIds = inboxState.installations.map((i) => i.id);
@@ -508,4 +497,16 @@ export class MultiInboxClient {
   }
 }
 
-MultiInboxClient.instance.initialize();
+export const useInitializeMultiInboxClient = () => {
+  const restored =
+    useAccountsStore.getState().multiInboxClientRestorationState ===
+    MultiInboxClientRestorationStates.restored;
+  async function initialize() {
+    await MultiInboxClient.instance.initialize();
+  }
+  useEffect(() => {
+    if (!restored) {
+      initialize();
+    }
+  }, [restored]);
+};

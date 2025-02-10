@@ -34,7 +34,7 @@ const storesByAccount: {
 // Store initialization
 export const initStores = (account: string) => {
   if (!(account in storesByAccount)) {
-    logger.debug(`[useAuthStatus] Initiating account ${account}`);
+    logger.debug(`[multi-inbox store] Initiating account ${account}`);
     // If adding a persisted store here, please add
     // the deletion method in deleteStores
     storesByAccount[account] = {
@@ -46,7 +46,7 @@ export const initStores = (account: string) => {
 };
 
 export const deleteStores = (account: string) => {
-  logger.debug(`[AccountsStore] Deleting account ${account}`);
+  logger.debug(`[multi-inbox store] Deleting account ${account}`);
   delete storesByAccount[account];
   mmkv.delete(`store-${account}-chat`);
   mmkv.delete(`store-${account}-settings`);
@@ -103,8 +103,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
 
       setCurrentSender: (sender: CurrentSender | undefined) =>
         set({ currentSender: sender }),
-      multiInboxClientRestorationState:
-        MultiInboxClientRestorationStates.restoring,
+      multiInboxClientRestorationState: MultiInboxClientRestorationStates.idle,
       setMultiInboxClientRestorationState: (
         state: MultiInboxClientRestorationState
       ) => set({ multiInboxClientRestorationState: state }),
@@ -133,7 +132,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
         const partializedState = {
           ...state,
           multiInboxClientRestorationState:
-            MultiInboxClientRestorationStates.restoring,
+            MultiInboxClientRestorationStates.idle,
         };
         return partializedState;
       },
@@ -142,33 +141,33 @@ export const useAccountsStore = create<AccountsStoreStype>()(
         return (state, error) => {
           if (error) {
             logger.warn(
-              `[useAuthStatus] An error happened during hydration: ${error}`
+              `[multi-inbox.store#onRehydrationStorage] An error happened during hydration: ${error}`
             );
           } else {
             logger.debug(
-              `[useAuthStatus] State hydrated successfully: ${JSON.stringify(
+              `[multi-inbox.store#onRehydrationStorage] State hydrated successfully: ${JSON.stringify(
                 state
               )}`
             );
             if (state?.senders && state.senders.length > 0) {
               logger.debug(
-                `[useAuthStatus] Found ${state.senders.length} accounts in hydration, initializing stores`
+                `[multi-inbox.store#onRehydrationStorage] Found ${state.senders.length} accounts in hydration, initializing stores`
               );
               state.senders.map((sender) => {
                 if (!storesByAccount[sender.ethereumAddress]) {
                   logger.debug(
-                    `[useAuthStatus] Initializing store for account: ${sender.ethereumAddress}`
+                    `[multi-inbox.store#onRehydrationStorage] Initializing store for account: ${sender.ethereumAddress}`
                   );
                   initStores(sender.ethereumAddress);
                 } else {
                   logger.debug(
-                    `[useAuthStatus] Store already exists for account: ${sender.ethereumAddress}`
+                    `[multi-inbox.store#onRehydrationStorage] Store already exists for account: ${sender.ethereumAddress}`
                   );
                 }
               });
             } else {
               logger.debug(
-                "[useAuthStatus] No accounts found in hydrated state"
+                "[multi-inbox.store#onRehydrationStorage] No accounts found in hydrated state"
               );
             }
           }

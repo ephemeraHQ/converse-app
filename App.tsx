@@ -42,9 +42,7 @@ import { initSentry } from "./utils/sentry";
 import { saveApiURI } from "./utils/sharedData";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
-import logger from "./utils/logger";
-import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
-import { SignupWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
+import { useInitializeMultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 preventSplashScreenAutoHide();
 LogBox.ignoreLogs([
@@ -143,7 +141,8 @@ const AppKeyboardProvider =
   Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
 // import { DevToolsBubble } from "react-native-react-query-devtools";
 
-export default function AppWithProviders() {
+export function AppWithProviders() {
+  useInitializeMultiInboxClient();
   const colorScheme = useColorScheme();
 
   const paperTheme = useMemo(() => {
