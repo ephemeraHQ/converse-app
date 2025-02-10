@@ -20,7 +20,6 @@ import {
   RolledUpReactions,
   SortedReaction,
 } from "./conversation-message-reactions.types";
-import { debugBorder } from "@/utils/debug-style";
 
 const MAX_REACTION_EMOJIS_SHOWN = 3;
 
@@ -58,12 +57,7 @@ export const ConversationMessageReactions = memo(
           accessibilityRole="button"
           accessibilityLabel="View reactions"
         >
-          <VStack
-            style={[
-              themed($reactionButton),
-              rolledUpReactions.userReacted && themed($reactionButtonActive),
-            ]}
-          >
+          <VStack style={themed($reactionButton)}>
             <HStack style={themed($emojiContainer)}>
               {rolledUpReactions.preview
                 .slice(0, MAX_REACTION_EMOJIS_SHOWN)
@@ -189,10 +183,6 @@ const $reactionButton: ThemedStyle<ViewStyle> = ({
   borderRadius: borderRadius.sm,
   borderWidth: borderWidth.sm,
   borderColor: colors.border.subtle,
-});
-
-const $reactionButtonActive: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  borderColor: colors.fill.minimal,
 });
 
 const $emojiContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({

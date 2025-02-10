@@ -63,6 +63,8 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
 }) {
   const { conversation } = props;
 
+  const { theme } = useAppTheme();
+
   const currentAccount = useCurrentAccount()!;
   const currentAccountInboxId = useSafeCurrentAccountInboxId();
   const topic = useCurrentConversationTopic()!;

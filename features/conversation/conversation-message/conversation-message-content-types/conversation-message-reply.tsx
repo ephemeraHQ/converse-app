@@ -13,10 +13,8 @@ import {
   isTextMessage,
   isTransactionReferenceMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useConversationMessageById } from "../use-conversation-message";
 import {
   useConversationStore,
-  useCurrentConversationTopic,
   useCurrentConversationTopicSafe,
 } from "@/features/conversation/conversation.store-context";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
@@ -30,6 +28,7 @@ import { useAppTheme } from "@theme/useAppTheme";
 import { DecodedMessage, MessageId, ReplyCodec } from "@xmtp/react-native-sdk";
 import { memo } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { useConversationMessageById } from "../use-conversation-message";
 
 export const MessageReply = memo(function MessageReply(props: {
   message: DecodedMessage<ReplyCodec>;
@@ -161,7 +160,7 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
           }}
         >
           <Icon
-            size={theme.iconSize.xs}
+            size={theme.iconSize.xxs}
             icon="arrowshape.turn.up.left.fill"
             color={
               fromMe

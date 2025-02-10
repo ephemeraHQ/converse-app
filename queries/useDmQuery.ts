@@ -2,9 +2,8 @@
  * TODO: Maybe delete this and just use the conversation query instead and add a "peer" argument?
  */
 import { queryClient } from "@/queries/queryClient";
-import { getConversationByPeerByAccount } from "@/utils/xmtpRN/conversations";
 import { getXmtpDmByInboxId } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-dm";
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions } from "@tanstack/react-query";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { dmQueryKey } from "./QueryKeys";
 import { setConversationQueryData } from "./conversation-query";
@@ -14,7 +13,7 @@ type IDmQueryArgs = {
   inboxId: InboxId;
 };
 
-type IDmQueryData = Awaited<ReturnType<typeof getConversationByPeerByAccount>>;
+type IDmQueryData = Awaited<ReturnType<typeof getXmtpDmByInboxId>>;
 
 async function getDm(args: IDmQueryArgs) {
   const { ethAccountAddress: ethAccountAddress, inboxId } = args;

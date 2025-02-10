@@ -37,6 +37,7 @@ export const SendButton = memo(function SendButton(props: {
         onPress={onPress}
         disabled={!canSend}
         iconName="arrow.up"
+        iconWeight="medium"
       />
     </VStack>
   );
