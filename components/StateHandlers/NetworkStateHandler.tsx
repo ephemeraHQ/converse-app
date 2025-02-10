@@ -7,7 +7,7 @@ import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
 
 NetInfo.configure({
-  reachabilityUrl: `${config.apiURI}/api/admin/healthcheck`,
+  reachabilityUrl: `${config.deprecatedApiURI}/api/admin/healthcheck`,
   reachabilityMethod: "HEAD",
   reachabilityTest: async (response) => {
     return response.status === 200;

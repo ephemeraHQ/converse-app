@@ -22,6 +22,7 @@ import {
 } from "@/features/multi-inbox/multi-inbox.store";
 import { base } from "viem/chains";
 import { InboxSigner } from "@/features/multi-inbox/multi-inbox-client.types";
+import { createUser } from "@/utils/api/users";
 
 const useXmtpFromPrivySmartWalletClientSigner = ({
   onSmartClientReady,
@@ -169,16 +170,37 @@ export const SignupWithPasskeyProvider = ({
       logger.debug(
         "[passkey onboarding context] Smart wallet client signer is ready"
       );
-      await MultiInboxClient.instance.createNewInboxForPrivySmartContractWallet(
-        {
-          inboxSigner: signer,
-        }
-      );
-
-      logger.debug(
-        "[passkey onboarding context] signing up and created a new inbox successfully in useXmtpFromPrivySmartWalletClientSigner"
-      );
-      // logger.error(
+      const { inboxId } =
+        await MultiInboxClient.instance.createNewInboxForPrivySmartContractWallet(
+          {
+            inboxSigner: signer,
+          }
+        );
+      try {
+        const smartContractWalletAddress = await signer.getAddress();
+        logger.debug(
+          "[passkey onboarding context] smart contract wallet address",
+          smartContractWalletAddress
+        );
+        const user = await createUser({
+          privyUserId: privyUser!.id,
+          smartContractWalletAddress,
+          inboxId,
+        });
+        logger.debug(
+          "[passkey onboarding context] created user",
+          JSON.stringify(user, null, 2)
+        );
+        logger.debug(
+          "[passkey onboarding context] signing up and created a new inbox successfully in useXmtpFromPrivySmartWalletClientSigner"
+        );
+      } catch (error) {
+        logger.error(
+          "[passkey onboarding context] Error creating user:",
+          error
+        );
+        throw error;
+      }
       //   "[passkey onboarding context] temp setting login after signup noramlly we'd create profile now"
       // );
       // useAccountsStore.getState().setAuthStatus(AuthStatuses.signedIn);

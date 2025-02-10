@@ -194,7 +194,7 @@ export class MultiInboxClient {
     inboxSigner,
   }: {
     inboxSigner: InboxSigner;
-  }) {
+  }): Promise<Pick<InboxClient, "inboxId">> {
     if (!inboxSigner) {
       this.setErrorState(
         "[createNewInboxForPrivySmartContractWallet] No inbox signer provided"
@@ -262,6 +262,9 @@ export class MultiInboxClient {
           lowercaseClientLinkedEthereumAddress;
 
         logger.debug("[addInbox] Successfully created new XMTP inbox");
+        return {
+          inboxId: clientInboxId,
+        };
       } catch (error) {
         logger.error(
           `[addInbox] Error creating XMTP inbox for address ${signerEthereumAddress}:`,

@@ -3,6 +3,10 @@ import { config } from "../../config";
 import { analyticsAppVersion, analyticsPlatform } from "../analytics";
 import { oldsSetupApiInterceptors } from "./interceptors";
 
+export const api = axios.create({
+  baseURL: config.apiURI,
+});
+
 /**
  * @deprecated Use api instead
  *
@@ -13,7 +17,7 @@ import { oldsSetupApiInterceptors } from "./interceptors";
  * all of the app's required endpoints.
  */
 export const oldApi = axios.create({
-  baseURL: config.apiURI,
+  baseURL: config.deprecatedApiURI,
   headers: {
     ConverseUserAgent: `${analyticsPlatform}/${analyticsAppVersion}`,
   },

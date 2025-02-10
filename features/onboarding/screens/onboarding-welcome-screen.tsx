@@ -10,6 +10,7 @@ import { Center } from "@/design-system/Center";
 import { Button, TextStyle, ViewStyle } from "react-native";
 import { useSignupWithPasskey } from "@/features/onboarding/contexts/signup-with-passkey.context";
 import { useNavigation } from "@react-navigation/native";
+import { useLogout } from "@/utils/logout";
 const $subtextStyle: TextStyle = {
   textAlign: "center",
 };
@@ -34,6 +35,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
 const OnboardingWelcomeScreenContent = memo(
   function OnboardingWelcomeScreenContent() {
     const { themed } = useAppTheme();
+    const { logout } = useLogout();
 
     const { signupWithPasskey, loginWithPasskey } = useSignupWithPasskey();
     const navigation = useNavigation();
@@ -78,6 +80,13 @@ const OnboardingWelcomeScreenContent = memo(
             }
           }}
           title="Sign in with passkey"
+        />
+
+        <Button
+          title="log out"
+          onPress={() => {
+            logout();
+          }}
         />
       </Screen>
     );
