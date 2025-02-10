@@ -24,6 +24,7 @@ export const IconButton = React.forwardRef(function IconButton(
   const {
     icon,
     iconName,
+    iconWeight,
     variant = "fill",
     size = "md",
     action = "primary",
@@ -126,6 +127,7 @@ export const IconButton = React.forwardRef(function IconButton(
               ref={ref}
               picto={iconName}
               style={iconStyle({ pressed, hovered })}
+              weight={iconWeight}
               {...iconProps({ pressed, hovered })}
             />
           );

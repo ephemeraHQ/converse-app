@@ -88,7 +88,6 @@ export function Icon(props: IIconProps) {
     style,
     size = defaultSize,
     color = defaultColor,
-    weight,
     ...rest
   } = props;
 

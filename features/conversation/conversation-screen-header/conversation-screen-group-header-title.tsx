@@ -1,4 +1,4 @@
-import { GroupAvatarMembers } from "@/components/group-avatar";
+import { GroupAvatar } from "@/components/group-avatar";
 import { Text } from "@/design-system/Text";
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
 import { useGroupNameForCurrentAccount } from "@/hooks/useGroupName";
@@ -7,12 +7,9 @@ import { useProfilesSocials } from "@/hooks/useProfilesSocials";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { copyToClipboard } from "@/utils/clipboard";
 import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
-import { Avatar } from "@components/Avatar";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { translate } from "@i18n";
 import { useRouter } from "@navigation/useNavigation";
-import { useGroupPhotoQuery } from "@queries/useGroupPhotoQuery";
-import { useAppTheme } from "@theme/useAppTheme";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useMemo } from "react";
 
@@ -24,19 +21,9 @@ export const GroupConversationTitle = memo(
   ({ conversationTopic }: GroupConversationTitleProps) => {
     const currentAccount = useCurrentAccount()!;
 
-    const { data: groupPhoto, isLoading: groupPhotoLoading } =
-      useGroupPhotoQuery({
-        account: currentAccount,
-        topic: conversationTopic,
-      });
-
     const { data: members } = useGroupMembersQuery({
       caller: "GroupConversationTitle",
       account: currentAccount,
-      topic: conversationTopic,
-    });
-
-    const { data: memberData } = useGroupMembersAvatarData({
       topic: conversationTopic,
     });
 
@@ -44,8 +31,6 @@ export const GroupConversationTitle = memo(
       useGroupNameForCurrentAccount({ conversationTopic });
 
     const navigation = useRouter();
-
-    const { theme } = useAppTheme();
 
     const onPress = useCallback(() => {
       navigation.push("Group", { topic: conversationTopic });
@@ -57,15 +42,7 @@ export const GroupConversationTitle = memo(
 
     const requestsCount = useGroupPendingRequests(conversationTopic).length;
 
-    const avatarComponent = useMemo(() => {
-      return groupPhoto ? (
-        <Avatar uri={groupPhoto} size={theme.avatarSize.md} />
-      ) : (
-        <GroupAvatarMembers members={memberData} size={theme.avatarSize.md} />
-      );
-    }, [groupPhoto, memberData, theme]);
-
-    if (groupPhotoLoading || groupNameLoading) {
+    if (groupNameLoading) {
       return null;
     }
 
@@ -95,7 +72,9 @@ export const GroupConversationTitle = memo(
             </Text>
           ) : null
         }
-        avatarComponent={avatarComponent}
+        avatarComponent={
+          <GroupAvatar groupTopic={conversationTopic} size="md" />
+        }
       />
     );
   }

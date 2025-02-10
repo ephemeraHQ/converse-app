@@ -1,6 +1,8 @@
 import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { userSearchQueryKey } from "@/queries/QueryKeys";
+import { getSearchConvosUsersQueryKey } from "@/queries/QueryKeys";
 import { searchProfilesForCurrentAccount } from "@/utils/api/profiles";
+import { captureError } from "@/utils/capture-error";
+import { GenericError } from "@/utils/error";
 import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { isEmptyObject } from "@/utils/objects";
@@ -10,7 +12,6 @@ import {
   isSameInboxId,
 } from "@/utils/xmtpRN/xmtp-inbox-id/xmtp-inbox-id";
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { InboxId } from "@xmtp/react-native-sdk";
 
 export function useSearchConvosUsers(args: {
   searchQuery: string;
@@ -41,18 +42,14 @@ export function useSearchConvosUsers(args: {
 function getConvosUsersSearchQueryOptions(searchQuery: string) {
   // logger.info(`[Search] Creating query options for search: ${searchQuery}`);
   return queryOptions({
-    queryKey: userSearchQueryKey(searchQuery),
+    queryKey: getSearchConvosUsersQueryKey(searchQuery),
     queryFn: () => searchConvosUsers({ searchQuery }),
     enabled: !!searchQuery,
     staleTime: 1000 * 10, // We often want to make sure we're looking if there are new users for our search query,
   });
 }
 
-async function searchConvosUsers({
-  searchQuery,
-}: {
-  searchQuery: string;
-}): Promise<{ message: string; inboxIds: InboxId[] }> {
+async function searchConvosUsers({ searchQuery }: { searchQuery: string }) {
   if (searchQuery.length === 0) {
     return {
       message: "",
@@ -109,17 +106,26 @@ async function handleGeneralSearch(searchQuery: string) {
 
   const inboxIds = (
     await Promise.all(
-      Object.keys(profiles).map((address) =>
-        getInboxIdFromAddress({
-          currentUserAddress: getCurrentAccount()!,
-          targetEthAddress: address,
-        })
-      )
+      Object.keys(profiles).map(async (address) => {
+        try {
+          return getInboxIdFromAddress({
+            currentUserAddress: getCurrentAccount()!,
+            targetEthAddress: address,
+          });
+        } catch (error) {
+          captureError(
+            new GenericError({
+              message: `Failed to get inbox ID for address ${address}`,
+            })
+          );
+          return null;
+        }
+      })
     )
   ).filter(Boolean);
 
   return {
     message: "",
-    inboxIds: inboxIds,
+    inboxIds,
   };
 }

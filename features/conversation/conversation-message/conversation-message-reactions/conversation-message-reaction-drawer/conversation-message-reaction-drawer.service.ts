@@ -1,28 +1,20 @@
-import { RolledUpReactions } from "../conversation-message-reactions.types";
+import { MessageId } from "@xmtp/react-native-sdk";
 import {
   resetMessageReactionsStore,
   useMessageReactionsStore,
-  IMessageReactionsStore,
 } from "./conversation-message-reaction-drawer.store";
+import { createBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils";
 
-export function openMessageReactionsDrawer(
-  rolledUpReactions: RolledUpReactions
-) {
+export const conversationMessageDrawerBottomSheetRef =
+  createBottomSheetModalRef();
+
+export function openMessageReactionsDrawer(args: { messageId: MessageId }) {
+  const { messageId } = args;
   const store = useMessageReactionsStore.getState();
-  store.setRolledUpReactions(rolledUpReactions);
+  store.actions.setMessageId(messageId);
 }
 
-export function closeMessageReactionsDrawer(arg?: { resetStore?: boolean }) {
-  const { resetStore = true } = arg ?? {};
-  if (resetStore) {
-    resetMessageReactionsStore();
-  }
-}
-
-export function resetMessageReactionsDrawer() {
+export function closeMessageReactionsDrawer() {
+  conversationMessageDrawerBottomSheetRef.current?.close();
   resetMessageReactionsStore();
-}
-
-export function useMessageReactionsRolledUpReactions() {
-  return useMessageReactionsStore((state) => state.rolledUpReactions);
 }

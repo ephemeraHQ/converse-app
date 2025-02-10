@@ -2,21 +2,20 @@ import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { AnimatedCenter } from "@/design-system/Center";
 import { AnimatedHStack } from "@/design-system/HStack";
 import { AnimatedVStack } from "@/design-system/VStack";
-import { ConversationListItemAvatarSkeleton } from "@/features/conversation-list/conversation-list-item/conversation-list-item-avatar-skeleton";
 import { ConversationListPinnedConversationDm } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-dm";
 import { ConversationListPinnedConversationGroup } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-group";
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles";
+import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
 import { useAllowedConversationsCount } from "@/features/conversation-list/hooks/use-conversations-count";
 import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useConversationQuery } from "@/queries/conversation-query";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { captureError } from "@/utils/capture-error";
-import { hexToRGBA } from "@/utils/colors";
 import { chunk } from "@/utils/general";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo } from "react";
-import { ViewStyle } from "react-native";
+import { ViewStyle, useWindowDimensions } from "react-native";
 
 export const ConversationListPinnedConversations = memo(
   function ConversationListPinnedConversations() {
@@ -25,10 +24,16 @@ export const ConversationListPinnedConversations = memo(
     const { pinnedConversations, isLoading: isLoadingPinnedConversations } =
       usePinnedConversations();
 
+    const { avatarSize } = useConversationListPinnedConversationsStyles();
+
     const {
       count: allowedConversationsCount,
       isLoading: allowedConversationsCountIsLoading,
     } = useAllowedConversationsCount();
+
+    const { screenHorizontalPadding } = useConversationListStyles();
+
+    const { width } = useWindowDimensions();
 
     if (isLoadingPinnedConversations || allowedConversationsCountIsLoading) {
       return null;
@@ -57,7 +62,8 @@ export const ConversationListPinnedConversations = memo(
             style={[
               themed($pinnedRow),
               {
-                justifyContent: row.length > 2 ? "space-between" : "center",
+                columnGap:
+                  (width - screenHorizontalPadding * 2 - avatarSize * 3) / 2,
               },
             ]}
             layout={theme.animation.reanimatedLayoutSpringTransition}
@@ -77,29 +83,6 @@ export const ConversationListPinnedConversations = memo(
     );
   }
 );
-
-const PinnedConversationsSkeleton = memo(function () {
-  const { themed } = useAppTheme();
-
-  const { avatarSize } = useConversationListPinnedConversationsStyles();
-
-  return (
-    <AnimatedHStack style={themed($container)}>
-      <ConversationListItemAvatarSkeleton
-        color={hexToRGBA("#FF8080", 0.15)}
-        size={avatarSize}
-      />
-      <ConversationListItemAvatarSkeleton
-        color={hexToRGBA("#FFE580", 0.3)}
-        size={avatarSize}
-      />
-      <ConversationListItemAvatarSkeleton
-        color={hexToRGBA("#80D9FF", 0.15)}
-        size={avatarSize}
-      />
-    </AnimatedHStack>
-  );
-});
 
 const PinnedConversationWrapper = memo(
   function PinnedConversationWrapper(props: { topic: ConversationTopic }) {
@@ -138,8 +121,7 @@ const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 });
 
 const $pinnedRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  justifyContent: "space-between",
-  columnGap: spacing.lg, // We want minimum gap between pinned conversations
+  justifyContent: "center",
   flexWrap: "wrap",
   rowGap: spacing.lg,
 });

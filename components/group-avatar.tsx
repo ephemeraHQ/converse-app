@@ -8,87 +8,50 @@ import { getInboxProfileSocialsQueryConfig } from "@/queries/useInboxProfileSoci
 import { $globalStyles } from "@/theme/styles";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import {
+  getPreferredInboxAddress,
   getPreferredInboxAvatar,
   getPreferredInboxName,
 } from "@/utils/profile";
 import { useQueries } from "@tanstack/react-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import React, { memo, useMemo } from "react";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { Avatar } from "./Avatar";
 
-const MAIN_CIRCLE_RADIUS = 50;
-const MAX_VISIBLE_MEMBERS = 4;
+/**
+ * Comp to render a group avatar from a list of inbox ids
+ */
+export const GroupAvatarInboxIds = memo(function GroupAvatarInboxIds(props: {
+  inboxIds: InboxId[];
+}) {
+  const { inboxIds } = props;
 
-type Position = { x: number; y: number; size: number };
+  const socialsData = useQueries({
+    queries: inboxIds.map((inboxId) =>
+      getInboxProfileSocialsQueryConfig({ inboxId })
+    ),
+  });
 
-type IGroupAvatarMember = {
-  address: string;
-  uri?: string;
-  name?: string;
-};
-
-type IGroupAvatarDumbProps = {
-  size?: number;
-  style?: StyleProp<ViewStyle>;
-  members?: IGroupAvatarMember[];
-};
-
-export const GroupAvatarMembers = memo(function GroupAvatarDumb(
-  props: IGroupAvatarDumbProps
-) {
-  const { themed, theme } = useAppTheme();
-
-  const { size = theme.avatarSize.md, style, members = [] } = props;
-
-  const memberCount = members?.length || 0;
-
-  const positions = useMemo(
-    () => calculatePositions(memberCount, MAIN_CIRCLE_RADIUS),
-    [memberCount]
-  );
-
-  return (
-    <Center style={[{ width: size, height: size }, $container, style]}>
-      <Center style={[{ width: size, height: size }, $container]}>
-        <VStack style={themed($background)} />
-        <Center style={$content}>
-          {positions.map((pos, index) => {
-            if (index < MAX_VISIBLE_MEMBERS && index < memberCount) {
-              return (
-                <Avatar
-                  key={`avatar-${index}`}
-                  uri={members[index].uri}
-                  name={members[index].name}
-                  size={(pos.size / 100) * size}
-                  style={{
-                    left: (pos.x / 100) * size,
-                    top: (pos.y / 100) * size,
-                    position: "absolute",
-                  }}
-                />
-              );
-            } else if (
-              index === MAX_VISIBLE_MEMBERS &&
-              memberCount > MAX_VISIBLE_MEMBERS
-            ) {
-              return (
-                <ExtraMembersIndicator
-                  key={`extra-${index}`}
-                  pos={pos}
-                  extraMembersCount={memberCount - MAX_VISIBLE_MEMBERS}
-                  size={size}
-                />
-              );
+  const members = useMemo(() => {
+    return socialsData
+      .map(({ data: socials }, index): IGroupAvatarMember | null =>
+        socials
+          ? {
+              address: getPreferredInboxAddress(socials) ?? "",
+              uri: getPreferredInboxAvatar(socials),
+              name: getPreferredInboxName(socials),
             }
-            return null;
-          })}
-        </Center>
-      </Center>
-    </Center>
-  );
+          : null
+      )
+      .filter(Boolean);
+  }, [socialsData]);
+
+  return <GroupAvatarUI members={members} />;
 });
 
+/**
+ * Comp to render a group avatar from a group topic (will render the group image if available)
+ */
 export const GroupAvatar = memo(function GroupAvatar(props: {
   groupTopic: ConversationTopic;
   size?: "sm" | "md" | "lg";
@@ -166,7 +129,77 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
     return <Avatar uri={group.imageUrlSquare} size={sizeNumber} />;
   }
 
-  return <GroupAvatarMembers members={memberData} size={sizeNumber} />;
+  return <GroupAvatarUI members={memberData} size={sizeNumber} />;
+});
+
+const MAIN_CIRCLE_RADIUS = 50;
+const MAX_VISIBLE_MEMBERS = 4;
+
+type Position = { x: number; y: number; size: number };
+
+type IGroupAvatarMember = {
+  address: string;
+  uri?: string;
+  name?: string;
+};
+
+type IGroupAvatarUIProps = {
+  size?: number;
+  style?: StyleProp<ViewStyle>;
+  members?: IGroupAvatarMember[];
+};
+
+const GroupAvatarUI = memo(function GroupAvatarUI(props: IGroupAvatarUIProps) {
+  const { themed, theme } = useAppTheme();
+
+  const { size = theme.avatarSize.md, style, members = [] } = props;
+
+  const memberCount = members?.length || 0;
+
+  const positions = useMemo(
+    () => calculatePositions(memberCount, MAIN_CIRCLE_RADIUS),
+    [memberCount]
+  );
+
+  return (
+    <Center style={[{ width: size, height: size }, $container, style]}>
+      <Center style={[{ width: size, height: size }, $container]}>
+        <VStack style={themed($background)} />
+        <Center style={$content}>
+          {positions.map((pos, index) => {
+            if (index < MAX_VISIBLE_MEMBERS && index < memberCount) {
+              return (
+                <Avatar
+                  key={`avatar-${index}`}
+                  uri={members[index].uri}
+                  name={members[index].name}
+                  size={(pos.size / 100) * size}
+                  style={{
+                    left: (pos.x / 100) * size,
+                    top: (pos.y / 100) * size,
+                    position: "absolute",
+                  }}
+                />
+              );
+            } else if (
+              index === MAX_VISIBLE_MEMBERS &&
+              memberCount > MAX_VISIBLE_MEMBERS
+            ) {
+              return (
+                <ExtraMembersIndicator
+                  key={`extra-${index}`}
+                  pos={pos}
+                  extraMembersCount={memberCount - MAX_VISIBLE_MEMBERS}
+                  size={size}
+                />
+              );
+            }
+            return null;
+          })}
+        </Center>
+      </Center>
+    </Center>
+  );
 });
 
 const calculatePositions = (
@@ -256,7 +289,6 @@ const $background: ThemedStyle<ViewStyle> = ({ colors }) => ({
   ...$globalStyles.absoluteFill,
   backgroundColor: colors.fill.minimal,
   borderRadius: 999,
-  opacity: 0.4,
 });
 
 const $extraMembersContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({

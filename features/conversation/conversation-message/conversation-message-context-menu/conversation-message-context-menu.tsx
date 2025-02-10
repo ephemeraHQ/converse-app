@@ -1,3 +1,4 @@
+import { getCurrentAccount } from "@/data/store/accountsStore";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { useDropdownMenuCustomStyles } from "@/design-system/dropdown-menu/dropdown-menu-custom";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
@@ -22,7 +23,8 @@ import { useCurrentConversationTopicSafe } from "@/features/conversation/convers
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { memo, useCallback } from "react";
+import { getConversationMessagesQueryData } from "@/queries/conversation-messages-query";
+import { memo, useCallback, useMemo } from "react";
 import { Modal, Platform, StyleSheet } from "react-native";
 import Animated from "react-native-reanimated";
 import { MessageContextMenuAboveMessageReactions } from "./conversation-message-context-menu-above-message-reactions";
@@ -59,20 +61,46 @@ const Content = memo(function Content(props: {
 
   const { bySender } = useConversationMessageReactions(messageId!);
 
-  const message = getMessageById({
-    messageId,
-    topic,
-  })!; // ! Because if we are inside this component it's because we selected a message and it exists for sure
+  const { message, previousMessage, nextMessage } = useMemo(() => {
+    const message = getMessageById({
+      messageId,
+      topic,
+    })!; // ! Because if we are inside this component it's because we selected a message and it exists for sure
 
-  const nextMessage = getMessageById({
-    messageId: message.id,
-    topic,
-  });
+    const messages = getConversationMessagesQueryData({
+      account: getCurrentAccount()!,
+      topic,
+    });
 
-  const previousMessage = getMessageById({
-    messageId: message.id,
-    topic,
-  });
+    const messageIndex = messages?.ids.findIndex((m) => m === messageId);
+
+    const nextMessageId = messageIndex
+      ? messages?.ids[messageIndex + 1]
+      : undefined;
+    const previousMessageId = messageIndex
+      ? messages?.ids[messageIndex - 1]
+      : undefined;
+
+    const nextMessage = nextMessageId
+      ? getMessageById({
+          messageId: nextMessageId,
+          topic,
+        }) ?? undefined
+      : undefined;
+
+    const previousMessage = previousMessageId
+      ? getMessageById({
+          messageId: previousMessageId,
+          topic,
+        }) ?? undefined
+      : undefined;
+
+    return {
+      message,
+      previousMessage,
+      nextMessage,
+    };
+  }, [messageId, topic]);
 
   const fromMe = messageIsFromCurrentAccountInboxId({ message });
   const menuItems = useMessageContextMenuItems({
@@ -170,8 +198,8 @@ const Content = memo(function Content(props: {
 
                 <MessageContextStoreProvider
                   message={message}
-                  nextMessage={nextMessage ?? undefined}
-                  previousMessage={previousMessage ?? undefined}
+                  nextMessage={nextMessage}
+                  previousMessage={previousMessage}
                 >
                   {/* TODO: maybe make ConversationMessage more dumb to not need any context? */}
 

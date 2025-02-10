@@ -141,7 +141,12 @@ export function AddAttachmentButton() {
           borderRadius: 36,
         }}
       >
-        <Icon color={theme.colors.text.secondary} icon="plus" size={18} />
+        <Icon
+          color={theme.colors.text.secondary}
+          icon="plus"
+          size={theme.iconSize.sm}
+          weight="medium"
+        />
       </Center>
     </DropdownMenu>
   );

@@ -4,7 +4,13 @@ import {
   textPrimaryColor,
 } from "@styles/colors";
 import React from "react";
-import { Text, TouchableOpacity, View, useColorScheme } from "react-native";
+import {
+  Text,
+  TouchableOpacity,
+  View,
+  useColorScheme,
+  Platform,
+} from "react-native";
 
 type IConversationRequestsListSegmentControllerProps = {
   options: string[];
@@ -24,7 +30,7 @@ export const ConversationRequestsListSegmentController: React.FC<
         backgroundColor: tertiaryBackgroundColor(colorScheme),
         borderRadius: 8,
         padding: 2,
-        height: 32,
+        height: Platform.OS === "android" ? 36 : 32,
         marginTop: 10,
         marginBottom: 2,
         marginHorizontal: 16,
@@ -36,7 +42,7 @@ export const ConversationRequestsListSegmentController: React.FC<
           style={[
             {
               flex: 1,
-              paddingVertical: 6,
+              paddingVertical: Platform.OS === "android" ? 4 : 6,
               alignItems: "center",
               justifyContent: "center",
             },
@@ -60,6 +66,7 @@ export const ConversationRequestsListSegmentController: React.FC<
               {
                 fontSize: 13,
                 color: textPrimaryColor(colorScheme),
+                lineHeight: Platform.OS === "android" ? 18 : undefined,
               },
               index === selectedIndex && {
                 fontWeight: "500",

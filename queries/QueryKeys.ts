@@ -155,7 +155,7 @@ export const dmPeerInboxIdQueryKey = (args: {
 }) => [QueryKeys.DM_PEER_INBOX_ID, args.account, args.topic];
 
 // Conversations Search
-export const userSearchQueryKey = (searchQuery: string) => [
+export const getSearchConvosUsersQueryKey = (searchQuery: string) => [
   QueryKeys.USER_SEARCH,
   "by-name",
   searchQuery,
