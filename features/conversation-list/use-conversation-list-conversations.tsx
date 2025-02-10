@@ -36,11 +36,11 @@ export const useConversationListConversations = () => {
     }
   }, [conversations, currentAccount]);
 
+  /// note(lustig): @thierryskoda why not just use refetchOnWindowFocus in the queryOptions for these?
   // For now, let's make sure we always are up to date with the conversations
   useScreenFocusEffectOnce(() => {
     refetch().catch(captureError);
   });
-
   // For now, let's make sure we always are up to date with the conversations
   useAppStateHandlers({
     onForeground: () => {

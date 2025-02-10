@@ -17,6 +17,7 @@ import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
 import logger from "@/utils/logger";
 import { Text } from "@/design-system/Text";
 import { ensureProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
+import { useInstalledWallets } from "./use-installed-wallets.hook";
 
 type ConnectWalletBottomSheetProps = {
   isVisible: boolean;
@@ -32,6 +33,8 @@ export function ConnectWalletBottomSheet({
 }: ConnectWalletBottomSheetProps) {
   const { theme } = useAppTheme();
   const insets = useSafeAreaInsets();
+  const { installedWallets, isLoading: areInstalledWalletsLoading } =
+    useInstalledWallets();
   const bottomSheetRef = useBottomSheetModalRef();
   const currentSender = useAccountsStore((state) => state.currentSender);
   const isInboxClientInitiated = currentSender?.inboxId;
@@ -88,6 +91,16 @@ export function ConnectWalletBottomSheet({
       });
     };
 
+  const isReadyToShowWalletList =
+    !areInstalledWalletsLoading &&
+    installedWallets !== undefined &&
+    isInboxClientInitiated;
+
+  const hasInstalledWallets =
+    !areInstalledWalletsLoading &&
+    installedWallets !== undefined &&
+    installedWallets.length > 0;
+
   return (
     <BottomSheetModal
       ref={bottomSheetRef}
@@ -107,25 +120,26 @@ export function ConnectWalletBottomSheet({
             paddingBottom: insets.bottom,
           }}
         >
-          {isInboxClientInitiated ? (
+          {isReadyToShowWalletList && (
             <>
-              <Button
-                title={"Add Rainbow to inbox"}
-                onPress={handleConnectWalletTapped("me.rainbow")}
-              />
-              <Button
-                title={"Add Metamask to inbox"}
-                onPress={handleConnectWalletTapped("io.metamask")}
-              />
-              <Button
-                title={"Add Coinbase to inbox"}
-                onPress={handleConnectWalletTapped("com.coinbase.wallet", {
-                  mobileConfig: { callbackURL: coinbaseUrl.toString() },
-                })}
-              />
+              {installedWallets.map((wallet) => (
+                <Button
+                  key={wallet.thirdwebId}
+                  title={`Add ${wallet.name} to inbox`}
+                  onPress={handleConnectWalletTapped(wallet.thirdwebId, {
+                    mobileConfig: { callbackURL: coinbaseUrl.toString() },
+                  })}
+                />
+              ))}
             </>
-          ) : (
-            <Text>Loading wallets</Text>
+          )}
+
+          {areInstalledWalletsLoading && <Text>Loading wallets</Text>}
+
+          {!hasInstalledWallets && (
+            <Text>
+              No wallets found. Please install a wallet and try again.
+            </Text>
           )}
         </VStack>
       </BottomSheetContentContainer>
