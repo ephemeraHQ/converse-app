@@ -116,11 +116,6 @@ export const ContactCard = memo(function ContactCard({
                   paddingHorizontal: theme.spacing.sm,
                   paddingVertical: theme.spacing.xs,
                 }}
-                style={{
-                  color: theme.colors.text.inverted.primary,
-                  fontSize: 20,
-                  fontWeight: "500",
-                }}
                 maxLength={32}
                 editable={!isLoading}
                 status={status}
