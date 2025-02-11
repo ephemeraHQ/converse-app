@@ -194,7 +194,7 @@ jobs:
 
       - name: Run EAS Update
         run: |
-          eas update --auto --channel=production --non-interactive
+          eas update --channel=production --message "Github action production deployment" --non-interactive
 
       - name: Upload source maps
         run: |

@@ -160,4 +160,9 @@ export const authLogger = {
     logger.error("[AUTH]", ...args),
 };
 
+/**
+ * @deprecated Use { logger } instead
+ */
 export default logger;
+
+export { logger };

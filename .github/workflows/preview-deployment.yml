@@ -223,7 +223,7 @@ jobs:
 
       - name: Run EAS Update
         run: |
-          eas update --auto --channel=preview --message "${{ needs.check-changes.outputs.commit_message }}" --non-interactive
+          eas update --channel=preview --message "${{ needs.check-changes.outputs.commit_message }}" --non-interactive
 
       - name: Upload Sourcemaps to Sentry
         run: |
