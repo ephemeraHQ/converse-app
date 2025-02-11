@@ -11,7 +11,6 @@ import {
   ConversationWithCodecsType,
   GroupData,
   GroupsDataEntity,
-  GroupWithCodecsType,
 } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import {
   Conversation,
@@ -86,7 +85,7 @@ export class JoinGroupClient {
     const liveGetGroupInvite = async (
       groupInviteId: string
     ): Promise<GroupInvite> => {
-      const { data } = await oldApi.get(`/api/groupInvite/${groupInviteId}`);
+      const { data } = await api.get(`/api/groupInvite/${groupInviteId}`);
       return data as GroupInvite;
     };
 

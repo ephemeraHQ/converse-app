@@ -50,6 +50,6 @@ export const stopStreamingAllMessage = async (args: { ethAddress: string }) => {
       `[XMTP - stopStreamingAllMessage] Stopped streaming messages for ${client.address}`
     );
   } catch (error) {
-    // throw new XMTPError("Failed to cancel message streaming", error);
+    throw new XMTPError("Failed to cancel message streaming", error);
   }
 };
