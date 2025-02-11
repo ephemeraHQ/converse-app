@@ -57,4 +57,4 @@ export const shared = {
     clientId: process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID,
   },
   thirdwebClientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
-} satisfies Partial<IConfig>;
+} as const satisfies Partial<IConfig>;

@@ -488,7 +488,7 @@ export class MultiInboxClient {
     useAccountsStore.getState().logoutAllSenders();
   }
 
-  async isClientInstallationValid(client: XmtpClient) {
+  private async isClientInstallationValid(client: XmtpClient) {
     const inboxState = await client.inboxState(true);
     const installationsIds = inboxState.installations.map((i) => i.id);
     logger.debug(

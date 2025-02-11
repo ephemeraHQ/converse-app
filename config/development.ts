@@ -14,9 +14,12 @@ export const developmentConfig: IConfig = {
   ),
   appCheckDebugToken:
     Platform.OS === "android"
-      ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID
-      : process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
+      ? // @ts-expect-error todo fixme
+        process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID
+      : // @ts-expect-error todo fixme
+        process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
   evm: {
+    // @ts-expect-error todo fixme
     rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     transactionChainId: "0x14a34", // Base Sepolia
     USDC: {

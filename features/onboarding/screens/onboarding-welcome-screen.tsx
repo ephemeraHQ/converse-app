@@ -36,51 +36,10 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
   return <OnboardingWelcomeScreenContent />;
 });
 
-import { useSocialProfiles } from "thirdweb/react";
-import { thirdwebClient } from "@/utils/thirdweb";
-const mycbidaddress1 = "0aF849d2778f6ccE4A2641438B6207DC4750a82B";
-const mycbidaddress = "0x0aF849d2778f6ccE4A2641438B6207DC4750a82B";
 const OnboardingWelcomeScreenContent = memo(
   function OnboardingWelcomeScreenContent() {
     const { themed } = useAppTheme();
     const { logout } = useLogout();
-
-    const {
-      data: profiles,
-      status,
-      error,
-    } = useSocialProfiles({
-      client: thirdwebClient,
-      address: mycbidaddress1,
-    });
-    logger.debug(
-      "[OnboardingWelcomeScreenContent] Profiles:",
-      JSON.stringify(profiles, null, 2)
-    );
-    logger.debug("[OnboardingWelcomeScreenContent] Status:", status);
-    logger.debug("[OnboardingWelcomeScreenContent] Error:", error);
-
-    useEffect(() => {
-      async function stuff() {
-        // const inboxClient = MultiInboxClient.instance.getInboxClientForAddress({
-        //   ethereumAddress: currentSender!.ethereumAddress,
-        // });
-
-        // await currentInboxClient?.addAccount(signer);
-        const cbId = await resolveCoinbaseId(mycbidaddress);
-        logger.debug(
-          `[ConnectWalletBottomSheet] Coinbase ID for address ${mycbidaddress}: ${cbId}`
-        );
-
-        const socialData = await ensureProfileSocialsQueryData(mycbidaddress);
-        logger.debug(
-          `[ConnectWalletBottomSheet] Social data for address ${mycbidaddress}:`,
-          JSON.stringify(socialData, null, 2)
-        );
-      }
-
-      stuff();
-    }, []);
 
     const { signupWithPasskey, loginWithPasskey } = useSignupWithPasskey();
     const navigation = useNavigation();
@@ -137,7 +96,7 @@ const OnboardingWelcomeScreenContent = memo(
         />
 
         <Button
-          title="log out"
+          title="Clear Stuff and Restart (use this if you get in a funky state)"
           onPress={() => {
             logout();
           }}
