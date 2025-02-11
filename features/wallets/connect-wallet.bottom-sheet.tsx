@@ -23,7 +23,11 @@ import { ensureProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery"
 import { useInstalledWallets } from "./use-installed-wallets.hook";
 import { lookupCoinbaseId } from "@/utils/evm/address";
 import { Button } from "@/design-system/Button/Button";
-
+import { ConnectButton } from "thirdweb/react";
+const wallets = [
+  createWallet("app.phantom"), // Add your wallet in wallet list
+  // add other wallets...
+];
 type ConnectWalletBottomSheetProps = {
   isVisible: boolean;
   onClose: () => void;
@@ -68,21 +72,22 @@ export function ConnectWalletBottomSheet({
       );
       // onWalletConnect("todo - callback after complete or error??");
       // onWalletConnect(async () => {
-      if (!isInboxClientInitiated) {
-        throw new Error(
-          `[ConnectWalletBottomSheet] Inbox client not initiated for address ${
-            currentSender!.ethereumAddress
-          } when attempting to connect wallet ${walletType}`
-        );
-      }
-      const currentInboxClient =
-        MultiInboxClient.instance.getInboxClientForAddress({
-          ethereumAddress: currentSender!.ethereumAddress,
-        })!;
+      // if (!isInboxClientInitiated) {
+      //   throw new Error(
+      //     `[ConnectWalletBottomSheet] Inbox client not initiated for address ${
+      //       currentSender!.ethereumAddress
+      //     } when attempting to connect wallet ${walletType}`
+      //   );
+      // }
+      // const currentInboxClient =
+      //   MultiInboxClient.instance.getInboxClientForAddress({
+      //     ethereumAddress: currentSender!.ethereumAddress,
+      //   })!;
       const w = createWallet(walletType, options);
       const account = await w.connect({ client: thirdwebClient });
       const addressToLink = account.address;
 
+      return;
       // check if is on xmtp already and branch
 
       const resultsMap = await currentInboxClient.canMessage([addressToLink]);
@@ -156,6 +161,7 @@ export function ConnectWalletBottomSheet({
       onDismiss={onClose}
     >
       <BottomSheetHeader title="Import an identity" />
+      {/* <ConnectButton wallets={wallets} client={thirdwebClient} /> */}
       <BottomSheetContentContainer
         style={{
           flex: 1,

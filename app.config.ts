@@ -24,6 +24,7 @@ type EnvironmentConfig = {
     package: string;
     googleServicesFile: string;
   };
+  alchemyApiKey: string;
 };
 
 const settings: Record<Environment, EnvironmentConfig> = {
@@ -52,6 +53,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "dev.getconverse.app",
     appName: "Converse DEV",
     icon: "./assets/icon-preview.png",
+    alchemyApiKey: process.env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   preview: {
     scheme: "converse-preview",
@@ -78,6 +80,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "preview.getconverse.app",
     appName: "Converse PREVIEW",
     icon: "./assets/icon-preview.png",
+    alchemyApiKey: process.env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   production: {
     scheme: "converse",
@@ -104,6 +107,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "getconverse.app",
     appName: "Converse",
     icon: "./assets/icon.png",
+    alchemyApiKey: process.env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
 };
 

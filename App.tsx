@@ -50,36 +50,47 @@ import { useAppStateHandlers } from "./hooks/useAppStateHandlers";
 import { useInstalledWallets } from "@/features/wallets/use-installed-wallets.hook";
 import logger from "./utils/logger";
 import { useAccountsStore } from "./features/multi-inbox/multi-inbox.store";
+import { SignupWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
+import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
 
 !!preventSplashScreenAutoHide && preventSplashScreenAutoHide();
 
-LogBox.ignoreLogs([
+const IGNORED_LOGS = [
   "Couldn't find real values for `KeyboardContext",
-  /Require cycle:.*/, // Ignore all require cycle warnings
-  "Privy: Expected status code 200, received 400", // Privy
-  "Error destroying session", // Privy
-  'event="noNetwork', // ethers
-  "[Reanimated] Reading from `value` during component render. Please ensure that you do not access the `value` property or use `get` method of a shared value while React is rendering a component.",
-  "Attempted to import the module", // General module import warnings
-  'Attempted to import the module "/Users', // More specific module import warnings
-  "Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API",
-  "Couldn't find real values for `KeyboardContext`. Please make sure you're inside of `KeyboardProvider` - otherwise functionality of `react-native-keyboard-controller` will not work. [Component Stack]",
+  "Error destroying session",
+  'event="noNetwork',
+  "[Reanimated] Reading from `value` during component render",
+  "Attempted to import the module",
+  'Attempted to import the module "/Users',
+  "Falling back to file-based resolution",
   "sync worker error storage error: Pool needs to  reconnect before use",
-  "[Converse.debug.dylib] sync worker error storage error: Pool needs to  reconnect before use",
-  "Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API.",
-  "Require cycle: utils/keychain/helpers.ts -> utils/keychain/index.ts -> utils/keychain/helpers.ts",
-  "Require cycle: data/store/accountsStore.ts -> utils/logout/index.tsx -> utils/xmtpRN/signIn.ts -> utils/xmtpRN/xmtp-client/xmtp-client-installations.ts -> data/store/accountsStore.ts",
-  "Require cycle: data/store/accountsStore.ts -> utils/logout/index.tsx -> utils/xmtpRN/signIn.ts -> utils/xmtpRN/xmtp-client/xmtp-client-installations.ts -> utils/xmtpRN/xmtp-client/xmtp-client.ts -> utils/evm/address.ts -> utils/api/profiles.ts -> data/store/accountsStore.ts",
-  "Require cycle: utils/xmtpRN/xmtp-client/xmtp-client-installations.ts -> utils/xmtpRN/xmtp-client/xmtp-client.ts -> utils/evm/address.ts -> utils/api/profiles.ts -> utils/api/api.ts -> utils/api/interceptors.ts -> utils/api/auth.ts -> utils/xmtpRN/xmtp-client/xmtp-client-installations.ts",
-  "Require cycle: utils/xmtpRN/signIn.ts -> utils/xmtpRN/xmtp-client/xmtp-client-installations.ts -> utils/xmtpRN/xmtp-client/xmtp-client.ts -> utils/evm/address.ts -> utils/api/profiles.ts -> utils/api/api.ts -> utils/api/interceptors.ts -> utils/api/auth.ts -> utils/xmtpRN/signIn.ts",
-  "Require cycle: utils/api/api.ts -> utils/api/interceptors.ts -> utils/api/auth.ts -> utils/api/api.ts",
-  "Require cycle: utils/logout/index.tsx -> utils/xmtpRN/signIn.ts -> utils/xmtpRN/xmtp-client/xmtp-client-installations.ts -> utils/logout/index.tsx",
-  "Require cycle: data/store/accountsStore.ts -> utils/logout/index.tsx -> data/store/accountsStore.ts",
-  "Require cycle: data/store/accountsStore.ts -> utils/logout/index.tsx -> features/notifications/utils/resetNotifications.ts -> features/notifications/utils/notifications-badge.ts -> data/store/accountsStore.ts",
-]);
+  "Require cycle", // This will catch all require cycle warnings
+];
 
+// Workaround for console filtering in development
 if (__DEV__) {
-  require("./ReactotronConfig.ts");
+  const connectConsoleTextFromArgs = (arrayOfStrings: string[]): string =>
+    arrayOfStrings
+      .slice(1)
+      .reduce(
+        (baseString, currentString) => baseString.replace("%s", currentString),
+        arrayOfStrings[0]
+      );
+
+  const filterIgnoredMessages =
+    (consoleLog: typeof console.log) =>
+    (...args: any[]) => {
+      const output = connectConsoleTextFromArgs(args);
+
+      if (!IGNORED_LOGS.some((log) => output.includes(log))) {
+        consoleLog(...args);
+      }
+    };
+
+  console.log = filterIgnoredMessages(console.log);
+  console.info = filterIgnoredMessages(console.info);
+  console.warn = filterIgnoredMessages(console.warn);
+  console.error = filterIgnoredMessages(console.error);
 }
 
 // This is the default configuration
@@ -193,10 +204,10 @@ export function AppWithProviders() {
                   <PaperProvider theme={paperTheme}>
                     <GestureHandlerRootView style={{ flex: 1 }}>
                       <BottomSheetModalProvider>
-                        <App />
-                        {/* <SignupWithPasskeyProvider>
+                        {/* <App /> */}
+                        <SignupWithPasskeyProvider>
                           <PrivyPlaygroundLandingScreen />
-                        </SignupWithPasskeyProvider> */}
+                        </SignupWithPasskeyProvider>
                         <DevToolsBubble onCopy={onCopy} />
                         <Snackbars />
                       </BottomSheetModalProvider>
