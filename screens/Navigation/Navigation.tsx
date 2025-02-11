@@ -134,21 +134,6 @@ const FakeScreen = memo(function FakeScreen() {
 export function SignedInNavigation() {
   const colorScheme = useColorScheme();
 
-  useEffect(() => {
-    async function stuff() {
-      const inboxClient = MultiInboxClient.instance.getInboxClientForAddress({
-        ethereumAddress: getSafeCurrentSender().ethereumAddress,
-      });
-
-      const state = await inboxClient.inboxState(true);
-      logger.debug(
-        `[SignedInNavigation] Inbox state: ${JSON.stringify(state, null, 2)}`
-      );
-    }
-
-    stuff();
-  }, []);
-
   return (
     <NativeStack.Navigator
       screenListeners={screenListeners("fullStackNavigation")}

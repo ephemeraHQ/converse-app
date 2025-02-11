@@ -8,6 +8,8 @@ import { isUNSAddress } from "@utils/uns";
 import axios from "axios";
 import { isAddress } from "ethers/lib/utils";
 import { config } from "../../config";
+import { ethers } from "ethers";
+import logger from "@/utils/logger";
 
 export const isSupportedPeer = (peer: string) => {
   const is0x = isAddress(peer.toLowerCase());
@@ -73,4 +75,87 @@ async function getLensOwner(handle: string) {
     captureError(e);
   }
   return null;
+}
+
+/**
+ * Resolves a Coinbase ID to an Ethereum address using ENS resolution
+ * @param cbId The Coinbase ID to resolve (e.g. "username.cb.id")
+ * @returns The resolved Ethereum address or null if resolution fails
+ */
+export async function resolveCoinbaseId(cbId: string): Promise<string | null> {
+  try {
+    if (!cbId.endsWith(".cb.id")) {
+      throw new Error("Invalid Coinbase ID format. Must end with .cb.id");
+    }
+
+    const provider = new ethers.providers.StaticJsonRpcProvider({
+      url: config.evm.rpcEndpoint,
+      skipFetchSetup: true,
+    });
+
+    const address = await provider.resolveName(cbId);
+    return address;
+  } catch (error) {
+    logger.error(`Failed to resolve Coinbase ID ${cbId}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Looks up the Coinbase ID associated with an Ethereum address using reverse resolution
+ * @param address The Ethereum address to lookup
+ * @returns The associated Coinbase ID if found, null otherwise
+ */
+export async function lookupCoinbaseId(
+  address: string
+): Promise<string | null> {
+  logger.debug(
+    `[lookupCoinbaseId] Looking up Coinbase ID for address: ${address}`
+  );
+  try {
+    const provider = new ethers.providers.StaticJsonRpcProvider({
+      url: config.evm.rpcEndpoint,
+      skipFetchSetup: true,
+    });
+
+    // First get all names associated with this address
+    logger.debug(
+      `[lookupCoinbaseId] Looking up ENS name for address: ${address}`
+    );
+    const name = await provider.lookupAddress(address);
+    if (!name) {
+      logger.debug(
+        `[lookupCoinbaseId] No ENS name found for address: ${address}`
+      );
+      return null;
+    }
+    logger.debug(
+      `[lookupCoinbaseId] Found ENS name: ${name} for address: ${address}`
+    );
+
+    // If we found a name, verify it resolves back to our address
+    logger.debug(`[lookupCoinbaseId] Resolving name: ${name} back to address`);
+    const resolvedAddress = await provider.resolveName(name);
+    if (resolvedAddress?.toLowerCase() !== address.toLowerCase()) {
+      logger.debug(
+        `[lookupCoinbaseId] Resolved address: ${resolvedAddress} does not match original address: ${address}`
+      );
+      return null;
+    }
+    logger.debug(
+      `[lookupCoinbaseId] Successfully verified name resolves back to address`
+    );
+
+    // If the name is a Coinbase ID, return it
+    if (name.endsWith(".cb.id")) {
+      logger.debug(`[lookupCoinbaseId] Found Coinbase ID: ${name}`);
+      return name;
+    }
+
+    logger.debug(`[lookupCoinbaseId] Name is not a Coinbase ID: ${name}`);
+    return null;
+  } catch (error) {
+    logger.error(`Failed to lookup Coinbase ID for address ${address}:`, error);
+    return null;
+  }
 }

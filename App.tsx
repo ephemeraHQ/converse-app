@@ -42,12 +42,17 @@ import { initSentry } from "./utils/sentry";
 import { saveApiURI } from "./utils/sharedData";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
-import { useInitializeMultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
+import {
+  MultiInboxClient,
+  useInitializeMultiInboxClient,
+} from "@/features/multi-inbox/multi-inbox.client";
 import { useAppStateHandlers } from "./hooks/useAppStateHandlers";
 import { useInstalledWallets } from "@/features/wallets/use-installed-wallets.hook";
 import logger from "./utils/logger";
+import { useAccountsStore } from "./features/multi-inbox/multi-inbox.store";
 
-preventSplashScreenAutoHide();
+!!preventSplashScreenAutoHide && preventSplashScreenAutoHide();
+
 LogBox.ignoreLogs([
   /Require cycle:.*/, // Ignore all require cycle warnings
   "Privy: Expected status code 200, received 400", // Privy
@@ -130,8 +135,6 @@ const App = () => {
       focusManager.setFocused(state === "active");
     });
   }, []);
-
-  // useInstalledWallets();
 
   // For now we use persit with zustand to get the accounts when the app launch so here is okay to see if we're logged in or not
 

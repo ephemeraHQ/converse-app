@@ -4,13 +4,17 @@ import { OnboardingTitle } from "@/features/onboarding/components/onboarding-tit
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 
 import { VStack } from "@/design-system/VStack";
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Center } from "@/design-system/Center";
 import { Button, TextStyle, ViewStyle } from "react-native";
 import { useSignupWithPasskey } from "@/features/onboarding/contexts/signup-with-passkey.context";
 import { useNavigation } from "@react-navigation/native";
 import { useLogout } from "@/utils/logout";
+import { ensureProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
+import { lookupCoinbaseId } from "@/utils/evm/address";
+import logger from "@/utils/logger";
+import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet.bottom-sheet";
 const $subtextStyle: TextStyle = {
   textAlign: "center",
 };
@@ -37,8 +41,33 @@ const OnboardingWelcomeScreenContent = memo(
     const { themed } = useAppTheme();
     const { logout } = useLogout();
 
+    useEffect(() => {
+      async function stuff() {
+        // const inboxClient = MultiInboxClient.instance.getInboxClientForAddress({
+        //   ethereumAddress: currentSender!.ethereumAddress,
+        // });
+
+        const mycbidaddress = "0x0aF849d2778f6ccE4A2641438B6207DC4750a82B";
+        // await currentInboxClient?.addAccount(signer);
+        const cbId = await lookupCoinbaseId(mycbidaddress);
+        logger.debug(
+          `[ConnectWalletBottomSheet] Coinbase ID for address ${mycbidaddress}: ${cbId}`
+        );
+
+        const socialData = await ensureProfileSocialsQueryData(mycbidaddress);
+        logger.debug(
+          `[ConnectWalletBottomSheet] Social data for address ${mycbidaddress}:`,
+          JSON.stringify(socialData, null, 2)
+        );
+      }
+
+      stuff();
+    }, []);
+
     const { signupWithPasskey, loginWithPasskey } = useSignupWithPasskey();
     const navigation = useNavigation();
+
+    const [isVisible, setIsVisible] = useState(true);
 
     return (
       <Screen
@@ -46,6 +75,13 @@ const OnboardingWelcomeScreenContent = memo(
         contentContainerStyle={$screenContainer}
         preset="scroll"
       >
+        <ConnectWalletBottomSheet
+          isVisible={isVisible}
+          onClose={() => {
+            setIsVisible(false);
+          }}
+          onWalletConnect={() => {}}
+        />
         <Center style={$titleContainer}>
           <VStack>
             <OnboardingSubtitle>Welcome to Convos</OnboardingSubtitle>
