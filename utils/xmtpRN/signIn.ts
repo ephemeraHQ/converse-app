@@ -8,7 +8,7 @@ import {
   ethersSignerToXmtpSigner,
   viemAccountToXmtpSigner,
 } from "./signer";
-import { isClientInstallationValid } from "./xmtp-client/xmtp-client-installations";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export const getInboxId = (address: string) =>
   Client.getOrCreateInboxId(address, config.xmtpEnv);
@@ -66,7 +66,8 @@ const createXmtpClientFromXmtpSigner = async (
   logger.debug(
     "[createXmtpClientFromXmtpSigner] Checking if installation is valid"
   );
-  const installationValid = await isClientInstallationValid(client);
+  const installationValid =
+    await MultiInboxClient.instance.isClientInstallationValid(client);
 
   if (!installationValid) {
     // TODO: Maybe need to clean up local database? Like client.deleteLocalDatabase();?

@@ -395,6 +395,10 @@ export class MultiInboxClient {
       );
 
       validInstallationXmtpInboxClients.forEach((xmtpClient) => {
+        if (!xmtpClient) {
+          logger.error("[MultiInboxClient] XMTP client is undefined");
+          return;
+        }
         const clientInboxId = xmtpClient.inboxId;
         const lowercaseClientLinkedEthereumAddress =
           xmtpClient.address.toLowerCase();
@@ -484,7 +488,7 @@ export class MultiInboxClient {
     useAccountsStore.getState().logoutAllSenders();
   }
 
-  private async isClientInstallationValid(client: XmtpClient) {
+  async isClientInstallationValid(client: XmtpClient) {
     const inboxState = await client.inboxState(true);
     const installationsIds = inboxState.installations.map((i) => i.id);
     logger.debug(

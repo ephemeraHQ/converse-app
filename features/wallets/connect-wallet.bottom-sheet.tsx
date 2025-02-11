@@ -21,7 +21,7 @@ import logger from "@/utils/logger";
 import { Text } from "@/design-system/Text";
 import { ensureProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 import { useInstalledWallets } from "./use-installed-wallets.hook";
-import { lookupCoinbaseId } from "@/utils/evm/address";
+import { resolveCoinbaseId } from "@/utils/evm/address";
 import { Button } from "@/design-system/Button/Button";
 import { ConnectButton } from "thirdweb/react";
 const wallets = [
@@ -87,8 +87,22 @@ export function ConnectWalletBottomSheet({
       const account = await w.connect({ client: thirdwebClient });
       const addressToLink = account.address;
 
-      return;
-      // check if is on xmtp already and branch
+      if (!isInboxClientInitiated) {
+        logger.debug("[ConnectWalletBottomSheet] Inbox client not initiated");
+        return account;
+      }
+
+      const currentInboxClient =
+        MultiInboxClient.instance.getInboxClientForAddress({
+          ethereumAddress: currentSender!.ethereumAddress,
+        });
+
+      if (!currentInboxClient) {
+        logger.debug(
+          "[ConnectWalletBottomSheet] No inbox client found for address"
+        );
+        return account;
+      }
 
       const resultsMap = await currentInboxClient.canMessage([addressToLink]);
       logger.debug(
@@ -128,7 +142,7 @@ export function ConnectWalletBottomSheet({
 
         const mycbidaddress = "0x0aF849d2778f6ccE4A2641438B6207DC4750a82B";
         // await currentInboxClient?.addAccount(signer);
-        const cbId = await lookupCoinbaseId(account.address);
+        const cbId = await resolveCoinbaseId(account.address);
         logger.debug(
           `[ConnectWalletBottomSheet] Coinbase ID for address ${account.address}: ${cbId}`
         );

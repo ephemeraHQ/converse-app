@@ -64,7 +64,7 @@ export function oldsSetupApiInterceptors(oldApi: AxiosInstance) {
           ...config.headers,
           authorization: `Bearer ${accessToken}`,
         };
-        return api(config);
+        return oldApi(config);
       }
 
       return Promise.reject(error);

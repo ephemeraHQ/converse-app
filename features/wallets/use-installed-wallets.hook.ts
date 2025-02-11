@@ -84,7 +84,7 @@ async function getInstalledWallets(
   logger.debug(
     `[getInstalledWallets] Checking ${supportedWallets.length} supported wallets`
   );
-  let installedWalletChecks;
+  let installedWalletChecks: boolean[] = [];
   try {
     installedWalletChecks = await Promise.all(
       supportedWallets.map(async (w) => {

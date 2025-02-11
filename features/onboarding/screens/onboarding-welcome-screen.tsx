@@ -12,7 +12,7 @@ import { useSignupWithPasskey } from "@/features/onboarding/contexts/signup-with
 import { useNavigation } from "@react-navigation/native";
 import { useLogout } from "@/utils/logout";
 import { ensureProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
-import { lookupCoinbaseId } from "@/utils/evm/address";
+import { resolveCoinbaseId } from "@/utils/evm/address";
 import logger from "@/utils/logger";
 import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet.bottom-sheet";
 const $subtextStyle: TextStyle = {
@@ -67,7 +67,7 @@ const OnboardingWelcomeScreenContent = memo(
         // });
 
         // await currentInboxClient?.addAccount(signer);
-        const cbId = await lookupCoinbaseId(mycbidaddress);
+        const cbId = await resolveCoinbaseId(mycbidaddress);
         logger.debug(
           `[ConnectWalletBottomSheet] Coinbase ID for address ${mycbidaddress}: ${cbId}`
         );
