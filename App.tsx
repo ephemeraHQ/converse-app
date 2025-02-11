@@ -54,6 +54,7 @@ import { useAccountsStore } from "./features/multi-inbox/multi-inbox.store";
 !!preventSplashScreenAutoHide && preventSplashScreenAutoHide();
 
 LogBox.ignoreLogs([
+  "Couldn't find real values for `KeyboardContext",
   /Require cycle:.*/, // Ignore all require cycle warnings
   "Privy: Expected status code 200, received 400", // Privy
   "Error destroying session", // Privy

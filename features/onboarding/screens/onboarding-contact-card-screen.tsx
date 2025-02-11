@@ -185,18 +185,24 @@ export function OnboardingContactCardScreen() {
       <ConnectWalletBottomSheet
         isVisible={isConnectWalletBottomSheetVisible}
         onClose={() => setIsConnectWalletBottomSheetVisible(false)}
-        onWalletConnect={async (connectHandler) => {
-          try {
-            await connectHandler();
-            listBottomSheetRef.current?.dismiss();
-          } catch (error) {
-            logger.error(
-              "[OnboardingContactCardScreen] Wallet connect error:",
-              error
-            );
-            captureErrorWithToast(error as Error);
-          }
+        onWalletConnect={(something) => {
+          logger.debug(
+            "[OnboardingContactCardScreen] Wallet connect:",
+            something
+          );
         }}
+        // onWalletConnect={async (connectHandler) => {
+        //   try {
+        //     await connectHandler();
+        //     listBottomSheetRef.current?.dismiss();
+        //   } catch (error) {
+        //     logger.error(
+        //       "[OnboardingContactCardScreen] Wallet connect error:",
+        //       error
+        //     );
+        //     captureErrorWithToast(error as Error);
+        //   }
+        // }}
       />
     </>
   );
