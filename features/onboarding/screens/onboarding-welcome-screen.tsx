@@ -8,7 +8,7 @@ import { memo, useState } from "react";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Center } from "@/design-system/Center";
 import { Button, TextStyle, ViewStyle } from "react-native";
-import { useSignupWithPasskey } from "@/features/onboarding/contexts/signup-with-passkey.context";
+import { useAuthenticateWithPasskey } from "@/features/onboarding/contexts/signup-with-passkey.context";
 import { useNavigation } from "@react-navigation/native";
 import { useLogout } from "@/utils/logout";
 import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet.bottom-sheet";
@@ -38,7 +38,8 @@ const OnboardingWelcomeScreenContent = memo(
     const { themed } = useAppTheme();
     const { logout } = useLogout();
 
-    const { signupWithPasskey, loginWithPasskey } = useSignupWithPasskey();
+    const { signupWithPasskey, loginWithPasskey } =
+      useAuthenticateWithPasskey();
     const navigation = useNavigation();
 
     const [isVisible, setIsVisible] = useState(true);
@@ -49,13 +50,13 @@ const OnboardingWelcomeScreenContent = memo(
         contentContainerStyle={$screenContainer}
         preset="scroll"
       >
-        <ConnectWalletBottomSheet
+        {/* <ConnectWalletBottomSheet
           isVisible={isVisible}
           onClose={() => {
             setIsVisible(false);
           }}
           onWalletConnect={() => {}}
-        />
+        /> */}
         <Center style={$titleContainer}>
           <VStack>
             <OnboardingSubtitle>Welcome to Convos</OnboardingSubtitle>

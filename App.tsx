@@ -8,7 +8,6 @@ import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { DebugButton } from "@components/DebugButton";
 import {
   AppState,
-  LogBox,
   Platform,
   StyleSheet,
   View,
@@ -43,15 +42,15 @@ import { saveApiURI } from "./utils/sharedData";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
 import {
-  MultiInboxClient,
+  // MultiInboxClient,
   useInitializeMultiInboxClient,
 } from "@/features/multi-inbox/multi-inbox.client";
-import { useAppStateHandlers } from "./hooks/useAppStateHandlers";
-import { useInstalledWallets } from "@/features/wallets/use-installed-wallets.hook";
+// import { useAppStateHandlers } from "./hooks/useAppStateHandlers";
+// import { useInstalledWallets } from "@/features/wallets/use-installed-wallets.hook";
 import logger from "./utils/logger";
-import { useAccountsStore } from "./features/multi-inbox/multi-inbox.store";
-import { SignupWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
-import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
+// import { useAccountsStore } from "./features/multi-inbox/multi-inbox.store";
+// import { AuthenticateWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
+// import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
 
 !!preventSplashScreenAutoHide && preventSplashScreenAutoHide();
 
@@ -204,10 +203,10 @@ export function AppWithProviders() {
                   <PaperProvider theme={paperTheme}>
                     <GestureHandlerRootView style={{ flex: 1 }}>
                       <BottomSheetModalProvider>
-                        {/* <App /> */}
-                        <SignupWithPasskeyProvider>
+                        <App />
+                        {/* <AuthenticateWithPasskeyProvider>
                           <PrivyPlaygroundLandingScreen />
-                        </SignupWithPasskeyProvider>
+                        </AuthenticateWithPasskeyProvider> */}
                         <DevToolsBubble onCopy={onCopy} />
                         <Snackbars />
                       </BottomSheetModalProvider>

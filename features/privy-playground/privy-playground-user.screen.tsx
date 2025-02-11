@@ -31,7 +31,7 @@ import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
 //   usePrivyUserCustomMetadataForCurrentAccount,
 // } from "@/queries/use-privy-user-custom-metadata";
 import { InboxState } from "@xmtp/react-native-sdk/build/lib/InboxState";
-import { SignupWithPasskeyProvider } from "../onboarding/contexts/signup-with-passkey.context";
+import { AuthenticateWithPasskeyProvider } from "../onboarding/contexts/signup-with-passkey.context";
 import {
   AuthStatuses,
   useAccountsStore,

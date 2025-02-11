@@ -8,10 +8,6 @@ import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Center } from "@/design-system/Center";
 import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer";
 import { TextStyle, ViewStyle } from "react-native";
-import {
-  ONBOARDING_ENTERING_DELAY,
-  ONBOARDING_ENTERING_DURATION,
-} from "@/features/onboarding/constants/animation-constants";
 import { useRouter } from "@/navigation/useNavigation";
 import { needToShowNotificationsPermissions } from "../Onboarding.utils";
 import {
@@ -28,7 +24,6 @@ import { useAddPfp } from "../hooks/useAddPfp";
 import { ProfileType } from "../types/onboarding.types";
 import { useCreateOrUpdateProfileInfo } from "../hooks/useCreateOrUpdateProfileInfo";
 import { useProfile } from "../hooks/useProfile";
-import { useBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils";
 import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet.bottom-sheet";
 import { useCoinbaseWalletListener } from "@/utils/coinbaseWallet";
 import { config } from "@/config";
@@ -129,14 +124,14 @@ export function OnboardingContactCardScreen() {
     }
   }, [createOrUpdateProfile, profile, router, asset?.uri, setAuthStatus]);
 
-  const listBottomSheetRef = useBottomSheetModalRef();
   const [
     isConnectWalletBottomSheetVisible,
     setIsConnectWalletBottomSheetVisible,
   ] = useState(false);
 
   const handleImportPress = useCallback(() => {
-    setIsConnectWalletBottomSheetVisible(true);
+    alert("Working on this right now 🤙");
+    // setIsConnectWalletBottomSheetVisible(true);
   }, []);
 
   return (

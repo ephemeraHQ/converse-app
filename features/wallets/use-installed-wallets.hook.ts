@@ -68,14 +68,14 @@ const SupportedWallets: ISupportedWallet[] = [
     customScheme: "metamask://",
     thirdwebId: "io.metamask",
   },
-  {
-    name: "Phantom",
-    iconURL:
-      "https://explorer-api.walletconnect.com/v3/logo/sm/018b2d52-10e9-4158-1fde-a5d5bac5aa00?projectId=2f05ae7f1116030fde2d36508f472bfb",
-    // customScheme: "phantom://",
-    customScheme: "https://phantom.app/ul/v1/connect",
-    thirdwebId: "app.phantom",
-  },
+  // {
+  //   name: "Phantom",
+  //   iconURL:
+  //     "https://explorer-api.walletconnect.com/v3/logo/sm/018b2d52-10e9-4158-1fde-a5d5bac5aa00?projectId=2f05ae7f1116030fde2d36508f472bfb",
+  //   // customScheme: "phantom://",
+  //   customScheme: "https://phantom.app/ul/v1/connect",
+  //   thirdwebId: "app.phantom",
+  // },
 ];
 
 async function getInstalledWallets(

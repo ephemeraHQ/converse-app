@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useRef } from "react";
 import {
   useLoginWithPasskey as usePrivyLoginWithPasskey,
   useSignupWithPasskey as usePrivySignupWithPasskey,
@@ -20,7 +13,6 @@ import {
   AuthStatuses,
   useAccountsStore,
 } from "@/features/multi-inbox/multi-inbox.store";
-import { base } from "viem/chains";
 import { InboxSigner } from "@/features/multi-inbox/multi-inbox-client.types";
 import { createUser } from "@/utils/api/users";
 
@@ -102,14 +94,14 @@ const useXmtpFromPrivySmartWalletClientSigner = ({
   ]);
 };
 
-const SignupWithPasskeyContext = createContext<
+const AuthenticateWithPasskeyContext = createContext<
   | {
       signupWithPasskey: () => Promise<void>;
       loginWithPasskey: () => Promise<void>;
     }
   | undefined
 >(undefined);
-export const SignupWithPasskeyProvider = ({
+export const AuthenticateWithPasskeyProvider = ({
   children,
 }: {
   children: React.ReactNode;
@@ -201,9 +193,6 @@ export const SignupWithPasskeyProvider = ({
         );
         throw error;
       }
-      //   "[passkey onboarding context] temp setting login after signup noramlly we'd create profile now"
-      // );
-      // useAccountsStore.getState().setAuthStatus(AuthStatuses.signedIn);
     },
   });
 
@@ -255,18 +244,18 @@ export const SignupWithPasskeyProvider = ({
   };
 
   return (
-    <SignupWithPasskeyContext.Provider
+    <AuthenticateWithPasskeyContext.Provider
       value={{ signupWithPasskey, loginWithPasskey }}
     >
       {children}
-    </SignupWithPasskeyContext.Provider>
+    </AuthenticateWithPasskeyContext.Provider>
   );
 };
-export const useSignupWithPasskey = () => {
-  const context = useContext(SignupWithPasskeyContext);
+export const useAuthenticateWithPasskey = () => {
+  const context = useContext(AuthenticateWithPasskeyContext);
   if (!context) {
     throw new Error(
-      "useSignupWithPasskey must be used within a SignupWithPasskeyProvider"
+      "useAuthenticateWithPasskey must be used within a AuthenticateWithPasskeyProvider"
     );
   }
   return context;

@@ -27,7 +27,7 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
-import { SignupWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
+import { AuthenticateWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
 import {
   getSafeCurrentSender,
   useAccountsStore,
@@ -178,7 +178,7 @@ export function SignedOutNavigation() {
   const colorScheme = useColorScheme();
 
   return (
-    <SignupWithPasskeyProvider>
+    <AuthenticateWithPasskeyProvider>
       <NativeStack.Navigator
         screenListeners={screenListeners("fullStackNavigation")}
         initialRouteName="OnboardingWelcome"
@@ -217,6 +217,6 @@ export function SignedOutNavigation() {
           </NativeStack.Group>
         </NativeStack.Group>
       </NativeStack.Navigator>
-    </SignupWithPasskeyProvider>
+    </AuthenticateWithPasskeyProvider>
   );
 }

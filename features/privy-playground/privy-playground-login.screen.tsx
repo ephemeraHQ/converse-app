@@ -6,7 +6,7 @@ import * as Application from "expo-application";
 import { getConfig } from "@/config";
 import { RELYING_PARTY } from "../onboarding/passkey.constants";
 import logger from "@/utils/logger";
-import { useSignupWithPasskey } from "@/features/onboarding/contexts/signup-with-passkey.context";
+import { useAuthenticateWithPasskey } from "@/features/onboarding/contexts/signup-with-passkey.context";
 import { useNavigation } from "@react-navigation/native";
 import { queryClient } from "@/queries/queryClient";
 import { useLogout } from "@/utils/logout";
@@ -18,7 +18,7 @@ import {
 import mmkv, { zustandMMKVStorage } from "@/utils/mmkv";
 
 export function PrivyPlaygroundLoginScreen() {
-  const { signupWithPasskey, loginWithPasskey } = useSignupWithPasskey();
+  const { signupWithPasskey, loginWithPasskey } = useAuthenticateWithPasskey();
   // const navigation = useNavigation();
   const { logout } = useLogout();
 
