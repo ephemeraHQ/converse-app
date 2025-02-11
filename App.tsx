@@ -207,7 +207,7 @@ export function AppWithProviders() {
                         {/* <AuthenticateWithPasskeyProvider>
                           <PrivyPlaygroundLandingScreen />
                         </AuthenticateWithPasskeyProvider> */}
-                        <DevToolsBubble onCopy={onCopy} />
+                        {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
                         <Snackbars />
                       </BottomSheetModalProvider>
                     </GestureHandlerRootView>
