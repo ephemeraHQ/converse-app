@@ -102,9 +102,10 @@ export default (): ExpoConfig => {
     userInterfaceStyle: "automatic",
     version: version,
     assetBundlePatterns: ["**/*"],
-    runtimeVersion: version,
+    runtimeVersion: {
+      policy: "appVersion",
+    },
     updates: {
-      fallbackToCacheTimeout: 0,
       url: "https://u.expo.dev/49a65fae-3895-4487-8e8a-5bd8bee3a401",
     },
     extra: {
