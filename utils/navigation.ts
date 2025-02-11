@@ -14,6 +14,7 @@ export const navigate = async <T extends keyof NavigationParamList>(
   screen: T,
   params?: NavigationParamList[T]
 ) => {
+  logger.debug("[Navigation] Navigating to:", screen, params);
   if (!converseNavigatorRef) {
     logger.error("[Navigation] Conversation navigator not found");
     return;

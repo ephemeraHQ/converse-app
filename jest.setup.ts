@@ -91,7 +91,7 @@ jest.mock("@/config", () => ({
     debugMenu: false,
     env: "test",
     xmtpEnv: "dev",
-    apiURI: "https://test.api",
+    deprecatedApiURI: "https://test.api",
     // Add other config values as needed by tests
   }),
   default: {
@@ -99,7 +99,7 @@ jest.mock("@/config", () => ({
     debugMenu: false,
     env: "test",
     xmtpEnv: "dev",
-    apiURI: "https://test.api",
+    deprecatedApiURI: "https://test.api",
     // Add other config values as needed by tests
   },
 }));

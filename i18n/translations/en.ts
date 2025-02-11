@@ -8,7 +8,6 @@ export const en = {
       createContactCard: "Create a Contact Card",
     },
     contactCard: {
-      title: "Complete your contact card",
       subtitle: "A secure identity",
       body: "Add and edit Contact Cards anytime,",
       bodyPressable: "or go Rando for extra privacy.",
@@ -410,8 +409,6 @@ export const en = {
   log_out: "Log out",
   disconnect_delete_local_data: "Disconnect and delete local data",
   disconnect_this_account: "Disconnect this account",
-  disconnect_account_description:
-    "Your group chats will be encrypted and saved on your device until you delete Converse. Your DMs will be backed up by the XMTP network.",
   your_profile_page: "Your profile page",
   copy_wallet_address: "Copy wallet address",
   turn_on_notifications: "Turn on notifications",
@@ -580,12 +577,6 @@ export const en = {
     member_removed: "{{userName}} removed {{memberName}} from the group",
     member_removed_unknown: "{{userName}} removed a member from the group",
     members_removed: "{{userName}} removed {{count}} members from the group",
-  },
-
-  debug: {
-    converse_log_session: "Converse Log Session",
-    libxmtp_log_session: "LibXMTP Log Session",
-    converse_version: "Converse v{{version}} ({{buildNumber}})",
   },
 
   file_preview: "File preview",

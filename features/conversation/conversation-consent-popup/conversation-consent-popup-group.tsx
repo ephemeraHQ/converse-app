@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useGroupConsentForCurrentAccount } from "@/features/consent/use-group-consent-for-current-account";
 import {
   ConsentPopupButtonsContainer,

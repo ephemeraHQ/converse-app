@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useQuery } from "@tanstack/react-query";
 import { getGroupInvite } from "@/utils/api/api-groups/api-groups";
 import { GroupInvite } from "@/utils/api/api-groups/api-group.types";

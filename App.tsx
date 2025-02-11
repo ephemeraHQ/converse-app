@@ -1,34 +1,32 @@
 import { PrivyProvider } from "@privy-io/expo";
-
+import { DevToolsBubble } from "react-native-react-query-devtools";
+import * as Clipboard from "expo-clipboard";
 // This is a requirement for Privy to work, does not make any sense
 // To test run yarn start --no-dev --minify
 
-import { setupStreamingSubscriptions } from "@/features/streams/streams";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
-import DebugButton from "@components/DebugButton";
-import { Snackbars } from "@components/Snackbar/Snackbars";
-import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
-import { useReactQueryDevTools } from "@dev-plugins/react-query";
-import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { useAppStateHandlers } from "@hooks/useAppStateHandlers";
-import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
-import { queryClient } from "@queries/queryClient";
-import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { useThemeProvider } from "@theme/useAppTheme";
-import { setupAppAttest } from "@utils/appCheck";
-import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
-import { converseEventEmitter } from "@utils/events";
-import logger from "@utils/logger";
-import "expo-dev-client";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { DebugButton } from "@components/DebugButton";
 import {
-  LogBox,
+  AppState,
   Platform,
   StyleSheet,
   View,
   useColorScheme,
 } from "react-native";
+import { Snackbars } from "@components/Snackbar/Snackbars";
+import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
+import { useReactQueryDevTools } from "@dev-plugins/react-query";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
+import { queryClient } from "@queries/queryClient";
+import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
+import { focusManager, QueryClientProvider } from "@tanstack/react-query";
+import { useThemeProvider } from "@theme/useAppTheme";
+import { setupAppAttest } from "@utils/appCheck";
+import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
+import { converseEventEmitter } from "@utils/events";
+import "expo-dev-client";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -38,35 +36,60 @@ import {
 } from "react-native-reanimated";
 import { ThirdwebProvider } from "thirdweb/react";
 import { config } from "./config";
-import {
-  TEMPORARY_ACCOUNT_NAME,
-  useAccountsStore,
-} from "./data/store/accountsStore";
-import { setAuthStatus } from "./data/store/authStore";
-import Main from "./screens/Main";
-import { registerBackgroundFetchTask } from "./utils/background";
+import { Main } from "./screens/Main";
 import { initSentry } from "./utils/sentry";
 import { saveApiURI } from "./utils/sharedData";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
+import { setupStreamingSubscriptions } from "@/features/streams/streams";
+import {
+  // MultiInboxClient,
+  useInitializeMultiInboxClient,
+} from "@/features/multi-inbox/multi-inbox.client";
+// import { useAppStateHandlers } from "./hooks/useAppStateHandlers";
+// import { useInstalledWallets } from "@/features/wallets/use-installed-wallets.hook";
+import logger from "./utils/logger";
+// import { useAccountsStore } from "./features/multi-inbox/multi-inbox.store";
+// import { AuthenticateWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
+// import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
 
-preventSplashScreenAutoHide();
+!!preventSplashScreenAutoHide && preventSplashScreenAutoHide();
 
-LogBox.ignoreLogs([
-  "Privy: Expected status code 200, received 400", // Privy
-  "Error destroying session", // Privy
-  'event="noNetwork', // ethers
-  "[Reanimated] Reading from `value` during component render. Please ensure that you do not access the `value` property or use `get` method of a shared value while React is rendering a component.",
-  "Attempted to import the module", // General module import warnings
-  'Attempted to import the module "/Users', // More specific module import warnings
-  "Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API",
-  "Couldn't find real values for `KeyboardContext`. Please make sure you're inside of `KeyboardProvider` - otherwise functionality of `react-native-keyboard-controller` will not work. [Component Stack]",
+const IGNORED_LOGS = [
+  "Couldn't find real values for `KeyboardContext",
+  "Error destroying session",
+  'event="noNetwork',
+  "[Reanimated] Reading from `value` during component render",
+  "Attempted to import the module",
+  'Attempted to import the module "/Users',
+  "Falling back to file-based resolution",
   "sync worker error storage error: Pool needs to  reconnect before use",
-  "[Converse.debug.dylib] sync worker error storage error: Pool needs to  reconnect before use",
-  "Falling back to file-based resolution. Consider updating the call site or asking the package maintainer(s) to expose this API.",
-]);
+  "Require cycle", // This will catch all require cycle warnings
+];
 
+// Workaround for console filtering in development
 if (__DEV__) {
-  require("./ReactotronConfig.ts");
+  const connectConsoleTextFromArgs = (arrayOfStrings: string[]): string =>
+    arrayOfStrings
+      .slice(1)
+      .reduce(
+        (baseString, currentString) => baseString.replace("%s", currentString),
+        arrayOfStrings[0]
+      );
+
+  const filterIgnoredMessages =
+    (consoleLog: typeof console.log) =>
+    (...args: any[]) => {
+      const output = connectConsoleTextFromArgs(args);
+
+      if (!IGNORED_LOGS.some((log) => output.includes(log))) {
+        consoleLog(...args);
+      }
+    };
+
+  console.log = filterIgnoredMessages(console.log);
+  console.info = filterIgnoredMessages(console.info);
+  console.warn = filterIgnoredMessages(console.warn);
+  console.error = filterIgnoredMessages(console.error);
 }
 
 // This is the default configuration
@@ -101,11 +124,8 @@ const App = () => {
     setupStreamingSubscriptions();
   }, []);
 
+  const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
   useCoinbaseWalletListener(true, coinbaseUrl);
-
-  useEffect(() => {
-    registerBackgroundFetchTask();
-  }, []);
 
   const showDebugMenu = useCallback(() => {
     if (!debugRef.current || !(debugRef.current as any).showDebugMenu) {
@@ -120,28 +140,14 @@ const App = () => {
       converseEventEmitter.off("showDebugMenu", showDebugMenu);
     };
   }, [showDebugMenu]);
-
-  // For now we use persit with zustand to get the accounts when the app launch so here is okay to see if we're logged in or not
   useEffect(() => {
-    const currentAccount = useAccountsStore.getState().currentAccount;
-    if (currentAccount && currentAccount !== TEMPORARY_ACCOUNT_NAME) {
-      setAuthStatus("signedIn");
-    } else {
-      setAuthStatus("signedOut");
-    }
+    AppState.addEventListener("change", (state) => {
+      logger.debug("[App] AppState changed to", state);
+      focusManager.setFocused(state === "active");
+    });
   }, []);
 
-  useAppStateHandlers({
-    onBackground() {
-      logger.debug("App is in background");
-    },
-    onForeground() {
-      logger.debug("App is in foreground");
-    },
-    onInactive() {
-      logger.debug("App is inactive");
-    },
-  });
+  // For now we use persit with zustand to get the accounts when the app launch so here is okay to see if we're logged in or not
 
   return (
     <View style={styles.safe}>
@@ -154,8 +160,10 @@ const App = () => {
 // On Android we use the default keyboard "animation"
 const AppKeyboardProvider =
   Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
+// import { DevToolsBubble } from "react-native-react-query-devtools";
 
-export default function AppWithProviders() {
+export function AppWithProviders() {
+  useInitializeMultiInboxClient();
   const colorScheme = useColorScheme();
 
   const paperTheme = useMemo(() => {
@@ -166,6 +174,18 @@ export default function AppWithProviders() {
 
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();
+
+  const onCopy = async (text: string) => {
+    try {
+      // For Expo:
+      await Clipboard.setStringAsync(text);
+      // OR for React Native CLI:
+      // await Clipboard.setString(text);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -184,6 +204,10 @@ export default function AppWithProviders() {
                     <GestureHandlerRootView style={{ flex: 1 }}>
                       <BottomSheetModalProvider>
                         <App />
+                        {/* <AuthenticateWithPasskeyProvider>
+                          <PrivyPlaygroundLandingScreen />
+                        </AuthenticateWithPasskeyProvider> */}
+                        {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
                         <Snackbars />
                       </BottomSheetModalProvider>
                     </GestureHandlerRootView>

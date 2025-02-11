@@ -1,16 +1,10 @@
 import { config } from "@/config";
 import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
 import { ProfileScreenConfig } from "@/features/profiles/profile.nav";
-import { useCheckCurrentInstallation } from "@/utils/xmtpRN/xmtp-client/xmtp-client-installations";
 import ActionSheetStateHandler from "@components/StateHandlers/ActionSheetStateHandler";
-import HydrationStateHandler from "@components/StateHandlers/HydrationStateHandler";
-import InitialStateHandler from "@components/StateHandlers/InitialStateHandler";
-import MainIdentityStateHandler from "@components/StateHandlers/MainIdentityStateHandler";
+import { HydrationStateHandler } from "@components/StateHandlers/HydrationStateHandler";
+import { InitialStateHandler } from "@components/StateHandlers/InitialStateHandler";
 import NetworkStateHandler from "@components/StateHandlers/NetworkStateHandler";
-import WalletsStateHandler from "@components/StateHandlers/WalletsStateHandler";
-import { useAppStore } from "@data/store/appStore";
-import { useAuthStatus } from "@data/store/authStore";
-import { useSelect } from "@data/store/storeHelpers";
 import { ConversationScreenConfig } from "@features/conversation/conversation.nav";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { backgroundColor } from "@styles/colors";
@@ -33,7 +27,7 @@ import {
   getConverseInitialURL,
   getConverseStateFromPath,
 } from "./Navigation/navHelpers";
-
+import { useAuthStatus } from "@/features/authentication/useAuthStatus.hook";
 const prefix = Linking.createURL("/");
 
 const linking: LinkingOptions<NavigationParamList> = {
@@ -55,9 +49,7 @@ const linking: LinkingOptions<NavigationParamList> = {
   getInitialURL: getConverseInitialURL,
 };
 
-export default function Main() {
-  useCheckCurrentInstallation();
-
+export function Main() {
   const {
     themeScheme,
     navigationTheme,
@@ -87,30 +79,16 @@ export default function Main() {
 }
 
 const NavigationContent = () => {
-  const authStatus = useAuthStatus();
+  const { isRestoring, isSignedIn, isSignedOut } = useAuthStatus();
 
-  const { splashScreenHidden } = useAppStore(useSelect(["splashScreenHidden"]));
-
-  // Uncomment to test design system components
-  // return (
-  //   <NativeStack.Navigator>
-  //     <NativeStack.Screen name="Examples" component={Examples} />
-  //   </NativeStack.Navigator>
-  // );
-  if (!splashScreenHidden) {
-    // TODO: Add a loading screen
-    return null;
-  }
-
-  if (authStatus === "idle") {
+  // Show idle navigation during signup/signin/restoration
+  if (isRestoring) {
     return <IdleNavigation />;
-  }
-
-  if (authStatus === "signedOut") {
+  } else if (isSignedOut) {
     return <SignedOutNavigation />;
+  } else if (isSignedIn) {
+    return <SignedInNavigation />;
   }
-
-  return <SignedInNavigation />;
 };
 
 // Bunch of handlers. Not really react components
@@ -125,9 +103,7 @@ const Initializer = () => {
         <StatusBar backgroundColor={backgroundColor(colorScheme)} />
       )}
       <NetworkStateHandler />
-      <MainIdentityStateHandler />
       <ActionSheetStateHandler />
-      <WalletsStateHandler />
     </>
   );
 };

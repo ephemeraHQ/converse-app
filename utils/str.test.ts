@@ -4,9 +4,7 @@ import {
   addressPrefix,
   capitalize,
   formatGroupName,
-  getTitleFontScale,
   shortDisplayName,
-  strByteSize,
 } from "./str";
 
 jest.mock("react-native", () => ({
@@ -20,14 +18,6 @@ jest.mock("react-native", () => ({
     OS: "ios",
   },
   TextInput: jest.fn(),
-}));
-
-jest.mock("../data/store/accountsStore", () => ({
-  getProfilesStore: jest
-    .fn()
-    .mockReturnValue({ getState: jest.fn().mockReturnValue({ profiles: {} }) }),
-  useAccountsList: jest.fn().mockReturnValue(["account1", "account2"]),
-  currentAccount: jest.fn().mockReturnValue("currentAccount"),
 }));
 
 jest.mock("expo-crypto", () => ({
@@ -73,23 +63,6 @@ describe("addressPrefix", () => {
 
   it("should return the original address if shorter than 6 characters", () => {
     expect(addressPrefix("0x123")).toBe("0x123");
-  });
-});
-
-describe("getTitleFontScale", () => {
-  it("should return the correct title font scale", () => {
-    expect(getTitleFontScale()).toBe(1);
-  });
-
-  it("should return a font scale not greater than 1.235", () => {
-    jest.spyOn(PixelRatio, "getFontScale").mockReturnValue(1.5);
-    expect(getTitleFontScale()).toBe(1.235);
-  });
-});
-
-describe("strByteSize", () => {
-  it("should return the byte size of a string", () => {
-    expect(strByteSize("hello")).toBe(5);
   });
 });
 

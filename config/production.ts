@@ -15,6 +15,7 @@ export const productionConfig: IConfig = {
     domain,
   ]),
   evm: {
+    // @ts-ignore note(lustig) env types aren't working for me OOTB
     rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     transactionChainId: "0x2105", // Base Mainnet
     USDC: {

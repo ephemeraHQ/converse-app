@@ -1,7 +1,7 @@
 import { conversationMetadataQueryKey } from "@/queries/QueryKeys";
 import { getTopics } from "@/utils/api/topics";
 import logger from "@/utils/logger";
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, skipToken } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { create, windowScheduler } from "@yornaath/batshit";
 import { queryClient } from "./queryClient";
@@ -16,10 +16,13 @@ type IArgs = {
 };
 
 export function getConversationMetadataQueryOptions({ account, topic }: IArgs) {
+  const enabled = !!topic && !!account;
   return queryOptions({
     queryKey: conversationMetadataQueryKey(account, topic),
-    queryFn: () => getConversationMetadata({ account, topic }),
-    enabled: !!topic && !!account,
+    queryFn: enabled
+      ? () => getConversationMetadata({ account, topic })
+      : skipToken,
+    enabled,
   });
 }
 

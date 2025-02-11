@@ -13,19 +13,33 @@ export async function getInboxIdFromAddress(args: {
 }) {
   const { currentUserAddress, targetEthAddress } = args;
   const startTime = Date.now();
-
   try {
+    const clientStartTime = Date.now();
     const client = await getXmtpClient({
       address: currentUserAddress,
     });
+    const clientDuration = Date.now() - clientStartTime;
 
-    const inboxId = await client.findInboxIdFromAddress(targetEthAddress);
-
-    const duration = Date.now() - startTime;
-
-    if (duration > 3000) {
+    if (clientDuration > 2000) {
       logger.warn(
-        `[getInboxIdFromAddress] Took ${duration}ms to get inboxId for address: ${targetEthAddress}`
+        `[getInboxIdFromAddress] Client lookup took ${clientDuration}ms for address: ${currentUserAddress}`
+      );
+    }
+
+    const lookupStartTime = Date.now();
+    const inboxId = await client.findInboxIdFromAddress(targetEthAddress);
+    const lookupDuration = Date.now() - lookupStartTime;
+
+    if (lookupDuration > 1000) {
+      logger.warn(
+        `[getInboxIdFromAddress] Inbox lookup took ${lookupDuration}ms for target address: ${targetEthAddress}`
+      );
+    }
+
+    const totalDuration = Date.now() - startTime;
+    if (totalDuration > 3000) {
+      logger.warn(
+        `[getInboxIdFromAddress] Total operation took ${totalDuration}ms (client: ${clientDuration}ms, lookup: ${lookupDuration}ms) for target address: ${targetEthAddress}`
       );
     }
 

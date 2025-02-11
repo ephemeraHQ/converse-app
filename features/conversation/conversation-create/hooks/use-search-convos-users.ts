@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
+import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { getSearchConvosUsersQueryKey } from "@/queries/QueryKeys";
 import { searchProfilesForCurrentAccount } from "@/utils/api/profiles";
 import { captureError } from "@/utils/capture-error";

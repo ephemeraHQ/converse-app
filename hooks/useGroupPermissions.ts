@@ -1,9 +1,9 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { currentAccount } from "../data/store/accountsStore";
+import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { useGroupPermissionsQuery } from "../queries/useGroupPermissionsQuery";
 
 export const useGroupPermissions = (topic: ConversationTopic) => {
-  const account = currentAccount();
+  const account = getSafeCurrentSender().ethereumAddress;
   const {
     data: permissions,
     isLoading,

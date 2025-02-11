@@ -14,6 +14,8 @@ import { translate } from "@/i18n";
 import { IconButton } from "@/design-system/IconButton/IconButton";
 import { Text } from "@/design-system/Text";
 import { ContactCardContainer } from "@/features/profiles/components/contact-card-container";
+import { HStack } from "@/design-system/HStack";
+import { Button } from "@/design-system/Button/Button";
 
 type IOnboardingContactCardProps = {
   displayName?: string;
@@ -21,6 +23,7 @@ type IOnboardingContactCardProps = {
   addPFP: () => void;
   pfpUri?: string;
   editable?: boolean;
+  onImportPress: () => void;
 };
 
 export const OnboardingCreateContactCard = memo(
@@ -29,6 +32,7 @@ export const OnboardingCreateContactCard = memo(
     setDisplayName,
     addPFP,
     pfpUri,
+    onImportPress,
     editable = true,
   }: IOnboardingContactCardProps) {
     const { theme } = useAppTheme();
@@ -56,9 +60,13 @@ export const OnboardingCreateContactCard = memo(
           .duration(ONBOARDING_ENTERING_DURATION)}
       >
         <ContactCardContainer>
-          <Pressable disabled={!editable} onPress={addPFP}>
-            <OnboardingEditableAvatar uri={pfpUri} name={displayName} />
-          </Pressable>
+          {/* @ts-ignore */}
+          <HStack justifyContent="space-between">
+            <Pressable disabled={!editable} onPress={addPFP}>
+              <OnboardingEditableAvatar uri={pfpUri} name={displayName} />
+            </Pressable>
+            <Button text="Import" onPress={onImportPress} />
+          </HStack>
           {editable ? (
             <TextField
               containerStyle={{

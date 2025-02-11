@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
@@ -36,11 +36,11 @@ export const useConversationListConversations = () => {
     }
   }, [conversations, currentAccount]);
 
+  /// note(lustig): @thierryskoda why not just use refetchOnWindowFocus in the queryOptions for these?
   // For now, let's make sure we always are up to date with the conversations
   useScreenFocusEffectOnce(() => {
     refetch().catch(captureError);
   });
-
   // For now, let's make sure we always are up to date with the conversations
   useAppStateHandlers({
     onForeground: () => {

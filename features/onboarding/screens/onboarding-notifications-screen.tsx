@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useCallback, useState } from "react";
-import { ViewStyle } from "react-native";
+import { ViewStyle, TextStyle } from "react-native";
 
 import { Avatar } from "@/components/Avatar";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
@@ -17,15 +17,22 @@ import { translate } from "@/i18n";
 import { captureError } from "@/utils/capture-error";
 import { useAppTheme } from "@theme/useAppTheme";
 import {
+  AuthStatuses,
+  useAccountsStore,
   useCurrentAccount,
   useSettingsStore,
-} from "../../../data/store/accountsStore";
-import { setAuthStatus } from "../../../data/store/authStore";
-import { NavigationParamList } from "../../../screens/Navigation/Navigation";
+} from "@/features/multi-inbox/multi-inbox.store";
+import { NavigationParamList } from "@/screens/Navigation/Navigation";
 
 const $screenContainer: ViewStyle = {
   flex: 1,
   marginHorizontal: 16,
+};
+
+const $noticeText: TextStyle = {
+  textAlign: "center",
+  marginTop: 8,
+  color: "gray",
 };
 
 export function OnboardingNotificationsScreen(
@@ -43,15 +50,16 @@ export function OnboardingNotificationsScreen(
 
   const displayName = usePreferredName(currentAccount);
 
-  const handleEnableNotifications = useCallback(async () => {
+  const setAuthStatus = useAccountsStore((s) => s.setAuthStatus);
+  const handleEnableNotifications = () => {
     try {
       // TODO
     } catch (error) {
       captureError(error);
     } finally {
-      setAuthStatus("signedIn");
+      setAuthStatus(AuthStatuses.signedIn);
     }
-  }, []);
+  };
 
   const [isEssentialsEnabled, setIsEssentialsEnabled] = useState(true);
 
@@ -75,49 +83,33 @@ export function OnboardingNotificationsScreen(
         <Text preset="body">{displayName}</Text>
       </AnimatedHStack>
       <Center style={{ flex: 1, flexDirection: "column" }}>
-        <OnboardingTitle preset="title">
-          {translate("onboarding.notifications.title")}
-        </OnboardingTitle>
+        <OnboardingTitle preset="title">Good vibrations only</OnboardingTitle>
         <OnboardingSubtitle style={{ marginTop: 16, marginBottom: 24 }}>
-          {translate("onboarding.notifications.subtitle")}
+          Most things aren't urgent. Protect your attention by minimizing
+          notifications.
         </OnboardingSubtitle>
         <OnboardingNotificationRow
-          title={translate("onboarding.notifications.essentials")}
-          description={translate(
-            "onboarding.notifications.essentialsDescription"
-          )}
-          value={isEssentialsEnabled}
-          onToggle={handleToggleEssentials}
-        />
-        <OnboardingNotificationRow
-          title={translate("onboarding.notifications.mentionsOnly")}
-          description={translate(
-            "onboarding.notifications.mentionsOnlyDescription"
-          )}
-          disabled
-          value={false}
-          onToggle={() => {}}
-        />
-        <OnboardingNotificationRow
-          title={translate("onboarding.notifications.cash")}
-          description={translate("onboarding.notifications.cashDescription")}
-          disabled
-          value={false}
+          title={"Essentials"}
+          description={"Notify me when approved contacts send messages"}
+          value={true}
           onToggle={() => {}}
         />
       </Center>
       <Button
-        text={translate("onboarding.notifications.enableNotifications")}
+        text="Enable notifications"
         onPress={handleEnableNotifications}
         size="lg"
         style={{ flexShrink: 1 }}
       />
+      <Text style={$noticeText} preset="body">
+        Note: Notifications will be back soon
+      </Text>
       <Button
-        text={translate("onboarding.notifications.later")}
+        text="Later"
         variant="text"
         onPress={() => {
           setNotificationsSettings({ showNotificationScreen: false });
-          setAuthStatus("signedIn");
+          setAuthStatus(AuthStatuses.signedIn);
         }}
       />
     </Screen>

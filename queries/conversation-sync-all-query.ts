@@ -1,8 +1,12 @@
+import {
+  AuthStatuses,
+  useAccountsStore,
+} from "@/features/multi-inbox/multi-inbox.store";
 import { conversationSyncAllQueryKey } from "@/queries/QueryKeys";
 import { queryClient } from "@/queries/queryClient";
 import { captureError } from "@/utils/capture-error";
 import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, skipToken } from "@tanstack/react-query";
 import { ConsentState } from "@xmtp/react-native-sdk";
 
 type IArgs = {
@@ -11,38 +15,43 @@ type IArgs = {
 };
 
 export function getConversationSyncAllQueryOptions(args: IArgs) {
+  const isSignedIn =
+    useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
+  const enabled = !!args.ethAddress && isSignedIn;
   return queryOptions({
+    enabled,
     queryKey: conversationSyncAllQueryKey(args),
-    queryFn: async () => {
-      if (!args.ethAddress) {
-        throw new Error("ethAddress is required");
-      }
+    queryFn: enabled
+      ? async () => {
+          if (!args.ethAddress) {
+            throw new Error("ethAddress is required");
+          }
 
-      if (!args.consentStates.length) {
-        throw new Error("consentStates is required");
-      }
+          if (!args.consentStates.length) {
+            throw new Error("consentStates is required");
+          }
 
-      const client = await getXmtpClient({
-        address: args.ethAddress,
-      });
+          const client = await getXmtpClient({
+            address: args.ethAddress,
+          });
 
-      const beforeSync = new Date().getTime();
-      await client.conversations.syncAllConversations(args.consentStates);
-      const afterSync = new Date().getTime();
+          const beforeSync = new Date().getTime();
+          await client.conversations.syncAllConversations(args.consentStates);
+          const afterSync = new Date().getTime();
 
-      const timeDiff = afterSync - beforeSync;
-      if (timeDiff > 3000) {
-        captureError(
-          new Error(
-            `[getConversationSyncAllQuery] Syncing conversations from network took ${timeDiff}ms for account ${args.ethAddress}`
-          )
-        );
-      }
+          const timeDiff = afterSync - beforeSync;
+          if (timeDiff > 3000) {
+            captureError(
+              new Error(
+                `[getConversationSyncAllQuery] Syncing conversations from network took ${timeDiff}ms for account ${args.ethAddress}`
+              )
+            );
+          }
 
-      return true;
-    },
+          return true;
+        }
+      : skipToken,
     staleTime: 5000, // 5 seconds seems okay for now to not overload the network
-    enabled: !!args.ethAddress && !!args.consentStates.length,
   });
 }
 

@@ -14,11 +14,17 @@ type EnvironmentConfig = {
     bundleIdentifier: string;
     associatedDomains: string[];
     googleServicesFile: string;
+    // infoPlist: {
+    //   NSAppTransportSecurity: {
+    //     NSAllowsArbitraryLoads: boolean;
+    //   };
+    // };
   };
   android: {
     package: string;
     googleServicesFile: string;
   };
+  alchemyApiKey: string;
 };
 
 const settings: Record<Environment, EnvironmentConfig> = {
@@ -32,6 +38,11 @@ const settings: Record<Environment, EnvironmentConfig> = {
         "webcredentials:dev.converse.xyz",
       ],
       googleServicesFile: "./google-services/ios/development.plist",
+      // infoPlist: {
+      //   NSAppTransportSecurity: {
+      //     NSAllowsArbitraryLoads: true,
+      //   },
+      // },
     },
     android: {
       package: "com.converse.dev",
@@ -42,6 +53,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "dev.getconverse.app",
     appName: "Converse DEV",
     icon: "./assets/icon-preview.png",
+    alchemyApiKey: process.env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   preview: {
     scheme: "converse-preview",
@@ -53,6 +65,11 @@ const settings: Record<Environment, EnvironmentConfig> = {
         "webcredentials:preview.converse.xyz",
       ],
       googleServicesFile: "./google-services/ios/preview.plist",
+      // infoPlist: {
+      //   NSAppTransportSecurity: {
+      //     NSAllowsArbitraryLoads: false,
+      //   },
+      // },
     },
     android: {
       package: "com.converse.preview",
@@ -63,6 +80,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "preview.getconverse.app",
     appName: "Converse PREVIEW",
     icon: "./assets/icon-preview.png",
+    alchemyApiKey: process.env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   production: {
     scheme: "converse",
@@ -74,6 +92,11 @@ const settings: Record<Environment, EnvironmentConfig> = {
         "webcredentials:converse.xyz",
       ],
       googleServicesFile: "./google-services/ios/production.plist",
+      // infoPlist: {
+      //   NSAppTransportSecurity: {
+      //     NSAllowsArbitraryLoads: false,
+      //   },
+      // },
     },
     android: {
       package: "com.converse.prod",
@@ -84,11 +107,13 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "getconverse.app",
     appName: "Converse",
     icon: "./assets/icon.png",
+    alchemyApiKey: process.env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
 };
 
 // eslint-disable-next-line import/no-default-export
 export default (): ExpoConfig => {
+  // @ts-expect-error note(lustig) env types aren't working for me OOTB
   const expoEnv = (process.env.EXPO_ENV || "development") as Environment;
   const config = settings[expoEnv];
 
@@ -136,6 +161,8 @@ export default (): ExpoConfig => {
           "zerion",
           "exodus",
           "oneinch",
+          "phantom",
+          "app.phantom",
         ],
         NSAppTransportSecurity: {
           NSAllowsArbitraryLoads: false, // Not sure why

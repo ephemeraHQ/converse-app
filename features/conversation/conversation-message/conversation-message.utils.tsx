@@ -10,7 +10,7 @@ import { getMessageContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-co
 import {
   getCurrentAccount,
   useCurrentAccount,
-} from "@data/store/accountsStore";
+} from "@/features/multi-inbox/multi-inbox.store";
 import { getReadableProfile } from "@utils/getReadableProfile";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {

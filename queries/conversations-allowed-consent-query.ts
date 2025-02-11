@@ -9,10 +9,19 @@ import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { allowedConsentConversationsQueryKey } from "@queries/QueryKeys";
-import { QueryObserver, queryOptions, useQuery } from "@tanstack/react-query";
+import {
+  QueryObserver,
+  queryOptions,
+  useQuery,
+  skipToken,
+} from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
 import { ensureGroupMembersQueryData } from "./useGroupMembersQuery";
+import {
+  AuthStatuses,
+  useAccountsStore,
+} from "@/features/multi-inbox/multi-inbox.store";
 
 export type IAllowedConsentConversationsQuery = Awaited<
   ReturnType<typeof getAllowedConsentConversations>
@@ -155,17 +164,19 @@ const getAllowedConsentConversations = async (args: IArgs) => {
 export const getAllowedConsentConversationsQueryOptions = (
   args: Optional<IArgsWithCaller, "caller">
 ) => {
+  const isSignedIn =
+    useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
   const { account, caller } = args;
+  const enabled = !!account && isSignedIn;
   return queryOptions({
     meta: {
       caller,
     },
     queryKey: allowedConsentConversationsQueryKey(account),
-    queryFn: () =>
-      getAllowedConsentConversations({
-        account,
-      }),
-    enabled: !!account,
+    queryFn: enabled
+      ? () => getAllowedConsentConversations({ account })
+      : skipToken,
+    enabled,
   });
 };
 

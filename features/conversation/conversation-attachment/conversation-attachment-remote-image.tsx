@@ -1,5 +1,5 @@
 import { AttachmentLoading } from "@/features/conversation/conversation-attachment/conversation-attachment-loading";
-import { getCurrentAccount } from "@data/store/accountsStore";
+import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { Icon } from "@design-system/Icon/Icon";
 import { Text } from "@design-system/Text";
 import { IVStackProps, VStack } from "@design-system/VStack";

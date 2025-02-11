@@ -22,10 +22,9 @@ import {
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { MutationKeys } from "../../queries/MutationKeys";
-import { updateConsentForGroupsForAccount } from "../../utils/xmtpRN/xmtp-consent/update-consent-for-groups-for-account";
-import { updateInboxIdsConsentForAccount } from "../../utils/xmtpRN/xmtp-consent/update-inbox-ids-consent-for-account";
+import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-
+import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
 type IAllowGroupMutationOptions = {
   account: string;
   topic: ConversationTopic;

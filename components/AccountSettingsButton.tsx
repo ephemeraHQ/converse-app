@@ -1,4 +1,3 @@
-import { useDisconnectActionSheet } from "@hooks/useDisconnectActionSheet";
 import { translate } from "@i18n";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {
@@ -17,7 +16,7 @@ import {
 } from "react-native";
 
 import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
-import { useAccountsStore } from "../data/store/accountsStore";
+import { useAccountsStore } from "../features/multi-inbox/multi-inbox.store";
 import { useAppStore } from "../data/store/appStore";
 import { useSelect } from "../data/store/storeHelpers";
 import { useRouter } from "../navigation/useNavigation";
@@ -25,6 +24,7 @@ import { navigate } from "../utils/navigation";
 import Picto from "./Picto/Picto";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "./TableView/TableViewImage";
+import { useLogout } from "@/utils/logout";
 
 type Props = {
   account: string;
@@ -33,11 +33,7 @@ type Props = {
 export default function AccountSettingsButton({ account }: Props) {
   const router = useRouter();
 
-  const {
-    setNotificationsPermissionStatus,
-    notificationsPermissionStatus,
-    isInternetReachable,
-  } = useAppStore(
+  const { notificationsPermissionStatus, isInternetReachable } = useAppStore(
     useSelect([
       "setNotificationsPermissionStatus",
       "notificationsPermissionStatus",
@@ -48,32 +44,35 @@ export default function AccountSettingsButton({ account }: Props) {
   const { setCurrentAccount } = useAccountsStore(
     useSelect(["setCurrentAccount"])
   );
+
   const colorScheme = useColorScheme();
-  const showDisconnectActionSheet = useDisconnectActionSheet(account);
+  const { logout } = useLogout();
 
   const onPress = useCallback(() => {
     Keyboard.dismiss();
 
     const methods = {
-      [translate("your_profile_page")]: async () => {
+      ["Your profile page"]: async () => {
         if (account) {
           invalidateProfileSocialsQuery(account);
-          setCurrentAccount(account, false);
+          setCurrentAccount({ ethereumAddress: account });
+
           router.navigate("Chats");
           navigate("Profile", {
             address: account,
           });
         }
       },
-      [translate("copy_wallet_address")]: () => {
+      ["Copy wallet address"]: () => {
         Clipboard.setString(account || "");
       },
-      [translate("turn_on_notifications")]: () => {
+      ["Turn on notifications"]: () => {
         // TODO
       },
-      [translate("disconnect_this_account")]: () =>
-        showDisconnectActionSheet(colorScheme),
-      [translate("cancel")]: () => {},
+      ["Logout"]: () => {
+        logout();
+      },
+      ["Cancel"]: () => {},
     };
 
     const options = Object.keys(methods);
@@ -121,7 +120,7 @@ export default function AccountSettingsButton({ account }: Props) {
     notificationsPermissionStatus,
     colorScheme,
     setCurrentAccount,
-    showDisconnectActionSheet,
+    logout,
   ]);
 
   return Platform.OS === "android" ? (

@@ -1,5 +1,5 @@
 import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query";
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useQuery } from "@tanstack/react-query";
 
 export const useAllowedConversationsCount = () => {

@@ -3,7 +3,7 @@ import { config } from "@/config";
 import {
   useCurrentAccount,
   useSettingsStore,
-} from "@/data/store/accountsStore";
+} from "@/features/multi-inbox/multi-inbox.store";
 import { Button } from "@/design-system/Button/Button";
 import { HStack } from "@/design-system/HStack";
 import { HeaderAction } from "@/design-system/Header/HeaderAction";
@@ -15,7 +15,6 @@ import { SettingsList } from "@/design-system/settings-list/settings-list";
 import { ContactCard } from "@/features/profiles/components/contact-card";
 import { SocialNames } from "@/features/profiles/components/social-names";
 import { formatConverseUsername } from "@/features/profiles/utils/format-converse-username";
-import { useDisconnectActionSheet } from "@/hooks/useDisconnectActionSheet";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { usePreferredUsername } from "@/hooks/usePreferredUsername";
@@ -32,6 +31,7 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { StackActions } from "@react-navigation/native";
 import React, { useCallback, useState } from "react";
 import { Alert, Share, ViewStyle } from "react-native";
+import { useLogout } from "@/utils/logout";
 
 export function ProfileScreen() {
   const [editMode, setEditMode] = useState(false);
@@ -61,11 +61,11 @@ export function ProfileScreen() {
     setEditMode(!editMode);
   }, [editMode]);
 
-  const showDisconnectActionSheet = useDisconnectActionSheet();
-
   const isBlockedPeer = useSettingsStore(
     (s) => s.peersStatus[peerAddress.toLowerCase()] === "blocked"
   );
+
+  const { logout } = useLogout();
 
   const handleContextMenuAction = useCallback(
     (actionId: string) => {
@@ -273,10 +273,9 @@ export function ProfileScreen() {
                   onValueChange: () => {},
                 },*/
                 {
-                  label: translate("log_out"),
+                  label: "Log out",
                   isWarning: true,
-                  onPress: () =>
-                    showDisconnectActionSheet(theme.isDark ? "dark" : "light"),
+                  onPress: () => logout(),
                 },
               ]}
             />

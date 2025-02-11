@@ -6,7 +6,7 @@ import {
   getInstallationKeySignature,
 } from "../xmtpRN/xmtp-client/xmtp-client-installations";
 import { getInboxId } from "../xmtpRN/signIn";
-import { api } from "./api";
+import { oldApi } from "./api";
 import {
   CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
   CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
@@ -15,6 +15,7 @@ import {
   XMTP_IDENTITY_KEY,
 } from "./api.constants";
 import { createDedupedFetcher } from "./api.utils";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export type AuthResponse = {
   accessToken: string;
@@ -52,7 +53,7 @@ export async function fetchAccessToken({
     `Creating access token for account: ${account} with inboxId: ${inboxId}`
   );
   const { data } = await dedupedFetch("/api/authenticate" + inboxId, () =>
-    api.post<AuthResponse>(
+    oldApi.post<AuthResponse>(
       "/api/authenticate",
       {
         inboxId,
@@ -92,7 +93,9 @@ export async function rotateAccessToken(
   const { data } = await dedupedFetch(
     `/api/authenticate/token-${account}`,
     () =>
-      api.post<AuthResponse>("/api/authenticate/token", { token: refreshToken })
+      oldApi.post<AuthResponse>("/api/authenticate/token", {
+        token: refreshToken,
+      })
   );
 
   if (!data?.accessToken) {
@@ -117,6 +120,13 @@ export async function getXmtpApiHeaders(
 ): Promise<XmtpApiHeaders> {
   if (!account) {
     throw new Error("[getXmtpApiHeaders] No account provided");
+  }
+  const inboxClient = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: account,
+  });
+
+  if (!inboxClient) {
+    throw new Error("[getXmtpApiHeaders] No inbox client found for account");
   }
 
   const secureMmkv = await getSecureMmkvForAccount(account);

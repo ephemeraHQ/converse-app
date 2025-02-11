@@ -1,46 +1,32 @@
+import React, { useCallback, useEffect, useState } from "react";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import { AnimatedText } from "@/design-system/Text";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 
-import { translate } from "@/i18n";
-
-import { AnimatedVStack, VStack } from "@/design-system/VStack";
-import { useCallback, useEffect, useState } from "react";
+import { VStack } from "@/design-system/VStack";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Center } from "@/design-system/Center";
 import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer";
 import { TextStyle, ViewStyle } from "react-native";
-import {
-  ONBOARDING_ENTERING_DELAY,
-  ONBOARDING_ENTERING_DURATION,
-} from "@/features/onboarding/constants/animation-constants";
 import { useRouter } from "@/navigation/useNavigation";
-import { Pressable } from "@/design-system/Pressable";
 import { needToShowNotificationsPermissions } from "../Onboarding.utils";
-import { setAuthStatus } from "@/data/store/authStore";
-import { useCurrentAccount } from "@/data/store/accountsStore";
-import { formatRandoDisplayName } from "@/utils/str";
+import {
+  AuthStatuses,
+  useAccountsStore,
+  useCurrentSender,
+} from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingCreateContactCard } from "@/features/onboarding/components/onboarding-contact-card";
 import { OnboardingContactCardThemeProvider } from "@/features/onboarding/components/onboarding-contact-card-provider";
 import logger from "@/utils/logger";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { v4 as uuidv4 } from "uuid";
 import { formatRandomUserName } from "@/features/onboarding/utils/format-random-user-name";
 import { useAddPfp } from "../hooks/useAddPfp";
 import { ProfileType } from "../types/onboarding.types";
 import { useCreateOrUpdateProfileInfo } from "../hooks/useCreateOrUpdateProfileInfo";
 import { useProfile } from "../hooks/useProfile";
-
-const $subtextStyle: TextStyle = {
-  textAlign: "center",
-};
-
-const $subtextPressableStyle: TextStyle = {
-  textAlign: "center",
-  textDecorationLine: "underline",
-  textDecorationStyle: "dotted",
-};
+import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet.bottom-sheet";
+import { useCoinbaseWalletListener } from "@/utils/coinbaseWallet";
+import { config } from "@/config";
 
 const $screenContainer: ViewStyle = {
   flex: 1,
@@ -62,74 +48,45 @@ const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 
 export function OnboardingContactCardScreen() {
   const router = useRouter();
+  const setAuthStatus = useAccountsStore((s) => s.setAuthStatus);
 
-  const address = useCurrentAccount()!;
+  const currentSender = useCurrentSender();
+  logger.debug(
+    `[OnboardingContactCardScreen] Current sender address: ${currentSender?.ethereumAddress}`
+  );
 
   const { themed, theme } = useAppTheme();
   const { animation } = theme;
-  const [type, setType] = useState<"real" | "rando">("real");
 
-  const { createOrUpdateProfile, loading, errorMessage } =
-    useCreateOrUpdateProfileInfo();
-
-  const toggleType = useCallback(() => {
-    if (!loading) {
-      setType((prev) => (prev === "real" ? "rando" : "real"));
-    }
-  }, [loading]);
-
-  const titleAnimation = animation
-    .fadeInUpSpring()
-    .delay(ONBOARDING_ENTERING_DELAY.FIRST)
-    .duration(ONBOARDING_ENTERING_DURATION);
-
-  const subtitleAnimation = animation
-    .fadeInUpSpring()
-    .delay(ONBOARDING_ENTERING_DELAY.SECOND)
-    .duration(ONBOARDING_ENTERING_DURATION);
+  logger.debug(
+    `[OnboardingContactCardScreen] Initializing with address: ${currentSender?.ethereumAddress}`
+  );
 
   const { profile, setProfile } = useProfile();
+  logger.debug(`[OnboardingContactCardScreen] Current profile:`, profile);
+  const { createOrUpdateProfile, loading, errorMessage } =
+    useCreateOrUpdateProfileInfo();
+  logger.debug(
+    `[OnboardingContactCardScreen] Profile update loading: ${loading}, error: ${errorMessage}`
+  );
 
-  const randoDisplayName = formatRandoDisplayName(address);
+  const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
+  useCoinbaseWalletListener(true, coinbaseUrl);
 
   useEffect(() => {
     if (errorMessage) {
+      logger.error(
+        `[OnboardingContactCardScreen] Profile update error: ${errorMessage}`
+      );
       captureErrorWithToast(new Error(errorMessage));
     }
   }, [errorMessage]);
 
   const { addPFP, asset } = useAddPfp();
-
-  const handleRandoContinue = useCallback(async () => {
-    try {
-      const randomUsername = uuidv4().replace(/-/g, "").slice(0, 30);
-      logger.debug(
-        "[OnboardingContactCardScreen] handleRandoContinue",
-        randoDisplayName
-      );
-      const { success } = await createOrUpdateProfile({
-        profile: {
-          displayName: randoDisplayName,
-          username: randomUsername,
-        },
-      });
-      logger.debug(
-        "[OnboardingContactCardScreen] handleRandoContinue success",
-        success
-      );
-      if (success) {
-        if (needToShowNotificationsPermissions()) {
-          router.push("OnboardingNotifications");
-        } else {
-          setAuthStatus("signedIn");
-        }
-      }
-    } catch (error) {
-      captureErrorWithToast(error as Error);
-    }
-  }, [randoDisplayName, createOrUpdateProfile, router]);
+  logger.debug(`[OnboardingContactCardScreen] Current PFP asset:`, asset);
 
   const handleRealContinue = useCallback(async () => {
+    logger.debug("[OnboardingContactCardScreen] Starting real continue flow");
     try {
       const profileUserName = formatRandomUserName(profile.displayName ?? "");
       const newProfile: ProfileType = {
@@ -137,107 +94,111 @@ export function OnboardingContactCardScreen() {
         username: profileUserName,
         avatar: asset?.uri,
       };
+      logger.debug(
+        "[OnboardingContactCardScreen] Creating real profile:",
+        newProfile
+      );
       const { success } = await createOrUpdateProfile({ profile: newProfile });
+      logger.debug(
+        `[OnboardingContactCardScreen] Real profile creation success: ${success}`
+      );
       if (success) {
         if (needToShowNotificationsPermissions()) {
+          logger.debug(
+            "[OnboardingContactCardScreen] Navigating to notifications permissions"
+          );
           router.push("OnboardingNotifications");
         } else {
-          setAuthStatus("signedIn");
+          logger.debug(
+            "[OnboardingContactCardScreen] Setting auth status to signedIn"
+          );
+          setAuthStatus(AuthStatuses.signedIn);
         }
       }
     } catch (error) {
+      logger.error(
+        "[OnboardingContactCardScreen] Error in real continue:",
+        error
+      );
       captureErrorWithToast(error as Error);
     }
-  }, [createOrUpdateProfile, profile, router, asset?.uri]);
+  }, [createOrUpdateProfile, profile, router, asset?.uri, setAuthStatus]);
 
-  const handleContinue = useCallback(() => {
-    logger.debug("[OnboardingContactCardScreen] handleContinue", type);
-    if (type === "real") {
-      handleRealContinue();
-    } else {
-      handleRandoContinue();
-    }
-  }, [type, handleRealContinue, handleRandoContinue]);
+  const [
+    isConnectWalletBottomSheetVisible,
+    setIsConnectWalletBottomSheetVisible,
+  ] = useState(false);
+
+  const handleImportPress = useCallback(() => {
+    alert("Working on this right now 🤙");
+    // setIsConnectWalletBottomSheetVisible(true);
+  }, []);
 
   return (
-    <Screen
-      preset="scroll"
-      contentContainerStyle={$screenContainer}
-      safeAreaEdges={["bottom"]}
-    >
-      <Center style={$centerContainerStyle}>
-        <VStack style={$titleContainer}>
-          {type === "real" ? (
-            <OnboardingTitle entering={titleAnimation} size={"xl"}>
-              {translate("onboarding.contactCard.title")}
+    <>
+      <Screen
+        preset="scroll"
+        contentContainerStyle={$screenContainer}
+        safeAreaEdges={["bottom"]}
+      >
+        <Center style={$centerContainerStyle}>
+          <VStack style={$titleContainer}>
+            <OnboardingTitle
+              // entering={titleAnimation}
+              size={"xl"}
+            >
+              Complete your contact card
             </OnboardingTitle>
-          ) : (
-            <OnboardingTitle entering={titleAnimation} size={"xl"}>
-              {translate("onboarding.contactCard.randoTitle")}
-            </OnboardingTitle>
-          )}
-          {type === "real" ? (
             <OnboardingSubtitle
               style={themed($subtitleStyle)}
-              entering={subtitleAnimation}
+              // entering={subtitleAnimation}
             >
-              {translate("onboarding.contactCard.subtitle")}
+              Choose how you show up
             </OnboardingSubtitle>
-          ) : (
-            <OnboardingSubtitle
-              style={themed($subtitleStyle)}
-              entering={subtitleAnimation}
-            >
-              {translate("onboarding.contactCard.randoSubtitle")}
-            </OnboardingSubtitle>
-          )}
-          <OnboardingContactCardThemeProvider>
-            {type === "real" ? (
+
+            <OnboardingContactCardThemeProvider>
               <OnboardingCreateContactCard
+                onImportPress={handleImportPress}
                 addPFP={addPFP}
-                pfpUri={type === "real" ? asset?.uri : undefined}
+                pfpUri={asset?.uri}
                 displayName={profile.displayName}
                 setDisplayName={(displayName) =>
                   setProfile({ ...profile, displayName })
                 }
               />
-            ) : (
-              <OnboardingCreateContactCard
-                editable={false}
-                addPFP={() => {}}
-                pfpUri={undefined}
-                displayName={randoDisplayName}
-                setDisplayName={() => {}}
-              />
-            )}
-          </OnboardingContactCardThemeProvider>
-          <AnimatedVStack
-            entering={animation
-              .fadeInDownSlow()
-              .delay(ONBOARDING_ENTERING_DELAY.THIRD)
-              .duration(ONBOARDING_ENTERING_DURATION)}
-          >
-            <AnimatedText style={$subtextStyle} color={"secondary"}>
-              {type === "real"
-                ? translate("onboarding.contactCard.body")
-                : translate("onboarding.contactCard.randoBody")}
-            </AnimatedText>
-            <Pressable onPress={toggleType}>
-              <AnimatedText style={$subtextPressableStyle} color={"secondary"}>
-                {type === "real"
-                  ? translate("onboarding.contactCard.bodyPressable")
-                  : translate("onboarding.contactCard.randoPressable")}
-              </AnimatedText>
-            </Pressable>
-          </AnimatedVStack>
-        </VStack>
-      </Center>
-      <OnboardingFooter
-        text={translate("onboarding.contactCard.continue")}
-        iconName="chevron.right"
-        onPress={handleContinue}
-        disabled={loading || (type === "real" && !profile.displayName)}
+            </OnboardingContactCardThemeProvider>
+          </VStack>
+        </Center>
+        <OnboardingFooter
+          text={"Continue"}
+          iconName="chevron.right"
+          onPress={handleRealContinue}
+          disabled={loading || !profile.displayName}
+        />
+      </Screen>
+
+      <ConnectWalletBottomSheet
+        isVisible={isConnectWalletBottomSheetVisible}
+        onClose={() => setIsConnectWalletBottomSheetVisible(false)}
+        onWalletConnect={(something) => {
+          logger.debug(
+            "[OnboardingContactCardScreen] Wallet connect:",
+            something
+          );
+        }}
+        // onWalletConnect={async (connectHandler) => {
+        //   try {
+        //     await connectHandler();
+        //     listBottomSheetRef.current?.dismiss();
+        //   } catch (error) {
+        //     logger.error(
+        //       "[OnboardingContactCardScreen] Wallet connect error:",
+        //       error
+        //     );
+        //     captureErrorWithToast(error as Error);
+        //   }
+        // }}
       />
-    </Screen>
+    </>
   );
 }

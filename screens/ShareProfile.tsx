@@ -27,7 +27,7 @@ import ActionButton from "../components/Chat/ActionButton";
 import Picto from "../components/Picto/Picto";
 import { Screen } from "../components/Screen/ScreenComp/Screen";
 import { config } from "../config";
-import { useCurrentAccount } from "../data/store/accountsStore";
+import { useCurrentAccount } from "../features/multi-inbox/multi-inbox.store";
 import { NavigationParamList } from "./Navigation/Navigation";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { usePreferredName } from "@/hooks/usePreferredName";

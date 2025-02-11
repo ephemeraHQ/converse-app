@@ -1,4 +1,3 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
 import { doesSocialsMatchTextQuery } from "@/features/profiles/utils/does-socials-match-text-query";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { getSearchExistingGroupsByMemberNameQueryKey } from "@/queries/QueryKeys";
@@ -9,6 +8,7 @@ import { captureError } from "@/utils/capture-error";
 import { normalizeString } from "@/utils/str";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
+import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 
 export async function searchExistingGroupsByGroupMembers(args: {
   searchQuery: string;
@@ -16,7 +16,7 @@ export async function searchExistingGroupsByGroupMembers(args: {
 }) {
   const { searchQuery, searcherInboxId } = args;
 
-  const currentAccount = getCurrentAccount()!;
+  const currentAccount = getSafeCurrentSender().ethereumAddress;
 
   const conversations = getAllowedConsentConversationsQueryData({
     account: currentAccount,

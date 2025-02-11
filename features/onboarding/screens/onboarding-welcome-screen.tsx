@@ -3,28 +3,15 @@ import { AnimatedText } from "@/design-system/Text";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 
-import { translate } from "@/i18n";
-
 import { VStack } from "@/design-system/VStack";
-import { memo, useCallback } from "react";
+import { memo, useState } from "react";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Center } from "@/design-system/Center";
-import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer";
-import { TextStyle, ViewStyle } from "react-native";
-import {
-  ONBOARDING_ENTERING_DELAY,
-  ONBOARDING_ENTERING_DURATION,
-} from "@/features/onboarding/constants/animation-constants";
-import { useRouter } from "@/navigation/useNavigation";
-import { useCreatePasskey } from "@/features/onboarding/passkey/useCreatePasskey";
-import {
-  PasskeyAuthStoreProvider,
-  usePasskeyAuthStoreContext,
-} from "@/features/onboarding/passkey/passkeyAuthStore";
-import logger from "@/utils/logger";
-import { captureErrorWithToast } from "@/utils/capture-error";
-import { usePrivySmartWalletConnection } from "../Privy/usePrivySmartWalletConnection";
-
+import { Button, TextStyle, ViewStyle } from "react-native";
+import { useAuthenticateWithPasskey } from "@/features/onboarding/contexts/signup-with-passkey.context";
+import { useNavigation } from "@react-navigation/native";
+import { useLogout } from "@/utils/logout";
+import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet.bottom-sheet";
 const $subtextStyle: TextStyle = {
   textAlign: "center",
 };
@@ -43,56 +30,19 @@ const $titleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 });
 
 export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
-  return (
-    <PasskeyAuthStoreProvider>
-      <OnboardingWelcomeScreenContent />
-    </PasskeyAuthStoreProvider>
-  );
+  return <OnboardingWelcomeScreenContent />;
 });
 
 const OnboardingWelcomeScreenContent = memo(
   function OnboardingWelcomeScreenContent() {
-    const { themed, theme } = useAppTheme();
-    const { animation } = theme;
+    const { themed } = useAppTheme();
+    const { logout } = useLogout();
 
-    const router = useRouter();
+    const { signupWithPasskey, loginWithPasskey } =
+      useAuthenticateWithPasskey();
+    const navigation = useNavigation();
 
-    const loading = usePasskeyAuthStoreContext((state) => state.loading);
-
-    const { createPasskey: handleCreateAccountWithPasskey } =
-      useCreatePasskey();
-
-    const setError = usePasskeyAuthStoreContext((state) => state.setError);
-
-    const handleError = useCallback(
-      (error: Error) => {
-        setError(error.message);
-        captureErrorWithToast(error);
-      },
-      [setError]
-    );
-
-    const onStatusChange = useCallback((status: string) => {
-      logger.debug("[OnboardingWelcomeScreenContent] onStatusChange", status);
-    }, []);
-
-    const onConnectionDone = useCallback(() => {
-      logger.debug("[OnboardingWelcomeScreenContent] onConnectionDone");
-      router.replace("OnboardingCreateContactCard");
-    }, [router]);
-
-    const onConnectionError = useCallback(
-      (error: Error) => {
-        handleError(error);
-      },
-      [handleError]
-    );
-
-    usePrivySmartWalletConnection({
-      onConnectionDone,
-      onConnectionError,
-      onStatusChange,
-    });
+    const [isVisible, setIsVisible] = useState(true);
 
     return (
       <Screen
@@ -100,42 +50,54 @@ const OnboardingWelcomeScreenContent = memo(
         contentContainerStyle={$screenContainer}
         preset="scroll"
       >
+        {/* <ConnectWalletBottomSheet
+          isVisible={isVisible}
+          onClose={() => {
+            setIsVisible(false);
+          }}
+          onWalletConnect={() => {}}
+        /> */}
         <Center style={$titleContainer}>
           <VStack>
-            <OnboardingSubtitle
-              entering={animation
-                .fadeInUpSpring()
-                .delay(ONBOARDING_ENTERING_DELAY.FIRST)
-                .duration(ONBOARDING_ENTERING_DURATION)}
-            >
-              {translate("onboarding.welcome.subtitle")}
-            </OnboardingSubtitle>
-            <OnboardingTitle
-              style={themed($titleStyle)}
-              entering={animation
-                .fadeInUpSpring()
-                .delay(ONBOARDING_ENTERING_DELAY.SECOND)
-                .duration(ONBOARDING_ENTERING_DURATION)}
-            >
-              {translate("onboarding.welcome.title")}
+            <OnboardingSubtitle>Welcome to Convos</OnboardingSubtitle>
+            <OnboardingTitle style={themed($titleStyle)}>
+              Not another chat app
             </OnboardingTitle>
-            <AnimatedText
-              style={$subtextStyle}
-              color={"secondary"}
-              entering={animation
-                .fadeInDownSlow()
-                .delay(ONBOARDING_ENTERING_DELAY.THIRD)
-                .duration(ONBOARDING_ENTERING_DURATION)}
-            >
-              {translate("onboarding.welcome.subtext")}
+            <AnimatedText style={$subtextStyle} color={"secondary"}>
+              Super secure · Decentralized · Universal
             </AnimatedText>
           </VStack>
         </Center>
-        <OnboardingFooter
-          text={translate("onboarding.welcome.createContactCard")}
-          iconName="biometric"
-          onPress={handleCreateAccountWithPasskey}
-          disabled={loading}
+
+        <Button
+          onPress={async () => {
+            try {
+              await signupWithPasskey();
+              // @ts-ignore
+              navigation.replace("OnboardingCreateContactCard");
+            } catch (error) {
+              console.log("error", error);
+            }
+          }}
+          title="Signup with Passkey"
+        />
+
+        <Button
+          onPress={async () => {
+            try {
+              await loginWithPasskey();
+            } catch (error) {
+              console.log("error", error);
+            }
+          }}
+          title="Sign in with passkey"
+        />
+
+        <Button
+          title="Clear Stuff and Restart (use this if you get in a funky state)"
+          onPress={() => {
+            logout();
+          }}
         />
       </Screen>
     );

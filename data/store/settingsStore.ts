@@ -39,6 +39,9 @@ export type SettingsStoreType = {
   ephemeralAccount: boolean;
   setEphemeralAccount: (ephemeral: boolean) => void;
 
+  isRandoAccount: boolean;
+  setIsRandoAccount: (isRando: boolean) => void;
+
   lastAsyncUpdate: number;
   setLastAsyncUpdate: (version: number) => void;
 
@@ -115,6 +118,13 @@ export const initSettingsStore = (account: string) => {
               ...notificationsSettings,
             },
           })),
+
+        isRandoAccount: false,
+        setIsRandoAccount: (isRando) =>
+          set(() => ({
+            isRandoAccount: isRando,
+          })),
+
         ephemeralAccount: false,
         setEphemeralAccount: (ephemeral) =>
           set(() => ({

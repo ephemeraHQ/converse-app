@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { MutationOptions, useMutation } from "@tanstack/react-query";
 import {
   createGroupJoinRequest,

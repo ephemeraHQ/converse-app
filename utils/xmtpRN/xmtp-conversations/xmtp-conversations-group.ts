@@ -12,6 +12,7 @@ const defaultPermissionPolicySet: PermissionPolicySet = {
   updateGroupNamePolicy: "allow",
   updateGroupDescriptionPolicy: "allow",
   updateGroupImagePolicy: "allow",
+  // @ts-expect-error todo fixme
   updateMessageDisappearingPolicy: "allow",
 };
 
