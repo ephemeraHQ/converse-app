@@ -5,6 +5,7 @@ import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 
 export const useGroupDescription = (topic: ConversationTopic) => {
   const account = getSafeCurrentSender().ethereumAddress;
+
   const { data, isLoading, isError } = useGroupDescriptionQuery({
     account,
     topic,

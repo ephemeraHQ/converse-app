@@ -19,13 +19,20 @@ export const useAuthStatus = () => {
   const isRestoring =
     multiInboxClientRestorationState === "restoring" || authStatus === "idle";
 
-  // useEffect(() => {
-  //   ensureUserQueryData({
-  //     privy
-  //     caller: "useAuthStatus",
-  //   });
-  // }, [ensureUserQueryData]);
+    const {user }= usePrivy()
 
+    useEffect(() => {
+      // Fetch we have the user query data
+      // Ensure we have all the XMTP clients for the user
+      // Also refetch the user query data to update it.
+      fetchUserQueryData({
+        privyId: 
+        caller: "useAuthStatus",
+      })
+  
+    }, [ensureUserQueryData, user]);
+  
+  
   const hasNotAuthenticated =
     [
       AuthStatuses.signedOut,

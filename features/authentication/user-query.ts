@@ -8,7 +8,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 export type UserQueryData = IUser;
 
 type IGetUserArgs = {
-  address: string;
+  privyId: string;
 };
 
 type IGetUserArgsWithCaller = IGetUserArgs & { caller: string };
@@ -20,25 +20,24 @@ export const useUserQuery = (args: IGetUserArgsWithCaller) => {
 export function getUserQueryOptions(
   args: Optional<IGetUserArgsWithCaller, "caller">
 ) {
-  const { address, caller } = args;
-  const enabled = !!address;
+  const { privyId, caller } = args;
   return queryOptions({
     meta: {
       caller,
     },
-    queryKey: getUserQueryKey({ privyId: address }),
-    queryFn: () => getUser({ address }),
-    enabled,
+    queryKey: getUserQueryKey({ privyId }),
+    queryFn: () => getUser({ privyId }),
+    enabled: !!privyId,
   });
 }
 
 export const setUserQueryData = (
   args: IGetUserArgs & { user: UserQueryData }
 ) => {
-  const { address, user } = args;
+  const { privyId, user } = args;
   queryClient.setQueryData(
     getUserQueryOptions({
-      address,
+      privyId,
     }).queryKey,
     user
   );
@@ -71,4 +70,8 @@ export function getOrFetchUser(args: IGetUserArgsWithCaller) {
 
 export function ensureUserQueryData(args: IGetUserArgsWithCaller) {
   return queryClient.ensureQueryData(getUserQueryOptions(args));
+}
+
+export function fetchUserQueryData(args: IGetUserArgsWithCaller) {
+  return queryClient.fetchQuery(getUserQueryOptions(args));
 }
