@@ -1,11 +1,15 @@
-import logger from "@/utils/logger";
-import { Client as XmtpClient } from "@xmtp/react-native-sdk";
 import { config } from "@/config";
-import { codecs } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import {
   AuthStatuses,
   useAccountsStore,
 } from "@/features/multi-inbox/multi-inbox.store";
+import { setInboxIdQueryData } from "@/queries/inbox-id-query";
+import { captureError } from "@/utils/capture-error";
+import { getDbEncryptionKey } from "@/utils/keychain";
+import logger from "@/utils/logger";
+import { codecs } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
+import { Client as XmtpClient } from "@xmtp/react-native-sdk";
+import { useEffect } from "react";
 import {
   ClientWithInvalidInstallation,
   CurrentSender,
@@ -13,9 +17,6 @@ import {
   InboxSigner,
   MultiInboxClientRestorationStates,
 } from "./multi-inbox-client.types";
-import { setInboxIdQueryData } from "@/queries/inbox-id-query";
-import { getDbEncryptionKey } from "@/utils/keychain";
-import { useEffect } from "react";
 
 /**
  * Client for managing multiple XMTP inboxes and their lifecycle.
@@ -505,15 +506,7 @@ export class MultiInboxClient {
 }
 
 export const useInitializeMultiInboxClient = () => {
-  const restored =
-    useAccountsStore.getState().multiInboxClientRestorationState ===
-    MultiInboxClientRestorationStates.restored;
-  async function initialize() {
-    await MultiInboxClient.instance.initialize();
-  }
   useEffect(() => {
-    if (!restored) {
-      initialize();
-    }
-  }, [restored]);
+    MultiInboxClient.instance.initialize().catch(captureError);
+  }, []);
 };

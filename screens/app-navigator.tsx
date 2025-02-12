@@ -30,6 +30,7 @@ import {
 import { hideSplashScreen } from "@/utils/splash/splash";
 import { captureError } from "@/utils/capture-error";
 import { getUserQueryData } from "@/features/authentication/user-query";
+import { useAuthHydrate } from "@/features/authentication/use-auth-hydrate";
 const prefix = Linking.createURL("/");
 
 const linking: LinkingOptions<NavigationParamList> = {
@@ -86,8 +87,9 @@ export function AppNavigator() {
 const AppStack = () => {
   // const { isRestoring, isSignedIn, isSignedOut } = useAuthStatus();
 
-  // const authStatus = useAuthStore((state) => state.status);
+  const authStatus = useAuthStore((state) => state.status);
 
+  useAuthHydrate();
   // const hasHiddenSplashRef = useRef(false);
 
   // useEffect(() => {
@@ -101,18 +103,26 @@ const AppStack = () => {
     // Hydrate the stuff, so we need to make sure we have
   }, []);
 
+  const isIdle = authStatus === "idle";
+  const isSignedIn = authStatus === "signedIn";
+  const isSignedOut = authStatus === "signedOut";
+
   return (
     <NativeStack.Navigator>
-      {authStatus === "idle" ? (
-        <NativeStack.Screen name="Idle" component={IdleScreen} />
-      ) : authStatus === "signedIn" ? (
+      {isIdle && <NativeStack.Screen name="Idle" component={IdleScreen} />}
+
+      {isSignedIn && (
+        // Signed in
         <NativeStack.Group>
           <NativeStack.Screen
             name="ConversationsList"
             component={ConversationListScreen}
           />
         </NativeStack.Group>
-      ) : (
+      )}
+
+      {isSignedOut && (
+        // Signed out
         <NativeStack.Group>
           <NativeStack.Screen
             options={{
@@ -121,7 +131,6 @@ const AppStack = () => {
             name="OnboardingWelcome"
             component={OnboardingWelcomeScreen}
           />
-          {/* <NativeStack.Screen name="SignedOut" component={SignedOutScreen} /> */}
         </NativeStack.Group>
       )}
     </NativeStack.Navigator>

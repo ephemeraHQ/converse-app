@@ -60,6 +60,7 @@ type AccountsStoreStype = {
   senders: CurrentSender[];
   logoutAllSenders: () => void;
 };
+
 // Main accounts store
 export const useAccountsStore = create<AccountsStoreStype>()(
   persist(
