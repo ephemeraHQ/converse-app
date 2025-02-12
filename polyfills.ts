@@ -1,3 +1,4 @@
+import "@thirdweb-dev/react-native-adapter";
 // IMPORTANT: DO NOT CHANGE THE ORDER OF THESE IMPORTS
 import "@walletconnect/react-native-compat";
 
