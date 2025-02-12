@@ -114,7 +114,17 @@ export class MultiInboxClient {
       logger.debug(
         "[initialize] Restoring previously created inboxes for device"
       );
-      await this.restorePreviouslyCreatedInboxesForDevice();
+      try {
+        await this.restorePreviouslyCreatedInboxesForDevice();
+      } catch (error) {
+        logger.error(
+          "[initialize] Error restoring previously created inboxes",
+          error
+        );
+        this.setErrorState(
+          "[initialize] Error restoring previously created inboxes"
+        );
+      }
       logger.debug(
         "[initialize] Successfully restored previously created inboxes"
       );
@@ -178,6 +188,7 @@ export class MultiInboxClient {
       .setMultiInboxClientRestorationState(
         MultiInboxClientRestorationStates.error(error)
       );
+    useAccountsStore.getState().setAuthStatus(AuthStatuses.signedOut);
   }
 
   /**

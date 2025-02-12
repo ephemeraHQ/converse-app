@@ -1,4 +1,15 @@
 /* eslint-disable react-native/no-inline-styles */
+/**
+ * 
+ * name resolution priority: https://xmtp-labs.slack.com/archives/C087HJBB99P/p1739287069678659?thread_ts=1739237685.119069&cid=C087HJBB99P
+shanemac
+  Yesterday at 10:17 AM
+ENS
+Farcaster
+Base
+Lens
+Unstoppable
+ */
 import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
@@ -117,10 +128,13 @@ const AddressDebugger = ({ address }: { address: string }) => {
       <Text>Checksum: {ethersUtils.getAddress(address)}</Text>
       <Text>Status: {status}</Text>
       {profiles && (
-        <Text>
-          Found {profiles.length} social profile(s). Check debug logs for
-          details.
-        </Text>
+        <>
+          <Text>
+            Found {profiles.length} social profile(s). Check debug logs for
+            details.
+          </Text>
+          <Text>{JSON.stringify(profiles, null, 2)}</Text>
+        </>
       )}
       {error && <Text style={{ color: "red" }}>Error: {error.message}</Text>}
     </View>
@@ -316,8 +330,8 @@ const ReverseResolver = ({ address }: { address: string }) => {
 export function PrivyPlaygroundLandingScreen() {
   logger.info("PrivyPlaygroundLandingScreen");
   const { user } = usePrivy();
-  const { currentSender, authStatus } = useAccountsStore();
   const mycbidaddress = "0x0aF849d2778f6ccE4A2641438B6207DC4750a82B";
+  const myrainbowaddress = "0x5222f538B29267a991B346EF61A2A2c389A9f320";
 
   useEffect(() => {
     logger.debug("Hiding splash screen");
@@ -341,7 +355,7 @@ export function PrivyPlaygroundLandingScreen() {
             <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
               Reverse Resolution Testing
             </Text>
-            <ReverseResolver address="0x0aF849d2778f6ccE4A2641438B6207DC4750a82B" />
+            <ReverseResolver address={mycbidaddress} />
           </View>
 
           <Text style={{ fontWeight: "bold", marginBottom: 10, marginTop: 20 }}>
@@ -366,6 +380,7 @@ export function PrivyPlaygroundLandingScreen() {
             Hardcoded Coinbase Address:
           </Text>
           <AddressDebugger address={mycbidaddress} />
+          <AddressDebugger address={myrainbowaddress} />
         </View>
       </ScrollView>
     </SafeAreaView>

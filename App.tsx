@@ -48,6 +48,8 @@ import {
 // import { useAppStateHandlers } from "./hooks/useAppStateHandlers";
 // import { useInstalledWallets } from "@/features/wallets/use-installed-wallets.hook";
 import logger from "./utils/logger";
+import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
+import { AuthenticateWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
 // import { useAccountsStore } from "./features/multi-inbox/multi-inbox.store";
 // import { AuthenticateWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
 // import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
@@ -203,10 +205,10 @@ export function AppWithProviders() {
                   <PaperProvider theme={paperTheme}>
                     <GestureHandlerRootView style={{ flex: 1 }}>
                       <BottomSheetModalProvider>
-                        <App />
-                        {/* <AuthenticateWithPasskeyProvider>
+                        {/* <App /> */}
+                        <AuthenticateWithPasskeyProvider>
                           <PrivyPlaygroundLandingScreen />
-                        </AuthenticateWithPasskeyProvider> */}
+                        </AuthenticateWithPasskeyProvider>
                         {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
                         <Snackbars />
                       </BottomSheetModalProvider>
